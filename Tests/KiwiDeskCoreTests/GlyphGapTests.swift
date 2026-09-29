@@ -165,7 +165,7 @@ struct GlyphGapDrawingTests {
                 sticky: "#ffffff",
                 floating: "#ffffff"
             ),
-            overflow: 2
+            after: .init(windows: [WindowID(901), WindowID(902)])
         )
         view.layout()
         return view

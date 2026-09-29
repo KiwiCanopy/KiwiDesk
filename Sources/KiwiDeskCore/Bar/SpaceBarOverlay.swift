@@ -12,24 +12,23 @@ public final class SpaceBarOverlay {
         let spaceGlyph: SpaceGlyph
         private(set) var apps: [SpaceBarItemView.App]
         let active: Bool
-        /// Windows hidden AFTER the drawn glyphs, in row order:
-        /// the trailing "+n" disc counts them and its menu lists
-        /// them (#1528).
-        private(set) var overflowWindows: [WindowID]
-        var overflow: Int { overflowWindows.count }
-        /// Focused window is hidden after the glyphs (#376).
-        private(set) var focusInOverflow: Bool
-        /// Windows hidden BEFORE the drawn glyphs — the leading
-        /// disc's (#1528 item 17).
-        private(set) var overflowBefore: [WindowID] = []
-        /// Focused window is hidden before the glyphs.
-        private(set) var focusBefore = false
+        /// The `+N` disc after the drawn glyphs — its menu lists
+        /// the windows it hides (#1528, #376).
+        private(set) var after: SpaceBarStrip.Disc
+        /// The disc before them (#1528 item 17).
+        private(set) var before: SpaceBarStrip.Disc = .none
+        var overflowWindows: [WindowID] { after.windows }
+        var overflow: Int { after.windows.count }
+        var focusInOverflow: Bool { after.holdsFocus }
+        var overflowBefore: [WindowID] { before.windows }
+        var focusBefore: Bool { before.holdsFocus }
         /// The groups drawn, which a chip under the pointer holds
         /// (#1528 item 21); nil for a layer item.
-        private(set) var strip: Range<Int>?
+        private(set) var drawn: SpaceBarStrip.Drawn?
         /// The `+N` discs drawn, one per side that hides windows.
         var discs: Int {
-            (overflowBefore.isEmpty ? 0 : 1) + (overflow > 0 ? 1 : 0)
+            (before.windows.isEmpty ? 0 : 1)
+                + (after.windows.isEmpty ? 0 : 1)
         }
         /// Set only by `collapsed(to:)` (#1683).
         private(set) var collapse: SpaceBarItemView.Collapse?
@@ -41,21 +40,36 @@ public final class SpaceBarOverlay {
             spaceGlyph: SpaceGlyph,
             apps: [SpaceBarItemView.App],
             active: Bool,
-            overflow: [WindowID],
-            focusInOverflow: Bool,
-            overflowBefore: [WindowID] = [],
-            focusBefore: Bool = false,
-            strip: Range<Int>? = nil
+            before: SpaceBarStrip.Disc = .none,
+            after: SpaceBarStrip.Disc,
+            drawn: SpaceBarStrip.Drawn? = nil
         ) {
             identity = .space(space)
             self.spaceGlyph = spaceGlyph
             self.apps = apps
             self.active = active
-            self.overflowWindows = overflow
-            self.focusInOverflow = focusInOverflow
-            self.overflowBefore = overflowBefore
-            self.focusBefore = focusBefore
-            self.strip = strip
+            self.before = before
+            self.after = after
+            self.drawn = drawn
+        }
+
+        /// A chip with no leading disc — the shape every item had
+        /// before the strip centred.
+        init(
+            space: SpaceID,
+            spaceGlyph: SpaceGlyph,
+            apps: [SpaceBarItemView.App],
+            active: Bool,
+            overflow: [WindowID],
+            focusInOverflow: Bool
+        ) {
+            self.init(
+                space: space,
+                spaceGlyph: spaceGlyph,
+                apps: apps,
+                active: active,
+                after: .init(windows: overflow, holdsFocus: focusInOverflow)
+            )
         }
 
         /// The layer item: one glyph, no apps, never active.
@@ -67,8 +81,7 @@ public final class SpaceBarOverlay {
             spaceGlyph = glyph
             apps = []
             active = false
-            overflowWindows = []
-            focusInOverflow = false
+            after = .none
         }
 
         var space: SpaceID? { identity.space }
@@ -79,8 +92,7 @@ public final class SpaceBarOverlay {
         /// the result. The shown item, a layer item and `.apps`
         /// pass unchanged. The count is what the corner disc
         /// draws and the label announces; the state badges
-        /// go with the glyphs, and `overflow` keeps meaning the
-        /// windows hidden past the cap.
+        /// go with the glyphs, and the discs with them.
         func collapsed(
             to content: SpaceBarStyle.InactiveContent
         ) -> Self {
@@ -92,10 +104,8 @@ public final class SpaceBarOverlay {
                 + overflowBefore.count
             var item = self
             item.apps = []
-            item.overflowWindows = []
-            item.focusInOverflow = false
-            item.overflowBefore = []
-            item.focusBefore = false
+            item.after = .none
+            item.before = .none
             switch content {
             case .apps:
                 return self
@@ -110,8 +120,12 @@ public final class SpaceBarOverlay {
     public var onSelect: @MainActor (SpaceID) -> Void = { _ in }
     /// The pointer entering or leaving a Space chip, with the
     /// strip it drew — the manager's hold (#1528 item 21).
-    var onStripHover: @MainActor (SpaceID, Range<Int>?, Bool) -> Void =
-        { _, _, _ in }
+    var onStripHover:
+        @MainActor (SpaceID, SpaceBarStrip.Drawn?, Bool) -> Void = {
+            _,
+            _,
+            _ in
+        }
     /// The glyph targets' answers, the manager's one instance.
     var glyphActions: SpaceBarGlyphActions?
 

@@ -57,7 +57,7 @@ public final class SpaceBarManager {
     /// The chip the pointer rests on and the strip it drew: the
     /// strip keeps it until the pointer leaves, so a click cannot
     /// slide another app under the pointer (#1528 item 21).
-    private(set) var stripHold: (space: SpaceID, strip: Range<Int>)?
+    private(set) var stripHold: (space: SpaceID, drawn: SpaceBarStrip.Drawn)?
     /// Fires when a hold ends, so the strip re-centres — Core
     /// wires it to `updateBars()`.
     var onStripReleased: @MainActor () -> Void = {}
@@ -113,6 +113,15 @@ public final class SpaceBarManager {
                 && $0.strip.width >= 1 && $0.strip.height >= 1
         }
         shownBars = valid
+        // A hold on a Space no bar draws any more has no chip
+        // left to report its exit (#1528 item 21).
+        if let hold = stripHold,
+            !valid.contains(where: {
+                $0.items.contains { $0.space == hold.space }
+            })
+        {
+            stripHold = nil
+        }
         let wanted = Set(valid.map(\.display))
         for (id, overlay) in overlays
         where !wanted.contains(id) {
@@ -132,20 +141,22 @@ public final class SpaceBarManager {
 
     /// The strip `space`'s chip keeps while the pointer rests on
     /// it; nil lets it centre.
-    func heldStrip(of space: SpaceID) -> Range<Int>? {
-        stripHold.flatMap { $0.space == space ? $0.strip : nil }
+    func heldStrip(of space: SpaceID) -> SpaceBarStrip.Drawn? {
+        stripHold.flatMap { $0.space == space ? $0.drawn : nil }
     }
 
     /// The pointer entering or leaving a Space chip. Leaving the
-    /// held chip ends the hold and asks for the re-centring
-    /// render.
+    /// held chip — or entering another before its exit arrives —
+    /// ends the hold and asks for the re-centring render.
     func stripHover(
         _ space: SpaceID,
-        _ strip: Range<Int>?,
+        _ drawn: SpaceBarStrip.Drawn?,
         inside: Bool
     ) {
-        if inside, let strip {
-            stripHold = (space, strip)
+        if inside, let drawn {
+            let replaced = stripHold.map { $0.space != space } ?? false
+            stripHold = (space, drawn)
+            if replaced { onStripReleased() }
             return
         }
         guard !inside, stripHold?.space == space else { return }
@@ -226,8 +237,8 @@ public final class SpaceBarManager {
             self?.onSelectSpace(space)
         }
         overlay.glyphActions = glyphActions
-        overlay.onStripHover = { [weak self] space, strip, inside in
-            self?.stripHover(space, strip, inside: inside)
+        overlay.onStripHover = { [weak self] space, drawn, inside in
+            self?.stripHover(space, drawn, inside: inside)
         }
         overlays[display] = overlay
         return overlay

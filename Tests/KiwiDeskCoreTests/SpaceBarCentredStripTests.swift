@@ -95,7 +95,8 @@ struct SpaceBarCentredStripTests {
                 SpaceBarOverlay.itemLengths(
                     [built],
                     depth: 32,
-                    look: SpaceBarLook()
+                    look: SpaceBarLook(),
+                    frontFollows: false
                 )[0]
             )
         }
@@ -109,10 +110,58 @@ struct SpaceBarCentredStripTests {
         let core = seededCore()
         core.state.apply(.windowFocused(WindowID(8)))
         core.state.workspaces.activate(two)
+        // The system focus moves to Space 2, so only Space 1's
+        // memory still names window 8.
+        core.state.apply(.windowCreated(window(20, app: "Other")))
+        core.state.apply(.windowFocused(WindowID(20)))
+        #expect(core.state.workspaces.lastFocused == WindowID(20))
         #expect(core.state.workspaces[one]?.focused == WindowID(8))
         let built = try item(core, one)
         #expect(drawn(built).contains(WindowID(8)))
         #expect(built.overflowWindows.isEmpty)
+    }
+
+    /// The active Space's system focus can name a window its row
+    /// does not draw — a switch whose focus report has not
+    /// arrived, a transient overlay — and the strip then centres
+    /// on the Space's remembered focus, not the row's start.
+    @Test("an undrawn focus falls back to the remembered one")
+    func undrawnFocusFallsBack() throws {
+        let core = seededCore()
+        core.state.workspaces.activate(two)
+        for id in UInt32(11)...19 {
+            core.state.apply(.windowCreated(window(id, app: "App\(id)")))
+        }
+        core.state.apply(.windowFocused(WindowID(17)))
+        core.state.workspaces.activate(one)
+        core.state.apply(.windowFocused(WindowID(2)))
+        core.state.workspaces.activate(two)
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        let built = try item(core, two)
+        #expect(drawn(built).contains(WindowID(17)))
+        #expect(built.overflowWindows.isEmpty)
+    }
+
+    /// The disc tint marks the SYSTEM focus, which only the
+    /// active Space carries (#1214): an inactive Space whose
+    /// strip hides it before the glyphs tints nothing.
+    @Test("an inactive Space's leading disc never claims the focus")
+    func inactiveLeadingDiscStaysUntinted() throws {
+        let core = seededCore()
+        core.state.apply(.windowFocused(WindowID(2)))
+        core.state.workspaces.activate(two)
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        core.spaceBars.stripHover(
+            one,
+            .init(window: 3..<9, count: 9),
+            inside: true
+        )
+        let built = try item(core, one)
+        #expect(built.overflowBefore.contains(WindowID(2)))
+        #expect(!built.focusBefore)
+        // Active again, the same hidden focus does tint.
+        core.state.workspaces.activate(one)
+        #expect(try item(core, one).focusBefore)
     }
 
     @Test("a held strip stays until the pointer leaves")
@@ -120,7 +169,7 @@ struct SpaceBarCentredStripTests {
         let core = seededCore()
         core.state.apply(.windowFocused(WindowID(3)))
         let before = try item(core, one)
-        let strip = try #require(before.strip)
+        let strip = try #require(before.drawn)
         var released = 0
         core.spaceBars.onStripReleased = { released += 1 }
         core.spaceBars.stripHover(one, strip, inside: true)
@@ -140,10 +189,14 @@ struct SpaceBarCentredStripTests {
     func staleHoldCentres() throws {
         let core = seededCore()
         core.state.apply(.windowFocused(WindowID(9)))
-        core.spaceBars.stripHover(one, 3..<9, inside: true)
+        core.spaceBars.stripHover(
+            one,
+            .init(window: 3..<9, count: 9),
+            inside: true
+        )
         core.state.apply(.windowDestroyed(WindowID(1), wasMinimized: false))
         let built = try item(core, one)
-        #expect(built.strip == 2..<8)
+        #expect(built.drawn == .init(window: 2..<8, count: 8))
         #expect(drawn(built).contains(WindowID(9)))
     }
 }

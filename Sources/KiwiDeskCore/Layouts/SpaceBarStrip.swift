@@ -5,6 +5,38 @@
 /// of `span` glyphs in the middle, `span + 1` glyphs and one
 /// disc at an end — so a focus change never changes its length.
 public enum SpaceBarStrip {
+    /// One side's `+N` disc: the windows it hides, in row order,
+    /// which its count draws and its menu lists, and whether the
+    /// system focus is among them, which tints it (#376).
+    public struct Disc: Equatable, Sendable {
+        public var windows: [WindowID] = []
+        public var holdsFocus = false
+
+        /// No hidden windows: the side draws no disc.
+        public static let none = Disc()
+    }
+
+    /// The groups a chip drew and how many the row held — two
+    /// readings of one render, so a later render can tell a moved
+    /// strip from a changed row (#1528 item 21).
+    public struct Drawn: Equatable, Sendable {
+        public var window: Range<Int>
+        public var count: Int
+
+        public init(window: Range<Int>, count: Int) {
+            self.window = window
+            self.count = count
+        }
+
+        /// Whether a row of `count` groups may keep drawing this
+        /// window under the pointer: the same row, and a window
+        /// `window(count:span:anchor:)` could have drawn for it.
+        public func holds(count: Int, span: Int) -> Bool {
+            count == self.count
+                && SpaceBarStrip.isWindow(window, count: count, span: span)
+        }
+    }
+
     /// The drawn groups for `count` groups: everything when
     /// `count <= span + 1`, else centred on `anchor` and clamped.
     /// An even span puts its extra glyph on the trailing side;
@@ -23,9 +55,8 @@ public enum SpaceBarStrip {
     }
 
     /// Whether `range` is a window `window` could have drawn for
-    /// `count` groups — the one test a held window passes to be
-    /// kept while the row changes under the pointer (item 21).
-    public static func isWindow(
+    /// `count` groups.
+    static func isWindow(
         _ range: Range<Int>,
         count: Int,
         span: Int
@@ -36,14 +67,6 @@ public enum SpaceBarStrip {
         if range == (count - span - 1)..<count { return true }
         return range.count == span && range.lowerBound > 0
             && range.upperBound < count
-    }
-
-    /// The cells a chip spends on glyphs and discs for `count`
-    /// groups — what the length measurement reads, so the length
-    /// the shelf plans is the one the chip draws.
-    public static func cells(count: Int, span: Int) -> Int {
-        let span = max(span, 1)
-        return count > span + 1 ? span + 2 : max(count, 0)
     }
 
     /// How a chip's glyphs walk when its strip moves (#1528 item
@@ -58,17 +81,24 @@ public enum SpaceBarStrip {
         public var enteringFront = 0
         public var enteringBack = 0
 
-        /// The walk from `old` to `new`; nil when nothing moves.
+        /// The walk from `old` to `new`; nil when nothing moves,
+        /// when the row changed under it — a window opened or
+        /// closed shifts every index — and when the two windows
+        /// share no group, a jump no glyph could walk across
+        /// without passing over the neighbouring chips.
         public static func between(
-            _ old: Range<Int>?,
+            _ old: Drawn?,
             leadingDisc oldDisc: Bool,
-            _ new: Range<Int>?,
+            _ new: Drawn?,
             leadingDisc newDisc: Bool
         ) -> Walk? {
-            guard let old, let new, old != new else { return nil }
+            guard let old, let new, old.count == new.count,
+                old.window != new.window,
+                old.window.overlaps(new.window)
+            else { return nil }
             let lead = (oldDisc ? 1 : 0) - (newDisc ? 1 : 0)
-            let front = new.lowerBound - old.lowerBound
-            let back = new.upperBound - old.upperBound
+            let front = new.window.lowerBound - old.window.lowerBound
+            let back = new.window.upperBound - old.window.upperBound
             return Walk(
                 cells: front + lead,
                 leavingFront: max(front, 0),

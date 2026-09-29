@@ -48,7 +48,9 @@ struct BarFontSiteTests {
                 sticky: "#ffffff",
                 floating: "#ffffff"
             ),
-            overflow: overflow
+            after: .init(
+                windows: (0..<overflow).map { WindowID(UInt32(900 + $0)) }
+            )
         )
         view.layout()
         return view

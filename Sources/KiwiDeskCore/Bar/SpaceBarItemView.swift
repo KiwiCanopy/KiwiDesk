@@ -81,17 +81,16 @@ final class SpaceBarItemView: NSView {
         tinted: true
     )
     private(set) var apps: [App] = []
-    private(set) var overflow = 0
-    /// The windows behind `+n`, which its menu lists (#1528).
-    private(set) var overflowWindows: [WindowID] = []
-    /// True if focused window is in overflow (#376).
-    private(set) var focusInOverflow = false
-    /// The windows behind the leading `+n` (#1528 item 17).
-    private(set) var overflowBefore: [WindowID] = []
-    /// True if the focused window hides before the glyphs.
-    private(set) var focusBefore = false
+    /// The `+n` discs before and after the glyphs (#1528, #376).
+    private(set) var before = SpaceBarStrip.Disc.none
+    private(set) var after = SpaceBarStrip.Disc.none
+    var overflow: Int { after.windows.count }
+    var overflowWindows: [WindowID] { after.windows }
+    var focusInOverflow: Bool { after.holdsFocus }
+    var overflowBefore: [WindowID] { before.windows }
+    var focusBefore: Bool { before.holdsFocus }
     /// The groups drawn (#1528 item 21).
-    private(set) var strip: Range<Int>?
+    private(set) var drawn: SpaceBarStrip.Drawn?
     /// The walk the next layout plays, when the strip moved under
     /// a Space it kept (#1528 item 21).
     var pendingWalk: SpaceBarStrip.Walk?
@@ -100,7 +99,11 @@ final class SpaceBarItemView: NSView {
     var pointerInside = false
     /// Reports the pointer entering or leaving a Space chip with
     /// the strip it drew; the manager holds that strip.
-    var onPointerInside: (SpaceID, Range<Int>?, Bool) -> Void = { _, _, _ in }
+    var onPointerInside: (SpaceID, SpaceBarStrip.Drawn?, Bool) -> Void = {
+        _,
+        _,
+        _ in
+    }
     private(set) var held: Held?
     /// What this item draws in place of its glyphs (#1683).
     private(set) var collapse: Collapse?
@@ -174,22 +177,20 @@ final class SpaceBarItemView: NSView {
         horizontal: Bool,
         style: SpaceBarLook,
         stateMarkColors: StateMarkColors,
-        overflow: Int = 0,
-        overflowWindows: [WindowID] = [],
-        focusInOverflow: Bool = false,
-        overflowBefore: [WindowID] = [],
-        focusBefore: Bool = false,
-        strip: Range<Int>? = nil,
+        before: SpaceBarStrip.Disc = .none,
+        after: SpaceBarStrip.Disc = .none,
+        drawn: SpaceBarStrip.Drawn? = nil,
         held: Held? = nil,
         collapse: Collapse? = nil
     ) {
         pendingWalk =
-            self.identity == identity && collapse == nil
+            self.identity == identity && self.collapse == nil
+                && collapse == nil
             ? SpaceBarStrip.Walk.between(
-                self.strip,
-                leadingDisc: !self.overflowBefore.isEmpty,
-                strip,
-                leadingDisc: !overflowBefore.isEmpty
+                self.drawn,
+                leadingDisc: !self.before.windows.isEmpty,
+                drawn,
+                leadingDisc: !before.windows.isEmpty
             ) : nil
         if self.identity != identity {
             cancelSpringSweep()
@@ -197,16 +198,16 @@ final class SpaceBarItemView: NSView {
             // A pointer resting on the Space this slot drew must
             // not leave its hover fill under the layer glyph.
             isHovered = false
+            // Nor its strip hold: the slot no longer draws that
+            // Space, so no exit would ever release it (#1528).
+            setPointerInside(false)
         }
         self.identity = identity
         self.spaceGlyph = spaceGlyph
         self.apps = apps
-        self.overflow = overflow
-        self.overflowWindows = overflowWindows
-        self.focusInOverflow = focusInOverflow
-        self.overflowBefore = overflowBefore
-        self.focusBefore = focusBefore
-        self.strip = strip
+        self.before = before
+        self.after = after
+        self.drawn = drawn
         self.held = held
         self.collapse = collapse
         self.isActive = active
@@ -220,17 +221,6 @@ final class SpaceBarItemView: NSView {
         setAccessibilityElement(true)
         setAccessibilityRole(space == nil ? .image : .button)
         setAccessibilityLabel(axLabel)
-    }
-
-    /// The glyphs `walk` carries off each end.
-    static func leaving(
-        _ views: [NSView],
-        walk: SpaceBarStrip.Walk?
-    ) -> [NSView] {
-        guard let walk else { return [] }
-        let front = min(walk.leavingFront, views.count)
-        let back = min(walk.leavingBack, views.count - front)
-        return Array(views.prefix(front)) + Array(views.suffix(back))
     }
 
     private func syncAppViews() {

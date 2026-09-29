@@ -40,43 +40,56 @@ struct SpaceBarStripTests {
     }
 
     /// The chip spends span + 2 cells whatever the anchor, so a
-    /// focus change never changes its length (item 20).
+    /// focus change never changes its length (item 20): the
+    /// glyphs drawn plus one cell per side that hides a group.
     @Test("an overflowing chip keeps one width")
     func fixedWidth() {
-        for anchor in 0..<9 {
-            let window = SpaceBarStrip.window(
-                count: 9,
-                span: 5,
-                anchor: anchor
-            )
-            let discs =
-                (window.lowerBound > 0 ? 1 : 0)
-                + (window.upperBound < 9 ? 1 : 0)
-            #expect(window.count + discs == 7, "anchor \(anchor)")
+        for count in 7...12 {
+            for anchor in 0..<count {
+                let window = SpaceBarStrip.window(
+                    count: count,
+                    span: 5,
+                    anchor: anchor
+                )
+                let discs =
+                    (window.lowerBound > 0 ? 1 : 0)
+                    + (window.upperBound < count ? 1 : 0)
+                #expect(
+                    window.count + discs == 7,
+                    "count \(count), anchor \(anchor)"
+                )
+            }
         }
-        #expect(SpaceBarStrip.cells(count: 9, span: 5) == 7)
-        #expect(SpaceBarStrip.cells(count: 6, span: 5) == 6)
-        #expect(SpaceBarStrip.cells(count: 3, span: 5) == 3)
+    }
+
+    private func drawn(_ window: Range<Int>, of count: Int = 9)
+        -> SpaceBarStrip.Drawn
+    {
+        .init(window: window, count: count)
     }
 
     @Test("a held window is kept only while the row still draws it")
     func heldWindowShapes() {
-        #expect(SpaceBarStrip.isWindow(0..<6, count: 9, span: 5))
-        #expect(SpaceBarStrip.isWindow(2..<7, count: 9, span: 5))
-        #expect(SpaceBarStrip.isWindow(3..<9, count: 9, span: 5))
-        #expect(!SpaceBarStrip.isWindow(0..<5, count: 9, span: 5))
-        #expect(!SpaceBarStrip.isWindow(4..<9, count: 9, span: 5))
-        #expect(!SpaceBarStrip.isWindow(2..<7, count: 7, span: 5))
-        #expect(SpaceBarStrip.isWindow(0..<4, count: 4, span: 5))
+        #expect(drawn(0..<6).holds(count: 9, span: 5))
+        #expect(drawn(2..<7).holds(count: 9, span: 5))
+        #expect(drawn(3..<9).holds(count: 9, span: 5))
+        #expect(!drawn(0..<5).holds(count: 9, span: 5))
+        #expect(!drawn(4..<9).holds(count: 9, span: 5))
+        #expect(drawn(0..<4, of: 4).holds(count: 4, span: 5))
+        // A row that gained or lost a group shifts every index:
+        // even a shape it could draw is not the one held.
+        #expect(!drawn(2..<7).holds(count: 10, span: 5))
+        #expect(!drawn(2..<7, of: 10).holds(count: 9, span: 5))
+        #expect(!drawn(2..<7, of: 7).holds(count: 7, span: 5))
     }
 
     @Test("a step through the middle walks one cell, one glyph each end")
     func middleStep() {
         #expect(
             SpaceBarStrip.Walk.between(
-                2..<7,
+                drawn(2..<7),
                 leadingDisc: true,
-                3..<8,
+                drawn(3..<8),
                 leadingDisc: true
             )
                 == .init(
@@ -87,9 +100,9 @@ struct SpaceBarStripTests {
         )
         #expect(
             SpaceBarStrip.Walk.between(
-                3..<8,
+                drawn(3..<8),
                 leadingDisc: true,
-                2..<7,
+                drawn(2..<7),
                 leadingDisc: true
             )
                 == .init(
@@ -106,9 +119,9 @@ struct SpaceBarStripTests {
     func discAppears() {
         #expect(
             SpaceBarStrip.Walk.between(
-                0..<6,
+                drawn(0..<6),
                 leadingDisc: false,
-                1..<6,
+                drawn(1..<6),
                 leadingDisc: true
             ) == .init(cells: 0, leavingFront: 1)
         )
@@ -118,9 +131,9 @@ struct SpaceBarStripTests {
     func noWalk() {
         #expect(
             SpaceBarStrip.Walk.between(
-                1..<6,
+                drawn(1..<6),
                 leadingDisc: true,
-                1..<6,
+                drawn(1..<6),
                 leadingDisc: true
             ) == nil
         )
@@ -128,9 +141,46 @@ struct SpaceBarStripTests {
             SpaceBarStrip.Walk.between(
                 nil,
                 leadingDisc: false,
-                1..<6,
+                drawn(1..<6),
                 leadingDisc: true
             ) == nil
+        )
+    }
+
+    /// A window opened or closed shifts every index, so the same
+    /// numbers name other apps: nothing walks.
+    @Test("a row that changed plays no walk")
+    func changedRowNoWalk() {
+        #expect(
+            SpaceBarStrip.Walk.between(
+                drawn(2..<7),
+                leadingDisc: true,
+                drawn(3..<8, of: 10),
+                leadingDisc: true
+            ) == nil
+        )
+    }
+
+    /// A jump from one end to the other shares no glyph: walking
+    /// it would slide glyphs across the neighbouring chips.
+    @Test("a jump that shares no group plays no walk")
+    func jumpNoWalk() {
+        #expect(
+            SpaceBarStrip.Walk.between(
+                drawn(0..<6, of: 14),
+                leadingDisc: false,
+                drawn(8..<14, of: 14),
+                leadingDisc: true
+            ) == nil
+        )
+        // One shared group still walks.
+        #expect(
+            SpaceBarStrip.Walk.between(
+                drawn(0..<6, of: 14),
+                leadingDisc: false,
+                drawn(5..<10, of: 14),
+                leadingDisc: true
+            ) != nil
         )
     }
 }

@@ -9,10 +9,10 @@ extension SpaceBarStyle {
     /// Valid drag-drop dwell bounds in milliseconds.
     public static let springDelayRange = 1000...4000
 
-    /// Valid glyph-cap bounds (#376): floor 1 (a lone glyph +
-    /// "+n", the PR #381 "0 is toggle-only" idiom), ceiling 12. A
-    /// fixed clamp, never fit-derived — a display-dependent cap
-    /// would break the bar's uniform model.
+    /// Valid glyph-span bounds (#376, #1528): floor 1 (a lone
+    /// glyph between its "+n" discs), ceiling 12. A fixed clamp,
+    /// never fit-derived — a display-dependent span would break
+    /// the bar's uniform model.
     public static let glyphSpanRange = 1...12
 
     /// Floor of `glyphGap` in pt: flush. No ceiling, as with the
@@ -29,7 +29,7 @@ extension SpaceBarStyle {
         Self.clampGlyphGap(glyphGap)
     }
 
-    /// Clamped glyph cap value (`glyphSpanRange`).
+    /// Clamped glyph span (`glyphSpanRange`).
     public var resolvedGlyphSpan: Int {
         min(
             max(glyphSpan, Self.glyphSpanRange.lowerBound),

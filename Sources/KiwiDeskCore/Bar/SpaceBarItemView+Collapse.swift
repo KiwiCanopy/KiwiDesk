@@ -26,7 +26,9 @@ extension SpaceBarItemView {
     /// The windows this item's Space holds, collapsed or not —
     /// what the label announces and the empty ink asks.
     var heldWindows: Int {
-        collapse?.windows ?? apps.reduce(0) { $0 + $1.count } + overflow
+        collapse?.windows
+            ?? apps.reduce(0) { $0 + $1.count } + overflow
+            + overflowBefore.count
     }
 
     /// Announced whatever the glyph draws (bars.md): a layer

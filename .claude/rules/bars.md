@@ -399,9 +399,27 @@ Obligations:
   active Space below.
 - **A strip under the pointer is held by `SpaceBarManager`
   alone** and released through its one `onStripReleased`, wired
-  to `updateBars()`; the builder keeps a held window only while
-  `SpaceBarStrip.isWindow` says the row still draws it
-  (`SpaceBarCentredStripTests` ▸ `holdKeepsTheStrip`,
+  to `updateBars()` (`ShelfWiringSeamTests` ▸
+  `stripReleaseRefreshesTheBars`). The hold ends wherever its
+  chip stops drawing that Space, not only on the pointer's exit:
+  item views are reused by index, so a slot handed another Space
+  reports the old Space's exit from `configure`; another Space's
+  entry replaces the hold AND releases it, since its exit may
+  arrive second; and `sync` drops a hold on a Space no shown bar
+  draws. A new way for a chip to stop drawing a Space owes the
+  same end, or the strip stays frozen with the pointer gone
+  (`SpaceBarStripHoldTests`).
+- **A render is compared with the last through one
+  `SpaceBarStrip.Drawn` — the window AND the row's group
+  count — never through indices alone.** A window opened or
+  closed shifts every index, so the same range names other
+  apps: the builder keeps a hold only while `Drawn.holds(count:
+  span:)` says the row is unchanged and could draw it, and
+  `Walk.between` walks nothing across a changed row, a collapse
+  on either side, or a jump whose windows share no group — which
+  would slide glyphs over the neighbouring chips
+  (`SpaceBarStripTests` ▸ `changedRowNoWalk`, `jumpNoWalk`,
+  `heldWindowShapes`; `SpaceBarCentredStripTests` ▸
   `staleHoldCentres`).
 
 ## A per-display bar answers the SHOWN question, never the render one

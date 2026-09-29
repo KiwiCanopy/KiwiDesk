@@ -51,7 +51,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public init() {}
 
     /// A Space item's content while its screen shows another
-    /// Space (#1683). Glyph cap still caps the shown Space.
+    /// Space (#1683). The glyph span still sizes the shown Space.
     public enum InactiveContent: String, Sendable, Codable,
         CaseIterable
     {

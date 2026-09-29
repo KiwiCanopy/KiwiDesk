@@ -41,19 +41,9 @@ extension KiwiCore {
                     ),
                     apps: content.apps,
                     active: id == current,
-                    overflow: content.after,
-                    // Only the active space carries the system
-                    // focus, and on a second screen `current` is
-                    // not it (#1214): an inactive space's
-                    // `focused` is just its own last-focused
-                    // window, so tinting a `+n` off it marks a
-                    // focus no glyph on that bar wears.
-                    focusInOverflow: id == activeSpace?.id
-                        && content.focusAfter,
-                    overflowBefore: content.before,
-                    focusBefore: id == activeSpace?.id
-                        && content.focusBefore,
-                    strip: content.window
+                    before: content.before,
+                    after: content.after,
+                    drawn: content.drawn
                 )
                 item.held = state.heldSpaces[id].map {
                     SpaceBarItemView.Held(

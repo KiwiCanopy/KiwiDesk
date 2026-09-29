@@ -124,7 +124,11 @@ struct SpaceBarGlyphClickTests {
         // is Mail 2 · Term 5 6 · Mail 3 · Web 4. A strip held on
         // Mail 3 hides a group of several windows before it and
         // one after (#1528 items 17, 21).
-        core.spaceBars.stripHover(two, 2..<3, inside: true)
+        core.spaceBars.stripHover(
+            two,
+            .init(window: 2..<3, count: 4),
+            inside: true
+        )
         let built = try item(core, two, cap: 1)
         #expect(built.apps.map(\.windows) == [[WindowID(3)]])
         #expect(

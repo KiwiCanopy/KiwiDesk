@@ -76,6 +76,6 @@ extension SpaceBarItemView {
         let inside = inside && space != nil
         guard inside != pointerInside else { return }
         pointerInside = inside
-        if let space { onPointerInside(space, strip, inside) }
+        if let space { onPointerInside(space, drawn, inside) }
     }
 }

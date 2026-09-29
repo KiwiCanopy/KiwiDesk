@@ -118,4 +118,12 @@ struct BarMotionTests {
         #expect(sweep.fillMode == .both)
         #expect(!sweep.isRemovedOnCompletion)
     }
+
+    /// A strip's glyph fades under its `+N` disc at full motion
+    /// and lands at once under Reduce Motion (#1528 item 21).
+    @Test("A glyph fades only at full motion")
+    func fadesOnlyAtFullMotion() {
+        #expect(BarMotion.fades(reduceMotion: false))
+        #expect(!BarMotion.fades(reduceMotion: true))
+    }
 }

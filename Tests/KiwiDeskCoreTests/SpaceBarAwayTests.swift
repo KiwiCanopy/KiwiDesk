@@ -71,7 +71,7 @@ struct SpaceBarAwayTests {
             style: core.tiler.settings.spaceBarLook
         )
         let apps = content.apps
-        let overflow = content.before + content.after
+        let overflow = content.before.windows + content.after.windows
         // Same app name: a merged away member would group with
         // the present one and read `count == 2` here.
         #expect(apps.map(\.name) == ["Safari"])

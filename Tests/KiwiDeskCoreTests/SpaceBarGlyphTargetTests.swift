@@ -82,8 +82,7 @@ struct SpaceBarGlyphTargetTests {
                 sticky: "#ffffff",
                 floating: "#ffffff"
             ),
-            overflow: overflow.count,
-            overflowWindows: overflow.map(WindowID.init),
+            after: .init(windows: overflow.map(WindowID.init)),
             collapse: collapsed ? .init(windows: 3) : nil
         )
         view.layout()
@@ -187,8 +186,7 @@ struct SpaceBarGlyphTargetTests {
                     sticky: "#ffffff",
                     floating: "#ffffff"
                 ),
-                overflow: overflow.count,
-                overflowWindows: overflow.map(WindowID.init)
+                after: .init(windows: overflow.map(WindowID.init))
             )
         }
         rerender([5])

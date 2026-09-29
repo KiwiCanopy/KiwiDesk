@@ -110,7 +110,8 @@ struct SpaceBarDriverTests {
             style: SpaceBarLook()
         )
         let apps = content.apps
-        #expect(content.before.isEmpty && content.after.isEmpty)
+        #expect(content.before.windows.isEmpty)
+        #expect(content.after.windows.isEmpty)
         #expect(apps.map(\.name) == ["Zed", "Finder", "Zed"])
         #expect(apps.map(\.count) == [2, 1, 1])
         #expect(apps.map(\.focused) == [true, false, false])
@@ -152,8 +153,8 @@ struct SpaceBarDriverTests {
             style: SpaceBarLook()
         )
         #expect(content.apps.count == 6)
-        #expect(content.before.isEmpty)
-        #expect(content.after.count == 4)
+        #expect(content.before.windows.isEmpty)
+        #expect(content.after.windows.count == 4)
     }
 
     @Test("glyph_span drives the visible/overflow split (#376)")
@@ -176,7 +177,7 @@ struct SpaceBarDriverTests {
         low.glyphSpan = 2
         let capped = core.spaceBarApps(in: space, style: low)
         #expect(capped.apps.count == 3)
-        #expect(capped.after.count == 3)
+        #expect(capped.after.windows.count == 3)
         // An out-of-range span clamps via resolvedGlyphSpan:
         // 0 → 1, and a span past the group count shows all with
         // no badge.
@@ -190,7 +191,8 @@ struct SpaceBarDriverTests {
         wide.glyphSpan = 99
         let all = core.spaceBarApps(in: space, style: wide)
         #expect(all.apps.count == 6)
-        #expect(all.before.isEmpty && all.after.isEmpty)
+        #expect(all.before.windows.isEmpty)
+        #expect(all.after.windows.isEmpty)
     }
 
     @Test("Front segment follows the toggle and the focus")

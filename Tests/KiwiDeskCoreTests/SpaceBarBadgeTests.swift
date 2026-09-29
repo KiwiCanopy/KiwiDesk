@@ -167,7 +167,11 @@ struct SpaceBarBadgeTests {
                 .first { $0.space == SpaceID("2") }
         )
         #expect(centred.apps.map(\.name).contains("Term"))
-        core.spaceBars.stripHover(SpaceID("2"), 0..<2, inside: true)
+        core.spaceBars.stripHover(
+            SpaceID("2"),
+            .init(window: 0..<2, count: 3),
+            inside: true
+        )
         let item = try #require(
             core.spaceBarItems(display: display, style: style)
                 .first { $0.space == SpaceID("2") }
