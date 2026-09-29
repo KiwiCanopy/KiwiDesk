@@ -1,7 +1,7 @@
 import ApplicationServices
 
 /// Shadow windows (#1785): an empty, button-less standard window
-/// stacked exactly on a real window of its process. It is never
+/// beside a real window of its process. It is never
 /// tracked, and a focus report naming it names its host — Orion
 /// reports its "Orion Preview" twin as the focused window, and a
 /// twin tracked as a tile traded focus with its host on every
@@ -13,6 +13,10 @@ struct ShadowWindows {
         AXHelper.hasTitlebarButton
     /// Per process: shadow id → the host it mirrors.
     var hosts: [pid_t: [WindowID: WindowID]] = [:]
+    /// Per process: tracked empty button-less windows no host
+    /// explained yet — re-asked when a host is tracked, so a twin
+    /// that arrived first is dropped however late its host comes.
+    var suspects: [pid_t: Set<WindowID>] = [:]
 }
 
 extension EventLoop {
@@ -34,7 +38,13 @@ extension EventLoop {
                 of: twin,
                 among: siblings
             )
-        else { return false }
+        else {
+            if twin.childCount == 0 {
+                shadows.suspects[pid, default: []].insert(id)
+            }
+            return false
+        }
+        shadows.suspects[pid]?.remove(id)
         shadows.hosts[pid, default: [:]][id] = host
         onLog(
             "shadow: w\(id.raw) mirrors w\(host.raw) "
@@ -47,5 +57,21 @@ extension EventLoop {
     /// window itself.
     func hostOfShadow(_ id: WindowID, pid: pid_t) -> WindowID {
         shadows.hosts[pid]?[id] ?? id
+    }
+
+    /// After a window is tracked: a suspect the process's windows
+    /// now explain is a shadow, and leaves state.
+    func retireShadowSuspects(pid: pid_t) {
+        guard let suspects = shadows.suspects[pid], !suspects.isEmpty
+        else { return }
+        for id in suspects.sorted(by: { $0.raw < $1.raw }) {
+            guard let element = elements[pid]?[id] else {
+                shadows.suspects[pid]?.remove(id)
+                continue
+            }
+            guard isShadow(element, id: id, pid: pid) else { continue }
+            releaseWindowRegistration(id, pid: pid)
+            onEvent(.windowDestroyed(id, wasMinimized: false))
+        }
     }
 }

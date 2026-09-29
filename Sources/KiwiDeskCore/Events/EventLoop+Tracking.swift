@@ -141,6 +141,7 @@ extension EventLoop {
             tabCarriers.insert(window.id)
         }
         onEvent(.windowCreated(window))
+        retireShadowSuspects(pid: pid)
     }
 
     /// Ids beyond this stop scheduling re-tracks for their app

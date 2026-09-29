@@ -268,6 +268,7 @@ extension EventLoop {
         healQuiet[pid] = nil
         processIdentity.unlisted[pid] = nil
         shadows.hosts[pid] = nil
+        shadows.suspects[pid] = nil
         transientRetried[pid] = nil
         pendingRetrack.remove(pid)
         pendingRemovalRecheck.remove(pid)

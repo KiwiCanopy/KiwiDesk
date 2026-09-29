@@ -9,23 +9,26 @@ struct WindowTraits: Equatable {
     let childCount: Int
     let frame: CGRect
 
-    /// An empty, button-less window stacked exactly on a real
-    /// window of the same process — Orion's "Orion Preview" twin,
-    /// which tracked as a tile fought its host for the slot and
-    /// the focus. The host's frame is what separates it from a
-    /// frameless real window (a terminal, an Electron app), which
-    /// has nothing real beneath it. Returns that host.
+    /// An empty, button-less window beside a real window of the
+    /// same process — Orion's "Orion Preview" twin, which tracked
+    /// as a tile fought its host for the slot and the focus. The
+    /// buttoned sibling is what separates it from a frameless real
+    /// window alone in its app (a terminal, an Electron app). Not
+    /// the frame: a twin tracked before its host appeared is tiled
+    /// away from it, and would never match again (device,
+    /// 2026-09-29). Returns the host, the same-frame one first.
     static func shadowHost(
         of twin: WindowTraits,
         among siblings: [WindowTraits]
     ) -> WindowID? {
-        guard !twin.hasTitlebarButton, twin.childCount == 0,
-            !twin.frame.isEmpty
+        guard !twin.hasTitlebarButton, twin.childCount == 0
         else { return nil }
-        return siblings.first { host in
-            host.id != twin.id && host.hasTitlebarButton
-                && sameFrame(host.frame, twin.frame)
-        }?.id
+        let hosts = siblings.filter {
+            $0.id != twin.id && $0.hasTitlebarButton
+        }
+        return
+            (hosts.first { sameFrame($0.frame, twin.frame) }
+            ?? hosts.first)?.id
     }
 
     private static func sameFrame(_ a: CGRect, _ b: CGRect) -> Bool {

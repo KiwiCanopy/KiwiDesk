@@ -50,16 +50,34 @@ struct ShadowWindowTests {
         )
     }
 
-    @Test("a button-less window elsewhere on screen is a window")
-    func offsetTwinIsKept() {
+    @Test("a twin tiled away from its host is still a shadow")
+    func displacedTwinIsAShadow() {
+        // Tracked before its host appeared, the twin was tiled into
+        // a slot of its own and never matched the host's frame again.
         let host = traits(1, buttons: true, children: 6)
-        let other = traits(
+        let twin = traits(
             2,
             buttons: false,
             children: 0,
             frame: frame.offsetBy(dx: 400, dy: 0)
         )
-        #expect(WindowTraits.shadowHost(of: other, among: [host]) == nil)
+        #expect(WindowTraits.shadowHost(of: twin, among: [host]) == host.id)
+    }
+
+    @Test("the same-frame host wins over another buttoned window")
+    func sameFrameHostWins() {
+        let elsewhere = traits(
+            1,
+            buttons: true,
+            children: 6,
+            frame: frame.offsetBy(dx: 400, dy: 0)
+        )
+        let host = traits(2, buttons: true, children: 6)
+        let twin = traits(3, buttons: false, children: 0)
+        #expect(
+            WindowTraits.shadowHost(of: twin, among: [elsewhere, host])
+                == host.id
+        )
     }
 
     @Test("content or a button keeps a stacked window a window")
@@ -145,5 +163,46 @@ struct ShadowWindowTests {
         loop.isRunning = true
         loop.stop()
         #expect(loop.shadows.hosts.isEmpty)
+    }
+
+    @Test("a twin tracked before its host leaves once the host comes")
+    func lateHostRetiresTheTwin() {
+        let host = traits(1, buttons: true, children: 6)
+        let twin = traits(2, buttons: false, children: 0)
+        let (loop, elements) = makeLoop([twin, host])
+        var destroyed: [WindowID] = []
+        loop.onEvent = { event in
+            if case .windowDestroyed(let id, _) = event {
+                destroyed.append(id)
+            }
+        }
+        // The twin alone: a window as far as anyone can tell.
+        loop.axWindows = { _ in [elements[0]] }
+        #expect(!loop.isShadow(elements[0], id: twin.id, pid: pid))
+        loop.elements[pid] = [twin.id: elements[0]]
+        loop.retireShadowSuspects(pid: pid)
+        #expect(destroyed.isEmpty)
+        // The host arrives and is tracked: the twin is re-asked.
+        loop.axWindows = { _ in elements }
+        loop.elements[pid]?[host.id] = elements[1]
+        loop.retireShadowSuspects(pid: pid)
+        #expect(destroyed == [twin.id])
+        #expect(loop.elements[pid]?[twin.id] == nil)
+        #expect(loop.hostOfShadow(twin.id, pid: pid) == host.id)
+    }
+
+    @Test("a frameless window alone is never retired")
+    func framelessAloneStays() {
+        let frameless = traits(1, buttons: false, children: 0)
+        let (loop, elements) = makeLoop([frameless])
+        var destroyed = 0
+        loop.onEvent = { event in
+            if case .windowDestroyed = event { destroyed += 1 }
+        }
+        #expect(!loop.isShadow(elements[0], id: frameless.id, pid: pid))
+        loop.elements[pid] = [frameless.id: elements[0]]
+        loop.retireShadowSuspects(pid: pid)
+        #expect(destroyed == 0)
+        #expect(loop.elements[pid]?[frameless.id] != nil)
     }
 }

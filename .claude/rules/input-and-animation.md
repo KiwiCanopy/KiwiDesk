@@ -424,11 +424,14 @@ editing here:
   process's own report decides — and the gate counts a sibling
   process of the active app as active (`ProcessIdentityTests`,
   `ProcessIdentityWiringTests`). **A shadow window is never
-  tracked**: an empty, button-less standard window on the exact
-  frame of a buttoned window of its own process (Orion's "Orion
-  Preview"), whose focus reports name that host — the host is
-  what keeps a frameless real window a window
-  (`ShadowWindowTests`).
+  tracked**: an empty, button-less standard window beside a
+  buttoned window of its own process (Orion's "Orion Preview"),
+  whose focus reports name that host — the buttoned sibling is
+  what keeps a frameless real window alone in its app a window,
+  never the frame, which a twin tiled before its host arrived
+  never matches again; a twin tracked first is re-asked when a
+  host is tracked, so the verdict does not depend on arrival
+  order (`ShadowWindowTests`).
 - **The spring integrator must stay inside its stability bound
   (#599).** `Spring.step` is semi-implicit Euler, which amplifies
   instead of damping once the step is large relative to the

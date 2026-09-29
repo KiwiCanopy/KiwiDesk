@@ -36,7 +36,10 @@ extension EventLoop {
         }
         observers = [:]
         processIdentity.unlisted = [:]
-        shadows.hosts = [:]
+        shadows = ShadowWindows(
+            traits: shadows.traits,
+            hasTitlebarButton: shadows.hasTitlebarButton
+        )
         elements = [:]
         enhancedUIBaselines = [:]
         manualAXApplied = []
