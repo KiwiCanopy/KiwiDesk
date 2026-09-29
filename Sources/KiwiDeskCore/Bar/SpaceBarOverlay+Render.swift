@@ -119,6 +119,20 @@ extension SpaceBarOverlay {
                 fit: style.backgroundFit
             )
         self.plateFrame = plateFrame
+        contentFrame = BarPlate.content(
+            strip: strip,
+            runStart: pinFront ? 0 : runStart,
+            runTotal: pinFront ? axis : total,
+            insets: pinFront
+                ? .zero
+                : Self.contentInsets(
+                    items: items,
+                    depth: depth,
+                    look: style,
+                    frontFollows: frontApp != nil
+                ),
+            horizontal: horizontal
+        )
         let hosting = glassHosting(style)
         prepareGlassHosting(hosting, pinnedFront: pinFront)
         let itemFrames = layoutLayerDivider(
@@ -149,7 +163,14 @@ extension SpaceBarOverlay {
             depth: depth,
             horizontal: horizontal,
             strip: strip,
-            style: style
+            style: style,
+            content: pinFront
+                ? contentFrame
+                : contentFrame.offsetBy(
+                    dx: -runFrame.minX,
+                    dy: -runFrame.minY
+                ),
+            rides: !pinFront
         )
         let glides = recordGlide(items, content: style.inactiveContent)
         BarMotion.runLayout { moveFrame(itemRun, runFrame, glides) }

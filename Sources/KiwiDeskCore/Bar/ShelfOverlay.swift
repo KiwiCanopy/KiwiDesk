@@ -11,12 +11,14 @@ import AppKit
 @MainActor
 final class ShelfOverlay {
     /// A section to place: its view, its slot on the shelf in AX
-    /// coordinates, and the plate its run asks for in the view's
-    /// own coordinates.
+    /// coordinates, and — in the view's own coordinates — the
+    /// plate its run asks for and the span its run draws (#1779).
     struct Section {
         let view: NSView
         let slot: CGRect
         let plate: CGRect
+        /// Zero falls back to the slot, so every site states it.
+        let content: CGRect
     }
 
     private(set) var panel: NSPanel?
@@ -104,6 +106,7 @@ final class ShelfOverlay {
             range: range,
             divider: Self.dividerFrame(
                 slots: sections.map(\.slot),
+                contents: sections.map(\.content),
                 strip: strip,
                 horizontal: horizontal
             ),

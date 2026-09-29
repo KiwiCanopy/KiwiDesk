@@ -92,7 +92,9 @@ extension AppBarOverlay {
 
     /// The section's one scroll door (bars.md): moves `itemRun` to
     /// `target`, clamped, and re-reads what the last render derived
-    /// from the offset — fades, counts, hover — never re-rendering.
+    /// from the offset — fades, counts, the drawn content, hover —
+    /// never re-rendering; the shelf re-lays only where that moved
+    /// the divider.
     /// The plate needs no re-read: an overflowing run's plate spans
     /// its strip at every offset (`BarPlate.frame`). Returns
     /// whether the offset moved.
@@ -121,6 +123,19 @@ extension AppBarOverlay {
             BarMotion.setFrame(itemRun, to: runFrame, animated: animated)
         }
         layoutOverflow(strip: state.strip, m: m, style: style)
+        let before = contentFrame
+        contentFrame = runContent.offsetBy(
+            dx: runFrame.minX,
+            dy: runFrame.minY
+        )
+        let length = m.horizontal ? state.strip.width : state.strip.height
+        let moved = ShelfOverlay.dividerMoves(
+            from: before,
+            to: contentFrame,
+            along: length,
+            horizontal: m.horizontal
+        )
+        if moved { onRendered() }
         syncHoverToPointer()
         return true
     }

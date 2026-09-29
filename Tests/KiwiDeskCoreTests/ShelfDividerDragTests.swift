@@ -206,12 +206,14 @@ struct ShelfDividerDragTests {
             ShelfOverlay.Section(
                 view: NSView(),
                 slot: CGRect(x: 0, y: 0, width: 300, height: 30),
-                plate: .zero
+                plate: .zero,
+                content: .zero
             ),
             ShelfOverlay.Section(
                 view: NSView(),
                 slot: CGRect(x: 300, y: 0, width: 700, height: 30),
-                plate: .zero
+                plate: .zero,
+                content: .zero
             ),
         ]
         overlay.show(

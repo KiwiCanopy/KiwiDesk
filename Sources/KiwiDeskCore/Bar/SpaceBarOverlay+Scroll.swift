@@ -21,6 +21,10 @@ extension SpaceBarOverlay {
         let horizontal: Bool
         let strip: CGRect
         let style: SpaceBarLook
+        /// The drawn content, in `itemRun`'s coordinates where it
+        /// `rides` the run, else in `root`'s (a pinned segment).
+        let content: CGRect
+        let rides: Bool
     }
 
     /// A wheel or trackpad scroll (`ShelfScrollInput`): taken
@@ -49,9 +53,10 @@ extension SpaceBarOverlay {
 
     /// The section's one scroll door (bars.md): moves the run to
     /// `target`, clamped, and re-reads what the last render derived
-    /// from the offset — drop targets, fades, counts, hover — never
-    /// re-rendering. The plate needs no re-read: an overflowing
-    /// run's plate spans its strip at every offset
+    /// from the offset — drop targets, fades, counts, the drawn
+    /// content, hover — never re-rendering; the shelf re-lays only
+    /// where that moved the divider. The plate needs no re-read:
+    /// an overflowing run's plate spans its strip at every offset
     /// (`BarPlate.frame`). Returns whether the offset moved.
     @discardableResult
     func moveRun(to target: CGFloat, animated: Bool) -> Bool {
@@ -102,6 +107,19 @@ extension SpaceBarOverlay {
             style: run.style,
             depth: run.depth
         )
+        let before = contentFrame
+        contentFrame =
+            run.rides
+            ? run.content.offsetBy(dx: runFrame.minX, dy: runFrame.minY)
+            : run.content
+        let length = run.horizontal ? run.strip.width : run.strip.height
+        let moved = ShelfOverlay.dividerMoves(
+            from: before,
+            to: contentFrame,
+            along: length,
+            horizontal: run.horizontal
+        )
+        if moved { onRendered() }
         syncHoverToPointer()
         return true
     }

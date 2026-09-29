@@ -8,7 +8,9 @@ import Testing
 /// glass, keeps its frame — nothing re-renders, and what a render
 /// derives from the offset is re-read to exactly a render's answer
 /// at that offset. The parity clauses are the forget-proof half: a
-/// new offset-dependent piece the door misses reds them.
+/// new offset-dependent piece the door misses reds them. The door
+/// re-lays the shelf only where the divider moved — leaving offset
+/// 0 can — so the no-render clauses count from a scrolled start.
 @Suite("Shelf scroll run")
 @MainActor
 struct ShelfScrollRunTests {
@@ -36,6 +38,7 @@ struct ShelfScrollRunTests {
         let after: Int
         let mask: [NSNumber]?
         let plate: CGRect
+        let content: CGRect
         let targets: [CGRect]
     }
 
@@ -47,6 +50,7 @@ struct ShelfScrollRunTests {
             mask: (o.itemContainer.layer?.mask as? CAGradientLayer)?
                 .locations,
             plate: o.plateFrame,
+            content: o.contentFrame,
             targets: []
         )
     }
@@ -59,6 +63,7 @@ struct ShelfScrollRunTests {
             mask: (o.itemContainer.layer?.mask as? CAGradientLayer)?
                 .locations,
             plate: o.plateFrame,
+            content: o.contentFrame,
             targets: o.hitFrames.map(\.frame)
         )
     }
@@ -75,9 +80,9 @@ struct ShelfScrollRunTests {
         return try #require(manager.overlayForTesting(barTitleDisplay))
     }
 
-    private func spaceBar() throws -> SpaceBarOverlay {
+    private func spaceBar(spaces: Int = 60) throws -> SpaceBarOverlay {
         let manager = SpaceBarManager()
-        manager.sync([paintedSpaceBar(front: nil, spaces: 60)])
+        manager.sync([paintedSpaceBar(front: nil, spaces: spaces)])
         return try #require(manager.overlayForTesting(barTitleDisplay))
     }
 
@@ -85,12 +90,14 @@ struct ShelfScrollRunTests {
     func appBarScroll() throws {
         let overlay = try appBar()
         let frames = overlay.itemViews.map(\.frame)
+        let item = try #require(overlay.itemViews.first)
+        item.scrollWheel(with: try trackpad(-100))
+        let first = overlay.scrollOffset
         var renders = 0
         overlay.onRendered = { renders += 1 }
-        let item = try #require(overlay.itemViews.first)
         item.scrollWheel(with: try trackpad(-300))
         let offset = overlay.scrollOffset
-        #expect(offset > 0)
+        #expect(offset > first)
         #expect(overlay.itemViews.map(\.frame) == frames)
         #expect(overlay.itemRun.frame.minX == -offset)
         #expect(renders == 0)
@@ -104,10 +111,14 @@ struct ShelfScrollRunTests {
     @Test("An App Bar page takes the scroll door")
     func appBarPage() throws {
         let overlay = try appBar()
+        _ = overlay.scroll(
+            ShelfScrollInput.Delta(x: 0, y: -100, precise: true)
+        )
+        let first = overlay.scrollOffset
         var renders = 0
         overlay.onRendered = { renders += 1 }
         overlay.forwardCount.onPage()
-        #expect(overlay.scrollOffset > 0)
+        #expect(overlay.scrollOffset > first)
         #expect(renders == 0)
         let paged = drawn(overlay)
         overlay.render(followingFocus: false)
@@ -118,20 +129,23 @@ struct ShelfScrollRunTests {
     func spaceBarScroll() throws {
         let overlay = try spaceBar()
         let frames = overlay.itemViews.map(\.frame)
+        let item = try #require(overlay.itemViews.first)
+        item.scrollWheel(with: try trackpad(-100))
+        let first = overlay.scrollOffset
         let targets = overlay.hitFrames.map(\.frame)
         var renders = 0
         overlay.onRendered = { renders += 1 }
-        let item = try #require(overlay.itemViews.first)
         item.scrollWheel(with: try trackpad(-300))
         let offset = overlay.scrollOffset
-        #expect(offset > 0)
+        #expect(offset > first)
         #expect(overlay.itemViews.map(\.frame) == frames)
         #expect(overlay.itemRun.frame.minX == -offset)
         #expect(renders == 0)
         // A target still whole on both sides of the scroll moved
-        // back by exactly the offset.
+        // back by exactly the travel.
+        let travel = offset - first
         let moved = overlay.hitFrames.first { now in
-            targets.contains { abs($0.maxX - offset - now.frame.maxX) < 0.01 }
+            targets.contains { abs($0.maxX - travel - now.frame.maxX) < 0.01 }
         }
         #expect(moved != nil)
         let scrolled = drawn(overlay)
@@ -176,13 +190,17 @@ struct ShelfScrollRunTests {
 
     @Test("A Space Bar page and autoscroll step take the scroll door")
     func spaceBarPageAndStep() throws {
-        let overlay = try spaceBar()
+        // Long enough that the page stays mid-run: an end coming
+        // into view moves the divider and rightly re-lays the shelf.
+        let overlay = try spaceBar(spaces: 200)
+        _ = overlay.scroll(
+            ShelfScrollInput.Delta(x: 0, y: -100, precise: true)
+        )
         var renders = 0
         overlay.onRendered = { renders += 1 }
         overlay.forwardCount.onPage()
         let paged = overlay.scrollOffset
         #expect(paged > 0)
-        // The page may land at the end, so the step goes back.
         overlay.scroll(by: -40)
         #expect(overlay.scrollOffset == paged - 40)
         #expect(renders == 0)
