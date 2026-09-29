@@ -168,4 +168,34 @@ struct ScrollGestureDeadEndTests {
         #expect(bumps().count == keyBumps().count)
         #expect(gesture.activeSpace?.focused != WindowID(3))
     }
+
+    /// Past the row's end the keys ask the float tier (#488): the
+    /// gesture reaches the same float rather than bumping.
+    @Test("a row end reaches a float beyond it, as the keys do")
+    func rowEndReachesTheFloatTier() {
+        func setUp() -> (KiwiCore, ScrollPanSession, () -> [Bump]) {
+            let (core, session, bumps) = makeCore(
+                "scrolling",
+                focus: WindowID(2)
+            )
+            core.state.windows.setFloating(WindowID(3), true)
+            core.state.apply(
+                .windowMoved(
+                    WindowID(3),
+                    CGRect(x: 1700, y: 300, width: 200, height: 200)
+                )
+            )
+            let space = core.state.workspaces.space(of: WindowID(1))!
+            core.state.workspaces.focus(WindowID(2), in: space)
+            return (core, session, bumps)
+        }
+        let (keys, _, _) = setUp()
+        keys.execute("focus", args: [.string("right")])
+        // The fixture reaches the tier at all: the keys land on it.
+        #expect(keys.activeSpace?.focused == WindowID(3))
+        let (gesture, session, bumps) = setUp()
+        swipe(gesture, session, dx: -80)
+        #expect(gesture.activeSpace?.focused == WindowID(3))
+        #expect(bumps().isEmpty)
+    }
 }

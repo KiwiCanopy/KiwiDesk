@@ -207,4 +207,29 @@ struct GesturesScrollWiringTests {
         #expect(caption.contains("navigate:{reveal(holder)}"))
         #expect(caption.contains("linkTitle:Self.goTo(holder)"))
     }
+
+    /// A group's end is a rule, not a missing one: every heading
+    /// after the first sits under a `GestureRule` and stands off
+    /// it; the first, under the card's own hairline, takes none.
+    @Test("groups close with a rule, and later headings stand off it")
+    func groupsClose() throws {
+        let drawer = Self.squash(try Self.source("GesturesDrawer.swift"))
+        let headings =
+            drawer.components(separatedBy: "GestureGroupHeading(")
+            .count - 1
+        #expect(headings == 3)
+        #expect(
+            drawer.components(
+                separatedBy: "GestureRule()GestureGroupHeading("
+            ).count - 1 == headings - 1
+        )
+        #expect(
+            drawer.components(separatedBy: "followsGroup:true").count - 1
+                == headings - 1
+        )
+        let first = try #require(drawer.range(of: "GestureGroupHeading("))
+        #expect(
+            !drawer[..<first.lowerBound].hasSuffix("GestureRule()")
+        )
+    }
 }

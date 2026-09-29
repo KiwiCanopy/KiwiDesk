@@ -204,25 +204,31 @@ struct GesturePlate<Content: View>: View {
     }
 }
 
-/// The rule between two entries of one group — never under a
-/// heading, before a group's first entry or after its last, so a
-/// heading stays joined to what it owns.
+/// The rule under every row of the card but its last: between two
+/// entries, and between a group's last row and the next heading,
+/// which stands farther from the rule than from its own first
+/// entry, so it stays joined to what it owns. Never under a
+/// heading, above the first (the card's hairline is there) or at
+/// the card's end, which its edge closes.
 struct GestureRule: View {
     var body: some View {
         SettingsTheme.hairline.frame(height: 1)
     }
 }
 
-/// A heading inside the drawer, one per place the hand is.
+/// A heading inside the drawer, one per place the hand is. A
+/// heading after the first follows a group's closing rule, and
+/// stands farther from it than from its own entries.
 struct GestureGroupHeading: View {
     let title: String
+    var followsGroup = false
 
     var body: some View {
         Text(title)
             .font(.caption.weight(.semibold))
             .foregroundStyle(SettingsTheme.groupHeading)
             .textCase(.uppercase)
-            .padding(.top, 6)
+            .padding(.top, followsGroup ? 14 : 6)
             .accessibilityAddTraits(.isHeader)
     }
 }

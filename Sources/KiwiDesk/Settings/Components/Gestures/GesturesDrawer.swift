@@ -40,18 +40,22 @@ struct GesturesDrawer: View {
                     )
                 )
                 GesturesScrollEntries(model: model, autoplay: $autoplay)
+                GestureRule()
                 GestureGroupHeading(
                     title: L(
                         "shortcuts.gestures.group.windows",
                         "On your windows"
-                    )
+                    ),
+                    followsGroup: true
                 )
                 windowEntries
+                GestureRule()
                 GestureGroupHeading(
                     title: L(
                         "shortcuts.gestures.group.shelf",
                         "On the KiwiShelf"
-                    )
+                    ),
+                    followsGroup: true
                 )
                 GesturesShelfEntries(model: model)
             }
