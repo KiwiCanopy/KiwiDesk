@@ -107,6 +107,13 @@ struct BarMenuLandingTests {
         model.suppressDirty = false
         model.adoptLiveWrite({ _ in }, persisted: true)
         #expect(model.config.settings.kiwishelf.minimum == loaded)
+        // A session-only write re-reads a clean draft too, as the
+        // tour's paint always has.
+        model.suppressDirty = true
+        model.config.settings.kiwishelf.minimum = loaded + 9
+        model.suppressDirty = false
+        model.adoptLiveWrite({ _ in }, persisted: false)
+        #expect(model.config.settings.kiwishelf.minimum == loaded)
     }
 
     /// An edit no file took — no profile live, or a failed write —

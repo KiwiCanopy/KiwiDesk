@@ -1179,8 +1179,10 @@ the user's, and on a leaf the draft had itself staged the write,
 the newer act, wins (`BarMenuLandingTests`); a stored profile's
 draft is another file and takes nothing. An edit NO file took —
 no profile live, or the write failed — lasts the session, as the
-tour's click does: a dirty draft takes nothing of it, since
-taking it on both sides would call a session value saved
+tour's click does, which means until a Save writes the draft: a
+clean draft still re-reads, the tour's shipped behaviour, while a
+dirty draft takes nothing of it, since taking it on both sides
+would call a session value saved
 (`BarMenuLandingTests` ▸ `sessionOnlyWriteLeavesTheDraft`,
 `BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). A writer that paints
 more than the leaves it names — the tour's whole look — refuses
