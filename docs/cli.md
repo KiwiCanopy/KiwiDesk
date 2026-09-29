@@ -292,6 +292,11 @@ exports nothing.
 | | `animations.set_monocle_flip_duration` | ms (100–1000, default 450); the flip's turn, persisted per-profile |
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
 | | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
+| Scroll gestures | `scroll_gesture.set_pan` | modifiers joined by `+` (default `control+option`; `""` off) — held with a scroll to move focus window by window |
+| | `scroll_gesture.set_space_step` | modifiers (default `control+option+command`; `""` frees them) — reserved for stepping between Spaces, not built yet |
+| | `scroll_gesture.set_natural_scrolling` | true\|false, [`trackpad\|mouse`] (default `true` for both) |
+| | `scroll_gesture.set_long_swipes` | true\|false (default `false`) |
+| | `scroll_gesture.set_step_distance` | pt (10–1000, default 60) — travel per extra window of a long swipe |
 | Sleep/Wake | `enable_wake_restore` | true\|false |
 | | `set_wake_restore_delay` | ms |
 | Drag | `drag.set_ghost_enabled` | true\|false |
@@ -339,6 +344,11 @@ exports nothing.
 | | `track.set_overflow_style` | `cascade_all\|cascade_overflow` (default `cascade_all` for track) |
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
+
+:::unreleased
+The `scroll_gesture.*` commands set the scroll gestures; see
+[Scroll Gestures](lua-reference.md#scroll-gestures).
+:::
 
 :::unreleased
 `set_float_placement` replaces `set_float_nudge`: a saved setting

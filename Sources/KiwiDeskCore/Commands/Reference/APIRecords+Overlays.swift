@@ -161,8 +161,8 @@ extension APIReference {
             .text("modifiers")
         ),
         "set_space_step": APIRecord(
-            "Sets the modifiers held with a scroll to step "
-                + "between Spaces; \"\" is off.",
+            "Reserves the modifiers for stepping between Spaces "
+                + "(not built yet); \"\" frees them.",
             .text("modifiers")
         ),
         "set_long_swipes": APIRecord(
