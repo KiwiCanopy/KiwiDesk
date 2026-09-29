@@ -18,7 +18,9 @@ public enum SpaceBarStrip {
 
     /// The groups a chip drew and how many the row held — two
     /// readings of one render, so a later render can tell a moved
-    /// strip from a changed row (#1528 item 21).
+    /// strip from a row that gained or lost a group (#1528 item
+    /// 21). An open and a close in one render keep the count, and
+    /// read as the same row.
     public struct Drawn: Equatable, Sendable {
         public var window: Range<Int>
         public var count: Int
@@ -29,7 +31,7 @@ public enum SpaceBarStrip {
         }
 
         /// Whether a row of `count` groups may keep drawing this
-        /// window under the pointer: the same row, and a window
+        /// window under the pointer: the same group count, and a window
         /// `window(count:span:anchor:)` could have drawn for it.
         public func holds(count: Int, span: Int) -> Bool {
             count == self.count
@@ -82,8 +84,8 @@ public enum SpaceBarStrip {
         public var enteringBack = 0
 
         /// The walk from `old` to `new`; nil when nothing moves,
-        /// when the row changed under it — a window opened or
-        /// closed shifts every index — and when the two windows
+        /// when the row's group count changed under it — a window
+        /// opened or closed shifts every index — and when the two windows
         /// share no group, a jump no glyph could walk across
         /// without passing over the neighbouring chips.
         public static func between(

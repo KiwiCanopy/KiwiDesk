@@ -191,8 +191,9 @@ struct ShelfWiringSeamTests {
     }
 
     /// A strip held under the pointer re-centres through the one
-    /// bar refresh when the hold ends (#1528 item 21); the hold
-    /// suite drives the manager, which cannot see this wiring.
+    /// bar refresh when the hold ends, deferred out of the render
+    /// that ended it (#1528 item 21); the hold suite drives the
+    /// manager, which cannot see this wiring.
     @Test("a released strip hold refreshes the bars")
     func stripReleaseRefreshesTheBars() throws {
         let wiring = Self.squash(
@@ -203,7 +204,9 @@ struct ShelfWiringSeamTests {
         )
         #expect(
             wiring.contains(
-                "spaceBars.onStripReleased={[weakself]inself?.updateBars()}"
+                "spaceBars.onStripReleased={[weakself]in"
+                    + "self?.deferred.schedule(.stripRecentre,after:.zero){"
+                    + "[weakself]inself?.updateBars()}}"
             )
         )
     }

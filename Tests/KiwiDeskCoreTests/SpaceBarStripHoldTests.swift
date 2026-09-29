@@ -82,6 +82,23 @@ struct SpaceBarStripHoldTests {
         #expect(released == 1)
     }
 
+    /// A run that shrinks drops its last views: one leaving under
+    /// the pointer ends its hold, though its Space is still drawn
+    /// by another slot.
+    @Test("a dropped view under the pointer releases its hold")
+    func droppedViewReleases() throws {
+        let manager = SpaceBarManager()
+        var released = 0
+        manager.onStripReleased = { released += 1 }
+        let three = SpaceID("3")
+        manager.sync([bar([item(one), item(two), item(three)])])
+        try view(manager, at: 2).setPointerInside(true)
+        #expect(manager.heldStrip(of: three) != nil)
+        manager.sync([bar([item(two), item(three)])])
+        #expect(manager.heldStrip(of: three) == nil)
+        #expect(released == 1)
+    }
+
     /// Another chip's entry can arrive ahead of the first chip's
     /// exit; the replaced hold still asks for its re-centring.
     @Test("a hold replaced by another Space's releases")

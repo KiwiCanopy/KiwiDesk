@@ -59,7 +59,8 @@ public final class SpaceBarManager {
     /// slide another app under the pointer (#1528 item 21).
     private(set) var stripHold: (space: SpaceID, drawn: SpaceBarStrip.Drawn)?
     /// Fires when a hold ends, so the strip re-centres — Core
-    /// wires it to `updateBars()`.
+    /// wires it to a deferred `updateBars()`, since a hold can end
+    /// inside the render or relayout that refresh would nest in.
     var onStripReleased: @MainActor () -> Void = {}
 
     private var overlays: [DisplayID: SpaceBarOverlay] = [:]

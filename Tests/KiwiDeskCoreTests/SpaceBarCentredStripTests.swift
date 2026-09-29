@@ -183,15 +183,17 @@ struct SpaceBarCentredStripTests {
         #expect(released == 1)
     }
 
-    /// A held strip the row no longer draws — a window closed
-    /// under the pointer — gives way to the centred one.
+    /// A held strip on a row that lost a group — a window closed
+    /// under the pointer — gives way to the centred one, even
+    /// where its indices still make a shape the shorter row could
+    /// draw: they now name other apps.
     @Test("a held strip the row outgrew is dropped")
     func staleHoldCentres() throws {
         let core = seededCore()
         core.state.apply(.windowFocused(WindowID(9)))
         core.spaceBars.stripHover(
             one,
-            .init(window: 3..<9, count: 9),
+            .init(window: 2..<7, count: 9),
             inside: true
         )
         core.state.apply(.windowDestroyed(WindowID(1), wasMinimized: false))

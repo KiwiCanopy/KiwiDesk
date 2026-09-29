@@ -399,13 +399,18 @@ Obligations:
   active Space below.
 - **A strip under the pointer is held by `SpaceBarManager`
   alone** and released through its one `onStripReleased`, wired
-  to `updateBars()` (`ShelfWiringSeamTests` ▸
+  to an `updateBars()` DEFERRED on `DeferredTasks.Key
+  .stripRecentre` — a hold can end inside a render or the
+  relayout's hover re-read, where a synchronous refresh would
+  nest `holdingRelayout` and let the outer render redraw the
+  stale hold (`ShelfWiringSeamTests` ▸
   `stripReleaseRefreshesTheBars`). The hold ends wherever its
   chip stops drawing that Space, not only on the pointer's exit:
   item views are reused by index, so a slot handed another Space
-  reports the old Space's exit from `configure`; another Space's
-  entry replaces the hold AND releases it, since its exit may
-  arrive second; and `sync` drops a hold on a Space no shown bar
+  reports the old Space's exit from `configure`, and a view the
+  run drops reports it before it leaves; another Space's entry
+  replaces the hold AND releases it, since its exit may arrive
+  second; and `sync` drops a hold on a Space no shown bar
   draws. A new way for a chip to stop drawing a Space owes the
   same end, or the strip stays frozen with the pointer gone
   (`SpaceBarStripHoldTests`).
@@ -414,7 +419,8 @@ Obligations:
   count — never through indices alone.** A window opened or
   closed shifts every index, so the same range names other
   apps: the builder keeps a hold only while `Drawn.holds(count:
-  span:)` says the row is unchanged and could draw it, and
+  span:)` says the row's group count is unchanged and could draw
+  it, and
   `Walk.between` walks nothing across a changed row, a collapse
   on either side, or a jump whose windows share no group — which
   would slide glyphs over the neighbouring chips
