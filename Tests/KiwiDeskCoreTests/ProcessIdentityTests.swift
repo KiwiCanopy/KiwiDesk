@@ -247,6 +247,7 @@ struct ProcessIdentityTests {
         loop.reportFrontWindow(of: [parent, child])
         #expect(box.focused.isEmpty)
         // Tracked, but another app took over during the reorder.
+        box.focused = []
         loop.elements[child] = [WindowID(2): element(child)]
         loop.lastActivePid = other
         loop.reportFrontWindow(of: [parent, child])

@@ -29,7 +29,7 @@ extension EventLoop {
             let app = note.runningApplication
             MainActor.assumeIsolated {
                 guard let app else { return }
-                self?.appTerminated(app)
+                self?.appTerminated(pid: app.processIdentifier)
             }
         }
         let activate = center.addObserver(
@@ -41,7 +41,10 @@ extension EventLoop {
             let app = note.runningApplication
             MainActor.assumeIsolated {
                 guard let app else { return }
-                self?.appActivated(app)
+                self?.appActivated(
+                    RunningApp(app),
+                    launchedAt: app.launchDate
+                )
             }
         }
         // Hide and unhide are the only signal an app gives
@@ -110,9 +113,9 @@ extension EventLoop {
         )
     }
 
-    private func appTerminated(_ app: NSRunningApplication) {
-        let pid = app.processIdentifier
-        // A child registration exits unnamed (#1785).
+    /// Descriptor-shaped, like `appHideChanged`: a test drives
+    /// the unnamed pid a LaunchServices child exits with (#1785).
+    func appTerminated(pid: pid_t) {
         guard Self.isProcessID(pid) else {
             retireExitedObservers()
             return
@@ -163,25 +166,23 @@ extension EventLoop {
 
     /// Closing an app's last window moves focus to a DIFFERENT
     /// app, so the closing app never reports anything. On every
-    /// app switch, reconcile the app we just left.
-    private func appActivated(_ app: NSRunningApplication) {
-        let pid = app.processIdentifier
+    /// app switch, reconcile the app we just left. Descriptor-
+    /// shaped for a test's unnamed or parent pid (#1785).
+    func appActivated(_ app: RunningApp, launchedAt: Date?) {
+        let pid = app.pid
         // Ahead of both reconciles below: a window this app shows
         // on its own activation is adopted by them, and must find
         // the #1599 launch follow already owed.
         onAppActivated(
             AppActivation(
                 pid: pid,
-                bundleID: AppRef(app).bundleID,
-                launchedAt: app.launchDate
+                bundleID: app.ref.bundleID,
+                launchedAt: launchedAt
             )
         )
         // The reconcile below takes this app's window snapshot
         // on the same turn — no second scan at attach (#672).
-        syncObservation(
-            for: RunningApp(app),
-            scanWindowsAtAttach: false
-        )
+        syncObservation(for: app, scanWindowsAtAttach: false)
         // An unnamed activation (#1785) leaves the gate with no
         // reading, which fails open.
         guard Self.isProcessID(pid) else {
@@ -200,7 +201,7 @@ extension EventLoop {
         // activated app first, so a window tracked late (cold
         // Electron tree, other native Space) is known before
         // the managed-window guard below.
-        reconcile(pid: pid, app: AppRef(app))
+        reconcile(pid: pid, app: app.ref)
         // One app, several processes: the announced pid may be a
         // sibling's, so its focused window is not the answer.
         let siblings = siblingProcesses(of: pid)
@@ -229,7 +230,7 @@ extension EventLoop {
                 classifyUntrackedFocus(
                     id: id,
                     pid: pid,
-                    bundleID: AppRef(app).bundleID,
+                    bundleID: app.ref.bundleID,
                     isAccessory: Self.classifiesAsOverlay(
                         pid: pid,
                         activationPolicy: app.activationPolicy
