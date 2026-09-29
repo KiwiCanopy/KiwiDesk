@@ -68,6 +68,26 @@ public enum FloatDetection {
         )
     }
 
+    /// Every on-screen, visible normal-layer (0) window's bounds,
+    /// FRONT to back — the order the WindowServer composites
+    /// them in (#1787). CG bounds are top-left, as AX frames are.
+    public static func frontToBackNormalFrames() -> [CGRect] {
+        let list =
+            CGWindowListCopyWindowInfo(
+                [.optionOnScreenOnly, .excludeDesktopElements],
+                kCGNullWindowID
+            ) as? [[String: Any]] ?? []
+        return list.compactMap { info in
+            guard info[kCGWindowLayer as String] as? Int == 0,
+                (info[kCGWindowAlpha as String] as? Double ?? 0) > 0
+            else { return nil }
+            return (info[kCGWindowBounds as String] as? [String: Any])
+                .flatMap {
+                    CGRect(dictionaryRepresentation: $0 as CFDictionary)
+                }
+        }
+    }
+
     /// CGWindowList's own on-screen flag for ONE window (#1345):
     /// the compositor's draw list, which the managed display's
     /// "current Space" reading lags through a switch (#1023). A

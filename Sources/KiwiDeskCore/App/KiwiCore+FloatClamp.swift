@@ -230,6 +230,11 @@ extension KiwiCore {
             // a fullscreen app is the frame set the stash
             // already refuses.
             !window.isFullscreen,
+            // Nor at one presenting over its whole screen: the
+            // fit would push a slide show under nothing and its
+            // stamp read the show's first focus as a bounce
+            // (#1787).
+            !coversAScreen(frame),
             // EFFECTIVE float, never the flag (#1178).
             EffectiveFloat.applies(
                 isFloating: window.isFloating,

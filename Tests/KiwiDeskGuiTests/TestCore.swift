@@ -97,6 +97,9 @@ func makeTestCore(
     // every edge open); an adjacency suite injects a fabricated
     // list itself.
     core.tiler.allScreenBounds = { [] }
+    // The WindowServer z-order the shelf stand-down reads
+    // (#1787): live, it hands every fixture the host desk.
+    core.shelves.frontWindowFrames = { [] }
     // Same class, fifth time (#933): the own-key-window seam
     // defaults to a live `NSApplication.shared` read, so a
     // runner that happens to hold a key window would suppress

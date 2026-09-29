@@ -3933,6 +3933,30 @@ screen edge, because that net runs for every float on every
 retile and would drag back a window parked half off-screen by
 hand, which macOS allows and this change never asked for.
 
+*A window covering its whole screen is presenting, and is left
+alone (#1787).* A slide show, or a borderless-fullscreen game or
+player, draws over the menu bar, the Dock and the shelf on
+purpose — that is the whole point of it — so pushing it clear of
+a strip breaks the thing the user just started, exactly as a fit
+would break native fullscreen, which the net already skips.
+Judged on the frame alone, over every screen's WHOLE frame:
+macOS keeps a titled window below the menu bar, so only a window
+drawn over it can cover a screen, and no subrole or app list is
+needed to tell a presentation from an ordinary float. The
+exemption is load-bearing twice: the fit's frame write also
+stamps the #1161 placement ledger, so in a Scrolling Space the
+show's own first focus read as an app answering our placement
+and the editor was raised back over it. And the shelf stands
+down on a screen whose FRONT window covers it, as it does on a
+native-fullscreen Space — front, not focused, because a
+presenter view keeps the focus on one screen while the show
+covers the other; a window stepping in front brings the shelf
+back. The WindowServer's order is read only while a tracked
+window covers that screen, so a desk without a presentation
+pays nothing, and a move or resize crossing the cover re-reads
+it, since an app may animate its show open past the focus
+report.
+
 *And the ring is kept clear, not just the window.* A float is
 held the ring's own outward reach off **every** edge of that
 region — bars and screen edges alike. The ring is the window

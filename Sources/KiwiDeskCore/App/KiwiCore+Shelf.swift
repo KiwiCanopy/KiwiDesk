@@ -158,7 +158,9 @@ extension KiwiCore {
             // gates here: nil retires the overlay through the
             // manager, keeping `shownStrips` consistent with
             // `clampFloatsClearOfBars`.
-            NativeSpaces.currentSpaceIsUser(display: display),
+            // A presentation in front stands it down the same
+            // way (#1787).
+            !shelfStandsDown(on: display),
             let id = state.workspaces.currentSpace(on: display),
             let space = state.workspaces[id]
         else { return nil }
@@ -196,9 +198,8 @@ extension KiwiCore {
         on display: DisplayID,
         style: SpaceBarLook
     ) -> [SpaceBarOverlay.Item]? {
-        // Same fullscreen-space stand-down as the App Bar (#670).
-        guard style.enabled,
-            NativeSpaces.currentSpaceIsUser(display: display)
+        // Same stand-down as the App Bar (#670, #1787).
+        guard style.enabled, !shelfStandsDown(on: display)
         else { return nil }
         var items = spaceBarItems(display: display, style: style)
         guard !items.isEmpty else { return nil }
