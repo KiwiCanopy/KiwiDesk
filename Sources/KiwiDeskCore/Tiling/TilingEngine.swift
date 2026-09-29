@@ -135,7 +135,8 @@ public final class TilingEngine {
     ///
     /// **It pins size, not topology.** The screen-list facts —
     /// which screens exist and where — enter through the
-    /// `allScreenBounds` hook below (#878), and screen
+    /// `allScreenBounds` hook below (#878) — whole frames through
+    /// `allScreenFrames` (#1787) — and screen
     /// *resolution* (which `NSScreen` a space lands on) still
     /// comes from the three static `screen(…)` resolvers, so a
     /// fixture can shrink the display it lays out against and
@@ -176,6 +177,12 @@ public final class TilingEngine {
         NSScreen.screens.map {
             GeometryUtils.axVisibleFrame(of: $0)
         }
+    }
+
+    /// Every screen's WHOLE AX frame, menu bar and Dock included
+    /// (#1787); `allScreenBounds`' sibling, pinned the same way.
+    var allScreenFrames: @MainActor () -> [CGRect] = {
+        NSScreen.screens.map(KiwiCore.axFrame(of:))
     }
 
     public init() {
@@ -322,18 +329,6 @@ public final class TilingEngine {
             )
             restoreStashed(state: state, frames: frames)
         }
-    }
-
-    /// Forwards display topology changes to the animator.
-    public func displaysChanged() {
-        animation.displaysChanged()
-    }
-
-    /// Whether we set this window's frame moments ago. Move
-    /// events arriving within the grace period are AX echoes
-    /// of our own frame-sets, not user drags.
-    public func didRecentlySetFrame(_ id: WindowID) -> Bool {
-        applier.didRecentlySetFrame(id)
     }
 
     /// Sets a frame directly (no animation) through the frame

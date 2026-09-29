@@ -325,6 +325,8 @@ extension KiwiCore {
         }
         if willRetile, followed != true {
             retile(newlyCreatedWindow: newlyCreatedWindow)
+        } else if crossedScreenCover(event, before: preEventFrame) {
+            updateBars()  // #1787
         }
         runCloseReturnTail(
             event: event,

@@ -32,6 +32,14 @@ final class ShelfManager {
         _ in
     }
 
+    /// The WindowServer's normal-layer windows, front to back —
+    /// which window a screen SHOWS in front, read by the
+    /// presentation stand-down (#1787). Pinned to `[]` by both
+    /// `makeTestCore` twins.
+    var frontWindowFrames: @MainActor () -> [CGRect] = {
+        FloatDetection.frontToBackNormalFrames()
+    }
+
     /// Which shelf an overlay draws: a display's, on one edge.
     struct Key: Hashable {
         let display: DisplayID
