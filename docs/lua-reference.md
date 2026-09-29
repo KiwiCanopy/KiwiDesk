@@ -2538,9 +2538,9 @@ stays collapsed and takes the focused accent. The user guide's
 what a click on a glyph does and the drag-onto-a-Space gesture.
 
 :::unreleased
-Adjacent windows share a glyph only while
+Turning
 [`space_bar.set_group_adjacent_windows`](#space_barset_group_adjacent_windows)
-is on; by default each window draws its own.
+off gives each window its own glyph.
 :::
 
 The bar is layout-independent and sits on
@@ -2741,8 +2741,7 @@ space_bar.set_front_app_title_cap(25)
 :::unreleased
 ### space_bar.set_group_adjacent_windows
 
-**Expects:** boolean (default `false`; a profile saved before
-this setting existed is migrated to `true`).
+**Expects:** boolean (default `true`).
 
 **Does:** collapses adjacent windows of one app in a Space item
 into one glyph with a count badge; clicking it opens a menu of
@@ -2752,7 +2751,7 @@ focuses it. `glyph_span` counts glyphs either way.
 **Example:**
 
 ```lua
-space_bar.set_group_adjacent_windows(true)
+space_bar.set_group_adjacent_windows(false)
 ```
 :::
 

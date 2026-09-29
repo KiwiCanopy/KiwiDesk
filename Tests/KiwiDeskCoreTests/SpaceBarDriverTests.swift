@@ -105,11 +105,9 @@ struct SpaceBarDriverTests {
         // Focus a member of the leading run: the group takes
         // the focused flag, and stays collapsed (no expansion).
         core.state.apply(.windowFocused(WindowID(1)))
-        var look = SpaceBarLook()
-        look.bar.groupAdjacentWindows = true
         let content = core.spaceBarApps(
             in: core.state.workspaces[SpaceID("1")]!,
-            style: look
+            style: SpaceBarLook()
         )
         let apps = content.apps
         #expect(content.before.windows.isEmpty)
@@ -150,11 +148,9 @@ struct SpaceBarDriverTests {
             .windowCreated(window(11, app: "App8"))
         )
         core.state.apply(.windowFocused(WindowID(1)))
-        var look = SpaceBarLook()
-        look.bar.groupAdjacentWindows = true
         let content = core.spaceBarApps(
             in: core.state.workspaces[SpaceID("1")]!,
-            style: look
+            style: SpaceBarLook()
         )
         #expect(content.apps.count == 6)
         #expect(content.before.windows.isEmpty)

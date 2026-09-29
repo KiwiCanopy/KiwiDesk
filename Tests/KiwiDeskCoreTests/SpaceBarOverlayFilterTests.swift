@@ -90,7 +90,6 @@ struct SpaceBarOverlayFilterTests {
         let core = seededCore()
         var style = SpaceBarLook()
         style.glyphSpan = 2
-        style.groupAdjacentWindows = true
         // Flat order: Web, overlay(Web), Web, Mail — pinned
         // rather than left to spawn placement, since the claim
         // is about an overlay sitting BETWEEN two same-app

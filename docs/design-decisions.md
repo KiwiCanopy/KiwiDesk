@@ -11661,28 +11661,25 @@ badge counts hidden **windows**, not slots — the same unit as the
 per-glyph count badges and the item's accessibility label.
 
 :::unreleased
-**The Space Bar groups only on request.** (#293, #1725, owner
-ruling 2026-09-28.) `space_bar.set_group_adjacent_windows`, the
-App Bar's toggle's twin, collapses adjacent same-app runs into one
-glyph + count badge; off — the default — every window is its own
-glyph. Once every glyph became a click target (#1528), a grouped
-glyph costs a menu and a pick per window, where an ungrouped one
-is one click; that reach is the bar's job, so it wins the
-default. The price is the span: it counts glyphs, so ungrouped it
-counts windows and fills sooner, and the centred strip with its
-`+n` discs carries the rest. While grouping is on the order is
+**The Space Bar groups by default; a switch turns it off.** (#293,
+#1725, owner ruling 2026-09-30.)
+`space_bar.set_group_adjacent_windows`, the App Bar's toggle's
+twin, collapses adjacent same-app runs into one glyph + count
+badge; off, every window is its own glyph and one click reaches
+it, where a grouped glyph costs a menu and a pick (#1528).
+Grouped stays the default because the glyph span depends on
+grouping running **first**: ungrouped, the span counts windows,
+burns itself on duplicates and fills sooner, conveying less —
+so ungrouping is the choice of a user who wants the one-click
+reach more than the overview. With grouping on the order is
 settled — group first, then span, whatever the span's value
 (`space_bar.set_glyph_span`, default 5, range 1–12, #376, #1528).
 A `+n` badge counts hidden **windows**, not slots — the same unit
 as the per-glyph count badges and the item's accessibility label.
 
-A profile saved before the setting existed keeps grouping: its
-Space Bar always grouped, and a saved setup's bar should not
-change under an upgrade (`SpaceBarGroupingMigrationTests`). The
-crossing reaches what a file stores — profiles and a backup's
-inline profiles. A built-in layout has no file and an `init.lua`
-is outside `ConfigMigration`'s charter, so both take the new
-default: the one glyph per window a fresh setup draws.
+The default being the old behaviour is also why the setting owes
+no crossing: an absent key meant grouped before and means grouped
+now, so no stored file, built-in layout or `init.lua` changes.
 :::
 
 :::unreleased

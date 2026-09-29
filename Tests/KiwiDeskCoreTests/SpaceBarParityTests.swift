@@ -64,7 +64,7 @@ struct SpaceBarCommandParityTests {
         .activeIndicator(.edgeMark),
         .activeDimFactor(0.7),
         .showFrontApp(true), .hideEmpty(true),
-        .groupAdjacentWindows(true),
+        .groupAdjacentWindows(false),
         .stickyBadge(false),
         .springDelay(1000),
         .focusedItemColor("#030303"),

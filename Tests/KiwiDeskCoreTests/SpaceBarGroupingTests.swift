@@ -4,10 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// `space_bar.group_adjacent_windows` (#1725): off — the default —
-/// every window draws its own glyph, so one click reaches it; on,
-/// adjacent same-app runs share one glyph and a count badge
-/// (`SpaceBarDriverTests` holds the grouped shape).
+/// `space_bar.group_adjacent_windows` (#1725): on — the default,
+/// the behaviour before the switch existed — adjacent same-app
+/// runs share one glyph and a count badge; off, every window
+/// draws its own glyph, so one click reaches it.
 @Suite("Space Bar grouping toggle (#1725)")
 @MainActor
 struct SpaceBarGroupingTests {
@@ -51,6 +51,18 @@ struct SpaceBarGroupingTests {
         ).apps
     }
 
+    /// The default is the behaviour an absent key always meant,
+    /// which is why the setting owes no `ConfigMigration`.
+    @Test("a fresh setup groups, as before the switch")
+    func defaultGroups() {
+        #expect(SpaceBarStyle().groupAdjacentWindows)
+        let decoded = try? JSONDecoder().decode(
+            SpaceBarStyle.self,
+            from: Data("{}".utf8)
+        )
+        #expect(decoded?.groupAdjacentWindows == true)
+    }
+
     @Test("off, each window is its own glyph")
     func offDrawsOneGlyphPerWindow() {
         let core = core(apps: ["Zed", "Zed", "Finder"])
@@ -72,12 +84,12 @@ struct SpaceBarGroupingTests {
     func verbWritesTheSetting() throws {
         let setting = try SpaceBarCommandSetting.parse(
             field: "group_adjacent_windows",
-            args: [.bool(true)]
+            args: [.bool(false)]
         ).get()
         var style = SpaceBarStyle()
         setting.apply(to: &style)
         var expected = SpaceBarStyle()
-        expected.groupAdjacentWindows = true
+        expected.groupAdjacentWindows = false
         #expect(style == expected)
     }
 }

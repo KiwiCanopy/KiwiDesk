@@ -34,9 +34,6 @@ struct ConfigMigrationShelfRoutingTests {
             // #1731's edge step, by path; its textual edit takes
             // the global groups alone, a layout's App Bar skipped.
             "Config/ConfigMigration+BarEdges.swift",
-            // #1725's grouping fill, by path: a settings
-            // root's own Space Bar, never a layout's.
-            "Config/ConfigMigration+SpaceBarGrouping.swift",
             "Appearance/ColorPalette+Apply.swift",
             "Appearance/ColorPaletteKeys.swift",
             "Appearance/ShelfLook+Apply.swift",

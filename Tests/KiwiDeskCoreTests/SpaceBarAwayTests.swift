@@ -92,7 +92,6 @@ struct SpaceBarAwayTests {
         // Ranked BETWEEN the two, so a merge breaks the run into
         // Safari · Mail · Safari.
         park(core, 2, app: "Mail", in: "2", rank: 1)
-        core.tiler.settings.spaceBarStyle.groupAdjacentWindows = true
         let apps = core.spaceBarApps(
             in: core.state.workspaces["2"]!,
             style: core.tiler.settings.spaceBarLook

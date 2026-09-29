@@ -48,9 +48,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// on `[Profile]` alone.
     /// 18 = a profile states which look it wears, one from before
     /// stamped `own` (#1752), on `[Profile]` alone.
-    /// 19 = the Space Bar's grouping became a setting, one from
-    /// before stamped grouped (#1725), on `[Profile]` alone.
-    public static let currentFormat = 19
+    public static let currentFormat = 18
 
     public let format: Int
 
