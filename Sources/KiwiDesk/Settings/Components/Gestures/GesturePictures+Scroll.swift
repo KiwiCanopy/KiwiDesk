@@ -26,8 +26,6 @@ extension GesturePicture {
                 * (1 - gestureEase(gestureStage(t, 0.85, 1)))
             let focus = gestureStage(t, 0.4, 0.5)
             let pan = -50 * gestureEase(gestureStage(t, 0.5, 0.8))
-            let keys = ScrollChordGlyphs.symbols(chord)
-            let pad = 6 + 13 * CGFloat(keys.count) + (keys.isEmpty ? 0 : 8)
             ZStack(alignment: .topLeading) {
                 ForEach(-1..<4, id: \.self) { index in
                     ink.window(
@@ -43,19 +41,7 @@ extension GesturePicture {
                     .opacity(1 - focus)
                 ink.target(CGRect(x: 108 + pan, y: 6, width: 44, height: 44))
                     .opacity(focus)
-                ForEach(Array(keys.enumerated()), id: \.offset) { at, key in
-                    ink.keycap(
-                        key,
-                        at: CGPoint(x: 6 + 13 * CGFloat(at), y: 57),
-                        held: true
-                    )
-                }
-                if !keys.isEmpty {
-                    ink.legendMark("+", at: CGPoint(x: pad - 7, y: 56))
-                }
-                ink.trackpad(at: CGPoint(x: pad, y: 55), swipe)
-                ink.legendMark("/", at: CGPoint(x: pad + 25, y: 57))
-                ink.mouse(at: CGPoint(x: pad + 31, y: 54), swipe)
+                ink.scrollLegend(chord, swipe: swipe)
             }
         }
     }
@@ -79,6 +65,30 @@ enum ScrollChordGlyphs {
 }
 
 extension GestureInk {
+    /// The legend band both scroll pictures share: the held keys,
+    /// "+", then a trackpad "/" a mouse moving together as `swipe`
+    /// runs 0 → 1 (fingers left, wheel rolled up); none drawn
+    /// before the inputs when the chord is off.
+    func scrollLegend(_ chord: ScrollChord, swipe: CGFloat) -> some View {
+        let keys = ScrollChordGlyphs.symbols(chord)
+        let pad = 6 + 13 * CGFloat(keys.count) + (keys.isEmpty ? 0 : 8)
+        return ZStack(alignment: .topLeading) {
+            ForEach(Array(keys.enumerated()), id: \.offset) { at, key in
+                keycap(
+                    key,
+                    at: CGPoint(x: 6 + 13 * CGFloat(at), y: 57),
+                    held: true
+                )
+            }
+            if !keys.isEmpty {
+                legendMark("+", at: CGPoint(x: pad - 7, y: 56))
+            }
+            trackpad(at: CGPoint(x: pad, y: 55), swipe)
+            legendMark("/", at: CGPoint(x: pad + 25, y: 57))
+            mouse(at: CGPoint(x: pad + 31, y: 54), swipe)
+        }
+    }
+
     /// A modifier key; `held` takes the accent fill and a heavier
     /// outline, never the colour alone.
     func keycap(_ symbol: String, at point: CGPoint, held: Bool) -> some View {

@@ -16,7 +16,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var edge: AppBarEdge = .top
     /// Max app-group glyphs per Space item before "+n" badge (#376).
     /// Default 5.
-    public var glyphCap = 5
+    public var glyphSpan = 5
     /// Extra room (pt) between app glyph cells inside a Space
     /// item, and before its `+n` badge (#1689); 0 abuts them. A
     /// drawing reads `resolvedGlyphGap`.
@@ -51,7 +51,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public init() {}
 
     /// A Space item's content while its screen shows another
-    /// Space (#1683). Glyph cap still caps the shown Space.
+    /// Space (#1683). The glyph span still sizes the shown Space.
     public enum InactiveContent: String, Sendable, Codable,
         CaseIterable
     {

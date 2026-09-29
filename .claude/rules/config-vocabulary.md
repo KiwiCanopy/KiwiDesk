@@ -320,11 +320,13 @@ synonym:
   size*, which the **item** row rules out.
 - **limit** / **cap** / **count** — a `limit` is a user-set
   maximum (`track.set_limit`); `cap` is the same idea where it
-  already reads better (`space_bar.set_glyph_cap`, and
+  already reads better (`app_bar.set_title_cap`, and
   `trackCap` / `normalCap` in code); a `count` is how many exist
   right now. `stack.set_master_count` is a retained exception —
   the user names how many windows are masters, and it shipped
-  that way.
+  that way. A **span** is a count shown around a focus, where an
+  end of the row shows one more (`space_bar.set_glyph_span`,
+  #1528) — a cap it is not, since nothing stops at it.
 - **sizing** — the collective of a layout's size adjustments:
   the BSP and stack ratios, the scrolling slot size and the
   stack/track weights — what `resize` writes and

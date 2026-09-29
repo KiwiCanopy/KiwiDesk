@@ -25,7 +25,8 @@ extension KiwiCore {
         _ direction: Direction,
         space: Space,
         focused: WindowID,
-        swapping: Bool
+        swapping: Bool,
+        warp: Bool
     ) -> CommandResponse? {
         let params = tiler.settings.resolvedTrack(for: space.id)
         let tiled = state.effectiveTiledMembers(of: space)
@@ -123,7 +124,7 @@ extension KiwiCore {
             )
             scheduleTrackZOrderRestoreIfOverflowing()
         } else {
-            focusWindow(target, warp: true)
+            focusWindow(target, warp: warp)
         }
         return .ok()
     }

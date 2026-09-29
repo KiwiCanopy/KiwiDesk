@@ -20,20 +20,21 @@ extension SpaceBarItemView {
         max(contentDepth - pad * 2, 8)
     }
 
-    /// Computes requested slot length for given app count and overflow badge.
+    /// Computes requested slot length for given app count and the
+    /// `+n` discs drawn (one per side that hides windows, #1528).
     /// `glyphGap` is the style's `resolvedGlyphGap`, taken with
     /// no default so a caller cannot measure without it (#1689);
     /// `contentDepth` is the shelf's for the strip (#1682), and
     /// `ends` the item's `ends(look:depth:first:last:)` (#1763).
     static func autoLength(
         appCount: Int,
-        overflow: Int = 0,
+        discs: Int = 0,
         contentDepth: CGFloat,
         glyphGap: CGFloat,
         ends: ItemEnds
     ) -> CGFloat {
         let cell = cell(contentDepth: contentDepth)
-        let slots = appCount + (overflow > 0 ? 1 : 0)
+        let slots = appCount + discs
         let divider: CGFloat = slots > 0 ? pad + 1 + pad : 0
         let gaps = CGFloat(max(slots - 1, 0)) * glyphGap
         return pad * 2 + ends.total + cell + divider
@@ -85,6 +86,16 @@ extension SpaceBarItemView {
             cursor += 1 + Self.pad
         }
         let glyphGap = style.resolvedGlyphGap
+        if collapse == nil, !overflowBefore.isEmpty {
+            layoutBadge(
+                leadingBadge,
+                onCellAt: cursor,
+                cell: cell,
+                centered: true
+            )
+            leadingTarget?.frame = cellRect(at: cursor, cell: cell)
+            cursor += cell + glyphGap
+        }
         for (index, view) in appViews.enumerated() {
             if index > 0 { cursor += glyphGap }
             place(view, at: cursor, cell: cell)
@@ -119,6 +130,7 @@ extension SpaceBarItemView {
             overflowTarget?.frame = cellRect(at: cursor, cell: cell)
             cursor += cell
         }
+        slideGlyphs(pitch: cell + glyphGap)
         layoutAccent()
     }
 

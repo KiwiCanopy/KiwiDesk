@@ -17,8 +17,9 @@ extension APIReference {
                 + "edge the two share one KiwiShelf.",
             .choice("edge", AppBarEdge.self)
         ),
-        "set_glyph_cap": APIRecord(
-            "Sets how many app-group glyphs a Space item shows.",
+        "set_glyph_span": APIRecord(
+            "Sets how many app-group glyphs a Space item shows "
+                + "around its focus.",
             .integer("glyphs")
         ),
         "set_glyph_gap": APIRecord(

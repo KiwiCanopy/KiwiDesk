@@ -387,6 +387,59 @@ Obligations:
   never hidden (`SpaceBarGlyphWiringTests` ▸
   `refusedRowIsGreyed`); that no second builder exists is
   review's.
+- **Which groups a Space item draws is `SpaceBarStrip.window`,
+  and its length reads the same arithmetic** — the builder takes
+  the window, `autoLength` counts the drawn glyphs plus one cell
+  per disc (`SpaceBarOverlay.Item.discs`), so the length the
+  shelf plans is the one the item draws and a focus change never
+  moves it (#1528, `SpaceBarStripTests`,
+  `SpaceBarCentredStripTests` ▸ `lengthIsFixed`). The centring
+  anchor is WHICH app the strip shows, a question of its own:
+  the active Space's system focus, falling back to its
+  remembered one where the system focus is no drawn group (a
+  transient overlay, a switch not yet reported), and another
+  Space's remembered one — never the `+n` tint's reading, which
+  stays gated on the active Space below.
+- **A strip under the pointer is held by `SpaceBarManager`
+  alone** and released through its one `onStripReleased`, wired
+  to an `updateBars()` DEFERRED on `DeferredTasks.Key
+  .stripRecentre` — a hold can end inside a render or the
+  relayout's hover re-read, where a synchronous refresh would
+  nest `holdingRelayout` and let the outer render redraw the
+  stale hold (`ShelfWiringSeamTests` ▸
+  `stripReleaseRefreshesTheBars`). The hold ends wherever its
+  chip stops drawing that Space, not only on the pointer's exit:
+  item views are reused by index, so a slot handed another Space
+  reports the old Space's exit from `configure`, and a view the
+  run drops, or an overlay that hides, reports it before it
+  goes; another Space's entry
+  replaces the hold AND releases it, since its exit may arrive
+  second; and `sync` drops a hold on a Space no shown bar
+  draws. A new way for a chip to stop drawing a Space owes the
+  same end, or the strip stays frozen with the pointer gone
+  (`SpaceBarStripHoldTests`).
+- **A render is compared with the last through one
+  `SpaceBarStrip.Drawn` — the window AND the row's group
+  count — never through indices alone.** A window opened or
+  closed shifts every index, so the same range names other
+  apps: the builder keeps a hold only while `Drawn.holds(count:
+  span:)` says the row's group count is unchanged and could draw
+  it, and
+  `Walk.between` walks nothing across a changed row, a collapse
+  on either side, or a jump whose windows share no group — which
+  would slide glyphs over the neighbouring chips
+  (`SpaceBarStripTests` ▸ `changedRowNoWalk`, `jumpNoWalk`,
+  `heldWindowShapes`; `SpaceBarCentredStripTests` ▸
+  `staleHoldCentres`).
+- **A strip walk plays through `BarMotion.playWalk`, as additive
+  offsets over the frames and alphas the layout just wrote, and
+  its leaving glyphs leave only when it lands.** A chip is laid
+  out more than once per render, and every pass rewrites the
+  final frames and resting alphas: an animator write to the same
+  properties was cancelled by the next pass, and a pass that
+  found no walk pending dropped the fading glyphs, so the device
+  showed no fade at all (`SpaceBarStripViewTests` ▸
+  `laterPassKeepsTheWalk`).
 
 ## A per-display bar answers the SHOWN question, never the render one
 

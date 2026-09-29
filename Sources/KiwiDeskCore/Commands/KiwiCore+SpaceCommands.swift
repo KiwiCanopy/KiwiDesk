@@ -1,8 +1,8 @@
 import AppKit
 import Foundation
 
-/// Space commands: `focus_space` and
-/// `move_to_space(_and_follow)` (#42).
+/// Space commands: `move_to_space(_and_follow)` (#42);
+/// `focus_space` is `KiwiCore+SpaceSwitch`.
 extension KiwiCore {
     /// Follows focus into a hidden window's Space —
     /// but only if that window is still the frontmost app's
@@ -60,13 +60,22 @@ extension KiwiCore {
                 ),
                 space != self.state.workspaces.activeSpace
             else { return }
-            self.applyFocusedSpaceSwitch(to: space)
-            // The focus echo that triggered this follow found
-            // the window on an inactive space, where the warp
-            // guard skips; now that the space is forward the
-            // slot frames are real — warp here (#186).
-            self.warpMouseToFocused(id)
+            self.landFocusFollow(id, on: space)
         }
+    }
+
+    /// The AX focus-follow's landing on `space`: switch, warp,
+    /// and the #412 float raise `focusSpace` and `followSwitch`
+    /// pay too (#1727) — on every landing, a Space another
+    /// display already shows included, where it is harmless.
+    func landFocusFollow(_ id: WindowID, on space: SpaceID) {
+        applyFocusedSpaceSwitch(to: space)
+        // The focus echo that triggered this follow found
+        // the window on an inactive space, where the warp
+        // guard skips; now that the space is forward the
+        // slot frames are real — warp here (#186).
+        warpMouseToFocused(id)
+        raiseLandingFloats(thenFocus: id)
     }
 
     /// After a restart, land on the Space of the
@@ -86,45 +95,6 @@ extension KiwiCore {
                 ?? state.rememberedSpace(of: id)
         else { return }
         state.workspaces.activate(space)
-    }
-
-    func focusSpace(
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        guard let raw = args.first?.stringValue else {
-            return .fail("expected space id")
-        }
-        // Who is frontmost BEFORE the switch: the settle uses it
-        // to tell "the handoff's activate never landed" (#463)
-        // apart from "the user moved on since".
-        let priorFrontmost = frontmostPIDProvider?()
-        state.workspaces.activate(SpaceID(raw))
-        logSpaceContents(SpaceID(raw))
-        spaceSwitchRetile()
-        // Floats and sticky windows come back above the
-        // tiled plane, then real (AX) focus lands on the
-        // space's last focused window — otherwise keystrokes
-        // keep going to a window that is now stashed
-        // offscreen (#412 QA: without the raise, a restored
-        // float sat buried behind full-frame tiled windows).
-        // Warp at INTENT time: the deferred re-assert runs
-        // under the z-order counter, where warps are swallowed
-        // — and the forced retile above already assigned the
-        // slot the warp targets.
-        let next = resolveSpaceSwitchFocusTarget()
-        if let next {
-            warpMouseToFocused(next)
-        }
-        raiseFloatsAndSticky(thenFocus: next)
-        if next == nil {
-            yieldFocusAfterEmptySwitch()
-        }
-        emitSpaceChange()
-        scheduleSpaceSettle(
-            SpaceID(raw),
-            priorFrontmost: priorFrontmost
-        )
-        return .ok()
     }
 
     /// The ONE membership filing (#1150): add, the #1708 float

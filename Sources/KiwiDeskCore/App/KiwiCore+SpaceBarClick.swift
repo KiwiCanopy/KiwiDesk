@@ -14,6 +14,15 @@ extension KiwiCore {
         spaceBars.glyphActions.tooltip = { [weak self] in
             self?.spaceBarTooltip($0)
         }
+        // A strip held under the pointer re-centres as it leaves
+        // (#1528 item 21), through the one bar refresh — deferred,
+        // since a hold can end inside a render or a relayout.
+        spaceBars.onStripReleased = { [weak self] in
+            self?.deferred.schedule(.stripRecentre, after: .zero) {
+                [weak self] in
+                self?.updateBars()
+            }
+        }
     }
 
     func pickFromSpaceBar(_ pick: SpaceBarGlyphPick) {
@@ -49,12 +58,6 @@ extension KiwiCore {
             return
         }
         followSwitch(to: space, focusing: window)
-        // The float layer comes back above the tiled plane as on a
-        // chip click (#412), which `followSwitch` does not do yet
-        // for any caller (#1727).
-        if !floatLayerTargets().isEmpty {
-            raiseFloatsAndSticky(thenFocus: window)
-        }
     }
 
     func spaceBarMenuRows(

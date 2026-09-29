@@ -9,7 +9,7 @@ enum SpaceBarKey: String, CaseIterable, Hashable {
     case spaceBarInactiveContent =
         "settings.spaceBarStyle.inactiveContent"
     case spaceBarItemLabel = "settings.spaceBarStyle.itemLabel"
-    case spaceBarGlyphCap = "settings.spaceBarStyle.glyphCap"
+    case spaceBarGlyphSpan = "settings.spaceBarStyle.glyphSpan"
     case spaceBarGlyphGap = "settings.spaceBarStyle.glyphGap"
     case spaceBarFrontAppTitleCap =
         "settings.spaceBarStyle.frontAppTitleCap"
@@ -27,7 +27,7 @@ extension SpaceBarKey {
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarHideEmpty, .spaceBarShowFrontApp,
             .spaceBarActiveIndicator, .spaceBarSpringDelay,
-            .spaceBarGlyphCap, .spaceBarGlyphGap,
+            .spaceBarGlyphSpan, .spaceBarGlyphGap,
             .spaceBarInactiveContent, .spaceBarItemLabel:
             return .row(.bars, .spaceBar, .atRest)
         case .spaceBarFrontAppTitleCap:
@@ -89,10 +89,10 @@ extension SpaceBarKey {
                 "space_bar.item_label",
                 help: "space_bar.item_label.help"
             )
-        case .spaceBarGlyphCap:
+        case .spaceBarGlyphSpan:
             return .text(
-                "space_bar.glyph_cap",
-                help: "space_bar.glyph_cap.help"
+                "space_bar.glyph_span",
+                help: "space_bar.glyph_span.help"
             )
         case .spaceBarGlyphGap:
             return .text(

@@ -48,6 +48,10 @@ final class DeferredTasks {
         /// whose reschedule is the POINT: cancel-and-replace turns
         /// a keystroke-rate burst into one refresh when it stops.
         case barTitleRefresh
+        /// Re-centres a Space chip whose strip hold ended (#1528
+        /// item 21), after the render or relayout that ended it
+        /// unwinds — never a bar refresh nested inside one.
+        case stripRecentre
         /// Re-reads the away ledger against one per-Desktop
         /// census while it is non-empty (#1146).
         case awayCensus

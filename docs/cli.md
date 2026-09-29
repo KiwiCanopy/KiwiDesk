@@ -293,7 +293,7 @@ exports nothing.
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
 | | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
 | Scroll gestures | `scroll_gesture.set_pan` | modifiers joined by `+` (default `control+option`; `""` off) — held with a scroll to move focus window by window |
-| | `scroll_gesture.set_space_step` | modifiers (default `control+option+command`; `""` frees them) — reserved for stepping between Spaces, not built yet |
+| | `scroll_gesture.set_space_step` | modifiers (default `control+option+command`; `""` off) — held with a scroll to step between the Spaces of the screen under the pointer |
 | | `scroll_gesture.set_natural_scrolling` | true\|false, [`trackpad\|mouse`] (default `true` for both) |
 | | `scroll_gesture.set_long_swipes` | true\|false (default `false`) |
 | | `scroll_gesture.set_step_distance` | pt (10–1000, default 60) — travel per extra window of a long swipe |

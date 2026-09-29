@@ -103,9 +103,9 @@ struct CoreLocalizationBoundaryTests {
         // The Space's announced name, held frames beside it (#1507).
         "Bar/SpaceBarItemView+Held.swift": 3,
         "Bar/SpaceBarOverlay+FrontApp.swift": 2,
-        // A glyph target's VoiceOver name and the `+n` target's,
-        // and the window menu's row text (#1528).
-        "Bar/SpaceBarItemView+Targets.swift": 2,
+        // A glyph target's VoiceOver name and each side's `+n`
+        // target's (#1528).
+        "Bar/SpaceBarItemView+Targets.swift": 3,
         "Bar/SpaceBarWindowMenu.swift": 1,
         // The shelf's overflow counts, a button each for VoiceOver
         // (#1517): before and after.

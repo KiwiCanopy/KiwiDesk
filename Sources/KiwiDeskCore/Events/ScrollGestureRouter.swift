@@ -22,6 +22,10 @@ public struct ScrollGestureEvent: Equatable, Sendable {
     /// True for the momentum that follows a trackpad lift.
     public var momentum: Bool
     public var location: CGPoint
+    /// When the tap read it, in `CFAbsoluteTime` seconds: the
+    /// hand's own spacing, which a busy main actor would squash.
+    /// No default: an event built without it reads as a spin.
+    public var time: Double
 }
 
 /// Decides, per scroll event, whether a registered chord owns it
@@ -38,7 +42,9 @@ struct ScrollGestureRouter {
     /// A lift is followed by momentum within a frame or two; with
     /// none by then the gesture has ended.
     static let momentumGrace = 0.1
-    /// A wheel's notches of one burst arrive well inside this.
+    /// A wheel's notches of one burst arrive well inside this;
+    /// held above `ScrollStepMeter.wheelQuiet`, whose latch the
+    /// burst's end resets.
     static let wheelPause = 0.25
 
     private struct Owner {
@@ -56,6 +62,8 @@ struct ScrollGestureRouter {
     /// pressed since. Lives for that one handoff only.
     private var passing = false
     private(set) var deadline: Double?
+    /// The clock of the call in progress, stamped on every event.
+    private var clock = 0.0
 
     /// Routes one sample: `consume` says whether the event is
     /// swallowed, `events` what the owning consumer hears. A
@@ -65,6 +73,7 @@ struct ScrollGestureRouter {
         _ sample: ScrollSample,
         now: Double
     ) -> (consume: Bool, events: [ScrollGestureEvent]) {
+        clock = now
         var released: [ScrollGestureEvent] = []
         if let owner, !chords.contains(owner.chord) {
             released = end(at: sample.location)
@@ -141,6 +150,7 @@ struct ScrollGestureRouter {
         guard let deadline, now >= deadline, let owner else {
             return []
         }
+        clock = now
         return end(at: owner.location)
     }
 
@@ -205,7 +215,8 @@ struct ScrollGestureRouter {
                 input: current.input,
                 delta: .zero,
                 momentum: false,
-                location: location
+                location: location,
+                time: clock
             )
         ]
     }
@@ -221,7 +232,8 @@ struct ScrollGestureRouter {
             input: owner?.input ?? .wheel,
             delta: sample.delta,
             momentum: momentum,
-            location: sample.location
+            location: sample.location,
+            time: clock
         )
     }
 }

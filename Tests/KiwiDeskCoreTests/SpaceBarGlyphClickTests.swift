@@ -66,7 +66,7 @@ struct SpaceBarGlyphClickTests {
         cap: Int? = nil
     ) throws -> SpaceBarOverlay.Item {
         var look = SpaceBarLook()
-        if let cap { look.glyphCap = cap }
+        if let cap { look.glyphSpan = cap }
         return try #require(
             core.spaceBarItems(display: display, style: look)
                 .first { $0.space == space }
@@ -113,7 +113,7 @@ struct SpaceBarGlyphClickTests {
         #expect(built.apps.map(\.count) == [2, 1])
     }
 
-    @Test("+n carries the windows past the cap, in row order")
+    @Test("each +n carries its side's windows, in row order")
     func overflowCarriesItsWindows() throws {
         let core = seededCore()
         core.state.workspaces.activate(two)
@@ -121,14 +121,22 @@ struct SpaceBarGlyphClickTests {
         core.state.apply(.windowCreated(window(6, app: "Term")))
         core.state.workspaces.activate(one)
         // New windows land after the focused Mail 2, so the row
-        // is Mail 2 · Term 5 6 · Mail 3 · Web 4: three hidden
-        // groups past the cap, the first of several windows.
-        let built = try item(core, two, cap: 1)
-        #expect(
-            built.overflowWindows
-                == [WindowID(5), WindowID(6), WindowID(3), WindowID(4)]
+        // is Mail 2 · Term 5 6 · Mail 3 · Web 4. A strip held on
+        // Mail 3 hides a group of several windows before it and
+        // one after (#1528 items 17, 21).
+        core.spaceBars.stripHover(
+            two,
+            .init(window: 2..<3, count: 4),
+            inside: true
         )
-        #expect(built.overflow == 4)
+        let built = try item(core, two, cap: 1)
+        #expect(built.apps.map(\.windows) == [[WindowID(3)]])
+        #expect(
+            built.overflowBefore
+                == [WindowID(2), WindowID(5), WindowID(6)]
+        )
+        #expect(built.overflowWindows == [WindowID(4)])
+        #expect(built.discs == 2)
     }
 
     @Test("A glyph on an inactive Space switches and lands on it")

@@ -146,12 +146,13 @@ struct SpaceBarBadgeTests {
     /// can never be the membership-guarded `space.focused`
     /// (#431), so asking the slot showed nothing at all in the
     /// one case #376's tint exists for.
-    @Test("A traveler hidden past the cap tints the +n")
+    @Test("A traveler hidden past the span tints the +n")
     func travelerFocusTintsTheOverflow() throws {
         let core = seededCore()
         core.state.workspaces.assign(SpaceID("2"), to: display)
         // Window 3 is third in its home row, so it injects at
-        // index 2 — past a cap of 2.
+        // index 2 — past a strip held on the first two (#1528
+        // item 21; unheld, the strip centres on it).
         core.state.apply(.windowCreated(window(3, app: "Term")))
         core.state.setSticky(WindowID(3), .global)
         core.state.workspaces.activate(SpaceID("2"))
@@ -160,7 +161,17 @@ struct SpaceBarBadgeTests {
         core.state.apply(.windowFocused(WindowID(4)))
         core.state.apply(.windowFocused(WindowID(3)))
         var style = SpaceBarLook()
-        style.glyphCap = 2
+        style.glyphSpan = 1
+        let centred = try #require(
+            core.spaceBarItems(display: display, style: style)
+                .first { $0.space == SpaceID("2") }
+        )
+        #expect(centred.apps.map(\.name).contains("Term"))
+        core.spaceBars.stripHover(
+            SpaceID("2"),
+            .init(window: 0..<2, count: 3),
+            inside: true
+        )
         let item = try #require(
             core.spaceBarItems(display: display, style: style)
                 .first { $0.space == SpaceID("2") }
