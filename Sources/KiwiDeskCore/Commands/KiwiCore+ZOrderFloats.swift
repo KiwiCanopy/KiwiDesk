@@ -31,10 +31,7 @@ extension KiwiCore {
     func raiseFloatsAndSticky(
         thenFocus focused: WindowID?
     ) {
-        let pairs = floatLayerTargets().compactMap {
-            id -> (WindowID, AXUIElement)? in
-            eventLoop.element(for: id).map { (id, $0) }
-        }
+        let pairs = floatRaisePairs()
         guard !pairs.isEmpty else {
             if let focused {
                 focusWindow(
@@ -72,9 +69,7 @@ extension KiwiCore {
             else { return }
             // The anchor, not `activeSpace?.focused`: a sticky
             // traveler homed elsewhere is never that slot (#1727).
-            if let focused, let space = self.activeSpace,
-                focused == self.state.focusAnchor(of: space)
-            {
+            if let focused, focused == self.focusedWindowID {
                 self.focusWindow(
                     focused,
                     refocusRetile: false,
@@ -90,12 +85,16 @@ extension KiwiCore {
     /// float target has an element — the caller has already
     /// focused `id`, so the direct hand-off would focus it twice.
     func raiseLandingFloats(thenFocus id: WindowID) {
-        guard
-            floatLayerTargets().contains(where: {
-                eventLoop.element(for: $0) != nil
-            })
-        else { return }
+        guard !floatRaisePairs().isEmpty else { return }
         raiseFloatsAndSticky(thenFocus: id)
+    }
+
+    /// The float-layer targets the raise can reach — those with an
+    /// element — read by the raise and by the landing's gate alike.
+    private func floatRaisePairs() -> [(WindowID, AXUIElement)] {
+        floatLayerTargets().compactMap { id in
+            eventLoop.element(for: id).map { (id, $0) }
+        }
     }
 
     /// Re-raises the float layer after focus lands on a tiled

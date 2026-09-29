@@ -115,6 +115,20 @@ struct ZOrderSequenceWiringTests {
         #expect(source.contains("keeping: raised"))
     }
 
+    /// The AX focus-follow's deferred body reads the live
+    /// frontmost and AX, so no unit test reaches it; its landing
+    /// — and with it the #412 float raise — is pinned here as
+    /// the CALL (#1727). `FollowSwitchFloatRaiseTests` pins what
+    /// the landing does.
+    @Test("The AX focus-follow lands through landFocusFollow")
+    func focusFollowTakesTheLanding() throws {
+        let source = try body(
+            of: "scheduleFocusFollow",
+            in: "KiwiCore+SpaceCommands.swift"
+        )
+        #expect(source.contains("self.landFocusFollow(id, on: space)"))
+    }
+
     /// The live restore's policy, which nothing else can see.
     ///
     /// `zOrderDrain` is a private helper and no unit test reaches
