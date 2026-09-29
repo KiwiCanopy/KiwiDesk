@@ -201,7 +201,12 @@ struct ScrollGestureReachTests {
         base.stepDistance = 1
         core.applyScrollGestures(base: base, profile: nil)
         #expect(core.mouse.scroll.resolved.pan.isEmpty)
-        #expect(core.mouse.scroll.resolved.stepDistance == 10)
+        let range = ScrollGestureBase.stepDistanceRange
+        #expect(core.mouse.scroll.resolved.stepDistance == range.lowerBound)
+        base.stepDistance = range.upperBound * 5
+        core.applyScrollGestures(base: base, profile: nil)
+        #expect(core.mouse.scroll.resolved.stepDistance == range.upperBound)
+        base.stepDistance = 1
         base.pan = [.control, .option]
         base.spaceStep = [.control, .option]
         core.applyScrollGestures(base: base, profile: nil)
@@ -225,6 +230,14 @@ struct ScrollGestureReachTests {
         #expect(!clash.isSuccess)
         #expect(
             core.mouse.scroll.base.spaceStep == [.control, .option, .command]
+        )
+        // The mirror: the profile's own pan clashes, the base's
+        // does not.
+        #expect(
+            !core.execute(
+                "scroll_gesture.set_space_step",
+                args: [.string("command+shift")]
+            ).isSuccess
         )
     }
 }

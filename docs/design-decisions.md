@@ -7710,10 +7710,16 @@ drawer.** (#1741, ui-designer ruling.) Shortcuts & Gestures ▸
 Mouse & trackpad is a family of its own beside the page's other
 cards, and drawn as a `.card` drawer — the drawer tier, with no
 section above it — it read as a sub-drawer of nothing. So
-`SettingsCollapsibleSection` wears `SettingsSection`'s
-`.headline` header over the same plate, and while shut the
-plate stays drawn with the summary inside it: the card keeps
-its place in the page instead of shrinking to a bare heading.
+`SettingsCollapsibleSection` is a `SettingsSection`: the same
+plain `.headline` title and plate, with the disclosure as the
+plate's first row — chevron and summary, the whole row one
+control — and the entries opening inside the card. The first
+cut put the chevron on the title outside the plate and left the
+summary a click target nothing announced; the owner found the
+card read as closed and inert (device look, 2026-09-29), so the
+affordance moved into the thing that opens. Shut, the card
+keeps that row and its place in the page instead of shrinking
+to a bare heading.
 This does not overturn #1021's tier, which is about drawers — a
 drawer qualifies the card it sits in, and a header louder than
 that card's own title inverts the hierarchy the other way. The
@@ -7722,7 +7728,8 @@ how many rows it holds. `GeneralShortcutsGroup` meets it too and
 is still a drawer, left for its own change.
 
 Both kinds draw the one `SettingsDisclosureButton` — chevron,
-full-row button, hover, heading trait, expanded/collapsed value
+full-row button, hover, the heading trait where the row is the
+heading, expanded/collapsed value
 and the Reduce Motion gate — so they differ in tier and chrome
 and in nothing the user operates. A second copy of that
 button is how the two would drift apart.
@@ -9761,7 +9768,12 @@ the rule that a press which does nothing always says why
 (▸ Layout and resize behavior, *A press writes forward, never
 across the store*) — while here there is nothing to refuse,
 since the flat window array gives every Space a well-defined
-next and previous window whatever its geometry.
+next and previous window whatever its geometry. The one place a
+step still lands on nothing — a Scrolling or Monocle row's end
+with `wrap_focus` off, or a Space holding one window — stays
+wordless on purpose: the gesture repeats per notch and per
+swipe, and a cue on each would be noise over the hand's own
+evidence that the row did not move.
 
 **One swipe moves one window by default, and long swipes are a
 tick box.** Counting by distance — a window per ~60 pt of finger

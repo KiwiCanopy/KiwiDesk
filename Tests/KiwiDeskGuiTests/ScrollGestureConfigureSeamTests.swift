@@ -3,16 +3,16 @@ import Testing
 
 /// **The scroll tap's settings resolve in ONE home** (#1656,
 /// input-and-animation.md): `KiwiCore.applyScrollGestures` lays
-/// the live profile's override over the global base and is the
-/// only caller of `ScrollGestures.configure`. Held by the VALUE
-/// the door takes rather than by the door's name, which a bare
-/// `configure(` shares with every bar view: the only production
-/// `ScrollGestureSettings` is built by `tapSettings`, so a second
-/// caller has to read `tapSettings` or build one itself.
+/// the live profile's override over the global base and hands the
+/// result to the front's one door, `ScrollGestures.adoptResolution`, which
+/// writes the resolve's inputs and output and configures the tap.
+/// The compiler keeps other writers off those inputs
+/// (`private(set)`); these clauses hold the rest of the shape.
 @Suite("Scroll gesture configure seam (#1656)")
 struct ScrollGestureConfigureSeamTests {
-    /// The resolve home.
+    /// The resolve home, and the front that owns the door.
     private static let home = "KiwiCore+ScrollGestureSettings.swift"
+    private static let front = "ScrollGestures.swift"
 
     /// Files that may construct a `ScrollGestureSettings`, each
     /// with its reason — the one copy of who may.
@@ -37,8 +37,8 @@ struct ScrollGestureConfigureSeamTests {
         }
     }
 
-    @Test("tapSettings is read in the resolve home alone")
-    func tapSettingsIsReadInTheHomeAlone() throws {
+    @Test("tapSettings is read by the front's door alone")
+    func tapSettingsIsReadByTheDoor() throws {
         var readers: [String] = []
         var scanned = 0
         for (name, text) in try coreFiles() {
@@ -48,7 +48,7 @@ struct ScrollGestureConfigureSeamTests {
             readers.append(name)
         }
         #expect(scanned > 100)
-        #expect(readers == [Self.home])
+        #expect(readers == [Self.front])
     }
 
     @Test("a ScrollGestureSettings is built only where ruled")
@@ -64,28 +64,52 @@ struct ScrollGestureConfigureSeamTests {
         #expect(built == Set(Self.builders.keys))
     }
 
-    @Test("the configure door is handed the resolved value once")
+    @Test("the resolve home is the door's one caller")
     func doorHasOneCaller() throws {
         var calls: [String] = []
         for (name, text) in try coreFiles() {
-            for site in SourceScan.callSites(in: text, for: ".configure") {
-                guard var cursor = site.paren,
-                    let argument = SourceScan.balanced(
-                        text,
-                        from: &cursor,
-                        open: "(",
-                        close: ")"
-                    ),
-                    argument.contains("tapSettings")
-                else { continue }
+            for _ in SourceScan.callSites(in: text, for: ".adoptResolution") {
                 calls.append(name)
             }
         }
         #expect(calls == [Self.home])
     }
 
-    /// The receiver a `.configure(` call site is spelled on — the
-    /// identifier ending at the dot.
+    /// The door is only a door while the inputs behind it cannot
+    /// be written from outside the front.
+    @Test("the front's stored inputs are private(set)")
+    func inputsAreSealed() throws {
+        let source = try String(
+            contentsOf: Self.coreRoot
+                .appendingPathComponent("Events/\(Self.front)"),
+            encoding: .utf8
+        )
+        for field in ["base", "profileOverride", "resolved"] {
+            #expect(
+                source.contains("private(set) var \(field)"),
+                "\(field) is writable from outside the front"
+            )
+        }
+    }
+
+    /// `configure` stays reachable for the front's own tests, so a
+    /// Core caller spelling it on the front bypasses the resolve.
+    @Test("nothing in Core configures the front but the door")
+    func noOtherConfigure() throws {
+        var callers: [String] = []
+        for (name, text) in try coreFiles() where name != Self.front {
+            for site in SourceScan.callSites(in: text, for: ".configure")
+            where ["scroll", "gestures"].contains(
+                Self.receiver(text, before: site.start)
+            ) {
+                callers.append(name)
+            }
+        }
+        #expect(callers.isEmpty)
+    }
+
+    /// The receiver a call site is spelled on — the identifier
+    /// ending at the dot.
     private static func receiver(
         _ text: [Character],
         before start: Int
@@ -95,57 +119,5 @@ struct ScrollGestureConfigureSeamTests {
             i -= 1
         }
         return String(text[i..<start])
-    }
-
-    /// A caller holding the front under any name the tree uses
-    /// for it: `mouse.scroll`, or a local `gestures`.
-    private static let frontNames: Set<String> = ["scroll", "gestures"]
-
-    @Test("only the home configures the front, whatever it passes")
-    func onlyTheHomeConfigures() throws {
-        var callers: [String] = []
-        for (name, text) in try coreFiles() {
-            for site in SourceScan.callSites(in: text, for: ".configure")
-            where Self.frontNames.contains(
-                Self.receiver(text, before: site.start)
-            ) {
-                callers.append(name)
-            }
-        }
-        #expect(callers == [Self.home])
-    }
-
-    /// The resolve's inputs and output are the home's to write:
-    /// the consumer reads `resolved`, so a stray write — whole or
-    /// to one sub-field — skips both the override and `configure`.
-    @Test("the front's stored inputs are written in the home alone")
-    func inputsAreTheHomes() throws {
-        let fields = ["base", "profileOverride", "resolved"]
-        let names = Self.frontNames.sorted().joined(separator: "|")
-        var writers: Set<String> = []
-        var homeWrites: [String: Int] = [:]
-        for (name, text) in try coreFiles() {
-            let source = String(text)
-            for field in fields {
-                let pattern =
-                    "\\b(\(names))\\.\(field)(\\.\\w+)*\\s*=(?!=)"
-                let regex = try NSRegularExpression(pattern: pattern)
-                let hits = regex.numberOfMatches(
-                    in: source,
-                    range: NSRange(source.startIndex..., in: source)
-                )
-                guard hits > 0 else { continue }
-                writers.insert(name)
-                if name == Self.home { homeWrites[field, default: 0] += hits }
-            }
-        }
-        #expect(writers == [Self.home])
-        // Each field still has its home write — a floor per field.
-        for field in fields {
-            #expect(
-                homeWrites[field, default: 0] >= 1,
-                "the home no longer writes \(field)"
-            )
-        }
     }
 }

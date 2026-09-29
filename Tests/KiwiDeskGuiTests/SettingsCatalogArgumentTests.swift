@@ -32,6 +32,11 @@ struct SettingsCatalogArgumentTests {
         // (`dragGhost` / `dragDropZone`), which the dotted-
         // reference sweep still covers.
         "DragVisualsEditor.swift: control",
+        // The collapsible card forwards its drawer's declaration
+        // to the one `SettingsSection` it is (#1741); its mount
+        // takes the drawer outright (`GesturesDrawer`), which the
+        // `SettingsCollapsibleSection(` needle above counts.
+        "SettingsCollapsibleSection.swift: control",
         // The self-anchoring control hands its descriptor to a
         // private row helper, so the argument at the
         // `.searchAnchored` site is the parameter, not a dotted

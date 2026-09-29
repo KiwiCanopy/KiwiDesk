@@ -42,15 +42,17 @@ editing here:
     live factory pinned inert in both `makeTestCore` twins
     (`ScrollGesturesTests`, `ScrollTapSeamTests`).
   - **Resolve the settings in ONE home,
-    `KiwiCore.applyScrollGestures`, the door's one caller**
-    (#1656): the global base with the live profile's override on
-    top, sanitised once more there, since a hand-edited file
-    reaches what the recorder refuses. A path that changes
-    either input reaches the tap by calling it, and writes the
-    front's `base`, `profileOverride` or `resolved` nowhere
-    else; a `ScrollGestureSettings` is built only through
-    `tapSettings`, read in that home alone, or a path hands the
-    tap a value that skipped the override
+    `KiwiCore.applyScrollGestures`, the one caller of the front's
+    door `ScrollGestures.adoptResolution`** (#1656): the global base with
+    the live profile's override on top, run through
+    `ScrollGestureBase.sanitized` — the verdict the Settings
+    entry reads too — since a hand-edited file reaches what the
+    recorder refuses. A path that changes either input reaches
+    the tap by calling it; the one deferred writer is the config
+    load's `resetInputs`, whose load configures at its tail. The
+    inputs stay `private(set)`, and a `ScrollGestureSettings` is
+    built only through `tapSettings`, read by the door alone, or
+    a path hands the tap a value that skipped the override
     (`ScrollGestureConfigureSeamTests`).
 - **A keypad digit is the same key as its number-row twin
   (#1074), and `KeypadKeys` is the one place that says so.** Both

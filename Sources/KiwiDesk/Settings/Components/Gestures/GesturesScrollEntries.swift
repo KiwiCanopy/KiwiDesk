@@ -29,7 +29,8 @@ struct GesturesScrollEntries: View {
             surface: .windows,
             settings: model.config.settings,
             pace: .steps,
-            off: gestures.pan.isEmpty
+            // Core's verdict, so a hand-edited lone ⌃ greys too.
+            off: gestures.sanitized.pan.isEmpty
         ) {
             GesturePicture.ScrollStep(t: $0, chord: gestures.pan)
         } control: {

@@ -40,9 +40,11 @@ extension KiwiCore {
             }
             configLoadIssues = issues
             refreshConfigIssues()
-            // The reset above changed the scroll inputs; the tail
-            // that would configure them is not reached.
-            applyScrollGestures(profile: mouse.scroll.profileOverride)
+            // The reset above changed the scroll inputs and the
+            // tail that would configure them is not reached: the
+            // defaults, the profile's override dropped with the
+            // rest of its state on this branch.
+            applyScrollGestures(profile: nil)
             return
         }
         lua = fresh

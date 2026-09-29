@@ -85,6 +85,33 @@ public struct ScrollGestureBase: Equatable, Sendable {
     }
 }
 
+extension ScrollGestureBase {
+    /// The refusals the recorder and the verbs make at entry,
+    /// applied once more to a value a hand-edited file can still
+    /// reach: a lone modifier turns that gesture off, a shared
+    /// chord stays the pan's (the `Consumer` order), and the step
+    /// distance is clamped. The tap and the Settings entry both
+    /// read this one verdict.
+    public var sanitized: ScrollGestureBase {
+        var result = self
+        if ScrollChordRefusal.of(pan, other: [], heldBy: .step) != nil {
+            result.pan = []
+        }
+        if ScrollChordRefusal.of(
+            spaceStep,
+            other: result.pan,
+            heldBy: .pan
+        ) != nil {
+            result.spaceStep = []
+        }
+        result.stepDistance = min(
+            max(stepDistance, Self.stepDistanceRange.lowerBound),
+            Self.stepDistanceRange.upperBound
+        )
+        return result
+    }
+}
+
 /// A profile's sparse divergence from `ScrollGestureBase`
 /// (#1656): a field it leaves nil follows the base. Written by the
 /// Settings "Applies to" checklist, never by hand-merging; its

@@ -74,7 +74,16 @@ struct GesturesScrollWiringTests {
         )
         #expect(row.contains("StepperRow("))
         #expect(row.contains(".disabled(!gestures.longSwipes)"))
-        #expect(!group.contains("if gestures.longSwipes"))
+        // Hidden by any spelling: no `if` reads the box.
+        let hides = try NSRegularExpression(
+            pattern: "\\bif\\b[^\\n{]*longSwipes"
+        )
+        #expect(
+            hides.numberOfMatches(
+                in: group,
+                range: NSRange(group.startIndex..., in: group)
+            ) == 0
+        )
     }
 
     @Test("every value row carries its Applies to column")
@@ -88,10 +97,10 @@ struct GesturesScrollWiringTests {
         }
         // Both Natural rows, through the one row builder that
         // itself carries the column.
-        #expect(
-            group.components(separatedBy: "\n        naturalRow(").count
-                == 3
-        )
+        // One row per input, each keyed by its own field.
+        let squashed = Self.squash(group)
+        #expect(squashed.contains("naturalRow(.naturalTrackpad,"))
+        #expect(squashed.contains("naturalRow(.naturalMouse,"))
         let natural = try #require(
             SourceScan.declarationBody(
                 after: "private func naturalRow(",

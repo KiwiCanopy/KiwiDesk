@@ -41,7 +41,7 @@ public struct ScrollGestureSettings: Equatable, Sendable {
 public final class ScrollGestures {
     /// The two gestures, in the precedence a shared chord takes.
     public enum Consumer: CaseIterable, Hashable, Sendable {
-        /// Pans a Scrolling row, or steps a Monocle stack (#1656).
+        /// Steps focus window by window on every layout (#1656).
         case pan
         /// Steps between the Spaces of a screen (#1519).
         case step
@@ -60,11 +60,11 @@ public final class ScrollGestures {
     public private(set) var settings = ScrollGestureSettings()
     /// The inputs `KiwiCore.applyScrollGestures` resolves from:
     /// the base a config load or a verb wrote, and the live
-    /// profile's override. Written there alone.
-    var base = ScrollGestureBase.defaults
-    var profileOverride: ScrollGestureOverride?
+    /// profile's override — written through `adopt` alone.
+    private(set) var base = ScrollGestureBase.defaults
+    private(set) var profileOverride: ScrollGestureOverride?
     /// The two resolved: what a consumer reads for its stepping.
-    var resolved = ScrollGestureBase.defaults
+    private(set) var resolved = ScrollGestureBase.defaults
     private var handlers: [Consumer: Handler] = [:]
     /// The consumer each chord's in-flight gesture began with, and
     /// its last event, so a change mid-gesture never hands one
@@ -97,6 +97,27 @@ public final class ScrollGestures {
         }
         self.settings = settings
         sync()
+    }
+
+    /// The one write of the resolve's inputs and output, ending in
+    /// the tap's `configure` — `KiwiCore.applyScrollGestures`'s
+    /// door (#1656, `ScrollGestureConfigureSeamTests`).
+    func adoptResolution(
+        base: ScrollGestureBase,
+        profileOverride: ScrollGestureOverride?,
+        resolved: ScrollGestureBase
+    ) {
+        self.base = base
+        self.profileOverride = profileOverride
+        self.resolved = resolved
+        configure(resolved.tapSettings)
+    }
+
+    /// A config load's reset: the inputs return to the defaults
+    /// WITHOUT configuring — the load configures at its tail.
+    func resetInputs() {
+        base = .defaults
+        profileOverride = nil
     }
 
     /// Called once the Accessibility grant is in hand.

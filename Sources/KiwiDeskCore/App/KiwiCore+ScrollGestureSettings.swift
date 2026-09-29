@@ -2,62 +2,33 @@ import Foundation
 
 /// Where the scroll gestures' settings reach the tap (#1656).
 extension KiwiCore {
-    /// The ONE `configure` caller: the base with the live
-    /// profile's override on top. A config load passes the base it
-    /// read; a profile apply passes nil and keeps the base in hand,
-    /// which under a Lua-owned config is what `init.lua`'s verbs
-    /// declared. So no path hands the tap a value that skipped the
-    /// override.
+    /// The ONE resolve: the base with the live profile's override
+    /// on top, sanitised, handed to the tap through the front's one
+    /// door. A config load passes the base it read; a profile
+    /// apply passes nil and keeps the base in hand, which under a
+    /// Lua-owned config is what `init.lua`'s verbs declared.
     func applyScrollGestures(
         base: ScrollGestureBase? = nil,
         profile: ScrollGestureOverride?
     ) {
         let gestures = mouse.scroll
-        if let base { gestures.base = base }
-        gestures.profileOverride = profile
-        let resolved = sanitizedScrollGestures(
-            profile?.resolved(onto: gestures.base) ?? gestures.base
+        let base = base ?? gestures.base
+        let raw = profile?.resolved(onto: base) ?? base
+        let resolved = raw.sanitized
+        // Said once per change, not on every re-resolve.
+        if resolved != raw, resolved != gestures.resolved {
+            onLog("scroll_gesture: refused values turned off or clamped")
+        }
+        gestures.adoptResolution(
+            base: base,
+            profileOverride: profile,
+            resolved: resolved
         )
-        gestures.resolved = resolved
-        gestures.configure(resolved.tapSettings)
     }
 
-    /// A config load's reset: the inputs go back to the defaults
-    /// without configuring, since the load configures at its tail.
+    /// A config load's reset: the load configures at its tail.
     func resetScrollGestureInputs() {
-        mouse.scroll.base = .defaults
-        mouse.scroll.profileOverride = nil
-    }
-
-    /// The refusals the recorder and the verbs make at entry,
-    /// applied once more to the RESOLVED value, which a hand-edited
-    /// file or two cascade levels can still reach: a lone modifier
-    /// turns that gesture off, a shared chord stays the pan's (the
-    /// `Consumer` order), and the step distance is clamped.
-    private func sanitizedScrollGestures(
-        _ value: ScrollGestureBase
-    ) -> ScrollGestureBase {
-        var result = value
-        if ScrollChordRefusal.of(value.pan, other: [], heldBy: .step)
-            != nil
-        {
-            onLog("scroll_gesture: pan needs two modifiers; off")
-            result.pan = []
-        }
-        if ScrollChordRefusal.of(
-            value.spaceStep,
-            other: result.pan,
-            heldBy: .pan
-        ) != nil {
-            onLog("scroll_gesture: space_step refused; off")
-            result.spaceStep = []
-        }
-        let range = ScrollGestureBase.stepDistanceRange
-        result.stepDistance = min(
-            max(result.stepDistance, range.lowerBound),
-            range.upperBound
-        )
-        return result
+        mouse.scroll.resetInputs()
     }
 
     /// `scroll_gesture.*`: writes the BASE, so a profile's own

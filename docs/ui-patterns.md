@@ -332,15 +332,17 @@ drawer accessory's job above.
 :::unreleased
 **A collapsible container that stands beside the page's
 sections is a collapsible section, not a drawer.**
-`SettingsCollapsibleSection` draws `SettingsSection`'s
-`.headline` header over the section plate; shut, the plate stays
-and holds the summary (`.callout`, `ink3`), and clicking the
-summary opens it too. A drawer that qualifies a card stays a
-`SettingsDisclosure` at the drawer tier. Both draw their header
-through the one `SettingsDisclosureButton`, so the full-row
-button, chevron, hover, heading trait and expanded value above
-hold for both, and search opens either on a hit for one of its
-catalog children. The ruling is in `docs/design-decisions.md`.
+`SettingsCollapsibleSection` IS a `SettingsSection` — the same
+plain `.headline` title, a heading, and plate — and the
+disclosure is the plate's first row: a chevron beside the
+summary (`.callout`, `ink3`), the whole row one button, the
+entries opening below it inside the card. The row is not a
+heading (`isHeading: false`), so the card lists once in the
+rotor. A drawer that qualifies a card stays a
+`SettingsDisclosure` at the drawer tier. Both draw the one
+`SettingsDisclosureButton`, so the full-row button, chevron,
+hover and expanded value above hold for both, and search opens
+either on a hit for one of its catalog children. The ruling is in `docs/design-decisions.md`.
 :::
 
 **Weigh every title edit against the search index.** Search
