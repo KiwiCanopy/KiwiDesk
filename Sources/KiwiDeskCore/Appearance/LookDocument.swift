@@ -8,6 +8,12 @@ struct LookDocument: Codable {
     /// Format version of the looks.json schema.
     static let currentFormat = 1
 
+    static var encoder: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return encoder
+    }
+
     /// Decoded format version preserved without normalization.
     var format: Int
     var looks: [ShelfLook]
@@ -50,22 +56,18 @@ struct LookDocument: Codable {
     }
 }
 
-/// An exported look (#1684): the look, plus its palette's colours
-/// when that palette is a user one, so the file carries everything
-/// another Mac needs. Bare, like the palette sidecar — a breaking
-/// `ShelfLook` change must rule this file deliberately.
+/// An exported look (#1684): the look alone, which owns its
+/// colours (#1752), so the file carries everything another Mac
+/// needs. Bare, like the palette sidecar — a breaking `ShelfLook`
+/// change must rule this file deliberately.
 public struct LookExport: Codable, Sendable, Equatable {
     public var look: ShelfLook
-    /// The named palette, present only when it is not bundled.
-    public var palette: ColorPalette?
 
-    public init(look: ShelfLook, palette: ColorPalette?) {
+    public init(look: ShelfLook) {
         self.look = look
-        self.palette = palette
     }
 
     private enum CodingKeys: String, CodingKey {
         case look
-        case palette
     }
 }

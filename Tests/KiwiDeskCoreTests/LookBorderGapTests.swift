@@ -10,7 +10,7 @@ import Testing
 @Suite("Look border and gaps")
 struct LookBorderGapTests {
     private func look(_ style: [String: JSONValue]) -> ShelfLook {
-        ShelfLook(name: "T", palette: nil, style: style)
+        ShelfLook(name: "T", style: style, colors: [:])
     }
 
     private func gaps(_ outer: Double, _ inner: Double) -> JSONValue {

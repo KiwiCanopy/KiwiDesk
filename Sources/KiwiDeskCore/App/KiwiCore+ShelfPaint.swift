@@ -29,19 +29,17 @@ extension KiwiCore {
         baseline.profile == profiles.currentName
     }
 
-    /// `settings` with `look` and its palette painted on, or —
-    /// with no look — `palette`'s colours alone, keeping the shape.
+    /// `settings` with `look` painted on, its colours included,
+    /// then `palette`'s colours over them — the later pick wins
+    /// (#1752).
     public static func painted(
         _ settings: TilingSettings,
         look: ShelfLook?,
         palette: ColorPalette?
     ) -> TilingSettings {
         var painted = settings
-        if let look {
-            look.apply(to: &painted, palette: palette)
-        } else {
-            palette?.apply(to: &painted)
-        }
+        look?.apply(to: &painted)
+        palette?.apply(to: &painted)
         return painted
     }
 
@@ -69,7 +67,7 @@ extension KiwiCore {
     }
 
     /// `current` with everything a paint reaches returned to
-    /// `before` and nothing else: the look's and the palette's keys,
+    /// `before` and nothing else: the look's styling and colours,
     /// then the writes `ShelfLook.apply` makes beyond its keys —
     /// every glass leaf, the per-layout indicators — put back too
     /// (`ShelfPaintRoundTripTests`).
@@ -81,13 +79,10 @@ extension KiwiCore {
             current,
             look: ShelfLook(
                 name: "",
-                palette: nil,
-                style: LookKeys.extract(from: before)
-            ),
-            palette: ColorPalette(
-                name: "",
+                style: LookKeys.extract(from: before),
                 colors: ColorPaletteKeys.extract(from: before)
-            )
+            ),
+            palette: nil
         )
         for leaf in TilingSettings.liquidGlassLeaves {
             settings[keyPath: leaf] = before[keyPath: leaf]

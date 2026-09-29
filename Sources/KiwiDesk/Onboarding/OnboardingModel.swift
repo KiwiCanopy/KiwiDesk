@@ -128,17 +128,13 @@ final class OnboardingModel {
         return looksBaseline.map(baselineIsLive) ?? false
     }
 
-    /// The palette `look` names, if it is still saved.
-    func palette(of look: ShelfLook) -> ColorPalette? {
-        KiwiCore.palette(of: look, in: shelfPalettes())
-    }
-
-    /// Applies `look` — its shape and its palette.
+    /// Applies `look` — its shape and its own colours (#1752).
     func pickLook(_ look: ShelfLook) {
-        paint(look, palette(of: look))
+        paint(look, nil)
     }
 
-    /// Repaints the colours alone, keeping the shape.
+    /// Re-colours the look, keeping the shape — the later pick
+    /// wins.
     func pickPalette(_ palette: ColorPalette) {
         paint(nil, palette)
     }

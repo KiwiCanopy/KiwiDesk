@@ -7,21 +7,18 @@ struct LooksShelf: View {
     @ObservedObject var model: SettingsModel
     @State var saveRequest: NameEditRequest?
     @State var renameRequest: NameEditRequest?
+    /// The colours a look click replaced — per mount, never a
+    /// stored preference, so the row offers only what this visit
+    /// did (`KeepColorsOffer`).
+    @State var keepColors: KeepColorsOffer?
+    /// Whether the row's own tick made the latest draft write.
+    @State var keepColorsWrote = false
     @FocusState var returningTile: String?
-    /// The look a click just applied and the colors it replaced —
-    /// per mount, never a stored preference, so the colors row
-    /// offers only what this visit did.
-    @State var justApplied: AppliedLook?
     /// Why the last save or import wrote nothing, until the next
     /// one succeeds.
     @State var failure: String?
 
     var store: LookStore { model.lookStore }
-
-    struct AppliedLook: Equatable {
-        let look: ShelfLook
-        let before: [String: String]
-    }
 
     private let columns = [
         GridItem(.adaptive(minimum: 132), spacing: 12, alignment: .top)
@@ -32,21 +29,28 @@ struct LooksShelf: View {
             SettingsCatalog.colors.looksShelf,
             caption: L(
                 "looks.caption",
-                "Apply a bundled or saved look — where the bars "
-                    + "sit, KiwiShelf's shape, font and indicators, "
-                    + "the focus "
-                    + "border's shape and sheen, and the window "
-                    + "gaps. A one-time paint, not a "
-                    + "live link; what the bars show is never part "
-                    + "of a look. Its gaps move your windows once "
-                    + "you save."
+                "Apply a bundled or saved look — its colors, "
+                    + "where the bars sit, KiwiShelf's shape, font "
+                    + "and indicators, the focus border's shape and "
+                    + "sheen, and the window gaps. A one-time "
+                    + "paint, not a live link; what the bars show "
+                    + "is never part of a look. Its gaps move your "
+                    + "windows once you save."
             )
         ) {
             bundledGroup
-            colorsRow
+            keepColorsRow
             userGroup
         }
         .onAppear(perform: reload)
+        .onChange(of: model.isDirty) { _, dirty in
+            guard !dirty else { return }
+            keepColors = KeepColorsOffer.afterDraftCleaned(
+                keepColors,
+                tickWrote: keepColorsWrote
+            )
+            keepColorsWrote = false
+        }
     }
 
     private var bundledGroup: some View {
@@ -96,8 +100,8 @@ struct LooksShelf: View {
                 Text(
                     L(
                         "looks.empty_hint",
-                        "Save KiwiShelf's current look and it "
-                            + "appears here."
+                        "Save the current look, colors included, "
+                            + "and it appears here."
                     )
                 )
                 .font(.caption)
@@ -111,10 +115,13 @@ struct LooksShelf: View {
     }
 
     /// Look tile: the picture is what a click gives — the look,
-    /// its colors included — over the draft; the checkmark reads
-    /// the styling alone, the palette shelf marking the colors.
+    /// its colors included — over the draft; the mark is Core's
+    /// one reading (`ShelfLook.match`), and a look whose shape is
+    /// live in other colors keeps it, saying so (#1752).
     private func card(_ look: ShelfLook, caption: String?) -> some View {
-        let applied = look.isApplied(to: model.config.settings)
+        let match = look.match(model.config.settings)
+        let applied = match != .none
+        let other = match == .otherColors
         return Button {
             apply(look)
         } label: {
@@ -122,6 +129,8 @@ struct LooksShelf: View {
                 name: look.name,
                 caption: caption,
                 isApplied: applied,
+                note: other ? otherColorsNote : nil,
+                appliedSpoken: other ? otherColorsSpoken : nil,
                 captionLines: 2
             ) {
                 LookPlate(settings: preview(look), spaceLabels: spaceLabels)
@@ -130,15 +139,31 @@ struct LooksShelf: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(applied ? [.isSelected] : [])
+        .help(other ? restoreColorsHelp : "")
         .popover(item: renameBinding(look.name)) { request in
             renamePopover(request)
         }
     }
 
+    private var otherColorsNote: String {
+        L("looks.other_colors", "Other colors")
+    }
+
+    private var otherColorsSpoken: String {
+        L("looks.applied_other_colors", "Applied, with other colors")
+    }
+
+    private var restoreColorsHelp: String {
+        L(
+            "looks.restore_colors.help",
+            "Click to bring back this look's own colors."
+        )
+    }
+
     /// The draft with `look` painted on, its colors included.
     private func preview(_ look: ShelfLook) -> TilingSettings {
         var settings = model.config.settings
-        look.apply(to: &settings, palette: model.palette(of: look))
+        look.apply(to: &settings)
         return settings
     }
 
@@ -146,18 +171,17 @@ struct LooksShelf: View {
         BarsPanelPreview.spaceLabels(of: model.config)
     }
 
-    /// Paints `look` with its colors, remembering the colors it
-    /// replaced so the row below can hand them back.
+    /// Paints `look`, its colors included, onto the draft,
+    /// remembering colors no saved palette could bring back.
     func apply(_ look: ShelfLook) {
-        let before = LookColorsOffer.before(
-            clicking: justApplied.map { ($0.look, $0.before) },
-            previousPalette: justApplied.flatMap {
-                model.palette(of: $0.look)
-            },
-            settings: model.config.settings
+        keepColorsWrote = false
+        keepColors = KeepColorsOffer.afterClicking(
+            look,
+            over: model.config.settings,
+            prior: standingKeepColors,
+            palettes: model.allPalettes
         )
-        model.applyLook(look, withColors: true)
-        justApplied = AppliedLook(look: look, before: before)
+        model.applyLook(look)
     }
 
     @ViewBuilder

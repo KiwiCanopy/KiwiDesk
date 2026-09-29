@@ -4,8 +4,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The look library, `looks.json` (#1684): the palette store's
-/// invariants, plus a palette rename re-pointing its looks and an
-/// export that carries a user palette's colours.
+/// invariants, plus an export carrying the look's own colours
+/// (#1752).
 @Suite("Look store")
 struct LookStoreTests {
     private func store() -> LookStore {
@@ -15,14 +15,11 @@ struct LookStoreTests {
         )
     }
 
-    private func look(
-        _ name: String,
-        palette: String? = "Slate"
-    ) -> ShelfLook {
+    private func look(_ name: String) -> ShelfLook {
         ShelfLook(
             name: name,
-            palette: palette,
-            style: ["kiwishelf.thickness": .number(30)]
+            style: ["kiwishelf.thickness": .number(30)],
+            colors: ["kiwishelf.fill_color": "#112233"]
         )
     }
 
@@ -58,31 +55,61 @@ struct LookStoreTests {
         #expect(store.userLooks()[0].style["app_bar.content"] == nil)
     }
 
-    @Test("a palette rename re-points only its looks")
-    func repoint() throws {
-        let store = store()
-        try store.save(look("A", palette: "Old"))
-        try store.save(look("B", palette: "Slate"))
-        try store.repointPalette(from: "Old", to: "New")
-        #expect(store.userLooks().map(\.palette) == ["New", "Slate"])
-    }
-
-    @Test("export and import round-trip with the palette")
+    @Test("export and import round-trip, foreign keys dropped")
     func roundTrip() throws {
         let store = store()
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("look-\(UUID().uuidString).json")
-        let palette = ColorPalette(
-            name: "Mine",
-            colors: ["kiwishelf.fill_color": "#112233", "bogus": "#FFF"]
-        )
-        try store.export(
-            LookExport(look: look("A", palette: "Mine"), palette: palette),
-            to: url
-        )
+        var exported = look("A")
+        exported.colors["bogus"] = "#FFF"
+        exported.style["app_bar.content"] = .string("icon")
+        try store.export(LookExport(look: exported), to: url)
         let back = try store.importLook(from: url)
-        #expect(back.look == look("A", palette: "Mine"))
-        #expect(back.palette?.colors == ["kiwishelf.fill_color": "#112233"])
+        #expect(back.style == look("A").style)
+        #expect(back.colors["bogus"] == nil)
+        #expect(back.colors["kiwishelf.fill_color"] == "#112233")
+    }
+
+    /// A look saved before a colour path existed reads with that
+    /// path completed, whichever door reads it (#1752).
+    @Test("a library read completes a sparse look's colours")
+    func readCompletesColours() throws {
+        let store = store()
+        try store.save(look("A"))
+        let back = try #require(store.userLooks().first)
+        #expect(Set(back.colors.keys) == Set(ColorPaletteKeys.all))
+        #expect(back.colors["kiwishelf.fill_color"] == "#112233")
+    }
+
+    /// A rewrite reads the library raw, so a key this build does
+    /// not know — a newer build's — survives another look's save.
+    @Test("a rewrite keeps a key this build does not know")
+    func rewriteKeepsUnknownKeys() throws {
+        let store = store()
+        var newer = look("Newer")
+        newer.style["kiwishelf.future_knob"] = .number(7)
+        try store.save(newer)
+        try store.save(look("Sibling"))
+        try store.rename(from: "Sibling", to: "Other")
+        let raw = try String(contentsOf: store.url, encoding: .utf8)
+        #expect(raw.contains("kiwishelf.future_knob"))
+    }
+
+    /// A stored look carries every colour path (#1752), so a sparse
+    /// file cannot leave earlier colours behind when applied.
+    @Test("an imported look's colours are completed")
+    func importCompletesColours() throws {
+        let store = store()
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("look-\(UUID().uuidString).json")
+        try store.export(LookExport(look: look("A")), to: url)
+        let back = try store.importLook(from: url)
+        #expect(Set(back.colors.keys) == Set(ColorPaletteKeys.all))
+        #expect(
+            back.colors
+                == ColorPalette(name: "", colors: look("A").colors)
+                .paintedColors
+        )
     }
 
     @Test("a newer library refuses rather than reads empty")

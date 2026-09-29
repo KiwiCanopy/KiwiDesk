@@ -23,6 +23,8 @@ public final class LookStore {
     }
 
     /// Decodes the document, running `ConfigMigration` if needed.
+    /// Raw, so a rewrite keeps what a newer build stored; a look
+    /// read for use is admitted in `userLooks`.
     private func readDocument() throws -> LookDocument? {
         guard var data = try? Data(contentsOf: fileURL) else {
             return nil
@@ -40,14 +42,18 @@ public final class LookStore {
         return doc
     }
 
-    /// User looks for mutating paths (throws on an unreadable library).
-    public func libraryLooks() throws -> [ShelfLook] {
+    /// User looks RAW, for the store's own rewrites and a backup's
+    /// export (throws on an unreadable library): a newer build's
+    /// keys survive them (`LookStoreTests` ▸ `rewriteKeepsUnknownKeys`).
+    /// Core-only; a reader that uses a look takes `userLooks`.
+    func libraryLooks() throws -> [ShelfLook] {
         try readDocument()?.looks ?? []
     }
 
-    /// User looks for read queries (empty on error).
+    /// User looks for read queries (empty on error), each as every
+    /// reader takes it (`ShelfLook.admitted`).
     public func userLooks() -> [ShelfLook] {
-        (try? libraryLooks()) ?? []
+        ((try? libraryLooks()) ?? []).map(\.admitted)
     }
 
     public func isBuiltinName(_ name: String) -> Bool {
@@ -84,7 +90,7 @@ public final class LookStore {
             guard !isBuiltinName(look.name),
                 seen.insert(look.name).inserted
             else { continue }
-            admissible.append(Self.filtered(look))
+            admissible.append(look.admitted)
         }
         try write(admissible)
         return looks.count - admissible.count
@@ -112,57 +118,22 @@ public final class LookStore {
         try write(looks)
     }
 
-    /// Points every user look naming palette `from` at `to` — a
-    /// palette rename keeps the looks drawn in it.
-    public func repointPalette(from: String, to: String) throws {
-        var looks = try libraryLooks()
-        guard looks.contains(where: { $0.palette == from }) else {
-            return
-        }
-        for index in looks.indices where looks[index].palette == from {
-            looks[index].palette = to
-        }
-        try write(looks)
-    }
-
     public func export(_ file: LookExport, to url: URL) throws {
         try Self.encoder.encode(file).write(to: url)
     }
 
-    /// Imports a look file, filtering styling to `LookKeys` and
-    /// colours to known palette paths.
-    public func importLook(from url: URL) throws -> LookExport {
+    /// Imports a look file, admitted (`ShelfLook.admitted`).
+    public func importLook(from url: URL) throws -> ShelfLook {
         guard let data = try? Data(contentsOf: url),
-            let raw = try? JSONDecoder().decode(
+            let file = try? JSONDecoder().decode(
                 LookExport.self,
                 from: data
             )
         else { throw StoreError.invalidFile }
-        let known = Set(ColorPaletteKeys.all)
-        let palette = raw.palette.map {
-            ColorPalette(
-                name: $0.name,
-                colors: $0.colors.filter { known.contains($0.key) }
-            )
-        }
-        return LookExport(look: Self.filtered(raw.look), palette: palette)
+        return file.look.admitted
     }
 
-    /// `look` with styling keys outside `LookKeys` dropped.
-    static func filtered(_ look: ShelfLook) -> ShelfLook {
-        let known = Set(LookKeys.all)
-        return ShelfLook(
-            name: look.name,
-            palette: look.palette,
-            style: look.style.filter { known.contains($0.key) }
-        )
-    }
-
-    private static var encoder: JSONEncoder {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return encoder
-    }
+    private static var encoder: JSONEncoder { LookDocument.encoder }
 
     private func write(_ looks: [ShelfLook]) throws {
         try FileManager.default.createDirectory(
