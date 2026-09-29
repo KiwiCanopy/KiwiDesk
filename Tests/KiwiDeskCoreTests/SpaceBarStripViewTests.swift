@@ -29,7 +29,8 @@ struct SpaceBarStripViewTests {
         _ view: SpaceBarItemView,
         drawn: ClosedRange<UInt32>,
         of count: UInt32 = 9,
-        space: SpaceID = SpaceID("1")
+        space: SpaceID = SpaceID("1"),
+        layingOut: Bool = true
     ) {
         var style = SpaceBarLook()
         style.glyphGap = 0
@@ -56,7 +57,7 @@ struct SpaceBarStripViewTests {
                 count: Int(count)
             )
         )
-        view.layout()
+        if layingOut { view.layout() }
     }
 
     private func makeView() -> SpaceBarItemView {
@@ -79,7 +80,8 @@ struct SpaceBarStripViewTests {
         configure(view, drawn: 3...7)
         let leading = try #require(view.leadingTarget)
         let trailing = try #require(view.overflowTarget)
-        #expect(leading.members == [WindowID(1), WindowID(2)])
+        // Nearest the glyphs first: the leading disc mirrors the row.
+        #expect(leading.members == [WindowID(2), WindowID(1)])
         #expect(trailing.members == [WindowID(8), WindowID(9)])
         let first = try #require(view.appViews.first)
         #expect(leading.frame.maxX <= first.frame.minX)
@@ -168,6 +170,45 @@ struct SpaceBarStripViewTests {
             (carried.layer?.animation(forKey: "kiwi.walk.fade") != nil)
                 == plays
         )
+    }
+
+    /// A menu pick lays the chip out late, and a second render of
+    /// the same strip can land first: it keeps the walk and the
+    /// glyph it carries off rather than swapping in place.
+    @Test("a repeat render before layout keeps the walk")
+    func repeatRenderKeepsTheWalk() {
+        let view = makeView()
+        configure(view, drawn: 3...7)
+        let carried = view.appViews[0]
+        configure(view, drawn: 4...8, layingOut: false)
+        configure(view, drawn: 4...8, layingOut: false)
+        #expect(view.pendingWalk != nil)
+        #expect(view.leavingViews.first === carried)
+        view.layout()
+        #expect(carried.superview === view)
+        #expect(
+            (view.appViews.last?.layer?.animation(forKey: "kiwi.walk.fade")
+                != nil) == !BarMotion.isReduced
+        )
+    }
+
+    /// A render while the walk plays keeps the glyph fading out;
+    /// the walk's own end removes it.
+    @Test("a render mid-walk keeps the fading glyph until it lands")
+    func midWalkRenderKeepsTheFade() async throws {
+        let view = makeView()
+        configure(view, drawn: 3...7)
+        let carried = view.appViews[0]
+        configure(view, drawn: 4...8)
+        configure(view, drawn: 4...8)
+        #expect(carried.superview === view)
+        // A generous guard rather than a deadline: a busy main
+        // actor runs the walk's end late, never early.
+        for _ in 0..<300 where carried.superview != nil {
+            try await Task.sleep(for: .milliseconds(100))
+        }
+        #expect(carried.superview == nil)
+        #expect(view.leavingViews.isEmpty)
     }
 
     @Test("an unmoved strip walks nothing")

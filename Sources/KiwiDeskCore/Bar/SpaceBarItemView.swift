@@ -183,15 +183,22 @@ final class SpaceBarItemView: NSView {
         held: Held? = nil,
         collapse: Collapse? = nil
     ) {
-        pendingWalk =
+        let keepsSpace =
             self.identity == identity && self.collapse == nil
-                && collapse == nil
+            && collapse == nil
+        let walk =
+            keepsSpace
             ? SpaceBarStrip.Walk.between(
                 self.drawn,
                 leadingDisc: !self.before.windows.isEmpty,
                 drawn,
                 leadingDisc: !before.windows.isEmpty
             ) : nil
+        // A render repeating the strip keeps what the last one
+        // started — a walk not yet laid out (a menu pick lays out
+        // late) and the glyphs still fading out (#1528 item 21).
+        let repeats = keepsSpace && walk == nil && self.drawn == drawn
+        if !repeats { pendingWalk = walk }
         if self.identity != identity {
             cancelSpringSweep()
             isDragHovered = false
@@ -214,7 +221,7 @@ final class SpaceBarItemView: NSView {
         self.horizontal = horizontal
         self.style = style
         self.stateMarkColors = stateMarkColors
-        syncAppViews()
+        syncAppViews(startsWalk: walk != nil, keepsLeaving: repeats)
         syncTargets()
         restyle()
         needsLayout = true
@@ -223,12 +230,15 @@ final class SpaceBarItemView: NSView {
         setAccessibilityLabel(axLabel)
     }
 
-    private func syncAppViews() {
-        leavingViews.forEach { $0.removeFromSuperview() }
+    private func syncAppViews(startsWalk: Bool, keepsLeaving: Bool) {
         // A walk keeps the glyphs it carries off, so they fade
         // under their disc rather than vanish (#1528 item 21).
-        let leaving = Self.leaving(appViews, walk: pendingWalk)
-        leavingViews = leaving
+        let leaving =
+            startsWalk ? Self.leaving(appViews, walk: pendingWalk) : []
+        if !keepsLeaving {
+            leavingViews.forEach { $0.removeFromSuperview() }
+            leavingViews = leaving
+        }
         appViews.filter { view in
             !leaving.contains { $0 === view }
         }.forEach { $0.removeFromSuperview() }

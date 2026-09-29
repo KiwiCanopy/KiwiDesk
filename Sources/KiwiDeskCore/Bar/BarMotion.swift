@@ -53,8 +53,10 @@ enum BarMotion {
     /// Plays a strip walk on the views' layers, ADDITIVE — offsets
     /// over the model values — so a later layout pass, which
     /// writes the same final frames and resting alphas, cannot
-    /// cancel it; `completion` runs once it lands, at once under
-    /// Reduce Motion, which plays nothing.
+    /// cancel it; `completion` runs once it lands — on a timer of
+    /// the walk's length, since a transaction completion begun
+    /// inside a layout pass never fired (device, 2026-09-29) — and
+    /// at once under Reduce Motion, which plays nothing.
     @MainActor
     static func playWalk(
         _ steps: [WalkStep],
@@ -62,10 +64,6 @@ enum BarMotion {
     ) {
         let reduceMotion = isReduced
         let span = walkDuration(reduceMotion: reduceMotion)
-        CATransaction.begin()
-        CATransaction.setCompletionBlock {
-            MainActor.assumeIsolated { completion() }
-        }
         for step in steps {
             step.view.wantsLayer = true
             guard let layer = step.view.layer else { continue }
@@ -99,7 +97,10 @@ enum BarMotion {
                 layer.add(fade, forKey: "kiwi.walk.fade")
             }
         }
-        CATransaction.commit()
+        Task { @MainActor in
+            if span > 0 { try? await Task.sleep(for: .seconds(span)) }
+            completion()
+        }
     }
 
     /// A strip walk's length: a glyph walking under a disc must

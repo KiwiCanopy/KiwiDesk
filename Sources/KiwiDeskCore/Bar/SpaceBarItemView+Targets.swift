@@ -35,10 +35,12 @@ extension SpaceBarItemView {
         }
         glyphTargets.forEach { $0.actions = glyphActions }
         let shown = collapse == nil
+        // Each disc lists its windows nearest the glyphs first, so
+        // the leading one reads its side of the row backwards.
         leadingTarget = discTarget(
             leadingTarget,
             space: space,
-            windows: shown ? overflowBefore : [],
+            windows: shown ? overflowBefore.reversed() : [],
             label: L(
                 "space_bar.overflow.before.ax",
                 "Earlier windows not shown: %1$d",
