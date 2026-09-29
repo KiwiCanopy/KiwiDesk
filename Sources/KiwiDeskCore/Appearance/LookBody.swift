@@ -30,6 +30,14 @@ public struct LookBody: Codable, Sendable, Equatable {
         ShelfLook(name: name, style: style, colors: colors)
     }
 
+    /// `settings` with this look painted over — `isWorn`'s pair,
+    /// and the one copy of the paint (#1752).
+    public func worn(over settings: TilingSettings) -> TilingSettings {
+        var worn = settings
+        named("").admitted.apply(to: &worn)
+        return worn
+    }
+
     /// Whether `settings` already wear this look — `isApplied`'s
     /// answer, never a path diff (#1752).
     public func isWorn(by settings: TilingSettings) -> Bool {

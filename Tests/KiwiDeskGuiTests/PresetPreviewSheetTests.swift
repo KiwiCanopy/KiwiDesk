@@ -1,5 +1,4 @@
 import Foundation
-import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -74,60 +73,6 @@ struct PresetPreviewSheetTests {
                 )
             )
         }
-    }
-
-    /// The preset's own settings, wearing the shared look an
-    /// applied built-in wears (#1752) — through the one paint, and
-    /// spent at the tile.
-    @Test("the sheet draws the preset's own settings")
-    func theSheetDrawsThePresetsSettings() throws {
-        let source = try squashed(Self.sheet)
-        #expect(
-            source.occurrences(
-                of: "KiwiCore.wearing(sharedLook,"
-                    + "layout.settings(sizes:liveSizes))"
-            ) == 1
-        )
-        #expect(source.occurrences(of: "settings:drawnSettings") == 1)
-        #expect(
-            try squashed(Self.section).occurrences(
-                of: "sharedLook:request.sharedLook"
-            ) == 1
-        )
-        #expect(
-            try squashed(Self.card).occurrences(
-                of: "sharedLook:model.core.sharedLook"
-            ) == 1
-        )
-    }
-
-    /// A built-in applies wearing the shared look, so its preview
-    /// must too: a sheet drawing the raw preset shows colours and
-    /// gaps the applied preset will not have.
-    @Test("the sheet draws a built-in wearing the shared look")
-    @MainActor func theSheetWearsTheSharedLook() throws {
-        let layout = try #require(StandardProfiles.workflows.first)
-        let raw = layout.settings(sizes: nil)
-        var worn = raw
-        worn.kiwishelf.fillColor = "#0A0B0C"
-        worn.gapsGlobal.inner.horizontal += 7
-        let look = LookBody(of: worn)
-        let sheet = PresetPreviewSheet(
-            layout: layout,
-            liveSizes: nil,
-            sharedLook: look
-        ) {}
-        #expect(sheet.drawnSettings == KiwiCore.wearing(look, raw))
-        #expect(sheet.drawnSettings != raw)
-        #expect(sheet.drawnSettings.kiwishelf.fillColor == "#0A0B0C")
-        #expect(sheet.drawnSettings.gapsGlobal == worn.gapsGlobal)
-        // No shared look: the preset's own settings, untouched.
-        let bare = PresetPreviewSheet(
-            layout: layout,
-            liveSizes: nil,
-            sharedLook: nil
-        ) {}
-        #expect(bare.drawnSettings == raw)
     }
 
     // MARK: - What it mounts

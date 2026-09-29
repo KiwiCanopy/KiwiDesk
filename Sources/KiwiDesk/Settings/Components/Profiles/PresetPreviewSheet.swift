@@ -37,9 +37,10 @@ struct PresetPreviewSheet: View {
 
     /// What the preset runs with once applied: its own settings
     /// wearing the shared look, as `KiwiCore.apply(composed:)`
-    /// paints it (`PresetPreviewSheetTests`).
+    /// paints it (`BuiltInLookWearTests`).
     var drawnSettings: TilingSettings {
-        KiwiCore.wearing(sharedLook, layout.settings(sizes: liveSizes))
+        let own = layout.settings(sizes: liveSizes)
+        return sharedLook?.worn(over: own) ?? own
     }
 
     private var plan: PresetPreviewPlan {

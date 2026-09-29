@@ -33,20 +33,7 @@ extension KiwiCore {
     /// follower and a built-in layout wear, a built-in having no
     /// file to be own in (#1752).
     func wearingSharedLook(_ settings: TilingSettings) -> TilingSettings {
-        Self.wearing(sharedLook, settings)
-    }
-
-    /// `settings` with `look` painted over, or unchanged for nil —
-    /// the one copy of the paint, which a preview of a built-in
-    /// takes with the look it was handed (gui.md, #702).
-    public static func wearing(
-        _ look: LookBody?,
-        _ settings: TilingSettings
-    ) -> TilingSettings {
-        guard let look else { return settings }
-        var worn = settings
-        look.named("").admitted.apply(to: &worn)
-        return worn
+        sharedLook?.worn(over: settings) ?? settings
     }
 
     /// Reads `gui.json` at a config load, beside the #1741
