@@ -186,7 +186,7 @@ extension EventLoop {
         // An unnamed activation (#1785) leaves the gate with no
         // reading, which fails open.
         guard Self.isProcessID(pid) else {
-            lastActivePid = nil
+            forgetUnnamedActivation(app)
             return
         }
         if let previous = lastActivePid, previous != pid {

@@ -84,6 +84,16 @@ extension EventLoop {
         }
     }
 
+    /// An activation announced without a pid: no active-app
+    /// reading, so the provenance gate fails open.
+    func forgetUnnamedActivation(_ app: RunningApp) {
+        onLog(
+            "activation: \(app.ref.bundleID ?? app.ref.name) "
+                + "announced without a pid"
+        )
+        lastActivePid = nil
+    }
+
     /// The other observed processes of `pid`'s app.
     func siblingProcesses(of pid: pid_t) -> Set<pid_t> {
         Set(observers.keys.filter { areSiblings(pid, $0) })
