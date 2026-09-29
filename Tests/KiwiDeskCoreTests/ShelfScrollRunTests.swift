@@ -155,11 +155,11 @@ struct ShelfScrollRunTests {
         #expect(drawn(overlay) == scrolled)
     }
 
-    /// A front segment too long to pin scrolls with the run (#409),
-    /// and a scroll re-lays nothing: its name is bounded by where
-    /// the run ENDS, so scrolled to it the whole name shows rather
-    /// than the unscrolled viewport's cut.
-    @Test("An unpinned front name is bounded by the run's end")
+    /// A front segment too long to pin scrolls with the run (#409):
+    /// its name is cut at the viewport's end (#1763), so the scroll
+    /// door re-lays it — scrolled to the end the whole name shows,
+    /// as a render at that offset draws it.
+    @Test("An unpinned front name follows the scroll")
     func unpinnedFrontNameIsWhole() throws {
         let manager = SpaceBarManager()
         let base = paintedSpaceBar(front: WindowID(1), spaces: 60)
@@ -184,8 +184,13 @@ struct ShelfScrollRunTests {
             "the segment is pinned, not scrolling with the run"
         )
         let name = overlay.frontName
-        #expect(name.frame.width > 0)
-        #expect(abs(name.frame.width - name.fittingSize.width) < 1)
+        let full = name.fittingSize.width
+        try #require(name.frame.width < full, "the fixture must cut")
+        overlay.moveRun(to: .greatestFiniteMagnitude, animated: false)
+        #expect(abs(name.frame.width - full) < 1)
+        let scrolled = name.frame
+        overlay.render(followingActive: false)
+        #expect(name.frame == scrolled)
     }
 
     @Test("A Space Bar page and autoscroll step take the scroll door")

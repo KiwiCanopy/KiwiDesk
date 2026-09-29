@@ -170,7 +170,9 @@ extension SpaceBarOverlay {
                     dx: -runFrame.minX,
                     dy: -runFrame.minY
                 ),
-            rides: !pinFront
+            rides: !pinFront,
+            frontApp: pinFront ? nil : frontApp,
+            frontStart: metrics.frontStart
         )
         let glides = recordGlide(items, content: style.inactiveContent)
         BarMotion.runLayout { moveFrame(itemRun, runFrame, glides) }
@@ -210,7 +212,7 @@ extension SpaceBarOverlay {
             frontApp,
             after: pinFront ? spacesAxis + gap : metrics.frontStart,
             strip: strip,
-            nameBound: pinFront ? axis : max(viewport, scrolledTotal),
+            nameBound: pinFront ? axis : viewport + scrollOffset,
             style: style,
             horizontal: horizontal
         )

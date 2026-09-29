@@ -340,9 +340,9 @@ Obligations:
   per event re-framed every glass and stalled a fast scroll
   under boxed Liquid Glass. Whatever a render derives from the
   offset is re-read there to exactly a render's answer at that
-  offset, so a new offset-dependent piece joins the door, and a
-  length a render bounds by the viewport is bounded by the
-  run's end instead, since no scroll re-lays it.
+  offset, so a new offset-dependent piece joins the door — a
+  piece a render cuts at the viewport included, as the
+  scrolling front segment's name is (#1763).
   `ShelfScrollRunTests` holds both bars to a render's answer and
   to no render.
 - **Every `ShelfArrangement.arrange` caller hands it the Space
