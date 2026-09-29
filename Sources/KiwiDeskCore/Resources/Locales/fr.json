@@ -356,7 +356,7 @@
   "drag.ghost.caption": "Indique la position depuis laquelle votre fenêtre est déplacée.",
   "drag.title": "Glisser à la souris",
   "floating.color": "Floating",
-  "floating.color.a11y": "Couleur du repère de fenêtre Floating",
+  "floating.color.a11y": "Couleur du repère de fenêtre flottante",
   "footer.cancel": "Annuler",
   "footer.default_profile_name": "Ma configuration",
   "footer.profile_name": "Nom du profil",

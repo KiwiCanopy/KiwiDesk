@@ -324,6 +324,13 @@ you were editing.
    General ▸ Appearance (`general.appearance`) in every catalog.
    A catalog picks its word for *look* by the same rung — never
    its Appearance, Style or palette word.
+   A layout mode's name is such a word too: in a catalog that
+   keeps **Floating** Latin, floating **one window** —
+   `make_floating`, an App Rule's float, the float mark — takes
+   your catalog's native verb (*schweben*, *flotar*, *плавать*),
+   and **Floating** names the layout mode only (#1791). Where
+   your picker translates the mode name, this entry does not
+   rule the per-window word.
 2. **Otherwise your catalog's own occurrence count decides.**
    Grep your file for both candidates; the one already carrying
    the concept wins and the other is swept to it. **Your file is

@@ -356,7 +356,7 @@
   "drag.ghost.caption": "Marca la posición desde la que se arrastra tu ventana.",
   "drag.title": "Arrastre con ratón",
   "floating.color": "Floating",
-  "floating.color.a11y": "Color de la marca de ventana Floating",
+  "floating.color.a11y": "Color de la marca de ventana flotante",
   "footer.cancel": "Cancelar",
   "footer.default_profile_name": "Mi configuración",
   "footer.profile_name": "Nombre del perfil",
