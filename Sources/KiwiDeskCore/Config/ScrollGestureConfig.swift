@@ -5,6 +5,27 @@ public enum ScrollInput: String, CaseIterable, Sendable {
     case trackpad, mouse
 }
 
+/// Why a scroll gesture's chord is refused (#1656 ruling): one
+/// modifier alone belongs to macOS and apps, and the two gestures
+/// never share a chord. Core names it; the CLI and the Settings
+/// recorder each word it.
+public enum ScrollChordRefusal: Equatable, Sendable {
+    case singleModifier
+    case otherGesture
+
+    /// The refusal for `chord` beside the other gesture's; empty
+    /// (off) is always accepted.
+    public static func of(
+        _ chord: ScrollChord,
+        other: ScrollChord
+    ) -> ScrollChordRefusal? {
+        guard !chord.isEmpty else { return nil }
+        if chord.rawValue.nonzeroBitCount < 2 { return .singleModifier }
+        if chord == other { return .otherGesture }
+        return nil
+    }
+}
+
 /// The scroll gestures' stored settings (#1656): the global base
 /// in `gui.json` every profile starts with. A profile diverges
 /// through the sparse `ScrollGestureOverride`; the two resolve in

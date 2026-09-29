@@ -41,6 +41,14 @@ editing here:
     and no tap exists while no wired consumer has a chord, the
     live factory pinned inert in both `makeTestCore` twins
     (`ScrollGesturesTests`, `ScrollTapSeamTests`).
+  - **Resolve the settings in ONE home,
+    `KiwiCore.applyScrollGestures`, the door's one caller**
+    (#1656): the global base with the live profile's override on
+    top, reached by the config load, the profile apply, the
+    "Applies to" save's re-resolve and the `scroll_gesture.*`
+    verbs. Build no `ScrollGestureSettings` and read no
+    `tapSettings` anywhere else, or a path hands the tap a value
+    that skipped the override (`ScrollGestureConfigureSeamTests`).
 - **A keypad digit is the same key as its number-row twin
   (#1074), and `KeypadKeys` is the one place that says so.** Both
   readers come to it — hotkey registration and `KeyCombo.keyName`

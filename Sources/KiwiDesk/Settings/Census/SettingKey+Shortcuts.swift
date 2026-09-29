@@ -30,6 +30,14 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case advanced = "(rows) shortcuts.advanced"
     case `import` = "(action) shortcuts.import"
     case restoreDefaults = "(action) shortcuts.restore_defaults"
+    // The scroll gestures (#1656); ⌃⌥⌘'s row lands with #1519.
+    case scrollPan = "config.scrollGesture.pan"
+    case scrollLongSwipes = "config.scrollGesture.longSwipes"
+    case scrollStepDistance = "config.scrollGesture.stepDistance"
+    case scrollNaturalTrackpad = "config.scrollGesture.naturalTrackpad"
+    case scrollNaturalMouse = "config.scrollGesture.naturalMouse"
+    /// Stored and reserved; its Settings row lands with #1519.
+    case scrollSpaceStep = "config.scrollGesture.spaceStep"
 }
 
 extension ShortcutsKey {
@@ -92,6 +100,12 @@ extension ShortcutsKey {
                 .atRest,
                 gate: .runtime(.luaImportAvailable)
             )
+        case .scrollPan, .scrollLongSwipes, .scrollStepDistance,
+            .scrollNaturalTrackpad, .scrollNaturalMouse:
+            // The Mouse & trackpad drawer's first group (#1656).
+            return .row(.shortcuts, .gestures, .showMore)
+        case .scrollSpaceStep:
+            return .luaOnly
         case .restoreDefaults:
             // Surfaced at rest when unseeded defaults are missing.
             return .row(
@@ -145,6 +159,18 @@ extension ShortcutsKey {
                 "shortcuts.restore_defaults",
                 help: "shortcuts.restore_defaults.help"
             )
+        case .scrollPan:
+            return .text("shortcuts.gestures.scroll.pan")
+        case .scrollLongSwipes:
+            return .text("shortcuts.gestures.scroll.long_swipes")
+        case .scrollStepDistance:
+            return .text("shortcuts.gestures.scroll.step_distance")
+        case .scrollNaturalTrackpad:
+            return .text("shortcuts.gestures.scroll.trackpad")
+        case .scrollNaturalMouse:
+            return .text("shortcuts.gestures.scroll.mouse")
+        case .scrollSpaceStep:
+            return .none
         }
     }
 }

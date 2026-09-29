@@ -48,8 +48,9 @@ struct ShortcutsFamilyRowsTests {
         //    the raw-Lua list and its Import action);
         //  - the rows here that are not shortcuts at all — the
         //    Mouse & trackpad drawer's two mouse settings (#1726),
-        //    whose census cases live in the Behaviour sub-enum
-        //    and whose controls the drawer's entries draw.
+        //    whose census cases live in the Behaviour sub-enum,
+        //    and its scroll gestures (#1656) — controls the
+        //    drawer's entries draw.
         let handDrawn: Set<SettingKey> = [
             .shortcuts(.layers),
             .shortcuts(.layersIcon),
@@ -59,6 +60,11 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.restoreDefaults),
             .behaviour(.mouseResize),
             .behaviour(.mouseFollowsFocus),
+            .shortcuts(.scrollPan),
+            .shortcuts(.scrollLongSwipes),
+            .shortcuts(.scrollStepDistance),
+            .shortcuts(.scrollNaturalTrackpad),
+            .shortcuts(.scrollNaturalMouse),
         ]
         let expander = fixture()
         let placed = SettingKey.allCases.filter {

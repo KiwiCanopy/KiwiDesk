@@ -171,6 +171,10 @@ extension KiwiCore {
             floatRules: profile?.floatRules,
             ignoreRules: profile?.ignoreRules
         )
+        applyScrollGestures(
+            base: config.scrollGesture,
+            profile: profile?.scrollGesture
+        )
         guard changed, let lua = keys.lua else { return }
         applyStructuredKeybindings(
             layers: config.layers,

@@ -7,6 +7,9 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     public var floatRules: RuleReachTable<[String]>
     /// Shortcuts, one action per layer (#1393's second half).
     public var keyLayers: RuleReachTable<String>
+    /// The scroll gestures, one field per key (#1656).
+    public var scrollGestures: RuleReachTable<ScrollGestureValue>
+    public let storedScrollBase: ScrollGestureBase
     public let storedKeyBase: [KeyLayer]
     public let storedKeyOverrides: [String: KeyLayerOverride]
     /// A row to write for each key, from the stored layers; the
@@ -25,6 +28,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         appRules: RuleReachTable<SpaceID>,
         floatRules: RuleReachTable<[String]>,
         keyLayers: RuleReachTable<String>,
+        scrollGestures: RuleReachTable<ScrollGestureValue>,
+        storedScrollBase: ScrollGestureBase,
         storedKeyBase: [KeyLayer],
         storedKeyOverrides: [String: KeyLayerOverride],
         keyTemplates: [String: KeyBinding],
@@ -36,6 +41,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         self.appRules = appRules
         self.floatRules = floatRules
         self.keyLayers = keyLayers
+        self.scrollGestures = scrollGestures
+        self.storedScrollBase = storedScrollBase
         self.storedKeyBase = storedKeyBase
         self.storedKeyOverrides = storedKeyOverrides
         self.keyTemplates = keyTemplates
@@ -49,12 +56,14 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     public var isEdited: Bool {
         !appRules.baseTouched.isEmpty || !floatRules.baseTouched.isEmpty
             || !keyLayers.baseTouched.isEmpty
+            || !scrollGestures.baseTouched.isEmpty
             || (pageKeyBase.map {
                 !RuleReachTable<String>.sameShortcuts($0, storedKeyBase)
             } ?? false)
             || appRules.touched.values.contains { !$0.isEmpty }
             || floatRules.touched.values.contains { !$0.isEmpty }
             || keyLayers.touched.values.contains { !$0.isEmpty }
+            || scrollGestures.touched.values.contains { !$0.isEmpty }
     }
 
     /// The loaded page's gui.json layers, when the draft is that
@@ -117,6 +126,11 @@ extension KiwiCore {
                 base: keyBase,
                 overrides: stored.map { ($0.name, $0.layers) }
             ),
+            scrollGestures: .scrollGestures(
+                base: sidecar.scrollGesture,
+                overrides: stored.map { ($0.name, $0.scrollGesture) }
+            ),
+            storedScrollBase: sidecar.scrollGesture,
             storedKeyBase: keyBase,
             storedKeyOverrides: keys,
             keyTemplates: templates,
@@ -145,6 +159,7 @@ extension KiwiCore {
         guard snapshot.isEdited else { return }
         let app = snapshot.appRules
         let float = snapshot.floatRules
+        let scroll = snapshot.scrollGestures
         var pending: [Profile] = []
         for name in app.profiles {
             let original = snapshot.storedFloatOverrides[name]
@@ -156,7 +171,10 @@ extension KiwiCore {
             let keyTouched =
                 name != page
                 && !(snapshot.keyLayers.touched[name] ?? []).isEmpty
-            guard appTouched || keyTouched || floatOverride != original
+            let scrollTouched = !(scroll.touched[name] ?? []).isEmpty
+            guard
+                appTouched || keyTouched || scrollTouched
+                    || floatOverride != original
             else { continue }
             var profile = try profiles.read(name: name)
             if appTouched {
@@ -170,6 +188,12 @@ extension KiwiCore {
                     templates: snapshot.keyTemplates
                 )
             }
+            if scrollTouched {
+                profile.scrollGesture = scroll.scrollGestureOverride(
+                    for: name,
+                    original: snapshot.storedScrollBase
+                )
+            }
             profile.floatRules = floatOverride
             pending.append(profile)
         }
@@ -181,7 +205,7 @@ extension KiwiCore {
                 snapshot.storedKeyBase
             )
         if !app.baseTouched.isEmpty || !float.baseTouched.isEmpty
-            || keysMoved
+            || !scroll.baseTouched.isEmpty || keysMoved
         {
             guard var stored = guiConfigStore.load() else {
                 throw SidecarError.unreadable
@@ -193,6 +217,9 @@ extension KiwiCore {
                 original: snapshot.storedFloatBase
             )
             stored.layers = snapshot.keyBase
+            stored.scrollGesture = scroll.scrollGestureBase(
+                original: snapshot.storedScrollBase
+            )
             sidecar = stored
         }
         for profile in pending { try profiles.write(profile) }

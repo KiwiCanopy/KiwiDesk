@@ -25,6 +25,13 @@ struct GesturesDrawer: View {
             VStack(alignment: .leading, spacing: 10) {
                 GestureGroupHeading(
                     title: L(
+                        "shortcuts.gestures.group.scroll",
+                        "Scroll gestures — anywhere, holding a modifier"
+                    )
+                )
+                GesturesScrollEntries(model: model)
+                GestureGroupHeading(
+                    title: L(
                         "shortcuts.gestures.group.windows",
                         "On your windows"
                     )

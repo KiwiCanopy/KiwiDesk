@@ -91,21 +91,17 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// The #1656 ruling's refusals, in CLI English: one modifier
-    /// alone belongs to macOS and apps, and the two gestures never
-    /// share a chord. Empty (off) is always accepted.
+    /// The #1656 ruling's refusals, in CLI English.
     static func scrollChordRefusal(
         _ chord: ScrollChord,
         other: ScrollChord
     ) -> String? {
-        guard !chord.isEmpty else { return nil }
-        if chord.rawValue.nonzeroBitCount < 2 {
-            return "needs two or more modifiers"
-        }
-        if chord == other {
+        switch ScrollChordRefusal.of(chord, other: other) {
+        case nil: return nil
+        case .singleModifier: return "needs two or more modifiers"
+        case .otherGesture:
             return "the other scroll gesture already uses "
                 + chord.spelling
         }
-        return nil
     }
 }

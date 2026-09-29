@@ -9723,6 +9723,84 @@ the Focus card: it fires on every focus change KiwiDesk sees — a
 Space switch, a closed window, ⌘-Tab — not only on focus
 shortcuts, and that card sits under the layer header.
 
+:::unreleased
+**⌃⌥ + scroll moves focus a window at a time; it never pans the
+row freely** (#1656, owner ruling 2026-09-29). A Scrolling
+Space's view is a function of its focus — the row pans to the
+focused window, and every anchor (`follow`, `center`, `start`,
+`end`) is stated against it — so a gesture that moved the view
+by itself would be a second writer of the viewport, owing a rule
+for handing it back when the fingers lift and a border that
+answers to neither. A device build of the fluid pan measured the
+cost: moving every window on every scroll event left the focus
+border trailing the row it frames, made a glowing border's
+surface redraw so the background seemed to move with it, and
+gave a mouse notch about 10 pt of travel, too little to read as
+anything. Stepping goes through the arrow keys' own focus step
+instead, so the animation, the border, the deferred raise and
+`wrap_focus` are the keyboard's and cannot drift from them; a
+scroll gesture that grows a movement path of its own re-opens
+all three measurements. The step does not warp the pointer: a
+warp mid-gesture would carry it off the screen the gesture is
+acting on.
+
+**One swipe moves one window by default, and long swipes are a
+tick box.** Counting by distance — a window per ~60 pt of finger
+travel — makes a single window hard to hit (measured on a device
+build), and macOS's own Scrolling
+speed scales the travel KiwiDesk reads by about ten times
+between its slowest and fastest settings (#1637's measurement),
+so no fixed distance means "one window" on every Mac. One per
+swipe is a step a user can aim. **Long swipes move more
+windows** keeps the first window at the swipe's start, so exactly
+one is still easy, and adds one per *Travel per window* after
+it. That distance is a Settings field rather than Lua-only
+because the Scrolling speed that scales it is system-wide: a
+user who likes macOS's speed everywhere else still needs this
+gesture's sensitivity apart from it. The glide after a lift
+never counts, on either setting — it is macOS extrapolating a
+flick, not the hand, and one fast flick glides past 10,000 pt,
+so counting it would race down the row. A wheel notch is one
+window either way, since a notch is already a discrete act.
+
+**The settings are stored like the shortcuts**: a base in
+`gui.json`, a sparse override per profile, and the **Applies to**
+checklist on each row, with that checklist's semantics
+(▸ Navigation & saving, *Each App Rules row carries an "Applies
+to" checklist*). A chord is an input binding like every key
+chord on the page, so a user who gives two profiles different
+keys expects the gesture's chord to follow the same model. The
+one difference is that the base holds every field: a profile
+never leaves a value out, so there is no "Not here", and turning
+the gesture off in one profile is an empty chord stored as that
+profile's override.
+
+**Natural scrolling is KiwiDesk's own, per input, and on by
+default.** The gesture moves windows, not the content under the
+pointer, so the direction a user chose for documents in macOS
+need not be the one they want here — and a wheel rolled toward
+you and two fingers dragged are different hands, so a single
+toggle would force one input's answer on the other. The rows
+quote Apple's own **Natural scrolling** and *Content tracks
+finger movement*, so the concept is the one the user already
+knows from System Settings, and the default matches macOS's
+own.
+
+**The chord takes two or more modifiers, and that is why there
+is no Zoom warning.** Measured on macOS 27 with Zoom's "Use
+scroll gesture with modifier keys to zoom" set to ⌃ and no
+KiwiDesk tap running: ⌃⌥ + scroll did not zoom, and only ⌃ +
+scroll did — Zoom fires on its modifier held alone. The recorder
+refuses a single modifier (⌃ + scroll is Zoom's default, and ⌘
+or ⌥ + scroll mean something in many apps), so no chord it
+accepts can meet Zoom, and a warning reading Zoom's preference
+would guard a case that cannot arise. The refusal is what makes
+the warning unnecessary, not the ⌃⌥ default: allowing a
+one-modifier chord re-opens it. The Space step's chord (#1519)
+is stored and refused to the pan before any gesture reads it, so
+no user's pan chord has taken it by the time that gesture ships.
+:::
+
 ### Overrides & appearance
 
 **[Principle]**

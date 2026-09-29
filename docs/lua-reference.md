@@ -3345,6 +3345,151 @@ Mouse & trackpad**.
 mouse.set_follows_focus(true)
 ```
 
+## Scroll Gestures
+
+:::unreleased
+Hold **⌃⌥** (the default; [`set_pan`](#scroll_gestureset_pan)
+changes it) and scroll over a Scrolling Space — a two-finger
+swipe on a trackpad or the mouse wheel, along either axis — and
+focus moves one window along the row, through the same step as
+[`focus`](#focus) in the row's direction: the row takes the
+ordinary focus animation and border, wraps only while
+[`scroll.set_wrap_focus`](#scrollset_wrap_focus) is on, and the
+pointer does not move, even with `mouse.follows_focus` on. On a
+Monocle Space it steps through the windows, wrapping per
+[`monocle.set_wrap_focus`](#monocleset_wrap_focus). On a Space in
+any other layout it does nothing. It reads the Space shown on
+the screen under the pointer, and a Scrolling or Monocle Space
+there becomes the active one.
+
+A trackpad swipe moves one window and a wheel notch moves one;
+the glide after the fingers lift never counts. With
+[long swipes](#scroll_gestureset_long_swipes) on, a swipe moves
+its first window as it starts and one more every
+[step distance](#scroll_gestureset_step_distance) of further
+travel, which macOS's own Scrolling speed scales. The direction
+follows KiwiDesk's own
+[Natural scrolling](#scroll_gestureset_natural_scrolling), per
+input, whatever macOS's is set to.
+
+The keys must be exactly the ones set: ⌃⌥⌘ + scroll is not
+⌃⌥ + scroll. While they are held, KiwiDesk takes the scroll on
+every Space, so the window under the pointer does not scroll; a
+scroll that began before the keys went down stays the window's.
+It needs only the Accessibility permission, never Input
+Monitoring.
+
+The settings are stored in `gui.json` as the `scroll_gesture`
+object — `pan`, `space_step`, `natural_scrolling` (`trackpad`,
+`mouse`), `long_swipes`, `step_distance` — the base every
+profile starts with. A profile file may carry a sparse
+`scroll_gesture` object that overrides any of them. In the
+Settings app they are the **Scroll gestures** group under
+**Shortcuts & Gestures ▸ Mouse & trackpad**, where each row's
+**Applies to** checklist writes the base or chosen profiles'
+overrides.
+
+The verbs below change the running base only: a profile's own
+override still wins, nothing reaches `gui.json`, and the value
+lasts until KiwiDesk next loads its config. In a Lua-owned setup
+`init.lua` is where it is kept, and **Adopt into the GUI** keeps
+the base it set.
+:::
+
+### scroll_gesture.set_pan
+
+:::unreleased
+**Expects:** modifiers joined by `+` — `control` (`ctrl`),
+`option` (`opt`, `alt`), `shift`, `command` (`cmd`) — default
+`"control+option"`; `""` turns the gesture off.
+
+**Does:** sets the keys held with a scroll to move focus window
+by window. It takes two or more modifiers: one alone fails, as
+do the chord [`set_space_step`](#scroll_gestureset_space_step)
+holds and an unknown or repeated name.
+
+**Example:**
+
+```lua
+scroll_gesture.set_pan("control+option+shift")
+scroll_gesture.set_pan("")   -- off
+```
+:::
+
+### scroll_gesture.set_space_step
+
+:::unreleased
+**Expects:** modifiers, as for
+[`set_pan`](#scroll_gestureset_pan) (default
+`"control+option+command"`); `""` frees the chord.
+
+**Does:** reserves a chord for stepping between Spaces, which is
+not built yet
+([#1519](https://github.com/KiwiCanopy/KiwiDesk/issues/1519)).
+No gesture reads it, so a scroll with these keys still reaches
+the window; `set_pan` cannot take it. It fails on the same
+chords `set_pan` does.
+
+**Example:**
+
+```lua
+scroll_gesture.set_space_step("")   -- free ⌃⌥⌘ for set_pan
+```
+:::
+
+### scroll_gesture.set_natural_scrolling
+
+:::unreleased
+**Expects:** a boolean, then optionally `"trackpad"` or
+`"mouse"` (default `true` for both).
+
+**Does:** on, a scroll gesture moves the row the way Natural
+scrolling moves content; off, the other way. Named, the input
+takes the value alone; left out, both do. A trackpad swipe reads
+the trackpad's value and a mouse wheel the mouse's, whatever
+macOS's Natural scrolling is set to.
+
+**Example:**
+
+```lua
+scroll_gesture.set_natural_scrolling(false, "mouse")
+```
+:::
+
+### scroll_gesture.set_long_swipes
+
+:::unreleased
+**Expects:** a boolean (default `false`).
+
+**Does:** on, a trackpad swipe moves one more window every
+[step distance](#scroll_gestureset_step_distance) of travel
+after its first; off, a swipe moves one window however long it
+is. A mouse wheel moves one window per notch either way.
+
+**Example:**
+
+```lua
+scroll_gesture.set_long_swipes(true)
+```
+:::
+
+### scroll_gesture.set_step_distance
+
+:::unreleased
+**Expects:** points, 10–1000 (default `60`); a value outside the
+range fails.
+
+**Does:** sets the finger travel per extra window of a
+[long swipe](#scroll_gestureset_long_swipes). It is kept, and
+does nothing, while long swipes are off.
+
+**Example:**
+
+```lua
+scroll_gesture.set_step_distance(120)
+```
+:::
+
 ## When Windows No Longer Fit
 
 No layout ever shrinks a window below `min_window_size`. When a

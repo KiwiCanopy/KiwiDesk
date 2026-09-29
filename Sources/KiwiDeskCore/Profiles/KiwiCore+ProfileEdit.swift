@@ -17,9 +17,10 @@ extension KiwiCore {
     /// (its Canvas is read-only in that case, so `spacePins` is
     /// empty here anyway).
     ///
-    /// `writingRules: false` leaves the app and float rule
-    /// overrides as stored, for a caller whose `saveRuleReach`
-    /// writes them — one encoder per field (#1393). The shortcut
+    /// `writingRules: false` leaves the app rule, float rule and
+    /// scroll-gesture overrides as stored, for a caller whose
+    /// `saveRuleReach` writes them — one encoder per field
+    /// (#1393). The shortcut
     /// override is always this diff, against the base as stored
     /// now, so a caller writes the base first.
     public func overwriteProfile(
@@ -28,10 +29,13 @@ extension KiwiCore {
         writingRules: Bool
     ) throws {
         var existing = try profiles.read(name: name)
-        let stored = (existing.appRules, existing.floatRules)
+        let stored = (
+            existing.appRules, existing.floatRules, existing.scrollGesture
+        )
         applyProfileEdits(from: config, onto: &existing)
         if !writingRules {
-            (existing.appRules, existing.floatRules) = stored
+            (existing.appRules, existing.floatRules, existing.scrollGesture) =
+                stored
         }
         try profiles.write(existing)
         refreshConfigIssues()
@@ -151,6 +155,10 @@ extension KiwiCore {
                 base: sidecar?.floatRules ?? globalFloatRuleBase,
                 edited: config.floatRules,
                 normalizing: FloatRules.normalizedRule
+            )
+            profile.scrollGesture = ScrollGestureOverride.diff(
+                base: base.scrollGesture,
+                edited: config.scrollGesture
             )
             // `ignoreRules` is deliberately untouched: the GUI has
             // no ignore editor, so even an inert hidden tombstone must

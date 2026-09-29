@@ -44,4 +44,24 @@ struct ScrollGestureConfigParityTests {
         )
         #expect(over?.resolved(onto: base) == edited)
     }
+
+    /// The "Applies to" table keys one row per field (#1656): a
+    /// field `ScrollGestureField` misses is one no checklist can
+    /// reach, and the save would drop it.
+    @Test("ScrollGestureField reads and writes every field")
+    func fieldsCoverTheBase() {
+        let base = ScrollGestureBase.defaults
+        let edited = ScrollGestureBase(
+            pan: [.command, .shift],
+            spaceStep: [],
+            naturalTrackpad: false,
+            naturalMouse: false,
+            longSwipes: true,
+            stepDistance: 120
+        )
+        #expect(ScrollGestureField.allCases.count == labels(base).count)
+        #expect(base.writing(edited.fields) == edited)
+        let over = ScrollGestureOverride.diff(base: base, edited: edited)
+        #expect(over?.fields == edited.fields)
+    }
 }
