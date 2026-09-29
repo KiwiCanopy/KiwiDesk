@@ -153,7 +153,7 @@ struct ProfilesGateWiringTests {
             // WHOLE, since a bare `liveSizes:sizes` matched a
             // sibling needle and could not fail on its own.
             "Components/Profiles/PresetCard.swift": [
-                "PresetPreviewRequest(layout:layout,liveSizes:sizes)"
+                "PresetPreviewRequest(layout:layout,liveSizes:sizes,"
             ],
             // The one derivation the preview sheet reads: a plan
             // that stopped resolving against the live displays
