@@ -1,0 +1,76 @@
+import CoreGraphics
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// The top-up reads the layer that REGISTERS — `gui.json`'s base
+/// under the live profile's override — so a Space verb the override
+/// binds is never given a second chord in the base (#1797).
+@Suite("Digit top-up reads the resolved layer (#1797)", .serialized)
+@MainActor
+struct DigitTopUpOverrideTests {
+    private func onStarterBaseline() throws -> KiwiCore {
+        let core = makeTestCore(
+            configDirectory: FileManager.default.temporaryDirectory
+                .appendingPathComponent(
+                    "kiwi-topup-override-\(UUID().uuidString)"
+                )
+        )
+        try core.guiConfigStore.save(GuiConfig())
+        let screen = Display(
+            id: DisplayID(1),
+            name: "A",
+            frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+        )
+        core.state.workspaces.upsertDisplay(screen)
+        try core.applyStandard(
+            StarterSetup.standardLayout(
+                displays: [screen],
+                mainID: DisplayID(1)
+            )
+        )
+        return core
+    }
+
+    private func baseRows(_ core: KiwiCore) -> [KeyBinding] {
+        core.persistedGuiConfig()?.layers
+            .first { $0.isDefault }?.bindings ?? []
+    }
+
+    @Test("a verb the profile override binds is not topped up")
+    func overrideBoundVerbIsSkipped() throws {
+        let core = try onStarterBaseline()
+        let name = try #require(core.profiles.currentName)
+        var profile = try core.profiles.read(name: name)
+        let goToFour = "KiwiDesk.focus_space(\"4\")"
+        profile.layers = KeyLayerOverride(
+            layers: [
+                KeyLayer(
+                    name: KeyLayer.defaultName,
+                    bindings: [
+                        KeyBinding(
+                            combo: "control+option+f4",
+                            lua: goToFour,
+                            kind: .navigation,
+                            label: "Go to Space 4"
+                        )
+                    ]
+                )
+            ]
+        )
+        try core.profiles.write(profile)
+        core.state.workspaces.ensureSpace(SpaceID("4"))
+
+        core.topUpDigitShortcuts()
+
+        let rows = baseRows(core)
+        // Vacuity: the top-up ran and reached Space 4.
+        #expect(
+            rows.contains {
+                $0.lua == "KiwiDesk.move_to_space(\"4\")"
+            }
+        )
+        #expect(!rows.contains { $0.lua == goToFour })
+    }
+}

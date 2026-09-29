@@ -91,8 +91,16 @@ extension KiwiCore {
         let spaces = SpaceID.deduplicated(
             state.workspaces.allSpaces.map(\.id)
         )
+        // The layer that REGISTERS is the base under the profile's
+        // override, so a verb bound in either counts as bound.
+        let override = activeProfileOverrides()?.layers
+        let registered = ConfigResolver.resolvedLayers(
+            base: config.layers,
+            profile: override
+        ).first { $0.isDefault }
         let added = DefaultKeybindings.digitTopUp(
-            existing: config.layers[index].bindings,
+            existing: registered?.bindings
+                ?? config.layers[index].bindings,
             spaces: spaces
         )
         guard !added.isEmpty else { return }
@@ -107,7 +115,7 @@ extension KiwiCore {
         guard let lua = keys.lua else { return }
         applyStructuredKeybindings(
             layers: config.layers,
-            profile: activeProfileOverrides()?.layers,
+            profile: override,
             lua: lua
         )
     }

@@ -15,8 +15,8 @@ public enum SpaceLuaArg {
     ]
 
     /// A Space binding's action: the verb and the Space it
-    /// targets — what "the same action" compares, never the raw
-    /// Lua string (#1797).
+    /// targets, `"1"` and `1` alike — what "the same action"
+    /// compares, never the raw Lua string (#1797).
     public struct Target: Hashable, Sendable {
         public let verb: String
         public let space: SpaceID
@@ -42,6 +42,7 @@ public enum SpaceLuaArg {
             )
             guard
                 let raw = LuaLiteral.parseString(inner)
+                    ?? Int(inner).map(String.init)
             else { return nil }
             return Target(verb: call, space: SpaceID(raw))
         }

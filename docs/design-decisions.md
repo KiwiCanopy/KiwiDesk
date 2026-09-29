@@ -9237,35 +9237,38 @@ both route through `composeMonitorChangeFallback`, and
 for a workflow Standard, correct for the starter setup's
 per-screen blocks, which are not even the same size as each other.
 The digit-shortcut half is the additive twin:
-`topUpDigitShortcuts` binds only the `⌃⌥N` a growth left unbound
-(GUI-managed, never overwriting a custom chord, capped at ten), so
-the shortcuts follow the spaces. Do not "simplify" either
+`topUpDigitShortcuts` extends the `⌃⌥N` rows to the Spaces a
+growth added, so the shortcuts follow the spaces — which digit each
+takes is #1797's entry below. Do not "simplify" either
 recompose site back to a bare `StandardProfiles.standard`, nor
 make `apply(composed:)` discard its assignment again — each
 reintroduces
 #485. (#485)
 
-**A Settings-managed layer holds one chord per action; Lua may
-hold more (#1797).** [Rationale] A Shortcuts row is one action in
-one layer, so a second chord for the same action is drawn nowhere —
-yet it stays registered, and it blocks recording its key on the
-row that should own it, naming a Space the user never bound it to.
-The #485 top-up was the one producer: it paired every *free digit*
-with whichever Space sat at that position, so a Space dragged
-behind others took a second chord and its neighbours shifted by
-one. It now asks per action — a Space verb with no row takes a
-digit only if that combo is free — and a Space named 1–10 takes
-its own number rather than its place, so a reorder produces
-nothing. Digits are handed out once and then belong to the Space
-by name (#91); a drag is an arrangement edit and never moves a
-chord. The leftovers were dropped by a one-shot `ConfigMigration`
-step rather than surfaced as rows (#92's "surface, never prune"
-is for a shortcut that can become valid again; an extra chord for
-a live Space never does). **Lua stays uncapped**, because layers
-are modal — activating one deactivates the base — so hjkl beside
-the arrows can only live in one layer, and two chords that do the
-same thing cannot conflict. A duplicate *chord* stays refused
-everywhere (#33/#34/#35). (#1797)
+**Nothing KiwiDesk writes gives an action a second chord in a
+layer; Lua may (#1797).** [Rationale] A Shortcuts row is one action
+in one layer, so a second chord for the same action is drawn
+nowhere — yet it stays registered, and it blocks recording its key
+on the row that should own it, naming a Space the user never bound
+it to. So the digit top-up asks per action, never per free digit:
+pairing each free digit with whichever Space sits at that position
+hands a reordered Space a second chord and shifts its neighbours by
+one. A Space named 1–10 takes its own number rather than its place,
+because digits are handed out once and then belong to the Space by
+name (#91) — a drag is an arrangement edit and never moves a chord.
+Existing extras are migrated away rather than surfaced: #92's
+"surface, never prune" protects a binding that can become valid
+again, and an extra chord for a live Space never does. The
+migration keeps the chord on the Space's own digit, so a Space
+renamed after the seed can lose the positional chord it learned
+— accepted, since the digit it keeps is the one its name
+predicts. It reads each stored list alone, so an extra split
+between `gui.json` and a profile's override survives it; the
+top-up, which reads the resolved layer, never makes one. **Lua stays uncapped**,
+because layers are modal — activating one deactivates the base —
+so hjkl beside the arrows can only live in one layer, and two
+chords that do the same thing cannot conflict. A duplicate *chord*
+stays refused everywhere (#33/#34/#35). (#1797)
 
 **Orphaned space shortcuts are surfaced, never pruned.** A binding
 that targets a space by name outlives the space's presence in the

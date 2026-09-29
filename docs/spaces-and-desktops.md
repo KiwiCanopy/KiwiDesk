@@ -55,11 +55,13 @@ your own `1`–`5` becomes `6`, and a held `Mail` beside your own
 again whenever a profile that loads uses its current one.
 
 :::unreleased
-Where KiwiDesk manages your config, a Space with no digit shortcut
-yet gets the one for its own number — a held `6` gets `⌃⌥6` — if
-that key is still free; a Space named otherwise takes the digit of
-its place among the first ten. A Space never gets a second digit
-shortcut, and reordering your Spaces never changes them.
+Where KiwiDesk manages your config, a Space missing its go-to,
+move or move-and-follow digit shortcut gets it for its own number —
+a held `6` gets `⌃⌥6` — if that key is still free. Any other Space
+takes the digit of its place among the first ten, unless a
+numbered Space owns that digit. A Space never gets a second
+digit shortcut for the same thing, and reordering your Spaces never
+changes them.
 :::
 
 :::unreleased

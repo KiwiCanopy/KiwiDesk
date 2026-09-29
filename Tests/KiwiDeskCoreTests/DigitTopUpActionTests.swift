@@ -83,14 +83,50 @@ struct DigitTopUpActionTests {
         )
     }
 
-    @Test("one top-up never hands one chord to two Spaces")
-    func oneChordPerTopUp() {
-        // A named Space in fifth place and Space 5 both want ⌃⌥5.
+    @Test("a numbered Space's digit is never taken by a named one")
+    func namedSpaceYieldsTheOwnDigit() {
+        // "Mail" sits fifth, where Space 5's own digit is.
         let added = DefaultKeybindings.digitTopUp(
             existing: seed(["1", "2", "3", "4"]),
             spaces: ids(["1", "2", "3", "4", "Mail", "5"])
         )
         let combos = added.map(\.combo)
         #expect(combos.count == Set(combos).count)
+        let five = added.filter { $0.lua.contains("(\"5\")") }
+        #expect(five.map(\.combo).allSatisfy { $0.hasSuffix("+5") })
+        #expect(five.count == 3)
+        #expect(!added.contains { $0.lua.contains("(\"Mail\")") })
+    }
+
+    @Test("a Space numbered past ten takes its place, like a name")
+    func outOfRangeNumberTakesItsPlace() {
+        let added = DefaultKeybindings.digitTopUp(
+            existing: seed(["1", "2", "3", "4"]),
+            spaces: ids(["1", "2", "3", "4", "11"])
+        )
+        #expect(
+            added.contains {
+                $0.combo == "control+option+5"
+                    && $0.lua == "KiwiDesk.focus_space(\"11\")"
+            }
+        )
+    }
+
+    @Test("an unquoted Space number is the same action")
+    func unquotedNumberIsBound() {
+        var existing = seed(["1", "2", "3", "4"])
+        existing.append(
+            KeyBinding(
+                combo: "control+option+f5",
+                lua: "KiwiDesk.focus_space(5)"
+            )
+        )
+        let added = DefaultKeybindings.digitTopUp(
+            existing: existing,
+            spaces: ids(["1", "2", "3", "4", "5"])
+        )
+        #expect(
+            !added.contains { $0.lua == "KiwiDesk.focus_space(\"5\")" }
+        )
     }
 }

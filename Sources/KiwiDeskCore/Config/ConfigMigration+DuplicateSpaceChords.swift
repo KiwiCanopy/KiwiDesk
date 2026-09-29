@@ -1,18 +1,11 @@
 import Foundation
 
-/// Drops a Space verb's second chord from a stored layer (#1797,
-/// `DuplicateSpaceChordMigrationTests`): the #485 digit top-up
-/// paired every free digit with whichever Space sat at that
-/// position, so a reordered list left a Space two navigation rows
-/// for one verb. A Shortcuts row draws the first alone, so the
-/// rest were invisible holders of their chords.
-///
-/// Per layer and per verb+Space, the row whose digit is the
-/// Space's own number is kept, else the first. Only `navigation`
-/// rows — the ones the seed and the top-up write — are touched;
-/// a `custom` row is drawn in its own right and stays the user's.
-/// It reaches every `bindings` list at any depth: `gui.json`'s
-/// layers, a profile's layer override, a bundle's inline copies.
+/// Drops a Space verb's extra chords from each stored `bindings`
+/// list (#1797, `DuplicateSpaceChordMigrationTests`): per verb and
+/// Space, the row on the Space's own digit is kept, else the first.
+/// It reaches every list at any depth — `gui.json`'s layers, a
+/// profile's layer override, a bundle's inline copies — but each
+/// list alone, never a base against its override.
 extension ConfigMigration {
     /// The formats from which a stored layer holds one chord per
     /// Space verb, per shape.
@@ -23,7 +16,6 @@ extension ConfigMigration {
     /// Spelled rather than derived: a historical step keeps
     /// naming what it was written to name.
     static let spaceChordBindingsKey = "bindings"
-    static let spaceChordNavigationKind = "navigation"
 
     @Sendable
     static func migratingDuplicateSpaceChords(
@@ -53,15 +45,12 @@ extension ConfigMigration {
                 as? [String: Any]
         else { return false }
         let format = root["format"] as? Int ?? 0
-        if root[SetupBundle.shapeMarker] != nil {
-            return format < spaceChordBundleFormat
+        switch shape(of: root) {
+        case .bundle: return format < spaceChordBundleFormat
+        case .profile: return format < spaceChordProfileFormat
+        case .gui: return format < spaceChordGuiFormat
+        case .palettes, .looks: return false
         }
-        if root[Profile.CodingKeys.monitorSets.rawValue] != nil
-            || root["monitorSets"] != nil
-        {
-            return format < spaceChordProfileFormat
-        }
-        return format < spaceChordGuiFormat
     }
 
     /// The tree with every `bindings` list deduplicated, and the
@@ -101,8 +90,10 @@ extension ConfigMigration {
         return (node, [])
     }
 
-    /// One layer's rows with each Space verb's extra navigation
-    /// chords removed, and the removed rows.
+    /// One layer's rows with each Space verb's extra chords
+    /// removed, and the removed rows. Every kind counts: a `custom`
+    /// row naming a Space verb is reclassified as navigation when
+    /// Settings loads it.
     static func dedupedSpaceChords(
         _ rows: [Any]
     ) -> ([Any], [[String: Any]]) {
@@ -136,7 +127,6 @@ extension ConfigMigration {
         _ row: Any
     ) -> SpaceLuaArg.Target? {
         guard let binding = row as? [String: Any],
-            binding["kind"] as? String == spaceChordNavigationKind,
             binding["combo"] is String,
             let lua = binding["lua"] as? String
         else { return nil }

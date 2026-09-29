@@ -4,10 +4,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A stored layer written before #1797 loses a Space verb's extra
-/// navigation chords — the #485 top-up's leftovers — keeping the
-/// Space's own digit, else the first; a `custom` row is the
-/// user's and stays. Fixtures come from the encoder, stamped at
-/// the format before the step.
+/// chords — the #485 top-up's leftovers — keeping the Space's own
+/// digit, else the first, whatever each row's kind. Fixtures come
+/// from the encoder, stamped at the format before the step.
 @Suite("Duplicate Space chord migration (#1797)")
 struct DuplicateSpaceChordMigrationTests {
     /// The formats before the step — spelled, so a change to the
@@ -90,19 +89,23 @@ struct DuplicateSpaceChordMigrationTests {
         #expect(try layer(out).map(\.combo) == ["control+option+f2"])
     }
 
-    @Test("a custom row and a different verb are left alone")
-    func customAndOtherVerbsStay() throws {
+    @Test("a custom row counts, and a different verb stays")
+    func customCountsOtherVerbsStay() throws {
         let rows = [
-            row("control+option+1", "KiwiDesk.focus_space(\"1\")"),
             row(
                 "control+option+h",
                 "KiwiDesk.focus_space(\"1\")",
                 kind: .custom
             ),
+            row("control+option+1", "KiwiDesk.focus_space(\"1\")"),
             row("control+option+shift+1", "KiwiDesk.move_to_space(\"1\")"),
         ]
         let out = try #require(ConfigMigration.migrated(try gui(rows)))
-        #expect(try layer(out).count == 3)
+        #expect(
+            try layer(out).map(\.combo) == [
+                "control+option+1", "control+option+shift+1",
+            ]
+        )
     }
 
     @Test("a profile's layer override crosses too")
@@ -133,7 +136,12 @@ struct DuplicateSpaceChordMigrationTests {
         let migrated = try decoder.decode(Profile.self, from: out)
         let bindings = try #require(migrated.layers?.layers.first)
             .bindings
-        #expect(bindings.count == 2)
+        #expect(
+            bindings.map(\.combo) == [
+                "control+option+command+1",
+                "control+option+command+6",
+            ]
+        )
     }
 
     /// Four-space indent, unsorted keys and `0.40` — what the

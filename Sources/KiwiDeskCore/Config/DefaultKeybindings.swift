@@ -144,12 +144,12 @@ public enum DefaultKeybindings {
         )
     }
 
-    /// Additive top-up of missing space digit rows (#485): a Space
-    /// verb with no row of its own takes its digit when that combo
-    /// is free, and otherwise stays unbound. It asks per ACTION,
-    /// never per free digit, so a reordered list cannot hand a
-    /// Space a second chord (#1797). Combo identity is by parsed
-    /// `KeyCombo`, so `ctrl+alt+6` counts as taken.
+    /// Additive top-up of missing space digit rows (#485, #1797):
+    /// each Space verb with no row in `existing` takes its digit
+    /// when that combo is free, and otherwise stays unbound. A
+    /// Space named 1–10 claims its own number first; any other
+    /// takes its place among the first ten. Combo identity is by
+    /// parsed `KeyCombo`, so `ctrl+alt+6` counts as taken.
     public static func digitTopUp(
         existing: [KeyBinding],
         spaces: [SpaceID]
@@ -163,9 +163,7 @@ public enum DefaultKeybindings {
             existing.compactMap { SpaceLuaArg.target(of: $0.lua) }
         )
         var rows: [KeyBinding] = []
-        for (index, space) in spaces.enumerated() {
-            guard let digit = topUpDigit(of: space, at: index)
-            else { continue }
+        for (digit, space) in topUpDigits(spaces) {
             let candidates = [
                 focusSpaceRow(digit: digit, space: space),
                 moveSpaceRow(digit: digit, space: space),
@@ -183,18 +181,26 @@ public enum DefaultKeybindings {
         return rows
     }
 
-    /// The digit a top-up gives `space`: its own number when it is
-    /// named 1–10 (`0` for 10), so a reorder cannot move it, and
-    /// otherwise its position within the digit capacity (#1797).
-    private static func topUpDigit(
-        of space: SpaceID,
-        at index: Int
-    ) -> String? {
-        let number = Int(space.raw) ?? (index + 1)
-        guard (1...digitCapacity).contains(number) else {
-            return nil
+    /// The digit each Space tops up on: a Space named 1–10 its own
+    /// number (`0` for 10), listed first so no other Space can take
+    /// it; any other Space its position within the capacity.
+    private static func topUpDigits(
+        _ spaces: [SpaceID]
+    ) -> [(String, SpaceID)] {
+        let range = 1...digitCapacity
+        let own: [(Int, SpaceID)] = spaces.compactMap { space in
+            Int(space.raw).flatMap {
+                range.contains($0) ? ($0, space) : nil
+            }
         }
-        return number == digitCapacity ? "0" : String(number)
+        let owners = Set(own.map(\.1))
+        let named: [(Int, SpaceID)] = spaces.enumerated().compactMap {
+            owners.contains($0.element) || !range.contains($0.offset + 1)
+                ? nil : ($0.offset + 1, $0.element)
+        }
+        return (own + named).map { number, space in
+            (number == digitCapacity ? "0" : String(number), space)
+        }
     }
 
     /// Maximum spaces with default digit shortcuts (1...9, 0) (#466).
