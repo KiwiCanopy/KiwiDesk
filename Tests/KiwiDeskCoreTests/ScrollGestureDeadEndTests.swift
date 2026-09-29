@@ -157,7 +157,11 @@ struct ScrollGestureDeadEndTests {
         let (keys, _, keyBumps) = setUp()
         keys.execute("focus", args: [.string("right")])
         let (gesture, session, bumps) = setUp()
+        gesture.tiler.settings.mouse.followsFocus = true
+        var warps = 0
+        gesture.pointerWarp = { _ in warps += 1 }
         swipe(gesture, session, dx: -80)
+        #expect(warps == 0)
         #expect(
             gesture.activeSpace?.focused == keys.activeSpace?.focused
         )

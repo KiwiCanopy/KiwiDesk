@@ -9760,7 +9760,11 @@ anything. Stepping goes through the arrow keys' own focus step
 instead, so the animation, the border, the deferred raise and
 `wrap_focus` are the keyboard's and cannot drift from them; a
 scroll gesture that grows a movement path of its own re-opens
-all three measurements. No step warps the pointer, on any
+all three measurements. It takes `navigate` but not `execute`,
+whose foreground preflight (#292) refuses a focused command while
+the frontmost app is not the anchor's: the gesture acts on the
+Space under the pointer, so its first step onto another screen
+would always be refused. No step warps the pointer, on any
 layout (owner ruling 2026-09-29).
 
 **A held chord always does something, on every layout** (#1656,

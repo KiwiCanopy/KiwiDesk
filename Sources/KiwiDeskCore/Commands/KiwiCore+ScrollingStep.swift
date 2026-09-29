@@ -26,7 +26,7 @@ extension KiwiCore {
         space: Space,
         focused: WindowID,
         swapping: Bool,
-        warp: Bool = true
+        warp: Bool
     ) -> CommandResponse? {
         let horizontal =
             tiler.settings.resolvedScrolling(for: space.id)

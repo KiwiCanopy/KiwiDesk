@@ -26,7 +26,7 @@ extension KiwiCore {
         space: Space,
         focused: WindowID,
         swapping: Bool,
-        warp: Bool = true
+        warp: Bool
     ) -> CommandResponse? {
         let params = tiler.settings.resolvedTrack(for: space.id)
         let tiled = state.effectiveTiledMembers(of: space)

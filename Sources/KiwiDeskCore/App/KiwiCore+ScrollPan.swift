@@ -29,6 +29,12 @@ final class ScrollPanSession {
 /// always does something (owner ruling 2026-09-29). A step that
 /// lands on nothing — a row end with wrap off, a lone window —
 /// bumps the ring as the arrow keys do (#436), once per event.
+///
+/// A row goes through `navigate` but not `execute`: the gesture
+/// acts on the Space under the POINTER, which the focused-command
+/// preflight (#292) would refuse on every first step onto another
+/// screen, since the frontmost app is still the old screen's. The
+/// flip's owed focus is the one part of that preamble it keeps.
 extension KiwiCore {
     /// Wires the consumer; once, at bootstrap.
     func wireScrollPan() {
@@ -52,8 +58,10 @@ extension KiwiCore {
         // NEXT window in, so a step runs against the delta's sign.
         let step = steps > 0 ? -1 : 1
         for _ in 0..<abs(steps) {
-            // A step that lands on nothing has said so already.
-            guard let space = state.workspaces[id],
+            // A Space no longer active is no longer the gesture's;
+            // a step that lands on nothing has said so already.
+            guard id == state.workspaces.activeSpace,
+                let space = state.workspaces[id],
                 stepScrollPan(space, by: step)
             else { return }
         }
@@ -94,9 +102,6 @@ extension KiwiCore {
             // A flip's owed focus lands first, as `execute` does
             // ahead of every focused-window command (#1391).
             runPendingMonocleFocus()
-            guard space.id == state.workspaces.activeSpace else {
-                return false
-            }
             return navigate(
                 [.string(direction.rawValue)],
                 swapping: false,
