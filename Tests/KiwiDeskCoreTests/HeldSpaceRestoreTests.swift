@@ -52,6 +52,9 @@ struct HeldSpaceRestoreTests {
     func heldWindowsGoHomeTogether() throws {
         let core = try dockedWithMemory()
         core.handle(.displaysChanged([desk.builtIn]))
+        // The docked profile's record is gone (a restart, #1728's
+        // second observation): only the hold can bring them home.
+        core.state.profilePartitioning.forget("desk")
         core.handle(.displaysChanged([desk.builtIn, desk.dell]))
         #expect(core.profiles.currentName == "desk")
         #expect(core.state.heldSpaces.isEmpty)
