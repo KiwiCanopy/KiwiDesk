@@ -126,6 +126,7 @@ extension SettingsModel {
         // The files half must land for the base half to: a failed
         // write keeps the stored rules in the globals write too.
         if !saved || saveRuleReach() == .failed { dropRuleHalf() }
+        if saved { saveLookReach() }
         persistGlobalsIfNeeded()
         reload()
         return saved

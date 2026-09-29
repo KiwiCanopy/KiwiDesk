@@ -66,6 +66,7 @@ extension SettingsModel {
         apply(stored ?? liveState())
         suppressDirty = true
         reachEdits = RuleReachEdits()
+        resetLookReach()
         suppressDirty = false
         refreshProfiles()
         refreshPalettes()

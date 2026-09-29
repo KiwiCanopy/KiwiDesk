@@ -212,7 +212,8 @@ struct SettingsCatalogArgumentTests {
         // 89 since #1741: Behavior's two cards left.
         // 94 since #1656: the drawer's five scroll-gesture rows.
         // 95 since #1519: the Space step's recorder.
-        #expect(direct.values.reduce(0, +) == 95)
+        // 96 since #1752: the Shared look card's.
+        #expect(direct.values.reduce(0, +) == 96)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

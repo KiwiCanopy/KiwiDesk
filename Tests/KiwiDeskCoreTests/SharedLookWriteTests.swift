@@ -166,9 +166,14 @@ struct SharedLookWriteTests {
         let core = try crossedCore()
         core.tiler.settings.kiwishelf.fillColor = odd
         try core.persistProfile(named: "Work", modes: nil)
-        #expect(
-            core.wearingSharedLook(TilingSettings())
-                .kiwishelf.fillColor == odd
+        let display = try #require(core.state.workspaces.allDisplays.first)
+        let composed = try #require(
+            ProfileComposition.compose(
+                displays: [display],
+                mainID: display.id
+            )
         )
+        core.apply(composed: composed, forceRetile: true)
+        #expect(core.tiler.settings.kiwishelf.fillColor == odd)
     }
 }

@@ -35,6 +35,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     case profilesPerMacOSSpace
     case savedProfiles
     case scrolling
+    /// "Shared look" on Looks & Animations (#1752).
+    case sharedLook
     case sizeAndFloat
     case spaceBar
     case spaceList
@@ -74,7 +76,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .pinnedToDisconnectedMonitors, .presets,
             .profilesPerMacOSSpace, .floatRules,
             .spaceRules,
-            .savedProfiles, .scrolling, .sizeAndFloat,
+            .savedProfiles, .scrolling, .sharedLook, .sizeAndFloat,
             .spaceList, .spacePlacement, .stack,
             .stickyWindows, .track:
             return nil

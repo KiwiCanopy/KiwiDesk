@@ -44,6 +44,7 @@ extension SettingsModel {
             recomputeDirty()
             return
         }
+        guard saveLookReach() else { return }
         do {
             // With a checklist the rule families are the table's,
             // already written above — one encoder per field.

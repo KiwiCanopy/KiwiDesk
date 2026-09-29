@@ -118,7 +118,8 @@ struct SettingsCatalogTests {
         // 119 since #1741: Behavior's Cues and On quit cards left.
         // 124 since #1656: the drawer's five scroll-gesture rows.
         // 125 since #1519: the Space step's recorder.
-        #expect(allEntries.count == 125)
+        // 126 since #1752: the Shared look card.
+        #expect(allEntries.count == 126)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

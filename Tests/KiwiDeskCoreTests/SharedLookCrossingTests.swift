@@ -105,6 +105,20 @@ struct SharedLookCrossingTests {
         #expect(try core.profiles.read(name: "Work").look == .own)
     }
 
+    /// gui.json first: a crossing whose write fails rewrites no
+    /// profile and stays owed for the next apply.
+    @Test("a failed gui.json write rewrites no profile")
+    func failedWriteLeavesProfiles() throws {
+        let core = try makeGuiCore()
+        try core.profiles.save(profile("Work"))
+        core.prepareSharedLook()
+        try Data("{".utf8).write(to: core.guiConfigStore.url)
+        core.adoptSharedLook(from: try core.profiles.read(name: "Work"))
+        #expect(core.sharedLook == nil)
+        #expect(core.sharedLookLedger.owed)
+        #expect(try core.profiles.read(name: "Work").look == .own)
+    }
+
     @Test("a Lua-owned config has no shared look")
     func luaOwnedCrossesNothing() throws {
         let core = makeTestCore(

@@ -9,6 +9,7 @@ struct AdvancedColorsSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                SharedLookPointer(model: model)
                 BorderColorCard(model: model)
                 DragColorCard(model: model)
                 KiwiShelfColorCard(model: model)

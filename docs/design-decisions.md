@@ -11990,7 +11990,8 @@ the question again rather than inheriting this answer
 (`ColorPaletteMatchTests` ▸ `newKeyUnmarksAnOlderConfig`).
 
 **A palette is a color recipe; a Profile owns the colors.**
-(#375.) A palette is a named color recipe you apply once to
+(#375; since #1752 a look owns them, and a profile wears the
+shared look or its own — below.) A palette is a named color recipe you apply once to
 overwrite the active profile's colors; a Profile is the
 persistent, addressable configuration — tiling, layout, and sparse
 behavior overrides — that owns those colors afterward. So the
@@ -12114,6 +12115,35 @@ Glass alone names itself KiwiDesk's own look instead, since the
 default has no reference to borrow (owner, 2026-09-29).
 A look has one description, shared by the Settings card and the
 tour, Glass's included (`LookDescriptionsTests`).
+
+**[Principle] Profiles share one look unless one keeps its own
+(#1752).** Keeping several profiles on the same look meant
+applying it once per profile, and the copies drifted apart
+silently. So `gui.json` holds one shared look and each profile
+either follows it or keeps its own — one switch per profile over
+the whole look, never a control per setting, since a look is
+worth sharing as the picture it draws. The unit is everything a
+look sets, the bar edges and global gaps included: a profile that
+needs other geometry keeps its own look whole. A Space's own gap
+exception stays with its profile, since it belongs to a Space
+rather than to the look. **Absent means shared, so the crossing
+stamps rather than reads** — every profile from before is marked
+own (`ProfileLookOwnMigrationTests`), and at the first apply of a
+stored profile its look seeds the shared one and every profile
+already wearing it follows, `gui.json` written before any profile
+(`SharedLookCrossingTests`); nothing on screen moves. A follower's
+look IS the shared one, so every write of it lands there — a
+Keep, a Save as, a Settings Save, the tour's paint — or the next
+apply would paint the old shared look over it
+(`SharedLookWriteTests`). A new profile copies the switch of the
+profile it is saved from; a "Save copy as…" of a follower whose
+draft changed the look keeps it as its own, since a copy touches
+no global file. The switch is the App Rules "Applies to" checklist
+with the look's own tick rules — every box live, no ⚠ on an own
+look, which is a choice rather than a divergence — its ticks
+staged in the draft and written through `saveLookReach`
+(`LookReachTests`). "Shared look" is the noun in copy, never
+"global", which already names a per-Space setting's fallback.
 
 **The App Bar is the dock; the Space Bar is the menu bar**
 (owner, 2026-09-28, #1528). The starter splits them — Space Bar

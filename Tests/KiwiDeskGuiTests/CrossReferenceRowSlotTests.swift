@@ -124,6 +124,7 @@ struct CrossReferenceRowSlotTests {
         "BarColorCards.swift:AdvancedColorsHelp.shelfBorderReference",
         "KiwiShelfCard.swift:Self.lookReference",  // LookReferenceTests
         "GapsEditor.swift:Self.lookReference",  // LookReferenceTests
+        "SharedLookPointer.swift:follows?Self.sharedProse:Self.ownProse",
     ]
 
     // MARK: - The values
