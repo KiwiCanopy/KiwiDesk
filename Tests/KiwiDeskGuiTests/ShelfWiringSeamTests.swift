@@ -231,4 +231,27 @@ struct ShelfWiringSeamTests {
             )
         }
     }
+
+    /// A bar view that takes a press — to focus, page or drag —
+    /// opens a Control-click's menu before anything else (#1518):
+    /// AppKit makes that click a context menu only where `mouseDown`
+    /// is left alone, so a view that skips the check focuses instead.
+    @Test("every pressed bar view opens a Control-click's menu first")
+    func controlClickComesFirst() throws {
+        for file in [
+            "Bar/SpaceBarItemView.swift", "Bar/SpaceBarGlyphTarget.swift",
+            "Bar/AppBarItemView.swift", "Bar/ShelfCountView.swift",
+            "Bar/ShelfDividerHandle.swift",
+        ] {
+            let body = Self.squash(
+                try Self.body(of: "override func mouseDown(", in: file)
+            )
+            #expect(
+                body.hasPrefix(
+                    "guard!openControlClickMenu(event)else{return}"
+                ),
+                Comment(rawValue: file)
+            )
+        }
+    }
 }

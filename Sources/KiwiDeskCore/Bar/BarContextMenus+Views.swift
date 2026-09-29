@@ -70,3 +70,29 @@ extension AppBarItemView {
         barContextMenus?.accessibilityActions(for: .empty)
     }
 }
+
+/// A Control-click opens what a right-click would (#1518). AppKit
+/// turns one into a context menu only for a view that leaves
+/// `mouseDown` alone, and every bar view that takes a press — to
+/// focus, page or drag — asks here first.
+extension NSView {
+    /// The menu a Control-click opens here: this view's own, else
+    /// the nearest one above that answers, as a right-click's falls
+    /// through.
+    func controlClickMenu(_ event: NSEvent) -> NSMenu? {
+        guard event.modifierFlags.contains(.control) else { return nil }
+        var view: NSView? = self
+        while let current = view {
+            if let menu = current.menu(for: event) { return menu }
+            view = current.superview
+        }
+        return nil
+    }
+
+    /// Opens the Control-click menu, answering whether it did.
+    func openControlClickMenu(_ event: NSEvent) -> Bool {
+        guard let menu = controlClickMenu(event) else { return false }
+        NSMenu.popUpContextMenu(menu, with: event, for: self)
+        return true
+    }
+}

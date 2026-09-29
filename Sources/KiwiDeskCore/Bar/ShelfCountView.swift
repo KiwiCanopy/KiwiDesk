@@ -207,6 +207,7 @@ final class ShelfCountView: NSView {
     }
 
     override func mouseDown(with event: NSEvent) {
+        guard !openControlClickMenu(event) else { return }
         onPage()
     }
 

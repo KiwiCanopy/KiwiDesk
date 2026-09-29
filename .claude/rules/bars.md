@@ -468,7 +468,12 @@ rather than the row it names makes the user search again. So:
   bar element VoiceOver can reach speaks at least the shelf
   section — the front-app chip's plain label and image carry it
   as a list set at render, since they have no override to answer
-  per query.
+  per query. And a view that takes a press — to focus, page
+  or drag — opens a Control-click's menu before anything else
+  (`openControlClickMenu`), since AppKit makes that click a
+  context menu only where `mouseDown` is left alone
+  (`ShelfWiringSeamTests` ▸ `controlClickComesFirst`,
+  `BarMenuViewTests` ▸ `controlClickFindsTheMenu`).
 - **`barMenuRows` reads state and adoption snapshots alone** —
   it runs on every menu open AND every VoiceOver query for a
   chip's actions, so a file read there is #1245's cost per focus

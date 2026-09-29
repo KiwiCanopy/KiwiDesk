@@ -79,6 +79,7 @@ final class SpaceBarGlyphTarget: NSView {
     }
 
     override func mouseDown(with event: NSEvent) {
+        guard !openControlClickMenu(event) else { return }
         actions?.pick(pick)
     }
 

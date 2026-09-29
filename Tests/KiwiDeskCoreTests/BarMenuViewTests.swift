@@ -136,6 +136,41 @@ struct BarMenuViewTests {
         #expect(title(appBar.forwardCount.menu(for: rightClick)) == "count")
     }
 
+    private func click(_ flags: NSEvent.ModifierFlags) -> NSEvent {
+        NSEvent.mouseEvent(
+            with: .leftMouseDown,
+            location: .zero,
+            modifierFlags: flags,
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            eventNumber: 0,
+            clickCount: 1,
+            pressure: 1
+        )!
+    }
+
+    /// A Control-click opens what a right-click would, found the
+    /// same way: a glyph's is its chip's, a disc's its own; a plain
+    /// click opens nothing, so the press does what it always did.
+    @Test("a Control-click finds the right-click's menu")
+    func controlClickFindsTheMenu() throws {
+        let (menus, overlay) = try drawn()
+        defer { withExtendedLifetime(menus) {} }
+        let chip = try #require(overlay.itemViews.first)
+        let glyph = try #require(chip.glyphTargets.first)
+        let disc = try #require(chip.overflowTarget)
+        #expect(
+            title(glyph.controlClickMenu(click(.control)))
+                == "\(BarHit.space(one))"
+        )
+        #expect(
+            title(disc.controlClickMenu(click(.control)))
+                == "\(BarHit.disc(one))"
+        )
+        #expect(glyph.controlClickMenu(click([])) == nil)
+    }
+
     /// VoiceOver reaches the shelf section from an App Bar item and
     /// the front-app chip too (#1518), each finding the menu source
     /// through the surface above it.
