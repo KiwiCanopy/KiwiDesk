@@ -5,7 +5,7 @@ import Testing
 
 /// The bar views that answer a right-click (#1518), through a real
 /// Space Bar overlay: each asks the one menu source for its hit, a
-/// glyph answers nothing so its click reaches its chip, and
+/// glyph and an App Bar item for the windows they stand for, and
 /// VoiceOver's actions read the same rows.
 @Suite("Bar menu views", .serialized)
 @MainActor
@@ -89,20 +89,45 @@ struct BarMenuViewTests {
         #expect(title(overlay.root.menu(for: rightClick)) == "empty")
     }
 
-    /// A glyph has no menu of its own yet (#1518's window rows come
-    /// later), so its click falls through to the chip under it —
-    /// and VoiceOver on it hears the chip's rows, the same ones.
-    @Test("a glyph answers nothing, so its chip does")
-    func glyphFallsThrough() throws {
+    /// A glyph asks for its own window rows, naming the windows
+    /// it stands for, and VoiceOver on it hears the same rows.
+    @Test("a glyph asks for the windows it stands for")
+    func glyphNamesItsWindows() throws {
         let (menus, overlay) = try drawn()
         defer { withExtendedLifetime(menus) {} }
         let chip = try #require(overlay.itemViews.first)
         let glyph = try #require(chip.glyphTargets.first)
-        #expect(glyph.menu(for: rightClick) == nil)
-        #expect(
-            glyph.accessibilityCustomActions()?.map(\.name)
-                == ["\(BarHit.space(one))"]
+        let hit = "\(BarHit.glyph(one, [WindowID(2)]))"
+        #expect(title(glyph.menu(for: rightClick)) == hit)
+        #expect(glyph.accessibilityCustomActions()?.map(\.name) == [hit])
+    }
+
+    /// An App Bar item hands its menu the windows the RENDER gave
+    /// it — a collapsed group's, not only the item's own id.
+    @Test("an App Bar item asks for its group's windows")
+    func appBarItemNamesItsGroup() throws {
+        let menus = BarContextMenus()
+        menus.rows = { hit in [.action("\(hit)") {}] }
+        let appBar = AppBarOverlay()
+        appBar.contextMenus = menus
+        appBar.show(
+            items: [
+                AppBarOverlay.Item(
+                    id: WindowID(2),
+                    text: "A",
+                    icon: nil,
+                    count: 2,
+                    members: [WindowID(2), WindowID(3)]
+                )
+            ],
+            activeIndex: nil,
+            strip: CGRect(x: 0, y: 0, width: 800, height: 32),
+            style: AppBarLook()
         )
+        let item = try #require(appBar.itemViews.first)
+        let hit = "\(BarHit.appItem([WindowID(2), WindowID(3)]))"
+        #expect(title(item.menu(for: rightClick)) == hit)
+        #expect(item.accessibilityCustomActions()?.map(\.name) == [hit])
     }
 
     @Test("VoiceOver's actions on a chip are its menu's rows")
@@ -151,7 +176,7 @@ struct BarMenuViewTests {
     }
 
     /// A Control-click opens what a right-click would, found the
-    /// same way: a glyph's is its chip's, a disc's its own; a plain
+    /// same way: a glyph's and a disc's their own; a plain
     /// click opens nothing, so the press does what it always did.
     @Test("a Control-click finds the right-click's menu")
     func controlClickFindsTheMenu() throws {
@@ -162,7 +187,7 @@ struct BarMenuViewTests {
         let disc = try #require(chip.overflowTarget)
         #expect(
             title(glyph.controlClickMenu(click(.control)))
-                == "\(BarHit.space(one))"
+                == "\(BarHit.glyph(one, [WindowID(2)]))"
         )
         #expect(
             title(disc.controlClickMenu(click(.control)))
@@ -171,10 +196,10 @@ struct BarMenuViewTests {
         #expect(glyph.controlClickMenu(click([])) == nil)
     }
 
-    /// VoiceOver reaches the shelf section from an App Bar item and
-    /// the front-app chip too (#1518), each finding the menu source
+    /// VoiceOver reaches an App Bar item's rows and the front-app
+    /// chip's shelf section (#1518), each finding the menu source
     /// through the surface above it.
-    @Test("an App Bar item and the front-app chip speak the shelf")
+    @Test("an App Bar item and the front-app chip speak their rows")
     func appBarAndFrontChipSpeakTheShelf() throws {
         let menus = BarContextMenus()
         menus.rows = { hit in [.action("\(hit)") {}] }
@@ -182,7 +207,10 @@ struct BarMenuViewTests {
         surface.contextMenus = menus
         let item = AppBarItemView(frame: .zero)
         surface.addSubview(item)
-        #expect(item.accessibilityCustomActions()?.map(\.name) == ["empty"])
+        #expect(
+            item.accessibilityCustomActions()?.map(\.name)
+                == ["\(BarHit.appItem([]))"]
+        )
         var style = SpaceBarLook()
         style.showFrontApp = true
         let manager = SpaceBarManager()

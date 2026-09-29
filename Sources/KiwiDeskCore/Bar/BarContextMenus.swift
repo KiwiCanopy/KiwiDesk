@@ -7,6 +7,11 @@ enum BarHit: Equatable {
     case space(SpaceID)
     /// A chip's `+N` disc.
     case disc(SpaceID)
+    /// An app glyph on a Space item: the windows it stands for,
+    /// in row order.
+    case glyph(SpaceID, [WindowID])
+    /// An App Bar item: its window, or a collapsed group's.
+    case appItem([WindowID])
     /// A section's overflow count.
     case count
     /// The divider between two bars sharing an edge.
@@ -24,6 +29,11 @@ final class BarContextMenus {
     var rows: (BarHit) -> [BarMenuRow] = { _ in [] }
     /// What the rows ask of the GUI; `KiwiCore.barMenuHooks`.
     var hooks = BarMenuHooks()
+    /// Quit ‹App›: the app handles its own unsaved work, KiwiDesk
+    /// asks nothing (#1518). Pinned inert in `makeTestCore`.
+    var terminateApp: @MainActor (pid_t) -> Void = {
+        NSRunningApplication(processIdentifier: $0)?.terminate()
+    }
 
     func menu(for hit: BarHit) -> NSMenu? {
         let rows = rows(hit)
