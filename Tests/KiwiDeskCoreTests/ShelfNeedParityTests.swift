@@ -63,8 +63,7 @@ struct ShelfNeedParityTests {
                     spaceGlyph: .text("\($0)", tinted: false),
                     apps: apps,
                     active: $0 == 1,
-                    overflow: [],
-                    focusInOverflow: false
+                    after: .none
                 )
             }
         let need = SpaceBarOverlay.naturalLength(
@@ -177,8 +176,7 @@ struct ShelfFloorWiringTests {
                 spaceGlyph: .text("Space \($0)", tinted: false),
                 apps: [],
                 active: $0 == 12,
-                overflow: [],
-                focusInOverflow: false
+                after: .none
             )
         }
         let windows = (1...40).map {

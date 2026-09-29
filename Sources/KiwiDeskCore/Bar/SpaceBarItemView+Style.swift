@@ -57,20 +57,21 @@ extension SpaceBarItemView {
                 lit: glyphIsHovered(index)
             )
         }
-        overflowBadge.isHidden = (collapse?.windows ?? overflow) < 1
+        overflowBadge.isHidden =
+            (collapse?.windows ?? after.windows.count) < 1
         // A collapsed count is the whole count, not "more".
         overflowBadge.stringValue =
-            collapse?.discText ?? "+\(overflow)"
+            collapse?.discText ?? "+\(after.windows.count)"
         applyBadge(
             overflowBadge,
-            appFocused: focusInOverflow,
+            appFocused: after.holdsFocus,
             lit: overflowTarget.map { $0 === hoveredTarget } ?? false
         )
-        leadingBadge.isHidden = collapse != nil || overflowBefore.isEmpty
-        leadingBadge.stringValue = "+\(overflowBefore.count)"
+        leadingBadge.isHidden = collapse != nil || before.windows.isEmpty
+        leadingBadge.stringValue = "+\(before.windows.count)"
         applyBadge(
             leadingBadge,
-            appFocused: focusBefore,
+            appFocused: before.holdsFocus,
             lit: leadingTarget.map { $0 === hoveredTarget } ?? false
         )
         styleStateBadges()

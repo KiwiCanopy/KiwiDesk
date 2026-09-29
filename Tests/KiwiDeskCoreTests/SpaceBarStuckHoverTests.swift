@@ -33,8 +33,7 @@ struct SpaceBarStuckHoverTests {
                 spaceGlyph: .text($0, tinted: true),
                 apps: [],
                 active: $0 == active,
-                overflow: [],
-                focusInOverflow: false
+                after: .none
             )
         }
         shelves.holdingRelayout {

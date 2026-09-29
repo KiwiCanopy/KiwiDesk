@@ -24,11 +24,15 @@ struct ScrollSlotReleaseSeamTests {
     /// `WindowManager` at `state.windows` spells `remove(id)` and
     /// `removeAll(pid:)`, which these do not match; a local
     /// `let windows =` binding is a read and is skipped below.
+    /// `sort(` and `reverse(` carry their paren so the copying
+    /// reads `sorted`/`reversed` are not writes — which trades a
+    /// mutating call spelled with a space before its paren,
+    /// `windows.sort (by:)`, for a needle that stops misfiring.
     private static let needles = [
         "windows = ", "windows.swapAt(", "windows.insert(",
         "windows.remove(at:", "windows.removeAll {",
         "windows.removeAll(where", "windows.append(",
-        "windows.sort", "windows.reverse", "windows.move(",
+        "windows.sort(", "windows.reverse(", "windows.move(",
     ]
 
     /// Files outside `Models/` allowed to write the order, with

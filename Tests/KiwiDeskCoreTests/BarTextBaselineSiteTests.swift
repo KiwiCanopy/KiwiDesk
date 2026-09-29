@@ -49,8 +49,7 @@ struct BarTextBaselineSiteTests {
                     spaceGlyph: .text("1", tinted: true),
                     apps: [],
                     active: true,
-                    overflow: [],
-                    focusInOverflow: false
+                    after: .none
                 )
             ],
             frontApp: SpaceBarItemView.App(

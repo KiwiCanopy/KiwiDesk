@@ -84,11 +84,6 @@ final class SpaceBarItemView: NSView {
     /// The `+n` discs before and after the glyphs (#1528, #376).
     private(set) var before = SpaceBarStrip.Disc.none
     private(set) var after = SpaceBarStrip.Disc.none
-    var overflow: Int { after.windows.count }
-    var overflowWindows: [WindowID] { after.windows }
-    var focusInOverflow: Bool { after.holdsFocus }
-    var overflowBefore: [WindowID] { before.windows }
-    var focusBefore: Bool { before.holdsFocus }
     /// The groups drawn (#1528 item 21).
     private(set) var drawn: SpaceBarStrip.Drawn?
     /// The walk the next layout plays, when the strip moved under

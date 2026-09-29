@@ -180,9 +180,9 @@ struct SpaceBarBadgeTests {
         // system focus while the Space's own slot stays on a
         // visible member.
         #expect(item.apps.map(\.name) == ["Note", "Zed"])
-        #expect(item.overflow == 1)
+        #expect(item.after.windows.count == 1)
         #expect(core.state.workspaces[SpaceID("2")]?.focused == WindowID(4))
-        #expect(item.focusInOverflow)
+        #expect(item.after.holdsFocus)
     }
 
     /// The badge and the group-breaking stay on the FLAG by
