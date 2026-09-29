@@ -93,7 +93,8 @@ struct CommandDispatchReachTests {
         let record = APIReference.entry(named: name)?.record
         return (record?.arguments ?? []).map { argument in
             switch argument.kind {
-            case .number, .integer, .desktop: return .number(1)
+            case .number, .integer, .desktop, .window:
+                return .number(1)
             case .boolean: return .bool(true)
             case .text: return .string("probe")
             case .color: return .string("#FFFFFF")

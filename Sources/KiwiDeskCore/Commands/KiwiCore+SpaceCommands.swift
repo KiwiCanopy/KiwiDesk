@@ -176,13 +176,13 @@ extension KiwiCore {
     }
 
     func moveToSpace(
+        _ command: String,
         _ args: [JSONValue],
         follow: Bool
     ) -> CommandResponse {
         guard let raw = args.first?.stringValue else {
             return .fail("expected space id")
         }
-        let command = follow ? "move_to_space_and_follow" : "move_to_space"
         switch commandTarget(command, args) {
         case .refused(let response): return response
         case .window(let window):
@@ -234,7 +234,11 @@ extension KiwiCore {
             // The one copy of the follow-shaped switch — the
             // capture/raise/settle ordering lives on it.
             followSwitch(to: target, focusing: window)
-        } else if let next = activeSpace?.focused {
+        } else if movedHeldFocus || from == state.workspaces.activeSpace,
+            let next = activeSpace?.focused
+        {
+            // A window moved from elsewhere that held no focus
+            // leaves the active Space's focus alone (#1518).
             // Captured before the refocus raise below — the
             // settle's dropped-activate detection (#463 pattern).
             let priorFrontmost = frontmostPIDProvider?()

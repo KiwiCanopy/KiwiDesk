@@ -28,11 +28,21 @@ extension KiwiCore {
 
     /// Places a just-floated `id` per `float_placement`. Callers
     /// gate the transition on `isEffectiveFloatForPlacement`
-    /// read before the flip; the setting gate lives here.
+    /// read before the flip; the setting gate lives here. On a
+    /// Space no screen shows — a verb naming its window (#1518) —
+    /// the frame is seeded as its pending capture, paid at the
+    /// activation, as `placeEnteringFloat` does.
     func placeFloating(_ id: WindowID) {
         guard let window = state.windows[id],
             let target = floatPlacementTarget(for: id)
         else { return }
+        if let space = floatPlacementSpace(of: id),
+            !state.workspaces.visibleSpaces.contains(space)
+        {
+            tiler.seedStash(id, frame: target)
+            tiler.forgetSizeBound(id)
+            return
+        }
         let base = currentFrame(of: id, fallback: window.frame)
         tiler.applyFrame(
             id,

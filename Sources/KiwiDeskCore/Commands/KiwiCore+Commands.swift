@@ -25,9 +25,9 @@ extension KiwiCore {
         case "focus_space":
             return focusSpace(args)
         case "move_to_space":
-            return moveToSpace(args, follow: false)
+            return moveToSpace(command, args, follow: false)
         case "move_to_space_and_follow":
-            return moveToSpace(args, follow: true)
+            return moveToSpace(command, args, follow: true)
         case "focus_desktop":
             return focusDesktop(args)
         case "move_to_desktop":

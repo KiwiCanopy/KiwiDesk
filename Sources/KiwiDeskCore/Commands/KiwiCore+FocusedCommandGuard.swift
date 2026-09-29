@@ -32,8 +32,7 @@ extension KiwiCore {
         _ args: [JSONValue]
     ) -> CommandResponse? {
         guard let frontmostPID = frontmostPIDProvider,
-            FocusedCommandPolicy.isFocused(command),
-            !namesWindow(command, args)
+            impliesFocus(command, args)
         else { return nil }
         // Sampled ONCE, before the guard: the log below must
         // print the pid that actually denied, not a re-sample

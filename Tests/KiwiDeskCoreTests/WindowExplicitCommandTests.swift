@@ -111,6 +111,43 @@ struct WindowExplicitCommandTests {
         #expect(core.state.workspaces[SpaceID(2)]?.windows ?? [] == [])
     }
 
+    @Test("a fractional id or a non-scalar value is refused")
+    func malformedRefused() {
+        let core = makeTwo()
+        let fractional = core.execute(
+            "make_floating",
+            args: [.number(1.5)]
+        )
+        #expect(fractional.error == "unknown window: 1.5")
+        let table = core.execute("make_floating", args: [.bool(true)])
+        #expect(table.error == "expected window id")
+        #expect(floats(core, 1) == false)
+        #expect(floats(core, 2) == false)
+    }
+
+    /// A move from a Space nobody shows, of a window that held no
+    /// focus, leaves the active Space's focus alone: the warp
+    /// that refocus would make is held, so it is observable.
+    @Test("a named move from elsewhere does not refocus the active Space")
+    func namedMoveKeepsFocus() {
+        let core = makeTwo()
+        core.execute("move_to_space", args: [.string("2"), .number(1)])
+        core.tiler.settings.mouse.followsFocus = true
+        core.zOrderRestoresInFlight = 1
+        defer { core.zOrderRestoresInFlight = 0 }
+        core.pendingMouseWarp = nil
+        #expect(
+            core.execute(
+                "move_to_space",
+                args: [.string("3"), .number(1)]
+            ).isSuccess
+        )
+        #expect(
+            core.state.workspaces[SpaceID(3)]?.windows == [WindowID(1)]
+        )
+        #expect(core.pendingMouseWarp == nil)
+    }
+
     @Test("without the argument the focused window is still the one")
     func focusedFallback() {
         let core = makeTwo()

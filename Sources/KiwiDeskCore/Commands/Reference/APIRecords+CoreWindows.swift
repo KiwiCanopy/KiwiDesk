@@ -25,13 +25,13 @@ extension APIReference {
             "Moves the focused window, or the one a window id "
                 + "names, to a Space without following it.",
             .space("space"),
-            .integer("window", optional: true)
+            .window("window", optional: true)
         ),
         "move_to_space_and_follow": APIRecord(
             "Moves the focused window, or the one a window id "
                 + "names, to a Space and switches to it.",
             .space("space"),
-            .integer("window", optional: true)
+            .window("window", optional: true)
         ),
         "focus_desktop": APIRecord(
             "Switches to a macOS Desktop, exactly as a swipe "
@@ -76,12 +76,12 @@ extension APIReference {
         "make_floating": APIRecord(
             "Marks the focused window, or the one a window id "
                 + "names, as floating above the tiles.",
-            .integer("window", optional: true)
+            .window("window", optional: true)
         ),
         "make_tiled": APIRecord(
             "Returns the focused window, or the one a window id "
                 + "names, to its Space's tiling layout.",
-            .integer("window", optional: true)
+            .window("window", optional: true)
         ),
         "make_auto": APIRecord(
             "Clears the focused window's manual float override."
@@ -89,7 +89,7 @@ extension APIReference {
         "toggle_floating": APIRecord(
             "Flips the focused window, or the one a window id "
                 + "names, between floating and tiled.",
-            .integer("window", optional: true)
+            .window("window", optional: true)
         ),
         "make_sticky": APIRecord(
             "Marks the focused window globally sticky across all "
