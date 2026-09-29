@@ -7,11 +7,18 @@ enum RuleFamily: Hashable {
     /// A shortcut: one action in one layer, keyed by
     /// `RuleReachTable.keyID`.
     case key
+    /// A scroll-gesture setting, keyed by `ScrollGestureField`
+    /// (#1656).
+    case scroll
 
     /// How a row's subject keys its table: app rules by the
-    /// lowercased bundle id, a shortcut's action verbatim.
+    /// lowercased bundle id, a shortcut's action and a scroll
+    /// setting verbatim.
     func key(_ subject: String) -> String {
-        self == .key ? subject : subject.lowercased()
+        switch self {
+        case .key, .scroll: subject
+        case .space, .float: subject.lowercased()
+        }
     }
 }
 

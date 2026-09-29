@@ -7715,10 +7715,16 @@ drawer.** (#1741, ui-designer ruling.) Shortcuts & Gestures ▸
 Mouse & trackpad is a family of its own beside the page's other
 cards, and drawn as a `.card` drawer — the drawer tier, with no
 section above it — it read as a sub-drawer of nothing. So
-`SettingsCollapsibleSection` wears `SettingsSection`'s
-`.headline` header over the same plate, and while shut the
-plate stays drawn with the summary inside it: the card keeps
-its place in the page instead of shrinking to a bare heading.
+`SettingsCollapsibleSection` is a `SettingsSection`: the same
+plain `.headline` title and plate, with the disclosure as the
+plate's first row — chevron and summary, the whole row one
+control — and the entries opening inside the card. The first
+cut put the chevron on the title outside the plate and left the
+summary a click target nothing announced; the owner found the
+card read as closed and inert (device look, 2026-09-29), so the
+affordance moved into the thing that opens. Shut, the card
+keeps that row and its place in the page instead of shrinking
+to a bare heading.
 This does not overturn #1021's tier, which is about drawers — a
 drawer qualifies the card it sits in, and a header louder than
 that card's own title inverts the hierarchy the other way. The
@@ -7727,7 +7733,8 @@ how many rows it holds. `GeneralShortcutsGroup` meets it too and
 is still a drawer, left for its own change.
 
 Both kinds draw the one `SettingsDisclosureButton` — chevron,
-full-row button, hover, heading trait, expanded/collapsed value
+full-row button, hover, the heading trait where the row is the
+heading, expanded/collapsed value
 and the Reduce Motion gate — so they differ in tier and chrome
 and in nothing the user operates. A second copy of that
 button is how the two would drift apart.
@@ -9727,6 +9734,125 @@ names. The pointer-follow is its own entry rather than a row in
 the Focus card: it fires on every focus change KiwiDesk sees — a
 Space switch, a closed window, ⌘-Tab — not only on focus
 shortcuts, and that card sits under the layer header.
+
+:::unreleased
+**⌃⌥ + scroll moves focus a window at a time; it never pans the
+row freely** (#1656, owner ruling 2026-09-29). A Scrolling
+Space's view is a function of its focus — the row pans to the
+focused window, and every anchor (`follow`, `center`, `start`,
+`end`) is stated against it — so a gesture that moved the view
+by itself would be a second writer of the viewport, owing a rule
+for handing it back when the fingers lift and a border that
+answers to neither. A device build of the fluid pan measured the
+cost: moving every window on every scroll event left the focus
+border trailing the row it frames, made a glowing border's
+surface redraw so the background seemed to move with it, and
+gave a mouse notch about 10 pt of travel, too little to read as
+anything. Stepping goes through the arrow keys' own focus step
+instead, so the animation, the border, the deferred raise and
+`wrap_focus` are the keyboard's and cannot drift from them; a
+scroll gesture that grows a movement path of its own re-opens
+all three measurements. No step warps the pointer, on any
+layout (owner ruling 2026-09-29).
+
+**A held chord always does something, on every layout** (#1656,
+owner and ui-designer ruling 2026-09-29). A Scrolling row pans,
+a Monocle stack steps, and every other layout — BSP, Stack,
+Grid, Track, Floating — steps focus to the next or previous
+window in the Space's own order, floating windows included,
+wrapping at the ends. The scroll is taken on every Space while
+the chord is held, rather than passed through where the layout
+has no row, because a chord has one owner: passed through, the
+same hand would do two things depending on where the pointer
+rests. With two screens a swipe meant for the Scrolling Space
+on one scrolls a page when the pointer drifts onto the other,
+and a page scrolling under a held window-manager chord reads as
+KiwiDesk broken, not as a layout without the feature. Taking
+the scroll and doing nothing was the other option, and it fails
+the rule that a press which does nothing always says why
+(▸ Layout and resize behavior, *A press writes forward, never
+across the store*) — while here there is nothing to refuse,
+since the flat window array gives every Space a well-defined
+next and previous window whatever its geometry. The one place a
+step still lands on nothing — a Scrolling or Monocle row's end
+with `wrap_focus` off, or a Space holding one window — stays
+wordless on purpose: the gesture repeats per notch and per
+swipe, and a cue on each would be noise over the hand's own
+evidence that the row did not move.
+
+**One swipe moves one window by default, and long swipes are a
+tick box.** Counting by distance — a window per ~60 pt of finger
+travel — makes a single window hard to hit (measured on a device
+build), and macOS's own Scrolling
+speed scales the travel KiwiDesk reads by about ten times
+between its slowest and fastest settings (#1637's measurement),
+so no fixed distance means "one window" on every Mac. One per
+swipe is a step a user can aim. **Long swipes move more
+windows** keeps the first window at the swipe's start, so exactly
+one is still easy, and adds one per *Travel per window* after
+it, on every layout: the meter counts the hand, and the layout
+only decides where each window's step lands. That distance is a
+Settings field rather than Lua-only
+because the Scrolling speed that scales it is system-wide: a
+user who likes macOS's speed everywhere else still needs this
+gesture's sensitivity apart from it. The glide after a lift
+never counts, on either setting — it is macOS extrapolating a
+flick, not the hand, and a fast flick's glide runs far past any
+swipe, so counting it would race down the row. A wheel notch is one
+window either way, since a notch is already a discrete act.
+
+**The settings are stored like the shortcuts**: a base in
+`gui.json`, a sparse override per profile, and the **Applies to**
+checklist on each row, with that checklist's semantics
+(▸ Navigation & saving, *Each App Rules row carries an "Applies
+to" checklist*). A chord is an input binding like every key
+chord on the page, so a user who gives two profiles different
+keys expects the gesture's chord to follow the same model. The
+one difference is that the base holds every field: a profile
+never leaves a value out, so there is no "Not here", and turning
+the gesture off in one profile is an empty chord stored as that
+profile's override.
+
+**Natural scrolling is KiwiDesk's own, per input, and on by
+default.** The gesture moves windows, not the content under the
+pointer, so the direction a user chose for documents in macOS
+need not be the one they want here — and a notched wheel rolled
+toward you and fingers dragged across a surface are different
+hands, so a single toggle would force one input's answer on the
+other. The split follows the event rather than the device: a
+scroll that reports finger phases, a Magic Mouse's included,
+takes the trackpad's value. The rows
+quote Apple's own **Natural scrolling** and *Content tracks
+finger movement*, so the concept is the one the user already
+knows from System Settings, and the default matches macOS's
+own.
+
+**The chord takes two or more modifiers, and that is why there
+is no Zoom warning.** Measured on macOS 27 with Zoom's "Use
+scroll gesture with modifier keys to zoom" set to ⌃ and no
+KiwiDesk tap running: ⌃⌥ + scroll did not zoom, and only ⌃ +
+scroll did — Zoom fires on its modifier held alone. The recorder
+refuses a single modifier (⌃ + scroll is Zoom's default, and ⌘
+or ⌥ + scroll mean something in many apps), so no chord the
+recorder or a verb accepts can meet Zoom — and a hand-edited
+file cannot either, since resolving the settings turns a
+single-modifier chord off — and a warning reading Zoom's
+preference would guard a case that cannot arise. The refusal is
+what makes the warning unnecessary, not the ⌃⌥ default:
+allowing a one-modifier chord anywhere re-opens it.
+
+**The two scroll gestures take different chords, and ⌃⌥⌘ stays
+reserved for the Space step** (#1519, owner ruling 2026-09-29).
+Both read either scroll axis — a Scrolling row can run
+vertically, and ⇧ is allowed on either — so no direction can
+tell a pan from a Space step, and one chord would reach only
+whichever gesture comes first in the tap's order. The recorder and `set_pan`
+refuse the Space step's chord for that reason, and
+`set_space_step` refuses the pan's. Where a file still gives
+both the same chord, the pan keeps it and the Space step is
+off: the Space step is not built yet, so the pan is the only
+gesture a shared chord could reach.
+:::
 
 ### Overrides & appearance
 

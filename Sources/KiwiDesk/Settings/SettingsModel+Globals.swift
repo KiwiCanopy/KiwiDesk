@@ -14,6 +14,7 @@ extension SettingsModel {
     ) {
         target.format = source.format
         target.layers = source.layers
+        target.scrollGesture = source.scrollGesture
         target.appRules = source.appRules
         target.floatRules = source.floatRules
         target.ignoreRules = source.ignoreRules

@@ -46,6 +46,7 @@ extension KiwiCore {
         tiler.animation.onLog = log
         strandDetector.onLog = log
         mouse.scroll.onLog = log
+        wireScrollPan()
         // QA lever (#596), read once: `KIWIDESK_NO_WS_TRACKING`
         // pins the ring and mark to the AX-fallback path.
         borders.configureFromEnvironment()

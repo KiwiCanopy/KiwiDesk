@@ -200,6 +200,10 @@ public enum APIReference {
         "mouse": [
             "set_follows_focus"
         ],
+        "scroll_gesture": [
+            "set_pan", "set_space_step", "set_natural_scrolling",
+            "set_long_swipes", "set_step_distance",
+        ],
         "quit": [
             "set_layout", "set_grid_target_depth",
         ],

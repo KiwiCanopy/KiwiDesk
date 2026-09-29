@@ -25,6 +25,13 @@ struct GesturesDrawer: View {
             VStack(alignment: .leading, spacing: 10) {
                 GestureGroupHeading(
                     title: L(
+                        "shortcuts.gestures.group.scroll",
+                        "Scroll gestures — anywhere, holding a modifier"
+                    )
+                )
+                GesturesScrollEntries(model: model)
+                GestureGroupHeading(
+                    title: L(
                         "shortcuts.gestures.group.windows",
                         "On your windows"
                     )
@@ -70,7 +77,9 @@ struct GesturesDrawer: View {
                 "Drag a window's edge to resize it."
             ),
             surface: .windows,
-            settings: settings
+            settings: settings,
+            help: MouseResizePicker.help,
+            helpSubject: MouseResizePicker.spokenLabel
         ) {
             GesturePicture.Edge(t: $0)
         } control: {
@@ -116,37 +125,37 @@ struct MouseResizePicker: View {
     @Binding var selection: MouseResizeMode
 
     /// No visible label: the entry's sentence names the control,
-    /// and the strip needs the whole row to fit its options. The
-    /// label key names it for VoiceOver and for the census.
+    /// and its `?` sits after that sentence (`help`). The label
+    /// key names it for VoiceOver and for the census.
     var body: some View {
         SegmentedPicker(
-            spokenLabel: L(
-                "behavior.mouse.resize_action",
-                "Mouse resize action"
-            ),
+            spokenLabel: Self.spokenLabel,
             hugsLabels: true,
             selection: $selection,
             options: [
                 (layoutLabel, MouseResizeMode.layout),
                 (snapBackLabel, .snapBack),
-            ],
-            help: L(
-                "behavior.mouse.resize_action.help",
-                "**%1$@** — Dragging a "
-                    + "window's edge resizes it and reflows "
-                    + "its neighbours in the layout.\n**%2$@**"
-                    + " — The window resizes "
-                    + "freely while you drag, then snaps back "
-                    + "to its tiled size when you release.",
-                L(
-                    "behavior.mouse.resize_layout",
-                    "Resize adjacent windows"
-                ),
-                L(
-                    "behavior.mouse.resize_snap_back",
-                    "Snap back to slot"
-                )
-            )
+            ]
+        )
+    }
+
+    static var spokenLabel: String {
+        L("behavior.mouse.resize_action", "Mouse resize action")
+    }
+
+    /// The options, explained: the `?` the edge entry's sentence
+    /// carries.
+    static var help: String {
+        L(
+            "behavior.mouse.resize_action.help",
+            "**%1$@** — Dragging a "
+                + "window's edge resizes it and reflows "
+                + "its neighbours in the layout.\n**%2$@**"
+                + " — The window resizes "
+                + "freely while you drag, then snaps back "
+                + "to its tiled size when you release.",
+            L("behavior.mouse.resize_layout", "Resize adjacent windows"),
+            L("behavior.mouse.resize_snap_back", "Snap back to slot")
         )
     }
 

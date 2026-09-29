@@ -41,7 +41,7 @@ struct GuiConfigParityTests {
                 "appRules", "spacePins", "mainSpaces",
                 "fallbackSpace", "floatRules", "ignoreRules",
                 "profileBindings", "desktopSpaces", "layers",
-                "appWide",
+                "scrollGesture", "appWide",
             ]
         )
     }
@@ -67,6 +67,16 @@ struct GuiConfigParityTests {
         wide.refusalSound = true
         wide.quitGridTargetDepth = 3
         config.appWide = wide
+        // Every field off its default: the base's coding is
+        // hand-listed, so a field left default is one unwatched.
+        config.scrollGesture = ScrollGestureBase(
+            pan: [.command, .shift],
+            spaceStep: [],
+            naturalTrackpad: false,
+            naturalMouse: false,
+            longSwipes: true,
+            stepDistance: 120
+        )
         config.layers = [
             KeyLayer(
                 name: "default",
@@ -93,6 +103,7 @@ struct GuiConfigParityTests {
         #expect(back.desktopSpaces == config.desktopSpaces)
         #expect(back.layers == config.layers)
         #expect(back.appWide == config.appWide)
+        #expect(back.scrollGesture == config.scrollGesture)
         // Profile-scoped fields deliberately do NOT ride the
         // sidecar (#36) — they come back default.
         #expect(back.settings == TilingSettings())

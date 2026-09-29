@@ -55,11 +55,21 @@ struct MonocleFlipSeamTests {
         #expect(calls.count == 3, "found \(calls.count)")
     }
 
+    /// Where a focused-window read lands the pending focus
+    /// ahead of itself, beside the door's own landings — the one
+    /// copy of who may, each with its reason.
+    private static let landingFiles: [String: String] = [
+        "KiwiCore+Execute.swift":
+            "the execute wrapper, `dispatchCommand`'s one caller",
+        "KiwiCore+ScrollPan.swift":
+            "the scroll step reaches `monocleCycle` without "
+            + "`execute` (#1656)",
+    ]
+
     /// A focused-window command lands the pending focus ahead
-    /// of its dispatch — one site, in the execute wrapper that
-    /// is `dispatchCommand`'s one caller, beside the door's own
-    /// landings — only the door ends a play (its settle and its
-    /// drop), and the Space switch takes the drop.
+    /// of its dispatch — once per registered file — only the
+    /// door ends a play (its settle and its drop), and the Space
+    /// switch takes the drop.
     @Test("The landing and the ending are wired where ruled")
     func landingAndEndingAreWired() throws {
         let landings = try SourceScan.identifierSites(
@@ -67,9 +77,8 @@ struct MonocleFlipSeamTests {
             under: Self.core
         ).filter { $0.file.lastPathComponent != Self.door }
         #expect(
-            landings.count == 1
-                && landings.first?.file.lastPathComponent
-                    == "KiwiCore+Execute.swift",
+            landings.map(\.file.lastPathComponent).sorted()
+                == Self.landingFiles.keys.sorted(),
             "landing sites: \(landings.map(\.site))"
         )
         let endings = try SourceScan.identifierSites(

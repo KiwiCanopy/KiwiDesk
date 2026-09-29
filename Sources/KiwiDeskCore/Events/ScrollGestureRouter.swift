@@ -16,7 +16,7 @@ public struct ScrollGestureEvent: Equatable, Sendable {
     public var kind: Kind
     public var input: Input
     /// Points; zero on `.began` and `.ended`. The direction is
-    /// final: `ScrollGestures.naturalScrolling` is applied before a
+    /// final: `ScrollGestureSettings.isNatural` is applied before a
     /// consumer hears it.
     public var delta: CGVector
     /// True for the momentum that follows a trackpad lift.

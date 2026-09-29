@@ -136,7 +136,8 @@ extension KiwiCore {
             profileModes: profile.layers,
             profileAppRules: profile.appRules,
             profileFloatRules: profile.floatRules,
-            profileIgnoreRules: profile.ignoreRules
+            profileIgnoreRules: profile.ignoreRules,
+            profileScrollGesture: profile.scrollGesture
         )
         // A renumbered held Space owes its ⌃⌥N (#485's top-up).
         if !state.heldSpaces.isEmpty { topUpDigitShortcuts() }
@@ -248,7 +249,8 @@ extension KiwiCore {
             profileModes: nil,
             profileAppRules: nil,
             profileFloatRules: nil,
-            profileIgnoreRules: nil
+            profileIgnoreRules: nil,
+            profileScrollGesture: nil
         )
         resolveSpaceDisplays()
         retile(pass: forceRetile ? .apply : .event)

@@ -144,6 +144,10 @@ extension KiwiCore {
             // live retile would be a pure no-op. Same policy
             // as `track.swap` above.
             return quitCommand(command, args)
+        case let gesture where gesture.hasPrefix("scroll_gesture."):
+            // No window moves: the tap's chords change, nothing
+            // else, so no retile trailer (#1656).
+            return scrollGestureCommand(command, args)
         default:
             return layoutCommand(command, args)
         }

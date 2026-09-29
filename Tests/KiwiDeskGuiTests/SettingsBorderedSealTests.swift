@@ -127,6 +127,11 @@ struct SettingsBorderedSealTests {
                     + "signal is the chrome's own accent fill, "
                     + "which never reads the tint"
             ),
+            "ScrollChordRecorderField.swift": (
+                1, ".tint(buttonTint)",
+                "the scroll gestures' modifier recorder (#1656), "
+                    + "the key recorder's own field and tint"
+            ),
         ]
 
     /// A raw bordered style appears only where an exemption

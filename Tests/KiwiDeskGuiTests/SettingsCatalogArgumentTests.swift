@@ -32,6 +32,11 @@ struct SettingsCatalogArgumentTests {
         // (`dragGhost` / `dragDropZone`), which the dotted-
         // reference sweep still covers.
         "DragVisualsEditor.swift: control",
+        // The collapsible card forwards its drawer's declaration
+        // to the one `SettingsSection` it is (#1741); its mount
+        // takes the drawer outright (`GesturesDrawer`), which the
+        // `SettingsCollapsibleSection(` needle above counts.
+        "SettingsCollapsibleSection.swift: control",
         // The self-anchoring control hands its descriptor to a
         // private row helper, so the argument at the
         // `.searchAnchored` site is the parameter, not a dotted
@@ -205,7 +210,8 @@ struct SettingsCatalogArgumentTests {
         // anchors (the drawer mounts as the Mouse card did).
         // 91 since #1731: the Each bar drawer and its two rows.
         // 89 since #1741: Behavior's two cards left.
-        #expect(direct.values.reduce(0, +) == 89)
+        // 94 since #1656: the drawer's five scroll-gesture rows.
+        #expect(direct.values.reduce(0, +) == 94)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

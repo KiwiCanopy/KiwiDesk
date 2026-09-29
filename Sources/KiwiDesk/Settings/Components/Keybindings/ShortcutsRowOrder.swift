@@ -13,6 +13,11 @@ enum ShortcutsRowOrder {
     /// The Mouse & trackpad drawer's settings, in entry order
     /// (#1726); the drawer's explainer entries are not settings.
     static let gesturesMore: [SettingKey] = [
+        .shortcuts(.scrollPan),
+        .shortcuts(.scrollLongSwipes),
+        .shortcuts(.scrollStepDistance),
+        .shortcuts(.scrollNaturalTrackpad),
+        .shortcuts(.scrollNaturalMouse),
         .behaviour(.mouseResize),
         .behaviour(.mouseFollowsFocus),
     ]

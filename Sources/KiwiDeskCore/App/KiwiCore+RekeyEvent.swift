@@ -33,7 +33,8 @@ extension KiwiCore {
         if let pending = pendingMonocleFocus {
             pendingMonocleFocus = (
                 from: pending.from == old ? new : pending.from,
-                to: pending.to == old ? new : pending.to
+                to: pending.to == old ? new : pending.to,
+                warp: pending.warp
             )
         }
         // The split heal's said-cue memo (#934) is id-keyed too.

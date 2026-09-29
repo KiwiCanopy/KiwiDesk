@@ -22,6 +22,9 @@ extension SettingsValueReadout {
             .openSettings, .switchToLayer, .openApplications,
             .advanced, .`import`, .restoreDefaults:
             return []
+        case .scrollPan, .scrollLongSwipes, .scrollStepDistance,
+            .scrollNaturalTrackpad, .scrollNaturalMouse, .scrollSpaceStep:
+            return scrollGestureRows(key, old: old, new: new)
         }
     }
 
