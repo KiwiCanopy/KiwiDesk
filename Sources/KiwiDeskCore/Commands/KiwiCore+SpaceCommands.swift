@@ -112,13 +112,23 @@ extension KiwiCore {
         // Read before the filing: only a window that was no
         // effective float where it left ENTERS floating (#1708).
         let wasFloat = isEffectiveFloatForPlacement(window)
+        // Only a window holding the focus, or landing where the
+        // user is, moves the trackers; any other is the target's
+        // focus for its next visit alone (#22, #1518).
+        let takesFocus =
+            state.workspaces.lastFocused == window
+            || target == state.workspaces.activeSpace
         addFocusedToSpace(window, to: target)
         if from != target,
             !placeEnteringFloat(window, wasFloat: wasFloat)
         {
             reanchorFloat(window, to: target)
         }
-        state.workspaces.focus(window, in: target)
+        if takesFocus {
+            state.workspaces.focus(window, in: target)
+        } else {
+            state.workspaces.stampFocus(window, in: target)
+        }
         if from != target {
             emitWindowMovedToSpace(
                 window,

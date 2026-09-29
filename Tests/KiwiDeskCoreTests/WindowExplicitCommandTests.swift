@@ -146,15 +146,25 @@ struct WindowExplicitCommandTests {
             core.state.workspaces[SpaceID(3)]?.windows == [WindowID(1)]
         )
         #expect(core.pendingMouseWarp == nil)
+        // KiwiDesk still believes the focus is where macOS keeps it.
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        #expect(
+            core.state.workspaces[SpaceID(3)]?.focused == WindowID(1)
+        )
     }
 
-    /// "Move to Current Space" (#1518): the moved window is the
-    /// active Space's focus in state and on the ring alike.
+    /// "Move to Current Space" (#1518): the moved window is not
+    /// only recorded as the active Space's focus, it is FOCUSED —
+    /// raised and warped to, the warp held so it is observable.
     @Test("a named move into the active Space focuses the window")
     func namedMoveIntoActiveFocuses() {
         let core = makeTwo()
         core.execute("move_to_space", args: [.string("2"), .number(1)])
-        #expect(core.activeSpace?.focused == WindowID(2))
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        core.tiler.settings.mouse.followsFocus = true
+        core.zOrderRestoresInFlight = 1
+        defer { core.zOrderRestoresInFlight = 0 }
+        core.pendingMouseWarp = nil
         #expect(
             core.execute(
                 "move_to_space",
@@ -163,6 +173,7 @@ struct WindowExplicitCommandTests {
         )
         #expect(core.activeSpace?.focused == WindowID(1))
         #expect(core.state.workspaces.lastFocused == WindowID(1))
+        #expect(core.pendingMouseWarp == WindowID(1))
     }
 
     @Test("without the argument the focused window is still the one")
