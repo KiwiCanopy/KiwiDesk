@@ -20,7 +20,10 @@ extension KiwiCore {
         return ShelfPaintBaseline(
             profile: name,
             live: tiler.settings,
-            stored: name.flatMap { try? profiles.read(name: $0).settings }
+            stored:
+                name
+                .flatMap { try? profiles.read(name: $0) }
+                .map(resolvedSettings(of:))
         )
     }
 

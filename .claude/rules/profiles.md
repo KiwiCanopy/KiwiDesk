@@ -1161,8 +1161,10 @@ the shared one, so a write of it lands in `gui.json` through the
 one `recordLookWrite` door (`SharedLookWriteTests`), and a
 reader of a stored profile's settings for use takes
 `resolvedSettings(of:)` rather than `profile.settings`
-(`SharedLookSeamTests`). Every change of the shared look lands
-through the one `landSharedLook` — `gui.json` first, then each
+(`SharedLookSeamTests`). Every change of the shared look after
+the crossing lands through the one `landSharedLook` — the
+crossing (`crossWith`) and a restore (`takeRestoredSharedLook`)
+being its only other writers — — `gui.json` first, then each
 follower's file copy re-stamped, then the live look re-resolved,
 never the whole profile re-applied (#1179) — so a write beside it
 leaves a copy or the screen stale (`SharedLookLandTests`). A
@@ -1182,7 +1184,9 @@ a restore returns only what a paint can reach
 refused once `currentName` moved (`ShelfPaintTests` ▸
 `restoreSkipsAnotherProfile`). The open draft's debt is paid ON
 the write, through `onShelfPainted` (`ShelfPaintTests` ▸
-`paintsAreAnnounced`), never by a caller; a caller refuses the
+`paintsAreAnnounced`), never by a caller; a paint of a follower
+lands in the shared look (`recordLookWrite`), which re-stamps the
+other followers' files too (#1752); a caller refuses the
 paint while a live-profile draft is dirty (`OnboardingLooksTests`
 ▸ `draftBlocks`). The argument is `docs/design-decisions.md` ▸
 *The tour's look is written through, and the tour owns its undo*.

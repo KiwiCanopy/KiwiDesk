@@ -76,12 +76,9 @@ struct SharedLookSeamTests {
     /// is review's, since no pattern can tell a use from a rewrite.
     @Test("raw stored-settings reads are listed")
     func rawReadsAreListed() throws {
-        let allowed: [String: String] = [
-            // The tour's Revert baseline: a follower's copy is
-            // re-stamped at every landing (`landSharedLook`), so
-            // raw equals worn there.
-            "KiwiCore+ShelfPaint.swift": "tour baseline"
-        ]
+        // Empty by design: an entry is a ruling that a raw read is
+        // a use, with its reason.
+        let allowed: [String: String] = [:]
         let pattern = try Regex(#"read\(name:[^)]*\)\??\.settings"#)
         var found: Set<String> = []
         for file in try SourceScan.swiftSources(under: Self.root) {

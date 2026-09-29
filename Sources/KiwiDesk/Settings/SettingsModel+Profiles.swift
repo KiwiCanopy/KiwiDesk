@@ -105,7 +105,9 @@ extension SettingsModel {
         // BEFORE this Save's edits, its re-resolve cannot paint the
         // old shared look over the draft's, and its writes precede
         // every gui.json write of the Save.
-        saveLookReach()
+        // A failed checklist write stops the Save, as the stored
+        // door's does: the ticks stay staged with its warning.
+        guard saveLookReach() else { return false }
         core.applyProfileScopedState(
             from: config,
             applyingModesFor: edited
