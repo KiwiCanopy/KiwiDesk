@@ -22,8 +22,10 @@ struct DigitTopUpActionTests {
         rows.compactMap { SpaceLuaArg.target(of: $0.lua) }
     }
 
-    /// The owner's shape: digits 1–4 bound, Space 1 dragged behind
-    /// others, then a top-up.
+    /// The owner's shape end to end: digits 1–4 bound, Space 1
+    /// dragged behind others, then a top-up. Either the bound-verb
+    /// skip or the own-digit rule alone keeps it green — each has
+    /// its own clause below.
     @Test("a reordered list gives no Space a second chord")
     func reorderAddsNoSecondChord() {
         let existing = seed(["1", "2", "3", "4"])
@@ -36,11 +38,6 @@ struct DigitTopUpActionTests {
             !added.contains { row in
                 SpaceLuaArg.target(of: row.lua).map(before.contains)
                     ?? false
-            }
-        )
-        #expect(
-            !added.contains {
-                $0.lua.contains("\"1\"")
             }
         )
     }

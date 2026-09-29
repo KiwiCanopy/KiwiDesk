@@ -27,12 +27,13 @@ struct DuplicateSpaceChordMigrationTests {
         "KiwiDesk.move_to_space_and_follow(\"\(space)\")"
     }
 
-    /// The owner's default layer: Space 1 on ⌃⌥⌘1 and ⌃⌥⌘5, Space
-    /// 5 on ⌃⌥⌘6 alone.
+    /// The owner's default layer: Space 1 on ⌃⌥⌘5 and ⌃⌥⌘1 — the
+    /// extra FIRST, so keeping the own digit is told apart from
+    /// keeping the first — and Space 5 on ⌃⌥⌘6 alone.
     private var ownersRows: [KeyBinding] {
         [
-            row("control+option+command+1", follow("1")),
             row("control+option+command+5", follow("1")),
+            row("control+option+command+1", follow("1")),
             row("control+option+command+6", follow("5")),
         ]
     }
@@ -64,6 +65,18 @@ struct DuplicateSpaceChordMigrationTests {
                 "control+option+command+1",
                 "control+option+command+6",
             ]
+        )
+    }
+
+    @Test("the tenth Space's own digit is 0")
+    func tenthKeepsZero() throws {
+        let rows = [
+            row("control+option+command+9", follow("10")),
+            row("control+option+command+0", follow("10")),
+        ]
+        let out = try #require(ConfigMigration.migrated(try gui(rows)))
+        #expect(
+            try layer(out).map(\.combo) == ["control+option+command+0"]
         )
     }
 
@@ -155,6 +168,45 @@ struct DuplicateSpaceChordMigrationTests {
             )
         )
         #expect(String(decoding: out, as: UTF8.self) == file(keep))
+    }
+
+    @Test("each shape stands down at its own floor")
+    func floorsArePerShape() throws {
+        let bindings: [[String: Any]] = ownersRows.map {
+            ["combo": $0.combo, "lua": $0.lua, "kind": "navigation"]
+        }
+        let layers: [[String: Any]] = [
+            ["name": "default", "bindings": bindings]
+        ]
+        func data(_ root: [String: Any]) throws -> Data {
+            try JSONSerialization.data(withJSONObject: root)
+        }
+        let profile: [String: Any] = [
+            "monitor_sets": [], "layers": ["layers": layers],
+        ]
+        let bundle: [String: Any] = [
+            SetupBundle.shapeMarker: 1, "config": ["layers": layers],
+        ]
+        let cases: [([String: Any], Int)] = [
+            (profile, ConfigMigration.spaceChordProfileFormat),
+            (bundle, ConfigMigration.spaceChordBundleFormat),
+        ]
+        for (root, floor) in cases {
+            var at = root
+            at["format"] = floor
+            var below = root
+            below["format"] = floor - 1
+            #expect(
+                ConfigMigration.migratingDuplicateSpaceChords(
+                    try data(at)
+                ) == nil
+            )
+            #expect(
+                ConfigMigration.migratingDuplicateSpaceChords(
+                    try data(below)
+                ) != nil
+            )
+        }
     }
 
     @Test("a file already at the step's format is not touched")
