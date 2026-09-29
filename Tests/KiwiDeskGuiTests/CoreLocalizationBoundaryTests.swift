@@ -94,7 +94,8 @@ struct CoreLocalizationBoundaryTests {
         // window-is-fullscreen (#1298). Same caveat as
         // `+StickyMarks` if the overlays ever move out of Core.
         "Commands/ResizeRefusal+Rendering.swift": 12,
-        "Borders/StickyMarkOverlay.swift": 1,
+        // The two marks' VoiceOver names (#1799).
+        "Borders/StickyMarkOverlay.swift": 2,
         // The Space Bar's item labels and a11y strings, and the
         // App Bar's a11y labels (#901), drawn by Core; one Space
         // Bar call is the layer item's label (#1169).

@@ -201,7 +201,8 @@ struct SettingsSearchIndexTests {
                 // unindexed here); the four drag Border/Fill rows
                 // stay anchor-less by ruling — two census rows
                 // per label key, which the join cannot split.
-                .gapsAndBorders: 18,
+                // 19 since #1799: the floating mark, at rest.
+                .gapsAndBorders: 19,
                 // 16 since the #1517 redesign: the bar cards
                 // lost their Style drawers, so every bar row is
                 // at rest and anchor-less by the same ruling

@@ -1,9 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Sticky window mark settings editor (#414). Deliberately ungated
-/// on the Space Bar — the mark survives the bar going off;
-/// `StickyMarkUngatedTests` keeps it ungated.
+/// Sticky window mark settings editor (#414), with the floating
+/// mark's switch beside it (#1799). Deliberately ungated on the
+/// Space Bar — the marks survive the bar going off;
+/// `StickyMarkUngatedTests` keeps them ungated.
 struct StickyMarkEditor: View {
     @ObservedObject var model: SettingsModel
 
@@ -29,6 +30,14 @@ struct StickyMarkEditor: View {
                 isOn: $model.config.settings.stickyStyle.mark,
                 help: Self.markHelp
             )
+            ToggleRow(
+                label: L(
+                    "floating.mark",
+                    "Show mark on floating windows"
+                ),
+                isOn: $model.config.settings.floatingStyle.mark,
+                help: Self.floatingMarkHelp
+            )
             // #1145: HIDDEN without the bridge — the
             // liquid-glass shape; `canDriveDesktops`' docstring
             // owns why this is never a grey.
@@ -44,6 +53,16 @@ struct StickyMarkEditor: View {
                 )
             }
         }
+    }
+
+    private static var floatingMarkHelp: String {
+        L(
+            "floating.mark.help",
+            "Draws a small mark in the top-right corner of a "
+                + "window you set floating, including one in a "
+                + "floating Space. A window that floats only "
+                + "because its Space does gets no mark."
+        )
     }
 
     private static var reachHelp: String {

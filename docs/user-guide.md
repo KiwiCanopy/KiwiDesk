@@ -571,16 +571,20 @@ A sticky window's glyph is listed under one Space only, the one
 it *renders* on: a ∞ window under the Space you are focused on,
 a 📌 window under the current Space of its own screen.
 
+:::unreleased
 | Mark | Where it sits | Means |
 | --- | --- | --- |
 | ∞ mark | On the window, top-right corner | **Global sticky** — every Space of every monitor |
 | 📌 mark | On the window, top-right corner | **Display sticky** — every Space of the one monitor it lives on |
+| Floating mark | On the window, top-right corner — left of a sticky mark | A window you set **floating** |
 | Badge, glyph's **top-left** | Space Bar | That window (or one in the group) is **sticky** |
 | Badge, glyph's **bottom-left** | Space Bar | That window is **floating** |
 | `+n` / count badge, glyph's **top-right** | Space Bar | How many windows a grouped glyph holds |
 
-Floating has no on-window mark. The badges have no Settings
+A window that floats only because its Space is in Floating
+layout wears no floating mark. The badges have no Settings
 toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
+:::
 
 **Drag a window onto a Space** to move it there:
 

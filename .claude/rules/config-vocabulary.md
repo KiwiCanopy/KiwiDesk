@@ -57,7 +57,7 @@ pick — which is why the same terms drifted twice (#228 split
 `tab_background`; R6 renamed it). Reuse these; don't coin a
 synonym:
 
-- **mark** — the on-window state glyph (sticky). Retired as a
+- **mark** — the on-window state glyph (sticky, floating). Retired as a
   name for it: *indicator*, *chip*.
 - **badge** — a small disc on a bar item's corner: the group
   count badge, and the Space Bar's sticky / floating state

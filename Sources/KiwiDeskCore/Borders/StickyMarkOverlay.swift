@@ -1,6 +1,7 @@
 import AppKit
 
-/// On-window sticky mark overlay (#414, #421, ui-designer 2026-07-21).
+/// On-window state mark overlay (#414, #421, ui-designer
+/// 2026-07-21): sticky and floating glyphs on one plate (#1799).
 @MainActor
 final class StickyMarkOverlay {
     static let size: CGFloat = StickyMarkPlate.size
@@ -18,9 +19,10 @@ final class StickyMarkOverlay {
     private var panel: NSPanel?
     private let plate = StickyMarkPlate()
     private let target: CGWindowID
-    /// Scope glyph (`infinity` or `pin.fill`, #445).
-    private var symbolName = StickyStyle.symbolName
+    /// Outermost first; the plate draws as many as fit (#1799).
+    private var glyphs: [StickyMarkManager.Glyph] = [.sticky()]
     private var currentWidth: CGFloat = size
+    private var pillShown = false
     private var expandWork: DispatchWorkItem?
     private var collapseWork: DispatchWorkItem?
     private(set) var lastFrame: CGRect?
@@ -34,6 +36,7 @@ final class StickyMarkOverlay {
         lastFrame = frame
         let panel = self.panel ?? makePanel()
         self.panel = panel
+        fitGlyphs(to: frame)
         panel.setFrame(
             markRect(for: frame, width: currentWidth),
             display: false
@@ -48,9 +51,10 @@ final class StickyMarkOverlay {
         panel?.order(.above, relativeTo: Int(target))
     }
 
-    /// Tints mark glyph (#429).
-    func setMarkColor(_ hex: String) {
-        plate.setMarkColor(hex)
+    /// Whether the plate carries a sticky glyph — the pills are
+    /// sticky's (#1799).
+    var isSticky: Bool {
+        glyphs.contains { $0.kind == .sticky }
     }
 
     /// Draws the mark as tinted glass or the `.hudWindow` badge
@@ -59,20 +63,50 @@ final class StickyMarkOverlay {
         plate.setGlass(on)
     }
 
-    /// Sets scope glyph symbol name (#445).
-    func setSymbol(_ name: String) {
-        guard name != symbolName else { return }
-        symbolName = name
-        if panel != nil { applySymbol() }
+    /// Sets the glyphs, outermost first, with their colours (#445,
+    /// #429, #1799).
+    func setGlyphs(_ wanted: [StickyMarkManager.Glyph]) {
+        guard !wanted.isEmpty else { return }
+        let changed = wanted != glyphs
+        glyphs = wanted
+        if changed, panel != nil { applyGlyphs() }
+        plate.setMarkColor(wanted[0].color)
     }
 
-    private func applySymbol() {
-        plate.symbol.image = NSImage(
-            systemSymbolName: symbolName,
-            accessibilityDescription: L(
-                "sticky.mark.ax",
-                "Sticky window"
-            )
+    /// Draws as many glyphs as `frame` fits (#1799).
+    private func fitGlyphs(to frame: CGRect) {
+        let fit = StickyMarkPlate.fittingSlots(
+            glyphs.count,
+            windowWidth: frame.width
+        )
+        if fit != plate.slotCount { applyGlyphs(slots: fit) }
+        if !pillShown { currentWidth = collapsedWidth }
+    }
+
+    private var collapsedWidth: CGFloat {
+        Self.size * CGFloat(plate.slotCount)
+    }
+
+    private func applyGlyphs(slots: Int? = nil) {
+        let count = slots ?? plate.slotCount
+        plate.symbol.image = Self.image(glyphs[0])
+        let inner = count > 1 && glyphs.count > 1 ? glyphs[1] : nil
+        plate.setInner(
+            inner.flatMap(Self.image),
+            hex: inner?.color ?? ""
+        )
+    }
+
+    private static func image(
+        _ glyph: StickyMarkManager.Glyph
+    ) -> NSImage? {
+        let label =
+            glyph.kind == .sticky
+            ? L("sticky.mark.ax", "Sticky window")
+            : L("floating.mark.ax", "Floating window")
+        return NSImage(
+            systemSymbolName: glyph.symbolName,
+            accessibilityDescription: label
         )
     }
 
@@ -83,7 +117,8 @@ final class StickyMarkOverlay {
         collapseWork = nil
         // Retire in the collapsed state so a later re-show cannot
         // resurrect the mark mid-pill.
-        currentWidth = Self.size
+        pillShown = false
+        currentWidth = collapsedWidth
         plate.setNameShown(false, animated: false, duration: 0)
         panel?.orderOut(nil)
     }
@@ -116,7 +151,7 @@ final class StickyMarkOverlay {
                 return
             }
             self.setPill(
-                width: Self.size,
+                width: self.collapsedWidth,
                 nameShown: false,
                 on: frame
             )
@@ -134,6 +169,7 @@ final class StickyMarkOverlay {
         on frame: CGRect
     ) {
         currentWidth = width
+        pillShown = nameShown
         let rect = markRect(for: frame, width: width)
         guard let panel else { return }
 
@@ -225,7 +261,7 @@ final class StickyMarkOverlay {
             .fullScreenAuxiliary,
             .ignoresCycle,
         ]
-        applySymbol()
+        applyGlyphs()
         panel.contentView = plate
         return panel
     }

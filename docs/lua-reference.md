@@ -4066,22 +4066,45 @@ through the one **Liquid Glass** switch
 sticky.set_liquid_glass(false)
 ```
 
+:::unreleased
+### floating.set_mark
+
+**Expects:** boolean (default `true`).
+
+**Does:** shows or hides the on-window floating mark — the
+`macwindow.on.rectangle` glyph at the top-right corner of a
+window set floating (`toggle_float`), including one in a
+floating-mode space. A window that floats only because its
+space is in floating mode gets no mark. A window that is also
+sticky carries both glyphs on one plate, the sticky one
+outermost; on a window too narrow for both, the floating glyph
+is left out. The mark draws as Liquid Glass under
+[`sticky.set_liquid_glass`](#stickyset_liquid_glass).
+
+**Example:**
+
+```lua
+floating.set_mark(false)
+```
+
 ### floating.set_color
 
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
 empty string `""` for **Automatic** (default `""`).
 
-**Does:** tints the Space Bar floating badge — a filled disc in
-the color with an auto-contrast glyph. Floating windows have no
-on-window mark, so this affects the Space Bar badge only. `""`
-is Automatic (the badge keeps the count-badge fill); any
-non-empty value must parse as a hex color.
+**Does:** tints the floating mark — the on-window mark and the
+Space Bar floating badge read this one value, as
+[`sticky.set_color`](#stickyset_color) describes for sticky. On
+a window that is both sticky and floating, Liquid Glass takes
+the sticky color and the floating glyph the label color. `""`
+is Automatic; any non-empty value must parse as a hex color.
 
 **Example:**
 
 ```lua
 floating.set_color("#8E5DE0")
 ```
+:::
 
 ## Launching Apps
 

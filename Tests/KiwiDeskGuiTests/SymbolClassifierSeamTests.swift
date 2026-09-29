@@ -33,9 +33,11 @@ struct SymbolClassifierSeamTests {
         "Sources/KiwiDeskCore/Bar/StateBadgeView.swift":
             "builds a badge image from a fixed name",
         "Sources/KiwiDeskCore/Borders/StickyMarkOverlay.swift":
-            "builds the sticky mark image from a fixed name",
-        "Sources/KiwiDeskCore/Borders/StickyMarkPlate.swift":
+            "builds the state mark images from fixed names",
+        "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Pill.swift":
             "render-time net on a name `homeSpaceMark` classified",
+        "Tests/KiwiDeskCoreTests/FloatingMarkTests.swift":
+            "builds the floating glyph from a fixed name",
         "Sources/KiwiDeskCore/Borders/SizeLimitOverlay.swift":
             "builds the refusal pill's image from `pillSymbol`",
         "Tests/KiwiDeskCoreTests/ResizeRefusalSymbolTests.swift":
@@ -93,10 +95,10 @@ struct SymbolClassifierSeamTests {
     /// The other spelling of a classifier: binding the lookup with
     /// `if let` / `guard let` and drawing the NAME on the else arm
     /// — the status item's mode-icon arm once did (#1538). One
-    /// render-time net may bind: `StickyMarkPlate` draws a name
+    /// render-time net may bind: `StickyMarkPlate+Pill` draws a name
     /// `homeSpaceMark` already classified.
     private let bindingAllowed: [String: String] = [
-        "Sources/KiwiDeskCore/Borders/StickyMarkPlate.swift":
+        "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Pill.swift":
             "render-time net on a name `homeSpaceMark` classified"
     ]
 

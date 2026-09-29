@@ -95,6 +95,8 @@ struct FloatFlagReaderCensusTests {
         "State/StateCoordinator+FloatFocus.swift": [.ruledToStay: 1],
         // The badge and its group-breaking (owner, 2026-09-13).
         "App/KiwiCore+SpaceBarItems.swift": [.ruledToStay: 2],
+        // The on-window floating mark, the badge's twin (#1799).
+        "App/KiwiCore+StickyMarks.swift": [.ruledToStay: 1],
     ]
 
     private func pinned(_ file: String) -> Int? {

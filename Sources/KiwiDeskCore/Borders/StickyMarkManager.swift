@@ -1,18 +1,47 @@
 import AppKit
 import CoreGraphics
 
-/// Manages sticky mark overlay indicators per sticky window
-/// (#414, `BorderManager`).
+/// Manages the on-window state marks (#414): sticky and, since
+/// #1799, floating — one plate per window, sticky outermost
+/// (`BorderManager`).
 @MainActor
 public final class StickyMarkManager {
+    /// One glyph on a window's plate.
+    public struct Glyph: Equatable {
+        public enum Kind: Equatable {
+            case sticky
+            case floating
+        }
+
+        public let kind: Kind
+        /// SF Symbol name (`infinity` / `pin.fill`, #445;
+        /// `FloatingStyle.symbolName`).
+        public let symbolName: String
+        /// Hex color string; empty = automatic (#429).
+        public let color: String
+
+        public static func sticky(
+            _ symbolName: String = StickyStyle.symbolName,
+            color: String = ""
+        ) -> Glyph {
+            Glyph(kind: .sticky, symbolName: symbolName, color: color)
+        }
+
+        public static func floating(color: String = "") -> Glyph {
+            Glyph(
+                kind: .floating,
+                symbolName: FloatingStyle.symbolName,
+                color: color
+            )
+        }
+    }
+
     /// Window mark specification.
     public struct Spec: Equatable {
         public let window: WindowID
         public let frame: CGRect
-        /// Hex color string (`StickyStyle.color`, #429).
-        public let color: String
-        /// SF Symbol name for sticky scope (`infinity` / `pin.fill`, #445).
-        public let symbolName: String
+        /// Outermost first: sticky, then floating (#1799).
+        public let glyphs: [Glyph]
         /// Liquid Glass as drawn — the stored leaf through
         /// `LiquidGlassGate` (#1621).
         public let glass: Bool
@@ -20,14 +49,12 @@ public final class StickyMarkManager {
         public init(
             window: WindowID,
             frame: CGRect,
-            color: String = "",
-            symbolName: String = StickyStyle.symbolName,
+            glyphs: [Glyph] = [.sticky()],
             glass: Bool
         ) {
             self.window = window
             self.frame = frame
-            self.color = color
-            self.symbolName = symbolName
+            self.glyphs = glyphs
             self.glass = glass
         }
     }
@@ -54,7 +81,7 @@ public final class StickyMarkManager {
 
     public init() {}
 
-    /// Windows currently displaying a sticky mark.
+    /// Windows currently displaying a mark.
     public var markedWindows: Set<WindowID> {
         Set(overlays.keys)
     }
@@ -80,8 +107,7 @@ public final class StickyMarkManager {
                 )
             overlays[spec.window] = overlay
             overlay.setGlass(spec.glass)
-            overlay.setMarkColor(spec.color)
-            overlay.setSymbol(spec.symbolName)
+            overlay.setGlyphs(spec.glyphs)
             overlay.update(
                 frame: FollowSource.syncFrame(
                     spec: spec.frame,
@@ -127,8 +153,9 @@ public final class StickyMarkManager {
 
     /// Flashes expanded home-space reorder hint (#421).
     /// Returns whether a pill was actually DRAWN (#1255): a
-    /// window with no mark overlay silently draws nothing, and
-    /// the refusal's sound follows the drawing.
+    /// window with no sticky glyph silently draws nothing — the
+    /// pills are sticky's (#1799) — and the refusal's sound
+    /// follows the drawing.
     @discardableResult
     public func flash(
         _ id: WindowID,
@@ -136,7 +163,9 @@ public final class StickyMarkManager {
         mark: SpaceMark,
         delay: TimeInterval
     ) -> Bool {
-        guard let overlay = overlays[id] else { return false }
+        guard let overlay = overlays[id], overlay.isSticky else {
+            return false
+        }
         overlay.flash(
             format: format,
             mark: mark,

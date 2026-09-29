@@ -9965,6 +9965,7 @@ intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
 
 **[Principle]**
 
+:::unreleased
 **Sticky has no native cue, so KiwiDesk gives it two marks
 and ships both on.** A sticky window can look identical to a
 normal one, and unlike focus — which duplicates an OS cue —
@@ -9972,9 +9973,10 @@ there is nothing to fall back to. So it gets an on-window mark
 (top-RIGHT corner — top-left belongs to the traffic lights)
 and a Space Bar badge (top-LEFT of its glyph — the bar
 reserves top-right for the group count; an intentional
-cross-surface difference). Floating gets a badge only in the
-bar, where tiled and floating are otherwise indistinguishable
-— on the window itself floating is self-evident. Badges are
+cross-surface difference). Floating gets both marks too, and
+the on-window one for the same reason as sticky's: it is what
+survives the Space Bar being hidden — see the floating mark
+entry below for why floating is not self-evident. Badges are
 Space-Bar-only (the per-layout App Bar shows no state badges),
 survive grouping as an "at least one" aggregate, and have no
 GUI toggle.
@@ -9987,12 +9989,13 @@ I act* — and a census `gate:` records the same dependency as
 data, for every surface that reads the census to decide what
 to grey and what to say about it. A declaration that is
 backwards is wrong wherever it is rendered, which is why the
-row carries none on either axis. What earns a gate is the
-**Floating** tint: it paints only the Space Bar's badge, so
-with the bar off there is genuinely nothing left for it to
-colour. The two rows sit one card apart and their gates
-differ, which is that reading applied honestly rather than an
-inconsistency.
+row carries none on either axis. The floating mark's switch is
+unconditional for the same reason, and so is the **Floating**
+tint beside it: it colours the on-window floating mark as well
+as the Space Bar's badge, so with the bar off it still has
+something to paint. A tint that painted ONLY a bar surface would
+earn the gate; neither mark colour does.
+:::
 
 **A floor guards a trap, not a choice** — so the switch gets
 no warning, only an honest `?`. Turning the mark off costs
@@ -10103,13 +10106,14 @@ like any other slot), and the rarer array-order case (a track swap
 stepping toward a folded overflow) is left uncued for now rather
 than duplicate the geometric detector against the array-step model.
 
+:::unreleased
 **The sticky/floating marks are a filled state-color pair,
 defaulting to Automatic.** The one sticky glyph reads the one
 `sticky.color`, so the on-window mark and the Space Bar sticky
 badge can never drift to different colors; floating gets its own
-`floating.color` (a minimal `floating` namespace, since floating
-has no other setting) tinting its Space Bar badge only — it has no
-on-window mark. The color owns the *fill*, and the glyph on top is
+`floating.color` (a minimal `floating` namespace: the colour and
+the floating mark's switch) tinting its Space Bar badge and its
+on-window mark alike. The color owns the *fill*, and the glyph on top is
 auto-contrasted black/white for legibility (a filled disc shows
 its hue far better than a thin glyph stroke at the 7–9 pt badge
 size, and an auto-contrast glyph means any picked fill stays
@@ -10133,6 +10137,7 @@ where `square.stack.3d.up.fill`'s perspective smeared); the
 pushpin family is off-limits — `SpaceAssignmentChip` uses
 `pin.fill` for the opposite idea (a window bound to one space).
 (#429)
+:::
 
 **On Liquid Glass the mark's disc goes** (#1621). It existed
 because `.hudWindow` carries no colour; tinted glass carries the
@@ -10146,6 +10151,46 @@ colour that is never on screen. The two surfaces still read as
 one mark through the one `sticky.color`: a disc on the Space Bar
 badge, the glass's tint on the mark. With the finish off, or
 Reduce transparency on, the disc returns.
+
+:::unreleased
+**Floating is not self-evident, so a window set floating wears
+an on-window mark** ([#1799](https://github.com/KiwiCanopy/KiwiDesk/issues/1799)).
+The old reading — a float overlaps a tiled plane, so the window
+itself says it floats — held only while every float sat over
+tiles. On a floating-mode space a window set floating looks
+exactly like its siblings, yet the flag decides what happens
+when it is dragged onto a tiled space; and a float resized into
+a gap reads as tiled anywhere. The Space Bar badge answers the
+question, but not with the bar off, and not for a user who is
+looking at the window.
+
+The mark reads **the floating flag, never `EffectiveFloat`**,
+the same predicate as the Space Bar badge, so the two surfaces
+cannot disagree. That includes a window set floating **inside a
+floating-mode space**: it wears the mark, because that is the
+case the flag is invisible in. A window that floats only because
+its space does wears none — every member would carry the
+layout's own symbol and say nothing, the #1286 badge argument
+unchanged. Do not "simplify" the check to the predicate.
+
+It ships **on**, behind its own `floating.mark` switch beside
+the sticky one — not folded into it, because the sticky switch
+also carries sticky's refusal pills, and one toggle would couple
+two meanings. A window that is both sticky and floating wears
+**one plate with both glyphs side by side, sticky outermost**:
+sticky keeps the top-right square its home-space pill is pinned
+to (#421), the floating glyph sits just inside it, and the pill
+grows from the plate's leading edge so neither glyph moves.
+Stacked would cover a second strip of the window; one combined
+glyph would read as neither. Where the window is too narrow for
+both beside the traffic lights, the floating glyph drops first,
+since sticky has no native cue at all and floating has overlap.
+The glyph is the badge's own `macwindow.on.rectangle`, so the
+bar and the window read as one mark. On Liquid Glass the plate
+carries ONE tint — the outermost glyph's colour, so sticky's
+when both show — because a glass has one backdrop beneath it;
+the flat finish keeps each glyph's own disc.
+:::
 
 **Overrides are visible-but-inherited, never hidden.** A
 per-layout or per-space override row always shows — dimmed
