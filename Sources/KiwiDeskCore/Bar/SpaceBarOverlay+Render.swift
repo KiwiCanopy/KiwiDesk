@@ -82,6 +82,11 @@ extension SpaceBarOverlay {
             strip: strip,
             horizontal: horizontal
         )
+        let runFrame = ShelfOverflow.runFrame(
+            in: itemContainer.bounds,
+            offset: scrollOffset,
+            horizontal: horizontal
+        )
         let metrics = Self.runMetrics(
             lengths: lengths,
             gap: gap,
@@ -90,15 +95,13 @@ extension SpaceBarOverlay {
             viewport: viewport,
             horizontal: horizontal,
             alignment: style.alignment,
-            pad: SpaceBarItemView.pad,
-            scrollOffset: scrollOffset
+            pad: SpaceBarItemView.pad
         )
-        let runStart: CGFloat
-        if let first = metrics.itemFrames.first {
-            runStart = horizontal ? first.minX : first.minY
-        } else {
-            runStart = metrics.frontStart
-        }
+        let runStart =
+            (metrics.itemFrames.first.map {
+                horizontal ? $0.minX : $0.minY
+            } ?? metrics.frontStart)
+            + (horizontal ? runFrame.minX : runFrame.minY)
         let plateFrame =
             pinFront
             ? CGRect(
@@ -143,11 +146,36 @@ extension SpaceBarOverlay {
         recordHitFrames(
             items: items,
             frames: itemFrames,
+            runOrigin: runFrame.origin,
             strip: strip,
             fades: fades,
             horizontal: horizontal
         )
+        scrollRun = ScrollRun(
+            items: items,
+            frames: itemFrames,
+            lengths: lengths,
+            entries: runEntries,
+            front: scrolledFront,
+            total: scrolledTotal,
+            viewport: viewport,
+            gap: gap,
+            depth: depth,
+            horizontal: horizontal,
+            strip: strip,
+            style: style,
+            content: pinFront
+                ? contentFrame
+                : contentFrame.offsetBy(
+                    dx: -runFrame.minX,
+                    dy: -runFrame.minY
+                ),
+            rides: !pinFront,
+            frontApp: pinFront ? nil : frontApp,
+            frontStart: metrics.frontStart
+        )
         let glides = recordGlide(items, content: style.inactiveContent)
+        BarMotion.runLayout { moveFrame(itemRun, runFrame, glides) }
         placeItems(itemFrames, glides: glides)
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
@@ -184,7 +212,7 @@ extension SpaceBarOverlay {
             frontApp,
             after: pinFront ? spacesAxis + gap : metrics.frontStart,
             strip: strip,
-            nameBound: pinFront ? axis : viewport,
+            nameBound: pinFront ? axis : viewport + scrollOffset,
             style: style,
             horizontal: horizontal
         )

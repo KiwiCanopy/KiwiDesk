@@ -38,7 +38,9 @@ struct SpaceBarGlideWiringTests {
             manager.overlayForTesting(barTitleDisplay)
         )
         var writes: [(view: NSView, travels: Bool)] = []
-        overlay.moveFrame = { view, _, travels in
+        // The run view carries the scroll, not the glide's items.
+        overlay.moveFrame = { [unowned overlay] view, _, travels in
+            guard view !== overlay.itemRun else { return }
             writes.append((view, travels))
         }
         var second = collapsedBar(

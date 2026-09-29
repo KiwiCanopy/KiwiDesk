@@ -56,7 +56,7 @@ struct BarAlignmentTests {
         #expect(frames[1].maxY == 100)
     }
 
-    @Test("Overflow collapses every alignment to the offset")
+    @Test("Overflow collapses every alignment to the run start")
     func overflowCollapses() {
         for alignment in AppBarStyle.BarAlignment.allCases {
             let frames = AppBarOverlay.frames(
@@ -64,10 +64,9 @@ struct BarAlignmentTests {
                 in: bounds,
                 gap: 0,
                 horizontal: true,
-                alignment: alignment,
-                scrolledBy: 250
+                alignment: alignment
             )
-            #expect(frames[0].minX == -250)
+            #expect(frames[0].minX == 0)
         }
     }
 

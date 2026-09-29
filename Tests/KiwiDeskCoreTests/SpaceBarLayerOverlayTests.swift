@@ -244,7 +244,7 @@ struct SpaceBarLayerOverlayTests {
                     ends: overlay.itemViews[0].ends
                 )
         )
-        #expect(overlay.layerDivider.superview === overlay.itemContainer)
+        #expect(overlay.layerDivider.superview === overlay.itemRun)
     }
 
     /// The same rule on a vertical bar: the trim and the placement
