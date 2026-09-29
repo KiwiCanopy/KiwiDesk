@@ -66,10 +66,12 @@ struct SpaceBarAwayTests {
         let core = makeCore()
         add(core, 1, to: "2")
         park(core, 7, in: "2", rank: 0)
-        let (apps, overflow, _) = core.spaceBarApps(
+        let content = core.spaceBarApps(
             in: core.state.workspaces["2"]!,
             style: core.tiler.settings.spaceBarLook
         )
+        let apps = content.apps
+        let overflow = content.before.windows + content.after.windows
         // Same app name: a merged away member would group with
         // the present one and read `count == 2` here.
         #expect(apps.map(\.name) == ["Safari"])
@@ -90,10 +92,10 @@ struct SpaceBarAwayTests {
         // Ranked BETWEEN the two, so a merge breaks the run into
         // Safari · Mail · Safari.
         park(core, 2, app: "Mail", in: "2", rank: 1)
-        let (apps, _, _) = core.spaceBarApps(
+        let apps = core.spaceBarApps(
             in: core.state.workspaces["2"]!,
             style: core.tiler.settings.spaceBarLook
-        )
+        ).apps
         #expect(apps.map(\.name) == ["Safari"])
         #expect(apps.map(\.count) == [2])
     }

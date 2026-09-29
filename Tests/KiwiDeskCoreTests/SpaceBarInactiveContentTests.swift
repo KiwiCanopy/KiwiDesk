@@ -130,12 +130,20 @@ struct SpaceBarInactiveContentTests {
             spaceGlyph: .text("2", tinted: true),
             apps: [app("Mail", 2), app("Web", 1)],
             active: false,
-            overflow: [WindowID(901), WindowID(902)],
-            focusInOverflow: true
+            before: .init(windows: [WindowID(900)]),
+            after: .init(
+                windows: [WindowID(901), WindowID(902)],
+                holdsFocus: true
+            ),
+            drawn: .init(window: 1..<3, count: 4)
         ).collapsed(to: .count)
-        #expect(item.collapse?.windows == 5)
+        #expect(item.collapse?.windows == 6)
         #expect(item.overflow == 0)
         #expect(!item.focusInOverflow)
+        #expect(item.overflowBefore.isEmpty)
+        // A collapsed chip draws no strip, so the pointer on it
+        // holds none (#1528 item 21).
+        #expect(item.drawn == nil)
     }
 
     /// A second collapse keeps the first's count rather than

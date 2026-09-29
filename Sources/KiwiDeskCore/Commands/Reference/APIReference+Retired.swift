@@ -46,6 +46,9 @@ extension APIReference {
             "space_bar.set_front_app_title_cap"
         map["set_float_nudge"] = "set_float_placement"
         map["kiwishelf.set_item_padding"] = "kiwishelf.set_glyph_size"
+        // The centred strip draws one more glyph at a row's end,
+        // so the count is a span, not a cap (#1528).
+        map["space_bar.set_glyph_cap"] = "space_bar.set_glyph_span"
         // Every window stroke takes the border's width and
         // corners (#1742).
         map["drag.set_ghost_border_width"] = "border.set_width"

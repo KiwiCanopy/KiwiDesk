@@ -1535,7 +1535,7 @@ ring's reason rather than a new one: a popup layer is not one of
 adds a glyph — plus two more for a submenu — is describing a
 gesture rather than the space. The filter therefore sits where the
 bar's members are read, not in tracking or the ignore gate, and it
-runs **before** the same-app grouping and the glyph cap (#376), so
+runs **before** the same-app grouping and the glyph span (#376), so
 an overlay can neither split a run nor reserve a capped slot the
 bar then draws nothing in. The App Bar needs no such filter: it
 builds from the tiled members, which a structural float has
@@ -11236,7 +11236,7 @@ untinted content (`dim_factor`) and every colour the two bars
 share — is `kiwishelf`'s. A field each bar may set for
 itself stays on that bar, whether or not the other bar has one
 like it: the active indicator's shape, the App Bar's content and
-title cap, the Space Bar's glyph cap, spring delay, front-app
+title cap, the Space Bar's glyph span, spring delay, front-app
 title cap, its active-Space dim and the colour of the focused
 window's glyph inside a Space item are examples, not the list.
 
@@ -11596,12 +11596,12 @@ defect (`LayoutSchematicCaptionTests`).
 **The Space Bar always groups; there is no knob.** (#293.)
 Adjacent same-app runs collapse into one glyph + count badge
 unconditionally — unlike the App Bar's `group_adjacent_windows`
-toggle. The glyph cap depends on grouping running **first**: an
-ungrouped mode would burn the cap on duplicates while conveying
-less. That ordering is the settled part; the cap's *value* is a
-knob (`space_bar.set_glyph_cap`, default 5, range 1–12, #376) —
-group first, then cap, whatever the cap is. The overflow badge's
-`+n` counts hidden **windows**, not slots — the same unit as the
+toggle. The glyph span depends on grouping running **first**: an
+ungrouped mode would burn the span on duplicates while conveying
+less. That ordering is the settled part; the span's *value* is a
+knob (`space_bar.set_glyph_span`, default 5, range 1–12, #376,
+#1528) — group first, then span, whatever the span is. A `+n`
+badge counts hidden **windows**, not slots — the same unit as the
 per-glyph count badges and the item's accessibility label.
 
 :::unreleased
@@ -11638,6 +11638,40 @@ pointer settles rather than drawn into the render, so it is
 current without the bar re-rendering on every title change. A
 setting to turn glyph clicks off waits for misclicks measured on
 a device (#1514).
+:::
+
+:::unreleased
+**A Space's strip centres on its focus, holds under the pointer,
+and does not scroll.** (#1528 items 17–22, owner rulings
+2026-09-29 from HTML previews, graded by ui-designer.) The span's
+glyphs centre on the focused app — the active Space's system
+focus, another Space's remembered one — clamped to the row, so no
+cell is ever empty and a side without a `+n` says you are at that
+end; a centre with blank cells read as missing apps. While the row
+overflows, the item is a fixed span + 2 cells: a `+n` on each side
+of the span in the middle, span + 1 glyphs and one `+n` at an end,
+so a focus change never reflows the items after it — which is why
+the setting is a *span* and not a *cap*, one glyph more showing at
+an end. The two `+n` stay discs rather than the section's count
+chips: a count chip pages the section, a disc lists windows, and
+one shape keeps one verb.
+
+The strip never scrolls. The wheel over the bar already scrolls
+the section, and a second scroll on the same axis would let where
+the pointer happens to rest decide what a swipe moves; the two
+menus reach every hidden window in one click, and centring
+removes the reason to scroll. A chip under the pointer holds its
+strip until the pointer leaves, so a second click cannot land on
+an app the first one slid there; everything else re-centres at
+once, walking by whole cells through `BarMotion` — the glyph
+carried off fading under its disc, the one brought in fading out
+of the other — and landing at once under Reduce Motion.
+
+The span stays out of a look: it decides which windows are one
+click away and which sit behind a menu — functionality, with
+`title_cap` and `kiwishelf.minimum` — and every bundled look
+writes its whole register, so picking one would reset a span the
+user set.
 :::
 
 **The Space Bar's two-accent model.** (#293.) Three tinted states,

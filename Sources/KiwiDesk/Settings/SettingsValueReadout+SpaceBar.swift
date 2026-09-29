@@ -49,11 +49,11 @@ extension SettingsValueReadout {
                 n.itemLabel,
                 AppBarOptions.itemLabel
             )
-        case .spaceBarGlyphCap:
+        case .spaceBarGlyphSpan:
             return spaceBarRow(
                 census,
-                trimmed(Double(o.glyphCap)),
-                trimmed(Double(n.glyphCap))
+                trimmed(Double(o.glyphSpan)),
+                trimmed(Double(n.glyphSpan))
             )
         case .spaceBarGlyphGap:
             return spaceBarPointsRow(census, o.glyphGap, n.glyphGap)

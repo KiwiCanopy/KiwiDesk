@@ -83,16 +83,16 @@ struct NumberTrapSafetyTests {
         )
     }
 
-    @Test("space_bar.set_glyph_cap clamps a huge value, no trap")
-    func glyphCapHuge() throws {
+    @Test("space_bar.set_glyph_span clamps a huge value, no trap")
+    func glyphSpanHuge() throws {
         let parsed = SpaceBarCommandSetting.parse(
-            field: "glyph_cap",
+            field: "glyph_span",
             args: [.number(1e300)]
         )
         var style = SpaceBarStyle()
         try parsed.get().apply(to: &style)
         #expect(
-            style.glyphCap == SpaceBarStyle.glyphCapRange.upperBound
+            style.glyphSpan == SpaceBarStyle.glyphSpanRange.upperBound
         )
     }
 
@@ -106,7 +106,7 @@ struct NumberTrapSafetyTests {
         )
         #expect(
             (try? SpaceBarCommandSetting.parse(
-                field: "glyph_cap",
+                field: "glyph_span",
                 args: [.number(.infinity)]
             ).get()) == nil
         )

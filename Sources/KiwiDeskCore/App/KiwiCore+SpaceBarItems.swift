@@ -6,22 +6,27 @@ import AppKit
 /// `inactive_content` — is `KiwiCore+SpaceBarRun`. Everything is
 /// read from snapshotted state — no AX calls here either.
 extension KiwiCore {
+    /// A Space chip's content (#1528): the drawn glyphs, the
+    /// `+N` discs before and after them, and what it drew.
+    struct SpaceBarStripContent {
+        var apps: [SpaceBarItemView.App]
+        var before: SpaceBarStrip.Disc
+        var after: SpaceBarStrip.Disc
+        var drawn: SpaceBarStrip.Drawn
+    }
+
     /// Adjacent same-app runs in the space's flat array order
     /// collapse into one glyph + count (the App Bar's grouping
-    /// model, without focused-inside expansion), then the cap
-    /// keeps the first `style.resolvedGlyphCap` slots (#376).
-    /// Grouping runs first by design so the cap counts app
-    /// *groups*, not raw windows. Returns the visible slots and
-    /// the *windows* hidden past the cap, in row order (the "+n"
-    /// badge counts them, its menu lists them, #1528).
+    /// model, without focused-inside expansion), so the span
+    /// counts app *groups*, not raw windows (#376). The drawn
+    /// groups are `SpaceBarStrip.window`, centred on the anchor
+    /// group — or `held`, what a chip under the pointer drew,
+    /// kept while the row still draws it (#1528 items 17, 21).
     func spaceBarApps(
         in space: Space,
-        style: SpaceBarLook
-    ) -> (
-        apps: [SpaceBarItemView.App],
-        overflow: [WindowID],
-        focusHidden: Bool
-    ) {
+        style: SpaceBarLook,
+        held: SpaceBarStrip.Drawn? = nil
+    ) -> SpaceBarStripContent {
         // One pass: ids and names stay index-aligned with no
         // unreachable "?" fallback. Sticky glyphs TRAVEL with
         // the user (#414 QA): a sticky window is listed only
@@ -35,7 +40,7 @@ extension KiwiCore {
         // another macOS Desktop is macOS's (#1228).
         let members = state.effectiveMembers(of: space)
         // Transient overlays (a popup's AX windows, a launcher
-        // panel) are dropped HERE, before grouping and the cap,
+        // panel) are dropped HERE, before grouping and the span,
         // so no slot is reserved for a glyph nobody draws — the
         // same draw-time decision the focus ring already makes
         // (#300, #683), never a widening of tracking or of the
@@ -52,24 +57,62 @@ extension KiwiCore {
             of: pairs.map { $0.1 },
             specials: pairs.map { $0.2 }
         ).map { Array(windows[$0]) }
-        let cap = style.resolvedGlyphCap
-        let visible = groups.prefix(cap)
-        let hidden = groups.dropFirst(cap)
-        let apps = visible.compactMap { group in
+        let span = style.resolvedGlyphSpan
+        let anchor = stripAnchors(of: space).lazy.compactMap { focus in
+            groups.firstIndex { $0.contains(focus) }
+        }.first
+        let drawn =
+            held.flatMap {
+                $0.holds(count: groups.count, span: span) ? $0 : nil
+            }
+            ?? SpaceBarStrip.Drawn(
+                window: SpaceBarStrip.window(
+                    count: groups.count,
+                    span: span,
+                    anchor: anchor
+                ),
+                count: groups.count
+            )
+        let window = drawn.window
+        let apps = groups[window].compactMap { group in
             spaceBarApp(group: group, space: space, style: style)
         }
-        // The focused window can be hidden past the cap: the "+n"
-        // then tints to signal focus is behind it (#376). It
-        // reads the SYSTEM focus, like every glyph beside it —
+        // A side hiding the focused window tints its disc (#376).
+        // It reads the SYSTEM focus, like every glyph beside it —
         // an injected ∞ traveler holds `lastFocused` and can
         // never be the membership-guarded `space.focused`
-        // (#431), so asking the slot left the one case this
-        // tint exists for showing nothing at all.
-        let focusHidden =
-            state.workspaces.lastFocused.map { focus in
-                hidden.contains { $0.contains(focus) }
-            } ?? false
-        return (apps, hidden.flatMap { $0 }, focusHidden)
+        // (#431) — and only on the active Space, the one that
+        // carries it: on a second screen the shown Space is not
+        // it (#1214), so a tint there marks a focus no glyph on
+        // that bar wears.
+        let focus =
+            space.id == activeSpace?.id ? state.workspaces.lastFocused : nil
+        let disc = { (windows: [WindowID]) in
+            SpaceBarStrip.Disc(
+                windows: windows,
+                holdsFocus: focus.map(windows.contains) ?? false
+            )
+        }
+        return SpaceBarStripContent(
+            apps: apps,
+            before: disc(groups[..<window.lowerBound].flatMap { $0 }),
+            after: disc(groups[window.upperBound...].flatMap { $0 }),
+            drawn: drawn
+        )
+    }
+
+    /// The windows a chip may centre on, best first (#1528 item
+    /// 17) — WHICH app the strip shows, not which holds the
+    /// system focus: the active Space's system focus, the one an
+    /// ∞ traveler holds too (#431), then — where that is no
+    /// drawn group, a transient overlay's say — the Space's
+    /// remembered focus, which is all any other Space has.
+    private func stripAnchors(of space: Space) -> [WindowID] {
+        let remembered = [space.focused].compactMap { $0 }
+        guard space.id == activeSpace?.id,
+            let focus = state.workspaces.lastFocused
+        else { return remembered }
+        return [focus] + remembered
     }
 
     /// One glyph slot for a same-app run. Internal rather
