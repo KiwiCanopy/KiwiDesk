@@ -7,7 +7,8 @@ extension AppBarItemView {
     /// 0.4, NOT the Space Bar's 0.6 middle tier: a binary signal
     /// with no lower tier to collide with
     /// (`BarAccent.activeUnfocusedAlpha`). The group-count badge
-    /// dims with the icon it hangs on, as a Space Bar badge does.
+    /// dims with the item's focus, as a Space Bar badge does,
+    /// whatever the item draws — a glyph or title is tinted.
     func applyColors() {
         label.textColor = NSColor(kiwiHex: textColorHex)
         glyphLabel.textColor = NSColor(kiwiHex: textColorHex)

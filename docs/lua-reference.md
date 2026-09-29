@@ -2242,7 +2242,8 @@ values clamp.
 
 **Does:** sets the opacity of untinted idle content on both bars
 — an emoji identifier or app image on a Space you are not on, an
-inactive App Bar item's icon; tinted content takes the item
+inactive App Bar item's icon and count badge; tinted content
+takes the item
 colour instead. The Space Bar's middle tier is
 [`space_bar.set_active_dim_factor`](#space_barset_active_dim_factor).
 Lua-only (no GUI).
