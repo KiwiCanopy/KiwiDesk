@@ -10219,7 +10219,8 @@ don't assume from tone.
   `#8E8E93` cannot hold white at disc size (≈3.3:1). Grey is also
   the bars' own vocabulary rather than an import, Monochrome
   having picked `#636366` for exactly this role before the default
-  did, and a grey this near-neutral (three points of blue and
+  did (it has since taken the lighter `#8E8E93` under BLACK ink,
+  which holds 6.4:1, #1769), and a grey this near-neutral (three points of blue and
   nothing else) is all but protan/deutan invariant, so the
   colour-vision posture improves for free. What is neutral is the
   **default**, not the knob: a theme that wants a hue here still

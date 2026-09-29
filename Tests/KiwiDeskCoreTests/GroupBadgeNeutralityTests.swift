@@ -32,8 +32,8 @@ struct GroupBadgeNeutralityTests {
     /// owns makes the comment a second copy to forget. The
     /// reason is the part a file cannot state about itself.
     private static let choosers: [String: String] = [
-        "Monochrome": "picked this grey for the role FIRST — "
-            + "the default followed it, not the other way round",
+        "Monochrome": "a lighter grey under black ink, the "
+            + "palette's inverted badge",
         "Sunset": "a warm badge echoing the palette temperature",
         "Ultraviolet": "a cool badge, same reason",
         "Kiwi Neon": "the neon showcase's own accent",
@@ -44,10 +44,9 @@ struct GroupBadgeNeutralityTests {
     /// so it is checked: one whose badge quietly drifted back to
     /// the default would otherwise keep its exemption and its
     /// reason string while the claim went false (code review,
-    /// 2026-08-24). Monochrome is the interesting member — it
-    /// picked this grey before the default did, so it agrees on
-    /// the FILL and is a chooser by its INK, which is why the
-    /// pair is read rather than the fill alone.
+    /// 2026-08-24). The pair is read rather than the fill alone
+    /// because a palette may choose by its INK on the default
+    /// fill, as Monochrome did until #1769 lightened its grey.
     @Test("A palette listed as a chooser really chose one")
     func choosersDifferFromTheDefault() throws {
         let app = KiwiShelf()
