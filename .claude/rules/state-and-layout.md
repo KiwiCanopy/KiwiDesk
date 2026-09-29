@@ -717,6 +717,20 @@ editing here:
   floating's — never a per-writer answer, so the writers'
   `tiled.contains` stays a construction net rather than a served
   case.
+- A switch that **lands on a Space it un-stashes** raises that
+  Space's float layer once, after its own retile — `focusSpace`
+  through `raiseFloatsAndSticky`, whose direct hand-off an empty
+  float layer still needs, and `followSwitch` and the AX
+  focus-follow's `landFocusFollow` through
+  `raiseLandingFloats(thenFocus:)` (#412, #1727). A stash restore repositions but cannot
+  re-order, so a landing without the raise leaves its floats
+  buried under the tiled plane until the next genuine focus. A
+  landing whose Space is already shown (the #446 display follow,
+  `handFollowFocus`) un-stashes nothing and states that it owes
+  none. The focus the raise hands back, and the one
+  `raiseFloatsAbove` re-reads, is the focus ANCHOR, never the
+  Space's slot, or a sticky traveler loses it
+  (`FollowSwitchFloatRaiseTests`).
 - A mutation that can change **which windows overlap** — a
   reorder, a swap, a focus move that crosses more than one slot —
   **arms the matching z-order restore after its own retile**

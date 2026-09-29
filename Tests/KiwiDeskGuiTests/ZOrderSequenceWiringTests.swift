@@ -21,8 +21,8 @@ import Testing
 ///   `raiseFloor`.** Its argument — that the floor excludes
 ///   the focused window because no quiet raise can beat the key
 ///   window — lives on that function with the measurement behind
-///   it. Inlining a floor here would be invisible: no test in
-///   either target calls `raiseFloatsAndSticky`.
+///   it. Inlining a floor here would be invisible: no unit
+///   test observes the floor the raise hands the sequence.
 ///
 /// A **presence** scan, so deleting the call reds. That is the
 /// polarity that works: a containment guard is inert when the

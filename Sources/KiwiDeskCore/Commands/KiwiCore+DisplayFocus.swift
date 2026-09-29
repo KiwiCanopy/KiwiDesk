@@ -56,7 +56,9 @@ extension KiwiCore {
         // would fight it. This also fires on a cross-display
         // *window* click, redundantly with the AX focus-follow
         // path; the switch is idempotent (`target != activeSpace`
-        // guards the repeat) so the overlap is harmless.
+        // guards the repeat) so the overlap is harmless. No #412
+        // float raise: the target is already shown, so nothing
+        // was stashed (#1727).
         applyFocusedSpaceSwitch(to: target)
     }
 
@@ -105,9 +107,7 @@ extension KiwiCore {
             priorFrontmost: priorFrontmost
         )
         spaceSwitchRetile(newcomer: arriving ? id : nil)
-        if !floatLayerTargets().isEmpty {
-            raiseFloatsAndSticky(thenFocus: id)
-        }
+        raiseLandingFloats(thenFocus: id)
     }
 
     /// Pay the focus a `move_to_desktop_and_follow` owes the
@@ -128,7 +128,7 @@ extension KiwiCore {
     /// the user had just left, and emitted no `space_change` for
     /// anything subscribed to one (review, #1007).
     ///
-    /// Three of `followSwitch`'s five above, deliberately: the
+    /// Three of `followSwitch`'s six above, deliberately: the
     /// retile and the space settle belong to the caller, and the
     /// caller here is the event fold, which retiles for the
     /// arrival itself.
@@ -152,10 +152,14 @@ extension KiwiCore {
     /// — because a bare focus leaves `focusedWindowID`, the
     /// implicit target of nearly every command, naming the space
     /// the user just left. A deliberate partial twin of
-    /// `followSwitch` (three of its five steps): the retile
+    /// `followSwitch` (three of its six steps): the retile
     /// belongs to the callers, which retile for their own
     /// reasons — the arrival's fold, or the re-home that ran
-    /// before the already-shown arm. The #463 dropped-activate
+    /// before the already-shown arm. The #412 float raise is
+    /// absent with it: it must follow the retile this twin does
+    /// not own, and neither arm lands on a Space it un-stashes —
+    /// the paid arrival rides a native Desktop reveal, the other
+    /// arm's Space is already shown (#1727). The #463 dropped-activate
     /// SETTLE is deliberately absent on both: the paid arrival
     /// rides a native switch whose own desktop settle re-asserts
     /// the active space's focus 600 ms later, and the

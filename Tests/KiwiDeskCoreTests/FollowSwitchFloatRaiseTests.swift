@@ -102,6 +102,33 @@ struct FollowSwitchFloatRaiseTests {
         expectRaised(core)
     }
 
+    /// The launch follow's other door: the rule-placed window
+    /// arrived before its app's activation, which pays it.
+    @Test("A placement paid at activation raises the landing floats")
+    func placedLaunchFollowRaises() {
+        let core = makeCore()
+        seed(core)
+        let now = Date()
+        core.launchFollow.pressAge = { 0.2 }
+        core.launchFollow.notePlacement(
+            .init(
+                window: WindowID(2),
+                bundleID: Self.bundle,
+                space: "2",
+                at: now
+            )
+        )
+        core.noteAppActivation(
+            AppActivation(
+                pid: Self.pid,
+                bundleID: Self.bundle,
+                launchedAt: now.addingTimeInterval(-0.3)
+            ),
+            now: now
+        )
+        expectRaised(core)
+    }
+
     @Test("A Space Bar glyph click raises the landing floats")
     func spaceBarClickRaises() {
         let core = makeCore()
@@ -110,26 +137,65 @@ struct FollowSwitchFloatRaiseTests {
         expectRaised(core)
     }
 
-    /// The closing hand-back asks the focus anchor: a floating
-    /// sticky traveler homed on Space 2 and drawn on Space 1 is
-    /// never Space 1's slot, yet it is the focus to hand back.
-    @Test("The raise hands focus back to a sticky traveler")
-    func travelerGetsFocusBack() {
+    /// The AX focus-follow lands on a Space it un-stashes too;
+    /// its deferred gate reads the live frontmost, so the landing
+    /// it performs is driven directly.
+    @Test("The AX focus-follow landing raises the landing floats")
+    func focusFollowLandingRaises() {
         let core = makeCore()
         seed(core)
+        core.landFocusFollow(WindowID(2), on: "2")
+        expectRaised(core)
+    }
+
+    /// Floating sticky traveler 50, homed on Space 2 and drawn on
+    /// Space 1, focused there; Space 1 holds float 4. Both have
+    /// elements.
+    private func seedTraveler(
+        _ core: KiwiCore,
+        floating: Bool
+    ) {
+        seed(core)
         core.state.windows.upsert(
-            window(50, floating: true, sticky: .global)
+            window(50, floating: floating, sticky: .global)
         )
         core.state.workspaces.add(WindowID(50), to: "2")
         core.state.workspaces.focus(WindowID(50), in: "2")
         core.state.windows.upsert(window(4, floating: true))
         core.state.workspaces.add(WindowID(4), to: "1")
-        core.eventLoop.elements[Self.pid]?[WindowID(4)] =
-            AXUIElementCreateApplication(Self.pid)
+        for id in [4, 50] {
+            core.eventLoop.elements[Self.pid]?[WindowID(UInt32(id))] =
+                AXUIElementCreateApplication(Self.pid)
+        }
         #expect(core.activeSpace?.focused == WindowID(1))
-        core.eventLoop.lastCommandedFocus = nil
+        #expect(core.focusedWindowID == WindowID(50))
+    }
+
+    /// The closing hand-back asks the focus anchor: the traveler
+    /// is never Space 1's slot, yet it is the focus to hand back.
+    /// Observed through the self-raise stamp its re-focus mints.
+    @Test("The raise hands focus back to a sticky traveler")
+    func travelerGetsFocusBack() {
+        let core = makeCore()
+        seedTraveler(core, floating: true)
+        core.selfRaiseStamps = [:]
         core.raiseFloatsAndSticky(thenFocus: WindowID(50))
         #expect(core.zOrderRaiseEchoes[WindowID(4)] != nil)
-        #expect(core.eventLoop.lastCommandedFocus != nil)
+        #expect(core.selfRaiseStamps[WindowID(50)] != nil)
+    }
+
+    /// The deferred focus raise re-reads the anchor, so a tiled
+    /// sticky traveler's focus lifts the floats above it (#418).
+    @Test("A tiled traveler's focus re-raises the floats")
+    func tiledTravelerFocusRaises() async throws {
+        let core = makeCore()
+        seedTraveler(core, floating: false)
+        core.raiseFloatsAbove(afterFocusing: WindowID(50))
+        #expect(core.deferred.isScheduled(.floatRaise))
+        // A generous hang-guard, never a deadline (#344).
+        for _ in 0..<200 where core.zOrderRaiseEchoes[WindowID(4)] == nil {
+            try await Task.sleep(for: .milliseconds(25))
+        }
+        #expect(core.zOrderRaiseEchoes[WindowID(4)] != nil)
     }
 }
