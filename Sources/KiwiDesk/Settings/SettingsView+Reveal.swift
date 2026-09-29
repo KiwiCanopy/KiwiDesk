@@ -38,6 +38,8 @@ extension SettingsView {
             break
         case .layoutMode(let mode):
             model.nav.layoutModeTab = mode
+        case .space(let space):
+            model.nav.spaceOverridesFocus = space
         }
         // Unconditional, nil included: guarding a nil→nil publish
         // would stop a destination-only request from CLEARING an

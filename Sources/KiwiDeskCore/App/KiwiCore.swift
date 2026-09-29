@@ -318,8 +318,8 @@ public final class KiwiCore {
     public var onConfigIssuesChange:
         @MainActor ([ConfigIssue])
             -> Void = { _ in }
-    /// Fired on every tour shelf paint's write (#1720).
-    public var onShelfPainted: @MainActor () -> Void = {}
+    /// Fired on every live-profile write from outside Settings.
+    public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
 
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18) —
     /// declared and argued as a bundle in `KiwiCore+LuaAPI`,

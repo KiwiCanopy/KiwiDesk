@@ -165,7 +165,7 @@ struct ShelfPaintTests {
         let core = makeCore()
         let taskbar = try look("Taskbar")
         var told: [Bool] = []
-        core.onShelfPainted = { [unowned core] in
+        core.onLiveProfileWritten = { [unowned core] _, _ in
             let file = try? core.profiles.read(name: "Mine").settings
             told.append(
                 taskbar.isApplied(to: core.tiler.settings)

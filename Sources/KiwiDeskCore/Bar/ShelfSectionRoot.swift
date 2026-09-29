@@ -6,7 +6,7 @@ import AppKit
 /// `onScroll` answers whether the section took it, and one it
 /// declines — nothing hidden — goes up the responder chain.
 @MainActor
-final class ShelfSectionRoot: AppBarOverlay.FlippedView {
+final class ShelfSectionRoot: BarMenuView {
     var onScroll: (ShelfScrollInput.Delta) -> Bool = { _ in false }
 
     override func scrollWheel(with event: NSEvent) {

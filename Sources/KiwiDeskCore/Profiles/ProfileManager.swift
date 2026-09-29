@@ -46,6 +46,20 @@ public final class ProfileManager {
     /// from, and what a Desktop switch asks for the declared
     /// Spaces instead of the disk (#1245).
     private(set) var active: ActiveProfile?
+    /// The live profile's saved layout modes as last adopted or
+    /// written (#1245, #1518), tagged so a stale copy never
+    /// answers for another profile.
+    private var savedModesRecord:
+        (profile: String, modes: [SpaceID: LayoutMode])?
+
+    /// The live profile's saved layout modes; nil while none is
+    /// live.
+    var liveSpaceModes: [SpaceID: LayoutMode]? {
+        guard let name = currentName, let record = savedModesRecord,
+            record.profile == name
+        else { return nil }
+        return record.modes
+    }
     /// Built-in Standard currently resolving (nil if covered by saved
     /// profile).
     public var currentStandard: String? { standard?.name }
@@ -128,7 +142,7 @@ public final class ProfileManager {
             try clearDormantDefaults(count: profile.monitorCount)
         }
         try write(profile)
-        active = ActiveProfile(profile)
+        adopt(profile)
         standard = nil
         isDirty = false
     }
@@ -183,6 +197,7 @@ public final class ProfileManager {
         try write(profile)
         if currentName == old {
             active = active?.renamed(to: new)
+            savedModesRecord = (new, profile.spaceModes)
         }
     }
 
@@ -274,7 +289,7 @@ public final class ProfileManager {
     /// `apply(profile:)`'s and no one else's — profiles.md ▸
     /// "Whose arrangement is live" (#1249).
     func becameLive(_ profile: Profile, fits: Bool) {
-        active = ActiveProfile(profile)
+        adopt(profile)
         standard = nil
         isDirty = !fits
     }
@@ -288,6 +303,12 @@ public final class ProfileManager {
         active = nil
         self.standard = standard
         isDirty = true
+    }
+
+    /// The one place both adoption records are set.
+    private func adopt(_ profile: Profile) {
+        active = ActiveProfile(profile)
+        savedModesRecord = (profile.name, profile.spaceModes)
     }
 
     /// Resets adoption state for Reset All Settings (#634).
@@ -318,6 +339,9 @@ public final class ProfileManager {
             to: url(for: name),
             options: .atomic
         )
+        if profile.name == currentName {
+            savedModesRecord = (profile.name, profile.spaceModes)
+        }
     }
 
     private func url(for name: String) -> URL {

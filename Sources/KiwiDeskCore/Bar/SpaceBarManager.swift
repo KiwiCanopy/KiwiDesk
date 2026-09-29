@@ -44,6 +44,8 @@ public final class SpaceBarManager {
     /// What a glyph or `+n` click does, and a glyph's tooltip
     /// (#1528) — Core sets both at bootstrap.
     let glyphActions = SpaceBarGlyphActions()
+    /// The shelf's context menus (#1518), set by Core at bootstrap.
+    weak var contextMenus: BarContextMenus?
 
     /// The menu bar item's layer and Space mark (#1413), fired
     /// on change only since the bar refreshes on every retile.
@@ -238,6 +240,7 @@ public final class SpaceBarManager {
             self?.onSelectSpace(space)
         }
         overlay.glyphActions = glyphActions
+        overlay.contextMenus = contextMenus
         overlay.onStripHover = { [weak self] space, drawn, inside in
             self?.stripHover(space, drawn, inside: inside)
         }

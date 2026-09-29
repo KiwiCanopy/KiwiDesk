@@ -160,6 +160,7 @@ final class SpaceBarItemView: NSView {
     required init?(coder: NSCoder) { fatalError() }
 
     override func mouseDown(with event: NSEvent) {
+        guard !openControlClickMenu(event) else { return }
         guard !isActive, let space else { return }
         onSelect(space)
     }

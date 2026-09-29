@@ -79,16 +79,25 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// write over a tour paint (#1720); a stored profile's cannot.
     var hasUnsavedDraft: Bool { model.isDirty && model.target == .live }
 
-    /// Re-reads a clean draft after the tour painted the shelf
-    /// (#1720), so a later Save writes the new look rather than
-    /// the colours the draft was opened with.
-    func adoptShelfPaint() {
-        if !model.isDirty { model.reload() }
-    }
-
     /// Re-reads saved profiles list without discarding staged edits (#246).
     func refreshProfiles() {
         model.refreshProfiles()
+    }
+
+    /// Shows Settings where a bar menu's row lands (#1518): the
+    /// page, and the card or row on it, as the search would.
+    func show(landing: SettingsLanding) {
+        model.nav.pendingReveal = SettingsAnchor(landing: landing)
+        show()
+    }
+
+    /// A write of the live profile from outside Settings — the
+    /// tour's look (#1720), a bar menu's row (#1518).
+    func adoptLiveWrite(
+        _ edit: (inout TilingSettings) -> Void,
+        persisted: Bool
+    ) {
+        model.adoptLiveWrite(edit, persisted: persisted)
     }
 
     /// Shows dashboard navigated to destination (#326).

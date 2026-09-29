@@ -3,7 +3,7 @@ import KiwiDeskCore
 
 /// The tour's looks step wiring (#1720): each pick goes through
 /// Core's one paint door; the Settings re-read rides the door's
-/// own `onShelfPainted`, wired beside `onCapturedLive`.
+/// own `onLiveProfileWritten`, wired beside `onCapturedLive`.
 extension AppDelegate {
     func wireOnboardingLooks() {
         onboardingModel.shelfLooks = { [weak self] in

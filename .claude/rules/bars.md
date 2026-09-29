@@ -441,6 +441,60 @@ Obligations:
   showed no fade at all (`SpaceBarStripViewTests` ▸
   `laterPassKeepsTheWalk`).
 
+## A bar's right-click menu is one row list (#1518)
+
+A menu drawn one way for the pointer and another for VoiceOver
+offers two sets of rows, and a Settings row that opens a page
+rather than the row it names makes the user search again. So:
+
+- **Build a bar menu's rows in `KiwiCore.barMenuRows(_:)`, keyed
+  by a `BarHit`, and nowhere beside it.** The one
+  `BarContextMenus` instance (`ShelfManager`'s) turns them into
+  the `NSMenu` and into VoiceOver's named actions both, through
+  `BarMenu`, which turns auto-enabling off at every level and
+  states each row's enablement — greyed, never hidden (#802)
+  (`BarMenuTests`, `BarMenuRowsTests`). Every menu ends with the
+  shelf section.
+- **A view that answers a right-click overrides `menu(for:)` and
+  `accessibilityCustomActions()` with its own `BarHit`, and one
+  with nothing of its own answers nil**, so the click reaches the
+  section root under it (`BarMenuViewTests`). It finds the menu
+  source through `barContextMenus`, the nearest `BarMenuView`
+  above it, never a reference handed down: a section root and the
+  shelf's surfaces are the one holder each, which their overlay
+  sets and their manager hands the overlay
+  (`ShelfWiringSeamTests` ▸ `managersHandTheMenus`). A new
+  right-clickable view owes `BarMenuViewTests` a clause, and a
+  bar element VoiceOver can reach speaks at least the shelf
+  section — the front-app chip's plain label and image carry it
+  as a list set at render, since they have no override to answer
+  per query. And a view that takes a press — to focus, page
+  or drag — opens a Control-click's menu before anything else
+  (`openControlClickMenu`), since AppKit makes that click a
+  context menu only where `mouseDown` is left alone
+  (`ShelfWiringSeamTests` ▸ `controlClickComesFirst`,
+  `BarMenuViewTests` ▸ `controlClickFindsTheMenu`).
+- **`barMenuRows` reads state and adoption snapshots alone** —
+  it runs on every menu open AND every VoiceOver query for a
+  chip's actions, so a file read there is #1245's cost per focus
+  and an AX read of another app is accessibility.md's blocking
+  call on the main actor. A row whose enablement needs such a
+  read takes it from a snapshot, or refuses at perform time with
+  a cue.
+- **A Settings row names its place as a `SettingsLanding` value,
+  and the GUI maps it** (`SettingsAnchor(landing:)`), landing on
+  the card or row as the search does — never a destination or a
+  sentence authored in Core (#96, `BarMenuLandingTests`).
+- **A row that writes a stored setting goes through its setter,
+  then the one `writeThroughLiveProfile` door**, whose draft
+  policy is [profiles.md](profiles.md)'s (`BarMenuRowsTests` ▸
+  `discSetsTheSpan`). A session value — a Layout pick, the
+  divider's reset — takes the setter alone, as its other doors
+  do.
+- **The Layout rows' look is `LayoutModeRows.entries`**, which
+  the status item's Layout menu builds from too; each side hands
+  it its own words, so no sentence crosses the #96 seam.
+
 ## A per-display bar answers the SHOWN question, never the render one
 
 A bar is built per display, so a per-display value sits in easy
