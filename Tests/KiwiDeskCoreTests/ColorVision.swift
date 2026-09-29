@@ -49,7 +49,7 @@ enum ColorVision {
     /// **A floor, not a target.** What actually ships: the drag
     /// default at **76** is the lowest pair in either family, the
     /// Space Bar default at **93** the lowest of its own, and
-    /// every authored palette sits at **123 or above**. 60 is
+    /// every authored palette sits at **119 or above**. 60 is
     /// comfortably past the 22 of the pre-#470 default and past
     /// both near-miss retunes considered at the time (`#F0B858`
     /// 23, `#E09B2E` 39), while leaving room to retune a hex

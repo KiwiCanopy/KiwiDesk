@@ -145,7 +145,7 @@ struct LookBorderGapTests {
                 "Classic": (2, .square, false, 6),
                 "Tiler": (2, .square, false, 4),
                 "Pill": (4, .rounded, true, 14),
-                "Bloom": (5, .rounded, true, 16),
+                "Sakura": (5, .rounded, true, 16),
             ]
         // Glass's gaps are the starter's for this screen (#1739).
         let bundled = LookCatalog.bundled(

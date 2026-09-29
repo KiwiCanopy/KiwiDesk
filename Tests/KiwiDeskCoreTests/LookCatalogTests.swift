@@ -33,7 +33,7 @@ struct LookCatalogTests {
             bundled.map(\.name)
                 == [
                     "Glass", "Taskbar", "Classic", "Tiler", "Pill",
-                    "Bloom",
+                    "Sakura",
                 ]
         )
     }
@@ -60,7 +60,7 @@ struct LookCatalogTests {
         let edges: [String: (space: String, app: String)] = [
             "Glass": ("top", "bottom"), "Taskbar": ("bottom", "bottom"),
             "Classic": ("top", "top"), "Tiler": ("top", "top"),
-            "Pill": ("top", "top"), "Bloom": ("top", "bottom"),
+            "Pill": ("top", "top"), "Sakura": ("top", "bottom"),
         ]
         for look in bundled {
             let want = try #require(edges[look.name], "\(look.name)")
@@ -138,7 +138,7 @@ struct LookCatalogTests {
     func sheenColumn() throws {
         let column: [String: Double] = [
             "Glass": 0.5, "Taskbar": 0, "Classic": 0.25,
-            "Tiler": 0, "Pill": 0.5, "Bloom": 0.6,
+            "Tiler": 0, "Pill": 0.5, "Sakura": 0.6,
         ]
         for (name, sheen) in column {
             let look = try #require(look(name))

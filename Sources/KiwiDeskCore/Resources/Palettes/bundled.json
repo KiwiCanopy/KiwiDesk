@@ -114,15 +114,15 @@
       "kiwishelf.hover_item_color": "#FFFFFF",
       "kiwishelf.fill_color": "#2C2C2EB3",
       "kiwishelf.border_color": "#FFFFFF59",
-      "kiwishelf.group_badge_color": "#995C00",
-      "kiwishelf.group_badge_text_color": "#000000",
+      "kiwishelf.group_badge_color": "#A8466A",
+      "kiwishelf.group_badge_text_color": "#FFFFFF",
       "space_bar.focused_item_color": "#64D2FF",
       "border.focused_color": "#FF8099",
       "border.unfocused_color": "#6A665EE6",
       "drag.ghost.border_color": "#FF8099",
       "drag.ghost.fill_color": "#FF809940",
-      "drag.drop_zone.border_color": "#FF9F0A",
-      "drag.drop_zone.fill_color": "#FF9F0A26"
+      "drag.drop_zone.border_color": "#9E2F6E",
+      "drag.drop_zone.fill_color": "#9E2F6E26"
     }
   },
   {
