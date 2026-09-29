@@ -3,7 +3,7 @@ import Testing
 
 /// The looks step's blocker and follow live in wiring the model
 /// tests stub out (#1720): the draft read that greys the step, the
-/// Settings re-read Core's `onShelfPainted` reaches, and the reload
+/// Settings re-read Core's `onLiveProfileWritten` reaches, and the reload
 /// inside it. Each needle is keyed on its use site.
 @Suite("Onboarding looks wiring (#1720)")
 struct OnboardingLooksWiringTests {
@@ -40,18 +40,15 @@ struct OnboardingLooksWiringTests {
         let delegate = try source("AppDelegate.swift")
         #expect(
             delegate.contains(
-                "core.onShelfPainted = { [weak self] in\n"
+                "core.onLiveProfileWritten = { [weak self] edit in\n"
                     + "            self?.dashboardIfCreated?"
-                    + ".adoptShelfPaint()"
+                    + ".adoptLiveWrite(edit)"
             )
         )
-        let controller = try source(
-            "Settings/SettingsWindowController.swift"
-        )
+        let model = try source("Settings/SettingsModel+LiveWrite.swift")
         #expect(
-            controller.contains(
-                "func adoptShelfPaint() {\n"
-                    + "        if !model.isDirty { model.reload() }"
+            model.contains(
+                "guard isDirty else {\n            reload()"
             )
         )
     }

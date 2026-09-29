@@ -6502,7 +6502,7 @@ Three obligations keep the write honest:
   its Save would write the old look back over the new one — greyed
   and never hidden, with a caption naming the buttons that clear
   it (`OnboardingLooksTests` ▸ `draftBlocks`). A clean draft
-  re-reads after every paint, through Core's `onShelfPainted` on
+  re-reads after every paint, through Core's `onLiveProfileWritten` on
   the write (`ShelfPaintTests` ▸ `paintsAreAnnounced`,
   `OnboardingLooksWiringTests` ▸ `paintFollowsIntoSettings`).
 - **Where no saved profile is live, the click lasts the session**

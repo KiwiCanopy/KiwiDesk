@@ -187,8 +187,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.profiles.onCapturedLive = { [weak self] _ in
             self?.dashboardIfCreated?.adoptKeptLayout()
         }
-        core.onShelfPainted = { [weak self] in
-            self?.dashboardIfCreated?.adoptShelfPaint()
+        core.onLiveProfileWritten = { [weak self] edit in
+            self?.dashboardIfCreated?.adoptLiveWrite(edit)
         }
         wireBarMenus()
         core.onConfigIssuesChange = { [weak self] issues in

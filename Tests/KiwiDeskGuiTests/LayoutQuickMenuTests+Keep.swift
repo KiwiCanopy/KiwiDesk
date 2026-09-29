@@ -61,7 +61,9 @@ extension LayoutQuickMenuTests {
                     "profiles/test-profile.json"
                 )
         )
-        #expect(core.savedModeForActiveSpace() == nil)
+        // The draft's seed reads the FILE (it writes one from the
+        // answer); the menus answer from adoption state (#1518).
+        #expect(core.savedProfileModes() == nil)
         model.reload()
 
         #expect(

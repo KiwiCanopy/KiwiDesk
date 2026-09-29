@@ -1312,7 +1312,7 @@
   "shortcuts.gestures.app_bar": "沿著 App Bar 拖移項目，即可重新排列它的視窗。",
   "shortcuts.gestures.app_bar_hover": "將指標懸停在標題被縮短的 App Bar 項目上，即可查看完整標題。",
   "shortcuts.gestures.app_bar_off": "沒有佈局顯示 App Bar。請在 %1$@ 中開啟。",
-  "shortcuts.gestures.context_menu": "右鍵點按 KiwiShelf，即可打開與所點對象對應的選單：空間的佈局、空間顯示多少個圖形，以及 KiwiShelf 的設定。",
+  "shortcuts.gestures.context_menu": "右鍵點按 KiwiShelf，即可打開與所點項目對應的選單：空間的佈局、空間顯示多少個圖形，以及 KiwiShelf 的設定。",
   "shortcuts.gestures.drop_on_space": "將視窗拖到 KiwiShelf 上的某個空間，即可把它移到那裡。",
   "shortcuts.gestures.edge": "拖移視窗邊緣即可調整它的尺寸。",
   "shortcuts.gestures.follow_focus": "焦點會隨快速鍵、空間切換、切換 App 或關閉視窗而移動。",

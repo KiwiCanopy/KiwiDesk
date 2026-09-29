@@ -46,6 +46,11 @@ public final class ProfileManager {
     /// from, and what a Desktop switch asks for the declared
     /// Spaces instead of the disk (#1245).
     private(set) var active: ActiveProfile?
+    /// The live profile's saved layout modes as KiwiDesk last
+    /// adopted or wrote them — what a question about the live
+    /// profile's layouts reads instead of its file (#1245, #1518).
+    /// Meaningful only while `currentName` is set.
+    private(set) var liveSpaceModes: [SpaceID: LayoutMode] = [:]
     /// Built-in Standard currently resolving (nil if covered by saved
     /// profile).
     public var currentStandard: String? { standard?.name }
@@ -129,6 +134,7 @@ public final class ProfileManager {
         }
         try write(profile)
         active = ActiveProfile(profile)
+        liveSpaceModes = profile.spaceModes
         standard = nil
         isDirty = false
     }
@@ -275,6 +281,7 @@ public final class ProfileManager {
     /// "Whose arrangement is live" (#1249).
     func becameLive(_ profile: Profile, fits: Bool) {
         active = ActiveProfile(profile)
+        liveSpaceModes = profile.spaceModes
         standard = nil
         isDirty = !fits
     }
@@ -318,6 +325,9 @@ public final class ProfileManager {
             to: url(for: name),
             options: .atomic
         )
+        if profile.name == currentName {
+            liveSpaceModes = profile.spaceModes
+        }
     }
 
     private func url(for name: String) -> URL {

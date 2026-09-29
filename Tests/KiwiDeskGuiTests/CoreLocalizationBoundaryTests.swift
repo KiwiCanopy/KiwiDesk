@@ -116,7 +116,7 @@ struct CoreLocalizationBoundaryTests {
         // use — the status item passes its words in, so none of
         // these crosses into the GUI.
         "App/KiwiCore+BarMenus.swift": 8,
-        "Bar/BarMenu.swift": 1,
+        "Bar/BarMenu.swift": 2,
         "Bar/LayoutModeRows.swift": 8,
     ]
 

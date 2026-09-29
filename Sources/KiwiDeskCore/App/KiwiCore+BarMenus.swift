@@ -60,10 +60,10 @@ extension KiwiCore {
         let spaces = Array(Set(shown + [id]))
         let saved = savedModes(for: spaces)
         let drifted = { (space: SpaceID) in
-            guard let live = self.state.workspaces[space]?.mode,
-                let stored = saved[space]
-            else { return false }
-            return live != stored
+            LayoutModeRows.drifted(
+                live: self.state.workspaces[space]?.mode,
+                saved: saved[space]
+            )
         }
         var layout = LayoutModeRows.entries(
             live: space.mode,
@@ -145,12 +145,6 @@ extension KiwiCore {
     func setGlyphSpanFromBar(_ span: Int) {
         execute("space_bar.set_glyph_span", args: [.number(Double(span))])
         let settled = tiler.settings.spaceBarStyle.glyphSpan
-        let edit: (inout TilingSettings) -> Void = {
-            $0.spaceBarStyle.glyphSpan = settled
-        }
-        if let name = profiles.currentName {
-            writeStoredSettings(name, edit)
-        }
-        barMenuHooks.settingsWritten(edit)
+        writeThroughLiveProfile { $0.spaceBarStyle.glyphSpan = settled }
     }
 }

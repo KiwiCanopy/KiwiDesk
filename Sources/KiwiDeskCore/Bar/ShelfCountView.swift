@@ -12,7 +12,6 @@ final class ShelfCountView: NSView {
     enum Side { case before, after }
 
     var onPage: () -> Void = {}
-    weak var contextMenus: BarContextMenus?
     let side: Side
     /// The hover chip — the Space items' hover fill, only under
     /// the pointer, so the count reads as clickable (ui-designer).

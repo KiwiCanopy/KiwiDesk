@@ -6,7 +6,6 @@ import AppKit
 /// cursor is set, never pushed (gui.md).
 @MainActor
 final class ShelfDividerHandle: NSView {
-    weak var contextMenus: BarContextMenus?
     /// A minimum the drag reached; `committed` on the release.
     var onMinimum: (_ percent: CGFloat, _ committed: Bool) -> Void = {
         _,

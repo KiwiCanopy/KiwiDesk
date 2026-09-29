@@ -37,6 +37,22 @@ final class BarContextMenus {
     }
 }
 
+extension NSView {
+    /// The menu source of the nearest bar surface above this view
+    /// (#1518): a section root or the shelf's own, which its overlay
+    /// sets — the one holder, so no view between can drop it.
+    var barContextMenus: BarContextMenus? {
+        var view = superview
+        while let current = view {
+            if let surface = current as? BarMenuView {
+                return surface.contextMenus
+            }
+            view = current.superview
+        }
+        return nil
+    }
+}
+
 /// A flipped bar view whose right-click opens the menu for `hit`:
 /// a section's root and the shelf's own surface, which a click
 /// reaches when no item under the pointer answers it.

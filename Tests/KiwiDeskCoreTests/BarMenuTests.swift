@@ -52,7 +52,8 @@ struct BarMenuTests {
         var fired: [String] = []
         let actions = BarMenu.accessibilityActions(rows { fired.append($0) })
         #expect(
-            actions.map(\.name) == ["Layout: BSP", "Layout: Grid", "Looks…"]
+            actions.map(\.name)
+                == ["Layout: BSP, current", "Layout: Grid", "Looks…"]
         )
         let looks = try #require(actions.last)
         #expect(looks.handler?() == true)

@@ -121,6 +121,8 @@ struct BarMenuViewTests {
         menus.rows = { hit in [.action("\(hit)") {}] }
         let shelf = ShelfOverlay()
         shelf.contextMenus = menus
+        // The panel build hosts the grip in the strip; no panel here.
+        shelf.stripView.addSubview(shelf.handle)
         #expect(title(shelf.content.menu(for: rightClick)) == "empty")
         #expect(title(shelf.stripView.menu(for: rightClick)) == "empty")
         #expect(title(shelf.handle.menu(for: rightClick)) == "divider")
@@ -128,5 +130,49 @@ struct BarMenuViewTests {
         appBar.contextMenus = menus
         #expect(title(appBar.root.menu(for: rightClick)) == "empty")
         #expect(title(appBar.forwardCount.menu(for: rightClick)) == "count")
+    }
+
+    /// VoiceOver reaches the shelf section from an App Bar item and
+    /// the front-app chip too (#1518), each finding the menu source
+    /// through the surface above it.
+    @Test("an App Bar item and the front-app chip speak the shelf")
+    func appBarAndFrontChipSpeakTheShelf() throws {
+        let menus = BarContextMenus()
+        menus.rows = { hit in [.action("\(hit)") {}] }
+        let surface = BarMenuView()
+        surface.contextMenus = menus
+        let item = AppBarItemView(frame: .zero)
+        surface.addSubview(item)
+        #expect(item.accessibilityCustomActions()?.map(\.name) == ["empty"])
+        var style = SpaceBarLook()
+        style.showFrontApp = true
+        let manager = SpaceBarManager()
+        manager.contextMenus = menus
+        manager.sync([
+            SpaceBarManager.Bar(
+                display: display,
+                items: [
+                    SpaceBarOverlay.Item(
+                        space: one,
+                        spaceGlyph: .text("1", tinted: true),
+                        apps: [],
+                        active: true,
+                        after: .none
+                    )
+                ],
+                frontApp: app(9),
+                frontWindow: WindowID(9),
+                strip: CGRect(x: 0, y: 0, width: 800, height: 32),
+                style: style,
+                stateMarkColors: StateMarkColors(
+                    sticky: "#ffffff",
+                    floating: "#ffffff"
+                )
+            )
+        ])
+        let overlay = try #require(manager.overlayForTesting(display))
+        let actions: [NSAccessibilityCustomAction]? =
+            overlay.frontIcon.accessibilityCustomActions()
+        #expect(actions?.map { $0.name } == ["empty"])
     }
 }

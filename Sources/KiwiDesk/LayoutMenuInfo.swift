@@ -34,8 +34,7 @@ struct LayoutMenuInfo {
         live: LayoutMode?,
         saved: LayoutMode?
     ) -> Bool {
-        guard let live, let saved else { return false }
-        return live != saved
+        LayoutModeRows.drifted(live: live, saved: saved)
     }
 
     var activeSpaceHasDrifted: Bool {

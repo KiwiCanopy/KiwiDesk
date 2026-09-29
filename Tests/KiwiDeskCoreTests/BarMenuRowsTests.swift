@@ -27,6 +27,13 @@ struct BarMenuRowsTests {
     private func seededCore() -> KiwiCore {
         LocalizationManager.shared.select("en")
         let core = makeCore()
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: display,
+                name: "Desk",
+                frame: CGRect(x: 0, y: 0, width: 1000, height: 600)
+            )
+        )
         core.state.workspaces.assign(one, to: display)
         core.state.workspaces.assign(two, to: display)
         core.state.workspaces.activate(one)
@@ -124,6 +131,16 @@ struct BarMenuRowsTests {
             args: [.string("1"), .string(other.rawValue)]
         )
         #expect(try keep().enabled)
+        // The bar draws the drift the status item does.
+        let drifted = try submenu(core.barMenuRows(.space(one))[0])
+        #expect(
+            drifted.first(where: \.checked)?.subtitle
+                == "not saved to profile"
+        )
+        // Keep saves the whole profile, so a shown Space's drift arms
+        // it on a hidden Space's chip too.
+        let hidden = try submenu(core.barMenuRows(.space(two))[0])
+        #expect(hidden.last?.enabled == true)
         var kept = 0
         core.barMenuHooks.keepLayout = { kept += 1 }
         perform(try keep())
@@ -148,9 +165,9 @@ struct BarMenuRowsTests {
         let current = core.tiler.settings.spaceBarStyle.resolvedGlyphSpan
         #expect(spans.filter(\.checked).map(\.title) == ["\(current)"])
         var draft = TilingSettings()
-        core.barMenuHooks.settingsWritten = { edit in edit(&draft) }
+        core.onLiveProfileWritten = { edit in edit(&draft) }
         let pick = current == 3 ? 4 : 3
-        perform(spans[pick - 1])
+        perform(spans[pick - SpaceBarStyle.glyphSpanRange.lowerBound])
         #expect(core.tiler.settings.spaceBarStyle.glyphSpan == pick)
         #expect(draft.spaceBarStyle.glyphSpan == pick)
         let stored = try core.profiles.read(name: "Desk")

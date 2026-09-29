@@ -1312,7 +1312,7 @@
   "shortcuts.gestures.app_bar": "Faites glisser un élément le long de l'App Bar pour réordonner ses fenêtres.",
   "shortcuts.gestures.app_bar_hover": "Survolez avec le pointeur un élément de l'App Bar dont le titre est raccourci pour le voir en entier.",
   "shortcuts.gestures.app_bar_off": "Aucune disposition n'affiche d'App Bar. Activez-en une dans %1$@.",
-  "shortcuts.gestures.context_menu": "Faites un clic droit sur KiwiShelf pour afficher un menu propre à ce que vous avez cliqué : la disposition d'un espace, le nombre de glyphes qu'affiche un espace et les réglages de KiwiShelf.",
+  "shortcuts.gestures.context_menu": "Faites un clic droit sur KiwiShelf pour afficher un menu propre à l'élément cliqué : la disposition d'un espace, le nombre de glyphes qu'affiche un espace et les réglages de KiwiShelf.",
   "shortcuts.gestures.drop_on_space": "Faites glisser une fenêtre sur un espace de KiwiShelf pour l'y déplacer.",
   "shortcuts.gestures.edge": "Faites glisser le bord d'une fenêtre pour la redimensionner.",
   "shortcuts.gestures.follow_focus": "La fenêtre active change après un raccourci, un changement d'espace, un changement d'app ou la fermeture d'une fenêtre.",

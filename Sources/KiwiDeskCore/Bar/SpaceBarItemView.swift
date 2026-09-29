@@ -57,8 +57,6 @@ final class SpaceBarItemView: NSView {
     /// so a click target reads as one (#1528).
     var hoveredTarget: SpaceBarGlyphTarget?
     weak var glyphActions: SpaceBarGlyphActions?
-    /// The bars' context menus (#1518), the manager's one instance.
-    weak var contextMenus: BarContextMenus?
     let heldBadge = StateBadgeView(symbolName: SpaceBarItemView.heldSymbol)
     /// Divider between identifier and app glyphs (QA 2026-07-19).
     let identifierDivider = NSView()

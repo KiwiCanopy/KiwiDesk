@@ -22,8 +22,6 @@ struct BarMenuWiringTests {
                 + "self?.dashboard.show(landing:landing)}",
             "core.barMenuHooks.keepLayout={[weakself]in"
                 + "self?.keepLayoutInProfile()}",
-            "core.barMenuHooks.settingsWritten={[weakself]editin"
-                + "self?.dashboardIfCreated?.adoptLiveWrite(edit)}",
         ] {
             #expect(wiring.contains(needle), Comment(rawValue: needle))
         }

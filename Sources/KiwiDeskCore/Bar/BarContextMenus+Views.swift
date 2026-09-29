@@ -8,13 +8,13 @@ extension SpaceBarItemView {
     var menuHit: BarHit? { space.map(BarHit.space) }
 
     override func menu(for event: NSEvent) -> NSMenu? {
-        menuHit.flatMap { contextMenus?.menu(for: $0) }
+        menuHit.flatMap { barContextMenus?.menu(for: $0) }
     }
 
     override func accessibilityCustomActions()
         -> [NSAccessibilityCustomAction]?
     {
-        menuHit.map { contextMenus?.accessibilityActions(for: $0) ?? [] }
+        menuHit.map { barContextMenus?.accessibilityActions(for: $0) ?? [] }
     }
 }
 
@@ -24,36 +24,47 @@ extension SpaceBarGlyphTarget {
     var menuHit: BarHit? { kind == .overflow ? .disc(space) : nil }
 
     override func menu(for event: NSEvent) -> NSMenu? {
-        menuHit.flatMap { contextMenus?.menu(for: $0) }
+        menuHit.flatMap { barContextMenus?.menu(for: $0) }
     }
 
     override func accessibilityCustomActions()
         -> [NSAccessibilityCustomAction]?
     {
-        menuHit.map { contextMenus?.accessibilityActions(for: $0) ?? [] }
+        menuHit.map { barContextMenus?.accessibilityActions(for: $0) ?? [] }
     }
 }
 
 extension ShelfCountView {
     override func menu(for event: NSEvent) -> NSMenu? {
-        contextMenus?.menu(for: .count)
+        barContextMenus?.menu(for: .count)
     }
 
     override func accessibilityCustomActions()
         -> [NSAccessibilityCustomAction]?
     {
-        contextMenus?.accessibilityActions(for: .count)
+        barContextMenus?.accessibilityActions(for: .count)
     }
 }
 
 extension ShelfDividerHandle {
     override func menu(for event: NSEvent) -> NSMenu? {
-        contextMenus?.menu(for: .divider)
+        barContextMenus?.menu(for: .divider)
     }
 
     override func accessibilityCustomActions()
         -> [NSAccessibilityCustomAction]?
     {
-        contextMenus?.accessibilityActions(for: .divider)
+        barContextMenus?.accessibilityActions(for: .divider)
+    }
+}
+
+/// An App Bar item speaks the shelf section to VoiceOver as its
+/// right-click shows it (#1518); its own window rows come with the
+/// App Bar's menu.
+extension AppBarItemView {
+    override func accessibilityCustomActions()
+        -> [NSAccessibilityCustomAction]?
+    {
+        barContextMenus?.accessibilityActions(for: .empty)
     }
 }

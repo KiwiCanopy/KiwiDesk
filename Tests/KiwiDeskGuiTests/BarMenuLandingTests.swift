@@ -84,4 +84,22 @@ struct BarMenuLandingTests {
         model.adoptLiveWrite { $0.spaceBarStyle.glyphSpan = span + 2 }
         #expect(model.config.settings.spaceBarStyle.glyphSpan == span)
     }
+
+    /// A clean draft re-reads what the write left behind rather than
+    /// taking the edit by hand.
+    @Test("a clean draft re-reads after a live write")
+    func cleanDraftReloads() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        let model = makeTestModel(core: core)
+        model.reload()
+        #expect(!model.isDirty)
+        let loaded = model.config.settings.kiwishelf.minimum
+        // A value no file holds, left clean: only a re-read drops it.
+        model.suppressDirty = true
+        model.config.settings.kiwishelf.minimum = loaded + 9
+        model.suppressDirty = false
+        model.adoptLiveWrite { _ in }
+        #expect(model.config.settings.kiwishelf.minimum == loaded)
+    }
 }

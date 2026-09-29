@@ -106,14 +106,10 @@ public final class SpaceBarOverlay {
         }
     /// The glyph targets' answers, the manager's one instance.
     var glyphActions: SpaceBarGlyphActions?
-    /// The bars' context menus (#1518), handed to every view here
-    /// that answers a right-click.
+    /// The bars' context menus (#1518): held by the section root,
+    /// which every view in the section finds by walking up.
     weak var contextMenus: BarContextMenus? {
-        didSet {
-            root.contextMenus = contextMenus
-            backCount.contextMenus = contextMenus
-            forwardCount.contextMenus = contextMenus
-        }
+        didSet { root.contextMenus = contextMenus }
     }
 
     /// The section's view; the shelf sets its origin, the

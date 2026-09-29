@@ -96,30 +96,46 @@ extension KiwiCore {
 
     private func paintShelfThrough(
         live: (inout TilingSettings) -> Void,
-        stored: (inout TilingSettings) -> Void
+        stored: @escaping SettingsEdit
     ) {
         live(&tiler.settings)
-        if let name = profiles.currentName {
-            writeStoredSettings(name, stored)
-        }
         // An explicit apply (§5): a look can move the shelf's edge.
         retile(pass: .apply)
-        onShelfPainted()
+        writeThroughLiveProfile(stored)
+    }
+
+    /// The one door a write of the live profile from outside
+    /// Settings takes — the tour's look (#1720), a bar menu's row
+    /// (#1518): `edit` lands in the live profile's file,
+    /// non-adopting, then reaches an open draft through
+    /// `onLiveProfileWritten`. Live settings are the caller's.
+    func writeThroughLiveProfile(_ edit: @escaping SettingsEdit) {
+        if let name = profiles.currentName {
+            writeStoredSettings(name, edit)
+        }
+        onLiveProfileWritten(edit)
     }
 
     /// Non-adopting, like `overwriteProfile`: `current` and
     /// `dirty` stay as they were.
-    func writeStoredSettings(
+    private func writeStoredSettings(
         _ name: String,
-        _ paint: (inout TilingSettings) -> Void
+        _ edit: SettingsEdit
     ) {
         do {
             var profile = try profiles.read(name: name)
-            paint(&profile.settings)
+            edit(&profile.settings)
             try profiles.write(profile)
             refreshConfigIssues()
         } catch {
-            onLog("tour look: profile \(name) not written: \(error)")
+            onLog("live profile \(name) not written: \(error)")
         }
     }
 }
+
+/// An edit of the settings a write applies (#1518).
+public typealias SettingsEdit = (inout TilingSettings) -> Void
+
+/// What the GUI takes when the live profile's file is written from
+/// outside Settings: the edit that write applied.
+public typealias LiveProfileWrite = @MainActor (@escaping SettingsEdit) -> Void

@@ -12,10 +12,9 @@ import Foundation
 /// must keep its live mode.
 extension KiwiCore {
     /// Saved layout mode for the active space under the active
-    /// profile. nil when no profile is active or its JSON is
-    /// unreadable — "unknown", never a phantom `.bsp` that
-    /// would fake drift; an absent entry (a readable profile
-    /// without the space) is the genuine `.bsp` default.
+    /// profile. nil when no profile is active — "unknown", never a
+    /// phantom `.bsp` that would fake drift; an absent entry (a
+    /// profile without the space) is the genuine `.bsp` default.
     public func savedModeForActiveSpace() -> LayoutMode? {
         guard let space = activeSpace else { return nil }
         // Expressed through the batch rather than beside it: the
@@ -41,15 +40,20 @@ extension KiwiCore {
     ///
     /// A space **absent** from the returned dictionary is
     /// "unknown", exactly as a nil from the call above is: no
-    /// active profile, or JSON that would not decode. A space
-    /// absent from a *readable* profile is the genuine `.bsp`
-    /// default and comes back as `.bsp` — so the two conditions
-    /// stay distinguishable, which is what keeps a phantom drift
-    /// off the menu.
+    /// active profile. A space absent from the profile is the
+    /// genuine `.bsp` default and comes back as `.bsp` — so the
+    /// two conditions stay distinguishable, which is what keeps a
+    /// phantom drift off the menu.
+    ///
+    /// Read from adoption state, never the file (#1245): the Layout
+    /// menus ask on every open and the Space Bar's per VoiceOver
+    /// query (#1518), where a file read — and a migration write —
+    /// per chip focus is the cost that rule forbids.
     public func savedModes(
         for spaces: [SpaceID]
     ) -> [SpaceID: LayoutMode] {
-        guard let stored = savedProfileModes() else { return [:] }
+        guard profiles.currentName != nil else { return [:] }
+        let stored = profiles.liveSpaceModes
         var modes: [SpaceID: LayoutMode] = [:]
         for space in spaces {
             modes[space] = stored[space] ?? .bsp

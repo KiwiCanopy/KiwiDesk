@@ -75,18 +75,22 @@ enum BarMenu {
     }
 
     /// VoiceOver's named actions: every enabled leaf, a nested one
-    /// named after its parent, so the rotor lists what the menu
-    /// offers.
+    /// named after its parent and a checked one said to be current,
+    /// so the rotor lists what the menu offers and what it holds.
     static func accessibilityActions(
         _ rows: [BarMenuRow],
         parent: String? = nil
     ) -> [NSAccessibilityCustomAction] {
         rows.flatMap { row -> [NSAccessibilityCustomAction] in
             guard row.enabled else { return [] }
-            let name =
+            let named =
                 parent.map {
                     L("bar.menu.ax.nested", "%1$@: %2$@", $0, row.title)
                 } ?? row.title
+            let name =
+                row.checked
+                ? L("space_bar.item.ax.current", "%1$@, current", named)
+                : named
             switch row.kind {
             case .separator:
                 return []

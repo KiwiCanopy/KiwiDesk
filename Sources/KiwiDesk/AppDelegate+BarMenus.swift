@@ -2,8 +2,7 @@ import AppKit
 import KiwiDeskCore
 
 /// The bars' right-click menus' GUI half (#1518): where a Settings
-/// row lands, the Layout menu's Keep row, and a live write an open
-/// draft takes.
+/// row lands, and the Layout menu's Keep row.
 extension AppDelegate {
     func wireBarMenus() {
         core.barMenuHooks.openSettings = { [weak self] landing in
@@ -11,9 +10,6 @@ extension AppDelegate {
         }
         core.barMenuHooks.keepLayout = { [weak self] in
             self?.keepLayoutInProfile()
-        }
-        core.barMenuHooks.settingsWritten = { [weak self] edit in
-            self?.dashboardIfCreated?.adoptLiveWrite(edit)
         }
     }
 

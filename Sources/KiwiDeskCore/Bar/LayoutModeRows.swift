@@ -48,8 +48,19 @@ public enum LayoutModeRows {
         }
     }
 
-    /// Whether the Keep row is armed: a whole-profile save, so any
-    /// shown Space on a temporary layout arms it (#1179).
+    /// Whether a Space stands on a temporary layout: its live mode
+    /// differs from a KNOWN saved one — an unknown never fakes one.
+    public static func drifted(
+        live: LayoutMode?,
+        saved: LayoutMode?
+    ) -> Bool {
+        guard let live, let saved else { return false }
+        return live != saved
+    }
+
+    /// Whether the Keep row is armed. Keep saves the whole live
+    /// profile (#1179), so drift in any Space the menu shows or
+    /// names arms it — every shown Space, and a chip's own.
     public static func keepArmed(drifts: [Bool]) -> Bool {
         drifts.contains(true)
     }

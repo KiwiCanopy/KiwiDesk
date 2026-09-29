@@ -458,23 +458,32 @@ rather than the row it names makes the user search again. So:
 - **A view that answers a right-click overrides `menu(for:)` and
   `accessibilityCustomActions()` with its own `BarHit`, and one
   with nothing of its own answers nil**, so the click reaches the
-  section root under it (`BarMenuViewTests`). A manager or
-  overlay that builds bar views hands them the menu source, or
-  they answer nothing (`ShelfWiringSeamTests` ▸
-  `managersHandTheMenus`); a new right-clickable view owes
-  `BarMenuViewTests` a clause.
+  section root under it (`BarMenuViewTests`). It finds the menu
+  source through `barContextMenus`, the nearest `BarMenuView`
+  above it, never a reference handed down: a section root and the
+  shelf's surfaces are the one holder each, which their overlay
+  sets and their manager hands the overlay
+  (`ShelfWiringSeamTests` ▸ `managersHandTheMenus`). A new
+  right-clickable view owes `BarMenuViewTests` a clause, and a
+  bar element VoiceOver can reach speaks at least the shelf
+  section.
+- **`barMenuRows` reads state and adoption snapshots alone** —
+  it runs on every menu open AND every VoiceOver query for a
+  chip's actions, so a file read there is #1245's cost per focus
+  and an AX read of another app is accessibility.md's blocking
+  call on the main actor. A row whose enablement needs such a
+  read takes it from a snapshot, or refuses at perform time with
+  a cue.
 - **A Settings row names its place as a `SettingsLanding` value,
   and the GUI maps it** (`SettingsAnchor(landing:)`), landing on
   the card or row as the search does — never a destination or a
   sentence authored in Core (#96, `BarMenuLandingTests`).
 - **A row that writes a stored setting goes through its setter,
-  then into the live profile's file, then hands the same edit to
-  `barMenuHooks.settingsWritten`**, which an open draft takes on
-  both sides of its diff — or the draft's next Save writes the
-  old value back (the #1720 shape; `BarMenuRowsTests` ▸
-  `discSetsTheSpan`, `BarMenuLandingTests`). A session value — a
-  Layout pick, the divider's reset — takes the setter alone, as
-  its other doors do.
+  then the one `writeThroughLiveProfile` door**, whose draft
+  policy is [profiles.md](profiles.md)'s (`BarMenuRowsTests` ▸
+  `discSetsTheSpan`). A session value — a Layout pick, the
+  divider's reset — takes the setter alone, as its other doors
+  do.
 - **The Layout rows' look is `LayoutModeRows.entries`**, which
   the status item's Layout menu builds from too; each side hands
   it its own words, so no sentence crosses the #96 seam.

@@ -24,13 +24,6 @@ public struct BarMenuHooks {
     /// The Layout menu's Keep row: the status item's own save, so
     /// a failure is reported the one way it already is.
     public var keepLayout: @MainActor () -> Void = {}
-    /// A menu wrote a setting into the live profile's file: an open
-    /// Settings draft takes the same edit, so its next Save does not
-    /// write the old value back (the #1720 shape).
-    public var settingsWritten:
-        @MainActor (@escaping (inout TilingSettings) -> Void) -> Void = {
-            _ in
-        }
 
     public init() {}
 }

@@ -40,12 +40,12 @@ final class ShelfOverlay {
     var dividerHovered = false
     var dividerShelf: KiwiShelf?
     /// The bars' context menus (#1518): the plate outside both
-    /// runs answers as empty bar space, the grip as the divider.
+    /// runs answers as empty bar space, and the grip, which finds
+    /// them by walking up, as the divider.
     weak var contextMenus: BarContextMenus? {
         didSet {
             content.contextMenus = contextMenus
             stripView.contextMenus = contextMenus
-            handle.contextMenus = contextMenus
         }
     }
 
