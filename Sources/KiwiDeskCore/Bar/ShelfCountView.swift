@@ -20,7 +20,7 @@ final class ShelfCountView: NSView {
     private let label = NSTextField(labelWithString: "")
     private let chevron = NSImageView()
     private var horizontal = true
-    private var count = 0
+    private(set) var count = 0
     private(set) var fontSize: CGFloat = 12
     /// The shelf whose family the number draws in (#1681).
     private var shelf = KiwiShelf()

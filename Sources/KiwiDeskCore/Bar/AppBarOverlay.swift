@@ -58,6 +58,9 @@ public final class AppBarOverlay {
     /// Follows the focused window unless a manual scroll holds.
     var follow = ShelfFollow<WindowID>()
     var lastMetrics: Metrics?
+    /// The style the last render drew, gated once (#1374), which a
+    /// scroll re-reads rather than gating again.
+    var drawnStyle: AppBarLook?
     private(set) var lastShown: RenderState?
 
     public init() {
@@ -119,6 +122,7 @@ public final class AppBarOverlay {
         // The one place the stored style becomes the drawn one
         // (#1374): glass stands down while transparency is reduced.
         let style = LiquidGlassGate.rendered(state.style)
+        drawnStyle = style
         let edge = style.edge
         syncItemViewCount(items.count)
         let m = metrics(
@@ -157,7 +161,7 @@ public final class AppBarOverlay {
                 height: m.viewport
             )
         itemContainer.frame = viewport
-        let runFrame = Self.runFrame(
+        let runFrame = ShelfOverflow.runFrame(
             in: itemContainer.bounds,
             offset: scrollOffset,
             horizontal: m.horizontal

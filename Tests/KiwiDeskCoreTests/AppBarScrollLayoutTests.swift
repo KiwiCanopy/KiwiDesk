@@ -207,14 +207,14 @@ struct AppBarScrollLayoutTests {
             alignment: .center
         )
         #expect(frames[0].minX == 0)
-        let run = AppBarOverlay.runFrame(
+        let run = ShelfOverflow.runFrame(
             in: viewport,
             offset: 250,
             horizontal: true
         )
         #expect(run.minX == -250 && run.width == viewport.width)
         #expect(frames[3].minX + run.minX == 50)
-        let vertical = AppBarOverlay.runFrame(
+        let vertical = ShelfOverflow.runFrame(
             in: viewport,
             offset: 40,
             horizontal: false

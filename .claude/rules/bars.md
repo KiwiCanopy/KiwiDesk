@@ -314,6 +314,22 @@ Obligations:
 - **Scroll input maps to travel through `ShelfScrollInput`**,
   whose deltas arrive already corrected for natural scrolling
   and are never flipped again (`ShelfScrollInputTests`).
+- **A manual scroll moves the section's run view and never
+  renders.** A section hosts its run — items, per-item glass,
+  tints, the layer rule, an unpinned front segment — in one
+  `itemRun` whose frame carries the offset
+  (`ShelfOverflow.runFrame`), so its items keep their frames; a
+  wheel, trackpad, page or drag-autoscroll step goes through the
+  section's one scroll door (`moveRun`), which moves that view
+  and re-reads what a render derives from the offset. A render
+  per event re-framed every glass and stalled a fast scroll
+  under boxed Liquid Glass. Whatever a render derives from the
+  offset is re-read there to exactly a render's answer at that
+  offset, so a new offset-dependent piece joins the door, and a
+  length a render bounds by the viewport is bounded by the
+  run's end instead, since no scroll re-lays it.
+  `ShelfScrollRunTests` holds both bars to a render's answer and
+  to no render.
 - **Every `ShelfArrangement.arrange` caller hands it the Space
   section's floor from `ShelfArrangement.hardFloor`** — the live
   plan and the Settings preview alike. The argument is required,

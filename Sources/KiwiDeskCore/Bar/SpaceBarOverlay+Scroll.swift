@@ -28,9 +28,12 @@ extension SpaceBarOverlay {
     /// and a manual scroll only where the offset moved. A trackpad
     /// moves the run directly, a wheel notch as one glide.
     func scroll(_ delta: ShelfScrollInput.Delta) -> Bool {
-        guard isVisible, let geom = scrollGeom, geom.maxOffset > 0
+        guard isVisible, let run = scrollRun, run.total > run.viewport
         else { return false }
-        let travel = ShelfScrollInput.travel(delta, itemStep: geom.step)
+        let travel = ShelfScrollInput.travel(
+            delta,
+            itemStep: Self.scrollStep(lengths: run.entries, gap: run.gap)
+        )
         if moveRun(to: scrollOffset + travel, animated: !delta.precise) {
             follow.scrolledByHand()
         }
@@ -44,11 +47,14 @@ extension SpaceBarOverlay {
         moveRun(to: scrollOffset + delta, animated: false)
     }
 
-    /// Moves the run to `target`, clamped, and re-reads the drop
-    /// targets, fades, counts and hover at the new offset. Returns
-    /// whether the offset moved.
+    /// The section's one scroll door (bars.md): moves the run to
+    /// `target`, clamped, and re-reads what the last render derived
+    /// from the offset — drop targets, fades, counts, hover — never
+    /// re-rendering. The plate needs no re-read: an overflowing
+    /// run's plate spans its strip at every offset
+    /// (`BarPlate.frame`). Returns whether the offset moved.
     @discardableResult
-    private func moveRun(to target: CGFloat, animated: Bool) -> Bool {
+    func moveRun(to target: CGFloat, animated: Bool) -> Bool {
         guard let run = scrollRun else { return false }
         let offset = Self.scrollOffset(
             current: target,
@@ -61,7 +67,7 @@ extension SpaceBarOverlay {
         )
         guard offset != scrollOffset else { return false }
         scrollOffset = offset
-        let runFrame = AppBarOverlay.runFrame(
+        let runFrame = ShelfOverflow.runFrame(
             in: itemContainer.bounds,
             offset: offset,
             horizontal: run.horizontal

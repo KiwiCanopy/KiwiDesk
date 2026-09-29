@@ -192,18 +192,6 @@ extension AppBarOverlay {
             : contentDepth
     }
 
-    /// `itemRun`'s frame in the viewport: the viewport's size,
-    /// shifted back along the axis by the scroll offset.
-    nonisolated static func runFrame(
-        in viewport: CGRect,
-        offset: CGFloat,
-        horizontal: Bool
-    ) -> CGRect {
-        horizontal
-            ? viewport.offsetBy(dx: -offset, dy: 0)
-            : viewport.offsetBy(dx: 0, dy: -offset)
-    }
-
     /// The scroll offset keeping the focused item in view, in
     /// equal slots — `ShelfOverflow.offset` does the arithmetic
     /// (#1517).
@@ -229,7 +217,7 @@ extension AppBarOverlay {
 
     /// Computes item frames along the bar axis (#293 QA), in
     /// `itemRun` coordinates: an overflowing run starts at zero and
-    /// `runFrame` carries the scroll.
+    /// `ShelfOverflow.runFrame` carries the scroll.
     nonisolated static func frames(
         lengths: [CGFloat],
         in bounds: CGRect,

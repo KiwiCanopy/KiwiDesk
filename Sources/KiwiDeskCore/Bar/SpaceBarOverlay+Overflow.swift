@@ -110,7 +110,7 @@ extension SpaceBarOverlay {
         fade: CGFloat
     ) {
         follow.scrolledByHand()
-        scrollOffset = ShelfOverflow.pageTarget(
+        let target = ShelfOverflow.pageTarget(
             from: scrollOffset,
             lengths: lengths,
             gap: gap,
@@ -118,7 +118,7 @@ extension SpaceBarOverlay {
             fade: fade,
             forward: forward
         )
-        render(followingActive: false)
+        moveRun(to: target, animated: true)
     }
 
     /// Updates drag autoscroll state based on cursor position (#385).

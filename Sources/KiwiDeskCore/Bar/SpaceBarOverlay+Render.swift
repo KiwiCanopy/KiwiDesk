@@ -82,7 +82,7 @@ extension SpaceBarOverlay {
             strip: strip,
             horizontal: horizontal
         )
-        let runFrame = AppBarOverlay.runFrame(
+        let runFrame = ShelfOverflow.runFrame(
             in: itemContainer.bounds,
             offset: scrollOffset,
             horizontal: horizontal
@@ -189,7 +189,7 @@ extension SpaceBarOverlay {
             frontApp,
             after: pinFront ? spacesAxis + gap : metrics.frontStart,
             strip: strip,
-            nameBound: pinFront ? axis : viewport,
+            nameBound: pinFront ? axis : max(viewport, scrolledTotal),
             style: style,
             horizontal: horizontal
         )
