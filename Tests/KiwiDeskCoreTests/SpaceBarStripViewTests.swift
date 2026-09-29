@@ -144,6 +144,32 @@ struct SpaceBarStripViewTests {
         #expect(view.leavingViews.isEmpty)
     }
 
+    /// The bar lays a chip out more than once per render: a pass
+    /// after the walk started re-writes the final frames and the
+    /// resting alphas, and must neither drop the glyph fading out
+    /// nor cancel the one fading in — the walk is an offset over
+    /// those values, so it plays on regardless.
+    @Test("a later layout pass leaves a walk in flight")
+    func laterPassKeepsTheWalk() throws {
+        let view = makeView()
+        configure(view, drawn: 3...7)
+        let carried = view.appViews[0]
+        configure(view, drawn: 4...8)
+        let arriving = try #require(view.appViews.last)
+        view.layout()
+        #expect(carried.superview === view)
+        #expect(view.leavingViews.first === carried)
+        let plays = !BarMotion.isReduced
+        #expect(
+            (arriving.layer?.animation(forKey: "kiwi.walk.fade") != nil)
+                == plays
+        )
+        #expect(
+            (carried.layer?.animation(forKey: "kiwi.walk.fade") != nil)
+                == plays
+        )
+    }
+
     @Test("an unmoved strip walks nothing")
     func unmovedStripStays() {
         let view = makeView()

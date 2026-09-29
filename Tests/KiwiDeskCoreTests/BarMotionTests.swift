@@ -119,11 +119,34 @@ struct BarMotionTests {
         #expect(!sweep.isRemovedOnCompletion)
     }
 
-    /// A strip's glyph fades under its `+N` disc at full motion
-    /// and lands at once under Reduce Motion (#1528 item 21).
-    @Test("A glyph fades only at full motion")
-    func fadesOnlyAtFullMotion() {
-        #expect(BarMotion.fades(reduceMotion: false))
-        #expect(!BarMotion.fades(reduceMotion: true))
+    /// A strip's glyph walks and fades at full motion, as an
+    /// offset over its model value that a later layout pass cannot
+    /// cancel, and stands still under Reduce Motion (#1528 item
+    /// 21).
+    @Test("A strip walk step is additive, and absent reduced")
+    func walkStepIsAdditive() throws {
+        #expect(BarMotion.walkDuration(reduceMotion: true) == 0)
+        let span = BarMotion.walkDuration(reduceMotion: false)
+        #expect(span > 0)
+        #expect(
+            BarMotion.walkAnimation(
+                keyPath: "opacity",
+                by: Float(-1),
+                zero: Float(0),
+                duration: BarMotion.walkDuration(reduceMotion: true)
+            ) == nil
+        )
+        let step = try #require(
+            BarMotion.walkAnimation(
+                keyPath: "opacity",
+                by: Float(-1),
+                zero: Float(0),
+                duration: span
+            ) as? CABasicAnimation
+        )
+        #expect(step.isAdditive)
+        #expect(step.fromValue as? Float == -1)
+        #expect(step.toValue as? Float == 0)
+        #expect(step.duration == span)
     }
 }

@@ -16,60 +16,64 @@ extension SpaceBarItemView {
         return Array(views.prefix(front)) + Array(views.suffix(back))
     }
 
-    /// Walks the glyphs in from where they drew when the strip
-    /// moved (#1528 item 21): each glyph and its badges start
-    /// `walk.cells` cells along and travel to their cells; the
-    /// glyphs it carries off fade out under their disc and those
-    /// it brings fade in. All through `BarMotion`, which lands
-    /// them at once under Reduce Motion.
+    /// Plays the pending walk from the frames and alphas this
+    /// layout pass just wrote (#1528 item 21): each glyph and its
+    /// badges start `walk.cells` cells along, the glyphs brought
+    /// in from transparent, and the glyphs carried off travel on
+    /// and fade out under their disc, leaving when the walk lands.
+    /// All through `BarMotion.playWalk`, whose offsets a later
+    /// layout pass cannot cancel; a pass with no walk pending
+    /// leaves one in flight alone.
     func slideGlyphs(pitch: CGFloat) {
-        let walk = pendingWalk
+        guard let walk = pendingWalk else { return }
         pendingWalk = nil
         let leaving = leavingViews
-        guard let walk else {
-            leaving.forEach { $0.removeFromSuperview() }
-            leavingViews = []
-            return
-        }
         let shift = CGFloat(walk.cells) * pitch
-        let moving: [NSView] =
-            appViews + badgeViews + stickyBadgeViews
-            + floatingBadgeViews
+        let along = { (by: CGFloat) -> CGVector in
+            self.horizontal
+                ? CGVector(dx: by, dy: 0) : CGVector(dx: 0, dy: by)
+        }
         let front = min(walk.enteringFront, appViews.count)
         let back = min(walk.enteringBack, appViews.count - front)
-        let entering =
-            Array(appViews.prefix(front)) + Array(appViews.suffix(back))
-        let along = { (frame: CGRect, by: CGFloat) -> CGRect in
-            self.horizontal
-                ? frame.offsetBy(dx: by, dy: 0)
-                : frame.offsetBy(dx: 0, dy: by)
-        }
-        BarMotion.runLayout(
-            {
-                for view in moving where !view.isHidden {
-                    let final = view.frame
-                    view.frame = along(final, shift)
-                    BarMotion.setFrame(view, to: final, animated: true)
-                }
-                for view in entering {
-                    view.alphaValue = 0
-                    BarMotion.setAlpha(view, to: 1)
-                }
-                for view in leaving {
-                    BarMotion.setFrame(
-                        view,
-                        to: along(view.frame, -shift),
-                        animated: true
-                    )
-                    BarMotion.setAlpha(view, to: 0)
-                }
-            },
-            completion: { [weak self] in
-                leaving.forEach { $0.removeFromSuperview() }
-                self?.leavingViews.removeAll { view in
-                    leaving.contains { $0 === view }
-                }
-            }
+        let entering = Set(
+            Array(0..<front)
+                + Array((appViews.count - back)..<appViews.count)
         )
+        var steps: [BarMotion.WalkStep] = []
+        for (index, glyph) in appViews.enumerated() {
+            let arrives = entering.contains(index)
+            let badges: [[NSView]] = [
+                badgeViews, stickyBadgeViews, floatingBadgeViews,
+            ]
+            let parts =
+                [glyph]
+                + badges.compactMap {
+                    $0.indices.contains(index) ? $0[index] : nil
+                }
+            for view in parts where !view.isHidden {
+                steps.append(
+                    .init(
+                        view: view,
+                        slide: along(shift),
+                        fade: arrives ? -view.alphaValue : 0
+                    )
+                )
+            }
+        }
+        for view in leaving {
+            let alpha = view.alphaValue
+            let to = along(-shift)
+            view.frame = view.frame.offsetBy(dx: to.dx, dy: to.dy)
+            view.alphaValue = 0
+            steps.append(
+                .init(view: view, slide: along(shift), fade: alpha)
+            )
+        }
+        BarMotion.playWalk(steps) { [weak self] in
+            leaving.forEach { $0.removeFromSuperview() }
+            self?.leavingViews.removeAll { view in
+                leaving.contains { $0 === view }
+            }
+        }
     }
 }

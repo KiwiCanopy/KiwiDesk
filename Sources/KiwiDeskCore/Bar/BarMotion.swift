@@ -25,14 +25,9 @@ enum BarMotion {
     static let slide: TimeInterval = 0.15
 
     /// Runs `body` in the bars' item-slide animation group: every
-    /// App Bar relayout, the Space run's glide (#1683) and a
-    /// Space chip's strip walk (#1528); `completion` runs once
-    /// the group lands.
+    /// App Bar relayout and the Space run's glide (#1683).
     @MainActor
-    static func runLayout(
-        _ body: () -> Void,
-        completion: (@MainActor @Sendable () -> Void)? = nil
-    ) {
+    static func runLayout(_ body: () -> Void) {
         let reduceMotion = isReduced
         NSAnimationContext.runAnimationGroup { context in
             context.duration = duration(
@@ -42,26 +37,100 @@ enum BarMotion {
                 name: .easeOut
             )
             body()
-        } completionHandler: {
-            guard let completion else { return }
+        }
+    }
+
+    /// One view's part in a Space chip's strip walk (#1528 item
+    /// 21), as offsets from where the view already stands: it
+    /// starts `slide` away, in its own superview's coordinates,
+    /// and `fade` off its opacity, and travels to where it is.
+    struct WalkStep {
+        let view: NSView
+        var slide = CGVector.zero
+        var fade: CGFloat = 0
+    }
+
+    /// Plays a strip walk on the views' layers, ADDITIVE — offsets
+    /// over the model values — so a later layout pass, which
+    /// writes the same final frames and resting alphas, cannot
+    /// cancel it; `completion` runs once it lands, at once under
+    /// Reduce Motion, which plays nothing.
+    @MainActor
+    static func playWalk(
+        _ steps: [WalkStep],
+        completion: @escaping @MainActor @Sendable () -> Void
+    ) {
+        let reduceMotion = isReduced
+        let span = walkDuration(reduceMotion: reduceMotion)
+        CATransaction.begin()
+        CATransaction.setCompletionBlock {
             MainActor.assumeIsolated { completion() }
         }
-    }
-
-    /// Fades `view` to `alpha`, fading only where Reduce Motion
-    /// is off — a strip's glyph walking under a `+N` disc or out
-    /// from one (#1528); reduced, it lands at once.
-    @MainActor
-    static func setAlpha(_ view: NSView, to alpha: CGFloat) {
-        if fades(reduceMotion: isReduced) {
-            view.animator().alphaValue = alpha
-        } else {
-            view.alphaValue = alpha
+        for step in steps {
+            step.view.wantsLayer = true
+            guard let layer = step.view.layer else { continue }
+            // A layer flipped unlike its view counts y the other way.
+            let flip: CGFloat =
+                (step.view.superview?.isFlipped ?? false)
+                    == (layer.superlayer?.isGeometryFlipped ?? false)
+                ? 1 : -1
+            let offset = CGPoint(
+                x: step.slide.dx,
+                y: step.slide.dy * flip
+            )
+            if offset != .zero,
+                let slide = walkAnimation(
+                    keyPath: "position",
+                    by: NSValue(point: offset),
+                    zero: NSValue(point: .zero),
+                    duration: span
+                )
+            {
+                layer.add(slide, forKey: "kiwi.walk.slide")
+            }
+            if step.fade != 0,
+                let fade = walkAnimation(
+                    keyPath: "opacity",
+                    by: Float(step.fade),
+                    zero: Float(0),
+                    duration: span
+                )
+            {
+                layer.add(fade, forKey: "kiwi.walk.fade")
+            }
         }
+        CATransaction.commit()
     }
 
-    /// Whether an alpha write may fade.
-    static func fades(reduceMotion: Bool) -> Bool { !reduceMotion }
+    /// A strip walk's length: a glyph walking under a disc must
+    /// read as travel, so it runs longer than an item slide and
+    /// just short of the plate glide, never lagging a held key.
+    static let walk: TimeInterval = 0.25
+
+    /// The walk's duration: zero under Reduce Motion, which plays
+    /// no walk at all.
+    static func walkDuration(reduceMotion: Bool) -> TimeInterval {
+        reduceMotion ? 0 : walk
+    }
+
+    /// A walk step's additive animation from `by` to `zero` over
+    /// `duration`; nil for a zero one, where the view simply
+    /// stands where it is.
+    static func walkAnimation(
+        keyPath: String,
+        by: Any,
+        zero: Any,
+        duration: TimeInterval
+    ) -> CAAnimation? {
+        guard duration > 0 else { return nil }
+        let step = CABasicAnimation(keyPath: keyPath)
+        step.fromValue = by
+        step.toValue = zero
+        step.isAdditive = true
+        step.duration = duration
+        step.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        return step
+    }
 
     /// The shelf plate's glide when a section appears or leaves
     /// (#1517): a re-placement the user did not ask for must be

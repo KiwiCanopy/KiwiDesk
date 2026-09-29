@@ -430,6 +430,15 @@ Obligations:
   (`SpaceBarStripTests` ▸ `changedRowNoWalk`, `jumpNoWalk`,
   `heldWindowShapes`; `SpaceBarCentredStripTests` ▸
   `staleHoldCentres`).
+- **A strip walk plays through `BarMotion.playWalk`, as additive
+  offsets over the frames and alphas the layout just wrote, and
+  its leaving glyphs leave only when it lands.** A chip is laid
+  out more than once per render, and every pass rewrites the
+  final frames and resting alphas: an animator write to the same
+  properties was cancelled by the next pass, and a pass that
+  found no walk pending dropped the fading glyphs, so the device
+  showed no fade at all (`SpaceBarStripViewTests` ▸
+  `laterPassKeepsTheWalk`).
 
 ## A per-display bar answers the SHOWN question, never the render one
 
