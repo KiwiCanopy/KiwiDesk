@@ -12,7 +12,7 @@ struct LookColorsOfferTests {
         $0.name == "Slate"
     }!
     private var taskbar: ShelfLook {
-        LookCatalog.bundled().first { $0.name == "Taskbar" }!
+        LookCatalog.bundled(sizes: []).first { $0.name == "Taskbar" }!
     }
 
     /// The draft after clicking Taskbar over the shipped colours.

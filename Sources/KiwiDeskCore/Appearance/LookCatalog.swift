@@ -1,19 +1,22 @@
+import CoreGraphics
 import Foundation
 
-/// The bundled looks (#1684). Glass is DERIVED from the shipped
-/// defaults with the starter's bar edges (#1528), so it never
-/// drifts; every other
-/// bundled look is Glass
-/// with its authored differences laid over it, so each names the
-/// whole of `LookKeys` and reproduces its picture wherever it is
-/// applied.
+/// The bundled looks (#1684). Glass is DERIVED from the starter's
+/// tuning for the given screens, so it is what a first run shows
+/// and doubles as the shape reset (#1739); every other bundled
+/// look is Glass with its authored differences laid over it, so
+/// each names the whole of `LookKeys` and reproduces its picture
+/// wherever it is applied.
 public enum LookCatalog {
     /// The always-present default look.
     public static let defaultName = "Glass"
 
-    /// Every built-in, Glass first.
-    public static func bundled() -> [ShelfLook] {
-        let glass = defaultLook()
+    /// Every built-in, Glass first, Glass derived for `sizes` —
+    /// the screens in positional order (`StarterSetup.sizes`).
+    /// Callers outside the catalog take `KiwiCore.bundledLooks`
+    /// (`LookCatalogSeamTests`).
+    public static func bundled(sizes: [CGSize]) -> [ShelfLook] {
+        let glass = defaultLook(sizes: sizes)
         return [glass]
             + authored().map { look in
                 ShelfLook(
@@ -24,15 +27,21 @@ public enum LookCatalog {
             }
     }
 
-    /// Glass: the shipped styling defaults and the starter's
-    /// split bars, in the default palette.
-    public static func defaultLook() -> ShelfLook {
-        var settings = TilingSettings()
-        settings.appBarStyle.edge = StarterSetup.appBarEdge
-        return ShelfLook(
+    /// Every built-in's name, which no screen changes.
+    public static var bundledNames: [String] {
+        [defaultName] + authored().map(\.name)
+    }
+
+    /// Glass: the starter's styling for `sizes` in the default
+    /// palette, so a first run shows it (#1739). Reached through
+    /// `KiwiCore.bundledLooks` (`LookCatalogSeamTests`).
+    public static func defaultLook(sizes: [CGSize]) -> ShelfLook {
+        ShelfLook(
             name: defaultName,
             palette: PaletteCatalog.defaultName,
-            style: LookKeys.extract(from: settings)
+            style: LookKeys.extract(
+                from: StarterSetup.settings(sizes: sizes)
+            )
         )
     }
 

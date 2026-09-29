@@ -1,3 +1,4 @@
+import CoreGraphics
 import KiwiDeskCore
 import Testing
 
@@ -21,8 +22,13 @@ struct OnboardingLooksTests {
         var draftPending = false
     }
 
-    private func look(_ name: String) throws -> ShelfLook {
-        try #require(LookCatalog.bundled().first { $0.name == name })
+    private func look(
+        _ name: String,
+        sizes: [CGSize] = []
+    ) throws -> ShelfLook {
+        try #require(
+            LookCatalog.bundled(sizes: sizes).first { $0.name == name }
+        )
     }
 
     private func makeModel(
@@ -90,15 +96,24 @@ struct OnboardingLooksTests {
         #expect(model.hasLookChanges)
     }
 
-    /// Picking Glass and Kiwi (Default) over the shipped defaults
-    /// with the starter's split bars (#1528) wakes neither the
-    /// file nor Revert. Not the starter itself: its gaps are
-    /// tuned per screen, which Glass does not carry.
-    @Test("a pick that changes nothing writes nothing")
-    func noOpPickWritesNothing() throws {
+    /// Glass and Kiwi (Default) are what a first run already
+    /// shows, so picking them wakes neither the file nor Revert —
+    /// measured on the real starter for each screen, never on
+    /// `TilingSettings()`, which hid a per-screen starter gap
+    /// (#1739).
+    @Test(
+        "a pick that changes nothing writes nothing",
+        arguments: [
+            CGSize(width: 1512, height: 982),
+            CGSize(width: 2560, height: 1440),
+        ]
+    )
+    func noOpPickWritesNothing(screen: CGSize) throws {
         let (model, recorder, core) = makeModel()
-        recorder.live.appBarStyle.edge = StarterSetup.appBarEdge
-        model.pickLook(try look(LookCatalog.defaultName))
+        let sizes = [screen]
+        recorder.live = StarterSetup.standardLayout(sizes: sizes)
+            .settings(sizes: sizes)
+        model.pickLook(try look(LookCatalog.defaultName, sizes: sizes))
         model.pickPalette(try palette(core, PaletteCatalog.defaultName))
         #expect(recorder.paints.isEmpty)
         #expect(recorder.captures == 0)

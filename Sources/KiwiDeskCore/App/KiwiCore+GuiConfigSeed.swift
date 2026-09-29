@@ -135,39 +135,38 @@ extension KiwiCore {
     /// `seedFirstRunStarterProfile()`, since `gui.json` carries
     /// only the space list and shortcuts.
     func starterSpaces() -> [SpaceID] {
-        StarterSetup.spaces(sizes: firstRunSizes())
+        StarterSetup.spaces(sizes: starterSizes())
     }
 
-    /// First-run display sizes in positional order — the one
-    /// accessor behind both the `gui.json` space list and the
-    /// Starter profile, so the two can't size to different
-    /// screens.
-    func firstRunSizes() -> [CGSize] {
+    /// The connected screens' sizes in positional order — the one
+    /// accessor behind the `gui.json` space list, the Starter
+    /// profile and Glass (#1739), so none sizes to other screens.
+    func starterSizes() -> [CGSize] {
         StarterSetup.sizes(
-            displays: firstRunDisplays(),
+            displays: starterDisplays(),
             mainID: PositionalDisplays.liveMainID
         )
     }
 
-    /// Connected displays for first-run seeding. `loadConfig` runs
+    /// Connected displays the starter is sized for. `loadConfig` runs
     /// before the event loop's first `publishDisplays`, so live
     /// state is still empty on a genuine first launch — fall back
     /// to the same `NSScreen` source `publishDisplays` reads.
     /// Prefers live state when present (tests seed displays there
-    /// to drive this deterministically). The one accessor behind
-    /// both the `gui.json` space count and the Starter profile, so
-    /// the two can't size to different display counts.
-    func firstRunDisplays() -> [Display] {
+    /// to drive this deterministically). Read through
+    /// `starterSizes`, so the space count, the Starter profile and
+    /// Glass can't size to different displays.
+    func starterDisplays() -> [Display] {
         let live = state.workspaces.allDisplays
         if !live.isEmpty { return live }
         return NSScreen.screens.compactMap { $0.kiwiDisplay }
     }
 
-    /// `firstRunDisplays().count`, floored at one — a Mac always
+    /// `starterDisplays().count`, floored at one — a Mac always
     /// drives at least one screen even if the read comes back
     /// empty (headless CI).
-    func firstRunDisplayCount() -> Int {
-        max(1, firstRunDisplays().count)
+    func starterDisplayCount() -> Int {
+        max(1, starterDisplays().count)
     }
 
     /// Builds an editable model from the running configuration.

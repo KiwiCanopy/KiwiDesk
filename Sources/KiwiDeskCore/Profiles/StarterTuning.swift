@@ -5,15 +5,14 @@ import Foundation
 ///
 /// Still ONE `TilingSettings` per profile: each layout takes the
 /// tuning of the screen `StarterSetup.hosts` names for it, and
-/// what no layout owns —
-/// gaps, the minimum window size — takes the MAIN screen's
-/// (#1662).
+/// what no layout owns — the minimum window size — takes the MAIN
+/// screen's (#1662). The gaps stay the shipped default on every
+/// screen, which clears the default ring (#1739).
 public enum StarterTuning {
     /// Baseline tuning the starter AND every preset build on, so
     /// a starter-only value never lands here (#1528).
     static func base() -> TilingSettings {
         var settings = TilingSettings()
-        settings.gapsGlobal = .uniform(8)
         settings.stack.masterRatio = 0.8
         settings.track.newWindow = .ownTrack
         settings.scrolling.slotSize = .fraction(
@@ -61,11 +60,9 @@ public enum StarterTuning {
         // No App Bar switch here: `LayoutAppBar` already defaults
         // it on for monocle and scrolling, per LAYOUT, so setting
         // it would be a no-op that reads like a decision.
-        case .laptop:
-            settings.gapsGlobal = .uniform(6)
         case .superUltrawide, .ultrawide:
             settings.minWindowSize = 420
-        case .desktop, .pivoted:
+        case .desktop, .pivoted, .laptop:
             break
         }
     }

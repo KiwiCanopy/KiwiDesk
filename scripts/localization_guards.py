@@ -218,6 +218,10 @@ GLOSSARY = {
     # verbatim like `kiwidesk` — `bars.switch.kiwishelf` ships
     # Latin in every catalog.
     "kiwishelf",
+    # Apple's `Liquid Glass`, a product name (see PRODUCT_NAMES).
+    # Trade: a stray "glass" in non-Latin prose is no longer caught.
+    "liquid",
+    "glass",
     "lua",
     "macos",
     "tiling",
@@ -308,6 +312,9 @@ PRODUCT_NAMES = (
     # The one edge both bars sit on (#1517, owner ruling 2026-09-24):
     # a coined name like the bars, kept verbatim in every locale.
     "KiwiShelf",
+    # Apple's material, named as Apple ships it (owner ruling
+    # 2026-09-29): `colors.liquid_glass` is Latin in every catalog.
+    "Liquid Glass",
 )
 
 # Locale codes a stub marker is written with. Keyed by the base

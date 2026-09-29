@@ -1,45 +1,55 @@
+import CoreGraphics
 import Foundation
 import Testing
 
 @testable import KiwiDeskCore
 
-/// The bundled looks (#1684): Glass derived from the shipped
-/// defaults and the starter's bars, every look total over the
-/// register, each look's bars its reference's, named palettes
-/// that exist, the ruled Sheen column, and five tellable apart.
+/// The bundled looks (#1684): Glass derived from the starter for
+/// the connected screens (#1739), bars included (#1528), every
+/// look total over the register, each look's bars its
+/// reference's, named palettes that exist, the ruled Sheen
+/// column, and six tellable apart.
 @Suite("Look catalog")
 struct LookCatalogTests {
-    private var bundled: [ShelfLook] { LookCatalog.bundled() }
+    private static let laptop = CGSize(width: 1512, height: 982)
+    private static let desktop = CGSize(width: 2560, height: 1440)
+
+    private var bundled: [ShelfLook] {
+        LookCatalog.bundled(sizes: [Self.desktop])
+    }
+
+    /// The Starter profile a first run seeds for `sizes`.
+    private func starter(_ sizes: [CGSize]) -> TilingSettings {
+        StarterSetup.standardLayout(sizes: sizes).settings(sizes: sizes)
+    }
 
     private func look(_ name: String) -> ShelfLook? {
         bundled.first { $0.name == name }
     }
 
-    @Test("the five bundled looks, Glass first")
+    @Test("the six bundled looks, Glass first")
     func names() {
         #expect(
             bundled.map(\.name)
-                == ["Glass", "Taskbar", "Classic", "Tiler", "Pill"]
+                == [
+                    "Glass", "Taskbar", "Classic", "Tiler", "Pill",
+                    "Sakura",
+                ]
         )
     }
 
-    /// Read off the starter's settings, not the constant, so
-    /// Glass and the starter's bars cannot part (#1528).
-    @Test("Glass is the shipped defaults with the starter's bars")
-    func glassIsTheStartersLook() throws {
+    @Test("Glass resets the shape to the starter's")
+    func glassIsTheReset() throws {
         let glass = try #require(look(LookCatalog.defaultName))
         #expect(glass.palette == PaletteCatalog.defaultName)
-        let laptop = CGSize(width: 1728, height: 1117)
-        var starter = TilingSettings()
-        starter.appBarStyle.edge =
-            StarterSetup.settings(sizes: [laptop]).appBarStyle.edge
-        var settings = TilingSettings()
+        let first = starter([Self.desktop])
+        var settings = first
         try #require(look("Tiler")).apply(to: &settings)
         #expect(!glass.isApplied(to: settings))
         glass.apply(to: &settings)
         #expect(
             LookKeys.extract(from: settings)
-                == LookKeys.extract(from: starter)
+                == LookKeys.extract(from: first)
         )
     }
 
@@ -50,7 +60,7 @@ struct LookCatalogTests {
         let edges: [String: (space: String, app: String)] = [
             "Glass": ("top", "bottom"), "Taskbar": ("bottom", "bottom"),
             "Classic": ("top", "top"), "Tiler": ("top", "top"),
-            "Pill": ("top", "top"),
+            "Pill": ("top", "top"), "Sakura": ("top", "bottom"),
         ]
         for look in bundled {
             let want = try #require(edges[look.name], "\(look.name)")
@@ -62,6 +72,34 @@ struct LookCatalogTests {
                 look.style["app_bar.edge"] == .string(want.app),
                 "\(look.name)"
             )
+        }
+    }
+
+    /// A Glass the starter's look keys disagree with moves a first
+    /// run's windows (#1739) — its gaps then, its App Bar edge
+    /// since #1528; the derivation itself is
+    /// `LookCatalogSeamTests`'.
+    @Test(
+        "Glass is what a first run shows",
+        arguments: [
+            [laptop], [desktop], [laptop, desktop], [desktop, laptop],
+        ]
+    )
+    @MainActor func glassIsTheFirstRun(sizes: [CGSize]) throws {
+        let first = starter(sizes)
+        let looks = LookCatalog.bundled(sizes: sizes)
+        let glass = try #require(looks.first)
+        #expect(glass.name == LookCatalog.defaultName)
+        #expect(glass.isApplied(to: first))
+        let palette = PaletteCatalog.bundled().first {
+            $0.name == glass.palette
+        }
+        #expect(
+            KiwiCore.painted(first, look: glass, palette: palette)
+                == first
+        )
+        for other in looks.dropFirst() {
+            #expect(!other.isApplied(to: first), "\(other.name)")
         }
     }
 
@@ -100,7 +138,7 @@ struct LookCatalogTests {
     func sheenColumn() throws {
         let column: [String: Double] = [
             "Glass": 0.5, "Taskbar": 0, "Classic": 0.25,
-            "Tiler": 0, "Pill": 0.5,
+            "Tiler": 0, "Pill": 0.5, "Sakura": 0.6,
         ]
         for (name, sheen) in column {
             let look = try #require(look(name))

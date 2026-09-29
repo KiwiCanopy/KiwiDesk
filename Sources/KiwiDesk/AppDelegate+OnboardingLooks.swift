@@ -6,7 +6,9 @@ import KiwiDeskCore
 /// own `onShelfPainted`, wired beside `onCapturedLive`.
 extension AppDelegate {
     func wireOnboardingLooks() {
-        onboardingModel.shelfLooks = { LookCatalog.bundled() }
+        onboardingModel.shelfLooks = { [weak self] in
+            self?.core.bundledLooks ?? []
+        }
         onboardingModel.shelfPalettes = { [weak self] in
             self?.core.allPalettes ?? []
         }

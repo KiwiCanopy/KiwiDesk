@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -144,8 +145,12 @@ struct LookBorderGapTests {
                 "Classic": (2, .square, false, 6),
                 "Tiler": (2, .square, false, 4),
                 "Pill": (4, .rounded, true, 14),
+                "Sakura": (5, .rounded, true, 16),
             ]
-        let bundled = LookCatalog.bundled()
+        // Glass's gaps are the starter's for this screen (#1739).
+        let bundled = LookCatalog.bundled(
+            sizes: [CGSize(width: 2560, height: 1440)]
+        )
         #expect(Set(column.keys) == Set(bundled.map(\.name)))
         for look in bundled {
             let row = try #require(column[look.name])
@@ -163,17 +168,27 @@ struct LookBorderGapTests {
     /// a look never makes two neighbours' rings overlap.
     @Test("every bundled look's gaps clear its rings")
     func gapsClearTheRings() {
-        for look in LookCatalog.bundled() {
-            var settings = TilingSettings()
-            look.apply(to: &settings)
-            settings.borderStyle.unfocusedEnabled = true
-            let needed = settings.borderStyle.fittingGaps()
-            let inner = settings.gapsGlobal.inner
-            #expect(
-                inner.horizontal >= needed.inner.horizontal
-                    && inner.vertical >= needed.inner.vertical,
-                "\(look.name) needs \(needed.inner.horizontal)"
-            )
+        let screens = [
+            CGSize(width: 1512, height: 982),
+            CGSize(width: 2560, height: 1440),
+        ]
+        for size in screens {
+            for look in LookCatalog.bundled(sizes: [size]) {
+                checkGapsClear(look)
+            }
         }
+    }
+
+    private func checkGapsClear(_ look: ShelfLook) {
+        var settings = TilingSettings()
+        look.apply(to: &settings)
+        settings.borderStyle.unfocusedEnabled = true
+        let needed = settings.borderStyle.fittingGaps()
+        let inner = settings.gapsGlobal.inner
+        #expect(
+            inner.horizontal >= needed.inner.horizontal
+                && inner.vertical >= needed.inner.vertical,
+            "\(look.name) needs \(needed.inner.horizontal)"
+        )
     }
 }
