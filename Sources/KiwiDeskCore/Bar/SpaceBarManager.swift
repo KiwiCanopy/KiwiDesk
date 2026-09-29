@@ -54,6 +54,14 @@ public final class SpaceBarManager {
     }
     private(set) var statusMark: StatusSpaceMark?
 
+    /// The chip the pointer rests on and the strip it drew: the
+    /// strip keeps it until the pointer leaves, so a click cannot
+    /// slide another app under the pointer (#1528 item 21).
+    private(set) var stripHold: (space: SpaceID, strip: Range<Int>)?
+    /// Fires when a hold ends, so the strip re-centres — Core
+    /// wires it to `updateBars()`.
+    var onStripReleased: @MainActor () -> Void = {}
+
     private var overlays: [DisplayID: SpaceBarOverlay] = [:]
     /// Active visible bars painted on screen.
     private var shownBars: [Bar] = []
@@ -120,6 +128,29 @@ public final class SpaceBarManager {
                 stateMarkColors: bar.stateMarkColors
             )
         }
+    }
+
+    /// The strip `space`'s chip keeps while the pointer rests on
+    /// it; nil lets it centre.
+    func heldStrip(of space: SpaceID) -> Range<Int>? {
+        stripHold.flatMap { $0.space == space ? $0.strip : nil }
+    }
+
+    /// The pointer entering or leaving a Space chip. Leaving the
+    /// held chip ends the hold and asks for the re-centring
+    /// render.
+    func stripHover(
+        _ space: SpaceID,
+        _ strip: Range<Int>?,
+        inside: Bool
+    ) {
+        if inside, let strip {
+            stripHold = (space, strip)
+            return
+        }
+        guard !inside, stripHold?.space == space else { return }
+        stripHold = nil
+        onStripReleased()
     }
 
     /// Hit-tests global screen point against space items (#372).
@@ -195,6 +226,9 @@ public final class SpaceBarManager {
             self?.onSelectSpace(space)
         }
         overlay.glyphActions = glyphActions
+        overlay.onStripHover = { [weak self] space, strip, inside in
+            self?.stripHover(space, strip, inside: inside)
+        }
         overlays[display] = overlay
         return overlay
     }

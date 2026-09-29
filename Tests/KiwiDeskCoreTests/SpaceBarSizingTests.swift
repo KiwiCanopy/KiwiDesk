@@ -40,7 +40,7 @@ struct SpaceBarSizingTests {
         #expect(
             SpaceBarItemView.autoLength(
                 appCount: 2,
-                overflow: 3,
+                discs: 1,
                 contentDepth: 32,
                 glyphGap: 0,
                 ends: .zero

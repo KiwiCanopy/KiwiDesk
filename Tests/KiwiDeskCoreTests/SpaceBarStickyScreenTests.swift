@@ -138,19 +138,22 @@ struct SpaceBarStickyScreenTests {
         // anything there, so the system focus is still a window
         // hidden past the Dell's cap while Space 1 is active.
         core.state.workspaces.activate(SpaceID("3"))
+        core.state.apply(.windowCreated(window(6, app: "Vim")))
         core.state.apply(.windowCreated(window(5, app: "Term")))
         core.state.apply(.windowFocused(WindowID(5)))
         core.state.workspaces.activate(SpaceID("1"))
         var style = SpaceBarLook()
         style.glyphCap = 1
+        // A strip held on the Dell's first two keeps Term behind
+        // its trailing badge (#1528 item 21).
+        core.spaceBars.stripHover(SpaceID("3"), 0..<2, inside: true)
         let away = try item(core, dell, "3", style)
         #expect(away.overflow == 1)
         #expect(!away.focusInOverflow)
         // Nor does the active screen claim it: the focus is not
         // behind ITS badge either, so neither bar tints.
         let here = try item(core, built, "1", style)
-        #expect(here.overflow == 1)
-        #expect(!here.focusInOverflow)
+        #expect(!here.focusInOverflow && !here.focusBefore)
         // Follow the focus back to the Dell: now that Space is
         // the active one and the badge does carry the signal.
         core.state.workspaces.activate(SpaceID("3"))

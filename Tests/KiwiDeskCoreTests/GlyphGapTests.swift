@@ -67,14 +67,14 @@ struct GlyphGapTests {
     func lengthCountsGaps() {
         let flush = SpaceBarItemView.autoLength(
             appCount: 3,
-            overflow: 2,
+            discs: 1,
             contentDepth: 32,
             glyphGap: 0,
             ends: .zero
         )
         let spaced = SpaceBarItemView.autoLength(
             appCount: 3,
-            overflow: 2,
+            discs: 1,
             contentDepth: 32,
             glyphGap: 5,
             ends: .zero
@@ -135,7 +135,7 @@ struct GlyphGapDrawingTests {
         }
         let length = SpaceBarItemView.autoLength(
             appCount: apps.count,
-            overflow: 2,
+            discs: 1,
             contentDepth: Self.depth,
             glyphGap: look.resolvedGlyphGap,
             ends: SpaceBarItemView.ends(
@@ -260,7 +260,7 @@ struct GlyphGapRenderTests {
                 view.frame.width
                     == SpaceBarItemView.autoLength(
                         appCount: item.apps.count,
-                        overflow: item.overflow,
+                        discs: item.discs,
                         contentDepth: depth,
                         glyphGap: Self.gap,
                         ends: view.ends

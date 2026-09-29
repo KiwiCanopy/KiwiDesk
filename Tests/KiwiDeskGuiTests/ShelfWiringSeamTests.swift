@@ -138,7 +138,7 @@ struct ShelfWiringSeamTests {
     @Test("Bar items gate hover on owning the pointer")
     func itemsGateHover() throws {
         for file in [
-            "Bar/SpaceBarItemView.swift", "Bar/AppBarItemView.swift",
+            "Bar/SpaceBarItemView+Hover.swift", "Bar/AppBarItemView.swift",
         ] {
             let body = Self.squash(
                 try Self.body(of: "func refreshHover(", in: file)

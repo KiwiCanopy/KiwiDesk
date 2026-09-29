@@ -14,6 +14,11 @@ extension KiwiCore {
         spaceBars.glyphActions.tooltip = { [weak self] in
             self?.spaceBarTooltip($0)
         }
+        // A strip held under the pointer re-centres as it leaves
+        // (#1528 item 21), through the one bar refresh.
+        spaceBars.onStripReleased = { [weak self] in
+            self?.updateBars()
+        }
     }
 
     func pickFromSpaceBar(_ pick: SpaceBarGlyphPick) {

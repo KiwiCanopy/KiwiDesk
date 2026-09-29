@@ -123,15 +123,18 @@ struct SpaceBarOverlayFilterTests {
         var style = SpaceBarLook()
         style.glyphCap = 1
         core.state.apply(.windowCreated(window(1, app: "Web")))
+        core.state.apply(.windowCreated(window(4, app: "Term")))
         core.state.apply(.windowCreated(window(2, app: "Mail")))
         core.state.apply(
             .windowCreated(window(3, app: "Mail", overlay: true))
         )
+        core.state.apply(.windowFocused(WindowID(1)))
         let item = try #require(
             core.spaceBarItems(display: display, style: style)
                 .first
         )
-        #expect(item.apps.map(\.name) == ["Web"])
+        // Span 1 at the row's start draws two (#1528 item 20).
+        #expect(item.apps.map(\.name) == ["Web", "Term"])
         // Mail alone is hidden: the overlay is not a window the
         // "+n" promises the user can reach.
         #expect(item.overflow == 1)

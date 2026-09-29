@@ -25,9 +25,14 @@ enum BarMotion {
     static let slide: TimeInterval = 0.15
 
     /// Runs `body` in the bars' item-slide animation group: every
-    /// App Bar relayout, and the Space run's glide (#1683).
+    /// App Bar relayout, the Space run's glide (#1683) and a
+    /// Space chip's strip walk (#1528); `completion` runs once
+    /// the group lands.
     @MainActor
-    static func runLayout(_ body: () -> Void) {
+    static func runLayout(
+        _ body: () -> Void,
+        completion: (@MainActor @Sendable () -> Void)? = nil
+    ) {
         let reduceMotion = isReduced
         NSAnimationContext.runAnimationGroup { context in
             context.duration = duration(
@@ -37,8 +42,26 @@ enum BarMotion {
                 name: .easeOut
             )
             body()
+        } completionHandler: {
+            guard let completion else { return }
+            MainActor.assumeIsolated { completion() }
         }
     }
+
+    /// Fades `view` to `alpha`, fading only where Reduce Motion
+    /// is off — a strip's glyph walking under a `+N` disc or out
+    /// from one (#1528); reduced, it lands at once.
+    @MainActor
+    static func setAlpha(_ view: NSView, to alpha: CGFloat) {
+        if fades(reduceMotion: isReduced) {
+            view.animator().alphaValue = alpha
+        } else {
+            view.alphaValue = alpha
+        }
+    }
+
+    /// Whether an alpha write may fade.
+    static func fades(reduceMotion: Bool) -> Bool { !reduceMotion }
 
     /// The shelf plate's glide when a section appears or leaves
     /// (#1517): a re-placement the user did not ask for must be

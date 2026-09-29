@@ -47,7 +47,7 @@ struct SpaceBarGlyphTargetTests {
         let apps = [app("Mail", [2, 3]), app("Web", [4])]
         let length = SpaceBarItemView.autoLength(
             appCount: apps.count,
-            overflow: overflow.count,
+            discs: overflow.isEmpty ? 0 : 1,
             contentDepth: Self.depth,
             glyphGap: 0,
             ends: SpaceBarItemView.ends(
@@ -212,7 +212,7 @@ struct SpaceBarGlyphTargetTests {
                 == ["Mail, windows: 2", "Web"]
         )
         let more = try #require(item.overflowTarget)
-        #expect(more.accessibilityLabel() == "Windows not shown: 1")
+        #expect(more.accessibilityLabel() == "Later windows not shown: 1")
     }
 
     @Test("A render with the same windows keeps its targets")

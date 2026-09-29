@@ -115,6 +115,8 @@ struct BarMotionSeamTests {
         "runPlateGlide": ["plateGlideDuration(", "isReduced"],
         "plateGlideDuration": [],
         "setFrame": ["travels(", "isReduced"],
+        "setAlpha": ["fades(", "isReduced"],
+        "fades": [],
         "travels": [],
         "springSweep": ["springAnimation(", "isReduced"],
         "springAnimation": ["reduceMotion"],

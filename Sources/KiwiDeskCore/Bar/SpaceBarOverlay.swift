@@ -12,12 +12,25 @@ public final class SpaceBarOverlay {
         let spaceGlyph: SpaceGlyph
         private(set) var apps: [SpaceBarItemView.App]
         let active: Bool
-        /// Windows hidden past the glyph cap, in row order: the
-        /// "+n" badge counts them and its menu lists them (#1528).
+        /// Windows hidden AFTER the drawn glyphs, in row order:
+        /// the trailing "+n" disc counts them and its menu lists
+        /// them (#1528).
         private(set) var overflowWindows: [WindowID]
         var overflow: Int { overflowWindows.count }
-        /// Focused window is hidden past the cap (#376).
+        /// Focused window is hidden after the glyphs (#376).
         private(set) var focusInOverflow: Bool
+        /// Windows hidden BEFORE the drawn glyphs — the leading
+        /// disc's (#1528 item 17).
+        private(set) var overflowBefore: [WindowID] = []
+        /// Focused window is hidden before the glyphs.
+        private(set) var focusBefore = false
+        /// The groups drawn, which a chip under the pointer holds
+        /// (#1528 item 21); nil for a layer item.
+        private(set) var strip: Range<Int>?
+        /// The `+N` discs drawn, one per side that hides windows.
+        var discs: Int {
+            (overflowBefore.isEmpty ? 0 : 1) + (overflow > 0 ? 1 : 0)
+        }
         /// Set only by `collapsed(to:)` (#1683).
         private(set) var collapse: SpaceBarItemView.Collapse?
         /// Where a held Space came from (#1507).
@@ -29,7 +42,10 @@ public final class SpaceBarOverlay {
             apps: [SpaceBarItemView.App],
             active: Bool,
             overflow: [WindowID],
-            focusInOverflow: Bool
+            focusInOverflow: Bool,
+            overflowBefore: [WindowID] = [],
+            focusBefore: Bool = false,
+            strip: Range<Int>? = nil
         ) {
             identity = .space(space)
             self.spaceGlyph = spaceGlyph
@@ -37,6 +53,9 @@ public final class SpaceBarOverlay {
             self.active = active
             self.overflowWindows = overflow
             self.focusInOverflow = focusInOverflow
+            self.overflowBefore = overflowBefore
+            self.focusBefore = focusBefore
+            self.strip = strip
         }
 
         /// The layer item: one glyph, no apps, never active.
@@ -70,10 +89,13 @@ public final class SpaceBarOverlay {
             }
             let windows =
                 apps.reduce(0) { $0 + $1.count } + overflow
+                + overflowBefore.count
             var item = self
             item.apps = []
             item.overflowWindows = []
             item.focusInOverflow = false
+            item.overflowBefore = []
+            item.focusBefore = false
             switch content {
             case .apps:
                 return self
@@ -86,6 +108,10 @@ public final class SpaceBarOverlay {
 
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.
     public var onSelect: @MainActor (SpaceID) -> Void = { _ in }
+    /// The pointer entering or leaving a Space chip, with the
+    /// strip it drew — the manager's hold (#1528 item 21).
+    var onStripHover: @MainActor (SpaceID, Range<Int>?, Bool) -> Void =
+        { _, _, _ in }
     /// The glyph targets' answers, the manager's one instance.
     var glyphActions: SpaceBarGlyphActions?
 

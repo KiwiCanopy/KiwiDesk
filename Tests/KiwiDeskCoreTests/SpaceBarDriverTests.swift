@@ -105,23 +105,25 @@ struct SpaceBarDriverTests {
         // Focus a member of the leading run: the group takes
         // the focused flag, and stays collapsed (no expansion).
         core.state.apply(.windowFocused(WindowID(1)))
-        let (apps, overflow, _) = core.spaceBarApps(
+        let content = core.spaceBarApps(
             in: core.state.workspaces[SpaceID("1")]!,
             style: SpaceBarLook()
         )
-        #expect(overflow.isEmpty)
+        let apps = content.apps
+        #expect(content.before.isEmpty && content.after.isEmpty)
         #expect(apps.map(\.name) == ["Zed", "Finder", "Zed"])
         #expect(apps.map(\.count) == [2, 1, 1])
         #expect(apps.map(\.focused) == [true, false, false])
     }
 
-    @Test("Groups past the cap collapse into the +n overflow")
+    @Test("Groups past the span collapse into the +n overflow")
     func overflowCap() throws {
         let core = makeCore()
         core.state.workspaces.assign(SpaceID("1"), to: display)
         core.state.workspaces.activate(SpaceID("1"))
-        // 7 apps → 7 groups; cap 5 → 2 hidden groups of two
-        // windows each, so n counts WINDOWS (4), not slots (2).
+        // 8 apps → 8 groups; span 5 at the row's start draws 6
+        // and hides 2 groups of two windows each, so n counts
+        // WINDOWS (4), not slots (2) (#1528 item 20).
         for id in 1...6 {
             core.state.apply(
                 .windowCreated(
@@ -138,12 +140,20 @@ struct SpaceBarDriverTests {
         core.state.apply(
             .windowCreated(window(9, app: "App7"))
         )
-        let (apps, overflow, _) = core.spaceBarApps(
+        core.state.apply(
+            .windowCreated(window(10, app: "App8"))
+        )
+        core.state.apply(
+            .windowCreated(window(11, app: "App8"))
+        )
+        core.state.apply(.windowFocused(WindowID(1)))
+        let content = core.spaceBarApps(
             in: core.state.workspaces[SpaceID("1")]!,
             style: SpaceBarLook()
         )
-        #expect(apps.count == 5)
-        #expect(overflow.count == 4)
+        #expect(content.apps.count == 6)
+        #expect(content.before.isEmpty)
+        #expect(content.after.count == 4)
     }
 
     @Test("glyph_cap drives the visible/overflow split (#376)")
@@ -157,27 +167,30 @@ struct SpaceBarDriverTests {
                 .windowCreated(window(UInt32(id), app: "App\(id)"))
             )
         }
+        core.state.apply(.windowFocused(WindowID(1)))
         let space = core.state.workspaces[SpaceID("1")]!
-        // A lower cap shows fewer glyphs, hides the rest as
-        // WINDOWS in the +n badge.
+        // A lower span shows fewer glyphs — one more than the
+        // span at the row's start (#1528 item 20) — and hides
+        // the rest as WINDOWS in the +n badge.
         var low = SpaceBarLook()
         low.glyphCap = 2
         let capped = core.spaceBarApps(in: space, style: low)
-        #expect(capped.apps.count == 2)
-        #expect(capped.overflow.count == 4)
-        // An out-of-range cap clamps via resolvedGlyphCap: 0 → 1,
-        // and a cap past the group count shows all with no badge.
+        #expect(capped.apps.count == 3)
+        #expect(capped.after.count == 3)
+        // An out-of-range span clamps via resolvedGlyphCap:
+        // 0 → 1, and a span past the group count shows all with
+        // no badge.
         var floored = SpaceBarLook()
         floored.glyphCap = 0
         #expect(
             core.spaceBarApps(in: space, style: floored)
-                .apps.count == 1
+                .apps.count == 2
         )
         var wide = SpaceBarLook()
         wide.glyphCap = 99
         let all = core.spaceBarApps(in: space, style: wide)
         #expect(all.apps.count == 6)
-        #expect(all.overflow.isEmpty)
+        #expect(all.before.isEmpty && all.after.isEmpty)
     }
 
     @Test("Front segment follows the toggle and the focus")

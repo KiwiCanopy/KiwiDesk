@@ -20,20 +20,21 @@ extension SpaceBarItemView {
         max(contentDepth - pad * 2, 8)
     }
 
-    /// Computes requested slot length for given app count and overflow badge.
+    /// Computes requested slot length for given app count and the
+    /// `+n` discs drawn (one per side that hides windows, #1528).
     /// `glyphGap` is the style's `resolvedGlyphGap`, taken with
     /// no default so a caller cannot measure without it (#1689);
     /// `contentDepth` is the shelf's for the strip (#1682), and
     /// `ends` the item's `ends(look:depth:first:last:)` (#1763).
     static func autoLength(
         appCount: Int,
-        overflow: Int = 0,
+        discs: Int = 0,
         contentDepth: CGFloat,
         glyphGap: CGFloat,
         ends: ItemEnds
     ) -> CGFloat {
         let cell = cell(contentDepth: contentDepth)
-        let slots = appCount + (overflow > 0 ? 1 : 0)
+        let slots = appCount + discs
         let divider: CGFloat = slots > 0 ? pad + 1 + pad : 0
         let gaps = CGFloat(max(slots - 1, 0)) * glyphGap
         return pad * 2 + ends.total + cell + divider
@@ -85,6 +86,16 @@ extension SpaceBarItemView {
             cursor += 1 + Self.pad
         }
         let glyphGap = style.resolvedGlyphGap
+        if collapse == nil, !overflowBefore.isEmpty {
+            layoutBadge(
+                leadingBadge,
+                onCellAt: cursor,
+                cell: cell,
+                centered: true
+            )
+            leadingTarget?.frame = cellRect(at: cursor, cell: cell)
+            cursor += cell + glyphGap
+        }
         for (index, view) in appViews.enumerated() {
             if index > 0 { cursor += glyphGap }
             place(view, at: cursor, cell: cell)
@@ -119,7 +130,65 @@ extension SpaceBarItemView {
             overflowTarget?.frame = cellRect(at: cursor, cell: cell)
             cursor += cell
         }
+        slideGlyphs(pitch: cell + glyphGap)
         layoutAccent()
+    }
+
+    /// Walks the glyphs in from where they drew when the strip
+    /// moved (#1528 item 21): each glyph and its badges start
+    /// `walk.cells` cells along and travel to their cells; the
+    /// glyphs it carries off fade out under their disc and those
+    /// it brings fade in. All through `BarMotion`, which lands
+    /// them at once under Reduce Motion.
+    private func slideGlyphs(pitch: CGFloat) {
+        let walk = pendingWalk
+        pendingWalk = nil
+        let leaving = leavingViews
+        guard let walk else {
+            leaving.forEach { $0.removeFromSuperview() }
+            leavingViews = []
+            return
+        }
+        let shift = CGFloat(walk.cells) * pitch
+        let moving: [NSView] =
+            appViews + badgeViews + stickyBadgeViews
+            + floatingBadgeViews
+        let front = min(walk.enteringFront, appViews.count)
+        let back = min(walk.enteringBack, appViews.count - front)
+        let entering =
+            Array(appViews.prefix(front)) + Array(appViews.suffix(back))
+        let along = { (frame: CGRect, by: CGFloat) -> CGRect in
+            self.horizontal
+                ? frame.offsetBy(dx: by, dy: 0)
+                : frame.offsetBy(dx: 0, dy: by)
+        }
+        BarMotion.runLayout(
+            {
+                for view in moving where !view.isHidden {
+                    let final = view.frame
+                    view.frame = along(final, shift)
+                    BarMotion.setFrame(view, to: final, animated: true)
+                }
+                for view in entering {
+                    view.alphaValue = 0
+                    BarMotion.setAlpha(view, to: 1)
+                }
+                for view in leaving {
+                    BarMotion.setFrame(
+                        view,
+                        to: along(view.frame, -shift),
+                        animated: true
+                    )
+                    BarMotion.setAlpha(view, to: 0)
+                }
+            },
+            completion: { [weak self] in
+                leaving.forEach { $0.removeFromSuperview() }
+                self?.leavingViews.removeAll { view in
+                    leaving.contains { $0 === view }
+                }
+            }
+        )
     }
 
     /// Positions count badge on cell corner or centered for overflow.
