@@ -1,15 +1,24 @@
 import Foundation
 
-/// Registers reduced hover help delay (argued in
-/// `docs/design-decisions.md`; band held by `ToolTipDelayTests`).
-/// `register`, never `set`: a user's own `NSInitialToolTipDelay`
-/// must win — overwriting it would be silent.
+/// Stores the shortened hover-help delay in the app's own domain
+/// (argued in `docs/design-decisions.md`; band held by
+/// `ToolTipDelayTests`). Stored, never registered: AppKit reads the
+/// stored value, not the registration domain (measured 2026-10-01,
+/// macOS 27). A user's own `NSInitialToolTipDelay` wins — `install`
+/// rewrites only a value `markerKey` says it wrote itself.
 enum ToolTipDelay {
     /// AppKit reads this in milliseconds.
     static let key = "NSInitialToolTipDelay"
-    static let milliseconds = 500
+    /// The value `install` last wrote; a stored value that differs,
+    /// or one present without this marker, is the user's.
+    static let markerKey = "KiwiDeskToolTipDelayWritten"
+    static let milliseconds = 250
 
     static func install(into defaults: UserDefaults = .standard) {
-        defaults.register(defaults: [key: milliseconds])
+        let stored = defaults.object(forKey: key) as? Int
+        let marker = defaults.object(forKey: markerKey) as? Int
+        if let stored, stored != marker { return }
+        defaults.set(milliseconds, forKey: key)
+        defaults.set(milliseconds, forKey: markerKey)
     }
 }
