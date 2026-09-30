@@ -118,7 +118,30 @@ extension SpaceBarOverlay {
             frontFollows: false
         )
         return runTotal(lengths: lengths, gap: gap, frontExtent: 0)
-            + SpaceBarItemView.pad + max(gap, SpaceBarItemView.pad)
+            + endPads(gap: gap)
+    }
+
+    /// The pads a fitting run leaves beside it — `pad` at the end
+    /// it hugs, `max(gap, pad)` at the other: `naturalLength`'s,
+    /// an overflowing viewport's and the hard floor's one reading
+    /// (#1830).
+    nonisolated static func endPads(gap: CGFloat) -> CGFloat {
+        SpaceBarItemView.pad + max(gap, SpaceBarItemView.pad)
+    }
+
+    /// Where an overflowing viewport starts: where `contentStart`
+    /// puts a run exactly `endPads` short of the axis.
+    nonisolated static func overflowLead(
+        gap: CGFloat,
+        alignment: KiwiShelf.Alignment
+    ) -> CGFloat {
+        let pads = endPads(gap: gap)
+        return contentStart(
+            total: 0,
+            axis: pads,
+            alignment: alignment,
+            pad: SpaceBarItemView.pad
+        )
     }
 
     /// The active Space item's length — what the shelf's hard

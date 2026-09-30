@@ -208,7 +208,10 @@ struct ShelfFloorWiringTests {
                 look: settings.spaceBarLook
             ),
             thickness: depth,
-            gap: settings.kiwishelf.itemGap
+            gap: settings.kiwishelf.itemGap,
+            endPads: SpaceBarOverlay.endPads(
+                gap: settings.spaceBarLook.itemGap
+            )
         )
         let plainMinimum =
             (600 - settings.kiwishelf.itemGap)

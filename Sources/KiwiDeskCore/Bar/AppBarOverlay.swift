@@ -182,8 +182,9 @@ public final class AppBarOverlay {
         let runStart: CGFloat
         if let first = frames.first {
             runStart =
-                m.horizontal
-                ? first.minX + runFrame.minX : first.minY + runFrame.minY
+                m.inset
+                + (m.horizontal
+                    ? first.minX + runFrame.minX : first.minY + runFrame.minY)
         } else {
             runStart = 0
         }
@@ -259,8 +260,8 @@ public final class AppBarOverlay {
             horizontal: m.horizontal
         )
         contentFrame = runContent.offsetBy(
-            dx: runFrame.minX,
-            dy: runFrame.minY
+            dx: runFrame.minX + itemContainer.frame.minX,
+            dy: runFrame.minY + itemContainer.frame.minY
         )
         // Single dispatch for glass hosting mode (#407).
         BarMotion.runLayout {

@@ -43,9 +43,12 @@ extension AppBarOverlay {
             thickness: thickness
         )
         let total = Self.runLength(lengths: lengths, gap: gap)
-        // No arrow zones: the run fills its section and fades on a
-        // side that hides entries (#1517).
-        let inset: CGFloat = 0
+        // No arrow zones: the run fades on a side that hides entries
+        // (#1517). An overflowing run keeps the end pad a fitting one
+        // has, where its alignment puts it, so crossing into overflow
+        // starts the scroll and moves no end (#1830).
+        let pads = Self.endPads(gap: gap)
+        let overflows = total > axis - pads
         return Metrics(
             horizontal: horizontal,
             slot: slot,
@@ -53,10 +56,29 @@ extension AppBarOverlay {
             breakAfter: breakAfter,
             lengths: lengths,
             total: total,
-            inset: inset,
-            viewport: max(axis - inset * 2, 0),
+            inset: overflows
+                ? Self.overflowLead(pads: pads, alignment: style.alignment)
+                : 0,
+            viewport: max(overflows ? axis - pads : axis, 0),
             alignment: style.alignment
         )
+    }
+
+    /// The pad a fitting run leaves beside it — `naturalLength`'s
+    /// and an overflowing viewport's one reading (#1830).
+    nonisolated static func endPads(gap: CGFloat) -> CGFloat { gap }
+
+    /// Where an overflowing viewport starts: where a run exactly
+    /// `pads` short of the axis would, by `frames`' alignment.
+    nonisolated static func overflowLead(
+        pads: CGFloat,
+        alignment: AppBarStyle.BarAlignment
+    ) -> CGFloat {
+        switch alignment {
+        case .start: return 0
+        case .center: return pads / 2
+        case .end: return pads
+        }
     }
 
     /// The run's natural length along the shelf — every slot at
@@ -85,7 +107,7 @@ extension AppBarOverlay {
             style: style,
             thickness: thickness
         )
-        return runLength(lengths: lengths, gap: gap) + gap
+        return runLength(lengths: lengths, gap: gap) + endPads(gap: gap)
     }
 
     /// One slot's length, its quarter cap measured on `capAxis`.

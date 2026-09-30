@@ -11784,6 +11784,17 @@ manual scroll — a page, the wheel, a drag's autoscroll — holds
 until the active Space or focus changes or the section hides:
 a section that followed the active entry on every refresh would
 undo the scroll the moment anything redrew.
+
+:::unreleased
+An overflowing run keeps the end pads a fitting one has, where
+its alignment puts them
+([#1830](https://github.com/KiwiCanopy/KiwiDesk/issues/1830)):
+its viewport is the section less those pads, so crossing into
+overflow starts the scroll and moves neither end, and a divider
+drag that shrinks the Space section moves no outer margin. The
+Space section's hard floor carries the same pads.
+:::
+
 The front-app segment hides while an App Bar shares the shelf:
 the App Bar already marks the focused window, and two marks of
 one fact on one plate is one too many.

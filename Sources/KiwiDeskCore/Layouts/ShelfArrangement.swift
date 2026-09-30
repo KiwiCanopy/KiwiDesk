@@ -179,15 +179,18 @@ public struct ShelfArrangement: Equatable, Sendable {
     }
 
     /// The Space section's hard floor for an active item
-    /// `activeExtent` long on a shelf `thickness` deep: the item
-    /// and, each side, the follow margin that keeps it clear of a
-    /// fade (`ShelfOverflow.followMargin`).
+    /// `activeExtent` long on a shelf `thickness` deep: the item,
+    /// each side the follow margin that keeps it clear of a fade
+    /// (`ShelfOverflow.followMargin`), and the `endPads` an
+    /// overflowing run keeps outside its viewport (#1830).
     public static func hardFloor(
         activeExtent: CGFloat,
         thickness: CGFloat,
-        gap: CGFloat
+        gap: CGFloat,
+        endPads: CGFloat
     ) -> CGFloat {
         activeExtent + fadeRoom(thickness: thickness, gap: gap)
+            + endPads
     }
 
     /// Both follow margins' room at their widest: what a section

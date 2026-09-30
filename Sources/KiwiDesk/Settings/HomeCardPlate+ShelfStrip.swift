@@ -58,7 +58,8 @@ struct ShelfStripPreview: View {
                 ShelfArrangement.hardFloor(
                     activeExtent: ($0.items.first?.length ?? 0) / u,
                     thickness: shelf.thickness,
-                    gap: $0.gap / u
+                    gap: $0.gap / u,
+                    endPads: endPads($0) / u
                 )
             } ?? 0,
             shelf: live
@@ -102,7 +103,13 @@ struct ShelfStripPreview: View {
             spec.items.map(\.length).reduce(0, +)
             + spec.pipEndInsets(scale: scale)
         let gaps = spec.gap * CGFloat(max(spec.items.count - 1, 0))
-        return items + gaps + 2 * (spec.gap + 3 * scale)
+        return items + gaps + endPads(spec)
+    }
+
+    /// The plate's pad at both ends of a run, which an overflowing
+    /// section keeps outside its viewport too (#1830).
+    func endPads(_ spec: HomeCardBarsTile.BarSpec) -> CGFloat {
+        2 * (spec.gap + 3 * scale)
     }
 
     /// Where a bar's run sits in its slot, along the edge: an
