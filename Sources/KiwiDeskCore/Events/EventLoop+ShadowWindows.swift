@@ -120,10 +120,7 @@ extension EventLoop {
             if shadows.hosts[pid]?[id] != nil { return .shadow }
             return waitOrTrack(id, pid: pid, reading: "unread")
         case .shell:
-            if shadows.hosts[pid]?[id] != nil {
-                shadows.endWait(id, pid: pid)
-                return .shadow
-            }
+            if shadows.hosts[pid]?[id] != nil { return .shadow }
             let siblings = siblingTraits(pid)
             guard
                 let host = WindowTraits.shadowHost(
@@ -131,6 +128,12 @@ extension EventLoop {
                     among: siblings
                 )
             else {
+                // A process already showing a tracked window is
+                // past its launch: nothing of its lists late.
+                guard elements[pid]?.isEmpty ?? true else {
+                    shadows.endWait(id, pid: pid)
+                    return .window
+                }
                 return waitOrTrack(id, pid: pid, reading: "alone")
             }
             shadows.record(id, host: host, pid: pid)
@@ -147,12 +150,6 @@ extension EventLoop {
         pid: pid_t,
         reading: String
     ) -> ShadowVerdict {
-        // A process already showing a tracked window is past its
-        // launch: nothing of its is listing late.
-        guard elements[pid]?.isEmpty ?? true else {
-            shadows.endWait(id, pid: pid)
-            return .window
-        }
         let wait = shadows.waits(id, pid: pid, now: monotonicNow())
         guard wait.waiting else {
             // Tracked from here: the rule holds nothing on it.
@@ -200,18 +197,24 @@ extension EventLoop {
     /// as a window — its host not listed yet, its content gone
     /// since — is handed back as a HIDE, never a close: no
     /// close-return raise and no closed-return mark for a window
-    /// nobody closed.
+    /// nobody closed. False when a queued boot step's budget ran
+    /// out first, so the caller defers the app (#803).
     func retireShadows(
         pid: pid_t,
-        listed: [(element: AXUIElement, id: WindowID)]
-    ) {
+        listed: [(element: AXUIElement, id: WindowID)],
+        budget: AppBudget
+    ) -> Bool {
         shadows.prune(pid: pid, listed: Set(listed.map(\.id)))
         // A shell needs a buttoned sibling: one window is spared
         // the read.
-        guard listed.count > 1 else { return }
-        let siblings = listed.compactMap { pair in
-            elements[pid]?[pair.id] == nil
-                ? nil : shadows.traits(pair.element, pair.id)
+        guard listed.count > 1 else { return true }
+        var siblings: [WindowTraits] = []
+        for pair in listed where elements[pid]?[pair.id] != nil {
+            // The budget's checkpoint between blocking reads (#803).
+            guard !budget.isSpent else { return false }
+            if let traits = shadows.traits(pair.element, pair.id) {
+                siblings.append(traits)
+            }
         }
         for twin in siblings where twin.reading == .shell {
             let id = twin.id
@@ -229,5 +232,6 @@ extension EventLoop {
             releaseWindowRegistration(id, pid: pid)
             onEvent(.windowHidden(id))
         }
+        return true
     }
 }

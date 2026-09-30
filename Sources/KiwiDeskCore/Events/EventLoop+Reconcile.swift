@@ -245,9 +245,10 @@ extension EventLoop {
             minimized: minimized,
             coalesceTabs: coalesceTabs && !recentSpaceSwitch
         )
-        // A queued boot step past its budget defers the re-ask to
-        // the next reconcile (#803); its reads are not budgeted.
-        guard !budget.isSpent else { return }
-        retireShadows(pid: pid, listed: listed)
+        // Past the sweep, so a spent budget here abandons nothing
+        // of the list; the app is completed after the pass (#803).
+        if !retireShadows(pid: pid, listed: listed, budget: budget) {
+            deferBootWork(pid: pid, ref: app, spentMs: budget.spentMs)
+        }
     }
 }

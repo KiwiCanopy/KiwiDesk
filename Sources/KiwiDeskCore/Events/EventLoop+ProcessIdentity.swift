@@ -30,14 +30,16 @@ struct ProcessIdentity {
 
     /// Whether a process still runs: what tells a record
     /// LaunchServices loses for a moment from one that is gone. A
-    /// zombie its parent has not reaped is gone.
+    /// zombie its parent has not reaped is gone — read through
+    /// `sysctl`, since `proc_pidinfo` answers ESRCH for one while
+    /// `kill(pid, 0)` still answers 0 (macOS 27.0, 2026-09-30).
     var runs: @MainActor (pid_t) -> Bool = { pid in
-        var info = proc_bsdinfo()
-        let size = Int32(MemoryLayout<proc_bsdinfo>.size)
-        if proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &info, size) == size {
-            return info.pbi_status != UInt32(SZOMB)
-        }
-        return kill(pid, 0) == 0 || errno == EPERM
+        var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, pid]
+        var info = kinfo_proc()
+        var size = MemoryLayout<kinfo_proc>.size
+        guard sysctl(&mib, UInt32(mib.count), &info, &size, nil, 0) == 0
+        else { return kill(pid, 0) == 0 || errno == EPERM }
+        return size > 0 && Int32(info.kp_proc.p_stat) != SZOMB
     }
 
     /// Whether LaunchServices calls the process at this pid
@@ -166,13 +168,17 @@ extension EventLoop {
         for app in unlisted where app.ref.bundleID != nil {
             processIdentity.record(app)
         }
-        // A pid that stopped running leaves the register here,
-        // ahead of any reuse of its number.
+        // Ahead of any reuse of a number that stopped running.
+        forgetExitedUnlisted()
+        return listed + unlisted
+    }
+
+    /// Drops every unlisted pid the process table no longer holds.
+    private func forgetExitedUnlisted() {
         for pid in processIdentity.unlisted.keys
         where !processIdentity.runs(pid) {
             processIdentity.forget(pid: pid)
         }
-        return listed + unlisted
     }
 
     /// A terminate announced without a pid: retire every observed
@@ -187,23 +193,18 @@ extension EventLoop {
             onEvent(.appTerminated(pid: pid))
         }
         // An unlisted pid that never attached has no observer.
-        for pid in processIdentity.unlisted.keys
-        where !processIdentity.runs(pid) {
-            processIdentity.forget(pid: pid)
-        }
+        forgetExitedUnlisted()
     }
 
     /// An activation announced without a pid that names no
     /// unlisted process either: no reading, so the provenance
     /// gate fails open.
-    func noteUnnamedActivation(_ app: RunningApp, resolved: pid_t) {
-        let named = Self.isProcessID(resolved)
+    func noteUnnamedActivation(_ app: RunningApp) {
         onLog(
             "activation: \(app.ref.bundleID ?? app.ref.name) "
                 + "announced without a pid"
-                + (named ? " — pid \(resolved)" : "")
         )
-        lastActivePid = named ? resolved : nil
+        lastActivePid = nil
     }
 
     /// The other observed processes of `pid`'s app.

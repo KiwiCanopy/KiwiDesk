@@ -162,8 +162,11 @@ editing AX code:
   `syncObservation` and `attach` refuse an unnamed pid; and a
   terminate announced without a pid retires the observed
   processes that are gone — gone by the process table
-  (`ProcessIdentity.runs`, where a zombie is gone too), never by
-  a record LaunchServices may have lost (`ProcessIdentityTests`,
+  (`ProcessIdentity.runs`, a `sysctl` read where a zombie is gone
+  too; `proc_pidinfo` answered ESRCH for one and `kill(pid, 0)`
+  still 0 on macOS 27.0, 2026-09-30), never by a record
+  LaunchServices may have lost (`ProcessIdentityTests`,
+  `ProcessPolicyReadingTests` ▸ `unnamedExitReadsTheProcessTable`,
   `ProcessIdentitySeamTests` ▸ `rawListHasItsReaders`). The one
   pass reading the raw list is `reconcileAll` before `start()`,
   where nothing attaches (#672); its branch says so.
@@ -179,7 +182,7 @@ editing AX code:
   is gone or never observed. The reconcile and notification
   ownership gates, the boot sweep's step and the float and
   overlay verdicts take it, and a new reader of a policy takes
-  it too (`ProcessIdentityTests` ▸
+  it too (`ProcessPolicyReadingTests` ▸
   `lostRecordKeepsARunningProcess`, `lostRecordDetachesAGoneProcess`,
   `keptPolicyFollowsTheLastRead`; `ProcessIdentitySeamTests` ▸
   `policyHasOneReading`).
@@ -215,7 +218,8 @@ editing AX code:
   then closed is asked again. **A shadow is never a tab**: the
   re-key's `appeared` skips what the rule holds, or a carrier
   vanishing at the twin's frame is re-keyed onto it
-  (`ShadowWindowTests`, `ShadowWindowReconcileTests`,
+  (`ShadowRuleTests`, `ShadowWindowTests`,
+  `ShadowWindowReconcileTests`,
   `ProcessIdentitySeamTests` ▸ `trackAsksTheVerdict`,
   `reconcileReasksAfterTheSweep`, `tabRekeySkipsShadows`). What a
   focus report naming a shadow does is

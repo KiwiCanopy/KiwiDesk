@@ -199,7 +199,7 @@ extension EventLoop {
         // An announcement KiwiDesk can name no process for leaves
         // the gate with no reading, which fails open (#1322).
         guard Self.isProcessID(pid) else {
-            noteUnnamedActivation(app, resolved: pid)
+            noteUnnamedActivation(app)
             return
         }
         lastActivePid = pid

@@ -20,17 +20,25 @@ struct ProcessIdentitySeamTests {
         )
     }
 
-    /// Files spelling `needle` anywhere under Core.
-    private func sites(of needle: String) throws -> Set<String> {
+    /// Files spelling `needle` anywhere under Core, or under one
+    /// of its directories.
+    private func sites(
+        of needle: String,
+        under directory: String? = nil
+    ) throws -> Set<String> {
         var found: Set<String> = []
         var scanned = 0
-        for file in try SourceScan.swiftSources(under: core) {
+        let root = directory.map { core.appendingPathComponent($0) } ?? core
+        for file in try SourceScan.swiftSources(under: root) {
             scanned += 1
             if try SourceScan.strippedSource(at: file).contains(needle) {
                 found.insert(file.lastPathComponent)
             }
         }
-        #expect(scanned >= 100, "scanned \(scanned) Core files")
+        #expect(
+            scanned >= (directory == nil ? 100 : 20),
+            "scanned \(scanned) files under \(directory ?? "Core")"
+        )
         return found
     }
 
@@ -62,6 +70,12 @@ struct ProcessIdentitySeamTests {
             tracking.range(of: "elements[pid, default: [:]][window.id]")
         )
         #expect(verdict.upperBound < registration.lowerBound)
+        // Unconditional: the guard wrapped in a subrole condition
+        // keeps every needle above (guard-prover, 2026-09-30).
+        // A wrap spelled without the constant would pass; the
+        // subrole is otherwise read here only for the float
+        // verdicts, by name.
+        #expect(!tracking.contains("kAXStandardWindowSubrole"))
     }
 
     @Test("the focus arm drops a shadow's report ahead of its read")
@@ -150,9 +164,15 @@ struct ProcessIdentitySeamTests {
                 == ["EventLoop+ProcessIdentity.swift"],
             "the raw policy seam is read beside the reading"
         )
+        // A record is looked up under `Events/` only where a seam
+        // defaults to it — the reading's own, and `appAt`,
+        // `isActive`, `appIsHidden`, `AppRef(pid:)`. A raw read
+        // beside them is a policy the reading cannot keep.
         #expect(
-            try sites(of: ")?.activationPolicy") == [],
-            "a LaunchServices record is read for its policy raw"
+            try sites(
+                of: "NSRunningApplication(processIdentifier:",
+                under: "Events"
+            ) == ["EventLoop+ProcessIdentity.swift", "EventLoop.swift"]
         )
     }
 

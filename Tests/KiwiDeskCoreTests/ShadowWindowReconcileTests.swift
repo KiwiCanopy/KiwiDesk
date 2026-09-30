@@ -115,6 +115,30 @@ struct ShadowWindowReconcileTests {
         indices.map { (element($0), box.windows[$0].id) }
     }
 
+    /// A budget with no deadline — an OS-driven reconcile's — or
+    /// one already spent.
+    private func budget(spent: Bool) -> EventLoop.AppBudget {
+        let now = ContinuousClock.now
+        return EventLoop.AppBudget(
+            openedAt: now,
+            deadline: spent ? now : nil,
+            now: { ContinuousClock.now }
+        )
+    }
+
+    private func retire(
+        _ loop: EventLoop,
+        _ box: Box,
+        _ indices: [Int],
+        spent: Bool = false
+    ) -> Bool {
+        loop.retireShadows(
+            pid: pid,
+            listed: listed(box, indices),
+            budget: budget(spent: spent)
+        )
+    }
+
     // MARK: - Handing a tracked shadow back
 
     @Test("a tracked shell beside its host leaves as a hide")
@@ -123,7 +147,7 @@ struct ShadowWindowReconcileTests {
         let twin = traits(2, buttons: false, children: 0)
         let (loop, box) = makeLoop([host, twin])
         loop.elements[pid] = [host.id: element(0), twin.id: element(1)]
-        loop.retireShadows(pid: pid, listed: listed(box, [0, 1]))
+        #expect(retire(loop, box, [0, 1]))
         #expect(box.hidden == [twin.id])
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[twin.id] == nil)
@@ -142,7 +166,7 @@ struct ShadowWindowReconcileTests {
             lone.id: element(0), content.id: element(1),
             unread.id: element(2),
         ]
-        loop.retireShadows(pid: pid, listed: listed(box, [0, 1, 2]))
+        #expect(retire(loop, box, [0, 1, 2]))
         #expect(box.hidden.isEmpty)
         #expect(loop.elements[pid]?.count == 3)
     }
@@ -154,9 +178,22 @@ struct ShadowWindowReconcileTests {
         let untracked = traits(3, buttons: false, children: 0)
         let (loop, box) = makeLoop([host, away, untracked])
         loop.elements[pid] = [host.id: element(0), away.id: element(1)]
-        loop.retireShadows(pid: pid, listed: listed(box, [0, 2]))
+        #expect(retire(loop, box, [0, 2]))
         #expect(box.traitReads == [host.id])
         #expect(box.hidden.isEmpty)
+    }
+
+    @Test("a spent boot budget reads nothing and says so")
+    func spentBudgetReadsNothing() {
+        let host = traits(1, buttons: true, children: 6)
+        let twin = traits(2, buttons: false, children: 0)
+        let (loop, box) = makeLoop([host, twin])
+        loop.elements[pid] = [host.id: element(0), twin.id: element(1)]
+        #expect(!retire(loop, box, [0, 1], spent: true))
+        #expect(box.traitReads.isEmpty)
+        #expect(box.hidden.isEmpty)
+        // One listed window pays nothing, budget or not.
+        #expect(retire(loop, box, [0], spent: true))
     }
 
     @Test("a pass listing one window reads nothing")
@@ -164,7 +201,7 @@ struct ShadowWindowReconcileTests {
         let lone = traits(1, buttons: false, children: 0)
         let (loop, box) = makeLoop([lone])
         loop.elements[pid] = [lone.id: element(0)]
-        loop.retireShadows(pid: pid, listed: listed(box, [0]))
+        #expect(retire(loop, box, [0]))
         #expect(box.traitReads.isEmpty)
         #expect(box.hidden.isEmpty)
     }
@@ -180,11 +217,11 @@ struct ShadowWindowReconcileTests {
                 == .shadow
         )
         // The host still listed, the twin not: the record holds.
-        loop.retireShadows(pid: pid, listed: listed(box, [0]))
+        #expect(retire(loop, box, [0]))
         #expect(loop.shadows.holds(twin.id, pid: pid))
         // The host closed: the twin is a window again until a
         // sibling explains it — a false positive ends here.
-        loop.retireShadows(pid: pid, listed: listed(box, [1]))
+        #expect(retire(loop, box, [1]))
         #expect(!loop.shadows.holds(twin.id, pid: pid))
     }
 
