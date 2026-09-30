@@ -17,6 +17,10 @@ import Foundation
 struct ActiveProfile {
     let name: String
     let declaredSpaces: Set<SpaceID>
+    /// The Spaces its list names — what a Keep rewrites, so the
+    /// live set drifts from THIS, never from `declaredSpaces`,
+    /// which other screen setups' pins widen (#1790).
+    let listedSpaces: Set<SpaceID>
     /// The screen count the profile is saved for — what the
     /// binding door asks about the profile ALREADY live (#1436),
     /// so it never re-reads the file to learn it (#1245).
@@ -28,6 +32,9 @@ struct ActiveProfile {
     init(_ profile: Profile) {
         name = profile.name
         declaredSpaces = profile.declaredSpaces
+        listedSpaces = Set(
+            profile.spaces.isEmpty ? profile.orderedSpaces : profile.spaces
+        )
         monitorCount = profile.monitorCount
         isStarterSetup = profile.isStarterSetup
     }
@@ -35,11 +42,13 @@ struct ActiveProfile {
     private init(
         name: String,
         declaredSpaces: Set<SpaceID>,
+        listedSpaces: Set<SpaceID>,
         monitorCount: Int,
         isStarterSetup: Bool
     ) {
         self.name = name
         self.declaredSpaces = declaredSpaces
+        self.listedSpaces = listedSpaces
         self.monitorCount = monitorCount
         self.isStarterSetup = isStarterSetup
     }
@@ -49,6 +58,7 @@ struct ActiveProfile {
         ActiveProfile(
             name: new,
             declaredSpaces: declaredSpaces,
+            listedSpaces: listedSpaces,
             monitorCount: monitorCount,
             isStarterSetup: isStarterSetup
         )

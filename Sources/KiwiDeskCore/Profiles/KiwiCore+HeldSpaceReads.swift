@@ -56,11 +56,29 @@ extension KiwiCore {
     /// — a closed window never does (#1561). The one answer to
     /// what a held Space holds (#1507 ruling 4, #1728).
     func heldSpace(holding window: WindowID) -> SpaceID? {
-        let space =
-            state.workspaces.space(of: window)
+        returningSpace(of: window).flatMap {
+            state.heldSpaces[$0] == nil ? nil : $0
+        }
+    }
+
+    /// The Space `window` is in, or will come back to — a closed
+    /// window comes back as a new one, so it names none.
+    func returningSpace(of window: WindowID) -> SpaceID? {
+        state.workspaces.space(of: window)
             ?? (state.closedDepartures.contains(window)
                 ? nil : state.rememberedSpace(of: window))
-        return space.flatMap { state.heldSpaces[$0] == nil ? nil : $0 }
+    }
+
+    /// Whether nothing is in `id` any more — no live member, no
+    /// away member, no window remembered there that will come
+    /// back (a hidden app's). The one answer for a held Space's
+    /// retire and a Space chip's Delete (#1507, #1790).
+    func spaceHoldsNothing(_ id: SpaceID) -> Bool {
+        withAwayMembers(state.workspaces[id]?.windows ?? [], of: id)
+            .isEmpty
+            && !state.rememberedSpaces.keys.contains {
+                returningSpace(of: $0) == id
+            }
     }
 
     /// The live Spaces an arrangement WRITE captures — Keep, a

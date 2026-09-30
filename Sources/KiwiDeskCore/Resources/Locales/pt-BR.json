@@ -99,7 +99,7 @@
   "bar.menu.ax.nested": "%1$@: %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.close_window": "Fechar Janela",
-  "bar.menu.delete_space": "Apagar espaço",
+  "bar.menu.delete_space": "Excluir espaço",
   "bar.menu.delete_space.returns": "volta ao recarregar",
   "bar.menu.float_window": "Fazer a janela flutuar",
   "bar.menu.looks": "Looks…",

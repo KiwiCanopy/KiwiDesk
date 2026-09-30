@@ -945,6 +945,17 @@ screen's Spaces are held, not forwarded*. The obligations:
   and `HeldSpaceTests` ▸ `claimedHeldNumberIsReclaimed` pin
   renumbers, but on fixtures whose live set has no gap, where the
   rules agree — a swap between them is review's to refuse.
+- **A minted Space avoids every name (#1790).** A new Space's
+  number — the empty-display heal's seed, a Space chip's New
+  Space — comes from the one `KiwiCore.mintedSpaceNumber`, whose
+  taken set is every live id, every Space a remembered window
+  will come back to, and every declaration a later apply
+  re-creates; a minting path beside it would file a returning
+  window into its new Space or be re-declared over
+  (`SpaceChipLifecycleRowsTests` ▸ `newSpace`). And "this Space
+  holds nothing" is the one `spaceHoldsNothing`, which the held
+  retire and the chip's Delete both ask (`SpaceChipLifecycleRowsTests`
+  ▸ `hiddenWindowHolds`).
 - **A held Space goes home only into the arrangement it left.**
   `returnsHome` asks for its screen back, the incoming
   arrangement equal to `HeldOrigin.arrangement` (#1230:

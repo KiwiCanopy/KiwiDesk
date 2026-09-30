@@ -99,7 +99,7 @@ extension KiwiCore {
                         profile
                     ),
                     enabled: LayoutModeRows.keepArmed(
-                        drifts: spaces.map(drifted) + [spaceSetDrifted()]
+                        drifts: spaces.map(drifted) + [spaceSetDrifted]
                     )
                 ) { [weak self] in
                     self?.barMenuHooks.keepLayout()

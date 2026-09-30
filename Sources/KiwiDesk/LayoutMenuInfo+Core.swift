@@ -27,7 +27,8 @@ extension LayoutMenuInfo {
                     mode: workspaces[entry.space]?.mode,
                     savedMode: saved[entry.space]
                 )
-            }
+            },
+            spaceSetDrifted: core.spaceSetDrifted
         )
     }
 }

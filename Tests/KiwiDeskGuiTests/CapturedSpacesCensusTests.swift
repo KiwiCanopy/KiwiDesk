@@ -19,7 +19,7 @@ struct CapturedSpacesCensusTests {
         "KiwiDeskCore/Profiles/KiwiCore+StarterRescale.swift":
             (1, "the ⌃⌥N top-up reaches a held Space by ruling"),
         "KiwiDeskCore/Profiles/KiwiCore+EmptyDisplayHeal.swift":
-            (2, "the heal's next number and the orphan's drop target"),
+            (1, "the orphan's drop target; its number is minted"),
         "KiwiDeskCore/Profiles/KiwiCore+ProfileResolution.swift":
             (2, "the mode loop skips held; the prune keeps them"),
         "KiwiDeskCore/Profiles/KiwiCore+HeldSpaces.swift":

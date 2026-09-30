@@ -219,12 +219,7 @@ extension KiwiCore {
         var retired = false
         for id in state.heldSpaces.keys {
             let space = state.workspaces[id]
-            let holdsNothing =
-                withAwayMembers(space?.windows ?? [], of: id).isEmpty
-                && !state.rememberedSpaces.keys.contains {
-                    heldSpace(holding: $0) == id
-                }
-            guard holdsNothing else { continue }
+            guard spaceHoldsNothing(id) else { continue }
             state.heldSpaces[id] = nil
             guard space != nil,
                 let other = state.workspaces.allSpaces.first(where: {

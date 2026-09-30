@@ -100,7 +100,7 @@
   "bar.menu.ax.subtitled": "%1$@、%2$@",
   "bar.menu.close_window": "ウインドウを閉じる",
   "bar.menu.delete_space": "スペースを削除",
-  "bar.menu.delete_space.returns": "再読み込みで戻ります",
+  "bar.menu.delete_space.returns": "再読み込みで戻る",
   "bar.menu.float_window": "ウインドウをフローティングにする",
   "bar.menu.looks": "デザイン…",
   "bar.menu.move_here": "現在のスペースに移動",

@@ -8,19 +8,16 @@ extension KiwiCore {
         [newSpaceRow(beside: id), deleteSpaceRow(id)]
     }
 
-    /// The next free number, pinned to the chip's screen so it
-    /// lands where the user clicked. The number is taken at the
-    /// click, never at the menu's build.
+    /// The next minted number, pinned to the chip's screen so it
+    /// lands where the user clicked. Number and screen are read at
+    /// the click; a screen gone since the menu opened mints nothing.
     private func newSpaceRow(beside id: SpaceID) -> BarMenuRow {
-        let screen = state.workspaces.display(of: id).flatMap { shown in
-            state.workspaces.allDisplays.first { $0.id == shown }
-        }
-        return .action(
+        .action(
             L("bar.menu.new_space", "New Space"),
-            enabled: screen != nil
+            enabled: chipScreen(of: id) != nil
         ) { [weak self] in
-            guard let self, let screen else { return }
-            let space = freeSpaceNumber()
+            guard let self, let screen = chipScreen(of: id) else { return }
+            let space = mintedSpaceNumber()
             execute("create_space", args: [.string(space.raw)])
             execute(
                 "pin_space_to_display",
@@ -29,9 +26,16 @@ extension KiwiCore {
         }
     }
 
+    private func chipScreen(of id: SpaceID) -> Display? {
+        state.workspaces.display(of: id).flatMap { shown in
+            state.workspaces.allDisplays.first { $0.id == shown }
+        }
+    }
+
     /// Empty only, so `delete_space` never rehomes a window (#1790).
-    /// A Space a source declares returns on the next load, which
-    /// the row says, as the Layout rows say "not saved".
+    /// A Space a source declares returns when that source is next
+    /// applied, which the row says, as the Layout rows say "not
+    /// saved".
     private func deleteSpaceRow(_ id: SpaceID) -> BarMenuRow {
         .action(
             L("bar.menu.delete_space", "Delete Space"),
@@ -44,32 +48,30 @@ extension KiwiCore {
         }
     }
 
-    /// No member, no window away on another Desktop still filed
-    /// there (#1146), not held (#1507), and not the only Space.
+    /// Holds nothing (`spaceHoldsNothing`), is not held (#1507),
+    /// and is not its screen's last Space, which the #1175 heal
+    /// would re-mint the moment it went.
     func spaceIsDeletable(_ id: SpaceID) -> Bool {
-        guard let space = state.workspaces[id] else { return false }
-        return space.windows.isEmpty
-            && !state.awayWindows.keys.contains {
-                state.rememberedSpace(of: $0) == id
-            }
-            && state.heldSpaces[id] == nil
-            && state.workspaces.allSpaces.count > 1
+        guard state.workspaces[id] != nil,
+            spaceHoldsNothing(id),
+            state.heldSpaces[id] == nil
+        else { return false }
+        let screen = state.workspaces.display(of: id)
+        return state.workspaces.allSpaces.contains {
+            $0.id != id && state.workspaces.display(of: $0.id) == screen
+        }
     }
 
-    /// The smallest number no live Space takes and no remembered
-    /// window names, so a returning window never lands in it.
-    func freeSpaceNumber() -> SpaceID {
-        SpaceID.smallestFreeNumber(
-            among: state.workspaces.allSpaces.map(\.id)
-                + state.rememberedSpaces.values.map(\.space)
-        )
-    }
-
-    /// Whether the live Space set differs from the one the active
-    /// profile declares — read from adoption state (#1245) — so a
-    /// New or Delete arms Keep as a mode change does.
-    func spaceSetDrifted() -> Bool {
+    /// Whether a Keep would change which Spaces the live profile
+    /// lists: the live Space set a Keep writes against the list
+    /// the last apply adopted (#1245). Pins are not compared, and
+    /// a #1175 heal seed is the system's, not an edit, so it arms
+    /// nothing. Both Keep rows — a chip's and the status item's —
+    /// arm on it.
+    public var spaceSetDrifted: Bool {
         guard let active = profiles.active else { return false }
-        return Set(capturedSpaces.map(\.id)) != active.declaredSpaces
+        let live = Set(capturedSpaces.map(\.id))
+            .subtracting(healedSpaces.values)
+        return live != active.listedSpaces.subtracting(healedSpaces.values)
     }
 }
