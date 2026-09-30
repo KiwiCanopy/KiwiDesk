@@ -11467,21 +11467,25 @@ per-layout override, and serves no user.
 :::unreleased
 **A Space's floats close both bars.**
 ([#1826](https://github.com/KiwiCanopy/KiwiDesk/issues/1826),
-owner ruling.) The App Bar lists them after the tiled row, past
-the floating mark; each Space Bar chip draws its flagged floats
-last. The App Bar's items are a map of
+owner ruling.) The App Bar lists them after the tiled row, past a
+thin rule and the floating mark; each Space Bar chip draws its
+flagged floats last. The App Bar's items are a map of
 the row, where order is layout order and a drag reorders it. A
 float has no slot in that row, so mixed in among the tiles it
-would read as one and invite a drag that means nothing. The mark
-says "the row ends here" and names what follows, and the float's
+would read as one and invite a drag that means nothing. The rule
+says "the row ends here", the mark names what follows, and the float's
 item stays undraggable rather than dimmed. Last rather than
 first, because the leading end is where the eye starts, and a
 float appearing there would shift every tile behind it.
 
-The mark is the floating symbol, not a rule: on a fused shelf a
-rule reads as the section divider between the two bars a few
-items away, two marks that look alike and mean different things.
-It is ONE section marker, not a badge on each item, so the
+The rule takes the in-item tier, 1 pt at half depth: at the
+section's weight it read, on a fused shelf, as the divider between
+the two bars a few items away — two marks alike in shape meaning
+different things. A mark alone, midway in the gap, belonged to
+neither side, and one pulled against the floats attached to
+whichever float came first once the focus fill moved. So the rule
+separates and the mark labels. The mark is ONE section marker, not
+a badge on each item, so the
 Space-Bar-only badges ruling stands. It keeps idle ink when a
 float is focused: the float's own item carries the focus, and a
 state mark keeps one ink (see *The Space Bar's two-accent

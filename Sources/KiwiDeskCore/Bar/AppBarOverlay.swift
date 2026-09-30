@@ -51,8 +51,9 @@ public final class AppBarOverlay {
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
-    /// The floating mark between the tiled row and its floats
-    /// (#1826).
+    /// The rule and the floating mark between the tiled row and
+    /// its floats (#1826).
+    let floatRule = FloatBreakRule()
     let floatMark = FloatBreakMark()
     /// The bars' context menus (#1518): held by the section root,
     /// which every view in the section finds by walking up.

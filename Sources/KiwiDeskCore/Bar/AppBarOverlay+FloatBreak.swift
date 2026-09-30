@@ -1,10 +1,11 @@
 import AppKit
 
-/// The floating mark between the tiled row and its floats (#1826):
-/// one idle-ink `FloatingStyle` symbol after the last tiled item,
-/// a section marker rather than a per-item badge. It rides the
-/// run: that item's slot is widened by the mark and a gap, so
-/// scrolling, hugging and the plate measure it.
+/// The break between the tiled row and its floats (#1826): a rule
+/// at the in-item rule tier ends the row, and one idle-ink
+/// `FloatingStyle` symbol opens the float section — a section
+/// marker, not a per-item badge. It rides the run: the last tiled
+/// item's slot is widened by both and their gaps, so scrolling,
+/// hugging and the plate measure it.
 extension AppBarOverlay {
     /// The last tiled item when floats follow it; nil when either
     /// side is empty, which draws no break.
@@ -28,14 +29,21 @@ extension AppBarOverlay {
         style.resolvedFontSize(forDepth: depth)
     }
 
-    /// Axis length the mark adds to the break's slot.
+    /// Axis length the break adds to the last tiled slot: gap,
+    /// rule, gap, mark.
     nonisolated static func floatBreakExtent(
         gap: CGFloat,
         style: AppBarLook,
         depth: CGFloat
     ) -> CGFloat {
-        gap + floatMarkSide(style: style, depth: depth)
+        gap * 2 + floatRuleThickness
+            + floatMarkSide(style: style, depth: depth)
     }
+
+    /// The rule's thickness: `BarDivider.frame`'s default, the
+    /// in-item tier, so it ranks below the section divider by
+    /// shape (#1826).
+    nonisolated static let floatRuleThickness: CGFloat = 1
 
     /// Every slot at `slot`, the break's widened by `extent`.
     nonisolated static func lengths(
@@ -68,8 +76,9 @@ extension AppBarOverlay {
         return frames
     }
 
-    /// Lays the mark out after the break's item, or hides it when
-    /// no break is drawn. Returns the frames the views take.
+    /// Lays the rule and the mark out after the break's item, or
+    /// hides them when no break is drawn. Returns the frames the
+    /// views take.
     func layoutFloatBreak(
         slots: [CGRect],
         m: Metrics,
@@ -79,12 +88,23 @@ extension AppBarOverlay {
         let frames = Self.itemFrames(slots, m: m)
         guard let index = m.breakAfter, frames.indices.contains(index)
         else {
+            floatRule.isHidden = true
             floatMark.isHidden = true
             return frames
         }
         let item = frames[index]
         let side = Self.floatMarkSide(style: style, depth: depth)
-        let start = (m.horizontal ? item.maxX : item.maxY) + m.gap
+        let ruleAt = (m.horizontal ? item.maxX : item.maxY) + m.gap
+        floatRule.isHidden = false
+        floatRule.layer?.backgroundColor =
+            BarDivider.color(textColor: style.itemColor).cgColor
+        floatRule.frame = BarDivider.frame(
+            at: ruleAt,
+            depth: depth,
+            horizontal: m.horizontal,
+            thickness: Self.floatRuleThickness
+        )
+        let start = ruleAt + Self.floatRuleThickness + m.gap
         let across = (depth - side) / 2
         floatMark.isHidden = false
         floatMark.contentTintColor = NSColor(
@@ -115,6 +135,24 @@ final class FloatBreakMark: NSImageView {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("FloatBreakMark is code-only")
+    }
+
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+}
+
+/// The break's rule: a boundary, not a state, so it is inert and
+/// keeps its ink whatever is focused.
+final class FloatBreakRule: NSView {
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        wantsLayer = true
+        isHidden = true
+        setAccessibilityElement(false)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("FloatBreakRule is code-only")
     }
 
     override func hitTest(_ point: NSPoint) -> NSView? { nil }

@@ -126,7 +126,7 @@ struct AppBarFloatTests {
         )
     }
 
-    @Test("The floating mark sits between the row and a float")
+    @Test("A rule ends the row and the mark opens the floats")
     func markBetweenSections() throws {
         let overlay = AppBarOverlay()
         show(overlay, [item(1), item(2), item(3, floating: true)])
@@ -135,22 +135,29 @@ struct AppBarFloatTests {
         #expect(mark.superview === overlay.itemRun)
         #expect(!mark.isAccessibilityElement())
         #expect(mark.hitTest(CGPoint(x: mark.frame.midX, y: 1)) == nil)
+        let rule = overlay.floatRule
+        #expect(!rule.isHidden)
+        #expect(rule.hitTest(CGPoint(x: rule.frame.midX, y: 15)) == nil)
         let tiled = overlay.itemViews[1].frame
         let float = overlay.itemViews[2].frame
-        #expect(mark.frame.minX > tiled.maxX)
+        // Row, rule, mark, floats — in that order along the axis.
+        #expect(rule.frame.minX > tiled.maxX)
+        #expect(mark.frame.minX > rule.frame.maxX)
         #expect(mark.frame.maxX < float.minX)
         // Every item keeps the one slot length; the mark widens
         // the run, not an item.
         #expect(tiled.width == float.width)
     }
 
-    @Test("No mark without both sections")
+    @Test("No break without both sections")
     func noMarkWithOneSection() {
         let overlay = AppBarOverlay()
         show(overlay, [item(1), item(2)])
         #expect(overlay.floatMark.isHidden)
+        #expect(overlay.floatRule.isHidden)
         show(overlay, [item(3, floating: true)])
         #expect(overlay.floatMark.isHidden)
+        #expect(overlay.floatRule.isHidden)
     }
 
     @Test("A float item neither reorders nor takes a drop")
