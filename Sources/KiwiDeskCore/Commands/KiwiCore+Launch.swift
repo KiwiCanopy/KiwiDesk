@@ -68,6 +68,16 @@ extension KiwiCore {
             // Only an app with nothing up here opens a window for
             // this pull; one already showing is merely focused.
             if census.visible == 0 { oweLaunchFollow(bundleID) }
+            // Nothing to pull — no window up, parked or away: the
+            // app outlived its last window (Safari after its ✕).
+            // `activate` asks for no window, so reopen it the way
+            // a Dock click does and it opens a fresh one (#1840).
+            if census.visible == 0, census.minimized.isEmpty,
+                reach?.windows.isEmpty ?? true,
+                openOrFocus.openApp(bundleID, false)
+            {
+                return .ok()
+            }
             openOrFocus.activate(pid)
             return .ok()
         }

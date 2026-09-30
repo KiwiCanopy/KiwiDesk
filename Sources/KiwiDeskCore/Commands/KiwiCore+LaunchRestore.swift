@@ -43,7 +43,9 @@ struct OpenOrFocusSeams {
     }
 
     /// Launches the app — the branch taken when it is not running,
-    /// or when `spawn_new` asks for a fresh instance. Returns
+    /// or when `spawn_new` asks for a fresh instance — and, on a
+    /// running app with no window at all, reopens it so it opens
+    /// one, as a Dock click does (#1840). Returns
     /// false when LaunchServices cannot resolve the bundle id,
     /// which is the command's "app not found".
     ///

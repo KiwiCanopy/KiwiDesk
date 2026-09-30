@@ -4286,6 +4286,12 @@ Desktop bridge, or where the per-Desktop window list cannot be
 read, other Desktops are not consulted — see
 [Accepted limitations](accepted-limitations.md).
 
+:::unreleased
+If the app is running with **no window at all** — you closed
+its last one and it stayed open, as Safari does — the shortcut
+asks it for a new window, the same as clicking it in the Dock.
+:::
+
 **Example:**
 
 ```lua
