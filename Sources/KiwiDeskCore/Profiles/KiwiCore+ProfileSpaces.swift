@@ -12,16 +12,16 @@ import Foundation
 /// them would give the stored half the unstored half's
 /// lifetime.
 extension KiwiCore {
-    /// Files the live Spaces under `profiles.currentName`, so
-    /// every verb that moves that name files first and moves
-    /// second — profiles.md ▸ "Whose arrangement is live" (#1249).
-    ///
-    /// A nil name files nothing: a built-in Standard, or a session
-    /// that has applied nothing, has no partitioning of its own.
+    /// Files the live Spaces under the live arrangement — the
+    /// saved profile `profiles.currentName` names, or the composed
+    /// Standard (#1829) — so every verb that moves it files first
+    /// and moves second — profiles.md ▸ "Whose arrangement is
+    /// live" (#1249). A session that has applied nothing files
+    /// nothing.
     func recordLivePartitioning() {
         state.profilePartitioning.record(
             livePartitioning,
-            as: profiles.currentName
+            as: liveArrangement
         )
     }
 
@@ -34,17 +34,29 @@ extension KiwiCore {
         }
     }
 
-    /// Every profile's record for the session snapshot (#1802),
-    /// the live profile's filed fresh — on a copy, since the live
-    /// record is written only as the profile goes inactive. A
-    /// relaunch under ANOTHER profile then still knows the one
-    /// that was live at the quit.
-    func partitioningForSnapshot() -> StateSnapshot.ProfileRecords? {
+    /// Every arrangement's record for the session snapshot
+    /// (#1802), profiles and Standards apart (#1829), the live
+    /// one filed fresh — on a copy, since the live record is
+    /// written only as it goes inactive. A relaunch under ANOTHER
+    /// arrangement then still knows the one live at the quit.
+    func partitioningForSnapshot() -> (
+        profiles: StateSnapshot.ProfileRecords?,
+        standards: StateSnapshot.ProfileRecords?
+    ) {
         var carried = state.profilePartitioning
-        carried.record(livePartitioning, as: profiles.currentName)
-        let records = carried.records
-        return records.isEmpty
-            ? nil : StateSnapshot.ProfileRecords(records)
+        carried.record(livePartitioning, as: liveArrangement)
+        var profiles: [String: [SpaceID: [WindowID]]] = [:]
+        var standards: [String: [SpaceID: [WindowID]]] = [:]
+        for (arrangement, spaces) in carried.records {
+            switch arrangement {
+            case .profile(let name): profiles[name] = spaces
+            case .standard(let name): standards[name] = spaces
+            }
+        }
+        return (
+            profiles.isEmpty ? nil : .init(profiles),
+            standards.isEmpty ? nil : .init(standards)
+        )
     }
 
     /// Boot adopts the previous session's records after the
@@ -54,49 +66,70 @@ extension KiwiCore {
     /// restored, and a new profile of that name is not it. An
     /// empty listing is not proof — an unreadable directory lists
     /// empty too — so it drops nothing.
+    /// A Standard's record is always kept: a built-in cannot be
+    /// deleted (#1829).
     func adoptCarriedPartitioning(from session: StateSnapshot) {
-        guard let carried = session.profileRecords?.records,
-            !carried.isEmpty
-        else { return }
+        let carried = session.profileRecords?.records ?? [:]
+        let standards = session.standardRecords?.records ?? [:]
+        guard !carried.isEmpty || !standards.isEmpty else { return }
         let saved = Set(profiles.list())
         let kept =
             saved.isEmpty
             ? carried : carried.filter { saved.contains($0.key) }
-        state.profilePartitioning.adopt(kept)
+        var adopted: [HeldOrigin.Arrangement: [SpaceID: [WindowID]]] =
+            [:]
+        for (name, spaces) in kept { adopted[.profile(name)] = spaces }
+        for (name, spaces) in standards {
+            adopted[.standard(name)] = spaces
+        }
+        state.profilePartitioning.adopt(adopted)
         onLog(
             "restore: carried the Space records of "
-                + "\(kept.count) profile(s)"
+                + "\(kept.count) profile(s), "
+                + "\(standards.count) Standard(s)"
         )
     }
 
-    /// Files the outgoing profile's partitioning before the space
-    /// set is rebuilt. Returns whether this apply is a CHANGE, so
-    /// the caller gates the prune and the restore on one answer.
+    /// Files the outgoing arrangement's partitioning before the
+    /// space set is rebuilt. Returns whether this apply is a
+    /// CHANGE, so the caller gates the prune and the restore on
+    /// one answer.
     ///
-    /// A re-apply of the LIVE profile, or the session's first,
-    /// files nothing and restores nothing — neither a monitor
-    /// reconnect nor boot may revert what is already on screen.
+    /// A re-apply of the LIVE arrangement, or the session's
+    /// first, files nothing and restores nothing — neither a
+    /// monitor reconnect nor boot may revert what is on screen.
     func recordOutgoingPartitioning(
-        before profile: Profile
+        before incoming: HeldOrigin.Arrangement
     ) -> Bool {
         guard
             state.profilePartitioning.isSwitch(
-                to: profile.name,
-                from: profiles.currentName
+                to: incoming,
+                from: liveArrangement
             )
         else { return false }
         recordLivePartitioning()
         return true
     }
 
+    /// A saved profile's entry to the two calls around it.
+    func recordOutgoingPartitioning(before profile: Profile) -> Bool {
+        recordOutgoingPartitioning(before: .profile(profile.name))
+    }
+
+    func restorePartitioning(of profile: Profile) {
+        restorePartitioning(
+            of: .profile(profile.name),
+            declaring: profile.declaredSpaces
+        )
+    }
+
     /// The one profile WRITE door (#1249). `ProfileManager.save`
     /// makes its argument current, so the outgoing name is gone
     /// the moment it returns; the filing has to precede it.
     ///
-    /// Unconditional rather than a caller's choice: on the preset
-    /// path `apply(composed:)` has already filed and stood the
-    /// name down through `standardIsLive`, so the record here is
-    /// a no-op — which is what leaves no exit anything to decide.
+    /// Unconditional rather than a caller's choice: saving a live
+    /// Standard files it under the Standard, whose arrangement is
+    /// going inactive, so no exit has anything to decide.
     ///
     /// The saved profile claims the connected combination it now
     /// holds (#1530); returns the profiles that lost it.
@@ -157,13 +190,15 @@ extension KiwiCore {
     /// A window in a held Space, live or remembered there, is left
     /// too: any hold outranks this record, so what was on a gone
     /// screen stays together and goes home together (#1728).
-    func restorePartitioning(of profile: Profile) {
+    func restorePartitioning(
+        of arrangement: HeldOrigin.Arrangement,
+        declaring declared: Set<SpaceID>
+    ) {
         guard
             let remembered = state.profilePartitioning.remembered(
-                for: profile.name
+                for: arrangement
             )
         else { return }
-        let declared = profile.declaredSpaces
         // `WorkspaceManager.add` calls `remove` first, which nils
         // both focus trackers when the moved window holds them
         // (`moveWindow` re-establishes focus for exactly this
@@ -222,7 +257,7 @@ extension KiwiCore {
         )
         if moved > 0 || refiled > 0 {
             onLog(
-                "profile '\(profile.name)': restored \(moved) "
+                "\(arrangement.logLabel): restored \(moved) "
                     + "window(s) to their own Spaces"
                     + (refiled > 0
                         ? ", re-filed \(refiled) absent" : "")

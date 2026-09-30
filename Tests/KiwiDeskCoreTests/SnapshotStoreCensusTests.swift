@@ -172,7 +172,7 @@ struct SnapshotStoreCensusTests {
         core.tiler.monocleShownMembers[shown] = WindowID(1)
         core.state.profilePartitioning.record(
             [Space(id: hidden, windows: [WindowID(4)])],
-            as: "Other"
+            as: .profile("Other")
         )
         core.state.heldSpaces[hidden] = HeldOrigin(
             name: hidden,

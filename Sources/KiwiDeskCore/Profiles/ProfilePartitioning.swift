@@ -1,8 +1,8 @@
 import Foundation
 
-/// What each profile left behind: per profile name, the windows
-/// each of its Spaces held when that profile was last live
-/// (#1230).
+/// What each arrangement left behind: per saved profile and per
+/// composed Standard (#1829), the windows each of its Spaces held
+/// when it was last live (#1230).
 ///
 /// **The profile is the SCOPE a Space name resolves in.** A
 /// Space's name stays its identity — `focus_space 1`, app rules,
@@ -33,7 +33,11 @@ import Foundation
 /// deleted, a profile renamed, the #634 reset, and a profile
 /// absent from disk when boot adopts the carried records.
 struct ProfilePartitioning: Sendable {
-    private var byProfile: [String: [SpaceID: [WindowID]]] = [:]
+    /// Keyed by ARRANGEMENT — a saved profile or a composed
+    /// Standard (#1829), which may share a name (`Starter`).
+    private var byProfile: [Arrangement: [SpaceID: [WindowID]]] = [:]
+
+    typealias Arrangement = HeldOrigin.Arrangement
 
     /// Whether applying `profile` is a CHANGE — the one question
     /// that gates both the snapshot and the restore. A re-apply
@@ -45,7 +49,10 @@ struct ProfilePartitioning: Sendable {
     /// `live` is `ProfileManager.currentName`, the one authority
     /// for whose arrangement is on screen — profiles.md ▸ "Whose
     /// arrangement is live" (#1249).
-    func isSwitch(to profile: String, from live: String?) -> Bool {
+    func isSwitch(
+        to profile: Arrangement,
+        from live: Arrangement?
+    ) -> Bool {
         if let live { return live != profile }
         // No live profile means one of two things, and they must
         // not be conflated. The session's FIRST apply has nothing
@@ -62,7 +69,7 @@ struct ProfilePartitioning: Sendable {
     /// apply after a Standard would otherwise skip the restore
     /// and fall back to the pre-#1230 name-match for that one
     /// apply.
-    func hasRecord(for profile: String) -> Bool {
+    func hasRecord(for profile: Arrangement) -> Bool {
         byProfile[profile] != nil
     }
 
@@ -74,7 +81,7 @@ struct ProfilePartitioning: Sendable {
     /// A nil `live` files nothing rather than being a caller's
     /// choice: boot and a built-in Standard have no profile whose
     /// partitioning this is.
-    mutating func record(_ spaces: [Space], as live: String?) {
+    mutating func record(_ spaces: [Space], as live: Arrangement?) {
         guard let live else { return }
         byProfile[live] = Dictionary(
             uniqueKeysWithValues: spaces.map {
@@ -84,19 +91,21 @@ struct ProfilePartitioning: Sendable {
     }
 
     func remembered(
-        for profile: String
+        for profile: Arrangement
     ) -> [SpaceID: [WindowID]]? {
         byProfile[profile]
     }
 
     /// Every profile's record, for the session snapshot (#1802).
-    var records: [String: [SpaceID: [WindowID]]] { byProfile }
+    var records: [Arrangement: [SpaceID: [WindowID]]] { byProfile }
 
     /// Boot's adoption of the previous session's records (#1802):
     /// a carried entry replaces this session's for that profile,
     /// since anything filed before the replay reflects the scan's
     /// order rather than the user's arrangement.
-    mutating func adopt(_ records: [String: [SpaceID: [WindowID]]]) {
+    mutating func adopt(
+        _ records: [Arrangement: [SpaceID: [WindowID]]]
+    ) {
         byProfile.merge(records) { _, carried in carried }
     }
 
@@ -116,14 +125,16 @@ struct ProfilePartitioning: Sendable {
         }
     }
 
+    /// A saved profile deleted — a Standard is never deleted.
     mutating func forget(_ profile: String) {
-        byProfile[profile] = nil
+        byProfile[.profile(profile)] = nil
     }
 
     mutating func rename(_ old: String, to new: String) {
-        guard let entry = byProfile.removeValue(forKey: old)
+        guard
+            let entry = byProfile.removeValue(forKey: .profile(old))
         else { return }
-        byProfile[new] = entry
+        byProfile[.profile(new)] = entry
     }
 
     /// The #634 tier-1 discard: forgets every profile's

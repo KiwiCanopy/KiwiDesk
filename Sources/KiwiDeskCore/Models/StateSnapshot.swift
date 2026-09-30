@@ -133,6 +133,8 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     /// Every profile's #1230 record (#1802,
     /// `StateSnapshot+ProfileRecords`).
     public var profileRecords: ProfileRecords?
+    /// The same for composed Standards, by name (#1829).
+    public var standardRecords: ProfileRecords?
 
     public init(
         windows: [WindowRecord],
@@ -150,7 +152,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case windows, spaces, activeSpace, capturedAt, arrangement
-        case profileRecords
+        case profileRecords, standardRecords
     }
 
     public init(from decoder: Decoder) throws {
@@ -171,6 +173,10 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         profileRecords = try? c.decodeIfPresent(
             ProfileRecords.self,
             forKey: .profileRecords
+        )
+        standardRecords = try? c.decodeIfPresent(
+            ProfileRecords.self,
+            forKey: .standardRecords
         )
     }
 }

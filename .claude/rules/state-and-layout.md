@@ -1766,8 +1766,9 @@ editing here:
   record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
   `HeldOrigin.Arrangement` keys and the snapshot's own
   `arrangement`, which every snapshot carries (#1646,
-  profiles.md), and its `profileRecords` — #1230's per-profile
-  record, keyed by profile name and Space name (#1802,
+  profiles.md), and its `profileRecords` and `standardRecords` —
+  #1230's record per saved profile and per composed Standard
+  (#1829), keyed by name and Space name (#1802,
   `ProfilePartitioningRestartTests` ▸
   `unreadableRecordIsIsolated`). Each record decodes its
   payload on its own and a payload it cannot read costs only

@@ -76,7 +76,7 @@ struct ProfilePartitioningRestartTests {
         let (second, _, _) = try desk()
         second.apply(profile: b, cause: .event)
         second.arrangeBootDesk(session: session)
-        #expect(second.state.profilePartitioning.hasRecord(for: "A"))
+        #expect(second.state.profilePartitioning.hasRecord(for: .profile("A")))
 
         second.apply(profile: a, cause: .event)
         #expect(second.state.workspaces[dual]?.windows == arranged)
@@ -94,7 +94,7 @@ struct ProfilePartitioningRestartTests {
         let records = core.sessionSnapshot().profileRecords?.records
         #expect(records?["A"]?[dual] == arranged)
         // A copy: the live record is written only at a switch.
-        #expect(!core.state.profilePartitioning.hasRecord(for: "A"))
+        #expect(!core.state.profilePartitioning.hasRecord(for: .profile("A")))
     }
 
     /// Anything this session filed before the replay reflects the
@@ -112,11 +112,13 @@ struct ProfilePartitioningRestartTests {
         second.apply(profile: b, cause: .event)
         second.state.profilePartitioning.record(
             [Space(id: dual, windows: [WindowID(1)])],
-            as: "A"
+            as: .profile("A")
         )
         second.arrangeBootDesk(session: session)
         #expect(
-            second.state.profilePartitioning.remembered(for: "A")?[dual]
+            second.state.profilePartitioning.remembered(for: .profile("A"))?[
+                dual
+            ]
                 == arranged
         )
     }
@@ -133,8 +135,10 @@ struct ProfilePartitioningRestartTests {
             ["Gone": [dual: arranged], "A": [dual: arranged]]
         )
         core.arrangeBootDesk(session: session)
-        #expect(!core.state.profilePartitioning.hasRecord(for: "Gone"))
-        #expect(core.state.profilePartitioning.hasRecord(for: "A"))
+        #expect(
+            !core.state.profilePartitioning.hasRecord(for: .profile("Gone"))
+        )
+        #expect(core.state.profilePartitioning.hasRecord(for: .profile("A")))
     }
 
     /// Each profile's entry decodes on its own, and the field on
