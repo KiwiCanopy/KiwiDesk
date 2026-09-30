@@ -37,22 +37,23 @@ extension SpaceBarOverlay {
     func recordHitFrames(
         items: [Item],
         frames: [CGRect],
+        runOrigin: CGPoint,
         strip: CGRect,
         fades: ShelfOverflow.Fades,
         horizontal: Bool
     ) {
         hitStrip = strip
-        // Item frames are viewport-relative, so they offset by the
-        // viewport's own origin; only the INTERSECTION stops at
-        // the fades.
+        // Item frames are run-relative, so they offset by the run's
+        // and the viewport's origins; only the INTERSECTION stops
+        // at the fades.
         let viewport = itemContainer.frame
         let clear = fades.clear(of: viewport, horizontal: horizontal)
         hitFrames = zip(items, frames).compactMap { item, frame in
             // The layer item is no drop target (#1169).
             guard let space = item.space else { return nil }
             let stripLocal = frame.offsetBy(
-                dx: viewport.minX,
-                dy: viewport.minY
+                dx: viewport.minX + runOrigin.x,
+                dy: viewport.minY + runOrigin.y
             )
             let visible = stripLocal.intersection(clear)
             guard !visible.isNull, visible.width >= 1,

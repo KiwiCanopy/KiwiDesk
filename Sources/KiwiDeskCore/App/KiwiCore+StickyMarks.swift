@@ -183,28 +183,43 @@ extension KiwiCore {
         to target: SpaceID,
         landingOn display: DisplayID? = nil
     ) -> Bool {
-        guard let sticky = state.windows[window], sticky.isSticky
+        guard
+            let pill = stickyMoveBlock(
+                window,
+                to: target,
+                landingOn: display
+            )
         else { return false }
+        flashStickyMoveBlocked(window, scope: pill)
+        return true
+    }
+
+    /// The gate's verdict alone, with no pill: the scope whose
+    /// refusal copy the pill would show, nil where the move is
+    /// allowed. A bar menu greys its Move row by it (#1518).
+    func stickyMoveBlock(
+        _ window: WindowID,
+        to target: SpaceID,
+        landingOn display: DisplayID? = nil
+    ) -> StickyScope? {
+        guard let sticky = state.windows[window], sticky.isSticky
+        else { return nil }
         switch sticky.stickyScope {
         case .none:
-            return false
+            return nil
         case .global:
-            flashStickyMoveBlocked(window, scope: .global)
-            return true
+            return .global
         case .display:
             let fromDisplay = state.homeDisplay(of: window)
             let toDisplay =
                 display ?? state.workspaces.display(of: target)
-            guard fromDisplay == toDisplay else { return false }
+            guard fromDisplay == toDisplay else { return nil }
             // On a single monitor "display" and "global" coincide —
             // there is no other display to move to — so the negative
             // "another space" copy is the honest one, not the
             // "different display" escape hatch.
-            let scope: StickyScope =
-                state.workspaces.allDisplays.count <= 1
+            return state.workspaces.allDisplays.count <= 1
                 ? .global : .display
-            flashStickyMoveBlocked(window, scope: scope)
-            return true
         }
     }
 

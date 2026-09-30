@@ -114,6 +114,10 @@ extension KiwiCore {
     /// A window ALREADY in its remembered Space is left where it
     /// sits: the record is a membership, the live row the order
     /// authority (#1387, profiles.md).
+    ///
+    /// A window in a held Space, live or remembered there, is left
+    /// too: any hold outranks this record, so what was on a gone
+    /// screen stays together and goes home together (#1728).
     func restorePartitioning(of profile: Profile) {
         guard
             let remembered = state.profilePartitioning.remembered(
@@ -143,6 +147,7 @@ extension KiwiCore {
                 state.workspaces[space] != nil
             else { continue }
             for window in remembered[space] ?? [] {
+                guard heldSpace(holding: window) == nil else { continue }
                 guard state.windows[window] != nil else {
                     // Not in state: away on another Desktop, or
                     // closed and still remembered (a close return

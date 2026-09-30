@@ -75,6 +75,7 @@ struct CommandDispatchReachTests {
     static let argumentRefusals: [String: String] = [
         "unknown space: ": "a Space id no space carries",
         "unknown mode: ": "a layout mode name no case carries",
+        "unknown window: ": "a window id no tracked window carries",
     ]
 
     /// The one catalogued name `execute` never sees:
@@ -92,7 +93,8 @@ struct CommandDispatchReachTests {
         let record = APIReference.entry(named: name)?.record
         return (record?.arguments ?? []).map { argument in
             switch argument.kind {
-            case .number, .integer, .desktop: return .number(1)
+            case .number, .integer, .desktop, .window:
+                return .number(1)
             case .boolean: return .bool(true)
             case .text: return .string("probe")
             case .color: return .string("#FFFFFF")

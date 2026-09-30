@@ -21,9 +21,10 @@ public enum ShelfScrollInput {
         }
     }
 
-    /// Travel per point a trackpad reports: a trackpad's points
-    /// felt slow at 1:1 (owner 2026-09-25).
-    public static let trackpadGain: CGFloat = 2
+    /// Travel per point a trackpad reports: 1:1, the finger's own
+    /// distance (owner 2026-09-29, retiring the ×2 tuned while a
+    /// scroll still lagged).
+    public static let trackpadGain: CGFloat = 1
 
     /// Points to move the section's offset — positive toward its
     /// end. The dominant axis wins, whichever way the shelf lies:

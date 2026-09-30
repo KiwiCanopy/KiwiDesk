@@ -13,6 +13,11 @@ extension AppBarOverlay {
         public let glyph: String?
         /// Grouped window count shown as badge.
         public let count: Int
+        /// The windows the item stands for — its own, or a
+        /// collapsed group's — which its menu names (#1518). The
+        /// render passes the group (`BarWindowMenuRowsTests`); the
+        /// default serves a one-window item.
+        public let members: [WindowID]
         /// The title was cut at `title_cap` (Core's verdict, the
         /// hover title's half of "hides text", #1514).
         public let titleCut: Bool
@@ -24,6 +29,7 @@ extension AppBarOverlay {
             icon: NSImage?,
             glyph: String? = nil,
             count: Int = 1,
+            members: [WindowID]? = nil,
             titleCut: Bool = false
         ) {
             self.id = id
@@ -32,6 +38,7 @@ extension AppBarOverlay {
             self.icon = icon
             self.glyph = glyph
             self.count = count
+            self.members = members ?? [id]
             self.titleCut = titleCut
         }
     }

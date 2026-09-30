@@ -9,9 +9,9 @@ extension AppBarOverlay {
     ) {
         guard let m = lastMetrics else { return }
         let mover = draggableView(for: view)
-        let point = itemContainer.convert(windowPoint, from: nil)
-        if itemContainer.subviews.last !== mover {
-            itemContainer.addSubview(mover)
+        let point = itemRun.convert(windowPoint, from: nil)
+        if itemRun.subviews.last !== mover {
+            itemRun.addSubview(mover)
         }
         var frame = mover.frame
         if m.horizontal {
@@ -69,11 +69,10 @@ extension AppBarOverlay {
                 repeating: m.slot,
                 count: order.count
             ),
-            in: itemContainer.bounds,
+            in: itemRun.bounds,
             gap: m.gap,
             horizontal: m.horizontal,
-            alignment: m.alignment,
-            scrolledBy: scrollOffset
+            alignment: m.alignment
         )
         for (index, view) in order.enumerated()
         where view !== dragged {
@@ -82,11 +81,11 @@ extension AppBarOverlay {
     }
 
     /// Where the first item's slot starts along the axis in
-    /// viewport coordinates (mirrors `frames`, alignment
+    /// `itemRun` coordinates (mirrors `frames`, alignment
     /// included — drop-index math must see the same origin
     /// the rendered slots use).
     private func contentStart(_ m: Metrics) -> CGFloat {
-        if m.total > m.viewport { return -scrollOffset }
+        if m.total > m.viewport { return 0 }
         switch m.alignment {
         case .start: return 0
         case .center: return (m.viewport - m.total) / 2

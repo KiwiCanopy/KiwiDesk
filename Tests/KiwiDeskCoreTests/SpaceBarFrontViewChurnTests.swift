@@ -77,16 +77,16 @@ struct SpaceBarFrontViewChurnTests {
             manager.overlayForTesting(barTitleDisplay)
         )
         let hosts = Self.frontViews(overlay).map(\.superview)
-        let order = overlay.itemContainer.subviews
+        let order = overlay.itemRun.subviews
         let frames = Self.frontViews(overlay).map(\.frame)
         let inserts = (
-            overlay.itemContainer.insertCount, overlay.root.insertCount
+            overlay.itemRun.insertCount, overlay.root.insertCount
         )
         manager.sync([Self.bar()])
         // A same-host re-add keeps the order; only the parent
         // counts it.
         #expect(
-            overlay.itemContainer.insertCount == inserts.0
+            overlay.itemRun.insertCount == inserts.0
                 && overlay.root.insertCount == inserts.1,
             "a steady render re-added a view"
         )
@@ -96,10 +96,10 @@ struct SpaceBarFrontViewChurnTests {
         // Identity, elementwise: a re-add into the SAME host is a
         // reorder no hook reports.
         #expect(
-            overlay.itemContainer.subviews.count == order.count
-                && zip(overlay.itemContainer.subviews, order)
+            overlay.itemRun.subviews.count == order.count
+                && zip(overlay.itemRun.subviews, order)
                     .allSatisfy { $0 === $1 },
-            "a steady render reordered the container"
+            "a steady render reordered the run"
         )
         #expect(
             Self.frontViews(overlay).map(\.frame) == frames,
@@ -121,8 +121,8 @@ struct SpaceBarFrontViewChurnTests {
         )
         for view in Self.frontViews(overlay) {
             #expect(
-                view.superview === overlay.itemContainer,
-                "scrolled-with segment not in the container: \(view)"
+                view.superview === overlay.itemRun,
+                "scrolled-with segment not in the run: \(view)"
             )
         }
         manager.sync([Self.bar(spaces: 60, glass: glass)])
@@ -135,8 +135,8 @@ struct SpaceBarFrontViewChurnTests {
         manager.sync([Self.bar(glass: glass)])
         for view in Self.frontViews(overlay) {
             #expect(
-                view.superview === overlay.itemContainer,
-                "segment did not return to the container: \(view)"
+                view.superview === overlay.itemRun,
+                "segment did not return to the run: \(view)"
             )
         }
     }

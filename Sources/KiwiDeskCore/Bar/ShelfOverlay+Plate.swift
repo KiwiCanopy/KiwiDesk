@@ -145,6 +145,37 @@ extension ShelfOverlay {
         )
     }
 
+    /// Whether a section's drawn content moving from `old` to `new`
+    /// moves what the divider reads of it, along its slot `length`
+    /// — a section moving its run re-lays the shelf only then.
+    nonisolated static func dividerMoves(
+        from old: CGRect,
+        to new: CGRect,
+        along length: CGFloat,
+        horizontal: Bool
+    ) -> Bool {
+        drawnSpan(of: old, along: length, horizontal: horizontal)
+            != drawnSpan(of: new, along: length, horizontal: horizontal)
+    }
+
+    /// A section's drawn span along its own slot `length`.
+    private nonisolated static func drawnSpan(
+        of content: CGRect,
+        along length: CGFloat,
+        horizontal: Bool
+    ) -> ClosedRange<CGFloat> {
+        let slot =
+            horizontal
+            ? CGRect(x: 0, y: 0, width: length, height: 1)
+            : CGRect(x: 0, y: 0, width: 1, height: length)
+        return drawnRange(
+            slot: slot,
+            content: content,
+            strip: .zero,
+            horizontal: horizontal
+        )
+    }
+
     /// A section's drawn span along the strip, in strip
     /// coordinates, never outside its slot.
     private nonisolated static func drawnRange(
