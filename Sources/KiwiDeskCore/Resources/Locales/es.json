@@ -1455,6 +1455,8 @@
   "space_bar.inactive_content.help": "Lo que muestran los Espacios que no están en pantalla. %1$@: sus glifos de aplicación. %2$@: solo el número, el nombre o el icono de cada Espacio, con el número de ventanas que contiene en su esquina. En ambos casos, un Espacio vacío se ve atenuado, salvo un icono emoji a color, que no puede atenuarse.",
   "space_bar.item.ax.current": "%1$@, actual",
   "space_bar.item.ax.held": "Espacio %1$@, conservado de la pantalla %2$@, sin guardar, ventanas: %3$d",
+  "space_bar.item.ax.held_profile": "Espacio %1$@, conservado del perfil %2$@ en la pantalla %3$@, sin guardar, ventanas: %4$d",
+  "space_bar.item.ax.held_profile_renumbered": "Espacio %1$@, conservado del perfil %2$@ en la pantalla %3$@, donde era el Espacio %4$@, sin guardar, ventanas: %5$d",
   "space_bar.item.ax.held_renumbered": "Espacio %1$@, conservado de la pantalla %2$@, donde era el Espacio %3$@, sin guardar, ventanas: %4$d",
   "space_bar.item.ax.layer": "Capa de atajos %1$@",
   "space_bar.item.ax.not_current": "%1$@, no actual",

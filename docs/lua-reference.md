@@ -409,9 +409,10 @@ exists, only the mode is set.
 
 :::unreleased
 Run from `init.lua`, the space is declared by the script. Run
-any other way — a keybinding, the CLI — it is **temporary**: it
-lasts until you switch to another profile, it is deleted when its
-last window leaves, and Keep and a Settings Save never write it —
+any other way — a keybinding, the CLI — it is **temporary**: a
+switch to another profile holds it while it has windows and drops
+it when it has none, it is deleted when its last window leaves,
+and Keep and a Settings Save never write it —
 only
 [`save_profile`](#save_profile-load_profile-delete_profile-set_default_profile)
 does. With `"profile"` the space is added to the live profile's
@@ -5027,10 +5028,14 @@ profile itself.
 **Expects:** a space identifier (or `""` to clear back to the first
 space).
 
-**Does:** sets where windows land when a profile switch drops their
-space. Without an explicit choice (or when the chosen space doesn't
-exist in the profile), windows land in the **first space** of the
-profile's ordered list.
+:::unreleased
+**Does:** sets where windows land when their space goes —
+`delete_space`, or a profile switch away from a hand-written
+config with no profile or Standard live, which has nothing to
+hold the space for. Without an explicit choice (or when the
+chosen space doesn't exist in the profile), windows land in the
+**first space** of the profile's ordered list.
+:::
 
 **Example:**
 
@@ -5132,21 +5137,26 @@ KiwiDesk.bind_profile_to_desktop(2, "Creator Studio")
 
 ### Space Reconciliation
 
-**Every profile owns its own spaces.** Two profiles can each
-define a space called `1` — or `Work` — and they are different
-spaces, each with its own windows. The name is still how you
-address a space (`focus_space 1` means "space 1 of the profile
-I'm in"); the profile is the scope that name resolves in.
+**A space is its name; every profile owns what it holds.** Two
+profiles can each define a space called `1` — or `Work` — and it
+is one space: across a switch between them it stays live and
+takes the incoming profile's settings, and each profile's record
+below decides which of the windows it knows go there. The name
+is how you address a space (`focus_space 1` means "space 1 of the
+profile I'm in"); give two spaces different names to keep them
+apart.
 
 **Switching profiles remembers where your windows were.** When
 you switch away, KiwiDesk files which space each window was in
 under the profile you are leaving; when you switch back, it puts
 them back.
 
+:::unreleased
 A window the incoming profile has never seen — opened while
-another profile was up — stays where it is when that profile
-declares the space it is sitting in, and lands in the profile's
-**fallback space** (`set_fallback_space`) when it does not.
+another profile was up — stays where it is: in a space the
+profile declares, or in its own space, now held, when the profile
+does not declare it (below).
+:::
 
 This happens on any profile CHANGE — an explicit `load_profile`,
 a Desktop binding swapping profiles under you, or a monitor
@@ -5170,12 +5180,27 @@ does not reset its mode
 ([#1507](https://github.com/KiwiCanopy/KiwiDesk/issues/1507)).
 
 :::unreleased
+**Every switch holds what it does not name.** The same hold runs
+on every profile CHANGE — `load_profile` of another profile, a
+Desktop binding, a monitor change, or a built-in Standard taking
+over — for every live space the incoming profile or Standard does
+not declare by name and that still holds windows, whether its
+monitor left or stayed. An empty one is dropped. A space held
+while its monitor stayed goes home when the arrangement it left
+applies again and declares its original name, as below. Switching
+away from a hand-written `init.lua` with no profile or Standard
+live holds only a gone monitor's spaces, and forwards the rest to
+the fallback space
+([#1790](https://github.com/KiwiCanopy/KiwiDesk/issues/1790)).
+:::
+
+:::unreleased
 A held space wears a two-screen marker in the Space Bar. A temporary
 space held this way comes back temporary.
 :::
 
 :::unreleased
-Held spaces keep their order: when a monitor change holds them, a
+Held spaces keep their order: when a switch holds them, a
 numbered held space after a renumbered one is renumbered past it
 too, even where its own name is free, and a later renumber keeps
 the Space Bar in that order
@@ -5195,17 +5220,20 @@ held.
 
 :::unreleased
 A window in a held space stays there even when the incoming
-profile remembers it in one of its own spaces, so what was on the
-monitor goes home together
+profile remembers it in one of its own spaces, so what the space
+held goes home together
 ([#1728](https://github.com/KiwiCanopy/KiwiDesk/issues/1728)).
 :::
 
+:::unreleased
 A held space is dropped once no window is left in it on any
-Desktop, by `delete_space`, and on an explicit `load_profile`,
-whose prune forwards it to the fallback space like any undeclared
-space. `save_profile`, the `gui.json` space list and pins and the
-per-profile record above never include one. A Desktop binding
-switch holds nothing.
+Desktop, and by `delete_space`, which forwards its windows to the
+fallback space; resetting every setting ends every hold. A
+`load_profile` does not end one: its prune drops only the empty
+spaces the profile does not declare. `save_profile`, the
+`gui.json` space list and pins and the per-profile record above
+never include one.
+:::
 
 :::unreleased
 Held spaces survive a KiwiDesk restart, an update and a crash:
@@ -5307,7 +5335,7 @@ stripped, grouped by namespace — `set_gap_override` becomes
     }
   ],
   "main_spaces": ["1"],       // follow the main display
-  "fallback_space": "1",      // rehome target on switch
+  "fallback_space": "1",      // rehome target
   "saved_at": "2026-07-04T12:00:00Z",
   "settings": {
     "drag": {

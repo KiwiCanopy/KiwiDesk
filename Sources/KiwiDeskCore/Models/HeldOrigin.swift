@@ -29,6 +29,12 @@ public struct HeldOrigin: Codable, Equatable, Sendable {
         case profile(String)
         case standard(String)
 
+        /// The saved profile's name; nil for a Standard.
+        public var profileName: String? {
+            if case .profile(let name) = self { return name }
+            return nil
+        }
+
         /// `profile 'Name'` / `Standard 'Name'`, for the log.
         var logLabel: String {
             switch self {

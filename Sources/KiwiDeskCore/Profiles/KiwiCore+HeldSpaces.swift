@@ -19,15 +19,17 @@ extension KiwiCore {
     func holdDepartingSpaces(
         declared: Set<SpaceID>,
         icons: [SpaceID: String],
-        temporaries: Set<SpaceID>
+        temporaries: Set<SpaceID>,
+        alsoHolding: (SpaceID) -> Bool = { _ in false }
     ) {
         let live = Set(liveFingerprints)
         let candidates: [(Space, String)] = state.workspaces.allSpaces
             .compactMap { space in
                 guard state.heldSpaces[space.id] == nil,
                     let screen = spacePins[space.id]
-                        ?? state.settlingScreens[space.id],
-                    !live.contains(screen),
+                        ?? state.settlingScreens[space.id]
+                        ?? shownScreen(of: space.id),
+                    !live.contains(screen) || alsoHolding(space.id),
                     !withAwayMembers(space.windows, of: space.id).isEmpty
                 else { return nil }
                 return (space, screen)
@@ -65,6 +67,40 @@ extension KiwiCore {
         }
         focus.restore(into: &state.workspaces)
         placeHeldBatchLast(names)
+    }
+
+    /// A Standard taking over (#1790): a Space it does not plan
+    /// that still holds windows is held for the arrangement it
+    /// leaves, and every other unplanned Space drops, the outgoing
+    /// arrangement bringing its own back.
+    func holdForStandard(
+        planned: [SpaceID],
+        icons: [SpaceID: String],
+        temporaries: Set<SpaceID>
+    ) {
+        let declared = Set(planned)
+        holdDepartingSpaces(
+            declared: declared,
+            icons: icons,
+            temporaries: temporaries,
+            alsoHolding: {
+                !declared.contains($0) && self.liveArrangement != nil
+            }
+        )
+        pruneSpaces(
+            keeping: declared.union(state.heldSpaces.keys),
+            orderedBy: planned
+        )
+    }
+
+    /// The fingerprint of the screen `id` lays out on now; one the
+    /// resolve has not placed yet lays out on the main screen.
+    private func shownScreen(of id: SpaceID) -> String? {
+        let display =
+            state.workspaces.display(of: id) ?? PositionalDisplays.liveMainID
+        let displays = state.workspaces.allDisplays
+        return (displays.first { $0.id == display } ?? displays.first)?
+            .fingerprint
     }
 
     /// A held id is never a declared one: every apply door calls

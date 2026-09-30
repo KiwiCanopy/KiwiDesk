@@ -7,9 +7,9 @@ import Testing
 
 /// Temporary Spaces (#1790, the owner's ruling of 2026-09-30): a
 /// Space a command makes is temporary, no arrangement write takes
-/// it, it drops on a switch and never on a config load, and it
-/// deletes itself once emptied. Replays the held-Space desk, docked
-/// on `desk`.
+/// it, a switch holds it while it has windows, a config load never
+/// drops it, and it deletes itself once emptied. Replays the
+/// held-Space desk, docked on `desk`.
 @Suite("Temporary Spaces (#1790)", .serialized)
 @MainActor
 struct TemporarySpaceTests {
@@ -117,8 +117,8 @@ struct TemporarySpaceTests {
         #expect(!core.isTemporary(scratch))
     }
 
-    @Test("a reload and a same-profile Load keep it; a switch drops it")
-    func dropsOnASwitchOnly() throws {
+    @Test("a reload and a same-profile Load keep it; a switch holds it")
+    func switchHoldsIt() throws {
         let core = try docked()
         movedIntoScratch(core)
         core.execute("create_space", args: [.string("7")])
@@ -133,14 +133,19 @@ struct TemporarySpaceTests {
         #expect(core.isTemporary(scratch))
         #expect(core.state.workspaces[scratch]?.windows == [WindowID(13)])
         core.execute("load_profile", args: [.string("solo")])
-        #expect(core.state.workspaces[scratch] == nil)
+        // With windows it is held, and comes back temporary; empty,
+        // it drops (#1790).
+        let held = try #require(
+            core.state.heldSpaces.first { $0.value.name == scratch }
+        )
+        #expect(held.value.isTemporary)
+        #expect(core.state.workspaces[held.key]?.windows == [WindowID(13)])
         #expect(core.state.workspaces[SpaceID(7)] == nil)
         #expect(core.liveTemporarySpaces.isEmpty)
-        #expect(core.state.workspaces.space(of: WindowID(13)) != nil)
     }
 
-    @Test("a switch to a composed Standard drops it too")
-    func standardSwitchDrops() throws {
+    @Test("a switch to a composed Standard holds it too")
+    func standardSwitchHolds() throws {
         let core = try docked()
         movedIntoScratch(core)
         let composed = try #require(
@@ -150,8 +155,11 @@ struct TemporarySpaceTests {
             )
         )
         core.apply(composed: composed, forceRetile: true)
-        #expect(core.state.workspaces[scratch] == nil)
-        #expect(core.state.workspaces.space(of: WindowID(13)) != nil)
+        let held = try #require(
+            core.state.heldSpaces.first { $0.value.name == scratch }
+        )
+        #expect(held.value.isTemporary)
+        #expect(core.state.workspaces.space(of: WindowID(13)) == held.key)
     }
 
     @Test("it deletes itself once emptied, and waits while shown")

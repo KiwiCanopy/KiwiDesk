@@ -4559,11 +4559,19 @@ the window, and Tile does not reach it.
 **[Principle]**
 
 **A space's name is its identity; the PROFILE is the scope
-that name resolves in.** Two profiles may each declare a
-space called `1`, and they are different spaces holding
-different windows — but `focus_space 1` still takes a bare
-name, resolved against the profile you are in, the way it
-already resolves against the Desktop you are on.
+its settings and contents resolve in.** Two profiles may each
+declare a space called `1`, and it is one live space: across a
+switch between them it stays live and takes the incoming
+profile's settings, while each profile's own record (below)
+decides which of the windows it knows go there. `focus_space 1`
+takes a bare name, resolved against the profile you are in, the
+way it already resolves against the Desktop you are on.
+
+Telling two same-named spaces apart by their layout was
+considered and refused (owner, 2026-09-30, #1790): a layout is a
+weak signal and often a temporary one, and a split made on it
+would mint doubles of a space the user thinks of as one. A
+distinct name is the user's tool for two spaces.
 
 The alternative shapes were both worse. Giving a space an
 opaque identity and demoting the name to a label breaks
@@ -4575,11 +4583,11 @@ would SPLIT a space.
 
 What made the icon look contradictory was not the icon. A
 space's mode (`space_modes`) and its icon (`space.icon`) were
-both stored per profile while the space itself was global, so
+both stored per profile while what the space held was not, so
 two profiles' `1` shared windows while disagreeing about how
-to draw them. Giving the space the same scope as its own mode
-and icon is what removes the contradiction, and it needs no
-new concept. (#1230)
+to draw them. Giving what the space holds the same scope as
+its own mode and icon is what removes the contradiction, and it
+needs no new concept. (#1230)
 
 **A profile switch restores that profile's partitioning; it
 does not merge by name.** With `ensureSpace` matching the
@@ -4622,8 +4630,11 @@ has an opinion about which of its spaces a window sits in.
 (#1230)
 
 **The fallback space is an explicit choice, not "whichever
-row is first".** When a profile switch drops a space, its
-windows need a home. Tying that to the first list row (the
+row is first".** When a space goes with windows still in it —
+`delete_space`, or a switch away from a hand-written config
+that has no arrangement to hold it for (*Every switch holds
+what the incoming arrangement does not name*) — its windows
+need a home. Tying that to the first list row (the
 #75 interim rule) forces users to order spaces by system
 constraint instead of preference — and the redesign made the
 order user-owned (drag to reorder). So the rehome target is a
@@ -13687,8 +13698,9 @@ pressing it then makes an empty Space of that number, as
 :::unreleased
 **A drawn marker, never a name change.** Identity stays the bare
 name, so `focus_space 6` and the digit chord work unchanged. What
-the user needs — this Space is held, from which screen, what it
-was called there, and that nothing saves it — rides a two-screen
+the user needs — this Space is held, from which saved profile and
+which screen, what it was called there, and that nothing saves it
+— rides a two-screen
 marker (`display.2`) drawn after the identifier in its own ink, an
 outline at regular weight so it reads as an object rather than a
 mark to decode, and the sentence the item announces to VoiceOver. There is no tooltip (owner
@@ -13726,9 +13738,10 @@ is asked for.
 **The hold outranks the incoming profile's record**
 ([#1728](https://github.com/KiwiCanopy/KiwiDesk/issues/1728)).
 The switch that holds a Space also runs #1230's restore for the
-profile coming in, and that profile has usually seen the gone
-screen's windows before, in Spaces of its own. Letting the restore
-move them would empty the held Space the same change just made,
+profile coming in, and that profile has usually seen the held
+Space's windows before, in Spaces of its own — whether the
+Space's screen left or the switch alone left it undeclared.
+Letting the restore move them would empty the held Space the same change just made,
 and it would retire — the write side of this is the paragraph
 above, which keeps a held Space out of that record: after a few dock cycles most windows are
 remembered somewhere, so the hold would keep only windows opened
@@ -13738,8 +13751,8 @@ screen stays together and goes home together: the undock side of
 the rule, below, that everything inside a held Space goes back.
 :::
 
-**It goes home only into the arrangement it left.** On reconnect a
-held Space returns when its screen is back, the arrangement
+**It goes home only into the arrangement it left.** A held Space
+returns when its screen is connected, the arrangement
 applying is the one it left, and that arrangement declares its
 origin name; it then takes everything inside — windows opened
 while it was held included — and the returning arrangement's mode.
@@ -13753,21 +13766,40 @@ nothing. Where a held Space does not return, it stays held, pinned
 back to its own screen: it is still not that arrangement's to
 save.
 
-**It ends by going home, by emptying, or by an explicit act.** It
-retires the moment nothing is left in it; a window on another
-Desktop or of a hidden app still counts, since it comes back to
-that Space. An explicit `load_profile` is the user making a
-profile's set the authority, so it forgets every hold and its
-prune forwards them like any undeclared Space; `delete_space` and
-resetting every setting end holds for the same reason. A config
-reload is not such an act: it redeclares nothing about a held
-Space, so it leaves its mode alone.
+:::unreleased
+**Every switch holds what the incoming arrangement does not name
+([#1790](https://github.com/KiwiCanopy/KiwiDesk/issues/1790)).**
+A switch is any apply that changes the live arrangement: a Load of
+another profile, a Desktop binding, a monitor change, a composed
+Standard taking over. A live Space the incoming profile or Standard
+does not declare by name, and that still holds windows, is held
+for the arrangement it leaves — whether its screen left or stayed,
+and a temporary Space included, which comes back temporary. An
+empty one is dropped. The unplug was only the first case found of
+a general loss: a user trying another profile and coming back
+meets it too, since a switch that forwards spreads the departing
+arrangement's Spaces into the incoming one's fallback, and a
+Space no arrangement declares — a temporary one above all — has
+nothing to come back as, so its windows stay spread for good.
+What caused the switch — a screen, a Desktop, a
+menu pick — changes nothing about what it does to the Spaces, so
+the hold does not ask. A switch away from a hand-written config
+with no profile or Standard live has no arrangement to hold for,
+and holds only a gone screen's Spaces as before.
 
-**A monitor change holds; a Desktop binding does not.** A hold
-answers a screen that LEFT, which only a monitor change reports. A
-binding switch fires on a Desktop activation: the user is choosing
-the bound profile's arrangement, and #1230's record brings the
-departing one back on the return.
+**It ends by going home, by emptying, or by resetting every
+setting.** It retires the moment nothing is left in it; a window
+on another Desktop or of a hidden app still counts, since it comes
+back to that Space. A Load does not end it: trying an arrangement
+is the case the hold exists for, and forgetting holds there would
+re-open the merge the rule above closes. A Load's prune still
+drops the empty Spaces. `delete_space` forwards a held Space's
+windows to the fallback, which empties it and ends the hold; the
+Space Bar's Delete is offered only for a Space that holds nothing,
+so it never reaches a held one. A config reload is not such an
+act: it redeclares nothing about a held Space, so it leaves its
+mode alone.
+:::
 
 **A window moved out of a held Space is #1230's to place on
 replug.** Where the returning arrangement is a saved profile, its
@@ -13927,28 +13959,26 @@ the Spaces it writes stop being temporary in the same step. Keep
 never takes one; that is the other half of the #1179 re-ruling
 above.
 
-**It lasts until the arrangement changes, never until the config
-reloads.** It drops on a switch to another profile or to a
-composed Standard: Load profile, a Desktop binding, a monitor
-change. The incoming arrangement is then the authority, and a
-scratch Space from the one before has no place in it, so its
-windows are forwarded as the prune forwards any Space the incoming
-arrangement does not declare. A config load is not that act. A
-Settings Save runs one, boot runs one, Reload runs one, and a Load
-of the profile already live re-applies the same arrangement.
-Dropping temporary Spaces on any of them would make Save destroy
-the Space the user was working in. The drop is therefore ruled by
-the switch, which the apply door already tells from a re-apply,
-and never by `loadConfig`.
-
-**Held when its screen leaves, like any Space.** A monitor change
-that switches profile holds a departing Space that still has
-windows (#1507), and a temporary one is included: the reason for
-the hold — a screen's windows must not collapse into one Space —
-does not depend on how the Space was made. It comes back temporary
-on replug. An empty one is dropped, as any empty departing Space
-is. While it is held it wears the held marker, since a Space is
-never both.
+**A switch holds it like any Space; a config load never touches
+it.** A switch to another profile or to a composed Standard — Load
+profile, a Desktop binding, a monitor change — holds every Space
+the incoming arrangement does not name that still has windows
+(*Every switch holds what the incoming arrangement does not
+name*), and a temporary one is included: the reason for the hold
+— a switch must not spread one arrangement's Spaces into another's
+for good — does not depend on how the Space was made. It comes
+back temporary when its arrangement returns. An empty one is
+dropped, as any empty undeclared Space is. While it is held it
+wears the held marker, since a Space is never both. Dropping a
+temporary Space with windows on a switch, as #1790 first ruled,
+was refused on the same ground: its windows went into the
+fallback, and the Space the user was working in was gone when
+they came back. A config load is not a switch. A Settings Save
+runs one, boot runs one, Reload runs one, and a Load of the
+profile already live re-applies the same arrangement; each keeps
+a temporary Space where it is. The hold is therefore ruled by the
+switch, which the apply door already tells from a re-apply, and
+never by `loadConfig`.
 
 **It survives a restart: the other Space a restore creates.**
 Quitting KiwiDesk, an update or a crash is not the user changing
@@ -13960,7 +13990,8 @@ exception stands on. So a temporary Space rides every session
 snapshot and is re-created ahead of the replay, but only when
 KiwiDesk boots into the arrangement the snapshot was taken under.
 Booting into another one is a switch that happened while KiwiDesk
-was down, and the Space drops as it would have live. A number the
+was down, and it does not re-create the Space: unlike a live
+switch, a boot holds only what was already held. A number the
 booting arrangement now declares is that arrangement's Space: the
 arrangement is the same one, so no two arrangements merge by name.
 

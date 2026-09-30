@@ -129,9 +129,11 @@ extension KiwiCore {
             let current = profiles.currentName
         {
             if current == name {
-                spacePins =
-                    profile.set(matching: monitors)?.spaceMonitorMap
-                    ?? [:]
+                spacePins = keepingPins(
+                    of: Set(liveTemporarySpaces),
+                    over: profile.set(matching: monitors)?
+                        .spaceMonitorMap ?? [:]
+                )
                 resolveSpaceDisplays()
                 retile()
                 emitSpaceChange()

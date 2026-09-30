@@ -50,7 +50,8 @@ extension KiwiCore {
                         .held(
                             SpaceBarItemView.Held(
                                 screenName: $0.screenName,
-                                originName: $0.name == id ? nil : $0.name
+                                originName: $0.name == id ? nil : $0.name,
+                                profileName: $0.arrangement?.profileName
                             )
                         )
                     } ?? (isTemporary(id) ? .temporary : nil)

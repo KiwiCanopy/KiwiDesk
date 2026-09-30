@@ -1459,6 +1459,8 @@
   "space_bar.inactive_content.help": "What the Spaces not on screen show. %1$@ — their app glyphs. %2$@ — just each Space's number, name or icon, with how many windows it holds on its corner. Either way an empty Space draws dimmer, except a color emoji icon, which cannot dim.",
   "space_bar.item.ax.current": "%1$@, current",
   "space_bar.item.ax.held": "Space %1$@, held from %2$@, not saved, windows: %3$d",
+  "space_bar.item.ax.held_profile": "Space %1$@, held from %2$@ on %3$@, not saved, windows: %4$d",
+  "space_bar.item.ax.held_profile_renumbered": "Space %1$@, held from %2$@ on %3$@, where it was Space %4$@, not saved, windows: %5$d",
   "space_bar.item.ax.held_renumbered": "Space %1$@, held from %2$@, where it was Space %3$@, not saved, windows: %4$d",
   "space_bar.item.ax.layer": "Shortcut layer %1$@",
   "space_bar.item.ax.not_current": "%1$@, not current",

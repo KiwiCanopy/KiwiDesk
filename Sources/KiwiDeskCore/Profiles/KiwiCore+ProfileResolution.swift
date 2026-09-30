@@ -73,20 +73,21 @@ extension KiwiCore {
         // made two profiles' `1` the same Space, and merged an
         // arrangement away for good. Derived, not a third
         // classification Bool — the growth threshold above stands.
-        // #1507: an unplug holds the gone screen's Spaces; an
-        // explicit load ends every hold and prunes them like any
-        // undeclared Space.
-        if cause == .monitorChange, switching {
+        // #1507/#1790: a switch holds every Space the incoming
+        // profile does not name that still holds windows; the
+        // prune below drops the empty ones.
+        if switching {
             holdDepartingSpaces(
                 declared: declared,
                 icons: outgoingIcons,
-                temporaries: temporaries
+                temporaries: temporaries,
+                alsoHolding: {
+                    !declared.contains($0) && self.liveArrangement != nil
+                }
             )
         }
-        if pruneStaleSpaces { forgetHeldSpaces() }
-        // A temporary Space drops on a switch alone — never on a
-        // same-profile Load or a reload (#1790); one the incoming
-        // profile declares is that profile's now.
+        // One the incoming profile declares is that profile's now;
+        // a same-profile Load or a reload keeps them (#1790).
         if pruneStaleSpaces || switching {
             pruneSpaces(
                 keeping: declared.union(state.heldSpaces.keys)
@@ -176,6 +177,7 @@ extension KiwiCore {
         // profile's tiers explicitly. `fits` is the #36 verdict,
         // read off the set already matched for the pins.
         profiles.becameLive(profile, fits: fits)
+        updateBars()  // #1790: the adoption moved `isTemporary`
     }
 
     /// Applies a composed Standard fallback (#53): transient,
@@ -189,6 +191,7 @@ extension KiwiCore {
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
         let temporaries = Set(liveTemporarySpaces)
+        let outgoingIcons = tiler.settings.spaceIcons
         reclaimHeldNames(
             declared: Set(composed.spaces),
             into: .standard(composed.sourceName)
@@ -221,14 +224,10 @@ extension KiwiCore {
             keepingPinsOf: temporaries.subtracting(composed.spaces)
         )
         if switching {
-            // A switch drops the temporary Spaces — only them, never
-            // one with windows on a screen that left (#1790).
-            let dropped = temporaries.subtracting(composed.spaces)
-                .filter { !departsWithWindows($0) }
-            pruneSpaces(
-                keeping: Set(state.workspaces.allSpaces.map(\.id))
-                    .subtracting(dropped),
-                orderedBy: composed.spaces
+            holdForStandard(
+                planned: composed.spaces,
+                icons: outgoingIcons,
+                temporaries: temporaries
             )
             restorePartitioning(of: standard, declaring: Set(composed.spaces))
         }
@@ -262,6 +261,7 @@ extension KiwiCore {
                 title: composed.sourceTitle
             )
         )
+        updateBars()  // #1790: the adoption moved `isTemporary`
     }
 
     /// Applies a built-in Preset and materializes it as a real,

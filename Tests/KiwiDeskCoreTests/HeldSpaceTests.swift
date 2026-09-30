@@ -73,15 +73,15 @@ struct HeldSpaceTests {
         #expect(core.state.heldSpaces[SpaceID(5)] != nil)
     }
 
-    @Test("an explicit load ends every hold")
-    func explicitLoadEndsHolds() throws {
+    /// A Load ends only an empty hold (#1790).
+    @Test("an explicit load keeps a hold with windows")
+    func explicitLoadKeepsHolds() throws {
         let core = try docked()
         core.handle(.displaysChanged([builtIn]))
         core.execute("load_profile", args: [.string("solo")])
-        #expect(core.state.heldSpaces.isEmpty)
-        #expect(core.state.workspaces[SpaceID(4)] == nil)
-        #expect(core.state.workspaces[SpaceID(5)] == nil)
-        #expect(Set(members(core, 1)) == Set(ids([13, 10, 11, 12])))
+        #expect(core.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
+        #expect(Set(members(core, 5)) == Set(ids([10, 11])))
+        #expect(members(core, 6) == ids([12]))
     }
 
     @Test("an empty Space of the gone screen is not held")
@@ -93,16 +93,19 @@ struct HeldSpaceTests {
         #expect(core.state.workspaces[SpaceID(4)] == nil)
     }
 
-    @Test("a Desktop-binding switch holds nothing")
-    func bindingSwitchDoesNotHold() throws {
+    /// Every switch holds what it does not name (#1790).
+    @Test("a Desktop-binding switch holds too")
+    func bindingSwitchHolds() throws {
         let core = try docked()
         core.state.workspaces.removeDisplay(dell.id)
         core.apply(
             profile: try core.profiles.read(name: "solo"),
             cause: .event
         )
-        #expect(core.state.heldSpaces.isEmpty)
-        #expect(core.state.workspaces[SpaceID(4)] == nil)
+        let held = try #require(
+            core.state.heldSpaces.first { $0.value.name == SpaceID(4) }
+        )
+        #expect(members(core, Int(held.key.raw) ?? 0) == ids([12]))
     }
 
     @Test("Keep and the partitioning record never capture a held Space")
@@ -255,7 +258,8 @@ struct HeldSpaceTests {
             renumbered.held
                 == SpaceBarItemView.Held(
                     screenName: "DELL",
-                    originName: SpaceID(3)
+                    originName: SpaceID(3),
+                    profileName: "desk"
                 )
         )
         let follower = try #require(
@@ -280,7 +284,7 @@ struct HeldSpaceTests {
         #expect(!view.markerView.isHidden)
         #expect(
             view.accessibilityLabel()
-                == "Space 5, held from DELL, where it was Space 3, "
+                == "Space 5, held from desk on DELL, where it was Space 3, "
                 + "not saved, windows: 0, not current"
         )
     }

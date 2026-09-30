@@ -1455,6 +1455,8 @@
   "space_bar.inactive_content.help": "不在屏幕上的空间显示什么。%1$@ — 显示其 App 图形。%2$@ — 只显示每个空间的编号、名称或图标，并在其角落显示它有多少个窗口。两种情况下，空的空间都会变暗显示，但彩色图标无法变暗。",
   "space_bar.item.ax.current": "%1$@，当前",
   "space_bar.item.ax.held": "空间 %1$@，保留自显示器“%2$@”，未存储，窗口：%3$d",
+  "space_bar.item.ax.held_profile": "空间 %1$@，保留自描述文件“%2$@”的显示器“%3$@”，未存储，窗口：%4$d",
+  "space_bar.item.ax.held_profile_renumbered": "空间 %1$@，保留自描述文件“%2$@”的显示器“%3$@”（原为空间 %4$@），未存储，窗口：%5$d",
   "space_bar.item.ax.held_renumbered": "空间 %1$@，保留自显示器“%2$@”（原为空间 %3$@），未存储，窗口：%4$d",
   "space_bar.item.ax.layer": "快捷键层 %1$@",
   "space_bar.item.ax.not_current": "%1$@，非当前",

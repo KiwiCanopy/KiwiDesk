@@ -1455,6 +1455,8 @@
   "space_bar.inactive_content.help": "Was die Spaces zeigen, die gerade nicht auf dem Bildschirm sind. %1$@ — ihre App-Glyphen. %2$@ — nur die Nummer, der Name oder das Symbol jedes Space, mit der Anzahl seiner Fenster in der Ecke. In beiden Fällen wird ein leerer Space gedämpft dargestellt, außer bei einem farbigen Emoji-Symbol, das sich nicht dämpfen lässt.",
   "space_bar.item.ax.current": "%1$@, aktuell",
   "space_bar.item.ax.held": "Space %1$@, übernommen von Bildschirm %2$@, nicht gesichert, Fenster: %3$d",
+  "space_bar.item.ax.held_profile": "Space %1$@, übernommen aus Profil %2$@ auf Bildschirm %3$@, nicht gesichert, Fenster: %4$d",
+  "space_bar.item.ax.held_profile_renumbered": "Space %1$@, übernommen aus Profil %2$@ auf Bildschirm %3$@, dort Space %4$@, nicht gesichert, Fenster: %5$d",
   "space_bar.item.ax.held_renumbered": "Space %1$@, übernommen von Bildschirm %2$@, dort Space %3$@, nicht gesichert, Fenster: %4$d",
   "space_bar.item.ax.layer": "Tastenkürzel-Ebene %1$@",
   "space_bar.item.ax.not_current": "%1$@, nicht aktuell",

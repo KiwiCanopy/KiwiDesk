@@ -67,8 +67,9 @@ synonym:
   its ink and with no plate: a held Space's (#1507) or a temporary
   one's (#1790), one slot shared since a Space is never both.
   Never a *badge*, which counts or marks window state.
-- **held Space** — a Space carried onto a remaining screen when
-  its own was unplugged (#1507). *Held* is the word in copy and
+- **held Space** — a Space with windows kept live for the
+  arrangement it left, when a switch does not name it (#1507,
+  #1790). *Held* is the word in copy and
   code (`space_bar.item.ax.held`, `heldSpaces`); its glyph is the
   **Space marker**, never a *mark* — a mark is on a window. Retired as
   a name for it: *transient*, the issue's working name.

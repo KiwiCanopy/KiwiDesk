@@ -881,13 +881,15 @@ reported screens at once and OWES the profile choice to
   decided at once would test a sequence production no longer
   takes.
 
-## A gone screen's Spaces are held, not forwarded (#1507)
+## A switch holds what it does not name (#1507, #1790)
 
-A monitor change that switches profile carries each Space that
-lived on a screen no longer connected, and still holds windows,
-as a **held** Space rather than letting the prune forward it; the
-argument is `docs/design-decisions.md` ▸ Profiles ▸ *An unplugged
-screen's Spaces are held, not forwarded*. The obligations:
+A switch — any apply that changes the live arrangement — carries
+each live Space the incoming arrangement does not declare by name,
+and that still holds windows, as a **held** Space rather than
+letting the prune forward it; the argument is
+`docs/design-decisions.md` ▸ Profiles ▸ *An unplugged screen's
+Spaces are held, not forwarded* and *Every switch holds what the
+incoming arrangement does not name*. The obligations:
 
 - **The hold's machinery has one home.** Holding, reclaiming,
   re-filing, retiring and ending live in the `KiwiCore+HeldSpace*`
@@ -902,25 +904,36 @@ screen's Spaces are held, not forwarded*. The obligations:
   (`forgetHeldSpaces`) and `delete_space` (`endHold`) do
   (`HeldSpaceTests` ▸ `deleteEndsHold`). Nothing scans for a
   second writer; review is the check.
-- **Hold for the screen a Space LIVED on, on a switching
-  `.monitorChange` apply only.** That screen is its pin, else
-  `StateCoordinator.settlingScreens` — recorded by the event arm
-  at the first report of a screen-count change, before that
-  report's resolve moves an unpinned Space, and cleared by the
-  settle and by `supersedeMonitorSettle` — so a Main-role or
-  auto-placed Space is held too (`HeldSpaceTests` ▸
-  `unpinnedSpaceIsHeld`). The hold runs ahead of the prune, while
-  `spacePins`, the icons and `liveArrangement` are still the
-  departing arrangement's (`HeldSpaceTests` ▸ `unplugHolds`,
-  `HeldSpaceTests` ▸ `heldIconIsTheDepartingOne`). A Desktop
-  binding's `.event` apply holds nothing (`HeldSpaceTests` ▸
-  `bindingSwitchDoesNotHold`), an `.explicit` apply forgets every
-  hold before its prune (`HeldSpaceTests` ▸
-  `explicitLoadEndsHolds`), and an unplug into a composed
-  Standard holds nothing: `apply(composed:)` does not prune, so
-  the gone screen's Spaces stay live as ordinary Spaces. Which
-  apply is which is `ProfileApplyCause`'s — see *Applies force or
-  don't, explicitly*.
+- **End a hold by going home, by emptying, or by the reset —
+  never by a Load.** A Load is the user trying an arrangement,
+  the case the hold exists for, so no apply door forgets holds;
+  its prune keeps every held Space and drops the empty undeclared
+  ones (`SwitchHoldTests` ▸ `loadEndsOnlyEmptyHolds`).
+  `delete_space` ends one because it forwards its windows first,
+  and the bar's Delete never reaches one: `spaceIsDeletable`
+  refuses a held Space.
+- **Hold on every SWITCHING apply, whatever its cause, for the
+  screen a Space LIVED on.** Both apply doors hold through
+  `holdDepartingSpaces` when the arrangement changes — a Load, a
+  Desktop binding, a monitor change, a composed Standard through
+  `holdForStandard` — and never on a re-apply; while an
+  arrangement is live a Space on a connected screen is held as
+  well as a gone screen's, and with none live (a hand-written
+  config) only a gone screen's (`SwitchHoldTests` ▸
+  `loadHoldsAndReturns`, `SwitchHoldTests` ▸ `emptyUnnamedDrops`,
+  `SwitchHoldTests` ▸ `standardHoldsLeftovers`). The screen is its
+  pin, else `StateCoordinator.settlingScreens` — recorded by the
+  event arm at the first report of a screen-count change, before
+  that report's resolve moves an unpinned Space, and cleared by
+  the settle and by `supersedeMonitorSettle` — else the screen it
+  lays out on now, so a Main-role or auto-placed Space is held too
+  (`HeldSpaceTests` ▸ `unpinnedSpaceIsHeld`). The hold runs ahead
+  of the prune, while `spacePins`, the icons and
+  `liveArrangement` are still the departing arrangement's
+  (`HeldSpaceTests` ▸ `unplugHolds`, `HeldSpaceTests` ▸
+  `heldIconIsTheDepartingOne`). Which apply switches is
+  `recordOutgoingPartitioning`'s answer, which both doors read,
+  and a new apply door owes the same hold on it.
 - **A held id is never a declared one.** Every door that makes a
   Space set authoritative — `apply(profile:)`,
   `apply(composed:)`, `returnHeldSpacesWithoutApply` — calls
@@ -1130,13 +1143,16 @@ in the profile*. The obligations:
   apply or a Save makes keeps its pin through
   `keepingTemporaryPins` (`TemporarySpaceTests` ▸
   `invisibleToArrangementWrites`, `draftCommitWritesItsSpace`).
-- **It drops on a switch, never on a config load.** Each apply
-  door reads the live temporary Spaces and whether the
-  arrangement changes BEFORE it makes anything live, and its prune
-  keeps them unless it does; a number the incoming arrangement
-  declares is that arrangement's. A new apply door owes the same
-  pair (`TemporarySpaceTests` ▸ `dropsOnASwitchOnly`,
-  `standardSwitchDrops`, `incomingDeclarationSurvives`).
+- **A switch holds it; a config load never touches it.** Each
+  apply door reads the live temporary Spaces and whether the
+  arrangement changes BEFORE it makes anything live; on a switch
+  the hold takes one with windows and the prune drops an empty
+  one, and otherwise the prune keeps them all. A number the
+  incoming arrangement declares is that arrangement's. A new
+  apply door owes the same pair (`TemporarySpaceTests` ▸
+  `switchHoldsIt`, `TemporarySpaceTests` ▸
+  `standardSwitchHolds`, `TemporarySpaceTests` ▸
+  `incomingDeclarationSurvives`).
 - **A hold carries it home temporary.** `HeldOrigin.temporary`
   rides the hold and `returnsHome` sends it home without a
   declaration (`TemporarySpaceRestartTests` ▸

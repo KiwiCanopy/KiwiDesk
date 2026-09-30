@@ -36,6 +36,8 @@ extension SpaceBarItemView {
     struct Held: Equatable {
         let screenName: String
         let originName: SpaceID?
+        /// The profile it was held from; nil for a Standard.
+        var profileName: String? = nil
     }
 
     /// The symbol the marker draws now, if any.
@@ -115,6 +117,9 @@ extension SpaceBarItemView {
                 windows
             )
         }
+        if let profile = held.profileName {
+            return profileSentence(space, held, profile, windows)
+        }
         guard let origin = held.originName else {
             return L(
                 "space_bar.item.ax.held",
@@ -130,6 +135,36 @@ extension SpaceBarItemView {
             "Space %1$@, held from %2$@, where it was Space %3$@, "
                 + "not saved, windows: %4$d",
             space.raw,
+            held.screenName,
+            origin.raw,
+            windows
+        )
+    }
+
+    /// A Space held from a saved profile names it with its screen.
+    private func profileSentence(
+        _ space: SpaceID,
+        _ held: Held,
+        _ profile: String,
+        _ windows: Int
+    ) -> String {
+        guard let origin = held.originName else {
+            return L(
+                "space_bar.item.ax.held_profile",
+                "Space %1$@, held from %2$@ on %3$@, not saved, "
+                    + "windows: %4$d",
+                space.raw,
+                profile,
+                held.screenName,
+                windows
+            )
+        }
+        return L(
+            "space_bar.item.ax.held_profile_renumbered",
+            "Space %1$@, held from %2$@ on %3$@, where it was "
+                + "Space %4$@, not saved, windows: %5$d",
+            space.raw,
+            profile,
             held.screenName,
             origin.raw,
             windows
