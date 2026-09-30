@@ -30,6 +30,8 @@ public enum APIReference {
             ("make_tiled", "make_tiled"),
             ("make_auto", "make_auto"),
             ("toggle_floating", "toggle_floating"),
+            ("new_window", "new_window"),
+            ("close_window", "close_window"),
             ("make_sticky", "make_sticky"),
             ("make_display_sticky", "make_display_sticky"),
             ("make_unsticky", "make_unsticky"),

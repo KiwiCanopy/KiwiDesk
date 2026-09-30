@@ -86,6 +86,11 @@ func makeTestCore(
     core.spaceBars.glyphActions.present = { _, _ in }
     // A bar menu's Quit row terminates a real app (#1518).
     core.shelves.contextMenus.terminateApp = { _ in }
+    // New Window activates the target's app and both window
+    // actions press another app's AX element (#1518).
+    core.openOrFocus.activate = { _ in }
+    core.windowActions.newWindow = { _, _ in }
+    core.windowActions.close = { _, _ in }
     // The scroll-gesture tap (#1656): a live one would take a
     // real session-wide event tap in any suite that binds a
     // chord. A suite that means the tap injects its own.

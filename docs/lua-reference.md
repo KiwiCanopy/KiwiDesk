@@ -708,6 +708,13 @@ window with no overlay — stays silent.
 Only hotkey fires cue; the same command over CLI/IPC stays
 silent, and a held chord sounds once per hold.
 
+:::unreleased
+A refusal only the app can give — [`new_window`](#new_window)
+finding no New Window, [`close_window`](#close_window) no close
+button — draws without the sound: it arrives after the app
+answers, when the hotkey fire is over.
+:::
+
 The retired `resize.feedback` key is dropped by the one-shot
 migration, its value not carried across.
 
@@ -3882,6 +3889,52 @@ KiwiDesk.bind("cmd+alt+f", function()
     KiwiDesk.toggle_floating()
 end)
 ```
+
+:::unreleased
+## Opening and Closing Windows
+
+Both verbs take an optional window id from
+[`get_state`](#get_state) and act on the focused window
+otherwise. They reach another app through Accessibility and
+return before it answers, so a refusal only the app can give
+shows as a pill on screen and a line in the log, never as an
+error here. KiwiDesk's own windows are refused.
+
+### new_window
+
+**Expects:** optionally a window id.
+
+**Does:** brings that window's app forward and presses its
+**File ▸ New Window** — the File-menu item with the shortcut ⌘N
+(or ⇧⌘N) whose title names a window. An app with no such item
+opens nothing, and a pill says so. A new window its App Rule
+files into another Space takes you there, as opening the app
+would ([accepted limitations](accepted-limitations.md)).
+
+**Example:**
+
+```lua
+KiwiDesk.bind("cmd+alt+n", function()
+    KiwiDesk.new_window()
+end)
+```
+
+### close_window
+
+**Expects:** optionally a window id.
+
+**Does:** presses that window's close button, so the app
+answers unsaved work its own way. A window with no close button
+stays open, and a pill says so.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("cmd+alt+w", function()
+    KiwiDesk.close_window()
+end)
+```
+:::
 
 ## Sticky Windows
 

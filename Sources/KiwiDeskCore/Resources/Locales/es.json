@@ -98,9 +98,11 @@
   "bar.menu.app_rules": "Reglas de apps…",
   "bar.menu.ax.nested": "%1$@: %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
+  "bar.menu.close_window": "Cerrar ventana",
   "bar.menu.float_window": "Hacer flotar la ventana",
   "bar.menu.looks": "Looks…",
   "bar.menu.move_here": "Mover al Espacio actual",
+  "bar.menu.new_window": "Nueva ventana",
   "bar.menu.quit_app": "Salir de %1$@",
   "bar.menu.reset_minimum": "Restablecer el mínimo de la Space Bar",
   "bar.menu.shelf_settings": "Ajustes de KiwiShelf…",
@@ -1335,7 +1337,7 @@
   "shortcuts.gestures.app_bar": "Arrastra un elemento a lo largo de la App Bar para reordenar sus ventanas.",
   "shortcuts.gestures.app_bar_hover": "Pasa el puntero sobre un elemento de la App Bar con el título acortado para verlo completo.",
   "shortcuts.gestures.app_bar_off": "Ningún diseño muestra una App Bar. Activa una en %1$@.",
-  "shortcuts.gestures.context_menu": "Haz clic derecho en KiwiShelf para ver un menú de aquello en lo que hiciste clic: el diseño de un Espacio, cuántos glifos muestra un Espacio y los ajustes de KiwiShelf.",
+  "shortcuts.gestures.context_menu": "Haz clic derecho en KiwiShelf para ver un menú de aquello en lo que hiciste clic: el diseño de un Espacio y cuántos glifos muestra, qué hacer con una ventana o su app, y los ajustes de KiwiShelf.",
   "shortcuts.gestures.drop_on_space": "Arrastra una ventana sobre un Espacio en KiwiShelf para moverla allí.",
   "shortcuts.gestures.edge": "Arrastra el borde de una ventana para redimensionarla.",
   "shortcuts.gestures.follow_focus": "El foco cambia con un atajo, un cambio de Espacio, un cambio de aplicación o una ventana cerrada.",
@@ -1613,5 +1615,7 @@
   "updates.state.unavailable": "La búsqueda de actualizaciones está desactivada en esta compilación.",
   "updates.state.up_to_date": "Actualizado",
   "updates.state.up_to_date_checked": "Actualizado · última comprobación %1$@",
-  "updates.try_again": "Reintentar"
+  "updates.try_again": "Reintentar",
+  "window_action.refusal.no_close_button": "«%1$@» no tiene botón de cerrar",
+  "window_action.refusal.no_new_window": "%1$@ no tiene el comando «Nueva ventana»"
 }

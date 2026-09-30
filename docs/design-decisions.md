@@ -3367,6 +3367,16 @@ those refusals draw nothing, so they must say nothing, where a
 sound placed one level up — on the refusal funnel, or beside the
 drawing call — would have made them audible-but-invisible.
 
+:::unreleased
+One family draws without the sound by construction: a refusal
+only an AX walk of another app can give (#1518's New Window and
+Close Window). The walk runs off the main actor and answers after
+the hotkey fire that asked has ended, and the sound is a fire's,
+so the pill is the whole cue. `RefusalCueSeamTests` names the
+unsounded pill door's callers, so a third is a decision rather
+than a slip.
+:::
+
 **The setting is OFF by default, and the DECODER is what
 delivers that** — the retired `resize.feedback` is not
 declared, so a stored `true` is an unknown key and every config
@@ -5182,7 +5192,11 @@ them, measured on device, is an OPEN the user caused:
   user is the worst of the three outcomes — it vanishes from
   where they are. A running app still showing a window — a
   switch into it, its own call window, ⌘T — owes nothing. The
-  boot scan involves no activation at all.
+  boot scan involves no activation at all. **New Window owes it
+  outright** (#1518, owner ruling 2026-09-30): the verb names the
+  app and asks for a window, which is the open this rule follows,
+  whatever the app already shows — and a press the app answers
+  with nothing retires the debt, since nothing opened.
 - **Either order.** A reopen can show its window BEFORE macOS
   reports the app active (Telegram, on device), so a
   rule-placed window arriving with nothing owed is kept for the
