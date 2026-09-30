@@ -146,7 +146,7 @@ struct BarWindowMenuRowsTests {
         core.state.apply(
             .windowFloatChanged(WindowID(1), isFloating: true)
         )
-        let tile = core.barMenuRows(.appItem([WindowID(1)]))[0]
+        let tile = core.barMenuRows(.appItem([WindowID(1)]))[1]
         #expect(tile.title == "Tile Window")
         #expect(!tile.enabled)
         #expect(tile.subtitle == AutoFloatReason.rule.sentence)
@@ -156,7 +156,7 @@ struct BarWindowMenuRowsTests {
             .windowFloatChanged(WindowID(3), isFloating: true)
         )
         let rows = core.barMenuRows(.glyph([WindowID(2), WindowID(3)]))
-        let float = submenu(rows[1])
+        let float = submenu(rows[2])
         #expect(float.map(\.enabled) == [true, false])
         #expect(float.map(\.checked) == [false, true])
         #expect(float[1].subtitle == AutoFloatReason.panel.sentence)

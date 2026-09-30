@@ -12,7 +12,7 @@ extension KiwiCore {
         symbol: String,
         text: String
     ) -> Bool {
-        flashRefusalPill(window, text: text, symbol: refusal.pillSymbol)
+        flashRefusalPill(window, text: text, symbol: symbol)
     }
 
     /// The frame a refusal pill draws on: the one the window was
