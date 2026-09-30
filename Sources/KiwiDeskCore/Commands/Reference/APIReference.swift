@@ -111,6 +111,7 @@ public enum APIReference {
             "set_on_window_resize", "set_on_window_swap",
             "set_on_relayout",
             "set_on_monocle_focus", "set_monocle_flip_duration",
+            "set_on_shelf", "set_shelf_duration",
             "set_size_policy", "set_size_rate",
         ],
         "stack": [

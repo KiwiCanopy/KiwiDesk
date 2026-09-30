@@ -46,15 +46,35 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         }
     }
 
+    /// The shelf's glide (#1838): a section growing in or out, the
+    /// plate and sections re-placing, a group folding — one motion
+    /// on one pace. Off, the shelf lands; not under `anyEnabled`.
+    public var onShelf = true
+
+    /// The shelf glide in milliseconds (500–2000 ms, #1838).
+    public var shelfDurationMS = 750 {
+        didSet { shelfDurationMS = Self.clampShelfMS(shelfDurationMS) }
+    }
+
     /// The band every spring duration clamps to, and the one a
     /// control's edges derive from (gui.md, #1359).
     public static let durationBand = 50...1000
     /// The flip's band: below 100 ms the plate is a flash, not a
     /// turn.
     public static let flipDurationBand = 100...1000
+    /// The shelf glide's band (owner, 2026-09-30): below half a
+    /// second it barely reads on a decelerating curve.
+    public static let shelfDurationBand = 500...2000
 
     static func clampMS(_ ms: Int) -> Int {
         min(max(ms, durationBand.lowerBound), durationBand.upperBound)
+    }
+
+    static func clampShelfMS(_ ms: Int) -> Int {
+        min(
+            max(ms, shelfDurationBand.lowerBound),
+            shelfDurationBand.upperBound
+        )
     }
 
     static func clampFlipMS(_ ms: Int) -> Int {
@@ -74,6 +94,8 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         case scrollDurationMS = "scroll_duration"
         case onMonocleFocus = "on_monocle_focus"
         case monocleFlipDurationMS = "monocle_flip_duration"
+        case onShelf = "on_shelf"
+        case shelfDurationMS = "shelf_duration"
     }
 
     public init() {}
@@ -132,5 +154,19 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 forKey: .monocleFlipDurationMS
             ) ?? 450
         )
+        onShelf =
+            try container.decodeIfPresent(Bool.self, forKey: .onShelf)
+            ?? true
+        shelfDurationMS = Self.clampShelfMS(
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .shelfDurationMS
+            ) ?? 750
+        )
+    }
+
+    /// The shelf glide's length in seconds, nothing while it is off.
+    public var shelfGlideSeconds: TimeInterval {
+        onShelf ? TimeInterval(shelfDurationMS) / 1000 : 0
     }
 }

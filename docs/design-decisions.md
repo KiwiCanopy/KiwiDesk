@@ -11742,6 +11742,25 @@ refracts through it, and every moving glass re-samples its
 backdrop each frame.
 :::
 
+:::unreleased
+**A section appearing grows out of what it joins; the glide's
+pace is the user's**
+([#1838](https://github.com/KiwiCanopy/KiwiDesk/issues/1838),
+owner ruling). A section joining a fused shelf grows out of the
+other from the side facing it and fades in, and one leaving
+shrinks back into it and fades out; a shelf appearing on an edge
+of its own grows from its alignment anchor, so an anchored edge
+never moves. A section already on the shelf glides from where
+its content was drawn: it re-lays for the new slot at once, so a
+glide from its old frame first throws the content aside. The
+curve stays decelerating — the motion answers the user's switch,
+and a curve that eases in reads as lag — while its length is
+theirs: `animations.shelf_duration`, 500–2000 ms, 750 by default,
+since the item slide's quarter second read as a snap for a bar
+coming and going; `on_shelf` turns it off, outside the window
+animations' master, and Reduce Motion keeps it off.
+:::
+
 *A minimum, not a share.* Each section is as long as its items
 while both fit. Once the shelf is full the Space section
 shrinks, never below the **Space Bar minimum**, and the App

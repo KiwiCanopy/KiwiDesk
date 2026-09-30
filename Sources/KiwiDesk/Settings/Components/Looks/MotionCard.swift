@@ -52,14 +52,18 @@ struct MotionCard: View {
             isExpanded: $moreExpanded,
             scrollHoisted: true
         ) {
-            rows(ColorsRowOrder.motionMore)
-                .padding(.top, 8)
-                .modifier(
-                    GreyOut(
-                        active: !animationsMasterBinding
-                            .wrappedValue
+            VStack(alignment: .leading, spacing: 8) {
+                rows(ColorsRowOrder.motionMore)
+                    .modifier(
+                        GreyOut(
+                            active: !animationsMasterBinding
+                                .wrappedValue
+                        )
                     )
-                )
+                Divider()
+                rows(ColorsRowOrder.motionShelf)
+            }
+            .padding(.top, 8)
         }
     }
 

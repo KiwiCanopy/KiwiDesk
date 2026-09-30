@@ -133,12 +133,6 @@ enum BarMotion {
         return step
     }
 
-    /// The shelf plate's glide when a section appears or leaves
-    /// (#1517): a re-placement the user did not ask for must be
-    /// seen to travel, and a little longer than an item slide so
-    /// the plate reads as one surface moving.
-    static let plateGlide: TimeInterval = 0.28
-
     /// Runs `body` in the plate glide's group: a decelerating
     /// ease with no overshoot, zero-length under Reduce Motion so
     /// the plate arrives without travelling.
@@ -147,7 +141,8 @@ enum BarMotion {
         let reduceMotion = isReduced
         NSAnimationContext.runAnimationGroup { context in
             context.duration = plateGlideDuration(
-                reduceMotion: reduceMotion
+                reduceMotion: reduceMotion,
+                seconds: shelfGlide
             )
             context.timingFunction = CAMediaTimingFunction(
                 controlPoints: 0.2,
@@ -161,9 +156,10 @@ enum BarMotion {
 
     /// The plate glide's duration: zero under Reduce Motion.
     static func plateGlideDuration(
-        reduceMotion: Bool
+        reduceMotion: Bool,
+        seconds: TimeInterval
     ) -> TimeInterval {
-        reduceMotion ? 0 : plateGlide
+        reduceMotion ? 0 : seconds
     }
 
     /// The group's duration. Zero under Reduce Motion, so

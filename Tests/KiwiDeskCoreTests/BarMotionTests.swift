@@ -25,8 +25,12 @@ struct BarMotionTests {
         #expect(BarMotion.duration(reduceMotion: true) == 0)
         #expect(BarMotion.duration(reduceMotion: false) > 0)
         // The shelf plate's glide lands under Reduce Motion too.
-        #expect(BarMotion.plateGlideDuration(reduceMotion: true) == 0)
-        #expect(BarMotion.plateGlideDuration(reduceMotion: false) > 0)
+        #expect(
+            BarMotion.plateGlideDuration(reduceMotion: true, seconds: 1) == 0
+        )
+        #expect(
+            BarMotion.plateGlideDuration(reduceMotion: false, seconds: 1) > 0
+        )
     }
 
     @Test("An item lands in its new frame, never travels to it")

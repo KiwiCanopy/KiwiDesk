@@ -20,6 +20,7 @@ extension KiwiCore {
         defer { publishStatusSpaceMark() }
         syncFontIssue()
         let settings = tiler.settings
+        BarMotion.shelfGlide = settings.animations.shelfGlideSeconds
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else {
             let fallback = appBarFallback(settings: settings)
