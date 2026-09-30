@@ -124,6 +124,39 @@ struct ShelfDividerWeightTests {
         #expect(front.alpha == BarDivider.ruleAlpha)
     }
 
+    /// The App Bar's float break (#1826) is drawn at the in-item
+    /// tier, so it ranks below the section divider by SHAPE: a
+    /// rule at the section's weight read as that divider on a
+    /// fused shelf.
+    @Test("The App Bar's float break takes the rule tier")
+    @MainActor
+    func floatBreakTakesTheRuleTier() throws {
+        LiquidGlassGate.override = { false }
+        let depth: CGFloat = 30
+        let overlay = AppBarOverlay()
+        overlay.show(
+            items: [
+                AppBarOverlay.Item(id: WindowID(1), text: "A", icon: nil),
+                AppBarOverlay.Item(
+                    id: WindowID(2),
+                    text: "F",
+                    icon: nil,
+                    floating: true
+                ),
+            ],
+            activeIndex: 1,
+            strip: CGRect(x: 0, y: 0, width: 800, height: depth),
+            style: AppBarLook()
+        )
+        let rule = overlay.floatRule
+        #expect(!rule.isHidden)
+        let ink = try #require(rule.layer?.backgroundColor)
+        #expect(ink.alpha == BarDivider.ruleAlpha)
+        #expect(rule.frame.width == BarDivider.ruleThickness)
+        #expect(rule.frame.width < BarDivider.sectionThickness)
+        #expect(rule.frame.height == depth * BarDivider.ruleLengthShare)
+    }
+
     /// Owner 2026-09-25: a draggable divider must show it can be
     /// grabbed. Hovering the live grip draws the line in the hover
     /// ink at full strength, at its resting weight; leaving

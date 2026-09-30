@@ -163,4 +163,33 @@ struct GlyphSizeAppBarTests {
                 * 0.9
         )
     }
+
+    /// The floating mark between the row and its floats (#1826)
+    /// sits on the title's ladder, centred across the full depth.
+    @Test("The floating mark follows the content")
+    func floatMarkFollowsContent() {
+        let look = Self.look()
+        let overlay = AppBarOverlay()
+        overlay.show(
+            items: [
+                AppBarOverlay.Item(id: WindowID(1), text: "W1", icon: nil),
+                AppBarOverlay.Item(
+                    id: WindowID(2),
+                    text: "W2",
+                    icon: nil,
+                    floating: true
+                ),
+            ],
+            activeIndex: nil,
+            strip: CGRect(x: 0, y: 0, width: 1440, height: Self.depth),
+            style: look
+        )
+        let side = look.resolvedFontSize(forContentDepth: Self.content)
+        #expect(!overlay.floatMark.isHidden)
+        #expect(
+            overlay.floatMark.frame.size
+                == CGSize(width: side, height: side)
+        )
+        #expect(overlay.floatMark.frame.midY == Self.depth / 2)
+    }
 }

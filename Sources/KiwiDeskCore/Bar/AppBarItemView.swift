@@ -48,6 +48,9 @@ final class AppBarItemView: NSView {
     var edge: AppBarEdge { style.edge }
     private(set) var isActive = false
     private(set) var count = 1
+    /// A float after the row's break (#1826): it reorders nothing,
+    /// so a press never becomes a drag.
+    private(set) var isFloatItem = false
     /// The windows its menu names (#1518); set beside `configure`.
     var members: [WindowID] = []
     /// Leading/trailing position within current item run; they
@@ -111,7 +114,7 @@ final class AppBarItemView: NSView {
     }
 
     override func mouseDragged(with event: NSEvent) {
-        guard let start = pressLocation else { return }
+        guard let start = pressLocation, !isFloatItem else { return }
         let location = event.locationInWindow
         if !isDragging,
             hypot(
@@ -192,6 +195,7 @@ final class AppBarItemView: NSView {
         glyph: String?,
         count: Int,
         titleCut: Bool = false,
+        floating: Bool = false,
         active: Bool,
         horizontal: Bool,
         style: AppBarLook
@@ -201,6 +205,7 @@ final class AppBarItemView: NSView {
         self.name = name
         self.text = text
         self.count = count
+        self.isFloatItem = floating
         self.horizontal = horizontal
         self.isActive = active
         self.style = style
@@ -234,6 +239,8 @@ final class AppBarItemView: NSView {
                     count
                 )
             )
+        } else if isFloatItem {
+            updateFloatingAccessibilityLabel()
         } else if !text.isEmpty && text != name {
             setAccessibilityLabel(
                 L(
@@ -248,6 +255,29 @@ final class AppBarItemView: NSView {
                 L(
                     "app_bar.item_app.ax",
                     "%1$@",
+                    name
+                )
+            )
+        }
+    }
+
+    /// A float's narration (#1826): the divider is visual only, so
+    /// the float fact is spoken — one key per resulting sentence.
+    private func updateFloatingAccessibilityLabel() {
+        if !text.isEmpty && text != name {
+            setAccessibilityLabel(
+                L(
+                    "app_bar.item_window_floating.ax",
+                    "%1$@, floating window %2$@",
+                    name,
+                    text
+                )
+            )
+        } else {
+            setAccessibilityLabel(
+                L(
+                    "app_bar.item_app_floating.ax",
+                    "%1$@, floating window",
                     name
                 )
             )

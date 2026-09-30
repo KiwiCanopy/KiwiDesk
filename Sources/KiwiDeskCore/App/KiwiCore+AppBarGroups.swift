@@ -59,8 +59,8 @@ extension KiwiCore {
         // Space Bar (#414): merging a tiled-sticky traveler
         // into a same-app group would hide it behind an
         // aggregate count, and clicking the group would focus
-        // its first member — possibly the traveler. Floating
-        // never appears here (tiled list).
+        // its first member — possibly the traveler. Floats
+        // are listed apart, after the row (`appBarFloats`).
         let specials = tiled.map {
             state.windows[$0]?.isSticky == true
         }
@@ -154,7 +154,8 @@ extension KiwiCore {
 
     func barItem(
         for group: [WindowID],
-        style: AppBarLook
+        style: AppBarLook,
+        floating: Bool = false
     ) -> AppBarOverlay.Item {
         let window = group.first.flatMap {
             state.windows[$0]
@@ -190,7 +191,8 @@ extension KiwiCore {
                 .map {
                     AppBarStyle.cappedTitle($0, to: style.resolvedTitleCap)
                         != $0
-                } ?? false
+                } ?? false,
+            floating: floating
         )
     }
 }

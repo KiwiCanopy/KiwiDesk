@@ -47,13 +47,21 @@ extension KiwiCore {
         // same draw-time decision the focus ring already makes
         // (#300, #683), never a widening of tracking or of the
         // ignore gate.
-        let pairs = members.compactMap { id -> (WindowID, String, Bool)? in
+        let listed = members.compactMap { id -> (WindowID, String, Bool)? in
             guard let member = state.windows[id],
                 !member.isTransientOverlay
             else { return nil }
             let isSpecial = member.isFloating || member.isSticky
             return (id, member.appName, isSpecial)
         }
+        // Floats close the chip (#1826), keyed on the badge's flag
+        // (#1286) so the badged glyphs are the ones gathered.
+        let floats = Set(
+            listed.map(\.0).filter { state.windows[$0]?.isFloating == true }
+        )
+        let pairs =
+            listed.filter { !floats.contains($0.0) }
+            + listed.filter { floats.contains($0.0) }
         let windows = pairs.map { $0.0 }
         let groups =
             style.groupAdjacentWindows

@@ -1013,3 +1013,15 @@ reaches.
 - **A preview of the bar draws the draft's face** through the
   same resolver (`BarSpec.textFont`); that the strip then draws
   with it is review's — no clause renders the text.
+
+## The App Bar's row reorders; its floats do not (#1826)
+
+- **List a float after the App Bar's row, never in `barGroups`**:
+  `moveBarItem` indexes `barGroups`, so a float there would be a
+  slot a drop could land in and a reorder would write into the
+  tiled order. The overlay reads which items float from
+  `Item.floating` alone — `tiledCount` and `breakAfter` take the
+  tiled prefix from it — and Core's highlight reads the same flag
+  (`appBarActiveIndex`). `AppBarFloatTests` ▸ `floatsTrailTheRow`
+  holds the order and `AppBarFloatOverlayTests` ▸
+  `floatDoesNotReorder` the drop.
