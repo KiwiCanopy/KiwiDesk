@@ -77,16 +77,16 @@ extension KiwiCore {
         return wasFloat ? .tiles(id, floatFrameToRemember(id)) : nil
     }
 
-    /// Pays `detectedFlip`'s debt after the event's retile, where
-    /// the fold really flipped the window. Stands down while event
+    /// Pays `detectedFlip`'s debt once the fold has run: a float
+    /// flip always lands, a tile one only where the fold really
+    /// tiled the window. The placement stands down while event
     /// retiles are deferred (boot, a sweep chunk: the frame is the
     /// app's, not a slot) and for a window a drag holds or in its
     /// own macOS Space (#670).
     func settleDetectedFlip(_ flip: DetectedFlip?) {
         switch flip {
         case .floats(let id):
-            guard !defersEventRetiles, seedsPlacement(id),
-                isEffectiveFloatForPlacement(id)
+            guard !defersEventRetiles, seedsPlacement(id)
             else { return }
             placeFloating(id)
         case .tiles(let id, let frame):

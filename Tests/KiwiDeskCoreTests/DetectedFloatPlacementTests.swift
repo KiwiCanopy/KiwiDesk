@@ -159,6 +159,23 @@ struct DetectedFloatPlacementTests {
         #expect(frames[window] == moved)
     }
 
+    /// A tile verdict the fold refuses — a user float, a
+    /// floating-mode member — files no frame: the window never
+    /// tiled, and a stale frame would be the next placement's.
+    @Test("a refused tile files no float frame")
+    func refusedTileFilesNothing() {
+        let core = setup { _, _ in }
+        #expect(core.execute("make_floating").isSuccess)
+        let moved = CGRect(x: 300, y: 200, width: 700, height: 500)
+        core.state.apply(.windowMoved(window, moved))
+        flip(core, false)
+        #expect(core.state.windows[window]?.isFloating == true)
+        #expect(core.state.floatFrames[window] == nil)
+        let member = setup(mode: "floating") { _, _ in }
+        flip(member, false)
+        #expect(member.state.floatFrames[window] == nil)
+    }
+
     @Test("a window on an unshown Space is seeded, not placed")
     func unshownSpaceSeeds() throws {
         var frames: [WindowID: CGRect] = [:]
