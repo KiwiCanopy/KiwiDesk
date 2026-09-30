@@ -11681,11 +11681,25 @@ badge counts hidden **windows**, not slots — the same unit as the
 per-glyph count badges and the item's accessibility label.
 
 :::unreleased
-Nor would an ungrouped mode buy reach. A group glyph is a click
-target whose menu lists its windows (#1528), so each member is
-one pick away; every slot an ungrouped mode spent on a duplicate
-would push another app behind `+n`, whose menu costs the same
-pick and drops that app's glyph from the overview.
+**The Space Bar groups by default; a switch turns it off.** (#293,
+#1725, owner ruling 2026-09-30.)
+`space_bar.set_group_adjacent_windows`, the App Bar's toggle's
+twin, collapses adjacent same-app runs into one glyph + count
+badge; off, every window is its own glyph and one click reaches
+it, where a grouped glyph costs a menu and a pick (#1528).
+Grouped stays the default because the glyph span depends on
+grouping running **first**: ungrouped, the span counts windows,
+burns itself on duplicates and fills sooner, conveying less —
+so ungrouping is the choice of a user who wants the one-click
+reach more than the overview. With grouping on the order is
+settled — group first, then span, whatever the span's value
+(`space_bar.set_glyph_span`, default 5, range 1–12, #376, #1528).
+A `+n` badge counts hidden **windows**, not slots — the same unit
+as the per-glyph count badges and the item's accessibility label.
+
+The default being the old behaviour is also why the setting owes
+no crossing: an absent key meant grouped before and means grouped
+now, so no stored file, built-in layout or `init.lua` changes.
 :::
 
 :::unreleased

@@ -78,8 +78,9 @@ extension SpaceBarCard {
                 "How many app glyphs a Space shows around its "
                     + "focused app; the rest sit behind a +n on "
                     + "either side, and at either end of the row "
-                    + "one more glyph fits. Adjacent windows of the "
-                    + "same app count as one glyph."
+                    + "one more glyph fits. With grouping on, "
+                    + "adjacent windows of the same app count as "
+                    + "one glyph."
             )
         )
     }

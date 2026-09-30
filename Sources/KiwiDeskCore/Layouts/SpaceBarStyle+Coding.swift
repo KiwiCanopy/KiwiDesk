@@ -9,6 +9,7 @@ extension SpaceBarStyle {
         case enabled
         case edge
         case glyphSpan = "glyph_span"
+        case groupAdjacentWindows = "group_adjacent_windows"
         case glyphGap = "glyph_gap"
         case inactiveContent = "inactive_content"
         case itemLabel = "item_label"
@@ -43,6 +44,11 @@ extension SpaceBarStyle {
                 Int.self,
                 forKey: .glyphSpan
             ) ?? defaults.glyphSpan
+        groupAdjacentWindows =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .groupAdjacentWindows
+            ) ?? defaults.groupAdjacentWindows
         glyphGap = Self.clampGlyphGap(
             try container.decodeIfPresent(
                 CGFloat.self,

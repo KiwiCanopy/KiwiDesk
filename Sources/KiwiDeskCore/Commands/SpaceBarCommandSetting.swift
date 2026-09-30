@@ -9,6 +9,7 @@ enum SpaceBarCommandSetting {
     case edge(AppBarEdge)
     case glyphSpan(Int)
     case glyphGap(CGFloat)
+    case groupAdjacentWindows(Bool)
     case inactiveContent(SpaceBarStyle.InactiveContent)
     case itemLabel(SpaceBarStyle.ItemLabel)
     case frontAppTitleCap(Int)
@@ -86,6 +87,7 @@ enum SpaceBarCommandSetting {
             "show_front_app": Self.showFrontApp,
             "hide_empty": Self.hideEmpty,
             "sticky_badge": Self.stickyBadge,
+            "group_adjacent_windows": Self.groupAdjacentWindows,
         ]
     }
 
@@ -203,6 +205,8 @@ enum SpaceBarCommandSetting {
         case .showFrontApp(let value):
             style.showFrontApp = value
         case .hideEmpty(let value): style.hideEmpty = value
+        case .groupAdjacentWindows(let value):
+            style.groupAdjacentWindows = value
         case .stickyBadge(let value): style.stickyBadge = value
         case .springDelay(let value):
             style.springDelay = value
