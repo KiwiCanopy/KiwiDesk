@@ -6,10 +6,12 @@ public enum SpaceMark: Equatable {
     case text(String)
 }
 
-/// Visual plate displaying sticky indicator glyph and space pill
-/// (#414, #421). A clipping container: the `.hudWindow` backing or,
-/// under Liquid Glass, tinted glass (#1621, `+Glass`), with the
-/// glyphs in `content` above either.
+/// Visual plate displaying the state glyphs and space pill (#414,
+/// #421): one or two squares, the outermost at the right edge and
+/// the inner one (floating beside sticky, #1799) left of it. A
+/// clipping container: the `.hudWindow` backing or, under Liquid
+/// Glass, tinted glass (#1621, `+Glass`), with the glyphs in
+/// `content` above either.
 @MainActor
 final class StickyMarkPlate: NSView {
     /// Collapsed badge square dimension.
@@ -35,10 +37,17 @@ final class StickyMarkPlate: NSView {
     /// The stored colour, kept for the glass tint.
     var markHex = ""
 
+    /// The outermost glyph and its disc (#429).
     let symbol = NSImageView()
-    let name = NSTextField(labelWithString: "")
-    /// Background disc behind mark glyph (#429).
     let roundel = NSView()
+    /// The inner glyph, its disc and colour (#1799); drawn only
+    /// while `slotCount` is 2.
+    let innerSymbol = NSImageView()
+    let innerRoundel = NSView()
+    var innerHex = ""
+    /// Glyph squares drawn: 1, or 2 with the inner one.
+    var slotCount = 1
+    let name = NSTextField(labelWithString: "")
     /// Diameter of background roundel.
     static let roundelSize: CGFloat = 15
 
@@ -64,13 +73,16 @@ final class StickyMarkPlate: NSView {
             view.autoresizingMask = [.width, .height]
         }
 
-        symbol.symbolConfiguration =
-            NSImage.SymbolConfiguration(
-                pointSize: Self.size * 0.55,
-                weight: .semibold
-            )
-        symbol.contentTintColor = .labelColor
-        symbol.imageScaling = .scaleProportionallyDown
+        for glyph in [symbol, innerSymbol] {
+            glyph.symbolConfiguration =
+                NSImage.SymbolConfiguration(
+                    pointSize: Self.size * 0.55,
+                    weight: .semibold
+                )
+            glyph.contentTintColor = .labelColor
+            glyph.imageScaling = .scaleProportionallyDown
+        }
+        innerSymbol.isHidden = true
 
         name.font = .systemFont(ofSize: 11, weight: .semibold)
         name.textColor = .labelColor
@@ -81,147 +93,113 @@ final class StickyMarkPlate: NSView {
         name.usesSingleLineMode = true
         name.alphaValue = 0
 
-        roundel.wantsLayer = true
-        roundel.layer?.cornerRadius = Self.roundelSize / 2
-        roundel.isHidden = true
+        for disc in [roundel, innerRoundel] {
+            disc.wantsLayer = true
+            disc.layer?.cornerRadius = Self.roundelSize / 2
+            disc.isHidden = true
+        }
 
         addSubview(hud)
         addSubview(content)
         content.addSubview(name)
-        content.addSubview(roundel)
-        content.addSubview(symbol)
+        for view in [roundel, symbol, innerRoundel, innerSymbol] {
+            content.addSubview(view)
+        }
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
 
-    /// Sets mark tint hex color and updates roundel appearance (#429).
+    /// Sets the outermost glyph's hex color — the glass tint and
+    /// the pill's ink — and its roundel (#429).
     func setMarkColor(_ hex: String) {
         markHex = hex
         guard !isGlass else {
             applyGlass()
             return
         }
-        if hex.isEmpty {
-            markColor = .labelColor
-            roundel.isHidden = true
-            symbol.contentTintColor = .labelColor
-        } else {
-            let fill = NSColor(kiwiHex: hex)
-            markColor = fill
-            roundel.isHidden = false
-            roundel.layer?.backgroundColor = fill.cgColor
-            symbol.contentTintColor = fill.contrastingGlyph
-        }
+        markColor = Self.paint(symbol, roundel, hex: hex)
+        Self.paint(
+            innerSymbol,
+            innerRoundel,
+            hex: slotCount > 1 ? innerHex : ""
+        )
         name.textColor = markColor
     }
+
+    /// Shows or hides the inner glyph (#1799), with its colour.
+    func setInner(_ image: NSImage?, hex: String) {
+        innerSymbol.image = image
+        innerHex = hex
+        slotCount = image == nil ? 1 : 2
+        innerSymbol.isHidden = image == nil
+        needsLayout = true
+        setMarkColor(markHex)
+    }
+
+    /// Paints one glyph on the flat finish: a filled disc under a
+    /// contrasting glyph, or the bare label ink on Automatic.
+    @discardableResult
+    private static func paint(
+        _ glyph: NSImageView,
+        _ disc: NSView,
+        hex: String
+    ) -> NSColor {
+        guard !hex.isEmpty else {
+            disc.isHidden = true
+            glyph.contentTintColor = .labelColor
+            return .labelColor
+        }
+        let fill = NSColor(kiwiHex: hex)
+        disc.isHidden = false
+        disc.layer?.backgroundColor = fill.cgColor
+        glyph.contentTintColor = fill.contrastingGlyph
+        return fill
+    }
+
+    /// Glyph squares that fit a window `width` points wide beside
+    /// the traffic lights, of `wanted` (#1799): the inner glyph
+    /// drops first, the outermost never.
+    static func fittingSlots(_ wanted: Int, windowWidth: CGFloat) -> Int {
+        let spare =
+            windowWidth - StickyMarkOverlay.inset * 2
+            - trafficLightClearance
+        return max(1, min(wanted, Int(spare / size)))
+    }
+
+    /// Room the traffic lights take at a window's top-left.
+    static let trafficLightClearance: CGFloat = 80
 
     override func layout() {
         super.layout()
         let w = bounds.width
-        symbol.frame = CGRect(
-            x: w - Self.size,
-            y: 0,
-            width: Self.size,
-            height: Self.size
-        )
         let inset = (Self.size - Self.roundelSize) / 2
-        roundel.frame = CGRect(
-            x: w - Self.size + inset,
-            y: inset,
-            width: Self.roundelSize,
-            height: Self.roundelSize
-        )
+        for (slot, pair) in [(symbol, roundel), (innerSymbol, innerRoundel)]
+            .enumerated()
+        {
+            let x = w - Self.size * CGFloat(slot + 1)
+            pair.0.frame = CGRect(
+                x: x,
+                y: 0,
+                width: Self.size,
+                height: Self.size
+            )
+            pair.1.frame = CGRect(
+                x: x + inset,
+                y: inset,
+                width: Self.roundelSize,
+                height: Self.roundelSize
+            )
+        }
         let textHeight = ceil(name.intrinsicContentSize.height)
-        let right = w - Self.size - Self.nameGap
+        let glyphs = Self.size * CGFloat(slotCount)
+        let right = w - glyphs - Self.nameGap
         name.frame = CGRect(
             x: Self.namePad,
             y: (Self.size - textHeight) / 2,
             width: max(0, right - Self.namePad),
             height: textHeight
         )
-    }
-
-    /// Formats attributed text and computes required expanded width.
-    func prepare(format: String, mark: SpaceMark) -> CGFloat {
-        let content = attributedContent(format: format, mark: mark)
-        name.attributedStringValue = content
-        let textWidth = ceil(content.size().width) + 1
-        let cap =
-            Self.maxWidth - Self.namePad - Self.nameGap - Self.size
-        let measured = min(textWidth, cap)
-        return Self.namePad + measured + Self.nameGap + Self.size
-    }
-
-    private var nameFont: NSFont {
-        name.font ?? .systemFont(ofSize: 11, weight: .semibold)
-    }
-
-    private func attributedContent(
-        format: String,
-        mark: SpaceMark
-    ) -> NSAttributedString {
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: nameFont,
-            .foregroundColor: markColor,
-        ]
-        let parts = format.components(separatedBy: "%1$@")
-        let out = NSMutableAttributedString(
-            string: parts.first ?? "",
-            attributes: attrs
-        )
-        switch mark {
-        case .text(let value):
-            out.append(
-                NSAttributedString(string: value, attributes: attrs)
-            )
-        case .symbol(let symbolName):
-            out.append(symbolRun(symbolName, attrs: attrs))
-        }
-        if parts.count > 1 {
-            out.append(
-                NSAttributedString(
-                    string: parts[1],
-                    attributes: attrs
-                )
-            )
-        }
-        return out
-    }
-
-    /// Generates inline image attachment for symbol mark.
-    private func symbolRun(
-        _ symbolName: String,
-        attrs: [NSAttributedString.Key: Any]
-    ) -> NSAttributedString {
-        let config = NSImage.SymbolConfiguration(
-            pointSize: nameFont.pointSize,
-            weight: .semibold
-        )
-        .applying(
-            NSImage.SymbolConfiguration(paletteColors: [markColor])
-        )
-        guard
-            let image = NSImage(
-                systemSymbolName: symbolName,
-                accessibilityDescription: nil
-            )?.withSymbolConfiguration(config)
-        else {
-            return NSAttributedString(
-                string: symbolName,
-                attributes: attrs
-            )
-        }
-        let attachment = NSTextAttachment()
-        attachment.image = image
-        let mid = (nameFont.capHeight - image.size.height) / 2
-        attachment.bounds = CGRect(
-            x: 0,
-            y: mid,
-            width: image.size.width,
-            height: image.size.height
-        )
-        return NSAttributedString(attachment: attachment)
     }
 
     /// Toggles visibility of space name label and morphs capsule shape.

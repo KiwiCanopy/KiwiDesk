@@ -10,8 +10,9 @@ extension KiwiCore {
         args: [JSONValue] = []
     ) -> CommandResponse {
         // A focused-window command lands the flip's owed focus
-        // first; a query does not (#1391).
-        if FocusedCommandPolicy.isFocused(command) {
+        // first; a query, or a call naming its window, does not
+        // (#1391, #1518).
+        if impliesFocus(command, args) {
             runPendingMonocleFocus()
         }
         let response = dispatchCommand(command, args: args)

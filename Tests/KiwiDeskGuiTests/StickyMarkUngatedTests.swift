@@ -76,6 +76,23 @@ struct StickyMarkUngatedTests {
         #expect(SettingsContainer.stickyWindows.gate == nil)
     }
 
+    /// The floating mark's switch and both mark colours paint on
+    /// the window too (#1799), so they carry no gate either — the
+    /// Floating tint's retired Space Bar gate is the one that
+    /// would come back.
+    @Test("the floating mark and both mark colours are ungated")
+    func floatingRowsAreUngated() {
+        let mark = SettingKey.borders(.floatingMark).placement
+        #expect(mark.gate == nil)
+        #expect(mark.container == .stickyWindows)
+        for key in [BordersKey.stickyColor, .floatingColor] {
+            let placement = SettingKey.borders(key).placement
+            #expect(placement.gate == nil, "\(key)")
+            #expect(placement.container == .borders, "\(key)")
+        }
+        #expect(SettingsContainer.borders.gate == nil)
+    }
+
     /// The editor greys nothing, reads nothing off the bar, and
     /// displays no value but the stored one.
     ///
@@ -140,21 +157,24 @@ struct StickyMarkUngatedTests {
             let packed = source.split(
                 whereSeparator: \.isWhitespace
             ).joined()
-            let after = packed.components(
-                separatedBy: "stickyStyle.mark="
-            )
-            let assigns = after.dropFirst().contains {
-                !$0.hasPrefix("=")
-            }
-            #expect(
-                !assigns,
-                Comment(
-                    rawValue:
-                        "\(file.lastPathComponent) assigns "
-                        + "stickyStyle.mark — the mark is the "
-                        + "user's setting, not a side effect"
+            // Both marks' switches (#1799).
+            for field in ["stickyStyle.mark", "floatingStyle.mark"] {
+                let after = packed.components(
+                    separatedBy: field + "="
                 )
-            )
+                let assigns = after.dropFirst().contains {
+                    !$0.hasPrefix("=")
+                }
+                #expect(
+                    !assigns,
+                    Comment(
+                        rawValue:
+                            "\(file.lastPathComponent) assigns "
+                            + "\(field) — the mark is the "
+                            + "user's setting, not a side effect"
+                    )
+                )
+            }
         }
     }
 

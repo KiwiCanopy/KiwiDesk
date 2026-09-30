@@ -3,7 +3,8 @@ import Foundation
 
 /// The App Bar's own look and behavior (monocle, scrolling).
 /// The look both bars share is `KiwiShelf`'s (#1517); a drawing
-/// reads `AppBarLook`.
+/// reads `AppBarLook`. An item draws its icon and title, and on a
+/// vertical edge its icon alone — rendering, not a setting (#1528).
 public struct AppBarStyle: Sendable, Equatable {
     /// The screen edge the bar sits on (top) — global only, never
     /// a layout's override (`layoutFixedKeys`). The Space Bar on
@@ -13,7 +14,6 @@ public struct AppBarStyle: Sendable, Equatable {
     /// the indicator's SHAPE is what tells the sections apart
     /// (#1517).
     public var activeIndicator: ActiveIndicator = .edgeMark
-    public var content: Content = .iconAndTitle
     /// Longest title drawn per item before tail-truncation (#1171).
     public var titleCap = 10
     /// Group adjacent windows of the same app with a count badge.

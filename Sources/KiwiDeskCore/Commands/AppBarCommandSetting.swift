@@ -20,7 +20,6 @@ struct AppBarSettingError: Error, Equatable,
 enum AppBarCommandSetting {
     case edge(AppBarEdge)
     case activeIndicator(AppBarStyle.ActiveIndicator)
-    case content(AppBarStyle.Content)
     case titleCap(Int)
     case groupAdjacentWindows(Bool)
 
@@ -49,11 +48,6 @@ enum AppBarCommandSetting {
                 args,
                 AppBarStyle.ActiveIndicator.self
             ).map(Self.activeIndicator)
-        case "content":
-            return BarSettingChoice.value(
-                args,
-                AppBarStyle.Content.self
-            ).map(Self.content)
         case "title_cap":
             return titleCap(args)
         case "group_adjacent_windows":
@@ -91,7 +85,6 @@ enum AppBarCommandSetting {
         case .edge(let value): style.edge = value
         case .activeIndicator(let value):
             style.activeIndicator = value
-        case .content(let value): style.content = value
         case .titleCap(let value): style.titleCap = value
         case .groupAdjacentWindows(let value):
             style.groupAdjacentWindows = value
@@ -105,7 +98,6 @@ enum AppBarCommandSetting {
         case .edge: break
         case .activeIndicator(let value):
             bar.activeIndicator = value
-        case .content(let value): bar.content = value
         case .titleCap(let value): bar.titleCap = value
         case .groupAdjacentWindows(let value):
             bar.groupAdjacentWindows = value

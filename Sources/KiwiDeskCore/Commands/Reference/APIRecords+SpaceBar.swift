@@ -18,7 +18,7 @@ extension APIReference {
             .choice("edge", AppBarEdge.self)
         ),
         "set_glyph_span": APIRecord(
-            "Sets how many app-group glyphs a Space item shows "
+            "Sets how many glyphs a Space item shows "
                 + "around its focus.",
             .integer("glyphs")
         ),
@@ -61,6 +61,11 @@ extension APIReference {
             "Sets how many characters of the front window's "
                 + "title the front-app segment shows.",
             .integer("characters")
+        ),
+        "set_group_adjacent_windows": APIRecord(
+            "Collapses adjacent same-app windows in a Space item "
+                + "into one glyph with a count badge.",
+            .boolean("enabled")
         ),
         "set_hide_empty": APIRecord(
             "Hides Spaces with no windows from the bar.",

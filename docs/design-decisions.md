@@ -9319,13 +9319,53 @@ both route through `composeMonitorChangeFallback`, and
 for a workflow Standard, correct for the starter setup's
 per-screen blocks, which are not even the same size as each other.
 The digit-shortcut half is the additive twin:
-`topUpDigitShortcuts` binds only the `⌃⌥N` a growth left unbound
-(GUI-managed, never overwriting a custom chord, capped at ten), so
-the shortcuts follow the spaces. Do not "simplify" either
+`topUpDigitShortcuts` extends the `⌃⌥N` rows to the Spaces a
+growth added, so the shortcuts follow the spaces — which digit each
+takes is #1797's entry below. Do not "simplify" either
 recompose site back to a bare `StandardProfiles.standard`, nor
 make `apply(composed:)` discard its assignment again — each
 reintroduces
 #485. (#485)
+
+**Nothing KiwiDesk writes may give an action a second chord in a
+layer; Lua may (#1797).** [Rationale] A Shortcuts row is one action
+in one layer, so a second chord for the same action is drawn
+nowhere — yet it stays registered, and it blocks recording its key
+on the row that should own it, naming a Space the user never bound
+it to. So the digit top-up asks per action, never per free digit:
+pairing each free digit with whichever Space sits at that position
+hands a reordered Space a second chord and shifts its neighbours by
+one. A Space named 1–10 takes its own number rather than its place,
+because digits are handed out once and then belong to the Space by
+name (#91) — a drag is an arrangement edit and never moves a chord.
+Existing extras are migrated away rather than surfaced, for every
+navigation action: #92's "surface, never prune" protects a binding
+that can become valid again, and an extra chord for a live action
+never does — which is also why an orphan Space verb, #92's own
+case, keeps all its chords. The
+migration keeps the chord on the Space's own digit, so a Space
+renamed after the seed can lose the positional chord it learned
+— accepted, since the digit it keeps is the one its name
+predicts. It reads each stored list alone, so an extra split
+between `gui.json` and a profile's override survives it; the
+top-up, which counts every profile's override against the shared
+base, never makes one — so a verb one profile binds on its own
+chord leaves the others without its digit, the lesser harm. The
+rule binds every writer and every navigation action, since a row
+draws one chord for focus-left as much as for a Space: an import
+from Lua and the adoption into Settings keep a Space verb's own
+digit, else the first chord, and name each chord they left out —
+dropping it rather than keeping it as a `custom` row, which the
+classifier turns back into a hidden `navigation` row on the next
+load. A rename over a deleted Space's leftover rows keeps one too,
+touching only the renamed Space's verbs and naming nothing, since
+the rename is the act that doubled them. Two rows are never merged:
+a `custom` row, drawn as a row of its own, and an orphan Space verb,
+which #92's Inactive section draws as one row per binding (#1807). **Lua stays uncapped**,
+because layers are modal — activating one deactivates the base —
+so hjkl beside the arrows can only live in one layer, and two
+chords that do the same thing cannot conflict. A duplicate *chord*
+stays refused everywhere (#33/#34/#35). (#1797)
 
 **Orphaned space shortcuts are surfaced, never pruned.** A binding
 that targets a space by name outlives the space's presence in the
@@ -10054,9 +10094,7 @@ there is nothing to fall back to. So it gets an on-window mark
 (top-RIGHT corner — top-left belongs to the traffic lights)
 and a Space Bar badge (top-LEFT of its glyph — the bar
 reserves top-right for the group count; an intentional
-cross-surface difference). Floating gets a badge only in the
-bar, where tiled and floating are otherwise indistinguishable
-— on the window itself floating is self-evident. Badges are
+cross-surface difference). Badges are
 Space-Bar-only (the per-layout App Bar shows no state badges),
 survive grouping as an "at least one" aggregate, and have no
 GUI toggle.
@@ -10069,12 +10107,17 @@ I act* — and a census `gate:` records the same dependency as
 data, for every surface that reads the census to decide what
 to grey and what to say about it. A declaration that is
 backwards is wrong wherever it is rendered, which is why the
-row carries none on either axis. What earns a gate is the
-**Floating** tint: it paints only the Space Bar's badge, so
-with the bar off there is genuinely nothing left for it to
-colour. The two rows sit one card apart and their gates
-differ, which is that reading applied honestly rather than an
-inconsistency.
+row carries none on either axis.
+
+:::unreleased
+Floating gets both marks too — the floating mark entry below
+argues why floating is not self-evident — and its switch is
+unconditional for the same reason as sticky's. So is the
+**Floating** tint: it colours the on-window floating mark as
+well as the Space Bar's badge, so with the bar off it still has
+something to paint. A tint that painted ONLY a bar surface would
+earn the gate; neither mark colour does.
+:::
 
 **A floor guards a trap, not a choice** — so the switch gets
 no warning, only an honest `?`. Turning the mark off costs
@@ -10189,9 +10232,8 @@ than duplicate the geometric detector against the array-step model.
 defaulting to Automatic.** The one sticky glyph reads the one
 `sticky.color`, so the on-window mark and the Space Bar sticky
 badge can never drift to different colors; floating gets its own
-`floating.color` (a minimal `floating` namespace, since floating
-has no other setting) tinting its Space Bar badge only — it has no
-on-window mark. The color owns the *fill*, and the glyph on top is
+`floating.color` in a minimal `floating` namespace. The color
+owns the *fill*, and the glyph on top is
 auto-contrasted black/white for legibility (a filled disc shows
 its hue far better than a thin glyph stroke at the 7–9 pt badge
 size, and an auto-contrast glyph means any picked fill stays
@@ -10216,6 +10258,11 @@ pushpin family is off-limits — `SpaceAssignmentChip` uses
 `pin.fill` for the opposite idea (a window bound to one space).
 (#429)
 
+:::unreleased
+`floating.color` tints the floating badge and the on-window
+floating mark alike, as `sticky.color` does sticky's pair.
+:::
+
 **On Liquid Glass the mark's disc goes** (#1621). It existed
 because `.hudWindow` carries no colour; tinted glass carries the
 colour itself, through `GlassTint.apply`, fading downward. The
@@ -10228,6 +10275,47 @@ colour that is never on screen. The two surfaces still read as
 one mark through the one `sticky.color`: a disc on the Space Bar
 badge, the glass's tint on the mark. With the finish off, or
 Reduce transparency on, the disc returns.
+
+:::unreleased
+**Floating is not self-evident, so a floating window wears an
+on-window mark** ([#1799](https://github.com/KiwiCanopy/KiwiDesk/issues/1799)).
+The old reading — a float overlaps a tiled plane, so the window
+itself says it floats — held only while every float sat over
+tiles. On a floating-mode space a window set floating looks
+exactly like its siblings, yet the flag decides what happens
+when it is dragged onto a tiled space; and a float resized into
+a gap reads as tiled anywhere. The Space Bar badge answers the
+question, but not with the bar off, and not for a user who is
+looking at the window.
+
+The mark reads **the floating flag, never `EffectiveFloat`**,
+the same predicate as the Space Bar badge, so the two surfaces
+cannot disagree. That includes a window set floating **inside a
+floating-mode space**: it wears the mark, because that is the
+case the flag is invisible in. A window that floats only because
+its space does wears none — every member would carry the
+layout's own symbol and say nothing, the #1286 badge argument
+unchanged. Do not "simplify" the check to the predicate.
+
+It ships **on**, behind its own `floating.mark` switch beside
+the sticky one — not folded into it, because the sticky switch
+also carries sticky's refusal pills, and one toggle would couple
+two meanings. A window that is both sticky and floating wears
+**one plate with both glyphs side by side, sticky outermost**:
+sticky keeps the top-right square its home-space pill is pinned
+to (#421), the floating glyph sits just inside it, and the pill
+grows from the plate's leading edge so neither glyph moves.
+Stacked would cover a second strip of the window; one combined
+glyph would read as neither. Where the window is too narrow for
+both beside the traffic lights, the floating glyph drops first:
+sticky owns the outermost square its pills are pinned to, and
+the outermost glyph never drops.
+The glyph is the badge's own `macwindow.on.rectangle`, so the
+bar and the window read as one mark. On Liquid Glass the plate
+carries ONE tint — the outermost glyph's colour, so sticky's
+when both show — because a glass has one backdrop beneath it;
+the flat finish keeps each glyph's own disc.
+:::
 
 **Overrides are visible-but-inherited, never hidden.** A
 per-layout or per-space override row always shows — dimmed
@@ -10256,7 +10344,7 @@ override doesn't just add a row, it adds a resolution question
 to every row above it — "why is my bar 44 pt here and 32
 there" is a bug report even when everything works — and the
 GUI price was the whole card again per layout, 40 rows for a
-narrow need (a monocle bar that wants to be icon-only). The
+narrow need (a monocle bar that wants a longer title). The
 need is real, so it stays fully available in Lua
 (`monocle.set_app_bar_*` / `scroll.set_app_bar_*`), where the
 precedent already existed: `liquid_glass`, `icon_source` and
@@ -11257,43 +11345,62 @@ exactly the "approachable by default" clause: the default is for
 the user who never opens the editor.
 
 **The bars name the WINDOW, not its app.** (Owner ruling
-2026-08-19, replacing the `name` / `icon_and_name` content modes.)
-`app_bar.set_content` takes `icon`, `title` or `icon_and_title`,
-and the Space Bar's front segment shows the focused window's title
-in place of its app's name. The retired spellings are simply gone.
+2026-08-19.) The App Bar draws each window's title, and the Space
+Bar's front segment shows the focused window's title in place of
+its app's name.
+
+:::unreleased
+**An App Bar item draws its icon AND its title.**
+([#1528](https://github.com/KiwiCanopy/KiwiDesk/issues/1528).)
+A vertical App Bar draws the icon alone, which is rendering, not
+a setting. There is no content setting because each alternative
+to both drops half of what an item is for. Icon-only repeats the
+Space Bar, whose glyphs are click targets carrying the same app and a
+hover title, so what the App Bar adds is the title. Title-only
+drops the icon that names the app beside a title that, on the
+sample below, mostly did not name it. A setting whose every other
+choice is worse than its default costs a row, three verbs and a
+per-layout override, and serves no user.
+:::
 
 **A stale enum spelling costs the FILE, not the field** — the
-price the config format charges everywhere else. `TilingSettings`
-decodes `AppBarStyle` inline, so an unreadable value fails the
+price the config format charges everywhere. `TilingSettings`
+decodes each bar style inline, so an unreadable value fails the
 enclosing decode: a profile carrying one is skipped by
 `allProfiles()` — it disappears from the profile list rather than
 opening at defaults, surfaced as a `ConfigIssue.profileBroken`
-with Delete / Reveal. And that is every profile v0.9.7 wrote, not
-the few whose owner changed the setting: `TilingSettings.encode`
-is exhaustive and `icon_and_name` was that build's default. The
-`gui.json` sidecar is NOT exposed — `GuiConfig.encode` writes the
-spaces, rules, bindings and layers, never `settings`.
+with Delete / Reveal. v0.9.7's retired content spelling was in
+every profile that build wrote, not the few whose owner changed
+the setting: `TilingSettings.encode` is exhaustive and
+`icon_and_name` was that build's default. The `gui.json` sidecar
+is NOT exposed — `GuiConfig.encode` writes its app-wide fields,
+never `settings`.
 
-Leniency for this one field was refused anyway, and not because
+Leniency for a renamed field is refused anyway, and not because
 that damage is small. The argument for it — an unreadable enum
 should not take its siblings down — is the strongest one in the
-area, and it is *why* it fails: it is not specific to `content`.
-Six sibling enums in this struct and every enum in
-`SpaceBarStyle` throw exactly this way, so sparing the single
-renamed field is a coin flip on which field the user gets wrong,
-not a mitigation. Leniency belongs everywhere or nowhere. Both
-decode sites are strict — `AppBarStyle` and the per-layout
-override.
+area, and it is *why* it fails: it is not specific to one field.
+Every enum in the bar styles throws exactly this way, so sparing
+the single renamed field is a coin flip on which field the user
+gets wrong, not a mitigation. Leniency belongs everywhere or
+nowhere.
 
 **The crossing is a migration, not a lenient decoder**, and the
 difference is that one of them ends. `ConfigMigration` rewrites
-`name` / `icon_and_name` in the file itself, once; a decoder that
-folded them would keep accepting the retired vocabulary forever,
-because nothing ever signals that the last config carrying it is
-gone. "Re-editing the config IS the migration" held while this
-repo had one user; v0.9.7 shipped to others (AGENTS.md §5), and
-asking a stranger to hand-edit JSON to get their profiles back is
-not a migration policy.
+the file itself, once; a decoder that folded a retired spelling
+would keep accepting it forever, because nothing ever signals
+that the last config carrying it is gone. "Re-editing the config
+IS the migration" held while this repo had one user; v0.9.7
+shipped to others (AGENTS.md §5), and asking a stranger to
+hand-edit JSON to get their profiles back is not a migration
+policy.
+
+:::unreleased
+A key that is dropped takes one step whatever it held, and an
+earlier value rewrite of that key folds into it: a deleted key
+needs no spelling fixed first, and two crossings over one key
+are two chances to disagree about it.
+:::
 
 `Profile` and `GuiConfig` carry a `format` version integer (#902),
 following `SetupBundle.currentFormat`. Migrations key off the format
@@ -11320,7 +11427,7 @@ self-heals, because focusing a group expands it into members
 that do show titles.
 
 Titles do NOT generally repeat the app name, which is what makes
-`icon_and_title` non-redundant: of that sample, Finder, ghostty
+the icon beside a title non-redundant: of that sample, Finder, ghostty
 and System Settings put none of it in the title, Obsidian
 appended its own name *and version*, and the browser appended
 the **site** rather than the app. Where an app does append it,
@@ -11358,9 +11465,10 @@ because retiling on a rename would re-issue a frame set — and, on
 an app that refuses a size, re-teach the #677 ledger — every time
 a tab was renamed. It is debounced through a `DeferredTasks` slot
 rather than a bespoke flag, so teardown's `cancelAll()` reaches it
-like every other settle (#48), and gated on the **rendered**
-content, so a vertical bar (which collapses to icon-only)
-schedules nothing.
+like every other settle (#48), and gated on whether a painted
+bar draws OR announces the title (#937) — so a vertical bar,
+which draws icons alone but announces the title, still
+schedules.
 
 **[Principle] One shelf holds both bars on one plate, and a
 field both bars read is stored once, on it.**
@@ -11373,10 +11481,10 @@ gap, font size, the app glyph style, the idle opacity of
 untinted content (`dim_factor`) and every colour the two bars
 share — is `kiwishelf`'s. A field each bar may set for
 itself stays on that bar, whether or not the other bar has one
-like it: the active indicator's shape, the App Bar's content and
-title cap, the Space Bar's glyph span, spring delay, front-app
-title cap, its active-Space dim and the colour of the focused
-window's glyph inside a Space item are examples, not the list.
+like it: the active indicator's shape, the App Bar's title cap,
+the Space Bar's glyph span, spring delay, front-app title cap,
+its active-Space dim and the colour of the focused window's glyph
+inside a Space item are examples, not the list.
 
 :::unreleased
 The edge left that list with #1731: each bar owns its edge, and
@@ -11743,11 +11851,25 @@ badge counts hidden **windows**, not slots — the same unit as the
 per-glyph count badges and the item's accessibility label.
 
 :::unreleased
-Nor would an ungrouped mode buy reach. A group glyph is a click
-target whose menu lists its windows (#1528), so each member is
-one pick away; every slot an ungrouped mode spent on a duplicate
-would push another app behind `+n`, whose menu costs the same
-pick and drops that app's glyph from the overview.
+**The Space Bar groups by default; a switch turns it off.** (#293,
+#1725, owner ruling 2026-09-30.)
+`space_bar.set_group_adjacent_windows`, the App Bar's toggle's
+twin, collapses adjacent same-app runs into one glyph + count
+badge; off, every window is its own glyph and one click reaches
+it, where a grouped glyph costs a menu and a pick (#1528).
+Grouped stays the default because the glyph span depends on
+grouping running **first**: ungrouped, the span counts windows,
+burns itself on duplicates and fills sooner, conveying less —
+so ungrouping is the choice of a user who wants the one-click
+reach more than the overview. With grouping on the order is
+settled — group first, then span, whatever the span's value
+(`space_bar.set_glyph_span`, default 5, range 1–12, #376, #1528).
+A `+n` badge counts hidden **windows**, not slots — the same unit
+as the per-glyph count badges and the item's accessibility label.
+
+The default being the old behaviour is also why the setting owes
+no crossing: an absent key meant grouped before and means grouped
+now, so no stored file, built-in layout or `init.lua` changes.
 :::
 
 :::unreleased
@@ -11857,8 +11979,8 @@ helper) separates the identifier from the glyph row inside every
 occupied item.
 
 **Space Bar content is fixed in v1.** (#293.) Identifier plus
-app glyphs — no clone of the App Bar's `Icon | Title |
-Icon & title` chooser. The identifier is structural and the
+app glyphs — no content chooser, which the App Bar has none of
+either (#1528). The identifier is structural and the
 compact glyphs are the point of the overview; a labelled-glyph
 mode needs its own demonstrated use case first.
 
@@ -11884,6 +12006,32 @@ served by a new user seeing the core organizing concept on
 first launch than by a cleaner-but-mute one. The App Bar
 stays per-layout (monocle/scrolling default it on; other
 layouts off).
+
+:::unreleased
+**The App Bar ships on, on its own edge.**
+([#1528](https://github.com/KiwiCanopy/KiwiDesk/issues/1528).)
+The starter setup seeds it in Monocle and Scrolling on the bottom
+edge, with the Space Bar on top, each on its own shelf. Off by
+default is the tempting reading once the Space Bar's glyphs are
+click targets, and it is wrong:
+
+- **It shows only where windows are out of sight.** The App Bar
+  exists in Monocle and Scrolling alone, the two layouts that
+  hide windows behind the one shown or off the screen, so it is
+  the surface that says what is there.
+- **It carries what the Space Bar cannot:** every window's title,
+  always visible, in row order. A Space Bar glyph names an app
+  and reaches a title only on hover or through a `+n` menu, so it
+  tells apps apart and not the windows of one app.
+- **The two bars do not double up.** The Space Bar's front-app
+  segment stands down wherever an App Bar shows on the display,
+  so the focused window is never marked twice.
+- **Where it lands is the starter's to say, not the type's.** A
+  default flip on the type changes what every sparsely-stored file
+  means, so it owes a `ConfigMigration` (AGENTS.md §5); a seed in
+  the starter changes no stored file. `AppBarStyle.edge` keeps its
+  `.top` default, and a saved profile keeps the edge it stores.
+:::
 
 **The front-app segment is per-display.** (#293.) With
 `space_bar.show_front_app` on, each display's bar shows the
@@ -12190,7 +12338,7 @@ earlier colour behind (`LookStoreTests`). **A look carries
 styling, never functionality** (owner, 2026-09-27): a field is styling
 if it changes how the same items look or where they sit, and
 functionality if it changes which items exist, what they show
-or say, or what they do — so App Bar content, Other Spaces and
+or say, or what they do — so the App Bar's grouping, Other Spaces and
 a bar's on/off never join, and a preview draws the user's own
 sections under the look. `LookKeys` is the register and
 classifies every field of the shelf, both bar styles, the

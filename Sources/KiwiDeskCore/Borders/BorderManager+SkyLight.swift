@@ -28,14 +28,14 @@ extension BorderManager {
     /// Whether sticky mark should consume WindowServer stream for `id` (#414).
     func markUsesWindowServerTracking(_ id: WindowID) -> Bool {
         skyLightActive
-            && (overlays[id] != nil || stickyTracked.contains(id))
+            && (overlays[id] != nil || markTracked.contains(id))
     }
 
-    /// Updates sticky mark window watch set in WindowServer subscription
-    /// (#414).
-    func setStickyTracked(_ ids: Set<WindowID>) {
-        guard ids != stickyTracked else { return }
-        stickyTracked = ids
+    /// Updates the marked windows' watch set in the WindowServer
+    /// subscription (#414, #1799).
+    func setMarkTracked(_ ids: Set<WindowID>) {
+        guard ids != markTracked else { return }
+        markTracked = ids
         updateSkyLightSubscription(Set(overlays.keys))
     }
 
@@ -47,7 +47,7 @@ extension BorderManager {
         _ kind: SkyLightWindowEvents.Kind,
         window id: WindowID
     ) {
-        guard overlays[id] != nil || stickyTracked.contains(id)
+        guard overlays[id] != nil || markTracked.contains(id)
         else { return }
         switch kind.action {
         case .follow:
@@ -95,7 +95,7 @@ extension BorderManager {
             skyLightActive = false
             return
         }
-        let wanted = borderWanted.union(stickyTracked)
+        let wanted = borderWanted.union(markTracked)
         let wasActive = skyLightActive
         if windowServerTrackingDisabled {
             skyLightActive = false

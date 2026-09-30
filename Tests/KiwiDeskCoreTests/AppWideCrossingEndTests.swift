@@ -239,7 +239,7 @@ struct AppWideCrossingEndTests {
         // A profile copy that disagrees with init.lua: only the
         // executed value may reach gui.json.
         try saveLegacy("Work", depth: 9, sound: false, in: core)
-        try core.adoptConfigIntoGui()
+        try core.adoptConfigIntoGui { _ in }
         #expect(core.guiConfigStore.load()?.appWide?.refusalSound == true)
         #expect(core.appWide.refusalSound)
         // The crossing ends in the files on this door too.

@@ -33,10 +33,24 @@ extension AppBarCard {
                 options: AppBarOptions.activeIndicator
                     .map { ($0.1, $0.0) }
             )
-        case .appBarContent:
-            contentRow
         case .appBarTitleCap:
             titleCapRow
         }
+    }
+
+    /// Window title character length cap (#901, #937).
+    var titleCapRow: some View {
+        StepperRow(
+            label: L("app_bar.title_cap", "Title length"),
+            value: style.titleCap,
+            in: AppBarStyle.titleCapRange,
+            help: L(
+                "app_bar.title_cap.help",
+                "How many characters of a window's title an "
+                    + "item shows before it is shortened. "
+                    + "Grouped windows show their app's name "
+                    + "instead, which is never shortened."
+            )
+        )
     }
 }

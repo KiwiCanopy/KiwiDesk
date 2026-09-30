@@ -73,7 +73,7 @@ struct ShelfLookApplyTests {
         look([
             "space_bar.edge": .string("diagonal"),
             "kiwishelf.fill_color": .string("#FF0000"),
-            "app_bar.content": .string("icon"),
+            "app_bar.title_cap": .number(7),
             "nonsense": .bool(true),
         ]).apply(to: &settings)
         #expect(settings == TilingSettings())

@@ -23,15 +23,11 @@ struct GlyphSizeAppBarTests {
         }
     }
 
-    private static func look(
-        edge: AppBarEdge = .top,
-        content: AppBarStyle.Content = .iconAndTitle
-    ) -> AppBarLook {
+    private static func look(edge: AppBarEdge = .top) -> AppBarLook {
         var look = AppBarLook()
         look.glyphSize = Self.content
         look.liquidGlass = false
         look.edge = edge
-        look.content = content
         return look
     }
 
@@ -117,31 +113,6 @@ struct GlyphSizeAppBarTests {
                 == CGSize(width: iconSide, height: iconSide)
         )
         #expect(abs(view.iconView.frame.midX - Self.depth / 2) <= 0.5)
-    }
-
-    /// Icons only: the measured slot is the content's, the icon
-    /// plus the slot's edge insets, never the full thickness.
-    @Test("An icon-only slot measures at the content depth")
-    func iconOnlySlot() {
-        let look = Self.look(content: .icon)
-        let items = [
-            AppBarOverlay.Item(id: WindowID(1), text: "Zed", icon: nil)
-        ]
-        let slot = AppBarOverlay.slot(
-            items: items,
-            style: look,
-            thickness: Self.depth,
-            capAxis: 2000
-        )
-        // A lone item opens and closes its run: both ends.
-        let ends = AppBarItemView.endPadding(
-            look,
-            depth: Self.depth,
-            first: true,
-            last: true
-        )
-        #expect(slot == iconSide + ends.total)
-        #expect(slot < Self.depth)
     }
 
     /// The live render lays each item at the strip's full depth;

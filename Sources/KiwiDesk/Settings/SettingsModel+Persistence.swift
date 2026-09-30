@@ -34,12 +34,21 @@ extension SettingsModel {
     }
 
     /// Adopts hand-written config into GUI management
-    /// (`KiwiCore.adoptConfigIntoGui`).
+    /// (`KiwiCore.adoptConfigIntoGui`), and opens Shortcuts when a
+    /// chord was left out so its note is seen (#1807).
     func adoptIntoGui() {
         do {
-            try core.adoptConfigIntoGui()
+            let adoption = try core.adoptConfigIntoGui {
+                KeybindingImportClassifier.classify(&$0)
+            }
             showLuaEditor = false
             reload()
+            droppedChords = adoption.dropped
+            if !adoption.dropped.isEmpty {
+                nav.pendingReveal = SettingsAnchor(
+                    destination: .shortcuts
+                )
+            }
             // Adopt recovers the file's keybindings (see
             // adoptConfigIntoGui / recoverKeybindings), so a
             // conflict can arrive with the seeded config: set or

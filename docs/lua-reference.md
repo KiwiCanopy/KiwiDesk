@@ -209,6 +209,16 @@ KiwiDesk.move_to_space_and_follow("mail")
 KiwiDesk.move_to_space_and_follow(3)
 ```
 
+:::unreleased
+`move_to_space` and `move_to_space_and_follow` take an optional
+window id from [`get_state`](#get_state) after the space, and
+then move that window rather than the focused one:
+`KiwiDesk.move_to_space("mail", 4711)`. An id no managed window
+carries is refused. A window moved into the current Space takes
+focus there; one moved between other Spaces leaves the current
+Space's focus where it is.
+:::
+
 ### focus_desktop
 
 **Expects:** a macOS Desktop number — the number Mission Control
@@ -267,7 +277,7 @@ at the moment you reveal it
 leaves the window's Space unchanged, and a **floating** or
 **sticky** window keeps its Space on any screen
 (`move_to_space` guards a sticky window the same way). With
-**Stay visible across Desktops** on (the default), a sticky
+**Keep sticky windows visible across Desktops** on (the default), a sticky
 window's move holds only until your screen next switches
 Desktop, when it is carried back onto its own screen's current
 Desktop; `override_sticky_reach("off")` first if you mean it to
@@ -2355,6 +2365,17 @@ before KiwiShelf keeps each bar's own edge — the App Bar at the
 bottom where it stored none.
 :::
 
+:::unreleased
+`app_bar.set_content`, `monocle.set_app_bar_content` and
+`scroll.set_app_bar_content` are retired → nothing: the App Bar
+always draws each item's icon and title, and a vertical one its
+icon alone. Over the CLI each fails with `…: the App Bar always
+draws each item's icon and title`. A saved profile drops its
+stored `content` once, and a backup as it is read, so a bar that
+showed only titles gains its icons, and one that showed only icons
+gains its titles.
+:::
+
 The `gap` active indicator is removed: `set_active_indicator`
 and its per-layout twins refuse it, naming the values that
 remain.
@@ -2393,6 +2414,16 @@ every layout's bar. Each layout decides whether it shows one and
 may override the App Bar's own fields for itself ([Per-Layout
 App Bar Overrides](#per-layout-app-bar-overrides)).
 
+Each item shows its window's icon and **title** — the window's
+own title, not its app name; on a `left` or `right` edge it shows
+the icon alone. The app name appears, never shortened, in two
+places:
+
+- a **grouped** item (its members show titles once it expands);
+- a window whose title is **empty** — some apps (Electron and
+  WebKit ones especially) report no title until well after the
+  window opens.
+
 ### app_bar.set_edge
 
 :::unreleased
@@ -2430,30 +2461,6 @@ app_bar.set_edge("bottom")
 app_bar.set_active_indicator("outline")
 ```
 
-### app_bar.set_content
-
-**Expects:** `"icon"`, `"title"`, or `"icon_and_title"`
-(default `icon_and_title`).
-
-**Does:** sets what each item displays. The text is the
-window's own **title**, not its app name. The app name appears,
-never shortened, in two places:
-
-- a **grouped** item (its members show titles once it expands);
-- a window whose title is **empty** — some apps (Electron and
-  WebKit ones especially) report no title until well after the
-  window opens.
-
-Vertical bars (edge `left`/`right`) always render icon-only; the
-stored preference returns when the bar moves back to a
-horizontal edge.
-
-**Example:**
-
-```lua
-app_bar.set_content("icon_and_title")
-```
-
 ### app_bar.set_title_cap
 
 **Expects:** a character count, 8–80 (default `10`). Values
@@ -2461,8 +2468,8 @@ outside the range are clamped.
 
 **Does:** sets how much of a window's title an item shows;
 longer titles are cut at the end and marked with an ellipsis. A
-title is also cut where it does not fit its slot; with
-`icon_and_title` only the title shrinks, never the icon.
+title is also cut where it does not fit its slot; only the
+title shrinks, never the icon.
 
 Every slot is as wide as the widest item, at least the icon
 square and at most a quarter of the whole KiwiShelf edge, so
@@ -2495,14 +2502,14 @@ app_bar.set_group_adjacent_windows(true)
 
 Each bar-hosting layout (monocle, scrolling) can override the
 App Bar's own fields for itself — `enabled`, `active_indicator`,
-`content`, `title_cap` and `group_adjacent_windows`. Only these
+`title_cap` and `group_adjacent_windows`. Only these
 two layouts show a bar, so only they expose `set_app_bar_*`.
 Unset fields inherit the global value.
 [KiwiShelf](#kiwishelf)'s fields — its colours, glyph style and
 `dim_factor` included — take no per-layout override. The
 overrides are the same setters prefixed with the layout name:
 
-- `monocle.set_app_bar_enabled`, `monocle.set_app_bar_content`,
+- `monocle.set_app_bar_enabled`,
   `monocle.set_app_bar_title_cap`, etc.
 - `scroll.set_app_bar_enabled`,
   `scroll.set_app_bar_active_indicator`,
@@ -2518,7 +2525,7 @@ no per-layout override either.
 ```lua
 monocle.set_app_bar_enabled(true)
 scroll.set_app_bar_enabled(true)
-scroll.set_app_bar_content("icon")  -- override for scrolling
+scroll.set_app_bar_title_cap(20)  -- override for scrolling
 ```
 
 ## Space Bar
@@ -2536,6 +2543,12 @@ a Space switches to it, and a group holding the focused window
 stays collapsed and takes the focused accent. The user guide's
 [Space Bar](user-guide.md#space-bar) section covers the badges,
 what a click on a glyph does and the drag-onto-a-Space gesture.
+
+:::unreleased
+Turning
+[`space_bar.set_group_adjacent_windows`](#space_barset_group_adjacent_windows)
+off gives each window its own glyph.
+:::
 
 The bar is layout-independent and sits on
 [KiwiShelf](#kiwishelf), which sets its thickness, margins,
@@ -2582,14 +2595,14 @@ space_bar.set_edge("left")
 **Expects:** an integer `1`–`12` (default `5`); out-of-range
 values clamp.
 
-**Does:** sets how many app-group glyphs a Space item shows
+**Does:** sets how many glyphs a Space item shows
 around its focused app — the Space's system focus while it is
 active, else the window it last focused. The rest sit behind a
 `+n` badge on each side, and at either end of the row the badge
 that side does not need becomes one more glyph, so the item keeps
-one length as the focus moves. Grouping runs first, so the span
-counts app *groups* (adjacent same-app windows share one glyph),
-while each `+n` counts its hidden *windows*. It limits glyphs per
+one length as the focus moves. The span counts glyphs — windows,
+or app *groups* while grouping is on — while each `+n` counts
+its hidden *windows*. It limits glyphs per
 Space only, not how many Spaces the bar shows. Replaces
 `set_glyph_cap`, which now fails naming it.
 
@@ -2731,6 +2744,23 @@ title.
 ```lua
 space_bar.set_front_app_title_cap(25)
 ```
+
+:::unreleased
+### space_bar.set_group_adjacent_windows
+
+**Expects:** boolean (default `true`).
+
+**Does:** collapses adjacent windows of one app in a Space item
+into one glyph with a count badge; clicking it opens a menu of
+its windows. Off, each window draws its own glyph and one click
+focuses it. `glyph_span` counts glyphs either way.
+
+**Example:**
+
+```lua
+space_bar.set_group_adjacent_windows(false)
+```
+:::
 
 ### space_bar.set_hide_empty
 
@@ -3745,6 +3775,15 @@ by a rule.
 
 ## Making Windows Floating or Tiled
 
+:::unreleased
+`make_floating`, `make_tiled` and `toggle_floating` take an
+optional window id from [`get_state`](#get_state), and then act on
+that window rather than the focused one:
+`KiwiDesk.make_floating(4711)`. An id no managed window carries is
+refused, and a window on a Space no screen shows takes its floating
+frame when that Space is next shown.
+:::
+
 ### make_floating
 
 **Expects:** nothing.
@@ -3830,6 +3869,11 @@ detection control. It is bound to `control+option+f` by default
 and is the only float verb offered in the Settings shortcut
 list; the explicit `make_*` verbs remain for scripts that need a
 specific direction.
+
+:::unreleased
+The window's on-window floating mark follows the setting as its
+Space Bar float badge does.
+:::
 
 **Example:**
 
@@ -4070,10 +4114,39 @@ color, or the bare glyph on Automatic. Settings writes this
 through the one **Liquid Glass** switch
 ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 
+:::unreleased
+The floating mark draws the same way, tinted by
+[`floating.set_color`](#floatingset_color) where no sticky glyph
+shares its plate.
+:::
+
 **Example:**
 
 ```lua
 sticky.set_liquid_glass(false)
+```
+
+:::unreleased
+### floating.set_mark
+
+**Expects:** boolean (default `true`).
+
+**Does:** shows or hides the on-window floating mark — the
+`macwindow.on.rectangle` glyph at the top-right corner of a
+floating window, including one in a floating-mode space: one
+floated by `make_floating` or `toggle_floating`, by a
+`float_rules` entry, or by KiwiDesk's own detection. A window
+that floats only because its space is in floating mode gets no
+mark. A window that is also
+sticky carries both glyphs on one plate, the sticky one
+outermost; on a window too narrow for both, the floating glyph
+is left out. The mark draws as Liquid Glass under
+[`sticky.set_liquid_glass`](#stickyset_liquid_glass).
+
+**Example:**
+
+```lua
+floating.set_mark(false)
 ```
 
 ### floating.set_color
@@ -4081,17 +4154,19 @@ sticky.set_liquid_glass(false)
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
 empty string `""` for **Automatic** (default `""`).
 
-**Does:** tints the Space Bar floating badge — a filled disc in
-the color with an auto-contrast glyph. Floating windows have no
-on-window mark, so this affects the Space Bar badge only. `""`
-is Automatic (the badge keeps the count-badge fill); any
-non-empty value must parse as a hex color.
+**Does:** tints the floating mark — the on-window mark and the
+Space Bar floating badge read this one value, as
+[`sticky.set_color`](#stickyset_color) describes for sticky. On
+a window that is both sticky and floating, Liquid Glass takes
+the sticky color and the floating glyph the label color. `""`
+is Automatic; any non-empty value must parse as a hex color.
 
 **Example:**
 
 ```lua
 floating.set_color("#8E5DE0")
 ```
+:::
 
 ## Launching Apps
 

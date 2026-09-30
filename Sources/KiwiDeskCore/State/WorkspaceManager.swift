@@ -267,6 +267,20 @@ public struct WorkspaceManager: Sendable {
         lastFocused = window
     }
 
+    /// Records `window` as `id`'s focus for its next visit and
+    /// leaves the focus trackers alone: the #22 stamp for a window
+    /// that held no focus, moved into a Space the user is not on
+    /// (#1518).
+    public mutating func stampFocus(
+        _ window: WindowID,
+        in id: SpaceID
+    ) {
+        guard spaces[id]?.windows.contains(window) == true else {
+            return
+        }
+        spaces[id]?.focused = window
+    }
+
     /// Re-asserts the focus trackers a batch of `add` calls
     /// cleared (#1230).
     ///

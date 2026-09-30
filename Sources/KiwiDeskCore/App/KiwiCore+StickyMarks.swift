@@ -1,39 +1,75 @@
 import AppKit
 import CoreGraphics
 
-/// Drives the on-window sticky marks (#414): every sticky
-/// window wears the mark, on every space — a sticky window is
-/// visible everywhere, so its mark is too. Gated only by
-/// `sticky.mark`; deliberately NOT by `border.enabled`
-/// (the mark is a border sibling, not a border feature).
+/// Drives the on-window state marks (#414, #1799): every sticky
+/// window wears its mark on every space — a sticky window is
+/// visible everywhere, so its mark is too — and a window SET
+/// floating wears the floating glyph where it shows. Gated by
+/// `sticky.mark` and `floating.mark`; deliberately NOT by
+/// `border.enabled` (the mark is a border sibling, not a border
+/// feature).
 extension KiwiCore {
     func updateStickyMarks() {
-        guard tiler.settings.stickyStyle.mark else {
-            stickyMarks.sync([])
-            borders.setStickyTracked([])
-            return
-        }
-        let sticky = state.windows.all.filter(\.isSticky)
-        let color = tiler.settings.stickyStyle.color
+        let specs = stickyMarkSpecs()
+        stickyMarks.sync(specs)
+        // Fold marked windows into the ring's WS watch set so the
+        // mark gets z-order/frame events even with no border (#414).
+        borders.setMarkTracked(Set(specs.map(\.window)))
+    }
+
+    /// One spec per marked window, glyphs outermost first.
+    func stickyMarkSpecs() -> [StickyMarkManager.Spec] {
+        let stickyMark = tiler.settings.stickyStyle.mark
+        let stickyColor = tiler.settings.stickyStyle.color
+        let floating = tiler.settings.floatingStyle
+        let shown = floating.mark ? floatingMarkWindows() : []
         let glass = LiquidGlassGate.rendered(
             glass: tiler.settings.stickyStyle.liquidGlass
         )
-        stickyMarks.sync(
-            sticky.map {
-                StickyMarkManager.Spec(
-                    window: $0.id,
-                    frame: $0.frame,
-                    color: color,
-                    symbolName: StickyStyle.symbolName(
-                        for: $0.stickyScope
-                    ) ?? StickyStyle.symbolName,
-                    glass: glass
+        return state.windows.all.compactMap { window in
+            var glyphs: [StickyMarkManager.Glyph] = []
+            if stickyMark, window.isSticky {
+                glyphs.append(
+                    .sticky(
+                        StickyStyle.symbolName(for: window.stickyScope)
+                            ?? StickyStyle.symbolName,
+                        color: stickyColor
+                    )
                 )
             }
+            if shown.contains(window.id) {
+                glyphs.append(.floating(color: floating.color))
+            }
+            guard !glyphs.isEmpty else { return nil }
+            return StickyMarkManager.Spec(
+                window: window.id,
+                frame: window.frame,
+                glyphs: glyphs,
+                glass: glass
+            )
+        }
+    }
+
+    /// Windows the floating glyph marks (#1799): the FLAG, never
+    /// `EffectiveFloat` — a floating-mode member floats by its
+    /// space and wears nothing — on a shown space, or sticky and so
+    /// shown everywhere. A transient overlay is no window the user
+    /// floated, and a native-fullscreen one fills its screen, so
+    /// neither wears it; a sticky glyph beside it keeps its own
+    /// rule.
+    private func floatingMarkWindows() -> Set<WindowID> {
+        let visible = Set(
+            state.workspaces.visibleSpaces.flatMap {
+                state.workspaces[$0]?.windows ?? []
+            }
         )
-        // Fold sticky windows into the ring's WS watch set so the
-        // mark gets z-order/frame events even with no border (#414).
-        borders.setStickyTracked(Set(sticky.map(\.id)))
+        return Set(
+            state.windows.all.filter {
+                $0.isFloating && !$0.isTransientOverlay
+                    && !$0.isFullscreen
+                    && ($0.isSticky || visible.contains($0.id))
+            }.map(\.id)
+        )
     }
 
     /// #421: when a tiled-sticky traveler snaps back after a drag
@@ -147,28 +183,43 @@ extension KiwiCore {
         to target: SpaceID,
         landingOn display: DisplayID? = nil
     ) -> Bool {
-        guard let sticky = state.windows[window], sticky.isSticky
+        guard
+            let pill = stickyMoveBlock(
+                window,
+                to: target,
+                landingOn: display
+            )
         else { return false }
+        flashStickyMoveBlocked(window, scope: pill)
+        return true
+    }
+
+    /// The gate's verdict alone, with no pill: the scope whose
+    /// refusal copy the pill would show, nil where the move is
+    /// allowed. A bar menu greys its Move row by it (#1518).
+    func stickyMoveBlock(
+        _ window: WindowID,
+        to target: SpaceID,
+        landingOn display: DisplayID? = nil
+    ) -> StickyScope? {
+        guard let sticky = state.windows[window], sticky.isSticky
+        else { return nil }
         switch sticky.stickyScope {
         case .none:
-            return false
+            return nil
         case .global:
-            flashStickyMoveBlocked(window, scope: .global)
-            return true
+            return .global
         case .display:
             let fromDisplay = state.homeDisplay(of: window)
             let toDisplay =
                 display ?? state.workspaces.display(of: target)
-            guard fromDisplay == toDisplay else { return false }
+            guard fromDisplay == toDisplay else { return nil }
             // On a single monitor "display" and "global" coincide —
             // there is no other display to move to — so the negative
             // "another space" copy is the honest one, not the
             // "different display" escape hatch.
-            let scope: StickyScope =
-                state.workspaces.allDisplays.count <= 1
+            return state.workspaces.allDisplays.count <= 1
                 ? .global : .display
-            flashStickyMoveBlocked(window, scope: scope)
-            return true
         }
     }
 

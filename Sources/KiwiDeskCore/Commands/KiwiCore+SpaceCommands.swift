@@ -108,13 +108,23 @@ extension KiwiCore {
         // Read before the filing: only a window that was no
         // effective float where it left ENTERS floating (#1708).
         let wasFloat = isEffectiveFloatForPlacement(window)
+        // Only a window holding the focus, or landing where the
+        // user is, moves the trackers; any other is the target's
+        // focus for its next visit alone (#22, #1518).
+        let takesFocus =
+            state.workspaces.lastFocused == window
+            || target == state.workspaces.activeSpace
         addFocusedToSpace(window, to: target)
         if from != target,
             !placeEnteringFloat(window, wasFloat: wasFloat)
         {
             reanchorFloat(window, to: target)
         }
-        state.workspaces.focus(window, in: target)
+        if takesFocus {
+            state.workspaces.focus(window, in: target)
+        } else {
+            state.workspaces.stampFocus(window, in: target)
+        }
         if from != target {
             emitWindowMovedToSpace(
                 window,
@@ -172,17 +182,19 @@ extension KiwiCore {
     }
 
     func moveToSpace(
+        _ command: String,
         _ args: [JSONValue],
         follow: Bool
     ) -> CommandResponse {
         guard let raw = args.first?.stringValue else {
             return .fail("expected space id")
         }
-        guard let focused = focusedWindowID else {
-            return .fail("no focused window")
+        switch commandTarget(command, args) {
+        case .refused(let response): return response
+        case .window(let window):
+            moveWindow(window, to: SpaceID(raw), follow: follow)
+            return .ok()
         }
-        moveWindow(focused, to: SpaceID(raw), follow: follow)
-        return .ok()
     }
 
     /// Relocates an explicit `window` into `target`. `follow`
@@ -228,7 +240,14 @@ extension KiwiCore {
             // The one copy of the follow-shaped switch — the
             // capture/raise/settle ordering lives on it.
             followSwitch(to: target, focusing: window)
-        } else if let next = activeSpace?.focused {
+        } else if movedHeldFocus
+            || from == state.workspaces.activeSpace
+            || target == state.workspaces.activeSpace,
+            let next = activeSpace?.focused
+        {
+            // A window moved between Spaces nobody is on, holding
+            // no focus, leaves the active Space's focus alone
+            // (#1518); one moved INTO it is that focus.
             // Captured before the refocus raise below — the
             // settle's dropped-activate detection (#463 pattern).
             let priorFrontmost = frontmostPIDProvider?()

@@ -15,17 +15,6 @@ import Foundation
 /// carve-out does not catch: the old spelling still runs and
 /// means one less, silently.
 public enum ConfigMigration {
-    /// Retired `app_bar.content` spellings mapped to current names
-    /// (owner ruling 2026-08-19). The walk rewrites by KEY at any
-    /// depth, so its breadth is bounded by THIS map: a second
-    /// `content` CodingKey anywhere in the config owes the walk a
-    /// path or this map a narrower home —
-    /// `ConfigMigrationRoutingTests` says so on arrival.
-    static let retiredBarContent = [
-        "name": "title",
-        "icon_and_name": "icon_and_title",
-    ]
-
     /// Ordered migrations, oldest first; each step takes the bytes
     /// as they stand after the previous one. **A step added here is
     /// not yet a step that RUNS**: `needsMigration` short-circuits
@@ -36,7 +25,6 @@ public enum ConfigMigration {
     /// coupling, which is why it is stated here.
     private static let steps: [@Sendable (Data) -> Data?] = [
         migratingLegacyPalettesArray,
-        migratingRetiredBarContent,
         migratingRetiredScrollSpeed,
         migratingProfileBindingStrings,
         migratingRetiredResizeFeedback,
@@ -50,28 +38,41 @@ public enum ConfigMigration {
         migratingShelfEdgeOntoBars,
         migratingRetiredGlyphCap,
         migratingProfileLookOwn,
+        migratingRetiredAppBarContent,
+        migratingDuplicateSpaceChords,
     ]
+
+    /// The file shapes a config root can take.
+    enum FileShape { case bundle, profile, palettes, looks, gui }
+
+    /// Which shape `root` is — the one classification every
+    /// per-shape floor asks.
+    static func shape(of root: [String: Any]) -> FileShape {
+        if root[SetupBundle.shapeMarker] != nil { return .bundle }
+        if root[Profile.CodingKeys.monitorSets.rawValue] != nil
+            || root["monitorSets"] != nil
+        {
+            return .profile
+        }
+        let palettes =
+            PaletteDocument.CodingKeys.palettes.rawValue
+        if root[palettes] != nil { return .palettes }
+        if root[LookDocument.CodingKeys.looks.rawValue] != nil {
+            return .looks
+        }
+        return .gui
+    }
 
     /// Target format integer for `root`'s shape (#902, #938, #939,
     /// #1684).
     static func targetFormat(for root: [String: Any]) -> Int {
-        if root[SetupBundle.shapeMarker] != nil {
-            return SetupBundle.currentFormat
+        switch shape(of: root) {
+        case .bundle: SetupBundle.currentFormat
+        case .profile: Profile.currentFormat
+        case .palettes: PaletteDocument.currentFormat
+        case .looks: LookDocument.currentFormat
+        case .gui: GuiConfig.currentFormat
         }
-        if root[Profile.CodingKeys.monitorSets.rawValue] != nil
-            || root["monitorSets"] != nil
-        {
-            return Profile.currentFormat
-        }
-        let palettes =
-            PaletteDocument.CodingKeys.palettes.rawValue
-        if root[palettes] != nil {
-            return PaletteDocument.currentFormat
-        }
-        if root[LookDocument.CodingKeys.looks.rawValue] != nil {
-            return LookDocument.currentFormat
-        }
-        return GuiConfig.currentFormat
     }
 
     /// Whether `data`'s stamp is below the floor a step introduced
@@ -126,39 +127,6 @@ public enum ConfigMigration {
         }
         let result = stamped(current)
         return result == data ? nil : result
-    }
-
-    /// Rewrites retired bar-content values in data.
-    @Sendable
-    static func migratingRetiredBarContent(
-        _ data: Data
-    ) -> Data? {
-        surgicallyApplying(
-            data,
-            gate: { $0.range(of: Data("\"content\"".utf8)) != nil },
-            rewriting: rewritten,
-            editing: surgicallyEdited
-        )
-    }
-
-    /// Replaces retired content values in text.
-    private static func surgicallyEdited(_ text: String) -> Data? {
-        var out = text
-        for (retired, mapped) in retiredBarContent {
-            out = out.replacingOccurrences(
-                of: "(\"content\"\\s*:\\s*)\"\(retired)\"",
-                with: "$1\"\(mapped)\"",
-                options: .regularExpression
-            )
-        }
-        return out == text ? nil : out.data(using: .utf8)
-    }
-
-    /// Recursively replaces retired `content` values in JSON tree.
-    private static func rewritten(_ node: Any) -> (Any, Bool) {
-        rewritingValues(of: node, at: "content") { value in
-            (value as? String).flatMap { retiredBarContent[$0] }
-        }
     }
 
     /// The one keyed tree walk the steps share: every value

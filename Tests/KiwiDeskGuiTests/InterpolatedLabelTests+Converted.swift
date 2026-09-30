@@ -122,7 +122,6 @@ extension InterpolatedLabelTests {
         "app_bar.no_layout.shelf_help": 2,
         "colors.kiwishelf_off.help": 3,
         "kiwishelf.icon_source.help": 2,
-        "kiwishelf.icon_source.no_icon": 2,
         "scroll_grid.app_bar_xref_link": 2,
         "colors.border_off.help": 1,
         // #1307: the one Liquid Glass row names the Fill it
@@ -176,9 +175,10 @@ extension InterpolatedLabelTests {
         "kiwishelf.alignment.note": 2,
         "kiwishelf.background_style.label.help": 2,
         "kiwishelf.background_fit.label.help": 2,
-        "app_bar.content.vertical_only.shelf": 2,
         "bars.app_bar.shelf_caption": 2,
         "kiwishelf.show.help": 2,
+        // #1799: the floating mark's help names the layout.
+        "floating.mark.help": 1,
         "scroll_grid.scroll_duration.animation_off": 1,
         "monocle.flip_duration.flip_off": 1,
         "track.auto_tracks.limit_inert": 1,

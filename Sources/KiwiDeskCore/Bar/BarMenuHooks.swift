@@ -12,6 +12,8 @@ public enum SettingsLanding: Equatable, Sendable {
     case advancedColors
     /// Spaces, on this Space's card.
     case space(SpaceID)
+    /// App Rules, on this app's row, by its lower-cased bundle id.
+    case appRule(String)
 }
 
 /// What a bar menu asks of the GUI (#1518) — set at the GUI's

@@ -57,7 +57,7 @@ pick — which is why the same terms drifted twice (#228 split
 `tab_background`; R6 renamed it). Reuse these; don't coin a
 synonym:
 
-- **mark** — the on-window state glyph (sticky). Retired as a
+- **mark** — the on-window state glyph (sticky, floating). Retired as a
   name for it: *indicator*, *chip*.
 - **badge** — a small disc on a bar item's corner: the group
   count badge, and the Space Bar's sticky / floating state
@@ -188,9 +188,9 @@ synonym:
   compared, and the option matching the app-icon word is not
   compared at all.
 - **title** vs **name** — a *title* is the text a window itself
-  reports (`app_bar.set_content`'s `title` / `icon_and_title`,
-  `app_bar.set_title_cap`, `space_bar.set_front_app_title_cap`,
-  the app rules' "Title contains…"); a *name* is the label of
+  reports (`app_bar.set_title_cap`,
+  `space_bar.set_front_app_title_cap`, the app rules' "Title
+  contains…"); a *name* is the label of
   the app that owns the window, which a bar draws only where a
   title cannot speak. Name a new drawn-text knob after the
   *title*, and coin no third word for either; the ruling is

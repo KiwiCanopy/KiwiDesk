@@ -77,8 +77,9 @@ public final class BorderManager {
     /// own mark yet fires no AX focus event, so the focus-driven
     /// re-sync never runs — this is what reaches the mark instead.
     var onWindowReordered: @MainActor (WindowID) -> Void = { _ in }
-    /// Windows tracked for sticky mark z-order without active rings.
-    var stickyTracked: Set<WindowID> = []
+    /// Windows tracked for state mark z-order without active rings
+    /// — every window wearing a mark (#414, #1799).
+    var markTracked: Set<WindowID> = []
 
     /// Drives the dead-end rubber-band bounce (#436).
     let bumpAnimator = BorderBumpAnimator()
@@ -140,7 +141,7 @@ public final class BorderManager {
         bumpTransients = [:]
         specs = [:]
         cornerRadii = [:]
-        stickyTracked = []
+        markTracked = []
         _ = eventSource?.watch([])
     }
 

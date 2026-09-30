@@ -14,11 +14,32 @@ public enum SpaceLuaArg {
         "move_to_space_and_follow",
     ]
 
+    /// A Space binding's action: the verb and the Space it
+    /// targets, `"1"` and `1` alike — what "the same action"
+    /// compares, never the raw Lua string (#1797).
+    public struct Target: Hashable, Sendable {
+        public let verb: String
+        public let space: SpaceID
+    }
+
     /// Extracts target SpaceID from catalog-authored Lua binding
-    /// (`SpaceID`, #92).
+    /// (`SpaceID`, #92) — a quoted argument only.
     public static func targetSpace(
         of lua: String
     ) -> SpaceID? {
+        parsed(lua, acceptingNumber: false)?.space
+    }
+
+    /// Extracts the verb and Space of a Space binding, its argument
+    /// quoted or a bare number, or nil for anything else.
+    public static func target(of lua: String) -> Target? {
+        parsed(lua, acceptingNumber: true)
+    }
+
+    private static func parsed(
+        _ lua: String,
+        acceptingNumber: Bool
+    ) -> Target? {
         guard lua.hasSuffix(")") else { return nil }
         for call in spaceCalls {
             let prefix = "KiwiDesk.\(call)("
@@ -26,10 +47,11 @@ public enum SpaceLuaArg {
             let inner = String(
                 lua.dropFirst(prefix.count).dropLast(1)
             )
-            guard
-                let raw = LuaLiteral.parseString(inner)
+            let number =
+                acceptingNumber ? Int(inner).map(String.init) : nil
+            guard let raw = LuaLiteral.parseString(inner) ?? number
             else { return nil }
-            return SpaceID(raw)
+            return Target(verb: call, space: SpaceID(raw))
         }
         return nil
     }

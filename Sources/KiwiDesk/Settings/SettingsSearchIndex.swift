@@ -255,8 +255,9 @@ extension SettingsSurface {
         switch self {
         case .main: return nil
         case .layoutMode(let mode): return mode.displayName
-        // Only a bar menu lands on a Space card; search never does.
-        case .space: return nil
+        // Only a bar menu lands on a Space card or a rule row;
+        // search never does.
+        case .space, .appRule: return nil
         }
     }
 }

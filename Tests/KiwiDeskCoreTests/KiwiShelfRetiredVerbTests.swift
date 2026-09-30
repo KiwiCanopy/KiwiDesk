@@ -61,6 +61,18 @@ struct KiwiShelfRetiredVerbTests {
         #expect(APIReference.retired["space_bar.set_item_size"] == .some(nil))
     }
 
+    /// `retiredReasons` is the one list of why a verb left with
+    /// no replacement: every such verb has a reason, and no
+    /// reason stands beside a replacement.
+    @Test("every verb retired with no replacement says why")
+    func retiredReasonsMatchTheNilEntries() {
+        let bare = Set(
+            APIReference.retired.filter { $0.value == nil }.keys
+        )
+        #expect(!bare.isEmpty)
+        #expect(bare == Set(APIReference.retiredReasons.keys))
+    }
+
     @Test("the front-app title length names its new verb")
     func titleCapRenamed() {
         let core = makeCore()

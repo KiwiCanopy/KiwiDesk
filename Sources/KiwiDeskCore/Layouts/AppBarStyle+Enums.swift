@@ -27,28 +27,6 @@ extension AppBarStyle {
         case edgeMark = "edge_mark"
     }
 
-    /// Content drawn per item (owner 2026-08-19, #160).
-    /// `CaseIterable` guarded by `BarTitleCapTests.showsTextIsExhaustive`.
-    public enum Content: String, Sendable, Codable, CaseIterable {
-        case icon
-        case title
-        case iconAndTitle = "icon_and_title"
-
-        /// Content actually rendered, collapsing vertical to `.icon`
-        /// (QA 2026-07-19).
-        public func rendered(horizontal: Bool) -> Content {
-            horizontal ? self : .icon
-        }
-
-        /// True if content displays text. A consumer deciding for
-        /// a PAINTED bar asks `AppBarStyle.renderedContent`, which
-        /// folds in the vertical collapse; the two sites reading
-        /// raw `content` are legal only because each stands on a
-        /// horizontal-only path — moving either off it owes it
-        /// `renderedContent` (#937).
-        public var showsText: Bool { self != .icon }
-    }
-
     /// Item group alignment along the bar's axis (#293 QA).
     public enum BarAlignment: String, Sendable, Codable,
         CaseIterable

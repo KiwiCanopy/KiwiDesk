@@ -30,7 +30,6 @@ import Testing
 struct BarTitleRefreshTests {
     /// One window, on one painted App Bar that draws text.
     private func seeded(
-        content: AppBarStyle.Content = .iconAndTitle,
         edge: AppBarEdge = .top,
         count: Int = 1,
         front: WindowID? = nil
@@ -44,7 +43,6 @@ struct BarTitleRefreshTests {
         core.state.apply(.windowFocused(WindowID(1)))
         core.appBars.sync([
             paintedAppBar(
-                content: content,
                 edge: edge,
                 items: [
                     appBarItem(1, text: "Downloads", count: count)
@@ -65,21 +63,11 @@ struct BarTitleRefreshTests {
         #expect(core.deferred.task(for: .barTitleRefresh) != nil)
     }
 
-    /// An icon-only App Bar draws no title text, but
-    /// `AppBarItemView` builds its accessibility label from the
-    /// same title unconditionally (#937), so there the title is
-    /// announced rather than drawn. The gate arms the refresh so
-    /// VoiceOver does not announce a stale title.
-    @Test("An icon-only App Bar still arms the refresh (#937)")
-    func iconOnlyStillArms() {
-        let core = seeded(content: .icon)
-        core.handleTitleChangedForBars(WindowID(1))
-        #expect(core.deferred.task(for: .barTitleRefresh) != nil)
-    }
-
     /// A vertical App Bar renders icon-only and draws no title,
-    /// but still announces the window title in its accessibility
-    /// label (#937).
+    /// but `AppBarItemView` builds its accessibility label from
+    /// the same title unconditionally (#937), so there the title
+    /// is announced rather than drawn. The gate arms the refresh
+    /// so VoiceOver does not announce a stale title.
     @Test("A vertical App Bar still arms the refresh (#937)")
     func verticalStillArms() {
         let core = seeded(edge: .left)
