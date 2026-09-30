@@ -90,15 +90,7 @@ extension EventLoop {
     /// (`SelfWindowExclusionTests`, the flag being otherwise
     /// unobservable from outside).
     func shouldForceFloat(pid: pid_t, id: WindowID) -> Bool {
-        Self.shouldForceFloat(
-            pid: pid,
-            activationPolicy: NSRunningApplication(
-                processIdentifier: pid
-            )?.activationPolicy ?? .prohibited,
-            tilesAsOwnWindow: Self.isOwnProcess(pid)
-                && ownWindowIdentifier(id)
-                    == OwnWindowTiling.identifier
-        )
+        forceFloatReason(pid: pid, id: id) != nil
     }
 
     /// `shouldForceFloat` as a reason (#1810): own chrome reads as
@@ -118,10 +110,18 @@ extension EventLoop {
         return isOwnProcess(pid) ? .panel : .accessoryApp
     }
 
-    /// The live force-float reason for one tracked window.
+    /// The live force-float reason for one tracked window — the
+    /// static above over the app's live policy and the mark.
     func forceFloatReason(pid: pid_t, id: WindowID) -> AutoFloatReason? {
-        guard shouldForceFloat(pid: pid, id: id) else { return nil }
-        return Self.isOwnProcess(pid) ? .panel : .accessoryApp
+        Self.forceFloatReason(
+            pid: pid,
+            activationPolicy: NSRunningApplication(
+                processIdentifier: pid
+            )?.activationPolicy ?? .prohibited,
+            tilesAsOwnWindow: Self.isOwnProcess(pid)
+                && ownWindowIdentifier(id)
+                    == OwnWindowTiling.identifier
+        )
     }
 
     /// The automatic verdict for one tracked window (#1810) — the

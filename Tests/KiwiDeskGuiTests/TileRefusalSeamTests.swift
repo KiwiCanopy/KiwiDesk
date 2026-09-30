@@ -56,6 +56,24 @@ struct TileRefusalSeamTests {
         #expect(door.contains("detectionVerdict(for:"))
     }
 
+    /// The raw store is internal, so the door is only a door if
+    /// no file beyond the event loop's own spells it: its
+    /// declaration, reset, writers, re-key and the query.
+    @Test("the verdict store stays inside the event loop")
+    func storeStaysInTheEventLoop() throws {
+        let sources = try Self.coreSources()
+        #expect(
+            Set(Self.census("detectedFloating", in: sources).keys) == [
+                "Events/EventLoop.swift",
+                "Events/EventLoop+Lifecycle.swift",
+                "Events/EventLoop+Tracking.swift",
+                "Events/EventLoop+Notifications.swift",
+                "Events/EventLoop+Tabs.swift",
+                "Events/EventLoop+Queries.swift",
+            ]
+        )
+    }
+
     /// The verbs and the row, and nobody else: a new reader
     /// states itself here.
     @Test("tileRefusal's callers are the verbs and the menu row")

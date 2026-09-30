@@ -119,6 +119,38 @@ struct TileReturnsToRulesTests {
         #expect(floats(core) == false)
     }
 
+    /// An in-place restart obeys it too: a carried user float is
+    /// adopted only where the window arrived tiled, and an old
+    /// `false` — a manual tile — adopts nothing.
+    @Test("an in-place restore adopts a user float only where it tiles")
+    func inPlaceRestoreObeysDetection() {
+        let session = StateSnapshot.WindowSession(
+            floating: true,
+            sticky: .none,
+            stickyReach: nil
+        )
+        let record = StateSnapshot.WindowRecord(
+            id: id,
+            frame: .zero,
+            session: session
+        )
+        let floated = makeCore()
+        track(floated, .floats(.panel))
+        floated.state.adoptSession(of: record)
+        #expect(floated.state.userFloated.isEmpty)
+        let tiled = makeCore()
+        track(tiled)
+        tiled.state.adoptSession(of: record)
+        #expect(tiled.state.userFloated == [id])
+        var old = record
+        old.session?.floating = false
+        let legacy = makeCore()
+        track(legacy)
+        legacy.state.adoptSession(of: old)
+        #expect(legacy.state.userFloated.isEmpty)
+        #expect(floats(legacy) == false)
+    }
+
     /// The reopen memory obeys the same rule: a window detection
     /// floats on arrival takes no record, and spends the memory.
     @Test("a reopen detection floats restores no record")
