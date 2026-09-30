@@ -61,7 +61,7 @@ struct OpenOrFocusPullTests {
     func switchesToTheWindowsSpace() {
         let (core, recorder) = makeCore()
         addWindow(core, 20, space: "2")
-        core.state.apply(.windowFocused(WindowID(30)))
+        core.rememberHonoredFocus(WindowID(30))
         #expect(press(core).isSuccess)
         #expect(core.state.workspaces.activeSpace == "2")
         #expect(core.state.workspaces.lastFocused == WindowID(20))
@@ -73,10 +73,10 @@ struct OpenOrFocusPullTests {
         let (core, _) = makeCore()
         addWindow(core, 20, space: "2")
         addWindow(core, 21, space: "3")
-        core.state.apply(.windowFocused(WindowID(21)))
-        core.state.apply(.windowFocused(WindowID(20)))
-        core.state.apply(.windowFocused(WindowID(21)))
-        core.state.apply(.windowFocused(WindowID(30)))
+        core.rememberHonoredFocus(WindowID(21))
+        core.rememberHonoredFocus(WindowID(20))
+        core.rememberHonoredFocus(WindowID(21))
+        core.rememberHonoredFocus(WindowID(30))
         _ = press(core)
         #expect(core.state.workspaces.activeSpace == "3")
         #expect(core.state.workspaces.lastFocused == WindowID(21))
@@ -108,22 +108,62 @@ struct OpenOrFocusPullTests {
         let (core, _) = makeCore()
         addWindow(core, 20, space: "2")
         addWindow(core, 21, space: "3")
-        core.state.apply(.windowFocused(WindowID(20)))
+        core.rememberHonoredFocus(WindowID(20))
         core.eventLoop.shadows.focusedWindow = { _ in WindowID(21) }
         _ = press(core)
         #expect(core.state.workspaces.lastFocused == WindowID(20))
     }
 
-    @Test("A closed window's recency ends with it")
-    func destroyEndsRecency() {
+    /// The stamp is the honored verdict's, never the fold's: a
+    /// report the focus handler then reverts — an echo, a
+    /// distrusted bounce — must not become the pull target.
+    @Test("A folded report alone stamps nothing")
+    func foldDoesNotStamp() {
         let (core, _) = makeCore()
         addWindow(core, 20, space: "2")
         core.state.apply(.windowFocused(WindowID(20)))
-        #expect(core.state.focusRecencyRank(of: WindowID(20)) > 0)
-        core.state.apply(
-            .windowDestroyed(WindowID(20), wasMinimized: false)
+        #expect(core.state.focusRecencyRank(of: WindowID(20)) == 0)
+    }
+
+    /// A Desktop departure or a minimize folds as a destroy but
+    /// comes back under the same id; only a close ends recency.
+    @Test("Recency survives a destroy fold and ends at a close")
+    func closeEndsRecency() {
+        let (core, _) = makeCore()
+        addWindow(core, 20, space: "2")
+        core.rememberHonoredFocus(WindowID(20))
+        var effects = AppliedEffects()
+        core.state.applyWindowDestroyed(
+            WindowID(20),
+            wasMinimized: false,
+            effects: &effects
         )
+        #expect(core.state.focusRecency[WindowID(20)] != nil)
+        let reason = core.handleWindowGone(
+            WindowID(20),
+            wasMinimized: false,
+            effects: effects
+        )
+        #expect(reason == .closed)
         #expect(core.state.focusRecency[WindowID(20)] == nil)
+    }
+
+    /// `focusWindow` refuses a raise onto a Desktop nobody shows
+    /// (#1345) — a native-fullscreen window, a slow app's
+    /// departed one — so the press takes the old path instead of
+    /// answering with nothing.
+    @Test("A target off every shown Desktop falls through")
+    func offScreenTargetFallsThrough() {
+        let (core, recorder) = makeCore()
+        addWindow(core, 20, space: "2")
+        core.rememberHonoredFocus(WindowID(20))
+        core.windowIsOnScreen = { _ in false }
+        core.openOrFocus.census = { _ in
+            KiwiCore.AppWindowCensus(visible: 1, minimized: [])
+        }
+        _ = press(core)
+        #expect(core.state.workspaces.activeSpace == "1")
+        #expect(recorder.activated == [100])
     }
 
     @Test("With no tracked window the app is activated as before")

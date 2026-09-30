@@ -78,6 +78,7 @@ extension KiwiCore {
     /// refocus down for nothing.
     func retireAwayDebts(of id: WindowID) {
         retireDesktopFocus(of: id)
+        state.focusRecency[id] = nil
         desktopMemory.returnFocus.retire(id)
         followFocus.retire(id)
     }

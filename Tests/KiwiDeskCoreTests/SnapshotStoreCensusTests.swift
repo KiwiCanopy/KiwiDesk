@@ -173,7 +173,7 @@ struct SnapshotStoreCensusTests {
         core.state.restoredFrames[WindowID(9)] = .zero
         core.state.departedSlots[WindowID(9)] = .init(rank: 0)
         core.state.closedDepartures.insert(WindowID(9))
-        core.state.focusRecency[WindowID(1)] = 1
+        core.state.focusRecency[WindowID(1)] = .init(pid: 7, tick: 1)
         core.tiler.monocleShownMembers[shown] = WindowID(1)
         core.state.profilePartitioning.record(
             [Space(id: hidden, windows: [WindowID(4)])],

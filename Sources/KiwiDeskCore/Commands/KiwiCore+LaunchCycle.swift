@@ -17,7 +17,7 @@ extension KiwiCore {
     /// `false` when cycling does not apply — the focused window
     /// is not this app's, the app is not the frontmost one, or
     /// it has fewer than two windows in the ring — so the caller
-    /// falls through to the plain activate. `bundleID` arrives
+    /// falls through to the pull. `bundleID` arrives
     /// lowercased (the command's normalization).
     func cycleToNextWindow(bundleID: String) -> Bool {
         guard
@@ -40,15 +40,26 @@ extension KiwiCore {
         return focusCycleTarget(ring[(index + 1) % ring.count], reach: reach)
     }
 
-    /// The window a first press lands on (#1840): the app's most
-    /// recently focused tracked window; with no recency yet (a
-    /// fresh KiwiDesk) the app's own focused window, else the
-    /// first in ring order. Focused through `focusCycleTarget`,
-    /// so a window in another Space is reached by a switch rather
-    /// than by the app's report, which the #1161 distrust may
-    /// refuse.
-    func pullTarget(bundleID: String, pid: pid_t) -> WindowID? {
+    /// The first press (#1840): focuses the app's most recently
+    /// focused tracked window by command — a window in another
+    /// Space is reached by a switch, not by the app's report,
+    /// which the #1161 distrust may refuse. Tracked windows
+    /// outrank away ones: an app with nothing here falls through
+    /// to the reach. False — the press takes the old path — when
+    /// the app tracks no window, or its target sits on a Desktop
+    /// nobody shows, where `focusWindow` refuses the raise.
+    func pullRecentWindow(bundleID: String, pid: pid_t) -> Bool {
+        guard let target = pullTarget(bundleID: bundleID, pid: pid),
+            !raiseCrossesDesktops(target)
+        else { return false }
+        return focusCycleTarget(target, reach: nil)
+    }
+
+    /// Recency first; with none yet (a fresh KiwiDesk) the app's
+    /// own focused window, else the first in ring order.
+    private func pullTarget(bundleID: String, pid: pid_t) -> WindowID? {
         let ring = cycleRing(bundleID: bundleID, away: [])
+        guard !ring.isEmpty else { return nil }
         let recent = ring.max {
             state.focusRecencyRank(of: $0)
                 < state.focusRecencyRank(of: $1)
@@ -93,8 +104,8 @@ extension KiwiCore {
     /// its hidden home space while the window renders right
     /// here — the same fly-back `scheduleFocusFollow` refuses.
     /// An AWAY target is reached (#1146); a refused reach leaves
-    /// the press to the plain activate.
-    func focusCycleTarget(
+    /// the press to the pull.
+    private func focusCycleTarget(
         _ id: WindowID,
         reach: AwayReach?
     ) -> Bool {

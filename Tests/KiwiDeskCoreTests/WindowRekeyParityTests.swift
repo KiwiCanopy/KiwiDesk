@@ -73,7 +73,7 @@ private func trackedFixture() -> StateCoordinator {
     state.departedSlots[old] = .init(rank: 0)
     state.closedDepartures.insert(old)
     state.unjudgedFilings.insert(old)
-    state.focusRecency[old] = 1
+    state.focusRecency[old] = .init(pid: 7, tick: 1)
     // A bare id inside a record VALUE (#1387) — the scan's net,
     // not the count's, like `scrollRest`.
     state.departedSlots[WindowID(1)] = .init(rank: 1, handedTo: old)
