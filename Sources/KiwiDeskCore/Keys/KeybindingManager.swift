@@ -92,7 +92,7 @@ public final class KeybindingManager {
     }
 
     /// Binds combo to Lua ref in default layer.
-    public func bind(_ combo: KeyCombo, ref: Int32) {
+    func bind(_ combo: KeyCombo, ref: Int32) {
         let old = layers[Self.defaultLayer, default: [:]]
             .updateValue(ref, forKey: combo)
         if let old, old != ref {
@@ -104,7 +104,7 @@ public final class KeybindingManager {
     }
 
     /// Defines layer with given bindings and optional icon.
-    public func defineLayer(
+    func defineLayer(
         _ name: String,
         bindings: [KeyCombo: Int32],
         icon: String? = nil
@@ -149,7 +149,7 @@ public final class KeybindingManager {
     }
 
     /// Resets all layers and releases Lua references on config reload.
-    public func reset() {
+    func reset() {
         deactivate()
         if let lua {
             for bindings in layers.values {
