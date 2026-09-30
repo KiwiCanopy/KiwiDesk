@@ -189,7 +189,7 @@ struct BarWindowActionRowsTests {
     }
 
     /// The pill draws on the window it names where it is drawn —
-    /// a shown Space, and not parked — and on the focused window
+    /// a shown Space, its centre on a screen — and on the focused window
     /// otherwise.
     @Test("a refusal draws on the target when drawn, else the focus")
     func cueTarget() {
@@ -203,9 +203,12 @@ struct BarWindowActionRowsTests {
             width: 400,
             height: 300
         )
+        // Scrolled out past the right edge, a peek on screen.
+        let peeking = CGRect(x: 990, y: 100, width: 400, height: 300)
         for (raw, frame) in [
             (UInt32(4), CGRect(x: 100, y: 100, width: 400, height: 300)),
             (UInt32(5), parked),
+            (UInt32(6), peeking),
         ] {
             core.state.apply(
                 .windowCreated(
@@ -225,6 +228,7 @@ struct BarWindowActionRowsTests {
         #expect(core.tiler.looksStashed(parked))
         #expect(core.cueWindow(for: WindowID(4)) == WindowID(4))
         #expect(core.cueWindow(for: WindowID(5)) == WindowID(1))
+        #expect(core.cueWindow(for: WindowID(6)) == WindowID(1))
         #expect(core.cueWindow(for: WindowID(2)) == WindowID(1))
     }
 

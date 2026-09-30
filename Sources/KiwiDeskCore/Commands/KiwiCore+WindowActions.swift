@@ -66,7 +66,7 @@ extension KiwiCore {
             if let bundle = window.appBundleID,
                 launchFollow.owed() == bundle
             {
-                launchFollow.forget()
+                launchFollow.forget(keeping: bundle)
             }
             cueWindowAction(
                 .noNewWindow(app: window.appName),
@@ -144,17 +144,21 @@ extension KiwiCore {
     }
 
     /// The window a refusal about `target` draws on: `target`
-    /// where it is drawn — a shown Space, and not parked — else
+    /// where it is drawn — a shown Space, its pill's centre on a
+    /// screen, which a park or a scrolled-out slot is not — else
     /// the focused window, which the user is looking at.
     func cueWindow(for target: WindowID) -> WindowID? {
-        let drawn =
+        let shown =
             state.workspaces.space(of: target).map {
                 state.workspaces.visibleSpaces.contains($0)
             } == true
-            && refusalPillFrame(target).map {
-                !tiler.looksStashed($0)
+        let onScreen =
+            refusalPillFrame(target).map { frame in
+                tiler.allScreenBounds().contains {
+                    $0.contains(CGPoint(x: frame.midX, y: frame.midY))
+                }
             } == true
-        return drawn ? target : focusedWindowID
+        return shown && onScreen ? target : focusedWindowID
     }
 }
 

@@ -708,6 +708,13 @@ window with no overlay — stays silent.
 Only hotkey fires cue; the same command over CLI/IPC stays
 silent, and a held chord sounds once per hold.
 
+:::unreleased
+A refusal only the app can give — [`new_window`](#new_window)
+finding no New Window, [`close_window`](#close_window) no close
+button — draws without the sound: it arrives after the app
+answers, when the hotkey fire is over.
+:::
+
 The retired `resize.feedback` key is dropped by the one-shot
 migration, its value not carried across.
 
