@@ -17,6 +17,8 @@ extension KiwiCore {
         cause: ProfileApplyCause
     ) {
         // Owed #1741 and #1752 crossings end at the first apply.
+        profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
+        defer { profiles.arrangementInFlight -= 1 }
         adoptAppWide(from: profile)
         adoptSharedLook(from: profile)
         let pruneStaleSpaces = cause.prunesStale
@@ -27,11 +29,14 @@ extension KiwiCore {
         // answer whether this apply is a profile CHANGE — which
         // gates the session clear, the prune below and the
         // restore after it.
+        let heldBefore = Set(state.heldSpaces.keys)
         // A held number this profile claims moves off it first.
         reclaimHeldNames(
             declared: profile.declaredSpaces,
             into: .profile(profile.name)
         )
+        // Read before anything moves what is live or declared (#1790).
+        let temporaries = Set(liveTemporarySpaces)
         let switching = recordOutgoingPartitioning(before: profile)
         // A held Space keeps the icon it had where it lived (#1507),
         // read before the incoming settings replace them.
@@ -69,16 +74,20 @@ extension KiwiCore {
         // made two profiles' `1` the same Space, and merged an
         // arrangement away for good. Derived, not a third
         // classification Bool — the growth threshold above stands.
-        // #1507: an unplug holds the gone screen's Spaces; an
-        // explicit load ends every hold and prunes them like any
-        // undeclared Space.
-        if cause == .monitorChange, switching {
-            holdDepartingSpaces(declared: declared, icons: outgoingIcons)
-        }
-        if pruneStaleSpaces { forgetHeldSpaces() }
-        if pruneStaleSpaces || switching {
+        // #1507/#1790: a switch holds what the incoming profile
+        // does not name; a same-profile Load keeps temporaries.
+        if switching {
+            holdAndPrune(
+                declared: declared,
+                orderedBy: profile.orderedSpaces,
+                icons: outgoingIcons,
+                temporaries: temporaries,
+                preferring: profile.fallbackSpace
+            )
+        } else if pruneStaleSpaces {
             pruneSpaces(
-                keeping: declared.union(state.heldSpaces.keys),
+                keeping: declared.union(state.heldSpaces.keys)
+                    .union(temporaries),
                 orderedBy: profile.orderedSpaces,
                 preferring: profile.fallbackSpace
             )
@@ -100,8 +109,12 @@ extension KiwiCore {
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
         // instead of keeping the previous state's mode.
+        // A held or temporary Space's mode is its own (#1507, #1790).
         for space in state.workspaces.allSpaces
-        where state.heldSpaces[space.id] == nil {
+        where state.heldSpaces[space.id] == nil
+            && !(temporaries.contains(space.id)
+                && !declared.contains(space.id))
+        {
             setSpaceMode(
                 space.id,
                 profile.spaceModes[space.id] ?? .bsp
@@ -113,7 +126,10 @@ extension KiwiCore {
         let live = liveFingerprints
         let fitting = profile.set(matching: live)
         let fits = fitting != nil
-        spacePins = fitting?.spaceMonitorMap ?? [:]
+        spacePins = keepingPins(
+            of: temporaries.subtracting(declared),
+            over: fitting?.spaceMonitorMap ?? [:]
+        )
         mainSpaces = Set(profile.mainSpaces)
         // Adopt the profile's explicit rehome target (#68);
         // a dangling reference reads as unset.
@@ -141,7 +157,7 @@ extension KiwiCore {
             profileScrollGesture: profile.scrollGesture
         )
         // A renumbered held Space owes its ⌃⌥N (#485's top-up).
-        if !state.heldSpaces.isEmpty { topUpDigitShortcuts() }
+        if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
         retile(pass: forceRetile ? .apply : .event)
         emitSpaceChange()
@@ -157,47 +173,7 @@ extension KiwiCore {
         // profile's tiers explicitly. `fits` is the #36 verdict,
         // read off the set already matched for the pins.
         profiles.becameLive(profile, fits: fits)
-    }
-
-    /// Explicit-load reconcile: drop live spaces whose name isn't
-    /// in the new profile, forwarding any windows they hold to
-    /// the rehome target so none are orphaned. A space whose
-    /// name also exists in the new profile is kept untouched —
-    /// its windows stay put regardless of the layout difference.
-    ///
-    /// `preferring` is the profile's explicit fallback space
-    /// (#68): when it names a survivor, windows rehome there.
-    /// Otherwise `orderedBy` — the profile's `orderedSpaces`
-    /// list (#75) — decides: the rehome target is the first
-    /// element that is also a survivor, so windows land in the
-    /// first space of the new profile's displayed list. When
-    /// both lists are empty (degenerate call) the guard skips
-    /// pruning entirely.
-    ///
-    /// `internal` (not `private`): the GUI save path
-    /// (`applyProfileScopedState`) reuses this same reconcile so a
-    /// Spaces-tab deletion drops the space from live too (#77),
-    /// not just profile loads.
-    func pruneSpaces(
-        keeping survivors: Set<SpaceID>,
-        orderedBy storedOrder: [SpaceID],
-        preferring explicit: SpaceID? = nil
-    ) {
-        // `orderedSpaces ⊆ declaredSpaces == survivors` so a
-        // non-empty storedOrder always has a match — nil only
-        // when storedOrder itself is empty (empty profile).
-        let fallback =
-            explicit.flatMap {
-                survivors.contains($0) ? $0 : nil
-            }
-            ?? storedOrder.first {
-                survivors.contains($0)
-            }
-        guard let fallback else { return }
-        for space in state.workspaces.allSpaces
-        where !survivors.contains(space.id) {
-            forwardWindows(of: space.id, to: fallback)
-        }
+        updateBars()  // #1790: the adoption moved `isTemporary`
     }
 
     /// Applies a composed Standard fallback (#53): transient,
@@ -208,6 +184,11 @@ extension KiwiCore {
         forceRetile: Bool
     ) {
         supersedeMonitorSettle()
+        profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
+        defer { profiles.arrangementInFlight -= 1 }
+        let temporaries = Set(liveTemporarySpaces)
+        let heldBefore = Set(state.heldSpaces.keys)
+        let outgoingIcons = tiler.settings.spaceIcons
         reclaimHeldNames(
             declared: Set(composed.spaces),
             into: .standard(composed.sourceName)
@@ -230,12 +211,24 @@ extension KiwiCore {
                 composed.spaceModes[space] ?? .bsp
             )
         }
+        // Held while the outgoing pins still stand (#1507, #1790).
+        if switching {
+            holdAndPrune(
+                declared: Set(composed.spaces),
+                orderedBy: composed.spaces,
+                icons: outgoingIcons,
+                temporaries: temporaries
+            )
+        }
         // Honor the composed layout's own positional plan (#485):
         // for a workflow Standard this equals what
         // `resolveSpaceDisplays` re-derives below, but the setup's
         // five-per-display plan is NOT the count's Standard, so its
         // blocks would otherwise scatter into the Standard's slots.
-        adoptComposedPlacement(composed)
+        adoptComposedPlacement(
+            composed,
+            keepingPinsOf: temporaries.subtracting(composed.spaces)
+        )
         if switching {
             restorePartitioning(of: standard, declaring: Set(composed.spaces))
         }
@@ -254,6 +247,7 @@ extension KiwiCore {
             profileIgnoreRules: nil,
             profileScrollGesture: nil
         )
+        if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
         retile(pass: forceRetile ? .apply : .event)
         emitSpaceChange()
@@ -269,6 +263,7 @@ extension KiwiCore {
                 title: composed.sourceTitle
             )
         )
+        updateBars()  // #1790: the adoption moved `isTemporary`
     }
 
     /// Applies a built-in Preset and materializes it as a real,

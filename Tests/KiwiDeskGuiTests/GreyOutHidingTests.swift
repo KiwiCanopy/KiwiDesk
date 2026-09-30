@@ -54,6 +54,10 @@ struct GreyOutHidingTests {
     /// written; all three predate #520 and none of them hides a
     /// control that exists in the other mode.
     private let hidingExempt: [String: String] = [
+        // The live Spaces a profile does not hold are not a stored
+        // profile's controls at all, so its page omits them (#1790).
+        "SpacesSection+LiveOnly.swift":
+            "rows of another arrangement; nothing to grey",
         // ADDS an explanatory banner in stored-profile mode.
         // Additive, so there is nothing being taken away.
         "ShortcutsSection.swift":

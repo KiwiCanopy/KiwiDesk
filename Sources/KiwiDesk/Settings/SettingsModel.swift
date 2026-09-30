@@ -74,6 +74,9 @@ final class SettingsModel: ObservableObject {
     var modeRevealTask: Task<Void, Never>?
     /// Distinct setting changes in draft, recomputed beside `isDirty`.
     @Published var draftChangeCount = 0
+    /// The live Spaces the profile does not hold (#1790), pushed by
+    /// Core; drawn view-only, never part of the draft.
+    @Published var liveOnlySpaces: [LiveOnlySpace] = []
     /// Destructive action behind unsaved-changes dialog (#515).
     @Published var pendingDiscard: PendingDiscard?
     /// Clean baseline state compared against `isDirty`; set by `apply(_:)`.

@@ -163,7 +163,9 @@ struct HeldSpaceRestartTests {
         a.state.workspaces.ensureSpace(SpaceID(7))
         a.state.windows.upsert(desk.window(14))
         a.state.workspaces.add(WindowID(14), to: SpaceID(7))
-        try a.profiles.save(desk.fiveSpaces())
+        // Written, not saved: a save would make `five` A's live
+        // arrangement, and 7 its temporary Space (#1790).
+        try a.profiles.write(desk.fiveSpaces())
         let b = boot(
             from: a,
             screens: [desk.builtIn],
@@ -185,7 +187,7 @@ struct HeldSpaceRestartTests {
         #expect(a.state.heldSpaces[SpaceID(5)]?.name == SpaceID(5))
         var wide = try a.profiles.read(name: "wide")
         wide.spaceModes[SpaceID(4)] = .stack
-        try a.profiles.save(wide)
+        try a.profiles.write(wide)
         let order = [1, 2, 4, 5].map { SpaceID($0) }
         let b = boot(
             from: a,

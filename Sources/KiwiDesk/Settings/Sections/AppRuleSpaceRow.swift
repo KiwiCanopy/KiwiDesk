@@ -71,6 +71,7 @@ struct AppRuleSpaceRow: View {
                     model.config.appRules[app] = space
                 }
             }
+            temporarySpaces
         } label: {
             AppRuleMenuLabel(text: spaceFacetLabel)
         }
@@ -82,6 +83,62 @@ struct AppRuleSpaceRow: View {
         )
         .accessibilityLabel(L("app_rules.space", "Opens in"))
         .accessibilityValue(spaceFacetLabel)
+    }
+
+    /// Temporary Spaces cannot be a rule's target (#1790): one row
+    /// each, in the Space rows' own shape, leading to the row that
+    /// adds it to the profile — greyed, with the reason once, where
+    /// no profile file is live. The live page only — a stored
+    /// profile's page is another arrangement.
+    @ViewBuilder private var temporarySpaces: some View {
+        let temporary = model.liveOnlySpaces.filter(\.isTemporary)
+        if !model.editingStoredProfile, !temporary.isEmpty {
+            let canAdd = temporary.contains(where: \.canAdd)
+            Section(
+                L(
+                    "app_rules.space.temporary_header",
+                    "Temporary — not in this profile"
+                )
+            ) {
+                ForEach(temporary) { space in
+                    Button(Self.addTemporaryTitle(space.id)) {
+                        model.nav.pendingReveal = SettingsAnchor(
+                            destination: .spaces,
+                            anchor: LiveOnlySpaceRow.anchor(space.id)
+                        )
+                    }
+                    .disabled(!canAdd)
+                    .accessibilityLabel(Self.addTemporarySpoken(space.id))
+                }
+                if !canAdd {
+                    Button(Self.noProfile) {}.disabled(true)
+                }
+            }
+        }
+    }
+
+    static func addTemporaryTitle(_ space: SpaceID) -> String {
+        L(
+            "app_rules.space.add_temporary",
+            "%1$@ — add it first…",
+            space.raw
+        )
+    }
+
+    static func addTemporarySpoken(_ space: SpaceID) -> String {
+        L(
+            "app_rules.space.add_temporary.spoken",
+            "Space %1$@ is temporary. Add it to this profile to apply "
+                + "app rules to it.",
+            space.raw
+        )
+    }
+
+    private static var noProfile: String {
+        L(
+            "spaces.add_to_profile.no_profile",
+            "Save this setup as a profile first"
+        )
     }
 
     /// The drawn and spoken value, one expression.

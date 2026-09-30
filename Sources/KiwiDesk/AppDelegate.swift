@@ -184,8 +184,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.dashboardIfCreated?.refreshProfiles()
         }
         configIssues.model.onRevealProfile = revealProfile
-        core.profiles.onCapturedLive = { [weak self] _ in
-            self?.dashboardIfCreated?.adoptKeptLayout()
+        core.profiles.onCapturedLive = { [weak self] _, write in
+            self?.dashboardIfCreated?.adoptKeptLayout(write)
         }
         core.onLiveProfileWritten = { [weak self] edit, persisted in
             self?.dashboardIfCreated?.adoptLiveWrite(
@@ -211,6 +211,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // refresh, so every trigger the bar has reaches it.
         core.onStatusSpaceMarkChange = { [weak self] mark in
             self?.statusItem?.setSpaceMark(mark)
+        }
+        // Settings ▸ Spaces draws the Spaces the profile does not
+        // hold (#1790), off the same refresh.
+        core.onLiveOnlySpacesChange = { [weak self] spaces in
+            self?.dashboardIfCreated?.showLiveOnlySpaces(spaces)
         }
 
         // Redirect SIGTERM from launchctl into AppKit termination flow.

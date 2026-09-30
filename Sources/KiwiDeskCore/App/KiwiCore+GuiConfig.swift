@@ -137,6 +137,8 @@ extension KiwiCore {
         // `TilingEngine.settings.didSet`, so the retile below
         // animates at the incoming duration, not a stale one
         // (#51 review).
+        // Read before the draft's Spaces are made live (#1790).
+        let temporaries = Set(liveTemporarySpaces)
         tiler.settings = config.settings
         // A GUI save is an explicit apply (§5): reseed the
         // session resize layer so an edited Layout Defaults
@@ -176,23 +178,30 @@ extension KiwiCore {
         // rewrites gui.json when the space list changed
         // (`globalsChanged`) — so the cold-boot seed can't re-add
         // the dropped space; this path needs no direct mirror.
-        // A held Space is never in the draft (#1507 ruling 5), so
-        // the Save must not read its absence as a deletion.
+        // A held or temporary Space is never in the draft (#1507
+        // ruling 5, #1790), so the Save must not read its absence
+        // as a deletion.
         pruneSpaces(
-            keeping: inList.union(extra).union(state.heldSpaces.keys),
+            keeping: inList.union(extra).union(state.heldSpaces.keys)
+                .union(temporaries),
             orderedBy: config.spaces,
             preferring: config.fallbackSpace
         )
         for space in state.workspaces.allSpaces
         where (scope?.contains(space.id) ?? true)
             && state.heldSpaces[space.id] == nil
+            && !(temporaries.contains(space.id)
+                && !inList.union(extra).contains(space.id))
         {
             setSpaceMode(
                 space.id,
                 config.spaceModes[space.id] ?? .bsp
             )
         }
-        spacePins = config.spacePins
+        spacePins = keepingPins(
+            of: temporaries.subtracting(inList.union(extra)),
+            over: config.spacePins
+        )
         mainSpaces = config.mainSpaces
         // A fallback pointing outside the edited space list is
         // meaningless — drop it rather than persist a dangling

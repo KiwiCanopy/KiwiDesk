@@ -24,6 +24,9 @@ struct SpaceChip: View {
 /// Small status capsule used across settings sections.
 struct BadgeChip: View {
     let label: String
+    /// Cuts the tail past this width, for a badge whose whole text
+    /// its help carries; nil draws it whole.
+    var maxWidth: CGFloat? = nil
 
     var body: some View {
         Text(label)
@@ -31,7 +34,9 @@ struct BadgeChip: View {
             // One line whatever the row's width: a badge is a label,
             // and a wrapped one reads as two.
             .lineLimit(1)
-            .fixedSize()
+            .truncationMode(.tail)
+            .fixedSize(horizontal: maxWidth == nil, vertical: true)
+            .frame(maxWidth: maxWidth, alignment: .leading)
             .padding(.horizontal, 6)
             .padding(.vertical, 1)
             .background(.tint.opacity(0.2))

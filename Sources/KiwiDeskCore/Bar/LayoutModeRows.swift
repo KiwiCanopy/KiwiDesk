@@ -58,9 +58,10 @@ public enum LayoutModeRows {
         return live != saved
     }
 
-    /// Whether the Keep row is armed. Keep saves the whole live
-    /// profile (#1179), so drift in any Space the menu shows or
-    /// names arms it — every shown Space, and a chip's own.
+    /// Whether the Keep row is armed. Keep keeps every screen's
+    /// layout at once (#1179, #1790), so drift in any Space the
+    /// menu shows or names arms it — every shown Space, and a
+    /// chip's own.
     public static func keepArmed(drifts: [Bool]) -> Bool {
         drifts.contains(true)
     }

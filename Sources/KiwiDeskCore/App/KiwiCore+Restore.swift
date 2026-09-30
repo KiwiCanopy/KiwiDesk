@@ -134,6 +134,8 @@ extension KiwiCore {
         let span = signposter.beginInterval("sessionRestore")
         // Held Spaces first, so the replay files into them (#1646).
         let holds = restoreHeldSpaces(from: session)
+        // The temporary ones too, on the same ground (#1790).
+        restoreTemporarySpaces(from: holds.snapshot)
         restore(holds.snapshot)
         settleHeldSpacesAtBoot(holds)
         adoptCarriedPartitioning(from: session)

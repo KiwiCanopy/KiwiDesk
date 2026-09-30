@@ -1,10 +1,11 @@
 import Foundation
 
 extension SpaceID {
-    /// The smallest positive number none of `ids` is called — the
-    /// one "next Space number" rule, shared by the empty-display
-    /// heal (#1175) and the Settings add row (#1531), so a minted
-    /// Space is always reachable by a digit binding.
+    /// The smallest positive number none of `ids` is called, so a
+    /// minted Space is always reachable by a digit binding. Which
+    /// ids are taken is `KiwiCore.mintedSpaceNumber`'s for a live
+    /// mint (#1175, #1790); the Settings add row asks it of its
+    /// draft (#1531).
     public static func smallestFreeNumber(
         among ids: some Sequence<SpaceID>
     ) -> SpaceID {

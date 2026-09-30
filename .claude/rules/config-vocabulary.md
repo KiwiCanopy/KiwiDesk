@@ -61,14 +61,25 @@ synonym:
   name for it: *indicator*, *chip*.
 - **badge** — a small disc on a bar item's corner: the group
   count badge, and the Space Bar's sticky / floating state
-  badges (`group_badge_*`, `space_bar.sticky_badge`), and the
-  **held badge** on a held Space's identifier (#1507). One
-  family; the three on an app glyph take three different corners.
-- **held Space** — a Space carried onto a remaining screen when
-  its own was unplugged (#1507). *Held* is the word in copy and
-  code (`space_bar.item.ax.held`, `heldSpaces`); its glyph is a
-  **badge**, never a *mark* — a mark is on a window. Retired as
+  badges (`group_badge_*`, `space_bar.sticky_badge`). One family;
+  the three on an app glyph take three different corners.
+- **Space marker** — a glyph drawn after a Space's identifier, in
+  its ink and with no plate: a held Space's (#1507) or a temporary
+  one's (#1790), one slot shared since a Space is never both.
+  Never a *badge*, which counts or marks window state.
+- **held Space** — a Space with windows kept live for the
+  arrangement it left, when a switch does not name it (#1507,
+  #1790). *Held* is the word in copy and
+  code (`space_bar.item.ax.held`, `heldSpaces`); its glyph is the
+  **Space marker**, never a *mark* — a mark is on a window. Retired as
   a name for it: *transient*, the issue's working name.
+- **temporary Space** — a Space made on the fly and not yet in
+  the profile (#1790). *Temporary* is the word in copy and code
+  (`space_bar.item.ax.temporary`, `temporarySpaces`); its
+  opposite is a Space **in the profile**, never *permanent*,
+  *saved* or *pinned*, which would collide with a Monitor pin.
+  A *temporary layout* (#1179) is a different thing — a mode not
+  kept in the profile — so a sentence naming either says which.
 - **pin** — two relations, and only ONE of them still spends the
   word (#1022). A **Monitor pin** binds a Space to a screen and
   takes the word in its labels (`diff.label.space_pin`,

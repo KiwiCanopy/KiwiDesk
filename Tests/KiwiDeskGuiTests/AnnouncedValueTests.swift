@@ -44,6 +44,8 @@ struct AnnouncedValueTests {
         // #1393: the trash that asks where a shared rule goes.
         "AppRuleIdentity.swift": 1,
         "SpacesSection+ModePicker.swift": 1,
+        // #1790: a temporary or held Space's greyed mode readout.
+        "LiveOnlySpaceRow.swift": 1,
         "DesktopsGroup+Row.swift": 1,
         // #1609: the add pull-down names its Desktop (#1393: a
         // `NativePullDown` since).

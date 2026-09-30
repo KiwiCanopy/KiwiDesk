@@ -826,8 +826,9 @@ space is healed*. The obligations:
   apply door — the profile, the composed Standard, the GUI draft
   — calls `retireHealedSpaces(declared:)` with the set it makes
   authoritative (`EmptyDisplayHealSeamTests` ▸
-  `retireHasThreeCallers` is the census), because a Keep or a
-  Settings Save captures the seed like any live space: once
+  `retireHasThreeCallers` is the census), because a
+  `save_profile` or a Settings Save captures the seed like any
+  live space: once
   declared it is the user's, and the heal seeds BESIDE it rather
   than pulling it back over their placement
   (`EmptyDisplayHealTests` ▸ `declaredSeedRetires`). The one
@@ -880,13 +881,15 @@ reported screens at once and OWES the profile choice to
   decided at once would test a sequence production no longer
   takes.
 
-## A gone screen's Spaces are held, not forwarded (#1507)
+## A switch holds what it does not name (#1507, #1790)
 
-A monitor change that switches profile carries each Space that
-lived on a screen no longer connected, and still holds windows,
-as a **held** Space rather than letting the prune forward it; the
-argument is `docs/design-decisions.md` ▸ Profiles ▸ *An unplugged
-screen's Spaces are held, not forwarded*. The obligations:
+A switch — any apply that changes the live arrangement — carries
+each live Space the incoming arrangement does not declare by name,
+and that still holds windows, as a **held** Space rather than
+letting the prune forward it; the argument is
+`docs/design-decisions.md` ▸ Profiles ▸ *An unplugged screen's
+Spaces are held, not forwarded* and *Every switch holds what the
+incoming arrangement does not name*. The obligations:
 
 - **The hold's machinery has one home.** Holding, reclaiming,
   re-filing, retiring and ending live in the `KiwiCore+HeldSpace*`
@@ -901,25 +904,43 @@ screen's Spaces are held, not forwarded*. The obligations:
   (`forgetHeldSpaces`) and `delete_space` (`endHold`) do
   (`HeldSpaceTests` ▸ `deleteEndsHold`). Nothing scans for a
   second writer; review is the check.
-- **Hold for the screen a Space LIVED on, on a switching
-  `.monitorChange` apply only.** That screen is its pin, else
-  `StateCoordinator.settlingScreens` — recorded by the event arm
-  at the first report of a screen-count change, before that
-  report's resolve moves an unpinned Space, and cleared by the
-  settle and by `supersedeMonitorSettle` — so a Main-role or
-  auto-placed Space is held too (`HeldSpaceTests` ▸
-  `unpinnedSpaceIsHeld`). The hold runs ahead of the prune, while
-  `spacePins`, the icons and `liveArrangement` are still the
-  departing arrangement's (`HeldSpaceTests` ▸ `unplugHolds`,
-  `HeldSpaceTests` ▸ `heldIconIsTheDepartingOne`). A Desktop
-  binding's `.event` apply holds nothing (`HeldSpaceTests` ▸
-  `bindingSwitchDoesNotHold`), an `.explicit` apply forgets every
-  hold before its prune (`HeldSpaceTests` ▸
-  `explicitLoadEndsHolds`), and an unplug into a composed
-  Standard holds nothing: `apply(composed:)` does not prune, so
-  the gone screen's Spaces stay live as ordinary Spaces. Which
-  apply is which is `ProfileApplyCause`'s — see *Applies force or
-  don't, explicitly*.
+- **End a hold by going home, by emptying, or by the reset —
+  never by a Load.** A Load is the user trying an arrangement,
+  the case the hold exists for, so no apply door forgets holds;
+  its prune keeps every held Space and drops the empty undeclared
+  ones (`SwitchHoldTests` ▸ `loadEndsOnlyEmptyHolds`).
+  `delete_space` ends one because it forwards its windows first,
+  and the bar's Delete never reaches one: `spaceIsDeletable`
+  refuses a held Space.
+- **Hold on every SWITCHING apply, whatever its cause, for the
+  screen a Space LIVED on.** Both apply doors hold through
+  `holdDepartingSpaces` when the arrangement changes — a Load, a
+  Desktop binding, a monitor change, a composed Standard — through
+  the one `holdAndPrune`, and never on a re-apply. A Space on a
+  connected screen is held only through the one `holdsUnnamed`:
+  the incoming arrangement does not name it, and it is temporary
+  or the outgoing arrangement declared it — a heal seed no return
+  could take is forwarded instead, and so is an `init.lua` Space,
+  which the next load re-creates empty from `init.lua`
+  (`SwitchHoldTests` ▸ `loadHoldsAndReturns`, `SwitchHoldTests` ▸
+  `emptyUnnamedDrops`, `SwitchHoldTests` ▸ `standardHoldsLeftovers`,
+  `SwitchHoldTests` ▸ `undeclaredSpaceIsForwarded`). The screen is its
+  pin, else `StateCoordinator.settlingScreens` — recorded by the
+  event arm at the first report of a screen-count change, before
+  that report's resolve moves an unpinned Space, and cleared by
+  the settle and by `supersedeMonitorSettle` — else the screen it
+  lays out on now, so a Main-role or auto-placed Space is held too
+  (`HeldSpaceTests` ▸ `unpinnedSpaceIsHeld`). The hold runs ahead
+  of the prune and of any pin adoption, while `spacePins`, the
+  icons and `liveArrangement` are still the departing
+  arrangement's (`HeldSpaceTests` ▸ `unplugHolds`,
+  `HeldSpaceTests` ▸ `heldIconIsTheDepartingOne`,
+  `SwitchHoldTests` ▸ `standardHoldsTheGoneScreen`); a door tops
+  up the digit rows only for a hold it renumbered, since the
+  top-up writes `gui.json` (`SwitchHoldTests` ▸
+  `unrenumberedHoldWritesNoRow`). Which apply switches is
+  `recordOutgoingPartitioning`'s answer, which both doors read,
+  and a new apply door owes the same hold on it.
 - **A held id is never a declared one.** Every door that makes a
   Space set authoritative — `apply(profile:)`,
   `apply(composed:)`, `returnHeldSpacesWithoutApply` — calls
@@ -950,6 +971,17 @@ screen's Spaces are held, not forwarded*. The obligations:
   and `HeldSpaceTests` ▸ `claimedHeldNumberIsReclaimed` pin
   renumbers, but on fixtures whose live set has no gap, where the
   rules agree — a swap between them is review's to refuse.
+- **A minted Space avoids every name (#1790).** A new Space's
+  number — the empty-display heal's seed, a Space chip's New
+  Space — comes from the one `KiwiCore.mintedSpaceNumber`, whose
+  taken set is every live id, every Space a remembered window
+  will come back to, and every declaration a later apply
+  re-creates; a minting path beside it would file a returning
+  window into its new Space or be re-declared over
+  (`SpaceChipLifecycleRowsTests` ▸ `newSpace`). And "this Space
+  holds nothing" is the one `spaceHoldsNothing`, which the held
+  retire and the chip's Delete both ask (`SpaceChipLifecycleRowsTests`
+  ▸ `hiddenWindowHolds`).
 - **A held Space goes home only into the arrangement it left.**
   `returnsHome` asks for its screen back, the incoming
   arrangement equal to `HeldOrigin.arrangement` (#1230:
@@ -965,15 +997,14 @@ screen's Spaces are held, not forwarded*. The obligations:
   arm only places Spaces and returns nothing, by ruling. A new
   door owes the call. The composed door and the no-apply arms
   have no clause.
-- **A switching apply's #1230 restore leaves every held Space's
-  members (#1728).** What a held Space holds — a member, else a
-  window remembered there that will come back — is answered once,
-  by `heldSpace(holding:)` in `KiwiCore+HeldSpaceReads.swift`,
-  which the restore and the retire both ask
-  (`HeldSpaceRestoreTests` ▸ `holdKeepsRememberedWindows`,
-  `HeldSpaceRestoreTests` ▸ `heldWindowsGoHomeTogether`). A new
-  path a switching apply runs that moves windows across Spaces
-  owes the same skip through that predicate, never a copy of it.
+- **A switching apply's #1230 restore places a remembered window
+  even out of a held Space (#1790, reversing #1728).** The hold
+  keeps only what the incoming arrangement never saw, and a held
+  Space the restore empties retires at the next retile
+  (`HeldSpaceRestoreTests` ▸ `memoryPlacesRememberedWindows`,
+  `HeldSpaceRestoreTests` ▸ `replugRestoresFromMemory`). A path a
+  switching apply runs that moves windows across Spaces takes no
+  exemption for a held Space's members.
 - **Retire at the head of `retile()`.** `retireEmptiedHeldSpaces`
   runs there because a membership change retiles; a path that
   empties a held Space without a retile owes the call
@@ -1027,8 +1058,11 @@ screen's Spaces are held, not forwarded*. The obligations:
   `HeldSpaceRestartTests` ▸ `renumberSkipsRecordedNumbers`,
   `HeldSpaceRestartTests` ▸ `ownNameGoesHome`). Nothing drops a
   hold at the replay: its unscanned windows are remembered there,
-  and `retireGoneHeldMembers`, AFTER the away seed, drops only
-  the filings the per-window `readWindowSpace` reads as `.gone`,
+  and `retireGoneRestoredFilings`, AFTER the away seed, drops only
+  the filings — in any Space, held or not, since a stale one
+  greys a Space's Delete for good (#1790,
+  `HeldSpaceRestartJudgeTests` ▸ `goneFilingFreesAPlainSpace`) —
+  the per-window `readWindowSpace` reads as `.gone`,
   leaving the end to the retire — never the Desktop census,
   which lists user Desktops alone. Measured 2026-09-28 on macOS
   27.0 (`SLSCopySpacesForWindows`, selector 0x7): a hidden app's
@@ -1074,8 +1108,8 @@ screen's Spaces are held, not forwarded*. The obligations:
 - **An arrangement WRITE reads `capturedSpaces` and
   `capturedPins`, never `state.workspaces.allSpaces` or
   `spacePins`.** A write recording which Spaces exist, what they
-  hold, their modes or their pins — Keep and `save_profile`
-  through `buildProfile` (which also drops a caller's modes for a
+  hold, their modes or their pins — `save_profile` through
+  `buildProfile` (which also drops a caller's modes for a
   Space it did not capture), the #1230 record, the sidecar
   mirror, the Settings draft (`overlayLiveProfileState`),
   `guiConfigSeed`, a Settings Save's live net and its modes —
@@ -1093,6 +1127,63 @@ screen's Spaces are held, not forwarded*. The obligations:
   `spacePins` raw. `topUpDigitShortcuts` reads `allSpaces` by
   ruling: it writes a chord, not an arrangement, and a held
   Space's chord is how it stays reachable.
+
+## A Space made on the fly is temporary (#1790)
+
+A live Space that no source declares is **temporary** until it is
+added to the profile; the argument is `docs/design-decisions.md` ▸
+Profiles ▸ *A Space made on the fly is temporary until you put it
+in the profile*. The obligations:
+
+- **Derive it; never store it.** `isTemporary` is the one answer:
+  an arrangement is live, and the Space is live, declared by no
+  profile, Standard or `init.lua`, not held, not a heal seed or the
+  placeholder. A stored mark let a Space be
+  declared AND temporary, and missed every way of making a Space
+  it was not hooked into; a derived answer has no third state to
+  fall into. What a temporary Space owns beside it is the
+  `temporaryArmed` ledger, whose writers
+  `TemporaryLedgerSeamTests` counts (`TemporarySpaceTests` ▸
+  `commandsMakeTemporary`, `declarationEndsIt`).
+- **No arrangement write takes it.** `capturedSpaces` and
+  `capturedPins(alsoOf:)` leave it out beside held Spaces; the
+  whole-live snapshot takes every one and a draft commit the ones
+  its draft lists, which it is about to declare; a pin reset an
+  apply or a Save makes keeps its pin through
+  `keepingPins` (`TemporarySpaceTests` ▸
+  `invisibleToArrangementWrites`, `draftCommitWritesItsSpace`).
+- **A switch holds it; a config load never touches it.** Each
+  apply door reads the live temporary Spaces and whether the
+  arrangement changes BEFORE it makes anything live; on a switch
+  the hold takes one with windows and the prune drops an empty
+  one, and otherwise the prune keeps them all. A number the
+  incoming arrangement declares is that arrangement's. A new
+  apply door owes the same pair (`TemporarySpaceTests` ▸
+  `switchHoldsIt`, `TemporarySpaceTests` ▸
+  `standardSwitchHolds`, `TemporarySpaceTests` ▸
+  `incomingDeclarationSurvives`).
+- **A hold carries it home temporary.** `HeldOrigin.temporary`
+  rides the hold and `returnsHome` sends it home without a
+  declaration (`TemporarySpaceRestartTests` ▸
+  `unplugHoldsAndReturns`).
+- **Every snapshot carries it with its pin, and boot re-creates
+  it ahead of the replay only under the arrangement it was taken
+  in** — the other Space a restore creates (#633), through
+  `restoreTemporarySpaces`; `sessionSnapshot` fills the record,
+  since only Core can say what is temporary
+  (`TemporarySpaceRestartTests`).
+- **It deletes itself at the head of `retile()`**, armed once it
+  has held anything, while no screen shows it and never a
+  screen's last Space (`TemporarySpaceTests` ▸ `autoDelete`).
+- **The live-write door keeps the adoption record with its write,
+  and no other write does.** `ProfileManager.redeclare`, called by
+  `writeThroughLiveProfile` alone, re-adopts the file the door
+  wrote, so a Space added stops being temporary in the same step;
+  every other write of the live profile leaves the declared Spaces
+  to the next apply, which judges a Space the file dropped against
+  what was declared — re-adopting there turned a removed Space
+  temporary instead of deleting it. The door announces only after
+  live has settled (`TemporarySpaceScopeTests`).
 
 ## Resolve before layout, and merge per-field first
 
@@ -1142,15 +1233,18 @@ loaded with it. The obligations:
 A layout can be changed in two places, and the writes they lead
 to are not the same verb. Keep them apart, in both directions:
 
-- **The quick menu's Keep = a whole-live snapshot.** "Write down
-  what is on screen", every screen at once.
-  `persistProfile(named:modes:)` with a nil `modes` is that
-  meaning, and it is the only thing that turns a temporary
-  layout permanent. **The debt it owes an open draft hangs off
-  the WRITE, not the caller** — `ProfileManager.onCapturedLive`
-  — because `save_profile` from Lua, the CLI or IPC is the same
-  write through another door, and a debt paid at one door only
-  is this issue's failure one channel over.
+- **Keep = the layouts on screen (#1790).** Both Keep rows take
+  the one `KiwiCore.keepLayouts`, which writes the mode of each
+  Space the live profile declares and nothing else — never the
+  Space list, order, pins or settings, never a temporary or held
+  Space — and claims no monitor set. `save_profile` is the
+  whole-live snapshot: `persistProfile(named:modes:)` with a nil
+  `modes`, which takes `snapshotSpaces` (temporary Spaces in,
+  held out) and ends their temporariness. **The debt either
+  owes an open draft hangs off the WRITE, not the caller** —
+  `ProfileManager.onCapturedLive`, told which `CapturedWrite` it
+  was so the baseline moves for exactly what was written
+  (`SpaceChipLifecycleRowsTests` ▸ `keepKeepsLayouts`).
 - **A Settings Save against the LIVE target = a draft commit.**
   "Save what I edited." It applies and persists the modes of the
   spaces the draft actually edited and nothing else —
@@ -1232,7 +1326,12 @@ and the tour owns its undo*.
 
 **A write of the live profile from outside Settings takes the one
 `KiwiCore.writeThroughLiveProfile` door** — the tour's look, a
-bar menu's row (#1518) — which writes the file non-adopting and
+bar menu's row (#1518), a Space added to or removed from the
+profile (#1790: the bar's confirmed Delete, `create_space` /
+`delete_space` with `profile`, Settings ▸ Spaces' add button,
+which is the one in-Settings caller) — carrying one
+`LiveProfileEdit` that the file and the draft each apply — which
+writes the file non-adopting and
 then hands the SAME edit to an open draft through
 `onLiveProfileWritten`, told whether a file took it — never a
 caller's own announcement

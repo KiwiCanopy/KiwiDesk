@@ -39,10 +39,21 @@ The Space list is part of the **profile**, with its layout
 modes, gaps, borders and rules. Whenever a different profile
 becomes live — loaded by you, or arriving on its own from a
 Desktop binding or a monitor change — its Space list becomes the
-authority: a Space it does not define is dropped, and the
-windows it held move to the profile's fallback Space
-(`set_fallback_space`). Re-applying the profile that is already
+authority. A Space's name is what makes it that Space: when both
+profiles have a `1`, it stays on screen and takes the new
+profile's settings. Re-applying the profile that is already
 live changes nothing, so a monitor reconnect is harmless.
+
+:::unreleased
+**Switching holds the Spaces it does not name.** When a
+different profile or a built-in Standard becomes live, each Space
+it does not have, and that still has windows in it, is **held**
+for the profile you left instead of being dropped — whether its
+screen was unplugged or is still there. A window the new profile
+has had before goes back to the Space it had it in, so a held
+Space keeps only windows that profile has never seen, and one
+left empty goes away.
+:::
 
 **Unplugging a screen holds its Spaces.** When unplugging a
 screen makes a different profile live, each Space that was on
@@ -72,10 +83,25 @@ order the screen had them. A later renumber keeps the Space Bar in
 that order.
 :::
 
-The Space Bar draws an asterisk badge on a held Space's
-identifier, and VoiceOver reads the screen it came from, its old
-name when it was renumbered, and that it is not saved: saving a
-profile never includes a held Space.
+:::unreleased
+The Space Bar draws a two-screen marker after a held Space's
+identifier, and VoiceOver reads the profile it was held from, the
+screen it came from, its old name when it was renumbered, and that
+it is not saved: saving a profile never includes a held Space. A
+Space held from a built-in Standard names only its screen.
+
+A Space you make on the fly — **New Space** on a Space's
+right-click menu, `create_space`, or `focus_space` and
+`move_to_space` naming a Space that does not exist — is
+**temporary**. It wears an hourglass marker, lasts through a
+restart, a reload and a Settings Save, and goes away when its
+last window leaves it. No save writes it into the profile until
+you choose **Add Space ‹n› to this profile** in Settings ▸
+Spaces, or save the profile under a name with `save_profile`.
+Switch to another profile while it holds windows and it is held
+like any other Space, and comes back temporary; an empty one goes
+away on the switch.
+:::
 
 Plug the screen back in and a held Space goes back to it with
 everything in it, windows opened while it was held included, when
@@ -83,11 +109,15 @@ what comes back is the profile (or built-in Standard) it left and
 that has a Space of the held one's original name. Otherwise it
 moves back onto its screen and stays held.
 
+:::unreleased
 A held Space goes away once no window is left in it; a window on
 another Desktop, or hidden with its app, still counts. Loading a
-profile yourself ends every hold, and the held windows move to
-that profile's fallback Space like those of any Space it does not
-define. A Desktop binding holds nothing.
+profile does not end a hold, and neither does a Desktop binding:
+it ends when the profile or Standard it left comes back and has
+a Space of its original name, when it empties, or when you reset
+every setting. `delete_space` moves its windows to the fallback
+Space (`set_fallback_space`), which empties it.
+:::
 
 :::unreleased
 Held Spaces come back when KiwiDesk quits and reopens, updates or
@@ -246,11 +276,12 @@ it switches to that Desktop and gives the window the focus.
 
 ## Every profile keeps its own arrangement
 
-Two profiles can each define a Space called `1` — or `Work` — and
-they are different Spaces holding different windows; the profile
-is the scope a Space name resolves in. Switching profiles never
-merges them: KiwiDesk files which Space each window was in under
-the profile you are leaving and puts them back when you return.
+Two profiles can each define a Space called `1` — or `Work` —
+and it is one Space, which wears the settings of the profile that
+is live. Where your windows go is each profile's own: KiwiDesk files
+which Space each window was in under the profile you are leaving
+and puts them back when you return. Give two Spaces different
+names to keep them apart.
 
 The full rules are in the [Lua reference](lua-reference.md)
 ▸ *Space Reconciliation*.

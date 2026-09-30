@@ -270,21 +270,31 @@ struct PausedGlobalsSaveTests {
 
     /// `spaces` is one of the six, and its freshness net has to
     /// run on this path too: a space that appeared live while
-    /// the dashboard sat open must not be pruned by the save.
+    /// the dashboard sat open must not be pruned by the save —
+    /// nor written, since one a command made is temporary (#1790).
     @Test("the space freshness net still runs")
     func liveSpacesAreMerged() throws {
         let (model, core) = try makeModel()
+        // A profile live, so a Space a command makes is temporary.
+        core.execute("save_profile", args: [.string("p")])
+        // The page follows the profile now live, or the Save refuses.
+        model.reload()
         model.permissionPaused = true
         _ = core.execute(
             "create_space",
             args: [.string("scratch")]
         )
+        // A live Space a source declares — the net's own subject.
+        core.state.workspaces.ensureSpace(SpaceID("net"))
+        core.initDeclaredSpaces.insert(SpaceID("net"))
         editGlobal(model)
         model.saveGlobalsWhilePaused()
-        #expect(
-            core.loadGuiConfig().spaces.contains(
-                SpaceID("scratch")
-            )
-        )
+        #expect(core.state.workspaces[SpaceID("scratch")] != nil)
+        #expect(core.isTemporary(SpaceID("scratch")))
+        // The stored list, not `loadGuiConfig()`, whose overlay
+        // answers from live (guard-prover).
+        let stored = core.guiConfigStore.load()?.spaces ?? []
+        #expect(!stored.contains(SpaceID("scratch")))
+        #expect(stored.contains(SpaceID("net")))
     }
 }

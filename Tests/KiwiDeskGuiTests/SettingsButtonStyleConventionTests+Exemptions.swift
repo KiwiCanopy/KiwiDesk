@@ -57,6 +57,19 @@ extension SettingsButtonStyleConventionTests {
                 "Menu item from the one builder the rowActions "
                     + "seam feeds (#845)"
             ),
+            // A temporary Space's one row action (#1790).
+            "LiveOnlySpaceRow.swift": (
+                1, "rowActions",
+                "Returned to the row-menu builder the rowActions "
+                    + "seam feeds (#845)"
+            ),
+            // The Space menu's temporary section, built beside the
+            // `Menu` it is placed in (#1790).
+            "AppRuleSpaceRow.swift": (
+                2, "temporarySpaces",
+                "Items of the Space menu, built in a property the "
+                    + "menu places"
+            ),
             "HeaderSearch.swift": (
                 1, "focusShortcut", "Invisible zero-size shortcut sink"
             ),

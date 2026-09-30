@@ -153,31 +153,15 @@ extension SpacesSection {
 
     /// Confirmation message with interpolated role names (#818).
     var deleteConfirmMessage: String {
-        L(
-            "spaces.delete_confirm.message",
-            "This Space has customized settings — its "
-                + "layout overrides, monitor pin, and any "
-                + "\u{201C}%1$@\u{201D} or \u{201C}%2$@\u{201D} "
-                + "role are removed too. You "
-                + "can add the Space back, but not its "
-                + "settings.",
-            L("monitor_card.follows_main", "Follows main display"),
-            L("spaces.fallback_badge", "Fallback")
-        )
+        SpaceDeleteWording.overridesMessage
     }
 
     @ViewBuilder
     func deleteConfirmActions(_ space: SpaceID) -> some View {
-        Button(
-            L("spaces.delete_confirm.delete", "Delete"),
-            role: .destructive
-        ) {
+        Button(SpaceDeleteWording.delete, role: .destructive) {
             removeSpace(space)
         }
-        Button(
-            L("spaces.delete_confirm.cancel", "Cancel"),
-            role: .cancel
-        ) {}
+        Button(SpaceDeleteWording.cancel, role: .cancel) {}
     }
 
     /// Confirmation binding for resetting all layout overrides on space

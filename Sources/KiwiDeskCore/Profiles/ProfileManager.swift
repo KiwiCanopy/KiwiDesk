@@ -46,6 +46,11 @@ public final class ProfileManager {
     /// from, and what a Desktop switch asks for the declared
     /// Spaces instead of the disk (#1245).
     private(set) var active: ActiveProfile?
+    /// Nonzero while an apply or a config load moves what is live
+    /// and what is declared (#1790): a temporary Space is judged
+    /// against the adoption state, which is the OUTGOING one until
+    /// the apply's last line, so nothing is retired meanwhile.
+    var arrangementInFlight = 0
     /// The live profile's saved layout modes as last adopted or
     /// written (#1245, #1518), tagged so a stale copy never
     /// answers for another profile.
@@ -78,11 +83,13 @@ public final class ProfileManager {
     /// Invalid profile files reported while listing (#31).
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
-    /// Fired after a CAPTURE-LIVE profile write lands — the
-    /// quick menu's Keep and the `save_profile` command alike,
-    /// so an open Settings draft's baseline follows the file.
-    /// On the WRITE rather than on either caller (#1179).
-    public var onCapturedLive: @MainActor (String) -> Void = { _ in }
+    /// Fired after a profile write from outside Settings lands —
+    /// Keep's layouts, or `save_profile`'s whole-live snapshot —
+    /// so an open Settings draft's baseline follows the file for
+    /// exactly what was written. On the WRITE rather than on
+    /// either caller (#1179, #1790).
+    public var onCapturedLive: @MainActor (String, CapturedWrite) -> Void =
+        { _, _ in }
 
     /// A profile predating the one-owner format was on disk when
     /// this manager was made, and no settle has run since (#1530).
@@ -220,22 +227,6 @@ public final class ProfileManager {
         }
     }
 
-    /// Next available case-insensitive name suffix (`base`, `base_1`, ...)
-    /// (#53, APFS case safety).
-    public func freeName(base: String) -> String {
-        let taken = Set(list().map { $0.lowercased() })
-        guard taken.contains(base.lowercased()) else {
-            return base
-        }
-        var suffix = 1
-        while taken.contains(
-            "\(base)_\(suffix)".lowercased()
-        ) {
-            suffix += 1
-        }
-        return "\(base)_\(suffix)"
-    }
-
     /// Reads a profile with atomic best-effort `ConfigMigration` rewrite.
     public func read(name: String) throws -> Profile {
         let file = url(for: try validated(name))
@@ -248,17 +239,6 @@ public final class ProfileManager {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(Profile.self, from: data)
-    }
-
-    /// Validates profile filename boundaries (no slashes, nulls, dot-files).
-    public static func isValidName(_ name: String) -> Bool {
-        let trimmed = name.trimmingCharacters(
-            in: .whitespacesAndNewlines
-        )
-        return !trimmed.isEmpty
-            && !name.contains("/")
-            && !name.contains("\0")
-            && !name.hasPrefix(".")
     }
 
     /// The name, or `ProfileError.invalidName`.
@@ -303,6 +283,17 @@ public final class ProfileManager {
         active = nil
         self.standard = standard
         isDirty = true
+    }
+
+    /// The live-write door's write of the live profile (#1790): the
+    /// declared Spaces follow the file, since live moved with it —
+    /// a Space added is no longer temporary, one removed is gone.
+    /// Any other write leaves them to the next apply (#1245), which
+    /// judges what the file dropped against what was declared.
+    /// The name and fit stay as they were.
+    func redeclare(_ profile: Profile) {
+        guard profile.name == currentName else { return }
+        adopt(profile)
     }
 
     /// The one place both adoption records are set.

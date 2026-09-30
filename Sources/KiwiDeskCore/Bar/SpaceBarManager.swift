@@ -55,6 +55,17 @@ public final class SpaceBarManager {
         _ in
     }
     private(set) var statusMark: StatusSpaceMark?
+    /// The live Spaces the profile does not hold (#1790), fired on
+    /// change only, as the status mark is — Settings ▸ Spaces draws
+    /// them. Internal: `KiwiCore.onLiveOnlySpacesChange` is the door.
+    var onLiveOnlyChange: @MainActor ([LiveOnlySpace]) -> Void = { _ in }
+    private(set) var liveOnly: [LiveOnlySpace] = []
+
+    func publishLiveOnly(_ spaces: [LiveOnlySpace]) {
+        guard spaces != liveOnly else { return }
+        liveOnly = spaces
+        onLiveOnlyChange(spaces)
+    }
 
     /// The chip the pointer rests on and the strip it drew: the
     /// strip keeps it until the pointer leaves, so a click cannot

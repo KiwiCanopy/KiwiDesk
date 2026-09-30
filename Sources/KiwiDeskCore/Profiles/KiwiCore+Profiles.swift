@@ -25,7 +25,7 @@ extension KiwiCore {
         switch command {
         case "save_profile":
             return claimingProfileCommand(args) { name in
-                // Capture-live, like the quick menu's Keep.
+                // The whole-live snapshot (#1179, #1790).
                 try self.persistProfile(named: name, modes: nil)
             }
         case "load_profile":
@@ -116,7 +116,8 @@ extension KiwiCore {
     /// Standard, it's load-bearing — without it the blocks scatter
     /// into the Standard's slots (#485).
     func adoptComposedPlacement(
-        _ composed: ProfileComposition.Composed
+        _ composed: ProfileComposition.Composed,
+        keepingPinsOf temporaries: Set<SpaceID>
     ) {
         let ordered = PositionalDisplays.ordered(
             state.workspaces.allDisplays,
@@ -134,14 +135,18 @@ extension KiwiCore {
                 pins[space] = display.fingerprint
             }
         }
-        spacePins = pins
+        spacePins = keepingPins(of: temporaries, over: pins)
         mainSpaces = mains
     }
 
     /// The connected monitors as a stored set, carrying the
-    /// live space pins (pins to disconnected monitors drop).
-    func liveMonitorSet() -> MonitorSet {
-        MonitorSet(monitors: liveFingerprints, spaceMonitorMap: capturedPins)
+    /// live space pins (pins to disconnected monitors drop) — a
+    /// temporary Space's only where `extra` names it (#1790).
+    func liveMonitorSet(alsoOf extra: Set<SpaceID>) -> MonitorSet {
+        MonitorSet(
+            monitors: liveFingerprints,
+            spaceMonitorMap: capturedPins(alsoOf: extra)
+        )
     }
 
     /// Snapshot of the current configuration as a new profile
@@ -156,20 +161,23 @@ extension KiwiCore {
         name: String,
         modes overrides: [SpaceID: LayoutMode]?
     ) -> Profile {
-        let liveSpaces = capturedSpaces.map(\.id)
+        // The whole-live snapshot takes every temporary Space; a
+        // draft commit only the ones its draft lists — about to
+        // be declared — and a held one neither (#1790).
+        let extra =
+            overrides.map { Set($0.keys) } ?? Set(liveTemporarySpaces)
+        let captured = capturedSpaces(alsoOf: extra)
+        let liveSpaces = captured.map(\.id)
         // A caller's modes are filtered to the captured Spaces
         // here, so no capture site can save a held one (#1507).
         let modes =
             overrides?.filter { liveSpaces.contains($0.key) }
             ?? Dictionary(
-                uniqueKeysWithValues:
-                    capturedSpaces.map {
-                        ($0.id, $0.mode)
-                    }
+                uniqueKeysWithValues: captured.map { ($0.id, $0.mode) }
             )
         return Profile(
             name: name,
-            monitorSets: [liveMonitorSet()],
+            monitorSets: [liveMonitorSet(alsoOf: extra)],
             mainSpaces: mainSpaces.sorted { $0.raw < $1.raw },
             // Carry the starter-setup identity when the live
             // layout IS that setup (#485): the transient Starter
@@ -199,8 +207,9 @@ extension KiwiCore {
     /// live set; returns the profiles that lost it (#1530).
     ///
     /// `modes` is REQUIRED so every call site chooses (the
-    /// `forceRetile` pattern, §5). Nil means capture live — the
-    /// Keep verb's "write down what is on screen". A Settings
+    /// `forceRetile` pattern, §5). Nil means capture live —
+    /// `save_profile`'s "write down what is on screen", temporary
+    /// Spaces included (#1790); Keep is `keepLayouts`. A Settings
     /// Save passes its draft's modes, dense over the live
     /// spaces, because that write commits what was edited and a
     /// standing temporary layout is not in it (#1179).
@@ -215,10 +224,12 @@ extension KiwiCore {
             let released = try saveProfile(built)
             recordLookWrite(of: built)
             refreshConfigIssues()
-            if modes == nil { profiles.onCapturedLive(name) }
+            if modes == nil { adoptedWholeLive(name) }
             return released
         }
-        let live = liveMonitorSet()
+        let live = liveMonitorSet(
+            alsoOf: modes.map { Set($0.keys) } ?? Set(liveTemporarySpaces)
+        )
         guard existing.monitorCount == live.monitors.count else {
             throw ProfileSaveError.screenCountMismatch(
                 expected: existing.monitorCount,
@@ -245,13 +256,20 @@ extension KiwiCore {
         // Re-saving repairs an unreadable profile — clear its
         // issue without waiting for a config reload (#68).
         refreshConfigIssues()
-        if modes == nil { profiles.onCapturedLive(name) }
+        if modes == nil { adoptedWholeLive(name) }
         return released
     }
 
     // The non-adopting edit writes (`overwriteProfile`,
     // `copyProfile`) and their shared transform live in
     // `KiwiCore+ProfileEdit.swift` (#18/#82).
+
+    /// The whole-live snapshot wrote every temporary Space into
+    /// the profile now live, which declares them (#1790); an open
+    /// draft's baseline follows the file.
+    private func adoptedWholeLive(_ name: String) {
+        profiles.onCapturedLive(name, .wholeLive)
+    }
 
     /// Whether `name` is the layout currently on screen — it is
     /// the active profile, or a native Space bound to it is the

@@ -26,7 +26,7 @@ struct CLIDeclaredInNoteTests {
             notes == [
                 "removed from the live layout but still in "
                     + "saved profile \"Work\" — "
-                    + "save the profile to make this durable",
+                    + "delete it with scope profile to remove it there too",
                 "still composed by the built-in \"Developer\" "
                     + "standard — save a profile to make this durable",
                 "still created by init.lua — "

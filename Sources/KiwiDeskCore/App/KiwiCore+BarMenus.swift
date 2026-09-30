@@ -16,7 +16,10 @@ extension KiwiCore {
     func barMenuRows(_ hit: BarHit) -> [BarMenuRow] {
         let above: [BarMenuRow]
         switch hit {
-        case .space(let id): above = spaceChipRows(id)
+        case .space(let id):
+            above =
+                spaceChipRows(id) + [.separator]
+                + spaceLifecycleRows(id)
         case .disc: above = [glyphSpanRow()]
         case .glyph(let windows):
             above = windowRows(windows, movable: true)
@@ -149,6 +152,8 @@ extension KiwiCore {
     func setGlyphSpanFromBar(_ span: Int) {
         execute("space_bar.set_glyph_span", args: [.number(Double(span))])
         let settled = tiler.settings.spaceBarStyle.glyphSpan
-        writeThroughLiveProfile { $0.spaceBarStyle.glyphSpan = settled }
+        writeThroughLiveProfile(
+            .settings { $0.spaceBarStyle.glyphSpan = settled }
+        )
     }
 }

@@ -26,9 +26,14 @@ extension SpaceBarItemView {
     /// no default so a caller cannot measure without it (#1689);
     /// `contentDepth` is the shelf's for the strip (#1682), and
     /// `ends` the item's `ends(look:depth:first:last:)` (#1763).
+    /// `marked` adds the Space marker's slot after the identifier
+    /// (#1790).
     static func autoLength(
         appCount: Int,
         discs: Int = 0,
+        marked: Bool = false,
+        identifierInk: CGFloat? = nil,
+        collapsed: Bool = false,
         contentDepth: CGFloat,
         glyphGap: CGFloat,
         ends: ItemEnds
@@ -37,7 +42,14 @@ extension SpaceBarItemView {
         let slots = appCount + discs
         let divider: CGFloat = slots > 0 ? pad + 1 + pad : 0
         let gaps = CGFloat(max(slots - 1, 0)) * glyphGap
-        return contentInset(ends: ends).total + cell + divider
+        return contentInset(ends: ends).total + cell
+            + markerLength(
+                cell: cell,
+                marked: marked,
+                ink: identifierInk,
+                collapsed: collapsed
+            )
+            + divider
             + CGFloat(slots) * cell + gaps
     }
 
@@ -68,17 +80,17 @@ extension SpaceBarItemView {
             cell: cell,
             slack: Self.pad
         )
-        layoutHeldBadge(onCellAt: cursor, cell: cell)
         if collapse != nil {
-            // The held asterisk owns the top corner (#1507).
-            layoutBadge(
-                overflowBadge,
-                onCellAt: cursor,
-                cell: cell,
-                lowerCorner: held != nil
-            )
+            layoutBadge(overflowBadge, onCellAt: cursor, cell: cell)
         }
         cursor += cell
+        layoutMarker(after: cursor, cell: cell)
+        cursor += Self.markerLength(
+            cell: cell,
+            marked: marker != nil,
+            ink: identifierInkWidth,
+            collapsed: collapse != nil
+        )
         if !identifierDivider.isHidden {
             cursor += Self.pad
             // An in-item rule is content: centred on the full
@@ -146,8 +158,7 @@ extension SpaceBarItemView {
         _ badge: NSTextField,
         onCellAt offset: CGFloat,
         cell: CGFloat,
-        centered: Bool = false,
-        lowerCorner: Bool = false
+        centered: Bool = false
     ) {
         guard !badge.isHidden else { return }
         let base =
@@ -158,12 +169,7 @@ extension SpaceBarItemView {
             emphasis: .bold
         )
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
-        // Below the held asterisk the disc keeps clear of it.
-        let ceiling =
-            lowerCorner
-            ? max(cell - StateBadgeMetrics.side(cell: cell), base)
-            : cell + 2
-        let diameter = min(max(base, textWidth + 2), ceiling)
+        let diameter = min(max(base, textWidth + 2), cell + 2)
         let box = cellRect(at: offset, cell: cell)
         let rect =
             centered
@@ -175,8 +181,7 @@ extension SpaceBarItemView {
             )
             : CGRect(
                 x: box.maxX - diameter + 1,
-                y: lowerCorner
-                    ? box.maxY - diameter + 1 : box.minY - 1,
+                y: box.minY - 1,
                 width: diameter,
                 height: diameter
             )

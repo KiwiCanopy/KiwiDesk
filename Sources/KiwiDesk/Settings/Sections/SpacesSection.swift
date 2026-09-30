@@ -115,10 +115,18 @@ struct SpacesSection: View {
             ForEach(displayedSpaces, id: \.raw) { space in
                 spaceRow(space)
             }
-            SpaceAddRow(spaces: model.config.spaces) {
+            SpaceAddRow(spaces: takenSpaces) {
                 model.config.spaces.append($0)
             }
+            liveOnlyRows
         }
+    }
+
+    /// Every name a new or renamed draft Space may not take: the
+    /// draft's, and the live Spaces it does not hold (#1790), so a
+    /// "+" never draws a second row for a temporary Space.
+    var takenSpaces: [SpaceID] {
+        model.config.spaces + model.liveOnlySpaces.map(\.id)
     }
 
     private func spaceRow(_ space: SpaceID) -> some View {
@@ -131,9 +139,7 @@ struct SpacesSection: View {
                 )
                 SpaceNameField(
                     space: space,
-                    isAvailable: {
-                        !model.config.spaces.contains($0)
-                    },
+                    isAvailable: { !takenSpaces.contains($0) },
                     onRename: {
                         model.config.renameSpace(
                             from: space,

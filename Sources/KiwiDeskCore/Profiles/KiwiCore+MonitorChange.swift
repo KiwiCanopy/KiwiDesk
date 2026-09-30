@@ -72,9 +72,11 @@ extension KiwiCore {
                 // deferred resolve picks up that set's pins;
                 // nothing runs between here and it.
                 profiles.markClean()
-                spacePins =
-                    profile.set(matching: fingerprints)?
-                    .spaceMonitorMap ?? [:]
+                spacePins = keepingPins(
+                    of: Set(liveTemporarySpaces),
+                    over: profile.set(matching: fingerprints)?
+                        .spaceMonitorMap ?? [:]
+                )
                 returnHeldSpacesWithoutApply(to: profile)
             }
         case .countDefault(let profile):
