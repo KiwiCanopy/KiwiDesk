@@ -31,7 +31,7 @@ struct PresentationGatherTests {
     private static let space = SpaceID("1")
 
     private func makeCore(pinsScreen: Bool) -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()

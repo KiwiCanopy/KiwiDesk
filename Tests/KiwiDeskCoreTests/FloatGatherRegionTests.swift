@@ -34,7 +34,7 @@ struct FloatGatherRegionTests {
     /// A core with one shown space in `mode`, holding the three
     /// members at `frames`. Nil where the host has no screen.
     private func makeCore(mode: LayoutMode) -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()

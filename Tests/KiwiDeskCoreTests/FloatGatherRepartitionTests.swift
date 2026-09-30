@@ -37,7 +37,9 @@ struct FloatGatherRepartitionTests {
     /// scrolled-out column's twin. Space `1` exists beside it.
     /// Nil where the host has no screen.
     private func makeCore() -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        // The primary, where `bounds` sits; `NSScreen.main`
+        // follows keyboard focus to another screen.
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()
