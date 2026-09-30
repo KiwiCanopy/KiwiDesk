@@ -128,6 +128,10 @@ struct FloatGatherRepartitionTests {
         core.apply(profile: a, cause: .reapply)
         // A re-apply of the live profile re-files nothing.
         core.apply(profile: a, cause: .reapply)
+        // A's applies reset the undeclared `2` to bsp; the
+        // scrolled-out park is what the gather reads.
+        core.setSpaceMode("2", .scrolling)
+        core.retile()
         #expect(core.tiler.stashOriginal(Self.parked) == nil)
         core.apply(
             profile: profile("B", modes: ["1": .floating], settings: settings),
