@@ -98,15 +98,13 @@ struct NavRow: View {
                 $0.kind == .navigation && $0.lua == lua
             },
             bindings: $bindings,
-            // Steal live-applies too (via `record`); only the
-            // recorder's own commit shows the caption.
-            commit: { _ = record($0) }
+            commit: { record($0) }
         )
     }
 
     private func record(
         _ combo: String
-    ) -> LiveApplyFeedback? {
+    ) {
         if let index {
             bindings[index].combo = combo
         } else {
@@ -123,13 +121,7 @@ struct NavRow: View {
             $0.kind == .navigation && $0.lua == command.lua
         }) {
             model.noteRecordedCombo(updated, in: bindings)
-            return model.liveApplyRecorded(
-                layerName: layerName,
-                bindingID: updated.id,
-                combo: combo
-            )
         }
-        return nil
     }
 
     /// The edited profile, where another profile shares this row.
@@ -164,14 +156,6 @@ struct NavRow: View {
             ),
             removal
         )
-        let id = bindings[index].id
         bindings.remove(at: index)
-        // Live target: the removed hotkey unregisters now
-        // (#123); no caption for a clear.
-        _ = model.liveApplyRecorded(
-            layerName: layerName,
-            bindingID: id,
-            combo: nil
-        )
     }
 }

@@ -33,10 +33,11 @@
 /// `FloatingModeRaiseTests`) while its TARGETS stay the flag's,
 /// there being no tiled plane in a floating-mode space to lift
 /// over. The float PLACEMENT of `make_floating` /
-/// `toggle_floating` (#1674) and of a move verb's entry into a
-/// floating Space (#1708) is ruled onto it: a window already an
-/// effective float keeps its frame, since a floating-mode
-/// member's frame is the user's, and the placement's cascade
+/// `toggle_floating` (#1674), of a move verb's entry into a
+/// floating Space (#1708) and of a detection flip over a tiled
+/// window (#1820, `DetectedFloatPlacementTests`) is ruled onto it: a
+/// window already an effective float keeps its frame, since a
+/// floating-mode member's frame is the user's, and the placement's cascade
 /// steps off every effective float of the Space
 /// (`FloatPlacementCommandTests`, `FloatMovePlacementTests`).
 /// Ruled to STAY on the flag: the Space Bar float badge and

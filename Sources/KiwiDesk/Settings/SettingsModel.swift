@@ -230,8 +230,6 @@ final class SettingsModel: ObservableObject {
     var updater: any AppUpdating = NoUpdater()
 
     let core: KiwiCore
-    /// Recorder live session delta and rollback point (#123).
-    var liveKeySession: RecorderLiveSession?
     /// Guards `config.didSet` during reload; written only by `apply(_:)`.
     var suppressDirty = false
     /// Sidecar baseline deciding if save regenerates global files
@@ -251,10 +249,6 @@ final class SettingsModel: ObservableObject {
     /// switch loads another), and encoding the page against the
     /// new name would bake its own rules into the shared base.
     var reachPage: String?
-    /// The profile `resolveLoadedRules` last resolved the page's
-    /// layers for — what the recorder's live apply tells Core, so
-    /// the override is skipped only for layers it already carries.
-    var resolvedPage: String?
     /// The draft's checklist choices over `ruleReachStored`.
     @Published var reachEdits = RuleReachEdits() {
         didSet {
