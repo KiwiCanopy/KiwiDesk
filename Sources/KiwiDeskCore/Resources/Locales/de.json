@@ -355,7 +355,7 @@
   "drag.ghost.caption": "Zeigt, wo dein Fenster vorher war.",
   "drag.title": "Drag & Drop",
   "floating.color": "Floating",
-  "floating.color.a11y": "Markierungsfarbe für Floating-Fenster",
+  "floating.color.a11y": "Markierungsfarbe für schwebende Fenster",
   "footer.cancel": "Abbrechen",
   "footer.default_profile_name": "Mein Setup",
   "footer.profile_name": "Profilname",
