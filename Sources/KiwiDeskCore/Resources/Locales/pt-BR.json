@@ -1330,6 +1330,7 @@
   "shortcuts.desktops.focus": "Ir para uma Mesa do macOS",
   "shortcuts.desktops.help": "As Mesas são os “espaços” do próprio macOS, não os do KiwiDesk. O KiwiDesk organiza as janelas dentro dos seus próprios espaços, então a maioria das configurações nunca precisa destes atalhos: trocar de Mesa move todo o seu ambiente, não uma janela, e cada Mesa mantém seus próprios espaços. Se você realmente trabalha em várias Mesas, vincule um perfil a cada Mesa em **%1$@**.",
   "shortcuts.desktops.move": "Mover janelas para uma Mesa do macOS",
+  "shortcuts.dropped_chord": "%1$@ ignorado: “%2$@” já tem %3$@.",
   "shortcuts.editing_layer": "Editando a camada “%1$@”",
   "shortcuts.gestures.app_bar": "Arraste um item ao longo da App Bar para reordenar as janelas dela.",
   "shortcuts.gestures.app_bar_hover": "Passe o cursor sobre um item da App Bar com o título encurtado para vê-lo por inteiro.",

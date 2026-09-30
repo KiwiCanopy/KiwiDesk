@@ -28,6 +28,9 @@ final class SettingsModel: ObservableObject {
     /// user who navigates away mid-run still meets the outcome.
     @Published var isExportingLog = false
     @Published var logExportProblem: LogExportProblem?
+    /// Chords the last import or adoption dropped as an action's
+    /// second (#1807), named by the Shortcuts header until a reload.
+    @Published var droppedChords: [NavigationChords.Dropped] = []
     /// True when init.lua has harmless custom Lua (coexistence banner).
     /// Always false when `forcedLuaEditor` is true.
     @Published var hasCustomLua = false

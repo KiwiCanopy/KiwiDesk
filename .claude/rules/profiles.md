@@ -94,18 +94,28 @@ because two real clients now remove drift — see
   the product argument is `docs/design-decisions.md` ▸ "Size is
   not a positional verb" (`SizeLayerSeedTests`).
 
-## A Space verb holds one chord per layer (#1797)
+## A navigation action holds one chord per layer (#1797, #1807)
 
-**A GUI writer of layer rows adds no row for a Space verb the
-layer — or any profile's override of it — already binds.** "The
-same verb" is `SpaceLuaArg.target`, the verb plus the Space, never
-the raw Lua string. The digit top-up is held to it by
-`DigitTopUpActionTests` and `DigitTopUpOverrideTests`; the Lua
-import, the adoption into Settings and `GuiConfig.renameSpace` are
-held by no guard (#1807), so a change to any of them, or a new
-writer, owes the check and its test. Lua itself is uncapped — the argument
-is `docs/design-decisions.md` ▸ *Nothing KiwiDesk writes may give
-an action a second chord in a layer*.
+**A GUI writer of layer rows leaves no navigation action two
+chords in a layer.** A writer that merges or rewrites rows takes the
+one `NavigationChords.deduplicated`, whose "same action" is a
+Space verb's `SpaceLuaArg.target` and any other action's Lua; a
+writer that only adds, as the digit top-up does, refuses an action
+already bound in the base or any profile's override; and a writer
+that re-adds a seed, as Restore Defaults does, first removes every
+row running a seeded action, through `NavigationChords.sameAction`. A new writer
+classifies itself in `LayerRowWriterCensusTests`, which counts
+every `.bindings` write and every writable `[KeyBinding]` holder in
+both trees against its reason — a writer that
+builds whole layers (`.layers =`, a `KeyLayer(` built with rows,
+the adoption's seed among them) is outside its scan and is
+review's — and a writer
+that can merge joins `NavigationChordWriterTests`, which drives
+each against a duplicate-counting oracle of its own
+(`DigitTopUpOverrideTests` holds the top-up's cross-profile
+reading). Lua itself is uncapped — the
+argument is `docs/design-decisions.md` ▸ *Nothing KiwiDesk writes
+may give an action a second chord in a layer*.
 
 ## The starter setup is derived, and its tuning is profile-wide
 
