@@ -16,6 +16,8 @@ public enum FocusedCommandPolicy {
         "make_tiled",
         "make_auto",
         "toggle_floating",
+        "new_window",
+        "close_window",
         "make_sticky",
         "make_display_sticky",
         "make_unsticky",

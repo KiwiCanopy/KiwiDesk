@@ -12,18 +12,30 @@ extension KiwiCore {
         _ refusal: ResizeRefusal,
         text: String
     ) -> Bool {
-        // The frame the window was ISSUED (#934): a floor's
-        // residue sits inward of its slot, and the pill draws on
-        // the window.
-        guard
-            let frame = tiler.placedFrames(state: state)[window]
-                ?? state.windows[window]?.frame
-        else { return false }
+        flashRefusalPill(window, text: text, symbol: refusal.pillSymbol)
+    }
+
+    /// The frame a refusal pill draws on: the one the window was
+    /// ISSUED (#934) — a floor's residue sits inward of its slot.
+    func refusalPillFrame(_ window: WindowID) -> CGRect? {
+        tiler.placedFrames(state: state)[window]
+            ?? state.windows[window]?.frame
+    }
+
+    /// The one door every refusal pill takes, the resize family's
+    /// and the window actions' (#1518) alike.
+    @discardableResult
+    func flashRefusalPill(
+        _ window: WindowID,
+        text: String,
+        symbol: String
+    ) -> Bool {
+        guard let frame = refusalPillFrame(window) else { return false }
         return borders.flashSizeLimitPill(
             window: window,
             frame: frame,
             text: text,
-            symbol: refusal.pillSymbol
+            symbol: symbol
         )
     }
 

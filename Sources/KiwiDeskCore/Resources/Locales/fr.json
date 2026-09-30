@@ -98,9 +98,11 @@
   "bar.menu.app_rules": "Règles d’apps…",
   "bar.menu.ax.nested": "%1$@ : %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
+  "bar.menu.close_window": "Fermer la fenêtre",
   "bar.menu.float_window": "Faire flotter la fenêtre",
   "bar.menu.looks": "Looks…",
   "bar.menu.move_here": "Déplacer vers l'espace actuel",
+  "bar.menu.new_window": "Nouvelle fenêtre",
   "bar.menu.quit_app": "Quitter %1$@",
   "bar.menu.reset_minimum": "Réinitialiser le minimum de la Space Bar",
   "bar.menu.shelf_settings": "Réglages de KiwiShelf…",
@@ -1335,7 +1337,7 @@
   "shortcuts.gestures.app_bar": "Faites glisser un élément le long de l'App Bar pour réordonner ses fenêtres.",
   "shortcuts.gestures.app_bar_hover": "Survolez avec le pointeur un élément de l'App Bar dont le titre est raccourci pour le voir en entier.",
   "shortcuts.gestures.app_bar_off": "Aucune disposition n'affiche d'App Bar. Activez-en une dans %1$@.",
-  "shortcuts.gestures.context_menu": "Faites un clic droit sur KiwiShelf pour afficher un menu propre à l'élément cliqué : la disposition d'un espace, le nombre de glyphes qu'affiche un espace et les réglages de KiwiShelf.",
+  "shortcuts.gestures.context_menu": "Faites un clic droit sur KiwiShelf pour afficher un menu propre à l'élément cliqué : la disposition d'un espace et le nombre de glyphes qu'il affiche, que faire d'une fenêtre ou de son app, et les réglages de KiwiShelf.",
   "shortcuts.gestures.drop_on_space": "Faites glisser une fenêtre sur un espace de KiwiShelf pour l'y déplacer.",
   "shortcuts.gestures.edge": "Faites glisser le bord d'une fenêtre pour la redimensionner.",
   "shortcuts.gestures.follow_focus": "La fenêtre active change après un raccourci, un changement d'espace, un changement d'app ou la fermeture d'une fenêtre.",
@@ -1616,5 +1618,7 @@
   "updates.state.unavailable": "La recherche de mises à jour est désactivée dans cette compilation.",
   "updates.state.up_to_date": "À jour",
   "updates.state.up_to_date_checked": "À jour · dernière vérification %1$@",
-  "updates.try_again": "Réessayer"
+  "updates.try_again": "Réessayer",
+  "window_action.refusal.no_close_button": "« %1$@ » n'a pas de bouton de fermeture",
+  "window_action.refusal.no_new_window": "%1$@ n'a pas de commande « Nouvelle fenêtre »"
 }
