@@ -4599,7 +4599,10 @@ record is a membership, never an order: a window already in its
 remembered space stays where the live row has it, because on a
 Desktop switch between bound profiles the restore runs while the
 departing Desktop's windows are still on screen, and re-placing
-them re-ordered the row the return then rebuilt (#1387).
+them re-ordered the row the return then rebuilt (#1387). The
+record rides the session snapshot, so a profile that is not live
+keeps it across a KiwiDesk quit, update or crash; it goes where
+the snapshot goes, which a Mac restart discards (#1802).
 
 Its counterpart is deliberately NOT stored, and the reason is
 WHEN each record is authoritative rather than who owns the fact.

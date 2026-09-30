@@ -136,6 +136,7 @@ extension KiwiCore {
         let holds = restoreHeldSpaces(from: session)
         restore(holds.snapshot)
         settleHeldSpacesAtBoot(holds)
+        adoptCarriedPartitioning(from: session)
         activateSpaceOfFocusedWindow()
         seedStartupFocus()
         spaceSwitchRetile()

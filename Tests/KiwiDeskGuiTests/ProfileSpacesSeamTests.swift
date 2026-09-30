@@ -38,7 +38,9 @@ struct ProfileSpacesSeamTests {
         // (#1246/#1249).
         "profilePartitioning": [
             "State/StateCoordinator.swift": 1,
-            "Profiles/KiwiCore+ProfileSpaces.swift": 3,
+            // The door, plus #1802's snapshot capture and boot
+            // adoption, which stay inside it.
+            "Profiles/KiwiCore+ProfileSpaces.swift": 5,
             "App/KiwiCore+RekeyEvent.swift": 1,
             "App/KiwiCore+Reset.swift": 1,
             "Profiles/KiwiCore+ProfileRename.swift": 1,

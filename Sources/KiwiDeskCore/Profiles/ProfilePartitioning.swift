@@ -87,6 +87,15 @@ struct ProfilePartitioning: Sendable {
         byProfile[profile]
     }
 
+    /// Every profile's record, for the session snapshot (#1802).
+    var records: [String: [SpaceID: [WindowID]]] { byProfile }
+
+    /// Boot's adoption of the previous session's records (#1802):
+    /// a carried entry replaces this session's for that profile.
+    mutating func adopt(_ records: [String: [SpaceID: [WindowID]]]) {
+        byProfile.merge(records) { _, carried in carried }
+    }
+
     /// A native-tab re-key (#308) moves the id in every profile's
     /// record, not just the live one: a tab switched while
     /// profile B is up must still be found when A comes back.
