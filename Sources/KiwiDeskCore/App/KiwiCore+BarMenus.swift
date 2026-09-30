@@ -16,7 +16,10 @@ extension KiwiCore {
     func barMenuRows(_ hit: BarHit) -> [BarMenuRow] {
         let above: [BarMenuRow]
         switch hit {
-        case .space(let id): above = spaceChipRows(id)
+        case .space(let id):
+            above =
+                spaceChipRows(id) + [.separator]
+                + spaceLifecycleRows(id)
         case .disc: above = [glyphSpanRow()]
         case .glyph(let windows):
             above = windowRows(windows, movable: true)
@@ -96,7 +99,7 @@ extension KiwiCore {
                         profile
                     ),
                     enabled: LayoutModeRows.keepArmed(
-                        drifts: spaces.map(drifted)
+                        drifts: spaces.map(drifted) + [spaceSetDrifted()]
                     )
                 ) { [weak self] in
                     self?.barMenuHooks.keepLayout()
