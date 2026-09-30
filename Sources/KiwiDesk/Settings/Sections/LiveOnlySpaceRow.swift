@@ -83,7 +83,7 @@ struct LiveOnlySpaceRow: View {
                     )
                 )
         case .held(let screen, let profile):
-            BadgeChip(label: Self.heldLabel(screen, profile))
+            BadgeChip(label: Self.heldLabel(screen, profile), maxWidth: 180)
                 .help(Self.heldHelp(screen, profile))
         }
     }
@@ -97,7 +97,12 @@ struct LiveOnlySpaceRow: View {
         guard let profile else {
             return L("spaces.held_badge", "Held from %1$@", screen)
         }
-        return L("spaces.held_badge.profile", "Held from %1$@", profile)
+        return L(
+            "spaces.held_badge.profile",
+            "Held from %1$@ · %2$@",
+            profile,
+            screen
+        )
     }
 
     private static func heldHelp(

@@ -51,17 +51,45 @@ extension SpaceBarItemView {
         (cell * 0.55).rounded()
     }
 
-    /// How far the marker tucks back into the identifier cell's
-    /// trailing slack, so it sits beside the digits rather than a
-    /// cell-width away (owner eyeball 2026-09-30).
-    static func markerTuck(cell: CGFloat) -> CGFloat {
-        (cell * 0.15).rounded()
+    /// How far the marker tucks back into the identifier cell: the
+    /// slack beside a text identifier's centred ink (negative where
+    /// the ink reaches past the cell), so it sits beside the digits
+    /// (owner eyeball 2026-09-30); a symbol takes a fixed share, and
+    /// a collapsed item none, its count disc owning the corner.
+    static func markerTuck(
+        cell: CGFloat,
+        ink: CGFloat?,
+        collapsed: Bool = false
+    ) -> CGFloat {
+        guard !collapsed else { return 0 }
+        return ink.map { ((cell - $0) / 2).rounded(.down) }
+            ?? (cell * 0.15).rounded()
     }
 
     /// How much a marker adds to the item's length — its side and
-    /// the gap before it, less the tuck; zero without one.
-    static func markerLength(cell: CGFloat, marked: Bool) -> CGFloat {
-        marked ? markerSide(cell: cell) + 2 - markerTuck(cell: cell) : 0
+    /// the gap before it, less the tuck; zero without one. `ink` is
+    /// the text identifier's ink width, nil for a symbol.
+    static func markerLength(
+        cell: CGFloat,
+        marked: Bool,
+        ink: CGFloat? = nil,
+        collapsed: Bool = false
+    ) -> CGFloat {
+        guard marked else { return 0 }
+        return markerSide(cell: cell) + 2
+            - markerTuck(cell: cell, ink: ink, collapsed: collapsed)
+    }
+
+    /// A text identifier's ink width in `font`; nil for a symbol.
+    static func identifierInk(_ glyph: SpaceGlyph, font: NSFont) -> CGFloat? {
+        guard case .text(let text, _) = glyph else { return nil }
+        return BarTextGlyph.metrics(text, font: font).ink.width
+    }
+
+    /// The drawn identifier's ink width, as the length measured it.
+    var identifierInkWidth: CGFloat? {
+        guard case .text = spaceGlyph else { return nil }
+        return BarTextGlyph.metrics(of: identifierLabel).ink.width
     }
 
     /// Monochrome at regular weight, in the identifier's own ink,
@@ -92,7 +120,13 @@ extension SpaceBarItemView {
     func layoutMarker(after offset: CGFloat, cell: CGFloat) {
         guard !markerView.isHidden else { return }
         let side = Self.markerSide(cell: cell)
-        let lead = offset + 2 - Self.markerTuck(cell: cell)
+        let lead =
+            offset + 2
+            - Self.markerTuck(
+                cell: cell,
+                ink: identifierInkWidth,
+                collapsed: collapse != nil
+            )
         let across = ((horizontal ? bounds.height : bounds.width) - side) / 2
         let rect =
             horizontal

@@ -122,11 +122,18 @@ struct SpaceChipLifecycleRowsTests {
         #expect(core.state.workspaces[two] == nil)
     }
 
-    @Test("Delete Space is greyed for a Space that holds anything")
+    /// Greyed for a window the user sees, or a hold; a window away
+    /// or hidden does not block it and comes back as a new one
+    /// would (#1790, owner 2026-09-30).
+    @Test("Delete Space is greyed for a window in it or a hold")
     func deleteGreyed() {
+        LocalizationManager.shared.select("en")
         let core = seededCore()
         // A member.
         #expect(row(core, one, "Delete Space")?.enabled == false)
+        #expect(
+            row(core, one, "Delete Space")?.subtitle == "Still has windows"
+        )
         // A window away on another Desktop, still filed there.
         core.state.awayWindows[WindowID(5)] = AwayWindow(
             id: WindowID(5),
@@ -136,7 +143,7 @@ struct SpaceChipLifecycleRowsTests {
             nativeSpace: 4
         )
         core.state.rememberedSpaces[WindowID(5)] = .departed(two)
-        #expect(row(core, two, "Delete Space")?.enabled == false)
+        #expect(row(core, two, "Delete Space")?.enabled == true)
         core.state.awayWindows[WindowID(5)] = nil
         core.state.rememberedSpaces[WindowID(5)] = nil
         #expect(row(core, two, "Delete Space")?.enabled == true)
@@ -145,28 +152,34 @@ struct SpaceChipLifecycleRowsTests {
             name: SpaceID("3"),
             screen: "DELL:2560x1440",
             icon: nil,
-            arrangement: nil
+            arrangement: .profile("Desk")
         )
         #expect(row(core, two, "Delete Space")?.enabled == false)
+        #expect(
+            row(core, two, "Delete Space")?.subtitle == "Goes back to Desk"
+        )
     }
 
     /// The #1175 heal would re-mint a screen's last Space the
     /// moment it went, so the row does not offer it.
     @Test("a screen's last Space cannot be deleted")
     func lastOnScreen() {
+        LocalizationManager.shared.select("en")
         let core = seededCore()
         #expect(core.state.workspaces[three]?.windows.isEmpty == true)
         #expect(row(core, three, "Delete Space")?.enabled == false)
+        #expect(
+            row(core, three, "Delete Space")?.subtitle
+                == "The only Space on this screen"
+        )
     }
 
-    /// A hidden app's window comes back to its Space (#913), so
-    /// the Space still holds it.
-    @Test("a hidden app's returning window greys Delete")
-    func hiddenWindowHolds() {
+    /// A hidden app's window is not one the user sees, so it does
+    /// not block Delete; it comes back as a new window would.
+    @Test("a hidden app's returning window leaves Delete on")
+    func hiddenWindowDoesNotBlock() {
         let core = seededCore()
         core.state.rememberedSpaces[WindowID(6)] = .departed(two)
-        #expect(row(core, two, "Delete Space")?.enabled == false)
-        core.state.closedDepartures.insert(WindowID(6))
         #expect(row(core, two, "Delete Space")?.enabled == true)
     }
 

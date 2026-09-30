@@ -29,11 +29,21 @@ extension SpaceBarOverlay {
         let gap = look.itemGap
         let leadsWithLayer = leadsWithLayer(items)
         let content = look.contentDepth(forDepth: depth)
+        let identifierFont = look.shelf.textFont(
+            ofSize: look.identifierFontSize(forDepth: depth)
+        )
         return items.enumerated().map { index, item in
             let length = SpaceBarItemView.autoLength(
                 appCount: item.apps.count,
                 discs: item.discs,
                 marked: item.marker != nil,
+                identifierInk: item.marker == nil
+                    ? nil
+                    : SpaceBarItemView.identifierInk(
+                        item.spaceGlyph,
+                        font: identifierFont
+                    ),
+                collapsed: item.collapse != nil,
                 contentDepth: content,
                 glyphGap: look.resolvedGlyphGap,
                 ends: itemEnds(

@@ -124,9 +124,9 @@ struct CoreLocalizationBoundaryTests {
         // The window rows of the same menus (#1518): Core draws
         // them, and no word crosses into the GUI.
         "App/KiwiCore+BarWindowMenus.swift": 8,
-        // A Space chip's New Space and Delete Space rows (#1790),
-        // on the same Core-drawn menu.
-        "App/KiwiCore+SpaceChipLifecycle.swift": 5,
+        // A Space chip's New Space and Delete Space rows and why a
+        // Delete is greyed (#1790), on the same Core-drawn menu.
+        "App/KiwiCore+SpaceChipLifecycle.swift": 9,
         // The window actions' refusal pills (#1518), which Core
         // draws on the window, as the resize pills are.
         "Commands/WindowActionRefusal.swift": 2,

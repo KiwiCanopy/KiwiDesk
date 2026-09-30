@@ -39,16 +39,19 @@ extension KiwiCore {
         }
     }
 
-    /// Empty only, so `delete_space` never rehomes a window. A
-    /// temporary Space goes at once; a profile Space asks first and
-    /// leaves the file too; a Space another source declares goes
-    /// for the session and says it comes back (#1790).
+    /// With no tiled or floating window in it, so `delete_space`
+    /// never rehomes one the user sees; a hidden one comes back as
+    /// a new window would. A temporary Space goes at once; a
+    /// profile Space asks first and leaves the file too; a Space
+    /// another source declares goes for the session and says it
+    /// comes back (#1790). A greyed row says why.
     private func deleteSpaceRow(_ id: SpaceID) -> BarMenuRow {
         let returns = returnsSubtitle(of: id)
+        let block = spaceDeleteBlock(id)
         return .action(
             L("bar.menu.delete_space", "Delete Space"),
-            enabled: spaceIsDeletable(id),
-            subtitle: returns
+            enabled: block == nil,
+            subtitle: block.map(blockSubtitle) ?? returns
         ) { [weak self] in
             self?.deleteFromChip(id, comesBack: returns != nil)
         }
@@ -104,17 +107,54 @@ extension KiwiCore {
             || fallbackSpace == id || probe != tiler.settings
     }
 
-    /// Holds nothing (`spaceHoldsNothing`), is not held (#1507),
-    /// and is not its screen's last Space, which the #1175 heal
-    /// would re-mint the moment it went.
-    func spaceIsDeletable(_ id: SpaceID) -> Bool {
-        guard state.workspaces[id] != nil,
-            spaceHoldsNothing(id),
-            state.heldSpaces[id] == nil
-        else { return false }
+    /// Why the bar's Delete is greyed, or nil where it may go: a
+    /// held Space is its profile's (#1507), a tiled or floating
+    /// window is one the user sees, and a screen's last Space the
+    /// #1175 heal would re-mint the moment it went (#1790).
+    func spaceDeleteBlock(_ id: SpaceID) -> SpaceDeleteBlock? {
+        guard let space = state.workspaces[id] else { return .gone }
+        if let origin = state.heldSpaces[id] {
+            return .held(profile: origin.arrangement?.profileName)
+        }
+        guard space.windows.isEmpty else { return .hasWindows }
         let screen = state.workspaces.display(of: id)
-        return state.workspaces.allSpaces.contains {
+        let sibling = state.workspaces.allSpaces.contains {
             $0.id != id && state.workspaces.display(of: $0.id) == screen
         }
+        return sibling ? nil : .onlySpaceOnScreen
     }
+
+    func spaceIsDeletable(_ id: SpaceID) -> Bool {
+        spaceDeleteBlock(id) == nil
+    }
+
+    private func blockSubtitle(_ block: SpaceDeleteBlock) -> String? {
+        switch block {
+        case .gone: return nil
+        case .hasWindows:
+            return L("bar.menu.delete_space.has_windows", "Still has windows")
+        case .onlySpaceOnScreen:
+            return L(
+                "bar.menu.delete_space.only_space",
+                "The only Space on this screen"
+            )
+        case .held(let profile?):
+            return L(
+                "bar.menu.delete_space.held",
+                "Goes back to %1$@",
+                profile
+            )
+        case .held(nil):
+            return L(
+                "bar.menu.delete_space.held_standard",
+                "Goes back when its setup returns"
+            )
+        }
+    }
+}
+
+/// Why a Space chip's Delete is greyed (#1790).
+enum SpaceDeleteBlock: Equatable {
+    case gone, hasWindows, onlySpaceOnScreen
+    case held(profile: String?)
 }

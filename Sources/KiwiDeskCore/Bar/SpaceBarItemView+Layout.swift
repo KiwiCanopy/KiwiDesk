@@ -32,6 +32,8 @@ extension SpaceBarItemView {
         appCount: Int,
         discs: Int = 0,
         marked: Bool = false,
+        identifierInk: CGFloat? = nil,
+        collapsed: Bool = false,
         contentDepth: CGFloat,
         glyphGap: CGFloat,
         ends: ItemEnds
@@ -41,7 +43,13 @@ extension SpaceBarItemView {
         let divider: CGFloat = slots > 0 ? pad + 1 + pad : 0
         let gaps = CGFloat(max(slots - 1, 0)) * glyphGap
         return contentInset(ends: ends).total + cell
-            + markerLength(cell: cell, marked: marked) + divider
+            + markerLength(
+                cell: cell,
+                marked: marked,
+                ink: identifierInk,
+                collapsed: collapsed
+            )
+            + divider
             + CGFloat(slots) * cell + gaps
     }
 
@@ -77,7 +85,12 @@ extension SpaceBarItemView {
         }
         cursor += cell
         layoutMarker(after: cursor, cell: cell)
-        cursor += Self.markerLength(cell: cell, marked: marker != nil)
+        cursor += Self.markerLength(
+            cell: cell,
+            marked: marker != nil,
+            ink: identifierInkWidth,
+            collapsed: collapse != nil
+        )
         if !identifierDivider.isHidden {
             cursor += Self.pad
             // An in-item rule is content: centred on the full
