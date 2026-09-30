@@ -94,6 +94,7 @@
   "app_rules.title_contains": "O título contém…",
   "app_rules.titled.caption": "As janelas cujo título contém um padrão permanecem flutuantes.",
   "bar.menu.advanced_colors": "Cores avançadas…",
+  "bar.menu.app_rules": "Regras de apps…",
   "bar.menu.ax.nested": "%1$@: %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.float_window": "Fazer a janela flutuar",

@@ -86,8 +86,8 @@ struct BarWindowMenuRowsTests {
         #expect(
             titles(rows)
                 == [
-                    "Move to Current Space", "Float Window", "—",
-                    "Quit Safari", "—",
+                    "Move to Current Space", "Float Window",
+                    "App Rules…", "—", "Quit Safari", "—",
                 ] + shelf
         )
     }
@@ -98,7 +98,10 @@ struct BarWindowMenuRowsTests {
         let rows = core.barMenuRows(.appItem([WindowID(1)]))
         #expect(
             titles(rows)
-                == ["Float Window", "—", "Quit Safari", "—"] + shelf
+                == [
+                    "Float Window", "App Rules…", "—", "Quit Safari",
+                    "—",
+                ] + shelf
         )
     }
 
@@ -162,12 +165,18 @@ struct BarWindowMenuRowsTests {
         #expect(titles(submenu(rows[0])) == ["Page 2", "Page 3"])
     }
 
+    private func quitRow(_ core: KiwiCore, _ id: WindowID) -> BarMenuRow? {
+        core.barMenuRows(.appItem([id])).first {
+            $0.title.hasPrefix("Quit ")
+        }
+    }
+
     @Test("Quit terminates the app; greyed for Finder and KiwiDesk")
-    func quitRow() {
+    func quitTerminates() throws {
         let core = seededCore()
         var quit: [pid_t] = []
         core.shelves.contextMenus.terminateApp = { quit.append($0) }
-        let row = core.barMenuRows(.appItem([WindowID(1)]))[2]
+        let row = try #require(quitRow(core, WindowID(1)))
         #expect(row.enabled)
         perform(row)
         #expect(quit == [41])
@@ -186,8 +195,10 @@ struct BarWindowMenuRowsTests {
                     )
                 )
             )
-            let rows = core.barMenuRows(.appItem([WindowID(raw)]))
-            #expect(!rows[2].enabled, "\(bundle)")
+            #expect(
+                quitRow(core, WindowID(raw))?.enabled == false,
+                "\(bundle)"
+            )
         }
     }
 
@@ -261,6 +272,26 @@ struct BarWindowMenuRowsTests {
             style: AppBarLook()
         )
         #expect(item.members == [WindowID(2), WindowID(3)])
+    }
+
+    /// App Rules… lands on that app's rule by its bundle id, and
+    /// is greyed for an app that has none, which no rule matches.
+    @Test("App Rules… lands on the app's rule, greyed without a bundle")
+    func appRulesRow() throws {
+        let core = seededCore()
+        var landed: [SettingsLanding] = []
+        core.barMenuHooks.openSettings = { landed.append($0) }
+        let rows = core.barMenuRows(.appItem([WindowID(1)]))
+        let row = try #require(rows.first { $0.title == "App Rules…" })
+        perform(row)
+        #expect(landed == [.appRule("com.apple.safari")])
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(7), pid: 70, appName: "Tool")
+            )
+        )
+        let bare = core.barMenuRows(.appItem([WindowID(7)]))
+        #expect(bare.first { $0.title == "App Rules…" }?.enabled == false)
     }
 
     @Test("a window gone since the render offers only the shelf")

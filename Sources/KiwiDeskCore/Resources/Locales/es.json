@@ -94,6 +94,7 @@
   "app_rules.title_contains": "El título contiene…",
   "app_rules.titled.caption": "Las ventanas cuyo título contenga un patrón permanecen flotantes.",
   "bar.menu.advanced_colors": "Colores avanzados…",
+  "bar.menu.app_rules": "Reglas de apps…",
   "bar.menu.ax.nested": "%1$@: %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.float_window": "Hacer flotar la ventana",

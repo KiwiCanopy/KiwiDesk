@@ -94,6 +94,7 @@
   "app_rules.title_contains": "Titel enthält…",
   "app_rules.titled.caption": "Fenster, deren Titel das Muster enthält, bleiben schwebend.",
   "bar.menu.advanced_colors": "Erweiterte Farben…",
+  "bar.menu.app_rules": "App-Regeln…",
   "bar.menu.ax.nested": "%1$@: %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.float_window": "Fenster schweben lassen",

@@ -94,6 +94,7 @@
   "app_rules.title_contains": "タイトルに次を含む…",
   "app_rules.titled.caption": "タイトルにパターンを含むウインドウはフローティングのままになります。",
   "bar.menu.advanced_colors": "詳細なカラー…",
+  "bar.menu.app_rules": "アプリルール…",
   "bar.menu.ax.nested": "%1$@：%2$@",
   "bar.menu.ax.subtitled": "%1$@、%2$@",
   "bar.menu.float_window": "ウインドウをフローティングにする",

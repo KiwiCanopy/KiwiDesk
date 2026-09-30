@@ -94,6 +94,7 @@
   "app_rules.title_contains": "Le titre contient…",
   "app_rules.titled.caption": "Les fenêtres dont le titre contient un motif restent flottantes.",
   "bar.menu.advanced_colors": "Couleurs avancées…",
+  "bar.menu.app_rules": "Règles d’apps…",
   "bar.menu.ax.nested": "%1$@ : %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.float_window": "Faire flotter la fenêtre",

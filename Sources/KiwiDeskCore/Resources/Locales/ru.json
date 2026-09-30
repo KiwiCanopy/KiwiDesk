@@ -94,6 +94,7 @@
   "app_rules.title_contains": "Заголовок содержит…",
   "app_rules.titled.caption": "Окна, заголовок которых содержит шаблон, остаются плавающими.",
   "bar.menu.advanced_colors": "Доп. цвета…",
+  "bar.menu.app_rules": "Правила приложений…",
   "bar.menu.ax.nested": "%1$@: %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.float_window": "Сделать окно плавающим",

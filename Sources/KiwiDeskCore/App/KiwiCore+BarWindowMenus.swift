@@ -19,6 +19,7 @@ extension KiwiCore {
         var rows: [BarMenuRow] = []
         if movable { rows.append(moveRow(live)) }
         rows.append(floatRow(live))
+        rows.append(appRulesRow(app))
         rows += [.separator, quitRow(app)]
         return rows
     }
@@ -91,6 +92,19 @@ extension KiwiCore {
             L("bar.menu.float_window", "Float Window"),
             rows
         )
+    }
+
+    /// Greyed for an app with no bundle id, which no rule can
+    /// match.
+    private func appRulesRow(_ app: ManagedWindow) -> BarMenuRow {
+        let bundle = app.appBundleID
+        return .action(
+            L("bar.menu.app_rules", "App Rules…"),
+            enabled: bundle != nil
+        ) { [weak self] in
+            guard let bundle else { return }
+            self?.barMenuHooks.openSettings(.appRule(bundle))
+        }
     }
 
     /// Greyed for Finder, which macOS relaunches, and for KiwiDesk

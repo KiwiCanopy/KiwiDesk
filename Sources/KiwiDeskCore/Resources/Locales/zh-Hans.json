@@ -94,6 +94,7 @@
   "app_rules.title_contains": "标题包含…",
   "app_rules.titled.caption": "标题包含该模式的窗口会保持浮动。",
   "bar.menu.advanced_colors": "高级颜色…",
+  "bar.menu.app_rules": "App 规则…",
   "bar.menu.ax.nested": "%1$@：%2$@",
   "bar.menu.ax.subtitled": "%1$@，%2$@",
   "bar.menu.float_window": "让窗口浮动",

@@ -33,6 +33,7 @@ extension SettingsView {
             model.noteSearchModeSwitch(armedNotice)
         }
         model.destination = resolved.destination
+        var scroll = resolved.scroll
         switch resolved.surface {
         case .main:
             break
@@ -40,12 +41,15 @@ extension SettingsView {
             model.nav.layoutModeTab = mode
         case .space(let space):
             model.nav.spaceOverridesFocus = space
+        case .appRule(let app):
+            model.nav.appRuleFocus = app
+            scroll = AppRulesSection.card(holding: app, in: model)?.id
         }
         // Unconditional, nil included: guarding a nil→nil publish
         // would stop a destination-only request from CLEARING an
         // unconsumed `pendingScroll`, and the driver would wash
         // the old anchor inside the new destination.
-        model.nav.pendingScroll = resolved.scroll
-        model.nav.setRevealTarget(resolved.scroll)
+        model.nav.pendingScroll = scroll
+        model.nav.setRevealTarget(scroll)
     }
 }
