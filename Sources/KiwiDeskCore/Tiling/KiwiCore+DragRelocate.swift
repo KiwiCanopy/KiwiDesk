@@ -14,12 +14,16 @@ import Foundation
 ///
 ///   path                  AX focus   #463    z-order   retile
 ///                                    settle  restore   force
-///   moveWindow(follow:)   yes+warp   yes*    —         yes*
+///   moveWindow(follow:)   yes+warp†  yes*    —         yes*
 ///   Space-Bar spring      none       none    none      yes
 ///   live crossing (#504)  none       none    yes       yes
 ///   drop-commit (below)   no-warp    yes     tiled*    no
 ///
 ///   *a float joining changes no tiled overlap (#674).
+///   †no-follow: only when the moved window held focus, left
+///    the active Space or entered it (#1518), so a move between
+///    other Spaces — a named verb, a drop from another display's
+///    Space — neither raises nor warps.
 ///
 /// The drop-commit also takes a float dropped on another display
 /// (#1686, `relocateDroppedFloat`), and must never re-anchor, or

@@ -126,8 +126,7 @@ struct ConfigMigrationRoutingTests {
     /// `scroll_duration` is an animation key and nothing else,
     /// and `scroll_speed` is a key nowhere at all.
     ///
-    /// Same argument as the `content` guard below, for the same
-    /// reason: the #1020 walk rewrites by KEY at any depth and
+    /// The #1020 walk rewrites by KEY at any depth and
     /// `readBackup` runs it across a whole `SetupBundle`, so a
     /// second `scroll_speed` JSON key anywhere in the config
     /// would put a value the walk was never scoped to inside its
@@ -270,58 +269,70 @@ struct ConfigMigrationRoutingTests {
         )
     }
 
-    /// `content` is a bar-content key and nothing else.
+    /// The retired `app_bar.content` drop stays scoped to the App
+    /// Bar groups, and `content` stays a key nothing declares.
     ///
-    /// `ConfigMigration`'s walk rewrites by KEY at any depth, and
-    /// `readBackup` runs it across a whole `SetupBundle` — so a
-    /// `content` CodingKey added to any other config type would
-    /// put a value the walk was never scoped to inside its reach.
-    /// The docstring used to assert this as a fact about the
-    /// tree; a fact about the tree is true the day it is written
-    /// (rule-authoring.md).
-    @Test("Only the two bar styles declare a `content` key")
-    func contentKeyStaysABarKey() throws {
+    /// The walk drops `content` under any parent named `app_bar`,
+    /// at any depth — the global bar and each layout's override
+    /// (#1528). A scope has two halves and both can widen: a new
+    /// `app_bar` group anywhere hands the drop a parent it was
+    /// never told about, and a `content` CodingKey declared
+    /// again would be a live value an older file's crossing
+    /// drops. The declaration needle is deliberately broad —
+    /// `case content` anywhere — so it fails CLOSED on a new one,
+    /// which then has to state which kind it is.
+    @Test("The App Bar content drop stays scoped to its groups")
+    func appBarContentDropStaysScoped() throws {
         let root = coreRoot
         let prefix = root.path + "/"
-        // Deliberately a broad needle — `case content` anywhere
-        // — so it fails CLOSED on a new declaration and the entry
-        // has to state which kind it is. Two are CodingKeys and
-        // therefore JSON keys the walk can reach; the third is a
-        // command verb that never reaches a file.
-        let allowed: Set<String> = [
-            // The global bar style's JSON key...
-            "Layouts/AppBarStyle+Coding.swift",
-            // ...and a layout's override, one level down, which
-            // is why the walk rewrites by key at any depth.
-            "Layouts/LayoutAppBar+Coding.swift",
-            // NOT a CodingKey: `AppBarCommandSetting.content` is
-            // the `app_bar.set_content` verb, an in-memory
-            // command payload. It is never serialized as a key,
-            // so the walk cannot reach it.
-            "Commands/AppBarCommandSetting.swift",
+        // The groups the walk lands on: the global bar, and the
+        // two layouts that carry an override.
+        let allowedGroup: Set<String> = [
+            "Tiling/TilingSettings+Coding.swift",
+            "Layouts/MonocleParams.swift",
+            "Layouts/LayoutParams.swift",
         ]
+        let allowedDeclaring: Set<String> = []
+        var group: Set<String> = []
         var declaring: Set<String> = []
         for file in try SourceScan.swiftSources(under: root) {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            guard source.occurrences(of: "case content") > 0
-            else { continue }
             let key =
                 file.path.hasPrefix(prefix)
                 ? String(file.path.dropFirst(prefix.count))
                 : file.path
-            declaring.insert(key)
+            if source.contains("= \"app_bar\""),
+                source.contains("CodingKey")
+            {
+                group.insert(key)
+            }
+            if source.range(
+                of: "case content(?![A-Za-z0-9_])",
+                options: .regularExpression
+            ) != nil {
+                declaring.insert(key)
+            }
         }
+        #expect(!group.isEmpty)
         #expect(
-            declaring == allowed,
+            group == allowedGroup,
+            Comment(
+                rawValue:
+                    "`app_bar` groups: \(group.sorted()) — a new "
+                    + "one is a parent the drop was never scoped "
+                    + "to, or this map owes it an entry"
+            )
+        )
+        #expect(
+            declaring == allowedDeclaring,
             Comment(
                 rawValue:
                     "`content` declarations: "
                     + "\(declaring.sorted()) — a new CodingKey "
-                    + "owes ConfigMigration's walk a path, or "
-                    + "this map a narrower home; a non-key case "
-                    + "just needs its entry and its reason"
+                    + "is a value the #1528 drop reaches; a "
+                    + "non-key case needs its entry and reason"
             )
         )
     }

@@ -46,13 +46,13 @@ struct LookStoreTests {
     func replaceFilters() throws {
         let store = store()
         var foreign = look("A")
-        foreign.style["app_bar.content"] = .string("icon")
+        foreign.style["app_bar.title_cap"] = .number(7)
         let refused = try store.replaceUserLooks(
             with: [foreign, look("A"), look("Taskbar")]
         )
         #expect(refused == 2)
         #expect(store.userLooks().map(\.name) == ["A"])
-        #expect(store.userLooks()[0].style["app_bar.content"] == nil)
+        #expect(store.userLooks()[0].style["app_bar.title_cap"] == nil)
     }
 
     @Test("export and import round-trip, foreign keys dropped")
@@ -62,7 +62,7 @@ struct LookStoreTests {
             .appendingPathComponent("look-\(UUID().uuidString).json")
         var exported = look("A")
         exported.colors["bogus"] = "#FFF"
-        exported.style["app_bar.content"] = .string("icon")
+        exported.style["app_bar.title_cap"] = .number(7)
         try store.export(LookExport(look: exported), to: url)
         let back = try store.importLook(from: url)
         #expect(back.style == look("A").style)

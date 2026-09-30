@@ -218,9 +218,10 @@ struct ShelfDropTargetTests {
                     $0.space == space
                 })
             else { continue }
+            let run = overlay.itemRun.frame.origin
             let drawn = item.frame.offsetBy(
-                dx: viewport.minX,
-                dy: viewport.minY
+                dx: viewport.minX + run.x,
+                dy: viewport.minY + run.y
             )
             #expect(
                 drawn.contains(CGPoint(x: hit.frame.midX, y: hit.frame.midY)),

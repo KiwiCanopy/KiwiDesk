@@ -84,39 +84,19 @@ struct AppBarGlyphLayoutTests {
         #expect(view.label.stringValue == "Downloads")
     }
 
-    @Test("Name-only content shows neither glyph nor image")
-    func nameOnlyHidesGlyph() {
-        var style = AppBarLook()
-        style.content = .title
-        let view = makeView(
-            thickness: 32,
-            glyph: ":zed:",
-            style: style
-        )
-        #expect(view.glyphLabel.isHidden)
-        #expect(view.iconView.isHidden)
-    }
-
     /// The widest name defines the uniform slot — and must then
     /// FIT that slot untruncated (the center-alignment cell
     /// metric that tail-truncated exactly the longest tab).
-    /// Parameterized over the formula's branches: content mode
-    /// (icon side present or not) and fixed-vs-auto font.
+    /// Parameterized over the formula's font branch: auto
+    /// (`0`) and fixed.
     @Test(
         "The widest title fits the slot it defined",
-        arguments: [
-            (AppBarStyle.Content.iconAndTitle, CGFloat(0)),
-            (AppBarStyle.Content.iconAndTitle, CGFloat(18)),
-            (AppBarStyle.Content.title, CGFloat(0)),
-        ]
+        arguments: [CGFloat(0), CGFloat(18)]
     )
-    func widestTitleFitsItsOwnSlot(
-        variant: (AppBarStyle.Content, CGFloat)
-    ) {
+    func widestTitleFitsItsOwnSlot(fontSize: CGFloat) {
         let thickness: CGFloat = 32
         var style = AppBarLook()
-        style.content = variant.0
-        style.fontSize = variant.1
+        style.fontSize = fontSize
         let items = [
             // The widest TITLE deliberately belongs to the
             // app with the SHORTEST name. A measurement that
@@ -155,7 +135,7 @@ struct AppBarGlyphLayoutTests {
             id: WindowID(2),
             text: "TanStack Start: Full-Stack React",
             icon: nil,
-            glyph: variant.0 == .title ? nil : ":settings:",
+            glyph: ":settings:",
             count: 1,
             active: false,
             horizontal: true,
@@ -197,35 +177,6 @@ struct AppBarGlyphLayoutTests {
             style: AppBarLook()
         )
         view.layout()
-        #expect(view.label.isHidden)
-    }
-
-    /// ...and an icon-only item hides its label outright.
-    ///
-    /// What it pins is the MEASUREMENT, which is the load-bearing
-    /// half: `showText` zeroes `textSize`, and a zero-width label
-    /// is hidden either way. Forcing `showText = true` reds this
-    /// test and nothing in `AppBarSlotSizingTests` (mutation,
-    /// 2026-08-20). The vertical sibling above does NOT pin that
-    /// — `layoutVertical` never consults `showsText` — which is
-    /// why the two keep separate paragraphs.
-    ///
-    /// It also settled a duplicate. `configure` hid the label as
-    /// well, and the layout pass then decided it again, so
-    /// mutating the `configure` write was inert in every suite —
-    /// an unobservable write, now gone. `layoutHorizontal` owns
-    /// this, through `Content.showsText` rather than a
-    /// hand-spelled `== .icon`, so a later text-free case
-    /// inherits the answer (review 2026-08-20).
-    @Test("An icon-only item hides its label")
-    func iconOnlyHidesLabel() {
-        var style = AppBarLook()
-        style.content = .icon
-        let view = makeView(
-            thickness: 32,
-            glyph: ":zed:",
-            style: style
-        )
         #expect(view.label.isHidden)
     }
 }

@@ -48,6 +48,8 @@ final class AppBarItemView: NSView {
     var edge: AppBarEdge { style.edge }
     private(set) var isActive = false
     private(set) var count = 1
+    /// The windows its menu names (#1518); set beside `configure`.
+    var members: [WindowID] = []
     /// Leading/trailing position within current item run; they
     /// set the rounded ends' insets (#1763).
     var isFirstInRun = false {
@@ -204,16 +206,10 @@ final class AppBarItemView: NSView {
         self.style = style
         isHovered = false
         iconView.image = icon
-        let content = style.content.rendered(
-            horizontal: horizontal
-        )
-        let showsGlyph =
-            glyph?.isEmpty == false && content != .title
+        let showsGlyph = glyph?.isEmpty == false
         glyphLabel.isHidden = !showsGlyph
         glyphLabel.stringValue = glyph ?? ""
-        iconView.isHidden =
-            showsGlyph || content == .title
-            || icon == nil
+        iconView.isHidden = showsGlyph || icon == nil
         badge.isHidden = count < 2
         badge.stringValue = "\(count)"
         badge.textColor =

@@ -86,7 +86,6 @@ struct RoundedItemEndPadChipTests {
         var look = AppBarLook()
         look.shelf = Fixture.shelf(roundness, boxed: boxed)
         look.edge = .top
-        look.content = .iconAndTitle
         return look
     }
 
@@ -229,25 +228,6 @@ struct RoundedItemEndPadChipTests {
     /// On a plate a middle slot draws no rounded end; the run's
     /// first clears its leading icon, and the last's trailing end
     /// is its title, which needs none.
-    /// Where no title follows the icon, the trailing end holds it
-    /// too and clears the curve (owner, 2026-09-29).
-    @Test("An icon-only App Bar slot clears both rounded ends")
-    func iconOnlySlotClearsBothEnds() {
-        var look = Self.appLook(100)
-        look.content = .icon
-        let e = Self.clearance(look, depth: Self.depth)
-        #expect(e > 0)
-        let edge = AppBarItemView.edgePadding
-        #expect(
-            AppBarItemView.endPadding(
-                look,
-                depth: Self.depth,
-                first: false,
-                last: false
-            ) == ItemEnds(leading: edge + e, trailing: edge + e)
-        )
-    }
-
     @Test("On a plate only the App Bar run's outer ends pad")
     func plateSlotsPadOnlyTheRunEnds() {
         let look = Self.appLook(100, boxed: false)

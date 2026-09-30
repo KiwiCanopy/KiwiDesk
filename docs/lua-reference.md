@@ -209,6 +209,16 @@ KiwiDesk.move_to_space_and_follow("mail")
 KiwiDesk.move_to_space_and_follow(3)
 ```
 
+:::unreleased
+`move_to_space` and `move_to_space_and_follow` take an optional
+window id from [`get_state`](#get_state) after the space, and
+then move that window rather than the focused one:
+`KiwiDesk.move_to_space("mail", 4711)`. An id no managed window
+carries is refused. A window moved into the current Space takes
+focus there; one moved between other Spaces leaves the current
+Space's focus where it is.
+:::
+
 ### focus_desktop
 
 **Expects:** a macOS Desktop number — the number Mission Control
@@ -2355,6 +2365,17 @@ before KiwiShelf keeps each bar's own edge — the App Bar at the
 bottom where it stored none.
 :::
 
+:::unreleased
+`app_bar.set_content`, `monocle.set_app_bar_content` and
+`scroll.set_app_bar_content` are retired → nothing: the App Bar
+always draws each item's icon and title, and a vertical one its
+icon alone. Over the CLI each fails with `…: the App Bar always
+draws each item's icon and title`. A saved profile drops its
+stored `content` once, and a backup as it is read, so a bar that
+showed only titles gains its icons, and one that showed only icons
+gains its titles.
+:::
+
 The `gap` active indicator is removed: `set_active_indicator`
 and its per-layout twins refuse it, naming the values that
 remain.
@@ -2393,6 +2414,16 @@ every layout's bar. Each layout decides whether it shows one and
 may override the App Bar's own fields for itself ([Per-Layout
 App Bar Overrides](#per-layout-app-bar-overrides)).
 
+Each item shows its window's icon and **title** — the window's
+own title, not its app name; on a `left` or `right` edge it shows
+the icon alone. The app name appears, never shortened, in two
+places:
+
+- a **grouped** item (its members show titles once it expands);
+- a window whose title is **empty** — some apps (Electron and
+  WebKit ones especially) report no title until well after the
+  window opens.
+
 ### app_bar.set_edge
 
 :::unreleased
@@ -2430,30 +2461,6 @@ app_bar.set_edge("bottom")
 app_bar.set_active_indicator("outline")
 ```
 
-### app_bar.set_content
-
-**Expects:** `"icon"`, `"title"`, or `"icon_and_title"`
-(default `icon_and_title`).
-
-**Does:** sets what each item displays. The text is the
-window's own **title**, not its app name. The app name appears,
-never shortened, in two places:
-
-- a **grouped** item (its members show titles once it expands);
-- a window whose title is **empty** — some apps (Electron and
-  WebKit ones especially) report no title until well after the
-  window opens.
-
-Vertical bars (edge `left`/`right`) always render icon-only; the
-stored preference returns when the bar moves back to a
-horizontal edge.
-
-**Example:**
-
-```lua
-app_bar.set_content("icon_and_title")
-```
-
 ### app_bar.set_title_cap
 
 **Expects:** a character count, 8–80 (default `10`). Values
@@ -2461,8 +2468,8 @@ outside the range are clamped.
 
 **Does:** sets how much of a window's title an item shows;
 longer titles are cut at the end and marked with an ellipsis. A
-title is also cut where it does not fit its slot; with
-`icon_and_title` only the title shrinks, never the icon.
+title is also cut where it does not fit its slot; only the
+title shrinks, never the icon.
 
 Every slot is as wide as the widest item, at least the icon
 square and at most a quarter of the whole KiwiShelf edge, so
@@ -2495,14 +2502,14 @@ app_bar.set_group_adjacent_windows(true)
 
 Each bar-hosting layout (monocle, scrolling) can override the
 App Bar's own fields for itself — `enabled`, `active_indicator`,
-`content`, `title_cap` and `group_adjacent_windows`. Only these
+`title_cap` and `group_adjacent_windows`. Only these
 two layouts show a bar, so only they expose `set_app_bar_*`.
 Unset fields inherit the global value.
 [KiwiShelf](#kiwishelf)'s fields — its colours, glyph style and
 `dim_factor` included — take no per-layout override. The
 overrides are the same setters prefixed with the layout name:
 
-- `monocle.set_app_bar_enabled`, `monocle.set_app_bar_content`,
+- `monocle.set_app_bar_enabled`,
   `monocle.set_app_bar_title_cap`, etc.
 - `scroll.set_app_bar_enabled`,
   `scroll.set_app_bar_active_indicator`,
@@ -2518,7 +2525,7 @@ no per-layout override either.
 ```lua
 monocle.set_app_bar_enabled(true)
 scroll.set_app_bar_enabled(true)
-scroll.set_app_bar_content("icon")  -- override for scrolling
+scroll.set_app_bar_title_cap(20)  -- override for scrolling
 ```
 
 ## Space Bar
@@ -3757,6 +3764,15 @@ identifier (a rare unbundled helper process) cannot be targeted
 by a rule.
 
 ## Making Windows Floating or Tiled
+
+:::unreleased
+`make_floating`, `make_tiled` and `toggle_floating` take an
+optional window id from [`get_state`](#get_state), and then act on
+that window rather than the focused one:
+`KiwiDesk.make_floating(4711)`. An id no managed window carries is
+refused, and a window on a Space no screen shows takes its floating
+frame when that Space is next shown.
+:::
 
 ### make_floating
 
@@ -5045,6 +5061,13 @@ undeclared, it stays held, pinned back to its monitor. With a
 hand-written `init.lua` and no profile for the connected
 monitors, a reconnect only places spaces, and a held space stays
 held.
+
+:::unreleased
+A window in a held space stays there even when the incoming
+profile remembers it in one of its own spaces, so what was on the
+monitor goes home together
+([#1728](https://github.com/KiwiCanopy/KiwiDesk/issues/1728)).
+:::
 
 A held space is dropped once no window is left in it on any
 Desktop, by `delete_space`, and on an explicit `load_profile`,

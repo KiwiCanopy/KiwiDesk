@@ -78,12 +78,10 @@ extension KiwiCore {
         // the app refuse it.
         decoder.dateDecodingStrategy = .iso8601
         // A bundle carries `[Profile]` inline, so it is the second
-        // reader of profile JSON — and backups shipped IN v0.9.7,
-        // whose profiles all carry the retired `app_bar.content`
-        // (`ConfigMigration`). Without this the bundle decode
-        // fails and the user is told `.notABackup` — "that file
-        // isn't a KiwiDesk backup" — about a file this app wrote
-        // one version ago.
+        // reader of profile JSON and owes every crossing: an
+        // older backup it cannot decode is refused as
+        // `.notABackup` — "that file isn't a KiwiDesk backup" —
+        // about a file this app wrote.
         //
         // In memory only, deliberately: a backup is the user's
         // artifact and a record of a moment, it may sit on

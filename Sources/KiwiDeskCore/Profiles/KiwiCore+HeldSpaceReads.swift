@@ -51,6 +51,18 @@ extension KiwiCore {
             && returnsHome(origin, declared: declared, into: arrangement)
     }
 
+    /// The held Space `window` belongs to: the one it is a member
+    /// of, else the one it is remembered in and will come back to
+    /// — a closed window never does (#1561). The one answer to
+    /// what a held Space holds (#1507 ruling 4, #1728).
+    func heldSpace(holding window: WindowID) -> SpaceID? {
+        let space =
+            state.workspaces.space(of: window)
+            ?? (state.closedDepartures.contains(window)
+                ? nil : state.rememberedSpace(of: window))
+        return space.flatMap { state.heldSpaces[$0] == nil ? nil : $0 }
+    }
+
     /// The live Spaces an arrangement WRITE captures — Keep, a
     /// Settings Save, the sidecar sync, a profile's partitioning
     /// record — which a held Space never joins (#1507 ruling 5).

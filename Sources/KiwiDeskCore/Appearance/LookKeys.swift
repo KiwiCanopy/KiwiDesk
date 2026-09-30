@@ -55,7 +55,6 @@ public enum LookKeys {
         "space_bar.sticky_badge": functionality,
         "space_bar.spring_delay": functionality,
         "space_bar.item_label": functionality,
-        "app_bar.content": functionality,
         "app_bar.title_cap": functionality,
         "app_bar.group_adjacent_windows": functionality,
         "border.enabled": functionality,

@@ -46,7 +46,7 @@ extension SpaceBarOverlay {
         BarMotion.runLayout {
             for (index, view) in itemViews.enumerated()
             where index < frames.count
-                && view.superview === itemContainer
+                && view.superview === itemRun
             {
                 moveFrame(view, frames[index], glides)
             }

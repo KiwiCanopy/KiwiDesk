@@ -12,7 +12,6 @@ extension LayoutAppBar: Codable {
     enum Key: String, CodingKey, CaseIterable {
         case enabled
         case activeIndicator = "active_indicator"
-        case content
         case titleCap = "title_cap"
         case groupAdjacentWindows = "group_adjacent_windows"
     }
@@ -27,10 +26,6 @@ extension LayoutAppBar: Codable {
         activeIndicator = try container.decodeIfPresent(
             ActiveIndicator.self,
             forKey: .activeIndicator
-        )
-        content = try container.decodeIfPresent(
-            Content.self,
-            forKey: .content
         )
         titleCap = try container.decodeIfPresent(
             Int.self,
@@ -49,7 +44,6 @@ extension LayoutAppBar: Codable {
             activeIndicator,
             forKey: .activeIndicator
         )
-        try container.encodeIfPresent(content, forKey: .content)
         try container.encodeIfPresent(titleCap, forKey: .titleCap)
         try container.encodeIfPresent(
             groupAdjacentWindows,

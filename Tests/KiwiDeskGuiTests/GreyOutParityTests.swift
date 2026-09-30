@@ -173,14 +173,6 @@ struct GreyOutParityTests {
             "GreyOut(active: ownPredicateLive && inert",
             1
         ),
-        // The shelf's glyph style greys when no bar draws an
-        // app icon — a predicate over two bars' state the census
-        // cannot express (#1517).
-        (
-            "KiwiShelfCard+Rows.swift",
-            "active: gates.noBarDrawsIcon",
-            1
-        ),
         // Not a GreyOut site — a plain `.disabled` with its own
         // reason-bearing help — but the same convention, and
         // the same failure if it is dropped: Apply would switch

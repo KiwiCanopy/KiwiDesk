@@ -153,12 +153,6 @@ extension KiwiShelfCard {
                 }
             }
         }
-        .modifier(
-            GreyOut(
-                active: gates.noBarDrawsIcon,
-                help: BarsGateHelp.sentence(for: .noAppIcon)
-            )
-        )
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfStyle.children
                 .kiwishelfStyleIconSource

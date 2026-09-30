@@ -141,7 +141,9 @@ extension SpaceBarOverlay {
         return lengths.max() ?? 0
     }
 
-    /// Calculates item frames and front segment start coordinate.
+    /// Calculates item frames and front segment start coordinate,
+    /// in `itemRun` coordinates: an overflowing run starts at zero
+    /// and the run's frame carries the scroll.
     nonisolated static func runMetrics(
         lengths: [CGFloat],
         gap: CGFloat,
@@ -150,8 +152,7 @@ extension SpaceBarOverlay {
         viewport: CGFloat,
         horizontal: Bool,
         alignment: KiwiShelf.Alignment,
-        pad: CGFloat,
-        scrollOffset: CGFloat
+        pad: CGFloat
     ) -> RunMetrics {
         let total = runTotal(
             lengths: lengths,
@@ -161,7 +162,7 @@ extension SpaceBarOverlay {
         let cross = horizontal ? strip.height : strip.width
         var cursor =
             total > viewport
-            ? -scrollOffset
+            ? 0
             : contentStart(
                 total: total,
                 axis: viewport,

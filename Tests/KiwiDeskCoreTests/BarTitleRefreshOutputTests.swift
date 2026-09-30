@@ -34,7 +34,6 @@ struct BarTitleRefreshOutputTests {
         core.state.workspaces.activate("1")
         core.state.workspaces.setMode(SpaceID("1"), .monocle)
         core.tiler.settings.monocle.appBar.enabled = true
-        core.tiler.settings.appBarStyle.content = .iconAndTitle
         core.tiler.settings.barEdge = .top
         core.state.apply(
             .windowCreated(titledWindow(1, title: "Downloads"))
@@ -66,18 +65,18 @@ struct BarTitleRefreshOutputTests {
         #expect(after.text == "Projects")
     }
 
-    /// The #937 chain's middle link: under icon content the
-    /// refresh must still rebuild the item's title text — the
-    /// drawn label ignores it, the accessibility label
+    /// The #937 chain's middle link: on a vertical, icon-only bar
+    /// the refresh must still rebuild the item's title text — the
+    /// drawn item shows no label, the accessibility label
     /// announces it (`AppBarAccessibilityTests` pins the view
     /// half). Without this pin a later "optimization" gating
-    /// `barItemText` on `showsText` reverts #937 with the arm
-    /// tests green — armed but inert, the vacuity class this
-    /// suite exists to rule out.
-    @Test("Icon content still re-renders the item's title")
-    func iconContentRefreshStillCarriesTitle() throws {
+    /// `barItemText` on a draws-text reading reverts #937 with
+    /// the arm tests green — armed but inert, the vacuity class
+    /// this suite exists to rule out.
+    @Test("A vertical bar still re-renders the item's title")
+    func verticalRefreshStillCarriesTitle() throws {
         let core = seededOnMainScreen()
-        core.tiler.settings.appBarStyle.content = .icon
+        core.tiler.settings.appBarStyle.edge = .left
         core.updateBars()
         let before = try #require(
             core.appBars.shownBarsForTesting.first?.items.first

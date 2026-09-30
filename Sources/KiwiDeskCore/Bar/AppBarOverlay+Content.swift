@@ -4,7 +4,7 @@ import AppKit
 /// section divider centres against (#1779).
 extension AppBarOverlay {
     /// The span from the first item's drawn start to the last
-    /// item's drawn end, in `root`'s coordinates, read at each
+    /// item's drawn end, in the coordinates of `frames`, read at each
     /// item's target `frames` after it is configured; zero for
     /// no items.
     func drawnContent(

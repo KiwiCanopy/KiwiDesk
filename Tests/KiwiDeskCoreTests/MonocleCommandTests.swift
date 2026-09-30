@@ -52,8 +52,8 @@ struct MonocleCommandTests {
         )
         #expect(
             core.execute(
-                "monocle.set_app_bar_content",
-                args: [.string("icon_and_title")]
+                "monocle.set_app_bar_title_cap",
+                args: [.number(12)]
             ).isSuccess
         )
     }

@@ -57,13 +57,12 @@ extension AppBarItemView {
         label.lineBreakMode = .byTruncatingTail
         label.stringValue = text
         let side = iconSlotHidden ? 0 : max(contentSide - pad * 2, 0)
-        let showText = style.content.showsText
-        var textSize = showText ? (label.cell?.cellSize ?? .zero) : .zero
+        var textSize = label.cell?.cellSize ?? .zero
         textSize.width = ceil(textSize.width)
         textSize.height = ceil(textSize.height)
-        var spacing: CGFloat = side > 0 && showText ? pad / 2 : 0
+        var spacing: CGFloat = side > 0 ? pad / 2 : 0
         let badgeReserve: CGFloat =
-            count >= 2 && showText
+            count >= 2
             ? Self.badgeSide(contentSide: contentSide) + pad
             : 0
         textSize.width = min(
@@ -81,7 +80,7 @@ extension AppBarItemView {
         let x = max(
             (size.width - side - spacing - textSize.width
                 - badgeExtent + edge.leading - edge.trailing) / 2,
-            showText ? edge.leading : pad
+            edge.leading
         )
         return HorizontalPlacement(
             x: x,
@@ -89,7 +88,7 @@ extension AppBarItemView {
             spacing: spacing,
             text: textSize,
             badgeExtent: badgeExtent,
-            showsLabel: showText && textSize.width > 0
+            showsLabel: textSize.width > 0
         )
     }
 

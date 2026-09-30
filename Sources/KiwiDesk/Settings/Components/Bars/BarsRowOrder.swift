@@ -66,7 +66,6 @@ enum BarsRowOrder {
     /// App Bar card — every row shown, each gate directly above
     /// what it gates (#1517).
     static let appBar: [SettingKey] = [
-        .appBar(.appBarContent),
         .appBar(.appBarTitleCap),
         .appBar(.appBarActiveIndicator),
         .appBar(.appBarGroupAdjacentWindows),

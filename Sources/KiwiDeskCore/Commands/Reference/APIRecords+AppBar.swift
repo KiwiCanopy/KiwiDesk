@@ -17,11 +17,6 @@ extension APIReference {
                 AppBarStyle.ActiveIndicator.self
             )
         ),
-        "set_content": APIRecord(
-            "Sets what each item draws: the icon, the window "
-                + "title, or both.",
-            .choice("content", AppBarStyle.Content.self)
-        ),
         "set_title_cap": APIRecord(
             "Sets how many characters of a window title an item "
                 + "shows, longer ones ending in an ellipsis.",

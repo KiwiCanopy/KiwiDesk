@@ -75,6 +75,42 @@ struct FloatPlacementCommandTests {
         #expect(frames[WindowID(2)]?.width == FloatPlacement.longFloor)
     }
 
+    /// A verb naming a window on a Space no screen shows (#1518)
+    /// never brings it on screen: the placement is its pending
+    /// capture, paid when the Space activates.
+    @Test("a named window on an unshown Space is seeded, not placed")
+    func unshownSpaceSeeds() throws {
+        var frames: [WindowID: CGRect] = [:]
+        let core = setup(mode: "bsp") { frames[$0] = $1 }
+        core.execute("move_to_space", args: [.string("2"), .number(1)])
+        frames = [:]
+        #expect(
+            core.execute("make_floating", args: [.number(1)]).isSuccess
+        )
+        let region = try #require(core.floatGrowBounds(of: WindowID(1)))
+        let placed = frames[WindowID(1)].map(region.intersects) ?? false
+        #expect(!placed)
+        let seed = try #require(core.tiler.stashedFrames[WindowID(1)])
+        #expect(abs(seed.midX - region.midX) < 0.001)
+        #expect(seed.width == FloatPlacement.longFloor)
+    }
+
+    /// A native-fullscreen window has its own macOS Space and is
+    /// never parked, so a seed would be re-delivered every retile
+    /// (#670): the unshown-Space placement stands down for it.
+    @Test("a fullscreen window on an unshown Space is not seeded")
+    func unshownFullscreenNotSeeded() {
+        var frames: [WindowID: CGRect] = [:]
+        let core = setup(mode: "bsp") { frames[$0] = $1 }
+        core.execute("move_to_space", args: [.string("2"), .number(1)])
+        core.state.windows.setFullscreen(WindowID(1), true)
+        let before = core.tiler.stashedFrames[WindowID(1)]
+        #expect(
+            core.execute("make_floating", args: [.number(1)]).isSuccess
+        )
+        #expect(core.tiler.stashedFrames[WindowID(1)] == before)
+    }
+
     @Test("keep leaves the frame where the layout had it")
     func keepLeavesIt() {
         var frames: [WindowID: CGRect] = [:]
