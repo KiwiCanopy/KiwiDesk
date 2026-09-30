@@ -25,4 +25,4 @@ _As of 2026-09-30_
 
 - Design your whole desktop with your own AI assistant, just by asking
 - Even more ways to make KiwiDesk truly yours
-- Jump to your previous and next Space, like back and forward in a browser
+- Simpler ways to get around your windows, Spaces and settings
