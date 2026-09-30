@@ -3876,28 +3876,46 @@ end)
 :::unreleased
 ## Opening and Closing Windows
 
-`new_window` opens a new window of the focused window's app, or of
-the app a window id from [`get_state`](#get_state) names: it brings
-the app forward and presses its **File ▸ New Window**. An app whose
-File menu has no such item — its ⌘N (or ⇧⌘N) row names no window —
-opens nothing, and a pill on the window says so. A new window its
-App Rule files into another Space takes you there, as opening the
-app would.
+Both verbs take an optional window id from
+[`get_state`](#get_state) and act on the focused window
+otherwise. They reach another app through Accessibility and
+return before it answers, so a refusal only the app can give
+shows as a pill on screen and a line in the log, never as an
+error here. KiwiDesk's own windows are refused.
 
-`close_window` closes the focused window, or the one a window id
-names, by pressing its close button, so the app answers unsaved work
-its own way. A window with no close button stays open, and a pill
-says so.
+### new_window
 
-Both act on another app through Accessibility, so the reply comes
-before the app answers: `success` means the press was asked for, and
-the pill is how a refusal shows. KiwiDesk's own windows are refused.
+**Expects:** optionally a window id.
+
+**Does:** brings that window's app forward and presses its
+**File ▸ New Window** — the File-menu item with the shortcut ⌘N
+(or ⇧⌘N) whose title names a window. An app with no such item
+opens nothing, and a pill says so. A new window its App Rule
+files into another Space takes you there, as opening the app
+would ([accepted limitations](accepted-limitations.md)).
+
+**Example:**
 
 ```lua
 KiwiDesk.bind("cmd+alt+n", function()
     KiwiDesk.new_window()
 end)
-KiwiDesk.close_window(4711)
+```
+
+### close_window
+
+**Expects:** optionally a window id.
+
+**Does:** presses that window's close button, so the app
+answers unsaved work its own way. A window with no close button
+stays open, and a pill says so.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("cmd+alt+w", function()
+    KiwiDesk.close_window()
+end)
 ```
 :::
 

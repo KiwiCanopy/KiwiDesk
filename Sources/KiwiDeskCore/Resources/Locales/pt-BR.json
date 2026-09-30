@@ -1617,5 +1617,5 @@
   "updates.state.up_to_date_checked": "Atualizado · última verificação %1$@",
   "updates.try_again": "Tentar novamente",
   "window_action.refusal.no_close_button": "“%1$@” não tem botão de fechar",
-  "window_action.refusal.no_new_window": "%1$@ não tem “Nova Janela”"
+  "window_action.refusal.no_new_window": "%1$@ não tem o comando “Nova Janela”"
 }

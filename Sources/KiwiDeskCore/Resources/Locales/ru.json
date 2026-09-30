@@ -1616,6 +1616,6 @@
   "updates.state.up_to_date": "Установлена последняя версия",
   "updates.state.up_to_date_checked": "Установлена последняя версия · последняя проверка %1$@",
   "updates.try_again": "Попробовать ещё раз",
-  "window_action.refusal.no_close_button": "У «%1$@» нет кнопки закрытия",
-  "window_action.refusal.no_new_window": "В %1$@ нет пункта «Новое окно»"
+  "window_action.refusal.no_close_button": "У окна «%1$@» нет кнопки закрытия",
+  "window_action.refusal.no_new_window": "%1$@: нет команды «Новое окно»"
 }

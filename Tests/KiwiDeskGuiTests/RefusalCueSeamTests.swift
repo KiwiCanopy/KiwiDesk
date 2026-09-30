@@ -72,11 +72,6 @@ struct RefusalCueSeamTests {
             + joined.occurrences(
                 of: "soundIfDrawn(stickyMarks.flash("
             )
-            // The primitive itself, which a refusal outside the
-            // resize family draws through (#1518's window actions).
-            + joined.occurrences(
-                of: "soundIfDrawn(borders.flashSizeLimitPill("
-            )
         #expect(drawn > 0)
         #expect(joined.occurrences(of: "soundIfDrawn(") == drawn + 1)
         // And the speaker is reached only THROUGH that gate. The

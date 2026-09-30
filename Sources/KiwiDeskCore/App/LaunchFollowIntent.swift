@@ -10,9 +10,10 @@ import Foundation
 /// (#890's weighing).
 ///
 /// Owed through `KiwiCore.oweLaunchFollow` alone: by Open or
-/// Focus, and by an activation that `noteAppActivation` judges a
-/// launch. One pending, paid once; another app's activation and
-/// a Desktop switch retire it.
+/// Focus, by `new_window` (#1518), and by an activation that
+/// `noteAppActivation` judges a launch. One pending, paid once;
+/// another app's activation, a Desktop switch and a refused New
+/// Window retire it.
 @MainActor
 final class LaunchFollowIntent {
     /// How long after the launch its window may still claim the

@@ -1616,6 +1616,6 @@
   "updates.state.up_to_date": "À jour",
   "updates.state.up_to_date_checked": "À jour · dernière vérification %1$@",
   "updates.try_again": "Réessayer",
-  "window_action.refusal.no_close_button": "« %1$@ » n’a pas de bouton de fermeture",
-  "window_action.refusal.no_new_window": "%1$@ n’a pas de « Nouvelle fenêtre »"
+  "window_action.refusal.no_close_button": "« %1$@ » n'a pas de bouton de fermeture",
+  "window_action.refusal.no_new_window": "%1$@ n'a pas de commande « Nouvelle fenêtre »"
 }

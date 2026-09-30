@@ -301,8 +301,9 @@ editing here:
   and only an OPEN owes it (#1599).** The debt is
   `LaunchFollowIntent`, keyed by the app's bundle id because the
   window does not exist when it is owed, and owed through the
-  one `oweLaunchFollow` door: by Open or Focus, and by
-  `noteAppActivation` for an activation within `pressGrace` of a
+  one `oweLaunchFollow` door: by Open or Focus, by `new_window`
+  (#1518, which retires its own debt when the app answers that
+  it opened nothing), and by `noteAppActivation` for an activation within `pressGrace` of a
   click or key-down, of a process started within `launchGrace`
   or showing no window (a reopen, an un-minimize — owner ruling
   2026-09-23), outside a Desktop switch — never on "the app is

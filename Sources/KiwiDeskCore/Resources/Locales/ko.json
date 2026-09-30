@@ -1617,5 +1617,5 @@
   "updates.state.up_to_date_checked": "최신 상태 · 마지막 확인 %1$@",
   "updates.try_again": "다시 시도",
   "window_action.refusal.no_close_button": "‘%1$@’에는 닫기 버튼이 없습니다",
-  "window_action.refusal.no_new_window": "%1$@에는 ‘새로운 윈도우’가 없습니다"
+  "window_action.refusal.no_new_window": "%1$@에는 ‘새로운 윈도우’ 명령이 없습니다"
 }

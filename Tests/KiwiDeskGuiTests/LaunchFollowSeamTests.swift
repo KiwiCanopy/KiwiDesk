@@ -35,13 +35,12 @@ struct LaunchFollowSeamTests {
             "launchFollow.pressAge = { KiwiCore.secondsSinceUserPress() }",
             "KiwiCore+BootSeams.swift", 1
         ),
-        // The ONE door that owes, and its two owers: the
-        // activation judged a launch, and Open or Focus's launch
-        // and pull branches.
+        // The ONE door that owes, and its owers: the activation
+        // judged a launch, Open or Focus's launch and pull
+        // branches, and New Window (#1518).
         ("launchFollow.record(", followFile, 1),
         ("oweLaunchFollow(bundleID, at: now)", followFile, 1),
         ("oweLaunchFollow(bundleID)", "KiwiCore+Launch.swift", 2),
-        // New Window opens something too (#1518).
         ("oweLaunchFollow(bundle)", "KiwiCore+WindowActions.swift", 1),
         // The claim at the arrival, the switch in place of its
         // retile, and the arrival's #45 start-at-target carried
@@ -93,11 +92,12 @@ struct LaunchFollowSeamTests {
         }
     }
 
-    /// Two retires, both load-bearing: another app's activation
-    /// (the user moved on) and the Desktop switch (the windows it
-    /// reveals are not a launch's). A third would be a new moment
+    /// Three retires, each load-bearing: another app's activation
+    /// (the user moved on), the Desktop switch (the windows it
+    /// reveals are not a launch's) and a refused New Window, which
+    /// opened nothing (#1518). A fourth would be a new moment
     /// ruled "not a launch", which is the judgement this rests on.
-    @Test("the debt is retired by an activation and a Desktop switch")
+    @Test("the debt is retired by an activation, a switch, a refusal")
     func twoRetires() throws {
         let sites = try SourceScan.identifierSites(
             of: "launchFollow.forget(",
@@ -105,8 +105,11 @@ struct LaunchFollowSeamTests {
         )
         #expect(
             Set(sites.map(\.file.lastPathComponent))
-                == [Self.followFile, "KiwiCore+Desktops.swift"]
-                && sites.count == 2,
+                == [
+                    Self.followFile, "KiwiCore+Desktops.swift",
+                    "KiwiCore+WindowActions.swift",
+                ]
+                && sites.count == 3,
             "found: \(sites.map(\.site))"
         )
     }

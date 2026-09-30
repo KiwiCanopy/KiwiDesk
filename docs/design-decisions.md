@@ -5100,7 +5100,11 @@ them, measured on device, is an OPEN the user caused:
   user is the worst of the three outcomes — it vanishes from
   where they are. A running app still showing a window — a
   switch into it, its own call window, ⌘T — owes nothing. The
-  boot scan involves no activation at all.
+  boot scan involves no activation at all. **New Window owes it
+  outright** (#1518, owner ruling 2026-09-30): the verb names the
+  app and asks for a window, which is the open this rule follows,
+  whatever the app already shows — and a press the app answers
+  with nothing retires the debt, since nothing opened.
 - **Either order.** A reopen can show its window BEFORE macOS
   reports the app active (Telegram, on device), so a
   rule-placed window arriving with nothing owed is kept for the

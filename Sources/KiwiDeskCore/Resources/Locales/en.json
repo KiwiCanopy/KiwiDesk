@@ -1621,5 +1621,5 @@
   "updates.state.up_to_date_checked": "Up to date · last checked %1$@",
   "updates.try_again": "Try again",
   "window_action.refusal.no_close_button": "“%1$@” has no close button",
-  "window_action.refusal.no_new_window": "%1$@ has no New Window"
+  "window_action.refusal.no_new_window": "%1$@ has no New Window command"
 }

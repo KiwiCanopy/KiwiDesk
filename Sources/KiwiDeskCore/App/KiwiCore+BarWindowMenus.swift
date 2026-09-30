@@ -165,7 +165,7 @@ extension KiwiCore {
     }
 
     /// A window's row in a submenu: its title, else its app's name.
-    private func windowTitle(_ id: WindowID) -> String {
+    func windowTitle(_ id: WindowID) -> String {
         guard let window = state.windows[id] else { return "" }
         return window.title.isEmpty ? window.appName : window.title
     }

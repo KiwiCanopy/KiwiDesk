@@ -21,7 +21,7 @@ enum WindowActionRefusal: Equatable {
         case .noNewWindow(let app):
             L(
                 "window_action.refusal.no_new_window",
-                "%1$@ has no New Window",
+                "%1$@ has no New Window command",
                 app
             )
         case .noCloseButton(let window):

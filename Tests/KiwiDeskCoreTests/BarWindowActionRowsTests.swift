@@ -15,7 +15,8 @@ struct BarWindowActionRowsTests {
     private let two = SpaceID("2")
 
     /// Windows 1–3 of "Safari" (pid 41) on Space 1, with 2 and 3
-    /// moved to Space 2; each has an AX element; the log captured.
+    /// moved to Space 2; each has an AX element of its own, so a
+    /// press can be told apart by window; the log captured.
     private func seededCore(log: Log = Log()) -> KiwiCore {
         LocalizationManager.shared.select("en")
         let core = makeTestCore(
@@ -46,7 +47,9 @@ struct BarWindowActionRowsTests {
                     )
                 )
             )
-            elements[WindowID(raw)] = AXUIElementCreateApplication(41)
+            elements[WindowID(raw)] = AXUIElementCreateApplication(
+                pid_t(40 + raw)
+            )
         }
         core.eventLoop.elements[41] = elements
         for raw in [2.0, 3.0] {
@@ -96,6 +99,20 @@ struct BarWindowActionRowsTests {
         let reply = core.execute("new_window", args: [.number(1)])
         #expect(reply.isSuccess)
         #expect(log.lines.contains("no enabled New Window item: w1"))
+        // Nothing opened, so nothing is owed (#1599).
+        #expect(core.launchFollow.owed(at: Date()) == nil)
+    }
+
+    /// Another app's debt is not this refusal's to retire.
+    @Test("a refused New Window leaves another app's follow owed")
+    func refusalKeepsAnotherDebt() {
+        let core = seededCore()
+        core.windowActions.newWindow = { _, done in
+            core.oweLaunchFollow("com.other.app")
+            done(false)
+        }
+        core.execute("new_window", args: [.number(1)])
+        #expect(core.launchFollow.owed(at: Date()) == "com.other.app")
     }
 
     @Test("Close Window presses the named window's own element")
@@ -153,15 +170,44 @@ struct BarWindowActionRowsTests {
         }
     }
 
-    /// The pill draws on the window it names where a screen shows
-    /// it, and on the focused window otherwise.
-    @Test("a refusal draws on the target when shown, else the focus")
-    func cueTarget() throws {
+    /// The pill draws on the window it names where it is drawn —
+    /// a shown Space, and not parked — and on the focused window
+    /// otherwise.
+    @Test("a refusal draws on the target when drawn, else the focus")
+    func cueTarget() {
         let core = seededCore()
-        let focused = try #require(core.focusedWindowID)
-        #expect(core.state.workspaces.space(of: focused) == one)
-        #expect(core.cueWindow(for: WindowID(1)) == WindowID(1))
-        #expect(core.cueWindow(for: WindowID(2)) == focused)
+        core.tiler.allScreenBounds = {
+            [CGRect(x: 0, y: 0, width: 1000, height: 600)]
+        }
+        let parked = CGRect(
+            x: 1000 - TilingEngine.stashPeekX,
+            y: 600 - TilingEngine.stashPeekY,
+            width: 400,
+            height: 300
+        )
+        for (raw, frame) in [
+            (UInt32(4), CGRect(x: 100, y: 100, width: 400, height: 300)),
+            (UInt32(5), parked),
+        ] {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(raw),
+                        pid: 41,
+                        appName: "Safari",
+                        frame: frame,
+                        // No layout slot: the frame is the state's.
+                        isFloating: true
+                    )
+                )
+            )
+        }
+        core.state.workspaces.focus(WindowID(1), in: one)
+        #expect(core.focusedWindowID == WindowID(1))
+        #expect(core.tiler.looksStashed(parked))
+        #expect(core.cueWindow(for: WindowID(4)) == WindowID(4))
+        #expect(core.cueWindow(for: WindowID(5)) == WindowID(1))
+        #expect(core.cueWindow(for: WindowID(2)) == WindowID(1))
     }
 
     @Test("the pill's sentences name their subject")
@@ -169,7 +215,7 @@ struct BarWindowActionRowsTests {
         LocalizationManager.shared.select("en")
         #expect(
             WindowActionRefusal.noNewWindow(app: "Claude").sentence
-                == "Claude has no New Window"
+                == "Claude has no New Window command"
         )
         #expect(
             WindowActionRefusal.noCloseButton(window: "Preview").sentence

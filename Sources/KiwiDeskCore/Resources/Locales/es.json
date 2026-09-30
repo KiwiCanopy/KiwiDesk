@@ -1617,5 +1617,5 @@
   "updates.state.up_to_date_checked": "Actualizado · última comprobación %1$@",
   "updates.try_again": "Reintentar",
   "window_action.refusal.no_close_button": "«%1$@» no tiene botón de cerrar",
-  "window_action.refusal.no_new_window": "%1$@ no tiene «Nueva ventana»"
+  "window_action.refusal.no_new_window": "%1$@ no tiene el comando «Nueva ventana»"
 }

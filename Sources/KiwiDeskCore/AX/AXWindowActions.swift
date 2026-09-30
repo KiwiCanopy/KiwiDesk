@@ -75,7 +75,9 @@ enum AXWindowActions {
     }
 
     /// Presses the window's close button. False where it has
-    /// none, or it is disabled. The app answers unsaved work its
+    /// none, or it is disabled. An unreadable enabled flag reads
+    /// as enabled here and on a menu row alike: the press is the
+    /// test. The app answers unsaved work its
     /// own way, as a click would.
     static func pressClose(_ window: AXUIElement) -> Bool {
         guard
@@ -129,7 +131,7 @@ enum AXWindowActions {
                 element,
                 kAXEnabledAttribute,
                 as: Bool.self
-            ) ?? false
+            ) != false
         )
     }
 }

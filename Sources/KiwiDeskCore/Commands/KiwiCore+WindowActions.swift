@@ -61,8 +61,14 @@ extension KiwiCore {
         if let bundle = window.appBundleID { oweLaunchFollow(bundle) }
         openOrFocus.activate(window.pid)
         windowActions.newWindow(window.pid) { [weak self] pressed in
-            guard !pressed else { return }
-            self?.cueWindowAction(
+            guard !pressed, let self else { return }
+            // Nothing opened, so nothing is owed (#1599).
+            if let bundle = window.appBundleID,
+                launchFollow.owed() == bundle
+            {
+                launchFollow.forget()
+            }
+            cueWindowAction(
                 .noNewWindow(app: window.appName),
                 on: window.id
             )
@@ -81,9 +87,11 @@ extension KiwiCore {
         }
         windowActions.close(element) { [weak self] pressed in
             guard !pressed else { return }
-            let title = window.title.isEmpty ? window.appName : window.title
-            self?.cueWindowAction(
-                .noCloseButton(window: String(title.prefix(40))),
+            guard let self else { return }
+            cueWindowAction(
+                .noCloseButton(
+                    window: String(windowTitle(window.id).prefix(40))
+                ),
                 on: window.id
             )
         }
@@ -101,12 +109,10 @@ extension KiwiCore {
         case .refused(let response):
             return .failure(ActionRefusal(response: response))
         case .window(let id):
-            guard let window = state.windows[id] else {
-                return .failure(
-                    ActionRefusal(response: .fail("unknown window"))
-                )
-            }
-            guard !EventLoop.isOwnProcess(window.pid) else {
+            // `commandTarget` answers only a tracked id.
+            guard let window = state.windows[id],
+                !EventLoop.isOwnProcess(window.pid)
+            else {
                 return .failure(
                     ActionRefusal(
                         response: .fail(
@@ -122,40 +128,33 @@ extension KiwiCore {
 
     /// Flashes the refusal where `cueWindow(for:)` says; the
     /// sentence names its subject, so it reads right on either.
+    /// Drawn without sound: it lands after the walk, long after
+    /// any hotkey fire that asked, and the sound is a fire's.
     func cueWindowAction(
         _ refusal: WindowActionRefusal,
         on target: WindowID
     ) {
         onLog("\(refusal.logReason): w\(target.raw)")
-        guard let window = cueWindow(for: target),
-            let frame = tiler.placedFrames(state: state)[window]
-                ?? state.windows[window]?.frame
-        else { return }
-        soundIfDrawn(
-            borders.flashSizeLimitPill(
-                window: window,
-                frame: frame,
-                text: refusal.sentence,
-                symbol: refusal.pillSymbol
-            )
+        guard let window = cueWindow(for: target) else { return }
+        flashRefusalPill(
+            window,
+            text: refusal.sentence,
+            symbol: refusal.pillSymbol
         )
     }
-}
 
-extension KiwiCore {
     /// The window a refusal about `target` draws on: `target`
-    /// where a screen shows its Space, else the focused window,
-    /// which the user is looking at.
+    /// where it is drawn — a shown Space, and not parked — else
+    /// the focused window, which the user is looking at.
     func cueWindow(for target: WindowID) -> WindowID? {
-        let shown = Set(
-            state.workspaces.allDisplays.compactMap {
-                state.workspaces.activeSpace(on: $0.id)
-            }
-        )
-        let onScreen =
-            state.workspaces.space(of: target).map(shown.contains)
-            ?? false
-        return onScreen ? target : focusedWindowID
+        let drawn =
+            state.workspaces.space(of: target).map {
+                state.workspaces.visibleSpaces.contains($0)
+            } == true
+            && refusalPillFrame(target).map {
+                !tiler.looksStashed($0)
+            } == true
+        return drawn ? target : focusedWindowID
     }
 }
 

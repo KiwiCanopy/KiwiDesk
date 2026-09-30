@@ -92,13 +92,13 @@ extension APIReference {
             .window("window", optional: true)
         ),
         "new_window": APIRecord(
-            "Opens a new window of the focused window's app, or "
-                + "of a window id's, through its File menu.",
+            "Asks the focused or named window's app for a new "
+                + "window; success means asked.",
             .window("window", optional: true)
         ),
         "close_window": APIRecord(
-            "Closes the focused window, or the one a window id "
-                + "names, through its close button.",
+            "Presses the focused or named window's close "
+                + "button; success means asked.",
             .window("window", optional: true)
         ),
         "make_sticky": APIRecord(

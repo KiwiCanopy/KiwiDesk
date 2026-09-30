@@ -1617,5 +1617,5 @@
   "updates.state.up_to_date_checked": "最新の状態です · 最終確認は%1$@",
   "updates.try_again": "再試行",
   "window_action.refusal.no_close_button": "「%1$@」には閉じるボタンがありません",
-  "window_action.refusal.no_new_window": "%1$@には「新規ウインドウ」がありません"
+  "window_action.refusal.no_new_window": "%1$@には「新規ウインドウ」コマンドがありません"
 }

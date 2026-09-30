@@ -535,7 +535,12 @@ rather than the row it names makes the user search again. So:
   into Core (owner ruling 2026-09-29 on #1518). A window row a
   verb cannot yet express earns the argument first, the way
   #1789 did for move and float; its refusal is the verb's own
-  `.fail`, cued as structure the GUI narrates. Nothing scans for
+  `.fail`, cued as structure the GUI narrates. A refusal only an
+  AX walk of another app can tell is the one exception: the walk
+  runs off the main actor, so the verb replies `.ok` ("asked")
+  and the refusal is a Core-drawn refusal pill through the one
+  `flashRefusalPill` door, plus a log line (#1518's New Window
+  and Close Window, `BarWindowActionRowsTests`). Nothing scans for
   a menu-only path, so this is review's; `BarWindowMenuRowsTests`
   drives the rows through their verbs.
 - **A row that writes a stored setting goes through its setter,
