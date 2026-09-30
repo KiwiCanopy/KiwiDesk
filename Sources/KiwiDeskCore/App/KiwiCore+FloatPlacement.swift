@@ -58,24 +58,44 @@ extension KiwiCore {
         tiler.forgetSizeBound(id)
     }
 
-    /// A tiled window detection starts floating (#1820) — a rule
-    /// saved over it, a misread healed — is placed as the float
-    /// verbs place one: read before the fold, placed after its
-    /// retile by `placeDetectedFloat`. A window a rule floats at
-    /// creation never reaches here.
-    func detectedFloatEntry(_ event: KiwiEvent) -> WindowID? {
-        guard case .windowFloatChanged(let id, isFloating: true) = event,
-            state.windows[id] != nil,
-            !isEffectiveFloatForPlacement(id)
-        else { return nil }
-        return id
+    /// What a detection flip owes (#1820), read before the fold:
+    /// a window that was no effective float and now floats is
+    /// placed as the float verbs place one, and an effective
+    /// float detection tiles files its frame as `make_tiled`
+    /// does (#1675), so a rule coming back returns it there.
+    enum DetectedFlip {
+        case floats(WindowID)
+        case tiles(WindowID, StateCoordinator.FloatFrame?)
     }
 
-    /// Places `detectedFloatEntry`'s window where the flip did
-    /// float it.
-    func placeDetectedFloat(_ id: WindowID?) {
-        guard let id, isEffectiveFloatForPlacement(id) else { return }
-        placeFloating(id)
+    func detectedFlip(_ event: KiwiEvent) -> DetectedFlip? {
+        guard case .windowFloatChanged(let id, let floating) = event,
+            state.windows[id] != nil
+        else { return nil }
+        let wasFloat = isEffectiveFloatForPlacement(id)
+        if floating { return wasFloat ? nil : .floats(id) }
+        return wasFloat ? .tiles(id, floatFrameToRemember(id)) : nil
+    }
+
+    /// Pays `detectedFlip`'s debt after the event's retile, where
+    /// the fold really flipped the window. Stands down while event
+    /// retiles are deferred (boot, a sweep chunk: the frame is the
+    /// app's, not a slot) and for a window a drag holds or in its
+    /// own macOS Space (#670).
+    func settleDetectedFlip(_ flip: DetectedFlip?) {
+        switch flip {
+        case .floats(let id):
+            guard !defersEventRetiles, seedsPlacement(id),
+                isEffectiveFloatForPlacement(id)
+            else { return }
+            placeFloating(id)
+        case .tiles(let id, let frame):
+            guard let frame, !isEffectiveFloatForPlacement(id)
+            else { return }
+            state.floatFrames[id] = frame
+        case nil:
+            break
+        }
     }
 
     /// Places a window a move verb just filed into a floating

@@ -60,7 +60,7 @@ extension KiwiCore {
         if case .appTerminated(let pid) = event {
             retireAwayDebts(ofExitedApp: pid)
         }
-        let detectedFloat = detectedFloatEntry(event)
+        let detectedFlip = detectedFlip(event)
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         var launchFollow: (WindowID, SpaceID)? = nil
@@ -329,7 +329,7 @@ extension KiwiCore {
         } else if crossedScreenCover(event, before: preEventFrame) {
             updateBars()  // #1787
         }
-        placeDetectedFloat(detectedFloat)
+        settleDetectedFlip(detectedFlip)
         runCloseReturnTail(
             event: event,
             effects: effects,
