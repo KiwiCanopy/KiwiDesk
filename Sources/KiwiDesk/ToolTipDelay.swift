@@ -7,7 +7,7 @@ import Foundation
 enum ToolTipDelay {
     /// AppKit reads this in milliseconds.
     static let key = "NSInitialToolTipDelay"
-    static let milliseconds = 700
+    static let milliseconds = 500
 
     static func install(into defaults: UserDefaults = .standard) {
         defaults.register(defaults: [key: milliseconds])

@@ -6340,7 +6340,7 @@ collapse.
 
 **[Trade-off]**
 
-**KiwiDesk registers a shorter `NSInitialToolTipDelay` (700 ms)
+**KiwiDesk registers a shorter `NSInitialToolTipDelay` (500 ms)
 than AppKit's default of roughly two seconds.** Registered as a
 fallback, never set: a user who has chosen their own delay keeps
 it.
@@ -6365,9 +6365,14 @@ understood is mis-designed.
 The floor matters as much as the ceiling: below roughly half a
 second, tooltips fire while the pointer merely *crosses* a row on
 its way elsewhere, and Settings becomes a field of popping
-yellow. Late help is better than that. 700 ms is chosen to be
-clearly faster than a pause-and-give-up while still requiring
-the pointer to actually rest.
+yellow. Late help is better than that. The delay sits AT that
+floor, 500 ms, rather than above it (owner ruling): Settings'
+help is read, not stumbled on — a reader who rests on a greyed
+control has already decided to ask, and every tenth of a second
+past the floor is spent making them wait for an answer they
+came for. The floor is the fastest delay that still requires
+the pointer to actually rest, so any margin above it buys
+nothing the reader wants.
 
 ### Permanent accessory mode (no activation policy switching)
 
