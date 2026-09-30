@@ -65,9 +65,9 @@ extension GesturePicture {
     /// Hold a dragged window over another Space: Space 1 keeps its
     /// other window, the dragged one's half simply empty; the ring
     /// fills;
-    /// the screen becomes Space 2 — BSP, two windows and an empty
-    /// gap; still dragging, the window goes down into the gap and
-    /// fills it — the rest frame.
+    /// the screen becomes Space 2 — a grid, three windows and an
+    /// empty corner; still dragging, the window goes down into the
+    /// corner and fills it — the rest frame.
     struct Spring: View, Animatable {
         var t: CGFloat
         nonisolated var animatableData: CGFloat {
@@ -99,7 +99,8 @@ extension GesturePicture {
                 }
                 .opacity(1 - open)
                 Group {
-                    ink.window(CGRect(x: 10, y: 24, width: 48, height: 42))
+                    ink.window(CGRect(x: 10, y: 24, width: 48, height: 20))
+                    ink.window(CGRect(x: 10, y: 46, width: 48, height: 20))
                     ink.window(CGRect(x: 62, y: 24, width: 48, height: 20))
                     ink.window(CGRect(x: 62, y: 46, width: 48, height: 20))
                         .opacity(drop)
