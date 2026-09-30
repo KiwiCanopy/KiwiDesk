@@ -325,7 +325,7 @@ editing here:
   nothing of the app is up; one already showing is merely
   focused. A new route that should follow an open owes through
   that door, and a new moment that is "not an open" retires
-  through `forget(` beside the two there — `LaunchFollowSeamTests`
+  through `forget(` beside those there — `LaunchFollowSeamTests`
   counts them, since both seams default inert and a lost wiring
   turns the feature off with `LaunchFollowTests` green. Its bound
   is derived from `FollowFocusIntent.drainWindow` plus one

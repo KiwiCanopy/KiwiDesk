@@ -540,7 +540,9 @@ rather than the row it names makes the user search again. So:
   runs off the main actor, so the verb replies `.ok` ("asked")
   and the refusal is a Core-drawn refusal pill through the one
   `flashRefusalPill` door, plus a log line (#1518's New Window
-  and Close Window, `BarWindowActionRowsTests`). Nothing scans for
+  and Close Window, `BarWindowActionRowsTests`; the door's
+  callers and its one primitive call are `RefusalCueSeamTests`
+  ▸ `pillDoorCallersAreNamed`). Nothing scans for
   a menu-only path, so this is review's; `BarWindowMenuRowsTests`
   drives the rows through their verbs.
 - **A row that writes a stored setting goes through its setter,

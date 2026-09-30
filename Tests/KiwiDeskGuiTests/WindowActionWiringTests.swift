@@ -54,11 +54,11 @@ struct WindowActionWiringTests {
     @Test("both test cores pin the window actions inert")
     func testCoresPin() throws {
         for target in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
-            let source = try String(
-                contentsOf: Self.root.appendingPathComponent(
+            // Comments stripped: a commented-out pin is no pin.
+            let source = try SourceScan.strippedSource(
+                at: Self.root.appendingPathComponent(
                     "Tests/\(target)/TestCore.swift"
-                ),
-                encoding: .utf8
+                )
             )
             for pin in [
                 "core.openOrFocus.activate = { _ in }",

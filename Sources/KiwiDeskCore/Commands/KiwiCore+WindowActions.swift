@@ -148,8 +148,13 @@ extension KiwiCore {
     /// screen, which a park or a scrolled-out slot is not — else
     /// the focused window, which the user is looking at.
     func cueWindow(for target: WindowID) -> WindowID? {
+        // A sticky window renders on its render Space, not its
+        // home (#1225).
+        let renders = state.windows[target].flatMap {
+            state.stickyRenderSpace(of: $0)
+        }
         let shown =
-            state.workspaces.space(of: target).map {
+            (renders ?? state.workspaces.space(of: target)).map {
                 state.workspaces.visibleSpaces.contains($0)
             } == true
         let onScreen =

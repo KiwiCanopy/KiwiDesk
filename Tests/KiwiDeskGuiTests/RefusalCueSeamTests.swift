@@ -292,5 +292,22 @@ struct RefusalCueSeamTests {
             ],
             "found: \(callers)"
         )
+        // And nothing goes around the door: the Borders primitive
+        // is called once in Core, from the door's own body.
+        var primitive = 0
+        for file in try SourceScan.swiftSources(under: core) {
+            primitive += Self.stripped(
+                try String(contentsOf: file, encoding: .utf8)
+            ).occurrences(of: "borders.flashSizeLimitPill(")
+        }
+        let door = Self.stripped(
+            try SourceScan.functionBody(
+                of: "flashRefusalPill",
+                in: "KiwiCore+SizeLimitPill.swift",
+                under: "App"
+            )
+        )
+        #expect(primitive == 1)
+        #expect(door.occurrences(of: "borders.flashSizeLimitPill(") == 1)
     }
 }

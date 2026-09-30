@@ -230,6 +230,10 @@ struct BarWindowActionRowsTests {
         #expect(core.cueWindow(for: WindowID(5)) == WindowID(1))
         #expect(core.cueWindow(for: WindowID(6)) == WindowID(1))
         #expect(core.cueWindow(for: WindowID(2)) == WindowID(1))
+        // A sticky window renders on the active Space, whatever
+        // its hidden home.
+        core.state.setSticky(WindowID(2), .global)
+        #expect(core.cueWindow(for: WindowID(2)) == WindowID(2))
     }
 
     @Test("the pill's sentences name their subject")
