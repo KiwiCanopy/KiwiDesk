@@ -98,9 +98,11 @@
   "bar.menu.app_rules": "アプリルール…",
   "bar.menu.ax.nested": "%1$@：%2$@",
   "bar.menu.ax.subtitled": "%1$@、%2$@",
+  "bar.menu.close_window": "ウインドウを閉じる",
   "bar.menu.float_window": "ウインドウをフローティングにする",
   "bar.menu.looks": "デザイン…",
   "bar.menu.move_here": "現在のスペースに移動",
+  "bar.menu.new_window": "新規ウインドウ",
   "bar.menu.quit_app": "%1$@を終了",
   "bar.menu.reset_minimum": "Space Barの最小長をリセット",
   "bar.menu.shelf_settings": "KiwiShelfの設定…",
@@ -1338,7 +1340,7 @@
   "shortcuts.gestures.app_bar": "App Barに沿ってアイテムをドラッグすると、ウインドウを並べ替えられます。",
   "shortcuts.gestures.app_bar_hover": "タイトルが短縮されたApp Barの項目にポインタを置くと、タイトル全体が表示されます。",
   "shortcuts.gestures.app_bar_off": "どのレイアウトにもApp Barが表示されていません。%1$@でオンにしてください。",
-  "shortcuts.gestures.context_menu": "KiwiShelfを右クリックすると、クリックしたものに応じたメニューが開きます。スペースのレイアウト、スペースに表示するグリフの数、KiwiShelfの設定を扱えます。",
+  "shortcuts.gestures.context_menu": "KiwiShelfを右クリックすると、クリックしたものに応じたメニューが開きます。スペースのレイアウトと表示するグリフの数、ウインドウやそのアプリに対する操作、KiwiShelfの設定を扱えます。",
   "shortcuts.gestures.drop_on_space": "ウインドウをKiwiShelf上のスペースにドラッグすると、そのスペースへ移動します。",
   "shortcuts.gestures.edge": "ウインドウの端をドラッグするとサイズを変更できます。",
   "shortcuts.gestures.follow_focus": "フォーカスは、ショートカット、スペースの切り替え、アプリの切り替え、ウインドウを閉じたときに移動します。",
@@ -1616,5 +1618,7 @@
   "updates.state.unavailable": "このビルドではアップデートの確認が無効になっています。",
   "updates.state.up_to_date": "最新の状態です",
   "updates.state.up_to_date_checked": "最新の状態です · 最終確認は%1$@",
-  "updates.try_again": "再試行"
+  "updates.try_again": "再試行",
+  "window_action.refusal.no_close_button": "「%1$@」には閉じるボタンがありません",
+  "window_action.refusal.no_new_window": "%1$@には「新規ウインドウ」コマンドがありません"
 }

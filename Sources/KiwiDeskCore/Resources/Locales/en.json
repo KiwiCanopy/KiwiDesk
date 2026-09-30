@@ -98,9 +98,11 @@
   "bar.menu.app_rules": "App Rules…",
   "bar.menu.ax.nested": "%1$@: %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
+  "bar.menu.close_window": "Close Window",
   "bar.menu.float_window": "Float Window",
   "bar.menu.looks": "Looks…",
   "bar.menu.move_here": "Move to Current Space",
+  "bar.menu.new_window": "New Window",
   "bar.menu.quit_app": "Quit %1$@",
   "bar.menu.reset_minimum": "Reset Space Bar Minimum",
   "bar.menu.shelf_settings": "KiwiShelf Settings…",
@@ -1342,7 +1344,7 @@
   "shortcuts.gestures.app_bar": "Drag an item along the App Bar to reorder its windows.",
   "shortcuts.gestures.app_bar_hover": "Point at an App Bar item whose title is cut short to see it in full.",
   "shortcuts.gestures.app_bar_off": "No layout shows an App Bar. Turn one on in %1$@.",
-  "shortcuts.gestures.context_menu": "Right-click the KiwiShelf for a menu of what you clicked: a Space's layout, how many glyphs a Space shows, and the KiwiShelf's settings.",
+  "shortcuts.gestures.context_menu": "Right-click the KiwiShelf for a menu of what you clicked: a Space's layout and how many glyphs it shows, what to do with a window or its app, and the KiwiShelf's settings.",
   "shortcuts.gestures.drop_on_space": "Drag a window onto a Space on the KiwiShelf to move it there.",
   "shortcuts.gestures.edge": "Drag a window's edge to resize it.",
   "shortcuts.gestures.follow_focus": "Focus moves with a shortcut, a Space switch, switching apps or a closed window.",
@@ -1620,5 +1622,7 @@
   "updates.state.unavailable": "Update checks are off in this build.",
   "updates.state.up_to_date": "Up to date",
   "updates.state.up_to_date_checked": "Up to date · last checked %1$@",
-  "updates.try_again": "Try again"
+  "updates.try_again": "Try again",
+  "window_action.refusal.no_close_button": "“%1$@” has no close button",
+  "window_action.refusal.no_new_window": "%1$@ has no New Window command"
 }

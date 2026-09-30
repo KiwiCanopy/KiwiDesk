@@ -16,12 +16,55 @@ extension KiwiCore {
         let live = windows.filter { state.windows[$0] != nil }
         guard let app = live.first.flatMap({ state.windows[$0] })
         else { return [] }
-        var rows: [BarMenuRow] = []
+        var rows = [newWindowRow(app)]
         if movable { rows.append(moveRow(live)) }
         rows.append(floatRow(live))
         rows.append(appRulesRow(app))
-        rows += [.separator, quitRow(app)]
+        rows += [.separator, closeRow(live), quitRow(app)]
         return rows
+    }
+
+    /// The app's File ▸ New Window, pressed through AX. Offered
+    /// from state alone (bars.md), so an app with no such row
+    /// refuses at perform time with a cue rather than greying;
+    /// greyed for KiwiDesk itself, as Quit is.
+    private func newWindowRow(_ app: ManagedWindow) -> BarMenuRow {
+        .action(
+            L("bar.menu.new_window", "New Window"),
+            enabled: !EventLoop.isOwnProcess(app.pid)
+        ) { [weak self] in
+            _ = self?.execute(
+                "new_window",
+                args: [.number(Double(app.id.raw))]
+            )
+        }
+    }
+
+    /// The window's close button, through AX; a window without
+    /// one refuses at perform time, as New Window does.
+    private func closeRow(_ windows: [WindowID]) -> BarMenuRow {
+        let title = L("bar.menu.close_window", "Close Window")
+        let closes = { (id: WindowID) in
+            self.state.windows[id].map {
+                !EventLoop.isOwnProcess($0.pid)
+            } ?? false
+        }
+        let close = { [weak self] (id: WindowID) in
+            _ = self?.execute(
+                "close_window",
+                args: [.number(Double(id.raw))]
+            )
+        }
+        guard windows.count > 1 else {
+            let id = windows[0]
+            return .action(title, enabled: closes(id)) { close(id) }
+        }
+        let rows = windows.map { id in
+            BarMenuRow.action(windowTitle(id), enabled: closes(id)) {
+                close(id)
+            }
+        }
+        return .submenu(title, enabled: rows.contains { $0.enabled }, rows)
     }
 
     /// "Current Space" is the Space holding the system focus —
@@ -131,7 +174,7 @@ extension KiwiCore {
     }
 
     /// A window's row in a submenu: its title, else its app's name.
-    private func windowTitle(_ id: WindowID) -> String {
+    func windowTitle(_ id: WindowID) -> String {
         guard let window = state.windows[id] else { return "" }
         return window.title.isEmpty ? window.appName : window.title
     }

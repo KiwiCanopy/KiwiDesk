@@ -88,6 +88,16 @@ extension APIReference {
                 + "and tiled, refused as make_tiled is.",
             .window("window", optional: true)
         ),
+        "new_window": APIRecord(
+            "Asks the focused or named window's app for a new "
+                + "window; success means asked.",
+            .window("window", optional: true)
+        ),
+        "close_window": APIRecord(
+            "Presses the focused or named window's close "
+                + "button; success means asked.",
+            .window("window", optional: true)
+        ),
         "make_sticky": APIRecord(
             "Marks the focused window globally sticky across all "
                 + "screens."

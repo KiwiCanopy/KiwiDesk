@@ -98,9 +98,11 @@
   "bar.menu.app_rules": "App-Regeln…",
   "bar.menu.ax.nested": "%1$@: %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
+  "bar.menu.close_window": "Fenster schließen",
   "bar.menu.float_window": "Fenster schweben lassen",
   "bar.menu.looks": "Looks…",
   "bar.menu.move_here": "In den aktuellen Space verschieben",
+  "bar.menu.new_window": "Neues Fenster",
   "bar.menu.quit_app": "%1$@ beenden",
   "bar.menu.reset_minimum": "Space-Bar-Minimum zurücksetzen",
   "bar.menu.shelf_settings": "KiwiShelf-Einstellungen…",
@@ -1338,7 +1340,7 @@
   "shortcuts.gestures.app_bar": "Ziehe ein Element entlang der App Bar, um ihre Fenster neu anzuordnen.",
   "shortcuts.gestures.app_bar_hover": "Zeige mit dem Mauszeiger auf ein Element der App Bar, dessen Titel gekürzt ist, um ihn vollständig zu sehen.",
   "shortcuts.gestures.app_bar_off": "Kein Layout zeigt eine App Bar. Aktiviere eine in %1$@.",
-  "shortcuts.gestures.context_menu": "Ein Rechtsklick auf KiwiShelf öffnet ein Menü zu dem, was du angeklickt hast: das Layout eines Space, wie viele Glyphen ein Space zeigt, und die Einstellungen von KiwiShelf.",
+  "shortcuts.gestures.context_menu": "Ein Rechtsklick auf KiwiShelf öffnet ein Menü zu dem, was du angeklickt hast: das Layout eines Space und wie viele Glyphen er zeigt, was mit einem Fenster oder seiner App geschehen soll, und die Einstellungen von KiwiShelf.",
   "shortcuts.gestures.drop_on_space": "Ziehe ein Fenster auf einen Space auf KiwiShelf, um es dorthin zu verschieben.",
   "shortcuts.gestures.edge": "Ziehe die Kante eines Fensters, um seine Größe zu ändern.",
   "shortcuts.gestures.follow_focus": "Der Fokus wechselt durch ein Tastenkürzel, einen Space-Wechsel, einen App-Wechsel oder ein geschlossenes Fenster.",
@@ -1616,5 +1618,7 @@
   "updates.state.unavailable": "Die Update-Prüfung ist in diesem Build deaktiviert.",
   "updates.state.up_to_date": "Auf dem neuesten Stand",
   "updates.state.up_to_date_checked": "Auf dem neuesten Stand · zuletzt geprüft %1$@",
-  "updates.try_again": "Erneut versuchen"
+  "updates.try_again": "Erneut versuchen",
+  "window_action.refusal.no_close_button": "„%1$@“ hat keine Schließen-Taste",
+  "window_action.refusal.no_new_window": "%1$@ hat keinen Befehl „Neues Fenster“"
 }

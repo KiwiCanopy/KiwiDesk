@@ -10,9 +10,10 @@ import Foundation
 /// (#890's weighing).
 ///
 /// Owed through `KiwiCore.oweLaunchFollow` alone: by Open or
-/// Focus, and by an activation that `noteAppActivation` judges a
-/// launch. One pending, paid once; another app's activation and
-/// a Desktop switch retire it.
+/// Focus, by `new_window` (#1518), and by an activation that
+/// `noteAppActivation` judges a launch. One pending, paid once;
+/// another app's activation, a Desktop switch and a refused New
+/// Window retire it.
 @MainActor
 final class LaunchFollowIntent {
     /// How long after the launch its window may still claim the
@@ -105,6 +106,13 @@ final class LaunchFollowIntent {
             return nil
         }
         return pending.bundleID
+    }
+
+    /// Retires `bundleID`'s debt alone, leaving any placement: a
+    /// refused New Window opened nothing, and a placement waits on
+    /// its own app's activation (#1518).
+    func forget(pending bundleID: String) {
+        if pending?.bundleID == bundleID { pending = nil }
     }
 
     /// Retires the debt unpaid, and any placement waiting for one

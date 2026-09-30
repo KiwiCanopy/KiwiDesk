@@ -98,9 +98,11 @@
   "bar.menu.app_rules": "Правила приложений…",
   "bar.menu.ax.nested": "%1$@: %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
+  "bar.menu.close_window": "Закрыть окно",
   "bar.menu.float_window": "Сделать окно плавающим",
   "bar.menu.looks": "Облики…",
   "bar.menu.move_here": "Переместить в текущее пространство",
+  "bar.menu.new_window": "Новое окно",
   "bar.menu.quit_app": "Завершить %1$@",
   "bar.menu.reset_minimum": "Сбросить минимум Space Bar",
   "bar.menu.shelf_settings": "Настройки KiwiShelf…",
@@ -1338,7 +1340,7 @@
   "shortcuts.gestures.app_bar": "Перетаскивай элемент вдоль App Bar, чтобы изменить порядок её окон.",
   "shortcuts.gestures.app_bar_hover": "Наведи указатель на элемент App Bar с сокращённым заголовком, чтобы увидеть его полностью.",
   "shortcuts.gestures.app_bar_off": "Ни одна раскладка не показывает App Bar. Включи её для раскладки в разделе %1$@.",
-  "shortcuts.gestures.context_menu": "Щёлкни по KiwiShelf правой кнопкой мыши — откроется меню для того, по чему ты щёлкнул: раскладка пространства, сколько глифов показывает пространство, и настройки KiwiShelf.",
+  "shortcuts.gestures.context_menu": "Щёлкни по KiwiShelf правой кнопкой мыши — откроется меню для того, по чему ты щёлкнул: раскладка пространства и сколько глифов оно показывает, что сделать с окном или его приложением, и настройки KiwiShelf.",
   "shortcuts.gestures.drop_on_space": "Перетащи окно на пространство на KiwiShelf, чтобы перенести его туда.",
   "shortcuts.gestures.edge": "Перетащи край окна, чтобы изменить его размер.",
   "shortcuts.gestures.follow_focus": "Фокус переходит после сочетания клавиш, переключения пространства, переключения приложений или закрытия окна.",
@@ -1616,5 +1618,7 @@
   "updates.state.unavailable": "Проверка обновлений отключена в этой сборке.",
   "updates.state.up_to_date": "Установлена последняя версия",
   "updates.state.up_to_date_checked": "Установлена последняя версия · последняя проверка %1$@",
-  "updates.try_again": "Попробовать ещё раз"
+  "updates.try_again": "Попробовать ещё раз",
+  "window_action.refusal.no_close_button": "У окна «%1$@» нет кнопки закрытия",
+  "window_action.refusal.no_new_window": "%1$@: нет команды «Новое окно»"
 }

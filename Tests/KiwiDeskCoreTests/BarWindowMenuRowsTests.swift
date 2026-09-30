@@ -10,6 +10,7 @@ import Testing
 /// already is; Float or Tile by the window's own setting; per-window
 /// submenus for a glyph or group standing for several; Quit greyed
 /// for Finder and KiwiDesk. Every row acts through the public verb.
+/// New Window and Close Window are `BarWindowActionRowsTests`'.
 @Suite("Bar window menu rows", .serialized)
 @MainActor
 struct BarWindowMenuRowsTests {
@@ -79,15 +80,16 @@ struct BarWindowMenuRowsTests {
         "KiwiShelf Settings…", "Looks…", "Advanced Colors…",
     ]
 
-    @Test("a one-window glyph offers move, float and quit")
+    @Test("a one-window glyph offers every window row, in order")
     func glyphRows() {
         let core = seededCore()
         let rows = core.barMenuRows(.glyph([WindowID(2)]))
         #expect(
             titles(rows)
                 == [
-                    "Move to Current Space", "Float Window",
-                    "App Rules…", "—", "Quit Safari", "—",
+                    "New Window", "Move to Current Space",
+                    "Float Window", "App Rules…", "—", "Close Window",
+                    "Quit Safari", "—",
                 ] + shelf
         )
     }
@@ -99,8 +101,8 @@ struct BarWindowMenuRowsTests {
         #expect(
             titles(rows)
                 == [
-                    "Float Window", "App Rules…", "—", "Quit Safari",
-                    "—",
+                    "New Window", "Float Window", "App Rules…", "—",
+                    "Close Window", "Quit Safari", "—",
                 ] + shelf
         )
     }
@@ -108,7 +110,7 @@ struct BarWindowMenuRowsTests {
     @Test("Move to Current Space moves the window to the focused Space")
     func moveMovesHere() {
         let core = seededCore()
-        let move = core.barMenuRows(.glyph([WindowID(2)]))[0]
+        let move = core.barMenuRows(.glyph([WindowID(2)]))[1]
         #expect(move.enabled)
         perform(move)
         #expect(core.state.workspaces.space(of: WindowID(2)) == one)
@@ -117,18 +119,18 @@ struct BarWindowMenuRowsTests {
     @Test("Move is greyed for a window already in the focused Space")
     func moveGreyedHere() {
         let core = seededCore()
-        let move = core.barMenuRows(.glyph([WindowID(1)]))[0]
+        let move = core.barMenuRows(.glyph([WindowID(1)]))[1]
         #expect(!move.enabled)
     }
 
     @Test("the float row follows the window's own setting")
     func floatFollowsState() {
         let core = seededCore()
-        let float = core.barMenuRows(.appItem([WindowID(1)]))[0]
+        let float = core.barMenuRows(.appItem([WindowID(1)]))[1]
         perform(float)
         #expect(core.state.windows[WindowID(1)]?.isFloating == true)
         #expect(core.state.windows[WindowID(2)]?.isFloating == false)
-        let tile = core.barMenuRows(.appItem([WindowID(1)]))[0]
+        let tile = core.barMenuRows(.appItem([WindowID(1)]))[1]
         #expect(tile.title == "Tile Window")
         perform(tile)
         #expect(core.state.windows[WindowID(1)]?.isFloating == false)
@@ -168,18 +170,18 @@ struct BarWindowMenuRowsTests {
         let core = seededCore()
         let windows = [WindowID(2), WindowID(3)]
         let rows = core.barMenuRows(.glyph(windows))
-        let move = submenu(rows[0])
+        let move = submenu(rows[1])
         #expect(titles(move) == ["Page 2", "Page 3"])
         #expect(move.allSatisfy { $0.enabled })
         perform(move[1])
         #expect(core.state.workspaces.space(of: WindowID(3)) == one)
         #expect(core.state.workspaces.space(of: WindowID(2)) == two)
-        let float = submenu(rows[1])
+        let float = submenu(rows[2])
         #expect(float.map(\.checked) == [false, false])
         perform(float[0])
         #expect(core.state.windows[WindowID(2)]?.isFloating == true)
         #expect(core.state.windows[WindowID(3)]?.isFloating == false)
-        let again = submenu(core.barMenuRows(.glyph(windows))[1])
+        let again = submenu(core.barMenuRows(.glyph(windows))[2])
         #expect(again.map(\.checked) == [true, false])
     }
 
@@ -187,8 +189,8 @@ struct BarWindowMenuRowsTests {
     func appGroupSubmenu() {
         let core = seededCore()
         let rows = core.barMenuRows(.appItem([WindowID(2), WindowID(3)]))
-        #expect(titles(rows).first == "Float Window")
-        #expect(titles(submenu(rows[0])) == ["Page 2", "Page 3"])
+        #expect(titles(rows).prefix(2) == ["New Window", "Float Window"])
+        #expect(titles(submenu(rows[1])) == ["Page 2", "Page 3"])
     }
 
     private func quitRow(_ core: KiwiCore, _ id: WindowID) -> BarMenuRow? {
@@ -245,7 +247,7 @@ struct BarWindowMenuRowsTests {
         core.state.workspaces.assign(two, to: other)
         core.state.workspaces.show(two, on: other)
         #expect(core.state.workspaces.currentSpace(on: other) == two)
-        let move = core.barMenuRows(.glyph([WindowID(2)]))[0]
+        let move = core.barMenuRows(.glyph([WindowID(2)]))[1]
         #expect(move.enabled)
         perform(move)
         #expect(core.state.workspaces.space(of: WindowID(2)) == one)
@@ -255,7 +257,7 @@ struct BarWindowMenuRowsTests {
     func moveGreyedForSticky() {
         let core = seededCore()
         core.state.setSticky(WindowID(2), .global)
-        let move = core.barMenuRows(.glyph([WindowID(2)]))[0]
+        let move = core.barMenuRows(.glyph([WindowID(2)]))[1]
         #expect(!move.enabled)
     }
 
@@ -268,23 +270,23 @@ struct BarWindowMenuRowsTests {
             )
         )
         let rows = core.barMenuRows(.glyph([WindowID(1), WindowID(4)]))
-        #expect(!rows[0].enabled)
-        #expect(submenu(rows[0]).allSatisfy { !$0.enabled })
+        #expect(!rows[1].enabled)
+        #expect(submenu(rows[1]).allSatisfy { !$0.enabled })
     }
 
     @Test("a group with one window left takes the plain rows")
     func goneMemberCollapses() {
         let core = seededCore()
         let rows = core.barMenuRows(.glyph([WindowID(2), WindowID(99)]))
-        for row in rows.prefix(2) {
+        for row in rows.prefix(3) {
             guard case .action = row.kind else {
                 Issue.record("expected a plain \(row.title) row")
                 continue
             }
         }
         #expect(
-            titles(rows).prefix(2)
-                == ["Move to Current Space", "Float Window"]
+            titles(rows).prefix(3)
+                == ["New Window", "Move to Current Space", "Float Window"]
         )
     }
 

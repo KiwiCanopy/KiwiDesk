@@ -98,9 +98,11 @@
   "bar.menu.app_rules": "앱 규칙…",
   "bar.menu.ax.nested": "%1$@: %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
+  "bar.menu.close_window": "윈도우 닫기",
   "bar.menu.float_window": "윈도우 플로팅",
   "bar.menu.looks": "디자인…",
   "bar.menu.move_here": "현재 공간으로 이동",
+  "bar.menu.new_window": "새로운 윈도우",
   "bar.menu.quit_app": "%1$@ 종료",
   "bar.menu.reset_minimum": "Space Bar 최소 길이 재설정",
   "bar.menu.shelf_settings": "KiwiShelf 설정…",
@@ -1338,7 +1340,7 @@
   "shortcuts.gestures.app_bar": "App Bar를 따라 항목을 드래그하면 윈도우 순서가 바뀝니다.",
   "shortcuts.gestures.app_bar_hover": "제목이 줄어든 App Bar 항목 위에 포인터를 올리면 전체 제목을 볼 수 있습니다.",
   "shortcuts.gestures.app_bar_off": "App Bar를 표시하는 레이아웃이 없습니다. %1$@에서 켜십시오.",
-  "shortcuts.gestures.context_menu": "KiwiShelf를 오른쪽 클릭하면 클릭한 대상에 맞는 메뉴가 열립니다. 공간의 레이아웃, 공간에 표시할 글리프 수, KiwiShelf 설정을 다룰 수 있습니다.",
+  "shortcuts.gestures.context_menu": "KiwiShelf를 오른쪽 클릭하면 클릭한 대상에 맞는 메뉴가 열립니다. 공간의 레이아웃과 표시할 글리프 수, 윈도우나 그 앱에 대한 동작, KiwiShelf 설정을 다룰 수 있습니다.",
   "shortcuts.gestures.drop_on_space": "윈도우를 KiwiShelf의 공간 위로 드래그하면 그 공간으로 이동합니다.",
   "shortcuts.gestures.edge": "윈도우 가장자리를 드래그하면 크기가 조절됩니다.",
   "shortcuts.gestures.follow_focus": "포커스는 단축키, 공간 전환, 앱 전환 또는 윈도우를 닫을 때 이동합니다.",
@@ -1616,5 +1618,7 @@
   "updates.state.unavailable": "이 빌드에서는 업데이트 확인이 꺼져 있습니다.",
   "updates.state.up_to_date": "최신 상태",
   "updates.state.up_to_date_checked": "최신 상태 · 마지막 확인 %1$@",
-  "updates.try_again": "다시 시도"
+  "updates.try_again": "다시 시도",
+  "window_action.refusal.no_close_button": "‘%1$@’에는 닫기 버튼이 없습니다",
+  "window_action.refusal.no_new_window": "%1$@에는 ‘새로운 윈도우’ 명령이 없습니다"
 }

@@ -353,6 +353,16 @@ window carries (`kiwidesk make_floating 4711`).
 :::
 
 :::unreleased
+`new_window` and `close_window` take the same optional window
+`id`. `new_window` presses that window's app's **File ▸ New
+Window**; `close_window` presses the window's close button. Both
+reach another app through Accessibility, so `success` means the
+press was asked for: an app with no such item, or a window with no
+close button, is refused by a pill on screen, not in the reply —
+see [Opening and Closing Windows](lua-reference.md#opening-and-closing-windows).
+:::
+
+:::unreleased
 The `scroll_gesture.*` commands set the scroll gestures; see
 [Scroll Gestures](lua-reference.md#scroll-gestures).
 :::

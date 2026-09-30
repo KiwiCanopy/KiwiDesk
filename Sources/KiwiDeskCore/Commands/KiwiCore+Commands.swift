@@ -48,6 +48,10 @@ extension KiwiCore {
             return setFloating(command, args, false)
         case "toggle_floating":
             return toggleFloating(command, args)
+        case "new_window":
+            return newWindow(args)
+        case "close_window":
+            return closeWindow(args)
         case "make_sticky":
             return setFocusedSticky(.global)
         case "make_display_sticky":
