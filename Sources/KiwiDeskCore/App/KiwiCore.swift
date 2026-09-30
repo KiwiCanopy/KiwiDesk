@@ -170,6 +170,8 @@ public final class KiwiCore {
     /// makes (#673), declared and argued as a bundle in
     /// `KiwiCore+LaunchRestore.swift`; all four live by default.
     var openOrFocus = OpenOrFocusSeams()
+    /// The AX presses behind `new_window` / `close_window` (#1518).
+    var windowActions = WindowActionSeams()
 
     /// The ignored-panel distrust (#21/#244/#951) — the state's
     /// own docs, and the one state machine mutating it, live in

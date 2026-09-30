@@ -3,7 +3,8 @@ import Foundation
 
 /// Every machine touch Open or Focus makes — both branches of
 /// `launch` — in one place, so a test can state the world and
-/// record what the command did to it (#673).
+/// record what the command did to it (#673). `new_window`
+/// brings its app forward through the same `activate` (#1518).
 ///
 /// A bundle rather than separate properties on `KiwiCore`: they
 /// are one feature's seams, always substituted together, and the
