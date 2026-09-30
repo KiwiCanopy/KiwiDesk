@@ -65,16 +65,20 @@ final class WhatsNewWindowController: NSObject, NSWindowDelegate {
     let offer: UpdateOffer
     /// Internal so a test sees what the relaunch handed on.
     let narration: BootNarration?
+    /// Internal so a test sees what the window was handed.
+    let next: NextOnMyList?
     private let done: () -> Void
     private var window: NSWindow?
 
     init(
         offer: UpdateOffer,
         narration: BootNarration?,
+        next: NextOnMyList?,
         done: @escaping () -> Void
     ) {
         self.offer = offer
         self.narration = narration
+        self.next = next
         self.done = done
         super.init()
     }
@@ -92,7 +96,8 @@ final class WhatsNewWindowController: NSObject, NSWindowDelegate {
     func makeWindow() -> NSWindow {
         let window = UpdateWindowChrome.window(
             offer: offer,
-            mode: .whatsNew(narration: narration) { [weak self] in
+            mode: .whatsNew(narration: narration, next: next) {
+                [weak self] in
                 self?.finish()
             }
         )

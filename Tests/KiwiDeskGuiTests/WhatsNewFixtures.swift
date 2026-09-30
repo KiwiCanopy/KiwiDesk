@@ -46,6 +46,8 @@ enum WhatsNewFixture {
         )
         let log = Log()
         coordinator.fetch = { _ in feed }
+        // Offline unless a test hands a list in (#1813).
+        coordinator.fetchNext = { _ in nil }
         coordinator.presents = { _ in log.presented += 1 }
         return (coordinator, record, log)
     }

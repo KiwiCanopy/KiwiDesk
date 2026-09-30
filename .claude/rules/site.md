@@ -326,21 +326,23 @@ one that reads wrong — *Build output directory* is relative to
 `wrangler.toml` has no key for **Build watch paths**, so that
 single field is dashboard-held by necessity rather than by
 preference (Workers & Pages ▸ `kiwidesk` ▸ Settings ▸ Build).
-It includes `site/*` and nothing else, so a PR that touches no
-site file starts no deploy — which is also what stops the Pages
-bot commenting on every Swift-only PR, and with it the mail
-GitHub sends the author about that comment.
+It must cover `site/*` and every input the build reads from
+outside `site/`, and should cover nothing more, so a PR that
+touches none of them starts no deploy — which is also what stops
+the Pages bot commenting on every Swift-only PR, and with it the
+mail GitHub sends the author about that comment.
 
 Nothing in this repo can read that field, so the two obligations
 below are the whole of its enforcement:
 
 - **A change that gives the site build an input outside `site/`
-  moves the watch path in the same change set.** The build is
-  self-contained today: every import under `site/src` resolves
-  within `site/`, there are no symlinks, and nothing reads
-  repo-root `docs/`. The day something does, the include list is
-  silently wrong and the symptom is a *stale production site* —
-  no build runs, so no build can go red.
+  asks the owner to widen the watch path before it merges.** Find
+  the current ones with `git ls-files -s site | grep ^120000` (the
+  symlinks) and the build files that read `..` paths
+  (`src/pages/roadmap.json.ts` reads `ROADMAP.md`, #1813). Miss
+  one and the include list is silently wrong: the symptom is a
+  *stale production site* — no build runs, so no build can go red,
+  and the daily rebuild below only bounds the staleness to a day.
 - **Write the include as `site/*`, never `site/**`.**
   Cloudflare's wildcard matches path separators, so `site/*`
   already covers `site/src/pages/index.astro` (their own example:
@@ -589,3 +591,35 @@ The entries inside it are the same English release notes the
 changelog page renders in every locale, which
 `site/src/components/Changelog.astro` argues for and now owns for
 both surfaces.
+
+## `/roadmap.json` is built from `ROADMAP.md`, and its path is permanent (#1813)
+
+`src/pages/roadmap.json.ts` turns the repo-root `ROADMAP.md`'s
+"Next on my list" section into the JSON the What's new window
+fetches beside `/appcast.xml`. It inherits the feed's obligations
+above — a program reads it, so it takes no locale route and no
+sitemap entry — and adds three:
+
+- **Its path is permanent from the first build that reads it.**
+  An installed copy asks for that one name forever, so a rename
+  empties the card in every shipped copy. `NextOnMyList.fileName`
+  is the app's copy of the name, and `scripts/check-site-tokens.py`
+  ▸ `check_roadmap_feed` holds the built file to it and to
+  `NextOnMyList.knownFormats` — on this gate, for the reason the
+  feed's guard is.
+- **The document grows without a format bump.** The window
+  ignores keys it does not know (`NextOnMyListTests` ▸
+  `unknownKeysAreIgnored`), so `FORMAT` moves only when an
+  existing field changes meaning or goes away — and a bump hides
+  the card in every copy shipped before it, the check above
+  comparing against the CURRENT build's formats only.
+- **`src/lib/roadmap.ts` is the one parser of the section, and it
+  refuses rather than drops.** A malformed section fails the
+  build, which is how a typo reaches the pull request that made
+  it instead of hiding the card in every installed copy;
+  `site/test-roadmap.mjs` holds each refusal and reads the real
+  file too. A refusal fails the WHOLE site build, the update
+  feed's deploy included, so the site gate stays required on any
+  PR that touches `ROADMAP.md`. The section's shape is stated once,
+  in a comment above it in `ROADMAP.md`, where whoever edits the
+  list will be.
