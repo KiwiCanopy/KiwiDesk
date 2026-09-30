@@ -112,4 +112,17 @@ struct StandardPartitioningTests {
                 == [WindowID(1)]
         )
     }
+
+    /// Quit while docked into the Standard: the capture files the
+    /// LIVE Standard as it stands, so a relaunch undocked still
+    /// knows it.
+    @Test("The Standard live at the quit is carried as it stood")
+    func liveStandardIsFiledAtCapture() throws {
+        let (core, _) = try desk()
+        core.apply(composed: standard, forceRetile: false)
+        core.state.workspaces.add(WindowID(1), to: "2")
+
+        let records = core.sessionSnapshot().arrangementRecords?.records
+        #expect(records?[.standard("Starter")]?["2"] == [WindowID(1)])
+    }
 }
