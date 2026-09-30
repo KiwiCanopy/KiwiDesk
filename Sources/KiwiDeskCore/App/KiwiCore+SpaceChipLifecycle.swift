@@ -16,7 +16,9 @@ extension KiwiCore {
     private func newSpaceRow(beside id: SpaceID) -> BarMenuRow {
         .action(
             L("bar.menu.new_space", "New Space"),
-            enabled: chipScreen(of: id) != nil
+            enabled: chipScreen(of: id) != nil,
+            // What it makes, said where it is chosen (#1790).
+            subtitle: L("bar.menu.new_space.temporary", "temporary")
         ) { [weak self] in
             guard let self, let screen = chipScreen(of: id) else { return }
             let space = mintedSpaceNumber()
@@ -40,17 +42,33 @@ extension KiwiCore {
     /// leaves the file too; a Space another source declares goes
     /// for the session and says it comes back (#1790).
     private func deleteSpaceRow(_ id: SpaceID) -> BarMenuRow {
-        let comesBack = declaredSources(of: id)
-            .contains { !$0.hasPrefix("profile:") }
+        let returns = returnsSubtitle(of: id)
         return .action(
             L("bar.menu.delete_space", "Delete Space"),
             enabled: spaceIsDeletable(id),
-            subtitle: comesBack
-                ? L("bar.menu.delete_space.returns", "comes back on reload")
-                : nil
+            subtitle: returns
         ) { [weak self] in
-            self?.deleteFromChip(id, comesBack: comesBack)
+            self?.deleteFromChip(id, comesBack: returns != nil)
         }
+    }
+
+    /// What re-creates a deleted `id` at the next reload, named —
+    /// `init.lua` first, since that is the one the user edits — or
+    /// nil where nothing does but the profile, whose Delete asks.
+    private func returnsSubtitle(of id: SpaceID) -> String? {
+        if initDeclaredSpaces.contains(id) {
+            return L(
+                "bar.menu.delete_space.returns_init",
+                "init.lua brings it back on reload"
+            )
+        }
+        guard profiles.standard?.spaces.contains(id) == true else {
+            return nil
+        }
+        return L(
+            "bar.menu.delete_space.returns_standard",
+            "the built-in layout brings it back on reload"
+        )
     }
 
     private func deleteFromChip(_ id: SpaceID, comesBack: Bool) {
@@ -66,7 +84,9 @@ extension KiwiCore {
             carriesOverrides: carriesOverrides(id)
         )
         barMenuHooks.confirmSpaceDelete(question) { [weak self] in
-            self?.execute(
+            // A window may have arrived while the alert was up.
+            guard let self, spaceIsDeletable(id) else { return }
+            execute(
                 "delete_space",
                 args: [.string(id.raw), .string(SpaceScope.profile.rawValue)]
             )

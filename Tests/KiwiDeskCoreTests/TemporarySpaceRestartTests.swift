@@ -108,7 +108,7 @@ struct TemporarySpaceRestartTests {
         let session = try crossed(a.sessionSnapshot())
         let b = boot(from: a, profile: "other", session: session)
         #expect(b.state.workspaces[scratch] == nil)
-        #expect(b.state.temporarySpaces.isEmpty)
+        #expect(b.liveTemporarySpaces.isEmpty)
     }
 
     @Test("an unplug holds it, and the replug brings it back temporary")
@@ -119,7 +119,7 @@ struct TemporarySpaceRestartTests {
             core.state.heldSpaces.first { $0.value.name == scratch }
         )
         #expect(held.value.isTemporary)
-        #expect(core.state.temporarySpaces.isEmpty, "never both")
+        #expect(!core.isTemporary(held.key), "never both")
         core.handle(.displaysChanged([desk.builtIn, desk.dell]))
         #expect(core.profiles.currentName == "desk")
         #expect(core.state.heldSpaces.isEmpty)
@@ -134,8 +134,13 @@ struct TemporarySpaceRestartTests {
 
     @Test("an empty one on a departing screen is dropped")
     func emptyDeparturesDrop() throws {
-        let core = try withScratch()
-        core.state.workspaces.add(WindowID(12), to: SpaceID(4))
+        let core = try desk.docked()
+        // Empty from birth, so unarmed: only the switch can drop it.
+        core.execute("create_space", args: [.string(scratch.raw)])
+        core.execute(
+            "pin_space_to_display",
+            args: [.string(scratch.raw), .string(desk.dell.fingerprint)]
+        )
         core.handle(.displaysChanged([desk.builtIn]))
         #expect(core.state.workspaces[scratch] == nil)
         #expect(!core.state.heldSpaces.values.contains { $0.name == scratch })

@@ -19,16 +19,17 @@ struct LiveOnlySpaceRowTests {
         )
     }
 
-    /// The model reads the roster on reload; the add button greys
-    /// where no profile file is live.
-    @Test("a reload reads the temporary Spaces, greyed with no profile")
-    func reloadReadsTheRoster() {
+    /// The model reads the roster on reload, and a temporary row's
+    /// add button is live where a profile file is.
+    @Test("a reload reads the temporary Spaces")
+    func reloadReadsTheRoster() throws {
         let core = makeTestCore()
+        core.execute("save_profile", args: [.string("p")])
         core.execute("create_space", args: [.string("7")])
         let model = makeTestModel(core: core)
         model.reload()
         let row = model.liveOnlySpaces.first { $0.id == SpaceID(7) }
         #expect(row?.isTemporary == true)
-        #expect(row?.canAdd == false)
+        #expect(row?.canAdd == true)
     }
 }

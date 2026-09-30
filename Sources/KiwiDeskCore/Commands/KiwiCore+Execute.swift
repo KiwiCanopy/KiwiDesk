@@ -15,10 +15,7 @@ extension KiwiCore {
         if impliesFocus(command, args) {
             runPendingMonocleFocus()
         }
-        let before = Set(state.workspaces.allSpaces.map(\.id))
         let response = dispatchCommand(command, args: args)
-        // A Space a command made is temporary (#1790).
-        markNewSpacesTemporary(since: before)
         // Every command run inside a hotkey fire is tallied so
         // the hold-to-glide engine can decide eligibility from
         // what the press actually DID (#1056) — a binding's

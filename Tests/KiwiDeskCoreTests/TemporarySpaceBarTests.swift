@@ -27,8 +27,7 @@ struct TemporarySpaceBarTests {
             horizontal: true,
             style: style,
             stateMarkColors: StateMarkColors(sticky: "", floating: ""),
-            held: item.held,
-            temporary: item.temporary
+            marker: item.marker
         )
         return view
     }
@@ -50,8 +49,8 @@ struct TemporarySpaceBarTests {
         let core = try desk.docked()
         core.execute("create_space", args: [.string("7")])
         let temporary = try item(core, SpaceID(7))
-        #expect(temporary.temporary)
-        #expect(try !item(core, SpaceID(1)).temporary)
+        #expect(temporary.marker == .temporary)
+        #expect(try item(core, SpaceID(1)).marker == nil)
         let drawn = view(temporary)
         #expect(!drawn.markerBadge.isHidden)
         #expect(drawn.markerBadge.symbolName == "hourglass")
@@ -76,7 +75,11 @@ struct TemporarySpaceBarTests {
         core.execute("create_space", args: [.string("7")])
         var style = SpaceBarLook()
         style.bar.stickyBadge = false
-        let drawn = view(try item(core, SpaceID(7)), style: style)
-        #expect(!drawn.markerBadge.isHidden)
+        let temporary = view(try item(core, SpaceID(7)), style: style)
+        #expect(!temporary.markerBadge.isHidden)
+        core.handle(.displaysChanged([desk.builtIn]))
+        let heldID = try #require(core.state.heldSpaces.keys.first)
+        let held = view(try item(core, heldID), style: style)
+        #expect(!held.markerBadge.isHidden)
     }
 }

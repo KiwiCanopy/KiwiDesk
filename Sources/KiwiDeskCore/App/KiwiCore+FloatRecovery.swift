@@ -64,11 +64,16 @@ extension KiwiCore {
             )
             : state.snapshot()
         snapshot.arrangement = liveArrangement
-        // A temporary Space's pin is in no arrangement, so its
-        // record carries it (#1790).
+        // Whether a Space is temporary is Core's to say, and its
+        // pin is in no arrangement, so its record carries both
+        // (#1790).
         for index in snapshot.spaces.indices {
             let id = SpaceID(snapshot.spaces[index].id)
-            snapshot.spaces[index].temporary?.pin = spacePins[id]
+            guard isTemporary(id) else { continue }
+            snapshot.spaces[index].temporary = .init(
+                armed: state.temporaryArmed.contains(id),
+                pin: spacePins[id]
+            )
         }
         // Only the frames change; every other field rides as
         // captured (the held Spaces, #1646).

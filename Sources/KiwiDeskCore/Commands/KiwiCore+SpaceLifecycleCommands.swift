@@ -13,7 +13,7 @@ extension KiwiCore {
     /// `scope` is `profile`, which writes it into the live
     /// profile's file too — an existing temporary Space included.
     /// `scope` may stand in the mode's place: no mode is spelled
-    /// like a scope (`SpaceScopeTests`).
+    /// like a scope (`TemporarySpaceScopeTests`).
     func createSpace(_ args: [JSONValue]) -> CommandResponse {
         guard let raw = args.first?.stringValue else {
             return .fail("expected space id")
@@ -39,17 +39,17 @@ extension KiwiCore {
         }
         state.workspaces.ensureSpace(space)
         if let mode { setSpaceMode(space, mode) }
-        if scope == .profile {
-            if case .failure(let refusal) = addToProfile(space) {
-                return .fail(refusal.description)
-            }
+        var refusal: ProfileScopeRefusal?
+        if scope == .profile, case .failure(let failed) = addToProfile(space) {
+            refusal = failed
         }
         // Give the new space a display (auto / main) so it can be
-        // shown, then apply.
+        // shown, then apply — a failed file write included, since
+        // the Space is live either way.
         resolveSpaceDisplays()
         retile(pass: .apply)
         emitSpaceChange()
-        return .ok()
+        return refusal.map { .fail($0.description) } ?? .ok()
     }
 
     /// `delete_space(space [, scope])` — removes a space after rehoming its
@@ -88,9 +88,10 @@ extension KiwiCore {
         else {
             return .fail("cannot delete the only space")
         }
-        if scope == .profile,
-            case .failure(let refusal) = removeFromProfile(space)
-        {
+        // Refused before anything moves; the file is written once
+        // live has let go of the Space, so an open draft that
+        // re-reads sees it gone (#1790).
+        if scope == .profile, let refusal = profileScopeRefusal(of: space) {
             return .fail(refusal.description)
         }
         forwardWindows(of: space, to: target)
@@ -103,6 +104,12 @@ extension KiwiCore {
         spacePins[space] = nil
         mainSpaces.remove(space)
         if fallbackSpace == space { fallbackSpace = nil }
+        var refusal: ProfileScopeRefusal?
+        if scope == .profile,
+            case .failure(let failed) = removeFromProfile(space)
+        {
+            refusal = failed
+        }
         resolveSpaceDisplays()
         // The rehomed windows now belong to `target`, whose
         // display just settled above: floats from the deleted
@@ -111,6 +118,7 @@ extension KiwiCore {
         reanchorFloats(of: target)
         retile(pass: .apply)
         emitSpaceChange()
+        if let refusal { return .fail(refusal.description) }
         let declared = declaredSources(of: space)
         guard !declared.isEmpty else { return .ok() }
         return .ok(

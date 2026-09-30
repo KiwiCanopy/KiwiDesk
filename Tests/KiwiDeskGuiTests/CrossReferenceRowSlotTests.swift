@@ -123,7 +123,7 @@ struct CrossReferenceRowSlotTests {
         "KiwiShelfCard.swift:Self.lookReference",  // LookReferenceTests
         "GapsEditor.swift:Self.lookReference",  // LookReferenceTests
         "SharedLookPointer.swift:follows?Self.sharedProse:Self.ownProse",
-        "SpacesSection.swift:Self.noProfileProse",  // LiveOnlySpaceRowTests
+        "SpacesSection+LiveOnly.swift:Self.noProfileProse",
     ]
 
     // MARK: - The values

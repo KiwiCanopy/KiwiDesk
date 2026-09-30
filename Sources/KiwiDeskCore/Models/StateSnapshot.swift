@@ -245,8 +245,7 @@ extension StateCoordinator {
             spaces: workspaces.allSpaces.map {
                 StateSnapshot.SpaceRecord(
                     space: $0,
-                    held: heldRecord(of: $0.id),
-                    temporary: temporaryRecord(of: $0.id)
+                    held: heldRecord(of: $0.id)
                 )
             },
             activeSpace: workspaces.activeSpace?.raw

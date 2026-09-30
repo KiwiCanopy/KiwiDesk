@@ -89,7 +89,15 @@ extension KiwiCore {
     /// one (#1790) joins. `save_profile` alone takes
     /// `snapshotSpaces`.
     public var capturedSpaces: [Space] {
-        snapshotSpaces.filter { state.temporarySpaces[$0.id] == nil }
+        capturedSpaces(alsoOf: [])
+    }
+
+    /// `capturedSpaces`, and the temporary Spaces in `extra` — the
+    /// ones a draft commit lists and is about to declare.
+    func capturedSpaces(alsoOf extra: Set<SpaceID>) -> [Space] {
+        snapshotSpaces.filter {
+            !isTemporary($0.id) || extra.contains($0.id)
+        }
     }
 
     /// The live Spaces the whole-live snapshot writes: every one
@@ -102,12 +110,16 @@ extension KiwiCore {
 
     /// The live pins an arrangement write captures — a held
     /// Space's home pin is not the arrangement's, nor a temporary
-    /// one's, unless the write is the whole-live snapshot.
-    func capturedPins(includingTemporary: Bool = false) -> [SpaceID: String] {
+    /// one's unless `extra` names it.
+    func capturedPins(alsoOf extra: Set<SpaceID>) -> [SpaceID: String] {
         spacePins.filter {
             state.heldSpaces[$0.key] == nil
-                && (includingTemporary
-                    || state.temporarySpaces[$0.key] == nil)
+                && (!isTemporary($0.key) || extra.contains($0.key))
         }
+    }
+
+    /// `capturedPins(alsoOf: [])`, for the GUI's draft baseline.
+    public var capturedSpacePins: [SpaceID: String] {
+        capturedPins(alsoOf: [])
     }
 }

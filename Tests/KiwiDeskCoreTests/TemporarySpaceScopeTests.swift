@@ -90,7 +90,19 @@ struct TemporarySpaceScopeTests {
         )
         #expect(!reply.isSuccess)
         #expect(core.state.workspaces[SpaceID(8)] == nil)
-        #expect(!core.canAddToProfile(SpaceID(8)))
+        // Under a Standard: a live temporary Space, and no profile
+        // file to add it to.
+        core.state.workspaces.upsertDisplay(desk.builtIn)
+        let composed = try #require(
+            ProfileComposition.compose(
+                displays: core.state.workspaces.allDisplays,
+                mainID: nil
+            )
+        )
+        core.apply(composed: composed, forceRetile: true)
+        core.execute("create_space", args: [.string("scratch")])
+        #expect(core.isTemporary(SpaceID("scratch")))
+        #expect(!core.canAddToProfile(SpaceID("scratch")))
     }
 
     @Test("delete_space with profile removes it from the file too")
@@ -127,5 +139,42 @@ struct TemporarySpaceScopeTests {
         #expect(core.addSpaceToProfile(SpaceID(7)))
         #expect(draft.spaces.last == SpaceID(7))
         #expect(!core.addSpaceToProfile(SpaceID(7)), "no longer temporary")
+    }
+
+    /// The door's edit lands alike in the file and in a draft: the
+    /// two applies are separate code, so they are held together.
+    @Test("an added and a removed Space apply alike to file and draft")
+    func editsApplyAlike() {
+        let added = AddedSpace(
+            after: SpaceID(1),
+            mode: .monocle,
+            pin: "DELL:1920x1080",
+            icon: "star"
+        )
+        var profile = desk.profile(
+            "p",
+            screens: ["DELL:1920x1080"],
+            spaces: [SpaceID(1), SpaceID(2)]
+        )
+        var draft = GuiConfig()
+        draft.spaces = [SpaceID(1), SpaceID(2)]
+        for edit: LiveProfileEdit in [
+            .addSpace(SpaceID(7), added), .removeSpace(SpaceID(2)),
+        ] {
+            profile.apply(edit, monitors: ["DELL:1920x1080"])
+            draft.apply(edit)
+        }
+        #expect(profile.spaces == draft.spaces)
+        #expect(profile.spaces == [SpaceID(1), SpaceID(7)])
+        #expect(profile.spaceModes[SpaceID(7)] == draft.spaceModes[SpaceID(7)])
+        #expect(
+            profile.monitorSets.first?.spaceMonitorMap[SpaceID(7)]
+                == draft.spacePins[SpaceID(7)]
+        )
+        #expect(
+            profile.settings.spaceIcons[SpaceID(7)]
+                == draft.settings.spaceIcons[SpaceID(7)]
+        )
+        #expect(!profile.declaredSpaces.contains(SpaceID(2)))
     }
 }

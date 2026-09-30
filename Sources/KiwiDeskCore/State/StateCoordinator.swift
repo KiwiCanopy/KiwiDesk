@@ -87,12 +87,10 @@ public struct StateCoordinator: Sendable {
     /// Keep, Save or partitioning record captures; written and
     /// ended in `KiwiCore+HeldSpaces.swift`.
     var heldSpaces: [SpaceID: HeldOrigin] = [:]
-    /// Spaces made on the fly (#1790), by live id — in no
-    /// arrangement, so no Keep, Save or partitioning record
-    /// captures one; written and ended in
-    /// `KiwiCore+TemporarySpaces.swift`. A Space is never both
-    /// this and held.
-    var temporarySpaces: [SpaceID: TemporarySpace] = [:]
+    /// The temporary Spaces (#1790) that have held something, so
+    /// emptying one deletes it. Whether a Space IS temporary is
+    /// derived (`KiwiCore.isTemporary`); only this is stored.
+    var temporaryArmed: Set<SpaceID> = []
     /// Restored held filings boot could not judge (#1646): the
     /// WindowServer did not answer whether they still exist, so
     /// the snapshot does not carry them again and a closed window

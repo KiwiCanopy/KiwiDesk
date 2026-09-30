@@ -90,6 +90,8 @@ struct SnapshotStoreCensusTests {
             ),
         "state.heldSpaces":
             (.always, "held Spaces, re-created at boot (#1646)"),
+        "state.temporaryArmed":
+            (.always, "temporary Spaces, re-created at boot (#1790)"),
         "state.restoredFrames":
             (.behind, "the replay's own debt, written by it"),
         "state.departedSlots":
@@ -166,6 +168,7 @@ struct SnapshotStoreCensusTests {
             icon: nil,
             arrangement: nil
         )
+        core.state.temporaryArmed.insert(shown)
         _ = F.settle(core)
         return core
     }
@@ -185,7 +188,7 @@ struct SnapshotStoreCensusTests {
         for named in [
             "state.floatFrames", "tiler.boundLearner.lastAsks",
             "state.userFloated", "tiler.monocleShownMembers",
-            "state.heldSpaces",
+            "state.heldSpaces", "state.temporaryArmed",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")
         }

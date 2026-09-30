@@ -213,6 +213,8 @@ extension KiwiCore {
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]
         fallbackSpace = nil
+        // Read while `init.lua`'s last Spaces still count (#1790).
+        let temporaries = Set(liveTemporarySpaces)
         initDeclaredSpaces = []
         // The session resize layer reseeds on reload (#458):
         // the config about to apply is the new truth, and a
@@ -224,7 +226,7 @@ extension KiwiCore {
         // none resets it.
         for space in state.workspaces.allSpaces
         where space.mode != .bsp && state.heldSpaces[space.id] == nil
-            && state.temporarySpaces[space.id] == nil
+            && !temporaries.contains(space.id)
         {
             setSpaceMode(space.id, .bsp)
         }

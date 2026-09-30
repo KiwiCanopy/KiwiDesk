@@ -32,11 +32,11 @@ extension KiwiCore {
             declared: profile.declaredSpaces,
             into: .profile(profile.name)
         )
-        // Read before the partitioning filing or the adoption moves
-        // the live arrangement (#1790).
-        let dropsTemporary = dropsTemporarySpaces(
-            into: .profile(profile.name)
-        )
+        // Read before the partitioning filing, the adoption or the
+        // incoming Spaces move what is live and what is declared
+        // (#1790).
+        let changes = dropsTemporarySpaces(into: .profile(profile.name))
+        let temporaries = Set(liveTemporarySpaces)
         let switching = recordOutgoingPartitioning(before: profile)
         // A held Space keeps the icon it had where it lived (#1507),
         // read before the incoming settings replace them.
@@ -77,22 +77,23 @@ extension KiwiCore {
         // #1507: an unplug holds the gone screen's Spaces; an
         // explicit load ends every hold and prunes them like any
         // undeclared Space.
-        if cause == .monitorChange, switching {
-            holdDepartingSpaces(declared: declared, icons: outgoingIcons)
+        // #1790: a change of arrangement is a switch here too, even
+        // where no partitioning record makes `switching` say so.
+        if cause == .monitorChange, switching || changes {
+            holdDepartingSpaces(
+                declared: declared,
+                icons: outgoingIcons,
+                temporaries: temporaries
+            )
         }
         if pruneStaleSpaces { forgetHeldSpaces() }
         // A temporary Space drops on a switch alone — never on a
-        // same-profile Load or a reload (#1790).
-        if dropsTemporary {
-            dropTemporarySpaces(
-                orderedBy: profile.orderedSpaces,
-                preferring: profile.fallbackSpace
-            )
-        }
-        if pruneStaleSpaces || switching {
+        // same-profile Load or a reload (#1790); one the incoming
+        // profile declares is that profile's now.
+        if pruneStaleSpaces || switching || changes {
             pruneSpaces(
                 keeping: declared.union(state.heldSpaces.keys)
-                    .union(state.temporarySpaces.keys),
+                    .union(changes ? [] : temporaries),
                 orderedBy: profile.orderedSpaces,
                 preferring: profile.fallbackSpace
             )
@@ -117,7 +118,8 @@ extension KiwiCore {
         // A held or temporary Space's mode is its own (#1507, #1790).
         for space in state.workspaces.allSpaces
         where state.heldSpaces[space.id] == nil
-            && state.temporarySpaces[space.id] == nil
+            && !(temporaries.contains(space.id)
+                && !declared.contains(space.id))
         {
             setSpaceMode(
                 space.id,
@@ -184,9 +186,10 @@ extension KiwiCore {
         forceRetile: Bool
     ) {
         supersedeMonitorSettle()
-        let dropsTemporary = dropsTemporarySpaces(
+        let changes = dropsTemporarySpaces(
             into: .standard(composed.sourceName)
         )
+        let temporaries = Set(liveTemporarySpaces)
         reclaimHeldNames(
             declared: Set(composed.spaces),
             into: .standard(composed.sourceName)
@@ -217,9 +220,18 @@ extension KiwiCore {
         // five-per-display plan is NOT the count's Standard, so its
         // blocks would otherwise scatter into the Standard's slots.
         adoptComposedPlacement(composed)
-        // A switch to a Standard drops them too (#1790).
-        if dropsTemporary {
-            dropTemporarySpaces(orderedBy: composed.spaces, preferring: nil)
+        // A switch to a Standard drops them too (#1790) — only them,
+        // since this door prunes nothing else, and never one with
+        // windows on a screen that left, which stays as it would
+        // have before.
+        if changes {
+            let dropped = temporaries.subtracting(composed.spaces)
+                .filter { !departsWithWindows($0) }
+            pruneSpaces(
+                keeping: Set(state.workspaces.allSpaces.map(\.id))
+                    .subtracting(dropped),
+                orderedBy: composed.spaces
+            )
         }
         refileHeldSpaces(
             declared: Set(composed.spaces),

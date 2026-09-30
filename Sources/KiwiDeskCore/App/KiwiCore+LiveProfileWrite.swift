@@ -30,9 +30,8 @@ extension KiwiCore {
     }
 
     /// Non-adopting, like `overwriteProfile`: `current` and
-    /// `dirty` stay as they were — the declared Spaces excepted,
-    /// which follow a Space added or removed, since the live set
-    /// already has (#1790).
+    /// `dirty` stay as they were, and `redeclare` keeps the
+    /// adoption record in step with the file this door wrote.
     private func writeStoredProfile(
         _ name: String,
         _ edit: LiveProfileEdit
@@ -41,10 +40,7 @@ extension KiwiCore {
             var profile = try profiles.read(name: name)
             profile.apply(edit, monitors: liveFingerprints)
             try profiles.write(profile)
-            if case .settings = edit {
-            } else {
-                profiles.redeclare(profile)
-            }
+            profiles.redeclare(profile)
             // A follower's look is the shared one (#1752); an edit
             // that leaves the look alone lands nothing.
             recordLookWrite(of: profile)

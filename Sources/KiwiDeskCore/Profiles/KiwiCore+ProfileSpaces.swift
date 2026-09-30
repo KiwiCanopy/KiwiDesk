@@ -84,7 +84,7 @@ extension KiwiCore {
             refiledWindows.insert(window)
         }
         state.workspaces.removeSpace(space)
-        state.temporarySpaces[space] = nil
+        state.temporaryArmed.remove(space)
     }
 
     /// Puts the incoming profile's own windows back in its own

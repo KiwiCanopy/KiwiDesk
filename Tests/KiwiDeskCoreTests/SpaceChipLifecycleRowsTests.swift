@@ -176,7 +176,7 @@ struct SpaceChipLifecycleRowsTests {
         core.initDeclaredSpaces = [two]
         #expect(
             row(core, two, "Delete Space")?.subtitle
-                == "comes back on reload"
+                == "init.lua brings it back on reload"
         )
     }
 

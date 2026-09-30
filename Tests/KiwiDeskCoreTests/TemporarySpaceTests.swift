@@ -40,14 +40,56 @@ struct TemporarySpaceTests {
         #expect(!core.isTemporary(SpaceID(2)))
     }
 
-    @Test("a Space init.lua makes is declared, never temporary")
-    func initScriptDeclares() throws {
+    @Test("a declaration ends it, whichever source makes it")
+    func declarationEndsIt() throws {
         let core = try docked()
-        _ = core.recordingTypoIssues {
-            core.execute("create_space", args: [.string("7")])
-        }
-        #expect(core.state.workspaces[SpaceID(7)] != nil)
+        core.execute("create_space", args: [.string("7")])
+        core.execute("create_space", args: [.string("8")])
+        // A hand edit of the live profile that declares 8, reached
+        // at the next apply — a reload.
+        var profile = try core.profiles.read(name: "desk")
+        profile.spaces.append(SpaceID(8))
+        try core.profiles.write(profile)
+        core.loadConfig()
+        #expect(!core.isTemporary(SpaceID(8)))
+        // init.lua's last run named 7 (a load resets that ledger).
+        core.initDeclaredSpaces = [SpaceID(7)]
         #expect(!core.isTemporary(SpaceID(7)))
+        #expect(core.liveTemporarySpaces.isEmpty)
+    }
+
+    @Test("a switch keeps a number the incoming profile declares")
+    func incomingDeclarationSurvives() throws {
+        let core = try docked()
+        movedIntoScratch(core)
+        try core.profiles.write(
+            desk.profile(
+                "wider",
+                screens: [desk.builtIn.fingerprint, desk.dell.fingerprint],
+                spaces: [SpaceID(1), SpaceID(2), scratch]
+            )
+        )
+        core.execute("load_profile", args: [.string("wider")])
+        #expect(core.state.workspaces[scratch] != nil)
+        #expect(!core.isTemporary(scratch))
+    }
+
+    @Test("a draft commit writes a Space its draft lists")
+    func draftCommitWritesItsSpace() throws {
+        let core = try docked()
+        var config = core.guiConfigSeed()
+        config.spaces.append(SpaceID(8))
+        core.applyProfileScopedState(from: config)
+        #expect(core.isTemporary(SpaceID(8)), "live, not yet declared")
+        try core.persistProfile(
+            named: "desk",
+            modes: config.modes(
+                for: core.capturedSpaces.map(\.id) + config.spaces
+            )
+        )
+        let stored = try core.profiles.read(name: "desk")
+        #expect(stored.spaces.contains(SpaceID(8)))
+        #expect(!core.isTemporary(SpaceID(8)))
     }
 
     @Test("no arrangement write but save_profile takes one")
@@ -89,7 +131,7 @@ struct TemporarySpaceTests {
         core.execute("load_profile", args: [.string("solo")])
         #expect(core.state.workspaces[scratch] == nil)
         #expect(core.state.workspaces[SpaceID(7)] == nil)
-        #expect(core.state.temporarySpaces.isEmpty)
+        #expect(core.liveTemporarySpaces.isEmpty)
         #expect(core.state.workspaces.space(of: WindowID(13)) != nil)
     }
 
@@ -134,12 +176,59 @@ struct TemporarySpaceTests {
 
     @Test("a hidden app's window keeps it")
     func hiddenWindowKeepsIt() throws {
+        for hidden in [true, false] {
+            let core = try docked()
+            movedIntoScratch(core)
+            // On Space 1's screen, so the retire has a sibling.
+            core.execute(
+                "pin_space_to_display",
+                args: [
+                    .string(scratch.raw), .string(desk.builtIn.fingerprint),
+                ]
+            )
+            core.retile()
+            core.state.workspaces.activate(SpaceID(1))
+            core.state.workspaces.remove(WindowID(13))
+            if hidden {
+                core.state.rememberedSpaces[WindowID(13)] =
+                    .departed(scratch)
+            }
+            core.retile()
+            // The positive control: without the hidden window it goes.
+            #expect((core.state.workspaces[scratch] != nil) == hidden)
+        }
+    }
+
+    /// A Standard is live, so a profile coming in is a switch even
+    /// with no partitioning record to say so.
+    @Test("a switch from a Standard drops it")
+    func standardToProfileDrops() throws {
         let core = try docked()
-        movedIntoScratch(core)
-        core.state.workspaces.activate(SpaceID(1))
-        core.state.workspaces.remove(WindowID(13))
-        core.state.rememberedSpaces[WindowID(13)] = .departed(scratch)
-        core.retile()
-        #expect(core.state.workspaces[scratch] != nil)
+        let composed = try #require(
+            ProfileComposition.compose(
+                displays: core.state.workspaces.allDisplays,
+                mainID: nil
+            )
+        )
+        core.apply(composed: composed, forceRetile: true)
+        // A name no Standard plans.
+        let scratch = SpaceID("scratch")
+        core.execute("create_space", args: [.string(scratch.raw)])
+        #expect(core.isTemporary(scratch))
+        core.execute("load_profile", args: [.string("desk")])
+        #expect(core.state.workspaces[scratch] == nil)
+    }
+
+    @Test("a Settings Save keeps it, and its pin")
+    func settingsSaveKeepsIt() throws {
+        let core = try docked()
+        core.execute("create_space", args: [.string("7")])
+        core.execute(
+            "pin_space_to_display",
+            args: [.string("7"), .string(desk.dell.fingerprint)]
+        )
+        core.applyProfileScopedState(from: core.guiConfigSeed())
+        #expect(core.isTemporary(SpaceID(7)))
+        #expect(core.spacePins[SpaceID(7)] == desk.dell.fingerprint)
     }
 }

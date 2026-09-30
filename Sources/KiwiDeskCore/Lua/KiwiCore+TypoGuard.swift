@@ -57,11 +57,6 @@ extension KiwiCore {
         }
     }
 
-    /// Whether `init.lua`'s chunk is running now — the one window
-    /// `typoIssues` is armed. A Space it makes is declared, never
-    /// temporary (#1790).
-    var isRunningInitScript: Bool { typoIssues != nil }
-
     /// Runs `body` with typo-guard ConfigIssue recording armed
     /// and returns what it captured. The only way to arm the
     /// buffer — the `defer` makes a forgotten drain impossible.

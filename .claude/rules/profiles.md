@@ -821,8 +821,9 @@ space is healed*. The obligations:
   apply door — the profile, the composed Standard, the GUI draft
   — calls `retireHealedSpaces(declared:)` with the set it makes
   authoritative (`EmptyDisplayHealSeamTests` ▸
-  `retireHasThreeCallers` is the census), because a Keep or a
-  Settings Save captures the seed like any live space: once
+  `retireHasThreeCallers` is the census), because a
+  `save_profile` or a Settings Save captures the seed like any
+  live space: once
   declared it is the user's, and the heal seeds BESIDE it rather
   than pulling it back over their placement
   (`EmptyDisplayHealTests` ▸ `declaredSeedRetires`). The one
@@ -1102,49 +1103,57 @@ screen's Spaces are held, not forwarded*. The obligations:
 
 ## A Space made on the fly is temporary (#1790)
 
-A Space a command makes is **temporary** until it is added to the
-profile; the argument is `docs/design-decisions.md` ▸ Profiles ▸
-*A Space made on the fly is temporary until you put it in the
-profile*. The obligations:
+A live Space that no source declares is **temporary** until it is
+added to the profile; the argument is `docs/design-decisions.md` ▸
+Profiles ▸ *A Space made on the fly is temporary until you put it
+in the profile*. The obligations:
 
-- **One seam marks it.** `execute` diffs the live Spaces around a
-  command and `markNewSpacesTemporary` files every new one no
-  source declares, that is not held, a heal seed or the
-  placeholder — never while `init.lua`'s chunk runs
-  (`isRunningInitScript`). A new way to make a Space outside
-  `execute` answers whether it is temporary in the same change
-  (`TemporarySpaceTests` ▸ `commandsMakeTemporary`,
-  `initScriptDeclares`).
+- **Derive it; never store it.** `isTemporary` is the one answer:
+  an arrangement is live, and the Space is live, declared by no
+  profile, Standard or `init.lua`, not held, not a heal seed or the
+  placeholder. A stored mark let a Space be
+  declared AND temporary, and missed every way of making a Space
+  it was not hooked into; a derived answer has no third state to
+  fall into. What a temporary Space owns beside it is the
+  `temporaryArmed` ledger, whose writers
+  `TemporaryLedgerSeamTests` counts (`TemporarySpaceTests` ▸
+  `commandsMakeTemporary`, `declarationEndsIt`).
 - **No arrangement write takes it.** `capturedSpaces` and
-  `capturedPins()` leave it out beside held Spaces; only the
-  whole-live snapshot reads `snapshotSpaces`, and a pin reset an
+  `capturedPins(alsoOf:)` leave it out beside held Spaces; the
+  whole-live snapshot takes every one and a draft commit the ones
+  its draft lists, which it is about to declare; a pin reset an
   apply or a Save makes keeps its pin through
   `keepingTemporaryPins` (`TemporarySpaceTests` ▸
-  `invisibleToArrangementWrites`, `dropsOnASwitchOnly`).
-- **It drops on a switch, never on a config load.** Both apply
-  doors read `dropsTemporarySpaces(into:)` — the live
-  arrangement changing — before the partitioning filing moves
-  it, and drop after the hold, which keeps a departing one that
-  still has windows; every prune and the Save's keep the rest.
-  A new apply door owes the same pair
-  (`TemporarySpaceTests` ▸ `dropsOnASwitchOnly`,
-  `standardSwitchDrops`).
+  `invisibleToArrangementWrites`, `draftCommitWritesItsSpace`).
+- **It drops on a switch, never on a config load.** Each apply
+  door reads the live temporary Spaces and whether the
+  arrangement changes BEFORE it makes anything live, and its prune
+  keeps them unless it does; a number the incoming arrangement
+  declares is that arrangement's. A new apply door owes the same
+  pair (`TemporarySpaceTests` ▸ `dropsOnASwitchOnly`,
+  `standardSwitchDrops`, `incomingDeclarationSurvives`).
 - **A hold carries it home temporary.** `HeldOrigin.temporary`
-  rides the hold, `returnsHome` sends it home without a
-  declaration, and it is never held and temporary at once
-  (`TemporarySpaceRestartTests` ▸ `unplugHoldsAndReturns`).
+  rides the hold and `returnsHome` sends it home without a
+  declaration (`TemporarySpaceRestartTests` ▸
+  `unplugHoldsAndReturns`).
 - **Every snapshot carries it with its pin, and boot re-creates
   it ahead of the replay only under the arrangement it was taken
   in** — the other Space a restore creates (#633), through
-  `restoreTemporarySpaces` (`TemporarySpaceRestartTests`).
+  `restoreTemporarySpaces`; `sessionSnapshot` fills the record,
+  since only Core can say what is temporary
+  (`TemporarySpaceRestartTests`).
 - **It deletes itself at the head of `retile()`**, armed once it
   has held anything, while no screen shows it and never a
   screen's last Space (`TemporarySpaceTests` ▸ `autoDelete`).
-- **Its ledger has one home.** `state.temporarySpaces` is written
-  in `KiwiCore+TemporarySpaces*.swift`, `KiwiCore+SpaceProfileScope.swift`,
-  the hold and `forwardWindows`, which ends an entry with its
-  Space; nothing scans for another writer, so review is the
-  check.
+- **The live-write door keeps the adoption record with its write,
+  and no other write does.** `ProfileManager.redeclare`, called by
+  `writeThroughLiveProfile` alone, re-adopts the file the door
+  wrote, so a Space added stops being temporary in the same step;
+  every other write of the live profile leaves the declared Spaces
+  to the next apply, which judges a Space the file dropped against
+  what was declared — re-adopting there turned a removed Space
+  temporary instead of deleting it. The door announces only after
+  live has settled (`TemporarySpaceScopeTests`).
 
 ## Resolve before layout, and merge per-field first
 

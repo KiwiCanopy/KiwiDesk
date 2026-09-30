@@ -97,8 +97,7 @@ extension StateCoordinator {
                     space: $0,
                     monocleShown: monocleShown[$0.id]
                 ),
-                held: heldRecord(of: $0.id),
-                temporary: temporaryRecord(of: $0.id)
+                held: heldRecord(of: $0.id)
             )
         }
         snapshot.windows = snapshot.windows.map { record in

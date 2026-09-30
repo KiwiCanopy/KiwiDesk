@@ -6,7 +6,7 @@ import Foundation
 /// shape.
 extension StateSnapshot {
     public struct TemporaryRecord: Codable, Sendable, Equatable {
-        /// `TemporarySpace.armed`.
+        /// Whether it has held something (`temporaryArmed`).
         public var armed: Bool
         /// The screen it is pinned to — a New Space's — which no
         /// arrangement records.
@@ -16,13 +16,5 @@ extension StateSnapshot {
             self.armed = armed
             self.pin = pin
         }
-    }
-}
-
-extension StateCoordinator {
-    /// The record of live Space `id`, if it is temporary; its pin
-    /// is `KiwiCore.sessionSnapshot`'s to add.
-    func temporaryRecord(of id: SpaceID) -> StateSnapshot.TemporaryRecord? {
-        temporarySpaces[id].map { .init(armed: $0.armed) }
     }
 }

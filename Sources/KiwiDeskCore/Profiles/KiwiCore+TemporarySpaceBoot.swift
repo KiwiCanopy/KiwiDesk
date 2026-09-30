@@ -21,9 +21,7 @@ extension KiwiCore {
             guard !declared.contains(id), state.workspaces[id] == nil
             else { continue }
             state.workspaces.ensureSpace(id, mode: record.mode)
-            state.temporarySpaces[id] = TemporarySpace(
-                armed: temporary.armed
-            )
+            if temporary.armed { state.temporaryArmed.insert(id) }
             if let pin = temporary.pin { spacePins[id] = pin }
             onLog("restart: temporary space \(id.raw)")
         }

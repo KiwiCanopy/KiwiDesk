@@ -101,7 +101,7 @@ struct SpaceAddNameTests {
     func sectionWiresTheRow() throws {
         let source = try sectionSource()
         let row = SourceScan.declarationBody(
-            after: "SpaceAddRow(spaces: model.config.spaces)",
+            after: "SpaceAddRow(spaces: takenSpaces)",
             in: source
         )
         #expect(row?.contains("model.config.spaces.append($0)") == true)

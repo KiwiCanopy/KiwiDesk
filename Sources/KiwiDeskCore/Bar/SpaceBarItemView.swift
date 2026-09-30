@@ -101,9 +101,8 @@ final class SpaceBarItemView: NSView {
         _,
         _ in
     }
-    private(set) var held: Held?
-    /// A temporary Space (#1790).
-    private(set) var temporary = false
+    /// The held or temporary Space marker (#1507, #1790).
+    private(set) var marker: Marker?
     /// What this item draws in place of its glyphs (#1683).
     private(set) var collapse: Collapse?
     private(set) var isActive = false
@@ -180,8 +179,7 @@ final class SpaceBarItemView: NSView {
         before: SpaceBarStrip.Disc = .none,
         after: SpaceBarStrip.Disc = .none,
         drawn: SpaceBarStrip.Drawn? = nil,
-        held: Held? = nil,
-        temporary: Bool = false,
+        marker: Marker? = nil,
         collapse: Collapse? = nil
     ) {
         let keepsSpace =
@@ -216,8 +214,7 @@ final class SpaceBarItemView: NSView {
         self.before = before
         self.after = after
         self.drawn = drawn
-        self.held = held
-        self.temporary = temporary
+        self.marker = marker
         self.collapse = collapse
         self.isActive = active
         self.horizontal = horizontal

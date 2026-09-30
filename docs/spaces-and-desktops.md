@@ -85,7 +85,7 @@ right-click menu, `create_space`, or `focus_space` and
 restart, a reload and a Settings Save, and goes away when you
 switch to another profile or when its last window leaves it. No
 save writes it into the profile until you choose **Add Space ‹n›
-to this profile** in Settings → Spaces, or save the profile
+to this profile** in Settings ▸ Spaces, or save the profile
 under a name with `save_profile`. If its screen is unplugged
 while it holds windows, it is held like any other Space and comes
 back temporary.

@@ -58,7 +58,6 @@ extension KiwiCore {
         guard writeThroughLiveProfile(.addSpace(id, added)) else {
             return .failure(.notWritten)
         }
-        state.temporarySpaces[id] = nil
         syncGuiSpacesToLive()
         updateBars()
         return .success(())

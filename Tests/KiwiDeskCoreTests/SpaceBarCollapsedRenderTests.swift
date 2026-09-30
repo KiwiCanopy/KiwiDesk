@@ -178,7 +178,7 @@ func collapsedBar(
             after: .none
         ).collapsed(to: content)
         if held, index == 1 {
-            item.held = .init(screenName: "Dell", originName: nil)
+            item.marker = .held(.init(screenName: "Dell", originName: nil))
         }
         return item
     }

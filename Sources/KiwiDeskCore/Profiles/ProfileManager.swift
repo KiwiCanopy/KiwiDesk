@@ -280,9 +280,12 @@ public final class ProfileManager {
         isDirty = true
     }
 
-    /// A Space added to or removed from the live profile's file
-    /// (#1790): the declared Spaces follow the file, since the
-    /// live set moved with it. The name and fit stay as they were.
+    /// The live-write door's write of the live profile (#1790): the
+    /// declared Spaces follow the file, since live moved with it —
+    /// a Space added is no longer temporary, one removed is gone.
+    /// Any other write leaves them to the next apply (#1245), which
+    /// judges what the file dropped against what was declared.
+    /// The name and fit stay as they were.
     func redeclare(_ profile: Profile) {
         guard profile.name == currentName else { return }
         adopt(profile)

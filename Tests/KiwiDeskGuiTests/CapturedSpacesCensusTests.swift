@@ -22,7 +22,11 @@ struct CapturedSpacesCensusTests {
         "KiwiDeskCore/Profiles/KiwiCore+EmptyDisplayHeal.swift":
             (1, "the orphan's drop target; its number is minted"),
         "KiwiDeskCore/Profiles/KiwiCore+ProfileResolution.swift":
-            (1, "the mode loop skips held and temporary Spaces"),
+            (
+                2,
+                "the mode loop skips held and temporary Spaces; "
+                    + "the Standard's drop keeps every Space but those"
+            ),
         "KiwiDeskCore/Profiles/KiwiCore+SpacePrune.swift":
             (1, "the prune; its callers keep held and temporary"),
         "KiwiDeskCore/Profiles/KiwiCore+HeldSpaces.swift":
@@ -38,7 +42,7 @@ struct CapturedSpacesCensusTests {
         "KiwiDeskCore/Profiles/KiwiCore+ProfileSpaces.swift":
             (1, "the restore's focus snapshot"),
         "KiwiDeskCore/Profiles/KiwiCore+TemporarySpaces.swift":
-            (5, "the temporary machinery itself (#1790)"),
+            (3, "the temporary machinery itself (#1790)"),
         "KiwiDeskCore/Profiles/KiwiCore+SpaceProfileScope.swift":
             (1, "an added Space's place in live order (#1790)"),
         "KiwiDeskCore/App/KiwiCore+GuiConfig.swift":

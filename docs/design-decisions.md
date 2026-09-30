@@ -13833,7 +13833,12 @@ draft is the profile being edited, and a Space there is already
 the profile's. A "permanent but unsaved" live Space is refused,
 because it is exactly the state the accidents above produced: some
 writes capture it, others do not, and nobody can tell which one it
-is in.
+is in. So temporary is not a mark a Space is given when it is made
+but what a live Space IS when no profile, Standard or `init.lua`
+declares it and it is not held: a declaration ends it the moment it
+lands, and no way of making a Space can slip past it into a third
+state — which a mark set at creation allowed on both counts.
+
 **Invisible to every arrangement write, as a held Space is.** The
 Settings Save, the `gui.json` space mirror, #1230's per-profile
 record and the pins read the live Spaces through the one captured

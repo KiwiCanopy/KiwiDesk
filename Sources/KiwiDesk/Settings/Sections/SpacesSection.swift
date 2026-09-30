@@ -115,33 +115,18 @@ struct SpacesSection: View {
             ForEach(displayedSpaces, id: \.raw) { space in
                 spaceRow(space)
             }
-            SpaceAddRow(spaces: model.config.spaces) {
+            SpaceAddRow(spaces: takenSpaces) {
                 model.config.spaces.append($0)
             }
             liveOnlyRows
         }
     }
 
-    /// The live Spaces the profile does not hold (#1790), after its
-    /// own rows and the "+": temporary, then held. The LIVE page
-    /// only — a stored profile's page is another arrangement.
-    @ViewBuilder private var liveOnlyRows: some View {
-        if !model.editingStoredProfile, !model.liveOnlySpaces.isEmpty {
-            if model.liveOnlySpaces.contains(where: \.isTemporary),
-                !model.liveOnlySpaces.contains(where: \.canAdd)
-            {
-                CrossReferenceRow(
-                    prose: Self.noProfileProse,
-                    linkTitle: SettingsDestination.profiles.title,
-                    destination: .profiles
-                )
-            }
-            ForEach(model.liveOnlySpaces) { space in
-                LiveOnlySpaceRow(space: space) {
-                    model.core.addSpaceToProfile(space.id)
-                }
-            }
-        }
+    /// Every name a new or renamed draft Space may not take: the
+    /// draft's, and the live Spaces it does not hold (#1790), so a
+    /// "+" never draws a second row for a temporary Space.
+    var takenSpaces: [SpaceID] {
+        model.config.spaces + model.liveOnlySpaces.map(\.id)
     }
 
     private func spaceRow(_ space: SpaceID) -> some View {
@@ -154,9 +139,7 @@ struct SpacesSection: View {
                 )
                 SpaceNameField(
                     space: space,
-                    isAvailable: {
-                        !model.config.spaces.contains($0)
-                    },
+                    isAvailable: { !takenSpaces.contains($0) },
                     onRename: {
                         model.config.renameSpace(
                             from: space,

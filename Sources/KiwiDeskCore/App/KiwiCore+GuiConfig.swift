@@ -137,6 +137,8 @@ extension KiwiCore {
         // `TilingEngine.settings.didSet`, so the retile below
         // animates at the incoming duration, not a stale one
         // (#51 review).
+        // Read before the draft's Spaces are made live (#1790).
+        let temporaries = Set(liveTemporarySpaces)
         tiler.settings = config.settings
         // A GUI save is an explicit apply (§5): reseed the
         // session resize layer so an edited Layout Defaults
@@ -181,14 +183,15 @@ extension KiwiCore {
         // as a deletion.
         pruneSpaces(
             keeping: inList.union(extra).union(state.heldSpaces.keys)
-                .union(state.temporarySpaces.keys),
+                .union(temporaries),
             orderedBy: config.spaces,
             preferring: config.fallbackSpace
         )
         for space in state.workspaces.allSpaces
         where (scope?.contains(space.id) ?? true)
             && state.heldSpaces[space.id] == nil
-            && state.temporarySpaces[space.id] == nil
+            && !(temporaries.contains(space.id)
+                && !inList.union(extra).contains(space.id))
         {
             setSpaceMode(
                 space.id,

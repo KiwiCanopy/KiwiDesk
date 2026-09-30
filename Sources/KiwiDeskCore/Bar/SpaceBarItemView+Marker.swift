@@ -8,9 +8,10 @@ import AppKit
 /// they share the slot. Never gated on `style.stickyBadge`: the
 /// marker and the sentence are the whole affordance either has.
 extension SpaceBarItemView {
-    /// Which marker a Space wears.
+    /// Which marker a Space wears — one value, so a Space cannot
+    /// carry two.
     enum Marker: Equatable {
-        case held
+        case held(Held)
         case temporary
 
         /// The SF Symbol it draws: outlines, so each reads as an
@@ -23,9 +24,10 @@ extension SpaceBarItemView {
         }
     }
 
-    /// The marker this item wears, if any.
-    var marker: Marker? {
-        held != nil ? .held : temporary ? .temporary : nil
+    /// Where this item's Space was held from, if it is held.
+    var held: Held? {
+        if case .held(let held) = marker { return held }
+        return nil
     }
 
     /// What the bar says about a held Space: the screen it came
@@ -88,7 +90,7 @@ extension SpaceBarItemView {
     /// held, the temporary one where it is temporary, the plain one
     /// otherwise. The window count stays last.
     func spaceName(_ space: SpaceID, windows: Int) -> String {
-        if temporary, held == nil {
+        if marker == .temporary {
             return L(
                 "space_bar.item.ax.temporary",
                 "Space %1$@, temporary, windows: %2$d",

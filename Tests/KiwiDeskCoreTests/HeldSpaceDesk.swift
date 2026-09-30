@@ -87,7 +87,9 @@ struct HeldSpaceDesk {
         let dellPin = dell.fingerprint
         var pins: [SpaceID: String] = [:]
         for space in dellSpaces { pins[space] = dellPin }
-        try core.profiles.save(
+        // Written, not saved: a save adopts it, and the load below
+        // must be a switch rather than a same-profile Load (#1790).
+        try core.profiles.write(
             profile(
                 "wide",
                 screens: [builtIn.fingerprint, dellPin],

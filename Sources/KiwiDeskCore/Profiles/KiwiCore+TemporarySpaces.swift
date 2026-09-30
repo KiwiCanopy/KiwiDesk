@@ -1,30 +1,55 @@
 import Foundation
 
-/// Temporary Spaces (#1790): a Space made on the fly belongs to no
-/// arrangement until it is added to the profile. It is dropped on a
-/// switch — never on a config load — and deleted once emptied. The
-/// ruling is on the issue and in `docs/design-decisions.md`.
+/// Temporary Spaces (#1790): a live Space that no source declares
+/// belongs to no arrangement until it is added to the profile. It
+/// is dropped on a switch — never on a config load — and deleted
+/// once emptied. The ruling is on the issue and in
+/// `docs/design-decisions.md`.
 extension KiwiCore {
-    /// Whether `id` is a live temporary Space.
+    /// Whether `id` is a live temporary Space: a profile or a
+    /// Standard is live, and `id` is live but not its, nor
+    /// `init.lua`'s, not held, and not the system's own (a heal
+    /// seed, the placeholder). DERIVED, so a declaration ends it
+    /// and any way of making a Space begins it — there is no third
+    /// state to fall into. With no arrangement live there is none
+    /// to stand outside of, so nothing is temporary.
     public func isTemporary(_ id: SpaceID) -> Bool {
-        state.temporarySpaces[id] != nil
+        liveHome != nil
+            && state.workspaces[id] != nil
+            && state.heldSpaces[id] == nil
+            && state.placeholderSpace != id
+            && !healedSpaces.values.contains(id)
+            && !isDeclared(id)
+    }
+
+    /// Whether a source re-creates `id` at the next load — the
+    /// question `declaredSources(of:)` answers with names.
+    func isDeclared(_ id: SpaceID) -> Bool {
+        profiles.active?.declaredSpaces.contains(id) == true
+            || profiles.standard?.spaces.contains(id) == true
+            || initDeclaredSpaces.contains(id)
+    }
+
+    /// Every live temporary Space, in live order.
+    var liveTemporarySpaces: [SpaceID] {
+        state.workspaces.allSpaces.map(\.id).filter(isTemporary)
     }
 
     /// The live Spaces the profile does not hold, in live order:
     /// the temporary ones, then the held ones (#1790).
     public var liveOnlySpaces: [LiveOnlySpace] {
-        let live = state.workspaces.allSpaces
-        let canAdd = profiles.currentName != nil
-        let temporary = live.filter { isTemporary($0.id) }.map {
-            LiveOnlySpace(
-                id: $0.id,
-                kind: .temporary,
-                mode: $0.mode,
-                icon: tiler.settings.spaceIcons[$0.id],
-                canAdd: canAdd
-            )
+        let temporary = liveTemporarySpaces.compactMap { id in
+            state.workspaces[id].map {
+                LiveOnlySpace(
+                    id: id,
+                    kind: .temporary,
+                    mode: $0.mode,
+                    icon: tiler.settings.spaceIcons[id],
+                    canAdd: canAddToProfile(id)
+                )
+            }
         }
-        let held = live.compactMap { space in
+        let held = state.workspaces.allSpaces.compactMap { space in
             state.heldSpaces[space.id].map {
                 LiveOnlySpace(
                     id: space.id,
@@ -49,29 +74,6 @@ extension KiwiCore {
         return true
     }
 
-    /// Marks every Space a command made — one that did not exist
-    /// before it ran — as temporary, unless a source declares it,
-    /// it is held, or it is the system's own (a heal seed, the
-    /// placeholder). `execute`'s alone, so every verb that can
-    /// make a Space is covered by one seam; `init.lua`'s run is
-    /// declaring, never temporary.
-    func markNewSpacesTemporary(since before: Set<SpaceID>) {
-        guard !isRunningInitScript else { return }
-        let seeds = Set(healedSpaces.values)
-        for space in state.workspaces.allSpaces
-        where !before.contains(space.id) {
-            let id = space.id
-            guard state.heldSpaces[id] == nil,
-                !seeds.contains(id),
-                state.placeholderSpace != id,
-                declaredSources(of: id).isEmpty
-            else { continue }
-            state.temporarySpaces[id] = TemporarySpace(
-                armed: !spaceHoldsNothing(id)
-            )
-        }
-    }
-
     /// `pins` — an arrangement's, about to replace the live ones —
     /// with each temporary Space's own pin kept: it is in no
     /// arrangement, so none restates it, and a reload or a Save
@@ -79,47 +81,28 @@ extension KiwiCore {
     func keepingTemporaryPins(
         _ pins: [SpaceID: String]
     ) -> [SpaceID: String] {
-        pins.merging(
-            spacePins.filter { state.temporarySpaces[$0.key] != nil }
-        ) { own, _ in own }
+        let temporary = spacePins.filter { isTemporary($0.key) }
+        return pins.merging(temporary) { own, _ in own }
     }
 
-    /// Whether this apply drops the temporary Spaces: the live
-    /// arrangement changes to `incoming`. Nothing live is nothing
-    /// to switch from — boot's first apply, a deleted profile.
+    /// Whether this apply is a switch of arrangement, which drops
+    /// the temporary Spaces: the live arrangement changes to
+    /// `incoming`. Nothing live is nothing to switch from — boot's
+    /// first apply, a deleted profile.
     func dropsTemporarySpaces(
         into incoming: HeldOrigin.Arrangement
     ) -> Bool {
         liveArrangement.map { $0 != incoming } ?? false
     }
 
-    /// Drops every temporary Space, forwarding its windows the way
-    /// the prune forwards an undeclared Space's: into `preferring`
-    /// where it survives, else the first of `orderedBy` that does.
-    /// Runs after the hold, which keeps a departing one that still
-    /// has windows.
-    func dropTemporarySpaces(
-        orderedBy order: [SpaceID],
-        preferring explicit: SpaceID?
-    ) {
-        let dropped = Set(state.temporarySpaces.keys)
-        guard !dropped.isEmpty else { return }
-        let survives = { (id: SpaceID) in
-            !dropped.contains(id) && self.state.workspaces[id] != nil
-        }
-        let target =
-            explicit.flatMap { survives($0) ? $0 : nil }
-            ?? order.first(where: survives)
-            ?? state.workspaces.allSpaces.map(\.id).first(where: survives)
-        guard let target else { return }
-        for id in state.workspaces.allSpaces.map(\.id)
-        where dropped.contains(id) {
-            tiler.settings.removeSpace(id)
-            spacePins[id] = nil
-            forwardWindows(of: id, to: target)
-            onLog("profile switch: dropped temporary space \(id.raw)")
-        }
-        state.temporarySpaces = [:]
+    /// Whether `id` lived on a screen no longer connected and still
+    /// holds windows — what a monitor change's hold takes (#1507).
+    func departsWithWindows(_ id: SpaceID) -> Bool {
+        guard let screen = spacePins[id] ?? state.settlingScreens[id],
+            !liveFingerprints.contains(screen)
+        else { return false }
+        return !withAwayMembers(state.workspaces[id]?.windows ?? [], of: id)
+            .isEmpty
     }
 
     /// Arms each temporary Space that holds something, and deletes
@@ -129,18 +112,12 @@ extension KiwiCore {
     @discardableResult
     func retireEmptiedTemporarySpaces() -> Bool {
         var retired = false
-        for (id, temporary) in state.temporarySpaces {
-            guard state.workspaces[id] != nil else {
-                state.temporarySpaces[id] = nil
-                continue
-            }
+        for id in liveTemporarySpaces {
             guard spaceHoldsNothing(id) else {
-                if !temporary.armed {
-                    state.temporarySpaces[id]?.armed = true
-                }
+                state.temporaryArmed.insert(id)
                 continue
             }
-            guard temporary.armed, !isShown(id),
+            guard state.temporaryArmed.contains(id), !isShown(id),
                 let other = sibling(onScreenOf: id)
             else { continue }
             tiler.settings.removeSpace(id)

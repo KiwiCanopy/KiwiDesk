@@ -399,6 +399,7 @@ KiwiDesk.pin_space_to_display("mail", 2)
 `"track"`, `"floating"`), and optionally a scope: `"session"`
 (the default) or `"profile"`. The scope may stand in the mode's
 place.
+:::
 
 **Does:** creates the space and resolves it onto a display.
 Spaces also appear the first time you reference one
@@ -406,13 +407,17 @@ Spaces also appear the first time you reference one
 creates one, and its mode, up front. If the space already
 exists, only the mode is set.
 
+:::unreleased
 Run from `init.lua`, the space is declared by the script. Run
-any other way — a keybinding, the CLI — it is **temporary**: no
-save writes it, it lasts until you switch to another profile,
-and it is deleted when its last window leaves. With `"profile"`
-the space is added to the live profile's file at once — its
-place, layout, monitor pin and icon — which is what
-**Add Space to this profile** in Settings ▸ Spaces does. It is
+any other way — a keybinding, the CLI — it is **temporary**: it
+lasts until you switch to another profile, it is deleted when its
+last window leaves, and Keep and a Settings Save never write it —
+only
+[`save_profile`](#save_profile-load_profile-delete_profile-set_default_profile)
+does. With `"profile"` the space is added to the live profile's
+file at once — its place, layout, monitor pin and icon — which is
+what **Add Space ‹name› to this profile** in Settings ▸ Spaces
+does. It is
 refused while no profile is live, and for a space `init.lua` or
 a built-in layout declares.
 :::
@@ -429,7 +434,8 @@ KiwiDesk.create_space("scratch", "monocle")
 **Expects:** a space identifier, and optionally a scope:
 `"session"` (the default) or `"profile"`, which also removes
 the space from the live profile's file. `"profile"` is refused
-for a space `init.lua` or a built-in layout declares.
+while no profile is live, and for a space `init.lua` or a
+built-in layout declares.
 :::
 
 **Does:** removes the space after moving its windows to the

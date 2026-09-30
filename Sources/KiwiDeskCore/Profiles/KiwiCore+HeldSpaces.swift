@@ -18,7 +18,8 @@ extension KiwiCore {
     /// departing arrangement's.
     func holdDepartingSpaces(
         declared: Set<SpaceID>,
-        icons: [SpaceID: String]
+        icons: [SpaceID: String],
+        temporaries: Set<SpaceID>
     ) {
         let live = Set(liveFingerprints)
         let candidates: [(Space, String)] = state.workspaces.allSpaces
@@ -49,8 +50,7 @@ extension KiwiCore {
                 screen: screen,
                 icon: icons[space.id],
                 arrangement: liveArrangement,
-                temporary: state.temporarySpaces
-                    .removeValue(forKey: space.id) == nil ? nil : true
+                temporary: temporaries.contains(space.id) ? true : nil
             )
             if id != space.id {
                 moveMembers(of: space.id, to: id, mode: space.mode)
@@ -142,7 +142,7 @@ extension KiwiCore {
             // under the number it holds (#1790).
             if origin.isTemporary {
                 spacePins[id] = origin.screen
-                state.temporarySpaces[id] = TemporarySpace(armed: true)
+                state.temporaryArmed.insert(id)
                 onLog(
                     "monitor change: temporary space \(id.raw) back "
                         + "on '\(origin.screenName)'"

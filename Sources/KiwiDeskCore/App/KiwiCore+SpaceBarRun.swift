@@ -45,13 +45,15 @@ extension KiwiCore {
                     after: content.after,
                     drawn: content.drawn
                 )
-                item.temporary = isTemporary(id)
-                item.held = state.heldSpaces[id].map {
-                    SpaceBarItemView.Held(
-                        screenName: $0.screenName,
-                        originName: $0.name == id ? nil : $0.name
-                    )
-                }
+                item.marker =
+                    state.heldSpaces[id].map {
+                        .held(
+                            SpaceBarItemView.Held(
+                                screenName: $0.screenName,
+                                originName: $0.name == id ? nil : $0.name
+                            )
+                        )
+                    } ?? (isTemporary(id) ? .temporary : nil)
                 // After the `hide_empty` verdict, which reads
                 // the glyphs the collapse drops.
                 return item.collapsed(to: style.inactiveContent)

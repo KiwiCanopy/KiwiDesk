@@ -37,7 +37,8 @@ extension KiwiCore {
         // every membership change retiles, so this is its one
         // choke point too, ahead of anything that lays it out.
         // A temporary one the same way, once armed (#1790).
-        if retireEmptiedHeldSpaces() || retireEmptiedTemporarySpaces() {
+        let heldRetired = retireEmptiedHeldSpaces()
+        if retireEmptiedTemporarySpaces() || heldRetired {
             resolveSpaceDisplays()
             emitSpaceChange()
         }

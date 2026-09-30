@@ -40,9 +40,9 @@ struct SpaceForwardingSeamTests {
                 "Profiles/KiwiCore+EmptyDisplayHeal.swift": 1,
                 // A held Space's re-file home and its retire (#1507).
                 "Profiles/KiwiCore+HeldSpaces.swift": 2,
-                // A temporary Space's drop on a switch and its
-                // auto-delete (#1790).
-                "Profiles/KiwiCore+TemporarySpaces.swift": 2,
+                // A temporary Space's auto-delete (#1790); its
+                // drop on a switch is the prune's.
+                "Profiles/KiwiCore+TemporarySpaces.swift": 1,
             ]
         )
     }
