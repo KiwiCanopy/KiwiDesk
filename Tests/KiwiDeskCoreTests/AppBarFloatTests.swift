@@ -63,7 +63,6 @@ struct AppBarFloatTests {
         let (core, space) = try makeCore()
         let app = try content(core, space)
         #expect(app.groups == [[WindowID(1)], [WindowID(2)]])
-        #expect(app.floats == [WindowID(3)])
         #expect(app.items.map(\.id) == [1, 2, 3].map(WindowID.init))
         #expect(app.items.map(\.floating) == [false, false, true])
     }
@@ -74,10 +73,31 @@ struct AppBarFloatTests {
         core.state.apply(.windowFocused(WindowID(1)))
         core.state.apply(.windowFocused(WindowID(3)))
         let app = try content(core, try #require(core.activeSpace))
-        #expect(core.appBarFloatHighlight(of: app) == 2)
+        #expect(core.appBarActiveIndex(of: app) == 2)
         core.state.apply(.windowFocused(WindowID(2)))
         let tiled = try content(core, try #require(core.activeSpace))
-        #expect(core.appBarFloatHighlight(of: tiled) == nil)
+        #expect(core.appBarActiveIndex(of: tiled) == 1)
+    }
+
+    /// The bar the shelf places carries that highlight — the
+    /// wiring, not only the reading (#1826).
+    @Test("The placed bar highlights a focused float")
+    func placedBarHighlightsFloat() throws {
+        let (core, _) = try makeCore()
+        core.state.apply(.windowFocused(WindowID(3)))
+        let app = try content(core, try #require(core.activeSpace))
+        let plan = try #require(
+            core.shelfPlans(
+                visible: CGRect(x: 0, y: 0, width: 1440, height: 900),
+                settings: core.tiler.settings,
+                spaceItems: nil,
+                app: app
+            ).first
+        )
+        let bar = try #require(
+            core.placedBar(app, display: DisplayID(7), plan: plan)
+        )
+        #expect(bar.activeIndex == 2)
     }
 
     @Test("A Space of floats alone still shows its bar")
@@ -88,7 +108,7 @@ struct AppBarFloatTests {
         }
         let app = try content(core, try #require(core.activeSpace))
         #expect(app.groups.isEmpty)
-        #expect(app.floats == [WindowID(3)])
+        #expect(app.items.map(\.id) == [WindowID(3)])
     }
 
     @Test("A Space Bar chip draws its floats last")
@@ -98,128 +118,5 @@ struct AppBarFloatTests {
             .apps
         #expect(apps.map(\.name) == ["A", "B", "F"])
         #expect(apps.map(\.floating) == [false, false, true])
-    }
-
-    // MARK: - The overlay
-
-    private func item(_ id: UInt32, floating: Bool = false)
-        -> AppBarOverlay.Item
-    {
-        AppBarOverlay.Item(
-            id: WindowID(id),
-            name: "App\(id)",
-            text: "App\(id)",
-            icon: nil,
-            floating: floating
-        )
-    }
-
-    private func show(
-        _ overlay: AppBarOverlay,
-        _ items: [AppBarOverlay.Item]
-    ) {
-        overlay.show(
-            items: items,
-            activeIndex: nil,
-            strip: CGRect(x: 0, y: 0, width: 800, height: 30),
-            style: AppBarLook()
-        )
-    }
-
-    @Test("A rule ends the row and the mark opens the floats")
-    func markBetweenSections() throws {
-        let overlay = AppBarOverlay()
-        show(overlay, [item(1), item(2), item(3, floating: true)])
-        let mark = overlay.floatMark
-        #expect(!mark.isHidden)
-        #expect(mark.superview === overlay.itemRun)
-        #expect(!mark.isAccessibilityElement())
-        #expect(mark.hitTest(CGPoint(x: mark.frame.midX, y: 1)) == nil)
-        let rule = overlay.floatRule
-        #expect(!rule.isHidden)
-        #expect(rule.hitTest(CGPoint(x: rule.frame.midX, y: 15)) == nil)
-        let tiled = overlay.itemViews[1].frame
-        let float = overlay.itemViews[2].frame
-        // Row, rule, mark, floats — in that order along the axis.
-        #expect(rule.frame.minX > tiled.maxX)
-        #expect(mark.frame.minX > rule.frame.maxX)
-        #expect(mark.frame.maxX < float.minX)
-        // Every item keeps the one slot length; the mark widens
-        // the run, not an item.
-        #expect(tiled.width == float.width)
-    }
-
-    @Test("No break without both sections")
-    func noMarkWithOneSection() {
-        let overlay = AppBarOverlay()
-        show(overlay, [item(1), item(2)])
-        #expect(overlay.floatMark.isHidden)
-        #expect(overlay.floatRule.isHidden)
-        show(overlay, [item(3, floating: true)])
-        #expect(overlay.floatMark.isHidden)
-        #expect(overlay.floatRule.isHidden)
-    }
-
-    @Test("A float item neither reorders nor takes a drop")
-    func floatDoesNotReorder() {
-        let overlay = AppBarOverlay()
-        var moves: [(Int, Int)] = []
-        overlay.onMove = { moves.append(($0, $1)) }
-        show(
-            overlay,
-            [item(1), item(2), item(3, floating: true)]
-        )
-        let float = overlay.itemViews[2]
-        overlay.dragEnded(float)
-        #expect(moves.isEmpty)
-        // A tiled item dragged past the break lands last in the
-        // row, never among the floats.
-        let first = overlay.itemViews[0]
-        first.frame.origin.x = overlay.itemViews[2].frame.midX
-        overlay.dragEnded(first)
-        #expect(moves.map(\.0) == [0])
-        #expect(moves.map(\.1) == [1])
-    }
-
-    @Test("The bar scrolls to a focused float past its end")
-    func scrollFollowsFloat() {
-        let overlay = AppBarOverlay()
-        let items =
-            (1...12).map { item(UInt32($0)) }
-            + [item(13, floating: true)]
-        overlay.show(
-            items: items,
-            activeIndex: 12,
-            strip: CGRect(x: 0, y: 0, width: 300, height: 30),
-            style: AppBarLook()
-        )
-        let float = overlay.itemViews[12].frame
-        let shown = overlay.itemContainer.bounds
-            .offsetBy(dx: overlay.scrollOffset, dy: 0)
-        #expect(overlay.scrollOffset > 0)
-        #expect(shown.contains(float))
-    }
-
-    @Test("VoiceOver says the item floats")
-    func floatNarration() {
-        LocalizationManager.shared.select("en")
-        let overlay = AppBarOverlay()
-        var titled = item(4, floating: true)
-        titled = AppBarOverlay.Item(
-            id: titled.id,
-            name: "Notes",
-            text: "Groceries",
-            icon: nil,
-            floating: true
-        )
-        show(overlay, [item(1), item(3, floating: true), titled])
-        let labels = overlay.itemViews.map { $0.accessibilityLabel() }
-        #expect(
-            labels == [
-                "App1",
-                "App3, floating window",
-                "Notes, floating window Groceries",
-            ]
-        )
     }
 }

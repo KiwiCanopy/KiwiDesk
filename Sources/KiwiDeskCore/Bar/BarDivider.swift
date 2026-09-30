@@ -14,6 +14,10 @@ public enum BarDivider {
     /// detail inside one item without reading as an item.
     static let sectionAlpha: CGFloat = 0.5
 
+    /// The in-item rule's thickness — the tier a break inside one
+    /// bar takes, ranking below the section divider by shape.
+    static let ruleThickness: CGFloat = 1
+
     /// Width of front-app section break divider — heavier than
     /// the 1 pt in-chip rule so the boundary reads as a bigger
     /// separation (QA 2026-07-19).
@@ -67,7 +71,7 @@ public enum BarDivider {
         at offset: CGFloat,
         depth: CGFloat,
         horizontal: Bool,
-        thickness: CGFloat = 1,
+        thickness: CGFloat = ruleThickness,
         lengthShare: CGFloat = ruleLengthShare
     ) -> CGRect {
         let span = depth * lengthShare

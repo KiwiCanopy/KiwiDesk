@@ -36,38 +36,45 @@ extension AppBarOverlay {
         style: AppBarLook,
         depth: CGFloat
     ) -> CGFloat {
-        gap * 2 + floatRuleThickness
+        gap * 2 + BarDivider.ruleThickness
             + floatMarkSide(style: style, depth: depth)
     }
 
-    /// The rule's thickness: `BarDivider.frame`'s default, the
-    /// in-item tier, so it ranks below the section divider by
-    /// shape (#1826).
-    nonisolated static let floatRuleThickness: CGFloat = 1
-
-    /// Every slot at `slot`, the break's widened by `extent`.
+    /// Each item's slot length at `slot`, the break's widened by
+    /// the break — the one derivation the render's `Metrics` and
+    /// the shelf's `naturalLength` share.
     nonisolated static func lengths(
+        items: [Item],
         slot: CGFloat,
-        count: Int,
-        breakAfter: Int?,
-        extent: CGFloat
+        style: AppBarLook,
+        thickness: CGFloat
     ) -> [CGFloat] {
-        var lengths = Array(repeating: slot, count: count)
-        if let index = breakAfter, lengths.indices.contains(index) {
-            lengths[index] += extent
+        var lengths = Array(repeating: slot, count: items.count)
+        if let index = breakAfter(items) {
+            lengths[index] += floatBreakExtent(
+                gap: style.itemGap,
+                style: style,
+                depth: thickness
+            )
         }
         return lengths
     }
 
-    /// `slots` with the break's trimmed back to the item's own
-    /// length — the frames the views take.
+    /// The frames the item views take in `bounds`: the run's slots,
+    /// the break's trimmed back to the item's own length.
     nonisolated static func itemFrames(
-        _ slots: [CGRect],
+        in bounds: CGRect,
         m: Metrics
     ) -> [CGRect] {
-        guard let index = m.breakAfter, slots.indices.contains(index)
-        else { return slots }
-        var frames = slots
+        var frames = Self.frames(
+            lengths: m.lengths,
+            in: bounds,
+            gap: m.gap,
+            horizontal: m.horizontal,
+            alignment: m.alignment
+        )
+        guard let index = m.breakAfter, frames.indices.contains(index)
+        else { return frames }
         if m.horizontal {
             frames[index].size.width = m.slot
         } else {
@@ -76,21 +83,21 @@ extension AppBarOverlay {
         return frames
     }
 
-    /// Lays the rule and the mark out after the break's item, or
-    /// hides them when no break is drawn. Returns the frames the
-    /// views take.
+    /// Lays the rule and the mark out after the break's item —
+    /// inside the render's `BarMotion.runLayout` pass, so they
+    /// travel with the items — or hides them when no break is
+    /// drawn.
     func layoutFloatBreak(
-        slots: [CGRect],
+        frames: [CGRect],
         m: Metrics,
         depth: CGFloat,
         style: AppBarLook
-    ) -> [CGRect] {
-        let frames = Self.itemFrames(slots, m: m)
+    ) {
         guard let index = m.breakAfter, frames.indices.contains(index)
         else {
             floatRule.isHidden = true
             floatMark.isHidden = true
-            return frames
+            return
         }
         let item = frames[index]
         let side = Self.floatMarkSide(style: style, depth: depth)
@@ -98,23 +105,28 @@ extension AppBarOverlay {
         floatRule.isHidden = false
         floatRule.layer?.backgroundColor =
             BarDivider.color(textColor: style.itemColor).cgColor
-        floatRule.frame = BarDivider.frame(
-            at: ruleAt,
-            depth: depth,
-            horizontal: m.horizontal,
-            thickness: Self.floatRuleThickness
+        BarMotion.setFrame(
+            floatRule,
+            to: BarDivider.frame(
+                at: ruleAt,
+                depth: depth,
+                horizontal: m.horizontal
+            ),
+            animated: true
         )
-        let start = ruleAt + Self.floatRuleThickness + m.gap
+        let start = ruleAt + BarDivider.ruleThickness + m.gap
         let across = (depth - side) / 2
         floatMark.isHidden = false
         floatMark.contentTintColor = NSColor(
             kiwiHex: style.shelf.idleItemColor
         )
-        floatMark.frame =
-            m.horizontal
-            ? CGRect(x: start, y: across, width: side, height: side)
-            : CGRect(x: across, y: start, width: side, height: side)
-        return frames
+        BarMotion.setFrame(
+            floatMark,
+            to: m.horizontal
+                ? CGRect(x: start, y: across, width: side, height: side)
+                : CGRect(x: across, y: start, width: side, height: side),
+            animated: true
+        )
     }
 }
 

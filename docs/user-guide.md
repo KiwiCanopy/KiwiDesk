@@ -523,9 +523,8 @@ the Space Bar on top; set both to one edge to share one shelf.
 
 :::unreleased
 Floating windows come last, past a thin line and the floating
-symbol. Click one to
-focus it. They stay out of the row's order, so they cannot be
-dragged; **Tile Window** on the item's right-click menu tiles one.
+symbol. They cannot be dragged; **Tile Window** on the item's
+right-click menu tiles one.
 :::
 
 **Liquid Glass** is one switch for both bars, the shortcuts
@@ -593,8 +592,8 @@ a 📌 window under the current Space of its own screen.
 | `+n` / count badge, glyph's **top-right** | Space Bar | How many windows a grouped glyph holds |
 
 A window that floats only because its Space is in Floating
-layout wears no floating mark. A Space's floating windows come
-last in its row. The badges have no Settings
+layout wears no floating mark. Glyphs wearing the floating badge
+come last in their Space's row. The badges have no Settings
 toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
 :::
 

@@ -1458,7 +1458,7 @@
   "space_bar.overflow.after.ax": "表示されていない後方のウインドウ：%1$d",
   "space_bar.overflow.before.ax": "表示されていない前方のウインドウ：%1$d",
   "space_bar.show_front_app": "最前面アプリを表示",
-  "space_bar.show_front_app.caption": "App Barのないスペースでだけ表示されます。フォーカス中のウインドウはApp Barがすでに示しています。",
+  "space_bar.show_front_app.caption": "App Barのないスペースでのみ表示されます。フォーカス中のウインドウはApp Barがすでに示しています。",
   "space_bar.show_front_app.help": "各ディスプレイが現在表示しているスペースの、フォーカス中のウインドウを示すセグメントを末尾に追加します。縦向きのバーではアイコンのみになります。",
   "space_bar.spring_delay": "スプリング遅延",
   "space_bar.spring_delay.help": "ウインドウをスペースの上にドラッグしてこの時間だけ保持すると、表示がそのスペースへ切り替わり、ウインドウをそのレイアウトにドロップできます。これより早くドロップした場合は、切り替えずにウインドウだけがそこへ移動します。",

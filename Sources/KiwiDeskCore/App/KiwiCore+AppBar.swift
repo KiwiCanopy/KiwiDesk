@@ -53,11 +53,7 @@ extension KiwiCore {
             display: display,
             space: app.space.id,
             items: app.items,
-            activeIndex: appBarFloatHighlight(of: app)
-                ?? app.groups.firstIndex { group in
-                    appBarFocused(of: app.space).map(group.contains)
-                        ?? false
-                },
+            activeIndex: appBarActiveIndex(of: app),
             strip: plan.segment(slot),
             style: style,
             capAxis: plan.length

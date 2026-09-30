@@ -105,11 +105,8 @@ extension AppBarOverlay {
         let offset = Self.scrollOffset(
             current: target,
             activeIndex: nil,
-            slot: m.slot,
+            lengths: m.lengths,
             gap: m.gap,
-            count: itemViews.count,
-            breakAfter: m.breakAfter,
-            breakExtent: m.breakExtent,
             axis: m.viewport,
             margin: 0
         )

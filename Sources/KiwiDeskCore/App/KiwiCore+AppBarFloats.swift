@@ -13,15 +13,16 @@ extension KiwiCore {
         state.floatingFocusCandidates(of: space)
     }
 
-    /// The item index of the float holding `app`'s Space's focus —
-    /// the system focus on the active Space, the remembered one
-    /// elsewhere — or nil when no listed float holds it.
-    func appBarFloatHighlight(of app: AppBarContent) -> Int? {
-        let focus =
-            app.space.id == activeSpace?.id
-            ? state.workspaces.lastFocused : app.space.focused
-        guard let focus, let index = app.floats.firstIndex(of: focus)
-        else { return nil }
-        return app.groups.count + index
+    /// The item that renders focused: the focus anchor's float
+    /// item, else the tiled group holding it. One reading of the
+    /// focus (`appBarFocused`) and of which items float
+    /// (`Item.floating`), so no index arithmetic restates the
+    /// order `appBarContent` builds.
+    func appBarActiveIndex(of app: AppBarContent) -> Int? {
+        guard let focus = appBarFocused(of: app.space) else {
+            return nil
+        }
+        return app.items.firstIndex { $0.floating && $0.id == focus }
+            ?? app.groups.firstIndex { $0.contains(focus) }
     }
 }

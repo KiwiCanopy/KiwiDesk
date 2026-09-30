@@ -146,11 +146,8 @@ public final class AppBarOverlay {
         scrollOffset = Self.scrollOffset(
             current: scrollOffset,
             activeIndex: followingFocus ? activeIndex : nil,
-            slot: m.slot,
+            lengths: m.lengths,
             gap: m.gap,
-            count: items.count,
-            breakAfter: m.breakAfter,
-            breakExtent: m.breakExtent,
             axis: m.viewport,
             margin: ShelfOverflow.followMargin(
                 gap: m.gap,
@@ -178,17 +175,9 @@ public final class AppBarOverlay {
             offset: scrollOffset,
             horizontal: m.horizontal
         )
-        let frames = layoutFloatBreak(
-            slots: Self.frames(
-                lengths: m.lengths,
-                in: CGRect(origin: .zero, size: runFrame.size),
-                gap: m.gap,
-                horizontal: m.horizontal,
-                alignment: m.alignment
-            ),
-            m: m,
-            depth: m.horizontal ? strip.height : strip.width,
-            style: style
+        let frames = Self.itemFrames(
+            in: CGRect(origin: .zero, size: runFrame.size),
+            m: m
         )
         let runStart: CGFloat
         if let first = frames.first {
@@ -222,6 +211,7 @@ public final class AppBarOverlay {
                     animated: true
                 )
             }
+            layoutFloatBreak(frames: frames, m: m, depth: depth, style: style)
         }
         for (index, item) in items.enumerated() {
             let view = itemViews[index]

@@ -152,7 +152,8 @@ struct ShelfDividerWeightTests {
         #expect(!rule.isHidden)
         let ink = try #require(rule.layer?.backgroundColor)
         #expect(ink.alpha == BarDivider.ruleAlpha)
-        #expect(rule.frame.width == 1)
+        #expect(rule.frame.width == BarDivider.ruleThickness)
+        #expect(rule.frame.width < BarDivider.sectionThickness)
         #expect(rule.frame.height == depth * BarDivider.ruleLengthShare)
     }
 

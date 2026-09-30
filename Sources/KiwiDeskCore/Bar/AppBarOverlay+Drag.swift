@@ -73,16 +73,7 @@ extension AppBarOverlay {
         var order = itemViews
         order.remove(at: from)
         order.insert(dragged, at: min(to, order.count))
-        let frames = Self.itemFrames(
-            Self.frames(
-                lengths: m.lengths,
-                in: itemRun.bounds,
-                gap: m.gap,
-                horizontal: m.horizontal,
-                alignment: m.alignment
-            ),
-            m: m
-        )
+        let frames = Self.itemFrames(in: itemRun.bounds, m: m)
         for (index, view) in order.enumerated()
         where view !== dragged {
             draggableView(for: view).frame = frames[index]

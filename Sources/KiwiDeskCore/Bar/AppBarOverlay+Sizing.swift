@@ -9,9 +9,8 @@ extension AppBarOverlay {
         let gap: CGFloat
         /// The last tiled item, where the float break sits (#1826).
         let breakAfter: Int?
-        /// Axis length the break adds to that item's slot.
-        let breakExtent: CGFloat
-        /// Each slot's length, the break's slot widened by it.
+        /// Each slot's length, the break's slot widened by it — the
+        /// one lengths array a render and its scroll read.
         let lengths: [CGFloat]
         let total: CGFloat
         let inset: CGFloat
@@ -37,16 +36,11 @@ extension AppBarOverlay {
             capAxis: capAxis ?? axis
         )
         let breakAfter = Self.breakAfter(items)
-        let breakExtent = Self.floatBreakExtent(
-            gap: gap,
-            style: style,
-            depth: thickness
-        )
         let lengths = Self.lengths(
+            items: items,
             slot: slot,
-            count: count,
-            breakAfter: breakAfter,
-            extent: breakExtent
+            style: style,
+            thickness: thickness
         )
         let total = Self.runLength(lengths: lengths, gap: gap)
         // No arrow zones: the run fills its section and fades on a
@@ -57,7 +51,6 @@ extension AppBarOverlay {
             slot: slot,
             gap: gap,
             breakAfter: breakAfter,
-            breakExtent: breakExtent,
             lengths: lengths,
             total: total,
             inset: inset,
@@ -87,14 +80,10 @@ extension AppBarOverlay {
         )
         let gap = style.itemGap
         let lengths = lengths(
+            items: items,
             slot: slot,
-            count: items.count,
-            breakAfter: breakAfter(items),
-            extent: floatBreakExtent(
-                gap: gap,
-                style: style,
-                depth: thickness
-            )
+            style: style,
+            thickness: thickness
         )
         return runLength(lengths: lengths, gap: gap) + gap
     }
@@ -117,14 +106,6 @@ extension AppBarOverlay {
                 thickness: thickness
             )
         )
-    }
-
-    nonisolated static func runLength(
-        slot: CGFloat,
-        count: Int,
-        gap: CGFloat
-    ) -> CGFloat {
-        slot * CGFloat(count) + gap * CGFloat(max(count - 1, 0))
     }
 
     nonisolated static func runLength(
@@ -204,27 +185,38 @@ extension AppBarOverlay {
         max(min(autoWidth, axis / 4), contentDepth)
     }
 
-    /// The scroll offset keeping the focused item in view, in
-    /// equal slots — `ShelfOverflow.offset` does the arithmetic
-    /// (#1517).
+    /// The scroll offset keeping the focused item in view over
+    /// equal slots and no break — `ShelfOverflow.offset` does the
+    /// arithmetic (#1517).
     nonisolated static func scrollOffset(
         current: CGFloat,
         activeIndex: Int?,
         slot: CGFloat,
         gap: CGFloat,
         count: Int,
-        breakAfter: Int? = nil,
-        breakExtent: CGFloat = 0,
         axis: CGFloat,
         margin: CGFloat
     ) -> CGFloat {
-        let lengths = lengths(
-            slot: slot,
-            count: max(count, 0),
-            breakAfter: breakAfter,
-            extent: breakExtent
+        scrollOffset(
+            current: current,
+            activeIndex: activeIndex,
+            lengths: Array(repeating: slot, count: max(count, 0)),
+            gap: gap,
+            axis: axis,
+            margin: margin
         )
-        return ShelfOverflow.offset(
+    }
+
+    /// The scroll offset over a render's own `Metrics.lengths`.
+    nonisolated static func scrollOffset(
+        current: CGFloat,
+        activeIndex: Int?,
+        lengths: [CGFloat],
+        gap: CGFloat,
+        axis: CGFloat,
+        margin: CGFloat
+    ) -> CGFloat {
+        ShelfOverflow.offset(
             current: current,
             lengths: lengths,
             gap: gap,

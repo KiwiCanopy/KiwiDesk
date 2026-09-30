@@ -1570,8 +1570,9 @@ gesture rather than the space. The filter therefore sits where the
 bar's members are read, not in tracking or the ignore gate, and it
 runs **before** the same-app grouping and the glyph span (#376), so
 an overlay can neither split a run nor reserve a capped slot the
-bar then draws nothing in. The App Bar's float section takes the
-same filter, through the focus keys' candidate list (#1826).
+bar then draws nothing in. The App Bar's tiled row needs no such
+filter: it builds from the tiled members, which a structural float
+has already left.
 
 The *launcher* subset of that class — an accessory app's
 raised-layer command bar (Spotlight, Raycast, Alfred) — takes the
@@ -11479,11 +11480,11 @@ first, because the leading end is where the eye starts, and a
 float appearing there would shift every tile behind it.
 
 The rule takes the in-item tier, 1 pt at half depth: at the
-section's weight it read, on a fused shelf, as the divider between
+section's weight it reads, on a fused shelf, as the divider between
 the two bars a few items away — two marks alike in shape meaning
-different things. A mark alone, midway in the gap, belonged to
-neither side, and one pulled against the floats attached to
-whichever float came first once the focus fill moved. So the rule
+different things. A mark alone, midway in the gap, belongs to
+neither side, and one pulled against the floats attaches to
+whichever float comes first once the focus fill moves. So the rule
 separates and the mark labels. The mark is ONE section marker, not
 a badge on each item, so the
 Space-Bar-only badges ruling stands. It keeps idle ink when a
@@ -11493,14 +11494,14 @@ model*). The Space
 Bar takes no mark, since each of its float glyphs wears its
 badge already.
 
-The set is the one the directional focus keys reach,
+The App Bar's set is the one the directional focus keys reach,
 `floatingFocusCandidates`, not a narrower "floated by hand or by
 rule": the #683 transient-overlay filter already drops dialogs,
-sheets and panels, and one definition keeps both bars listing
-the same windows. The Space Bar's sort takes the badge's flag
-(#1286), so the glyphs gathered at the end are the badged ones; an
-effective-float key would gather a whole Floating-layout Space
-and sort nothing. No badge on the App Bar item: that bar shows
+sheets and panels. The Space Bar's sort takes the badge's flag
+(#1286) instead, so the glyphs gathered at the end are the badged
+ones — a fullscreen float among them, which the App Bar leaves out
+as the focus keys do; an effective-float key would gather a whole
+Floating-layout Space and sort nothing. No badge on the App Bar item: that bar shows
 no state badges (see *Sticky has no native cue*), and VoiceOver
 speaks "floating window" on each float item.
 

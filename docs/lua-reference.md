@@ -2419,9 +2419,8 @@ space.
 
 :::unreleased
 The space's floating windows follow the row, past a thin line and
-the floating symbol; they
-focus on a click but cannot be dragged, since they hold no place
-in the row's order.
+the floating symbol; they focus on a click, cannot be dragged, and
+are never grouped.
 :::
 
 The bar sits on [KiwiShelf](#kiwishelf), which sets its
