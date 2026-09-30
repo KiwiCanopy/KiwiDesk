@@ -40,14 +40,14 @@ extension SpacesKey {
     var text: SettingRowText {
         switch self {
         case .spaceIcon, .spaceList, .spacesName, .spaceModes,
-            .fallbackSpace, .spaceOverrideResetActive:
+            .fallbackSpace, .spaceOverrideResetActive,
+            .spacesAddToProfile:
+            // The add button names its Space (#1790).
             return .dynamic
         case .spaceOverrideResetAll:
             return .text("space_override.reset_all")
         case .spacesDelete:
             return .text("spaces.delete.help")
-        case .spacesAddToProfile:
-            return .text("spaces.add_to_profile")
         }
     }
 }
