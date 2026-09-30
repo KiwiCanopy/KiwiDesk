@@ -9,6 +9,8 @@ extension AppBarOverlay {
         let gap: CGFloat
         /// The last tiled item, where the float break sits (#1826).
         let breakAfter: Int?
+        /// Axis length the break adds to that item's slot.
+        let breakExtent: CGFloat
         /// Each slot's length, the break's slot widened by it.
         let lengths: [CGFloat]
         let total: CGFloat
@@ -35,11 +37,16 @@ extension AppBarOverlay {
             capAxis: capAxis ?? axis
         )
         let breakAfter = Self.breakAfter(items)
+        let breakExtent = Self.floatBreakExtent(
+            gap: gap,
+            style: style,
+            depth: thickness
+        )
         let lengths = Self.lengths(
             slot: slot,
             count: count,
-            gap: gap,
-            breakAfter: breakAfter
+            breakAfter: breakAfter,
+            extent: breakExtent
         )
         let total = Self.runLength(lengths: lengths, gap: gap)
         // No arrow zones: the run fills its section and fades on a
@@ -50,6 +57,7 @@ extension AppBarOverlay {
             slot: slot,
             gap: gap,
             breakAfter: breakAfter,
+            breakExtent: breakExtent,
             lengths: lengths,
             total: total,
             inset: inset,
@@ -81,8 +89,12 @@ extension AppBarOverlay {
         let lengths = lengths(
             slot: slot,
             count: items.count,
-            gap: gap,
-            breakAfter: breakAfter(items)
+            breakAfter: breakAfter(items),
+            extent: floatBreakExtent(
+                gap: gap,
+                style: style,
+                depth: thickness
+            )
         )
         return runLength(lengths: lengths, gap: gap) + gap
     }
@@ -202,14 +214,15 @@ extension AppBarOverlay {
         gap: CGFloat,
         count: Int,
         breakAfter: Int? = nil,
+        breakExtent: CGFloat = 0,
         axis: CGFloat,
         margin: CGFloat
     ) -> CGFloat {
         let lengths = lengths(
             slot: slot,
             count: max(count, 0),
-            gap: gap,
-            breakAfter: breakAfter
+            breakAfter: breakAfter,
+            extent: breakExtent
         )
         return ShelfOverflow.offset(
             current: current,

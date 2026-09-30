@@ -11467,16 +11467,27 @@ per-layout override, and serves no user.
 :::unreleased
 **A Space's floats close both bars.**
 ([#1826](https://github.com/KiwiCanopy/KiwiDesk/issues/1826),
-owner ruling.) The App Bar lists them after the tiled row, past a
-break at the Space Bar layer break's weight; each Space Bar chip
-draws its flagged floats last. The App Bar's items are a map of
+owner ruling.) The App Bar lists them after the tiled row, past
+the floating mark; each Space Bar chip draws its flagged floats
+last. The App Bar's items are a map of
 the row, where order is layout order and a drag reorders it. A
 float has no slot in that row, so mixed in among the tiles it
-would read as one and invite a drag that means nothing. The break
-says "the row ends here", which a badge cannot, and the float's
+would read as one and invite a drag that means nothing. The mark
+says "the row ends here" and names what follows, and the float's
 item stays undraggable rather than dimmed. Last rather than
 first, because the leading end is where the eye starts, and a
 float appearing there would shift every tile behind it.
+
+The mark is the floating symbol, not a rule: on a fused shelf a
+rule reads as the section divider between the two bars a few
+items away, two marks that look alike and mean different things.
+It is ONE section marker, not a badge on each item, so the
+Space-Bar-only badges ruling stands. It keeps idle ink when a
+float is focused: the float's own item carries the focus, and a
+state mark keeps one ink (see *The Space Bar's two-accent
+model*). The Space
+Bar takes no mark, since each of its float glyphs wears its
+badge already.
 
 The set is the one the directional focus keys reach,
 `floatingFocusCandidates`, not a narrower "floated by hand or by
@@ -11487,7 +11498,7 @@ the same windows. The Space Bar's sort takes the badge's flag
 effective-float key would gather a whole Floating-layout Space
 and sort nothing. No badge on the App Bar item: that bar shows
 no state badges (see *Sticky has no native cue*), and VoiceOver
-speaks "floating window" in its place.
+speaks "floating window" on each float item.
 
 A focused float takes the highlight, and the bar scrolls to it.
 A float's focus pans no window, but the bar's scroll is not the

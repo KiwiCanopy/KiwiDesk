@@ -522,7 +522,7 @@ the Space Bar on top; set both to one edge to share one shelf.
 :::
 
 :::unreleased
-Floating windows come last, past a thin line. Click one to
+Floating windows come last, past the floating symbol. Click one to
 focus it. They stay out of the row's order, so they cannot be
 dragged; **Tile Window** on the item's right-click menu tiles one.
 :::

@@ -4,8 +4,8 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The App Bar lists a Space's floats after its tiled row, behind
-/// a break (#1826): never in `barGroups`, which the drag reorder
+/// The App Bar lists a Space's floats after its tiled row, past
+/// the floating mark (#1826): never in `barGroups`, which the drag reorder
 /// indexes, and a focused float takes the highlight.
 @Suite("App Bar floats", .serialized)
 @MainActor
@@ -126,29 +126,31 @@ struct AppBarFloatTests {
         )
     }
 
-    @Test("The break sits between the last tiled item and a float")
-    func breakBetweenSections() throws {
+    @Test("The floating mark sits between the row and a float")
+    func markBetweenSections() throws {
         let overlay = AppBarOverlay()
         show(overlay, [item(1), item(2), item(3, floating: true)])
-        let rule = overlay.floatDivider
-        #expect(!rule.isHidden)
-        #expect(rule.superview === overlay.itemRun)
+        let mark = overlay.floatMark
+        #expect(!mark.isHidden)
+        #expect(mark.superview === overlay.itemRun)
+        #expect(!mark.isAccessibilityElement())
+        #expect(mark.hitTest(CGPoint(x: mark.frame.midX, y: 1)) == nil)
         let tiled = overlay.itemViews[1].frame
         let float = overlay.itemViews[2].frame
-        #expect(rule.frame.minX > tiled.maxX)
-        #expect(rule.frame.maxX < float.minX)
-        // Every item keeps the one slot length; the break widens
+        #expect(mark.frame.minX > tiled.maxX)
+        #expect(mark.frame.maxX < float.minX)
+        // Every item keeps the one slot length; the mark widens
         // the run, not an item.
         #expect(tiled.width == float.width)
     }
 
-    @Test("No break without both sections")
-    func noBreakWithOneSection() {
+    @Test("No mark without both sections")
+    func noMarkWithOneSection() {
         let overlay = AppBarOverlay()
         show(overlay, [item(1), item(2)])
-        #expect(overlay.floatDivider.isHidden)
+        #expect(overlay.floatMark.isHidden)
         show(overlay, [item(3, floating: true)])
-        #expect(overlay.floatDivider.isHidden)
+        #expect(overlay.floatMark.isHidden)
     }
 
     @Test("A float item neither reorders nor takes a drop")

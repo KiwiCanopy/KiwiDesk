@@ -109,6 +109,7 @@ extension AppBarOverlay {
             gap: m.gap,
             count: itemViews.count,
             breakAfter: m.breakAfter,
+            breakExtent: m.breakExtent,
             axis: m.viewport,
             margin: 0
         )

@@ -51,14 +51,9 @@ public final class AppBarOverlay {
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
-    /// The break between the tiled row and its floats (#1826).
-    let floatDivider: NSView = {
-        let view = NSView()
-        view.wantsLayer = true
-        view.isHidden = true
-        view.setAccessibilityElement(false)
-        return view
-    }()
+    /// The floating mark between the tiled row and its floats
+    /// (#1826).
+    let floatMark = FloatBreakMark()
     /// The bars' context menus (#1518): held by the section root,
     /// which every view in the section finds by walking up.
     weak var contextMenus: BarContextMenus? {
@@ -154,6 +149,7 @@ public final class AppBarOverlay {
             gap: m.gap,
             count: items.count,
             breakAfter: m.breakAfter,
+            breakExtent: m.breakExtent,
             axis: m.viewport,
             margin: ShelfOverflow.followMargin(
                 gap: m.gap,

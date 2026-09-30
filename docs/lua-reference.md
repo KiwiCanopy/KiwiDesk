@@ -2418,7 +2418,8 @@ space it is showing, and dragging an item reorders that display's
 space.
 
 :::unreleased
-The space's floating windows follow the row, after a break; they
+The space's floating windows follow the row, past the floating
+symbol; they
 focus on a click but cannot be dragged, since they hold no place
 in the row's order.
 :::
