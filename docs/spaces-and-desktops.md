@@ -49,7 +49,10 @@ live changes nothing, so a monitor reconnect is harmless.
 different profile or a built-in Standard becomes live, each Space
 it does not have, and that still has windows in it, is **held**
 for the profile you left instead of being dropped — whether its
-screen was unplugged or is still there. An empty one goes away.
+screen was unplugged or is still there. A window the new profile
+has had before goes back to the Space it had it in, so a held
+Space keeps only windows that profile has never seen, and one
+left empty goes away.
 :::
 
 **Unplugging a screen holds its Spaces.** When unplugging a

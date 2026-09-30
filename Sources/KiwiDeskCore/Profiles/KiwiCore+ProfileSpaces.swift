@@ -212,7 +212,6 @@ extension KiwiCore {
                 state.workspaces[space] != nil
             else { continue }
             for window in remembered[space] ?? [] {
-                guard heldSpace(holding: window) == nil else { continue }
                 guard state.windows[window] != nil else {
                     // Not in state: away on another Desktop, or
                     // closed and still remembered (a close return

@@ -5219,10 +5219,10 @@ monitors, a reconnect only places spaces, and a held space stays
 held.
 
 :::unreleased
-A window in a held space stays there even when the incoming
-profile remembers it in one of its own spaces, so what the space
-held goes home together
-([#1728](https://github.com/KiwiCanopy/KiwiDesk/issues/1728)).
+A window the incoming profile remembers in one of its own spaces
+goes there, even out of a held space; a held space keeps only
+the windows that profile has never seen, and is dropped once
+empty.
 :::
 
 :::unreleased

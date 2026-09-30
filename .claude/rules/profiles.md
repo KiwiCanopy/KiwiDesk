@@ -996,15 +996,14 @@ incoming arrangement does not name*. The obligations:
   arm only places Spaces and returns nothing, by ruling. A new
   door owes the call. The composed door and the no-apply arms
   have no clause.
-- **A switching apply's #1230 restore leaves every held Space's
-  members (#1728).** What a held Space holds — a member, else a
-  window remembered there that will come back — is answered once,
-  by `heldSpace(holding:)` in `KiwiCore+HeldSpaceReads.swift`,
-  which the restore and the retire both ask
-  (`HeldSpaceRestoreTests` ▸ `holdKeepsRememberedWindows`,
-  `HeldSpaceRestoreTests` ▸ `heldWindowsGoHomeTogether`). A new
-  path a switching apply runs that moves windows across Spaces
-  owes the same skip through that predicate, never a copy of it.
+- **A switching apply's #1230 restore places a remembered window
+  even out of a held Space (#1790, reversing #1728).** The hold
+  keeps only what the incoming arrangement never saw, and a held
+  Space the restore empties retires at the next retile
+  (`HeldSpaceRestoreTests` ▸ `memoryPlacesRememberedWindows`,
+  `HeldSpaceRestoreTests` ▸ `replugRestoresFromMemory`). A path a
+  switching apply runs that moves windows across Spaces takes no
+  exemption for a held Space's members.
 - **Retire at the head of `retile()`.** `retireEmptiedHeldSpaces`
   runs there because a membership change retiles; a path that
   empties a held Space without a retile owes the call

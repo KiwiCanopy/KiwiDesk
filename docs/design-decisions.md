@@ -13735,20 +13735,28 @@ is asked for.
 :::
 
 :::unreleased
-**The hold outranks the incoming profile's record**
-([#1728](https://github.com/KiwiCanopy/KiwiDesk/issues/1728)).
-The switch that holds a Space also runs #1230's restore for the
-profile coming in, and that profile has usually seen the held
-Space's windows before, in Spaces of its own — whether the
-Space's screen left or the switch alone left it undeclared.
-Letting the restore move them would empty the held Space the same change just made,
-and it would retire — the write side of this is the paragraph
-above, which keeps a held Space out of that record: after a few dock cycles most windows are
-remembered somewhere, so the hold would keep only windows opened
-since. The restore therefore leaves a window in any held Space where
-it is, live or away and remembered there, and what was on one
-screen stays together and goes home together: the undock side of
-the rule, below, that everything inside a held Space goes back.
+**The incoming profile's record outranks the hold**
+([#1728](https://github.com/KiwiCanopy/KiwiDesk/issues/1728),
+reversed on #1790). The switch that holds a Space also runs
+#1230's restore for the arrangement coming in, and that
+arrangement has usually seen the held Space's windows before, in
+Spaces of its own. A window it remembers goes there, live or away
+and remembered there, and the held Space keeps only the windows it
+has never seen; one left empty retires. A remembered window sat
+in that Space because the user put it there the last time that
+setup was live, so the restore returns their own placement rather
+than stuffing another screen's windows into it. #1728 first ruled
+the other way, because a replug restored the docked layout from
+the docked profile's record alone and that record did not survive
+a KiwiDesk restart, so a restart while undocked lost it. Once
+[#1828](https://github.com/KiwiCanopy/KiwiDesk/pull/1828) kept
+every profile's record across a restart, and
+[#1832](https://github.com/KiwiCanopy/KiwiDesk/pull/1832) gave a
+composed Standard a record of its own, the replug restores from
+memory like any switch, and one rule serves every switch. The
+record stores membership rather than order (#1387), so a row that
+returns from memory may come back in another order than a held
+Space would have kept.
 :::
 
 **It goes home only into the arrangement it left.** A held Space

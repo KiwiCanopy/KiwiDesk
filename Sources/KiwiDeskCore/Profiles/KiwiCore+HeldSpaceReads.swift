@@ -53,16 +53,6 @@ extension KiwiCore {
             && returnsHome(origin, declared: declared, into: arrangement)
     }
 
-    /// The held Space `window` belongs to: the one it is a member
-    /// of, else the one it is remembered in and will come back to
-    /// — a closed window never does (#1561). The one answer to
-    /// what a held Space holds (#1507 ruling 4, #1728).
-    func heldSpace(holding window: WindowID) -> SpaceID? {
-        returningSpace(of: window).flatMap {
-            state.heldSpaces[$0] == nil ? nil : $0
-        }
-    }
-
     /// The Space `window` is in, or will come back to — a closed
     /// window comes back as a new one, so it names none.
     func returningSpace(of window: WindowID) -> SpaceID? {

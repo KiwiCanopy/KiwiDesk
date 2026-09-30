@@ -111,7 +111,9 @@ struct FloatGatherRepartitionTests {
     }
 
     /// A switch to a profile that does not declare the window's
-    /// Space forwards it into the fallback — the prune door.
+    /// Space forwards it into the fallback — the prune door. The
+    /// Space is `init.lua`'s, not A's, so the switch does not hold
+    /// it (#1790).
     @Test(
         "A switch's prune into a floating space gathers",
         .enabled(if: NSScreen.main != nil)
@@ -119,11 +121,8 @@ struct FloatGatherRepartitionTests {
     func switchPruneIsAnEntry() throws {
         let core = try #require(makeCore())
         let settings = core.tiler.settings
-        let a = profile(
-            "A",
-            modes: ["1": .floating, "2": .scrolling],
-            settings: settings
-        )
+        core.initDeclaredSpaces = ["2"]
+        let a = profile("A", modes: ["1": .floating], settings: settings)
         core.apply(profile: a, cause: .reapply)
         // A re-apply of the live profile re-files nothing.
         core.apply(profile: a, cause: .reapply)
