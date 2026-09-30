@@ -11,9 +11,6 @@ extension SettingsModel {
                 atomically: true,
                 encoding: .utf8
             )
-            // The reload replaces every hotkey; the recorder
-            // snapshot must not roll the fresh Lua table back.
-            liveKeySession = nil
             core.loadConfig()
             reload()
             // Free-form Lua isn't checked at input time, so set or

@@ -888,10 +888,13 @@ banner. A collision with a shortcut every app carries (⌘W, ⌘Q,
 it is bound.
 
 The recorder **suspends your KiwiDesk shortcuts while it is
-open**, so a combo already bound to a window action can be
-tested. With the banner's top row picked, a recording, a clear
-or a deleted row takes effect at once, before Save; Revert
-restores the saved ones, also live.
+open**, so a combo already bound to a window action is recorded
+instead of firing.
+
+:::unreleased
+A recording, a clear or a deleted row takes effect when you
+Save, like every other setting; Revert discards it.
+:::
 
 ### Keyboard Modifiers & Keys
 

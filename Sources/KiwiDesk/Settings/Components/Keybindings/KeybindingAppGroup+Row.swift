@@ -50,7 +50,7 @@ extension ApplicationsGroup {
                         },
                         bindings: $bindings,
                         commit: {
-                            _ = record(
+                            record(
                                 $0,
                                 id: binding.wrappedValue.id
                             )
@@ -59,13 +59,7 @@ extension ApplicationsGroup {
                 },
                 onRecord: { record($0, into: binding) },
                 onClear: {
-                    let id = binding.wrappedValue.id
                     binding.wrappedValue.combo = ""
-                    _ = model.liveApplyRecorded(
-                        layerName: layerName,
-                        bindingID: id,
-                        combo: nil
-                    )
                 }
             )
             KeyReachTrash(
@@ -155,7 +149,7 @@ extension ApplicationsGroup {
     private func record(
         _ combo: String,
         into binding: Binding<KeyBinding>
-    ) -> LiveApplyFeedback? {
+    ) {
         binding.wrappedValue.combo = combo
         let id = binding.wrappedValue.id
         if let index = bindings.firstIndex(
@@ -166,33 +160,22 @@ extension ApplicationsGroup {
                 in: bindings
             )
         }
-        return model.liveApplyRecorded(
-            layerName: layerName,
-            bindingID: id,
-            combo: combo
-        )
     }
 
     /// Records shortcut combo lookup by ID (`UUID`).
-    @discardableResult
     private func record(
         _ combo: String,
         id: UUID
-    ) -> LiveApplyFeedback? {
+    ) {
         guard
             let index = bindings.firstIndex(where: {
                 $0.id == id
             })
-        else { return nil }
+        else { return }
         bindings[index].combo = combo
         model.noteRecordedCombo(
             bindings[index],
             in: bindings
-        )
-        return model.liveApplyRecorded(
-            layerName: layerName,
-            bindingID: id,
-            combo: combo
         )
     }
 }

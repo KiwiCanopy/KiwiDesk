@@ -100,7 +100,6 @@ extension KiwiCore {
     /// cannot be decoded (`isGuiManaged` implies existence, so
     /// nil here means unreadable/corrupt JSON — post phase 5
     /// nothing stands behind it; never a silent no-op).
-    /// Internal: shared with `liveApplyKeybindings` (#123).
     func loadStructuredConfig() -> GuiConfig? {
         if let config = guiConfigStore.load() {
             return config
@@ -307,7 +306,6 @@ extension KiwiCore {
     /// A profile that exists but cannot
     /// be read degrades to the base config — loudly, matching
     /// the corrupt-gui.json policy above.
-    /// Internal: shared with `liveApplyKeybindings` (#123).
     func activeProfileOverrides() -> Profile? {
         guard let name = profiles.currentName else {
             return nil

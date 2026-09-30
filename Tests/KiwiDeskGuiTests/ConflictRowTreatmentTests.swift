@@ -45,8 +45,6 @@ struct ConflictRowTreatmentTests {
             "RecorderButtonChrome(recording:recording,dead:isDead)",
             // …the caption is mounted under the field…
             "clearButton}deadCaption",
-            // …a dead row never also claims "Active now"…
-            "ifletliveFeedback,showsFeedback(liveFeedback){",
             // …and the tier and its sentence arrive as ONE
             // value, declared `let` with no default so the
             // memberwise init REQUIRES it: widening this to a

@@ -2,33 +2,21 @@ import Foundation
 
 /// Prepared structured keybindings waiting for one atomic
 /// `KeybindingManager` swap. Lua refs are minted before the
-/// running table changes, so a recorder edit never exposes a
-/// half-built layer set (#123 review).
+/// running table changes, so an apply never exposes a
+/// half-built layer set.
 struct PreparedKeybindings {
-    struct Failure {
-        let layer: String
-        let binding: KeyBinding
-    }
-
     var refs: [String: [KeyCombo: Int32]]
     var icons: [String: String]
     var registeredLayers: [KeyLayer]
-    var failures: [Failure]
-
-    @MainActor func release(using lua: LuaInterpreter) {
-        for bindings in refs.values {
-            for ref in bindings.values {
-                lua.release(ref: ref)
-            }
-        }
-    }
 }
 
 extension KiwiCore {
     /// Resolves the base + profile tiers, prepares every Lua
-    /// callback, then replaces all layers in one batch. Regular
-    /// config/profile applies reset to default; recorder-only
-    /// entry points call the lower seam with their active layer.
+    /// callback, then replaces all layers in one batch — the one
+    /// door to the running structured table, called only with
+    /// saved layers (`ShortcutsApplyOnSaveTests`). Regular
+    /// config/profile applies reset to default; a rule write's
+    /// refresh keeps the running layer.
     func applyStructuredKeybindings(
         layers base: [KeyLayer],
         profile: KeyLayerOverride?,
@@ -43,22 +31,24 @@ extension KiwiCore {
             resolved,
             lua: lua
         )
-        install(prepared, preferredLayer: preferredLayer)
+        keys.replaceLayers(
+            prepared.refs,
+            icons: prepared.icons,
+            preferredLayer: preferredLayer
+        )
+        appliedStructuredLayers = prepared.registeredLayers
     }
 
     /// Compiles every representable, assigned binding without
     /// touching the running table. Invalid combos and compile
-    /// errors retain established per-binding skip semantics;
-    /// failures remain identifiable so live recorder feedback
-    /// never claims the target compiled.
-    func prepareKeybindings(
+    /// errors are logged and skipped per binding.
+    private func prepareKeybindings(
         _ layers: [KeyLayer],
         lua: LuaInterpreter
     ) -> PreparedKeybindings {
         var refs: [String: [KeyCombo: Int32]] = [:]
         var icons: [String: String] = [:]
         var registeredLayers: [KeyLayer] = []
-        var failures: [PreparedKeybindings.Failure] = []
 
         for layer in layers {
             let prepared = prepare(layer: layer, lua: lua)
@@ -73,26 +63,12 @@ extension KiwiCore {
                     bindings: prepared.bindings
                 )
             )
-            failures.append(contentsOf: prepared.failures)
         }
         return PreparedKeybindings(
             refs: refs,
             icons: icons,
-            registeredLayers: registeredLayers,
-            failures: failures
+            registeredLayers: registeredLayers
         )
-    }
-
-    func install(
-        _ prepared: PreparedKeybindings,
-        preferredLayer: String
-    ) {
-        keys.replaceLayers(
-            prepared.refs,
-            icons: prepared.icons,
-            preferredLayer: preferredLayer
-        )
-        appliedStructuredLayers = prepared.registeredLayers
     }
 
     private func prepare(
@@ -100,12 +76,10 @@ extension KiwiCore {
         lua: LuaInterpreter
     ) -> (
         refs: [KeyCombo: Int32],
-        bindings: [KeyBinding],
-        failures: [PreparedKeybindings.Failure]
+        bindings: [KeyBinding]
     ) {
         var entries:
             [KeyCombo: (index: Int, binding: KeyBinding, ref: Int32)] = [:]
-        var failures: [PreparedKeybindings.Failure] = []
 
         for (index, binding) in layer.bindings.enumerated()
         where !binding.combo.isEmpty {
@@ -114,9 +88,6 @@ extension KiwiCore {
                 onLog(
                     "structured: invalid combo "
                         + "'\(binding.combo)'"
-                )
-                failures.append(
-                    .init(layer: layer.name, binding: binding)
                 )
                 continue
             }
@@ -135,9 +106,6 @@ extension KiwiCore {
                     "structured: bind skipped "
                         + "[\(binding.combo)]: \(error)"
                 )
-                failures.append(
-                    .init(layer: layer.name, binding: binding)
-                )
             }
         }
 
@@ -150,8 +118,7 @@ extension KiwiCore {
                     ($0.key, $0.value.ref)
                 }
             ),
-            bindings: ordered.map(\.value.binding),
-            failures: failures
+            bindings: ordered.map(\.value.binding)
         )
     }
 }

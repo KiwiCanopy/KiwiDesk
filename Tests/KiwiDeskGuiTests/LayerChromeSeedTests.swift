@@ -14,11 +14,7 @@ import Testing
 @Suite("New layers carry the app-chrome rows")
 struct LayerChromeSeedTests {
     /// `KeyLayer(` sites that seed nothing, and why.
-    private static let allowed: [String: String] = [
-        // The live-apply session mirror re-creates a layer the
-        // user already authored in the draft; it seeds nothing.
-        "SettingsModel+LiveApply.swift": "session mirror of an authored layer"
-    ]
+    private static let allowed: [String: String] = [:]
 
     @Test("every layer-authoring site seeds through appChromeRows")
     func layerSitesSeedThroughTheSeam() throws {

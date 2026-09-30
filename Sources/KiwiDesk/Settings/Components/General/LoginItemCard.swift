@@ -76,8 +76,7 @@ struct LoginItemCard: View {
 
     /// The transient live-apply confirmation: "Updating…" while a
     /// change is in flight, then a green check + a level-specific
-    /// line that fades on its own (mirrors the key recorder's
-    /// `LiveApplyCaption`). Nothing shows at rest, on the initial
+    /// line that fades on its own. Nothing shows at rest, on the initial
     /// read, or on the greyed unregisterable control — only after a
     /// user-driven change, because the changes apply live and there
     /// is no Save to press.

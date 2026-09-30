@@ -8053,22 +8053,24 @@ control stays staged behind Save unless it clears one of two
 bars: **(a)** it owns no profile state at all (the General ▸
 Language picker persists straight to `UserDefaults`, never
 `gui.json` — there is nothing to stage), or **(b)** its
-feedback loop *is* the live runtime and no in-window
-simulation can substitute (the keybinding recorder: the only
-way to know a shortcut works is to press it). Everything else
+feedback loop *is* the live runtime, no in-window simulation
+can substitute, and its runtime effect cannot outlive the draft
+that made it — an effect in force but not saved survives the
+window that shows it, and the user learns a setting the next
+restart takes away (see "The recorder stages like every
+control" below). Everything else
 — sliders, colors, pickers, placement grids — stays staged;
 where a raw value is hard to judge, build an in-window
 preview (the `GapsDiagram` / `DragVisualsEditor`-strip
 pattern), never live-apply. Sweep verdicts: Spaces,
-App Rules, Shortcuts (minus the recorder), and the
+App Rules, Shortcuts, and the
 Desktop→profile bindings are plainly staged. Monitors'
 drag-cards and the icon pickers are **self-previewing** (the
 control is its own preview — a third category needing neither
 live-apply nor a bolted-on preview). Profiles-section
 rename/delete/make-default/preset-apply are immediate file
 **actions**, not settings — correctly outside this question.
-The Spaces tab's per-space layout picker stays staged. **No
-control besides the key recorder passes the live-apply bar.**
+The Spaces tab's per-space layout picker stays staged.
 
 :::unreleased
 Bar **(a)** is about owning no profile state, not about which
@@ -8864,39 +8866,30 @@ not read by colour alone. The larger pending-candidate model
 is scoped in #213 pending a design round — the *Steal*/*Go to*
 hard-block is the conflict UX until then.
 
-**The recorder live-applies on the live target; stored profiles
-stay staged.** (#123 Part 1.) A recorder is an input device —
-"recorded but inert until Save" breaks its mental model (the user
-presses the new combo and nothing happens). A successfully
-committed recording (or clear) on the live edit target
-re-registers the running Carbon hotkeys immediately, with no file
-writes. The runtime source starts from the clean Settings baseline
-and accumulates **recorder combo mutations only**: staged Lua
-bodies, app choices, layer edits, and other shortcut fields never
-hitchhike on a recording. A new row's action is required payload
-for its first recording; later non-recorder edits to it stay
-staged. The base then resolves through the active profile's
-override, matching Save + reload semantics. `isDirty` and the save
-pill keep their meaning ("the file hasn't caught up"); Save
-persists base shortcuts globally in `gui.json`, while
-stored-profile editing owns sparse profile overrides.
-
-Re-registration prepares every Lua callback before one atomic
-layer-table swap, then activates the preserved runtime layer once
-(profile/config applies still reset to default). Feedback is
-scoped to the exact row and layer: "Active now" only after that
-combo registered in the active layer; inactive-layer, profile-
-shadowed, compile-failed, and Carbon-denied states say so instead.
-Revert first re-applies persisted state; if the sidecar/profile
-became unreadable, an in-memory pre-edit snapshot removes ghost
-hotkeys. That snapshot is valid only within its loaded config/VM
-generation; a newer authoritative reload wins and retires the
-session instead of replaying stale GUI callbacks. Rollback
-bookkeeping clears only after one path succeeds.
-Editing a stored profile stays fully staged (instant apply would
-rewrite the RUNNING hotkeys while the banner says an inactive
-profile is being edited); the override banner states that its
-shortcuts take effect the next time the profile is active.
+:::unreleased
+**The recorder stages like every control; only its suspend is
+live.** A recording, a clear or a deleted row changes the draft,
+and the running hotkeys are rebuilt from the saved files alone
+(`ShortcutsApplyOnSaveTests` holds the census of who may write
+the running table). The argument is what a live-but-unsaved
+chord outlives: the window that shows it is unsaved closes
+without a revert, a restart shows no prompt, and a config reload
+drops it, so the user builds muscle memory on a shortcut that
+vanishes later, far from the edit that made it. No native Mac
+app has a setting that is in effect but not kept — System
+Settings ▸ Keyboard Shortcuts applies *and* saves in one act —
+and one save pill cannot say both "not in effect yet" and "in
+effect but not kept". Reverting the live copy when the window
+closes was weighed and refused: closing Settings would silently
+undo a chord the user just pressed, while the draft survives
+the close, and a chord left in an open window still dies at the
+restart. What stays live is the suspend while a recorder is
+armed (#213): it exists so a chord already bound to KiwiDesk is
+captured rather than fired, and disarming resumes the saved
+table. What a recording can still tell before Save — a
+duplicate in the layer, "Assigned to…", a macOS collision — it
+tells; trying the chord is record, Save, press.
+:::
 
 **A catalog label's identity and its display text are two
 different fields.** `KeybindingCatalog`'s `NavCommand.label` (and
