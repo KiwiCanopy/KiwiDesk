@@ -30,6 +30,14 @@ struct StickyMarkEditor: View {
                 isOn: $model.config.settings.stickyStyle.mark,
                 help: Self.markHelp
             )
+            ToggleRow(
+                label: L(
+                    "floating.mark",
+                    "Show mark on floating windows"
+                ),
+                isOn: $model.config.settings.floatingStyle.mark,
+                help: Self.floatingMarkHelp
+            )
             // #1145: HIDDEN without the bridge — the
             // liquid-glass shape; `canDriveDesktops`' docstring
             // owns why this is never a grey.
@@ -44,14 +52,6 @@ struct StickyMarkEditor: View {
                     help: Self.reachHelp
                 )
             }
-            ToggleRow(
-                label: L(
-                    "floating.mark",
-                    "Show mark on floating windows"
-                ),
-                isOn: $model.config.settings.floatingStyle.mark,
-                help: Self.floatingMarkHelp
-            )
         }
     }
 
