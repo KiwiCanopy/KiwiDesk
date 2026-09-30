@@ -202,6 +202,21 @@ twice, was a question the user answered twice. The argument is
   collapses is review's. The run's glide on a
   switch goes through `BarMotion` like every bar motion, its box
   glass travelling with its item (`SpaceBarGlideWiringTests`).
+- **Key the App Bar's item views, their box glass and the members
+  still gliding by WINDOW, never by position** (#1831): a group's
+  fold or release is then a glide of the same views, and each
+  glass stays paired with the window it hosts, so no view moves
+  between glasses (#1315). On a boxed glass run only content
+  crosses: a folded member leaves its glass at once, and a
+  released one travels bare (`glidingIn`) until the latest
+  glide's landing re-renders it into its glass — the host change
+  that arm names. `AppBarGroupGlideTests` holds the mapping,
+  ▸ `glassRunMovesContent` the pairing and ▸
+  `landingLeavesNoGlass` that no render mints a second glass. A
+  render that folds or releases runs its item frames AND its
+  glass hosting on the one plate glide the shelf re-places the
+  section on; that the two passes pick the same glide is
+  review's.
 
 ## One shelf panel per display and edge draws the plate; the bars draw sections
 
@@ -345,6 +360,14 @@ Obligations:
   scrolling front segment's name is (#1763).
   `ShelfScrollRunTests` holds both bars to a render's answer and
   to no render.
+- **An overflowing run keeps the end pads a fitting one has,
+  read from its bar's one `endPads`** — the reading
+  `naturalLength`, the overflowing viewport and
+  `ShelfArrangement.hardFloor` all take (#1830) — and placed by
+  the run's own alignment, so crossing into overflow moves no end.
+  `ShelfOverflowPadTests` holds both bars across the threshold at
+  every alignment; a bar whose need and viewport read two pads is
+  what it reds.
 - **Every `ShelfArrangement.arrange` caller hands it the Space
   section's floor from `ShelfArrangement.hardFloor`** — the live
   plan and the Settings preview alike. The argument is required,
@@ -617,10 +640,12 @@ reading a bar still makes for itself:
   stay blind to all three by construction, which is why they are
   their own file rather than added expectations.
 
-## The bars start motion in one file, and that file gates it
+## The bars start motion in one home, and that home gates it
 
-A bar animation is gated on Reduce Motion, and `BarMotion` is
-where every one of them lives (#1078). `Sources/KiwiDesk`'s gate
+A bar animation is gated on Reduce Motion, and `BarMotion` — its
+file and the extensions split from it at the §2.1 ceiling, which
+`BarMotionSeamTests.homes` lists and censuses alike — is where
+every one of them lives (#1078). `Sources/KiwiDesk`'s gate
 is spelled per call, in the argument, because a SwiftUI
 animation carries one to name; an AppKit frame write does not
 (`view.animator().frame = f` takes no animation argument at

@@ -213,9 +213,10 @@ struct BarWindowActionRowsTests {
     @Test("a refusal draws on the target when drawn, else the focus")
     func cueTarget() {
         let core = seededCore()
-        core.tiler.allScreenBounds = {
-            [CGRect(x: 0, y: 0, width: 1000, height: 600)]
-        }
+        // One rect for the layout and the on-screen test (#531).
+        let desk = CGRect(x: 0, y: 0, width: 1000, height: 600)
+        core.tiler.visibleBounds = { _ in desk }
+        core.tiler.allScreenBounds = { [desk] }
         let parked = CGRect(
             x: 1000 - TilingEngine.stashPeekX,
             y: 600 - TilingEngine.stashPeekY,

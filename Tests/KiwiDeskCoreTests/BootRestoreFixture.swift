@@ -10,10 +10,14 @@ import Foundation
 /// are reduced so every frame a pass issues reaches the
 /// applier's `issued` tee.
 ///
-/// Both display seams (#531) are pinned to the MAIN screen's own
-/// visible frame rather than a fabricated one: the park resolves
-/// each window's real screen (a `visibleBounds` exemption), so
-/// any other pin makes the corner test disagree with the park.
+/// Both display seams (#531) are pinned to the PRIMARY screen's
+/// own visible frame rather than a fabricated one: the park
+/// resolves each window's real screen (a `visibleBounds`
+/// exemption), so any other pin makes the corner test disagree
+/// with the park. Primary, never `NSScreen.main`: main follows
+/// keyboard focus and can change between process A and B, while
+/// the park's per-window pick takes the first screen a frame
+/// touches — the primary, for every frame this fixture places.
 /// Every assertion compares process B against process A on the
 /// same host, so the host's size never reaches a verdict.
 @MainActor
@@ -29,11 +33,11 @@ enum BootRestoreFixture {
         var floating = false
     }
 
-    /// A core on the host's main screen, both display seams
+    /// A core on the host's primary screen, both display seams
     /// pinned and both Spaces on it, `shown` active. Nil where
     /// the host has no screen.
     static func makeCore() -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()

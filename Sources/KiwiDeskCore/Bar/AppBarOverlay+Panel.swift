@@ -62,17 +62,6 @@ extension AppBarOverlay {
         )
     }
 
-    func syncItemViewCount(_ count: Int) {
-        while itemViews.count > count {
-            itemViews.removeLast().removeFromSuperview()
-        }
-        while itemViews.count < count {
-            let view = AppBarItemView()
-            itemViews.append(view)
-            itemRun.addSubview(view)
-        }
-    }
-
     /// Builds the section's view once. Items render inside a
     /// clipping viewport that fades at its hidden ends (#1517).
     func configureRoot() {

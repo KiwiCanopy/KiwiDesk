@@ -2150,3 +2150,14 @@ section {
     display: none;
   }
 }
+
+/* The Simple hero's heading is the slogan, in the kicker's look and
+   box, so it sits where the Nerd kicker does. */
+h1.hero__kicker {
+  margin-top: 0;
+  line-height: inherit;
+}
+.hero__video {
+  max-width: min(620px, 100%);
+  margin: 0 auto clamp(1.25rem, 3vw, 1.75rem);
+}

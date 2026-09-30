@@ -86,11 +86,10 @@ extension AppBarOverlay {
     /// the rendered slots use).
     private func contentStart(_ m: Metrics) -> CGFloat {
         if m.total > m.viewport { return 0 }
-        switch m.alignment {
-        case .start: return 0
-        case .center: return (m.viewport - m.total) / 2
-        case .end: return m.viewport - m.total
-        }
+        return Self.alignedStart(
+            slack: m.viewport - m.total,
+            alignment: m.alignment
+        )
     }
 
     /// The slot whose span contains `center`, clamped to the

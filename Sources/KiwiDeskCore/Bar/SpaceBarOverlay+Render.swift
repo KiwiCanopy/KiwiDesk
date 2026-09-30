@@ -37,8 +37,12 @@ extension SpaceBarOverlay {
         // falls back to scrolling with the run rather than
         // collapsing the Spaces to nothing (#409).
         let fadeRoom = ShelfArrangement.fadeRoom(thickness: depth, gap: gap)
+        // An overflowing run keeps the end pads a fitting one has,
+        // where its alignment puts them, so crossing into overflow
+        // starts the scroll and moves no end (#1830).
+        let pads = Self.endPads(gap: gap)
         let pinFront =
-            total > axis && frontApp != nil
+            total > axis - pads && frontApp != nil
             && front < axis - fadeRoom
         let scrolledFront = pinFront ? 0 : front
         let spacesAxis = pinFront ? axis - front : axis
@@ -47,10 +51,13 @@ extension SpaceBarOverlay {
             gap: gap,
             frontExtent: scrolledFront
         )
-        // No arrow zones: the run fills its section and fades on
-        // a side that hides entries (#1517).
-        let inset: CGFloat = 0
-        let viewport = spacesAxis
+        // No arrow zones: the run fades on a side that hides
+        // entries (#1517).
+        let overflows = scrolledTotal > spacesAxis - pads
+        let inset =
+            overflows
+            ? Self.overflowLead(gap: gap, alignment: style.alignment) : 0
+        let viewport = max(overflows ? spacesAxis - pads : spacesAxis, 0)
         scrollOffset = Self.scrollOffset(
             current: scrollOffset,
             lengths: lengths,
@@ -98,7 +105,8 @@ extension SpaceBarOverlay {
             pad: SpaceBarItemView.pad
         )
         let runStart =
-            (metrics.itemFrames.first.map {
+            inset
+            + (metrics.itemFrames.first.map {
                 horizontal ? $0.minX : $0.minY
             } ?? metrics.frontStart)
             + (horizontal ? runFrame.minX : runFrame.minY)
