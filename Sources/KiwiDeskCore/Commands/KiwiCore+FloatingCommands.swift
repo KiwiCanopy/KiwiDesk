@@ -1,9 +1,9 @@
 import Foundation
 
-/// `floating.*` sub-API (#429): the floating-window mark
-/// settings. One setter today — the Space Bar floating badge
-/// tint; `layoutCommand`'s forced retile applies it (the bar
-/// re-renders inside the retile path, like the sticky badge).
+/// `floating.*` sub-API (#429, #1799): the floating-window mark
+/// settings — the on-window mark's switch and the tint it shares
+/// with the Space Bar badge; `layoutCommand`'s forced retile
+/// applies both (the marks sync inside the retile path).
 ///
 /// Applies unconditionally (Lua is open; the `dim_factor`
 /// precedent). `set_color` shares `setMarkColor` with
@@ -21,6 +21,12 @@ extension KiwiCore {
             command.dropFirst("floating.set_".count)
         )
         switch field {
+        case "mark":
+            guard let flag = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            tiler.settings.floatingStyle.mark = flag
+            return .ok()
         case "color":
             return setMarkColor(args) {
                 tiler.settings.floatingStyle.color = $0

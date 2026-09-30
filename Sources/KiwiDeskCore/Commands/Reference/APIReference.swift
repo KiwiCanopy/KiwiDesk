@@ -143,7 +143,8 @@ public enum APIReference {
         ],
         "space_bar": [
             "set_enabled", "set_edge", "set_glyph_span", "set_glyph_gap",
-            "set_inactive_content", "set_item_label",
+            "set_group_adjacent_windows", "set_inactive_content",
+            "set_item_label",
             "set_active_indicator",
             "set_active_dim_factor", "set_show_front_app",
             "set_front_app_title_cap", "set_hide_empty",
@@ -230,7 +231,7 @@ public enum APIReference {
             "set_liquid_glass",
         ],
         "floating": [
-            "set_color"
+            "set_mark", "set_color",
         ],
     ]
 

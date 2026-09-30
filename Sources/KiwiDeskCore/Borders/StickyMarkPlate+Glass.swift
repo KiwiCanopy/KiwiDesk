@@ -31,13 +31,16 @@ extension StickyMarkPlate {
         setMarkColor(markHex)
     }
 
-    /// Tints the glass with the stored colour; the glyphs take the
-    /// label ink the pinned variant resolves.
+    /// Tints the glass with the outermost glyph's colour — one
+    /// backdrop per glass (#1799) — and the glyphs take the label
+    /// ink the pinned variant resolves.
     func applyGlass() {
         guard let glass else { return }
         roundel.isHidden = true
+        innerRoundel.isHidden = true
         markColor = .labelColor
         symbol.contentTintColor = .labelColor
+        innerSymbol.contentTintColor = .labelColor
         name.textColor = .labelColor
         GlassPlate.update(glass, frame: bounds, cornerRadius: 0)
         GlassTint.apply(

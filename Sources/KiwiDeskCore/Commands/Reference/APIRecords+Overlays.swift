@@ -139,11 +139,16 @@ extension APIReference {
     ]
 
     static let floatingRecords: [String: APIRecord] = [
+        "set_mark": APIRecord(
+            "Shows or hides the on-window mark on windows set "
+                + "floating.",
+            .boolean("enabled")
+        ),
         "set_color": APIRecord(
-            "Sets the Space Bar floating badge color; empty is "
+            "Sets the floating mark and badge color; empty is "
                 + "automatic.",
             .color("hex")
-        )
+        ),
     ]
 
     static let mouseRecords: [String: APIRecord] = [

@@ -43,7 +43,10 @@
 /// the group-breaking beside it (`KiwiCore+SpaceBarItems`), which
 /// mark the exception to a space's layout and in a floating-mode
 /// space have none to mark (owner ruling 2026-09-13,
-/// `SpaceBarBadgeTests`), and the arrival's screen-home
+/// `SpaceBarBadgeTests`) — and the on-window floating mark
+/// beside it, for the same reason (#1799,
+/// `KiwiCore+StickyMarks`, `FloatingMarkDriverTests`) — and the
+/// arrival's screen-home
 /// stand-down (`StateCoordinator.screenHome`, #1362): the flag
 /// TRAVELS with the window and survives a re-file, so a flag
 /// float keeps its home wherever it lands, while floating-mode

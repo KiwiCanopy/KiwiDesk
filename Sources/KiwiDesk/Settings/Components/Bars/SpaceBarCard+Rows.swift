@@ -36,6 +36,20 @@ extension SpaceBarCard {
                 .foregroundStyle(.secondary)
                 .padding(.leading, 20)
             }
+        case .spaceBarGroupAdjacent:
+            ToggleRow(
+                label: L(
+                    "space_bar.group_adjacent",
+                    "Group adjacent same-app windows"
+                ),
+                isOn: style.groupAdjacentWindows,
+                help: L(
+                    "space_bar.group_adjacent.help",
+                    "Merges neighbouring windows of the same app "
+                        + "in a Space into one glyph with a count "
+                        + "badge, instead of one glyph each."
+                )
+            )
         case .spaceBarHideEmpty:
             ToggleRow(
                 label: L(

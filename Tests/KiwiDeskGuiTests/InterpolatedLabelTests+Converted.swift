@@ -177,6 +177,8 @@ extension InterpolatedLabelTests {
         "kiwishelf.background_fit.label.help": 2,
         "bars.app_bar.shelf_caption": 2,
         "kiwishelf.show.help": 2,
+        // #1799: the floating mark's help names the layout.
+        "floating.mark.help": 1,
         "scroll_grid.scroll_duration.animation_off": 1,
         "monocle.flip_duration.flip_off": 1,
         "track.auto_tracks.limit_inert": 1,

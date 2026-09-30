@@ -49,6 +49,7 @@ enum ColorsRowOrder {
         .borders(.borderFocusedColor),
         .borders(.borderUnfocusedColor),
         .borders(.stickyColor),
+        .borders(.floatingColor),
     ]
 
     /// Drag visuals twin columns (#231).
@@ -72,7 +73,7 @@ enum ColorsRowOrder {
     ]
 
     /// KiwiShelf colours behind More, with the Space Bar's own
-    /// focused-window ink and the floating mark.
+    /// focused-window ink.
     static let kiwishelfMore: [SettingKey] = [
         .kiwishelf(.hoverFillColor),
         .kiwishelf(.hoverItemColor),
@@ -80,6 +81,5 @@ enum ColorsRowOrder {
         .kiwishelf(.groupBadgeTextColor),
         .kiwishelf(.borderColor),
         .spaceBar(.spaceBarFocusedItemColor),
-        .borders(.floatingColor),
     ]
 }

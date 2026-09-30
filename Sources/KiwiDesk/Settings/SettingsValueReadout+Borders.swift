@@ -74,6 +74,12 @@ extension SettingsValueReadout {
                 old.settings.stickyStyle.mark,
                 new.settings.stickyStyle.mark
             )
+        case .floatingMark:
+            return bordersOnOffRow(
+                census,
+                old.settings.floatingStyle.mark,
+                new.settings.floatingStyle.mark
+            )
         case .stickyDesktopReach:
             return bordersOnOffRow(
                 census,
