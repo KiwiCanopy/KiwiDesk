@@ -72,7 +72,6 @@ struct MonocleSettingsTests {
         settings.monocle.orientation = .vertical
         settings.monocle.appBar.enabled = false
         settings.monocle.appBar.activeIndicator = .outline
-        settings.monocle.appBar.content = .icon
         settings.monocle.appBar.titleCap = 7
         settings.monocle.appBar.groupAdjacentWindows = false
         let data = try JSONEncoder().encode(settings)
@@ -138,7 +137,7 @@ struct MonocleSettingsTests {
         )
         #expect(decoded.monocle.appBar.titleCap == 30)
         // Unlisted fields stay nil (inherit the global style).
-        #expect(decoded.monocle.appBar.content == nil)
+        #expect(decoded.monocle.appBar.activeIndicator == nil)
         #expect(decoded.monocle.appBar.enabled)
     }
 }

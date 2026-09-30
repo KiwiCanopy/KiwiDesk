@@ -46,14 +46,6 @@ extension SettingsValueReadout {
                 layoutBarCount(o.titleCap),
                 layoutBarCount(n.titleCap)
             )
-        case .monocleAppBarContent, .scrollingAppBarContent:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarContent,
-                layoutBarChoice(o.content, AppBarOptions.content),
-                layoutBarChoice(n.content, AppBarOptions.content)
-            )
         case .monocleAppBarGroupAdjacentWindows,
             .scrollingAppBarGroupAdjacentWindows:
             return layoutBarRow(
@@ -83,11 +75,11 @@ extension SettingsValueReadout {
     ) -> LayoutMode {
         switch key {
         case .monocleAppBarEnabled, .monocleAppBarActiveIndicator,
-            .monocleAppBarContent, .monocleAppBarTitleCap,
+            .monocleAppBarTitleCap,
             .monocleAppBarGroupAdjacentWindows:
             return .monocle
         case .scrollingAppBarEnabled, .scrollingAppBarActiveIndicator,
-            .scrollingAppBarContent, .scrollingAppBarTitleCap,
+            .scrollingAppBarTitleCap,
             .scrollingAppBarGroupAdjacentWindows:
             return .scrolling
         }

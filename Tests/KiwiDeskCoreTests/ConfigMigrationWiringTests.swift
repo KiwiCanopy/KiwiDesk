@@ -45,6 +45,19 @@ struct ConfigMigrationWiringTests {
         return dir
     }
 
+    /// `text` with a retired `app_bar.content` entry put back as
+    /// the first line of every `app_bar` object — the pretty,
+    /// sorted layout `ProfileManager` writes, so the fixture is
+    /// this build's own output plus the one key an older build
+    /// wrote.
+    private func withRetiredContent(_ text: String) -> String {
+        text.replacingOccurrences(
+            of: "(\"app_bar\" : \\{\\n)( *)",
+            with: "$1$2\"content\" : \"icon_and_name\",\n$2",
+            options: .regularExpression
+        )
+    }
+
     /// A v0.9.7 profile FILE loads, and is repaired on disk.
     ///
     /// The migration being correct proves nothing about anything
@@ -57,8 +70,6 @@ struct ConfigMigrationWiringTests {
     func profileFileMigratesOnRead() throws {
         let dir = try scratch()
         defer { try? FileManager.default.removeItem(at: dir) }
-        var settings = TilingSettings()
-        settings.appBarStyle.content = .iconAndTitle
         let manager = ProfileManager(directory: dir)
         try manager.save(
             Profile(
@@ -67,18 +78,16 @@ struct ConfigMigrationWiringTests {
                     MonitorSet(monitors: ["A:100x100"])
                 ],
                 spaceModes: [SpaceID(1): .monocle],
-                settings: settings
+                settings: TilingSettings()
             )
         )
         let file = dir.appendingPathComponent("Starter.json")
         try Data(
-            String(
-                decoding: try Data(contentsOf: file),
-                as: UTF8.self
-            )
-            .replacingOccurrences(
-                of: "\"icon_and_title\"",
-                with: "\"icon_and_name\""
+            withRetiredContent(
+                String(
+                    decoding: try Data(contentsOf: file),
+                    as: UTF8.self
+                )
             )
             .replacingOccurrences(
                 of: stamp(Profile.currentFormat),
@@ -93,10 +102,7 @@ struct ConfigMigrationWiringTests {
             ).contains("icon_and_name")
         )
 
-        let profile = try manager.read(name: "Starter")
-        #expect(
-            profile.settings.appBarStyle.content == .iconAndTitle
-        )
+        _ = try manager.read(name: "Starter")
         // Repaired in place, so the crossing runs once rather
         // than on every launch forever.
         let onDisk = String(
@@ -104,26 +110,27 @@ struct ConfigMigrationWiringTests {
             as: UTF8.self
         )
         #expect(!onDisk.contains("icon_and_name"))
-        // ...and it is listed, which is the whole point: an
-        // unmigrated file is SKIPPED by `allProfiles()`.
+        #expect(onDisk.contains(stamp(Profile.currentFormat)))
         #expect(manager.allProfiles().map(\.name) == ["Starter"])
     }
 
-    /// A v0.9.7 BACKUP restores.
+    /// A BACKUP from an older build restores with its values.
     ///
     /// The bundle carries `[Profile]` inline, so it is the second
     /// reader of profile JSON — and backups shipped in v0.9.7
     /// itself. Missing the hop here refused the file as
     /// `.notABackup`, permanently: unlike a profile, a backup is
     /// never rewritten, so there is no next launch that repairs
-    /// it (found in review, 2026-08-20).
+    /// it (found in review, 2026-08-20). The fixture carries a
+    /// renamed key (#1528's `glyph_cap`), whose value the decode
+    /// drops without the hop, so the hop is what this observes.
     @MainActor
-    @Test("A v0.9.7 backup is readable, not `.notABackup`")
+    @Test("An older backup is readable, its values intact")
     func retiredBackupIsReadable() throws {
         let dir = try scratch()
         defer { try? FileManager.default.removeItem(at: dir) }
         var settings = TilingSettings()
-        settings.appBarStyle.content = .iconAndTitle
+        settings.spaceBarStyle.glyphSpan = 8
         let bundle = SetupBundle(
             format: 1,
             writtenBy: "0.9.7",
@@ -149,24 +156,23 @@ struct ConfigMigrationWiringTests {
                 as: UTF8.self
             )
             .replacingOccurrences(
-                of: "\"icon_and_title\"",
-                with: "\"icon_and_name\""
+                of: "\"glyph_span\"",
+                with: "\"glyph_cap\""
             ).utf8
         ).write(to: file)
-        // The fixture must BE a v0.9.7 bundle.
+        // The fixture must BE an older bundle.
         #expect(
             String(
                 decoding: try Data(contentsOf: file),
                 as: UTF8.self
-            ).contains("icon_and_name")
+            ).contains("glyph_cap")
         )
 
         let core = makeTestCore(configDirectory: dir)
         let read = try core.readBackup(at: file)
         #expect(read.profiles.count == 1)
         #expect(
-            read.profiles.first?.settings.appBarStyle.content
-                == .iconAndTitle
+            read.profiles.first?.settings.spaceBarStyle.glyphSpan == 8
         )
     }
 
@@ -186,7 +192,7 @@ struct ConfigMigrationWiringTests {
         )
     }
 
-    /// The migration touches ONE line of the file.
+    /// The migration touches only what it came for.
     ///
     /// It rewrites the user's config without being asked, so it
     /// may change only what it came for. Serializing the parsed
@@ -199,12 +205,10 @@ struct ConfigMigrationWiringTests {
     /// config kept in a dotfiles repo would have shown the whole
     /// thing as noise.
     @MainActor
-    @Test("Migrating rewrites only the migrated key and format stamp")
+    @Test("Migrating rewrites only the migrated keys and stamp")
     func migrationTouchesOneLine() throws {
         let dir = try scratch()
         defer { try? FileManager.default.removeItem(at: dir) }
-        var settings = TilingSettings()
-        settings.appBarStyle.content = .iconAndTitle
         let manager = ProfileManager(directory: dir)
         try manager.save(
             Profile(
@@ -213,7 +217,7 @@ struct ConfigMigrationWiringTests {
                     MonitorSet(monitors: ["A:100x100"])
                 ],
                 spaceModes: [SpaceID(1): .monocle],
-                settings: settings
+                settings: TilingSettings()
             )
         )
         let file = dir.appendingPathComponent("Starter.json")
@@ -225,25 +229,21 @@ struct ConfigMigrationWiringTests {
         // are untouched is a claim about a file that never had any.
         #expect(asWritten.contains("0.4"))
 
-        // An unversioned v0.9.7 profile: the retired content
-        // spelling, and the track limit one below today's — what
-        // that build stored for the picture today's default
-        // draws (#1354's lift).
+        // A format-0 v0.9.7 profile: the retired App Bar content,
+        // and the track limit one below today's — what that build
+        // stored for the picture today's default draws (#1354's
+        // lift).
         let downgradedLimit = asWritten.replacingOccurrences(
             of: "\"limit\" : \(TrackParams().limit)",
             with: "\"limit\" : \(TrackParams().limit - 1)"
         )
         #expect(downgradedLimit != asWritten)
-        let old =
-            downgradedLimit
-            .replacingOccurrences(
-                of: "\"icon_and_title\"",
-                with: "\"icon_and_name\""
-            )
+        let old = withRetiredContent(downgradedLimit)
             .replacingOccurrences(
                 of: stamp(Profile.currentFormat),
-                with: ""
+                with: stamp(0)
             )
+        #expect(old.contains("icon_and_name"))
         let migrated = String(
             decoding: try #require(
                 ConfigMigration.migrated(Data(old.utf8))
@@ -253,48 +253,25 @@ struct ConfigMigrationWiringTests {
         // Floats remain un-reencoded:
         #expect(migrated.contains("0.4"))
         #expect(!migrated.contains("0.40000000000000002"))
-        #expect(migrated.contains("icon_and_title"))
         #expect(!migrated.contains("icon_and_name"))
-        #expect(
-            migrated.contains(
-                "\"format\" : \(Profile.currentFormat)"
-            )
-        )
 
-        // When format: 0 was already present, exactly three lines
-        // change: the stamp, icon_and_name -> icon_and_title, and
-        // the lifted track limit.
-        let withFormat0 =
-            downgradedLimit
-            .replacingOccurrences(
-                of: "\"icon_and_title\"",
-                with: "\"icon_and_name\""
-            )
-            .replacingOccurrences(
-                of: stamp(Profile.currentFormat),
-                with: stamp(0)
-            )
-        let migratedWithFormat0 = String(
-            decoding: try #require(
-                ConfigMigration.migrated(Data(withFormat0.utf8))
-            ),
-            as: UTF8.self
-        )
-        let before = withFormat0.split(
+        // The content lines are gone; of the rest exactly two
+        // change: the stamp and the lifted track limit.
+        let before = old.split(
             separator: "\n",
             omittingEmptySubsequences: false
         )
+        .filter { !$0.contains("\"content\"") }
         // A pre-#1752 profile gains its `look: own` line (#1752),
         // envelope like the stamp, set aside before the count.
-        let after = migratedWithFormat0.split(
+        let after = migrated.split(
             separator: "\n",
             omittingEmptySubsequences: false
         )
         .filter { $0 != #"  "look" : "own","# }
         #expect(before.count == after.count)
         let changed = zip(before, after).filter { $0 != $1 }
-        #expect(changed.count == 3)
-        #expect(changed.contains { $0.1.contains("icon_and_title") })
+        #expect(changed.count == 2)
         #expect(
             changed.contains {
                 $0.1.contains("\"limit\" : \(TrackParams().limit)")

@@ -112,9 +112,6 @@ extension HomeCardBarsTile {
                 L("bars_scene.title_files", "Downloads")
             ),
         ]
-        let content = style.bar.content.rendered(
-            horizontal: !vertical
-        )
         var items: [BarItem] = []
         for (index, mock) in mocks.enumerated() {
             let active = index == 0
@@ -125,10 +122,9 @@ extension HomeCardBarsTile {
                 length: 20 * scale
             )
             if scale > 1 {
-                item.glyph =
-                    content == .title ? nil : mock.glyph
-                item.label =
-                    content.showsText ? mock.title : nil
+                // Icon and title; a vertical bar the icon alone.
+                item.glyph = mock.glyph
+                item.label = vertical ? nil : mock.title
             }
             item.active = active
             items.append(item)

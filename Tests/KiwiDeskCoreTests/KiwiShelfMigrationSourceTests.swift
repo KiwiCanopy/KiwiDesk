@@ -114,7 +114,7 @@ struct KiwiShelfMigrationSourceTests {
         let data = Data(
             """
             {"format":7,"monitor_sets":[],"name":"A","settings":\
-            {"layout":{"scroll":{"app_bar":{"content":"icon",\
+            {"layout":{"scroll":{"app_bar":{"title_cap":7,\
             "edge":"left","thickness":50}}}}}
             """.utf8
         )
@@ -128,7 +128,7 @@ struct KiwiShelfMigrationSourceTests {
         let bar = try #require(scroll["app_bar"] as? [String: Any])
         #expect(bar["edge"] == nil)
         #expect(bar["thickness"] == nil)
-        #expect(bar["content"] as? String == "icon")
+        #expect(bar["title_cap"] as? Int == 7)
     }
 
     /// At or above the formats the step introduced, an absent

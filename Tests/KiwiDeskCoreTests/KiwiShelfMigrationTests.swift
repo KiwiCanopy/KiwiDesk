@@ -112,7 +112,9 @@ struct KiwiShelfMigrationTests {
         #expect(app["edge"] as? String == "bottom")
         #expect(app["thickness"] == nil)
         #expect(app["item_size"] == nil)
-        #expect(app["content"] as? String == "icon")
+        // Its own stays through the shelf step; the chain's later
+        // #1528 step drops the retired content.
+        #expect(app["content"] == nil)
         #expect(app["item_color"] == nil)
         #expect(app["active_indicator"] as? String == "outline")
         #expect(try root(out)["format"] as? Int == Profile.currentFormat)
@@ -127,7 +129,7 @@ struct KiwiShelfMigrationTests {
         let bar = try #require(group(monocle, "app_bar"))
         #expect(bar["edge"] == nil)
         #expect(bar["thickness"] == nil)
-        #expect(bar["content"] as? String == "title")
+        #expect(bar["content"] == nil)
         #expect(bar["enabled"] as? Bool == true)
         // A layout's colour is the shelf's now, and its Gap is
         // gone like the global bar's.
@@ -185,7 +187,6 @@ struct KiwiShelfMigrationTests {
         #expect(decoded.kiwishelf.thickness == 36)
         #expect(decoded.kiwishelf.liquidGlass == false)
         #expect(decoded.spaceBarStyle.frontAppTitleCap == 24)
-        #expect(decoded.appBarStyle.content == .icon)
     }
 
     @Test("a migrated file needs no second crossing")

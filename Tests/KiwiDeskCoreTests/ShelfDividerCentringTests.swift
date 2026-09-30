@@ -20,16 +20,15 @@ struct ShelfDividerCentringTests {
         height: 28
     )
 
-    /// One arrangement to measure: order, finish, App Bar content
-    /// and edge.
+    /// One arrangement to measure: order, finish and App Bar
+    /// edge.
     struct Case: CustomTestStringConvertible, Sendable {
         let order: KiwiShelf.Order
         let style: AppBarStyle.BackgroundStyle
-        let content: AppBarStyle.Content
         let edge: AppBarEdge
 
         var testDescription: String {
-            "\(order) \(style) \(content) \(edge)"
+            "\(order) \(style) \(edge)"
         }
 
         var strip: CGRect {
@@ -42,24 +41,8 @@ struct ShelfDividerCentringTests {
             .flatMap { order in
                 [AppBarStyle.BackgroundStyle.plain, .boxed].flatMap { style in
                     [
-                        Case(
-                            order: order,
-                            style: style,
-                            content: .icon,
-                            edge: .top
-                        ),
-                        Case(
-                            order: order,
-                            style: style,
-                            content: .iconAndTitle,
-                            edge: .top
-                        ),
-                        Case(
-                            order: order,
-                            style: style,
-                            content: .icon,
-                            edge: .left
-                        ),
+                        Case(order: order, style: style, edge: .top),
+                        Case(order: order, style: style, edge: .left),
                     ]
                 }
             }
@@ -141,7 +124,6 @@ struct ShelfDividerCentringTests {
         var appLook = AppBarLook()
         appLook.shelf = shelf
         appLook.edge = c.edge
-        appLook.content = c.content
         let placed = ShelfArrangement.arrange(
             length: length,
             spaceNeed: SpaceBarOverlay.naturalLength(
