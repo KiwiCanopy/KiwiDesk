@@ -90,12 +90,12 @@ struct SnapshotStoreCensusTests {
             ),
         "state.heldSpaces":
             (.always, "held Spaces, re-created at boot (#1646)"),
-        "state.profilePartitioning.byProfile[]":
+        "state.profilePartitioning.byArrangement[]":
             (
                 .always,
-                "a profile's Space → windows map, adopted at boot (#1802)"
+                "an arrangement's Space map, adopted at boot (#1802)"
             ),
-        "state.profilePartitioning.byProfile[][]":
+        "state.profilePartitioning.byArrangement[][]":
             (
                 .always,
                 "a Space's windows in that record, adopted at boot (#1802)"
@@ -200,7 +200,7 @@ struct SnapshotStoreCensusTests {
             "state.floatFrames", "tiler.boundLearner.lastAsks",
             "state.userFloated", "tiler.monocleShownMembers",
             "state.heldSpaces",
-            "state.profilePartitioning.byProfile[][]",
+            "state.profilePartitioning.byArrangement[][]",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")
         }

@@ -64,8 +64,7 @@ extension KiwiCore {
             )
             : state.snapshot()
         snapshot.arrangement = liveArrangement
-        (snapshot.profileRecords, snapshot.standardRecords) =
-            partitioningForSnapshot()
+        snapshot.arrangementRecords = partitioningForSnapshot()
         // Only the frames change; every other field rides as
         // captured (the held Spaces, #1646).
         return snapshot.mappingWindowRecords { record in

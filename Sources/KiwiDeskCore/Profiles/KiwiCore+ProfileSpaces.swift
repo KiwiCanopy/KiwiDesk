@@ -35,28 +35,15 @@ extension KiwiCore {
     }
 
     /// Every arrangement's record for the session snapshot
-    /// (#1802), profiles and Standards apart (#1829), the live
-    /// one filed fresh — on a copy, since the live record is
-    /// written only as it goes inactive. A relaunch under ANOTHER
-    /// arrangement then still knows the one live at the quit.
-    func partitioningForSnapshot() -> (
-        profiles: StateSnapshot.ProfileRecords?,
-        standards: StateSnapshot.ProfileRecords?
-    ) {
+    /// (#1802, #1829), the live one filed fresh — on a copy, since
+    /// the live record is written only as it goes inactive. A
+    /// relaunch under ANOTHER arrangement then still knows the one
+    /// live at the quit.
+    func partitioningForSnapshot() -> StateSnapshot.ArrangementRecords? {
         var carried = state.profilePartitioning
         carried.record(livePartitioning, as: liveArrangement)
-        var profiles: [String: [SpaceID: [WindowID]]] = [:]
-        var standards: [String: [SpaceID: [WindowID]]] = [:]
-        for (arrangement, spaces) in carried.records {
-            switch arrangement {
-            case .profile(let name): profiles[name] = spaces
-            case .standard(let name): standards[name] = spaces
-            }
-        }
-        return (
-            profiles.isEmpty ? nil : .init(profiles),
-            standards.isEmpty ? nil : .init(standards)
-        )
+        let records = carried.records
+        return records.isEmpty ? nil : .init(records)
     }
 
     /// Boot adopts the previous session's records after the
@@ -65,28 +52,23 @@ extension KiwiCore {
     /// a profile no longer on disk is dropped: it could never be
     /// restored, and a new profile of that name is not it. An
     /// empty listing is not proof — an unreadable directory lists
-    /// empty too — so it drops nothing.
-    /// A Standard's record is always kept: a built-in cannot be
-    /// deleted (#1829).
+    /// empty too — so it drops nothing, and a Standard's record is
+    /// always kept, since a built-in cannot be deleted (#1829).
     func adoptCarriedPartitioning(from session: StateSnapshot) {
-        let carried = session.profileRecords?.records ?? [:]
-        let standards = session.standardRecords?.records ?? [:]
-        guard !carried.isEmpty || !standards.isEmpty else { return }
+        guard let carried = session.arrangementRecords?.records,
+            !carried.isEmpty
+        else { return }
         let saved = Set(profiles.list())
-        let kept =
-            saved.isEmpty
-            ? carried : carried.filter { saved.contains($0.key) }
-        var adopted: [HeldOrigin.Arrangement: [SpaceID: [WindowID]]] =
-            [:]
-        for (name, spaces) in kept { adopted[.profile(name)] = spaces }
-        for (name, spaces) in standards {
-            adopted[.standard(name)] = spaces
+        let kept = carried.filter { arrangement, _ in
+            guard case .profile(let name) = arrangement,
+                !saved.isEmpty
+            else { return true }
+            return saved.contains(name)
         }
-        state.profilePartitioning.adopt(adopted)
+        state.profilePartitioning.adopt(kept)
         onLog(
             "restore: carried the Space records of "
-                + "\(kept.count) profile(s), "
-                + "\(standards.count) Standard(s)"
+                + "\(kept.count) arrangement(s)"
         )
     }
 
@@ -98,6 +80,16 @@ extension KiwiCore {
     /// A re-apply of the LIVE arrangement, or the session's
     /// first, files nothing and restores nothing — neither a
     /// monitor reconnect nor boot may revert what is on screen.
+    ///
+    /// `apply(profile:)` gates the session-ratio clear, the hold,
+    /// the prune and the restore on the answer; `apply(composed:)`
+    /// gates only the restore. A Standard is transient (#53): it
+    /// prunes nothing, holds nothing and keeps the session layer,
+    /// so the outgoing profile's undeclared Spaces stay live beside
+    /// it and the restore moves windows into its DECLARED Spaces
+    /// alone. A step that must follow an arrangement change on
+    /// both doors — #1790's temporary-Space drop — gates on this
+    /// same answer, never a test of its own.
     func recordOutgoingPartitioning(
         before incoming: HeldOrigin.Arrangement
     ) -> Bool {

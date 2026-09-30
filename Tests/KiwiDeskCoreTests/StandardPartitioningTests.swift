@@ -99,7 +99,9 @@ struct StandardPartitioningTests {
             StateSnapshot.self,
             from: JSONEncoder().encode(first.sessionSnapshot())
         )
-        #expect(session.standardRecords?.byProfile["Starter"] != nil)
+        #expect(
+            session.arrangementRecords?.records[.standard("Starter")] != nil
+        )
 
         let (second, _) = try desk()
         second.apply(profile: starter, cause: .event)

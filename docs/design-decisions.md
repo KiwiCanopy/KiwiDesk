@@ -13549,9 +13549,10 @@ monitor change that switches profile makes the incoming profile's
 Space set the authority, and its prune forwarded every window of a
 Space it did not declare into its fallback Space: a second
 screen's arrangement collapsed into one Space on the laptop.
-Plugging back in could not undo that: #1230's record restores
-only into Spaces the returning arrangement declares, and the prune
-had dropped the rest. And nothing needed destroying: a Space whose
+Plugging back in could not undo that where the docked arrangement
+is a composed Standard — as it is on a Mac whose saved profiles
+are all single-screen — because a Standard has no file for #1230's
+record to live in. And nothing needed destroying: a Space whose
 screen is absent already resolves onto a remaining one, and only
 the prune dropped it. So a departing Space that still holds
 windows — live, or on another Desktop — is carried as a **held**
@@ -13695,9 +13696,11 @@ replug.** Where the returning arrangement is a saved profile, its
 record still files that window under its own Space, so the restore
 moves it back: each profile is its own arrangement of the windows,
 and a move made while another profile was live is that profile's.
-No ledger is added to make the saved case stick — the model
-decides it, and one move after the replug overrides it. What is
-inside the held Space goes back in every case.
+Where it is a composed Standard there is no record, and the window
+stays where the user put it. No ledger is added to make the saved
+case stick — the model decides it, and one move after the replug
+overrides it. What is inside the held Space goes back in both
+cases.
 
 :::unreleased
 **A composed Standard keeps a record too
@@ -13706,13 +13709,19 @@ It is an arrangement of the windows like a saved profile — the one
 a Mac whose saved profiles are all single-screen docks into — so it
 files its partitioning as it goes inactive and gets it back when it
 returns, and a window moved out of a held Space goes back there as
-well. The record needs no file: it lives in memory and rides the
-session snapshot (#1802). It is keyed by ARRANGEMENT, never by
-name, because the docked Starter Standard and the saved `Starter`
-profile share one, and a name key would read the switch between
-them as no switch at all. Auto-saving a profile for the screen set
-instead was refused: a monitor change never claims a monitor set
-(#1530), and the Standard stays transient so it can recompose.
+well. This retires two statements above: that a Standard has no
+file for the record to live in — it needs none, since the record
+lives in memory and rides the session snapshot (#1802) — and the
+Standard case of the held-window rule. It is keyed by ARRANGEMENT,
+never by name, because the docked Starter Standard and the saved
+`Starter` profile share one, and a name key would read the switch
+between them as no switch at all. One key serves a Standard at
+every screen count, as one name serves a saved profile at every
+monitor set, so the record holds the composition last live under
+that name and the restore fills only the Spaces the returning one
+declares. Auto-saving a profile for the screen set instead was
+refused: a monitor change never claims a monitor set (#1530), and
+the Standard stays transient so it can recompose.
 :::
 
 :::unreleased

@@ -91,8 +91,8 @@ struct ProfilePartitioningRestartTests {
         core.apply(profile: a, cause: .event)
         for id in arranged { core.state.workspaces.add(id, to: dual) }
 
-        let records = core.sessionSnapshot().profileRecords?.records
-        #expect(records?["A"]?[dual] == arranged)
+        let records = core.sessionSnapshot().arrangementRecords?.records
+        #expect(records?[.profile("A")]?[dual] == arranged)
         // A copy: the live record is written only at a switch.
         #expect(!core.state.profilePartitioning.hasRecord(for: .profile("A")))
     }
@@ -131,8 +131,11 @@ struct ProfilePartitioningRestartTests {
         let (core, _, b) = try desk()
         core.apply(profile: b, cause: .event)
         var session = core.sessionSnapshot()
-        session.profileRecords = StateSnapshot.ProfileRecords(
-            ["Gone": [dual: arranged], "A": [dual: arranged]]
+        session.arrangementRecords = StateSnapshot.ArrangementRecords(
+            [
+                .profile("Gone"): [dual: arranged],
+                .profile("A"): [dual: arranged],
+            ]
         )
         core.arrangeBootDesk(session: session)
         #expect(
@@ -141,30 +144,47 @@ struct ProfilePartitioningRestartTests {
         #expect(core.state.profilePartitioning.hasRecord(for: .profile("A")))
     }
 
-    /// Each profile's entry decodes on its own, and the field on
-    /// its own: an unreadable record costs only itself.
+    /// Each entry decodes on its own, and the field on its own:
+    /// an unreadable record costs only itself — and the entries
+    /// AFTER it are still read.
     @Test("An unreadable record costs only itself")
     func unreadableRecordIsIsolated() throws {
-        let entry = #"{"A":{"3":[6,7,8]},"B":"garbage"}"#
-        let partial = try decode(records: entry)
-        #expect(partial.profileRecords?.records["A"]?[dual] == arranged)
-        #expect(partial.profileRecords?.byProfile["B"] == nil)
+        let partial = try decode(
+            records: "[\(entry("profile", "A", #"{"3":[6,7,8]}"#)),"
+                + "\(entry("profile", "B", #""garbage""#)), \"junk\","
+                + "\(entry("standard", "S", #"{"3":[6]}"#))]"
+        )
+        let records = partial.arrangementRecords?.records
+        #expect(records?[.profile("A")]?[dual] == arranged)
+        #expect(records?[.profile("B")] == nil)
+        #expect(records?[.standard("S")]?[dual] == [WindowID(6)])
         #expect(partial.spaces.count == 1)
 
         // Two keys naming one Space: damaged, and still no trap.
-        let twin = try decode(records: #"{"A":{"3":[6],"03":[7]}}"#)
-        #expect(twin.profileRecords?.records["A"]?.count == 1)
+        let twin = try decode(
+            records: "[\(entry("profile", "A", #"{"3":[6],"03":[7]}"#))]"
+        )
+        #expect(twin.arrangementRecords?.records[.profile("A")]?.count == 1)
 
         let broken = try decode(records: #""garbage""#)
-        #expect(broken.profileRecords == nil)
+        #expect(broken.arrangementRecords == nil)
         #expect(broken.spaces.count == 1)
+    }
+
+    private func entry(
+        _ kind: String,
+        _ name: String,
+        _ spaces: String
+    ) -> String {
+        #"{"arrangement":{"kind":""# + kind + #"","name":""# + name
+            + #""},"spaces":"# + spaces + "}"
     }
 
     private func decode(records: String) throws -> StateSnapshot {
         let json = """
             {"windows":[],"capturedAt":0,"activeSpace":"1",
              "spaces":[{"id":"1","mode":"bsp","windows":[]}],
-             "profileRecords":\(records)}
+             "arrangementRecords":\(records)}
             """
         return try JSONDecoder().decode(
             StateSnapshot.self,

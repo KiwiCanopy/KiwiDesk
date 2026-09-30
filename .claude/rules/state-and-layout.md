@@ -53,9 +53,10 @@ editing here:
   a named register so a new one has to argue for itself — the
   GUI's own binding rows are outside that scan;
   `KiwiCore+DesktopSpaces.swift` carries the argument.
-- **Ask `ProfileManager.currentName` for which profile that
-  store is filing FOR**, rather than reading or adding a second
-  answer beside it. The obligations that fall on moving that name
+- **Ask the adoption state, through `KiwiCore.liveArrangement`,
+  which arrangement that store is filing FOR** — a saved profile
+  or a composed Standard (#1829) — rather than reading or adding
+  a second answer beside it. The obligations that fall on moving that name
   are [profiles.md](profiles.md) ▸ "Whose arrangement is live",
   which is where they load: this file's `paths:` do not reach
   `Sources/KiwiDeskCore/Profiles/**`, where every toucher lives.
@@ -1766,9 +1767,9 @@ editing here:
   record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
   `HeldOrigin.Arrangement` keys and the snapshot's own
   `arrangement`, which every snapshot carries (#1646,
-  profiles.md), and its `profileRecords` and `standardRecords` —
-  #1230's record per saved profile and per composed Standard
-  (#1829), keyed by name and Space name (#1802,
+  profiles.md), and its `arrangementRecords` — #1230's record
+  per saved profile and per composed Standard, keyed by the
+  arrangement and Space name (#1802, #1829,
   `ProfilePartitioningRestartTests` ▸
   `unreadableRecordIsIsolated`). Each record decodes its
   payload on its own and a payload it cannot read costs only
