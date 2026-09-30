@@ -36,6 +36,7 @@
   "app_rules.empty": "Apps ohne Regel werden normal gekachelt und öffnen sich in dem Space, in dem du sie öffnest.",
   "app_rules.float": "Schweben",
   "app_rules.float.help": "Schweben nimmt die passenden Fenster dieser App aus der Kachelung: Jedes behält seine letzte Position und Größe und bleibt über den gekachelten Fenstern, statt sich in das Raster eines Space einzufügen.\n\nDies ist Schweben pro App – nicht der Layout-Modus **Floating**, der jedes Fenster in einem Space schweben lässt.",
+  "app_rules.float.help.open_windows": "Gilt für geöffnete Fenster, sobald du sicherst. Hast du ein Fenster selbst schweben lassen oder gekachelt, behält es diese Wahl.",
   "app_rules.float.none": "Schwebt nicht",
   "app_rules.float.remove.help": "Diese App nicht mehr schweben lassen",
   "app_rules.float.scope.all": "Alle Fenster",

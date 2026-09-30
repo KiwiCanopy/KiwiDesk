@@ -36,6 +36,7 @@
   "app_rules.empty": "Le app senza regole si affiancano normalmente, nello spazio in cui le apri.",
   "app_rules.float": "Fluttuazione",
   "app_rules.float.help": "La fluttuazione toglie le finestre corrispondenti di questa app dall'affiancamento: ciascuna mantiene la sua ultima posizione e dimensione e resta sopra le finestre affiancate, invece di incastrarsi nella griglia di uno spazio.\n\nQuesta è fluttuazione per app, non la modalità di layout **Floating**, che fa fluttuare tutte le finestre di uno spazio.",
+  "app_rules.float.help.open_windows": "Si applica alle finestre aperte non appena salvi. Una finestra che hai fatto fluttuare o affiancato a mano mantiene questa scelta.",
   "app_rules.float.none": "Non fluttua",
   "app_rules.float.remove.help": "Non far più fluttuare questa app",
   "app_rules.float.scope.all": "Tutte le finestre",

@@ -36,6 +36,7 @@
   "app_rules.empty": "Las apps sin regla se colocan en mosaico normalmente, en el espacio donde las abras.",
   "app_rules.float": "Flotación",
   "app_rules.float.help": "La flotación saca las ventanas coincidentes de esta app fuera del mosaico: cada una conserva su última posición y tamaño y permanece por encima de las ventanas en mosaico, en lugar de encajar en la cuadrícula de un espacio.\n\nEsto es flotación por app, no el modo de diseño **Floating**, que hace flotar todas las ventanas de un espacio.",
+  "app_rules.float.help.open_windows": "Se aplica a las ventanas abiertas en cuanto guardas. Una ventana que hiciste flotar o colocaste en mosaico por tu cuenta conserva esa elección.",
   "app_rules.float.none": "No flota",
   "app_rules.float.remove.help": "Dejar de hacer flotar esta app",
   "app_rules.float.scope.all": "Todas las ventanas",
