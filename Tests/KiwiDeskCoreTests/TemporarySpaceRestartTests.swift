@@ -137,6 +137,7 @@ struct TemporarySpaceRestartTests {
         let core = try desk.docked()
         // Empty from birth, so unarmed: only the switch can drop it.
         core.execute("create_space", args: [.string(scratch.raw)])
+        #expect(core.state.workspaces[scratch] != nil, "unarmed at birth")
         core.execute(
             "pin_space_to_display",
             args: [.string(scratch.raw), .string(desk.dell.fingerprint)]

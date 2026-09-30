@@ -1,26 +1,26 @@
 import Foundation
 
-/// Held Spaces (#1507): a monitor change that switches profile
-/// carries each Space of a screen that is gone, and still holds
-/// windows, onto a remaining screen instead of forwarding its
-/// windows into the incoming profile's fallback. The ruling is on
-/// the issue and in `docs/design-decisions.md`.
+/// Held Spaces (#1507, #1790): a switch keeps each Space the
+/// incoming arrangement does not name, and that still holds
+/// windows, instead of forwarding its windows into the incoming
+/// profile's fallback. The ruling is on the issues and in
+/// `docs/design-decisions.md`.
 extension KiwiCore {
     /// Marks the departing Spaces the prune must keep. A Space
-    /// that lived on a screen no longer connected — its pin, else
-    /// the screen `settlingScreens` recorded at the report, which
-    /// reaches a Main-role or auto-placed Space — and holds windows
-    /// (live or away) is held under its own name, or under the
-    /// next number past every live one where the incoming
-    /// profile declares that name or the held order needs it
-    /// (#1664). Runs before the prune, while
-    /// `spacePins`, `icons` and `liveArrangement` are still the
-    /// departing arrangement's.
+    /// that holds windows (live or away) and lived on a screen no
+    /// longer connected — its pin, else the screen
+    /// `settlingScreens` recorded at the report, which reaches a
+    /// Main-role or auto-placed Space — or that `holdsUnnamed`
+    /// takes though its screen stayed, is held under its own name,
+    /// or under the next number past every live one where the
+    /// incoming profile declares that name or the held order
+    /// needs it (#1664). Runs before the prune and any pin
+    /// adoption, while `spacePins`, `icons` and `liveArrangement`
+    /// are still the departing arrangement's.
     func holdDepartingSpaces(
         declared: Set<SpaceID>,
         icons: [SpaceID: String],
-        temporaries: Set<SpaceID>,
-        alsoHolding: (SpaceID) -> Bool = { _ in false }
+        temporaries: Set<SpaceID>
     ) {
         let live = Set(liveFingerprints)
         let candidates: [(Space, String)] = state.workspaces.allSpaces
@@ -29,7 +29,12 @@ extension KiwiCore {
                     let screen = spacePins[space.id]
                         ?? state.settlingScreens[space.id]
                         ?? shownScreen(of: space.id),
-                    !live.contains(screen) || alsoHolding(space.id),
+                    !live.contains(screen)
+                        || holdsUnnamed(
+                            space.id,
+                            declared: declared,
+                            temporaries: temporaries
+                        ),
                     !withAwayMembers(space.windows, of: space.id).isEmpty
                 else { return nil }
                 return (space, screen)
@@ -60,7 +65,7 @@ extension KiwiCore {
             }
             state.heldSpaces[id] = origin
             onLog(
-                "monitor change: held space \(id.raw) from "
+                "switch: held space \(id.raw) from "
                     + "'\(origin.screenName)'"
                     + (id == origin.name ? "" : " (was \(origin.name.raw))")
             )
@@ -82,25 +87,12 @@ extension KiwiCore {
         holdDepartingSpaces(
             declared: declared,
             icons: icons,
-            temporaries: temporaries,
-            alsoHolding: {
-                !declared.contains($0) && self.liveArrangement != nil
-            }
+            temporaries: temporaries
         )
         pruneSpaces(
             keeping: declared.union(state.heldSpaces.keys),
             orderedBy: planned
         )
-    }
-
-    /// The fingerprint of the screen `id` lays out on now; one the
-    /// resolve has not placed yet lays out on the main screen.
-    private func shownScreen(of id: SpaceID) -> String? {
-        let display =
-            state.workspaces.display(of: id) ?? PositionalDisplays.liveMainID
-        let displays = state.workspaces.allDisplays
-        return (displays.first { $0.id == display } ?? displays.first)?
-            .fingerprint
     }
 
     /// A held id is never a declared one: every apply door calls
@@ -285,8 +277,8 @@ extension KiwiCore {
     }
 
     /// Ends every held Space's record without touching the Space —
-    /// an explicit load makes its profile's set authoritative, and
-    /// its prune forwards them like any undeclared Space.
+    /// resetting every setting, which makes nothing a hold's to
+    /// keep.
     func forgetHeldSpaces() {
         state.heldSpaces = [:]
     }

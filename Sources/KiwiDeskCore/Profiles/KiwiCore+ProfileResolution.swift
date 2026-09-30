@@ -36,6 +36,7 @@ extension KiwiCore {
         )
         // Read before anything moves what is live or declared (#1790).
         let temporaries = Set(liveTemporarySpaces)
+        let heldBefore = Set(state.heldSpaces.keys)
         let switching = recordOutgoingPartitioning(before: profile)
         // A held Space keeps the icon it had where it lived (#1507),
         // read before the incoming settings replace them.
@@ -80,10 +81,7 @@ extension KiwiCore {
             holdDepartingSpaces(
                 declared: declared,
                 icons: outgoingIcons,
-                temporaries: temporaries,
-                alsoHolding: {
-                    !declared.contains($0) && self.liveArrangement != nil
-                }
+                temporaries: temporaries
             )
         }
         // One the incoming profile declares is that profile's now;
@@ -161,7 +159,7 @@ extension KiwiCore {
             profileScrollGesture: profile.scrollGesture
         )
         // A renumbered held Space owes its ⌃⌥N (#485's top-up).
-        if !state.heldSpaces.isEmpty { topUpDigitShortcuts() }
+        if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
         retile(pass: forceRetile ? .apply : .event)
         emitSpaceChange()
@@ -191,6 +189,7 @@ extension KiwiCore {
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
         let temporaries = Set(liveTemporarySpaces)
+        let heldBefore = Set(state.heldSpaces.keys)
         let outgoingIcons = tiler.settings.spaceIcons
         reclaimHeldNames(
             declared: Set(composed.spaces),
@@ -214,6 +213,14 @@ extension KiwiCore {
                 composed.spaceModes[space] ?? .bsp
             )
         }
+        // Held while the outgoing pins still stand (#1507, #1790).
+        if switching {
+            holdForStandard(
+                planned: composed.spaces,
+                icons: outgoingIcons,
+                temporaries: temporaries
+            )
+        }
         // Honor the composed layout's own positional plan (#485):
         // for a workflow Standard this equals what
         // `resolveSpaceDisplays` re-derives below, but the setup's
@@ -224,11 +231,6 @@ extension KiwiCore {
             keepingPinsOf: temporaries.subtracting(composed.spaces)
         )
         if switching {
-            holdForStandard(
-                planned: composed.spaces,
-                icons: outgoingIcons,
-                temporaries: temporaries
-            )
             restorePartitioning(of: standard, declaring: Set(composed.spaces))
         }
         refileHeldSpaces(
@@ -246,6 +248,7 @@ extension KiwiCore {
             profileIgnoreRules: nil,
             profileScrollGesture: nil
         )
+        if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
         retile(pass: forceRetile ? .apply : .event)
         emitSpaceChange()

@@ -1,10 +1,10 @@
 import Foundation
 
 /// Temporary Spaces (#1790): a live Space that no source declares
-/// belongs to no arrangement until it is added to the profile. It
-/// is dropped on a switch — never on a config load — and deleted
-/// once emptied. The ruling is on the issue and in
-/// `docs/design-decisions.md`.
+/// belongs to no arrangement until it is added to the profile. A
+/// switch holds it while it has windows — a config load never
+/// drops it — and it is deleted once emptied. The ruling is on
+/// the issue and in `docs/design-decisions.md`.
 extension KiwiCore {
     /// Whether `id` is a live temporary Space: a profile or a
     /// Standard is live, and `id` is live but not its, nor
@@ -87,16 +87,6 @@ extension KiwiCore {
     ) -> [SpaceID: String] {
         let kept = spacePins.filter { temporaries.contains($0.key) }
         return pins.merging(kept) { own, _ in own }
-    }
-
-    /// Whether `id` lived on a screen no longer connected and still
-    /// holds windows — what a monitor change's hold takes (#1507).
-    func departsWithWindows(_ id: SpaceID) -> Bool {
-        guard let screen = spacePins[id] ?? state.settlingScreens[id],
-            !liveFingerprints.contains(screen)
-        else { return false }
-        return !withAwayMembers(state.workspaces[id]?.windows ?? [], of: id)
-            .isEmpty
     }
 
     /// Arms each temporary Space that holds something, and deletes

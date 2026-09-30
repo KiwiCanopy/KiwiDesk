@@ -122,4 +122,42 @@ extension KiwiCore {
     public var capturedSpacePins: [SpaceID: String] {
         capturedPins(alsoOf: [])
     }
+
+    /// Whether a switch holds `id` though its screen stayed
+    /// (#1790): the incoming arrangement does not name it, and it
+    /// is temporary or the outgoing one declared it — never a heal
+    /// seed or an `init.lua` Space, which no return could take.
+    func holdsUnnamed(
+        _ id: SpaceID,
+        declared: Set<SpaceID>,
+        temporaries: Set<SpaceID>
+    ) -> Bool {
+        guard !declared.contains(id) else { return false }
+        if temporaries.contains(id) { return true }
+        switch liveArrangement {
+        case .profile:
+            return profiles.active?.declaredSpaces.contains(id) == true
+        case .standard:
+            return profiles.standard?.spaces.contains(id) == true
+        case nil: return false
+        }
+    }
+
+    /// The fingerprint of the screen `id` lays out on now; one the
+    /// resolve has not placed yet lays out on the main screen.
+    func shownScreen(of id: SpaceID) -> String? {
+        let display =
+            state.workspaces.display(of: id) ?? PositionalDisplays.liveMainID
+        let displays = state.workspaces.allDisplays
+        return (displays.first { $0.id == display } ?? displays.first)?
+            .fingerprint
+    }
+
+    /// Whether a held Space joined under a number not its own since
+    /// `before` — a renumber owes its ⌃⌥N (#485's top-up).
+    func heldRenumbered(since before: Set<SpaceID>) -> Bool {
+        state.heldSpaces.contains {
+            !before.contains($0.key) && $0.key != $0.value.name
+        }
+    }
 }

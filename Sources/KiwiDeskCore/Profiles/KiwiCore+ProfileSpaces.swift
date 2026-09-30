@@ -83,13 +83,11 @@ extension KiwiCore {
     ///
     /// `apply(profile:)` gates the session-ratio clear, the hold,
     /// the prune and the restore on the answer; `apply(composed:)`
-    /// gates only the restore. A Standard is transient (#53): it
-    /// prunes nothing, holds nothing and keeps the session layer,
-    /// so the outgoing profile's undeclared Spaces stay live beside
-    /// it and the restore moves windows into its DECLARED Spaces
-    /// alone. A step that must follow an arrangement change on
-    /// both doors — #1790's temporary-Space drop — gates on this
-    /// same answer, never a test of its own.
+    /// gates the hold, its prune and the restore, and keeps the
+    /// session layer (#53). A step that must follow an arrangement
+    /// change on both doors — #1790's hold of what the incoming
+    /// arrangement does not name — gates on this same answer,
+    /// never a test of its own.
     func recordOutgoingPartitioning(
         before incoming: HeldOrigin.Arrangement
     ) -> Bool {

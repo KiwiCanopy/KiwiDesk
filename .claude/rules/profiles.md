@@ -916,22 +916,28 @@ incoming arrangement does not name*. The obligations:
   screen a Space LIVED on.** Both apply doors hold through
   `holdDepartingSpaces` when the arrangement changes — a Load, a
   Desktop binding, a monitor change, a composed Standard through
-  `holdForStandard` — and never on a re-apply; while an
-  arrangement is live a Space on a connected screen is held as
-  well as a gone screen's, and with none live (a hand-written
-  config) only a gone screen's (`SwitchHoldTests` ▸
-  `loadHoldsAndReturns`, `SwitchHoldTests` ▸ `emptyUnnamedDrops`,
-  `SwitchHoldTests` ▸ `standardHoldsLeftovers`). The screen is its
+  `holdForStandard` — and never on a re-apply. A Space on a
+  connected screen is held only through the one `holdsUnnamed`:
+  the incoming arrangement does not name it, and it is temporary
+  or the outgoing arrangement declared it — a heal seed or an
+  `init.lua` Space no return could take is forwarded instead
+  (`SwitchHoldTests` ▸ `loadHoldsAndReturns`, `SwitchHoldTests` ▸
+  `emptyUnnamedDrops`, `SwitchHoldTests` ▸ `standardHoldsLeftovers`,
+  `SwitchHoldTests` ▸ `undeclaredSpaceIsForwarded`). The screen is its
   pin, else `StateCoordinator.settlingScreens` — recorded by the
   event arm at the first report of a screen-count change, before
   that report's resolve moves an unpinned Space, and cleared by
   the settle and by `supersedeMonitorSettle` — else the screen it
   lays out on now, so a Main-role or auto-placed Space is held too
   (`HeldSpaceTests` ▸ `unpinnedSpaceIsHeld`). The hold runs ahead
-  of the prune, while `spacePins`, the icons and
-  `liveArrangement` are still the departing arrangement's
-  (`HeldSpaceTests` ▸ `unplugHolds`, `HeldSpaceTests` ▸
-  `heldIconIsTheDepartingOne`). Which apply switches is
+  of the prune and of any pin adoption, while `spacePins`, the
+  icons and `liveArrangement` are still the departing
+  arrangement's (`HeldSpaceTests` ▸ `unplugHolds`,
+  `HeldSpaceTests` ▸ `heldIconIsTheDepartingOne`,
+  `SwitchHoldTests` ▸ `standardHoldsTheGoneScreen`); a door tops
+  up the digit rows only for a hold it renumbered, since the
+  top-up writes `gui.json` (`SwitchHoldTests` ▸
+  `unrenumberedHoldWritesNoRow`). Which apply switches is
   `recordOutgoingPartitioning`'s answer, which both doors read,
   and a new apply door owes the same hold on it.
 - **A held id is never a declared one.** Every door that makes a

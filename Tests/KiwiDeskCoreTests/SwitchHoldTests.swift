@@ -149,4 +149,100 @@ struct SwitchHoldTests {
         #expect(!core.isTemporary(SpaceID(5)))
         #expect(!core.spaceBars.liveOnly.contains { $0.id == SpaceID(5) })
     }
+
+    /// A Standard adopts its own pins; the hold must read the
+    /// outgoing profile's first, with no settle record to fall
+    /// back on — a same-count screen swap.
+    @Test("a Standard holds a gone screen's Space under that screen")
+    func standardHoldsTheGoneScreen() throws {
+        let core = try desk.docked()
+        let lg = Display(
+            id: DisplayID(4),
+            name: "LG",
+            frame: desk.dell.frame
+        )
+        core.state.workspaces.removeDisplay(desk.dell.id)
+        core.state.workspaces.upsertDisplay(lg)
+        #expect(core.state.settlingScreens.isEmpty)
+        let composed = try #require(
+            ProfileComposition.compose(
+                displays: core.state.workspaces.allDisplays,
+                mainID: nil
+            )
+        )
+        core.apply(composed: composed, forceRetile: true)
+        let held = try #require(
+            core.state.heldSpaces.first { $0.value.name == SpaceID(3) }
+        )
+        #expect(held.value.screen == desk.dell.fingerprint)
+    }
+
+    /// No return could take a Space the outgoing profile never
+    /// declared, so it is forwarded, not held.
+    @Test("an init.lua Space the switch does not name is forwarded")
+    func undeclaredSpaceIsForwarded() throws {
+        let core = try desk.docked()
+        let lua = SpaceID("lua")
+        core.initDeclaredSpaces = [lua]
+        core.state.workspaces.ensureSpace(lua)
+        core.state.workspaces.add(WindowID(12), to: lua)
+        try pair(core)
+        core.execute("load_profile", args: [.string("pair")])
+        #expect(core.state.heldSpaces[lua] == nil)
+        #expect(!core.state.heldSpaces.values.contains { $0.name == lua })
+    }
+
+    @Test("a set pick on the live profile keeps a temporary pin")
+    func setPickKeepsPin() throws {
+        let core = try desk.docked()
+        core.execute("create_space", args: [.string("7")])
+        core.execute(
+            "pin_space_to_display",
+            args: [.string("7"), .string(desk.dell.fingerprint)]
+        )
+        try core.claimMonitorSet(
+            [desk.builtIn.fingerprint, desk.dell.fingerprint],
+            for: "desk"
+        )
+        #expect(core.spacePins[SpaceID(7)] == desk.dell.fingerprint)
+    }
+
+    @Test("a Standard's planned Space is never published as temporary")
+    func standardRepublishes() throws {
+        let core = try desk.docked()
+        let composed = try #require(
+            ProfileComposition.compose(
+                displays: core.state.workspaces.allDisplays,
+                mainID: nil
+            )
+        )
+        core.apply(composed: composed, forceRetile: true)
+        let planned = Set(composed.spaces)
+        #expect(
+            !core.spaceBars.liveOnly.contains { planned.contains($0.id) }
+        )
+    }
+
+    /// The top-up writes `gui.json`; a hold under its own number
+    /// owes it nothing, so a switch leaves the file alone.
+    @Test("a hold under its own number writes no digit row")
+    func unrenumberedHoldWritesNoRow() throws {
+        let core = try desk.docked()
+        var config = GuiConfig()
+        config.layers = [KeyLayer(name: KeyLayer.defaultName, bindings: [])]
+        try core.guiConfigStore.save(config)
+        core.execute("create_space", args: [.string("7")])
+        core.state.workspaces.add(WindowID(12), to: SpaceID(7))
+        try pair(core)
+        // A Load mirrors its Spaces into the file too, so the rows
+        // are what is compared.
+        let rows = { core.guiConfigStore.load()?.layers.first?.bindings }
+        let before = rows()
+        core.execute("load_profile", args: [.string("pair")])
+        #expect(core.state.heldSpaces[SpaceID(7)]?.name == SpaceID(7))
+        #expect(rows() == before)
+        // Vacuity: a top-up here does write.
+        core.topUpDigitShortcuts()
+        #expect(rows() != before)
+    }
 }

@@ -281,7 +281,9 @@ struct TemporarySpaceTests {
     func settingsWriteKeepsDeclarations() throws {
         let core = try docked()
         var profile = try core.profiles.read(name: "desk")
+        // `spaceModes` declares too (`declaredSpaces`).
         profile.spaces.removeAll { $0 == SpaceID(2) }
+        profile.spaceModes[SpaceID(2)] = nil
         try core.profiles.write(profile)
         core.writeThroughLiveProfile(.settings { _ in })
         #expect(!core.isTemporary(SpaceID(2)))
