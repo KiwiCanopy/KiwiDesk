@@ -12,6 +12,8 @@
 # Website + published docs — content a PR could quietly alter.
 /site/            @hajiboy95
 /docs/            @hajiboy95
+# Feeds the site's /roadmap.json and the app's What's new.
+/ROADMAP.md       @hajiboy95
 
 # Build + CI + this file itself — highest-trust surfaces.
 /.github/         @hajiboy95

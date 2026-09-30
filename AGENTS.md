@@ -288,6 +288,12 @@ scripts.
   hook lints staged Swift, runs the locale checks, and **refuses
   a commit while HEAD is `main`** (override with
   `KIWIDESK_ALLOW_MAIN_COMMIT=1`, never `--no-verify`).
+- `scripts/gate-lock <cmd…>` runs a heavy gate step in the one
+  machine-wide gate slot, at low priority; `scripts/gate-hook` is
+  the Claude Code `PreToolUse` hook that applies it to every
+  agent's `swift build` / `swift test` — registered in the
+  user-level settings so every worktree gets it. A human in a
+  terminal types the prefix.
 - `./scripts/build-app.sh` packages, signs and optionally
   notarizes the `.app` (#89) — see
   [packaging-and-release.md](.claude/rules/packaging-and-release.md).

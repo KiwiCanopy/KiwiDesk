@@ -154,7 +154,7 @@ struct VerifyGateParityTests {
     /// `## ` heading's list, which is how the workflow pin
     /// expresses its exemption structurally instead of by
     /// command text.
-    private func skillSteps(
+    func skillSteps(
         section: String? = nil
     ) throws -> [String] {
         let skill = try String(

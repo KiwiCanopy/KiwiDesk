@@ -36,6 +36,14 @@ Say in the report which gate you ran and why.
 
 ## Fast inner loop
 
+Heavy steps queue machine-wide: `scripts/gate-hook` runs every
+`swift build` / `swift test` whole under `scripts/gate-lock`,
+one at a time across all worktrees, so parallel sessions stop
+throttling the machine. Queue wait plus the suite can pass the
+Bash tool's 10-minute cap — run the test step with
+`run_in_background`. A step that says "gate busy" is waiting,
+not hung; don't kill it or run around it.
+
 1. `swift build`
 2. `swift test -q` (one command — the old two-command split
    died with the #494 tail-hang fix; history and the rest of

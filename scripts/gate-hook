@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""Claude Code PreToolUse hook: queue a heavy gate step behind
+`scripts/gate-lock`.
+
+Reads the hook's JSON on stdin. A Bash command running a heavy
+step in command position is rewritten to run WHOLE under the
+wrapper (`gate-lock bash -c '<original>'`), so a pipeline keeps
+its exit code and `cd x && swift test` locks the test rather
+than the `cd`. Anything else, or a command already naming
+gate-lock, prints nothing and passes through unchanged.
+
+Registered from the user-level settings so it reaches every
+worktree; `GateLockHookTests` pins that every heavy skill step
+is caught.
+"""
+
+import json
+import os
+import re
+import shlex
+import sys
+
+# A heavy step at the start of the command or after a shell
+# separator, optionally behind `VAR=value` assignments — never
+# inside a quoted argument like `grep "swift test"`.
+HEAVY = re.compile(
+    r"(?:^|[;&|(\n]|\bthen\b|\bdo\b)\s*"
+    r"(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*"
+    r"(?:\./)?(?:swift\s+(?:build|test)\b"
+    r"|scripts/(?:release|build-app)\.sh\b)"
+)
+
+# The only shape approved on the hook's own authority: nothing a
+# shell could expand, chain or redirect. The release scripts push
+# and sign, so they queue but keep the normal check.
+PLAIN = re.compile(r"swift (?:build|test)(?: [A-Za-z0-9_./:=,-]+)*")
+
+
+def main() -> int:
+    try:
+        event = json.load(sys.stdin)
+    except ValueError:
+        return 0
+    if event.get("tool_name") != "Bash":
+        return 0
+    tool_input = event.get("tool_input") or {}
+    command = tool_input.get("command")
+    if not isinstance(command, str) or "gate-lock" in command:
+        return 0
+    if not HEAVY.search(command):
+        return 0
+    wrapper = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "gate-lock"
+    )
+    updated = dict(tool_input)
+    updated["command"] = (
+        f"{shlex.quote(wrapper)} bash -c {shlex.quote(command)}"
+    )
+    output = {
+        "hookEventName": "PreToolUse",
+        "updatedInput": updated,
+    }
+    if PLAIN.fullmatch(command.strip()):
+        output["permissionDecision"] = "allow"
+        output["permissionDecisionReason"] = (
+            "plain gate step, queued behind scripts/gate-lock"
+        )
+    json.dump({"hookSpecificOutput": output}, sys.stdout)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
