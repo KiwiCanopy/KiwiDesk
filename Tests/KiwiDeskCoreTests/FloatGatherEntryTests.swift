@@ -52,7 +52,7 @@ struct FloatGatherEntryTests {
     /// A core with one shown space in `mode`, holding the three
     /// members at `frames`. Nil where the host has no screen.
     private func makeCore(mode: LayoutMode) -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()
@@ -310,7 +310,8 @@ struct FloatGatherEntryTests {
         core.settleDrawnSpaceModes()
         let other = SpaceID("2")
         core.state.workspaces.ensureSpace(other)
-        core.resolveSpaceDisplays(mainID: NSScreen.main!.kiwiDisplay!.id)
+        let primary = try #require(NSScreen.screens.first?.kiwiDisplay)
+        core.resolveSpaceDisplays(mainID: primary.id)
         core.state.workspaces.activate(other)
         core.retile(pass: .apply)
         // Parked, uncaptured: the corner is all the state holds.

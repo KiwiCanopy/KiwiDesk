@@ -173,7 +173,7 @@ struct UnsolicitedResizeTests {
         // `FloatingModeBarClampTests` paints: the zoom lands the
         // window under the strip, and the arm's retile carries
         // the #1178 sweep.
-        let screen = try #require(NSScreen.main)
+        let screen = try #require(NSScreen.screens.first)
         let display = try #require(screen.kiwiDisplay)
         let core = makeTestCore()
         core.tiler.visibleBounds = { _ in screen.frame }
