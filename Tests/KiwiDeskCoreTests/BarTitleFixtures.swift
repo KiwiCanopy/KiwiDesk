@@ -65,12 +65,10 @@ func appBarItem(
 
 @MainActor
 func paintedAppBar(
-    content: AppBarStyle.Content = .iconAndTitle,
     edge: AppBarEdge = .top,
     items: [AppBarOverlay.Item]
 ) -> AppBarManager.Bar {
     var style = AppBarLook()
-    style.content = content
     style.edge = edge
     // Pinned (tests.md #660): the default flipped on in #1369 and
     // `glassEnabled` picks the hosting mode, so an unpinned leaf

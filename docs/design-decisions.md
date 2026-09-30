@@ -10174,7 +10174,7 @@ override doesn't just add a row, it adds a resolution question
 to every row above it — "why is my bar 44 pt here and 32
 there" is a bug report even when everything works — and the
 GUI price was the whole card again per layout, 40 rows for a
-narrow need (a monocle bar that wants to be icon-only). The
+narrow need (a monocle bar that wants a longer title). The
 need is real, so it stays fully available in Lua
 (`monocle.set_app_bar_*` / `scroll.set_app_bar_*`), where the
 precedent already existed: `liquid_glass`, `icon_source` and
@@ -11175,43 +11175,62 @@ exactly the "approachable by default" clause: the default is for
 the user who never opens the editor.
 
 **The bars name the WINDOW, not its app.** (Owner ruling
-2026-08-19, replacing the `name` / `icon_and_name` content modes.)
-`app_bar.set_content` takes `icon`, `title` or `icon_and_title`,
-and the Space Bar's front segment shows the focused window's title
-in place of its app's name. The retired spellings are simply gone.
+2026-08-19.) The App Bar draws each window's title, and the Space
+Bar's front segment shows the focused window's title in place of
+its app's name.
+
+:::unreleased
+**An App Bar item draws its icon AND its title.**
+([#1528](https://github.com/KiwiCanopy/KiwiDesk/issues/1528).)
+A vertical App Bar draws the icon alone, which is rendering, not
+a setting. There is no content setting because each alternative
+to both drops half of what an item is for. Icon-only repeats the
+Space Bar, whose glyphs are click targets carrying the same app and a
+hover title, so what the App Bar adds is the title. Title-only
+drops the icon that names the app beside a title that, on the
+sample below, mostly did not name it. A setting whose every other
+choice is worse than its default costs a row, three verbs and a
+per-layout override, and serves no user.
+:::
 
 **A stale enum spelling costs the FILE, not the field** — the
-price the config format charges everywhere else. `TilingSettings`
-decodes `AppBarStyle` inline, so an unreadable value fails the
+price the config format charges everywhere. `TilingSettings`
+decodes each bar style inline, so an unreadable value fails the
 enclosing decode: a profile carrying one is skipped by
 `allProfiles()` — it disappears from the profile list rather than
 opening at defaults, surfaced as a `ConfigIssue.profileBroken`
-with Delete / Reveal. And that is every profile v0.9.7 wrote, not
-the few whose owner changed the setting: `TilingSettings.encode`
-is exhaustive and `icon_and_name` was that build's default. The
-`gui.json` sidecar is NOT exposed — `GuiConfig.encode` writes the
-spaces, rules, bindings and layers, never `settings`.
+with Delete / Reveal. v0.9.7's retired content spelling was in
+every profile that build wrote, not the few whose owner changed
+the setting: `TilingSettings.encode` is exhaustive and
+`icon_and_name` was that build's default. The `gui.json` sidecar
+is NOT exposed — `GuiConfig.encode` writes its app-wide fields,
+never `settings`.
 
-Leniency for this one field was refused anyway, and not because
+Leniency for a renamed field is refused anyway, and not because
 that damage is small. The argument for it — an unreadable enum
 should not take its siblings down — is the strongest one in the
-area, and it is *why* it fails: it is not specific to `content`.
-Six sibling enums in this struct and every enum in
-`SpaceBarStyle` throw exactly this way, so sparing the single
-renamed field is a coin flip on which field the user gets wrong,
-not a mitigation. Leniency belongs everywhere or nowhere. Both
-decode sites are strict — `AppBarStyle` and the per-layout
-override.
+area, and it is *why* it fails: it is not specific to one field.
+Every enum in the bar styles throws exactly this way, so sparing
+the single renamed field is a coin flip on which field the user
+gets wrong, not a mitigation. Leniency belongs everywhere or
+nowhere.
 
 **The crossing is a migration, not a lenient decoder**, and the
 difference is that one of them ends. `ConfigMigration` rewrites
-`name` / `icon_and_name` in the file itself, once; a decoder that
-folded them would keep accepting the retired vocabulary forever,
-because nothing ever signals that the last config carrying it is
-gone. "Re-editing the config IS the migration" held while this
-repo had one user; v0.9.7 shipped to others (AGENTS.md §5), and
-asking a stranger to hand-edit JSON to get their profiles back is
-not a migration policy.
+the file itself, once; a decoder that folded a retired spelling
+would keep accepting it forever, because nothing ever signals
+that the last config carrying it is gone. "Re-editing the config
+IS the migration" held while this repo had one user; v0.9.7
+shipped to others (AGENTS.md §5), and asking a stranger to
+hand-edit JSON to get their profiles back is not a migration
+policy.
+
+:::unreleased
+A key that is dropped takes one step whatever it held, and an
+earlier value rewrite of that key folds into it: a deleted key
+needs no spelling fixed first, and two crossings over one key
+are two chances to disagree about it.
+:::
 
 `Profile` and `GuiConfig` carry a `format` version integer (#902),
 following `SetupBundle.currentFormat`. Migrations key off the format
@@ -11238,7 +11257,7 @@ self-heals, because focusing a group expands it into members
 that do show titles.
 
 Titles do NOT generally repeat the app name, which is what makes
-`icon_and_title` non-redundant: of that sample, Finder, ghostty
+the icon beside a title non-redundant: of that sample, Finder, ghostty
 and System Settings put none of it in the title, Obsidian
 appended its own name *and version*, and the browser appended
 the **site** rather than the app. Where an app does append it,
@@ -11276,9 +11295,10 @@ because retiling on a rename would re-issue a frame set — and, on
 an app that refuses a size, re-teach the #677 ledger — every time
 a tab was renamed. It is debounced through a `DeferredTasks` slot
 rather than a bespoke flag, so teardown's `cancelAll()` reaches it
-like every other settle (#48), and gated on the **rendered**
-content, so a vertical bar (which collapses to icon-only)
-schedules nothing.
+like every other settle (#48), and gated on whether a painted
+bar draws OR announces the title (#937) — so a vertical bar,
+which draws icons alone but announces the title, still
+schedules.
 
 **[Principle] One shelf holds both bars on one plate, and a
 field both bars read is stored once, on it.**
@@ -11291,10 +11311,10 @@ gap, font size, the app glyph style, the idle opacity of
 untinted content (`dim_factor`) and every colour the two bars
 share — is `kiwishelf`'s. A field each bar may set for
 itself stays on that bar, whether or not the other bar has one
-like it: the active indicator's shape, the App Bar's content and
-title cap, the Space Bar's glyph span, spring delay, front-app
-title cap, its active-Space dim and the colour of the focused
-window's glyph inside a Space item are examples, not the list.
+like it: the active indicator's shape, the App Bar's title cap,
+the Space Bar's glyph span, spring delay, front-app title cap,
+its active-Space dim and the colour of the focused window's glyph
+inside a Space item are examples, not the list.
 
 :::unreleased
 The edge left that list with #1731: each bar owns its edge, and
@@ -11775,8 +11795,8 @@ helper) separates the identifier from the glyph row inside every
 occupied item.
 
 **Space Bar content is fixed in v1.** (#293.) Identifier plus
-app glyphs — no clone of the App Bar's `Icon | Title |
-Icon & title` chooser. The identifier is structural and the
+app glyphs — no content chooser, which the App Bar has none of
+either (#1528). The identifier is structural and the
 compact glyphs are the point of the overview; a labelled-glyph
 mode needs its own demonstrated use case first.
 
@@ -11802,6 +11822,32 @@ served by a new user seeing the core organizing concept on
 first launch than by a cleaner-but-mute one. The App Bar
 stays per-layout (monocle/scrolling default it on; other
 layouts off).
+
+:::unreleased
+**The App Bar ships on, on its own edge.**
+([#1528](https://github.com/KiwiCanopy/KiwiDesk/issues/1528).)
+The starter setup seeds it in Monocle and Scrolling on the bottom
+edge, with the Space Bar on top, each on its own shelf. Off by
+default is the tempting reading once the Space Bar's glyphs are
+click targets, and it is wrong:
+
+- **It shows only where windows are out of sight.** The App Bar
+  exists in Monocle and Scrolling alone, the two layouts that
+  hide windows behind the one shown or off the screen, so it is
+  the surface that says what is there.
+- **It carries what the Space Bar cannot:** every window's title,
+  always visible, in row order. A Space Bar glyph names an app
+  and reaches a title only on hover or through a `+n` menu, so it
+  tells apps apart and not the windows of one app.
+- **The two bars do not double up.** The Space Bar's front-app
+  segment stands down wherever an App Bar shows on the display,
+  so the focused window is never marked twice.
+- **Where it lands is the starter's to say, not the type's.** A
+  default flip on the type changes what every sparsely-stored file
+  means, so it owes a `ConfigMigration` (AGENTS.md §5); a seed in
+  the starter changes no stored file. `AppBarStyle.edge` keeps its
+  `.top` default, and a saved profile keeps the edge it stores.
+:::
 
 **The front-app segment is per-display.** (#293.) With
 `space_bar.show_front_app` on, each display's bar shows the
@@ -12108,7 +12154,7 @@ earlier colour behind (`LookStoreTests`). **A look carries
 styling, never functionality** (owner, 2026-09-27): a field is styling
 if it changes how the same items look or where they sit, and
 functionality if it changes which items exist, what they show
-or say, or what they do — so App Bar content, Other Spaces and
+or say, or what they do — so the App Bar's grouping, Other Spaces and
 a bar's on/off never join, and a preview draws the user's own
 sections under the look. `LookKeys` is the register and
 classifies every field of the shelf, both bar styles, the

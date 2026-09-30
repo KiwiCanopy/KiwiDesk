@@ -181,12 +181,6 @@ public struct AppBarLook: Sendable, Equatable {
         return min(max(content * KiwiShelf.autoTitleShare, 9), 28)
     }
 
-    /// Content folded for the bar's edge: a vertical bar draws
-    /// icons only (`Content.rendered(horizontal:)`).
-    public var renderedContent: AppBarStyle.Content {
-        bar.content.rendered(horizontal: bar.edge.isHorizontal)
-    }
-
     /// The shelf's corner radius for a thickness.
     public func resolvedCornerRadius(
         forThickness thickness: CGFloat

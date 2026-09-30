@@ -34,6 +34,10 @@ struct ConfigMigrationShelfRoutingTests {
             // #1731's edge step, by path; its textual edit takes
             // the global groups alone, a layout's App Bar skipped.
             "Config/ConfigMigration+BarEdges.swift",
+            // #1528's content drop: its walk scopes to `app_bar`
+            // parents; its textual edit is kept only where it
+            // agrees with that walk.
+            "Config/ConfigMigration+AppBarContent.swift",
             "Appearance/ColorPalette+Apply.swift",
             "Appearance/ColorPaletteKeys.swift",
             "Appearance/ShelfLook+Apply.swift",

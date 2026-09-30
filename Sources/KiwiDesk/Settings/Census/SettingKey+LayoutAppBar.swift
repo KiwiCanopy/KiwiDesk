@@ -9,14 +9,12 @@ enum LayoutAppBarKey: String, CaseIterable, Hashable {
     case monocleAppBarEnabled = "settings.monocle.appBar.enabled"
     case monocleAppBarActiveIndicator =
         "settings.monocle.appBar.activeIndicator"
-    case monocleAppBarContent = "settings.monocle.appBar.content"
     case monocleAppBarTitleCap = "settings.monocle.appBar.titleCap"
     case monocleAppBarGroupAdjacentWindows =
         "settings.monocle.appBar.groupAdjacentWindows"
     case scrollingAppBarEnabled = "settings.scrolling.appBar.enabled"
     case scrollingAppBarActiveIndicator =
         "settings.scrolling.appBar.activeIndicator"
-    case scrollingAppBarContent = "settings.scrolling.appBar.content"
     case scrollingAppBarTitleCap = "settings.scrolling.appBar.titleCap"
     case scrollingAppBarGroupAdjacentWindows =
         "settings.scrolling.appBar.groupAdjacentWindows"
@@ -29,9 +27,9 @@ extension LayoutAppBarKey {
             // Drawn in the KiwiShelf card's Show group, which has
             // no container gate.
             return .row(.bars, .kiwishelf, .atRest)
-        case .monocleAppBarActiveIndicator, .monocleAppBarContent,
+        case .monocleAppBarActiveIndicator,
             .monocleAppBarTitleCap, .monocleAppBarGroupAdjacentWindows,
-            .scrollingAppBarActiveIndicator, .scrollingAppBarContent,
+            .scrollingAppBarActiveIndicator,
             .scrollingAppBarTitleCap,
             .scrollingAppBarGroupAdjacentWindows:
             return .luaOnly
@@ -46,9 +44,9 @@ extension LayoutAppBarKey {
             return .text("kiwishelf.show.monocle")
         case .scrollingAppBarEnabled:
             return .text("kiwishelf.show.scrolling")
-        case .monocleAppBarActiveIndicator, .monocleAppBarContent,
+        case .monocleAppBarActiveIndicator,
             .monocleAppBarTitleCap, .monocleAppBarGroupAdjacentWindows,
-            .scrollingAppBarActiveIndicator, .scrollingAppBarContent,
+            .scrollingAppBarActiveIndicator,
             .scrollingAppBarTitleCap,
             .scrollingAppBarGroupAdjacentWindows:
             return .none

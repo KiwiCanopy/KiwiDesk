@@ -206,16 +206,10 @@ final class AppBarItemView: NSView {
         self.style = style
         isHovered = false
         iconView.image = icon
-        let content = style.content.rendered(
-            horizontal: horizontal
-        )
-        let showsGlyph =
-            glyph?.isEmpty == false && content != .title
+        let showsGlyph = glyph?.isEmpty == false
         glyphLabel.isHidden = !showsGlyph
         glyphLabel.stringValue = glyph ?? ""
-        iconView.isHidden =
-            showsGlyph || content == .title
-            || icon == nil
+        iconView.isHidden = showsGlyph || icon == nil
         badge.isHidden = count < 2
         badge.stringValue = "\(count)"
         badge.textColor =

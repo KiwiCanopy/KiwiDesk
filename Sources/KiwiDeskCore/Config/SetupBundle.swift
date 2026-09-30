@@ -48,7 +48,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// on `[Profile]` alone.
     /// 18 = a profile states which look it wears, one from before
     /// stamped `own` (#1752), on `[Profile]` alone.
-    public static let currentFormat = 18
+    /// 19 = `app_bar.content` retired (#1528), on `[Profile]`
+    /// alone.
+    public static let currentFormat = 19
 
     public let format: Int
 

@@ -23,23 +23,23 @@ struct AppBarOverrideTests {
     @Test("Unset fields inherit the global style")
     func inheritance() {
         var global = AppBarStyle()
-        global.content = .icon
+        global.activeIndicator = .outline
         global.titleCap = 7
         let resolved = LayoutAppBar().resolved(with: global)
-        #expect(resolved.content == .icon)
+        #expect(resolved.activeIndicator == .outline)
         #expect(resolved.titleCap == 7)
     }
 
     @Test("Set fields override just themselves")
     func overrideOne() {
         var global = AppBarStyle()
-        global.content = .icon
+        global.activeIndicator = .outline
         global.titleCap = 7
         var bar = LayoutAppBar()
-        bar.content = .title
+        bar.activeIndicator = .edgeMark
         let resolved = bar.resolved(with: global)
         // The one set field wins; the rest still inherit.
-        #expect(resolved.content == .title)
+        #expect(resolved.activeIndicator == .edgeMark)
         #expect(resolved.titleCap == 7)
     }
 
@@ -187,12 +187,13 @@ struct AppBarCommandTests {
         )
         #expect(
             core.execute(
-                "scroll.set_app_bar_content",
-                args: [.string("icon")]
+                "scroll.set_app_bar_active_indicator",
+                args: [.string("outline")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.scrolling.appBar.content == .icon
+            core.tiler.settings.scrolling.appBar.activeIndicator
+                == .outline
         )
         // Untouched fields stay nil (inherit the global look).
         #expect(

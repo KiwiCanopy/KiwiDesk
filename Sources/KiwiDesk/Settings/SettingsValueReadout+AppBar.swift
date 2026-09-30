@@ -19,13 +19,6 @@ extension SettingsValueReadout {
                 n.activeIndicator,
                 AppBarOptions.activeIndicator
             )
-        case .appBarContent:
-            return appBarChoiceRow(
-                census,
-                o.content,
-                n.content,
-                AppBarOptions.content
-            )
         case .appBarGroupAdjacentWindows:
             return appBarOnOffRow(
                 census,

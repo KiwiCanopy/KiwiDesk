@@ -87,7 +87,6 @@ struct ItemCornerMaskTests {
             var look = AppBarLook()
             look.shelf = Fixture.shelf(100, boxed: boxed)
             look.edge = .top
-            look.content = .iconAndTitle
             let manager = AppBarManager()
             manager.sync([
                 AppBarManager.Bar(

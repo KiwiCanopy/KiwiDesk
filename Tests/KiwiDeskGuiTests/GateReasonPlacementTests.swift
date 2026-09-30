@@ -75,10 +75,6 @@ struct GateReasonPlacementTests {
                 // The same shape since #1360: Fit layout gaps
                 // sits on the Gaps card and reads the focus
                 // border switch on the Focus Border card.
-                // Since #1517 the App Bar's Content row is inert on
-                // a vertical edge, and the edge is the KiwiShelf
-                // card's — another card, so the reason is drawn.
-                .appBar(.appBarContent),
                 .borders(.borderFitGaps),
                 .borders(.borderFitGapsExtraSpacing),
             ]
