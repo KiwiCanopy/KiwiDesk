@@ -102,6 +102,15 @@ public struct APIArgument: Sendable, Equatable {
         APIArgument(name, .desktop, optional: optional)
     }
 
+    /// A window id as `get_state` reports it (#1518): the one
+    /// argument a window-explicit verb names its target by.
+    public static func window(
+        _ name: String,
+        optional: Bool = false
+    ) -> APIArgument {
+        APIArgument(name, .window, optional: optional)
+    }
+
     /// Lua function callback argument (Lua-only).
     public static func callback(
         _ name: String,
@@ -142,6 +151,7 @@ public enum APIArgumentKind: Sendable, Equatable {
     case color
     case space
     case desktop
+    case window
     case callback
     case table
     case choice(APIChoice)
@@ -156,6 +166,7 @@ public enum APIArgumentKind: Sendable, Equatable {
         case .color: return "color"
         case .space: return "space"
         case .desktop: return "desktop"
+        case .window: return "window"
         case .callback: return "function"
         case .table: return "table"
         case .choice: return "choice"

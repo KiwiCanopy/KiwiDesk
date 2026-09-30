@@ -179,6 +179,9 @@ extension KiwiCore {
         )
     }
 
+    /// Finder's bundle id, lower-cased as `ManagedWindow` stores it.
+    static let finderBundleID = "com.apple.finder"
+
     /// Hands key focus to the desktop when a move empties the
     /// focused display's space (#446). macOS exposes no "focus the
     /// empty desktop" API, so we activate Finder (the desktop's
@@ -201,7 +204,7 @@ extension KiwiCore {
     func yieldFocusToDesktop() {
         guard
             let finder = NSRunningApplication.runningApplications(
-                withBundleIdentifier: "com.apple.finder"
+                withBundleIdentifier: Self.finderBundleID
             ).first
         else { return }
         let pid = finder.processIdentifier

@@ -937,6 +937,15 @@ screen's Spaces are held, not forwarded*. The obligations:
   arm only places Spaces and returns nothing, by ruling. A new
   door owes the call. The composed door and the no-apply arms
   have no clause.
+- **A switching apply's #1230 restore leaves every held Space's
+  members (#1728).** What a held Space holds — a member, else a
+  window remembered there that will come back — is answered once,
+  by `heldSpace(holding:)` in `KiwiCore+HeldSpaceReads.swift`,
+  which the restore and the retire both ask
+  (`HeldSpaceRestoreTests` ▸ `holdKeepsRememberedWindows`,
+  `HeldSpaceRestoreTests` ▸ `heldWindowsGoHomeTogether`). A new
+  path a switching apply runs that moves windows across Spaces
+  owes the same skip through that predicate, never a copy of it.
 - **Retire at the head of `retile()`.** `retireEmptiedHeldSpaces`
   runs there because a membership change retiles; a path that
   empties a held Space without a retile owes the call

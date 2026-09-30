@@ -12,7 +12,8 @@ extension KiwiCore {
     /// (`start()` installs it; unit tests leave it `nil`), so it
     /// never touches config setters, `focus_space`, spawns, profile
     /// ops, reads, or explicit-id App Bar actions — only the
-    /// commands `FocusedCommandPolicy` classifies as focused.
+    /// commands `FocusedCommandPolicy` classifies as focused, and
+    /// of those only a call that names no window (#1518).
     ///
     /// Foreground ownership requires ALL of:
     /// 1. `focusedWindow` (the focus ANCHOR, `focusedWindowID`, so a
@@ -27,10 +28,11 @@ extension KiwiCore {
     /// pid actually matches, so an activation race rejects a
     /// shortcut rather than mutating a hidden window.
     func focusedCommandDenial(
-        for command: String
+        for command: String,
+        _ args: [JSONValue]
     ) -> CommandResponse? {
         guard let frontmostPID = frontmostPIDProvider,
-            FocusedCommandPolicy.isFocused(command)
+            impliesFocus(command, args)
         else { return nil }
         // Sampled ONCE, before the guard: the log below must
         // print the pid that actually denied, not a re-sample

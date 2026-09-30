@@ -28,8 +28,7 @@ struct SpaceBarRunMetricsTests {
             viewport: 200,
             horizontal: true,
             alignment: .start,
-            pad: 4,
-            scrollOffset: 0
+            pad: 4
         )
         #expect(m.itemFrames.map(\.minX) == [4, 28, 52])
         #expect(m.itemFrames.allSatisfy { $0.width == 20 })
@@ -49,8 +48,7 @@ struct SpaceBarRunMetricsTests {
             viewport: 200,
             horizontal: true,
             alignment: .center,
-            pad: 4,
-            scrollOffset: 0
+            pad: 4
         )
         #expect(m.itemFrames.map(\.minX) == [66, 90, 114])
     }
@@ -71,8 +69,7 @@ struct SpaceBarRunMetricsTests {
             viewport: 200,
             horizontal: true,
             alignment: .end,
-            pad: 4,
-            scrollOffset: 0
+            pad: 4
         )
         #expect(m.itemFrames.first?.minX == 112)
         // The cursor advances a gap after every item (including
@@ -95,8 +92,7 @@ struct SpaceBarRunMetricsTests {
             viewport: 200,
             horizontal: false,
             alignment: .start,
-            pad: 4,
-            scrollOffset: 0
+            pad: 4
         )
         #expect(m.itemFrames.map(\.minY) == [4, 28, 52])
         #expect(m.itemFrames.allSatisfy { $0.minX == 0 })
@@ -104,10 +100,10 @@ struct SpaceBarRunMetricsTests {
         #expect(m.itemFrames.map(\.height) == [20, 20, 20])
     }
 
-    @Test("An overflowing run starts at the scroll offset")
+    @Test("An overflowing run starts at the run's origin")
     func overflowStartsAtOffset() {
         // total 404 > viewport 180: alignment collapses, the run
-        // begins at -scrollOffset regardless of alignment.
+        // begins at zero and the run's frame carries the scroll.
         let m = SpaceBarOverlay.runMetrics(
             lengths: [200, 200],
             gap: 4,
@@ -116,9 +112,8 @@ struct SpaceBarRunMetricsTests {
             viewport: 180,
             horizontal: true,
             alignment: .center,
-            pad: 4,
-            scrollOffset: 50
+            pad: 4
         )
-        #expect(m.itemFrames.map(\.minX) == [-50, 154])
+        #expect(m.itemFrames.map(\.minX) == [0, 204])
     }
 }

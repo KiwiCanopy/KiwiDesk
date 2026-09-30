@@ -59,17 +59,15 @@ extension AppBarOverlay {
 
     /// A wheel or trackpad scroll (`ShelfScrollInput`): taken
     /// while entries are hidden, fluid rather than slot-aligned,
-    /// and a manual scroll only where the offset moved.
+    /// and a manual scroll only where the offset moved — a
+    /// trackpad directly, a wheel notch as one glide.
     func scroll(_ delta: ShelfScrollInput.Delta) -> Bool {
         guard isVisible, let m = lastMetrics, m.total > m.viewport
         else { return false }
-        let before = scrollOffset
-        scrollOffset += ShelfScrollInput.travel(
-            delta,
-            itemStep: m.slot + m.gap
-        )
-        render(followingFocus: false)
-        if scrollOffset != before { follow.scrolledByHand() }
+        let travel = ShelfScrollInput.travel(delta, itemStep: m.slot + m.gap)
+        if moveRun(to: scrollOffset + travel, animated: !delta.precise) {
+            follow.scrolledByHand()
+        }
         return true
     }
 
@@ -81,7 +79,7 @@ extension AppBarOverlay {
         fade: CGFloat
     ) {
         follow.scrolledByHand()
-        scrollOffset = ShelfOverflow.pageTarget(
+        let target = ShelfOverflow.pageTarget(
             from: scrollOffset,
             lengths: lengths,
             gap: m.gap,
@@ -89,7 +87,57 @@ extension AppBarOverlay {
             fade: fade,
             forward: forward
         )
-        render(followingFocus: false)
+        moveRun(to: target, animated: true)
+    }
+
+    /// The section's one scroll door (bars.md): moves `itemRun` to
+    /// `target`, clamped, and re-reads what the last render derived
+    /// from the offset — fades, counts, the drawn content, hover —
+    /// never re-rendering; the shelf re-lays only where that moved
+    /// the divider.
+    /// The plate needs no re-read: an overflowing run's plate spans
+    /// its strip at every offset (`BarPlate.frame`). Returns
+    /// whether the offset moved.
+    @discardableResult
+    private func moveRun(to target: CGFloat, animated: Bool) -> Bool {
+        guard let m = lastMetrics, let state = lastShown,
+            let style = drawnStyle
+        else { return false }
+        let offset = Self.scrollOffset(
+            current: target,
+            activeIndex: nil,
+            slot: m.slot,
+            gap: m.gap,
+            count: itemViews.count,
+            axis: m.viewport,
+            margin: 0
+        )
+        guard offset != scrollOffset else { return false }
+        scrollOffset = offset
+        let runFrame = ShelfOverflow.runFrame(
+            in: itemContainer.bounds,
+            offset: offset,
+            horizontal: m.horizontal
+        )
+        BarMotion.runLayout {
+            BarMotion.setFrame(itemRun, to: runFrame, animated: animated)
+        }
+        layoutOverflow(strip: state.strip, m: m, style: style)
+        let before = contentFrame
+        contentFrame = runContent.offsetBy(
+            dx: runFrame.minX,
+            dy: runFrame.minY
+        )
+        let length = m.horizontal ? state.strip.width : state.strip.height
+        let moved = ShelfOverlay.dividerMoves(
+            from: before,
+            to: contentFrame,
+            along: length,
+            horizontal: m.horizontal
+        )
+        if moved { onRendered() }
+        syncHoverToPointer()
+        return true
     }
 
     /// Re-reads every hover this section draws from the resting
