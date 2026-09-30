@@ -101,8 +101,10 @@ public struct StateCoordinator: Sendable {
     /// Minimized windows in order (#40, #673; `MinimizeOrderTests`).
     var minimizeOrder: [MinimizedWindow] = []
 
-    /// Explicit `make_floating` / `make_tiled` verdicts per window.
-    var manualFloatOverrides: [WindowID: Bool] = [:]
+    /// Windows the user floated (#1810): a Float records one, a
+    /// Tile clears it and hands the window back to detection.
+    /// There is no manual tile.
+    var userFloated: Set<WindowID> = []
 
     /// Per-window `override_sticky_reach` verdicts (#1145): absent =
     /// the global `sticky.desktop_reach` toggle rules. Session
@@ -123,11 +125,11 @@ public struct StateCoordinator: Sendable {
         let frame: CGRect
     }
 
-    /// Manual float intent remembered across close/reopen (#160).
+    /// User floats remembered across close/reopen (#160, #1810).
     /// Keyed by app + title, not `WindowID`: a reopened window
     /// gets a fresh id, and old ids can be recycled onto unrelated
     /// windows. Last close wins, first reopen consumes.
-    var rememberedFloating: [WindowIdentity: Bool] = [:]
+    var rememberedFloating: Set<WindowIdentity> = []
 
     /// Sticky intent remembered across window close/reopen (#414, #445).
     var rememberedSticky: [WindowIdentity: StickyScope] = [:]
@@ -194,10 +196,8 @@ public struct StateCoordinator: Sendable {
         ) {
             minimizeOrder[index].id = new
         }
-        if let intent = manualFloatOverrides.removeValue(
-            forKey: old
-        ) {
-            manualFloatOverrides[new] = intent
+        if userFloated.remove(old) != nil {
+            userFloated.insert(new)
         }
         if let reach = stickyReachOverrides.removeValue(
             forKey: old
@@ -288,8 +288,14 @@ public struct StateCoordinator: Sendable {
             }
 
         case .windowFloatChanged(let id, let floating):
-            // Manual overrides beat AX detection on title flips (#160).
-            guard manualFloatOverrides[id] == nil else { break }
+            // A user float beats a TILE verdict (#160); where
+            // detection floats the window, no record stands (#1810),
+            // or removing the rule later would not tile it.
+            if floating {
+                userFloated.remove(id)
+            } else if userFloated.contains(id) {
+                break
+            }
             // Clears stale overlay flag on return to tiled (#300).
             windows.setFloating(id, floating)
 

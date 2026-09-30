@@ -104,15 +104,19 @@ extension KiwiCore {
 
     /// The label follows the window's own float setting, the one
     /// `toggle_floating` flips; a group's submenu ticks each window
-    /// that floats.
+    /// that floats. A Tile that detection would refuse is greyed,
+    /// its reason the subtitle — the pill's own sentence (#1810).
     private func floatRow(_ windows: [WindowID]) -> BarMenuRow {
         guard windows.count > 1 else {
             let id = windows[0]
             let floats = state.windows[id]?.isFloating == true
+            let refusal = floats ? tileRefusal(of: id) : nil
             return .action(
                 floats
                     ? L("bar.menu.tile_window", "Tile Window")
-                    : L("bar.menu.float_window", "Float Window")
+                    : L("bar.menu.float_window", "Float Window"),
+                enabled: refusal == nil,
+                subtitle: refusal?.sentence
             ) { [weak self] in
                 _ = self?.execute(
                     floats ? "make_tiled" : "make_floating",
@@ -121,9 +125,13 @@ extension KiwiCore {
             }
         }
         let rows = windows.map { id in
-            BarMenuRow.action(
+            let floats = state.windows[id]?.isFloating == true
+            let refusal = floats ? tileRefusal(of: id) : nil
+            return BarMenuRow.action(
                 windowTitle(id),
-                checked: state.windows[id]?.isFloating == true
+                enabled: refusal == nil,
+                checked: floats,
+                subtitle: refusal?.sentence
             ) { [weak self] in
                 _ = self?.execute(
                     "toggle_floating",
@@ -133,6 +141,7 @@ extension KiwiCore {
         }
         return .submenu(
             L("bar.menu.float_window", "Float Window"),
+            enabled: rows.contains { $0.enabled },
             rows
         )
     }

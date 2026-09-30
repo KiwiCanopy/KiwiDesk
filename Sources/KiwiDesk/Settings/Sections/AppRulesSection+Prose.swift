@@ -79,8 +79,8 @@ extension AppRulesSection {
             + L(
                 "app_rules.float.help.open_windows",
                 "Applies to open windows as soon as you save. A "
-                    + "window you floated or tiled yourself keeps "
-                    + "that choice."
+                    + "window you floated yourself stays floating "
+                    + "until you tile it."
             )
         if offersTitles {
             text +=

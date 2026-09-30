@@ -2,17 +2,17 @@ import AppKit
 import CoreGraphics
 
 extension KiwiCore {
-    /// Flashes one refusal pill (#933). The glyph and the text
-    /// both come from the refusal's own case (#1260/#1258), so
-    /// the two channels cannot disagree and neither can be
-    /// chosen at a call site.
+    /// Flashes one refusal pill (#933). Every caller hands it
+    /// the glyph and the text of ONE renderer — a resize
+    /// refusal's case (#1260/#1258) or a Tile refusal's reason
+    /// (#1810) — never a literal of its own.
     @discardableResult
     private func flashSizeLimitPill(
         _ window: WindowID,
-        _ refusal: ResizeRefusal,
+        symbol: String,
         text: String
     ) -> Bool {
-        flashRefusalPill(window, text: text, symbol: refusal.pillSymbol)
+        flashRefusalPill(window, text: text, symbol: symbol)
     }
 
     /// The frame a refusal pill draws on: the one the window was
@@ -106,7 +106,7 @@ extension KiwiCore {
         soundIfDrawn(
             flashSizeLimitPill(
                 refusal.window,
-                refusal,
+                symbol: refusal.pillSymbol,
                 text: refusal.pillText
             )
         )
@@ -114,10 +114,24 @@ extension KiwiCore {
         if let second = refusal.secondPill {
             flashSizeLimitPill(
                 second.window,
-                refusal,
+                symbol: refusal.pillSymbol,
                 text: second.text
             )
         }
+    }
+
+    /// A Tile refused because detection floats the window
+    /// (#1810): the pill names the reason, the sentence the bar
+    /// menu's greyed row carries too.
+    func cueTileRefusal(_ window: WindowID, _ reason: AutoFloatReason) {
+        borders.onTileRefusal(window, reason)
+        soundIfDrawn(
+            flashSizeLimitPill(
+                window,
+                symbol: reason.pillSymbol,
+                text: reason.sentence
+            )
+        )
     }
 
     /// The zone has no parameter on the asked axis (#1255).

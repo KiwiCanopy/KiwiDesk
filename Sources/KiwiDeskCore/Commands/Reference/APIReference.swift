@@ -28,7 +28,6 @@ public enum APIReference {
             ("delete_space", "delete_space"),
             ("make_floating", "make_floating"),
             ("make_tiled", "make_tiled"),
-            ("make_auto", "make_auto"),
             ("toggle_floating", "toggle_floating"),
             ("new_window", "new_window"),
             ("close_window", "close_window"),

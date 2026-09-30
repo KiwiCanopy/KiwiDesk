@@ -56,8 +56,8 @@
 /// DROP onto another display (#1686, `relocateDroppedFloat`)
 /// re-files every float, flag or floating-mode, and reads the
 /// flag only to decide whether one is owed: a floating-mode
-/// member landing on a TILED Space takes the float verb's manual
-/// override, or the layout would tile it; onto a floating Space
+/// member landing on a TILED Space takes the float verb's user
+/// float, or the layout would tile it; onto a floating Space
 /// it takes none (owner rulings 2026-09-26,
 /// `FloatDropRefileTests`). `toggle_floating` is ruled to STAY on
 /// the flag (#1697): in a floating-mode Space every member is an
@@ -65,7 +65,10 @@
 /// state would make every press write the same no-op, while the
 /// flag is the window's own intent that travels with it — whether
 /// it keeps floating once it leaves the Space or the Space leaves
-/// floating mode (`ToggleFloatingFlagTests`). The bar menus'
+/// floating mode (`ToggleFloatingFlagTests`). A Tile — the
+/// toggle's included — refuses on DETECTION's verdict alone
+/// (#1810, `TileReturnsToRulesTests`): a floating-mode member is
+/// no refusal, the flag being what the Tile writes. The bar menus'
 /// Float/Tile row and its submenu ticks (#1518) stay on the flag
 /// for the same reason: they label what their verbs write. Every
 /// other reader

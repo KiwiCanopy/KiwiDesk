@@ -91,10 +91,10 @@ public final class EventLoop {
     /// it costs more than it buys; only the pid is cleared so a
     /// re-attach re-applies the warm-up.
     var manualAXApplied: Set<pid_t> = []
-    /// Last float-detection verdict per tracked window, so
-    /// reconcile can re-check and emit only actual changes
-    /// (manual make_floating overrides stay untouched).
-    var detectedFloating: [WindowID: Bool] = [:]
+    /// Last float-detection verdict per tracked window, with its
+    /// reason (#1810), so reconcile can re-check and emit only
+    /// actual changes.
+    var detectedFloating: [WindowID: FloatVerdict] = [:]
     /// Last native-fullscreen verdict per tracked window, so the
     /// reconcile recheck emits `.windowFullscreenChanged` only on
     /// an actual transition (mirrors `detectedFloating`).

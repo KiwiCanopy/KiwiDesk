@@ -136,6 +136,32 @@ struct BarWindowMenuRowsTests {
         #expect(core.state.windows[WindowID(1)]?.isFloating == false)
     }
 
+    /// Where detection floats the window, a Tile would refuse: the
+    /// row is greyed, never hidden, and carries the refusal pill's
+    /// own sentence (#1810).
+    @Test("a Tile detection would refuse is greyed with its reason")
+    func tileGreyedWithReason() {
+        let core = seededCore()
+        core.eventLoop.detectedFloating[WindowID(1)] = .floats(.rule)
+        core.state.apply(
+            .windowFloatChanged(WindowID(1), isFloating: true)
+        )
+        let tile = core.barMenuRows(.appItem([WindowID(1)]))[1]
+        #expect(tile.title == "Tile Window")
+        #expect(!tile.enabled)
+        #expect(tile.subtitle == AutoFloatReason.rule.sentence)
+        #expect(tile.subtitle == "An App Rule floats this window")
+        core.eventLoop.detectedFloating[WindowID(3)] = .floats(.panel)
+        core.state.apply(
+            .windowFloatChanged(WindowID(3), isFloating: true)
+        )
+        let rows = core.barMenuRows(.glyph([WindowID(2), WindowID(3)]))
+        let float = submenu(rows[2])
+        #expect(float.map(\.enabled) == [true, false])
+        #expect(float.map(\.checked) == [false, true])
+        #expect(float[1].subtitle == AutoFloatReason.panel.sentence)
+    }
+
     /// A glyph standing for several windows names each one: the
     /// move and float rows open submenus of titles, and a pick acts
     /// on that window alone.

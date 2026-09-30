@@ -1557,6 +1557,17 @@ editing here:
   `ResizeRefusalAppBoundTests` builds the fixtures where the two
   terms disagree; the config-floor suites stamp the flag their
   fixtures earn.
+- **A window is tiled or floating, and detection's verdict is
+  read through ONE door (#1810).** The float verbs and the bar
+  menu's Float/Tile row ask `KiwiCore.tileRefusal(of:)`, never
+  `detectionVerdict(for:)` or the detection beside it, and the
+  verdict is composed only in `EventLoop.autoFloatVerdict` —
+  `TileRefusalSeamTests` holds all three by census, so a new
+  reader names itself there. A user-float record never stands on
+  a window detection floats, from any door (`userFloated`'s
+  fold, the reopen memory, the in-place restore;
+  `TileReturnsToRulesTests`); the argument is
+  `docs/design-decisions.md`'s.
 - **A float safety NET asks `EffectiveFloat.applies`, never the
   flag alone** (#1178). `FloatingLayout` assigns no frames, so a
   `.floating` space's members are unmanaged in exactly the way a

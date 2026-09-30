@@ -49,7 +49,7 @@ struct SnapshotStoreCensusTests {
             (.always, "the track partition (#128)"),
         "state.workspaces.spaces[].handedBreaks":
             (.behind, "a break's provenance; draws nothing (#1387)"),
-        "state.manualFloatOverrides":
+        "state.userFloated":
             (.inPlace, "a float set by hand, which the scan cannot see"),
         "state.stickyReachOverrides":
             (.inPlace, "a reach pin set by hand"),
@@ -184,7 +184,7 @@ struct SnapshotStoreCensusTests {
         // Non-vacuous: the stores the ruling names were reached.
         for named in [
             "state.floatFrames", "tiler.boundLearner.lastAsks",
-            "state.manualFloatOverrides", "tiler.monocleShownMembers",
+            "state.userFloated", "tiler.monocleShownMembers",
             "state.heldSpaces",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")

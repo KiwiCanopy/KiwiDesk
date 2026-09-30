@@ -88,6 +88,8 @@ public final class BorderManager {
 
     /// Test observation seam for resize refusal cues (#933).
     var onResizeRefusal: (ResizeRefusal) -> Void = { _ in }
+    /// Test observation seam for Tile refusal cues (#1810).
+    var onTileRefusal: (WindowID, AutoFloatReason) -> Void = { _, _ in }
 
     /// Observers for key window transitions (#933).
     var ownKeyWindowObservers: [NSObjectProtocol] = []

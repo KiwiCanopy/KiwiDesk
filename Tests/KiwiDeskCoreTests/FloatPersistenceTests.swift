@@ -19,7 +19,7 @@ private func makeWindow(
     )
 }
 
-/// Manual float intent surviving close/reopen cycles (#160).
+/// A user float surviving close/reopen cycles (#160, #1810).
 @Suite("Float persistence")
 struct FloatPersistenceTests {
     @Test("make_floating survives close and reopen")
@@ -36,12 +36,13 @@ struct FloatPersistenceTests {
         #expect(state.windows[WindowID(2)]?.isFloating == true)
     }
 
-    @Test("make_tiled survives close and reopen")
-    func manualTileSurvivesReopen() {
+    /// A Tile leaves nothing to remember (#1810): the reopened
+    /// window takes detection's verdict, floating included.
+    @Test("make_tiled leaves nothing for a reopen")
+    func tileRemembersNothing() {
         var state = StateCoordinator()
-        state.apply(
-            .windowCreated(makeWindow(1, floating: true))
-        )
+        state.apply(.windowCreated(makeWindow(1)))
+        state.setFloating(WindowID(1), true)
         state.setFloating(WindowID(1), false)
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
@@ -49,7 +50,8 @@ struct FloatPersistenceTests {
         state.apply(
             .windowCreated(makeWindow(2, floating: true))
         )
-        #expect(state.windows[WindowID(2)]?.isFloating == false)
+        #expect(state.windows[WindowID(2)]?.isFloating == true)
+        #expect(state.userFloated.isEmpty)
     }
 
     @Test("A drifted title keeps the detection verdict")
@@ -88,7 +90,7 @@ struct FloatPersistenceTests {
         #expect(state.windows[WindowID(2)]?.isFloating == true)
     }
 
-    @Test("A manual override outlives detection verdict flips")
+    @Test("A user float outlives detection verdict flips")
     func overrideBeatsDetectionFlips() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
@@ -148,7 +150,7 @@ struct FloatPersistenceTests {
         var overlay = makeWindow(1, floating: true)
         overlay.isTransientOverlay = true
         state.apply(.windowCreated(overlay))
-        // The manual make_tiled path routes through the same
+        // The make_tiled path routes through the same
         // `WindowManager.setFloating`, so the invariant holds there
         // too, not just on the detection path.
         state.setFloating(WindowID(1), false)
@@ -241,17 +243,17 @@ struct FloatPersistenceTests {
         #expect(state.windows[WindowID(9)]?.isFloating == false)
     }
 
-    @Test("Clearing the override returns detection control")
-    func clearRestoresDetection() {
+    @Test("A Tile returns detection control")
+    func tileRestoresDetection() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
         state.setFloating(WindowID(1), true)
-        state.clearFloatOverride(WindowID(1))
-        // Detection verdicts apply again ...
+        state.setFloating(WindowID(1), false)
+        // Detection verdicts apply again (#1810) ...
         state.apply(
-            .windowFloatChanged(WindowID(1), isFloating: false)
+            .windowFloatChanged(WindowID(1), isFloating: true)
         )
-        #expect(state.windows[WindowID(1)]?.isFloating == false)
+        #expect(state.windows[WindowID(1)]?.isFloating == true)
         // ... and reopen restores nothing (#164).
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
