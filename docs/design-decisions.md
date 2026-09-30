@@ -9269,7 +9269,7 @@ base, never makes one — so a verb one profile binds on its own
 chord leaves the others without its digit, the lesser harm. The
 rule binds every writer: a Lua import, the Lua-to-Settings
 adoption and a Space rename over leftover rows owe the same check
-the top-up makes. A `custom` row is drawn as a row of its
+the top-up makes (#1807). A `custom` row is drawn as a row of its
 own, so the migration leaves it alone. **Lua stays uncapped**,
 because layers are modal — activating one deactivates the base —
 so hjkl beside the arrows can only live in one layer, and two

@@ -102,8 +102,8 @@ same verb" is `SpaceLuaArg.target`, the verb plus the Space, never
 the raw Lua string. The digit top-up is held to it by
 `DigitTopUpActionTests` and `DigitTopUpOverrideTests`; the Lua
 import, the adoption into Settings and `GuiConfig.renameSpace` are
-held by no guard, so a change to any of them, or a new writer,
-owes the check and its test. Lua itself is uncapped — the argument
+held by no guard (#1807), so a change to any of them, or a new
+writer, owes the check and its test. Lua itself is uncapped — the argument
 is `docs/design-decisions.md` ▸ *Nothing KiwiDesk writes may give
 an action a second chord in a layer*.
 
