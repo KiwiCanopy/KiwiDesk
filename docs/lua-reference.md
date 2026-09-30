@@ -209,6 +209,16 @@ KiwiDesk.move_to_space_and_follow("mail")
 KiwiDesk.move_to_space_and_follow(3)
 ```
 
+:::unreleased
+`move_to_space` and `move_to_space_and_follow` take an optional
+window id from [`get_state`](#get_state) after the space, and
+then move that window rather than the focused one:
+`KiwiDesk.move_to_space("mail", 4711)`. An id no managed window
+carries is refused. A window moved into the current Space takes
+focus there; one moved between other Spaces leaves the current
+Space's focus where it is.
+:::
+
 ### focus_desktop
 
 **Expects:** a macOS Desktop number — the number Mission Control
@@ -3734,6 +3744,15 @@ identifier (a rare unbundled helper process) cannot be targeted
 by a rule.
 
 ## Making Windows Floating or Tiled
+
+:::unreleased
+`make_floating`, `make_tiled` and `toggle_floating` take an
+optional window id from [`get_state`](#get_state), and then act on
+that window rather than the focused one:
+`KiwiDesk.make_floating(4711)`. An id no managed window carries is
+refused, and a window on a Space no screen shows takes its floating
+frame when that Space is next shown.
+:::
 
 ### make_floating
 
