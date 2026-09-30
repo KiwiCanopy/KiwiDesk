@@ -11790,7 +11790,8 @@ shows the tint behind it bare, black for a moment on the shipped
 look, and a glass animating its width re-lays its content every
 frame (both device, 2026-10-01). A box fading as one unit with
 its tint needs the pair composited together, which the box
-hosting does not do yet. A window closing within a Space still
+hosting does not do yet
+([#1842](https://github.com/KiwiCanopy/KiwiDesk/issues/1842)). A window closing within a Space still
 leaves at once, and a group still folds its members. The
 curve stays decelerating — the motion answers the user's switch,
 and a curve that eases in reads as lag — while its length is
