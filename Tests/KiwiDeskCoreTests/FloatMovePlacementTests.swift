@@ -120,6 +120,16 @@ struct FloatMovePlacementTests {
     @Test("a window already floating keeps its own frame")
     func floatKeepsItsFrame() {
         let core = setup()
+        // Both Spaces on the screen the slot sits on, which the
+        // float re-anchor (#444) reads as the source; left to the
+        // `NSScreen.main` fallback, a second screen reads the
+        // move as a display crossing.
+        if let host = TilingEngine.screen(containing: slot),
+            let display = host.kiwiDisplay
+        {
+            core.state.apply(.displaysChanged([display]))
+            core.resolveSpaceDisplays(mainID: display.id)
+        }
         core.state.setFloating(WindowID(2), true)
         #expect(
             core.execute("move_to_space", args: [.string("2")]).isSuccess

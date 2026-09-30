@@ -15,9 +15,12 @@ import Testing
 extension FullscreenStandDownTests {
     private static let show = WindowID(1)
 
-    /// The main screen's whole frame in AX coordinates.
+    /// The primary screen's whole frame in AX coordinates — the
+    /// one the fixture's editor frame sits on. Never
+    /// `NSScreen.main`, which follows keyboard focus to another
+    /// screen and leaves the editor off the one under test.
     private var screenFrame: CGRect? {
-        NSScreen.main.map {
+        NSScreen.screens.first.map {
             GeometryUtils.flip(
                 $0.frame,
                 primaryHeight: GeometryUtils.primaryHeight
@@ -29,7 +32,7 @@ extension FullscreenStandDownTests {
     /// that holds one flag-floating window at `frame` — the
     /// device shape. Nil where the host has no screen.
     private func makeShelfCore(frame: CGRect) -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay,
             let bounds = screenFrame
         else { return nil }
