@@ -13347,6 +13347,22 @@ to adopt, while a held Space belongs to an arrangement that is
 coming back. The badge and its "not saved" sentence stand in for a
 promote verb, which can come later if it is asked for.
 
+:::unreleased
+**The hold outranks the incoming profile's record**
+([#1728](https://github.com/KiwiCanopy/KiwiDesk/issues/1728)).
+The switch that holds a Space also runs #1230's restore for the
+profile coming in, and that profile has usually seen the gone
+screen's windows before, in Spaces of its own. Letting the restore
+move them would empty the held Space the same change just made,
+and it would retire — the write side of this is the paragraph
+above, which keeps a held Space out of that record: after a few dock cycles most windows are
+remembered somewhere, so the hold would keep only windows opened
+since. The restore therefore leaves a window in any held Space where
+it is, live or away and remembered there, and what was on one
+screen stays together and goes home together: the undock side of
+the rule, below, that everything inside a held Space goes back.
+:::
+
 **It goes home only into the arrangement it left.** On reconnect a
 held Space returns when its screen is back, the arrangement
 applying is the one it left, and that arrangement declares its

@@ -346,6 +346,14 @@ exports nothing.
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
 :::unreleased
+`move_to_space`, `move_to_space_and_follow`, `make_floating`,
+`make_tiled` and `toggle_floating` take an optional last
+argument, a window `id` from `get_state`: they then act on that
+window rather than the focused one, and refuse an id no managed
+window carries (`kiwidesk make_floating 4711`).
+:::
+
+:::unreleased
 The `scroll_gesture.*` commands set the scroll gestures; see
 [Scroll Gestures](lua-reference.md#scroll-gestures).
 :::

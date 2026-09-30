@@ -30,7 +30,10 @@ struct StashSeederCensusTests {
         // a floating Space (#1708): a centred, cascaded or
         // remembered frame in the grow bound — never a corner —
         // seeded ahead of the move's own retile, whose #1177
-        // gather outranks it by overwriting where it trips.
+        // gather outranks it by overwriting where it trips. The
+        // float verbs' placement of a window on a Space no screen
+        // shows (#1518) takes the same gated door, after the
+        // verb's retile because only the activation delivers it.
         "App/KiwiCore+FloatPlacement.swift": 1,
         // The entry-into-floating gather (#1177).
         "App/KiwiCore+FloatGather.swift": 1,

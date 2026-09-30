@@ -329,6 +329,22 @@ Obligations:
 - **Scroll input maps to travel through `ShelfScrollInput`**,
   whose deltas arrive already corrected for natural scrolling
   and are never flipped again (`ShelfScrollInputTests`).
+- **A manual scroll moves the section's run view and never
+  renders.** A section hosts its run — items, per-item glass,
+  tints, the layer rule, an unpinned front segment — in one
+  `itemRun` whose frame carries the offset
+  (`ShelfOverflow.runFrame`), so its items keep their frames; a
+  wheel, trackpad, page or drag-autoscroll step goes through the
+  section's one scroll door (`moveRun`), which moves that view
+  and re-reads what a render derives from the offset. A render
+  per event re-framed every glass and stalled a fast scroll
+  under boxed Liquid Glass. Whatever a render derives from the
+  offset is re-read there to exactly a render's answer at that
+  offset, so a new offset-dependent piece joins the door — a
+  piece a render cuts at the viewport included, as the
+  scrolling front segment's name is (#1763).
+  `ShelfScrollRunTests` holds both bars to a render's answer and
+  to no render.
 - **Every `ShelfArrangement.arrange` caller hands it the Space
   section's floor from `ShelfArrangement.hardFloor`** — the live
   plan and the Settings preview alike. The argument is required,
@@ -513,6 +529,15 @@ rather than the row it names makes the user search again. So:
   and the GUI maps it** (`SettingsAnchor(landing:)`), landing on
   the card or row as the search does — never a destination or a
   sentence authored in Core (#96, `BarMenuLandingTests`).
+- **A row that acts on a window acts through a public verb that
+  names it** — a `Commands/Reference` record taking a `.window`
+  argument, called through `execute` — never a menu-only path
+  into Core (owner ruling 2026-09-29 on #1518). A window row a
+  verb cannot yet express earns the argument first, the way
+  #1789 did for move and float; its refusal is the verb's own
+  `.fail`, cued as structure the GUI narrates. Nothing scans for
+  a menu-only path, so this is review's; `BarWindowMenuRowsTests`
+  drives the rows through their verbs.
 - **A row that writes a stored setting goes through its setter,
   then the one `writeThroughLiveProfile` door**, whose draft
   policy is [profiles.md](profiles.md)'s (`BarMenuRowsTests` ▸

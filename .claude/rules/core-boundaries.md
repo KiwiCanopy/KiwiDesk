@@ -141,6 +141,19 @@ itself when a sixth is added.
   (a number or a per-edge table) each take. `APIRecord.arguments`
   carries the argument, and the residue it cannot close.
 
+  **One argument kind is read by dispatch, and it is `.window`
+  (#1518).** A record taking a `.window` argument exempts its verb
+  from the #292 foreground preflight whenever a call names one —
+  the target is named rather than implied — so that verb's handler
+  reads the argument ONLY through `commandTarget`, which also
+  refuses an id no tracked window carries. Adding `.window` to a
+  record whose handler ignores it would let a named call skip the
+  preflight and still act on the focus, which is the hazard #292
+  closes; `WindowArgumentReachTests` probes every such record with
+  an unknown id and reds on a handler that does not refuse it. A
+  question "does this call act on the focus" asks
+  `impliesFocus(_:_:)`, never `FocusedCommandPolicy` alone.
+
   A record's `summary` is English prose authored in Core, and it
   rides the **CLI/IPC exception above rather than widening the
   #96 seam**: `list_commands` is a machine-readable description

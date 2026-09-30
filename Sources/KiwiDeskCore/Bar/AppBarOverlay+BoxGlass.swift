@@ -57,7 +57,7 @@ extension AppBarOverlay {
         }
         while boxGlasses.count < n {
             guard let glass = GlassPlate.make() else { break }
-            itemContainer.addSubview(glass)
+            itemRun.addSubview(glass)
             boxGlasses.append(glass)
             boxTints.append(GlassBackdrop())
         }
@@ -78,7 +78,7 @@ extension AppBarOverlay {
         for glass in boxGlasses {
             for item in itemViews where GlassPlate.holds(glass, item) {
                 GlassPlate.release(glass)
-                itemContainer.addSubview(item)
+                itemRun.addSubview(item)
             }
             glass.removeFromSuperview()
         }

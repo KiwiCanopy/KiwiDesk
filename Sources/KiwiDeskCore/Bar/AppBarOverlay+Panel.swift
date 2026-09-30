@@ -69,7 +69,7 @@ extension AppBarOverlay {
         while itemViews.count < count {
             let view = AppBarItemView()
             itemViews.append(view)
-            itemContainer.addSubview(view)
+            itemRun.addSubview(view)
         }
     }
 
@@ -82,6 +82,7 @@ extension AppBarOverlay {
         root.layer?.backgroundColor = NSColor.clear.cgColor
         itemContainer.wantsLayer = true
         itemContainer.layer?.masksToBounds = true
+        itemContainer.addSubview(itemRun)
         root.addSubview(itemContainer)
         root.addSubview(backCount)
         root.addSubview(forwardCount)
