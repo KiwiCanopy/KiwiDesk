@@ -281,10 +281,13 @@ struct SwitchHoldTests {
         for id in [SpaceID(5), SpaceID(6)] {
             core.state.workspaces.ensureSpace(id)
         }
-        core.state.workspaces.setMode(SpaceID(5), .monocle)
+        // Still alive when the second hold renumbers into it.
+        core.state.workspaces.setMode(SpaceID(6), .monocle)
         core.handle(.displaysChanged([desk.builtIn]))
         #expect(core.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
         #expect(desk.members(core, 5) == desk.ids([10, 11]))
-        #expect(core.state.workspaces[SpaceID(5)]?.mode != .monocle)
+        // The held Space wears its own mode, not the emptied one's.
+        #expect(core.state.heldSpaces[SpaceID(6)]?.name == SpaceID(4))
+        #expect(core.state.workspaces[SpaceID(6)]?.mode == .bsp)
     }
 }

@@ -75,6 +75,26 @@ struct SpaceBarCollapsedRenderTests {
         #expect(!view.overflowBadge.frame.intersects(view.markerView.frame))
     }
 
+    /// The plan measures a marked item with the identifier ink the
+    /// layout tucks the marker by, so the reserved length is the
+    /// drawn one (#1790).
+    @Test("A marked item's planned length is its drawn length")
+    func markedLengthMatchesLayout() throws {
+        let view = try render(.apps, held: true).itemViews[1]
+        view.layoutSubtreeIfNeeded()
+        #expect(!view.markerView.isHidden)
+        #expect(view.identifierInkWidth != nil)
+        let drawn = SpaceBarItemView.autoLength(
+            appCount: 2,
+            marked: true,
+            identifierInk: view.identifierInkWidth,
+            contentDepth: view.contentDepth,
+            glyphGap: view.style.resolvedGlyphGap,
+            ends: view.ends
+        )
+        #expect(abs(view.frame.width - drawn) < 0.5)
+    }
+
     /// Past nine the disc reads "9+" and stays a disc, while the
     /// label announces the exact count.
     @Test("A crowded Space's disc reads 9+")
