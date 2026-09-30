@@ -26,6 +26,7 @@
 import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
 import ThemeHead from "./ThemeHead.astro";
+import PhRankPill from "./PhRankPill.astro";
 import logoMark from "../assets/brand/logo.svg";
 import kiwiMark from "../assets/brand/kiwi-mark.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
@@ -104,6 +105,8 @@ const phReviewHref =
 const phLaunchEnds = Date.UTC(2026, 8, 28, 7);
 const phLaunchLive = Date.now() < phLaunchEnds;
 const kofi = "https://ko-fi.com/kiwicanopy";
+// The app's own copy is SupportLinks.discord.
+const discord = "https://discord.gg/bYeTrJyZyS";
 const kiwiCanopyUrl = "https://kiwicanopy.com";
 // The maker's personal GitHub profile — distinct from the project
 // repo link above, used only for the low-key footer credit.
@@ -579,9 +582,30 @@ const jsonLd = [
              per page rather than by demoting the Nerd hero). */}
         {isSimple && (
         <div class="hero__mode hero__mode--simple">
-          <span class="hero__kicker">{t.hero_kicker}</span>
-          <h1 class="hero__title">{t.hero_title}</h1>
-          <p class="hero__sub">{t.hero_sub}</p>
+          {/* The slogan is this page's heading, drawn as the Nerd
+               hero's kicker so both pages open alike. */}
+          <h1 class="hero__kicker">{t.hero_title}</h1>
+          {/* The trailer IS the explanation on this page: its poster
+               already reads "All on their own" over a tiled desktop,
+               so the hero carries no sub-line. It plays muted on its
+               own unless Reduce Motion or Save-Data asks otherwise;
+               the Nerd page keeps it in #demo. */}
+          <div class="demo__frame hero__video">
+            <video id="demoVideo" controls muted loop playsinline
+              preload="metadata" poster={trailerPoster}
+              data-autoplay aria-label={t.demo_video_aria}>
+              <source src={trailerFile} type="video/mp4" />
+            </video>
+            <button class="demo__overlay" id="demoOverlay"
+              type="button" aria-label={t.demo_play_aria}>
+              <span class="demo__play" aria-hidden="true">
+                <svg width="34" height="34" viewBox="0 0 24 24"
+                  fill="#08150a">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </span>
+            </button>
+          </div>
           <div class="hero__cta">
             {/* The download leads in Simple mode (#904). The guide
                  detour this replaces existed only because there was
@@ -603,15 +627,6 @@ const jsonLd = [
                 {t.hero_cta_primary}
               </a>
             )}
-            {/* "Show me first" stays — the hero is not a pure
-                 conversion ask and the demo is doing work. */}
-            <a class="btn btn--ghost btn--ghost-light" href="#demo">
-              <svg width="17" height="17" viewBox="0 0 24 24"
-                fill="currentColor" aria-hidden="true">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-              {t.hero_cta_secondary}
-            </a>
           </div>
           {downloadHref && (
             <p class="req req--center" id="heroReq">
@@ -645,18 +660,7 @@ const jsonLd = [
                 {downloadIsPrerelease && ` · ${t.beta_suffix}`}
               </span>
             )}
-            <a class="pill pill--light pill--link"
-              href={phReviewHref}
-              target="_blank" rel="noopener">
-              <svg class="pill__ph" width="15" height="15"
-                viewBox="0 0 31 31" aria-hidden="true">
-                <path fill="currentColor" fill-rule="evenodd"
-                  d="M31 15.5a15.5 15.5 0 1 1-31 0 15.5 15.5 0 0 1 31 0ZM17.43 15.96h-4.34v-4.65h4.34a2.31 2.31 0 0 1 0 4.65m0-7.75h-7.4v15.5h3.06v-4.65h4.34a5.42 5.42 0 0 0 0-10.85" />
-              </svg>
-              {t.producthunt_review}
-              <Icon name="lucide:arrow-up-right" width={13}
-                height={13} aria-hidden="true" />
-            </a>
+            <PhRankPill label={t.producthunt_rank} />
           </div>
         </div>
         )}
@@ -737,13 +741,16 @@ const jsonLd = [
                1.0 shipped until somebody remembered it. Now the
                beta half appears only while the promoted release
                is flagged one, so it retires itself. */}
-          {downloadVersion && (
-            <span class="pill pill--light">
-              <span class="pill__dot" aria-hidden="true"></span>
-              {t.version_pill} {downloadVersion}
-              {downloadIsPrerelease && ` · ${t.beta_suffix}`}
-            </span>
-          )}
+          <div class="hero__pills">
+            {downloadVersion && (
+              <span class="pill pill--light">
+                <span class="pill__dot" aria-hidden="true"></span>
+                {t.version_pill} {downloadVersion}
+                {downloadIsPrerelease && ` · ${t.beta_suffix}`}
+              </span>
+            )}
+            <PhRankPill label={t.producthunt_rank} />
+          </div>
 
           {/* Comparison link (#975), first screen, Nerd page
                ONLY. The two audiences ask this question at
@@ -837,7 +844,9 @@ const jsonLd = [
     </section>
     )}
 
-    {/* ============ Demo video (both modes) ============ */}
+    {/* ============ Demo video (Nerd only) ============
+         The Simple page plays the trailer in its hero. */}
+    {isDev && (
     <section class="tint" id="demo">
       <div class="wrap">
         <div class="section-head reveal">
@@ -878,6 +887,7 @@ const jsonLd = [
         </blockquote>
       </div>
     </section>
+    )}
 
     {/* ============ Voices (both modes) ============
          People only — the star count lives in the heroes. Quotes
@@ -1412,6 +1422,8 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             rel="noopener">{t.footer_github}<span aria-hidden="true"> ↗</span></a>
           <a href={`${homeHref}compare/`}>{t.nav_compare}</a>
           <a href={`${homeHref}changelog/`}>{t.footer_changelog}</a>
+          <a href={discord} target="_blank"
+            rel="noopener">{t.footer_discord}<span aria-hidden="true"> ↗</span></a>
           {/* Legal links stay visible in every mode — the Impressum
               must be reachable from every page (§ 5 DDG). */}
           <a href={`${homeHref}imprint`}>{t.footer_impressum}</a>
@@ -1520,6 +1532,18 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       video?.addEventListener("pause", () => {
         if (overlay && video.currentTime === 0) overlay.hidden = false;
       });
+      const saveData = (navigator as { connection?:
+        { saveData?: boolean } }).connection?.saveData;
+      if (video?.hasAttribute("data-autoplay") && !saveData &&
+        !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        video.autoplay = true;
+        video.play().catch(() => {});
+        // A tab opened in the background holds autoplay until shown.
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden && video.paused &&
+            video.currentTime === 0) video.play().catch(() => {});
+        }, { once: true });
+      }
 
       // ---- Copy the build commands ----
       // Labels come from data-* attributes so the copied/idle text
