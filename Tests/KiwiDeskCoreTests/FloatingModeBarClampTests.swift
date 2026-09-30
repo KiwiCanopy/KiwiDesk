@@ -32,7 +32,7 @@ struct FloatingModeBarClampTests {
         mode: LayoutMode,
         frame: CGRect
     ) -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()
@@ -75,7 +75,7 @@ struct FloatingModeBarClampTests {
     func sweepClampsAFloatingModeMember() throws {
         // Overlapping the top strip by construction: origin at
         // the screen's own top-left.
-        let screen = try #require(NSScreen.main)
+        let screen = try #require(NSScreen.screens.first)
         let frame = CGRect(
             x: screen.frame.minX + 100,
             y: screen.frame.minY,
@@ -119,7 +119,7 @@ struct FloatingModeBarClampTests {
         // than the region between the bars was equally
         // unreachable. Oversized on purpose, so the fit arm
         // engages rather than being asserted about in absentia.
-        let screen = try #require(NSScreen.main)
+        let screen = try #require(NSScreen.screens.first)
         let frame = CGRect(
             x: screen.frame.minX,
             y: screen.frame.minY,
@@ -156,7 +156,7 @@ struct FloatingModeBarClampTests {
         // decision, because the frames the two paths write are
         // indistinguishable once the retile net runs behind
         // them.
-        let screen = try #require(NSScreen.main)
+        let screen = try #require(NSScreen.screens.first)
         let core = try #require(
             makeBarredCore(
                 mode: .floating,
@@ -205,7 +205,7 @@ struct FloatingModeBarClampTests {
         // stash already refuses. Unguarded when it landed:
         // deleting the clause left all 4300 tests green
         // (guard-prover, 2026-08-31).
-        let screen = try #require(NSScreen.main)
+        let screen = try #require(NSScreen.screens.first)
         let frame = CGRect(
             x: screen.frame.minX,
             y: screen.frame.minY,
@@ -238,7 +238,7 @@ struct FloatingModeBarClampTests {
         .enabled(if: NSScreen.main != nil)
     )
     func dropClampsAFloatingModeMember() throws {
-        let screen = try #require(NSScreen.main)
+        let screen = try #require(NSScreen.screens.first)
         let frame = CGRect(
             x: screen.frame.minX + 100,
             y: screen.frame.minY,
@@ -276,7 +276,7 @@ struct FloatingModeBarClampTests {
         // The negative half: widening the predicate must not
         // make the float net start correcting tiles, whose
         // frames the layout owns.
-        let screen = try #require(NSScreen.main)
+        let screen = try #require(NSScreen.screens.first)
         let frame = CGRect(
             x: screen.frame.minX + 100,
             y: screen.frame.minY,

@@ -15,11 +15,11 @@ import Testing
 struct ShelfDriverTests {
     private static let window = WindowID(1)
 
-    /// A core on the main screen holding one window in a
+    /// A core on the primary screen holding one window in a
     /// scrolling space, with both bars on. Nil where the host has
     /// no screen to paint on.
     private func makeShelfCore(appBar: Bool = true) -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()
@@ -69,7 +69,7 @@ struct ShelfDriverTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let space = try #require(core.spaceBars.shownStrips.first)
         let app = try #require(core.appBars.shownStrips.first)
-        let screen = try #require(NSScreen.main)
+        let screen = try #require(NSScreen.screens.first)
         let visible = GeometryUtils.axVisibleFrame(of: screen)
         let strip = ShelfGeometry.strip(
             in: visible,
@@ -101,7 +101,7 @@ struct ShelfDriverTests {
         #expect(alone.spaceBars.showsTitle(of: Self.window))
         // Alone, the Space Bar spans the whole strip.
         let strip = try #require(alone.spaceBars.shownStrips.first)
-        let screen = try #require(NSScreen.main)
+        let screen = try #require(NSScreen.screens.first)
         #expect(strip.strip.width == screen.visibleFrame.width)
     }
 

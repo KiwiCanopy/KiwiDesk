@@ -18,7 +18,7 @@ struct FloatClampPendingCaptureTests {
     private static let window = WindowID(1)
 
     private func makeBarredCore(frame: CGRect) -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()
@@ -49,7 +49,7 @@ struct FloatClampPendingCaptureTests {
         .enabled(if: NSScreen.main != nil)
     )
     func clearCaptureIsLeft() throws {
-        let screen = try #require(NSScreen.main)
+        let screen = try #require(NSScreen.screens.first)
         // The state frame sits under the strip; the capture does
         // not.
         let under = CGRect(
@@ -81,7 +81,7 @@ struct FloatClampPendingCaptureTests {
         .enabled(if: NSScreen.main != nil)
     )
     func coveredCaptureIsCorrected() throws {
-        let screen = try #require(NSScreen.main)
+        let screen = try #require(NSScreen.screens.first)
         let clear = CGRect(
             x: screen.frame.minX + 100,
             y: screen.frame.minY + 400,
