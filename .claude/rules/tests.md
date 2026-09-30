@@ -256,9 +256,10 @@ bite large test PRs:
   A scratch suite does not isolate a test that registers
   defaults, sets an environment variable or writes a shared
   domain — the worked case is
-  `UserDefaults.register(defaults:)`, whose mechanism and
-  passed-locally/red-on-CI history `ToolTipDelayTests` owns
-  (2026-08-03). Neither a `--filter` run nor a `guard-prover`
+  `UserDefaults.register(defaults:)`, which writes the
+  process-global registration domain whatever suite it is
+  called on, so a test asserting the key absent beforehand
+  passed locally and red on CI (2026-08-03). Neither a `--filter` run nor a `guard-prover`
   mutation can reach this class: both observe the test on its
   own, which is the state it passes in.
 - **A test asserting localized output pins the locale first.**
