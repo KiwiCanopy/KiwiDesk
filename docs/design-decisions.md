@@ -8053,11 +8053,12 @@ control stays staged behind Save unless it clears one of two
 bars: **(a)** it owns no profile state at all (the General ▸
 Language picker persists straight to `UserDefaults`, never
 `gui.json` — there is nothing to stage), or **(b)** its
-feedback loop *is* the live runtime and no in-window
-simulation can substitute — and its runtime effect cannot
-outlive the draft that made it, which is why the key recorder,
-once this bar's example, no longer passes it (see "The recorder
-stages like every control" below). Everything else
+feedback loop *is* the live runtime, no in-window simulation
+can substitute, and its runtime effect cannot outlive the draft
+that made it — an effect in force but not saved survives the
+window that shows it, and the user learns a setting the next
+restart takes away (see "The recorder stages like every
+control" below). Everything else
 — sliders, colors, pickers, placement grids — stays staged;
 where a raw value is hard to judge, build an in-window
 preview (the `GapsDiagram` / `DragVisualsEditor`-strip
@@ -8069,8 +8070,7 @@ control is its own preview — a third category needing neither
 live-apply nor a bolted-on preview). Profiles-section
 rename/delete/make-default/preset-apply are immediate file
 **actions**, not settings — correctly outside this question.
-The Spaces tab's per-space layout picker stays staged. **No
-control passes bar (b).**
+The Spaces tab's per-space layout picker stays staged.
 
 :::unreleased
 Bar **(a)** is about owning no profile state, not about which
@@ -8869,9 +8869,8 @@ hard-block is the conflict UX until then.
 :::unreleased
 **The recorder stages like every control; only its suspend is
 live.** A recording, a clear or a deleted row changes the draft,
-and the running hotkeys are rebuilt from the saved files alone —
-on Save, a config reload or a profile apply
-(`ShortcutsApplyOnSaveTests` holds the census of who may replace
+and the running hotkeys are rebuilt from the saved files alone
+(`ShortcutsApplyOnSaveTests` holds the census of who may write
 the running table). The argument is what a live-but-unsaved
 chord outlives: the window that shows it is unsaved closes
 without a revert, a restart shows no prompt, and a config reload
@@ -8889,8 +8888,7 @@ armed (#213): it exists so a chord already bound to KiwiDesk is
 captured rather than fired, and disarming resumes the saved
 table. What a recording can still tell before Save — a
 duplicate in the layer, "Assigned to…", a macOS collision — it
-tells; trying the chord is record, Save, press. (#123 Part 1,
-reversed.)
+tells; trying the chord is record, Save, press.
 :::
 
 **A catalog label's identity and its display text are two

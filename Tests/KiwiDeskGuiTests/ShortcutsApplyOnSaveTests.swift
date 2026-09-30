@@ -57,8 +57,11 @@ struct ShortcutsApplyOnSaveTests {
             .bindings(for: KeyLayer.defaultName)[parsed] != nil
     }
 
-    /// A recorder's arm and disarm bracket the draft write the
-    /// way the field does; the disarm resumes the saved table.
+    /// A smoke check of the model half: the recorder's arm and
+    /// disarm bracket a draft write the way the field does, and
+    /// the disarm resumes the saved table. The row views' closures
+    /// are private, so the census below is what reds on a view
+    /// that registers ahead of Save.
     @Test("a recorded, cleared or deleted row registers nothing")
     func draftEditsLeaveTheTable() throws {
         let (model, core) = try makeModel()
@@ -82,12 +85,12 @@ struct ShortcutsApplyOnSaveTests {
         #expect(try isRegistered("alt+h", core: core))
     }
 
-    /// Every site that replaces the running structured table,
-    /// with the saved source it reads. A new entry is a new way
-    /// for the table to run ahead of the files — rule it here.
+    /// Every call that writes the running hotkey table, with the
+    /// saved source it reads. A new entry is a new way for the
+    /// table to run ahead of the files — rule it here.
     private static let installers: [String: (Int, String)] = [
         "KiwiDeskCore/App/KiwiCore+StructuredKeybindings.swift":
-            (2, "the one install and its manager swap"),
+            (1, "the one structured door's manager swap"),
         "KiwiDeskCore/App/KiwiCore+StructuredConfig.swift":
             (
                 3,
@@ -96,16 +99,21 @@ struct ShortcutsApplyOnSaveTests {
             ),
         "KiwiDeskCore/Profiles/KiwiCore+StarterRescale.swift":
             (1, "the digit top-up, from the sidecar it just saved"),
+        "KiwiDeskCore/App/KiwiCore+Config.swift":
+            (1, "config load clears the table before the file runs"),
+        "KiwiDeskCore/Lua/KiwiCore+LuaAPI.swift":
+            (2, "init.lua's own bind and layer verbs, run from disk"),
     ]
 
-    @Test("the running table is replaced only from saved files")
+    @Test("the running table is written only from saved files")
     func installersAreCensused() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         let sources = root.appendingPathComponent("Sources")
+        // The structured door and the manager's writers, by
+        // name alone: arguments are what a new caller changes.
         let call = try NSRegularExpression(
             pattern: #"(?<!func )\b(applyStructuredKeybindings"#
-                + #"|replaceLayers|install)\(\s*(prepared|layers|$)"#,
-            options: .anchorsMatchLines
+                + #"|replaceLayers|keys\.(bind|defineLayer|reset))\("#
         )
         var found: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: sources) {

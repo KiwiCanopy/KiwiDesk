@@ -41,7 +41,7 @@ public final class KeybindingManager {
     /// set/clear) in `fire`, so a callback pumping a nested run
     /// loop cannot clear the outer fire's flag.
     public private(set) var isFiring = false
-    /// Combos rejected during activation (#123).
+    /// Combos rejected during the most recent activation.
     public internal(set) var activationFailures: Set<KeyCombo> =
         []
     private var layers: [String: [KeyCombo: Int32]] = [:]

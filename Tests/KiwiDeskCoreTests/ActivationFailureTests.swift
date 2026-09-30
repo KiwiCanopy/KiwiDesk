@@ -33,10 +33,8 @@ private final class DenyingRegistrar: HotkeyRegistrar {
     }
 }
 
-/// `activationFailures` (#123): combos the system declined in
-/// the most recent activation, so the GUI's live-apply can
-/// branch its caption ("Active now" vs "the system didn't
-/// grant it").
+/// `activationFailures`: combos the system declined in the most
+/// recent activation.
 @Suite("Hotkey activation failures (#123)", .serialized)
 @MainActor
 struct ActivationFailureTests {

@@ -98,8 +98,6 @@ struct NavRow: View {
                 $0.kind == .navigation && $0.lua == lua
             },
             bindings: $bindings,
-            // Steal live-applies too (via `record`); only the
-            // recorder's own commit shows the caption.
             commit: { record($0) }
         )
     }
