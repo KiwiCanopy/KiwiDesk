@@ -203,7 +203,8 @@ public final class AppBarOverlay {
         // only the ones the container hosts (#1730).
         if hosting != .boxGlass { teardownBoxGlasses() }
         standArrivals(glide.arrivals)
-        BarMotion.runLayout {
+        let groups = !glide.departures.isEmpty || !glide.arrivals.isEmpty
+        (groups ? BarMotion.runGroupLayout : BarMotion.runLayout) {
             BarMotion.setFrame(itemRun, to: runFrame, animated: true)
             for (index, view) in itemViews.enumerated()
             where view.superview === itemRun {
@@ -221,7 +222,7 @@ public final class AppBarOverlay {
                 frames: frames
             )
         }
-        BarMotion.removeAfterSlide(glide.departures.map(\.view))
+        BarMotion.removeAfterGroupGlide(glide.departures.map(\.view))
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             let active = index == activeIndex

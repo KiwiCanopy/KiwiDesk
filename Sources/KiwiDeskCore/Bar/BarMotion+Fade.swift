@@ -24,12 +24,38 @@ extension BarMotion {
         animated && !reduceMotion
     }
 
-    /// Removes `views` once an item slide lands — a timer of the
-    /// slide's length, as `playWalk` does — and at once under
-    /// Reduce Motion, which plays no slide.
+    /// A group's members sliding together or apart (#1831): longer
+    /// than an item slide, which read as a snap for this travel
+    /// (owner, 2026-09-30), so a render that folds or releases a
+    /// member takes it for its whole pass and the row keeps step.
+    static let groupGlide: TimeInterval = 0.35
+
+    /// The group glide's length, nothing under Reduce Motion.
+    static func groupGlideDuration(reduceMotion: Bool) -> TimeInterval {
+        reduceMotion ? 0 : groupGlide
+    }
+
+    /// Runs `body` in the group glide's animation group.
     @MainActor
-    static func removeAfterSlide(_ views: [NSView]) {
-        let span = duration(reduceMotion: isReduced)
+    static func runGroupLayout(_ body: () -> Void) {
+        let reduceMotion = isReduced
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = groupGlideDuration(
+                reduceMotion: reduceMotion
+            )
+            context.timingFunction = CAMediaTimingFunction(
+                name: .easeInEaseOut
+            )
+            body()
+        }
+    }
+
+    /// Removes `views` once the group glide lands — a timer of its
+    /// length, as `playWalk` does — and at once under Reduce
+    /// Motion, which plays no glide.
+    @MainActor
+    static func removeAfterGroupGlide(_ views: [NSView]) {
+        let span = groupGlideDuration(reduceMotion: isReduced)
         guard span > 0 else {
             views.forEach { $0.removeFromSuperview() }
             return

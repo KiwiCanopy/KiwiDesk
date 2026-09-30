@@ -102,6 +102,15 @@ struct AppBarGroupGlideTests {
         #expect(overlay.itemViews[0].alphaValue == 1)
     }
 
+    @Test("The group glide outlasts an item slide, and not motion")
+    func glideLength() {
+        #expect(
+            BarMotion.groupGlideDuration(reduceMotion: false)
+                > BarMotion.duration(reduceMotion: false)
+        )
+        #expect(BarMotion.groupGlideDuration(reduceMotion: true) == 0)
+    }
+
     @Test("An alpha write fades only where motion is allowed")
     func fadeGate() {
         #expect(BarMotion.fades(true, reduceMotion: false))
