@@ -91,6 +91,8 @@ struct AnnouncedValuePinTests {
         // Before you update labels (#1542).
         "UpdateWindowView.swift": 1,
         "UpdateNotesGroups.swift": 2,
+        // What's new's "Next on my list" label (#1813).
+        "NextOnMyListPanel.swift": 1,
         // The Mouse & trackpad drawer's group headings (#1726).
         "GestureEntry.swift": 1,
         // The tour looks step's two row headers (#1720).

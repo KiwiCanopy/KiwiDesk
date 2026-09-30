@@ -19,11 +19,17 @@ struct WhatsNewRecord {
     static let relaunchKey = "updates.relaunchNotes"
 
     /// What the relaunch reads: the version installed, the one it
-    /// replaced, and the feed items the window merged.
+    /// replaced, the feed items the window merged, and the "Next on
+    /// my list" fetched while the offer was open (#1813).
     struct Relaunch: Codable, Equatable {
         let version: String
         let since: String
         let items: [WhatsNewFeed.Item]
+        var next: NextOnMyList? = nil
+
+        enum CodingKeys: String, CodingKey {
+            case version, since, items, next
+        }
     }
 
     let defaults: UserDefaults
@@ -82,4 +88,23 @@ struct WhatsNewRecord {
 /// 1.x upgrade, whose starting version was never recorded.
 struct WhatsNewDue: Equatable {
     let since: String?
+}
+
+extension WhatsNewRecord.Relaunch {
+    /// The record crosses an update: a list this build cannot read
+    /// costs only the card, never the notes or the narration.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        version = try container.decode(String.self, forKey: .version)
+        since = try container.decode(String.self, forKey: .since)
+        items = try container.decode(
+            [WhatsNewFeed.Item].self,
+            forKey: .items
+        )
+        next =
+            (try? container.decodeIfPresent(
+                NextOnMyList.self,
+                forKey: .next
+            )) ?? nil
+    }
 }

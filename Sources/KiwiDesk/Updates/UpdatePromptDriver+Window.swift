@@ -57,10 +57,18 @@ extension UpdatePromptDriver {
         session.onInstall = { [record = seenRecord] in
             record?.markSeen(item.versionString)
         }
-        session.onInstalling = { [record = seenRecord] in
-            record?.markRelaunch(relaunch)
+        session.onInstalling = { [weak self, record = seenRecord] in
+            var carried = relaunch
+            carried.next = self?.offeredNext
+            record?.markRelaunch(carried)
         }
         self.window = window
+        if let fetchNext {
+            nextFetch = Task { [weak self] in
+                let next = await fetchNext()
+                if !Task.isCancelled { self?.offeredNext = next }
+            }
+        }
     }
 
     /// Shows the window: the offer got the user's attention.
@@ -84,6 +92,9 @@ extension UpdatePromptDriver {
     func closeWindow() {
         window?.close()
         window = nil
+        nextFetch?.cancel()
+        nextFetch = nil
+        offeredNext = nil
     }
 
     /// What the relaunch narrates (#1667): the items the window

@@ -10,6 +10,8 @@ struct UpdateNotesScroll: View {
     let failed: Bool
     /// After the update: the cautions are past advice.
     let whatsNew: Bool
+    /// Drawn under the Highlights card (#1813).
+    var next: NextOnMyList?
     /// Lays every tab out at once, unscrolled, so the window's
     /// height is the tallest tab's and a switch does not jump it.
     let measuring: Bool
@@ -92,11 +94,14 @@ struct UpdateNotesScroll: View {
     ) -> some View {
         switch tab {
         case .highlights:
-            UpdateHighlightsPanel(
-                digest: digest,
-                failed: failed,
-                whatsNew: whatsNew
-            )
+            VStack(alignment: .leading, spacing: 12) {
+                UpdateHighlightsPanel(
+                    digest: digest,
+                    failed: failed,
+                    whatsNew: whatsNew
+                )
+                if let next { NextOnMyListPanel(next: next) }
+            }
         case .group(let id):
             if let group = digest.group(id) {
                 UpdateNotesGroupList(
