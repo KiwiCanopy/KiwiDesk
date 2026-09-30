@@ -9256,9 +9256,11 @@ hands a reordered Space a second chord and shifts its neighbours by
 one. A Space named 1–10 takes its own number rather than its place,
 because digits are handed out once and then belong to the Space by
 name (#91) — a drag is an arrangement edit and never moves a chord.
-Existing extras are migrated away rather than surfaced: #92's
-"surface, never prune" protects a binding that can become valid
-again, and an extra chord for a live Space never does. The
+Existing extras are migrated away rather than surfaced, for every
+navigation action: #92's "surface, never prune" protects a binding
+that can become valid again, and an extra chord for a live action
+never does — which is also why an orphan Space verb, #92's own
+case, keeps all its chords. The
 migration keeps the chord on the Space's own digit, so a Space
 renamed after the seed can lose the positional chord it learned
 — accepted, since the digit it keeps is the one its name

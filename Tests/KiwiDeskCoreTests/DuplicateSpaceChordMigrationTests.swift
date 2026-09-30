@@ -38,9 +38,13 @@ struct DuplicateSpaceChordMigrationTests {
         ]
     }
 
+    /// The Spaces every fixture lists, so its Space verbs are live.
+    private let listed = ["1", "5", "10", "Mail"].map { SpaceID($0) }
+
     private func gui(_ bindings: [KeyBinding]) throws -> Data {
         var config = GuiConfig()
         config.format = guiBefore
+        config.spaces = listed
         config.layers = [
             KeyLayer(name: KeyLayer.defaultName, bindings: bindings)
         ]
@@ -105,12 +109,33 @@ struct DuplicateSpaceChordMigrationTests {
         #expect(try layer(out).count == 3)
     }
 
+    @Test("any navigation action keeps one chord")
+    func otherActionsCross() throws {
+        let rows = [
+            row("control+option+left", "KiwiDesk.focus(\"left\")"),
+            row("control+option+h", "KiwiDesk.focus(\"left\")"),
+        ]
+        let out = try #require(ConfigMigration.migrated(try gui(rows)))
+        #expect(try layer(out).map(\.combo) == ["control+option+left"])
+    }
+
+    @Test("an orphan Space verb keeps every chord")
+    func orphanStays() throws {
+        let rows = [
+            row("control+option+7", follow("7")),
+            row("control+option+f7", follow("7")),
+        ]
+        let out = try #require(ConfigMigration.migrated(try gui(rows)))
+        #expect(try layer(out).count == 2)
+    }
+
     @Test("a profile's layer override crosses too")
     func profileOverrideCrosses() throws {
         let profile = Profile(
             format: profileBefore,
             name: "Work",
             monitorSets: [MonitorSet(monitors: ["A:100x100"])],
+            spaces: listed,
             spaceModes: [:],
             settings: TilingSettings(),
             layers: KeyLayerOverride(
@@ -187,10 +212,12 @@ struct DuplicateSpaceChordMigrationTests {
             try JSONSerialization.data(withJSONObject: root)
         }
         let profile: [String: Any] = [
-            "monitor_sets": [], "layers": ["layers": layers],
+            "monitor_sets": [], "spaces": ["1"],
+            "layers": ["layers": layers],
         ]
         let bundle: [String: Any] = [
-            SetupBundle.shapeMarker: 1, "config": ["layers": layers],
+            SetupBundle.shapeMarker: 1,
+            "config": ["spaces": ["1"], "layers": layers],
         ]
         let cases: [([String: Any], Int)] = [
             (profile, ConfigMigration.spaceChordProfileFormat),
@@ -218,6 +245,7 @@ struct DuplicateSpaceChordMigrationTests {
     func currentFormatStandsDown() throws {
         var config = GuiConfig()
         config.format = ConfigMigration.spaceChordGuiFormat
+        config.spaces = listed
         config.layers = [
             KeyLayer(name: KeyLayer.defaultName, bindings: ownersRows)
         ]

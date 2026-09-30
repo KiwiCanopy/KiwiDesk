@@ -1,11 +1,14 @@
 import Foundation
 
-/// Drops a Space verb's extra chords from each stored `bindings`
-/// list (#1797, `DuplicateSpaceChordMigrationTests`): per verb and
-/// Space, the row on the Space's own digit is kept, else the first.
-/// It reaches every list at any depth — `gui.json`'s layers, a
-/// profile's layer override, a bundle's inline copies — but each
-/// list alone, never a base against its override.
+/// Drops a navigation action's extra chords from each stored
+/// `bindings` list (#1797, #1807, `DuplicateSpaceChordMigrationTests`):
+/// per action, a Space verb keeps the row on its own digit, anything
+/// else its first row. A Space verb naming a Space its file does not
+/// list is an orphan (#92), drawn one row per binding, and is left
+/// alone, as is every `custom` row. It reaches every list at any
+/// depth — `gui.json`'s layers, a profile's layer override, a
+/// bundle's inline copies — but each list alone, never a base
+/// against its override.
 extension ConfigMigration {
     /// The formats from which a stored layer holds one chord per
     /// Space verb, per shape.
@@ -17,6 +20,14 @@ extension ConfigMigration {
     /// naming what it was written to name.
     static let spaceChordBindingsKey = "bindings"
     static let spaceChordNavigationKind = "navigation"
+    static let spaceChordSpacesKey = "spaces"
+
+    /// What "the same action" is to this step: a Space verb by its
+    /// verb and Space, anything else by its Lua.
+    enum ChordAction: Hashable {
+        case space(SpaceLuaArg.Target)
+        case lua(String)
+    }
 
     @Sendable
     static func migratingDuplicateSpaceChords(
@@ -55,24 +66,33 @@ extension ConfigMigration {
     }
 
     /// The tree with every `bindings` list deduplicated, and the
-    /// rows it dropped, in document order.
+    /// rows it dropped, in document order. `spaces` is the Space list
+    /// of the nearest enclosing object that carries one — the file
+    /// root, a bundle's `config`, a profile.
     static func withoutDuplicateSpaceChords(
-        _ node: Any
+        _ node: Any,
+        spaces: Set<SpaceID>? = nil
     ) -> (Any, [[String: Any]]) {
         if let dict = node as? [String: Any] {
+            let spaces = listedSpaces(in: dict) ?? spaces
             var out: [String: Any] = [:]
             var drops: [[String: Any]] = []
             for (key, value) in dict {
                 if key == spaceChordBindingsKey,
                     let rows = value as? [Any]
                 {
-                    let (kept, gone) = dedupedSpaceChords(rows)
+                    let (kept, gone) = dedupedSpaceChords(
+                        rows,
+                        spaces: spaces
+                    )
                     out[key] = kept
                     drops += gone
                     continue
                 }
-                let (child, childDrops) =
-                    withoutDuplicateSpaceChords(value)
+                let (child, childDrops) = withoutDuplicateSpaceChords(
+                    value,
+                    spaces: spaces
+                )
                 out[key] = child
                 drops += childDrops
             }
@@ -81,8 +101,10 @@ extension ConfigMigration {
         if let array = node as? [Any] {
             var drops: [[String: Any]] = []
             let out = array.map { value -> Any in
-                let (child, childDrops) =
-                    withoutDuplicateSpaceChords(value)
+                let (child, childDrops) = withoutDuplicateSpaceChords(
+                    value,
+                    spaces: spaces
+                )
                 drops += childDrops
                 return child
             }
@@ -91,27 +113,47 @@ extension ConfigMigration {
         return (node, [])
     }
 
-    /// One layer's rows with each Space verb's extra `navigation`
-    /// chords removed, and the removed rows. A `custom` row is
-    /// drawn as a row of its own, so it is never removed.
+    private static func listedSpaces(
+        in dict: [String: Any]
+    ) -> Set<SpaceID>? {
+        guard let list = dict[spaceChordSpacesKey] as? [Any] else {
+            return nil
+        }
+        return Set(
+            list.compactMap { value -> SpaceID? in
+                if let raw = value as? String { return SpaceID(raw) }
+                if let number = value as? Int {
+                    return SpaceID(String(number))
+                }
+                return nil
+            }
+        )
+    }
+
+    /// One layer's rows with each navigation action's extra chords
+    /// removed, and the removed rows. A `custom` row is drawn as a
+    /// row of its own, and an orphan Space verb one row per binding,
+    /// so neither is ever removed; with no Space list in reach, no
+    /// Space verb is.
     static func dedupedSpaceChords(
-        _ rows: [Any]
+        _ rows: [Any],
+        spaces: Set<SpaceID>?
     ) -> ([Any], [[String: Any]]) {
-        var groups: [SpaceLuaArg.Target: [Int]] = [:]
-        var order: [SpaceLuaArg.Target] = []
+        var groups: [ChordAction: [Int]] = [:]
+        var order: [ChordAction] = []
         for (index, row) in rows.enumerated() {
-            guard let target = spaceChordTarget(row) else { continue }
-            if groups[target] == nil { order.append(target) }
-            groups[target, default: []].append(index)
+            guard let action = chordAction(row, spaces: spaces)
+            else { continue }
+            if groups[action] == nil { order.append(action) }
+            groups[action, default: []].append(index)
         }
         var drop: Set<Int> = []
-        for target in order {
-            guard let indices = groups[target], indices.count > 1
+        for action in order {
+            guard let indices = groups[action], indices.count > 1
             else { continue }
             let keep =
-                indices.first {
-                    isOwnDigit(rows[$0], of: target.space)
-                } ?? indices[0]
+                indices.first { isOwnDigit(rows[$0], of: action) }
+                ?? indices[0]
             drop.formUnion(indices.filter { $0 != keep })
         }
         guard !drop.isEmpty else { return (rows, []) }
@@ -123,25 +165,33 @@ extension ConfigMigration {
         return (kept, gone)
     }
 
-    private static func spaceChordTarget(
-        _ row: Any
-    ) -> SpaceLuaArg.Target? {
+    private static func chordAction(
+        _ row: Any,
+        spaces: Set<SpaceID>?
+    ) -> ChordAction? {
         guard let binding = row as? [String: Any],
             binding["kind"] as? String == spaceChordNavigationKind,
             binding["combo"] is String,
             let lua = binding["lua"] as? String
         else { return nil }
-        return SpaceLuaArg.target(of: lua)
+        guard let target = SpaceLuaArg.target(of: lua) else {
+            return .lua(lua)
+        }
+        guard let spaces, spaces.contains(target.space) else {
+            return nil
+        }
+        return .space(target)
     }
 
     /// Whether the row's key is the digit the seed gives a Space
     /// of this number — `1`…`9`, and `0` for the tenth.
     private static func isOwnDigit(
         _ row: Any,
-        of space: SpaceID
+        of action: ChordAction
     ) -> Bool {
-        guard let combo = (row as? [String: Any])?["combo"] as? String,
-            let number = Int(space.raw),
+        guard case .space(let target) = action,
+            let combo = (row as? [String: Any])?["combo"] as? String,
+            let number = Int(target.space.raw),
             let key = combo.split(separator: "+").last
         else { return false }
         let digit = number == 10 ? 0 : number
