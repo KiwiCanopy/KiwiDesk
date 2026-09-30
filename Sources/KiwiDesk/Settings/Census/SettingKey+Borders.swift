@@ -16,6 +16,7 @@ enum BordersKey: String, CaseIterable, Hashable {
     case stickyMark = "settings.stickyStyle.mark"
     case stickyColor = "settings.stickyStyle.color"
     case stickyDesktopReach = "settings.stickyStyle.desktopReach"
+    case floatingMark = "settings.floatingStyle.mark"
     case dragGhostEnabled = "settings.dragGhost.enabled"
     case dragGhostBorder = "settings.dragGhost.border"
     case dragGhostBorderColor = "settings.dragGhost.borderColor"
@@ -82,7 +83,9 @@ extension BordersKey {
                     .borders(.borderUnfocusedEnabled),
                 ])
             )
-        case .stickyColor:
+        case .stickyColor, .floatingColor:
+            // Both paint on the window, so neither takes the Space
+            // Bar's gate (StickyMarkUngatedTests, #1799).
             return .row(.advancedColours, .borders, .atRest)
         case .borderGlowSize:
             return .row(
@@ -96,7 +99,7 @@ extension BordersKey {
             )
         case .borderDrawOrder:
             return .luaOnly
-        case .stickyMark:
+        case .stickyMark, .floatingMark:
             // Ungated (StickyMarkUngatedTests).
             return .row(
                 .gapsAndBorders,
@@ -170,16 +173,6 @@ extension BordersKey {
                     .borders(.dragDropZoneEnabled),
                     .borders(.dragDropZoneFill),
                 ])
-            )
-        case .floatingColor:
-            // The floating badge is drawn on Space Bar items, whose
-            // colours are the shelf's card since #1517; only the
-            // Space Bar draws it, so its switch gates the row.
-            return .row(
-                .advancedColours,
-                .kiwishelf,
-                .showMore,
-                gate: .setting(.spaceBar(.spaceBarEnabled))
             )
         }
     }

@@ -277,7 +277,7 @@ at the moment you reveal it
 leaves the window's Space unchanged, and a **floating** or
 **sticky** window keeps its Space on any screen
 (`move_to_space` guards a sticky window the same way). With
-**Stay visible across Desktops** on (the default), a sticky
+**Keep sticky windows visible across Desktops** on (the default), a sticky
 window's move holds only until your screen next switches
 Desktop, when it is carried back onto its own screen's current
 Desktop; `override_sticky_reach("off")` first if you mean it to
@@ -3860,6 +3860,11 @@ and is the only float verb offered in the Settings shortcut
 list; the explicit `make_*` verbs remain for scripts that need a
 specific direction.
 
+:::unreleased
+The window's on-window floating mark follows the setting as its
+Space Bar float badge does.
+:::
+
 **Example:**
 
 ```lua
@@ -4099,10 +4104,39 @@ color, or the bare glyph on Automatic. Settings writes this
 through the one **Liquid Glass** switch
 ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 
+:::unreleased
+The floating mark draws the same way, tinted by
+[`floating.set_color`](#floatingset_color) where no sticky glyph
+shares its plate.
+:::
+
 **Example:**
 
 ```lua
 sticky.set_liquid_glass(false)
+```
+
+:::unreleased
+### floating.set_mark
+
+**Expects:** boolean (default `true`).
+
+**Does:** shows or hides the on-window floating mark — the
+`macwindow.on.rectangle` glyph at the top-right corner of a
+floating window, including one in a floating-mode space: one
+floated by `make_floating` or `toggle_floating`, by a
+`float_rules` entry, or by KiwiDesk's own detection. A window
+that floats only because its space is in floating mode gets no
+mark. A window that is also
+sticky carries both glyphs on one plate, the sticky one
+outermost; on a window too narrow for both, the floating glyph
+is left out. The mark draws as Liquid Glass under
+[`sticky.set_liquid_glass`](#stickyset_liquid_glass).
+
+**Example:**
+
+```lua
+floating.set_mark(false)
 ```
 
 ### floating.set_color
@@ -4110,17 +4144,19 @@ sticky.set_liquid_glass(false)
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
 empty string `""` for **Automatic** (default `""`).
 
-**Does:** tints the Space Bar floating badge — a filled disc in
-the color with an auto-contrast glyph. Floating windows have no
-on-window mark, so this affects the Space Bar badge only. `""`
-is Automatic (the badge keeps the count-badge fill); any
-non-empty value must parse as a hex color.
+**Does:** tints the floating mark — the on-window mark and the
+Space Bar floating badge read this one value, as
+[`sticky.set_color`](#stickyset_color) describes for sticky. On
+a window that is both sticky and floating, Liquid Glass takes
+the sticky color and the floating glyph the label color. `""`
+is Automatic; any non-empty value must parse as a hex color.
 
 **Example:**
 
 ```lua
 floating.set_color("#8E5DE0")
 ```
+:::
 
 ## Launching Apps
 

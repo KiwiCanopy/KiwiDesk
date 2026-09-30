@@ -87,9 +87,11 @@ struct SettingsCodingTests {
         #expect(sticky["desktop_reach"] as? Bool == true)
         // `floating.set_color` → `floating.color` (#429): the
         // sticky mark's sibling namespace, also Automatic by
-        // default.
+        // default; `floating.set_mark` → `floating.mark` (#1799),
+        // default ON.
         let floating = try object(root["floating"])
-        #expect(Set(floating.keys) == ["color"])
+        #expect(Set(floating.keys) == ["mark", "color"])
+        #expect(floating["mark"] as? Bool == true)
         #expect(floating["color"] as? String == "")
         // The `quit` group left for gui.json with #1741
         // (`AppWideSettingsTests`); the key set above holds its

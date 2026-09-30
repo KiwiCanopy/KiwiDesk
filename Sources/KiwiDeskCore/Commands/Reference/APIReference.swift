@@ -231,7 +231,7 @@ public enum APIReference {
             "set_liquid_glass",
         ],
         "floating": [
-            "set_color"
+            "set_mark", "set_color",
         ],
     ]
 

@@ -28,7 +28,7 @@ struct OverlayGlassGateTests {
         ),
         (
             file: "App/KiwiCore+StickyMarks.swift",
-            function: "func updateStickyMarks(",
+            function: "func stickyMarkSpecs(",
             stored: "glass: tiler.settings.stickyStyle.liquidGlass"
         ),
     ]
