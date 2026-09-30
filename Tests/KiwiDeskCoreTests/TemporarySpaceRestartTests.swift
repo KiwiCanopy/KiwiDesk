@@ -141,6 +141,8 @@ struct TemporarySpaceRestartTests {
             "pin_space_to_display",
             args: [.string(scratch.raw), .string(desk.dell.fingerprint)]
         )
+        core.retile()
+        #expect(core.state.workspaces[scratch] != nil, "unarmed: stays")
         core.handle(.displaysChanged([desk.builtIn]))
         #expect(core.state.workspaces[scratch] == nil)
         #expect(!core.state.heldSpaces.values.contains { $0.name == scratch })

@@ -90,6 +90,10 @@ struct TemporarySpaceScopeTests {
         )
         #expect(!reply.isSuccess)
         #expect(core.state.workspaces[SpaceID(8)] == nil)
+        // No arrangement is live, so nothing is temporary.
+        core.execute("create_space", args: [.string("8")])
+        #expect(core.state.workspaces[SpaceID(8)] != nil)
+        #expect(!core.isTemporary(SpaceID(8)))
         // Under a Standard: a live temporary Space, and no profile
         // file to add it to.
         core.state.workspaces.upsertDisplay(desk.builtIn)
@@ -158,6 +162,14 @@ struct TemporarySpaceScopeTests {
         )
         var draft = GuiConfig()
         draft.spaces = [SpaceID(1), SpaceID(2)]
+        // Space 2 carries everything a removal must take with it.
+        profile.apply(
+            .addSpace(SpaceID(2), added),
+            monitors: ["DELL:1920x1080"]
+        )
+        draft.apply(.addSpace(SpaceID(2), added))
+        profile.mainSpaces = [SpaceID(2)]
+        profile.fallbackSpace = SpaceID(2)
         for edit: LiveProfileEdit in [
             .addSpace(SpaceID(7), added), .removeSpace(SpaceID(2)),
         ] {
@@ -176,5 +188,17 @@ struct TemporarySpaceScopeTests {
                 == draft.settings.spaceIcons[SpaceID(7)]
         )
         #expect(!profile.declaredSpaces.contains(SpaceID(2)))
+        #expect(profile.spaceModes[SpaceID(2)] == nil)
+        #expect(draft.spaceModes[SpaceID(2)] == nil)
+        #expect(profile.mainSpaces.isEmpty)
+        #expect(profile.fallbackSpace == nil)
+        #expect(
+            profile.monitorSets.allSatisfy {
+                $0.spaceMonitorMap[SpaceID(2)] == nil
+            }
+        )
+        #expect(draft.spacePins[SpaceID(2)] == nil)
+        #expect(profile.settings.spaceIcons[SpaceID(2)] == nil)
+        #expect(draft.settings.spaceIcons[SpaceID(2)] == nil)
     }
 }

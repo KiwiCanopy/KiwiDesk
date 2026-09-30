@@ -50,6 +50,7 @@ struct TemporarySpaceTests {
         var profile = try core.profiles.read(name: "desk")
         profile.spaces.append(SpaceID(8))
         try core.profiles.write(profile)
+        #expect(core.isTemporary(SpaceID(8)), "a write waits for the apply")
         core.loadConfig()
         #expect(!core.isTemporary(SpaceID(8)))
         // init.lua's last run named 7 (a load resets that ledger).
@@ -71,7 +72,7 @@ struct TemporarySpaceTests {
             )
         )
         core.execute("load_profile", args: [.string("wider")])
-        #expect(core.state.workspaces[scratch] != nil)
+        #expect(core.state.workspaces[scratch]?.windows == [WindowID(13)])
         #expect(!core.isTemporary(scratch))
     }
 
@@ -217,9 +218,65 @@ struct TemporarySpaceTests {
         // A name no Standard plans.
         let scratch = SpaceID("scratch")
         core.execute("create_space", args: [.string(scratch.raw)])
-        #expect(core.isTemporary(scratch))
+        // The Standard's own Spaces are declared by it.
+        #expect(core.liveTemporarySpaces == [scratch])
         core.execute("load_profile", args: [.string("desk")])
         #expect(core.state.workspaces[scratch] == nil)
+    }
+
+    /// No partitioning record names the incoming profile: only the
+    /// live Standard makes its arrival a switch.
+    @Test("a Standard to a never-applied profile drops it")
+    func standardToFreshProfileDrops() throws {
+        let core = try docked()
+        let composed = try #require(
+            ProfileComposition.compose(
+                displays: core.state.workspaces.allDisplays,
+                mainID: nil
+            )
+        )
+        core.apply(composed: composed, forceRetile: true)
+        try core.profiles.write(
+            desk.profile(
+                "fresh",
+                screens: [desk.builtIn.fingerprint, desk.dell.fingerprint],
+                spaces: [SpaceID(1), SpaceID(2)]
+            )
+        )
+        #expect(
+            core.state.profilePartitioning.remembered(
+                for: .profile("fresh")
+            ) == nil
+        )
+        let scratch = SpaceID("scratch")
+        core.execute("create_space", args: [.string(scratch.raw)])
+        core.execute("load_profile", args: [.string("fresh")])
+        #expect(core.state.workspaces[scratch] == nil)
+    }
+
+    @Test("a same-profile Load and a Settings Save keep its mode")
+    func keepsItsMode() throws {
+        let core = try docked()
+        core.execute(
+            "create_space",
+            args: [.string("7"), .string("monocle")]
+        )
+        core.execute("load_profile", args: [.string("desk")])
+        #expect(core.state.workspaces[SpaceID(7)]?.mode == .monocle)
+        core.applyProfileScopedState(from: core.guiConfigSeed())
+        #expect(core.state.workspaces[SpaceID(7)]?.mode == .monocle)
+    }
+
+    /// A settings leaf written through the door leaves what is
+    /// declared to the next apply, like a plain write (#1245).
+    @Test("a settings write through the door redeclares nothing")
+    func settingsWriteKeepsDeclarations() throws {
+        let core = try docked()
+        var profile = try core.profiles.read(name: "desk")
+        profile.spaces.removeAll { $0 == SpaceID(2) }
+        try core.profiles.write(profile)
+        core.writeThroughLiveProfile(.settings { _ in })
+        #expect(!core.isTemporary(SpaceID(2)))
     }
 
     @Test("a Settings Save keeps it, and its pin")
