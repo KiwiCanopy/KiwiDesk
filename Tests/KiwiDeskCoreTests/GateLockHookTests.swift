@@ -38,9 +38,52 @@ struct GateLockHookTests {
         #expect(try rewrite("grep -n \"swift test\" x") == nil)
     }
 
+    /// Permission rules judge the REWRITTEN command, so the hook
+    /// approves a plain step itself — and nothing a shell could
+    /// chain, expand or redirect, which a text rule on the wrapped
+    /// `bash -c '…'` could not tell apart.
+    @Test("a plain skill step is approved, never a compound one")
+    func onlyPlainStepsAreApproved() throws {
+        let steps = try VerifyGateParityTests().skillSteps()
+            .filter { $0.hasPrefix("swift ") }
+        #expect(steps.count >= 3, "scraped too few swift steps")
+        for step in steps {
+            #expect(try decision(step) == "allow", "\(step)")
+        }
+        for command in [
+            "swift test; rm x", "cd x && swift test",
+            "swift test | tail", "swift test > out",
+            "swift test --filter 'A|B'", "swift test $(evil)",
+            "FOO=1 swift build", "./scripts/release.sh 1.0",
+        ] {
+            #expect(try rewrite(command) != nil, "\(command)")
+            #expect(try decision(command) == nil, "\(command)")
+        }
+    }
+
     /// The rewritten command, or nil when the hook passes the
     /// call through. The rest of the tool input must survive.
     private func rewrite(_ command: String) throws -> String? {
+        guard let specific = try hookOutput(command) else {
+            return nil
+        }
+        let updated = try #require(
+            specific["updatedInput"] as? [String: Any]
+        )
+        #expect(updated["timeout"] as? Int == 600_000)
+        #expect(updated["run_in_background"] as? Bool == true)
+        return updated["command"] as? String
+    }
+
+    /// The hook's own permission verdict, nil when it leaves the
+    /// normal check to judge.
+    private func decision(_ command: String) throws -> String? {
+        try hookOutput(command)?["permissionDecision"] as? String
+    }
+
+    private func hookOutput(
+        _ command: String
+    ) throws -> [String: Any]? {
         let event: [String: Any] = [
             "tool_name": "Bash",
             "tool_input": [
@@ -69,14 +112,8 @@ struct GateLockHookTests {
                 with: Data(run.stdout.utf8)
             ) as? [String: Any]
         )
-        let specific =
-            output["hookSpecificOutput"]
-            as? [String: Any]
-        let updated = try #require(
-            specific?["updatedInput"] as? [String: Any]
+        return try #require(
+            output["hookSpecificOutput"] as? [String: Any]
         )
-        #expect(updated["timeout"] as? Int == 600_000)
-        #expect(updated["run_in_background"] as? Bool == true)
-        return updated["command"] as? String
     }
 }

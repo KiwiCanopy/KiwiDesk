@@ -30,6 +30,11 @@ HEAVY = re.compile(
     r"|scripts/(?:release|build-app)\.sh\b)"
 )
 
+# The only shape approved on the hook's own authority: nothing a
+# shell could expand, chain or redirect. The release scripts push
+# and sign, so they queue but keep the normal check.
+PLAIN = re.compile(r"swift (?:build|test)(?: [A-Za-z0-9_./:=,-]+)*")
+
 
 def main() -> int:
     try:
@@ -51,15 +56,16 @@ def main() -> int:
     updated["command"] = (
         f"{shlex.quote(wrapper)} bash -c {shlex.quote(command)}"
     )
-    json.dump(
-        {
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "updatedInput": updated,
-            }
-        },
-        sys.stdout,
-    )
+    output = {
+        "hookEventName": "PreToolUse",
+        "updatedInput": updated,
+    }
+    if PLAIN.fullmatch(command.strip()):
+        output["permissionDecision"] = "allow"
+        output["permissionDecisionReason"] = (
+            "plain gate step, queued behind scripts/gate-lock"
+        )
+    json.dump({"hookSpecificOutput": output}, sys.stdout)
     return 0
 
 
