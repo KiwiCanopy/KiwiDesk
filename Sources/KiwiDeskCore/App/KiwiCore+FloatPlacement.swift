@@ -58,7 +58,7 @@ extension KiwiCore {
         tiler.forgetSizeBound(id)
     }
 
-    /// A tiled window detection starts floating — a float rule
+    /// A tiled window detection starts floating (#1820) — a rule
     /// saved over it, a misread healed — is placed as the float
     /// verbs place one: read before the fold, placed after its
     /// retile by `placeDetectedFloat`. A window a rule floats at

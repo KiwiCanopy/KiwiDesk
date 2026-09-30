@@ -4376,8 +4376,12 @@ on the space the window RENDERS on — a sticky traveler's, not its
 home's, for the gate and the region alike: a window already an
 effective float there — its flag, or a floating-mode member whose
 frame is the user's — keeps it. App rules floating a window at
-creation stay out, as does a Space's own entry into floating
-mode, which #1177's quit grid owns.
+creation stay out, since the frame it opens with is its app's, as
+does a Space's own entry into floating mode, which #1177's quit
+grid owns. A rule saved over a window already TILED, or a
+detection misread healing into a float, is placed like the verb
+(#1820): the frame that window brings is a layout slot, which is
+what the placement exists to replace.
 
 *A move into a floating Space is placed the same way (#1708).* A
 tiled window a move verb files into a floating-mode Space —

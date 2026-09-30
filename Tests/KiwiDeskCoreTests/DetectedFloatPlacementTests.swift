@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A tiled window detection starts floating — a float rule saved
-/// over it — is placed as the float verbs place one (#1674): it
+/// over it — is placed as the float verbs place one (#1820): it
 /// leaves its layout slot for the centred placement, `keep` leaves
 /// it, and a window already an effective float is never placed.
 @Suite("Float placement on a detection flip", .serialized)

@@ -35,7 +35,7 @@
 /// over. The float PLACEMENT of `make_floating` /
 /// `toggle_floating` (#1674), of a move verb's entry into a
 /// floating Space (#1708) and of a detection flip over a tiled
-/// window (`DetectedFloatPlacementTests`) is ruled onto it: a
+/// window (#1820, `DetectedFloatPlacementTests`) is ruled onto it: a
 /// window already an effective float keeps its frame, since a
 /// floating-mode member's frame is the user's, and the placement's cascade
 /// steps off every effective float of the Space
