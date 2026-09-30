@@ -1,0 +1,42 @@
+#!/bin/bash
+# Run a heavy gate step while holding the ONE machine-wide gate
+# slot, at low priority: parallel sessions each running
+# `swift test` throttle the machine into timing flakes.
+# Usage: scripts/gate-lock <command ...>
+#
+# A kernel lock (lockf), so a holder that dies releases it. Not
+# re-entrant across processes: a nested call runs straight
+# through on KIWIDESK_GATE_LOCK_HELD. Agents are queued through
+# scripts/gate-hook; a human in a terminal types this prefix.
+set -uo pipefail
+
+if [ "$#" -eq 0 ]; then
+    echo "usage: scripts/gate-lock <command ...>" >&2
+    exit 64
+fi
+if [ "${KIWIDESK_GATE_LOCK_HELD:-}" = 1 ]; then
+    exec "$@"
+fi
+
+# The per-user temp dir, not $TMPDIR: a sandboxed session may
+# remap $TMPDIR, and every session must meet at one file.
+DIR="$(getconf DARWIN_USER_TEMP_DIR 2>/dev/null || echo /tmp/)"
+LOCK="${DIR}kiwidesk-gate.lock"
+HOLDER="${DIR}kiwidesk-gate.holder"
+WAIT="${KIWIDESK_GATE_WAIT:-1800}"
+
+if ! /usr/bin/lockf -k -s -t 0 "$LOCK" true; then
+    echo "==> gate busy ($(cat "$HOLDER" 2>/dev/null ||
+        echo unknown holder)); waiting up to ${WAIT}s" >&2
+fi
+
+export KIWIDESK_GATE_LOCK_HELD=1
+export KIWIDESK_GATE_HOLDER="$PWD pid $$ since $(date +%T)"
+/usr/bin/lockf -k -t "$WAIT" "$LOCK" /bin/sh -c \
+    'printf "%s\n" "$KIWIDESK_GATE_HOLDER" > "$0"
+     exec /usr/bin/nice -n 10 "$@"' "$HOLDER" "$@"
+STATUS=$?
+if [ "$STATUS" -eq 75 ]; then
+    echo "==> gate still busy after ${WAIT}s; gave up" >&2
+fi
+exit "$STATUS"
