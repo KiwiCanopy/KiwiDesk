@@ -17,8 +17,10 @@ extension KiwiCore {
         .action(
             L("bar.menu.new_space", "New Space"),
             enabled: chipScreen(of: id) != nil,
-            // What it makes, said where it is chosen (#1790).
-            subtitle: L("bar.menu.new_space.temporary", "temporary")
+            // What it makes, said where it is chosen (#1790) — and
+            // with no arrangement live nothing is temporary.
+            subtitle: liveHome == nil
+                ? nil : L("bar.menu.new_space.temporary", "temporary")
         ) { [weak self] in
             guard let self, let screen = chipScreen(of: id) else { return }
             let space = mintedSpaceNumber()

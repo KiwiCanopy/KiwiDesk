@@ -4,6 +4,10 @@ import Foundation
 extension KiwiCore {
     /// Loads (or reloads) init.lua into a fresh VM.
     public func loadConfig() {
+        // #1790: `init.lua`'s Spaces are undeclared until its run
+        // returns, so nothing is retired meanwhile.
+        profiles.arrangementInFlight += 1
+        defer { profiles.arrangementInFlight -= 1 }
         // Before the settle, which may rewrite a profile file the
         // #1741 crossing still has to read.
         prepareAppWide()

@@ -33,11 +33,7 @@ public struct StateMarkColors: Sendable, Equatable {
 final class StateBadgeView: NSView {
     let symbol = NSImageView()
 
-    /// The SF Symbol the badge draws now.
-    private(set) var symbolName: String
-
     init(symbolName: String) {
-        self.symbolName = symbolName
         super.init(frame: .zero)
         wantsLayer = true
         layer?.masksToBounds = true
@@ -55,19 +51,6 @@ final class StateBadgeView: NSView {
     required init?(coder: NSCoder) { fatalError() }
 
     override var isFlipped: Bool { true }
-
-    /// Draws `symbol` in place of the current one — one corner
-    /// badge wearing whichever state its item has (#1790).
-    func show(
-        symbol name: String,
-        configuration: NSImage.SymbolConfiguration
-    ) {
-        symbolName = name
-        symbol.image = NSImage(
-            systemSymbolName: name,
-            accessibilityDescription: nil
-        )?.withSymbolConfiguration(configuration)
-    }
 
     override func layout() {
         super.layout()

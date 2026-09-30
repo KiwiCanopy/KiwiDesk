@@ -198,7 +198,10 @@ extension KiwiCore {
                 config.spaceModes[space.id] ?? .bsp
             )
         }
-        spacePins = keepingTemporaryPins(config.spacePins)
+        spacePins = keepingPins(
+            of: temporaries.subtracting(inList.union(extra)),
+            over: config.spacePins
+        )
         mainSpaces = config.mainSpaces
         // A fallback pointing outside the edited space list is
         // meaningless — drop it rather than persist a dangling

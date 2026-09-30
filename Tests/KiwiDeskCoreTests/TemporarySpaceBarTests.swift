@@ -52,8 +52,8 @@ struct TemporarySpaceBarTests {
         #expect(temporary.marker == .temporary)
         #expect(try item(core, SpaceID(1)).marker == nil)
         let drawn = view(temporary)
-        #expect(!drawn.markerBadge.isHidden)
-        #expect(drawn.markerBadge.symbolName == "hourglass")
+        #expect(!drawn.markerView.isHidden)
+        #expect(drawn.markerSymbol == "hourglass")
         #expect(
             drawn.accessibilityLabel()
                 == "Space 7, temporary, windows: 0, not current"
@@ -65,8 +65,8 @@ struct TemporarySpaceBarTests {
         let core = try desk.docked()
         core.handle(.displaysChanged([desk.builtIn]))
         let drawn = view(try item(core, SpaceID(5)))
-        #expect(!drawn.markerBadge.isHidden)
-        #expect(drawn.markerBadge.symbolName == "display")
+        #expect(!drawn.markerView.isHidden)
+        #expect(drawn.markerSymbol == "display.2")
     }
 
     @Test("the sticky badge switch hides neither marker")
@@ -76,10 +76,10 @@ struct TemporarySpaceBarTests {
         var style = SpaceBarLook()
         style.bar.stickyBadge = false
         let temporary = view(try item(core, SpaceID(7)), style: style)
-        #expect(!temporary.markerBadge.isHidden)
+        #expect(!temporary.markerView.isHidden)
         core.handle(.displaysChanged([desk.builtIn]))
         let heldID = try #require(core.state.heldSpaces.keys.first)
         let held = view(try item(core, heldID), style: style)
-        #expect(!held.markerBadge.isHidden)
+        #expect(!held.markerView.isHidden)
     }
 }

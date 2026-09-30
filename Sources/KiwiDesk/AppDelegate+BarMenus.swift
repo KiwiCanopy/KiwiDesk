@@ -21,7 +21,7 @@ extension AppDelegate {
     /// switching back.
     static func confirmsSpaceDelete(_ question: SpaceDeleteQuestion) -> Bool {
         let alert = NSAlert()
-        alert.alertStyle = .warning
+        alert.alertStyle = .informational
         alert.messageText = L(
             "bar.delete_space_confirm.title",
             "Delete Space \u{201C}%1$@\u{201D} from profile "
@@ -32,9 +32,13 @@ extension AppDelegate {
         if question.carriesOverrides {
             alert.informativeText = SpaceDeleteWording.overridesMessage
         }
-        alert.addButton(withTitle: SpaceDeleteWording.delete)
-        alert.buttons.first?.hasDestructiveAction = true
-        alert.addButton(withTitle: SpaceDeleteWording.cancel)
+        let delete = alert.addButton(withTitle: SpaceDeleteWording.delete)
+        delete.hasDestructiveAction = true
+        let cancel = alert.addButton(withTitle: SpaceDeleteWording.cancel)
+        // Irreversible: Cancel is the default (Return / Escape),
+        // Delete needs a deliberate click, as `ConfigIssuesWindow`.
+        delete.keyEquivalent = ""
+        cancel.keyEquivalent = "\r"
         NSApp.activate()
         return alert.runModal() == .alertFirstButtonReturn
     }

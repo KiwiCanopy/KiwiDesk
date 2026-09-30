@@ -73,7 +73,7 @@ that order.
 :::
 
 :::unreleased
-The Space Bar draws a screen marker on a held Space's
+The Space Bar draws a two-screen marker after a held Space's
 identifier, and VoiceOver reads the screen it came from, its old
 name when it was renumbered, and that it is not saved: saving a
 profile never includes a held Space.

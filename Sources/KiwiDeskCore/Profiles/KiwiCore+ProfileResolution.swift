@@ -17,6 +17,8 @@ extension KiwiCore {
         cause: ProfileApplyCause
     ) {
         // Owed #1741 and #1752 crossings end at the first apply.
+        profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
+        defer { profiles.arrangementInFlight -= 1 }
         adoptAppWide(from: profile)
         adoptSharedLook(from: profile)
         let pruneStaleSpaces = cause.prunesStale
@@ -32,9 +34,7 @@ extension KiwiCore {
             declared: profile.declaredSpaces,
             into: .profile(profile.name)
         )
-        // Read before the partitioning filing, the adoption or the
-        // incoming Spaces move what is live and what is declared
-        // (#1790).
+        // Read before anything moves what is live or declared (#1790).
         let changes = dropsTemporarySpaces(into: .profile(profile.name))
         let temporaries = Set(liveTemporarySpaces)
         let switching = recordOutgoingPartitioning(before: profile)
@@ -77,8 +77,7 @@ extension KiwiCore {
         // #1507: an unplug holds the gone screen's Spaces; an
         // explicit load ends every hold and prunes them like any
         // undeclared Space.
-        // #1790: a change of arrangement is a switch here too, even
-        // where no partitioning record makes `switching` say so.
+        // An arrangement change is a switch even with no record (#1790).
         if cause == .monitorChange, switching || changes {
             holdDepartingSpaces(
                 declared: declared,
@@ -132,7 +131,10 @@ extension KiwiCore {
         let live = liveFingerprints
         let fitting = profile.set(matching: live)
         let fits = fitting != nil
-        spacePins = keepingTemporaryPins(fitting?.spaceMonitorMap ?? [:])
+        spacePins = keepingPins(
+            of: temporaries.subtracting(declared),
+            over: fitting?.spaceMonitorMap ?? [:]
+        )
         mainSpaces = Set(profile.mainSpaces)
         // Adopt the profile's explicit rehome target (#68);
         // a dangling reference reads as unset.
@@ -186,6 +188,8 @@ extension KiwiCore {
         forceRetile: Bool
     ) {
         supersedeMonitorSettle()
+        profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
+        defer { profiles.arrangementInFlight -= 1 }
         let changes = dropsTemporarySpaces(
             into: .standard(composed.sourceName)
         )
@@ -219,11 +223,12 @@ extension KiwiCore {
         // `resolveSpaceDisplays` re-derives below, but the setup's
         // five-per-display plan is NOT the count's Standard, so its
         // blocks would otherwise scatter into the Standard's slots.
-        adoptComposedPlacement(composed)
-        // A switch to a Standard drops them too (#1790) — only them,
-        // since this door prunes nothing else, and never one with
-        // windows on a screen that left, which stays as it would
-        // have before.
+        adoptComposedPlacement(
+            composed,
+            keepingPinsOf: temporaries.subtracting(composed.spaces)
+        )
+        // A switch to a Standard drops them too — only them, and never
+        // one with windows on a screen that left (#1790).
         if changes {
             let dropped = temporaries.subtracting(composed.spaces)
                 .filter { !departsWithWindows($0) }

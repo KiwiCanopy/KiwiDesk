@@ -46,6 +46,11 @@ public final class ProfileManager {
     /// from, and what a Desktop switch asks for the declared
     /// Spaces instead of the disk (#1245).
     private(set) var active: ActiveProfile?
+    /// Nonzero while an apply or a config load moves what is live
+    /// and what is declared (#1790): a temporary Space is judged
+    /// against the adoption state, which is the OUTGOING one until
+    /// the apply's last line, so nothing is retired meanwhile.
+    var arrangementInFlight = 0
     /// The live profile's saved layout modes as last adopted or
     /// written (#1245, #1518), tagged so a stale copy never
     /// answers for another profile.

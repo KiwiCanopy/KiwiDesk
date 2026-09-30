@@ -116,7 +116,8 @@ extension KiwiCore {
     /// Standard, it's load-bearing — without it the blocks scatter
     /// into the Standard's slots (#485).
     func adoptComposedPlacement(
-        _ composed: ProfileComposition.Composed
+        _ composed: ProfileComposition.Composed,
+        keepingPinsOf temporaries: Set<SpaceID>
     ) {
         let ordered = PositionalDisplays.ordered(
             state.workspaces.allDisplays,
@@ -134,7 +135,7 @@ extension KiwiCore {
                 pins[space] = display.fingerprint
             }
         }
-        spacePins = keepingTemporaryPins(pins)
+        spacePins = keepingPins(of: temporaries, over: pins)
         mainSpaces = mains
     }
 

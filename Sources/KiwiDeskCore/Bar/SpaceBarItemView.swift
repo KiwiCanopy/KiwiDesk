@@ -59,7 +59,9 @@ final class SpaceBarItemView: NSView {
     weak var glyphActions: SpaceBarGlyphActions?
     /// Blank until its item wears a marker; the style pass draws
     /// the marker's symbol (`styleMarkerBadge`).
-    let markerBadge = StateBadgeView(symbolName: "")
+    /// The held or temporary Space marker, inline after the
+    /// identifier in its ink (#1507, #1790).
+    let markerView = NSImageView()
     /// Divider between identifier and app glyphs (QA 2026-07-19).
     let identifierDivider = NSView()
     let accent = SheenRimView()
@@ -132,7 +134,9 @@ final class SpaceBarItemView: NSView {
         addSubview(identifierDivider)
         addSubview(overflowBadge)
         addSubview(leadingBadge)
-        addSubview(markerBadge)
+        markerView.imageScaling = .scaleProportionallyUpOrDown
+        markerView.setAccessibilityElement(false)
+        addSubview(markerView)
         addSubview(accentClip)
         accentClip.addSubview(accent)
         springRing.fillColor = nil

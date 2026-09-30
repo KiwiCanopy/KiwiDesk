@@ -54,6 +54,7 @@ struct TemporarySpaceTests {
         #expect(!core.isTemporary(SpaceID(8)))
         // init.lua's last run named 7 (a load resets that ledger).
         core.initDeclaredSpaces = [SpaceID(7)]
+        #expect(core.state.workspaces[SpaceID(7)] != nil)
         #expect(!core.isTemporary(SpaceID(7)))
         #expect(core.liveTemporarySpaces.isEmpty)
     }

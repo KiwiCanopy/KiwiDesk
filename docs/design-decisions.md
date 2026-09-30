@@ -13631,13 +13631,13 @@ pressing it then makes an empty Space of that number, as
 `focus_space` does for any Space it does not find.
 
 :::unreleased
-**A drawn badge, never a name change.** Identity stays the bare
+**A drawn marker, never a name change.** Identity stays the bare
 name, so `focus_space 6` and the digit chord work unchanged. What
 the user needs — this Space is held, from which screen, what it
-was called there, and that nothing saves it — rides a `display`
-marker on the identifier, drawn as an outline in one colour so it
-reads as an object rather than a mark to decode, and the sentence
-the item announces to VoiceOver. There is no tooltip (owner
+was called there, and that nothing saves it — rides a two-screen
+marker (`display.2`) drawn after the identifier in its own ink, an
+outline at regular weight so it reads as an object rather than a
+mark to decode, and the sentence the item announces to VoiceOver. There is no tooltip (owner
 ruling, 2026-09-25): macOS shows a view's tooltip only while its
 app is frontmost, and KiwiDesk is a background app, so a tooltip
 would promise a sentence nobody sees. The badge is therefore a
@@ -13938,10 +13938,15 @@ shortcut follow its name, never its row.
 **A marker, never a name change.** The same argument as the held
 Space's: identity stays the bare name, so `focus_space 6` and the
 digit chord work unchanged. A temporary Space wears an hourglass
-in the identifier's top-trailing corner, the slot the held marker
-uses; a Space is never both, so they share it. Like the held
-marker, it is not hidden by `space_bar.set_sticky_badge(false)`,
-which hides the window-state badges only.
+after its identifier, in the slot the held marker uses; a Space is
+never both, so they share it. The marker takes the identifier's
+ink, dimming and lighting with it, and no plate: a filled disc
+belongs to the badges, which count or mark window state, and at a
+badge's size a thin glyph like the hourglass stopped reading. It
+is drawn a little taller than the digits for the same reason, and
+the item grows by its slot. Like the held marker, it is not
+hidden by `space_bar.set_sticky_badge(false)`, which hides the
+window-state badges only.
 :::
 
 ### Monitors

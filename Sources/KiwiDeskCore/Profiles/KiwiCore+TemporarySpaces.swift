@@ -75,14 +75,18 @@ extension KiwiCore {
     }
 
     /// `pins` — an arrangement's, about to replace the live ones —
-    /// with each temporary Space's own pin kept: it is in no
-    /// arrangement, so none restates it, and a reload or a Save
-    /// must not move a New Space off the screen it was made on.
-    func keepingTemporaryPins(
-        _ pins: [SpaceID: String]
+    /// with the live pins of `temporaries` kept: they are in no
+    /// arrangement, so none restates them, and a reload or a Save
+    /// must not move a New Space off the screen it was made on. The
+    /// caller hands the set it read before the apply, less what the
+    /// apply declares, since mid-apply the adoption is the outgoing
+    /// one.
+    func keepingPins(
+        of temporaries: Set<SpaceID>,
+        over pins: [SpaceID: String]
     ) -> [SpaceID: String] {
-        let temporary = spacePins.filter { isTemporary($0.key) }
-        return pins.merging(temporary) { own, _ in own }
+        let kept = spacePins.filter { temporaries.contains($0.key) }
+        return pins.merging(kept) { own, _ in own }
     }
 
     /// Whether this apply is a switch of arrangement, which drops
@@ -111,8 +115,12 @@ extension KiwiCore {
     /// heal would mint straight back. Returns whether any went.
     @discardableResult
     func retireEmptiedTemporarySpaces() -> Bool {
+        guard profiles.arrangementInFlight == 0 else { return false }
+        let temporaries = liveTemporarySpaces
+        // A Space declared since it was armed is not temporary now.
+        state.temporaryArmed.formIntersection(temporaries)
         var retired = false
-        for id in liveTemporarySpaces {
+        for id in temporaries {
             guard spaceHoldsNothing(id) else {
                 state.temporaryArmed.insert(id)
                 continue

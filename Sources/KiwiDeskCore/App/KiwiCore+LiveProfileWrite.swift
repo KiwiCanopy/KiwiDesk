@@ -40,7 +40,12 @@ extension KiwiCore {
             var profile = try profiles.read(name: name)
             profile.apply(edit, monitors: liveFingerprints)
             try profiles.write(profile)
-            profiles.redeclare(profile)
+            // Only a Space edit moves what is declared; a settings
+            // edit leaves that to the next apply (#1245).
+            if case .settings = edit {
+            } else {
+                profiles.redeclare(profile)
+            }
             // A follower's look is the shared one (#1752); an edit
             // that leaves the look alone lands nothing.
             recordLookWrite(of: profile)

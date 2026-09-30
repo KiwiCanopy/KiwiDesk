@@ -5161,7 +5161,7 @@ does not reset its mode
 ([#1507](https://github.com/KiwiCanopy/KiwiDesk/issues/1507)).
 
 :::unreleased
-A held space wears a screen marker in the Space Bar. A temporary
+A held space wears a two-screen marker in the Space Bar. A temporary
 space held this way comes back temporary.
 :::
 

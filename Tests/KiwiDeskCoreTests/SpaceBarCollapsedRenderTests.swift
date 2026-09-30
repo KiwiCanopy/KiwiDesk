@@ -60,19 +60,19 @@ struct SpaceBarCollapsedRenderTests {
         #expect(disc.midY < view.bounds.midY)
     }
 
-    /// The held asterisk owns the top corner (#1507), so the disc
-    /// takes the bottom one rather than covering it.
+    /// The Space marker sits after the identifier (#1507, #1790),
+    /// so the disc keeps its corner and never covers it.
     @Test(
-        "A held Space's disc takes the bottom corner",
+        "A marked Space's disc stays clear of its marker",
         arguments: [3, 12]
     )
-    func heldDiscMovesDown(windows: Int) throws {
+    func markedDiscStaysClear(windows: Int) throws {
         let view = try render(.count, held: true, windows: windows)
             .itemViews[1]
         view.layoutSubtreeIfNeeded()
-        #expect(!view.markerBadge.isHidden)
-        #expect(view.overflowBadge.frame.midY > view.bounds.midY)
-        #expect(!view.overflowBadge.frame.intersects(view.markerBadge.frame))
+        #expect(!view.markerView.isHidden)
+        #expect(view.overflowBadge.frame.midY < view.bounds.midY)
+        #expect(!view.overflowBadge.frame.intersects(view.markerView.frame))
     }
 
     /// Past nine the disc reads "9+" and stays a disc, while the

@@ -1,12 +1,13 @@
 import AppKit
 
-/// The Space marker on the identifier cell's top-trailing corner —
-/// a separate view, so the identifier's ink framing (#1529/#1543)
-/// is untouched — and the Space's announced sentence: a held Space
-/// (#1507) wears a display, naming where it was held from, and a
-/// temporary one (#1790) an hourglass. A Space is never both, so
-/// they share the slot. Never gated on `style.stickyBadge`: the
-/// marker and the sentence are the whole affordance either has.
+/// The Space marker, drawn inline after the identifier in the
+/// identifier's own ink — a separate view, so the identifier's ink
+/// framing (#1529/#1543) is untouched — and the Space's announced
+/// sentence: a held Space (#1507) wears two screens, naming where
+/// it was held from, and a temporary one (#1790) an hourglass. A
+/// Space is never both, so they share the slot. Never gated on
+/// `style.stickyBadge`: it is no window-state badge, and the marker
+/// and the sentence are the whole affordance either has.
 extension SpaceBarItemView {
     /// Which marker a Space wears — one value, so a Space cannot
     /// carry two.
@@ -18,7 +19,7 @@ extension SpaceBarItemView {
         /// object rather than a mark to decode.
         var symbol: String {
             switch self {
-            case .held: return "display"
+            case .held: return "display.2"
             case .temporary: return "hourglass"
             }
         }
@@ -37,53 +38,61 @@ extension SpaceBarItemView {
         let originName: SpaceID?
     }
 
-    /// The badge family's Automatic fill; a shape, not a hue. The
-    /// symbol draws monochrome at regular weight.
-    func styleMarkerBadge() {
-        markerBadge.isHidden = marker == nil
-        if let marker, markerBadge.symbolName != marker.symbol {
-            markerBadge.show(
-                symbol: marker.symbol,
-                configuration: NSImage.SymbolConfiguration(
-                    pointSize: 0,
-                    weight: .regular
-                ).applying(.preferringMonochrome())
-            )
-        }
-        let fill = NSColor(kiwiHex: style.groupBadgeColor)
-        markerBadge.layer?.backgroundColor = fill.cgColor
-        markerBadge.symbol.contentTintColor = fill.contrastingGlyph
-        markerBadge.alphaValue = untintedAlpha
+    /// The symbol the marker draws now, if any.
+    var markerSymbol: String? {
+        markerView.isHidden ? nil : marker?.symbol
     }
 
-    /// Places the marker on the identifier cell at `offset`.
-    func layoutMarkerBadge(onCellAt offset: CGFloat, cell: CGFloat) {
-        guard !markerBadge.isHidden else { return }
-        let side = StateBadgeMetrics.side(cell: cell)
-        let cellRect =
+    /// The marker's side along the bar: a little taller than the
+    /// identifier's digits, so a thin glyph still reads.
+    static func markerSide(cell: CGFloat) -> CGFloat {
+        (cell * 0.55).rounded()
+    }
+
+    /// How much a marker adds to the item's length — its side and
+    /// the gap before it; zero without one.
+    static func markerLength(cell: CGFloat, marked: Bool) -> CGFloat {
+        marked ? markerSide(cell: cell) + 2 : 0
+    }
+
+    /// Monochrome at regular weight, in the identifier's own ink,
+    /// dimming and lighting with it.
+    func styleMarker() {
+        markerView.isHidden = marker == nil
+        guard let marker else { return }
+        markerView.image = NSImage(
+            systemSymbolName: marker.symbol,
+            accessibilityDescription: nil
+        )?.withSymbolConfiguration(
+            NSImage.SymbolConfiguration(pointSize: 0, weight: .regular)
+                .applying(.preferringMonochrome())
+        )
+        switch spaceGlyph {
+        case .symbol:
+            markerView.contentTintColor = stateColor
+            markerView.alphaValue = 1
+        case .text(_, let tinted):
+            markerView.contentTintColor = tinted ? stateColor : .labelColor
+            markerView.alphaValue = tinted ? 1 : untintedAlpha
+        }
+    }
+
+    /// Places the marker after the identifier cell ending at
+    /// `offset`, centred across the item on its alignment rect so
+    /// a glyph's uneven padding does not pull it off centre.
+    func layoutMarker(after offset: CGFloat, cell: CGFloat) {
+        guard !markerView.isHidden else { return }
+        let side = Self.markerSide(cell: cell)
+        let lead = offset + 2
+        let across = ((horizontal ? bounds.height : bounds.width) - side) / 2
+        let rect =
             horizontal
-            ? CGRect(
-                x: offset,
-                y: (bounds.height - cell) / 2,
-                width: cell,
-                height: cell
-            )
-            : CGRect(
-                x: (bounds.width - cell) / 2,
-                y: offset,
-                width: cell,
-                height: cell
-            )
-        markerBadge.frame = backingAlignedRect(
-            CGRect(
-                x: cellRect.maxX - side + 1,
-                y: cellRect.minY - 1,
-                width: side,
-                height: side
-            ),
+            ? CGRect(x: lead, y: across, width: side, height: side)
+            : CGRect(x: across, y: lead, width: side, height: side)
+        markerView.frame = backingAlignedRect(
+            rect,
             options: .alignAllEdgesNearest
         )
-        markerBadge.needsLayout = true
     }
 
     /// The Space's name as announced: the held frames where it is

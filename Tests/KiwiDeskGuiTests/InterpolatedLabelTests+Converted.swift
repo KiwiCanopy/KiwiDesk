@@ -257,10 +257,6 @@ extension InterpolatedLabelTests {
         // #1393: an unreadable profile's line names the Profiles
         // destination; the copy's grey reason names Save.
         "app_rules.reach.unreadable": 1,
-        // The Space menu's way to a temporary Space's row names
-        // the Spaces page (#1790).
-        "app_rules.space.add_temporary_one": 1,
-        "app_rules.space.add_temporary_many": 1,
         "footer.save_copy.reach_blocked": 1,
         // A draft whose page moved names Revert.
         "profiles.page_moved": 1,

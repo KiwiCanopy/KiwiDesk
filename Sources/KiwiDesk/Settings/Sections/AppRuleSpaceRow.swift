@@ -85,40 +85,60 @@ struct AppRuleSpaceRow: View {
         .accessibilityValue(spaceFacetLabel)
     }
 
-    /// Temporary Spaces cannot be a rule's target (#1790): listed
-    /// disabled, with the way to add one to the profile. The live
-    /// page only — a stored profile's page is another arrangement.
+    /// Temporary Spaces cannot be a rule's target (#1790): one row
+    /// each, in the Space rows' own shape, leading to the row that
+    /// adds it to the profile — greyed, with the reason once, where
+    /// no profile file is live. The live page only — a stored
+    /// profile's page is another arrangement.
     @ViewBuilder private var temporarySpaces: some View {
         let temporary = model.liveOnlySpaces.filter(\.isTemporary)
-        if !model.editingStoredProfile, let first = temporary.first {
+        if !model.editingStoredProfile, !temporary.isEmpty {
+            let canAdd = temporary.contains(where: \.canAdd)
             Section(
-                L("app_rules.space.temporary_header", "Temporary")
+                L(
+                    "app_rules.space.temporary_header",
+                    "Temporary — not in this profile"
+                )
             ) {
                 ForEach(temporary) { space in
-                    Button(space.id.raw) {}.disabled(true)
+                    Button(Self.addTemporaryTitle(space.id)) {
+                        model.nav.pendingReveal = SettingsAnchor(
+                            destination: .spaces,
+                            anchor: LiveOnlySpaceRow.anchor(space.id)
+                        )
+                    }
+                    .disabled(!canAdd)
+                    .accessibilityLabel(Self.addTemporarySpoken(space.id))
                 }
-                Button(Self.addTemporaryTitle(many: temporary.count > 1)) {
-                    model.nav.pendingReveal = SettingsAnchor(
-                        destination: .spaces,
-                        anchor: LiveOnlySpaceRow.anchor(first.id)
-                    )
+                if !canAdd {
+                    Button(Self.noProfile) {}.disabled(true)
                 }
             }
         }
     }
 
-    static func addTemporaryTitle(many: Bool) -> String {
-        many
-            ? L(
-                "app_rules.space.add_temporary_many",
-                "Add them to this profile in %1$@…",
-                SettingsDestination.spaces.title
-            )
-            : L(
-                "app_rules.space.add_temporary_one",
-                "Add it to this profile in %1$@…",
-                SettingsDestination.spaces.title
-            )
+    static func addTemporaryTitle(_ space: SpaceID) -> String {
+        L(
+            "app_rules.space.add_temporary",
+            "%1$@ — add it first…",
+            space.raw
+        )
+    }
+
+    static func addTemporarySpoken(_ space: SpaceID) -> String {
+        L(
+            "app_rules.space.add_temporary.spoken",
+            "Space %1$@ is temporary. Add it to this profile to apply "
+                + "app rules to it.",
+            space.raw
+        )
+    }
+
+    private static var noProfile: String {
+        L(
+            "spaces.add_to_profile.no_profile",
+            "Save this setup as a profile first"
+        )
     }
 
     /// The drawn and spoken value, one expression.

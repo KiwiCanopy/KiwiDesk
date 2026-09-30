@@ -555,16 +555,18 @@ rather than the row it names makes the user search again. So:
   the status item's Layout menu builds from too; each side hands
   it its own words, so no sentence crosses the #96 seam.
 
-## A Space wears one marker, drawn in one corner (#1790)
+## A Space wears one marker, drawn after its identifier (#1790)
 
 A held Space (#1507) and a temporary one (#1790) each wear a
-marker on the identifier's top-trailing corner, and a Space is
-never both, so the two share one `markerBadge`. **A further Space
-state joins `SpaceBarItemView.Marker`**, which picks the symbol,
-the `spaceName` sentence and the overflow disc's lower corner in
-one place, rather than growing a second corner view; and **no
-marker is gated on `style.stickyBadge`**, which hides window
-state alone (`TemporarySpaceBarTests` ▸
+marker after the identifier, in its ink, and a Space is never
+both, so the two share one `markerView`. **A further Space state
+joins `SpaceBarItemView.Marker`**, which picks the symbol and the
+`spaceName` sentence in one place, rather than growing a second
+view; **its slot is measured through the one `markerLength`**,
+which `autoLength` and the layout both add, so the length the
+shelf plans is the one the item draws (`SpaceBarCollapsedRenderTests`);
+and **no marker is gated on `style.stickyBadge`**, which hides
+window state alone (`TemporarySpaceBarTests` ▸
 `stickySwitchKeepsMarkers`).
 
 ## A per-display bar answers the SHOWN question, never the render one
