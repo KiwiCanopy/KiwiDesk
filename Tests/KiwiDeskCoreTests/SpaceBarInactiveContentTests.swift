@@ -82,7 +82,8 @@ struct SpaceBarInactiveContentTests {
         let built = items(seededCore(), .apps)
         let other = try #require(built[SpaceID("2")])
         #expect(other.collapse == nil)
-        #expect(other.apps.map(\.name) == ["Mail", "Mail", "Web"])
+        // The floating Mail closes the chip (#1826).
+        #expect(other.apps.map(\.name) == ["Mail", "Web", "Mail"])
     }
 
     @Test("Window count keeps the identifier and the count")

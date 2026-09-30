@@ -97,8 +97,9 @@ struct FloatFlagReaderCensusTests {
         // The float tier of directional focus: the tiled tier
         // already reaches a floating-mode space by live frame.
         "State/StateCoordinator+FloatFocus.swift": [.ruledToStay: 1],
-        // The badge and its group-breaking (owner, 2026-09-13).
-        "App/KiwiCore+SpaceBarItems.swift": [.ruledToStay: 2],
+        // The badge, its group-breaking (owner, 2026-09-13) and the
+        // chip's trailing floats (#1826).
+        "App/KiwiCore+SpaceBarItems.swift": [.ruledToStay: 3],
         // The on-window floating mark, the badge's twin (#1799).
         "App/KiwiCore+StickyMarks.swift": [.ruledToStay: 1],
         // The bar menu's Float/Tile label and submenu ticks name

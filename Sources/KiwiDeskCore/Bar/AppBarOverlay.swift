@@ -51,6 +51,10 @@ public final class AppBarOverlay {
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
+    /// The rule and the floating mark between the tiled row and
+    /// its floats (#1826).
+    let floatRule = FloatBreakRule()
+    let floatMark = FloatBreakMark()
     /// The bars' context menus (#1518): held by the section root,
     /// which every view in the section finds by walking up.
     weak var contextMenus: BarContextMenus? {
@@ -142,9 +146,8 @@ public final class AppBarOverlay {
         scrollOffset = Self.scrollOffset(
             current: scrollOffset,
             activeIndex: followingFocus ? activeIndex : nil,
-            slot: m.slot,
+            lengths: m.lengths,
             gap: m.gap,
-            count: items.count,
             axis: m.viewport,
             margin: ShelfOverflow.followMargin(
                 gap: m.gap,
@@ -172,15 +175,9 @@ public final class AppBarOverlay {
             offset: scrollOffset,
             horizontal: m.horizontal
         )
-        let frames = Self.frames(
-            lengths: Array(
-                repeating: m.slot,
-                count: items.count
-            ),
+        let frames = Self.itemFrames(
             in: CGRect(origin: .zero, size: runFrame.size),
-            gap: m.gap,
-            horizontal: m.horizontal,
-            alignment: m.alignment
+            m: m
         )
         let runStart: CGFloat
         if let first = frames.first {
@@ -214,6 +211,7 @@ public final class AppBarOverlay {
                     animated: true
                 )
             }
+            layoutFloatBreak(frames: frames, m: m, depth: depth, style: style)
         }
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
@@ -227,6 +225,7 @@ public final class AppBarOverlay {
                 glyph: item.glyph,
                 count: item.count,
                 titleCut: item.titleCut,
+                floating: item.floating,
                 active: active,
                 horizontal: m.horizontal,
                 style: style

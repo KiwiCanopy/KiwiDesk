@@ -2,12 +2,20 @@ import AppKit
 
 /// Drag-and-drop item reordering and reflow for AppBarOverlay.
 extension AppBarOverlay {
+    /// The tiled items, which alone reorder: a float has no slot
+    /// in the row (#1826).
+    private var tiledCount: Int {
+        lastShown.map { Self.tiledCount($0.items) } ?? 0
+    }
+
     /// Moves dragged item view and live reflows sibling slots.
     func dragMoved(
         _ view: AppBarItemView,
         to windowPoint: CGPoint
     ) {
-        guard let m = lastMetrics else { return }
+        guard let m = lastMetrics,
+            (itemViews.firstIndex(of: view).map { $0 < tiledCount }) == true
+        else { return }
         let mover = draggableView(for: view)
         let point = itemRun.convert(windowPoint, from: nil)
         if itemRun.subviews.last !== mover {
@@ -25,7 +33,8 @@ extension AppBarOverlay {
 
     func dragEnded(_ view: AppBarItemView) {
         guard let m = lastMetrics,
-            let from = itemViews.firstIndex(of: view)
+            let from = itemViews.firstIndex(of: view),
+            from < tiledCount
         else { return }
         let mover = draggableView(for: view)
         let to = Self.dropIndex(
@@ -34,7 +43,7 @@ extension AppBarOverlay {
             start: contentStart(m),
             slot: m.slot,
             gap: m.gap,
-            count: itemViews.count
+            count: tiledCount
         )
         if to == from {
             // Nothing moved: snap the item back into line.
@@ -59,21 +68,12 @@ extension AppBarOverlay {
             start: contentStart(m),
             slot: m.slot,
             gap: m.gap,
-            count: itemViews.count
+            count: tiledCount
         )
         var order = itemViews
         order.remove(at: from)
         order.insert(dragged, at: min(to, order.count))
-        let frames = Self.frames(
-            lengths: Array(
-                repeating: m.slot,
-                count: order.count
-            ),
-            in: itemRun.bounds,
-            gap: m.gap,
-            horizontal: m.horizontal,
-            alignment: m.alignment
-        )
+        let frames = Self.itemFrames(in: itemRun.bounds, m: m)
         for (index, view) in order.enumerated()
         where view !== dragged {
             draggableView(for: view).frame = frames[index]
