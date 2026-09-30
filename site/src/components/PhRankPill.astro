@@ -1,6 +1,7 @@
 ---
 // The Product Hunt launch result as a hero pill, on both pages.
 // It links to the product page so the claim can be checked there.
+// The trophy takes the accent, not gold: gold reads as first place.
 import { Icon } from "astro-icon/components";
 
 interface Props {
@@ -11,11 +12,8 @@ const href = "https://www.producthunt.com/products/kiwidesk";
 ---
 <a class="pill pill--light pill--link" href={href}
   target="_blank" rel="noopener">
-  <svg class="pill__ph" width="15" height="15"
-    viewBox="0 0 31 31" aria-hidden="true">
-    <path fill="currentColor" fill-rule="evenodd"
-      d="M31 15.5a15.5 15.5 0 1 1-31 0 15.5 15.5 0 0 1 31 0ZM17.43 15.96h-4.34v-4.65h4.34a2.31 2.31 0 0 1 0 4.65m0-7.75h-7.4v15.5h3.06v-4.65h4.34a5.42 5.42 0 0 0 0-10.85" />
-  </svg>
+  <Icon class="pill__ph" name="lucide:trophy" width={15}
+    height={15} aria-hidden="true" />
   {label}
   <Icon name="lucide:arrow-up-right" width={13}
     height={13} aria-hidden="true" />
