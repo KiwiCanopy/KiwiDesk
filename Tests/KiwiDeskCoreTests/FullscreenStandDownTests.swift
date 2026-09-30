@@ -245,7 +245,7 @@ struct FullscreenStandDownTests {
     @Test("Both per-display bars hide on a fullscreen space")
     func perDisplayBarsHide() {
         let core = makeCore()
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return }
         core.state.apply(.displaysChanged([display]))

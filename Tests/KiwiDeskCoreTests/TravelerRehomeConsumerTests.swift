@@ -31,7 +31,7 @@ struct TravelerRehomeConsumerTests {
     /// screen, with a second space on the same display active in
     /// `mode`.
     private func makeFixture(mode: LayoutMode) -> Fixture? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let home = GeometryUtils.axVisibleFrame(of: screen)

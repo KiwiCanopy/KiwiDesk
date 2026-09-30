@@ -13,14 +13,14 @@ import Testing
 struct ShelfSplitDriverTests {
     private static let window = WindowID(1)
 
-    /// A core on the main screen holding one window in a
+    /// A core on the primary screen holding one window in a
     /// scrolling space, both bars on, the Space Bar on `space` and
     /// the App Bar on `app`. Nil where the host has no screen.
     private func makeCore(
         space: AppBarEdge,
         app: AppBarEdge
     ) -> (KiwiCore, DisplayID)? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()
