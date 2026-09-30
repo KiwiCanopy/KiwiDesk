@@ -21,12 +21,16 @@ extension StateSnapshot {
             }
         }
 
+        /// Keys that name one Space (`"01"` and `"1"`) are a
+        /// damaged file, never a write of ours: the first wins
+        /// rather than trapping at boot.
         var records: [String: [SpaceID: [WindowID]]] {
             byProfile.mapValues { spaces in
                 Dictionary(
-                    uniqueKeysWithValues: spaces.map {
+                    spaces.map {
                         (SpaceID($0.key), $0.value.map(WindowID.init))
-                    }
+                    },
+                    uniquingKeysWith: { first, _ in first }
                 )
             }
         }

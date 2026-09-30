@@ -51,13 +51,17 @@ extension KiwiCore {
     /// replay (#1802) — after the boot apply too, which must not
     /// read a carried record as a switch and prune. A record for
     /// a profile no longer on disk is dropped: it could never be
-    /// restored, and a new profile of that name is not it.
+    /// restored, and a new profile of that name is not it. An
+    /// empty listing is not proof — an unreadable directory lists
+    /// empty too — so it drops nothing.
     func adoptCarriedPartitioning(from session: StateSnapshot) {
         guard let carried = session.profileRecords?.records,
             !carried.isEmpty
         else { return }
         let saved = Set(profiles.list())
-        let kept = carried.filter { saved.contains($0.key) }
+        let kept =
+            saved.isEmpty
+            ? carried : carried.filter { saved.contains($0.key) }
         state.profilePartitioning.adopt(kept)
         onLog(
             "restore: carried the Space records of "

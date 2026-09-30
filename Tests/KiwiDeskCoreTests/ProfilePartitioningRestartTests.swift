@@ -97,6 +97,30 @@ struct ProfilePartitioningRestartTests {
         #expect(!core.state.profilePartitioning.hasRecord(for: "A"))
     }
 
+    /// Anything this session filed before the replay reflects the
+    /// scan's order, not the user's arrangement: the carried
+    /// record replaces it.
+    @Test("A carried record outranks one filed during the scan")
+    func carriedRecordWins() throws {
+        let (first, a, b) = try desk()
+        first.apply(profile: a, cause: .event)
+        for id in arranged { first.state.workspaces.add(id, to: dual) }
+        first.apply(profile: b, cause: .event)
+        let session = try throughTheFile(first.sessionSnapshot())
+
+        let (second, _, _) = try desk()
+        second.apply(profile: b, cause: .event)
+        second.state.profilePartitioning.record(
+            [Space(id: dual, windows: [WindowID(1)])],
+            as: "A"
+        )
+        second.arrangeBootDesk(session: session)
+        #expect(
+            second.state.profilePartitioning.remembered(for: "A")?[dual]
+                == arranged
+        )
+    }
+
     /// A record whose profile left the disk while KiwiDesk was
     /// down could never be restored, and a new profile of that
     /// name is not it.
@@ -122,6 +146,10 @@ struct ProfilePartitioningRestartTests {
         #expect(partial.profileRecords?.records["A"]?[dual] == arranged)
         #expect(partial.profileRecords?.byProfile["B"] == nil)
         #expect(partial.spaces.count == 1)
+
+        // Two keys naming one Space: damaged, and still no trap.
+        let twin = try decode(records: #"{"A":{"3":[6],"03":[7]}}"#)
+        #expect(twin.profileRecords?.records["A"]?.count == 1)
 
         let broken = try decode(records: #""garbage""#)
         #expect(broken.profileRecords == nil)
