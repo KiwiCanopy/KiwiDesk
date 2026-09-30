@@ -74,11 +74,23 @@ extension KiwiCore {
     private func foregroundOwned(front: pid_t?) -> Bool {
         guard let focused = focusedWindow,
             let front,
-            front == focused.pid,
+            owns(front: front, pid: focused.pid),
             eventLoop.observes(pid: focused.pid),
             !ignoredPanel.active.contains(focused.pid)
         else { return false }
         return true
+    }
+
+    /// Whether the frontmost process is `pid`'s app — the
+    /// loop's one reading of an announced pid (#1785).
+    func owns(front: pid_t, pid: pid_t) -> Bool {
+        eventLoop.names(front, appOf: pid)
+    }
+
+    /// Whether the one frontmost reading is `pid`'s app.
+    func frontmostOwns(pid: pid_t) -> Bool {
+        frontmostPIDProvider?().map { owns(front: $0, pid: pid) }
+            ?? false
     }
 
     /// The denied clause, said twice from ONE reading — the
@@ -96,7 +108,7 @@ extension KiwiCore {
             ?? "none"
         let reason: String
         if let focused, let front {
-            if front != focused.pid {
+            if !owns(front: front, pid: focused.pid) {
                 reason = "frontmost pid \(front) is another app"
             } else if !eventLoop.observes(pid: focused.pid) {
                 reason = "pid unobserved"

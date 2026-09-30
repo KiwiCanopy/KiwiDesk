@@ -35,6 +35,8 @@ extension EventLoop {
             writeEnhancedUI(pid, false)
         }
         observers = [:]
+        processIdentity.forgetAll()
+        shadows.forgetAll()
         elements = [:]
         enhancedUIBaselines = [:]
         manualAXApplied = []

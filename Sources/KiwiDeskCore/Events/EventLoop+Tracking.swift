@@ -97,6 +97,11 @@ extension EventLoop {
         else {
             return
         }
+        // Every subrole: Orion's twin reads AXUnknown as often
+        // as AXStandardWindow (#1785, device 2026-09-30).
+        guard
+            shadowVerdict(element, id: window.id, pid: pid) == .window
+        else { return }
         let verdict = autoFloatVerdict(
             element,
             id: window.id,
@@ -163,6 +168,13 @@ extension EventLoop {
             transientRetried[pid, default: []]
                 .insert(id).inserted
         else { return }
+        queueRetrack(pid: pid)
+    }
+
+    /// Queues `pid` for the scheduled re-track — the transient
+    /// ledger's one arm, and a shadow candidate's, which re-asks
+    /// until its host lists outside that ledger (#1785).
+    func queueRetrack(pid: pid_t) {
         let wasIdle = pendingRetrack.isEmpty
         pendingRetrack.insert(pid)
         if wasIdle {

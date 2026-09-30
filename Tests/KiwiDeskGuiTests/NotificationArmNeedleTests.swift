@@ -49,8 +49,9 @@ struct NotificationArmNeedleTests {
         // The create-time policy classification, ahead of any
         // registration the map could answer from.
         "EventLoop+WindowPolicy.swift": 2,
-        // `appActivated`'s own focused-window read (#1322).
-        "EventLoop+Apps.swift": 1,
+        // The one AX focused-window read (#1322, #1785), which
+        // `appActivated` takes through `focusedWindowID(pid:)`.
+        "EventLoop+ShadowWindows.swift": 1,
     ]
 
     /// Files under `Events/` that may call the seam directly.

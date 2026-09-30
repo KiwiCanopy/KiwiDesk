@@ -72,7 +72,11 @@ extension EventLoop {
             coalesceTabs
             ? TabReconciler.rekeys(
                 vanished: rekeyCandidates(vanishedIDs, minimized),
-                appeared: appeared.map(appearedTab)
+                // A shadow is listed and untracked at every pass,
+                // and never a tab of its host (#1785).
+                appeared: appeared.filter {
+                    !shadows.holds($0.id, pid: pid)
+                }.map(appearedTab)
             )
             : []
         var elementByID = Dictionary(

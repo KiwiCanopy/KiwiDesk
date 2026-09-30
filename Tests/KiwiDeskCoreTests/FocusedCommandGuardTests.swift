@@ -111,6 +111,44 @@ struct FocusedCommandGuardTests {
         #expect(core.state.windows[WindowID(1)]?.isFloating == true)
     }
 
+    /// A sibling process (Orion's second profile) is announced
+    /// under its parent's pid; the front reading is that
+    /// announcement (#1785).
+    @Test("Allows when the frontmost process is a sibling of the app")
+    func allowsOnSiblingForeground() {
+        let core = makeCore()
+        let pid = getpid()
+        let family = AppRef(bundleID: "test.kiwi.family", name: "Fam")
+        let sibling: pid_t = 178_901
+        addFocused(core, pid: pid)
+        observe(core, pid: pid)
+        core.eventLoop.processIdentity.appAt = { asked in
+            asked == pid
+                ? RunningApp(
+                    pid: pid,
+                    activationPolicy: .regular,
+                    ref: family
+                ) : nil
+        }
+        core.eventLoop.processIdentity.record(
+            RunningApp(pid: sibling, activationPolicy: .regular, ref: family)
+        )
+        core.frontmostPIDProvider = { sibling }
+        #expect(core.execute("make_floating").isSuccess)
+        #expect(core.state.windows[WindowID(1)]?.isFloating == true)
+        // An unlisted process of ANOTHER bundle is another app.
+        let stranger: pid_t = 178_902
+        core.eventLoop.processIdentity.record(
+            RunningApp(
+                pid: stranger,
+                activationPolicy: .regular,
+                ref: AppRef(bundleID: "test.kiwi.other", name: "Other")
+            )
+        )
+        core.frontmostPIDProvider = { stranger }
+        #expect(!core.execute("make_floating").isSuccess)
+    }
+
     @Test("Blocks when an ignored panel is latched for the pid")
     func blocksWhenPanelLatched() {
         let core = makeCore()

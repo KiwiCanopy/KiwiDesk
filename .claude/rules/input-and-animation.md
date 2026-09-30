@@ -404,11 +404,46 @@ editing here:
   OPEN). Since #1088 the gate is read at the report's DELIVERY,
   after the off-main liveness read (the bullet above says why).
   `FocusReportProvenanceTests` drives the real branch and
-  `FocusReportEmitterCensusTests` pins the two emitters. Stated,
+  `FocusReportEmitterCensusTests` is the census of emitters. Stated,
   not held: an app that does activate is re-reported by
   `appActivated`'s own focused-window read, which is what closes
   the ordering race on a real cmd-tab — that read may name a lazy
   app's OLD window, and #465 then converges it.
+- **A pid LaunchServices cannot name is never an identity
+  (#1785).** A process an app starts as its own LaunchServices
+  child (Orion's second profile) is listed with pid -1 — even
+  looked up by its real pid — and its activation announced under
+  its parent's pid or none, while the WindowServer and AX know
+  its real one (device, 2026-09-29). So a pid ≤ 0 is never read
+  as the active app, and an activation announced without one is
+  attributed to the unlisted process of its bundle
+  (`EventLoop.process(of:)`), which the launch follow and both of
+  `appActivated`'s reconciles — the app just left, the process
+  itself — key on as a named activation's would; a Core read of
+  the frontmost app takes the one `frontmostPIDProvider` chain,
+  never `frontmostApplication` beside it; an activation of an app
+  with such a process reports no focus of its own, since its
+  announced pid's focused window is the parent's even when the
+  user chose the child's; **among sibling processes the gate
+  counts a report only while LaunchServices calls THAT process
+  active, asked by its real pid** (`ProcessIdentity.isActive`),
+  a record missing at that moment being no reading, so the report
+  stands — a click on the child is announced under the parent,
+  which LaunchServices marks active for 25–190 ms first, and the
+  inactive profile keeps reporting focus for its real window, 54
+  such reports in two sittings that each provoked a placement
+  re-assert (device, 2026-09-30); an announced pid naming a
+  process's app is the one `EventLoop.names(_:appOf:)`, which the
+  gate and the #292 preflight both take; every AX focused-window
+  read goes through `focusedWindowID(pid:)`, which names a
+  shadow's front-most tracked sibling; and **a focus report
+  naming a shadow is dropped at the arm, never mapped onto its
+  host** — the twin takes its process's focus as the process
+  DEACTIVATES, so the report says where the user left
+  (`ProcessIdentityTests`, `ProcessIdentityWiringTests`,
+  `FocusedCommandGuardTests` ▸ `allowsOnSiblingForeground`,
+  `ProcessIdentitySeamTests` ▸ `focusArmDropsTheShadow`,
+  `announcedPidHasOneReading`, `ShadowWindowFocusTests`).
 - **The spring integrator must stay inside its stability bound
   (#599).** `Spring.step` is semi-implicit Euler, which amplifies
   instead of damping once the step is large relative to the

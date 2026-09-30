@@ -12,7 +12,9 @@ public enum KiwiEvent: Sendable {
     /// not a `windowDestroyed` flag: the public reason must not
     /// say `closed` (`WindowGoneReason.hidden`), and the
     /// close-return raise stands down, since macOS picks the next
-    /// frontmost itself on a hide (#913).
+    /// frontmost itself on a hide (#913). A shadow handed back
+    /// after it was tracked leaves the same way (#1785): nobody
+    /// closed it, and nothing may raise a successor.
     case windowHidden(WindowID)
     case windowMoved(WindowID, CGRect)
     case windowResized(WindowID, CGRect)

@@ -574,8 +574,10 @@ lifecycle; the `reason` field says why the set changed:
 - `window_destroyed` — `closed` (a real close), `minimized`
   (only minimized; it will come back as `restored`),
   `hidden` (its app was hidden, with ⌘H or by hiding itself
-  as its last window closed; the window is untouched and
-  comes back as `returned`), `vanished` (the window is on a
+  as its last window closed, and the window comes back as
+  `returned` — or KiwiDesk stopped managing a window, an app's
+  shadow window it had tracked),
+  `vanished` (the window is on a
   macOS Desktop no screen is showing; it returns as
   `returned`). A `vanished` payload also carries `desktop`,
   the Mission Control number of the Desktop holding the

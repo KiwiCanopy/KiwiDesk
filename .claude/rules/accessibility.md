@@ -3,6 +3,9 @@ paths:
   - "Sources/KiwiDeskCore/AX/**"
   - "Sources/KiwiDeskCore/Events/EventLoop+BootScan.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+AppObservation.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+ProcessIdentity.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+ShadowWindows.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+Tracking.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileAll.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+RemovalDistrust.swift"
@@ -147,6 +150,81 @@ editing AX code:
   takes the same shape: a needle anchored to `finishBoot`'s own
   closing brace, since the tail is not test-drivable but a call
   MOVED out of it heals nothing.
+- **Every pass that attaches apps reads `liveApps`, and a pid
+  ≤ 0 never attaches (#1785).** The raw running-app list has no
+  entry that could adopt a LaunchServices child — listed with
+  pid -1, the measurement is
+  [input-and-animation.md](input-and-animation.md)'s — and an
+  observer keyed on -1 names every such process at once.
+  `liveApps` adds each window owner the list lacks, resolved by
+  the WindowServer's pid through `ProcessIdentity.appAt`, and
+  prunes its register of a pid that stopped running;
+  `syncObservation` and `attach` refuse an unnamed pid; and a
+  terminate announced without a pid retires the observed
+  processes that are gone — gone by the process table
+  (`ProcessIdentity.runs`, a `sysctl` read where a zombie is gone
+  too; `proc_pidinfo` answered ESRCH for one and `kill(pid, 0)`
+  still 0 on macOS 27.0, 2026-09-30), never by a record
+  LaunchServices may have lost (`ProcessIdentityTests`,
+  `ProcessPolicyReadingTests` ▸ `unnamedExitReadsTheProcessTable`,
+  `ProcessIdentitySeamTests` ▸ `rawListHasItsReaders`). The one
+  pass reading the raw list is `reconcileAll` before `start()`,
+  where nothing attaches (#672); its branch says so.
+- **A missing LaunchServices record is not a prohibited process
+  (#1785).** `NSRunningApplication(processIdentifier:)` answered
+  nil for a RUNNING process for tens of milliseconds as its app
+  activated (device, 2026-09-30, the listed process too), and
+  `?? .prohibited` at an ownership gate detached it with every
+  window it held. So a process's activation policy has ONE
+  reading, `EventLoop.policy(of:)`: LaunchServices' answer,
+  else — while `ProcessIdentity.runs` says the process is alive
+  — the policy last read; `.prohibited` only for a process that
+  is gone or never observed. The reconcile and notification
+  ownership gates, the boot sweep's step and the float and
+  overlay verdicts take it, and a new reader of a policy takes
+  it too (`ProcessPolicyReadingTests` ▸
+  `lostRecordKeepsARunningProcess`, `lostRecordDetachesAGoneProcess`,
+  `keptPolicyFollowsTheLastRead`; `ProcessIdentitySeamTests` ▸
+  `policyHasOneReading`).
+- **A shadow window never becomes a tile (#1785).** A window
+  with no title-bar button and no AX child beside a buttoned
+  window of its own process (Orion's "Orion Preview") is refused
+  at `track`, whatever its subrole reads. Six obligations. **Ask
+  the verdict of every window `track` offers, in ONE batched
+  round trip** (`AXHelper.windowTraits`, the four buttons, the
+  children and the frame in one call): the twin read `AXUnknown`
+  as often as `AXStandardWindow` (device, 2026-09-30), and a
+  subrole gate let it in as a float; only a shell reads its
+  siblings, since `track` runs inside the boot scan's budget,
+  and a sibling's children are read, never consulted. **A lone
+  shell waits `ShadowWindows.hostWait` for a host only while its
+  process shows no tracked window** — a fresh Orion listed the
+  twin over a second before the real window (device,
+  2026-09-30) — and tiles at once beside a tracked window of its
+  app, so a decoration-less app's next window pays nothing; the
+  launch-time wait is `docs/accepted-limitations.md`'s row.
+  **A tracked window that reads as a shell beside a buttoned
+  sibling is handed back at the reconcile that lists it**
+  (`retireShadows`, one round trip per tracked listed window,
+  none for a pass listing one window, and a queued boot step
+  whose budget runs out between its reads deferred and completed
+  after the pass, #803's shape), as a HIDE and never a close: no
+  close-return raise and no closed-return mark for a window
+  nobody closed. **A read that fails takes no verdict back**: a
+  known shadow stays one, and only readings with no verdict
+  between them count toward the wait — a twin whose element died
+  mid-read was tracked for a third of a second that way (device,
+  2026-09-30). **A record dies with its host**, pruned at that
+  same door, so a window judged a shadow beside a sibling that
+  then closed is asked again. **A shadow is never a tab**: the
+  re-key's `appeared` skips what the rule holds, or a carrier
+  vanishing at the twin's frame is re-keyed onto it
+  (`ShadowRuleTests`, `ShadowWindowTests`,
+  `ShadowWindowReconcileTests`, `ShadowWindowFocusTests`,
+  `ProcessIdentitySeamTests` ▸ `trackAsksTheVerdict`,
+  `reconcileReasksAfterTheSweep`, `tabRekeySkipsShadows`). What a
+  focus report naming a shadow does is
+  [input-and-animation.md](input-and-animation.md)'s.
 - **A bulk pass asks the WindowServer before it asks AX
   (#1037).** `reconcileAll` — the Desktop-switch re-sync and the
   config reload's — reads one on-screen census and skips an

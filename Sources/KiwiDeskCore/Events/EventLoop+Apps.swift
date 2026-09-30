@@ -29,7 +29,7 @@ extension EventLoop {
             let app = note.runningApplication
             MainActor.assumeIsolated {
                 guard let app else { return }
-                self?.appTerminated(app)
+                self?.appTerminated(pid: app.processIdentifier)
             }
         }
         let activate = center.addObserver(
@@ -41,7 +41,10 @@ extension EventLoop {
             let app = note.runningApplication
             MainActor.assumeIsolated {
                 guard let app else { return }
-                self?.appActivated(app)
+                self?.appActivated(
+                    RunningApp(app),
+                    launchedAt: app.launchDate
+                )
             }
         }
         // Hide and unhide are the only signal an app gives
@@ -110,8 +113,13 @@ extension EventLoop {
         )
     }
 
-    private func appTerminated(_ app: NSRunningApplication) {
-        let pid = app.processIdentifier
+    /// Descriptor-shaped, like `appHideChanged`: a test drives
+    /// the unnamed pid a LaunchServices child exits with (#1785).
+    func appTerminated(pid: pid_t) {
+        guard Self.isProcessID(pid) else {
+            retireExitedObservers()
+            return
+        }
         detach(pid: pid, restoreEnhancedUI: false)
         onEvent(.appTerminated(pid: pid))
     }
@@ -150,34 +158,49 @@ extension EventLoop {
     func appHideChanged(pid: pid_t, ref: AppRef) {
         // Ignored and prohibited apps have no observer; nothing
         // of theirs is tracked, so there is nothing to reconcile
-        // (mirrors `appActivated`'s guard).
+        // (mirrors `appActivated`'s guard). Nor has an unnamed
+        // pid (#1785): a child's hide is the heal's to settle.
         guard observers[pid] != nil else { return }
         reconcile(pid: pid, app: ref)
     }
 
     /// Closing an app's last window moves focus to a DIFFERENT
     /// app, so the closing app never reports anything. On every
-    /// app switch, reconcile the app we just left.
-    private func appActivated(_ app: NSRunningApplication) {
-        let pid = app.processIdentifier
+    /// app switch, reconcile the app we just left. Descriptor-
+    /// shaped for a test's unnamed or parent pid (#1785).
+    func appActivated(_ app: RunningApp, launchedAt: Date?) {
+        // A pid ≤ 0 is never an identity (#1785): an unnamed
+        // announcement is its unlisted process, which the launch
+        // follow and both reconciles below key on.
+        let pid = process(of: app) ?? app.pid
         // Ahead of both reconciles below: a window this app shows
         // on its own activation is adopted by them, and must find
         // the #1599 launch follow already owed.
         onAppActivated(
             AppActivation(
                 pid: pid,
-                bundleID: AppRef(app).bundleID,
-                launchedAt: app.launchDate
+                bundleID: app.ref.bundleID,
+                launchedAt: launchedAt
             )
         )
         // The reconcile below takes this app's window snapshot
         // on the same turn — no second scan at attach (#672).
         syncObservation(
-            for: RunningApp(app),
+            for: RunningApp(
+                pid: pid,
+                activationPolicy: app.activationPolicy,
+                ref: app.ref
+            ),
             scanWindowsAtAttach: false
         )
         if let previous = lastActivePid, previous != pid {
             reconcile(pid: previous, app: AppRef(pid: previous))
+        }
+        // An announcement KiwiDesk can name no process for leaves
+        // the gate with no reading, which fails open (#1322).
+        guard Self.isProcessID(pid) else {
+            noteUnnamedActivation(app)
+            return
         }
         lastActivePid = pid
         // Ignored and prohibited apps have no observer. Keep the
@@ -188,14 +211,14 @@ extension EventLoop {
         // activated app first, so a window tracked late (cold
         // Electron tree, other native Space) is known before
         // the managed-window guard below.
-        reconcile(pid: pid, app: AppRef(app))
+        reconcile(pid: pid, app: app.ref)
+        // Several processes: the announced pid may be a sibling's.
+        guard !defersToSiblingReports(pid) else { return }
         // Clicking a window of another app only activates the
         // app: if that window was already its app's focused
         // window, no kAXFocusedWindowChanged fires. Report the
         // cross-app focus change ourselves.
-        if let element = AXHelper.focusedWindow(pid: pid),
-            let id = AXHelper.windowID(of: element)
-        {
+        if let id = focusedWindowID(pid: pid) {
             // Only managed windows: an ignored panel (issue
             // #21) or a not-yet-tracked window must not leak
             // a focus event with no state behind it. Surface
@@ -210,7 +233,7 @@ extension EventLoop {
                 classifyUntrackedFocus(
                     id: id,
                     pid: pid,
-                    bundleID: AppRef(app).bundleID,
+                    bundleID: app.ref.bundleID,
                     isAccessory: Self.classifiesAsOverlay(
                         pid: pid,
                         activationPolicy: app.activationPolicy
@@ -253,58 +276,6 @@ struct AppActivation {
     let pid: pid_t
     let bundleID: String?
     let launchedAt: Date?
-}
-
-/// What the app-lifecycle funnels (`syncObservation`, `attach`,
-/// the startup scan, `reconcileAll`) need from a running app.
-/// A snapshot value, not the live `NSRunningApplication`, so a
-/// test can fabricate one for a made-up pid and drive the
-/// funnels through the machine seams (#672 review).
-struct RunningApp {
-    let pid: pid_t
-    let activationPolicy: NSApplication.ActivationPolicy
-    let ref: AppRef
-
-    init(
-        pid: pid_t,
-        activationPolicy: NSApplication.ActivationPolicy,
-        ref: AppRef
-    ) {
-        self.pid = pid
-        self.activationPolicy = activationPolicy
-        self.ref = ref
-    }
-
-    init(_ app: NSRunningApplication) {
-        self.init(
-            pid: app.processIdentifier,
-            activationPolicy: app.activationPolicy,
-            ref: AppRef(app)
-        )
-    }
-}
-
-extension AppRef {
-    /// Captures identity + display name from a live app handle.
-    init(_ app: NSRunningApplication) {
-        self.init(
-            bundleID: app.bundleIdentifier,
-            name: app.localizedName ?? "?"
-        )
-    }
-
-    /// Re-derives identity from a pid alone (reconcile paths
-    /// that only hold the process id). An app that has since
-    /// exited yields a nil bundle id and a `"?"` name — so it
-    /// matches no rule, which is the correct outcome for a
-    /// process that is gone.
-    init(pid: pid_t) {
-        let app = NSRunningApplication(processIdentifier: pid)
-        self.init(
-            bundleID: app?.bundleIdentifier,
-            name: app?.localizedName ?? "?"
-        )
-    }
 }
 
 extension Notification {

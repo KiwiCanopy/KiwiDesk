@@ -115,6 +115,14 @@ func makeTestCore(
     // the focused ring in every border suite. Pin "no own key
     // window"; the stand-down suites inject their own reading.
     core.eventLoop.ownKeyWindow = { nil }
+    // Same class, again (#1785): the process-table and
+    // LaunchServices reads behind the ownership gate and the
+    // sibling focus gate default LIVE, and a fixture pid can be a
+    // real process on the host. Pin "runs, no record"; the
+    // identity suites inject their own readings.
+    core.eventLoop.processIdentity.runs = { _ in true }
+    core.eventLoop.processIdentity.isActive = { _ in nil }
+    core.eventLoop.processIdentity.appAt = { _ in nil }
     // Same class, sixth time (#1146): the compositor reads behind
     // the gone classifier and the away ledger default LIVE, and
     // a fixture id can be a real CGWindowID on the host — one

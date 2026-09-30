@@ -337,14 +337,14 @@ public final class EventLoop {
     var applyAXMessagingTimeout: (Float) -> Void =
         AXHelper.setGlobalMessagingTimeout
 
-    /// Whether `start()` registers the live NSWorkspace /
-    /// screen-parameter observers. Default-true (production);
-    /// the lifecycle suites turn it off so driving `start()`
-    /// leaves no observer whose callback could re-enter the
-    /// loop through live defaults mid-test. A forgotten opt-out
-    /// only registers observers that are removed by `stop()` —
-    /// never a missed production registration.
+    /// Whether `start()` registers the live NSWorkspace and
+    /// screen observers; lifecycle suites turn it off so no live
+    /// callback re-enters the loop mid-test.
     var registersWorkspaceObservers = true
+
+    /// Pids LaunchServices cannot name, and shadow windows (#1785).
+    var processIdentity = ProcessIdentity()
+    var shadows = ShadowWindows()
 
     public init() {}
 }

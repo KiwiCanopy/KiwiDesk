@@ -1,0 +1,188 @@
+import AppKit
+import ApplicationServices
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// The #1785 lifecycle wiring: the workspace handlers reach the
+/// process-identity decisions `ProcessIdentityTests` pins, and the
+/// front-window read's edges. Split from that suite at the file
+/// ceiling; same seams, its own per-file harness (tests.md).
+@MainActor
+@Suite("Process identity wiring (#1785)")
+struct ProcessIdentityWiringTests {
+    private final class FakeObserver: AppObserving {
+        var onNotification: @MainActor (String, AXUIElement) -> Void = {
+            _,
+            _ in
+        }
+        var needsRegistrationRepair = false
+        func observe(window: AXUIElement) {}
+        func repairRegistration() {}
+        func invalidate() {}
+    }
+
+    @MainActor
+    private final class Box {
+        var census: [pid_t: Set<WindowID>] = [:]
+        var alive: [pid_t: RunningApp] = [:]
+        var active: [pid_t: Bool] = [:]
+        var focused: [WindowID] = []
+        var terminated: [pid_t] = []
+        var destroyed: [WindowID] = []
+        var logs: [String] = []
+    }
+
+    private static let bundle = "test.kiwi.browser"
+    private let parent: pid_t = 178_601
+    private let child: pid_t = 178_602
+
+    private func app(_ pid: pid_t) -> RunningApp {
+        RunningApp(
+            pid: pid,
+            activationPolicy: .regular,
+            ref: AppRef(bundleID: Self.bundle, name: "Browser")
+        )
+    }
+
+    /// A loop observing the parent and, through the heal, its
+    /// unlisted child — both windows tracked.
+    private func makeLoop() -> (loop: EventLoop, box: Box) {
+        let loop = EventLoop()
+        let box = Box()
+        loop.onLog = { box.logs.append($0) }
+        loop.registersWorkspaceObservers = false
+        loop.visiblePIDs = { [] }
+        loop.applyAXMessagingTimeout = { _ in }
+        loop.makeObserver = { _ in FakeObserver() }
+        loop.readEnhancedUI = { _ in false }
+        loop.writeEnhancedUI = { _, _ in }
+        loop.writeManualAX = { _, _ in }
+        loop.axWindows = { _ in [] }
+        loop.activationPolicy = { _ in .regular }
+        loop.onScreenNormalWindowIDs = { box.census }
+        loop.onEvent = { event in
+            switch event {
+            case .windowFocused(let id): box.focused.append(id)
+            case .appTerminated(let pid): box.terminated.append(pid)
+            case .windowDestroyed(let id, _): box.destroyed.append(id)
+            default: break
+            }
+        }
+        loop.processIdentity.appAt = { box.alive[$0] }
+        loop.processIdentity.runs = { box.alive[$0] != nil }
+        loop.processIdentity.isActive = { box.active[$0] }
+        loop.runningApplications = { [] }
+        #expect(loop.beginScan())
+        loop.scanChunk(budget: nil)
+        loop.runningApplications = { [self.app(parent), self.app(-1)] }
+        box.alive = [parent: app(parent), child: app(child)]
+        box.census = [parent: [WindowID(1)], child: [WindowID(2)]]
+        loop.healSweep()
+        loop.elements[parent] = [WindowID(1): element(parent)]
+        loop.elements[child] = [WindowID(2): element(child)]
+        box.focused = []
+        return (loop, box)
+    }
+
+    private func element(_ pid: pid_t) -> AXUIElement {
+        AXUIElementCreateApplication(pid)
+    }
+
+    @Test("a parent's activation defers to the processes' reports")
+    func parentActivationDefers() {
+        let (loop, box) = makeLoop()
+        box.logs = []
+        // The parent's own focused window is tracked: without the
+        // deferral the activation would report it.
+        loop.shadows.focusedWindow = { _ in WindowID(1) }
+        loop.appActivated(app(parent), launchedAt: nil)
+        #expect(loop.lastActivePid == parent)
+        #expect(box.focused.isEmpty)
+        #expect(
+            box.logs.contains {
+                $0.hasPrefix("activation: pid \(parent) runs beside")
+            }
+        )
+    }
+
+    @Test("an unnamed activation names its unlisted process")
+    func unnamedActivationNamesTheProcess() {
+        let (loop, box) = makeLoop()
+        var activated: [pid_t] = []
+        loop.onAppActivated = { activated.append($0.pid) }
+        loop.lastActivePid = parent
+        // Both windows closed meanwhile, unreported: the app just
+        // left and the child are each reconciled, as a named
+        // activation does (the AX list answers nothing).
+        box.census = [:]
+        loop.appActivated(app(-1), launchedAt: nil)
+        #expect(loop.lastActivePid == child)
+        // The launch follow reads this process's windows by it.
+        #expect(activated == [child])
+        #expect(Set(box.destroyed) == [WindowID(1), WindowID(2)])
+        #expect(box.focused.isEmpty)
+    }
+
+    @Test("an unnamed activation of an unknown app leaves no reading")
+    func unknownUnnamedActivationClearsTheReading() {
+        let (loop, box) = makeLoop()
+        var activated: [pid_t] = []
+        loop.onAppActivated = { activated.append($0.pid) }
+        loop.lastActivePid = parent
+        loop.appActivated(
+            RunningApp(
+                pid: -1,
+                activationPolicy: .regular,
+                ref: AppRef(bundleID: "test.kiwi.unknown", name: "Other")
+            ),
+            launchedAt: nil
+        )
+        #expect(loop.lastActivePid == nil)
+        #expect(activated == [-1])
+        #expect(box.focused.isEmpty)
+    }
+
+    @Test("an unnamed exit retires the gone child through the handler")
+    func unnamedExitReachesTheRetire() {
+        let (loop, box) = makeLoop()
+        box.alive[child] = nil
+        loop.appTerminated(pid: -1)
+        #expect(!loop.observes(pid: child))
+        #expect(loop.observes(pid: parent))
+        #expect(box.terminated == [child])
+    }
+
+    @Test("a named exit keeps today's path")
+    func namedExitDetachesThatPid() {
+        let (loop, box) = makeLoop()
+        loop.appTerminated(pid: parent)
+        #expect(!loop.observes(pid: parent))
+        #expect(loop.observes(pid: child))
+        #expect(box.terminated == [parent])
+    }
+
+    @Test("stop forgets the unlisted processes")
+    func stopClearsTheUnlistedMap() {
+        let (loop, _) = makeLoop()
+        #expect(loop.processIdentity.unlisted[child] == Self.bundle)
+        loop.stop()
+        #expect(loop.processIdentity.unlisted.isEmpty)
+    }
+
+    @Test("an unnamed exit never retires KiwiDesk itself")
+    func ownProcessIsNeverRetired() {
+        let (loop, _) = makeLoop()
+        let own = getpid()
+        loop.attach(
+            pid: own,
+            activationPolicy: .regular,
+            ref: AppRef(bundleID: "test.kiwi.self", name: "Self"),
+            scanWindowsAtAttach: false
+        )
+        #expect(loop.observes(pid: own))
+        loop.retireExitedObservers()
+        #expect(loop.observes(pid: own))
+    }
+}

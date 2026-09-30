@@ -21,6 +21,7 @@ extension EventLoop {
         for app: RunningApp,
         scanWindowsAtAttach: Bool
     ) {
+        guard Self.isProcessID(app.pid) else { return }
         let isIgnored = shouldIgnoreApp(
             bundleID: app.ref.bundleID
         )
@@ -69,7 +70,7 @@ extension EventLoop {
         // made the boot scan's prefilter test nothing — every
         // app was already attached and warmed by the time
         // `start()` ran.
-        guard isRunning else { return }
+        guard isRunning, Self.isProcessID(pid) else { return }
         guard observers[pid] == nil else { return }
         guard
             Self.shouldAttach(
@@ -115,6 +116,13 @@ extension EventLoop {
             self?.handle(note, element, pid: pid, app: ref)
         }
         observers[pid] = observer
+        processIdentity.note(
+            RunningApp(
+                pid: pid,
+                activationPolicy: activationPolicy,
+                ref: ref
+            )
+        )
         // Attached either way — the observer is installed, so the
         // app's windows still arrive by event — but it stops
         // paying for boot work it has already proven it cannot
@@ -265,6 +273,8 @@ extension EventLoop {
         // relaunch reusing the pid starts with a fresh retry
         // budget and an unquieted gate.
         healQuiet[pid] = nil
+        processIdentity.forget(pid: pid)
+        shadows.forget(pid: pid)
         transientRetried[pid] = nil
         pendingRetrack.remove(pid)
         pendingRemovalRecheck.remove(pid)

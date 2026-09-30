@@ -104,7 +104,7 @@ struct ClickProvenanceWiringTests {
         let source = try strippedSource()
         let pattern =
             #"let frontmost[\s\S]{0,160}?"#
-            + #"frontmostApplication[\s\S]{0,200}?"#
+            + #"eventLoop\.frontmostProcess\(\)[\s\S]{0,200}?"#
             + #"frontmostPIDProvider\s*=\s*frontmost[\s\S]{0,200}?"#
             + #"eventLoop\.frontmostPID\s*=\s*frontmost"#
         let wired =

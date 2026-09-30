@@ -1,0 +1,268 @@
+import AppKit
+import ApplicationServices
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// A pid LaunchServices cannot name is never an identity (#1785).
+/// Orion's second profile is a LaunchServices child: listed with
+/// pid -1, its activation announced under its parent's pid, while
+/// the WindowServer files its windows under its real one. Driven
+/// through the injected machine seams (tests.md); an AX app
+/// element appears only as an inert dictionary value.
+@MainActor
+@Suite("Process identity (#1785)")
+struct ProcessIdentityTests {
+    private final class FakeObserver: AppObserving {
+        var onNotification: @MainActor (String, AXUIElement) -> Void = {
+            _,
+            _ in
+        }
+        var needsRegistrationRepair = false
+        func observe(window: AXUIElement) {}
+        func repairRegistration() {}
+        func invalidate() {}
+    }
+
+    @MainActor
+    private final class Box {
+        var census: [pid_t: Set<WindowID>] = [:]
+        var created: [pid_t] = []
+        var windowQueries: [pid_t] = []
+        var lookups: [pid_t] = []
+        var alive: [pid_t: RunningApp] = [:]
+        var active: [pid_t: Bool] = [:]
+        var events: [KiwiEvent] = []
+        var focused: [WindowID] = []
+    }
+
+    private static let bundle = "test.kiwi.browser"
+    private let parent: pid_t = 178_501
+    private let child: pid_t = 178_502
+    private let other: pid_t = 178_503
+
+    private func app(
+        _ pid: pid_t,
+        bundle: String = Self.bundle
+    ) -> RunningApp {
+        RunningApp(
+            pid: pid,
+            activationPolicy: .regular,
+            ref: AppRef(bundleID: bundle, name: "Browser")
+        )
+    }
+
+    /// The listing Orion produced: the parent under its pid, the
+    /// child under -1, beside an unrelated app.
+    private var listing: [RunningApp] {
+        [app(parent), app(-1), app(other, bundle: "test.kiwi.other")]
+    }
+
+    private func makeLoop() -> (loop: EventLoop, box: Box) {
+        let loop = EventLoop()
+        let box = Box()
+        loop.onLog = { _ in }
+        loop.registersWorkspaceObservers = false
+        loop.visiblePIDs = { [] }
+        loop.applyAXMessagingTimeout = { _ in }
+        loop.makeObserver = { pid in
+            box.created.append(pid)
+            return FakeObserver()
+        }
+        loop.readEnhancedUI = { _ in false }
+        loop.writeEnhancedUI = { _, _ in }
+        loop.writeManualAX = { _, _ in }
+        loop.axWindows = { pid in
+            box.windowQueries.append(pid)
+            return []
+        }
+        loop.activationPolicy = { _ in .regular }
+        loop.onScreenNormalWindowIDs = { box.census }
+        loop.onEvent = { event in
+            box.events.append(event)
+            if case .windowFocused(let id) = event {
+                box.focused.append(id)
+            }
+        }
+        loop.processIdentity.appAt = { pid in
+            box.lookups.append(pid)
+            return box.alive[pid]
+        }
+        loop.processIdentity.runs = { box.alive[$0] != nil }
+        loop.processIdentity.isActive = { box.active[$0] }
+        loop.runningApplications = { [] }
+        #expect(loop.beginScan())
+        loop.scanChunk(budget: nil)
+        loop.runningApplications = { self.listing }
+        box.alive = [
+            parent: app(parent), child: app(child),
+            other: app(other, bundle: "test.kiwi.other"),
+        ]
+        return (loop, box)
+    }
+
+    private func element(_ pid: pid_t) -> AXUIElement {
+        AXUIElementCreateApplication(pid)
+    }
+
+    @Test("the heal adopts a census pid the app list lacks")
+    func healAdoptsTheUnlistedProcess() {
+        let (loop, box) = makeLoop()
+        box.census = [child: [WindowID(830_336)]]
+        loop.healSweep()
+        #expect(loop.observes(pid: child))
+        #expect(box.windowQueries == [child])
+        #expect(loop.processIdentity.unlisted[child] == Self.bundle)
+    }
+
+    @Test("a pid of zero or below never attaches")
+    func unnamedPidNeverAttaches() {
+        let (loop, box) = makeLoop()
+        for pid: pid_t in [-1, -2, 0] {
+            loop.syncObservation(for: app(pid), scanWindowsAtAttach: true)
+            loop.attach(
+                pid: pid,
+                activationPolicy: .regular,
+                ref: app(pid).ref,
+                scanWindowsAtAttach: true
+            )
+        }
+        #expect(box.created.isEmpty)
+        #expect(loop.observers.isEmpty)
+    }
+
+    @Test("listed apps are never looked up by pid")
+    func listedAppsTakeTodaysPath() {
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)], other: [WindowID(2)]]
+        loop.healSweep()
+        #expect(box.lookups.isEmpty)
+        #expect(loop.observes(pid: parent))
+        #expect(loop.observes(pid: other))
+        #expect(loop.processIdentity.unlisted.isEmpty)
+    }
+
+    @Test("an unannounced exit retires only the gone process")
+    func unannouncedExitRetiresTheGoneProcess() {
+        let (loop, box) = makeLoop()
+        box.census = [
+            parent: [WindowID(1)], child: [WindowID(2)],
+            other: [WindowID(3)],
+        ]
+        loop.healSweep()
+        loop.elements[child] = [WindowID(2): element(child)]
+        box.alive[child] = nil
+        loop.retireExitedObservers()
+        #expect(!loop.observes(pid: child))
+        #expect(loop.observes(pid: parent))
+        #expect(loop.observes(pid: other))
+        #expect(loop.processIdentity.unlisted[child] == nil)
+        #expect(
+            box.events.contains {
+                if case .appTerminated(let pid) = $0 {
+                    pid == child
+                } else {
+                    false
+                }
+            }
+        )
+        #expect(
+            box.events.contains {
+                if case .windowDestroyed(let id, _) = $0 {
+                    id == WindowID(2)
+                } else {
+                    false
+                }
+            }
+        )
+    }
+
+    @Test("among siblings the gate asks which process is active")
+    func gateAsksWhichSiblingIsActive() {
+        let (loop, box) = makeLoop()
+        box.census = [
+            parent: [WindowID(1)], child: [WindowID(2)],
+            other: [WindowID(3)],
+        ]
+        loop.healSweep()
+        // Announced under the parent; the child is the one in
+        // front (device, 2026-09-30).
+        loop.lastActivePid = parent
+        box.active = [parent: false, child: true]
+        #expect(loop.reportsFromActiveApp(child))
+        #expect(!loop.reportsFromActiveApp(parent))
+        #expect(!loop.reportsFromActiveApp(other))
+        box.active = [parent: true, child: false]
+        #expect(loop.reportsFromActiveApp(parent))
+        #expect(!loop.reportsFromActiveApp(child))
+        // Another app in front: neither process reports.
+        loop.lastActivePid = other
+        box.active = [parent: false, child: true]
+        #expect(!loop.reportsFromActiveApp(child))
+        #expect(loop.reportsFromActiveApp(other))
+    }
+
+    @Test("a sibling with no record still reports")
+    func siblingWithoutARecordFailsOpen() {
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)], child: [WindowID(2)]]
+        loop.healSweep()
+        loop.lastActivePid = parent
+        box.active = [:]
+        #expect(loop.reportsFromActiveApp(parent))
+        #expect(loop.reportsFromActiveApp(child))
+    }
+
+    @Test("an app with one process is never asked")
+    func loneProcessIsNeverAsked() {
+        let (loop, box) = makeLoop()
+        box.census = [other: [WindowID(3)]]
+        loop.healSweep()
+        var asked: [pid_t] = []
+        loop.processIdentity.isActive = { pid in
+            asked.append(pid)
+            return false
+        }
+        loop.lastActivePid = other
+        #expect(loop.reportsFromActiveApp(other))
+        #expect(asked.isEmpty)
+    }
+
+    @Test("two listed processes of one bundle stay strangers")
+    func listedPairsAreNotSiblings() {
+        let (loop, box) = makeLoop()
+        let twin: pid_t = 178_504
+        box.alive[twin] = app(twin)
+        loop.runningApplications = { [self.app(parent), self.app(twin)] }
+        box.census = [parent: [WindowID(1)], twin: [WindowID(4)]]
+        loop.healSweep()
+        loop.lastActivePid = parent
+        #expect(!loop.reportsFromActiveApp(twin))
+        #expect(loop.siblingProcesses(of: parent).isEmpty)
+    }
+
+    @Test("an unnamed frontmost reading leaves the gate open")
+    func unnamedFrontmostFailsOpen() {
+        let (loop, _) = makeLoop()
+        loop.lastActivePid = nil
+        loop.frontmostPID = { -1 }
+        #expect(loop.reportsFromActiveApp(other))
+    }
+
+    @Test("an unnamed frontmost app is its one unlisted process")
+    func frontmostResolvesTheUnlistedProcess() {
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)], child: [WindowID(2)]]
+        loop.healSweep()
+        loop.processIdentity.frontmostApp = { self.app(-1) }
+        #expect(loop.frontmostProcess() == child)
+        loop.processIdentity.frontmostApp = { self.app(parent) }
+        #expect(loop.frontmostProcess() == parent)
+        // An unnamed app KiwiDesk knows no process of: no reading.
+        loop.processIdentity.frontmostApp = {
+            self.app(-1, bundle: "test.kiwi.unknown")
+        }
+        #expect(loop.frontmostProcess() == nil)
+    }
+}

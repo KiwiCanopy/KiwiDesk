@@ -19,9 +19,8 @@ extension KiwiCore {
         // now on, an implicit-focused command fails closed unless
         // the OS frontmost app is KiwiDesk's focused managed
         // window.
-        let frontmost: @MainActor () -> pid_t? = {
-            NSWorkspace.shared.frontmostApplication?
-                .processIdentifier
+        let frontmost: @MainActor () -> pid_t? = { [weak self] in
+            self?.eventLoop.frontmostProcess()
         }
         frontmostPIDProvider = frontmost
         // The focus-report gate reads the same chain (#1322).

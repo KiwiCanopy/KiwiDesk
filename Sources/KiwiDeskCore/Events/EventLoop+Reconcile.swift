@@ -38,8 +38,7 @@ extension EventLoop {
                 onLog("slow reconcile: \(name) took \(ms)ms")
             }
         }
-        let activationPolicy =
-            self.activationPolicy(pid) ?? .prohibited
+        let activationPolicy = policy(of: pid)
         guard
             Self.ownsObservation(
                 hasObserver: observers[pid] != nil,
@@ -154,6 +153,7 @@ extension EventLoop {
         // sibling vanishes) coalesces into a re-key before either a
         // create or a destroy is emitted (#308).
         var appeared: [(element: AXUIElement, id: WindowID)] = []
+        var listed: [(element: AXUIElement, id: WindowID)] = []
         for element in liveElements {
             guard !budget.isSpent else {
                 deferBootWork(
@@ -206,6 +206,7 @@ extension EventLoop {
             }
             ignorePending.remove(id)
             live.insert(id)
+            listed.append((element: element, id: id))
             if let known = elements[pid]?[id] {
                 // The same window under a fresh AX element — a
                 // carried sticky window's element dies as it
@@ -236,6 +237,10 @@ extension EventLoop {
         // change, covering targeted reconciles that race the bulk
         // `reconcileAll` (#308 review).
         let recentSpaceSwitch = isWithinSpaceSwitchGrace()
+        // A shadow's record dies with its host, ahead of the sweep
+        // that would answer from it (#1785); the population is
+        // what the app LISTS, a minimized host included.
+        shadows.prune(pid: pid, listed: live.union(minimized))
         reconcileTabsAndSweep(
             pid: pid,
             app: app,
@@ -244,5 +249,10 @@ extension EventLoop {
             minimized: minimized,
             coalesceTabs: coalesceTabs && !recentSpaceSwitch
         )
+        // Past the sweep, so a spent budget here abandons nothing
+        // of the list; the app is completed after the pass (#803).
+        if !retireShadows(pid: pid, listed: listed, budget: budget) {
+            deferBootWork(pid: pid, ref: app, spentMs: budget.spentMs)
+        }
     }
 }

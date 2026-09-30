@@ -115,9 +115,7 @@ extension EventLoop {
     func forceFloatReason(pid: pid_t, id: WindowID) -> AutoFloatReason? {
         Self.forceFloatReason(
             pid: pid,
-            activationPolicy: NSRunningApplication(
-                processIdentifier: pid
-            )?.activationPolicy ?? .prohibited,
+            activationPolicy: policy(of: pid),
             tilesAsOwnWindow: Self.isOwnProcess(pid)
                 && ownWindowIdentifier(id)
                     == OwnWindowTiling.identifier
@@ -195,9 +193,7 @@ extension EventLoop {
     func classifiesAsOverlay(pid: pid_t) -> Bool {
         Self.classifiesAsOverlay(
             pid: pid,
-            activationPolicy: NSRunningApplication(
-                processIdentifier: pid
-            )?.activationPolicy ?? .prohibited
+            activationPolicy: policy(of: pid)
         )
     }
 

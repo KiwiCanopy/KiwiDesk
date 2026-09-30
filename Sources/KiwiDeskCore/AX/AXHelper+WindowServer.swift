@@ -43,6 +43,16 @@ extension AXHelper {
         )
     }
 
+    /// On-screen layer-0 document windows with their owners,
+    /// front to back (#1785).
+    public static func onScreenNormalWindowsFrontToBack()
+        -> [(id: WindowID, pid: pid_t)]
+    {
+        normalWindowRows(
+            options: [.optionOnScreenOnly, .excludeDesktopElements]
+        )
+    }
+
     /// PIDs owning at least one layer-0 document window (#662, #672).
     public static func pidsWithNormalWindows() -> Set<pid_t> {
         Set(
