@@ -1458,7 +1458,7 @@
   "space_bar.overflow.after.ax": "Nachfolgende nicht angezeigte Fenster: %1$d",
   "space_bar.overflow.before.ax": "Vorherige nicht angezeigte Fenster: %1$d",
   "space_bar.show_front_app": "Vordergrund-App anzeigen",
-  "space_bar.show_front_app.caption": "Erscheint nur, solange keine App Bar angezeigt wird — die App Bar markiert das fokussierte Fenster bereits.",
+  "space_bar.show_front_app.caption": "Erscheint nur auf einem Space ohne App Bar — die App Bar markiert das fokussierte Fenster bereits.",
   "space_bar.show_front_app.help": "Fügt ein nachfolgendes Segment mit dem fokussierten Fenster des Space hinzu, das jedes Display aktuell anzeigt. Bei vertikalen Leisten nur Symbol.",
   "space_bar.spring_delay": "Spring-Verzögerung",
   "space_bar.spring_delay.help": "Ziehe ein Fenster auf einen Space und halte es so lange, damit die Ansicht zu diesem Space springt und du das Fenster dort ablegen kannst. Ein schnelleres Ablegen verschiebt das Fenster dorthin, ohne zu wechseln.",

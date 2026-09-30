@@ -1458,7 +1458,7 @@
   "space_bar.overflow.after.ax": "后面未显示的窗口：%1$d",
   "space_bar.overflow.before.ax": "前面未显示的窗口：%1$d",
   "space_bar.show_front_app": "显示最前台 App",
-  "space_bar.show_front_app.caption": "仅在未显示 App Bar 时出现——App Bar 已经标出了聚焦窗口。",
+  "space_bar.show_front_app.caption": "仅在没有 App Bar 的空间中出现——App Bar 已经标出了聚焦窗口。",
   "space_bar.show_front_app.help": "在末尾添加一个区段，显示每个显示器当前所显示空间中的聚焦窗口。在垂直栏上只显示图标。",
   "space_bar.spring_delay": "悬停弹跳延迟",
   "space_bar.spring_delay.help": "将窗口拖到某个空间上并停留这么久，画面就会弹到那个空间，让你把窗口放进它的布局。更快松开则只把窗口移过去，而不切换。",

@@ -1458,7 +1458,7 @@
   "space_bar.overflow.after.ax": "Janelas posteriores não exibidas: %1$d",
   "space_bar.overflow.before.ax": "Janelas anteriores não exibidas: %1$d",
   "space_bar.show_front_app": "Mostrar app em primeiro plano",
-  "space_bar.show_front_app.caption": "Só aparece enquanto nenhuma App Bar é exibida — a App Bar já marca a janela em foco.",
+  "space_bar.show_front_app.caption": "Só aparece em um espaço sem App Bar — a App Bar já marca a janela em foco.",
   "space_bar.show_front_app.help": "Adiciona um segmento final com a janela em foco do espaço que cada tela exibe no momento. Apenas ícone nas barras verticais.",
   "space_bar.spring_delay": "Atraso de acionamento",
   "space_bar.spring_delay.help": "Arraste uma janela até um espaço e segure por este tempo para a visão saltar até esse espaço, de modo que você possa soltar a janela no layout dele. Um soltar mais rápido move a janela para lá sem trocar de espaço.",

@@ -1458,7 +1458,7 @@
   "space_bar.overflow.after.ax": "Fenêtres suivantes non affichées : %1$d",
   "space_bar.overflow.before.ax": "Fenêtres précédentes non affichées : %1$d",
   "space_bar.show_front_app": "Afficher l'application au premier plan",
-  "space_bar.show_front_app.caption": "N'apparaît que tant qu'aucune App Bar n'est affichée — l'App Bar signale déjà la fenêtre active.",
+  "space_bar.show_front_app.caption": "N'apparaît que sur un espace sans App Bar — l'App Bar signale déjà la fenêtre active.",
   "space_bar.show_front_app.help": "Ajoute un segment final affichant la fenêtre active de l'espace sur chaque écran. Icône uniquement sur les barres verticales.",
   "space_bar.spring_delay": "Délai de survol",
   "space_bar.spring_delay.help": "Faites glisser une fenêtre sur un espace et maintenez-la ce temps pour basculer la vue sur cet espace, permettant de la déposer dans sa disposition. Un dépôt plus rapide déplace la fenêtre sans basculer d'espace.",
