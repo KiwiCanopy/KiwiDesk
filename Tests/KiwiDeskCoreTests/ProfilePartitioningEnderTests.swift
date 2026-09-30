@@ -22,12 +22,12 @@ struct ProfilePartitioningEnderTests {
         var store = ProfilePartitioning()
         store.record(
             [Space(id: "1", windows: [WindowID(1)])],
-            as: "A"
+            as: .profile("A")
         )
         store.rename("A", to: "A2")
-        #expect(store.remembered(for: "A") == nil)
+        #expect(store.remembered(for: .profile("A")) == nil)
         #expect(
-            store.remembered(for: "A2")?["1"] == [WindowID(1)]
+            store.remembered(for: .profile("A2"))?["1"] == [WindowID(1)]
         )
     }
 
@@ -40,18 +40,18 @@ struct ProfilePartitioningEnderTests {
         var store = ProfilePartitioning()
         store.record(
             [Space(id: "1", windows: [WindowID(1)])],
-            as: "A"
+            as: .profile("A")
         )
         store.record(
             [Space(id: "1", windows: [WindowID(1)])],
-            as: "B"
+            as: .profile("B")
         )
         store.rekey(WindowID(1), to: WindowID(77))
         #expect(
-            store.remembered(for: "A")?["1"] == [WindowID(77)]
+            store.remembered(for: .profile("A"))?["1"] == [WindowID(77)]
         )
         #expect(
-            store.remembered(for: "B")?["1"] == [WindowID(77)]
+            store.remembered(for: .profile("B"))?["1"] == [WindowID(77)]
         )
     }
 
@@ -60,9 +60,9 @@ struct ProfilePartitioningEnderTests {
         var store = ProfilePartitioning()
         store.record(
             [Space(id: "1", windows: [WindowID(1)])],
-            as: "A"
+            as: .profile("A")
         )
         store.forget("A")
-        #expect(store.remembered(for: "A") == nil)
+        #expect(store.remembered(for: .profile("A")) == nil)
     }
 }

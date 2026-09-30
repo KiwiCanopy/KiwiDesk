@@ -13749,6 +13749,28 @@ overrides it. What is inside the held Space goes back in both
 cases.
 
 :::unreleased
+**A composed Standard keeps a record too
+([#1829](https://github.com/KiwiCanopy/KiwiDesk/issues/1829)).**
+It is an arrangement of the windows like a saved profile — the one
+a Mac whose saved profiles are all single-screen docks into — so it
+files its partitioning as it goes inactive and gets it back when it
+returns, and a window moved out of a held Space goes back there as
+well. This retires two statements above: that a Standard has no
+file for the record to live in — it needs none, since the record
+lives in memory and rides the session snapshot (#1802) — and the
+Standard case of the held-window rule. It is keyed by ARRANGEMENT,
+never by name, because the docked Starter Standard and the saved
+`Starter` profile share one, and a name key would read the switch
+between them as no switch at all. One key serves a Standard at
+every screen count, as one name serves a saved profile at every
+monitor set, so the record holds the composition last live under
+that name and the restore fills only the Spaces the returning one
+declares. Auto-saving a profile for the screen set instead was
+refused: a monitor change never claims a monitor set (#1530), and
+the Standard stays transient so it can recompose.
+:::
+
+:::unreleased
 **It survives a restart, a crash included
 ([#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646)).**
 Taking the laptop away for a day spans an update, a crash or a

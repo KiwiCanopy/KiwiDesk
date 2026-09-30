@@ -96,7 +96,7 @@ extension KiwiCore {
         // #1230: and now put this profile's own windows back into
         // its own Spaces. After the prune, so what the profile has
         // never seen is already in its `fallback_space`.
-        if switching { restorePartitioning(of: profile) }
+        if switching { restoreProfilePartitioning(of: profile) }
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
         // instead of keeping the previous state's mode.
@@ -212,12 +212,10 @@ extension KiwiCore {
             declared: Set(composed.spaces),
             into: .standard(composed.sourceName)
         )
-        // #1230: a Standard is not a profile — file whatever
-        // profile was live before the compose rearranges it, or
-        // its arrangement is what gets recorded under that
-        // profile's name at the next switch. Standing the name
-        // down is this door's too, not its caller's (#1249).
-        recordLivePartitioning()
+        // #1230/#1829: a Standard is an arrangement like a
+        // profile — file the outgoing one, restore its own.
+        let standard = HeldOrigin.Arrangement.standard(composed.sourceName)
+        let switching = recordOutgoingPartitioning(before: standard)
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
         tiler.settings = wearingSharedLook(composed.settings)
@@ -238,6 +236,9 @@ extension KiwiCore {
         // five-per-display plan is NOT the count's Standard, so its
         // blocks would otherwise scatter into the Standard's slots.
         adoptComposedPlacement(composed)
+        if switching {
+            restorePartitioning(of: standard, declaring: Set(composed.spaces))
+        }
         refileHeldSpaces(
             declared: Set(composed.spaces),
             into: .standard(composed.sourceName)
@@ -258,10 +259,9 @@ extension KiwiCore {
         emitSpaceChange()
         // #1145: same tail as `apply(profile:)`, same reasons.
         refreshStickyReach()
-        // Last, like `apply(profile:)`'s `becameLive` — and after
-        // `recordLivePartitioning` by constraint: it files under
-        // the outgoing name, which this call stands down
-        // (`ProfileSaveAdoptionTests`).
+        // Last, like `apply(profile:)`'s `becameLive`: the filing
+        // above read the outgoing arrangement, which this stands
+        // down (`ProfileSaveAdoptionTests`).
         profiles.standardIsLive(
             ActiveStandard(
                 name: composed.sourceName,

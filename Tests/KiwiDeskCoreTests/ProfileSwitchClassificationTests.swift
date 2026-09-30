@@ -9,19 +9,14 @@ import Testing
 /// own seam: that suite is what a switch DOES to windows, this
 /// one is when an apply is a switch at all.
 ///
-/// **Three states, not two.** A re-apply of the LIVE profile is
-/// not a switch, so a monitor reconnect cannot revert the user's
-/// own moves. The session's FIRST apply is not one either —
-/// pruning there would drop the Spaces the boot restore just
-/// rebuilt. A built-in Standard hands the live slot back empty,
-/// and the apply after it IS a switch whenever that profile has
-/// an arrangement to put back.
-///
-/// Conflating the two nil cases breaks one end or the other:
-/// treating them both as switches makes boot destructive, and
-/// treating them both as non-switches makes the apply after a
-/// Standard silently fall back to the pre-#1230 name-match. Both
-/// halves shipped during this lane, one after the other.
+/// A re-apply of the LIVE arrangement is not a switch, so a
+/// monitor reconnect cannot revert the user's own moves. The
+/// session's FIRST apply is not one either — pruning there would
+/// drop the Spaces the boot restore just rebuilt. A composed
+/// Standard is live AS ITSELF since #1829, so the apply after it
+/// is a switch like any other, record or none; before that it
+/// handed the slot back empty, and the two nil cases — treated
+/// alike — shipped one broken end after the other.
 @Suite("Which applies are profile switches (#1230)", .serialized)
 @MainActor
 struct ProfileSwitchClassificationTests {
@@ -106,10 +101,8 @@ struct ProfileSwitchClassificationTests {
         #expect(members(core, "restored") == [WindowID(1)])
     }
 
-    /// After a Standard the live slot is empty, and "no live
-    /// profile" must not read as "not a switch" — the next apply
-    /// would skip the restore and fall back to the pre-#1230
-    /// name-match for that one apply.
+    /// The apply after a Standard restores the profile's own
+    /// arrangement rather than name-matching into the Standard's.
     @Test("A profile after a Standard still restores")
     func restoresAfterAStandard() {
         let core = makeCore()
@@ -137,5 +130,31 @@ struct ProfileSwitchClassificationTests {
         core.apply(profile: a, cause: .event)
         #expect(members(core, "1") == [WindowID(1)])
         #expect(members(core, "2") == [WindowID(2)])
+    }
+
+    /// A Standard → profile apply is a switch even where the
+    /// profile has no record (#1829): the Standard's undeclared
+    /// Spaces are pruned into the profile's fallback, as any
+    /// other arrangement's are.
+    @Test("A profile after a Standard is a switch, record or none")
+    func standardToProfileIsASwitch() {
+        let core = makeCore()
+        live(core, [1])
+        core.apply(
+            composed: ProfileComposition.Composed(
+                sourceName: "Std",
+                spaces: ["1", "9"],
+                spaceModes: ["1": .bsp, "9": .bsp],
+                assignment: [:],
+                settings: TilingSettings(),
+                sourceTitle: nil
+            ),
+            forceRetile: false
+        )
+        core.state.workspaces.add(WindowID(1), to: "9")
+
+        core.apply(profile: profile("P", spaces: ["1"]), cause: .event)
+        #expect(core.state.workspaces["9"] == nil)
+        #expect(members(core, "1") == [WindowID(1)])
     }
 }
