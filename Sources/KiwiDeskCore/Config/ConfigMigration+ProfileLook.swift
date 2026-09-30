@@ -36,14 +36,14 @@ extension ConfigMigration {
         )
     }
 
-    /// A profile root — told by its monitor sets, as
-    /// `targetFormat` tells it — or a bundle's `profiles`, each
-    /// given `own` where it states no look.
+    /// A profile root or a bundle's `profiles` — told apart by
+    /// `shape(of:)` — each given `own` where it states no look.
     private static func stampingOwnLook(_ node: Any) -> (Any, Bool) {
         guard var root = node as? [String: Any] else {
             return (node, false)
         }
-        if root[SetupBundle.shapeMarker] != nil {
+        let shape = shape(of: root)
+        if shape == .bundle {
             guard var profiles = root["profiles"] as? [[String: Any]]
             else { return (node, false) }
             var changed = false
@@ -55,10 +55,7 @@ extension ConfigMigration {
             root["profiles"] = profiles
             return (root, changed)
         }
-        let isProfile =
-            root[Profile.CodingKeys.monitorSets.rawValue] != nil
-            || root["monitorSets"] != nil
-        guard isProfile, root[profileLookKey] == nil else {
+        guard shape == .profile, root[profileLookKey] == nil else {
             return (node, false)
         }
         root[profileLookKey] = profileLookOwn

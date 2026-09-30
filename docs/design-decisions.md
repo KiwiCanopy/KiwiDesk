@@ -9237,13 +9237,46 @@ both route through `composeMonitorChangeFallback`, and
 for a workflow Standard, correct for the starter setup's
 per-screen blocks, which are not even the same size as each other.
 The digit-shortcut half is the additive twin:
-`topUpDigitShortcuts` binds only the `⌃⌥N` a growth left unbound
-(GUI-managed, never overwriting a custom chord, capped at ten), so
-the shortcuts follow the spaces. Do not "simplify" either
+`topUpDigitShortcuts` extends the `⌃⌥N` rows to the Spaces a
+growth added, so the shortcuts follow the spaces — which digit each
+takes is #1797's entry below. Do not "simplify" either
 recompose site back to a bare `StandardProfiles.standard`, nor
 make `apply(composed:)` discard its assignment again — each
 reintroduces
 #485. (#485)
+
+**Nothing KiwiDesk writes may give an action a second chord in a
+layer; Lua may (#1797).** [Rationale] A Shortcuts row is one action
+in one layer, so a second chord for the same action is drawn
+nowhere — yet it stays registered, and it blocks recording its key
+on the row that should own it, naming a Space the user never bound
+it to. So the digit top-up asks per action, never per free digit:
+pairing each free digit with whichever Space sits at that position
+hands a reordered Space a second chord and shifts its neighbours by
+one. A Space named 1–10 takes its own number rather than its place,
+because digits are handed out once and then belong to the Space by
+name (#91) — a drag is an arrangement edit and never moves a chord.
+Existing extras are migrated away rather than surfaced, for every
+navigation action: #92's "surface, never prune" protects a binding
+that can become valid again, and an extra chord for a live action
+never does — which is also why an orphan Space verb, #92's own
+case, keeps all its chords. The
+migration keeps the chord on the Space's own digit, so a Space
+renamed after the seed can lose the positional chord it learned
+— accepted, since the digit it keeps is the one its name
+predicts. It reads each stored list alone, so an extra split
+between `gui.json` and a profile's override survives it; the
+top-up, which counts every profile's override against the shared
+base, never makes one — so a verb one profile binds on its own
+chord leaves the others without its digit, the lesser harm. The
+rule binds every writer: a Lua import, the Lua-to-Settings
+adoption and a Space rename over leftover rows owe the same check
+the top-up makes (#1807). A `custom` row is drawn as a row of its
+own, so the migration leaves it alone. **Lua stays uncapped**,
+because layers are modal — activating one deactivates the base —
+so hjkl beside the arrows can only live in one layer, and two
+chords that do the same thing cannot conflict. A duplicate *chord*
+stays refused everywhere (#33/#34/#35). (#1797)
 
 **Orphaned space shortcuts are surfaced, never pruned.** A binding
 that targets a space by name outlives the space's presence in the

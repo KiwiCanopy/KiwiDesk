@@ -39,28 +39,40 @@ public enum ConfigMigration {
         migratingRetiredGlyphCap,
         migratingProfileLookOwn,
         migratingRetiredAppBarContent,
+        migratingDuplicateSpaceChords,
     ]
+
+    /// The file shapes a config root can take.
+    enum FileShape { case bundle, profile, palettes, looks, gui }
+
+    /// Which shape `root` is — the one classification every
+    /// per-shape floor asks.
+    static func shape(of root: [String: Any]) -> FileShape {
+        if root[SetupBundle.shapeMarker] != nil { return .bundle }
+        if root[Profile.CodingKeys.monitorSets.rawValue] != nil
+            || root["monitorSets"] != nil
+        {
+            return .profile
+        }
+        let palettes =
+            PaletteDocument.CodingKeys.palettes.rawValue
+        if root[palettes] != nil { return .palettes }
+        if root[LookDocument.CodingKeys.looks.rawValue] != nil {
+            return .looks
+        }
+        return .gui
+    }
 
     /// Target format integer for `root`'s shape (#902, #938, #939,
     /// #1684).
     static func targetFormat(for root: [String: Any]) -> Int {
-        if root[SetupBundle.shapeMarker] != nil {
-            return SetupBundle.currentFormat
+        switch shape(of: root) {
+        case .bundle: SetupBundle.currentFormat
+        case .profile: Profile.currentFormat
+        case .palettes: PaletteDocument.currentFormat
+        case .looks: LookDocument.currentFormat
+        case .gui: GuiConfig.currentFormat
         }
-        if root[Profile.CodingKeys.monitorSets.rawValue] != nil
-            || root["monitorSets"] != nil
-        {
-            return Profile.currentFormat
-        }
-        let palettes =
-            PaletteDocument.CodingKeys.palettes.rawValue
-        if root[palettes] != nil {
-            return PaletteDocument.currentFormat
-        }
-        if root[LookDocument.CodingKeys.looks.rawValue] != nil {
-            return LookDocument.currentFormat
-        }
-        return GuiConfig.currentFormat
     }
 
     /// Whether `data`'s stamp is below the floor a step introduced

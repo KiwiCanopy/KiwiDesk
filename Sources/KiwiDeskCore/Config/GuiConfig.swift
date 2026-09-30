@@ -25,7 +25,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// **4 (#1609)**: a `profiles` entry may be an object scoped to
     /// one screen setup. No step — a bare name still means all
     /// setups — so the bump is the refusal an older reader owes.
-    public static let currentFormat = 4
+    ///
+    /// **5 (#1797)**: a layer holds one chord per Space verb, so a
+    /// top-up's extras are dropped.
+    public static let currentFormat = 5
 
     public var format: Int = GuiConfig.currentFormat
     /// Active profile tiling parameters.
