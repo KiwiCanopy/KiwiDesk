@@ -206,8 +206,9 @@ editing AX code:
   **A tracked window that reads as a shell beside a buttoned
   sibling is handed back at the reconcile that lists it**
   (`retireShadows`, one round trip per tracked listed window,
-  none for a pass listing one window, and skipped when a queued
-  boot step's budget is spent), as a HIDE and never a close: no
+  none for a pass listing one window, and a queued boot step
+  whose budget runs out between its reads deferred and completed
+  after the pass, #803's shape), as a HIDE and never a close: no
   close-return raise and no closed-return mark for a window
   nobody closed. **A read that fails takes no verdict back**: a
   known shadow stays one, and only readings with no verdict
@@ -219,7 +220,7 @@ editing AX code:
   re-key's `appeared` skips what the rule holds, or a carrier
   vanishing at the twin's frame is re-keyed onto it
   (`ShadowRuleTests`, `ShadowWindowTests`,
-  `ShadowWindowReconcileTests`,
+  `ShadowWindowReconcileTests`, `ShadowWindowFocusTests`,
   `ProcessIdentitySeamTests` ▸ `trackAsksTheVerdict`,
   `reconcileReasksAfterTheSweep`, `tabRekeySkipsShadows`). What a
   focus report naming a shadow does is

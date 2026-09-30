@@ -5,11 +5,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// What the loop does with a shadow once it knows one (#1785):
-/// hands back one it tracked, drops the focus report naming it,
-/// names a real window for a polled focus read, and keeps it out
-/// of the tab re-key. Split from `ShadowWindowTests` at the file
-/// ceiling; its own per-file harness (tests.md).
+/// What a reconcile does with a shadow once it knows one (#1785):
+/// hands back one it tracked, reads only what the pass listed,
+/// ends a record with its host and keeps to the boot budget. Its
+/// focus half is `ShadowWindowFocusTests`'; split at the file
+/// ceiling, its own per-file harness (tests.md).
 @MainActor
 @Suite("Shadow windows in the reconcile (#1785)")
 struct ShadowWindowReconcileTests {
@@ -183,6 +183,43 @@ struct ShadowWindowReconcileTests {
         #expect(box.hidden.isEmpty)
     }
 
+    /// The wiring: a budget spent between two of the retire
+    /// pass's reads defers the app to the pass's epilogue (#803),
+    /// which a silent skip ahead of the call — the shape this
+    /// replaced — never does. An OS-driven reconcile carries no
+    /// deadline and is never deferred.
+    @Test("a budget spent mid-pass defers the app, never silently")
+    func spentBudgetMidPassDefersTheApp() {
+        let host = traits(1, buttons: true, children: 6)
+        let other = traits(2, buttons: true, children: 6)
+        let (loop, box) = makeLoop([host, other])
+        loop.elements[pid] = [host.id: element(0), other.id: element(1)]
+        loop.axWindows = { _ in [self.element(0), self.element(1)] }
+        loop.resolveWindowID = { element in
+            CFEqual(element, self.element(0)) ? host.id : other.id
+        }
+        loop.onScreenNormalWindowIDs = { [self.pid: [host.id, other.id]] }
+        var now = ContinuousClock.now
+        loop.monotonicNow = { now }
+        // The first read spends the step's budget; the second
+        // read's checkpoint sees it.
+        let reads = loop.shadows.traits
+        loop.shadows.traits = { element, id in
+            now = now.advanced(by: .seconds(1))
+            return reads(element, id)
+        }
+        loop.bootScan.stepBudget = .milliseconds(500)
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.traitReads.count == 1)
+        #expect(loop.takeDeferredBootApps().keys.contains(pid))
+        // Outside a queued step the same reads never defer.
+        loop.bootScan.stepBudget = nil
+        box.traitReads = []
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.traitReads.count == 2)
+        #expect(loop.takeDeferredBootApps().isEmpty)
+    }
+
     @Test("a spent boot budget reads nothing and says so")
     func spentBudgetReadsNothing() {
         let host = traits(1, buttons: true, children: 6)
@@ -223,101 +260,5 @@ struct ShadowWindowReconcileTests {
         // sibling explains it — a false positive ends here.
         #expect(retire(loop, box, [1]))
         #expect(!loop.shadows.holds(twin.id, pid: pid))
-    }
-
-    // MARK: - Focus
-
-    @Test("a focus report naming a shadow is dropped")
-    func shadowReportIsDropped() {
-        let host = traits(1, buttons: true, children: 6)
-        let twin = traits(2, buttons: false, children: 0)
-        let (loop, box) = makeLoop([host, twin])
-        loop.elements[pid] = [host.id: element(0)]
-        loop.axWindows = { _ in [self.element(0), self.element(1)] }
-        loop.resolveWindowID = { element in
-            CFEqual(element, self.element(1)) ? twin.id : host.id
-        }
-        loop.lastActivePid = pid
-        // `track` asks the verdict; an inert element never gets
-        // that far, so the suite asks it as `track` would.
-        #expect(
-            loop.shadowVerdict(element(1), id: twin.id, pid: pid)
-                == .shadow
-        )
-        box.logs = []
-        loop.handleFocusedWindowChanged(element(1), pid: pid, app: ref)
-        #expect(box.focused.isEmpty)
-        #expect(
-            box.logs.contains {
-                $0 == "focus: w\(twin.id.raw) is a shadow "
-                    + "(pid \(pid)) — dropped"
-            },
-            "logs: \(box.logs)"
-        )
-        // The host stays tracked: the report moved nothing.
-        #expect(loop.elements[pid]?[host.id] != nil)
-        #expect(box.hidden.isEmpty && box.destroyed.isEmpty)
-    }
-
-    @Test("a polled focus naming a shadow names a real window")
-    func polledFocusNamesARealWindow() {
-        let first = traits(1, buttons: true, children: 6)
-        let second = traits(2, buttons: true, children: 6)
-        let twin = traits(3, buttons: false, children: 0)
-        let (loop, box) = makeLoop([first, second, twin])
-        loop.axWindows = { _ in
-            [self.element(0), self.element(1), self.element(2)]
-        }
-        #expect(
-            loop.shadowVerdict(element(2), id: twin.id, pid: pid)
-                == .shadow
-        )
-        loop.shadows.focusedWindow = { _ in twin.id }
-        // None tracked: the host it was judged against.
-        #expect(loop.focusedWindowID(pid: pid) == first.id)
-        // One tracked: that one.
-        loop.elements[pid] = [second.id: element(1)]
-        #expect(loop.focusedWindowID(pid: pid) == second.id)
-        // Several: the front-most TRACKED one of this process —
-        // never the shadow in front of it, nor another's window.
-        loop.elements[pid] = [first.id: element(0), second.id: element(1)]
-        box.front = [
-            (twin.id, pid), (WindowID(9), pid + 1), (second.id, pid),
-            (first.id, pid),
-        ]
-        #expect(loop.focusedWindowID(pid: pid) == second.id)
-        // A real window names itself.
-        loop.shadows.focusedWindow = { _ in first.id }
-        #expect(loop.focusedWindowID(pid: pid) == first.id)
-    }
-
-    // MARK: - Tabs
-
-    @Test("a shadow never takes a vanished carrier's slot")
-    func shadowIsNoTab() {
-        let host = traits(1, buttons: true, children: 6)
-        let twin = traits(2, buttons: false, children: 0)
-        let (loop, box) = makeLoop([host, twin])
-        loop.axWindows = { _ in [self.element(0), self.element(1)] }
-        #expect(
-            loop.shadowVerdict(element(1), id: twin.id, pid: pid)
-                == .shadow
-        )
-        // The carrier vanishes on the frame an inert element
-        // reads, which is what a re-key matches on.
-        loop.elements[pid] = [host.id: element(0)]
-        loop.tabCarriers = [host.id]
-        loop.trackedFrames[host.id] = AXHelper.frame(of: element(1))
-        loop.reconcileTabsAndSweep(
-            pid: pid,
-            app: ref,
-            appeared: [(element: element(1), id: twin.id)],
-            live: [twin.id],
-            minimized: [],
-            coalesceTabs: true
-        )
-        #expect(box.rekeyed.isEmpty)
-        #expect(box.destroyed == [host.id])
-        #expect(loop.elements[pid]?[twin.id] == nil)
     }
 }

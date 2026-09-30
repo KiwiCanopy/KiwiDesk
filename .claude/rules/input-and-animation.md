@@ -443,7 +443,7 @@ editing here:
   (`ProcessIdentityTests`, `ProcessIdentityWiringTests`,
   `FocusedCommandGuardTests` ▸ `allowsOnSiblingForeground`,
   `ProcessIdentitySeamTests` ▸ `focusArmDropsTheShadow`,
-  `announcedPidHasOneReading`, `ShadowWindowReconcileTests`).
+  `announcedPidHasOneReading`, `ShadowWindowFocusTests`).
 - **The spring integrator must stay inside its stability bound
   (#599).** `Spring.step` is semi-implicit Euler, which amplifies
   instead of damping once the step is large relative to the

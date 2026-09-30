@@ -102,12 +102,6 @@ struct ProcessPolicyReadingTests {
         return (loop, box)
     }
 
-    private func element(_ pid: pid_t) -> AXUIElement {
-        AXUIElementCreateApplication(pid)
-    }
-
-    // MARK: - The policy reading
-
     // MARK: - The policy reading
 
     @Test("a record lost for a moment keeps a running process")

@@ -167,7 +167,10 @@ struct ProcessIdentitySeamTests {
         // A record is looked up under `Events/` only where a seam
         // defaults to it — the reading's own, and `appAt`,
         // `isActive`, `appIsHidden`, `AppRef(pid:)`. A raw read
-        // beside them is a policy the reading cannot keep.
+        // beside them is a policy the reading cannot keep. The
+        // trade: a raw policy read outside `Events/` passes this
+        // census; the Core-wide clauses above catch its two
+        // spellings, `activationPolicy(` and `?? .prohibited`.
         #expect(
             try sites(
                 of: "NSRunningApplication(processIdentifier:",
