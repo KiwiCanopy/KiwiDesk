@@ -24,7 +24,6 @@ struct ShelfPaintRoundTripTests {
             \TilingSettings.scrolling.appBar,
         ] {
             settings[keyPath: host].activeIndicator = .outline
-            settings[keyPath: host].content = .icon
             settings[keyPath: host].titleCap = 17
             settings[keyPath: host].groupAdjacentWindows = false
         }

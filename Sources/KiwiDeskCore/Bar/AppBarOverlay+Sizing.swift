@@ -78,7 +78,6 @@ extension AppBarOverlay {
         capAxis: CGFloat
     ) -> CGFloat {
         slotLength(
-            content: style.renderedContent,
             contentDepth: style.contentDepth(forDepth: thickness),
             axis: capAxis,
             autoWidth: autoSlotWidth(
@@ -127,9 +126,7 @@ extension AppBarOverlay {
         let font = style.shelf.textFont(
             ofSize: style.resolvedFontSize(forDepth: thickness)
         )
-        let iconSide =
-            style.content == .title
-            ? 0 : max(depth - pad * 2, 0)
+        let iconSide = max(depth - pad * 2, 0)
         let measure = NSTextField(labelWithString: "")
         measure.alignment = .center
         measure.font = font
@@ -144,15 +141,8 @@ extension AppBarOverlay {
                 first: place.first,
                 last: place.last
             )
-            let text: CGFloat
-            if !style.content.showsText {
-                text = 0
-            } else {
-                measure.stringValue = item.text
-                text = ceil(
-                    measure.cell?.cellSize.width ?? 0
-                )
-            }
+            measure.stringValue = item.text
+            let text = ceil(measure.cell?.cellSize.width ?? 0)
             let spacing =
                 iconSide > 0 && text > 0 ? pad / 2 : 0
             let badge =
@@ -166,30 +156,15 @@ extension AppBarOverlay {
         }
     }
 
-    /// Shared slot length for bar layout pass.
+    /// Shared slot length, floored at the content depth (#1682)
+    /// so measurement's icon side equals layout's — the
+    /// slot-fits-widest-title invariant leans on it.
     nonisolated static func slotLength(
-        content: AppBarStyle.Content,
         contentDepth: CGFloat,
         axis: CGFloat,
         autoWidth: CGFloat
     ) -> CGFloat {
-        return max(
-            min(autoWidth, axis / 4),
-            minimumSlot(contentDepth: contentDepth, content: content)
-        )
-    }
-
-    /// Minimum usable slot size based on content mode. Icon
-    /// slots floor at the content depth (#1682) so measurement's
-    /// icon side equals layout's — the slot-fits-widest-title
-    /// invariant leans on it.
-    nonisolated static func minimumSlot(
-        contentDepth: CGFloat,
-        content: AppBarStyle.Content
-    ) -> CGFloat {
-        content == .title
-            ? AppBarItemView.contentPadding * 4
-            : contentDepth
+        max(min(autoWidth, axis / 4), contentDepth)
     }
 
     /// The scroll offset keeping the focused item in view, in

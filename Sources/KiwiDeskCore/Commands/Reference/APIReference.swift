@@ -138,12 +138,13 @@ public enum APIReference {
             "set_fill_when_alone", "set_slot_size_override",
             "set_anchor_override", "set_orientation_override",
             "set_app_bar_enabled", "set_app_bar_active_indicator",
-            "set_app_bar_content", "set_app_bar_title_cap",
+            "set_app_bar_title_cap",
             "set_app_bar_group_adjacent_windows",
         ],
         "space_bar": [
             "set_enabled", "set_edge", "set_glyph_span", "set_glyph_gap",
-            "set_inactive_content", "set_item_label",
+            "set_group_adjacent_windows", "set_inactive_content",
+            "set_item_label",
             "set_active_indicator",
             "set_active_dim_factor", "set_show_front_app",
             "set_front_app_title_cap", "set_hide_empty",
@@ -151,7 +152,7 @@ public enum APIReference {
             "set_focused_item_color",
         ],
         "app_bar": [
-            "set_edge", "set_active_indicator", "set_content", "set_title_cap",
+            "set_edge", "set_active_indicator", "set_title_cap",
             "set_group_adjacent_windows",
         ],
         "kiwishelf": [
@@ -184,8 +185,7 @@ public enum APIReference {
             "set_orientation", "set_orientation_override",
             "set_hide_style", "set_wrap_focus",
             "set_new_window_placement", "set_app_bar_enabled",
-            "set_app_bar_active_indicator", "set_app_bar_content",
-            "set_app_bar_title_cap",
+            "set_app_bar_active_indicator", "set_app_bar_title_cap",
             "set_app_bar_group_adjacent_windows",
         ],
         "track": [

@@ -8,13 +8,11 @@ import Foundation
 /// switch never changes it.
 public struct LayoutAppBar: Sendable, Equatable {
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
-    public typealias Content = AppBarStyle.Content
 
     /// Whether this layout displays an App Bar.
     public var enabled = true
 
     public var activeIndicator: ActiveIndicator?
-    public var content: Content?
     public var titleCap: Int?
     public var groupAdjacentWindows: Bool?
 
@@ -26,7 +24,6 @@ public struct LayoutAppBar: Sendable, Equatable {
         if let activeIndicator {
             out.activeIndicator = activeIndicator
         }
-        if let content { out.content = content }
         if let titleCap { out.titleCap = titleCap }
         if let groupAdjacentWindows {
             out.groupAdjacentWindows = groupAdjacentWindows

@@ -41,7 +41,7 @@ struct LookKeysCensusTests {
     func functionalityStaysOut() {
         let all = Set(LookKeys.all)
         for path in [
-            "app_bar.content", "space_bar.inactive_content",
+            "space_bar.inactive_content",
             "space_bar.enabled", "space_bar.show_front_app",
             "space_bar.hide_empty", "app_bar.title_cap",
             "border.enabled", "border.unfocused_enabled",

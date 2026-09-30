@@ -68,11 +68,6 @@ extension APIReference {
                 AppBarStyle.ActiveIndicator.self
             )
         ),
-        "set_app_bar_content": APIRecord(
-            "Overrides what the App Bar's items draw for this "
-                + "layout.",
-            .choice("content", AppBarStyle.Content.self)
-        ),
         "set_app_bar_title_cap": APIRecord(
             "Overrides the App Bar's title length cap for this "
                 + "layout.",

@@ -107,7 +107,6 @@ struct BarsGateWiringTests {
         for key in [
             "app_bar.no_layout.shelf_help",
             "space_bar.disabled.shelf_help",
-            "kiwishelf.icon_source.no_icon",
         ] {
             #expect(
                 help.contains(key),
@@ -133,7 +132,7 @@ struct BarsGateWiringTests {
     @Test("each reason has its own sentence")
     func eachReasonHasItsOwnSentence() {
         let all: [BarsGates.InertReason] = [
-            .noBarShown, .spaceBarOff, .noAppIcon, .shelfEmpty,
+            .noBarShown, .spaceBarOff, .shelfEmpty,
             .boxedShelf, .barsSplit,
         ]
         let sentences = all.map(BarsGateHelp.sentence)

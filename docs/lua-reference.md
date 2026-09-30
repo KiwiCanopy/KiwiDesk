@@ -2365,6 +2365,17 @@ before KiwiShelf keeps each bar's own edge — the App Bar at the
 bottom where it stored none.
 :::
 
+:::unreleased
+`app_bar.set_content`, `monocle.set_app_bar_content` and
+`scroll.set_app_bar_content` are retired → nothing: the App Bar
+always draws each item's icon and title, and a vertical one its
+icon alone. Over the CLI each fails with `…: the App Bar always
+draws each item's icon and title`. A saved profile drops its
+stored `content` once, and a backup as it is read, so a bar that
+showed only titles gains its icons, and one that showed only icons
+gains its titles.
+:::
+
 The `gap` active indicator is removed: `set_active_indicator`
 and its per-layout twins refuse it, naming the values that
 remain.
@@ -2403,6 +2414,16 @@ every layout's bar. Each layout decides whether it shows one and
 may override the App Bar's own fields for itself ([Per-Layout
 App Bar Overrides](#per-layout-app-bar-overrides)).
 
+Each item shows its window's icon and **title** — the window's
+own title, not its app name; on a `left` or `right` edge it shows
+the icon alone. The app name appears, never shortened, in two
+places:
+
+- a **grouped** item (its members show titles once it expands);
+- a window whose title is **empty** — some apps (Electron and
+  WebKit ones especially) report no title until well after the
+  window opens.
+
 ### app_bar.set_edge
 
 :::unreleased
@@ -2440,30 +2461,6 @@ app_bar.set_edge("bottom")
 app_bar.set_active_indicator("outline")
 ```
 
-### app_bar.set_content
-
-**Expects:** `"icon"`, `"title"`, or `"icon_and_title"`
-(default `icon_and_title`).
-
-**Does:** sets what each item displays. The text is the
-window's own **title**, not its app name. The app name appears,
-never shortened, in two places:
-
-- a **grouped** item (its members show titles once it expands);
-- a window whose title is **empty** — some apps (Electron and
-  WebKit ones especially) report no title until well after the
-  window opens.
-
-Vertical bars (edge `left`/`right`) always render icon-only; the
-stored preference returns when the bar moves back to a
-horizontal edge.
-
-**Example:**
-
-```lua
-app_bar.set_content("icon_and_title")
-```
-
 ### app_bar.set_title_cap
 
 **Expects:** a character count, 8–80 (default `10`). Values
@@ -2471,8 +2468,8 @@ outside the range are clamped.
 
 **Does:** sets how much of a window's title an item shows;
 longer titles are cut at the end and marked with an ellipsis. A
-title is also cut where it does not fit its slot; with
-`icon_and_title` only the title shrinks, never the icon.
+title is also cut where it does not fit its slot; only the
+title shrinks, never the icon.
 
 Every slot is as wide as the widest item, at least the icon
 square and at most a quarter of the whole KiwiShelf edge, so
@@ -2505,14 +2502,14 @@ app_bar.set_group_adjacent_windows(true)
 
 Each bar-hosting layout (monocle, scrolling) can override the
 App Bar's own fields for itself — `enabled`, `active_indicator`,
-`content`, `title_cap` and `group_adjacent_windows`. Only these
+`title_cap` and `group_adjacent_windows`. Only these
 two layouts show a bar, so only they expose `set_app_bar_*`.
 Unset fields inherit the global value.
 [KiwiShelf](#kiwishelf)'s fields — its colours, glyph style and
 `dim_factor` included — take no per-layout override. The
 overrides are the same setters prefixed with the layout name:
 
-- `monocle.set_app_bar_enabled`, `monocle.set_app_bar_content`,
+- `monocle.set_app_bar_enabled`,
   `monocle.set_app_bar_title_cap`, etc.
 - `scroll.set_app_bar_enabled`,
   `scroll.set_app_bar_active_indicator`,
@@ -2528,7 +2525,7 @@ no per-layout override either.
 ```lua
 monocle.set_app_bar_enabled(true)
 scroll.set_app_bar_enabled(true)
-scroll.set_app_bar_content("icon")  -- override for scrolling
+scroll.set_app_bar_title_cap(20)  -- override for scrolling
 ```
 
 ## Space Bar
@@ -2546,6 +2543,12 @@ a Space switches to it, and a group holding the focused window
 stays collapsed and takes the focused accent. The user guide's
 [Space Bar](user-guide.md#space-bar) section covers the badges,
 what a click on a glyph does and the drag-onto-a-Space gesture.
+
+:::unreleased
+Turning
+[`space_bar.set_group_adjacent_windows`](#space_barset_group_adjacent_windows)
+off gives each window its own glyph.
+:::
 
 The bar is layout-independent and sits on
 [KiwiShelf](#kiwishelf), which sets its thickness, margins,
@@ -2592,14 +2595,14 @@ space_bar.set_edge("left")
 **Expects:** an integer `1`–`12` (default `5`); out-of-range
 values clamp.
 
-**Does:** sets how many app-group glyphs a Space item shows
+**Does:** sets how many glyphs a Space item shows
 around its focused app — the Space's system focus while it is
 active, else the window it last focused. The rest sit behind a
 `+n` badge on each side, and at either end of the row the badge
 that side does not need becomes one more glyph, so the item keeps
-one length as the focus moves. Grouping runs first, so the span
-counts app *groups* (adjacent same-app windows share one glyph),
-while each `+n` counts its hidden *windows*. It limits glyphs per
+one length as the focus moves. The span counts glyphs — windows,
+or app *groups* while grouping is on — while each `+n` counts
+its hidden *windows*. It limits glyphs per
 Space only, not how many Spaces the bar shows. Replaces
 `set_glyph_cap`, which now fails naming it.
 
@@ -2741,6 +2744,23 @@ title.
 ```lua
 space_bar.set_front_app_title_cap(25)
 ```
+
+:::unreleased
+### space_bar.set_group_adjacent_windows
+
+**Expects:** boolean (default `true`).
+
+**Does:** collapses adjacent windows of one app in a Space item
+into one glyph with a count badge; clicking it opens a menu of
+its windows. Off, each window draws its own glyph and one click
+focuses it. `glyph_span` counts glyphs either way.
+
+**Example:**
+
+```lua
+space_bar.set_group_adjacent_windows(false)
+```
+:::
 
 ### space_bar.set_hide_empty
 

@@ -200,8 +200,7 @@ struct SettingsSearchIndexTests {
                 // gone (the sticky reach row is bridge-gated and
                 // unindexed here); the four drag Border/Fill rows
                 // stay anchor-less by ruling — two census rows
-                // per label key, which the join cannot split.
-                // 19 since #1799: the floating mark, at rest.
+                // per label key, unsplit; 19 with #1799's mark.
                 .gapsAndBorders: 19,
                 // 16 since the #1517 redesign: the bar cards
                 // lost their Style drawers, so every bar row is
@@ -210,6 +209,7 @@ struct SettingsSearchIndexTests {
                 // 18: Glyph gap (#1689) and Other Spaces (#1683),
                 // at rest; #1713 took the glyph size to Style.
                 // 19 since #1535: Space label, at rest.
+                // -1 #1528 (App Bar Content), +1 #1725 (grouping).
                 .bars: 19,
                 // 7 since #277: the Animations drawer's five
                 // rows gained anchors; the palette shelf's three
