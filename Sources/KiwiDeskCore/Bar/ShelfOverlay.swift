@@ -25,6 +25,9 @@ final class ShelfOverlay {
     /// Whether an appearing shelf grows from its anchor (#1838);
     /// `ShelfManager.growsOnAppear` sets it.
     var growsOnAppear = true
+    /// Sections shrinking out after they left, removed once the
+    /// glide lands (#1838).
+    var leavingViews: Set<NSView> = []
     /// Each section's drawn content at its last placement, in its
     /// own coordinates — where a glide starts it from (#1838).
     var placedContent: [ObjectIdentifier: CGRect] = [:]
@@ -107,6 +110,9 @@ final class ShelfOverlay {
                 radius: radius,
                 animated: false
             )
+        }
+        if glides, !BarMotion.isReduced {
+            standGlideStarts(sections, in: strip, horizontal: horizontal)
         }
         BarMotion.runPlateGlide {
             place(

@@ -1,12 +1,70 @@
 import AppKit
 
 /// Placing the sections on the strip (#1517, #1838). A section
-/// joining lands at its slot and fades in on the plate glide; one
-/// already on the strip glides there from where its content was
-/// DRAWN: the section re-lays its content for the new slot at once,
-/// so a glide from its old frame would jump that content aside and
-/// slide it back (#1838, measured on device).
+/// joining grows out of the one it joins and fades in, a leaving one
+/// shrinks back into it and fades out, and one already on the strip
+/// glides from where its content was DRAWN — all on the plate
+/// glide. A section re-lays its content for the new slot at once, so
+/// a glide from its old frame jumped that content aside first.
 extension ShelfOverlay {
+    /// Stands each gliding section at its glide start, ahead of the
+    /// plate glide's group: a frame written inside the group is not
+    /// where the animator starts from (device, #1838), so the
+    /// content jumped to its new layout in the old frame first.
+    func standGlideStarts(
+        _ sections: [Section],
+        in strip: CGRect,
+        horizontal: Bool
+    ) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        for section in sections
+        where section.view.superview !== stripView {
+            // A section joining grows out of the one it joins, from
+            // the side facing it (owner, device 2026-09-30).
+            let frame = Self.slotFrame(section, in: strip)
+            stripView.addSubview(
+                section.view,
+                positioned: .below,
+                relativeTo: divider
+            )
+            section.view.frame = Self.collapsed(
+                frame,
+                toward: Self.facing(frame, others: sections, in: strip),
+                horizontal: horizontal
+            )
+            section.view.alphaValue = 0
+        }
+        for section in sections
+        where section.view.superview === stripView {
+            guard let drawn = placedContent[ObjectIdentifier(section.view)]
+            else { continue }
+            section.view.frame = Self.glideStart(
+                from: section.view.frame,
+                drawn: drawn,
+                content: section.content,
+                to: Self.slotFrame(section, in: strip),
+                horizontal: horizontal
+            )
+        }
+        CATransaction.commit()
+    }
+
+    /// A section's frame on the strip: origin and size in ONE
+    /// write, so a section never re-lays at a new size from its old
+    /// place.
+    nonisolated static func slotFrame(
+        _ section: Section,
+        in strip: CGRect
+    ) -> CGRect {
+        CGRect(
+            x: section.slot.minX - strip.minX,
+            y: section.slot.minY - strip.minY,
+            width: section.slot.width,
+            height: section.slot.height
+        )
+    }
+
     func place(
         _ sections: [Section],
         in strip: CGRect,
@@ -14,11 +72,41 @@ extension ShelfOverlay {
         animated: Bool
     ) {
         let wanted = sections.map(\.view)
+        var leaving: [NSView] = []
         for view in stripView.subviews
         where view !== divider && view !== handle
             && !wanted.contains(where: { $0 === view })
         {
-            view.removeFromSuperview()
+            guard animated, !leavingViews.contains(view) else {
+                if !animated { view.removeFromSuperview() }
+                continue
+            }
+            // A section leaving shrinks back into the one it leaves.
+            view.isHidden = false
+            leaving.append(view)
+            BarMotion.setFrame(
+                view,
+                to: Self.collapsed(
+                    view.frame,
+                    toward: Self.facing(
+                        view.frame,
+                        others: sections,
+                        in: strip
+                    ),
+                    horizontal: horizontal
+                ),
+                animated: true
+            )
+            BarMotion.setAlpha(view, to: 0, animated: true)
+        }
+        if !leaving.isEmpty {
+            leavingViews.formUnion(leaving)
+            BarMotion.afterGroupGlide { [weak self] in
+                for view in leaving where view.superview != nil {
+                    view.removeFromSuperview()
+                }
+                self?.leavingViews.subtract(leaving)
+            }
         }
         placedContent = placedContent.filter { key, _ in
             wanted.contains { ObjectIdentifier($0) == key }
@@ -33,29 +121,12 @@ extension ShelfOverlay {
                     relativeTo: divider
                 )
             }
-            // Origin and size in ONE write, so a section never
-            // re-lays at a new size from its old place.
-            let frame = CGRect(
-                x: section.slot.minX - strip.minX,
-                y: section.slot.minY - strip.minY,
-                width: section.slot.width,
-                height: section.slot.height
-            )
-            if animated, !joining, let drawn = placedContent[key] {
-                section.view.frame = Self.glideStart(
-                    from: section.view.frame,
-                    drawn: drawn,
-                    content: section.content,
-                    to: frame,
-                    horizontal: horizontal
-                )
-            }
+            let frame = Self.slotFrame(section, in: strip)
             BarMotion.setFrame(
                 section.view,
                 to: frame,
                 animated: animated && !joining
             )
-            if joining, animated { section.view.alphaValue = 0 }
             BarMotion.setAlpha(section.view, to: 1, animated: animated)
             placedContent[key] = section.content
         }
@@ -119,5 +190,28 @@ extension ShelfOverlay {
                 width: plate.width,
                 height: 0
             )
+    }
+
+    /// Which end of `frame` faces the other sections — where a
+    /// joining section grows from and a leaving one shrinks to.
+    nonisolated static func facing(
+        _ frame: CGRect,
+        others sections: [Section],
+        in strip: CGRect
+    ) -> KiwiShelf.Alignment {
+        let before = sections.contains {
+            slotFrame($0, in: strip).midX < frame.midX
+                || slotFrame($0, in: strip).midY < frame.midY
+        }
+        return before ? .start : .end
+    }
+
+    /// `frame` shrunk to nothing at its `anchor` end.
+    nonisolated static func collapsed(
+        _ frame: CGRect,
+        toward anchor: KiwiShelf.Alignment,
+        horizontal: Bool
+    ) -> CGRect {
+        collapsed(frame, to: anchor, horizontal: horizontal)
     }
 }

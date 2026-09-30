@@ -5585,6 +5585,27 @@ while `set_on_monocle_focus` is off.
 animations.set_monocle_flip_duration(300)
 ```
 
+:::unreleased
+### animations.set_on_shelf, animations.set_shelf_duration
+
+**Expects:**
+
+- `set_on_shelf(bool)` — `true` or `false` (default `true`).
+- `set_shelf_duration(ms)` — a number (milliseconds, clamped
+  500–2000; default `750`).
+
+**Does:** the KiwiShelf glide: a bar growing in or shrinking out
+when you switch Spaces, and the bars gliding to their new places.
+Off, they move at once. It is not under the window-animation
+switches, and Reduce Motion keeps it off.
+
+**Example:**
+
+```lua
+animations.set_shelf_duration(1000)
+```
+:::
+
 ### enable_wake_restore, set_wake_restore_delay
 
 **Expects:**

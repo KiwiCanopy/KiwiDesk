@@ -4,6 +4,12 @@ import AppKit
 /// App Bar group's members sliding into its item and out of it.
 /// The same one home — `BarMotionSeamTests` censuses both files.
 extension BarMotion {
+    /// The shelf glide's length (#1838), the user's
+    /// `animations.shelf_duration` — nothing while `on_shelf` is
+    /// off — kept current by `KiwiCore.updateBars()`.
+    @MainActor static var shelfGlide: TimeInterval =
+        AnimationSettings().shelfGlideSeconds
+
     /// Fades `view` to `alpha` inside the running layout group,
     /// landing at once where `fades` refuses.
     @MainActor
@@ -32,7 +38,10 @@ extension BarMotion {
     static func afterGroupGlide(
         _ body: @escaping @MainActor () -> Void
     ) {
-        let span = plateGlideDuration(reduceMotion: isReduced)
+        let span = plateGlideDuration(
+            reduceMotion: isReduced,
+            seconds: shelfGlide
+        )
         Task { @MainActor in
             if span > 0 { try? await Task.sleep(for: .seconds(span)) }
             body()

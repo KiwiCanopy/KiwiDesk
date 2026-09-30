@@ -89,6 +89,35 @@ extension MotionCard {
             .searchAnchored(
                 SettingsCatalog.colors.motionMore.children.animationDuration
             )
+        case .animationsOnShelf:
+            ToggleRow(
+                label: L("behavior.animations.shelf", "Animate KiwiShelf"),
+                isOn: animations.onShelf,
+                help: L(
+                    "behavior.animations.shelf.help",
+                    "A bar growing in or shrinking out when you "
+                        + "switch Spaces, and the bars gliding to "
+                        + "their new places. Off, they move at once."
+                )
+            )
+            .searchAnchored(
+                SettingsCatalog.colors.motionMore.children.animateShelf
+            )
+        case .animationsShelfDurationMS:
+            StepperRow(
+                label: L(
+                    "behavior.animations.shelf_duration",
+                    "KiwiShelf duration"
+                ),
+                value: animations.shelfDurationMS,
+                in: AnimationSettings.shelfDurationBand,
+                step: 50,
+                suffix: "ms"
+            )
+            .modifier(GreyOut(active: !animations.onShelf.wrappedValue))
+            .searchAnchored(
+                SettingsCatalog.colors.motionMore.children.shelfDuration
+            )
         default:
             let _ = assertionFailure(
                 "non-Motion Colours key in the Motion card: "

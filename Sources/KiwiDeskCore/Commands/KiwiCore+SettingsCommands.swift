@@ -126,6 +126,22 @@ extension KiwiCore {
             }
             tiler.settings.animations.monocleFlipDurationMS = ms
             return .ok()
+        case "animations.set_on_shelf":
+            // The shelf's glide on and off (#1838).
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            tiler.settings.animations.onShelf = on
+            updateBars()
+            return .ok()
+        case "animations.set_shelf_duration":
+            // The shelf glide's pace (#1838).
+            guard let ms = args.first?.intValue else {
+                return .fail("expected milliseconds")
+            }
+            tiler.settings.animations.shelfDurationMS = ms
+            updateBars()
+            return .ok()
         case "animations.set_size_policy":
             // Experimental (#47), engine-only — not persisted to a
             // profile. Flip live to compare the throttled-smooth
