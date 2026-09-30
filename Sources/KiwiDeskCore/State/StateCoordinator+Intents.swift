@@ -1,17 +1,23 @@
 import Foundation
 
-/// Manual float and sticky intent state management
-/// (`WindowIdentity`, #160, #414).
+/// User float and sticky intent state management
+/// (`WindowIdentity`, #160, #414, #1810).
 extension StateCoordinator {
-    /// Marks a window floating or tiled, remembering override across
-    /// restarts (#160).
+    /// Floats a window as the user's choice, or clears that choice
+    /// and tiles it (#1810). A Tile also forgets the window's
+    /// reopen memory, so nothing brings the float back.
     public mutating func setFloating(
         _ id: WindowID,
         _ floating: Bool
     ) {
-        guard windows[id] != nil else { return }
+        guard let window = windows[id] else { return }
         windows.setFloating(id, floating)
-        manualFloatOverrides[id] = floating
+        if floating {
+            userFloated.insert(id)
+        } else {
+            userFloated.remove(id)
+            rememberedFloating.remove(WindowIdentity(of: window))
+        }
     }
 
     /// Sets a window's sticky scope (`make_sticky`, #414, #445).
@@ -23,42 +29,31 @@ extension StateCoordinator {
         windows.setSticky(id, scope)
     }
 
-    /// Clears manual float override and remembered identity intent (#164).
-    public mutating func clearFloatOverride(_ id: WindowID) {
-        manualFloatOverrides[id] = nil
-        if let window = windows[id] {
-            rememberedFloating[WindowIdentity(of: window)] = nil
-        }
-    }
-
-    /// Saves manual float override into reopen memory keyed by
-    /// identity (#160). An empty title carries no identity — every
+    /// Saves a user float into reopen memory keyed by identity
+    /// (#160). An empty title carries no identity — every
     /// pre-title window of the app would match it — so the
-    /// override is dropped instead of remembered.
+    /// float is dropped instead of remembered.
     mutating func rememberFloatOverride(
         of window: ManagedWindow
     ) {
-        guard
-            let intent = manualFloatOverrides.removeValue(
-                forKey: window.id
-            ),
+        guard userFloated.remove(window.id) != nil,
             !window.title.isEmpty
         else { return }
-        rememberedFloating[WindowIdentity(of: window)] = intent
+        rememberedFloating.insert(WindowIdentity(of: window))
     }
 
-    /// Restores remembered float override onto (re)tracked window (#160).
+    /// Restores a remembered user float onto a (re)tracked window
+    /// (#160).
     mutating func restoreFloatOverride(
         of window: ManagedWindow
     ) {
-        guard manualFloatOverrides[window.id] == nil,
+        guard !userFloated.contains(window.id),
             !window.title.isEmpty,
-            let intent = rememberedFloating.removeValue(
-                forKey: WindowIdentity(of: window)
-            )
+            rememberedFloating.remove(WindowIdentity(of: window))
+                != nil
         else { return }
-        windows.setFloating(window.id, intent)
-        manualFloatOverrides[window.id] = intent
+        windows.setFloating(window.id, true)
+        userFloated.insert(window.id)
     }
 
     /// Saves closing window's sticky state into identity memory (#414).

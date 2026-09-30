@@ -9,7 +9,7 @@ extension KiwiCore {
     @discardableResult
     private func flashSizeLimitPill(
         _ window: WindowID,
-        _ refusal: ResizeRefusal,
+        symbol: String,
         text: String
     ) -> Bool {
         // The frame the window was ISSUED (#934): a floor's
@@ -23,7 +23,7 @@ extension KiwiCore {
             window: window,
             frame: frame,
             text: text,
-            symbol: refusal.pillSymbol
+            symbol: symbol
         )
     }
 
@@ -94,7 +94,7 @@ extension KiwiCore {
         soundIfDrawn(
             flashSizeLimitPill(
                 refusal.window,
-                refusal,
+                symbol: refusal.pillSymbol,
                 text: refusal.pillText
             )
         )
@@ -102,10 +102,23 @@ extension KiwiCore {
         if let second = refusal.secondPill {
             flashSizeLimitPill(
                 second.window,
-                refusal,
+                symbol: refusal.pillSymbol,
                 text: second.text
             )
         }
+    }
+
+    /// A Tile refused because detection floats the window
+    /// (#1810): the pill names the reason, the sentence the bar
+    /// menu's greyed row carries too.
+    func cueTileRefusal(_ window: WindowID, _ reason: AutoFloatReason) {
+        soundIfDrawn(
+            flashSizeLimitPill(
+                window,
+                symbol: "nosign",
+                text: reason.sentence
+            )
+        )
     }
 
     /// The zone has no parameter on the asked axis (#1255).

@@ -36,9 +36,9 @@ extension StateSnapshot {
         }
     }
 
-    /// One window's runtime flags: the manual float override
-    /// (nil = auto, #164 — detection re-derives it), the sticky
-    /// scope and the sticky-reach override.
+    /// One window's runtime flags: the user float (`true`, else
+    /// nil — detection re-derives it, #1810), the sticky scope and
+    /// the sticky-reach override.
     public struct WindowSession: Codable, Sendable, Equatable {
         public var floating: Bool?
         public var sticky: StickyScope
@@ -104,7 +104,8 @@ extension StateCoordinator {
             var record = record
             if let window = windows[record.windowID] {
                 record.session = StateSnapshot.WindowSession(
-                    floating: manualFloatOverrides[window.id],
+                    floating: userFloated.contains(window.id)
+                        ? true : nil,
                     sticky: window.stickyScope,
                     stickyReach: stickyReachOverrides[window.id]
                 )
@@ -140,8 +141,9 @@ extension StateCoordinator {
             windows[record.windowID] != nil
         else { return }
         let id = record.windowID
-        if let floating = session.floating {
-            setFloating(id, floating)
+        // A pre-#1810 `false` was a manual tile, which is gone.
+        if session.floating == true {
+            setFloating(id, true)
         }
         setSticky(id, session.sticky)
         stickyReachOverrides[id] = session.stickyReach

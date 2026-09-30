@@ -195,7 +195,7 @@ extension KiwiCore {
     /// active Space at the drop (#1686), through the drop-commit
     /// above. A floating-mode member keeps floating there: onto a
     /// tiled Space it takes the flag, or the layout would tile it
-    /// — as a MANUAL override, the float verb's, so detection
+    /// — as a USER float, the float verb's record, so detection
     /// cannot re-tile it and it reopens floating (owner ruling
     /// 2026-09-26). A sticky is not re-filed by the
     /// drop at all — its home is #445's to move, and a refusal

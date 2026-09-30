@@ -101,6 +101,35 @@ extension EventLoop {
         )
     }
 
+    /// `shouldForceFloat` as a reason (#1810): own chrome reads as
+    /// a panel, anyone else's as an app with no Dock icon.
+    func forceFloatReason(pid: pid_t, id: WindowID) -> AutoFloatReason? {
+        guard shouldForceFloat(pid: pid, id: id) else { return nil }
+        return Self.isOwnProcess(pid) ? .panel : .accessoryApp
+    }
+
+    /// The automatic verdict for one tracked window (#1810) — the
+    /// one composition `track` and `recheckFloat` both take.
+    func autoFloatVerdict(
+        _ element: AXUIElement,
+        id: WindowID,
+        pid: pid_t,
+        bundleID: String?,
+        layer: Int?
+    ) -> FloatVerdict {
+        if let forced = forceFloatReason(pid: pid, id: id) {
+            return .floats(forced)
+        }
+        return FloatVerdict(
+            FloatDetection.autoFloatReason(
+                element: element,
+                bundleID: bundleID,
+                layer: layer,
+                rules: floatRules
+            )
+        )
+    }
+
     /// Maps an own window id to its `NSWindow` — the one place
     /// AX identity meets AppKit identity, shared by the ignore
     /// gate (`canBecomeMain`) and by `ownWindowIdentifier`'s

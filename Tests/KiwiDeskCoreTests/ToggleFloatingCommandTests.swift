@@ -5,9 +5,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The `toggle_floating` command (#221): one verb to flip the
-/// focused window between floating and tiled, reading its
-/// effective state and writing the explicit opposite — never
-/// `auto` (that stays `make_auto`'s job, #164).
+/// focused window between floating and tiled — through the float
+/// verbs, so a toggle back to tiled hands the window to detection
+/// again (#1810, `TileReturnsToRulesTests`).
 @Suite("toggle_floating command", .serialized)
 @MainActor
 struct ToggleFloatingCommandTests {
@@ -65,22 +65,18 @@ struct ToggleFloatingCommandTests {
         #expect(isFloating(core) == false)
     }
 
-    /// A fresh window is detection-controlled (auto). Toggling it
-    /// must write an *explicit* override, not leave it auto —
-    /// proven here because `make_auto` + a re-detection verdict is
-    /// then required to move it back, exactly as after a
-    /// `make_floating`.
-    @Test("toggle writes an explicit override, not auto")
-    func writesExplicitOverride() {
+    /// A toggle back to tiled leaves no manual tile behind: a
+    /// detection float applies at once (#1810).
+    @Test("a toggle back to tiled yields to detection")
+    func toggleBackYieldsToDetection() {
         let core = makeCore()
         addWindow(core, 1)
         #expect(core.execute("toggle_floating").isSuccess)
+        #expect(core.execute("toggle_floating").isSuccess)
+        core.state.apply(
+            .windowFloatChanged(WindowID(1), isFloating: true)
+        )
         #expect(isFloating(core) == true)
-        // Detection alone can't move an explicitly-overridden
-        // window; only make_auto returns it to detection control.
-        core.eventLoop.detectedFloating[WindowID(1)] = false
-        #expect(core.execute("make_auto").isSuccess)
-        #expect(isFloating(core) == false)
     }
 
     @Test("toggle without a focused window fails")

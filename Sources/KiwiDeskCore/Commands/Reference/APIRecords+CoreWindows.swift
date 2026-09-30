@@ -79,12 +79,9 @@ extension APIReference {
             .window("window", optional: true)
         ),
         "make_tiled": APIRecord(
-            "Returns the focused window, or the one a window id "
-                + "names, to its Space's tiling layout.",
+            "Hands the focused or named window back to its "
+                + "float rules, which may still float it.",
             .window("window", optional: true)
-        ),
-        "make_auto": APIRecord(
-            "Clears the focused window's manual float override."
         ),
         "toggle_floating": APIRecord(
             "Flips the focused window, or the one a window id "

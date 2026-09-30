@@ -38,10 +38,10 @@ struct ToggleFloatingFlagTests {
         #expect(core.state.windows[window]?.isFloating == false)
         #expect(core.execute("toggle_floating").isSuccess)
         #expect(core.state.windows[window]?.isFloating == true)
-        #expect(core.state.manualFloatOverrides[window] == true)
+        #expect(core.state.userFloated == [window])
         #expect(core.execute("toggle_floating").isSuccess)
         #expect(core.state.windows[window]?.isFloating == false)
-        #expect(core.state.manualFloatOverrides[window] == false)
+        #expect(core.state.userFloated.isEmpty)
     }
 
     /// The flag set there is what the window keeps once the Space

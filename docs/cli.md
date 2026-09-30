@@ -240,7 +240,6 @@ exports nothing.
 | | `delete_space` | space id — see [Deleting a Space](#deleting-a-space) |
 | Window | `make_floating` | — |
 | | `make_tiled` | — |
-| | `make_auto` | — |
 | | `toggle_floating` | — |
 | | `make_sticky` | — (sticky on every monitor) |
 | | `make_display_sticky` | — (sticky on this monitor only) |
@@ -356,6 +355,14 @@ window carries (`kiwidesk make_floating 4711`).
 :::unreleased
 The `scroll_gesture.*` commands set the scroll gestures; see
 [Scroll Gestures](lua-reference.md#scroll-gestures).
+:::
+
+:::unreleased
+`make_auto` is retired: it fails with `make_auto was retired —
+use make_tiled`, and `make_tiled` does its job. `make_tiled`, and
+`toggle_floating` towards tiled, fail on a window that a float
+rule, dialog and panel detection or a missing Dock icon floats
+([`make_tiled`](lua-reference.md#make_tiled)).
 :::
 
 :::unreleased

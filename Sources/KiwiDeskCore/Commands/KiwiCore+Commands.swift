@@ -46,8 +46,6 @@ extension KiwiCore {
             return setFloating(command, args, true)
         case "make_tiled":
             return setFloating(command, args, false)
-        case "make_auto":
-            return setFocusedAuto()
         case "toggle_floating":
             return toggleFloating(command, args)
         case "make_sticky":
@@ -155,67 +153,6 @@ extension KiwiCore {
 
     // MARK: - Window state
 
-    /// `make_floating` / `make_tiled`: the named window, else the
-    /// focused one (#1518).
-    private func setFloating(
-        _ command: String,
-        _ args: [JSONValue],
-        _ floating: Bool
-    ) -> CommandResponse {
-        switch commandTarget(command, args) {
-        case .refused(let response): return response
-        case .window(let window): return setFloating(window, floating)
-        }
-    }
-
-    private func setFloating(
-        _ focused: WindowID,
-        _ floating: Bool
-    ) -> CommandResponse {
-        // Snapshot before the flip: the placement fires only for
-        // a window that was no EFFECTIVE float — a floating-mode
-        // member's frame is already the user's (`EffectiveFloat`).
-        let wasFloating = isEffectiveFloatForPlacement(focused)
-        // Read before the flip's retile moves it; kept only where
-        // the flip really tiles it — a floating-mode member made
-        // tiled still floats (#1675).
-        let floatFrame = !floating ? floatFrameToRemember(focused) : nil
-        state.setFloating(focused, floating)
-        if let floatFrame, wasFloating,
-            !isEffectiveFloatForPlacement(focused)
-        {
-            state.floatFrames[focused] = floatFrame
-        }
-        retile()
-        // Float direction only: `make_tiled` already animates a
-        // real move back into the layout.
-        if floating, !wasFloating {
-            placeFloating(focused)
-        }
-        return .ok()
-    }
-
-    /// `toggle_floating` (#221): flip the window between
-    /// floating and tiled in one verb. Reads the window's own FLAG,
-    /// ruled onto it in the `EffectiveFloat` roster (#1697), and
-    /// writes the explicit opposite as a manual override — like
-    /// `make_floating`/`make_tiled`, it never yields `auto` (that
-    /// stays `make_auto`'s job), so the #164 tri-state is
-    /// preserved by construction.
-    private func toggleFloating(
-        _ command: String,
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        switch commandTarget(command, args) {
-        case .refused(let response): return response
-        case .window(let id):
-            guard let window = state.windows[id] else {
-                return .fail("no focused window")
-            }
-            return setFloating(id, !window.isFloating)
-        }
-    }
-
     /// `make_sticky` / `make_display_sticky` / `make_unsticky`
     /// (#414/#445): sets the focused window's sticky SCOPE. No
     /// tri-state and no detection source — the scope is the whole
@@ -254,35 +191,6 @@ extension KiwiCore {
         let next: StickyScope =
             window.stickyScope == scope ? .none : scope
         return setFocusedSticky(next)
-    }
-
-    /// `make_auto` (#164): clears the focused window's manual
-    /// float override and returns it to detection control by
-    /// re-applying the event loop's cached verdict. Without a
-    /// cached verdict (untracked window) the current state
-    /// stands until the next detection pass.
-    ///
-    /// Feeds the fold directly instead of `KiwiCore.handle`
-    /// (like `setFocusedFloating`): commands own their retile.
-    /// If `handle` ever grows a `windowFloatChanged` side
-    /// effect (bus emit), mirror it here.
-    private func setFocusedAuto() -> CommandResponse {
-        guard let focused = focusedWindowID else {
-            return .fail("no focused window")
-        }
-        state.clearFloatOverride(focused)
-        if let detected = eventLoop.detectionVerdict(
-            for: focused
-        ) {
-            state.apply(
-                .windowFloatChanged(
-                    focused,
-                    isFloating: detected
-                )
-            )
-        }
-        retile()
-        return .ok()
     }
 
     // `resize` lives in `KiwiCore+Resize.swift` (#56/#67).

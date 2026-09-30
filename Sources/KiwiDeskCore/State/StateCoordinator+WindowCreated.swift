@@ -48,8 +48,7 @@ extension StateCoordinator {
         effects.rehomedToScreenSpace = preferred
         let held = preferred ?? livingRememberedSpace(remembered)
         // A raised-layer overlay (a popup menu) skips the rule
-        // (#1602); read from state, where a restored tiled intent
-        // clears the overlay flag.
+        // (#1602).
         let popup =
             windows[window.id].map {
                 $0.isTransientOverlay && $0.isRaisedLayer

@@ -88,7 +88,7 @@ private func trackedFixture() -> StateCoordinator {
 
 /// The number of WindowID-keyed containers `trackedFixture`
 /// populates: `WindowManager.windows`, `rememberedSpaces`,
-/// `restoredFrames` (#1362), `manualFloatOverrides`,
+/// `restoredFrames` (#1362), `userFloated`,
 /// `stickyReachOverrides` (#1145), `floatFrames` (#1675),
 /// `departedSlots` (#1207),
 /// `awayWindows` (#1146), `closedDepartures` (#1414),

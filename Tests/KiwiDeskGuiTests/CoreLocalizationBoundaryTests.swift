@@ -94,6 +94,9 @@ struct CoreLocalizationBoundaryTests {
         // window-is-fullscreen (#1298). Same caveat as
         // `+StickyMarks` if the overlays ever move out of Core.
         "Commands/ResizeRefusal+Rendering.swift": 12,
+        // The Tile refusal's three reasons (#1810), drawn on the
+        // same pill and on the bar menu's greyed row, both Core's.
+        "Commands/AutoFloatReason+Rendering.swift": 3,
         // The two marks' VoiceOver names (#1799).
         "Borders/StickyMarkOverlay.swift": 2,
         // The Space Bar's item labels and a11y strings, and the

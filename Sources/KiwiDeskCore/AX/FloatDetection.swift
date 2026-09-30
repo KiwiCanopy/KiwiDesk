@@ -154,40 +154,26 @@ public enum FloatDetection {
         layer == nil && shouldFloat(role: role, subrole: subrole)
     }
 
-    /// Evaluates if AX element should float using window rules (`FloatRules`).
+    /// Why an AX element floats by detection, or nil where it
+    /// tiles (#1810). Structure is asked before the rules, so a
+    /// dialog a rule also matches reports `.panel` — deleting the
+    /// rule would not tile it.
     @MainActor
-    public static func shouldFloat(
-        element: AXUIElement,
-        bundleID: String?,
-        rules: FloatRules
-    ) -> Bool {
-        let layer = AXHelper.windowID(of: element)
-            .flatMap { windowLayer(of: $0) }
-        return shouldFloat(
-            element: element,
-            bundleID: bundleID,
-            layer: layer,
-            rules: rules
-        )
-    }
-
-    /// Float decision given cached WindowServer layer (`FloatRules`).
-    @MainActor
-    public static func shouldFloat(
+    public static func autoFloatReason(
         element: AXUIElement,
         bundleID: String?,
         layer: Int?,
         rules: FloatRules
-    ) -> Bool {
-        let title = AXHelper.title(of: element)
-        if rules.matches(bundleID: bundleID, title: title) {
-            return true
-        }
-        return shouldFloat(
+    ) -> AutoFloatReason? {
+        let structural = shouldFloat(
             role: AXHelper.role(of: element),
             subrole: AXHelper.subrole(of: element),
             layer: layer ?? 0
         )
+        if structural { return .panel }
+        let title = AXHelper.title(of: element)
+        return rules.matches(bundleID: bundleID, title: title)
+            ? .rule : nil
     }
 }
 

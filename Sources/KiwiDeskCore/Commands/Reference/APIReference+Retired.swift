@@ -2,8 +2,8 @@ import Foundation
 
 /// Retired verbs: #1517's, when the two bars moved onto one
 /// shelf, #1674's `set_float_nudge`, #1713's item padding and
-/// #1731's shelf edge, which each bar took back, and #1528's App
-/// Bar content.
+/// #1731's shelf edge, which each bar took back, #1528's App Bar
+/// content, and #1810's `make_auto`.
 /// No aliases (AGENTS.md §5): a retired name fails, and the
 /// failure names what replaces it — in Lua as a
 /// `ConfigIssue.Kind.retiredCall`, over IPC through
@@ -45,6 +45,9 @@ extension APIReference {
         map["space_bar.set_title_cap"] =
             "space_bar.set_front_app_title_cap"
         map["set_float_nudge"] = "set_float_placement"
+        // A window is tiled or floating, and Tile hands it back
+        // to detection (#1810).
+        map["make_auto"] = "make_tiled"
         map["kiwishelf.set_item_padding"] = "kiwishelf.set_glyph_size"
         // The centred strip draws one more glyph at a row's end,
         // so the count is a span, not a cap (#1528).
