@@ -51,7 +51,7 @@ enum FloatStrandFixture {
         frame: CGRect,
         floating: Bool = false
     ) -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()

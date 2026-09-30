@@ -37,7 +37,7 @@ extension FullscreenStandDownTests {
     @Test("A fullscreen space schedules no title refresh")
     func titleRefreshStandsDown() {
         let core = makeCore()
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return }
         core.state.apply(.displaysChanged([display]))
@@ -84,7 +84,7 @@ extension FullscreenStandDownTests {
     @Test("The Space Bar driver arms the gate through its bar")
     func spaceBarTitleRefreshStandsDown() {
         let core = makeCore()
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return }
         core.state.apply(.displaysChanged([display]))

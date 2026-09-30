@@ -30,7 +30,7 @@ struct RestoredFrameDebtTests {
         width: 800,
         height: 600
     )
-    /// The main-screen tile the scan left the late window at.
+    /// The primary-screen tile the scan left the late window at.
     private static let tile = CGRect(
         x: 6,
         y: 68,
@@ -67,7 +67,7 @@ struct RestoredFrameDebtTests {
     /// A pinned core with `tracked` in the active space `1` and
     /// a second space `2` in `mode`, both on the one display.
     private func makeCore(mode: LayoutMode) -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()

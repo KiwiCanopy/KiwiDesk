@@ -13,11 +13,11 @@ import Testing
 @MainActor
 struct SpaceBarLayerRefreshTests {
     /// A core showing a Space Bar over one Space on the host's
-    /// main screen; nil where the host has none to paint on.
+    /// primary screen; nil where the host has none to paint on.
     private func makeBarredCore(
         resolvingSpaces: Bool = true
     ) -> KiwiCore? {
-        guard let screen = NSScreen.main,
+        guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore(
@@ -42,7 +42,7 @@ struct SpaceBarLayerRefreshTests {
     }
 
     private func identities(_ core: KiwiCore) -> [SpaceBarItemView.Identity] {
-        guard let display = NSScreen.main?.kiwiDisplay?.id,
+        guard let display = NSScreen.screens.first?.kiwiDisplay?.id,
             let shown = core.spaceBars.overlayForTesting(display)?
                 .lastShown
         else { return [] }
