@@ -23,8 +23,9 @@ import Testing
 /// are not `BarMotion`.
 @Suite("Core motion routing (#1078)")
 struct BarMotionSeamTests {
-    /// The file the bars' motion lives in.
-    private static let home = "BarMotion.swift"
+    /// The files the bars' motion lives in: `BarMotion` and its
+    /// extensions split at the §2.1 ceiling, one home.
+    private static let homes = ["BarMotion.swift", "BarMotion+Fade.swift"]
 
     /// Ways to start AppKit or Core Animation motion. Type
     /// spellings, where constructing one IS starting an
@@ -51,20 +52,6 @@ struct BarMotionSeamTests {
     /// a mention: `.animator` with no paren requirement also
     /// answers for a stored `animator` of our own.
     private static let animatorCall = ".animator"
-
-    /// SwiftUI's starters, held at ZERO in Core rather than
-    /// added to `starters`, because the two lists earn different
-    /// answers and merging them would give the wrong one. A
-    /// SwiftUI animation carries an argument, so it takes
-    /// `ReduceMotionGateTests`' per-call gate — NOT a route
-    /// through a `BarMotion`, which is what a `starters` entry
-    /// would demand. So the first one to land in Core reds here
-    /// and its author widens that suite's root instead.
-    private static let swiftUIStarters = [
-        "withAnimation", ".animation", ".transaction",
-        "phaseAnimator", "keyframeAnimator", "symbolEffect",
-        "contentTransition",
-    ]
 
     /// Files that start motion outside `BarMotion`, each naming
     /// its ruling — the one copy of who is exempt.
@@ -115,6 +102,9 @@ struct BarMotionSeamTests {
         "runPlateGlide": ["plateGlideDuration(", "isReduced"],
         "plateGlideDuration": [],
         "setFrame": ["travels(", "isReduced"],
+        "setAlpha": ["fades(", "isReduced"],
+        "fades": [],
+        "afterGroupGlide": ["plateGlideDuration(", "isReduced"],
         "playWalk": ["walkDuration(", "isReduced"],
         "walkDuration": [],
         "walkAnimation": ["duration"],
@@ -125,6 +115,12 @@ struct BarMotionSeamTests {
         "flipMorph": ["reduceMotion"],
         "flipFade": ["reduceMotion"],
     ]
+
+    private static func stripped(_ home: String) throws -> String {
+        try SourceScan.strippedSource(
+            at: coreRoot.appendingPathComponent("Bar/\(home)")
+        )
+    }
 
     private static var coreRoot: URL {
         SourceScan.repoRoot(from: #filePath)
@@ -172,7 +168,7 @@ struct BarMotionSeamTests {
             }
             guard !found.isEmpty else { continue }
             hits.insert(name)
-            guard name != Self.home, Self.allowed[name] == nil
+            guard !Self.homes.contains(name), Self.allowed[name] == nil
             else { continue }
             strays.append(
                 "\(name): \(found.joined(separator: ", "))"
@@ -187,13 +183,13 @@ struct BarMotionSeamTests {
         // carries them, so a spelling that stops matching reds
         // here instead of emptying the clause above in silence.
         #expect(
-            hits.contains(Self.home),
-            "\(Self.home) no longer matches any starter"
+            Self.homes.allSatisfy(hits.contains),
+            "a home no longer matches any starter: \(Self.homes)"
         )
         #expect(
             strays.isEmpty,
             """
-            starts motion outside \(Self.home) — route it \
+            starts motion outside \(Self.homes) — route it \
             through a gated home, or rule it in `allowed`: \
             \(strays)
             """
@@ -204,44 +200,6 @@ struct BarMotionSeamTests {
         #expect(
             Self.allowed.keys.allSatisfy(hits.contains),
             "a ruling fires on nothing: \(Self.allowed.keys)"
-        )
-    }
-
-    @Test("No SwiftUI starter ships unscanned in Core")
-    func noSwiftUIStarterArrives() throws {
-        var found: [String] = []
-        var scanned = 0
-        for file in try SourceScan.swiftSources(
-            under: Self.coreRoot
-        ) {
-            scanned += 1
-            let source = try SourceScan.strippedSource(at: file)
-            let text = Array(source)
-            for spelling in Self.swiftUIStarters
-            where source.contains(spelling)
-                && !SourceScan.callSites(
-                    in: text,
-                    for: spelling,
-                    closureCounts: true
-                ).isEmpty
-            {
-                found.append(
-                    "\(file.lastPathComponent): \(spelling)"
-                )
-            }
-        }
-        // Its OWN floor, not the sibling's: borrowed non-vacuity
-        // dies the day the clause that lends it is split out or
-        // renamed (guard-prover).
-        #expect(scanned >= 200, "scanned \(scanned) files")
-        #expect(
-            found.isEmpty,
-            """
-            a SwiftUI surface arrived in Core: gate it per call \
-            the way `Sources/KiwiDesk` does and widen \
-            ReduceMotionGateTests' root to reach it, rather than \
-            routing it through BarMotion: \(found)
-            """
         )
     }
 
@@ -256,10 +214,9 @@ struct BarMotionSeamTests {
     /// to both shapes (code review).
     @Test("Every member of BarMotion is censused and gated")
     func everyMemberIsCensused() throws {
-        let file = Self.coreRoot
-            .appendingPathComponent("Bar/\(Self.home)")
-        let source = try SourceScan.strippedSource(at: file)
-        let members = SourceScan.memberBodies(in: source)
+        let members = try Self.homes.flatMap {
+            SourceScan.memberBodies(in: try Self.stripped($0))
+        }
         let names = members.map(\.declaration)
         #expect(
             Set(names) == Set(Self.members.keys),

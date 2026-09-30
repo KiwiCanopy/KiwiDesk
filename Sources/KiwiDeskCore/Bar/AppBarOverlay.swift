@@ -64,6 +64,15 @@ public final class AppBarOverlay {
     var boxGlasses: [NSView] = []
     /// Solid backdrops behind per-box glass for tint refraction (#408).
     var boxTints: [GlassBackdrop] = []
+    /// The window each box glass is paired with, by position in
+    /// `boxGlasses` (#1831).
+    var boxGlassOwners: [WindowID] = []
+    /// Members sliding out of a group on a boxed glass run, which
+    /// take their glass when the glide lands (#1831).
+    var glidingIn: Set<WindowID> = []
+    /// Bumped by every render that starts a group glide, so only
+    /// the latest glide's landing re-renders.
+    var glideGeneration = 0
     var scrollOffset: CGFloat = 0
     /// Follows the focused window unless a manual scroll holds.
     var follow = ShelfFollow<WindowID>()
@@ -134,7 +143,10 @@ public final class AppBarOverlay {
         let style = LiquidGlassGate.rendered(state.style)
         drawnStyle = style
         let edge = style.edge
-        syncItemViewCount(items.count)
+        let glide = syncItemViews(
+            to: items,
+            glass: glassHosting(style) == .boxGlass
+        )
         let m = metrics(
             strip: strip,
             count: items.count,
@@ -182,8 +194,9 @@ public final class AppBarOverlay {
         let runStart: CGFloat
         if let first = frames.first {
             runStart =
-                m.horizontal
-                ? first.minX + runFrame.minX : first.minY + runFrame.minY
+                m.inset
+                + (m.horizontal
+                    ? first.minX + runFrame.minX : first.minY + runFrame.minY)
         } else {
             runStart = 0
         }
@@ -201,7 +214,13 @@ public final class AppBarOverlay {
         // Items leave their glass BEFORE the frame pass, which sets
         // only the ones the container hosts (#1730).
         if hosting != .boxGlass { teardownBoxGlasses() }
-        BarMotion.runLayout {
+        standArrivals(glide.arrivals)
+        // A group folding or releasing members changes the bar's
+        // length, and the shelf re-places the section on the plate
+        // glide: the items ride the same glide, so the fold and
+        // the re-centring are one motion (#1831).
+        let groups = !glide.departures.isEmpty || !glide.arrivals.isEmpty
+        (groups ? BarMotion.runPlateGlide : BarMotion.runLayout) {
             BarMotion.setFrame(itemRun, to: runFrame, animated: true)
             for (index, view) in itemViews.enumerated()
             where view.superview === itemRun {
@@ -212,6 +231,12 @@ public final class AppBarOverlay {
                 )
             }
             layoutFloatBreak(frames: frames, m: m, depth: depth, style: style)
+            playGroupGlide(
+                departures: glide.departures,
+                arrivals: glide.arrivals,
+                items: items,
+                frames: frames
+            )
         }
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
@@ -251,11 +276,12 @@ public final class AppBarOverlay {
             horizontal: m.horizontal
         )
         contentFrame = runContent.offsetBy(
-            dx: runFrame.minX,
-            dy: runFrame.minY
+            dx: runFrame.minX + itemContainer.frame.minX,
+            dy: runFrame.minY + itemContainer.frame.minY
         )
-        // Single dispatch for glass hosting mode (#407).
-        BarMotion.runLayout {
+        // Single dispatch for glass hosting mode (#407), on the
+        // glide the items took, so a box travels with its item.
+        (groups ? BarMotion.runPlateGlide : BarMotion.runLayout) {
             installGlassHosting(
                 hosting,
                 frames: frames,

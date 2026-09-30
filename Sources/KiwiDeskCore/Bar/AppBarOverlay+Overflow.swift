@@ -123,8 +123,8 @@ extension AppBarOverlay {
         layoutOverflow(strip: state.strip, m: m, style: style)
         let before = contentFrame
         contentFrame = runContent.offsetBy(
-            dx: runFrame.minX,
-            dy: runFrame.minY
+            dx: runFrame.minX + itemContainer.frame.minX,
+            dy: runFrame.minY + itemContainer.frame.minY
         )
         let length = m.horizontal ? state.strip.width : state.strip.height
         let moved = ShelfOverlay.dividerMoves(

@@ -203,8 +203,9 @@ struct ShelfArrangementTests {
             ShelfArrangement.hardFloor(
                 activeExtent: 50,
                 thickness: 40,
-                gap: 6
-            ) == 50 + 2 * margin
+                gap: 6,
+                endPads: 10
+            ) == 50 + 2 * margin + 10
         )
     }
 

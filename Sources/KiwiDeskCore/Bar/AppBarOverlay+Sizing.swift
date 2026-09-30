@@ -43,9 +43,12 @@ extension AppBarOverlay {
             thickness: thickness
         )
         let total = Self.runLength(lengths: lengths, gap: gap)
-        // No arrow zones: the run fills its section and fades on a
-        // side that hides entries (#1517).
-        let inset: CGFloat = 0
+        // No arrow zones: the run fades on a side that hides entries
+        // (#1517). An overflowing run keeps the end pad a fitting one
+        // has, where its alignment puts it, so crossing into overflow
+        // starts the scroll and moves no end (#1830).
+        let pads = Self.endPads(gap: gap)
+        let overflows = total > axis - pads
         return Metrics(
             horizontal: horizontal,
             slot: slot,
@@ -53,10 +56,39 @@ extension AppBarOverlay {
             breakAfter: breakAfter,
             lengths: lengths,
             total: total,
-            inset: inset,
-            viewport: max(axis - inset * 2, 0),
+            inset: overflows
+                ? Self.overflowLead(pads: pads, alignment: style.alignment)
+                : 0,
+            viewport: max(overflows ? axis - pads : axis, 0),
             alignment: style.alignment
         )
+    }
+
+    /// The pad a fitting run leaves beside it — `naturalLength`'s
+    /// and an overflowing viewport's one reading (#1830).
+    nonisolated static func endPads(gap: CGFloat) -> CGFloat { gap }
+
+    /// Where an overflowing viewport starts: where a run exactly
+    /// `pads` short of the axis would.
+    nonisolated static func overflowLead(
+        pads: CGFloat,
+        alignment: AppBarStyle.BarAlignment
+    ) -> CGFloat {
+        alignedStart(slack: pads, alignment: alignment)
+    }
+
+    /// Where a run leaving `slack` along its axis starts, by
+    /// alignment — the one reading `frames`, the drop index and the
+    /// overflow lead take.
+    nonisolated static func alignedStart(
+        slack: CGFloat,
+        alignment: AppBarStyle.BarAlignment
+    ) -> CGFloat {
+        switch alignment {
+        case .start: return 0
+        case .center: return slack / 2
+        case .end: return slack
+        }
     }
 
     /// The run's natural length along the shelf — every slot at
@@ -85,7 +117,7 @@ extension AppBarOverlay {
             style: style,
             thickness: thickness
         )
-        return runLength(lengths: lengths, gap: gap) + gap
+        return runLength(lengths: lengths, gap: gap) + endPads(gap: gap)
     }
 
     /// One slot's length, its quarter cap measured on `capAxis`.
@@ -241,16 +273,9 @@ extension AppBarOverlay {
             lengths.reduce(0, +)
             + gap * CGFloat(max(lengths.count - 1, 0))
         let axis = horizontal ? bounds.width : bounds.height
-        var position: CGFloat
-        if total > axis {
-            position = 0
-        } else {
-            switch alignment {
-            case .start: position = 0
-            case .center: position = (axis - total) / 2
-            case .end: position = axis - total
-            }
-        }
+        var position =
+            total > axis
+            ? 0 : alignedStart(slack: axis - total, alignment: alignment)
         return lengths.map { length in
             defer { position += length + gap }
             return horizontal
