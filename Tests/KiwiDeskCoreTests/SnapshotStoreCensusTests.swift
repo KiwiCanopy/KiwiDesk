@@ -108,6 +108,8 @@ struct SnapshotStoreCensusTests {
             (.behind, "a Desktop departure's slot (#1207)"),
         "state.unjudgedFilings":
             (.behind, "a boot's unanswered judge; ends the carry (#1646)"),
+        "state.focusRecency":
+            (.behind, "which window was focused last (#1840); a residue"),
         "state.closedDepartures":
             (.behind, "a close's mark, consumed at the next arrival"),
         "state.awayWindows":
@@ -171,6 +173,7 @@ struct SnapshotStoreCensusTests {
         core.state.restoredFrames[WindowID(9)] = .zero
         core.state.departedSlots[WindowID(9)] = .init(rank: 0)
         core.state.closedDepartures.insert(WindowID(9))
+        core.state.focusRecency[WindowID(1)] = 1
         core.tiler.monocleShownMembers[shown] = WindowID(1)
         core.state.profilePartitioning.record(
             [Space(id: hidden, windows: [WindowID(4)])],

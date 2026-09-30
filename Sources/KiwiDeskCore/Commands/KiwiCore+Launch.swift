@@ -30,6 +30,13 @@ extension KiwiCore {
         if !newInstance,
             let pid = openOrFocus.runningAppPID(bundleID)
         {
+            // A tracked window is focused by command, its Space
+            // switched to: the one it was last focused in (#1840).
+            if let target = pullTarget(bundleID: bundleID, pid: pid),
+                focusCycleTarget(target, reach: nil)
+            {
+                return .ok()
+            }
             let census = openOrFocus.census(pid)
             // Nothing up here but a window up on an away Desktop
             // (#1146): reach it rather than un-park or duplicate.

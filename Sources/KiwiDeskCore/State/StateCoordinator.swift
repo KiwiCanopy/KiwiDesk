@@ -102,6 +102,11 @@ public struct StateCoordinator: Sendable {
     /// by the event arm, read by the hold, cleared by the settle.
     var settlingScreens: [SpaceID: String] = [:]
 
+    /// Honored-focus recency per window (#1840), stamped from
+    /// `focusTick`; session state, ended with the window.
+    var focusRecency: [WindowID: UInt64] = [:]
+    var focusTick: UInt64 = 0
+
     /// Minimized windows in order (#40, #673; `MinimizeOrderTests`).
     var minimizeOrder: [MinimizedWindow] = []
 
@@ -211,6 +216,9 @@ public struct StateCoordinator: Sendable {
         if let frame = floatFrames.removeValue(forKey: old) {
             floatFrames[new] = frame
         }
+        if let rank = focusRecency.removeValue(forKey: old) {
+            focusRecency[new] = rank
+        }
     }
 
     /// Folds an event into state and returns side-effect facts (#166).
@@ -231,6 +239,7 @@ public struct StateCoordinator: Sendable {
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)
                 stickyReachOverrides[id] = nil
+                focusRecency[id] = nil
             }
             floatFrames = floatFrames.filter { $0.value.pid != pid }
             forgetMinimized(pid: pid)
@@ -255,6 +264,7 @@ public struct StateCoordinator: Sendable {
             if !wasMinimized {
                 stickyReachOverrides[id] = nil
             }
+            focusRecency[id] = nil
 
         // Hides fold as non-minimized destroys to remember space (#913).
         case .windowHidden(let id):
@@ -276,6 +286,7 @@ public struct StateCoordinator: Sendable {
             if let space = workspaces.space(of: id) {
                 workspaces.focus(id, in: space)
             }
+            stampFocusRecency(id)
 
         case .windowTitleChanged(let id, let title):
             let floatBefore = windows[id]?.isFloating

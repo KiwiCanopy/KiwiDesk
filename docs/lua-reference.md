@@ -4287,6 +4287,10 @@ read, other Desktops are not consulted — see
 [Accepted limitations](accepted-limitations.md).
 
 :::unreleased
+A first press focuses the app window you used **most recently**,
+switching to its Space; right after KiwiDesk starts, the app's
+own frontmost window.
+
 If the app is running with **no window at all** — you closed
 its last one and it stayed open, as Safari does — the shortcut
 asks it for a new window, the same as clicking it in the Dock.
