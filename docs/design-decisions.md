@@ -3943,7 +3943,7 @@ two overlapping windows is on top is the focus order, as for any
 overlap; no z-order restore is armed for a residue the layout
 constructs on purpose. The write lands where a press lands — in a
 declared per-Space ratio where one exists — so an arrival can mark
-the profile dirty and a Keep persists the healed number; accepted
+the profile dirty and a save persists the healed number; accepted
 with the ruling, since the number is the one a press would have
 written. What the heal reaches is what a resize reaches:
 the first split of each orientation in bsp, the master/stack
@@ -8400,20 +8400,21 @@ deleted for the afternoon, did more than it said, and the bar's
 New Space made that the common case rather than the corner one.
 Which Spaces a profile has is changed deliberately (*A Space
 made on the fly is temporary*, under Profiles), so the row whose
-word is
-*layout* keeps layouts, and the verb whose word is *save* keeps
-the setup. Each moves an open draft's saved baseline for exactly
-what it wrote and leaves staged edits staged.
-:::
+word is *layout* keeps layouts, and the verb whose word is
+*save* keeps the setup. Each moves an open draft's saved baseline
+for exactly what it wrote and leaves staged edits staged.
 
-Each half fails in a way the other hides. A Save that re-applies
-the draft over live and then captures live back **restores the
-previous layout and saves that** — Save behaving exactly like
-Revert, destroying the change it advertised. A draft that seeds
-its per-space modes from LIVE writes a temporary layout into the
-file on any unrelated Save. So the draft seeds its modes from the
-SAVED profile, and live supplies only what is live's to state:
-which spaces exist, their order, their pins and the Main role.
+Each half of the Settings Save fails in a way the other hides. A
+Save that re-applies the draft over live and then captures live
+back **restores the previous layout and saves that** — Save
+behaving exactly like Revert, destroying the change it advertised.
+A draft that seeds its per-space modes from LIVE writes a
+temporary layout into the file on any unrelated Save. So the draft
+seeds its modes from the SAVED profile, and live supplies only
+what is live's to state: which spaces exist, their order, their
+pins and the Main role — never a temporary or held Space, which
+the draft does not hold.
+:::
 
 "Edited" is one predicate — `SettingsDraftDiff`'s attribution,
 the same seam the save pill's count and the unsaved-changes
@@ -12562,7 +12563,7 @@ look alone and never re-applies the whole profile, which would
 reach a standing temporary layout (#1179). A write landed beside
 the door skips one of the two, which is why there is one. A
 follower's look IS the shared one, so every write of it lands
-there — a Keep, a Save as, a Settings Save, the tour's paint — or
+there — `save_profile`, a Save as, a Settings Save, the tour's paint — or
 the next apply would paint the old shared look over it
 (`SharedLookWriteTests`). A new profile copies the switch of the
 profile it is saved from; a "Save copy" of a follower whose draft
@@ -13546,7 +13547,7 @@ open that screen in, and pins it to that screen so the next
 resolve keeps it. It is one mechanism where every relocation
 ends, because a heal on one door leaves the other empty. The
 seed is a live space like any other: no file learns it until you
-save — a Keep or a Settings Save captures it — and an explicit
+save — a Settings Save or `save_profile` captures it — and an explicit
 reload prunes it with every space the profile does not declare.
 One residue, accepted: a re-dock onto the live profile's own
 screen set re-seats the seed in its opening layout, so a layout
@@ -13635,13 +13636,14 @@ name, so `focus_space 6` and the digit chord work unchanged. What
 the user needs — this Space is held, from which screen, what it
 was called there, and that nothing saves it — rides a `display`
 marker on the identifier, drawn as an outline in one colour so it
-reads as an object rather than a mark to decode, and the sentence the item announces to
-VoiceOver. There is no tooltip (owner ruling, 2026-09-25): macOS
-shows a view's tooltip only while its app is frontmost, and
-KiwiDesk is a background app, so a tooltip would promise a
-sentence nobody sees. The badge is therefore a held Space's whole
-visible affordance, and `space_bar.set_sticky_badge(false)`, which
-hides the window-state badges, does not hide it.
+reads as an object rather than a mark to decode, and the sentence
+the item announces to VoiceOver. There is no tooltip (owner
+ruling, 2026-09-25): macOS shows a view's tooltip only while its
+app is frontmost, and KiwiDesk is a background app, so a tooltip
+would promise a sentence nobody sees. The badge is therefore a
+held Space's whole visible affordance, and
+`space_bar.set_sticky_badge(false)`, which hides the window-state
+badges, does not hide it.
 :::
 
 :::unreleased
@@ -13740,10 +13742,10 @@ as the other session stores were; since #930 crash recovery
 RESTORES those stores from the autosave, so clearing the hold
 alone would bring its windows back into a Space that no longer
 knew it was held — badgeless, and captured as a declared Space by
-the next Keep, the leak ruling 5 exists to stop. The crash
+the next `save_profile`, the leak ruling 5 exists to stop. The crash
 therefore restores it too (owner, 2026-09-27).
 
-**Boot re-creates it, the one Space a restore creates.** The
+**Boot re-creates it, one of two Spaces a restore creates.** The
 replay never creates a Space (#633), because a resurrected Space
 used to be written back into `gui.json`; a held Space is declared
 by no config, so without an exception its windows would be filed
@@ -13806,7 +13808,7 @@ the same one a mode set at runtime still survives (#633).
 **Discarding the saved arrangement deletes the record, not the
 hold.** The #634 discard removes the snapshot files that carry
 it; ending the live holds too would turn each into an ordinary
-Space that the next Keep captures. Resetting every setting ends
+Space that the next `save_profile` captures. Resetting every setting ends
 them, as before.
 :::
 
@@ -13815,23 +13817,23 @@ them, as before.
 
 **A Space made on the fly is temporary until you put it in the
 profile ([#1790](https://github.com/KiwiCanopy/KiwiDesk/issues/1790)).**
-The Space Bar's New Space, `create_space` and a `focus_space 7`
-or `move_to_space 7` naming a Space that does not exist each make
-a Space for the task in hand. Before, every one of them became part
-of the profile by accident: the next Settings Save or Keep captured
-live, wrote it into the file, and it came back at every boot from
-then on. A scratch Space, or a digit pressed once by mistake,
-turned into arrangement. There are therefore two states and no
-third: **temporary**, or **in the profile**. A Space is in the
-profile only through a deliberate act — the profile or `init.lua`
-declaring it, Settings ▸ Spaces "+", `create_space 7 profile`, or
-**Add Space ‹name› to this profile**. The "+" counts even though
-it lives in the draft until Save: the draft is the profile being
-edited, and a Space there is already the profile's. A "permanent
-but unsaved" live Space is refused, because it is exactly the
-state the accidents above produced: some writes capture it, others
-do not, and nobody can tell which one it is in.
-
+The Space Bar's New Space, a plain `create_space` and a
+`focus_space 7` or `move_to_space 7` naming a Space that does not
+exist each make a Space for the task in hand. Without this rule
+every one of them becomes part of the profile by accident: the
+next Settings Save or Keep captures live, writes it into the file,
+and it comes back at every boot from then on. A scratch Space, or
+a digit pressed once by mistake, turns into arrangement. There are
+therefore two states and no third: **temporary**, or **in the
+profile**. A Space is in the profile only through a deliberate act
+— the profile or `init.lua` declaring it, Settings ▸ Spaces "+",
+`create_space 7 profile`, or **Add Space ‹name› to this profile**.
+The "+" counts even though it lives in the draft until Save: the
+draft is the profile being edited, and a Space there is already
+the profile's. A "permanent but unsaved" live Space is refused,
+because it is exactly the state the accidents above produced: some
+writes capture it, others do not, and nobody can tell which one it
+is in.
 **Invisible to every arrangement write, as a held Space is.** The
 Settings Save, the `gui.json` space mirror, #1230's per-profile
 record and the pins read the live Spaces through the one captured
@@ -13867,7 +13869,7 @@ on replug. An empty one is dropped, as any empty departing Space
 is. While it is held it wears the held marker, since a Space is
 never both.
 
-**It survives a restart: the second Space a restore creates.**
+**It survives a restart: the other Space a restore creates.**
 Quitting KiwiDesk, an update or a crash is not the user changing
 arrangement. The replay never creates a Space (#633), because a
 resurrected Space used to be written back into `gui.json`. That
@@ -13925,8 +13927,8 @@ a Space the user cannot find in the one page about Spaces reads as
 lost. The temporary and held rows are view-only — never in the
 draft, the save pill or the saved list — because the draft is the
 profile and these are not its Spaces. A temporary row carries the
-button that makes it one. A Space's number and shortcut follow its
-name, never its row.
+button that adds it to the profile. A Space's number and
+shortcut follow its name, never its row.
 
 **A marker, never a name change.** The same argument as the held
 Space's: identity stays the bare name, so `focus_space 6` and the
