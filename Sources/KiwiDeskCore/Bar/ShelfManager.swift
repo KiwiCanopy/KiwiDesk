@@ -46,6 +46,11 @@ final class ShelfManager {
         let edge: AppBarEdge
     }
 
+    /// Whether a shelf appearing grows from its anchor (#1838).
+    /// Live in production; a test that reads a plate's frame on a
+    /// shelf's first show turns it off, since the grow travels on
+    /// the run loop.
+    var growsOnAppear = true
     private var overlays: [Key: ShelfOverlay] = [:]
     /// The bars' context menus (#1518) — the one instance; Core
     /// sets its rows and hands it to both bar managers.
@@ -119,6 +124,7 @@ final class ShelfManager {
         }
         let overlay = overlays[key] ?? ShelfOverlay()
         overlays[key] = overlay
+        overlay.growsOnAppear = growsOnAppear
         overlay.contextMenus = contextMenus
         overlay.handle.onMinimum = { [weak self] percent, committed in
             self?.onMinimum(percent, committed)

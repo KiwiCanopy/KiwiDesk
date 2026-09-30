@@ -22,6 +22,12 @@ final class ShelfOverlay {
     }
 
     private(set) var panel: NSPanel?
+    /// Whether an appearing shelf grows from its anchor (#1838);
+    /// `ShelfManager.growsOnAppear` sets it.
+    var growsOnAppear = true
+    /// Each section's drawn content at its last placement, in its
+    /// own coordinates — where a glide starts it from (#1838).
+    var placedContent: [ObjectIdentifier: CGRect] = [:]
     let content = BarMenuView()
     /// Holds both sections and the divider, above the plate.
     let stripView = BarMenuView()
@@ -84,15 +90,39 @@ final class ShelfOverlay {
             horizontal: horizontal,
             shelf: shelf
         )
+        let radius = shelf.resolvedCornerRadius(forThickness: depth)
+        // A shelf appearing grows from its alignment anchor, its
+        // content fading in on the same glide (#1838).
+        let grows = !glides && growsOnAppear
+        if grows, let plate {
+            layoutPlate(
+                Self.collapsed(
+                    plate,
+                    to: shelf.alignment,
+                    horizontal: horizontal
+                ),
+                edge: edge,
+                shelf: shelf,
+                sheen: sheen,
+                radius: radius,
+                animated: false
+            )
+        }
         BarMotion.runPlateGlide {
-            place(sections, in: strip, animated: glides)
+            place(
+                sections,
+                in: strip,
+                horizontal: horizontal,
+                animated: glides
+            )
+            if grows { fadeIn(sections) }
             layoutPlate(
                 plate,
                 edge: edge,
                 shelf: shelf,
                 sheen: sheen,
-                radius: shelf.resolvedCornerRadius(forThickness: depth),
-                animated: glides
+                radius: radius,
+                animated: glides || grows
             )
             layoutDivider(
                 sections: sections,
@@ -216,45 +246,6 @@ final class ShelfOverlay {
 
     /// Adds each section's view once and sets its origin; a view
     /// no section names any more leaves the strip.
-    private func place(
-        _ sections: [Section],
-        in strip: CGRect,
-        animated: Bool
-    ) {
-        let wanted = sections.map(\.view)
-        for view in stripView.subviews
-        where view !== divider && view !== handle
-            && !wanted.contains(where: { $0 === view })
-        {
-            view.removeFromSuperview()
-        }
-        for section in sections {
-            // A section joining lands at its slot; only one already
-            // on the strip glides there (ruling 7).
-            let joining = section.view.superview !== stripView
-            if joining {
-                stripView.addSubview(
-                    section.view,
-                    positioned: .below,
-                    relativeTo: divider
-                )
-            }
-            // Origin and size in ONE write, so a section never
-            // re-lays at a new size from its old place.
-            let frame = CGRect(
-                x: section.slot.minX - strip.minX,
-                y: section.slot.minY - strip.minY,
-                width: section.slot.width,
-                height: section.slot.height
-            )
-            BarMotion.setFrame(
-                section.view,
-                to: frame,
-                animated: animated && !joining
-            )
-        }
-    }
-
     func solidPlateView() -> NSView {
         if let solidPlate { return solidPlate }
         let plate = NSView()

@@ -208,6 +208,8 @@ struct ShelfBorderDrawingTests {
             spaces.shownOverlay(on: barTitleDisplay)
         )
         let shelves = ShelfManager()
+        // Reads the plate's frame on its first show (#1838).
+        shelves.growsOnAppear = false
         shelves.sync([
             ShelfManager.Shelf(
                 display: barTitleDisplay,
