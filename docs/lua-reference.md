@@ -5151,9 +5151,13 @@ the next number past the highest live one. A
 profile or Standard that later applies and declares a held
 space's current number moves it past the highest live number
 again. A held space keeps its icon and mode — `reload_config`
-does not reset its mode — and wears an asterisk badge in the
-Space Bar
+does not reset its mode
 ([#1507](https://github.com/KiwiCanopy/KiwiDesk/issues/1507)).
+
+:::unreleased
+A held space wears a screen marker in the Space Bar. A temporary
+space held this way comes back temporary.
+:::
 
 :::unreleased
 Held spaces keep their order: when a monitor change holds them, a

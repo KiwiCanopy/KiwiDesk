@@ -1080,8 +1080,8 @@ screen's Spaces are held, not forwarded*. The obligations:
 - **An arrangement WRITE reads `capturedSpaces` and
   `capturedPins`, never `state.workspaces.allSpaces` or
   `spacePins`.** A write recording which Spaces exist, what they
-  hold, their modes or their pins — Keep and `save_profile`
-  through `buildProfile` (which also drops a caller's modes for a
+  hold, their modes or their pins — `save_profile` through
+  `buildProfile` (which also drops a caller's modes for a
   Space it did not capture), the #1230 record, the sidecar
   mirror, the Settings draft (`overlayLiveProfileState`),
   `guiConfigSeed`, a Settings Save's live net and its modes —
@@ -1099,6 +1099,52 @@ screen's Spaces are held, not forwarded*. The obligations:
   `spacePins` raw. `topUpDigitShortcuts` reads `allSpaces` by
   ruling: it writes a chord, not an arrangement, and a held
   Space's chord is how it stays reachable.
+
+## A Space made on the fly is temporary (#1790)
+
+A Space a command makes is **temporary** until it is added to the
+profile; the argument is `docs/design-decisions.md` ▸ Profiles ▸
+*A Space made on the fly is temporary until you put it in the
+profile*. The obligations:
+
+- **One seam marks it.** `execute` diffs the live Spaces around a
+  command and `markNewSpacesTemporary` files every new one no
+  source declares, that is not held, a heal seed or the
+  placeholder — never while `init.lua`'s chunk runs
+  (`isRunningInitScript`). A new way to make a Space outside
+  `execute` answers whether it is temporary in the same change
+  (`TemporarySpaceTests` ▸ `commandsMakeTemporary`,
+  `initScriptDeclares`).
+- **No arrangement write takes it.** `capturedSpaces` and
+  `capturedPins()` leave it out beside held Spaces; only the
+  whole-live snapshot reads `snapshotSpaces`, and a pin reset an
+  apply or a Save makes keeps its pin through
+  `keepingTemporaryPins` (`TemporarySpaceTests` ▸
+  `invisibleToArrangementWrites`, `dropsOnASwitchOnly`).
+- **It drops on a switch, never on a config load.** Both apply
+  doors read `dropsTemporarySpaces(into:)` — the live
+  arrangement changing — before the partitioning filing moves
+  it, and drop after the hold, which keeps a departing one that
+  still has windows; every prune and the Save's keep the rest.
+  A new apply door owes the same pair
+  (`TemporarySpaceTests` ▸ `dropsOnASwitchOnly`,
+  `standardSwitchDrops`).
+- **A hold carries it home temporary.** `HeldOrigin.temporary`
+  rides the hold, `returnsHome` sends it home without a
+  declaration, and it is never held and temporary at once
+  (`TemporarySpaceRestartTests` ▸ `unplugHoldsAndReturns`).
+- **Every snapshot carries it with its pin, and boot re-creates
+  it ahead of the replay only under the arrangement it was taken
+  in** — the other Space a restore creates (#633), through
+  `restoreTemporarySpaces` (`TemporarySpaceRestartTests`).
+- **It deletes itself at the head of `retile()`**, armed once it
+  has held anything, while no screen shows it and never a
+  screen's last Space (`TemporarySpaceTests` ▸ `autoDelete`).
+- **Its ledger has one home.** `state.temporarySpaces` is written
+  in `KiwiCore+TemporarySpaces*.swift`, `KiwiCore+SpaceProfileScope.swift`,
+  the hold and `forwardWindows`, which ends an entry with its
+  Space; nothing scans for another writer, so review is the
+  check.
 
 ## Resolve before layout, and merge per-field first
 
@@ -1148,15 +1194,18 @@ loaded with it. The obligations:
 A layout can be changed in two places, and the writes they lead
 to are not the same verb. Keep them apart, in both directions:
 
-- **The quick menu's Keep = a whole-live snapshot.** "Write down
-  what is on screen", every screen at once.
-  `persistProfile(named:modes:)` with a nil `modes` is that
-  meaning, and it is the only thing that turns a temporary
-  layout permanent. **The debt it owes an open draft hangs off
-  the WRITE, not the caller** — `ProfileManager.onCapturedLive`
-  — because `save_profile` from Lua, the CLI or IPC is the same
-  write through another door, and a debt paid at one door only
-  is this issue's failure one channel over.
+- **Keep = the layouts on screen (#1790).** Both Keep rows take
+  the one `KiwiCore.keepLayouts`, which writes the mode of each
+  Space the live profile declares and nothing else — never the
+  Space list, order, pins or settings, never a temporary or held
+  Space — and claims no monitor set. `save_profile` is the
+  whole-live snapshot: `persistProfile(named:modes:)` with a nil
+  `modes`, which takes `snapshotSpaces` (temporary Spaces in,
+  held out) and ends their temporariness. **The debt either
+  owes an open draft hangs off the WRITE, not the caller** —
+  `ProfileManager.onCapturedLive`, told which `CapturedWrite` it
+  was so the baseline moves for exactly what was written
+  (`SpaceChipLifecycleRowsTests` ▸ `keepKeepsLayouts`).
 - **A Settings Save against the LIVE target = a draft commit.**
   "Save what I edited." It applies and persists the modes of the
   spaces the draft actually edited and nothing else —
@@ -1238,7 +1287,12 @@ and the tour owns its undo*.
 
 **A write of the live profile from outside Settings takes the one
 `KiwiCore.writeThroughLiveProfile` door** — the tour's look, a
-bar menu's row (#1518) — which writes the file non-adopting and
+bar menu's row (#1518), a Space added to or removed from the
+profile (#1790: the bar's confirmed Delete, `create_space` /
+`delete_space` with `profile`, Settings ▸ Spaces' add button,
+which is the one in-Settings caller) — carrying one
+`LiveProfileEdit` that the file and the draft each apply — which
+writes the file non-adopting and
 then hands the SAME edit to an open draft through
 `onLiveProfileWritten`, told whether a file took it — never a
 caller's own announcement

@@ -72,10 +72,24 @@ order the screen had them. A later renumber keeps the Space Bar in
 that order.
 :::
 
-The Space Bar draws an asterisk badge on a held Space's
+:::unreleased
+The Space Bar draws a screen marker on a held Space's
 identifier, and VoiceOver reads the screen it came from, its old
 name when it was renumbered, and that it is not saved: saving a
 profile never includes a held Space.
+
+A Space you make on the fly — **New Space** on a Space's
+right-click menu, `create_space`, or `focus_space` and
+`move_to_space` naming a Space that does not exist — is
+**temporary**. It wears an hourglass marker, lasts through a
+restart, a reload and a Settings Save, and goes away when you
+switch to another profile or when its last window leaves it. No
+save writes it into the profile until you choose **Add Space ‹n›
+to this profile** in Settings → Spaces, or save the profile
+under a name with `save_profile`. If its screen is unplugged
+while it holds windows, it is held like any other Space and comes
+back temporary.
+:::
 
 Plug the screen back in and a held Space goes back to it with
 everything in it, windows opened while it was held included, when
