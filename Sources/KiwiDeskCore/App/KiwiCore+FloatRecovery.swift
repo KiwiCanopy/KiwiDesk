@@ -64,6 +64,7 @@ extension KiwiCore {
             )
             : state.snapshot()
         snapshot.arrangement = liveArrangement
+        snapshot.arrangementRecords = partitioningForSnapshot()
         // Whether a Space is temporary is Core's to say, and its
         // pin is in no arrangement, so its record carries both
         // (#1790).

@@ -100,9 +100,10 @@ struct CoreLocalizationBoundaryTests {
         // The two marks' VoiceOver names (#1799).
         "Borders/StickyMarkOverlay.swift": 2,
         // The Space Bar's item labels and a11y strings, and the
-        // App Bar's a11y labels (#901), drawn by Core; one Space
+        // App Bar's a11y labels (#901, a float's two #1826), drawn
+        // by Core; one Space
         // Bar call is the layer item's label (#1169).
-        "Bar/AppBarItemView.swift": 3,
+        "Bar/AppBarItemView.swift": 5,
         "Bar/SpaceBarItemView+Collapse.swift": 3,
         // The Space's announced name: held (#1507), temporary (#1790).
         "Bar/SpaceBarItemView+Marker.swift": 4,

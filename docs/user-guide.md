@@ -521,6 +521,12 @@ shares. The starter setup puts the App Bar on the bottom edge and
 the Space Bar on top; set both to one edge to share one shelf.
 :::
 
+:::unreleased
+Floating windows come last, past a thin line and the floating
+symbol. They cannot be dragged; **Tile Window** on the item's
+right-click menu tiles one.
+:::
+
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag ghost and drop zone, and the sticky mark
 (its own card in Settings); on macOS before 26 each draws its
@@ -586,7 +592,8 @@ a 📌 window under the current Space of its own screen.
 | `+n` / count badge, glyph's **top-right** | Space Bar | How many windows a grouped glyph holds |
 
 A window that floats only because its Space is in Floating
-layout wears no floating mark. The badges have no Settings
+layout wears no floating mark. Glyphs wearing the floating badge
+come last in their Space's row. The badges have no Settings
 toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
 :::
 
@@ -888,10 +895,13 @@ banner. A collision with a shortcut every app carries (⌘W, ⌘Q,
 it is bound.
 
 The recorder **suspends your KiwiDesk shortcuts while it is
-open**, so a combo already bound to a window action can be
-tested. With the banner's top row picked, a recording, a clear
-or a deleted row takes effect at once, before Save; Revert
-restores the saved ones, also live.
+open**, so a combo already bound to a window action is recorded
+instead of firing.
+
+:::unreleased
+A recording, a clear or a deleted row takes effect when you
+Save, like every other setting; Revert discards it.
+:::
 
 ### Keyboard Modifiers & Keys
 

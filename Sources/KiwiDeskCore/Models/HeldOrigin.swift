@@ -25,9 +25,17 @@ public struct HeldOrigin: Codable, Equatable, Sendable {
     public var isTemporary: Bool { temporary == true }
 
     /// A saved profile or a composed Standard, by name.
-    public enum Arrangement: Codable, Equatable, Sendable {
+    public enum Arrangement: Codable, Hashable, Sendable {
         case profile(String)
         case standard(String)
+
+        /// `profile 'Name'` / `Standard 'Name'`, for the log.
+        var logLabel: String {
+            switch self {
+            case .profile(let name): "profile '\(name)'"
+            case .standard(let name): "Standard '\(name)'"
+            }
+        }
 
         private enum CodingKeys: String, CodingKey { case kind, name }
         private enum Kind: String, Codable { case profile, standard }

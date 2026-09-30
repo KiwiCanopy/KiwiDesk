@@ -113,7 +113,7 @@ struct ProfileSaveAdoptionTests {
         try core.persistProfile(named: "B", modes: nil)
 
         let filed = core.state.profilePartitioning.remembered(
-            for: "A"
+            for: .profile("A")
         )
         #expect(filed?["1"] == [WindowID(1), WindowID(2)])
         #expect(filed?["2"] == [])
@@ -159,7 +159,7 @@ struct ProfileSaveAdoptionTests {
         )
         #expect(core.profiles.currentName == name)
         let filed = core.state.profilePartitioning.remembered(
-            for: "A"
+            for: .profile("A")
         )
         #expect(filed?["1"] == [WindowID(1)])
         #expect(filed?["2"] == [WindowID(2)])
@@ -308,7 +308,7 @@ struct ProfileSaveAdoptionTests {
         #expect(members(core, "restored") == [WindowID(1)])
         // ...and nothing was filed under the reset profile.
         #expect(
-            core.state.profilePartitioning.remembered(for: "A")
+            core.state.profilePartitioning.remembered(for: .profile("A"))
                 == nil
         )
     }

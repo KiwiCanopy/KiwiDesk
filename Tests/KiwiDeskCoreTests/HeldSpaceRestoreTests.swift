@@ -31,7 +31,7 @@ struct HeldSpaceRestoreTests {
                 Space(id: SpaceID(1), windows: desk.ids([10, 11, 22])),
                 Space(id: SpaceID(2), windows: desk.ids([13])),
             ],
-            as: "solo"
+            as: .profile("solo")
         )
         return core
     }

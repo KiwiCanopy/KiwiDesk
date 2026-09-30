@@ -122,14 +122,8 @@ struct ApplicationsGroup: View {
         )
     }
 
-    /// Removes binding and unregisters active hotkey
-    /// (#517, `liveApplyRecorded`).
+    /// Removes the binding from the draft.
     func remove(_ id: UUID) {
         bindings.removeAll { $0.id == id }
-        _ = model.liveApplyRecorded(
-            layerName: layerName,
-            bindingID: id,
-            combo: nil
-        )
     }
 }

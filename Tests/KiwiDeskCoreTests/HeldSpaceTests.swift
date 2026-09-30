@@ -113,7 +113,9 @@ struct HeldSpaceTests {
         #expect(!kept.spaces.contains(SpaceID(6)))
         #expect(!kept.spaces.contains(SpaceID(5)))
         core.recordLivePartitioning()
-        let record = core.state.profilePartitioning.remembered(for: "solo")
+        let record = core.state.profilePartitioning.remembered(
+            for: .profile("solo")
+        )
         #expect(record?[SpaceID(6)] == nil)
         #expect(record?[SpaceID(5)] == nil)
     }

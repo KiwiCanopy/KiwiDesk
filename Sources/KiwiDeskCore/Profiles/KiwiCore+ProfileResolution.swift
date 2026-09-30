@@ -35,7 +35,6 @@ extension KiwiCore {
             into: .profile(profile.name)
         )
         // Read before anything moves what is live or declared (#1790).
-        let changes = dropsTemporarySpaces(into: .profile(profile.name))
         let temporaries = Set(liveTemporarySpaces)
         let switching = recordOutgoingPartitioning(before: profile)
         // A held Space keeps the icon it had where it lived (#1507),
@@ -77,8 +76,7 @@ extension KiwiCore {
         // #1507: an unplug holds the gone screen's Spaces; an
         // explicit load ends every hold and prunes them like any
         // undeclared Space.
-        // An arrangement change is a switch even with no record (#1790).
-        if cause == .monitorChange, switching || changes {
+        if cause == .monitorChange, switching {
             holdDepartingSpaces(
                 declared: declared,
                 icons: outgoingIcons,
@@ -89,10 +87,10 @@ extension KiwiCore {
         // A temporary Space drops on a switch alone — never on a
         // same-profile Load or a reload (#1790); one the incoming
         // profile declares is that profile's now.
-        if pruneStaleSpaces || switching || changes {
+        if pruneStaleSpaces || switching {
             pruneSpaces(
                 keeping: declared.union(state.heldSpaces.keys)
-                    .union(changes ? [] : temporaries),
+                    .union(switching ? [] : temporaries),
                 orderedBy: profile.orderedSpaces,
                 preferring: profile.fallbackSpace
             )
@@ -110,7 +108,7 @@ extension KiwiCore {
         // #1230: and now put this profile's own windows back into
         // its own Spaces. After the prune, so what the profile has
         // never seen is already in its `fallback_space`.
-        if switching { restorePartitioning(of: profile) }
+        if switching { restoreProfilePartitioning(of: profile) }
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
         // instead of keeping the previous state's mode.
@@ -190,20 +188,15 @@ extension KiwiCore {
         supersedeMonitorSettle()
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
-        let changes = dropsTemporarySpaces(
-            into: .standard(composed.sourceName)
-        )
         let temporaries = Set(liveTemporarySpaces)
         reclaimHeldNames(
             declared: Set(composed.spaces),
             into: .standard(composed.sourceName)
         )
-        // #1230: a Standard is not a profile — file whatever
-        // profile was live before the compose rearranges it, or
-        // its arrangement is what gets recorded under that
-        // profile's name at the next switch. Standing the name
-        // down is this door's too, not its caller's (#1249).
-        recordLivePartitioning()
+        // #1230/#1829: a Standard is an arrangement like a
+        // profile — file the outgoing one, restore its own.
+        let standard = HeldOrigin.Arrangement.standard(composed.sourceName)
+        let switching = recordOutgoingPartitioning(before: standard)
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
         tiler.settings = wearingSharedLook(composed.settings)
@@ -227,9 +220,9 @@ extension KiwiCore {
             composed,
             keepingPinsOf: temporaries.subtracting(composed.spaces)
         )
-        // A switch to a Standard drops them too — only them, and never
-        // one with windows on a screen that left (#1790).
-        if changes {
+        if switching {
+            // A switch drops the temporary Spaces — only them, never
+            // one with windows on a screen that left (#1790).
             let dropped = temporaries.subtracting(composed.spaces)
                 .filter { !departsWithWindows($0) }
             pruneSpaces(
@@ -237,6 +230,7 @@ extension KiwiCore {
                     .subtracting(dropped),
                 orderedBy: composed.spaces
             )
+            restorePartitioning(of: standard, declaring: Set(composed.spaces))
         }
         refileHeldSpaces(
             declared: Set(composed.spaces),
@@ -258,10 +252,9 @@ extension KiwiCore {
         emitSpaceChange()
         // #1145: same tail as `apply(profile:)`, same reasons.
         refreshStickyReach()
-        // Last, like `apply(profile:)`'s `becameLive` — and after
-        // `recordLivePartitioning` by constraint: it files under
-        // the outgoing name, which this call stands down
-        // (`ProfileSaveAdoptionTests`).
+        // Last, like `apply(profile:)`'s `becameLive`: the filing
+        // above read the outgoing arrangement, which this stands
+        // down (`ProfileSaveAdoptionTests`).
         profiles.standardIsLive(
             ActiveStandard(
                 name: composed.sourceName,

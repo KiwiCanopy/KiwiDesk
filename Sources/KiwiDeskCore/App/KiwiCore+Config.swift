@@ -17,7 +17,6 @@ extension KiwiCore {
         if profiles.owesSetSettle {
             settleSharedSets()
         }
-        keybindingRuntimeGeneration &+= 1
         bus.resetLuaCallbacks()
         appliedStructuredLayers = nil
         keys.reset()

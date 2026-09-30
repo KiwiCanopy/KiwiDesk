@@ -101,7 +101,9 @@ struct TemporarySpaceTests {
         let draft = core.buildProfile(name: "desk", modes: [:])
         #expect(!draft.declaredSpaces.contains(scratch))
         core.recordLivePartitioning()
-        let record = core.state.profilePartitioning.remembered(for: "desk")
+        let record = core.state.profilePartitioning.remembered(
+            for: .profile("desk")
+        )
         #expect(record?[scratch] == nil)
         // The whole-live snapshot writes it, and it is the
         // profile's from then on.

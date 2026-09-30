@@ -96,10 +96,5 @@ extension SettingsModel {
         savedSidecar = sidecar
         recomputeDirty()
         refreshProfiles()
-        // The recorder's rollback point was minted against the
-        // pre-save modes; every other save path retires it, and a
-        // stale one silently reverts a staged action edit on the
-        // next recorder change.
-        liveKeySession = nil
     }
 }

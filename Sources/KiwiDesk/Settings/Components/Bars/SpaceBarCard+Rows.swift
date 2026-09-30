@@ -28,8 +28,9 @@ extension SpaceBarCard {
                 Text(
                     L(
                         "space_bar.show_front_app.caption",
-                        "Shows only while no App Bar does — the App "
-                            + "Bar already marks the focused window."
+                        "Shows only on a Space without an App Bar — "
+                            + "the App Bar already marks the focused "
+                            + "window."
                     )
                 )
                 .font(.caption)

@@ -581,9 +581,13 @@ holds the secondary-switch decision including its nil case.
 
 ## Whose arrangement is live (#1249)
 
-`ProfileManager.currentName` is the single authority for which
-profile's partitioning the live Spaces represent. **Give the
-#1230 store no field that answers the same question** —
+The adoption state is the single authority for which
+arrangement's partitioning the live Spaces represent: the saved
+profile `ProfileManager.currentName` names, or the composed
+Standard beside it, read together through
+`KiwiCore.liveArrangement`, which the #1230 store files under
+(#1829). **Give the store no field that answers the same
+question** —
 `ProfilePartitioning` carried one until #1249 (its own rule is
 [state-and-layout.md](state-and-layout.md) ▸ "Never store which
 Space a window holds PER DESKTOP"), and the pair shipped the same
@@ -603,11 +607,12 @@ The obligations below bind this directory:
 - **Move the name only where the Spaces move with it.** The two
   apply doors do (`becameLive`, `standardIsLive`), each at the
   end of its own body. This is not a claim that nothing else
-  writes `currentName` — `save`, `delete`, `rename` and
+  writes the adoption state — `save`, `delete`, `rename` and
   `resetAdoption` all do, each for a reason that is not an
-  apply. It is an obligation on a NEW writer: if it moves
-  the name while the Spaces stay put, the store starts filing one
-  profile's windows under another's name.
+  apply. It is an obligation on a NEW writer of either half —
+  the live profile or the live Standard: if it moves one while
+  the Spaces stay put, the store starts filing one arrangement's
+  windows under another's key.
 - **Answer a question about the ACTIVE profile from adoption
   state, never by re-reading its file (#1245).**
   `handleDesktopChange` runs on the main actor mid-transition,

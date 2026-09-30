@@ -1570,9 +1570,9 @@ gesture rather than the space. The filter therefore sits where the
 bar's members are read, not in tracking or the ignore gate, and it
 runs **before** the same-app grouping and the glyph span (#376), so
 an overlay can neither split a run nor reserve a capped slot the
-bar then draws nothing in. The App Bar needs no such filter: it
-builds from the tiled members, which a structural float has
-already left.
+bar then draws nothing in. The App Bar's tiled row needs no such
+filter: it builds from the tiled members, which a structural float
+has already left.
 
 The *launcher* subset of that class — an accessory app's
 raised-layer command bar (Spotlight, Raycast, Alfred) — takes the
@@ -4376,8 +4376,12 @@ on the space the window RENDERS on — a sticky traveler's, not its
 home's, for the gate and the region alike: a window already an
 effective float there — its flag, or a floating-mode member whose
 frame is the user's — keeps it. App rules floating a window at
-creation stay out, as does a Space's own entry into floating
-mode, which #1177's quit grid owns.
+creation stay out, since the frame it opens with is its app's, as
+does a Space's own entry into floating mode, which #1177's quit
+grid owns. A rule saved over a window already TILED, or a
+detection misread healing into a float, is placed like the verb
+(#1820): the frame that window brings is a layout slot, which is
+what the placement exists to replace.
 
 *A move into a floating Space is placed the same way (#1708).* A
 tiled window a move verb files into a floating-mode Space —
@@ -4596,6 +4600,17 @@ remembered space stays where the live row has it, because on a
 Desktop switch between bound profiles the restore runs while the
 departing Desktop's windows are still on screen, and re-placing
 them re-ordered the row the return then rebuilt (#1387).
+
+:::unreleased
+The record rides the session snapshot, so a profile that is not
+live keeps it across a KiwiDesk quit, update or crash; it goes
+where the snapshot goes, which a Mac restart discards. It takes
+the replay's logout residue with it for longer: a record can sit
+unread until its profile returns, and a login that remints a
+remembered id then moves that window instead — the exposure the
+replay already accepts, so it is accepted here rather than gated
+on a session identity the replay does not have either (#1802).
+:::
 
 Its counterpart is deliberately NOT stored, and the reason is
 WHEN each record is authoritative rather than who owns the fact.
@@ -8053,22 +8068,24 @@ control stays staged behind Save unless it clears one of two
 bars: **(a)** it owns no profile state at all (the General ▸
 Language picker persists straight to `UserDefaults`, never
 `gui.json` — there is nothing to stage), or **(b)** its
-feedback loop *is* the live runtime and no in-window
-simulation can substitute (the keybinding recorder: the only
-way to know a shortcut works is to press it). Everything else
+feedback loop *is* the live runtime, no in-window simulation
+can substitute, and its runtime effect cannot outlive the draft
+that made it — an effect in force but not saved survives the
+window that shows it, and the user learns a setting the next
+restart takes away (see "The recorder stages like every
+control" below). Everything else
 — sliders, colors, pickers, placement grids — stays staged;
 where a raw value is hard to judge, build an in-window
 preview (the `GapsDiagram` / `DragVisualsEditor`-strip
 pattern), never live-apply. Sweep verdicts: Spaces,
-App Rules, Shortcuts (minus the recorder), and the
+App Rules, Shortcuts, and the
 Desktop→profile bindings are plainly staged. Monitors'
 drag-cards and the icon pickers are **self-previewing** (the
 control is its own preview — a third category needing neither
 live-apply nor a bolted-on preview). Profiles-section
 rename/delete/make-default/preset-apply are immediate file
 **actions**, not settings — correctly outside this question.
-The Spaces tab's per-space layout picker stays staged. **No
-control besides the key recorder passes the live-apply bar.**
+The Spaces tab's per-space layout picker stays staged.
 
 :::unreleased
 Bar **(a)** is about owning no profile state, not about which
@@ -8885,39 +8902,30 @@ not read by colour alone. The larger pending-candidate model
 is scoped in #213 pending a design round — the *Steal*/*Go to*
 hard-block is the conflict UX until then.
 
-**The recorder live-applies on the live target; stored profiles
-stay staged.** (#123 Part 1.) A recorder is an input device —
-"recorded but inert until Save" breaks its mental model (the user
-presses the new combo and nothing happens). A successfully
-committed recording (or clear) on the live edit target
-re-registers the running Carbon hotkeys immediately, with no file
-writes. The runtime source starts from the clean Settings baseline
-and accumulates **recorder combo mutations only**: staged Lua
-bodies, app choices, layer edits, and other shortcut fields never
-hitchhike on a recording. A new row's action is required payload
-for its first recording; later non-recorder edits to it stay
-staged. The base then resolves through the active profile's
-override, matching Save + reload semantics. `isDirty` and the save
-pill keep their meaning ("the file hasn't caught up"); Save
-persists base shortcuts globally in `gui.json`, while
-stored-profile editing owns sparse profile overrides.
-
-Re-registration prepares every Lua callback before one atomic
-layer-table swap, then activates the preserved runtime layer once
-(profile/config applies still reset to default). Feedback is
-scoped to the exact row and layer: "Active now" only after that
-combo registered in the active layer; inactive-layer, profile-
-shadowed, compile-failed, and Carbon-denied states say so instead.
-Revert first re-applies persisted state; if the sidecar/profile
-became unreadable, an in-memory pre-edit snapshot removes ghost
-hotkeys. That snapshot is valid only within its loaded config/VM
-generation; a newer authoritative reload wins and retires the
-session instead of replaying stale GUI callbacks. Rollback
-bookkeeping clears only after one path succeeds.
-Editing a stored profile stays fully staged (instant apply would
-rewrite the RUNNING hotkeys while the banner says an inactive
-profile is being edited); the override banner states that its
-shortcuts take effect the next time the profile is active.
+:::unreleased
+**The recorder stages like every control; only its suspend is
+live.** A recording, a clear or a deleted row changes the draft,
+and the running hotkeys are rebuilt from the saved files alone
+(`ShortcutsApplyOnSaveTests` holds the census of who may write
+the running table). The argument is what a live-but-unsaved
+chord outlives: the window that shows it is unsaved closes
+without a revert, a restart shows no prompt, and a config reload
+drops it, so the user builds muscle memory on a shortcut that
+vanishes later, far from the edit that made it. No native Mac
+app has a setting that is in effect but not kept — System
+Settings ▸ Keyboard Shortcuts applies *and* saves in one act —
+and one save pill cannot say both "not in effect yet" and "in
+effect but not kept". Reverting the live copy when the window
+closes was weighed and refused: closing Settings would silently
+undo a chord the user just pressed, while the draft survives
+the close, and a chord left in an open window still dies at the
+restart. What stays live is the suspend while a recorder is
+armed (#213): it exists so a chord already bound to KiwiDesk is
+captured rather than fired, and disarming resumes the saved
+table. What a recording can still tell before Save — a
+duplicate in the layer, "Assigned to…", a macOS collision — it
+tells; trying the chord is record, Save, press.
+:::
 
 **A catalog label's identity and its display text are two
 different fields.** `KeybindingCatalog`'s `NavCommand.label` (and
@@ -11489,6 +11497,52 @@ choice is worse than its default costs a row, three verbs and a
 per-layout override, and serves no user.
 :::
 
+:::unreleased
+**A Space's floats close both bars.**
+([#1826](https://github.com/KiwiCanopy/KiwiDesk/issues/1826),
+owner ruling.) The App Bar lists them after the tiled row, past a
+thin rule and the floating mark; each Space Bar chip draws its
+flagged floats last. The App Bar's items are a map of
+the row, where order is layout order and a drag reorders it. A
+float has no slot in that row, so mixed in among the tiles it
+would read as one and invite a drag that means nothing. The rule
+says "the row ends here", the mark names what follows, and the float's
+item stays undraggable rather than dimmed. Last rather than
+first, because the leading end is where the eye starts, and a
+float appearing there would shift every tile behind it.
+
+The rule takes the in-item tier, 1 pt at half depth: at the
+section's weight it reads, on a fused shelf, as the divider between
+the two bars a few items away — two marks alike in shape meaning
+different things. A mark alone, midway in the gap, belongs to
+neither side, and one pulled against the floats attaches to
+whichever float comes first once the focus fill moves. So the rule
+separates and the mark labels. The mark is ONE section marker, not
+a badge on each item, so the
+Space-Bar-only badges ruling stands. It keeps idle ink when a
+float is focused: the float's own item carries the focus, and a
+state mark keeps one ink (see *The Space Bar's two-accent
+model*). The Space
+Bar takes no mark, since each of its float glyphs wears its
+badge already.
+
+The App Bar's set is the one the directional focus keys reach,
+`floatingFocusCandidates`, not a narrower "floated by hand or by
+rule": the #683 transient-overlay filter already drops dialogs,
+sheets and panels. The Space Bar's sort takes the badge's flag
+(#1286) instead, so the glyphs gathered at the end are the badged
+ones — a fullscreen float among them, which the App Bar leaves out
+as the focus keys do; an effective-float key would gather a whole
+Floating-layout Space and sort nothing. No badge on the App Bar item: that bar shows
+no state badges (see *Sticky has no native cue*), and VoiceOver
+speaks "floating window" on each float item.
+
+A focused float takes the highlight, and the bar scrolls to it.
+A float's focus pans no window, but the bar's scroll is not the
+row's: it exists to keep the focused item visible, and a
+highlight past the fade is no access point at all.
+:::
+
 **A stale enum spelling costs the FILE, not the field** — the
 price the config format charges everywhere. `TilingSettings`
 decodes each bar style inline, so an unreadable value fails the
@@ -13725,6 +13779,28 @@ stays where the user put it. No ledger is added to make the saved
 case stick — the model decides it, and one move after the replug
 overrides it. What is inside the held Space goes back in both
 cases.
+
+:::unreleased
+**A composed Standard keeps a record too
+([#1829](https://github.com/KiwiCanopy/KiwiDesk/issues/1829)).**
+It is an arrangement of the windows like a saved profile — the one
+a Mac whose saved profiles are all single-screen docks into — so it
+files its partitioning as it goes inactive and gets it back when it
+returns, and a window moved out of a held Space goes back there as
+well. This retires two statements above: that a Standard has no
+file for the record to live in — it needs none, since the record
+lives in memory and rides the session snapshot (#1802) — and the
+Standard case of the held-window rule. It is keyed by ARRANGEMENT,
+never by name, because the docked Starter Standard and the saved
+`Starter` profile share one, and a name key would read the switch
+between them as no switch at all. One key serves a Standard at
+every screen count, as one name serves a saved profile at every
+monitor set, so the record holds the composition last live under
+that name and the restore fills only the Spaces the returning one
+declares. Auto-saving a profile for the screen set instead was
+refused: a monitor change never claims a monitor set (#1530), and
+the Standard stays transient so it can recompose.
+:::
 
 :::unreleased
 **It survives a restart, a crash included

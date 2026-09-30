@@ -92,6 +92,16 @@ struct SnapshotStoreCensusTests {
             (.always, "held Spaces, re-created at boot (#1646)"),
         "state.temporaryArmed":
             (.always, "temporary Spaces, re-created at boot (#1790)"),
+        "state.profilePartitioning.byArrangement[]":
+            (
+                .always,
+                "an arrangement's Space map, adopted at boot (#1802)"
+            ),
+        "state.profilePartitioning.byArrangement[][]":
+            (
+                .always,
+                "a Space's windows in that record, adopted at boot (#1802)"
+            ),
         "state.restoredFrames":
             (.behind, "the replay's own debt, written by it"),
         "state.departedSlots":
@@ -162,14 +172,20 @@ struct SnapshotStoreCensusTests {
         core.state.departedSlots[WindowID(9)] = .init(rank: 0)
         core.state.closedDepartures.insert(WindowID(9))
         core.tiler.monocleShownMembers[shown] = WindowID(1)
+        core.state.profilePartitioning.record(
+            [Space(id: hidden, windows: [WindowID(4)])],
+            as: .profile("Other")
+        )
         core.state.heldSpaces[hidden] = HeldOrigin(
             name: hidden,
             screen: "DELL:1920x1080",
             icon: nil,
             arrangement: nil
         )
-        core.state.temporaryArmed.insert(shown)
         _ = F.settle(core)
+        // After the settle, whose retire prunes an arm on a Space
+        // no live profile leaves temporary.
+        core.state.temporaryArmed.insert(shown)
         return core
     }
 
@@ -189,6 +205,7 @@ struct SnapshotStoreCensusTests {
             "state.floatFrames", "tiler.boundLearner.lastAsks",
             "state.userFloated", "tiler.monocleShownMembers",
             "state.heldSpaces", "state.temporaryArmed",
+            "state.profilePartitioning.byArrangement[][]",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")
         }

@@ -78,7 +78,7 @@ struct AdvancedLuaGroup: View {
                         // ForEach would write the wrong row
                         // (#68 review M2).
                         commit: {
-                            _ = record(
+                            record(
                                 $0,
                                 id: binding.wrappedValue.id
                             )
@@ -87,14 +87,7 @@ struct AdvancedLuaGroup: View {
                 },
                 onRecord: { record($0, into: binding) },
                 onClear: {
-                    let id = binding.wrappedValue.id
                     binding.wrappedValue.combo = ""
-                    // Live target: unregister now (#123).
-                    _ = model.liveApplyRecorded(
-                        layerName: layerName,
-                        bindingID: id,
-                        combo: nil
-                    )
                 }
             )
             KeyReachTrash(
@@ -109,7 +102,7 @@ struct AdvancedLuaGroup: View {
     private func record(
         _ combo: String,
         into binding: Binding<KeyBinding>
-    ) -> LiveApplyFeedback? {
+    ) {
         binding.wrappedValue.combo = combo
         let id = binding.wrappedValue.id
         if let index = bindings.firstIndex(
@@ -120,49 +113,28 @@ struct AdvancedLuaGroup: View {
                 in: bindings
             )
         }
-        return model.liveApplyRecorded(
-            layerName: layerName,
-            bindingID: id,
-            combo: combo
-        )
     }
 
     /// Looks the row up by id at write time — safe after any
     /// structural mutation of the bindings array.
-    @discardableResult
     private func record(
         _ combo: String,
         id: UUID
-    ) -> LiveApplyFeedback? {
+    ) {
         guard
             let index = bindings.firstIndex(where: {
                 $0.id == id
             })
-        else { return nil }
+        else { return }
         bindings[index].combo = combo
         model.noteRecordedCombo(
             bindings[index],
             in: bindings
         )
-        return model.liveApplyRecorded(
-            layerName: layerName,
-            bindingID: id,
-            combo: combo
-        )
     }
 
-    /// Deleting a row must unregister its hotkey, exactly as
-    /// `onClear` does above (#517). Without this the row
-    /// vanishes while its shortcut keeps firing until Save or
-    /// Revert — `liveApplyRecorded` rebuilds the running table
-    /// from its own session copy, which never saw the removal.
-    /// No-op off the live target, where nothing is registered.
+    /// Removes the row from the draft.
     private func remove(_ id: UUID) {
         bindings.removeAll { $0.id == id }
-        _ = model.liveApplyRecorded(
-            layerName: layerName,
-            bindingID: id,
-            combo: nil
-        )
     }
 }

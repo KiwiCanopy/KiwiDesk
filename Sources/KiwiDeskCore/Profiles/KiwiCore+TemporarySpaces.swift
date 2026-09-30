@@ -89,16 +89,6 @@ extension KiwiCore {
         return pins.merging(kept) { own, _ in own }
     }
 
-    /// Whether this apply is a switch of arrangement, which drops
-    /// the temporary Spaces: the live arrangement changes to
-    /// `incoming`. Nothing live is nothing to switch from — boot's
-    /// first apply, a deleted profile.
-    func dropsTemporarySpaces(
-        into incoming: HeldOrigin.Arrangement
-    ) -> Bool {
-        liveArrangement.map { $0 != incoming } ?? false
-    }
-
     /// Whether `id` lived on a screen no longer connected and still
     /// holds windows — what a monitor change's hold takes (#1507).
     func departsWithWindows(_ id: SpaceID) -> Bool {

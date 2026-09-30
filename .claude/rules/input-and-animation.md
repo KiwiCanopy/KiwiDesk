@@ -13,6 +13,16 @@ editing here:
 - Hotkeys use the **Carbon API** (`RegisterEventHotKey`), not
   CGEventTap — a keyboard tap needs Input Monitoring. Mouse
   presses are read through `NSEvent` monitors.
+- **The running hotkey table is written only from saved files.**
+  A new writer — a caller of `applyStructuredKeybindings`, of
+  `KeybindingManager.replaceLayers`, or of `keys.bind` /
+  `defineLayer` / `reset` — reads what is on disk, and joins
+  `ShortcutsApplyOnSaveTests`' census with that source named.
+  No Settings control registers a hotkey ahead of Save: a chord
+  in effect but not saved outlives the window that shows it and
+  dies at the restart (design-decisions ▸ "The recorder stages
+  like every control"). The recorder's suspend (#213) is the one
+  live touch, and it resumes the saved table.
 - **Scroll gestures take the ONE active scroll-wheel tap,
   `ScrollGestureTap`, reached only through `MouseTracker.scroll`
   (#1656, #1519).** Its creation asks macOS for the

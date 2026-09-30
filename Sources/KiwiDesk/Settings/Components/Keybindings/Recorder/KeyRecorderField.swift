@@ -20,14 +20,11 @@ struct KeyRecorderField: View {
     /// KiwiDesk-collision check run before committing; nil commits
     /// unconditionally.
     var preflight: ((String) -> RecorderRejection?)? = nil
-    /// Commits the combo; returns the live-apply feedback to flash
-    /// (#123), or nil when the edit stays staged.
-    let onRecord: (String) -> LiveApplyFeedback?
+    /// Commits the combo into the draft; Save registers it.
+    let onRecord: (String) -> Void
     let onClear: () -> Void
 
     @EnvironmentObject private var coordinator: RecorderCoordinator
-    @Environment(\.accessibilityReduceMotion)
-    var reduceMotion
     @State private var fieldID = UUID()
     @State private var recorder = ChordRecorder()
     @State private var preview = ""
@@ -38,7 +35,6 @@ struct KeyRecorderField: View {
     @State private var rejection: RecorderRejection?
     @State private var flashing = false
     @State var conflictPopoverShown = false
-    @State var liveFeedback: LiveApplyFeedback?
 
     private var recording: Bool {
         coordinator.active == fieldID
@@ -55,17 +51,9 @@ struct KeyRecorderField: View {
             if let rejection = liveRejection {
                 rejectionRow(rejection)
             }
-            if let liveFeedback, showsFeedback(liveFeedback) {
-                LiveApplyCaption(feedback: liveFeedback)
-            }
-        }
-        .onChange(of: liveFeedback) { _, feedback in
-            guard let feedback else { return }
-            scheduleFeedbackFade(feedback)
         }
         .onChange(of: coordinator.generation) { _, _ in
             rejection = nil
-            liveFeedback = nil
             recorder.stop()
             preview = ""
         }
@@ -249,7 +237,7 @@ struct KeyRecorderField: View {
             flash()
             return
         }
-        liveFeedback = onRecord(string)
+        onRecord(string)
     }
 
     private func flash() {

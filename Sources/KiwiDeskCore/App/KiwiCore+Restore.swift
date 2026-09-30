@@ -138,6 +138,7 @@ extension KiwiCore {
         restoreTemporarySpaces(from: holds.snapshot)
         restore(holds.snapshot)
         settleHeldSpacesAtBoot(holds)
+        adoptCarriedPartitioning(from: session)
         activateSpaceOfFocusedWindow()
         seedStartupFocus()
         spaceSwitchRetile()

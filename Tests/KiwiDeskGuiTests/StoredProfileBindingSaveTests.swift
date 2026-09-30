@@ -114,7 +114,6 @@ struct StoredProfileBindingSaveTests {
     func runtimeMapFollows() throws {
         let model = try makeModel()
         model.core.loadConfig()
-        let generation = model.core.keybindingRuntimeGeneration
         model.config.profileBindings[.number(2)] = DesktopBinding(
             profile: "Away",
             desktop: 2
@@ -125,7 +124,6 @@ struct StoredProfileBindingSaveTests {
         #expect(
             model.core.desktopBindings[.number(2)]?.profiles == ["Away"]
         )
-        #expect(model.core.keybindingRuntimeGeneration > generation)
     }
 
     /// Seeded with COMPACT JSON, which the store's pretty-printed
