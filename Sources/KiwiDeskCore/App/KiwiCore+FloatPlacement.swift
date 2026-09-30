@@ -58,6 +58,26 @@ extension KiwiCore {
         tiler.forgetSizeBound(id)
     }
 
+    /// A tiled window detection starts floating — a float rule
+    /// saved over it, a misread healed — is placed as the float
+    /// verbs place one: read before the fold, placed after its
+    /// retile by `placeDetectedFloat`. A window a rule floats at
+    /// creation never reaches here.
+    func detectedFloatEntry(_ event: KiwiEvent) -> WindowID? {
+        guard case .windowFloatChanged(let id, isFloating: true) = event,
+            state.windows[id] != nil,
+            !isEffectiveFloatForPlacement(id)
+        else { return nil }
+        return id
+    }
+
+    /// Places `detectedFloatEntry`'s window where the flip did
+    /// float it.
+    func placeDetectedFloat(_ id: WindowID?) {
+        guard let id, isEffectiveFloatForPlacement(id) else { return }
+        placeFloating(id)
+    }
+
     /// Places a window a move verb just filed into a floating
     /// Space where it was no effective float before (#1708):
     /// the frame it brings is the layout's slot, as at the float
