@@ -81,6 +81,35 @@ struct NewWindowMenuMatchTests {
         #expect(match([item("New window", "n", 0)]) != nil)
     }
 
+    /// An app's menus follow the Mac's language, not KiwiDesk's,
+    /// so a language KiwiDesk does not ship still matches.
+    @Test("every macOS language's New Window matches")
+    func otherLanguages() {
+        for title in [
+            "Nieuw venster",
+            "Nytt fönster",
+            "Nowe okno",
+            "Nové okno",
+            "Nyt vindue",
+            "Nytt vindu",
+            "Uusi ikkuna",
+            "Yeni Pencere",
+            "Fereastră nouă",
+            "Új ablak",
+            "Novi prozor",
+            "Нове вікно",
+            "Jendela Baru",
+            "Cửa sổ Mới",
+            "Νέο παράθυρο",
+            "نافذة جديدة",
+            "חלון חדש",
+            "नई विंडो",
+            "หน้าต่างใหม่",
+        ] {
+            #expect(match([item(title, "N", 0)]) != nil, "\(title)")
+        }
+    }
+
     /// A disabled row still answers, so the press refuses it
     /// rather than falling through to a looser match.
     @Test("a disabled row is still the match")

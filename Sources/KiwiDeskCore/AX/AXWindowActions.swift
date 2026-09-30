@@ -18,14 +18,43 @@ enum AXWindowActions {
     }
 
     /// A word for "window" as a menu title spells it, in every
-    /// language KiwiDesk ships — Apple's own (Finder's "Open in
-    /// New Window", every locale) plus the two other apps use
-    /// (ウィンドウ, Chrome's 창). Matching data, not copy.
+    /// language macOS ships — Apple's own (AppKit's "Close Window",
+    /// every locale), stemmed where the word inflects, plus the two
+    /// other apps use (ウィンドウ, Chrome's 창). A menu's language is
+    /// the app's, not KiwiDesk's, so all of them are asked at once.
+    /// Matching data, not copy.
     static let windowWords = [
-        "window", "fenster", "fenetre", "ventana", "finestra",
-        "janela", "ウインドウ", "ウィンドウ", "윈도우", "창",
+        "window",
+        "fenster",
+        "fenetre",
+        "ventana",
+        "finestra",
+        "janela",
+        "venster",
+        "fönster",
+        "vindu",
+        "ikkun",
+        "okn",
+        "prozor",
+        "ablak",
+        "pencere",
+        "fereastr",
+        "jendela",
+        "tetingkap",
+        "cửa sổ",
+        "παράθυρ",
+        "ウインドウ",
+        "ウィンドウ",
+        "윈도우",
+        "창",
         "окн",
-        "窗口", "視窗",
+        "вікн",
+        "窗口",
+        "視窗",
+        "نافذ",
+        "חלון",
+        "विंडो",
+        "หน้าต่าง",
     ]
 
     /// The New Window row: ⌘N, else ⇧⌘N, whose title names a
