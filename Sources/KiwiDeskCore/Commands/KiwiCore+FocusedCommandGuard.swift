@@ -79,11 +79,10 @@ extension KiwiCore {
         return true
     }
 
-    /// Whether the frontmost process is `pid`'s app: itself, or a
-    /// sibling process of it, which LaunchServices may announce
-    /// in its place (#1785).
+    /// Whether the frontmost process is `pid`'s app — the
+    /// loop's one reading of an announced pid (#1785).
     func owns(front: pid_t, pid: pid_t) -> Bool {
-        front == pid || eventLoop.areSiblings(front, pid)
+        eventLoop.names(front, appOf: pid)
     }
 
     /// Whether the one frontmost reading is `pid`'s app.

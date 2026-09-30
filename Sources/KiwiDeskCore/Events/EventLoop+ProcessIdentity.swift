@@ -29,9 +29,15 @@ struct ProcessIdentity {
         AXHelper.onScreenNormalWindowsFrontToBack
 
     /// Whether a process still runs: what tells a record
-    /// LaunchServices loses for a moment from one that is gone.
+    /// LaunchServices loses for a moment from one that is gone. A
+    /// zombie its parent has not reaped is gone.
     var runs: @MainActor (pid_t) -> Bool = { pid in
-        kill(pid, 0) == 0 || errno == EPERM
+        var info = proc_bsdinfo()
+        let size = Int32(MemoryLayout<proc_bsdinfo>.size)
+        if proc_pidinfo(pid, PROC_PIDTBSDINFO, 0, &info, size) == size {
+            return info.pbi_status != UInt32(SZOMB)
+        }
+        return kill(pid, 0) == 0 || errno == EPERM
     }
 
     /// Whether LaunchServices calls the process at this pid
@@ -160,6 +166,12 @@ extension EventLoop {
         for app in unlisted where app.ref.bundleID != nil {
             processIdentity.record(app)
         }
+        // A pid that stopped running leaves the register here,
+        // ahead of any reuse of its number.
+        for pid in processIdentity.unlisted.keys
+        where !processIdentity.runs(pid) {
+            processIdentity.forget(pid: pid)
+        }
         return listed + unlisted
     }
 
@@ -181,9 +193,9 @@ extension EventLoop {
         }
     }
 
-    /// An activation announced without a pid: the unlisted
-    /// process it resolved to is the active app; with none, no
-    /// reading, so the provenance gate fails open.
+    /// An activation announced without a pid that names no
+    /// unlisted process either: no reading, so the provenance
+    /// gate fails open.
     func noteUnnamedActivation(_ app: RunningApp, resolved: pid_t) {
         let named = Self.isProcessID(resolved)
         onLog(
@@ -212,8 +224,8 @@ extension EventLoop {
     }
 
     private func bundle(of pid: pid_t) -> String? {
-        processIdentity.unlisted[pid]
-            ?? processIdentity.observed[pid]?.ref.bundleID
+        processIdentity.observed[pid]?.ref.bundleID
+            ?? processIdentity.unlisted[pid]
             ?? processIdentity.appAt(pid)?.ref.bundleID
     }
 
@@ -228,5 +240,57 @@ extension EventLoop {
                 + "\(siblings.sorted()) — their own reports decide"
         )
         return true
+    }
+}
+
+/// What the app-lifecycle funnels (`syncObservation`, `attach`,
+/// the startup scan, `reconcileAll`) need from a running app.
+/// A snapshot value, not the live `NSRunningApplication`, so a
+/// test can fabricate one for a made-up pid and drive the
+/// funnels through the machine seams (#672 review).
+struct RunningApp {
+    let pid: pid_t
+    let activationPolicy: NSApplication.ActivationPolicy
+    let ref: AppRef
+
+    init(
+        pid: pid_t,
+        activationPolicy: NSApplication.ActivationPolicy,
+        ref: AppRef
+    ) {
+        self.pid = pid
+        self.activationPolicy = activationPolicy
+        self.ref = ref
+    }
+
+    init(_ app: NSRunningApplication) {
+        self.init(
+            pid: app.processIdentifier,
+            activationPolicy: app.activationPolicy,
+            ref: AppRef(app)
+        )
+    }
+}
+
+extension AppRef {
+    /// Captures identity + display name from a live app handle.
+    init(_ app: NSRunningApplication) {
+        self.init(
+            bundleID: app.bundleIdentifier,
+            name: app.localizedName ?? "?"
+        )
+    }
+
+    /// Re-derives identity from a pid alone (reconcile paths
+    /// that only hold the process id). An app that has since
+    /// exited yields a nil bundle id and a `"?"` name — so it
+    /// matches no rule, which is the correct outcome for a
+    /// process that is gone.
+    init(pid: pid_t) {
+        let app = NSRunningApplication(processIdentifier: pid)
+        self.init(
+            bundleID: app?.bundleIdentifier,
+            name: app?.localizedName ?? "?"
+        )
     }
 }

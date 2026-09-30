@@ -3,6 +3,9 @@ paths:
   - "Sources/KiwiDeskCore/AX/**"
   - "Sources/KiwiDeskCore/Events/EventLoop+BootScan.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+AppObservation.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+ProcessIdentity.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+ShadowWindows.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+Tracking.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileAll.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+RemovalDistrust.swift"
@@ -148,22 +151,26 @@ editing AX code:
   closing brace, since the tail is not test-drivable but a call
   MOVED out of it heals nothing.
 - **Every pass that attaches apps reads `liveApps`, and a pid
-  ≤ 0 never attaches (#1785).** A process an app starts as its
-  own LaunchServices child is listed with pid -1 — even looked up
-  by its real pid — so the raw running-app list has no entry
-  that could adopt it, and an observer keyed on -1 names every
-  such process at once (device, 2026-09-29). `liveApps` adds each
-  window owner the list lacks, resolved by the WindowServer's
-  pid through `ProcessIdentity.appAt`, and `syncObservation` and
-  `attach` refuse an unnamed pid; a terminate announced without
-  a pid retires the observed processes that are gone — gone by
-  the process table (`ProcessIdentity.runs`), never by a record
-  LaunchServices may have lost (`ProcessIdentityTests`,
-  `ProcessIdentitySeamTests` ▸ `rawListHasItsReaders`).
+  ≤ 0 never attaches (#1785).** The raw running-app list has no
+  entry that could adopt a LaunchServices child — listed with
+  pid -1, the measurement is
+  [input-and-animation.md](input-and-animation.md)'s — and an
+  observer keyed on -1 names every such process at once.
+  `liveApps` adds each window owner the list lacks, resolved by
+  the WindowServer's pid through `ProcessIdentity.appAt`, and
+  prunes its register of a pid that stopped running;
+  `syncObservation` and `attach` refuse an unnamed pid; and a
+  terminate announced without a pid retires the observed
+  processes that are gone — gone by the process table
+  (`ProcessIdentity.runs`, where a zombie is gone too), never by
+  a record LaunchServices may have lost (`ProcessIdentityTests`,
+  `ProcessIdentitySeamTests` ▸ `rawListHasItsReaders`). The one
+  pass reading the raw list is `reconcileAll` before `start()`,
+  where nothing attaches (#672); its branch says so.
 - **A missing LaunchServices record is not a prohibited process
-  (#1785).** `NSRunningApplication(processIdentifier:)` answers
+  (#1785).** `NSRunningApplication(processIdentifier:)` answered
   nil for a RUNNING process for tens of milliseconds as its app
-  activates (device, 2026-09-30, the listed process too), and
+  activated (device, 2026-09-30, the listed process too), and
   `?? .prohibited` at an ownership gate detached it with every
   window it held. So a process's activation policy has ONE
   reading, `EventLoop.policy(of:)`: LaunchServices' answer,
@@ -172,29 +179,40 @@ editing AX code:
   is gone or never observed. The reconcile and notification
   ownership gates, the boot sweep's step and the float and
   overlay verdicts take it, and a new reader of a policy takes
-  it too (`ProcessIdentityTests` ▸ the policy reading,
-  `ProcessIdentitySeamTests` ▸ `policyHasOneReading`).
+  it too (`ProcessIdentityTests` ▸
+  `lostRecordKeepsARunningProcess`, `lostRecordDetachesAGoneProcess`,
+  `keptPolicyFollowsTheLastRead`; `ProcessIdentitySeamTests` ▸
+  `policyHasOneReading`).
 - **A shadow window never becomes a tile (#1785).** A window
   with no title-bar button and no AX child beside a buttoned
   window of its own process (Orion's "Orion Preview") is refused
-  at `track`, whatever its subrole reads. Five obligations. **Ask
+  at `track`, whatever its subrole reads. Six obligations. **Ask
   the verdict of every window `track` offers, in ONE batched
-  round trip** (`AXHelper.windowTraits`): the twin reads
-  `AXUnknown` as often as `AXStandardWindow`, and a subrole gate
-  let it in as a float; only a shell reads its siblings, and a
-  buttoned sibling's children are not read at all, since `track`
-  runs inside the boot scan's budget. **A shell alone waits
-  `ShadowWindows.hostWait` for a host**, then tiles — a fresh
-  Orion lists the twin over a second before the real window.
+  round trip** (`AXHelper.windowTraits`, the four buttons, the
+  children and the frame in one call): the twin read `AXUnknown`
+  as often as `AXStandardWindow` (device, 2026-09-30), and a
+  subrole gate let it in as a float; only a shell reads its
+  siblings, since `track` runs inside the boot scan's budget,
+  and a sibling's children are read, never consulted. **A lone
+  shell waits `ShadowWindows.hostWait` for a host only while its
+  process shows no tracked window** — a fresh Orion listed the
+  twin over a second before the real window (device,
+  2026-09-30) — and tiles at once beside a tracked window of its
+  app, so a decoration-less app's next window pays nothing; the
+  launch-time wait is `docs/accepted-limitations.md`'s row.
   **A tracked window that reads as a shell beside a buttoned
   sibling is handed back at the reconcile that lists it**
-  (`retireShadows`, one round trip per tracked listed window),
-  as a HIDE and never a close: no close-return raise and no
-  closed-return mark for a window nobody closed. **A read that
-  fails takes no verdict back**: a known shadow stays one, and
-  only readings with no verdict between them count toward the
-  wait — a twin whose element died mid-read was tracked for a
-  third of a second that way. **A shadow is never a tab**: the
+  (`retireShadows`, one round trip per tracked listed window,
+  none for a pass listing one window, and skipped when a queued
+  boot step's budget is spent), as a HIDE and never a close: no
+  close-return raise and no closed-return mark for a window
+  nobody closed. **A read that fails takes no verdict back**: a
+  known shadow stays one, and only readings with no verdict
+  between them count toward the wait — a twin whose element died
+  mid-read was tracked for a third of a second that way (device,
+  2026-09-30). **A record dies with its host**, pruned at that
+  same door, so a window judged a shadow beside a sibling that
+  then closed is asked again. **A shadow is never a tab**: the
   re-key's `appeared` skips what the rule holds, or a carrier
   vanishing at the twin's frame is re-keyed onto it
   (`ShadowWindowTests`, `ShadowWindowReconcileTests`,

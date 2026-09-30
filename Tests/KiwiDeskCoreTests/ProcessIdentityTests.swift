@@ -132,6 +132,17 @@ struct ProcessIdentityTests {
         #expect(loop.observers.isEmpty)
     }
 
+    @Test("an unlisted process that stopped running leaves the register")
+    func stoppedUnlistedProcessIsForgotten() {
+        let (loop, box) = makeLoop()
+        box.census = [child: [WindowID(2)]]
+        loop.healSweep()
+        #expect(loop.processIdentity.unlisted[child] == Self.bundle)
+        box.alive[child] = nil
+        _ = loop.liveApps(owners: [])
+        #expect(loop.processIdentity.unlisted[child] == nil)
+    }
+
     @Test("listed apps are never looked up by pid")
     func listedAppsTakeTodaysPath() {
         let (loop, box) = makeLoop()

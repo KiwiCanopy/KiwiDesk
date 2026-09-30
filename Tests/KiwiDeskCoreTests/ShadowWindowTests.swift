@@ -235,6 +235,19 @@ struct ShadowWindowTests {
         #expect(!loop.shadows.holds(frameless.id, pid: pid))
     }
 
+    @Test("a lone shell beside a tracked window of its app tiles at once")
+    func loneShellPastLaunchTilesAtOnce() {
+        let tracked = traits(1, buttons: false, children: 0)
+        let frameless = traits(2, buttons: false, children: 0)
+        let (loop, elements, box) = makeLoop([tracked, frameless])
+        // A decoration-less terminal's second window: its first
+        // is already a tile, so nothing of its app lists late.
+        loop.elements[pid] = [tracked.id: elements[0]]
+        #expect(verdict(loop, elements, box, 1) == .window)
+        #expect(!loop.shadows.holds(frameless.id, pid: pid))
+        #expect(box.retracks == 0)
+    }
+
     @Test("a shell whose host lists late is a shadow on the re-track")
     func lateHostMakesAShadow() {
         let host = traits(1, buttons: true, children: 6)
@@ -298,16 +311,18 @@ struct ShadowWindowTests {
         #expect(loop.hostOfShadow(twin.id, pid: pid) == twin.id)
     }
 
-    @Test("a shadow no longer listed is forgotten")
-    func unlistedShadowIsPruned() {
+    @Test("a shadow that left the list keeps its record")
+    func unlistedShadowKeepsItsRecord() {
         let host = traits(1, buttons: true, children: 6)
         let twin = traits(2, buttons: false, children: 0)
         let other = traits(3, buttons: false, children: 0)
         let (loop, elements, box) = makeLoop([host, twin, other])
         #expect(verdict(loop, elements, box, 1) == .shadow)
+        // The twin flickers out while another shell is judged: its
+        // record survives, so its return costs no sibling read.
         box.listed = [0, 2]
         #expect(verdict(loop, elements, box, 2) == .shadow)
-        #expect(!loop.shadows.holds(twin.id, pid: pid))
+        #expect(loop.shadows.holds(twin.id, pid: pid))
         #expect(loop.shadows.holds(other.id, pid: pid))
     }
 

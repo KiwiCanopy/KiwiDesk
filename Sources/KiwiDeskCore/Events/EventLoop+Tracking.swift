@@ -161,27 +161,19 @@ extension EventLoop {
     /// when the queue was empty: later drops ride the already
     /// armed one-shot instead of pushing its deadline back with
     /// every reschedule.
-    /// Whether the re-track was queued — false once this window
-    /// or its app spent its retries.
-    @discardableResult
-    func markTransientDrop(pid: pid_t, id: WindowID) -> Bool {
+    func markTransientDrop(pid: pid_t, id: WindowID) {
         guard
             transientRetried[pid, default: []].count
                 < Self.transientRetryCap,
             transientRetried[pid, default: []]
                 .insert(id).inserted
-        else { return false }
-        let wasIdle = pendingRetrack.isEmpty
-        pendingRetrack.insert(pid)
-        if wasIdle {
-            onTransientDrop()
-        }
-        return true
+        else { return }
+        queueRetrack(pid: pid)
     }
 
-    /// Queues `pid` for the scheduled re-track outside the
-    /// transient ledger — a shadow candidate re-asks until its
-    /// host lists (#1785).
+    /// Queues `pid` for the scheduled re-track — the transient
+    /// ledger's one arm, and a shadow candidate's, which re-asks
+    /// until its host lists outside that ledger (#1785).
     func queueRetrack(pid: pid_t) {
         let wasIdle = pendingRetrack.isEmpty
         pendingRetrack.insert(pid)

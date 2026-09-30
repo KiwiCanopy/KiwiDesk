@@ -169,8 +169,9 @@ extension EventLoop {
     /// app switch, reconcile the app we just left. Descriptor-
     /// shaped for a test's unnamed or parent pid (#1785).
     func appActivated(_ app: RunningApp, launchedAt: Date?) {
-        // A pid ≤ 0 is never an identity (#1785): the launch
-        // follow reads this process's windows by it.
+        // A pid ≤ 0 is never an identity (#1785): an unnamed
+        // announcement is its unlisted process, which the launch
+        // follow and both reconciles below key on.
         let pid = process(of: app) ?? app.pid
         // Ahead of both reconciles below: a window this app shows
         // on its own activation is adopted by them, and must find
@@ -184,15 +185,22 @@ extension EventLoop {
         )
         // The reconcile below takes this app's window snapshot
         // on the same turn — no second scan at attach (#672).
-        syncObservation(for: app, scanWindowsAtAttach: false)
-        // An unnamed activation (#1785) reports no focus: its
-        // process's own report decides.
-        guard Self.isProcessID(app.pid) else {
-            noteUnnamedActivation(app, resolved: pid)
-            return
-        }
+        syncObservation(
+            for: RunningApp(
+                pid: pid,
+                activationPolicy: app.activationPolicy,
+                ref: app.ref
+            ),
+            scanWindowsAtAttach: false
+        )
         if let previous = lastActivePid, previous != pid {
             reconcile(pid: previous, app: AppRef(pid: previous))
+        }
+        // An announcement KiwiDesk can name no process for leaves
+        // the gate with no reading, which fails open (#1322).
+        guard Self.isProcessID(pid) else {
+            noteUnnamedActivation(app, resolved: pid)
+            return
         }
         lastActivePid = pid
         // Ignored and prohibited apps have no observer. Keep the
@@ -268,58 +276,6 @@ struct AppActivation {
     let pid: pid_t
     let bundleID: String?
     let launchedAt: Date?
-}
-
-/// What the app-lifecycle funnels (`syncObservation`, `attach`,
-/// the startup scan, `reconcileAll`) need from a running app.
-/// A snapshot value, not the live `NSRunningApplication`, so a
-/// test can fabricate one for a made-up pid and drive the
-/// funnels through the machine seams (#672 review).
-struct RunningApp {
-    let pid: pid_t
-    let activationPolicy: NSApplication.ActivationPolicy
-    let ref: AppRef
-
-    init(
-        pid: pid_t,
-        activationPolicy: NSApplication.ActivationPolicy,
-        ref: AppRef
-    ) {
-        self.pid = pid
-        self.activationPolicy = activationPolicy
-        self.ref = ref
-    }
-
-    init(_ app: NSRunningApplication) {
-        self.init(
-            pid: app.processIdentifier,
-            activationPolicy: app.activationPolicy,
-            ref: AppRef(app)
-        )
-    }
-}
-
-extension AppRef {
-    /// Captures identity + display name from a live app handle.
-    init(_ app: NSRunningApplication) {
-        self.init(
-            bundleID: app.bundleIdentifier,
-            name: app.localizedName ?? "?"
-        )
-    }
-
-    /// Re-derives identity from a pid alone (reconcile paths
-    /// that only hold the process id). An app that has since
-    /// exited yields a nil bundle id and a `"?"` name — so it
-    /// matches no rule, which is the correct outcome for a
-    /// process that is gone.
-    init(pid: pid_t) {
-        let app = NSRunningApplication(processIdentifier: pid)
-        self.init(
-            bundleID: app?.bundleIdentifier,
-            name: app?.localizedName ?? "?"
-        )
-    }
 }
 
 extension Notification {

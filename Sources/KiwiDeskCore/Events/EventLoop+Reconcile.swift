@@ -245,6 +245,9 @@ extension EventLoop {
             minimized: minimized,
             coalesceTabs: coalesceTabs && !recentSpaceSwitch
         )
+        // A queued boot step past its budget defers the re-ask to
+        // the next reconcile (#803); its reads are not budgeted.
+        guard !budget.isSpent else { return }
         retireShadows(pid: pid, listed: listed)
     }
 }

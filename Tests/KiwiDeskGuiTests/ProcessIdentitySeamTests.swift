@@ -143,11 +143,35 @@ struct ProcessIdentitySeamTests {
             try sites(of: "?? .prohibited") == [],
             "a missing record is read as prohibited beside the reading"
         )
+        // The seam's one caller, by the call and not the argument
+        // spelling; the declaration is `var activationPolicy:`.
         #expect(
-            try sites(of: "activationPolicy(pid)")
+            try sites(of: "activationPolicy(")
                 == ["EventLoop+ProcessIdentity.swift"],
             "the raw policy seam is read beside the reading"
         )
+        #expect(
+            try sites(of: ")?.activationPolicy") == [],
+            "a LaunchServices record is read for its policy raw"
+        )
+    }
+
+    /// The announced pid naming a process's app is one reading,
+    /// which the focus gate and the #292 preflight both take.
+    @Test("an announced pid names an app in one place")
+    func announcedPidHasOneReading() throws {
+        #expect(
+            try sites(of: "areSiblings(")
+                == [
+                    "EventLoop+FocusReport.swift",
+                    "EventLoop+ProcessIdentity.swift",
+                ]
+        )
+        let preflight = try source(
+            "Commands/KiwiCore+FocusedCommandGuard.swift"
+        )
+        #expect(preflight.contains("eventLoop.names(front, appOf: pid)"))
+        #expect(!preflight.contains("areSiblings("))
     }
 
     /// The AX focused-window read lives in ONE resolver, which maps

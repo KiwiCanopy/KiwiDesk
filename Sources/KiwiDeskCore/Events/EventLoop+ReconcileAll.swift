@@ -53,6 +53,9 @@ extension EventLoop {
         // below rather than reading the list twice (#672); one
         // the gate skips shows nothing, and is scanned by the
         // first pass that reaches it.
+        // Before `start()` the raw list is enough: nothing attaches
+        // yet (#672), and `liveApps` would read the WindowServer for
+        // owners this pass cannot adopt.
         let apps = isRunning ? liveApps() : runningApplications()
         for app in apps {
             syncObservation(for: app, scanWindowsAtAttach: false)

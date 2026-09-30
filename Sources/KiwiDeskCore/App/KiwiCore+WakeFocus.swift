@@ -38,8 +38,9 @@ extension KiwiCore {
     }
 
     /// The one copy of the #442 trusted-frontmost tail: the
-    /// injectable provider where wired (nil in unit tests),
-    /// the live chain otherwise, filtered to tracked windows.
+    /// injectable provider where wired (nil in unit tests), else
+    /// the frontmost chain `armMachineSeams` wires beside it —
+    /// nil until then — filtered to tracked windows.
     /// A blocking AX round trip against an unresponsive app —
     /// callers on a press path pay it at most once per arm.
     func trustedFrontmostTracked() -> WindowID? {

@@ -159,6 +159,35 @@ struct ShadowWindowReconcileTests {
         #expect(box.hidden.isEmpty)
     }
 
+    @Test("a pass listing one window reads nothing")
+    func oneListedWindowIsNotRead() {
+        let lone = traits(1, buttons: false, children: 0)
+        let (loop, box) = makeLoop([lone])
+        loop.elements[pid] = [lone.id: element(0)]
+        loop.retireShadows(pid: pid, listed: listed(box, [0]))
+        #expect(box.traitReads.isEmpty)
+        #expect(box.hidden.isEmpty)
+    }
+
+    @Test("a record dies with its host")
+    func recordDiesWithItsHost() {
+        let host = traits(1, buttons: true, children: 6)
+        let twin = traits(2, buttons: false, children: 0)
+        let (loop, box) = makeLoop([host, twin])
+        loop.axWindows = { _ in [self.element(0), self.element(1)] }
+        #expect(
+            loop.shadowVerdict(element(1), id: twin.id, pid: pid)
+                == .shadow
+        )
+        // The host still listed, the twin not: the record holds.
+        loop.retireShadows(pid: pid, listed: listed(box, [0]))
+        #expect(loop.shadows.holds(twin.id, pid: pid))
+        // The host closed: the twin is a window again until a
+        // sibling explains it — a false positive ends here.
+        loop.retireShadows(pid: pid, listed: listed(box, [1]))
+        #expect(!loop.shadows.holds(twin.id, pid: pid))
+    }
+
     // MARK: - Focus
 
     @Test("a focus report naming a shadow is dropped")

@@ -24,6 +24,9 @@ struct ShadowWindows {
     /// (device, 2026-09-30).
     private(set) var firstSeen: [pid_t: [WindowID: ContinuousClock.Instant]] =
         [:]
+    /// The wait is a launch's: only a process that shows nothing
+    /// tracked yet pays it, so a decoration-less window opened
+    /// beside another of its app tiles at once.
     static let hostWait: Duration = .seconds(3)
 
     /// Whether a candidate still waits, and whether this ask
@@ -61,9 +64,11 @@ struct ShadowWindows {
         firstSeen[pid]?[id] = nil
     }
 
-    /// Keeps only the entries whose shadow is still listed.
+    /// A record dies with its host: kept only while the host is
+    /// still listed, so a window judged a shadow beside a sibling
+    /// that then closed is asked again.
     mutating func prune(pid: pid_t, listed: Set<WindowID>) {
-        hosts[pid] = hosts[pid]?.filter { listed.contains($0.key) }
+        hosts[pid] = hosts[pid]?.filter { listed.contains($0.value) }
     }
 
     mutating func forget(pid: pid_t) {
@@ -120,7 +125,6 @@ extension EventLoop {
                 return .shadow
             }
             let siblings = siblingTraits(pid)
-            shadows.prune(pid: pid, listed: Set(siblings.map(\.id)))
             guard
                 let host = WindowTraits.shadowHost(
                     of: twin,
@@ -143,6 +147,12 @@ extension EventLoop {
         pid: pid_t,
         reading: String
     ) -> ShadowVerdict {
+        // A process already showing a tracked window is past its
+        // launch: nothing of its is listing late.
+        guard elements[pid]?.isEmpty ?? true else {
+            shadows.endWait(id, pid: pid)
+            return .window
+        }
         let wait = shadows.waits(id, pid: pid, now: monotonicNow())
         guard wait.waiting else {
             // Tracked from here: the rule holds nothing on it.
@@ -195,6 +205,10 @@ extension EventLoop {
         pid: pid_t,
         listed: [(element: AXUIElement, id: WindowID)]
     ) {
+        shadows.prune(pid: pid, listed: Set(listed.map(\.id)))
+        // A shell needs a buttoned sibling: one window is spared
+        // the read.
+        guard listed.count > 1 else { return }
         let siblings = listed.compactMap { pair in
             elements[pid]?[pair.id] == nil
                 ? nil : shadows.traits(pair.element, pair.id)

@@ -127,11 +127,18 @@ extension EventLoop {
     /// LaunchServices' own flag, asked by its real pid (#1785).
     func reportsFromActiveApp(_ pid: pid_t) -> Bool {
         guard let active = activeAppReading() else { return true }
-        guard active == pid || areSiblings(active, pid) else {
-            return false
-        }
+        guard names(active, appOf: pid) else { return false }
         guard !siblingProcesses(of: pid).isEmpty else { return true }
+        // A record lost for the moment (accessibility.md) is no
+        // reading: the report stands, as it did before #1785.
         return processIdentity.isActive(pid) ?? true
+    }
+
+    /// Whether an announced pid names `pid`'s app: itself, or a
+    /// sibling process of it, which LaunchServices may announce
+    /// in its place (#1785). The #292 preflight asks this too.
+    func names(_ announced: pid_t, appOf pid: pid_t) -> Bool {
+        announced == pid || areSiblings(announced, pid)
     }
 
     private func activeAppReading() -> pid_t? {

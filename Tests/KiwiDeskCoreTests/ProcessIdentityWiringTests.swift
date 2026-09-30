@@ -30,6 +30,7 @@ struct ProcessIdentityWiringTests {
         var active: [pid_t: Bool] = [:]
         var focused: [WindowID] = []
         var terminated: [pid_t] = []
+        var destroyed: [WindowID] = []
         var logs: [String] = []
     }
 
@@ -65,6 +66,7 @@ struct ProcessIdentityWiringTests {
             switch event {
             case .windowFocused(let id): box.focused.append(id)
             case .appTerminated(let pid): box.terminated.append(pid)
+            case .windowDestroyed(let id, _): box.destroyed.append(id)
             default: break
             }
         }
@@ -111,10 +113,15 @@ struct ProcessIdentityWiringTests {
         var activated: [pid_t] = []
         loop.onAppActivated = { activated.append($0.pid) }
         loop.lastActivePid = parent
+        // Both windows closed meanwhile, unreported: the app just
+        // left and the child are each reconciled, as a named
+        // activation does (the AX list answers nothing).
+        box.census = [:]
         loop.appActivated(app(-1), launchedAt: nil)
         #expect(loop.lastActivePid == child)
         // The launch follow reads this process's windows by it.
         #expect(activated == [child])
+        #expect(Set(box.destroyed) == [WindowID(1), WindowID(2)])
         #expect(box.focused.isEmpty)
     }
 

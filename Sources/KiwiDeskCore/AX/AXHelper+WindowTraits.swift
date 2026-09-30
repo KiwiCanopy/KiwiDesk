@@ -51,12 +51,16 @@ struct WindowTraits: Equatable {
             ?? hosts.first)?.id
     }
 
+    private static let tolerance = TabReconciler.frameTolerance
+
     private static func sameSize(_ a: CGRect, _ b: CGRect) -> Bool {
-        abs(a.width - b.width) <= 2 && abs(a.height - b.height) <= 2
+        abs(a.width - b.width) <= tolerance
+            && abs(a.height - b.height) <= tolerance
     }
 
     private static func sameFrame(_ a: CGRect, _ b: CGRect) -> Bool {
-        abs(a.minX - b.minX) <= 2 && abs(a.minY - b.minY) <= 2
+        abs(a.minX - b.minX) <= tolerance
+            && abs(a.minY - b.minY) <= tolerance
             && sameSize(a, b)
     }
 }

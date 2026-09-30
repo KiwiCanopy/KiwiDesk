@@ -3610,7 +3610,9 @@ A **shadow window** — a window with no title-bar buttons and no
 content beside a real window of the same app (Orion's "Orion
 Preview") — is not managed either: it takes no slot and appears
 in no bar, whatever its size or position. A `float_rules` entry
-does not bring it back.
+does not bring it back. A window with neither buttons nor content
+that is the first its app shows is managed after a short wait;
+one opened beside a managed window of its app at once.
 :::
 
 **KiwiDesk's Settings window** is tracked and **tiled like any
