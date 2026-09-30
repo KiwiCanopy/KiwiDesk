@@ -42,7 +42,8 @@ extension SettingsView {
         case .space(let space):
             model.nav.spaceOverridesFocus = space
         case .appRule(let app):
-            model.nav.appRuleFocus = app
+            // Scroll and flash, as the search lands — no focus: a
+            // navigation moves focus only where macOS would (#991).
             scroll = AppRulesSection.card(holding: app, in: model)?.id
         }
         // Unconditional, nil included: guarding a nil→nil publish

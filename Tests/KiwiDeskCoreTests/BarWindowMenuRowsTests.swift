@@ -283,6 +283,7 @@ struct BarWindowMenuRowsTests {
         core.barMenuHooks.openSettings = { landed.append($0) }
         let rows = core.barMenuRows(.appItem([WindowID(1)]))
         let row = try #require(rows.first { $0.title == "App Rules…" })
+        #expect(row.enabled)
         perform(row)
         #expect(landed == [.appRule("com.apple.safari")])
         core.state.apply(

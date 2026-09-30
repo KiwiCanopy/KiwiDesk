@@ -49,10 +49,6 @@ struct SettingsNavigation {
     /// Active space ID for pushed space overrides editor (#678).
     var spaceOverridesFocus: SpaceID?
 
-    /// The app whose rule row App Rules focuses on its next draw
-    /// (#1518); taken and cleared by the section.
-    var appRuleFocus: String?
-
     /// Originating card destination when popping back to Home.
     var homeReturnFocus: SettingsDestination?
 
@@ -72,7 +68,6 @@ struct SettingsNavigation {
         layoutModeTab = nil
         shortcutsLayer = nil
         spaceOverridesFocus = nil
-        appRuleFocus = nil
         // The latch is paired with the write that set it, so it
         // must not outlive the visit — a window re-shown states
         // no destination rather than one the last visit earned.

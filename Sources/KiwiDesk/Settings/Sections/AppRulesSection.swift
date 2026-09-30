@@ -36,8 +36,6 @@ struct AppRulesSection: View {
         // the draft's baseline, and a slot carried across one lists
         // an empty row, editor open, in a draft that never had it.
         .onChange(of: model.cleanConfig) { composingTitles = nil }
-        .onAppear(perform: takeRuleFocus)
-        .onChange(of: model.nav.appRuleFocus) { takeRuleFocus() }
     }
 
     /// The list card holding `app`'s rule — the Space list first —
@@ -53,21 +51,6 @@ struct AppRulesSection: View {
         }
         let floats = model.config.floatRules.map(FloatFacet.appSegment(of:))
         return floats.contains(app) ? SettingsCatalog.appRules.floatList : nil
-    }
-
-    /// Hands keyboard focus to the row a landing named, once the
-    /// reveal has mounted it, through the rows' own focus values
-    /// (#816).
-    func takeRuleFocus() {
-        guard let app = model.nav.appRuleFocus else { return }
-        model.nav.appRuleFocus = nil
-        DispatchQueue.main.async {
-            if spaceApps.contains(app) {
-                returningSpaceRow = app
-            } else if floatApps.contains(app) {
-                returningFloatRow = app
-            }
-        }
     }
 
     /// The area's census gates, from one construction site for

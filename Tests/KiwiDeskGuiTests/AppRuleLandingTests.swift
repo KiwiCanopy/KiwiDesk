@@ -4,10 +4,11 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// A bar menu's App Rules… (#1518): Settings opens App Rules on
-/// the card holding that app's rule — the Space list first — and
-/// names the row for the section to focus. An app with no rule
-/// lands on the page and nothing is created (#1022).
+/// A bar menu's App Rules… (#1518): Settings opens App Rules
+/// scrolled to, and flashing, the card holding that app's rule —
+/// the Space list first — as the search lands, moving no focus
+/// (#991). An app with no rule lands on the page and nothing is
+/// created (#1022).
 @Suite("App Rules landing from a bar menu", .serialized)
 @MainActor
 struct AppRuleLandingTests {
@@ -66,10 +67,10 @@ struct AppRuleLandingTests {
         #expect(AppRulesSection.card(holding: app, in: model()) == nil)
     }
 
-    /// Through the one reveal consumer: the page, the card to
-    /// scroll to and the row to focus — and for an app with no
-    /// rule, the page alone, with the draft untouched.
-    @Test("the reveal scrolls to the card and names the row")
+    /// Through the one reveal consumer: the page and the card to
+    /// scroll to — and for an app with no rule, the page alone,
+    /// with the draft untouched.
+    @Test("the reveal scrolls to the card holding the rule")
     func revealNamesTheRow() {
         let ruled = model(float: true)
         let landing = SettingsAnchor(landing: .appRule(app))
@@ -77,7 +78,6 @@ struct AppRuleLandingTests {
         #expect(ruled.destination == .appRules)
         let floatList = SettingsCatalog.appRules.floatList.id
         #expect(ruled.nav.pendingScroll == floatList)
-        #expect(ruled.nav.appRuleFocus == app)
         let bare = model()
         SettingsView(model: bare).apply(landing)
         #expect(bare.destination == .appRules)
