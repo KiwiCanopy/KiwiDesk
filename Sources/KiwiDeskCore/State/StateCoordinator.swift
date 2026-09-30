@@ -102,7 +102,7 @@ public struct StateCoordinator: Sendable {
     /// by the event arm, read by the hold, cleared by the settle.
     var settlingScreens: [SpaceID: String] = [:]
 
-    /// Honored-focus recency per window (#1840): written only by
+    /// Honored-focus recency per window (#1840): stamped only by
     /// `rememberHonoredFocus`, ended by a close or the app's exit.
     var focusRecency: [WindowID: FocusStamp] = [:]
     var focusTick: UInt64 = 0

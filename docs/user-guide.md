@@ -952,12 +952,11 @@ the caps print, not which key fires.
   an edge against the screen edge or a bar stays put and the
   whole step goes to the other side. Floats are held clear of a
   bar and the screen edge by the focus ring's width.
-- **Applications** — *Open or Focus* pulls a running instance
-  into the current space, or launches it; pressing again while
-  its window is focused cycles the app's other windows, other
-  Desktops included; with nothing open anywhere it restores one
-  minimized window. Add the same app twice to bind one shortcut
-  per behaviour.
+- **Applications** — *Open or Focus* focuses a running app's
+  window or launches the app, and pressing again cycles its
+  windows; which window each press reaches is in
+  [`pull_or_spawn`](lua-reference.md#pull_or_spawn). Add the
+  same app twice to bind one shortcut per behaviour.
 
 :::unreleased
 A window that fills its whole screen — a slide show, a

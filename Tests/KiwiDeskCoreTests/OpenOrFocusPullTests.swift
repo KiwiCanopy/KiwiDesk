@@ -148,6 +148,21 @@ struct OpenOrFocusPullTests {
         #expect(core.state.focusRecency[WindowID(20)] == nil)
     }
 
+    /// A hidden window has already left state, so the exit's own
+    /// window walk misses it; the stamp carries its pid.
+    @Test("The app's exit ends a hidden window's recency")
+    func appExitEndsRecency() {
+        let (core, _) = makeCore()
+        addWindow(core, 20, space: "2")
+        core.rememberHonoredFocus(WindowID(20))
+        core.rememberHonoredFocus(WindowID(30))
+        core.state.apply(.windowHidden(WindowID(20)))
+        #expect(core.state.focusRecency[WindowID(20)] != nil)
+        core.state.apply(.appTerminated(pid: 100))
+        #expect(core.state.focusRecency[WindowID(20)] == nil)
+        #expect(core.state.focusRecency[WindowID(30)] != nil)
+    }
+
     /// `focusWindow` refuses a raise onto a Desktop nobody shows
     /// (#1345) — a native-fullscreen window, a slow app's
     /// departed one — so the press takes the old path instead of
