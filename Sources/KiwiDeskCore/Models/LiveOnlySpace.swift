@@ -6,8 +6,9 @@ import Foundation
 public struct LiveOnlySpace: Equatable, Sendable, Identifiable {
     public enum Kind: Equatable, Sendable {
         case temporary
-        /// Held from the screen of that name.
-        case held(screen: String)
+        /// Held from the screen of that name, for the saved profile
+        /// named — nil where a Standard or no profile was live.
+        case held(screen: String, profile: String?)
     }
 
     public let id: SpaceID

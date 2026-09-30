@@ -152,14 +152,13 @@ extension KiwiCore {
     /// Puts the incoming profile's own windows back in its own
     /// Spaces.
     ///
-    /// Runs AFTER the prune, so the order is the landing rule
-    /// (#1230, owner 2026-09-03): the prune has already forwarded
-    /// everything the new profile does not declare into its
-    /// `fallback_space`, and this moves back only what that
-    /// profile remembers. A window it has never seen — opened
-    /// while another profile was up — therefore stays where the
-    /// prune put it, which is the existing setting for exactly
-    /// this situation and needs no new concept.
+    /// Runs AFTER the hold and the prune, so the order is the
+    /// landing rule (#1230, #1790): a Space the new profile does
+    /// not name was held, or forwarded into its `fallback_space`
+    /// where no return could take it, and this moves back only
+    /// what that profile remembers. A window it has never seen —
+    /// opened while another profile was up — therefore stays in
+    /// the held Space, or where the prune put it.
     ///
     /// Only LIVE windows MOVE: a remembered id can belong to a
     /// window since closed, or to one sitting on an away Desktop

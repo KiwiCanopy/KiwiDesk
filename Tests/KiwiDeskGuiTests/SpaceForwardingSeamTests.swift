@@ -38,8 +38,10 @@ struct SpaceForwardingSeamTests {
                 "Commands/KiwiCore+SpaceLifecycleCommands.swift": 1,
                 "App/KiwiCore+PlaceholderSpace.swift": 1,
                 "Profiles/KiwiCore+EmptyDisplayHeal.swift": 1,
-                // A held Space's re-file home and its retire (#1507).
-                "Profiles/KiwiCore+HeldSpaces.swift": 2,
+                // A held Space's re-file home and its retire
+                // (#1507), and the empty Space a renumbered hold
+                // takes the number of (#1790).
+                "Profiles/KiwiCore+HeldSpaces.swift": 3,
                 // A temporary Space's auto-delete (#1790); its
                 // drop on a switch is the prune's.
                 "Profiles/KiwiCore+TemporarySpaces.swift": 1,

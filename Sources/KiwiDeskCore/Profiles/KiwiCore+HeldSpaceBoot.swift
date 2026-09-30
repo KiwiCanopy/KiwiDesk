@@ -104,11 +104,12 @@ extension KiwiCore {
         resolveSpaceDisplays()
     }
 
-    /// Boot's last word on the restored holds, after the away seed:
-    /// a window a held Space remembers that the WindowServer hosts
+    /// Boot's last word on the restored filings, after the away
+    /// seed: a window a Space remembers that the WindowServer hosts
     /// on no Space at all is gone for good — a relaunched app's,
     /// one closed while KiwiDesk was down — so its filing is
-    /// dropped and #1507's retire ends a hold left with nothing.
+    /// dropped, #1507's retire ends a hold left with nothing, and
+    /// an emptied Space's Delete unlocks (#1790).
     /// The per-window read, not the Desktop census, which lists
     /// user Desktops only. Measured 2026-09-28 on macOS 27.0 with
     /// this selector (0x7): a window of a hidden app and a
@@ -117,10 +118,9 @@ extension KiwiCore {
     /// to read hosted, not measured. An unanswered read judges
     /// nothing (absent, never faked) and marks the filing, which
     /// the snapshot then does not carry again.
-    func retireGoneHeldMembers() {
+    func retireGoneRestoredFilings() {
         let filed = state.rememberedSpaces.compactMap { entry in
-            guard case .restored(let space) = entry.value,
-                state.heldSpaces[space] != nil,
+            guard case .restored = entry.value,
                 state.windows[entry.key] == nil
             else { return nil as WindowID? }
             return entry.key

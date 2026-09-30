@@ -915,12 +915,13 @@ incoming arrangement does not name*. The obligations:
 - **Hold on every SWITCHING apply, whatever its cause, for the
   screen a Space LIVED on.** Both apply doors hold through
   `holdDepartingSpaces` when the arrangement changes — a Load, a
-  Desktop binding, a monitor change, a composed Standard through
-  `holdForStandard` — and never on a re-apply. A Space on a
+  Desktop binding, a monitor change, a composed Standard — through
+  the one `holdAndPrune`, and never on a re-apply. A Space on a
   connected screen is held only through the one `holdsUnnamed`:
   the incoming arrangement does not name it, and it is temporary
-  or the outgoing arrangement declared it — a heal seed or an
-  `init.lua` Space no return could take is forwarded instead
+  or the outgoing arrangement declared it — a heal seed no return
+  could take is forwarded instead, and so is an `init.lua` Space,
+  which the next load re-creates empty from `init.lua`
   (`SwitchHoldTests` ▸ `loadHoldsAndReturns`, `SwitchHoldTests` ▸
   `emptyUnnamedDrops`, `SwitchHoldTests` ▸ `standardHoldsLeftovers`,
   `SwitchHoldTests` ▸ `undeclaredSpaceIsForwarded`). The screen is its
@@ -1057,8 +1058,11 @@ incoming arrangement does not name*. The obligations:
   `HeldSpaceRestartTests` ▸ `renumberSkipsRecordedNumbers`,
   `HeldSpaceRestartTests` ▸ `ownNameGoesHome`). Nothing drops a
   hold at the replay: its unscanned windows are remembered there,
-  and `retireGoneHeldMembers`, AFTER the away seed, drops only
-  the filings the per-window `readWindowSpace` reads as `.gone`,
+  and `retireGoneRestoredFilings`, AFTER the away seed, drops only
+  the filings — in any Space, held or not, since a stale one
+  greys a Space's Delete for good (#1790,
+  `HeldSpaceRestartJudgeTests` ▸ `goneFilingFreesAPlainSpace`) —
+  the per-window `readWindowSpace` reads as `.gone`,
   leaving the end to the retire — never the Desktop census,
   which lists user Desktops alone. Measured 2026-09-28 on macOS
   27.0 (`SLSCopySpacesForWindows`, selector 0x7): a hidden app's
@@ -1146,7 +1150,7 @@ in the profile*. The obligations:
   whole-live snapshot takes every one and a draft commit the ones
   its draft lists, which it is about to declare; a pin reset an
   apply or a Save makes keeps its pin through
-  `keepingTemporaryPins` (`TemporarySpaceTests` ▸
+  `keepingPins` (`TemporarySpaceTests` ▸
   `invisibleToArrangementWrites`, `draftCommitWritesItsSpace`).
 - **A switch holds it; a config load never touches it.** Each
   apply door reads the live temporary Spaces and whether the

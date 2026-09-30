@@ -39,10 +39,15 @@ extension KiwiCore {
                 else { return nil }
                 return (space, screen)
             }
-        // Every live number is taken — a Space the prune is about
-        // to drop still exists, and numbering into it would merge.
+        // A number is taken while something still needs it: the
+        // incoming declaration, a hold, a Space with windows, a
+        // window remembered there. An EMPTY Space the prune is
+        // about to drop frees its number (#1790).
         let taken = declared.union(state.heldSpaces.keys)
-            .union(state.workspaces.allSpaces.map(\.id))
+            .union(
+                state.workspaces.allSpaces.map(\.id)
+                    .filter { !spaceHoldsNothing($0) }
+            )
             .union(state.rememberedSpaces.values.map(\.space))
         let names = Self.orderedHeldNames(
             candidates.map(\.0.id),
@@ -60,6 +65,11 @@ extension KiwiCore {
                 temporary: temporaries.contains(space.id) ? true : nil
             )
             if id != space.id {
+                // An empty Space under that number goes first, or
+                // the held one would wear its mode.
+                if state.workspaces[id] != nil {
+                    forwardWindows(of: id, to: space.id)
+                }
                 moveMembers(of: space.id, to: id, mode: space.mode)
                 focus.spaceFocus[id] = space.focused
             }
@@ -74,16 +84,17 @@ extension KiwiCore {
         placeHeldBatchLast(names)
     }
 
-    /// A Standard taking over (#1790): a Space it does not plan
-    /// that still holds windows is held for the arrangement it
-    /// leaves, and every other unplanned Space drops, the outgoing
-    /// arrangement bringing its own back.
-    func holdForStandard(
-        planned: [SpaceID],
+    /// A switch into an arrangement declaring `declared` (#1507,
+    /// #1790): what it does not name and that still holds windows is
+    /// held for the arrangement it leaves, and every other Space it
+    /// does not name drops. Both apply doors take this one pair.
+    func holdAndPrune(
+        declared: Set<SpaceID>,
+        orderedBy order: [SpaceID],
         icons: [SpaceID: String],
-        temporaries: Set<SpaceID>
+        temporaries: Set<SpaceID>,
+        preferring fallback: SpaceID? = nil
     ) {
-        let declared = Set(planned)
         holdDepartingSpaces(
             declared: declared,
             icons: icons,
@@ -91,7 +102,8 @@ extension KiwiCore {
         )
         pruneSpaces(
             keeping: declared.union(state.heldSpaces.keys),
-            orderedBy: planned
+            orderedBy: order,
+            preferring: fallback
         )
     }
 

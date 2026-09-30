@@ -36,7 +36,7 @@ struct HeldSpaceRestartJudgeTests {
         #expect(a.state.heldSpaces[SpaceID(6)] != nil)
         let b = try bootSolo(a, windows: [13, 10, 11])
         b.desktopMemory.readWindowSpace = t.hosting([12])
-        b.retireGoneHeldMembers()
+        b.retireGoneRestoredFilings()
         #expect(b.state.heldSpaces[SpaceID(6)]?.name == SpaceID(4))
         #expect(
             b.state.rememberedSpaces[WindowID(12)] == .restored(SpaceID(6))
@@ -63,7 +63,7 @@ struct HeldSpaceRestartJudgeTests {
         #expect(a.state.heldSpaces[SpaceID(6)] != nil)
         let b = try bootSolo(a, windows: [13, 10, 11])
         b.desktopMemory.readWindowSpace = t.hosting([12])
-        b.retireGoneHeldMembers()
+        b.retireGoneRestoredFilings()
         #expect(b.state.heldSpaces[SpaceID(6)] != nil)
         #expect(b.state.rememberedSpace(of: away) == SpaceID(6))
     }
@@ -75,7 +75,7 @@ struct HeldSpaceRestartJudgeTests {
         let a = try t.unplugged()
         let b = try bootSolo(a, windows: [13, 12])
         b.desktopMemory.readWindowSpace = t.hosting([13, 10, 11, 12])
-        b.retireGoneHeldMembers()
+        b.retireGoneRestoredFilings()
         #expect(b.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
         b.handle(.windowCreated(desk.window(10)))
         #expect(b.state.workspaces.space(of: WindowID(10)) == SpaceID(5))
@@ -92,7 +92,7 @@ struct HeldSpaceRestartJudgeTests {
             DesktopCensus(hosts: [:], shown: [])
         }
         b.desktopMemory.readWindowSpace = t.hosting([10, 11], on: 99)
-        b.retireGoneHeldMembers()
+        b.retireGoneRestoredFilings()
         #expect(b.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
     }
 
@@ -103,10 +103,10 @@ struct HeldSpaceRestartJudgeTests {
         // Kept through the replay: nothing has judged 10 and 11.
         #expect(b.state.heldSpaces[SpaceID(5)] != nil)
         b.desktopMemory.readWindowSpace = { _ in .unavailable }
-        b.retireGoneHeldMembers()
+        b.retireGoneRestoredFilings()
         #expect(b.state.heldSpaces[SpaceID(5)] != nil)
         b.desktopMemory.readWindowSpace = t.hosting([13, 12])
-        b.retireGoneHeldMembers()
+        b.retireGoneRestoredFilings()
         #expect(b.state.heldSpaces[SpaceID(5)] == nil)
         #expect(b.state.workspaces[SpaceID(5)] == nil)
         #expect(b.state.heldSpaces[SpaceID(6)]?.name == SpaceID(4))
@@ -119,7 +119,7 @@ struct HeldSpaceRestartJudgeTests {
         let a = try t.unplugged()
         let b = try bootSolo(a, windows: [13, 12])
         b.desktopMemory.readWindowSpace = { _ in .unavailable }
-        b.retireGoneHeldMembers()
+        b.retireGoneRestoredFilings()
         #expect(b.state.heldSpaces[SpaceID(5)] != nil)
         // A filing the judge never read — here one made later in
         // the session — still rides: the mark is per filing.
@@ -161,5 +161,24 @@ struct HeldSpaceRestartJudgeTests {
         #expect(b.state.workspaces.space(of: WindowID(10)) == SpaceID(3))
         #expect(b.state.workspaces[SpaceID(5)] == nil)
         #expect(!b.capturedSpaces.map(\.id).contains(SpaceID(5)))
+    }
+
+    /// A filing in a Space no hold owns goes too: left behind, it
+    /// kept that Space "holding a window" and its Delete grey.
+    @Test("a gone window's filing in a plain Space is dropped")
+    func goneFilingFreesAPlainSpace() throws {
+        let a = try desk.docked()
+        let b = t.boot(
+            from: a,
+            screens: [desk.builtIn, desk.dell],
+            profile: "desk",
+            windows: [13, 10, 11],
+            session: try t.crossed(a.sessionSnapshot())
+        )
+        #expect(b.state.rememberedSpace(of: WindowID(12)) == SpaceID(4))
+        b.desktopMemory.readWindowSpace = t.hosting([13, 10, 11])
+        b.retireGoneRestoredFilings()
+        #expect(b.state.rememberedSpaces[WindowID(12)] == nil)
+        #expect(b.spaceHoldsNothing(SpaceID(4)))
     }
 }

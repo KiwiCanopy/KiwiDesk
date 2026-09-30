@@ -51,10 +51,17 @@ extension SpaceBarItemView {
         (cell * 0.55).rounded()
     }
 
+    /// How far the marker tucks back into the identifier cell's
+    /// trailing slack, so it sits beside the digits rather than a
+    /// cell-width away (owner eyeball 2026-09-30).
+    static func markerTuck(cell: CGFloat) -> CGFloat {
+        (cell * 0.15).rounded()
+    }
+
     /// How much a marker adds to the item's length — its side and
-    /// the gap before it; zero without one.
+    /// the gap before it, less the tuck; zero without one.
     static func markerLength(cell: CGFloat, marked: Bool) -> CGFloat {
-        marked ? markerSide(cell: cell) + 2 : 0
+        marked ? markerSide(cell: cell) + 2 - markerTuck(cell: cell) : 0
     }
 
     /// Monochrome at regular weight, in the identifier's own ink,
@@ -85,7 +92,7 @@ extension SpaceBarItemView {
     func layoutMarker(after offset: CGFloat, cell: CGFloat) {
         guard !markerView.isHidden else { return }
         let side = Self.markerSide(cell: cell)
-        let lead = offset + 2
+        let lead = offset + 2 - Self.markerTuck(cell: cell)
         let across = ((horizontal ? bounds.height : bounds.width) - side) / 2
         let rect =
             horizontal

@@ -3,7 +3,7 @@ import Testing
 
 /// Boot's two held-Space calls (#1646), which no behavior suite
 /// reaches: `finishBoot()` is not test-drivable, and
-/// `HeldSpaceRestartTests` calls `retireGoneHeldMembers()` by
+/// `HeldSpaceRestartTests` calls `retireGoneRestoredFilings()` by
 /// hand. The judge must run inside `finishBoot` AFTER
 /// `seedAwayWindows()`, or an away window's filing is judged
 /// before the seed; and `arrangeBootDesk` must hold the Spaces
@@ -45,7 +45,7 @@ struct HeldSpaceBootWiringTests {
         )
         #expect(
             try offset(of: "seedAwayWindows()", in: tail)
-                < offset(of: "retireGoneHeldMembers()", in: tail)
+                < offset(of: "retireGoneRestoredFilings()", in: tail)
         )
     }
 

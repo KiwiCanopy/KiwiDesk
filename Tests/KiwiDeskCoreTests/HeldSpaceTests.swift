@@ -89,8 +89,12 @@ struct HeldSpaceTests {
         let core = try docked()
         core.state.workspaces.add(WindowID(12), to: SpaceID(1))
         core.handle(.displaysChanged([builtIn]))
-        #expect(core.state.heldSpaces[SpaceID(4)] == nil)
-        #expect(core.state.workspaces[SpaceID(4)] == nil)
+        // The emptied 4 frees its number for the renumbered 3
+        // (#1790); it is never held itself.
+        #expect(
+            !core.state.heldSpaces.values.contains { $0.name == SpaceID(4) }
+        )
+        #expect(core.state.heldSpaces[SpaceID(4)]?.name == SpaceID(3))
     }
 
     /// Every switch holds what it does not name (#1790).

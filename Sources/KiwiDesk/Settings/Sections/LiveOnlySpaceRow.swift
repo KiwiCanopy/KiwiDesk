@@ -65,8 +65,8 @@ struct LiveOnlySpaceRow: View {
                 "spaces.temporary.locked.help",
                 "Add this Space to the profile to change it"
             )
-        case .held(let screen):
-            Self.heldHelp(screen)
+        case .held(let screen, let profile):
+            Self.heldHelp(screen, profile)
         }
     }
 
@@ -77,24 +77,45 @@ struct LiveOnlySpaceRow: View {
                 .help(
                     L(
                         "spaces.temporary_badge.help",
-                        "Made on the fly. It goes away when you "
-                            + "switch to another profile or its last "
-                            + "window leaves."
+                        "Made on the fly. It goes away once its last "
+                            + "window leaves; switching profiles keeps "
+                            + "it while it has windows."
                     )
                 )
-        case .held(let screen):
-            BadgeChip(
-                label: L("spaces.held_badge", "Held from %1$@", screen)
-            )
-            .help(Self.heldHelp(screen))
+        case .held(let screen, let profile):
+            BadgeChip(label: Self.heldLabel(screen, profile))
+                .help(Self.heldHelp(screen, profile))
         }
     }
 
-    private static func heldHelp(_ screen: String) -> String {
-        L(
-            "spaces.held_badge.help",
-            "Goes back to its own profile when %1$@ is connected "
-                + "again",
+    /// Where it was held from: its profile where one was live, else
+    /// its screen (#1507, #1790).
+    private static func heldLabel(
+        _ screen: String,
+        _ profile: String?
+    ) -> String {
+        guard let profile else {
+            return L("spaces.held_badge", "Held from %1$@", screen)
+        }
+        return L("spaces.held_badge.profile", "Held from %1$@", profile)
+    }
+
+    private static func heldHelp(
+        _ screen: String,
+        _ profile: String?
+    ) -> String {
+        guard let profile else {
+            return L(
+                "spaces.held_badge.help",
+                "Goes back to its own profile when %1$@ is connected "
+                    + "again",
+                screen
+            )
+        }
+        return L(
+            "spaces.held_badge.profile.help",
+            "Goes back when %1$@ is live again with %2$@ connected",
+            profile,
             screen
         )
     }

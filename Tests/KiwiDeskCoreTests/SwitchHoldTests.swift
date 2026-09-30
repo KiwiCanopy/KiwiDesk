@@ -272,4 +272,19 @@ struct SwitchHoldTests {
         let rows = core.guiConfigStore.load()?.layers.first?.bindings ?? []
         #expect(rows.contains { $0.lua.contains("(\"\(moved.key.raw)\")") })
     }
+
+    /// An empty Space the switch drops frees its number, so a
+    /// renumbered hold does not skip past it (#1790).
+    @Test("a hold takes the lowest number nothing still needs")
+    func holdSkipsOnlyNeededNumbers() throws {
+        let core = try desk.docked()
+        for id in [SpaceID(5), SpaceID(6)] {
+            core.state.workspaces.ensureSpace(id)
+        }
+        core.state.workspaces.setMode(SpaceID(5), .monocle)
+        core.handle(.displaysChanged([desk.builtIn]))
+        #expect(core.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
+        #expect(desk.members(core, 5) == desk.ids([10, 11]))
+        #expect(core.state.workspaces[SpaceID(5)]?.mode != .monocle)
+    }
 }

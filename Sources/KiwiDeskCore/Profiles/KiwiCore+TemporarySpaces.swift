@@ -53,7 +53,10 @@ extension KiwiCore {
             state.heldSpaces[space.id].map {
                 LiveOnlySpace(
                     id: space.id,
-                    kind: .held(screen: $0.screenName),
+                    kind: .held(
+                        screen: $0.screenName,
+                        profile: $0.arrangement?.profileName
+                    ),
                     mode: space.mode,
                     icon: $0.icon ?? tiler.settings.spaceIcons[space.id],
                     canAdd: false

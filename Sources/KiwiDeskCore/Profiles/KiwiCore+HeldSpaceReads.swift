@@ -128,13 +128,17 @@ extension KiwiCore {
     }
 
     /// The fingerprint of the screen `id` lays out on now; one the
-    /// resolve has not placed yet lays out on the main screen.
+    /// resolve has not placed yet lays out on the main screen, or
+    /// the first where no connected screen is main. Nil for a
+    /// display that is gone.
     func shownScreen(of id: SpaceID) -> String? {
-        let display =
-            state.workspaces.display(of: id) ?? PositionalDisplays.liveMainID
         let displays = state.workspaces.allDisplays
-        return (displays.first { $0.id == display } ?? displays.first)?
-            .fingerprint
+        guard let placed = state.workspaces.display(of: id) else {
+            let main = PositionalDisplays.liveMainID
+            return (displays.first { $0.id == main } ?? displays.first)?
+                .fingerprint
+        }
+        return displays.first { $0.id == placed }?.fingerprint
     }
 
     /// Whether a held Space still holding something joined under a

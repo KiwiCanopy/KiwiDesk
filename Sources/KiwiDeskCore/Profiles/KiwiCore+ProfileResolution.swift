@@ -74,22 +74,20 @@ extension KiwiCore {
         // made two profiles' `1` the same Space, and merged an
         // arrangement away for good. Derived, not a third
         // classification Bool — the growth threshold above stands.
-        // #1507/#1790: a switch holds every Space the incoming
-        // profile does not name that still holds windows; the
-        // prune below drops the empty ones.
+        // #1507/#1790: a switch holds what the incoming profile
+        // does not name; a same-profile Load keeps temporaries.
         if switching {
-            holdDepartingSpaces(
+            holdAndPrune(
                 declared: declared,
+                orderedBy: profile.orderedSpaces,
                 icons: outgoingIcons,
-                temporaries: temporaries
+                temporaries: temporaries,
+                preferring: profile.fallbackSpace
             )
-        }
-        // One the incoming profile declares is that profile's now;
-        // a same-profile Load or a reload keeps them (#1790).
-        if pruneStaleSpaces || switching {
+        } else if pruneStaleSpaces {
             pruneSpaces(
                 keeping: declared.union(state.heldSpaces.keys)
-                    .union(switching ? [] : temporaries),
+                    .union(temporaries),
                 orderedBy: profile.orderedSpaces,
                 preferring: profile.fallbackSpace
             )
@@ -215,8 +213,9 @@ extension KiwiCore {
         }
         // Held while the outgoing pins still stand (#1507, #1790).
         if switching {
-            holdForStandard(
-                planned: composed.spaces,
+            holdAndPrune(
+                declared: Set(composed.spaces),
+                orderedBy: composed.spaces,
                 icons: outgoingIcons,
                 temporaries: temporaries
             )
