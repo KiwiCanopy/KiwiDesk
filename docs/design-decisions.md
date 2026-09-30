@@ -6369,42 +6369,70 @@ opening a window.
 
 **[Rationale]**
 
-**A shadow is an empty, button-less standard window at the size of
-a buttoned window of its own process** — Orion's "Orion Preview",
-which lists itself as focused and flickers in and out of the AX
-list. Tiled, it took a slot and traded focus with its host on
-every click. What separates it from a frameless real window (a
-terminal, an Electron app) is the buttoned sibling it mirrors: a
-real frameless window has none. It is never tracked rather than
-tracked and later retired, because retiring a tile runs the close
-path — a close-return raise, a `window_destroyed` — for a window
-nobody closed, and a verdict that could retire a tracked window
-would take a frameless app's main window the moment it opened a
-preferences pane. So an empty, button-less window with no host
-yet waits for the one-shot re-track before it may become a tile:
-a twin can list before its host does, and a real frameless window
-alone in its app is tracked on the retry. A cached verdict is
-re-asked on the same two cheap reads, so a window that gains
-content or a button becomes a window. The trade: an app whose
-genuinely empty, frameless window matches a buttoned sibling's
-size would lose that window's tile — no such app is known.
+**A shadow is a window with no title-bar button and no
+accessibility child beside a buttoned window of its own process**
+— Orion's "Orion Preview", which sits at 1×1 in a screen corner
+and comes forward, listed and focused, the moment its process
+steps back, hiding again as the process activates. Tiled, it took
+a slot and traded focus with its host on every click: KiwiDesk
+raised it, Orion hid it, the close-return raise fronted the host,
+Orion showed it again. What separates it from a frameless real
+window (a terminal, an Electron app) is the buttoned sibling: a
+real frameless window has none, and its content lists. The rule
+asks that of every window, whatever its subrole reads — the twin
+reads `AXUnknown` as often as `AXStandardWindow`, and a subrole
+gate let it in as a float — and reads a window in one round
+trip, since Orion answers a read in 100–600 ms while busy. A
+shell alone waits for a host before it tiles, because a fresh
+Orion lists the twin over a second before the real window, and
+tiles if none comes; one tracked while it still read as a window
+is handed back at the next reconcile as a HIDE, never a close,
+since nobody closed it. A read that fails takes no verdict back:
+a known shadow stays one, and only readings with no verdict
+between them count toward the wait. The trade: an app whose
+genuinely empty, frameless window sits beside a buttoned one
+would lose that window's tile — no such app is known.
 
-**A pid LaunchServices cannot name is not an identity.** A process
-an app starts as its own LaunchServices child (Orion's second
+**A focus report naming a shadow is dropped, never mapped onto
+its host.** The twin takes its process's focus as the process
+DEACTIVATES, so the report says where the user left, never where
+they went. Mapped, it moved focus onto the profile the user had
+just clicked away from, and back two seconds later when the
+clicked window's own report landed.
+
+**A pid LaunchServices cannot name is not an identity, and among
+sibling processes the announcement names the app.** A process an
+app starts as its own LaunchServices child (Orion's second
 profile) is listed with pid -1 — even looked up by its real pid —
-and its activation is announced under the parent's pid or none,
 while the WindowServer and Accessibility know the real one
-(device, 2026-09-29). Keyed on -1, every such process is one; the
-announced pid names the parent while the user clicked the child.
-So every pass attaching apps adopts the WindowServer's owner pid
-through one `liveApps`, a pid ≤ 0 is never observed nor read as
-the active app, the frontmost pid is read through one chain that
-names such an app by its unlisted process, the focus gate and the
-#292 preflight count a sibling process of the active app as the
-app, and an activation of an app running as several processes
-reports no focus of its own — its announced pid's focused window
-is the parent's even when the child was chosen, while each
-process's own focus report names the right one.
+(device, 2026-09-29). Keyed on -1, every such process is one. So
+every pass attaching apps adopts the WindowServer's owner pid
+through one `liveApps`, a pid ≤ 0 is never observed, and an
+activation announced without a pid is attributed to the unlisted
+process of that bundle, which is what the launch follow and the
+"app we just left" reconcile key on. What an announcement cannot
+say is WHICH process: a click on the child's window is announced
+under the parent's pid, LaunchServices marks the parent active
+for 25–190 ms and only then the child, and the inactive profile
+keeps reporting focus for its real window meanwhile (device,
+2026-09-30). So an activation of an app running as several
+processes reports no focus of its own, each process's own report
+decides, and a report counts only while LaunchServices calls THAT
+process active, asked by its real pid — the one reading that
+answers what the announcement cannot. The #292 preflight counts a
+sibling process of the active app as the app, since the frontmost
+reading is an announcement too.
+
+**A record LaunchServices loses for a moment is not a process
+that exited.** The record of a running process goes missing for
+tens of milliseconds as its app activates — nine times in an
+hour's probing, the listed process included — and an ownership
+gate that read the absence as `.prohibited` detached the process
+with every window it held, to be re-adopted as new five seconds
+later. So a missing record detaches only a process the process
+table says is gone; until then the policy last read stands, for
+the float verdicts as much as for the gates, and an exit
+announced without a pid retires by the process table too.
 :::
 
 ### Where the app lives is taught inside the tour's own window

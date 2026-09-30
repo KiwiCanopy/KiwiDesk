@@ -16,10 +16,7 @@ extension EventLoop {
         // A callback can already be queued when a reload ignores an
         // app or its policy becomes prohibited. It must not recreate
         // state after the observer has been detached.
-        let activationPolicy =
-            NSRunningApplication(
-                processIdentifier: pid
-            )?.activationPolicy ?? .prohibited
+        let activationPolicy = policy(of: pid)
         guard
             Self.ownsObservation(
                 hasObserver: observers[pid] != nil,

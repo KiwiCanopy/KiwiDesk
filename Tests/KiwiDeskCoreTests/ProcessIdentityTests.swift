@@ -32,6 +32,7 @@ struct ProcessIdentityTests {
         var windowQueries: [pid_t] = []
         var lookups: [pid_t] = []
         var alive: [pid_t: RunningApp] = [:]
+        var active: [pid_t: Bool] = [:]
         var events: [KiwiEvent] = []
         var focused: [WindowID] = []
     }
@@ -88,6 +89,8 @@ struct ProcessIdentityTests {
             box.lookups.append(pid)
             return box.alive[pid]
         }
+        loop.processIdentity.runs = { box.alive[$0] != nil }
+        loop.processIdentity.isActive = { box.active[$0] }
         loop.runningApplications = { [] }
         #expect(loop.beginScan())
         loop.scanChunk(budget: nil)
@@ -175,20 +178,109 @@ struct ProcessIdentityTests {
         )
     }
 
-    @Test("the gate counts a sibling of the active process")
-    func gateCountsTheSibling() {
+    @Test("among siblings the gate asks which process is active")
+    func gateAsksWhichSiblingIsActive() {
         let (loop, box) = makeLoop()
         box.census = [
             parent: [WindowID(1)], child: [WindowID(2)],
             other: [WindowID(3)],
         ]
         loop.healSweep()
+        // Announced under the parent; the child is the one in
+        // front (device, 2026-09-30).
         loop.lastActivePid = parent
+        box.active = [parent: false, child: true]
+        #expect(loop.reportsFromActiveApp(child))
+        #expect(!loop.reportsFromActiveApp(parent))
+        #expect(!loop.reportsFromActiveApp(other))
+        box.active = [parent: true, child: false]
+        #expect(loop.reportsFromActiveApp(parent))
+        #expect(!loop.reportsFromActiveApp(child))
+        // Another app in front: neither process reports.
+        loop.lastActivePid = other
+        box.active = [parent: false, child: true]
+        #expect(!loop.reportsFromActiveApp(child))
+        #expect(loop.reportsFromActiveApp(other))
+    }
+
+    @Test("a sibling with no record still reports")
+    func siblingWithoutARecordFailsOpen() {
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)], child: [WindowID(2)]]
+        loop.healSweep()
+        loop.lastActivePid = parent
+        box.active = [:]
         #expect(loop.reportsFromActiveApp(parent))
         #expect(loop.reportsFromActiveApp(child))
-        #expect(!loop.reportsFromActiveApp(other))
+    }
+
+    @Test("an app with one process is never asked")
+    func loneProcessIsNeverAsked() {
+        let (loop, box) = makeLoop()
+        box.census = [other: [WindowID(3)]]
+        loop.healSweep()
+        var asked: [pid_t] = []
+        loop.processIdentity.isActive = { pid in
+            asked.append(pid)
+            return false
+        }
         loop.lastActivePid = other
-        #expect(!loop.reportsFromActiveApp(child))
+        #expect(loop.reportsFromActiveApp(other))
+        #expect(asked.isEmpty)
+    }
+
+    // MARK: - The policy reading
+
+    @Test("a record lost for a moment keeps a running process")
+    func lostRecordKeepsARunningProcess() {
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)]]
+        loop.healSweep()
+        var logs: [String] = []
+        loop.onLog = { logs.append($0) }
+        loop.activationPolicy = { _ in nil }
+        #expect(loop.policy(of: parent) == .regular)
+        #expect(loop.policy(of: parent) == .regular)
+        // One absence, one line.
+        #expect(logs.filter { $0.hasPrefix("ownership:") }.count == 1)
+        loop.reconcile(pid: parent, app: app(parent).ref)
+        #expect(loop.observes(pid: parent))
+        // The record back, then lost again: news again.
+        loop.activationPolicy = { _ in .regular }
+        #expect(loop.policy(of: parent) == .regular)
+        loop.activationPolicy = { _ in nil }
+        #expect(loop.policy(of: parent) == .regular)
+        #expect(logs.filter { $0.hasPrefix("ownership:") }.count == 2)
+    }
+
+    @Test("a missing record detaches a process that is gone")
+    func lostRecordDetachesAGoneProcess() {
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)]]
+        loop.healSweep()
+        loop.activationPolicy = { _ in nil }
+        box.alive[parent] = nil
+        #expect(loop.policy(of: parent) == .prohibited)
+        loop.reconcile(pid: parent, app: app(parent).ref)
+        #expect(!loop.observes(pid: parent))
+    }
+
+    @Test("a process never observed has no policy to keep")
+    func unobservedProcessIsProhibited() {
+        let (loop, _) = makeLoop()
+        loop.activationPolicy = { _ in nil }
+        #expect(loop.policy(of: other) == .prohibited)
+    }
+
+    @Test("the policy read last is the one kept")
+    func keptPolicyFollowsTheLastRead() {
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)]]
+        loop.healSweep()
+        loop.activationPolicy = { _ in .accessory }
+        #expect(loop.policy(of: parent) == .accessory)
+        loop.activationPolicy = { _ in nil }
+        #expect(loop.policy(of: parent) == .accessory)
     }
 
     @Test("two listed processes of one bundle stay strangers")

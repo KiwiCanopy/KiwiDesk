@@ -34,24 +34,120 @@ struct ProcessIdentitySeamTests {
         return found
     }
 
-    @Test("track asks the shadow verdict of a standard window")
+    /// The verdict guards `track` with nothing beside it: Orion's
+    /// twin reads `AXUnknown` as often as `AXStandardWindow`, and
+    /// the subrole condition this once carried let it through as
+    /// a float (device, 2026-09-30).
+    @Test("track asks the shadow verdict of every window, once")
     func trackAsksTheVerdict() throws {
-        let tracking = try source("Events/EventLoop+Tracking.swift")
+        let tracking = try SourceScan.functionBody(
+            of: "track",
+            in: "EventLoop+Tracking.swift",
+            under: "Events"
+        )
+        try #require(!tracking.isEmpty)
         let pattern =
-            #"subrole == kAXStandardWindowSubrole,\s*"#
-            + #"shadowVerdict\(element, id: window\.id, pid: pid\)"#
-            + #"\s*!= \.window\s*\{\s*return"#
-        #expect(
-            tracking.range(of: pattern, options: .regularExpression)
-                != nil,
+            #"guard\s+shadowVerdict\(element, id: window\.id, "#
+            + #"pid: pid\)\s*== \.window\s+else \{ return \}"#
+        let verdict = try #require(
+            tracking.range(of: pattern, options: .regularExpression),
             "track no longer refuses a shadow before it becomes a tile"
+        )
+        #expect(
+            tracking.components(separatedBy: "shadowVerdict(").count == 2
+        )
+        // Ahead of the registration, or the shadow is a tile by
+        // the time it is refused.
+        let registration = try #require(
+            tracking.range(of: "elements[pid, default: [:]][window.id]")
+        )
+        #expect(verdict.upperBound < registration.lowerBound)
+    }
+
+    @Test("the focus arm drops a shadow's report ahead of its read")
+    func focusArmDropsTheShadow() throws {
+        let arm = try SourceScan.functionBody(
+            of: "handleFocusedWindowChanged",
+            in: "EventLoop+FocusReport.swift",
+            under: "Events"
+        )
+        try #require(!arm.isEmpty)
+        let drop = try #require(
+            arm.range(of: "!shadows.holds(reported, pid: pid)")
+        )
+        let read = try #require(arm.range(of: "axReads.requestFocus("))
+        #expect(drop.upperBound < read.lowerBound)
+        // A report is never translated into another window's.
+        #expect(!arm.contains("hostOfShadow("))
+    }
+
+    @Test("a reconcile re-asks what it tracks, after its sweep")
+    func reconcileReasksAfterTheSweep() throws {
+        let reconcile = try SourceScan.functionBody(
+            of: "reconcile",
+            in: "EventLoop+Reconcile.swift",
+            under: "Events"
+        )
+        try #require(!reconcile.isEmpty)
+        #expect(
+            reconcile.components(separatedBy: "retireShadows(").count == 2
+        )
+        let sweep = try #require(
+            reconcile.range(
+                of: "reconcileTabsAndSweep(",
+                options: .backwards
+            )
+        )
+        let retire = try #require(reconcile.range(of: "retireShadows("))
+        #expect(sweep.upperBound < retire.lowerBound)
+    }
+
+    @Test("a shadow is kept out of the tab re-key")
+    func tabRekeySkipsShadows() throws {
+        let sweep = try SourceScan.functionBody(
+            of: "reconcileTabsAndSweep",
+            in: "EventLoop+Tabs.swift",
+            under: "Events"
+        )
+        try #require(!sweep.isEmpty)
+        let pattern =
+            #"appeared: appeared\.filter \{\s*"#
+            + #"!shadows\.holds\(\$0\.id, pid: pid\)\s*"#
+            + #"\}\.map\(appearedTab\)"#
+        #expect(
+            sweep.range(of: pattern, options: .regularExpression) != nil
         )
     }
 
-    @Test("the focus report names a shadow's host")
-    func focusReportMapsTheShadow() throws {
-        let report = try source("Events/EventLoop+FocusReport.swift")
-        #expect(report.contains("let id = hostOfShadow(reported, pid: pid)"))
+    /// The ownership gates and the float verdicts read the policy
+    /// through the one reading that survives a record
+    /// LaunchServices loses for a moment. A raw read beside it
+    /// detaches a running process, or tiles an accessory app's
+    /// float for the length of the gap.
+    @Test("a process's policy has one reading")
+    func policyHasOneReading() throws {
+        #expect(
+            try sites(of: "func policy(of pid: pid_t)")
+                == ["EventLoop+ProcessIdentity.swift"]
+        )
+        #expect(
+            try sites(of: "policy(of: pid)")
+                == [
+                    "EventLoop+BootScan.swift",
+                    "EventLoop+Notifications.swift",
+                    "EventLoop+Reconcile.swift",
+                    "EventLoop+WindowPolicy.swift",
+                ]
+        )
+        #expect(
+            try sites(of: "?? .prohibited") == [],
+            "a missing record is read as prohibited beside the reading"
+        )
+        #expect(
+            try sites(of: "activationPolicy(pid)")
+                == ["EventLoop+ProcessIdentity.swift"],
+            "the raw policy seam is read beside the reading"
+        )
     }
 
     /// The AX focused-window read lives in ONE resolver, which maps

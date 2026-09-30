@@ -27,6 +27,7 @@ struct ProcessIdentityWiringTests {
     private final class Box {
         var census: [pid_t: Set<WindowID>] = [:]
         var alive: [pid_t: RunningApp] = [:]
+        var active: [pid_t: Bool] = [:]
         var focused: [WindowID] = []
         var terminated: [pid_t] = []
         var logs: [String] = []
@@ -68,6 +69,8 @@ struct ProcessIdentityWiringTests {
             }
         }
         loop.processIdentity.appAt = { box.alive[$0] }
+        loop.processIdentity.runs = { box.alive[$0] != nil }
+        loop.processIdentity.isActive = { box.active[$0] }
         loop.runningApplications = { [] }
         #expect(loop.beginScan())
         loop.scanChunk(budget: nil)
@@ -102,12 +105,35 @@ struct ProcessIdentityWiringTests {
         )
     }
 
-    @Test("an unnamed activation leaves the gate with no reading")
-    func unnamedActivationClearsTheReading() {
+    @Test("an unnamed activation names its unlisted process")
+    func unnamedActivationNamesTheProcess() {
         let (loop, box) = makeLoop()
+        var activated: [pid_t] = []
+        loop.onAppActivated = { activated.append($0.pid) }
         loop.lastActivePid = parent
         loop.appActivated(app(-1), launchedAt: nil)
+        #expect(loop.lastActivePid == child)
+        // The launch follow reads this process's windows by it.
+        #expect(activated == [child])
+        #expect(box.focused.isEmpty)
+    }
+
+    @Test("an unnamed activation of an unknown app leaves no reading")
+    func unknownUnnamedActivationClearsTheReading() {
+        let (loop, box) = makeLoop()
+        var activated: [pid_t] = []
+        loop.onAppActivated = { activated.append($0.pid) }
+        loop.lastActivePid = parent
+        loop.appActivated(
+            RunningApp(
+                pid: -1,
+                activationPolicy: .regular,
+                ref: AppRef(bundleID: "test.kiwi.unknown", name: "Other")
+            ),
+            launchedAt: nil
+        )
         #expect(loop.lastActivePid == nil)
+        #expect(activated == [-1])
         #expect(box.focused.isEmpty)
     }
 

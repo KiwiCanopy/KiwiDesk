@@ -1,26 +1,49 @@
 import ApplicationServices
 import CoreGraphics
 
+/// How one window reads to the shadow rule (#1785).
+enum ShellReading: Equatable {
+    /// A title-bar button or an AX child: a window.
+    case furnished
+    /// Neither, and every read answered.
+    case shell
+    /// A read did not answer; never taken as empty.
+    case unread
+
+    /// `button` and `children` are nil where the read failed.
+    static func of(button: Bool?, children: Int?) -> ShellReading {
+        if button == true { return .furnished }
+        if let children, children > 0 { return .furnished }
+        guard button == false, children == 0 else { return .unread }
+        return .shell
+    }
+}
+
 /// What the shadow-window rule reads of one AX window (#1785).
 struct WindowTraits: Equatable {
     let id: WindowID
-    /// Close, minimize, zoom or full-screen button present.
-    let hasTitlebarButton: Bool
-    let childCount: Int
+    /// Close, minimize, zoom or full-screen button present; nil
+    /// when the read did not answer.
+    let hasTitlebarButton: Bool?
+    /// nil when the read did not answer.
+    let childCount: Int?
     let frame: CGRect
 
-    /// An empty, button-less window on the frame — or at the
-    /// size — of a buttoned window of its process: the host it
-    /// mirrors (#1785). A frameless real window alone in its app
-    /// has no such sibling.
+    var reading: ShellReading {
+        .of(button: hasTitlebarButton, children: childCount)
+    }
+
+    /// The buttoned window of its process a shell mirrors (#1785):
+    /// the one on its frame, else at its size, else any — a shell
+    /// parks at 1×1, and KiwiDesk may have resized one it tiled
+    /// (device, 2026-09-30). A shell alone in its app has none.
     static func shadowHost(
         of twin: WindowTraits,
         among siblings: [WindowTraits]
     ) -> WindowID? {
-        guard !twin.hasTitlebarButton, twin.childCount == 0
-        else { return nil }
+        guard twin.reading == .shell else { return nil }
         let hosts = siblings.filter {
-            $0.id != twin.id && $0.hasTitlebarButton
+            $0.id != twin.id && $0.hasTitlebarButton == true
         }
         return
             (hosts.first { sameFrame($0.frame, twin.frame) }
@@ -44,38 +67,84 @@ extension AXHelper {
         kAXZoomButtonAttribute, kAXFullScreenButtonAttribute,
     ]
 
-    /// Whether the window carries any title-bar button. Stops at
-    /// the first one found: a real window pays one read.
-    static func hasTitlebarButton(_ element: AXUIElement) -> Bool {
-        titlebarButtons.contains { name in
-            var value: CFTypeRef?
-            return AXUIElementCopyAttributeValue(
-                element,
-                name as CFString,
-                &value
-            ) == .success && value != nil
-        }
-    }
-
-    /// The window's AX child count; -1 when the read fails, which
-    /// the shadow rule never reads as empty.
-    static func childCount(_ element: AXUIElement) -> Int {
-        var count: CFIndex = 0
-        return AXUIElementGetAttributeValueCount(
+    /// The shadow rule's reading of one window, in ONE round trip
+    /// whatever the window holds — Orion answers a read in
+    /// 100–600 ms while busy (device, 2026-09-30). `id` spares
+    /// the id's own round trip where the caller holds it; nil
+    /// without one.
+    static func windowTraits(
+        _ element: AXUIElement,
+        id known: WindowID?
+    ) -> WindowTraits? {
+        guard let id = known ?? windowID(of: element) else { return nil }
+        let names =
+            titlebarButtons + [
+                kAXChildrenAttribute, kAXPositionAttribute,
+                kAXSizeAttribute,
+            ]
+        var values: CFArray?
+        let error = AXUIElementCopyMultipleAttributeValues(
             element,
-            kAXChildrenAttribute as CFString,
-            &count
-        ) == .success ? count : -1
-    }
-
-    /// The shadow rule's reading of one window; nil without an id.
-    static func windowTraits(_ element: AXUIElement) -> WindowTraits? {
-        guard let id = windowID(of: element) else { return nil }
+            names as CFArray,
+            AXCopyMultipleAttributeOptions(rawValue: 0),
+            &values
+        )
+        guard error == .success,
+            let items = values as? [AnyObject],
+            items.count == names.count
+        else {
+            return WindowTraits(
+                id: id,
+                hasTitlebarButton: nil,
+                childCount: nil,
+                frame: .zero
+            )
+        }
+        let buttons = items.prefix(titlebarButtons.count).map(carries)
+        let children = items[titlebarButtons.count]
         return WindowTraits(
             id: id,
-            hasTitlebarButton: hasTitlebarButton(element),
-            childCount: childCount(element),
-            frame: frame(of: element)
+            hasTitlebarButton: buttons.contains(true)
+                ? true : buttons.contains(nil) ? nil : false,
+            childCount: (children as? [AnyObject])?.count
+                ?? (carries(children) == false ? 0 : nil),
+            frame: frame(
+                position: items[titlebarButtons.count + 1],
+                size: items[titlebarButtons.count + 2]
+            )
         )
+    }
+
+    /// Whether a batched read's item carries a value: false where
+    /// the element answered it has none, nil where the read
+    /// failed.
+    private static func carries(_ item: AnyObject) -> Bool? {
+        guard CFGetTypeID(item) == AXValueGetTypeID() else {
+            return CFGetTypeID(item) != CFNullGetTypeID()
+        }
+        // swift-format-ignore: NeverForceUnwrap
+        let value = item as! AXValue
+        guard AXValueGetType(value) == .axError else { return true }
+        var error = AXError.success
+        AXValueGetValue(value, .axError, &error)
+        return error == .noValue || error == .attributeUnsupported
+            ? false : nil
+    }
+
+    private static func frame(
+        position: AnyObject,
+        size: AnyObject
+    ) -> CGRect {
+        guard CFGetTypeID(position) == AXValueGetTypeID(),
+            CFGetTypeID(size) == AXValueGetTypeID()
+        else { return .zero }
+        var origin = CGPoint.zero
+        var extent = CGSize.zero
+        // swift-format-ignore: NeverForceUnwrap
+        guard
+            AXValueGetValue(position as! AXValue, .cgPoint, &origin),
+            AXValueGetValue(size as! AXValue, .cgSize, &extent)
+        else { return .zero }
+        return CGRect(origin: origin, size: extent)
     }
 }

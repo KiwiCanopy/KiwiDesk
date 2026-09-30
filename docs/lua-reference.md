@@ -3606,11 +3606,11 @@ windows with no matching WindowServer window are ignored by the
 same policy.
 
 :::unreleased
-A **shadow window** — an empty standard window with no title-bar
-buttons, at the size of a window of the same app that has them
-(Orion's "Orion Preview") — is not managed either: it takes no
-slot, appears in no bar, and focusing it counts as focusing the
-window it mirrors. A `float_rules` entry does not bring it back.
+A **shadow window** — a window with no title-bar buttons and no
+content beside a real window of the same app (Orion's "Orion
+Preview") — is not managed either: it takes no slot and appears
+in no bar, whatever its size or position. A `float_rules` entry
+does not bring it back.
 :::
 
 **KiwiDesk's Settings window** is tracked and **tiled like any

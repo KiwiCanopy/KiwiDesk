@@ -29,7 +29,20 @@ extension EventLoop {
                 arm: kAXFocusedWindowChangedNotification
             )
         else { return }
-        let id = hostOfShadow(reported, pid: pid)
+        // A shadow takes its process's focus as the process
+        // DEACTIVATES, so its report says where the user left,
+        // never where they went (#1785, device 2026-09-30).
+        guard
+            elements[pid]?[reported] != nil
+                || !shadows.holds(reported, pid: pid)
+        else {
+            onLog(
+                "focus: w\(reported.raw) is a shadow "
+                    + "(pid \(pid)) — dropped"
+            )
+            return
+        }
+        let id = reported
         // Focus events carry only managed windows: the
         // reconcile above just settled tracking, so an
         // absent id is an ignored panel (issue #21) —
@@ -108,12 +121,17 @@ extension EventLoop {
 
     /// Whether `pid` is the app macOS activated last. Before any
     /// activation the frontmost reading stands in; with neither,
-    /// the report stands — fails OPEN by design (#1322). A
-    /// sibling process of the active one counts: LaunchServices
-    /// announces a child's activation under its parent (#1785).
+    /// the report stands — fails OPEN by design (#1322). Among
+    /// sibling processes the announcement names the APP — a
+    /// child's arrives under its parent's pid — so the process is
+    /// LaunchServices' own flag, asked by its real pid (#1785).
     func reportsFromActiveApp(_ pid: pid_t) -> Bool {
         guard let active = activeAppReading() else { return true }
-        return active == pid || areSiblings(active, pid)
+        guard active == pid || areSiblings(active, pid) else {
+            return false
+        }
+        guard !siblingProcesses(of: pid).isEmpty else { return true }
+        return processIdentity.isActive(pid) ?? true
     }
 
     private func activeAppReading() -> pid_t? {

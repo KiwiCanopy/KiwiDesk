@@ -28,16 +28,55 @@ struct ProcessIdentity {
     var frontToBack: @MainActor () -> [(id: WindowID, pid: pid_t)] =
         AXHelper.onScreenNormalWindowsFrontToBack
 
+    /// Whether a process still runs: what tells a record
+    /// LaunchServices loses for a moment from one that is gone.
+    var runs: @MainActor (pid_t) -> Bool = { pid in
+        kill(pid, 0) == 0 || errno == EPERM
+    }
+
+    /// Whether LaunchServices calls the process at this pid
+    /// active — asked by the REAL pid it names the process, where
+    /// an announcement names the app; nil without a record.
+    var isActive: @MainActor (pid_t) -> Bool? = { pid in
+        NSRunningApplication(processIdentifier: pid)?.isActive
+    }
+
     /// Pids the running-app list does not carry, with their bundle
     /// ids — the only processes a sibling can be.
     private(set) var unlisted: [pid_t: String] = [:]
+    /// Every observed process as it last read, so neither the
+    /// ownership gate nor a sibling check asks LaunchServices
+    /// what attach already knew.
+    private(set) var observed: [pid_t: RunningApp] = [:]
+    /// Observed processes whose record is missing right now, so
+    /// one absence logs once.
+    private(set) var unrecorded: Set<pid_t> = []
 
     mutating func record(_ app: RunningApp) {
         unlisted[app.pid] = app.ref.bundleID
     }
 
-    mutating func forget(pid: pid_t) { unlisted[pid] = nil }
-    mutating func forgetAll() { unlisted = [:] }
+    mutating func note(_ app: RunningApp) {
+        observed[app.pid] = app
+        unrecorded.remove(app.pid)
+    }
+
+    /// Whether this absence is news.
+    mutating func noteUnrecorded(_ pid: pid_t) -> Bool {
+        unrecorded.insert(pid).inserted
+    }
+
+    mutating func forget(pid: pid_t) {
+        unlisted[pid] = nil
+        observed[pid] = nil
+        unrecorded.remove(pid)
+    }
+
+    mutating func forgetAll() {
+        unlisted = [:]
+        observed = [:]
+        unrecorded = []
+    }
 }
 
 extension EventLoop {
@@ -46,9 +85,14 @@ extension EventLoop {
     /// process of that bundle; with several, the one whose
     /// window is front-most; with none known, no reading.
     func frontmostProcess() -> pid_t? {
-        guard let app = processIdentity.frontmostApp() else {
-            return nil
-        }
+        processIdentity.frontmostApp().flatMap(process(of:))
+    }
+
+    /// The process an app record names: its own pid, else its
+    /// unlisted process of that bundle — with several, the one
+    /// whose TRACKED window is front-most, since a shadow comes
+    /// forward as its process steps back.
+    func process(of app: RunningApp) -> pid_t? {
         guard !Self.isProcessID(app.pid) else { return app.pid }
         let bundleID = app.ref.bundleID
         let candidates = Set(
@@ -58,7 +102,40 @@ extension EventLoop {
         guard candidates.count > 1 else { return candidates.first }
         return processIdentity.frontToBack().first {
             candidates.contains($0.pid)
+                && elements[$0.pid]?[$0.id] != nil
         }?.pid
+    }
+
+    /// A process's activation policy, the one reading the
+    /// ownership gates and the float verdicts take. LaunchServices
+    /// loses a running process's record for a moment as its app
+    /// activates (device, 2026-09-30), so a missing record is
+    /// `.prohibited` only once the process is gone; until then
+    /// the policy last read stands.
+    func policy(of pid: pid_t) -> NSApplication.ActivationPolicy {
+        let known = processIdentity.observed[pid]
+        if let policy = activationPolicy(pid) {
+            if let known {
+                processIdentity.note(
+                    RunningApp(
+                        pid: pid,
+                        activationPolicy: policy,
+                        ref: known.ref
+                    )
+                )
+            }
+            return policy
+        }
+        guard let known, processIdentity.runs(pid) else {
+            return .prohibited
+        }
+        if processIdentity.noteUnrecorded(pid) {
+            onLog(
+                "ownership: pid \(pid) runs without a "
+                    + "LaunchServices record — kept"
+            )
+        }
+        return known.activationPolicy
     }
 
     /// A pid LaunchServices could not name (-1, or any value
@@ -89,29 +166,32 @@ extension EventLoop {
     /// A terminate announced without a pid: retire every observed
     /// process that no longer runs, which is the one it meant.
     func retireExitedObservers() {
+        // By the process table, never by LaunchServices' record,
+        // which goes missing for a running process too.
         for pid in observers.keys.sorted()
-        where !Self.isOwnProcess(pid)
-            && processIdentity.appAt(pid) == nil
-        {
+        where !Self.isOwnProcess(pid) && !processIdentity.runs(pid) {
             onLog("app exit: pid \(pid) gone, unannounced — detached")
             detach(pid: pid, restoreEnhancedUI: false)
             onEvent(.appTerminated(pid: pid))
         }
         // An unlisted pid that never attached has no observer.
         for pid in processIdentity.unlisted.keys
-        where processIdentity.appAt(pid) == nil {
+        where !processIdentity.runs(pid) {
             processIdentity.forget(pid: pid)
         }
     }
 
-    /// An activation announced without a pid: no active-app
+    /// An activation announced without a pid: the unlisted
+    /// process it resolved to is the active app; with none, no
     /// reading, so the provenance gate fails open.
-    func forgetUnnamedActivation(_ app: RunningApp) {
+    func noteUnnamedActivation(_ app: RunningApp, resolved: pid_t) {
+        let named = Self.isProcessID(resolved)
         onLog(
             "activation: \(app.ref.bundleID ?? app.ref.name) "
                 + "announced without a pid"
+                + (named ? " — pid \(resolved)" : "")
         )
-        lastActivePid = nil
+        lastActivePid = named ? resolved : nil
     }
 
     /// The other observed processes of `pid`'s app.
@@ -133,6 +213,7 @@ extension EventLoop {
 
     private func bundle(of pid: pid_t) -> String? {
         processIdentity.unlisted[pid]
+            ?? processIdentity.observed[pid]?.ref.bundleID
             ?? processIdentity.appAt(pid)?.ref.bundleID
     }
 

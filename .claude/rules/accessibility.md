@@ -156,23 +156,52 @@ editing AX code:
   window owner the list lacks, resolved by the WindowServer's
   pid through `ProcessIdentity.appAt`, and `syncObservation` and
   `attach` refuse an unnamed pid; a terminate announced without
-  a pid retires the observed processes that are gone
-  (`ProcessIdentityTests`, `ProcessIdentitySeamTests` ▸
-  `rawListHasItsReaders`).
-- **A shadow window never becomes a tile (#1785).** An empty,
-  button-less standard window at the size of a buttoned window
-  of its own process (Orion's "Orion Preview") is refused at
-  `track`, and a focus report naming it names that host. Two
-  obligations. **Never retire a tracked window as a shadow**: a
-  retirement runs the close path for a window nobody closed, and
-  a frameless app's main window read before its content lists
-  would be taken the moment the app opened a buttoned one — so a
-  lone candidate waits for the one-shot re-track instead, and is
-  tracked if still alone. **Read siblings only for an empty,
-  button-less window**, since `track` runs inside the boot
-  scan's budget: a window with a button or content pays one or
-  two reads (`ShadowWindowTests`, `ProcessIdentitySeamTests` ▸
-  `trackAsksTheVerdict`).
+  a pid retires the observed processes that are gone — gone by
+  the process table (`ProcessIdentity.runs`), never by a record
+  LaunchServices may have lost (`ProcessIdentityTests`,
+  `ProcessIdentitySeamTests` ▸ `rawListHasItsReaders`).
+- **A missing LaunchServices record is not a prohibited process
+  (#1785).** `NSRunningApplication(processIdentifier:)` answers
+  nil for a RUNNING process for tens of milliseconds as its app
+  activates (device, 2026-09-30, the listed process too), and
+  `?? .prohibited` at an ownership gate detached it with every
+  window it held. So a process's activation policy has ONE
+  reading, `EventLoop.policy(of:)`: LaunchServices' answer,
+  else — while `ProcessIdentity.runs` says the process is alive
+  — the policy last read; `.prohibited` only for a process that
+  is gone or never observed. The reconcile and notification
+  ownership gates, the boot sweep's step and the float and
+  overlay verdicts take it, and a new reader of a policy takes
+  it too (`ProcessIdentityTests` ▸ the policy reading,
+  `ProcessIdentitySeamTests` ▸ `policyHasOneReading`).
+- **A shadow window never becomes a tile (#1785).** A window
+  with no title-bar button and no AX child beside a buttoned
+  window of its own process (Orion's "Orion Preview") is refused
+  at `track`, whatever its subrole reads. Five obligations. **Ask
+  the verdict of every window `track` offers, in ONE batched
+  round trip** (`AXHelper.windowTraits`): the twin reads
+  `AXUnknown` as often as `AXStandardWindow`, and a subrole gate
+  let it in as a float; only a shell reads its siblings, and a
+  buttoned sibling's children are not read at all, since `track`
+  runs inside the boot scan's budget. **A shell alone waits
+  `ShadowWindows.hostWait` for a host**, then tiles — a fresh
+  Orion lists the twin over a second before the real window.
+  **A tracked window that reads as a shell beside a buttoned
+  sibling is handed back at the reconcile that lists it**
+  (`retireShadows`, one round trip per tracked listed window),
+  as a HIDE and never a close: no close-return raise and no
+  closed-return mark for a window nobody closed. **A read that
+  fails takes no verdict back**: a known shadow stays one, and
+  only readings with no verdict between them count toward the
+  wait — a twin whose element died mid-read was tracked for a
+  third of a second that way. **A shadow is never a tab**: the
+  re-key's `appeared` skips what the rule holds, or a carrier
+  vanishing at the twin's frame is re-keyed onto it
+  (`ShadowWindowTests`, `ShadowWindowReconcileTests`,
+  `ProcessIdentitySeamTests` ▸ `trackAsksTheVerdict`,
+  `reconcileReasksAfterTheSweep`, `tabRekeySkipsShadows`). What a
+  focus report naming a shadow does is
+  [input-and-animation.md](input-and-animation.md)'s.
 - **A bulk pass asks the WindowServer before it asks AX
   (#1037).** `reconcileAll` — the Desktop-switch re-sync and the
   config reload's — reads one on-screen census and skips an

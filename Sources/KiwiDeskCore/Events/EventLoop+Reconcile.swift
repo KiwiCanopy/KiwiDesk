@@ -38,8 +38,7 @@ extension EventLoop {
                 onLog("slow reconcile: \(name) took \(ms)ms")
             }
         }
-        let activationPolicy =
-            self.activationPolicy(pid) ?? .prohibited
+        let activationPolicy = policy(of: pid)
         guard
             Self.ownsObservation(
                 hasObserver: observers[pid] != nil,
@@ -154,6 +153,7 @@ extension EventLoop {
         // sibling vanishes) coalesces into a re-key before either a
         // create or a destroy is emitted (#308).
         var appeared: [(element: AXUIElement, id: WindowID)] = []
+        var listed: [(element: AXUIElement, id: WindowID)] = []
         for element in liveElements {
             guard !budget.isSpent else {
                 deferBootWork(
@@ -206,6 +206,7 @@ extension EventLoop {
             }
             ignorePending.remove(id)
             live.insert(id)
+            listed.append((element: element, id: id))
             if let known = elements[pid]?[id] {
                 // The same window under a fresh AX element — a
                 // carried sticky window's element dies as it
@@ -244,6 +245,6 @@ extension EventLoop {
             minimized: minimized,
             coalesceTabs: coalesceTabs && !recentSpaceSwitch
         )
-        retireShadowSuspects(pid: pid)
+        retireShadows(pid: pid, listed: listed)
     }
 }

@@ -202,8 +202,7 @@ extension EventLoop {
                 .reconcile(
                     RunningApp(
                         pid: pid,
-                        activationPolicy: activationPolicy(pid)
-                            ?? .prohibited,
+                        activationPolicy: policy(of: pid),
                         ref: AppRef(pid: pid)
                     )
                 )

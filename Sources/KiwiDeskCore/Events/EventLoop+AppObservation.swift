@@ -116,6 +116,13 @@ extension EventLoop {
             self?.handle(note, element, pid: pid, app: ref)
         }
         observers[pid] = observer
+        processIdentity.note(
+            RunningApp(
+                pid: pid,
+                activationPolicy: activationPolicy,
+                ref: ref
+            )
+        )
         // Attached either way — the observer is installed, so the
         // app's windows still arrive by event — but it stops
         // paying for boot work it has already proven it cannot

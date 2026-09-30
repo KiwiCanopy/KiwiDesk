@@ -97,11 +97,11 @@ extension EventLoop {
         else {
             return
         }
-        if subrole == kAXStandardWindowSubrole,
-            shadowVerdict(element, id: window.id, pid: pid) != .window
-        {
-            return
-        }
+        // Every subrole: Orion's twin reads AXUnknown as often
+        // as AXStandardWindow (#1785, device 2026-09-30).
+        guard
+            shadowVerdict(element, id: window.id, pid: pid) == .window
+        else { return }
         window.isFloating =
             shouldForceFloat(pid: pid, id: window.id)
             || FloatDetection.shouldFloat(

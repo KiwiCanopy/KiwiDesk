@@ -169,7 +169,9 @@ extension EventLoop {
     /// app switch, reconcile the app we just left. Descriptor-
     /// shaped for a test's unnamed or parent pid (#1785).
     func appActivated(_ app: RunningApp, launchedAt: Date?) {
-        let pid = app.pid
+        // A pid ≤ 0 is never an identity (#1785): the launch
+        // follow reads this process's windows by it.
+        let pid = process(of: app) ?? app.pid
         // Ahead of both reconciles below: a window this app shows
         // on its own activation is adopted by them, and must find
         // the #1599 launch follow already owed.
@@ -183,10 +185,10 @@ extension EventLoop {
         // The reconcile below takes this app's window snapshot
         // on the same turn — no second scan at attach (#672).
         syncObservation(for: app, scanWindowsAtAttach: false)
-        // An unnamed activation (#1785) leaves the gate with no
-        // reading, which fails open.
-        guard Self.isProcessID(pid) else {
-            forgetUnnamedActivation(app)
+        // An unnamed activation (#1785) reports no focus: its
+        // process's own report decides.
+        guard Self.isProcessID(app.pid) else {
+            noteUnnamedActivation(app, resolved: pid)
             return
         }
         if let previous = lastActivePid, previous != pid {
