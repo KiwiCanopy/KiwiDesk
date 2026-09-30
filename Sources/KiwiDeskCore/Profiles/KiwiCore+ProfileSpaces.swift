@@ -108,7 +108,7 @@ extension KiwiCore {
         recordOutgoingPartitioning(before: .profile(profile.name))
     }
 
-    func restorePartitioning(of profile: Profile) {
+    func restoreProfilePartitioning(of profile: Profile) {
         restorePartitioning(
             of: .profile(profile.name),
             declaring: profile.declaredSpaces

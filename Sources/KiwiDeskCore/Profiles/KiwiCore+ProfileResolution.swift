@@ -96,7 +96,7 @@ extension KiwiCore {
         // #1230: and now put this profile's own windows back into
         // its own Spaces. After the prune, so what the profile has
         // never seen is already in its `fallback_space`.
-        if switching { restorePartitioning(of: profile) }
+        if switching { restoreProfilePartitioning(of: profile) }
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
         // instead of keeping the previous state's mode.
