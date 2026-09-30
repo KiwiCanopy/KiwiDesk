@@ -221,7 +221,7 @@ struct ConfigWriteTests {
         core.loadConfig()
         #expect(core.configHasForeignCode)
 
-        try core.adoptConfigIntoGui()
+        try core.adoptConfigIntoGui { _ in }
 
         // Now GUI-managed: no foreign code, sidecar written.
         #expect(!core.configHasForeignCode)

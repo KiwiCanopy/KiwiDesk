@@ -103,7 +103,10 @@ Space verb's `SpaceLuaArg.target` and any other action's Lua; a
 writer that only adds, as the digit top-up does, refuses an action
 already bound in the base or any profile's override. A new writer
 classifies itself in `LayerRowWriterCensusTests`, which counts
-every row write in both trees against its reason, and a writer
+every row write in both trees against its reason — a writer that
+builds whole layers (`.layers =`, a `KeyLayer(` built with rows,
+the adoption's seed among them) is outside its scan and is
+review's — and a writer
 that can merge joins `NavigationChordWriterTests`, which drives
 each against a duplicate-counting oracle of its own
 (`DigitTopUpOverrideTests` holds the top-up's cross-profile

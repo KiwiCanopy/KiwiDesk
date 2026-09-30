@@ -259,7 +259,7 @@ extension KiwiCore {
     /// under GUI ownership and the chords it left out.
     @discardableResult
     public func adoptConfigIntoGui(
-        classifying: (inout GuiConfig) -> Void = { _ in }
+        classifying: (inout GuiConfig) -> Void
     ) throws -> (config: GuiConfig, dropped: [NavigationChords.Dropped]) {
         let original =
             (try? String(

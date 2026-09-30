@@ -96,7 +96,12 @@ extension SettingsModel {
         against shipped: [KeyBinding],
         orphans: Set<String>
     ) -> Bool {
-        if shipped.contains(where: { $0.lua == row.lua }) {
+        // The same action as a shipped row, `"1"` and `1` alike.
+        let action = SpaceLuaArg.target(of: row.lua)
+        if shipped.contains(where: {
+            $0.lua == row.lua
+                || (action != nil && SpaceLuaArg.target(of: $0.lua) == action)
+        }) {
             return false
         }
         if orphans.contains(row.lua) {

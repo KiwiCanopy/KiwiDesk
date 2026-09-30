@@ -131,7 +131,10 @@ struct NavigationChordWriterTests {
         model.config.layers = [
             KeyLayer(
                 name: KeyLayer.defaultName,
-                bindings: [row("control+option+f1", goTo("1"))]
+                bindings: [
+                    row("control+option+f1", goTo("1")),
+                    row("control+option+f2", "KiwiDesk.focus_space(1)"),
+                ]
             )
         ]
         model.droppedChords = [
@@ -176,7 +179,7 @@ struct NavigationChordWriterTests {
         let saved = try #require(core.guiConfigStore.load())
         #expect(duplicated(saved).isEmpty)
         #expect(model.droppedChords.count == 2)
-        #expect(model.destination == .shortcuts)
+        #expect(model.nav.pendingReveal?.destination == .shortcuts)
         // The one write keeps what the adoption put back live.
         #expect(core.state.workspaces[SpaceID("1")]?.mode == .stack)
     }

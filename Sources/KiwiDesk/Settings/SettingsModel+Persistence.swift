@@ -45,7 +45,9 @@ extension SettingsModel {
             reload()
             droppedChords = adoption.dropped
             if !adoption.dropped.isEmpty {
-                destination = .shortcuts
+                nav.pendingReveal = SettingsAnchor(
+                    destination: .shortcuts
+                )
             }
             // Adopt recovers the file's keybindings (see
             // adoptConfigIntoGui / recoverKeybindings), so a

@@ -107,6 +107,6 @@ public enum NavigationChords {
             let own = KeyCombo.parse(digit)?.keyCode,
             let code = KeyCombo.parse(row.combo)?.keyCode
         else { return false }
-        return code == own || KeypadKeys.rowTwin(of: code) == own
+        return code == own
     }
 }
