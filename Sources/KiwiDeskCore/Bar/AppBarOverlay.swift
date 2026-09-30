@@ -134,7 +134,7 @@ public final class AppBarOverlay {
         let style = LiquidGlassGate.rendered(state.style)
         drawnStyle = style
         let edge = style.edge
-        syncItemViewCount(items.count)
+        let glide = syncItemViews(to: items)
         let m = metrics(
             strip: strip,
             count: items.count,
@@ -201,6 +201,7 @@ public final class AppBarOverlay {
         // Items leave their glass BEFORE the frame pass, which sets
         // only the ones the container hosts (#1730).
         if hosting != .boxGlass { teardownBoxGlasses() }
+        standArrivals(glide.arrivals)
         BarMotion.runLayout {
             BarMotion.setFrame(itemRun, to: runFrame, animated: true)
             for (index, view) in itemViews.enumerated()
@@ -212,7 +213,14 @@ public final class AppBarOverlay {
                 )
             }
             layoutFloatBreak(frames: frames, m: m, depth: depth, style: style)
+            playGroupGlide(
+                departures: glide.departures,
+                arrivals: glide.arrivals,
+                items: items,
+                frames: frames
+            )
         }
+        BarMotion.removeAfterSlide(glide.departures.map(\.view))
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             let active = index == activeIndex
