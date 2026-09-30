@@ -8359,6 +8359,7 @@ carries the why. The blocked tooltip's monitor wording appears
 only when a monitor set really is the only thing a save would
 write.
 
+:::unreleased
 **Quick-menu layout switch is session-only, and Settings does
 not narrate it.** Changing a space's layout from the status-bar
 quick menu updates the running state immediately and writes
@@ -8368,16 +8369,22 @@ in Profile "<name>"** — and Keep, not Save, is the word,
 because macOS already uses it for exactly this shape: a change
 that is undone unless you say otherwise. That row arms when ANY
 screen's shown space stands on a temporary layout, not just the
-focused one, since the verb writes the whole profile; a failed
-keep (a screen-count mismatch) raises an alert, the menu having
-no surface to warn in.
+focused one, since the verb keeps every screen's at once; a
+failed keep raises an alert, the menu having no surface to warn
+in.
 
-**The two write paths mean different things, and that is the
-whole design (#1179).**
+**The profile has three write paths, and each writes exactly
+what its words say (#1179, re-ruled by #1790).**
 
-- **Quick-menu Keep = a whole-live snapshot.** "Write down what
-  is on screen." It takes every screen at once, and it is the
-  only thing that turns a temporary layout permanent.
+- **Keep = the layouts on screen.** "Keep this layout." It
+  writes the mode of each Space the profile lists whose live
+  mode differs from the saved one, on every screen at once, and
+  nothing else: never which Spaces exist, their order or their
+  pins, and never a temporary Space. It is the only thing that
+  turns a temporary layout permanent.
+- **`save_profile` = a whole-live snapshot.** "Write down what
+  is on screen" — the CLI's Save as New. It takes every live
+  Space, temporary ones included, and held ones never.
 - **Settings Save = a draft commit.** "Save what I edited." It
   applies and persists the modes of the spaces the draft
   actually edited, and nothing else. It never re-asserts the
@@ -8385,6 +8392,19 @@ whole design (#1179).**
   Save carrying it destroys the very layout the user was about
   to keep. It never captures live either, which would adopt a
   temporary layout nobody asked to keep.
+
+Keep was the whole-live snapshot until temporary Spaces (#1790)
+split the two. A row labelled *Keep Layout* that also wrote a
+scratch Space into the file, or dropped a Space the user had
+deleted for the afternoon, did more than it said, and the bar's
+New Space made that the common case rather than the corner one.
+Which Spaces a profile has is changed deliberately (*A Space
+made on the fly is temporary*, under Profiles), so the row whose
+word is
+*layout* keeps layouts, and the verb whose word is *save* keeps
+the setup. Each moves an open draft's saved baseline for exactly
+what it wrote and leaves staged edits staged.
+:::
 
 Each half fails in a way the other hides. A Save that re-applies
 the draft over live and then captures live back **restores the
@@ -13609,32 +13629,42 @@ chord left behind names a Space that may no longer exist, and
 pressing it then makes an empty Space of that number, as
 `focus_space` does for any Space it does not find.
 
+:::unreleased
 **A drawn badge, never a name change.** Identity stays the bare
 name, so `focus_space 6` and the digit chord work unchanged. What
 the user needs — this Space is held, from which screen, what it
-was called there, and that nothing saves it — rides an asterisk
-badge on the identifier and the sentence the item announces to
+was called there, and that nothing saves it — rides a `display`
+marker on the identifier, drawn as an outline in one colour so it
+reads as an object rather than a mark to decode, and the sentence the item announces to
 VoiceOver. There is no tooltip (owner ruling, 2026-09-25): macOS
 shows a view's tooltip only while its app is frontmost, and
 KiwiDesk is a background app, so a tooltip would promise a
 sentence nobody sees. The badge is therefore a held Space's whole
 visible affordance, and `space_bar.set_sticky_badge(false)`, which
 hides the window-state badges, does not hide it.
+:::
 
-**Invisible to every arrangement write.** Keep is a whole-live
-snapshot; a held `6` written into the laptop-only profile would
-become a declared Space there, never retiring, and sit beside a
-new held `7` at the next undock with nobody told. The same holds
-for its pin, for the Settings draft and Save, and for the
-`gui.json` space list, whose Spaces cold boot seeds back into live
-— and for #1230's record, which is the incoming profile's own
-arrangement and not the one the held Space came from. A Settings
-Save therefore neither lists a held Space nor prunes it for being
-unlisted. This is the opposite of the #1175 heal's seed, which
-every save captures: a seed is the screen's own Space for the user
-to adopt, while a held Space belongs to an arrangement that is
-coming back. The badge and its "not saved" sentence stand in for a
-promote verb, which can come later if it is asked for.
+:::unreleased
+**Invisible to every arrangement write.** A held `6` written into
+the laptop-only profile would become a declared Space there, never
+retiring, and sit beside a new held `7` at the next undock with
+nobody told. The same holds for Keep and `save_profile`, for its
+pin, for the Settings draft and Save, and for the `gui.json` space
+list, whose Spaces cold boot seeds back into live — and for
+#1230's record, which is the incoming profile's own arrangement
+and not the one the held Space came from. A Settings Save
+therefore neither persists a held Space nor prunes it for being
+unlisted; Settings ▸ Spaces draws it as a view-only row after the
+others, which is showing, not saving. This is the opposite of the
+#1175 heal's seed, which every save captures: a seed is the
+screen's own Space for the user to adopt, while a held Space
+belongs to an arrangement that is coming back. A temporary Space
+(#1790) is kept out of the same writes for the opposite reason —
+it belongs to no arrangement yet — and `save_profile` is the one
+write that takes it. The marker and its "not saved" sentence stand
+in for a promote verb on a held Space, which can come later if it
+is asked for.
+:::
 
 :::unreleased
 **The hold outranks the incoming profile's record**
@@ -13778,6 +13808,133 @@ hold.** The #634 discard removes the snapshot files that carry
 it; ending the live holds too would turn each into an ordinary
 Space that the next Keep captures. Resetting every setting ends
 them, as before.
+:::
+
+:::unreleased
+**[Principle]**
+
+**A Space made on the fly is temporary until you put it in the
+profile ([#1790](https://github.com/KiwiCanopy/KiwiDesk/issues/1790)).**
+The Space Bar's New Space, `create_space` and a `focus_space 7`
+or `move_to_space 7` naming a Space that does not exist each make
+a Space for the task in hand. Before, every one of them became part
+of the profile by accident: the next Settings Save or Keep captured
+live, wrote it into the file, and it came back at every boot from
+then on. A scratch Space, or a digit pressed once by mistake,
+turned into arrangement. There are therefore two states and no
+third: **temporary**, or **in the profile**. A Space is in the
+profile only through a deliberate act — the profile or `init.lua`
+declaring it, Settings ▸ Spaces "+", `create_space 7 profile`, or
+**Add Space ‹name› to this profile**. The "+" counts even though
+it lives in the draft until Save: the draft is the profile being
+edited, and a Space there is already the profile's. A "permanent
+but unsaved" live Space is refused, because it is exactly the
+state the accidents above produced: some writes capture it, others
+do not, and nobody can tell which one it is in.
+
+**Invisible to every arrangement write, as a held Space is.** The
+Settings Save, the `gui.json` space mirror, #1230's per-profile
+record and the pins read the live Spaces through the one captured
+set, and a temporary Space is not in it. A held Space stays out
+because it belongs to an arrangement that is coming back; a
+temporary one because it belongs to no arrangement yet. The one
+write that takes it is `save_profile`, the whole-live snapshot:
+saying "write down what is on screen" is the deliberate act, so
+the Spaces it writes stop being temporary in the same step. Keep
+never takes one; that is the other half of the #1179 re-ruling
+above.
+
+**It lasts until the arrangement changes, never until the config
+reloads.** It drops on a switch to another profile or to a
+composed Standard: Load profile, a Desktop binding, a monitor
+change. The incoming arrangement is then the authority, and a
+scratch Space from the one before has no place in it, so its
+windows are forwarded as the prune forwards any Space the incoming
+arrangement does not declare. A config load is not that act. A
+Settings Save runs one, boot runs one, Reload runs one, and a Load
+of the profile already live re-applies the same arrangement.
+Dropping temporary Spaces on any of them would make Save destroy
+the Space the user was working in. The drop is therefore ruled by
+the switch, which the apply door already tells from a re-apply,
+and never by `loadConfig`.
+
+**Held when its screen leaves, like any Space.** A monitor change
+that switches profile holds a departing Space that still has
+windows (#1507), and a temporary one is included: the reason for
+the hold — a screen's windows must not collapse into one Space —
+does not depend on how the Space was made. It comes back temporary
+on replug. An empty one is dropped, as any empty departing Space
+is. While it is held it wears the held marker, since a Space is
+never both.
+
+**It survives a restart: the second Space a restore creates.**
+Quitting KiwiDesk, an update or a crash is not the user changing
+arrangement. The replay never creates a Space (#633), because a
+resurrected Space used to be written back into `gui.json`. That
+argument is about arrangement writes, and a temporary Space is
+invisible to all of them — the ground the held Space's boot
+exception stands on. So a temporary Space rides every session
+snapshot and is re-created ahead of the replay, but only when
+KiwiDesk boots into the arrangement the snapshot was taken under.
+Booting into another one is a switch that happened while KiwiDesk
+was down, and the Space drops as it would have live. A number the
+booting arrangement now declares is that arrangement's Space: the
+arrangement is the same one, so no two arrangements merge by name.
+
+**It deletes itself when its last window leaves.** This is on,
+with no setting: a scratch Space nobody cleans up is the clutter
+the temporary state exists to avoid, and a setting would ask for a
+decision nobody thinks about. Three conditions keep it from
+surprising anyone. It fires on the departure that empties the
+Space, so a Space just made from the bar — empty from birth —
+stays until something has been in it. It waits while any screen
+shows the Space, so nothing vanishes under the pointer. And
+"empty" is the one `spaceHoldsNothing`, so a hidden app's window
+or one on another Desktop keeps it. A screen's last Space is never
+deleted, since the empty-display heal would mint it straight back.
+
+**Adding a Space to the profile is a write, not a draft edit.**
+**Add Space ‹name› to this profile** and `create_space 7 profile`
+write the Space into the live profile's file at once — its place
+in the list, mode, pin and icon — through the live-write door, so
+an open draft moves its saved baseline and keeps its other edits
+staged. A draft edit is the wrong shape: the Space is not in the
+draft to edit, and making the promote wait for Save would tie it
+to whatever else the draft holds. Both are refused where no
+profile file is live, since a Standard has no file to write into,
+and the button's hint says what makes one.
+
+**Deleting from the profile asks first.** A temporary Space is
+deleted at once, since nothing was written. Deleting a profile
+Space from the bar also removes it from the file, which switching
+back does not undo, so the bar asks, in the words Settings uses
+for its own delete. On the command line `delete_space 5 profile`
+is that confirmation, and a plain `delete_space` stays
+session-only. A Space `init.lua` or a Standard declares is not the
+profile's to remove: the bar deletes it for the session and says
+it comes back on reload, and `profile` refuses, naming the source.
+
+**App Rules target profile Spaces only.** A rule is config, and a
+rule pointing at a Space that drops on the next switch loses its
+target without telling anyone. A temporary Space is listed
+disabled, with the way to add it to the profile.
+
+**Settings shows them and never edits them.** Settings ▸ Spaces
+lists profile rows, then temporary rows, then held rows, because
+a Space the user cannot find in the one page about Spaces reads as
+lost. The temporary and held rows are view-only — never in the
+draft, the save pill or the saved list — because the draft is the
+profile and these are not its Spaces. A temporary row carries the
+button that makes it one. A Space's number and shortcut follow its
+name, never its row.
+
+**A marker, never a name change.** The same argument as the held
+Space's: identity stays the bare name, so `focus_space 6` and the
+digit chord work unchanged. A temporary Space wears an hourglass
+in the identifier's top-trailing corner, the slot the held marker
+uses; a Space is never both, so they share it. Like the held
+marker, it is not hidden by `space_bar.set_sticky_badge(false)`,
+which hides the window-state badges only.
 :::
 
 ### Monitors
