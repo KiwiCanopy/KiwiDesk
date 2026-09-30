@@ -247,7 +247,7 @@ struct ShadowWindowReconcileTests {
     func recordDiesWithItsHost() {
         let host = traits(1, buttons: true, children: 6)
         let twin = traits(2, buttons: false, children: 0)
-        let (loop, box) = makeLoop([host, twin])
+        let (loop, _) = makeLoop([host, twin])
         var listed = [element(0), element(1)]
         loop.axWindows = { _ in listed }
         loop.resolveWindowID = { element in
