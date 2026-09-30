@@ -166,6 +166,9 @@ struct NextOnMyListWiringTests {
         )
         let relaunch = try #require(driver.seenRecord?.takeRelaunch())
         #expect(relaunch.next == Self.list)
+        // A closed offer's list never rides a later offer's install.
+        driver.closeWindow()
+        #expect(driver.offeredNext == nil)
     }
 
     /// The driver's fetch is inert unless the live updater wires
