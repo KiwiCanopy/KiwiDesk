@@ -43,14 +43,16 @@ extension StateCoordinator {
     }
 
     /// Restores a remembered user float onto a (re)tracked window
-    /// (#160).
+    /// (#160) — consumed, never restored, where detection already
+    /// floats it (#1810).
     mutating func restoreFloatOverride(
         of window: ManagedWindow
     ) {
         guard !userFloated.contains(window.id),
             !window.title.isEmpty,
             rememberedFloating.remove(WindowIdentity(of: window))
-                != nil
+                != nil,
+            windows[window.id]?.isFloating == false
         else { return }
         windows.setFloating(window.id, true)
         userFloated.insert(window.id)

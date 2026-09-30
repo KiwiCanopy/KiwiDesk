@@ -103,6 +103,22 @@ extension EventLoop {
 
     /// `shouldForceFloat` as a reason (#1810): own chrome reads as
     /// a panel, anyone else's as an app with no Dock icon.
+    nonisolated static func forceFloatReason(
+        pid: pid_t,
+        activationPolicy: NSApplication.ActivationPolicy,
+        tilesAsOwnWindow: Bool
+    ) -> AutoFloatReason? {
+        guard
+            shouldForceFloat(
+                pid: pid,
+                activationPolicy: activationPolicy,
+                tilesAsOwnWindow: tilesAsOwnWindow
+            )
+        else { return nil }
+        return isOwnProcess(pid) ? .panel : .accessoryApp
+    }
+
+    /// The live force-float reason for one tracked window.
     func forceFloatReason(pid: pid_t, id: WindowID) -> AutoFloatReason? {
         guard shouldForceFloat(pid: pid, id: id) else { return nil }
         return Self.isOwnProcess(pid) ? .panel : .accessoryApp

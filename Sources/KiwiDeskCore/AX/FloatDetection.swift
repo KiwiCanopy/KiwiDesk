@@ -170,10 +170,23 @@ public enum FloatDetection {
             subrole: AXHelper.subrole(of: element),
             layer: layer ?? 0
         )
+        return autoFloatReason(structural: structural) {
+            rules.matches(
+                bundleID: bundleID,
+                title: AXHelper.title(of: element)
+            )
+        }
+    }
+
+    /// The reason's order, pure: structure first, then the rule —
+    /// asked only where structure tiles, since it costs a title
+    /// read.
+    public static func autoFloatReason(
+        structural: Bool,
+        ruleMatches: () -> Bool
+    ) -> AutoFloatReason? {
         if structural { return .panel }
-        let title = AXHelper.title(of: element)
-        return rules.matches(bundleID: bundleID, title: title)
-            ? .rule : nil
+        return ruleMatches() ? .rule : nil
     }
 }
 

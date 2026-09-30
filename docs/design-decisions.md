@@ -4398,8 +4398,10 @@ tile override back:
 *Tile on a window the verdict floats refuses.* Overriding the
 verdict there is the third state again, so the verb does nothing
 and says why, in one sentence per reason — a rule, a dialog or
-panel, an app with no Dock icon — carried as a reason case the
-GUI renders (#96), and CLI/IPC fail in English. The bar menu's
+panel, an app with no Dock icon — carried as a reason case that
+one Core renderer turns into words (`AutoFloatReason+Rendering`:
+the pill and the menu are Core-drawn, so no word crosses the #96
+seam), and CLI/IPC fail in English. The bar menu's
 Tile Window row greys with the same sentence rather than hiding
 (grey, don't hide), and the row and the cue read the one reason
 value so they cannot disagree. A rule's reason names App Rules,
@@ -4408,9 +4410,13 @@ because that is where the user can change the answer.
 *Float records nothing where the verdict already floats.* Such a
 record changes nothing now, and later keeps the window floating
 after the user removes the rule that floated it — the hidden
-state by the other door.
+state by the other door. So the rule holds from every door, not
+only the verb's: a record made earlier is dropped the moment
+detection floats the window, and neither the reopen memory nor a
+restart restores one onto a window detection floats.
 
-*The verdict has one reader.* A verb asks it through
+*The verdict has one reader.* A verb and the menu row ask it
+through `KiwiCore.tileRefusal(of:)`, which reads
 `EventLoop.detectionVerdict(for:)`, the copy detection wrote,
 never by calling the float detection or the rules again beside
 it, which would let the verb and the window disagree. A

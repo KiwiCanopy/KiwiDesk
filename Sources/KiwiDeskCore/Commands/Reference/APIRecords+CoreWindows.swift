@@ -79,13 +79,13 @@ extension APIReference {
             .window("window", optional: true)
         ),
         "make_tiled": APIRecord(
-            "Hands the focused or named window back to its "
-                + "float rules, which may still float it.",
+            "Tiles the focused or named window; refused where "
+                + "a float rule or detection floats it.",
             .window("window", optional: true)
         ),
         "toggle_floating": APIRecord(
-            "Flips the focused window, or the one a window id "
-                + "names, between floating and tiled.",
+            "Flips the focused or named window between floating "
+                + "and tiled, refused as make_tiled is.",
             .window("window", optional: true)
         ),
         "make_sticky": APIRecord(

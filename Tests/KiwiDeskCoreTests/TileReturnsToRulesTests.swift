@@ -76,21 +76,61 @@ struct TileReturnsToRulesTests {
     func tileRefuses(_ reason: AutoFloatReason) {
         let core = makeCore()
         track(core, .floats(reason))
+        var cued: [AutoFloatReason] = []
+        core.borders.onTileRefusal = { window, reason in
+            #expect(window == id)
+            cued.append(reason)
+        }
         let response = core.execute("make_tiled")
         #expect(response == .fail(reason.failure))
         #expect(floats(core) == true)
         #expect(core.tileRefusal(of: id) == reason)
+        #expect(cued == [reason])
     }
 
     @Test("a toggle towards tiled refuses the same way")
     func toggleRefuses() {
         let core = makeCore()
         track(core, .floats(.panel))
+        var cued = 0
+        core.borders.onTileRefusal = { _, _ in cued += 1 }
         #expect(
             core.execute("toggle_floating")
                 == .fail(AutoFloatReason.panel.failure)
         )
         #expect(floats(core) == true)
+        #expect(cued == 1)
+    }
+
+    /// Where detection floats the window no record stands, from
+    /// whichever door it came: a rule arriving over a user float
+    /// drops it, so the rule's removal tiles the window.
+    @Test("a detection float drops an earlier user float")
+    func detectionFloatDropsTheRecord() {
+        let core = makeCore()
+        track(core)
+        #expect(core.execute("make_floating").isSuccess)
+        core.eventLoop.detectedFloating[id] = .floats(.rule)
+        core.state.apply(.windowFloatChanged(id, isFloating: true))
+        #expect(core.state.userFloated.isEmpty)
+        #expect(!core.execute("make_tiled").isSuccess)
+        core.eventLoop.detectedFloating[id] = .tiles
+        core.state.apply(.windowFloatChanged(id, isFloating: false))
+        #expect(floats(core) == false)
+    }
+
+    /// The reopen memory obeys the same rule: a window detection
+    /// floats on arrival takes no record, and spends the memory.
+    @Test("a reopen detection floats restores no record")
+    func reopenIntoDetectionFloat() {
+        let core = makeCore()
+        track(core)
+        #expect(core.execute("make_floating").isSuccess)
+        core.state.apply(.windowDestroyed(id, wasMinimized: false))
+        #expect(core.state.rememberedFloating.count == 1)
+        track(core, .floats(.rule))
+        #expect(core.state.userFloated.isEmpty)
+        #expect(core.state.rememberedFloating.isEmpty)
     }
 
     @Test("a Float records nothing where detection floats it")
@@ -105,13 +145,33 @@ struct TileReturnsToRulesTests {
         #expect(floats(core) == false)
     }
 
+    /// A memory filed by a same-identity twin that closed floated
+    /// is what a Tile of the live window must forget, or the next
+    /// reopen brings the float back.
     @Test("a Tile forgets the close/reopen memory")
     func tileForgetsReopen() {
         let core = makeCore()
         track(core)
-        #expect(core.execute("make_floating").isSuccess)
-        #expect(core.execute("make_tiled").isSuccess)
+        let twin = WindowID(2)
+        core.eventLoop.detectedFloating[twin] = .tiles
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: twin,
+                    pid: 1,
+                    appName: "App",
+                    title: "Doc"
+                )
+            )
+        )
+        #expect(
+            core.execute("make_floating", args: [.number(1)]).isSuccess
+        )
         core.state.apply(.windowDestroyed(id, wasMinimized: false))
+        #expect(core.state.rememberedFloating.count == 1)
+        let twinArgs: [JSONValue] = [.number(2)]
+        #expect(core.execute("make_floating", args: twinArgs).isSuccess)
+        #expect(core.execute("make_tiled", args: twinArgs).isSuccess)
         #expect(core.state.rememberedFloating.isEmpty)
     }
 

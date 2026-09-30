@@ -20,6 +20,10 @@ extension AutoFloatReason {
         }
     }
 
+    /// The pill's glyph: no tile here, the resize family's
+    /// non-arrow (`ResizeRefusal.pillSymbol`), SF Symbols 1.0.
+    var pillSymbol: String { "nosign" }
+
     /// The CLI/IPC failure — English, a machine contract (#96).
     var failure: String {
         switch self {

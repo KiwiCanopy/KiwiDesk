@@ -141,8 +141,11 @@ extension StateCoordinator {
             windows[record.windowID] != nil
         else { return }
         let id = record.windowID
-        // A pre-#1810 `false` was a manual tile, which is gone.
-        if session.floating == true {
+        // A pre-#1810 `false` was a manual tile, which is gone;
+        // a window detection floats takes no record.
+        if session.floating == true,
+            windows[id]?.isFloating == false
+        {
             setFloating(id, true)
         }
         setSticky(id, session.sticky)

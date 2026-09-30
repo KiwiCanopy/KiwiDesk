@@ -2,10 +2,10 @@ import AppKit
 import CoreGraphics
 
 extension KiwiCore {
-    /// Flashes one refusal pill (#933). The glyph and the text
-    /// both come from the refusal's own case (#1260/#1258), so
-    /// the two channels cannot disagree and neither can be
-    /// chosen at a call site.
+    /// Flashes one refusal pill (#933). Every caller hands it
+    /// the glyph and the text of ONE renderer — a resize
+    /// refusal's case (#1260/#1258) or a Tile refusal's reason
+    /// (#1810) — never a literal of its own.
     @discardableResult
     private func flashSizeLimitPill(
         _ window: WindowID,
@@ -112,10 +112,11 @@ extension KiwiCore {
     /// (#1810): the pill names the reason, the sentence the bar
     /// menu's greyed row carries too.
     func cueTileRefusal(_ window: WindowID, _ reason: AutoFloatReason) {
+        borders.onTileRefusal(window, reason)
         soundIfDrawn(
             flashSizeLimitPill(
                 window,
-                symbol: "nosign",
+                symbol: reason.pillSymbol,
                 text: reason.sentence
             )
         )

@@ -288,8 +288,14 @@ public struct StateCoordinator: Sendable {
             }
 
         case .windowFloatChanged(let id, let floating):
-            // A user float beats AX detection on title flips (#160).
-            guard !userFloated.contains(id) else { break }
+            // A user float beats a TILE verdict (#160); where
+            // detection floats the window, no record stands (#1810),
+            // or removing the rule later would not tile it.
+            if floating {
+                userFloated.remove(id)
+            } else if userFloated.contains(id) {
+                break
+            }
             // Clears stale overlay flag on return to tiled (#300).
             windows.setFloating(id, floating)
 
