@@ -1,6 +1,6 @@
 ---
 name: changelog-curator
-description: "Curates a KiwiDesk release's `## Highlights` block — reads the commit range since the last curation, sorts what a user would notice from what only a contributor would, drafts the block in the form `scripts/changelog-sync` accepts, and validates it. Use before cutting a release, when a curation has fallen behind `main`, or to re-read a draft block that has grown past what a reader will finish."
+description: "Curates a KiwiDesk release's `## Highlights` block — reads the commit range since the last curation, sorts what a user would notice from what only a contributor would, drafts the block in the form `scripts/changelog-sync` accepts, and validates it — and drafts the matching refresh of ROADMAP.md's Next on my list. Use before cutting a release, when a curation has fallen behind `main`, to re-read a draft block that has grown past what a reader will finish, or when the roadmap list no longer matches the plan."
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: inherit
 ---
@@ -87,7 +87,8 @@ stay quiet about:
 - **An internal refactor, a test, a guard, a rule file.** Real
   work; not a change anyone experiences.
 - **A forecast.** No "next up", no roadmap position. Ruled, and
-  the reason is that nothing catches it later.
+  the reason is that nothing catches it later. What comes next
+  has its own home, which the section below refreshes.
 - **A bullet per issue when the issues share a symptom.** The
   reader is not reconciling your issue tracker.
 - **Twenty bullets, or a nine-line bullet.** Ruled: the first
@@ -109,6 +110,34 @@ internal and are not: a change to a **default** anyone upgrading
 inherits, and a **rename or removal** of something a user's
 config or muscle memory names.
 
+## Refreshing "Next on my list"
+
+A second deliverable, drafted after the block and kept apart from
+it: the refresh of `ROADMAP.md`'s "Next on my list", the list the
+What's new window shows. The section's shape is the comment above
+it in that file; why it exists and what keeps it honest is
+`docs/design-decisions.md` ▸ *KiwiDesk draws its own update
+window*; what the site does with it is `.claude/rules/site.md` ▸
+`/roadmap.json`.
+
+1. **Remove what this release ships.** An item the highlights
+   now carry is no longer next.
+2. **Learn which issues are next from the next release's plan**
+   (`plan/roadmap-<version>.md`, whose rows are the owner's order),
+   else from the next milestone's open Feature issues. Write each
+   item from the public issue, never from the plan's text: `plan/`
+   is private and nothing in it may reach the repo.
+3. **Pass the release-notes test** above — the thing a user would
+   notice, in one line, with no issue number.
+4. **Never pad.** With nothing user-visible ruled next, leave the
+   file alone and let its expiry hide the card. Bugs, internal
+   work and investigations are not a list.
+5. **The date moves only on the owner's word.** Propose it with
+   the draft; bumped by habit, a list nobody still believes never
+   expires.
+6. **Validate** with `node site/test-roadmap.mjs`, which reads
+   the real file.
+
 ## Non-goals
 
 - **Whether to publish, and in what order channels open** —
@@ -126,4 +155,6 @@ Report as `path:line — SEVERITY: problem. fix.`, most severe
 first, then the validator's own line and a count — or `No
 findings.` when an existing block needs no change. When you
 authored, say which commits you read, which you set aside and
-under which of the categories above.
+under which of the categories above. Then give the proposed "Next
+on my list" section as a separate block, naming the issue behind
+each item and whether you propose moving the date.

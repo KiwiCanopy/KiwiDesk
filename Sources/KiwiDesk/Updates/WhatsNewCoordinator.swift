@@ -14,6 +14,13 @@ final class WhatsNewCoordinator {
     private let feedURL: () -> URL?
     /// Fetches the feed; a test hands items in.
     var fetch: (URL) async -> [WhatsNewFeed.Item]? = WhatsNewFeed.fetch
+    /// Fetches "Next on my list" beside the feed (#1813); a test
+    /// hands one in.
+    var fetchNext: (URL) async -> NextOnMyList? = {
+        await NextOnMyList.fetch(besideFeed: $0)
+    }
+    /// The clock the list's age is judged on; a test pins it.
+    var now: () -> Date = Date.init
     /// Puts the window on screen; a test records it instead.
     var presents: (WhatsNewWindowController) -> Void = { $0.present() }
     /// Nudged whenever `waiting` changes.
@@ -27,6 +34,8 @@ final class WhatsNewCoordinator {
     private var window: WhatsNewWindowController?
     /// The boot line a relaunch narrates; nil on any other launch.
     private var narration: BootNarration?
+    /// "Next on my list" for the notes waiting, judged at show.
+    private var next: NextOnMyList?
 
     init(
         record: WhatsNewRecord,
@@ -57,6 +66,7 @@ final class WhatsNewCoordinator {
             )
         else { return false }
         self.narration = narration
+        next = relaunch.next
         waiting = offer
         if opensWindow { show() }
         return true
@@ -100,6 +110,7 @@ final class WhatsNewCoordinator {
             record.markAnswered(current)
             return
         }
+        next = await fetchNext(url)
         waiting = offer
         if opensWindow { show() }
     }
@@ -112,7 +123,8 @@ final class WhatsNewCoordinator {
             self.window
             ?? WhatsNewWindowController(
                 offer: offer,
-                narration: narration
+                narration: narration,
+                next: next?.current(at: now())
             ) { [weak self] in
                 self?.answered()
             }
@@ -124,6 +136,7 @@ final class WhatsNewCoordinator {
         record.markAnswered(current)
         window = nil
         narration = nil
+        next = nil
         waiting = nil
     }
 }

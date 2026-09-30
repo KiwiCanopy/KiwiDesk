@@ -1,0 +1,120 @@
+import AppKit
+import Foundation
+import SwiftUI
+import Testing
+
+@testable import KiwiDesk
+@testable import KiwiDeskCore
+
+/// "Next on my list" (#1813 ruling): what the window reads of the
+/// site's `roadmap.json`, when it hides the list, and that the
+/// What's new window draws it. The Markdown half is
+/// `site/test-roadmap.mjs`'s.
+@MainActor
+@Suite("Next on my list (#1813)")
+struct NextOnMyListTests {
+    private static func data(_ json: String) -> Data { Data(json.utf8) }
+
+    private static let valid = """
+        {"format":1,"as_of":"2026-09-30","items":["One","Two"]}
+        """
+
+    private static func day(_ text: String) throws -> Date {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate]
+        return try #require(formatter.date(from: text))
+    }
+
+    @Test("reads the date as midnight UTC, and the items")
+    func readsTheDocument() throws {
+        let next = try #require(NextOnMyList.decode(Self.data(Self.valid)))
+        #expect(next.asOf == (try Self.day("2026-09-30")))
+        #expect(next.items == ["One", "Two"])
+    }
+
+    @Test("a key it does not know is ignored")
+    func unknownKeysAreIgnored() {
+        let grown = """
+            {"format":1,"as_of":"2026-09-30","items":["One"],"later":[]}
+            """
+        #expect(NextOnMyList.decode(Self.data(grown))?.items == ["One"])
+    }
+
+    @Test("anything it cannot show reads as nothing")
+    func unreadableReadsAsNothing() {
+        for json in [
+            #"{"format":2,"as_of":"2026-09-30","items":["One"]}"#,
+            #"{"format":1,"items":[]}"#,
+            #"{"format":1,"as_of":"2026-09-30","items":[]}"#,
+            #"{"format":1,"items":["One"]}"#,
+            #"{"format":1,"as_of":"soon","items":["One"]}"#,
+            #"{"as_of":"2026-09-30","items":["One"]}"#,
+            "not json",
+        ] {
+            #expect(NextOnMyList.decode(Self.data(json)) == nil, "\(json)")
+        }
+    }
+
+    @Test("hidden once more than sixty days old, or dated ahead")
+    func ageBoundsTheList() throws {
+        let next = NextOnMyList(asOf: try Self.day("2026-09-30"), items: ["A"])
+        let day: TimeInterval = 86_400
+        #expect(next.current(at: next.asOf) == next)
+        #expect(next.current(at: next.asOf + 60 * day) == next)
+        #expect(next.current(at: next.asOf + 60 * day + 1) == nil)
+        // A writer east of UTC dates the list a day early.
+        #expect(next.current(at: next.asOf - day) == next)
+        #expect(next.current(at: next.asOf - day - 1) == nil)
+    }
+
+    @Test("fetched beside the update feed")
+    func fetchedBesideTheFeed() throws {
+        let feed = try #require(
+            URL(string: "https://kiwidesk.kiwicanopy.com/appcast.xml")
+        )
+        #expect(
+            NextOnMyList.url(besideFeed: feed).absoluteString
+                == "https://kiwidesk.kiwicanopy.com/roadmap.json"
+        )
+    }
+
+    /// Through the mode, the layout and the Highlights tab: a
+    /// window handed a list is taller by the card.
+    @Test("What's new draws the card under Highlights")
+    func whatsNewDrawsTheCard() throws {
+        LocalizationManager.shared.select("en")
+        let offer = UpdateOffer(
+            version: "2.1.0",
+            build: "2.1.0",
+            installed: "2.0.0",
+            released: nil,
+            digest: UpdateNotesDigest(
+                summary: "Summary.",
+                cautions: [],
+                groups: [
+                    .init(
+                        type: "fixed",
+                        title: "Fixed",
+                        entries: [.init(text: "A.", version: "2.1.0")]
+                    )
+                ],
+                versions: ["2.1.0"],
+                unreadable: []
+            )
+        )
+        let next = NextOnMyList(
+            asOf: try Self.day("2026-09-30"),
+            items: ["One", "Two", "Three"]
+        )
+        func height(_ next: NextOnMyList?) -> CGFloat {
+            NSHostingView(
+                rootView: UpdateWindowView(
+                    offer: offer,
+                    mode: .whatsNew(narration: nil, next: next) {},
+                    measuring: true
+                )
+            ).fittingSize.height
+        }
+        #expect(height(next) > height(nil) + 80)
+    }
+}

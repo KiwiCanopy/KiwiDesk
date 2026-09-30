@@ -6,8 +6,13 @@ import SwiftUI
 /// the update).
 enum UpdateWindowMode {
     case offer(UpdateSession)
-    /// `narration` is set after the window's own Install (#1667).
-    case whatsNew(narration: BootNarration?, done: () -> Void)
+    /// `narration` is set after the window's own Install (#1667);
+    /// `next` is "Next on my list", shown only here (#1813).
+    case whatsNew(
+        narration: BootNarration?,
+        next: NextOnMyList? = nil,
+        done: () -> Void
+    )
 }
 
 /// KiwiDesk's own update window (#1542 ruling ▸ Window): a pinned
@@ -27,12 +32,13 @@ struct UpdateWindowView: View {
                 session: session,
                 measuring: measuring
             )
-        case .whatsNew(let narration, let done):
+        case .whatsNew(let narration, let next, let done):
             UpdateWindowLayout(
                 offer: offer,
                 whatsNew: true,
                 failed: false,
                 narration: narration,
+                next: next,
                 measuring: measuring
             ) {
                 WhatsNewFooter(done: done)
@@ -70,6 +76,7 @@ private struct UpdateWindowLayout<Footer: View>: View {
     let whatsNew: Bool
     let failed: Bool
     var narration: BootNarration?
+    var next: NextOnMyList?
     let measuring: Bool
     @ViewBuilder let footer: () -> Footer
 
@@ -84,6 +91,7 @@ private struct UpdateWindowLayout<Footer: View>: View {
                 offer: offer,
                 failed: failed,
                 whatsNew: whatsNew,
+                next: next,
                 measuring: measuring
             )
             footer()

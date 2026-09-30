@@ -86,6 +86,10 @@ final class SparkleUpdater: AppUpdating {
         // launch reads, and the feed is the one Sparkle resolved.
         let record = WhatsNewRecord()
         driver.seenRecord = record
+        driver.fetchNext = { [updater] in
+            guard let feed = updater.feedURL else { return nil }
+            return await NextOnMyList.fetch(besideFeed: feed)
+        }
         whatsNew = WhatsNewCoordinator(
             record: record,
             host: host,

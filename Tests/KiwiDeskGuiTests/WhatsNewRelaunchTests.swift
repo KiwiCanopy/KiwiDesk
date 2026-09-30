@@ -119,7 +119,11 @@ struct WhatsNewRelaunchTests {
                 "Sources/KiwiDesk/Updates/UpdateWindowView.swift"
             )
         )
-        #expect(source.contains("case .whatsNew(let narration, let done)"))
+        #expect(
+            source.contains(
+                "case .whatsNew(let narration, let next, let done)"
+            )
+        )
         #expect(source.contains("narration: narration.line"))
         let subtitle = try #require(
             SourceScan.declarationBody(
@@ -153,6 +157,10 @@ struct WhatsNewRelaunchTests {
                 "Sources/KiwiDesk/Updates/UpdateWindowChrome.swift"
             )
         )
-        #expect(chrome.contains("mode: .whatsNew(narration: narration)"))
+        #expect(
+            chrome.contains(
+                "mode: .whatsNew(narration: narration, next: next)"
+            )
+        )
     }
 }

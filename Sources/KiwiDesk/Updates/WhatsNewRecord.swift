@@ -19,11 +19,13 @@ struct WhatsNewRecord {
     static let relaunchKey = "updates.relaunchNotes"
 
     /// What the relaunch reads: the version installed, the one it
-    /// replaced, and the feed items the window merged.
+    /// replaced, the feed items the window merged, and the "Next on
+    /// my list" fetched while the offer was open (#1813).
     struct Relaunch: Codable, Equatable {
         let version: String
         let since: String
         let items: [WhatsNewFeed.Item]
+        var next: NextOnMyList? = nil
     }
 
     let defaults: UserDefaults

@@ -665,6 +665,31 @@ notes it merged across the relaunch, because the fetch a normal
 and the line would then narrate nothing.
 :::
 
+:::unreleased
+**"What's new" ends with what comes next, on a list that expires
+(#1813).** Under Highlights sits a card titled "Next on my list":
+up to three items from `ROADMAP.md`, dated, with a link to
+Discord. It is the one place the notes look forward, and it is
+built so the forecast cannot outlive its truth — the failure
+[a highlight must never risk](#release-notes-are-written-for-the-person-installing).
+The list lives in a repo file the owner can correct on any day,
+never in a release body nothing corrects; the site serves it
+beside the update feed, on the domain installed copies already
+trust, so moving the file breaks none of them; and the window
+hides it once its date is sixty days old, so a list nobody keeps
+disappears instead of promising. The words fit a one-person
+project: "Next on my list" admits an item may not have started
+and the order may change, where "What's next" reads as the next
+release's contents. It shows only after the update, because the
+offer is where someone decides whether to install and a large
+release pushes the card below the fold there, and never as a tab,
+since a tab names a kind of change in this release. The items
+stay English like the notes; the heading is translated. Keeping
+it current is part of curating each release, which removes what
+that release shipped and moves the date only while the list still
+holds.
+:::
+
 **What a 1.x client sees is unchanged.** The feed keeps its HTML
 description beside the structured notes, so a copy that predates
 this window keeps Sparkle's; the window first appears for the
@@ -830,6 +855,12 @@ carries it. So no roadmap position, no "next up", no promise
 about the following release: whether 0.9.7 turned out to be the
 last beta was not knowable on the day it shipped, and the notes
 did not need to answer it.
+
+:::unreleased
+What comes next has one home, and it is not the release body:
+[a dated list that expires](#kiwidesk-draws-its-own-update-window-1542),
+kept in a file that can be corrected the day plans change.
+:::
 
 **A fix to something that has not shipped is not news; it is
 part of the thing it fixes.** 1.2.0 brought Liquid Glass to

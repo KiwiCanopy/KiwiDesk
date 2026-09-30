@@ -28,6 +28,7 @@
 
 site/**
 README.md
+ROADMAP.md
 CONTRIBUTING.md
 CLA.md
 SECURITY.md
