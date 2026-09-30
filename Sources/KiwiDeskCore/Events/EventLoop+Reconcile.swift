@@ -237,6 +237,10 @@ extension EventLoop {
         // change, covering targeted reconciles that race the bulk
         // `reconcileAll` (#308 review).
         let recentSpaceSwitch = isWithinSpaceSwitchGrace()
+        // A shadow's record dies with its host, ahead of the sweep
+        // that would answer from it (#1785); the population is
+        // what the app LISTS, a minimized host included.
+        shadows.prune(pid: pid, listed: live.union(minimized))
         reconcileTabsAndSweep(
             pid: pid,
             app: app,

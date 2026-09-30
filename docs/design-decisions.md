@@ -2376,7 +2376,10 @@ shows no tracked window yet waits for a host before a lone shell
 tiles, because a fresh Orion listed the twin over a second before
 the real window (device, 2026-09-30); a shell in an app that
 already shows a tile is a window at once, so a decoration-less
-terminal's next window pays nothing. A shell tracked while it
+terminal's next window pays nothing. That rests on the twin being
+one per PROCESS, which is what Orion showed: an app minting one
+per window would see each new twin tiled and handed back a
+reconcile later. A shell tracked while it
 still read as a window is handed back at the next reconcile as a
 HIDE, never a close, since nobody closed it; a read that fails
 takes no verdict back, so a known shadow stays one; and a record

@@ -550,8 +550,8 @@ lifecycle; the `reason` field says why the set changed:
   (only minimized; it will come back as `restored`),
   `hidden` (its app was hidden, with ⌘H or by hiding itself
   as its last window closed, and the window comes back as
-  `returned` — or KiwiDesk stopped managing a window it will
-  not manage again, an app's shadow window it had tracked),
+  `returned` — or KiwiDesk stopped managing a window, an app's
+  shadow window it had tracked),
   `vanished` (the window is on a
   macOS Desktop no screen is showing; it returns as
   `returned`). A `vanished` payload also carries `desktop`,

@@ -66,7 +66,8 @@ struct ShadowWindows {
 
     /// A record dies with its host: kept only while the host is
     /// still listed, so a window judged a shadow beside a sibling
-    /// that then closed is asked again.
+    /// that then closed is asked again — at the reconcile that
+    /// lost the host, ahead of its sweep.
     mutating func prune(pid: pid_t, listed: Set<WindowID>) {
         hosts[pid] = hosts[pid]?.filter { listed.contains($0.value) }
     }
@@ -204,7 +205,6 @@ extension EventLoop {
         listed: [(element: AXUIElement, id: WindowID)],
         budget: AppBudget
     ) -> Bool {
-        shadows.prune(pid: pid, listed: Set(listed.map(\.id)))
         // A shell needs a buttoned sibling: one window is spared
         // the read.
         guard listed.count > 1 else { return true }

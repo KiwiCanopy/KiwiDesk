@@ -243,22 +243,28 @@ struct ShadowWindowReconcileTests {
         #expect(box.hidden.isEmpty)
     }
 
-    @Test("a record dies with its host")
+    @Test("a record dies with its host, at the reconcile that lost it")
     func recordDiesWithItsHost() {
         let host = traits(1, buttons: true, children: 6)
         let twin = traits(2, buttons: false, children: 0)
         let (loop, box) = makeLoop([host, twin])
-        loop.axWindows = { _ in [self.element(0), self.element(1)] }
+        var listed = [element(0), element(1)]
+        loop.axWindows = { _ in listed }
+        loop.resolveWindowID = { element in
+            CFEqual(element, self.element(0)) ? host.id : twin.id
+        }
         #expect(
             loop.shadowVerdict(element(1), id: twin.id, pid: pid)
                 == .shadow
         )
         // The host still listed, the twin not: the record holds.
-        #expect(retire(loop, box, [0]))
+        listed = [element(0)]
+        loop.reconcile(pid: pid, app: ref)
         #expect(loop.shadows.holds(twin.id, pid: pid))
         // The host closed: the twin is a window again until a
         // sibling explains it — a false positive ends here.
-        #expect(retire(loop, box, [1]))
+        listed = [element(1)]
+        loop.reconcile(pid: pid, app: ref)
         #expect(!loop.shadows.holds(twin.id, pid: pid))
     }
 }

@@ -114,6 +114,13 @@ struct ProcessIdentitySeamTests {
         )
         let retire = try #require(reconcile.range(of: "retireShadows("))
         #expect(sweep.upperBound < retire.lowerBound)
+        // The record prune AHEAD of that sweep, which would answer
+        // the ex-shadow from a record its host no longer backs.
+        let prune = try #require(reconcile.range(of: "shadows.prune("))
+        #expect(prune.upperBound < sweep.lowerBound)
+        #expect(
+            try sites(of: "shadows.prune(") == ["EventLoop+Reconcile.swift"]
+        )
     }
 
     @Test("a shadow is kept out of the tab re-key")
