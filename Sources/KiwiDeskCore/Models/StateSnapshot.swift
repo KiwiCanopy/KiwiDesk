@@ -130,6 +130,9 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     /// The arrangement live at the capture (#1646): a replay under
     /// another one leaves the modes of the Spaces it declares.
     public var arrangement: HeldOrigin.Arrangement?
+    /// Every profile's #1230 record (#1802,
+    /// `StateSnapshot+ProfileRecords`).
+    public var profileRecords: ProfileRecords?
 
     public init(
         windows: [WindowRecord],
@@ -147,6 +150,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case windows, spaces, activeSpace, capturedAt, arrangement
+        case profileRecords
     }
 
     public init(from decoder: Decoder) throws {
@@ -162,6 +166,11 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         arrangement = try? c.decodeIfPresent(
             HeldOrigin.Arrangement.self,
             forKey: .arrangement
+        )
+        // On its own too: an unreadable one replays as no record.
+        profileRecords = try? c.decodeIfPresent(
+            ProfileRecords.self,
+            forKey: .profileRecords
         )
     }
 }

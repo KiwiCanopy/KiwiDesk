@@ -4601,6 +4601,17 @@ Desktop switch between bound profiles the restore runs while the
 departing Desktop's windows are still on screen, and re-placing
 them re-ordered the row the return then rebuilt (#1387).
 
+:::unreleased
+The record rides the session snapshot, so a profile that is not
+live keeps it across a KiwiDesk quit, update or crash; it goes
+where the snapshot goes, which a Mac restart discards. It takes
+the replay's logout residue with it for longer: a record can sit
+unread until its profile returns, and a login that remints a
+remembered id then moves that window instead — the exposure the
+replay already accepts, so it is accepted here rather than gated
+on a session identity the replay does not have either (#1802).
+:::
+
 Its counterpart is deliberately NOT stored, and the reason is
 WHEN each record is authoritative rather than who owns the fact.
 A window's Desktop is read from the compositor continuously, so

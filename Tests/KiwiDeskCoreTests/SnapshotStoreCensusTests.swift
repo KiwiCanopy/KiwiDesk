@@ -90,6 +90,16 @@ struct SnapshotStoreCensusTests {
             ),
         "state.heldSpaces":
             (.always, "held Spaces, re-created at boot (#1646)"),
+        "state.profilePartitioning.byProfile[]":
+            (
+                .always,
+                "a profile's Space → windows map, adopted at boot (#1802)"
+            ),
+        "state.profilePartitioning.byProfile[][]":
+            (
+                .always,
+                "a Space's windows in that record, adopted at boot (#1802)"
+            ),
         "state.restoredFrames":
             (.behind, "the replay's own debt, written by it"),
         "state.departedSlots":
@@ -160,6 +170,10 @@ struct SnapshotStoreCensusTests {
         core.state.departedSlots[WindowID(9)] = .init(rank: 0)
         core.state.closedDepartures.insert(WindowID(9))
         core.tiler.monocleShownMembers[shown] = WindowID(1)
+        core.state.profilePartitioning.record(
+            [Space(id: hidden, windows: [WindowID(4)])],
+            as: "Other"
+        )
         core.state.heldSpaces[hidden] = HeldOrigin(
             name: hidden,
             screen: "DELL:1920x1080",
@@ -186,6 +200,7 @@ struct SnapshotStoreCensusTests {
             "state.floatFrames", "tiler.boundLearner.lastAsks",
             "state.userFloated", "tiler.monocleShownMembers",
             "state.heldSpaces",
+            "state.profilePartitioning.byProfile[][]",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")
         }

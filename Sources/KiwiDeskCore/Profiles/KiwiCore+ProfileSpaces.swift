@@ -20,13 +20,52 @@ extension KiwiCore {
     /// that has applied nothing, has no partitioning of its own.
     func recordLivePartitioning() {
         state.profilePartitioning.record(
-            capturedSpaces.map {
-                Space(
-                    id: $0.id,
-                    windows: withAwayMembers($0.windows, of: $0.id)
-                )
-            },
+            livePartitioning,
             as: profiles.currentName
+        )
+    }
+
+    private var livePartitioning: [Space] {
+        capturedSpaces.map {
+            Space(
+                id: $0.id,
+                windows: withAwayMembers($0.windows, of: $0.id)
+            )
+        }
+    }
+
+    /// Every profile's record for the session snapshot (#1802),
+    /// the live profile's filed fresh — on a copy, since the live
+    /// record is written only as the profile goes inactive. A
+    /// relaunch under ANOTHER profile then still knows the one
+    /// that was live at the quit.
+    func partitioningForSnapshot() -> StateSnapshot.ProfileRecords? {
+        var carried = state.profilePartitioning
+        carried.record(livePartitioning, as: profiles.currentName)
+        let records = carried.records
+        return records.isEmpty
+            ? nil : StateSnapshot.ProfileRecords(records)
+    }
+
+    /// Boot adopts the previous session's records after the
+    /// replay (#1802) — after the boot apply too, which must not
+    /// read a carried record as a switch and prune. A record for
+    /// a profile no longer on disk is dropped: it could never be
+    /// restored, and a new profile of that name is not it. An
+    /// empty listing is not proof — an unreadable directory lists
+    /// empty too — so it drops nothing.
+    func adoptCarriedPartitioning(from session: StateSnapshot) {
+        guard let carried = session.profileRecords?.records,
+            !carried.isEmpty
+        else { return }
+        let saved = Set(profiles.list())
+        let kept =
+            saved.isEmpty
+            ? carried : carried.filter { saved.contains($0.key) }
+        state.profilePartitioning.adopt(kept)
+        onLog(
+            "restore: carried the Space records of "
+                + "\(kept.count) profile(s)"
         )
     }
 
