@@ -58,6 +58,46 @@ extension KiwiCore {
         tiler.forgetSizeBound(id)
     }
 
+    /// What a detection flip owes (#1820), read before the fold:
+    /// a window that was no effective float and now floats is
+    /// placed as the float verbs place one, and an effective
+    /// float detection tiles files its frame as `make_tiled`
+    /// does (#1675), so a rule coming back returns it there.
+    enum DetectedFlip {
+        case floats(WindowID)
+        case tiles(WindowID, StateCoordinator.FloatFrame?)
+    }
+
+    func detectedFlip(_ event: KiwiEvent) -> DetectedFlip? {
+        guard case .windowFloatChanged(let id, let floating) = event,
+            state.windows[id] != nil
+        else { return nil }
+        let wasFloat = isEffectiveFloatForPlacement(id)
+        if floating { return wasFloat ? nil : .floats(id) }
+        return wasFloat ? .tiles(id, floatFrameToRemember(id)) : nil
+    }
+
+    /// Pays `detectedFlip`'s debt once the fold has run: a float
+    /// flip always lands, a tile one only where the fold really
+    /// tiled the window. The placement stands down while event
+    /// retiles are deferred (boot, a sweep chunk: the frame is the
+    /// app's, not a slot) and for a window a drag holds or in its
+    /// own macOS Space (#670).
+    func settleDetectedFlip(_ flip: DetectedFlip?) {
+        switch flip {
+        case .floats(let id):
+            guard !defersEventRetiles, seedsPlacement(id)
+            else { return }
+            placeFloating(id)
+        case .tiles(let id, let frame):
+            guard let frame, !isEffectiveFloatForPlacement(id)
+            else { return }
+            state.floatFrames[id] = frame
+        case nil:
+            break
+        }
+    }
+
     /// Places a window a move verb just filed into a floating
     /// Space where it was no effective float before (#1708):
     /// the frame it brings is the layout's slot, as at the float
