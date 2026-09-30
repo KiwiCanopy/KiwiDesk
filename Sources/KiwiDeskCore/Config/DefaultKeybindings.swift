@@ -203,26 +203,35 @@ public enum DefaultKeybindings {
     private static func topUpDigits(
         _ spaces: [SpaceID]
     ) -> [(digit: String, space: SpaceID, own: Bool)] {
-        let range = 1...digitCapacity
-        let own: [(Int, SpaceID)] = spaces.compactMap { space in
-            Int(space.raw).flatMap {
-                range.contains($0) ? ($0, space) : nil
-            }
+        let own: [(String, SpaceID)] = spaces.compactMap { space in
+            ownDigit(of: space).map { ($0, space) }
         }
         let owners = Set(own.map(\.1))
-        let positional: [(Int, SpaceID)] = spaces.enumerated().compactMap {
-            owners.contains($0.element) || !range.contains($0.offset + 1)
-                ? nil : ($0.offset + 1, $0.element)
-        }
-        let digit = { (number: Int) in
-            number == digitCapacity ? "0" : String(number)
-        }
-        return own.map { (digit($0.0), $0.1, true) }
-            + positional.map { (digit($0.0), $0.1, false) }
+        let positional: [(String, SpaceID)] = spaces.enumerated()
+            .compactMap {
+                owners.contains($0.element) || $0.offset >= digitCapacity
+                    ? nil
+                    : (
+                        $0.offset + 1 == digitCapacity
+                            ? "0" : String($0.offset + 1),
+                        $0.element
+                    )
+            }
+        return own.map { ($0.0, $0.1, true) }
+            + positional.map { ($0.0, $0.1, false) }
     }
 
     /// Maximum spaces with default digit shortcuts (1...9, 0) (#466).
     public static let digitCapacity = 10
+
+    /// The digit a Space named 1–10 owns (`0` for 10), or nil — the
+    /// one mapping the top-up and `NavigationChords` share (#1807).
+    public static func ownDigit(of space: SpaceID) -> String? {
+        guard let number = Int(space.raw),
+            (1...digitCapacity).contains(number)
+        else { return nil }
+        return number == digitCapacity ? "0" : String(number)
+    }
 
     private static func numbered(
         _ spaces: [SpaceID]

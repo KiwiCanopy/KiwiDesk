@@ -35,6 +35,7 @@ extension SettingsModel {
             )
         }
         config.layers[index].bindings = shipped + kept
+        droppedChords = []
     }
 
     private var shippedDefaults: [KeyBinding] {
@@ -95,9 +96,7 @@ extension SettingsModel {
         against shipped: [KeyBinding],
         orphans: Set<String>
     ) -> Bool {
-        if shipped.contains(where: { $0.lua == row.lua }) {
-            return false
-        }
+        if isSeedAction(row, shipped) { return false }
         if orphans.contains(row.lua) {
             return false
         }
@@ -107,6 +106,16 @@ extension SettingsModel {
         return !shipped.contains {
             KeyCombo.parse($0.combo) == combo
         }
+    }
+
+    /// Whether `row` runs a shipped row's action, of any kind — the
+    /// seed replaces it, so neither the reset keeps it nor its
+    /// discard count names it (#1807).
+    private static func isSeedAction(
+        _ row: KeyBinding,
+        _ shipped: [KeyBinding]
+    ) -> Bool {
+        shipped.contains { NavigationChords.sameAction($0, row) }
     }
 
     /// Count of custom shortcuts displaced by restoring defaults.
@@ -119,9 +128,7 @@ extension SettingsModel {
         let shipped = shippedDefaults
         let orphanLua = orphanLuaInDefaultLayer
         return layer.bindings.filter { row in
-            if shipped.contains(where: { $0.lua == row.lua }) {
-                return false
-            }
+            if Self.isSeedAction(row, shipped) { return false }
             if orphanLua.contains(row.lua) { return false }
             guard let combo = KeyCombo.parse(row.combo) else {
                 return false

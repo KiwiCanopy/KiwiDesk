@@ -127,6 +127,9 @@ extension SettingsModel {
             &updated,
             recoverResizeStep: true
         )
+        // After the classifier, which is what makes a row an
+        // action (#1807).
+        droppedChords = NavigationChords.deduplicate(&updated)
         config = updated
     }
 }

@@ -1330,6 +1330,7 @@
   "shortcuts.desktops.focus": "前往 macOS 桌面",
   "shortcuts.desktops.help": "桌面是 macOS 自己的「空間」，而不是 KiwiDesk 的空間。KiwiDesk 在自己的空間內排列視窗，所以大多數設定根本用不到這些快速鍵：切換桌面移動的是整個工作環境，而不是一個視窗，而且每個桌面都保留各自的空間。如果你確實要跨桌面工作，請在 **%1$@** 中為每個桌面綁定一個描述檔。",
   "shortcuts.desktops.move": "將視窗移至 macOS 桌面",
+  "shortcuts.dropped_chord": "已略過 %1$@：「%2$@」已有 %3$@。",
   "shortcuts.editing_layer": "正在編輯「%1$@」層",
   "shortcuts.gestures.app_bar": "沿著 App Bar 拖移項目，即可重新排列它的視窗。",
   "shortcuts.gestures.app_bar_hover": "將指標懸停在標題被縮短的 App Bar 項目上，即可查看完整標題。",
