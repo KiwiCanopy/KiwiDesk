@@ -267,7 +267,7 @@ at the moment you reveal it
 leaves the window's Space unchanged, and a **floating** or
 **sticky** window keeps its Space on any screen
 (`move_to_space` guards a sticky window the same way). With
-**Stay visible across Desktops** on (the default), a sticky
+**Keep sticky windows visible across Desktops** on (the default), a sticky
 window's move holds only until your screen next switches
 Desktop, when it is carried back onto its own screen's current
 Desktop; `override_sticky_reach("off")` first if you mean it to

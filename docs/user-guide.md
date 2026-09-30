@@ -478,8 +478,8 @@ its slot.
 
 Where macOS supports it, sticky reaches across **macOS
 Desktops**: switch Desktops and sticky windows come along with
-the screen they are on. **Stay visible across Desktops** (beside
-the mark toggle) switches it and appears only on a macOS that can
+the screen they are on. **Keep sticky windows visible across
+Desktops** (beside the mark toggle) switches it and appears only on a macOS that can
 drive Desktops; `override_sticky_reach` in Lua pins a single
 window the other way. Mission Control shows a sticky window on
 one Desktop at a time.
