@@ -125,7 +125,8 @@ struct ShelfStripPreviewTests {
             ShelfArrangement.hardFloor(
                 activeExtent: 22 / unit,
                 thickness: shelf.thickness,
-                gap: 5 / unit
+                gap: 5 / unit,
+                endPads: preview.endPads(try #require(preview.space)) / unit
             ) * unit
         #expect(space.length >= floor - 0.01)
     }
