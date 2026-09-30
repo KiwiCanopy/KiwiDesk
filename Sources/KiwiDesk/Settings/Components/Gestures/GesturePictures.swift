@@ -4,7 +4,11 @@ import SwiftUI
 /// phase `t`, 0 → 1, and rests on its key frame at 1 — the frame
 /// Reduce Motion shows. Coordinates are the 120 × 72 plate's.
 enum GesturePicture {
-    /// Drag a window onto another: the ghost lands on the target.
+    /// Drag a window onto another: it lifts off whole and travels
+    /// at its own size; over the other window that one's border
+    /// takes the accent; on the drop the two trade places, the
+    /// ring staying on the slot the dragged one landed in — the
+    /// rest frame.
     struct Swap: View, Animatable {
         var t: CGFloat
         nonisolated var animatableData: CGFloat {
@@ -15,13 +19,35 @@ enum GesturePicture {
 
         var body: some View {
             let ink = GestureInk(palette: palette)
-            let x = gestureLerp(14, 68, t)
+            let lift = gestureStage(t, 0.03, 0.12)
+            let carry = gestureEase(gestureStage(t, 0.12, 0.48))
+            let ring = gestureStage(t, 0.46, 0.56)
+            let swap = gestureEase(gestureStage(t, 0.66, 0.84))
+            let settle = gestureStage(t, 0.8, 0.9)
+            let dragged = CGRect(
+                x: gestureLerp(gestureLerp(8, 58, carry), 62, swap),
+                y: gestureLerp(gestureLerp(10, 14, carry), 10, swap),
+                width: 50,
+                height: 52
+            )
             ZStack(alignment: .topLeading) {
                 ink.window(CGRect(x: 8, y: 10, width: 50, height: 52))
-                ink.window(CGRect(x: 62, y: 10, width: 50, height: 52))
+                    .opacity(1 - lift)
+                ink.window(
+                    CGRect(
+                        x: gestureLerp(62, 8, swap),
+                        y: 10,
+                        width: 50,
+                        height: 52
+                    )
+                )
+                ink.window(dragged).opacity(settle)
+                ink.ghost(dragged).opacity(lift * (1 - settle))
                 ink.target(CGRect(x: 62, y: 10, width: 50, height: 52))
-                ink.ghost(CGRect(x: x, y: 20, width: 38, height: 30))
-                ink.pointer(at: CGPoint(x: x + 20, y: 34))
+                    .opacity(ring)
+                ink.pointer(
+                    at: CGPoint(x: dragged.minX + 22, y: dragged.minY + 24)
+                )
             }
         }
     }
