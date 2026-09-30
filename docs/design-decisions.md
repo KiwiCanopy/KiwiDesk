@@ -6340,10 +6340,21 @@ collapse.
 
 **[Trade-off]**
 
-**KiwiDesk registers a shorter `NSInitialToolTipDelay` (700 ms)
-than AppKit's default of roughly two seconds.** Registered as a
-fallback, never set: a user who has chosen their own delay keeps
-it.
+**KiwiDesk stores a shorter `NSInitialToolTipDelay` (250 ms) in
+its own defaults domain, against AppKit's default of roughly two
+seconds.** A user who has chosen their own delay keeps it: launch
+writes the value only where none is stored, or where the stored
+one matches the marker (`KiwiDeskToolTipDelayWritten`) recording
+what KiwiDesk itself last wrote — so a retune reaches our earlier
+value and never a user's.
+
+It is stored because registering it does nothing. AppKit's
+tooltip code reads the stored preference and never the
+registration domain (measured 2026-10-01, macOS 27): a registered
+delay left the two-second default in force, while the same key
+written with `defaults write` took effect at once. A registered
+fallback would have been the more polite shape; it is not an
+available one.
 
 This is a deliberate deviation from "standard controls work the
 standard way", taken because the default makes a specific
@@ -6362,12 +6373,16 @@ gating control sitting directly above it (#527) — hover remains
 the last of the three, and a surface that needs hover to be
 understood is mis-designed.
 
-The floor matters as much as the ceiling: below roughly half a
-second, tooltips fire while the pointer merely *crosses* a row on
-its way elsewhere, and Settings becomes a field of popping
-yellow. Late help is better than that. 700 ms is chosen to be
-clearly faster than a pause-and-give-up while still requiring
-the pointer to actually rest.
+The floor matters as much as the ceiling: too short, and
+tooltips fire while the pointer merely *crosses* a row on its way
+elsewhere, and Settings becomes a field of popping yellow. Where
+that floor lies was settled on the device, not by estimate
+(owner ruling): at a quarter second help appears once the
+pointer rests, and a pointer sweeping across rows still does not
+set it off. Settings' help is read, not stumbled on — a reader
+who rests on a greyed control has already decided to ask — so
+any margin above the delay that still needs a rest only makes
+them wait for an answer they came for.
 
 ### Permanent accessory mode (no activation policy switching)
 
