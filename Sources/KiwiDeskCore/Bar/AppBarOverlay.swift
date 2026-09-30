@@ -64,6 +64,9 @@ public final class AppBarOverlay {
     var boxGlasses: [NSView] = []
     /// Solid backdrops behind per-box glass for tint refraction (#408).
     var boxTints: [GlassBackdrop] = []
+    /// Members sliding out of a group on a boxed glass run, which
+    /// take their glass when the glide lands (#1831).
+    var glidingIn: Set<ObjectIdentifier> = []
     var scrollOffset: CGFloat = 0
     /// Follows the focused window unless a manual scroll holds.
     var follow = ShelfFollow<WindowID>()
@@ -203,8 +206,12 @@ public final class AppBarOverlay {
         // only the ones the container hosts (#1730).
         if hosting != .boxGlass { teardownBoxGlasses() }
         standArrivals(glide.arrivals)
+        // A group folding or releasing members changes the bar's
+        // length, and the shelf re-places the section on the plate
+        // glide: the items ride the same glide, so the fold and
+        // the re-centring are one motion (#1831).
         let groups = !glide.departures.isEmpty || !glide.arrivals.isEmpty
-        (groups ? BarMotion.runGroupLayout : BarMotion.runLayout) {
+        (groups ? BarMotion.runPlateGlide : BarMotion.runLayout) {
             BarMotion.setFrame(itemRun, to: runFrame, animated: true)
             for (index, view) in itemViews.enumerated()
             where view.superview === itemRun {
@@ -222,7 +229,6 @@ public final class AppBarOverlay {
                 frames: frames
             )
         }
-        BarMotion.removeAfterGroupGlide(glide.departures.map(\.view))
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             let active = index == activeIndex
@@ -264,8 +270,9 @@ public final class AppBarOverlay {
             dx: runFrame.minX + itemContainer.frame.minX,
             dy: runFrame.minY + itemContainer.frame.minY
         )
-        // Single dispatch for glass hosting mode (#407).
-        BarMotion.runLayout {
+        // Single dispatch for glass hosting mode (#407), on the
+        // glide the items took, so a box travels with its item.
+        (groups ? BarMotion.runPlateGlide : BarMotion.runLayout) {
             installGlassHosting(
                 hosting,
                 frames: frames,

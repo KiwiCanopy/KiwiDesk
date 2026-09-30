@@ -76,6 +76,9 @@ struct OverlayGlassGateTests {
     /// callers, so a new glass host reds until it names its gate.
     private static let minters: [String: String] = [
         "Bar/AppBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
+        // Mints a new item's glass beside its own (#1831), under the
+        // same render's gate.
+        "Bar/AppBarOverlay+GroupGlide.swift": "ReduceTransparencySeamTests",
         "Bar/SpaceBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
         "Bar/ShelfOverlay.swift": "ShelfPlateGlassGateTests",
         "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",

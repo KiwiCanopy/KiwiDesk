@@ -102,13 +102,56 @@ struct AppBarGroupGlideTests {
         #expect(overlay.itemViews[0].alphaValue == 1)
     }
 
-    @Test("The group glide outlasts an item slide, and not motion")
-    func glideLength() {
-        #expect(
-            BarMotion.groupGlideDuration(reduceMotion: false)
-                > BarMotion.duration(reduceMotion: false)
+    /// A boxed glass run keeps each item's glass with its view, so
+    /// a collapse moves no view between glasses (bars.md, #1315);
+    /// only the CONTENT travels — a folded member leaves its glass
+    /// at once, and a released one takes its glass when it lands.
+    @Test("A boxed glass run moves content, never a glass")
+    func glassRunMovesContent() throws {
+        guard #available(macOS 26, *) else { return }
+        let before = LiquidGlassGate.override
+        defer { LiquidGlassGate.override = before }
+        LiquidGlassGate.override = { false }
+        var style = AppBarLook()
+        style.liquidGlass = true
+        style.backgroundStyle = .boxed
+        let overlay = AppBarOverlay()
+        let show = { (items: [AppBarOverlay.Item]) in
+            overlay.show(
+                items: items,
+                activeIndex: nil,
+                strip: CGRect(x: 0, y: 0, width: 900, height: 30),
+                style: style
+            )
+        }
+        show([item(1), item(2), item(9)])
+        let first = overlay.itemViews[0]
+        let second = overlay.itemViews[1]
+        let other = overlay.itemViews[2]
+        let glassOf = { (view: AppBarItemView) in
+            overlay.boxGlasses.first { GlassPlate.holds($0, view) }
+        }
+        let firstGlass = try #require(glassOf(first))
+        let secondGlass = try #require(glassOf(second))
+        let otherGlass = try #require(glassOf(other))
+        let fold = overlay.syncItemViews(
+            to: [item(1, members: [1, 2]), item(9)]
         )
-        #expect(BarMotion.groupGlideDuration(reduceMotion: true) == 0)
+        #expect(
+            overlay.boxGlasses.map(ObjectIdentifier.init)
+                == [firstGlass, otherGlass].map(ObjectIdentifier.init)
+        )
+        #expect(fold.departures.map(\.view) == [second])
+        #expect(second.superview === overlay.itemRun)
+        #expect(secondGlass.superview == nil)
+        // Released again, the member travels bare: its glass is
+        // hidden and hosts nothing until the glide lands.
+        show([item(1, members: [1, 2]), item(9)])
+        show([item(1), item(2), item(9)])
+        let arrival = overlay.itemViews[1]
+        #expect(overlay.glidingIn.contains(ObjectIdentifier(arrival)))
+        #expect(arrival.superview === overlay.itemRun)
+        #expect(overlay.boxGlasses[1].isHidden)
     }
 
     @Test("An alpha write fades only where motion is allowed")

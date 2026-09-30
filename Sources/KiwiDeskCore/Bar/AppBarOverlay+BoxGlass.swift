@@ -21,8 +21,11 @@ extension AppBarOverlay {
         let radius = style.resolvedCornerRadius(forThickness: depth)
         for i in 0..<n {
             let glass = boxGlasses[i]
-            glass.isHidden = itemViews[i].isHidden
-            GlassPlate.setContent(glass, itemViews[i])
+            // A member still sliding out of its group travels bare
+            // and takes its glass when it lands (#1831).
+            let gliding = glidingIn.contains(ObjectIdentifier(itemViews[i]))
+            glass.isHidden = itemViews[i].isHidden || gliding
+            if !gliding { GlassPlate.setContent(glass, itemViews[i]) }
             GlassPlate.update(
                 glass,
                 frame: frames[i],
@@ -30,7 +33,7 @@ extension AppBarOverlay {
                 animated: animated
             )
             let tint = boxTints[i]
-            if itemViews[i].isHidden {
+            if itemViews[i].isHidden || gliding {
                 tint.isHidden = true
             } else {
                 GlassTint.apply(
