@@ -63,10 +63,8 @@ extension KiwiCore {
         windowActions.newWindow(window.pid) { [weak self] pressed in
             guard !pressed, let self else { return }
             // Nothing opened, so nothing is owed (#1599).
-            if let bundle = window.appBundleID,
-                launchFollow.owed() == bundle
-            {
-                launchFollow.forget(keeping: bundle)
+            if let bundle = window.appBundleID {
+                launchFollow.forget(pending: bundle)
             }
             cueWindowAction(
                 .noNewWindow(app: window.appName),

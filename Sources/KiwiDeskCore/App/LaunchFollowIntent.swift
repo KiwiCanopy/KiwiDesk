@@ -108,6 +108,13 @@ final class LaunchFollowIntent {
         return pending.bundleID
     }
 
+    /// Retires `bundleID`'s debt alone, leaving any placement: a
+    /// refused New Window opened nothing, and a placement waits on
+    /// its own app's activation (#1518).
+    func forget(pending bundleID: String) {
+        if pending?.bundleID == bundleID { pending = nil }
+    }
+
     /// Retires the debt unpaid, and any placement waiting for one
     /// except `keeping`'s — the app whose activation is judging it.
     func forget(keeping bundleID: String? = nil) {

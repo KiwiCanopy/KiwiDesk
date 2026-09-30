@@ -115,6 +115,25 @@ struct BarWindowActionRowsTests {
         #expect(core.launchFollow.owed(at: Date()) == "com.other.app")
     }
 
+    /// A placement waits on its own app's activation, whichever
+    /// app it is; a refusal retires only the debt it owed.
+    @Test("a refused New Window leaves a waiting placement")
+    func refusalKeepsPlacement() {
+        let core = seededCore()
+        core.launchFollow.notePlacement(
+            .init(
+                window: WindowID(3),
+                bundleID: "com.other.app",
+                space: two,
+                at: Date()
+            )
+        )
+        core.windowActions.newWindow = { _, done in done(false) }
+        core.execute("new_window", args: [.number(1)])
+        #expect(core.launchFollow.owed(at: Date()) == nil)
+        #expect(core.launchFollow.placement?.bundleID == "com.other.app")
+    }
+
     @Test("Close Window presses the named window's own element")
     func closeActs() {
         let core = seededCore()
