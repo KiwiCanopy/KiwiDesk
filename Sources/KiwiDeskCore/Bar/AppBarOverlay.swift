@@ -232,6 +232,7 @@ public final class AppBarOverlay {
                 style: style
             )
             view.itemActions = itemActions
+            view.members = item.members
             let place = Self.runPlace(index: index, count: items.count)
             view.isFirstInRun = place.first
             view.isLastInRun = place.last

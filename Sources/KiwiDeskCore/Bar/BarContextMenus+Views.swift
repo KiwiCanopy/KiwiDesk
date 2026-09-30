@@ -19,20 +19,19 @@ extension SpaceBarItemView {
 }
 
 extension SpaceBarGlyphTarget {
-    /// A `+N` disc's; a glyph answers nothing yet, so its click
-    /// reaches the chip.
-    var menuHit: BarHit? { kind == .overflow ? .disc(space) : nil }
-
-    override func menu(for event: NSEvent) -> NSMenu? {
-        menuHit.flatMap { barContextMenus?.menu(for: $0) }
+    /// A `+N` disc's, or an app glyph's window rows.
+    var menuHit: BarHit {
+        kind == .overflow ? .disc(space) : .glyph(members)
     }
 
-    /// A glyph speaks the chip's rows, the ones its right-click
-    /// falls through to.
+    override func menu(for event: NSEvent) -> NSMenu? {
+        barContextMenus?.menu(for: menuHit)
+    }
+
     override func accessibilityCustomActions()
         -> [NSAccessibilityCustomAction]?
     {
-        barContextMenus?.accessibilityActions(for: menuHit ?? .space(space))
+        barContextMenus?.accessibilityActions(for: menuHit)
     }
 }
 
@@ -60,14 +59,18 @@ extension ShelfDividerHandle {
     }
 }
 
-/// An App Bar item speaks the shelf section to VoiceOver as its
-/// right-click shows it (#1518); its own window rows come with the
-/// App Bar's menu.
+/// An App Bar item's window rows, or a collapsed group's (#1518).
 extension AppBarItemView {
+    var menuHit: BarHit { .appItem(members) }
+
+    override func menu(for event: NSEvent) -> NSMenu? {
+        barContextMenus?.menu(for: menuHit)
+    }
+
     override func accessibilityCustomActions()
         -> [NSAccessibilityCustomAction]?
     {
-        barContextMenus?.accessibilityActions(for: .empty)
+        barContextMenus?.accessibilityActions(for: menuHit)
     }
 }
 

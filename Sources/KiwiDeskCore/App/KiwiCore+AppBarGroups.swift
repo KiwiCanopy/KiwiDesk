@@ -185,6 +185,7 @@ extension KiwiCore {
                 source: style.iconSource
             ),
             count: group.count,
+            members: group,
             titleCut: barItemTitle(count: group.count, window: window)
                 .map {
                     AppBarStyle.cappedTitle($0, to: style.resolvedTitleCap)
