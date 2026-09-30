@@ -956,6 +956,14 @@ review before you Save; each binding must be an inline
 `function() … end` on one line. **Adopt into the GUI** imports
 the whole file's managed settings and keeps your custom Lua live.
 
+:::unreleased
+A shortcut row holds one key per action, so where `init.lua` binds
+one action to two keys, Import and Adopt bring in one — a Space's
+own digit where it has one, otherwise the first — and the Shortcuts
+header names each key left out. Both keys keep working from
+`init.lua`.
+:::
+
 ### Shortcut Layers
 
 The **+** beside the layer chips defines a layer: a name, an

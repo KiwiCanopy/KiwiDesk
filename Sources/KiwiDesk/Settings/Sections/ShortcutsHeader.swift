@@ -28,6 +28,25 @@ struct ShortcutsHeader: View {
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.groupHeading)
             }
+            ForEach(droppedLines, id: \.self) { line in
+                Text(line)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.groupHeading)
+            }
+        }
+    }
+
+    /// One line per chord the import or adoption left out, naming
+    /// the chord its action kept (#1807).
+    private var droppedLines: [String] {
+        model.droppedChords.map { entry in
+            L(
+                "shortcuts.dropped_chord",
+                "%1$@ left out: “%2$@” already has %3$@.",
+                ShortcutsReferenceBuilder.glyphs(entry.dropped.combo),
+                entry.kept.label,
+                ShortcutsReferenceBuilder.glyphs(entry.kept.combo)
+            )
         }
     }
 

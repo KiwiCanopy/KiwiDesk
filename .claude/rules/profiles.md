@@ -94,18 +94,20 @@ because two real clients now remove drift — see
   the product argument is `docs/design-decisions.md` ▸ "Size is
   not a positional verb" (`SizeLayerSeedTests`).
 
-## A Space verb holds one chord per layer (#1797)
+## A navigation action holds one chord per layer (#1797, #1807)
 
-**A GUI writer of layer rows adds no row for a Space verb the
-layer — or any profile's override of it — already binds.** "The
-same verb" is `SpaceLuaArg.target`, the verb plus the Space, never
-the raw Lua string. The digit top-up is held to it by
-`DigitTopUpActionTests` and `DigitTopUpOverrideTests`; the Lua
-import, the adoption into Settings and `GuiConfig.renameSpace` are
-held by no guard (#1807), so a change to any of them, or a new
-writer, owes the check and its test. Lua itself is uncapped — the argument
-is `docs/design-decisions.md` ▸ *Nothing KiwiDesk writes may give
-an action a second chord in a layer*.
+**A GUI writer of layer rows leaves no navigation action two
+chords in a layer** — the digit top-up counting every profile's
+override against the shared base as well. The dedupe is the one
+`NavigationChords.deduplicated`, whose "same action" is a Space
+verb's `SpaceLuaArg.target` and any other action's Lua; a writer
+takes it rather than comparing rows itself.
+`NavigationChordWriterTests` drives every writer — the top-up,
+Restore Defaults, the import, the adoption, a Space rename — and a
+new writer joins it; `DigitTopUpOverrideTests` holds the
+top-up's cross-profile reading. Lua itself is uncapped — the
+argument is `docs/design-decisions.md` ▸ *Nothing KiwiDesk writes
+may give an action a second chord in a layer*.
 
 ## The starter setup is derived, and its tuning is profile-wide
 

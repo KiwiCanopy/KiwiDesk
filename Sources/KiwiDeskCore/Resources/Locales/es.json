@@ -1325,6 +1325,7 @@
   "shortcuts.desktops.focus": "Ir a un Escritorio de macOS",
   "shortcuts.desktops.help": "Los Escritorios son los «espacios» propios de macOS, no los de KiwiDesk. KiwiDesk organiza las ventanas dentro de sus propios espacios, así que la mayoría de las configuraciones nunca necesita estos atajos: cambiar de Escritorio mueve todo tu entorno, no una ventana, y cada Escritorio conserva sus propios espacios. Si de verdad trabajas en varios Escritorios, asocia un perfil a cada Escritorio en **%1$@**.",
   "shortcuts.desktops.move": "Mover ventanas a un Escritorio de macOS",
+  "shortcuts.dropped_chord": "%1$@ omitido: «%2$@» ya tiene %3$@.",
   "shortcuts.editing_layer": "Editando la capa «%1$@»",
   "shortcuts.gestures.app_bar": "Arrastra un elemento a lo largo de la App Bar para reordenar sus ventanas.",
   "shortcuts.gestures.app_bar_hover": "Pasa el puntero sobre un elemento de la App Bar con el título acortado para verlo completo.",

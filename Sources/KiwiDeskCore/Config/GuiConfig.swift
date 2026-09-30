@@ -158,6 +158,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             }
             return layer
         }
+        // Rows a deleted `to` left behind (#92) now meet the
+        // renamed ones.
+        NavigationChords.deduplicate(&self)
         return true
     }
 

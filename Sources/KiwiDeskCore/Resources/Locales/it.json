@@ -1325,6 +1325,7 @@
   "shortcuts.desktops.focus": "Vai a una Scrivania di macOS",
   "shortcuts.desktops.help": "Le Scrivanie sono gli «spazi» propri di macOS, non quelli di KiwiDesk. KiwiDesk dispone le finestre nei propri spazi, quindi la maggior parte delle configurazioni non ha mai bisogno di queste scorciatoie: cambiare Scrivania sposta tutto il tuo ambiente, non una finestra, e ogni Scrivania conserva i propri spazi. Se lavori davvero su più Scrivanie, associa un profilo a ogni Scrivania in **%1$@**.",
   "shortcuts.desktops.move": "Sposta finestre su una Scrivania di macOS",
+  "shortcuts.dropped_chord": "%1$@ saltata: «%2$@» ha già %3$@.",
   "shortcuts.editing_layer": "Modifica del livello «%1$@»",
   "shortcuts.gestures.app_bar": "Trascina un elemento lungo la App Bar per riordinarne le finestre.",
   "shortcuts.gestures.app_bar_hover": "Passa il puntatore su un elemento della App Bar con il titolo accorciato per vederlo per intero.",

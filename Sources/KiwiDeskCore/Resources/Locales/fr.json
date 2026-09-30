@@ -1325,6 +1325,7 @@
   "shortcuts.desktops.focus": "Aller à un Bureau macOS",
   "shortcuts.desktops.help": "Les Bureaux sont les « espaces » propres à macOS, pas ceux de KiwiDesk. KiwiDesk range les fenêtres dans ses propres espaces, si bien que la plupart des configurations n'ont jamais besoin de ces raccourcis : changer de Bureau déplace tout votre environnement, pas une fenêtre, et chaque Bureau conserve ses propres espaces. Si vous travaillez vraiment sur plusieurs Bureaux, associez un profil à chaque Bureau dans **%1$@**.",
   "shortcuts.desktops.move": "Déplacer les fenêtres vers un Bureau macOS",
+  "shortcuts.dropped_chord": "%1$@ ignoré : « %2$@ » a déjà %3$@.",
   "shortcuts.editing_layer": "Modification du calque « %1$@ »",
   "shortcuts.gestures.app_bar": "Faites glisser un élément le long de l'App Bar pour réordonner ses fenêtres.",
   "shortcuts.gestures.app_bar_hover": "Survolez avec le pointeur un élément de l'App Bar dont le titre est raccourci pour le voir en entier.",

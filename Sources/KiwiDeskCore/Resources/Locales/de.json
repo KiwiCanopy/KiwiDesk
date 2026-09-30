@@ -1325,6 +1325,7 @@
   "shortcuts.desktops.focus": "Zu einem macOS-Schreibtisch wechseln",
   "shortcuts.desktops.help": "Schreibtische sind die eigenen „Spaces“ von macOS — nicht die Spaces von KiwiDesk. KiwiDesk ordnet Fenster in seinen eigenen Spaces an, deshalb brauchen die meisten Setups diese Tastenkürzel nie: Ein Schreibtischwechsel verschiebt deine ganze Umgebung, nicht ein einzelnes Fenster, und jeder Schreibtisch behält seine eigenen Spaces. Wenn du wirklich über mehrere Schreibtische hinweg arbeitest, verknüpfe ein Profil pro Schreibtisch unter **%1$@**.",
   "shortcuts.desktops.move": "Fenster auf einen macOS-Schreibtisch verschieben",
+  "shortcuts.dropped_chord": "%1$@ übersprungen: „%2$@“ hat bereits %3$@.",
   "shortcuts.editing_layer": "Ebene „%1$@“ wird bearbeitet",
   "shortcuts.gestures.app_bar": "Ziehe ein Element entlang der App Bar, um ihre Fenster neu anzuordnen.",
   "shortcuts.gestures.app_bar_hover": "Zeige mit dem Mauszeiger auf ein Element der App Bar, dessen Titel gekürzt ist, um ihn vollständig zu sehen.",

@@ -34,7 +34,11 @@ extension SettingsModel {
                 orphans: orphanLua
             )
         }
-        config.layers[index].bindings = shipped + kept
+        config.layers[index].bindings =
+            NavigationChords.deduplicated(
+                shipped + kept,
+                liveSpaces: Set(config.spaces)
+            ).rows
     }
 
     private var shippedDefaults: [KeyBinding] {

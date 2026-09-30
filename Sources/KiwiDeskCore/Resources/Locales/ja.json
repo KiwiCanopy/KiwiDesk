@@ -1325,6 +1325,7 @@
   "shortcuts.desktops.focus": "macOSのデスクトップへ移動",
   "shortcuts.desktops.help": "デスクトップはmacOS自体の「操作スペース」であり、KiwiDeskのスペースではありません。KiwiDeskは自身のスペース内にウインドウを配置するため、ほとんどの場合これらのショートカットは必要ありません。デスクトップを切り替えると、移動するのは1つのウインドウではなく作業環境全体です。また、デスクトップごとに独自のスペースが保たれます。デスクトップをまたいで作業する場合は、**%1$@**でデスクトップごとにプロファイルを割り当ててください。",
   "shortcuts.desktops.move": "ウインドウをmacOSのデスクトップに移動",
+  "shortcuts.dropped_chord": "%1$@をスキップしました：「%2$@」にはすでに%3$@が割り当てられています。",
   "shortcuts.editing_layer": "「%1$@」レイヤーを編集中",
   "shortcuts.gestures.app_bar": "App Barに沿ってアイテムをドラッグすると、ウインドウを並べ替えられます。",
   "shortcuts.gestures.app_bar_hover": "タイトルが短縮されたApp Barの項目にポインタを置くと、タイトル全体が表示されます。",
