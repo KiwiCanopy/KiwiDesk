@@ -230,8 +230,6 @@ final class SettingsModel: ObservableObject {
     var updater: any AppUpdating = NoUpdater()
 
     let core: KiwiCore
-    /// Recorder live session delta and rollback point (#123).
-    var liveKeySession: RecorderLiveSession?
     /// Guards `config.didSet` during reload; written only by `apply(_:)`.
     var suppressDirty = false
     /// Sidecar baseline deciding if save regenerates global files

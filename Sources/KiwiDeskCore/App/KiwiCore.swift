@@ -41,14 +41,9 @@ public final class KiwiCore {
     public let exec = ExecLauncher()
 
     /// Effective structured keybinding sources currently
-    /// installed in `keys`. Kept so a recorder-only live edit
-    /// can capture an in-memory rollback point without reading
-    /// gui.json or a profile again (#123 review).
+    /// installed in `keys`, read by the shortcuts reference
+    /// panel (`liveKeybindingSnapshot`).
     var appliedStructuredLayers: [KeyLayer]?
-    /// Changes whenever `loadConfig()` replaces the Lua VM and
-    /// hotkey table. Recorder snapshots are valid only within
-    /// the generation that captured them.
-    var keybindingRuntimeGeneration: UInt64 = 0
 
     /// The global window-rule bases (`GlobalRuleBase`).
     var globalRuleBase = GlobalRuleBase()

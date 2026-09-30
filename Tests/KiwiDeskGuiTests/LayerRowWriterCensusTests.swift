@@ -53,12 +53,6 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDesk/Settings/Sections/ShortcutsSection.swift":
             (1, "layer editor: writes back the rows it was handed"),
-        "KiwiDesk/Settings/SettingsModel+LiveApply.swift":
-            (
-                1,
-                "live session copy: mirrors a draft row by id so its"
-                    + " recording registers at once; never persisted"
-            ),
         "KiwiDesk/Settings/Components/Keybindings/"
             + "KeybindingCatalog+Layers.swift":
             (1, "layer rename: rewrites Lua in place, adds no row"),
@@ -83,8 +77,6 @@ struct LayerRowWriterCensusTests {
             (1, "custom rows, which are no navigation action"),
         "KiwiDesk/Settings/Components/Keybindings/KeybindingAppGroup.swift":
             (1, "application rows, which are no navigation action"),
-        "KiwiDesk/Settings/SettingsModel+LiveApply.swift":
-            (1, "clears a combo from the live session copy"),
         "KiwiDeskCore/Keys/KeybindingMerge.swift":
             (1, "the import merge; its caller takes the dedupe"),
         "KiwiDesk/Settings/Sections/ShortcutsSection.swift":

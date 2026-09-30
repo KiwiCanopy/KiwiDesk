@@ -43,7 +43,6 @@ extension SettingsModel {
 
     /// Reloads configuration and profile state from core into view model.
     func reload() {
-        restoreLiveKeySessionIfNeeded()
         droppedChords = []
         // A load can make the stored target the loaded one.
         // Core's name, not `activeProfile`, which `refreshProfiles`

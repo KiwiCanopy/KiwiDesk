@@ -2,8 +2,8 @@ import Foundation
 
 /// Prepared structured keybindings waiting for one atomic
 /// `KeybindingManager` swap. Lua refs are minted before the
-/// running table changes, so a recorder edit never exposes a
-/// half-built layer set (#123 review).
+/// running table changes, so an apply never exposes a
+/// half-built layer set.
 struct PreparedKeybindings {
     struct Failure {
         let layer: String
@@ -14,21 +14,13 @@ struct PreparedKeybindings {
     var icons: [String: String]
     var registeredLayers: [KeyLayer]
     var failures: [Failure]
-
-    @MainActor func release(using lua: LuaInterpreter) {
-        for bindings in refs.values {
-            for ref in bindings.values {
-                lua.release(ref: ref)
-            }
-        }
-    }
 }
 
 extension KiwiCore {
     /// Resolves the base + profile tiers, prepares every Lua
     /// callback, then replaces all layers in one batch. Regular
-    /// config/profile applies reset to default; recorder-only
-    /// entry points call the lower seam with their active layer.
+    /// config/profile applies reset to default; a rule write's
+    /// refresh keeps the running layer.
     func applyStructuredKeybindings(
         layers base: [KeyLayer],
         profile: KeyLayerOverride?,

@@ -21,14 +21,6 @@ extension KeyRecorderField {
     /// The sentence every channel shows.
     var conflictSentence: String? { reading?.sentence }
 
-    /// A dead row is never "Active now" (#1126): the outline and
-    /// caption say macOS answers the chord, so the live-apply
-    /// success caption would contradict them in the same column.
-    func showsFeedback(_ feedback: LiveApplyFeedback) -> Bool {
-        if case .applied = feedback.status, isDead { return false }
-        return true
-    }
-
     var conflictBadge: some View {
         iconSlot {
             if let sentence = conflictSentence {

@@ -192,9 +192,6 @@ extension InterpolatedLabelTests {
         // #888 — the "Clear all bindings" escape hatch retired
         // along with the separate-Spaces grey it existed for.
         "shortcuts.imported_note": 1,
-        "key_recorder.live_apply_failed": 2,
-        "key_recorder.revert_failed": 1,
-        "key_recorder.revert_used_snapshot": 1,
         "lua_editor.adopt.title": 1,
         "lua_editor.adopt.message_dirty": 1,
         "layout_params.master_orientation.one_master": 1,
