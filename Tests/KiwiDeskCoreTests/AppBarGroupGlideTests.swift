@@ -46,7 +46,8 @@ struct AppBarGroupGlideTests {
         let third = overlay.itemViews[2]
         let other = overlay.itemViews[3]
         let glide = overlay.syncItemViews(
-            to: [item(1, members: [1, 2, 3]), item(9)]
+            to: [item(1, members: [1, 2, 3]), item(9)],
+            glass: false
         )
         // The group's view and the neighbour's are the same objects,
         // so their frame writes glide rather than swap content.
@@ -67,7 +68,8 @@ struct AppBarGroupGlideTests {
         let group = overlay.itemViews[0]
         let slot = group.frame
         let glide = overlay.syncItemViews(
-            to: [item(1), item(2), item(3), item(9)]
+            to: [item(1), item(2), item(3), item(9)],
+            glass: false
         )
         #expect(overlay.itemViews[0] === group)
         #expect(glide.departures.isEmpty)
@@ -84,7 +86,7 @@ struct AppBarGroupGlideTests {
         let overlay = AppBarOverlay()
         show(overlay, [item(1), item(2)])
         let closed = overlay.itemViews[1]
-        let glide = overlay.syncItemViews(to: [item(1)])
+        let glide = overlay.syncItemViews(to: [item(1)], glass: false)
         #expect(glide.departures.isEmpty)
         #expect(closed.superview == nil)
     }
@@ -94,7 +96,10 @@ struct AppBarGroupGlideTests {
         let overlay = AppBarOverlay()
         show(overlay, [item(1, members: [1, 2])])
         let slot = overlay.itemViews[0].frame
-        let glide = overlay.syncItemViews(to: [item(1), item(2)])
+        let glide = overlay.syncItemViews(
+            to: [item(1), item(2)],
+            glass: false
+        )
         overlay.standArrivals(glide.arrivals)
         let arrival = overlay.itemViews[1]
         #expect(arrival.frame == slot)
@@ -135,7 +140,8 @@ struct AppBarGroupGlideTests {
         let secondGlass = try #require(glassOf(second))
         let otherGlass = try #require(glassOf(other))
         let fold = overlay.syncItemViews(
-            to: [item(1, members: [1, 2]), item(9)]
+            to: [item(1, members: [1, 2]), item(9)],
+            glass: true
         )
         #expect(
             overlay.boxGlasses.map(ObjectIdentifier.init)
@@ -149,9 +155,58 @@ struct AppBarGroupGlideTests {
         show([item(1, members: [1, 2]), item(9)])
         show([item(1), item(2), item(9)])
         let arrival = overlay.itemViews[1]
-        #expect(overlay.glidingIn.contains(ObjectIdentifier(arrival)))
+        #expect(overlay.glidingIn.contains(WindowID(2)))
         #expect(arrival.superview === overlay.itemRun)
         #expect(overlay.boxGlasses[1].isHidden)
+    }
+
+    /// A released member's glass is paired by window, so no render
+    /// before or at the landing mints a second one, and the landing
+    /// hosts it: a boxed glass run's subviews come back to their
+    /// count (the leak review found, #1831).
+    @Test("A glide's landing leaves no glass behind")
+    func landingLeavesNoGlass() throws {
+        guard #available(macOS 26, *) else { return }
+        let before = LiquidGlassGate.override
+        defer { LiquidGlassGate.override = before }
+        LiquidGlassGate.override = { false }
+        var style = AppBarLook()
+        style.liquidGlass = true
+        style.backgroundStyle = .boxed
+        let overlay = AppBarOverlay()
+        let show = { (items: [AppBarOverlay.Item]) in
+            overlay.show(
+                items: items,
+                activeIndex: nil,
+                strip: CGRect(x: 0, y: 0, width: 900, height: 30),
+                style: style
+            )
+        }
+        let expanded = [item(1), item(2), item(9)]
+        show(expanded)
+        let settled = overlay.itemRun.subviews.count
+        show([item(1, members: [1, 2]), item(9)])
+        show(expanded)
+        // A render while the member still glides mints nothing.
+        show(expanded)
+        overlay.landGroupGlide(
+            departures: [],
+            landed: [WindowID(2)],
+            generation: overlay.glideGeneration
+        )
+        #expect(overlay.glidingIn.isEmpty)
+        #expect(
+            overlay.boxGlasses.indices.allSatisfy {
+                GlassPlate.holds(overlay.boxGlasses[$0], overlay.itemViews[$0])
+            }
+        )
+        // Tints ride beside their glass in the run; the folded
+        // member's own view left with its glide's timer, not here.
+        #expect(
+            overlay.itemRun.subviews.filter { $0 is NSGlassEffectView }
+                .count == expanded.count
+        )
+        _ = settled
     }
 
     @Test("An alpha write fades only where motion is allowed")

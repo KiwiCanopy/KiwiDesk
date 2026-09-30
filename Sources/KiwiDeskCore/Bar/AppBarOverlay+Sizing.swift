@@ -69,15 +69,25 @@ extension AppBarOverlay {
     nonisolated static func endPads(gap: CGFloat) -> CGFloat { gap }
 
     /// Where an overflowing viewport starts: where a run exactly
-    /// `pads` short of the axis would, by `frames`' alignment.
+    /// `pads` short of the axis would.
     nonisolated static func overflowLead(
         pads: CGFloat,
         alignment: AppBarStyle.BarAlignment
     ) -> CGFloat {
+        alignedStart(slack: pads, alignment: alignment)
+    }
+
+    /// Where a run leaving `slack` along its axis starts, by
+    /// alignment — the one reading `frames`, the drop index and the
+    /// overflow lead take.
+    nonisolated static func alignedStart(
+        slack: CGFloat,
+        alignment: AppBarStyle.BarAlignment
+    ) -> CGFloat {
         switch alignment {
         case .start: return 0
-        case .center: return pads / 2
-        case .end: return pads
+        case .center: return slack / 2
+        case .end: return slack
         }
     }
 
@@ -263,16 +273,9 @@ extension AppBarOverlay {
             lengths.reduce(0, +)
             + gap * CGFloat(max(lengths.count - 1, 0))
         let axis = horizontal ? bounds.width : bounds.height
-        var position: CGFloat
-        if total > axis {
-            position = 0
-        } else {
-            switch alignment {
-            case .start: position = 0
-            case .center: position = (axis - total) / 2
-            case .end: position = axis - total
-            }
-        }
+        var position =
+            total > axis
+            ? 0 : alignedStart(slack: axis - total, alignment: alignment)
         return lengths.map { length in
             defer { position += length + gap }
             return horizontal

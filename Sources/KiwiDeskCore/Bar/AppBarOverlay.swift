@@ -64,9 +64,15 @@ public final class AppBarOverlay {
     var boxGlasses: [NSView] = []
     /// Solid backdrops behind per-box glass for tint refraction (#408).
     var boxTints: [GlassBackdrop] = []
+    /// The window each box glass is paired with, by position in
+    /// `boxGlasses` (#1831).
+    var boxGlassOwners: [WindowID] = []
     /// Members sliding out of a group on a boxed glass run, which
     /// take their glass when the glide lands (#1831).
-    var glidingIn: Set<ObjectIdentifier> = []
+    var glidingIn: Set<WindowID> = []
+    /// Bumped by every render that starts a group glide, so only
+    /// the latest glide's landing re-renders.
+    var glideGeneration = 0
     var scrollOffset: CGFloat = 0
     /// Follows the focused window unless a manual scroll holds.
     var follow = ShelfFollow<WindowID>()
@@ -137,7 +143,10 @@ public final class AppBarOverlay {
         let style = LiquidGlassGate.rendered(state.style)
         drawnStyle = style
         let edge = style.edge
-        let glide = syncItemViews(to: items)
+        let glide = syncItemViews(
+            to: items,
+            glass: glassHosting(style) == .boxGlass
+        )
         let m = metrics(
             strip: strip,
             count: items.count,

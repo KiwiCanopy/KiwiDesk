@@ -107,7 +107,9 @@ struct ShelfStripPreview: View {
     }
 
     /// The plate's pad at both ends of a run, which an overflowing
-    /// section keeps outside its viewport too (#1830).
+    /// section keeps outside its viewport too (#1830). The
+    /// preview's own, not `SpaceBarOverlay.endPads`: its runs are
+    /// schematics padded alike at both ends (bars.md).
     func endPads(_ spec: HomeCardBarsTile.BarSpec) -> CGFloat {
         2 * (spec.gap + 3 * scale)
     }

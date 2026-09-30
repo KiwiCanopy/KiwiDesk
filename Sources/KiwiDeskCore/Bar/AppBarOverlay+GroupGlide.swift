@@ -2,18 +2,12 @@ import AppKit
 
 /// A group's members slide together into its item as it collapses
 /// and out of it as it expands (#1831), rather than the row
-/// swapping content in place. Item views are keyed by the window
-/// they stand for — and a boxed glass run's glass and tint by the
-/// view they host, so no view changes glass (bars.md, #1315) — so
-/// a view that stays glides to its new slot, a member absorbed
-/// into a group slides onto the group's slot and fades, and a
-/// member released from one starts on that slot.
-///
-/// On a boxed glass run only the CONTENT travels: a departing
-/// member leaves its glass at once, and an arriving one takes its
-/// glass when it lands (`glidingIn`). A glass sliding under
-/// another ghosts through it and re-samples its backdrop every
-/// frame (owner, device 2026-09-30), so no box ever glides into one.
+/// swapping content in place. Item views, their box glass and the
+/// members still gliding are all keyed by the window they stand
+/// for, so a view that stays glides to its new slot, a member
+/// absorbed into a group slides onto the group's slot and fades,
+/// and a member released from one starts on that slot. On a boxed
+/// glass run only the CONTENT travels: no glass glides into another.
 extension AppBarOverlay {
     /// A view leaving the run into the item that absorbed it.
     struct Departure {
@@ -21,21 +15,25 @@ extension AppBarOverlay {
         let into: WindowID
     }
 
-    /// A new view and the frame of the item it was folded into.
+    /// A new view, its window, and the frame of the item it was
+    /// folded into.
     struct Arrival {
         let view: AppBarItemView
+        let id: WindowID
         let from: CGRect
     }
 
     /// Reuses each view whose window still has an item, in the
-    /// items' order, its glass and tint moving with it; returns the
-    /// views folded into another item and the new ones released
-    /// from one. A view whose window left the bar goes at once.
+    /// items' order, its glass paired by window where `glass`;
+    /// returns the views folded into another item and the new ones
+    /// released from one. A view whose window left the bar goes at
+    /// once.
     func syncItemViews(
-        to items: [Item]
+        to items: [Item],
+        glass: Bool
     ) -> (departures: [Departure], arrivals: [Arrival]) {
         let old = itemViews
-        var hosts = glassHosts(of: old)
+        var hosts = boxGlassHosts()
         var byID = Dictionary(
             old.map { ($0.windowID, $0) },
             uniquingKeysWith: { first, _ in first }
@@ -52,17 +50,17 @@ extension AppBarOverlay {
             next.append(view)
             if let source = old.first(where: { $0.members.contains(item.id) }
             ) {
-                let from =
-                    hosts[ObjectIdentifier(source)]?.glass.frame
-                    ?? source.frame
+                let from = hosts[source.windowID]?.glass.frame ?? source.frame
                 if from != .zero {
-                    arrivals.append(Arrival(view: view, from: from))
+                    arrivals.append(
+                        Arrival(view: view, id: item.id, from: from)
+                    )
                 }
             }
         }
         var departures: [Departure] = []
         for view in byID.values {
-            let host = hosts.removeValue(forKey: ObjectIdentifier(view))
+            let host = hosts.removeValue(forKey: view.windowID)
             guard
                 let target = items.first(where: {
                     $0.members.contains(view.windowID)
@@ -75,23 +73,9 @@ extension AppBarOverlay {
             departures.append(Departure(view: view, into: target.id))
         }
         itemViews = next
-        pairGlasses(with: next, hosts: hosts)
-        glidingIn.formUnion(arrivals.map { ObjectIdentifier($0.view) })
+        if glass { pairBoxGlasses(with: items.map(\.id), hosts: hosts) }
+        glidingIn.formUnion(arrivals.map(\.id))
         return (departures, arrivals)
-    }
-
-    /// Each glass and tint by the view it hosts.
-    private func glassHosts(
-        of views: [AppBarItemView]
-    ) -> [ObjectIdentifier: (glass: NSView, tint: GlassBackdrop)] {
-        var hosts: [ObjectIdentifier: (NSView, GlassBackdrop)] = [:]
-        for (index, glass) in boxGlasses.enumerated()
-        where index < views.count && index < boxTints.count
-            && GlassPlate.holds(glass, views[index])
-        {
-            hosts[ObjectIdentifier(views[index])] = (glass, boxTints[index])
-        }
-        return hosts.mapValues { (glass: $0.0, tint: $0.1) }
     }
 
     /// Takes a departing view out of its glass where the glass
@@ -110,36 +94,9 @@ extension AppBarOverlay {
         tint.removeFromSuperview()
     }
 
-    /// Re-orders the glass pool to follow `views`; a view with no
-    /// glass yet takes a fresh one at its place, and a pool that
-    /// cannot mint one is left for `updateBoxGlasses` to refill.
-    private func pairGlasses(
-        with views: [AppBarItemView],
-        hosts: [ObjectIdentifier: (glass: NSView, tint: GlassBackdrop)]
-    ) {
-        guard !boxGlasses.isEmpty else { return }
-        var glasses: [NSView] = []
-        var tints: [GlassBackdrop] = []
-        for view in views {
-            if let host = hosts[ObjectIdentifier(view)] {
-                glasses.append(host.glass)
-                tints.append(host.tint)
-            } else if let glass = GlassPlate.make() {
-                itemRun.addSubview(glass)
-                glasses.append(glass)
-                tints.append(GlassBackdrop())
-            } else {
-                break
-            }
-        }
-        boxGlasses = glasses
-        boxTints = tints
-    }
-
     /// Plays the glide inside the render's layout group: arrivals
     /// fade in from their group's slot, departures slide onto the
-    /// item that absorbed them and fade out; once it lands the
-    /// departures leave and the arrivals take their glass.
+    /// item that absorbed them and fade out.
     func playGroupGlide(
         departures: [Departure],
         arrivals: [Arrival],
@@ -163,25 +120,44 @@ extension AppBarOverlay {
             BarMotion.setAlpha(departure.view, to: 0, animated: true)
         }
         guard !departures.isEmpty || !arrivals.isEmpty else { return }
-        let landed = Set(arrivals.map { ObjectIdentifier($0.view) })
+        glideGeneration += 1
+        let generation = glideGeneration
+        let landed = Set(arrivals.map(\.id))
         BarMotion.afterGroupGlide { [weak self] in
-            for departure in departures {
-                departure.view.removeFromSuperview()
-            }
-            guard let self, !landed.isEmpty else { return }
-            self.glidingIn.subtract(landed)
-            // Hosts the landed members in their glass: a host
-            // change, so the reparent is this arm's (#1315).
-            if self.boxGlasses.isEmpty == false {
-                self.render(followingFocus: false)
-            }
+            self?.landGroupGlide(
+                departures: departures,
+                landed: landed,
+                generation: generation
+            )
         }
     }
 
+    /// A glide landing: its departures leave, its arrivals stop
+    /// gliding, and — for the latest glide only, which a newer one
+    /// supersedes — a boxed glass run re-renders so they take their
+    /// glass: a host change, so the reparent is this arm's (#1315).
+    func landGroupGlide(
+        departures: [Departure],
+        landed: Set<WindowID>,
+        generation: Int
+    ) {
+        for departure in departures {
+            departure.view.removeFromSuperview()
+        }
+        glidingIn.subtract(landed)
+        guard generation == glideGeneration, !landed.isEmpty,
+            !boxGlasses.isEmpty, lastShown != nil
+        else { return }
+        render(followingFocus: false)
+    }
+
     /// Stands each arrival on its group's slot, transparent, ahead
-    /// of the frame pass that moves it out.
+    /// of the frame pass that moves it out; a view still gliding
+    /// in from an earlier render keeps its fade.
     func standArrivals(_ arrivals: [Arrival]) {
-        for view in itemViews { view.alphaValue = 1 }
+        for view in itemViews where !glidingIn.contains(view.windowID) {
+            view.alphaValue = 1
+        }
         for arrival in arrivals {
             arrival.view.frame = arrival.from
             arrival.view.alphaValue = 0

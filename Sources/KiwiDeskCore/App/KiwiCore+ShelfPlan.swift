@@ -85,7 +85,7 @@ extension KiwiCore {
                     ),
                     thickness: depth,
                     gap: shelf.itemGap,
-                    endPads: SpaceBarOverlay.endPads(gap: look.itemGap)
+                    endPads: SpaceBarOverlay.endPads(gap: shelf.itemGap)
                 )
             } ?? 0
         let appNeed = app.map {

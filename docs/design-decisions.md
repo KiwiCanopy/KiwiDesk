@@ -11727,6 +11727,21 @@ never snap — and under Reduce Motion it arrives without
 travelling. Under Boxed there is no plate to glide; each box
 slides on its own.
 
+:::unreleased
+**A group folding or releasing its members rides that same
+glide** ([#1831](https://github.com/KiwiCanopy/KiwiDesk/issues/1831)).
+The fold changes the App Bar's length, so the shelf re-places
+the section while the members slide: two paces would read as the
+members settling and then the bar moving again, so one glide
+carries both, and the item slide's shorter pace, which reads as
+a snap for this travel, is kept for every other render. On a
+boxed Liquid Glass bar only the content travels — a folded
+member leaves its glass at once and a released one takes its
+glass when it lands — because a glass sliding under another
+refracts through it, and every moving glass re-samples its
+backdrop each frame.
+:::
+
 *A minimum, not a share.* Each section is as long as its items
 while both fit. Once the shelf is full the Space section
 shrinks, never below the **Space Bar minimum**, and the App
@@ -11785,6 +11800,10 @@ until the active Space or focus changes or the section hides:
 a section that followed the active entry on every refresh would
 undo the scroll the moment anything redrew.
 
+The front-app segment hides while an App Bar shares the shelf:
+the App Bar already marks the focused window, and two marks of
+one fact on one plate is one too many.
+
 :::unreleased
 An overflowing run keeps the end pads a fitting one has, where
 its alignment puts them
@@ -11792,12 +11811,9 @@ its alignment puts them
 its viewport is the section less those pads, so crossing into
 overflow starts the scroll and moves neither end, and a divider
 drag that shrinks the Space section moves no outer margin. The
-Space section's hard floor carries the same pads.
+hard floor under *A minimum, not a share* adds those pads to
+the active item and its fades.
 :::
-
-The front-app segment hides while an App Bar shares the shelf:
-the App Bar already marks the focused window, and two marks of
-one fact on one plate is one too many.
 
 *A shared field is stored once.* A value two bars must agree
 on, stored twice, is a question the user answers twice and can
