@@ -154,6 +154,9 @@ extension KiwiCore {
         let style: AppBarLook
         let groups: [[WindowID]]
         let items: [AppBarOverlay.Item]
+        /// The floats listed after the tiled groups (#1826), each
+        /// its own item at `groups.count + index`.
+        var floats: [WindowID] = []
     }
 
     /// The App Bar content for the space shown on `display`, or
@@ -184,12 +187,17 @@ extension KiwiCore {
             in: space,
             grouping: style.groupAdjacentWindows
         )
-        guard !groups.isEmpty else { return nil }
+        let floats = appBarFloats(in: space)
+        guard !groups.isEmpty || !floats.isEmpty else { return nil }
         return AppBarContent(
             space: space,
             style: style,
             groups: groups,
             items: groups.map { barItem(for: $0, style: style) }
+                + floats.map {
+                    barItem(for: [$0], style: style, floating: true)
+                },
+            floats: floats
         )
     }
 

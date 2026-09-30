@@ -7,6 +7,10 @@ extension AppBarOverlay {
         let horizontal: Bool
         let slot: CGFloat
         let gap: CGFloat
+        /// The last tiled item, where the float break sits (#1826).
+        let breakAfter: Int?
+        /// Each slot's length, the break's slot widened by it.
+        let lengths: [CGFloat]
         let total: CGFloat
         let inset: CGFloat
         let viewport: CGFloat
@@ -30,7 +34,14 @@ extension AppBarOverlay {
             thickness: thickness,
             capAxis: capAxis ?? axis
         )
-        let total = Self.runLength(slot: slot, count: count, gap: gap)
+        let breakAfter = Self.breakAfter(items)
+        let lengths = Self.lengths(
+            slot: slot,
+            count: count,
+            gap: gap,
+            breakAfter: breakAfter
+        )
+        let total = Self.runLength(lengths: lengths, gap: gap)
         // No arrow zones: the run fills its section and fades on a
         // side that hides entries (#1517).
         let inset: CGFloat = 0
@@ -38,6 +49,8 @@ extension AppBarOverlay {
             horizontal: horizontal,
             slot: slot,
             gap: gap,
+            breakAfter: breakAfter,
+            lengths: lengths,
             total: total,
             inset: inset,
             viewport: max(axis - inset * 2, 0),
@@ -65,8 +78,13 @@ extension AppBarOverlay {
             capAxis: capAxis
         )
         let gap = style.itemGap
-        return runLength(slot: slot, count: items.count, gap: gap)
-            + gap
+        let lengths = lengths(
+            slot: slot,
+            count: items.count,
+            gap: gap,
+            breakAfter: breakAfter(items)
+        )
+        return runLength(lengths: lengths, gap: gap) + gap
     }
 
     /// One slot's length, its quarter cap measured on `capAxis`.
@@ -95,6 +113,13 @@ extension AppBarOverlay {
         gap: CGFloat
     ) -> CGFloat {
         slot * CGFloat(count) + gap * CGFloat(max(count - 1, 0))
+    }
+
+    nonisolated static func runLength(
+        lengths: [CGFloat],
+        gap: CGFloat
+    ) -> CGFloat {
+        lengths.reduce(0, +) + gap * CGFloat(max(lengths.count - 1, 0))
     }
 
     /// Whether item `index` of `count` opens or closes the run —
@@ -176,14 +201,21 @@ extension AppBarOverlay {
         slot: CGFloat,
         gap: CGFloat,
         count: Int,
+        breakAfter: Int? = nil,
         axis: CGFloat,
         margin: CGFloat
     ) -> CGFloat {
-        ShelfOverflow.offset(
-            current: current,
-            lengths: Array(repeating: slot, count: max(count, 0)),
+        let lengths = lengths(
+            slot: slot,
+            count: max(count, 0),
             gap: gap,
-            total: runLength(slot: slot, count: count, gap: gap),
+            breakAfter: breakAfter
+        )
+        return ShelfOverflow.offset(
+            current: current,
+            lengths: lengths,
+            gap: gap,
+            total: runLength(lengths: lengths, gap: gap),
             activeIndex: activeIndex,
             viewport: axis,
             margin: margin

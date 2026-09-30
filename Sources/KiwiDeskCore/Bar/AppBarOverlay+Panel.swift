@@ -83,6 +83,7 @@ extension AppBarOverlay {
         itemContainer.wantsLayer = true
         itemContainer.layer?.masksToBounds = true
         itemContainer.addSubview(itemRun)
+        itemRun.addSubview(floatDivider)
         root.addSubview(itemContainer)
         root.addSubview(backCount)
         root.addSubview(forwardCount)

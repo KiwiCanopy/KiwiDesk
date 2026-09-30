@@ -9,8 +9,7 @@ extension AppBarOverlay {
         m: Metrics,
         style: AppBarLook
     ) {
-        let count = itemViews.count
-        let lengths = Array(repeating: m.slot, count: count)
+        let lengths = m.lengths
         let depth = m.horizontal ? strip.height : strip.width
         let fades = ShelfOverflow.fades(
             lengths: lengths,
@@ -109,6 +108,7 @@ extension AppBarOverlay {
             slot: m.slot,
             gap: m.gap,
             count: itemViews.count,
+            breakAfter: m.breakAfter,
             axis: m.viewport,
             margin: 0
         )

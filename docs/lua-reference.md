@@ -2417,6 +2417,12 @@ monitors each display shows its own bar, on that display, for the
 space it is showing, and dragging an item reorders that display's
 space.
 
+:::unreleased
+The space's floating windows follow the row, after a break; they
+focus on a click but cannot be dragged, since they hold no place
+in the row's order.
+:::
+
 The bar sits on [KiwiShelf](#kiwishelf), which sets its
 thickness, margins, background, colours and app glyph style.
 Everything else about it is **global**: `app_bar.set_*` sets

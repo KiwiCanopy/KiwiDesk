@@ -521,6 +521,12 @@ shares. The starter setup puts the App Bar on the bottom edge and
 the Space Bar on top; set both to one edge to share one shelf.
 :::
 
+:::unreleased
+Floating windows come last, past a thin line. Click one to
+focus it. They stay out of the row's order, so they cannot be
+dragged; **Tile Window** on the item's right-click menu tiles one.
+:::
+
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag ghost and drop zone, and the sticky mark
 (its own card in Settings); on macOS before 26 each draws its
@@ -586,7 +592,8 @@ a 📌 window under the current Space of its own screen.
 | `+n` / count badge, glyph's **top-right** | Space Bar | How many windows a grouped glyph holds |
 
 A window that floats only because its Space is in Floating
-layout wears no floating mark. The badges have no Settings
+layout wears no floating mark. A Space's floating windows come
+last in its row. The badges have no Settings
 toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
 :::
 

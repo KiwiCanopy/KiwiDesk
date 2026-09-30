@@ -21,6 +21,9 @@ extension AppBarOverlay {
         /// The title was cut at `title_cap` (Core's verdict, the
         /// hover title's half of "hides text", #1514).
         public let titleCut: Bool
+        /// A float listed after the row's break (#1826): no slot in
+        /// the row, so no drag.
+        public let floating: Bool
 
         public init(
             id: WindowID,
@@ -30,7 +33,8 @@ extension AppBarOverlay {
             glyph: String? = nil,
             count: Int = 1,
             members: [WindowID]? = nil,
-            titleCut: Bool = false
+            titleCut: Bool = false,
+            floating: Bool = false
         ) {
             self.id = id
             self.name = name
@@ -40,6 +44,7 @@ extension AppBarOverlay {
             self.count = count
             self.members = members ?? [id]
             self.titleCut = titleCut
+            self.floating = floating
         }
     }
 }

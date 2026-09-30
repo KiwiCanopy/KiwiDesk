@@ -1570,9 +1570,8 @@ gesture rather than the space. The filter therefore sits where the
 bar's members are read, not in tracking or the ignore gate, and it
 runs **before** the same-app grouping and the glyph span (#376), so
 an overlay can neither split a run nor reserve a capped slot the
-bar then draws nothing in. The App Bar needs no such filter: it
-builds from the tiled members, which a structural float has
-already left.
+bar then draws nothing in. The App Bar's float section takes the
+same filter, through the focus keys' candidate list (#1826).
 
 The *launcher* subset of that class — an accessory app's
 raised-layer command bar (Spotlight, Raycast, Alfred) — takes the
@@ -11463,6 +11462,37 @@ drops the icon that names the app beside a title that, on the
 sample below, mostly did not name it. A setting whose every other
 choice is worse than its default costs a row, three verbs and a
 per-layout override, and serves no user.
+:::
+
+:::unreleased
+**A Space's floats close both bars.**
+([#1826](https://github.com/KiwiCanopy/KiwiDesk/issues/1826),
+owner ruling.) The App Bar lists them after the tiled row, past a
+break at the Space Bar layer break's weight; each Space Bar chip
+draws its flagged floats last. The App Bar's items are a map of
+the row, where order is layout order and a drag reorders it. A
+float has no slot in that row, so mixed in among the tiles it
+would read as one and invite a drag that means nothing. The break
+says "the row ends here", which a badge cannot, and the float's
+item stays undraggable rather than dimmed. Last rather than
+first, because the leading end is where the eye starts, and a
+float appearing there would shift every tile behind it.
+
+The set is the one the directional focus keys reach,
+`floatingFocusCandidates`, not a narrower "floated by hand or by
+rule": the #683 transient-overlay filter already drops dialogs,
+sheets and panels, and one definition keeps both bars listing
+the same windows. The Space Bar's sort takes the badge's flag
+(#1286), so the glyphs gathered at the end are the badged ones; an
+effective-float key would gather a whole Floating-layout Space
+and sort nothing. No badge on the App Bar item: that bar shows
+no state badges (see *Sticky has no native cue*), and VoiceOver
+speaks "floating window" in its place.
+
+A focused float takes the highlight, and the bar scrolls to it.
+A float's focus pans no window, but the bar's scroll is not the
+row's: it exists to keep the focused item visible, and a
+highlight past the fade is no access point at all.
 :::
 
 **A stale enum spelling costs the FILE, not the field** — the

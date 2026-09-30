@@ -51,6 +51,14 @@ public final class AppBarOverlay {
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
+    /// The break between the tiled row and its floats (#1826).
+    let floatDivider: NSView = {
+        let view = NSView()
+        view.wantsLayer = true
+        view.isHidden = true
+        view.setAccessibilityElement(false)
+        return view
+    }()
     /// The bars' context menus (#1518): held by the section root,
     /// which every view in the section finds by walking up.
     weak var contextMenus: BarContextMenus? {
@@ -145,6 +153,7 @@ public final class AppBarOverlay {
             slot: m.slot,
             gap: m.gap,
             count: items.count,
+            breakAfter: m.breakAfter,
             axis: m.viewport,
             margin: ShelfOverflow.followMargin(
                 gap: m.gap,
@@ -172,15 +181,17 @@ public final class AppBarOverlay {
             offset: scrollOffset,
             horizontal: m.horizontal
         )
-        let frames = Self.frames(
-            lengths: Array(
-                repeating: m.slot,
-                count: items.count
+        let frames = layoutFloatBreak(
+            slots: Self.frames(
+                lengths: m.lengths,
+                in: CGRect(origin: .zero, size: runFrame.size),
+                gap: m.gap,
+                horizontal: m.horizontal,
+                alignment: m.alignment
             ),
-            in: CGRect(origin: .zero, size: runFrame.size),
-            gap: m.gap,
-            horizontal: m.horizontal,
-            alignment: m.alignment
+            m: m,
+            depth: m.horizontal ? strip.height : strip.width,
+            style: style
         )
         let runStart: CGFloat
         if let first = frames.first {
@@ -227,6 +238,7 @@ public final class AppBarOverlay {
                 glyph: item.glyph,
                 count: item.count,
                 titleCut: item.titleCut,
+                floating: item.floating,
                 active: active,
                 horizontal: m.horizontal,
                 style: style
