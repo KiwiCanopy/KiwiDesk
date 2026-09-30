@@ -10,7 +10,7 @@ export const MAX_ITEMS = 3;
 
 export interface NextOnMyList {
   format: number;
-  // Absent when ROADMAP.md has no such section.
+  // Absent when the section is left empty: nothing is listed.
   as_of?: string;
   items: string[];
 }
@@ -45,7 +45,11 @@ export function parseRoadmap(
 ): NextOnMyList {
   const lines = markdown.split(/\r?\n/).map((line) => line.trimEnd());
   const starts = lines.flatMap((line, i) => (line === HEADING ? [i] : []));
-  if (starts.length === 0) return { format: FORMAT, items: [] };
+  // Required, so a renamed heading fails here instead of emptying
+  // the card; an empty section is how the list says nothing.
+  if (starts.length === 0) {
+    throw new Error(`ROADMAP.md: no "${HEADING}" section`);
+  }
 
   const problems: string[] = [];
   if (starts.length > 1) {
@@ -83,10 +87,11 @@ export function parseRoadmap(
       );
     }
   }
-  if (asOf === undefined) {
+  const empty = asOf === undefined && items.length === 0;
+  if (asOf === undefined && !empty) {
     problems.push(`no "As of YYYY-MM-DD" line under "${HEADING}"`);
   }
-  if (items.length === 0) {
+  if (items.length === 0 && !empty) {
     problems.push(`no items under "${HEADING}"`);
   } else if (items.length > MAX_ITEMS) {
     problems.push(`${items.length} items; at most ${MAX_ITEMS}`);
@@ -94,5 +99,6 @@ export function parseRoadmap(
   if (problems.length > 0) {
     throw new Error(`ROADMAP.md: ${problems.join("; ")}`);
   }
+  if (empty) return { format: FORMAT, items: [] };
   return { format: FORMAT, as_of: asOf, items };
 }

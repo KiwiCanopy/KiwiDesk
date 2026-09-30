@@ -1334,7 +1334,6 @@ def check_typed_changelog(dist: pathlib.Path) -> None:
     )
 
 
-
 def check_roadmap_feed(dist: pathlib.Path) -> None:
     """The What's new window's "Next on my list" is served beside
     the appcast, in a format the app reads (#1813).
@@ -1377,10 +1376,17 @@ def check_roadmap_feed(dist: pathlib.Path) -> None:
         isinstance(item, str) for item in items
     ):
         fail(f"roadmap: /{name.group(1)} carries no list of items")
+    # What the app needs to draw the card; an empty list is the
+    # section left empty on purpose.
+    if items and not re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}", str(data.get("as_of", ""))
+    ):
+        fail(f"roadmap: /{name.group(1)} lists items with no date")
     print(
         f"roadmap: /{name.group(1)} served, {len(items)} item(s), "
         f"as of {data.get('as_of', 'never')}"
     )
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()

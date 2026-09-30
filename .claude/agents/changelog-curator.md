@@ -121,7 +121,9 @@ window*; what the site does with it is `.claude/rules/site.md` ▸
 `/roadmap.json`.
 
 1. **Remove what this release ships.** An item the highlights
-   now carry is no longer next.
+   now carry is no longer next. When nothing is left, leave the
+   section empty — heading only, no date — which lists nothing;
+   removing or renaming the heading fails the site build.
 2. **Learn which issues are next from the next release's plan**
    (`plan/roadmap-<version>.md`, whose rows are the owner's order),
    else from the next milestone's open Feature issues. Write each
@@ -129,9 +131,9 @@ window*; what the site does with it is `.claude/rules/site.md` ▸
    is private and nothing in it may reach the repo.
 3. **Pass the release-notes test** above — the thing a user would
    notice, in one line, with no issue number.
-4. **Never pad.** With nothing user-visible ruled next, leave the
-   file alone and let its expiry hide the card. Bugs, internal
-   work and investigations are not a list.
+4. **Never pad.** With nothing user-visible ruled next, empty the
+   section rather than fill it. Bugs, internal work and
+   investigations are not a list.
 5. **The date moves only on the owner's word.** Propose it with
    the draft; bumped by habit, a list nobody still believes never
    expires.

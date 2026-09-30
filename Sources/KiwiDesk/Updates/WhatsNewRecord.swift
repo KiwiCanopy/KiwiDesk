@@ -26,6 +26,10 @@ struct WhatsNewRecord {
         let since: String
         let items: [WhatsNewFeed.Item]
         var next: NextOnMyList? = nil
+
+        enum CodingKeys: String, CodingKey {
+            case version, since, items, next
+        }
     }
 
     let defaults: UserDefaults
@@ -84,4 +88,23 @@ struct WhatsNewRecord {
 /// 1.x upgrade, whose starting version was never recorded.
 struct WhatsNewDue: Equatable {
     let since: String?
+}
+
+extension WhatsNewRecord.Relaunch {
+    /// The record crosses an update: a list this build cannot read
+    /// costs only the card, never the notes or the narration.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        version = try container.decode(String.self, forKey: .version)
+        since = try container.decode(String.self, forKey: .since)
+        items = try container.decode(
+            [WhatsNewFeed.Item].self,
+            forKey: .items
+        )
+        next =
+            (try? container.decodeIfPresent(
+                NextOnMyList.self,
+                forKey: .next
+            )) ?? nil
+    }
 }

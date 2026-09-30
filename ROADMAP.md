@@ -10,11 +10,13 @@ any of it.
 
 <!--
 KiwiDesk's "What's new" window shows the section below (#1813), so
-it keeps a fixed shape: one "As of YYYY-MM-DD" line, then one to
-three bullets of one line each, written for someone who has never
-seen the code, with no issue numbers. The site build refuses any
-other shape, and the app hides the list once its date is more than
-60 days old. Everything outside that section is free.
+it keeps a fixed shape: one "As of YYYY-MM-DD" line, then one-line
+bullets (at most site/src/lib/roadmap.ts's MAX_ITEMS), written for
+someone who has never seen the code, with no issue numbers. Leave
+the section empty, heading only, to list nothing; never remove or
+rename the heading. The site build refuses any other shape, and the
+app hides a list older than NextOnMyList.maxAge. Everything outside
+that section is free.
 -->
 
 ## Next on my list

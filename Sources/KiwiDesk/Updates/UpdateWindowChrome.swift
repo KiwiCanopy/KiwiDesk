@@ -73,7 +73,7 @@ final class WhatsNewWindowController: NSObject, NSWindowDelegate {
     init(
         offer: UpdateOffer,
         narration: BootNarration?,
-        next: NextOnMyList? = nil,
+        next: NextOnMyList?,
         done: @escaping () -> Void
     ) {
         self.offer = offer

@@ -68,8 +68,8 @@ check("the section ends at the next heading", () => {
   assert(list.items.length === 1, list.items.join("|"));
 });
 
-check("a file with no such section lists nothing", () => {
-  const list = parseRoadmap("# Roadmap\n\n## Later\n\n- Idea\n", today);
+check("an empty section lists nothing", () => {
+  const list = parseRoadmap(`${doc()}\n## Later\n\n- Idea\n`, today);
   assert(list.items.length === 0, list.items.join("|"));
   assert(!("as_of" in list), `as_of ${list.as_of}`);
 });
@@ -89,7 +89,12 @@ refuses("a date that does not exist",
   doc("As of 2026-02-30", "- One"), "is not a date");
 refuses("a date further ahead than a day",
   doc("As of 2026-10-02", "- One"), "is in the future");
-refuses("an empty list", doc("As of 2026-09-28"), "no items");
+refuses("a date with no items", doc("As of 2026-09-28"), "no items");
+refuses("a missing section", "# Roadmap\n\n## Later\n\n- Idea\n",
+  "no \"## Next on my list\" section");
+refuses("a renamed heading",
+  "# Roadmap\n\n## Next on My List\n\nAs of 2026-09-28\n- One\n",
+  "no \"## Next on my list\" section");
 refuses("four items",
   doc("As of 2026-09-28", "- A", "- B", "- C", "- D"), "at most 3");
 refuses("an issue number", doc("As of 2026-09-28", "- Fix #123"),
@@ -110,7 +115,11 @@ check("ROADMAP.md itself parses", () => {
     new URL("../ROADMAP.md", import.meta.url),
     "utf8",
   );
-  parseRoadmap(source);
+  const list = parseRoadmap(source);
+  assert(
+    list.items.length === 0 || list.as_of !== undefined,
+    "items with no date",
+  );
 });
 
 if (failures.length) {

@@ -10,7 +10,7 @@ enum UpdateWindowMode {
     /// `next` is "Next on my list", shown only here (#1813).
     case whatsNew(
         narration: BootNarration?,
-        next: NextOnMyList? = nil,
+        next: NextOnMyList?,
         done: () -> Void
     )
 }

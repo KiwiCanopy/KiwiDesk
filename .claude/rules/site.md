@@ -326,22 +326,23 @@ one that reads wrong — *Build output directory* is relative to
 `wrangler.toml` has no key for **Build watch paths**, so that
 single field is dashboard-held by necessity rather than by
 preference (Workers & Pages ▸ `kiwidesk` ▸ Settings ▸ Build).
-It includes `site/*` and the outside inputs the first bullet
-below names, so a PR that touches none of them starts no deploy —
-which is also what stops the Pages bot commenting on every
-Swift-only PR, and with it the mail GitHub sends the author about
-that comment.
+It must cover `site/*` and every input the build reads from
+outside `site/`, and should cover nothing more, so a PR that
+touches none of them starts no deploy — which is also what stops
+the Pages bot commenting on every Swift-only PR, and with it the
+mail GitHub sends the author about that comment.
 
 Nothing in this repo can read that field, so the two obligations
 below are the whole of its enforcement:
 
 - **A change that gives the site build an input outside `site/`
-  moves the watch path in the same change set.** The `docs/` and
-  `assets/` symlinks are such inputs, and so is `ROADMAP.md`,
-  which `src/pages/roadmap.json.ts` reads (#1813). Miss one and
-  the include list is silently wrong: the symptom is a *stale
-  production site* — no build runs, so no build can go red, and
-  the daily rebuild below only bounds the staleness to a day.
+  asks the owner to widen the watch path before it merges.** Find
+  the current ones with `git ls-files -s site | grep ^120000` (the
+  symlinks) and the build files that read `..` paths
+  (`src/pages/roadmap.json.ts` reads `ROADMAP.md`, #1813). Miss
+  one and the include list is silently wrong: the symptom is a
+  *stale production site* — no build runs, so no build can go red,
+  and the daily rebuild below only bounds the staleness to a day.
 - **Write the include as `site/*`, never `site/**`.**
   Cloudflare's wildcard matches path separators, so `site/*`
   already covers `site/src/pages/index.astro` (their own example:
@@ -607,12 +608,18 @@ sitemap entry — and adds three:
   `NextOnMyList.knownFormats` — on this gate, for the reason the
   feed's guard is.
 - **The document grows without a format bump.** The window
-  ignores keys it does not know, so `FORMAT` moves only when an
-  existing field changes meaning or goes away.
+  ignores keys it does not know (`NextOnMyListTests` ▸
+  `unknownKeysAreIgnored`), so `FORMAT` moves only when an
+  existing field changes meaning or goes away — and a bump hides
+  the card in every copy shipped before it, the check above
+  comparing against the CURRENT build's formats only.
 - **`src/lib/roadmap.ts` is the one parser of the section, and it
   refuses rather than drops.** A malformed section fails the
   build, which is how a typo reaches the pull request that made
   it instead of hiding the card in every installed copy;
   `site/test-roadmap.mjs` holds each refusal and reads the real
-  file too. The section's shape is stated once, in a comment above
-  it in `ROADMAP.md`, where whoever edits the list will be.
+  file too. A refusal fails the WHOLE site build, the update
+  feed's deploy included, so the site gate stays required on any
+  PR that touches `ROADMAP.md`. The section's shape is stated once,
+  in a comment above it in `ROADMAP.md`, where whoever edits the
+  list will be.

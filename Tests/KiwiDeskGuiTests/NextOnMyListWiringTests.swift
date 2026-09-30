@@ -109,6 +109,21 @@ struct NextOnMyListWiringTests {
         #expect(relaunch.next == nil)
     }
 
+    /// A later build may store the list another way: an unreadable
+    /// one costs the card, never the relaunch's notes.
+    @Test("an unreadable carried list leaves the relaunch intact")
+    func unreadableListKeepsTheRecord() throws {
+        let json =
+            #"{"version":"2.1.0","since":"2.0.0","items":[],"#
+            + #""next":{"shape":"from a later build"}}"#
+        let relaunch = try JSONDecoder().decode(
+            WhatsNewRecord.Relaunch.self,
+            from: Data(json.utf8)
+        )
+        #expect(relaunch.version == "2.1.0")
+        #expect(relaunch.next == nil)
+    }
+
     private static func item(_ version: String) throws -> SUAppcastItem {
         try #require(
             SUAppcastItem(
@@ -170,6 +185,45 @@ struct NextOnMyListWiringTests {
         #expect(source.contains("guard let feed = updater.feedURL"))
         #expect(
             source.contains("await NextOnMyList.fetch(besideFeed: feed)")
+        )
+    }
+
+    /// Both sides of the inverted seam (tests.md): the driver's
+    /// fetch has no default and one writer, while the coordinator's
+    /// default is the live fetch every launch takes.
+    @Test("the driver's fetch is inert by default, the launch's live")
+    func seamDefaults() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        func source(_ file: String) throws -> String {
+            try SourceScan.strippedSource(
+                at: root.appendingPathComponent(
+                    "Sources/KiwiDesk/Updates/\(file)"
+                )
+            )
+        }
+        let driver = try source("UpdatePromptDriver.swift")
+        #expect(
+            driver.contains(
+                "var fetchNext: (() async -> NextOnMyList?)?\n"
+            )
+        )
+        var writers = 0
+        let enumerator = FileManager.default.enumerator(
+            at: root.appendingPathComponent("Sources"),
+            includingPropertiesForKeys: nil
+        )
+        while let url = enumerator?.nextObject() as? URL {
+            guard url.pathExtension == "swift" else { continue }
+            writers +=
+                try SourceScan.strippedSource(at: url)
+                .components(separatedBy: ".fetchNext = {").count - 1
+        }
+        #expect(writers == 1)
+        let coordinator = try source("WhatsNewCoordinator.swift")
+        #expect(
+            coordinator.contains(
+                "await NextOnMyList.fetch(besideFeed: $0)"
+            )
         )
     }
 }

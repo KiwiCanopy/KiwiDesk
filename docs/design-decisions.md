@@ -685,9 +685,11 @@ offer is where someone decides whether to install and a large
 release pushes the card below the fold there, and never as a tab,
 since a tab names a kind of change in this release. The items
 stay English like the notes; the heading is translated. Keeping
-it current is part of curating each release, which removes what
-that release shipped and moves the date only while the list still
-holds.
+it current is part of curating each release, because a list is
+only as honest as its last correction. On the relaunch after the
+window's own Install the card is best effort: it shows what the
+offer fetched before the install began, since that relaunch opens
+before anything could be fetched again.
 :::
 
 **What a 1.x client sees is unchanged.** The feed keeps its HTML
