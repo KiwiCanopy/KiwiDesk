@@ -82,7 +82,8 @@ struct GesturesDrawer: View {
                     + "another screen to move it there."
             ),
             surface: .windows,
-            settings: settings
+            settings: settings,
+            pace: .story
         ) { GesturePicture.Swap(t: $0) }
         GestureRule()
         GestureEntry(
