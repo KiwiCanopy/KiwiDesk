@@ -3873,6 +3873,34 @@ KiwiDesk.bind("cmd+alt+f", function()
 end)
 ```
 
+:::unreleased
+## Opening and Closing Windows
+
+`new_window` opens a new window of the focused window's app, or of
+the app a window id from [`get_state`](#get_state) names: it brings
+the app forward and presses its **File ▸ New Window**. An app whose
+File menu has no such item — its ⌘N (or ⇧⌘N) row names no window —
+opens nothing, and a pill on the window says so. A new window its
+App Rule files into another Space takes you there, as opening the
+app would.
+
+`close_window` closes the focused window, or the one a window id
+names, by pressing its close button, so the app answers unsaved work
+its own way. A window with no close button stays open, and a pill
+says so.
+
+Both act on another app through Accessibility, so the reply comes
+before the app answers: `success` means the press was asked for, and
+the pill is how a refusal shows. KiwiDesk's own windows are refused.
+
+```lua
+KiwiDesk.bind("cmd+alt+n", function()
+    KiwiDesk.new_window()
+end)
+KiwiDesk.close_window(4711)
+```
+:::
+
 ## Sticky Windows
 
 A **sticky** window stays present on every space instead of

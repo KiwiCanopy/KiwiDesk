@@ -25,6 +25,9 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+SizeLimitPill.swift": (
             .issued, "a pill draws on the window's frame"
         ),
+        "KiwiCore+WindowActions.swift": (
+            .issued, "a window action's refusal pill draws on it"
+        ),
         "KiwiCore+DeadEndCue.swift": (
             .issued, "the bump rides the window's frame"
         ),

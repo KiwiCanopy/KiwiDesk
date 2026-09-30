@@ -98,9 +98,11 @@
   "bar.menu.app_rules": "Regole app…",
   "bar.menu.ax.nested": "%1$@: %2$@",
   "bar.menu.ax.subtitled": "%1$@, %2$@",
+  "bar.menu.close_window": "Chiudi finestra",
   "bar.menu.float_window": "Fai fluttuare la finestra",
   "bar.menu.looks": "Look…",
   "bar.menu.move_here": "Sposta nello spazio attuale",
+  "bar.menu.new_window": "Nuova finestra",
   "bar.menu.quit_app": "Esci da %1$@",
   "bar.menu.reset_minimum": "Ripristina il minimo della Space Bar",
   "bar.menu.shelf_settings": "Impostazioni di KiwiShelf…",
@@ -1335,7 +1337,7 @@
   "shortcuts.gestures.app_bar": "Trascina un elemento lungo la App Bar per riordinarne le finestre.",
   "shortcuts.gestures.app_bar_hover": "Passa il puntatore su un elemento della App Bar con il titolo accorciato per vederlo per intero.",
   "shortcuts.gestures.app_bar_off": "Nessun layout mostra una App Bar. Attivane una in %1$@.",
-  "shortcuts.gestures.context_menu": "Fai clic destro su KiwiShelf per un menu di ciò su cui hai fatto clic: il layout di uno spazio, quanti glifi mostra uno spazio e le impostazioni di KiwiShelf.",
+  "shortcuts.gestures.context_menu": "Fai clic destro su KiwiShelf per un menu di ciò su cui hai fatto clic: il layout di uno spazio e quanti glifi mostra, cosa fare con una finestra o la sua app, e le impostazioni di KiwiShelf.",
   "shortcuts.gestures.drop_on_space": "Trascina una finestra su uno spazio di KiwiShelf per spostarla lì.",
   "shortcuts.gestures.edge": "Trascina il bordo di una finestra per ridimensionarla.",
   "shortcuts.gestures.follow_focus": "Il focus si sposta con una scorciatoia, un cambio di spazio, un cambio di app o una finestra chiusa.",
@@ -1613,5 +1615,7 @@
   "updates.state.unavailable": "Il controllo degli aggiornamenti è disattivato in questa build.",
   "updates.state.up_to_date": "Aggiornato",
   "updates.state.up_to_date_checked": "Aggiornato · ultimo controllo %1$@",
-  "updates.try_again": "Riprova"
+  "updates.try_again": "Riprova",
+  "window_action.refusal.no_close_button": "«%1$@» non ha il pulsante di chiusura",
+  "window_action.refusal.no_new_window": "%1$@ non ha «Nuova finestra»"
 }

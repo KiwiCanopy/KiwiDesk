@@ -82,8 +82,9 @@ struct GesturesShelfEntries: View {
             L(
                 "shortcuts.gestures.context_menu",
                 "Right-click the KiwiShelf for a menu of what you "
-                    + "clicked: a Space's layout, how many glyphs a "
-                    + "Space shows, and the KiwiShelf's settings."
+                    + "clicked: a Space's layout and how many glyphs "
+                    + "it shows, what to do with a window or its app, "
+                    + "and the KiwiShelf's settings."
             ),
             surface: .shelf,
             settings: settings,

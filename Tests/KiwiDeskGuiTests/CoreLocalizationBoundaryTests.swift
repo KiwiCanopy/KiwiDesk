@@ -119,7 +119,10 @@ struct CoreLocalizationBoundaryTests {
         "App/KiwiCore+BarMenus.swift": 8,
         // The window rows of the same menus (#1518): Core draws
         // them, and no word crosses into the GUI.
-        "App/KiwiCore+BarWindowMenus.swift": 6,
+        "App/KiwiCore+BarWindowMenus.swift": 8,
+        // The window actions' refusal pills (#1518), which Core
+        // draws on the window, as the resize pills are.
+        "Commands/WindowActionRefusal.swift": 2,
         "Bar/BarMenu.swift": 3,
         "Bar/LayoutModeRows.swift": 8,
     ]

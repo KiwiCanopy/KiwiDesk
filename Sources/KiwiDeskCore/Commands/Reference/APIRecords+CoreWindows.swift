@@ -91,6 +91,16 @@ extension APIReference {
                 + "names, between floating and tiled.",
             .window("window", optional: true)
         ),
+        "new_window": APIRecord(
+            "Opens a new window of the focused window's app, or "
+                + "of a window id's, through its File menu.",
+            .window("window", optional: true)
+        ),
+        "close_window": APIRecord(
+            "Closes the focused window, or the one a window id "
+                + "names, through its close button.",
+            .window("window", optional: true)
+        ),
         "make_sticky": APIRecord(
             "Marks the focused window globally sticky across all "
                 + "screens."

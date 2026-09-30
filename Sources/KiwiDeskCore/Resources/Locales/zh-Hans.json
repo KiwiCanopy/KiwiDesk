@@ -98,9 +98,11 @@
   "bar.menu.app_rules": "App 规则…",
   "bar.menu.ax.nested": "%1$@：%2$@",
   "bar.menu.ax.subtitled": "%1$@，%2$@",
+  "bar.menu.close_window": "关闭窗口",
   "bar.menu.float_window": "让窗口浮动",
   "bar.menu.looks": "造型…",
   "bar.menu.move_here": "移动到当前空间",
+  "bar.menu.new_window": "新建窗口",
   "bar.menu.quit_app": "退出 %1$@",
   "bar.menu.reset_minimum": "重置 Space Bar 最小长度",
   "bar.menu.shelf_settings": "KiwiShelf 设置…",
@@ -1335,7 +1337,7 @@
   "shortcuts.gestures.app_bar": "沿 App Bar 拖动项目，可重新排列其窗口。",
   "shortcuts.gestures.app_bar_hover": "将指针悬停在标题被缩短的 App Bar 项目上，可查看完整标题。",
   "shortcuts.gestures.app_bar_off": "没有布局显示 App Bar。请在 %1$@ 中打开。",
-  "shortcuts.gestures.context_menu": "右键点按 KiwiShelf，可打开与所点对象相应的菜单：空间的布局、空间显示多少个图形，以及 KiwiShelf 的设置。",
+  "shortcuts.gestures.context_menu": "右键点按 KiwiShelf，可打开与所点对象相应的菜单：空间的布局及其显示多少个图形、对窗口或其 App 的操作，以及 KiwiShelf 的设置。",
   "shortcuts.gestures.drop_on_space": "将窗口拖到 KiwiShelf 上的某个空间，即可把它移到那里。",
   "shortcuts.gestures.edge": "拖动窗口边缘可调整其大小。",
   "shortcuts.gestures.follow_focus": "焦点会随快捷键、空间切换、切换 App 或关闭窗口而移动。",
@@ -1613,5 +1615,7 @@
   "updates.state.unavailable": "此构建版本已关闭更新检查。",
   "updates.state.up_to_date": "已是最新版本",
   "updates.state.up_to_date_checked": "已是最新版本 · 上次检查：%1$@",
-  "updates.try_again": "重试"
+  "updates.try_again": "重试",
+  "window_action.refusal.no_close_button": "“%1$@”没有关闭按钮",
+  "window_action.refusal.no_new_window": "%1$@ 没有“新建窗口”"
 }

@@ -98,9 +98,11 @@
   "bar.menu.app_rules": "App 規則…",
   "bar.menu.ax.nested": "%1$@：%2$@",
   "bar.menu.ax.subtitled": "%1$@，%2$@",
+  "bar.menu.close_window": "關閉視窗",
   "bar.menu.float_window": "讓視窗浮動",
   "bar.menu.looks": "造型…",
   "bar.menu.move_here": "移至目前空間",
+  "bar.menu.new_window": "新增視窗",
   "bar.menu.quit_app": "結束 %1$@",
   "bar.menu.reset_minimum": "重設 Space Bar 最小長度",
   "bar.menu.shelf_settings": "KiwiShelf 設定…",
@@ -1335,7 +1337,7 @@
   "shortcuts.gestures.app_bar": "沿著 App Bar 拖移項目，即可重新排列它的視窗。",
   "shortcuts.gestures.app_bar_hover": "將指標懸停在標題被縮短的 App Bar 項目上，即可查看完整標題。",
   "shortcuts.gestures.app_bar_off": "沒有佈局顯示 App Bar。請在 %1$@ 中開啟。",
-  "shortcuts.gestures.context_menu": "右鍵點按 KiwiShelf，即可打開與所點項目對應的選單：空間的佈局、空間顯示多少個圖形，以及 KiwiShelf 的設定。",
+  "shortcuts.gestures.context_menu": "右鍵點按 KiwiShelf，即可打開與所點項目對應的選單：空間的佈局及其顯示多少個圖形、對視窗或其 App 的操作，以及 KiwiShelf 的設定。",
   "shortcuts.gestures.drop_on_space": "將視窗拖到 KiwiShelf 上的某個空間，即可把它移到那裡。",
   "shortcuts.gestures.edge": "拖移視窗邊緣即可調整它的尺寸。",
   "shortcuts.gestures.follow_focus": "焦點會隨快速鍵、空間切換、切換 App 或關閉視窗而移動。",
@@ -1613,5 +1615,7 @@
   "updates.state.unavailable": "此組建已關閉更新檢查。",
   "updates.state.up_to_date": "已是最新版本",
   "updates.state.up_to_date_checked": "已是最新版本 · 上次檢查：%1$@",
-  "updates.try_again": "再試一次"
+  "updates.try_again": "再試一次",
+  "window_action.refusal.no_close_button": "「%1$@」沒有關閉按鈕",
+  "window_action.refusal.no_new_window": "%1$@ 沒有「新增視窗」"
 }
