@@ -8,7 +8,10 @@ name: Site
 # SupportLinks.swift is here because check-site-tokens.py reads it
 # (#1019): it names the guide routes the APP links, and the check
 # that the site serves them is only sound if it runs when either
-# side moves. unreleased-strip is here on that same ground twice
+# side moves. NextOnMyList.swift is here on the same ground for
+# the file the What's new window fetches (#1813), and ROADMAP.md
+# because the build reads it and refuses a malformed section.
+# unreleased-strip is here on that same ground twice
 # over (#1232): this gate RUNS it against the corpus, and
 # check-site-tokens.py IMPORTS it for the marker's grammar, so an
 # edit to it that reds the real docs would otherwise reach main
@@ -28,6 +31,8 @@ on:
       - "docs/**"
       - "assets/**"
       - "Sources/KiwiDesk/SupportLinks.swift"
+      - "Sources/KiwiDesk/Updates/NextOnMyList.swift"
+      - "ROADMAP.md"
       - "scripts/check-site-tokens.py"
       - "scripts/unreleased-strip"
       - ".github/workflows/site.yml"
@@ -37,6 +42,8 @@ on:
       - "docs/**"
       - "assets/**"
       - "Sources/KiwiDesk/SupportLinks.swift"
+      - "Sources/KiwiDesk/Updates/NextOnMyList.swift"
+      - "ROADMAP.md"
       - "scripts/check-site-tokens.py"
       - "scripts/unreleased-strip"
       - ".github/workflows/site.yml"
@@ -90,6 +97,11 @@ jobs:
       # check above goes vacuous until then.
       - name: Check the typed changelog view
         run: node test-changelog.mjs
+
+      # The roadmap parser's own subject (#1813), over fixtures and
+      # the real ROADMAP.md.
+      - name: Check the roadmap section
+        run: node test-roadmap.mjs
 
       # The unreleased-marker plugin's own subject (#1232). The
       # artifact clauses in the check above go vacuous whenever

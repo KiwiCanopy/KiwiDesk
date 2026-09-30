@@ -104,6 +104,15 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     /// Where the window's own Install records its notes as read;
     /// nil keeps a test's driver off the real defaults.
     var seenRecord: WhatsNewRecord?
+    /// Fetches "Next on my list" while an offer is open, so the
+    /// relaunch carries it (#1813). `SparkleUpdater` wires it; nil
+    /// keeps a test's driver offline.
+    var fetchNext: (() async -> NextOnMyList?)?
+    /// The open offer's fetch, cancelled with its window; a test
+    /// awaits it.
+    var nextFetch: Task<Void, Never>?
+    /// What that fetch returned.
+    var offeredNext: NextOnMyList?
     /// Puts the window on screen; a test records it instead.
     var presents: (UpdateWindowController) -> Void = { $0.present() }
     /// Replaces Sparkle's modal error alert in a test, which would

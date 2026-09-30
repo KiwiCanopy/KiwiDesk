@@ -46,6 +46,9 @@ count in this sentence for the next author to falsify.
    — `scripts/unreleased-strip` owns it and this loads it.
    `site/test-unreleased.mjs` is the other half; see that check's
    own note on what it cannot do alone.
+7. The "Next on my list" file is served where the app fetches it,
+   in a format the app reads (#1813). Artifact-read, with the name
+   and the formats read off the app's own Swift source.
 
 KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
 as a net for ordinary edits rather than proof. `CONSUMERS` names the
@@ -1331,6 +1334,60 @@ def check_typed_changelog(dist: pathlib.Path) -> None:
     )
 
 
+def check_roadmap_feed(dist: pathlib.Path) -> None:
+    """The What's new window's "Next on my list" is served beside
+    the appcast, in a format the app reads (#1813).
+
+    On the SITE gate for `check_appcast`'s reason: a change
+    confined to the site skips the macOS jobs, and the endpoint's
+    rename is exactly such a change. `NextOnMyList.swift` is the
+    app's copy of the file name and the formats it reads, so both
+    are read from it rather than restated, and `site.yml` runs on
+    that file too.
+    """
+    source = (
+        REPO / "Sources/KiwiDesk/Updates/NextOnMyList.swift"
+    ).read_text(encoding="utf-8")
+    name = re.search(r'static let fileName = "([^"]+)"', source)
+    formats = re.search(
+        r"static let knownFormats: Set<Int> = \[([\d,\s]+)\]", source
+    )
+    if name is None or formats is None:
+        raise SystemExit(
+            "check-site-tokens: could not read NextOnMyList's file "
+            "name or formats; the app's roadmap fetch is unguarded "
+            "until this parser is fixed"
+        )
+    served = dist / name.group(1)
+    if not served.is_file():
+        fail(
+            f"roadmap: the app fetches /{name.group(1)} beside "
+            "/appcast.xml, which this build does not serve"
+        )
+    data = json.loads(served.read_text(encoding="utf-8"))
+    known = {int(f) for f in re.findall(r"\d+", formats.group(1))}
+    if data.get("format") not in known:
+        fail(
+            f"roadmap: /{name.group(1)} is format "
+            f"{data.get('format')!r}; the app reads {sorted(known)}"
+        )
+    items = data.get("items")
+    if not isinstance(items, list) or not all(
+        isinstance(item, str) for item in items
+    ):
+        fail(f"roadmap: /{name.group(1)} carries no list of items")
+    # What the app needs to draw the card; an empty list is the
+    # section left empty on purpose.
+    if items and not re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}", str(data.get("as_of", ""))
+    ):
+        fail(f"roadmap: /{name.group(1)} lists items with no date")
+    print(
+        f"roadmap: /{name.group(1)} served, {len(items)} item(s), "
+        f"as of {data.get('as_of', 'never')}"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1353,6 +1410,7 @@ def main() -> None:
     check_markdown_pipeline(dist)
     check_unreleased_markers(dist)
     check_typed_changelog(dist)
+    check_roadmap_feed(dist)
 
 
 if __name__ == "__main__":
