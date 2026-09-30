@@ -28,26 +28,39 @@ struct ShortcutsHeader: View {
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.groupHeading)
             }
-            ForEach(droppedLines, id: \.self) { line in
-                Text(line)
+            ForEach(Array(droppedLines.enumerated()), id: \.offset) {
+                Text($0.element)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.groupHeading)
             }
         }
     }
 
-    /// One line per chord the import or adoption left out, naming
-    /// the chord its action kept (#1807).
+    /// One line per chord the import or adoption left out (#1807).
     private var droppedLines: [String] {
-        model.droppedChords.map { entry in
-            L(
-                "shortcuts.dropped_chord",
-                "%1$@ left out: “%2$@” already has %3$@.",
-                ShortcutsReferenceBuilder.glyphs(entry.dropped.combo),
-                entry.kept.label,
-                ShortcutsReferenceBuilder.glyphs(entry.kept.combo)
-            )
+        model.droppedChords.map {
+            Self.droppedLine($0, config: model.config)
         }
+    }
+
+    /// Names the chord left out and the one its action kept, the
+    /// action by its localized row label.
+    static func droppedLine(
+        _ entry: NavigationChords.Dropped,
+        config: GuiConfig
+    ) -> String {
+        L(
+            "shortcuts.dropped_chord",
+            "%1$@ left out: “%2$@” already has %3$@.",
+            ShortcutsReferenceBuilder.glyphs(entry.dropped.combo),
+            entry.kept.label.isEmpty
+                ? entry.kept.lua
+                : KeybindingCatalog.localizedLabel(
+                    for: entry.kept.label,
+                    config: config
+                ),
+            ShortcutsReferenceBuilder.glyphs(entry.kept.combo)
+        )
     }
 
     /// Names the active layer once there is a choice — the one

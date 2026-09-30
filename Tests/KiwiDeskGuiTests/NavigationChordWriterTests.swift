@@ -13,15 +13,25 @@ import Testing
 @MainActor
 struct NavigationChordWriterTests {
     /// The navigation actions holding more than one chord in any
-    /// layer, as `NavigationChords` counts them.
+    /// layer — counted here, not by `NavigationChords`, so a writer
+    /// and its oracle cannot go wrong together: a live Space verb by
+    /// verb and Space, anything else by its Lua.
     private func duplicated(_ config: GuiConfig) -> [String] {
-        config.layers.flatMap { layer in
-            let rows = layer.bindings
-            let deduped = NavigationChords.deduplicated(
-                rows,
-                liveSpaces: Set(config.spaces)
-            )
-            return deduped.dropped.map { "\(layer.name): \($0.dropped.lua)" }
+        let live = Set(config.spaces)
+        return config.layers.flatMap { layer in
+            var seen: [String: Int] = [:]
+            for row in layer.bindings where row.kind == .navigation {
+                let key: String
+                if let target = SpaceLuaArg.target(of: row.lua) {
+                    guard live.contains(target.space) else { continue }
+                    key = "\(target.verb) \(target.space.raw)"
+                } else {
+                    key = row.lua
+                }
+                seen[key, default: 0] += 1
+            }
+            return seen.filter { $0.value > 1 }
+                .map { "\(layer.name): \($0.key)" }
         }
     }
 
@@ -45,6 +55,7 @@ struct NavigationChordWriterTests {
             withIntermediateDirectories: true
         )
         let lua = """
+            KiwiDesk.set_mode(1, "stack")
             KiwiDesk.bind("ctrl+alt+f1", function()
                 KiwiDesk.focus_space("1")
             end)
@@ -66,6 +77,7 @@ struct NavigationChordWriterTests {
 
     @Test("a rename over a deleted Space's rows")
     func renameWriter() {
+        let left = "KiwiDesk.focus(\"left\")"
         var config = GuiConfig()
         config.spaces = [SpaceID("3")]
         config.layers = [
@@ -74,6 +86,8 @@ struct NavigationChordWriterTests {
                 bindings: [
                     row("control+option+3", goTo("3")),
                     row("control+option+7", goTo("7")),
+                    row("control+option+left", left),
+                    row("control+option+h", left),
                 ]
             )
         ]
@@ -82,9 +96,13 @@ struct NavigationChordWriterTests {
             to: SpaceID("7")
         )
         #expect(renamed)
-        #expect(duplicated(config).isEmpty)
-        // Vacuity: the rename reached the rows.
-        #expect(config.layers[0].bindings.allSatisfy { $0.lua == goTo("7") })
+        let rows = config.layers[0].bindings
+        #expect(
+            rows.filter { $0.lua == goTo("7") }.map(\.combo)
+                == ["control+option+7"]
+        )
+        // A double the rename did not make is not the rename's.
+        #expect(rows.filter { $0.lua == left }.count == 2)
     }
 
     @Test("the digit top-up over a reordered list")
@@ -110,19 +128,27 @@ struct NavigationChordWriterTests {
     func resetWriter() {
         let model = makeTestModel()
         model.config.spaces = [SpaceID("1")]
-        let desktop = "KiwiDesk.focus_desktop(2)"
         model.config.layers = [
             KeyLayer(
                 name: KeyLayer.defaultName,
-                bindings: [
-                    row("control+option+f2", desktop),
-                    row("control+option+f3", desktop),
-                ]
+                bindings: [row("control+option+f1", goTo("1"))]
+            )
+        ]
+        model.droppedChords = [
+            NavigationChords.Dropped(
+                dropped: row("f1", goTo("1")),
+                kept: row("f2", goTo("1"))
             )
         ]
         model.resetShortcutsToDefaults()
         #expect(duplicated(model.config).isEmpty)
-        #expect(model.config.layers[0].bindings.contains { $0.lua == desktop })
+        // Vacuity: the seed's own go-to row landed beside the user's.
+        #expect(
+            model.config.layers[0].bindings.contains {
+                $0.combo == "control+option+1" && $0.lua == goTo("1")
+            }
+        )
+        #expect(model.droppedChords.isEmpty)
     }
 
     @Test("an import from init.lua")
@@ -150,5 +176,8 @@ struct NavigationChordWriterTests {
         let saved = try #require(core.guiConfigStore.load())
         #expect(duplicated(saved).isEmpty)
         #expect(model.droppedChords.count == 2)
+        #expect(model.destination == .shortcuts)
+        // The one write keeps what the adoption put back live.
+        #expect(core.state.workspaces[SpaceID("1")]?.mode == .stack)
     }
 }

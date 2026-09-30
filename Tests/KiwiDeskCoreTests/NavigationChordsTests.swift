@@ -61,4 +61,31 @@ struct NavigationChordsTests {
         #expect(result.rows.count == 4)
         #expect(result.dropped.isEmpty)
     }
+
+    @Test("a keypad digit is the Space's own digit")
+    func keypadIsOwnDigit() {
+        let rows = [
+            row("control+option+f5", "KiwiDesk.focus_space(\"5\")"),
+            row("control+option+keypad5", "KiwiDesk.focus_space(\"5\")"),
+        ]
+        let result = NavigationChords.deduplicated(rows, liveSpaces: live)
+        #expect(result.rows.map(\.combo) == ["control+option+keypad5"])
+    }
+
+    @Test("a dedupe touching one Space leaves the rest")
+    func touchingScopes() {
+        let rows = [
+            row("control+option+left", "KiwiDesk.focus(\"left\")"),
+            row("control+option+h", "KiwiDesk.focus(\"left\")"),
+            row("control+option+5", "KiwiDesk.focus_space(\"5\")"),
+            row("control+option+f5", "KiwiDesk.focus_space(\"5\")"),
+        ]
+        let result = NavigationChords.deduplicated(
+            rows,
+            liveSpaces: live,
+            touching: SpaceID("5")
+        )
+        #expect(result.rows.count == 3)
+        #expect(result.dropped.map(\.dropped.combo) == ["control+option+f5"])
+    }
 }

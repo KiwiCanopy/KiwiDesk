@@ -9275,10 +9275,11 @@ from Lua and the adoption into Settings keep a Space verb's own
 digit, else the first chord, and name each chord they left out —
 dropping it rather than keeping it as a `custom` row, which the
 classifier turns back into a hidden `navigation` row on the next
-load; a rename over a deleted Space's leftover rows keeps one too.
-Two rows are never merged: a `custom` row, drawn as a row of its
-own, and an orphan Space verb, which #92's Inactive section draws
-one row per binding (#1807). **Lua stays uncapped**,
+load. A rename over a deleted Space's leftover rows keeps one too,
+touching only the renamed Space's verbs and naming nothing, since
+the rename is the act that doubled them. Two rows are never merged:
+a `custom` row, drawn as a row of its own, and an orphan Space verb,
+which #92's Inactive section draws as one row per binding (#1807). **Lua stays uncapped**,
 because layers are modal — activating one deactivates the base —
 so hjkl beside the arrows can only live in one layer, and two
 chords that do the same thing cannot conflict. A duplicate *chord*

@@ -97,15 +97,17 @@ because two real clients now remove drift — see
 ## A navigation action holds one chord per layer (#1797, #1807)
 
 **A GUI writer of layer rows leaves no navigation action two
-chords in a layer** — the digit top-up counting every profile's
-override against the shared base as well. The dedupe is the one
-`NavigationChords.deduplicated`, whose "same action" is a Space
-verb's `SpaceLuaArg.target` and any other action's Lua; a writer
-takes it rather than comparing rows itself.
-`NavigationChordWriterTests` drives every writer — the top-up,
-Restore Defaults, the import, the adoption, a Space rename — and a
-new writer joins it; `DigitTopUpOverrideTests` holds the
-top-up's cross-profile reading. Lua itself is uncapped — the
+chords in a layer.** A writer that merges or rewrites rows takes the
+one `NavigationChords.deduplicated`, whose "same action" is a
+Space verb's `SpaceLuaArg.target` and any other action's Lua; a
+writer that only adds, as the digit top-up does, refuses an action
+already bound in the base or any profile's override. A new writer
+classifies itself in `LayerRowWriterCensusTests`, which counts
+every row write in both trees against its reason, and a writer
+that can merge joins `NavigationChordWriterTests`, which drives
+each against a duplicate-counting oracle of its own
+(`DigitTopUpOverrideTests` holds the top-up's cross-profile
+reading). Lua itself is uncapped — the
 argument is `docs/design-decisions.md` ▸ *Nothing KiwiDesk writes
 may give an action a second chord in a layer*.
 

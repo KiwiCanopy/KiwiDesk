@@ -253,15 +253,22 @@ extension KiwiCore {
     /// carry over from the live (executed) state — bindings are
     /// recovered from the file via `recoverKeybindings`; any that
     /// can't be read back stay only in the commented backup.
-    /// Returns the seeded model now under GUI ownership.
+    /// `classifying` sorts the recovered rows into actions (the GUI's
+    /// catalog), after which each navigation action keeps one chord
+    /// before the one write (#1807). Returns the seeded model now
+    /// under GUI ownership and the chords it left out.
     @discardableResult
-    public func adoptConfigIntoGui() throws -> GuiConfig {
+    public func adoptConfigIntoGui(
+        classifying: (inout GuiConfig) -> Void = { _ in }
+    ) throws -> (config: GuiConfig, dropped: [NavigationChords.Dropped]) {
         let original =
             (try? String(
                 contentsOf: configURL,
                 encoding: .utf8
             )) ?? ""
-        let config = guiConfigSeed()
+        var config = guiConfigSeed()
+        classifying(&config)
+        let dropped = NavigationChords.deduplicate(&config)
         // The executed values travel with the rest (#1741).
         storeLiveAppWide()
         try guiConfigStore.save(config)
@@ -287,6 +294,6 @@ extension KiwiCore {
         // executed original's tiling back so adopt preserves
         // the live arrangement until it is saved as a profile.
         applyProfileScopedState(from: config)
-        return config
+        return (config, dropped)
     }
 }

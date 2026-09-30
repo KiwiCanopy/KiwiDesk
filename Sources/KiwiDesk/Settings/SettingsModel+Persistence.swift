@@ -34,14 +34,19 @@ extension SettingsModel {
     }
 
     /// Adopts hand-written config into GUI management
-    /// (`KiwiCore.adoptConfigIntoGui`).
+    /// (`KiwiCore.adoptConfigIntoGui`), and opens Shortcuts when a
+    /// chord was left out so its note is seen (#1807).
     func adoptIntoGui() {
         do {
-            try core.adoptConfigIntoGui()
-            let dropped = try dedupeAdoptedChords()
+            let adoption = try core.adoptConfigIntoGui {
+                KeybindingImportClassifier.classify(&$0)
+            }
             showLuaEditor = false
             reload()
-            droppedChords = dropped
+            droppedChords = adoption.dropped
+            if !adoption.dropped.isEmpty {
+                destination = .shortcuts
+            }
             // Adopt recovers the file's keybindings (see
             // adoptConfigIntoGui / recoverKeybindings), so a
             // conflict can arrive with the seeded config: set or
@@ -51,18 +56,5 @@ extension SettingsModel {
         } catch {
             core.onLog("adopt failed: \(error)")
         }
-    }
-
-    /// The adopted sidecar with each navigation action's extra
-    /// chords dropped, written back — the adoption already wrote it,
-    /// so the drop is not left to a Save the user may never make
-    /// (#1807). Classified first, which is what makes a row an
-    /// action.
-    private func dedupeAdoptedChords() throws -> [NavigationChords.Dropped] {
-        guard var adopted = core.guiConfigStore.load() else { return [] }
-        KeybindingImportClassifier.classify(&adopted)
-        let dropped = NavigationChords.deduplicate(&adopted)
-        if !dropped.isEmpty { try core.saveGuiConfig(adopted) }
-        return dropped
     }
 }

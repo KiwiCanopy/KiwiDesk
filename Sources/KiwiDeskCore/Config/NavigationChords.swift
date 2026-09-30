@@ -16,6 +16,11 @@ public enum NavigationChords {
     enum Action: Hashable {
         case space(SpaceLuaArg.Target)
         case lua(String)
+
+        var space: SpaceID? {
+            if case .space(let target) = self { return target.space }
+            return nil
+        }
     }
 
     /// `rows` with each `navigation` action's extra chords removed,
@@ -24,12 +29,14 @@ public enum NavigationChords {
     /// one row per binding, so it is never removed.
     public static func deduplicated(
         _ rows: [KeyBinding],
-        liveSpaces: Set<SpaceID>
+        liveSpaces: Set<SpaceID>,
+        touching space: SpaceID? = nil
     ) -> (rows: [KeyBinding], dropped: [Dropped]) {
         var groups: [Action: [Int]] = [:]
         var order: [Action] = []
         for (index, row) in rows.enumerated() {
-            guard let action = action(of: row, liveSpaces: liveSpaces)
+            guard let action = action(of: row, liveSpaces: liveSpaces),
+                space == nil || action.space == space
             else { continue }
             if groups[action] == nil { order.append(action) }
             groups[action, default: []].append(index)
@@ -56,16 +63,21 @@ public enum NavigationChords {
         return (kept, dropped)
     }
 
-    /// Every layer of `config` deduplicated against its own Spaces;
-    /// returns what was dropped.
+    /// Every layer of `config` deduplicated against its own Spaces —
+    /// only the verbs naming `space` when one is given; returns what
+    /// was dropped.
     @discardableResult
-    public static func deduplicate(_ config: inout GuiConfig) -> [Dropped] {
+    public static func deduplicate(
+        _ config: inout GuiConfig,
+        touching space: SpaceID? = nil
+    ) -> [Dropped] {
         let live = Set(config.spaces)
         var dropped: [Dropped] = []
         for index in config.layers.indices {
             let result = deduplicated(
                 config.layers[index].bindings,
-                liveSpaces: live
+                liveSpaces: live,
+                touching: space
             )
             config.layers[index].bindings = result.rows
             dropped += result.dropped
@@ -84,17 +96,17 @@ public enum NavigationChords {
         return liveSpaces.contains(target.space) ? .space(target) : nil
     }
 
-    /// Whether the row's key is the digit a Space of this number
-    /// takes — `1`…`9`, and `0` for the tenth.
+    /// Whether the row's key is the Space's own digit, its keypad
+    /// twin included (#1074).
     private static func isOwnDigit(
         _ row: KeyBinding,
         _ action: Action
     ) -> Bool {
         guard case .space(let target) = action,
-            let number = Int(target.space.raw),
-            let key = row.combo.split(separator: "+").last
+            let digit = DefaultKeybindings.ownDigit(of: target.space),
+            let own = KeyCombo.parse(digit)?.keyCode,
+            let code = KeyCombo.parse(row.combo)?.keyCode
         else { return false }
-        let digit = number == 10 ? 0 : number
-        return (0...9).contains(digit) && key == "\(digit)"
+        return code == own || KeypadKeys.rowTwin(of: code) == own
     }
 }
