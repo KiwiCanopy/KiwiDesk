@@ -23,13 +23,15 @@ import Foundation
 /// `KiwiCore+DesktopSpaces.swift` for that argument in full.
 ///
 /// Window ids only, never window state (#1230 ruling 4): ~60
-/// integers at 20 windows across 3 profiles, written once per
-/// profile change. Entries are NOT pruned on a window's
+/// integers at 20 windows across 3 profiles, filed once per
+/// profile change and carried in every session snapshot (#1802).
+/// Entries are NOT pruned on a window's
 /// disappearance — an away Desktop's windows are absent from
 /// `state.windows` too (#1146), so pruning on absence would make
 /// a Desktop return lose its profile memory. A restore filters to
 /// live windows instead, and the enders are explicit: a profile
-/// deleted, a profile renamed, and the #634 reset.
+/// deleted, a profile renamed, the #634 reset, and a profile
+/// absent from disk when boot adopts the carried records.
 struct ProfilePartitioning: Sendable {
     private var byProfile: [String: [SpaceID: [WindowID]]] = [:]
 
@@ -85,6 +87,17 @@ struct ProfilePartitioning: Sendable {
         for profile: String
     ) -> [SpaceID: [WindowID]]? {
         byProfile[profile]
+    }
+
+    /// Every profile's record, for the session snapshot (#1802).
+    var records: [String: [SpaceID: [WindowID]]] { byProfile }
+
+    /// Boot's adoption of the previous session's records (#1802):
+    /// a carried entry replaces this session's for that profile,
+    /// since anything filed before the replay reflects the scan's
+    /// order rather than the user's arrangement.
+    mutating func adopt(_ records: [String: [SpaceID: [WindowID]]]) {
+        byProfile.merge(records) { _, carried in carried }
     }
 
     /// A native-tab re-key (#308) moves the id in every profile's

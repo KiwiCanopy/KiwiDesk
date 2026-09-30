@@ -1766,7 +1766,10 @@ editing here:
   record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
   `HeldOrigin.Arrangement` keys and the snapshot's own
   `arrangement`, which every snapshot carries (#1646,
-  profiles.md). Each record decodes its
+  profiles.md), and its `profileRecords` — #1230's per-profile
+  record, keyed by profile name and Space name (#1802,
+  `ProfilePartitioningRestartTests` ▸
+  `unreadableRecordIsIsolated`). Each record decodes its
   payload on its own and a payload it cannot read costs only
   itself — sizing starts fresh, the arrangement restores
   (`SnapshotCarryCensusTests` ▸
