@@ -101,9 +101,12 @@ chords in a layer.** A writer that merges or rewrites rows takes the
 one `NavigationChords.deduplicated`, whose "same action" is a
 Space verb's `SpaceLuaArg.target` and any other action's Lua; a
 writer that only adds, as the digit top-up does, refuses an action
-already bound in the base or any profile's override. A new writer
+already bound in the base or any profile's override; and a writer
+that re-adds a seed, as Restore Defaults does, first removes every
+row running a seeded action, through `NavigationChords.sameAction`. A new writer
 classifies itself in `LayerRowWriterCensusTests`, which counts
-every row write in both trees against its reason — a writer that
+every `.bindings` write and every writable `[KeyBinding]` holder in
+both trees against its reason — a writer that
 builds whole layers (`.layers =`, a `KeyLayer(` built with rows,
 the adoption's seed among them) is outside its scan and is
 review's — and a writer

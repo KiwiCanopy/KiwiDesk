@@ -23,6 +23,15 @@ public enum NavigationChords {
         }
     }
 
+    /// Whether two rows run the same action — a Space verb by verb
+    /// and Space, anything else by its Lua — whatever their kind.
+    public static func sameAction(_ a: KeyBinding, _ b: KeyBinding) -> Bool {
+        if let target = SpaceLuaArg.target(of: a.lua) {
+            return SpaceLuaArg.target(of: b.lua) == target
+        }
+        return a.lua == b.lua
+    }
+
     /// `rows` with each `navigation` action's extra chords removed,
     /// keeping a Space verb's own digit, else the first. A Space verb
     /// naming a Space outside `liveSpaces` is an orphan (#92), drawn
