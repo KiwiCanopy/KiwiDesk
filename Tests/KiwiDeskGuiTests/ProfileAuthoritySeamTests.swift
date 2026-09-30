@@ -155,14 +155,15 @@ struct ProfileAuthoritySeamTests {
     /// that helper is named only by the doors that move the name
     /// beside it. It spells no store, so the per-file
     /// `profilePartitioning` map above cannot see its callers —
-    /// a third one would file the live Spaces under whatever name
-    /// happened to be current, with nothing to red (#1249).
-    /// Three sites in `KiwiCore+ProfileSpaces.swift`: the `func`
-    /// line itself, which this needle matches like any call, plus
-    /// the two doors that live beside it.
+    /// a new one would file the live Spaces under whatever
+    /// arrangement happened to be live, with nothing to red
+    /// (#1249). Three sites, all in `KiwiCore+ProfileSpaces.swift`:
+    /// the `func` line itself, which this needle matches like any
+    /// call, plus the two doors beside it — both applies, profile
+    /// and Standard alike, reach it through the outgoing door
+    /// (#1829).
     private let recordCallers: [String: Int] = [
-        "Profiles/KiwiCore+ProfileSpaces.swift": 3,
-        "Profiles/KiwiCore+ProfileResolution.swift": 1,
+        "Profiles/KiwiCore+ProfileSpaces.swift": 3
     ]
 
     @Test("The partitioning record has three known callers")
@@ -190,9 +191,9 @@ struct ProfileAuthoritySeamTests {
                 rawValue:
                     "recordLivePartitioning moved or gained a "
                     + "caller; it files the live Spaces under "
-                    + "profiles.currentName, so a caller that is "
-                    + "not about to move that name files them "
-                    + "under the wrong profile (#1249)"
+                    + "the live arrangement, so a caller that is "
+                    + "not about to move it files them under the "
+                    + "wrong one (#1249)"
             )
         )
     }
