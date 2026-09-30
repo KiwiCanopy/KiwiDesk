@@ -157,17 +157,35 @@ struct BarWindowActionRowsTests {
     func ownProcess() {
         let core = seededCore()
         let own = ProcessInfo.processInfo.processIdentifier
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(id: WindowID(9), pid: own, appName: "KiwiDesk")
+        var pressed = 0
+        core.windowActions.newWindow = { _, _ in pressed += 1 }
+        core.windowActions.close = { _, _ in pressed += 1 }
+        for raw in [UInt32(9), 10] {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(raw),
+                        pid: own,
+                        appName: "KiwiDesk"
+                    )
+                )
             )
-        )
+        }
+        // Each has an element, so a refusal is the gate's.
+        core.eventLoop.elements[own] = [
+            WindowID(9): AXUIElementCreateApplication(own),
+            WindowID(10): AXUIElementCreateApplication(own),
+        ]
         let rows = core.barMenuRows(.appItem([WindowID(9)]))
         #expect(row(rows, "New Window")?.enabled == false)
         #expect(row(rows, "Close Window")?.enabled == false)
         for verb in ["new_window", "close_window"] {
             #expect(!core.execute(verb, args: [.number(9)]).isSuccess)
         }
+        #expect(pressed == 0)
+        // A group whose every window is greyed greys its submenu.
+        let group = core.barMenuRows(.glyph([WindowID(9), WindowID(10)]))
+        #expect(row(group, "Close Window")?.enabled == false)
     }
 
     /// The pill draws on the window it names where it is drawn —
