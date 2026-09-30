@@ -245,4 +245,31 @@ struct SwitchHoldTests {
         core.topUpDigitShortcuts()
         #expect(rows() != before)
     }
+
+    /// A profile claiming a held number moves the hold off it; that
+    /// renumber owes its ⌃⌥N like the hold's own.
+    @Test("a reclaimed held number gets its digit row")
+    func reclaimTopsUp() throws {
+        let core = try desk.docked()
+        var config = GuiConfig()
+        config.layers = [KeyLayer(name: KeyLayer.defaultName, bindings: [])]
+        try core.guiConfigStore.save(config)
+        try pair(core)
+        core.execute("load_profile", args: [.string("pair")])
+        #expect(core.state.heldSpaces[SpaceID(3)] != nil)
+        try core.profiles.write(
+            desk.profile(
+                "three",
+                screens: [desk.builtIn.fingerprint, desk.dell.fingerprint],
+                spaces: [SpaceID(1), SpaceID(2), SpaceID(3)]
+            )
+        )
+        core.execute("load_profile", args: [.string("three")])
+        let moved = try #require(
+            core.state.heldSpaces.first { $0.value.name == SpaceID(3) }
+        )
+        #expect(moved.key != SpaceID(3))
+        let rows = core.guiConfigStore.load()?.layers.first?.bindings ?? []
+        #expect(rows.contains { $0.lua.contains("(\"\(moved.key.raw)\")") })
+    }
 }

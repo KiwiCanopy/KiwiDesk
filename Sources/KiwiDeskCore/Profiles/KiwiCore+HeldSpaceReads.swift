@@ -123,14 +123,8 @@ extension KiwiCore {
         temporaries: Set<SpaceID>
     ) -> Bool {
         guard !declared.contains(id) else { return false }
-        if temporaries.contains(id) { return true }
-        switch liveArrangement {
-        case .profile:
-            return profiles.active?.declaredSpaces.contains(id) == true
-        case .standard:
-            return profiles.standard?.spaces.contains(id) == true
-        case nil: return false
-        }
+        return temporaries.contains(id)
+            || liveHome?.declared.contains(id) == true
     }
 
     /// The fingerprint of the screen `id` lays out on now; one the
@@ -143,11 +137,13 @@ extension KiwiCore {
             .fingerprint
     }
 
-    /// Whether a held Space joined under a number not its own since
-    /// `before` — a renumber owes its ⌃⌥N (#485's top-up).
+    /// Whether a held Space still holding something joined under a
+    /// number not its own since `before` — a renumber owes its
+    /// ⌃⌥N (#485's top-up); one the restore emptied retires.
     func heldRenumbered(since before: Set<SpaceID>) -> Bool {
         state.heldSpaces.contains {
             !before.contains($0.key) && $0.key != $0.value.name
+                && !spaceHoldsNothing($0.key)
         }
     }
 }

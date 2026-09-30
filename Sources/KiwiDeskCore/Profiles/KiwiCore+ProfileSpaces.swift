@@ -178,9 +178,9 @@ extension KiwiCore {
     /// sits: the record is a membership, the live row the order
     /// authority (#1387, profiles.md).
     ///
-    /// A window in a held Space, live or remembered there, is left
-    /// too: any hold outranks this record, so what was on a gone
-    /// screen stays together and goes home together (#1728).
+    /// A window in a held Space is placed like any other: the
+    /// record outranks the hold, which keeps only what this
+    /// arrangement never saw (#1790, reversing #1728).
     func restorePartitioning(
         of arrangement: HeldOrigin.Arrangement,
         declaring declared: Set<SpaceID>

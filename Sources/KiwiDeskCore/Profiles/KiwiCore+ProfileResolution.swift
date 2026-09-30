@@ -29,6 +29,7 @@ extension KiwiCore {
         // answer whether this apply is a profile CHANGE — which
         // gates the session clear, the prune below and the
         // restore after it.
+        let heldBefore = Set(state.heldSpaces.keys)
         // A held number this profile claims moves off it first.
         reclaimHeldNames(
             declared: profile.declaredSpaces,
@@ -36,7 +37,6 @@ extension KiwiCore {
         )
         // Read before anything moves what is live or declared (#1790).
         let temporaries = Set(liveTemporarySpaces)
-        let heldBefore = Set(state.heldSpaces.keys)
         let switching = recordOutgoingPartitioning(before: profile)
         // A held Space keeps the icon it had where it lived (#1507),
         // read before the incoming settings replace them.
