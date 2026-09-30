@@ -30,6 +30,45 @@ extension BarMotion {
         animated && !reduceMotion
     }
 
+    /// The share of the plate glide a dissolve's OUT-fade takes
+    /// (#1838): the old row goes early while the new keeps fading
+    /// in over the whole glide, so a longer old row is not seen
+    /// beneath the new at half strength midway. Under half, or the
+    /// two rows meet at equal strength; well over a third, or the
+    /// old row reads as cut. Owner-tuned on device, 2026-10-01.
+    static let dissolveOutShare = 0.4
+
+    /// Runs `body` in a dissolve's out-fade group, nested in the
+    /// plate glide: `dissolveOutShare` of its length, the same
+    /// curve, zero under Reduce Motion.
+    @MainActor
+    static func runDissolveOut(_ body: () -> Void) {
+        let reduceMotion = isReduced
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = dissolveOutDuration(
+                reduceMotion: reduceMotion,
+                seconds: shelfGlide
+            )
+            context.timingFunction = CAMediaTimingFunction(
+                controlPoints: 0.2,
+                0.9,
+                0.3,
+                1
+            )
+            body()
+        }
+    }
+
+    /// The out-fade's length: `dissolveOutShare` of the plate
+    /// glide's, zero under Reduce Motion.
+    static func dissolveOutDuration(
+        reduceMotion: Bool,
+        seconds: TimeInterval
+    ) -> TimeInterval {
+        plateGlideDuration(reduceMotion: reduceMotion, seconds: seconds)
+            * dissolveOutShare
+    }
+
     /// Runs `body` once a group glide lands — a timer of the plate
     /// glide's length, as `playWalk` does, and the next turn under
     /// Reduce Motion, which plays no glide. Never inline: it is

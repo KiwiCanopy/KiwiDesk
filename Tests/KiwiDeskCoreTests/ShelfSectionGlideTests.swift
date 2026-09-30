@@ -32,6 +32,38 @@ struct ShelfSectionGlideTests {
         #expect(start.size == slot.size)
     }
 
+    /// Between two Spaces with an App Bar the section keeps its
+    /// content at the same offset and only its length changes.
+    @Test("Content keeping its offset glides from the old frame")
+    func sameOffsetGlidesSizeToo() {
+        let from = CGRect(x: 820, y: 0, width: 681, height: 40)
+        let start = ShelfOverlay.glideStart(
+            from: from,
+            drawn: CGRect(x: 21, y: 0, width: 623, height: 40),
+            content: CGRect(x: 21.3, y: 0, width: 300, height: 40),
+            to: CGRect(x: 900, y: 0, width: 340, height: 40),
+            horizontal: true
+        )
+        // The old frame, size included: the new row is revealed as
+        // the section grows, cropped as it shrinks.
+        #expect(start == from)
+    }
+
+    /// A lone section's slot is the whole strip on every Space;
+    /// its row re-centring inside it moved the section (device).
+    @Test("An unchanged slot never moves the section")
+    func unchangedSlotStays() {
+        let strip = CGRect(x: 0, y: 0, width: 1728, height: 40)
+        let start = ShelfOverlay.glideStart(
+            from: strip,
+            drawn: CGRect(x: 400, y: 0, width: 900, height: 40),
+            content: CGRect(x: 644, y: 0, width: 440, height: 40),
+            to: strip,
+            horizontal: true
+        )
+        #expect(start == strip)
+    }
+
     @Test("A vertical shelf holds its content along y")
     func verticalHoldsY() {
         let start = ShelfOverlay.glideStart(
@@ -61,10 +93,10 @@ struct ShelfSectionGlideTests {
     }
 }
 
-/// A shelf appearing grows from its alignment anchor (#1838): its
-/// centre, or the end it is anchored to, so an anchored edge never
-/// moves while it grows.
-@Suite("Shelf appearing grows from its anchor")
+/// A frame collapsed to an anchor (#1838): what a section joining
+/// a fused shelf grows from and a leaving one shrinks to, at the
+/// end facing the section it joins or leaves.
+@Suite("Shelf frame collapses to its anchor")
 struct ShelfAppearAnchorTests {
     private let plate = CGRect(x: 100, y: 0, width: 400, height: 40)
 

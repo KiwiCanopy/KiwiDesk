@@ -210,9 +210,21 @@ struct SpaceBarInactiveContentTests {
                 content: content,
                 from: from,
                 to: to,
-                sameItems: same
+                sameItems: same,
+                sameSlot: true
             )
         }
+        // A slot that moved or resized hands the motion to the
+        // shelf's glide (#1838).
+        #expect(
+            !SpaceBarOverlay.itemsGlide(
+                content: .count,
+                from: one,
+                to: two,
+                sameItems: true,
+                sameSlot: false
+            )
+        )
         #expect(glide(.count, one, two, true))
         #expect(!glide(.apps, one, two, true))
         #expect(!glide(.count, one, one, true))

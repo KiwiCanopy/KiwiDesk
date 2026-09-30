@@ -108,8 +108,11 @@ public final class AppBarManager {
             .map { (strip: $0.strip, edge: $0.edge) }
     }
 
-    /// Synchronizes painted overlays with `bars`, retiring overlays for
-    /// removed displays.
+    /// Synchronizes painted overlays with `bars`, hiding the
+    /// overlay of a display with no bar. Hidden, never dropped: the
+    /// section's root keeps its place on its shelf, so a bar
+    /// coming back is the same section re-shown rather than a new
+    /// one joining (#1838).
     public func sync(_ bars: [Bar]) {
         let valid = bars.filter {
             !$0.items.isEmpty
@@ -119,7 +122,6 @@ public final class AppBarManager {
         let wanted = Set(valid.map(\.display))
         for (id, overlay) in overlays where !wanted.contains(id) {
             overlay.hide()
-            overlays[id] = nil
             spaceOfDisplay[id] = nil
         }
         for bar in valid {
@@ -130,7 +132,8 @@ public final class AppBarManager {
                 activeIndex: bar.activeIndex,
                 strip: bar.strip,
                 style: bar.style,
-                capAxis: bar.capAxis
+                capAxis: bar.capAxis,
+                space: bar.space
             )
         }
     }

@@ -225,9 +225,15 @@ public final class SpaceBarOverlay {
             hide()
             return
         }
+        // A slot that moved or resized hands the motion to the
+        // shelf's glide, so the chips land (#1838).
+        let slotChanged = lastShown.map { $0.strip != strip } ?? false
         lastShown = (items, frontApp, strip, style, stateMarkColors)
         let active = items.first(where: \.active)?.space
-        render(followingActive: follow.follows(active))
+        render(
+            followingActive: follow.follows(active),
+            slotChanged: slotChanged
+        )
     }
 
     public func hide() {

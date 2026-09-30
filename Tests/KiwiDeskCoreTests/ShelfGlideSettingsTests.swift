@@ -83,4 +83,24 @@ struct ShelfGlideSettingsTests {
         #expect(!core.tiler.settings.animations.onShelf)
         #expect(BarMotion.shelfGlide == 0)
     }
+
+    /// A dissolve's out-fade is a share of the glide, never the
+    /// whole of it, and nothing under Reduce Motion.
+    @Test("The dissolve's out-fade takes its share of the glide")
+    func dissolveOutIsAShare() {
+        let whole = BarMotion.plateGlideDuration(
+            reduceMotion: false,
+            seconds: 0.75
+        )
+        let out = BarMotion.dissolveOutDuration(
+            reduceMotion: false,
+            seconds: 0.75
+        )
+        #expect(out == whole * BarMotion.dissolveOutShare)
+        #expect(out > 0 && out < whole)
+        #expect(
+            BarMotion.dissolveOutDuration(reduceMotion: true, seconds: 0.75)
+                == 0
+        )
+    }
 }

@@ -46,11 +46,6 @@ final class ShelfManager {
         let edge: AppBarEdge
     }
 
-    /// Whether a shelf appearing grows from its anchor (#1838).
-    /// Live in production; a test that reads a plate's frame on a
-    /// shelf's first show turns it off, since the grow travels on
-    /// the run loop.
-    var growsOnAppear = true
     private var overlays: [Key: ShelfOverlay] = [:]
     /// The bars' context menus (#1518) — the one instance; Core
     /// sets its rows and hands it to both bar managers.
@@ -68,16 +63,16 @@ final class ShelfManager {
     }
     private var last: [Key: Shelf] = [:]
 
-    /// Shows `shelves`, retiring every shelf absent from them — a
-    /// display's second one included, once its bars re-fuse.
+    /// Shows `shelves`, fading out every shelf absent from them —
+    /// a display's second one included, once its bars re-fuse —
+    /// and retiring it once it has left (#1838).
     func sync(_ shelves: [Shelf]) {
         let wanted = Set(shelves.map(Self.key))
-        for (key, overlay) in overlays where !wanted.contains(key) {
-            overlay.hide()
-            overlays[key] = nil
-        }
         for key in last.keys where !wanted.contains(key) {
             last[key] = nil
+        }
+        for (key, overlay) in overlays where !wanted.contains(key) {
+            overlay.hide(animated: true)
         }
         for shelf in shelves {
             let key = Self.key(shelf)
@@ -124,7 +119,7 @@ final class ShelfManager {
         }
         let overlay = overlays[key] ?? ShelfOverlay()
         overlays[key] = overlay
-        overlay.growsOnAppear = growsOnAppear
+        overlay.onLeft = { [weak self] in self?.retire(key) }
         overlay.contextMenus = contextMenus
         overlay.handle.onMinimum = { [weak self] percent, committed in
             self?.onMinimum(percent, committed)
@@ -146,6 +141,13 @@ final class ShelfManager {
         shelf.space?.syncHoverToPointer()
         shelf.app?.syncHoverToPointer()
         overlay.handle.syncHoverToPointer()
+    }
+
+    /// Drops a shelf that has left the screen, unless a plan wants
+    /// it again meanwhile.
+    private func retire(_ key: Key) {
+        guard last[key] == nil else { return }
+        overlays[key] = nil
     }
 
     #if DEBUG

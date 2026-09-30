@@ -7,10 +7,12 @@ import AppKit
 /// glide. A section re-lays its content for the new slot at once, so
 /// a glide from its old frame jumped that content aside first.
 extension ShelfOverlay {
-    /// Stands each gliding section at its glide start, ahead of the
-    /// plate glide's group: a frame written inside the group is not
-    /// where the animator starts from (device, #1838), so the
-    /// content jumped to its new layout in the old frame first.
+    /// Stands each gliding section at its glide start and COMMITS
+    /// it: the animator starts a frame glide from the layer's
+    /// PRESENTATION, which lags a model write until the transaction
+    /// commits — a start stood at 569 animated from 0 until the
+    /// flush (device, #1838) — so a stood start that was not flushed
+    /// glided from the old frame, the content jumping aside first.
     func standGlideStarts(
         _ sections: [Section],
         in strip: CGRect,
@@ -48,6 +50,7 @@ extension ShelfOverlay {
             )
         }
         CATransaction.commit()
+        CATransaction.flush()
     }
 
     /// A section's frame on the strip: origin and size in ONE
@@ -101,11 +104,15 @@ extension ShelfOverlay {
         }
         if !leaving.isEmpty {
             leavingViews.formUnion(leaving)
+            // A view wanted again before this lands left the set,
+            // and stays: removing it re-joined it a second time
+            // (device, #1838).
             BarMotion.afterGroupGlide { [weak self] in
-                for view in leaving where view.superview != nil {
+                guard let self else { return }
+                for view in leaving where self.leavingViews.contains(view) {
                     view.removeFromSuperview()
+                    self.leavingViews.remove(view)
                 }
-                self?.leavingViews.subtract(leaving)
             }
         }
         placedContent = placedContent.filter { key, _ in
@@ -113,6 +120,7 @@ extension ShelfOverlay {
         }
         for section in sections {
             let key = ObjectIdentifier(section.view)
+            leavingViews.remove(section.view)
             let joining = section.view.superview !== stripView
             if joining {
                 stripView.addSubview(
@@ -132,10 +140,19 @@ extension ShelfOverlay {
         }
     }
 
-    /// Where a gliding section starts: at its new size, placed so
-    /// its content — `content`, re-laid for the new slot — sits
-    /// where it was drawn last (`drawn` in the section's `from`
-    /// frame). A zero content reading glides from `from` as before.
+    /// Where a gliding section starts. Content that keeps its
+    /// offset inside the section — `content`, re-laid for the new
+    /// slot, where `drawn` was — is a RESIZE: the section glides
+    /// from `from`, size included, the new row revealed from its
+    /// anchored end (a switch between two Spaces with an App Bar).
+    /// Content re-anchored inside its slot — centred across the
+    /// lone strip, at the end of a fused one — starts at the new
+    /// size, placed so the content sits where it was drawn, since
+    /// the old bounds would clip it. A slot that did not change
+    /// moves the section not at all, whatever its content did: a
+    /// row re-centring inside the whole strip is the section's own
+    /// render's, and a start that held it slid the section instead
+    /// (device, #1838). A zero reading glides from `from`.
     nonisolated static func glideStart(
         from: CGRect,
         drawn: CGRect,
@@ -143,28 +160,25 @@ extension ShelfOverlay {
         to frame: CGRect,
         horizontal: Bool
     ) -> CGRect {
-        guard drawn != .zero, content != .zero else { return from }
+        guard frame != from, drawn != .zero, content != .zero else {
+            return from
+        }
+        let shift =
+            horizontal ? drawn.minX - content.minX : drawn.minY - content.minY
+        // Sub-point: a rounding difference between two renders'
+        // end pads, never a re-anchoring.
+        guard abs(shift) >= 0.5 else { return from }
         var start = frame
         if horizontal {
-            start.origin.x = from.minX + drawn.minX - content.minX
+            start.origin.x = from.minX + shift
         } else {
-            start.origin.y = from.minY + drawn.minY - content.minY
+            start.origin.y = from.minY + shift
         }
         return start
     }
 
-    /// A shelf appearing (#1838): its sections land at their slots
-    /// transparent and fade in on the running glide.
-    func fadeIn(_ sections: [Section]) {
-        for section in sections {
-            section.view.alphaValue = 0
-            BarMotion.setAlpha(section.view, to: 1, animated: true)
-        }
-    }
-
-    /// `plate` shrunk to nothing at its alignment anchor — its
-    /// centre, or the end it is anchored to — so an appearing shelf
-    /// grows from there and never moves an anchored edge.
+    /// `frame` shrunk to nothing at `alignment`'s anchor — its
+    /// centre, or the end it is anchored to.
     nonisolated static func collapsed(
         _ plate: CGRect,
         to alignment: KiwiShelf.Alignment,

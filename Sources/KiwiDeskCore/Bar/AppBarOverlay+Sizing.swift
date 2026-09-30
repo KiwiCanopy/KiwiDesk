@@ -9,6 +9,9 @@ extension AppBarOverlay {
         let gap: CGFloat
         /// The last tiled item, where the float break sits (#1826).
         let breakAfter: Int?
+        /// What a run of floats alone gives its leading mark ahead
+        /// of the first slot; zero where a tiled row leads.
+        let markLead: CGFloat
         /// Each slot's length, the break's slot widened by it — the
         /// one lengths array a render and its scroll read.
         let lengths: [CGFloat]
@@ -36,6 +39,10 @@ extension AppBarOverlay {
             capAxis: capAxis ?? axis
         )
         let breakAfter = Self.breakAfter(items)
+        let markLead =
+            Self.leadsWithMark(items)
+            ? Self.floatMarkLead(gap: gap, style: style, depth: thickness)
+            : 0
         let lengths = Self.lengths(
             items: items,
             slot: slot,
@@ -54,6 +61,7 @@ extension AppBarOverlay {
             slot: slot,
             gap: gap,
             breakAfter: breakAfter,
+            markLead: markLead,
             lengths: lengths,
             total: total,
             inset: overflows
