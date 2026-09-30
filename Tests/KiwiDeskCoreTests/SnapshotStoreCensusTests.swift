@@ -115,7 +115,7 @@ struct SnapshotStoreCensusTests {
         "borders.cornerRadii": (.behind, "render state, redrawn"),
         "borders.overlays": (.behind, "render state, redrawn"),
         "borders.specs": (.behind, "render state, redrawn"),
-        "borders.stickyTracked": (.behind, "render state, redrawn"),
+        "borders.markTracked": (.behind, "render state, redrawn"),
         "stickyMarks.overlays": (.behind, "render state, redrawn"),
     ]
 

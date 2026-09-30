@@ -277,7 +277,7 @@ at the moment you reveal it
 leaves the window's Space unchanged, and a **floating** or
 **sticky** window keeps its Space on any screen
 (`move_to_space` guards a sticky window the same way). With
-**Stay visible across Desktops** on (the default), a sticky
+**Keep sticky windows visible across Desktops** on (the default), a sticky
 window's move holds only until your screen next switches
 Desktop, when it is carried back onto its own screen's current
 Desktop; `override_sticky_reach("off")` first if you mean it to
@@ -2544,6 +2544,12 @@ stays collapsed and takes the focused accent. The user guide's
 [Space Bar](user-guide.md#space-bar) section covers the badges,
 what a click on a glyph does and the drag-onto-a-Space gesture.
 
+:::unreleased
+Turning
+[`space_bar.set_group_adjacent_windows`](#space_barset_group_adjacent_windows)
+off gives each window its own glyph.
+:::
+
 The bar is layout-independent and sits on
 [KiwiShelf](#kiwishelf), which sets its thickness, margins,
 background, colours and app glyph style; every `space_bar.*`
@@ -2589,14 +2595,14 @@ space_bar.set_edge("left")
 **Expects:** an integer `1`–`12` (default `5`); out-of-range
 values clamp.
 
-**Does:** sets how many app-group glyphs a Space item shows
+**Does:** sets how many glyphs a Space item shows
 around its focused app — the Space's system focus while it is
 active, else the window it last focused. The rest sit behind a
 `+n` badge on each side, and at either end of the row the badge
 that side does not need becomes one more glyph, so the item keeps
-one length as the focus moves. Grouping runs first, so the span
-counts app *groups* (adjacent same-app windows share one glyph),
-while each `+n` counts its hidden *windows*. It limits glyphs per
+one length as the focus moves. The span counts glyphs — windows,
+or app *groups* while grouping is on — while each `+n` counts
+its hidden *windows*. It limits glyphs per
 Space only, not how many Spaces the bar shows. Replaces
 `set_glyph_cap`, which now fails naming it.
 
@@ -2738,6 +2744,23 @@ title.
 ```lua
 space_bar.set_front_app_title_cap(25)
 ```
+
+:::unreleased
+### space_bar.set_group_adjacent_windows
+
+**Expects:** boolean (default `true`).
+
+**Does:** collapses adjacent windows of one app in a Space item
+into one glyph with a count badge; clicking it opens a menu of
+its windows. Off, each window draws its own glyph and one click
+focuses it. `glyph_span` counts glyphs either way.
+
+**Example:**
+
+```lua
+space_bar.set_group_adjacent_windows(false)
+```
+:::
 
 ### space_bar.set_hide_empty
 
@@ -3837,6 +3860,11 @@ and is the only float verb offered in the Settings shortcut
 list; the explicit `make_*` verbs remain for scripts that need a
 specific direction.
 
+:::unreleased
+The window's on-window floating mark follows the setting as its
+Space Bar float badge does.
+:::
+
 **Example:**
 
 ```lua
@@ -4076,10 +4104,39 @@ color, or the bare glyph on Automatic. Settings writes this
 through the one **Liquid Glass** switch
 ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 
+:::unreleased
+The floating mark draws the same way, tinted by
+[`floating.set_color`](#floatingset_color) where no sticky glyph
+shares its plate.
+:::
+
 **Example:**
 
 ```lua
 sticky.set_liquid_glass(false)
+```
+
+:::unreleased
+### floating.set_mark
+
+**Expects:** boolean (default `true`).
+
+**Does:** shows or hides the on-window floating mark — the
+`macwindow.on.rectangle` glyph at the top-right corner of a
+floating window, including one in a floating-mode space: one
+floated by `make_floating` or `toggle_floating`, by a
+`float_rules` entry, or by KiwiDesk's own detection. A window
+that floats only because its space is in floating mode gets no
+mark. A window that is also
+sticky carries both glyphs on one plate, the sticky one
+outermost; on a window too narrow for both, the floating glyph
+is left out. The mark draws as Liquid Glass under
+[`sticky.set_liquid_glass`](#stickyset_liquid_glass).
+
+**Example:**
+
+```lua
+floating.set_mark(false)
 ```
 
 ### floating.set_color
@@ -4087,17 +4144,19 @@ sticky.set_liquid_glass(false)
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
 empty string `""` for **Automatic** (default `""`).
 
-**Does:** tints the Space Bar floating badge — a filled disc in
-the color with an auto-contrast glyph. Floating windows have no
-on-window mark, so this affects the Space Bar badge only. `""`
-is Automatic (the badge keeps the count-badge fill); any
-non-empty value must parse as a hex color.
+**Does:** tints the floating mark — the on-window mark and the
+Space Bar floating badge read this one value, as
+[`sticky.set_color`](#stickyset_color) describes for sticky. On
+a window that is both sticky and floating, Liquid Glass takes
+the sticky color and the floating glyph the label color. `""`
+is Automatic; any non-empty value must parse as a hex color.
 
 **Example:**
 
 ```lua
 floating.set_color("#8E5DE0")
 ```
+:::
 
 ## Launching Apps
 

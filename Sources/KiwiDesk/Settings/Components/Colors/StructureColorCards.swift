@@ -37,8 +37,8 @@ struct BorderColorCard: View {
     private var caption: String {
         L(
             "colors.borders.caption",
-            "The ring around the focused window, and the mark on "
-                + "a sticky one."
+            "The ring around the focused window, and the marks on "
+                + "sticky and floating ones."
         )
     }
 }

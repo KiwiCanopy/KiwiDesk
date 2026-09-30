@@ -95,6 +95,8 @@ struct FloatFlagReaderCensusTests {
         "State/StateCoordinator+FloatFocus.swift": [.ruledToStay: 1],
         // The badge and its group-breaking (owner, 2026-09-13).
         "App/KiwiCore+SpaceBarItems.swift": [.ruledToStay: 2],
+        // The on-window floating mark, the badge's twin (#1799).
+        "App/KiwiCore+StickyMarks.swift": [.ruledToStay: 1],
         // The bar menu's Float/Tile label and submenu ticks name
         // the flag their verbs write (#1518, as #1697).
         "App/KiwiCore+BarWindowMenus.swift": [.ruledToStay: 2],

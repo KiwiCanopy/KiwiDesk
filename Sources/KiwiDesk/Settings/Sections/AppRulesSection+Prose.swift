@@ -71,6 +71,17 @@ extension AppRulesSection {
                 + "— not the **Floating** layout mode, which "
                 + "floats every window in a Space."
         )
+        // Unlike the Space list, a float rule reaches windows
+        // already open: a Save reloads the config, which re-checks
+        // them (#1518, owner 2026-09-30).
+        text +=
+            "\n\n"
+            + L(
+                "app_rules.float.help.open_windows",
+                "Applies to open windows as soon as you save. A "
+                    + "window you floated or tiled yourself keeps "
+                    + "that choice."
+            )
         if offersTitles {
             text +=
                 "\n\n"

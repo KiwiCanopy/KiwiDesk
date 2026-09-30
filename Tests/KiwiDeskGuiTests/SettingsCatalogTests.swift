@@ -230,6 +230,8 @@ struct SettingsCatalogTests {
                 )
             case .space:
                 #expect(destination == .spaces)
+            case .appRule:
+                #expect(destination == .appRules)
             }
         }
     }
