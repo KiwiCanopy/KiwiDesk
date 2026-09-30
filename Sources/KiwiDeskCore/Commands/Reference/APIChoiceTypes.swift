@@ -10,6 +10,7 @@ extension KiwiNotification: APIChoiceType {}
 extension Direction: APIChoiceType {}
 extension StickyReachOverride: APIChoiceType {}
 extension LayoutMode: APIChoiceType {}
+extension SpaceScope: APIChoiceType {}
 extension SpawnPlacement: APIChoiceType {}
 extension MouseResizeMode: APIChoiceType {}
 extension FloatPlacement: APIChoiceType {}

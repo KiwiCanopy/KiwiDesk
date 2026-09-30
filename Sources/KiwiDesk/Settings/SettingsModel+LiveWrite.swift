@@ -2,8 +2,10 @@ import KiwiDeskCore
 
 /// A write of the live profile from outside Settings, which Core
 /// announces through `onLiveProfileWritten` — the tour's look
-/// (#1720), a bar menu's row (#1518). profiles.md rules the draft
-/// policy.
+/// (#1720), a bar menu's row (#1518), a Space added to or removed
+/// from the profile by the bar's Delete, `create_space` /
+/// `delete_space` with `profile`, or Settings ▸ Spaces' own add
+/// button (#1790). profiles.md rules the draft policy.
 extension SettingsModel {
     /// A clean draft re-reads. A dirty one takes a `persisted`
     /// edit on both sides of its diff, so the change is neither
@@ -12,10 +14,7 @@ extension SettingsModel {
     /// wins — and nothing of an edit no file took, which lasts the
     /// session as the tour's does. A stored profile's draft is
     /// another file, which the write did not reach.
-    func adoptLiveWrite(
-        _ edit: (inout TilingSettings) -> Void,
-        persisted: Bool
-    ) {
+    func adoptLiveWrite(_ edit: LiveProfileEdit, persisted: Bool) {
         guard target == .live else { return }
         guard isDirty else {
             reload()
@@ -23,8 +22,8 @@ extension SettingsModel {
         }
         guard persisted else { return }
         suppressDirty = true
-        edit(&config.settings)
-        edit(&cleanConfig.settings)
+        config.apply(edit)
+        cleanConfig.apply(edit)
         suppressDirty = false
         recomputeDirty()
     }

@@ -26,8 +26,25 @@ public struct BarMenuHooks {
     /// The Layout menu's Keep row: the status item's own save, so
     /// a failure is reported the one way it already is.
     public var keepLayout: @MainActor () -> Void = {}
+    /// A Space chip's Delete of a profile Space (#1790): the GUI
+    /// asks, and runs `confirmed` only on a yes. Core names the
+    /// Space and the profile; the GUI words the question.
+    public var confirmSpaceDelete:
+        @MainActor (SpaceDeleteQuestion, @escaping @MainActor () -> Void)
+            -> Void = { _, _ in }
 
     public init() {}
+}
+
+/// What a profile Space's Delete asks (#1790): whether to remove
+/// `space` from `profile`'s file as well.
+public struct SpaceDeleteQuestion: Equatable, Sendable {
+    public let space: SpaceID
+    public let profile: String
+    /// Whether the Space carries a pin, a role or per-Space
+    /// settings the delete also removes — Settings' own delete
+    /// says so in that case.
+    public let carriesOverrides: Bool
 }
 
 extension KiwiCore {

@@ -3,7 +3,8 @@ import Testing
 
 /// An arrangement WRITE reads `capturedSpaces`, never the full live
 /// list, so no Keep, Save, sidecar or partitioning record captures
-/// a held Space (#1507 ruling 5, profiles.md). Scoped to where
+/// a held Space (#1507 ruling 5, profiles.md) or a temporary one
+/// (#1790). Scoped to where
 /// arrangement writes live — Core's `Profiles/`, the GUI config
 /// seam and the Settings model — every other reader of the live
 /// list there is listed with its reason, and an unlisted one reds.
@@ -21,7 +22,9 @@ struct CapturedSpacesCensusTests {
         "KiwiDeskCore/Profiles/KiwiCore+EmptyDisplayHeal.swift":
             (1, "the orphan's drop target; its number is minted"),
         "KiwiDeskCore/Profiles/KiwiCore+ProfileResolution.swift":
-            (2, "the mode loop skips held; the prune keeps them"),
+            (1, "the mode loop skips held and temporary Spaces"),
+        "KiwiDeskCore/Profiles/KiwiCore+SpacePrune.swift":
+            (1, "the prune; its callers keep held and temporary"),
         "KiwiDeskCore/Profiles/KiwiCore+HeldSpaces.swift":
             (5, "the held machinery itself"),
         "KiwiDeskCore/Profiles/KiwiCore+HeldSpaceReads.swift":
@@ -34,6 +37,10 @@ struct CapturedSpacesCensusTests {
             (3, "the display resolve places held Spaces too"),
         "KiwiDeskCore/Profiles/KiwiCore+ProfileSpaces.swift":
             (1, "the restore's focus snapshot"),
+        "KiwiDeskCore/Profiles/KiwiCore+TemporarySpaces.swift":
+            (5, "the temporary machinery itself (#1790)"),
+        "KiwiDeskCore/Profiles/KiwiCore+SpaceProfileScope.swift":
+            (1, "an added Space's place in live order (#1790)"),
         "KiwiDeskCore/App/KiwiCore+GuiConfig.swift":
             (1, "the Save's mode loop, which skips held"),
         "KiwiDesk/Settings/SettingsModel+Globals.swift":

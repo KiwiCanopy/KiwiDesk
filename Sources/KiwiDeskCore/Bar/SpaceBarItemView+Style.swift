@@ -22,7 +22,7 @@ extension SpaceBarItemView {
         styleIdentifier()
         styleApps()
         styleBadges()
-        styleHeldBadge()
+        styleMarkerBadge()
         styleDivider()
         styleAccent()
     }

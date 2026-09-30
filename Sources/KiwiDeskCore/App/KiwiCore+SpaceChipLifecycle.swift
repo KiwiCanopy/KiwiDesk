@@ -1,16 +1,18 @@
 import Foundation
 
-/// A Space chip's New Space and Delete Space rows (#1790, the
-/// owner's ruling of 2026-09-29 in its body), through the public
-/// `create_space`, `pin_space_to_display` and `delete_space`.
+/// A Space chip's New Space and Delete Space rows (#1790), through
+/// the public `create_space`, `pin_space_to_display` and
+/// `delete_space`. A New Space is temporary; the ruling is on the
+/// issue and in `docs/design-decisions.md`.
 extension KiwiCore {
     func spaceLifecycleRows(_ id: SpaceID) -> [BarMenuRow] {
         [newSpaceRow(beside: id), deleteSpaceRow(id)]
     }
 
     /// The next minted number, pinned to the chip's screen so it
-    /// lands where the user clicked. Number and screen are read at
-    /// the click; a screen gone since the menu opened mints nothing.
+    /// lands where the user clicked, and given its ⌃⌥N as a held
+    /// Space is. Number and screen are read at the click; a screen
+    /// gone since the menu opened mints nothing.
     private func newSpaceRow(beside id: SpaceID) -> BarMenuRow {
         .action(
             L("bar.menu.new_space", "New Space"),
@@ -23,6 +25,7 @@ extension KiwiCore {
                 "pin_space_to_display",
                 args: [.string(space.raw), .string(screen.fingerprint)]
             )
+            topUpDigitShortcuts()
         }
     }
 
@@ -32,20 +35,51 @@ extension KiwiCore {
         }
     }
 
-    /// Empty only, so `delete_space` never rehomes a window (#1790).
-    /// A Space a source declares returns when that source is next
-    /// applied, which the row says, as the Layout rows say "not
-    /// saved".
+    /// Empty only, so `delete_space` never rehomes a window. A
+    /// temporary Space goes at once; a profile Space asks first and
+    /// leaves the file too; a Space another source declares goes
+    /// for the session and says it comes back (#1790).
     private func deleteSpaceRow(_ id: SpaceID) -> BarMenuRow {
-        .action(
+        let comesBack = declaredSources(of: id)
+            .contains { !$0.hasPrefix("profile:") }
+        return .action(
             L("bar.menu.delete_space", "Delete Space"),
             enabled: spaceIsDeletable(id),
-            subtitle: declaredSources(of: id).isEmpty
-                ? nil
-                : L("bar.menu.delete_space.returns", "comes back on reload")
+            subtitle: comesBack
+                ? L("bar.menu.delete_space.returns", "comes back on reload")
+                : nil
         ) { [weak self] in
-            _ = self?.execute("delete_space", args: [.string(id.raw)])
+            self?.deleteFromChip(id, comesBack: comesBack)
         }
+    }
+
+    private func deleteFromChip(_ id: SpaceID, comesBack: Bool) {
+        guard !comesBack, let profile = profiles.currentName,
+            profiles.active?.declaredSpaces.contains(id) == true
+        else {
+            execute("delete_space", args: [.string(id.raw)])
+            return
+        }
+        let question = SpaceDeleteQuestion(
+            space: id,
+            profile: profile,
+            carriesOverrides: carriesOverrides(id)
+        )
+        barMenuHooks.confirmSpaceDelete(question) { [weak self] in
+            self?.execute(
+                "delete_space",
+                args: [.string(id.raw), .string(SpaceScope.profile.rawValue)]
+            )
+        }
+    }
+
+    /// Whether deleting `id` also drops a pin, a role or per-Space
+    /// settings — `GuiConfig.carriesOverrides`' question, of live.
+    private func carriesOverrides(_ id: SpaceID) -> Bool {
+        var probe = tiler.settings
+        probe.removeSpace(id)
+        return spacePins[id] != nil || mainSpaces.contains(id)
+            || fallbackSpace == id || probe != tiler.settings
     }
 
     /// Holds nothing (`spaceHoldsNothing`), is not held (#1507),
@@ -60,18 +94,5 @@ extension KiwiCore {
         return state.workspaces.allSpaces.contains {
             $0.id != id && state.workspaces.display(of: $0.id) == screen
         }
-    }
-
-    /// Whether a Keep would change which Spaces the live profile
-    /// lists: the live Space set a Keep writes against the list
-    /// the last apply adopted (#1245). Pins are not compared, and
-    /// a #1175 heal seed is the system's, not an edit, so it arms
-    /// nothing. Both Keep rows — a chip's and the status item's —
-    /// arm on it.
-    public var spaceSetDrifted: Bool {
-        guard let active = profiles.active else { return false }
-        let live = Set(capturedSpaces.map(\.id))
-            .subtracting(healedSpaces.values)
-        return live != active.listedSpaces.subtracting(healedSpaces.values)
     }
 }

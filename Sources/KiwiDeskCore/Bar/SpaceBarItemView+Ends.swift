@@ -7,9 +7,9 @@ import AppKit
 /// identifier alone (owner, 2026-09-29).
 extension SpaceBarItemView {
     /// Whether the identifier cell carries a corner badge — a
-    /// collapse's count or the held mark, at its trailing top.
-    static func badgesIdentifier(collapsed: Bool, held: Bool) -> Bool {
-        collapsed || held
+    /// collapse's count or the Space marker, at its trailing top.
+    static func badgesIdentifier(collapsed: Bool, marked: Bool) -> Bool {
+        collapsed || marked
     }
 
     /// Whether the trailing end holds an icon-like glyph: app
@@ -35,7 +35,10 @@ extension SpaceBarItemView {
     }
 
     private var badged: Bool {
-        Self.badgesIdentifier(collapsed: collapse != nil, held: held != nil)
+        Self.badgesIdentifier(
+            collapsed: collapse != nil,
+            marked: marker != nil
+        )
     }
 
     /// The extra end padding this item's rounded ends owe.

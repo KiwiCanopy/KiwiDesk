@@ -8,7 +8,8 @@ import Testing
 /// owner's ruling of 2026-09-29): New Space mints the next free
 /// number pinned to the chip's screen; Delete Space is offered
 /// only for an empty Space and names a declared one's return; and
-/// a changed Space set arms Keep as a mode change does.
+/// Keep keeps layouts alone, so a changed Space set never arms it
+/// (the 2026-09-30 ruling).
 @Suite("Space chip lifecycle rows", .serialized)
 @MainActor
 struct SpaceChipLifecycleRowsTests {
@@ -187,41 +188,39 @@ struct SpaceChipLifecycleRowsTests {
         return layout.first { $0.title == title }
     }
 
-    /// Keep saves the whole live profile (#1179), so a changed
-    /// Space set arms it as a changed mode does, and Keep itself
-    /// clears it — even where another screen setup's pins still
-    /// name the deleted Space, which Keep does not rewrite.
-    @Test("New and Delete arm Keep, and Keep disarms it")
-    func keepArms() throws {
+    /// Keep keeps the layouts of the profile's own Spaces (#1179,
+    /// re-ruled by #1790): a New Space arms nothing, a temporary
+    /// Space's mode arms nothing, and a profile Space's does — and
+    /// Keep writes that mode alone, never the Space list.
+    @Test("Keep keeps layouts, never the Space set")
+    func keepKeepsLayouts() throws {
         let core = seededCore()
-        var profile = core.buildProfile(name: "p", modes: nil)
-        // Another screen setup of the same count pins Space 2.
-        let office = MonitorSet(
-            monitors: ["A:1x1", "B:1x1"],
-            spaceMonitorMap: [two: "A:1x1"]
-        )
-        let added = profile.upsert(office)
-        #expect(added)
-        // A held Space is never captured, so it is no drift.
-        core.state.workspaces.ensureSpace(SpaceID("9"))
-        core.state.heldSpaces[SpaceID("9")] = HeldOrigin(
-            name: SpaceID("4"),
-            screen: "DELL:2560x1440",
-            icon: nil,
-            arrangement: nil
-        )
+        let profile = core.buildProfile(name: "p", modes: nil)
+        try core.profiles.save(profile)
         core.profiles.becameLive(profile, fits: true)
-        #expect(!core.spaceSetDrifted)
         #expect(keep(core)?.enabled == false)
         perform(row(core, one, "New Space"))
-        #expect(core.spaceSetDrifted)
+        let minted = try #require(
+            core.state.workspaces.allSpaces.map(\.id).first {
+                !profile.declaredSpaces.contains($0)
+            }
+        )
+        #expect(core.isTemporary(minted))
+        #expect(keep(core)?.enabled == false)
+        core.execute(
+            "set_mode",
+            args: [.string(minted.raw), .string("monocle")]
+        )
+        core.state.workspaces.activate(minted)
+        #expect(keep(core)?.enabled == false)
+        core.state.workspaces.activate(one)
+        core.execute("set_mode", args: [.string(one.raw), .string("stack")])
         #expect(keep(core)?.enabled == true)
-        try core.persistProfile(named: "p", modes: nil)
-        #expect(!core.spaceSetDrifted)
-        perform(row(core, two, "Delete Space"))
-        #expect(core.state.workspaces[two] == nil)
-        #expect(keep(core)?.enabled == true)
-        try core.persistProfile(named: "p", modes: nil)
-        #expect(!core.spaceSetDrifted)
+        try core.keepLayouts()
+        let stored = try core.profiles.read(name: "p")
+        #expect(stored.spaceModes[one] == .stack)
+        #expect(stored.spaces == profile.spaces)
+        #expect(!stored.declaredSpaces.contains(minted))
+        #expect(keep(core)?.enabled == false)
     }
 }

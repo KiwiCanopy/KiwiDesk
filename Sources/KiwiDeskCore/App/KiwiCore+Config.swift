@@ -219,10 +219,13 @@ extension KiwiCore {
         // shadowing session value would make an edited ratio
         // visibly do nothing (§5 forced-retile rationale).
         clearSessionRatios { $0 = SessionRatios() }
-        // A held Space's mode is its own, never the config's
-        // (#1507): no reload redeclares it, so none resets it.
+        // A held or temporary Space's mode is its own, never the
+        // config's (#1507, #1790): no reload redeclares it, so
+        // none resets it.
         for space in state.workspaces.allSpaces
-        where space.mode != .bsp && state.heldSpaces[space.id] == nil {
+        where space.mode != .bsp && state.heldSpaces[space.id] == nil
+            && state.temporarySpaces[space.id] == nil
+        {
             setSpaceMode(space.id, .bsp)
         }
     }

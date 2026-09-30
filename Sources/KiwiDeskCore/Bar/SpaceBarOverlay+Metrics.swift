@@ -67,7 +67,7 @@ extension SpaceBarOverlay {
         )
         let badged = SpaceBarItemView.badgesIdentifier(
             collapsed: item.collapse != nil,
-            held: item.held != nil
+            marked: item.held != nil || item.temporary
         )
         return SpaceBarItemView.ends(
             look: look,

@@ -99,7 +99,7 @@ extension KiwiCore {
                         profile
                     ),
                     enabled: LayoutModeRows.keepArmed(
-                        drifts: spaces.map(drifted) + [spaceSetDrifted]
+                        drifts: spaces.map(drifted)
                     )
                 ) { [weak self] in
                     self?.barMenuHooks.keepLayout()
@@ -152,6 +152,8 @@ extension KiwiCore {
     func setGlyphSpanFromBar(_ span: Int) {
         execute("space_bar.set_glyph_span", args: [.number(Double(span))])
         let settled = tiler.settings.spaceBarStyle.glyphSpan
-        writeThroughLiveProfile { $0.spaceBarStyle.glyphSpan = settled }
+        writeThroughLiveProfile(
+            .settings { $0.spaceBarStyle.glyphSpan = settled }
+        )
     }
 }

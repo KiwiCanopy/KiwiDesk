@@ -28,9 +28,6 @@ struct LayoutMenuInfo {
     let savedModeForActiveSpace: LayoutMode?
     /// Every connected screen, in provider discovery order.
     let screens: [Screen]
-    /// Core's `spaceSetDrifted`: a New or Delete Space the profile
-    /// does not list yet, which the chip's Keep arms on too (#1790).
-    var spaceSetDrifted = false
 
     /// Returns true if live layout mode differs from a known saved mode.
     static func drifted(
@@ -55,8 +52,7 @@ struct LayoutMenuInfo {
     /// would have saved it.
     var anyScreenHasDrifted: Bool {
         LayoutModeRows.keepArmed(
-            drifts: [activeSpaceHasDrifted, spaceSetDrifted]
-                + screens.map(\.hasDrifted)
+            drifts: [activeSpaceHasDrifted] + screens.map(\.hasDrifted)
         )
     }
 

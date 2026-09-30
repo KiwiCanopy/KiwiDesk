@@ -270,7 +270,8 @@ struct PausedGlobalsSaveTests {
 
     /// `spaces` is one of the six, and its freshness net has to
     /// run on this path too: a space that appeared live while
-    /// the dashboard sat open must not be pruned by the save.
+    /// the dashboard sat open must not be pruned by the save —
+    /// nor written, since one a command made is temporary (#1790).
     @Test("the space freshness net still runs")
     func liveSpacesAreMerged() throws {
         let (model, core) = try makeModel()
@@ -281,10 +282,10 @@ struct PausedGlobalsSaveTests {
         )
         editGlobal(model)
         model.saveGlobalsWhilePaused()
+        #expect(core.state.workspaces[SpaceID("scratch")] != nil)
+        #expect(core.isTemporary(SpaceID("scratch")))
         #expect(
-            core.loadGuiConfig().spaces.contains(
-                SpaceID("scratch")
-            )
+            !core.loadGuiConfig().spaces.contains(SpaceID("scratch"))
         )
     }
 }

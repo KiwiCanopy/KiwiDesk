@@ -29,6 +29,8 @@ public final class SpaceBarOverlay {
         private(set) var collapse: SpaceBarItemView.Collapse?
         /// Where a held Space came from (#1507).
         var held: SpaceBarItemView.Held?
+        /// Whether it is a temporary Space (#1790).
+        var temporary = false
 
         init(
             space: SpaceID,

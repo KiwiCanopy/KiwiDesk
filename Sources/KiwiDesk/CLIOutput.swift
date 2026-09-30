@@ -38,7 +38,7 @@ enum CLIOutput {
             let name = source.dropFirst(profile.count)
             return "removed from the live layout but still in "
                 + "saved profile \"\(name)\" — "
-                + "save the profile to make this durable"
+                + "delete it with scope profile to remove it there too"
         }
         let standard = "standard:"
         if source.hasPrefix(standard) {

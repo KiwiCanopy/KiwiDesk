@@ -96,7 +96,7 @@ extension KiwiCore {
         // only in `gui.json` is seeded into live at boot
         // (`seedGuiSpaces`, #77), so it is present here too.
         config.spaces = SpaceID.deduplicated(live)
-        config.spacePins = capturedPins
+        config.spacePins = capturedPins()
         config.mainSpaces = mainSpaces
         config.fallbackSpace = fallbackSpace
     }
@@ -177,7 +177,7 @@ extension KiwiCore {
         var config = GuiConfig()
         config.settings = tiler.settings
         config.appRules = globalRuleBase.appRules
-        config.spacePins = capturedPins
+        config.spacePins = capturedPins()
         config.mainSpaces = mainSpaces
         config.fallbackSpace = fallbackSpace
         config.layers = recoverKeybindings()

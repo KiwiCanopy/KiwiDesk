@@ -70,6 +70,7 @@ extension SettingsModel {
         resetLookReach()
         suppressDirty = false
         refreshProfiles()
+        liveOnlySpaces = core.liveOnlySpaces
         refreshPalettes()
         refreshLooks()
         // Recompute, never hand-set: `apply` assigns under

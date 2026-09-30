@@ -16,6 +16,13 @@ public struct HeldOrigin: Codable, Equatable, Sendable {
     /// (#1230: arrangements never merge by name). Nil where no
     /// profile or Standard was live.
     public let arrangement: Arrangement?
+    /// Whether it was a temporary Space (#1790) — it comes back
+    /// as one, and goes home without being declared. Nil in a
+    /// record written before temporary Spaces existed.
+    public var temporary: Bool? = nil
+
+    /// Whether it comes back as a temporary Space.
+    public var isTemporary: Bool { temporary == true }
 
     /// A saved profile or a composed Standard, by name.
     public enum Arrangement: Codable, Equatable, Sendable {

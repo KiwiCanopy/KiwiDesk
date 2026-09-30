@@ -68,11 +68,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.updater = updater
     }
 
-    /// A quick-menu keep just wrote the live layout into the
-    /// profile: move the draft's saved baseline onto it without
-    /// discarding staged edits (#1179).
-    func adoptKeptLayout() {
+    /// A Keep or `save_profile` just wrote the live profile: move
+    /// the draft's saved baseline onto what it wrote without
+    /// discarding staged edits (#1179, #1790).
+    func adoptKeptLayout(_ write: CapturedWrite) {
         model.adoptKeptLayout()
+        if write == .wholeLive { model.adoptCapturedSpaces() }
     }
 
     /// Whether a live-profile draft holds edits a Save would
@@ -91,12 +92,15 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         show()
     }
 
+    /// The live Spaces the profile does not hold changed (#1790).
+    func showLiveOnlySpaces(_ spaces: [LiveOnlySpace]) {
+        model.liveOnlySpaces = spaces
+    }
+
     /// A write of the live profile from outside Settings — the
-    /// tour's look (#1720), a bar menu's row (#1518).
-    func adoptLiveWrite(
-        _ edit: (inout TilingSettings) -> Void,
-        persisted: Bool
-    ) {
+    /// tour's look (#1720), a bar menu's row (#1518), a Space added
+    /// or removed (#1790).
+    func adoptLiveWrite(_ edit: LiveProfileEdit, persisted: Bool) {
         model.adoptLiveWrite(edit, persisted: persisted)
     }
 

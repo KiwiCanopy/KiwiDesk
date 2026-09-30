@@ -5,22 +5,44 @@ import Foundation
 /// persistent GUI-config equivalents). Split from the
 /// display-placement verbs for single responsibility.
 extension KiwiCore {
-    /// `create_space(space [, mode])` — brings a space into
-    /// existence (spaces otherwise appear implicitly on first
+    /// `create_space(space [, mode] [, scope])` — brings a space
+    /// into existence (spaces otherwise appear implicitly on first
     /// reference), optionally setting its layout mode, and resolves
     /// it onto a display. A no-op beyond the mode set if the space
-    /// already exists.
+    /// already exists. A Space it makes is temporary (#1790) unless
+    /// `scope` is `profile`, which writes it into the live
+    /// profile's file too — an existing temporary Space included.
+    /// `scope` may stand in the mode's place: no mode is spelled
+    /// like a scope (`SpaceScopeTests`).
     func createSpace(_ args: [JSONValue]) -> CommandResponse {
         guard let raw = args.first?.stringValue else {
             return .fail("expected space id")
         }
         let space = SpaceID(raw)
-        state.workspaces.ensureSpace(space)
-        if args.count > 1, let modeRaw = args[1].stringValue {
-            guard let mode = LayoutMode(rawValue: modeRaw) else {
-                return .fail("unknown mode: \(modeRaw)")
+        var mode: LayoutMode?
+        var scope = SpaceScope.session
+        for arg in args.dropFirst().compactMap(\.stringValue) {
+            if let parsed = LayoutMode(rawValue: arg), mode == nil {
+                mode = parsed
+            } else if let parsed = SpaceScope(rawValue: arg) {
+                scope = parsed
+            } else {
+                return .fail(
+                    "expected \(LayoutMode.expectedList)"
+                        + " or \(SpaceScope.expectedList)"
+                )
             }
-            setSpaceMode(space, mode)
+        }
+        // The refusal comes before the Space exists.
+        if scope == .profile, let refusal = profileScopeRefusal(of: space) {
+            return .fail(refusal.description)
+        }
+        state.workspaces.ensureSpace(space)
+        if let mode { setSpaceMode(space, mode) }
+        if scope == .profile {
+            if case .failure(let refusal) = addToProfile(space) {
+                return .fail(refusal.description)
+            }
         }
         // Give the new space a display (auto / main) so it can be
         // shown, then apply.
@@ -30,14 +52,16 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// `delete_space(space)` — removes a space after rehoming its
+    /// `delete_space(space [, scope])` — removes a space after rehoming its
     /// windows to the fallback space (or the first surviving space),
     /// so no window is orphaned. Clears the space from every runtime
     /// map (placement pins, Main role, per-space settings). Runtime
     /// only: a space still declared in `init.lua` or the profile
     /// reappears on the next config load, and `data.declared_in`
     /// names every such source (#1509, `declaredSources(of:)`).
-    /// Refuses to delete the only space.
+    /// Refuses to delete the only space. `scope` `profile` also
+    /// removes it from the live profile's file (#1790) — the CLI's
+    /// confirmation — and refuses a Space another source declares.
     func deleteSpace(_ args: [JSONValue]) -> CommandResponse {
         guard let raw = args.first?.stringValue else {
             return .fail("expected space id")
@@ -45,6 +69,13 @@ extension KiwiCore {
         let space = SpaceID(raw)
         guard state.workspaces[space] != nil else {
             return .fail("unknown space: \(raw)")
+        }
+        var scope = SpaceScope.session
+        if args.count > 1, let scopeRaw = args[1].stringValue {
+            guard let parsed = SpaceScope(rawValue: scopeRaw) else {
+                return .expected(SpaceScope.self)
+            }
+            scope = parsed
         }
         let survivors = state.workspaces.allSpaces
             .map(\.id)
@@ -56,6 +87,11 @@ extension KiwiCore {
                 }) ?? survivors.first
         else {
             return .fail("cannot delete the only space")
+        }
+        if scope == .profile,
+            case .failure(let refusal) = removeFromProfile(space)
+        {
+            return .fail(refusal.description)
         }
         forwardWindows(of: space, to: target)
         endHold(of: space)

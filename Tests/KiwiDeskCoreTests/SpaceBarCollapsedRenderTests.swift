@@ -70,9 +70,9 @@ struct SpaceBarCollapsedRenderTests {
         let view = try render(.count, held: true, windows: windows)
             .itemViews[1]
         view.layoutSubtreeIfNeeded()
-        #expect(!view.heldBadge.isHidden)
+        #expect(!view.markerBadge.isHidden)
         #expect(view.overflowBadge.frame.midY > view.bounds.midY)
-        #expect(!view.overflowBadge.frame.intersects(view.heldBadge.frame))
+        #expect(!view.overflowBadge.frame.intersects(view.markerBadge.frame))
     }
 
     /// Past nine the disc reads "9+" and stays a disc, while the

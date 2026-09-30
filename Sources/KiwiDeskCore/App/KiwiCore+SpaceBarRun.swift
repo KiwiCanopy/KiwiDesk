@@ -45,6 +45,7 @@ extension KiwiCore {
                     after: content.after,
                     drawn: content.drawn
                 )
+                item.temporary = isTemporary(id)
                 item.held = state.heldSpaces[id].map {
                     SpaceBarItemView.Held(
                         screenName: $0.screenName,

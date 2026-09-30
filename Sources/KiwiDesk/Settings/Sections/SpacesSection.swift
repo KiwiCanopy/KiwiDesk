@@ -118,6 +118,29 @@ struct SpacesSection: View {
             SpaceAddRow(spaces: model.config.spaces) {
                 model.config.spaces.append($0)
             }
+            liveOnlyRows
+        }
+    }
+
+    /// The live Spaces the profile does not hold (#1790), after its
+    /// own rows and the "+": temporary, then held. The LIVE page
+    /// only — a stored profile's page is another arrangement.
+    @ViewBuilder private var liveOnlyRows: some View {
+        if !model.editingStoredProfile, !model.liveOnlySpaces.isEmpty {
+            if model.liveOnlySpaces.contains(where: \.isTemporary),
+                !model.liveOnlySpaces.contains(where: \.canAdd)
+            {
+                CrossReferenceRow(
+                    prose: Self.noProfileProse,
+                    linkTitle: SettingsDestination.profiles.title,
+                    destination: .profiles
+                )
+            }
+            ForEach(model.liveOnlySpaces) { space in
+                LiveOnlySpaceRow(space: space) {
+                    model.core.addSpaceToProfile(space.id)
+                }
+            }
         }
     }
 

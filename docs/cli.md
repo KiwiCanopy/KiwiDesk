@@ -236,7 +236,7 @@ exports nothing.
 | | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the focused window there, switches with it and keeps keyboard focus on it. `space id` names the Space it lands in |
 | | `move_space_to_display` | space id, display index or name |
 | | `pin_space_to_display` | space id, display index or name |
-| | `create_space` | space id, [mode] |
+| | `create_space` | space id, [mode] — see [`create_space`](lua-reference.md#create_space) |
 | | `delete_space` | space id — see [Deleting a Space](#deleting-a-space) |
 | Window | `make_floating` | — |
 | | `make_tiled` | — |
@@ -448,6 +448,15 @@ one.
 
 `delete_space` succeeds whether or not the removal lasts.
 
+:::unreleased
+`kiwidesk delete_space 5 profile` also removes the Space from
+the live profile's file, and `kiwidesk create_space 7 profile`
+adds one there; the scope is the command line's confirmation.
+Both refuse a Space `init.lua` or a built-in layout declares,
+naming it. A Space made any other way is temporary — see
+[`create_space`](lua-reference.md#create_space).
+:::
+
 When the space is still declared somewhere, the response says
 where:
 
@@ -463,7 +472,7 @@ when none does. The JSON goes to stdout as always; the CLI adds
 one line per source on stderr, so stdout carries nothing new:
 
 ```
-removed from the live layout but still in saved profile "Work" — save the profile to make this durable
+removed from the live layout but still in saved profile "Work" — delete it with scope profile to remove it there too
 still composed by the built-in "Developer" standard — save a profile to make this durable
 still created by init.lua — remove the call that creates it
 ```

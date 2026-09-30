@@ -36,7 +36,7 @@ extension KiwiCore {
         liveFingerprints.contains(origin.screen)
             && (origin.arrangement == nil
                 || origin.arrangement == arrangement)
-            && declared.contains(origin.name)
+            && (origin.isTemporary || declared.contains(origin.name))
     }
 
     /// Whether held Space `id` goes home under its own name — the
@@ -47,7 +47,9 @@ extension KiwiCore {
         declared: Set<SpaceID>,
         into arrangement: HeldOrigin.Arrangement
     ) -> Bool {
-        id == origin.name
+        // A temporary one comes back under the number it holds, so
+        // one the arrangement declares must move off it first.
+        (origin.isTemporary ? !declared.contains(id) : id == origin.name)
             && returnsHome(origin, declared: declared, into: arrangement)
     }
 
@@ -81,18 +83,31 @@ extension KiwiCore {
             }
     }
 
-    /// The live Spaces an arrangement WRITE captures — Keep, a
-    /// Settings Save, the sidecar sync, a profile's partitioning
-    /// record — which a held Space never joins (#1507 ruling 5).
+    /// The live Spaces an arrangement WRITE captures — a Settings
+    /// Save, the sidecar sync, a profile's partitioning record —
+    /// which neither a held Space (#1507 ruling 5) nor a temporary
+    /// one (#1790) joins. `save_profile` alone takes
+    /// `snapshotSpaces`.
     public var capturedSpaces: [Space] {
+        snapshotSpaces.filter { state.temporarySpaces[$0.id] == nil }
+    }
+
+    /// The live Spaces the whole-live snapshot writes: every one
+    /// but a held Space, temporary ones included (#1790).
+    var snapshotSpaces: [Space] {
         state.workspaces.allSpaces.filter {
             state.heldSpaces[$0.id] == nil
         }
     }
 
     /// The live pins an arrangement write captures — a held
-    /// Space's home pin is not the arrangement's.
-    var capturedPins: [SpaceID: String] {
-        spacePins.filter { state.heldSpaces[$0.key] == nil }
+    /// Space's home pin is not the arrangement's, nor a temporary
+    /// one's, unless the write is the whole-live snapshot.
+    func capturedPins(includingTemporary: Bool = false) -> [SpaceID: String] {
+        spacePins.filter {
+            state.heldSpaces[$0.key] == nil
+                && (includingTemporary
+                    || state.temporarySpaces[$0.key] == nil)
+        }
     }
 }

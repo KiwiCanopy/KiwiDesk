@@ -34,12 +34,15 @@ struct SpaceForwardingSeamTests {
         // parameter names, so the call needle misses it).
         #expect(
             callers == [
-                "Profiles/KiwiCore+ProfileResolution.swift": 1,
+                "Profiles/KiwiCore+SpacePrune.swift": 1,
                 "Commands/KiwiCore+SpaceLifecycleCommands.swift": 1,
                 "App/KiwiCore+PlaceholderSpace.swift": 1,
                 "Profiles/KiwiCore+EmptyDisplayHeal.swift": 1,
                 // A held Space's re-file home and its retire (#1507).
                 "Profiles/KiwiCore+HeldSpaces.swift": 2,
+                // A temporary Space's drop on a switch and its
+                // auto-delete (#1790).
+                "Profiles/KiwiCore+TemporarySpaces.swift": 2,
             ]
         )
     }

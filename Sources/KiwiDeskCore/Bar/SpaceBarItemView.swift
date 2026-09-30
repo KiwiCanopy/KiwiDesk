@@ -57,7 +57,9 @@ final class SpaceBarItemView: NSView {
     /// so a click target reads as one (#1528).
     var hoveredTarget: SpaceBarGlyphTarget?
     weak var glyphActions: SpaceBarGlyphActions?
-    let heldBadge = StateBadgeView(symbolName: SpaceBarItemView.heldSymbol)
+    /// Blank until its item wears a marker; the style pass draws
+    /// the marker's symbol (`styleMarkerBadge`).
+    let markerBadge = StateBadgeView(symbolName: "")
     /// Divider between identifier and app glyphs (QA 2026-07-19).
     let identifierDivider = NSView()
     let accent = SheenRimView()
@@ -100,6 +102,8 @@ final class SpaceBarItemView: NSView {
         _ in
     }
     private(set) var held: Held?
+    /// A temporary Space (#1790).
+    private(set) var temporary = false
     /// What this item draws in place of its glyphs (#1683).
     private(set) var collapse: Collapse?
     private(set) var isActive = false
@@ -129,7 +133,7 @@ final class SpaceBarItemView: NSView {
         addSubview(identifierDivider)
         addSubview(overflowBadge)
         addSubview(leadingBadge)
-        addSubview(heldBadge)
+        addSubview(markerBadge)
         addSubview(accentClip)
         accentClip.addSubview(accent)
         springRing.fillColor = nil
@@ -177,6 +181,7 @@ final class SpaceBarItemView: NSView {
         after: SpaceBarStrip.Disc = .none,
         drawn: SpaceBarStrip.Drawn? = nil,
         held: Held? = nil,
+        temporary: Bool = false,
         collapse: Collapse? = nil
     ) {
         let keepsSpace =
@@ -212,6 +217,7 @@ final class SpaceBarItemView: NSView {
         self.after = after
         self.drawn = drawn
         self.held = held
+        self.temporary = temporary
         self.collapse = collapse
         self.isActive = active
         self.horizontal = horizontal

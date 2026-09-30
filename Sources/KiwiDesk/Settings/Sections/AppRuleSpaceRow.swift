@@ -71,6 +71,7 @@ struct AppRuleSpaceRow: View {
                     model.config.appRules[app] = space
                 }
             }
+            temporarySpaces
         } label: {
             AppRuleMenuLabel(text: spaceFacetLabel)
         }
@@ -82,6 +83,42 @@ struct AppRuleSpaceRow: View {
         )
         .accessibilityLabel(L("app_rules.space", "Opens in"))
         .accessibilityValue(spaceFacetLabel)
+    }
+
+    /// Temporary Spaces cannot be a rule's target (#1790): listed
+    /// disabled, with the way to add one to the profile. The live
+    /// page only — a stored profile's page is another arrangement.
+    @ViewBuilder private var temporarySpaces: some View {
+        let temporary = model.liveOnlySpaces.filter(\.isTemporary)
+        if !model.editingStoredProfile, let first = temporary.first {
+            Section(
+                L("app_rules.space.temporary_header", "Temporary")
+            ) {
+                ForEach(temporary) { space in
+                    Button(space.id.raw) {}.disabled(true)
+                }
+                Button(Self.addTemporaryTitle(many: temporary.count > 1)) {
+                    model.nav.pendingReveal = SettingsAnchor(
+                        destination: .spaces,
+                        anchor: LiveOnlySpaceRow.anchor(first.id)
+                    )
+                }
+            }
+        }
+    }
+
+    static func addTemporaryTitle(many: Bool) -> String {
+        many
+            ? L(
+                "app_rules.space.add_temporary_many",
+                "Add them to this profile in %1$@…",
+                SettingsDestination.spaces.title
+            )
+            : L(
+                "app_rules.space.add_temporary_one",
+                "Add it to this profile in %1$@…",
+                SettingsDestination.spaces.title
+            )
     }
 
     /// The drawn and spoken value, one expression.

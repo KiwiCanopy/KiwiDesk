@@ -275,7 +275,7 @@ struct HeldSpaceTests {
             stateMarkColors: StateMarkColors(sticky: "", floating: ""),
             held: renumbered.held
         )
-        #expect(!view.heldBadge.isHidden)
+        #expect(!view.markerBadge.isHidden)
         #expect(
             view.accessibilityLabel()
                 == "Space 5, held from DELL, where it was Space 3, "

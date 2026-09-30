@@ -63,15 +63,17 @@ extension APIReference {
             .text("display")
         ),
         "create_space": APIRecord(
-            "Brings a Space into existence, optionally in a "
-                + "given layout mode.",
+            "Makes a Space; temporary unless scope is profile, "
+                + "which may take the optional mode's place.",
             .space("space"),
-            .choice("mode", LayoutMode.self, optional: true)
+            .choice("mode", LayoutMode.self, optional: true),
+            .choice("scope", SpaceScope.self, optional: true)
         ),
         "delete_space": APIRecord(
-            "Removes a Space after rehoming its windows; "
-                + "declared_in names what re-creates it on reload.",
-            .space("space")
+            "Removes a Space after rehoming its windows; scope "
+                + "profile removes it from the profile too.",
+            .space("space"),
+            .choice("scope", SpaceScope.self, optional: true)
         ),
         "make_floating": APIRecord(
             "Marks the focused window, or the one a window id "

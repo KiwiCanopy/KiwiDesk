@@ -43,11 +43,14 @@ extension KiwiCore {
         )
         var focus = heldFocusTrackers()
         for ((space, screen), id) in zip(candidates, names) {
+            // A temporary one comes back temporary (#1790).
             let origin = HeldOrigin(
                 name: space.id,
                 screen: screen,
                 icon: icons[space.id],
-                arrangement: liveArrangement
+                arrangement: liveArrangement,
+                temporary: state.temporarySpaces
+                    .removeValue(forKey: space.id) == nil ? nil : true
             )
             if id != space.id {
                 moveMembers(of: space.id, to: id, mode: space.mode)
@@ -135,6 +138,17 @@ extension KiwiCore {
                 continue
             }
             state.heldSpaces[id] = nil
+            // A temporary one is back as one, on its own screen,
+            // under the number it holds (#1790).
+            if origin.isTemporary {
+                spacePins[id] = origin.screen
+                state.temporarySpaces[id] = TemporarySpace(armed: true)
+                onLog(
+                    "monitor change: temporary space \(id.raw) back "
+                        + "on '\(origin.screenName)'"
+                )
+                continue
+            }
             if goesHomeInPlace(
                 id,
                 origin,

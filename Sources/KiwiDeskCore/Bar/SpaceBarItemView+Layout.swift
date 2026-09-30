@@ -68,14 +68,14 @@ extension SpaceBarItemView {
             cell: cell,
             slack: Self.pad
         )
-        layoutHeldBadge(onCellAt: cursor, cell: cell)
+        layoutMarkerBadge(onCellAt: cursor, cell: cell)
         if collapse != nil {
-            // The held asterisk owns the top corner (#1507).
+            // The Space marker owns the top corner (#1507, #1790).
             layoutBadge(
                 overflowBadge,
                 onCellAt: cursor,
                 cell: cell,
-                lowerCorner: held != nil
+                lowerCorner: marker != nil
             )
         }
         cursor += cell
@@ -158,7 +158,7 @@ extension SpaceBarItemView {
             emphasis: .bold
         )
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
-        // Below the held asterisk the disc keeps clear of it.
+        // Below the Space marker the disc keeps clear of it.
         let ceiling =
             lowerCorner
             ? max(cell - StateBadgeMetrics.side(cell: cell), base)

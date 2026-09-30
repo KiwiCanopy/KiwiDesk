@@ -28,6 +28,14 @@ extension KiwiCore {
         set { spaceBars.onStatusMarkChange = newValue }
     }
 
+    /// The live Spaces the profile does not hold (#1790), pushed off
+    /// the bar's refresh like the status mark.
+    public var onLiveOnlySpacesChange: @MainActor ([LiveOnlySpace]) -> Void
+    {
+        get { spaceBars.onLiveOnlyChange }
+        set { spaceBars.onLiveOnlyChange = newValue }
+    }
+
     public var activeSpace: Space? {
         state.workspaces.activeSpace.flatMap {
             state.workspaces[$0]

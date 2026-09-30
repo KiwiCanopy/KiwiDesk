@@ -102,13 +102,11 @@ struct CrossReferenceRowSlotTests {
     /// had broken.
     ///
     /// One entry names a BINDING rather than a producer, and the
-    /// file+expression key does not close the hole there:
-    /// `LayoutCard`'s row needs `if let` for an optional
-    /// sentence, so the scan sees `appBarProse` and re-pointing
-    /// that binding at a different producer would leave this
-    /// comparison identical while
-    /// `theAppBarProsePlacesItsLink` went on asserting an
-    /// orphaned `LayoutCardText.appBarState`. Named, not papered
+    /// file+expression key does not close the hole there: `LayoutCard`'s row
+    /// needs `if let` for an optional sentence, so the scan sees `appBarProse`
+    /// and re-pointing that binding at a different producer would leave this
+    /// comparison identical while `theAppBarProsePlacesItsLink` went on
+    /// asserting an orphaned `LayoutCardText.appBarState`. Named, not papered
     /// over: the others carry their producer; only this row can't.
     private static let asserted: Set<String> = [
         "MotionCard.swift:Self.scrollingXrefProse",
@@ -125,6 +123,7 @@ struct CrossReferenceRowSlotTests {
         "KiwiShelfCard.swift:Self.lookReference",  // LookReferenceTests
         "GapsEditor.swift:Self.lookReference",  // LookReferenceTests
         "SharedLookPointer.swift:follows?Self.sharedProse:Self.ownProse",
+        "SpacesSection.swift:Self.noProfileProse",  // LiveOnlySpaceRowTests
     ]
 
     // MARK: - The values

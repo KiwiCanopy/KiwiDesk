@@ -27,4 +27,15 @@ extension SettingsModel {
         }
         recomputeDirty()
     }
+
+    /// `save_profile` also wrote which Spaces exist and their pins
+    /// (#1790): the baseline takes the live list, and a draft that
+    /// had not edited the list takes it too.
+    func adoptCapturedSpaces() {
+        guard target == .live else { return }
+        let live = core.capturedSpaces.map(\.id)
+        if config.spaces == cleanConfig.spaces { config.spaces = live }
+        cleanConfig.spaces = live
+        recomputeDirty()
+    }
 }

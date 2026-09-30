@@ -176,23 +176,26 @@ extension KiwiCore {
         // rewrites gui.json when the space list changed
         // (`globalsChanged`) — so the cold-boot seed can't re-add
         // the dropped space; this path needs no direct mirror.
-        // A held Space is never in the draft (#1507 ruling 5), so
-        // the Save must not read its absence as a deletion.
+        // A held or temporary Space is never in the draft (#1507
+        // ruling 5, #1790), so the Save must not read its absence
+        // as a deletion.
         pruneSpaces(
-            keeping: inList.union(extra).union(state.heldSpaces.keys),
+            keeping: inList.union(extra).union(state.heldSpaces.keys)
+                .union(state.temporarySpaces.keys),
             orderedBy: config.spaces,
             preferring: config.fallbackSpace
         )
         for space in state.workspaces.allSpaces
         where (scope?.contains(space.id) ?? true)
             && state.heldSpaces[space.id] == nil
+            && state.temporarySpaces[space.id] == nil
         {
             setSpaceMode(
                 space.id,
                 config.spaceModes[space.id] ?? .bsp
             )
         }
-        spacePins = config.spacePins
+        spacePins = keepingTemporaryPins(config.spacePins)
         mainSpaces = config.mainSpaces
         // A fallback pointing outside the edited space list is
         // meaningless — drop it rather than persist a dangling

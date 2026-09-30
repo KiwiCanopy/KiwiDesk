@@ -167,7 +167,7 @@ struct BarMenuRowsTests {
         var draft = TilingSettings()
         var persisted = false
         core.onLiveProfileWritten = { edit, written in
-            edit(&draft)
+            if case .settings(let change) = edit { change(&draft) }
             persisted = written
         }
         let pick = current == 3 ? 4 : 3

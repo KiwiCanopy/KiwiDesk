@@ -192,6 +192,7 @@ extension SpaceBarOverlay {
                 after: item.after,
                 drawn: item.drawn,
                 held: item.held,
+                temporary: item.temporary,
                 collapse: item.collapse
             )
             view.onSelect = { [weak self] space in

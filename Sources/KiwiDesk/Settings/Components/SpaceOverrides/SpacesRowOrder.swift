@@ -8,6 +8,7 @@ enum SpacesRowOrder {
         .spaces(.spacesName),
         .spaces(.spaceModes),
         .spaces(.spacesDelete),
+        .spaces(.spacesAddToProfile),
         .spaces(.fallbackSpace),
     ]
 
