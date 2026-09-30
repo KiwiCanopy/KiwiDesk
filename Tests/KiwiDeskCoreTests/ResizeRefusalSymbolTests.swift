@@ -151,4 +151,19 @@ struct ResizeRefusalSymbolTests {
             )
         }
     }
+
+    /// The Tile refusal wears the same pill (#1810): no tile
+    /// here, so never an arrow, and a glyph the target resolves.
+    @Test("a Tile refusal draws a resolvable non-arrow")
+    func tileRefusalSymbol() {
+        for reason: AutoFloatReason in [.rule, .panel, .accessoryApp] {
+            #expect(!reason.pillSymbol.contains("arrow"))
+            #expect(
+                NSImage(
+                    systemSymbolName: reason.pillSymbol,
+                    accessibilityDescription: nil
+                ) != nil
+            )
+        }
+    }
 }

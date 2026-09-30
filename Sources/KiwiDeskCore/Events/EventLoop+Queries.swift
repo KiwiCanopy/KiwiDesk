@@ -1,14 +1,15 @@
 import ApplicationServices
 
 /// Read-only lookups into the event loop's tracking tables — used
-/// by the tiler (geometry apply), `make_auto`, the focused-command
-/// preflight (#292), and native-Space raise safety. None mutate;
-/// they keep `EventLoop.swift` focused on tracking and dispatch.
+/// by the tiler (geometry apply), the float verbs, the
+/// focused-command preflight (#292), and native-Space raise
+/// safety. None mutate; they keep `EventLoop.swift` focused on
+/// tracking and dispatch.
 extension EventLoop {
-    /// Last float-detection verdict of a tracked window —
-    /// what `make_auto` returns a window to when the manual
-    /// override is cleared (#164). Nil for untracked windows.
-    public func detectionVerdict(for id: WindowID) -> Bool? {
+    /// Last float-detection verdict of a tracked window — what a
+    /// Tile returns a window to, and why it refuses (#1810). Nil
+    /// for untracked windows.
+    public func detectionVerdict(for id: WindowID) -> FloatVerdict? {
         detectedFloating[id]
     }
 

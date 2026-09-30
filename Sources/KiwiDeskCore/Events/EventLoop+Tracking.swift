@@ -97,14 +97,14 @@ extension EventLoop {
         else {
             return
         }
-        window.isFloating =
-            shouldForceFloat(pid: pid, id: window.id)
-            || FloatDetection.shouldFloat(
-                element: element,
-                bundleID: app.bundleID,
-                layer: layer,
-                rules: floatRules
-            )
+        let verdict = autoFloatVerdict(
+            element,
+            id: window.id,
+            pid: pid,
+            bundleID: app.bundleID,
+            layer: layer
+        )
+        window.isFloating = verdict.floats
         // A transient overlay floats for a *structural* reason
         // (third-party accessory app, panel subrole, or raised
         // layer), never just because a float rule matched — so a
@@ -123,7 +123,7 @@ extension EventLoop {
         // around a display-filling window shows only at the
         // corners); snapshot it here, refresh on reconcile.
         window.isFullscreen = readFullscreen(element)
-        detectedFloating[window.id] = window.isFloating
+        detectedFloating[window.id] = verdict
         detectedFullscreen[window.id] = window.isFullscreen
         elements[pid, default: [:]][window.id] = element
         observers[pid]?.observe(window: element)
@@ -182,8 +182,8 @@ extension EventLoop {
     /// A window scanned mid-launch or mid-animation can report
     /// a wrong subrole once (Ghostty's quick terminal during
     /// the startup scan) and would otherwise stay misclassified
-    /// until it closes. Only a changed detection verdict emits,
-    /// so manual make_floating overrides survive reconciles.
+    /// until it closes. Only a changed detection verdict emits;
+    /// the fold keeps a user float over it (#1810).
     // Internal (not private): also called by `handle` in
     // EventLoop+Notifications.swift.
     func recheckFloat(
@@ -193,16 +193,19 @@ extension EventLoop {
         app: AppRef
     ) {
         recheckFullscreen(element, id: id)
-        let floating =
-            shouldForceFloat(pid: pid, id: id)
-            || FloatDetection.shouldFloat(
-                element: element,
-                bundleID: app.bundleID,
-                rules: floatRules
-            )
-        guard detectedFloating[id] != floating else { return }
-        detectedFloating[id] = floating
-        onEvent(.windowFloatChanged(id, isFloating: floating))
+        let verdict = autoFloatVerdict(
+            element,
+            id: id,
+            pid: pid,
+            bundleID: app.bundleID,
+            layer: FloatDetection.windowLayer(of: id)
+        )
+        let before = detectedFloating[id]
+        detectedFloating[id] = verdict
+        // A changed REASON alone is stored silently: the flag
+        // follows only whether the window floats.
+        guard before?.floats != verdict.floats else { return }
+        onEvent(.windowFloatChanged(id, isFloating: verdict.floats))
     }
 
     /// Re-reads native-fullscreen state on reconcile so a

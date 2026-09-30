@@ -90,7 +90,30 @@ extension EventLoop {
     /// (`SelfWindowExclusionTests`, the flag being otherwise
     /// unobservable from outside).
     func shouldForceFloat(pid: pid_t, id: WindowID) -> Bool {
-        Self.shouldForceFloat(
+        forceFloatReason(pid: pid, id: id) != nil
+    }
+
+    /// `shouldForceFloat` as a reason (#1810): own chrome reads as
+    /// a panel, anyone else's as an app with no Dock icon.
+    nonisolated static func forceFloatReason(
+        pid: pid_t,
+        activationPolicy: NSApplication.ActivationPolicy,
+        tilesAsOwnWindow: Bool
+    ) -> AutoFloatReason? {
+        guard
+            shouldForceFloat(
+                pid: pid,
+                activationPolicy: activationPolicy,
+                tilesAsOwnWindow: tilesAsOwnWindow
+            )
+        else { return nil }
+        return isOwnProcess(pid) ? .panel : .accessoryApp
+    }
+
+    /// The live force-float reason for one tracked window — the
+    /// static above over the app's live policy and the mark.
+    func forceFloatReason(pid: pid_t, id: WindowID) -> AutoFloatReason? {
+        Self.forceFloatReason(
             pid: pid,
             activationPolicy: NSRunningApplication(
                 processIdentifier: pid
@@ -98,6 +121,28 @@ extension EventLoop {
             tilesAsOwnWindow: Self.isOwnProcess(pid)
                 && ownWindowIdentifier(id)
                     == OwnWindowTiling.identifier
+        )
+    }
+
+    /// The automatic verdict for one tracked window (#1810) — the
+    /// one composition `track` and `recheckFloat` both take.
+    func autoFloatVerdict(
+        _ element: AXUIElement,
+        id: WindowID,
+        pid: pid_t,
+        bundleID: String?,
+        layer: Int?
+    ) -> FloatVerdict {
+        if let forced = forceFloatReason(pid: pid, id: id) {
+            return .floats(forced)
+        }
+        return FloatVerdict(
+            FloatDetection.autoFloatReason(
+                element: element,
+                bundleID: bundleID,
+                layer: layer,
+                rules: floatRules
+            )
         )
     }
 

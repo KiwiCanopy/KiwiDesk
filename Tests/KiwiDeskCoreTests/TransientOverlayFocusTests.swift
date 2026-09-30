@@ -144,34 +144,6 @@ struct TransientOverlayFocusTests {
         )
     }
 
-    /// The flag clears the moment detection heals the window back
-    /// to tiled (`setFloating`, #300), so the fold must ask STATE
-    /// — after `upsert` and `restoreFloatOverride` — and not the
-    /// incoming snapshot.
-    @Test("A healed overlay takes focus like any window")
-    func healedOverlayTakesFocus() {
-        let core = makeCore()
-        core.state.workspaces.ensureSpace("1")
-        core.state.workspaces.activate("1")
-        core.handle(.windowCreated(window(1)))
-        core.handle(.windowFocused(WindowID(1)))
-        // A remembered make_tiled for that window's identity:
-        // the fold's `restoreFloatOverride` untiles it, and
-        // `setFloating(_, false)` drops the overlay flag with it.
-        let overlay = window(2, floating: true, overlay: true)
-        core.state.rememberedFloating[
-            StateCoordinator.WindowIdentity(of: overlay)
-        ] = false
-        core.handle(.windowCreated(overlay))
-        #expect(
-            core.state.windows[WindowID(2)]?
-                .isTransientOverlay == false
-        )
-        #expect(
-            core.state.workspaces["1"]?.focused == WindowID(2)
-        )
-    }
-
     /// The #636 arm the denial must not swallow: a space whose
     /// members all left with a native switch has `focused == nil`,
     /// and the first ORDINARY returner still seeds it — the

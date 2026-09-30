@@ -14,7 +14,6 @@ public enum FocusedCommandPolicy {
         "move_to_desktop_and_follow",
         "make_floating",
         "make_tiled",
-        "make_auto",
         "toggle_floating",
         "new_window",
         "close_window",

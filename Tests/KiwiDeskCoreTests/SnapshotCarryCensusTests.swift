@@ -199,7 +199,7 @@ struct SnapshotCarryCensusTests {
             Set(windowLeftBehind.keys).isSubset(of: before.keys),
             "the register names a property ManagedWindow no longer has"
         )
-        #expect(b.state.manualFloatOverrides[w1] == true)
+        #expect(b.state.userFloated.contains(w1))
         #expect(b.state.stickyReachOverrides[w1] == false)
         #expect(b.tiler.monocleShownMembers[spaceID] == w2)
     }

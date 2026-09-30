@@ -4279,7 +4279,7 @@ and not this one's; it is shrunk into the float region there,
 never under a learned app minimum, and a parked corner frame is
 never recorded (#1352). It is recorded only where the flip really
 tiles the window: a floating-mode member made tiled still floats,
-and `make_auto`, whose flip is detection's, records nothing. The
+so it records nothing. The
 memory is SESSION state by owner ruling: it lives beside the float
 overrides, never in a snapshot, and ends where the window ends — a
 close, an away window's retirement, its app's exit — while a
@@ -4293,10 +4293,9 @@ rarely carries the same id, title or screen.
 on the space the window RENDERS on — a sticky traveler's, not its
 home's, for the gate and the region alike: a window already an
 effective float there — its flag, or a floating-mode member whose
-frame is the user's — keeps it. `make_auto` stays
-out (its flip is detection, not a deliberate float), as do app
-rules floating a window at creation and a Space's own entry into
-floating mode, which #1177's quit grid owns.
+frame is the user's — keeps it. App rules floating a window at
+creation stay out, as does a Space's own entry into floating
+mode, which #1177's quit grid owns.
 
 *A move into a floating Space is placed the same way (#1708).* A
 tiled window a move verb files into a floating-mode Space —
@@ -4409,6 +4408,65 @@ the flag, and the same-app grouping it breaks keeps it with it
 "disagree" by this: one is a mark drawn, the other a ring
 withheld, and neither claims the space is anything but what the
 user set it to.
+
+:::unreleased
+**A window is tiled or floating, and Tile hands it back to the
+rules ([#1810](https://github.com/KiwiCanopy/KiwiDesk/issues/1810)).**
+[Principle] The automatic verdict — float rules, dialog, sheet,
+panel and raised-layer detection, an app with no Dock icon —
+decides whether a window floats, and the user can add exactly one
+thing on top of it: "I floated this". Float (`make_floating`, the
+bar menu's Float Window, `toggle_floating` towards floating)
+records it; Tile (`make_tiled`, Tile Window, `toggle_floating`
+towards tiled) clears it, and the window follows the verdict
+again, including a rule added afterwards. There is no manual-tile
+override and so no third "auto" state to return to: `make_auto`
+is retired with no alias, since Tile does its job. Do not bring a
+tile override back:
+
+- It was never designed. `make_tiled` shipped as "un-float", and
+  only a later change made it a sticky override.
+- No report ever used it to correct a misdetection.
+- It was an invisible third state: it beat every rule, survived
+  close and reopen, nothing drew it, and only Lua or the CLI
+  could clear it. With Tile Window one click away on the bar
+  menu, a window tiled once would never obey a float rule added
+  later.
+- A Tile pressed during a momentary misread mid-launch stuck
+  after detection healed.
+- Its one real beneficiary, an app that hides its Dock icon, is
+  better served by an app-level rule, which waits until someone
+  asks for it.
+
+*Tile on a window the verdict floats refuses.* Overriding the
+verdict there is the third state again, so the verb does nothing
+and says why, in one sentence per reason — a rule, a dialog or
+panel, an app with no Dock icon — carried as a reason case that
+one Core renderer turns into words (`AutoFloatReason+Rendering`:
+the pill and the menu are Core-drawn, so no word crosses the #96
+seam), and CLI/IPC fail in English. The bar menu's
+Tile Window row greys with the same sentence rather than hiding
+(grey, don't hide), and the row and the cue read the one reason
+value so they cannot disagree. A rule's reason names App Rules,
+because that is where the user can change the answer.
+
+*Float records nothing where the verdict already floats.* Such a
+record changes nothing now, and later keeps the window floating
+after the user removes the rule that floated it — the hidden
+state by the other door. So the rule holds from every door, not
+only the verb's: a record made earlier is dropped the moment
+detection floats the window, and neither the reopen memory nor a
+restart restores one onto a window detection floats.
+
+*The verdict has one reader.* A verb and the menu row ask it
+through `KiwiCore.tileRefusal(of:)`, which reads
+`EventLoop.detectionVerdict(for:)`, the copy detection wrote,
+never by calling the float detection or the rules again beside
+it, which would let the verb and the window disagree. A
+floating-mode Space still floats every member through
+`EffectiveFloat`; that is the Space's layout, not a verdict about
+the window, and Tile does not reach it.
+:::
 
 ### Spaces, profiles & config ownership
 
@@ -5059,8 +5117,8 @@ rulings:
   window marked "always with me" that a Desktop switch strands
   is the surprise, not the reach.
 - **A single window can be pinned against the toggle**
-  (`override_sticky_reach` on/off/auto — the `make_auto`
-  semantics: `auto` clears the pin back to the toggle).
+  (`override_sticky_reach` on/off/auto — `auto` clears the pin
+  back to the toggle).
   Session-scoped: a pin is a judgement about this window now,
   and old window ids get recycled.
 - **The row hides without the bridge** — *an absent capability
@@ -10999,10 +11057,10 @@ because of its Space — joins too, and onto a tiled Space takes
 the float flag, since the layout would otherwise tile it: it was
 floating and stays floating, and the flag it never set is the
 price (owner ruling 2026-09-26, over leaving it home and over
-tiling it). The flag is the float verb's MANUAL override, so
+tiling it). The flag is the one `make_floating` records, so
 detection cannot re-tile the window later and it reopens floating
 — a window that tiled itself minutes after a drop is the worse
-surprise, and `make_auto` undoes it. A sticky window is not re-filed by the drop at all:
+surprise, and Tile undoes it. A sticky window is not re-filed by the drop at all:
 its home is #445's to move, and that gate's refusal cue on a
 window the user just visibly moved would mislead.
 

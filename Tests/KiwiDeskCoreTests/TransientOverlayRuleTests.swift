@@ -84,21 +84,6 @@ struct TransientOverlayRuleTests {
         #expect(state.workspaces.space(of: WindowID(3)) == ruled)
     }
 
-    /// The skip reads STATE, not the incoming snapshot: a restored
-    /// tiled intent clears the overlay flag ahead of the target, so
-    /// the window is a window again and follows the rule.
-    @Test("a popup restored as tiled follows the rule")
-    func restoredTiledIntentFollowsTheRule() {
-        var state = makeState()
-        let popup = window(4, overlay: true, raised: true, title: "T")
-        state.rememberedFloating[
-            StateCoordinator.WindowIdentity(of: popup)
-        ] = false
-        state.apply(.windowCreated(popup))
-        #expect(state.windows[WindowID(4)]?.isTransientOverlay == false)
-        #expect(state.workspaces.space(of: WindowID(4)) == ruled)
-    }
-
     /// The tracker is where the layer is read, from a live element
     /// no fixture can build, so the fold clauses above hand the
     /// field in and would stay green with the assignment gone. Read

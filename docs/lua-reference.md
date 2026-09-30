@@ -653,8 +653,8 @@ A window floated again after you tiled it returns to the frame it
 last floated at, while that frame is still on the same screen;
 KiwiDesk forgets it when the window closes, its app quits or
 KiwiDesk quits.
-`"keep"`: the window keeps the frame it had in the layout. Never fires on `make_tiled`,
-`make_auto`, or a window already floating, including one on a
+`"keep"`: the window keeps the frame it had in the layout. Never fires on `make_tiled`
+or a window already floating, including one on a
 floating-mode Space. Global (per profile, all spaces); no Settings
 toggle. Replaces `set_float_nudge`: a saved setting that had the
 nudge off becomes `"keep"`, while an `init.lua` call to
@@ -3795,11 +3795,17 @@ tiled plane: focusing or cmd-tabbing to a tiled window never
 buries the float behind it, and two overlapping floats stack
 most-recently-focused on top. (To exclude a window from tiling
 *without* pinning it above others, use `ignore_rules` — KiwiDesk
-then leaves its z-order untouched.) The override survives the
+then leaves its z-order untouched.) The float survives the
 window closing and reopening (matched by app name and title; a
 window that closes while untitled has no identity to match and
 loses it) and applies only to that window — use `float_rules` to
 float every window of an app.
+
+:::unreleased
+A window that a `float_rules` entry, KiwiDesk's dialog and panel
+detection, or its app having no Dock icon already floats is left
+as it is, and nothing is remembered for it.
+:::
 
 **Example:**
 
@@ -3811,9 +3817,27 @@ KiwiDesk.make_floating()
 
 **Expects:** nothing.
 
-**Does:** marks the focused window as tiled. It returns to its
-space's tiling layout. Like `make_floating`, the override
-survives the window closing and reopening.
+**Does:** returns the focused window to its space's tiling
+layout.
+
+:::unreleased
+It undoes a `make_floating`: from then on
+`float_rules` and KiwiDesk's own detection decide whether it
+floats, including rules you add later. A window floated by a
+`float_rules` entry, by that detection (dialogs, sheets, panels)
+or because its app has no Dock icon cannot be tiled: the command
+does nothing, a pill on the window names the reason, and over the
+CLI it fails. Remove the `float_rules` entry to tile such a
+window. A window that floats only because its Space is in
+floating layout still floats there.
+
+Dragging a window out of a floating-layout Space onto a tiled
+Space on another display floats it the way `make_floating` does,
+so it stays floating there; `make_tiled` undoes it.
+
+`make_auto` is retired, and `make_tiled` does its job: a call
+fails with `make_auto was retired — use make_tiled`.
+:::
 
 **Example:**
 
@@ -3821,48 +3845,18 @@ survives the window closing and reopening.
 KiwiDesk.make_tiled()
 ```
 
-### make_auto
-
-**Expects:** nothing.
-
-**Does:** clears the focused window's manual override — the
-third state of the float tri-state (floating-manual /
-tiled-manual / auto). The window returns to detection control:
-`float_rules` and the built-in dialog/panel detection apply
-again, including future rule edits, and the close/reopen memory
-of the window's current identity is forgotten. (A remembered
-intent stored under an *older* title can still resurface after a
-reopen — run `make_auto` again once the window shows the wrong
-state and it is purged for good.) Use it when a window "sticks"
-floating or tiled after a `make_floating`/`make_tiled` you no
-longer want.
-
-:::unreleased
-Dragging a window out of a floating-layout Space onto a tiled
-Space on another display sets the same manual override, so it
-stays floating there; `make_auto` clears it too.
-:::
-
-**Example:**
-
-```lua
-KiwiDesk.make_auto()
-```
-
 ### toggle_floating
 
 **Expects:** nothing.
 
-**Does:** flips the focused window's own float setting in one
-verb — a window set to float is set to tile, and vice versa. On a
-floating-layout Space every window floats whatever its setting, so
-the window does not move there (its Space Bar glyph still shows
-the float badge or loses it); the setting decides whether it keeps
-floating once a command moves it to a tiled Space or the Space
-changes layout. Like `make_floating`/`make_tiled`, it writes an
-explicit manual override (which survives close/reopen); it never
-produces the `auto` state, so `make_auto` stays the way back to
-detection control. It is bound to `control+option+f` by default
+**Does:** flips the focused window in one verb — a floating
+window is tiled as [`make_tiled`](#make_tiled) tiles it, and a
+tiled one floated as [`make_floating`](#make_floating) floats it.
+On a floating-layout Space every window floats, so the window
+does not move there (its Space Bar glyph still shows the float
+badge or loses it); the flip decides whether it keeps floating
+once a command moves it to a tiled Space or the Space changes
+layout. It is bound to `control+option+f` by default
 and is the only float verb offered in the Settings shortcut
 list; the explicit `make_*` verbs remain for scripts that need a
 specific direction.
