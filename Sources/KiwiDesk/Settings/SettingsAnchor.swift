@@ -45,6 +45,8 @@ struct SettingsAnchor: Hashable {
             return renders ? surface : .main
         case .space:
             return destination == .spaces ? surface : .main
+        case .appRule:
+            return destination == .appRules ? surface : .main
         }
     }
 }
@@ -56,6 +58,8 @@ enum SettingsSurface: Hashable {
     case layoutMode(LayoutMode)
     /// One Space's card on Spaces (#1518).
     case space(SpaceID)
+    /// One app's rule row on App Rules (#1518).
+    case appRule(String)
 }
 
 extension SettingsAnchor {
@@ -74,6 +78,8 @@ extension SettingsAnchor {
             self.init(destination: .advancedColors)
         case .space(let space):
             self.init(destination: .spaces, surface: .space(space))
+        case .appRule(let app):
+            self.init(destination: .appRules, surface: .appRule(app))
         }
     }
 }

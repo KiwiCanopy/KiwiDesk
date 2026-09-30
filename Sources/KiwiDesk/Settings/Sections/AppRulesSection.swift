@@ -38,6 +38,21 @@ struct AppRulesSection: View {
         .onChange(of: model.cleanConfig) { composingTitles = nil }
     }
 
+    /// The list card holding `app`'s rule — the Space list first —
+    /// where a bar menu's App Rules… lands (#1518); nil for an app
+    /// with no rule, which lands on the page and creates none.
+    @MainActor
+    static func card(
+        holding app: String,
+        in model: SettingsModel
+    ) -> SettingsControl? {
+        if model.config.appRules.keys.contains(app) {
+            return SettingsCatalog.appRules.spaceList
+        }
+        let floats = model.config.floatRules.map(FloatFacet.appSegment(of:))
+        return floats.contains(app) ? SettingsCatalog.appRules.floatList : nil
+    }
+
     /// The area's census gates, from one construction site for
     /// both lists and every row.
     var gates: AppRulesGates {
