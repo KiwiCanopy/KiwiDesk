@@ -67,37 +67,41 @@ public enum GeometryUtils {
     /// `VisibleFrameReadCensusTests` holds the exceptions.
     @MainActor
     static func visibleFrame(of screen: NSScreen) -> CGRect {
-        #if DEBUG
-            if let visibleFrameOverride {
-                return visibleFrameOverride(screen)
-            }
-        #endif
-        return liveVisibleFrame(of: screen)
-    }
-
-    #if DEBUG
-        /// Test seam over `visibleFrame(of:)`; nil reads the
-        /// machine. Every read is a WindowServer round trip, which
-        /// a test core memoizes (#1868).
-        @MainActor
-        static var visibleFrameOverride: ((NSScreen) -> CGRect)?
-    #endif
-
-    /// The machine's reading behind `visibleFrame(of:)`.
-    @MainActor
-    static func liveVisibleFrame(of screen: NSScreen) -> CGRect {
+        let area = appKitArea(of: screen)
         if menuBarAutoHides {
             return reclaimingMenuBar(
-                screen.visibleFrame,
+                area.visible,
                 screen: screen.frame,
-                safeTop: screen.safeAreaInsets.top
+                safeTop: area.safeTop
             )
         }
         return clearingMenuBar(
-            screen.visibleFrame,
+            area.visible,
             barBottom: DrawnMenuBars.bottom(of: screen)
         )
     }
+
+    /// AppKit's own reading of a screen's usable area and notch
+    /// inset — the WindowServer round trip under
+    /// `visibleFrame(of:)`, before the #1386 correction.
+    @MainActor
+    static func appKitArea(
+        of screen: NSScreen
+    ) -> (visible: CGRect, safeTop: CGFloat) {
+        #if DEBUG
+            if let appKitAreaOverride { return appKitAreaOverride(screen) }
+        #endif
+        return (screen.visibleFrame, screen.safeAreaInsets.top)
+    }
+
+    #if DEBUG
+        /// Test seam over `appKitArea(of:)`; nil reads the machine.
+        /// A test core memoizes it, the correction above still
+        /// running live (#1868).
+        @MainActor
+        static var appKitAreaOverride:
+            ((NSScreen) -> (visible: CGRect, safeTop: CGFloat))?
+    #endif
 
     /// Lowers `visible`'s top edge to a drawn bar's bottom edge
     /// when it reaches past it; never raises it (#1386).

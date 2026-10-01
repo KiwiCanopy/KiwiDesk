@@ -64,7 +64,7 @@ extension KiwiCore {
     /// `CGDirectDisplayID`. Nil when the display is not currently
     /// connected to a screen.
     func screen(for display: DisplayID) -> NSScreen? {
-        NSScreen.screens.first { $0.kiwiDisplayID == display }
+        TilingEngine.screen(for: display)
     }
 
     /// The bar-hosting layout for a space, resolved through the

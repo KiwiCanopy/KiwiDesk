@@ -5,10 +5,10 @@ paths:
 
 # Core boundaries
 
-Deliberately short — it loads on every `KiwiDeskCore` edit. Five
+Deliberately short — it loads on every `KiwiDeskCore` edit. Six
 seams, each violated *outside* the directory that owns them — the
-count is the five bullets immediately below, so it corrects
-itself when a sixth is added.
+count is the six bullets immediately below, so it corrects
+itself when a seventh is added.
 
 - **Core names, the GUI narrates (#96).** A user-facing
   condition detected in Core returns **structure** (a case, an
@@ -170,3 +170,15 @@ itself when a sixth is added.
   `ResourceBundleRoutingTests` is the guard and its map is the
   exemption list; the argument is in
   [packaging-and-release.md](packaging-and-release.md).
+- **A class that stores a panel orders it out in its own
+  `isolated deinit`** (#1868). AppKit keeps an ordered-in window
+  alive after its owner is gone, so an overlay dropped while
+  shown leaves its panel on screen for good — every test core
+  that drew a shelf or a mark did, until hundreds stood and every
+  WindowServer call slowed. "A panel" is `NSPanel`, `NSWindow` or
+  a Core subclass of either, stored directly, in a collection or
+  inside a struct the class holds. `OverlayPanelDeinitCensusTests`
+  holds the class (deinit in the owning class, calling
+  `orderOut`); `OverlayPanelReleaseTests` the behaviour for the
+  shelf and the sticky mark. The deinit is the backstop, not the
+  graceful path: a retire or a fade still hides first.

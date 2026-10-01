@@ -28,11 +28,8 @@ extension SourceScan {
 
     /// Reads `url`, strips comments, and caches the result so
     /// subsequent scans over the same file reuse the parsed representation.
-    ///
-    /// Single-flight per file: the scan suites start together, and
-    /// with the cache filled only after the walk every one of them
-    /// stripped the whole tree itself (#1868). A file's own lock
-    /// makes the late callers wait for the first walk instead.
+    /// Single-flight per file: a late caller waits for the first
+    /// strip instead of walking the file again (#1868).
     static func strippedSource(at url: URL) throws -> String {
         let fileLock: NSLock = cacheLock.withLock {
             if let lock = stripLocks[url] { return lock }
