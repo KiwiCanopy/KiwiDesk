@@ -22,7 +22,7 @@ extension SpaceBarItemView {
         styleIdentifier()
         styleApps()
         styleBadges()
-        styleHeldBadge()
+        styleMarker()
         styleDivider()
         styleAccent()
     }
@@ -175,7 +175,7 @@ extension SpaceBarItemView {
         return NSColor(kiwiHex: style.fillColor)
     }
 
-    private var stateColor: NSColor {
+    var stateColor: NSColor {
         // The layer item takes the current-Space ink: it exists
         // to be noticed, and it is never "not current" (#1169).
         if isActive || space == nil {

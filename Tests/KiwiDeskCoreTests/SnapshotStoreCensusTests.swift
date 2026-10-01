@@ -90,6 +90,8 @@ struct SnapshotStoreCensusTests {
             ),
         "state.heldSpaces":
             (.always, "held Spaces, re-created at boot (#1646)"),
+        "state.temporaryArmed":
+            (.always, "temporary Spaces, re-created at boot (#1790)"),
         "state.profilePartitioning.byArrangement[]":
             (
                 .always,
@@ -181,6 +183,9 @@ struct SnapshotStoreCensusTests {
             arrangement: nil
         )
         _ = F.settle(core)
+        // After the settle, whose retire prunes an arm on a Space
+        // no live profile leaves temporary.
+        core.state.temporaryArmed.insert(shown)
         return core
     }
 
@@ -199,7 +204,7 @@ struct SnapshotStoreCensusTests {
         for named in [
             "state.floatFrames", "tiler.boundLearner.lastAsks",
             "state.userFloated", "tiler.monocleShownMembers",
-            "state.heldSpaces",
+            "state.heldSpaces", "state.temporaryArmed",
             "state.profilePartitioning.byArrangement[][]",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")

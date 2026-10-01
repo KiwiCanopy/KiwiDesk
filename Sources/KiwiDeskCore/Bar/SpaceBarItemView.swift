@@ -57,7 +57,11 @@ final class SpaceBarItemView: NSView {
     /// so a click target reads as one (#1528).
     var hoveredTarget: SpaceBarGlyphTarget?
     weak var glyphActions: SpaceBarGlyphActions?
-    let heldBadge = StateBadgeView(symbolName: SpaceBarItemView.heldSymbol)
+    /// Blank until its item wears a marker; the style pass draws
+    /// the marker's symbol (`styleMarkerBadge`).
+    /// The held or temporary Space marker, inline after the
+    /// identifier in its ink (#1507, #1790).
+    let markerView = NSImageView()
     /// Divider between identifier and app glyphs (QA 2026-07-19).
     let identifierDivider = NSView()
     let accent = SheenRimView()
@@ -99,7 +103,8 @@ final class SpaceBarItemView: NSView {
         _,
         _ in
     }
-    private(set) var held: Held?
+    /// The held or temporary Space marker (#1507, #1790).
+    private(set) var marker: Marker?
     /// What this item draws in place of its glyphs (#1683).
     private(set) var collapse: Collapse?
     private(set) var isActive = false
@@ -129,7 +134,9 @@ final class SpaceBarItemView: NSView {
         addSubview(identifierDivider)
         addSubview(overflowBadge)
         addSubview(leadingBadge)
-        addSubview(heldBadge)
+        markerView.imageScaling = .scaleProportionallyUpOrDown
+        markerView.setAccessibilityElement(false)
+        addSubview(markerView)
         addSubview(accentClip)
         accentClip.addSubview(accent)
         springRing.fillColor = nil
@@ -176,7 +183,7 @@ final class SpaceBarItemView: NSView {
         before: SpaceBarStrip.Disc = .none,
         after: SpaceBarStrip.Disc = .none,
         drawn: SpaceBarStrip.Drawn? = nil,
-        held: Held? = nil,
+        marker: Marker? = nil,
         collapse: Collapse? = nil
     ) {
         let keepsSpace =
@@ -211,7 +218,7 @@ final class SpaceBarItemView: NSView {
         self.before = before
         self.after = after
         self.drawn = drawn
-        self.held = held
+        self.marker = marker
         self.collapse = collapse
         self.isActive = active
         self.horizontal = horizontal

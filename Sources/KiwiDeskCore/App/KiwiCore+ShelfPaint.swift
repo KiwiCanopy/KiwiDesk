@@ -104,6 +104,6 @@ extension KiwiCore {
         live(&tiler.settings)
         // An explicit apply (§5): a look can move the shelf's edge.
         retile(pass: .apply)
-        writeThroughLiveProfile(stored)
+        writeThroughLiveProfile(.settings(stored))
     }
 }

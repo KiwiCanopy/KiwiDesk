@@ -32,6 +32,8 @@ struct SymbolClassifierSeamTests {
             "builds the identifier image from a `.symbol` verdict",
         "Sources/KiwiDeskCore/Bar/StateBadgeView.swift":
             "builds a badge image from a fixed name",
+        "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Marker.swift":
+            "builds the Space marker's image from a fixed name",
         "Sources/KiwiDeskCore/Borders/StickyMarkOverlay.swift":
             "builds the state mark images from fixed names",
         "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Pill.swift":

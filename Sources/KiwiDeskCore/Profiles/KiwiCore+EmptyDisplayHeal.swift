@@ -46,9 +46,7 @@ extension KiwiCore {
                 seed = earlier
                 setSpaceMode(seed, lead)
             case .absent:
-                seed = SpaceID.smallestFreeNumber(
-                    among: state.workspaces.allSpaces.map(\.id)
-                )
+                seed = mintedSpaceNumber()
                 state.workspaces.ensureSpace(seed, mode: lead)
                 healedSpaces[display.fingerprint] = seed
             }

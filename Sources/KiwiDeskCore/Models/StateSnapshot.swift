@@ -56,14 +56,19 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         /// The Space's hold, in every snapshot (#1646,
         /// `StateSnapshot+Held`).
         public var held: HeldRecord?
+        /// Whether the Space is temporary, in every snapshot
+        /// (#1790, `KiwiCore+TemporarySpaceBoot`).
+        public var temporary: TemporaryRecord?
 
         public init(
             space: Space,
             session: SpaceSession? = nil,
-            held: HeldRecord? = nil
+            held: HeldRecord? = nil,
+            temporary: TemporaryRecord? = nil
         ) {
             self.session = session
             self.held = held
+            self.temporary = temporary
             self.id = space.id.raw
             self.mode = space.mode
             self.windows = space.windows.map(\.raw)
@@ -77,7 +82,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         }
 
         private enum CodingKeys: String, CodingKey {
-            case id, mode, windows, focused, session, held
+            case id, mode, windows, focused, session, held, temporary
             case trackBreaks = "track_breaks"
             case trackWeights = "track_weights"
         }
@@ -113,6 +118,10 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
             )
             // On its own too: an unreadable hold costs itself.
             held = try? c.decodeIfPresent(HeldRecord.self, forKey: .held)
+            temporary = try? c.decodeIfPresent(
+                TemporaryRecord.self,
+                forKey: .temporary
+            )
         }
 
         /// This record under another id (#1646's boot renumber).

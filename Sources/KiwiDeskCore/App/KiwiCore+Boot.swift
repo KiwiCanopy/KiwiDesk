@@ -181,7 +181,7 @@ extension KiwiCore {
         // restore filed what the snapshot knows.
         seedAwayWindows()
         // After the seed, so an away window keeps its hold (#1646).
-        retireGoneHeldMembers()
+        retireGoneRestoredFilings()
         drainDeferredBootApps()
         closeBootInterval()
         logBootSummary()

@@ -60,19 +60,39 @@ struct SpaceBarCollapsedRenderTests {
         #expect(disc.midY < view.bounds.midY)
     }
 
-    /// The held asterisk owns the top corner (#1507), so the disc
-    /// takes the bottom one rather than covering it.
+    /// The Space marker sits after the identifier (#1507, #1790),
+    /// so the disc keeps its corner and never covers it.
     @Test(
-        "A held Space's disc takes the bottom corner",
+        "A marked Space's disc stays clear of its marker",
         arguments: [3, 12]
     )
-    func heldDiscMovesDown(windows: Int) throws {
+    func markedDiscStaysClear(windows: Int) throws {
         let view = try render(.count, held: true, windows: windows)
             .itemViews[1]
         view.layoutSubtreeIfNeeded()
-        #expect(!view.heldBadge.isHidden)
-        #expect(view.overflowBadge.frame.midY > view.bounds.midY)
-        #expect(!view.overflowBadge.frame.intersects(view.heldBadge.frame))
+        #expect(!view.markerView.isHidden)
+        #expect(view.overflowBadge.frame.midY < view.bounds.midY)
+        #expect(!view.overflowBadge.frame.intersects(view.markerView.frame))
+    }
+
+    /// The plan measures a marked item with the identifier ink the
+    /// layout tucks the marker by, so the reserved length is the
+    /// drawn one (#1790).
+    @Test("A marked item's planned length is its drawn length")
+    func markedLengthMatchesLayout() throws {
+        let view = try render(.apps, held: true).itemViews[1]
+        view.layoutSubtreeIfNeeded()
+        #expect(!view.markerView.isHidden)
+        #expect(view.identifierInkWidth != nil)
+        let drawn = SpaceBarItemView.autoLength(
+            appCount: 2,
+            marked: true,
+            identifierInk: view.identifierInkWidth,
+            contentDepth: view.contentDepth,
+            glyphGap: view.style.resolvedGlyphGap,
+            ends: view.ends
+        )
+        #expect(abs(view.frame.width - drawn) < 0.5)
     }
 
     /// Past nine the disc reads "9+" and stays a disc, while the
@@ -178,7 +198,7 @@ func collapsedBar(
             after: .none
         ).collapsed(to: content)
         if held, index == 1 {
-            item.held = .init(screenName: "Dell", originName: nil)
+            item.marker = .held(.init(screenName: "Dell", originName: nil))
         }
         return item
     }

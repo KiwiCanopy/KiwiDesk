@@ -101,10 +101,16 @@ struct SpaceAddNameTests {
     func sectionWiresTheRow() throws {
         let source = try sectionSource()
         let row = SourceScan.declarationBody(
-            after: "SpaceAddRow(spaces: model.config.spaces)",
+            after: "SpaceAddRow(spaces: takenSpaces)",
             in: source
         )
         #expect(row?.contains("model.config.spaces.append($0)") == true)
+        // A "+" never reuses a live-only Space's name (#1790).
+        let taken = SourceScan.declarationBody(
+            after: "var takenSpaces: [SpaceID]",
+            in: source
+        )
+        #expect(taken?.contains("model.liveOnlySpaces") == true)
     }
 
     @Test("the row draws the rule's refusal")

@@ -36,7 +36,9 @@ extension KiwiCore {
         // A held Space retires the moment it empties (#1507) —
         // every membership change retiles, so this is its one
         // choke point too, ahead of anything that lays it out.
-        if retireEmptiedHeldSpaces() {
+        // A temporary one the same way, once armed (#1790).
+        let heldRetired = retireEmptiedHeldSpaces()
+        if retireEmptiedTemporarySpaces() || heldRetired {
             resolveSpaceDisplays()
             emitSpaceChange()
         }

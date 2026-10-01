@@ -68,7 +68,7 @@ struct BarMenuLandingTests {
         #expect(model.isDirty)
         let before = model.draftChangeCount
         model.adoptLiveWrite(
-            { $0.spaceBarStyle.glyphSpan = 7 },
+            .settings { $0.spaceBarStyle.glyphSpan = 7 },
             persisted: true
         )
         #expect(model.config.settings.spaceBarStyle.glyphSpan == 7)
@@ -85,7 +85,7 @@ struct BarMenuLandingTests {
         model.target = .storedProfile("Other")
         let span = model.config.settings.spaceBarStyle.glyphSpan
         model.adoptLiveWrite(
-            { $0.spaceBarStyle.glyphSpan = span + 2 },
+            .settings { $0.spaceBarStyle.glyphSpan = span + 2 },
             persisted: true
         )
         #expect(model.config.settings.spaceBarStyle.glyphSpan == span)
@@ -105,14 +105,14 @@ struct BarMenuLandingTests {
         model.suppressDirty = true
         model.config.settings.kiwishelf.minimum = loaded + 9
         model.suppressDirty = false
-        model.adoptLiveWrite({ _ in }, persisted: true)
+        model.adoptLiveWrite(.settings { _ in }, persisted: true)
         #expect(model.config.settings.kiwishelf.minimum == loaded)
         // A session-only write re-reads a clean draft too, as the
         // tour's paint always has.
         model.suppressDirty = true
         model.config.settings.kiwishelf.minimum = loaded + 9
         model.suppressDirty = false
-        model.adoptLiveWrite({ _ in }, persisted: false)
+        model.adoptLiveWrite(.settings { _ in }, persisted: false)
         #expect(model.config.settings.kiwishelf.minimum == loaded)
     }
 
@@ -124,7 +124,7 @@ struct BarMenuLandingTests {
         let model = dirtyModel()
         let span = model.config.settings.spaceBarStyle.glyphSpan
         model.adoptLiveWrite(
-            { $0.spaceBarStyle.glyphSpan = span + 2 },
+            .settings { $0.spaceBarStyle.glyphSpan = span + 2 },
             persisted: false
         )
         #expect(model.config.settings.spaceBarStyle.glyphSpan == span)

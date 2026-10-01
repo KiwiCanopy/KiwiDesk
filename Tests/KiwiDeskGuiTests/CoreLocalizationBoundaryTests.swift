@@ -105,8 +105,8 @@ struct CoreLocalizationBoundaryTests {
         // Bar call is the layer item's label (#1169).
         "Bar/AppBarItemView.swift": 5,
         "Bar/SpaceBarItemView+Collapse.swift": 3,
-        // The Space's announced name, held frames beside it (#1507).
-        "Bar/SpaceBarItemView+Held.swift": 3,
+        // The Space's announced name: held (#1507), temporary (#1790).
+        "Bar/SpaceBarItemView+Marker.swift": 6,
         "Bar/SpaceBarOverlay+FrontApp.swift": 2,
         // A glyph target's VoiceOver name and each side's `+n`
         // target's (#1528).
@@ -124,6 +124,9 @@ struct CoreLocalizationBoundaryTests {
         // The window rows of the same menus (#1518): Core draws
         // them, and no word crosses into the GUI.
         "App/KiwiCore+BarWindowMenus.swift": 8,
+        // A Space chip's New Space and Delete Space rows and why a
+        // Delete is greyed (#1790), on the same Core-drawn menu.
+        "App/KiwiCore+SpaceChipLifecycle.swift": 9,
         // The window actions' refusal pills (#1518), which Core
         // draws on the window, as the resize pills are.
         "Commands/WindowActionRefusal.swift": 2,

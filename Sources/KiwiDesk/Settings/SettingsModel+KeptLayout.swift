@@ -27,4 +27,25 @@ extension SettingsModel {
         }
         recomputeDirty()
     }
+
+    /// `save_profile` also wrote which Spaces exist and their pins
+    /// (#1790): a clean draft re-reads; a dirty one moves its
+    /// baseline onto the written list and pins, and takes them into
+    /// the draft too where it had not edited them.
+    func adoptCapturedSpaces() {
+        guard target == .live else { return }
+        guard isDirty else {
+            reload()
+            return
+        }
+        let live = core.capturedSpaces.map(\.id)
+        let pins = core.capturedSpacePins
+        if config.spaces == cleanConfig.spaces { config.spaces = live }
+        if config.spacePins == cleanConfig.spacePins {
+            config.spacePins = pins
+        }
+        cleanConfig.spaces = live
+        cleanConfig.spacePins = pins
+        recomputeDirty()
+    }
 }

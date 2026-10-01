@@ -125,6 +125,12 @@ extension View {
         searchFlash(control.id)
     }
 
+    /// Anchors and flashes a row no catalog control names — a live
+    /// Space's view-only row (#1790), which App Rules lands on.
+    func liveSpaceAnchored(_ anchor: String) -> some View {
+        self.searchFlash(anchor).searchAnchor(anchor)
+    }
+
     /// Hoisted scroll target marker at section top
     /// (`SettingsAnchorPrimitiveTests`, #610).
     func searchScrollAnchor(

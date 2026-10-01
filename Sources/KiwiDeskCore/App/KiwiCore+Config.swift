@@ -4,6 +4,10 @@ import Foundation
 extension KiwiCore {
     /// Loads (or reloads) init.lua into a fresh VM.
     public func loadConfig() {
+        // #1790: `init.lua`'s Spaces are undeclared until its run
+        // returns, so nothing is retired meanwhile.
+        profiles.arrangementInFlight += 1
+        defer { profiles.arrangementInFlight -= 1 }
         // Before the settle, which may rewrite a profile file the
         // #1741 crossing still has to read.
         prepareAppWide()
@@ -212,16 +216,21 @@ extension KiwiCore {
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]
         fallbackSpace = nil
+        // Read while `init.lua`'s last Spaces still count (#1790).
+        let temporaries = Set(liveTemporarySpaces)
         initDeclaredSpaces = []
         // The session resize layer reseeds on reload (#458):
         // the config about to apply is the new truth, and a
         // shadowing session value would make an edited ratio
         // visibly do nothing (§5 forced-retile rationale).
         clearSessionRatios { $0 = SessionRatios() }
-        // A held Space's mode is its own, never the config's
-        // (#1507): no reload redeclares it, so none resets it.
+        // A held or temporary Space's mode is its own, never the
+        // config's (#1507, #1790): no reload redeclares it, so
+        // none resets it.
         for space in state.workspaces.allSpaces
-        where space.mode != .bsp && state.heldSpaces[space.id] == nil {
+        where space.mode != .bsp && state.heldSpaces[space.id] == nil
+            && !temporaries.contains(space.id)
+        {
             setSpaceMode(space.id, .bsp)
         }
     }

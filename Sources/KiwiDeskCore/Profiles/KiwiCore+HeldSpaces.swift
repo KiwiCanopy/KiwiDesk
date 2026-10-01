@@ -1,40 +1,53 @@
 import Foundation
 
-/// Held Spaces (#1507): a monitor change that switches profile
-/// carries each Space of a screen that is gone, and still holds
-/// windows, onto a remaining screen instead of forwarding its
-/// windows into the incoming profile's fallback. The ruling is on
-/// the issue and in `docs/design-decisions.md`.
+/// Held Spaces (#1507, #1790): a switch keeps each Space the
+/// incoming arrangement does not name, and that still holds
+/// windows, instead of forwarding its windows into the incoming
+/// profile's fallback. The ruling is on the issues and in
+/// `docs/design-decisions.md`.
 extension KiwiCore {
     /// Marks the departing Spaces the prune must keep. A Space
-    /// that lived on a screen no longer connected — its pin, else
-    /// the screen `settlingScreens` recorded at the report, which
-    /// reaches a Main-role or auto-placed Space — and holds windows
-    /// (live or away) is held under its own name, or under the
-    /// next number past every live one where the incoming
-    /// profile declares that name or the held order needs it
-    /// (#1664). Runs before the prune, while
-    /// `spacePins`, `icons` and `liveArrangement` are still the
-    /// departing arrangement's.
+    /// that holds windows (live or away) and lived on a screen no
+    /// longer connected — its pin, else the screen
+    /// `settlingScreens` recorded at the report, which reaches a
+    /// Main-role or auto-placed Space — or that `holdsUnnamed`
+    /// takes though its screen stayed, is held under its own name,
+    /// or under the next number past every live one where the
+    /// incoming profile declares that name or the held order
+    /// needs it (#1664). Runs before the prune and any pin
+    /// adoption, while `spacePins`, `icons` and `liveArrangement`
+    /// are still the departing arrangement's.
     func holdDepartingSpaces(
         declared: Set<SpaceID>,
-        icons: [SpaceID: String]
+        icons: [SpaceID: String],
+        temporaries: Set<SpaceID>
     ) {
         let live = Set(liveFingerprints)
         let candidates: [(Space, String)] = state.workspaces.allSpaces
             .compactMap { space in
                 guard state.heldSpaces[space.id] == nil,
                     let screen = spacePins[space.id]
-                        ?? state.settlingScreens[space.id],
-                    !live.contains(screen),
+                        ?? state.settlingScreens[space.id]
+                        ?? shownScreen(of: space.id),
+                    !live.contains(screen)
+                        || holdsUnnamed(
+                            space.id,
+                            declared: declared,
+                            temporaries: temporaries
+                        ),
                     !withAwayMembers(space.windows, of: space.id).isEmpty
                 else { return nil }
                 return (space, screen)
             }
-        // Every live number is taken — a Space the prune is about
-        // to drop still exists, and numbering into it would merge.
+        // A number is taken while something still needs it: the
+        // incoming declaration, a hold, a Space with windows, a
+        // window remembered there. An EMPTY Space the prune is
+        // about to drop frees its number (#1790).
         let taken = declared.union(state.heldSpaces.keys)
-            .union(state.workspaces.allSpaces.map(\.id))
+            .union(
+                state.workspaces.allSpaces.map(\.id)
+                    .filter { !spaceHoldsNothing($0) }
+            )
             .union(state.rememberedSpaces.values.map(\.space))
         let names = Self.orderedHeldNames(
             candidates.map(\.0.id),
@@ -43,25 +56,55 @@ extension KiwiCore {
         )
         var focus = heldFocusTrackers()
         for ((space, screen), id) in zip(candidates, names) {
+            // A temporary one comes back temporary (#1790).
             let origin = HeldOrigin(
                 name: space.id,
                 screen: screen,
                 icon: icons[space.id],
-                arrangement: liveArrangement
+                arrangement: liveArrangement,
+                temporary: temporaries.contains(space.id) ? true : nil
             )
             if id != space.id {
+                // An empty Space under that number goes first, or
+                // the held one would wear its mode.
+                if state.workspaces[id] != nil {
+                    forwardWindows(of: id, to: space.id)
+                }
                 moveMembers(of: space.id, to: id, mode: space.mode)
                 focus.spaceFocus[id] = space.focused
             }
             state.heldSpaces[id] = origin
             onLog(
-                "monitor change: held space \(id.raw) from "
+                "switch: held space \(id.raw) from "
                     + "'\(origin.screenName)'"
                     + (id == origin.name ? "" : " (was \(origin.name.raw))")
             )
         }
         focus.restore(into: &state.workspaces)
         placeHeldBatchLast(names)
+    }
+
+    /// A switch into an arrangement declaring `declared` (#1507,
+    /// #1790): what it does not name and that still holds windows is
+    /// held for the arrangement it leaves, and every other Space it
+    /// does not name drops. Both apply doors take this one pair.
+    func holdAndPrune(
+        declared: Set<SpaceID>,
+        orderedBy order: [SpaceID],
+        icons: [SpaceID: String],
+        temporaries: Set<SpaceID>,
+        preferring fallback: SpaceID? = nil
+    ) {
+        holdDepartingSpaces(
+            declared: declared,
+            icons: icons,
+            temporaries: temporaries
+        )
+        pruneSpaces(
+            keeping: declared.union(state.heldSpaces.keys),
+            orderedBy: order,
+            preferring: fallback
+        )
     }
 
     /// A held id is never a declared one: every apply door calls
@@ -135,6 +178,17 @@ extension KiwiCore {
                 continue
             }
             state.heldSpaces[id] = nil
+            // A temporary one is back as one, on its own screen,
+            // under the number it holds (#1790).
+            if origin.isTemporary {
+                spacePins[id] = origin.screen
+                state.temporaryArmed.insert(id)
+                onLog(
+                    "monitor change: temporary space \(id.raw) back "
+                        + "on '\(origin.screenName)'"
+                )
+                continue
+            }
             if goesHomeInPlace(
                 id,
                 origin,
@@ -219,12 +273,7 @@ extension KiwiCore {
         var retired = false
         for id in state.heldSpaces.keys {
             let space = state.workspaces[id]
-            let holdsNothing =
-                withAwayMembers(space?.windows ?? [], of: id).isEmpty
-                && !state.rememberedSpaces.keys.contains {
-                    heldSpace(holding: $0) == id
-                }
-            guard holdsNothing else { continue }
+            guard spaceHoldsNothing(id) else { continue }
             state.heldSpaces[id] = nil
             guard space != nil,
                 let other = state.workspaces.allSpaces.first(where: {
@@ -240,8 +289,8 @@ extension KiwiCore {
     }
 
     /// Ends every held Space's record without touching the Space —
-    /// an explicit load makes its profile's set authoritative, and
-    /// its prune forwards them like any undeclared Space.
+    /// resetting every setting, which makes nothing a hold's to
+    /// keep.
     func forgetHeldSpaces() {
         state.heldSpaces = [:]
     }

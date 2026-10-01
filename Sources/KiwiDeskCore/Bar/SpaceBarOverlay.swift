@@ -27,8 +27,14 @@ public final class SpaceBarOverlay {
         }
         /// Set only by `collapsed(to:)` (#1683).
         private(set) var collapse: SpaceBarItemView.Collapse?
+        /// The held or temporary Space marker (#1507, #1790).
+        var marker: SpaceBarItemView.Marker?
+
         /// Where a held Space came from (#1507).
-        var held: SpaceBarItemView.Held?
+        var held: SpaceBarItemView.Held? {
+            if case .held(let held) = marker { return held }
+            return nil
+        }
 
         init(
             space: SpaceID,

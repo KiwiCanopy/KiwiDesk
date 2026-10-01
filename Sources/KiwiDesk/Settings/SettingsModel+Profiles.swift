@@ -76,8 +76,8 @@ extension SettingsModel {
     /// save pill never counted, which is the bug this closes,
     /// and capturing live instead would silently adopt that same
     /// temporary layout into the file, which is its mirror. The
-    /// quick menu's Keep verb is the capture-live path and stays
-    /// separate.
+    /// capture-live path is `save_profile`, and Keep keeps layouts
+    /// alone; both stay separate (#1790).
     ///
     /// "Edited" is `SettingsDraftDiff`'s answer, the same seam
     /// the pill count and the unsaved popover read — never a
@@ -116,8 +116,10 @@ extension SettingsModel {
         do {
             try core.persistProfile(
                 named: name,
+                // The draft's own list too: a Space "+" added is live
+                // but not yet declared until this write (#1790).
                 modes: config.modes(
-                    for: core.capturedSpaces.map(\.id)
+                    for: core.capturedSpaces.map(\.id) + config.spaces
                 )
             )
         } catch {

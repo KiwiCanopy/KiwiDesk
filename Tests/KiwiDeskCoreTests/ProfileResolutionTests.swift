@@ -290,7 +290,7 @@ struct SpacePlacementTests {
         core.state.workspaces.ensureSpace(SpaceID(1))
         core.state.workspaces.ensureSpace(SpaceID(2))
         core.state.workspaces.setMode(SpaceID(2), .grid)
-        try core.profiles.save(
+        try core.profiles.write(  // not save: the load switches (#1790)
             Profile(
                 name: "sparse",
                 monitorSets: [

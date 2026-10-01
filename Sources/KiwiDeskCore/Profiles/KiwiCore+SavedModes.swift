@@ -54,7 +54,10 @@ extension KiwiCore {
     ) -> [SpaceID: LayoutMode] {
         guard let stored = profiles.liveSpaceModes else { return [:] }
         var modes: [SpaceID: LayoutMode] = [:]
-        for space in spaces {
+        // A temporary or held Space has no saved layout to drift
+        // from, so Keep never arms on one (#1790).
+        for space in spaces
+        where !isTemporary(space) && state.heldSpaces[space] == nil {
             modes[space] = stored[space] ?? .bsp
         }
         return modes

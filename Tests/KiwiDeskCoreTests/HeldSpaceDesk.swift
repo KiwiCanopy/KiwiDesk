@@ -87,7 +87,9 @@ struct HeldSpaceDesk {
         let dellPin = dell.fingerprint
         var pins: [SpaceID: String] = [:]
         for space in dellSpaces { pins[space] = dellPin }
-        try core.profiles.save(
+        // Written, not saved: a save adopts it, and the load below
+        // must be a switch rather than a same-profile Load (#1790).
+        try core.profiles.write(
             profile(
                 "wide",
                 screens: [builtIn.fingerprint, dellPin],
@@ -95,6 +97,11 @@ struct HeldSpaceDesk {
                 pins: pins
             )
         )
+        // `wide` does not name desk's DELL Spaces, so the load would
+        // hold them with their windows (#1790): hand those to 1.
+        for id in [10, 11, 12] {
+            core.state.workspaces.add(WindowID(UInt32(id)), to: SpaceID(1))
+        }
         core.execute("load_profile", args: [.string("wide")])
         for (offset, space) in dellSpaces.enumerated() {
             let window = WindowID(UInt32(100 + offset))

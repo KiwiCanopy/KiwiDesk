@@ -29,7 +29,7 @@ struct AppBarGroupGlideDispatchTests {
 
     @Test("Both group passes take the one groups-or-not choice")
     func bothPassesTakeTheChoice() throws {
-        let source = try renderSource()
+        let source = try Self.renderSource()
         let choice =
             "(groups ? BarMotion.runPlateGlide : BarMotion.runLayout) {"
         #expect(source.components(separatedBy: choice).count - 1 == 2)

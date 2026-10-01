@@ -71,8 +71,8 @@ struct MonitorSetClaimSeamTests {
         "persistProfile(": [
             // Declaration and the `save_profile` arm.
             "KiwiCore+Profiles.swift": 2,
-            // Both Layout menus' Keep (#1518); the Settings Save.
-            "AppDelegate+BarMenus.swift": 1,
+            // The Settings Save. Keep writes layouts alone and
+            // claims nothing (#1790, `keepLayouts`).
             "SettingsModel+Profiles.swift": 1,
         ],
         "saveProfile(": [

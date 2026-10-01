@@ -83,13 +83,11 @@ extension KiwiCore {
     ///
     /// `apply(profile:)` gates the session-ratio clear, the hold,
     /// the prune and the restore on the answer; `apply(composed:)`
-    /// gates only the restore. A Standard is transient (#53): it
-    /// prunes nothing, holds nothing and keeps the session layer,
-    /// so the outgoing profile's undeclared Spaces stay live beside
-    /// it and the restore moves windows into its DECLARED Spaces
-    /// alone. A step that must follow an arrangement change on
-    /// both doors — #1790's temporary-Space drop — gates on this
-    /// same answer, never a test of its own.
+    /// gates the hold, its prune and the restore, and keeps the
+    /// session layer (#53). A step that must follow an arrangement
+    /// change on both doors — #1790's hold of what the incoming
+    /// arrangement does not name — gates on this same answer,
+    /// never a test of its own.
     func recordOutgoingPartitioning(
         before incoming: HeldOrigin.Arrangement
     ) -> Bool {
@@ -148,19 +146,19 @@ extension KiwiCore {
             refiledWindows.insert(window)
         }
         state.workspaces.removeSpace(space)
+        state.temporaryArmed.remove(space)
     }
 
     /// Puts the incoming profile's own windows back in its own
     /// Spaces.
     ///
-    /// Runs AFTER the prune, so the order is the landing rule
-    /// (#1230, owner 2026-09-03): the prune has already forwarded
-    /// everything the new profile does not declare into its
-    /// `fallback_space`, and this moves back only what that
-    /// profile remembers. A window it has never seen — opened
-    /// while another profile was up — therefore stays where the
-    /// prune put it, which is the existing setting for exactly
-    /// this situation and needs no new concept.
+    /// Runs AFTER the hold and the prune, so the order is the
+    /// landing rule (#1230, #1790): a Space the new profile does
+    /// not name was held, or forwarded into its `fallback_space`
+    /// where no return could take it, and this moves back only
+    /// what that profile remembers. A window it has never seen —
+    /// opened while another profile was up — therefore stays in
+    /// the held Space, or where the prune put it.
     ///
     /// Only LIVE windows MOVE: a remembered id can belong to a
     /// window since closed, or to one sitting on an away Desktop
@@ -179,9 +177,9 @@ extension KiwiCore {
     /// sits: the record is a membership, the live row the order
     /// authority (#1387, profiles.md).
     ///
-    /// A window in a held Space, live or remembered there, is left
-    /// too: any hold outranks this record, so what was on a gone
-    /// screen stays together and goes home together (#1728).
+    /// A window in a held Space is placed like any other: the
+    /// record outranks the hold, which keeps only what this
+    /// arrangement never saw (#1790, reversing #1728).
     func restorePartitioning(
         of arrangement: HeldOrigin.Arrangement,
         declaring declared: Set<SpaceID>
@@ -213,7 +211,6 @@ extension KiwiCore {
                 state.workspaces[space] != nil
             else { continue }
             for window in remembered[space] ?? [] {
-                guard heldSpace(holding: window) == nil else { continue }
                 guard state.windows[window] != nil else {
                     // Not in state: away on another Desktop, or
                     // closed and still remembered (a close return
