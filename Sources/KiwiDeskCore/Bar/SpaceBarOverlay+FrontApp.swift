@@ -14,8 +14,8 @@ extension SpaceBarOverlay {
     ) {
         guard let app else {
             [
-                frontBox, frontBorder, frontDivider, frontIcon,
-                frontGlyph, frontName,
+                frontBox, frontBorder, frontAccentClip, frontDivider,
+                frontIcon, frontGlyph, frontName,
             ]
             .forEach { $0.isHidden = true }
             // The glass AND its tint: a tint left up reads as a
@@ -114,8 +114,8 @@ extension SpaceBarOverlay {
         // to a glass subtree (#1315).
         let content = frontHost ?? itemRun
         for view in [
-            frontBox, frontBorder, frontDivider, frontIcon, frontGlyph,
-            frontName,
+            frontBox, frontBorder, frontAccentClip, frontDivider,
+            frontIcon, frontGlyph, frontName,
         ] where view.superview !== content {
             content.addSubview(
                 view,
@@ -124,6 +124,10 @@ extension SpaceBarOverlay {
             )
         }
         frontDivider.wantsLayer = true
+        if frontAccent.superview !== frontAccentClip {
+            frontAccentClip.wantsLayer = true
+            frontAccentClip.addSubview(frontAccent)
+        }
         frontIcon.setAccessibilityElement(false)
         frontName.setAccessibilityElement(false)
     }
@@ -152,24 +156,21 @@ extension SpaceBarOverlay {
             .leading
     }
 
-    /// The front chip's end padding — an item's pad, plus the
-    /// rounded end's clearance where the app icon sits: leading
-    /// always, trailing only on a vertical bar, where no title
-    /// follows the icon (#1763, owner 2026-09-29) — or 0 where no
-    /// chip draws. The extent, the content's start, the title's
-    /// cap and the box all read it.
+    /// The front chip's end padding — an item's pad plus the
+    /// rounded end's clearance, alike at both ends so a title
+    /// ends as far inside the chip as the icon starts (#1856,
+    /// owner 2026-10-01, reversing #1763's trailing pad), and in
+    /// every shelf style, since the chip draws its active
+    /// indicator in each. The extent, the content's start, the
+    /// title's cap, the box and the indicator all read it.
     func chipEndPad(
         _ style: SpaceBarLook,
         depth: CGFloat,
         horizontal: Bool
     ) -> ItemEnds {
-        guard style.hasBox || wantsBoxGlass(style) else { return .zero }
         let pad = SpaceBarItemView.pad
         let clear = SpaceBarItemView.endClearance(look: style, depth: depth)
-        return ItemEnds(
-            leading: pad + clear,
-            trailing: pad + (horizontal ? 0 : clear)
-        )
+        return ItemEnds(leading: pad + clear, trailing: pad + clear)
     }
 
     /// Focused app glyph or icon layout with accessibility (#160, QA

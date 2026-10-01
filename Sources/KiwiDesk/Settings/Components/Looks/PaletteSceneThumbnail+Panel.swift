@@ -78,7 +78,12 @@ extension PaletteSceneThumbnail {
                     ink: color("kiwishelf.group_badge_text_color")
                 )
             }
-            item(color("space_bar.focused_item_color"))
+            // The front-app segment, wearing its own indicator
+            // (#1856).
+            item(
+                color("space_bar.focused_item_color"),
+                highlight: sheened("space_bar.focused_highlight_color")
+            )
         }
     }
 

@@ -17,4 +17,33 @@ public enum BarAccent {
     /// `untintedAlpha` — its dim is binary; semantic parity over
     /// literal-value parity (owner 2026-07-20).
     public static let activeUnfocusedAlpha: CGFloat = 0.6
+
+    /// The edge mark's frame on an item's window-facing side, in
+    /// its flipped `bounds` — a Space item's and the front chip's.
+    public static func edgeMarkFrame(
+        in bounds: CGRect,
+        edge: AppBarEdge,
+        thickness mark: CGFloat
+    ) -> CGRect {
+        switch edge {
+        case .top:
+            return CGRect(
+                x: 0,
+                y: bounds.height - mark,
+                width: bounds.width,
+                height: mark
+            )
+        case .bottom:
+            return CGRect(x: 0, y: 0, width: bounds.width, height: mark)
+        case .left:
+            return CGRect(
+                x: bounds.width - mark,
+                y: 0,
+                width: mark,
+                height: bounds.height
+            )
+        case .right:
+            return CGRect(x: 0, y: 0, width: mark, height: bounds.height)
+        }
+    }
 }

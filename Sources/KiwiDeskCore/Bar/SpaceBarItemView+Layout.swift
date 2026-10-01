@@ -268,38 +268,11 @@ extension SpaceBarItemView {
                     dy: BarAccent.capsuleInset
                 )
         case .edgeMark:
-            // Positions edge indicator on window-facing side of slot.
-            let mark = style.edgeMarkThickness
-            switch style.edge {
-            case .top:
-                accent.frame = CGRect(
-                    x: 0,
-                    y: bounds.height - mark,
-                    width: bounds.width,
-                    height: mark
-                )
-            case .bottom:
-                accent.frame = CGRect(
-                    x: 0,
-                    y: 0,
-                    width: bounds.width,
-                    height: mark
-                )
-            case .left:
-                accent.frame = CGRect(
-                    x: bounds.width - mark,
-                    y: 0,
-                    width: mark,
-                    height: bounds.height
-                )
-            case .right:
-                accent.frame = CGRect(
-                    x: 0,
-                    y: 0,
-                    width: mark,
-                    height: bounds.height
-                )
-            }
+            accent.frame = BarAccent.edgeMarkFrame(
+                in: bounds,
+                edge: style.edge,
+                thickness: style.edgeMarkThickness
+            )
         }
     }
 }

@@ -12228,6 +12228,21 @@ signal. A thin divider (the front-app segment's rule, shared
 helper) separates the identifier from the glyph row inside every
 occupied item.
 
+**The front-app segment wears the active indicator in its own
+colour** ([#1856](https://github.com/KiwiCanopy/KiwiDesk/issues/1856)).
+The segment is the focused window, so it draws the Space Bar's
+outline or edge mark like the active Space does, at the same
+width, in `focused_highlight_color`. That colour's empty
+Automatic value follows `focused_item_color`, so the segment's
+text and indicator share one hue the way the active Space's
+identifier and indicator do (every bundled palette pairs them
+that way). Drawing it in the active Space's `highlight_color`
+instead was refused: two items would claim one signal, and the
+two accents above would merge for a colour-vision-deficient
+reader. The segment's two ends also pad alike, the rounded end's
+clearance at the title's end as at the icon's, and so do the App
+Bar's items: a ring makes an uneven pair the first thing read.
+
 **Space Bar content is fixed in v1.** (#293.) Identifier plus
 app glyphs — no content chooser, which the App Bar has none of
 either (#1528). The identifier is structural and the

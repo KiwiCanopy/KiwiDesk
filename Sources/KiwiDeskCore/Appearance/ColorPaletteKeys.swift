@@ -38,14 +38,24 @@ public enum ColorPaletteKeys {
             )
     }
 
-    /// Whether path permits the empty "Automatic" value
-    /// (`StickyStyle.color`). Derived from the path — a third mark
-    /// struct cannot join the surface without joining this too.
-    /// Without it the surface is one-directional: a palette could
-    /// paint a mark but never hand it back to Automatic.
+    /// Whether path permits the empty "Automatic" value: a mark's
+    /// adaptive tint (`StickyStyle.color`), derived from the path
+    /// so a third mark struct cannot join the surface without
+    /// joining this too, or a `followers` colour. Without it the
+    /// surface is one-directional: a palette could paint the
+    /// colour but never hand it back to Automatic.
     public static func allowsAutomatic(_ path: String) -> Bool {
-        path.hasSuffix(".color")
+        path.hasSuffix(".color") || followers[path] != nil
     }
+
+    /// Colours whose Automatic is ANOTHER colour of the palette
+    /// rather than an adaptive tint, keyed to the path they follow
+    /// (#1856): the front chip's ring follows the front app's own
+    /// text, as every bundled palette pairs a text with its ring.
+    public static let followers: [String: String] = [
+        "space_bar.focused_highlight_color":
+            "space_bar.focused_item_color"
+    ]
 
     private static func colorPaths(
         _ cases: [some CodingKey],

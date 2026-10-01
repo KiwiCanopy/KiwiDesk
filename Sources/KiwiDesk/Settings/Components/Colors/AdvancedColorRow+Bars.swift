@@ -91,6 +91,22 @@ extension AdvancedColorRow {
             .modifier(
                 gated(gates.focusedItemInert, focusedItemHelp)
             )
+        case .spaceBarFocusedHighlightColor:
+            HexColorField(
+                label: L(
+                    "space_bar.color.focused_highlight",
+                    "Front app indicator"
+                ),
+                automatic: true,
+                hex: style.focusedHighlightColor
+            )
+            .help(focusedHighlightHelp)
+            .modifier(
+                gated(
+                    gates.focusedHighlightInert,
+                    AdvancedColorsHelp.frontAppOff
+                )
+            )
         default:
             let _ = assertionFailure(
                 "non-colour Space Bar key in Advanced Colours: "
@@ -98,6 +114,17 @@ extension AdvancedColorRow {
             )
             EmptyView()
         }
+    }
+
+    /// Automatic is the front app's own focused-window colour, by
+    /// that row's own key (#818, #1856).
+    private var focusedHighlightHelp: String {
+        L(
+            "space_bar.color.focused_highlight.help",
+            "The outline or edge mark around the front-app segment. "
+                + "Automatic uses \u{201C}%1$@\u{201D}.",
+            L("space_bar.color.focused_item", "Focused window")
+        )
     }
 
     /// The icon mode is INTERPOLATED from the picker entry's own

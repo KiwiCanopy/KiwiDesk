@@ -17,9 +17,10 @@ struct RoundedItemEndPadChipTests {
 
     // MARK: - The front-app chip
 
-    /// The icon's end clears the curve; the title's keeps the
-    /// plain pad, its ink clearing on its own (owner, 2026-09-29).
-    @Test("The front-app chip pads its icon's rounded end")
+    /// Both ends clear the curve alike, so the title ends as far
+    /// inside the chip as the icon starts (#1856, owner 2026-10-01,
+    /// reversing 2026-09-29's plain trailing pad).
+    @Test("The front-app chip pads both rounded ends alike")
     func frontChipPadsItsEnds() throws {
         for depth in [Self.depth, 80] {
             for roundness in Fixture.roundnesses {
@@ -34,14 +35,14 @@ struct RoundedItemEndPadChipTests {
                 )
                 #expect(
                     overlay.chipEndPad(look, depth: depth, horizontal: true)
-                        == ItemEnds(leading: end, trailing: pad)
+                        == ItemEnds(leading: end, trailing: end)
                 )
                 #expect(!overlay.frontBox.isHidden)
                 let box = overlay.frontBox.frame
                 let icon = overlay.frontIcon.frame
                 let name = overlay.frontName.frame
                 #expect(abs(icon.minX - box.minX - end) <= 0.5)
-                #expect(abs(box.maxX - name.maxX - pad) <= 0.5)
+                #expect(abs(box.maxX - name.maxX - end) <= 0.5)
             }
         }
     }
@@ -158,13 +159,13 @@ struct RoundedItemEndPadChipTests {
                     first: true,
                     last: true
                 )
-                // The icon's end clears the curve; the title's
-                // keeps the plain edge (owner, 2026-09-29).
+                // Both ends clear the curve alike (#1856, owner
+                // 2026-10-01).
                 #expect(ends.leading == AppBarItemView.edgePadding + e)
-                #expect(ends.trailing == AppBarItemView.edgePadding)
+                #expect(ends.trailing == AppBarItemView.edgePadding + e)
                 // Read apart from the layout, which clamps to any width.
                 let slot = Self.slot(look, depth: depth)
-                #expect(abs(slot - square - e) < 1e-9)
+                #expect(abs(slot - square - 2 * e) < 1e-9)
                 let view = appItem(width: slot, look: look, depth: depth)
                 let title = ceil(view.label.cell?.cellSize.width ?? 0)
                 #expect(view.label.frame.width >= title)
@@ -226,8 +227,8 @@ struct RoundedItemEndPadChipTests {
     }
 
     /// On a plate a middle slot draws no rounded end; the run's
-    /// first clears its leading icon, and the last's trailing end
-    /// is its title, which needs none.
+    /// first clears its leading end and its last its trailing one
+    /// (#1856).
     @Test("On a plate only the App Bar run's outer ends pad")
     func plateSlotsPadOnlyTheRunEnds() {
         let look = Self.appLook(100, boxed: false)
@@ -237,7 +238,7 @@ struct RoundedItemEndPadChipTests {
         let places: [(Bool, Bool, ItemEnds)] = [
             (true, false, ItemEnds(leading: edge + e, trailing: edge)),
             (false, false, ItemEnds(leading: edge, trailing: edge)),
-            (false, true, ItemEnds(leading: edge, trailing: edge)),
+            (false, true, ItemEnds(leading: edge, trailing: edge + e)),
         ]
         // Three alike items: the slot is the run's widest, an end's.
         let slot = Self.slot(look, depth: Self.depth, count: 3)

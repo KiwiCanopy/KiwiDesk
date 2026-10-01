@@ -62,10 +62,10 @@ extension AppBarItemView {
 
     /// A horizontal slot's leading and trailing insets on a strip
     /// `depth` deep, at its place in the run: `edgePadding` plus
-    /// the clearance of a rounded leading end, where the icon
-    /// sits — the title that follows it needs none at the
-    /// trailing end (#1763, owner 2026-09-29) — the one reading
-    /// the layout and the slot measurement share.
+    /// the clearance of each rounded end, alike at both so a title
+    /// ends as far inside as the icon starts (#1856, owner
+    /// 2026-10-01, reversing #1763's trailing pad) — the one
+    /// reading the layout and the slot measurement share.
     nonisolated static func endPadding(
         _ look: AppBarLook,
         depth: CGFloat,
@@ -87,7 +87,7 @@ extension AppBarItemView {
         )
         return ItemEnds(
             leading: edgePadding + ends.leading,
-            trailing: edgePadding
+            trailing: edgePadding + ends.trailing
         )
     }
 

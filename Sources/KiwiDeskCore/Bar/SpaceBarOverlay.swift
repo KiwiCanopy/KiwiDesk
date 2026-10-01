@@ -189,6 +189,10 @@ public final class SpaceBarOverlay {
     let frontBox = NSView()
     /// The chip's border (#1679), above its box or glass.
     let frontBorder = ShelfBorder.make()
+    /// The chip's active indicator (#1856), clipped to the chip,
+    /// above its border.
+    let frontAccent = SheenRimView()
+    let frontAccentClip = AppBarOverlay.FlippedView()
     let frontDivider = NSView()
     let frontIcon = NSImageView()
     let frontGlyph: NSTextField = {

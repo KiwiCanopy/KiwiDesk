@@ -114,7 +114,8 @@ struct GlyphSizeGlyphTests {
         let cell = SpaceBarItemView.cell(contentDepth: Self.content)
         let fixed =
             look.itemGap + BarDivider.sectionThickness + look.itemGap
-            + cell + pad + pad
+            + overlay.chipEndPad(look, depth: Self.depth, horizontal: true)
+            .total + cell + pad + pad
         let title = ceil(
             ("A window" as NSString).size(
                 withAttributes: [.font: drawn]

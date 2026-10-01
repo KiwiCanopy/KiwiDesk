@@ -163,7 +163,11 @@ struct GapsBordersPanelTests {
         let automatic = ColorPaletteKeys.all
             .filter(ColorPaletteKeys.allowsAutomatic)
         #expect(
-            Set(automatic) == ["sticky.color", "floating.color"],
+            Set(automatic)
+                == [
+                    "sticky.color", "floating.color",
+                    "space_bar.focused_highlight_color",
+                ],
             Comment(
                 rawValue:
                     "the adaptive set changed: "
@@ -174,7 +178,9 @@ struct GapsBordersPanelTests {
         // direction, which membership alone would not catch if a
         // third mark ever joined legitimately.
         for path in ColorPaletteKeys.all
-        where path.hasSuffix("_color") {
+        where path.hasSuffix("_color")
+            && ColorPaletteKeys.followers[path] == nil
+        {
             #expect(!ColorPaletteKeys.allowsAutomatic(path))
         }
     }

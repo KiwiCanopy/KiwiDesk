@@ -68,6 +68,7 @@ struct SpaceBarCommandParityTests {
         .stickyBadge(false),
         .springDelay(1000),
         .focusedItemColor("#030303"),
+        .focusedHighlightColor("#040404"),
     ]
 
     @Test("Each command sets exactly one field")

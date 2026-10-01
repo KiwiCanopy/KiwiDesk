@@ -69,6 +69,13 @@ struct AdvancedColorsGates {
                 && !(style.showFrontApp && style.edge.isHorizontal)
     }
 
+    /// The front chip's indicator draws only while the segment
+    /// does (#1856).
+    var focusedHighlightInert: Bool {
+        let style = settings.spaceBarLook
+        return !style.enabled || !style.showFrontApp
+    }
+
     /// Whether the focused-item row draws its remote reason as a
     /// link beneath the grid (#1310): only while the bar is on —
     /// off, the header carries the outer reason and the row is
@@ -168,6 +175,18 @@ enum AdvancedColorsHelp {
             L("app_bar.icon_source.app_image", "App icons"),
             L("app_bar.icon_source.app_font", "Symbols"),
             CrossReferenceRow.linkSlot
+        )
+    }
+
+    /// The front-app indicator row's hover reason (#1856): the
+    /// switch by its own key, on the page that holds it (#818).
+    static var frontAppOff: String {
+        L(
+            "colors.front_app_off.help",
+            "No front-app segment draws, so its indicator isn't "
+                + "drawn. Turn on \u{201C}%1$@\u{201D} in %2$@.",
+            L("space_bar.show_front_app", "Show front app"),
+            SettingsDestination.bars.title
         )
     }
 

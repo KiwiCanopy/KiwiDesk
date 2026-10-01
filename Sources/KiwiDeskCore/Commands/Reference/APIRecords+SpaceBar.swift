@@ -86,5 +86,10 @@ extension APIReference {
                 + "front-app segment.",
             .color("hex")
         ),
+        "set_focused_highlight_color": APIRecord(
+            "Sets the front-app segment's indicator color; empty "
+                + "follows the focused item color.",
+            .color("hex")
+        ),
     ]
 }

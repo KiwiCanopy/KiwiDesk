@@ -22,7 +22,7 @@ enum PaletteSceneRoles {
         "drag.ghost.border_color",
     ]
 
-    /// The sixteen roles drawn by the detail panel (#231).
+    /// The seventeen roles drawn by the detail panel (#231).
     static let panel: Set<String> = [
         // The shelf: plate and its border — drawn while the
         // draft's border is on (#1679) — the accent
@@ -36,6 +36,7 @@ enum PaletteSceneRoles {
         "kiwishelf.group_badge_color",
         "kiwishelf.group_badge_text_color",
         "space_bar.focused_item_color",
+        "space_bar.focused_highlight_color",
         // Border focus pair.
         "border.focused_color",
         "border.unfocused_color",

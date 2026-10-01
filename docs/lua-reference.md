@@ -2815,6 +2815,27 @@ distinction.
 ```lua
 space_bar.set_focused_item_color("#C2790A")
 ```
+:::unreleased
+
+### space_bar.set_focused_highlight_color
+
+**Expects:** a hex color (`#RRGGBB` or `#RRGGBBAA`), or `""`.
+
+**Does:** sets the color of the front-app segment's active
+indicator, the outline or edge mark that
+[`space_bar.set_active_indicator`](#space_barset_active_indicator)
+picks. `""`, the default, follows
+[`focused_item_color`](#space_barset_focused_item_color), so the
+segment's text and indicator share one color, the way the active
+Space's do.
+
+**Example:**
+
+```lua
+space_bar.set_focused_highlight_color("")
+```
+
+:::
 
 ## Where New Windows Land
 
