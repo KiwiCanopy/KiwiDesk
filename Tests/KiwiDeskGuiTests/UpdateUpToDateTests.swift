@@ -137,4 +137,23 @@ struct UpdateUpToDateTests {
         #expect(log.shown.count == 2)
         #expect(log.shown.last === driver.upToDate)
     }
+
+    /// The click that brings an open answer back must not narrate
+    /// a new check: Home read "Checking…" under the open window
+    /// (device, 2026-10-01). `canCheckForUpdates` stays true
+    /// through a session, so the gate asks `sessionInProgress`.
+    @Test("a check during an open session narrates nothing")
+    func openSessionNarratesNoCheck() throws {
+        let source = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+                "Sources/KiwiDesk/Updates/AppUpdater.swift"
+            )
+        )
+        #expect(
+            source.contains(
+                "if updater.canCheckForUpdates, !updater.sessionInProgress {"
+                    + "\n            updates.set(updates.state.onOwnCheck)"
+            )
+        )
+    }
 }

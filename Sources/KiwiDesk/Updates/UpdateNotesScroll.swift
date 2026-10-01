@@ -96,14 +96,9 @@ struct UpdateNotesScroll: View {
                     whatsNew: whatsNew
                 )
             } else {
-                Text(
-                    L(
-                        "update.window.no_notes",
-                        "This version's notes are online."
-                    )
-                )
-                .foregroundStyle(SettingsTheme.ink2)
-                .updateNotesCard()
+                Text(UpdateNotesEnglish.noNotes)
+                    .foregroundStyle(SettingsTheme.ink2)
+                    .updateNotesCard()
             }
         case .group(let id):
             if let group = offer.digest?.group(id) {

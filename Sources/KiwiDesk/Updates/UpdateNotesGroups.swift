@@ -31,7 +31,7 @@ struct UpdateHighlightsPanel: View {
 
     private var label: some View {
         Label {
-            Text(L("update.window.highlights", "Highlights"))
+            Text(UpdateNotesEnglish.highlights)
                 .textCase(.uppercase)
                 .tracking(0.9)
         } icon: {
@@ -77,8 +77,8 @@ struct UpdateHighlightsPanel: View {
 
     private var cautionsLabel: String {
         whatsNew
-            ? L("update.window.good_to_know", "Good to know")
-            : L("update.window.before_you_update", "Before you update")
+            ? UpdateNotesEnglish.goodToKnow
+            : UpdateNotesEnglish.beforeYouUpdate
     }
 
     private var shape: RoundedRectangle {
@@ -113,7 +113,7 @@ struct UpdateNotesGroupList: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(UpdateNotesNaming.counted(group))
+            Text(UpdateNotesEnglish.counted(group))
                 .textCase(.uppercase)
                 .tracking(0.9)
                 .font(.system(size: 11, weight: .semibold))

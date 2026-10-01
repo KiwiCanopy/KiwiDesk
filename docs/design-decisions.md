@@ -705,8 +705,12 @@ is an update. In What's new and in the up-to-date answer the pane
 adds one quiet line, "Like my work? Support KiwiDesk on Ko-fi";
 never in the offer, whose one decision is Install or Later, and
 the link goes with the pane when there is no list — Home keeps
-the permanent place to support KiwiDesk. The items
-stay English like the notes; the heading is translated. Keeping
+the permanent place to support KiwiDesk. The items stay English
+like the notes, and so does everything else inside a card — its
+heading, the date, the links (#1849): a card is the notes' own
+page, and a translated heading over English lines read as two
+languages in one box. The strip, the title and the buttons around
+the cards speak the user's language. Keeping
 it current is part of curating each release, because a list is
 only as honest as its last correction. On the relaunch after the
 window's own Install the card is best effort: it shows what the

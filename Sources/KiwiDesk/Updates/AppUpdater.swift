@@ -140,7 +140,9 @@ final class SparkleUpdater: AppUpdating {
     }
 
     func checkForUpdates() {
-        if updater.canCheckForUpdates {
+        // An open session only brings its window back (#1849);
+        // `canCheckForUpdates` does not say a session is open.
+        if updater.canCheckForUpdates, !updater.sessionInProgress {
             updates.set(updates.state.onOwnCheck)
         }
         updater.checkForUpdates()

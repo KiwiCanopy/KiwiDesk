@@ -29,19 +29,13 @@ struct NextOnMyListPanel: View {
                 }
             }
             UpdateNotesLink(
-                title: L(
-                    "update.window.next_discord",
-                    "Follow along and share ideas on Discord"
-                ),
+                title: UpdateNotesEnglish.discord,
                 url: SupportLinks.discord
             )
             .padding(.top, 3)
             if asksForSupport {
                 UpdateNotesLink(
-                    title: L(
-                        "update.window.next_support",
-                        "Like my work? Support KiwiDesk on Ko-fi"
-                    ),
+                    title: UpdateNotesEnglish.support,
                     url: SupportLinks.koFi
                 )
             }
@@ -52,7 +46,7 @@ struct NextOnMyListPanel: View {
 
     private var label: some View {
         Label {
-            Text(L("update.window.next_on_my_list", "Next on my list"))
+            Text(UpdateNotesEnglish.nextOnMyList)
                 .textCase(.uppercase)
                 .tracking(0.9)
         } icon: {
@@ -67,10 +61,7 @@ struct NextOnMyListPanel: View {
     private var asOf: String {
         var style = Date.FormatStyle.dateTime.month(.wide).day()
         style.timeZone = .gmt
-        return L(
-            "update.window.next_as_of",
-            "As of %1$@",
-            next.asOf.formatted(style)
-        )
+        style.locale = UpdateNotesEnglish.locale
+        return UpdateNotesEnglish.asOf(next.asOf.formatted(style))
     }
 }
