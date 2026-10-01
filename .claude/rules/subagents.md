@@ -71,6 +71,7 @@ by hand whenever you remove an agent.
 | `localization-auditor` | `L()` sites and the locale catalogs | audits or authors |
 | `site-engineer` | `site/` and its shipped output | audits or authors |
 | `changelog-curator` | A release's curated `## Highlights` block | audits or authors |
+| `test-profiler` | The test run's time, waits and windows | measures and reports |
 
 The column is the agent's territory, deliberately not its trigger.
 **When** to reach for one is the `description` field, which is what

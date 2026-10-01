@@ -372,6 +372,16 @@ per-artifact `case` block it replaced was already the second.
 
 ## Cutting a release (#32)
 
+**Before phase A of a MINOR or MAJOR release, profile the test run
+against the previous release's baseline** (owner ruling
+2026-10-01, #1868) through the `profile-tests` skill — on demand
+otherwise, never on a schedule. A target that slowed or a window
+count that climbs again is the release's to explain before the
+cut, since the next one will not remember which commit did it. A
+patch release skips it. The baseline is the owner's machine's and
+lives privately in `plan/`, so the obligation is the owner's
+session's; a contributor's PR owes none of it.
+
 **Cut every release with `scripts/release.sh <version>`.** The
 git tag and `KiwiDeskVersion.semantic` are two hand-written copies
 of one number, and that script stamps the constant *before*

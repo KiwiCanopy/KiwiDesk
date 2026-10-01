@@ -32,10 +32,12 @@ bite large test PRs:
   `GeometryUtils.appKitVisibleFrameOverride`, memoized in both
   twins with the #1386 correction over it still live
   (`DrawnMenuBarsWiringTests` ▸ `twinsMemoizeTheAppKitRead`). When a target's
-  time grows or turns bimodal, sample the test process and count
-  its windows before tuning parallelism: an idle CPU means it is
-  waiting, not starved — and a pile of windows is a panel owner
-  missing its deinit (core-boundaries.md).
+  time grows or turns bimodal, measure before tuning parallelism,
+  through the `profile-tests` skill
+  (`.claude/skills/profile-tests/SKILL.md`; the `test-profiler`
+  agent runs it): an idle CPU means the run is waiting, not
+  starved — and a pile of windows is a panel owner missing its
+  deinit (core-boundaries.md).
 - **Split suites early** — the 79-char limit and 350-line ceiling
   bite large test files. Break a suite into focused files *before*
   it approaches the ceiling.
