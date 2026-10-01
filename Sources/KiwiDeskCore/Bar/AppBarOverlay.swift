@@ -137,7 +137,12 @@ public final class AppBarOverlay {
         render(followingFocus: follow.follows(focus))
     }
 
+    /// Hides the section, tearing nothing down: its views stay
+    /// for the shelf, which draws a leaving section until its leave
+    /// lands and shows the root again meanwhile; a hide of a hidden
+    /// section writes nothing (#1838).
     public func hide() {
+        guard lastShown != nil else { return }
         follow.reset()
         lastShown = nil
         scrollOffset = 0

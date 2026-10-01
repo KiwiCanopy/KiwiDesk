@@ -66,9 +66,7 @@ struct AppBarDissolveTests {
     /// a close within one, and never the first show after a hide.
     @Test("Only a show for another Space dissolves")
     func dissolveIsASwitch() async throws {
-        let before = BarMotion.shelfGlide
-        defer { BarMotion.shelfGlide = before }
-        BarMotion.shelfGlide = 0.05
+        pinShelfGlide()
         let overlay = AppBarOverlay()
         let strip = CGRect(x: 0, y: 0, width: 900, height: 30)
         overlay.show(
@@ -134,9 +132,7 @@ struct AppBarDissolveTests {
         let gate = LiquidGlassGate.override
         defer { LiquidGlassGate.override = gate }
         LiquidGlassGate.override = { false }
-        let before = BarMotion.shelfGlide
-        defer { BarMotion.shelfGlide = before }
-        BarMotion.shelfGlide = 0.05
+        pinShelfGlide()
         var style = AppBarLook()
         style.liquidGlass = true
         style.backgroundStyle = .boxed

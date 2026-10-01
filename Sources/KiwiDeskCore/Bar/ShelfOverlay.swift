@@ -101,7 +101,8 @@ final class ShelfOverlay {
             shelf: shelf
         )
         let radius = shelf.resolvedCornerRadius(forThickness: depth)
-        if glides, !BarMotion.isReduced {
+        let travels = BarMotion.shelfGlideLength > 0
+        if glides, travels {
             standGlideStarts(sections, in: strip, horizontal: horizontal)
         }
         BarMotion.runPlateGlide {
@@ -148,12 +149,16 @@ final class ShelfOverlay {
             display: true
         )
         if !panel.isVisible {
+            guard travels else {
+                panel.orderFrontRegardless()
+                return
+            }
             // Shown transparent and committed so, laid out already,
-            // so the fade starts from it rather than from the last
-            // shown state (#1838).
-            content.alphaValue = 0
-            panel.orderFrontRegardless()
-            CATransaction.flush()
+            // so the fade starts from it (#1838).
+            BarMotion.standCommitted {
+                content.alphaValue = 0
+                panel.orderFrontRegardless()
+            }
             BarMotion.runPlateGlide {
                 BarMotion.setAlpha(content, to: 1, animated: true)
             }
@@ -173,11 +178,7 @@ final class ShelfOverlay {
             onLeft()
             return true
         }
-        let span = BarMotion.plateGlideDuration(
-            reduceMotion: BarMotion.isReduced,
-            seconds: BarMotion.shelfGlide
-        )
-        guard animated, span > 0 else {
+        guard animated, BarMotion.shelfGlideLength > 0 else {
             leaving = nil
             panel.orderOut(nil)
             content.alphaValue = 1

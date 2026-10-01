@@ -242,7 +242,12 @@ public final class SpaceBarOverlay {
         )
     }
 
+    /// Hides the section, tearing nothing down: its views stay
+    /// for the shelf, which draws a leaving section until its leave
+    /// lands and shows the root again meanwhile; a hide of a hidden
+    /// section writes nothing (#1838).
     public func hide() {
+        guard lastShown != nil else { return }
         // A chip hidden under the pointer ends its hold (#1528),
         // though its Space may draw on another display's bar.
         itemViews.forEach { $0.setPointerInside(false) }

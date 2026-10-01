@@ -137,10 +137,12 @@ public final class SpaceBarManager {
             stripHold = nil
         }
         let wanted = Set(valid.map(\.display))
+        // Hidden, never dropped: the section's root keeps its place
+        // on its shelf, so a bar coming back is the same section
+        // re-shown (#1838).
         for (id, overlay) in overlays
         where !wanted.contains(id) {
             overlay.hide()
-            overlays[id] = nil
         }
         for bar in valid {
             overlay(for: bar.display).show(
@@ -223,6 +225,15 @@ public final class SpaceBarManager {
     /// Cancels active drag autoscroll across all overlays.
     public func endDragAutoScroll() {
         overlays.values.forEach { $0.cancelDragAutoScroll() }
+    }
+
+    /// Drops the overlays of displays no longer connected; a
+    /// display still live keeps its hidden overlay (#1838).
+    public func retire(except live: Set<DisplayID>) {
+        for (id, overlay) in overlays where !live.contains(id) {
+            overlay.hide()
+            overlays[id] = nil
+        }
     }
 
     /// The section a display's shelf places, while it shows

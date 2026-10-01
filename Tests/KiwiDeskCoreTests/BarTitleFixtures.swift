@@ -48,6 +48,16 @@ func titledWindow(
 // WindowServer to ask.
 
 let barTitleDisplay = DisplayID(7)
+
+/// Pins the shelf glide short for a test that awaits a landing — a
+/// PIN every writer writes alike and none restores, so no suite's
+/// restore can leave another's value behind across an `await`
+/// (tests.md ▸ a pinned clock, #1456). A core-driven test pins the
+/// setting instead, since `updateBars()` derives the glide from it.
+@MainActor
+func pinShelfGlide() {
+    BarMotion.shelfGlide = 0.05
+}
 let barTitleStrip = CGRect(x: 0, y: 0, width: 1440, height: 28)
 
 func appBarItem(

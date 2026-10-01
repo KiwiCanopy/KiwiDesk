@@ -30,6 +30,9 @@ extension KiwiCore {
             shelves.holdingRelayout {
                 appBars.sync(fallback)
                 spaceBars.sync([])
+                let live = Set(fallback.map(\.display))
+                appBars.retire(except: live)
+                spaceBars.retire(except: live)
             }
             // A lone bar's slot IS its strip.
             syncShelves(
@@ -112,6 +115,9 @@ extension KiwiCore {
         shelves.holdingRelayout {
             appBars.sync(appBarsShown)
             spaceBars.sync(spaceBarsShown)
+            let live = Set(displays.map(\.id))
+            appBars.retire(except: live)
+            spaceBars.retire(except: live)
         }
         syncShelves(strips, settings: settings)
     }

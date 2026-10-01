@@ -10,6 +10,27 @@ extension BarMotion {
     @MainActor static var shelfGlide: TimeInterval =
         AnimationSettings().shelfGlideSeconds
 
+    /// The plate glide's live length: the user's `shelfGlide` under
+    /// the Reduce Motion setting — what a stand reads to know
+    /// whether anything will travel at all.
+    @MainActor
+    static var shelfGlideLength: TimeInterval {
+        plateGlideDuration(reduceMotion: isReduced, seconds: shelfGlide)
+    }
+
+    /// Runs `body`'s writes with no implicit motion and COMMITS
+    /// them: an animation started after it begins from what `body`
+    /// stood rather than from the last committed presentation,
+    /// which is where the animator reads its start (#1838).
+    @MainActor
+    static func standCommitted(_ body: () -> Void) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        body()
+        CATransaction.commit()
+        CATransaction.flush()
+    }
+
     /// Fades `view` to `alpha` inside the running layout group,
     /// landing at once where `fades` refuses.
     @MainActor

@@ -10,10 +10,8 @@ import AppKit
 /// glass run only the CONTENT travels: no glass glides into another.
 /// A Space switch DISSOLVES instead (#1838): the old row's content
 /// fades out where it stands, bare, cropped by the section as it
-/// resizes, while the new row's fades in at its slots. The boxes
-/// cut: a glass takes no alpha — at partial opacity it shows the
-/// tint behind it bare — and no geometry — its content re-lays
-/// every frame (device, 2026-10-01).
+/// resizes, while the new row's fades in at its slots, and the
+/// boxes cut.
 extension AppBarOverlay {
     /// A view leaving the run: into the item that absorbed it, or
     /// — `into` nil — fading out where it stands on a dissolve.

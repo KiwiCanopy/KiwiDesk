@@ -5651,10 +5651,12 @@ animations.set_monocle_flip_duration(300)
 - `set_shelf_duration(ms)` — a number (milliseconds, clamped
   500–2000; default `750`).
 
-**Does:** the KiwiShelf glide: a bar growing in or shrinking out
-when you switch Spaces, and the bars gliding to their new places.
-Off, they move at once. It is not under the window-animation
-switches, and Reduce Motion keeps it off.
+**Does:** the KiwiShelf motion when you switch Spaces: a bar
+sharing a shelf grows out of the other bar and shrinks back into
+it, a bar on an edge of its own fades in and out, the App Bar's row
+dissolves to the new Space's, and the bars glide to their new
+places. Off, they move at once. It is not under the
+window-animation switches, and Reduce Motion keeps it off.
 
 **Example:**
 

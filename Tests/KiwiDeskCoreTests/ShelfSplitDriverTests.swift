@@ -96,9 +96,9 @@ struct ShelfSplitDriverTests {
             makeCore(space: .top, app: .bottom)
         )
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        let before = BarMotion.shelfGlide
-        defer { BarMotion.shelfGlide = before }
-        BarMotion.shelfGlide = 0.05
+        // The band's floor: `updateBars()` derives the glide from
+        // the setting, so a fixture pins what the path reads.
+        core.tiler.settings.animations.shelfDurationMS = 500
         core.tiler.settings.appBarStyle.edge = .top
         core.updateBars()
         // The second shelf fades out and is retired once its fade
@@ -119,5 +119,29 @@ struct ShelfSplitDriverTests {
             core.spaceBars.shownOverlay(on: display)?.root.superview
                 === top.stripView
         )
+    }
+
+    /// Splitting a fused shelf moves the App Bar's section to the
+    /// new shelf while the old one's leave is still landing; that
+    /// landing must not pull it back out of the new strip (#1838).
+    @Test(
+        "Splitting keeps the moved section on its new shelf",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func splitKeepsTheMovedSection() async throws {
+        let (core, display) = try #require(
+            makeCore(space: .top, app: .top)
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        core.tiler.settings.animations.shelfDurationMS = 500
+        core.tiler.settings.appBarStyle.edge = .bottom
+        core.updateBars()
+        let bottom = try #require(
+            core.shelves.overlayForTesting(display, edge: .bottom)
+        )
+        let app = try #require(core.appBars.shownOverlay(on: display))
+        #expect(app.root.superview === bottom.stripView)
+        try await Task.sleep(for: .milliseconds(900))
+        #expect(app.root.superview === bottom.stripView)
     }
 }

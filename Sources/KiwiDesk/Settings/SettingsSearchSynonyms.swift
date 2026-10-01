@@ -91,7 +91,7 @@ enum SettingsSearchSynonyms {
         case .colours(.animationsMonocleFlipDurationMS):
             return ["speed", "flip speed"]
         case .colours(.animationsOnShelf):
-            return ["bar", "app bar", "space bar", "grow", "slide"]
+            return ["bar", "app bar", "space bar", "grow", "fade", "slide"]
         case .colours(.animationsShelfDurationMS):
             return ["speed", "bar speed", "shelf speed"]
         case .colours(.paletteSave):

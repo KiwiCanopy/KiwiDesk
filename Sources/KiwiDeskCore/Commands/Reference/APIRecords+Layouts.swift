@@ -54,7 +54,7 @@ extension APIReference {
             .boolean("enabled")
         ),
         "set_shelf_duration": APIRecord(
-            "Sets the shelf's glide in milliseconds (500–2000).",
+            "Sets the shelf's glide in milliseconds, clamped to its band.",
             .integer("milliseconds")
         ),
         "set_size_policy": APIRecord(

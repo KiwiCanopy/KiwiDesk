@@ -60,9 +60,7 @@ struct ShelfFadeTests {
 
     @Test("A fading hide keeps the panel until the fade lands")
     func fadingHide() async throws {
-        let before = BarMotion.shelfGlide
-        defer { BarMotion.shelfGlide = before }
-        BarMotion.shelfGlide = 0.05
+        pinShelfGlide()
         let overlay = ShelfOverlay()
         var left = 0
         overlay.onLeft = { left += 1 }
@@ -80,9 +78,7 @@ struct ShelfFadeTests {
     @Test("A show during the fade-out keeps the shelf")
     func showCancelsTheFade() async throws {
         guard !BarMotion.isReduced else { return }
-        let before = BarMotion.shelfGlide
-        defer { BarMotion.shelfGlide = before }
-        BarMotion.shelfGlide = 0.05
+        pinShelfGlide()
         let overlay = ShelfOverlay()
         var left = 0
         overlay.onLeft = { left += 1 }
@@ -101,9 +97,7 @@ struct ShelfFadeTests {
     @Test("A hide already fading keeps its landing")
     func repeatedHideKeepsTheLanding() async throws {
         guard !BarMotion.isReduced else { return }
-        let before = BarMotion.shelfGlide
-        defer { BarMotion.shelfGlide = before }
-        BarMotion.shelfGlide = 0.05
+        pinShelfGlide()
         let overlay = ShelfOverlay()
         var left = 0
         overlay.onLeft = { left += 1 }
@@ -122,9 +116,7 @@ struct ShelfFadeTests {
     @Test("A section wanted again before its leave lands stays")
     func reWantedSectionStays() async throws {
         guard !BarMotion.isReduced else { return }
-        let before = BarMotion.shelfGlide
-        defer { BarMotion.shelfGlide = before }
-        BarMotion.shelfGlide = 0.1
+        pinShelfGlide()
         let overlay = ShelfOverlay()
         let space = ShelfOverlay.Section(
             view: NSView(),
@@ -156,6 +148,70 @@ struct ShelfFadeTests {
         #expect(app.view.superview === overlay.stripView)
     }
 
+    /// The bar managers hide a section and tear nothing down, and a
+    /// hide of a hidden section writes nothing: the shelf shows the
+    /// root again while the leave runs, and every refresh inside
+    /// the glide asks the manager to hide once more (#1838).
+    @Test("A hidden section keeps its views; a second hide writes nothing")
+    func hiddenSectionKeepsItsViews() {
+        let overlay = AppBarOverlay()
+        overlay.show(
+            items: [AppBarOverlay.Item(id: WindowID(1), text: "A", icon: nil)],
+            activeIndex: nil,
+            strip: Self.strip,
+            style: AppBarLook(),
+            space: SpaceID("1")
+        )
+        overlay.hide()
+        #expect(overlay.root.isHidden)
+        #expect(!overlay.itemViews.isEmpty)
+        #expect(
+            overlay.itemViews.allSatisfy { $0.superview === overlay.itemRun }
+        )
+        overlay.root.isHidden = false
+        overlay.hide()
+        #expect(!overlay.root.isHidden)
+    }
+
+    /// Driven through the managers: a refresh inside the fade asks
+    /// the App Bar manager to hide again, and the leaving root stays
+    /// shown until the fade lands.
+    @Test("A refresh inside the fade keeps the leaving section shown")
+    func refreshKeepsTheLeavingSection() async throws {
+        guard !BarMotion.isReduced else { return }
+        pinShelfGlide()
+        let apps = AppBarManager()
+        let bar = AppBarManager.Bar(
+            display: barTitleDisplay,
+            space: SpaceID("1"),
+            items: [AppBarOverlay.Item(id: WindowID(1), text: "A", icon: nil)],
+            activeIndex: nil,
+            strip: barTitleStrip,
+            style: AppBarLook(),
+            capAxis: barTitleStrip.width
+        )
+        apps.sync([bar])
+        let app = try #require(apps.shownOverlay(on: barTitleDisplay))
+        let shelves = ShelfManager()
+        shelves.sync([
+            ShelfManager.Shelf(
+                display: barTitleDisplay,
+                edge: .bottom,
+                strip: barTitleStrip,
+                shelf: Self.shelf(),
+                sheen: 0,
+                space: nil,
+                app: app
+            )
+        ])
+        apps.sync([])
+        shelves.sync([])
+        #expect(!app.root.isHidden)
+        apps.sync([])
+        #expect(!app.root.isHidden)
+        try await settle { shelves.overlayForTesting(barTitleDisplay) == nil }
+    }
+
     @Test("A shelf never shown reports leaving at once")
     func neverShownLeaves() {
         let overlay = ShelfOverlay()
@@ -170,9 +226,7 @@ struct ShelfFadeTests {
     /// drops it.
     @Test("The manager retires a shelf once it has left")
     func managerRetiresOnceLeft() async throws {
-        let before = BarMotion.shelfGlide
-        defer { BarMotion.shelfGlide = before }
-        BarMotion.shelfGlide = 0.05
+        pinShelfGlide()
         let spaces = SpaceBarManager()
         spaces.sync([paintedSpaceBar(front: nil, spaces: 3)])
         let section = try #require(

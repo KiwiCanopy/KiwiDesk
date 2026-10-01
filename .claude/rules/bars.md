@@ -217,14 +217,16 @@ twice, was a question the user answered twice. The argument is
   glass hosting on the one plate glide the shelf re-places the
   section on, both passes taking the one groups-or-not choice
   (`AppBarGroupGlideDispatchTests`).
-- **Stand a section's glide start and COMMIT it, in
-  `standGlideStarts`, before the plate glide starts** (#1838).
+- **Stand what a glide or fade will read from and COMMIT it
+  through the one `BarMotion.standCommitted`, before the group
+  that reads it** (#1838) — a section's glide start in
+  `standGlideStarts`, a shelf's transparent first show.
   The animator starts a frame glide from the layer's last
   COMMITTED presentation, never from a frame written in the same
   pass: a start stood at 569 glided from 0 until the
   `CATransaction.flush()` behind it (device, 2026-09-30), the
-  content jumping aside first. Where a start is, is the one
-  `ShelfOverlay.glideStart`: content that keeps its offset inside
+  content jumping aside first. Compute where a start is through
+  `ShelfOverlay.glideStart`, never beside a call site: content that keeps its offset inside
   the section glides from the old frame, size included; content
   re-anchored in its slot starts at the new size placed where it
   was drawn, since the old bounds would clip it; and a slot that
@@ -242,9 +244,9 @@ twice, was a question the user answered twice. The argument is
   ruling, #1838). The fade-out keeps the panel until it lands,
   a show meanwhile fades it back, the shelf reports leaving
   exactly once, and `ShelfManager` retires it only then
-  (`ShelfFadeTests`). The layout never waits for chrome: the
-  windows take the strip the instant the switch lands and the
-  fading shelf draws over their edge.
+  (`ShelfFadeTests`). Never hold a strip reserved for a shelf that is fading out:
+  the windows take it the instant the switch lands and the fading
+  shelf draws over their edge.
 - **A Space switch DISSOLVES the App Bar's row, both rows fading
   from the first frame, the old over `BarMotion.dissolveOutShare`
   of the glide** (holding the new row back left the boxes empty
@@ -258,13 +260,19 @@ twice, was a question the user answered twice. The argument is
   On a boxed glass run the boxes CUT and only content dissolves:
   a glass takes no alpha — at partial opacity it shows the tint
   behind it bare — and no geometry — its content re-lays every
-  frame (both device, 2026-10-01) (`AppBarDissolveTests`). The
-  App Bar overlay is HIDDEN and kept per display, never dropped,
-  so a bar coming back is the same section re-shown
-  (`AppBarManager.sync`), and a shelf fade-out already running
-  is never restarted by a later refresh (`ShelfFadeTests`);
-  both were how a lone shelf's appear took the fused join arm
-  and flew in. The Space Bar's chip
+  frame (both device, 2026-10-01) (`AppBarDissolveTests`). A bar
+  manager hides its display's overlay and never drops it — a bar
+  coming back is the same section re-shown — retiring only a
+  display that left (`BarManagerKeepTests`); its `hide()` tears
+  nothing down and a hide of a hidden section writes nothing,
+  since the shelf draws a leaving section until its leave lands
+  (`ShelfFadeTests` ▸ `hiddenSectionKeepsItsViews`,
+  `refreshKeepsTheLeavingSection`); and a shelf fade-out already
+  running is never restarted by a later refresh (`ShelfFadeTests`
+  ▸ `repeatedHideKeepsTheLanding`) — both were how a lone shelf's
+  appear took the fused join arm and flew in. A leave's landing
+  removes only a view still on its own strip
+  (`ShelfSplitDriverTests` ▸ `splitKeepsTheMovedSection`). The Space Bar's chip
   glide stands down when its slot changed, the shelf gliding the
   section then (`SpaceBarInactiveContentTests`).
 - **A row of floats alone keeps the floating mark ahead of its

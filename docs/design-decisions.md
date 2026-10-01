@@ -11770,10 +11770,9 @@ a picture that can claim a placement the engine does not make,
 the schematic rule's defect (#702) on the one surface where the
 user decides where the bars go. When an App Bar section appears
 or leaves under a centred or far-end alignment the plate grows
-or shrinks and slides to its new place over a short decelerating
-ease with no overshoot, a little longer than an item's slide so
-the plate reads as one surface moving, through `BarMotion` — a
-re-placement the user did not ask for must be seen to travel,
+or shrinks and slides to its new place over a decelerating ease with no
+overshoot, through `BarMotion` — a re-placement the user did not
+ask for must be seen to travel,
 never snap — and under Reduce Motion it arrives without
 travelling. Under Boxed there is no plate to glide; each box
 slides on its own.
@@ -11785,8 +11784,8 @@ The fold changes the App Bar's length, so the shelf re-places
 the section while the members slide: two paces would read as the
 members settling and then the bar moving again, so one glide
 carries both, and the item slide's shorter pace, which reads as
-a snap for this travel, is kept for every other render. On a
-boxed Liquid Glass bar only the content travels — a folded
+a snap for this travel, is kept for every other render but a Space switch's dissolve
+(below). On a boxed Liquid Glass bar only the content travels — a folded
 member leaves its glass at once and a released one takes its
 glass when it lands — because a glass sliding under another
 refracts through it, and every moving glass re-samples its
@@ -11818,9 +11817,7 @@ from the old frame, length included, the new row revealed from
 the anchored end; content re-anchored in its slot, centred across
 a lone strip or at the end of a fused one, starts at the new size
 placed where it was drawn, since the old bounds would clip it.
-The start is committed before the glide starts, because the
-animator takes its start from what was last committed rather
-than from a frame written in the same pass. A switch between two
+A switch between two
 Spaces that both show an App Bar changes the row's SUBJECT, so
 the row dissolves: the old items stay where they stand and fade
 out, cropped by the section as it shrinks, while the new fade in
@@ -11843,8 +11840,8 @@ leaves at once, and a group still folds its members. The
 curve stays decelerating — the motion answers the user's switch,
 and a curve that eases in reads as lag — while its length is
 theirs: `animations.shelf_duration`, 500–2000 ms, 750 by default,
-since the item slide's quarter second read as a snap for a bar
-coming and going; `on_shelf` turns it off, outside the window
+since the fixed plate glide, just over a quarter second until
+#1838, read as a snap for a bar coming and going; `on_shelf` turns it off, outside the window
 animations' master, and Reduce Motion keeps it off.
 :::
 
