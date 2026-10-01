@@ -79,6 +79,10 @@ struct WarningGateTests {
         #expect(try gate(over: log, flags: []).status == 1)
         let other = ["-Xswiftc", "-Wwarning", "-Xswiftc", "Other"]
         #expect(try gate(over: log, flags: other).status == 1)
+        // The tag ends a diagnostic; the same text in a message
+        // exempts nothing.
+        let quoted = "/r/A.swift:1:1: warning: [#\(Self.group)] x\n"
+        #expect(try gate(over: quoted).status == 1)
     }
 
     /// A terminal run wraps the warning and its group tag in

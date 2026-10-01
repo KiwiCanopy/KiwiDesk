@@ -28,19 +28,20 @@ if [ "$STATUS" -ne 0 ]; then
     exit "$STATUS"
 fi
 
-# The groups this command downgrades: each word after -Wwarning.
+# The groups this command downgrades: each word after -Wwarning,
+# matched as the tag that ends a diagnostic, never as text in it.
 EXEMPT=()
 PREVIOUS=""
 for ARG in "$@"; do
     [ "$ARG" = "-Xswiftc" ] && continue
-    [ "$PREVIOUS" = "-Wwarning" ] && EXEMPT+=("-e[#$ARG]")
+    [ "$PREVIOUS" = "-Wwarning" ] && EXEMPT+=("-e\[#$ARG\]\$")
     PREVIOUS="$ARG"
 done
 exempted() {
     if [ "${#EXEMPT[@]}" -eq 0 ]; then
         cat
     else
-        grep -vF "${EXEMPT[@]}"
+        grep -v "${EXEMPT[@]}"
     fi
 }
 

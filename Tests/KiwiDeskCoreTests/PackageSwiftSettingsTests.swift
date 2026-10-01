@@ -15,7 +15,9 @@ struct PackageSwiftSettingsTests {
     private static func scan(
         _ manifest: String
     ) -> (targets: Int, missing: [Substring]) {
-        let opener = /\.(target|executableTarget|testTarget)\(/
+        // Any target kind, however spaced: a missed opener would
+        // fold its target into the neighbour's slice.
+        let opener = /\.(\w*[tT]arget|macro|plugin)\s*\(/
         let starts = manifest.matches(of: opener)
             .map(\.range.lowerBound)
         let swift = zip(starts, starts.dropFirst() + [manifest.endIndex])
@@ -52,9 +54,15 @@ struct PackageSwiftSettingsTests {
             .target(name: "CLua", path: "Vendor/CLua"),
             .target(name: "A", swiftSettings: swiftSettings),
             .executableTarget(name: "Tool"),
+            .testTarget (name: "Spaced", swiftSettings: swiftSettings),
+            .macro(name: "M"),
             """
         let scan = Self.scan(manifest)
-        #expect(scan.targets == 2)
-        #expect(scan.missing.map { $0.contains("Tool") } == [true])
+        #expect(scan.targets == 4)
+        #expect(
+            scan.missing.map { $0.prefix(30) }.joined()
+                .contains("Tool")
+        )
+        #expect(scan.missing.count == 2)
     }
 }
