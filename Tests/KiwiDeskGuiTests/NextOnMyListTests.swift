@@ -176,4 +176,32 @@ struct NextOnMyListTests {
         )
         #expect(!markdown.contains("L("))
     }
+
+    /// The Next pane names Discord and Ko-fi with the marks Home's
+    /// support strip draws, through the one `BrandMark` both take,
+    /// so the two surfaces cannot drift (#1863).
+    @Test("the Next pane's links wear Home's brand marks")
+    func linksWearHomesMarks() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let panel = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Updates/NextOnMyListPanel.swift"
+            )
+        )
+        #expect(panel.contains("mark: BrandAssets.markDiscord"))
+        #expect(panel.contains("mark: BrandAssets.markKofi"))
+        let link = try SourceScan.strippedSource(
+            at: root.appendingPathComponent("Updates/UpdateNotesScroll.swift")
+        )
+        #expect(link.contains("if let mark { BrandMark(image: mark"))
+        let home = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Settings/Home/SupportLinkRow.swift"
+            )
+        )
+        #expect(home.contains("BrandMark(image: mark)"))
+        // One drawing: no second `Image(nsImage:` for a mark.
+        #expect(home.occurrences(of: "Image(nsImage:") == 1)
+    }
 }

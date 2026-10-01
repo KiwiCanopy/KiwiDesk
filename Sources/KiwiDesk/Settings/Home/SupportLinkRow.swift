@@ -13,13 +13,7 @@ struct SupportLinkRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 7) {
             if let mark {
-                Image(nsImage: mark)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 16, height: 16)
-                    .foregroundStyle(SettingsTheme.ink2)
-                    .padding(.top, 2)
-                    .accessibilityHidden(true)
+                BrandMark(image: mark).padding(.top, 2)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Link(destination: url) {
@@ -35,5 +29,22 @@ struct SupportLinkRow: View {
             }
         }
         .frame(maxWidth: 320, alignment: .leading)
+    }
+}
+
+/// A service's mark as KiwiDesk draws it wherever a link names that
+/// service (#1536, #1863): the template image in secondary ink,
+/// decorative — the link's text is its label.
+struct BrandMark: View {
+    let image: NSImage
+    var side: CGFloat = 16
+
+    var body: some View {
+        Image(nsImage: image)
+            .resizable()
+            .scaledToFit()
+            .frame(width: side, height: side)
+            .foregroundStyle(SettingsTheme.ink2)
+            .accessibilityHidden(true)
     }
 }
