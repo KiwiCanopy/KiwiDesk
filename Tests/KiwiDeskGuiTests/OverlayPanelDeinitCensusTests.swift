@@ -4,15 +4,21 @@ import Testing
 /// Every Core class that stores a panel orders it out in its own
 /// `isolated deinit` (#1868, core-boundaries.md). A struct
 /// holding one is a value, so the class it lives in answers.
-/// "A panel" is `NSPanel`, `NSWindow` or a Core subclass of
-/// either, stored directly, in a collection, or initialized in
-/// place — by a constructor or a Core function returning one; a
+/// "A panel" is `NSPanel`, `NSWindow`, a Core subclass or alias
+/// of either, or a Core function returning one, named anywhere in
+/// a stored property's declaration line — its type, however
+/// nested, or its initializer; a function-typed store takes a
+/// panel rather than holding one and is not counted; a
 /// local inside a function is not stored, and a store at file
 /// scope, or in a struct no class lexically encloses, is
 /// refused. The deinit must name each stored panel as a whole
 /// identifier beside its `orderOut(`, so a struct's panel is
 /// named through its holder's loop. The scope walk is
-/// `SourceScan.scopeTree`'s, held by `SourceScanScopesTests`. A type
+/// `SourceScan.scopeTree`'s, held by `SourceScanScopesTests`.
+/// The net's reach, stated: a declaration whose type wraps onto
+/// the next line, the second name of `var a, b: NSPanel?`, and a
+/// window held through an `NSWindowController` (which owns its
+/// teardown) are not seen. A type
 /// followed by `.` is a member of it (`NSWindow.Level`), not a
 /// panel; the trade is any `NSPanel.Something` store, which by
 /// that spelling holds no window.
@@ -41,52 +47,71 @@ struct OverlayPanelDeinitCensusTests {
     }
 
     /// `NSPanel`, `NSWindow`, and every Core class descending
-    /// from either — derived, so a new subclass is a panel too.
+    /// from either or alias naming one — derived, so a new
+    /// subclass (generic or module-qualified) or a `typealias`
+    /// is a panel too.
     private func panelTypes(in files: [(String, String)]) -> [String] {
         var types: Set<String> = ["NSPanel", "NSWindow"]
+        let shapes = [
+            #"\bclass\s+(\w+)(?:<[^>]*>)?\s*:\s*(?:\w+\.)?(\w+)"#,
+            #"\btypealias\s+(\w+)\s*=\s*(?:\w+\.)?(\w+)"#,
+        ]
         var grew = true
         while grew {
             grew = false
             for (_, text) in files {
-                for name in matches(
-                    #"\bclass\s+(\w+)\s*:\s*(\w+)"#,
-                    in: text
-                )
-                where types.contains(name.1)
-                    && !types.contains(
-                        name.0
-                    )
-                {
-                    types.insert(name.0)
-                    grew = true
+                for shape in shapes {
+                    for (name, base) in matches(shape, in: text)
+                    where types.contains(base) && !types.contains(name) {
+                        types.insert(name)
+                        grew = true
+                    }
                 }
             }
         }
         return types.sorted()
     }
 
-    /// Every Core function that returns a panel type, so a store
-    /// initialized through one (`lazy var panel = makePanel()`)
-    /// is a store too. The net's reach, stated: a generic factory
-    /// (`func make<T>(`), one taking a function-typed parameter
-    /// (its `)` ends the match early) and one returning an
-    /// optional panel are not seen, so a store made through one
-    /// is unchecked.
-    private func panelFactories(
+    /// Every Core function that returns a panel type, optional or
+    /// not, as the call spellings that reach it: bare or through
+    /// `Self.` / `self.` inside its type, or `<DeclaringType>.`
+    /// outside it — so a store made through one (`lazy var panel =
+    /// makePanel()`) is a store too, and another type's
+    /// same-named `make()` is not.
+    private func panelFactoryCalls(
         returning alternatives: String,
         in files: [(String, String)]
     ) -> [String] {
-        var names: Set<String> = []
+        let factory = try! NSRegularExpression(
+            pattern: #"\bfunc\s+(\w+)[^{]*?->\s*(?:\w+\.)?(?:"#
+                + alternatives + #")\b(?!\.)"#
+        )
+        var calls: Set<String> = []
         for (_, text) in files {
-            for hit in matches(
-                #"\bfunc\s+(\w+)\s*\([^)]*\)\s*->\s*("#
-                    + alternatives + #")(?![.\w?])"#,
-                in: text
+            let ns = text as NSString
+            let tree = SourceScan.scopeTree(of: ns)
+            for hit in factory.matches(
+                in: text,
+                range: NSRange(location: 0, length: ns.length)
             ) {
-                names.insert(hit.0)
+                let name = ns.substring(with: hit.range(at: 1))
+                var owner = tree.innermost[hit.range.location]
+                while let scope = owner,
+                    !Self.typeKeywords.contains(tree.scopes[scope].keyword)
+                {
+                    owner = tree.scopes[scope].parent
+                }
+                let qualifiers =
+                    ["Self", "self"]
+                    + (owner.map { [tree.scopes[$0].name] } ?? [])
+                calls.insert(
+                    #"(?<![\w.])(?:(?:"#
+                        + qualifiers.joined(separator: "|")
+                        + #")\.)?"# + name + #"\("#
+                )
             }
         }
-        return names.sorted()
+        return calls.sorted()
     }
 
     private func matches(
@@ -111,21 +136,46 @@ struct OverlayPanelDeinitCensusTests {
         let files = try sources()
         let types = panelTypes(in: files)
         let alternatives = types.joined(separator: "|")
-        let makers = panelFactories(returning: alternatives, in: files)
-        let stored = try NSRegularExpression(
-            pattern: #"\b(?:var|let)\s+(\w+)\s*(?::\s*\[?\s*"#
-                + #"(?:\w+\s*:\s*)?(?:"# + alternatives
-                + #")(?![.\w])\s*\]?\??|=\s*(?:\w+\.)?(?:"#
-                + (types + makers).joined(separator: "|") + #")\()"#
+        let calls = panelFactoryCalls(
+            returning: alternatives,
+            in: files
+        )
+        let declared = try NSRegularExpression(
+            pattern: #"\b(?:var|let)\s+(\w+)([^\n]*)"#
+        )
+        // A panel type or factory named anywhere in the declaration
+        // — `NSPanel?`, `[K: [NSPanel]]`, `Set<NSPanel>`,
+        // `NSPanel.init(`, `Self.makePanel()` — but never a member
+        // of one (`NSWindow.Level`).
+        let names = try NSRegularExpression(
+            pattern: #"(?<!\w)(?:"# + alternatives
+                + #")\b(?!\s*\.\s*(?!init\b)\w)|"#
+                + calls.joined(separator: "|")
         )
         var owners: Set<String> = []
         var offenders: [String] = []
         for (file, text) in files {
             let ns = text as NSString
-            let hits = stored.matches(
+            let hits = declared.matches(
                 in: text,
                 range: NSRange(location: 0, length: ns.length)
-            )
+            ).filter {
+                let rest = ns.substring(with: $0.range(at: 2))
+                // A function-typed store TAKES a panel; it holds none.
+                let annotation =
+                    rest.split(
+                        separator: "=",
+                        maxSplits: 1
+                    ).first ?? ""
+                if annotation.contains("->") { return false }
+                return names.firstMatch(
+                    in: rest,
+                    range: NSRange(
+                        location: 0,
+                        length: (rest as NSString).length
+                    )
+                ) != nil
+            }
             guard !hits.isEmpty else { continue }
             let tree = SourceScan.scopeTree(of: ns)
             for hit in hits {
