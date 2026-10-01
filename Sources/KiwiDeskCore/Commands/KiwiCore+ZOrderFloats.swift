@@ -147,7 +147,7 @@ extension KiwiCore {
         _ ids: [WindowID],
         excluding focused: WindowID?
     ) -> Int {
-        let now = Date()
+        let now = wallClock()
         zOrderRaiseEchoes = zOrderRaiseEchoes.filter {
             now.timeIntervalSince($0.value)
                 < Self.zOrderRaiseEchoWindow

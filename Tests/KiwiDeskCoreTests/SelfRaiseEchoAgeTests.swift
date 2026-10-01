@@ -88,9 +88,10 @@ struct SelfRaiseEchoAgeTests {
     func expiredStampReportIsHonored() {
         let core = makeCore()
         let (target, _) = makeFixture(core)
-        core.selfRaiseStamps[target] = Date(
-            timeIntervalSinceNow: -KiwiCore.selfRaiseEchoWindow - 1
-        )
+        core.selfRaiseStamps[target] =
+            core.wallClock().addingTimeInterval(
+                -KiwiCore.selfRaiseEchoWindow - 1
+            )
         core.handle(.windowFocused(target))
         #expect(focused(core) == target)
     }
@@ -102,7 +103,7 @@ struct SelfRaiseEchoAgeTests {
     func freshEntryEchoStillReverts() {
         let core = makeCore()
         let (target, other) = makeFixture(core)
-        core.selfRaiseStamps[target] = Date()
+        core.selfRaiseStamps[target] = core.wallClock()
         core.handle(.windowFocused(target))
         #expect(focused(core) == other)
     }
@@ -114,9 +115,9 @@ struct SelfRaiseEchoAgeTests {
     func freshEntryYieldsToClick() {
         let core = makeCore()
         let (target, _) = makeFixture(core)
-        core.selfRaiseStamps[target] = Date()
+        core.selfRaiseStamps[target] = core.wallClock()
         core.lastLeftClick = (
-            Date(), CGPoint(x: 100, y: 100), target
+            core.wallClock(), CGPoint(x: 100, y: 100), target
         )
         core.handle(.windowFocused(target))
         #expect(focused(core) == target)
@@ -144,13 +145,13 @@ struct SelfRaiseDuplicateEchoTests {
         // Step 1: `target` was raised; its first echo lands with
         // state focus already on it — honored, stamp kept.
         core.state.workspaces.focus(target, in: space)
-        core.selfRaiseStamps[target] = Date()
+        core.selfRaiseStamps[target] = core.wallClock()
         core.handle(.windowFocused(target))
         #expect(focused(core) == target)
         #expect(core.selfRaiseStamps[target] != nil)
         // Step 2: the user moves on to `other` (raised, stamped).
         core.state.workspaces.focus(other, in: space)
-        core.selfRaiseStamps[other] = Date()
+        core.selfRaiseStamps[other] = core.wallClock()
         // The departed app's duplicate report lands now.
         core.handle(.windowFocused(target))
         #expect(focused(core) == other)
@@ -165,15 +166,16 @@ struct SelfRaiseDuplicateEchoTests {
         let (target, other) = makeFixture(core)
         let space = core.state.workspaces.space(of: target)!
         core.state.workspaces.focus(target, in: space)
-        core.selfRaiseStamps[target] = Date()
+        core.selfRaiseStamps[target] = core.wallClock()
         core.handle(.windowFocused(target))
         // The honored report retiled and stamped every window's
         // placement (#1161); the pan is long past here.
         core.tiler.placements.forgetAll()
         core.state.workspaces.focus(other, in: space)
-        core.selfRaiseStamps[target] = Date(
-            timeIntervalSinceNow: -KiwiCore.selfRaiseEchoWindow - 1
-        )
+        core.selfRaiseStamps[target] =
+            core.wallClock().addingTimeInterval(
+                -KiwiCore.selfRaiseEchoWindow - 1
+            )
         core.handle(.windowFocused(target))
         #expect(focused(core) == target)
     }
@@ -184,7 +186,7 @@ struct SelfRaiseDuplicateEchoTests {
     func goneWindowForgetsStamp() {
         let core = makeCore()
         let (target, _) = makeFixture(core)
-        core.selfRaiseStamps[target] = Date()
+        core.selfRaiseStamps[target] = core.wallClock()
         core.handle(.windowDestroyed(target, wasMinimized: false))
         #expect(core.selfRaiseStamps[target] == nil)
     }

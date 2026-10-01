@@ -329,11 +329,18 @@ bite large test PRs:
   another chain — the applier's post-set stamps on the AX queue
   (#1254), the placement stamps at the tiler's leaves (#1161) —
   as `FrameApplier.clock`, `PlacementLedger.clock`,
-  `ZOrderDrain.now` and `TeardownRestack.now` do. `makeTestCore`
-  freezes the applier's and the ledger's (a stamp read in the
-  same test cannot age) and
-  `EchoClockSeamTests` holds the host uptime to those seams'
-  defaults and the freeze to both twins. A test that wants the
+  `ZOrderDrain.now`, `TeardownRestack.now` and
+  `KiwiCore.wallClock` do — one clock shape per stored type,
+  uptime for a `TimeInterval` stamp and `wallClock` for a `Date`
+  one. A handler's `now` and every stamp it judges come from the
+  same clock, or a frozen stamp ages against a live read (#1852).
+  `makeTestCore` freezes the applier's, the ledger's and the
+  core's wall clock (a stamp read in the same test cannot age),
+  and `EchoClockSeamTests` holds the host uptime to those seams'
+  defaults, every wall-clock read left in Core to its classified
+  register, and the freeze to both twins. A frozen clock ties
+  stamps written in sequence, so a test asserting which of two
+  raises is NEWER writes explicit offsets. A test that wants the
   EXPIRY moves the clock ahead rather than sleeping past the
   bound — `TilingEngine.echoGraceOverride` is the door for a
   fixture that replaces `animation.apply` and so writes NO

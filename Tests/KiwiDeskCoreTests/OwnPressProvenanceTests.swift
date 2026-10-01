@@ -70,16 +70,16 @@ struct OwnPressProvenanceTests {
         core.stampLeftClick(
             at: CGPoint(x: inside.midX, y: inside.midY)
         )
-        #expect(core.recentClickReached(target, now: Date()))
-        #expect(!core.recentClickReached(other, now: Date()))
+        #expect(core.recentClickReached(target, now: core.wallClock()))
+        #expect(!core.recentClickReached(other, now: core.wallClock()))
     }
 
     @Test("A press outside every window carries no provenance")
     func stampOutsideReachesNothing() {
         let (core, target, other) = makeFixture()
         core.stampLeftClick(at: CGPoint(x: 1400, y: 800))
-        #expect(!core.recentClickReached(target, now: Date()))
-        #expect(!core.recentClickReached(other, now: Date()))
+        #expect(!core.recentClickReached(target, now: core.wallClock()))
+        #expect(!core.recentClickReached(other, now: core.wallClock()))
     }
 
     @Test("A stamped press beats the placement bounce")

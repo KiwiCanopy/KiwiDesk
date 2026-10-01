@@ -122,7 +122,7 @@ struct PlacementDisplacementTests {
         let core = makeCore()
         let (target, _) = makeFixture(core)
         core.tiler.placements.noteDisplaced(target, frame: onscreen)
-        core.lastLeftClick = (Date(), CGPoint(x: 10, y: 10), target)
+        core.lastLeftClick = (core.wallClock(), CGPoint(x: 10, y: 10), target)
         core.handle(.windowFocused(target))
         #expect(focused(core) == target)
     }

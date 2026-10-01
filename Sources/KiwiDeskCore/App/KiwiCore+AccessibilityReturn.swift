@@ -94,14 +94,14 @@ extension KiwiCore {
         // DIFFERENT victim is a new steal and replaces it.
         if let debt = accessibilityReturn,
             debt.victim == anchor,
-            Date().timeIntervalSince(debt.at)
+            wallClock().timeIntervalSince(debt.at)
                 < Self.accessibilityReturnGrace
         {
             return
         }
         accessibilityReturn = AccessibilityReturnDebt(
             victim: anchor,
-            at: Date()
+            at: wallClock()
         )
         onLog(
             "focus: accessibility steal of w\(anchor.raw) "

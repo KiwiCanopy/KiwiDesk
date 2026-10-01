@@ -187,7 +187,7 @@ struct PlacementBounceTests {
         let (target, _) = makeFixture(core)
         core.tiler.placements.stamp(target, target: offscreen)
         core.lastLeftClick = (
-            Date(), CGPoint(x: 100, y: 100), target
+            core.wallClock(), CGPoint(x: 100, y: 100), target
         )
         core.handle(.windowFocused(target))
         #expect(focused(core) == target)

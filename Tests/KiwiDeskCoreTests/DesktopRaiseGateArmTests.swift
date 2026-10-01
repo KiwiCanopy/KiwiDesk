@@ -126,7 +126,7 @@ struct DesktopRaiseGateArmTests {
         host(core, unshown: nil)
         let space = core.state.workspaces.space(of: target)!
         core.desktopMemory.honoredFocus[space] = [10: target]
-        core.recentReturns[target] = Date()
+        core.recentReturns[target] = core.wallClock()
         core.handle(.windowFocused(target))
         #expect(core.activeSpace?.focused == target)
     }
@@ -138,7 +138,7 @@ struct DesktopRaiseGateArmTests {
         host(core, unshown: nil)
         let space = core.state.workspaces.space(of: target)!
         core.desktopMemory.honoredFocus[space] = [10: other]
-        core.recentReturns[target] = Date()
+        core.recentReturns[target] = core.wallClock()
         core.handle(.windowFocused(target))
         #expect(core.activeSpace?.focused == other)
     }
@@ -154,9 +154,10 @@ struct DesktopRaiseGateArmTests {
         host(core, unshown: nil)
         let space = core.state.workspaces.space(of: target)!
         core.desktopMemory.honoredFocus[space] = [10: target]
-        core.recentReturns[target] = Date(
-            timeIntervalSinceNow: -KiwiCore.restoredFocusWindow - 1
-        )
+        core.recentReturns[target] =
+            core.wallClock().addingTimeInterval(
+                -KiwiCore.restoredFocusWindow - 1
+            )
         core.handle(.windowFocused(target))
         #expect(core.activeSpace?.focused == other)
     }
@@ -241,7 +242,7 @@ struct DesktopRaiseGateArmTests {
                     -MoveIntentLatch.window - 1
             )
         )
-        core.selfRaiseStamps[WindowID(2)] = Date()
+        core.selfRaiseStamps[WindowID(2)] = core.wallClock()
     }
 
     @Test("A sibling re-report whose re-assert crosses Desktops is honored")

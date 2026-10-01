@@ -100,7 +100,7 @@ struct AccessibilityReturnTests {
         // anything — fail-open otherwise (guard-prover).
         #expect(core.accessibilityReturn != nil)
         core.lastLeftClick = (
-            at: Date(), point: .zero, reached: WindowID(2)
+            at: core.wallClock(), point: .zero, reached: WindowID(2)
         )
         core.handle(.windowFocused(WindowID(2)))
         #expect(
@@ -143,10 +143,10 @@ struct AccessibilityReturnTests {
         // Fail-open guard: the backdate below no-ops on nil,
         // so prove the arm fired first (guard-prover).
         #expect(core.accessibilityReturn != nil)
-        core.accessibilityReturn?.at = Date(
-            timeIntervalSinceNow:
+        core.accessibilityReturn?.at =
+            core.wallClock().addingTimeInterval(
                 -KiwiCore.accessibilityReturnGrace - 1
-        )
+            )
         core.handle(.windowFocused(WindowID(2)))
         #expect(
             core.state.workspaces[SpaceID(1)]?.focused
@@ -180,7 +180,7 @@ struct AccessibilityReturnTests {
         // debt for the genuine yield.
         let core = makeCore()
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
-        core.zOrderRaiseEchoes[WindowID(2)] = Date()
+        core.zOrderRaiseEchoes[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(2)))
         // The echo machine reverted the report; the debt
         // survived it.
@@ -209,7 +209,7 @@ struct AccessibilityReturnTests {
         // the debt survives for the genuine yield.
         let core = makeCore()
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
-        core.selfRaiseStamps[WindowID(2)] = Date()
+        core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(2)))
         // The echo was honored as our own raise's fallout —
         // and the debt is intact.
@@ -233,7 +233,7 @@ struct AccessibilityReturnTests {
     func yieldInsideEchoWindowIsNotReturned() {
         let core = makeCore()
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
-        core.selfRaiseStamps[WindowID(2)] = Date()
+        core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(2)))
         #expect(
             core.state.workspaces[SpaceID(1)]?.focused
@@ -250,16 +250,14 @@ struct AccessibilityReturnTests {
         // the same victim (re-review, 2026-08-27).
         let core = makeCore()
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
-        core.accessibilityReturn?.at = Date(
-            timeIntervalSinceNow:
+        core.accessibilityReturn?.at =
+            core.wallClock().addingTimeInterval(
                 -KiwiCore.accessibilityReturnGrace - 1
-        )
+            )
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
         let at = core.accessibilityReturn?.at
         #expect(at != nil)
-        #expect(
-            at.map { Date().timeIntervalSince($0) < 2 } == true
-        )
+        #expect(at == core.wallClock())
     }
 
     @Test("A lazy panel re-report never renews the grace")
@@ -270,7 +268,7 @@ struct AccessibilityReturnTests {
         // stands (#689's semantic-re-arm shape).
         let core = makeCore()
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
-        let aged = Date(timeIntervalSinceNow: -5)
+        let aged = core.wallClock().addingTimeInterval(-5)
         core.accessibilityReturn?.at = aged
         core.eventLoop.onIgnoredPanelFocus(7, Self.voBundle)
         #expect(core.accessibilityReturn?.at == aged)
