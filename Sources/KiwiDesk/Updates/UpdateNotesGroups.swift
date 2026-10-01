@@ -31,7 +31,7 @@ struct UpdateHighlightsPanel: View {
 
     private var label: some View {
         Label {
-            Text(L("update.window.highlights", "Highlights"))
+            Text(UpdateNotesEnglish.highlights)
                 .textCase(.uppercase)
                 .tracking(0.9)
         } icon: {
@@ -77,8 +77,8 @@ struct UpdateHighlightsPanel: View {
 
     private var cautionsLabel: String {
         whatsNew
-            ? L("update.window.good_to_know", "Good to know")
-            : L("update.window.before_you_update", "Before you update")
+            ? UpdateNotesEnglish.goodToKnow
+            : UpdateNotesEnglish.beforeYouUpdate
     }
 
     private var shape: RoundedRectangle {
@@ -104,7 +104,8 @@ struct UpdateHighlightsPanel: View {
     }
 }
 
-/// One type's changes, the body of its tab: every entry, flat.
+/// One type's changes, the body of its tab: its name and count
+/// as the pane's heading, like Next's (#1849), then every entry.
 struct UpdateNotesGroupList: View {
     let group: UpdateNotesDigest.Group
     /// Entries carry their version when the view spans several.
@@ -112,6 +113,12 @@ struct UpdateNotesGroupList: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            Text(UpdateNotesEnglish.counted(group))
+                .textCase(.uppercase)
+                .tracking(0.9)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(SettingsTheme.ink2)
+                .accessibilityAddTraits(.isHeader)
             ForEach(
                 Array(group.entries.enumerated()),
                 id: \.offset
@@ -123,8 +130,22 @@ struct UpdateNotesGroupList: View {
                 )
             }
         }
-        .padding(.top, 4)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .updateNotesCard()
+    }
+}
+
+extension View {
+    /// The plain card every pane but Highlights sits in, so the
+    /// notes read on the window's glass (#1849).
+    func updateNotesCard() -> some View {
+        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        return
+            self
+            .padding(.horizontal, 17)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(shape.fill(SettingsTheme.card))
+            .overlay(shape.strokeBorder(SettingsTheme.hairline, lineWidth: 1))
     }
 }
 

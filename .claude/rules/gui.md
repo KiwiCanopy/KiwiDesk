@@ -390,21 +390,35 @@ because `checkForUpdates` is the one door that brings the waiting
 alert forward, and asking for a check is the Settings footer's
 (`UpdateReminderTests`, `UpdatesRowTests`).
 
-**A found update is KiwiDesk's own window's from the offer on
-(#1542), and the reminder DECISION stays the policy's.**
-`UpdatePromptDriver` routes every phase after the offer —
-download, preparing, installing, a failure — to that window
-while one is open, and defers to the standard driver otherwise;
-checking, "up to date" and an information-only offer stay
-Sparkle's (`UpdateWindowRoutingTests`). Bypassing `super` there
-also bypasses the policy's delegate answers, so the own path
-asks the policy through its own doors (`offerArrived`,
+**Every update answer a user can meet is KiwiDesk's own window's
+— a user's check, the offer, "up to date" (#1542, #1849) — and
+the reminder DECISION stays the policy's.** `UpdatePromptDriver`
+routes every phase after the offer — download, preparing,
+installing, a failure — to that window while one is open, and
+defers to the standard driver otherwise; of the no-update
+reasons only "on the newest version" and "newer than the feed's
+newest" are the window's, the rest, a failure before the offer
+and an information-only offer stay Sparkle's
+(`UpdateWindowRoutingTests`, `UpdateUpToDateTests`). The window
+is ONE slot, `UpdatePromptDriver.current`, changed only through
+`replace(with:presenting:)`, which puts the new state up and
+keyed BEFORE the old one closes — a closing key window hands
+focus back and Core reverts the new one's report as a z-order
+echo — and ends the old state's work with it (`UpdateCheckingTests`
+▸ `answerIsUpFirst`, `offerIsUpFirst`,
+`cancelDuringFetchEndsTheAnswer`). A check asked for while an
+update window is open brings that window forward instead of
+narrating a new check, and Try Again's check takes a door past
+that bring-forward (`UpdateUpToDateTests` ▸
+`openSessionNarratesNoCheck`, `UpdatePromptWiringTests` ▸
+`liveUpdaterFeedsTheWindow`). Bypassing `super` there also
+bypasses the policy's delegate answers, so the own path asks the
+policy through its own doors (`offerArrived`,
 `offerGotAttention`) and never writes `updatePending` itself.
-Three orderings are Sparkle 2.9.6's and a bump re-checks them
-beside #1011's: the offer closes Sparkle's "Checking…" window
-through the standard driver's public teardown; the
-ready-to-install prompt is answered `.install` because the
-window already had its Install; and Try Again's check starts at
+Two orderings are Sparkle 2.9.6's and a bump re-checks them
+beside #1011's: the ready-to-install prompt is answered
+`.install` because the window already had its Install; and Try
+Again's check starts at
 the update cycle's end (`updater(_:didFinishUpdateCycleFor:)`,
 after `sessionInProgress` clears), since a check started inside
 the ending session only re-shows the offer

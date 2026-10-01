@@ -50,6 +50,9 @@ enum UpdateFailure: Equatable {
 @MainActor
 final class UpdateSession: ObservableObject {
     @Published private(set) var phase: UpdateWindowPhase = .found
+    /// "Next on my list", once the offer's fetch lands and while
+    /// it is current (#1849).
+    @Published var next: NextOnMyList?
 
     /// A Try Again after a failed download: Sparkle ends the
     /// failed session and a fresh check re-finds the update,

@@ -87,10 +87,12 @@ struct AnnouncedValuePinTests {
         // while the directory was still outside every lens, so
         // this is the backlog arriving rather than a new title.
         "ShortcutsBands.swift": 2,
-        // The update window's title, and the Highlights and
-        // Before you update labels (#1542).
+        // The update window's title, the Highlights and Before you
+        // update labels (#1542), and each kind card's heading and
+        // the checking state's title (#1849).
         "UpdateWindowView.swift": 1,
-        "UpdateNotesGroups.swift": 2,
+        "UpdateNotesGroups.swift": 3,
+        "UpdateCheckingWindowController.swift": 1,
         // What's new's "Next on my list" label (#1813).
         "NextOnMyListPanel.swift": 1,
         // The Mouse & trackpad drawer's group headings (#1726).

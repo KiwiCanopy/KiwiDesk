@@ -28,6 +28,16 @@ struct UpdateStateRow: View {
             case .upToDate(let lastChecked):
                 sentence(Self.upToDateSentence(lastChecked, now: Date()))
                 checkAgain(enabled: true, label: checkAgainLabel)
+            case .answering:
+                // Said in the line, not only on hover (#1849); the
+                // live control first, the greyed one after.
+                sentence(Self.closeAnswerFirst)
+                showWindow
+                checkAgain(
+                    enabled: false,
+                    label: checkAgainLabel,
+                    reason: Self.closeAnswerFirst
+                )
             case .checking:
                 sentence(
                     L("updates.state.checking", "Checking for updates…")
@@ -93,20 +103,47 @@ struct UpdateStateRow: View {
         L("updates.check_again", "Check for updates again")
     }
 
-    private func checkAgain(enabled: Bool, label: String) -> some View {
-        Button(action: check) {
+    /// Brings the open answer forward — the check's own door does
+    /// the same, since a second check finds the window first.
+    private var showWindow: some View {
+        let label = L("updates.show_window", "Show the update window")
+        return Button(action: check) {
+            Image(systemName: "arrow.up.forward.app")
+                .font(.system(size: 11, weight: .medium))
+        }
+        .buttonStyle(.borderless)
+        .foregroundStyle(SettingsTheme.ink2)
+        .help(label)
+        .accessibilityLabel(label)
+    }
+
+    /// While the up-to-date window is open (#1849).
+    static var closeAnswerFirst: String {
+        L(
+            "updates.state.up_to_date_window_open",
+            "Up to date · close the update window to check again"
+        )
+    }
+
+    /// `reason` says why a greyed control is greyed, on hover and
+    /// to VoiceOver alike.
+    private func checkAgain(
+        enabled: Bool,
+        label: String,
+        reason: String? = nil
+    ) -> some View {
+        let why =
+            reason ?? L("updates.state.checking", "Checking for updates…")
+        return Button(action: check) {
             Image(systemName: "arrow.clockwise")
                 .font(.system(size: 11, weight: .medium))
         }
         .buttonStyle(.borderless)
         .foregroundStyle(enabled ? SettingsTheme.ink2 : SettingsTheme.ink3)
         .disabled(!enabled)
-        .help(
-            enabled
-                ? label
-                : L("updates.state.checking", "Checking for updates…")
-        )
+        .help(enabled ? label : why)
         .accessibilityLabel(label)
+        .accessibilityHint(enabled ? "" : why)
     }
 
     /// "Up to date", dated by the last check where one is known.
