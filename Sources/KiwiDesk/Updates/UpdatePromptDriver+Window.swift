@@ -14,26 +14,23 @@ extension UpdatePromptDriver {
         stage: SPUUserUpdateStage,
         reply: @escaping (SPUUserUpdateChoice) -> Void
     ) {
-        // Sparkle's "Checking…" window closes with the offer; its
-        // own close is private, and this is the public door to it.
-        super.dismissUpdateInstallation()
         if let window, window.session.retry == .checking,
             window.offer.build == item.versionString
         {
             return window.session.refound(reply: reply)
         }
-        openWindow(for: item, stage: stage, reply: reply)
-        if prompts.offerArrived(userInitiated: userInitiated) {
-            presentWindow()
-        }
+        let window = makeOffer(for: item, stage: stage, reply: reply)
+        let shows = prompts.offerArrived(userInitiated: userInitiated)
+        replace(with: .offer(window), presenting: shows)
+        if shows { prompts.offerGotAttention() }
+        fetchOfferedNext(into: window.session)
     }
 
-    func openWindow(
+    func makeOffer(
         for item: SUAppcastItem,
         stage: SPUUserUpdateStage,
         reply: @escaping (SPUUserUpdateChoice) -> Void
-    ) {
-        closeWindow()
+    ) -> UpdateWindowController {
         let session = UpdateSession(
             reply: reply,
             installsFrom: Self.installsFrom(stage)
@@ -62,19 +59,24 @@ extension UpdatePromptDriver {
             carried.next = self?.offeredNext
             record?.markRelaunch(carried)
         }
-        self.window = window
-        if let fetchNext {
-            nextFetch = Task { [weak self] in
-                let next = await fetchNext()
-                if !Task.isCancelled { self?.offeredNext = next }
-            }
+        return window
+    }
+
+    /// "Next on my list" for the offer's tab and the relaunch.
+    func fetchOfferedNext(into session: UpdateSession) {
+        guard let fetchNext else { return }
+        nextFetch = Task { [weak self] in
+            let next = await fetchNext()
+            guard !Task.isCancelled else { return }
+            self?.offeredNext = next
+            session.next = next?.current(at: Date())
         }
     }
 
-    /// Shows the window: the offer got the user's attention.
+    /// Shows the offer: it got the user's attention.
     func presentWindow() {
         prompts.offerGotAttention()
-        if let window { presents(window) }
+        if let window { presents(.offer(window)) }
     }
 
     /// A download Sparkle already fetched, or began installing,
@@ -89,12 +91,9 @@ extension UpdatePromptDriver {
         }
     }
 
+    /// Closes the offer, and only the offer.
     func closeWindow() {
-        window?.close()
-        window = nil
-        nextFetch?.cancel()
-        nextFetch = nil
-        offeredNext = nil
+        if window != nil { replace(with: nil) }
     }
 
     /// What the relaunch narrates (#1667): the items the window

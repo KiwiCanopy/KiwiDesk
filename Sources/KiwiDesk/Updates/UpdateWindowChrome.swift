@@ -2,39 +2,50 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// The one window both update surfaces share (#1542): titled, not
-/// tiled — it carries no `OwnWindowTiling` mark — not
-/// miniaturizable, closable, 560 pt wide and opening at its
-/// content between the ruled heights.
+/// The one window every update answer shares (#1542, #1849):
+/// titled, not tiled — it carries no `OwnWindowTiling` mark — not
+/// miniaturizable, closable, `UpdateWindowMetrics.width` wide and
+/// opening at its content between the ruled heights.
 @MainActor
 enum UpdateWindowChrome {
     static func window(
         offer: UpdateOffer,
         mode: UpdateWindowMode
     ) -> NSWindow {
+        window(
+            root: UpdateWindowView(offer: offer, mode: mode),
+            // The probe has no window, so no title-bar inset.
+            height: UpdateWindowMetrics.height(
+                fitting: fittingHeight(offer: offer, mode: mode)
+                    + UpdateWindowMetrics.titleBar
+            )
+        )
+    }
+
+    /// The window around any of its states, at `height` and, for a
+    /// state narrower than the notes, `width`.
+    static func window<Root: View>(
+        root: Root,
+        height: CGFloat,
+        width: CGFloat = UpdateWindowMetrics.width
+    ) -> NSWindow {
         let hosting = NSHostingController(
-            rootView: LocaleScopedRoot {
-                UpdateWindowView(offer: offer, mode: mode)
-            }
-            .environmentObject(LocalizationManager.shared)
+            rootView: LocaleScopedRoot { root }
+                .environmentObject(LocalizationManager.shared)
         )
         hosting.sizingOptions = []
         let window = NSWindow(contentViewController: hosting)
         window.styleMask = [.titled, .closable, .fullSizeContentView]
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
+        // The glass ground draws the window's backdrop (#1849).
+        window.isOpaque = false
+        window.backgroundColor = .clear
         window.title = L("update.window.window_title", "KiwiDesk Update")
         window.isReleasedWhenClosed = false
         window.animationBehavior = .documentWindow
         window.setContentSize(
-            NSSize(
-                width: UpdateWindowMetrics.width,
-                // The probe has no window, so no title-bar inset.
-                height: UpdateWindowMetrics.height(
-                    fitting: fittingHeight(offer: offer, mode: mode)
-                        + UpdateWindowMetrics.titleBar
-                )
-            )
+            NSSize(width: width, height: height)
         )
         return window
     }

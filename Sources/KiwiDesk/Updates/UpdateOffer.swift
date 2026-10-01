@@ -59,6 +59,45 @@ struct UpdateOffer {
         )
     }
 
+    /// The running version's own notes, for the window's "up to
+    /// date" answer (#1849); no digest when the feed does not list
+    /// this build.
+    static func current(
+        loaded: [SUAppcastItem],
+        host: Bundle
+    ) -> UpdateOffer {
+        let build =
+            host.object(forInfoDictionaryKey: "CFBundleVersion")
+            as? String ?? ""
+        let shown =
+            host.object(
+                forInfoDictionaryKey: "CFBundleShortVersionString"
+            ) as? String ?? build
+        let item = loaded.first { $0.versionString == build }
+        let digest = item.flatMap {
+            UpdateNotesDigest.make(
+                sources: [
+                    UpdateNotesDigest.Source(
+                        version: $0.versionString,
+                        notes: $0.propertiesDictionary[ReleaseNotes.element]
+                            as? String
+                    )
+                ],
+                installed: nil,
+                offered: build,
+                compare: SUStandardVersionComparator.default
+                    .compareVersion(_:toVersion:)
+            )
+        }
+        return UpdateOffer(
+            version: shown,
+            build: build,
+            installed: shown,
+            released: item?.date,
+            digest: digest
+        )
+    }
+
     /// "What's new" for the running version, merged across every
     /// feed item after `since`; nil when the running version's
     /// own notes cannot be read.
