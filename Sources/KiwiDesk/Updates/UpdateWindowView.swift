@@ -121,12 +121,18 @@ private struct UpdateWindowLayout<Footer: View>: View {
             footer()
         }
         .frame(width: UpdateWindowMetrics.width)
-        // SwiftUI keeps the content below the transparent title
-        // bar; only the ground runs up behind the traffic lights.
-        // Glass like the system alert it replaces, so it answers
-        // Reduce transparency alone and not the overlays' switch
-        // (#1849).
-        .background {
+        .updateWindowGround()
+    }
+}
+
+extension View {
+    /// The window's ground: glass like the system alert it
+    /// replaces, so it answers Reduce transparency alone and not
+    /// the overlays' switch (#1849). SwiftUI keeps the content
+    /// below the transparent title bar; only the ground runs up
+    /// behind the traffic lights.
+    func updateWindowGround() -> some View {
+        background {
             Color.clear
                 .glassChrome(
                     in: Rectangle(),

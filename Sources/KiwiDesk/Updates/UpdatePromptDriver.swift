@@ -88,8 +88,8 @@ final class UpdatePromptPolicy: NSObject,
 /// bouncing (#1011), and handing a found update to KiwiDesk's own
 /// window (#1542): each override below routes a phase to that
 /// window while one is open and defers to Sparkle otherwise.
-/// Checking stays Sparkle's; "up to date" is the window's too
-/// (#1849), any other no-update reason Sparkle's own wording.
+/// A user's check and "up to date" are the window's too (#1849);
+/// any other no-update reason keeps Sparkle's own wording.
 @MainActor
 final class UpdatePromptDriver: SPUStandardUserDriver {
     /// The policy the driver answers from, typed — Sparkle holds
@@ -115,6 +115,11 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     var offeredNext: NextOnMyList?
     /// Puts the window on screen; a test records it instead.
     var presents: (UpdateWindowController) -> Void = { $0.present() }
+    /// "Checking for updates…" while a user's check runs (#1849).
+    var checking: UpdateCheckingWindowController?
+    var presentsChecking: (UpdateCheckingWindowController) -> Void = {
+        $0.present()
+    }
     /// The "up to date" answer while it is open (#1849).
     var upToDate: UpToDateWindowController?
     /// Its list fetch, which the window waits on.
@@ -168,6 +173,7 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         acknowledgement: @escaping () -> Void
     ) {
         guard Self.isUpToDate(error) else {
+            closeChecking()
             if let sparkleNotFound {
                 return sparkleNotFound(error, acknowledgement)
             }
@@ -196,9 +202,7 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         cancellation: @escaping () -> Void
     ) {
         guard let window, window.session.retry == .checking else {
-            return super.showUserInitiatedUpdateCheck(
-                cancellation: cancellation
-            )
+            return showChecking(cancellation: cancellation)
         }
         window.session.checkStarted(cancellation: cancellation)
     }
@@ -298,6 +302,7 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         _ error: any Error,
         acknowledgement: @escaping () -> Void
     ) {
+        closeChecking()
         guard let window, window.session.phase != .found else {
             if let sparkleError {
                 return sparkleError(error, acknowledgement)
@@ -312,6 +317,7 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     }
 
     override func dismissUpdateInstallation() {
+        closeChecking()
         if let window, !window.session.dismissed() {
             closeWindow()
         }

@@ -634,8 +634,11 @@ Reduce transparency stands it down — not the Liquid Glass switch,
 which governs KiwiDesk's overlays on the desktop rather than a
 window.
 
-**What stays Sparkle's:** checking, and the download and install
-themselves. The window takes over at the offer and holds it
+**What stays Sparkle's:** the check, the download and the install
+themselves — the window only draws them. A check the user started
+shows as the window's own "Checking for updates…" with one Cancel,
+which the answer then replaces, so a check opens and ends in the
+same chrome. The window takes over at the offer and holds it
 through downloading, preparing and installing — one window per
 offer rather than an alert followed by a status window — because
 the notes stay readable while the download runs. A scheduled offer still never takes the screen

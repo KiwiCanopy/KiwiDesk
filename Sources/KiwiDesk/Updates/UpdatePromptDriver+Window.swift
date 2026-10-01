@@ -14,18 +14,31 @@ extension UpdatePromptDriver {
         stage: SPUUserUpdateStage,
         reply: @escaping (SPUUserUpdateChoice) -> Void
     ) {
-        // Sparkle's "Checking…" window closes with the offer; its
-        // own close is private, and this is the public door to it.
-        super.dismissUpdateInstallation()
         if let window, window.session.retry == .checking,
             window.offer.build == item.versionString
         {
+            closeCheckingWindows()
             return window.session.refound(reply: reply)
         }
+        // A scheduled offer puts nothing up, so nothing waits on it;
+        // dismissing after it would end the session it is pending in.
+        if !userInitiated { closeCheckingWindows() }
         openWindow(for: item, stage: stage, reply: reply)
         if prompts.offerArrived(userInitiated: userInitiated) {
             presentWindow()
+            closeCheckingWindows()
         }
+    }
+
+    /// Takes the checking window down AFTER its answer is key: a
+    /// closing key window hands focus back to the window under it,
+    /// and Core then reverts the answer's own report as a z-order
+    /// echo, sending it behind (#1849).
+    func closeCheckingWindows() {
+        // Sparkle's own "Checking…" panel; the public door to its
+        // private close.
+        super.dismissUpdateInstallation()
+        closeChecking()
     }
 
     func openWindow(
@@ -141,10 +154,7 @@ extension UpdatePromptDriver {
         next: NextOnMyList?,
         acknowledgement: @escaping () -> Void
     ) {
-        // Sparkle's "Checking…" window; the public door to its close.
-        super.dismissUpdateInstallation()
-        closeWindow()
-        upToDate?.close()
+        let replaced = upToDate
         let window = UpToDateWindowController(
             offer: UpdateOffer.current(loaded: loadedItems, host: .main),
             next: next
@@ -154,5 +164,24 @@ extension UpdatePromptDriver {
         }
         upToDate = window
         presentsUpToDate(window)
+        // Only now, behind the answer (`closeCheckingWindows`).
+        replaced?.close()
+        closeCheckingWindows()
+        closeWindow()
+    }
+}
+
+/// The window's checking state (#1849).
+extension UpdatePromptDriver {
+    func showChecking(cancellation: @escaping () -> Void) {
+        closeChecking()
+        let window = UpdateCheckingWindowController(cancel: cancellation)
+        checking = window
+        presentsChecking(window)
+    }
+
+    func closeChecking() {
+        checking?.close()
+        checking = nil
     }
 }

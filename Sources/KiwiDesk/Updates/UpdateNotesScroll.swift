@@ -103,7 +103,7 @@ struct UpdateNotesScroll: View {
                     )
                 )
                 .foregroundStyle(SettingsTheme.ink2)
-                .padding(.top, 6)
+                .updateNotesCard()
             }
         case .group(let id):
             if let group = offer.digest?.group(id) {

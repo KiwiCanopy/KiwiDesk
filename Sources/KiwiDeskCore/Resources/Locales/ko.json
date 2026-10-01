@@ -1600,6 +1600,7 @@
   "track.wrap_focus": "포커스 루프",
   "update.window.before_you_update": "업데이트 전에",
   "update.window.cancel": "취소",
+  "update.window.checking": "업데이트 확인 중…",
   "update.window.done": "완료",
   "update.window.downloading": "다운로드 중… %1$@",
   "update.window.downloading_of": "다운로드 중… %2$@ 중 %1$@",

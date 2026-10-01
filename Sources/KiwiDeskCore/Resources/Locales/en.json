@@ -1604,6 +1604,7 @@
   "track.wrap_focus": "Wrap focus",
   "update.window.before_you_update": "Before you update",
   "update.window.cancel": "Cancel",
+  "update.window.checking": "Checking for updates…",
   "update.window.done": "Done",
   "update.window.downloading": "Downloading… %1$@",
   "update.window.downloading_of": "Downloading… %1$@ of %2$@",

@@ -1600,6 +1600,7 @@
   "track.wrap_focus": "Fokus umlaufen lassen",
   "update.window.before_you_update": "Vor dem Update",
   "update.window.cancel": "Abbrechen",
+  "update.window.checking": "Nach Updates wird gesucht…",
   "update.window.done": "Fertig",
   "update.window.downloading": "Wird geladen… %1$@",
   "update.window.downloading_of": "Wird geladen… %1$@ von %2$@",

@@ -46,11 +46,7 @@ struct NextOnMyListPanel: View {
                 )
             }
         }
-        .padding(.horizontal, 17)
-        .padding(.vertical, 14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(shape.fill(SettingsTheme.card))
-        .overlay(shape.strokeBorder(SettingsTheme.hairline, lineWidth: 1))
+        .updateNotesCard()
         .accessibilityElement(children: .contain)
     }
 
@@ -76,9 +72,5 @@ struct NextOnMyListPanel: View {
             "As of %1$@",
             next.asOf.formatted(style)
         )
-    }
-
-    private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
     }
 }

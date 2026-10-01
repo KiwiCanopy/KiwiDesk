@@ -1600,6 +1600,7 @@
   "track.wrap_focus": "Scorrimento circolare del focus",
   "update.window.before_you_update": "Prima di aggiornare",
   "update.window.cancel": "Annulla",
+  "update.window.checking": "Controllo degli aggiornamenti in corso…",
   "update.window.done": "OK",
   "update.window.downloading": "Download in corso… %1$@",
   "update.window.downloading_of": "Download in corso… %1$@ di %2$@",

@@ -1600,6 +1600,7 @@
   "track.wrap_focus": "Envolver foco",
   "update.window.before_you_update": "Antes de actualizar",
   "update.window.cancel": "Cancelar",
+  "update.window.checking": "Buscando actualizaciones…",
   "update.window.done": "OK",
   "update.window.downloading": "Descargando… %1$@",
   "update.window.downloading_of": "Descargando… %1$@ de %2$@",

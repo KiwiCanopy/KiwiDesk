@@ -123,8 +123,22 @@ struct UpdateNotesGroupList: View {
                 )
             }
         }
-        .padding(.top, 4)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .updateNotesCard()
+    }
+}
+
+extension View {
+    /// The plain card every pane but Highlights sits in, so the
+    /// notes read on the window's glass (#1849).
+    func updateNotesCard() -> some View {
+        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        return
+            self
+            .padding(.horizontal, 17)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(shape.fill(SettingsTheme.card))
+            .overlay(shape.strokeBorder(SettingsTheme.hairline, lineWidth: 1))
     }
 }
 

@@ -1600,6 +1600,7 @@
   "track.wrap_focus": "Замыкать фокус по кругу",
   "update.window.before_you_update": "Перед обновлением",
   "update.window.cancel": "Отменить",
+  "update.window.checking": "Проверка обновлений…",
   "update.window.done": "Готово",
   "update.window.downloading": "Загрузка… %1$@",
   "update.window.downloading_of": "Загрузка… %1$@ из %2$@",

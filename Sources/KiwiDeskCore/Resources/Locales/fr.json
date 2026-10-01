@@ -1600,6 +1600,7 @@
   "track.wrap_focus": "Boucler le focus",
   "update.window.before_you_update": "Avant la mise à jour",
   "update.window.cancel": "Annuler",
+  "update.window.checking": "Recherche de mises à jour…",
   "update.window.done": "OK",
   "update.window.downloading": "Téléchargement… %1$@",
   "update.window.downloading_of": "Téléchargement… %1$@ sur %2$@",

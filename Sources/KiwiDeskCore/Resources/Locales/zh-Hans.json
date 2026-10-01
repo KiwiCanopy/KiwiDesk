@@ -1600,6 +1600,7 @@
   "track.wrap_focus": "焦点循环",
   "update.window.before_you_update": "更新前须知",
   "update.window.cancel": "取消",
+  "update.window.checking": "正在检查更新…",
   "update.window.done": "完成",
   "update.window.downloading": "正在下载… %1$@",
   "update.window.downloading_of": "正在下载… %1$@，共 %2$@",

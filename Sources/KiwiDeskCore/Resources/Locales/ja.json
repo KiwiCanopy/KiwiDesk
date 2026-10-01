@@ -1600,6 +1600,7 @@
   "track.wrap_focus": "フォーカスをループ",
   "update.window.before_you_update": "アップデートの前に",
   "update.window.cancel": "キャンセル",
+  "update.window.checking": "アップデートを確認中…",
   "update.window.done": "完了",
   "update.window.downloading": "ダウンロード中… %1$@",
   "update.window.downloading_of": "ダウンロード中… %2$@中 %1$@",
