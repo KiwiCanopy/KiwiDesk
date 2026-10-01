@@ -4,10 +4,11 @@ import CoreText
 /// Where bar text goes: along the bar a text glyph — an App Font
 /// ligature, a Space's digits or monogram — is placed by its INK
 /// (#1529, #1543); across it every bar text sits on one baseline
-/// per font, its cap height centred (#1707). The Space Bar's
-/// fields on `SpaceBarStyle.glyphFontSize`'s one ladder take
-/// `frame`; free-running text (a title, a count) takes `originY`
-/// and a badge cell `lineTop`; the App Bar's slot keeps its own
+/// per font, its cap height — a numeral's figures — centred
+/// (#1707). The Space Bar's fields on
+/// `SpaceBarStyle.glyphFontSize`'s one ladder take `frame`;
+/// free-running text (a title, a count) takes `originY` and a
+/// badge cell `lineTop`; the App Bar's slot keeps its own
 /// font-scaling and snug rulings (`AppBarItemView+GlyphSlot`) and
 /// anchors through `Metrics`.
 enum BarTextGlyph {
@@ -101,7 +102,7 @@ enum BarTextGlyph {
     /// rather than the advance, since the cell's neighbours are
     /// image cells whose pixels centre. Vertically an App Font
     /// ligature centres its line box and text sets its baseline
-    /// through `originY(capsCentredOn:for:height:)`.
+    /// through `originY(centredOn:for:height:)`.
     @MainActor
     static func frame(
         for field: NSTextField,
@@ -123,7 +124,7 @@ enum BarTextGlyph {
             AppFont.isAppFont(field.font)
             ? cell.midY - height / 2
             : originY(
-                capsCentredOn: cell.midY,
+                centredOn: cell.midY,
                 for: field,
                 height: height
             )
@@ -132,11 +133,11 @@ enum BarTextGlyph {
 
     /// The frame origin's y for `field` laid out `height` tall
     /// in a FLIPPED host (every bar view is): its baseline sits
-    /// where `lineTop(capsCentredOn:font:)` puts it. The frame
+    /// where `lineTop(centredOn:text:font:)` puts it. The frame
     /// may pass the cell.
     @MainActor
     static func originY(
-        capsCentredOn mid: CGFloat,
+        centredOn mid: CGFloat,
         for field: NSTextField,
         height: CGFloat
     ) -> CGFloat {
@@ -149,20 +150,44 @@ enum BarTextGlyph {
             width: max(ceil(cell.cellSize.width), 1),
             height: height
         )
-        return lineTop(capsCentredOn: mid, font: font)
-            - cell.titleRect(forBounds: bounds).minY
+        return lineTop(
+            centredOn: mid,
+            text: field.stringValue,
+            font: font
+        ) - cell.titleRect(forBounds: bounds).minY
     }
 
-    /// Where a line of `font` starts, flipped, so its baseline
-    /// centres the font's cap height on `mid`: one baseline per
-    /// font whatever a string's own ink, so an old-style 3 and a
-    /// 1 line up and a tall face's ascent does not lift it (#1707).
+    /// Where a line of `text` in `font` starts, flipped, so its
+    /// baseline centres the font's `band(for:font:)` on `mid`: one
+    /// baseline per font and band whatever a string's own ink, so
+    /// an old-style 3 and a 1 line up and a tall face's ascent does
+    /// not lift it (#1707).
     @MainActor
     static func lineTop(
-        capsCentredOn mid: CGFloat,
+        centredOn mid: CGFloat,
+        text: String,
         font: NSFont
     ) -> CGFloat {
-        mid + font.capHeight / 2 - layout.defaultBaselineOffset(for: font)
+        let band = band(for: text, font: font)
+        return mid + (band.lowerBound + band.upperBound) / 2
+            - layout.defaultBaselineOffset(for: font)
+    }
+
+    /// The span above the baseline a line centres: the cap height,
+    /// or for a figures-only string the ink of the font's ten
+    /// digits — an old-style face's figures sit below its caps'
+    /// middle, so a numbered Space centred by its caps reads low.
+    static func band(
+        for text: String,
+        font: NSFont
+    ) -> ClosedRange<CGFloat> {
+        let caps = 0...font.capHeight
+        guard !text.isEmpty, text.allSatisfy(\.isASCIIDigit) else {
+            return caps
+        }
+        let figures = metrics("0123456789", font: font).ink
+        guard figures.height > 0 else { return caps }
+        return figures.minY...figures.maxY
     }
 
     @MainActor private static let layout = NSLayoutManager()
@@ -190,4 +215,8 @@ enum BarTextGlyph {
         }
         field.font = fitted
     }
+}
+
+extension Character {
+    fileprivate var isASCIIDigit: Bool { ("0"..."9").contains(self) }
 }

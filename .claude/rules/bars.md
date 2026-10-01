@@ -1109,11 +1109,17 @@ reaches.
   issue stale after `load_profile`. `BarFontIssueTests` ▸
   `followsProfileSwitch` and ▸ `fontSetChangeRederives` hold it.
 - **Set every bar text's baseline through `BarTextGlyph` — the
-  font's cap height centred on the item, one baseline per font —
+  font's cap height centred on the item, or for a figures-only
+  string its ten digits' ink, one baseline per font and band —
   never by centring its line box and never by a string's own
   ink** (#1707): an old-style 3 descends where a 1 does not, so
   per-string ink centring gave each digit its own baseline, and
-  a tall face's ascent lifted a centred line box off its item. A
+  a tall face's ascent lifted a centred line box off its item.
+  Old-style figures sit below the caps' middle, so a numbered
+  Space centred by its caps read low; the figure band is the
+  font's, not the string's, so every numeral still shares one
+  baseline (`BarTextBaselineTests` ▸
+  `identifierFigures`, ▸ `numeralsShareABaseline`). A
   cell site takes `frame`, free-running text (the App Bar title,
   the front-app name, `ShelfCountView`'s number) `originY`, and a
   badge cell `lineTop`; an App Font ligature is an icon and

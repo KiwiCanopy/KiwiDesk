@@ -121,7 +121,7 @@ extension AppBarItemView {
         label.frame = CGRect(
             x: x,
             y: BarTextGlyph.originY(
-                capsCentredOn: bounds.midY,
+                centredOn: bounds.midY,
                 for: label,
                 height: placed.text.height
             ),

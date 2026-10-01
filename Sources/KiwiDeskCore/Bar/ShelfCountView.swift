@@ -252,7 +252,7 @@ final class ShelfCountView: NSView {
         label.frame.origin = CGPoint(
             x: numberCenter.x - label.frame.width / 2,
             y: BarTextGlyph.originY(
-                capsCentredOn: numberCenter.y,
+                centredOn: numberCenter.y,
                 for: label,
                 height: label.frame.height
             )

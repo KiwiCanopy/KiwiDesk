@@ -8,8 +8,8 @@ import Testing
 /// each rendered in Apple Chancery at a size where centring the
 /// line box instead misses the cap band by more than the
 /// tolerance. The measurement is `BarTextBaselineTests`': the ink
-/// bottom of a flat-footed glyph is the baseline, and the cap band
-/// is the font's own `capHeight` above it.
+/// bottom of a flat-footed glyph is the baseline, and the band —
+/// caps, or a count's figures — is measured above it.
 @Suite("Bar text sites centre their cap band")
 @MainActor
 struct BarTextBaselineSiteTests {
@@ -26,9 +26,12 @@ struct BarTextBaselineSiteTests {
             BarTextBaselineTests.inkRows(of: field),
             "no ink in \(field.stringValue)"
         )
-        let cap = try #require(field.font).capHeight
+        let band = BarTextBaselineTests.bandMiddle(
+            of: field.stringValue,
+            font: try #require(field.font)
+        )
         return (
-            field.frame.minY + rows.upperBound - cap / 2,
+            field.frame.minY + rows.upperBound - band,
             rows.lowerBound > 0 && rows.upperBound < field.bounds.height
         )
     }

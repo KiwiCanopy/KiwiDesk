@@ -280,7 +280,7 @@ extension SpaceBarOverlay {
         frontName.frame = CGRect(
             x: offset,
             y: BarTextGlyph.originY(
-                capsCentredOn: depth / 2,
+                centredOn: depth / 2,
                 for: frontName,
                 height: height
             ),
