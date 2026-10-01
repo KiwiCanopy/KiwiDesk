@@ -71,8 +71,10 @@ public final class AppBarManager {
         Set(overlays.filter { $0.value.isVisible }.keys)
     }
 
-    /// Drops the overlays of displays no longer connected; a
-    /// display still live keeps its hidden overlay (#1838).
+    /// Drops the overlays of displays outside `live` — the
+    /// connected ones, and those whose shelf is still fading, which
+    /// the caller adds; a display still live keeps its hidden
+    /// overlay (#1838).
     public func retire(except live: Set<DisplayID>) {
         for (id, overlay) in overlays where !live.contains(id) {
             overlay.hide()

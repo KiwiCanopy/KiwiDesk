@@ -269,12 +269,21 @@ twice, was a question the user answered twice. The argument is
   nothing down and a hide of a hidden section writes nothing,
   since the shelf draws a leaving section until its leave lands
   (`ShelfFadeTests` ▸ `hiddenSectionKeepsItsViews`,
+  `hiddenSpaceBarSectionKeepsItsViews`,
   `refreshKeepsTheLeavingSection`); and a shelf fade-out already
   running is never restarted by a later refresh (`ShelfFadeTests`
   ▸ `repeatedHideKeepsTheLanding`) — both were how a lone shelf's
-  appear took the fused join arm and flew in. A leave's landing
-  removes only a view still on its own strip
-  (`ShelfSplitDriverTests` ▸ `splitKeepsTheMovedSection`). The Space
+  appear took the fused join arm and flew in. A leave stamps its
+  views, and a landing removes only the views whose latest leave it
+  owns (`ShelfFadeTests` ▸ `leaveInsideALeave`) that still sit on
+  its own strip (`ShelfSplitDriverTests` ▸
+  `splitKeepsTheMovedSection`), scheduled through the overlay's one
+  `afterGlide`, which a test drains by hand rather than on a clock.
+  A departed display's overlay is dropped only once its shelf's
+  fade has landed — `updateBars()` spares
+  `ShelfManager.leavingDisplays` — or a display re-enumerating
+  inside the glide re-joins as a new section (`ShelfFadeTests` ▸
+  `managerRetiresOnceLeft`). The Space
   Bar's chip
   glide stands down when its slot changed, the shelf gliding the
   section then (`SpaceBarInactiveContentTests`).

@@ -143,6 +143,13 @@ final class ShelfManager {
         overlay.handle.syncHoverToPointer()
     }
 
+    /// The displays with a shelf still fading out: a bar manager
+    /// spares their overlays, whose roots that fade still draws
+    /// (#1838).
+    var leavingDisplays: Set<DisplayID> {
+        Set(overlays.filter { $0.value.isLeaving }.map(\.key.display))
+    }
+
     /// Drops a shelf that has left the screen, unless a plan wants
     /// it again meanwhile.
     private func retire(_ key: Key) {

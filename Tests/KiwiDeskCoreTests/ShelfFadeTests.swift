@@ -139,12 +139,16 @@ struct ShelfFadeTests {
                 sections: sections
             )
         }
+        var landings: [@MainActor () -> Void] = []
+        overlay.afterGlide = { landings.append($0) }
         both([space, app])
         both([space])
         #expect(overlay.leavingViews[app.view] != nil)
         both([space, app])
         #expect(overlay.leavingViews[app.view] == nil)
-        try await Task.sleep(for: .milliseconds(300))
+        // The leave's landing, run by hand.
+        try #require(landings.count == 1)
+        landings[0]()
         #expect(app.view.superview === overlay.stripView)
     }
 
@@ -152,11 +156,12 @@ struct ShelfFadeTests {
     /// one glide wears its latest leave's stamp: the first landing
     /// leaves it to the second, which removes it (#1838).
     @Test("A leave inside a leave keeps the later landing")
-    func leaveInsideALeave() async throws {
+    func leaveInsideALeave() throws {
         guard !BarMotion.isReduced else { return }
-        BarMotion.shelfGlide = 0.3
-        defer { pinShelfGlide() }
+        pinShelfGlide()
         let overlay = ShelfOverlay()
+        var landings: [@MainActor () -> Void] = []
+        overlay.afterGlide = { landings.append($0) }
         let space = ShelfOverlay.Section(
             view: NSView(),
             slot: CGRect(x: 100, y: 0, width: 500, height: 40),
@@ -181,17 +186,42 @@ struct ShelfFadeTests {
         both([space, app])
         both([space])
         let first = try #require(overlay.leavingViews[app.view])
-        try await Task.sleep(for: .milliseconds(100))
         both([space, app])
         both([space])
         let second = try #require(overlay.leavingViews[app.view])
         #expect(second != first)
-        // Past the first landing, well short of the second.
-        try await Task.sleep(for: .milliseconds(280))
+        try #require(landings.count == 2)
+        // The first leave's landing leaves the view to the second.
+        landings[0]()
         #expect(app.view.superview === overlay.stripView)
         #expect(overlay.leavingViews[app.view] == second)
-        try await settle { overlay.leavingViews.isEmpty }
+        landings[1]()
         #expect(app.view.superview == nil)
+        #expect(overlay.leavingViews.isEmpty)
+    }
+
+    /// The Space Bar's twin of the hide contract.
+    @Test("A hidden Space Bar section keeps its views, hides once")
+    func hiddenSpaceBarSectionKeepsItsViews() {
+        let overlay = SpaceBarOverlay()
+        overlay.show(
+            items: paintedSpaceBar(front: nil, spaces: 2).items,
+            strip: Self.strip,
+            style: SpaceBarLook(),
+            stateMarkColors: StateMarkColors(
+                sticky: "#ffffff",
+                floating: "#ffffff"
+            )
+        )
+        overlay.hide()
+        #expect(overlay.root.isHidden)
+        #expect(!overlay.itemViews.isEmpty)
+        #expect(
+            overlay.itemViews.allSatisfy { $0.superview === overlay.itemRun }
+        )
+        overlay.root.isHidden = false
+        overlay.hide()
+        #expect(!overlay.root.isHidden)
     }
 
     /// The bar managers hide a section and tear nothing down, and a
@@ -297,9 +327,13 @@ struct ShelfFadeTests {
         shelves.sync([])
         if !BarMotion.isReduced {
             #expect(shelves.overlayForTesting(barTitleDisplay) === overlay)
+            // Its display is spared by the bar managers' retire
+            // while the fade runs.
+            #expect(shelves.leavingDisplays == [barTitleDisplay])
         }
         try await settle { shelves.overlayForTesting(barTitleDisplay) == nil }
         #expect(shelves.overlayForTesting(barTitleDisplay) == nil)
+        #expect(shelves.leavingDisplays.isEmpty)
         #expect(!overlay.isVisible)
     }
 }

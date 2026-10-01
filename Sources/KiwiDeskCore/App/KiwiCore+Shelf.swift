@@ -30,9 +30,10 @@ extension KiwiCore {
             shelves.holdingRelayout {
                 appBars.sync(fallback)
                 spaceBars.sync([])
-                let live = Set(fallback.map(\.display))
-                appBars.retire(except: live)
-                spaceBars.retire(except: live)
+                let keep = Set(fallback.map(\.display))
+                    .union(shelves.leavingDisplays)
+                appBars.retire(except: keep)
+                spaceBars.retire(except: keep)
             }
             // A lone bar's slot IS its strip.
             syncShelves(
@@ -115,9 +116,13 @@ extension KiwiCore {
         shelves.holdingRelayout {
             appBars.sync(appBarsShown)
             spaceBars.sync(spaceBarsShown)
-            let live = Set(displays.map(\.id))
-            appBars.retire(except: live)
-            spaceBars.retire(except: live)
+            // A departed display's overlay waits for its shelf's fade
+            // to land: dropped mid-fade, a display re-enumerating
+            // inside the glide would re-join as a new section.
+            let keep = Set(displays.map(\.id))
+                .union(shelves.leavingDisplays)
+            appBars.retire(except: keep)
+            spaceBars.retire(except: keep)
         }
         syncShelves(strips, settings: settings)
     }

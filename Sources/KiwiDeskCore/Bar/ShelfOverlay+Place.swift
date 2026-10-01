@@ -100,7 +100,7 @@ extension ShelfOverlay {
             // stays, one leaving again wears a later stamp, and one
             // another shelf took meanwhile is that shelf's to place
             // (#1838).
-            BarMotion.afterGroupGlide { [weak self] in
+            afterGlide { [weak self] in
                 guard let self else { return }
                 for view in leaving where self.leavingViews[view] == token {
                     if view.superview === self.stripView {
