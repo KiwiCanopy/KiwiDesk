@@ -54,6 +54,8 @@ struct AppBarFloatOverlayTests {
         #expect(m.markLead > 0)
         #expect(m.lengths[0] == m.slot + m.markLead)
         #expect(m.lengths[1] == m.slot)
+        // The first float's frame keeps the lead outside it.
+        #expect(overlay.itemViews[0].frame.width == m.slot)
         // A tiled row leading takes no lead.
         show(overlay, [item(3), item(4, floating: true)])
         #expect(try #require(overlay.lastMetrics).markLead == 0)

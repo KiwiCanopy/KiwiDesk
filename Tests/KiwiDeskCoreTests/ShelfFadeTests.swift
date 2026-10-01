@@ -210,6 +210,7 @@ struct ShelfFadeTests {
         apps.sync([])
         #expect(!app.root.isHidden)
         try await settle { shelves.overlayForTesting(barTitleDisplay) == nil }
+        #expect(shelves.overlayForTesting(barTitleDisplay) == nil)
     }
 
     @Test("A shelf never shown reports leaving at once")
@@ -252,6 +253,7 @@ struct ShelfFadeTests {
             #expect(shelves.overlayForTesting(barTitleDisplay) === overlay)
         }
         try await settle { shelves.overlayForTesting(barTitleDisplay) == nil }
+        #expect(shelves.overlayForTesting(barTitleDisplay) == nil)
         #expect(!overlay.isVisible)
     }
 }
