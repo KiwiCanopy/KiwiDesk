@@ -67,9 +67,14 @@ recompile, so a warm tree hides it from a re-run. Before pushing,
 check the warning the ratchet would see:
 
 ```
-swift build --build-tests -Xswiftc -warnings-as-errors \
+scripts/warning-gate swift build --build-tests \
+  -Xswiftc -warnings-as-errors \
   -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 ```
+
+`scripts/warning-gate` fails on a warning `-warnings-as-errors`
+cannot promote — an isolation inherited from an SDK class
+(#1780) — as CI's steps do.
 
 Step 1 keeps its bare command deliberately: `VerifyGateParityTests`
 scrapes it and requires the identical line in `scripts/release.sh`

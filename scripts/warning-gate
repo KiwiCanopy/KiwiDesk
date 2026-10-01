@@ -1,0 +1,43 @@
+#!/bin/bash
+# Run a ratcheted build or test command, then fail on any Swift
+# compiler warning left in its output outside the
+# DeprecatedDeclaration exemption (#1780). `-warnings-as-errors`
+# cannot promote an isolation a type inherits from an SDK class
+# (`NSView`), so those reach the output as warnings and would
+# land green (packaging-and-release.md ▸ the ratchet).
+#
+# Only `.swift` diagnostics count: Vendor/'s C is clang's, which
+# the ratchet does not reach. A cached build re-emits nothing,
+# so a local run proves only what it compiled.
+#
+# Usage: scripts/warning-gate <command ...>
+set -uo pipefail
+
+if [ "$#" -eq 0 ]; then
+    echo "usage: scripts/warning-gate <command ...>" >&2
+    exit 64
+fi
+
+LOG="$(mktemp -t warning-gate)"
+trap 'rm -f "$LOG"' EXIT
+
+"$@" 2>&1 | tee "$LOG"
+STATUS=${PIPESTATUS[0]}
+if [ "$STATUS" -ne 0 ]; then
+    exit "$STATUS"
+fi
+
+# Strip colour and hyperlink escapes, which a terminal run adds
+# around the `[#Group]` tag.
+LEFT="$(
+    perl -pe 's/\e\[[0-9;]*m//g; s/\e\]8;;.*?\e\\//g' "$LOG" |
+        grep -E '^[^ ]+\.swift:[0-9]+:[0-9]+: warning:' |
+        grep -vF '[#DeprecatedDeclaration]' |
+        sort -u
+)"
+if [ -n "$LEFT" ]; then
+    echo "==> warning-gate: compiler warnings the ratchet" \
+        "did not promote (#1780):" >&2
+    echo "$LEFT" >&2
+    exit 1
+fi
