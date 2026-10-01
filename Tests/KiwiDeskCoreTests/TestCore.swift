@@ -107,6 +107,9 @@ func makeTestCore(
     // New Window activates the target's app and both window
     // actions press another app's AX element (#1518).
     core.openOrFocus.activate = { _ in }
+    // Open or Focus's first press asks the app's AX-focused
+    // window when nothing is stamped yet (#1840).
+    core.eventLoop.shadows.focusedWindow = { _ in nil }
     core.windowActions.newWindow = { _, _ in }
     core.windowActions.close = { _, _ in }
     // The scroll-gesture tap (#1656): a live one would take a

@@ -102,6 +102,11 @@ public struct StateCoordinator: Sendable {
     /// by the event arm, read by the hold, cleared by the settle.
     var settlingScreens: [SpaceID: String] = [:]
 
+    /// Honored-focus recency per window (#1840): stamped only by
+    /// `rememberHonoredFocus`, ended by a close or the app's exit.
+    var focusRecency: [WindowID: FocusStamp] = [:]
+    var focusTick: UInt64 = 0
+
     /// Minimized windows in order (#40, #673; `MinimizeOrderTests`).
     var minimizeOrder: [MinimizedWindow] = []
 
@@ -211,6 +216,9 @@ public struct StateCoordinator: Sendable {
         if let frame = floatFrames.removeValue(forKey: old) {
             floatFrames[new] = frame
         }
+        if let rank = focusRecency.removeValue(forKey: old) {
+            focusRecency[new] = rank
+        }
     }
 
     /// Folds an event into state and returns side-effect facts (#166).
@@ -233,6 +241,7 @@ public struct StateCoordinator: Sendable {
                 stickyReachOverrides[id] = nil
             }
             floatFrames = floatFrames.filter { $0.value.pid != pid }
+            focusRecency = focusRecency.filter { $0.value.pid != pid }
             forgetMinimized(pid: pid)
             // The app's exit ends its away entries for good
             // (#1146), and a head's hand-off with them (#1387).

@@ -30,6 +30,11 @@ extension KiwiCore {
         if !newInstance,
             let pid = openOrFocus.runningAppPID(bundleID)
         {
+            // A tracked window is focused by command, its Space
+            // switched to: the one it was last focused in (#1840).
+            if pullRecentWindow(bundleID: bundleID, pid: pid) {
+                return .ok()
+            }
             let census = openOrFocus.census(pid)
             // Nothing up here but a window up on an away Desktop
             // (#1146): reach it rather than un-park or duplicate.
@@ -68,6 +73,18 @@ extension KiwiCore {
             // Only an app with nothing up here opens a window for
             // this pull; one already showing is merely focused.
             if census.visible == 0 { oweLaunchFollow(bundleID) }
+            // Nothing to pull — no window up, parked or on record
+            // away: the app outlived its last window (Safari after
+            // its ✕). `activate` asks for no window, so reopen it
+            // the way a Dock click does (#1840). An away entry an
+            // unreadable census could not confirm keeps the
+            // activate.
+            if census.visible == 0, census.minimized.isEmpty,
+                awayWindows(bundleID: bundleID).isEmpty,
+                openOrFocus.openApp(bundleID, false)
+            {
+                return .ok()
+            }
             openOrFocus.activate(pid)
             return .ok()
         }

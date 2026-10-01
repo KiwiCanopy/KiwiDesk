@@ -11,6 +11,8 @@ extension KiwiCore {
     /// that beats the switch handler lands under the right key.
     func rememberHonoredFocus(_ id: WindowID) {
         guard let space = state.workspaces.space(of: id) else { return }
+        // The first-press target of Open or Focus (#1840).
+        state.stampFocusRecency(id)
         // A focus honored in the active space while a return's
         // debt stands is the user's or the OS's own choice: the
         // memory yields, or the owed window's arrival pays over

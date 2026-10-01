@@ -4286,6 +4286,20 @@ Desktop bridge, or where the per-Desktop window list cannot be
 read, other Desktops are not consulted — see
 [Accepted limitations](accepted-limitations.md).
 
+:::unreleased
+A first press focuses the app window you used **most recently**
+among the ones KiwiDesk is tracking — its windows on the
+Desktops on screen — switching to its Space. Right after
+KiwiDesk starts, before you have used any of them, it takes the
+app's own focused window, else the first in the cycle order
+above. A window on another Desktop is reached only when the app
+has none on the Desktops on screen, as described above.
+
+If the app is running with **no window at all** — you closed
+its last one and it stayed open, as Safari does — the shortcut
+asks it for a new window, the same as clicking it in the Dock.
+:::
+
 **Example:**
 
 ```lua
