@@ -19,16 +19,14 @@ struct BarTextBaselineTests {
 
     init() { LiquidGlassGate.override = { false } }
 
-    /// The middle of the band `text` centres, above the baseline:
-    /// a figures-only string's is its digits' ink, measured apart
-    /// from `BarTextGlyph`.
-    static func bandMiddle(of text: String, font: NSFont) -> CGFloat {
-        let figures =
-            !text.isEmpty
-            && text.allSatisfy { ("0"..."9").contains($0) }
-        guard figures else {
-            return font.capHeight / 2
-        }
+    /// The middle of `band` above the baseline in `font`,
+    /// measured apart from `BarTextGlyph`: the cap height, or the
+    /// ink of the ten digits.
+    static func bandMiddle(
+        _ band: BarTextGlyph.Band,
+        font: NSFont
+    ) -> CGFloat {
+        guard band == .figures else { return font.capHeight / 2 }
         return CTLineGetImageBounds(
             CTLineCreateWithAttributedString(
                 NSAttributedString(
@@ -181,7 +179,7 @@ struct BarTextBaselineTests {
         )
         let mid =
             one.ink.upperBound
-            - Self.bandMiddle(of: "1", font: one.font)
+            - Self.bandMiddle(.figures, font: one.font)
         #expect(
             abs(mid - one.mid) <= 1,
             "figure band middle \(mid) vs item middle \(one.mid)"

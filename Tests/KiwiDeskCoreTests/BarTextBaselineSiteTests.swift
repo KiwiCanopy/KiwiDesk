@@ -20,18 +20,19 @@ struct BarTextBaselineSiteTests {
     /// The cap band's middle, in the field's host, and whether the
     /// ink stays inside the field.
     static func capMiddle(
-        of field: NSTextField
+        of field: NSTextField,
+        band: BarTextGlyph.Band = .caps
     ) throws -> (mid: CGFloat, whole: Bool) {
         let rows = try #require(
             BarTextBaselineTests.inkRows(of: field),
             "no ink in \(field.stringValue)"
         )
-        let band = BarTextBaselineTests.bandMiddle(
-            of: field.stringValue,
+        let middle = BarTextBaselineTests.bandMiddle(
+            band,
             font: try #require(field.font)
         )
         return (
-            field.frame.minY + rows.upperBound - band,
+            field.frame.minY + rows.upperBound - middle,
             rows.lowerBound > 0 && rows.upperBound < field.bounds.height
         )
     }
@@ -85,23 +86,42 @@ struct BarTextBaselineSiteTests {
         )
     }
 
-    @Test("a count badge centres its caps on its disc")
-    func countBadge() throws {
-        try #require(BarFont.isInstalled(Self.family))
+    /// A badge on a disc in Chancery, framed in a flipped host.
+    static func badge(_ text: String) -> NSTextField {
         let host = AppBarOverlay.FlippedView(
             frame: CGRect(x: 0, y: 0, width: 100, height: 100)
         )
         let badge = SpaceBarItemView.makeBadge()
         host.addSubview(badge)
-        badge.font = NSFont(name: Self.family, size: 40)
-        badge.stringValue = "H"
+        badge.font = NSFont(name: family, size: 40)
+        badge.stringValue = text
         badge.frame = CGRect(x: 10, y: 10, width: 70, height: 70)
-        let band = try Self.capMiddle(of: badge)
+        return badge
+    }
+
+    /// The 1's flat foot is the baseline the figure band rests on.
+    @Test("a count badge centres its figures on its disc")
+    func countBadge() throws {
+        try #require(BarFont.isInstalled(Self.family))
+        let badge = Self.badge("1")
+        let band = try Self.capMiddle(of: badge, band: .figures)
         #expect(band.whole, "badge clipped")
         #expect(
             abs(band.mid - badge.frame.midY) <= 1,
-            "cap band \(band.mid) vs disc middle \(badge.frame.midY)"
+            "figure band \(band.mid) vs disc middle \(badge.frame.midY)"
         )
+    }
+
+    /// The band is the badge's role, never its string: a count
+    /// and an overflow badge sit on one line in an old-style face.
+    @Test("a count and an overflow badge share one line")
+    func overflowBadgeLine() throws {
+        try #require(BarFont.isInstalled(Self.family))
+        let tops = ["3", "+3", "12"].map { text in
+            let badge = Self.badge(text)
+            return badge.cell?.titleRect(forBounds: badge.bounds).minY
+        }
+        #expect(Set(tops).count == 1, "line tops \(tops)")
     }
 
     @Test("the shelf's overflow count centres its caps")
@@ -126,7 +146,7 @@ struct BarTextBaselineSiteTests {
         let label = try #require(
             view.subviews.first { $0 is NSTextField } as? NSTextField
         )
-        let band = try Self.capMiddle(of: label)
+        let band = try Self.capMiddle(of: label, band: .figures)
         #expect(band.whole, "count clipped at \(label.frame)")
         #expect(
             abs(band.mid - view.bounds.midY) <= 1,

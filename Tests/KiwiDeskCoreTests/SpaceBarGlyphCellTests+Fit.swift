@@ -71,7 +71,11 @@ extension SpaceBarGlyphCellTests {
             field.alignment = .center
             let appFont = try #require(AppFont.font(size: size))
             field.font = appFont
-            field.frame = BarTextGlyph.frame(for: field, in: cell)
+            field.frame = BarTextGlyph.frame(
+                for: field,
+                in: cell,
+                band: .caps
+            )
             let font = try Self.requireAppFont(field)
             let ink = BarTextGlyph.metrics(ligature, font: font).ink
             #expect(ink.width <= Self.cell + 0.01, "\(ligature)")

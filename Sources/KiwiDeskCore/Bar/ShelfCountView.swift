@@ -254,6 +254,7 @@ final class ShelfCountView: NSView {
             y: BarTextGlyph.originY(
                 centredOn: numberCenter.y,
                 for: label,
+                band: .figures,
                 height: label.frame.height
             )
         )

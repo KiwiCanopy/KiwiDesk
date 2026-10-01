@@ -229,7 +229,11 @@ extension SpaceBarOverlay {
             frontGlyph.textColor = accent
             let host = frontGlyph.superview ?? itemRun
             frontGlyph.frame = host.backingAlignedRect(
-                BarTextGlyph.frame(for: frontGlyph, in: frame),
+                BarTextGlyph.frame(
+                    for: frontGlyph,
+                    in: frame,
+                    band: .caps
+                ),
                 options: .alignAllEdgesNearest
             )
             frontGlyph.setAccessibilityElement(true)
@@ -284,6 +288,7 @@ extension SpaceBarOverlay {
             y: BarTextGlyph.originY(
                 centredOn: depth / 2,
                 for: frontName,
+                band: .caps,
                 height: height
             ),
             width: min(frontName.frame.width, available),

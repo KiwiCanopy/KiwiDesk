@@ -123,6 +123,7 @@ extension AppBarItemView {
             y: BarTextGlyph.originY(
                 centredOn: bounds.midY,
                 for: label,
+                band: .caps,
                 height: placed.text.height
             ),
             width: placed.text.width,

@@ -245,6 +245,7 @@ extension SpaceBarItemView {
             rect = BarTextGlyph.frame(
                 for: field,
                 in: rect,
+                band: .of(identifier: field.stringValue),
                 slack: slack
             )
         }

@@ -102,11 +102,12 @@ enum BarTextGlyph {
     /// rather than the advance, since the cell's neighbours are
     /// image cells whose pixels centre. Vertically an App Font
     /// ligature centres its line box and text sets its baseline
-    /// through `originY(centredOn:for:height:)`.
+    /// through `originY(centredOn:for:band:height:)`.
     @MainActor
     static func frame(
         for field: NSTextField,
         in cell: CGRect,
+        band: Band,
         slack: CGFloat = 0
     ) -> CGRect {
         fit(field, toWidth: cell.width + slack * 2)
@@ -126,6 +127,7 @@ enum BarTextGlyph {
             : originY(
                 centredOn: cell.midY,
                 for: field,
+                band: band,
                 height: height
             )
         return rect
@@ -133,12 +135,13 @@ enum BarTextGlyph {
 
     /// The frame origin's y for `field` laid out `height` tall
     /// in a FLIPPED host (every bar view is): its baseline sits
-    /// where `lineTop(centredOn:text:font:)` puts it. The frame
+    /// where `lineTop(centredOn:band:font:)` puts it. The frame
     /// may pass the cell.
     @MainActor
     static func originY(
         centredOn mid: CGFloat,
         for field: NSTextField,
+        band: Band,
         height: CGFloat
     ) -> CGFloat {
         guard let font = field.font, let cell = field.cell else {
@@ -152,43 +155,62 @@ enum BarTextGlyph {
         )
         return lineTop(
             centredOn: mid,
-            text: field.stringValue,
+            band: band,
             font: font
         ) - cell.titleRect(forBounds: bounds).minY
     }
 
-    /// Where a line of `text` in `font` starts, flipped, so its
-    /// baseline centres the font's `band(for:font:)` on `mid`: one
-    /// baseline per font and band whatever a string's own ink, so
-    /// an old-style 3 and a 1 line up and a tall face's ascent does
-    /// not lift it (#1707).
+    /// The span above the baseline a line centres, named by the
+    /// SITE's role and never read off the string, so a "3" and a
+    /// "+3" badge share a line.
+    enum Band {
+        /// The cap height: titles, names, a lettered identifier.
+        case caps
+        /// The ink of the font's ten digits: counts and numbered
+        /// identifiers — an old-style face's figures sit below its
+        /// caps' middle, so a numeral centred by its caps reads low.
+        case figures
+
+        /// A Space identifier's band: figures for a numeral, caps
+        /// for anything carrying a letter or symbol.
+        static func of(identifier text: String) -> Band {
+            !text.isEmpty && text.allSatisfy(\.isNumber)
+                ? .figures : .caps
+        }
+    }
+
+    /// Where a line of `font` starts, flipped, so its baseline
+    /// centres `band` on `mid`: one baseline per font and band
+    /// whatever a string's own ink, so an old-style 3 and a 1 line
+    /// up and a tall face's ascent does not lift it (#1707).
     @MainActor
     static func lineTop(
         centredOn mid: CGFloat,
-        text: String,
+        band: Band,
         font: NSFont
     ) -> CGFloat {
-        let band = band(for: text, font: font)
-        return mid + (band.lowerBound + band.upperBound) / 2
+        let span = span(of: band, font: font)
+        return mid + (span.lowerBound + span.upperBound) / 2
             - layout.defaultBaselineOffset(for: font)
     }
 
-    /// The span above the baseline a line centres: the cap height,
-    /// or for a figures-only string the ink of the font's ten
-    /// digits — an old-style face's figures sit below its caps'
-    /// middle, so a numbered Space centred by its caps reads low.
-    static func band(
-        for text: String,
-        font: NSFont
-    ) -> ClosedRange<CGFloat> {
+    /// `band`'s span above the baseline in `font`; a face with no
+    /// digit ink centres its caps. Memoized per font, since a
+    /// badge cell asks on every draw.
+    @MainActor
+    static func span(of band: Band, font: NSFont) -> ClosedRange<CGFloat> {
         let caps = 0...font.capHeight
-        guard !text.isEmpty, text.allSatisfy(\.isASCIIDigit) else {
-            return caps
-        }
-        let figures = metrics("0123456789", font: font).ink
-        guard figures.height > 0 else { return caps }
-        return figures.minY...figures.maxY
+        guard band == .figures else { return caps }
+        if let known = figureSpans[font] { return known }
+        let ink = metrics("0123456789", font: font).ink
+        let span = ink.height > 0 ? ink.minY...ink.maxY : caps
+        if figureSpans.count > 64 { figureSpans.removeAll() }
+        figureSpans[font] = span
+        return span
     }
+
+    @MainActor private static var figureSpans: [NSFont: ClosedRange<CGFloat>] =
+        [:]
 
     @MainActor private static let layout = NSLayoutManager()
 
@@ -215,8 +237,4 @@ enum BarTextGlyph {
         }
         field.font = fitted
     }
-}
-
-extension Character {
-    fileprivate var isASCIIDigit: Bool { ("0"..."9").contains(self) }
 }
