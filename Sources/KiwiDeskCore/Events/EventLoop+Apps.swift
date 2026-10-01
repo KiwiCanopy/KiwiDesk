@@ -288,14 +288,21 @@ extension Notification {
 }
 
 extension NSScreen {
-    /// Converts an `NSScreen` into a KiwiDesk display snapshot.
+    /// Converts an `NSScreen` into a KiwiDesk display snapshot. Its
+    /// usable area is a WindowServer round trip, so an id-only
+    /// reader takes `kiwiDisplayID` (#1868).
     @MainActor var kiwiDisplay: Display? {
-        guard let number = screenNumber else { return nil }
+        guard let id = kiwiDisplayID else { return nil }
         return Display(
-            id: DisplayID(number),
+            id: id,
             name: localizedName,
             frame: frame,
             visibleFrame: GeometryUtils.visibleFrame(of: self)
         )
+    }
+
+    /// The screen's display id, read without a WindowServer call.
+    @MainActor var kiwiDisplayID: DisplayID? {
+        screenNumber.map { DisplayID($0) }
     }
 }

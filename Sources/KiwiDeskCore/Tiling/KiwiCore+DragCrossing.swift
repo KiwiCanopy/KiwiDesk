@@ -17,7 +17,7 @@ extension KiwiCore {
         dragCrossing.displayAt = { point in
             NSScreen.screens
                 .first { $0.frame.contains(point) }?
-                .kiwiDisplay?.id
+                .kiwiDisplayID
         }
         dragCrossing.onCross = { [weak self] id, display in
             self?.performLiveCrossing(id, onto: display)

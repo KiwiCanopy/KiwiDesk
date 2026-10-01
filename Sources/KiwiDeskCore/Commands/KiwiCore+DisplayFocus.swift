@@ -38,7 +38,7 @@ extension KiwiCore {
                 GeometryUtils.visibleFrame(of: $0)
                     .contains(cocoaPoint)
             }),
-            let display = screen.kiwiDisplay?.id
+            let display = screen.kiwiDisplayID
         else { return }
         let focusedDisplay = state.workspaces.activeSpace.flatMap {
             state.workspaces.display(of: $0)

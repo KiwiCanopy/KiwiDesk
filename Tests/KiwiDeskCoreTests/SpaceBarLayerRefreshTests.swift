@@ -42,7 +42,7 @@ struct SpaceBarLayerRefreshTests {
     }
 
     private func identities(_ core: KiwiCore) -> [SpaceBarItemView.Identity] {
-        guard let display = NSScreen.screens.first?.kiwiDisplay?.id,
+        guard let display = NSScreen.screens.first?.kiwiDisplayID,
             let shown = core.spaceBars.overlayForTesting(display)?
                 .lastShown
         else { return [] }

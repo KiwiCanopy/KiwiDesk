@@ -29,7 +29,7 @@ final class BorderBumpAnimator {
         reduceMotion: Bool,
         onDone: @escaping @MainActor () -> Void
     ) {
-        guard let display = screen.kiwiDisplay?.id else {
+        guard let display = screen.kiwiDisplayID else {
             onDone()
             return
         }

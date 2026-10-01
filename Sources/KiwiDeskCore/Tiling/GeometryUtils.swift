@@ -67,18 +67,45 @@ public enum GeometryUtils {
     /// `VisibleFrameReadCensusTests` holds the exceptions.
     @MainActor
     static func visibleFrame(of screen: NSScreen) -> CGRect {
+        let visible = appKitVisibleFrame(of: screen)
         if menuBarAutoHides {
             return reclaimingMenuBar(
-                screen.visibleFrame,
+                visible,
                 screen: screen.frame,
                 safeTop: screen.safeAreaInsets.top
             )
         }
         return clearingMenuBar(
-            screen.visibleFrame,
+            visible,
             barBottom: DrawnMenuBars.bottom(of: screen)
         )
     }
+
+    /// AppKit's own usable area — the WindowServer round trip
+    /// under `visibleFrame(of:)`, before the #1386 correction.
+    @MainActor
+    static func appKitVisibleFrame(of screen: NSScreen) -> CGRect {
+        #if DEBUG
+            if let appKitVisibleFrameOverride {
+                return appKitVisibleFrameOverride(screen)
+            }
+        #endif
+        return liveAppKitVisibleFrame(of: screen)
+    }
+
+    /// The machine read behind `appKitVisibleFrame(of:)`.
+    @MainActor
+    static func liveAppKitVisibleFrame(of screen: NSScreen) -> CGRect {
+        screen.visibleFrame
+    }
+
+    #if DEBUG
+        /// Test seam over `appKitVisibleFrame(of:)`; nil reads the
+        /// machine. A test core memoizes it, the correction above
+        /// still running live (#1868).
+        @MainActor
+        static var appKitVisibleFrameOverride: ((NSScreen) -> CGRect)?
+    #endif
 
     /// Lowers `visible`'s top edge to a drawn bar's bottom edge
     /// when it reaches past it; never raises it (#1386).
@@ -189,7 +216,7 @@ extension GeometryUtils {
                 in: screens.map(\.frame)
             )
         else { return nil }
-        return screens[index].kiwiDisplay?.id
+        return screens[index].kiwiDisplayID
     }
 
     /// Confines the origin so `frame` stays inside `visible`; an

@@ -122,7 +122,7 @@ public final class AnimationEngine {
             apply(window, target, true)
             return
         }
-        guard let display = screen.kiwiDisplay?.id else {
+        guard let display = screen.kiwiDisplayID else {
             cancel(window: window)
             apply(window, target, true)
             return

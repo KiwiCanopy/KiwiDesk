@@ -8,6 +8,7 @@ extension SourceScan {
     nonisolated(unsafe) private static var sourcesCache: [URL: [URL]] = [:]
     nonisolated(unsafe) private static var rawFileCache: [URL: String] = [:]
     nonisolated(unsafe) private static var strippedCache: [URL: String] = [:]
+    nonisolated(unsafe) private static var stripLocks: [URL: NSLock] = [:]
 
     /// Reads raw string contents of `url`, cached in-memory
     /// across test suites.
@@ -27,18 +28,22 @@ extension SourceScan {
 
     /// Reads `url`, strips comments, and caches the result so
     /// subsequent scans over the same file reuse the parsed representation.
+    /// Single-flight per file: a late caller waits for the first
+    /// strip instead of walking the file again (#1868).
     static func strippedSource(at url: URL) throws -> String {
-        cacheLock.lock()
-        if let cached = strippedCache[url] {
-            cacheLock.unlock()
+        let fileLock: NSLock = cacheLock.withLock {
+            if let lock = stripLocks[url] { return lock }
+            let lock = NSLock()
+            stripLocks[url] = lock
+            return lock
+        }
+        fileLock.lock()
+        defer { fileLock.unlock() }
+        if let cached = cacheLock.withLock({ strippedCache[url] }) {
             return cached
         }
-        cacheLock.unlock()
-        let raw = try rawSource(at: url)
-        let stripped = stripComments(raw)
-        cacheLock.lock()
-        strippedCache[url] = stripped
-        cacheLock.unlock()
+        let stripped = stripComments(try rawSource(at: url))
+        cacheLock.withLock { strippedCache[url] = stripped }
         return stripped
     }
 

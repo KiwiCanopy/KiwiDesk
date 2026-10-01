@@ -177,7 +177,7 @@ struct AnimationSettleWatchdogTests {
         // Through `animate`, so this rides the engine's real
         // duration-to-response mapping rather than a copy of it.
         guard let screen = NSScreen.main,
-            let screenDisplay = screen.kiwiDisplay?.id
+            let screenDisplay = screen.kiwiDisplayID
         else { return }
         for durationMS in Self.durations {
             for hz in [30.0, 60.0, 120.0] {

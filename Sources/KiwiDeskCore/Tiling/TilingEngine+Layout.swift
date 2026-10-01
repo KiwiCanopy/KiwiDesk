@@ -220,7 +220,7 @@ extension TilingEngine {
     /// The `NSScreen` backing a display id, matched by
     /// `CGDirectDisplayID`.
     static func screen(for display: DisplayID) -> NSScreen? {
-        NSScreen.screens.first { $0.kiwiDisplay?.id == display }
+        NSScreen.screens.first { $0.kiwiDisplayID == display }
     }
 
     /// The `NSScreen` a frame (AX coords) mostly sits on — the

@@ -15,6 +15,15 @@ final class SizeLimitOverlay {
 
     private var pills: [CGWindowID: Pill] = [:]
 
+    /// AppKit keeps a visible panel alive after its owner is gone,
+    /// so a dropped overlay would leave it on screen (#1868).
+    isolated deinit {
+        for pill in pills.values {
+            pill.hideWork?.cancel()
+            pill.panel.orderOut(nil)
+        }
+    }
+
     private static let holdDuration: TimeInterval = 1.4
     private static let fadeDuration: TimeInterval = 0.2
     private static let pillHeight: CGFloat = 26
@@ -194,6 +203,7 @@ final class SizeLimitOverlay {
         panel.contentView = plate
         return panel
     }
+
 }
 
 /// The pill's visual content: frosted blur plate with symbol and label.
