@@ -226,7 +226,8 @@ twice, was a question the user answered twice. The argument is
   pass: a start stood at 569 glided from 0 until the
   `CATransaction.flush()` behind it (device, 2026-09-30), the
   content jumping aside first. Compute where a start is through
-  `ShelfOverlay.glideStart`, never beside a call site: content that keeps its offset inside
+  `ShelfOverlay.glideStart`, never beside a call site: content that keeps its
+  offset inside
   the section glides from the old frame, size included; content
   re-anchored in its slot starts at the new size placed where it
   was drawn, since the old bounds would clip it; and a slot that
@@ -244,7 +245,8 @@ twice, was a question the user answered twice. The argument is
   ruling, #1838). The fade-out keeps the panel until it lands,
   a show meanwhile fades it back, the shelf reports leaving
   exactly once, and `ShelfManager` retires it only then
-  (`ShelfFadeTests`). Never hold a strip reserved for a shelf that is fading out:
+  (`ShelfFadeTests`). Never hold a strip reserved for a shelf that is fading
+  out:
   the windows take it the instant the switch lands and the fading
   shelf draws over their edge.
 - **A Space switch DISSOLVES the App Bar's row, both rows fading
@@ -272,7 +274,8 @@ twice, was a question the user answered twice. The argument is
   ▸ `repeatedHideKeepsTheLanding`) — both were how a lone shelf's
   appear took the fused join arm and flew in. A leave's landing
   removes only a view still on its own strip
-  (`ShelfSplitDriverTests` ▸ `splitKeepsTheMovedSection`). The Space Bar's chip
+  (`ShelfSplitDriverTests` ▸ `splitKeepsTheMovedSection`). The Space
+  Bar's chip
   glide stands down when its slot changed, the shelf gliding the
   section then (`SpaceBarInactiveContentTests`).
 - **A row of floats alone keeps the floating mark ahead of its
@@ -375,7 +378,8 @@ render content into it (#1517). Obligations:
   routing is review's.
 - **An empty Space's identifier, on a Space its screen does not
   show, is `KiwiShelf.emptyItemColor` under either content,
-  derived from the palette and never picked** (#1683): the idle floor and the occupied-to-empty step
+  derived from the palette and never picked** (#1683): the idle floor and the
+  occupied-to-empty step
   both hold, or the cue drops rather than the floor.
   `EmptyItemInkTests` measures every bundled palette's answer.
 

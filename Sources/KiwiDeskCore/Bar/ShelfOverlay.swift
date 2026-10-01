@@ -28,9 +28,9 @@ final class ShelfOverlay {
     /// Fires once the shelf has left the screen — at once, or when
     /// its fade-out lands; `ShelfManager` retires it there.
     var onLeft: @MainActor () -> Void = {}
-    /// Sections shrinking out after they left, removed once the
-    /// glide lands (#1838).
-    var leavingViews: Set<NSView> = []
+    /// Sections shrinking out after they left, each stamped by its
+    /// latest leave, whose landing alone removes it (#1838).
+    var leavingViews: [NSView: UUID] = [:]
     /// Each section's drawn content at its last placement, in its
     /// own coordinates — where a glide starts it from (#1838).
     var placedContent: [ObjectIdentifier: CGRect] = [:]

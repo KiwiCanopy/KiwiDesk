@@ -75,7 +75,7 @@ extension ShelfOverlay {
         where view !== divider && view !== handle
             && !wanted.contains(where: { $0 === view })
         {
-            guard animated, !leavingViews.contains(view) else {
+            guard animated, leavingViews[view] == nil else {
                 if !animated { view.removeFromSuperview() }
                 continue
             }
@@ -94,19 +94,20 @@ extension ShelfOverlay {
             BarMotion.setAlpha(view, to: 0, animated: true)
         }
         if !leaving.isEmpty {
-            leavingViews.formUnion(leaving)
+            let token = UUID()
+            for view in leaving { leavingViews[view] = token }
             // A view wanted again before this lands left the set and
-            // stays; one another shelf took meanwhile is that
-            // shelf's to place (#1838).
+            // stays, one leaving again wears a later stamp, and one
+            // another shelf took meanwhile is that shelf's to place
+            // (#1838).
             BarMotion.afterGroupGlide { [weak self] in
                 guard let self else { return }
-                for view in leaving
-                where self.leavingViews.contains(view)
-                    && view.superview === self.stripView
-                {
-                    view.removeFromSuperview()
+                for view in leaving where self.leavingViews[view] == token {
+                    if view.superview === self.stripView {
+                        view.removeFromSuperview()
+                    }
+                    self.leavingViews[view] = nil
                 }
-                self.leavingViews.subtract(leaving)
             }
         }
         placedContent = placedContent.filter { key, _ in
@@ -114,7 +115,7 @@ extension ShelfOverlay {
         }
         for section in sections {
             let key = ObjectIdentifier(section.view)
-            leavingViews.remove(section.view)
+            leavingViews[section.view] = nil
             let joining = section.view.superview !== stripView
             if joining {
                 stripView.addSubview(

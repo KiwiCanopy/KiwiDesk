@@ -141,7 +141,15 @@ struct ShelfSplitDriverTests {
         )
         let app = try #require(core.appBars.shownOverlay(on: display))
         #expect(app.root.superview === bottom.stripView)
-        try await Task.sleep(for: .milliseconds(900))
+        // The old shelf's landing is observable only by its own
+        // write: the leaving set emptying.
+        let top = try #require(
+            core.shelves.overlayForTesting(display, edge: .top)
+        )
+        for _ in 0..<150 where !top.leavingViews.isEmpty {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        #expect(top.leavingViews.isEmpty)
         #expect(app.root.superview === bottom.stripView)
     }
 }

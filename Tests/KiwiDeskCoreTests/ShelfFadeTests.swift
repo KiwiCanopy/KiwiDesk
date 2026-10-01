@@ -141,11 +141,57 @@ struct ShelfFadeTests {
         }
         both([space, app])
         both([space])
-        #expect(overlay.leavingViews.contains(app.view))
+        #expect(overlay.leavingViews[app.view] != nil)
         both([space, app])
-        #expect(!overlay.leavingViews.contains(app.view))
+        #expect(overlay.leavingViews[app.view] == nil)
         try await Task.sleep(for: .milliseconds(300))
         #expect(app.view.superview === overlay.stripView)
+    }
+
+    /// A section that leaves, is wanted again and leaves again inside
+    /// one glide wears its latest leave's stamp: the first landing
+    /// leaves it to the second, which removes it (#1838).
+    @Test("A leave inside a leave keeps the later landing")
+    func leaveInsideALeave() async throws {
+        guard !BarMotion.isReduced else { return }
+        BarMotion.shelfGlide = 0.3
+        defer { pinShelfGlide() }
+        let overlay = ShelfOverlay()
+        let space = ShelfOverlay.Section(
+            view: NSView(),
+            slot: CGRect(x: 100, y: 0, width: 500, height: 40),
+            plate: CGRect(x: 0, y: 0, width: 500, height: 40),
+            content: CGRect(x: 10, y: 0, width: 480, height: 40)
+        )
+        let app = ShelfOverlay.Section(
+            view: NSView(),
+            slot: CGRect(x: 620, y: 0, width: 400, height: 40),
+            plate: CGRect(x: 0, y: 0, width: 400, height: 40),
+            content: CGRect(x: 10, y: 0, width: 380, height: 40)
+        )
+        let both = { (sections: [ShelfOverlay.Section]) in
+            overlay.show(
+                strip: Self.strip,
+                edge: .top,
+                shelf: Self.shelf(),
+                sheen: 0,
+                sections: sections
+            )
+        }
+        both([space, app])
+        both([space])
+        let first = try #require(overlay.leavingViews[app.view])
+        try await Task.sleep(for: .milliseconds(100))
+        both([space, app])
+        both([space])
+        let second = try #require(overlay.leavingViews[app.view])
+        #expect(second != first)
+        // Past the first landing, well short of the second.
+        try await Task.sleep(for: .milliseconds(280))
+        #expect(app.view.superview === overlay.stripView)
+        #expect(overlay.leavingViews[app.view] == second)
+        try await settle { overlay.leavingViews.isEmpty }
+        #expect(app.view.superview == nil)
     }
 
     /// The bar managers hide a section and tear nothing down, and a
