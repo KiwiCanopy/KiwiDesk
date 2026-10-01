@@ -47,24 +47,30 @@ struct WarningGateTests {
         }
     }
 
-    /// A terminal run wraps the group tag in colour and
-    /// hyperlink escapes; the exemption must still match.
-    @Test("The exemption survives terminal escapes")
-    func escapedTagPasses() throws {
-        let log = """
-            /r/Sources/B.swift:1:1: \u{1B}[1;35mwarning: \
-            \u{1B}[0m\u{1B}[1;39md\u{1B}[0;0m [#\u{1B}]8;;\
-            https://docs.swift.org/x\u{1B}\\DeprecatedDeclaration\
-            \u{1B}]8;;\u{1B}\\]
-
+    /// A terminal run wraps the warning and its group tag in
+    /// colour and hyperlink escapes. Both halves: an escaped
+    /// warning is still SEEN, and an escaped exemption still
+    /// matches.
+    @Test("Terminal escapes neither hide a warning nor the tag")
+    func escapesAreStripped() throws {
+        let paint = "\u{1B}[1;35mwarning: \u{1B}[0m"
+        let isolated = "/r/Sources/A.swift:1:1: \(paint)read\n"
+        #expect(try gate(over: isolated).status == 1)
+        let tag = """
+            [#\u{1B}]8;;https://docs.swift.org/x\u{1B}\\\
+            DeprecatedDeclaration\u{1B}]8;;\u{1B}\\]
             """
-        #expect(try gate(over: log).status == 0)
+        let exempt = "/r/Sources/B.swift:1:1: \(paint)d \(tag)\n"
+        #expect(try gate(over: exempt).status == 0)
     }
 
     @Test("A failing command keeps its own status")
     func commandStatusWins() throws {
-        let run = try spawn("/bin/bash", [Self.script.path, "/usr/bin/false"])
-        #expect(run.status == 1)
+        let run = try spawn(
+            "/bin/bash",
+            [Self.script.path, "/bin/sh", "-c", "exit 3"]
+        )
+        #expect(run.status == 3)
         #expect(!run.stderr.contains("warning-gate:"))
     }
 
