@@ -81,13 +81,15 @@ extension SourceScan {
     ]
 
     /// The lookbehind keeps a member reference — `case .class,
-    /// .enum:` — from naming the closure after it a type.
+    /// .enum:` — from naming the closure after it a type; the name
+    /// is read in a lookahead so `class func f` leaves `func` to
+    /// match as the scope's own keyword.
     private static let scopeKeyword = try! NSRegularExpression(
         pattern: #"(?<!\.)\b("#
             + typeKeywords.joined(separator: "|")
-            + #"|func|init|deinit|var|let|if|guard|for|while|"#
-            + #"switch|else|do|catch|get|set|willSet|didSet|"#
-            + #"defer|repeat)\b\s*(\w*)"#
+            + #"|func|init|deinit|subscript|var|let|if|guard|for|"#
+            + #"while|switch|else|do|catch|get|set|willSet|didSet|"#
+            + #"defer|repeat)\b(?=\s*(\w*))"#
     )
 
     /// The scope tree of `text`, which must already be blanked;

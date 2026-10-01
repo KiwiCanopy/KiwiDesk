@@ -64,6 +64,28 @@ struct SourceScanEnclosingTypesTests {
         #expect(found["after"] == "Manager")
     }
 
+    @Test("a class member is its class's, never a type of its own")
+    func classMembersAreNotTypes() {
+        let found = owners(
+            """
+            class Base {
+                class func make() {
+                    let a = 1 // @func
+                }
+                class var shared: Int {
+                    1 // @var
+                }
+                class subscript(i: Int) -> Int {
+                    i // @subscript
+                }
+            }
+            """
+        )
+        #expect(found["func"] == "Base")
+        #expect(found["var"] == "Base")
+        #expect(found["subscript"] == "Base")
+    }
+
     @Test("a declaration line is its outer type's, a close its own")
     func declarationAndCloseLines() {
         let found = owners(

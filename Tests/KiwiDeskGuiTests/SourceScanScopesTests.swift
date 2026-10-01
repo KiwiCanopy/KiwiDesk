@@ -46,7 +46,11 @@ struct SourceScanScopesTests {
                     range: NSRange(location: 0, length: text.length)
                 )
                 let declared = Set(
-                    hits.map { $0.range.location + $0.range.length - 1 }
+                    hits.filter {
+                        !Self.notTypes.contains(
+                            text.substring(with: $0.range(at: 2))
+                        )
+                    }.map { $0.range.location + $0.range.length - 1 }
                 )
                 for scope in scopes
                 where SourceScan.typeKeywords.contains(scope.keyword)
