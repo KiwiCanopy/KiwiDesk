@@ -67,7 +67,11 @@ struct OverlayPanelDeinitCensusTests {
 
     /// Every Core function that returns a panel type, so a store
     /// initialized through one (`lazy var panel = makePanel()`)
-    /// is a store too.
+    /// is a store too. The net's reach, stated: a generic factory
+    /// (`func make<T>(`), one taking a function-typed parameter
+    /// (its `)` ends the match early) and one returning an
+    /// optional panel are not seen, so a store made through one
+    /// is unchecked.
     private func panelFactories(
         returning alternatives: String,
         in files: [(String, String)]
@@ -152,12 +156,15 @@ struct OverlayPanelDeinitCensusTests {
                             length: min(40, deinitScope.open)
                         )
                     )
-                    return head.contains("isolated deinit")
-                        && body.contains("orderOut(")
-                        && SourceScan.mentions(
-                            identifier: property,
-                            in: body
-                        )
+                    // Named on the line that orders it out.
+                    let ordersItOut = body.split(separator: "\n").contains {
+                        $0.contains("orderOut(")
+                            && SourceScan.mentions(
+                                identifier: property,
+                                in: String($0)
+                            )
+                    }
+                    return head.contains("isolated deinit") && ordersItOut
                 }
                 if !releases {
                     offenders.append("\(file): \(name).\(property)")

@@ -3,9 +3,10 @@ import Testing
 
 /// `SourceScan.scopeTree` decides what a class-scoped scan SEES,
 /// so it owes a whole-tree canary measured outside its walker
-/// (tests.md ▸ source-scanning primitives): every class a plain
-/// regex finds in both Sources trees must come back as a `class`
-/// scope opening at the same brace. A walker that mis-names or
+/// (tests.md ▸ source-scanning primitives): every class, struct,
+/// enum, actor and extension a plain regex finds in both Sources
+/// trees must come back as a scope of that keyword and name,
+/// opening at the same brace. A walker that mis-names or
 /// loses scopes would otherwise let a census pass for having
 /// found no owner.
 @Suite("SourceScan scope tree")
@@ -13,13 +14,14 @@ struct SourceScanScopesTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
     private static let declaration = try! NSRegularExpression(
-        pattern: #"\bclass\s+(\w+)[^{;=]*\{"#
+        pattern: #"\b(class|struct|enum|actor|extension)\s+(\w+)"#
+            + #"[^{;=]*\{"#
     )
     private static let notTypes: Set<String> = [
-        "func", "var", "let", "subscript",
+        "func", "var", "let", "subscript", "in", "case",
     ]
 
-    @Test("every class declaration in Sources is a class scope")
+    @Test("every type declaration in Sources is its own scope")
     func nothingGoesDark() throws {
         var seen = 0
         var dark: [String] = []
@@ -41,18 +43,19 @@ struct SourceScanScopesTests {
                     in: text as String,
                     range: NSRange(location: 0, length: text.length)
                 ) {
-                    let name = text.substring(with: hit.range(at: 1))
+                    let keyword = text.substring(with: hit.range(at: 1))
+                    let name = text.substring(with: hit.range(at: 2))
                     guard !Self.notTypes.contains(name) else { continue }
                     seen += 1
                     let brace = hit.range.location + hit.range.length - 1
                     let scope = byOpen[brace]
-                    if scope?.keyword != "class" || scope?.name != name {
+                    if scope?.keyword != keyword || scope?.name != name {
                         dark.append("\(file.lastPathComponent): \(name)")
                     }
                 }
             }
         }
-        #expect(seen > 100, "the regex found only \(seen) classes")
+        #expect(seen > 500, "the regex found only \(seen) types")
         #expect(dark.isEmpty, .init(rawValue: "unseen: \(dark)"))
     }
 

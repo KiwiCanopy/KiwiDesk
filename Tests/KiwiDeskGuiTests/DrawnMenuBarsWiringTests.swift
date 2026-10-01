@@ -179,9 +179,15 @@ struct DrawnMenuBarsWiringTests {
     func twinsMemoizeTheAppKitRead() throws {
         for target in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
             let text = try source("Tests/\(target)/TestCore.swift")
-            #expect(
-                text.contains("GeometryUtils.appKitVisibleFrameOverride ="),
+            let memo = try #require(
+                text.range(of: "GeometryUtils.appKitVisibleFrameOverride =")
+                    .map { String(text[$0.upperBound...].prefix(400)) },
                 .init(rawValue: "\(target) misses the memo")
+            )
+            // The closure caches: it reads and writes the memo.
+            #expect(
+                memo.contains("testAppKitFrames[key]"),
+                .init(rawValue: "\(target)'s override does not memoize")
             )
         }
         let geometry = try source(
@@ -195,5 +201,13 @@ struct DrawnMenuBarsWiringTests {
         )
         #expect(door.contains("appKitVisibleFrame(of: screen)"))
         #expect(!door.contains("screen.visibleFrame"))
+        // And the AppKit door still consults the override.
+        let appKit = try #require(
+            SourceScan.declarationBody(
+                after: "static func appKitVisibleFrame(of screen: NSScreen)",
+                in: geometry
+            )
+        )
+        #expect(appKit.contains("appKitVisibleFrameOverride(screen)"))
     }
 }
