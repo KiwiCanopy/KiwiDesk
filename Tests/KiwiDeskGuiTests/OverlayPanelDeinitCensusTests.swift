@@ -177,11 +177,11 @@ struct OverlayPanelDeinitCensusTests {
                     offenders.append("\(file): \(property) at file scope")
                     continue
                 }
-                // A local inside a function is not a stored property.
-                guard
-                    SourceScan.typeKeywords.contains(
-                        tree.scopes[scope].keyword
-                    )
+                // A local inside a function is not a stored property,
+                // and a protocol requirement stores nothing.
+                let keyword = tree.scopes[scope].keyword
+                guard SourceScan.typeKeywords.contains(keyword),
+                    keyword != "protocol"
                 else { continue }
                 guard let owner = tree.owningClass(of: scope) else {
                     offenders.append("\(file): no class owns it")
