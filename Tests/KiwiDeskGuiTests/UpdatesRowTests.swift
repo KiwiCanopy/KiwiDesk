@@ -81,7 +81,8 @@ struct UpdatesRowTests {
         controller.updater = updater
         for state in [
             UpdateState.unavailable, .notChecked(lastChecked: nil),
-            .upToDate(lastChecked: nil), .checking, .failed,
+            .upToDate(lastChecked: nil), .answering(lastChecked: nil),
+            .checking, .failed,
         ] {
             updater.updates.set(state)
             #expect(controller.makeUpdatesItem() == nil)

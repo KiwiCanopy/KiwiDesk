@@ -2,9 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// An entry followed by its version in brackets, which only a
-/// window spanning several versions passes (owner, 2026-09-24).
-/// One localized frame, since the brackets are punctuation a
-/// locale may write differently; the version is drawn quieter.
+/// window spanning several versions passes (owner, 2026-09-24),
+/// in the notes' English (#1849); the version is drawn quieter.
 extension UpdateNotesMarkdown {
     @MainActor
     static func entry(_ markdown: String, version: String?)
@@ -12,19 +11,11 @@ extension UpdateNotesMarkdown {
     {
         var text = self.text(markdown)
         guard let version else { return text }
-        let frame = L("update.window.entry_version", "%1$@ (%2$@)")
-        let parts = frame.components(separatedBy: "%1$@")
-        guard parts.count == 2 else { return text }
-        // Either side may carry the version, whichever order the
-        // locale writes.
-        let quiet = parts.map { part -> AttributedString in
-            var run = AttributedString(
-                part.replacingOccurrences(of: "%2$@", with: version)
-            )
-            run.foregroundColor = SettingsTheme.ink3
-            return run
-        }
-        text = quiet[0] + text + quiet[1]
+        var quiet = AttributedString(
+            UpdateNotesEnglish.entryVersion(version)
+        )
+        quiet.foregroundColor = SettingsTheme.ink3
+        text += quiet
         return text
     }
 }

@@ -161,12 +161,17 @@ struct UpdatePromptWiringTests {
             )
         )
         #expect(live.contains("driver.updateCycleFinished()"))
+        // Try Again's check goes past the click's bring-forward:
+        // its failed window is still open (#1849 review).
         #expect(
             live.contains(
                 "driver.startCheck = { [weak self] in "
-                    + "self?.checkForUpdates() }"
+                    + "self?.startOwnCheck() }"
             )
         )
+        // The open answer reaches Home through the pinned fold.
+        #expect(live.contains("updates.state.after("))
+        #expect(live.contains(".answered(open: open),"))
     }
 
     /// "What's new" (#1542): the updater builds ONE record for

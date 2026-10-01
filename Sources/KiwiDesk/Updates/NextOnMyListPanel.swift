@@ -6,6 +6,9 @@ import SwiftUI
 /// wrote them — English, like the changelog — and a Discord link.
 struct NextOnMyListPanel: View {
     let next: NextOnMyList
+    /// One quiet support line under Discord — never beside an
+    /// Install (#1849).
+    var asksForSupport = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -26,25 +29,24 @@ struct NextOnMyListPanel: View {
                 }
             }
             UpdateNotesLink(
-                title: L(
-                    "update.window.next_discord",
-                    "Follow along and share ideas on Discord"
-                ),
+                title: UpdateNotesEnglish.discord,
                 url: SupportLinks.discord
             )
             .padding(.top, 3)
+            if asksForSupport {
+                UpdateNotesLink(
+                    title: UpdateNotesEnglish.support,
+                    url: SupportLinks.koFi
+                )
+            }
         }
-        .padding(.horizontal, 17)
-        .padding(.vertical, 14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(shape.fill(SettingsTheme.card))
-        .overlay(shape.strokeBorder(SettingsTheme.hairline, lineWidth: 1))
+        .updateNotesCard()
         .accessibilityElement(children: .contain)
     }
 
     private var label: some View {
         Label {
-            Text(L("update.window.next_on_my_list", "Next on my list"))
+            Text(UpdateNotesEnglish.nextOnMyList)
                 .textCase(.uppercase)
                 .tracking(0.9)
         } icon: {
@@ -59,14 +61,7 @@ struct NextOnMyListPanel: View {
     private var asOf: String {
         var style = Date.FormatStyle.dateTime.month(.wide).day()
         style.timeZone = .gmt
-        return L(
-            "update.window.next_as_of",
-            "As of %1$@",
-            next.asOf.formatted(style)
-        )
-    }
-
-    private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
+        style.locale = UpdateNotesEnglish.locale
+        return UpdateNotesEnglish.asOf(next.asOf.formatted(style))
     }
 }

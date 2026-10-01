@@ -2,31 +2,55 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The notes between the pinned header and footer: a pinned tab
-/// strip over one scrolling list — Highlights, or one type's
-/// changes (#1666 ruling).
+/// strip over one scrolling list — Highlights, one type's
+/// changes (#1666 ruling), or "Next on my list" (#1849).
 struct UpdateNotesScroll: View {
     let offer: UpdateOffer
     /// The Failed state steps the Highlights gold back.
     let failed: Bool
     /// After the update: the cautions are past advice.
     let whatsNew: Bool
-    /// Drawn under the Highlights card (#1813).
+    /// The last tab's list, while there is one.
     var next: NextOnMyList?
     /// Lays every tab out at once, unscrolled, so the window's
     /// height is the tallest tab's and a switch does not jump it.
     let measuring: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var selection = UpdateNotesTabs.initial
+    @State private var selection: UpdateNotesTab
     @State private var moreBelow = false
+
+    init(
+        offer: UpdateOffer,
+        failed: Bool,
+        whatsNew: Bool,
+        next: NextOnMyList? = nil,
+        opening: UpdateNotesTab = UpdateNotesTabs.initial,
+        measuring: Bool
+    ) {
+        self.offer = offer
+        self.failed = failed
+        self.whatsNew = whatsNew
+        self.next = next
+        self.measuring = measuring
+        _selection = State(initialValue: opening)
+    }
+
+    private var tabs: [UpdateNotesTab] {
+        UpdateNotesTabs.tabs(offer.digest, next: next != nil)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            if let digest = offer.digest, UpdateNotesTabs.showsStrip(digest) {
-                UpdateNotesTabStrip(digest: digest, selection: $selection)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, UpdateWindowMetrics.inset)
-                    .padding(.bottom, 14)
+            if tabs.count > 1 {
+                UpdateNotesTabStrip(
+                    digest: offer.digest,
+                    next: next != nil,
+                    selection: $selection
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, UpdateWindowMetrics.inset)
+                .padding(.bottom, 14)
             }
             if measuring {
                 padded
@@ -35,7 +59,7 @@ struct UpdateNotesScroll: View {
                     // A switch opens the new tab at its top.
                     .id(selection)
                     .modifier(UpdateNotesScrollCues(moreBelow: $moreBelow))
-                    .overlay(alignment: .bottom) { fade }
+                    .mask { fade }
             }
         }
     }
@@ -50,83 +74,85 @@ struct UpdateNotesScroll: View {
 
     private var content: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let digest = offer.digest {
-                if measuring {
-                    ZStack(alignment: .topLeading) {
-                        ForEach(UpdateNotesTabs.tabs(digest), id: \.self) {
-                            tab($0, digest)
-                        }
-                    }
-                } else {
-                    tab(selection, digest)
-                }
-                ForEach(digest.unreadable, id: \.self) { version in
-                    UpdateNotesLink(
-                        title: L(
-                            "update.window.version_notes",
-                            "Release notes for %1$@",
-                            version
-                        ),
-                        url: UpdateOffer.notesURL(for: version)
-                    )
+            if measuring {
+                ZStack(alignment: .topLeading) {
+                    ForEach(tabs, id: \.self) { pane($0) }
                 }
             } else {
-                Text(
-                    L(
-                        "update.window.no_notes",
-                        "This version's notes are online."
-                    )
-                )
-                .foregroundStyle(SettingsTheme.ink2)
-                .padding(.top, 6)
+                pane(selection)
             }
-            UpdateNotesLink(
-                title: L("update.window.full_notes", "Full release notes"),
-                url: UpdateOffer.notesURL(for: offer.version)
-            )
+            if measuring || selection != .next { links }
         }
     }
 
     @ViewBuilder
-    private func tab(
-        _ tab: UpdateNotesTab,
-        _ digest: UpdateNotesDigest
-    ) -> some View {
+    private func pane(_ tab: UpdateNotesTab) -> some View {
         switch tab {
         case .highlights:
-            VStack(alignment: .leading, spacing: 12) {
+            if let digest = offer.digest {
                 UpdateHighlightsPanel(
                     digest: digest,
                     failed: failed,
                     whatsNew: whatsNew
                 )
-                if let next { NextOnMyListPanel(next: next) }
+            } else {
+                Text(UpdateNotesEnglish.noNotes)
+                    .foregroundStyle(SettingsTheme.ink2)
+                    .updateNotesCard()
             }
         case .group(let id):
-            if let group = digest.group(id) {
+            if let group = offer.digest?.group(id) {
                 UpdateNotesGroupList(
                     group: group,
-                    labelled: digest.spansVersions
+                    labelled: offer.digest?.spansVersions ?? false
                 )
+            }
+        case .next:
+            if let next {
+                // After the update or with none: the offer asks
+                // nothing beside its Install (#1849).
+                NextOnMyListPanel(next: next, asksForSupport: whatsNew)
             }
         }
     }
 
-    /// Soft edge while more is below (#1542 ruling).
-    private var fade: some View {
-        LinearGradient(
-            colors: [SettingsTheme.page.opacity(0), SettingsTheme.page],
-            startPoint: .top,
-            endPoint: .bottom
+    /// The notes' own links: a version whose notes do not read,
+    /// and the full notes online.
+    @ViewBuilder private var links: some View {
+        ForEach(offer.digest?.unreadable ?? [], id: \.self) { version in
+            UpdateNotesLink(
+                title: L(
+                    "update.window.version_notes",
+                    "Release notes for %1$@",
+                    version
+                ),
+                url: UpdateOffer.notesURL(for: version)
+            )
+        }
+        UpdateNotesLink(
+            title: L("update.window.full_notes", "Full release notes"),
+            url: UpdateOffer.notesURL(for: offer.version)
         )
-        .frame(height: 34)
-        .opacity(moreBelow ? 1 : 0)
+    }
+
+    /// Soft edge while more is below (#1542 ruling): the notes
+    /// themselves fade, since a painted band would show on glass
+    /// (#1849).
+    private var fade: some View {
+        // A mask reads alpha alone; `.primary` is any opaque ink.
+        VStack(spacing: 0) {
+            Rectangle().fill(.primary)
+            LinearGradient(
+                colors: [.primary, .primary.opacity(moreBelow ? 0 : 1)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 34)
+        }
         .animation(
             reduceMotion ? nil : .easeOut(duration: 0.2),
             value: moreBelow
         )
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 }
 

@@ -78,9 +78,10 @@ struct NextOnMyListTests {
         )
     }
 
-    /// Through the mode, the layout and the Highlights tab: a
-    /// window handed a list is taller by the card.
-    @Test("What's new draws the card under Highlights")
+    /// Through the mode, the layout and the Next tab (#1849): the
+    /// window is measured over every tab, so a long list it is
+    /// handed makes it taller.
+    @Test("What's new draws the list in its Next tab")
     func whatsNewDrawsTheCard() throws {
         LocalizationManager.shared.select("en")
         let offer = UpdateOffer(
@@ -104,7 +105,7 @@ struct NextOnMyListTests {
         )
         let next = NextOnMyList(
             asOf: try Self.day("2026-09-30"),
-            items: ["One", "Two", "Three"]
+            items: (1...12).map { "Item \($0)" }
         )
         func height(_ next: NextOnMyList?) -> CGFloat {
             NSHostingView(
@@ -116,5 +117,63 @@ struct NextOnMyListTests {
             ).fittingSize.height
         }
         #expect(height(next) > height(nil) + 80)
+    }
+
+    /// The Ko-fi line rides What's new and the up-to-date answer,
+    /// never the offer, whose one decision is Install (#1849).
+    @Test("the support line never sits beside an Install")
+    func supportNeverInTheOffer() throws {
+        let source = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+                "Sources/KiwiDesk/Updates/UpdateNotesScroll.swift"
+            )
+        )
+        #expect(
+            source.contains(
+                "NextOnMyListPanel(next: next, asksForSupport: whatsNew)"
+            )
+        )
+        let window = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+                "Sources/KiwiDesk/Updates/UpdateWindowView.swift"
+            )
+        )
+        // The offer's layout passes `whatsNew: false`, the other two
+        // `true`.
+        let offer = try #require(
+            window.components(separatedBy: "private struct UpdateOfferLayout")
+                .last
+        )
+        #expect(offer.contains("whatsNew: false,"))
+    }
+
+    /// Everything inside a notes card is English like the notes
+    /// (#1849): the card views spell no `L(`, so a later pass
+    /// cannot translate a heading back over English lines.
+    @Test("the notes' cards speak the notes' English")
+    func cardsSpellNoLocalizedString() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Updates")
+        for file in [
+            "NextOnMyListPanel.swift", "UpdateNotesEnglish.swift",
+        ] {
+            let source = try SourceScan.strippedSource(
+                at: root.appendingPathComponent(file)
+            )
+            #expect(!source.contains("L("), "\(file) localizes")
+        }
+        let groups = try SourceScan.strippedSource(
+            at: root.appendingPathComponent("UpdateNotesGroups.swift")
+        )
+        // The panel and the list; the naming enum after them names
+        // the strip's tabs, which ARE translated.
+        let cards = try #require(
+            groups.components(separatedBy: "enum UpdateNotesNaming").first
+        )
+        #expect(!cards.contains("L("))
+        let markdown = try SourceScan.strippedSource(
+            at: root.appendingPathComponent("UpdateNotesMarkdown.swift")
+        )
+        #expect(!markdown.contains("L("))
     }
 }

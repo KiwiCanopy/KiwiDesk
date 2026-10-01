@@ -147,4 +147,27 @@ struct UpdateStateTests {
             )
         }
     }
+
+    /// The up-to-date answer's open window is a state of its own
+    /// (#1849): Home narrates it, and closing it returns to "up to
+    /// date" with the same check date.
+    @Test("the open answer folds in and out")
+    func answerFolds() {
+        let checked = Date(timeIntervalSince1970: 1_000)
+        let open = UpdateState.upToDate(lastChecked: checked)
+            .after(.answered(open: true), lastChecked: checked)
+        #expect(open == .answering(lastChecked: checked))
+        #expect(
+            open.after(.answered(open: false), lastChecked: nil)
+                == .upToDate(lastChecked: checked)
+        )
+        // A close with no answer open changes nothing.
+        #expect(
+            UpdateState.checking.after(
+                .answered(open: false),
+                lastChecked: nil
+            )
+                == .checking
+        )
+    }
 }

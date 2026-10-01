@@ -48,6 +48,30 @@ struct UpdateNotesTabsTests {
         #expect(tabs == [.highlights, .group("new"), .group("scripting")])
     }
 
+    @Test("Next is the last tab while there is a list (#1849)")
+    func nextTrailsWhileThereIsAList() {
+        let digest = Self.digest([Self.group("new")])
+        #expect(
+            UpdateNotesTabs.tabs(digest, next: true)
+                == [.highlights, .group("new"), .next]
+        )
+        #expect(!UpdateNotesTabs.tabs(digest).contains(.next))
+        #expect(UpdateNotesTabs.tabs(nil, next: true) == [.highlights, .next])
+        #expect(!UpdateNotesTabs.showsStrip(nil))
+        #expect(UpdateNotesTabs.showsStrip(nil, next: true))
+    }
+
+    @Test("an update opens on Highlights, no update on Next (#1849)")
+    func openingTabFollowsTheState() {
+        #expect(
+            UpdateNotesTabs.opening(upToDate: false, next: true) == .highlights
+        )
+        #expect(UpdateNotesTabs.opening(upToDate: true, next: true) == .next)
+        #expect(
+            UpdateNotesTabs.opening(upToDate: true, next: false) == .highlights
+        )
+    }
+
     @Test("Highlights opens, even when Lua & CLI is the only group")
     func highlightsIsTheDefault() {
         #expect(UpdateNotesTabs.initial == .highlights)
@@ -69,11 +93,8 @@ struct UpdateNotesTabsTests {
                 "Sources/KiwiDesk/Updates/UpdateNotesScroll.swift"
             )
         )
-        #expect(
-            source.contains(
-                "if let digest = offer.digest, UpdateNotesTabs.showsStrip("
-            )
-        )
+        #expect(source.contains("UpdateNotesTabs.tabs(offer.digest, next:"))
+        #expect(source.contains("if tabs.count > 1 {"))
     }
 
     @Test("a segment names its group and its count")
@@ -83,6 +104,11 @@ struct UpdateNotesTabsTests {
             Self.digest([Self.group("fixed", count: 8)])
         ).map(\.title)
         #expect(titles == ["Highlights", "Fixed · 8"])
+        let withNext = UpdateNotesTabStrip.options(
+            Self.digest([Self.group("fixed", count: 8)]),
+            next: true
+        ).map(\.title)
+        #expect(withNext == ["Highlights", "Fixed · 8", "Next"])
     }
 
     /// The strip's room: the window less its side insets.
@@ -98,9 +124,10 @@ struct UpdateNotesTabsTests {
     /// The segmented strip at its widest selection, and what the
     /// window's strip chose at the room it has.
     private static func widths(
-        _ digest: UpdateNotesDigest
+        _ digest: UpdateNotesDigest,
+        next: Bool = false
     ) -> (strip: CGFloat, chosen: CGFloat) {
-        let options = UpdateNotesTabStrip.options(digest)
+        let options = UpdateNotesTabStrip.options(digest, next: next)
         let strip =
             options.map { option in
                 width(
@@ -113,6 +140,7 @@ struct UpdateNotesTabsTests {
         let chosen = NSHostingController(
             rootView: UpdateNotesTabStrip(
                 digest: digest,
+                next: next,
                 selection: .constant(.highlights)
             )
         ).sizeThatFits(
@@ -121,7 +149,7 @@ struct UpdateNotesTabsTests {
         return (strip, chosen.width)
     }
 
-    @Test("the four kinds fit as segments in every locale")
+    @Test("the four kinds and Next fit as segments in every locale")
     func knownKindsFitAsSegments() {
         defer { LocalizationManager.shared.select("en") }
         for locale in LocalizationManager.shared.available {
@@ -131,7 +159,8 @@ struct UpdateNotesTabsTests {
                     ["new", "improved", "fixed", "scripting"].map {
                         Self.group($0, count: 18)
                     }
-                )
+                ),
+                next: true
             )
             #expect(strip <= Self.available, "\(locale): \(strip)")
             #expect(chosen == strip, "\(locale): \(chosen)")

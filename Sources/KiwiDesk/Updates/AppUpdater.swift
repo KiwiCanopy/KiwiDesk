@@ -116,7 +116,17 @@ final class SparkleUpdater: AppUpdating {
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
         )
-        driver.startCheck = { [weak self] in self?.checkForUpdates() }
+        // Try Again's check: its failed window is still open, so it
+        // goes past the bring-forward the click takes (#1849).
+        driver.startCheck = { [weak self] in self?.startOwnCheck() }
+        driver.onAnswerOpen = { [updates, updater] open in
+            updates.set(
+                updates.state.after(
+                    .answered(open: open),
+                    lastChecked: updater.lastUpdateCheckDate
+                )
+            )
+        }
         do {
             try updater.start()
             // Until this session's first answer only the DATE of
@@ -137,7 +147,14 @@ final class SparkleUpdater: AppUpdating {
     }
 
     func checkForUpdates() {
-        if updater.canCheckForUpdates {
+        // An open update window comes back instead (#1849).
+        if driver.focusOpenWindow() { return }
+        startOwnCheck()
+    }
+
+    private func startOwnCheck() {
+        // `canCheckForUpdates` does not say a session is open.
+        if updater.canCheckForUpdates, !updater.sessionInProgress {
             updates.set(updates.state.onOwnCheck)
         }
         updater.checkForUpdates()
