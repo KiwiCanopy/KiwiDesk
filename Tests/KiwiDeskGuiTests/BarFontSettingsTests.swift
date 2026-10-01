@@ -163,6 +163,31 @@ struct BarFontSettingsTests {
         )
     }
 
+    /// #1859: a family of fixed faces greys the slider, saying so,
+    /// and the slider shows the face drawn rather than the stored
+    /// weight, which it keeps for the next family.
+    @Test("A fixed-face family greys the slider at the drawn face")
+    func fixedFacesGreySlider() throws {
+        pinEnglish()
+        try #require(BarFont.isInstalled("Menlo"))
+        #expect(
+            BarFontText.fixedFacesCaption(family: "Menlo")
+                == "Menlo comes in fixed weights only — pick one above."
+        )
+        #expect(
+            BarFontText.fixedFacesCaption(
+                family: KiwiShelf.systemFontFamily
+            ) == nil
+        )
+        #expect(FontWeightRow.shownWeight(family: "Menlo", weight: 540) == 400)
+        #expect(
+            FontWeightRow.shownWeight(
+                family: KiwiShelf.systemFontFamily,
+                weight: 540
+            ) == 540
+        )
+    }
+
     @Test("The weight slider speaks its number and its name")
     func spokenWeight() {
         pinEnglish()

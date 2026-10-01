@@ -85,6 +85,26 @@ public enum BarFont {
             ? .exact : .nearestFace(weight: drawn)
     }
 
+    /// What `family` draws for a stored `weight`, on the 100–900
+    /// scale: the weight itself where it draws exactly, the
+    /// nearest face otherwise; a missing family draws System.
+    public static func drawnWeight(family: String, weight: Int) -> Int {
+        switch rendering(family: family, weight: weight) {
+        case .nearestFace(let drawn): return drawn
+        case .exact, .missing: return weight
+        }
+    }
+
+    /// Whether `family` draws any weight on a `wght` axis — the
+    /// system pair, a variable family — rather than only its
+    /// fixed faces, which the weight slider cannot move between
+    /// (#1859). A missing family draws System, which can.
+    public static func hasWeightAxis(_ family: String) -> Bool {
+        if KiwiShelf.systemFontFamilies.contains(family) { return true }
+        guard let faces = faces(of: family) else { return true }
+        return faces.contains { $0.axis != nil }
+    }
+
     /// Whether `family` has `weight` of its own — a named chip's
     /// enablement: exactly when `rendering` says it draws it.
     public static func offers(weight: Int, family: String) -> Bool {

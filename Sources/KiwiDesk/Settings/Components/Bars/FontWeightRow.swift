@@ -5,8 +5,9 @@ import SwiftUI
 /// (`SliderPresetRow`): a slider over `KiwiShelf.fontWeightRange`
 /// with its readout, and the five common weights as chips beneath,
 /// each drawn in its weight and greyed where the family has no
-/// such face. The caption says when the family draws a face other
-/// than the stored weight.
+/// such face. A family of fixed faces greys the slider, which
+/// then shows the face drawn (#1859). The caption says when the
+/// family draws a face other than the stored weight.
 struct FontWeightRow: View {
     @Binding var weight: Int
     let family: String
@@ -26,10 +27,17 @@ struct FontWeightRow: View {
             value: slider,
             range: Self.range,
             step: 10,
-            readout: String(weight),
-            spokenValue: BarFontText.spokenWeight(weight)
+            readout: String(shown),
+            spokenValue: BarFontText.spokenWeight(shown),
+            sliderInert: fixedFaces
         ) {
             FontWeightChips(weight: $weight, family: family, label: label)
+            if let fixedFaces {
+                Text(fixedFaces)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             if let caption {
                 Text(caption)
                     .font(.caption)
@@ -47,9 +55,25 @@ struct FontWeightRow: View {
             KiwiShelf.fontWeightRange.upperBound
         )
 
+    /// The slider's position: the stored weight, or on a family
+    /// of fixed faces the face it draws.
+    static func shownWeight(family: String, weight: Int) -> Int {
+        BarFont.hasWeightAxis(family)
+            ? weight : BarFont.drawnWeight(family: family, weight: weight)
+    }
+
+    private var shown: Int {
+        Self.shownWeight(family: family, weight: weight)
+    }
+
+    /// Why the slider is greyed: the family has fixed faces only.
+    private var fixedFaces: String? {
+        BarFontText.fixedFacesCaption(family: family)
+    }
+
     private var slider: Binding<Double> {
         Binding(
-            get: { Double(weight) },
+            get: { Double(shown) },
             set: { weight = KiwiShelf.clampFontWeight($0) }
         )
     }

@@ -701,6 +701,7 @@
   "kiwishelf.font_weight.black": "Чёрный",
   "kiwishelf.font_weight.bold": "Жирный",
   "kiwishelf.font_weight.chip_missing": "У %1$@ нет начертания «%2$@».",
+  "kiwishelf.font_weight.fixed_faces": "У %1$@ только фиксированные значения насыщенности — выбери одно выше.",
   "kiwishelf.font_weight.heavy": "Тяжёлый",
   "kiwishelf.font_weight.help": "Насколько жирным рисуется текст обеих панелей. Шрифт без этой насыщенности рисует ближайшую; значение сохраняется для следующего шрифта.",
   "kiwishelf.font_weight.light": "Светлый",
