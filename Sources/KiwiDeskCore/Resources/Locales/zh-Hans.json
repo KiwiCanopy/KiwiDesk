@@ -701,6 +701,7 @@
   "kiwishelf.font_weight.black": "超粗",
   "kiwishelf.font_weight.bold": "粗体",
   "kiwishelf.font_weight.chip_missing": "%1$@没有“%2$@”样式。",
+  "kiwishelf.font_weight.fixed_faces": "%1$@仅提供固定字重——请从上方选择一个。",
   "kiwishelf.font_weight.heavy": "特粗",
   "kiwishelf.font_weight.help": "两个栏上文本的字重。不含此字重的字体会使用最接近的字重；此设置会为下一个字体保留。",
   "kiwishelf.font_weight.light": "细体",

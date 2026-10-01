@@ -701,6 +701,7 @@
   "kiwishelf.font_weight.black": "Preto",
   "kiwishelf.font_weight.bold": "Negrito",
   "kiwishelf.font_weight.chip_missing": "%1$@ não tem o estilo “%2$@”.",
+  "kiwishelf.font_weight.fixed_faces": "%1$@ só está disponível em pesos fixos — escolha um acima.",
   "kiwishelf.font_weight.heavy": "Pesado",
   "kiwishelf.font_weight.help": "Quão pesado o texto das duas barras é desenhado. Uma fonte sem esse peso desenha o mais próximo; o ajuste é mantido para a próxima fonte.",
   "kiwishelf.font_weight.light": "Leve",

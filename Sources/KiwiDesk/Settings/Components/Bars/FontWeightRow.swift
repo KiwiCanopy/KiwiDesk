@@ -5,8 +5,9 @@ import SwiftUI
 /// (`SliderPresetRow`): a slider over `KiwiShelf.fontWeightRange`
 /// with its readout, and the five common weights as chips beneath,
 /// each drawn in its weight and greyed where the family has no
-/// such face. The caption says when the family draws a face other
-/// than the stored weight.
+/// such face. A family of fixed faces greys the slider, which
+/// then shows the face drawn (#1859). The caption says when the
+/// family draws a face other than the stored weight.
 struct FontWeightRow: View {
     @Binding var weight: Int
     let family: String
@@ -26,10 +27,22 @@ struct FontWeightRow: View {
             value: slider,
             range: Self.range,
             step: 10,
-            readout: String(weight),
-            spokenValue: BarFontText.spokenWeight(weight)
+            readout: String(state.shown),
+            spokenValue: BarFontText.spokenWeight(state.shown),
+            sliderInert: state.inert
         ) {
-            FontWeightChips(weight: $weight, family: family, label: label)
+            FontWeightChips(
+                weight: $weight,
+                shown: state.shown,
+                family: family,
+                label: label
+            )
+            if let inert = state.inert {
+                Text(inert)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             if let caption {
                 Text(caption)
                     .font(.caption)
@@ -47,15 +60,40 @@ struct FontWeightRow: View {
             KiwiShelf.fontWeightRange.upperBound
         )
 
+    /// What the row states for a stored weight (#1859): the one
+    /// value the slider, its readout, its spoken value and the
+    /// chips' selection read. On a family of fixed faces the row
+    /// states the face drawn and why the slider is greyed; the
+    /// stored weight stays the one asked for.
+    struct WeightState: Equatable {
+        let shown: Int
+        let inert: String?
+
+        @MainActor init(family: String, weight: Int) {
+            inert = BarFontText.fixedFacesCaption(family: family)
+            shown =
+                inert == nil
+                ? weight
+                : BarFont.drawnWeight(family: family, weight: weight)
+        }
+    }
+
+    private var state: WeightState {
+        WeightState(family: family, weight: weight)
+    }
+
     private var slider: Binding<Double> {
         Binding(
-            get: { Double(weight) },
+            get: { Double(state.shown) },
             set: { weight = KiwiShelf.clampFontWeight($0) }
         )
     }
 
+    /// The nearest-face caption — stood down where the row already
+    /// states the face drawn, or it would narrate a second weight.
     private var caption: String? {
-        BarFontText.weightCaption(
+        guard state.inert == nil else { return nil }
+        return BarFontText.weightCaption(
             family: family,
             rendering: BarFont.rendering(family: family, weight: weight),
             weight: weight
@@ -63,10 +101,12 @@ struct FontWeightRow: View {
     }
 }
 
-/// The five weight chips: a chip snaps the slider to its weight.
-/// They wrap, since a word chip is wider than a fraction.
+/// The five weight chips: a chip snaps the slider to its weight,
+/// and the one at the row's `shown` weight reads selected. They
+/// wrap, since a word chip is wider than a fraction.
 struct FontWeightChips: View {
     @Binding var weight: Int
+    let shown: Int
     let family: String
     let label: String
 
@@ -76,7 +116,7 @@ struct FontWeightChips: View {
                 PresetChip(
                     title: BarFontText.weightName(named),
                     font: .callout.weight(named.swiftUIWeight),
-                    selected: weight == named.value
+                    selected: shown == named.value
                 ) {
                     weight = named.value
                 }

@@ -701,6 +701,7 @@
   "kiwishelf.font_weight.black": "Schwarz",
   "kiwishelf.font_weight.bold": "Fett",
   "kiwishelf.font_weight.chip_missing": "%1$@ hat keinen Schnitt „%2$@“.",
+  "kiwishelf.font_weight.fixed_faces": "%1$@ gibt es nur in festen Stärken — wähle oben eine.",
   "kiwishelf.font_weight.heavy": "Extrafett",
   "kiwishelf.font_weight.help": "Wie kräftig der Text beider Leisten gezeichnet wird. Eine Schrift ohne diese Stärke zeichnet die nächstliegende; die Einstellung bleibt für die nächste Schrift erhalten.",
   "kiwishelf.font_weight.light": "Leicht",
