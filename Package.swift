@@ -1,6 +1,12 @@
 // swift-tools-version: 6.4
 import PackageDescription
 
+// Upcoming features ruled in by #1780's survey, one per commit;
+// every Swift target takes the same list.
+let swiftSettings: [SwiftSetting] = [
+    .enableUpcomingFeature("ImmutableWeakCaptures")
+]
+
 let package = Package(
     name: "KiwiDesk",
     defaultLocalization: "en",
@@ -71,7 +77,8 @@ let package = Package(
                 .copy("Resources/Palettes"),
                 // Bundled shelf looks (#1684).
                 .copy("Resources/Looks"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         // Executable: AppDelegate, menu bar, SwiftUI GUI.
         .executableTarget(
@@ -93,12 +100,14 @@ let package = Package(
                 .copy("Resources/MarkDiscord.png"),
                 .copy("Resources/MarkGitHub.png"),
                 .copy("Resources/MarkKofi.png"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "KiwiDeskCoreTests",
             dependencies: ["KiwiDeskCore"],
-            path: "Tests/KiwiDeskCoreTests"
+            path: "Tests/KiwiDeskCoreTests",
+            swiftSettings: swiftSettings
         ),
         // GUI model tests (#64): SwiftPM ≥5.5 lets a test
         // target depend on an executable target, so the
@@ -107,7 +116,8 @@ let package = Package(
         .testTarget(
             name: "KiwiDeskGuiTests",
             dependencies: ["KiwiDesk", "KiwiDeskCore"],
-            path: "Tests/KiwiDeskGuiTests"
+            path: "Tests/KiwiDeskGuiTests",
+            swiftSettings: swiftSettings
         ),
     ]
 )
