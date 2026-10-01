@@ -30,13 +30,15 @@ struct NextOnMyListPanel: View {
             }
             UpdateNotesLink(
                 title: UpdateNotesEnglish.discord,
-                url: SupportLinks.discord
+                url: SupportLinks.discord,
+                mark: BrandAssets.markDiscord
             )
             .padding(.top, 3)
             if asksForSupport {
                 UpdateNotesLink(
                     title: UpdateNotesEnglish.support,
-                    url: SupportLinks.koFi
+                    url: SupportLinks.koFi,
+                    mark: BrandAssets.markKofi
                 )
             }
         }
