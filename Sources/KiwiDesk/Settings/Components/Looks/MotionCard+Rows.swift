@@ -95,10 +95,10 @@ extension MotionCard {
                 isOn: animations.onShelf,
                 help: L(
                     "behavior.animations.shelf.help",
-                    "On a shelf the bars share, the App Bar grows "
-                        + "out of the Space Bar and shrinks back into "
-                        + "it; a bar on an edge of its own fades in "
-                        + "and out; the bars glide to their new "
+                    "While both bars share an edge, the App Bar "
+                        + "grows out of the Space Bar and shrinks back "
+                        + "into it; a bar on an edge of its own fades "
+                        + "in and out; the bars glide to their new "
                         + "places. Off, or with Reduce Motion on, "
                         + "they move at once."
                 )
