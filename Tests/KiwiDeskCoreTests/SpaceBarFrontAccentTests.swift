@@ -79,10 +79,36 @@ struct SpaceBarFrontAccentTests {
         #expect(mark.height < clip.height)
     }
 
+    /// From a chip that drew to none: a fresh view is unhidden by
+    /// default, so the drawn state comes first.
     @Test("No front app draws no indicator")
     func hidesWithTheSegment() throws {
-        let o = try overlay(front: nil)
+        let manager = SpaceBarManager()
+        for front in [WindowID(1), nil] as [WindowID?] {
+            let base = paintedSpaceBar(front: front, spaces: 2)
+            manager.sync([base])
+        }
+        let o = try #require(manager.overlayForTesting(barTitleDisplay))
         #expect(o.frontAccentClip.isHidden)
+    }
+
+    /// The width a run reserves for the segment is the width it
+    /// draws, so a hugging plate ends where the chip does.
+    @Test(
+        "The segment reserves what it draws",
+        arguments: [AppBarStyle.BackgroundStyle.boxed, .plain]
+    )
+    func extentIsDrawn(background: AppBarStyle.BackgroundStyle) throws {
+        let o = try overlay { $0.shelf.backgroundStyle = background }
+        let shown = try #require(o.lastShown)
+        let extent = o.frontExtent(
+            shown.frontApp,
+            depth: shown.strip.height,
+            horizontal: true,
+            style: shown.style
+        )
+        let drawn = o.frontAccentClip.frame.maxX - o.frontDivider.frame.minX
+        #expect(abs(drawn - extent) <= 0.5, "\(drawn) vs \(extent)")
     }
 
     @Test("The setter takes empty as Automatic, the text colour not")

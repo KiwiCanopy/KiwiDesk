@@ -202,6 +202,7 @@
   "color_field.swatch.a11y_hint": "打开颜色选择器",
   "color_field.swatch.help": "编辑%1$@颜色",
   "color_field.swatch.help_auto": "自动 — 跟随浅色和深色外观",
+  "color_field.swatch.help_follows": "自动 — 跟随“%1$@”",
   "color_panel.done": "完成",
   "colors.advanced.scene.title": "所有颜色一览",
   "colors.border_off.help": "焦点边框已关闭，因此不会绘制聚焦窗口和非焦点窗口的颜色。请在“%1$@”中打开它。",

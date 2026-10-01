@@ -42,11 +42,10 @@ struct PaletteSceneThumbnail: View {
     /// The palette's hex for `path`, the shipped default beneath;
     /// an Automatic follower reads the colour it follows (#1856).
     func hex(_ path: String) -> String {
-        let hex = palette.colors[path] ?? Self.fallback[path] ?? ""
-        if hex.isEmpty, let leader = ColorPaletteKeys.followers[path] {
-            return self.hex(leader)
-        }
-        return hex
+        ColorPaletteKeys.resolved(
+            path,
+            in: Self.fallback.merging(palette.colors) { $1 }
+        )
     }
 
     /// The panel's bar-plate rim: the palette's border colour

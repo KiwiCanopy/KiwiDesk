@@ -34,7 +34,7 @@ struct RoundedItemEndPadChipTests {
                     front: Fixture.app("Claude")
                 )
                 #expect(
-                    overlay.chipEndPad(look, depth: depth, horizontal: true)
+                    SpaceBarOverlay.chipEndPad(look, depth: depth)
                         == ItemEnds(leading: end, trailing: end)
                 )
                 #expect(!overlay.frontBox.isHidden)
@@ -69,11 +69,7 @@ struct RoundedItemEndPadChipTests {
         )
         #expect(name.frame.width < full, "the fixture must truncate")
         let box = overlay.frontBox.frame
-        let end = overlay.chipEndPad(
-            look,
-            depth: Self.depth,
-            horizontal: true
-        ).trailing
+        let end = SpaceBarOverlay.chipEndPad(look, depth: Self.depth).trailing
         #expect(abs(box.maxX - name.frame.maxX - end) <= 0.5)
         #expect(box.maxX <= width + 0.5)
     }

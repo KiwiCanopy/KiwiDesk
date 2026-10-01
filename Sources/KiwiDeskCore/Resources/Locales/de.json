@@ -202,6 +202,7 @@
   "color_field.swatch.a11y_hint": "Öffnet die Farbauswahl",
   "color_field.swatch.help": "Bearbeite die Farbe für %1$@",
   "color_field.swatch.help_auto": "Automatisch — folgt Hell und Dunkel",
+  "color_field.swatch.help_follows": "Automatisch — folgt „%1$@“",
   "color_panel.done": "Fertig",
   "colors.advanced.scene.title": "Alle Farben auf einmal",
   "colors.border_off.help": "Der Fokus-Rahmen ist aus, daher werden seine beiden Farben nicht gezeichnet. Aktiviere ihn unter „%1$@“.",

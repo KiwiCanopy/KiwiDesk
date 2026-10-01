@@ -202,6 +202,7 @@
   "color_field.swatch.a11y_hint": "カラーピッカーを開きます",
   "color_field.swatch.help": "%1$@のカラーを編集",
   "color_field.swatch.help_auto": "自動 — ライトモードとダークモードに合わせます",
+  "color_field.swatch.help_follows": "自動 — 「%1$@」に合わせます",
   "color_panel.done": "完了",
   "colors.advanced.scene.title": "すべてのカラーを一度に",
   "colors.border_off.help": "フォーカスボーダーがオフのため、フォーカス中／フォーカスされていないウインドウのカラーは描画されません。「%1$@」でオンにしてください。",

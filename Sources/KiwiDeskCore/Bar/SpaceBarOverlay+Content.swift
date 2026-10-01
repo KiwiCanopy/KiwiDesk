@@ -5,8 +5,9 @@ import CoreGraphics
 extension SpaceBarOverlay {
     /// How far in from the run's two ends its drawn content starts
     /// (#1779): each end item's `pad` and rounded-end clearance,
-    /// none on a boxed shelf, and none at an end the front-app
-    /// segment or a lone layer item's rule closes.
+    /// none on a boxed shelf, the front-app chip's own end pad
+    /// where it closes the run (#1856), and none at an end a lone
+    /// layer item's rule closes.
     static func contentInsets(
         items: [Item],
         depth: CGFloat,
@@ -22,8 +23,7 @@ extension SpaceBarOverlay {
             look: look,
             frontFollows: frontFollows
         )
-        let closedByRule =
-            frontFollows || (last == 0 && leadsWithLayer(items))
+        let closedByRule = last == 0 && leadsWithLayer(items)
         let trail = itemEnds(
             items,
             index: last,
@@ -31,10 +31,14 @@ extension SpaceBarOverlay {
             look: look,
             frontFollows: frontFollows
         )
+        let trailing =
+            frontFollows
+            ? chipEndPad(look, depth: depth).trailing
+            : closedByRule
+                ? 0 : SpaceBarItemView.contentInset(ends: trail).trailing
         return ItemEnds(
             leading: SpaceBarItemView.contentInset(ends: lead).leading,
-            trailing: closedByRule
-                ? 0 : SpaceBarItemView.contentInset(ends: trail).trailing
+            trailing: trailing
         )
     }
 }

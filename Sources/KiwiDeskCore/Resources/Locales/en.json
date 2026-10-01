@@ -202,6 +202,7 @@
   "color_field.swatch.a11y_hint": "Opens the color picker",
   "color_field.swatch.help": "Edit the %1$@ color",
   "color_field.swatch.help_auto": "Automatic — follows light and dark",
+  "color_field.swatch.help_follows": "Automatic — follows “%1$@”",
   "color_panel.done": "Done",
   "colors.advanced.scene.title": "Every color at once",
   "colors.border_off.help": "The focus border is off, so its two colors aren't drawn. Turn it on in %1$@.",

@@ -54,6 +54,12 @@ struct BarTextFieldCensusTests {
             reason: "identifier and app glyphs (frame), badges "
                 + "(IndicatorBarBadgeCell)"
         ),
+        "SpaceBarOverlay+FrontApp.swift": Entry(
+            count: 1,
+            door: nil,
+            reason: "measures the front-app title's width (#1856), "
+                + "draws nothing"
+        ),
         "SpaceBarOverlay.swift": Entry(
             count: 2,
             door: ("BarTextGlyph.originY(", "SpaceBarOverlay+FrontApp.swift"),

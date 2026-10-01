@@ -202,6 +202,7 @@
   "color_field.swatch.a11y_hint": "색상 선택기를 엽니다",
   "color_field.swatch.help": "%1$@ 색상 편집",
   "color_field.swatch.help_auto": "자동 — 밝은 모드와 어두운 모드를 따릅니다",
+  "color_field.swatch.help_follows": "자동 — ‘%1$@’을(를) 따릅니다",
   "color_panel.done": "완료",
   "colors.advanced.scene.title": "모든 색상을 한눈에",
   "colors.border_off.help": "포커스 테두리가 꺼져 있어 포커스된 윈도우와 포커스되지 않은 윈도우의 색상은 그려지지 않습니다. %1$@에서 켜십시오.",

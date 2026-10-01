@@ -11,6 +11,10 @@ struct HexColorField: View {
     var labelWidth: CGFloat = SettingsMetrics.colorLabelColumn
     /// Whether an empty hex represents an "Automatic" adaptive value (#429).
     var automatic: Bool = false
+    /// What an Automatic that follows another colour follows
+    /// (`ColorPaletteKeys.followers`, #1856); nil for the marks'
+    /// adaptive Automatic.
+    var follows: ColorFollow?
     @Binding var hex: String
 
     var body: some View {
@@ -21,6 +25,7 @@ struct HexColorField: View {
             ColorSwatch(
                 label: a11yLabel ?? label,
                 automatic: automatic,
+                follows: follows,
                 hex: $hex
             )
         }
@@ -46,11 +51,20 @@ struct HexColorField: View {
     }
 }
 
+/// The colour an Automatic well follows and the row it is, by
+/// that row's own label (#818, #1856).
+struct ColorFollow: Equatable {
+    let hex: String
+    let label: String
+}
+
 /// Swatch button and hex input field for color editing (#68, #429).
 struct ColorSwatch: View {
     let label: String
     /// Empty hex represents "Automatic" adaptive color (#429).
     var automatic: Bool = false
+    /// Set where Automatic is another colour rather than adaptive.
+    var follows: ColorFollow?
     @Binding var hex: String
     @State private var draft: String
     @FocusState private var focused: Bool
@@ -59,10 +73,12 @@ struct ColorSwatch: View {
     init(
         label: String,
         automatic: Bool = false,
+        follows: ColorFollow? = nil,
         hex: Binding<String>
     ) {
         self.label = label
         self.automatic = automatic
+        self.follows = follows
         self._hex = hex
         self._draft = State(initialValue: hex.wrappedValue)
     }
@@ -171,7 +187,9 @@ struct ColorSwatch: View {
     /// (the macOS "Auto appearance" idiom — the adaptivity reads
     /// as a shape, not an absent color), else the flat color.
     @ViewBuilder private var dot: some View {
-        if isAutomatic {
+        if isAutomatic, let follows {
+            Circle().fill(Color(kiwiHex: follows.hex))
+        } else if isAutomatic {
             Circle().fill(
                 LinearGradient(
                     stops: [
@@ -188,7 +206,14 @@ struct ColorSwatch: View {
     }
 
     private var swatchHelp: String {
-        isAutomatic
+        if isAutomatic, let follows {
+            return L(
+                "color_field.swatch.help_follows",
+                "Automatic — follows \u{201C}%1$@\u{201D}",
+                follows.label
+            )
+        }
+        return isAutomatic
             ? L(
                 "color_field.swatch.help_auto",
                 "Automatic — follows light and dark"
@@ -245,7 +270,11 @@ struct ColorSwatch: View {
 
     private func present() {
         // Seed opaque color when automatic to prevent 0-alpha picker (#429).
-        let seed = isAutomatic ? NSColor.labelColor : NSColor(color)
+        let seed =
+            isAutomatic
+            ? follows.map { NSColor(Color(kiwiHex: $0.hex)) }
+                ?? NSColor.labelColor
+            : NSColor(color)
         token = ColorPanelController.shared.present(
             current: seed
         ) { hex = HexColorField.hexString(from: $0) }

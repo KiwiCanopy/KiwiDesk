@@ -48,11 +48,14 @@ enum SpaceBarCommandSetting {
         if let keyword = numberFields[field] {
             return number(args).map(keyword)
         }
-        if field == "focused_highlight_color" {
-            return automaticColor(args).map(Self.focusedHighlightColor)
-        }
         if let keyword = colorFields[field] {
-            return color(args).map(keyword)
+            // The palette register says which colour takes ""
+            // (`ColorPaletteKeys.followers`, #1856).
+            let automatic = ColorPaletteKeys.allowsAutomatic(
+                "space_bar.\(field)"
+            )
+            return (automatic ? automaticColor(args) : color(args))
+                .map(keyword)
         }
         return .failure("unknown space bar setting: \(field)")
     }

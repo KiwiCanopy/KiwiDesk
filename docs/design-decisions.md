@@ -10624,6 +10624,20 @@ a reset reach them. This does not soften the colors-only rule
 below — two more COLOURS joined; no palette gained a flag, a width
 or an effect.
 
+Automatic has a second kind since
+[#1856](https://github.com/KiwiCanopy/KiwiDesk/issues/1856): a
+**follower**, whose empty value is another colour of the palette
+rather than an adaptive tint — `ColorPaletteKeys.followers` names
+each and the colour it follows, and `ColorPaletteKeys.resolved`
+is the one reading of it. It may join only where the colour it
+follows never empties, so Automatic always resolves to something
+drawn, and its well shows that colour rather than the light/dark
+split, which would promise an adaptivity it does not have. Unlike
+a mark tint, every authored palette carries a follower EMPTY: its
+default is a pairing the palette's own colours define, so a
+palette that left it out would keep the last palette's ring
+beside its own text.
+
 **Palette colors follow a rough matching guide.** (#408
 follow-up, 2026-07-20.) A palette (the bar + border + drag
 colors, bundled or user-saved) reads as one system when its

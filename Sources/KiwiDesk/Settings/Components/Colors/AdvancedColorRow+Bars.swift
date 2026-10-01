@@ -98,6 +98,13 @@ extension AdvancedColorRow {
                     "Front app indicator"
                 ),
                 automatic: true,
+                follows: ColorFollow(
+                    hex: style.wrappedValue.focusedItemColor,
+                    label: L(
+                        "space_bar.color.focused_item",
+                        "Focused window"
+                    )
+                ),
                 hex: style.focusedHighlightColor
             )
             .help(focusedHighlightHelp)

@@ -47,7 +47,8 @@ extension SpaceBarOverlay {
             total > axis - pads && frontApp != nil
             && front < axis - fadeRoom
         let scrolledFront = pinFront ? 0 : front
-        let spacesAxis = pinFront ? axis - front : axis
+        // A pinned segment keeps the gap the run puts before it.
+        let spacesAxis = pinFront ? axis - front - gap : axis
         let scrolledTotal = Self.runTotal(
             lengths: lengths,
             gap: gap,

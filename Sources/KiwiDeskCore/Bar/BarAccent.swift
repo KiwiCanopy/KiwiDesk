@@ -18,6 +18,22 @@ public enum BarAccent {
     /// literal-value parity (owner 2026-07-20).
     public static let activeUnfocusedAlpha: CGFloat = 0.6
 
+    /// The outline's frame and corner radius in an item's
+    /// `bounds` rounded at `radius`: a box hugs it, an unboxed
+    /// item insets `capsuleInset` (QA 2026-07-19) — a Space item's
+    /// and the front chip's.
+    public static func outline(
+        in bounds: CGRect,
+        radius: CGFloat,
+        boxed: Bool
+    ) -> (frame: CGRect, radius: CGFloat) {
+        let inset = boxed ? 0 : capsuleInset
+        return (
+            bounds.insetBy(dx: inset, dy: inset),
+            max(0, radius - inset)
+        )
+    }
+
     /// The edge mark's frame on an item's window-facing side, in
     /// its flipped `bounds` — a Space item's and the front chip's.
     public static func edgeMarkFrame(

@@ -202,6 +202,7 @@
   "color_field.swatch.a11y_hint": "Ouvre le sélecteur de couleur",
   "color_field.swatch.help": "Modifier la couleur %1$@",
   "color_field.swatch.help_auto": "Automatique — suit les modes clair et sombre",
+  "color_field.swatch.help_follows": "Automatique — suit « %1$@ »",
   "color_panel.done": "OK",
   "colors.advanced.scene.title": "Toutes les couleurs d'un coup",
   "colors.border_off.help": "La bordure de focus est désactivée, ses deux couleurs ne sont donc pas dessinées. Activez-la dans %1$@.",

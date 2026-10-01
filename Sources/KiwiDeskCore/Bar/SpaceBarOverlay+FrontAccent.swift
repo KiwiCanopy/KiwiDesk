@@ -11,12 +11,21 @@ extension SpaceBarOverlay {
     func layoutFrontAccent(
         in rect: CGRect,
         radius: CGFloat,
-        style: SpaceBarLook
+        style: SpaceBarLook,
+        horizontal: Bool
     ) {
         frontAccentClip.isHidden = false
         frontAccentClip.frame = rect
         frontAccentClip.layer?.masksToBounds = true
         frontAccentClip.layer?.cornerRadius = radius
+        // The run's last place, as `chipEndPad` reads it.
+        frontAccentClip.layer?.maskedCorners = ItemCornerMask.mask(
+            shelf: style.shelf,
+            first: false,
+            last: true,
+            outlined: style.activeIndicator == .outline,
+            horizontal: horizontal
+        )
         let hex = style.resolvedFocusedHighlightColor
         let outline = style.activeIndicator == .outline
         let bounds = frontAccentClip.bounds
@@ -29,12 +38,16 @@ extension SpaceBarOverlay {
         let ink = BarAccent.flatInk(hex, sheen: style.sheen)
         guard let layer = frontAccent.layer else { return }
         if outline {
-            let inset = style.hasBox ? 0 : BarAccent.capsuleInset
-            frontAccent.frame = bounds.insetBy(dx: inset, dy: inset)
+            let ring = BarAccent.outline(
+                in: bounds,
+                radius: radius,
+                boxed: style.hasBox
+            )
+            frontAccent.frame = ring.frame
             layer.backgroundColor = nil
             layer.borderColor = ink
             layer.borderWidth = style.resolvedHighlightWidth
-            layer.cornerRadius = max(0, radius - inset)
+            layer.cornerRadius = ring.radius
         } else {
             frontAccent.frame = BarAccent.edgeMarkFrame(
                 in: bounds,

@@ -202,6 +202,7 @@
   "color_field.swatch.a11y_hint": "Abre el selector de color",
   "color_field.swatch.help": "Editar el color de %1$@",
   "color_field.swatch.help_auto": "Automático: sigue el modo claro y oscuro",
+  "color_field.swatch.help_follows": "Automático: sigue a «%1$@»",
   "color_panel.done": "OK",
   "colors.advanced.scene.title": "Todos los colores a la vez",
   "colors.border_off.help": "El contorno de foco está desactivado, así que sus dos colores no se dibujan. Actívalo en %1$@.",

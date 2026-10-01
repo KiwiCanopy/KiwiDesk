@@ -202,6 +202,7 @@
   "color_field.swatch.a11y_hint": "打開顏色選擇器",
   "color_field.swatch.help": "編輯 %1$@ 的顏色",
   "color_field.swatch.help_auto": "自動 — 依循淺色與深色模式",
+  "color_field.swatch.help_follows": "自動 — 依循「%1$@」",
   "color_panel.done": "完成",
   "colors.advanced.scene.title": "所有顏色一覽",
   "colors.border_off.help": "焦點邊框已關閉，因此不會繪製焦點視窗與非焦點視窗的顏色。請在「%1$@」中開啟它。",

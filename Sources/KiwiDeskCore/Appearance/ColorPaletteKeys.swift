@@ -57,6 +57,21 @@ public enum ColorPaletteKeys {
             "space_bar.focused_item_color"
     ]
 
+    /// `path`'s colour in `colors` as it is DRAWN: a follower left
+    /// Automatic reads the colour it follows — the one reading a
+    /// picture of a palette takes, held to the renderer's own by
+    /// `ColorPaletteFollowerTests`.
+    public static func resolved(
+        _ path: String,
+        in colors: [String: String]
+    ) -> String {
+        let hex = colors[path] ?? ""
+        if hex.isEmpty, let leader = followers[path] {
+            return resolved(leader, in: colors)
+        }
+        return hex
+    }
+
     private static func colorPaths(
         _ cases: [some CodingKey],
         prefix: String

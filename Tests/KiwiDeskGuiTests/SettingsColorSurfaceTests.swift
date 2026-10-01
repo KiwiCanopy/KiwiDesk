@@ -172,6 +172,7 @@ struct SettingsColorSurfaceTests {
             "ColorField+AutomaticMenu.swift",
         ]
         var flags = 0
+        var follows = 0
         for file in try SourceScan.swiftSources(under: settingsDir)
         where !plumbing.contains(file.lastPathComponent) {
             let source = SourceScan.stripComments(
@@ -180,7 +181,13 @@ struct SettingsColorSurfaceTests {
             flags +=
                 source.components(separatedBy: "automatic:")
                 .count - 1
+            follows +=
+                source.components(separatedBy: "follows: ColorFollow(")
+                .count - 1
         }
+        // A follower's well shows what it follows rather than the
+        // marks' light/dark split (#1856).
+        #expect(follows == ColorPaletteKeys.followers.count)
         let automaticPaths = ColorPaletteKeys.all.filter(
             ColorPaletteKeys.allowsAutomatic
         )

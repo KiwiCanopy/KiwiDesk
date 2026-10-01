@@ -22,7 +22,12 @@ extension SpaceBarOverlay {
             horizontal: horizontal,
             style: style
         )
-        layoutFrontAccent(in: rect, radius: radius, style: style)
+        layoutFrontAccent(
+            in: rect,
+            radius: radius,
+            style: style,
+            horizontal: horizontal
+        )
         // Boxed fills the chip; per-box glass frosts it as a
         // backdrop; plain (shared plate) draws neither here.
         let boxed = style.hasBox
@@ -67,11 +72,7 @@ extension SpaceBarOverlay {
         style: SpaceBarLook
     ) -> (CGRect, CGFloat) {
         let pad = SpaceBarItemView.pad
-        let endPad = chipEndPad(
-            style,
-            depth: depth,
-            horizontal: horizontal
-        )
+        let endPad = Self.chipEndPad(style, depth: depth)
         let content: NSView = app.glyph != nil ? frontGlyph : frontIcon
         let end =
             horizontal

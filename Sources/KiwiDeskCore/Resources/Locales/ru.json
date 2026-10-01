@@ -202,6 +202,7 @@
   "color_field.swatch.a11y_hint": "Открывает палитру цветов",
   "color_field.swatch.help": "Изменить цвет %1$@",
   "color_field.swatch.help_auto": "Автоматически — следует светлой и тёмной теме",
+  "color_field.swatch.help_follows": "Автоматически — следует цвету «%1$@»",
   "color_panel.done": "Готово",
   "colors.advanced.scene.title": "Все цвета сразу",
   "colors.border_off.help": "Рамка фокуса выключена, поэтому два её цвета не рисуются. Включи её в разделе «%1$@».",
