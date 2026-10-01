@@ -22,6 +22,25 @@ final class ShelfOverlay {
     }
 
     private(set) var panel: NSPanel?
+    /// The fade-out in flight, if any (#1838): its landing orders
+    /// the panel out unless a show cleared it meanwhile.
+    private var leaving: UUID?
+    /// Fires once the shelf has left the screen — at once, or when
+    /// its fade-out lands; `ShelfManager` retires it there.
+    var onLeft: @MainActor () -> Void = {}
+    /// Whether a fade-out is in flight.
+    var isLeaving: Bool { leaving != nil }
+    /// Schedules a landing once the plate glide has run — the
+    /// glide's own timer; a test hands a queue it drains by hand.
+    var afterGlide: (@escaping @MainActor () -> Void) -> Void = {
+        BarMotion.afterGroupGlide($0)
+    }
+    /// Sections shrinking out after they left, each stamped by its
+    /// latest leave, whose landing alone removes it (#1838).
+    var leavingViews: [NSView: UUID] = [:]
+    /// Each section's drawn content at its last placement, in its
+    /// own coordinates — where a glide starts it from (#1838).
+    var placedContent: [ObjectIdentifier: CGRect] = [:]
     let content = BarMenuView()
     /// Holds both sections and the divider, above the plate.
     let stripView = BarMenuView()
@@ -55,8 +74,9 @@ final class ShelfOverlay {
 
     /// Lays the shelf out over `strip` (AX coordinates) on `edge`
     /// with `shelf` as rendered — glass already gated by
-    /// `LiquidGlassGate` — and shows it; `sheen` paints the plate's
-    /// border with the ramp (#1644).
+    /// `LiquidGlassGate` — and shows it, fading in where it appears
+    /// (#1838); `sheen` paints the plate's border with the ramp
+    /// (#1644).
     func show(
         strip: CGRect,
         edge: AppBarEdge,
@@ -67,14 +87,17 @@ final class ShelfOverlay {
     ) {
         guard !sections.isEmpty, strip.width >= 1, strip.height >= 1
         else {
-            hide()
+            hide(animated: true)
             return
         }
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        // A shelf appearing arrives; one already on screen glides
-        // to its new placement (#1517).
+        // A shelf appearing fades in where it lands; one already on
+        // screen glides to its new placement (#1517), and one fading
+        // out fades back (#1838).
         let glides = panel.isVisible
+        let fadesBack = glides && leaving != nil
+        leaving = nil
         stripView.frame = CGRect(origin: .zero, size: strip.size)
         let horizontal = edge.isHorizontal
         let depth = horizontal ? strip.height : strip.width
@@ -84,14 +107,24 @@ final class ShelfOverlay {
             horizontal: horizontal,
             shelf: shelf
         )
+        let radius = shelf.resolvedCornerRadius(forThickness: depth)
+        let travels = BarMotion.shelfGlideLength > 0
+        if glides, travels {
+            standGlideStarts(sections, in: strip, horizontal: horizontal)
+        }
         BarMotion.runPlateGlide {
-            place(sections, in: strip, animated: glides)
+            place(
+                sections,
+                in: strip,
+                horizontal: horizontal,
+                animated: glides
+            )
             layoutPlate(
                 plate,
                 edge: edge,
                 shelf: shelf,
                 sheen: sheen,
-                radius: shelf.resolvedCornerRadius(forThickness: depth),
+                radius: radius,
                 animated: glides
             )
             layoutDivider(
@@ -101,6 +134,9 @@ final class ShelfOverlay {
                 horizontal: horizontal,
                 animated: glides
             )
+            if fadesBack {
+                BarMotion.setAlpha(content, to: 1, animated: true)
+            }
         }
         layoutHandle(
             range: range,
@@ -119,11 +155,64 @@ final class ShelfOverlay {
             ),
             display: true
         )
-        if !panel.isVisible { panel.orderFrontRegardless() }
+        if !panel.isVisible {
+            guard travels else {
+                panel.orderFrontRegardless()
+                return
+            }
+            // Shown transparent and committed so, laid out already,
+            // so the fade starts from it (#1838).
+            BarMotion.standCommitted {
+                content.alphaValue = 0
+                panel.orderFrontRegardless()
+            }
+            BarMotion.runPlateGlide {
+                BarMotion.setAlpha(content, to: 1, animated: true)
+            }
+        }
     }
 
-    func hide() {
-        panel?.orderOut(nil)
+    /// Orders the shelf out — after fading out where `animated`
+    /// and the glide has a length (#1838), the sections its
+    /// managers hid drawing on until it lands — and fires `onLeft`
+    /// once it has left. Returns whether this call began the
+    /// leave; false where a fade is already running, which keeps
+    /// its own landing.
+    @discardableResult
+    func hide(animated: Bool = false) -> Bool {
+        guard let panel, panel.isVisible else {
+            leaving = nil
+            onLeft()
+            return true
+        }
+        guard animated, BarMotion.shelfGlideLength > 0 else {
+            leaving = nil
+            panel.orderOut(nil)
+            content.alphaValue = 1
+            onLeft()
+            return true
+        }
+        // A fade already running keeps its landing: every bar
+        // refresh inside the glide asked again, and a restarted
+        // fade never landed on a lively Space (device, #1838).
+        guard leaving == nil else { return false }
+        for view in stripView.subviews
+        where view !== divider && view !== handle {
+            view.isHidden = false
+        }
+        let token = UUID()
+        leaving = token
+        BarMotion.runPlateGlide {
+            BarMotion.setAlpha(content, to: 0, animated: true)
+        }
+        afterGlide { [weak self] in
+            guard let self, self.leaving == token else { return }
+            self.leaving = nil
+            self.panel?.orderOut(nil)
+            self.content.alphaValue = 1
+            self.onLeft()
+        }
+        return true
     }
 
     /// Lays the grip over the divider line while the shelf is
@@ -212,92 +301,5 @@ final class ShelfOverlay {
                 width: strip.width,
                 height: extent
             )
-    }
-
-    /// Adds each section's view once and sets its origin; a view
-    /// no section names any more leaves the strip.
-    private func place(
-        _ sections: [Section],
-        in strip: CGRect,
-        animated: Bool
-    ) {
-        let wanted = sections.map(\.view)
-        for view in stripView.subviews
-        where view !== divider && view !== handle
-            && !wanted.contains(where: { $0 === view })
-        {
-            view.removeFromSuperview()
-        }
-        for section in sections {
-            // A section joining lands at its slot; only one already
-            // on the strip glides there (ruling 7).
-            let joining = section.view.superview !== stripView
-            if joining {
-                stripView.addSubview(
-                    section.view,
-                    positioned: .below,
-                    relativeTo: divider
-                )
-            }
-            // Origin and size in ONE write, so a section never
-            // re-lays at a new size from its old place.
-            let frame = CGRect(
-                x: section.slot.minX - strip.minX,
-                y: section.slot.minY - strip.minY,
-                width: section.slot.width,
-                height: section.slot.height
-            )
-            BarMotion.setFrame(
-                section.view,
-                to: frame,
-                animated: animated && !joining
-            )
-        }
-    }
-
-    func solidPlateView() -> NSView {
-        if let solidPlate { return solidPlate }
-        let plate = NSView()
-        plate.wantsLayer = true
-        solidPlate = plate
-        return plate
-    }
-
-    /// Nil below macOS 26, where there is no glass to draw.
-    func glassPlateView() -> NSView? {
-        if let glassPlate { return glassPlate }
-        glassPlate = GlassPlate.make()
-        return glassPlate
-    }
-
-    func tintView() -> GlassBackdrop {
-        if let glassTint { return glassTint }
-        let tint = GlassBackdrop()
-        glassTint = tint
-        return tint
-    }
-
-    private func makePanel() -> NSPanel {
-        let panel = BarPanel.makeNonActivating()
-        // KiwiDesk is never the active app; a glyph's hover title
-        // would otherwise never show (#1514).
-        panel.allowsToolTipsWhenApplicationIsInactive = true
-        content.wantsLayer = true
-        content.layer?.masksToBounds = true
-        panel.contentView = content
-        stripView.wantsLayer = true
-        content.addSubview(stripView)
-        content.addSubview(
-            plateBorder,
-            positioned: .below,
-            relativeTo: stripView
-        )
-        divider.wantsLayer = true
-        divider.isHidden = true
-        stripView.addSubview(divider)
-        handle.isHidden = true
-        handle.onHover = { [weak self] in self?.setDividerHovered($0) }
-        stripView.addSubview(handle)
-        return panel
     }
 }

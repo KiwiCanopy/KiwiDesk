@@ -11586,7 +11586,11 @@ would read as one and invite a drag that means nothing. The rule
 says "the row ends here", the mark names what follows, and the float's
 item stays undraggable rather than dimmed. Last rather than
 first, because the leading end is where the eye starts, and a
-float appearing there would shift every tile behind it.
+float appearing there would shift every tile behind it. A row of
+floats alone keeps the mark, ahead of its first float, and draws
+no rule (owner ruling, #1838): there is no row end to mark, but
+what the bar shows still wants naming, or a lone float reads as
+a tile.
 
 The rule takes the in-item tier, 1 pt at half depth: at the
 section's weight it reads, on a fused shelf, as the divider between
@@ -11817,10 +11821,9 @@ a picture that can claim a placement the engine does not make,
 the schematic rule's defect (#702) on the one surface where the
 user decides where the bars go. When an App Bar section appears
 or leaves under a centred or far-end alignment the plate grows
-or shrinks and slides to its new place over a short decelerating
-ease with no overshoot, a little longer than an item's slide so
-the plate reads as one surface moving, through `BarMotion` — a
-re-placement the user did not ask for must be seen to travel,
+or shrinks and slides to its new place over a decelerating ease with no
+overshoot, through `BarMotion` — a re-placement the user did not
+ask for must be seen to travel,
 never snap — and under Reduce Motion it arrives without
 travelling. Under Boxed there is no plate to glide; each box
 slides on its own.
@@ -11832,12 +11835,65 @@ The fold changes the App Bar's length, so the shelf re-places
 the section while the members slide: two paces would read as the
 members settling and then the bar moving again, so one glide
 carries both, and the item slide's shorter pace, which reads as
-a snap for this travel, is kept for every other render. On a
-boxed Liquid Glass bar only the content travels — a folded
+a snap for this travel, is kept for every other render but a Space switch's dissolve
+(below). On a boxed Liquid Glass bar only the content travels — a folded
 member leaves its glass at once and a released one takes its
 glass when it lands — because a glass sliding under another
 refracts through it, and every moving glass re-samples its
 backdrop each frame.
+:::
+
+:::unreleased
+**A section grows out of what it joins, a lone shelf fades, and
+the glide's pace is the user's**
+([#1838](https://github.com/KiwiCanopy/KiwiDesk/issues/1838),
+owner ruling). Motion shows where a thing comes from. A section
+joining a fused shelf comes out of the section that made room for
+it, so it grows out of that one from the side facing it and fades
+in, and one leaving shrinks back into it and fades out. A shelf on
+an edge of its own has no neighbour to come out of — only the
+windows stepped back — so it fades in where it lands and fades
+out where it leaves, the plate included, one shape on every
+alignment and style; a wipe from the middle of an empty edge
+would invent an origin, and it is not what the platform's own
+chrome does. The fade-out draws over the edge the windows have
+already taken back, briefly: the layout never waits for chrome,
+since holding the strip reserved until the bar had gone would lay
+every new Space out twice. A section already on the shelf glides
+from where its content was drawn: it re-lays for the new slot at
+once, so a glide from its old frame first threw the content
+aside. Content that keeps its offset inside the section — a
+switch between two Spaces that both show an App Bar — glides
+from the old frame, length included, the new row revealed from
+the anchored end; content re-anchored in its slot, centred across
+a lone strip or at the end of a fused one, starts at the new size
+placed where it was drawn, since the old bounds would clip it.
+A switch between two
+Spaces that both show an App Bar changes the row's SUBJECT, so
+the row dissolves: the old items stay where they stand and fade
+out, cropped by the section as it shrinks, while the new fade in
+at their slots, both from the first frame — holding the new row
+back left the boxes empty between (owner, device 2026-10-01) —
+the old row going over `BarMotion.dissolveOutShare` of the glide
+so a longer one is not seen beneath the new at half strength
+midway, while a slide would
+claim the same windows moved, and a cut, which is what a
+discarded view is, made the shrink read as the new row simply
+placed. On a boxed glass run the boxes
+cut and only the content dissolves: a glass at partial opacity
+shows the tint behind it bare, black for a moment on the shipped
+look, and a glass animating its width re-lays its content every
+frame (both device, 2026-10-01). A box fading as one unit with
+its tint needs the pair composited together, which the box
+hosting does not do yet
+([#1842](https://github.com/KiwiCanopy/KiwiDesk/issues/1842)). A window closing within a Space still
+leaves at once, and a group still folds its members. The
+curve stays decelerating — the motion answers the user's switch,
+and a curve that eases in reads as lag — while its length is
+theirs: `animations.shelf_duration`, 500–2000 ms, 750 by default,
+since the fixed plate glide, just over a quarter second until
+#1838, read as a snap for a bar coming and going; `on_shelf` turns it off, outside the window
+animations' master, and Reduce Motion keeps it off.
 :::
 
 *A minimum, not a share.* Each section is as long as its items

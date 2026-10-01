@@ -4,6 +4,33 @@ import AppKit
 /// App Bar group's members sliding into its item and out of it.
 /// The same one home — `BarMotionSeamTests` censuses both files.
 extension BarMotion {
+    /// The shelf glide's length (#1838), the user's
+    /// `animations.shelf_duration` — nothing while `on_shelf` is
+    /// off — kept current by `KiwiCore.updateBars()`.
+    @MainActor static var shelfGlide: TimeInterval =
+        AnimationSettings().shelfGlideSeconds
+
+    /// The plate glide's live length: the user's `shelfGlide` under
+    /// the Reduce Motion setting — what a stand reads to know
+    /// whether anything will travel at all.
+    @MainActor
+    static var shelfGlideLength: TimeInterval {
+        plateGlideDuration(reduceMotion: isReduced, seconds: shelfGlide)
+    }
+
+    /// Runs `body`'s writes with no implicit motion and COMMITS
+    /// them: an animation started after it begins from what `body`
+    /// stood rather than from the last committed presentation,
+    /// which is where the animator reads its start (#1838).
+    @MainActor
+    static func standCommitted(_ body: () -> Void) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        body()
+        CATransaction.commit()
+        CATransaction.flush()
+    }
+
     /// Fades `view` to `alpha` inside the running layout group,
     /// landing at once where `fades` refuses.
     @MainActor
@@ -24,6 +51,44 @@ extension BarMotion {
         animated && !reduceMotion
     }
 
+    /// The share of the plate glide a dissolve's OUT-fade takes
+    /// (#1838): the old row goes early while the new keeps fading
+    /// in over the whole glide, so a longer old row is not seen
+    /// beneath the new at half strength midway. Under half, or the
+    /// two rows meet at equal strength; well over a third, or the
+    /// old row reads as cut. Owner-tuned on device, 2026-10-01.
+    static let dissolveOutShare = 0.4
+
+    /// Runs `body` in a dissolve's out-fade group, nested in the
+    /// plate glide: `dissolveOutShare` of its length, the same
+    /// curve, zero under Reduce Motion.
+    @MainActor
+    static func runDissolveOut(_ body: () -> Void) {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = dissolveOutDuration(
+                reduceMotion: isReduced,
+                seconds: shelfGlide
+            )
+            context.timingFunction = CAMediaTimingFunction(
+                controlPoints: 0.2,
+                0.9,
+                0.3,
+                1
+            )
+            body()
+        }
+    }
+
+    /// The out-fade's length: `dissolveOutShare` of the plate
+    /// glide's, zero under Reduce Motion.
+    static func dissolveOutDuration(
+        reduceMotion: Bool,
+        seconds: TimeInterval
+    ) -> TimeInterval {
+        plateGlideDuration(reduceMotion: reduceMotion, seconds: seconds)
+            * dissolveOutShare
+    }
+
     /// Runs `body` once a group glide lands — a timer of the plate
     /// glide's length, as `playWalk` does, and the next turn under
     /// Reduce Motion, which plays no glide. Never inline: it is
@@ -32,7 +97,10 @@ extension BarMotion {
     static func afterGroupGlide(
         _ body: @escaping @MainActor () -> Void
     ) {
-        let span = plateGlideDuration(reduceMotion: isReduced)
+        let span = plateGlideDuration(
+            reduceMotion: isReduced,
+            seconds: shelfGlide
+        )
         Task { @MainActor in
             if span > 0 { try? await Task.sleep(for: .seconds(span)) }
             body()

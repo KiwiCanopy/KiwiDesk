@@ -2,8 +2,10 @@ import AppKit
 
 /// Layout and rendering passes for `SpaceBarOverlay` (#407, #409).
 extension SpaceBarOverlay {
-    /// Executes one layout pass over the last shown state.
-    func render(followingActive: Bool) {
+    /// Executes one layout pass over the last shown state;
+    /// `slotChanged` says the section's slot is not the one the
+    /// last pass drew into.
+    func render(followingActive: Bool, slotChanged: Bool = false) {
         guard let state = lastShown else { return }
         let (items, frontApp, strip, _, stateMarkColors) = state
         // The one place the stored style becomes the drawn one
@@ -182,7 +184,11 @@ extension SpaceBarOverlay {
             frontApp: pinFront ? nil : frontApp,
             frontStart: metrics.frontStart
         )
-        let glides = recordGlide(items, content: style.inactiveContent)
+        let glides = recordGlide(
+            items,
+            content: style.inactiveContent,
+            slotChanged: slotChanged
+        )
         BarMotion.runLayout { moveFrame(itemRun, runFrame, glides) }
         placeItems(itemFrames, glides: glides)
         for (index, item) in items.enumerated() {

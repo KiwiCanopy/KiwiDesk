@@ -35,6 +35,33 @@ struct AppBarFloatOverlayTests {
         )
     }
 
+    /// A row of floats alone keeps the mark, leading the run, and
+    /// draws no rule (owner, #1838); the run's length and its drawn
+    /// span carry the mark too.
+    @Test("Floats alone keep the mark ahead of the row and no rule")
+    func floatsAloneKeepTheMark() throws {
+        let overlay = AppBarOverlay()
+        show(overlay, [item(1, floating: true), item(2, floating: true)])
+        #expect(overlay.floatRule.isHidden)
+        let mark = overlay.floatMark
+        #expect(!mark.isHidden)
+        let first = overlay.itemViews[0].frame
+        #expect(mark.frame.maxX < first.minX)
+        #expect(mark.frame.minX >= 0)
+        // The drawn span starts at the mark, not the first float.
+        #expect(overlay.runContent.minX <= mark.frame.minX + 0.5)
+        let m = try #require(overlay.lastMetrics)
+        #expect(m.markLead > 0)
+        #expect(m.lengths[0] == m.slot + m.markLead)
+        #expect(m.lengths[1] == m.slot)
+        // The first float's frame keeps the lead outside it.
+        #expect(overlay.itemViews[0].frame.width == m.slot)
+        // A tiled row leading takes no lead.
+        show(overlay, [item(3), item(4, floating: true)])
+        #expect(try #require(overlay.lastMetrics).markLead == 0)
+        #expect(!overlay.floatRule.isHidden)
+    }
+
     @Test("A rule ends the row and the mark opens the floats")
     func markBetweenSections() throws {
         let overlay = AppBarOverlay()
@@ -64,7 +91,9 @@ struct AppBarFloatOverlayTests {
         #expect(tiled.width == float.width)
     }
 
-    @Test("No break without both sections")
+    /// A tiled row alone draws neither; floats alone keep the mark
+    /// and drop the rule (#1838).
+    @Test("No break without both sections; floats alone keep the mark")
     func noMarkWithOneSection() {
         let overlay = AppBarOverlay()
         // Drawn first, so each hide below is the render's own.
@@ -75,7 +104,7 @@ struct AppBarFloatOverlayTests {
         #expect(overlay.floatRule.isHidden)
         show(overlay, [item(1), item(3, floating: true)])
         show(overlay, [item(3, floating: true)])
-        #expect(overlay.floatMark.isHidden)
+        #expect(!overlay.floatMark.isHidden)
         #expect(overlay.floatRule.isHidden)
     }
 

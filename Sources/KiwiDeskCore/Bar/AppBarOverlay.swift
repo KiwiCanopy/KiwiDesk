@@ -26,6 +26,9 @@ public final class AppBarOverlay {
         let strip: CGRect
         let style: AppBarLook
         let capAxis: CGFloat?
+        /// The Space the items belong to; a change dissolves the
+        /// row (#1838).
+        let space: SpaceID?
     }
 
     /// The section's view; the shelf sets its origin, the
@@ -81,6 +84,15 @@ public final class AppBarOverlay {
     /// scroll re-reads rather than gating again.
     var drawnStyle: AppBarLook?
     private(set) var lastShown: RenderState?
+    /// The one frame write the run and its items take; a test
+    /// swaps it to see whether a pass asked to travel.
+    var moveFrame: BarFrameMove = BarMotion.setFrame(_:to:animated:)
+    /// Set by a `show` after a hide, consumed by its render: the
+    /// first render of a section appearing lands, never slides.
+    private var pendingLanding = false
+    /// Set by a `show` for another Space, consumed by its render:
+    /// the old row fades out in place and the new fades in (#1838).
+    private var pendingDissolve = false
 
     public init() {
         configureRoot()
@@ -92,13 +104,15 @@ public final class AppBarOverlay {
     /// one the shelf places it at.
     var shownStrip: CGRect? { lastShown?.strip }
 
-    /// Renders `items` into `strip` (AX coordinates).
+    /// Renders `items` into `strip` (AX coordinates); `space` is
+    /// the Space they belong to.
     public func show(
         items: [Item],
         activeIndex: Int?,
         strip: CGRect,
         style: AppBarLook,
-        capAxis: CGFloat? = nil
+        capAxis: CGFloat? = nil,
+        space: SpaceID? = nil
     ) {
         guard !items.isEmpty,
             strip.width >= 1, strip.height >= 1
@@ -106,12 +120,16 @@ public final class AppBarOverlay {
             hide()
             return
         }
+        let appearing = lastShown == nil
+        pendingLanding = appearing
+        pendingDissolve = !appearing && lastShown?.space != space
         lastShown = RenderState(
             items: items,
             activeIndex: activeIndex,
             strip: strip,
             style: style,
-            capAxis: capAxis
+            capAxis: capAxis,
+            space: space
         )
         let focus = activeIndex.flatMap {
             items.indices.contains($0) ? items[$0].id : nil
@@ -119,7 +137,12 @@ public final class AppBarOverlay {
         render(followingFocus: follow.follows(focus))
     }
 
+    /// Hides the section, tearing nothing down: its views stay
+    /// for the shelf, which draws a leaving section until its leave
+    /// lands and shows the root again meanwhile; a hide of a hidden
+    /// section writes nothing (#1838).
     public func hide() {
+        guard lastShown != nil else { return }
         follow.reset()
         lastShown = nil
         scrollOffset = 0
@@ -143,9 +166,14 @@ public final class AppBarOverlay {
         let style = LiquidGlassGate.rendered(state.style)
         drawnStyle = style
         let edge = style.edge
+        let lands = pendingLanding
+        let dissolves = pendingDissolve
+        pendingLanding = false
+        pendingDissolve = false
         let glide = syncItemViews(
             to: items,
-            glass: glassHosting(style) == .boxGlass
+            glass: glassHosting(style) == .boxGlass,
+            dissolving: dissolves
         )
         let m = metrics(
             strip: strip,
@@ -221,16 +249,18 @@ public final class AppBarOverlay {
         // the re-centring are one motion (#1831).
         let groups = !glide.departures.isEmpty || !glide.arrivals.isEmpty
         (groups ? BarMotion.runPlateGlide : BarMotion.runLayout) {
-            BarMotion.setFrame(itemRun, to: runFrame, animated: true)
+            moveFrame(itemRun, runFrame, !lands)
             for (index, view) in itemViews.enumerated()
             where view.superview === itemRun {
-                BarMotion.setFrame(
-                    view,
-                    to: frames[index],
-                    animated: true
-                )
+                moveFrame(view, frames[index], !lands)
             }
-            layoutFloatBreak(frames: frames, m: m, depth: depth, style: style)
+            layoutFloatBreak(
+                frames: frames,
+                m: m,
+                depth: depth,
+                style: style,
+                animated: !lands
+            )
             playGroupGlide(
                 departures: glide.departures,
                 arrivals: glide.arrivals,
@@ -273,7 +303,8 @@ public final class AppBarOverlay {
         runContent = drawnContent(
             frames: frames,
             strip: strip,
-            horizontal: m.horizontal
+            horizontal: m.horizontal,
+            leading: m.markLead
         )
         contentFrame = runContent.offsetBy(
             dx: runFrame.minX + itemContainer.frame.minX,
@@ -287,7 +318,7 @@ public final class AppBarOverlay {
                 frames: frames,
                 style: style,
                 depth: depth,
-                animated: true
+                animated: !lands
             )
         }
         layoutOverflow(strip: strip, m: m, style: style)

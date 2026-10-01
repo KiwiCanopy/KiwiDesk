@@ -5656,6 +5656,29 @@ while `set_on_monocle_focus` is off.
 animations.set_monocle_flip_duration(300)
 ```
 
+:::unreleased
+### animations.set_on_shelf, animations.set_shelf_duration
+
+**Expects:**
+
+- `set_on_shelf(bool)` — `true` or `false` (default `true`).
+- `set_shelf_duration(ms)` — a number (milliseconds, clamped
+  500–2000; default `750`).
+
+**Does:** the KiwiShelf motion when you switch Spaces: a bar
+sharing a shelf grows out of the other bar and shrinks back into
+it, a bar on an edge of its own fades in and out, the App Bar's row
+dissolves to the new Space's, and the bars glide to their new
+places. Off, they move at once. It is not under the
+window-animation switches, and Reduce Motion keeps it off.
+
+**Example:**
+
+```lua
+animations.set_shelf_duration(1000)
+```
+:::
+
 ### enable_wake_restore, set_wake_restore_delay
 
 **Expects:**

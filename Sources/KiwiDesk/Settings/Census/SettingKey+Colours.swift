@@ -21,6 +21,9 @@ enum ColoursKey: String, CaseIterable, Hashable {
         "settings.animations.onMonocleFocus"
     case animationsMonocleFlipDurationMS =
         "settings.animations.monocleFlipDurationMS"
+    case animationsOnShelf = "settings.animations.onShelf"
+    case animationsShelfDurationMS =
+        "settings.animations.shelfDurationMS"
     case paletteApply = "(action) palette.apply"
     case paletteSave = "(action) palette.save"
     case paletteRename = "(action) palette.rename"
@@ -74,6 +77,17 @@ extension ColoursKey {
                 .motion,
                 .showMore,
                 gate: .setting(.colours(.animationsMaster))
+            )
+        case .animationsOnShelf:
+            // Not under the master: the shelf glides whatever the
+            // window animations do (#1838, ui-designer).
+            return .row(.coloursAndMotion, .motion, .showMore)
+        case .animationsShelfDurationMS:
+            return .row(
+                .coloursAndMotion,
+                .motion,
+                .showMore,
+                gate: .setting(.colours(.animationsOnShelf))
             )
         case .animationsOnScrolling:
             return .row(.layoutDefaults, .scrolling, .atRest)
@@ -155,6 +169,13 @@ extension ColoursKey {
             return .text("behavior.animations.relayout")
         case .animationsDurationMS:
             return .text("behavior.animations.duration")
+        case .animationsOnShelf:
+            return .text(
+                "behavior.animations.shelf",
+                help: "behavior.animations.shelf.help"
+            )
+        case .animationsShelfDurationMS:
+            return .text("behavior.animations.shelf_duration")
         case .animationsOnScrolling:
             return .text(
                 "scroll_grid.animate_focus_shifts",

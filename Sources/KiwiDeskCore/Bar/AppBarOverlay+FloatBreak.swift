@@ -5,8 +5,24 @@ import AppKit
 /// `FloatingStyle` symbol opens the float section — a section
 /// marker, not a per-item badge. It rides the run: the last tiled
 /// item's slot is widened by both and their gaps, so scrolling,
-/// hugging and the plate measure it.
+/// hugging and the plate measure it. A row of floats alone keeps
+/// the mark, leading the run, and draws no rule (owner, #1838).
 extension AppBarOverlay {
+    /// Whether the run is floats alone, led by the mark.
+    nonisolated static func leadsWithMark(_ items: [Item]) -> Bool {
+        items.first?.floating == true
+    }
+
+    /// Axis length the leading mark adds ahead of the first float:
+    /// mark, gap.
+    nonisolated static func floatMarkLead(
+        gap: CGFloat,
+        style: AppBarLook,
+        depth: CGFloat
+    ) -> CGFloat {
+        floatMarkSide(style: style, depth: depth) + gap
+    }
+
     /// The last tiled item when floats follow it; nil when either
     /// side is empty, which draws no break.
     nonisolated static func breakAfter(_ items: [Item]) -> Int? {
@@ -57,11 +73,19 @@ extension AppBarOverlay {
                 depth: thickness
             )
         }
+        if leadsWithMark(items) {
+            lengths[0] += floatMarkLead(
+                gap: style.itemGap,
+                style: style,
+                depth: thickness
+            )
+        }
         return lengths
     }
 
     /// The frames the item views take in `bounds`: the run's slots,
-    /// the break's trimmed back to the item's own length.
+    /// the break's trimmed back to the item's own length, a leading
+    /// mark's first slot trimmed from its start.
     nonisolated static func itemFrames(
         in bounds: CGRect,
         m: Metrics
@@ -73,6 +97,15 @@ extension AppBarOverlay {
             horizontal: m.horizontal,
             alignment: m.alignment
         )
+        if m.markLead > 0, !frames.isEmpty {
+            if m.horizontal {
+                frames[0].origin.x += m.markLead
+                frames[0].size.width = m.slot
+            } else {
+                frames[0].origin.y += m.markLead
+                frames[0].size.height = m.slot
+            }
+        }
         guard let index = m.breakAfter, frames.indices.contains(index)
         else { return frames }
         if m.horizontal {
@@ -84,15 +117,31 @@ extension AppBarOverlay {
     }
 
     /// Lays the rule and the mark out after the break's item —
-    /// inside the render's `BarMotion.runLayout` pass, so they
-    /// travel with the items — or hides them when no break is
-    /// drawn.
+    /// inside the render's layout pass, so they travel with the
+    /// items where `animated` — the mark alone ahead of a run of
+    /// floats, or hides them when no break is drawn.
     func layoutFloatBreak(
         frames: [CGRect],
         m: Metrics,
         depth: CGFloat,
-        style: AppBarLook
+        style: AppBarLook,
+        animated: Bool
     ) {
+        let side = Self.floatMarkSide(style: style, depth: depth)
+        let across = (depth - side) / 2
+        if m.markLead > 0, let first = frames.first {
+            floatRule.isHidden = true
+            let start = (m.horizontal ? first.minX : first.minY) - m.markLead
+            placeFloatMark(
+                start: start,
+                across: across,
+                side: side,
+                m: m,
+                style: style,
+                animated: animated
+            )
+            return
+        }
         guard let index = m.breakAfter, frames.indices.contains(index)
         else {
             floatRule.isHidden = true
@@ -100,7 +149,6 @@ extension AppBarOverlay {
             return
         }
         let item = frames[index]
-        let side = Self.floatMarkSide(style: style, depth: depth)
         let ruleAt = (m.horizontal ? item.maxX : item.maxY) + m.gap
         floatRule.isHidden = false
         floatRule.layer?.backgroundColor =
@@ -112,10 +160,26 @@ extension AppBarOverlay {
                 depth: depth,
                 horizontal: m.horizontal
             ),
-            animated: true
+            animated: animated
         )
-        let start = ruleAt + BarDivider.ruleThickness + m.gap
-        let across = (depth - side) / 2
+        placeFloatMark(
+            start: ruleAt + BarDivider.ruleThickness + m.gap,
+            across: across,
+            side: side,
+            m: m,
+            style: style,
+            animated: animated
+        )
+    }
+
+    private func placeFloatMark(
+        start: CGFloat,
+        across: CGFloat,
+        side: CGFloat,
+        m: Metrics,
+        style: AppBarLook,
+        animated: Bool
+    ) {
         floatMark.isHidden = false
         floatMark.contentTintColor = NSColor(
             kiwiHex: style.shelf.idleItemColor
@@ -125,7 +189,7 @@ extension AppBarOverlay {
             to: m.horizontal
                 ? CGRect(x: start, y: across, width: side, height: side)
                 : CGRect(x: across, y: start, width: side, height: side),
-            animated: true
+            animated: animated
         )
     }
 }

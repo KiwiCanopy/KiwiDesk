@@ -231,12 +231,23 @@ public final class SpaceBarOverlay {
             hide()
             return
         }
+        // A slot that moved or resized hands the motion to the
+        // shelf's glide, so the chips land (#1838).
+        let slotChanged = lastShown.map { $0.strip != strip } ?? false
         lastShown = (items, frontApp, strip, style, stateMarkColors)
         let active = items.first(where: \.active)?.space
-        render(followingActive: follow.follows(active))
+        render(
+            followingActive: follow.follows(active),
+            slotChanged: slotChanged
+        )
     }
 
+    /// Hides the section, tearing nothing down: its views stay
+    /// for the shelf, which draws a leaving section until its leave
+    /// lands and shows the root again meanwhile; a hide of a hidden
+    /// section writes nothing (#1838).
     public func hide() {
+        guard lastShown != nil else { return }
         // A chip hidden under the pointer ends its hold (#1528),
         // though its Space may draw on another display's bar.
         itemViews.forEach { $0.setPointerInside(false) }

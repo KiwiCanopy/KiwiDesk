@@ -63,16 +63,16 @@ final class ShelfManager {
     }
     private var last: [Key: Shelf] = [:]
 
-    /// Shows `shelves`, retiring every shelf absent from them — a
-    /// display's second one included, once its bars re-fuse.
+    /// Shows `shelves`, fading out every shelf absent from them —
+    /// a display's second one included, once its bars re-fuse —
+    /// and retiring it once it has left (#1838).
     func sync(_ shelves: [Shelf]) {
         let wanted = Set(shelves.map(Self.key))
-        for (key, overlay) in overlays where !wanted.contains(key) {
-            overlay.hide()
-            overlays[key] = nil
-        }
         for key in last.keys where !wanted.contains(key) {
             last[key] = nil
+        }
+        for (key, overlay) in overlays where !wanted.contains(key) {
+            overlay.hide(animated: true)
         }
         for shelf in shelves {
             let key = Self.key(shelf)
@@ -119,6 +119,7 @@ final class ShelfManager {
         }
         let overlay = overlays[key] ?? ShelfOverlay()
         overlays[key] = overlay
+        overlay.onLeft = { [weak self] in self?.retire(key) }
         overlay.contextMenus = contextMenus
         overlay.handle.onMinimum = { [weak self] percent, committed in
             self?.onMinimum(percent, committed)
@@ -140,6 +141,20 @@ final class ShelfManager {
         shelf.space?.syncHoverToPointer()
         shelf.app?.syncHoverToPointer()
         overlay.handle.syncHoverToPointer()
+    }
+
+    /// The displays with a shelf still fading out: a bar manager
+    /// spares their overlays, whose roots that fade still draws
+    /// (#1838).
+    var leavingDisplays: Set<DisplayID> {
+        Set(overlays.filter { $0.value.isLeaving }.map(\.key.display))
+    }
+
+    /// Drops a shelf that has left the screen, unless a plan wants
+    /// it again meanwhile.
+    private func retire(_ key: Key) {
+        guard last[key] == nil else { return }
+        overlays[key] = nil
     }
 
     #if DEBUG

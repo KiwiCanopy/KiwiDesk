@@ -57,7 +57,6 @@ public final class AppBarManager {
     /// The font-set observer (#1681), homed here for the same
     /// reason.
     var fontSetObserver: NSObjectProtocol?
-    private var spaceOfDisplay: [DisplayID: SpaceID] = [:]
     /// The bars actually painted after `sync`'s filter — the one
     /// source for anything that must sit clear of a bar (#242).
     private var shownBars: [Bar] = []
@@ -69,7 +68,18 @@ public final class AppBarManager {
 
     /// Displays currently showing an app bar.
     public var shownDisplays: Set<DisplayID> {
-        Set(spaceOfDisplay.keys)
+        Set(overlays.filter { $0.value.isVisible }.keys)
+    }
+
+    /// Drops the overlays of displays outside `live` — the
+    /// connected ones, and those whose shelf is still fading, which
+    /// the caller adds; a display still live keeps its hidden
+    /// overlay (#1838).
+    public func retire(except live: Set<DisplayID>) {
+        for (id, overlay) in overlays where !live.contains(id) {
+            overlay.hide()
+            overlays[id] = nil
+        }
     }
 
     /// Painted app bar strips across all displays (#242, QA 2026-07-19).
@@ -108,8 +118,11 @@ public final class AppBarManager {
             .map { (strip: $0.strip, edge: $0.edge) }
     }
 
-    /// Synchronizes painted overlays with `bars`, retiring overlays for
-    /// removed displays.
+    /// Synchronizes painted overlays with `bars`, hiding the
+    /// overlay of a display with no bar. Hidden, never dropped: the
+    /// section's root keeps its place on its shelf, so a bar
+    /// coming back is the same section re-shown rather than a new
+    /// one joining (#1838).
     public func sync(_ bars: [Bar]) {
         let valid = bars.filter {
             !$0.items.isEmpty
@@ -119,18 +132,16 @@ public final class AppBarManager {
         let wanted = Set(valid.map(\.display))
         for (id, overlay) in overlays where !wanted.contains(id) {
             overlay.hide()
-            overlays[id] = nil
-            spaceOfDisplay[id] = nil
         }
         for bar in valid {
             let overlay = overlay(for: bar.display)
-            spaceOfDisplay[bar.display] = bar.space
             overlay.show(
                 items: bar.items,
                 activeIndex: bar.activeIndex,
                 strip: bar.strip,
                 style: bar.style,
-                capAxis: bar.capAxis
+                capAxis: bar.capAxis,
+                space: bar.space
             )
         }
     }
@@ -164,7 +175,7 @@ public final class AppBarManager {
         }
         overlay.onMove = { [weak self] from, to in
             guard let self,
-                let space = self.spaceOfDisplay[display]
+                let space = self.overlays[display]?.lastShown?.space
             else { return }
             self.onMove(space, from, to)
         }

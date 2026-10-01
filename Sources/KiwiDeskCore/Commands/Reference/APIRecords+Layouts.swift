@@ -48,6 +48,15 @@ extension APIReference {
             "Sets the Monocle card flip's turn in milliseconds.",
             .integer("milliseconds")
         ),
+        "set_on_shelf": APIRecord(
+            "Enables or disables the shelf's glide — a bar growing "
+                + "in or out and the shelf re-placing.",
+            .boolean("enabled")
+        ),
+        "set_shelf_duration": APIRecord(
+            "Sets the shelf's glide in milliseconds, clamped to its band.",
+            .integer("milliseconds")
+        ),
         "set_size_policy": APIRecord(
             "Sets how window sizes animate.",
             .choice("policy", SizePolicy.self)

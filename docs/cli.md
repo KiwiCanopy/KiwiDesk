@@ -289,6 +289,8 @@ exports nothing.
 | | `animations.set_on_relayout` | true\|false (default true) |
 | | `animations.set_on_monocle_focus` | true\|false (default true); the Monocle focus card flip, persisted per-profile |
 | | `animations.set_monocle_flip_duration` | ms (100–1000, default 450); the flip's turn, persisted per-profile |
+| | `animations.set_on_shelf` | true\|false (default true); the KiwiShelf motion on a Space switch, persisted per-profile |
+| | `animations.set_shelf_duration` | ms (500–2000, default 750); the shelf glide's length, persisted per-profile |
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
 | | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
 | Scroll gestures | `scroll_gesture.set_pan` | modifiers joined by `+` (default `control+option`; `""` off) — held with a scroll to move focus window by window |
@@ -365,6 +367,12 @@ see [Opening and Closing Windows](lua-reference.md#opening-and-closing-windows).
 :::unreleased
 The `scroll_gesture.*` commands set the scroll gestures; see
 [Scroll Gestures](lua-reference.md#scroll-gestures).
+:::
+
+:::unreleased
+`animations.set_on_shelf` and `animations.set_shelf_duration` set
+the KiwiShelf motion on a Space switch; see
+[animations.set_on_shelf](lua-reference.md#animationsset_on_shelf).
 :::
 
 :::unreleased

@@ -77,7 +77,7 @@ struct OverlayGlassGateTests {
     private static let minters: [String: String] = [
         "Bar/AppBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
         "Bar/SpaceBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
-        "Bar/ShelfOverlay.swift": "ShelfPlateGlassGateTests",
+        "Bar/ShelfOverlay+Views.swift": "ShelfPlateGlassGateTests",
         "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",
         "Borders/StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
     ]

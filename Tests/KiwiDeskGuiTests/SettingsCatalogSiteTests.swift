@@ -93,7 +93,9 @@ struct SettingsCatalogSiteTests {
         // 118 since #1656: the drawer's five scroll-gesture rows.
         // 119 since #1519: the Space step's recorder.
         // 120 since #1752: the Shared look card.
-        #expect(names.count == 120)
+        // 122 since #1838: the Motion drawer's shelf toggle and
+        // duration rows.
+        #expect(names.count == 122)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

@@ -109,6 +109,14 @@ struct MotionMoreControls: Sendable {
         "behavior.animations.duration",
         "Duration"
     )
+    let animateShelf = SettingsControl(
+        "behavior.animations.shelf",
+        "Animate KiwiShelf"
+    )
+    let shelfDuration = SettingsControl(
+        "behavior.animations.shelf_duration",
+        "KiwiShelf duration"
+    )
 }
 
 /// Advanced Colors catalog controls (#678 Phase 3, #277, #793).

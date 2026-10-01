@@ -23,6 +23,7 @@ extension KiwiCore {
         }
         syncFontIssue()
         let settings = tiler.settings
+        BarMotion.shelfGlide = settings.animations.shelfGlideSeconds
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else {
             let fallback = appBarFallback(settings: settings)
@@ -43,6 +44,7 @@ extension KiwiCore {
                 },
                 settings: settings
             )
+            retireDepartedBars(live: Set(fallback.map(\.display)))
             return
         }
         let look = settings.spaceBarLook
@@ -113,6 +115,18 @@ extension KiwiCore {
             spaceBars.sync(spaceBarsShown)
         }
         syncShelves(strips, settings: settings)
+        retireDepartedBars(live: Set(displays.map(\.id)))
+    }
+
+    /// Drops the bar overlays of displays outside `live` — after the
+    /// shelves are synced, so a departed display whose shelf is
+    /// still fading is spared until that fade lands: dropped
+    /// mid-fade, a display re-enumerating inside the glide would
+    /// re-join as a new section (#1838).
+    private func retireDepartedBars(live: Set<DisplayID>) {
+        let keep = live.union(shelves.leavingDisplays)
+        appBars.retire(except: keep)
+        spaceBars.retire(except: keep)
     }
 
     /// One shelf to show: its display, edge and strip, which bars

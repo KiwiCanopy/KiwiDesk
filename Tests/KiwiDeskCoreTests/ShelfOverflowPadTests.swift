@@ -88,14 +88,21 @@ struct ShelfOverflowPadTests {
             thickness: Self.depth,
             capAxis: Self.capAxis
         )
+        // Well past the threshold — a one-point step is inside the
+        // tolerance and cannot red a lost pad (#1837 prover) — and
+        // the TRAILING pad, which the shorter strip keeps where an
+        // absolute end cannot.
+        let short = natural - 3 * Self.shelf(alignment).itemGap
         let fits = try appRun(alignment, length: natural)
-        let scrolls = try appRun(alignment, length: natural - 1)
+        let scrolls = try appRun(alignment, length: short)
         let tolerance = ShelfOverflow.clipTolerance
         #expect(
             abs(fits.first.lowerBound - scrolls.first.lowerBound)
                 <= tolerance
         )
-        #expect(abs(fits.end - scrolls.end) <= tolerance)
+        #expect(
+            abs((natural - fits.end) - (short - scrolls.end)) <= tolerance
+        )
     }
 
     // MARK: - Space Bar
@@ -155,14 +162,17 @@ struct ShelfOverflowPadTests {
             depth: Self.depth,
             look: spaceLook(alignment)
         )
+        let short = natural - 3 * Self.shelf(alignment).itemGap
         let fits = try spaceRun(alignment, length: natural)
-        let scrolls = try spaceRun(alignment, length: natural - 1)
+        let scrolls = try spaceRun(alignment, length: short)
         let tolerance = ShelfOverflow.clipTolerance
         #expect(
             abs(fits.first.lowerBound - scrolls.first.lowerBound)
                 <= tolerance
         )
-        #expect(abs(fits.end - scrolls.end) <= tolerance)
+        #expect(
+            abs((natural - fits.end) - (short - scrolls.end)) <= tolerance
+        )
     }
 
     /// The floor budgets the pads an overflowing Space run keeps.

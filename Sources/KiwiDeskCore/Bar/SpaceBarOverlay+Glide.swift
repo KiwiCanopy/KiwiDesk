@@ -5,19 +5,24 @@ import AppKit
 /// run re-sizes, and its items travel there through `BarMotion`.
 extension SpaceBarOverlay {
     /// Whether a render's items glide to their frames: only where
-    /// the same items are drawn and the Space the screen shows
-    /// changed under a content that collapses the others. Every
-    /// other render lands — among them a `hide_empty` change,
-    /// where pooled views would slide between different Spaces'
-    /// slots. The shelf plate and section divider take the
-    /// shelf's own glide; the front-app segment lands.
+    /// the same items are drawn in the same slot and the Space the
+    /// screen shows changed under a content that collapses the
+    /// others. Every other render lands — among them a `hide_empty`
+    /// change, where pooled views would slide between different
+    /// Spaces' slots, and a slot that moved or resized, where the
+    /// shelf glides the whole section from where its content was
+    /// drawn and a run gliding inside it would pull that content
+    /// away from the start (#1838). The shelf plate and section
+    /// divider take the shelf's own glide; the front-app segment
+    /// lands.
     nonisolated static func itemsGlide(
         content: SpaceBarStyle.InactiveContent,
         from shown: SpaceID?,
         to expanded: SpaceID?,
-        sameItems: Bool
+        sameItems: Bool,
+        sameSlot: Bool
     ) -> Bool {
-        content != .apps && sameItems && shown != nil
+        content != .apps && sameItems && sameSlot && shown != nil
             && shown != expanded
     }
 
@@ -25,7 +30,8 @@ extension SpaceBarOverlay {
     /// the next render is told a switch from a steady pass.
     func recordGlide(
         _ items: [Item],
-        content: SpaceBarStyle.InactiveContent
+        content: SpaceBarStyle.InactiveContent,
+        slotChanged: Bool
     ) -> Bool {
         let expanded = activeIndex(items).flatMap { items[$0].space }
         let identities = items.map(\.identity)
@@ -33,7 +39,8 @@ extension SpaceBarOverlay {
             content: content,
             from: shownExpanded,
             to: expanded,
-            sameItems: identities == shownIdentities
+            sameItems: identities == shownIdentities,
+            sameSlot: !slotChanged
         )
         shownExpanded = expanded
         shownIdentities = identities

@@ -90,6 +90,10 @@ enum SettingsSearchSynonyms {
             return ["card flip", "transition", "blur"]
         case .colours(.animationsMonocleFlipDurationMS):
             return ["speed", "flip speed"]
+        case .colours(.animationsOnShelf):
+            return ["bar", "app bar", "space bar", "grow", "fade", "slide"]
+        case .colours(.animationsShelfDurationMS):
+            return ["speed", "bar speed", "shelf speed"]
         case .colours(.paletteSave):
             return ["theme", "color scheme"]
         case .colours(.lookSave):

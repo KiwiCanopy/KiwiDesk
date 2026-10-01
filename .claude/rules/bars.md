@@ -215,8 +215,86 @@ twice, was a question the user answered twice. The argument is
   `landingLeavesNoGlass` that no render mints a second glass. A
   render that folds or releases runs its item frames AND its
   glass hosting on the one plate glide the shelf re-places the
-  section on; that the two passes pick the same glide is
-  review's.
+  section on, both passes taking the one groups-or-not choice
+  (`AppBarGroupGlideDispatchTests`).
+- **Stand what a glide or fade will read from and COMMIT it
+  through the one `BarMotion.standCommitted`, before the group
+  that reads it** (#1838) — a section's glide start in
+  `standGlideStarts`, a shelf's transparent first show.
+  The animator starts a frame glide from the layer's last
+  COMMITTED presentation, never from a frame written in the same
+  pass: a start stood at 569 glided from 0 until the
+  `CATransaction.flush()` behind it (device, 2026-09-30), the
+  content jumping aside first. Compute where a start is through
+  `ShelfOverlay.glideStart`, never beside a call site: content that keeps its
+  offset inside
+  the section glides from the old frame, size included; content
+  re-anchored in its slot starts at the new size placed where it
+  was drawn, since the old bounds would clip it; and a slot that
+  did not change moves the section not at all — its row
+  re-centring inside the whole strip is its own render's, and a
+  start that held it slid the section in from the side (device,
+  2026-10-01). `ShelfSectionGlideTests` holds the three; that the
+  start is flushed is review's, since no headless render reads
+  the animator's from-value. The glide's length is the user's
+  `animations.shelf_duration`, `BarMotion.shelfGlide` set in
+  `updateBars()` (`ShelfGlideSettingsTests`).
+- **A section joining a fused shelf grows out of the section it
+  joins and a leaving one shrinks back into it; a shelf on an
+  edge of its own fades in and out, plate included** (owner
+  ruling, #1838). The fade-out keeps the panel until it lands,
+  a show meanwhile fades it back, the shelf reports leaving
+  exactly once, and `ShelfManager` retires it only then
+  (`ShelfFadeTests`). Never hold a strip reserved for a shelf that is fading
+  out:
+  the windows take it the instant the switch lands and the fading
+  shelf draws over their edge.
+- **A Space switch DISSOLVES the App Bar's row, both rows fading
+  from the first frame, the old over `BarMotion.dissolveOutShare`
+  of the glide** (holding the new row back left the boxes empty
+  between; owner, device 2026-10-01) — keyed on the Space
+  `AppBarManager` hands
+  `show`, never a close within a Space, never the first show
+  after a hide, which LANDS its run and items rather than sliding
+  them in (`AppBarLandingTests`). A section wanted again before its
+  leave lands leaves `leavingViews` and stays on the strip
+  (`ShelfFadeTests` ▸ `reWantedSectionStays`).
+  On a boxed glass run the boxes CUT and only content dissolves:
+  a glass takes no alpha — at partial opacity it shows the tint
+  behind it bare — and no geometry — its content re-lays every
+  frame (both device, 2026-10-01) (`AppBarDissolveTests`). A bar
+  manager hides its display's overlay and never drops it — a bar
+  coming back is the same section re-shown — retiring only a
+  display that left (`BarManagerKeepTests`); its `hide()` tears
+  nothing down and a hide of a hidden section writes nothing,
+  since the shelf draws a leaving section until its leave lands
+  (`ShelfFadeManagerTests` ▸ `hiddenSectionKeepsItsViews`,
+  `hiddenSpaceBarSectionKeepsItsViews`,
+  `refreshKeepsTheLeavingSection`); and a shelf fade-out already
+  running is never restarted by a later refresh (`ShelfFadeTests`
+  ▸ `repeatedHideKeepsTheLanding`) — both were how a lone shelf's
+  appear took the fused join arm and flew in. A leave stamps its
+  views, and a landing removes only the views whose latest leave it
+  owns (`ShelfFadeTests` ▸ `leaveInsideALeave`) that still sit on
+  its own strip (`ShelfSplitDriverTests` ▸
+  `splitKeepsTheMovedSection`). Schedule a landing through the
+  overlay's `afterGlide`, never a timer beside it, so a test drains
+  it by hand rather than on a clock (`ShelfFadeTests` ▸
+  `reWantedSectionStays` reds on a landing scheduled past it).
+  Retire a departed display's bar overlays AFTER `syncShelves`, and
+  never one `ShelfManager.leavingDisplays` names: the shelf sync is
+  where a departing display's shelf is told to leave, and an
+  overlay dropped mid-fade re-joins as a new section when the
+  display re-enumerates inside the glide (`ShelfFadeManagerTests` ▸
+  `managerRetiresOnceLeft` the reading, `ShelfRetireWiringTests`
+  the one door and its place after the sync). The Space
+  Bar's chip
+  glide stands down when its slot changed, the shelf gliding the
+  section then (`SpaceBarInactiveContentTests`).
+- **A row of floats alone keeps the floating mark ahead of its
+  first float and draws no rule** (owner ruling, #1838):
+  `AppBarFloatOverlayTests` ▸ `floatsAloneKeepTheMark` holds the
+  mark, the rule, the run's lengths and the drawn span.
 
 ## One shelf panel per display and edge draws the plate; the bars draw sections
 
@@ -313,7 +391,8 @@ render content into it (#1517). Obligations:
   routing is review's.
 - **An empty Space's identifier, on a Space its screen does not
   show, is `KiwiShelf.emptyItemColor` under either content,
-  derived from the palette and never picked** (#1683): the idle floor and the occupied-to-empty step
+  derived from the palette and never picked** (#1683): the idle floor and the
+  occupied-to-empty step
   both hold, or the cue drops rather than the floor.
   `EmptyItemInkTests` measures every bundled palette's answer.
 
