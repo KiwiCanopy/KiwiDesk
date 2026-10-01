@@ -268,7 +268,7 @@ twice, was a question the user answered twice. The argument is
   display that left (`BarManagerKeepTests`); its `hide()` tears
   nothing down and a hide of a hidden section writes nothing,
   since the shelf draws a leaving section until its leave lands
-  (`ShelfFadeTests` ▸ `hiddenSectionKeepsItsViews`,
+  (`ShelfFadeManagerTests` ▸ `hiddenSectionKeepsItsViews`,
   `hiddenSpaceBarSectionKeepsItsViews`,
   `refreshKeepsTheLeavingSection`); and a shelf fade-out already
   running is never restarted by a later refresh (`ShelfFadeTests`
@@ -277,14 +277,17 @@ twice, was a question the user answered twice. The argument is
   views, and a landing removes only the views whose latest leave it
   owns (`ShelfFadeTests` ▸ `leaveInsideALeave`) that still sit on
   its own strip (`ShelfSplitDriverTests` ▸
-  `splitKeepsTheMovedSection`), scheduled through the overlay's one
-  `afterGlide`, which a test drains by hand rather than on a clock.
-  A departed display's overlay is dropped only once its shelf's
-  fade has landed — `updateBars()` spares
-  `ShelfManager.leavingDisplays` — or a display re-enumerating
-  inside the glide re-joins as a new section (`ShelfFadeTests` ▸
+  `splitKeepsTheMovedSection`). Schedule a landing through the
+  overlay's `afterGlide`, never a timer beside it, so a test drains
+  it by hand rather than on a clock (`ShelfFadeTests` ▸
+  `reWantedSectionStays` reds on a landing scheduled past it).
+  Retire a departed display's bar overlays AFTER `syncShelves`, and
+  never one `ShelfManager.leavingDisplays` names: the shelf sync is
+  where a departing display's shelf is told to leave, and an
+  overlay dropped mid-fade re-joins as a new section when the
+  display re-enumerates inside the glide (`ShelfFadeManagerTests` ▸
   `managerRetiresOnceLeft` the reading, `ShelfRetireWiringTests`
-  its one consumer). The Space
+  the one door and its place after the sync). The Space
   Bar's chip
   glide stands down when its slot changed, the shelf gliding the
   section then (`SpaceBarInactiveContentTests`).

@@ -3,8 +3,7 @@ import AppKit
 /// The shelf's views, made once (#1517): the plates, the tint and
 /// the panel the strip draws in.
 extension ShelfOverlay {
-    /// Adds each section's view once and sets its origin; a view
-    /// no section names any more leaves the strip.
+    /// The solid plate, made once.
     func solidPlateView() -> NSView {
         if let solidPlate { return solidPlate }
         let plate = NSView()
