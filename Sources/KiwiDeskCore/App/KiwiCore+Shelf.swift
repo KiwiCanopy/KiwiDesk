@@ -30,10 +30,6 @@ extension KiwiCore {
             shelves.holdingRelayout {
                 appBars.sync(fallback)
                 spaceBars.sync([])
-                let keep = Set(fallback.map(\.display))
-                    .union(shelves.leavingDisplays)
-                appBars.retire(except: keep)
-                spaceBars.retire(except: keep)
             }
             // A lone bar's slot IS its strip.
             syncShelves(
@@ -48,6 +44,7 @@ extension KiwiCore {
                 },
                 settings: settings
             )
+            retireDepartedBars(live: Set(fallback.map(\.display)))
             return
         }
         let look = settings.spaceBarLook
@@ -116,15 +113,20 @@ extension KiwiCore {
         shelves.holdingRelayout {
             appBars.sync(appBarsShown)
             spaceBars.sync(spaceBarsShown)
-            // A departed display's overlay waits for its shelf's fade
-            // to land: dropped mid-fade, a display re-enumerating
-            // inside the glide would re-join as a new section.
-            let keep = Set(displays.map(\.id))
-                .union(shelves.leavingDisplays)
-            appBars.retire(except: keep)
-            spaceBars.retire(except: keep)
         }
         syncShelves(strips, settings: settings)
+        retireDepartedBars(live: Set(displays.map(\.id)))
+    }
+
+    /// Drops the bar overlays of displays outside `live` — after the
+    /// shelves are synced, so a departed display whose shelf is
+    /// still fading is spared until that fade lands: dropped
+    /// mid-fade, a display re-enumerating inside the glide would
+    /// re-join as a new section (#1838).
+    private func retireDepartedBars(live: Set<DisplayID>) {
+        let keep = live.union(shelves.leavingDisplays)
+        appBars.retire(except: keep)
+        spaceBars.retire(except: keep)
     }
 
     /// One shelf to show: its display, edge and strip, which bars
