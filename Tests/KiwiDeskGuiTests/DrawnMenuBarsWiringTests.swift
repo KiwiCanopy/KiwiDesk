@@ -170,4 +170,44 @@ struct DrawnMenuBarsWiringTests {
             )
         }
     }
+
+    /// The #1868 seam under the correction: both twins memoize
+    /// AppKit's read, and the door reads it only through the
+    /// seam. A dropped memo reds nothing else — it only slows
+    /// every run back down.
+    @Test("both twins memoize AppKit's area under the correction")
+    func twinsMemoizeTheAppKitRead() throws {
+        for target in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
+            let text = try source("Tests/\(target)/TestCore.swift")
+            let memo = try #require(
+                text.range(of: "GeometryUtils.appKitVisibleFrameOverride =")
+                    .map { String(text[$0.upperBound...].prefix(400)) },
+                .init(rawValue: "\(target) misses the memo")
+            )
+            // The closure caches: it reads and writes the memo.
+            #expect(
+                memo.contains("testAppKitFrames[key]"),
+                .init(rawValue: "\(target)'s override does not memoize")
+            )
+        }
+        let geometry = try source(
+            "Sources/KiwiDeskCore/Tiling/GeometryUtils.swift"
+        )
+        let door = try #require(
+            SourceScan.declarationBody(
+                after: "static func visibleFrame(of screen: NSScreen)",
+                in: geometry
+            )
+        )
+        #expect(door.contains("appKitVisibleFrame(of: screen)"))
+        #expect(!door.contains("screen.visibleFrame"))
+        // And the AppKit door still consults the override.
+        let appKit = try #require(
+            SourceScan.declarationBody(
+                after: "static func appKitVisibleFrame(of screen: NSScreen)",
+                in: geometry
+            )
+        )
+        #expect(appKit.contains("appKitVisibleFrameOverride(screen)"))
+    }
 }

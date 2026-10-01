@@ -22,6 +22,13 @@ final class ShelfOverlay {
     }
 
     private(set) var panel: NSPanel?
+
+    /// AppKit keeps a visible panel alive after its owner is gone,
+    /// so a dropped overlay would leave it on screen (#1868).
+    isolated deinit {
+        panel?.orderOut(nil)
+    }
+
     /// The fade-out in flight, if any (#1838): its landing orders
     /// the panel out unless a show cleared it meanwhile.
     private var leaving: UUID?

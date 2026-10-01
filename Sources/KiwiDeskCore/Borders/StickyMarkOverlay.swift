@@ -17,6 +17,13 @@ final class StickyMarkOverlay {
     private static let collapseDuration: TimeInterval = 0.16
 
     private var panel: NSPanel?
+
+    /// AppKit keeps a visible panel alive after its owner is gone,
+    /// so a dropped overlay would leave it on screen (#1868).
+    isolated deinit {
+        panel?.orderOut(nil)
+    }
+
     let plate = StickyMarkPlate()
     private let target: CGWindowID
     /// Outermost first; the plate draws as many as fit (#1799).

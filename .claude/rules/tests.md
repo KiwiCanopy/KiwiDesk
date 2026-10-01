@@ -24,6 +24,18 @@ bite large test PRs:
   failed on a narrow runner and passed on a dev Mac (#523). A
   pile's signature is equal `minX` with midYs exactly
   `OverlapStack.offset` (40 pt, vertical-only) apart.
+- **A WindowServer read on a per-retile path answers from a
+  `makeTestCore` seam, never live in every fixture** (#1868). A
+  live read is a round trip whose replies slow by orders of
+  magnitude under load, and the main-actor suites queue behind
+  it; AppKit's screen area takes
+  `GeometryUtils.appKitVisibleFrameOverride`, memoized in both
+  twins with the #1386 correction over it still live
+  (`DrawnMenuBarsWiringTests` ▸ `twinsMemoizeTheAppKitRead`). When a target's
+  time grows or turns bimodal, sample the test process and count
+  its windows before tuning parallelism: an idle CPU means it is
+  waiting, not starved — and a pile of windows is a panel owner
+  missing its deinit (core-boundaries.md).
 - **Split suites early** — the 79-char limit and 350-line ceiling
   bite large test files. Break a suite into focused files *before*
   it approaches the ceiling.

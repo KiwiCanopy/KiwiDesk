@@ -31,7 +31,7 @@ struct AnimationEngineStabilityTests {
     @Test("The engine drains at the shortest duration on 60 Hz")
     func engineDrainsAtShortDurationOn60Hz() {
         guard let screen = NSScreen.main,
-            let display = screen.kiwiDisplay?.id
+            let display = screen.kiwiDisplayID
         else { return }
         // The whole unstable band, not just its floor — the
         // duration chosen matters, and 50 ms is the wrong one.

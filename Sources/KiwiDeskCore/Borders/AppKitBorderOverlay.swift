@@ -4,6 +4,13 @@ import AppKit
 @MainActor
 final class AppKitBorderOverlay: BorderOverlayBackend {
     private var panel: NSPanel?
+
+    /// AppKit keeps a visible panel alive after its owner is gone,
+    /// so a dropped overlay would leave it on screen (#1868).
+    isolated deinit {
+        panel?.orderOut(nil)
+    }
+
     private let shape = CAShapeLayer()
     /// Secondary shadow layer stacked under ring for edge bloom density
     /// (#533).

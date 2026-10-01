@@ -44,7 +44,7 @@ extension KiwiCore {
             state.arrivalDisplay =
                 TilingEngine.screen(
                     containing: window.frame
-                )?.kiwiDisplay?.id
+                )?.kiwiDisplayID
             // The Desktop return's owed focus, mirrored in the
             // same way (#1207).
             state.returningFocus = desktopMemory.returnFocus.owed()

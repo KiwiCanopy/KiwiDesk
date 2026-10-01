@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 
 @testable import KiwiDeskCore
@@ -190,5 +191,17 @@ func makeTestCore(
     // a starved runner's second aged out of its echo window.
     let frozen = Date()
     core.wallClock = { frozen }
+    // AppKit's screen area is a WindowServer round trip (#1868):
+    // read once per screen; the #1386 correction stays live.
+    GeometryUtils.appKitVisibleFrameOverride = { screen in
+        let key = screen.kiwiDisplayID
+        if let key, let known = testAppKitFrames[key] { return known }
+        let frame = GeometryUtils.liveAppKitVisibleFrame(of: screen)
+        if let key { testAppKitFrames[key] = frame }
+        return frame
+    }
     return core
 }
+
+/// `makeTestCore`'s per-process memo of AppKit's screen areas.
+@MainActor private var testAppKitFrames: [DisplayID: CGRect] = [:]
