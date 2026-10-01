@@ -100,34 +100,41 @@ struct UpdateCheckingTests {
         #expect(log.cancelled == 1)
     }
 
+    /// What the driver put up and took down, in order.
+    private static func events(_ driver: UpdatePromptDriver) -> Box {
+        let box = Box()
+        driver.presents = { box.log.append("up " + Self.name($0)) }
+        driver.closes = { box.log.append("down " + Self.name($0)) }
+        return box
+    }
+
+    private final class Box { var log: [String] = [] }
+
+    private static func name(_ slot: UpdateWindowSlot) -> String {
+        switch slot {
+        case .checking: return "checking"
+        case .offer: return "offer"
+        case .upToDate: return "upToDate"
+        }
+    }
+
     /// A closing key window hands focus back to the window under
     /// it and the answer is reverted as a z-order echo (device,
-    /// 2026-10-01): the answer must be put up first.
+    /// 2026-10-01): the answer goes up before the check comes down.
     @Test("the answer is up before the checking window goes")
     func answerIsUpFirst() async {
         let (driver, log) = driver()
-        var checkingAtAnswer: Bool?
-        driver.presents = { [weak driver] slot in
-            if case .upToDate = slot {
-                checkingAtAnswer = driver?.checking != nil
-            }
-        }
+        let box = Self.events(driver)
         check(driver, log)
         driver.showUpdateNotFoundWithError(Self.notFound(.onLatestVersion)) {}
         await driver.upToDateFetch?.value
-        #expect(checkingAtAnswer == true)
-        #expect(driver.checking == nil)
+        #expect(box.log == ["up checking", "up upToDate", "down checking"])
     }
 
     @Test("a found offer is up before the checking window goes")
     func offerIsUpFirst() throws {
         let (driver, log) = driver()
-        var checkingAtOffer: Bool?
-        driver.presents = { [weak driver] slot in
-            if case .offer = slot {
-                checkingAtOffer = driver?.checking != nil
-            }
-        }
+        let box = Self.events(driver)
         check(driver, log)
         let item = try #require(
             SUAppcastItem(
@@ -145,8 +152,7 @@ struct UpdateCheckingTests {
             userInitiated: true,
             stage: .notDownloaded
         ) { _ in }
-        #expect(checkingAtOffer == true)
-        #expect(driver.checking == nil)
+        #expect(box.log == ["up checking", "up offer", "down checking"])
     }
 
     /// Sparkle's cancellation does nothing once the appcast loaded,

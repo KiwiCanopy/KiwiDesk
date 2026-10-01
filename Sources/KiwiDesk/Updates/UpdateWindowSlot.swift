@@ -78,7 +78,7 @@ extension UpdatePromptDriver {
         if presenting, let new { presents(new) }
         current = new
         guard let old, old.controller !== new?.controller else { return }
-        old.close()
+        closes(old)
         if case .offer = old {
             nextFetch?.cancel()
             nextFetch = nil

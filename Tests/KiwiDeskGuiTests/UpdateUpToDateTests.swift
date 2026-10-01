@@ -157,16 +157,20 @@ struct UpdateUpToDateTests {
         )
         // Sparkle brings nothing forward for a no-update session,
         // so the click asks the driver before Sparkle.
-        // The live updater's body: the first of the conformances
-        // (the inert one comes after it).
-        let bodies = source.components(separatedBy: "func checkForUpdates() {")
-        try #require(bodies.count > 1)
-        let body = bodies[1]
+        // The live updater's `checkForUpdates` body alone: from its
+        // declaration to the helper after it.
+        let after = try #require(
+            source.components(separatedBy: "func checkForUpdates() {")
+                .dropFirst().first
+        )
+        let body = try #require(
+            after.components(separatedBy: "func startOwnCheck()").first
+        )
         let focus = try #require(
             body.range(of: "if driver.focusOpenWindow() { return }")
         )
-        let sparkle = try #require(body.range(of: "updater.checkForUpdates()"))
-        #expect(focus.lowerBound < sparkle.lowerBound)
+        let check = try #require(body.range(of: "startOwnCheck()"))
+        #expect(focus.lowerBound < check.lowerBound)
         #expect(
             source.contains(
                 "if updater.canCheckForUpdates, !updater.sessionInProgress {"

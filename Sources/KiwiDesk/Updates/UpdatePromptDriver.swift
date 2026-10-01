@@ -42,6 +42,8 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     var offeredNext: NextOnMyList?
     /// Puts an update window on screen; a test records it instead.
     var presents: (UpdateWindowSlot) -> Void = { $0.present() }
+    /// Takes one down; a test records the order against `presents`.
+    var closes: (UpdateWindowSlot) -> Void = { $0.close() }
     /// Told as the answer opens and closes, so Home narrates it
     /// while Sparkle's session waits on the window's Done.
     var onAnswerOpen: (Bool) -> Void = { _ in }
