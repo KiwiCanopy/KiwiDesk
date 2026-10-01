@@ -18,7 +18,9 @@ extension SpaceBarOverlay {
                 frontGlyph, frontName,
             ]
             .forEach { $0.isHidden = true }
-            frontGlass?.isHidden = true
+            // The glass AND its tint: a tint left up reads as a
+            // dark chip on a Space with no front app.
+            updateFrontGlass(nil, radius: 0, style: style)
             return
         }
         attachFrontViewsIfNeeded()
