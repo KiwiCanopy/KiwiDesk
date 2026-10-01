@@ -20,6 +20,7 @@ enum SpaceBarCommandSetting {
     case stickyBadge(Bool)
     case springDelay(Int)
     case focusedItemColor(String)
+    case focusedHighlightColor(String)
 
     /// Parses a setter field and its arguments into SpaceBarCommandSetting.
     static func parse(
@@ -48,7 +49,13 @@ enum SpaceBarCommandSetting {
             return number(args).map(keyword)
         }
         if let keyword = colorFields[field] {
-            return color(args).map(keyword)
+            // The palette register says which colour takes ""
+            // (`ColorPaletteKeys.followers`, #1856).
+            let automatic = ColorPaletteKeys.allowsAutomatic(
+                "space_bar.\(field)"
+            )
+            return (automatic ? automaticColor(args) : color(args))
+                .map(keyword)
         }
         return .failure("unknown space bar setting: \(field)")
     }
@@ -105,7 +112,8 @@ enum SpaceBarCommandSetting {
     /// validated setters; see the AppBar twin.
     static var colorFields: [String: (String) -> SpaceBarCommandSetting] {
         [
-            "focused_item_color": Self.focusedItemColor
+            "focused_item_color": Self.focusedItemColor,
+            "focused_highlight_color": Self.focusedHighlightColor,
         ]
     }
 
@@ -184,6 +192,19 @@ enum SpaceBarCommandSetting {
         return .success(hex)
     }
 
+    /// A colour that also takes `""`, Automatic
+    /// (`ColorPaletteKeys.followers`, #1856).
+    private static func automaticColor(
+        _ args: [JSONValue]
+    ) -> Result<String, AppBarSettingError> {
+        guard let hex = args.first?.stringValue,
+            hex.isEmpty || DragVisual.parseHex(hex) != nil
+        else {
+            return .failure("expected #RRGGBB, #RRGGBBAA or \"\"")
+        }
+        return .success(hex)
+    }
+
     /// Applies setting value to SpaceBarStyle.
     func apply(to style: inout SpaceBarStyle) {
         switch self {
@@ -212,6 +233,8 @@ enum SpaceBarCommandSetting {
             style.springDelay = value
         case .focusedItemColor(let value):
             style.focusedItemColor = value
+        case .focusedHighlightColor(let value):
+            style.focusedHighlightColor = value
         }
     }
 }

@@ -14,8 +14,8 @@ extension SpaceBarOverlay {
     ) {
         guard let app else {
             [
-                frontBox, frontBorder, frontDivider, frontIcon,
-                frontGlyph, frontName,
+                frontBox, frontBorder, frontAccentClip, frontDivider,
+                frontIcon, frontGlyph, frontName,
             ]
             .forEach { $0.isHidden = true }
             // The glass AND its tint: a tint left up reads as a
@@ -66,7 +66,12 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// Total axis length consumed by front segment (#409).
+    /// The axis length the front segment DRAWS from the run's
+    /// `frontStart` (#409): the section rule, a gap, the chip —
+    /// its ends, the glyph cell and, on a horizontal bar, a pad
+    /// and the title as `layoutFrontName` sizes it. The gap before
+    /// the rule is the run's (`runTotal`), so a hugging plate ends
+    /// where the chip does.
     func frontExtent(
         _ app: SpaceBarItemView.App?,
         depth: CGFloat,
@@ -74,38 +79,38 @@ extension SpaceBarOverlay {
         style: SpaceBarLook
     ) -> CGFloat {
         guard let app else { return 0 }
-        let pad = SpaceBarItemView.pad
         let cell = SpaceBarItemView.cell(
             contentDepth: style.contentDepth(forDepth: depth)
         )
-        let inset = chipEndPad(
-            style,
-            depth: depth,
-            horizontal: horizontal
-        )
         var extent =
-            style.itemGap + BarDivider.sectionThickness
-            + style.itemGap + inset.total + cell
+            BarDivider.sectionThickness + style.itemGap
+            + Self.chipEndPad(style, depth: depth).total + cell
         if horizontal {
-            extent += pad
-            let size = style.titleFontSize(forDepth: depth)
+            // What is DRAWN, not the app name: measuring a
+            // different string than `layoutFrontName` lays out
+            // slides the whole Space run off its alignment.
             extent +=
-                ceil(
-                    // What is DRAWN, not the app name: measuring
-                    // a different string than `layoutFrontName`
-                    // lays out slides the whole Space run off its
-                    // alignment.
-                    ((app.title ?? app.name) as NSString).size(
-                        withAttributes: [
-                            .font: style.shelf.textFont(
-                                ofSize: size
-                            )
-                        ]
-                    ).width
-                ) + pad
+                SpaceBarItemView.pad
+                + Self.titleWidth(
+                    app.title ?? app.name,
+                    font: style.shelf.textFont(
+                        ofSize: style.titleFontSize(forDepth: depth)
+                    )
+                )
         }
         return extent
     }
+
+    /// The width `layoutFrontName`'s `sizeToFit` gives `text` in
+    /// `font` — the label's own cell, padding included.
+    static func titleWidth(_ text: String, font: NSFont) -> CGFloat {
+        measure.font = font
+        measure.stringValue = text
+        measure.sizeToFit()
+        return measure.frame.width
+    }
+
+    private static let measure = NSTextField(labelWithString: "")
 
     private func attachFrontViewsIfNeeded() {
         // Only a host CHANGE reparents (a plain `addSubview`
@@ -114,8 +119,8 @@ extension SpaceBarOverlay {
         // to a glass subtree (#1315).
         let content = frontHost ?? itemRun
         for view in [
-            frontBox, frontBorder, frontDivider, frontIcon, frontGlyph,
-            frontName,
+            frontBox, frontBorder, frontAccentClip, frontDivider,
+            frontIcon, frontGlyph, frontName,
         ] where view.superview !== content {
             content.addSubview(
                 view,
@@ -124,6 +129,10 @@ extension SpaceBarOverlay {
             )
         }
         frontDivider.wantsLayer = true
+        if frontAccent.superview !== frontAccentClip {
+            frontAccentClip.wantsLayer = true
+            frontAccentClip.addSubview(frontAccent)
+        }
         frontIcon.setAccessibilityElement(false)
         frontName.setAccessibilityElement(false)
     }
@@ -148,27 +157,36 @@ extension SpaceBarOverlay {
             lengthShare: BarDivider.sectionLengthShare
         )
         return BarDivider.sectionThickness + style.itemGap
-            + chipEndPad(style, depth: depth, horizontal: horizontal)
+            + Self.chipEndPad(style, depth: depth)
             .leading
     }
 
-    /// The front chip's end padding — an item's pad, plus the
-    /// rounded end's clearance where the app icon sits: leading
-    /// always, trailing only on a vertical bar, where no title
-    /// follows the icon (#1763, owner 2026-09-29) — or 0 where no
-    /// chip draws. The extent, the content's start, the title's
-    /// cap and the box all read it.
-    func chipEndPad(
+    /// The front chip's end padding — an item's pad plus the
+    /// rounded end's clearance at each end the shelf rounds, read
+    /// through the one `KiwiShelf.itemEnds` (#1763) for the run's
+    /// last place: both ends while Boxed or outlined, so a title
+    /// ends as far inside the chip as the icon starts (#1856,
+    /// owner 2026-10-01), and every shelf style pads, since the
+    /// chip draws its indicator in each. The extent, the
+    /// content's start, the title's cap, the box and the indicator
+    /// all read it.
+    static func chipEndPad(
         _ style: SpaceBarLook,
-        depth: CGFloat,
-        horizontal: Bool
+        depth: CGFloat
     ) -> ItemEnds {
-        guard style.hasBox || wantsBoxGlass(style) else { return .zero }
         let pad = SpaceBarItemView.pad
-        let clear = SpaceBarItemView.endClearance(look: style, depth: depth)
+        let ends = style.shelf.itemEnds(
+            clearance: SpaceBarItemView.endClearance(
+                look: style,
+                depth: depth
+            ),
+            first: false,
+            last: true,
+            outlined: style.activeIndicator == .outline
+        )
         return ItemEnds(
-            leading: pad + clear,
-            trailing: pad + (horizontal ? 0 : clear)
+            leading: pad + ends.leading,
+            trailing: pad + ends.trailing
         )
     }
 
@@ -280,7 +298,7 @@ extension SpaceBarOverlay {
         // chip's box runs its end pad past the name (#1763).
         let trailing = max(
             SpaceBarItemView.pad,
-            chipEndPad(style, depth: depth, horizontal: true).trailing
+            Self.chipEndPad(style, depth: depth).trailing
         )
         let available = max(viewport - offset - trailing, 0)
         frontName.frame = CGRect(

@@ -39,9 +39,13 @@ struct PaletteSceneThumbnail: View {
         return SheenPaint.style(hex(path), sheen: drawsSheen)
     }
 
-    /// The palette's hex for `path`, the shipped default beneath.
+    /// The palette's hex for `path`, the shipped default beneath;
+    /// an Automatic follower reads the colour it follows (#1856).
     func hex(_ path: String) -> String {
-        palette.colors[path] ?? Self.fallback[path] ?? ""
+        ColorPaletteKeys.resolved(
+            path,
+            in: Self.fallback.merging(palette.colors) { $1 }
+        )
     }
 
     /// The panel's bar-plate rim: the palette's border colour
@@ -58,8 +62,7 @@ struct PaletteSceneThumbnail: View {
     /// (`PaletteSceneThumbnail+Panel`, `Color.kiwiMark`,
     /// `ColorPaletteKeys.allowsAutomatic`).
     func color(_ path: String) -> Color {
-        let hex =
-            palette.colors[path] ?? Self.fallback[path] ?? ""
+        let hex = self.hex(path)
         guard ColorPaletteKeys.allowsAutomatic(path) else {
             return Color(kiwiHex: hex.isEmpty ? "#00000000" : hex)
         }

@@ -94,6 +94,11 @@ extension SpaceBarOverlay {
                 appCount: item.apps.count,
                 badged: badged,
                 horizontal: horizontal
+            ),
+            lone: SpaceBarItemView.lone(
+                item.spaceGlyph,
+                appCount: item.apps.count,
+                badged: badged
             )
         )
     }

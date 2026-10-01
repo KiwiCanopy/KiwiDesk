@@ -151,7 +151,7 @@ public enum APIReference {
             "set_active_dim_factor", "set_show_front_app",
             "set_front_app_title_cap", "set_hide_empty",
             "set_sticky_badge", "set_spring_delay",
-            "set_focused_item_color",
+            "set_focused_item_color", "set_focused_highlight_color",
         ],
         "app_bar": [
             "set_edge", "set_active_indicator", "set_title_cap",

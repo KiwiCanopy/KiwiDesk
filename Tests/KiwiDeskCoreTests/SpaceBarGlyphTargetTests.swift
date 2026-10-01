@@ -60,7 +60,8 @@ struct SpaceBarGlyphTargetTests {
                     appCount: apps.count,
                     badged: false,
                     horizontal: true
-                )
+                ),
+                lone: apps.count == 0 ? .text("1", tinted: true) : nil
             )
         )
         let view = SpaceBarItemView(

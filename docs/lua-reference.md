@@ -2154,11 +2154,11 @@ kiwishelf.set_border_width(2)
 **Expects:** points, 1–6 (default `2`); values outside the range
 are clamped.
 
-**Does:** sets how heavy both bars' active indicator draws, in
-the [`highlight_color`](#kiwishelf-colours): the outline's stroke
-width, and the edge mark in proportion (half as thick again, so
-the default draws a 3 pt mark). Which of the two each bar uses is
-its own `set_active_indicator`.
+**Does:** sets how heavy both bars' active indicator draws: the
+outline's stroke width, and the edge mark in proportion (half as
+thick again, so the default draws a 3 pt mark). Which of the two
+each bar uses is its own `set_active_indicator`, and its colour
+is the [`highlight_color`](#kiwishelf-colours).
 
 **Example:**
 
@@ -2283,9 +2283,17 @@ kiwishelf.set_dim_factor(0.4)
 ### KiwiShelf colours
 
 Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
-setting. One set of colours serves both bars; only the colour of
-the focused window's glyph is the Space Bar's own
+setting. One set of colours serves both bars; the focused
+window's colour is the Space Bar's own
 ([`space_bar.set_focused_item_color`](#space_barset_focused_item_color)).
+
+:::unreleased
+
+So is the front-app segment's indicator colour
+([`space_bar.set_focused_highlight_color`](#space_barset_focused_highlight_color)),
+which follows the focused window's colour until you set it.
+
+:::
 
 - `kiwishelf.set_fill_color` — the plate's one fill, or each
   item's box under `boxed` (default `#14201CB3`, dark moss at 70%
@@ -2668,6 +2676,13 @@ space_bar.set_item_label("layout")
 **Does:** how the active Space is marked, in KiwiShelf's
 [`highlight_color`](#kiwishelf-colours).
 
+:::unreleased
+
+The front-app segment wears the same indicator, in its own
+[`focused_highlight_color`](#space_barset_focused_highlight_color).
+
+:::
+
 **Example:**
 
 ```lua
@@ -2815,6 +2830,27 @@ distinction.
 ```lua
 space_bar.set_focused_item_color("#C2790A")
 ```
+:::unreleased
+
+### space_bar.set_focused_highlight_color
+
+**Expects:** a hex color (`#RRGGBB` or `#RRGGBBAA`), or `""`.
+
+**Does:** sets the color of the front-app segment's active
+indicator, the outline or edge mark that
+[`space_bar.set_active_indicator`](#space_barset_active_indicator)
+picks. `""`, the default, follows
+[`focused_item_color`](#space_barset_focused_item_color), so the
+segment's text and indicator share one color, the way the active
+Space's do.
+
+**Example:**
+
+```lua
+space_bar.set_focused_highlight_color("")
+```
+
+:::
 
 ## Where New Windows Land
 

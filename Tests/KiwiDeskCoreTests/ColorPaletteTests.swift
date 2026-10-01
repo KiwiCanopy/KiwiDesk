@@ -20,11 +20,12 @@ struct ColorPaletteTests {
 
     /// 17 since #1517: the shelf's 8 replace the bars' 17, the
     /// Space Bar keeping its focused-window ink; 18 since #1679,
-    /// the shelf's border.
-    @Test("The color surface is the 18 namespaced color paths")
+    /// the shelf's border; 19 since #1856, the front chip's
+    /// indicator.
+    @Test("The color surface is the 19 namespaced color paths")
     func colorSurface() {
         let all = ColorPaletteKeys.all
-        #expect(all.count == 18)
+        #expect(all.count == 19)
         #expect(all.allSatisfy { $0.contains(".") })
         // Every path is a color key: `_color`-suffixed, or the
         // bare `color` of a struct that IS one mark.
@@ -50,16 +51,27 @@ struct ColorPaletteTests {
         #expect(all.contains("floating.color"))
     }
 
-    /// Only the mark paths admit the empty "Automatic" value, and
-    /// the predicate is derived from the path shape rather than
-    /// hand-listed — a `_color` path taking an empty value would
-    /// write an unrenderable color.
-    @Test("Automatic is a mark-only palette value")
-    func automaticIsMarkOnly() {
+    /// Only the mark paths and the `followers` admit the empty
+    /// "Automatic" value — a mark's derived from the path shape —
+    /// and a follower's leader is a palette path that never empties
+    /// itself, so Automatic always resolves to a colour (#1856).
+    @Test("Automatic is a mark's or a follower's palette value")
+    func automaticIsMarkOrFollower() {
         let automatic = ColorPaletteKeys.all.filter(
             ColorPaletteKeys.allowsAutomatic
         )
-        #expect(Set(automatic) == ["sticky.color", "floating.color"])
+        #expect(
+            Set(automatic)
+                == [
+                    "sticky.color", "floating.color",
+                    "space_bar.focused_highlight_color",
+                ]
+        )
+        for (follower, leader) in ColorPaletteKeys.followers {
+            #expect(ColorPaletteKeys.all.contains(follower))
+            #expect(ColorPaletteKeys.all.contains(leader))
+            #expect(!ColorPaletteKeys.allowsAutomatic(leader))
+        }
     }
 
     /// Both directions: a palette paints a mark, and a palette

@@ -290,5 +290,10 @@ extension InterpolatedLabelTests {
         // The Float card's `?` names the float VALUE it explains
         // (#1022, #1608).
         "app_rules.section.help.titles": 1,
+        // The front-app indicator row (#1856): its `?` names the
+        // focused-window row Automatic follows, and its hover
+        // reason the switch that draws the segment, both by key.
+        "space_bar.color.focused_highlight.help": 1,
+        "colors.front_app_off.help": 2,
     ]
 }

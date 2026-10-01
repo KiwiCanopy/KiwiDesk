@@ -18,6 +18,8 @@ enum SpaceBarKey: String, CaseIterable, Hashable {
     case spaceBarActiveDimFactor = "settings.spaceBarStyle.activeDimFactor"
     case spaceBarStickyBadge = "settings.spaceBarStyle.stickyBadge"
     case spaceBarFocusedItemColor = "settings.spaceBarStyle.focusedItemColor"
+    case spaceBarFocusedHighlightColor =
+        "settings.spaceBarStyle.focusedHighlightColor"
 }
 
 extension SpaceBarKey {
@@ -54,6 +56,17 @@ extension SpaceBarKey {
                     .kiwishelf(.iconSource),
                     .spaceBar(.spaceBarShowFrontApp),
                     .kiwishelf(.spaceBarEdge),
+                ])
+            )
+        case .spaceBarFocusedHighlightColor:
+            // Inert while no front-app segment draws (#1856).
+            return .row(
+                .advancedColours,
+                .kiwishelf,
+                .showMore,
+                gate: .anyOf([
+                    .spaceBar(.spaceBarEnabled),
+                    .spaceBar(.spaceBarShowFrontApp),
                 ])
             )
         }
@@ -118,6 +131,11 @@ extension SpaceBarKey {
             return .text(
                 "space_bar.color.focused_item",
                 help: "space_bar.color.focused_item.help"
+            )
+        case .spaceBarFocusedHighlightColor:
+            return .text(
+                "space_bar.color.focused_highlight",
+                help: "space_bar.color.focused_highlight.help"
             )
         }
     }

@@ -273,9 +273,11 @@ extension SpaceBarItemView {
             accent.layer?.borderColor = ink
             accent.layer?.borderWidth = style.resolvedHighlightWidth
             accent.layer?.cornerRadius =
-                style.hasBox
-                ? cornerRadius
-                : max(0, cornerRadius - BarAccent.capsuleInset)
+                BarAccent.outline(
+                    in: bounds,
+                    radius: cornerRadius,
+                    boxed: style.hasBox
+                ).radius
         case .edgeMark:
             accent.layer?.borderWidth = 0
             accent.layer?.cornerRadius = 0

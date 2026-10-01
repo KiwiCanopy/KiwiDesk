@@ -21,6 +21,7 @@ extension SpaceBarStyle {
         case stickyBadge = "sticky_badge"
         case springDelay = "spring_delay"
         case focusedItemColor = "focused_item_color"
+        case focusedHighlightColor = "focused_highlight_color"
     }
 
     /// Decodes SpaceBarStyle falling back to defaults for missing keys.
@@ -106,5 +107,10 @@ extension SpaceBarStyle {
                 String.self,
                 forKey: .focusedItemColor
             ) ?? defaults.focusedItemColor
+        focusedHighlightColor =
+            try container.decodeIfPresent(
+                String.self,
+                forKey: .focusedHighlightColor
+            ) ?? defaults.focusedHighlightColor
     }
 }

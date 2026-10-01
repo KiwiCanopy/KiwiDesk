@@ -83,6 +83,12 @@ extension SettingsValueReadout {
                 o.focusedItemColor,
                 n.focusedItemColor
             )
+        case .spaceBarFocusedHighlightColor:
+            return spaceBarRow(
+                census,
+                bordersAutoHex(o.focusedHighlightColor),
+                bordersAutoHex(n.focusedHighlightColor)
+            )
         }
     }
 }

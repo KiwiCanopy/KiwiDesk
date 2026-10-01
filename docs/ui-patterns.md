@@ -533,6 +533,13 @@ the mark fallback, never the generic hex parser, which falls
 back to the accent color. The flag stays off for the ~14 wells
 whose color has a concrete default and no adaptive concept.
 
+A well whose Automatic is ANOTHER colour (#1856, the front-app
+indicator following "Focused window") takes the flag AND a
+`follows`: while empty it draws the followed colour flat, its
+tooltip names the followed row by that row's own label, and the
+picker opens on that colour — the split shape would promise
+light/dark following it does not do.
+
 ## Row layout & alignment
 
 **Row order within a section is fixed-tier, not

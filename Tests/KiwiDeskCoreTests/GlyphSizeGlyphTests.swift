@@ -110,16 +110,13 @@ struct GlyphSizeGlyphTests {
             horizontal: true,
             style: look
         )
-        let pad = SpaceBarItemView.pad
         let cell = SpaceBarItemView.cell(contentDepth: Self.content)
         let fixed =
-            look.itemGap + BarDivider.sectionThickness + look.itemGap
-            + cell + pad + pad
-        let title = ceil(
-            ("A window" as NSString).size(
-                withAttributes: [.font: drawn]
-            ).width
-        )
-        #expect(extent - fixed == title)
+            BarDivider.sectionThickness + look.itemGap
+            + SpaceBarOverlay.chipEndPad(look, depth: Self.depth).total
+            + cell + SpaceBarItemView.pad
+        // The title as its label sizes it, in the face it draws.
+        let title = SpaceBarOverlay.titleWidth("A window", font: drawn)
+        #expect(abs(extent - fixed - title) < 1e-9)
     }
 }

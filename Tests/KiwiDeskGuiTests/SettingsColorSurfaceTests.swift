@@ -126,8 +126,9 @@ struct SettingsColorSurfaceTests {
             $0.placement.area == .advancedColours
         }
         // 17 rows since #1517: the shelf's eight colours replaced
-        // the two bars' seventeen; 18 since #1679, the border.
-        #expect(placed.count == 18)
+        // the two bars' seventeen; 18 since #1679, the border; 19
+        // since #1856, the front chip's indicator.
+        #expect(placed.count == 19)
         #expect(placed.count == ColorPaletteKeys.all.count)
     }
 
@@ -171,6 +172,7 @@ struct SettingsColorSurfaceTests {
             "ColorField+AutomaticMenu.swift",
         ]
         var flags = 0
+        var follows = 0
         for file in try SourceScan.swiftSources(under: settingsDir)
         where !plumbing.contains(file.lastPathComponent) {
             let source = SourceScan.stripComments(
@@ -179,11 +181,19 @@ struct SettingsColorSurfaceTests {
             flags +=
                 source.components(separatedBy: "automatic:")
                 .count - 1
+            follows +=
+                source.components(separatedBy: "follows: ColorFollow(")
+                .count - 1
         }
+        // A follower's well shows what it follows rather than the
+        // marks' light/dark split (#1856).
+        #expect(follows == ColorPaletteKeys.followers.count)
         let automaticPaths = ColorPaletteKeys.all.filter(
             ColorPaletteKeys.allowsAutomatic
         )
         #expect(flags == automaticPaths.count)
-        #expect(flags == 2)
+        // The two marks, and the front indicator following its
+        // text (#1856).
+        #expect(flags == 3)
     }
 }

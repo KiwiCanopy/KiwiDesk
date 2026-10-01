@@ -174,4 +174,47 @@ struct HighlightWidthDrawingTests {
                 == Self.width * KiwiShelf.edgeMarkRatio
         )
     }
+
+    /// The front-app chip's own indicator (#1856), through the
+    /// real Space Bar overlay.
+    private func frontChip(
+        _ indicator: AppBarStyle.ActiveIndicator,
+        edge: AppBarEdge = .top
+    ) throws -> SpaceBarOverlay {
+        let base = paintedSpaceBar(edge: edge, front: WindowID(1))
+        var look = base.style
+        look.highlightWidth = Self.width
+        look.activeIndicator = indicator
+        let manager = SpaceBarManager()
+        manager.sync([
+            SpaceBarManager.Bar(
+                display: base.display,
+                items: base.items,
+                frontApp: base.frontApp,
+                frontWindow: base.frontWindow,
+                strip: base.strip,
+                style: look,
+                stateMarkColors: base.stateMarkColors
+            )
+        ])
+        return try #require(manager.overlayForTesting(barTitleDisplay))
+    }
+
+    @Test("The front-app chip's outline strokes at the width")
+    func frontOutline() throws {
+        let overlay = try frontChip(.outline)
+        #expect(overlay.frontAccent.layer?.borderWidth == Self.width)
+    }
+
+    @Test(
+        "The front-app chip's edge mark takes the derived thickness",
+        arguments: [AppBarEdge.top, .bottom, .left, .right]
+    )
+    func frontEdgeMark(edge: AppBarEdge) throws {
+        let overlay = try frontChip(.edgeMark, edge: edge)
+        #expect(
+            markDepth(overlay.frontAccent.frame, edge)
+                == Self.width * KiwiShelf.edgeMarkRatio
+        )
+    }
 }

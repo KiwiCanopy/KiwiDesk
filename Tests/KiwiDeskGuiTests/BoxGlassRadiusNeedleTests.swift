@@ -32,12 +32,13 @@ struct BoxGlassRadiusNeedleTests {
         #expect(args.contains("size: frames[i].size"))
     }
 
-    /// The front-app chip is a box too: its fill, glass and rim
-    /// round from the same derivation, handed the chip's size.
+    /// The front-app chip is a box too: its fill, glass, rim and
+    /// indicator round from the same derivation, handed the
+    /// chip's size, measured once in `frontChipRect` (#1856).
     @Test("the front-app chip takes its own box radius")
     func frontChipTakesIt() throws {
         let body = try SourceScan.functionBody(
-            of: "layoutFrontBox",
+            of: "frontChipRect",
             in: "SpaceBarOverlay+FrontAppBox.swift",
             under: "Bar"
         )
@@ -49,6 +50,13 @@ struct BoxGlassRadiusNeedleTests {
         )
         #expect(args.contains("size: rect.size"))
         #expect(!body.contains("resolvedCornerRadius("))
+        let box = try SourceScan.functionBody(
+            of: "layoutFrontBox",
+            in: "SpaceBarOverlay+FrontAppBox.swift",
+            under: "Bar"
+        )
+        #expect(box.contains("let (rect, radius) = frontChipRect("))
+        #expect(!box.contains("resolvedCornerRadius("))
     }
 
     @Test("the glass and the tint are both handed that radius")

@@ -27,6 +27,7 @@ enum SpaceBarFixtures {
         style.stickyBadge = false
         style.springDelay = 1000
         style.focusedItemColor = "#030303"
+        style.focusedHighlightColor = "#040404"
         return style
     }
 }

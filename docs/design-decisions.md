@@ -10655,6 +10655,20 @@ a reset reach them. This does not soften the colors-only rule
 below — two more COLOURS joined; no palette gained a flag, a width
 or an effect.
 
+Automatic has a second kind since
+[#1856](https://github.com/KiwiCanopy/KiwiDesk/issues/1856): a
+**follower**, whose empty value is another colour of the palette
+rather than an adaptive tint — `ColorPaletteKeys.followers` names
+each and the colour it follows, and `ColorPaletteKeys.resolved`
+is the one reading of it. It may join only where the colour it
+follows never empties, so Automatic always resolves to something
+drawn, and its well shows that colour rather than the light/dark
+split, which would promise an adaptivity it does not have. Unlike
+a mark tint, every authored palette carries a follower EMPTY: its
+default is a pairing the palette's own colours define, so a
+palette that left it out would keep the last palette's ring
+beside its own text.
+
 **Palette colors follow a rough matching guide.** (#408
 follow-up, 2026-07-20.) A palette (the bar + border + drag
 colors, bundled or user-saved) reads as one system when its
@@ -12258,6 +12272,37 @@ tint" while still reading as inactive), so color is never the only
 signal. A thin divider (the front-app segment's rule, shared
 helper) separates the identifier from the glyph row inside every
 occupied item.
+
+**The front-app segment wears the active indicator in its own
+colour** ([#1856](https://github.com/KiwiCanopy/KiwiDesk/issues/1856)).
+The segment is the focused window, so it draws the Space Bar's
+outline or edge mark like the active Space does, at the same
+width, in `focused_highlight_color`. That colour's empty
+Automatic value follows `focused_item_color`, so the segment's
+text and indicator share one hue the way the active Space's
+identifier and indicator do (every bundled palette pairs them
+that way). Drawing it in the active Space's `highlight_color`
+instead was refused: two items would claim one signal, and the
+two accents above would merge for a colour-vision-deficient
+reader. The segment's two ends also pad alike, the rounded end's
+clearance at the title's end as at the icon's, and so do the App
+Bar's items: a ring makes an uneven pair the first thing read.
+
+The same argument reaches the Space chips, which wear that ring
+when active: a chip pads every rounded end by the same clearance
+once an icon sits at either end, so its content centres, where
+it used to pad only the end holding the icon — which pushed an
+empty symbol Space's icon off-centre, a marked digit Space's the
+other way, and left a digit Space with apps lopsided (owner
+2026-10-01, reversing 2026-09-29's per-end pad). A chip whose
+identifier is its only content pads nothing where that glyph's
+ink fits the chip's rounded box unpadded, so an empty Space reads
+as round with a symbol as with a digit. Its icon then shifts by
+the clearance when the Space's first app opens; the chip is
+growing for that app anyway, and the alternative — padding every
+chip always — gives up the round idle chip, which the owner ruled
+the calmer state. A symbol too large for the round box pads both
+ends instead, a centred pill.
 
 **Space Bar content is fixed in v1.** (#293.) Identifier plus
 app glyphs — no content chooser, which the App Bar has none of

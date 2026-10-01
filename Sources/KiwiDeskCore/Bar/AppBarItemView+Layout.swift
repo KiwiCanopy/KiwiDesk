@@ -62,10 +62,10 @@ extension AppBarItemView {
 
     /// A horizontal slot's leading and trailing insets on a strip
     /// `depth` deep, at its place in the run: `edgePadding` plus
-    /// the clearance of a rounded leading end, where the icon
-    /// sits — the title that follows it needs none at the
-    /// trailing end (#1763, owner 2026-09-29) — the one reading
-    /// the layout and the slot measurement share.
+    /// the clearance of each rounded end, alike at both so a title
+    /// ends as far inside as the icon starts (#1856, owner
+    /// 2026-10-01, reversing #1763's trailing pad) — the one
+    /// reading the layout and the slot measurement share.
     nonisolated static func endPadding(
         _ look: AppBarLook,
         depth: CGFloat,
@@ -87,7 +87,7 @@ extension AppBarItemView {
         )
         return ItemEnds(
             leading: edgePadding + ends.leading,
-            trailing: edgePadding
+            trailing: edgePadding + ends.trailing
         )
     }
 
@@ -158,22 +158,13 @@ extension AppBarItemView {
 
     /// Outline selection ring (ui-designer 2026-07-14, owner 2026-07-20).
     private func layoutRing() {
-        if style.hasBox {
-            accent.frame = bounds
-            accent.layer?.cornerRadius =
-                style.resolvedCornerRadius(
-                    forThickness: crossThickness
-                )
-        } else {
-            let inset = BarAccent.capsuleInset
-            accent.frame = bounds.insetBy(dx: inset, dy: inset)
-            accent.layer?.cornerRadius = max(
-                0,
-                style.resolvedCornerRadius(
-                    forThickness: crossThickness
-                ) - inset
-            )
-        }
+        let ring = BarAccent.outline(
+            in: bounds,
+            radius: style.resolvedCornerRadius(forThickness: crossThickness),
+            boxed: style.hasBox
+        )
+        accent.frame = ring.frame
+        accent.layer?.cornerRadius = ring.radius
     }
 
     /// Edge mark layout (owner call 2026-07-20).

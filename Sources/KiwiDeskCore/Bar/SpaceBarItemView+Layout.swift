@@ -258,48 +258,18 @@ extension SpaceBarItemView {
     private func layoutAccent() {
         switch style.activeIndicator {
         case .outline:
-            // Boxed hugs the box; unboxed insets (`BarAccent.capsuleInset`,
-            // QA 2026-07-19).
             accent.frame =
-                style.hasBox
-                ? bounds
-                : bounds.insetBy(
-                    dx: BarAccent.capsuleInset,
-                    dy: BarAccent.capsuleInset
-                )
+                BarAccent.outline(
+                    in: bounds,
+                    radius: cornerRadius,
+                    boxed: style.hasBox
+                ).frame
         case .edgeMark:
-            // Positions edge indicator on window-facing side of slot.
-            let mark = style.edgeMarkThickness
-            switch style.edge {
-            case .top:
-                accent.frame = CGRect(
-                    x: 0,
-                    y: bounds.height - mark,
-                    width: bounds.width,
-                    height: mark
-                )
-            case .bottom:
-                accent.frame = CGRect(
-                    x: 0,
-                    y: 0,
-                    width: bounds.width,
-                    height: mark
-                )
-            case .left:
-                accent.frame = CGRect(
-                    x: bounds.width - mark,
-                    y: 0,
-                    width: mark,
-                    height: bounds.height
-                )
-            case .right:
-                accent.frame = CGRect(
-                    x: 0,
-                    y: 0,
-                    width: mark,
-                    height: bounds.height
-                )
-            }
+            accent.frame = BarAccent.edgeMarkFrame(
+                in: bounds,
+                edge: style.edge,
+                thickness: style.edgeMarkThickness
+            )
         }
     }
 }

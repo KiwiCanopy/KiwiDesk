@@ -50,8 +50,20 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Focused window accent color on space bar and front-app segment (#470,
     /// #511, QA 2026-07-19; `SpaceBarAccentSeparationTests`).
     public var focusedItemColor = "#C2790A"
+    /// The front-app chip's active indicator colour (#1856); empty
+    /// is Automatic, the front app's own `focusedItemColor`, as
+    /// every bundled palette pairs a text with its ring. A drawing
+    /// reads `resolvedFocusedHighlightColor`.
+    public var focusedHighlightColor = ""
 
     public init() {}
+
+    /// The front chip's indicator as drawn: Automatic follows the
+    /// focused item colour.
+    public var resolvedFocusedHighlightColor: String {
+        focusedHighlightColor.isEmpty
+            ? focusedItemColor : focusedHighlightColor
+    }
 
     /// A Space item's content while its screen shows another
     /// Space (#1683). The glyph span still sizes the shown Space.
