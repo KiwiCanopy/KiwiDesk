@@ -49,6 +49,60 @@ struct SourceScanEnclosingTypesTests {
         #expect(found["free"] == .some(nil))
     }
 
+    @Test("a member after a closed nested type is the outer's")
+    func closedSiblingIsNotTheOwner() {
+        let found = owners(
+            """
+            final class Manager {
+                struct Spec {
+                    let width = 1
+                }
+                var onLog: Int = 0 // @after
+            }
+            """
+        )
+        #expect(found["after"] == "Manager")
+    }
+
+    @Test("a declaration line is its outer type's, a close its own")
+    func declarationAndCloseLines() {
+        let found = owners(
+            """
+            struct Outer {
+                struct Inner { // @declaration
+                    let x = 1
+                } // @close
+            }
+            """
+        )
+        #expect(found["declaration"] == "Outer")
+        #expect(found["close"] == "Inner")
+    }
+
+    /// Built from single-line literals so the fixture itself holds
+    /// no `\"""`. Each emoji is two UTF-16 units that blanking
+    /// turns into one space: a reading that took offsets from the
+    /// unblanked lines lands past `Inner`'s brace.
+    @Test("a wide or multi-line literal shifts no line")
+    func literalsKeepLineStarts() {
+        let found = owners(
+            [
+                "struct Outer {",
+                "    let wide = \"" + String(repeating: "👋", count: 24)
+                    + "\"",
+                "    let tall = \"\"\"",
+                "        enum Fake {",
+                "        \"\"\"",
+                "    struct Inner { // @declaration",
+                "        let x = 1 // @inside",
+                "    }",
+                "}",
+            ].joined(separator: "\n")
+        )
+        #expect(found["declaration"] == "Outer")
+        #expect(found["inside"] == "Inner")
+    }
+
     @Test("extension and protocol count as types")
     func extensionAndProtocolPush() {
         let found = owners(

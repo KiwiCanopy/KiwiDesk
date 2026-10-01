@@ -3,15 +3,16 @@ import Foundation
 // Brace scopes with their declaring keyword, for guards that ask
 // which TYPE owns a declaration and which members sit inside it.
 //
-// Here rather than in its first consumer for the reason the
-// family exists (tests.md ▸ source-scanning primitives): a second
-// privately-owned brace walker beside `balanced` is the "harden
-// one copy and not the other" harm, and `enclosingTypes` reads
-// this tree rather than walking braces itself. It walks BLANKED
+// The family's one SCOPE walker (tests.md ▸ source-scanning
+// primitives): `enclosingTypes` and every type-ownership census
+// read this tree rather than counting braces themselves.
+// `balanced` counts braces too, but over live literals, and both
+// take their literal grammar from `literalEnd`. It walks BLANKED
 // source (`blankingCommentsAndLiterals`), so no brace inside a
-// literal or comment is counted, and
-// `SourceScanScopesTests` ▸ `nothingGoesDark` holds it to every
-// class declaration in Core, measured outside the walker.
+// literal or comment is counted, and `SourceScanScopesTests` ▸
+// `nothingGoesDark` holds it, from outside the walker, to the
+// type declarations in both Sources trees in both directions:
+// none lost, none invented.
 extension SourceScan {
     /// One brace scope, named by the last declaration keyword
     /// ahead of its `{` — `class`, `struct`, `func`, `deinit`,
@@ -43,6 +44,19 @@ extension SourceScan {
             )
         }
 
+        /// The nearest TYPE scope (`typeKeywords`) open at
+        /// `offset`, past any function, accessor or closure;
+        /// nil at file scope or in a free function.
+        func enclosingType(at offset: Int) -> Int? {
+            var cursor = innermost[offset]
+            while let index = cursor,
+                !SourceScan.typeKeywords.contains(scopes[index].keyword)
+            {
+                cursor = scopes[index].parent
+            }
+            return cursor
+        }
+
         /// The class or actor owning scope `index`: itself, or
         /// the nearest enclosing one past any struct, enum or
         /// extension LEXICALLY around it — a struct declared at
@@ -60,11 +74,18 @@ extension SourceScan {
         }
     }
 
+    /// The keywords whose scope is a type; `extension` and
+    /// `protocol` included, so a member of either resolves to it.
+    static let typeKeywords = [
+        "class", "struct", "enum", "actor", "extension", "protocol",
+    ]
+
     /// The lookbehind keeps a member reference — `case .class,
     /// .enum:` — from naming the closure after it a type.
     private static let scopeKeyword = try! NSRegularExpression(
-        pattern: #"(?<!\.)\b(class|struct|enum|actor|extension|protocol|"#
-            + #"func|init|deinit|var|let|if|guard|for|while|"#
+        pattern: #"(?<!\.)\b("#
+            + typeKeywords.joined(separator: "|")
+            + #"|func|init|deinit|var|let|if|guard|for|while|"#
             + #"switch|else|do|catch|get|set|willSet|didSet|"#
             + #"defer|repeat)\b\s*(\w*)"#
     )
