@@ -1632,6 +1632,7 @@
   "updates.check": "アップデートを確認",
   "updates.check_again": "アップデートをもう一度確認",
   "updates.relative.just_now": "たった今",
+  "updates.show_window": "アップデートウインドウを表示",
   "updates.state.available": "バージョン %1$@ が利用可能です。",
   "updates.state.checking": "アップデートを確認中…",
   "updates.state.failed": "アップデートを確認できませんでした。オフラインの可能性があります。",
@@ -1640,6 +1641,7 @@
   "updates.state.unavailable": "このビルドではアップデートの確認が無効になっています。",
   "updates.state.up_to_date": "最新の状態です",
   "updates.state.up_to_date_checked": "最新の状態です · 最終確認は%1$@",
+  "updates.state.up_to_date_window_open": "最新の状態です · もう一度確認するにはアップデートウインドウを閉じてください",
   "updates.try_again": "再試行",
   "window_action.refusal.no_close_button": "「%1$@」には閉じるボタンがありません",
   "window_action.refusal.no_new_window": "%1$@には「新規ウインドウ」コマンドがありません"

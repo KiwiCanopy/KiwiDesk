@@ -164,7 +164,6 @@ extension UpdatePromptDriver {
         }
         upToDate = window
         presentsUpToDate(window)
-        onUpToDate()
         // Only now, behind the answer (`closeCheckingWindows`).
         replaced?.close()
         closeCheckingWindows()
@@ -174,6 +173,23 @@ extension UpdatePromptDriver {
 
 /// The window's checking state (#1849).
 extension UpdatePromptDriver {
+    /// Brings whichever update window is open forward — the offer,
+    /// the up-to-date answer or the check (#1849). Sparkle asks
+    /// only while it shows an update, so the click asks here first.
+    @discardableResult
+    func focusOpenWindow() -> Bool {
+        if window != nil {
+            presentWindow()
+        } else if let upToDate {
+            presentsUpToDate(upToDate)
+        } else if let checking {
+            presentsChecking(checking)
+        } else {
+            return false
+        }
+        return true
+    }
+
     func showChecking(cancellation: @escaping () -> Void) {
         closeChecking()
         let window = UpdateCheckingWindowController(cancel: cancellation)

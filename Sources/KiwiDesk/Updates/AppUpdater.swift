@@ -117,8 +117,13 @@ final class SparkleUpdater: AppUpdating {
             .eraseToAnyPublisher()
         )
         driver.startCheck = { [weak self] in self?.checkForUpdates() }
-        driver.onUpToDate = { [updates, updater] in
-            updates.set(.upToDate(lastChecked: updater.lastUpdateCheckDate))
+        driver.onAnswerOpen = { [updates, updater] open in
+            if open {
+                updates.set(
+                    .upToDate(lastChecked: updater.lastUpdateCheckDate)
+                )
+            }
+            updates.setAnswerOpen(open)
         }
         do {
             try updater.start()

@@ -1632,6 +1632,7 @@
   "updates.check": "Проверить обновления",
   "updates.check_again": "Проверить обновления ещё раз",
   "updates.relative.just_now": "только что",
+  "updates.show_window": "Показать окно обновления",
   "updates.state.available": "Доступна версия %1$@.",
   "updates.state.checking": "Проверка обновлений…",
   "updates.state.failed": "Не удалось проверить обновления — возможно, ты офлайн.",
@@ -1640,6 +1641,7 @@
   "updates.state.unavailable": "Проверка обновлений отключена в этой сборке.",
   "updates.state.up_to_date": "Установлена последняя версия",
   "updates.state.up_to_date_checked": "Установлена последняя версия · последняя проверка %1$@",
+  "updates.state.up_to_date_window_open": "Установлена последняя версия · закрой окно обновления, чтобы проверить снова",
   "updates.try_again": "Попробовать ещё раз",
   "window_action.refusal.no_close_button": "У окна «%1$@» нет кнопки закрытия",
   "window_action.refusal.no_new_window": "%1$@: нет команды «Новое окно»"

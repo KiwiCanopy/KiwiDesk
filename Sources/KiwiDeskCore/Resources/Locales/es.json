@@ -1632,6 +1632,7 @@
   "updates.check": "Buscar actualizaciones",
   "updates.check_again": "Volver a buscar actualizaciones",
   "updates.relative.just_now": "hace un momento",
+  "updates.show_window": "Mostrar la ventana de actualización",
   "updates.state.available": "La versión %1$@ está disponible.",
   "updates.state.checking": "Buscando actualizaciones…",
   "updates.state.failed": "No se pudo buscar actualizaciones: puede que estés sin conexión.",
@@ -1640,6 +1641,7 @@
   "updates.state.unavailable": "La búsqueda de actualizaciones está desactivada en esta compilación.",
   "updates.state.up_to_date": "Actualizado",
   "updates.state.up_to_date_checked": "Actualizado · última comprobación %1$@",
+  "updates.state.up_to_date_window_open": "Actualizado · cierra la ventana de actualización para volver a comprobar",
   "updates.try_again": "Reintentar",
   "window_action.refusal.no_close_button": "«%1$@» no tiene botón de cerrar",
   "window_action.refusal.no_new_window": "%1$@ no tiene el comando «Nueva ventana»"

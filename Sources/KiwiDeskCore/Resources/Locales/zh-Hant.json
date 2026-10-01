@@ -1632,6 +1632,7 @@
   "updates.check": "檢查更新",
   "updates.check_again": "再次檢查更新",
   "updates.relative.just_now": "剛剛",
+  "updates.show_window": "顯示更新視窗",
   "updates.state.available": "版本 %1$@ 已可用。",
   "updates.state.checking": "正在檢查更新…",
   "updates.state.failed": "無法檢查更新——你可能處於離線狀態。",
@@ -1640,6 +1641,7 @@
   "updates.state.unavailable": "此組建已關閉更新檢查。",
   "updates.state.up_to_date": "已是最新版本",
   "updates.state.up_to_date_checked": "已是最新版本 · 上次檢查：%1$@",
+  "updates.state.up_to_date_window_open": "已是最新版本 · 關閉更新視窗即可再次檢查",
   "updates.try_again": "再試一次",
   "window_action.refusal.no_close_button": "「%1$@」沒有關閉按鈕",
   "window_action.refusal.no_new_window": "%1$@ 沒有「新增視窗」指令"

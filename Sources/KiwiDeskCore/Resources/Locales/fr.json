@@ -1632,6 +1632,7 @@
   "updates.check": "Rechercher des mises à jour",
   "updates.check_again": "Rechercher à nouveau des mises à jour",
   "updates.relative.just_now": "à l'instant",
+  "updates.show_window": "Afficher la fenêtre de mise à jour",
   "updates.state.available": "La version %1$@ est disponible.",
   "updates.state.checking": "Recherche de mises à jour…",
   "updates.state.failed": "Impossible de rechercher des mises à jour — vous êtes peut-être hors ligne.",
@@ -1640,6 +1641,7 @@
   "updates.state.unavailable": "La recherche de mises à jour est désactivée dans cette compilation.",
   "updates.state.up_to_date": "À jour",
   "updates.state.up_to_date_checked": "À jour · dernière vérification %1$@",
+  "updates.state.up_to_date_window_open": "À jour · fermez la fenêtre de mise à jour pour vérifier à nouveau",
   "updates.try_again": "Réessayer",
   "window_action.refusal.no_close_button": "« %1$@ » n'a pas de bouton de fermeture",
   "window_action.refusal.no_new_window": "%1$@ n'a pas de commande « Nouvelle fenêtre »"

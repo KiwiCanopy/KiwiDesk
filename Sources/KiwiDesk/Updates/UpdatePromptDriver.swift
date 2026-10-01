@@ -121,12 +121,18 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         $0.present()
     }
     /// The "up to date" answer while it is open (#1849).
-    var upToDate: UpToDateWindowController?
+    var upToDate: UpToDateWindowController? {
+        didSet {
+            if (upToDate == nil) != (oldValue == nil) {
+                onAnswerOpen(upToDate != nil)
+            }
+        }
+    }
     /// Its list fetch, which the window waits on.
     var upToDateFetch: Task<Void, Never>?
-    /// Told when the answer shows, so Home says "up to date" while
-    /// Sparkle's session waits on the window's Done.
-    var onUpToDate: () -> Void = {}
+    /// Told as the answer opens and closes, so Home says "up to
+    /// date" while Sparkle's session waits on the window's Done.
+    var onAnswerOpen: (Bool) -> Void = { _ in }
     /// Puts that answer on screen; a test records it instead.
     var presentsUpToDate: (UpToDateWindowController) -> Void = {
         $0.present()
@@ -198,23 +204,6 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
 
     override func showUpdateInFocus() {
         if !focusOpenWindow() { super.showUpdateInFocus() }
-    }
-
-    /// Brings whichever update window is open forward — the offer,
-    /// the up-to-date answer or the check (#1849). Sparkle asks
-    /// only while it shows an update, so the click asks here first.
-    @discardableResult
-    func focusOpenWindow() -> Bool {
-        if window != nil {
-            presentWindow()
-        } else if let upToDate {
-            presentsUpToDate(upToDate)
-        } else if let checking {
-            presentsChecking(checking)
-        } else {
-            return false
-        }
-        return true
     }
 
     override func showUserInitiatedUpdateCheck(

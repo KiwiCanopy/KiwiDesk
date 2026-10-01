@@ -1632,6 +1632,7 @@
   "updates.check": "업데이트 확인",
   "updates.check_again": "업데이트 다시 확인",
   "updates.relative.just_now": "방금 전",
+  "updates.show_window": "업데이트 윈도우 보기",
   "updates.state.available": "버전 %1$@을(를) 사용할 수 있습니다.",
   "updates.state.checking": "업데이트 확인 중…",
   "updates.state.failed": "업데이트를 확인하지 못했습니다 — 오프라인 상태일 수 있습니다.",
@@ -1640,6 +1641,7 @@
   "updates.state.unavailable": "이 빌드에서는 업데이트 확인이 꺼져 있습니다.",
   "updates.state.up_to_date": "최신 상태",
   "updates.state.up_to_date_checked": "최신 상태 · 마지막 확인 %1$@",
+  "updates.state.up_to_date_window_open": "최신 상태 · 다시 확인하려면 업데이트 윈도우를 닫으십시오",
   "updates.try_again": "다시 시도",
   "window_action.refusal.no_close_button": "‘%1$@’에는 닫기 버튼이 없습니다",
   "window_action.refusal.no_new_window": "%1$@에는 ‘새로운 윈도우’ 명령이 없습니다"

@@ -1636,6 +1636,7 @@
   "updates.check": "Check for updates",
   "updates.check_again": "Check for updates again",
   "updates.relative.just_now": "just now",
+  "updates.show_window": "Show the update window",
   "updates.state.available": "Version %1$@ is available.",
   "updates.state.checking": "Checking for updates…",
   "updates.state.failed": "Couldn't check for updates — you may be offline.",
@@ -1644,6 +1645,7 @@
   "updates.state.unavailable": "Update checks are off in this build.",
   "updates.state.up_to_date": "Up to date",
   "updates.state.up_to_date_checked": "Up to date · last checked %1$@",
+  "updates.state.up_to_date_window_open": "Up to date · close the update window to check again",
   "updates.try_again": "Try again",
   "window_action.refusal.no_close_button": "“%1$@” has no close button",
   "window_action.refusal.no_new_window": "%1$@ has no New Window command"

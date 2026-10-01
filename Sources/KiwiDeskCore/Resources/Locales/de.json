@@ -1632,6 +1632,7 @@
   "updates.check": "Nach Updates suchen",
   "updates.check_again": "Erneut nach Updates suchen",
   "updates.relative.just_now": "gerade eben",
+  "updates.show_window": "Update-Fenster anzeigen",
   "updates.state.available": "Version %1$@ ist verfügbar.",
   "updates.state.checking": "Nach Updates wird gesucht…",
   "updates.state.failed": "Nach Updates konnte nicht gesucht werden — vielleicht bist du offline.",
@@ -1640,6 +1641,7 @@
   "updates.state.unavailable": "Die Update-Prüfung ist in diesem Build deaktiviert.",
   "updates.state.up_to_date": "Auf dem neuesten Stand",
   "updates.state.up_to_date_checked": "Auf dem neuesten Stand · zuletzt geprüft %1$@",
+  "updates.state.up_to_date_window_open": "Auf dem neuesten Stand · schließe das Update-Fenster, um erneut zu prüfen",
   "updates.try_again": "Erneut versuchen",
   "window_action.refusal.no_close_button": "„%1$@“ hat keine Schließen-Taste",
   "window_action.refusal.no_new_window": "%1$@ hat keinen Befehl „Neues Fenster“"

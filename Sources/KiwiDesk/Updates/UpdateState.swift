@@ -78,6 +78,14 @@ final class UpdateStateStore: ObservableObject {
     func set(_ state: UpdateState) {
         self.state = state
     }
+
+    /// The up-to-date answer is open (#1849): a check would only
+    /// repeat it, so the row says to close it first.
+    @Published private(set) var answerOpen = false
+
+    func setAnswerOpen(_ open: Bool) {
+        answerOpen = open
+    }
 }
 
 /// Sparkle's updater delegate: each cycle outcome folded into the

@@ -1632,6 +1632,7 @@
   "updates.check": "检查更新",
   "updates.check_again": "再次检查更新",
   "updates.relative.just_now": "刚刚",
+  "updates.show_window": "显示更新窗口",
   "updates.state.available": "版本 %1$@ 已可用。",
   "updates.state.checking": "正在检查更新…",
   "updates.state.failed": "无法检查更新——你可能处于离线状态。",
@@ -1640,6 +1641,7 @@
   "updates.state.unavailable": "此构建版本已关闭更新检查。",
   "updates.state.up_to_date": "已是最新版本",
   "updates.state.up_to_date_checked": "已是最新版本 · 上次检查：%1$@",
+  "updates.state.up_to_date_window_open": "已是最新版本 · 关闭更新窗口即可再次检查",
   "updates.try_again": "重试",
   "window_action.refusal.no_close_button": "“%1$@”没有关闭按钮",
   "window_action.refusal.no_new_window": "%1$@ 没有“新建窗口”命令"

@@ -1632,6 +1632,7 @@
   "updates.check": "Verificar atualizações",
   "updates.check_again": "Verificar atualizações novamente",
   "updates.relative.just_now": "agora mesmo",
+  "updates.show_window": "Mostrar a janela de atualização",
   "updates.state.available": "A versão %1$@ está disponível.",
   "updates.state.checking": "Verificando atualizações…",
   "updates.state.failed": "Não foi possível verificar atualizações — você pode estar offline.",
@@ -1640,6 +1641,7 @@
   "updates.state.unavailable": "A verificação de atualizações está desativada nesta compilação.",
   "updates.state.up_to_date": "Atualizado",
   "updates.state.up_to_date_checked": "Atualizado · última verificação %1$@",
+  "updates.state.up_to_date_window_open": "Atualizado · feche a janela de atualização para verificar de novo",
   "updates.try_again": "Tentar novamente",
   "window_action.refusal.no_close_button": "“%1$@” não tem botão de fechar",
   "window_action.refusal.no_new_window": "%1$@ não tem o comando “Nova Janela”"

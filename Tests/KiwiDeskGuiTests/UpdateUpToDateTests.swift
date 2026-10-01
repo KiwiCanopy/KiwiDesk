@@ -124,18 +124,23 @@ struct UpdateUpToDateTests {
     /// answer waited on Done (device, 2026-10-01): the answer
     /// says so at once, and a second check brings it back.
     @Test("the answer reports itself and comes back in focus")
-    func answerReportsAndRefocuses() async {
+    func answerReportsAndRefocuses() async throws {
         let (driver, log) = driver()
-        var reported = 0
-        driver.onUpToDate = { reported += 1 }
+        var reported: [Bool] = []
+        driver.onAnswerOpen = { reported.append($0) }
         driver.showUpdateNotFoundWithError(
             Self.notFound(.onLatestVersion)
         ) {}
         await settle(driver)
-        #expect(reported == 1)
+        #expect(reported == [true])
         #expect(driver.focusOpenWindow())
         #expect(log.shown.count == 2)
         #expect(log.shown.last === driver.upToDate)
+        // Done closes it, and Home may check again.
+        let window = try #require(log.shown.last).makeWindow()
+        _ = window.delegate?.windowShouldClose?(window)
+        #expect(reported == [true, false])
+        #expect(!driver.focusOpenWindow())
     }
 
     /// The click that brings an open answer back must not narrate
