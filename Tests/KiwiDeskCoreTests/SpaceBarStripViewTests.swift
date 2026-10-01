@@ -66,7 +66,16 @@ struct SpaceBarStripViewTests {
             discs: 2,
             contentDepth: Self.depth,
             glyphGap: 0,
-            ends: .zero
+            // The item's own ends: app glyphs pad both (#1856).
+            ends: SpaceBarItemView.ends(
+                look: SpaceBarLook(),
+                depth: Self.depth,
+                first: false,
+                last: false,
+                leadsWithIcon: false,
+                endsInIcon: true,
+                lone: nil
+            )
         )
         return SpaceBarItemView(
             frame: CGRect(x: 0, y: 0, width: length, height: Self.depth)
@@ -84,7 +93,9 @@ struct SpaceBarStripViewTests {
         #expect(leading.members == [WindowID(2), WindowID(1)])
         #expect(trailing.members == [WindowID(8), WindowID(9)])
         let first = try #require(view.appViews.first)
-        #expect(leading.frame.maxX <= first.frame.minX)
+        // Within the half point a glyph's backing-aligned frame
+        // rounds by, beside the disc's unrounded target.
+        #expect(leading.frame.maxX <= first.frame.minX + 0.5)
         #expect(!view.leadingBadge.isHidden)
         #expect(view.leadingBadge.stringValue == "+2")
         #expect(

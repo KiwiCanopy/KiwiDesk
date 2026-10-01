@@ -1,10 +1,12 @@
 import AppKit
 
 /// A Space item's rounded ends (#1763): the clearance its glyph
-/// cell needs, at a rounded end (`KiwiShelf.roundsItemEnds`) where
-/// an icon-like glyph sits — a symbol identifier, app glyphs or a
-/// `+N` disc, a corner badge on the identifier — never a text
-/// identifier alone (owner, 2026-09-29).
+/// cell needs, at every rounded end (`KiwiShelf.roundsItemEnds`)
+/// alike once an icon-like glyph sits at either end — a symbol
+/// identifier, app glyphs or a `+N` disc, a corner badge on the
+/// identifier — so the content centres (#1856, owner 2026-10-01,
+/// reversing 2026-09-29's per-end pad). A text identifier needs
+/// none, and neither does a lone glyph that fits the round end.
 extension SpaceBarItemView {
     /// Whether the identifier cell carries a corner badge — a
     /// collapse's count or the Space marker, at its trailing top.
@@ -34,6 +36,53 @@ extension SpaceBarItemView {
         return badged && !horizontal
     }
 
+    /// The identifier when it is the item's only content — no app
+    /// glyph, no corner badge — else nil.
+    static func lone(
+        _ glyph: SpaceGlyph,
+        appCount: Int,
+        badged: Bool
+    ) -> SpaceGlyph? {
+        appCount == 0 && !badged ? glyph : nil
+    }
+
+    /// Whether a lone identifier, centred in a chip that pads no
+    /// end, keeps its ink inside the chip's rounded box: a symbol
+    /// measured as it draws, at the identifier's point size; text,
+    /// whose ink clears a curve by ruling, always.
+    static func fitsRoundEnd(
+        _ glyph: SpaceGlyph,
+        look: SpaceBarLook,
+        depth: CGFloat
+    ) -> Bool {
+        guard case .symbol(let name) = glyph else { return true }
+        let size = look.identifierFontSize(forDepth: depth)
+        // The verdict is already `.symbol`; a name that draws
+        // nothing has no ink to clear.
+        let ink =
+            NSImage(
+                systemSymbolName: name,
+                accessibilityDescription: nil
+            )?.withSymbolConfiguration(
+                NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
+            )?.size ?? .zero
+        let length = autoLength(
+            appCount: 0,
+            contentDepth: look.contentDepth(forDepth: depth),
+            glyphGap: 0,
+            ends: .zero
+        )
+        let radius = min(
+            look.resolvedCornerRadius(forThickness: depth),
+            min(length, depth) / 2
+        )
+        // The ink's corner past the box's straight run, against
+        // the corner's own circle.
+        let dx = max(0, ink.width / 2 - (length / 2 - radius))
+        let dy = max(0, ink.height / 2 - (depth / 2 - radius))
+        return dx * dx + dy * dy <= radius * radius
+    }
+
     private var badged: Bool {
         Self.badgesIdentifier(
             collapsed: collapse != nil,
@@ -57,6 +106,11 @@ extension SpaceBarItemView {
                 appCount: apps.count,
                 badged: badged,
                 horizontal: style.edge.isHorizontal
+            ),
+            lone: Self.lone(
+                spaceGlyph,
+                appCount: apps.count,
+                badged: badged
             )
         )
     }
@@ -79,17 +133,19 @@ extension SpaceBarItemView {
         first: Bool,
         last: Bool,
         leadsWithIcon: Bool,
-        endsInIcon: Bool
+        endsInIcon: Bool,
+        lone: SpaceGlyph?
     ) -> ItemEnds {
-        let rounded = look.shelf.itemEnds(
+        let fits = lone.map {
+            fitsRoundEnd($0, look: look, depth: depth)
+        }
+        guard leadsWithIcon || endsInIcon, fits != true
+        else { return .zero }
+        return look.shelf.itemEnds(
             clearance: endClearance(look: look, depth: depth),
             first: first,
             last: last,
             outlined: look.activeIndicator == .outline
-        )
-        return ItemEnds(
-            leading: leadsWithIcon ? rounded.leading : 0,
-            trailing: endsInIcon ? rounded.trailing : 0
         )
     }
 }

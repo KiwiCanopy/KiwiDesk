@@ -106,7 +106,8 @@ struct BarTextBaselineTests {
                     appCount: 0,
                     badged: false,
                     horizontal: true
-                )
+                ),
+                lone: 0 == 0 ? .text("1", tinted: true) : nil
             )
         )
         let view = SpaceBarItemView(

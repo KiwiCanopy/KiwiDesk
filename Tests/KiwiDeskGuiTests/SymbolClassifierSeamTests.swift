@@ -30,6 +30,8 @@ struct SymbolClassifierSeamTests {
             "builds the updates row's image from a fixed name",
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Style.swift":
             "builds the identifier image from a `.symbol` verdict",
+        "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Ends.swift":
+            "measures a `.symbol` verdict's ink for a lone chip's ends",
         "Sources/KiwiDeskCore/Bar/StateBadgeView.swift":
             "builds a badge image from a fixed name",
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Marker.swift":

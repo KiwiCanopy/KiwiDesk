@@ -12257,6 +12257,22 @@ reader. The segment's two ends also pad alike, the rounded end's
 clearance at the title's end as at the icon's, and so do the App
 Bar's items: a ring makes an uneven pair the first thing read.
 
+The same argument reaches the Space chips, which wear that ring
+when active: a chip pads every rounded end by the same clearance
+once an icon sits at either end, so its content centres, where
+it used to pad only the end holding the icon — which pushed an
+empty symbol Space's icon off-centre, a marked digit Space's the
+other way, and left a digit Space with apps lopsided (owner
+2026-10-01, reversing 2026-09-29's per-end pad). A chip whose
+identifier is its only content pads nothing where that glyph's
+ink fits the chip's rounded box unpadded, so an empty Space reads
+as round with a symbol as with a digit. Its icon then shifts by
+the clearance when the Space's first app opens; the chip is
+growing for that app anyway, and the alternative — padding every
+chip always — gives up the round idle chip, which the owner ruled
+the calmer state. A symbol too large for the round box pads both
+ends instead, a centred pill.
+
 **Space Bar content is fixed in v1.** (#293.) Identifier plus
 app glyphs — no content chooser, which the App Bar has none of
 either (#1528). The identifier is structural and the
