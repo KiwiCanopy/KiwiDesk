@@ -146,7 +146,6 @@ one carrying settings when this Mac's settings come from
 `init.lua` (profiles and palettes alone restore there). A
 restore that skips a profile or a palette says so.
 
-:::unreleased
 Saved looks travel in a backup beside the palettes, and restore
 wherever they do; **Reset All Settings…** keeps them too. The
 shared look travels with the settings, and each profile keeps
@@ -158,7 +157,6 @@ same one.
 The alert sound and the windows per pile on quit travel in a
 backup. An older backup keeps them in its profiles instead, and
 restoring it takes them from the profile that becomes active.
-:::
 
 ## The gui.json File
 
@@ -211,7 +209,6 @@ hand-written setup, the first time you Save in Settings.
   inside `function() ... end`), **`kind`** ("navigation",
   "application", or "custom") and **`label`**.
 
-:::unreleased
 **`refusal`** holds `sound`, the alert sound when an action
 can't apply, and **`quit`** holds `grid_target_depth`, the
 windows per pile on quit, beside `layout`, how windows are
@@ -222,7 +219,6 @@ is set from Lua (`quit.set_layout`).
 Liquid Glass, the focus border's shape and the global gaps, worn
 by every profile without its own. Settings writes it; choose
 which profiles use it in **Looks & Animations ▸ Shared look**.
-:::
 
 A `profile_bindings` entry names its profiles as a list,
 `profiles`, one per screen count, each for all screen setups — a
@@ -269,7 +265,6 @@ keybindings runs on every reload.
   and per-layout / per-space tuning, space-to-monitor pins, the
   Main role and the fallback space.
 
-:::unreleased
 The alert sound when an action can't apply and the windows per
 pile on quit are global too: they sit in `gui.json`, and loading
 a profile never changes them.
@@ -284,7 +279,6 @@ uses the shared look and untick or tick it there; on a profile
 with its own look the list is greyed. A new profile shares the
 look if the profile it was saved from does. With a Lua-owned
 `init.lua` there is no shared look.
-:::
 
 The General section leaves the grid while you edit a stored
 profile without switching to it.
@@ -330,10 +324,8 @@ track shortcut bound.
   stack) arranges the space's windows in the grid KiwiDesk uses
   on quit; with everything already reachable, nothing moves.
 
-:::unreleased
 That grid's windows per pile is set at **General ▸ Windows per
 pile on quit**.
-:::
 
 **Monocle** — a focus change flips a card from one app's icon
 to the next over a blur; the flip and its duration live here
@@ -446,11 +438,9 @@ display snaps the window back. Floating windows show no overlay
 and cannot be dropped onto a tiled slot; use *make tiled* first
 ([Accepted limitations](accepted-limitations.md)).
 
-:::unreleased
 A floating window dropped on another display moves into the Space
 that display shows, and stays where you let go of it, clear of
 the bars. A sticky window keeps its own Space.
-:::
 
 ### Sticky Windows
 
@@ -515,26 +505,20 @@ Lua-only: every `app_bar.*` field has a `monocle.set_app_bar_*` /
 `scroll.set_app_bar_*` twin ([Per-layout App Bar
 overrides](lua-reference.md#per-layout-app-bar-overrides)).
 
-:::unreleased
 The one exception is the App Bar's edge, which every layout
 shares. The starter setup puts the App Bar on the bottom edge and
 the Space Bar on top; set both to one edge to share one shelf.
-:::
 
-:::unreleased
 Floating windows come last, past a thin line and the floating
 symbol. They cannot be dragged; **Tile Window** on the item's
 right-click menu tiles one.
-:::
 
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag ghost and drop zone, and the sticky mark
 (its own card in Settings); on macOS before 26 each draws its
 flat look instead.
 
-:::unreleased
 It covers the floating mark too.
-:::
 
 On by default, on every surface. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,
@@ -547,7 +531,6 @@ as you set it.
 One bar per display, listing that display's Spaces in profile
 order. Click a Space to switch to it.
 
-:::unreleased
 Click an app glyph to switch to its Space and focus that window.
 A glyph with a count badge, and a `+n` badge, open a menu of
 the windows they stand for instead; nothing switches until you
@@ -560,7 +543,6 @@ a Space it holds still, so a second click lands where the first
 did; it re-centres once the pointer leaves. With **Other Spaces** set to *Window count*, a
 Space not on screen draws no glyphs, so a click anywhere on it
 switches.
-:::
 
 While a shortcut layer other than `default` is active, its icon
 — or two letters of its name when it has none — leads the bar,
@@ -581,7 +563,6 @@ A sticky window's glyph is listed under one Space only, the one
 it *renders* on: a ∞ window under the Space you are focused on,
 a 📌 window under the current Space of its own screen.
 
-:::unreleased
 | Mark | Where it sits | Means |
 | --- | --- | --- |
 | ∞ mark | On the window, top-right corner | **Global sticky** — every Space of every monitor |
@@ -595,7 +576,6 @@ A window that floats only because its Space is in Floating
 layout wears no floating mark. Glyphs wearing the floating badge
 come last in their Space's row. The badges have no Settings
 toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
-:::
 
 **Drag a window onto a Space** to move it there:
 
@@ -664,12 +644,10 @@ Assignments](#per-profile-space-assignments)). **Save a copy…**
 while editing a stored profile duplicates it with your pending
 edits, without touching the running layout.
 
-:::unreleased
 The shared look is the other exception: saving a profile that
 uses it changes it at once wherever it is worn, the running
 layout included. A copy of such a profile whose look you changed
 keeps that look as its own.
-:::
 
 ### Saving
 
@@ -783,7 +761,6 @@ A fresh install seeds a setup chosen for the screens you have.
 **Every screen opens in scrolling**, except the smallest, which
 opens in monocle.
 
-:::unreleased
 The slot is 85% of the screen; on an ultrawide or super
 ultrawide it is 30%.
 
@@ -794,7 +771,6 @@ ultrawide it is 30%.
 | Ultrawide (3000 pt +, or 2.1:1 up to 3:1) | stack · track · grid |
 | Super ultrawide (3:1 and wider, e.g. 32:9) | stack · track · grid |
 | Portrait (taller than wide) | stack · grid · monocle |
-:::
 
 Screens are measured in points, so a 5K 27" and a 1440p 27" get
 the same answer. Every setup gets exactly one Floating space, on
@@ -804,7 +780,6 @@ each screen's share proportional to its width. "Smallest" is
 read from width alone, so a 27" beside an ultrawide opens in
 monocle.
 
-:::unreleased
 Each layout is tuned for the screen it sits on, scrolling for
 the widest screen that opens in it, and the minimum window size
 follows the main screen — larger on an ultrawide or super
@@ -815,26 +790,21 @@ ultrawide or super ultrawide centres the focused window and
 keeps a lone window at its slot size, and each scrolling space
 scrolls the way its own screen faces — vertically on a portrait
 screen.
-:::
 
-:::unreleased
 With an ultrawide beside other screens, scrolling lives on the
 ultrawide alone: every other screen opens in monocle, and each
 screen gets three spaces ending in its own floating one — a
 widescreen monocle · bsp · floating, a portrait screen monocle ·
 grid (one column of three) · floating, a laptop monocle · grid
 (two across) · floating.
-:::
 
 While you are still on the starter setup, connecting or removing
 a monitor re-derives it and the `⌃⌥N` space shortcuts extend to
 new spaces (up to ten).
 
-:::unreleased
 It is saved as an ordinary profile named after your main screen
 — **Ultrawide**, say, or **Widescreen + 1** across two screens —
 and the same setup is always available as a preset of that name.
-:::
 
 ### Default Shortcuts
 
@@ -898,10 +868,8 @@ The recorder **suspends your KiwiDesk shortcuts while it is
 open**, so a combo already bound to a window action is recorded
 instead of firing.
 
-:::unreleased
 A recording, a clear or a deleted row takes effect when you
 Save, like every other setting; Revert discards it.
-:::
 
 ### Keyboard Modifiers & Keys
 
@@ -958,12 +926,10 @@ the caps print, not which key fires.
   [`pull_or_spawn`](lua-reference.md#pull_or_spawn). Add the
   same app twice to bind one shortcut per behaviour.
 
-:::unreleased
 A window that fills its whole screen — a slide show, a
 borderless-fullscreen game or player — is not held clear of the
 bars: it stays where its app put it, and both bars hide while it
 is in front ([limitations](accepted-limitations.md)).
-:::
 
 ### Import & Adopt
 
@@ -973,12 +939,10 @@ review before you Save; each binding must be an inline
 `function() … end` on one line. **Adopt into the GUI** imports
 the whole file's managed settings and keeps your custom Lua live.
 
-:::unreleased
 Import and Adopt bring in one key per action: a key is left out
 when its action already has one, on the Shortcuts page or earlier
 in `init.lua` — a Space keeps its own digit where it has one — and
 the Shortcuts header names each key left out.
-:::
 
 ### Shortcut Layers
 

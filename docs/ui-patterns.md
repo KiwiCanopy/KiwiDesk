@@ -135,12 +135,10 @@ the rule keeps them: new-window placement (comparative labels), the
 seven-option Space layout mode, and the dynamic Language and
 Desktop→Profile lists.
 
-:::unreleased
 The update window's notes tabs are one such strip (#1666): how
 many there are is set by the release feed rather than by us, so
 the strip falls back to a menu on the same selection wherever it
 does not fit.
-:::
 
 Every shipped segmented strip fits a full-width row at the
 720 pt minimum (`SettingsWidthClass.minimum`), measured against
@@ -329,7 +327,6 @@ Checklist's "Done: 2 of 4" — and never a control: an accessory
 that acts needs a name and a value of its own, which is the
 drawer accessory's job above.
 
-:::unreleased
 **A collapsible container that stands beside the page's
 sections is a collapsible section, not a drawer.**
 `SettingsCollapsibleSection` IS a `SettingsSection` — the same
@@ -343,7 +340,6 @@ rotor. A drawer that qualifies a card stays a
 `SettingsDisclosureButton`, so the full-row button, chevron,
 hover and expanded value above hold for both, and search opens
 either on a hit for one of its catalog children. The ruling is in `docs/design-decisions.md`.
-:::
 
 **Weigh every title edit against the search index.** Search
 indexes destination titles, every census-labelled setting row
@@ -729,7 +725,6 @@ tunable layout gets a schematic, Monocle included* — it draws
 the **navigation model** (a fan of full-screen cards +
 `orientation` cycle chevrons), not geometry.
 
-:::unreleased
 **A thumbnail that is read rather than compared plays its layout
 once** — the one exception to the no-idle-animation rule above.
 The setup tour's Spaces step and the preset preview sheet host
@@ -744,7 +739,6 @@ without a pile — rather than
 Live preview and the Home cards stay at rest. Why is
 [design decisions](design-decisions.md) ▸ *A thumbnail that is
 read rather than compared*.
-:::
 
 One schematic serves several surfaces at two scales
 (`SchematicScale`, whose own doc comment is the authority on what
@@ -978,11 +972,9 @@ windows* move; the system setting wins over both. (#989, #1069,
 `.claude/rules/gui.md` ▸ the Reduce Motion gate and
 `.claude/rules/bars.md` ▸ the bars start motion in one file.)
 
-:::unreleased
 The shelf's own glide is the one chrome motion with rows on that
 card — **Animate KiwiShelf** and its duration — and Reduce Motion
 still wins over them (#1838).
-:::
 
 Nothing is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays

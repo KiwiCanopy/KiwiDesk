@@ -167,14 +167,12 @@ spawns one supervised launch; it finds the instance lock held,
 brings the running copy forward once — taking focus from your
 terminal — and exits cleanly.
 
-:::unreleased
 `restart` of a running service leaves your windows where they
 are: the app is told first, spreads nothing out on its way down,
 and the new process picks the windows up in place, sizes
 included. It does so only when the program the service will start
 is signed like the one running; otherwise, and on `stop`, the
 windows are spread out per `quit.layout` as on any quit.
-:::
 
 **This service is the only way to get crash supervision** (#1071),
 and Settings offers no switch for it. Settings ▸ General's
@@ -346,15 +344,12 @@ exports nothing.
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
-:::unreleased
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last
 argument, a window `id` from `get_state`: they then act on that
 window rather than the focused one, and refuse an id no managed
 window carries (`kiwidesk make_floating 4711`).
-:::
 
-:::unreleased
 `new_window` and `close_window` take the same optional window
 `id`. `new_window` presses that window's app's **File ▸ New
 Window**; `close_window` presses the window's close button. Both
@@ -362,39 +357,28 @@ reach another app through Accessibility, so `success` means the
 press was asked for: an app with no such item, or a window with no
 close button, is refused by a pill on screen, not in the reply —
 see [Opening and Closing Windows](lua-reference.md#opening-and-closing-windows).
-:::
 
-:::unreleased
 The `scroll_gesture.*` commands set the scroll gestures; see
 [Scroll Gestures](lua-reference.md#scroll-gestures).
-:::
 
-:::unreleased
 `animations.set_on_shelf` and `animations.set_shelf_duration` set
 the KiwiShelf motion on a Space switch; see
 [animations.set_on_shelf](lua-reference.md#animationsset_on_shelf).
-:::
 
-:::unreleased
 `make_auto` is retired: it fails with `make_auto was retired —
 use make_tiled`, and `make_tiled` does its job. `make_tiled`, and
 `toggle_floating` towards tiled, fail on a window that a float
 rule, dialog and panel detection or a missing Dock icon floats
 ([`make_tiled`](lua-reference.md#make_tiled)).
-:::
 
-:::unreleased
 `set_float_placement` replaces `set_float_nudge`: a saved setting
 that had the nudge off becomes `keep`, and a call to
 `set_float_nudge` fails naming its replacement.
-:::
 
-:::unreleased
 `drag.set_ghost_border_width` and
 `drag.set_drop_zone_border_width` fail naming `border.set_width`,
 and `drag.set_corner_radius` fails naming
 `border.set_corner_style`.
-:::
 
 `bind_profile_to_desktop` files one profile per screen count on a
 Desktop, for all screen setups: a second profile of another count
@@ -456,14 +440,12 @@ one.
 
 `delete_space` succeeds whether or not the removal lasts.
 
-:::unreleased
 `kiwidesk delete_space 5 profile` also removes the Space from
 the live profile's file, and `kiwidesk create_space 7 profile`
 adds one there; the scope is the command line's confirmation.
 Both refuse a Space `init.lua` or a built-in layout declares,
 naming it. A Space made any other way is temporary — see
 [`create_space`](lua-reference.md#create_space).
-:::
 
 When the space is still declared somewhere, the response says
 where:
