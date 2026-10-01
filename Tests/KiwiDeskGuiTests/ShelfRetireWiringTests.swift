@@ -57,5 +57,16 @@ struct ShelfRetireWiringTests {
         for segment in segments.dropLast() {
             #expect(segment.contains("syncShelves("), "a retire before sync")
         }
+        // No retire inside `updateBars()` itself — a second door there
+        // would run ahead of the sync — and both inside the door.
+        #expect(
+            body.components(separatedBy: ".retire(except:").count - 1 == 0,
+            "a retire inside updateBars()"
+        )
+        let doorBody = String(source[decl...])
+        #expect(
+            doorBody.components(separatedBy: ".retire(except: keep)").count - 1
+                == 2
+        )
     }
 }
