@@ -66,7 +66,7 @@ that — Settings, the CLI, Lua — is in the
 ### Building from source
 
 For contributors, or to run an unreleased commit. Requirements:
-macOS 14+, Xcode 16+ / Swift 6.
+Xcode 27+ / Swift 6.4 (the app itself runs on macOS 14+).
 
 ```sh
 git clone https://github.com/KiwiCanopy/KiwiDesk.git
