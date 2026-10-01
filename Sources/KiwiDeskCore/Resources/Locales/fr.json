@@ -703,6 +703,7 @@
   "kiwishelf.font_weight.black": "Noir",
   "kiwishelf.font_weight.bold": "Gras",
   "kiwishelf.font_weight.chip_missing": "%1$@ n'a pas de style « %2$@ ».",
+  "kiwishelf.font_weight.fixed_faces": "%1$@ n'existe qu'en graisses fixes — choisissez-en une ci-dessus.",
   "kiwishelf.font_weight.heavy": "Extra-gras",
   "kiwishelf.font_weight.help": "La graisse du texte des deux barres. Une police sans cette graisse utilise la plus proche ; le réglage est conservé pour la police suivante.",
   "kiwishelf.font_weight.light": "Léger",

@@ -703,6 +703,7 @@
   "kiwishelf.font_weight.black": "ブラック",
   "kiwishelf.font_weight.bold": "ボールド",
   "kiwishelf.font_weight.chip_missing": "%1$@には「%2$@」のスタイルがありません。",
+  "kiwishelf.font_weight.fixed_faces": "%1$@は固定の太さのみです。上のいずれかを選んでください。",
   "kiwishelf.font_weight.heavy": "ヘビー",
   "kiwishelf.font_weight.help": "両方のバーのテキストを描くフォントの太さです。この太さを持たないフォントは最も近い太さで描画し、設定は次のフォントのために保持されます。",
   "kiwishelf.font_weight.light": "ライト",

@@ -182,15 +182,20 @@ private struct UpdateNotesScrollCues: ViewModifier {
 struct UpdateNotesLink: View {
     let title: String
     let url: URL
+    /// The service's mark, as Home's support strip draws it (#1863).
+    var mark: NSImage?
 
     var body: some View {
         Button {
             NSWorkspace.shared.open(url)
         } label: {
-            Text(title)
-                .underline()
-                .font(.system(size: 12.5))
-                .foregroundStyle(SettingsTheme.ink2)
+            HStack(spacing: 6) {
+                if let mark { BrandMark(image: mark, side: 14) }
+                Text(title)
+                    .underline()
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(SettingsTheme.ink2)
+            }
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(.isLink)

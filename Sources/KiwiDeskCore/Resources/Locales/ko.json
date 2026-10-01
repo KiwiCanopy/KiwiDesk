@@ -703,6 +703,7 @@
   "kiwishelf.font_weight.black": "블랙",
   "kiwishelf.font_weight.bold": "볼드",
   "kiwishelf.font_weight.chip_missing": "%1$@에는 ‘%2$@’ 스타일이 없습니다.",
+  "kiwishelf.font_weight.fixed_faces": "%1$@에는 고정된 굵기만 있습니다. 위에서 하나를 선택하십시오.",
   "kiwishelf.font_weight.heavy": "헤비",
   "kiwishelf.font_weight.help": "두 바의 텍스트를 그리는 굵기입니다. 이 굵기가 없는 서체는 가장 가까운 굵기로 그리며, 설정은 다음 서체를 위해 유지됩니다.",
   "kiwishelf.font_weight.light": "라이트",

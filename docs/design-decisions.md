@@ -13348,6 +13348,17 @@ size as its count changes; the system pair keeps its own figures,
 since widening a count on an untouched profile would break that
 promise.
 
+The weight row keeps its slider for every family and greys it
+where the family has no `wght` axis on the 100–900 scale
+([#1859](https://github.com/KiwiCanopy/KiwiDesk/issues/1859)): a
+family of fixed faces draws the same face across a run of slider
+positions, so a live slider there moves and changes nothing. The
+chips stay live and the greyed slider sits on the face drawn,
+while the stored weight is still the one asked for. Removing the
+slider everywhere was weighed and refused, since it would take
+the in-between weights of a variable family off the GUI; hiding
+it per family would make the row change kind with the family.
+
 ### Profiles
 
 **[Principle]**

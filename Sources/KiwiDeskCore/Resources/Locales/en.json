@@ -703,6 +703,7 @@
   "kiwishelf.font_weight.black": "Black",
   "kiwishelf.font_weight.bold": "Bold",
   "kiwishelf.font_weight.chip_missing": "%1$@ has no “%2$@” face.",
+  "kiwishelf.font_weight.fixed_faces": "%1$@ comes in fixed weights only — pick one above.",
   "kiwishelf.font_weight.heavy": "Heavy",
   "kiwishelf.font_weight.help": "How heavy both bars' text draws. A font without this weight draws its nearest one; the setting is kept for the next font.",
   "kiwishelf.font_weight.light": "Light",

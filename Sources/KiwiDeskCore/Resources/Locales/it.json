@@ -703,6 +703,7 @@
   "kiwishelf.font_weight.black": "Nero",
   "kiwishelf.font_weight.bold": "Grassetto",
   "kiwishelf.font_weight.chip_missing": "%1$@ non ha lo stile «%2$@».",
+  "kiwishelf.font_weight.fixed_faces": "%1$@ è disponibile solo in pesi fissi — scegline uno sopra.",
   "kiwishelf.font_weight.heavy": "Extragrassetto",
   "kiwishelf.font_weight.help": "Quanto è marcato il testo di entrambe le barre. Un carattere senza questo peso usa il più vicino; l'impostazione resta per il carattere successivo.",
   "kiwishelf.font_weight.light": "Leggero",

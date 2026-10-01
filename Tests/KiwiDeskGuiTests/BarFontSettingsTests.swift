@@ -163,6 +163,64 @@ struct BarFontSettingsTests {
         )
     }
 
+    /// #1859: a family of fixed faces greys the slider, saying so,
+    /// and the row states the face drawn rather than the stored
+    /// weight, which it keeps for the next family.
+    @Test("A fixed-face family greys the slider at the drawn face")
+    func fixedFacesGreySlider() throws {
+        pinEnglish()
+        try #require(BarFont.isInstalled("Menlo"))
+        let menlo = FontWeightRow.WeightState(family: "Menlo", weight: 540)
+        #expect(menlo.shown == 400)
+        #expect(
+            menlo.inert
+                == "Menlo comes in fixed weights only — pick one above."
+        )
+        let system = FontWeightRow.WeightState(
+            family: KiwiShelf.systemFontFamily,
+            weight: 540
+        )
+        #expect(system.shown == 540)
+        #expect(system.inert == nil)
+    }
+
+    /// The row reads every stated value off ONE `WeightState`, and
+    /// the shared row greys the slider only while a reason is
+    /// given — a helper the call site stopped reading would leave
+    /// the clause above green.
+    @Test("The weight row is wired through its one state")
+    func weightRowWiring() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        func squashed(_ path: String) throws -> String {
+            try SourceScan.strippedSource(
+                at: root.appendingPathComponent(path)
+            ).split(whereSeparator: \.isWhitespace).joined()
+        }
+        let row = try squashed(
+            "Sources/KiwiDesk/Settings/Components/Bars/FontWeightRow.swift"
+        )
+        for needle in [
+            "readout:String(state.shown)",
+            "spokenValue:BarFontText.spokenWeight(state.shown)",
+            "sliderInert:state.inert",
+            "shown:state.shown",
+            "get:{Double(state.shown)}",
+            "selected:shown==named.value",
+            "guardstate.inert==nilelse{returnnil}",
+        ] {
+            #expect(row.contains(needle), "FontWeightRow lost \(needle)")
+        }
+        let shared = try squashed(
+            "Sources/KiwiDesk/Settings/Components/Common/SliderPresetRow.swift"
+        )
+        #expect(shared.contains(".modifier(SliderInert(reason:sliderInert))"))
+        #expect(
+            shared.contains(
+                "content.modifier(GreyOut(active:true,help:reason))"
+            )
+        )
+    }
+
     @Test("The weight slider speaks its number and its name")
     func spokenWeight() {
         pinEnglish()

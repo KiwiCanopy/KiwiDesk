@@ -73,6 +73,18 @@ enum BarFontText {
         )
     }
 
+    /// Why the weight slider is greyed: `family` draws fixed faces
+    /// only, so the chips are the choice (#1859). Nil for a family
+    /// on a `wght` axis.
+    static func fixedFacesCaption(family: String) -> String? {
+        guard !BarFont.hasWeightAxis(family) else { return nil }
+        return L(
+            "kiwishelf.font_weight.fixed_faces",
+            "%1$@ comes in fixed weights only — pick one above.",
+            familyName(family)
+        )
+    }
+
     /// The slider's spoken value: the number and its nearest name,
     /// so a VoiceOver user hears the chip it sits on.
     static func spokenWeight(_ weight: Int) -> String {
