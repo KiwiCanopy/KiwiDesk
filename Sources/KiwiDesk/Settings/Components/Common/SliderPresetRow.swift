@@ -39,14 +39,24 @@ struct SliderPresetRow<Presets: View>: View {
                         .foregroundStyle(.secondary)
                         .font(.body.monospacedDigit())
                 }
-                .modifier(
-                    GreyOut(
-                        active: sliderInert != nil,
-                        help: sliderInert ?? ""
-                    )
-                )
+                .modifier(SliderInert(reason: sliderInert))
                 presets
             }
+        }
+    }
+}
+
+/// Greys the slider with its reason only while one is given: an
+/// inactive `GreyOut` still sets an empty `.help`, which would
+/// shadow an outer gate's tooltip on every slider row.
+private struct SliderInert: ViewModifier {
+    let reason: String?
+
+    @ViewBuilder func body(content: Content) -> some View {
+        if let reason {
+            content.modifier(GreyOut(active: true, help: reason))
+        } else {
+            content
         }
     }
 }

@@ -95,14 +95,22 @@ public enum BarFont {
         }
     }
 
-    /// Whether `family` draws any weight on a `wght` axis — the
-    /// system pair, a variable family — rather than only its
-    /// fixed faces, which the weight slider cannot move between
-    /// (#1859). A missing family draws System, which can.
+    /// Whether some weight of `family` draws on a `wght` axis —
+    /// the system pair, a variable family — rather than every
+    /// weight landing on a fixed face, which the weight slider
+    /// cannot move between (#1859). Asked through the face `font`
+    /// picks, so a family shipping fixed faces beside a variable
+    /// one reads as the renderer draws it. A missing family draws
+    /// System, which can.
     public static func hasWeightAxis(_ family: String) -> Bool {
         if KiwiShelf.systemFontFamilies.contains(family) { return true }
         guard let faces = faces(of: family) else { return true }
-        return faces.contains { $0.axis != nil }
+        let range = KiwiShelf.fontWeightRange
+        return stride(
+            from: range.lowerBound,
+            through: range.upperBound,
+            by: 10
+        ).contains { nearest(faces, to: $0).axis != nil }
     }
 
     /// Whether `family` has `weight` of its own — a named chip's
