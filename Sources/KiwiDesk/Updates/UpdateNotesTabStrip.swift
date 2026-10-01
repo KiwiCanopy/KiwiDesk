@@ -6,11 +6,13 @@ import SwiftUI
 /// the same selection when they do not fit — a feed type this
 /// build does not know carries a title nobody sized.
 struct UpdateNotesTabStrip: View {
-    let digest: UpdateNotesDigest
+    let digest: UpdateNotesDigest?
+    /// Whether "Next on my list" has a tab (#1849).
+    var next = false
     @Binding var selection: UpdateNotesTab
 
     var body: some View {
-        let options = Self.options(digest)
+        let options = Self.options(digest, next: next)
         ViewThatFits(in: .horizontal) {
             // The selected label draws bolder, so the strip is
             // judged at its widest selection: a click must not flip
@@ -55,15 +57,20 @@ struct UpdateNotesTabStrip: View {
 
     @MainActor
     static func options(
-        _ digest: UpdateNotesDigest
+        _ digest: UpdateNotesDigest?,
+        next: Bool = false
     ) -> [(title: String, value: UpdateNotesTab)] {
-        UpdateNotesTabs.tabs(digest).map { tab in
+        UpdateNotesTabs.tabs(digest, next: next).map { tab in
             switch tab {
             case .highlights:
                 return (L("update.window.highlights", "Highlights"), tab)
             case .group(let id):
-                let group = digest.group(id)
+                let group = digest?.group(id)
                 return (group.map(UpdateNotesNaming.counted) ?? id, tab)
+            case .next:
+                // Short so the strip fits; the pane's heading says
+                // "Next on my list" in full (#1849).
+                return (L("update.window.next_tab", "Next"), tab)
             }
         }
     }

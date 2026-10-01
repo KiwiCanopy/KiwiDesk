@@ -22,6 +22,9 @@ enum UpdateWindowChrome {
         let window = NSWindow(contentViewController: hosting)
         window.styleMask = [.titled, .closable, .fullSizeContentView]
         window.titlebarAppearsTransparent = true
+        // The glass ground draws the window's backdrop (#1849).
+        window.isOpaque = false
+        window.backgroundColor = .clear
         window.titleVisibility = .hidden
         window.title = L("update.window.window_title", "KiwiDesk Update")
         window.isReleasedWhenClosed = false

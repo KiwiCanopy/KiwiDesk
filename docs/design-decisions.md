@@ -609,19 +609,36 @@ is the tab that opens, in both modes, because the "Before you
 update" cautions live there and must be seen before Install; an
 empty group gets no tab, since a tab with nothing behind it
 promises nothing. Each tab keeps its count, which previews what
-changed before a click, and the window is 600 pt wide so that
-the four kinds fit in every shipped language; a kind this build
-does not know carries a title nobody measured, so the strip
-turns into a menu on the same selection wherever it would not
-fit. The window's height is the tallest tab's, so a switch
-never resizes it.
+changed before a click, and the window is 670 pt wide so that
+the four kinds and Next (below) fit in every shipped language; a
+kind this build does not know carries a title nobody measured,
+so the strip turns into a menu on the same selection wherever it
+would not fit. The window's height is the tallest tab's, so a
+switch never resizes it. The labels are words, not symbols
+(#1849): the window speaks the user's language over notes that
+stay English, which is the ordinary split between an app and its
+content, and the symbols a strip of kinds would need misread
+here — sparkles as Apple Intelligence, an up-arrow as Install.
 
-**What stays Sparkle's:** checking, "you're up to date", and the
-download and install themselves. The window takes over at the
-offer and holds it through downloading, preparing and installing
-— one window per offer rather than an alert followed by a status
-window — because the notes stay readable while the download
-runs. A scheduled offer still never takes the screen
+**The window answers "you're up to date" too (#1849).** A check
+the user started that finds nothing newer opens the same window,
+headed "KiwiDesk is up to date", on the same strip — the running
+version's notes, which nothing else in the app shows again once
+"What's new" is closed, then Next, which it opens on — with one
+Done that answers Sparkle. Two answers to one question used to
+look like two apps. Only that reason is ours: a check refused
+because the system is too old or too new keeps Sparkle's own
+explanation, which says what to do about it. The window's ground
+is the system glass, as the alert it replaced was, and only
+Reduce transparency stands it down — not the Liquid Glass switch,
+which governs KiwiDesk's overlays on the desktop rather than a
+window.
+
+**What stays Sparkle's:** checking, and the download and install
+themselves. The window takes over at the offer and holds it
+through downloading, preparing and installing — one window per
+offer rather than an alert followed by a status window — because
+the notes stay readable while the download runs. A scheduled offer still never takes the screen
 ([the reminder](#scheduled-update-reminders-are-a-mark-not-a-notification-1013)
 is unchanged); the row it leaves opens this window.
 
@@ -661,8 +678,8 @@ notes it merged across the relaunch, because the fetch a normal
 "What's new" waits on usually returns after boot has finished,
 and the line would then narrate nothing.
 
-**"What's new" ends with what comes next, on a list that expires
-(#1813).** Under Highlights sits a card titled "Next on my list":
+**The window ends with what comes next, on a list that expires
+(#1813, #1849).** Its last tab, "Next", opens "Next on my list":
 up to three items from `ROADMAP.md`, dated, with a link to
 Discord. It is the one place the notes look forward, and it is
 built so the forecast cannot outlive its truth — the failure
@@ -675,10 +692,17 @@ hides it once its date is sixty days old, so a list nobody keeps
 disappears instead of promising. The words fit a one-person
 project: "Next on my list" admits an item may not have started
 and the order may change, where "What's next" reads as the next
-release's contents. It shows only after the update, because the
-offer is where someone decides whether to install and a large
-release pushes the card below the fold there, and never as a tab,
-since a tab names a kind of change in this release. The items
+release's contents. It first shipped as a card under Highlights
+after the update only, on the argument that a large release
+pushed it below the fold of the offer; a tab cannot fall below a
+fold, so it now rides every state (#1849), last so the kinds keep
+their order and labelled short so the strip still fits, its pane
+carrying the full heading. Highlights still opens wherever there
+is an update. In What's new and in the up-to-date answer the pane
+adds one quiet line, "Like my work? Support KiwiDesk on Ko-fi";
+never in the offer, whose one decision is Install or Later, and
+the link goes with the pane when there is no list — Home keeps
+the permanent place to support KiwiDesk. The items
 stay English like the notes; the heading is translated. Keeping
 it current is part of curating each release, because a list is
 only as honest as its last correction. On the relaunch after the

@@ -1,18 +1,21 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// What the window is for: an offer Sparkle is waiting on, or
-/// the notes of an update already installed (#1542 ruling ▸ After
-/// the update).
+/// What the window is for: an offer Sparkle is waiting on, the
+/// notes of an update already installed (#1542 ruling ▸ After the
+/// update), or the answer that there is none (#1849).
 enum UpdateWindowMode {
     case offer(UpdateSession)
     /// `narration` is set after the window's own Install (#1667);
-    /// `next` is "Next on my list", shown only here (#1813).
+    /// `next` is "Next on my list" (#1813).
     case whatsNew(
         narration: BootNarration?,
         next: NextOnMyList?,
         done: () -> Void
     )
+    /// A check found nothing newer: the running version's notes
+    /// and the list, which opens (#1849).
+    case upToDate(next: NextOnMyList?, done: () -> Void)
 }
 
 /// KiwiDesk's own update window (#1542 ruling ▸ Window): a pinned
@@ -43,6 +46,17 @@ struct UpdateWindowView: View {
             ) {
                 WhatsNewFooter(done: done)
             }
+        case .upToDate(let next, let done):
+            UpdateWindowLayout(
+                offer: offer,
+                whatsNew: true,
+                failed: false,
+                upToDate: true,
+                next: next,
+                measuring: measuring
+            ) {
+                WhatsNewFooter(done: done)
+            }
         }
     }
 }
@@ -59,6 +73,7 @@ private struct UpdateOfferLayout: View {
             offer: offer,
             whatsNew: false,
             failed: isFailed,
+            next: session.next,
             measuring: measuring
         ) {
             UpdateWindowFooter(session: session)
@@ -76,6 +91,7 @@ private struct UpdateWindowLayout<Footer: View>: View {
     let whatsNew: Bool
     let failed: Bool
     var narration: BootNarration?
+    var upToDate = false
     var next: NextOnMyList?
     let measuring: Bool
     @ViewBuilder let footer: () -> Footer
@@ -85,13 +101,21 @@ private struct UpdateWindowLayout<Footer: View>: View {
             if let narration {
                 NarratedHeader(offer: offer, narration: narration)
             } else {
-                UpdateWindowHeader(offer: offer, whatsNew: whatsNew)
+                UpdateWindowHeader(
+                    offer: offer,
+                    whatsNew: whatsNew,
+                    upToDate: upToDate
+                )
             }
             UpdateNotesScroll(
                 offer: offer,
                 failed: failed,
                 whatsNew: whatsNew,
                 next: next,
+                opening: UpdateNotesTabs.opening(
+                    upToDate: upToDate,
+                    next: next != nil
+                ),
                 measuring: measuring
             )
             footer()
@@ -99,13 +123,27 @@ private struct UpdateWindowLayout<Footer: View>: View {
         .frame(width: UpdateWindowMetrics.width)
         // SwiftUI keeps the content below the transparent title
         // bar; only the ground runs up behind the traffic lights.
-        .background(SettingsTheme.page.ignoresSafeArea())
+        // Glass like the system alert it replaces, so it answers
+        // Reduce transparency alone and not the overlays' switch
+        // (#1849).
+        .background {
+            Color.clear
+                .glassChrome(
+                    in: Rectangle(),
+                    enabled: true,
+                    variant: .regular,
+                    fallback: AnyShapeStyle(SettingsTheme.page)
+                )
+                .ignoresSafeArea()
+        }
         .tint(SettingsTheme.accent)
     }
 }
 
 enum UpdateWindowMetrics {
-    static let width: CGFloat = 600
+    /// Wide enough for the four kinds and Next in every shipped
+    /// locale (#1666, #1849), held by `UpdateNotesTabsTests`.
+    static let width: CGFloat = 670
     /// The header's, the tab strip's and the notes' side inset.
     static let inset: CGFloat = 20
     static let minHeight: CGFloat = 420
@@ -136,6 +174,7 @@ private struct NarratedHeader: View {
 private struct UpdateWindowHeader: View {
     let offer: UpdateOffer
     let whatsNew: Bool
+    var upToDate = false
     /// Boot's line after the window's own Install; it takes the
     /// subtitle slot until boot is ready (#1667).
     var narration: String?
@@ -165,6 +204,12 @@ private struct UpdateWindowHeader: View {
     }
 
     private var title: String {
+        if upToDate {
+            return L(
+                "update.window.up_to_date_title",
+                "KiwiDesk is up to date"
+            )
+        }
         if whatsNew {
             return L(
                 "update.window.whats_new_title",
@@ -181,6 +226,13 @@ private struct UpdateWindowHeader: View {
 
     private var subtitle: String {
         if let narration { return narration }
+        if upToDate {
+            return L(
+                "update.window.up_to_date_subtitle",
+                "%1$@ is the newest version",
+                offer.version
+            )
+        }
         if whatsNew {
             guard let released = offer.released else { return "" }
             return L(

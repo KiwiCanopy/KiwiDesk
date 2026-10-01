@@ -78,9 +78,10 @@ struct NextOnMyListTests {
         )
     }
 
-    /// Through the mode, the layout and the Highlights tab: a
-    /// window handed a list is taller by the card.
-    @Test("What's new draws the card under Highlights")
+    /// Through the mode, the layout and the Next tab (#1849): the
+    /// window is measured over every tab, so a long list it is
+    /// handed makes it taller.
+    @Test("What's new draws the list in its Next tab")
     func whatsNewDrawsTheCard() throws {
         LocalizationManager.shared.select("en")
         let offer = UpdateOffer(
@@ -104,7 +105,7 @@ struct NextOnMyListTests {
         )
         let next = NextOnMyList(
             asOf: try Self.day("2026-09-30"),
-            items: ["One", "Two", "Three"]
+            items: (1...12).map { "Item \($0)" }
         )
         func height(_ next: NextOnMyList?) -> CGFloat {
             NSHostingView(

@@ -88,8 +88,8 @@ final class UpdatePromptPolicy: NSObject,
 /// bouncing (#1011), and handing a found update to KiwiDesk's own
 /// window (#1542): each override below routes a phase to that
 /// window while one is open and defers to Sparkle otherwise.
-/// Checking, "up to date" and the download and install stay
-/// Sparkle's.
+/// Checking stays Sparkle's; "up to date" is the window's too
+/// (#1849), any other no-update reason Sparkle's own wording.
 @MainActor
 final class UpdatePromptDriver: SPUStandardUserDriver {
     /// The policy the driver answers from, typed — Sparkle holds
@@ -115,9 +115,20 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     var offeredNext: NextOnMyList?
     /// Puts the window on screen; a test records it instead.
     var presents: (UpdateWindowController) -> Void = { $0.present() }
+    /// The "up to date" answer while it is open (#1849).
+    var upToDate: UpToDateWindowController?
+    /// Its list fetch, which the window waits on.
+    var upToDateFetch: Task<Void, Never>?
+    /// Puts that answer on screen; a test records it instead.
+    var presentsUpToDate: (UpToDateWindowController) -> Void = {
+        $0.present()
+    }
     /// Replaces Sparkle's modal error alert in a test, which would
     /// otherwise block the run; nil is Sparkle's own.
     var sparkleError: ((any Error, @escaping () -> Void) -> Void)?
+    /// Replaces Sparkle's modal no-update alert in a test; nil is
+    /// Sparkle's own.
+    var sparkleNotFound: ((any Error, @escaping () -> Void) -> Void)?
     /// Replaces Sparkle's own ready-to-install prompt in a test,
     /// for the same reason; nil is Sparkle's own.
     var sparkleReadyToInstall: (() -> SPUUserUpdateChoice)?
@@ -146,6 +157,34 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
             stage: state.stage,
             reply: reply
         )
+    }
+
+    /// "You're up to date" in the window (#1849), the list fetched
+    /// first while Sparkle's Checking window stays up. Every other
+    /// no-update reason — a system too old, say — keeps Sparkle's
+    /// explanation.
+    override func showUpdateNotFoundWithError(
+        _ error: any Error,
+        acknowledgement: @escaping () -> Void
+    ) {
+        guard Self.isUpToDate(error) else {
+            if let sparkleNotFound {
+                return sparkleNotFound(error, acknowledgement)
+            }
+            return super.showUpdateNotFoundWithError(
+                error,
+                acknowledgement: acknowledgement
+            )
+        }
+        upToDateFetch?.cancel()
+        upToDateFetch = Task { [weak self, fetchNext] in
+            let next = await fetchNext?()
+            guard !Task.isCancelled else { return }
+            self?.showUpToDate(
+                next: next?.current(at: Date()),
+                acknowledgement: acknowledgement
+            )
+        }
     }
 
     override func showUpdateInFocus() {

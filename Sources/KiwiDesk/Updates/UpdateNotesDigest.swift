@@ -150,30 +150,45 @@ struct UpdateNotesDigest: Equatable {
     }
 }
 
-/// One tab of the notes (#1666 ruling): Highlights, then a
-/// type's changes.
+/// One tab of the notes (#1666 ruling): Highlights, a type's
+/// changes, then "Next on my list" (#1849).
 enum UpdateNotesTab: Hashable {
     case highlights
     case group(String)
+    case next
 }
 
 /// Which tabs exist and which one opens (#1666 ruling).
 enum UpdateNotesTabs {
-    /// Highlights, then one per non-empty group in digest order:
-    /// a tab with nothing in it promises nothing.
-    static func tabs(_ digest: UpdateNotesDigest) -> [UpdateNotesTab] {
+    /// Highlights, then one per non-empty group in digest order —
+    /// a tab with nothing in it promises nothing — then Next while
+    /// there is a list. Without a digest Highlights stays, saying
+    /// the notes are online.
+    static func tabs(
+        _ digest: UpdateNotesDigest?,
+        next: Bool = false
+    ) -> [UpdateNotesTab] {
         [.highlights]
-            + digest.groups.filter { !$0.entries.isEmpty }.map {
+            + (digest?.groups ?? []).filter { !$0.entries.isEmpty }.map {
                 .group($0.id)
             }
+            + (next ? [.next] : [])
     }
 
     /// No strip when Highlights is the only tab.
-    static func showsStrip(_ digest: UpdateNotesDigest) -> Bool {
-        tabs(digest).count > 1
+    static func showsStrip(
+        _ digest: UpdateNotesDigest?,
+        next: Bool = false
+    ) -> Bool {
+        tabs(digest, next: next).count > 1
     }
 
-    /// Highlights in both modes: the "Before you update" cautions
-    /// live there and must be seen before Install.
+    /// Highlights wherever there is an update: the "Before you
+    /// update" cautions live there and must be seen before Install.
     static let initial = UpdateNotesTab.highlights
+
+    /// With no update the list is the news, so Next opens (#1849).
+    static func opening(upToDate: Bool, next: Bool) -> UpdateNotesTab {
+        upToDate && next ? .next : initial
+    }
 }

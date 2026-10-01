@@ -6,6 +6,9 @@ import SwiftUI
 /// wrote them — English, like the changelog — and a Discord link.
 struct NextOnMyListPanel: View {
     let next: NextOnMyList
+    /// One quiet support line under Discord — never beside an
+    /// Install (#1849).
+    var asksForSupport = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -33,6 +36,15 @@ struct NextOnMyListPanel: View {
                 url: SupportLinks.discord
             )
             .padding(.top, 3)
+            if asksForSupport {
+                UpdateNotesLink(
+                    title: L(
+                        "update.window.next_support",
+                        "Like my work? Support KiwiDesk on Ko-fi"
+                    ),
+                    url: SupportLinks.koFi
+                )
+            }
         }
         .padding(.horizontal, 17)
         .padding(.vertical, 14)

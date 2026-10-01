@@ -66,7 +66,9 @@ extension UpdatePromptDriver {
         if let fetchNext {
             nextFetch = Task { [weak self] in
                 let next = await fetchNext()
-                if !Task.isCancelled { self?.offeredNext = next }
+                guard !Task.isCancelled else { return }
+                self?.offeredNext = next
+                session.next = next?.current(at: Date())
             }
         }
     }
@@ -118,5 +120,39 @@ extension UpdatePromptDriver {
                 )
             }
         )
+    }
+}
+
+/// The window's "up to date" answer (#1849).
+extension UpdatePromptDriver {
+    /// Sparkle's reason is the one the window answers: this build
+    /// is the newest, or newer than the feed's newest.
+    static func isUpToDate(_ error: any Error) -> Bool {
+        let reason =
+            (error as NSError).userInfo[SPUNoUpdateFoundReasonKey]
+            as? NSNumber
+        return reason?.int32Value
+            == SPUNoUpdateFoundReason.onLatestVersion.rawValue
+            || reason?.int32Value
+                == SPUNoUpdateFoundReason.onNewerThanLatestVersion.rawValue
+    }
+
+    func showUpToDate(
+        next: NextOnMyList?,
+        acknowledgement: @escaping () -> Void
+    ) {
+        // Sparkle's "Checking…" window; the public door to its close.
+        super.dismissUpdateInstallation()
+        closeWindow()
+        upToDate?.close()
+        let window = UpToDateWindowController(
+            offer: UpdateOffer.current(loaded: loadedItems, host: .main),
+            next: next
+        ) { [weak self] in
+            self?.upToDate = nil
+            acknowledgement()
+        }
+        upToDate = window
+        presentsUpToDate(window)
     }
 }
