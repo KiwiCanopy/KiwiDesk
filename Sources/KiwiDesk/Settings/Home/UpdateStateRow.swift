@@ -29,12 +29,13 @@ struct UpdateStateRow: View {
                 if store.answerOpen {
                     // Said in the line, not only on hover (#1849).
                     sentence(Self.closeAnswerFirst)
+                    // The live control first, the greyed one after.
+                    showWindow
                     checkAgain(
                         enabled: false,
                         label: checkAgainLabel,
                         reason: Self.closeAnswerFirst
                     )
-                    showWindow
                 } else {
                     sentence(
                         Self.upToDateSentence(lastChecked, now: Date())
@@ -111,7 +112,7 @@ struct UpdateStateRow: View {
     private var showWindow: some View {
         let label = L("updates.show_window", "Show the update window")
         return Button(action: check) {
-            Image(systemName: "macwindow")
+            Image(systemName: "arrow.up.forward.app")
                 .font(.system(size: 11, weight: .medium))
         }
         .buttonStyle(.borderless)
