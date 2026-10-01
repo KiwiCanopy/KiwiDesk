@@ -32,7 +32,8 @@ final class UpdateCheckingWindowController: NSObject, NSWindowDelegate {
         )
         let window = UpdateWindowChrome.window(
             root: view,
-            height: probe.fittingSize.height + UpdateWindowMetrics.titleBar
+            height: probe.fittingSize.height + UpdateWindowMetrics.titleBar,
+            width: UpdateCheckingView.width
         )
         window.delegate = self
         self.window = window
@@ -61,13 +62,16 @@ final class UpdateCheckingWindowController: NSObject, NSWindowDelegate {
 /// where the version line will be, and Cancel.
 struct UpdateCheckingView: View {
     let cancel: () -> Void
+    /// Alert-sized: one line, a bar and Cancel need none of the
+    /// notes' width.
+    static let width: CGFloat = 400
 
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 16) {
                 Image(nsImage: NSApp.applicationIconImage)
                     .resizable()
-                    .frame(width: 64, height: 64)
+                    .frame(width: 48, height: 48)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 8) {
                     Text(
@@ -76,12 +80,12 @@ struct UpdateCheckingView: View {
                             "Checking for updates…"
                         )
                     )
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(SettingsTheme.ink)
+                    .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
                     ProgressView()
                         .progressViewStyle(.linear)
-                        .frame(maxWidth: 260)
                 }
                 Spacer(minLength: 0)
             }
@@ -102,7 +106,7 @@ struct UpdateCheckingView: View {
                 Rectangle().fill(SettingsTheme.hairline).frame(height: 1)
             }
         }
-        .frame(width: UpdateWindowMetrics.width)
+        .frame(width: Self.width)
         .updateWindowGround()
     }
 }

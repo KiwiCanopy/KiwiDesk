@@ -22,8 +22,13 @@ enum UpdateWindowChrome {
         )
     }
 
-    /// The window around any of its states, at `height`.
-    static func window<Root: View>(root: Root, height: CGFloat) -> NSWindow {
+    /// The window around any of its states, at `height` and, for a
+    /// state narrower than the notes, `width`.
+    static func window<Root: View>(
+        root: Root,
+        height: CGFloat,
+        width: CGFloat = UpdateWindowMetrics.width
+    ) -> NSWindow {
         let hosting = NSHostingController(
             rootView: LocaleScopedRoot { root }
                 .environmentObject(LocalizationManager.shared)
@@ -40,7 +45,7 @@ enum UpdateWindowChrome {
         window.isReleasedWhenClosed = false
         window.animationBehavior = .documentWindow
         window.setContentSize(
-            NSSize(width: UpdateWindowMetrics.width, height: height)
+            NSSize(width: width, height: height)
         )
         return window
     }
