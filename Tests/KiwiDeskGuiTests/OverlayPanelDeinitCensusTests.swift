@@ -28,9 +28,6 @@ import Testing
 struct OverlayPanelDeinitCensusTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
-    private static let typeKeywords: Set<String> = [
-        "class", "struct", "enum", "actor", "extension",
-    ]
     private func sources() throws -> [(String, String)] {
         try SourceScan.swiftSources(
             under: Self.root.appendingPathComponent(
@@ -95,12 +92,7 @@ struct OverlayPanelDeinitCensusTests {
                 range: NSRange(location: 0, length: ns.length)
             ) {
                 let name = ns.substring(with: hit.range(at: 1))
-                var owner = tree.innermost[hit.range.location]
-                while let scope = owner,
-                    !Self.typeKeywords.contains(tree.scopes[scope].keyword)
-                {
-                    owner = tree.scopes[scope].parent
-                }
+                let owner = tree.enclosingType(at: hit.range.location)
                 let qualifiers =
                     ["Self", "self"]
                     + (owner.map { [tree.scopes[$0].name] } ?? [])
@@ -185,8 +177,11 @@ struct OverlayPanelDeinitCensusTests {
                     offenders.append("\(file): \(property) at file scope")
                     continue
                 }
-                // A local inside a function is not a stored property.
-                guard Self.typeKeywords.contains(tree.scopes[scope].keyword)
+                // A local inside a function is not a stored property,
+                // and a protocol requirement stores nothing.
+                let keyword = tree.scopes[scope].keyword
+                guard SourceScan.typeKeywords.contains(keyword),
+                    keyword != "protocol"
                 else { continue }
                 guard let owner = tree.owningClass(of: scope) else {
                     offenders.append("\(file): no class owns it")
