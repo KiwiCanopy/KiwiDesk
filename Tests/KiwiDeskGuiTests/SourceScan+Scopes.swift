@@ -5,10 +5,11 @@ import Foundation
 //
 // Here rather than in its first consumer for the reason the
 // family exists (tests.md ▸ source-scanning primitives): a second
-// privately-owned brace walker beside `balanced` and
-// `enclosingTypes` is the "harden one copy and not the other"
-// harm. It walks BLANKED source (`blankingCommentsAndLiterals`),
-// so no brace inside a literal or comment is counted, and
+// privately-owned brace walker beside `balanced` is the "harden
+// one copy and not the other" harm, and `enclosingTypes` reads
+// this tree rather than walking braces itself. It walks BLANKED
+// source (`blankingCommentsAndLiterals`), so no brace inside a
+// literal or comment is counted, and
 // `SourceScanScopesTests` ▸ `nothingGoesDark` holds it to every
 // class declaration in Core, measured outside the walker.
 extension SourceScan {
@@ -59,8 +60,10 @@ extension SourceScan {
         }
     }
 
+    /// The lookbehind keeps a member reference — `case .class,
+    /// .enum:` — from naming the closure after it a type.
     private static let scopeKeyword = try! NSRegularExpression(
-        pattern: #"\b(class|struct|enum|actor|extension|protocol|"#
+        pattern: #"(?<!\.)\b(class|struct|enum|actor|extension|protocol|"#
             + #"func|init|deinit|var|let|if|guard|for|while|"#
             + #"switch|else|do|catch|get|set|willSet|didSet|"#
             + #"defer|repeat)\b\s*(\w*)"#
