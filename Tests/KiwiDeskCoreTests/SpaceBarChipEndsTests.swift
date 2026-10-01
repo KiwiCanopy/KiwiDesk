@@ -14,6 +14,7 @@ struct SpaceBarChipEndsTests {
 
     private static let depth: CGFloat = 44
     private static let envelope = SpaceGlyph.symbol("envelope")
+    private static let square = SpaceGlyph.symbol("square.fill")
 
     private static func look(fontSize: CGFloat = 0) -> SpaceBarLook {
         var look = SpaceBarLook()
@@ -76,12 +77,14 @@ struct SpaceBarChipEndsTests {
         )
     }
 
+    /// A square symbol filling its cell: its corners reach past a
+    /// round end by a clear margin, as it draws.
     @Test("A lone glyph too large for the round end pads both alike")
     func loneOversizeGlyph() {
         let look = Self.look(fontSize: 36)
         #expect(
             !SpaceBarItemView.fitsRoundEnd(
-                Self.envelope,
+                Self.square,
                 look: look,
                 depth: Self.depth
             )
@@ -90,7 +93,7 @@ struct SpaceBarChipEndsTests {
             look,
             leads: true,
             trails: false,
-            lone: Self.envelope
+            lone: Self.square
         )
         #expect(ends.leading > 0)
         #expect(ends.leading == ends.trailing)

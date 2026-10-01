@@ -20,8 +20,9 @@ public enum BarAccent {
 
     /// The outline's frame and corner radius in an item's
     /// `bounds` rounded at `radius`: a box hugs it, an unboxed
-    /// item insets `capsuleInset` (QA 2026-07-19) — a Space item's
-    /// and the front chip's.
+    /// item insets `capsuleInset` (QA 2026-07-19) — both bars'
+    /// items' and the front chip's. The Space item's drop ring
+    /// draws its own path, morphing into this one.
     public static func outline(
         in bounds: CGRect,
         radius: CGFloat,

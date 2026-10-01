@@ -48,8 +48,10 @@ extension SpaceBarItemView {
 
     /// Whether a lone identifier, centred in a chip that pads no
     /// end, keeps its ink inside the chip's rounded box: a symbol
-    /// measured as it draws, at the identifier's point size; text,
-    /// whose ink clears a curve by ruling, always.
+    /// as it draws — at the identifier's point size, scaled down
+    /// into its cell as the image view does; text, whose ink
+    /// clears a curve by ruling, always. Memoized, since every
+    /// length read asks.
     static func fitsRoundEnd(
         _ glyph: SpaceGlyph,
         look: SpaceBarLook,
@@ -57,15 +59,7 @@ extension SpaceBarItemView {
     ) -> Bool {
         guard case .symbol(let name) = glyph else { return true }
         let size = look.identifierFontSize(forDepth: depth)
-        // The verdict is already `.symbol`; a name that draws
-        // nothing has no ink to clear.
-        let ink =
-            NSImage(
-                systemSymbolName: name,
-                accessibilityDescription: nil
-            )?.withSymbolConfiguration(
-                NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
-            )?.size ?? .zero
+        let cell = cell(contentDepth: look.contentDepth(forDepth: depth))
         let length = autoLength(
             appCount: 0,
             contentDepth: look.contentDepth(forDepth: depth),
@@ -76,12 +70,42 @@ extension SpaceBarItemView {
             look.resolvedCornerRadius(forThickness: depth),
             min(length, depth) / 2
         )
+        let horizontal = look.edge.isHorizontal
+        let key =
+            [name, "\(size)", "\(cell)", "\(length)", "\(depth)"]
+            .joined(separator: "|") + "|\(radius)|\(horizontal)"
+            as NSString
+        if let known = fitCache.object(forKey: key) {
+            return known.boolValue
+        }
+        // The verdict is already `.symbol`; a name that draws
+        // nothing has no ink to clear.
+        let image =
+            NSImage(
+                systemSymbolName: name,
+                accessibilityDescription: nil
+            )?.withSymbolConfiguration(
+                NSImage.SymbolConfiguration(pointSize: size, weight: .regular)
+            )?.size ?? .zero
+        let scale = min(
+            1,
+            cell / max(image.width, 1),
+            cell / max(image.height, 1)
+        )
+        // Along the bar and across it: a vertical bar's length
+        // runs along y.
+        let along = (horizontal ? image.width : image.height) * scale
+        let across = (horizontal ? image.height : image.width) * scale
         // The ink's corner past the box's straight run, against
         // the corner's own circle.
-        let dx = max(0, ink.width / 2 - (length / 2 - radius))
-        let dy = max(0, ink.height / 2 - (depth / 2 - radius))
-        return dx * dx + dy * dy <= radius * radius
+        let dx = max(0, along / 2 - (length / 2 - radius))
+        let dy = max(0, across / 2 - (depth / 2 - radius))
+        let fits = dx * dx + dy * dy <= radius * radius
+        fitCache.setObject(NSNumber(value: fits), forKey: key)
+        return fits
     }
+
+    private static let fitCache = NSCache<NSString, NSNumber>()
 
     private var badged: Bool {
         Self.badgesIdentifier(

@@ -158,22 +158,13 @@ extension AppBarItemView {
 
     /// Outline selection ring (ui-designer 2026-07-14, owner 2026-07-20).
     private func layoutRing() {
-        if style.hasBox {
-            accent.frame = bounds
-            accent.layer?.cornerRadius =
-                style.resolvedCornerRadius(
-                    forThickness: crossThickness
-                )
-        } else {
-            let inset = BarAccent.capsuleInset
-            accent.frame = bounds.insetBy(dx: inset, dy: inset)
-            accent.layer?.cornerRadius = max(
-                0,
-                style.resolvedCornerRadius(
-                    forThickness: crossThickness
-                ) - inset
-            )
-        }
+        let ring = BarAccent.outline(
+            in: bounds,
+            radius: style.resolvedCornerRadius(forThickness: crossThickness),
+            boxed: style.hasBox
+        )
+        accent.frame = ring.frame
+        accent.layer?.cornerRadius = ring.radius
     }
 
     /// Edge mark layout (owner call 2026-07-20).
