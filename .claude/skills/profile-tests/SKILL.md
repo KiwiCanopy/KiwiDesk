@@ -19,9 +19,10 @@ the worktree root on a tree built with `swift build --build-tests`.
 .claude/skills/profile-tests/scripts/profile-run.sh KiwiDeskCoreTests <out-dir>
 ```
 
-It takes the gate slot first (one heavy run on the machine at a
-time — tests.md explains why parallel runs are noise), so its
-clock starts at acquisition, then records the helper's window
+It takes the gate slot first (`verify-gate` ▸ Fast inner loop
+owns why), so its clock starts at acquisition — and the run is
+niced, as every gate step is, so compare only niced times — then
+records the helper's window
 census every 10 s and samples it at `--sample-after` (150 s by
 default) and again 60 s later if the helper is still running. Set
 `--sample-after` well below the target's FAST time, or a fast run
@@ -50,7 +51,7 @@ into `main`.
 
 - **Main thread mostly blocked in `mach_msg`, process CPU low**:
   the run is WAITING — on WindowServer when the entries are
-  `SLS…` / `_NX…` / `CG…`. More cores and a parallelism cap do
+  `SLS…` / `_NX…` / `CGS…`. More cores and a parallelism cap do
   nothing here. Each wait chain names the innermost KiwiDesk frame
   with its `file:line` and the WindowServer entry it waited in —
   "KiwiDesk frame" includes production code, which the test binary
@@ -85,11 +86,12 @@ Compare against the previous release's baseline — per-target wall
 time over two runs, waiting or working, the top wait chains and
 CPU frames, the peak window count. It lives privately in the
 owner's main checkout at `plan/test-baseline.md`, which a worktree
-cannot see, so the caller hands it in. A target 25 % slower, a
-mode that flipped, or a window count that climbs again is
-investigated before the cut. Record the new numbers there
-afterwards, with the date and the machine. The obligation itself
-is packaging-and-release.md's.
+cannot see, so the caller hands it in. **A regression is** a
+target 25 % slower over two runs, a mode that flipped (waiting ↔
+working, or a target turned bimodal), or a window count that
+climbs again. Record the new numbers there afterwards, with the
+date and the machine. When this is owed, and what a regression
+then costs a release, is packaging-and-release.md's.
 
 ## What this is not
 

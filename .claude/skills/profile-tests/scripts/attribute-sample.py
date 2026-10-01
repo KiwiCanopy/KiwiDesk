@@ -21,7 +21,14 @@ import collections
 import re
 import sys
 
-IDLE = ("mach_msg", "__workq_kernreturn", "__psynch", "semwait", "read")
+# Leaf functions that mean a thread is parked, matched by exact name.
+IDLE = {
+    "mach_msg", "mach_msg2_trap", "mach_msg_overwrite",
+    "__workq_kernreturn", "__psynch_cvwait", "__psynch_mutexwait",
+    "semaphore_wait_trap", "semaphore_timedwait_trap",
+    "__semwait_signal", "__ulock_wait", "__ulock_wait2", "kevent",
+    "kevent64", "kevent_id", "read", "__read_nocancel", "__select",
+}
 WS = re.compile(r"(SLS|CGS|_SLS|_CGS|_NX|CGMain|CGDisplay)")
 
 
@@ -74,9 +81,10 @@ def main():
         main_thread = ("Main Thread" in header
                        or "com.apple.main-thread" in header)
         for count, frame, stack in leaves(body):
-            idle = any(k in frame for k in IDLE)
+            leaf = frame.split("  (in")[0].split("(")[0].strip()
+            idle = leaf in IDLE
             ours = [name(f) for f in stack if mine(f)]
-            if main_thread and "mach_msg" in frame:
+            if main_thread and leaf.startswith("mach_msg"):
                 blocked += count
                 entry = [f.split("  (in")[0] for f in stack if WS.match(f)]
                 source = ours[-1] if ours else "(no KiwiDesk frame)"

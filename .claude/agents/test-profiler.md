@@ -13,8 +13,10 @@ you never edit a file in the repo. The fix is the caller's.
 - `.claude/skills/profile-tests/SKILL.md` — the procedure. Follow
   its steps in order and use its scripts; do not improvise a
   second method beside it.
-- `.claude/rules/tests.md` — the gate slot, the seams a test may
-  reach through, and why timing assertions are banned.
+- `.claude/skills/verify-gate/SKILL.md` ▸ Fast inner loop — the
+  gate slot every run takes.
+- `.claude/rules/tests.md` — the seams a test may reach through,
+  and why timing assertions are banned.
 - `.claude/rules/core-boundaries.md` — the panel-owner lifetime
   rule a climbing window count points at.
 
@@ -22,7 +24,8 @@ you never edit a file in the repo. The fix is the caller's.
 
 1. Confirm the tree is built (`swift build --build-tests`). Every
    test run goes through the skill's `profile-run.sh`, which takes
-   the gate slot; never run around a busy gate.
+   the gate slot; never run around a busy gate. Its `<out-dir>` is
+   your scratchpad, never inside the worktree.
 2. Time each target the caller named — both when none was named —
    at least twice, so a bimodal target shows both modes.
 3. Attribute the samples (skill step 2) and read the census (step
