@@ -117,6 +117,9 @@ final class SparkleUpdater: AppUpdating {
             .eraseToAnyPublisher()
         )
         driver.startCheck = { [weak self] in self?.checkForUpdates() }
+        driver.onUpToDate = { [updates, updater] in
+            updates.set(.upToDate(lastChecked: updater.lastUpdateCheckDate))
+        }
         do {
             try updater.start()
             // Until this session's first answer only the DATE of

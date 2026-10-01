@@ -119,4 +119,22 @@ struct UpdateUpToDateTests {
         #expect(log.acknowledged == 1)
         #expect(driver.upToDate == nil)
     }
+
+    /// Home read "Checking…" with its button greyed while the
+    /// answer waited on Done (device, 2026-10-01): the answer
+    /// says so at once, and a second check brings it back.
+    @Test("the answer reports itself and comes back in focus")
+    func answerReportsAndRefocuses() async {
+        let (driver, log) = driver()
+        var reported = 0
+        driver.onUpToDate = { reported += 1 }
+        driver.showUpdateNotFoundWithError(
+            Self.notFound(.onLatestVersion)
+        ) {}
+        await settle(driver)
+        #expect(reported == 1)
+        driver.showUpdateInFocus()
+        #expect(log.shown.count == 2)
+        #expect(log.shown.last === driver.upToDate)
+    }
 }

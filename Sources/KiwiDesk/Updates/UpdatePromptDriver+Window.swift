@@ -164,6 +164,7 @@ extension UpdatePromptDriver {
         }
         upToDate = window
         presentsUpToDate(window)
+        onUpToDate()
         // Only now, behind the answer (`closeCheckingWindows`).
         replaced?.close()
         closeCheckingWindows()
