@@ -2287,13 +2287,11 @@ setting. One set of colours serves both bars; the focused
 window's colour is the Space Bar's own
 ([`space_bar.set_focused_item_color`](#space_barset_focused_item_color)).
 
-:::unreleased
 
 So is the front-app segment's indicator colour
 ([`space_bar.set_focused_highlight_color`](#space_barset_focused_highlight_color)),
 which follows the focused window's colour until you set it.
 
-:::
 
 - `kiwishelf.set_fill_color` — the plate's one fill, or each
   item's box under `boxed` (default `#14201CB3`, dark moss at 70%
@@ -2676,12 +2674,10 @@ space_bar.set_item_label("layout")
 **Does:** how the active Space is marked, in KiwiShelf's
 [`highlight_color`](#kiwishelf-colours).
 
-:::unreleased
 
 The front-app segment wears the same indicator, in its own
 [`focused_highlight_color`](#space_barset_focused_highlight_color).
 
-:::
 
 **Example:**
 
@@ -2830,7 +2826,6 @@ distinction.
 ```lua
 space_bar.set_focused_item_color("#C2790A")
 ```
-:::unreleased
 
 ### space_bar.set_focused_highlight_color
 
@@ -2850,7 +2845,6 @@ Space's do.
 space_bar.set_focused_highlight_color("")
 ```
 
-:::
 
 ## Where New Windows Land
 
