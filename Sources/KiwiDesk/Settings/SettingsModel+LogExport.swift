@@ -1,5 +1,6 @@
 import AppKit
 import KiwiDeskCore
+import UniformTypeIdentifiers
 
 /// Export the log from Settings (#1209) — rung zero of General ▸
 /// Advanced's recovery ladder, because it changes nothing. Read-only

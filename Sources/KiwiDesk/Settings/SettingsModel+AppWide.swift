@@ -1,3 +1,4 @@
+import Combine
 import KiwiDeskCore
 
 /// General's app-wide rows (#1741): read live from the core and

@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import os
 
 /// Start/stop lifecycle. Split from `EventLoop.swift` for file
 /// size (§2); the attach path it drives lives in

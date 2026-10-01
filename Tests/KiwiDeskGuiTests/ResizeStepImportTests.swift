@@ -1,3 +1,4 @@
+import CoreFoundation
 import KiwiDeskCore
 import Testing
 

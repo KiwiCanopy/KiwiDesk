@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// Configuration persistence, revert, and GUI adoption actions

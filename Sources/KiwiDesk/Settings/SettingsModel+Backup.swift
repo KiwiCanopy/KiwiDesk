@@ -1,5 +1,6 @@
 import AppKit
 import KiwiDeskCore
+import UniformTypeIdentifiers
 
 /// Export and restore whole setup from Settings (#606).
 extension SettingsModel {

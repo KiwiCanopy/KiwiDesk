@@ -4,7 +4,8 @@ import PackageDescription
 // Upcoming features ruled in by #1780's survey, one per commit;
 // every Swift target takes the same list.
 let swiftSettings: [SwiftSetting] = [
-    .enableUpcomingFeature("ImmutableWeakCaptures")
+    .enableUpcomingFeature("ImmutableWeakCaptures"),
+    .enableUpcomingFeature("MemberImportVisibility"),
 ]
 
 let package = Package(

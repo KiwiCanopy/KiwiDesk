@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// Per-setting diff between draft `GuiConfig` and baseline (#678,

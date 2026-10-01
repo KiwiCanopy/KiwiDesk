@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// The two sibling-distrust reads `handleWindowFocused` weighs

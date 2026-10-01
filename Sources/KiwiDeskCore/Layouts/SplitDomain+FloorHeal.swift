@@ -1,3 +1,5 @@
+import CoreFoundation
+
 /// The split stores' floor heal math (#934/#1430) —
 /// `TrackLayout.flooredWeights` one store over: a bsp split ratio
 /// or the stack master ratio moved so the side drawing under a

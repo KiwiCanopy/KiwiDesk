@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import os
 
 /// Window reconciliation — the safety net that syncs tracked windows
 /// against an app's live AX window list. Split from `EventLoop.swift`

@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// The resolved scroll-gesture settings (#1656 ruling: a global

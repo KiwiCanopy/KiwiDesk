@@ -1,3 +1,4 @@
+import CoreFoundation
 import KiwiDeskCore
 
 /// The one place deriving `LayoutMenuInfo` from live `KiwiCore` state (#752).

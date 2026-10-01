@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// Diagnostic commands: `get_state`, `get_layout_info`,
