@@ -283,7 +283,8 @@ twice, was a question the user answered twice. The argument is
   fade has landed — `updateBars()` spares
   `ShelfManager.leavingDisplays` — or a display re-enumerating
   inside the glide re-joins as a new section (`ShelfFadeTests` ▸
-  `managerRetiresOnceLeft`). The Space
+  `managerRetiresOnceLeft` the reading, `ShelfRetireWiringTests`
+  its one consumer). The Space
   Bar's chip
   glide stands down when its slot changed, the shelf gliding the
   section then (`SpaceBarInactiveContentTests`).
