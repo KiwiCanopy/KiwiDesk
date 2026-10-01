@@ -1,8 +1,9 @@
 // swift-tools-version: 6.4
 import PackageDescription
 
-// Upcoming features ruled in by #1780's survey, one per commit;
-// every Swift target takes the same list.
+// Upcoming features ruled in by #1780's survey. A new Swift
+// target takes this list too, or it compiles another dialect
+// (`PackageSwiftSettingsTests`).
 let swiftSettings: [SwiftSetting] = [
     .enableUpcomingFeature("ImmutableWeakCaptures"),
     .enableUpcomingFeature("MemberImportVisibility"),

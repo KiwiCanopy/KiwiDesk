@@ -671,11 +671,12 @@ reach is worth stating once: `-Xswiftc` is swiftc's, so
 **Every ratcheted step runs through `scripts/warning-gate`
 (#1780).** `-warnings-as-errors` cannot promote an isolation a
 type inherits from an SDK class (`NSView`): it stays a warning
-and lands green, as four sites did until the 6.4 survey. The gate
-fails on any `.swift` warning left in the output outside the
-group the Build step downgrades, and the two stay one list.
-`WarningGateTests` holds the behaviour, the wiring and that
-parity.
+and lands green. The gate fails on any `.swift` warning left in
+the output outside the groups the wrapped command itself
+downgrades with `-Wwarning`, so the exemption is never a second
+list. `WarningGateTests` holds the behaviour and the wiring, and
+the release step refuses the gate as it refuses the flag
+(`WarningRatchetWorkflowTests` ▸ `releaseStepIsExempt`).
 
 **`ci.yml` filters by exclusion; `site.yml` filters by
 inclusion.** Keep it that way. The site build's inputs are a

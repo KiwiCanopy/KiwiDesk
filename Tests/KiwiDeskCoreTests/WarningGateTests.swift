@@ -4,21 +4,37 @@ import Testing
 /// `scripts/warning-gate`, the ratchet's second half (#1780):
 /// `-warnings-as-errors` cannot promote an isolation a type
 /// inherits from an SDK class, so the gate fails on any Swift
-/// warning left in the output outside the exemption.
+/// warning left in the output outside the groups the wrapped
+/// command downgrades with `-Wwarning`.
 @Suite("Compiler-warning gate (#1780)")
 struct WarningGateTests {
     private static let script = scriptFixtureRepoRoot()
         .appendingPathComponent("scripts/warning-gate")
 
-    /// Runs the gate over `log` as a command's output.
-    private func gate(over log: String) throws -> ScriptRun {
+    /// A group no compiler emits, so no clause pins the one the
+    /// Build step downgrades today.
+    private static let group = "MadeUpGroup"
+
+    /// The flags a ratcheted step passes to downgrade `group`.
+    private static let downgrade = [
+        "-Xswiftc", "-warnings-as-errors",
+        "-Xswiftc", "-Wwarning", "-Xswiftc", group,
+    ]
+
+    /// Runs the gate over `log` as the output of a command that
+    /// carries `flags`, the way a wrapped `swift build` does.
+    private func gate(
+        over log: String,
+        flags: [String] = downgrade
+    ) throws -> ScriptRun {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("warning-gate-\(UUID()).log")
         try log.write(to: url, atomically: true, encoding: .utf8)
         defer { try? FileManager.default.removeItem(at: url) }
+        let command = ["/bin/sh", "-c", #"cat "$0""#, url.path]
         return try spawn(
             "/bin/bash",
-            [Self.script.path, "/bin/cat", url.path]
+            [Self.script.path] + command + flags
         )
     }
 
@@ -28,6 +44,11 @@ struct WarningGateTests {
         nonisolated context
         """
 
+    private static let tagged = """
+        /r/Sources/B.swift:253:33: warning: 'x' was \
+        deprecated in macOS 14.0 [#\(group)]
+        """
+
     @Test("An unpromoted isolation warning reds the gate")
     func isolationWarningFails() throws {
         let run = try gate(over: "Compiling\n\(Self.isolation)\n")
@@ -35,16 +56,29 @@ struct WarningGateTests {
         #expect(run.stderr.contains("A.swift:145:26"))
     }
 
-    @Test("The exempt group, a C warning and a clean log pass")
+    /// A checkout path with a space still names a `.swift` file.
+    @Test("A warning under a spaced path reds the gate")
+    func spacedPathFails() throws {
+        let log = "/r/My Repo/Sources/A.swift:1:1: warning: x\n"
+        #expect(try gate(over: log).status == 1)
+    }
+
+    @Test("A downgraded group, a C warning and a clean log pass")
     func exemptionsPass() throws {
-        let deprecated = """
-            /r/Sources/B.swift:253:33: warning: 'x' was \
-            deprecated in macOS 14.0 [#DeprecatedDeclaration]
-            """
         let clang = "/r/Vendor/CLua/src/l.c:9:1: warning: unused"
-        for log in [deprecated, clang, "Build complete!"] {
+        for log in [Self.tagged, clang, "Build complete!"] {
             #expect(try gate(over: log + "\n").status == 0, "\(log)")
         }
+    }
+
+    /// The exemption is read off the wrapped command's own
+    /// flags: without the downgrade the same tag is a warning.
+    @Test("A group the command does not downgrade reds the gate")
+    func exemptionComesFromTheFlags() throws {
+        let log = Self.tagged + "\n"
+        #expect(try gate(over: log, flags: []).status == 1)
+        let other = ["-Xswiftc", "-Wwarning", "-Xswiftc", "Other"]
+        #expect(try gate(over: log, flags: other).status == 1)
     }
 
     /// A terminal run wraps the warning and its group tag in
@@ -58,7 +92,7 @@ struct WarningGateTests {
         #expect(try gate(over: isolated).status == 1)
         let tag = """
             [#\u{1B}]8;;https://docs.swift.org/x\u{1B}\\\
-            DeprecatedDeclaration\u{1B}]8;;\u{1B}\\]
+            \(Self.group)\u{1B}]8;;\u{1B}\\]
             """
         let exempt = "/r/Sources/B.swift:1:1: \(paint)d \(tag)\n"
         #expect(try gate(over: exempt).status == 0)
@@ -99,23 +133,5 @@ struct WarningGateTests {
             encoding: .utf8
         )
         #expect(skill.contains("scripts/warning-gate swift build"))
-    }
-
-    /// The group the gate lets through is the one the Build step
-    /// downgrades: a downgrade retired with #1170 must leave the
-    /// gate no exemption either.
-    @Test("The gate exempts the Build step's downgraded group")
-    func exemptionMatchesTheDowngrade() throws {
-        let step = try workflowStep("Build", in: workflowSource("ci.yml"))
-        let words = step.split(whereSeparator: \.isWhitespace)
-        let downgraded = words.indices.dropLast(2)
-            .filter { words[$0] == "-Wwarning" }
-            .map { String(words[$0 + 2]) }
-        let script = try String(contentsOf: Self.script, encoding: .utf8)
-        let exempt = script.split(separator: "\n")
-            .filter { $0.contains("grep -vF") }
-            .compactMap { $0.split(separator: "'").dropFirst().first }
-            .map { String($0.dropFirst(2).dropLast()) }
-        #expect(exempt == downgraded)
     }
 }
