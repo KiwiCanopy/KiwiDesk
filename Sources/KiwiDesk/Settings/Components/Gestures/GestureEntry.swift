@@ -185,7 +185,9 @@ enum GesturePace {
 /// The desktop-dark ground every gesture picture sits on, the
 /// Home cards' plate (`SettingsTheme.previewPlate`), sized once.
 struct GesturePlate<Content: View>: View {
-    static var size: CGSize { CGSize(width: 120, height: 72) }
+    nonisolated static var size: CGSize {
+        CGSize(width: 120, height: 72)
+    }
     @ViewBuilder let content: () -> Content
 
     var body: some View {
