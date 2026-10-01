@@ -104,7 +104,8 @@ struct UpdateHighlightsPanel: View {
     }
 }
 
-/// One type's changes, the body of its tab: every entry, flat.
+/// One type's changes, the body of its tab: its name and count
+/// as the pane's heading, like Next's (#1849), then every entry.
 struct UpdateNotesGroupList: View {
     let group: UpdateNotesDigest.Group
     /// Entries carry their version when the view spans several.
@@ -112,6 +113,12 @@ struct UpdateNotesGroupList: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            Text(UpdateNotesNaming.counted(group))
+                .textCase(.uppercase)
+                .tracking(0.9)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(SettingsTheme.ink2)
+                .accessibilityAddTraits(.isHeader)
             ForEach(
                 Array(group.entries.enumerated()),
                 id: \.offset
