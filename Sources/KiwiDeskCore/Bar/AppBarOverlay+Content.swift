@@ -23,8 +23,9 @@ extension AppBarOverlay {
             horizontal ? frame.minX : frame.minY
         }
         let start =
-            origin(first)
-            + firstView.drawnSpan(in: first.size).lowerBound - leading
+            leading > 0
+            ? origin(first) - leading
+            : origin(first) + firstView.drawnSpan(in: first.size).lowerBound
         let end =
             origin(last)
             + lastView.drawnSpan(in: last.size).upperBound

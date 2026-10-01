@@ -105,7 +105,6 @@ struct BarMotionSeamTests {
         "setAlpha": ["fades(", "isReduced"],
         "fades": [],
         "afterGroupGlide": ["plateGlideDuration(", "isReduced"],
-        "dissolveOutShare": [],
         "runDissolveOut": ["dissolveOutDuration(", "isReduced"],
         "dissolveOutDuration": ["plateGlideDuration("],
         "playWalk": ["walkDuration(", "isReduced"],

@@ -91,13 +91,22 @@ struct ShelfSplitDriverTests {
         "Re-fusing retires the second shelf",
         .enabled(if: NSScreen.main != nil)
     )
-    func refuseRetiresTheSecondShelf() throws {
+    func refuseRetiresTheSecondShelf() async throws {
         let (core, display) = try #require(
             makeCore(space: .top, app: .bottom)
         )
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let before = BarMotion.shelfGlide
+        defer { BarMotion.shelfGlide = before }
+        BarMotion.shelfGlide = 0.05
         core.tiler.settings.appBarStyle.edge = .top
         core.updateBars()
+        // The second shelf fades out and is retired once its fade
+        // lands (#1838).
+        for _ in 0..<150
+        where core.shelves.overlayForTesting(display, edge: .bottom) != nil {
+            try await Task.sleep(for: .milliseconds(20))
+        }
         #expect(core.shelves.overlayForTesting(display, edge: .bottom) == nil)
         let top = try #require(
             core.shelves.overlayForTesting(display, edge: .top)

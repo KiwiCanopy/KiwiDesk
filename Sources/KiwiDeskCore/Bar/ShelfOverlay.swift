@@ -89,22 +89,8 @@ final class ShelfOverlay {
         // screen glides to its new placement (#1517), and one fading
         // out fades back (#1838).
         let glides = panel.isVisible
-        let fades = !glides || leaving != nil
+        let fadesBack = glides && leaving != nil
         leaving = nil
-        if !glides {
-            content.alphaValue = 0
-            panel.setFrame(
-                GeometryUtils.flip(
-                    strip,
-                    primaryHeight: GeometryUtils.primaryHeight
-                ),
-                display: false
-            )
-            panel.orderFrontRegardless()
-            // Committed transparent, so the fade starts from it
-            // rather than from the last shown state (#1838).
-            CATransaction.flush()
-        }
         stripView.frame = CGRect(origin: .zero, size: strip.size)
         let horizontal = edge.isHorizontal
         let depth = horizontal ? strip.height : strip.width
@@ -140,7 +126,9 @@ final class ShelfOverlay {
                 horizontal: horizontal,
                 animated: glides
             )
-            if fades { BarMotion.setAlpha(content, to: 1, animated: true) }
+            if fadesBack {
+                BarMotion.setAlpha(content, to: 1, animated: true)
+            }
         }
         layoutHandle(
             range: range,
@@ -159,18 +147,31 @@ final class ShelfOverlay {
             ),
             display: true
         )
-        if !panel.isVisible { panel.orderFrontRegardless() }
+        if !panel.isVisible {
+            // Shown transparent and committed so, laid out already,
+            // so the fade starts from it rather than from the last
+            // shown state (#1838).
+            content.alphaValue = 0
+            panel.orderFrontRegardless()
+            CATransaction.flush()
+            BarMotion.runPlateGlide {
+                BarMotion.setAlpha(content, to: 1, animated: true)
+            }
+        }
     }
 
     /// Orders the shelf out — after fading out where `animated`
     /// and the glide has a length (#1838), the sections its
-    /// managers hid drawing on until it lands, a fade already
-    /// running left to land — and fires `onLeft` once it has left.
-    func hide(animated: Bool = false) {
+    /// managers hid drawing on until it lands — and fires `onLeft`
+    /// once it has left. Returns whether this call began the
+    /// leave; false where a fade is already running, which keeps
+    /// its own landing.
+    @discardableResult
+    func hide(animated: Bool = false) -> Bool {
         guard let panel, panel.isVisible else {
             leaving = nil
             onLeft()
-            return
+            return true
         }
         let span = BarMotion.plateGlideDuration(
             reduceMotion: BarMotion.isReduced,
@@ -181,12 +182,12 @@ final class ShelfOverlay {
             panel.orderOut(nil)
             content.alphaValue = 1
             onLeft()
-            return
+            return true
         }
         // A fade already running keeps its landing: every bar
         // refresh inside the glide asked again, and a restarted
         // fade never landed on a lively Space (device, #1838).
-        guard leaving == nil else { return }
+        guard leaving == nil else { return false }
         for view in stripView.subviews
         where view !== divider && view !== handle {
             view.isHidden = false
@@ -203,6 +204,7 @@ final class ShelfOverlay {
             self.content.alphaValue = 1
             self.onLeft()
         }
+        return true
     }
 
     /// Lays the grip over the divider line while the shelf is

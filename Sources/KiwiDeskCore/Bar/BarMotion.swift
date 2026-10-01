@@ -138,10 +138,9 @@ enum BarMotion {
     /// the plate arrives without travelling.
     @MainActor
     static func runPlateGlide(_ body: () -> Void) {
-        let reduceMotion = isReduced
         NSAnimationContext.runAnimationGroup { context in
             context.duration = plateGlideDuration(
-                reduceMotion: reduceMotion,
+                reduceMotion: isReduced,
                 seconds: shelfGlide
             )
             context.timingFunction = CAMediaTimingFunction(

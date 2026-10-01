@@ -43,10 +43,9 @@ extension BarMotion {
     /// curve, zero under Reduce Motion.
     @MainActor
     static func runDissolveOut(_ body: () -> Void) {
-        let reduceMotion = isReduced
         NSAnimationContext.runAnimationGroup { context in
             context.duration = dissolveOutDuration(
-                reduceMotion: reduceMotion,
+                reduceMotion: isReduced,
                 seconds: shelfGlide
             )
             context.timingFunction = CAMediaTimingFunction(

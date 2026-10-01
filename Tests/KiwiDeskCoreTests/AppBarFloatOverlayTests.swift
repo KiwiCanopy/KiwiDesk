@@ -89,7 +89,9 @@ struct AppBarFloatOverlayTests {
         #expect(tiled.width == float.width)
     }
 
-    @Test("No break without both sections")
+    /// A tiled row alone draws neither; floats alone keep the mark
+    /// and drop the rule (#1838).
+    @Test("No break without both sections; floats alone keep the mark")
     func noMarkWithOneSection() {
         let overlay = AppBarOverlay()
         // Drawn first, so each hide below is the render's own.
@@ -100,7 +102,7 @@ struct AppBarFloatOverlayTests {
         #expect(overlay.floatRule.isHidden)
         show(overlay, [item(1), item(3, floating: true)])
         show(overlay, [item(3, floating: true)])
-        #expect(overlay.floatMark.isHidden)
+        #expect(!overlay.floatMark.isHidden)
         #expect(overlay.floatRule.isHidden)
     }
 

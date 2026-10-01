@@ -124,8 +124,11 @@ struct ColorsCensusRenderTests {
             .atRest,
             "motion at rest"
         )
+        // The drawer draws its rows in two lists: the ones under
+        // the master's grey and the shelf glide's outside it
+        // (#1838); one tier, two orders.
         pin(
-            ColorsRowOrder.motionMore,
+            ColorsRowOrder.motionMore + ColorsRowOrder.motionShelf,
             .coloursAndMotion,
             .motion,
             .showMore,

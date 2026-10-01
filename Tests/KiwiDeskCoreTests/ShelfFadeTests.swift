@@ -103,16 +103,15 @@ struct ShelfFadeTests {
         guard !BarMotion.isReduced else { return }
         let before = BarMotion.shelfGlide
         defer { BarMotion.shelfGlide = before }
-        BarMotion.shelfGlide = 0.2
+        BarMotion.shelfGlide = 0.05
         let overlay = ShelfOverlay()
         var left = 0
         overlay.onLeft = { left += 1 }
         show(overlay, Self.section())
-        overlay.hide(animated: true)
-        try await Task.sleep(for: .milliseconds(120))
-        overlay.hide(animated: true)
-        // The first fade's landing, not a second one 200 ms later.
-        try await Task.sleep(for: .milliseconds(160))
+        #expect(overlay.hide(animated: true))
+        // Asked again mid-fade, the running fade is kept.
+        #expect(!overlay.hide(animated: true))
+        try await settle { left == 1 }
         #expect(left == 1)
         #expect(!overlay.isVisible)
     }
