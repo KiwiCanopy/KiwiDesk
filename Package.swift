@@ -6,6 +6,7 @@ import PackageDescription
 let swiftSettings: [SwiftSetting] = [
     .enableUpcomingFeature("ImmutableWeakCaptures"),
     .enableUpcomingFeature("MemberImportVisibility"),
+    .enableUpcomingFeature("InferIsolatedConformances"),
 ]
 
 let package = Package(
