@@ -209,7 +209,6 @@ KiwiDesk.move_to_space_and_follow("mail")
 KiwiDesk.move_to_space_and_follow(3)
 ```
 
-:::unreleased
 `move_to_space` and `move_to_space_and_follow` take an optional
 window id from [`get_state`](#get_state) after the space, and
 then move that window rather than the focused one:
@@ -217,7 +216,6 @@ then move that window rather than the focused one:
 carries is refused. A window moved into the current Space takes
 focus there; one moved between other Spaces leaves the current
 Space's focus where it is.
-:::
 
 ### focus_desktop
 
@@ -393,13 +391,11 @@ KiwiDesk.pin_space_to_display("mail", 2)
 
 ### create_space
 
-:::unreleased
 **Expects:** a space identifier, optionally a layout mode
 (`"bsp"`, `"stack"`, `"scrolling"`, `"grid"`, `"monocle"`,
 `"track"`, `"floating"`), and optionally a scope: `"session"`
 (the default) or `"profile"`. The scope may stand in the mode's
 place.
-:::
 
 **Does:** creates the space and resolves it onto a display.
 Spaces also appear the first time you reference one
@@ -407,7 +403,6 @@ Spaces also appear the first time you reference one
 creates one, and its mode, up front. If the space already
 exists, only the mode is set.
 
-:::unreleased
 Run from `init.lua`, the space is declared by the script. Run
 any other way — a keybinding, the CLI — it is **temporary**: a
 switch to another profile holds it while it has windows and drops
@@ -421,7 +416,6 @@ what **Add Space ‹name› to this profile** in Settings ▸ Spaces
 does. It is
 refused while no profile is live, and for a space `init.lua` or
 a built-in layout declares.
-:::
 
 **Example:**
 
@@ -431,13 +425,11 @@ KiwiDesk.create_space("scratch", "monocle")
 
 ### delete_space
 
-:::unreleased
 **Expects:** a space identifier, and optionally a scope:
 `"session"` (the default) or `"profile"`, which also removes
 the space from the live profile's file. `"profile"` is refused
 while no profile is live, and for a space `init.lua` or a
 built-in layout declares.
-:::
 
 **Does:** removes the space after moving its windows to the
 fallback space (or the first surviving space), and clears the
@@ -656,7 +648,6 @@ KiwiDesk.set_swap_skips_cascade(true)
 
 ### set_float_placement
 
-:::unreleased
 **Expects:** `"center"` (default) or `"keep"`.
 
 **Does:** where a window lands when `make_floating` or a
@@ -694,7 +685,6 @@ nudge off becomes `"keep"`, while an `init.lua` call to
 ```lua
 KiwiDesk.set_float_placement("keep")
 ```
-:::
 
 ### set_float_scale_on_display_change
 
@@ -737,17 +727,14 @@ window with no overlay — stays silent.
 Only hotkey fires cue; the same command over CLI/IPC stays
 silent, and a held chord sounds once per hold.
 
-:::unreleased
 A refusal only the app can give — [`new_window`](#new_window)
 finding no New Window, [`close_window`](#close_window) no close
 button — draws without the sound: it arrives after the app
 answers, when the hotkey fire is over.
-:::
 
 The retired `resize.feedback` key is dropped by the one-shot
 migration, its value not carried across.
 
-:::unreleased
 The GUI twin is **General ▸ Play the alert sound when an action
 can't apply**. The setting is app-wide: it is stored in
 `gui.json` as `refusal.sound`, no profile carries it, and
@@ -761,7 +748,6 @@ The verb changes the running value only: it never reaches
 KiwiDesk loads its config. In a Lua-owned setup, `init.lua` is
 where it is kept, and the General row is greyed. **Adopt into
 the GUI** keeps the value `init.lua` set.
-:::
 
 **Example:**
 
@@ -1875,16 +1861,13 @@ windows by the strip.
 Both bars hide on a screen showing a native-fullscreen app and
 return with the Desktop.
 
-:::unreleased
 They also hide on a screen whose front window — one KiwiDesk
 manages — fills that whole screen, such as a slide show or a
 borderless-fullscreen game or player, and return when another
 window comes in front or that window stops filling the screen.
 KiwiDesk leaves such a window where its app put it and never
 moves it clear of the bars.
-:::
 
-:::unreleased
 Each bar sets its own edge —
 [`space_bar.set_edge`](#space_barset_edge) and
 [`app_bar.set_edge`](#app_barset_edge). On the same edge the two
@@ -1899,7 +1882,6 @@ the bars split, switching a Space into or out of such a layout
 moves its windows by the App Bar's strip. Where the two edges
 meet at a corner, the Space Bar runs the whole edge and the App
 Bar stops at it.
-:::
 
 While both bars show they are one plate with two sections, in
 the order `set_order` gives them, placed along the edge as one
@@ -1989,7 +1971,6 @@ kiwishelf.set_thickness(32)
 
 ### kiwishelf.set_glyph_size
 
-:::unreleased
 **Expects:** points; `0` (default) means auto. A negative value
 is raised to `0`.
 
@@ -2010,7 +1991,6 @@ on each side: `28` on a `40` pt shelf leaves `6` pt.
 ```lua
 kiwishelf.set_glyph_size(16)
 ```
-:::
 
 ### kiwishelf.set_outer_margin
 
@@ -2139,7 +2119,6 @@ kiwishelf.set_corner_roundness(50)
 
 ### kiwishelf.set_border
 
-:::unreleased
 **Expects:** `true` or `false` (default `false`).
 
 **Does:** strokes a line around the plate, or around each item's
@@ -2155,11 +2134,9 @@ off.
 ```lua
 kiwishelf.set_border(true)
 ```
-:::
 
 ### kiwishelf.set_border_width
 
-:::unreleased
 **Expects:** points, 1–4 (default `1`); values outside the range
 are clamped.
 
@@ -2171,11 +2148,9 @@ are clamped.
 ```lua
 kiwishelf.set_border_width(2)
 ```
-:::
 
 ### kiwishelf.set_highlight_width
 
-:::unreleased
 **Expects:** points, 1–6 (default `2`); values outside the range
 are clamped.
 
@@ -2190,7 +2165,6 @@ its own `set_active_indicator`.
 ```lua
 kiwishelf.set_highlight_width(3)
 ```
-:::
 
 ### kiwishelf.set_item_gap
 
@@ -2213,11 +2187,9 @@ kiwishelf.set_item_gap(6)
 **Does:** if `0`, each bar's text scales with the thickness; any
 positive value pins the font size for both bars.
 
-:::unreleased
 An automatic font size follows the
 [`glyph_size`](#kiwishelfset_glyph_size) where one is set: Space
 numbers draw at about half of it and titles at about 0.42 of it.
-:::
 
 **Example:**
 
@@ -2227,7 +2199,6 @@ kiwishelf.set_font_size(0)
 
 ### kiwishelf.set_font_family
 
-:::unreleased
 **Expects:** a font family name (default `"System"`).
 `"System"` and `"System Monospaced"` name the system's own faces;
 any other name is an installed family, as Font Book lists it.
@@ -2246,11 +2217,9 @@ brings it back.
 ```lua
 kiwishelf.set_font_family("Menlo")
 ```
-:::
 
 ### kiwishelf.set_font_weight
 
-:::unreleased
 **Expects:** a weight from `100` to `900` (default `400`), or one
 of the names `"ultralight"` (100), `"thin"`, `"light"`,
 `"regular"`, `"medium"`, `"semibold"`, `"bold"`, `"heavy"` and
@@ -2268,7 +2237,6 @@ it.
 ```lua
 kiwishelf.set_font_weight("semibold")
 ```
-:::
 
 ### kiwishelf.set_icon_source
 
@@ -2348,11 +2316,9 @@ the focused window's glyph is the Space Bar's own
   overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
   you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
 
-:::unreleased
 `kiwishelf.set_border_color` sets the
 [border](#kiwishelfset_border)'s colour (default `#EAF3EE59`, the
 item colour at 35% opacity). Every bundled palette carries one.
-:::
 
 **Example:**
 
@@ -2389,7 +2355,6 @@ content`.
 - `space_bar.set_title_cap` →
   [`space_bar.set_front_app_title_cap`](#space_barset_front_app_title_cap).
 
-:::unreleased
 `kiwishelf.set_edge` is retired too → `space_bar.set_edge`: each
 bar sets its own edge again, and `app_bar.set_edge` is the App
 Bar's. `monocle.set_app_bar_edge` and `scroll.set_app_bar_edge`
@@ -2399,9 +2364,7 @@ rewritten once, and every setup keeps its bars where they were: a
 stored KiwiShelf edge becomes both bars' edge, and a profile from
 before KiwiShelf keeps each bar's own edge — the App Bar at the
 bottom where it stored none.
-:::
 
-:::unreleased
 `app_bar.set_content`, `monocle.set_app_bar_content` and
 `scroll.set_app_bar_content` are retired → nothing: the App Bar
 always draws each item's icon and title, and a vertical one its
@@ -2410,7 +2373,6 @@ draws each item's icon and title`. A saved profile drops its
 stored `content` once, and a backup as it is read, so a bar that
 showed only titles gains its icons, and one that showed only icons
 gains its titles.
-:::
 
 The `gap` active indicator is removed: `set_active_indicator`
 and its per-layout twins refuse it, naming the values that
@@ -2443,11 +2405,9 @@ monitors each display shows its own bar, on that display, for the
 space it is showing, and dragging an item reorders that display's
 space.
 
-:::unreleased
 The space's floating windows follow the row, past a thin line and
 the floating symbol; they focus on a click, cannot be dragged, and
 are never grouped.
-:::
 
 The bar sits on [KiwiShelf](#kiwishelf), which sets its
 thickness, margins, background, colours and app glyph style.
@@ -2468,7 +2428,6 @@ places:
 
 ### app_bar.set_edge
 
-:::unreleased
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
 (default `"top"`; the starter setup seeds `"bottom"`).
 
@@ -2483,7 +2442,6 @@ it does not follow a layout's orientation.
 ```lua
 app_bar.set_edge("bottom")
 ```
-:::
 
 ### app_bar.set_active_indicator
 
@@ -2557,10 +2515,8 @@ overrides are the same setters prefixed with the layout name:
   `scroll.set_app_bar_active_indicator`,
   `scroll.set_app_bar_group_adjacent_windows`, etc.
 
-:::unreleased
 The App Bar's edge ([`app_bar.set_edge`](#app_barset_edge)) takes
 no per-layout override either.
-:::
 
 **Example:**
 
@@ -2586,11 +2542,9 @@ stays collapsed and takes the focused accent. The user guide's
 [Space Bar](user-guide.md#space-bar) section covers the badges,
 what a click on a glyph does and the drag-onto-a-Space gesture.
 
-:::unreleased
 Turning
 [`space_bar.set_group_adjacent_windows`](#space_barset_group_adjacent_windows)
 off gives each window its own glyph.
-:::
 
 The bar is layout-independent and sits on
 [KiwiShelf](#kiwishelf), which sets its thickness, margins,
@@ -2615,7 +2569,6 @@ space_bar.set_enabled(true)
 
 ### space_bar.set_edge
 
-:::unreleased
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
 (default `"top"`).
 
@@ -2629,11 +2582,9 @@ edge is absolute — it does not follow a layout's orientation.
 ```lua
 space_bar.set_edge("left")
 ```
-:::
 
 ### space_bar.set_glyph_span
 
-:::unreleased
 **Expects:** an integer `1`–`12` (default `5`); out-of-range
 values clamp.
 
@@ -2653,11 +2604,9 @@ Space only, not how many Spaces the bar shows. Replaces
 ```lua
 space_bar.set_glyph_span(8)
 ```
-:::
 
 ### space_bar.set_glyph_gap
 
-:::unreleased
 **Expects:** points (default `0`; a negative value is raised to
 `0`).
 
@@ -2671,11 +2620,9 @@ between Space items themselves is the shelf's
 ```lua
 space_bar.set_glyph_gap(4)
 ```
-:::
 
 ### space_bar.set_inactive_content
 
-:::unreleased
 **Expects:** `"apps"` or `"count"` (default `"apps"`).
 
 **Does:** sets what a Space item draws while its screen shows
@@ -2694,11 +2641,9 @@ drops its sticky and floating badges.
 ```lua
 space_bar.set_inactive_content("count")
 ```
-:::
 
 ### space_bar.set_item_label
 
-:::unreleased
 **Expects:** `"identifier"` or `"layout"` (default
 `"identifier"`).
 
@@ -2714,7 +2659,6 @@ name.
 ```lua
 space_bar.set_item_label("layout")
 ```
-:::
 
 ### space_bar.set_active_indicator
 
@@ -2787,7 +2731,6 @@ title.
 space_bar.set_front_app_title_cap(25)
 ```
 
-:::unreleased
 ### space_bar.set_group_adjacent_windows
 
 **Expects:** boolean (default `true`).
@@ -2802,7 +2745,6 @@ focuses it. `glyph_span` counts glyphs either way.
 ```lua
 space_bar.set_group_adjacent_windows(false)
 ```
-:::
 
 ### space_bar.set_hide_empty
 
@@ -3101,7 +3043,6 @@ switch ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 drag.set_liquid_glass(false)
 ```
 
-:::unreleased
 ### Retired drag verbs
 
 These verbs are retired. A call in `init.lua` is reported in
@@ -3116,7 +3057,6 @@ with `<verb> was retired — use <replacement>`.
 
 A saved profile's `drag.corner_radius` and each visual's
 `border_width` are no longer read.
-:::
 
 ## Focus Border
 
@@ -3154,10 +3094,8 @@ touch: each border reaches its width into the gap, so with
 unfocused borders on, 5 pt is the widest width at which two of
 them fill the 10 pt gap without overlapping.
 
-:::unreleased
 The drag ghost and the drop zone draw their stroke at this width
 too.
-:::
 
 **Example:**
 
@@ -3214,11 +3152,9 @@ border.set_unfocused_color("#8E8E93CC")
 **Does:** `rounded` (default) matches the real macOS window
 corner radius, queried per window; `square` draws sharp corners.
 
-:::unreleased
 The drag ghost and the drop zone take this style too: `rounded`
 draws them at the system window radius, `square` with no
 rounding.
-:::
 
 **Example:**
 
@@ -3275,7 +3211,6 @@ border.set_glow_size(8)   -- a fixed, wider bloom
 border.set_glow_size(0)   -- back to automatic
 ```
 
-:::unreleased
 ### border.set_sheen
 
 **Expects:** a number from `-1` to `1` (default `0.5`). A value
@@ -3303,7 +3238,6 @@ Glass** switch on Colours &amp; Animations, reading `+50%`,
 ```lua
 border.set_sheen(-0.3)   -- a slightly darker top
 ```
-:::
 
 ### border.set_draw_order
 
@@ -3387,11 +3321,9 @@ Only edges **shared with a neighbor** trade area — pulling a
 window's outer, screen-side edge has nobody to trade with and
 snaps back.
 
-:::unreleased
 Scrolling is the exception: one slot size serves the whole row,
 so any edge of a column resizes it, including the outer edge of
 the first or last column.
-:::
 
 The layout follows the size the window actually reached when you
 release. If you flick faster than a slow app resizes its window
@@ -3428,10 +3360,8 @@ on a window in an inactive space (cmd+tab into a stashed window),
 the warp waits until KiwiDesk follows focus and pulls that space
 forward. Clicking an app-bar item warps too.
 
-:::unreleased
 Also togglable in the Settings app under **Shortcuts & Gestures ▸
 Mouse & trackpad**.
-:::
 
 **Example:**
 
@@ -3441,7 +3371,6 @@ mouse.set_follows_focus(true)
 
 ## Scroll Gestures
 
-:::unreleased
 Hold **⌃⌥** (the default; [`set_pan`](#scroll_gestureset_pan)
 changes it) and scroll — a two-finger swipe on a trackpad or the
 mouse wheel, along either axis — and focus moves one window on
@@ -3512,11 +3441,9 @@ override still wins, nothing reaches `gui.json`, and the value
 lasts until KiwiDesk next loads its config. In a Lua-owned setup
 `init.lua` is where it is kept, and **Adopt into the GUI** keeps
 the base it set.
-:::
 
 ### scroll_gesture.set_pan
 
-:::unreleased
 **Expects:** modifiers joined by `+` — `control` (`ctrl`),
 `option` (`opt`, `alt`), `shift`, `command` (`cmd`) — default
 `"control+option"`; `""` turns the gesture off.
@@ -3533,11 +3460,9 @@ in the base or in the live profile's override.
 scroll_gesture.set_pan("control+option+shift")
 scroll_gesture.set_pan("")   -- off
 ```
-:::
 
 ### scroll_gesture.set_space_step
 
-:::unreleased
 **Expects:** modifiers, as for
 [`set_pan`](#scroll_gestureset_pan) (default
 `"control+option+command"`); `""` turns the gesture off.
@@ -3553,11 +3478,9 @@ chords `set_pan` does, with the pan's chord in place of its own;
 scroll_gesture.set_space_step("control+option+shift")
 scroll_gesture.set_space_step("")   -- off
 ```
-:::
 
 ### scroll_gesture.set_natural_scrolling
 
-:::unreleased
 **Expects:** a boolean, then optionally `"trackpad"` or
 `"mouse"` (default `true` for both).
 
@@ -3573,11 +3496,9 @@ to.
 ```lua
 scroll_gesture.set_natural_scrolling(false, "mouse")
 ```
-:::
 
 ### scroll_gesture.set_long_swipes
 
-:::unreleased
 **Expects:** a boolean (default `false`).
 
 **Does:** on, a swipe moves one more window every
@@ -3592,11 +3513,9 @@ always steps one Space per swipe.
 ```lua
 scroll_gesture.set_long_swipes(true)
 ```
-:::
 
 ### scroll_gesture.set_step_distance
 
-:::unreleased
 **Expects:** points, 10–1000 (default `60`); a value outside the
 range fails.
 
@@ -3609,7 +3528,6 @@ does nothing, while long swipes are off.
 ```lua
 scroll_gesture.set_step_distance(120)
 ```
-:::
 
 ## When Windows No Longer Fit
 
@@ -3677,7 +3595,6 @@ managed window or KiwiDesk focus border. Auxiliary AX proxy
 windows with no matching WindowServer window are ignored by the
 same policy.
 
-:::unreleased
 A **shadow window** — a window with no title-bar buttons and no
 content beside a real window of the same app (Orion's "Orion
 Preview") — is not managed either: it takes no slot and appears
@@ -3685,7 +3602,6 @@ in no bar, whatever its size or position. A `float_rules` entry
 does not bring it back. A window with neither buttons nor content
 that is the first its app shows is managed after a short wait;
 one opened beside a managed window of its app at once.
-:::
 
 **KiwiDesk's Settings window** is tracked and **tiled like any
 other window** — it takes a layout slot, appears in the App Bar,
@@ -3817,14 +3733,12 @@ by a rule.
 
 ## Making Windows Floating or Tiled
 
-:::unreleased
 `make_floating`, `make_tiled` and `toggle_floating` take an
 optional window id from [`get_state`](#get_state), and then act on
 that window rather than the focused one:
 `KiwiDesk.make_floating(4711)`. An id no managed window carries is
 refused, and a window on a Space no screen shows takes its floating
 frame when that Space is next shown.
-:::
 
 ### make_floating
 
@@ -3846,11 +3760,9 @@ window that closes while untitled has no identity to match and
 loses it) and applies only to that window — use `float_rules` to
 float every window of an app.
 
-:::unreleased
 A window that a `float_rules` entry, KiwiDesk's dialog and panel
 detection, or its app having no Dock icon already floats is left
 as it is, and nothing is remembered for it.
-:::
 
 **Example:**
 
@@ -3865,7 +3777,6 @@ KiwiDesk.make_floating()
 **Does:** returns the focused window to its space's tiling
 layout.
 
-:::unreleased
 It undoes a `make_floating`: from then on
 `float_rules` and KiwiDesk's own detection decide whether it
 floats, including rules you add later. A window floated by a
@@ -3882,7 +3793,6 @@ so it stays floating there; `make_tiled` undoes it.
 
 `make_auto` is retired, and `make_tiled` does its job: a call
 fails with `make_auto was retired — use make_tiled`.
-:::
 
 **Example:**
 
@@ -3906,10 +3816,8 @@ and is the only float verb offered in the Settings shortcut
 list; the explicit `make_*` verbs remain for scripts that need a
 specific direction.
 
-:::unreleased
 The window's on-window floating mark follows the setting as its
 Space Bar float badge does.
-:::
 
 **Example:**
 
@@ -3919,7 +3827,6 @@ KiwiDesk.bind("cmd+alt+f", function()
 end)
 ```
 
-:::unreleased
 ## Opening and Closing Windows
 
 Both verbs take an optional window id from
@@ -3963,7 +3870,6 @@ KiwiDesk.bind("cmd+alt+w", function()
     KiwiDesk.close_window()
 end)
 ```
-:::
 
 ## Sticky Windows
 
@@ -4196,11 +4102,9 @@ color, or the bare glyph on Automatic. Settings writes this
 through the one **Liquid Glass** switch
 ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 
-:::unreleased
 The floating mark draws the same way, tinted by
 [`floating.set_color`](#floatingset_color) where no sticky glyph
 shares its plate.
-:::
 
 **Example:**
 
@@ -4208,7 +4112,6 @@ shares its plate.
 sticky.set_liquid_glass(false)
 ```
 
-:::unreleased
 ### floating.set_mark
 
 **Expects:** boolean (default `true`).
@@ -4248,7 +4151,6 @@ is Automatic; any non-empty value must parse as a hex color.
 ```lua
 floating.set_color("#8E5DE0")
 ```
-:::
 
 ## Launching Apps
 
@@ -4286,7 +4188,6 @@ Desktop bridge, or where the per-Desktop window list cannot be
 read, other Desktops are not consulted — see
 [Accepted limitations](accepted-limitations.md).
 
-:::unreleased
 A first press focuses the app window you used **most recently**
 among the ones KiwiDesk is tracking — its windows on the
 Desktops on screen — switching to its Space. Right after
@@ -4298,7 +4199,6 @@ has none on the Desktops on screen, as described above.
 If the app is running with **no window at all** — you closed
 its last one and it stayed open, as Safari does — the shortcut
 asks it for a new window, the same as clicking it in the Dock.
-:::
 
 **Example:**
 
@@ -5042,14 +4942,12 @@ profile itself.
 **Expects:** a space identifier (or `""` to clear back to the first
 space).
 
-:::unreleased
 **Does:** sets where windows land when their space goes —
 `delete_space`, or a profile switch away from a hand-written
 config with no profile or Standard live, which has nothing to
 hold the space for. Without an explicit choice (or when the
 chosen space doesn't exist in the profile), windows land in the
 **first space** of the profile's ordered list.
-:::
 
 **Example:**
 
@@ -5165,12 +5063,10 @@ you switch away, KiwiDesk files which space each window was in
 under the profile you are leaving; when you switch back, it puts
 them back.
 
-:::unreleased
 A window the incoming profile has never seen — opened while
 another profile was up — stays where it is: in a space the
 profile declares, or in its own space, now held, when the profile
 does not declare it (below).
-:::
 
 This happens on any profile CHANGE — an explicit `load_profile`,
 a Desktop binding swapping profiles under you, or a monitor
@@ -5193,7 +5089,6 @@ again. A held space keeps its icon and mode — `reload_config`
 does not reset its mode
 ([#1507](https://github.com/KiwiCanopy/KiwiDesk/issues/1507)).
 
-:::unreleased
 **Every switch holds what it does not name.** The same hold runs
 on every profile CHANGE — `load_profile` of another profile, a
 Desktop binding, a monitor change, or a built-in Standard taking
@@ -5206,20 +5101,15 @@ away from a hand-written `init.lua` with no profile or Standard
 live holds only a gone monitor's spaces, and forwards the rest to
 the fallback space
 ([#1790](https://github.com/KiwiCanopy/KiwiDesk/issues/1790)).
-:::
 
-:::unreleased
 A held space wears a two-screen marker in the Space Bar. A temporary
 space held this way comes back temporary.
-:::
 
-:::unreleased
 Held spaces keep their order: when a switch holds them, a
 numbered held space after a renumbered one is renumbered past it
 too, even where its own name is free, and a later renumber keeps
 the Space Bar in that order
 ([#1664](https://github.com/KiwiCanopy/KiwiDesk/issues/1664)).
-:::
 
 Once its monitor is back, a held space goes home when the
 arrangement then live is the one it left — the same profile, or
@@ -5232,14 +5122,11 @@ hand-written `init.lua` and no profile for the connected
 monitors, a reconnect only places spaces, and a held space stays
 held.
 
-:::unreleased
 A window the incoming profile remembers in one of its own spaces
 goes there, even out of a held space; a held space keeps only
 the windows that profile has never seen, and is dropped once
 empty.
-:::
 
-:::unreleased
 A held space is dropped once no window is left in it on any
 Desktop, and by `delete_space`, which forwards its windows to the
 fallback space; resetting every setting ends every hold. A
@@ -5247,9 +5134,7 @@ fallback space; resetting every setting ends every hold. A
 spaces the profile does not declare. `save_profile`, the
 `gui.json` space list and pins and the per-profile record above
 never include one.
-:::
 
-:::unreleased
 Held spaces survive a KiwiDesk restart, an update and a crash:
 every session snapshot records them, and a held space whose
 monitor is connected at launch goes home at once by the rule
@@ -5257,7 +5142,6 @@ above. A held space whose windows were all closed meanwhile
 ends by the rule above once macOS confirms they are gone, and a
 restart of the Mac ends every hold
 ([#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646)).
-:::
 
 ### Profile Monitor Sets
 
@@ -5656,7 +5540,6 @@ while `set_on_monocle_focus` is off.
 animations.set_monocle_flip_duration(300)
 ```
 
-:::unreleased
 ### animations.set_on_shelf, animations.set_shelf_duration
 
 **Expects:**
@@ -5677,7 +5560,6 @@ window-animation switches, and Reduce Motion keeps it off.
 ```lua
 animations.set_shelf_duration(1000)
 ```
-:::
 
 ### enable_wake_restore, set_wake_restore_delay
 
@@ -5737,7 +5619,6 @@ Windows on a display's background Desktops cannot be
 repositioned without disabling SIP, which KiwiDesk never does —
 the visible Desktop per display is the arranged scope.
 
-:::unreleased
 Two restarts arrange nothing: an update's **Install and
 Relaunch**, and `kiwidesk service restart` of a running service
 whose new program is signed like the running one. Windows stay
@@ -5749,7 +5630,6 @@ fresh. Every other stop, `service stop` and an automatic update
 included, arranges per `quit.layout`. If the new process never
 comes up, the windows stay as a crash leaves them, and the next
 launch restores the arrangement.
-:::
 
 ### quit.set_layout
 
@@ -5793,7 +5673,6 @@ grid from its window count `N` and the density target `T` (see
 teardown placement: windows stay on their own display, and
 nothing is managed afterwards. Default: `grid`.
 
-:::unreleased
 The setting is app-wide: it is stored in `gui.json` as
 `quit.layout`, no profile carries it, and loading a profile never
 changes it. It has no Settings row while `grid` is its one value.
@@ -5813,7 +5692,6 @@ grid is the smallest step of the ladder 3×2 → 4×2 → 4×3 → 4×4
 in piles `T` deep — at the standard 5: up to 30 windows 3×2, up
 to 40 4×2, up to 60 4×3, beyond that 4×4. Windows pile only once
 they outnumber its cells; until then each still takes a tile.
-:::
 
 **Example:**
 
@@ -5832,7 +5710,6 @@ count, and never pass 4×4; the target only moves the growth
 thresholds. It is not a hard maximum: past 4×4, additional
 windows keep cascading in its cells. Default: `5`.
 
-:::unreleased
 The GUI twin is **General ▸ Windows per pile on quit**. The
 setting is app-wide: it is stored in `gui.json` as
 `quit.grid_target_depth`, no profile carries it, and loading a
@@ -5843,7 +5720,6 @@ Lua-owned setup are as for
 The thresholds sit on the ladder 3×2 → 4×2 → 4×3 → 4×4: 3×2
 through `6×T` windows, 4×2 through `8×T`, 4×3 through `12×T`,
 4×4 above. Up to six windows tile whatever the target.
-:::
 
 **Example:**
 

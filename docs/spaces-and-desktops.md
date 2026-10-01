@@ -44,7 +44,6 @@ profiles have a `1`, it stays on screen and takes the new
 profile's settings. Re-applying the profile that is already
 live changes nothing, so a monitor reconnect is harmless.
 
-:::unreleased
 **Switching holds the Spaces it does not name.** When a
 different profile or a built-in Standard becomes live, each Space
 it does not have, and that still has windows in it, is **held**
@@ -53,7 +52,6 @@ screen was unplugged or is still there. A window the new profile
 has had before goes back to the Space it had it in, so a held
 Space keeps only windows that profile has never seen, and one
 left empty goes away.
-:::
 
 **Unplugging a screen holds its Spaces.** When unplugging a
 screen makes a different profile live, each Space that was on
@@ -65,7 +63,6 @@ your own `1`–`5` becomes `6`, and a held `Mail` beside your own
 `Mail` becomes a number too. A held Space moves to a new number
 again whenever a profile that loads uses its current one.
 
-:::unreleased
 Where KiwiDesk manages your config, a Space missing its go-to,
 move or move-and-follow digit shortcut gets it for its own number —
 a held `6` gets `⌃⌥6` — if that key is still free. Any other Space
@@ -73,17 +70,13 @@ takes the digit of its place among the first ten, unless a
 numbered Space owns that digit. A Space never gets a second
 digit shortcut for the same thing, and reordering your Spaces never
 changes them.
-:::
 
-:::unreleased
 Held Spaces keep the order they had: when a screen's Spaces are
 held, a numbered Space after a renumbered one is renumbered after
 it too, so the Space Bar and the digit shortcuts list them in the
 order the screen had them. A later renumber keeps the Space Bar in
 that order.
-:::
 
-:::unreleased
 The Space Bar draws a two-screen marker after a held Space's
 identifier, and VoiceOver reads the profile it was held from, the
 screen it came from, its old name when it was renumbered, and that
@@ -101,7 +94,6 @@ Spaces, or save the profile under a name with `save_profile`.
 Switch to another profile while it holds windows and it is held
 like any other Space, and comes back temporary; an empty one goes
 away on the switch.
-:::
 
 Plug the screen back in and a held Space goes back to it with
 everything in it, windows opened while it was held included, when
@@ -109,7 +101,6 @@ what comes back is the profile (or built-in Standard) it left and
 that has a Space of the held one's original name. Otherwise it
 moves back onto its screen and stays held.
 
-:::unreleased
 A held Space goes away once no window is left in it; a window on
 another Desktop, or hidden with its app, still counts. Loading a
 profile does not end a hold, and neither does a Desktop binding:
@@ -117,16 +108,13 @@ it ends when the profile or Standard it left comes back and has
 a Space of its original name, when it empties, or when you reset
 every setting. `delete_space` moves its windows to the fallback
 Space (`set_fallback_space`), which empties it.
-:::
 
-:::unreleased
 Held Spaces come back when KiwiDesk quits and reopens, updates or
 crashes — a window hidden, on another Desktop or still opening
 included — and go home at once, as above, if their screen is back
 by then. A restart of the Mac ends them, since macOS reopens every
 window as a new one. A window of a hidden app goes home with its
 held Space too, and comes back there when you show the app.
-:::
 
 Every Space sits on a screen. In Settings the **Monitors**
 section is a picture of your desk: drag a Space chip onto the

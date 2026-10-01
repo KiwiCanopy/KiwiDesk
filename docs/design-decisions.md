@@ -599,7 +599,6 @@ every skipped version's "Before you update" line is shown, since
 a caution published two versions ago still applies to someone
 crossing it now. One version behind looks like any other offer.
 
-:::unreleased
 **One tab per group, not a disclosure each (#1666).** The window
 first shipped every group as a disclosure beneath a row of
 per-type links that opened one and scrolled to it — two
@@ -616,7 +615,6 @@ does not know carries a title nobody measured, so the strip
 turns into a menu on the same selection wherever it would not
 fit. The window's height is the tallest tab's, so a switch
 never resizes it.
-:::
 
 **What stays Sparkle's:** checking, "you're up to date", and the
 download and install themselves. The window takes over at the
@@ -648,7 +646,6 @@ defaults rather than the config folder: it describes this Mac,
 and a backup restored elsewhere must neither replay nor swallow
 it.
 
-:::unreleased
 **After the window's own Install, "What's new" narrates the
 relaunch (#1667).** The user has read the notes but has not seen
 the relaunch, in which windows move and re-tile with nothing on
@@ -663,9 +660,7 @@ still never over the permission tour. The install carries the
 notes it merged across the relaunch, because the fetch a normal
 "What's new" waits on usually returns after boot has finished,
 and the line would then narrate nothing.
-:::
 
-:::unreleased
 **"What's new" ends with what comes next, on a list that expires
 (#1813).** Under Highlights sits a card titled "Next on my list":
 up to three items from `ROADMAP.md`, dated, with a link to
@@ -690,7 +685,6 @@ only as honest as its last correction. On the relaunch after the
 window's own Install the card is best effort: it shows what the
 offer fetched before the install began, since that relaunch opens
 before anything could be fetched again.
-:::
 
 **What a 1.x client sees is unchanged.** The feed keeps its HTML
 description beside the structured notes, so a copy that predates
@@ -858,11 +852,9 @@ about the following release: whether 0.9.7 turned out to be the
 last beta was not knowable on the day it shipped, and the notes
 did not need to answer it.
 
-:::unreleased
 What comes next has one home, and it is not the release body:
 [a dated list that expires](#kiwidesk-draws-its-own-update-window-1542),
 kept in a file that can be corrected the day plans change.
-:::
 
 **A fix to something that has not shipped is not news; it is
 part of the thing it fixes.** 1.2.0 brought Liquid Glass to
@@ -1673,7 +1665,6 @@ indistinguishable from "SkyLight unavailable" — and unavailable
 must keep the single-Desktop fallback fully alive, so a lookup
 miss always counts as a Desktop.
 
-:::unreleased
 **A presentation in front stands the shelf down the same way
 (#1787).** A window filling its whole screen — the float-region
 entry's verdict — is a slide show or a borderless-fullscreen
@@ -1694,7 +1685,6 @@ honored focus, a retile or a crossing, so a window of an app
 KiwiDesk ignores stepping in front of a show leaves the shelf
 down until the next of those, and a screen-filling window
 KiwiDesk does not track keeps the shelf drawn over it.
-:::
 
 "Without a destroy" is AppKit's transition, not every app's
 ([#1272](https://github.com/KiwiCanopy/KiwiDesk/issues/1272)).
@@ -2385,7 +2375,6 @@ since in both the app did activate. An app running as several
 processes qualifies "the app macOS activated last" per process —
 the #1785 entry below.
 
-:::unreleased
 ### A shadow window is judged by its buttoned sibling; a pid LaunchServices cannot name is no identity (#1785)
 
 **[Rationale]**
@@ -2463,7 +2452,6 @@ be re-adopted as new five seconds later. So a missing record
 detaches only a process the process table says is gone; until
 then the policy last read stands, for the float verdicts as much
 as for the gates.
-:::
 
 ### An ignored panel's dismissal is a race; provenance ends it
 
@@ -3400,7 +3388,6 @@ those refusals draw nothing, so they must say nothing, where a
 sound placed one level up — on the refusal funnel, or beside the
 drawing call — would have made them audible-but-invisible.
 
-:::unreleased
 One family draws without the sound by construction: a refusal
 only an AX walk of another app can give (#1518's New Window and
 Close Window). The walk runs off the main actor and answers after
@@ -3408,7 +3395,6 @@ the hotkey fire that asked has ended, and the sound is a fire's,
 so the pill is the whole cue. `RefusalCueSeamTests` names the
 unsounded pill door's callers, so a third is a decision rather
 than a slip.
-:::
 
 **The setting is OFF by default, and the DECODER is what
 delivers that** — the retired `resize.feedback` is not
@@ -3428,14 +3414,12 @@ while keeping the stored `true` would have made every existing
 install noisier at limits it currently hits silently. So the
 crossing drops the retired key rather than carrying it.
 
-:::unreleased
 Where the switch sits is a STORAGE decision wearing a placement
 question: it is on General because the value is app-wide, in
 `gui.json`, and written the moment it changes. The storage, the
 crossing out of the profiles, and why General's card needs the
 immediate write are argued once, in [Spaces, profiles & config
 ownership](#spaces-profiles--config-ownership) (#1741).
-:::
 
 **An arrow means a resize stopped; a non-arrow means there is
 no resize here (#1260).** [Principle] The pill carries two kinds
@@ -4108,7 +4092,6 @@ ring's actual presence would shift the float every time it gained
 or lost focus. And it goes to zero with borders off, so nothing
 is reserved for chrome that is not on screen.
 
-:::unreleased
 *A window filling its whole screen is presenting, and the float
 nets leave it where its app put it (#1787).* A slide show, or a
 borderless-fullscreen game or player, draws over the menu bar,
@@ -4135,7 +4118,6 @@ cost is a bar hidden behind a window the user sized to cover it.
 Every other reader of a window is ruled against the verdict one
 verb at a time
 ([#1788](https://github.com/KiwiCanopy/KiwiDesk/issues/1788)).
-:::
 
 **A resize nobody asked for is corrected on its own event
 (#1358).** [Principle] macOS's title-bar double-click zoom, its
@@ -4495,7 +4477,6 @@ the flag, and the same-app grouping it breaks keeps it with it
 withheld, and neither claims the space is anything but what the
 user set it to.
 
-:::unreleased
 **A window is tiled or floating, and Tile hands it back to the
 rules ([#1810](https://github.com/KiwiCanopy/KiwiDesk/issues/1810)).**
 [Principle] The automatic verdict — float rules, dialog, sheet,
@@ -4552,7 +4533,6 @@ it, which would let the verb and the window disagree. A
 floating-mode Space still floats every member through
 `EffectiveFloat`; that is the Space's layout, not a verdict about
 the window, and Tile does not reach it.
-:::
 
 ### Spaces, profiles & config ownership
 
@@ -4609,7 +4589,6 @@ Desktop switch between bound profiles the restore runs while the
 departing Desktop's windows are still on screen, and re-placing
 them re-ordered the row the return then rebuilt (#1387).
 
-:::unreleased
 The record rides the session snapshot, so a profile that is not
 live keeps it across a KiwiDesk quit, update or crash; it goes
 where the snapshot goes, which a Mac restart discards. It takes
@@ -4618,7 +4597,6 @@ unread until its profile returns, and a login that remints a
 remembered id then moves that window instead — the exposure the
 replay already accepts, so it is accepted here rather than gated
 on a session identity the replay does not have either (#1802).
-:::
 
 Its counterpart is deliberately NOT stored, and the reason is
 WHEN each record is authoritative rather than who owns the fact.
@@ -4743,7 +4721,6 @@ binding rules for adding one — sparse-diff mechanics, parity
 tests, mutation through the `KiwiCore` facade — live in
 `AGENTS.md` §5.
 
-:::unreleased
 **A setting nobody varies per profile is app-wide, and it
 crosses out of the profiles by ADOPTION at the first apply, not
 by a migration step (#1741).** [Rationale] The alert sound when
@@ -4842,7 +4819,6 @@ Behaviour held nothing, and the destination is retired rather
 than kept for an empty card: This Profile on Home now holds
 exactly the profile-scoped cards, which is what its heading
 says.
-:::
 
 **Floating windows hide with their space; visible-everywhere
 is Sticky, an explicit flag.** A floating window exempt from
@@ -5078,7 +5054,6 @@ screen's direction through a per-space override, since sideways
 on a tall screen — or down a wide one — is the mode at its
 worst (owner ruling, #1662).
 
-:::unreleased
 **One tuning per profile: a layout's is its screen's, the rest
 is the main screen's or the shipped default's.** `TilingSettings`
 is profile-wide, so a laptop beside a 27" has exactly one minimum
@@ -5099,9 +5074,7 @@ look a first run shows, move windows (owner, 2026-09-28, #1739).
 It is still one
 `TilingSettings`, never a per-display config behind the values
 the Settings window shows.
-:::
 
-:::unreleased
 **An unlisted mode in a sparse preset follows the screen it lands
 on, not a fixed `bsp`.** The workflow presets predate the
 screen-shape theory and several declare a mode for only some of
@@ -5118,9 +5091,7 @@ not knowable — a preset's **Layouts** sheet draws a plan for a screen COUNT,
 and a three-screen preset is drawn on a one-screen Mac — the
 historic `bsp` stands, because inventing a shape is a worse
 answer than the old one. (Owner ruling.)
-:::
 
-:::unreleased
 **A preset is its own choices over the screen's tuning, and it
 names the workflow, never the hardware** (owner ruling, #1663).
 A preset declares only what it chose on purpose — Minimalist's
@@ -5143,7 +5114,6 @@ naming every screen in the starter's own words rather than
 counting the others — the same for every card in it, so a
 per-card copy would say nothing about any one preset — and
 nothing stores it.
-:::
 
 **There is one Starter preset, and it is for the screens you
 have.** It is titled by its main screen's class — Laptop,
@@ -6739,7 +6709,6 @@ correct failure here — the screen without the sentence is exactly
 the screen that shipped before it, while the sentence with a
 rebound keymap behind it teaches someone else's keyboard.
 
-:::unreleased
 ### The tour's look is written through, and the tour owns its undo
 
 **[Principle]**
@@ -6801,7 +6770,6 @@ read from the live settings on every render: after hand-tuned
 colours no palette reads selected until a click, while a look
 whose shape is still live keeps its mark and says "Other colors"
 (`ShelfLookApplyTests` ▸ `matchReadsShapeThenColours`).
-:::
 
 ### The Mac Checklist counts what macOS can confirm
 
@@ -7299,12 +7267,10 @@ newly focused window. A still picture cannot show motion.
 GESTURE rather than a rest state — the Shortcuts & Gestures
 drawer's, argued under Shortcuts below — may move.)
 
-:::unreleased
 A thumbnail that is read rather than compared — the welcome
 tour's and the preset preview's — may move too; *A thumbnail that
 is read rather than compared*, below, argues why the Layouts
 chooser still may not.
-:::
 
 The premise is true and the conclusion does not follow. **A pair
 does not show motion either.** It shows two *states* and asks the
@@ -7370,7 +7336,6 @@ draw it at all — leaving it to the frame's clip is not the same
 thing, for the reason `SchematicCanvas.screen` states: the clip
 does not crop where a reader would assume.
 
-:::unreleased
 **A thumbnail that is read rather than compared plays its layout
 once** (#1750, owner ruling 2026-09-28). The welcome tour's Spaces
 step and the preset preview on Profiles each draw a layout
@@ -7450,7 +7415,6 @@ preview tile alike, one register on one sheet.
 the one layout that places nothing as if it placed windows in a
 tidy diagonal. The scattered frame is what the story ends on, so
 Settings draws it too, and the two can never disagree.
-:::
 
 **Home is the only navigator: a card grid, not a sidebar.** (#678
 turn 9, superseding the #68/#297 fixed source list.) A sidebar is
@@ -7992,7 +7956,6 @@ complaint on the channel no number of points can answer — so
 drawer built outside the wrapper too. (gui.md requires it of a
 title component, and a drawer title is one.)
 
-:::unreleased
 **A collapsible container that is a peer of the page's sections
 is a collapsible SECTION; one that qualifies a card stays a
 drawer.** (#1741, ui-designer ruling.) Shortcuts & Gestures ▸
@@ -8022,7 +7985,6 @@ heading, expanded/collapsed value
 and the Reduce Motion gate — so they differ in tier and chrome
 and in nothing the user operates. A second copy of that
 button is how the two would drift apart.
-:::
 
 **The header's accessory is a SIBLING of that button, never its
 child.** A drawer's `accessory:` slot may hold a control — the
@@ -8113,13 +8075,11 @@ rename/delete/make-default/preset-apply are immediate file
 **actions**, not settings — correctly outside this question.
 The Spaces tab's per-space layout picker stays staged.
 
-:::unreleased
 Bar **(a)** is about owning no profile state, not about which
 file a control writes: General's alert-sound and
 windows-per-pile rows clear it while writing `gui.json`, since
 what they write belongs to no profile (#1741, [Spaces, profiles
 & config ownership](#spaces-profiles--config-ownership)).
-:::
 
 **Three save verbs: Revert / Save a copy… / Save.** Seven
 differently-labeled verbs switching on invisible mode state
@@ -8402,7 +8362,6 @@ carries the why. The blocked tooltip's monitor wording appears
 only when a monitor set really is the only thing a save would
 write.
 
-:::unreleased
 **Quick-menu layout switch is session-only, and Settings does
 not narrate it.** Changing a space's layout from the status-bar
 quick menu updates the running state immediately and writes
@@ -8457,7 +8416,6 @@ seeds its modes from the SAVED profile, and live supplies only
 what is live's to state: which spaces exist, their order, their
 pins and the Main role — never a temporary or held Space, which
 the draft does not hold.
-:::
 
 "Edited" is one predicate — `SettingsDraftDiff`'s attribution,
 the same seam the save pill's count and the unsaved-changes
@@ -8928,7 +8886,6 @@ not read by colour alone. The larger pending-candidate model
 is scoped in #213 pending a design round — the *Steal*/*Go to*
 hard-block is the conflict UX until then.
 
-:::unreleased
 **The recorder stages like every control; only its suspend is
 live.** A recording, a clear or a deleted row changes the draft,
 and the running hotkeys are rebuilt from the saved files alone
@@ -8951,7 +8908,6 @@ captured rather than fired, and disarming resumes the saved
 table. What a recording can still tell before Save — a
 duplicate in the layer, "Assigned to…", a macOS collision — it
 tells; trying the chord is record, Save, press.
-:::
 
 **A catalog label's identity and its display text are two
 different fields.** `KeybindingCatalog`'s `NavCommand.label` (and
@@ -9904,7 +9860,6 @@ window order decides. One window, not all: the user parked them
 individually, and a shortcut that un-parks a session's worth of
 windows at once cannot be undone with one press.
 
-:::unreleased
 With no window at all — none up, none minimized, none on record
 on another Desktop — there is nothing to restore and
 `activate()` asks for no window, so the press would again do
@@ -9913,7 +9868,6 @@ reopen a Dock click sends, and the app opens a window by its
 own reopen handling. The reopen is kept to that case: with a
 minimized window present, the restore above already answers,
 from an order the user made. (#1840)
-:::
 
 **A time-windowed cycle reset** — treating a press after some
 idle gap as a fresh cycle — was rejected on the same argument
@@ -9927,7 +9881,6 @@ into the layout. If demand for reaching minimized windows ever
 materializes it belongs in a Lua-only verb, never in the default
 cycle. (#673)
 
-:::unreleased
 **Open or Focus lands on the window you used last (#1840).**
 [Rationale] A first press — no window of the app focused yet —
 focuses the app's most recently focused tracked window,
@@ -9965,7 +9918,6 @@ ordinary path, since raising it is a Desktop switch (#1345).
 Fixed behavior, no setting. The walk after it stays the #637
 ring: history picks where the first press lands, never the
 order of the presses that follow.
-:::
 
 **A hidden app holds no tiles, and the same rule covers an app
 that hides itself.** [Principle] A tile is room on screen given
@@ -10058,7 +10010,6 @@ everything just slid. Fixed behavior, no setting: no peer WM
 ships a knob here, and if demand materializes it becomes a
 Lua-only setting later. `CloseFocusReturnTests` pins all of it.
 
-:::unreleased
 **The page is "Shortcuts & Gestures", and what the mouse does is
 explained at its top** (#1726, owner and ui-designer 2026-09-27/28).
 A new user never discovers a mouse control from a window of
@@ -10112,7 +10063,6 @@ motion no one came for. So it plays at most once per visit, only
 on the click — a search hit, Go to or a diff jump opens the card
 to reach one row, whose wash is the motion that answers them —
 and never under Reduce Motion.
-:::
 
 **An entry lands with its feature, and greys where its surface is
 off.** Describing #1528's clicks before they ship teaches what the
@@ -10132,7 +10082,6 @@ the Focus card: it fires on every focus change KiwiDesk sees — a
 Space switch, a closed window, ⌘-Tab — not only on focus
 shortcuts, and that card sits under the layer header.
 
-:::unreleased
 **⌃⌥ + scroll moves focus a window at a time; it never pans the
 row freely** (#1656, owner ruling 2026-09-29). A Scrolling
 Space's view is a function of its focus — the row pans to the
@@ -10292,7 +10241,6 @@ hand's spacing on the tap's own clock, never the main actor's,
 where a busy switch would squash deliberate notches into a
 burst. The number is provisional until a device logs notch
 intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
-:::
 
 ### Overrides & appearance
 
@@ -10320,7 +10268,6 @@ to grey and what to say about it. A declaration that is
 backwards is wrong wherever it is rendered, which is why the
 row carries none on either axis.
 
-:::unreleased
 Floating gets both marks too — the floating mark entry below
 argues why floating is not self-evident — and its switch is
 unconditional for the same reason as sticky's. So is the
@@ -10328,7 +10275,6 @@ unconditional for the same reason as sticky's. So is the
 well as the Space Bar's badge, so with the bar off it still has
 something to paint. A tint that painted ONLY a bar surface would
 earn the gate; neither mark colour does.
-:::
 
 **A floor guards a trap, not a choice** — so the switch gets
 no warning, only an honest `?`. Turning the mark off costs
@@ -10469,10 +10415,8 @@ pushpin family is off-limits — `SpaceAssignmentChip` uses
 `pin.fill` for the opposite idea (a window bound to one space).
 (#429)
 
-:::unreleased
 `floating.color` tints the floating badge and the on-window
 floating mark alike, as `sticky.color` does sticky's pair.
-:::
 
 **On Liquid Glass the mark's disc goes** (#1621). It existed
 because `.hudWindow` carries no colour; tinted glass carries the
@@ -10487,7 +10431,6 @@ one mark through the one `sticky.color`: a disc on the Space Bar
 badge, the glass's tint on the mark. With the finish off, or
 Reduce transparency on, the disc returns.
 
-:::unreleased
 **Floating is not self-evident, so a floating window wears an
 on-window mark** ([#1799](https://github.com/KiwiCanopy/KiwiDesk/issues/1799)).
 The old reading — a float overlaps a tiled plane, so the window
@@ -10526,7 +10469,6 @@ bar and the window read as one mark. On Liquid Glass the plate
 carries ONE tint — the outermost glyph's colour, so sticky's
 when both show — because a glass has one backdrop beneath it;
 the flat finish keeps each glyph's own disc.
-:::
 
 **Overrides are visible-but-inherited, never hidden.** A
 per-layout or per-space override row always shows — dimmed
@@ -10910,7 +10852,6 @@ grey's own home contrast — the lightness half of the vanish, which
 a near-black grey at in-band alpha would otherwise clear on every
 pair clause.
 
-:::unreleased
 **Nightfall's focused accent is orange, not its theme's magenta.**
 Nightfall borrows the night-blue family of a well-known editor
 theme under its own name. It uses no credit line, since colour
@@ -10927,7 +10868,6 @@ Slate, True Dark) pairs its blue with
 idle identifier and the section divider over a white wallpaper;
 `IdleItemContrastTests` and `ShelfDividerWeightTests` hold both
 over every bundled palette.
-:::
 
 **The logo's mark holds one hue across themes; only the wordmark
 ink is themed (#479).** A dark-mode logo exists for exactly one
@@ -11376,7 +11316,6 @@ hint — the hint the 95% default exists for is the NEIGHBOUR
 peeking in, and a lone window has none. `ScrollingLayoutTests`
 holds both halves (`singleWindow`, `shortRow`).
 
-:::unreleased
 **[Principle]**
 
 **One width and one corner style for every window stroke —
@@ -11451,7 +11390,6 @@ is §5's meaning-change crossing (#1354) owed: `border.width` and
 `border.corner_style` keep their unit and scale and only widen
 their reach to every stroke, which is the change the ruling
 decided, so a stored value reads as it did.
-:::
 
 **[Rationale]**
 
@@ -11560,7 +11498,6 @@ the user who never opens the editor.
 Bar's front segment shows the focused window's title in place of
 its app's name.
 
-:::unreleased
 **An App Bar item draws its icon AND its title.**
 ([#1528](https://github.com/KiwiCanopy/KiwiDesk/issues/1528).)
 A vertical App Bar draws the icon alone, which is rendering, not
@@ -11572,9 +11509,7 @@ drops the icon that names the app beside a title that, on the
 sample below, mostly did not name it. A setting whose every other
 choice is worse than its default costs a row, three verbs and a
 per-layout override, and serves no user.
-:::
 
-:::unreleased
 **A Space's floats close both bars.**
 ([#1826](https://github.com/KiwiCanopy/KiwiDesk/issues/1826),
 owner ruling.) The App Bar lists them after the tiled row, past a
@@ -11622,7 +11557,6 @@ A focused float takes the highlight, and the bar scrolls to it.
 A float's focus pans no window, but the bar's scroll is not the
 row's: it exists to keep the focused item visible, and a
 highlight past the fade is no access point at all.
-:::
 
 **A stale enum spelling costs the FILE, not the field** — the
 price the config format charges everywhere. `TilingSettings`
@@ -11656,12 +11590,10 @@ shipped to others (AGENTS.md §5), and asking a stranger to
 hand-edit JSON to get their profiles back is not a migration
 policy.
 
-:::unreleased
 A key that is dropped takes one step whatever it held, and an
 earlier value rewrite of that key folds into it: a deleted key
 needs no spelling fixed first, and two crossings over one key
 are two chances to disagree about it.
-:::
 
 `Profile` and `GuiConfig` carry a `format` version integer (#902),
 following `SetupBundle.currentFormat`. Migrations key off the format
@@ -11747,10 +11679,8 @@ the Space Bar's glyph span, spring delay, front-app title cap,
 its active-Space dim and the colour of the focused window's glyph
 inside a Space item are examples, not the list.
 
-:::unreleased
 The edge left that list with #1731: each bar owns its edge, and
 one shelf per edge is what holds them — *Amended* below.
-:::
 
 *One plate, two sections.* While both bars show they are one
 plate with two sections, Space and App, placed as one unit by
@@ -11806,10 +11736,8 @@ layout appearing, while reserving everywhere left an empty
 strip — permanently, in every layout that draws nothing there —
 to spare it.
 
-:::unreleased
 A split App Bar pays the same price with the Space Bar on — the
 reflow paragraph of *Amended* below.
-:::
 
 *One placement rule, asked by every picture of it.* Where each
 section sits along the edge is decided in ONE pure function,
@@ -11828,7 +11756,6 @@ never snap — and under Reduce Motion it arrives without
 travelling. Under Boxed there is no plate to glide; each box
 slides on its own.
 
-:::unreleased
 **A group folding or releasing its members rides that same
 glide** ([#1831](https://github.com/KiwiCanopy/KiwiDesk/issues/1831)).
 The fold changes the App Bar's length, so the shelf re-places
@@ -11841,9 +11768,7 @@ member leaves its glass at once and a released one takes its
 glass when it lands — because a glass sliding under another
 refracts through it, and every moving glass re-samples its
 backdrop each frame.
-:::
 
-:::unreleased
 **A section grows out of what it joins, a lone shelf fades, and
 the glide's pace is the user's**
 ([#1838](https://github.com/KiwiCanopy/KiwiDesk/issues/1838),
@@ -11894,7 +11819,6 @@ theirs: `animations.shelf_duration`, 500–2000 ms, 750 by default,
 since the fixed plate glide, just over a quarter second until
 #1838, read as a snap for a bar coming and going; `on_shelf` turns it off, outside the window
 animations' master, and Reduce Motion keeps it off.
-:::
 
 *A minimum, not a share.* Each section is as long as its items
 while both fit. Once the shelf is full the Space section
@@ -11958,7 +11882,6 @@ The front-app segment hides while an App Bar shares the shelf:
 the App Bar already marks the focused window, and two marks of
 one fact on one plate is one too many.
 
-:::unreleased
 An overflowing run keeps the end pads a fitting one has, where
 its alignment puts them
 ([#1830](https://github.com/KiwiCanopy/KiwiDesk/issues/1830)):
@@ -11967,7 +11890,6 @@ overflow starts the scroll and moves neither end, and a divider
 drag that shrinks the Space section moves no outer margin. The
 hard floor under *A minimum, not a share* adds those pads to
 the active item and its fades.
-:::
 
 *A shared field is stored once.* A value two bars must agree
 on, stored twice, is a question the user answers twice and can
@@ -12010,7 +11932,6 @@ measures a different string — the front-app segment's title,
 inert whenever that segment is hidden — so it is named for it:
 `front_app_title_cap`.
 
-:::unreleased
 *The content's size is named for what it produces.* How large
 an item's glyphs, counts and automatic text draw across the
 shelf is `glyph_size` (#1713), automatic by default and never
@@ -12021,7 +11942,6 @@ user who wanted smaller icons did not look for it. It is not an
 retired above — and it moves nothing along the edge. The stored
 value is kept as typed and clamped where it draws, so a thicker
 shelf brings a larger typed size back.
-:::
 
 *The crossing.* A saved profile or bundle is rewritten once
 (`KiwiShelfMigrationTests`): the shelf takes the Space Bar's
@@ -12062,7 +11982,6 @@ the call is spelled right, so a nearest-spelling guess would
 send the user to the wrong fix, where the retired list knows the
 replacement (or that none exists) for certain.
 
-:::unreleased
 *Amended: each bar owns its edge, and one edge fuses them.*
 ([#1731](https://github.com/KiwiCanopy/KiwiDesk/issues/1731),
 owner rulings 2026-09-28.) The edge is each bar's —
@@ -12129,7 +12048,6 @@ setup split before the shelf stays split rather than being fused
 by a rule that no longer holds. `kiwishelf.set_edge` retires naming `space_bar.set_edge`;
 the per-layout App Bar edge verbs name `app_bar.set_edge`; and
 the bars' own `set_edge` verbs are live.
-:::
 
 **The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
@@ -12141,10 +12059,8 @@ layout; free four-edge placement removes the derivation and its
 rationale with it. The Settings preview is edge-aware and draws
 a left- or right-edge shelf vertical.
 
-:::unreleased
 The rule is each bar's since #1731: `space_bar.edge` and
 `app_bar.edge` are absolute, one of the four, default top.
-:::
 
 **The shelf is placed by ONE rule, and owns two margins.**
 ([#1516](https://github.com/KiwiCanopy/KiwiDesk/issues/1516),
@@ -12190,7 +12106,6 @@ knob (`space_bar.set_glyph_span`, default 5, range 1–12, #376,
 badge counts hidden **windows**, not slots — the same unit as the
 per-glyph count badges and the item's accessibility label.
 
-:::unreleased
 **The Space Bar groups by default; a switch turns it off.** (#293,
 #1725, owner ruling 2026-09-30.)
 `space_bar.set_group_adjacent_windows`, the App Bar's toggle's
@@ -12210,9 +12125,7 @@ as the per-glyph count badges and the item's accessibility label.
 The default being the old behaviour is also why the setting owes
 no crossing: an absent key meant grouped before and means grouped
 now, so no stored file, built-in layout or `init.lua` changes.
-:::
 
-:::unreleased
 **[Principle] A Space Bar glyph reaches its window; a list never
 switches by itself.** (#1528, owner rulings 2026-09-20 and
 2026-09-27.) On every Space, a glyph standing for one window
@@ -12238,9 +12151,7 @@ pointer settles rather than drawn into the render, so it is
 current without the bar re-rendering on every title change. A
 setting to turn glyph clicks off waits for misclicks measured on
 a device (#1514).
-:::
 
-:::unreleased
 **A Space's strip centres on its focus, holds under the pointer,
 and does not scroll.** (#1528 items 17–22, owner rulings
 2026-09-29 from HTML previews, graded by ui-designer.) The span's
@@ -12272,7 +12183,6 @@ click away and which sit behind a menu — functionality, with
 `title_cap` and `kiwishelf.minimum` — and every bundled look
 writes its whole register, so picking one would reset a span the
 user set.
-:::
 
 **The Space Bar's two-accent model.** (#293.) Three tinted states,
 all GUI-exposed inline (never behind a disclosure — the system is
@@ -12347,7 +12257,6 @@ first launch than by a cleaner-but-mute one. The App Bar
 stays per-layout (monocle/scrolling default it on; other
 layouts off).
 
-:::unreleased
 **The App Bar ships on, on its own edge.**
 ([#1528](https://github.com/KiwiCanopy/KiwiDesk/issues/1528).)
 The starter setup seeds it in Monocle and Scrolling on the bottom
@@ -12371,7 +12280,6 @@ click targets, and it is wrong:
   means, so it owes a `ConfigMigration` (AGENTS.md §5); a seed in
   the starter changes no stored file. `AppBarStyle.edge` keeps its
   `.top` default, and a saved profile keeps the edge it stores.
-:::
 
 **The front-app segment is per-display.** (#293.) With
 `space_bar.show_front_app` on, each display's bar shows the
@@ -12659,7 +12567,6 @@ the numbers, the two green-primary siblings' cool focused accent
 (#511), `SpaceBarAccentSeparationTests`' catalog-wide sweep and
 its bundled-only scope; the shelf curates, Lua is open.
 
-:::unreleased
 **[Principle] A look is KiwiShelf's styling and the colours it
 wears (#1684, #1752).** The signal #375's deferral waited for
 arrived, so a look is its own one-shot paint beside the palette,
@@ -12820,7 +12727,6 @@ never carry the split: a preset
 apply and the monitor-change fallback replace the live settings
 whole, so a preset that split would move an existing user's App
 Bar unasked (`StarterBarEdgeTests`).
-:::
 
 **"Automatic" is a value; "Auto" is an adjective — and the
 readout column was widened to say it.** (R6/#406, owner ruling
@@ -12947,7 +12853,6 @@ wrote, where this is a row a user ticked. So the panel follows the
 active profile. The cost is real and accepted: switch to a Desktop
 bound to another profile and the panel's material follows it.
 
-:::unreleased
 *"Unbuildable" is true of a migration step, not of the move.*
 #1741 moved three settings app-wide by an adoption at
 `apply(profile:)`, which knows which profile is live and so can
@@ -12958,7 +12863,6 @@ verdict on whether it could be: a proposal to make it app-wide
 argues its own case on that path and its trade — the first
 profile applied decides, every other profile's value is
 abandoned.
-:::
 
 **The switch means ALL of them, and its `?` carries what a
 boolean cannot.** Owner ruling: `off` is a true statement
@@ -13046,7 +12950,6 @@ step therefore fills both from the switch's own reading over the
 leaves the file does carry, off where those disagree, as the
 panel's leaf was filled from the bars' (#1369).
 
-:::unreleased
 **The sheen is its own setting beside the Liquid Glass switch,
 never one of its surfaces.** (#1644, owner rulings 2026-09-27,
 after the device sitting.) The switch governs "every KiwiDesk
@@ -13103,7 +13006,6 @@ wallpaper. The cap this replaced held every stop at 3:1 and so
 took nearly all the lift from the default green ring, which is
 the one most people see; it traded the look the owner approved
 at the sitting for a guarantee the band already gives.
-:::
 
 **Both drag markers' glass is thinned (owner, device 2026-09-25).**
 The drop zone lies over the window a drop would swap with, which
@@ -13121,7 +13023,6 @@ is exactly when the drop zone shows. Beneath it, both markers
 still sit above the windows below it, and the home slot is empty
 for the drag.
 
-:::unreleased
 **The Settings drag preview hosts Core's marker, tinted glass
 and all.** (#1645.) It draws the engine's own `DragMarkerView`,
 so the picture is the drag rather than a re-drawing of it
@@ -13130,7 +13031,6 @@ untinted": that ruling governs Settings *chrome* — a surface
 the window draws for itself — while a hosted engine view is a
 picture of a surface the product draws on screen, and a picture
 that dropped the tint would show a marker no drag draws.
-:::
 
 **Liquid Glass is an orthogonal finish toggle, not a third
 `background_style`.** (#390; revised 2026-07-20.) A third
@@ -13816,7 +13716,6 @@ the resident keeping the name with the held Space reachable by a
 bar click alone is refused because it leaves a Space with no
 shortcut, and no next/previous-Space verb exists to reach it by.
 
-:::unreleased
 **The held Spaces keep their order**
 ([#1664](https://github.com/KiwiCanopy/KiwiDesk/issues/1664)).
 Where only some names collide, a numbered held Space keeps its own
@@ -13834,7 +13733,6 @@ but not at a reclaim, and dropping a Space is `forwardWindows`'
 alone (#1177), so each would need a live rename across every store
 keyed by a Space — for a case only a later arrangement declaring a
 held number reaches.
-:::
 
 **Accepted: the chord outlives the Space.** The top-up writes the
 renumbered Space's digit chord into `gui.json`, and nothing takes
@@ -13844,7 +13742,6 @@ chord left behind names a Space that may no longer exist, and
 pressing it then makes an empty Space of that number, as
 `focus_space` does for any Space it does not find.
 
-:::unreleased
 **A drawn marker, never a name change.** Identity stays the bare
 name, so `focus_space 6` and the digit chord work unchanged. What
 the user needs — this Space is held, from which saved profile and
@@ -13859,9 +13756,7 @@ would promise a sentence nobody sees. The badge is therefore a
 held Space's whole visible affordance, and
 `space_bar.set_sticky_badge(false)`, which hides the window-state
 badges, does not hide it.
-:::
 
-:::unreleased
 **Invisible to every arrangement write.** A held `6` written into
 the laptop-only profile would become a declared Space there, never
 retiring, and sit beside a new held `7` at the next undock with
@@ -13881,9 +13776,7 @@ it belongs to no arrangement yet — and `save_profile` is the one
 write that takes it. The marker and its "not saved" sentence stand
 in for a promote verb on a held Space, which can come later if it
 is asked for.
-:::
 
-:::unreleased
 **The incoming profile's record outranks the hold**
 ([#1728](https://github.com/KiwiCanopy/KiwiDesk/issues/1728),
 reversed on #1790). The switch that holds a Space also runs
@@ -13906,7 +13799,6 @@ memory like any switch, and one rule serves every switch. The
 record stores membership rather than order (#1387), so a row that
 returns from memory may come back in another order than a held
 Space would have kept.
-:::
 
 **It goes home only into the arrangement it left.** A held Space
 returns when its screen is connected, the arrangement
@@ -13923,7 +13815,6 @@ nothing. Where a held Space does not return, it stays held, pinned
 back to its own screen: it is still not that arrangement's to
 save.
 
-:::unreleased
 **Every switch holds what the incoming arrangement does not name
 ([#1790](https://github.com/KiwiCanopy/KiwiDesk/issues/1790)).**
 A switch is any apply that changes the live arrangement: a Load of
@@ -13956,7 +13847,6 @@ Space Bar's Delete is offered only for a Space that holds nothing,
 so it never reaches a held one. A config reload is not such an
 act: it redeclares nothing about a held Space, so it leaves its
 mode alone.
-:::
 
 **A window moved out of a held Space is #1230's to place on
 replug.** Where the returning arrangement is a saved profile, its
@@ -13969,7 +13859,6 @@ case stick — the model decides it, and one move after the replug
 overrides it. What is inside the held Space goes back in both
 cases.
 
-:::unreleased
 **A composed Standard keeps a record too
 ([#1829](https://github.com/KiwiCanopy/KiwiDesk/issues/1829)).**
 It is an arrangement of the windows like a saved profile — the one
@@ -13989,9 +13878,7 @@ that name and the restore fills only the Spaces the returning one
 declares. Auto-saving a profile for the screen set instead was
 refused: a monitor change never claims a monitor set (#1530), and
 the Standard stays transient so it can recompose.
-:::
 
-:::unreleased
 **It survives a restart, a crash included
 ([#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646)).**
 Taking the laptop away for a day spans an update, a crash or a
@@ -14075,9 +13962,7 @@ hold.** The #634 discard removes the snapshot files that carry
 it; ending the live holds too would turn each into an ordinary
 Space that the next `save_profile` captures. Resetting every setting ends
 them, as before.
-:::
 
-:::unreleased
 **[Principle]**
 
 **A Space made on the fly is temporary until you put it in the
@@ -14211,7 +14096,6 @@ is drawn a little taller than the digits for the same reason, and
 the item grows by its slot. Like the held marker, it is not
 hidden by `space_bar.set_sticky_badge(false)`, which hides the
 window-state badges only.
-:::
 
 ### Monitors
 
@@ -14594,7 +14478,6 @@ exists to guarantee and what this spares it.
 
 ### An in-place restart gathers nothing
 
-:::unreleased
 **[Principle]**
 
 **A restart the user did not ask to see must not be seen.** A
@@ -14659,7 +14542,6 @@ session memory two minutes after the stop: the next launch, much
 later, is a launch after a quit, and restores the arrangement
 alone. The payload is one build writing for the next, so a
 payload the reading build cannot decode costs only itself.
-:::
 
 ### A bulk reconcile asks the WindowServer before it asks Accessibility
 
@@ -14762,7 +14644,6 @@ glass, no motion, and the services' marks are template images
 in secondary ink. On this page colour means "this control is
 on", and a brand blue or orange would say that about a link.
 
-:::unreleased
 **The footer line above also carries the tour's permanent door**
 (#1754) — mark, name, version, update state, "Show me around",
 *About KiwiDesk*. The first-run banner retires once dismissed or
@@ -14772,7 +14653,6 @@ thing asked about the app itself, and Home is where Settings
 opens, so it needs no search entry — About beside it has none
 either. One permanent door only: a second one elsewhere would
 make the reader ask whether they differ.
-:::
 
 **The update state is one component.** What the channel last
 said lands in one store (`UpdateStateStore`, written by the

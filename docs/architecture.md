@@ -212,13 +212,11 @@ flowchart TD
    (§5); the worked example is `.claude/rules/profiles.md` ▸
    Resolve before layout.
 
-:::unreleased
 Between steps 2 and 3, a GUI-managed profile that follows the
 shared look (#1752) wears it: `KiwiCore.resolvedSettings(of:)`
 paints the look `gui.json` carries over the profile's own
 settings, a built-in Standard wears it the same way, and a
 profile with its own look keeps its settings as stored.
-:::
 
 Hand-mirrored field lists here are guarded by parity tests — see
 `.claude/rules/parity-tests.md`.

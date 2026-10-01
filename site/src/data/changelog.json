@@ -2,6 +2,80 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "2.1.0",
+      "tag": "v2.1.0",
+      "date": "2026-10-01",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v2.1.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v2.1.0/KiwiDesk-2.1.0.dmg",
+      "summary": "KiwiDesk 2.1.0 makes KiwiShelf your own. Looks are ready-made shelf designs to start from: pick one, then change the font, the border, the glyph size, the colours and the edge of each bar until it is yours, and keep it as a Look of your own — kiwis come in green, gold and red, and your shelf in whatever you like. The Space Bar keeps the window you are in at the centre of its Space, and a Space made on the fly leaves when it empties. Plugging a screen in or out got smarter too: your windows go back where they were, and new ones wait together in a Space marked with a two-screen icon until their screen comes back. An update now leaves your windows where they are, and a long round of fixes rounds it off. App shortcuts now do what they were made for even when macOS keeps an app running with no window — Safari after its red close button, say: the shortcut brings its window back instead of doing nothing. New here, or not yet through everything KiwiDesk does on a chord or a swipe? Press ⌃⌥K for the overview, or open Shortcuts & Gestures in Settings, where each gesture comes with its own little preview — this release's included: a right-click on KiwiShelf for a menu of what you clicked, and moving through your windows and your Spaces with a trackpad gesture or your mouse.",
+      "sections": [
+        {
+          "title": "New",
+          "items": [
+            "**Looks: ready-made and saved KiwiShelf designs** — Glass, Taskbar, Classic, Tiler, Pill and Sakura, each with its colours, where the bars sit, the focus border's shape and the gaps — on the page now called Looks & Animations, and as a step of the welcome tour. One look is shared across your profiles unless a profile keeps its own, and a new palette, Nightfall, joins the bundled ones.",
+            "**Each bar can now sit on its own edge** — KiwiShelf ▸ Position ▸ Each bar — and on different edges each is its own shelf. New setups start with the Space Bar on top and the App Bar on the bottom; yours stay where they are.",
+            "**Right-click the KiwiShelf for a menu of what you clicked:** a Space's layout, its settings, New Space and Delete Space; an app's New Window, Move to Current Space, Float or Tile, App Rules…, Close Window and Quit; and KiwiShelf Settings, Looks and Advanced Colors at the end of every menu.",
+            "**Click an app glyph on the Space Bar to focus that window** — a glyph standing for several opens a menu of them — and hover a glyph or an App Bar item for its full title.",
+            "**Hold ⌃⌥ and scroll to move focus window by window, ⌃⌥⌘ and scroll to step between Spaces** — trackpad or mouse wheel — set up under the new Shortcuts & Gestures ▸ Mouse & trackpad, which also shows what the mouse and trackpad do, in moving pictures.",
+            "**Temporary Spaces:** a Space you make on the fly — New Space on the bar, or a shortcut to a Space that doesn't exist yet — is marked with an hourglass, goes away once its last window leaves, and is never saved unless you add it to the profile in Settings ▸ Spaces.",
+            "**The Space Bar gains Other Spaces** — their apps, or just each Space's name with a window count — **a Space label that draws the layout** in place of the name, a switch for grouping a Space's same-app windows, and a gap between glyphs.",
+            "**KiwiShelf ▸ Style gains a Font and Font weight for the bars' text, a Border around the plate or the boxes, a Glyph size and a Highlight width.**",
+            "**A sheen on the focus border, the shelf's highlight and border, and the drag borders** — a lighter or darker top edge, set under Looks & Animations ▸ Sheen, and on for everyone.",
+            "**Floating windows now wear a mark on the window**, like sticky ones (Gaps & Borders ▸ Show mark on floating windows), and the App Bar now lists a Space's floating windows after its tiled row.",
+            "**KiwiShelf now animates a Space switch:** the App Bar grows out of the Space Bar and shrinks back into it, a bar on an edge of its own fades in and out, the row dissolves between two Spaces that both show one, and App Bar groups slide together and apart. Looks & Animations ▸ Animate KiwiShelf and KiwiShelf duration set it, and Reduce Motion lands everything at once.",
+            "**What's new now ends with Next on my list** — a dated list of up to three things I'm working on next."
+          ],
+          "type": "new"
+        },
+        {
+          "title": "Improved",
+          "items": [
+            "**Floating a tiled window now centres it at a usable size** — Float Window (⌃⌥F), or a Float rule saved over an open window — cascading when another float already sits there, and a window you float again returns to where it last floated.",
+            "**Installing an update now leaves your windows where they are** — Install and Relaunch from the update window, and `kiwidesk service restart` — sizes and scroll positions included; a quit still spreads them out.",
+            "**On quit, windows now fill the screen in a balanced grid before they pile up** — two side by side, four as a 2×2, the last one stretched over what is left — and entering or leaving the Floating layout does the same.",
+            "**The update window now has tabs** — Highlights, New, Improved, Fixed, Lua & CLI — and after Install, What's new opens again at once and says how far the start has got.",
+            "**The Space Bar now keeps your focused window centred in each Space's row**, with a +n on either side for the rest, and holds still while your pointer rests on it.",
+            "**Plugging a screen in or out now remembers your windows:** a window that was already open before you plugged in or out goes back to the Space it was in, and the ones opened since stay together in a held Space, marked with a two-screen icon on the Space Bar, that goes back to its screen when the screen does. Held Spaces keep their order and their hidden windows, survive a KiwiDesk restart, and a profile switch now holds any Space it has no name for while it has windows.",
+            "**The alert sound and the quit grid's windows per pile are now app-wide**, on General, applying without Save; the Behavior page is gone, and its mouse settings live under Shortcuts & Gestures.",
+            "**Tile Window now says why it can't** — an App Rule, a dialog or a missing Dock icon floats the window — and removing a Float rule now tiles its windows again.",
+            "**The starter setup and the workflow presets are now tuned to the shape of your screens** — an ultrawide scrolls wide, a portrait screen scrolls tall — and Visual Creative & Developer is now called Design Studio.",
+            "**The welcome tour can now be replayed any time** from the bottom of Settings Home, and its layout thumbnails, like the preset previews, play their layout once."
+          ],
+          "type": "improved"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**Open or Focus now reopens an app that is running with no window**, and lands on the window you used last — right after a Space switch it used to do nothing.",
+            "**Scrolling the shelf no longer stalls** under a boxed Liquid Glass bar.",
+            "**A slide show or a borderless-fullscreen game now opens in front**, and the bars get out of its way.",
+            "**In a Scrolling Space, dragging the outer edge of the first or last column now resizes it** instead of snapping back.",
+            "**Windows on Spaces you aren't looking at no longer flash onto the screen at launch**, and a Monocle Space's windows no longer come back at half size after a relaunch.",
+            "**A floating window dragged onto another display now belongs to that display's Space** — tiling it no longer sends it back across, and switching the old screen's Space no longer parks it.",
+            "**A tiled window moved into a Floating Space no longer lands partly off-screen**, and a floating window no longer hides behind the tiles after a move-and-follow.",
+            "**Orion's second profile now tiles**, and its invisible preview twins no longer take a slot or trade focus with their window.",
+            "**A Space no longer gets a second digit shortcut after you reorder Spaces**, and a duplicate already in your saved shortcuts is dropped once.",
+            "**A shortcut recorded in Settings now takes effect on Save**, like every other setting — it used to work at once and vanish on the next start.",
+            "**A profile's memory of which windows sit in which Space now survives a restart**, and quitting under one profile and starting under another no longer puts the first one's layouts on the second's Spaces.",
+            "**A Space chip no longer keeps its hover after a click switched Spaces**, a full bar's end items no longer touch the border, and switching Boxed to Plain no longer clips the items."
+          ],
+          "type": "fixed"
+        },
+        {
+          "title": "Lua & CLI",
+          "items": [
+            "**If you write your own Lua config:** `make_auto` is retired — `make_tiled` does its job, and fails on a window a rule or detection floats; `set_float_nudge` becomes `set_float_placement(\"center\" | \"keep\")`, a saved nudge-off reading as `keep`; `kiwishelf.set_edge` is `space_bar.set_edge` and `app_bar.set_edge`; `space_bar.set_glyph_cap` is `space_bar.set_glyph_span`; `drag.set_ghost_border_width` and `drag.set_drop_zone_border_width` are `border.set_width`, and `drag.set_corner_radius` is `border.set_corner_style`; and `app_bar.set_content`, `monocle.set_app_bar_content` and `scroll.set_app_bar_content` are gone, the App Bar always drawing icon and title. Each old call is reported in Config Issues with its replacement.",
+            "**The move and float verbs now take a window:** `move_to_space`, `move_to_space_and_follow`, `make_floating`, `make_tiled` and `toggle_floating` accept a window id from `get_state` as a last argument and act on that window instead of the focused one.",
+            "**New: `new_window` and `close_window`**, with the same optional window id — they press the app's own File ▸ New Window and the window's close button.",
+            "**`create_space` and `delete_space` now take a scope**, `session` (the default) or `profile`, which also writes the live profile's file; a Space created from a keybinding or the CLI is temporary.",
+            "**`set_refusal_sound`, `quit.set_layout` and `quit.set_grid_target_depth` now change the running value only** — the settings are app-wide in `gui.json`, and no profile carries them."
+          ],
+          "type": "scripting"
+        }
+      ]
+    },
+    {
       "version": "2.0.0",
       "tag": "v2.0.0",
       "date": "2026-09-25",
