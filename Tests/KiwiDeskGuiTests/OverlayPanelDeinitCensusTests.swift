@@ -6,7 +6,11 @@ import Testing
 /// holding one is a value, so the class it lives in answers.
 /// "A panel" is `NSPanel`, `NSWindow` or a Core subclass of
 /// either, stored directly, in a collection, or initialized in
-/// place; a local inside a function is not stored. A type
+/// place — by a constructor or a Core function returning one; a
+/// local inside a function is not stored, and a store at file
+/// scope, owned by no class, is refused. The deinit must name
+/// each stored panel beside its `orderOut(` — by property name,
+/// so a struct's panel is named through its holder's loop. A type
 /// followed by `.` is a member of it (`NSWindow.Level`), not a
 /// panel; the trade is any `NSPanel.Something` store, which by
 /// that spelling holds no window.
@@ -79,6 +83,26 @@ struct OverlayPanelDeinitCensusTests {
             }
         }
         return types.sorted()
+    }
+
+    /// Every Core function that returns a panel type, so a store
+    /// initialized through one (`lazy var panel = makePanel()`)
+    /// is a store too.
+    private func panelFactories(
+        returning alternatives: String,
+        in files: [(String, String)]
+    ) -> [String] {
+        var names: Set<String> = []
+        for (_, text) in files {
+            for hit in matches(
+                #"\bfunc\s+(\w+)\s*\([^)]*\)\s*->\s*("#
+                    + alternatives + #")(?![.\w?])"#,
+                in: text
+            ) {
+                names.insert(hit.0)
+            }
+        }
+        return names.sorted()
     }
 
     private func matches(
@@ -157,11 +181,12 @@ struct OverlayPanelDeinitCensusTests {
         let files = try sources()
         let types = panelTypes(in: files)
         let alternatives = types.joined(separator: "|")
+        let makers = panelFactories(returning: alternatives, in: files)
         let stored = try NSRegularExpression(
-            pattern: #"\b(?:var|let)\s+\w+\s*(?::\s*\[?\s*"#
+            pattern: #"\b(?:var|let)\s+(\w+)\s*(?::\s*\[?\s*"#
                 + #"(?:\w+\s*:\s*)?(?:"# + alternatives
-                + #")(?![.\w])\s*\]?\??|=\s*(?:"# + alternatives
-                + #"|BarPanel\.make\w*)\()"#
+                + #")(?![.\w])\s*\]?\??|=\s*(?:\w+\.)?(?:"#
+                + (types + makers).joined(separator: "|") + #")\()"#
         )
         var owners: Set<String> = []
         var offenders: [String] = []
@@ -174,12 +199,15 @@ struct OverlayPanelDeinitCensusTests {
             guard !hits.isEmpty else { continue }
             let tree = parse(ns)
             for hit in hits {
-                guard
-                    let scope = tree.innermost[hit.range.location],
-                    Self.typeKeywords.contains(
-                        tree.scopes[scope].keyword
-                    )
-                else { continue }  // a local, not a stored property
+                let property = ns.substring(with: hit.range(at: 1))
+                guard let scope = tree.innermost[hit.range.location]
+                else {
+                    offenders.append("\(file): \(property) at file scope")
+                    continue
+                }
+                // A local inside a function is not a stored property.
+                guard Self.typeKeywords.contains(tree.scopes[scope].keyword)
+                else { continue }
                 guard let owner = owningClass(scope, in: tree) else {
                     offenders.append("\(file): no class owns it")
                     continue
@@ -206,8 +234,11 @@ struct OverlayPanelDeinitCensusTests {
                     )
                     return head.contains("isolated deinit")
                         && body.contains("orderOut(")
+                        && body.contains(property)
                 }
-                if !releases { offenders.append("\(file): \(name)") }
+                if !releases {
+                    offenders.append("\(file): \(name).\(property)")
+                }
             }
         }
         // The derivation and the scan still see what they were

@@ -211,16 +211,15 @@ func makeTestCore(
     core.wallClock = { frozen }
     // AppKit's screen area is a WindowServer round trip (#1868):
     // read once per screen; the #1386 correction stays live.
-    GeometryUtils.appKitAreaOverride = { screen in
+    GeometryUtils.appKitVisibleFrameOverride = { screen in
         let key = screen.kiwiDisplayID
-        if let key, let known = testAppKitAreas[key] { return known }
-        let area = (screen.visibleFrame, screen.safeAreaInsets.top)
-        if let key { testAppKitAreas[key] = area }
-        return area
+        if let key, let known = testAppKitFrames[key] { return known }
+        let frame = GeometryUtils.liveAppKitVisibleFrame(of: screen)
+        if let key { testAppKitFrames[key] = frame }
+        return frame
     }
     return core
 }
 
 /// `makeTestCore`'s per-process memo of AppKit's screen areas.
-@MainActor private var testAppKitAreas:
-    [DisplayID: (visible: CGRect, safeTop: CGFloat)] = [:]
+@MainActor private var testAppKitFrames: [DisplayID: CGRect] = [:]

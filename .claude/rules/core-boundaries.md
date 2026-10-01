@@ -6,9 +6,10 @@ paths:
 # Core boundaries
 
 Deliberately short — it loads on every `KiwiDeskCore` edit. Six
-seams, each violated *outside* the directory that owns them — the
-count is the six bullets immediately below, so it corrects
-itself when a seventh is added.
+rules that bind anywhere in Core: five seams, each violated
+*outside* the directory that owns them, and the one lifetime rule
+every panel owner owes — the count is the six bullets immediately
+below, so it corrects itself when a seventh is added.
 
 - **Core names, the GUI narrates (#96).** A user-facing
   condition detected in Core returns **structure** (a case, an

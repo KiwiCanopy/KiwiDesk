@@ -29,7 +29,7 @@ bite large test PRs:
   live read is a round trip whose replies slow by orders of
   magnitude under load, and the main-actor suites queue behind
   it; AppKit's screen area takes
-  `GeometryUtils.appKitAreaOverride`, memoized in both twins,
+  `GeometryUtils.appKitVisibleFrameOverride`, memoized in both twins,
   with the #1386 correction over it still live. When a target's
   time grows or turns bimodal, sample the test process and count
   its windows before tuning parallelism: an idle CPU means it is
