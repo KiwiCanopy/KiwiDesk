@@ -178,7 +178,9 @@ below, so it corrects itself when a seventh is added.
   that drew a shelf or a mark did, until hundreds stood and every
   WindowServer call slowed. "A panel" is `NSPanel`, `NSWindow` or
   a Core subclass of either, stored directly, in a collection or
-  inside a struct the class holds. `OverlayPanelDeinitCensusTests`
+  inside a struct nested in the class — a struct at top level
+  holding one has no owner the census can name, so it is
+  refused. `OverlayPanelDeinitCensusTests`
   holds the class (deinit in the owning class, calling
   `orderOut`); `OverlayPanelReleaseTests` the behaviour for the
   shelf and the sticky mark. The deinit is the backstop, not the

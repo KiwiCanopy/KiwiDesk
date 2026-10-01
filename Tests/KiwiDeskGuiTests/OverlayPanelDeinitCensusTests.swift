@@ -8,9 +8,11 @@ import Testing
 /// either, stored directly, in a collection, or initialized in
 /// place — by a constructor or a Core function returning one; a
 /// local inside a function is not stored, and a store at file
-/// scope, owned by no class, is refused. The deinit must name
-/// each stored panel beside its `orderOut(` — by property name,
-/// so a struct's panel is named through its holder's loop. A type
+/// scope, or in a struct no class lexically encloses, is
+/// refused. The deinit must name each stored panel as a whole
+/// identifier beside its `orderOut(`, so a struct's panel is
+/// named through its holder's loop. The scope walk is
+/// `SourceScan.scopeTree`'s, held by `SourceScanScopesTests`. A type
 /// followed by `.` is a member of it (`NSWindow.Level`), not a
 /// panel; the trade is any `NSPanel.Something` store, which by
 /// that spelling holds no window.
@@ -23,28 +25,6 @@ struct OverlayPanelDeinitCensusTests {
     private static let typeKeywords: Set<String> = [
         "class", "struct", "enum", "actor", "extension",
     ]
-    private static let scopeKeyword = try! NSRegularExpression(
-        pattern: #"\b(class|struct|enum|actor|extension|protocol|"#
-            + #"func|init|deinit|var|let|if|guard|for|while|"#
-            + #"switch|else|do|catch|get|set|willSet|didSet|"#
-            + #"defer|repeat)\b\s*(\w*)"#
-    )
-
-    private struct Scope {
-        let keyword: String
-        let name: String
-        let open: Int
-        let parent: Int?
-    }
-
-    private struct Parse {
-        var scopes: [Scope] = []
-        /// Scope index → the index one past its closing brace.
-        var close: [Int: Int] = [:]
-        /// Offset → the innermost scope open there.
-        var innermost: [Int: Int] = [:]
-    }
-
     private func sources() throws -> [(String, String)] {
         try SourceScan.swiftSources(
             under: Self.root.appendingPathComponent(
@@ -122,60 +102,6 @@ struct OverlayPanelDeinitCensusTests {
         }
     }
 
-    /// Every brace scope of `text`, named by the last declaration
-    /// keyword before its `{`.
-    private func parse(_ text: NSString) -> Parse {
-        var result = Parse()
-        var stack: [Int] = []
-        var segmentStart = 0
-        for i in 0..<text.length {
-            let unit = text.character(at: i)
-            if let top = stack.last { result.innermost[i] = top }
-            if unit == 123 {  // {
-                let range = NSRange(
-                    location: segmentStart,
-                    length: i - segmentStart
-                )
-                let hit = Self.scopeKeyword.matches(
-                    in: text as String,
-                    range: range
-                ).last
-                result.scopes.append(
-                    Scope(
-                        keyword: hit.map {
-                            text.substring(with: $0.range(at: 1))
-                        } ?? "",
-                        name: hit.map {
-                            text.substring(with: $0.range(at: 2))
-                        } ?? "",
-                        open: i,
-                        parent: stack.last
-                    )
-                )
-                stack.append(result.scopes.count - 1)
-                segmentStart = i + 1
-            } else if unit == 125 {  // }
-                if let top = stack.popLast() { result.close[top] = i }
-                segmentStart = i + 1
-            } else if unit == 59 {  // ;
-                segmentStart = i + 1
-            }
-        }
-        return result
-    }
-
-    /// The class (or actor) that owns scope `index`: itself, or
-    /// the nearest enclosing one past any struct or enum.
-    private func owningClass(_ index: Int, in parse: Parse) -> Int? {
-        var cursor: Int? = index
-        while let current = cursor {
-            let keyword = parse.scopes[current].keyword
-            if keyword == "class" || keyword == "actor" { return current }
-            cursor = parse.scopes[current].parent
-        }
-        return nil
-    }
-
     @Test("every class storing a panel orders it out in its deinit")
     func everyOwnerReleases() throws {
         let files = try sources()
@@ -197,7 +123,7 @@ struct OverlayPanelDeinitCensusTests {
                 range: NSRange(location: 0, length: ns.length)
             )
             guard !hits.isEmpty else { continue }
-            let tree = parse(ns)
+            let tree = SourceScan.scopeTree(of: ns)
             for hit in hits {
                 let property = ns.substring(with: hit.range(at: 1))
                 guard let scope = tree.innermost[hit.range.location]
@@ -208,7 +134,7 @@ struct OverlayPanelDeinitCensusTests {
                 // A local inside a function is not a stored property.
                 guard Self.typeKeywords.contains(tree.scopes[scope].keyword)
                 else { continue }
-                guard let owner = owningClass(scope, in: tree) else {
+                guard let owner = tree.owningClass(of: scope) else {
                     offenders.append("\(file): no class owns it")
                     continue
                 }
@@ -218,7 +144,7 @@ struct OverlayPanelDeinitCensusTests {
                     let deinitScope = tree.scopes[$0]
                     guard deinitScope.keyword == "deinit",
                         deinitScope.parent == owner,
-                        let end = tree.close[$0]
+                        let body = tree.body($0, in: ns)
                     else { return false }
                     let head = ns.substring(
                         with: NSRange(
@@ -226,15 +152,12 @@ struct OverlayPanelDeinitCensusTests {
                             length: min(40, deinitScope.open)
                         )
                     )
-                    let body = ns.substring(
-                        with: NSRange(
-                            location: deinitScope.open,
-                            length: end - deinitScope.open
-                        )
-                    )
                     return head.contains("isolated deinit")
                         && body.contains("orderOut(")
-                        && body.contains(property)
+                        && SourceScan.mentions(
+                            identifier: property,
+                            in: body
+                        )
                 }
                 if !releases {
                     offenders.append("\(file): \(name).\(property)")

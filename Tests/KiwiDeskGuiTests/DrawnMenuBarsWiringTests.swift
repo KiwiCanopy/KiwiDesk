@@ -170,4 +170,30 @@ struct DrawnMenuBarsWiringTests {
             )
         }
     }
+
+    /// The #1868 seam under the correction: both twins memoize
+    /// AppKit's read, and the door reads it only through the
+    /// seam. A dropped memo reds nothing else — it only slows
+    /// every run back down.
+    @Test("both twins memoize AppKit's area under the correction")
+    func twinsMemoizeTheAppKitRead() throws {
+        for target in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
+            let text = try source("Tests/\(target)/TestCore.swift")
+            #expect(
+                text.contains("GeometryUtils.appKitVisibleFrameOverride ="),
+                .init(rawValue: "\(target) misses the memo")
+            )
+        }
+        let geometry = try source(
+            "Sources/KiwiDeskCore/Tiling/GeometryUtils.swift"
+        )
+        let door = try #require(
+            SourceScan.declarationBody(
+                after: "static func visibleFrame(of screen: NSScreen)",
+                in: geometry
+            )
+        )
+        #expect(door.contains("appKitVisibleFrame(of: screen)"))
+        #expect(!door.contains("screen.visibleFrame"))
+    }
 }
