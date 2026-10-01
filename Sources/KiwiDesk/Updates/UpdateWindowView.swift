@@ -132,17 +132,19 @@ extension View {
     /// below the transparent title bar; only the ground runs up
     /// behind the traffic lights.
     func updateWindowGround() -> some View {
-        background {
-            Color.clear
-                .glassChrome(
-                    in: Rectangle(),
-                    enabled: true,
-                    variant: .regular,
-                    fallback: AnyShapeStyle(SettingsTheme.page)
-                )
-                .ignoresSafeArea()
-        }
-        .tint(SettingsTheme.accent)
+        // The tint BELOW the glass, so the ground sits outside the
+        // tinted environment (gui.md, as `ShortcutsPanelView`).
+        tint(SettingsTheme.accent)
+            .background {
+                Color.clear
+                    .glassChrome(
+                        in: Rectangle(),
+                        enabled: true,
+                        variant: .regular,
+                        fallback: AnyShapeStyle(SettingsTheme.page)
+                    )
+                    .ignoresSafeArea()
+            }
     }
 }
 

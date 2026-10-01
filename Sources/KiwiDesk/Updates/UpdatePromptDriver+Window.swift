@@ -17,36 +17,20 @@ extension UpdatePromptDriver {
         if let window, window.session.retry == .checking,
             window.offer.build == item.versionString
         {
-            closeCheckingWindows()
             return window.session.refound(reply: reply)
         }
-        // A scheduled offer puts nothing up, so nothing waits on it;
-        // dismissing after it would end the session it is pending in.
-        if !userInitiated { closeCheckingWindows() }
-        openWindow(for: item, stage: stage, reply: reply)
-        if prompts.offerArrived(userInitiated: userInitiated) {
-            presentWindow()
-            closeCheckingWindows()
-        }
+        let window = makeOffer(for: item, stage: stage, reply: reply)
+        let shows = prompts.offerArrived(userInitiated: userInitiated)
+        replace(with: .offer(window), presenting: shows)
+        if shows { prompts.offerGotAttention() }
+        fetchOfferedNext(into: window.session)
     }
 
-    /// Takes the checking window down AFTER its answer is key: a
-    /// closing key window hands focus back to the window under it,
-    /// and Core then reverts the answer's own report as a z-order
-    /// echo, sending it behind (#1849).
-    func closeCheckingWindows() {
-        // Sparkle's own "Checking…" panel; the public door to its
-        // private close.
-        super.dismissUpdateInstallation()
-        closeChecking()
-    }
-
-    func openWindow(
+    func makeOffer(
         for item: SUAppcastItem,
         stage: SPUUserUpdateStage,
         reply: @escaping (SPUUserUpdateChoice) -> Void
-    ) {
-        closeWindow()
+    ) -> UpdateWindowController {
         let session = UpdateSession(
             reply: reply,
             installsFrom: Self.installsFrom(stage)
@@ -75,21 +59,24 @@ extension UpdatePromptDriver {
             carried.next = self?.offeredNext
             record?.markRelaunch(carried)
         }
-        self.window = window
-        if let fetchNext {
-            nextFetch = Task { [weak self] in
-                let next = await fetchNext()
-                guard !Task.isCancelled else { return }
-                self?.offeredNext = next
-                session.next = next?.current(at: Date())
-            }
+        return window
+    }
+
+    /// "Next on my list" for the offer's tab and the relaunch.
+    func fetchOfferedNext(into session: UpdateSession) {
+        guard let fetchNext else { return }
+        nextFetch = Task { [weak self] in
+            let next = await fetchNext()
+            guard !Task.isCancelled else { return }
+            self?.offeredNext = next
+            session.next = next?.current(at: Date())
         }
     }
 
-    /// Shows the window: the offer got the user's attention.
+    /// Shows the offer: it got the user's attention.
     func presentWindow() {
         prompts.offerGotAttention()
-        if let window { presents(window) }
+        if let window { presents(.offer(window)) }
     }
 
     /// A download Sparkle already fetched, or began installing,
@@ -104,12 +91,9 @@ extension UpdatePromptDriver {
         }
     }
 
+    /// Closes the offer, and only the offer.
     func closeWindow() {
-        window?.close()
-        window = nil
-        nextFetch?.cancel()
-        nextFetch = nil
-        offeredNext = nil
+        if window != nil { replace(with: nil) }
     }
 
     /// What the relaunch narrates (#1667): the items the window
@@ -133,72 +117,5 @@ extension UpdatePromptDriver {
                 )
             }
         )
-    }
-}
-
-/// The window's "up to date" answer (#1849).
-extension UpdatePromptDriver {
-    /// Sparkle's reason is the one the window answers: this build
-    /// is the newest, or newer than the feed's newest.
-    static func isUpToDate(_ error: any Error) -> Bool {
-        let reason =
-            (error as NSError).userInfo[SPUNoUpdateFoundReasonKey]
-            as? NSNumber
-        return reason?.int32Value
-            == SPUNoUpdateFoundReason.onLatestVersion.rawValue
-            || reason?.int32Value
-                == SPUNoUpdateFoundReason.onNewerThanLatestVersion.rawValue
-    }
-
-    func showUpToDate(
-        next: NextOnMyList?,
-        acknowledgement: @escaping () -> Void
-    ) {
-        let replaced = upToDate
-        let window = UpToDateWindowController(
-            offer: UpdateOffer.current(loaded: loadedItems, host: .main),
-            next: next
-        ) { [weak self] in
-            self?.upToDate = nil
-            acknowledgement()
-        }
-        upToDate = window
-        presentsUpToDate(window)
-        // Only now, behind the answer (`closeCheckingWindows`).
-        replaced?.close()
-        closeCheckingWindows()
-        closeWindow()
-    }
-}
-
-/// The window's checking state (#1849).
-extension UpdatePromptDriver {
-    /// Brings whichever update window is open forward — the offer,
-    /// the up-to-date answer or the check (#1849). Sparkle asks
-    /// only while it shows an update, so the click asks here first.
-    @discardableResult
-    func focusOpenWindow() -> Bool {
-        if window != nil {
-            presentWindow()
-        } else if let upToDate {
-            presentsUpToDate(upToDate)
-        } else if let checking {
-            presentsChecking(checking)
-        } else {
-            return false
-        }
-        return true
-    }
-
-    func showChecking(cancellation: @escaping () -> Void) {
-        closeChecking()
-        let window = UpdateCheckingWindowController(cancel: cancellation)
-        checking = window
-        presentsChecking(window)
-    }
-
-    func closeChecking() {
-        checking?.close()
-        checking = nil
     }
 }

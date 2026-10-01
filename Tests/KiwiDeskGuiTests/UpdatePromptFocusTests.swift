@@ -10,7 +10,7 @@ import Testing
 /// code is: `UpdaterSeamGuardTests` counts how many of each
 /// object exist, `UpdatePromptWiringTests` holds what the seam
 /// HANDS Sparkle, and this one holds what the driver and its
-/// policy DECLARE. It reads `UpdatePromptDriver.swift` only, so
+/// policy DECLARE. It reads the driver's and the policy's files, so
 /// no needle here can be satisfied by the seam file.
 ///
 /// Source scans for the parts that cannot reach a unit test:
@@ -43,19 +43,24 @@ struct UpdatePromptFocusTests {
     private static let root = SourceScan.repoRoot(
         from: #filePath
     )
-    /// One file: this suite reads what the driver and its policy
-    /// DECLARE. What the seam HANDS Sparkle is
-    /// `UpdatePromptWiringTests`, which reads the other one and
-    /// cannot be satisfied by this one.
-    private static let prompt = "UpdatePromptDriver.swift"
+    /// The driver's and its policy's files: this suite reads what
+    /// they DECLARE. What the seam HANDS Sparkle is
+    /// `UpdatePromptWiringTests`, which reads `AppUpdater.swift`
+    /// and cannot be satisfied by these.
+    private static let prompt = [
+        "UpdatePromptDriver.swift", "UpdatePromptPolicy.swift",
+    ]
 
     private static func promptSource() throws -> String {
-        try SourceScan.strippedSource(
-            at:
-                root
-                .appendingPathComponent("Sources/KiwiDesk/Updates")
-                .appendingPathComponent(prompt)
-        )
+        try prompt.map {
+            try SourceScan.strippedSource(
+                at:
+                    root
+                    .appendingPathComponent("Sources/KiwiDesk/Updates")
+                    .appendingPathComponent($0)
+            )
+        }
+        .joined(separator: "\n")
     }
 
     /// The click's own focus is kept (#1011).

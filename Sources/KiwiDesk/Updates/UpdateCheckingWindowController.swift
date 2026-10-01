@@ -47,9 +47,13 @@ final class UpdateCheckingWindowController: NSObject, NSWindowDelegate {
         window = nil
     }
 
+    /// The driver's slot is the only owner, and `cancel` empties
+    /// it — so this controller outlives its own call.
     private func cancelled() {
-        close()
-        cancel()
+        withExtendedLifetime(self) {
+            close()
+            cancel()
+        }
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {

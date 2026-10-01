@@ -26,22 +26,18 @@ struct UpdateStateRow: View {
                 // Nothing ran yet, so not "again".
                 checkAgain(enabled: true, label: checkLabel)
             case .upToDate(let lastChecked):
-                if store.answerOpen {
-                    // Said in the line, not only on hover (#1849).
-                    sentence(Self.closeAnswerFirst)
-                    // The live control first, the greyed one after.
-                    showWindow
-                    checkAgain(
-                        enabled: false,
-                        label: checkAgainLabel,
-                        reason: Self.closeAnswerFirst
-                    )
-                } else {
-                    sentence(
-                        Self.upToDateSentence(lastChecked, now: Date())
-                    )
-                    checkAgain(enabled: true, label: checkAgainLabel)
-                }
+                sentence(Self.upToDateSentence(lastChecked, now: Date()))
+                checkAgain(enabled: true, label: checkAgainLabel)
+            case .answering:
+                // Said in the line, not only on hover (#1849); the
+                // live control first, the greyed one after.
+                sentence(Self.closeAnswerFirst)
+                showWindow
+                checkAgain(
+                    enabled: false,
+                    label: checkAgainLabel,
+                    reason: Self.closeAnswerFirst
+                )
             case .checking:
                 sentence(
                     L("updates.state.checking", "Checking for updates…")

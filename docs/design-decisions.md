@@ -605,8 +605,9 @@ per-type links that opened one and scrolled to it — two
 navigation mechanisms for one job, the second needing its own
 VoiceOver focus hand-off to work at all. A pinned strip of tabs
 is one mechanism, and puts every group one step away. Highlights
-is the tab that opens, in both modes, because the "Before you
-update" cautions live there and must be seen before Install; an
+is the tab that opens wherever there is an update, because the
+"Before you update" cautions live there and must be seen before
+Install; an
 empty group gets no tab, since a tab with nothing behind it
 promises nothing. Each tab keeps its count, which previews what
 changed before a click, and the window is 670 pt wide so that
@@ -641,7 +642,8 @@ which the answer then replaces, so a check opens and ends in the
 same chrome. The window takes over at the offer and holds it
 through downloading, preparing and installing — one window per
 offer rather than an alert followed by a status window — because
-the notes stay readable while the download runs. A scheduled offer still never takes the screen
+the notes stay readable while the download runs. A scheduled
+offer still never takes the screen
 ([the reminder](#scheduled-update-reminders-are-a-mark-not-a-notification-1013)
 is unchanged); the row it leaves opens this window.
 
@@ -695,13 +697,11 @@ hides it once its date is sixty days old, so a list nobody keeps
 disappears instead of promising. The words fit a one-person
 project: "Next on my list" admits an item may not have started
 and the order may change, where "What's next" reads as the next
-release's contents. It first shipped as a card under Highlights
-after the update only, on the argument that a large release
-pushed it below the fold of the offer; a tab cannot fall below a
-fold, so it now rides every state (#1849), last so the kinds keep
-their order and labelled short so the strip still fits, its pane
-carrying the full heading. Highlights still opens wherever there
-is an update. In What's new and in the up-to-date answer the pane
+release's contents. It is the strip's last tab in every state
+(#1849) rather than a card under Highlights, because a card falls
+below the fold of a large release and a tab cannot; last so the
+kinds keep their order, labelled short so the strip still fits,
+its pane carrying the full heading. In What's new and in the up-to-date answer the pane
 adds one quiet line, "Like my work? Support KiwiDesk on Ko-fi";
 never in the offer, whose one decision is Install or Later, and
 the link goes with the pane when there is no list — Home keeps

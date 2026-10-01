@@ -118,4 +118,62 @@ struct NextOnMyListTests {
         }
         #expect(height(next) > height(nil) + 80)
     }
+
+    /// The Ko-fi line rides What's new and the up-to-date answer,
+    /// never the offer, whose one decision is Install (#1849).
+    @Test("the support line never sits beside an Install")
+    func supportNeverInTheOffer() throws {
+        let source = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+                "Sources/KiwiDesk/Updates/UpdateNotesScroll.swift"
+            )
+        )
+        #expect(
+            source.contains(
+                "NextOnMyListPanel(next: next, asksForSupport: whatsNew)"
+            )
+        )
+        let window = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+                "Sources/KiwiDesk/Updates/UpdateWindowView.swift"
+            )
+        )
+        // The offer's layout passes `whatsNew: false`, the other two
+        // `true`.
+        let offer = try #require(
+            window.components(separatedBy: "private struct UpdateOfferLayout")
+                .last
+        )
+        #expect(offer.contains("whatsNew: false,"))
+    }
+
+    /// Everything inside a notes card is English like the notes
+    /// (#1849): the card views spell no `L(`, so a later pass
+    /// cannot translate a heading back over English lines.
+    @Test("the notes' cards speak the notes' English")
+    func cardsSpellNoLocalizedString() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Updates")
+        for file in [
+            "NextOnMyListPanel.swift", "UpdateNotesEnglish.swift",
+        ] {
+            let source = try SourceScan.strippedSource(
+                at: root.appendingPathComponent(file)
+            )
+            #expect(!source.contains("L("), "\(file) localizes")
+        }
+        let groups = try SourceScan.strippedSource(
+            at: root.appendingPathComponent("UpdateNotesGroups.swift")
+        )
+        // The panel and the list; the naming enum after them names
+        // the strip's tabs, which ARE translated.
+        let cards = try #require(
+            groups.components(separatedBy: "enum UpdateNotesNaming").first
+        )
+        #expect(!cards.contains("L("))
+        let markdown = try SourceScan.strippedSource(
+            at: root.appendingPathComponent("UpdateNotesMarkdown.swift")
+        )
+        #expect(!markdown.contains("L("))
+    }
 }

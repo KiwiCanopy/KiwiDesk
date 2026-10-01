@@ -10,6 +10,9 @@ enum UpdateState: Equatable {
     /// is known, never what it found.
     case notChecked(lastChecked: Date?)
     case upToDate(lastChecked: Date?)
+    /// The up-to-date answer is open (#1849): a check would only
+    /// repeat it until its Done.
+    case answering(lastChecked: Date?)
     /// Our own check, in flight. A scheduled check is not
     /// narrated (design-decisions ▸ #1536).
     case checking
@@ -35,6 +38,11 @@ enum UpdateState: Equatable {
         switch outcome {
         case .found(let version):
             return .available(version: version)
+        case .answered(open: true):
+            return .answering(lastChecked: lastChecked)
+        case .answered(open: false):
+            guard case .answering(let checked) = self else { return self }
+            return .upToDate(lastChecked: checked)
         case .notFound:
             return .upToDate(lastChecked: lastChecked)
         case .aborted(let error):
@@ -59,6 +67,8 @@ enum UpdateState: Equatable {
 enum UpdateCycleOutcome {
     case found(version: String)
     case notFound
+    /// The window's up-to-date answer opened or closed (#1849).
+    case answered(open: Bool)
     case aborted(any Error)
     case finished((any Error)?)
 }
@@ -77,14 +87,6 @@ final class UpdateStateStore: ObservableObject {
 
     func set(_ state: UpdateState) {
         self.state = state
-    }
-
-    /// The up-to-date answer is open (#1849): a check would only
-    /// repeat it, so the row says to close it first.
-    @Published private(set) var answerOpen = false
-
-    func setAnswerOpen(_ open: Bool) {
-        answerOpen = open
     }
 }
 

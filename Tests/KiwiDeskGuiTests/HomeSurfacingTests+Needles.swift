@@ -273,6 +273,12 @@ extension HomeSurfacingTests {
             // The footer draws the ONE update-state view (#1536).
             "UpdateStateRow(store:model.updater.updates"
         ],
+        "Settings/Home/UpdateStateRow.swift": [
+            // The open answer says why the check is greyed, in the
+            // line, and offers the window first (#1849).
+            "case.answering:sentence(Self.closeAnswerFirst)showWindow"
+                + "checkAgain(enabled:false,"
+        ],
         "Settings/Home/AboutSheet.swift": [
             // …and so does About, so the two cannot drift.
             "UpdateStateRow(store:store,check:check)"

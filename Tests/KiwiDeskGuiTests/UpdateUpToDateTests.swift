@@ -26,8 +26,9 @@ struct UpdateUpToDateTests {
             hostBundle: Bundle.main,
             delegate: UpdatePromptPolicy()
         )
-        driver.presents = { _ in }
-        driver.presentsUpToDate = { log.shown.append($0) }
+        driver.presents = {
+            if case .upToDate(let window) = $0 { log.shown.append(window) }
+        }
         driver.sparkleNotFound = { _, _ in log.sparkle += 1 }
         driver.fetchNext = { next }
         return (driver, log)

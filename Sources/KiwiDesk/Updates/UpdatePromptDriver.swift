@@ -1,89 +1,6 @@
 import AppKit
 import Sparkle
 
-/// Sparkle UI delegate customizations for an accessory app with no
-/// Dock tile (#1011). Held for the process lifetime by
-/// `SparkleUpdater`: the standard driver references its delegate
-/// WEAKLY, so a policy nobody retains is a policy Sparkle stops
-/// asking.
-@MainActor
-final class UpdatePromptPolicy: NSObject,
-    @MainActor SPUStandardUserDriverDelegate
-{
-    /// A SCHEDULED update waiting behind the gentle reminder
-    /// (#1013): set when Sparkle leaves the showing to KiwiDesk,
-    /// cleared once the update got attention or the session ended.
-    /// The one home of the fact; `onUpdatePendingChanged` nudges
-    /// the consumer, which reads it back.
-    var updatePending = false {
-        didSet { onUpdatePendingChanged() }
-    }
-    var onUpdatePendingChanged: () -> Void = {}
-
-    /// Gentle reminders (#1013): a background app's scheduled
-    /// alert is drawn BEHIND every window, which for a menu-bar
-    /// app is drawn nowhere. Sparkle's own warning names this.
-    var supportsGentleScheduledUpdateReminders: Bool { true }
-
-    /// A scheduled update is KiwiDesk's to show whatever focus
-    /// Sparkle proposes: an unsolicited offer never takes the
-    /// screen (#1013; #1011 is the opposite rule). User-initiated
-    /// checks never reach this answer.
-    func standardUserDriverShouldHandleShowingScheduledUpdate(
-        _ update: SUAppcastItem,
-        andInImmediateFocus immediateFocus: Bool
-    ) -> Bool {
-        false
-    }
-
-    func standardUserDriverWillHandleShowingUpdate(
-        _ handleShowingUpdate: Bool,
-        forUpdate update: SUAppcastItem,
-        state: SPUUserUpdateState
-    ) {
-        updatePending = !handleShowingUpdate
-    }
-
-    func standardUserDriverDidReceiveUserAttention(
-        forUpdate update: SUAppcastItem
-    ) {
-        updatePending = false
-    }
-
-    func standardUserDriverWillFinishUpdateSession() {
-        updatePending = false
-    }
-
-    /// KiwiDesk's own window got an offer (#1542): the same answer
-    /// as above — a scheduled one waits behind the mark, a user's
-    /// own check shows now. True when it shows.
-    func offerArrived(userInitiated: Bool) -> Bool {
-        updatePending = !userInitiated
-        return userInitiated
-    }
-
-    /// The own window's offer is on screen.
-    func offerGotAttention() {
-        updatePending = false
-    }
-
-    /// Disallows minimizing the status window (#1011): activating
-    /// a process deminiaturizes nothing, so a parked prompt would
-    /// sit in a Dock KiwiDesk has no icon in — refusing the
-    /// affordance is what closes the parking route, and only that.
-    func standardUserDriverAllowsMinimizableStatusWindow() -> Bool {
-        false
-    }
-
-    /// Activates app for modal alerts — unconditional only because
-    /// Sparkle gates them on user engagement
-    /// (`SPUScheduledUpdateDriver.m`, Sparkle 2.9.6); check that
-    /// gate when the version moves.
-    func standardUserDriverWillShowModalAlert() {
-        NSApp.activate(ignoringOtherApps: true)
-    }
-}
-
 /// Custom Sparkle user driver ensuring prompts come to front without Dock
 /// bouncing (#1011), and handing a found update to KiwiDesk's own
 /// window (#1542): each override below routes a phase to that
@@ -100,7 +17,17 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     var loadedItems: [SUAppcastItem] = []
     /// Starts a user-initiated check; Try Again's door.
     var startCheck: () -> Void = {}
-    var window: UpdateWindowController?
+    /// The one update window on screen (#1849), replaced only
+    /// through `replace(with:presenting:)`.
+    var current: UpdateWindowSlot? {
+        didSet {
+            let was = oldValue?.isAnswer ?? false
+            let isAnswer = current?.isAnswer ?? false
+            if was != isAnswer { onAnswerOpen(isAnswer) }
+        }
+    }
+    /// A not-found answer waiting on its list.
+    var pendingUpToDate: PendingUpToDate?
     /// Where the window's own Install records its notes as read;
     /// nil keeps a test's driver off the real defaults.
     var seenRecord: WhatsNewRecord?
@@ -113,30 +40,11 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     var nextFetch: Task<Void, Never>?
     /// What that fetch returned.
     var offeredNext: NextOnMyList?
-    /// Puts the window on screen; a test records it instead.
-    var presents: (UpdateWindowController) -> Void = { $0.present() }
-    /// "Checking for updates…" while a user's check runs (#1849).
-    var checking: UpdateCheckingWindowController?
-    var presentsChecking: (UpdateCheckingWindowController) -> Void = {
-        $0.present()
-    }
-    /// The "up to date" answer while it is open (#1849).
-    var upToDate: UpToDateWindowController? {
-        didSet {
-            if (upToDate == nil) != (oldValue == nil) {
-                onAnswerOpen(upToDate != nil)
-            }
-        }
-    }
-    /// Its list fetch, which the window waits on.
-    var upToDateFetch: Task<Void, Never>?
-    /// Told as the answer opens and closes, so Home says "up to
-    /// date" while Sparkle's session waits on the window's Done.
+    /// Puts an update window on screen; a test records it instead.
+    var presents: (UpdateWindowSlot) -> Void = { $0.present() }
+    /// Told as the answer opens and closes, so Home narrates it
+    /// while Sparkle's session waits on the window's Done.
     var onAnswerOpen: (Bool) -> Void = { _ in }
-    /// Puts that answer on screen; a test records it instead.
-    var presentsUpToDate: (UpToDateWindowController) -> Void = {
-        $0.present()
-    }
     /// Replaces Sparkle's modal error alert in a test, which would
     /// otherwise block the run; nil is Sparkle's own.
     var sparkleError: ((any Error, @escaping () -> Void) -> Void)?
@@ -158,7 +66,9 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         reply: @escaping (SPUUserUpdateChoice) -> Void
     ) {
         guard !appcastItem.isInformationOnlyUpdate else {
-            closeWindow()
+            // Sparkle's own alert answers; it is modal, so nothing
+            // under it can take the focus back.
+            replace(with: nil)
             return super.showUpdateFound(
                 with: appcastItem,
                 state: state,
@@ -182,7 +92,7 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         acknowledgement: @escaping () -> Void
     ) {
         guard Self.isUpToDate(error) else {
-            closeChecking()
+            replace(with: nil)
             if let sparkleNotFound {
                 return sparkleNotFound(error, acknowledgement)
             }
@@ -191,15 +101,7 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
                 acknowledgement: acknowledgement
             )
         }
-        upToDateFetch?.cancel()
-        upToDateFetch = Task { [weak self, fetchNext] in
-            let next = await fetchNext?()
-            guard !Task.isCancelled else { return }
-            self?.showUpToDate(
-                next: next?.current(at: Date()),
-                acknowledgement: acknowledgement
-            )
-        }
+        awaitUpToDate(acknowledgement: acknowledgement)
     }
 
     override func showUpdateInFocus() {
@@ -310,7 +212,7 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         _ error: any Error,
         acknowledgement: @escaping () -> Void
     ) {
-        closeChecking()
+        if checking != nil { replace(with: nil) }
         guard let window, window.session.phase != .found else {
             if let sparkleError {
                 return sparkleError(error, acknowledgement)
@@ -324,10 +226,16 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         presentWindow()
     }
 
+    /// Sparkle's session ended: whatever it held ends with it — a
+    /// pending answer unacknowledged, since its session is gone —
+    /// save an offer kept for Try Again.
     override func dismissUpdateInstallation() {
-        closeChecking()
-        if let window, !window.session.dismissed() {
-            closeWindow()
+        pendingUpToDate?.fetch.cancel()
+        pendingUpToDate = nil
+        if let window {
+            if !window.session.dismissed() { replace(with: nil) }
+        } else {
+            replace(with: nil)
         }
         super.dismissUpdateInstallation()
     }

@@ -22,9 +22,9 @@ struct UpdateCheckingTests {
             hostBundle: Bundle.main,
             delegate: UpdatePromptPolicy()
         )
-        driver.presents = { _ in }
-        driver.presentsUpToDate = { _ in }
-        driver.presentsChecking = { _ in log.checking += 1 }
+        driver.presents = {
+            if case .checking = $0 { log.checking += 1 }
+        }
         driver.sparkleNotFound = { _, _ in }
         driver.sparkleError = { _, _ in }
         driver.fetchNext = { nil }
@@ -107,8 +107,10 @@ struct UpdateCheckingTests {
     func answerIsUpFirst() async {
         let (driver, log) = driver()
         var checkingAtAnswer: Bool?
-        driver.presentsUpToDate = { [weak driver] _ in
-            checkingAtAnswer = driver?.checking != nil
+        driver.presents = { [weak driver] slot in
+            if case .upToDate = slot {
+                checkingAtAnswer = driver?.checking != nil
+            }
         }
         check(driver, log)
         driver.showUpdateNotFoundWithError(Self.notFound(.onLatestVersion)) {}
@@ -121,8 +123,10 @@ struct UpdateCheckingTests {
     func offerIsUpFirst() throws {
         let (driver, log) = driver()
         var checkingAtOffer: Bool?
-        driver.presents = { [weak driver] _ in
-            checkingAtOffer = driver?.checking != nil
+        driver.presents = { [weak driver] slot in
+            if case .offer = slot {
+                checkingAtOffer = driver?.checking != nil
+            }
         }
         check(driver, log)
         let item = try #require(
@@ -143,5 +147,53 @@ struct UpdateCheckingTests {
         ) { _ in }
         #expect(checkingAtOffer == true)
         #expect(driver.checking == nil)
+    }
+
+    /// Sparkle's cancellation does nothing once the appcast loaded,
+    /// so a Cancel while the list is fetched ends the pending
+    /// answer itself (review, 2026-10-01): no answer, and Sparkle
+    /// acknowledged exactly once.
+    @Test("Cancel during the list fetch ends the answer")
+    func cancelDuringFetchEndsTheAnswer() async throws {
+        let (driver, log) = driver()
+        var acknowledged = 0
+        var answers = 0
+        driver.presents = { if case .upToDate = $0 { answers += 1 } }
+        driver.fetchNext = {
+            try? await Task.sleep(for: .seconds(30))
+            return nil
+        }
+        check(driver, log)
+        driver.showUpdateNotFoundWithError(Self.notFound(.onLatestVersion)) {
+            acknowledged += 1
+        }
+        let fetch = try #require(driver.upToDateFetch)
+        let window = try #require(driver.checking).makeWindow()
+        _ = window.delegate?.windowShouldClose?(window)
+        await fetch.value
+        #expect(answers == 0)
+        #expect(acknowledged == 1)
+        #expect(log.cancelled == 0)
+        #expect(driver.current == nil)
+    }
+
+    @Test("the session's end drops a pending answer unanswered")
+    func dismissDropsThePendingAnswer() async throws {
+        let (driver, log) = driver()
+        var acknowledged = 0
+        driver.fetchNext = {
+            try? await Task.sleep(for: .seconds(30))
+            return nil
+        }
+        check(driver, log)
+        driver.showUpdateNotFoundWithError(Self.notFound(.onLatestVersion)) {
+            acknowledged += 1
+        }
+        let fetch = try #require(driver.upToDateFetch)
+        driver.dismissUpdateInstallation()
+        await fetch.value
+        #expect(driver.current == nil)
+        #expect(driver.upToDate == nil)
+        #expect(acknowledged == 0)
     }
 }

@@ -48,9 +48,13 @@ final class UpToDateWindowController: NSObject, NSWindowDelegate {
         window = nil
     }
 
+    /// The driver's slot is the only owner, and `done` empties it
+    /// — so this controller outlives its own call.
     private func finish() {
-        close()
-        done()
+        withExtendedLifetime(self) {
+            close()
+            done()
+        }
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
