@@ -99,7 +99,7 @@ extension KiwiCore {
                 wasMinimized: effects.appearedWasMinimized,
                 hadRememberedSpace: effects.hadRememberedSpace
             )
-            if reason == .returned { recentReturns[window.id] = focusClock() }
+            if reason == .returned { recentReturns[window.id] = wallClock() }
             if effects.closedReturnPlacedAsNew {
                 onLog(
                     "close return: w\(window.id.raw) re-shown — "

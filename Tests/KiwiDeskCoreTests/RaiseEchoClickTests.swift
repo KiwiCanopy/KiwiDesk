@@ -102,7 +102,7 @@ struct RaiseEchoClickTests {
         // Stamped, never echoed, and past the echo window —
         // the shape a no-echo raise leaves behind.
         core.selfRaiseStamps[top] =
-            core.focusClock().addingTimeInterval(
+            core.wallClock().addingTimeInterval(
                 -KiwiCore.selfRaiseEchoWindow - 1
             )
         core.handle(.windowFocused(top))
@@ -115,7 +115,7 @@ struct RaiseEchoClickTests {
     func olderSelfRaiseStampDoesNotVeto() {
         let core = makeCore()
         let (intended, top, _) = makePile(core)
-        core.selfRaiseStamps[top] = core.focusClock().addingTimeInterval(-0.5)
+        core.selfRaiseStamps[top] = core.wallClock().addingTimeInterval(-0.5)
         core.handle(.windowFocused(top))
         #expect(focused(core) == intended)
     }
@@ -127,7 +127,7 @@ struct RaiseEchoClickTests {
     func newerSelfRaiseStampVetoes() {
         let core = makeCore()
         let (_, top, _) = makePile(core)
-        core.selfRaiseStamps[top] = core.focusClock().addingTimeInterval(0.1)
+        core.selfRaiseStamps[top] = core.wallClock().addingTimeInterval(0.1)
         core.handle(.windowFocused(top))
         #expect(focused(core) == top)
     }
@@ -136,7 +136,7 @@ struct RaiseEchoClickTests {
     func clickOnReportedWindowIsHonored() {
         let core = makeCore()
         let (_, top, _) = makePile(core)
-        core.lastLeftClick = (core.focusClock(), overlapPoint, top)
+        core.lastLeftClick = (core.wallClock(), overlapPoint, top)
         core.handle(.windowFocused(top))
         #expect(focused(core) == top)
         // The stamp survives the escape: the raise's real echo
@@ -154,7 +154,7 @@ struct RaiseEchoClickTests {
     func buriedPileMateEchoReverts() {
         let core = makeCore()
         let (intended, top, under) = makePile(core)
-        core.lastLeftClick = (core.focusClock(), overlapPoint, top)
+        core.lastLeftClick = (core.wallClock(), overlapPoint, top)
         core.handle(.windowFocused(under))
         #expect(focused(core) == intended)
     }
@@ -164,7 +164,7 @@ struct RaiseEchoClickTests {
         let core = makeCore()
         let (intended, top, _) = makePile(core)
         core.lastLeftClick = (
-            core.focusClock(), CGPoint(x: 100, y: 100), intended
+            core.wallClock(), CGPoint(x: 100, y: 100), intended
         )
         core.handle(.windowFocused(top))
         #expect(focused(core) == intended)
@@ -175,7 +175,7 @@ struct RaiseEchoClickTests {
         let core = makeCore()
         let (intended, top, _) = makePile(core)
         core.lastLeftClick = (
-            core.focusClock().addingTimeInterval(
+            core.wallClock().addingTimeInterval(
                 -KiwiCore.zOrderRaiseEchoWindow - 0.1
             ),
             overlapPoint,
@@ -192,7 +192,7 @@ struct RaiseEchoClickTests {
     func unresolvedClickReverts() {
         let core = makeCore()
         let (intended, top, _) = makePile(core)
-        core.lastLeftClick = (core.focusClock(), overlapPoint, nil)
+        core.lastLeftClick = (core.wallClock(), overlapPoint, nil)
         core.handle(.windowFocused(top))
         #expect(focused(core) == intended)
     }

@@ -100,7 +100,7 @@ extension FullscreenStandDownTests {
 
         #expect(core.tiler.recentInstantTarget(Self.show) == nil)
         #expect(core.tiler.placements.recent(Self.show) == nil)
-        #expect(core.placementBounce(Self.show, now: core.focusClock()) == nil)
+        #expect(core.placementBounce(Self.show, now: core.wallClock()) == nil)
     }
 
     @Test("A presentation in FRONT stands the shelf down")

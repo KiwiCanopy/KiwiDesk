@@ -67,7 +67,7 @@ struct ActivationReReportTests {
         let core = makeCore()
         seedHiddenSibling(core)
         #expect(core.state.workspaces.lastFocused == WindowID(2))
-        core.selfRaiseStamps[WindowID(2)] = core.focusClock()
+        core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(1)))
         // No focus-follow scheduled, focus stays reverted.
         #expect(core.deferred.task(for: .focusFollow) == nil)
@@ -85,10 +85,10 @@ struct ActivationReReportTests {
         let core = makeCore()
         seedHiddenSibling(core)
         core.selfRaiseStamps[WindowID(2)] =
-            core.focusClock().addingTimeInterval(
+            core.wallClock().addingTimeInterval(
                 -0.5
             )
-        core.selfRaiseStamps[WindowID(1)] = core.focusClock()
+        core.selfRaiseStamps[WindowID(1)] = core.wallClock()
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.deferred.task(for: .focusFollow) != nil)
         #expect(core.state.workspaces.lastFocused == WindowID(1))
@@ -99,10 +99,10 @@ struct ActivationReReportTests {
         let core = makeCore()
         seedHiddenSibling(core)
         core.selfRaiseStamps[WindowID(1)] =
-            core.focusClock().addingTimeInterval(
+            core.wallClock().addingTimeInterval(
                 -0.5
             )
-        core.selfRaiseStamps[WindowID(2)] = core.focusClock()
+        core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.deferred.task(for: .focusFollow) == nil)
         #expect(core.state.workspaces.lastFocused == WindowID(2))
@@ -125,7 +125,7 @@ struct ActivationReReportTests {
         let core = makeCore()
         seedHiddenSibling(core)
         addWindow(core, 3, pid: 9)
-        core.selfRaiseStamps[WindowID(3)] = core.focusClock()
+        core.selfRaiseStamps[WindowID(3)] = core.wallClock()
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.deferred.task(for: .focusFollow) != nil)
     }
@@ -139,7 +139,7 @@ struct ActivationReReportTests {
         let core = makeCore()
         seedHiddenSibling(core)
         core.selfRaiseStamps[WindowID(2)] =
-            core.focusClock().addingTimeInterval(
+            core.wallClock().addingTimeInterval(
                 -KiwiCore.selfRaiseEchoWindow - 1
             )
         core.handle(.windowFocused(WindowID(1)))
@@ -155,7 +155,7 @@ struct ActivationReReportTests {
         addWindow(core, 1, pid: 5)
         addWindow(core, 2, pid: 5)
         // Both on the active space; 2 focused and stamped.
-        core.selfRaiseStamps[WindowID(2)] = core.focusClock()
+        core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.state.workspaces.lastFocused == WindowID(1))
     }
@@ -200,7 +200,7 @@ struct ActivationReReportTests {
         let core = makeCore()
         seedHiddenSibling(core)
         splitAcrossDisplays(core)
-        core.selfRaiseStamps[WindowID(2)] = core.focusClock()
+        core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.deferred.task(for: .focusFollow) == nil)
         #expect(core.state.workspaces.lastFocused == WindowID(2))
@@ -221,9 +221,9 @@ struct ActivationReReportTests {
                 CGRect(x: 2100, y: 300, width: 800, height: 600)
             )
         )
-        core.selfRaiseStamps[WindowID(2)] = core.focusClock()
+        core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.lastLeftClick = (
-            core.focusClock(),
+            core.wallClock(),
             CGPoint(x: 2500, y: 600),
             nil
         )
@@ -256,7 +256,7 @@ struct ActivationReReportTests {
             follow: false
         )
         core.state.apply(.windowFocused(WindowID(2)))
-        core.selfRaiseStamps[WindowID(2)] = core.focusClock()
+        core.selfRaiseStamps[WindowID(2)] = core.wallClock()
         core.handle(.windowFocused(WindowID(3)))
         // Honored: the sticky becomes the real focus.
         #expect(core.state.workspaces.lastFocused == WindowID(3))

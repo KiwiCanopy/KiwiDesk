@@ -248,7 +248,7 @@ struct MouseWarpHoldTests {
         // which the echo window reads as fresh however slow the
         // runner is between here and the read (#1408's shape).
         core.lastLeftClick = (
-            core.focusClock().addingTimeInterval(60),
+            core.wallClock().addingTimeInterval(60),
             CGPoint(x: 700, y: 500),
             nil
         )
@@ -260,7 +260,7 @@ struct MouseWarpHoldTests {
         // A stale press no longer marks intent as mouse-made.
         core.zOrderRestoresInFlight = 1
         core.lastLeftClick = (
-            core.focusClock().addingTimeInterval(
+            core.wallClock().addingTimeInterval(
                 -KiwiCore.selfRaiseEchoWindow - 0.1
             ),
             CGPoint(x: 700, y: 500),
@@ -309,7 +309,7 @@ struct MouseWarpHoldTests {
         // echo window on a contended queue runner and the warp
         // fired (CI, 2026-09-13).
         core.lastLeftClick = (
-            core.focusClock().addingTimeInterval(60),
+            core.wallClock().addingTimeInterval(60),
             CGPoint(x: 600, y: 100),
             WindowID(2)
         )

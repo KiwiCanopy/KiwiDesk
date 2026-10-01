@@ -93,7 +93,7 @@ struct IgnoredPanelGraceTests {
         // A fresh click that actually reached W (#687
         // provenance) — genuine focus, not a stale re-report.
         core.lastLeftClick = (
-            at: core.focusClock(), point: .zero, reached: WindowID(3)
+            at: core.wallClock(), point: .zero, reached: WindowID(3)
         )
         core.handle(.windowFocused(WindowID(3)))
         #expect(
@@ -118,7 +118,7 @@ struct IgnoredPanelGraceTests {
         core.state.workspaces.focus(WindowID(2), in: SpaceID(1))
         core.armIgnoredPanel(9)
         core.ignoredPanel.dismissDeadline =
-            core.focusClock().addingTimeInterval(
+            core.wallClock().addingTimeInterval(
                 -1
             )
         core.handle(.windowFocused(WindowID(1)))
@@ -153,7 +153,7 @@ struct IgnoredPanelGraceTests {
         core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
         core.armIgnoredPanel(9)
         core.ignoredPanel.dismissDeadline =
-            core.focusClock().addingTimeInterval(
+            core.wallClock().addingTimeInterval(
                 -1
             )
         core.handle(.windowFocused(WindowID(2)))
@@ -168,7 +168,7 @@ struct IgnoredPanelGraceTests {
     @Test("armIgnoredPanel resets an existing dismiss deadline")
     func armResetsDeadline() {
         let core = makeCore()
-        core.ignoredPanel.dismissDeadline = core.focusClock()
+        core.ignoredPanel.dismissDeadline = core.wallClock()
         core.armIgnoredPanel(5)
         #expect(core.ignoredPanel.active.contains(5))
         #expect(core.ignoredPanel.dismissDeadline == nil)
@@ -194,7 +194,7 @@ struct IgnoredPanelGraceTests {
         core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
         // KiwiDesk raised the panel app's main window, then the
         // quick terminal took and dropped focus.
-        core.selfRaiseStamps[WindowID(3)] = core.focusClock()
+        core.selfRaiseStamps[WindowID(3)] = core.wallClock()
         core.armIgnoredPanel(3)
         core.handle(.windowFocused(WindowID(3)))
         #expect(core.selfRaiseStamps[WindowID(3)] != nil)

@@ -56,7 +56,7 @@ extension KiwiCore {
         if let window = state.windows[id],
             let element = eventLoop.element(for: id)
         {
-            stampSelfRaise(id, now: focusClock())
+            stampSelfRaise(id, now: wallClock())
             AXHelper.raise(element, pid: window.pid)
         }
     }

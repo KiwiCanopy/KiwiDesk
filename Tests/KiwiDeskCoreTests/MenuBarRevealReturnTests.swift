@@ -85,7 +85,7 @@ struct MenuBarRevealReturnTests {
         // Stamped AHEAD: an "inside the window" verdict measured
         // against the wall clock races a starved runner (#1371).
         core.lastLeftClick = (
-            at: core.focusClock().addingTimeInterval(60),
+            at: core.wallClock().addingTimeInterval(60),
             point: .zero,
             reached: nil
         )
@@ -105,13 +105,13 @@ struct MenuBarRevealReturnTests {
         // activation KiwiDesk could not hold is never fought
         // twice. The stamp is set AHEAD so the verdict does not
         // ride how long the runner took between the two calls.
-        core.menuBarRevealReturnAt = core.focusClock().addingTimeInterval(60)
+        core.menuBarRevealReturnAt = core.wallClock().addingTimeInterval(60)
         core.handle(.windowFocused(WindowID(2)))
         #expect(focused(core) == WindowID(2))
         // Past the bound, the next reveal is returned again.
         core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
         core.menuBarRevealReturnAt =
-            core.focusClock().addingTimeInterval(
+            core.wallClock().addingTimeInterval(
                 -KiwiCore.menuBarRevealReturnWindow - 1
             )
         core.handle(.windowFocused(WindowID(2)))
@@ -131,7 +131,7 @@ struct MenuBarRevealReturnTests {
         core.handle(.windowFocused(WindowID(2)))
         #expect(focused(core) == WindowID(1))
         #expect(core.tiler.placements.recent(WindowID(2)) == nil)
-        core.menuBarRevealReturnAt = core.focusClock().addingTimeInterval(60)
+        core.menuBarRevealReturnAt = core.wallClock().addingTimeInterval(60)
         core.handle(.windowFocused(WindowID(2)))
         #expect(focused(core) == WindowID(2))
     }
@@ -209,7 +209,7 @@ struct MenuBarRevealReturnTests {
     func selfEchoIsNotReturned() {
         let core = makeCore()
         core.selfRaiseStamps[WindowID(2)] =
-            core.focusClock().addingTimeInterval(
+            core.wallClock().addingTimeInterval(
                 60
             )
         var log: [String] = []

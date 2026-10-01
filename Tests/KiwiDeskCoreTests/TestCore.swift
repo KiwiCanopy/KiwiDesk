@@ -207,6 +207,6 @@ func makeTestCore(
     // And the focus-report ledgers' (#1852): a stamp read across
     // a starved runner's second aged out of its echo window.
     let frozen = Date()
-    core.focusClock = { frozen }
+    core.wallClock = { frozen }
     return core
 }
