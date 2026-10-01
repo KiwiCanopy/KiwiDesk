@@ -18,7 +18,9 @@ extension SpaceBarOverlay {
                 frontGlyph, frontName,
             ]
             .forEach { $0.isHidden = true }
-            frontGlass?.isHidden = true
+            // The glass AND its tint: a tint left up reads as a
+            // dark chip on a Space with no front app.
+            updateFrontGlass(nil, radius: 0, style: style)
             return
         }
         attachFrontViewsIfNeeded()
@@ -227,7 +229,11 @@ extension SpaceBarOverlay {
             frontGlyph.textColor = accent
             let host = frontGlyph.superview ?? itemRun
             frontGlyph.frame = host.backingAlignedRect(
-                BarTextGlyph.frame(for: frontGlyph, in: frame),
+                BarTextGlyph.frame(
+                    for: frontGlyph,
+                    in: frame,
+                    band: .caps
+                ),
                 options: .alignAllEdgesNearest
             )
             frontGlyph.setAccessibilityElement(true)
@@ -280,8 +286,9 @@ extension SpaceBarOverlay {
         frontName.frame = CGRect(
             x: offset,
             y: BarTextGlyph.originY(
-                capsCentredOn: depth / 2,
+                centredOn: depth / 2,
                 for: frontName,
+                band: .caps,
                 height: height
             ),
             width: min(frontName.frame.width, available),
