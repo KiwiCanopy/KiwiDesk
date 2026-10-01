@@ -8,6 +8,13 @@ the full picture, and the
 [Discord](https://discord.gg/bYeTrJyZyS) is the place to talk about
 any of it.
 
+The last two releases were heavy on the outside: the shelf, the
+looks, the menus. But as with kiwis, the outside is what catches
+the eye, while the real quality shines from the inside, with
+fabulous taste. So besides a few small new features, the next
+update works under the hood — performance and cleanups — for an
+overall juicier KiwiDesk.
+
 <!--
 KiwiDesk's "What's new" window shows the section below (#1813), so
 it keeps a fixed shape: one "As of YYYY-MM-DD" line, then one-line
@@ -21,8 +28,8 @@ that section is free.
 
 ## Next on my list
 
-_As of 2026-09-30_
+_As of 2026-10-01_
 
+- The inside of the kiwi: a faster start and a lighter touch while you work, with nothing new to learn
 - Design your whole desktop with your own AI assistant, just by asking
-- Even more ways to make KiwiDesk truly yours
-- Simpler ways to get around your windows, Spaces and settings
+- A few small things, like shortcuts for named Spaces and Spaces past ten
