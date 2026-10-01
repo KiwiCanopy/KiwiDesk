@@ -133,7 +133,7 @@ struct UpdateUpToDateTests {
         ) {}
         await settle(driver)
         #expect(reported == 1)
-        driver.showUpdateInFocus()
+        #expect(driver.focusOpenWindow())
         #expect(log.shown.count == 2)
         #expect(log.shown.last === driver.upToDate)
     }
@@ -149,6 +149,18 @@ struct UpdateUpToDateTests {
                 "Sources/KiwiDesk/Updates/AppUpdater.swift"
             )
         )
+        // Sparkle brings nothing forward for a no-update session,
+        // so the click asks the driver before Sparkle.
+        // The live updater's body: the first of the conformances
+        // (the inert one comes after it).
+        let bodies = source.components(separatedBy: "func checkForUpdates() {")
+        try #require(bodies.count > 1)
+        let body = bodies[1]
+        let focus = try #require(
+            body.range(of: "if driver.focusOpenWindow() { return }")
+        )
+        let sparkle = try #require(body.range(of: "updater.checkForUpdates()"))
+        #expect(focus.lowerBound < sparkle.lowerBound)
         #expect(
             source.contains(
                 "if updater.canCheckForUpdates, !updater.sessionInProgress {"

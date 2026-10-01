@@ -196,13 +196,25 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         }
     }
 
-    /// A second check while a session is open brings its window
-    /// back — the offer, the up-to-date answer or the check (#1849).
     override func showUpdateInFocus() {
-        if window != nil { return presentWindow() }
-        if let upToDate { return presentsUpToDate(upToDate) }
-        if let checking { return presentsChecking(checking) }
-        super.showUpdateInFocus()
+        if !focusOpenWindow() { super.showUpdateInFocus() }
+    }
+
+    /// Brings whichever update window is open forward — the offer,
+    /// the up-to-date answer or the check (#1849). Sparkle asks
+    /// only while it shows an update, so the click asks here first.
+    @discardableResult
+    func focusOpenWindow() -> Bool {
+        if window != nil {
+            presentWindow()
+        } else if let upToDate {
+            presentsUpToDate(upToDate)
+        } else if let checking {
+            presentsChecking(checking)
+        } else {
+            return false
+        }
+        return true
     }
 
     override func showUserInitiatedUpdateCheck(
