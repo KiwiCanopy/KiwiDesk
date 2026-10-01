@@ -186,5 +186,9 @@ func makeTestCore(
     // window is measured on its own seam; a test wanting the
     // expiry moves this clock ahead.
     core.tiler.placements.clock = { 0 }
+    // And the focus-report ledgers' (#1852): a stamp read across
+    // a starved runner's second aged out of its echo window.
+    let frozen = Date()
+    core.focusClock = { frozen }
     return core
 }

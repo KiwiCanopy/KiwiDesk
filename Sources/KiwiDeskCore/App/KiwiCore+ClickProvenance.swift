@@ -107,7 +107,7 @@ extension KiwiCore {
     /// press time is when the fact exists.
     func stampLeftClick(at axPoint: CGPoint) {
         lastLeftClick = (
-            Date(),
+            focusClock(),
             axPoint,
             clickReachedWindow(at: axPoint)
         )

@@ -133,7 +133,7 @@ struct ScrollingDeferredRaiseTests {
         // The user clicks window 1 mid-pan: the OS raised it
         // itself; a stale raise must not steal focus back. The
         // click is what tells it from the pan's own echo (#1161).
-        core.lastLeftClick = (Date(), CGPoint.zero, WindowID(1))
+        core.lastLeftClick = (core.focusClock(), CGPoint.zero, WindowID(1))
         core.eventLoop.onEvent(.windowFocused(WindowID(1)))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)
@@ -157,7 +157,7 @@ struct ScrollingDeferredRaiseTests {
         // echoes back mid-pan (its AX focus notification lands).
         // The stamp as `raiseWindow` writes it: the echo
         // classification is age-bounded (#687 device QA).
-        core.selfRaiseStamps[WindowID(2)] = Date()
+        core.selfRaiseStamps[WindowID(2)] = core.focusClock()
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         // The stale self-echo neither clears the pending raise nor
         // snaps state focus back to 2.
@@ -186,8 +186,8 @@ struct ScrollingDeferredRaiseTests {
         // was misread as a user click and stole focus back.
         // Stamps as `raiseWindow` writes them — the echo
         // classification is age-bounded (#687 device QA).
-        core.selfRaiseStamps[WindowID(2)] = Date()
-        core.selfRaiseStamps[WindowID(4)] = Date()
+        core.selfRaiseStamps[WindowID(2)] = core.focusClock()
+        core.selfRaiseStamps[WindowID(4)] = core.focusClock()
         core.state.workspaces.focus(WindowID(4), in: space)
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.activeSpace?.focused == WindowID(4))
@@ -213,7 +213,7 @@ struct ScrollingDeferredRaiseTests {
         // The click's provenance (#687): without it a clickless
         // report for a window the pan just placed past the edge
         // is #1161's bounce, which this test does not read.
-        core.lastLeftClick = (Date(), CGPoint.zero, WindowID(2))
+        core.lastLeftClick = (core.focusClock(), CGPoint.zero, WindowID(2))
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)

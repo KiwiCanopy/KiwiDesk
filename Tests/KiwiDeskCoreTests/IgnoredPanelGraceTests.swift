@@ -93,7 +93,7 @@ struct IgnoredPanelGraceTests {
         // A fresh click that actually reached W (#687
         // provenance) — genuine focus, not a stale re-report.
         core.lastLeftClick = (
-            at: Date(), point: .zero, reached: WindowID(3)
+            at: core.focusClock(), point: .zero, reached: WindowID(3)
         )
         core.handle(.windowFocused(WindowID(3)))
         #expect(
@@ -117,9 +117,10 @@ struct IgnoredPanelGraceTests {
         addWindow(core, 2, pid: 9)
         core.state.workspaces.focus(WindowID(2), in: SpaceID(1))
         core.armIgnoredPanel(9)
-        core.ignoredPanel.dismissDeadline = Date(
-            timeIntervalSinceNow: -1
-        )
+        core.ignoredPanel.dismissDeadline =
+            core.focusClock().addingTimeInterval(
+                -1
+            )
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.ignoredPanel.active.isEmpty)
         #expect(core.ignoredPanel.dismissDeadline == nil)
@@ -151,9 +152,10 @@ struct IgnoredPanelGraceTests {
         addWindow(core, 2, pid: 9)
         core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
         core.armIgnoredPanel(9)
-        core.ignoredPanel.dismissDeadline = Date(
-            timeIntervalSinceNow: -1
-        )
+        core.ignoredPanel.dismissDeadline =
+            core.focusClock().addingTimeInterval(
+                -1
+            )
         core.handle(.windowFocused(WindowID(2)))
         #expect(core.ignoredPanel.active.isEmpty)
         #expect(core.ignoredPanel.dismissDeadline == nil)
@@ -166,7 +168,7 @@ struct IgnoredPanelGraceTests {
     @Test("armIgnoredPanel resets an existing dismiss deadline")
     func armResetsDeadline() {
         let core = makeCore()
-        core.ignoredPanel.dismissDeadline = Date()
+        core.ignoredPanel.dismissDeadline = core.focusClock()
         core.armIgnoredPanel(5)
         #expect(core.ignoredPanel.active.contains(5))
         #expect(core.ignoredPanel.dismissDeadline == nil)
@@ -192,7 +194,7 @@ struct IgnoredPanelGraceTests {
         core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
         // KiwiDesk raised the panel app's main window, then the
         // quick terminal took and dropped focus.
-        core.selfRaiseStamps[WindowID(3)] = Date()
+        core.selfRaiseStamps[WindowID(3)] = core.focusClock()
         core.armIgnoredPanel(3)
         core.handle(.windowFocused(WindowID(3)))
         #expect(core.selfRaiseStamps[WindowID(3)] != nil)

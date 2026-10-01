@@ -95,7 +95,7 @@ extension KiwiCore {
             // user's hand put it. The trade: keyboard nav
             // within ~1 s of a press, mid-drain, loses its
             // warp too — pre-#689 every such warp was lost.
-            if !recentLeftPress(now: Date()) {
+            if !recentLeftPress(now: focusClock()) {
                 pendingMouseWarp = id
             }
             return

@@ -11,7 +11,7 @@ extension KiwiCore {
         _ id: WindowID,
         effects: AppliedEffects
     ) {
-        let now = Date()
+        let now = focusClock()
         // Dismissing an ignored panel (Ghostty's quick terminal)
         // makes AX re-report the app's managed main window —
         // possibly on another space — as focused (#21/#244):
@@ -306,7 +306,7 @@ extension KiwiCore {
         // warp was dropped by the in-flight hold; the re-fire
         // surfaced it).
         if !selfEcho, effects.focusBefore != id,
-            !recentClickReached(id, now: Date())
+            !recentClickReached(id, now: focusClock())
         {
             warpMouseToFocused(id)
         }

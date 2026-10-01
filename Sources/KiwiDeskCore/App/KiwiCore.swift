@@ -133,6 +133,12 @@ public final class KiwiCore {
     /// deliberate focus (#689).
     var zOrderRaiseEchoes: [WindowID: Date] = [:]
 
+    /// The clock every focus-report ledger stamps and ages on —
+    /// z-order and self-raise echoes, click provenance, returns,
+    /// the steal and reveal debts. A test freezes it (#1852,
+    /// tests.md ▸ age-bounded ledgers).
+    var focusClock: () -> Date = Date.init
+
     /// Bumped per z-order raise sequence so a stale sequence's
     /// focus handoff cannot steal focus back (the
     /// `runPendingFocusRaise` staleness pattern); a counter

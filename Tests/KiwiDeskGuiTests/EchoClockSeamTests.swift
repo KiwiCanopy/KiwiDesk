@@ -142,10 +142,51 @@ struct EchoClockSeamTests {
             for pin in [
                 "core.tiler.applier.clock = { 0 }",
                 "core.tiler.placements.clock = { 0 }",
+                "core.focusClock = { frozen }",
             ] {
                 let pins = source.occurrences(of: pin)
                 #expect(pins == 1, "\(target) pins `\(pin)` \(pins)×")
             }
         }
+    }
+
+    /// The files that stamp or age a focus-report ledger on the
+    /// handler's clock (#1852): every read goes through
+    /// `focusClock`, so a test's freeze reaches all of them.
+    private static let focusClockHomes = [
+        "App/KiwiCore+AccessibilityReturn.swift",
+        "App/KiwiCore+ClickProvenance.swift",
+        "App/KiwiCore+Events.swift",
+        "App/KiwiCore+FocusEvents.swift",
+        "App/KiwiCore+MouseWarp.swift",
+        "Commands/KiwiCore+FocusRaise.swift",
+        "Commands/KiwiCore+ZOrderFloats.swift",
+    ]
+
+    @Test("the focus-report ledgers read the core's clock")
+    func focusLedgersReadTheCoreClock() throws {
+        let core = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore"
+        )
+        for home in Self.focusClockHomes {
+            let source = try SourceScan.strippedSource(
+                at: core.appendingPathComponent(home)
+            )
+            #expect(
+                source.occurrences(of: "Date()") == 0,
+                "\(home) reads the wall clock beside `focusClock`"
+            )
+            #expect(
+                source.occurrences(of: "focusClock()") > 0,
+                "\(home) no longer reads `focusClock`"
+            )
+        }
+        let seam = try SourceScan.strippedSource(
+            at: core.appendingPathComponent("App/KiwiCore.swift")
+        )
+        #expect(
+            seam.occurrences(of: "var focusClock: () -> Date = Date.init")
+                == 1
+        )
     }
 }
