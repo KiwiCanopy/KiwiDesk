@@ -281,11 +281,13 @@ struct OpenOrFocusReachTests {
     }
 
     /// The bridge is present but declines the switch: the press
-    /// falls through to the plain activate rather than dying in
-    /// the cycle. (A `guard canDriveDesktops` inside the reach is
-    /// defence in depth this fixture cannot see — an absent
-    /// resolver refuses through the bridge's own nil anyway.)
-    @Test("a refused reach falls through to the activate")
+    /// falls through to the pull rather than dying in the cycle —
+    /// the tracked window is focused by command (#1840), so
+    /// nothing is left to the activate. (A `guard
+    /// canDriveDesktops` inside the reach is defence in depth
+    /// this fixture cannot see — an absent resolver refuses
+    /// through the bridge's own nil anyway.)
+    @Test("a refused reach falls through to the pull")
     func refusedReachFallsThrough() {
         let (core, touches) = makeCore(bridge: .refusing)
         defer { teardown() }
@@ -295,7 +297,8 @@ struct OpenOrFocusReachTests {
         #expect(Bridge.switches.isEmpty)
         #expect(core.followFocus.owed() == nil)
         #expect(core.state.workspaces["1"]?.focused == WindowID(1))
-        #expect(touches.activated == [pid])
+        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        #expect(touches.activated.isEmpty)
     }
 
     @Test("without the bridge the ring is the tracked windows alone")

@@ -55,6 +55,9 @@ struct ReturningFocusSeamTests {
         // (#1345) — never a fold, never the switch handler.
         ("rememberHonoredFocus(id)", "KiwiCore+FocusEvents.swift"),
         ("rememberHonoredFocus(frontmost)", "KiwiCore+FocusSeed.swift"),
+        // Open or Focus's recency rides the same door (#1840): a
+        // reverted report must never become the pull's target.
+        ("state.stampFocusRecency(id)", memoryFile),
         // The precedence: a standing follow (#1007) is read once,
         // where the return decides whether to owe.
         ("followFocus.owed(", memoryFile),

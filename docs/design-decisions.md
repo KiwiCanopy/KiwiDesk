@@ -9876,10 +9876,10 @@ and it is derivable from state KiwiDesk already owns, so the
 order is testable and never guesses. The trade-off is that the
 first repeat press may not land on the "second most recent"
 window the way ⌘-backtick does; anyone wanting MRU semantics
-already has macOS's own cycling, which KiwiDesk deliberately
-does not shadow. The ring is app-scoped, so overflow pile-mates
-are reachable by construction (they are windows of the ring's
-app like any other — the cross-layout navigation table's
+for the walk already has macOS's own cycling, which KiwiDesk
+deliberately does not shadow. The ring is app-scoped, so
+overflow pile-mates are reachable by construction (they are
+windows of the ring's app like any other — the cross-layout navigation table's
 pile-exclusion logic is about *spatial* neighbor search and
 does not apply). On multiple displays the ring follows the one
 global space order; scope it per display only if device use
@@ -9904,6 +9904,17 @@ window order decides. One window, not all: the user parked them
 individually, and a shortcut that un-parks a session's worth of
 windows at once cannot be undone with one press.
 
+:::unreleased
+With no window at all — none up, none minimized, none on record
+on another Desktop — there is nothing to restore and
+`activate()` asks for no window, so the press would again do
+nothing: the shortcut reopens the app instead, sending the
+reopen a Dock click sends, and the app opens a window by its
+own reopen handling. The reopen is kept to that case: with a
+minimized window present, the restore above already answers,
+from an order the user made. (#1840)
+:::
+
 **A time-windowed cycle reset** — treating a press after some
 idle gap as a fresh cycle — was rejected on the same argument
 that rejects MRU above: the target depends on history the user
@@ -9915,6 +9926,46 @@ parking decision, and an overshoot yanks a parked window back
 into the layout. If demand for reaching minimized windows ever
 materializes it belongs in a Lua-only verb, never in the default
 cycle. (#673)
+
+:::unreleased
+**Open or Focus lands on the window you used last (#1840).**
+[Rationale] A first press — no window of the app focused yet —
+focuses the app's most recently focused tracked window,
+switching to its Space; with no recency yet (KiwiDesk just
+started) the app's own focused window; else the first window in
+ring order. The repeat-press ring above is unchanged. This is
+not the MRU #637 rejects, for the reason close-return focus is
+not (below): the objection is to a *repeating* gesture whose
+third target rests on history the user cannot see. A first
+press is one step to the window the user last left, and from
+there the walk is the fixed ring. Ring order for the first
+press instead lands on whichever window the Space order puts
+first — often one the user has not touched in hours.
+
+Recency is KiwiDesk's own, stamped at an honored focus, rather
+than the app's focused window alone: KiwiDesk's own raises — a
+z-order restore, a lazy app's re-report of a sibling (#496) —
+move the app's focused window without the user choosing it, and
+the common press then needs no synchronous AX read. The app's
+answer is the fallback only while nothing is stamped. The stamp
+is the window's, not its Space's or Desktop's: a Desktop
+departure, a minimize and a hide keep it, and only a close or
+the app's exit ends it, so a window that comes back is still
+the one the user last used.
+
+The press focuses **by command** — a window in another Space is
+reached by a Space switch, the way a follow move is — never by
+`activate()` and a wait for the app's focus report. For a window
+a Space switch has just parked, that report is the clickless
+focus [#1161's placement distrust](#a-placement-bounce-is-the-apps-answer-not-the-users-1161)
+bounces, and each refusal renews the ledger, so the press would
+do nothing however often it is repeated. A target on a Desktop
+nobody shows (a native-fullscreen window) is left to the
+ordinary path, since raising it is a Desktop switch (#1345).
+Fixed behavior, no setting. The walk after it stays the #637
+ring: history picks where the first press lands, never the
+order of the presses that follow.
+:::
 
 **A hidden app holds no tiles, and the same rule covers an app
 that hides itself.** [Principle] A tile is room on screen given
