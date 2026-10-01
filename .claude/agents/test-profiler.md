@@ -30,14 +30,17 @@ you never edit a file in the repo. The fix is the caller's.
    cause.
 4. Name the mechanism: the call chains that hold the time, with
    their share, and the code they enter at (`path:line`).
-5. When the caller asked for a release comparison, read the
-   baseline the skill names and report each delta.
+5. When the caller asked for a release comparison, use the
+   baseline the caller hands you (it lives in the owner's private
+   `plan/`, which a worktree cannot see) and report each delta;
+   with none handed in, report the new numbers as the baseline.
 
 ## Calibration — stay quiet about
 
 - Parallelism width as a fix: it is a lever only when the helper
   is CPU-bound, and the evidence says which.
-- A single run's number as a trend.
+- A single run's number as a trend, and `run.log`'s suite times as
+  cost — they are finish times (the skill says how to read them).
 - Suites that are slow by design and inside their budget; report
   what moved, not what is large.
 - Anything in the app's runtime behaviour — that is

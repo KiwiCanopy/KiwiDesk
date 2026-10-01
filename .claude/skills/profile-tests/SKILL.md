@@ -19,13 +19,19 @@ the worktree root on a tree built with `swift build --build-tests`.
 .claude/skills/profile-tests/scripts/profile-run.sh KiwiDeskCoreTests <out-dir>
 ```
 
-It runs the target through `scripts/gate-lock` (one heavy run on
-the machine at a time — tests.md explains why parallel runs are
-noise), records the helper's window census every 20 s, and takes
-two `sample`s 60 s apart once the run passes `--sample-after`
-(150 s by default; set it below the target's FAST time so a fast
-run is sampled too). Its summary is the wall time, the
-`Test run with` line and the last window counts.
+It takes the gate slot first (one heavy run on the machine at a
+time — tests.md explains why parallel runs are noise), so its
+clock starts at acquisition, then records the helper's window
+census every 10 s and samples it at `--sample-after` (150 s by
+default) and again 60 s later if the helper is still running. Set
+`--sample-after` well below the target's FAST time, or a fast run
+is never sampled. Its summary is the wall time, the
+`Test run with` line and the peak on-screen window count.
+
+`run.log`'s "Suite X passed after N seconds" is when X FINISHED,
+counted from the start of a run that starts nearly every suite at
+once — the last finishers, not the most expensive suites. Read it
+only as "who queued longest", and take cost from the samples.
 
 Run each target at least twice. One number says nothing about a
 bimodal target, and a mode is a property of a run, not a commit.
@@ -36,14 +42,20 @@ bimodal target, and a mode is a property of a run, not a commit.
 .claude/skills/profile-tests/scripts/attribute-sample.py <out-dir>/sample-a.txt
 ```
 
-and read `ps.txt` beside it.
+and read `ps.txt` beside it FIRST: the main thread's blocked
+share means something only for a main-actor-bound target. A helper
+near `cores × 100 %` is working, and its main thread is merely
+parked in the test runner — the script prints that as one chain
+into `main`.
 
 - **Main thread mostly blocked in `mach_msg`, process CPU low**:
   the run is WAITING — on WindowServer when the entries are
   `SLS…` / `_NX…` / `CG…`. More cores and a parallelism cap do
-  nothing here. Read the test-module frames above the waits:
-  those are the reads to seam (tests.md ▸ a WindowServer read on
-  a per-retile path) or the windows being created.
+  nothing here. Each wait chain names the innermost KiwiDesk frame
+  with its `file:line` and the WindowServer entry it waited in —
+  "KiwiDesk frame" includes production code, which the test binary
+  links. Those are the reads to seam (tests.md ▸ a WindowServer
+  read on a per-retile path) or the windows being created.
 - **Helper near `cores × 100 %`, little blocking**: the run is
   WORKING. The "busiest frames, CPU only" list names the code;
   in the GUI target that has been the source-scanning family,
@@ -70,12 +82,14 @@ owes `guard-prover` (tests.md).
 ## 5. Before a minor or major release
 
 Compare against the previous release's baseline — per-target wall
-time over two runs, the slowest suites from `run.log`, the peak
-window count — kept privately in `plan/test-baseline.md`. A target
-25 % slower or a window count that climbs again is investigated
-before the cut. Record the new numbers there afterwards, with the
-date and the machine. The obligation itself is
-packaging-and-release.md's.
+time over two runs, waiting or working, the top wait chains and
+CPU frames, the peak window count. It lives privately in the
+owner's main checkout at `plan/test-baseline.md`, which a worktree
+cannot see, so the caller hands it in. A target 25 % slower, a
+mode that flipped, or a window count that climbs again is
+investigated before the cut. Record the new numbers there
+afterwards, with the date and the machine. The obligation itself
+is packaging-and-release.md's.
 
 ## What this is not
 

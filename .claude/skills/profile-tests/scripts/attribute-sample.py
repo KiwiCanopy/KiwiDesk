@@ -4,12 +4,18 @@
 Usage: attribute-sample.py <sample.txt> [--module KiwiDeskCoreTests]
 
 Prints, for the MAIN thread: how many samples it spent blocked in
-mach_msg (waiting on another process, usually WindowServer) versus
-running, the outermost WindowServer entry points it waited in, and
-the innermost frames of the test module above each wait. Then, for
-ALL threads, the busiest innermost test-module frames by CPU
+mach_msg (waiting on another process, usually WindowServer), and
+each WAIT CHAIN — the innermost KiwiDesk frame (file:line) above
+the wait joined to the outermost WindowServer entry it waited in.
+Then, for ALL threads, the busiest innermost KiwiDesk frames by CPU
 samples (blocked leaves excluded). The first half answers "what is
 it waiting on", the second "where does the CPU go" (#1868).
+
+"KiwiDesk frame" means any frame of the test binary, production
+code included: Core is linked into it. The main thread's blocked
+share only means something for a main-actor-bound target; read
+ps.txt first — a helper near cores x 100 % is working, and its
+main thread is merely parked in the test runner.
 """
 import collections
 import re
@@ -46,8 +52,11 @@ def leaves(body):
 
 
 def name(frame):
-    return re.sub(r"\(.*", "", frame.split("  (in")[0]).replace(
+    """Function name plus the `File.swift:NN` sample appends."""
+    fn = re.sub(r"\(.*", "", frame.split("  (in")[0]).replace(
         "static ", "").strip()
+    where = re.search(r"(\w[\w+]*\.swift:\d+)", frame)
+    return f"{fn} [{where.group(1)}]" if where else fn
 
 
 def main():
@@ -58,34 +67,32 @@ def main():
     mine = (lambda f: f"(in {module})" in f) if module else (
         lambda f: re.search(r"\(in KiwiDesk\w*Tests\)", f))
     blocked = 0
-    ws = collections.Counter()
-    waits = collections.Counter()
+    total = 0
+    chains = collections.Counter()
     cpu = collections.Counter()
     for header, body in threads(lines):
-        main_thread = "Main Thread" in header
+        main_thread = ("Main Thread" in header
+                       or "com.apple.main-thread" in header)
         for count, frame, stack in leaves(body):
             idle = any(k in frame for k in IDLE)
             ours = [name(f) for f in stack if mine(f)]
             if main_thread and "mach_msg" in frame:
                 blocked += count
                 entry = [f.split("  (in")[0] for f in stack if WS.match(f)]
-                if entry:
-                    ws[entry[0][:60]] += count
-                if ours:
-                    waits[" <- ".join(reversed(ours[-3:]))] += count
+                source = ours[-1] if ours else "(no KiwiDesk frame)"
+                target = re.sub(r"\s+\+.*", "", entry[0])[:48] if entry \
+                    else "(not WindowServer)"
+                chains[f"{source} => {target}"] += count
             if not idle and ours:
                 cpu[ours[-1][:70]] += count
         if main_thread:
             total = int(re.search(r"(\d+) Thread", header).group(1))
     print(f"main thread: {total} samples, {blocked} blocked in mach_msg "
           f"({100 * blocked // max(total, 1)} %)")
-    print("-- outermost WindowServer entry while blocked")
-    for k, c in ws.most_common(8):
-        print(f"{c:6}  {k}")
-    print("-- test-module frames above those waits")
-    for k, c in waits.most_common(12):
-        print(f"{c:6}  {k}")
-    print("-- busiest test-module frames, all threads, CPU only")
+    print("-- wait chains: innermost KiwiDesk frame => WindowServer entry")
+    for k, c in chains.most_common(14):
+        print(f"{c:6}  {100 * c // max(blocked, 1):3} %  {k}")
+    print("-- busiest KiwiDesk frames, all threads, CPU only")
     for k, c in cpu.most_common(12):
         print(f"{c:6}  {k}")
 
