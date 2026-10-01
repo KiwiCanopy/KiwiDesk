@@ -32,7 +32,7 @@ extension KiwiCore {
             ).first,
             let bar = placedBar(
                 app,
-                display: screen.kiwiDisplay?.id
+                display: screen.kiwiDisplayID
                     ?? DisplayID(CGMainDisplayID()),
                 plan: plan
             )
@@ -64,7 +64,7 @@ extension KiwiCore {
     /// `CGDirectDisplayID`. Nil when the display is not currently
     /// connected to a screen.
     func screen(for display: DisplayID) -> NSScreen? {
-        NSScreen.screens.first { $0.kiwiDisplay?.id == display }
+        NSScreen.screens.first { $0.kiwiDisplayID == display }
     }
 
     /// The bar-hosting layout for a space, resolved through the

@@ -24,6 +24,19 @@ bite large test PRs:
   failed on a narrow runner and passed on a dev Mac (#523). A
   pile's signature is equal `minX` with midYs exactly
   `OverlapStack.offset` (40 pt, vertical-only) apart.
+- **A test run must not pile up real windows** (#1868). AppKit
+  keeps an ordered-in panel alive after its owner is gone, so a
+  Core type that stores an `NSPanel` orders it out in an
+  `isolated deinit` — otherwise every test core that drew a
+  shelf or a mark left one on screen, and with hundreds up every
+  later WindowServer call slowed until the main-actor suites took
+  the whole run (`OverlayPanelDeinitCensusTests`,
+  `OverlayPanelReleaseTests`). Likewise a WindowServer read on a
+  per-retile path joins `makeTestCore`'s memo or seam rather than
+  answering live in every fixture (`GeometryUtils.visibleFrame`'s
+  override). When a target's time grows or turns bimodal, sample
+  the test process and count its windows before tuning
+  parallelism: an idle CPU means it is waiting, not starved.
 - **Split suites early** — the 79-char limit and 350-line ceiling
   bite large test files. Break a suite into focused files *before*
   it approaches the ceiling.

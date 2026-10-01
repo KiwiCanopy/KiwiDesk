@@ -171,21 +171,25 @@ enum SourceScan {
                 i = literal.end
                 continue
             }
-            if matches(text, at: i, openSpan) {
+            // Every marker starts with `/` or `*`: the one-character
+            // test skips the three walks for nearly every character
+            // of the tree (#1868).
+            let marker = text[i] == "/" || text[i] == "*"
+            if marker, matches(text, at: i, openSpan) {
                 depth += 1
                 drop("/")
                 drop("*")
                 i += 2
                 continue
             }
-            if depth > 0, matches(text, at: i, closeSpan) {
+            if marker, depth > 0, matches(text, at: i, closeSpan) {
                 depth -= 1
                 drop("*")
                 drop("/")
                 i += 2
                 continue
             }
-            if depth == 0, matches(text, at: i, lineComment) {
+            if marker, depth == 0, matches(text, at: i, lineComment) {
                 while i < text.count, text[i] != "\n" {
                     drop(text[i])
                     i += 1
@@ -230,6 +234,7 @@ enum SourceScan {
         _ text: [Character],
         from i: Int
     ) -> (end: Int, delimiter: Int)? {
+        guard text[i] == "\"" || text[i] == "#" else { return nil }
         if matches(text, at: i, rawQuote) {
             return close(
                 text,
@@ -274,7 +279,7 @@ enum SourceScan {
                 i += 2
                 continue
             }
-            if matches(text, at: i, delimiter) {
+            if text[i] == delimiter[0], matches(text, at: i, delimiter) {
                 return i + delimiter.count
             }
             i += 1
@@ -292,9 +297,10 @@ enum SourceScan {
         _ needle: [Character]
     ) -> Bool {
         guard i + needle.count <= text.count else { return false }
-        for (offset, character) in needle.enumerated()
-        where text[i + offset] != character {
-            return false
+        var offset = 0
+        while offset < needle.count {
+            if text[i + offset] != needle[offset] { return false }
+            offset += 1
         }
         return true
     }

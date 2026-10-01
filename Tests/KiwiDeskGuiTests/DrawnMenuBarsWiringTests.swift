@@ -20,9 +20,18 @@ struct DrawnMenuBarsWiringTests {
         let text = try source(
             "Sources/KiwiDeskCore/Tiling/GeometryUtils.swift"
         )
-        let body = try #require(
+        // The door returns the live derivation; only a test core's
+        // memo stands in front of it (#1868).
+        let door = try #require(
             SourceScan.declarationBody(
                 after: "static func visibleFrame(of screen: NSScreen)",
+                in: text
+            )
+        )
+        #expect(door.contains("return liveVisibleFrame(of: screen)"))
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "static func liveVisibleFrame(of screen: NSScreen)",
                 in: text
             )
         )

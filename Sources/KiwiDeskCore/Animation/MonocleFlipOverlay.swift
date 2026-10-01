@@ -11,6 +11,13 @@ import QuartzCore
 @MainActor
 final class MonocleFlipOverlay {
     private var panel: NSPanel?
+
+    /// AppKit keeps a visible panel alive after its owner is gone,
+    /// so a dropped overlay would leave it on screen (#1868).
+    isolated deinit {
+        panel?.orderOut(nil)
+    }
+
     private var pending: DispatchWorkItem?
     private var teardown: DispatchWorkItem?
     private var onLanding: (() -> Void)?

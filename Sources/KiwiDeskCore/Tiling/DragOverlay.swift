@@ -20,6 +20,12 @@ public final class DragOverlay {
             self.panel = panel
             panel.contentView = view
         }
+
+        /// AppKit keeps a visible panel alive after its owner is
+        /// gone, so a dropped marker would stay on screen (#1868).
+        isolated deinit {
+            panel.orderOut(nil)
+        }
     }
 
     private(set) var ghost: Marker?

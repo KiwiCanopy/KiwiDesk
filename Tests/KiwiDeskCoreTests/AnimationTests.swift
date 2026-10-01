@@ -136,7 +136,7 @@ struct AnimationEngineTests {
     @Test("Reduce Motion flipping on tears down an in-flight anim")
     func reduceMotionCancelsInFlight() {
         guard let screen = NSScreen.main,
-            let display = screen.kiwiDisplay?.id
+            let display = screen.kiwiDisplayID
         else { return }
         let engine = AnimationEngine()
         var applies: [(frame: CGRect, setSize: Bool)] = []
@@ -181,7 +181,7 @@ struct AnimationEngineSizingTests {
         rateHz: Int? = nil
     ) -> [(frame: CGRect, setSize: Bool)]? {
         guard let screen = NSScreen.main,
-            let display = screen.kiwiDisplay?.id
+            let display = screen.kiwiDisplayID
         else { return nil }
         let engine = AnimationEngine()
         engine.sizePolicy = policy
@@ -289,7 +289,7 @@ struct AnimationEngineSizingTests {
     @Test("A retarget mid-grow still lands on the exact new target")
     func retargetMidGrowLandsExact() throws {
         guard let screen = NSScreen.main,
-            let display = screen.kiwiDisplay?.id
+            let display = screen.kiwiDisplayID
         else { return }
         let engine = AnimationEngine()
         var applies: [(frame: CGRect, setSize: Bool)] = []

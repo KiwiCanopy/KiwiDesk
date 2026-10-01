@@ -67,6 +67,25 @@ public enum GeometryUtils {
     /// `VisibleFrameReadCensusTests` holds the exceptions.
     @MainActor
     static func visibleFrame(of screen: NSScreen) -> CGRect {
+        #if DEBUG
+            if let visibleFrameOverride {
+                return visibleFrameOverride(screen)
+            }
+        #endif
+        return liveVisibleFrame(of: screen)
+    }
+
+    #if DEBUG
+        /// Test seam over `visibleFrame(of:)`; nil reads the
+        /// machine. Every read is a WindowServer round trip, which
+        /// a test core memoizes (#1868).
+        @MainActor
+        static var visibleFrameOverride: ((NSScreen) -> CGRect)?
+    #endif
+
+    /// The machine's reading behind `visibleFrame(of:)`.
+    @MainActor
+    static func liveVisibleFrame(of screen: NSScreen) -> CGRect {
         if menuBarAutoHides {
             return reclaimingMenuBar(
                 screen.visibleFrame,
@@ -189,7 +208,7 @@ extension GeometryUtils {
                 in: screens.map(\.frame)
             )
         else { return nil }
-        return screens[index].kiwiDisplay?.id
+        return screens[index].kiwiDisplayID
     }
 
     /// Confines the origin so `frame` stays inside `visible`; an
