@@ -2,6 +2,36 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "2.1.1",
+      "tag": "v2.1.1",
+      "date": "2026-10-01",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v2.1.1",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v2.1.1/KiwiDesk-2.1.1.dmg",
+      "summary": "A small cleanup this time: a few quick findings I fixed while the bigger performance work is under way. Checking for updates now answers in KiwiDesk's own window, the front app on the Space Bar gets an indicator of its own, and fonts with old-style numbers sit straight on the bar.",
+      "sections": [
+        {
+          "title": "Improved",
+          "items": [
+            "**The front app on the Space Bar now wears the active indicator too** — its outline or edge mark, in the front app's colour unless you pick another under Advanced Colors ▸ Front app indicator.",
+            "**Check for updates now answers in KiwiDesk's own update window**, while it checks and when you're up to date, with this version's notes and Next on my list, now a tab of its own.",
+            "**Picking the Pill or Sakura look now also sets its own font**, Avenir Next or Hiragino Sans.",
+            "**The Font weight slider now greys out for a font with fixed weights only**, like Menlo or Apple Chancery, and shows the weight it draws instead of moving without effect.",
+            "**Rounded chips on KiwiShelf now leave the same room at both ends**, and an empty Space shown by a symbol is as round as a numbered one."
+          ],
+          "type": "improved"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**Space numbers now sit centred in fonts with old-style figures**, like Apple Chancery or Georgia, instead of low.",
+            "**Switching to an empty Space no longer leaves a dark box** where the front app was shown."
+          ],
+          "type": "fixed"
+        }
+      ]
+    },
+    {
       "version": "2.1.0",
       "tag": "v2.1.0",
       "date": "2026-10-01",
