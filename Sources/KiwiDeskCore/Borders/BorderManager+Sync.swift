@@ -7,23 +7,49 @@ import AppKit
 /// `FollowSource`, `sync` rebuilds everything but holds an
 /// animating window's geometry.
 extension BorderManager {
+    #if DEBUG
+        /// Test-only: a full re-stack that prunes nothing.
+        func sync(_ desired: [Spec]) {
+            sync(desired, alive: nil, reassertOrder: true)
+        }
+    #endif
+
     /// Synchronizes overlays to match desired specs and retires unused
     /// overlays (`FollowSource.syncFrame`, #596).
-    public func sync(_ desired: [Spec]) {
+    /// `alive` prunes dormant rings of windows outside it (nil
+    /// keeps them all). `reassertOrder` re-stacks every ring; off,
+    /// only a ring that needs ordering in is ordered (#1925).
+    public func sync(
+        _ desired: [Spec],
+        alive: Set<WindowID>?,
+        reassertOrder: Bool
+    ) {
         let wanted = Set(desired.map(\.window))
-        updateSkyLightSubscription(wanted)
+        #if DEBUG
+            lastSyncReassertedOrder = reassertOrder
+        #endif
         for (id, overlay) in overlays where !wanted.contains(id) {
-            overlay.hide()
+            overlay.retire()
+            dormant[id] = overlay
             overlays[id] = nil
             specs[id] = nil
-            cornerRadii[id] = nil
         }
+        if let alive {
+            for (id, overlay) in dormant where !alive.contains(id) {
+                overlay.hide()
+                dormant[id] = nil
+                cornerRadii[id] = nil
+            }
+        }
+        // Before the loop, so the order policy reads this sync's
+        // tracking verdict; the set equals the one after it.
+        updateSkyLightSubscription(wanted)
         for spec in desired {
             specs[spec.window] = spec
             let overlay = overlay(for: spec.window)
             // Only geometry stands down mid-animation (#596);
-            // create, recolor, re-order and retire run
-            // unconditionally. `screen` MUST derive from this same
+            // create, recolor and retire run unconditionally.
+            // `screen` MUST derive from this same
             // rect, not `spec.frame`: it picks the backing scale,
             // and a held frame paired with the spec's screen
             // rasterizes the ring at the wrong display's scale.
@@ -43,11 +69,28 @@ extension BorderManager {
                 glowBlur: spec.glowBlur,
                 sheen: spec.sheen
             )
-            // Re-assert stacking each sync — the target may have
-            // moved in the window order since the ring last
-            // positioned.
-            overlay.order(relativeTo: spec.window.raw)
+            // Without the WindowServer stream no reorder event
+            // tells a shown ring its target moved, so every sync
+            // re-stacks.
+            if Self.ordersRing(
+                reassert: reassertOrder,
+                needsOrder: overlay.needsOrder,
+                tracked: skyLightActive
+            ) {
+                overlay.order(relativeTo: spec.window.raw)
+            }
         }
+    }
+
+    /// Whether `sync` orders a ring: a settle pass re-stacks all,
+    /// a steady one only a ring not yet shown, unless no
+    /// WindowServer stream reports its target moving (#1925).
+    static func ordersRing(
+        reassert: Bool,
+        needsOrder: Bool,
+        tracked: Bool
+    ) -> Bool {
+        reassert || needsOrder || !tracked
     }
 
     /// Moves overlay to match window frame during animation or AX echo

@@ -59,6 +59,7 @@ struct BorderStackingTests {
     @Test("A manager's ring reads the level through its seam")
     func managerLevelSeamReachesTheRing() throws {
         let manager = BorderManager()
+        manager.restack = { _, _, _ in false }
         manager.setDrawOrder(.front)
         manager.windowLevel = { _ in 5 }
         let overlay = manager.makeOverlay(for: WindowID(7))

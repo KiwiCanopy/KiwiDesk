@@ -35,6 +35,10 @@ public final class BorderManager {
     }
 
     var overlays: [WindowID: BorderOverlay] = [:]
+    /// Rings `sync` retired, kept invisible until their window
+    /// wears one again: a Space switch then creates and orders out
+    /// no panel (#1925). Pruned once the window is gone.
+    var dormant: [WindowID: BorderOverlay] = [:]
     /// Transient rings spawned for dead-end bounces when borders are disabled.
     var bumpTransients: [WindowID: BorderOverlay] = [:]
     #if DEBUG
@@ -42,6 +46,11 @@ public final class BorderManager {
         /// the runtime gate a test core never passes. Production
         /// must not read it; it says nothing about a drawn bump.
         var deadEndProbe: ((WindowID, Direction) -> Void)?
+    #endif
+    #if DEBUG
+        /// Test-only: whether the last `sync` re-stacked every
+        /// ring. Production must not read it (#1925).
+        var lastSyncReassertedOrder: Bool?
     #endif
     var specs: [WindowID: Spec] = [:]
     var cornerRadii: [WindowID: CGFloat] = [:]
@@ -61,6 +70,16 @@ public final class BorderManager {
     /// live by default; a test core pins it (#1868).
     var windowLevel: (CGWindowID) -> Int? =
         AppKitBorderOverlay.windowLayer
+    /// A ring's re-stack write, live by default; a test core pins
+    /// it to the AppKit fallback (#1925).
+    var restack: (CGWindowID, Bool, CGWindowID) -> Bool =
+        SkyLight.orderWindow
+    #if DEBUG
+        /// Test-only: builds ring backends and stands in for the
+        /// WindowServer request. Production must not set them.
+        var backendFactory: (() -> any BorderOverlayBackend)?
+        var watchOverride: ((Set<WindowID>) -> Bool)?
+    #endif
     var reportedTrackingActive: Bool?
     var onLog: @MainActor (String) -> Void = CoreLog.write
     /// True while local animation drives this window (#594).
@@ -124,7 +143,9 @@ public final class BorderManager {
             order == .front ? .above : .below
         guard mapped != activeOrder else { return }
         for overlay in overlays.values { overlay.hide() }
+        for overlay in dormant.values { overlay.hide() }
         overlays.removeAll()
+        dormant.removeAll()
         activeOrder = mapped
     }
 
@@ -142,8 +163,10 @@ public final class BorderManager {
     public func clear() {
         bumpAnimator.flushAll()
         for overlay in overlays.values { overlay.hide() }
+        for overlay in dormant.values { overlay.hide() }
         for overlay in bumpTransients.values { overlay.hide() }
         overlays = [:]
+        dormant = [:]
         bumpTransients = [:]
         specs = [:]
         cornerRadii = [:]
@@ -167,17 +190,28 @@ public final class BorderManager {
     /// concurrent `sync` can never adopt or stomp its transient.
     func overlay(for window: WindowID) -> BorderOverlay {
         if let existing = overlays[window] { return existing }
-        let overlay = makeOverlay(for: window)
+        let overlay =
+            dormant.removeValue(forKey: window)
+            ?? makeOverlay(for: window)
         overlays[window] = overlay
         return overlay
     }
 
     /// Builds a ring overlay for `window` (#361, #367).
     func makeOverlay(for window: WindowID) -> BorderOverlay {
-        BorderOverlay(
+        #if DEBUG
+            if let backendFactory {
+                return BorderOverlay(
+                    window: window.raw,
+                    backend: backendFactory()
+                )
+            }
+        #endif
+        return BorderOverlay(
             window: window.raw,
             order: activeOrder,
-            levelOf: windowLevel
+            levelOf: windowLevel,
+            restack: restack
         )
     }
 

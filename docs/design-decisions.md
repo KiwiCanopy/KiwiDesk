@@ -1746,7 +1746,12 @@ SkyLight window stays composited over the Mission Control
 overview at its desktop frame whatever Space it is pinned to,
 where the panel's `.transient` hides it with the desktop
 (#1917). A front-order panel takes its target's window level, so
-a raised target's band never covers the ring. Direct mouse
+a raised target's band never covers the ring. Re-stacking an
+ordered-in panel behind its target is the one private WRITE: a
+SkyLight transaction, because AppKit's relative order looks the
+other app's window up synchronously first and that answer stalls
+a Space switch under GPU load, with AppKit's order as the
+fallback (#1925). Direct mouse
 drags use one movement authority: WindowServer bounds whenever its event
 surface is active, otherwise the stable AX/AppKit fallback. No path
 projects a border from cursor motion, so macOS edge/corner dwell holds
