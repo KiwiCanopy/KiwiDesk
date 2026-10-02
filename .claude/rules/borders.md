@@ -62,7 +62,7 @@ frame is the leading truth — every other channel trails it, by
 | `follow(.animationTick)` | always applies — it *is* the truth. One correction (#677): when the animation's target re-asks a size the app has twice refused, the tick renders the commanded origin at the learned answer (`SizePin`, computed by `TilingEngine.animationSizePin` — from the confirmed bound, or provisionally from the first refusal's candidate, because a render self-corrects at settle while geometry must stay confirmed-only), because the window performs our position sets and refuses the size — `FollowSizePinTests` |
 | `follow(.axEcho)` | stands down (#594), and also while WindowServer-tracked (#285) |
 | `reconcile` (WS bounds re-read) | stands down (#594) |
-| `sync` (`updateBorders()` / `updateStickyMarks()`) | geometry stands down (#596); create, recolor, re-order and retire still run |
+| `sync` (`updateBorders()` / `updateStickyMarks()`) | geometry stands down (#596); create, recolor and retire still run, and so does re-order where the section below says it does (#1925) |
 
 `sync` is the easy one to miss, because it reads as a rebuild
 rather than a move — its spec frame is `state.windows[id]?.frame`,
@@ -124,6 +124,32 @@ second cancel the other:
   window whose app accepted no AX write at all — the ring rode our
   commanded frames to the target while the window never moved, and
   no echo and no WindowServer event is coming.
+
+## A Space switch builds, orders out and re-asks nothing
+
+Every WindowServer call a ring makes on the main actor is a round
+trip, and while WindowServer is GPU-bound one costs hundreds of
+ms (#1925 measured 390 ms for a single order). So:
+
+- **A ring `sync` retires goes dormant** — alpha 0, still ordered
+  in, its corner radius kept — and comes back for its window;
+  only a window gone from state drops it (`alive`). Its held
+  frame is dropped on retire, or an animated return flashes it
+  where it rested (`BorderDormantRingTests`).
+- **The WindowServer watch set names dormant rings too**
+  (`watchSet`), so a switch leaves the request unchanged.
+- **A steady `sync` orders only a ring that needs it** — new,
+  revived, hidden, or with no WindowServer stream to report its
+  target moving; the two settle passes re-stack every ring
+  (`BorderManager.ordersRing`, `BorderOrderReassertTests`).
+- **An ordered-in panel re-stacks in a SkyLight transaction**,
+  never AppKit's `order(_:relativeTo:)`, which looks the other
+  app's window rights up synchronously first; the first show and
+  the first after an order-out stay AppKit's, and a missing
+  symbol falls back to it (`AppKitBorderOverlay.restack`,
+  `BorderRestackTests`). This is an ordering call on the AppKit
+  panel, not a drawing backend: the section on `.transient`
+  below still binds.
 
 ## The overlay panels join every Space
 

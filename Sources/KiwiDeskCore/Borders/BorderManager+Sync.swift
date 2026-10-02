@@ -38,8 +38,8 @@ extension BorderManager {
             specs[spec.window] = spec
             let overlay = overlay(for: spec.window)
             // Only geometry stands down mid-animation (#596);
-            // create, recolor, re-order and retire run
-            // unconditionally. `screen` MUST derive from this same
+            // create, recolor and retire run unconditionally.
+            // `screen` MUST derive from this same
             // rect, not `spec.frame`: it picks the backing scale,
             // and a held frame paired with the spec's screen
             // rasterizes the ring at the wrong display's scale.
