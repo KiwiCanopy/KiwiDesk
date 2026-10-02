@@ -147,7 +147,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             ? nil : frontmost
         let front = frontmost?.bundleIdentifier ?? "none"
         logPanel("sheet show; front \(front)")
-        NSApplication.shared.activate(ignoringOtherApps: true)
+        NSApplication.shared.activate()
         panel.makeKeyAndOrderFront(nil)
     }
 

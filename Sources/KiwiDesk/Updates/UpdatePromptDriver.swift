@@ -134,6 +134,8 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
             )
         }
         super.showDownloadInitiated(cancellation: cancellation)
+        // Forcing (#1170): runs after the click that closed
+        // Sparkle's alert, with no user event in hand.
         NSApp.activate(ignoringOtherApps: true)
     }
 
@@ -188,6 +190,7 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
             return .install
         }
         if let sparkleReadyToInstall { return sparkleReadyToInstall() }
+        // Forcing (#1170): reached asynchronously, no user event.
         NSApp.activate(ignoringOtherApps: true)
         return await super.showReadyToInstallAndRelaunch()
     }
