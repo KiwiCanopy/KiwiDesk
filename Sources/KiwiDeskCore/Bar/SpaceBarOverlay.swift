@@ -202,14 +202,19 @@ public final class SpaceBarOverlay {
         return tf
     }()
     let frontName = NSTextField(labelWithString: "")
-    var lastShown:
-        (
-            items: [Item],
-            frontApp: SpaceBarItemView.App?,
-            strip: CGRect,
-            style: SpaceBarLook,
-            stateMarkColors: StateMarkColors
-        )?
+    /// One show's input, compared whole to skip a repeat (#1901).
+    struct Shown: Equatable {
+        let items: [Item]
+        let frontApp: SpaceBarItemView.App?
+        let strip: CGRect
+        let style: SpaceBarLook
+        let stateMarkColors: StateMarkColors
+    }
+
+    var lastShown: Shown?
+
+    /// What the last draw read beyond its input (#1901).
+    private var drawnEnvironment: BarDrawEnvironment?
 
     public init() {
         configureRoot()
@@ -235,10 +240,25 @@ public final class SpaceBarOverlay {
             hide()
             return
         }
+        let next = Shown(
+            items: items,
+            frontApp: frontApp,
+            strip: strip,
+            style: style,
+            stateMarkColors: stateMarkColors
+        )
+        // An identical show draws nothing (#1901): the switch,
+        // its focus report and its activation each refresh.
+        let environment = BarDrawEnvironment.current
+        if isVisible, lastShown == next, drawnEnvironment == environment {
+            WorkMeter.shared.add(\.barShowsSkipped)
+            return
+        }
+        drawnEnvironment = environment
         // A slot that moved or resized hands the motion to the
         // shelf's glide, so the chips land (#1838).
         let slotChanged = lastShown.map { $0.strip != strip } ?? false
-        lastShown = (items, frontApp, strip, style, stateMarkColors)
+        lastShown = next
         let active = items.first(where: \.active)?.space
         render(
             followingActive: follow.follows(active),
@@ -283,3 +303,6 @@ public final class SpaceBarOverlay {
         }
     }
 }
+
+/// Compared by `show` to skip an identical draw (#1901).
+extension SpaceBarOverlay.Item: Equatable {}
