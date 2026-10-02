@@ -19,7 +19,7 @@ export const OPERATOR = {
   name: "Maikel Hajiabadi",
   designation: "KiwiCanopy",
   address: ["Moselstraße 43", "60329 Frankfurt am Main"],
-  email: "hello.kiwicanopy+kiwidesk@gmail.com",
+  email: "kiwidesk@kiwicanopy.com",
 } as const;
 
 const MAILTO = `<a href="mailto:${OPERATOR.email}">${OPERATOR.email}</a>`;
@@ -51,7 +51,7 @@ const de: LegalStrings = {
   backHome: "Zurück zur Startseite",
   impressum: {
     title: "Impressum",
-    updated: "28. Juli 2026",
+    updated: "2. Oktober 2026",
     sections: [
       {
         title: "Angaben gemäß § 5 DDG",
@@ -84,7 +84,7 @@ const de: LegalStrings = {
   },
   datenschutz: {
     title: "Datenschutzerklärung",
-    updated: "28. Juli 2026",
+    updated: "2. Oktober 2026",
     sections: [
       {
         title: "1. Datenschutz auf einen Blick",
@@ -99,7 +99,7 @@ const de: LegalStrings = {
           `KiwiDesk-App selbst wird über GitHub bereitgestellt; diese Datenschutzerklärung bezieht ` +
           `sich ausschließlich auf diese Website. Personenbezogene Daten fallen nur in dem ` +
           `technisch unvermeidbaren Umfang an, der zum Ausliefern der Website nötig ist ` +
-          `(siehe „Hosting“).</p>`,
+          `(siehe „Hosting“), sowie bei einer Kontaktaufnahme per E-Mail (Abschnitt 6).</p>`,
       },
       {
         title: "2. Verantwortliche Stelle",
@@ -169,7 +169,13 @@ const de: LegalStrings = {
         body:
           `<p>Wenn du uns per E-Mail kontaktierst, werden deine Angaben inklusive der von dir ` +
           `mitgeteilten Kontaktdaten zum Zweck der Bearbeitung deiner Anfrage und für den Fall ` +
-          `von Anschlussfragen gespeichert. Rechtsgrundlage ist unser berechtigtes Interesse an ` +
+          `von Anschlussfragen gespeichert. E-Mails an Adressen unter kiwicanopy.com nimmt ` +
+          `Cloudflare (siehe Abschnitt 3) mit dem Dienst Email Routing entgegen und leitet sie an unser ` +
+          `Postfach weiter. Der Inhalt wird dabei nicht gespeichert; Cloudflare protokolliert ` +
+          `Absender, Empfänger, Betreff, Zeitpunkt und Zustellstatus. Das Postfach wird bei Google (Gmail) ` +
+          `geführt; Anbieter ist die Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, ` +
+          `Irland. Dabei kann eine Übermittlung an die Google LLC in den USA erfolgen, die sich auf ` +
+          `das EU-US Data Privacy Framework stützt. Rechtsgrundlage ist unser berechtigtes Interesse an ` +
           `der Beantwortung deiner Anfrage (Art. 6 Abs. 1 lit. f DSGVO) bzw. Art. 6 Abs. 1 lit. b ` +
           `DSGVO, sofern die Anfrage auf einen Vertrag abzielt. Diese Daten werden gelöscht, ` +
           `sobald sie für die Erreichung des Zwecks nicht mehr erforderlich sind, sofern keine ` +
@@ -298,7 +304,7 @@ const en: LegalStrings = {
     "This is a courtesy translation. The legally binding version of these notices is the German original (Impressum / Datenschutzerklärung).",
   impressum: {
     title: "Legal Notice (Impressum)",
-    updated: "28 July 2026",
+    updated: "2 October 2026",
     sections: [
       {
         title: "Information pursuant to § 5 DDG",
@@ -331,7 +337,7 @@ const en: LegalStrings = {
   },
   datenschutz: {
     title: "Privacy Policy",
-    updated: "28 July 2026",
+    updated: "2 October 2026",
     sections: [
       {
         title: "1. Privacy at a glance",
@@ -345,7 +351,7 @@ const en: LegalStrings = {
           `processing, and no analytics or tracking services. The KiwiDesk app itself is ` +
           `distributed via GitHub; this privacy policy relates solely to this website. Personal ` +
           `data is only processed to the technically unavoidable extent required to deliver the ` +
-          `website (see “Hosting”).</p>`,
+          `website (see “Hosting”), and when you contact us by email (section 6).</p>`,
       },
       {
         title: "2. Responsible party",
@@ -410,7 +416,12 @@ const en: LegalStrings = {
         body:
           `<p>If you contact us by email, your details, including the contact data you provide, ` +
           `will be stored for the purpose of processing your request and in case of follow-up ` +
-          `questions. The legal basis is our legitimate interest in answering your request ` +
+          `questions. Email to kiwicanopy.com addresses is received by Cloudflare (see section 3) ` +
+          `with its Email Routing service and forwarded to our mailbox. The content is not ` +
+          `stored; Cloudflare logs sender, recipient, subject, time and delivery status. The mailbox is hosted by Google (Gmail); the provider is Google Ireland Limited, ` +
+          `Gordon House, Barrow Street, Dublin 4, Ireland. Data may be transferred to Google LLC in ` +
+          `the USA on the basis of the EU-US Data Privacy Framework. ` +
+          `The legal basis is our legitimate interest in answering your request ` +
           `(Art. 6 (1) (f) GDPR), or Art. 6 (1) (b) GDPR where the request relates to a ` +
           `contract. This data is deleted once it is no longer required to achieve the purpose, ` +
           `provided no statutory retention obligations apply.</p>`,
@@ -531,7 +542,7 @@ const ja: LegalStrings = {
     "本文は参考のための翻訳です。法的に有効なのはドイツ語の原文（Impressum / Datenschutzerklärung）です。",
   impressum: {
     title: "運営者情報（Impressum）",
-    updated: "2026年7月28日",
+    updated: "2026年10月2日",
     sections: [
       {
         title: "DDG 第5条に基づく情報",
@@ -562,7 +573,7 @@ const ja: LegalStrings = {
   },
   datenschutz: {
     title: "プライバシーポリシー",
-    updated: "2026年7月28日",
+    updated: "2026年10月2日",
     sections: [
       {
         title: "1. 概要",
@@ -574,7 +585,7 @@ const ja: LegalStrings = {
           `ドキュメント）です。ユーザーアカウント、ログイン、問い合わせフォーム、決済処理、解析・ ` +
           `トラッキングサービスはいずれもありません。KiwiDesk アプリ本体は GitHub で配布されており、 ` +
           `本プライバシーポリシーは本ウェブサイトのみを対象とします。個人データは、ウェブサイトを ` +
-          `配信するために技術的に避けられない範囲でのみ処理されます（「ホスティング」参照）。</p>`,
+          `配信するために技術的に避けられない範囲でのみ処理されます（「ホスティング」参照）。メールでお問い合わせいただいた場合は第6項をご参照ください。</p>`,
       },
       {
         title: "2. 責任者",
@@ -631,7 +642,12 @@ const ja: LegalStrings = {
         title: "6. メールによるお問い合わせ",
         body:
           `<p>メールでご連絡いただいた場合、お問い合わせの処理および追加のご質問に備えるため、 ` +
-          `ご提供いただいた連絡先を含む情報を保存します。法的根拠は、お問い合わせに回答することへの ` +
+          `ご提供いただいた連絡先を含む情報を保存します。kiwicanopy.com のアドレス宛てのメールは、 ` +
+          `Cloudflare（第3項参照）の Email Routing サービスが受信し、当方のメールボックスへ転送します。 ` +
+          `内容は保存されませんが、Cloudflare は送信者、受信者、件名、日時および配信状況を記録します。メールボックスは Google（Gmail）が提供しており、提供者は ` +
+          `Google Ireland Limited（Gordon House, Barrow Street, Dublin 4, Ireland）です。その際、 ` +
+          `EU-US Data Privacy Framework に基づき米国の Google LLC へデータが移転される場合があります。 ` +
+          `法的根拠は、お問い合わせに回答することへの ` +
           `正当な利益（GDPR 第6条第1項(f)）、または契約に関わる場合は GDPR 第6条第1項(b)です。 ` +
           `これらのデータは、目的の達成に不要となり次第、法定の保存義務がない限り削除されます。</p>`,
       },
