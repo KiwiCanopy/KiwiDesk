@@ -125,8 +125,11 @@ struct BorderDormantRingTests {
     @Test("Borders off release every dormant ring")
     func disabledBordersReleasePool() {
         let core = makeTestCore()
-        core.borders.sync([spec(9)])
+        core.borders.sync([spec(9), spec(4)])
         core.borders.sync([])
+        core.state.windows.upsert(
+            ManagedWindow(id: WindowID(4), pid: 4, appName: "Here")
+        )
         core.state.awayWindows[WindowID(9)] = AwayWindow(
             id: WindowID(9),
             pid: 1,
@@ -137,8 +140,24 @@ struct BorderDormantRingTests {
         )
         core.updateBorders()
         #expect(core.borders.dormant[WindowID(9)] != nil)
+        #expect(core.borders.dormant[WindowID(4)] != nil)
         core.tiler.settings.borderStyle.enabled = false
         core.updateBorders()
         #expect(core.borders.dormant.isEmpty)
+    }
+
+    @Test("A finished bump keeps a dormant ring's corner radius")
+    func bumpTeardownKeepsDormantRadius() {
+        let border = BorderManager()
+        border.restack = { _, _, _ in false }
+        defer { border.clear() }
+        border.sync([spec(1)])
+        border.sync([])
+        border.retireBumpTransient(WindowID(1))
+        #expect(border.cornerRadii[WindowID(1)] != nil)
+        border.sync([], alive: [], reassertOrder: true)
+        border.cornerRadii[WindowID(1)] = 10
+        border.retireBumpTransient(WindowID(1))
+        #expect(border.cornerRadii[WindowID(1)] == nil)
     }
 }

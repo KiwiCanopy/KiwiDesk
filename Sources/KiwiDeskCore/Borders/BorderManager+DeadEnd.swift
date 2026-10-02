@@ -45,14 +45,17 @@ extension BorderManager {
             screen: screen,
             reduceMotion: reduceMotion
         ) { [weak self] in
-            guard let self else { return }
-            self.bumpTransients[window]?.hide()
-            self.bumpTransients[window] = nil
-            if self.overlays[window] == nil,
-                self.dormant[window] == nil
-            {
-                self.forgetCornerRadius(window)
-            }
+            self?.retireBumpTransient(window)
+        }
+    }
+
+    /// Drops a finished bump's transient ring; the corner radius
+    /// stays while a worn or dormant ring still needs it (#1925).
+    func retireBumpTransient(_ window: WindowID) {
+        bumpTransients[window]?.hide()
+        bumpTransients[window] = nil
+        if overlays[window] == nil, dormant[window] == nil {
+            forgetCornerRadius(window)
         }
     }
 

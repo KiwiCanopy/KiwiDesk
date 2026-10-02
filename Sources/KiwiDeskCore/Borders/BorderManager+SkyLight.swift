@@ -98,9 +98,10 @@ extension BorderManager {
     func updateSkyLightSubscription(
         _ borderWanted: Set<WindowID>
     ) {
+        let wanted = watchSet(ringed: borderWanted)
         #if DEBUG
             if let watchOverride {
-                skyLightActive = watchOverride(watchSet(ringed: borderWanted))
+                skyLightActive = watchOverride(wanted)
                 return
             }
         #endif
@@ -108,7 +109,6 @@ extension BorderManager {
             skyLightActive = false
             return
         }
-        let wanted = watchSet(ringed: borderWanted)
         if windowServerTrackingDisabled {
             skyLightActive = false
         } else {
