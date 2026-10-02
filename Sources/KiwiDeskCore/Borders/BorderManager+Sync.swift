@@ -9,14 +9,30 @@ import AppKit
 extension BorderManager {
     /// Synchronizes overlays to match desired specs and retires unused
     /// overlays (`FollowSource.syncFrame`, #596).
-    public func sync(_ desired: [Spec]) {
+    /// `alive`, when given, prunes dormant rings of windows no
+    /// longer tracked. `reassertOrder` re-stacks every ring; off,
+    /// only a ring that needs ordering in is ordered (#1925).
+    public func sync(
+        _ desired: [Spec],
+        alive: Set<WindowID>? = nil,
+        reassertOrder: Bool = true
+    ) {
         let wanted = Set(desired.map(\.window))
-        updateSkyLightSubscription(wanted)
+        #if DEBUG
+            lastSyncReassertedOrder = reassertOrder
+        #endif
         for (id, overlay) in overlays where !wanted.contains(id) {
-            overlay.hide()
+            overlay.retire()
+            dormant[id] = overlay
             overlays[id] = nil
             specs[id] = nil
-            cornerRadii[id] = nil
+        }
+        if let alive {
+            for (id, overlay) in dormant where !alive.contains(id) {
+                overlay.hide()
+                dormant[id] = nil
+                cornerRadii[id] = nil
+            }
         }
         for spec in desired {
             specs[spec.window] = spec
@@ -43,11 +59,31 @@ extension BorderManager {
                 glowBlur: spec.glowBlur,
                 sheen: spec.sheen
             )
-            // Re-assert stacking each sync — the target may have
-            // moved in the window order since the ring last
-            // positioned.
-            overlay.order(relativeTo: spec.window.raw)
+            // Without the WindowServer stream no reorder event
+            // tells a shown ring its target moved, so every sync
+            // re-stacks.
+            if Self.ordersRing(
+                reassert: reassertOrder,
+                needsOrder: overlay.needsOrder,
+                tracked: skyLightActive
+            ) {
+                overlay.order(relativeTo: spec.window.raw)
+            }
         }
+        // After the ring set settles: a dormant ring stays watched,
+        // so a Space switch leaves the request unchanged (#1925).
+        updateSkyLightSubscription(wanted)
+    }
+
+    /// Whether `sync` orders a ring: a settle pass re-stacks all,
+    /// a steady one only a ring not yet shown, unless no
+    /// WindowServer stream reports its target moving (#1925).
+    static func ordersRing(
+        reassert: Bool,
+        needsOrder: Bool,
+        tracked: Bool
+    ) -> Bool {
+        reassert || needsOrder || !tracked
     }
 
     /// Moves overlay to match window frame during animation or AX echo

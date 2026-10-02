@@ -13,6 +13,13 @@ protocol BorderOverlayBackend: AnyObject {
     )
     func order(relativeTo windowNumber: CGWindowID)
     func hide()
+    /// Fades the ring out (or back) without ordering it out, so a
+    /// retired ring costs no WindowServer round trip (#1925).
+    func setDormant(_ dormant: Bool)
+}
+
+extension BorderOverlayBackend {
+    func setDormant(_ dormant: Bool) {}
 }
 
 /// One window's focus ring (#285, #357): keeps the last render's
@@ -32,6 +39,15 @@ final class BorderOverlay {
     private var lastCornerRadius: CGFloat =
         GeometryUtils.systemWindowCornerRadius
     private var isHidden = false
+    /// Retired by `sync` but kept for its window's return (#1925).
+    private(set) var isDormant = false
+    private var hasOrdered = false
+
+    /// Whether a steady `sync` must order the ring in: AppKit
+    /// pays a WindowServer round trip per order against another
+    /// app's window, so a shown ring is left to the reorder
+    /// events and the settle passes (#1925).
+    var needsOrder: Bool { !hasOrdered || isHidden || isDormant }
     /// Dead-end rubber-band offset (#436).
     private var bumpOffset = CGVector.zero
 
@@ -92,7 +108,22 @@ final class BorderOverlay {
     func order(relativeTo windowNumber: CGWindowID) {
         targetWindow = windowNumber
         isHidden = false
+        hasOrdered = true
         backend.order(relativeTo: windowNumber)
+        if isDormant {
+            isDormant = false
+            backend.setDormant(false)
+        }
+    }
+
+    /// Parks the ring invisibly for its window's return (#1925);
+    /// the next `order(relativeTo:)` shows it again. Drops the
+    /// held frame, or an animated return flashes the ring where
+    /// it rested before its window slides in.
+    func retire() {
+        isDormant = true
+        lastFrame = nil
+        backend.setDormant(true)
     }
 
     /// Renders the rubber-band bump offset for the dead-end cue

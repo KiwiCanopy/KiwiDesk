@@ -50,6 +50,9 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// The panel's window number, nil before the first render.
     var panelNumber: Int? { panel?.windowNumber }
 
+    /// The panel's alpha, nil before the first render.
+    var panelAlpha: CGFloat? { panel?.alphaValue }
+
     /// The panel's level, nil before the first render.
     var panelLevel: NSWindow.Level? { panel?.level }
 
@@ -232,6 +235,13 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
 
     func hide() {
         panel?.orderOut(nil)
+    }
+
+    /// Alpha, not `orderOut`: ordering out asks WindowServer
+    /// whether the panel is shown, a round trip that stalls the
+    /// main actor while WindowServer is GPU-bound (#1925).
+    func setDormant(_ dormant: Bool) {
+        panel?.alphaValue = dormant ? 0 : 1
     }
 
     private func makePanel() -> NSPanel {

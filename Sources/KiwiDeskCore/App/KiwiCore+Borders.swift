@@ -17,13 +17,20 @@ import Foundation
 /// (launchers/panels, #300) and native-fullscreen windows
 /// (display-filling — only the corners would show) never do.
 extension KiwiCore {
-    func updateBorders() {
+    /// `reassertOrder` re-stacks every ring — the settle passes'
+    /// job; a steady retile orders only rings that need it, the
+    /// WindowServer reorder events keeping the rest (#1925).
+    func updateBorders(reassertOrder: Bool = false) {
         let measured = tiler.meter.begin(.borders)  // #1508
         defer { measured() }
         // Global draw order (behind / front, #367) — set before the
         // enabled guard so a re-enable rebuilds on the right backend.
         borders.setDrawOrder(tiler.settings.borderStyle.drawOrder)
-        borders.sync(desiredBorderSpecs())
+        borders.sync(
+            desiredBorderSpecs(),
+            alive: Set(state.windows.all.map(\.id)),
+            reassertOrder: reassertOrder
+        )
     }
 
     /// Re-evaluates the ring set when one of OUR OWN windows
@@ -202,7 +209,7 @@ extension KiwiCore {
             .borderDropSettle,
             after: .milliseconds(animationMS + 50)
         ) { [weak self] in
-            self?.updateBorders()
+            self?.updateBorders(reassertOrder: true)
         }
     }
 
@@ -254,7 +261,7 @@ extension KiwiCore {
     /// cause; the shape of the exposure is why this stays
     /// ungated rather than growing a second guard.
     func runBorderResync() {
-        updateBorders()
+        updateBorders(reassertOrder: true)
         updateStickyMarks()
     }
 
