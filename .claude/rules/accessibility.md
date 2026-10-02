@@ -22,6 +22,13 @@ editing AX code:
 
 - AX calls are slow and can block. Never call them inside tight
   loops or layout math — snapshot state first, then compute.
+- **Every AX message to another app runs inside
+  `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
+  and writes, the actions and the multi-attribute read, wherever
+  in Core they are spelled. The per-switch AX count is what a
+  performance change is measured by (the `measure-work` skill),
+  and an unmetered call makes that count lie in the change that
+  adds it. `WorkMeterAXSeamTests` reds a bare call.
 - Electron/WebKit apps answer AX queries lazily (100–300 ms).
   `AXEnhancedUserInterface` is set to `true` on managed apps to
   keep their AX tree warm; do not remove it without a replacement.

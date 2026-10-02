@@ -87,12 +87,14 @@ extension AXHelper {
                 kAXSizeAttribute,
             ]
         var values: CFArray?
-        let error = AXUIElementCopyMultipleAttributeValues(
-            element,
-            names as CFArray,
-            AXCopyMultipleAttributeOptions(rawValue: 0),
-            &values
-        )
+        let error = WorkMeter.shared.ax {
+            AXUIElementCopyMultipleAttributeValues(
+                element,
+                names as CFArray,
+                AXCopyMultipleAttributeOptions(rawValue: 0),
+                &values
+            )
+        }
         guard error == .success,
             let items = values as? [AnyObject],
             items.count == names.count

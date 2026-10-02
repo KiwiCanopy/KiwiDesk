@@ -47,6 +47,8 @@ struct FocusedCommandPolicyTests {
         "border.fit_gaps",
         // Announces the next stop, touching no window (#930).
         "prepare_restart",
+        // Reads the engine's counters, touching no window (#1508).
+        "get_work_counters",
     ]
 
     /// A command that does not act on the implicit focused window:

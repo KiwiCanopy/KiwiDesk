@@ -57,6 +57,7 @@ extension KiwiCore {
         // with its play (#1391): the switch's own raise picks the
         // focus, and the plate must not linger over the arrival.
         dropMonocleFlip()
+        tiler.meter.noteSpaceSwitch()  // #1508
         let animated =
             tiler.settings.animations.onSpaceChange
         retile(

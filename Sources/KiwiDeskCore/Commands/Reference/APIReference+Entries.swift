@@ -120,8 +120,11 @@ extension APIReference {
     /// dispatch; `prepare_restart` is dispatched by `execute` and
     /// announces a stop as an in-place restart, which a config
     /// calling it would do by accident (#930).
+    /// `get_work_counters` is a measuring instrument (#1508): a
+    /// config polling it would count its own work.
     public static let cliOnly: [String] = [
         socketOnlyCommand,
         ServiceManager.prepareRestartCommand,
+        "get_work_counters",
     ]
 }

@@ -95,6 +95,11 @@ extension APIReference {
             "Makes the next stop an in-place restart if the service "
                 + "program passes the identity check."
         ),
+        "get_work_counters": APIRecord(
+            "Returns the engine's work counters since the last "
+                + "reset, and resets them when passed true.",
+            .boolean("reset", optional: true)
+        ),
         "help": APIRecord(
             "Describes one command, or lists the whole API "
                 + "surface.",

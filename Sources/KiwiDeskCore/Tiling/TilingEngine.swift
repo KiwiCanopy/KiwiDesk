@@ -40,6 +40,12 @@ public final class TilingEngine {
     /// sibling extensions (`recentInstantTarget`, #881).
     let applier = FrameApplier()
 
+    /// Where this engine's work is counted (#1508); a test
+    /// counting one pass hands it a fresh instance.
+    var meter = WorkMeter.shared {
+        didSet { applier.meter = meter }
+    }
+
     /// A window in an active drag gesture, exempt from ALL frame
     /// application in `retile` — both the main layout loop and
     /// `stashInactive` (#372). The pointer owns a dragged window's
@@ -285,26 +291,23 @@ public final class TilingEngine {
                 // Tolerance: apps clamp what we set (character
                 // grids, minimum sizes), so the reported frame is
                 // often a hair off the target. Re-applying an
-                // unchanged target just wobbles the window.
-                if probe == nil, !pass.reissues,
-                    Self.close(current, to: target)
-                {
-                    animation.cancel(window: id)
-                    continue
-                }
-                // #677: a target the app has twice refused is
-                // "already there" too — re-issuing it restarts an
+                // unchanged target just wobbles the window. #677:
+                // a target the app has twice refused is "already
+                // there" too — re-issuing it restarts an
                 // animation the window can never perform, forever.
                 if probe == nil, !pass.reissues,
-                    sizeBoundExplains(
-                        id,
-                        current: current,
-                        target: target
-                    )
+                    Self.close(current, to: target)
+                        || sizeBoundExplains(
+                            id,
+                            current: current,
+                            target: target
+                        )
                 {
                     animation.cancel(window: id)
+                    meter.add(\.framesSkipped)
                     continue
                 }
+                meter.add(\.framesIssued)
                 let issued = probe?.frame ?? target
                 applyFrame(
                     id,

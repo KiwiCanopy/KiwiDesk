@@ -8,6 +8,7 @@ import Foundation
 /// Split from `KiwiCore.swift` (wiring) for file size (§2).
 extension KiwiCore {
     func handle(_ event: KiwiEvent) {
+        tiler.meter.add(\.events)  // #1508
         // `state.apply` folds the event in and hands back the
         // facts the write erases — the gone window's app / space /
         // focus, the pre-echo focus, a float flip, and the appear
