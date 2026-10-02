@@ -214,9 +214,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         )
     }
 
-    /// Orders the ring in directly behind or above the target. A
-    /// deferred panel has no window device until ordered front,
-    /// and `order(_:relativeTo:)` alone never creates one.
+    /// Orders the ring in directly behind or above the target.
     func order(relativeTo windowNumber: CGWindowID) {
         guard let panel else { return }
         // An unread level keeps the last one rather than dropping
@@ -226,7 +224,6 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         {
             panel.level = NSWindow.Level(rawValue: raw)
         }
-        if !panel.isVisible { panel.orderFrontRegardless() }
         panel.order(
             orderMode == .above ? .above : .below,
             relativeTo: Int(windowNumber)
