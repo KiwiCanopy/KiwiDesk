@@ -295,11 +295,11 @@ public final class TilingEngine {
                 // a target the app has twice refused is "already
                 // there" too — re-issuing it restarts an
                 // animation the window can never perform, forever.
-                // The last frame sent outranks a state frame whose
-                // echo has not landed (#1912): a window just placed
-                // is not re-asked, nor slid in from a stale corner.
+                // An unanswered instant set outranks the stale state
+                // frame: no re-ask, no slide from the corner (#1912).
                 let sent = commandedFrame(of: id)
                 if probe == nil, !pass.reissues, let sent,
+                    animation.targetFrame(window: id) == nil,
                     Self.close(sent, to: target)
                 {
                     meter.add(\.framesSkipped)
