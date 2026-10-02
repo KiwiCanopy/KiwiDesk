@@ -106,8 +106,8 @@ struct FrameApplierBatchTests {
     }
 
     /// The wiring: bootstrap hands the applier the loop's warmed
-    /// baseline, and the loop's detach retires the hold.
-    @Test("The loop's baseline and its detach reach the holds")
+    /// baseline, and the loop's detach and stop retire the hold.
+    @Test("The loop's baseline, detach and stop reach the holds")
     func loopWiring() async {
         let core = makeTestCore()
         let log = Log()
@@ -127,6 +127,15 @@ struct FrameApplierBatchTests {
         applier.endAnimating(w2)
         await drain()
         #expect(log.all == ["frame", "off"])
+        // `stop` retires every baseline the same way.
+        core.eventLoop.enhancedUIBaselines[pid] = false
+        applier.beginAnimating(w2)
+        await drain()
+        core.eventLoop.isRunning = true
+        core.eventLoop.stop()
+        applier.endAnimating(w2)
+        await drain()
+        #expect(log.all == ["frame", "off", "off"])
     }
 
     /// The consumer: a Space switch's park through the real
