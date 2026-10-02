@@ -293,11 +293,17 @@ extension TilingEngine {
     /// Uses the EUI-bracketed instant path so an un-animated
     /// placement (space switch / stash with animation off) snaps
     /// cleanly instead of triggering the app's own move
-    /// animation (which stutters on slow-AX apps).
-    public func setFrame(_ id: WindowID, _ frame: CGRect) {
+    /// animation (which stutters on slow-AX apps). A park
+    /// passes `setSize: false`: its size is the window's own, so
+    /// the move is one AX call rather than three (#1508).
+    public func setFrame(
+        _ id: WindowID,
+        _ frame: CGRect,
+        setSize: Bool = true
+    ) {
         boundLearner.supersedeAsk(id)  // as `applyFrame`, #1694
         placements.stamp(id, target: frame)
-        applier.applyInstant(id, frame)
+        applier.applyInstant(id, frame, setSize: setSize)
     }
 
     /// The commanded frame of a recent instant set whose echo

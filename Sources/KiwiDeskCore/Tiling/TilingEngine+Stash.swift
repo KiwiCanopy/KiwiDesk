@@ -289,6 +289,6 @@ extension TilingEngine {
         }
         animation.cancel(window: window.id)
         meter.add(\.parksIssued)
-        setFrame(window.id, target)
+        setFrame(window.id, target, setSize: false)
     }
 }
