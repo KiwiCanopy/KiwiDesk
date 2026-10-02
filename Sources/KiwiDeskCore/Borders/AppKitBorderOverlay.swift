@@ -33,18 +33,27 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     private let levelOf: (CGWindowID) -> Int?
     /// Re-stacks an ordered-in panel without AppKit's per-order
     /// rights lookup (#1925); false sends it through AppKit.
-    var restack: (CGWindowID, Bool, CGWindowID) -> Bool =
-        SkyLight.orderWindow
-    /// Ordered in by AppKit and not ordered out since.
+    var restack: (CGWindowID, Bool, CGWindowID) -> Bool
+    /// Ordered in by AppKit and not ordered out since: the panel's
+    /// physical state, beside `BorderOverlay.needsOrder`, which is
+    /// the manager's policy — keep the two apart.
     private(set) var isOrderedIn = false
+    #if DEBUG
+        /// Test-only: orders AppKit performed. Production must not
+        /// read it.
+        private(set) var appKitOrders = 0
+    #endif
 
     init(
         order: BorderGeometry.Order = .below,
         levelOf: @escaping (CGWindowID) -> Int? =
-            AppKitBorderOverlay.windowLayer
+            AppKitBorderOverlay.windowLayer,
+        restack: @escaping (CGWindowID, Bool, CGWindowID) -> Bool =
+            SkyLight.orderWindow
     ) {
         orderMode = order
         self.levelOf = levelOf
+        self.restack = restack
     }
 
     /// The panel's Spaces/Exposé behavior, nil before the first
@@ -246,6 +255,9 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
             orderMode == .above ? .above : .below,
             relativeTo: Int(windowNumber)
         )
+        #if DEBUG
+            appKitOrders += 1
+        #endif
         isOrderedIn = true
     }
 

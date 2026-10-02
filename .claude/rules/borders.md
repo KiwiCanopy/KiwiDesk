@@ -5,6 +5,7 @@ paths:
   # scoping this file to Borders/ alone would mean it never loads
   # for the exact file where someone would re-merge the two keys.
   - "Sources/KiwiDeskCore/App/KiwiCore+Borders.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+BorderSettle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
   - "Sources/KiwiDeskCore/App/DeferredTasks.swift"
@@ -106,8 +107,9 @@ second cancel the other:
 
 - **Visibility, early** (`scheduleBorderDropReconcile`,
   `.borderDropSettle`). WindowServer can order a ring out with no
-  matching unhide; `sync`'s trailing `order(relativeTo:)` is what
-  un-hides it. Landing mid-flight is safe *because* geometry
+  matching unhide; this pass's re-stack of every ring is what
+  un-hides it, since a steady `sync` orders only a ring
+  `needsOrder` flags (#1925). Landing mid-flight is safe *because* geometry
   stands down above — precisely, and only, for a window **our own
   animation** is driving. It still re-reads state for every other
   ring, exactly as the `updateBorders()` at the end of each
@@ -125,31 +127,39 @@ second cancel the other:
   commanded frames to the target while the window never moved, and
   no echo and no WindowServer event is coming.
 
-## A Space switch builds, orders out and re-asks nothing
+## The switch path makes no WindowServer round trip for a ring
 
-Every WindowServer call a ring makes on the main actor is a round
-trip, and while WindowServer is GPU-bound one costs hundreds of
-ms (#1925 measured 390 ms for a single order). So:
+A WindowServer call a ring makes on the main actor waits for its
+answer, and while WindowServer is GPU-bound one answer took
+390 ms (#1925, 2026-10-03). So a change to the ring's switch path
+keeps these:
 
-- **A ring `sync` retires goes dormant** — alpha 0, still ordered
-  in, its corner radius kept — and comes back for its window;
-  only a window gone from state drops it (`alive`). Its held
-  frame is dropped on retire, or an animated return flashes it
-  where it rested (`BorderDormantRingTests`).
-- **The WindowServer watch set names dormant rings too**
-  (`watchSet`), so a switch leaves the request unchanged.
-- **A steady `sync` orders only a ring that needs it** — new,
-  revived, hidden, or with no WindowServer stream to report its
-  target moving; the two settle passes re-stack every ring
-  (`BorderManager.ordersRing`, `BorderOrderReassertTests`).
-- **An ordered-in panel re-stacks in a SkyLight transaction**,
-  never AppKit's `order(_:relativeTo:)`, which looks the other
-  app's window rights up synchronously first; the first show and
-  the first after an order-out stay AppKit's, and a missing
-  symbol falls back to it (`AppKitBorderOverlay.restack`,
-  `BorderRestackTests`). This is an ordering call on the AppKit
-  panel, not a drawing backend: the section on `.transient`
-  below still binds.
+- **A ring `sync` retires goes dormant, never ordered out** —
+  alpha 0, still ordered in, its corner radius kept — and comes
+  back for its window, its held frame dropped on retire or an
+  animated return flashes it where it rested
+  (`BorderDormantRingTests`). Only a window outside `alive`
+  (state plus the away ledger; nothing while borders are off)
+  drops its ring.
+- **The WindowServer request names dormant rings too**, so a
+  switch leaves it unchanged (`BorderDormantRingTests` ▸
+  `watchRequestSurvivesSwitch`).
+- **A steady `sync` orders only a ring `needsOrder` flags** —
+  new, revived or hidden — unless no WindowServer stream reports
+  its target moving; the two settle passes re-stack every ring
+  (`BorderOrderReassertTests`).
+- **An ordered-in panel re-stacks through `restack`**, a SkyLight
+  transaction, never AppKit's `order(_:relativeTo:)`, which looks
+  the other app's window rights up synchronously first; the
+  first show, the first after an order-out and a missing symbol
+  take AppKit (`BorderRestackTests`). This orders the AppKit
+  panel and draws nothing: the `.transient` section below still
+  binds.
+
+The WindowServer `.hide` arm still orders a ring out: it fires
+for a minimize, a hidden app or a Desktop switch, never for a
+Space switch, so it stays off the path above until a measurement
+says otherwise.
 
 ## The overlay panels join every Space
 

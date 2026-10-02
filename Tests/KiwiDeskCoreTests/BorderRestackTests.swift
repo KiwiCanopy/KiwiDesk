@@ -46,6 +46,7 @@ struct BorderRestackTests {
         #expect(!ring.isOrderedIn)
         ring.order(relativeTo: 7)
         #expect(restacks == [7, 7])
+        #expect(ring.appKitOrders == 2)
     }
 
     @Test("A missing symbol falls back to AppKit's order")
@@ -60,6 +61,7 @@ struct BorderRestackTests {
         ring.order(relativeTo: 7)
         ring.order(relativeTo: 7)
         #expect(asked == 1)
+        #expect(ring.appKitOrders == 2)
         #expect(ring.isOrderedIn)
     }
 }

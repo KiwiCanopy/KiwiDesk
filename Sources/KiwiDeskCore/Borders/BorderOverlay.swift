@@ -56,10 +56,16 @@ final class BorderOverlay {
         window: CGWindowID,
         order: BorderGeometry.Order,
         levelOf: @escaping (CGWindowID) -> Int? =
-            AppKitBorderOverlay.windowLayer
+            AppKitBorderOverlay.windowLayer,
+        restack: @escaping (CGWindowID, Bool, CGWindowID) -> Bool =
+            SkyLight.orderWindow
     ) {
         targetWindow = window
-        backend = AppKitBorderOverlay(order: order, levelOf: levelOf)
+        backend = AppKitBorderOverlay(
+            order: order,
+            levelOf: levelOf,
+            restack: restack
+        )
     }
 
     /// Test seam for mocking backends (#533).

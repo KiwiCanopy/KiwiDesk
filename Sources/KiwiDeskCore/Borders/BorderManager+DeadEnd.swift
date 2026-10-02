@@ -48,7 +48,9 @@ extension BorderManager {
             guard let self else { return }
             self.bumpTransients[window]?.hide()
             self.bumpTransients[window] = nil
-            if self.overlays[window] == nil {
+            if self.overlays[window] == nil,
+                self.dormant[window] == nil
+            {
                 self.forgetCornerRadius(window)
             }
         }

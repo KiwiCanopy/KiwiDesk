@@ -70,6 +70,16 @@ public final class BorderManager {
     /// live by default; a test core pins it (#1868).
     var windowLevel: (CGWindowID) -> Int? =
         AppKitBorderOverlay.windowLayer
+    /// A ring's re-stack write, live by default; a test core pins
+    /// it to the AppKit fallback (#1925).
+    var restack: (CGWindowID, Bool, CGWindowID) -> Bool =
+        SkyLight.orderWindow
+    #if DEBUG
+        /// Test-only: builds ring backends and stands in for the
+        /// WindowServer request. Production must not set them.
+        var backendFactory: (() -> any BorderOverlayBackend)?
+        var watchOverride: ((Set<WindowID>) -> Bool)?
+    #endif
     var reportedTrackingActive: Bool?
     var onLog: @MainActor (String) -> Void = CoreLog.write
     /// True while local animation drives this window (#594).
@@ -189,10 +199,19 @@ public final class BorderManager {
 
     /// Builds a ring overlay for `window` (#361, #367).
     func makeOverlay(for window: WindowID) -> BorderOverlay {
-        BorderOverlay(
+        #if DEBUG
+            if let backendFactory {
+                return BorderOverlay(
+                    window: window.raw,
+                    backend: backendFactory()
+                )
+            }
+        #endif
+        return BorderOverlay(
             window: window.raw,
             order: activeOrder,
-            levelOf: windowLevel
+            levelOf: windowLevel,
+            restack: restack
         )
     }
 

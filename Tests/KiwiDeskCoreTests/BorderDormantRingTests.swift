@@ -78,16 +78,20 @@ struct BorderDormantRingTests {
         #expect(panel.panelAlpha == 1)
     }
 
-    @Test("A switch leaves the WindowServer watch set unchanged")
-    func watchSetSurvivesSwitch() {
+    @Test("A switch leaves the WindowServer request unchanged")
+    func watchRequestSurvivesSwitch() {
         let border = BorderManager()
         defer { border.clear() }
+        var requests: [Set<WindowID>] = []
+        border.watchOverride = {
+            requests.append($0)
+            return true
+        }
         border.sync([spec(1), spec(2)])
-        let before = border.watchSet(ringed: border.borderedWindows)
         border.sync([spec(3)])
         border.sync([spec(1), spec(2)])
-        let after = border.watchSet(ringed: border.borderedWindows)
-        #expect(after == before.union([WindowID(3)]))
+        let all: Set<WindowID> = [WindowID(1), WindowID(2), WindowID(3)]
+        #expect(requests == [[WindowID(1), WindowID(2)], all, all])
     }
 
     @Test("Corner radius outlives dormancy and dies with the window")
@@ -98,7 +102,7 @@ struct BorderDormantRingTests {
         #expect(border.cornerRadii[WindowID(1)] != nil)
         border.sync([])
         #expect(border.cornerRadii[WindowID(1)] != nil)
-        border.sync([], alive: [])
+        border.sync([], alive: [], reassertOrder: true)
         #expect(border.dormant.isEmpty)
         #expect(border.cornerRadii[WindowID(1)] == nil)
     }
@@ -112,84 +116,24 @@ struct BorderDormantRingTests {
         core.updateBorders()
         #expect(core.borders.dormant[WindowID(9)] == nil)
     }
-}
 
-/// #1925: AppKit pays a WindowServer round trip per order against
-/// another app's window, so a steady `sync` stops re-stacking a
-/// shown ring and leaves it to the reorder events; the settle
-/// passes still re-stack every ring.
-@Suite("Border order re-assert")
-@MainActor
-struct BorderOrderReassertTests {
-    @Test("A steady sync orders only a ring that is not shown")
-    func steadySyncSkipsShownRing() {
-        #expect(
-            !BorderManager.ordersRing(
-                reassert: false,
-                needsOrder: false,
-                tracked: true
-            )
-        )
-        #expect(
-            BorderManager.ordersRing(
-                reassert: false,
-                needsOrder: true,
-                tracked: true
-            )
-        )
-        #expect(
-            BorderManager.ordersRing(
-                reassert: true,
-                needsOrder: false,
-                tracked: true
-            )
-        )
-        #expect(
-            BorderManager.ordersRing(
-                reassert: false,
-                needsOrder: false,
-                tracked: false
-            )
-        )
-    }
-
-    @Test("A ring needs ordering until shown, and again once hidden")
-    func needsOrderLifecycle() {
-        let ring = BorderOverlay(window: 7, backend: SilentBackend())
-        #expect(ring.needsOrder)
-        ring.order(relativeTo: 7)
-        #expect(!ring.needsOrder)
-        ring.hide()
-        #expect(ring.needsOrder)
-        ring.order(relativeTo: 7)
-        ring.retire()
-        #expect(ring.needsOrder)
-    }
-
-    @Test("A retile syncs steady; both settle passes re-stack")
-    func settlePassesReassert() async {
+    @Test("Borders off release every dormant ring")
+    func disabledBordersReleasePool() {
         let core = makeTestCore()
+        core.borders.sync([spec(9)])
+        core.borders.sync([])
+        core.state.awayWindows[WindowID(9)] = AwayWindow(
+            id: WindowID(9),
+            pid: 1,
+            appName: "App",
+            appBundleID: nil,
+            nativeSpace: 1,
+            isUp: true
+        )
         core.updateBorders()
-        #expect(core.borders.lastSyncReassertedOrder == false)
-        core.runBorderResync()
-        #expect(core.borders.lastSyncReassertedOrder == true)
+        #expect(core.borders.dormant[WindowID(9)] != nil)
+        core.tiler.settings.borderStyle.enabled = false
         core.updateBorders()
-        core.scheduleBorderDropReconcile()
-        let drop = core.deferred.task(for: .borderDropSettle)
-        #expect(drop != nil)
-        await drop?.value
-        #expect(core.borders.lastSyncReassertedOrder == true)
+        #expect(core.borders.dormant.isEmpty)
     }
-}
-
-@MainActor
-private final class SilentBackend: BorderOverlayBackend {
-    let orderMode: BorderGeometry.Order = .below
-    func update(
-        geometry: BorderGeometry,
-        colorHex: String,
-        screen: NSScreen?
-    ) {}
-    func order(relativeTo windowNumber: CGWindowID) {}
-    func hide() {}
 }

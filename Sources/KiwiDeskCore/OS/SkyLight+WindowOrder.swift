@@ -1,10 +1,10 @@
 import CoreGraphics
 
 /// Re-stacks one of OUR windows against another app's window in a
-/// committed transaction (#1925). AppKit's `order(_:relativeTo:)`
-/// looks the other window's rights up first, a synchronous
-/// WindowServer round trip that held the main actor up to 390 ms
-/// while WindowServer was GPU-bound; the commit sends no reply.
+/// committed transaction (#1925): AppKit's `order(_:relativeTo:)`
+/// looks the other window's rights up synchronously first, and the
+/// commit waits for no reply. Stacking device-checked on macOS 27,
+/// Mission Control and popovers included (2026-10-03).
 extension SkyLight {
     typealias TransactionCreateFn =
         @convention(c) (ConnectionID) -> Unmanaged<CFTypeRef>?
@@ -30,8 +30,8 @@ extension SkyLight {
 
     /// Orders `window` directly above or below `target`; false when
     /// a symbol is missing, and the caller orders through AppKit.
-    /// The mutator's status is not read: it carries no meaningful
-    /// result, and only the transaction's creation gates.
+    /// Only the transaction's creation gates: the mutators return
+    /// no usable status (the pre-#1923 SkyLight ring's finding).
     static func orderWindow(
         _ window: CGWindowID,
         above: Bool,

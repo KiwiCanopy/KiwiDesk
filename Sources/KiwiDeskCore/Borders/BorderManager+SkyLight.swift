@@ -98,6 +98,12 @@ extension BorderManager {
     func updateSkyLightSubscription(
         _ borderWanted: Set<WindowID>
     ) {
+        #if DEBUG
+            if let watchOverride {
+                skyLightActive = watchOverride(watchSet(ringed: borderWanted))
+                return
+            }
+        #endif
         guard privateRuntimeStarted else {
             skyLightActive = false
             return

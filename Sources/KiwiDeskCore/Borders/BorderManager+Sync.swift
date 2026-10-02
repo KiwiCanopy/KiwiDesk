@@ -7,15 +7,22 @@ import AppKit
 /// `FollowSource`, `sync` rebuilds everything but holds an
 /// animating window's geometry.
 extension BorderManager {
+    #if DEBUG
+        /// Test-only: a full re-stack that prunes nothing.
+        func sync(_ desired: [Spec]) {
+            sync(desired, alive: nil, reassertOrder: true)
+        }
+    #endif
+
     /// Synchronizes overlays to match desired specs and retires unused
     /// overlays (`FollowSource.syncFrame`, #596).
-    /// `alive`, when given, prunes dormant rings of windows no
-    /// longer tracked. `reassertOrder` re-stacks every ring; off,
+    /// `alive` prunes dormant rings of windows outside it (nil
+    /// keeps them all). `reassertOrder` re-stacks every ring; off,
     /// only a ring that needs ordering in is ordered (#1925).
     public func sync(
         _ desired: [Spec],
-        alive: Set<WindowID>? = nil,
-        reassertOrder: Bool = true
+        alive: Set<WindowID>?,
+        reassertOrder: Bool
     ) {
         let wanted = Set(desired.map(\.window))
         #if DEBUG
@@ -34,6 +41,9 @@ extension BorderManager {
                 cornerRadii[id] = nil
             }
         }
+        // Before the loop, so the order policy reads this sync's
+        // tracking verdict; the set equals the one after it.
+        updateSkyLightSubscription(wanted)
         for spec in desired {
             specs[spec.window] = spec
             let overlay = overlay(for: spec.window)
@@ -70,9 +80,6 @@ extension BorderManager {
                 overlay.order(relativeTo: spec.window.raw)
             }
         }
-        // After the ring set settles: a dormant ring stays watched,
-        // so a Space switch leaves the request unchanged (#1925).
-        updateSkyLightSubscription(wanted)
     }
 
     /// Whether `sync` orders a ring: a settle pass re-stacks all,
