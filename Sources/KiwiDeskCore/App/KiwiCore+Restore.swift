@@ -122,8 +122,8 @@ extension KiwiCore {
     /// accessibility.md). With no session, the scan's order is the
     /// arrangement.
     ///
-    /// Settles like any other space switch — forced past the
-    /// tolerance check, the space-switch animation respected
+    /// Settles like any other space switch — its layout frames
+    /// forced past the tolerance check, the animation respected
     /// (#207), the bar told where we landed. Internal so a test
     /// drives the boot tail; `finishBoot` is not test-drivable.
     func arrangeBootDesk(session: StateSnapshot?) {

@@ -81,6 +81,29 @@ struct PlacementBounceSeamTests {
         }
     }
 
+    /// Each placement leaf stamps in its OWN body: the census
+    /// above counts both stamps in one file, which a stamp moved
+    /// from one leaf to the other would still satisfy.
+    @Test("each placement leaf stamps once")
+    func eachLeafStamps() throws {
+        let file = Self.core.appendingPathComponent(
+            "Tiling/TilingEngine+Layout.swift"
+        )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        for leaf in ["func applyFrame(", "func setFrame("] {
+            let body = SourceScan.declarationBody(
+                after: leaf,
+                in: source
+            )
+            let stamps = body?.components(
+                separatedBy: "placements.stamp("
+            ).count
+            #expect(stamps == 2, "\(leaf) stamps \((stamps ?? 1) - 1)")
+        }
+    }
+
     /// The self ledger has one MINTER: `stampSelfRaise`. A raise
     /// assigning the dictionary beside it would skip the prune
     /// with nothing red. Write sites are counted over

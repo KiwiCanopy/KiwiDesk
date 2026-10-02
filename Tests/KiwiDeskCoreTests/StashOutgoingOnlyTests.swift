@@ -5,11 +5,13 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A Space switch forces the park of only the Space it leaves
-/// (#1508): a window parked longer than that takes the "already
-/// parked" check, or every switch re-parks every hidden window,
-/// ~6 AX calls each. Driven through the real `focus_space`, the
-/// parks read off an injected meter. Display pinned (#531).
+/// A Space switch forces the park of only the Space it leaves,
+/// on its own pass and its settle's (#1508): a window parked
+/// longer than that takes the "already parked" check, or every
+/// switch re-parks every hidden window, ~6 AX calls each. Driven
+/// through the real `focus_space`, the parks read off an
+/// injected meter; the ask ledger's clock is frozen by
+/// `makeTestCore` (#1456). Display pinned (#531).
 @Suite("Switch re-parks only the outgoing Space (#1508)", .serialized)
 @MainActor
 struct StashOutgoingOnlyTests {
@@ -61,19 +63,68 @@ struct StashOutgoingOnlyTests {
         #expect(c.parksSkipped == 1)
     }
 
-    @Test("The outgoing Space is re-parked over an echo-lagged corner")
-    func outgoingSpaceIsForced() throws {
-        // Space 2 is shown and left before its windows' echoes
-        // land: the state frame still reads the corner from the
-        // first park, so only the force sends the park again.
+    /// Space 2 is shown and left before its windows' echoes
+    /// land, and the ask ledger has let the show go (aged out):
+    /// the state frame still reads the first park's corner, so
+    /// only a force sends the park again.
+    private func leaveSpaceTwoUnechoed(_ core: KiwiCore) throws {
+        try echo(core, [w1, w2, w3])
+        core.execute("focus_space", args: [.string("2")])
+        core.tiler.clearInstantTarget(w2)
+    }
+
+    @Test("The Space left is forced by the switch and its settle")
+    func departureForcedTwice() throws {
+        guard NSScreen.main != nil else { return }
+        let (core, meter) = makeCore()
+        try leaveSpaceTwoUnechoed(core)
+        var parks: [(Int, Int)] = []
+        for step in 0..<3 {
+            _ = meter.snapshot(reset: true)
+            if step == 0 {
+                core.execute("focus_space", args: [.string("1")])
+            } else {
+                // The settle's pass (`scheduleSpaceSettle`).
+                core.retile(animated: false, pass: .reissue)
+            }
+            core.tiler.clearInstantTarget(w2)
+            let c = meter.snapshot(reset: false).counts
+            parks.append((c.parksIssued, c.parksSkipped))
+        }
+        // w2 forced over its stale corner by the switch and the
+        // settle, then checked; w3 checked throughout.
+        #expect(parks.map(\.0) == [1, 1, 0])
+        #expect(parks.map(\.1) == [1, 1, 2])
+    }
+
+    @Test("An event pass seeing the departure first leaves it owed")
+    func eventPassKeepsTheDeparture() throws {
+        guard NSScreen.main != nil else { return }
+        let (core, meter) = makeCore()
+        try leaveSpaceTwoUnechoed(core)
+        core.state.workspaces.activate(SpaceID(1))
+        _ = meter.snapshot(reset: true)
+        core.retile()
+        var c = meter.snapshot(reset: true).counts
+        #expect(c.parksIssued == 0)
+        core.retile(animated: false, pass: .reissue)
+        c = meter.snapshot(reset: false).counts
+        #expect(c.parksIssued == 1)
+    }
+
+    @Test("An unanswered ask outranks a corner the state still reads")
+    func pendingAskIsNotParked() throws {
+        // A move into a hidden Space, a renumbered held Space:
+        // no departure is owed, but the window was last sent
+        // somewhere other than the corner.
         guard NSScreen.main != nil else { return }
         let (core, meter) = makeCore()
         try echo(core, [w1, w2, w3])
         core.execute("focus_space", args: [.string("2")])
+        core.state.workspaces.activate(SpaceID(1))
         _ = meter.snapshot(reset: true)
-        core.execute("focus_space", args: [.string("1")])
+        core.retile()
         let c = meter.snapshot(reset: false).counts
-        // w2 forced over its stale corner; w3 still skipped.
         #expect(c.parksIssued == 1)
         #expect(c.parksSkipped == 1)
     }

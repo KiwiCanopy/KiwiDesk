@@ -113,10 +113,8 @@ public final class TilingEngine {
     /// by the layout on every retile.
     var stashedFrames: [WindowID: CGRect] = [:]
 
-    /// The Spaces shown on some display at the last stash pass
-    /// (#1508): a re-issuing pass forces the park of only the
-    /// Spaces that left view since, never the long-parked rest.
-    var shownAtLastStash: Set<SpaceID> = []
+    /// Which Spaces' parks a re-issuing pass forces (#1508).
+    var stashDepartures = StashDepartures()
 
     /// Resolves the AX element of a window (wired to the
     /// event loop's registry).
@@ -218,11 +216,12 @@ public final class TilingEngine {
     /// one frame-set each (Space switches).
     ///
     /// `pass` (#1488): `.reissue` and `.apply` skip the "already
-    /// there" tolerance check and (re)issue every frame — a
-    /// Space switch needs that, since the check reads state
+    /// there" tolerance check and (re)issue every layout frame —
+    /// a Space switch needs that, since the check reads state
     /// frames whose AX echoes lag during rapid switching and
     /// strand windows mid-transition — and `.apply` alone probes
-    /// past corroborated bounds once (#1055).
+    /// past corroborated bounds once (#1055). The parks they
+    /// force are only the ones `StashDepartures` owes (#1508).
     ///
     /// `stashAnimated` makes the park of newly-inactive
     /// windows a visible slide to the corner instead of an
@@ -333,7 +332,7 @@ public final class TilingEngine {
             stashInactive(
                 state: state,
                 fallback: screen,
-                force: pass.reissues,
+                forcesDepartures: pass.reissues,
                 animated: stashAnimated
             )
             restoreStashed(state: state, frames: frames)

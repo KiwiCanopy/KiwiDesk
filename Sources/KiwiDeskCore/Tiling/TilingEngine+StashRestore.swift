@@ -166,19 +166,9 @@ extension TilingEngine {
         _ frame: CGRect,
         in bounds: CGRect
     ) -> Bool {
-        let atBottom =
-            abs(frame.minY - (bounds.maxY - stashPeekY))
-            <= WindowServerFacts.visibilityFloor
-        let atRight =
-            abs(frame.minX - (bounds.maxX - stashPeekX))
-            <= retileTolerance
-        let atLeft =
-            abs(
-                frame.minX
-                    - (bounds.minX + stashPeekX
-                        - frame.width)
-            ) <= retileTolerance
-        return atBottom && (atRight || atLeft)
+        [HideCorner.bottomRight, .bottomLeft].contains {
+            parked(frame, at: stashFrame(frame, in: bounds, corner: $0))
+        }
     }
 
     /// Drops a window's stash capture: the user moved it

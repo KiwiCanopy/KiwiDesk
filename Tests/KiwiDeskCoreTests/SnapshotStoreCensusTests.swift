@@ -59,8 +59,10 @@ struct SnapshotStoreCensusTests {
             (.inPlace, "the member Monocle shows under a float focus"),
         "tiler.stashedFrames":
             (.always, "a parked float's capture rides its record frame"),
-        "tiler.shownAtLastStash":
+        "tiler.stashDepartures.shown":
             (.behind, "which Spaces the last park saw shown (#1508)"),
+        "tiler.stashDepartures.owed":
+            (.behind, "parks a switch still forces (#1508)"),
         "state.floatFrames":
             (
                 .behind,
