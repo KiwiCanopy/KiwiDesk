@@ -64,9 +64,10 @@ struct StashOutgoingOnlyTests {
     }
 
     /// Space 2 is shown and left before its windows' echoes
-    /// land, and the ask ledger has let the show go (aged out):
-    /// the state frame still reads the first park's corner, so
-    /// only a force sends the park again.
+    /// land, and the instant ledger has let the show go — in
+    /// production a self-echo clears it whatever frame it
+    /// carries: the state frame still reads the first park's
+    /// corner, so only a force sends the park again.
     private func leaveSpaceTwoUnechoed(_ core: KiwiCore) throws {
         try echo(core, [w1, w2, w3])
         core.execute("focus_space", args: [.string("2")])
@@ -87,6 +88,7 @@ struct StashOutgoingOnlyTests {
                 // The settle's pass (`scheduleSpaceSettle`).
                 core.retile(animated: false, pass: .reissue)
             }
+            // Isolates the force from the commanded net.
             core.tiler.clearInstantTarget(w2)
             let c = meter.snapshot(reset: false).counts
             parks.append((c.parksIssued, c.parksSkipped))
@@ -127,6 +129,40 @@ struct StashOutgoingOnlyTests {
         let c = meter.snapshot(reset: false).counts
         #expect(c.parksIssued == 1)
         #expect(c.parksSkipped == 1)
+    }
+
+    @Test("A slide away outranks an older instant park")
+    func animationOutranksInstantPark() {
+        // An instant park, then an animated slide-in inside the
+        // echo grace: the animation is the newer ask, and the
+        // instant ledger still holds the corner.
+        guard let screen = NSScreen.main, screen.kiwiDisplay != nil
+        else { return }
+        let engine = TilingEngine()
+        let meter = WorkMeter(now: { 0 })
+        engine.meter = meter
+        engine.applier.clock = { 0 }
+        let bounds = CGRect(x: 0, y: 25, width: 1728, height: 1092)
+        let slot = CGRect(x: 100, y: 100, width: 800, height: 600)
+        let corner = TilingEngine.stashFrame(
+            slot,
+            in: bounds,
+            corner: .bottomRight
+        )
+        let id = WindowID(1)
+        engine.setFrame(id, corner)
+        engine.applyFrame(id, from: corner, to: slot, animated: true)
+        engine.stash(
+            ManagedWindow(id: id, pid: 100, appName: "A", frame: corner),
+            in: bounds,
+            corner: .bottomRight,
+            force: false,
+            capturesOriginal: false
+        )
+        let c = meter.snapshot(reset: false).counts
+        engine.animation.cancelAll(snapToTargets: false)
+        #expect(c.parksIssued == 1)
+        #expect(c.parksSkipped == 0)
     }
 
     @Test("A park macOS lifted off its line counts as parked")

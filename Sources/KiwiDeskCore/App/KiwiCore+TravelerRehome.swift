@@ -55,13 +55,7 @@ extension KiwiCore {
         else { return }
         // The commanded frame outranks the echo-fed state one, so
         // a retile mid-flight compares the move already made.
-        let base =
-            tiler.animation.commandedFrame(
-                window: id,
-                includingHeldGlide: false
-            )
-            ?? tiler.recentInstantTarget(id)
-            ?? window.frame
+        let base = tiler.commandedFrame(of: id) ?? window.frame
         guard
             let moved = TravelerRehome.target(
                 frame: base,

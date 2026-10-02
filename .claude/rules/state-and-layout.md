@@ -1871,22 +1871,27 @@ editing here:
   who chooses what (`SpaceSwitchReissueTests`,
   `RetileBoundSkipTests` ▸ `reissueIssuesTheBound`).
 - **A re-issuing pass forces only the parks a departure owes
-  (#1508).** A Space leaving view may hold windows whose state
-  frame still reads the corner from before they were shown, so
-  its park is forced — on the pass that sees it leave and on the
-  settle's after it, which re-sends a park a slow app dropped —
-  and every other hidden window takes the "already parked"
-  check, or every switch re-parks every hidden window at ~6 AX
-  calls each. `StashDepartures` is the one ledger of what is
-  owed: a departure first seen by an `.event` pass, which forces
-  nothing, stays owed. The check itself asks the last frame we
-  SENT as well as the state frame (`recentInstantTarget`, the
-  animation target), so a window whose unanswered ask is not the
-  corner is never taken as parked — the net for a departure no
-  ledger names (a verb's move into a hidden Space, a renumbered
-  held Space) — and it reads "at the corner" through the one
-  `parked(_:at:)`, which `looksStashed` asks per corner, the lift
-  macOS applies included (`StashOutgoingOnlyTests`).
+  (#1508)**, or every switch re-parks every hidden window — the
+  per-switch cost `get_work_counters` measures as
+  `parks_issued`. A new reason to force a park records it in
+  `StashDepartures` rather than passing a Bool beside a call
+  site; that ledger owes a departure the next two forcing
+  passes, whichever they are, which is what keeps a settle
+  re-sending a park a slow app dropped. Every other hidden
+  window takes the "already parked" check, and that check asks
+  the last frame SENT as well as the state frame, so a window
+  whose unanswered ask is not the corner is never read as
+  parked — the net for a departure the ledger cannot name (a
+  verb's move into a hidden Space, a renumbered held Space). A
+  reader of "the last frame we sent" takes
+  `TilingEngine.commandedFrame(of:)`, never the instant ledger
+  and the animation target spelled in its own order
+  (`CommandedFrameSeamTests`), and "at the corner" is read
+  through `parked(_:at:)`, which `looksStashed` asks per corner.
+  Accepted residue: a self-echo clears the instant target
+  whatever frame it carries, so a late echo of an earlier park
+  can vouch for a corner the window has left until the next
+  pass that moves it (`StashOutgoingOnlyTests`).
 - **A resize nobody asked for is corrected on its own event
   (#1358)** — the `.windowResized` arm's outcomes are four and a
   new arm keeps them so: our ask's ECHO goes to the #677 answer

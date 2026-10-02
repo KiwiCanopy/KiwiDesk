@@ -9,11 +9,13 @@ import Foundation
 ///
 /// A departure is recorded on whichever pass first sees it —
 /// an event pass included, which forces nothing — and is owed
-/// `forcedPasses` forcing passes: the switch's own and the
-/// settle's after it, which re-sends a park a slow app dropped.
-/// A Space shown again owes nothing.
+/// the next `forcedPasses` forcing passes, whichever they are:
+/// usually the switch's own and its settle's, which re-sends a
+/// park a slow app dropped. A second switch or an apply inside
+/// the settle spends the second, and the stash's commanded-frame
+/// check is then the net. A Space shown again owes nothing.
 struct StashDepartures {
-    /// The switch pass and its settle.
+    /// Usually the switch pass and its settle.
     static let forcedPasses = 2
 
     /// The Spaces shown on some display at the last stash pass.

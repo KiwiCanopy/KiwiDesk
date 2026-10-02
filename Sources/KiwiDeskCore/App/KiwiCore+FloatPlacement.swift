@@ -230,11 +230,6 @@ extension KiwiCore {
         of id: WindowID,
         fallback: CGRect
     ) -> CGRect {
-        tiler.animation.commandedFrame(
-            window: id,
-            includingHeldGlide: false
-        )
-            ?? tiler.recentInstantTarget(id)
-            ?? fallback
+        tiler.commandedFrame(of: id) ?? fallback
     }
 }

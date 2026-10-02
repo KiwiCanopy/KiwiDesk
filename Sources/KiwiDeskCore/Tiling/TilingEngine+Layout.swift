@@ -310,6 +310,15 @@ extension TilingEngine {
         applier.instantTarget(id)
     }
 
+    /// The last frame we sent `id` whose answer may be pending:
+    /// an animation's target ahead of a recent instant set,
+    /// since an animated apply leaves the instant ledger
+    /// standing (#881, #1508). Nil once both have settled.
+    func commandedFrame(of id: WindowID) -> CGRect? {
+        animation.commandedFrame(window: id, includingHeldGlide: false)
+            ?? recentInstantTarget(id)
+    }
+
     /// See `recentInstantTarget` — called on the first
     /// self-echo.
     func clearInstantTarget(_ id: WindowID) {

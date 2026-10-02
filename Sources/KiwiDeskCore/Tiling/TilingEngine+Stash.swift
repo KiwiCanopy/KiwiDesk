@@ -245,9 +245,7 @@ extension TilingEngine {
         // Parked only if the last frame we sent agrees: a state
         // frame at the corner may be the echo of an earlier park
         // that a later ask, still unanswered, has moved on from.
-        let commanded =
-            recentInstantTarget(window.id)
-            ?? animation.targetFrame(window: window.id)
+        let commanded = commandedFrame(of: window.id)
         if !force, Self.parked(window.frame, at: target),
             commanded.map({ Self.parked($0, at: target) }) ?? true
         {
