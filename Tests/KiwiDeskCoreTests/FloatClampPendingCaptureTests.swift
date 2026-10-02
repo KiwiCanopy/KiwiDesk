@@ -112,4 +112,53 @@ struct FloatClampPendingCaptureTests {
         // rather than a later pass re-delivering the covered one.
         #expect(core.tiler.stashOriginal(Self.window) == commanded)
     }
+
+    /// A switch's restore slides the float (#1909); the sweep
+    /// retargets that slide clear of the bar rather than
+    /// snapping it.
+    @Test(
+        "A covered capture mid-slide is retargeted, not snapped",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func slideIsRetargeted() throws {
+        let screen = try #require(NSScreen.screens.first)
+        let clear = CGRect(
+            x: screen.frame.minX + 100,
+            y: screen.frame.minY + 400,
+            width: 400,
+            height: 300
+        )
+        let core = try #require(makeBarredCore(frame: clear))
+        defer {
+            NativeSpaces.currentSpaceIsUserOverride = nil
+            core.tiler.animation.cancelAll(snapToTargets: false)
+        }
+        let painted = try #require(
+            core.spaceBars.shownStrips.first?.1,
+            "no bar painted — the clause would pass vacuously"
+        )
+        let capture = CGRect(
+            x: screen.frame.minX + 100,
+            y: screen.frame.minY,
+            width: 400,
+            height: 300
+        )
+        core.tiler.seedStash(Self.window, frame: capture)
+        core.tiler.restoreStashed(
+            state: core.state,
+            frames: [:],
+            animated: true
+        )
+        #expect(
+            core.tiler.animation.targetFrame(window: Self.window)
+                == capture
+        )
+        core.clampFloatsClearOfBars()
+        let target = try #require(
+            core.tiler.animation.targetFrame(window: Self.window),
+            "the sweep snapped the slide"
+        )
+        #expect(target.minY >= painted.maxY)
+        #expect(core.tiler.recentInstantTarget(Self.window) == nil)
+    }
 }
