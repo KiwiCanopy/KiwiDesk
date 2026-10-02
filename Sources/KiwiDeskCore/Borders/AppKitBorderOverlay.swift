@@ -31,6 +31,12 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// above-order panel takes it, or a raised target's band
     /// would cover the ring.
     private let levelOf: (CGWindowID) -> Int?
+    /// Re-stacks an ordered-in panel without AppKit's per-order
+    /// rights lookup (#1925); false sends it through AppKit.
+    var restack: (CGWindowID, Bool, CGWindowID) -> Bool =
+        SkyLight.orderWindow
+    /// Ordered in by AppKit and not ordered out since.
+    private(set) var isOrderedIn = false
 
     init(
         order: BorderGeometry.Order = .below,
@@ -227,14 +233,25 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         {
             panel.level = NSWindow.Level(rawValue: raw)
         }
+        if isOrderedIn,
+            restack(
+                CGWindowID(panel.windowNumber),
+                orderMode == .above,
+                windowNumber
+            )
+        {
+            return
+        }
         panel.order(
             orderMode == .above ? .above : .below,
             relativeTo: Int(windowNumber)
         )
+        isOrderedIn = true
     }
 
     func hide() {
         panel?.orderOut(nil)
+        isOrderedIn = false
     }
 
     /// Alpha, not `orderOut`: ordering out asks WindowServer
