@@ -30,6 +30,12 @@ public final class WorkMeter: @unchecked Sendable {
         public var retileMaxNanos = 0
         public var reissuePasses = 0
         public var spaceSwitches = 0
+        public var barRenders = 0
+        public var barNanos = 0
+        public var barMaxNanos = 0
+        public var borderSyncs = 0
+        public var borderNanos = 0
+        public var borderMaxNanos = 0
         public var framesIssued = 0
         public var framesSkipped = 0
         public var parksIssued = 0
@@ -130,6 +136,40 @@ public final class WorkMeter: @unchecked Sendable {
         }
     }
 
+    /// A counted, timed main-actor job.
+    enum Span {
+        case bars, borders
+
+        var fields:
+            (
+                count: WritableKeyPath<Counts, Int>,
+                total: WritableKeyPath<Counts, Int>,
+                max: WritableKeyPath<Counts, Int>
+            )
+        {
+            switch self {
+            case .bars: (\.barRenders, \.barNanos, \.barMaxNanos)
+            case .borders:
+                (\.borderSyncs, \.borderNanos, \.borderMaxNanos)
+            }
+        }
+    }
+
+    /// Starts timing one pass of `span`; the returned call counts
+    /// it and records its duration.
+    func begin(_ span: Span) -> () -> Void {
+        let start = now()
+        return { [self] in
+            let f = span.fields
+            add(f.count)
+            addDuration(
+                Int(clamping: now() &- start),
+                total: f.total,
+                max: f.max
+            )
+        }
+    }
+
     /// Counts one explicit Space switch and marks it on the
     /// signpost timeline.
     func noteSpaceSwitch() {
@@ -202,6 +242,13 @@ extension WorkMeter {
             "events_per_retile": per(c.events, c.retiles),
             "reissue_passes": count(c.reissuePasses),
             "space_switches": count(c.spaceSwitches),
+            "bar_renders": count(c.barRenders),
+            "bar_ms_mean": perMs(c.barNanos, c.barRenders),
+            "bar_ms_max": ms(c.barMaxNanos),
+            "bar_renders_per_switch": per(c.barRenders, c.spaceSwitches),
+            "border_syncs": count(c.borderSyncs),
+            "border_ms_mean": perMs(c.borderNanos, c.borderSyncs),
+            "border_ms_max": ms(c.borderMaxNanos),
             "frames_issued": count(c.framesIssued),
             "frames_skipped": count(c.framesSkipped),
             "parks_issued": count(c.parksIssued),

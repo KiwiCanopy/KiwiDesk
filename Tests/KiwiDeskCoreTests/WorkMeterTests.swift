@@ -160,6 +160,22 @@ struct WorkMeterTests {
         #expect(c.reissuePasses == 1)
     }
 
+    @Test("A bar render and a ring sync are counted and timed")
+    func barsAndBorders() {
+        let core = makeTestCore()
+        let m = meter()
+        core.tiler.meter = m
+        core.updateBars()
+        core.updateBorders()
+        core.updateBorders()
+        let c = m.snapshot(reset: false).counts
+        #expect(c.barRenders == 1)
+        #expect(c.borderSyncs == 2)
+        // The step clock reads once at each end of each pass.
+        #expect(c.barNanos >= 1_000_000)
+        #expect(c.borderMaxNanos >= 1_000_000)
+    }
+
     @Test("get_work_counters reports and resets on request")
     func verbReportsAndResets() {
         let core = makeTestCore()
