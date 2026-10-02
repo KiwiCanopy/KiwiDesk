@@ -99,21 +99,7 @@ extension SkyLightBorderOverlay {
         colorHex: String
     ) -> Bool {
         guard let context else { return false }
-        let bounds = CGRect(
-            origin: .zero,
-            size: geometry.overlayFrame.size
-        )
-        // Inset centerline path by glowMargin + lineWidth / 2 (#358).
-        let inset = geometry.glowMargin + geometry.lineWidth / 2
-        let pathRect = bounds.insetBy(dx: inset, dy: inset)
-        context.clear(bounds)
-        // Draw crisp ring (glow swaps to AppKit backend, #533).
-        paintRing(
-            context,
-            pathRect: pathRect,
-            geometry: geometry,
-            colorHex: colorHex
-        )
+        Self.paint(geometry, colorHex: colorHex, into: context)
         context.flush()
         guard
             SkyLight.flushWindowContent?(
@@ -128,8 +114,35 @@ extension SkyLightBorderOverlay {
         ) == .success
     }
 
+    /// Clears the surface and strokes the ring into `context`.
+    /// WindowServer sizes the surface in whole points, so a
+    /// fractional frame leaves an edge row past `bounds` that a
+    /// clear of `bounds` alone never reaches (#1916); the clear
+    /// takes the whole-point extent.
+    static func paint(
+        _ geometry: BorderGeometry,
+        colorHex: String,
+        into context: CGContext
+    ) {
+        let bounds = CGRect(
+            origin: .zero,
+            size: geometry.overlayFrame.size
+        )
+        // Inset centerline path by glowMargin + lineWidth / 2 (#358).
+        let inset = geometry.glowMargin + geometry.lineWidth / 2
+        let pathRect = bounds.insetBy(dx: inset, dy: inset)
+        context.clear(bounds.integral)
+        // Draw crisp ring (glow swaps to AppKit backend, #533).
+        paintRing(
+            context,
+            pathRect: pathRect,
+            geometry: geometry,
+            colorHex: colorHex
+        )
+    }
+
     /// Strokes plain crisp ring path at full line width (#358).
-    private func paintRing(
+    private static func paintRing(
         _ context: CGContext,
         pathRect: CGRect,
         geometry: BorderGeometry,
