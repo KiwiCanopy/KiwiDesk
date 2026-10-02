@@ -26,6 +26,7 @@ struct BorderDormantRingTests {
     @Test("A retired ring goes dormant and is the one that returns")
     func retiredRingReturns() {
         let border = BorderManager()
+        border.restack = { _, _, _ in false }
         defer { border.clear() }
         border.sync([spec(1), spec(2)])
         let ring = border.overlays[WindowID(1)]
@@ -42,6 +43,7 @@ struct BorderDormantRingTests {
     @Test("A returning ring under animation starts from its spec")
     func returningRingDropsHeldFrame() {
         let border = BorderManager()
+        border.restack = { _, _, _ in false }
         defer { border.clear() }
         let rest = CGRect(x: 0, y: 0, width: 400, height: 300)
         let parked = CGRect(x: 1700, y: 1000, width: 400, height: 300)
@@ -67,6 +69,7 @@ struct BorderDormantRingTests {
     @Test("A dormant ring fades rather than ordering out")
     func dormantRingFades() throws {
         let border = BorderManager()
+        border.restack = { _, _, _ in false }
         defer { border.clear() }
         border.sync([spec(1)])
         let ring = try #require(border.overlays[WindowID(1)])
@@ -81,6 +84,7 @@ struct BorderDormantRingTests {
     @Test("A switch leaves the WindowServer request unchanged")
     func watchRequestSurvivesSwitch() {
         let border = BorderManager()
+        border.restack = { _, _, _ in false }
         defer { border.clear() }
         var requests: [Set<WindowID>] = []
         border.watchOverride = {
@@ -97,6 +101,7 @@ struct BorderDormantRingTests {
     @Test("Corner radius outlives dormancy and dies with the window")
     func cornerRadiusLifetime() {
         let border = BorderManager()
+        border.restack = { _, _, _ in false }
         defer { border.clear() }
         border.sync([spec(1)])
         #expect(border.cornerRadii[WindowID(1)] != nil)

@@ -156,10 +156,12 @@ keeps these:
   panel and draws nothing: the `.transient` section below still
   binds.
 
-The WindowServer `.hide` arm still orders a ring out: it fires
-for a minimize, a hidden app or a Desktop switch, never for a
-Space switch, so it stays off the path above until a measurement
-says otherwise.
+The WindowServer `.hide` arm still orders a ring out. A
+KiwiDesk Space switch parks windows by moving them, so it raises
+no `.hide` (no order-out on the 1↔2 runs' panel polls, macOS 27,
+2026-10-03); a minimize, a hidden app or a Desktop switch does,
+and those stay off the path above until a measurement says
+otherwise.
 
 ## The overlay panels join every Space
 
