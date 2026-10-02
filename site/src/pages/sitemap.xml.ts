@@ -38,7 +38,7 @@ const video = {
     "the scrolling layout, a window dragged onto the Space Bar, a pinned " +
     "window that follows you, and one profile per macOS Desktop.",
   seconds: 71,
-  published: "2026-09-13",
+  published: "2026-09-13T00:00:00+02:00",
 };
 
 function urlFor(base: string, lang: Lang, path: string): string {
