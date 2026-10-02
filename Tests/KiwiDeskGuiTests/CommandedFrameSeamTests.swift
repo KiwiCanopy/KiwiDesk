@@ -36,4 +36,19 @@ struct CommandedFrameSeamTests {
             "found \(sites.map(\.site))"
         )
     }
+
+    /// The applier is reachable from Core, so the ledger has a
+    /// second spelling; only the accessor's file may take it.
+    @Test("only the accessor reads the applier's ledger")
+    func applierLedgerReaders() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "applier.instantTarget(",
+            under: Self.core
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent)
+                == ["TilingEngine+Layout.swift"],
+            "found \(sites.map(\.site))"
+        )
+    }
 }
