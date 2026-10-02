@@ -81,15 +81,11 @@ public final class EventLoop {
     /// changed it. An ignore transition or stop restores that
     /// exact value instead of assuming KiwiDesk owned `true`.
     var enhancedUIBaselines: [pid_t: Bool] = [:]
-    /// Apps sent `AXManualAccessibility` — the Chromium warm-up used
-    /// when an app never answers the EUI read (#360). Set-once per
-    /// process: unlike the EUI baseline, a Chromium app answers that
-    /// read permanently with nil, so without this the warm-up would
-    /// re-fire a blocking AX write on every reconcile. Deliberately
-    /// not restored on detach — unlike EUI, an eager AX tree is what a
-    /// managed app wants and Chromium's does not tear down, so re-poking
-    /// it costs more than it buys; only the pid is cleared so a
-    /// re-attach re-applies the warm-up.
+    /// Apps sent `AXManualAccessibility` — the Chromium warm-up for
+    /// an app that never answers the EUI read (#360). Set-once per
+    /// process, or every reconcile re-fires a blocking AX write.
+    /// Never restored on detach (an eager AX tree is what a managed
+    /// app wants); the pid is cleared so a re-attach re-applies it.
     var manualAXApplied: Set<pid_t> = []
     /// Last float-detection verdict per tracked window, with its
     /// reason (#1810), so reconcile can re-check and emit only
@@ -330,6 +326,10 @@ public final class EventLoop {
         AXHelper.setEnhancedUserInterface
     var writeManualAX: (pid_t, Bool) -> Void =
         AXHelper.setManualAccessibility
+
+    /// Each EUI baseline the loop retires, with the value it left
+    /// the flag at; the frame applier's holds restore that (#1508).
+    var onEnhancedUIRetired: (pid_t, Bool) -> Void = { _, _ in }
 
     /// Applies the process-global AX messaging timeout at
     /// `start` (#672) — see `AXHelper.setGlobalMessagingTimeout`

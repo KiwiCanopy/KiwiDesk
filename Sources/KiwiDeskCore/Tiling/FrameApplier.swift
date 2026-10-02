@@ -15,6 +15,15 @@ final class FrameApplier {
     private let pending = PendingFrames()
     private let recent = RecentApplies()
     private let instantTargets = InstantTargets()
+    private let enhancedUI = EnhancedUIHolds()
+
+    /// The AX writes the queues perform; a test counts them.
+    var writer = FrameWriter.live
+
+    /// Whether the app's EUI is on at rest — the event loop's
+    /// warmed baseline, wired at bootstrap. Off by default: an
+    /// unwired applier never toggles the flag.
+    var enhancedUIAtRest: @MainActor (pid_t) -> Bool = { _ in false }
 
     /// Every frame issued to a window, at both entry points and
     /// ahead of the element guard — the one sink every layout,
@@ -71,7 +80,7 @@ final class FrameApplier {
         animatingPid[id] = pid
         pidCounts[pid, default: 0] += 1
         if pidCounts[pid] == 1 {
-            setEUI(pid: pid, enabled: false)
+            holdEUI(pid: pid, held: true)
         }
     }
 
@@ -82,7 +91,7 @@ final class FrameApplier {
         pidCounts[pid, default: 1] -= 1
         if pidCounts[pid, default: 0] <= 0 {
             pidCounts[pid] = nil
-            setEUI(pid: pid, enabled: true)
+            holdEUI(pid: pid, held: false)
         }
     }
 
@@ -113,19 +122,17 @@ final class FrameApplier {
         let store = pending
         let recent = recent
         let clock = clock
+        let writer = writer
         let waited = meter.queued()
         queue(for: pid).async {
             waited()
             guard let entry = store.take(id) else { return }
             if entry.setSize {
-                WindowControl.setFrame(
-                    entry.frame,
-                    of: entry.element
-                )
+                writer.setFrame(entry.frame, entry.element)
             } else {
-                WindowControl.setPosition(
+                writer.setPosition(
                     entry.frame.origin,
-                    of: entry.element
+                    entry.element
                 )
             }
             // Kept beside the enqueue stamp: the grace runs from
@@ -134,14 +141,18 @@ final class FrameApplier {
         }
     }
 
-    /// Applies a frame instantly, dropping EUI around the set
-    /// (#881). Deliberately outside the `begin/endAnimating`
-    /// ref-count: every EUI toggle and frame-set for a pid rides
-    /// the one serial queue, so the live read observes the correct
-    /// interleaved state. Callers must `animation.cancel(window:)`
-    /// first (as `retile` and `stashInactive` do) so a window is
-    /// never spring-animated and instant-set at once.
-    func applyInstant(_ id: WindowID, _ frame: CGRect) {
+    /// Applies a frame instantly, with EUI held off around the
+    /// set (#881) — one hold for a run of sets queued back to
+    /// back, shared with the animation ref-count through
+    /// `EnhancedUIHolds` (#1508). Position-only unless `setSize`.
+    /// Callers must `animation.cancel(window:)` first (as
+    /// `retile` and `stashInactive` do) so a window is never
+    /// spring-animated and instant-set at once.
+    func applyInstant(
+        _ id: WindowID,
+        _ frame: CGRect,
+        setSize: Bool
+    ) {
         // Recorded before the element guard, at enqueue time: the
         // overlay sync wants the commanded frame this same turn
         // (#881); a stamp for a gone window expires unread.
@@ -155,25 +166,23 @@ final class FrameApplier {
         nonisolated(unsafe) let target = element
         let recent = recent
         let clock = clock
+        let writer = writer
+        let holds = enhancedUI
         let waited = meter.queued()
+        holds.noteQueued(
+            pid,
+            atRest: enhancedUIAtRest(pid),
+            instant: true
+        )
         queue(for: pid).async {
             waited()
-            let wasEnabled =
-                AXHelper.getEnhancedUserInterface(pid: pid)
-                == true
-            if wasEnabled {
-                AXHelper.setEnhancedUserInterface(
-                    pid: pid,
-                    enabled: false
-                )
+            holds.beginInstant(pid, writer)
+            if setSize {
+                writer.setFrame(frame, target)
+            } else {
+                writer.setPosition(frame.origin, target)
             }
-            WindowControl.setFrame(frame, of: target)
-            if wasEnabled {
-                AXHelper.setEnhancedUserInterface(
-                    pid: pid,
-                    enabled: true
-                )
-            }
+            holds.endInstant(pid, writer)
             recent.record(id, now: clock())  // as `apply`, #1254
         }
     }
@@ -195,15 +204,31 @@ final class FrameApplier {
         return queue
     }
 
-    /// EUI toggles ride the same per-app queue as the frames, so
+    /// EUI holds ride the same per-app queue as the frames, so
     /// off → frames → on ordering is guaranteed.
-    private func setEUI(pid: pid_t, enabled: Bool) {
-        queue(for: pid).async {
-            AXHelper.setEnhancedUserInterface(
-                pid: pid,
-                enabled: enabled
+    private func holdEUI(pid: pid_t, held: Bool) {
+        let holds = enhancedUI
+        let writer = writer
+        if held {
+            holds.noteQueued(
+                pid,
+                atRest: enhancedUIAtRest(pid),
+                instant: false
             )
         }
+        queue(for: pid).async {
+            if held {
+                holds.acquire(pid, writer)
+            } else {
+                holds.release(pid, writer)
+            }
+        }
+    }
+
+    /// The event loop stopped owning the app and left its EUI
+    /// at `leftOn`; a hold still open restores that.
+    func retireApp(_ pid: pid_t, leftOn: Bool) {
+        enhancedUI.retire(pid, leftOn: leftOn)
     }
 
     private static func pid(of element: AXUIElement) -> pid_t? {

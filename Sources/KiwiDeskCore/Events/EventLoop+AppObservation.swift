@@ -263,8 +263,10 @@ extension EventLoop {
         observers.removeValue(forKey: pid)?.invalidate()
         if let baseline = enhancedUIBaselines.removeValue(
             forKey: pid
-        ), restoreEnhancedUI, !baseline {
-            writeEnhancedUI(pid, false)
+        ) {
+            let restores = restoreEnhancedUI && !baseline
+            if restores { writeEnhancedUI(pid, false) }
+            onEnhancedUIRetired(pid, !restores)
         }
         // AXManualAccessibility is left set on the app (an eager AX
         // tree is what a managed app wants); only forget the pid so a

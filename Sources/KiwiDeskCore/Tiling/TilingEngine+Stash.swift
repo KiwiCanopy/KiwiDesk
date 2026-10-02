@@ -289,6 +289,9 @@ extension TilingEngine {
         }
         animation.cancel(window: window.id)
         meter.add(\.parksIssued)
-        setFrame(window.id, target)
+        // Only the right corner's x is width-free; the left one
+        // is measured from the state width, which the size write
+        // makes true (#1508).
+        setFrame(window.id, target, setSize: corner == .bottomLeft)
     }
 }

@@ -58,7 +58,8 @@ struct FrameApplierStampTests {
         applier.clock = { now.withLock { $0 } }
         applier.applyInstant(
             w,
-            CGRect(x: 0, y: 0, width: 100, height: 100)
+            CGRect(x: 0, y: 0, width: 100, height: 100),
+            setSize: true
         )
         #expect(applier.didRecentlySetFrame(w))
         #expect(applier.instantTarget(w) != nil)
@@ -75,7 +76,8 @@ struct FrameApplierStampTests {
         #expect(!applier.didRecentlySetFrame(w))
         applier.applyInstant(
             w,
-            CGRect(x: 0, y: 0, width: 100, height: 100)
+            CGRect(x: 0, y: 0, width: 100, height: 100),
+            setSize: true
         )
         #expect(applier.didRecentlySetFrame(w))
     }
