@@ -59,6 +59,10 @@ struct SnapshotStoreCensusTests {
             (.inPlace, "the member Monocle shows under a float focus"),
         "tiler.stashedFrames":
             (.always, "a parked float's capture rides its record frame"),
+        "tiler.stashDepartures.shown":
+            (.behind, "which Spaces the last park saw shown (#1508)"),
+        "tiler.stashDepartures.owed":
+            (.behind, "parks a switch still forces (#1508)"),
         "state.floatFrames":
             (
                 .behind,
@@ -189,6 +193,15 @@ struct SnapshotStoreCensusTests {
         // After the settle, whose retire prunes an arm on a Space
         // no live profile leaves temporary.
         core.state.temporaryArmed.insert(shown)
+        // A departure owed (#1508): the hidden Space leaves view.
+        _ = core.tiler.stashDepartures.pass(
+            shown: [shown, hidden],
+            forcing: false
+        )
+        _ = core.tiler.stashDepartures.pass(
+            shown: [shown],
+            forcing: false
+        )
         return core
     }
 
@@ -208,6 +221,7 @@ struct SnapshotStoreCensusTests {
             "state.floatFrames", "tiler.boundLearner.lastAsks",
             "state.userFloated", "tiler.monocleShownMembers",
             "state.heldSpaces", "state.temporaryArmed",
+            "tiler.stashDepartures.owed",
             "state.profilePartitioning.byArrangement[][]",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")

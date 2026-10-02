@@ -1864,12 +1864,34 @@ editing here:
   corroborated bounds (#1055), under which the automatic track
   count and every heal stand down, so a switch that forced
   redrew the count's overlap on every return. `.reissue`
-  re-issues every frame and probes nothing; a new caller that
+  re-issues every LAYOUT frame and probes nothing; a new caller that
   activates a Space and is not an explicit apply takes it, and
   every site that spells either case is pinned with its reason
   in `RetilePassRoutingTests`' `allowed` map — the one copy of
   who chooses what (`SpaceSwitchReissueTests`,
   `RetileBoundSkipTests` ▸ `reissueIssuesTheBound`).
+- **A re-issuing pass forces only the parks a departure owes
+  (#1508)**, or every switch re-parks every hidden window — the
+  per-switch cost `get_work_counters` measures as
+  `parks_issued`. A new reason to force a park records it in
+  `StashDepartures` rather than passing a Bool beside a call
+  site; that ledger owes a departure the next two forcing
+  passes, whichever they are, which is what keeps a settle
+  re-sending a park a slow app dropped. Every other hidden
+  window takes the "already parked" check, and that check asks
+  the last frame SENT as well as the state frame, so a window
+  whose unanswered ask is not the corner is never read as
+  parked — the net for a departure the ledger cannot name (a
+  verb's move into a hidden Space, a renumbered held Space). A
+  reader of "the last frame we sent" takes
+  `TilingEngine.commandedFrame(of:)`, never the instant ledger
+  and the animation target spelled in its own order
+  (`CommandedFrameSeamTests`), and "at the corner" is read
+  through `parked(_:at:)`, which `looksStashed` asks per corner.
+  Accepted residue: a self-echo clears the instant target
+  whatever frame it carries, so a late echo of an earlier park
+  can vouch for a corner the window has left until the next
+  pass that moves it (`StashOutgoingOnlyTests`).
 - **A resize nobody asked for is corrected on its own event
   (#1358)** — the `.windowResized` arm's outcomes are four and a
   new arm keeps them so: our ask's ECHO goes to the #677 answer

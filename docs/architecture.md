@@ -171,7 +171,9 @@ Every retile an explicit `set_*` triggers is an **apply**
 1 pt gap edit moves windows (§5), and probes past the learned app
 size bounds once. A Space or Desktop switch is a **reissue** —
 past the tolerance, no probe — and everything event-driven is the
-default `.event` pass (`RetilePass`).
+default `.event` pass (`RetilePass`). A reissue forces the park
+of only the Spaces that just left view; a window parked longer
+keeps its place (`StashDepartures`).
 
 A commanded focus in a Monocle Space goes through the flip door
 (`App/KiwiCore+MonocleFlip`), which plays the card flip from

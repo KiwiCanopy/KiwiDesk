@@ -30,14 +30,15 @@ struct PlacementBounceSeamTests {
         // direct `WindowControl.setFrame` is the ruled exception,
         // the app being on its way out.
         ("animation.animate(", ["TilingEngine+Layout.swift"]),
-        ("applier.applyInstant(", ["TilingEngine.swift"]),
+        ("applier.applyInstant(", ["TilingEngine+Layout.swift"]),
         // The stamps at those leaves — generic, so a stamp spelled
         // anywhere else is a third site rather than invisible; the
         // distrust goes through the ledger's bounded `renew` door,
-        // never a stamp, or the chain of renewals has no end.
+        // never a stamp, or the chain of renewals has no end. Both
+        // leaves share one file, so it is named once per leaf.
         (
             "placements.stamp(",
-            ["TilingEngine+Layout.swift", "TilingEngine.swift"]
+            ["TilingEngine+Layout.swift", "TilingEngine+Layout.swift"]
         ),
         ("placements.renew(", ["KiwiCore+PlacementBounce.swift"]),
         // The one focus command path records the window it left;
@@ -77,6 +78,29 @@ struct PlacementBounceSeamTests {
                 \(sites.map(\.site).joined(separator: ", "))
                 """
             )
+        }
+    }
+
+    /// Each placement leaf stamps in its OWN body: the census
+    /// above counts both stamps in one file, which a stamp moved
+    /// from one leaf to the other would still satisfy.
+    @Test("each placement leaf stamps once")
+    func eachLeafStamps() throws {
+        let file = Self.core.appendingPathComponent(
+            "Tiling/TilingEngine+Layout.swift"
+        )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        for leaf in ["func applyFrame(", "func setFrame("] {
+            let body = SourceScan.declarationBody(
+                after: leaf,
+                in: source
+            )
+            let stamps = body?.components(
+                separatedBy: "placements.stamp("
+            ).count
+            #expect(stamps == 2, "\(leaf) stamps \((stamps ?? 1) - 1)")
         }
     }
 

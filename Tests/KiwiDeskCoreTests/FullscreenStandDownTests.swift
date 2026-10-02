@@ -205,7 +205,7 @@ struct FullscreenStandDownTests {
         engine.stashInactive(
             state: makeState(fullscreen: false),
             fallback: screen,
-            force: true
+            forcesDepartures: true
         )
         #expect(engine.stashedFrames[w2] != nil)
 
@@ -213,7 +213,7 @@ struct FullscreenStandDownTests {
         exempt.stashInactive(
             state: makeState(fullscreen: true),
             fallback: screen,
-            force: true
+            forcesDepartures: true
         )
         #expect(exempt.stashedFrames[w2] == nil)
     }

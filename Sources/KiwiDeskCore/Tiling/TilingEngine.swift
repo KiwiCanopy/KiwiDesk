@@ -113,6 +113,9 @@ public final class TilingEngine {
     /// by the layout on every retile.
     var stashedFrames: [WindowID: CGRect] = [:]
 
+    /// Which Spaces' parks a re-issuing pass forces (#1508).
+    var stashDepartures = StashDepartures()
+
     /// Resolves the AX element of a window (wired to the
     /// event loop's registry).
     public var elementProvider: @MainActor (WindowID) -> AXUIElement? = { _ in
@@ -213,11 +216,12 @@ public final class TilingEngine {
     /// one frame-set each (Space switches).
     ///
     /// `pass` (#1488): `.reissue` and `.apply` skip the "already
-    /// there" tolerance check and (re)issue every frame — a
-    /// Space switch needs that, since the check reads state
+    /// there" tolerance check and (re)issue every layout frame —
+    /// a Space switch needs that, since the check reads state
     /// frames whose AX echoes lag during rapid switching and
     /// strand windows mid-transition — and `.apply` alone probes
-    /// past corroborated bounds once (#1055).
+    /// past corroborated bounds once (#1055). The parks they
+    /// force are only the ones `StashDepartures` owes (#1508).
     ///
     /// `stashAnimated` makes the park of newly-inactive
     /// windows a visible slide to the corner instead of an
@@ -328,22 +332,10 @@ public final class TilingEngine {
             stashInactive(
                 state: state,
                 fallback: screen,
-                force: pass.reissues,
+                forcesDepartures: pass.reissues,
                 animated: stashAnimated
             )
             restoreStashed(state: state, frames: frames)
         }
-    }
-
-    /// Sets a frame directly (no animation) through the frame
-    /// pipeline, so it is echo-tracked like animated frames.
-    /// Uses the EUI-bracketed instant path so an un-animated
-    /// placement (space switch / stash with animation off) snaps
-    /// cleanly instead of triggering the app's own move
-    /// animation (which stutters on slow-AX apps).
-    public func setFrame(_ id: WindowID, _ frame: CGRect) {
-        boundLearner.supersedeAsk(id)  // as `applyFrame`, #1694
-        placements.stamp(id, target: frame)
-        applier.applyInstant(id, frame)
     }
 }

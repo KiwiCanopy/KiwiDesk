@@ -97,6 +97,18 @@ extension TilingEngine {
         )
     }
 
+    /// Whether `frame` already sits at its park `target`, whose
+    /// size is the frame's own: x exact, y inside the lift macOS
+    /// applies to a parked window. `looksStashed` asks this for
+    /// both corners; its docstring holds the measurement (#1352).
+    /// The ±2 pt tolerance alone re-parked a lifted window on
+    /// every pass (#1508).
+    static func parked(_ frame: CGRect, at target: CGRect) -> Bool {
+        abs(frame.minX - target.minX) <= retileTolerance
+            && abs(frame.minY - target.minY)
+                <= WindowServerFacts.visibilityFloor
+    }
+
     /// Hides every inactive Space's windows — tiled
     /// AND floating (#412): a floating window belongs to one
     /// space and hides with it, exactly like a tiled one.
@@ -113,10 +125,14 @@ extension TilingEngine {
     /// to the corner, running concurrently with the entrance
     /// in the same retile pass. Every other caller keeps the
     /// instant default.
+    ///
+    /// `forcesDepartures` forces the parks `StashDepartures` owes
+    /// (#1508); every other window takes the "already parked"
+    /// check.
     func stashInactive(
         state: StateCoordinator,
         fallback: NSScreen,
-        force: Bool,
+        forcesDepartures: Bool,
         animated: Bool = false
     ) {
         // Every space shown on some display stays in place; only
@@ -125,6 +141,10 @@ extension TilingEngine {
         // each display keeps its own shown space (#multi-monitor).
         let visible = state.workspaces.visibleSpaces
         guard !visible.isEmpty else { return }
+        let forced = stashDepartures.pass(
+            shown: visible,
+            forcing: forcesDepartures
+        )
         // The corner scan's screen list comes from the SAME
         // topology seam the scrolling walls read (#878), so the
         // two consumers of `ScreenNeighbors.detect` can never
@@ -171,7 +191,7 @@ extension TilingEngine {
                     window,
                     in: bounds,
                     corner: corner,
-                    force: force,
+                    force: forced.contains(space.id),
                     animated: animated,
                     // A floating-MODE space's members ride the
                     // float capture/restore cycle whatever their
@@ -222,7 +242,13 @@ extension TilingEngine {
         // below, where the window is already parked and no frame
         // is set.
         boundLearner.parkRetiresAsk(window.id)
-        if !force, Self.close(window.frame, to: target) {
+        // Parked only if the last frame we sent agrees: a state
+        // frame at the corner may be the echo of an earlier park
+        // that a later ask, still unanswered, has moved on from.
+        let commanded = commandedFrame(of: window.id)
+        if !force, Self.parked(window.frame, at: target),
+            commanded.map({ Self.parked($0, at: target) }) ?? true
+        {
             meter.add(\.parksSkipped)
             return
         }

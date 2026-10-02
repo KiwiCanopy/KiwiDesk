@@ -99,11 +99,7 @@ extension KiwiCore {
     /// (the gather's and the placement's cascade, #1708).
     func wouldBeFrame(of window: ManagedWindow) -> CGRect {
         tiler.stashOriginal(window.id)
-            ?? tiler.animation.commandedFrame(
-                window: window.id,
-                includingHeldGlide: false
-            )
-            ?? tiler.recentInstantTarget(window.id)
+            ?? tiler.commandedFrame(of: window.id)
             ?? window.frame
     }
 }

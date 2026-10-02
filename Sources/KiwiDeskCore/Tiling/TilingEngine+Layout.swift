@@ -288,6 +288,18 @@ extension TilingEngine {
         }
     }
 
+    /// Sets a frame directly (no animation) through the frame
+    /// pipeline, so it is echo-tracked like animated frames.
+    /// Uses the EUI-bracketed instant path so an un-animated
+    /// placement (space switch / stash with animation off) snaps
+    /// cleanly instead of triggering the app's own move
+    /// animation (which stutters on slow-AX apps).
+    public func setFrame(_ id: WindowID, _ frame: CGRect) {
+        boundLearner.supersedeAsk(id)  // as `applyFrame`, #1694
+        placements.stamp(id, target: frame)
+        applier.applyInstant(id, frame)
+    }
+
     /// The commanded frame of a recent instant set whose echo
     /// is still pending, nil otherwise (#881). The overlay
     /// syncs read it (`FollowSource.syncFrame`'s `commanded`)
@@ -296,6 +308,15 @@ extension TilingEngine {
     /// echo-fed state frame is the better truth.
     func recentInstantTarget(_ id: WindowID) -> CGRect? {
         applier.instantTarget(id)
+    }
+
+    /// The last frame we sent `id` whose answer may be pending:
+    /// an animation's target ahead of a recent instant set,
+    /// since an animated apply leaves the instant ledger
+    /// standing (#881, #1508). Nil once both have settled.
+    func commandedFrame(of id: WindowID) -> CGRect? {
+        animation.commandedFrame(window: id, includingHeldGlide: false)
+            ?? recentInstantTarget(id)
     }
 
     /// See `recentInstantTarget` — called on the first
