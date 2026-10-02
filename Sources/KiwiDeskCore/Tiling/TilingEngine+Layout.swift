@@ -274,6 +274,10 @@ extension TilingEngine {
                 ?? NSScreen.main
                 ?? NSScreen.screens.first
         {
+            // The slide is the newer ask: an instant set it
+            // supersedes must not vouch for the window once the
+            // slide has settled (#1912, `commandedFrame(of:)`).
+            applier.clearInstantTarget(id)
             animation.animate(
                 window: id,
                 on: screen,

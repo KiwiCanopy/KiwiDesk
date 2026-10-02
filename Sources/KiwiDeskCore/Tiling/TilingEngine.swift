@@ -295,6 +295,16 @@ public final class TilingEngine {
                 // a target the app has twice refused is "already
                 // there" too — re-issuing it restarts an
                 // animation the window can never perform, forever.
+                // An unanswered instant set outranks the stale state
+                // frame: no re-ask, no slide from the corner (#1912).
+                let sent = commandedFrame(of: id)
+                if probe == nil, !pass.reissues, let sent,
+                    animation.targetFrame(window: id) == nil,
+                    Self.close(sent, to: target)
+                {
+                    meter.add(\.framesSkipped)
+                    continue
+                }
                 if probe == nil, !pass.reissues,
                     Self.close(current, to: target)
                         || sizeBoundExplains(
@@ -311,7 +321,7 @@ public final class TilingEngine {
                 let issued = probe?.frame ?? target
                 applyFrame(
                     id,
-                    from: current,
+                    from: sent ?? current,
                     to: issued,
                     animated: animated,
                     isNewWindow: id == newlyCreatedWindow,
