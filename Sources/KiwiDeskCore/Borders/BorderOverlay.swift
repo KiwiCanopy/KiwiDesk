@@ -36,9 +36,14 @@ final class BorderOverlay {
     private var bumpOffset = CGVector.zero
 
     /// Builds the ring's AppKit panel in `order` (#1917).
-    init(window: CGWindowID, order: BorderGeometry.Order) {
+    init(
+        window: CGWindowID,
+        order: BorderGeometry.Order,
+        levelOf: @escaping (CGWindowID) -> Int? =
+            AppKitBorderOverlay.windowLayer
+    ) {
         targetWindow = window
-        backend = AppKitBorderOverlay(order: order)
+        backend = AppKitBorderOverlay(order: order, levelOf: levelOf)
     }
 
     /// Test seam for mocking backends (#533).

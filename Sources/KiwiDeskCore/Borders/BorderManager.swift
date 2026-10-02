@@ -57,6 +57,10 @@ public final class BorderManager {
     /// every developer Mac, so without a lever they are
     /// unobservable.
     var windowServerTrackingDisabled = false
+    /// A front-order ring's read of its target's window level,
+    /// live by default; a test core pins it (#1868).
+    var windowLevel: (CGWindowID) -> Int? =
+        AppKitBorderOverlay.windowLayer
     var reportedTrackingActive: Bool?
     var onLog: @MainActor (String) -> Void = CoreLog.write
     /// True while local animation drives this window (#594).
@@ -170,7 +174,11 @@ public final class BorderManager {
 
     /// Builds a ring overlay for `window` (#361, #367).
     func makeOverlay(for window: WindowID) -> BorderOverlay {
-        BorderOverlay(window: window.raw, order: activeOrder)
+        BorderOverlay(
+            window: window.raw,
+            order: activeOrder,
+            levelOf: windowLevel
+        )
     }
 
     /// Display containing majority of frame for pixel scaling (#449).

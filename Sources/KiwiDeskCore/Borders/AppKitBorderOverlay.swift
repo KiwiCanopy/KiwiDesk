@@ -219,10 +219,12 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// and `order(_:relativeTo:)` alone never creates one.
     func order(relativeTo windowNumber: CGWindowID) {
         guard let panel else { return }
-        if orderMode == .above {
-            panel.level = NSWindow.Level(
-                rawValue: levelOf(windowNumber) ?? 0
-            )
+        // An unread level keeps the last one rather than dropping
+        // a raised target's ring into the normal band.
+        if orderMode == .above, let raw = levelOf(windowNumber),
+            panel.level.rawValue != raw
+        {
+            panel.level = NSWindow.Level(rawValue: raw)
         }
         if !panel.isVisible { panel.orderFrontRegardless() }
         panel.order(

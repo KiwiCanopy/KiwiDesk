@@ -25,10 +25,16 @@ struct BorderStackingTests {
     ) throws {
         let target = makeTarget(level: level)
         defer { target.orderOut(nil) }
+        // A window covering the target: a front ring lands between
+        // the two, never in front of everything.
+        let cover = makeTarget(level: level)
+        defer { cover.orderOut(nil) }
         let ring = AppKitBorderOverlay(order: order)
         render(ring, order: order, glow: 0)
         defer { ring.hide() }
-        _ = onScreenStack(waitingFor: [target.windowNumber])
+        _ = onScreenStack(waitingFor: [
+            target.windowNumber, cover.windowNumber,
+        ])
         ring.order(relativeTo: CGWindowID(target.windowNumber))
 
         let ringNumber = try #require(ring.panelNumber)
@@ -39,12 +45,28 @@ struct BorderStackingTests {
         let targetIndex = try #require(
             stack.firstIndex(of: target.windowNumber)
         )
+        let coverIndex = try #require(
+            stack.firstIndex(of: cover.windowNumber)
+        )
         if order == .above {
-            #expect(ringIndex < targetIndex)
+            #expect(coverIndex < ringIndex && ringIndex < targetIndex)
             #expect(ring.panelLevel == level)
         } else {
             #expect(ringIndex > targetIndex)
         }
+    }
+
+    @Test("A manager's ring reads the level through its seam")
+    func managerLevelSeamReachesTheRing() throws {
+        let manager = BorderManager()
+        manager.setDrawOrder(.front)
+        manager.windowLevel = { _ in 5 }
+        let overlay = manager.makeOverlay(for: WindowID(7))
+        let ring = try #require(overlay.backend as? AppKitBorderOverlay)
+        render(ring, order: .above, glow: 0)
+        defer { ring.hide() }
+        ring.order(relativeTo: 7)
+        #expect(ring.panelLevel?.rawValue == 5)
     }
 
     @Test("A front glow is cut out of its window")
