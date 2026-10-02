@@ -307,10 +307,10 @@ extension KiwiCore {
                 )
                 continue
             }
-            // Mirror applyInstant's EUI bracket: EUI-on apps
-            // self-animate frame changes (Electron/WebKit) and
-            // can clamp or swallow the set — drop it for the
-            // move and restore whatever it was.
+            // Its own live EUI bracket, not the frame queues'
+            // holds (#1508): EUI-on apps self-animate frame
+            // changes (Electron/WebKit) and can clamp or swallow
+            // the set — drop it for the move and restore it.
             var pid: pid_t = 0
             let hasPid =
                 AXUIElementGetPid(element, &pid) == .success

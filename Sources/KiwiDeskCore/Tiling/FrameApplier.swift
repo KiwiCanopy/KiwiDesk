@@ -20,6 +20,11 @@ final class FrameApplier {
     /// The AX writes the queues perform; a test counts them.
     var writer = FrameWriter.live
 
+    /// Whether the app's EUI is on at rest — the event loop's
+    /// warmed baseline, wired at bootstrap. Off by default: an
+    /// unwired applier never toggles the flag.
+    var enhancedUIAtRest: @MainActor (pid_t) -> Bool = { _ in false }
+
     /// Every frame issued to a window, at both entry points and
     /// ahead of the element guard — the one sink every layout,
     /// stash, restore and `setFrame` frame reaches, so a test can
@@ -73,6 +78,7 @@ final class FrameApplier {
             let pid = Self.pid(of: element)
         else { return }
         animatingPid[id] = pid
+        enhancedUI.noteAtRest(pid, enhancedUIAtRest(pid))
         pidCounts[pid, default: 0] += 1
         if pidCounts[pid] == 1 {
             holdEUI(pid: pid, held: true)
@@ -146,7 +152,7 @@ final class FrameApplier {
     func applyInstant(
         _ id: WindowID,
         _ frame: CGRect,
-        setSize: Bool = true
+        setSize: Bool
     ) {
         // Recorded before the element guard, at enqueue time: the
         // overlay sync wants the commanded frame this same turn
@@ -164,6 +170,7 @@ final class FrameApplier {
         let writer = writer
         let holds = enhancedUI
         let waited = meter.queued()
+        holds.noteAtRest(pid, enhancedUIAtRest(pid))
         holds.noteInstantQueued(pid)
         queue(for: pid).async {
             waited()
@@ -209,9 +216,10 @@ final class FrameApplier {
         }
     }
 
-    /// Drops a terminated app's cached EUI state (pid reuse).
-    func forgetApp(_ pid: pid_t) {
-        enhancedUI.forget(pid)
+    /// The event loop stopped owning the app and left its EUI
+    /// at `leftOn`; a hold still open restores that.
+    func retireApp(_ pid: pid_t, leftOn: Bool) {
+        enhancedUI.retire(pid, leftOn: leftOn)
     }
 
     private static func pid(of element: AXUIElement) -> pid_t? {

@@ -31,9 +31,9 @@ extension EventLoop {
         for observer in observers.values {
             observer.invalidate()
         }
-        for (pid, baseline) in enhancedUIBaselines
-        where !baseline {
-            writeEnhancedUI(pid, false)
+        for (pid, baseline) in enhancedUIBaselines {
+            if !baseline { writeEnhancedUI(pid, false) }
+            onEnhancedUIRetired(pid, baseline)
         }
         observers = [:]
         processIdentity.forgetAll()

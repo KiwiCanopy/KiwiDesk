@@ -7,13 +7,11 @@ import Foundation
 struct FrameWriter: Sendable {
     var setFrame: @Sendable (CGRect, AXUIElement) -> Void
     var setPosition: @Sendable (CGPoint, AXUIElement) -> Void
-    var readEUI: @Sendable (pid_t) -> Bool?
     var writeEUI: @Sendable (pid_t, Bool) -> Void
 
     static let live = FrameWriter(
         setFrame: { WindowControl.setFrame($0, of: $1) },
         setPosition: { WindowControl.setPosition($0, of: $1) },
-        readEUI: { AXHelper.getEnhancedUserInterface(pid: $0) },
         writeEUI: {
             AXHelper.setEnhancedUserInterface(pid: $0, enabled: $1)
         }
@@ -24,20 +22,28 @@ struct FrameWriter: Sendable {
 /// #1508): an animation of one of its windows, or a run of
 /// instant sets queued back to back. The flag drops when the
 /// first hold starts and returns when the last ends, so a batch
-/// of N instant sets costs two toggles rather than 2N, and the
-/// at-rest value is read once per app rather than per set.
+/// of N instant sets costs two toggles rather than 2N.
 ///
-/// Every method but `noteInstantQueued` runs on the app's own
-/// serial frame queue, which is what orders a toggle against
-/// the sets it brackets. Only an ANSWERED read is cached: an app
-/// that does not answer (Chromium, or a read that timed out)
-/// is never toggled and is asked again at its next hold.
+/// Whether the flag is ON at rest is the event loop's fact
+/// (`enhancedUIBaselines`, warmed on): it is handed in at each
+/// enqueue and at the loop's retirement of the app, never read
+/// or cached here. An app the loop has not warmed — Chromium,
+/// a cold app — is never toggled.
+///
+/// `noteAtRest`, `noteInstantQueued` and `retire` run on the
+/// main actor; every other method on the app's own serial frame
+/// queue, which orders a toggle against the sets it brackets.
 final class EnhancedUIHolds: @unchecked Sendable {
     private struct App {
-        var atRest: Bool?
+        var atRest = false
+        var dropped = false
         var holders = 0
         var queuedInstants = 0
         var instantHeld = false
+
+        var idle: Bool {
+            holders == 0 && queuedInstants == 0 && !instantHeld
+        }
     }
 
     private let lock = NSLock()
@@ -47,6 +53,21 @@ final class EnhancedUIHolds: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         return body(&apps)
+    }
+
+    /// Main actor, at enqueue: the loop's current at-rest value.
+    func noteAtRest(_ pid: pid_t, _ on: Bool) {
+        with { $0[pid, default: App()].atRest = on }
+    }
+
+    /// Main actor, when the loop stops owning the app: the value
+    /// it left the flag at, which a hold still open restores.
+    func retire(_ pid: pid_t, leftOn: Bool) {
+        with { apps in
+            guard var app = apps[pid] else { return }
+            app.atRest = leftOn
+            apps[pid] = app.idle ? nil : app
+        }
     }
 
     /// Main actor, at enqueue: an instant set is on its way, so
@@ -84,20 +105,15 @@ final class EnhancedUIHolds: @unchecked Sendable {
     }
 
     func acquire(_ pid: pid_t, _ writer: FrameWriter) {
-        let state = with { apps -> (first: Bool, atRest: Bool?) in
-            apps[pid, default: App()].holders += 1
-            let app = apps[pid]!
-            return (app.holders == 1, app.atRest)
+        let drops = with { apps -> Bool in
+            var app = apps[pid, default: App()]
+            app.holders += 1
+            defer { apps[pid] = app }
+            guard app.holders == 1, app.atRest else { return false }
+            app.dropped = true
+            return true
         }
-        guard state.first else { return }
-        var atRest = state.atRest
-        if atRest == nil {
-            atRest = writer.readEUI(pid)
-            if let atRest {
-                with { $0[pid]?.atRest = atRest }
-            }
-        }
-        if atRest == true { writer.writeEUI(pid, false) }
+        if drops { writer.writeEUI(pid, false) }
     }
 
     func release(_ pid: pid_t, _ writer: FrameWriter) {
@@ -105,15 +121,15 @@ final class EnhancedUIHolds: @unchecked Sendable {
             guard var app = apps[pid], app.holders > 0
             else { return false }
             app.holders -= 1
-            apps[pid] = app
-            return app.holders == 0 && app.atRest == true
+            guard app.holders == 0 else {
+                apps[pid] = app
+                return false
+            }
+            let restores = app.dropped && app.atRest
+            app.dropped = false
+            apps[pid] = app.idle ? nil : app
+            return restores
         }
         if restores { writer.writeEUI(pid, true) }
-    }
-
-    /// A terminated app's pid may be reused by a process whose
-    /// flag nobody has read.
-    func forget(_ pid: pid_t) {
-        with { $0[pid] = nil }
     }
 }

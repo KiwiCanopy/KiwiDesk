@@ -61,7 +61,6 @@ extension KiwiCore {
         if case .appTerminated(let pid) = event {
             retireAwayDebts(ofExitedApp: pid)
             BarIconCache.forget(pid: pid)
-            tiler.applier.forgetApp(pid)
         }
         let detectedFlip = detectedFlip(event)
         let effects = state.apply(event)

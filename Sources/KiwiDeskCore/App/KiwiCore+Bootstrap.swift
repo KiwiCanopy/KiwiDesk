@@ -152,6 +152,14 @@ extension KiwiCore {
         tiler.elementProvider = { [weak self] id in
             self?.eventLoop.element(for: id)
         }
+        // The loop owns whether an app's EUI is on at rest; the
+        // applier's holds only borrow it (#1508).
+        tiler.applier.enhancedUIAtRest = { [weak self] pid in
+            self?.eventLoop.enhancedUIBaselines[pid] != nil
+        }
+        eventLoop.onEnhancedUIRetired = { [weak self] pid, on in
+            self?.tiler.applier.retireApp(pid, leftOn: on)
+        }
         eventLoop.onEvent = { [weak self] event in
             self?.handle(event)
         }
