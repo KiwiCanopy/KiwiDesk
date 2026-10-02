@@ -78,7 +78,8 @@ final class UpdatePromptPolicy: NSObject,
     /// Activates app for modal alerts — unconditional only because
     /// Sparkle gates them on user engagement
     /// (`SPUScheduledUpdateDriver.m`, Sparkle 2.9.6); check that
-    /// gate when the version moves.
+    /// gate when the version moves. Forcing rather than cooperative
+    /// (#1170): Sparkle calls this off any user event of ours.
     func standardUserDriverWillShowModalAlert() {
         NSApp.activate(ignoringOtherApps: true)
     }

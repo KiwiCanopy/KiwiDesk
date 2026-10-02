@@ -34,7 +34,7 @@ extension StatusItemController {
     /// Triggers software update check via Sparkle updater.
     @objc func checkForUpdates(_ sender: NSMenuItem) {
         guard updater.canCheckForUpdates else { return }
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate()
         updater.checkForUpdates()
     }
 

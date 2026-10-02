@@ -42,6 +42,8 @@ func surfaceRunningInstanceAndExit() -> Never {
         // Without it a menu-bar app's modal opens behind
         // everything and the second launch looks like a no-op.
         NSApp.setActivationPolicy(.regular)
+        // Forcing, not cooperative (#1170): no trial could reach
+        // this path, and a refused activation hides the modal.
         NSApp.activate(ignoringOtherApps: true)
         alert.runModal()
     }
