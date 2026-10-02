@@ -3,7 +3,7 @@
 # Usage: measure-switches.sh <bundle.app> <space-a> <space-b> <rounds>
 #                            [--load] [--gap SECONDS]
 # Each round is two switches (a→b, b→a), --gap apart (default 0.8 s,
-# past the 300 ms settle). --load runs one `yes` per core for the
+# past the `.spaceSettle` delay in KiwiCore+SpaceFocusHandoff). --load runs one `yes` per core for the
 # duration. Prints the `get_work_counters` JSON for the window.
 set -uo pipefail
 CLI="${1:?bundle}/Contents/MacOS/KiwiDesk"

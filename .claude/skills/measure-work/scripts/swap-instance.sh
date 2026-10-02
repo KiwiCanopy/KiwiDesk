@@ -17,15 +17,23 @@ running() {  # full path of the running app executable, if any
     [ -n "$pid" ] && ps -o command= -p "$pid"
 }
 
-stop() {  # stop the app at bundle $1 and wait for its pid to go
+pids_of() {  # pids whose whole command is bundle $1's executable
     local pid
-    pid=$(pgrep -f "^$1/$EXE\$") || return 0
-    kill -TERM "$pid"
+    for pid in $(pgrep -f "KiwiDesk\.app/$EXE\$"); do
+        [ "$(ps -o command= -p "$pid")" = "$1/$EXE" ] && echo "$pid"
+    done
+}
+
+stop() {  # stop the app at bundle $1 and wait for its pids to go
+    local pids pid
+    pids=$(pids_of "$1")
+    [ -z "$pids" ] && return 0
+    for pid in $pids; do kill -TERM "$pid"; done
     for _ in $(seq 50); do
-        kill -0 "$pid" 2>/dev/null || return 0
+        [ -z "$(pids_of "$1")" ] && return 0
         sleep 0.2
     done
-    echo "pid $pid did not exit (a modal sheet blocks TERM?)" >&2
+    echo "$1 did not exit (a modal sheet blocks TERM?)" >&2
     return 1
 }
 
@@ -41,7 +49,9 @@ launch() {  # open bundle $1 and wait until it is the running app
 
 case "${1:-}" in
 start)
-    MINE="$(cd "${2:?bundle}" && pwd)"
+    # Physical path: LaunchServices runs the bundle under it, so a
+    # symlinked spelling would match no running process.
+    MINE="$(cd "${2:?bundle}" && pwd -P)"
     STATE="${3:?state file}"
     PREV="$(running)"
     PREV="${PREV%/$EXE}"
@@ -54,6 +64,12 @@ restore)
     PREV=$(sed -n 's/^prev=//p' "$STATE")
     MINE=$(sed -n 's/^mine=//p' "$STATE")
     stop "$MINE" || exit 1
+    # Never open a second instance beside one still running.
+    STILL="$(running)"
+    if [ -n "$STILL" ]; then
+        echo "not restoring: still running $STILL" >&2
+        exit 1
+    fi
     if [ -n "$PREV" ]; then launch "$PREV"; else echo "nothing to restore"; fi
     ;;
 *)

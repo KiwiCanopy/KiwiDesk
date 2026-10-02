@@ -1,6 +1,6 @@
 ---
 name: work-profiler
-description: "Measures the work KiwiDesk does per Space switch on the real desk and reports before/after numbers. Use before and after a change meant to make switching or retiling cheaper (#1508 and its follow-ups), to compare two commits' bundles, or when a user reports lag while switching. It swaps the running app for a scratch build and puts it back; it edits nothing in the repo."
+description: "Measures the work KiwiDesk does per Space switch on the real desk and reports before/after numbers. Use before and after a change meant to make switching or retiling cheaper (#1508 and its follow-ups), to compare two commits' bundles, or when a user reports lag while switching. It takes the owner's desk and the gate slot for its whole run — never spawn two at once or during the owner's own test session. It swaps the running app for a scratch build and puts it back; it edits nothing in the repo."
 tools: Read, Grep, Glob, Bash
 model: inherit
 ---

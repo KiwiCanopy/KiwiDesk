@@ -71,13 +71,21 @@ whatever was there before.
 ## 5. Read the numbers
 
 The per-switch figures are the ones that answer #1508:
-`ax_calls_per_switch`, `parks_issued` and `frames_issued` over
-`space_switches`, `retile_ms_mean`/`max`, `queue_wait_ms_max`.
-Compare a change against its own before-bundle on the same pair,
-the same rounds and the same load, and report the deltas.
-`ax_off_main_ms_total` divided by the call count is the per-call
-cost the load inflates; `ax_main_ms_*` is what blocks the main
-actor.
+`ax_calls_per_switch`, `bar_renders_per_switch`, `parks_issued`
+and `frames_issued` over `space_switches`, `retile_ms_mean`/`max`,
+`queue_wait_ms_max`. Compare a change against its own
+before-bundle on the same pair, the same rounds and the same
+load, and report the deltas. Two readings to keep straight:
+
+- `space_switches` counts the switch door (`focus_space`, the
+  scroll step) and nothing else — not boot, wake or a Desktop
+  switch — so a run that is not pure CLI Space switches has no
+  per-switch denominator.
+- `retile_ms` CONTAINS `bar_ms` and `border_ms`: a saving in the
+  bars lowers both, and counting it twice is the mistake.
+
+`ax_off_main_us_mean` is the per-call cost the load inflates;
+`ax_main_*` is what blocks the main actor.
 
 ## What this is not
 

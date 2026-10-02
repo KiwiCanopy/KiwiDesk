@@ -40,8 +40,9 @@ public final class TilingEngine {
     /// sibling extensions (`recentInstantTarget`, #881).
     let applier = FrameApplier()
 
-    /// Where this engine's work is counted (#1508); a test
-    /// counting one pass hands it a fresh instance.
+    /// The core-wide work meter (#1508), homed on the engine
+    /// beside the applier it feeds; KiwiCore counts events, bars
+    /// and rings into it too. A test hands it a fresh instance.
     var meter = WorkMeter.shared {
         didSet { applier.meter = meter }
     }

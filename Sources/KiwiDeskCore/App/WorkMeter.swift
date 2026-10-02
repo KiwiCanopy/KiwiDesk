@@ -9,8 +9,9 @@ import os
 ///
 /// Thread-safe: AX calls are counted from the per-app frame
 /// queues as well as the main actor. A process global because
-/// the raw AX call sites are static; a test counting a pass
-/// hands the engine its own instance (`TilingEngine.meter`).
+/// the raw AX call sites are static, so AX calls always count
+/// into `.shared`; everything else counts into the meter
+/// `TilingEngine.meter` holds, which a test may replace.
 public final class WorkMeter: @unchecked Sendable {
     /// The production meter every unwired site records into.
     public static let shared = WorkMeter()
@@ -170,8 +171,9 @@ public final class WorkMeter: @unchecked Sendable {
         }
     }
 
-    /// Counts one explicit Space switch and marks it on the
-    /// signpost timeline.
+    /// Counts one Space switch (`switchSpace`, the command and
+    /// gesture door; not boot, wake or a Desktop switch) and marks
+    /// it on the signpost timeline.
     func noteSpaceSwitch() {
         add(\.spaceSwitches)
         Self.signposter.emitEvent("space switch")
@@ -209,34 +211,34 @@ public final class WorkMeter: @unchecked Sendable {
 
 extension WorkMeter {
     /// The `get_work_counters` reply: raw counts plus the
-    /// derived rates #1508 asks for. Milliseconds throughout.
-    func report(reset: Bool) -> JSONValue {
+    /// derived rates #1508 asks for — durations in ms, per-call
+    /// means in µs. `retile_ms` includes `bar_ms` and `border_ms`.
+    /// The AX fields are null unless `countsAX`, which defaults to
+    /// whether this is `.shared`: the static AX sites count only
+    /// there, so an injected meter's AX columns cannot move.
+    func report(reset: Bool, countsAX: Bool? = nil) -> JSONValue {
         let (c, seconds) = snapshot(reset: reset)
-        func ms(_ nanos: Int) -> JSONValue {
-            .number((Double(nanos) / 1e4).rounded() / 100)
+        let ax = countsAX ?? (self === Self.shared)
+        func round2(_ value: Double) -> JSONValue {
+            .number((value * 100).rounded() / 100)
         }
+        func ms(_ nanos: Int) -> JSONValue { round2(Double(nanos) / 1e6) }
         func per(_ part: Int, _ whole: Int) -> JSONValue {
-            whole == 0
-                ? .null
-                : .number(
-                    (Double(part) / Double(whole) * 100)
-                        .rounded() / 100
-                )
+            whole == 0 ? .null : round2(Double(part) / Double(whole))
         }
         func perMs(_ nanos: Int, _ whole: Int) -> JSONValue {
-            whole == 0 ? .null : ms(nanos / whole)
+            whole == 0 ? .null : round2(Double(nanos) / Double(whole) / 1e6)
+        }
+        func perUs(_ nanos: Int, _ whole: Int) -> JSONValue {
+            whole == 0 ? .null : round2(Double(nanos) / Double(whole) / 1e3)
         }
         let count: (Int) -> JSONValue = { .number(Double($0)) }
-        return .object([
-            "seconds": .number((seconds * 100).rounded() / 100),
+        var out: [String: JSONValue] = [
+            "seconds": round2(seconds),
             "events": count(c.events),
             "retiles": count(c.retiles),
             "retiles_per_second": seconds > 0
-                ? .number(
-                    (Double(c.retiles) / seconds * 100)
-                        .rounded() / 100
-                )
-                : .null,
+                ? round2(Double(c.retiles) / seconds) : .null,
             "retile_ms_mean": perMs(c.retileNanos, c.retiles),
             "retile_ms_max": ms(c.retileMaxNanos),
             "events_per_retile": per(c.events, c.retiles),
@@ -255,21 +257,26 @@ extension WorkMeter {
             "parks_skipped": count(c.parksSkipped),
             "frames_coalesced": count(c.framesCoalesced),
             "queued_jobs": count(c.queuedJobs),
-            "queue_wait_ms_mean": perMs(
-                c.queueWaitNanos,
-                c.queuedJobs
-            ),
+            "queue_wait_us_mean": perUs(c.queueWaitNanos, c.queuedJobs),
             "queue_wait_ms_max": ms(c.queueWaitMaxNanos),
+        ]
+        let axFields: [String: JSONValue] = [
             "ax_main_calls": count(c.axMainCalls),
-            "ax_main_ms_mean": perMs(c.axMainNanos, c.axMainCalls),
+            "ax_main_us_mean": perUs(c.axMainNanos, c.axMainCalls),
             "ax_main_ms_max": ms(c.axMainMaxNanos),
             "ax_main_ms_total": ms(c.axMainNanos),
             "ax_off_main_calls": count(c.axOffMainCalls),
+            "ax_off_main_us_mean": perUs(
+                c.axOffMainNanos,
+                c.axOffMainCalls
+            ),
             "ax_off_main_ms_total": ms(c.axOffMainNanos),
             "ax_calls_per_switch": per(
                 c.axMainCalls + c.axOffMainCalls,
                 c.spaceSwitches
             ),
-        ])
+        ]
+        for (key, value) in axFields { out[key] = ax ? value : .null }
+        return .object(out)
     }
 }

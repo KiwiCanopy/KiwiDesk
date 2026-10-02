@@ -63,14 +63,30 @@ struct WorkMeterTests {
         m.add(\.events, 6)
         for _ in 0..<5 { m.ax(isMain: true) {} }
         m.ax(isMain: false) {}
-        guard case .object(let r) = m.report(reset: false) else {
+        guard
+            case .object(let r) = m.report(reset: false, countsAX: true)
+        else {
             Issue.record("report is not an object")
             return
         }
         #expect(r["ax_calls_per_switch"] == .number(3))
         #expect(r["events_per_retile"] == .number(1.5))
-        #expect(r["ax_main_ms_mean"] == .number(1))
-        #expect(r["queue_wait_ms_mean"] == .null)
+        // One step-clock millisecond per call, in µs.
+        #expect(r["ax_main_us_mean"] == .number(1000))
+        #expect(r["queue_wait_us_mean"] == .null)
+    }
+
+    @Test("An injected meter reports its AX columns as null")
+    func injectedMeterHidesAX() {
+        let m = meter()
+        m.ax(isMain: true) {}
+        guard case .object(let r) = m.report(reset: false) else {
+            Issue.record("report is not an object")
+            return
+        }
+        #expect(r["ax_main_calls"] == .null)
+        #expect(r["ax_calls_per_switch"] == .null)
+        #expect(r["retiles"] == .number(0))
     }
 
     @Test("A park counts issued, already-parked and forced")
@@ -153,11 +169,14 @@ struct WorkMeterTests {
         let m = meter()
         core.tiler.meter = m
         core.handle(.windowTitleChanged(WindowID(9), "x"))
+        core.switchSpace(to: SpaceID(2), warp: false)
+        // A switch retile outside the switch door (boot, wake,
+        // restore) is no switch.
         core.spaceSwitchRetile()
         let c = m.snapshot(reset: false).counts
         #expect(c.events == 1)
         #expect(c.spaceSwitches == 1)
-        #expect(c.reissuePasses == 1)
+        #expect(c.reissuePasses == 2)
     }
 
     @Test("A bar render and a ring sync are counted and timed")

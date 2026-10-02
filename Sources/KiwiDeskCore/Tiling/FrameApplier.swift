@@ -22,7 +22,8 @@ final class FrameApplier {
     /// see what a pass moved (#930). A no-op in production.
     var issued: @MainActor (WindowID, CGRect) -> Void = { _, _ in }
 
-    /// Counts coalesced frames and per-app queue waits (#1508).
+    /// Counts coalesced frames and per-app queue waits (#1508);
+    /// set by `TilingEngine.meter`, which owns the choice.
     var meter = WorkMeter.shared
 
     /// Grace period for ignoring self-inflicted AX frame echoes.
