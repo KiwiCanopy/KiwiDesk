@@ -52,35 +52,6 @@ struct BorderOverlayVisibilityTests {
             ]
         )
     }
-
-    @Test("Failed private hide falls back and stays hidden")
-    func hideFailurePreservesIntent() {
-        let primary = RecordingBorderBackend()
-        primary.hideSucceeds = false
-        let fallback = RecordingBorderBackend()
-        let overlay = BorderOverlay(
-            window: 7,
-            backend: primary,
-            fallback: fallback
-        )
-        overlay.update(
-            frame: CGRect(x: 10, y: 20, width: 300, height: 200),
-            width: 4,
-            cornerStyle: .rounded,
-            cornerRadius: 16,
-            colorHex: "#FF0000",
-            screen: nil
-        )
-        overlay.order(relativeTo: 7)
-        primary.calls = []
-
-        overlay.hide()
-        #expect(primary.calls == [.hide])
-        #expect(fallback.calls == [.update, .hide])
-
-        overlay.order(relativeTo: 7)
-        #expect(fallback.calls == [.update, .hide, .order(7)])
-    }
 }
 
 @MainActor
@@ -92,25 +63,21 @@ private final class RecordingBorderBackend: BorderOverlayBackend {
     }
 
     var calls: [Call] = []
-    var hideSucceeds = true
     let orderMode: BorderGeometry.Order = .below
 
     func update(
         geometry: BorderGeometry,
         colorHex: String,
         screen: NSScreen?
-    ) -> Bool {
+    ) {
         calls.append(.update)
-        return true
     }
 
-    func order(relativeTo windowNumber: CGWindowID) -> Bool {
+    func order(relativeTo windowNumber: CGWindowID) {
         calls.append(.order(windowNumber))
-        return true
     }
 
-    func hide() -> Bool {
+    func hide() {
         calls.append(.hide)
-        return hideSucceeds
     }
 }

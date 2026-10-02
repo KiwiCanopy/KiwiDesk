@@ -3203,10 +3203,12 @@ the bloom is a **brightened** derivative of `focused_color`, so
 set only `focused_color` and the glow follows. Its reach
 **scales with the border width**, clamped to a legible band, so
 a hairline border gets a subtle rim and a thick one a
-proportional aura — override it with `set_glow_size` below. A
-glowing ring renders on the behind-order renderer, so
-`draw_order("front")` is inert while glow is on (see
-[Accepted limitations](accepted-limitations.md)).
+proportional aura — override it with `set_glow_size` below.
+
+:::unreleased
+A glowing ring keeps the `draw_order` you chose: `"front"` no
+longer falls back to behind while glow is on.
+:::
 
 The bloom counts as part of the ring's reach: `border.fit_gaps`
 sizes for it, and a floating window keeps that much off bars and
@@ -3282,11 +3284,6 @@ shadowless hairline — but can flicker on windows that repaint
 rapidly (Firefox/Zen and other Gecko browsers emit a compositor
 reorder on every keystroke). Lua-only, with no GUI control.
 Changing it re-draws every border immediately.
-
-While `border.glow` is on, the focused ring renders on the
-behind-order renderer regardless of this setting — `"front"`
-takes effect again the moment glow turns off (see
-[Accepted limitations](accepted-limitations.md)).
 
 **Example:**
 

@@ -1,6 +1,8 @@
 import AppKit
 
-/// AppKit NSPanel fallback backend for window focus border rings (#278, #320).
+/// The focus ring's NSPanel (#278, #320). The one ring backend
+/// since #1917: macOS 27 composites a raw SkyLight window over
+/// the Mission Control overview, and `.transient` hides this one.
 @MainActor
 final class AppKitBorderOverlay: BorderOverlayBackend {
     private var panel: NSPanel?
@@ -20,11 +22,19 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     private let sheen = CAGradientLayer()
     private let sheenMask = CAShapeLayer()
 
-    /// Stacks below target window to preserve popover occlusion (#320).
-    let orderMode: BorderGeometry.Order = .below
+    /// Stacks relative to the target window: `below` preserves
+    /// popover occlusion (#320), `above` is `draw_order` front.
+    let orderMode: BorderGeometry.Order
 
-    /// AppKit backend supports glow rendering (#533).
-    let rendersGlow = true
+    init(order: BorderGeometry.Order = .below) {
+        orderMode = order
+    }
+
+    /// The panel's Spaces/Exposé behavior, nil before the first
+    /// render.
+    var panelBehavior: NSWindow.CollectionBehavior? {
+        panel?.collectionBehavior
+    }
 
     /// Updates ring geometry, stroke color, and glow bloom
     /// (#358). Implicit Core Animation is disabled so the ring
@@ -35,7 +45,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         geometry: BorderGeometry,
         colorHex: String,
         screen: NSScreen?
-    ) -> Bool {
+    ) {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         CATransaction.begin()
@@ -75,7 +85,6 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         if !panel.isVisible {
             panel.orderFrontRegardless()
         }
-        return true
     }
 
     /// Renders outer glow halo from filled silhouette (#358, #533).
@@ -149,15 +158,16 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         )
     }
 
-    /// Stacks ring directly behind target window in WindowServer hierarchy.
-    func order(relativeTo windowNumber: CGWindowID) -> Bool {
-        panel?.order(.below, relativeTo: Int(windowNumber))
-        return true
+    /// Stacks the ring directly behind or above the target.
+    func order(relativeTo windowNumber: CGWindowID) {
+        panel?.order(
+            orderMode == .above ? .above : .below,
+            relativeTo: Int(windowNumber)
+        )
     }
 
-    func hide() -> Bool {
+    func hide() {
         panel?.orderOut(nil)
-        return true
     }
 
     private func makePanel() -> NSPanel {
@@ -179,7 +189,8 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
         // `.canJoinAllSpaces`: the ring follows a carried sticky
-        // window across Desktops (#1145), the bars' recipe.
+        // window across Desktops (#1145), the bars' recipe;
+        // `.transient` hides it in Mission Control (#1917).
         panel.collectionBehavior = [
             .canJoinAllSpaces,
             .transient,

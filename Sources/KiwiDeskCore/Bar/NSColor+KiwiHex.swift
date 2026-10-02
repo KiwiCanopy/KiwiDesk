@@ -24,8 +24,7 @@ extension NSColor {
     }
 
     /// Opaque sRGB shadow color for focus glow overlays
-    /// (`BorderStyle.glowColor(from:)`, `BorderOverlay.ensureBackend`,
-    /// #358, #533).
+    /// (`BorderStyle.glowColor(from:)`, #358, #533).
     static func kiwiGlow(hex: String) -> CGColor {
         let base = NSColor(kiwiHex: BorderStyle.glowColor(from: hex))
         let srgb = base.usingColorSpace(.sRGB) ?? base

@@ -1643,21 +1643,21 @@ of `border.glow_size` (#551, owner-requested): an explicit size
 overrides it, clamped only at a renderable ceiling — the GUI
 curates a tighter slider band, Lua stays open — resolved once in
 `BorderStyle.resolvedGlowBlur` before any geometry, so the
-pipeline still carries a single finished number. A glow ring
-also **renders on the AppKit
-backend** (`BorderOverlay.ensureBackend`), swapping back to
-SkyLight when glow turns off: the WindowServer-backed SkyLight
-context drops any `CGContextSetShadowWithColor` hue to the
-default black-at-low-alpha — a grey smear with a clipped hard
-edge (#533, device-confirmed with the colour rebuilt in sRGB and
-GenericRGB both, and with the bloom pre-rendered to a bitmap and
-blitted) — and painted-falloff substitutes band on device, the
-same contour lines as shadowing the thin stroke directly. The
-`CAShapeLayer` double shadow (a
-full-radius pass plus a half-radius boost, summing toward the
-full glow colour at the ring edge) is the one renderer that
-blooms correctly; the cost is that a glow ring under
-`draw_order: "front"` degrades to behind-the-window ordering.
+pipeline still carries a single finished number. The ring
+**renders on one AppKit panel** for both draw orders
+(`AppKitBorderOverlay`), and SkyLight draws no ring: a
+WindowServer-backed SkyLight context drops any
+`CGContextSetShadowWithColor` hue to the default
+black-at-low-alpha — a grey smear with a clipped hard edge (#533,
+device-confirmed with the colour rebuilt in sRGB and GenericRGB
+both, and with the bloom pre-rendered to a bitmap and blitted) —
+and on macOS 27 a raw SkyLight window stays drawn over the
+Mission Control overview at its desktop frame whatever Space it
+is pinned to, while the panel's `.transient` hides it with the
+desktop (#1917). The `CAShapeLayer` double shadow (a full-radius
+pass plus a half-radius boost, summing toward the full glow
+colour at the ring edge) is the one renderer that blooms
+correctly; painted-falloff substitutes band on device.
 Default OFF is native-first — a fresh install reads as a crisp
 flat ring, glow is opt-in flourish.
 
@@ -1738,15 +1738,13 @@ close; the residue, a window closed *while* fullscreen dropping a
 budget late, is in
 [Accepted Limitations](accepted-limitations.md).
 
-The ring's **rendering backend is opportunistic, not architectural**
-(#285): when the complete runtime-linked SkyLight drawing and event
-surface resolves, an SLS window follows WindowServer move/resize/order
-events directly. One carve-out: the glow ring *mandates* the public
-AppKit renderer for correctness (#533, see the glow entry above) —
-bending the doctrine in the safe direction, toward the mandatory
-public fallback, never onto the private path. Drawing and tracking degrade independently: a failed
-raw-window operation replays the ring through the public AppKit panel
-without discarding a healthy WindowServer event stream. Direct mouse
+The ring **draws on the public AppKit panel and tracks through
+WindowServer opportunistically** (#285, #1917): when the
+runtime-linked SkyLight event surface resolves, the ring follows
+WindowServer move/resize/order events directly, and without it the
+AX echoes drive it. Drawing never takes the private path — a
+SkyLight-drawn ring cannot bloom (#533) and stays over the Mission
+Control overview on macOS 27 (see the glow entry above). Direct mouse
 drags use one movement authority: WindowServer bounds whenever its event
 surface is active, otherwise the stable AX/AppKit fallback. No path
 projects a border from cursor motion, so macOS edge/corner dwell holds

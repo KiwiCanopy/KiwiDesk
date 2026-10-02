@@ -170,16 +170,7 @@ public final class BorderManager {
 
     /// Builds a ring overlay for `window` (#361, #367).
     func makeOverlay(for window: WindowID) -> BorderOverlay {
-        BorderOverlay(
-            window: window.raw,
-            order: activeOrder,
-            onFallback: { [weak self] reason in
-                self?.onLog(
-                    "border \(window.raw): \(reason); "
-                        + "using AppKit rendering"
-                )
-            }
-        )
+        BorderOverlay(window: window.raw, order: activeOrder)
     }
 
     /// Display containing majority of frame for pixel scaling (#449).
