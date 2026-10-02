@@ -47,12 +47,6 @@ final class ShelfManager {
     }
 
     private var overlays: [Key: ShelfOverlay] = [:]
-
-    /// Makes every overlay's next show draw (#1901); reached only
-    /// through `KiwiCore.invalidateBarRenders`.
-    func invalidateRenders() {
-        overlays.values.forEach { $0.invalidateRender() }
-    }
     /// The bars' context menus (#1518) — the one instance; Core
     /// sets its rows and hands it to both bar managers.
     let contextMenus = BarContextMenus()

@@ -29,7 +29,6 @@ extension KiwiCore {
     /// bars, whose refresh carries the issue.
     func fontSetDidChange() {
         BarFont.invalidate()
-        invalidateBarRenders()
         updateBars()
     }
 }

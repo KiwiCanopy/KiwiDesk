@@ -154,20 +154,24 @@ twice, was a question the user answered twice. The argument is
   managers' `sync(` to `KiwiCore+Shelf.swift`, and
   `ShelfDriverTests` drives the pair through it.
 - **A show whose input repeats draws nothing, so everything a
-  draw reads must be IN that input or reach the one
-  `KiwiCore.invalidateBarRenders()` (#1901).** A Space switch
-  refreshes the bars from its retile, its focus report and its
-  activation, and on the device each repeat cost a full render
-  (~46 ms) until the two bar overlays and the shelf compared the
-  input with what they last drew. The trap is a read the
-  comparison cannot see: Reduce transparency and the installed
-  fonts are read at draw time, so their observers invalidate
-  ahead of their `updateBars()`, and a new draw-time read joins
-  them rather than reading beside the input
-  (`BarRenderInvalidationSeamTests`, `BarRenderSkipTests`). Keep
-  the input comparable, which is why the bars' app icons come
-  from the one `BarIconCache`: a fresh `NSImage` per render never
-  compares equal and costs a LaunchServices round trip besides.
+  draw reads belongs IN the compared input — the shown value or
+  the one `BarDrawEnvironment` — and a path that moves views
+  outside `show` calls its overlay's `invalidateRender()` (#1901).**
+  A Space switch refreshes the bars from its retile, its focus
+  report and its activation, and on the device each repeat cost a
+  full render (~46 ms) until the two bar overlays and the shelf
+  compared what they were handed with what they last drew. A
+  draw-time read outside the input — Reduce transparency, the
+  installed fonts, the system accent, the UI language, the
+  primary screen's height the panel is flipped against — leaves
+  the old drawing standing, and a drag's hand-set frames survive
+  a refresh that repeats its input, which is why the drop
+  invalidates. Finding a NEW draw-time read is review's: the
+  suites hold the ones the environment carries and the drop
+  (`BarRenderSkipTests`). Keep the input comparable, which is why
+  the bars' app icons come from the one `BarIconCache`: a fresh
+  `NSImage` per read never compares equal and costs a
+  LaunchServices round trip besides.
 - **Stand a bar down through the one
   `KiwiCore.shelfStandsDown(on:)`**, read once per display in
   `updateBars()` for both bars — a native-fullscreen Space

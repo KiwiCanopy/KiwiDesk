@@ -77,12 +77,6 @@ public final class SpaceBarManager {
     var onStripReleased: @MainActor () -> Void = {}
 
     private var overlays: [DisplayID: SpaceBarOverlay] = [:]
-
-    /// Makes every overlay's next show draw (#1901); reached only
-    /// through `KiwiCore.invalidateBarRenders`.
-    func invalidateRenders() {
-        overlays.values.forEach { $0.invalidateRender() }
-    }
     /// Active visible bars painted on screen.
     private var shownBars: [Bar] = []
 

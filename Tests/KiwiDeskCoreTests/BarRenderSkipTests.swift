@@ -6,9 +6,10 @@ import Testing
 /// An identical show draws nothing (#1901): a Space switch, its
 /// focus report and its activation each refresh the bars, and the
 /// repeats cost a full render apiece. Each overlay skips a show
-/// whose input equals the last one drawn, draws a changed one, and
-/// draws again after `invalidateRender` — the door for a draw-time
-/// read outside the input.
+/// whose input and `BarDrawEnvironment` equal the last drawn,
+/// draws a changed one, draws again when the environment moves
+/// (the font set stands in for every field), and an App Bar drop
+/// puts its hand-set frames back though the refresh repeats.
 @Suite("Bar render skip (#1901)", .serialized)
 @MainActor
 struct BarRenderSkipTests {
@@ -67,7 +68,7 @@ struct BarRenderSkipTests {
         show("B")
         #expect(renders > first)
         let second = renders
-        overlay.invalidateRender()
+        BarFont.invalidate()
         show("B")
         #expect(renders > second)
     }
@@ -95,7 +96,7 @@ struct BarRenderSkipTests {
         show("2")
         #expect(renders > first)
         let second = renders
-        overlay.invalidateRender()
+        BarFont.invalidate()
         show("2")
         #expect(renders > second)
     }
@@ -127,8 +128,41 @@ struct BarRenderSkipTests {
         overlay.stripView.frame = .zero
         show()
         #expect(overlay.stripView.frame == .zero)
-        overlay.invalidateRender()
+        BarFont.invalidate()
         show()
         #expect(overlay.stripView.frame == laid)
+    }
+
+    @Test("A drop whose refresh repeats its input snaps the row back")
+    func dropSnapsBack() throws {
+        let overlay = AppBarOverlay()
+        var look = AppBarLook()
+        look.shelf.liquidGlass = false
+        func show() {
+            overlay.show(
+                items: Self.appItems("A"),
+                activeIndex: 0,
+                strip: Self.strip,
+                style: look,
+                capAxis: 2000
+            )
+        }
+        // A move the model refuses still refreshes, with the same
+        // input — a sticky traveler dragged past its neighbours.
+        overlay.onMove = { _, _ in show() }
+        show()
+        let view = try #require(overlay.itemViews.first)
+        let mover = overlay.draggableView(for: view)
+        let home = mover.frame
+        var dragged = home
+        dragged.origin.x = Self.strip.width - home.width
+        mover.frame = dragged
+        overlay.dragEnded(view)
+        #expect(mover.frame == home)
+        // And a drop nothing refreshes after snaps back too.
+        overlay.onMove = { _, _ in }
+        mover.frame = dragged
+        overlay.dragEnded(view)
+        #expect(mover.frame == home)
     }
 }

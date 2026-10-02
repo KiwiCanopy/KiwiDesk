@@ -45,12 +45,12 @@ extension AppBarOverlay {
             gap: m.gap,
             count: tiledCount
         )
-        if to == from {
-            // Nothing moved: snap the item back into line.
-            render(followingFocus: false)
-        } else {
-            onMove(from, to)
-        }
+        // The drag set frames by hand, so the refresh the move
+        // asks for must draw though its input repeats (#1901); a
+        // move that refreshes nothing is snapped back here.
+        invalidateRender()
+        if to != from { onMove(from, to) }
+        if drawnEnvironment == nil { render(followingFocus: false) }
     }
 
     /// The non-dragged items take the frames of the order

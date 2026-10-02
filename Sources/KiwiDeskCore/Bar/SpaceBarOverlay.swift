@@ -202,23 +202,23 @@ public final class SpaceBarOverlay {
         return tf
     }()
     let frontName = NSTextField(labelWithString: "")
-    var lastShown:
-        (
-            items: [Item],
-            frontApp: SpaceBarItemView.App?,
-            strip: CGRect,
-            style: SpaceBarLook,
-            stateMarkColors: StateMarkColors
-        )?
+    /// One show's input, compared whole to skip a repeat (#1901).
+    struct Shown: Equatable {
+        let items: [Item]
+        let frontApp: SpaceBarItemView.App?
+        let strip: CGRect
+        let style: SpaceBarLook
+        let stateMarkColors: StateMarkColors
+    }
 
-    /// Set by `invalidateRender`: the next show draws even if its
-    /// input repeats, for a draw-time read that moved (#1901).
-    private var renderStale = false
-    /// The Reduce transparency verdict the last draw read (#1374).
-    private var drawnGlass = false
+    var lastShown: Shown?
 
-    /// Makes the next show draw (#1901).
-    func invalidateRender() { renderStale = true }
+    /// What the last draw read beyond its input (#1901).
+    private var drawnEnvironment: BarDrawEnvironment?
+
+    /// Makes the next show draw though its input repeats — for a
+    /// path that moved views outside `show` (#1901).
+    func invalidateRender() { drawnEnvironment = nil }
 
     public init() {
         configureRoot()
@@ -244,23 +244,25 @@ public final class SpaceBarOverlay {
             hide()
             return
         }
+        let next = Shown(
+            items: items,
+            frontApp: frontApp,
+            strip: strip,
+            style: style,
+            stateMarkColors: stateMarkColors
+        )
         // An identical show draws nothing (#1901): the switch,
         // its focus report and its activation each refresh.
-        if isVisible, !renderStale, let last = lastShown,
-            last.items == items, last.frontApp == frontApp,
-            last.strip == strip, last.style == style,
-            last.stateMarkColors == stateMarkColors,
-            drawnGlass == LiquidGlassGate.drawsGlass
-        {
+        let environment = BarDrawEnvironment.current
+        if isVisible, lastShown == next, drawnEnvironment == environment {
             WorkMeter.shared.add(\.barShowsSkipped)
             return
         }
-        renderStale = false
-        drawnGlass = LiquidGlassGate.drawsGlass
+        drawnEnvironment = environment
         // A slot that moved or resized hands the motion to the
         // shelf's glide, so the chips land (#1838).
         let slotChanged = lastShown.map { $0.strip != strip } ?? false
-        lastShown = (items, frontApp, strip, style, stateMarkColors)
+        lastShown = next
         let active = items.first(where: \.active)?.space
         render(
             followingActive: follow.follows(active),

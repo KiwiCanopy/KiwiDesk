@@ -13,34 +13,18 @@ final class ShelfOverlay {
     /// A section to place: its view, its slot on the shelf in AX
     /// coordinates, and — in the view's own coordinates — the
     /// plate its run asks for and the span its run draws (#1779).
-    struct Section: Equatable {
+    struct Section {
         let view: NSView
         let slot: CGRect
         let plate: CGRect
         /// Zero falls back to the slot, so every site states it.
         let content: CGRect
-
-        static func == (a: Section, b: Section) -> Bool {
-            a.view === b.view && a.slot == b.slot && a.plate == b.plate
-                && a.content == b.content
-        }
     }
 
-    /// One show's whole input, compared to skip a re-lay of an
-    /// unchanged shelf (#1901).
-    private struct Drawn: Equatable {
-        let strip: CGRect
-        let edge: AppBarEdge
-        let shelf: KiwiShelf
-        let sheen: CGFloat
-        let sections: [Section]
-        let divider: ShelfArrangement.Divider?
-    }
-
-    /// The last input laid out; nil after `invalidateRender`.
+    /// The last input laid out.
     private var drawn: Drawn?
 
-    /// Makes the next show lay out (#1901).
+    /// Makes the next show lay out though its input repeats.
     func invalidateRender() { drawn = nil }
 
     private(set) var panel: NSPanel?
@@ -125,7 +109,9 @@ final class ShelfOverlay {
             shelf: shelf,
             sheen: sheen,
             sections: sections,
-            divider: range
+            divider: range,
+            primaryHeight: GeometryUtils.primaryHeight,
+            environment: .current
         )
         // A shown, settled shelf asked again for what it already
         // lays out moves nothing (#1901).

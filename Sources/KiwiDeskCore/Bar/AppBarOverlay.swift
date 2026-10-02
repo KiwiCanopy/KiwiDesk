@@ -31,11 +31,12 @@ public final class AppBarOverlay {
         let space: SpaceID?
     }
 
-    /// Set by `invalidateRender` (#1901), as the Space Bar's.
-    private var renderStale = false
+    /// What the last draw read beyond its input (#1901).
+    private(set) var drawnEnvironment: BarDrawEnvironment?
 
-    /// Makes the next show draw (#1901).
-    func invalidateRender() { renderStale = true }
+    /// Makes the next show draw though its input repeats — for a
+    /// path that moved views outside `show`, like a drag (#1901).
+    func invalidateRender() { drawnEnvironment = nil }
 
     /// The section's view; the shelf sets its origin, the
     /// section its size.
@@ -134,15 +135,13 @@ public final class AppBarOverlay {
             capAxis: capAxis,
             space: space
         )
-        // An identical show draws nothing (#1901); the drawn style
-        // carries the Reduce transparency verdict (#1374).
-        if isVisible, !renderStale, lastShown == next,
-            drawnStyle == LiquidGlassGate.rendered(style)
-        {
+        // An identical show draws nothing (#1901).
+        let environment = BarDrawEnvironment.current
+        if isVisible, lastShown == next, drawnEnvironment == environment {
             WorkMeter.shared.add(\.barShowsSkipped)
             return
         }
-        renderStale = false
+        drawnEnvironment = environment
         let appearing = lastShown == nil
         pendingLanding = appearing
         pendingDissolve = !appearing && lastShown?.space != space
