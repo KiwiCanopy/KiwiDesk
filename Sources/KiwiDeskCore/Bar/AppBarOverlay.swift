@@ -38,6 +38,12 @@ public final class AppBarOverlay {
     /// path that moved views outside `show`, like a drag (#1901).
     func invalidateRender() { drawnEnvironment = nil }
 
+    /// Redraws the shown input, recording what the draw read.
+    func redrawShown() {
+        drawnEnvironment = .current
+        render(followingFocus: false)
+    }
+
     /// The section's view; the shelf sets its origin, the
     /// section its size.
     let root = ShelfSectionRoot()

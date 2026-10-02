@@ -50,7 +50,7 @@ extension AppBarOverlay {
         // move that refreshes nothing is snapped back here.
         invalidateRender()
         if to != from { onMove(from, to) }
-        if drawnEnvironment == nil { render(followingFocus: false) }
+        if drawnEnvironment == nil { redrawShown() }
     }
 
     /// The non-dragged items take the frames of the order

@@ -216,10 +216,6 @@ public final class SpaceBarOverlay {
     /// What the last draw read beyond its input (#1901).
     private var drawnEnvironment: BarDrawEnvironment?
 
-    /// Makes the next show draw though its input repeats — for a
-    /// path that moved views outside `show` (#1901).
-    func invalidateRender() { drawnEnvironment = nil }
-
     public init() {
         configureRoot()
     }

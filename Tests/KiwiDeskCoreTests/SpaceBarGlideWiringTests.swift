@@ -45,7 +45,7 @@ struct SpaceBarGlideWiringTests {
         }
         // A steady pass repeats its input, which draws nothing
         // since #1901; force the draw it is here to classify.
-        if from == to { overlay.invalidateRender() }
+        if from == to { BarFont.invalidate() }
         var second = collapsedBar(
             content,
             active: to,

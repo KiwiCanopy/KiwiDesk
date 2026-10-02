@@ -24,9 +24,6 @@ final class ShelfOverlay {
     /// The last input laid out.
     private var drawn: Drawn?
 
-    /// Makes the next show lay out though its input repeats.
-    func invalidateRender() { drawn = nil }
-
     private(set) var panel: NSPanel?
 
     /// AppKit keeps a visible panel alive after its owner is gone,
