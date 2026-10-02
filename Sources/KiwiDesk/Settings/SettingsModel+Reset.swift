@@ -1,3 +1,4 @@
+import CoreFoundation
 import KiwiDeskCore
 
 /// Reset escape hatches for SettingsModel (#634, #1096).

@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import os
 
 /// Per-app AX observer ownership and rule-driven attachment.
 extension EventLoop {

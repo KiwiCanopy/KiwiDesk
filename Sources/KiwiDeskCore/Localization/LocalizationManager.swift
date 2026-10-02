@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 /// Locale lookup for user-facing GUI strings with inline English fallback

@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import os
 
 /// The bulk re-sync — every observed app against its live AX
 /// window list — and the WindowServer gate that keeps it off

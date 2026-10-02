@@ -231,10 +231,10 @@ struct SocketTests {
     }
 
     /// The listener binds asynchronously, so connecting retries
-    /// until it answers. `nonisolated` because a client must
+    /// until it answers. `@concurrent` because a client must
     /// never be held on the main actor: its reads block, and the
     /// server it is waiting on processes on the main queue.
-    private nonisolated static func connect(
+    @concurrent private nonisolated static func connect(
         to path: String
     ) async throws -> SocketClient {
         let deadline = Date().addingTimeInterval(

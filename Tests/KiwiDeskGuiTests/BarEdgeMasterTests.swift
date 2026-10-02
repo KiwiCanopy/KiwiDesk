@@ -1,5 +1,6 @@
 import Foundation
 import KiwiDeskCore
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk

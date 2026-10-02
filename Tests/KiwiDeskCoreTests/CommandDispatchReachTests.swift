@@ -262,9 +262,9 @@ struct CommandDispatchReachTests {
         return url
     }
 
-    /// `async` and nonisolated so the read runs off the main
-    /// actor rather than inside this suite's spend.
-    private nonisolated static func source(
+    /// `@concurrent` so the read runs off the main actor rather
+    /// than inside this suite's spend.
+    @concurrent private nonisolated static func source(
         _ path: String
     ) async throws -> String {
         try String(
@@ -275,6 +275,7 @@ struct CommandDispatchReachTests {
 
     /// Every `"unknown <words>: ` literal under Core, as the
     /// prefix the predicate matches on.
+    @concurrent
     private nonisolated static func unknownLiterals() async throws
         -> Set<String>
     {

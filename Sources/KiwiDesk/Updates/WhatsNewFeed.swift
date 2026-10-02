@@ -49,8 +49,9 @@ enum WhatsNewFeed {
     }
 
     /// One GET; nil when offline or refused — "What's new" then
-    /// stays owed until a later launch.
-    static func fetch(_ url: URL) async -> [Item]? {
+    /// stays owed until a later launch. Off the main actor: it
+    /// decodes the feed.
+    @concurrent static func fetch(_ url: URL) async -> [Item]? {
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
         guard

@@ -668,6 +668,16 @@ local check — off the Build step's. What the ratchet does NOT
 reach is worth stating once: `-Xswiftc` is swiftc's, so
 `Vendor/`'s C stays clang's.
 
+**Every ratcheted step runs through `scripts/warning-gate`
+(#1780).** `-warnings-as-errors` cannot promote an isolation a
+type inherits from an SDK class (`NSView`): it stays a warning
+and lands green. The gate fails on any `.swift` warning left in
+the output outside the groups the wrapped command itself
+downgrades with `-Wwarning`, so the exemption is never a second
+list. `WarningGateTests` holds the behaviour and the wiring, and
+the release step refuses the gate as it refuses the flag
+(`WarningRatchetWorkflowTests` ▸ `releaseStepIsExempt`).
+
 **`ci.yml` filters by exclusion; `site.yml` filters by
 inclusion.** Keep it that way. The site build's inputs are a
 closed, small set, so naming them is safe. The app's are open, and

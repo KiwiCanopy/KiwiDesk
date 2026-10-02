@@ -75,8 +75,11 @@ struct NextOnMyList: Codable, Equatable {
     }
 
     /// One GET; nil when offline, refused or unreadable, which
-    /// only leaves the card out.
-    static func fetch(besideFeed feed: URL) async -> NextOnMyList? {
+    /// only leaves the card out. Off the main actor: it decodes
+    /// the list.
+    @concurrent static func fetch(
+        besideFeed feed: URL
+    ) async -> NextOnMyList? {
         var request = URLRequest(url: url(besideFeed: feed))
         request.cachePolicy = .reloadIgnoringLocalCacheData
         // What's new waits on this before it opens.

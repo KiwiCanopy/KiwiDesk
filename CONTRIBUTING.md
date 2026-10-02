@@ -14,7 +14,7 @@ swift build
 swift test
 ```
 
-Requirements: macOS 14+, Xcode 16+ (Swift 6).
+Requirements: Xcode 27+ (Swift 6.4); the app runs on macOS 14+.
 
 ## Ground Rules
 

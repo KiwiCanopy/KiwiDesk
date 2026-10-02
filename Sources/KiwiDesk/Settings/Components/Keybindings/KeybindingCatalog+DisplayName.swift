@@ -1,3 +1,4 @@
+import CoreFoundation
 import KiwiDeskCore
 
 /// Localized display name resolution for stored keybinding labels (#96).

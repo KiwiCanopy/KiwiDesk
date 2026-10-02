@@ -1,0 +1,61 @@
+#!/bin/bash
+# Run a ratcheted build or test command, then fail on any Swift
+# compiler warning left in its output outside the groups the
+# command itself downgrades with `-Wwarning <Group>` (#1780), so
+# the exemption is never a second list. `-warnings-as-errors`
+# cannot promote an isolation a type inherits from an SDK class
+# (`NSView`), so those reach the output as warnings and would
+# land green (packaging-and-release.md ▸ the ratchet).
+#
+# Only `.swift` diagnostics count: Vendor/'s C is clang's, which
+# the ratchet does not reach. A cached build re-emits nothing,
+# so a local run proves only what it compiled.
+#
+# Usage: scripts/warning-gate <command ...>
+set -uo pipefail
+
+if [ "$#" -eq 0 ]; then
+    echo "usage: scripts/warning-gate <command ...>" >&2
+    exit 64
+fi
+
+LOG="$(mktemp -t warning-gate)"
+trap 'rm -f "$LOG"' EXIT
+
+"$@" 2>&1 | tee "$LOG"
+STATUS=${PIPESTATUS[0]}
+if [ "$STATUS" -ne 0 ]; then
+    exit "$STATUS"
+fi
+
+# The groups this command downgrades: each word after -Wwarning,
+# matched as the tag that ends a diagnostic, never as text in it.
+EXEMPT=()
+PREVIOUS=""
+for ARG in "$@"; do
+    [ "$ARG" = "-Xswiftc" ] && continue
+    [ "$PREVIOUS" = "-Wwarning" ] && EXEMPT+=("-e\[#$ARG\]\$")
+    PREVIOUS="$ARG"
+done
+exempted() {
+    if [ "${#EXEMPT[@]}" -eq 0 ]; then
+        cat
+    else
+        grep -v "${EXEMPT[@]}"
+    fi
+}
+
+# Strip colour and hyperlink escapes, which a terminal run adds
+# around the warning and its `[#Group]` tag.
+LEFT="$(
+    perl -pe 's/\e\[[0-9;]*m//g; s/\e\]8;;.*?\e\\//g' "$LOG" |
+        grep -E '^.+\.swift:[0-9]+:[0-9]+: warning:' |
+        exempted |
+        sort -u
+)"
+if [ -n "$LEFT" ]; then
+    echo "==> warning-gate: compiler warnings the ratchet" \
+        "did not promote (#1780):" >&2
+    echo "$LEFT" >&2
+    exit 1
+fi

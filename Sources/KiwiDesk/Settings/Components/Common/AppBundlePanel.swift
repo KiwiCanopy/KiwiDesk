@@ -1,5 +1,6 @@
 import AppKit
 import KiwiDeskCore
+import UniformTypeIdentifiers
 
 /// The "Other…" escape both app pickers share (#1279).
 ///

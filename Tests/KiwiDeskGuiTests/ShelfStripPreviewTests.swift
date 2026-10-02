@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import KiwiDeskCore
 import Testing
 

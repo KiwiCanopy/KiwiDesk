@@ -1,5 +1,6 @@
 import AppKit
 import KiwiDeskCore
+import UniformTypeIdentifiers
 
 /// Cache for downsized application icons (#263, `InstalledApp`,
 /// `AppRuleIdentity`).

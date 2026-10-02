@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import os
 
 /// Coming up: the machine wiring `start()` arms, the chunked scan
 /// that hands the run loop back between apps (#801), the

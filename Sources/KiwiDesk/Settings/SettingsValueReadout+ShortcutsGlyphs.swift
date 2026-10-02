@@ -1,3 +1,4 @@
+import CoreFoundation
 import KiwiDeskCore
 
 /// Shortcut action label resolution and glyph rendering for settings readout

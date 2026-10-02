@@ -209,14 +209,18 @@ struct WarningRatchetWorkflowTests {
             "Build (release)",
             in: try ci()
         )
-        #expect(
-            !step.contains("-warnings-as-errors"),
-            """
-            the release build must not ratchet: a new \
-            toolchain's diagnostics would block a release \
-            (packaging-and-release.md)
-            """
-        )
+        // Both spellings of the ratchet: the flag, and the gate
+        // that fails on what the flag cannot promote (#1780).
+        for spelling in ["-warnings-as-errors", "warning-gate"] {
+            #expect(
+                !step.contains(spelling),
+                """
+                the release build must not ratchet (\(spelling)): \
+                a new toolchain's diagnostics would block a \
+                release (packaging-and-release.md)
+                """
+            )
+        }
     }
 
     /// The downgrade is an EXEMPTION, so it is held to the

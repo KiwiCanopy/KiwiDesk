@@ -3,7 +3,7 @@ import AppKit
 /// Slot layout implementation for `SpaceBarItemView`.
 extension SpaceBarItemView {
     /// Cross-axis padding inside the slot.
-    static let pad: CGFloat = 4
+    nonisolated static let pad: CGFloat = 4
 
     /// The item's depth across the shelf.
     var depth: CGFloat { horizontal ? bounds.height : bounds.width }

@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// Snapshot restore: replays saved state after wake/unlock, a
 /// crash, or a restart. Split from `KiwiCore+Events.swift` (event

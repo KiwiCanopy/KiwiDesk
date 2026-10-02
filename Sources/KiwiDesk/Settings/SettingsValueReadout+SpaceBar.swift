@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import KiwiDeskCore
 
 /// Diff row readout generators for SpaceBarStyle census keys.

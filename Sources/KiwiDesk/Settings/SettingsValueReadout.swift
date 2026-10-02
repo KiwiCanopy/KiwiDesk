@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import KiwiDeskCore
 
 /// Formats changed settings keys into diff rows for draft

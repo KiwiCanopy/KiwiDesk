@@ -1,3 +1,4 @@
+import KiwiDeskCore
 import SwiftUI
 
 /// Spaces & Layouts home card tile illustration with layered mini-desktops.
