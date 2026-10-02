@@ -48,9 +48,21 @@ extension AppBarOverlay {
         // The drag set frames by hand, so the refresh the move
         // asks for must draw though its input repeats (#1901); a
         // move that refreshes nothing is snapped back here.
+        let before = draws
         invalidateRender()
         if to != from { onMove(from, to) }
-        if drawnEnvironment == nil { redrawShown() }
+        if draws == before { redrawShown() }
+    }
+
+    /// Makes the next show draw though its input repeats — for a
+    /// path that leaves views where a draw of the same input
+    /// would not put them, which a drop is (#1901).
+    func invalidateRender() { drawnEnvironment = nil }
+
+    /// Redraws the shown input, recording what the draw read.
+    func redrawShown() {
+        drawnEnvironment = .current
+        render(followingFocus: false)
     }
 
     /// The non-dragged items take the frames of the order

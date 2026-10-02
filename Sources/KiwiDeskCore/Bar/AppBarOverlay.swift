@@ -32,17 +32,9 @@ public final class AppBarOverlay {
     }
 
     /// What the last draw read beyond its input (#1901).
-    private(set) var drawnEnvironment: BarDrawEnvironment?
-
-    /// Makes the next show draw though its input repeats — for a
-    /// path that moved views outside `show`, like a drag (#1901).
-    func invalidateRender() { drawnEnvironment = nil }
-
-    /// Redraws the shown input, recording what the draw read.
-    func redrawShown() {
-        drawnEnvironment = .current
-        render(followingFocus: false)
-    }
+    var drawnEnvironment: BarDrawEnvironment?
+    /// Counts draws, so a drop can tell whether its move drew.
+    private(set) var draws = 0
 
     /// The section's view; the shelf sets its origin, the
     /// section its size.
@@ -179,6 +171,7 @@ public final class AppBarOverlay {
     /// it isn't immediately snapped back.
     func render(followingFocus: Bool) {
         guard let state = lastShown else { return }
+        draws += 1
         let items = state.items
         let activeIndex = state.activeIndex
         let strip = state.strip

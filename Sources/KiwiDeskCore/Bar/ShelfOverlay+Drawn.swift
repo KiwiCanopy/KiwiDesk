@@ -12,6 +12,8 @@ extension ShelfOverlay {
         let divider: ShelfArrangement.Divider?
         /// The panel's Cocoa frame is flipped against it.
         let primaryHeight: CGFloat
+        /// Its glass bit repeats `shelf`'s, which arrives already
+        /// gated; kept whole so every overlay compares one value.
         let environment: BarDrawEnvironment
     }
 }
