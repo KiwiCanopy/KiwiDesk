@@ -226,7 +226,7 @@ const de: LegalStrings = {
   },
   nutzungsbedingungen: {
     title: "Nutzungsbedingungen",
-    updated: "13. September 2026",
+    updated: "2. Oktober 2026",
     sections: [
       {
         title: "1. Geltungsbereich",
@@ -467,7 +467,7 @@ const en: LegalStrings = {
   },
   nutzungsbedingungen: {
     title: "Terms of Service",
-    updated: "13 September 2026",
+    updated: "2 October 2026",
     sections: [
       {
         title: "1. Scope",
@@ -584,8 +584,8 @@ const ja: LegalStrings = {
           `本ウェブサイトはその情報・ドキュメントサイト（マーケティング用トップページおよび ` +
           `ドキュメント）です。ユーザーアカウント、ログイン、問い合わせフォーム、決済処理、解析・ ` +
           `トラッキングサービスはいずれもありません。KiwiDesk アプリ本体は GitHub で配布されており、 ` +
-          `本プライバシーポリシーは本ウェブサイトのみを対象とします。個人データは、ウェブサイトを ` +
-          `配信するために技術的に避けられない範囲でのみ処理されます（「ホスティング」参照）。メールでお問い合わせいただいた場合は第6項をご参照ください。</p>`,
+          `本プライバシーポリシーは本ウェブサイトのみを対象とします。個人データは、ウェブサイトの ` +
+          `配信に技術的に避けられない範囲（「ホスティング」参照）と、メールでお問い合わせいただいた場合（第6項）にのみ処理されます。</p>`,
       },
       {
         title: "2. 責任者",
@@ -688,7 +688,7 @@ const ja: LegalStrings = {
   },
   nutzungsbedingungen: {
     title: "利用規約",
-    updated: "2026年9月13日",
+    updated: "2026年10月2日",
     sections: [
       {
         title: "1. 適用範囲",
