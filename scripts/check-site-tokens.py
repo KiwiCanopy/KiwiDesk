@@ -49,6 +49,9 @@ count in this sentence for the next author to falsify.
 7. The "Next on my list" file is served where the app fetches it,
    in a format the app reads (#1813). Artifact-read, with the name
    and the formats read off the app's own Swift source.
+8. Every built page declares a raster favicon. Google Search takes
+   no SVG favicon, so a head carrying only `/favicon.svg` shows a
+   generic icon in results on a green build.
 
 KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
 as a net for ordinary edits rather than proof. `CONSUMERS` names the
@@ -1388,6 +1391,28 @@ def check_roadmap_feed(dist: pathlib.Path) -> None:
     )
 
 
+def check_raster_favicon(dist: pathlib.Path) -> None:
+    """Every built page links a PNG favicon, not only the SVG.
+
+    Google Search's favicon guidelines list BMP, GIF, ICO, PNG, JPEG,
+    PPM and TIFF and no SVG (observed 2026-10-02), so the PNG is what
+    search results show. The hand-written heads take it from
+    `FaviconLinks.astro`, the docs from Starlight's `head` config; a
+    new head that copies the old bare SVG link passes everything else.
+    """
+    icon = re.compile(r"<link\b[^>]*\brel=\"icon\"[^>]*\btype=\"image/png\"")
+    pages = sorted(dist.rglob("*.html"))
+    missing = [p for p in pages if not icon.search(p.read_text())]
+    if missing:
+        listed = ", ".join(str(p.relative_to(dist)) for p in missing[:5])
+        fail(
+            f"{len(missing)} built page(s) declare no PNG favicon "
+            f"(e.g. {listed}). Use FaviconLinks.astro in a hand-written "
+            "head; Google Search shows no SVG favicon."
+        )
+    print(f"raster favicon: declared on all {len(pages)} built page(s)")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1411,6 +1436,7 @@ def main() -> None:
     check_unreleased_markers(dist)
     check_typed_changelog(dist)
     check_roadmap_feed(dist)
+    check_raster_favicon(dist)
 
 
 if __name__ == "__main__":

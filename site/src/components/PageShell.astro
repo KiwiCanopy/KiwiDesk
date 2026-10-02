@@ -14,6 +14,7 @@
 // - Theme toggle & language persistence scripts
 import "../styles/landing.css";
 import ThemeHead from "./ThemeHead.astro";
+import FaviconLinks from "./FaviconLinks.astro";
 import logoMark from "../assets/brand/logo.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
@@ -102,7 +103,7 @@ const makerProfile = "https://github.com/hajiboy95";
         set:html={JSON.stringify(jsonLd)}></script>
     )}
     <ThemeHead />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <FaviconLinks />
     <link rel="alternate" hreflang="en" href={`${site}${localePath("en", slug)}`} />
     <link rel="alternate" hreflang="de" href={`${site}${localePath("de", slug)}`} />
     <link rel="alternate" hreflang="ja" href={`${site}${localePath("ja", slug)}`} />

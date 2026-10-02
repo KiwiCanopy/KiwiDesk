@@ -15,6 +15,7 @@
 // shared with kiwicanopy.com — the marketing-site face of the
 // brand. KiwiCV keeps its own compass NotFound on purpose.
 import ThemeHead from "../components/ThemeHead.astro";
+import FaviconLinks from "../components/FaviconLinks.astro";
 import logoMark from "../assets/brand/logo.svg";
 import en from "../i18n/en.json";
 import de from "../i18n/de.json";
@@ -40,7 +41,7 @@ const alts = [
          every unmatched path renders this same body, so any
          canonical we named would be a lie about one of them. */}
     <meta name="robots" content="noindex, follow" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <FaviconLinks />
     {/* Theme color + the anti-FOUC resolver. This page needs no
          mode or language state of its own, so ThemeHead is the
          whole of its client-side setup. */}

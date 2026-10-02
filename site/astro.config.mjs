@@ -81,6 +81,12 @@ export default defineConfig({
       // kiwi green, so there is no light/dark pair to declare.
       logo: { src: "./src/assets/brand/logo.svg" },
       favicon: "/favicon.svg",
+      // The raster pair FaviconLinks.astro adds to the hand-written pages;
+      // Google Search shows no SVG favicon.
+      head: [
+        { tag: "link", attrs: { rel: "icon", href: "/favicon.png", type: "image/png", sizes: "96x96" } },
+        { tag: "link", attrs: { rel: "apple-touch-icon", href: "/apple-touch-icon.png" } },
+      ],
       social: [
         {
           icon: "github",

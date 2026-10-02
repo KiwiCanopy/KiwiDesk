@@ -31,6 +31,7 @@
 import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
 import ThemeHead from "./ThemeHead.astro";
+import FaviconLinks from "./FaviconLinks.astro";
 import logoMark from "../assets/brand/logo.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
@@ -319,7 +320,7 @@ const jsonLd = [
     <meta name="twitter:description" content={s.guide_meta_desc} />
     <meta name="twitter:image" content={ogImageURL} />
     <ThemeHead />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <FaviconLinks />
     <link rel="alternate" hreflang="en" href={enURL} />
     <link rel="alternate" hreflang="de" href={deURL} />
     <link rel="alternate" hreflang="ja" href={jaURL} />
