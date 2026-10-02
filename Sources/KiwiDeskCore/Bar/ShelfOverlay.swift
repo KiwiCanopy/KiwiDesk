@@ -13,13 +13,35 @@ final class ShelfOverlay {
     /// A section to place: its view, its slot on the shelf in AX
     /// coordinates, and — in the view's own coordinates — the
     /// plate its run asks for and the span its run draws (#1779).
-    struct Section {
+    struct Section: Equatable {
         let view: NSView
         let slot: CGRect
         let plate: CGRect
         /// Zero falls back to the slot, so every site states it.
         let content: CGRect
+
+        static func == (a: Section, b: Section) -> Bool {
+            a.view === b.view && a.slot == b.slot && a.plate == b.plate
+                && a.content == b.content
+        }
     }
+
+    /// One show's whole input, compared to skip a re-lay of an
+    /// unchanged shelf (#1901).
+    private struct Drawn: Equatable {
+        let strip: CGRect
+        let edge: AppBarEdge
+        let shelf: KiwiShelf
+        let sheen: CGFloat
+        let sections: [Section]
+        let divider: ShelfArrangement.Divider?
+    }
+
+    /// The last input laid out; nil after `invalidateRender`.
+    private var drawn: Drawn?
+
+    /// Makes the next show lay out (#1901).
+    func invalidateRender() { drawn = nil }
 
     private(set) var panel: NSPanel?
 
@@ -97,6 +119,21 @@ final class ShelfOverlay {
             hide(animated: true)
             return
         }
+        let next = Drawn(
+            strip: strip,
+            edge: edge,
+            shelf: shelf,
+            sheen: sheen,
+            sections: sections,
+            divider: range
+        )
+        // A shown, settled shelf asked again for what it already
+        // lays out moves nothing (#1901).
+        if panel?.isVisible == true, leaving == nil, drawn == next {
+            WorkMeter.shared.add(\.shelfShowsSkipped)
+            return
+        }
+        drawn = next
         let panel = self.panel ?? makePanel()
         self.panel = panel
         // A shelf appearing fades in where it lands; one already on

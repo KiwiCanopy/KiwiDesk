@@ -50,6 +50,12 @@ public final class AppBarManager {
     }
 
     private var overlays: [DisplayID: AppBarOverlay] = [:]
+
+    /// Makes every overlay's next show draw (#1901); reached only
+    /// through `KiwiCore.invalidateBarRenders`.
+    func invalidateRenders() {
+        overlays.values.forEach { $0.invalidateRender() }
+    }
     /// The Reduce transparency observer `KiwiCore` wires in
     /// `start()` for BOTH bars (#1374); homed here rather than on
     /// `KiwiCore`, whose file sits at the §2.1 ceiling.

@@ -173,11 +173,7 @@ extension KiwiCore {
                 appName: name,
                 style: style
             ),
-            icon: window.flatMap {
-                NSRunningApplication(
-                    processIdentifier: $0.pid
-                )?.icon
-            },
+            icon: window.flatMap { BarIconCache.icon(pid: $0.pid) },
             // Nil (source wants images / map still loading /
             // no glyph / font absent) falls back to the
             // native image in the item view.

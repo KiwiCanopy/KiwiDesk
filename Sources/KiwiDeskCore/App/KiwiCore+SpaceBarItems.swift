@@ -142,9 +142,7 @@ extension KiwiCore {
             let member = state.windows[first]
         else { return nil }
         let name = member.appName
-        let icon = NSRunningApplication(
-            processIdentifier: member.pid
-        )?.icon
+        let icon = BarIconCache.icon(pid: member.pid)
         var glyph = appFont.glyph(
             forAppName: name,
             source: style.iconSource

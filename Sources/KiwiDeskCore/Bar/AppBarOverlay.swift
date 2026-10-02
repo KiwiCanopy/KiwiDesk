@@ -20,7 +20,7 @@ public final class AppBarOverlay {
     }
 
     /// Cached inputs from last `show()` for manual arrow scrolling.
-    struct RenderState {
+    struct RenderState: Equatable {
         let items: [Item]
         let activeIndex: Int?
         let strip: CGRect
@@ -30,6 +30,12 @@ public final class AppBarOverlay {
         /// row (#1838).
         let space: SpaceID?
     }
+
+    /// Set by `invalidateRender` (#1901), as the Space Bar's.
+    private var renderStale = false
+
+    /// Makes the next show draw (#1901).
+    func invalidateRender() { renderStale = true }
 
     /// The section's view; the shelf sets its origin, the
     /// section its size.
@@ -120,10 +126,7 @@ public final class AppBarOverlay {
             hide()
             return
         }
-        let appearing = lastShown == nil
-        pendingLanding = appearing
-        pendingDissolve = !appearing && lastShown?.space != space
-        lastShown = RenderState(
+        let next = RenderState(
             items: items,
             activeIndex: activeIndex,
             strip: strip,
@@ -131,6 +134,19 @@ public final class AppBarOverlay {
             capAxis: capAxis,
             space: space
         )
+        // An identical show draws nothing (#1901); the drawn style
+        // carries the Reduce transparency verdict (#1374).
+        if isVisible, !renderStale, lastShown == next,
+            drawnStyle == LiquidGlassGate.rendered(style)
+        {
+            WorkMeter.shared.add(\.barShowsSkipped)
+            return
+        }
+        renderStale = false
+        let appearing = lastShown == nil
+        pendingLanding = appearing
+        pendingDissolve = !appearing && lastShown?.space != space
+        lastShown = next
         let focus = activeIndex.flatMap {
             items.indices.contains($0) ? items[$0].id : nil
         }

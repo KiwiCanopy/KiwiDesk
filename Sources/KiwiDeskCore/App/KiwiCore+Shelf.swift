@@ -120,6 +120,16 @@ extension KiwiCore {
         retireDepartedBars(live: Set(displays.map(\.id)))
     }
 
+    /// The one door that makes every bar overlay and shelf draw
+    /// on the next refresh although its input repeats (#1901) —
+    /// for a draw-time read outside the shown input, like Reduce
+    /// transparency or the installed fonts.
+    func invalidateBarRenders() {
+        appBars.invalidateRenders()
+        spaceBars.invalidateRenders()
+        shelves.invalidateRenders()
+    }
+
     /// Drops the bar overlays of displays outside `live` — after the
     /// shelves are synced, so a departed display whose shelf is
     /// still fading is spared until that fade lands: dropped

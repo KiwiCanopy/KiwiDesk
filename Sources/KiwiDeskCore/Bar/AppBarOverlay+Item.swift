@@ -48,3 +48,6 @@ extension AppBarOverlay {
         }
     }
 }
+
+/// Compared by `show` to skip an identical draw (#1901).
+extension AppBarOverlay.Item: Equatable {}

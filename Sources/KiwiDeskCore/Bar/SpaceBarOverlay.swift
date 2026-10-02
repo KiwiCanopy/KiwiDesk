@@ -211,6 +211,15 @@ public final class SpaceBarOverlay {
             stateMarkColors: StateMarkColors
         )?
 
+    /// Set by `invalidateRender`: the next show draws even if its
+    /// input repeats, for a draw-time read that moved (#1901).
+    private var renderStale = false
+    /// The Reduce transparency verdict the last draw read (#1374).
+    private var drawnGlass = false
+
+    /// Makes the next show draw (#1901).
+    func invalidateRender() { renderStale = true }
+
     public init() {
         configureRoot()
     }
@@ -235,6 +244,19 @@ public final class SpaceBarOverlay {
             hide()
             return
         }
+        // An identical show draws nothing (#1901): the switch,
+        // its focus report and its activation each refresh.
+        if isVisible, !renderStale, let last = lastShown,
+            last.items == items, last.frontApp == frontApp,
+            last.strip == strip, last.style == style,
+            last.stateMarkColors == stateMarkColors,
+            drawnGlass == LiquidGlassGate.drawsGlass
+        {
+            WorkMeter.shared.add(\.barShowsSkipped)
+            return
+        }
+        renderStale = false
+        drawnGlass = LiquidGlassGate.drawsGlass
         // A slot that moved or resized hands the motion to the
         // shelf's glide, so the chips land (#1838).
         let slotChanged = lastShown.map { $0.strip != strip } ?? false
@@ -283,3 +305,6 @@ public final class SpaceBarOverlay {
         }
     }
 }
+
+/// Compared by `show` to skip an identical draw (#1901).
+extension SpaceBarOverlay.Item: Equatable {}

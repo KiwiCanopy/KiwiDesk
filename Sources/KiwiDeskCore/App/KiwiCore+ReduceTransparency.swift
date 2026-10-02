@@ -26,6 +26,7 @@ extension KiwiCore {
     /// The observer body: both bars from their drivers, then the
     /// sticky marks.
     func reduceTransparencyDidChange() {
+        invalidateBarRenders()
         updateBars()
         updateStickyMarks()
     }
