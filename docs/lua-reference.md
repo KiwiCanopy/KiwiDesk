@@ -3095,9 +3095,9 @@ KiwiDesk draws a thin border around the focused window. It is
 `border.set_unfocused_enabled` adds one on every other window.
 The border is a pure overlay: it never changes where windows
 tile (no gap coupling), and the configured width is the
-thickness drawn outward into the gap. It is pinned to its
-window's stacking level, so popovers, sheets, and other windows
-the system places above the target stay above its border.
+thickness drawn outward into the gap. It is stacked directly
+against its window, so popovers, sheets, and other windows the
+system places above the target stay above its border.
 Overflow piles and monocle show a border only on the visible top
 window.
 
@@ -3203,10 +3203,12 @@ the bloom is a **brightened** derivative of `focused_color`, so
 set only `focused_color` and the glow follows. Its reach
 **scales with the border width**, clamped to a legible band, so
 a hairline border gets a subtle rim and a thick one a
-proportional aura — override it with `set_glow_size` below. A
-glowing ring renders on the behind-order renderer, so
-`draw_order("front")` is inert while glow is on (see
-[Accepted limitations](accepted-limitations.md)).
+proportional aura — override it with `set_glow_size` below.
+
+:::unreleased
+A glowing ring keeps the `draw_order` you chose, `"front"`
+included.
+:::
 
 The bloom counts as part of the ring's reach: `border.fit_gaps`
 sizes for it, and a floating window keeps that much off bars and
@@ -3282,11 +3284,6 @@ shadowless hairline — but can flicker on windows that repaint
 rapidly (Firefox/Zen and other Gecko browsers emit a compositor
 reorder on every keystroke). Lua-only, with no GUI control.
 Changing it re-draws every border immediately.
-
-While `border.glow` is on, the focused ring renders on the
-behind-order renderer regardless of this setting — `"front"`
-takes effect again the moment glow turns off (see
-[Accepted limitations](accepted-limitations.md)).
 
 **Example:**
 

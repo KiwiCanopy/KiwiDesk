@@ -57,6 +57,10 @@ public final class BorderManager {
     /// every developer Mac, so without a lever they are
     /// unobservable.
     var windowServerTrackingDisabled = false
+    /// A front-order ring's read of its target's window level,
+    /// live by default; a test core pins it (#1868).
+    var windowLevel: (CGWindowID) -> Int? =
+        AppKitBorderOverlay.windowLayer
     var reportedTrackingActive: Bool?
     var onLog: @MainActor (String) -> Void = CoreLog.write
     /// True while local animation drives this window (#594).
@@ -173,12 +177,7 @@ public final class BorderManager {
         BorderOverlay(
             window: window.raw,
             order: activeOrder,
-            onFallback: { [weak self] reason in
-                self?.onLog(
-                    "border \(window.raw): \(reason); "
-                        + "using AppKit rendering"
-                )
-            }
+            levelOf: windowLevel
         )
     }
 

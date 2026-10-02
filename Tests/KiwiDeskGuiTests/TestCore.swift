@@ -68,6 +68,9 @@ func makeTestCore(
     // states the read itself.
     core.monocleFlip.reduceMotion = { true }
     core.borders.windowServerTrackingDisabled = false
+    // A front-order ring reads its target's level from WindowServer
+    // on every sync otherwise (#1868).
+    core.borders.windowLevel = { _ in nil }
     // `prepare_restart` reads the developer's real LaunchAgent
     // plist otherwise (#930); a suite that means one injects it.
     core.inPlaceRestart.serviceProgram = { nil }

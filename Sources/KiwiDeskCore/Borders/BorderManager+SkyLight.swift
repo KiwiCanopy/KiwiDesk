@@ -96,7 +96,6 @@ extension BorderManager {
             return
         }
         let wanted = borderWanted.union(markTracked)
-        let wasActive = skyLightActive
         if windowServerTrackingDisabled {
             skyLightActive = false
         } else {
@@ -110,11 +109,6 @@ extension BorderManager {
         if reportedTrackingActive != skyLightActive {
             reportedTrackingActive = skyLightActive
             onLog(trackingStatusMessage)
-        }
-        if wasActive, !skyLightActive {
-            for overlay in overlays.values {
-                overlay.useAppKitFallback()
-            }
         }
     }
 
