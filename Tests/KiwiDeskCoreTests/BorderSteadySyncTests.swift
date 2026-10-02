@@ -35,6 +35,7 @@ struct BorderSteadySyncTests {
     @Test("A sync mid-animation holds the last commanded frame")
     func syncHoldsFrameWhileAnimating() {
         let border = BorderManager()
+        border.restack = { _, _, _ in false }
         border.sync([spec(1, frame: start)])
         border.isAnimating = { _ in true }
         // The ring rides the tick out to the target...
@@ -59,6 +60,7 @@ struct BorderSteadySyncTests {
     @Test("Only geometry stands down — sync still recolors")
     func syncStillRecolorsWhileAnimating() {
         let border = BorderManager()
+        border.restack = { _, _, _ in false }
         border.sync([spec(1, frame: start)])
         border.isAnimating = { _ in true }
         border.follow(
@@ -78,6 +80,7 @@ struct BorderSteadySyncTests {
     @Test("A ring created mid-animation takes the spec frame")
     func newRingMidAnimationUsesSpec() {
         let border = BorderManager()
+        border.restack = { _, _, _ in false }
         border.isAnimating = { _ in true }
         // No held frame to prefer — one tick behind beats no ring.
         border.sync([spec(2, frame: stale)])
@@ -87,6 +90,7 @@ struct BorderSteadySyncTests {
     @Test("Retirement is unaffected mid-animation")
     func retirementUnaffectedWhileAnimating() {
         let border = BorderManager()
+        border.restack = { _, _, _ in false }
         border.sync([spec(1, frame: start), spec(2, frame: stale)])
         border.isAnimating = { _ in true }
         border.sync([spec(1, frame: start)])
@@ -158,7 +162,7 @@ struct StickyMarkSteadySyncTests {
         // permanently, `sync` being the steady-state path.
         //
         // This test lives on the MARK, not the ring, and that
-        // asymmetry is the point. `BorderManager.sync` opens with
+        // asymmetry is the point. `BorderManager.sync` ends with
         // `updateSkyLightSubscription`, which recomputes
         // `skyLightActive` from scratch — so a ring-side version
         // of this test reads `false` no matter what it set, and

@@ -5,6 +5,7 @@ paths:
   # scoping this file to Borders/ alone would mean it never loads
   # for the exact file where someone would re-merge the two keys.
   - "Sources/KiwiDeskCore/App/KiwiCore+Borders.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+BorderSettle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
   - "Sources/KiwiDeskCore/App/DeferredTasks.swift"
@@ -62,7 +63,7 @@ frame is the leading truth — every other channel trails it, by
 | `follow(.animationTick)` | always applies — it *is* the truth. One correction (#677): when the animation's target re-asks a size the app has twice refused, the tick renders the commanded origin at the learned answer (`SizePin`, computed by `TilingEngine.animationSizePin` — from the confirmed bound, or provisionally from the first refusal's candidate, because a render self-corrects at settle while geometry must stay confirmed-only), because the window performs our position sets and refuses the size — `FollowSizePinTests` |
 | `follow(.axEcho)` | stands down (#594), and also while WindowServer-tracked (#285) |
 | `reconcile` (WS bounds re-read) | stands down (#594) |
-| `sync` (`updateBorders()` / `updateStickyMarks()`) | geometry stands down (#596); create, recolor, re-order and retire still run |
+| `sync` (`updateBorders()` / `updateStickyMarks()`) | geometry stands down (#596); create, recolor and retire still run, and so does re-order where the section below says it does (#1925) |
 
 `sync` is the easy one to miss, because it reads as a rebuild
 rather than a move — its spec frame is `state.windows[id]?.frame`,
@@ -106,8 +107,9 @@ second cancel the other:
 
 - **Visibility, early** (`scheduleBorderDropReconcile`,
   `.borderDropSettle`). WindowServer can order a ring out with no
-  matching unhide; `sync`'s trailing `order(relativeTo:)` is what
-  un-hides it. Landing mid-flight is safe *because* geometry
+  matching unhide; this pass's re-stack of every ring is what
+  un-hides it, since a steady `sync` orders only a ring
+  `needsOrder` flags (#1925). Landing mid-flight is safe *because* geometry
   stands down above — precisely, and only, for a window **our own
   animation** is driving. It still re-reads state for every other
   ring, exactly as the `updateBorders()` at the end of each
@@ -124,6 +126,42 @@ second cancel the other:
   window whose app accepted no AX write at all — the ring rode our
   commanded frames to the target while the window never moved, and
   no echo and no WindowServer event is coming.
+
+## The switch path makes no WindowServer round trip for a ring
+
+A WindowServer call a ring makes on the main actor waits for its
+answer, and while WindowServer is GPU-bound one answer took
+390 ms (#1925, 2026-10-03). So a change to the ring's switch path
+keeps these:
+
+- **A ring `sync` retires goes dormant, never ordered out** —
+  alpha 0, still ordered in, its corner radius kept — and comes
+  back for its window, its held frame dropped on retire or an
+  animated return flashes it where it rested
+  (`BorderDormantRingTests`). Only a window outside `alive`
+  (state plus the away ledger; nothing while borders are off)
+  drops its ring.
+- **The WindowServer request names dormant rings too**, so a
+  switch leaves it unchanged (`BorderDormantRingTests` ▸
+  `watchRequestSurvivesSwitch`).
+- **A steady `sync` orders only a ring `needsOrder` flags** —
+  new, revived or hidden — unless no WindowServer stream reports
+  its target moving; the two settle passes re-stack every ring
+  (`BorderOrderReassertTests`).
+- **An ordered-in panel re-stacks through `restack`**, a SkyLight
+  transaction, never AppKit's `order(_:relativeTo:)`, which looks
+  the other app's window rights up synchronously first; the
+  first show, the first after an order-out and a missing symbol
+  take AppKit (`BorderRestackTests`). This orders the AppKit
+  panel and draws nothing: the `.transient` section below still
+  binds.
+
+The WindowServer `.hide` arm still orders a ring out. A
+KiwiDesk Space switch parks windows by moving them, so it raises
+no `.hide` (no order-out on the 1↔2 runs' panel polls, macOS 27,
+2026-10-03); a minimize, a hidden app or a Desktop switch does,
+and those stay off the path above until a measurement says
+otherwise.
 
 ## The overlay panels join every Space
 

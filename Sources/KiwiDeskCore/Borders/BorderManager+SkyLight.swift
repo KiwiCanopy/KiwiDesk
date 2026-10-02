@@ -88,14 +88,27 @@ extension BorderManager {
         return true
     }
 
+    /// The windows the WindowServer request names: rings worn and
+    /// dormant, plus marks — a Space switch moves rings between
+    /// the first two and leaves the set unchanged (#1925).
+    func watchSet(ringed: Set<WindowID>) -> Set<WindowID> {
+        ringed.union(dormant.keys).union(markTracked)
+    }
+
     func updateSkyLightSubscription(
         _ borderWanted: Set<WindowID>
     ) {
+        let wanted = watchSet(ringed: borderWanted)
+        #if DEBUG
+            if let watchOverride {
+                skyLightActive = watchOverride(wanted)
+                return
+            }
+        #endif
         guard privateRuntimeStarted else {
             skyLightActive = false
             return
         }
-        let wanted = borderWanted.union(markTracked)
         if windowServerTrackingDisabled {
             skyLightActive = false
         } else {

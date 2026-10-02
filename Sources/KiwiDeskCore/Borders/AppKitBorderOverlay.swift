@@ -31,14 +31,29 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// above-order panel takes it, or a raised target's band
     /// would cover the ring.
     private let levelOf: (CGWindowID) -> Int?
+    /// Re-stacks an ordered-in panel without AppKit's per-order
+    /// rights lookup (#1925); false sends it through AppKit.
+    var restack: (CGWindowID, Bool, CGWindowID) -> Bool
+    /// Ordered in by AppKit and not ordered out since: the panel's
+    /// physical state, beside `BorderOverlay.needsOrder`, which is
+    /// the manager's policy — keep the two apart.
+    private(set) var isOrderedIn = false
+    #if DEBUG
+        /// Test-only: orders AppKit performed. Production must not
+        /// read it.
+        private(set) var appKitOrders = 0
+    #endif
 
     init(
         order: BorderGeometry.Order = .below,
         levelOf: @escaping (CGWindowID) -> Int? =
-            AppKitBorderOverlay.windowLayer
+            AppKitBorderOverlay.windowLayer,
+        restack: @escaping (CGWindowID, Bool, CGWindowID) -> Bool =
+            SkyLight.orderWindow
     ) {
         orderMode = order
         self.levelOf = levelOf
+        self.restack = restack
     }
 
     /// The panel's Spaces/Exposé behavior, nil before the first
@@ -49,6 +64,9 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
 
     /// The panel's window number, nil before the first render.
     var panelNumber: Int? { panel?.windowNumber }
+
+    /// The panel's alpha, nil before the first render.
+    var panelAlpha: CGFloat? { panel?.alphaValue }
 
     /// The panel's level, nil before the first render.
     var panelLevel: NSWindow.Level? { panel?.level }
@@ -224,14 +242,35 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         {
             panel.level = NSWindow.Level(rawValue: raw)
         }
+        if isOrderedIn,
+            restack(
+                CGWindowID(panel.windowNumber),
+                orderMode == .above,
+                windowNumber
+            )
+        {
+            return
+        }
         panel.order(
             orderMode == .above ? .above : .below,
             relativeTo: Int(windowNumber)
         )
+        #if DEBUG
+            appKitOrders += 1
+        #endif
+        isOrderedIn = true
     }
 
     func hide() {
         panel?.orderOut(nil)
+        isOrderedIn = false
+    }
+
+    /// Alpha, not `orderOut`: ordering out asks WindowServer
+    /// whether the panel is shown, a round trip that stalls the
+    /// main actor while WindowServer is GPU-bound (#1925).
+    func setDormant(_ dormant: Bool) {
+        panel?.alphaValue = dormant ? 0 : 1
     }
 
     private func makePanel() -> NSPanel {
