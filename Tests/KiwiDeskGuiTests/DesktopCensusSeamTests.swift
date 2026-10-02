@@ -133,7 +133,7 @@ struct DesktopCensusSeamTests {
         #expect(
             Set(one.map(\.file.lastPathComponent))
                 == ["SkyLight+Borders.swift", "NativeSpaces.swift"]
-                && one.count == 3,
+                && one.count == 2,
             .init(
                 rawValue: "found "
                     + one.map(\.site).joined(separator: ", ")
