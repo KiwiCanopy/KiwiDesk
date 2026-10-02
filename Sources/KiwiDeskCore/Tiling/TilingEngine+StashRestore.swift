@@ -41,9 +41,16 @@ extension TilingEngine {
     /// when it returns, so the capture waits for it (#1352). A
     /// native-tab re-key migrates its entry to the new id
     /// (`KiwiCore.handle`, #308).
+    ///
+    /// `animated: true` is the entrance half of a coordinated
+    /// space switch (#207, #1909): the float slides in from the
+    /// corner as the tiled windows do. A slide already carrying
+    /// it to its original is left to land on every pass, or the
+    /// settle would snap it.
     func restoreStashed(
         state: StateCoordinator,
-        frames: [WindowID: CGRect]
+        frames: [WindowID: CGRect],
+        animated: Bool = false
     ) {
         stashedFrames = stashedFrames.filter {
             state.windows[$0.key] != nil
@@ -82,6 +89,15 @@ extension TilingEngine {
                 !screens.contains(where: { $0.intersects(original) })
             {
                 stashedFrames[id] = nil
+                continue
+            }
+            if let inFlight = animation.targetFrame(window: id),
+                Self.close(inFlight, to: original)
+            {
+                continue
+            }
+            if animated, let current = state.windows[id]?.frame {
+                applyFrame(id, from: current, to: original, animated: true)
                 continue
             }
             animation.cancel(window: id)

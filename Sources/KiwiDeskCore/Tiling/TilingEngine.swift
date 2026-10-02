@@ -223,11 +223,9 @@ public final class TilingEngine {
     /// past corroborated bounds once (#1055). The parks they
     /// force are only the ones `StashDepartures` owes (#1508).
     ///
-    /// `stashAnimated` makes the park of newly-inactive
-    /// windows a visible slide to the corner instead of an
-    /// instant set — the coordinated space switch (#207), where
-    /// the outgoing windows slide out WHILE the incoming ones
-    /// slide in. Every other retile keeps the instant default.
+    /// `stashAnimated` turns the park and the float restore into
+    /// slides — the coordinated space switch (#207, #1909), out
+    /// and in at once. Every other retile keeps them instant.
     ///
     /// `sizing` is the caller's promise about how every window in
     /// this pass gets its size (#593); promising them all
@@ -252,12 +250,9 @@ public final class TilingEngine {
         withForcedPass(pass.probes) {
             // The issued set, not the slots (#934).
             let frames = placedFrames(state: state)
-            // The #45 invariant, enforced rather than trusted: a
-            // newcomer IS an instant size, so no promise survives one.
-            // Both arguments meet in this one signature, which makes
-            // this the only place the combination is expressible — and
-            // the routing guard cannot see it, because it counts
-            // occurrences, not combinations.
+            // The #45 invariant, enforced here because the routing
+            // guard counts occurrences, not combinations: a newcomer
+            // IS an instant size, so no promise survives one.
             let promised: BatchSizing =
                 newlyCreatedWindow == nil ? sizing : .mayInstantSize
 
@@ -335,7 +330,11 @@ public final class TilingEngine {
                 forcesDepartures: pass.reissues,
                 animated: stashAnimated
             )
-            restoreStashed(state: state, frames: frames)
+            restoreStashed(
+                state: state,
+                frames: frames,
+                animated: stashAnimated
+            )
         }
     }
 }
