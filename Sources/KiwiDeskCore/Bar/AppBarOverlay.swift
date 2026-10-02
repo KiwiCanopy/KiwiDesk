@@ -20,7 +20,7 @@ public final class AppBarOverlay {
     }
 
     /// Cached inputs from last `show()` for manual arrow scrolling.
-    struct RenderState {
+    struct RenderState: Equatable {
         let items: [Item]
         let activeIndex: Int?
         let strip: CGRect
@@ -30,6 +30,11 @@ public final class AppBarOverlay {
         /// row (#1838).
         let space: SpaceID?
     }
+
+    /// What the last draw read beyond its input (#1901).
+    var drawnEnvironment: BarDrawEnvironment?
+    /// Counts draws, so a drop can tell whether its move drew.
+    private(set) var draws = 0
 
     /// The section's view; the shelf sets its origin, the
     /// section its size.
@@ -120,10 +125,7 @@ public final class AppBarOverlay {
             hide()
             return
         }
-        let appearing = lastShown == nil
-        pendingLanding = appearing
-        pendingDissolve = !appearing && lastShown?.space != space
-        lastShown = RenderState(
+        let next = RenderState(
             items: items,
             activeIndex: activeIndex,
             strip: strip,
@@ -131,6 +133,17 @@ public final class AppBarOverlay {
             capAxis: capAxis,
             space: space
         )
+        // An identical show draws nothing (#1901).
+        let environment = BarDrawEnvironment.current
+        if isVisible, lastShown == next, drawnEnvironment == environment {
+            WorkMeter.shared.add(\.barShowsSkipped)
+            return
+        }
+        drawnEnvironment = environment
+        let appearing = lastShown == nil
+        pendingLanding = appearing
+        pendingDissolve = !appearing && lastShown?.space != space
+        lastShown = next
         let focus = activeIndex.flatMap {
             items.indices.contains($0) ? items[$0].id : nil
         }
@@ -158,6 +171,7 @@ public final class AppBarOverlay {
     /// it isn't immediately snapped back.
     func render(followingFocus: Bool) {
         guard let state = lastShown else { return }
+        draws += 1
         let items = state.items
         let activeIndex = state.activeIndex
         let strip = state.strip

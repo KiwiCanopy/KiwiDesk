@@ -69,9 +69,7 @@ extension KiwiCore {
                 window: id,
                 app: window.appName,
                 title: window.title,
-                icon: NSRunningApplication(
-                    processIdentifier: window.pid
-                )?.icon,
+                icon: BarIconCache.icon(pid: window.pid),
                 // The focus door's own refusal (#1345): a row it
                 // would refuse is greyed, never hidden (#802).
                 enabled: !raiseCrossesDesktops(id)

@@ -37,6 +37,8 @@ public final class WorkMeter: @unchecked Sendable {
         public var borderSyncs = 0
         public var borderNanos = 0
         public var borderMaxNanos = 0
+        public var barShowsSkipped = 0
+        public var shelfShowsSkipped = 0
         public var framesIssued = 0
         public var framesSkipped = 0
         public var parksIssued = 0
@@ -248,6 +250,8 @@ extension WorkMeter {
             "bar_ms_mean": perMs(c.barNanos, c.barRenders),
             "bar_ms_max": ms(c.barMaxNanos),
             "bar_renders_per_switch": per(c.barRenders, c.spaceSwitches),
+            "bar_shows_skipped": count(c.barShowsSkipped),
+            "shelf_shows_skipped": count(c.shelfShowsSkipped),
             "border_syncs": count(c.borderSyncs),
             "border_ms_mean": perMs(c.borderNanos, c.borderSyncs),
             "border_ms_max": ms(c.borderMaxNanos),

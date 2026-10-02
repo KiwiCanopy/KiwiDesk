@@ -21,6 +21,9 @@ final class ShelfOverlay {
         let content: CGRect
     }
 
+    /// The last input laid out.
+    private var drawn: Drawn?
+
     private(set) var panel: NSPanel?
 
     /// AppKit keeps a visible panel alive after its owner is gone,
@@ -97,6 +100,23 @@ final class ShelfOverlay {
             hide(animated: true)
             return
         }
+        let next = Drawn(
+            strip: strip,
+            edge: edge,
+            shelf: shelf,
+            sheen: sheen,
+            sections: sections,
+            divider: range,
+            primaryHeight: GeometryUtils.primaryHeight,
+            environment: .current
+        )
+        // A shown, settled shelf asked again for what it already
+        // lays out moves nothing (#1901).
+        if panel?.isVisible == true, leaving == nil, drawn == next {
+            WorkMeter.shared.add(\.shelfShowsSkipped)
+            return
+        }
+        drawn = next
         let panel = self.panel ?? makePanel()
         self.panel = panel
         // A shelf appearing fades in where it lands; one already on

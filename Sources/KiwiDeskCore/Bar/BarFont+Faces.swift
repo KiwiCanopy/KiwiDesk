@@ -42,7 +42,14 @@ extension BarFont {
 
     /// Forgets everything read about the installed fonts — the
     /// font-set observer's one call.
-    public static func invalidate() { cache = Cache() }
+    public static func invalidate() {
+        cache = Cache()
+        generation += 1
+    }
+
+    /// Counts `invalidate` calls; a bar redraws when it moved
+    /// (`BarDrawEnvironment`, #1901).
+    private(set) static var generation = 0
 
     /// A family's upright, normal-width faces — every face where
     /// the family has none — or nil when it is not installed.

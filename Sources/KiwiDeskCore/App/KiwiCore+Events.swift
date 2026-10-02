@@ -60,6 +60,7 @@ extension KiwiCore {
         // read before the fold drops them.
         if case .appTerminated(let pid) = event {
             retireAwayDebts(ofExitedApp: pid)
+            BarIconCache.forget(pid: pid)
         }
         let detectedFlip = detectedFlip(event)
         let effects = state.apply(event)

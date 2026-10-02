@@ -153,6 +153,29 @@ twice, was a question the user answered twice. The argument is
   plan no longer gives it. `BarsRefreshSeamTests` holds both
   managers' `sync(` to `KiwiCore+Shelf.swift`, and
   `ShelfDriverTests` drives the pair through it.
+- **A show whose input repeats draws nothing, so everything a
+  draw reads belongs IN the compared input — the shown value or
+  the one `BarDrawEnvironment` — and a path that LEAVES views
+  where a draw of the same input would not put them invalidates
+  its overlay (#1901).**
+  A Space switch refreshes the bars from its retile, its focus
+  report and its activation, and on the device each repeat cost a
+  full render (~46 ms) until the two bar overlays and the shelf
+  compared what they were handed with what they last drew. A
+  draw-time read outside the input — Reduce transparency, the
+  installed fonts, the system accent, the UI language, the
+  primary screen's height the panel is flipped against — leaves
+  the old drawing standing. The App Bar drop is the one path of
+  the second kind: its hand-set frames survive a refresh that
+  repeats its input, so it invalidates and redraws itself when
+  no refresh drew. A manual scroll, a glide or a fade moves
+  views too and owes nothing — a redraw of the same input puts
+  them where they already are. Finding a NEW draw-time read is review's: the
+  suites hold the ones the environment carries and the drop
+  (`BarRenderSkipTests`). Keep the input comparable, which is why
+  the bars' app icons come from the one `BarIconCache`: a fresh
+  `NSImage` per read never compares equal and costs a
+  LaunchServices round trip besides.
 - **Stand a bar down through the one
   `KiwiCore.shelfStandsDown(on:)`**, read once per display in
   `updateBars()` for both bars — a native-fullscreen Space
