@@ -10,7 +10,8 @@ extension ShelfOverlay {
         let sheen: CGFloat
         let sections: [Section]
         let divider: ShelfArrangement.Divider?
-        /// The panel's Cocoa frame is flipped against it.
+        /// The panel's Cocoa frame is flipped against it. Review's:
+        /// `GeometryUtils.primaryHeight` has no seam a test can move.
         let primaryHeight: CGFloat
         /// Its glass bit repeats `shelf`'s, which arrives already
         /// gated; kept whole so every overlay compares one value.
