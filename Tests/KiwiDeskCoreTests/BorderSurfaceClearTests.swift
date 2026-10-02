@@ -64,5 +64,9 @@ struct BorderSurfaceClearTests {
         #expect(stale.isEmpty)
         let litCorner = (0..<(4 * scale)).filter { data[$0 * 4 + 3] != 0 }
         #expect(litCorner.isEmpty)
+        // The ring itself drew: the top stroke spans 496.5–501.5 pt,
+        // so 3 pt below the surface top is solid ink.
+        let strokeRow = 3 * scale * width
+        #expect(data[(strokeRow + width / 2) * 4 + 3] == 255)
     }
 }
