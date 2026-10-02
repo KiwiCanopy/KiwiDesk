@@ -83,4 +83,27 @@ struct CommandedFrameRetileTests {
         #expect(TilingEngine.close(start, to: slot))
         #expect(!TilingEngine.close(start, to: corner))
     }
+
+    @Test(
+        "A settled slide is not vouched for by the set it replaced",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func slideRetiresTheInstantSet() throws {
+        // Instant set to A, slide to B settling with no echo,
+        // then the layout asks A again: the window is at B, so
+        // the pass must issue rather than skip on the old set.
+        let core = makeTestCore()
+        defer { core.tiler.animation.cancelAll(snapToTargets: false) }
+        _ = try #require(NSScreen.main?.kiwiDisplay)
+        let slotA = try placedUnechoed(core)
+        let slotB = slotA.offsetBy(dx: 100, dy: 0)
+        core.tiler.applyFrame(w1, from: slotA, to: slotB, animated: true)
+        #expect(core.tiler.recentInstantTarget(w1) == nil)
+        // The slide lands; no echo reaches the state.
+        core.tiler.animation.cancelAll(snapToTargets: false)
+        let meter = WorkMeter(now: { 0 })
+        core.tiler.meter = meter
+        core.tiler.retile(state: core.state, animated: false)
+        #expect(meter.snapshot(reset: false).counts.framesIssued == 1)
+    }
 }
