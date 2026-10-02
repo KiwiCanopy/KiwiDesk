@@ -193,6 +193,15 @@ struct SnapshotStoreCensusTests {
         // After the settle, whose retire prunes an arm on a Space
         // no live profile leaves temporary.
         core.state.temporaryArmed.insert(shown)
+        // A departure owed (#1508): the hidden Space leaves view.
+        _ = core.tiler.stashDepartures.pass(
+            shown: [shown, hidden],
+            forcing: false
+        )
+        _ = core.tiler.stashDepartures.pass(
+            shown: [shown],
+            forcing: false
+        )
         return core
     }
 
@@ -212,6 +221,7 @@ struct SnapshotStoreCensusTests {
             "state.floatFrames", "tiler.boundLearner.lastAsks",
             "state.userFloated", "tiler.monocleShownMembers",
             "state.heldSpaces", "state.temporaryArmed",
+            "tiler.stashDepartures.owed",
             "state.profilePartitioning.byArrangement[][]",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")
