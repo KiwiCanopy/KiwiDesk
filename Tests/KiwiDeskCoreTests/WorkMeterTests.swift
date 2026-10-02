@@ -76,6 +76,18 @@ struct WorkMeterTests {
         #expect(r["queue_wait_us_mean"] == .null)
     }
 
+    @Test("The production meter reports its AX columns")
+    func sharedMeterShowsAX() {
+        // Read only, no reset: other suites share this meter.
+        guard case .object(let r) = WorkMeter.shared.report(reset: false)
+        else {
+            Issue.record("report is not an object")
+            return
+        }
+        #expect(r["ax_main_calls"] != .null)
+        #expect(r["ax_off_main_calls"] != .null)
+    }
+
     @Test("An injected meter reports its AX columns as null")
     func injectedMeterHidesAX() {
         let m = meter()
