@@ -46,8 +46,8 @@ timeout, and output capture.
 ## Recipe pages
 
 - [**SketchyBar**](sketchybar.md) — spaces widget with click
-  to focus, window icons, layout-aware styling. The flagship
-  integration.
+  to focus, window icons, layout-aware styling, and a theme picker
+  that repaints KiwiDesk. The flagship integration.
 - [**JankyBorders**](jankyborders.md) — layout-aware border
   colors via the `layout_change` event.
 - [**Miscellaneous**](misc.md) — shell scripts, event stream

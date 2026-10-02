@@ -479,3 +479,70 @@ successful read.
 > to prevent blocking the main thread — use `KiwiDesk.exec`
 > with a callback instead (see [Lua
 > reference](../lua-reference.md)).
+
+## Match the bar's theme
+
+A theme picker in your bar can repaint KiwiDesk too: its colours
+and the KiwiShelf font are CLI commands. One script holds the
+themes, and a picker item runs it.
+
+```sh
+#!/bin/sh
+# ~/.config/sketchybar/kiwidesk-theme.sh <theme>   (chmod +x it)
+k() { kiwidesk "$@" >/dev/null || echo "kiwidesk $1 failed" >&2; }
+
+case "$1" in
+  gruvbox)
+    ring="#D79921"; accent="#D79921"; focus="#83A598"
+    fill="#1E1E2EFA"; font="Charter" ;;
+  blue)
+    ring="#15BDF9"; accent="#15BDF9"; focus="#FF7F00"
+    fill="#021254FA"; font="Avenir Next" ;;
+  profile)
+    # Back to the profile. These are KiwiDesk's shipped defaults:
+    # replace them with your own profile's values.
+    ring="#4A9816"; accent="#8DB354"; focus="#C2790A"
+    fill="#14201CB3"; font="System" ;;
+  *) exit 1 ;;
+esac
+
+k border.set_focused_color "$ring"
+k kiwishelf.set_highlight_color "$accent"
+k kiwishelf.set_active_item_color "$accent"
+k space_bar.set_focused_item_color "$focus"
+k kiwishelf.set_fill_color "$fill"
+k kiwishelf.set_font_family "$font"
+```
+
+```lua
+local picker = SBAR.add("item", "theme_picker", {
+    position = "right",
+    icon = { string = "󰏘" },
+    click_script = "sketchybar --set theme_picker popup.drawing=toggle",
+})
+SBAR.add("item", "theme.gruvbox", {
+    position = "popup." .. picker.name,
+    label = { string = "Gruvbox" },
+    click_script = "$CONFIG_DIR/kiwidesk-theme.sh gruvbox",
+})
+```
+
+What to know:
+
+- **The commands change the live look, and only until the next
+  profile apply.** Loading a profile, a Desktop binding switching
+  profiles, a screen-count change, `reload_config` and a KiwiDesk
+  restart all put the profile's look back, which is why the
+  script carries a `profile` entry. The reverse holds too:
+  `save_profile` after a theme pick saves that theme into the
+  profile.
+- **With Liquid Glass on, the fill tints the glass**
+  ([`kiwishelf.set_fill_color`](../lua-reference.md#kiwishelf-colours)).
+  A bar's usual faint wash (`0x40` alpha) barely tints it; a
+  theme's solid pill colour reads as tinted glass.
+- **KiwiDesk takes a font's family name**
+  ([`kiwishelf.set_font_family`](../lua-reference.md#kiwishelfset_font_family)).
+  If the bar uses the same font, give sketchybar the family's real
+  style name: Charter's regular face is `Roman` and Apple
+  Chancery's only style is `Chancery`, and sketchybar falls back to
+  the system font without a word on a style the family lacks.
