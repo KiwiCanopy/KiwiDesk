@@ -288,6 +288,18 @@ extension TilingEngine {
         }
     }
 
+    /// Sets a frame directly (no animation) through the frame
+    /// pipeline, so it is echo-tracked like animated frames.
+    /// Uses the EUI-bracketed instant path so an un-animated
+    /// placement (space switch / stash with animation off) snaps
+    /// cleanly instead of triggering the app's own move
+    /// animation (which stutters on slow-AX apps).
+    public func setFrame(_ id: WindowID, _ frame: CGRect) {
+        boundLearner.supersedeAsk(id)  // as `applyFrame`, #1694
+        placements.stamp(id, target: frame)
+        applier.applyInstant(id, frame)
+    }
+
     /// The commanded frame of a recent instant set whose echo
     /// is still pending, nil otherwise (#881). The overlay
     /// syncs read it (`FollowSource.syncFrame`'s `commanded`)
