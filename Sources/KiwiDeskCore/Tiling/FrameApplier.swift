@@ -22,6 +22,10 @@ final class FrameApplier {
     /// see what a pass moved (#930). A no-op in production.
     var issued: @MainActor (WindowID, CGRect) -> Void = { _, _ in }
 
+    /// Counts coalesced frames and per-app queue waits (#1508);
+    /// set by `TilingEngine.meter`, which owns the choice.
+    var meter = WorkMeter.shared
+
     /// Grace period for ignoring self-inflicted AX frame echoes.
     private static let echoGrace: TimeInterval = 1.0
 
@@ -102,11 +106,16 @@ final class FrameApplier {
                 setSize: setSize
             )
         )
-        guard !alreadyScheduled else { return }
+        guard !alreadyScheduled else {
+            meter.add(\.framesCoalesced)
+            return
+        }
         let store = pending
         let recent = recent
         let clock = clock
+        let waited = meter.queued()
         queue(for: pid).async {
+            waited()
             guard let entry = store.take(id) else { return }
             if entry.setSize {
                 WindowControl.setFrame(
@@ -146,7 +155,9 @@ final class FrameApplier {
         nonisolated(unsafe) let target = element
         let recent = recent
         let clock = clock
+        let waited = meter.queued()
         queue(for: pid).async {
+            waited()
             let wasEnabled =
                 AXHelper.getEnhancedUserInterface(pid: pid)
                 == true

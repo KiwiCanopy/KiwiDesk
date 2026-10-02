@@ -97,10 +97,12 @@ enum AXWindowActions {
         guard let index = newWindowItem(in: items),
             items[index].enabled
         else { return false }
-        return AXUIElementPerformAction(
-            elements[index],
-            kAXPressAction as CFString
-        ) == .success
+        return WorkMeter.shared.ax {
+            AXUIElementPerformAction(
+                elements[index],
+                kAXPressAction as CFString
+            )
+        } == .success
     }
 
     /// Presses the window's close button. False where it has
@@ -121,10 +123,12 @@ enum AXWindowActions {
                 as: Bool.self
             ) != false
         else { return false }
-        return AXUIElementPerformAction(
-            button,
-            kAXPressAction as CFString
-        ) == .success
+        return WorkMeter.shared.ax {
+            AXUIElementPerformAction(
+                button,
+                kAXPressAction as CFString
+            )
+        } == .success
     }
 
     private static func children(

@@ -17,7 +17,9 @@ extension KiwiCore {
     /// focus, a layer switch, a title, Reduce transparency). The
     /// menu bar's stand-in rides the same refresh (#1413).
     func updateBars() {
+        let measured = tiler.meter.begin(.bars)  // #1508
         defer {
+            measured()
             publishStatusSpaceMark()
             spaceBars.publishLiveOnly(liveOnlySpaces)
         }

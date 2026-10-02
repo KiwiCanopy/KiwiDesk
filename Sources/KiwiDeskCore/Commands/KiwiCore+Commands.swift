@@ -115,6 +115,12 @@ extension KiwiCore {
             )
         case "get_state":
             return .ok(stateJSON())
+        case "get_work_counters":
+            return .ok(
+                tiler.meter.report(
+                    reset: args.first?.boolValue ?? false
+                )
+            )
         case "get_layout_info":
             return layoutInfo()
         case "list_monitors":

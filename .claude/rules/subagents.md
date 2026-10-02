@@ -72,6 +72,7 @@ by hand whenever you remove an agent.
 | `site-engineer` | `site/` and its shipped output | audits or authors |
 | `changelog-curator` | A release's curated `## Highlights` block | audits or authors |
 | `test-profiler` | The test run's time, waits and windows | measures and reports |
+| `work-profiler` | The engine's work per Space switch, on the desk | measures and reports |
 
 The column is the agent's territory, deliberately not its trigger.
 **When** to reach for one is the `description` field, which is what

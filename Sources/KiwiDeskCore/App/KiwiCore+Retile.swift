@@ -33,6 +33,10 @@ extension KiwiCore {
         stashAnimated: Bool = false,
         sizing: BatchSizing = .mayInstantSize
     ) {
+        // The whole main-actor cost of a pass, bars and rings
+        // included (#1508).
+        let finish = tiler.meter.beginRetile(pass)
+        defer { finish() }
         // A held Space retires the moment it empties (#1507) —
         // every membership change retiles, so this is its one
         // choke point too, ahead of anything that lays it out.

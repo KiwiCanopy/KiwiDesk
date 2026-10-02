@@ -27,11 +27,13 @@ public enum WindowControl {
         guard let value = AXValueCreate(.cgPoint, &point) else {
             return
         }
-        AXUIElementSetAttributeValue(
-            element,
-            kAXPositionAttribute as CFString,
-            value
-        )
+        WorkMeter.shared.ax {
+            AXUIElementSetAttributeValue(
+                element,
+                kAXPositionAttribute as CFString,
+                value
+            )
+        }
     }
 
     public static func setSize(
@@ -42,10 +44,12 @@ public enum WindowControl {
         guard let value = AXValueCreate(.cgSize, &box) else {
             return
         }
-        AXUIElementSetAttributeValue(
-            element,
-            kAXSizeAttribute as CFString,
-            value
-        )
+        WorkMeter.shared.ax {
+            AXUIElementSetAttributeValue(
+                element,
+                kAXSizeAttribute as CFString,
+                value
+            )
+        }
     }
 }

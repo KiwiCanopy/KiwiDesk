@@ -43,11 +43,13 @@ public enum AXHelper {
         as type: T.Type
     ) -> T? {
         var value: CFTypeRef?
-        let err = AXUIElementCopyAttributeValue(
-            element,
-            name as CFString,
-            &value
-        )
+        let err = WorkMeter.shared.ax {
+            AXUIElementCopyAttributeValue(
+                element,
+                name as CFString,
+                &value
+            )
+        }
         guard err == .success else { return nil }
         return value as? T
     }
@@ -98,11 +100,13 @@ public enum AXHelper {
     public static func frame(of element: AXUIElement) -> CGRect {
         var rect = CGRect.zero
         var value: CFTypeRef?
-        let err = AXUIElementCopyAttributeValue(
-            element,
-            "AXFrame" as CFString,
-            &value
-        )
+        let err = WorkMeter.shared.ax {
+            AXUIElementCopyAttributeValue(
+                element,
+                "AXFrame" as CFString,
+                &value
+            )
+        }
         guard err == .success,
             let axValue = value,
             CFGetTypeID(axValue) == AXValueGetTypeID()
@@ -144,11 +148,13 @@ public enum AXHelper {
     public static func unminimize(
         _ element: AXUIElement
     ) -> Bool {
-        AXUIElementSetAttributeValue(
-            element,
-            kAXMinimizedAttribute as CFString,
-            kCFBooleanFalse
-        ) == .success
+        WorkMeter.shared.ax {
+            AXUIElementSetAttributeValue(
+                element,
+                kAXMinimizedAttribute as CFString,
+                kCFBooleanFalse
+            )
+        } == .success
     }
 
     /// True if window is in native fullscreen. Snapshot at
@@ -182,11 +188,13 @@ public enum AXHelper {
         enabled: Bool
     ) {
         let app = appElement(pid: pid)
-        AXUIElementSetAttributeValue(
-            app,
-            "AXEnhancedUserInterface" as CFString,
-            enabled as CFBoolean
-        )
+        WorkMeter.shared.ax {
+            AXUIElementSetAttributeValue(
+                app,
+                "AXEnhancedUserInterface" as CFString,
+                enabled as CFBoolean
+            )
+        }
     }
 
     /// Sets `AXManualAccessibility` for Chromium-family browsers:
@@ -197,20 +205,24 @@ public enum AXHelper {
         pid: pid_t,
         enabled: Bool
     ) {
-        AXUIElementSetAttributeValue(
-            appElement(pid: pid),
-            "AXManualAccessibility" as CFString,
-            enabled as CFBoolean
-        )
+        WorkMeter.shared.ax {
+            AXUIElementSetAttributeValue(
+                appElement(pid: pid),
+                "AXManualAccessibility" as CFString,
+                enabled as CFBoolean
+            )
+        }
     }
 
     /// Raises window without activating app (z-order only, verify via
     /// `ZOrderDrain`, #426, #684).
     public static func raiseQuietly(_ element: AXUIElement) {
-        AXUIElementPerformAction(
-            element,
-            kAXRaiseAction as CFString
-        )
+        WorkMeter.shared.ax {
+            AXUIElementPerformAction(
+                element,
+                kAXRaiseAction as CFString
+            )
+        }
     }
 
     /// True if window belongs to own process and must raise on the
@@ -240,15 +252,19 @@ public enum AXHelper {
         _ element: AXUIElement,
         pid: pid_t
     ) {
-        AXUIElementSetAttributeValue(
-            element,
-            kAXMainAttribute as CFString,
-            kCFBooleanTrue
-        )
-        AXUIElementPerformAction(
-            element,
-            kAXRaiseAction as CFString
-        )
+        WorkMeter.shared.ax {
+            AXUIElementSetAttributeValue(
+                element,
+                kAXMainAttribute as CFString,
+                kCFBooleanTrue
+            )
+        }
+        WorkMeter.shared.ax {
+            AXUIElementPerformAction(
+                element,
+                kAXRaiseAction as CFString
+            )
+        }
         NSRunningApplication(processIdentifier: pid)?
             .activate(options: .activateIgnoringOtherApps)
     }

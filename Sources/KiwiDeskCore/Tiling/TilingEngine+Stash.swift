@@ -223,6 +223,7 @@ extension TilingEngine {
         // is set.
         boundLearner.parkRetiresAsk(window.id)
         if !force, Self.close(window.frame, to: target) {
+            meter.add(\.parksSkipped)
             return
         }
         // A corner is never an original (#1352): a capture lost
@@ -240,6 +241,7 @@ extension TilingEngine {
             // slide to the corner. A window still flying IN
             // retargets in place (spring carry-over), so a
             // rapid bounce stays smooth.
+            meter.add(\.parksIssued)
             applyFrame(
                 window.id,
                 from: window.frame,
@@ -256,9 +258,11 @@ extension TilingEngine {
         if let inFlight = animation.targetFrame(
             window: window.id
         ), Self.close(inFlight, to: target) {
+            meter.add(\.parksSkipped)
             return
         }
         animation.cancel(window: window.id)
+        meter.add(\.parksIssued)
         setFrame(window.id, target)
     }
 }

@@ -18,6 +18,8 @@ import Foundation
 /// (display-filling — only the corners would show) never do.
 extension KiwiCore {
     func updateBorders() {
+        let measured = tiler.meter.begin(.borders)  // #1508
+        defer { measured() }
         // Global draw order (behind / front, #367) — set before the
         // enabled guard so a re-enable rebuilds on the right backend.
         borders.setDrawOrder(tiler.settings.borderStyle.drawOrder)

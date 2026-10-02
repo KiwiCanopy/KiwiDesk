@@ -20,6 +20,7 @@ extension KiwiCore {
         // to tell "the handoff's activate never landed" (#463)
         // apart from "the user moved on since".
         let priorFrontmost = frontmostPIDProvider?()
+        tiler.meter.noteSpaceSwitch()  // #1508
         state.workspaces.activate(space)
         logSpaceContents(space)
         spaceSwitchRetile()

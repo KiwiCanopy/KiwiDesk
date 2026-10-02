@@ -28,6 +28,10 @@ editing here:
   window-server surface, which churns across releases. Do not read
   it as licence for a second linked symbol, and do not "fix" this
   one to `dlsym`.
+- An AX message in `OS/` (`WindowControl`'s writes) runs inside
+  `WorkMeter.shared.ax { … }` like every other in Core — the
+  argument is [accessibility.md](accessibility.md)'s, and
+  `WorkMeterAXSeamTests` reds a bare call (#1508).
 - **Every** private fast path must have a public-API fallback
   (`AXUIElement`). No fallback = not acceptable — with one
   carve-out, which is not a loophole: where macOS exposes a
