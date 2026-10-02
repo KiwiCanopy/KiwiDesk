@@ -7,6 +7,18 @@ import CoreGraphics
 /// lost. On nil the caller skips the reconcile and the AX echo
 /// path keeps updating the overlay.
 extension SkyLight {
+    typealias GetWindowBoundsFn =
+        @convention(c) (
+            ConnectionID,
+            CGWindowID,
+            UnsafeMutablePointer<CGRect>
+        ) -> CGError
+
+    static let getWindowBounds: GetWindowBoundsFn? = symbol(
+        "SLSGetWindowBounds",
+        as: GetWindowBoundsFn.self
+    )
+
     /// Authoritative WindowServer bounds (AX coordinates) for `wid`, or nil.
     static func windowBounds(_ wid: CGWindowID) -> CGRect? {
         guard let connection,

@@ -119,7 +119,10 @@ struct DesktopCensusSeamTests {
         )
         #expect(
             Set(list.map(\.file.lastPathComponent))
-                == ["SkyLight+Borders.swift", "NativeSpaces+Census.swift"]
+                == [
+                    "SkyLight+WindowSpaces.swift",
+                    "NativeSpaces+Census.swift",
+                ]
                 && list.count == 3,
             .init(
                 rawValue: "found "
@@ -132,7 +135,7 @@ struct DesktopCensusSeamTests {
         )
         #expect(
             Set(one.map(\.file.lastPathComponent))
-                == ["SkyLight+Borders.swift", "NativeSpaces.swift"]
+                == ["SkyLight+WindowSpaces.swift", "NativeSpaces.swift"]
                 && one.count == 2,
             .init(
                 rawValue: "found "

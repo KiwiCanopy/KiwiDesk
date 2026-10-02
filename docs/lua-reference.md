@@ -3095,9 +3095,9 @@ KiwiDesk draws a thin border around the focused window. It is
 `border.set_unfocused_enabled` adds one on every other window.
 The border is a pure overlay: it never changes where windows
 tile (no gap coupling), and the configured width is the
-thickness drawn outward into the gap. It is pinned to its
-window's stacking level, so popovers, sheets, and other windows
-the system places above the target stay above its border.
+thickness drawn outward into the gap. It is stacked directly
+against its window, so popovers, sheets, and other windows the
+system places above the target stay above its border.
 Overflow piles and monocle show a border only on the visible top
 window.
 
@@ -3206,8 +3206,8 @@ a hairline border gets a subtle rim and a thick one a
 proportional aura — override it with `set_glow_size` below.
 
 :::unreleased
-A glowing ring keeps the `draw_order` you chose: `"front"` no
-longer falls back to behind while glow is on.
+A glowing ring keeps the `draw_order` you chose, `"front"`
+included.
 :::
 
 The bloom counts as part of the ring's reach: `border.fit_gaps`

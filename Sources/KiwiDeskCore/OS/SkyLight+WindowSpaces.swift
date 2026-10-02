@@ -2,25 +2,14 @@ import CoreFoundation
 import CoreGraphics
 import Foundation
 
-/// Runtime-only SkyLight reads the focus border and the Desktop
-/// gates share: a window's WindowServer bounds and the Spaces
-/// hosting it. Every symbol is optional; nil is "cannot read".
+/// Runtime-only SkyLight read of the Spaces hosting a window, for
+/// the Desktop gates and the census. Nil is "cannot read".
 extension SkyLight {
-    typealias GetWindowBoundsFn =
-        @convention(c) (
-            ConnectionID,
-            CGWindowID,
-            UnsafeMutablePointer<CGRect>
-        ) -> CGError
     typealias CopySpacesForWindowsFn =
         @convention(c) (
             ConnectionID, UInt32, CFArray
         ) -> Unmanaged<CFArray>?
 
-    static let getWindowBounds: GetWindowBoundsFn? = symbol(
-        "SLSGetWindowBounds",
-        as: GetWindowBoundsFn.self
-    )
     static let copySpacesForWindows: CopySpacesForWindowsFn? =
         symbol(
             "SLSCopySpacesForWindows",

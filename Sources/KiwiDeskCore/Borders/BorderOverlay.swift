@@ -1,7 +1,8 @@
 import AppKit
 
-/// Focus-ring backend protocol (#357, #533): the production
-/// `AppKitBorderOverlay`, or a test double.
+/// Focus-ring backend: the production `AppKitBorderOverlay`, or
+/// a test double exercising `BorderOverlay`'s replay without a
+/// window.
 @MainActor
 protocol BorderOverlayBackend: AnyObject {
     var orderMode: BorderGeometry.Order { get }
@@ -34,9 +35,7 @@ final class BorderOverlay {
     /// Dead-end rubber-band offset (#436).
     private var bumpOffset = CGVector.zero
 
-    /// The AppKit panel for both orders: a raw SkyLight window
-    /// stays drawn over the Mission Control overview on macOS 27,
-    /// whatever Space it is pinned to (#1917).
+    /// Builds the ring's AppKit panel in `order` (#1917).
     init(window: CGWindowID, order: BorderGeometry.Order) {
         targetWindow = window
         backend = AppKitBorderOverlay(order: order)

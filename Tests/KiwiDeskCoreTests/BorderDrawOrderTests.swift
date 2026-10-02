@@ -4,9 +4,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `BorderManager` draw-order is global (#367): flipping it must
-/// retire every live ring so each rebuilds on the backend that
-/// matches the new order (front → SkyLight above, behind → AppKit
-/// below). An unchanged order is a no-op.
+/// retire every live ring so each rebuilds its panel in the new
+/// order. An unchanged order is a no-op.
 @Suite("Border draw order", .serialized)
 @MainActor
 struct BorderDrawOrderTests {

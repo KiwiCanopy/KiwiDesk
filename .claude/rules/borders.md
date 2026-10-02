@@ -28,7 +28,7 @@ reason; the obligation is [bars.md](bars.md)'s and
 `LookKeysCensusTests` reds an unruled field.
 
 The *product* rulings about these overlays (who gets a ring, why
-glow forces the AppKit renderer, why a fullscreen window gets
+the ring draws on an AppKit panel, why a fullscreen window gets
 none) live in `docs/design-decisions.md`. This file is the
 engineering side: which input owns an overlay's frame, and when.
 
@@ -135,6 +135,20 @@ single-Desktop panel strands the mark and the ring on the
 origin (device-observed 2026-09-01). Keep the flag on any new
 overlay panel that follows a window; `StickyOverlaySpanTests`
 pins the two that exist.
+
+## The ring draws on the `.transient` panel, never a raw window
+
+**A ring renders through `AppKitBorderOverlay` in both draw
+orders, and a new drawing path for a window overlay keeps
+`.transient`** (#1917). On macOS 27.0.1 (measured 2026-10-02) a
+raw SkyLight window stays composited over the Mission Control
+overview at its desktop frame, pinned to its target's Space or
+not, with no window call found that hides it; `.transient`
+does. Do not bring a private
+drawing backend back for a crisper front order —
+`BorderMissionControlTests` reds a non-AppKit ring or a panel
+without the flag, and whether the flag still hides is a device
+check no test can make.
 
 ## Never gate an overlay pass on the global animation count
 
