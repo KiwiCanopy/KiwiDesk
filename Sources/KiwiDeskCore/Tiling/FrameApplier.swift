@@ -78,7 +78,6 @@ final class FrameApplier {
             let pid = Self.pid(of: element)
         else { return }
         animatingPid[id] = pid
-        enhancedUI.noteAtRest(pid, enhancedUIAtRest(pid))
         pidCounts[pid, default: 0] += 1
         if pidCounts[pid] == 1 {
             holdEUI(pid: pid, held: true)
@@ -170,8 +169,11 @@ final class FrameApplier {
         let writer = writer
         let holds = enhancedUI
         let waited = meter.queued()
-        holds.noteAtRest(pid, enhancedUIAtRest(pid))
-        holds.noteInstantQueued(pid)
+        holds.noteQueued(
+            pid,
+            atRest: enhancedUIAtRest(pid),
+            instant: true
+        )
         queue(for: pid).async {
             waited()
             holds.beginInstant(pid, writer)
@@ -207,6 +209,13 @@ final class FrameApplier {
     private func holdEUI(pid: pid_t, held: Bool) {
         let holds = enhancedUI
         let writer = writer
+        if held {
+            holds.noteQueued(
+                pid,
+                atRest: enhancedUIAtRest(pid),
+                instant: false
+            )
+        }
         queue(for: pid).async {
             if held {
                 holds.acquire(pid, writer)

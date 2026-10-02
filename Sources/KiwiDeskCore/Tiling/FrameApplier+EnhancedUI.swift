@@ -30,19 +30,22 @@ struct FrameWriter: Sendable {
 /// or cached here. An app the loop has not warmed — Chromium,
 /// a cold app — is never toggled.
 ///
-/// `noteAtRest`, `noteInstantQueued` and `retire` run on the
-/// main actor; every other method on the app's own serial frame
-/// queue, which orders a toggle against the sets it brackets.
+/// `noteQueued` and `retire` run on the main actor; every other
+/// method on the app's own serial frame queue, which orders a
+/// toggle against the sets it brackets. An entry with a hold
+/// queued is never dropped, so the value noted for it survives.
 final class EnhancedUIHolds: @unchecked Sendable {
     private struct App {
         var atRest = false
         var dropped = false
         var holders = 0
+        var queuedHolds = 0
         var queuedInstants = 0
         var instantHeld = false
 
         var idle: Bool {
-            holders == 0 && queuedInstants == 0 && !instantHeld
+            holders == 0 && queuedHolds == 0 && queuedInstants == 0
+                && !instantHeld
         }
     }
 
@@ -55,9 +58,20 @@ final class EnhancedUIHolds: @unchecked Sendable {
         return body(&apps)
     }
 
-    /// Main actor, at enqueue: the loop's current at-rest value.
-    func noteAtRest(_ pid: pid_t, _ on: Bool) {
-        with { $0[pid, default: App()].atRest = on }
+    /// Main actor, at enqueue: the loop's current at-rest value
+    /// and a hold on its way — an instant set, or an animation's
+    /// `acquire`.
+    func noteQueued(_ pid: pid_t, atRest: Bool, instant: Bool) {
+        with { apps in
+            var app = apps[pid, default: App()]
+            app.atRest = atRest
+            if instant {
+                app.queuedInstants += 1
+            } else {
+                app.queuedHolds += 1
+            }
+            apps[pid] = app
+        }
     }
 
     /// Main actor, when the loop stops owning the app: the value
@@ -68,12 +82,6 @@ final class EnhancedUIHolds: @unchecked Sendable {
             app.atRest = leftOn
             apps[pid] = app.idle ? nil : app
         }
-    }
-
-    /// Main actor, at enqueue: an instant set is on its way, so
-    /// the one ahead of it keeps the flag down.
-    func noteInstantQueued(_ pid: pid_t) {
-        with { $0[pid, default: App()].queuedInstants += 1 }
     }
 
     /// Ahead of an instant set: joins the running batch or opens
@@ -87,7 +95,7 @@ final class EnhancedUIHolds: @unchecked Sendable {
             app.instantHeld = true
             return true
         }
-        if opens { acquire(pid, writer) }
+        if opens { hold(pid, writer) }
     }
 
     /// After an instant set: closes the batch once no other
@@ -104,7 +112,13 @@ final class EnhancedUIHolds: @unchecked Sendable {
         if closes { release(pid, writer) }
     }
 
+    /// An animation's hold, noted by `noteQueued`.
     func acquire(_ pid: pid_t, _ writer: FrameWriter) {
+        with { $0[pid, default: App()].queuedHolds -= 1 }
+        hold(pid, writer)
+    }
+
+    private func hold(_ pid: pid_t, _ writer: FrameWriter) {
         let drops = with { apps -> Bool in
             var app = apps[pid, default: App()]
             app.holders += 1
