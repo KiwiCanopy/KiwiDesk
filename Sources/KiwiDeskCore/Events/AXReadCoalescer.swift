@@ -4,8 +4,9 @@ import Foundation
 
 /// Coalesces asynchronous AX reads off the main actor (#618):
 /// the frame behind a move/resize notification, the liveness
-/// frame behind a focus report and the title behind a title
-/// notification (#1088). Per-PID serial reads keep one slow app
+/// frame behind a focus report, the title behind a title
+/// notification (#1088) and the window list behind an
+/// event-driven reconcile (#1930). Per-PID serial reads keep one slow app
 /// from blocking the main thread (`FrameApplier`). Two residuals
 /// are accepted: an event can deliver after its window's
 /// destroy, and `trackedFrames` can lag by one read — draining
@@ -29,6 +30,7 @@ final class AXReadCoalescer {
         case frames
         case focus
         case titles
+        case windowList
     }
 
     private enum Key: Hashable, Sendable {
@@ -38,25 +40,35 @@ final class AXReadCoalescer {
         /// windows (#1088, input-and-animation.md).
         case focus(pid_t)
         case title(WindowID)
+        /// One per app. A request landing mid-read joins the
+        /// next read rather than replacing its waiter: every
+        /// waiter is a reconcile owed, and a read that began
+        /// before the request cannot answer it (#1930).
+        case windowList(pid_t)
 
         var lane: Lane {
             switch self {
             case .frame: .frames
             case .focus: .focus
             case .title: .titles
+            case .windowList: .windowList
             }
         }
     }
 
     /// What one read answered — the key decides which.
-    private enum Reading: Sendable {
+    /// Unchecked for the window list alone: an `AXUIElement` is
+    /// an immutable CF reference, safe to hand across threads.
+    private enum Reading: @unchecked Sendable {
         case frame(CGRect)
         case title(String?)
+        case windowList([AXUIElement])
     }
 
     private struct Pending {
-        let element: AXUIElement
         let pid: pid_t
+        /// The blocking read, run OFF the main actor.
+        let read: @Sendable () -> Reading
         let onReading: @MainActor (Reading) -> Void
     }
 
@@ -102,7 +114,11 @@ final class AXReadCoalescer {
         pid: pid_t,
         onFrame: @escaping @MainActor (CGRect) -> Void
     ) {
-        enqueue(.frame(window, kind), element: element, pid: pid) {
+        let reader = reader
+        nonisolated(unsafe) let element = element
+        enqueue(.frame(window, kind), pid: pid) {
+            .frame(reader(element))
+        } onReading: {
             if case .frame(let frame) = $0 { onFrame(frame) }
         }
     }
@@ -114,7 +130,11 @@ final class AXReadCoalescer {
         pid: pid_t,
         onFrame: @escaping @MainActor (CGRect) -> Void
     ) {
-        enqueue(.focus(pid), element: element, pid: pid) {
+        let reader = reader
+        nonisolated(unsafe) let element = element
+        enqueue(.focus(pid), pid: pid) {
+            .frame(reader(element))
+        } onReading: {
             if case .frame(let frame) = $0 { onFrame(frame) }
         }
     }
@@ -128,43 +148,62 @@ final class AXReadCoalescer {
         pid: pid_t,
         onTitle: @escaping @MainActor (String?) -> Void
     ) {
-        enqueue(.title(window), element: element, pid: pid) {
+        let titleReader = titleReader
+        nonisolated(unsafe) let element = element
+        enqueue(.title(window), pid: pid) {
+            .title(titleReader(element))
+        } onReading: {
             if case .title(let title) = $0 { onTitle(title) }
+        }
+    }
+
+    /// Requests an app's window list for an event-driven
+    /// reconcile (#1930). `read` is the caller's blocking list
+    /// read, run OFF the main actor; every waiter is answered.
+    func requestWindows(
+        pid: pid_t,
+        read: @escaping @Sendable () -> [AXUIElement],
+        onList: @escaping @MainActor ([AXUIElement]) -> Void
+    ) {
+        enqueue(.windowList(pid), pid: pid) {
+            .windowList(read())
+        } onReading: {
+            if case .windowList(let list) = $0 { onList(list) }
         }
     }
 
     private func enqueue(
         _ key: Key,
-        element: AXUIElement,
         pid: pid_t,
+        read: @escaping @Sendable () -> Reading,
         onReading: @escaping @MainActor (Reading) -> Void
     ) {
-        let pending = Pending(
-            element: element,
+        var pending = Pending(
             pid: pid,
+            read: read,
             onReading: onReading
         )
         if inFlight[key] != nil {
+            if case .windowList = key,
+                let waiting = queued[key]?.onReading
+            {
+                pending = Pending(pid: pid, read: read) {
+                    waiting($0)
+                    onReading($0)
+                }
+            }
             queued[key] = pending
             return
         }
         inFlight[key] = pending
-        read(key, pending)
+        self.read(key, pending)
     }
 
     private func read(_ key: Key, _ pending: Pending) {
-        nonisolated(unsafe) let element = pending.element
-        let reader = reader
-        let titleReader = titleReader
+        let work = pending.read
         let deliver = deliver
         dispatch(pending.pid, lane: key.lane) { [weak self] in
-            let reading: Reading
-            switch key {
-            case .frame, .focus:
-                reading = .frame(reader(element))
-            case .title:
-                reading = .title(titleReader(element))
-            }
+            let reading = work()
             deliver {
                 self?.complete(key, reading)
             }

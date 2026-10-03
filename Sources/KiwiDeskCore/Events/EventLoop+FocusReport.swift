@@ -12,23 +12,66 @@ extension EventLoop {
     /// report rides one off-main frame read, delivered by
     /// `deliverFocusReport` (#1088, input-and-animation.md). An
     /// untracked id still asks: the #21 classification needs
-    /// the panel's id. The reconcile ahead of both is the #21
-    /// destroy net and stays a main-actor list read.
+    /// the panel's id. The reconcile beside both is the #21
+    /// destroy net, its list read off the main actor (#1930): a
+    /// tracked id reports at once, any other after the reconcile
+    /// settled tracking.
     func handleFocusedWindowChanged(
         _ element: AXUIElement,
         pid: pid_t,
         app: AppRef
     ) {
+        let requested = ContinuousClock.now
+        let reported = windowID(
+            of: element,
+            pid: pid,
+            arm: kAXFocusedWindowChangedNotification
+        )
         // Closing a window nearly always moves focus;
         // reconciling here catches missed destroy events.
-        reconcile(pid: pid, app: app)
-        guard
-            let reported = windowID(
-                of: element,
+        if let reported, elements[pid]?[reported] != nil {
+            requestFocusReport(
+                reported,
+                element: element,
                 pid: pid,
-                arm: kAXFocusedWindowChangedNotification
+                requested: requested
             )
-        else { return }
+            reconcileOffMain(pid: pid, app: app)
+            return
+        }
+        reconcileOffMain(pid: pid, app: app) { [weak self] in
+            guard let self, let reported, observers[pid] != nil
+            else { return }
+            // A focus KiwiDesk commanded during the reconcile
+            // supersedes this report, as at delivery below.
+            if let commanded = lastCommandedFocus,
+                requested < commanded
+            {
+                onLog(
+                    "focus: w\(reported.raw) stale — a focus was "
+                        + "commanded during its reconcile, dropped"
+                )
+                return
+            }
+            settleFocusReport(
+                reported,
+                element: element,
+                pid: pid,
+                app: app,
+                requested: requested
+            )
+        }
+    }
+
+    /// The report of a window that was untracked when it came
+    /// in, after the reconcile settled tracking (#1930).
+    private func settleFocusReport(
+        _ reported: WindowID,
+        element: AXUIElement,
+        pid: pid_t,
+        app: AppRef,
+        requested: ContinuousClock.Instant
+    ) {
         // A shadow takes its process's focus as the process
         // DEACTIVATES, so its report says where the user left,
         // never where they went (#1785, device 2026-09-30).
@@ -60,7 +103,22 @@ extension EventLoop {
             )
             return
         }
-        let requested = ContinuousClock.now
+        requestFocusReport(
+            id,
+            element: element,
+            pid: pid,
+            requested: requested
+        )
+    }
+
+    /// One off-main liveness read behind a tracked window's
+    /// report, delivered by `deliverFocusReport` (#1088).
+    private func requestFocusReport(
+        _ id: WindowID,
+        element: AXUIElement,
+        pid: pid_t,
+        requested: ContinuousClock.Instant
+    ) {
         axReads.requestFocus(element: element, pid: pid) {
             [weak self] frame in
             self?.deliverFocusReport(

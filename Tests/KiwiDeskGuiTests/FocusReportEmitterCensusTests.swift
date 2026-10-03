@@ -20,7 +20,7 @@ struct FocusReportEmitterCensusTests {
     /// The census: file → whether it asks the gate.
     private static let emitters: [String: Bool] = [
         "EventLoop+FocusReport.swift": true,
-        "EventLoop+Apps.swift": false,
+        "EventLoop+ActivationFocus.swift": false,
     ]
 
     private static var eventsRoot: URL {

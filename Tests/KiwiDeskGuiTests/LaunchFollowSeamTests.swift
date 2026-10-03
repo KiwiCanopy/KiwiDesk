@@ -124,7 +124,9 @@ struct LaunchFollowSeamTests {
             under: "Events"
         )
         let report = try #require(body.range(of: "onAppActivated("))
-        let reconcile = try #require(body.range(of: "reconcile("))
+        let reconcile = try #require(
+            body.range(of: "reconcileOffMain(")
+        )
         #expect(report.lowerBound < reconcile.lowerBound)
     }
 

@@ -8,6 +8,7 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+Tracking.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileAll.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileOffMain.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+RemovalDistrust.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Tabs.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Heal.swift"
@@ -22,6 +23,22 @@ editing AX code:
 
 - AX calls are slow and can block. Never call them inside tight
   loops or layout math — snapshot state first, then compute.
+- **An event-driven reconcile reads the window list OFF the main
+  actor (#1930).** The list read is the one AX call whose cost is
+  the APP's: System Settings answers it in 100–157 ms idle and up
+  to 745 ms under a saturated GPU, and the activation and focus
+  arms paid that on the main actor at every Space switch that
+  touched it. So `appActivated` and `handleFocusedWindowChanged`
+  reconcile through `reconcileOffMain`, which reads on the app's
+  `AXReadCoalescer` lane and applies the list on the main actor,
+  and a new event-driven caller does the same. The list is up to
+  one read old when it lands, so `PrefetchedWindows` keeps the
+  flight out of the sweep — a window tracked during the read
+  stays, one gone during it is not re-adopted — and a focus
+  report that waited for the reconcile is judged at delivery
+  (a later activation or a commanded focus drops it). Boot, the
+  heal and `reconcileAll` keep the synchronous `reconcile`
+  (`ReconcileOffMainTests`).
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever

@@ -134,7 +134,9 @@ struct FocusArmRouteTests {
         loop.trackedFrames[id] = .zero
         report(loop)
         #expect(box.focused.isEmpty, "reported inline")
-        #expect(box.work.count == 1)
+        // The liveness read, then the reconcile's list read
+        // (#1930) — neither performed inline.
+        #expect(box.work.count == 2)
         box.drainOne()
         #expect(box.focused == [id])
         #expect(loop.trackedFrames[id] == box.frame)
@@ -188,7 +190,8 @@ struct FocusArmRouteTests {
     func untrackedStillAsksAndClassifies() {
         // The map is not a wall: the #21 classification needs
         // the panel's id, and the ask is the one reader that
-        // has it. No read is scheduled for it.
+        // has it. It classifies once the reconcile's list read
+        // settled tracking (#1930); no liveness read follows.
         let (loop, box) = makeLoop()
         loop.elements[pid] = [:]
         box.listed = []
@@ -198,6 +201,9 @@ struct FocusArmRouteTests {
             box.asked.contains { $0.contains("(untracked) → w77") },
             "no ask: \(box.logs)"
         )
+        #expect(box.work.count == 1)
+        #expect(!box.logs.contains { $0.contains("untracked w77") })
+        box.drainOne()
         #expect(
             box.logs.contains { $0.contains("untracked w77") },
             "the untracked path did not run: \(box.logs)"

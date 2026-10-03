@@ -182,16 +182,16 @@ struct FocusReportProvenanceTests {
         #expect(box.focused == [WindowID(11)], "reported \(box.focused)")
     }
 
-    /// An element that answers no id is not reported. The
-    /// reconcile that precedes the arm drops a window the app no
-    /// longer lists from the map, so the map misses, the fallback
-    /// ask answers nil and nothing is read. The route itself —
-    /// map first, the dead-element drop at delivery — is
-    /// `FocusArmRouteTests`' (#1088).
+    /// An element that answers no id is not reported: the map
+    /// misses, the fallback ask answers nil and nothing is read.
+    /// The route itself — map first, the dead-element drop at
+    /// delivery — is `FocusArmRouteTests`' (#1088).
     @Test("An element that no longer answers is not reported")
     func deadElementIsNotReported() {
         let (loop, box) = makeLoop()
         loop.lastActivePid = pid
+        loop.elements[pid] = [:]
+        box.listed = []
         loop.resolveWindowID = { _ in nil }
         loop.handleFocusedWindowChanged(element, pid: pid, app: ref)
         #expect(box.focused.isEmpty, "reported \(box.focused)")

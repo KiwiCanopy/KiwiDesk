@@ -60,6 +60,12 @@ struct ProcessIdentityWiringTests {
         loop.writeEnhancedUI = { _, _ in }
         loop.writeManualAX = { _, _ in }
         loop.axWindows = { _ in [] }
+        // The reconcile's list read rides the coalescer (#1930),
+        // pumped synchronously here.
+        loop.axReads.deliver = { work in
+            MainActor.assumeIsolated { work() }
+        }
+        loop.axReads.dispatchOverride = { _, work in work() }
         loop.activationPolicy = { _ in .regular }
         loop.onScreenNormalWindowIDs = { box.census }
         loop.onEvent = { event in

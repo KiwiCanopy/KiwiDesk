@@ -15,11 +15,13 @@ extension EventLoop {
     /// occupying layout slots. `coalesceTabs` is false on a bulk
     /// `reconcileAll` (native-Space switch / reload / wake), where
     /// same-app windows across spaces tile to identical frames and
-    /// must not merge (#308).
+    /// must not merge (#308). `prefetched` is a list read off
+    /// the main actor (`reconcileOffMain`, #1930).
     func reconcile(
         pid: pid_t,
         app: AppRef,
-        coalesceTabs: Bool = true
+        coalesceTabs: Bool = true,
+        prefetched: PrefetchedWindows? = nil
     ) {
         // Per-app timing (#672): mirrors `attach` — the window
         // list and warmup below are the same blocking AX calls,
@@ -127,7 +129,7 @@ extension EventLoop {
         // partially read list would untrack every window the
         // abort never reached.
         let budget = openAppBudget()
-        let liveElements = axWindows(pid)
+        let liveElements = prefetched?.elements ?? axWindows(pid)
         if activationPolicy == .regular
             || liveElements.contains(where: Self.isStandardWindow)
         {
@@ -238,6 +240,13 @@ extension EventLoop {
         // change, covering targeted reconciles that race the bulk
         // `reconcileAll` (#308 review).
         let recentSpaceSwitch = isWithinSpaceSwitchGrace()
+        if let prefetched {
+            prefetched.excuseFlight(
+                tracked: Set(elements[pid]?.keys ?? [:].keys),
+                live: &live,
+                appeared: &appeared
+            )
+        }
         // A shadow's record dies with its host, ahead of the sweep
         // that would answer from it (#1785); the population is
         // what the app LISTS, a minimized host included.

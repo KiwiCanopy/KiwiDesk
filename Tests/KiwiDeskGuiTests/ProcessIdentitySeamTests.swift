@@ -78,6 +78,8 @@ struct ProcessIdentitySeamTests {
         #expect(!tracking.contains("kAXStandardWindowSubrole"))
     }
 
+    /// A shadow is never tracked, so its report takes the
+    /// untracked branch, settled after the reconcile (#1930).
     @Test("the focus arm drops a shadow's report ahead of its read")
     func focusArmDropsTheShadow() throws {
         let arm = try SourceScan.functionBody(
@@ -85,14 +87,25 @@ struct ProcessIdentitySeamTests {
             in: "EventLoop+FocusReport.swift",
             under: "Events"
         )
-        try #require(!arm.isEmpty)
-        let drop = try #require(
-            arm.range(of: "!shadows.holds(reported, pid: pid)")
+        let settle = try SourceScan.functionBody(
+            of: "settleFocusReport",
+            in: "EventLoop+FocusReport.swift",
+            under: "Events"
         )
-        let read = try #require(arm.range(of: "axReads.requestFocus("))
+        try #require(!arm.isEmpty && !settle.isEmpty)
+        let tracked = try #require(
+            arm.range(of: "elements[pid]?[reported] != nil")
+        )
+        let deferred = try #require(arm.range(of: "settleFocusReport("))
+        #expect(tracked.upperBound < deferred.lowerBound)
+        let drop = try #require(
+            settle.range(of: "!shadows.holds(reported, pid: pid)")
+        )
+        let read = try #require(settle.range(of: "requestFocusReport("))
         #expect(drop.upperBound < read.lowerBound)
         // A report is never translated into another window's.
         #expect(!arm.contains("hostOfShadow("))
+        #expect(!settle.contains("hostOfShadow("))
     }
 
     @Test("a reconcile re-asks what it tracks, after its sweep")
