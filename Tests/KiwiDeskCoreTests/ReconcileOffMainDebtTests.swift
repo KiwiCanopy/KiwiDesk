@@ -45,6 +45,10 @@ struct ReconcileOffMainDebtTests {
         }
         /// Runs the queued read at `index` ahead of the others.
         func run(_ index: Int) {
+            guard index < work.count else {
+                Issue.record("no queued read at \(index)")
+                return
+            }
             work.remove(at: index)()
         }
     }

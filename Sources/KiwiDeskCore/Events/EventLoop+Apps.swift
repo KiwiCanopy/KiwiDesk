@@ -184,7 +184,7 @@ extension EventLoop {
             )
         )
         // The reconcile below takes this app's window snapshot
-        // on the same turn — no second scan at attach (#672).
+        // — no second scan at attach (#672).
         syncObservation(
             for: RunningApp(
                 pid: pid,

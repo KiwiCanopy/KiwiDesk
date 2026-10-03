@@ -180,8 +180,10 @@ struct ReconcileOffMainTests {
         #expect(loop.elements[pid]?[late] != nil)
     }
 
-    @Test("an untracked focus waits for the reconcile")
-    func untrackedFocusWaits() {
+    /// The wait itself — a window the reconcile adopts — is
+    /// `ReconcileOffMainDebtTests`' (`untrackedFocusJoinsThePendingRead`).
+    @Test("an untracked focus that stays untracked classifies")
+    func untrackedFocusClassifies() {
         let (loop, box) = makeLoop()
         loop.elements[pid] = [:]
         box.focus = WindowID(23)

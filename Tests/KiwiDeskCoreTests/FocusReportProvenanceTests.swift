@@ -182,21 +182,6 @@ struct FocusReportProvenanceTests {
         #expect(box.focused == [WindowID(11)], "reported \(box.focused)")
     }
 
-    /// An element that answers no id is not reported: the map
-    /// misses, the fallback ask answers nil and nothing is read.
-    /// The route itself — map first, the dead-element drop at
-    /// delivery — is `FocusArmRouteTests`' (#1088).
-    @Test("An element that no longer answers is not reported")
-    func deadElementIsNotReported() {
-        let (loop, box) = makeLoop()
-        loop.lastActivePid = pid
-        loop.elements[pid] = [:]
-        box.listed = []
-        loop.resolveWindowID = { _ in nil }
-        loop.handleFocusedWindowChanged(element, pid: pid, app: ref)
-        #expect(box.focused.isEmpty, "reported \(box.focused)")
-    }
-
     /// The gate sits AFTER the untracked classification, so an
     /// ignored panel of an inactive app still arms #244's distrust
     /// the way it did before.
