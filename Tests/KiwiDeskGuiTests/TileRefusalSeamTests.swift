@@ -123,7 +123,10 @@ struct TileRefusalSeamTests {
             in: "FloatDetection.swift",
             under: "AX"
         )
+        // Handing the pure body the read values, not only the
+        // `structural:` tail an inline copy would still call.
         #expect(element.contains("autoFloatReason("))
+        #expect(element.contains("subrole: AXHelper.subrole(of: element)"))
         #expect(!element.contains("shouldFloat("))
     }
 }
