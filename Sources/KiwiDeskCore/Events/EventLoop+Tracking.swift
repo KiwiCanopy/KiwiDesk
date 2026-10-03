@@ -103,11 +103,10 @@ extension EventLoop {
             shadowVerdict(element, id: window.id, pid: pid) == .window
         else { return }
         let verdict = autoFloatVerdict(
-            element,
+            .element(element, layer: layer),
             id: window.id,
             pid: pid,
-            bundleID: app.bundleID,
-            layer: layer
+            bundleID: app.bundleID
         )
         window.isFloating = verdict.floats
         // A transient overlay floats for a *structural* reason
@@ -137,6 +136,7 @@ extension EventLoop {
         // as a sibling appears at the same frame) coalesces into a
         // re-key instead of a destroy + create (#308).
         trackedFrames[window.id] = window.frame
+        offMain.noteFreshWrite(window.id)
         if AXHelper.hasNativeTabs(element) {
             tabCarriers.insert(window.id)
         }
@@ -205,19 +205,41 @@ extension EventLoop {
         app: AppRef
     ) {
         recheckFullscreen(element, id: id)
+        offMain.noteFreshWrite(id, [.detection])
         let verdict = autoFloatVerdict(
-            element,
+            .element(element, layer: FloatDetection.windowLayer(of: id)),
             id: id,
             pid: pid,
-            bundleID: app.bundleID,
-            layer: FloatDetection.windowLayer(of: id)
+            bundleID: app.bundleID
         )
+        applyFloatVerdict(verdict, id: id)
+    }
+
+    private func applyFloatVerdict(_ verdict: FloatVerdict, id: WindowID) {
         let before = detectedFloating[id]
         detectedFloating[id] = verdict
         // A changed REASON alone is stored silently: the flag
         // follows only whether the window floats.
         guard before?.floats != verdict.floats else { return }
         onEvent(.windowFloatChanged(id, isFloating: verdict.floats))
+    }
+
+    /// `recheckFloat` over what the off-main read found (#1933):
+    /// the same two verdicts, no AX call.
+    func recheckFloat(
+        id: WindowID,
+        pid: pid_t,
+        app: AppRef,
+        reading: TrackedReading
+    ) {
+        applyFullscreen(reading.fullscreen, id: id)
+        let verdict = autoFloatVerdict(
+            .read(reading.autoReason),
+            id: id,
+            pid: pid,
+            bundleID: app.bundleID
+        )
+        applyFloatVerdict(verdict, id: id)
     }
 
     /// Re-reads native-fullscreen state on reconcile so a
@@ -228,7 +250,10 @@ extension EventLoop {
         _ element: AXUIElement,
         id: WindowID
     ) {
-        let fullscreen = readFullscreen(element)
+        applyFullscreen(readFullscreen(element), id: id)
+    }
+
+    private func applyFullscreen(_ fullscreen: Bool, id: WindowID) {
         guard detectedFullscreen[id] != fullscreen else { return }
         detectedFullscreen[id] = fullscreen
         onEvent(

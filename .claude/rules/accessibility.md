@@ -9,6 +9,7 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileAll.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileOffMain.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+ListedWindows.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+RemovalDistrust.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Tabs.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Heal.swift"
@@ -49,11 +50,19 @@ editing AX code:
     close-return raise is
     [state-and-layout.md](state-and-layout.md)'s.
 
-  The reconcile body still reads per-window attributes on the
-  main actor as it applies the list — up to 123 ms on System
-  Settings' `AXFullScreen` (2026-10-03); that half is #1933's.
-  `ReconcileOffMainTests` and `ReconcileOffMainDebtTests` hold
-  the behaviour.
+  **What the apply needs of each window is read WITH the list
+  (#1933)** — what `ListedWindow` and `TrackedReading` carry —
+  through `ListedWindowReader`, built on the loop's own seams;
+  before this, System Settings' `AXFullScreen` alone cost up to
+  123 ms on the main actor (2026-10-03). A value the apply comes
+  to need joins the reader rather than being read beside it, and
+  a seam the reader captures reads no `EventLoop` state — it runs
+  off the main actor; one that needs loop state is resolved at
+  request time, as the tracked set is. A window the read did not
+  cover (tracked during the flight, or appeared and handed to
+  `track`) is read the way the synchronous reconcile reads it.
+  `ReconcileOffMainTests`, `ReconcileOffMainDebtTests` and
+  `ReconcileSnapshotTests` hold the behaviour.
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever

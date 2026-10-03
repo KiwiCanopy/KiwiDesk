@@ -40,6 +40,13 @@ struct NotificationArmNeedleTests {
     private static let idRead = "AXHelper.windowID("
     private static let seamRead = "resolveWindowID("
     private static let titleRead = "AXHelper.title("
+    /// Files under `Events/` that read a title OFF the main actor:
+    /// the reconcile's list read, which asks it for the float
+    /// rules' detection (#1933). A title read anywhere else under
+    /// `Events/` runs on the main actor.
+    private static let offMainTitleReaders: Set<String> = [
+        "EventLoop+ListedWindows.swift"
+    ]
 
     /// Files under `Events/` that may spell the id read, with
     /// the count each may carry.
@@ -135,9 +142,12 @@ struct NotificationArmNeedleTests {
                 "\(name) calls the seam \(seam)×, allowed \(expectedSeam)"
             #expect(seam == expectedSeam, seamNote)
             if seam > 0 { seenSeam.insert(name) }
+            let ruled = Self.offMainTitleReaders.contains(name)
             #expect(
-                !source.contains(Self.titleRead),
-                "\(name) reads the title on the main actor"
+                ruled == source.contains(Self.titleRead),
+                ruled
+                    ? "\(name) no longer reads a title: drop its entry"
+                    : "\(name) reads the title on the main actor"
             )
         }
         // Every allowed entry still exists, or a map is stale.

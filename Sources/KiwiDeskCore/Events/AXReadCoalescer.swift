@@ -60,17 +60,11 @@ final class AXReadCoalescer {
         }
     }
 
-    /// An app's window list, handed across threads: an
-    /// `AXUIElement` is an immutable CF reference.
-    private struct ElementList: @unchecked Sendable {
-        let elements: [AXUIElement]
-    }
-
     /// What one read answered — the key decides which.
     private enum Reading: Sendable {
         case frame(CGRect)
         case title(String?)
-        case windowList(ElementList)
+        case windowList(WindowListReading)
         case window(WindowID?)
     }
 
@@ -171,15 +165,13 @@ final class AXReadCoalescer {
     /// read, run OFF the main actor.
     func requestWindows(
         pid: pid_t,
-        read: @escaping @Sendable () -> [AXUIElement],
-        onList: @escaping @MainActor ([AXUIElement]) -> Void
+        read: @escaping @Sendable () -> WindowListReading,
+        onList: @escaping @MainActor (WindowListReading) -> Void
     ) {
         enqueue(.windowList(pid), pid: pid) {
-            .windowList(ElementList(elements: read()))
+            .windowList(read())
         } onReading: {
-            if case .windowList(let list) = $0 {
-                onList(list.elements)
-            }
+            if case .windowList(let reading) = $0 { onList(reading) }
         }
     }
 

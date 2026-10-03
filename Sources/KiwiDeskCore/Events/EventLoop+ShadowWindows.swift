@@ -219,7 +219,8 @@ extension EventLoop {
     func retireShadows(
         pid: pid_t,
         listed: [(element: AXUIElement, id: WindowID)],
-        budget: AppBudget
+        budget: AppBudget,
+        read: [WindowID: WindowTraits] = [:]
     ) -> Bool {
         // A shell needs a buttoned sibling: one window is spared
         // the read.
@@ -228,7 +229,10 @@ extension EventLoop {
         for pair in listed where elements[pid]?[pair.id] != nil {
             // The budget's checkpoint between blocking reads (#803).
             guard !budget.isSpent else { return false }
-            if let traits = shadows.traits(pair.element, pair.id) {
+            // A window the off-main read covered asks nothing (#1933).
+            if let traits = read[pair.id]
+                ?? shadows.traits(pair.element, pair.id)
+            {
                 siblings.append(traits)
             }
         }

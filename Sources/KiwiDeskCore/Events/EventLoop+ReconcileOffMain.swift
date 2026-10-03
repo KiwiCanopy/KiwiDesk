@@ -10,6 +10,32 @@ struct PrefetchedWindows {
     let elements: [AXUIElement]
     /// The app's tracked ids when the read started.
     let trackedAtRead: Set<WindowID>
+    /// Parallel to `elements`; empty where no window was read.
+    var windows: [ListedWindow] = []
+    var layers: [WindowID: Int] = [:]
+    /// `OffMainReconcile.writes` when the read was asked.
+    var writesAtRead = 0
+
+    /// What was read of the `index`th listed window, if anything.
+    func window(at index: Int) -> ListedWindow? {
+        windows.indices.contains(index) ? windows[index] : nil
+    }
+
+    /// Whether the read found a standard window; nil where it read
+    /// none, so the caller asks the elements.
+    var listsStandardWindow: Bool? {
+        windows.isEmpty
+            ? nil : windows.contains(where: \.isStandardWindow)
+    }
+
+    /// The shadow traits read of each tracked window.
+    var traits: [WindowID: WindowTraits] {
+        windows.reduce(into: [:]) { traits, window in
+            if let id = window.id, let read = window.tracked?.traits {
+                traits[id] = read
+            }
+        }
+    }
 
     /// Keeps the flight out of the sweep: a window tracked during
     /// the read stays live (the list predates it), and one that
@@ -52,6 +78,34 @@ struct OffMainReconcile {
     /// Outlives `dropDebts`, or a read from before a stop could
     /// carry the ticket of one asked after it.
     private var issued = 0
+    /// What a main-actor read wrote of a window: its frame, or
+    /// its detection (fullscreen state and float verdict).
+    enum FreshValue: CaseIterable {
+        case frame
+        case detection
+    }
+
+    /// Per window and value, when a main-actor read last wrote it
+    /// — fresher than any off-main reading begun before (#1933).
+    private(set) var writes = 0
+    private var lastWrite: [FreshValue: [WindowID: Int]] = [:]
+
+    mutating func noteFreshWrite(
+        _ id: WindowID,
+        _ values: [FreshValue] = FreshValue.allCases
+    ) {
+        writes += 1
+        for value in values { lastWrite[value, default: [:]][id] = writes }
+    }
+
+    /// Whether a main-actor read wrote `value` of `id` after `mark`.
+    func wroteFresh(
+        _ value: FreshValue,
+        of id: WindowID,
+        since mark: Int
+    ) -> Bool {
+        (lastWrite[value]?[id] ?? 0) > mark
+    }
 
     mutating func startRead(
         pid: pid_t,
@@ -129,25 +183,38 @@ extension EventLoop {
     ) {
         let ticket = offMain.startRead(pid: pid, then: then)
         let tracked = Set(elements[pid]?.keys ?? [:].keys)
+        let writesAtRead = offMain.writes
+        let reader = listedWindowReader(
+            bundleID: app.bundleID,
+            tracked: tracked
+        )
         nonisolated(unsafe) let read = axWindows
         axReads.requestWindows(pid: pid) {
-            read(pid)
-        } onList: { [weak self] list in
+            let elements = read(pid)
+            let layers = FloatDetection.windowLayers(pid: pid)
+            return WindowListReading(
+                elements: elements,
+                windows: reader.read(elements, layers: layers),
+                layers: layers
+            )
+        } onList: { [weak self] reading in
             self?.applyWindowList(
-                list,
+                reading,
                 pid: pid,
                 app: app,
                 tracked: tracked,
+                writesAtRead: writesAtRead,
                 ticket: ticket
             )
         }
     }
 
     private func applyWindowList(
-        _ list: [AXUIElement],
+        _ reading: WindowListReading,
         pid: pid_t,
         app: AppRef,
         tracked: Set<WindowID>,
+        writesAtRead: Int,
         ticket: Int
     ) {
         guard offMain.reading[pid]?.ticket == ticket else { return }
@@ -157,8 +224,11 @@ extension EventLoop {
             pid: pid,
             app: app,
             prefetched: PrefetchedWindows(
-                elements: list,
-                trackedAtRead: tracked
+                elements: reading.elements,
+                trackedAtRead: tracked,
+                windows: reading.windows,
+                layers: reading.layers,
+                writesAtRead: writesAtRead
             )
         )
         // The next read starts before the owed run, so a `then`
@@ -172,5 +242,22 @@ extension EventLoop {
             }
         }
         for then in owed { then() }
+    }
+}
+
+extension EventLoop {
+    /// The reader for `pid`'s next off-main list read.
+    func listedWindowReader(
+        bundleID: String?,
+        tracked: Set<WindowID>
+    ) -> ListedWindowReader {
+        ListedWindowReader(
+            resolve: resolveWindowID,
+            fullscreen: readFullscreen,
+            traits: shadows.traits,
+            bundleID: bundleID,
+            rules: floatRules,
+            tracked: tracked
+        )
     }
 }
