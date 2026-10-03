@@ -224,15 +224,25 @@ editing AX code:
   activated (device, 2026-09-30, the listed process too), and
   `?? .prohibited` at an ownership gate detached it with every
   window it held. So a process's activation policy has ONE
-  reading, `EventLoop.policy(of:)`: LaunchServices' answer,
-  else — while `ProcessIdentity.runs` says the process is alive
-  — the policy last read; `.prohibited` only for a process that
-  is gone or never observed. The reconcile and notification
+  reading, `EventLoop.policy(of:)`: for an observed process the
+  policy last FILED, else LaunchServices' answer; and one door
+  files it, `notePolicy`, which keeps the policy last read
+  while `ProcessIdentity.runs` says the process is alive and
+  files `.prohibited` once it is gone. The window-list read off
+  the main actor reads the policy and the hidden state beside
+  the list and the reconcile files them, because a
+  LaunchServices read is a synchronous XPC round trip, every
+  AX notification asks the policy, and an app activation
+  invalidates even a retained `NSRunningApplication`'s cache —
+  1.2 s of main thread in 30 s of Space switching (#1936,
+  device 2026-10-03). The reconcile and notification
   ownership gates, the boot sweep's step and the float and
   overlay verdicts take it, and a new reader of a policy takes
   it too (`ProcessPolicyReadingTests` ▸
   `lostRecordKeepsARunningProcess`, `lostRecordDetachesAGoneProcess`,
-  `keptPolicyFollowsTheLastRead`; `ProcessIdentitySeamTests` ▸
+  `keptPolicyFollowsTheLastRead`,
+  `observedProcessAsksNothing`; `ReconcileSnapshotTests` ▸
+  `readingCarriesPolicyAndHidden`; `ProcessIdentitySeamTests` ▸
   `policyHasOneReading`).
 - **A shadow window never becomes a tile (#1785).** A window
   with no title-bar button and no AX child beside a buttoned

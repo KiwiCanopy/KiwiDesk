@@ -32,6 +32,8 @@ struct ReconcileSnapshotTests {
         /// Seam calls made while the list applied.
         var askedWhileApplying: [String] = []
         var fullscreen = false
+        var policy: NSApplication.ActivationPolicy = .regular
+        var hidden = false
         var traitReads = 0
         var events: [String] = []
         /// Read work held back, where a test pumps it by hand.
@@ -57,9 +59,12 @@ struct ReconcileSnapshotTests {
 
     /// A loop tracking two windows of `pid`, both listed, every
     /// read pumped synchronously and the delivery marked.
-    private func makeLoop() -> (loop: EventLoop, box: Box) {
+    private func makeLoop(
+        policy: NSApplication.ActivationPolicy = .regular
+    ) -> (loop: EventLoop, box: Box) {
         let loop = EventLoop()
         let box = Box()
+        box.policy = policy
         loop.onLog = { _ in }
         loop.registersWorkspaceObservers = false
         loop.runningApplications = { [] }
@@ -69,9 +74,20 @@ struct ReconcileSnapshotTests {
         loop.readEnhancedUI = { _ in false }
         loop.writeEnhancedUI = { _, _ in }
         loop.writeManualAX = { _, _ in }
-        loop.activationPolicy = { _ in .regular }
+        // LaunchServices answers on the read's thread (#1936).
+        loop.activationPolicy = { _ in
+            MainActor.assumeIsolated {
+                box.asked("policy")
+                return box.policy
+            }
+        }
         loop.onScreenNormalWindowIDs = { [:] }
-        loop.appIsHidden = { _ in false }
+        loop.appIsHidden = { _ in
+            MainActor.assumeIsolated {
+                box.asked("hidden")
+                return box.hidden
+            }
+        }
         loop.frontmostPID = { nil }
         let one = elementOne
         let two = elementTwo
@@ -121,6 +137,8 @@ struct ReconcileSnapshotTests {
                 box.events.append("float w\(id.raw) \(on)")
             case .windowDestroyed(let id, _):
                 box.events.append("destroyed w\(id.raw)")
+            case .windowHidden(let id):
+                box.events.append("hidden w\(id.raw)")
             default: break
             }
         }
@@ -128,7 +146,7 @@ struct ReconcileSnapshotTests {
         loop.scanChunk(budget: nil)
         loop.attach(
             pid: pid,
-            activationPolicy: .regular,
+            activationPolicy: policy,
             ref: ref,
             scanWindowsAtAttach: false
         )
@@ -232,15 +250,25 @@ struct ReconcileSnapshotTests {
     func forceFloatDecidesTheReadVerdict() {
         // An accessory app's windows float as such on either path:
         // the reading's detection never skips the override.
-        let (offMain, _) = makeLoop()
-        offMain.activationPolicy = { _ in .accessory }
+        let (offMain, _) = makeLoop(policy: .accessory)
         offMain.reconcileOffMain(pid: pid, app: ref)
-        let (sync, _) = makeLoop()
-        sync.activationPolicy = { _ in .accessory }
+        let (sync, _) = makeLoop(policy: .accessory)
         sync.reconcile(pid: pid, app: ref)
         #expect(offMain.detectedFloating[first] == .floats(.accessoryApp))
         #expect(
             offMain.detectedFloating[first] == sync.detectedFloating[first]
         )
+    }
+
+    @Test("the reading files the app's policy and hidden state")
+    func readingCarriesPolicyAndHidden() {
+        let (loop, box) = makeLoop()
+        box.policy = .accessory
+        loop.reconcileOffMain(pid: pid, app: ref)
+        #expect(loop.policy(of: pid) == .accessory)
+        box.hidden = true
+        loop.reconcileOffMain(pid: pid, app: ref)
+        #expect(box.events.contains("hidden w41"))
+        #expect(box.askedWhileApplying.isEmpty, "\(box.askedWhileApplying)")
     }
 }

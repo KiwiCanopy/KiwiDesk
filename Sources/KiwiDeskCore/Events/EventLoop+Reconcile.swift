@@ -41,6 +41,7 @@ extension EventLoop {
                 onLog("slow reconcile: \(name) took \(ms)ms")
             }
         }
+        if let prefetched { notePolicy(prefetched.policy, of: pid) }
         let activationPolicy = policy(of: pid)
         guard
             Self.ownsObservation(
@@ -97,7 +98,7 @@ extension EventLoop {
         // a missed hide is `appActivated`'s reconcile of the
         // app just left, which a ⌘H always produces because
         // hiding moves the foreground.
-        guard !appIsHidden(pid) else {
+        guard !(prefetched?.hidden ?? appIsHidden(pid)) else {
             reconcileTabsAndSweep(
                 pid: pid,
                 app: app,

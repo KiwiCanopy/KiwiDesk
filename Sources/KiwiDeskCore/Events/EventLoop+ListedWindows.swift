@@ -1,3 +1,4 @@
+import AppKit
 import ApplicationServices
 import CoreGraphics
 import Foundation
@@ -39,6 +40,11 @@ struct WindowListReading: @unchecked Sendable {
     let windows: [ListedWindow]
     /// The app's WindowServer layers, one snapshot for the pass.
     let layers: [WindowID: Int]
+    /// LaunchServices' policy and hidden state, read beside the
+    /// list so the main actor asks neither (#1936); nil policy
+    /// without a record.
+    let policy: NSApplication.ActivationPolicy?
+    let hidden: Bool
 }
 
 /// Reads a list's windows OFF the main actor (#1933). The seams

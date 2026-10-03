@@ -35,6 +35,7 @@ struct ProcessPolicyReadingTests {
         var active: [pid_t: Bool] = [:]
         var events: [KiwiEvent] = []
         var focused: [WindowID] = []
+        var policyReads = 0
     }
 
     private static let bundle = "test.kiwi.browser"
@@ -77,7 +78,10 @@ struct ProcessPolicyReadingTests {
             box.windowQueries.append(pid)
             return []
         }
-        loop.activationPolicy = { _ in .regular }
+        loop.activationPolicy = { _ in
+            box.policyReads += 1
+            return .regular
+        }
         loop.onScreenNormalWindowIDs = { box.census }
         loop.onEvent = { event in
             box.events.append(event)
@@ -104,6 +108,22 @@ struct ProcessPolicyReadingTests {
 
     // MARK: - The policy reading
 
+    @Test("an observed process answers without asking LaunchServices")
+    func observedProcessAsksNothing() {
+        // Every AX notification asks the policy; a LaunchServices
+        // read on main is a synchronous XPC round trip (#1936).
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)]]
+        loop.healSweep()
+        box.policyReads = 0
+        #expect(loop.policy(of: parent) == .regular)
+        loop.reconcile(pid: parent, app: app(parent).ref)
+        #expect(box.policyReads == 0)
+        // A process never observed still asks.
+        _ = loop.policy(of: other)
+        #expect(box.policyReads == 1)
+    }
+
     @Test("a record lost for a moment keeps a running process")
     func lostRecordKeepsARunningProcess() {
         let (loop, box) = makeLoop()
@@ -111,17 +131,16 @@ struct ProcessPolicyReadingTests {
         loop.healSweep()
         var logs: [String] = []
         loop.onLog = { logs.append($0) }
-        loop.activationPolicy = { _ in nil }
-        #expect(loop.policy(of: parent) == .regular)
+        loop.notePolicy(nil, of: parent)
+        loop.notePolicy(nil, of: parent)
         #expect(loop.policy(of: parent) == .regular)
         // One absence, one line.
         #expect(logs.filter { $0.hasPrefix("ownership:") }.count == 1)
         loop.reconcile(pid: parent, app: app(parent).ref)
         #expect(loop.observes(pid: parent))
         // The record back, then lost again: news again.
-        loop.activationPolicy = { _ in .regular }
-        #expect(loop.policy(of: parent) == .regular)
-        loop.activationPolicy = { _ in nil }
+        loop.notePolicy(.regular, of: parent)
+        loop.notePolicy(nil, of: parent)
         #expect(loop.policy(of: parent) == .regular)
         #expect(logs.filter { $0.hasPrefix("ownership:") }.count == 2)
     }
@@ -149,8 +168,8 @@ struct ProcessPolicyReadingTests {
         let (loop, box) = makeLoop()
         box.census = [parent: [WindowID(1)]]
         loop.healSweep()
-        loop.activationPolicy = { _ in nil }
         box.alive[parent] = nil
+        loop.notePolicy(nil, of: parent)
         #expect(loop.policy(of: parent) == .prohibited)
         loop.reconcile(pid: parent, app: app(parent).ref)
         #expect(!loop.observes(pid: parent))
@@ -168,9 +187,9 @@ struct ProcessPolicyReadingTests {
         let (loop, box) = makeLoop()
         box.census = [parent: [WindowID(1)]]
         loop.healSweep()
-        loop.activationPolicy = { _ in .accessory }
+        loop.notePolicy(.accessory, of: parent)
         #expect(loop.policy(of: parent) == .accessory)
-        loop.activationPolicy = { _ in nil }
+        loop.notePolicy(nil, of: parent)
         #expect(loop.policy(of: parent) == .accessory)
     }
 

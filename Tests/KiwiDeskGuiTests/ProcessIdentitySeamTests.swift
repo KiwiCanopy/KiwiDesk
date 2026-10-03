@@ -184,6 +184,21 @@ struct ProcessIdentitySeamTests {
                 == ["EventLoop+ProcessIdentity.swift"],
             "the raw policy seam is read beside the reading"
         )
+        // An observed process's policy is refreshed by the
+        // off-main list read alone, filed through one door: a
+        // main-actor read is a LaunchServices round trip per AX
+        // notification (#1936).
+        #expect(
+            try sites(of: "notePolicy(")
+                == [
+                    "EventLoop+ProcessIdentity.swift",
+                    "EventLoop+Reconcile.swift",
+                ]
+        )
+        #expect(
+            try source("Events/EventLoop+ReconcileOffMain.swift")
+                .contains("let readPolicy = activationPolicy")
+        )
         // A record is looked up under `Events/` only where a seam
         // defaults to it — the reading's own, and `appAt`,
         // `isActive`, `appIsHidden`, `AppRef(pid:)`. A raw read

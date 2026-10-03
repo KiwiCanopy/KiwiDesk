@@ -115,35 +115,44 @@ extension EventLoop {
     }
 
     /// A process's activation policy, the one reading the
-    /// ownership gates and the float verdicts take. LaunchServices
-    /// loses a running process's record for a moment as its app
-    /// activates (device, 2026-09-30), so a missing record is
-    /// `.prohibited` only once the process is gone; until then
-    /// the policy last read stands.
+    /// ownership gates and the float verdicts take. An observed
+    /// process answers the policy last filed by `notePolicy`: a
+    /// LaunchServices read is a synchronous XPC round trip, and
+    /// every AX notification asks (#1936). Any other process asks
+    /// LaunchServices, and no record is `.prohibited`.
     func policy(of pid: pid_t) -> NSApplication.ActivationPolicy {
-        let known = processIdentity.observed[pid]
-        if let policy = activationPolicy(pid) {
-            if let known {
-                processIdentity.note(
-                    RunningApp(
-                        pid: pid,
-                        activationPolicy: policy,
-                        ref: known.ref
-                    )
-                )
-            }
-            return policy
+        if let known = processIdentity.observed[pid] {
+            return known.activationPolicy
         }
-        guard let known, processIdentity.runs(pid) else {
+        guard let policy = activationPolicy(pid) else {
             return .prohibited
         }
-        if processIdentity.noteUnrecorded(pid) {
-            onLog(
-                "ownership: pid \(pid) runs without a "
-                    + "LaunchServices record — kept"
-            )
+        return policy
+    }
+
+    /// Files a policy read off the main actor for an observed
+    /// process. LaunchServices loses a running process's record
+    /// for a moment as its app activates (device, 2026-09-30), so
+    /// a missing record is `.prohibited` only once the process is
+    /// gone; until then the policy last read stands (#1785).
+    func notePolicy(
+        _ read: NSApplication.ActivationPolicy?,
+        of pid: pid_t
+    ) {
+        guard let known = processIdentity.observed[pid] else { return }
+        let gone = read == nil && !processIdentity.runs(pid)
+        guard let policy = gone ? .prohibited : read else {
+            if processIdentity.noteUnrecorded(pid) {
+                onLog(
+                    "ownership: pid \(pid) runs without a "
+                        + "LaunchServices record — kept"
+                )
+            }
+            return
         }
-        return known.activationPolicy
+        processIdentity.note(
+            RunningApp(pid: pid, activationPolicy: policy, ref: known.ref)
+        )
     }
 
     /// A pid LaunchServices could not name (-1, or any value

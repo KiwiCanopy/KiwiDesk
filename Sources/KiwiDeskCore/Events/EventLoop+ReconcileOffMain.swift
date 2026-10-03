@@ -1,3 +1,4 @@
+import AppKit
 import ApplicationServices
 import Foundation
 
@@ -15,6 +16,10 @@ struct PrefetchedWindows {
     var layers: [WindowID: Int] = [:]
     /// `OffMainReconcile.writes` when the read was asked.
     var writesAtRead = 0
+    /// The app's policy and hidden state, read with the list
+    /// (#1936); a nil `hidden` asks the main-actor seam.
+    var policy: NSApplication.ActivationPolicy?
+    var hidden: Bool?
 
     /// What was read of the `index`th listed window, if anything.
     func window(at index: Int) -> ListedWindow? {
@@ -189,13 +194,17 @@ extension EventLoop {
             tracked: tracked
         )
         nonisolated(unsafe) let read = axWindows
+        nonisolated(unsafe) let readPolicy = activationPolicy
+        nonisolated(unsafe) let readHidden = appIsHidden
         axReads.requestWindows(pid: pid) {
             let elements = read(pid)
             let layers = FloatDetection.windowLayers(pid: pid)
             return WindowListReading(
                 elements: elements,
                 windows: reader.read(elements, layers: layers),
-                layers: layers
+                layers: layers,
+                policy: readPolicy(pid),
+                hidden: readHidden(pid)
             )
         } onList: { [weak self] reading in
             self?.applyWindowList(
@@ -228,7 +237,9 @@ extension EventLoop {
                 trackedAtRead: tracked,
                 windows: reading.windows,
                 layers: reading.layers,
-                writesAtRead: writesAtRead
+                writesAtRead: writesAtRead,
+                policy: reading.policy,
+                hidden: reading.hidden
             )
         )
         // The next read starts before the owed run, so a `then`
