@@ -1,6 +1,29 @@
 import AppKit
 import ApplicationServices
 
+/// Which focus report may still land (#1930): every report asked
+/// for takes a ticket from one counter that never resets, and a
+/// report delivered late stands only while its app has EMITTED
+/// none newer — a newer one that was dropped (a dead element, a
+/// shadow, a panel) supersedes nothing.
+struct FocusReportOrder {
+    private var issued = 0
+    private var emitted: [pid_t: Int] = [:]
+
+    mutating func issueTicket() -> Int {
+        issued += 1
+        return issued
+    }
+
+    mutating func noteEmitted(_ ticket: Int, pid: pid_t) {
+        emitted[pid] = max(emitted[pid] ?? 0, ticket)
+    }
+
+    func isSuperseded(_ ticket: Int, pid: pid_t) -> Bool {
+        (emitted[pid] ?? 0) > ticket
+    }
+}
+
 /// The `kAXFocusedWindowChanged` branch (#21/#244), and the one
 /// question it asks before reporting: is the app the one macOS
 /// activated last (#1322).
@@ -12,23 +35,70 @@ extension EventLoop {
     /// report rides one off-main frame read, delivered by
     /// `deliverFocusReport` (#1088, input-and-animation.md). An
     /// untracked id still asks: the #21 classification needs
-    /// the panel's id. The reconcile ahead of both is the #21
-    /// destroy net and stays a main-actor list read.
+    /// the panel's id. The reconcile beside both is the #21
+    /// destroy net, its list read off the main actor (#1930): a
+    /// tracked id reports at once, any other after the reconcile
+    /// settled tracking — and only while the app emitted no newer
+    /// report (`FocusReportOrder`).
     func handleFocusedWindowChanged(
         _ element: AXUIElement,
         pid: pid_t,
         app: AppRef
     ) {
+        let requested = ContinuousClock.now
+        let ticket = focusOrder.issueTicket()
+        let reported = windowID(
+            of: element,
+            pid: pid,
+            arm: kAXFocusedWindowChangedNotification
+        )
         // Closing a window nearly always moves focus;
         // reconciling here catches missed destroy events.
-        reconcile(pid: pid, app: app)
-        guard
-            let reported = windowID(
-                of: element,
+        if let reported, elements[pid]?[reported] != nil {
+            requestFocusReport(
+                reported,
+                element: element,
                 pid: pid,
-                arm: kAXFocusedWindowChangedNotification
+                requested: requested,
+                ticket: ticket
             )
-        else { return }
+            reconcileOffMain(pid: pid, app: app)
+            return
+        }
+        reconcileOffMain(pid: pid, app: app) { [weak self] in
+            guard let self, let reported, observers[pid] != nil,
+                !focusOrder.isSuperseded(ticket, pid: pid)
+            else { return }
+            // A focus KiwiDesk commanded during the reconcile
+            // supersedes this report, as at delivery below.
+            guard !focusCommanded(since: requested) else {
+                onLog(
+                    "focus: w\(reported.raw) stale — a focus was "
+                        + "commanded during its reconcile, dropped"
+                )
+                return
+            }
+            settleFocusReport(
+                reported,
+                element: element,
+                pid: pid,
+                app: app,
+                requested: requested,
+                ticket: ticket
+            )
+        }
+    }
+
+    /// The report of a window that was untracked when it came
+    /// in, after the reconcile settled tracking (#1930).
+    private func settleFocusReport(
+        _ reported: WindowID,
+        element: AXUIElement,
+        pid: pid_t,
+        app: AppRef,
+        requested: ContinuousClock.Instant,
+        ticket: Int
+    ) {
         // A shadow takes its process's focus as the process
         // DEACTIVATES, so its report says where the user left,
         // never where they went (#1785, device 2026-09-30).
@@ -60,14 +130,32 @@ extension EventLoop {
             )
             return
         }
-        let requested = ContinuousClock.now
+        requestFocusReport(
+            id,
+            element: element,
+            pid: pid,
+            requested: requested,
+            ticket: ticket
+        )
+    }
+
+    /// One off-main liveness read behind a tracked window's
+    /// report, delivered by `deliverFocusReport` (#1088).
+    private func requestFocusReport(
+        _ id: WindowID,
+        element: AXUIElement,
+        pid: pid_t,
+        requested: ContinuousClock.Instant,
+        ticket: Int
+    ) {
         axReads.requestFocus(element: element, pid: pid) {
             [weak self] frame in
             self?.deliverFocusReport(
                 id,
                 pid: pid,
                 frame: frame,
-                requested: requested
+                requested: requested,
+                ticket: ticket
             )
         }
     }
@@ -81,10 +169,16 @@ extension EventLoop {
         _ id: WindowID,
         pid: pid_t,
         frame: CGRect,
-        requested: ContinuousClock.Instant
+        requested: ContinuousClock.Instant,
+        ticket: Int
     ) {
         guard observers[pid] != nil, elements[pid]?[id] != nil
         else { return }
+        // The app emitted a newer report meanwhile (#1930).
+        guard !focusOrder.isSuperseded(ticket, pid: pid) else {
+            onLog("focus: w\(id.raw) superseded by a newer report")
+            return
+        }
         // A dead element reads as `.zero` (#1084 review), and a
         // real on-screen window never has that frame.
         guard frame != .zero else {
@@ -95,7 +189,7 @@ extension EventLoop {
         // A report older than the last focus KiwiDesk commanded
         // describes a state the command superseded; the
         // command's own echo follows, so this one is stale.
-        if let commanded = lastCommandedFocus, requested < commanded {
+        guard !focusCommanded(since: requested) else {
             onLog(
                 "focus: w\(id.raw) stale — a focus was commanded "
                     + "during its read, dropped"
@@ -116,7 +210,18 @@ extension EventLoop {
             waited.seconds * 1000
             + waited.attoseconds / 1_000_000_000_000_000
         onLog("focus: w\(id.raw) liveness read \(ms)ms off main")
+        focusOrder.noteEmitted(ticket, pid: pid)
         onEvent(.windowFocused(id))
+    }
+
+    /// Whether KiwiDesk commanded a focus after `requested`: a
+    /// report asked before it describes a state the command
+    /// superseded, and the command's own echo follows (#1088).
+    func focusCommanded(since requested: ContinuousClock.Instant)
+        -> Bool
+    {
+        guard let commanded = lastCommandedFocus else { return false }
+        return requested < commanded
     }
 
     /// Whether `pid` is the app macOS activated last. Before any

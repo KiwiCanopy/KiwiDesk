@@ -88,6 +88,12 @@ struct ShadowWindowFocusTests {
             return traits
         }
         loop.resolveWindowID = { _ in box.answer }
+        // The reconcile's list read rides the coalescer (#1930),
+        // pumped synchronously here.
+        loop.axReads.deliver = { work in
+            MainActor.assumeIsolated { work() }
+        }
+        loop.axReads.dispatchOverride = { _, work in work() }
         loop.onEvent = { event in
             switch event {
             case .windowHidden(let id): box.hidden.append(id)

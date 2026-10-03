@@ -8,6 +8,7 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+Tracking.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Reconcile.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileAll.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+ReconcileOffMain.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+RemovalDistrust.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Tabs.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Heal.swift"
@@ -22,6 +23,37 @@ editing AX code:
 
 - AX calls are slow and can block. Never call them inside tight
   loops or layout math — snapshot state first, then compute.
+- **The activation and focus arms read OFF the main actor
+  (#1930).** `appActivated` and `handleFocusedWindowChanged`
+  reconcile through `reconcileOffMain`, and the activation reads
+  its focused window through `requestFocusedWindowID`; a new
+  event-driven caller takes the same doors or joins
+  `SyncReconcileCensusTests`' `allowed` map with its reason. The
+  cost of these reads is the APP's: System Settings answered its
+  window list in 100–157 ms idle and up to 745 ms under a
+  saturated GPU, and its focused window in up to 120 ms (device,
+  2026-10-03), on every Space switch that touched it. Three
+  obligations come with an off-main read:
+  - **The flight stays out of the sweep.** The list is up to one
+    read old when it applies, so `PrefetchedWindows` keeps a
+    window tracked during the read live and refuses to re-adopt
+    one gone during it; one list read is outstanding per app,
+    and what waits on it is owed by that read's one reconcile.
+  - **A late report is judged at delivery**, by the gates
+    [input-and-animation.md](input-and-animation.md)'s delivery
+    clause owns; an untracked window waits for a reconcile begun
+    after its event — the one parked behind a read in flight,
+    else that read, else a fresh one.
+  - **The app the user left lands after the new app's report**
+    whenever its read is slower; what that means for the
+    close-return raise is
+    [state-and-layout.md](state-and-layout.md)'s.
+
+  The reconcile body still reads per-window attributes on the
+  main actor as it applies the list — up to 123 ms on System
+  Settings' `AXFullScreen` (2026-10-03); that half is #1933's.
+  `ReconcileOffMainTests` and `ReconcileOffMainDebtTests` hold
+  the behaviour.
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever

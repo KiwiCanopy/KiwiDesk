@@ -184,7 +184,7 @@ extension EventLoop {
             )
         )
         // The reconcile below takes this app's window snapshot
-        // on the same turn — no second scan at attach (#672).
+        // — no second scan at attach (#672).
         syncObservation(
             for: RunningApp(
                 pid: pid,
@@ -194,7 +194,7 @@ extension EventLoop {
             scanWindowsAtAttach: false
         )
         if let previous = lastActivePid, previous != pid {
-            reconcile(pid: previous, app: AppRef(pid: previous))
+            reconcileOffMain(pid: previous, app: AppRef(pid: previous))
         }
         // An announcement KiwiDesk can name no process for leaves
         // the gate with no reading, which fails open (#1322).
@@ -207,41 +207,16 @@ extension EventLoop {
         // cross-app bookkeeping above, but never query their AX
         // tree merely because they became active.
         guard observers[pid] != nil else { return }
-        // Mirror the focused-changed path: reconcile the
-        // activated app first, so a window tracked late (cold
-        // Electron tree, other native Space) is known before
-        // the managed-window guard below.
-        reconcile(pid: pid, app: app.ref)
         // Several processes: the announced pid may be a sibling's.
-        guard !defersToSiblingReports(pid) else { return }
-        // Clicking a window of another app only activates the
-        // app: if that window was already its app's focused
-        // window, no kAXFocusedWindowChanged fires. Report the
-        // cross-app focus change ourselves.
-        if let id = focusedWindowID(pid: pid) {
-            // Only managed windows: an ignored panel (issue
-            // #21) or a not-yet-tracked window must not leak
-            // a focus event with no state behind it. Surface
-            // the ignored panel gaining focus, though, so the
-            // dismiss report can be distrusted later (#244).
-            if elements[pid]?[id] != nil {
-                // Ungated: the app just activated, which is the
-                // gate's own source (#1322, censused in
-                // `FocusReportEmitterCensusTests`).
-                onEvent(.windowFocused(id))
-            } else {
-                classifyUntrackedFocus(
-                    id: id,
-                    pid: pid,
-                    bundleID: app.ref.bundleID,
-                    isAccessory: Self.classifiesAsOverlay(
-                        pid: pid,
-                        activationPolicy: app.activationPolicy
-                    ),
-                    channel: "activation"
-                )
-            }
+        guard !defersToSiblingReports(pid) else {
+            reconcileOffMain(pid: pid, app: app.ref)
+            return
         }
+        // Both reads run off the main actor (#1930): the window
+        // list, and the focused window this activation reports.
+        let event = ContinuousClock.now
+        reconcileOffMain(pid: pid, app: app.ref)
+        requestActivationFocus(pid: pid, app: app, event: event)
     }
 
     /// The user switched native macOS Spaces. AX only reports

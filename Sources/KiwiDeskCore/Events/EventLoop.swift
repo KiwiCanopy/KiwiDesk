@@ -108,13 +108,13 @@ public final class EventLoop {
     /// and by the focus report's liveness read (#1088), moved
     /// on re-key, cleared on destroy/detach/stop.
     var trackedFrames: [WindowID: CGRect] = [:]
-    /// Per-app off-main AX reads behind the notification arms —
-    /// the move/resize frame (#618), the focus report's liveness
-    /// frame and the title (#1088). Each read is blocking IPC
-    /// into an app that is busiest exactly when it storms, and
-    /// on the main actor it froze the focus ring for the app's
-    /// whole busy stretch. The type owns the coalescing argument.
+    /// Per-app off-main AX reads (#618, #1088, #1930); the type
+    /// owns the coalescing argument.
     let axReads = AXReadCoalescer()
+    /// The off-main reconciles owed per app (#1930).
+    var offMain = OffMainReconcile()
+    /// Which focus report may still land (#1930).
+    var focusOrder = FocusReportOrder()
     /// Tracked windows that carry (or last carried) an `AXTabGroup`.
     /// A re-key needs a tab group on only one side, so this preserves
     /// the "was a carrier" fact for a window that vanishes after a

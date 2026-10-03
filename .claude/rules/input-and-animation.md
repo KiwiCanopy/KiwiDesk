@@ -372,7 +372,18 @@ editing here:
   `focusWindow` stamps `EventLoop.lastCommandedFocus` for a
   command onto ANOTHER window, after the #1345 refusal, so the
   z-order closing re-asserts (same target) and a refused command
-  supersede nothing. The report-reacting re-asserts
+  supersede nothing. **A report the app has since superseded is
+  dropped too** (#1930): every report asked for — the focus arm's
+  and the activation's — takes a ticket from
+  `FocusReportOrder`'s one counter, and one delivered after its
+  app EMITTED a newer one is stale. Emitted, never asked: a newer
+  report the arm then dropped (a dead element, a shadow, a panel)
+  supersedes nothing, or it would discard the activation report
+  it raced (`ReconcileOffMainDebtTests` ▸
+  `droppedNewerReportSupersedesNothing`, `newerReportDropsTheWaitingOne`).
+  The gates judged at delivery live beside `reportsFromActiveApp`
+  in `EventLoop+FocusReport`, and a new one joins them there.
+  The report-reacting re-asserts
   (`+PlacementBounce`, `+AccessibilityReturn`,
   `+MenuBarRevealReturn`, `+FocusEvents`' sibling arm) write no
   stamp BY RULING: each runs inside `handleWindowFocused`,
