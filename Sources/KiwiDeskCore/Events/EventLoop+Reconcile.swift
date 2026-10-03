@@ -115,11 +115,13 @@ extension EventLoop {
         )
         // One window-server snapshot for the whole pass; only
         // apps with an ignore rule need layers at all.
+        // A prefetched read carries the app's whole map (#1933).
         let layers =
-            FloatDetection.requiresWindowLayers(
+            prefetched?.layers
+            ?? (FloatDetection.requiresWindowLayers(
                 bundleID: app.bundleID,
                 isAccessory: isAccessory
-            ) ? FloatDetection.windowLayers(pid: pid) : [:]
+            ) ? FloatDetection.windowLayers(pid: pid) : [:])
         // A queued boot step bounds this app's blocking AX work
         // and completes it after the pass (#803) — see
         // `openAppBudget`, which is inert for an OS-driven
@@ -131,7 +133,8 @@ extension EventLoop {
         let budget = openAppBudget()
         let liveElements = prefetched?.elements ?? axWindows(pid)
         if activationPolicy == .regular
-            || liveElements.contains(where: Self.isStandardWindow)
+            || prefetched?.listsStandardWindow
+                ?? liveElements.contains(where: Self.isStandardWindow)
         {
             guard !budget.isSpent else {
                 deferBootWork(
@@ -157,7 +160,9 @@ extension EventLoop {
         // create or a destroy is emitted (#308).
         var appeared: [(element: AXUIElement, id: WindowID)] = []
         var listed: [(element: AXUIElement, id: WindowID)] = []
-        for element in liveElements {
+        for (index, element) in liveElements.enumerated() {
+            // What the off-main read found, if it read this one.
+            let read = prefetched?.window(at: index)
             guard !budget.isSpent else {
                 deferBootWork(
                     pid: pid,
@@ -166,13 +171,15 @@ extension EventLoop {
                 )
                 return
             }
-            guard let id = resolveWindowID(element)
-            else { continue }
+            let resolved: WindowID? =
+                if let read { read.id } else { resolveWindowID(element) }
+            guard let id = resolved else { continue }
             // Minimized windows count as gone. Unlike windows
             // missing from the list entirely (other native
             // Space), they are flagged so state forgets their
             // space (see KiwiEvent.windowDestroyed).
-            guard !AXHelper.isMinimized(element) else {
+            guard !(read?.minimized ?? AXHelper.isMinimized(element))
+            else {
                 minimized.insert(id)
                 continue
             }
@@ -185,9 +192,10 @@ extension EventLoop {
             // destroy/create pair to subscribers.
             if shouldIgnore(
                 element,
+                id: read == nil ? nil : id,
                 pid: pid,
                 app: app,
-                layer: layers[id],
+                layer: read == nil ? layers[id] : layers[id] ?? 0,
                 isAccessory: isAccessory
             ) {
                 // App-wide user rules are stable config, not a
@@ -221,17 +229,22 @@ extension EventLoop {
                     elements[pid]?[id] = element
                     observers[pid]?.observe(window: element)
                 }
-                recheckFloat(
-                    element,
-                    id: id,
-                    pid: pid,
-                    app: app
-                )
                 // Keep every tracked window's frame current so a
                 // later switch matches against its real on-screen
                 // frame (the vanished side of a tab switch may be a
                 // window that had no tab group of its own — #308).
-                trackedFrames[id] = AXHelper.frame(of: element)
+                if let tracked = read?.tracked {
+                    recheckFloat(
+                        id: id,
+                        pid: pid,
+                        app: app,
+                        reading: tracked
+                    )
+                    trackedFrames[id] = tracked.frame
+                } else {
+                    recheckFloat(element, id: id, pid: pid, app: app)
+                    trackedFrames[id] = AXHelper.frame(of: element)
+                }
             } else {
                 appeared.append((element: element, id: id))
             }
@@ -261,7 +274,12 @@ extension EventLoop {
         )
         // Past the sweep, so a spent budget here abandons nothing
         // of the list; the app is completed after the pass (#803).
-        if !retireShadows(pid: pid, listed: listed, budget: budget) {
+        if !retireShadows(
+            pid: pid,
+            listed: listed,
+            budget: budget,
+            read: prefetched?.traits ?? [:]
+        ) {
             deferBootWork(pid: pid, ref: app, spentMs: budget.spentMs)
         }
     }

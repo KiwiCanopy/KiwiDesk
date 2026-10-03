@@ -10,6 +10,30 @@ struct PrefetchedWindows {
     let elements: [AXUIElement]
     /// The app's tracked ids when the read started.
     let trackedAtRead: Set<WindowID>
+    /// Parallel to `elements`; empty where no window was read.
+    var windows: [ListedWindow] = []
+    var layers: [WindowID: Int] = [:]
+
+    /// What was read of the `index`th listed window, if anything.
+    func window(at index: Int) -> ListedWindow? {
+        windows.indices.contains(index) ? windows[index] : nil
+    }
+
+    /// Whether the read found a standard window; nil where it read
+    /// none, so the caller asks the elements.
+    var listsStandardWindow: Bool? {
+        windows.isEmpty
+            ? nil : windows.contains(where: \.isStandardWindow)
+    }
+
+    /// The shadow traits read of each tracked window.
+    var traits: [WindowID: WindowTraits] {
+        windows.reduce(into: [:]) { traits, window in
+            if let id = window.id, let read = window.tracked?.traits {
+                traits[id] = read
+            }
+        }
+    }
 
     /// Keeps the flight out of the sweep: a window tracked during
     /// the read stays live (the list predates it), and one that
@@ -129,12 +153,19 @@ extension EventLoop {
     ) {
         let ticket = offMain.startRead(pid: pid, then: then)
         let tracked = Set(elements[pid]?.keys ?? [:].keys)
+        let reader = listedWindowReader(pid: pid, bundleID: app.bundleID)
         nonisolated(unsafe) let read = axWindows
         axReads.requestWindows(pid: pid) {
-            read(pid)
-        } onList: { [weak self] list in
+            let elements = read(pid)
+            let layers = FloatDetection.windowLayers(pid: pid)
+            return WindowListReading(
+                elements: elements,
+                windows: reader.read(elements, layers: layers),
+                layers: layers
+            )
+        } onList: { [weak self] reading in
             self?.applyWindowList(
-                list,
+                reading,
                 pid: pid,
                 app: app,
                 tracked: tracked,
@@ -144,7 +175,7 @@ extension EventLoop {
     }
 
     private func applyWindowList(
-        _ list: [AXUIElement],
+        _ reading: WindowListReading,
         pid: pid_t,
         app: AppRef,
         tracked: Set<WindowID>,
@@ -157,8 +188,10 @@ extension EventLoop {
             pid: pid,
             app: app,
             prefetched: PrefetchedWindows(
-                elements: list,
-                trackedAtRead: tracked
+                elements: reading.elements,
+                trackedAtRead: tracked,
+                windows: reading.windows,
+                layers: reading.layers
             )
         )
         // The next read starts before the owed run, so a `then`

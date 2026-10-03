@@ -122,26 +122,37 @@ extension EventLoop {
         )
     }
 
+    /// Where detection's half of a verdict comes from: the
+    /// element, asked now, or what an off-main read found (#1933).
+    enum FloatDetectionSource {
+        case element(AXUIElement, layer: Int?)
+        case read(AutoFloatReason?)
+    }
+
     /// The automatic verdict for one tracked window (#1810) — the
     /// one composition `track` and `recheckFloat` both take.
     func autoFloatVerdict(
-        _ element: AXUIElement,
+        _ source: FloatDetectionSource,
         id: WindowID,
         pid: pid_t,
-        bundleID: String?,
-        layer: Int?
+        bundleID: String?
     ) -> FloatVerdict {
         if let forced = forceFloatReason(pid: pid, id: id) {
             return .floats(forced)
         }
-        return FloatVerdict(
-            FloatDetection.autoFloatReason(
-                element: element,
-                bundleID: bundleID,
-                layer: layer,
-                rules: floatRules
+        switch source {
+        case .element(let element, let layer):
+            return FloatVerdict(
+                FloatDetection.autoFloatReason(
+                    element: element,
+                    bundleID: bundleID,
+                    layer: layer,
+                    rules: floatRules
+                )
             )
-        )
+        case .read(let reason):
+            return FloatVerdict(reason)
+        }
     }
 
     /// Maps an own window id to its `NSWindow` — the one place
@@ -265,8 +276,11 @@ extension EventLoop {
         return !isManaged
     }
 
+    /// `id` is the window's, where the caller already read it
+    /// (#1933); nil asks the element.
     func shouldIgnore(
         _ element: AXUIElement,
+        id known: WindowID? = nil,
         pid: pid_t,
         app: AppRef,
         layer: Int? = nil,
@@ -274,7 +288,7 @@ extension EventLoop {
     ) -> Bool {
         if Self.isOwnProcess(pid) {
             guard
-                let window = AXHelper.windowID(of: element)
+                let window = (known ?? AXHelper.windowID(of: element))
                     .flatMap({ Self.ownWindow(number: Int($0.raw)) })
             else {
                 return true
@@ -290,7 +304,7 @@ extension EventLoop {
         if shouldIgnoreApp(bundleID: app.bundleID) {
             return true
         }
-        guard let id = AXHelper.windowID(of: element) else {
+        guard let id = known ?? AXHelper.windowID(of: element) else {
             return false
         }
         return FloatDetection.shouldIgnore(
