@@ -235,7 +235,11 @@ editing AX code:
   AX notification asks the policy, and an app activation
   invalidates even a retained `NSRunningApplication`'s cache —
   1.2 s of main thread in 30 s of Space switching (#1936,
-  device 2026-10-03). The reconcile and notification
+  device 2026-10-03). For the same reason the heal sweep walks
+  the running-app list only for an unwatched app its gate lets
+  in — every record in a fresh list is a round trip
+  (`ProcessPolicyReadingTests` ▸
+  `healWalksTheListOnlyForAnUnwatchedApp`). The reconcile and notification
   ownership gates, the boot sweep's step and the float and
   overlay verdicts take it, and a new reader of a policy takes
   it too (`ProcessPolicyReadingTests` ▸

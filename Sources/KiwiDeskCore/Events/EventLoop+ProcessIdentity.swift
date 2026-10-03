@@ -183,7 +183,7 @@ extension EventLoop {
     }
 
     /// Drops every unlisted pid the process table no longer holds.
-    private func forgetExitedUnlisted() {
+    func forgetExitedUnlisted() {
         for pid in processIdentity.unlisted.keys
         where !processIdentity.runs(pid) {
             processIdentity.forget(pid: pid)

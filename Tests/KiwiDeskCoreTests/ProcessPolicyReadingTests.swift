@@ -36,6 +36,7 @@ struct ProcessPolicyReadingTests {
         var events: [KiwiEvent] = []
         var focused: [WindowID] = []
         var policyReads = 0
+        var listings = 0
     }
 
     private static let bundle = "test.kiwi.browser"
@@ -98,7 +99,10 @@ struct ProcessPolicyReadingTests {
         loop.runningApplications = { [] }
         #expect(loop.beginScan())
         loop.scanChunk(budget: nil)
-        loop.runningApplications = { self.listing }
+        loop.runningApplications = {
+            box.listings += 1
+            return self.listing
+        }
         box.alive = [
             parent: app(parent), child: app(child),
             other: app(other, bundle: "test.kiwi.other"),
@@ -122,6 +126,24 @@ struct ProcessPolicyReadingTests {
         // A process never observed still asks.
         _ = loop.policy(of: other)
         #expect(box.policyReads == 1)
+    }
+
+    @Test("a heal over watched apps never walks the app list")
+    func healWalksTheListOnlyForAnUnwatchedApp() {
+        // Every record in the list is a LaunchServices round trip
+        // after any activation (#1936).
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)]]
+        loop.healSweep()
+        #expect(loop.observes(pid: parent))
+        box.listings = 0
+        loop.healSweep()
+        #expect(box.listings == 0)
+        // An unwatched app the gate lets in is looked up.
+        box.census[other] = [WindowID(3)]
+        loop.healSweep()
+        #expect(box.listings == 1)
+        #expect(loop.observes(pid: other))
     }
 
     @Test("a record lost for a moment keeps a running process")

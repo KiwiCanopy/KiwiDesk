@@ -30,15 +30,24 @@ extension EventLoop {
     /// it, so it is adopted when its desktop is visited (the
     /// native-space-change `reconcileAll`) —
     /// `docs/accepted-limitations.md` carries the row.
+    ///
+    /// A watched app answers from its filed record; the running-app
+    /// list is walked only for an unwatched app the gate lets in,
+    /// since every record in it is a LaunchServices round trip
+    /// after any activation (#1936).
     func healSweep() {
         guard isRunning else { return }
         let census = onScreenNormalWindowIDs()
         var quiet: [pid_t: Set<WindowID>] = [:]
-        for app in liveApps(owners: Set(census.keys)) {
-            let pid = app.pid
+        var unwatched: [pid_t: RunningApp]?
+        forgetExitedUnlisted()
+        for pid in census.keys.sorted() where Self.isProcessID(pid) {
             guard let ids = census[pid], !ids.isEmpty
             else { continue }
             if let observer = observers[pid] {
+                let app =
+                    processIdentity.observed[pid]?.ref
+                    ?? AppRef(pid: pid)
                 if observer.needsRegistrationRepair {
                     observer.repairRegistration()
                 }
@@ -52,10 +61,10 @@ extension EventLoop {
                     quiet[pid] = missing
                     continue
                 }
-                reconcile(pid: pid, app: app.ref)
+                reconcile(pid: pid, app: app)
                 settleHeal(
                     pid: pid,
-                    app: app.ref,
+                    app: app,
                     missing: missing,
                     quiet: &quiet
                 )
@@ -64,6 +73,14 @@ extension EventLoop {
                     quiet[pid] = ids
                     continue
                 }
+                if unwatched == nil {
+                    unwatched = Dictionary(
+                        liveApps(owners: Set(census.keys))
+                            .map { ($0.pid, $0) },
+                        uniquingKeysWith: { first, _ in first }
+                    )
+                }
+                guard let app = unwatched?[pid] else { continue }
                 // The launch-time attach failed or never ran
                 // (`AXObserverCreate` can refuse a not-yet-ready
                 // app). The reconcile takes this app's window
