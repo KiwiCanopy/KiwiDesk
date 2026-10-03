@@ -5,8 +5,9 @@ import Foundation
 /// Coalesces asynchronous AX reads off the main actor (#618):
 /// the frame behind a move/resize notification, the liveness
 /// frame behind a focus report, the title behind a title
-/// notification (#1088) and the window list behind an
-/// event-driven reconcile (#1930). Per-PID serial reads keep one slow app
+/// notification (#1088), and the window list behind an
+/// event-driven reconcile and the focused window behind an
+/// activation (#1930). Per-PID serial reads keep one slow app
 /// from blocking the main thread (`FrameApplier`). Two residuals
 /// are accepted: an event can deliver after its window's
 /// destroy, and `trackedFrames` can lag by one read — draining
@@ -45,11 +46,14 @@ final class AXReadCoalescer {
         /// waiter is a reconcile owed, and a read that began
         /// before the request cannot answer it (#1930).
         case windowList(pid_t)
+        /// One per app, newest-wins like `.focus`: an activation's
+        /// focused-window read (#1930).
+        case focusedWindow(pid_t)
 
         var lane: Lane {
             switch self {
             case .frame: .frames
-            case .focus: .focus
+            case .focus, .focusedWindow: .focus
             case .title: .titles
             case .windowList: .windowList
             }
@@ -63,6 +67,7 @@ final class AXReadCoalescer {
         case frame(CGRect)
         case title(String?)
         case windowList([AXUIElement])
+        case window(WindowID?)
     }
 
     private struct Pending {
@@ -169,6 +174,22 @@ final class AXReadCoalescer {
             .windowList(read())
         } onReading: {
             if case .windowList(let list) = $0 { onList(list) }
+        }
+    }
+
+    /// Requests an app's focused window id for an activation
+    /// (#1930); `read` is the caller's blocking read, run OFF
+    /// the main actor. One in flight per app, the newest waiter
+    /// answered.
+    func requestFocusedWindow(
+        pid: pid_t,
+        read: @escaping @Sendable () -> WindowID?,
+        onID: @escaping @MainActor (WindowID?) -> Void
+    ) {
+        enqueue(.focusedWindow(pid), pid: pid) {
+            .window(read())
+        } onReading: {
+            if case .window(let id) = $0 { onID(id) }
         }
     }
 

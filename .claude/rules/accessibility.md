@@ -34,9 +34,11 @@ editing AX code:
   and a new event-driven caller does the same. The list is up to
   one read old when it lands, so `PrefetchedWindows` keeps the
   flight out of the sweep — a window tracked during the read
-  stays, one gone during it is not re-adopted — and a focus
-  report that waited for the reconcile is judged at delivery
-  (a later activation or a commanded focus drops it). Boot, the
+  stays, one gone during it is not re-adopted. The activation's
+  focused-window read is the same class (System Settings: up to
+  120 ms) and rides the app's focus lane; its report is judged
+  at delivery — a later activation or a commanded focus drops
+  it — and an untracked window waits for a reconcile. Boot, the
   heal and `reconcileAll` keep the synchronous `reconcile`
   (`ReconcileOffMainTests`).
 - **Every AX message to another app runs inside

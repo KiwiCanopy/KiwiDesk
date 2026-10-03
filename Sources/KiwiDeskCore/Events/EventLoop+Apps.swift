@@ -212,24 +212,10 @@ extension EventLoop {
             reconcileOffMain(pid: pid, app: app.ref)
             return
         }
-        // A tracked focus reports now; the reconcile cannot
-        // change the managed-window guard's answer for it. Any
-        // other waits for the reconcile, so a window tracked late
-        // (cold Electron tree, other native Space) is known first
-        // (#1930).
-        if let id = focusedWindowID(pid: pid), elements[pid]?[id] != nil {
-            reportActivationFocus(id)
-            reconcileOffMain(pid: pid, app: app.ref)
-            return
-        }
-        let requested = ContinuousClock.now
-        reconcileOffMain(pid: pid, app: app.ref) { [weak self] in
-            self?.reportActivationFocus(
-                pid: pid,
-                app: app,
-                requested: requested
-            )
-        }
+        // Both reads run off the main actor (#1930): the window
+        // list, and the focused window this activation reports.
+        reconcileOffMain(pid: pid, app: app.ref)
+        requestActivationFocus(pid: pid, app: app)
     }
 
     /// The user switched native macOS Spaces. AX only reports

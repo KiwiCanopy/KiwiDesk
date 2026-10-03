@@ -34,6 +34,9 @@ struct ReconcileOffMainTests {
         var destroyed: [WindowID] = []
         var logs: [String] = []
         var listReads = 0
+        var focusReads = 0
+        /// The ids the AX list answers; empty destroys window 21.
+        var listed: [WindowID] = []
         var work: [@Sendable () -> Void] = []
         var focus: WindowID?
 
@@ -54,8 +57,9 @@ struct ReconcileOffMainTests {
     }
 
     /// A loop observing `pid` with window 21 tracked and the AX
-    /// list answering NOTHING — so a reconcile that ran destroys
-    /// it, which is how a test sees whether it ran yet.
+    /// list answering NOTHING unless a test lists it — so a
+    /// reconcile that ran destroys it, which is how a test sees
+    /// whether it ran yet.
     private func makeLoop() -> (loop: EventLoop, box: Box) {
         let loop = EventLoop()
         let box = Box()
@@ -73,11 +77,21 @@ struct ReconcileOffMainTests {
         loop.appIsHidden = { _ in false }
         loop.frontmostPID = { nil }
         loop.shadows.focusedWindow = { _ in
-            MainActor.assumeIsolated { box.focus }
+            MainActor.assumeIsolated {
+                box.focusReads += 1
+                return box.focus
+            }
         }
+        let dummy = AXUIElementCreateApplication(pid)
         loop.axWindows = { _ in
-            MainActor.assumeIsolated { box.listReads += 1 }
-            return []
+            let count = MainActor.assumeIsolated {
+                box.listReads += 1
+                return box.listed.count
+            }
+            return Array(repeating: dummy, count: count)
+        }
+        loop.resolveWindowID = { _ in
+            MainActor.assumeIsolated { box.listed.first }
         }
         loop.axReads.deliver = { work in
             MainActor.assumeIsolated { work() }
@@ -104,17 +118,27 @@ struct ReconcileOffMainTests {
         return (loop, box)
     }
 
-    @Test("an activation reads the list off the main actor")
+    @Test("an activation reads both its reads off the main actor")
     func activationReadsOffMain() {
         let (loop, box) = makeLoop()
         box.focus = id
+        box.listed = [id]
         loop.appActivated(app(pid), launchedAt: nil)
-        // A tracked focus reports at once; the list waits.
-        #expect(box.focused == [id])
-        #expect(box.listReads == 0, "read inline")
-        #expect(box.destroyed.isEmpty, "reconciled inline")
+        #expect(box.listReads == 0, "list read inline")
+        #expect(box.focusReads == 0, "focus read inline")
+        #expect(box.focused.isEmpty, "reported inline")
         box.drain()
         #expect(box.listReads == 1)
+        #expect(box.focusReads == 1)
+        #expect(box.focused == [id])
+    }
+
+    @Test("an activation's reconcile lands after its read")
+    func activationReconcilesAfterTheRead() {
+        let (loop, box) = makeLoop()
+        loop.appActivated(app(pid), launchedAt: nil)
+        #expect(box.destroyed.isEmpty, "reconciled inline")
+        box.drain()
         #expect(box.destroyed == [id])
     }
 
