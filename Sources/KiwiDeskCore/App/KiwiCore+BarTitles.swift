@@ -104,8 +104,8 @@ extension KiwiCore {
     /// display's every space), on the main actor, BEFORE the
     /// debounce — once per keystroke in an editor.
     ///
-    /// Space Bar first: it compares one optional per painted
-    /// bar, while the App Bar half walks that bar's items.
+    /// Both managers read their painted front segment and items,
+    /// including inline Space Bar titles.
     private func barsShowTitle(of id: WindowID) -> Bool {
         spaceBars.showsTitle(of: id) || appBars.showsTitle(of: id)
     }

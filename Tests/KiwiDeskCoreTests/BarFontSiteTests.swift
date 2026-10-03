@@ -21,13 +21,15 @@ struct BarFontSiteTests {
 
     private func spaceItem(
         glyph: String? = nil,
-        overflow: Int = 0
+        overflow: Int = 0,
+        inlineTitle: String? = nil
     ) -> SpaceBarItemView {
         let view = SpaceBarItemView(
             frame: CGRect(x: 0, y: 0, width: 140, height: 40)
         )
         let app = SpaceBarItemView.App(
             name: "Safari",
+            inlineTitle: inlineTitle,
             icon: nil,
             glyph: glyph,
             focused: true,
@@ -83,6 +85,15 @@ struct BarFontSiteTests {
         try #require(BarFont.isInstalled(Self.family))
         let font = try #require(spaceItem().identifierLabel.font)
         #expect(font.familyName == Self.family)
+    }
+
+    @Test("The inline title draws the shelf's family")
+    func inlineTitle() throws {
+        try #require(BarFont.isInstalled(Self.family))
+        let field = try #require(
+            spaceItem(inlineTitle: "Document").titleViews.first
+        )
+        #expect(field.font?.familyName == Self.family)
     }
 
     @Test("The Space Bar's overflow count draws the family")

@@ -67,6 +67,7 @@ extension SpaceBarItemView {
         }
         isHovered = hovered
         hoveredTarget = target
+        reportTitleHover(target)
         restyle()
     }
 
@@ -76,6 +77,7 @@ extension SpaceBarItemView {
         let inside = inside && space != nil
         guard inside != pointerInside else { return }
         pointerInside = inside
+        if !inside { reportTitleHover(nil) }
         if let space { onPointerInside(space, drawn, inside) }
     }
 }

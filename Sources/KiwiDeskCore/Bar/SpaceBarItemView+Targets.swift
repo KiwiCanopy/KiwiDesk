@@ -114,7 +114,9 @@ extension SpaceBarItemView {
 
     /// A glyph speaks as its app; a group adds its window count.
     static func glyphLabel(_ app: App) -> String {
-        guard app.count > 1 else { return app.name }
+        guard app.count > 1 else {
+            return app.inlineTitle.map { app.name + ": " + $0 } ?? app.name
+        }
         return L(
             "space_bar.glyph.ax.group",
             "%1$@, windows: %2$d",

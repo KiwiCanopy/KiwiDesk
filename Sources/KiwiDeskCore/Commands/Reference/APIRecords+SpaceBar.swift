@@ -67,6 +67,16 @@ extension APIReference {
                 + "into one glyph with a count badge.",
             .boolean("enabled")
         ),
+        "set_expand_active_space": APIRecord(
+            "Shows individual window titles in the active Space "
+                + "on horizontal bars.",
+            .boolean("enabled")
+        ),
+        "set_show_hover_titles": APIRecord(
+            "Reveals an inactive Space glyph's window title or "
+                + "grouped app name on hover on horizontal bars.",
+            .boolean("enabled")
+        ),
         "set_hide_empty": APIRecord(
             "Hides Spaces with no windows from the bar.",
             .boolean("enabled")

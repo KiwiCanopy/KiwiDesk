@@ -35,13 +35,21 @@ extension SpaceBarOverlay {
     ) -> Bool {
         let expanded = activeIndex(items).flatMap { items[$0].space }
         let identities = items.map(\.identity)
-        let glides = Self.itemsGlide(
-            content: content,
-            from: shownExpanded,
-            to: expanded,
-            sameItems: identities == shownIdentities,
-            sameSlot: !slotChanged
-        )
+        let titles = items.map { $0.apps.map(\.inlineTitle) }
+        let titleGlide =
+            !shownInlineTitles.isEmpty
+            && titles != shownInlineTitles
+            && identities == shownIdentities && !slotChanged
+        let glides =
+            titleGlide
+            || Self.itemsGlide(
+                content: content,
+                from: shownExpanded,
+                to: expanded,
+                sameItems: identities == shownIdentities,
+                sameSlot: !slotChanged
+            )
+        shownInlineTitles = titles
         shownExpanded = expanded
         shownIdentities = identities
         return glides

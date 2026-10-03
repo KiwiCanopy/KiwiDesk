@@ -21,6 +21,7 @@ final class SpaceBarItemView: NSView {
     struct App: Equatable {
         let name: String
         var title: String?
+        var inlineTitle: String?
         let icon: NSImage?
         let glyph: String?
         let focused: Bool
@@ -40,6 +41,12 @@ final class SpaceBarItemView: NSView {
         return tf
     }()
     var appViews: [NSView] = []
+    var titleViews: [NSTextField] = []
+    var pendingTitleReveal = false
+    var pendingInlineWalk = false
+    var titleViewWindowKeys: [[WindowID]] = []
+    var titleTransitionFrames: [WindowID: CGRect] = [:]
+    var drawnTitleWindows: Set<WindowID> = []
     /// Glyphs a strip walk carries under a disc, fading, until the
     /// walk lands (#1528 item 21).
     var leavingViews: [NSView] = []
@@ -214,6 +221,7 @@ final class SpaceBarItemView: NSView {
         }
         self.identity = identity
         self.spaceGlyph = spaceGlyph
+        prepareTitleTransition(to: apps, keepsSpace: keepsSpace)
         self.apps = apps
         self.before = before
         self.after = after
@@ -225,6 +233,7 @@ final class SpaceBarItemView: NSView {
         self.style = style
         self.stateMarkColors = stateMarkColors
         syncAppViews(startsWalk: walk != nil, keepsLeaving: repeats)
+        syncInlineTitles(keepsSpace: keepsSpace)
         syncTargets()
         restyle()
         needsLayout = true

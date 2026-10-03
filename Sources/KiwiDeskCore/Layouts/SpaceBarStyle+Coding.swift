@@ -10,6 +10,8 @@ extension SpaceBarStyle {
         case edge
         case glyphSpan = "glyph_span"
         case groupAdjacentWindows = "group_adjacent_windows"
+        case expandActiveSpace = "expand_active_space"
+        case showHoverTitles = "show_hover_titles"
         case glyphGap = "glyph_gap"
         case inactiveContent = "inactive_content"
         case itemLabel = "item_label"
@@ -50,6 +52,16 @@ extension SpaceBarStyle {
                 Bool.self,
                 forKey: .groupAdjacentWindows
             ) ?? defaults.groupAdjacentWindows
+        expandActiveSpace =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .expandActiveSpace
+            ) ?? defaults.expandActiveSpace
+        showHoverTitles =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .showHoverTitles
+            ) ?? defaults.showHoverTitles
         glyphGap = Self.clampGlyphGap(
             try container.decodeIfPresent(
                 CGFloat.self,

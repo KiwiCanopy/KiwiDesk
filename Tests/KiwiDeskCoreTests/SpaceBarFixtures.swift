@@ -24,6 +24,8 @@ enum SpaceBarFixtures {
         style.showFrontApp = true
         style.hideEmpty = true
         style.groupAdjacentWindows = false
+        style.expandActiveSpace = true
+        style.showHoverTitles = true
         style.stickyBadge = false
         style.springDelay = 1000
         style.focusedItemColor = "#030303"

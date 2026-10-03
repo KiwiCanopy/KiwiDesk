@@ -14,6 +14,15 @@ extension KiwiCore {
         spaceBars.glyphActions.tooltip = { [weak self] in
             self?.spaceBarTooltip($0)
         }
+        spaceBars.glyphActions.hover = { [weak self] space, window in
+            guard let self,
+                self.spaceBars.setTitleHover(space, window: window)
+            else { return }
+            self.deferred.schedule(.stripRecentre, after: .zero) {
+                [weak self] in
+                self?.updateBars()
+            }
+        }
         // A strip held under the pointer re-centres as it leaves
         // (#1528 item 21), through the one bar refresh — deferred,
         // since a hold can end inside a render or a relayout.

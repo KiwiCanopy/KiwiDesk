@@ -2732,9 +2732,8 @@ outside the range are clamped.
 front-app segment shows. The segment always ellipsizes at the
 bar's edge; its length feeds the bar's alignment, so under
 `center` or `end` an uncapped title slides the run of Space
-items sideways every time the title changes. Inert while
-`show_front_app` is off — nothing else on the Space Bar draws a
-title.
+items sideways every time the title changes. Applies only to the front-app label; inline window titles
+use their own cap. Inert while `show_front_app` is off.
 
 **Example:**
 
@@ -2756,6 +2755,40 @@ focuses it. `glyph_span` counts glyphs either way.
 ```lua
 space_bar.set_group_adjacent_windows(false)
 ```
+
+:::unreleased
+
+### space_bar.set_expand_active_space
+
+**Expects:** boolean (default `false`).
+
+**Does:** keeps the Space each display shows expanded on horizontal
+bars, with an icon and title per window. Adjacent windows stay
+separate in that Space; grouping still applies to other Spaces.
+Titles show at most 24 characters. Vertical bars keep icons only.
+
+**Example:**
+
+```lua
+space_bar.set_expand_active_space(true)
+```
+
+### space_bar.set_show_hover_titles
+
+**Expects:** boolean (default `false`).
+
+**Does:** animates an inline title into an app glyph when hovered
+in another Space on a horizontal bar. A single window shows its
+title; a group shows the app name. Titles show at most 24
+characters. Vertical bars keep icons only.
+
+**Example:**
+
+```lua
+space_bar.set_show_hover_titles(true)
+```
+
+:::
 
 ### space_bar.set_hide_empty
 

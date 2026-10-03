@@ -144,6 +144,7 @@ public enum APIReference {
             "set_app_bar_group_adjacent_windows",
         ],
         "space_bar": [
+            "set_expand_active_space", "set_show_hover_titles",
             "set_enabled", "set_edge", "set_glyph_span", "set_glyph_gap",
             "set_group_adjacent_windows", "set_inactive_content",
             "set_item_label",

@@ -21,6 +21,7 @@ extension SpaceBarItemView {
         )
         styleIdentifier()
         styleApps()
+        styleInlineTitles()
         styleBadges()
         styleMarker()
         styleDivider()

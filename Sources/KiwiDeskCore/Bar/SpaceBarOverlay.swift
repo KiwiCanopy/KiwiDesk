@@ -157,6 +157,7 @@ public final class SpaceBarOverlay {
     /// (#1683), so a switch is told from a render that keeps it.
     var shownExpanded: SpaceID?
     var shownIdentities: [SpaceBarItemView.Identity] = []
+    var shownInlineTitles: [[String?]] = []
     /// The one frame write a run item, its box glass and that
     /// glass's backdrop take; a test swaps it to see whether a
     /// pass asked to travel.
@@ -278,6 +279,7 @@ public final class SpaceBarOverlay {
         follow.reset()
         shownExpanded = nil
         shownIdentities = []
+        shownInlineTitles = []
         lastShown = nil
         hitStrip = .zero
         hitFrames = []

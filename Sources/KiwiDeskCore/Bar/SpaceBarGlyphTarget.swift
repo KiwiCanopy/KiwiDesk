@@ -23,6 +23,7 @@ struct SpaceBarGlyphPick {
 /// threaded view → overlay → manager.
 @MainActor
 final class SpaceBarGlyphActions {
+    var hover: @MainActor (SpaceID, WindowID?) -> Void = { _, _ in }
     var pick: @MainActor (SpaceBarGlyphPick) -> Void = { _ in }
     /// Read at hover time, so a title is current without the bar
     /// re-rendering on every title change (#1514).

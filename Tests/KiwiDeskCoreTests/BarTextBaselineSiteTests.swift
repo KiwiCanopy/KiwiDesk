@@ -86,6 +86,43 @@ struct BarTextBaselineSiteTests {
         )
     }
 
+    @Test("the inline title centres its caps on the strip")
+    func inlineTitle() throws {
+        try #require(BarFont.isInstalled(Self.family))
+        var look = SpaceBarLook()
+        look.fontFamily = Self.family
+        look.fontSize = 40
+        let chip = SpaceBarItemView(
+            frame: CGRect(x: 0, y: 0, width: 240, height: 60)
+        )
+        chip.configure(
+            identity: .space("1"),
+            spaceGlyph: .text("1", tinted: true),
+            apps: [
+                SpaceBarItemView.App(
+                    name: "Notes",
+                    inlineTitle: "HH",
+                    icon: nil,
+                    glyph: nil,
+                    focused: true,
+                    count: 1
+                )
+            ],
+            active: true,
+            horizontal: true,
+            style: look,
+            stateMarkColors: StateMarkColors(sticky: "", floating: "")
+        )
+        chip.layout()
+        let field = try #require(chip.titleViews.first)
+        let band = try Self.capMiddle(of: field)
+        #expect(band.whole, "inline title clipped at \(field.frame)")
+        #expect(
+            abs(band.mid - chip.bounds.midY) <= 1,
+            "band \(band.mid), chip \(chip.bounds), field \(field.frame)"
+        )
+    }
+
     /// A badge on a disc in Chancery, framed in a flipped host.
     static func badge(_ text: String) -> NSTextField {
         let host = AppBarOverlay.FlippedView(
