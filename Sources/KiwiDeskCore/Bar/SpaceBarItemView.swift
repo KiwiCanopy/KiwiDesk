@@ -63,6 +63,8 @@ final class SpaceBarItemView: NSView {
     /// The target under the pointer, drawn like the focused glyph
     /// so a click target reads as one (#1528).
     var hoveredTarget: SpaceBarGlyphTarget?
+    var titleHoverAnchor: (window: WindowID, frame: CGRect)?
+    var titleHoverWatch: Task<Void, Never>?
     weak var glyphActions: SpaceBarGlyphActions?
     /// Blank until its item wears a marker; the style pass draws
     /// the marker's symbol (`styleMarkerBadge`).
@@ -127,6 +129,8 @@ final class SpaceBarItemView: NSView {
     var onSelect: (SpaceID) -> Void = { _ in }
 
     override var isFlipped: Bool { true }
+
+    isolated deinit { titleHoverWatch?.cancel() }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -210,6 +214,7 @@ final class SpaceBarItemView: NSView {
         let repeats = keepsSpace && walk == nil && self.drawn == drawn
         if !repeats { pendingWalk = walk }
         if self.identity != identity {
+            clearTitleHover()
             cancelSpringSweep()
             isDragHovered = false
             // A pointer resting on the Space this slot drew must
@@ -231,6 +236,9 @@ final class SpaceBarItemView: NSView {
         self.isActive = active
         self.horizontal = horizontal
         self.style = style
+        if active || !horizontal || !style.showHoverTitles {
+            clearTitleHover()
+        }
         self.stateMarkColors = stateMarkColors
         syncAppViews(startsWalk: walk != nil, keepsLeaving: repeats)
         syncInlineTitles(keepsSpace: keepsSpace)

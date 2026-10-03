@@ -7,6 +7,8 @@ extension SpaceBarOverlay {
     /// last pass drew into.
     func render(followingActive: Bool, slotChanged: Bool = false) {
         guard let state = lastShown else { return }
+        let drawnContent = contentFrame
+        let drawnRun = itemRun.convert(CGPoint.zero, to: root)
         let items = state.items
         let frontApp = state.frontApp
         let strip = state.strip
@@ -191,8 +193,12 @@ extension SpaceBarOverlay {
         let glides = recordGlide(
             items,
             content: style.inactiveContent,
-            slotChanged: slotChanged
+            slotChanged: slotChanged,
+            horizontal: horizontal
         )
+        inlineResizeShift =
+            contentFrame.minX - drawnContent.minX
+            + drawnRun.x - itemContainer.frame.minX - runFrame.minX
         BarMotion.runLayout { moveFrame(itemRun, runFrame, glides) }
         placeItems(itemFrames, glides: glides)
         for (index, item) in items.enumerated() {
@@ -234,14 +240,19 @@ extension SpaceBarOverlay {
             style: style,
             horizontal: horizontal
         )
-        BarMotion.runLayout {
-            installGlassHosting(
+        let placeGlass = {
+            self.installGlassHosting(
                 hosting,
                 frames: itemFrames,
                 style: style,
                 depth: horizontal ? strip.height : strip.width,
-                animated: glides
+                animated: glides || self.resizesInlineTitles
             )
+        }
+        if resizesInlineTitles {
+            BarMotion.runPlateGlide(placeGlass)
+        } else {
+            BarMotion.runLayout(placeGlass)
         }
         layoutOverflow(
             fades,

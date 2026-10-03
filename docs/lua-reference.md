@@ -2780,7 +2780,9 @@ space_bar.set_expand_active_space(true)
 **Does:** animates an inline title into an app glyph when hovered
 in another Space on a horizontal bar. A single window shows its
 title; a group shows the app name. Titles show at most 24
-characters. Vertical bars keep icons only.
+characters. The title stays open through the item's animated
+expansion; moving the pointer to another glyph changes it.
+Vertical bars keep icons only.
 
 **Example:**
 

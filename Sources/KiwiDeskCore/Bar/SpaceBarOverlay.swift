@@ -158,6 +158,8 @@ public final class SpaceBarOverlay {
     var shownExpanded: SpaceID?
     var shownIdentities: [SpaceBarItemView.Identity] = []
     var shownInlineTitles: [[String?]] = []
+    var resizesInlineTitles = false
+    var inlineResizeShift: CGFloat = 0
     /// The one frame write a run item, its box glass and that
     /// glass's backdrop take; a test swaps it to see whether a
     /// pass asked to travel.
@@ -275,11 +277,15 @@ public final class SpaceBarOverlay {
         guard lastShown != nil else { return }
         // A chip hidden under the pointer ends its hold (#1528),
         // though its Space may draw on another display's bar.
-        itemViews.forEach { $0.setPointerInside(false) }
+        itemViews.forEach {
+            $0.clearTitleHover()
+            $0.setPointerInside(false)
+        }
         follow.reset()
         shownExpanded = nil
         shownIdentities = []
         shownInlineTitles = []
+        resizesInlineTitles = false
         lastShown = nil
         hitStrip = .zero
         hitFrames = []

@@ -93,12 +93,4 @@ extension SpaceBarItemView {
         }
     }
 
-    func reportTitleHover(_ target: SpaceBarGlyphTarget?) {
-        guard let space else { return }
-        let window =
-            style.showHoverTitles && horizontal && !isActive
-                && target?.kind == .glyph
-            ? target?.members.first : nil
-        glyphActions?.hover(space, window)
-    }
 }
