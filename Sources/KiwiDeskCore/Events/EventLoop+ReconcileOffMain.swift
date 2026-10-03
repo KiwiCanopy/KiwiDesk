@@ -27,33 +27,25 @@ struct PrefetchedWindows {
     }
 }
 
-/// The off-main reconciles owed per app, and each app's newest
-/// focus report (#1930). One list read is outstanding per app;
-/// what waits on it is owed by THAT read's one reconcile, and a
-/// request landing mid-read is owed by the read after it, since a
-/// read that began first cannot answer it.
+/// The off-main reconciles owed per app (#1930). One list read is
+/// outstanding per app; what waits on it is owed by THAT read's
+/// one reconcile, and a request landing mid-read is owed by the
+/// read after it, since a read that began first cannot answer it.
 struct OffMainReconcile {
+    struct Read {
+        /// Names the read, so a delivery from a read the loop no
+        /// longer waits on — one from before a stop — pays nothing.
+        let ticket: Int
+        var then: [@MainActor () -> Void]
+    }
+
     struct Debt {
         var app: AppRef
         var then: [@MainActor () -> Void]
     }
 
-    var reading: [pid_t: [@MainActor () -> Void]] = [:]
+    var reading: [pid_t: Read] = [:]
     var next: [pid_t: Debt] = [:]
-    /// Per app: the generation of the newest focus report asked
-    /// for. A report delivered late stands only while it is the
-    /// newest, so it can never land after a newer one.
-    private(set) var focusReports: [pid_t: Int] = [:]
-
-    mutating func stampFocusReport(pid: pid_t) -> Int {
-        let stamp = (focusReports[pid] ?? 0) + 1
-        focusReports[pid] = stamp
-        return stamp
-    }
-
-    func isNewestFocusReport(_ stamp: Int, pid: pid_t) -> Bool {
-        focusReports[pid] == stamp
-    }
 }
 
 extension EventLoop {
@@ -84,18 +76,22 @@ extension EventLoop {
         readWindowList(pid: pid, app: app, then: owed)
     }
 
-    /// Runs `then` once the reconcile in flight for `pid` lands,
-    /// or at once when none is — for a reader that needs tracking
-    /// settled by the read already asked, not a fresh one.
+    /// Runs `then` after the reconcile last asked for `pid` — the
+    /// one parked behind a read in flight, else that read — or
+    /// after a fresh one when none is pending: a reader that needs
+    /// tracking settled by a read begun after its own event.
     func afterPendingReconcile(
         pid: pid_t,
+        app: AppRef,
         then: @escaping @MainActor () -> Void
     ) {
-        guard offMain.reading[pid] != nil else {
-            then()
-            return
+        if offMain.next[pid] != nil {
+            offMain.next[pid]?.then.append(then)
+        } else if offMain.reading[pid] != nil {
+            offMain.reading[pid]?.then.append(then)
+        } else {
+            reconcileOffMain(pid: pid, app: app, then: then)
         }
-        offMain.reading[pid]?.append(then)
     }
 
     private func readWindowList(
@@ -103,7 +99,8 @@ extension EventLoop {
         app: AppRef,
         then: [@MainActor () -> Void]
     ) {
-        offMain.reading[pid] = then
+        let ticket = focusOrder.issueTicket()
+        offMain.reading[pid] = .init(ticket: ticket, then: then)
         let tracked = Set(elements[pid]?.keys ?? [:].keys)
         nonisolated(unsafe) let read = axWindows
         axReads.requestWindows(pid: pid) {
@@ -113,7 +110,8 @@ extension EventLoop {
                 list,
                 pid: pid,
                 app: app,
-                tracked: tracked
+                tracked: tracked,
+                ticket: ticket
             )
         }
     }
@@ -122,9 +120,12 @@ extension EventLoop {
         _ list: [AXUIElement],
         pid: pid_t,
         app: AppRef,
-        tracked: Set<WindowID>
+        tracked: Set<WindowID>,
+        ticket: Int
     ) {
-        let owed = offMain.reading.removeValue(forKey: pid) ?? []
+        guard offMain.reading[pid]?.ticket == ticket else { return }
+        let owed = offMain.reading.removeValue(forKey: pid)?.then ?? []
+        let debt = offMain.next.removeValue(forKey: pid)
         reconcile(
             pid: pid,
             app: app,
@@ -133,23 +134,16 @@ extension EventLoop {
                 trackedAtRead: tracked
             )
         )
-        for then in owed { then() }
-        if let debt = offMain.next.removeValue(forKey: pid) {
+        // The next read starts before the owed run, so a `then`
+        // asking again joins the read after it.
+        if let debt {
             reconcileOffMain(pid: pid, app: debt.app)
-            offMain.reading[pid]? += debt.then
-            if offMain.reading[pid] == nil {
+            if offMain.reading[pid] != nil {
+                offMain.reading[pid]?.then += debt.then
+            } else {
                 for then in debt.then { then() }
             }
         }
-    }
-
-    /// Whether KiwiDesk commanded a focus after `requested`: a
-    /// report asked before it describes a state the command
-    /// superseded, and the command's own echo follows (#1088).
-    func focusCommanded(since requested: ContinuousClock.Instant)
-        -> Bool
-    {
-        guard let commanded = lastCommandedFocus else { return false }
-        return requested < commanded
+        for then in owed { then() }
     }
 }

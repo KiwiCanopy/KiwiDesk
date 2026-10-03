@@ -111,9 +111,10 @@ public final class EventLoop {
     /// Per-app off-main AX reads (#618, #1088, #1930); the type
     /// owns the coalescing argument.
     let axReads = AXReadCoalescer()
-    /// The off-main reconciles owed per app, and each app's newest
-    /// focus report (#1930, `EventLoop+ReconcileOffMain`).
+    /// The off-main reconciles owed per app (#1930).
     var offMain = OffMainReconcile()
+    /// Which focus report may still land (#1930).
+    var focusOrder = FocusReportOrder()
     /// Tracked windows that carry (or last carried) an `AXTabGroup`.
     /// A re-key needs a tab group on only one side, so this preserves
     /// the "was a carrier" fact for a window that vanishes after a

@@ -8,20 +8,20 @@ extension EventLoop {
     /// actor (#1930) and reports it at delivery.
     func requestActivationFocus(pid: pid_t, app: RunningApp) {
         let requested = ContinuousClock.now
-        let stamp = offMain.stampFocusReport(pid: pid)
+        let ticket = focusOrder.issueTicket()
         requestFocusedWindowID(pid: pid) { [weak self] id in
             self?.deliverActivationFocus(
                 id,
                 pid: pid,
                 app: app,
                 requested: requested,
-                stamp: stamp
+                ticket: ticket
             )
         }
     }
 
     /// The activation's focus report, judged at delivery (#1930):
-    /// a later activation, a newer report from the app or a
+    /// a later activation, a newer report the app emitted or a
     /// commanded focus supersedes it. An untracked window waits
     /// for the reconcile the activation asked, so a window tracked
     /// late (cold Electron tree, other native Space) is known
@@ -31,11 +31,11 @@ extension EventLoop {
         pid: pid_t,
         app: RunningApp,
         requested: ContinuousClock.Instant,
-        stamp: Int,
+        ticket: Int,
         settled: Bool = false
     ) {
         guard lastActivePid == pid, observers[pid] != nil,
-            offMain.isNewestFocusReport(stamp, pid: pid)
+            !focusOrder.isSuperseded(ticket, pid: pid)
         else { return }
         guard !focusCommanded(since: requested) else {
             onLog(
@@ -55,17 +55,18 @@ extension EventLoop {
         // focus, though, so the dismiss report can be distrusted
         // later (#244).
         if elements[pid]?[id] != nil {
-            reportActivationFocus(id)
+            reportActivationFocus(id, pid: pid, ticket: ticket)
             return
         }
         guard settled else {
-            afterPendingReconcile(pid: pid) { [weak self] in
+            afterPendingReconcile(pid: pid, app: app.ref) {
+                [weak self] in
                 self?.deliverActivationFocus(
                     id,
                     pid: pid,
                     app: app,
                     requested: requested,
-                    stamp: stamp,
+                    ticket: ticket,
                     settled: true
                 )
             }
@@ -86,7 +87,12 @@ extension EventLoop {
     /// The activation channel's one report. Ungated: the app just
     /// activated, which is the gate's own source (#1322, censused
     /// in `FocusReportEmitterCensusTests`).
-    func reportActivationFocus(_ id: WindowID) {
+    func reportActivationFocus(
+        _ id: WindowID,
+        pid: pid_t,
+        ticket: Int
+    ) {
+        focusOrder.noteEmitted(ticket, pid: pid)
         onEvent(.windowFocused(id))
     }
 }

@@ -9,11 +9,11 @@ import Testing
 /// **What waits on an off-main reconcile, and which focus report
 /// stands** (#1930). One list read is outstanding per app and
 /// answers only what was owed when it began; a focus report that
-/// waits on a reconcile delivers only while no newer report from
-/// the app was asked for. The read work is captured and pumped by
-/// hand, in whatever order a test needs: the list read is queued
-/// ahead of the activation's focus read.
-@Suite("Reconcile off main: debts and generations (#1930)")
+/// lands late delivers only while its app emitted none newer.
+/// The read work is captured and pumped by hand, in whatever
+/// order a test needs: the list read is queued ahead of the
+/// activation's focus read.
+@Suite("Reconcile off main: debts and report order (#1930)")
 @MainActor
 struct ReconcileOffMainDebtTests {
     private final class FakeObserver: AppObserving {
@@ -179,12 +179,15 @@ struct ReconcileOffMainDebtTests {
         loop.appActivated(app(pid), launchedAt: nil)
         box.run(1)
         // The user focuses tracked window 21 while the report for
-        // the untracked one waits on the list read.
+        // the untracked one waits on the list read, and that newer
+        // report lands first.
         loop.handleFocusedWindowChanged(
             AXUIElementCreateApplication(pid),
             pid: pid,
             app: ref
         )
+        box.run(1)
+        #expect(box.focused == [id])
         loop.elements[pid]?[late] = AXUIElementCreateApplication(pid)
         box.listed = [id, late]
         box.drain()
@@ -204,6 +207,62 @@ struct ReconcileOffMainDebtTests {
         box.listed = [id, late]
         box.drain()
         #expect(box.focused == [late])
+    }
+
+    @Test("a newer report that was dropped supersedes nothing")
+    func droppedNewerReportSupersedesNothing() {
+        let (loop, box) = makeLoop()
+        loop.lastActivePid = pid
+        box.focus = id
+        box.listed = [id]
+        loop.appActivated(app(pid), launchedAt: nil)
+        // A focus change naming no window (a dead element) asks
+        // after the activation and reports nothing.
+        loop.resolveWindowID = { _ in nil }
+        loop.handleFocusedWindowChanged(
+            AXUIElementCreateApplication(other),
+            pid: pid,
+            app: ref
+        )
+        loop.resolveWindowID = { _ in
+            MainActor.assumeIsolated { box.listed.first }
+        }
+        box.drain()
+        #expect(box.focused == [id], "reported \(box.focused)")
+    }
+
+    @Test("an untracked focus joins the read parked behind one")
+    func untrackedFocusJoinsTheParkedRead() {
+        let (loop, box) = makeLoop()
+        // A read is already in flight when the app activates, so
+        // the activation's own reconcile is parked behind it.
+        loop.reconcileOffMain(pid: pid, app: ref)
+        let late = WindowID(34)
+        box.focus = late
+        loop.appActivated(app(pid), launchedAt: nil)
+        #expect(box.work.count == 2)
+        box.run(1)
+        // The read that began first answers nothing it was not
+        // asked before it began.
+        box.run(0)
+        #expect(box.focused.isEmpty, "judged by the earlier read")
+        #expect(box.work.count == 1)
+        loop.elements[pid]?[late] = AXUIElementCreateApplication(pid)
+        box.listed = [late]
+        box.run(0)
+        #expect(box.focused == [late])
+    }
+
+    @Test("a read from before a stop pays nothing after it")
+    func staleReadPaysNothing() {
+        let (loop, box) = makeLoop()
+        var answered: [String] = []
+        loop.reconcileOffMain(pid: pid, app: ref) { answered.append("a") }
+        loop.offMain = OffMainReconcile()
+        loop.reconcileOffMain(pid: pid, app: ref) { answered.append("b") }
+        box.drain()
+        #expect(answered == ["b"])
+        #expect(box.listReads == 2)
     }
 
     @Test("an app KiwiDesk does not observe is never read")

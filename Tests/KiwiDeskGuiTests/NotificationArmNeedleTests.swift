@@ -184,7 +184,7 @@ struct NotificationArmNeedleTests {
         #expect(delivery.contains("!focusCommanded(since: requested)"))
         let staleness = try SourceScan.functionBody(
             of: "focusCommanded",
-            in: "EventLoop+ReconcileOffMain.swift",
+            in: "EventLoop+FocusReport.swift",
             under: "Events"
         )
         #expect(staleness.contains("requested < commanded"))

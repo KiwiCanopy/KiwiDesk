@@ -41,8 +41,9 @@ final class AXReadCoalescer {
         /// windows (#1088, input-and-animation.md).
         case focus(pid_t)
         case title(WindowID)
-        /// One per app; `reconcileOffMain` keeps at most one
-        /// request outstanding and owns what waits on it (#1930).
+        /// One per app. `reconcileOffMain` is the one caller: it
+        /// keeps one request outstanding and owns what waits on it
+        /// (#1930), so this key never queues.
         case windowList(pid_t)
         /// One per app, newest-wins like `.focus`: an activation's
         /// focused-window read (#1930).
