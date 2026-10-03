@@ -214,8 +214,9 @@ extension EventLoop {
         }
         // Both reads run off the main actor (#1930): the window
         // list, and the focused window this activation reports.
+        let event = ContinuousClock.now
         reconcileOffMain(pid: pid, app: app.ref)
-        requestActivationFocus(pid: pid, app: app)
+        requestActivationFocus(pid: pid, app: app, event: event)
     }
 
     /// The user switched native macOS Spaces. AX only reports

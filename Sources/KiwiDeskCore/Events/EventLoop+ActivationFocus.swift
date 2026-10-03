@@ -6,8 +6,11 @@ import Foundation
 extension EventLoop {
     /// Reads the activated app's focused window off the main
     /// actor (#1930) and reports it at delivery.
-    func requestActivationFocus(pid: pid_t, app: RunningApp) {
-        let requested = ContinuousClock.now
+    func requestActivationFocus(
+        pid: pid_t,
+        app: RunningApp,
+        event requested: ContinuousClock.Instant
+    ) {
         let ticket = focusOrder.issueTicket()
         requestFocusedWindowID(pid: pid) { [weak self] id in
             self?.deliverActivationFocus(
@@ -59,8 +62,11 @@ extension EventLoop {
             return
         }
         guard settled else {
-            afterPendingReconcile(pid: pid, app: app.ref) {
-                [weak self] in
+            afterPendingReconcile(
+                pid: pid,
+                app: app.ref,
+                since: requested
+            ) { [weak self] in
                 self?.deliverActivationFocus(
                     id,
                     pid: pid,

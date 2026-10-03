@@ -192,6 +192,9 @@ struct ReconcileOffMainTests {
         box.drain()
         #expect(box.logs.contains { $0.contains("untracked w23") })
         #expect(box.focused.isEmpty)
+        // The activation's own read had landed: it settled
+        // tracking, so no second read is asked.
+        #expect(box.listReads == 1)
     }
 
     @Test("a later activation supersedes a waiting report")

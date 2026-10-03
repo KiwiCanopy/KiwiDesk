@@ -260,7 +260,7 @@ struct ReconcileOffMainDebtTests {
         let (loop, box) = makeLoop()
         var answered: [String] = []
         loop.reconcileOffMain(pid: pid, app: ref) { answered.append("a") }
-        loop.offMain = OffMainReconcile()
+        loop.offMain.dropDebts()
         loop.reconcileOffMain(pid: pid, app: ref) { answered.append("b") }
         box.drain()
         #expect(answered == ["b"])

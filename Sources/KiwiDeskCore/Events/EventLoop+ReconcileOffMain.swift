@@ -46,6 +46,29 @@ struct OffMainReconcile {
 
     var reading: [pid_t: Read] = [:]
     var next: [pid_t: Debt] = [:]
+    /// When each app's last list read began.
+    private(set) var readStarted: [pid_t: ContinuousClock.Instant] =
+        [:]
+    /// Outlives `dropDebts`, or a read from before a stop could
+    /// carry the ticket of one asked after it.
+    private var issued = 0
+
+    mutating func startRead(
+        pid: pid_t,
+        then: [@MainActor () -> Void]
+    ) -> Int {
+        issued += 1
+        reading[pid] = Read(ticket: issued, then: then)
+        readStarted[pid] = .now
+        return issued
+    }
+
+    /// Forgets what waits, at a stop; the counter stays.
+    mutating func dropDebts() {
+        reading = [:]
+        next = [:]
+        readStarted = [:]
+    }
 }
 
 extension EventLoop {
@@ -76,19 +99,24 @@ extension EventLoop {
         readWindowList(pid: pid, app: app, then: owed)
     }
 
-    /// Runs `then` after the reconcile last asked for `pid` — the
-    /// one parked behind a read in flight, else that read — or
-    /// after a fresh one when none is pending: a reader that needs
-    /// tracking settled by a read begun after its own event.
+    /// Runs `then` once tracking is settled by a read begun after
+    /// `event`: the one parked behind a read in flight, else that
+    /// read; at once when the app's last read began after `event`
+    /// and has landed; else after a fresh one.
     func afterPendingReconcile(
         pid: pid_t,
         app: AppRef,
+        since event: ContinuousClock.Instant,
         then: @escaping @MainActor () -> Void
     ) {
         if offMain.next[pid] != nil {
             offMain.next[pid]?.then.append(then)
         } else if offMain.reading[pid] != nil {
             offMain.reading[pid]?.then.append(then)
+        } else if let started = offMain.readStarted[pid],
+            started >= event
+        {
+            then()
         } else {
             reconcileOffMain(pid: pid, app: app, then: then)
         }
@@ -99,8 +127,7 @@ extension EventLoop {
         app: AppRef,
         then: [@MainActor () -> Void]
     ) {
-        let ticket = focusOrder.issueTicket()
-        offMain.reading[pid] = .init(ticket: ticket, then: then)
+        let ticket = offMain.startRead(pid: pid, then: then)
         let tracked = Set(elements[pid]?.keys ?? [:].keys)
         nonisolated(unsafe) let read = axWindows
         axReads.requestWindows(pid: pid) {

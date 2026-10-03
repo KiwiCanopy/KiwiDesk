@@ -44,14 +44,10 @@ editing AX code:
     clause owns; an untracked window waits for a reconcile begun
     after its event — the one parked behind a read in flight,
     else that read, else a fresh one.
-  - **The close-return raise keys on the focus the removal
-    LOST, and only on that.** The app the user left is reconciled
-    after the new app's focus report whenever its read is slower,
-    so a close it never reported lands with the focus already
-    moved and raises nothing — and where that report was dropped
-    instead, it lands as it did before #1930, removal and raise
-    alike. A change keying the raise on anything but `focusLost`
-    owes this order a test.
+  - **The app the user left lands after the new app's report**
+    whenever its read is slower; what that means for the
+    close-return raise is
+    [state-and-layout.md](state-and-layout.md)'s.
 
   The reconcile body still reads per-window attributes on the
   main actor as it applies the list — up to 123 ms on System

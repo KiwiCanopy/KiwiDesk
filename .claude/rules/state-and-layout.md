@@ -772,6 +772,14 @@ editing here:
   ruling (and which arms that covers) is
   `docs/design-decisions.md`'s. `CloseReturnStandDownWiringTests`
   pins both consulting sites.
+  **The raise keys on the focus the removal LOST, and only on
+  that (#1930).** The activation reconciles the app the user
+  left off the main actor, after the new app's focus report
+  whenever that app's list read is slower, so a close it never
+  reported lands with the focus already moved and raises
+  nothing; where the report was dropped instead, it lands as it
+  did before, removal and raise alike. A change keying the raise
+  on anything but `focusLost` owes that order a test.
   An arm in `focusWindow` guards against its own re-arm (the
   restore's closing re-assert calls back in) **semantically** —
   refuse because the focus is unchanged (`previousFocused !=
