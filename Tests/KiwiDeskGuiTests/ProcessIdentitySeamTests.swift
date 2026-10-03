@@ -228,6 +228,17 @@ struct ProcessIdentitySeamTests {
         )
     }
 
+    /// The raw focused-window seam is read beside the shadow
+    /// mapping alone — `focusedWindowID` and its off-main twin
+    /// (#1930); a raw reader elsewhere hands state a shadow id.
+    @Test("the raw focused-window seam has one reader")
+    func rawFocusedWindowSeamHasOneReader() throws {
+        #expect(
+            try sites(of: "shadows.focusedWindow")
+                == ["EventLoop+ShadowWindows.swift"]
+        )
+    }
+
     /// LaunchServices' frontmost app is read in ONE place; its pid
     /// is -1 for a child registration, so a raw read beside the
     /// chain refuses the second profile's commands again.

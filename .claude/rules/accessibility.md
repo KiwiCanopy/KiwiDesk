@@ -23,24 +23,38 @@ editing AX code:
 
 - AX calls are slow and can block. Never call them inside tight
   loops or layout math — snapshot state first, then compute.
-- **An event-driven reconcile reads the window list OFF the main
-  actor (#1930).** The list read is the one AX call whose cost is
-  the APP's: System Settings answers it in 100–157 ms idle and up
-  to 745 ms under a saturated GPU, and the activation and focus
-  arms paid that on the main actor at every Space switch that
-  touched it. So `appActivated` and `handleFocusedWindowChanged`
-  reconcile through `reconcileOffMain`, which reads on the app's
-  `AXReadCoalescer` lane and applies the list on the main actor,
-  and a new event-driven caller does the same. The list is up to
-  one read old when it lands, so `PrefetchedWindows` keeps the
-  flight out of the sweep — a window tracked during the read
-  stays, one gone during it is not re-adopted. The activation's
-  focused-window read is the same class (System Settings: up to
-  120 ms) and rides the app's focus lane; its report is judged
-  at delivery — a later activation or a commanded focus drops
-  it — and an untracked window waits for a reconcile. Boot, the
-  heal and `reconcileAll` keep the synchronous `reconcile`
-  (`ReconcileOffMainTests`).
+- **The activation and focus arms read OFF the main actor
+  (#1930).** `appActivated` and `handleFocusedWindowChanged`
+  reconcile through `reconcileOffMain`, and the activation reads
+  its focused window through `requestFocusedWindowID`; a new
+  event-driven caller takes the same doors or joins
+  `SyncReconcileCensusTests`' `allowed` map with its reason. The
+  cost of these reads is the APP's: System Settings answered its
+  window list in 100–157 ms idle and up to 745 ms under a
+  saturated GPU, and its focused window in up to 120 ms (device,
+  2026-10-03), on every Space switch that touched it. Three
+  obligations come with an off-main read:
+  - **The flight stays out of the sweep.** The list is up to one
+    read old when it applies, so `PrefetchedWindows` keeps a
+    window tracked during the read live and refuses to re-adopt
+    one gone during it; one list read is outstanding per app,
+    and what waits on it is owed by that read's one reconcile.
+  - **A late report is judged at delivery.** A later activation,
+    a focus KiwiDesk commanded (`focusCommanded(since:)`, the one
+    predicate) or a newer report from the same app
+    (`OffMainReconcile`'s generation) drops it; an untracked
+    window waits for the reconcile already asked.
+  - **The order of the two lanes is ruled, not pinned.** The app
+    the user LEFT is reconciled after the new app's focus report
+    whenever its read is slower — a close it never reported now
+    lands with the focus already moved, so its removal loses no
+    focus and raises nothing (`KiwiCore+CloseReturn`).
+
+  The reconcile body still reads per-window attributes on the
+  main actor as it applies the list — up to 123 ms on System
+  Settings' `AXFullScreen` (2026-10-03); that half is #1933's.
+  `ReconcileOffMainTests` and `ReconcileOffMainDebtTests` hold
+  the behaviour.
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever

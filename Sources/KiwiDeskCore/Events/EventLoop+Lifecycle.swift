@@ -27,6 +27,7 @@ extension EventLoop {
         // frontmost reading on restart (#1322).
         lastActivePid = nil
         lastCommandedFocus = nil
+        offMain = OffMainReconcile()
         displayWatch.stop()
         for observer in observers.values {
             observer.invalidate()

@@ -187,10 +187,26 @@ extension EventLoop {
     }
 
     /// The app's AX-focused window as a tracked id would name it —
-    /// the one read every activation-time focus takes, so no
+    /// the one read every focused-window reader takes, here or
+    /// off the main actor through `requestFocusedWindowID`, so no
     /// reader forgets a shadow's host.
     func focusedWindowID(pid: pid_t) -> WindowID? {
         shadows.focusedWindow(pid).map { hostOfShadow($0, pid: pid) }
+    }
+
+    /// `focusedWindowID` read OFF the main actor on the app's
+    /// focus lane (#1930), the host mapped at delivery.
+    func requestFocusedWindowID(
+        pid: pid_t,
+        then: @escaping @MainActor (WindowID?) -> Void
+    ) {
+        nonisolated(unsafe) let read = shadows.focusedWindow
+        axReads.requestFocusedWindow(pid: pid) {
+            read(pid)
+        } onID: { [weak self] raw in
+            guard let self else { return }
+            then(raw.map { self.hostOfShadow($0, pid: pid) })
+        }
     }
 
     /// At a reconcile's end every tracked window it listed is

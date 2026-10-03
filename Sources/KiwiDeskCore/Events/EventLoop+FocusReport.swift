@@ -15,13 +15,15 @@ extension EventLoop {
     /// the panel's id. The reconcile beside both is the #21
     /// destroy net, its list read off the main actor (#1930): a
     /// tracked id reports at once, any other after the reconcile
-    /// settled tracking.
+    /// settled tracking — and only while no newer report from the
+    /// app was asked for (`OffMainReconcile`).
     func handleFocusedWindowChanged(
         _ element: AXUIElement,
         pid: pid_t,
         app: AppRef
     ) {
         let requested = ContinuousClock.now
+        let stamp = offMain.stampFocusReport(pid: pid)
         let reported = windowID(
             of: element,
             pid: pid,
@@ -34,19 +36,19 @@ extension EventLoop {
                 reported,
                 element: element,
                 pid: pid,
-                requested: requested
+                requested: requested,
+                stamp: stamp
             )
             reconcileOffMain(pid: pid, app: app)
             return
         }
         reconcileOffMain(pid: pid, app: app) { [weak self] in
-            guard let self, let reported, observers[pid] != nil
+            guard let self, let reported, observers[pid] != nil,
+                offMain.isNewestFocusReport(stamp, pid: pid)
             else { return }
             // A focus KiwiDesk commanded during the reconcile
             // supersedes this report, as at delivery below.
-            if let commanded = lastCommandedFocus,
-                requested < commanded
-            {
+            guard !focusCommanded(since: requested) else {
                 onLog(
                     "focus: w\(reported.raw) stale — a focus was "
                         + "commanded during its reconcile, dropped"
@@ -58,7 +60,8 @@ extension EventLoop {
                 element: element,
                 pid: pid,
                 app: app,
-                requested: requested
+                requested: requested,
+                stamp: stamp
             )
         }
     }
@@ -70,7 +73,8 @@ extension EventLoop {
         element: AXUIElement,
         pid: pid_t,
         app: AppRef,
-        requested: ContinuousClock.Instant
+        requested: ContinuousClock.Instant,
+        stamp: Int
     ) {
         // A shadow takes its process's focus as the process
         // DEACTIVATES, so its report says where the user left,
@@ -107,7 +111,8 @@ extension EventLoop {
             id,
             element: element,
             pid: pid,
-            requested: requested
+            requested: requested,
+            stamp: stamp
         )
     }
 
@@ -117,7 +122,8 @@ extension EventLoop {
         _ id: WindowID,
         element: AXUIElement,
         pid: pid_t,
-        requested: ContinuousClock.Instant
+        requested: ContinuousClock.Instant,
+        stamp: Int
     ) {
         axReads.requestFocus(element: element, pid: pid) {
             [weak self] frame in
@@ -125,7 +131,8 @@ extension EventLoop {
                 id,
                 pid: pid,
                 frame: frame,
-                requested: requested
+                requested: requested,
+                stamp: stamp
             )
         }
     }
@@ -139,10 +146,17 @@ extension EventLoop {
         _ id: WindowID,
         pid: pid_t,
         frame: CGRect,
-        requested: ContinuousClock.Instant
+        requested: ContinuousClock.Instant,
+        stamp: Int
     ) {
         guard observers[pid] != nil, elements[pid]?[id] != nil
         else { return }
+        // A newer report from the app was asked for meanwhile; it
+        // lands after this one would (#1930).
+        guard offMain.isNewestFocusReport(stamp, pid: pid) else {
+            onLog("focus: w\(id.raw) superseded by a newer report")
+            return
+        }
         // A dead element reads as `.zero` (#1084 review), and a
         // real on-screen window never has that frame.
         guard frame != .zero else {
@@ -153,7 +167,7 @@ extension EventLoop {
         // A report older than the last focus KiwiDesk commanded
         // describes a state the command superseded; the
         // command's own echo follows, so this one is stale.
-        if let commanded = lastCommandedFocus, requested < commanded {
+        guard !focusCommanded(since: requested) else {
             onLog(
                 "focus: w\(id.raw) stale — a focus was commanded "
                     + "during its read, dropped"

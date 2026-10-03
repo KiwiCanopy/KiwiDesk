@@ -8,36 +8,36 @@ extension EventLoop {
     /// actor (#1930) and reports it at delivery.
     func requestActivationFocus(pid: pid_t, app: RunningApp) {
         let requested = ContinuousClock.now
-        nonisolated(unsafe) let read = shadows.focusedWindow
-        axReads.requestFocusedWindow(pid: pid) {
-            read(pid)
-        } onID: { [weak self] raw in
+        let stamp = offMain.stampFocusReport(pid: pid)
+        requestFocusedWindowID(pid: pid) { [weak self] id in
             self?.deliverActivationFocus(
-                raw,
+                id,
                 pid: pid,
                 app: app,
                 requested: requested,
-                settled: false
+                stamp: stamp
             )
         }
     }
 
-    /// The activation's focus report, judged at delivery: a later
-    /// activation or a commanded focus supersedes it (#1930). An
-    /// untracked window waits for a reconcile first, so a window
-    /// tracked late (cold Electron tree, other native Space) is
-    /// known before the managed-window guard.
+    /// The activation's focus report, judged at delivery (#1930):
+    /// a later activation, a newer report from the app or a
+    /// commanded focus supersedes it. An untracked window waits
+    /// for the reconcile the activation asked, so a window tracked
+    /// late (cold Electron tree, other native Space) is known
+    /// before the managed-window guard.
     private func deliverActivationFocus(
-        _ raw: WindowID?,
+        _ id: WindowID?,
         pid: pid_t,
         app: RunningApp,
         requested: ContinuousClock.Instant,
-        settled: Bool
+        stamp: Int,
+        settled: Bool = false
     ) {
-        guard lastActivePid == pid, observers[pid] != nil else {
-            return
-        }
-        if let commanded = lastCommandedFocus, requested < commanded {
+        guard lastActivePid == pid, observers[pid] != nil,
+            offMain.isNewestFocusReport(stamp, pid: pid)
+        else { return }
+        guard !focusCommanded(since: requested) else {
             onLog(
                 "activation: pid \(pid) focus stale — a focus was "
                     + "commanded during its read, dropped"
@@ -48,8 +48,7 @@ extension EventLoop {
         // app: if that window was already its app's focused
         // window, no kAXFocusedWindowChanged fires. Report the
         // cross-app focus change ourselves.
-        guard let raw else { return }
-        let id = hostOfShadow(raw, pid: pid)
+        guard let id else { return }
         // Only managed windows: an ignored panel (issue #21) or a
         // not-yet-tracked window must not leak a focus event with
         // no state behind it. Surface the ignored panel gaining
@@ -60,12 +59,13 @@ extension EventLoop {
             return
         }
         guard settled else {
-            reconcileOffMain(pid: pid, app: app.ref) { [weak self] in
+            afterPendingReconcile(pid: pid) { [weak self] in
                 self?.deliverActivationFocus(
-                    raw,
+                    id,
                     pid: pid,
                     app: app,
                     requested: requested,
+                    stamp: stamp,
                     settled: true
                 )
             }

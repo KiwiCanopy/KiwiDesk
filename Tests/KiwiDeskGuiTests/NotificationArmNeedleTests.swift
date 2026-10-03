@@ -50,7 +50,8 @@ struct NotificationArmNeedleTests {
         // registration the map could answer from.
         "EventLoop+WindowPolicy.swift": 2,
         // The one AX focused-window read (#1322, #1785), which
-        // `appActivated` takes through `focusedWindowID(pid:)`.
+        // `appActivated` takes off the main actor through
+        // `requestFocusedWindowID(pid:then:)` (#1930).
         "EventLoop+ShadowWindows.swift": 1,
     ]
 
@@ -178,6 +179,28 @@ struct NotificationArmNeedleTests {
             under: "Events"
         )
         try #require(!delivery.isEmpty)
-        #expect(delivery.contains("requested < commanded"))
+        // The drop is one predicate (#1930), which every delivery
+        // that judges a stale report asks.
+        #expect(delivery.contains("!focusCommanded(since: requested)"))
+        let staleness = try SourceScan.functionBody(
+            of: "focusCommanded",
+            in: "EventLoop+ReconcileOffMain.swift",
+            under: "Events"
+        )
+        #expect(staleness.contains("requested < commanded"))
+        for (function, file) in [
+            ("handleFocusedWindowChanged", "EventLoop+FocusReport.swift"),
+            ("deliverActivationFocus", "EventLoop+ActivationFocus.swift"),
+        ] {
+            let body = try SourceScan.functionBody(
+                of: function,
+                in: file,
+                under: "Events"
+            )
+            #expect(
+                body.contains("!focusCommanded(since: requested)"),
+                "\(function) does not ask the predicate"
+            )
+        }
     }
 }

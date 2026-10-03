@@ -242,7 +242,7 @@ struct PrefetchedWindowsFlightTests {
     func trackedDuringFlightIsLive() {
         let flight = PrefetchedWindows(
             elements: [],
-            trackedAtRequest: [WindowID(1)]
+            trackedAtRead: [WindowID(1)]
         )
         var live: Set<WindowID> = []
         var appeared: [(element: AXUIElement, id: WindowID)] = []
@@ -258,7 +258,7 @@ struct PrefetchedWindowsFlightTests {
     func goneDuringFlightIsNotAdopted() {
         let flight = PrefetchedWindows(
             elements: [],
-            trackedAtRequest: [WindowID(1), WindowID(2)]
+            trackedAtRead: [WindowID(1), WindowID(2)]
         )
         var live: Set<WindowID> = [WindowID(2)]
         var appeared = [(element: element, id: WindowID(1))]
@@ -269,50 +269,5 @@ struct PrefetchedWindowsFlightTests {
         )
         #expect(appeared.isEmpty)
         #expect(live.isEmpty)
-    }
-}
-
-/// The window-list lane (#1930): a request landing mid-read
-/// joins the NEXT read, and every waiter is answered.
-@Suite("Window list lane (#1930)")
-@MainActor
-struct WindowListLaneTests {
-    @MainActor
-    private final class Pump {
-        var work: [@Sendable () -> Void] = []
-        var reads = 0
-        var answered: [String] = []
-    }
-
-    @Test("every waiter is answered, and a mid-read one re-reads")
-    func waitersMerge() {
-        let pump = Pump()
-        let coalescer = AXReadCoalescer()
-        coalescer.deliver = { work in
-            MainActor.assumeIsolated { work() }
-        }
-        coalescer.dispatchOverride = { _, work in
-            pump.work.append(work)
-        }
-        func request(_ name: String) {
-            coalescer.requestWindows(pid: 42) {
-                MainActor.assumeIsolated { pump.reads += 1 }
-                return []
-            } onList: { _ in
-                pump.answered.append(name)
-            }
-        }
-        request("a")
-        request("b")
-        request("c")
-        #expect(pump.work.count == 1)
-        pump.work.removeFirst()()
-        #expect(pump.answered == ["a"])
-        // b and c arrived mid-read: one more read answers both.
-        #expect(pump.work.count == 1)
-        pump.work.removeFirst()()
-        #expect(pump.answered == ["a", "b", "c"])
-        #expect(pump.reads == 2)
-        #expect(pump.work.isEmpty)
     }
 }

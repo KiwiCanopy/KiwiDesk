@@ -41,10 +41,8 @@ final class AXReadCoalescer {
         /// windows (#1088, input-and-animation.md).
         case focus(pid_t)
         case title(WindowID)
-        /// One per app. A request landing mid-read joins the
-        /// next read rather than replacing its waiter: every
-        /// waiter is a reconcile owed, and a read that began
-        /// before the request cannot answer it (#1930).
+        /// One per app; `reconcileOffMain` keeps at most one
+        /// request outstanding and owns what waits on it (#1930).
         case windowList(pid_t)
         /// One per app, newest-wins like `.focus`: an activation's
         /// focused-window read (#1930).
@@ -60,13 +58,17 @@ final class AXReadCoalescer {
         }
     }
 
+    /// An app's window list, handed across threads: an
+    /// `AXUIElement` is an immutable CF reference.
+    private struct ElementList: @unchecked Sendable {
+        let elements: [AXUIElement]
+    }
+
     /// What one read answered — the key decides which.
-    /// Unchecked for the window list alone: an `AXUIElement` is
-    /// an immutable CF reference, safe to hand across threads.
-    private enum Reading: @unchecked Sendable {
+    private enum Reading: Sendable {
         case frame(CGRect)
         case title(String?)
-        case windowList([AXUIElement])
+        case windowList(ElementList)
         case window(WindowID?)
     }
 
@@ -164,16 +166,18 @@ final class AXReadCoalescer {
 
     /// Requests an app's window list for an event-driven
     /// reconcile (#1930). `read` is the caller's blocking list
-    /// read, run OFF the main actor; every waiter is answered.
+    /// read, run OFF the main actor.
     func requestWindows(
         pid: pid_t,
         read: @escaping @Sendable () -> [AXUIElement],
         onList: @escaping @MainActor ([AXUIElement]) -> Void
     ) {
         enqueue(.windowList(pid), pid: pid) {
-            .windowList(read())
+            .windowList(ElementList(elements: read()))
         } onReading: {
-            if case .windowList(let list) = $0 { onList(list) }
+            if case .windowList(let list) = $0 {
+                onList(list.elements)
+            }
         }
     }
 
@@ -199,20 +203,12 @@ final class AXReadCoalescer {
         read: @escaping @Sendable () -> Reading,
         onReading: @escaping @MainActor (Reading) -> Void
     ) {
-        var pending = Pending(
+        let pending = Pending(
             pid: pid,
             read: read,
             onReading: onReading
         )
         if inFlight[key] != nil {
-            if case .windowList = key,
-                let waiting = queued[key]?.onReading
-            {
-                pending = Pending(pid: pid, read: read) {
-                    waiting($0)
-                    onReading($0)
-                }
-            }
             queued[key] = pending
             return
         }
