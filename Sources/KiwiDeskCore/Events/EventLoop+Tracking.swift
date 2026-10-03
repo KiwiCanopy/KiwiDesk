@@ -205,7 +205,7 @@ extension EventLoop {
         app: AppRef
     ) {
         recheckFullscreen(element, id: id)
-        offMain.noteFreshWrite(id)
+        offMain.noteFreshWrite(id, [.detection])
         let verdict = autoFloatVerdict(
             .element(element, layer: FloatDetection.windowLayer(of: id)),
             id: id,

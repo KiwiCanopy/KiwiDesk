@@ -186,7 +186,7 @@ extension EventLoop {
             return
         }
         trackedFrames[id] = frame
-        offMain.noteFreshWrite(id)
+        offMain.noteFreshWrite(id, [.frame])
         // A report older than the last focus KiwiDesk commanded
         // describes a state the command superseded; the
         // command's own echo follows, so this one is stale.

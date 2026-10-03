@@ -78,20 +78,33 @@ struct OffMainReconcile {
     /// Outlives `dropDebts`, or a read from before a stop could
     /// carry the ticket of one asked after it.
     private var issued = 0
-    /// Per window, when a main-actor read last wrote its frame,
-    /// fullscreen state or float verdict — a value fresher than
-    /// any off-main reading begun before it (#1933).
-    private(set) var writes = 0
-    private var lastWrite: [WindowID: Int] = [:]
-
-    mutating func noteFreshWrite(_ id: WindowID) {
-        writes += 1
-        lastWrite[id] = writes
+    /// What a main-actor read wrote of a window: its frame, or
+    /// its detection (fullscreen state and float verdict).
+    enum FreshValue: CaseIterable {
+        case frame
+        case detection
     }
 
-    /// Whether a main-actor read wrote `id` after `mark`.
-    func wroteFresh(_ id: WindowID, since mark: Int) -> Bool {
-        (lastWrite[id] ?? 0) > mark
+    /// Per window and value, when a main-actor read last wrote it
+    /// — fresher than any off-main reading begun before (#1933).
+    private(set) var writes = 0
+    private var lastWrite: [FreshValue: [WindowID: Int]] = [:]
+
+    mutating func noteFreshWrite(
+        _ id: WindowID,
+        _ values: [FreshValue] = FreshValue.allCases
+    ) {
+        writes += 1
+        for value in values { lastWrite[value, default: [:]][id] = writes }
+    }
+
+    /// Whether a main-actor read wrote `value` of `id` after `mark`.
+    func wroteFresh(
+        _ value: FreshValue,
+        of id: WindowID,
+        since mark: Int
+    ) -> Bool {
+        (lastWrite[value]?[id] ?? 0) > mark
     }
 
     mutating func startRead(

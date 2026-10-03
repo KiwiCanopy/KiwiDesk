@@ -142,10 +142,12 @@ struct NotificationArmNeedleTests {
                 "\(name) calls the seam \(seam)×, allowed \(expectedSeam)"
             #expect(seam == expectedSeam, seamNote)
             if seam > 0 { seenSeam.insert(name) }
+            let ruled = Self.offMainTitleReaders.contains(name)
             #expect(
-                Self.offMainTitleReaders.contains(name)
-                    == source.contains(Self.titleRead),
-                "\(name) reads the title on the main actor"
+                ruled == source.contains(Self.titleRead),
+                ruled
+                    ? "\(name) no longer reads a title: drop its entry"
+                    : "\(name) reads the title on the main actor"
             )
         }
         // Every allowed entry still exists, or a map is stale.

@@ -210,4 +210,37 @@ struct ReconcileSnapshotTests {
         #expect(loop.detectedFullscreen[first] == false)
         #expect(box.events.contains("fullscreen w41 false"))
     }
+
+    @Test("a frame write during the read vetoes only the frame")
+    func frameWriteVetoesOnlyTheFrame() {
+        let (loop, box) = makeLoop()
+        box.held = []
+        loop.reconcileOffMain(pid: pid, app: ref)
+        // The move arm delivers a fresh frame during the flight.
+        let moved = CGRect(x: 7, y: 7, width: 300, height: 200)
+        loop.trackedFrames[first] = moved
+        loop.offMain.noteFreshWrite(first, [.frame])
+        box.fullscreen = true
+        for work in box.held ?? [] { work() }
+        // The reading's fullscreen state still lands.
+        #expect(loop.detectedFullscreen[first] == true)
+        // The fresher frame stands over the reading's.
+        #expect(loop.trackedFrames[first] == moved)
+    }
+
+    @Test("the force-float override decides the read verdict too")
+    func forceFloatDecidesTheReadVerdict() {
+        // An accessory app's windows float as such on either path:
+        // the reading's detection never skips the override.
+        let (offMain, _) = makeLoop()
+        offMain.activationPolicy = { _ in .accessory }
+        offMain.reconcileOffMain(pid: pid, app: ref)
+        let (sync, _) = makeLoop()
+        sync.activationPolicy = { _ in .accessory }
+        sync.reconcile(pid: pid, app: ref)
+        #expect(offMain.detectedFloating[first] == .floats(.accessoryApp))
+        #expect(
+            offMain.detectedFloating[first] == sync.detectedFloating[first]
+        )
+    }
 }

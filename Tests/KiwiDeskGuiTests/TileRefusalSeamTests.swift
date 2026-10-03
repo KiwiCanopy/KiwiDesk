@@ -116,5 +116,14 @@ struct TileRefusalSeamTests {
         let tracking = sources["Events/EventLoop+Tracking.swift"] ?? ""
         // `track`, `recheckFloat` and its off-main twin (#1933).
         #expect(tracking.occurrences(of: "autoFloatVerdict(") == 3)
+        // The element variant delegates to the one pure body the
+        // off-main read calls, rather than composing beside it.
+        let element = try SourceScan.functionBody(
+            of: "autoFloatReason",
+            in: "FloatDetection.swift",
+            under: "AX"
+        )
+        #expect(element.contains("autoFloatReason("))
+        #expect(!element.contains("shouldFloat("))
     }
 }
