@@ -20,6 +20,12 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Whether adjacent windows of one app share a glyph and a
     /// count badge (#1725); off draws one glyph per window.
     public var groupAdjacentWindows = true
+    /// Shows individual window titles in the shown Space on
+    /// horizontal bars; vertical bars keep their glyphs.
+    public var expandActiveSpace = false
+    /// Reveals inactive Space glyph titles on hover on
+    /// horizontal bars.
+    public var showHoverTitles = false
     /// Extra room (pt) between app glyph cells inside a Space
     /// item, and before its `+n` badge (#1689); 0 abuts them. A
     /// drawing reads `resolvedGlyphGap`.

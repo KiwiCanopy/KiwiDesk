@@ -11,6 +11,21 @@ import Testing
 /// design.
 @Suite("Space bar field-list parity")
 struct SpaceBarParityTests {
+    @Test("Inline title options are independent and off by default")
+    func inlineTitleDefaults() {
+        let defaults = SpaceBarStyle()
+        #expect(!defaults.expandActiveSpace)
+        #expect(!defaults.showHoverTitles)
+        var look = SpaceBarLook()
+        look.expandActiveSpace = true
+        #expect(look.bar.expandActiveSpace)
+        #expect(!look.showHoverTitles)
+        look.expandActiveSpace = false
+        look.showHoverTitles = true
+        #expect(!look.expandActiveSpace)
+        #expect(look.bar.showHoverTitles)
+    }
+
     @Test("SpaceBarStyle CodingKeys cover every field")
     func keyParity() {
         #expect(
@@ -65,6 +80,7 @@ struct SpaceBarCommandParityTests {
         .activeDimFactor(0.7),
         .showFrontApp(true), .hideEmpty(true),
         .groupAdjacentWindows(false),
+        .expandActiveSpace(true), .showHoverTitles(true),
         .stickyBadge(false),
         .springDelay(1000),
         .focusedItemColor("#030303"),
@@ -136,7 +152,7 @@ struct SpaceBarCommandParityTests {
     ) -> [JSONValue] {
         switch key {
         case .enabled, .showFrontApp, .hideEmpty, .stickyBadge,
-            .groupAdjacentWindows:
+            .groupAdjacentWindows, .expandActiveSpace, .showHoverTitles:
             return [.bool(true)]
         case .activeIndicator: return [.string("edge_mark")]
         case .edge: return [.string("left")]

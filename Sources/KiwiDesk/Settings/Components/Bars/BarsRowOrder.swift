@@ -57,6 +57,8 @@ enum BarsRowOrder {
         .spaceBar(.spaceBarGlyphGap),
         .spaceBar(.spaceBarActiveIndicator),
         .spaceBar(.spaceBarSpringDelay),
+        .spaceBar(.spaceBarExpandActive),
+        .spaceBar(.spaceBarShowHoverTitles),
         .spaceBar(.spaceBarGroupAdjacent),
         .spaceBar(.spaceBarHideEmpty),
         .spaceBar(.spaceBarShowFrontApp),

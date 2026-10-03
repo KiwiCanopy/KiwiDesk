@@ -43,7 +43,8 @@ extension SpaceBarItemView {
             BarHoverHit.owns(self, event),
             target: targetsForHover.first {
                 BarHoverHit.owns($0, event)
-            }
+            },
+            pointerMoved: event.type == .mouseMoved
         )
     }
 
@@ -58,10 +59,12 @@ extension SpaceBarItemView {
 
     func applyHover(
         _ ownsPointer: Bool,
-        target: SpaceBarGlyphTarget?
+        target: SpaceBarGlyphTarget?,
+        pointerMoved: Bool = false
     ) {
         setPointerInside(ownsPointer)
         let hovered = !isActive && space != nil && ownsPointer
+        reportTitleHover(target, pointerMoved: pointerMoved)
         guard hovered != isHovered || target !== hoveredTarget else {
             return
         }
@@ -76,6 +79,7 @@ extension SpaceBarItemView {
         let inside = inside && space != nil
         guard inside != pointerInside else { return }
         pointerInside = inside
+        if !inside { reportTitleHover(nil) }
         if let space { onPointerInside(space, drawn, inside) }
     }
 }

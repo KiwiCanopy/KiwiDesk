@@ -31,17 +31,32 @@ extension SpaceBarOverlay {
     func recordGlide(
         _ items: [Item],
         content: SpaceBarStyle.InactiveContent,
-        slotChanged: Bool
+        slotChanged: Bool,
+        horizontal: Bool = true
     ) -> Bool {
         let expanded = activeIndex(items).flatMap { items[$0].space }
         let identities = items.map(\.identity)
-        let glides = Self.itemsGlide(
-            content: content,
-            from: shownExpanded,
-            to: expanded,
-            sameItems: identities == shownIdentities,
-            sameSlot: !slotChanged
-        )
+        let titles = items.map { $0.apps.map(\.inlineTitle) }
+        let hasTitles = (titles + shownInlineTitles).joined().contains {
+            $0 != nil
+        }
+        let titleChange =
+            hasTitles
+            && !shownInlineTitles.isEmpty
+            && titles != shownInlineTitles
+            && identities == shownIdentities
+        let titleGlide = titleChange && !slotChanged
+        resizesInlineTitles = titleChange && slotChanged && horizontal
+        let glides =
+            titleGlide
+            || Self.itemsGlide(
+                content: content,
+                from: shownExpanded,
+                to: expanded,
+                sameItems: identities == shownIdentities,
+                sameSlot: !slotChanged
+            )
+        shownInlineTitles = titles
         shownExpanded = expanded
         shownIdentities = identities
         return glides
@@ -50,13 +65,43 @@ extension SpaceBarOverlay {
     /// Places the items the container hosts; an item a glass box
     /// hosts rides its glass, which `updateBoxGlasses` moves.
     func placeItems(_ frames: [CGRect], glides: Bool) {
-        BarMotion.runLayout {
-            for (index, view) in itemViews.enumerated()
-            where index < frames.count
-                && view.superview === itemRun
-            {
-                moveFrame(view, frames[index], glides)
+        if resizesInlineTitles {
+            BarMotion.standCommitted {
+                for (index, view) in itemViews.enumerated()
+                where index < frames.count && view.superview === itemRun {
+                    standResize(view, at: frames[index])
+                }
             }
         }
+        let place = {
+            for (index, view) in self.itemViews.enumerated()
+            where index < frames.count
+                && view.superview === self.itemRun
+            {
+                self.moveFrame(
+                    view,
+                    frames[index],
+                    glides || self.resizesInlineTitles
+                )
+            }
+        }
+        if resizesInlineTitles {
+            BarMotion.runPlateGlide(place)
+        } else {
+            BarMotion.runLayout(place)
+        }
+    }
+
+    /// The shelf carries the content anchor; cells travel relative to it.
+    func standResize(_ view: NSView, at frame: CGRect) {
+        view.frame =
+            view.frame == .zero
+            ? frame
+            : CGRect(
+                x: view.frame.minX + inlineResizeShift,
+                y: frame.minY,
+                width: view.frame.width,
+                height: view.frame.height
+            )
     }
 }

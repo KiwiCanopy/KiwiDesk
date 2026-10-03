@@ -28,6 +28,18 @@ extension SettingsValueReadout {
                 o.groupAdjacentWindows,
                 n.groupAdjacentWindows
             )
+        case .spaceBarExpandActive:
+            return spaceBarOnOffRow(
+                census,
+                o.expandActiveSpace,
+                n.expandActiveSpace
+            )
+        case .spaceBarShowHoverTitles:
+            return spaceBarOnOffRow(
+                census,
+                o.showHoverTitles,
+                n.showHoverTitles
+            )
         case .spaceBarHideEmpty:
             return spaceBarOnOffRow(census, o.hideEmpty, n.hideEmpty)
         case .spaceBarShowFrontApp:

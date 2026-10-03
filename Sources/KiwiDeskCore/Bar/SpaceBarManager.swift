@@ -76,6 +76,8 @@ public final class SpaceBarManager {
     /// inside the render or relayout that refresh would nest in.
     var onStripReleased: @MainActor () -> Void = {}
 
+    var titleHover: (space: SpaceID, window: WindowID)?
+
     private var overlays: [DisplayID: SpaceBarOverlay] = [:]
     /// Active visible bars painted on screen.
     private var shownBars: [Bar] = []
@@ -103,12 +105,19 @@ public final class SpaceBarManager {
         }
     }
 
-    /// Whether a painted bar's front segment presents title for
-    /// `id` — on either channel, drawn or announced, so it is NOT
-    /// gated on the text edge: announced stale is as wrong as
-    /// drawn stale (review 2026-08-20, #937).
+    /// Whether a painted front segment or inline single-window
+    /// glyph presents this title, drawn or announced (#937).
+    /// Group labels name the app and consume no window title.
     public func showsTitle(of id: WindowID) -> Bool {
-        shownBars.contains { $0.frontWindow == id }
+        shownBars.contains { bar in
+            bar.frontWindow == id
+                || bar.items.contains { item in
+                    item.apps.contains { app in
+                        app.inlineTitle != nil && app.count == 1
+                            && app.windows.contains(id)
+                    }
+                }
+        }
     }
 
     func publishStatusMark(_ mark: StatusSpaceMark) {
@@ -127,6 +136,19 @@ public final class SpaceBarManager {
                 && $0.strip.width >= 1 && $0.strip.height >= 1
         }
         shownBars = valid
+        if let hover = titleHover,
+            !valid.contains(where: { bar in
+                bar.style.showHoverTitles && bar.style.edge.isHorizontal
+                    && bar.items.contains { item in
+                        item.space == hover.space && !item.active
+                            && item.apps.contains {
+                                $0.windows.contains(hover.window)
+                            }
+                    }
+            })
+        {
+            titleHover = nil
+        }
         // A hold on a Space no bar draws any more has no chip
         // left to report its exit (#1528 item 21).
         if let hold = stripHold,

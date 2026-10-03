@@ -25,13 +25,19 @@ enum BarHoverHit {
     /// exit event, so the hover is re-read here (#1665).
     static func ownsPointer(_ view: NSView) -> Bool {
         guard let window = view.window,
-            let content = window.contentView
+            let content = window.contentView,
+            let point = pointer(in: view)
         else { return false }
+        return owns(view, at: point, in: content)
+    }
+
+    static func pointer(in view: NSView) -> CGPoint? {
+        guard let window = view.window else { return nil }
         var point = window.mouseLocationOutsideOfEventStream
         #if DEBUG
             if let pointerOverride { point = pointerOverride(window) }
         #endif
-        return owns(view, at: point, in: content)
+        return point
     }
 
     private static func owns(

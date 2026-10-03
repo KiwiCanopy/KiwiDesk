@@ -43,7 +43,8 @@ struct LookKeysCensusTests {
         for path in [
             "space_bar.inactive_content",
             "space_bar.enabled", "space_bar.show_front_app",
-            "space_bar.hide_empty", "app_bar.title_cap",
+            "space_bar.hide_empty", "space_bar.expand_active_space",
+            "space_bar.show_hover_titles", "app_bar.title_cap",
             "border.enabled", "border.unfocused_enabled",
             "border.draw_order", "gap.override",
         ] {
