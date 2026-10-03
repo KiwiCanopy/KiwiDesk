@@ -234,16 +234,26 @@ extension EventLoop {
                 // frame (the vanished side of a tab switch may be a
                 // window that had no tab group of its own — #308).
                 if let tracked = read?.tracked {
-                    recheckFloat(
-                        id: id,
-                        pid: pid,
-                        app: app,
-                        reading: tracked
-                    )
-                    trackedFrames[id] = tracked.frame
+                    // A main-actor read that wrote this window
+                    // during the flight is fresher: it stands.
+                    if let prefetched,
+                        !offMain.wroteFresh(
+                            id,
+                            since: prefetched.writesAtRead
+                        )
+                    {
+                        recheckFloat(
+                            id: id,
+                            pid: pid,
+                            app: app,
+                            reading: tracked
+                        )
+                        trackedFrames[id] = tracked.frame
+                    }
                 } else {
                     recheckFloat(element, id: id, pid: pid, app: app)
                     trackedFrames[id] = AXHelper.frame(of: element)
+                    offMain.noteFreshWrite(id)
                 }
             } else {
                 appeared.append((element: element, id: id))

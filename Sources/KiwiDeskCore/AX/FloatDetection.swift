@@ -165,16 +165,33 @@ public enum FloatDetection {
         layer: Int?,
         rules: FloatRules
     ) -> AutoFloatReason? {
-        let structural = shouldFloat(
+        autoFloatReason(
             role: AXHelper.role(of: element),
             subrole: AXHelper.subrole(of: element),
+            layer: layer,
+            bundleID: bundleID,
+            rules: rules
+        ) { AXHelper.title(of: element) }
+    }
+
+    /// Detection over values already read — the one body the
+    /// element variant and the off-main list read share (#1933).
+    /// `title` is asked only where structure tiles.
+    public static func autoFloatReason(
+        role: String,
+        subrole: String,
+        layer: Int?,
+        bundleID: String?,
+        rules: FloatRules,
+        title: () -> String
+    ) -> AutoFloatReason? {
+        let structural = shouldFloat(
+            role: role,
+            subrole: subrole,
             layer: layer ?? 0
         )
         return autoFloatReason(structural: structural) {
-            rules.matches(
-                bundleID: bundleID,
-                title: AXHelper.title(of: element)
-            )
+            rules.matches(bundleID: bundleID, title: title())
         }
     }
 

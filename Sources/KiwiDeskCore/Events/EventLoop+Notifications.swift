@@ -170,6 +170,7 @@ extension EventLoop {
             guard frame != .zero else { return }
             if self.elements[pid]?[id] != nil {
                 self.trackedFrames[id] = frame
+                self.offMain.noteFreshWrite(id)
             }
             switch kind {
             case .moved:

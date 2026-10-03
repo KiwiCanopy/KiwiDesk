@@ -34,6 +34,8 @@ struct ReconcileSnapshotTests {
         var fullscreen = false
         var traitReads = 0
         var events: [String] = []
+        /// Read work held back, where a test pumps it by hand.
+        var held: [@Sendable () -> Void]?
 
         func asked(_ seam: String) {
             if applying { askedWhileApplying.append(seam) }
@@ -106,7 +108,11 @@ struct ReconcileSnapshotTests {
                 box.applying = false
             }
         }
-        loop.axReads.dispatchOverride = { _, work in work() }
+        loop.axReads.dispatchOverride = { _, work in
+            MainActor.assumeIsolated {
+                if box.held != nil { box.held?.append(work) } else { work() }
+            }
+        }
         loop.onEvent = { event in
             switch event {
             case .windowFullscreenChanged(let id, let on):
@@ -174,5 +180,34 @@ struct ReconcileSnapshotTests {
         loop.reconcile(pid: pid, app: ref)
         #expect(box.askedWhileApplying.contains("fullscreen"))
         #expect(box.askedWhileApplying.contains("id"))
+    }
+
+    @Test("a reading older than a main-actor write does not revert it")
+    func staleReadingDoesNotRevert() {
+        let (loop, box) = makeLoop()
+        box.held = []
+        loop.reconcileOffMain(pid: pid, app: ref)
+        // During the flight a synchronous reconcile reads the
+        // window entering fullscreen; the held read saw it before.
+        box.fullscreen = true
+        loop.reconcile(pid: pid, app: ref)
+        #expect(loop.detectedFullscreen[first] == true)
+        box.fullscreen = false
+        box.events = []
+        for work in box.held ?? [] { work() }
+        #expect(loop.detectedFullscreen[first] == true)
+        #expect(!box.events.contains("fullscreen w41 false"))
+    }
+
+    @Test("a reading with no fresher write still applies")
+    func readingAppliesWithoutAFresherWrite() {
+        // The negative control for the stale-reading skip.
+        let (loop, box) = makeLoop()
+        loop.detectedFullscreen[first] = true
+        box.held = []
+        loop.reconcileOffMain(pid: pid, app: ref)
+        for work in box.held ?? [] { work() }
+        #expect(loop.detectedFullscreen[first] == false)
+        #expect(box.events.contains("fullscreen w41 false"))
     }
 }

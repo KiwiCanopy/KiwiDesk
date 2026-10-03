@@ -51,14 +51,14 @@ editing AX code:
     [state-and-layout.md](state-and-layout.md)'s.
 
   **What the apply needs of each window is read WITH the list
-  (#1933)** — the id, minimized, role and subrole, and for a
-  window tracked when the read began its fullscreen state, frame,
-  detection verdict and shadow traits, plus the app's layer map —
-  through `ListedWindowReader`, built on the loop's own seams. The
-  apply on the main actor only compares: before this, System
-  Settings' `AXFullScreen` alone cost up to 123 ms there
-  (2026-10-03). A value the apply comes to need joins the reader
-  rather than being read beside it. A window the read did not
+  (#1933)** — what `ListedWindow` and `TrackedReading` carry —
+  through `ListedWindowReader`, built on the loop's own seams;
+  before this, System Settings' `AXFullScreen` alone cost up to
+  123 ms on the main actor (2026-10-03). A value the apply comes
+  to need joins the reader rather than being read beside it, and
+  a seam the reader captures reads no `EventLoop` state — it runs
+  off the main actor; one that needs loop state is resolved at
+  request time, as the tracked set is. A window the read did not
   cover (tracked during the flight, or appeared and handed to
   `track`) is read the way the synchronous reconcile reads it.
   `ReconcileOffMainTests`, `ReconcileOffMainDebtTests` and

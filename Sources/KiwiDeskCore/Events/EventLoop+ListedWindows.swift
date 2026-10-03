@@ -42,7 +42,9 @@ struct WindowListReading: @unchecked Sendable {
 }
 
 /// Reads a list's windows OFF the main actor (#1933). The seams
-/// are the loop's own, captured at request time.
+/// are the loop's own, captured at request time, and each must
+/// read no `EventLoop` state: one that needs it is resolved on the
+/// main actor at request time, as `tracked` is.
 struct ListedWindowReader: @unchecked Sendable {
     let resolve: (AXUIElement) -> WindowID?
     let fullscreen: (AXUIElement) -> Bool
@@ -69,22 +71,16 @@ struct ListedWindowReader: @unchecked Sendable {
         let subrole = AXHelper.subrole(of: element)
         var reading: TrackedReading?
         if let id, !minimized, tracked.contains(id) {
-            let structural = FloatDetection.shouldFloat(
-                role: role,
-                subrole: subrole,
-                layer: layers[id] ?? 0
-            )
             reading = TrackedReading(
                 fullscreen: fullscreen(element),
                 frame: AXHelper.frame(of: element),
                 autoReason: FloatDetection.autoFloatReason(
-                    structural: structural
-                ) {
-                    rules.matches(
-                        bundleID: bundleID,
-                        title: AXHelper.title(of: element)
-                    )
-                },
+                    role: role,
+                    subrole: subrole,
+                    layer: layers[id],
+                    bundleID: bundleID,
+                    rules: rules
+                ) { AXHelper.title(of: element) },
                 traits: many ? traits(element, id) : nil
             )
         }
@@ -94,23 +90,6 @@ struct ListedWindowReader: @unchecked Sendable {
             role: role,
             subrole: subrole,
             tracked: reading
-        )
-    }
-}
-
-extension EventLoop {
-    /// The reader for `pid`'s next off-main list read.
-    func listedWindowReader(
-        pid: pid_t,
-        bundleID: String?
-    ) -> ListedWindowReader {
-        ListedWindowReader(
-            resolve: resolveWindowID,
-            fullscreen: readFullscreen,
-            traits: shadows.traits,
-            bundleID: bundleID,
-            rules: floatRules,
-            tracked: Set(elements[pid]?.keys ?? [:].keys)
         )
     }
 }

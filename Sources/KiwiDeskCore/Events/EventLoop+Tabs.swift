@@ -239,6 +239,7 @@ extension EventLoop {
         detectedFloating[to] = floating
         detectedFullscreen[to] = fullscreen
         trackedFrames[to] = AXHelper.frame(of: element)
+        offMain.noteFreshWrite(to)
         if AXHelper.hasNativeTabs(element) {
             tabCarriers.insert(to)
         }

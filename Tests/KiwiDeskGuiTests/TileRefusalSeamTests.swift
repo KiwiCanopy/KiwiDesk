@@ -98,8 +98,9 @@ struct TileRefusalSeamTests {
             Self.census("FloatDetection.autoFloatReason(", in: sources)
                 == [
                     "Events/EventLoop+WindowPolicy.swift": 1,
-                    // Detection's half alone, read off the main
-                    // actor with the list (#1933); its verdict is
+                    // Detection's one pure body over values the
+                    // off-main list read found (#1933); the element
+                    // variant delegates to it, and the verdict is
                     // composed in `autoFloatVerdict` as `.read`.
                     "Events/EventLoop+ListedWindows.swift": 1,
                 ]

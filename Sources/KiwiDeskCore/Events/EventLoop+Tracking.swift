@@ -136,6 +136,7 @@ extension EventLoop {
         // as a sibling appears at the same frame) coalesces into a
         // re-key instead of a destroy + create (#308).
         trackedFrames[window.id] = window.frame
+        offMain.noteFreshWrite(window.id)
         if AXHelper.hasNativeTabs(element) {
             tabCarriers.insert(window.id)
         }
@@ -204,6 +205,7 @@ extension EventLoop {
         app: AppRef
     ) {
         recheckFullscreen(element, id: id)
+        offMain.noteFreshWrite(id)
         let verdict = autoFloatVerdict(
             .element(element, layer: FloatDetection.windowLayer(of: id)),
             id: id,
