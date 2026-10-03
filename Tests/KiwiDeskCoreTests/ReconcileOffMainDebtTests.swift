@@ -167,6 +167,8 @@ struct ReconcileOffMainDebtTests {
         box.listed = [late]
         box.run(0)
         #expect(box.focused == [late])
+        // A second read the coalescer only queued shows up here.
+        box.drain()
         #expect(box.listReads == 1)
     }
 
@@ -263,6 +265,58 @@ struct ReconcileOffMainDebtTests {
         box.drain()
         #expect(answered == ["b"])
         #expect(box.listReads == 2)
+    }
+
+    @Test("a newer activation report drops a waiting focus report")
+    func activationSupersedesTheFocusArm() {
+        let (loop, box) = makeLoop()
+        loop.lastActivePid = pid
+        let second = WindowID(22)
+        loop.elements[pid]?[second] = AXUIElementCreateApplication(other)
+        box.listed = [id, second]
+        // The focus arm reports tracked window 21; its liveness
+        // read waits while the activation reports window 22.
+        loop.handleFocusedWindowChanged(
+            AXUIElementCreateApplication(pid),
+            pid: pid,
+            app: ref
+        )
+        box.focus = second
+        loop.appActivated(app(pid), launchedAt: nil)
+        // Queued: liveness(21), list, focus(22).
+        box.run(2)
+        #expect(box.focused == [second])
+        box.drain()
+        #expect(box.focused == [second], "reported \(box.focused)")
+        #expect(box.logs.contains { $0.contains("superseded") })
+    }
+
+    @Test("a newer report drops a focus report waiting to settle")
+    func newerReportDropsTheSettlingOne() {
+        let (loop, box) = makeLoop()
+        loop.lastActivePid = pid
+        let late = WindowID(35)
+        box.listed = [id]
+        // The focus arm names an untracked window: its report
+        // waits for the reconcile while the activation reports 21.
+        loop.resolveWindowID = { _ in late }
+        loop.handleFocusedWindowChanged(
+            AXUIElementCreateApplication(other),
+            pid: pid,
+            app: ref
+        )
+        loop.resolveWindowID = { _ in
+            MainActor.assumeIsolated { box.listed.first }
+        }
+        box.focus = id
+        loop.appActivated(app(pid), launchedAt: nil)
+        // Queued: list, focus(21).
+        box.run(1)
+        #expect(box.focused == [id])
+        loop.elements[pid]?[late] = AXUIElementCreateApplication(pid)
+        box.listed = [id, late]
+        box.drain()
+        #expect(box.focused == [id], "reported \(box.focused)")
     }
 
     @Test("an app KiwiDesk does not observe is never read")
