@@ -265,7 +265,7 @@ public final class TilingEngine {
                 // real placement happens at drop, once the exemption
                 // clears.
                 if id == dragExemptWindow { continue }
-                issue(
+                issueLayoutFrame(
                     id,
                     target: target,
                     state: state,

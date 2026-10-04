@@ -1,10 +1,12 @@
 import CoreGraphics
 
-/// One window's turn in `retile`, split from `TilingEngine.swift`
-/// at the §2.1 ceiling (#1944): skip a frame the window already
-/// holds or was already sent, else issue it and record the ask.
 extension TilingEngine {
-    func issue(
+    /// One window's turn in `retile`'s layout loop: skip a frame
+    /// the window already holds or was already sent, else issue
+    /// it and record the ask. The layout loop is its one caller,
+    /// since only the layout loop records asks (#1694,
+    /// `LayoutAskSeamTests`).
+    func issueLayoutFrame(
         _ id: WindowID,
         target: CGRect,
         state: StateCoordinator,
