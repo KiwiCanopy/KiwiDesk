@@ -61,13 +61,16 @@ final class BorderOverlay {
         levelOf: @escaping (CGWindowID) -> Int? =
             AppKitBorderOverlay.windowLayer,
         restack: @escaping (CGWindowID, Bool, CGWindowID) -> Bool =
-            SkyLight.orderWindow
+            SkyLight.orderWindow,
+        move: @escaping (CGWindowID, CGPoint) -> Bool =
+            SkyLight.moveWindow
     ) {
         targetWindow = window
         backend = AppKitBorderOverlay(
             order: order,
             levelOf: levelOf,
-            restack: restack
+            restack: restack,
+            move: move
         )
     }
 

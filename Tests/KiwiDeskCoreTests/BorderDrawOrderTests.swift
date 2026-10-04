@@ -23,6 +23,7 @@ struct BorderDrawOrderTests {
     func flipRetiresRings() {
         let manager = BorderManager()
         manager.restack = { _, _, _ in false }
+        manager.moveWindow = { _, _ in false }
         manager.sync([spec(41)])
         #expect(manager.borderedWindows == [WindowID(41)])
         // behind (default) → front: overlays retired, rebuilt next sync.
@@ -36,6 +37,7 @@ struct BorderDrawOrderTests {
     func sameOrderIsNoOp() {
         let manager = BorderManager()
         manager.restack = { _, _, _ in false }
+        manager.moveWindow = { _, _ in false }
         manager.sync([spec(41)])
         // Default is behind; setting behind again must not retire.
         manager.setDrawOrder(.behind)

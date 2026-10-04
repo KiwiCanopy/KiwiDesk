@@ -15,6 +15,7 @@ struct BorderTrackingLeverTests {
     func environmentDecode() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
+        border.moveWindow = { _, _ in false }
         border.configureFromEnvironment([:])
         #expect(!border.windowServerTrackingDisabled)
         // Present-but-empty is "not set" (the strand detector's
@@ -33,6 +34,7 @@ struct BorderTrackingLeverTests {
     func subscriptionStandsDown() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
+        border.moveWindow = { _, _ in false }
         border.configureFromEnvironment([
             "KIWIDESK_NO_WS_TRACKING": "yes"
         ])

@@ -27,6 +27,7 @@ struct BorderFollowAnimationTests {
     func animationTickAppliesUnderTracking() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
+        border.moveWindow = { _, _ in false }
         border.sync([spec(1)])
         // Force the stream live AFTER sync (`sync` re-runs the
         // subscription, which resets `skyLightActive` while the
@@ -63,6 +64,7 @@ struct BorderFollowAnimationTests {
     func axEchoSuppressedWhileAnimating() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
+        border.moveWindow = { _, _ in false }
         border.sync([spec(1)])
         // Stream down (AX fallback path) — the WS guard alone
         // would let this echo through; the animation guard must
@@ -92,6 +94,7 @@ struct BorderFollowAnimationTests {
     func axEchoSuppressedWhenTracked() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
+        border.moveWindow = { _, _ in false }
         border.sync([spec(1)])
         border.skyLightActive = true
         let echo = CGRect(x: 9, y: 9, width: 9, height: 9)
@@ -128,6 +131,7 @@ struct BorderReconcileAnimationTests {
     func reconcileGatedOnAnimation() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
+        border.moveWindow = { _, _ in false }
         border.sync([spec(1)])
         let real = CGRect(x: 20, y: 20, width: 400, height: 300)
         border.readWindowBounds = { _ in real }

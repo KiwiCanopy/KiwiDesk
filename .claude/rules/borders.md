@@ -155,10 +155,19 @@ keeps these:
   take AppKit (`BorderRestackTests`). This orders the AppKit
   panel and draws nothing: the `.transient` section below still
   binds.
-- **An animating ring moves inside its panel rather than
-  resizing it** — a panel resize hands WindowServer a fenced
-  transaction the main actor waits on, every frame, GPU idle or
-  not (#1937, device 2026-10-03). Every ring writer takes its
+- **An ordered-in panel the ring's size moves through
+  `SkyLight.moveWindow`, never AppKit's `setFrame`** — mid-animation
+  too, so it takes no room. `setFrame` ties the move to the next
+  commit with a fence, and while another app's window transaction
+  held WindowServer up the ring's commit waited ~500 ms on it, the
+  fence's timeout (#1956, `BorderPanelMoveTests`). AppKit learns
+  the frame from WindowServer's moved event; the first show, a
+  panel ordered out since, a size change and a missing symbol take
+  AppKit.
+- **An animating ring that changes size moves inside its panel
+  rather than resizing it** — a panel resize hands WindowServer a
+  fenced transaction the main actor waits on, every frame, GPU
+  idle or not (#1937, device 2026-10-03). Every ring writer takes its
   room from the one `BorderManager.room(for:screen:)`: while
   `isAnimating` holds, the ring's screen outset by up to one
   screen plus the widest ring's reach per axis, capped by

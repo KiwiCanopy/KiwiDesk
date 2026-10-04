@@ -107,6 +107,7 @@ struct BorderMovingRoomTests {
     func managerOffersRoomWhileAnimating() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
+        border.moveWindow = { _, _ in false }
         defer { border.clear() }
         let backend = RoomCapturingBackend()
         border.backendFactory = { backend }
