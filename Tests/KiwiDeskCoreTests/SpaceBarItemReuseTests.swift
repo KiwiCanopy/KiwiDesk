@@ -167,12 +167,10 @@ struct SpaceBarItemReuseTests {
         #expect(view.stickyBadgeViews[0] === badge)
         #expect(badge.symbolName == StickyStyle.displaySymbolName)
         let drawn = try #require(badge.symbol.image)
-        let wanted = try #require(
-            NSImage(
-                systemSymbolName: StickyStyle.displaySymbolName,
-                accessibilityDescription: nil
-            )
+        let fresh = StateBadgeView(
+            symbolName: StickyStyle.displaySymbolName
         )
+        let wanted = try #require(fresh.symbol.image)
         #expect(drawn.tiffRepresentation == wanted.tiffRepresentation)
         #expect(StickyStyle.displaySymbolName != StickyStyle.symbolName)
     }
