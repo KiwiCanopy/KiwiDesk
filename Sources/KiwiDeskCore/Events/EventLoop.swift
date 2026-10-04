@@ -293,8 +293,8 @@ public final class EventLoop {
     /// the host's frontmost app.
     var frontmostPID: () -> pid_t? = { nil }
 
-    /// Activation policy for a pid a reconcile only knows by
-    /// number.
+    /// Activation policy for a pid. Also runs off the main actor
+    /// in the window-list read, so reads no loop state (#1936).
     var activationPolicy: (pid_t) -> NSApplication.ActivationPolicy? = {
         NSRunningApplication(processIdentifier: $0)?
             .activationPolicy
@@ -309,10 +309,9 @@ public final class EventLoop {
     /// windows, un-minimized and at their last frames, so
     /// nothing in the window list separates them from windows
     /// that are really up — `reconcile` read them as live and
-    /// their tiles were never released. A seam like its
-    /// neighbours: a unit test cannot hide a real app, and a
-    /// call site that stopped consulting it would restore that
-    /// defect with every suite green.
+    /// their tiles were never released. A seam because a unit
+    /// test cannot hide a real app; also runs off the main actor
+    /// in the window-list read, like `activationPolicy`.
     var appIsHidden: (pid_t) -> Bool = {
         NSRunningApplication(processIdentifier: $0)?.isHidden
             ?? false

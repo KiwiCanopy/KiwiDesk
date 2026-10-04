@@ -45,9 +45,7 @@ extension EventLoop {
             guard let ids = census[pid], !ids.isEmpty
             else { continue }
             if let observer = observers[pid] {
-                let app =
-                    processIdentity.observed[pid]?.ref
-                    ?? AppRef(pid: pid)
+                let app = appRef(of: pid)
                 if observer.needsRegistrationRepair {
                     observer.repairRegistration()
                 }
@@ -74,9 +72,12 @@ extension EventLoop {
                     continue
                 }
                 if unwatched == nil {
+                    let walked = liveApps(owners: Set(census.keys))
+                    for app in walked {
+                        notePolicy(app.activationPolicy, of: app.pid)
+                    }
                     unwatched = Dictionary(
-                        liveApps(owners: Set(census.keys))
-                            .map { ($0.pid, $0) },
+                        walked.map { ($0.pid, $0) },
                         uniquingKeysWith: { first, _ in first }
                     )
                 }

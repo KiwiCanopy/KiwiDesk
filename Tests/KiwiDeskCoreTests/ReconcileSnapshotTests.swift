@@ -37,6 +37,8 @@ struct ReconcileSnapshotTests {
         var fullscreen = false
         var policy: NSApplication.ActivationPolicy = .regular
         var hidden = false
+        /// The off-main read's hidden answer, where it differs.
+        var readHidden: Bool?
         var traitReads = 0
         var events: [String] = []
         /// Read work held back, where a test pumps it by hand.
@@ -90,6 +92,7 @@ struct ReconcileSnapshotTests {
             MainActor.assumeIsolated {
                 box.asked("hidden")
                 if !box.reading { box.askedOutsideRead.append("hidden") }
+                if box.reading, let read = box.readHidden { return read }
                 return box.hidden
             }
         }
@@ -125,9 +128,12 @@ struct ReconcileSnapshotTests {
         }
         loop.axReads.deliver = { work in
             MainActor.assumeIsolated {
+                let reading = box.reading
                 box.applying = true
+                box.reading = false
                 work()
                 box.applying = false
+                box.reading = reading
             }
         }
         loop.axReads.dispatchOverride = { _, work in
@@ -278,11 +284,24 @@ struct ReconcileSnapshotTests {
         box.policy = .accessory
         loop.reconcileOffMain(pid: pid, app: ref)
         #expect(loop.policy(of: pid) == .accessory)
+        // Both are read on the read's own thread, never at request.
+        #expect(box.askedWhileApplying.isEmpty, "\(box.askedWhileApplying)")
+        #expect(box.askedOutsideRead.isEmpty, "\(box.askedOutsideRead)")
+        // A hidden reading is confirmed live before it drops.
         box.hidden = true
         loop.reconcileOffMain(pid: pid, app: ref)
         #expect(box.events.contains("hidden w41"))
-        #expect(box.askedWhileApplying.isEmpty, "\(box.askedWhileApplying)")
-        // Both are read on the read's own thread, never at request.
-        #expect(box.askedOutsideRead.isEmpty, "\(box.askedOutsideRead)")
+        #expect(box.askedWhileApplying == ["hidden"])
+    }
+
+    @Test("an unhide during the read keeps the windows")
+    func unhideDuringTheReadKeepsWindows() {
+        // The reading saw the app hidden; by its delivery the
+        // user unhid it, and the live seam says so (#1936).
+        let (loop, box) = makeLoop()
+        box.readHidden = true
+        loop.reconcileOffMain(pid: pid, app: ref)
+        #expect(!box.events.contains { $0.hasPrefix("hidden") })
+        #expect(loop.elements[pid]?[first] != nil)
     }
 }

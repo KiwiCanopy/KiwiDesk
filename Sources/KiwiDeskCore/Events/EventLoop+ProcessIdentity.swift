@@ -130,7 +130,19 @@ extension EventLoop {
         return policy
     }
 
-    /// Files a policy read off the main actor for an observed
+    /// One fresh LaunchServices read, filed — for a window's
+    /// adoption, never per notification (#1936).
+    func refreshPolicy(of pid: pid_t) {
+        notePolicy(activationPolicy(pid), of: pid)
+    }
+
+    /// The app record an observed process filed, else
+    /// LaunchServices' (#1936).
+    func appRef(of pid: pid_t) -> AppRef {
+        processIdentity.observed[pid]?.ref ?? AppRef(pid: pid)
+    }
+
+    /// Files a policy read for an observed
     /// process. LaunchServices loses a running process's record
     /// for a moment as its app activates (device, 2026-09-30), so
     /// a missing record is `.prohibited` only once the process is

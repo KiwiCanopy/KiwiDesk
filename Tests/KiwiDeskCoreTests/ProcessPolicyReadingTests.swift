@@ -153,6 +153,34 @@ struct ProcessPolicyReadingTests {
         #expect(loop.observes(pid: child))
     }
 
+    @Test("every pass already holding a fresh policy files it")
+    func freshReadsAreFiled() {
+        // An app can flip its policy without activating, so the
+        // reads a pass already made refresh the filed one (#1936).
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)]]
+        loop.healSweep()
+        loop.runningApplications = {
+            [
+                RunningApp(
+                    pid: self.parent,
+                    activationPolicy: .accessory,
+                    ref: self.app(self.parent).ref
+                )
+            ]
+        }
+        loop.reconcileAll()
+        #expect(loop.policy(of: parent) == .accessory)
+        // A window's adoption reads once.
+        loop.activationPolicy = { _ in .regular }
+        loop.track(
+            AXUIElementCreateApplication(parent),
+            pid: parent,
+            app: app(parent).ref
+        )
+        #expect(loop.policy(of: parent) == .regular)
+    }
+
     @Test("a record lost for a moment keeps a running process")
     func lostRecordKeepsARunningProcess() {
         let (loop, box) = makeLoop()

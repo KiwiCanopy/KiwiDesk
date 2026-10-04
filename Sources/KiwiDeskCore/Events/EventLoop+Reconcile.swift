@@ -98,7 +98,11 @@ extension EventLoop {
         // a missed hide is `appActivated`'s reconcile of the
         // app just left, which a ⌘H always produces because
         // hiding moves the foreground.
-        guard !(prefetched?.hidden ?? appIsHidden(pid)) else {
+        // A reading is one read old, and an unhide during it must
+        // not drop what the unhide adopted: only the live seam
+        // may say hidden (#1936).
+        let hidden = prefetched?.hidden == false ? false : appIsHidden(pid)
+        guard !hidden else {
             reconcileTabsAndSweep(
                 pid: pid,
                 app: app,

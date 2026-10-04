@@ -228,14 +228,21 @@ editing AX code:
   policy last FILED, else LaunchServices' answer; and one door
   files it, `notePolicy`, which keeps the policy last read
   while `ProcessIdentity.runs` says the process is alive and
-  files `.prohibited` once it is gone. The window-list read off
-  the main actor reads the policy and the hidden state beside
-  the list and the reconcile files them, because a
-  LaunchServices read is a synchronous XPC round trip, every
-  AX notification asks the policy, and an app activation
-  invalidates even a retained `NSRunningApplication`'s cache —
-  1.2 s of main thread in 30 s of Space switching (#1936,
-  device 2026-10-03). For the same reason the heal sweep walks
+  files `.prohibited` once it is gone. A per-event path never
+  reads LaunchServices on the main actor — a read is a
+  synchronous XPC round trip, every AX notification asks the
+  policy, and an app activation invalidates even a retained
+  `NSRunningApplication`'s cache: 1.2 s of main thread in 30 s
+  of Space switching (#1936, device 2026-10-03). So a policy is
+  filed where a fresh one is already in hand or is worth one
+  read — the off-main window-list read, a pass that walked the
+  list, and one read per adopted window through
+  `refreshPolicy`, since an app flips its policy without
+  activating — and a new filer joins `ProcessIdentitySeamTests`'
+  census with its reason. The reading's hidden state is one
+  read old, so only the live `appIsHidden` may drop an app's
+  windows (`ReconcileSnapshotTests` ▸
+  `unhideDuringTheReadKeepsWindows`). For the same reason the heal sweep walks
   the running-app list only for an unwatched app its gate lets
   in — every record in a fresh list is a round trip
   (`ProcessPolicyReadingTests` ▸
@@ -245,7 +252,8 @@ editing AX code:
   it too (`ProcessPolicyReadingTests` ▸
   `lostRecordKeepsARunningProcess`, `lostRecordDetachesAGoneProcess`,
   `keptPolicyFollowsTheLastRead`,
-  `observedProcessAsksNothing`; `ReconcileSnapshotTests` ▸
+  `observedProcessAsksNothing`, `freshReadsAreFiled`;
+  `ReconcileSnapshotTests` ▸
   `readingCarriesPolicyAndHidden`; `ProcessIdentitySeamTests` ▸
   `policyHasOneReading`).
 - **A shadow window never becomes a tile (#1785).** A window
