@@ -37,6 +37,9 @@ final class DeferredTasks {
         case floatRaise
         /// Adoption-heal sweep for unhandled windows (#675).
         case adoptionHeal
+        /// The heal's census read off the main actor (#1956);
+        /// tracked so teardown cancels it before it re-arms.
+        case adoptionHealRead
         /// Re-tracks windows dropped mid-launch (#675).
         case transientRetrack
         /// Re-reads an app whose sweep removal was distrusted
@@ -109,6 +112,13 @@ final class DeferredTasks {
             burstStarts[key] = nil
             body()
         }
+    }
+
+    /// Holds a task started elsewhere under `key`, cancelling the
+    /// one it replaces.
+    func track(_ key: Key, _ task: Task<Void, Never>) {
+        tasks[key]?.cancel()
+        tasks[key] = task
     }
 
     /// True if `key` has work scheduled.

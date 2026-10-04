@@ -109,10 +109,16 @@ extension KiwiCore {
             after: timings.adoptionHealInterval
         ) { [weak self] in
             guard let self else { return }
-            if self.eventLoop.isRunning {
-                self.eventLoop.healSweep()
+            guard self.eventLoop.isRunning else {
+                self.scheduleAdoptionHeal()
+                return
             }
-            self.scheduleAdoptionHeal()
+            self.deferred.track(
+                .adoptionHealRead,
+                self.eventLoop.requestHealSweep { [weak self] in
+                    self?.scheduleAdoptionHeal()
+                }
+            )
         }
     }
 

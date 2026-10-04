@@ -187,7 +187,11 @@ editing AX code:
   adoption-heal sweep call `repairRegistration()`, and the sweep
   (`EventLoop.healSweep`) is the pass *guaranteed* to come —
   census-gated so a healthy tick costs one WindowServer snapshot
-  and no AX. `AdoptionHealTests` pins the gate and both repair
+  and no AX. The scheduled sweep reads that snapshot off the main
+  actor: it waits for WindowServer to take this process's pending
+  window updates, ~340 ms when a tick met a Space switch (#1956,
+  `AdoptionHealScheduleTests` ▸ `healReadsCensusOffMain`).
+  `AdoptionHealTests` pins the gate and both repair
   funnels; `AdoptionHealScheduleTests` pins the scheduled tasks.
   Nothing machine-checks that the boot tail (`finishBoot`, in
   `KiwiCore+Boot`) still calls `scheduleAdoptionHeal()`, so do
