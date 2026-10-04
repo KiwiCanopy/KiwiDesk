@@ -10,41 +10,77 @@ extension ShelfOverlay {
     /// Stands each gliding section at its glide start, committed
     /// ahead of the plate glide (#1838): a joining section collapsed
     /// at the end facing the section it joins, transparent; one on
-    /// the strip at `glideStart`.
+    /// the strip at `glideStart`. Returns whether it stood anything.
+    @discardableResult
     func standGlideStarts(
         _ sections: [Section],
         in strip: CGRect,
         horizontal: Bool
-    ) {
+    ) -> Bool {
+        // Nothing joins and nothing moves: the stand would commit
+        // no write, and its flush is a synchronous layout pass of
+        // every bar view (#1942).
+        let writes = standWrites(sections, in: strip, horizontal: horizontal)
+        guard !writes.isEmpty else {
+            WorkMeter.shared.add(\.shelfStandsSkipped)
+            return false
+        }
         BarMotion.standCommitted {
-            for section in sections
-            where section.view.superview !== stripView {
-                let frame = Self.slotFrame(section, in: strip)
-                stripView.addSubview(
-                    section.view,
-                    positioned: .below,
-                    relativeTo: divider
-                )
-                section.view.frame = Self.collapsed(
-                    frame,
-                    to: Self.facing(frame, others: sections, in: strip),
+            for (section, write) in writes {
+                switch write {
+                case .join(let frame):
+                    stripView.addSubview(
+                        section.view,
+                        positioned: .below,
+                        relativeTo: divider
+                    )
+                    section.view.frame = frame
+                    section.view.alphaValue = 0
+                case .start(let frame):
+                    section.view.frame = frame
+                }
+            }
+        }
+        return true
+    }
+
+    /// What standing a section writes: a joining one is added
+    /// collapsed and transparent, one on the strip moves to its
+    /// glide start.
+    enum StandWrite: Equatable {
+        case join(CGRect)
+        case start(CGRect)
+    }
+
+    /// The stand's writes, decided once: the one derivation both
+    /// whether to stand and what to stand read.
+    func standWrites(
+        _ sections: [Section],
+        in strip: CGRect,
+        horizontal: Bool
+    ) -> [(Section, StandWrite)] {
+        sections.compactMap { section in
+            let slot = Self.slotFrame(section, in: strip)
+            guard section.view.superview === stripView else {
+                let frame = Self.collapsed(
+                    slot,
+                    to: Self.facing(slot, others: sections, in: strip),
                     horizontal: horizontal
                 )
-                section.view.alphaValue = 0
+                return (section, .join(frame))
             }
-            for section in sections
-            where section.view.superview === stripView {
-                guard
-                    let drawn = placedContent[ObjectIdentifier(section.view)]
-                else { continue }
-                section.view.frame = Self.glideStart(
-                    from: section.view.frame,
-                    drawn: drawn,
-                    content: section.content,
-                    to: Self.slotFrame(section, in: strip),
-                    horizontal: horizontal
-                )
-            }
+            guard
+                let drawn = placedContent[ObjectIdentifier(section.view)]
+            else { return nil }
+            let start = Self.glideStart(
+                from: section.view.frame,
+                drawn: drawn,
+                content: section.content,
+                to: slot,
+                horizontal: horizontal
+            )
+            return start == section.view.frame
+                ? nil : (section, .start(start))
         }
     }
 
