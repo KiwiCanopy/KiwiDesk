@@ -80,6 +80,11 @@ swift build -c release
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md); AI coding
 agents are welcome. To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
+Questions and ideas go to
+[Discussions](https://github.com/KiwiCanopy/KiwiDesk/discussions), where
+the answer helps the next person too. To chat, share a setup or follow
+releases, join the [Discord](https://discord.gg/bYeTrJyZyS).
+
 ## License
 
 [Business Source License 1.1](LICENSE): using KiwiDesk is free, at home
