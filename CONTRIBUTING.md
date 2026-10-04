@@ -98,6 +98,44 @@ And before you push, actually run it — build and launch KiwiDesk,
 exercise the change, and confirm it behaves the way you intend.
 Green tests aren't proof for anything user-facing.
 
+## Before You Start
+
+I'd rather nobody's effort goes to waste, so please agree on the
+work in the issue before you write the code.
+
+**Every change starts from an issue.** Please don't send a PR for
+a feature or fix that has no issue yet — open one first. The
+tracker is where everyone sees what is being worked on and what
+is coming next, and work that skips it is invisible to both.
+A typo or a broken link is the one exception.
+
+**Settle the design first.** If an issue still needs design —
+what it should look like, how it should behave, which approach to
+take — discuss it in the issue's comments. It is ready to build
+once I've written a `### Ruling` section into the issue body.
+A PR for an issue without a ruling may be closed unreviewed,
+however good the code is.
+
+**Claim it before you start.** When an issue is clear (a ruled
+feature, or a bug whose fix is obvious), leave a comment saying
+you're taking it and roughly how long you expect it to take.
+I'll assign it to you, so nobody else starts on the same thing.
+Opening a draft PR early is the best way to show progress.
+
+**Claims can lapse.** If a claim runs well past its estimate with
+no update, comment, pushed branch or draft PR, I may hand it to
+someone else. How long I wait depends on the issue: a severe bug
+can be reassigned within days, while a quiet feature can wait
+longer. A short "still on it" comment keeps a claim alive. Please
+don't take over a claimed issue yourself — ask in the issue and
+I'll decide.
+
+**Show what you built.** An external contributor's PR that
+changes anything visible — the Settings window, the bars,
+borders, animation — attaches a short screen recording to its
+"How I verified" section (a screenshot is enough for a static
+change).
+
 ## Branching & Pull Requests
 
 **Branch naming:** follow Conventional Commit types with kebab-case

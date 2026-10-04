@@ -11,6 +11,11 @@ Closes #... (if applicable)
 - [ ] I understand what this change does and have run it in
   the app to confirm it works as intended (see "How I
   verified" below and CONTRIBUTING.md → Using AI Assistants)
+- [ ] This PR has a linked issue, which was claimed, and has
+  a `### Ruling` if it needed design (see CONTRIBUTING.md → Before You Start)
+- [ ] External contributors: a visible change has a screen
+  recording (or a screenshot, if static) under "How I
+  verified"
 - [ ] Commits follow Conventional Commits format
   (see AGENTS.md §3)
 - [ ] New behavior is tested (pure logic / layout code
