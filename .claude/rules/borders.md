@@ -161,14 +161,15 @@ keeps these:
   not (#1937, device 2026-10-03). Every ring writer takes its
   room from the one `BorderManager.room(for:screen:)`: while
   `isAnimating` holds, the ring's screen outset by up to one
-  screen per axis — so a ring parked in the stash corner or
-  sliding in from it fits, whose exact-panel moves the main
+  screen plus the widest ring's reach per axis, capped by
+  `roomLimit` points and `roomPixelLimit` pixels — so on a
+  screen the caps leave whole, a ring parked in the stash corner
+  or sliding in from it fits, whose exact-panel moves the main
   actor waited ~500 ms on mid-switch (#1956,
-  `BorderMovingRoomTests` ▸ `roomHoldsParkedRing`) — capped by
-  `roomLimit` inside AppKit's window size limit on the widest
-  display; the panel takes the room
-  once and the ring's layers move inside, and a ring outside it
-  — far into a parked corner — takes an exact panel for those
+  `BorderMovingRoomTests` ▸ `roomHoldsParkedRing`); on a wider
+  desk the caps cut first and a parked ring can fall outside.
+  The panel takes the room once and the ring's layers move
+  inside; a ring outside it takes an exact panel for those
   frames. A live ring's panel returns to the ring's own frame at
   the first render after `isAnimating` ends — the late resync at
   the latest — while a ring retired mid-flight keeps the room,

@@ -159,18 +159,39 @@ extension BorderManager {
         #if DEBUG
             frame = roomScreenOverride ?? frame
         #endif
-        return frame.map(Self.room(around:))
+        let scale = screen?.backingScaleFactor ?? 2
+        return frame.map { Self.room(around: $0, scale: scale) }
     }
 
-    /// The outset is up to one screen per axis, capped so the
-    /// panel stays inside AppKit's window size limit on the widest
-    /// display.
-    nonisolated static func room(around screen: CGRect) -> CGRect {
-        let dx = min(screen.width, (roomLimit - screen.width) / 2)
-        let dy = min(screen.height, (roomLimit - screen.height) / 2)
+    /// The outset is a screen plus the widest ring's reach per
+    /// axis, so a ring parked in the stash corner fits (#1956),
+    /// capped by `roomLimit` points and `roomPixelLimit` pixels at
+    /// `scale`. A wider desk parks rings past it; those take the
+    /// exact panel.
+    nonisolated static func room(
+        around screen: CGRect,
+        scale: CGFloat
+    ) -> CGRect {
+        let limit = min(roomLimit, roomPixelLimit / max(scale, 1))
+        let dx = min(
+            screen.width + ringReachLimit,
+            (limit - screen.width) / 2
+        )
+        let dy = min(
+            screen.height + ringReachLimit,
+            (limit - screen.height) / 2
+        )
         return screen.insetBy(dx: -max(dx, 0), dy: -max(dy, 0))
     }
 
+    /// The farthest any ring draws past its window: the widest
+    /// stroke plus the largest glow.
+    nonisolated static let ringReachLimit =
+        BorderStyle.maxWidth + BorderStyle.maxGlowSize
+
     /// Below AppKit's 10,000 pt window size limit.
     nonisolated static let roomLimit: CGFloat = 9600
+
+    /// Below the 16,384 px surface limit a 2x panel would pass.
+    nonisolated static let roomPixelLimit: CGFloat = 16000
 }
