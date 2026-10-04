@@ -57,6 +57,13 @@ struct SpaceBarItemReuseTests {
         view.layout()
     }
 
+    /// Elementwise identity, computed outside `#expect`: written
+    /// inline, `elementsEqual(_:by: ===)` passed on false
+    /// (guard-prover, Testing 2084).
+    static func same(_ a: [NSView?], _ b: [NSView?]) -> Bool {
+        a.count == b.count && zip(a, b).allSatisfy { $0 === $1 }
+    }
+
     private static func view() -> SpaceBarItemView {
         SpaceBarItemView(frame: CGRect(x: 0, y: 0, width: 200, height: 28))
     }
@@ -72,10 +79,19 @@ struct SpaceBarItemReuseTests {
         let before = view.subviews
         let glyphs = view.appViews
         let badges = view.badgeViews
+        let sticky = view.stickyBadgeViews
+        let floating = view.floatingBadgeViews
         Self.configure(view, apps: apps, active: false)
-        #expect(view.subviews.elementsEqual(before, by: ===))
-        #expect(view.appViews.elementsEqual(glyphs, by: ===))
-        #expect(view.badgeViews.elementsEqual(badges, by: ===))
+        let keepsSubviews = Self.same(view.subviews, before)
+        let keepsGlyphs = Self.same(view.appViews, glyphs)
+        let keepsBadges = Self.same(view.badgeViews, badges)
+        let keepsSticky = Self.same(view.stickyBadgeViews, sticky)
+        let keepsFloating = Self.same(view.floatingBadgeViews, floating)
+        #expect(keepsSubviews)
+        #expect(keepsGlyphs)
+        #expect(keepsBadges)
+        #expect(keepsSticky)
+        #expect(keepsFloating)
     }
 
     @Test("A state badge stands only on an app wearing that state")
@@ -108,6 +124,8 @@ struct SpaceBarItemReuseTests {
             active: true
         )
         let kept = try #require(view.appViews.first)
+        let departed = try #require(view.appViews.last)
+        let departedBadge = try #require(view.badgeViews.last)
         let sticky = try #require(view.stickyBadgeViews[1])
         Self.configure(
             view,
@@ -117,6 +135,12 @@ struct SpaceBarItemReuseTests {
         #expect(view.appViews.count == 2)
         #expect(view.appViews[0] is NSTextField)
         #expect(kept.superview == nil)
+        #expect(departed.superview == nil)
+        #expect(departedBadge.superview == nil)
+        let text = view.appViews[0]
+        Self.configure(view, apps: [Self.app(1), Self.app(2)], active: true)
+        #expect(view.appViews[0] is NSImageView)
+        #expect(text.superview == nil)
         #expect(sticky.superview == nil)
         #expect(view.stickyBadgeViews.allSatisfy { $0 == nil })
         #expect(view.appViews.allSatisfy { $0.superview === view })
@@ -142,6 +166,14 @@ struct SpaceBarItemReuseTests {
         )
         #expect(view.stickyBadgeViews[0] === badge)
         #expect(badge.symbolName == StickyStyle.displaySymbolName)
+        let drawn = try #require(badge.symbol.image)
+        let wanted = try #require(
+            NSImage(
+                systemSymbolName: StickyStyle.displaySymbolName,
+                accessibilityDescription: nil
+            )
+        )
+        #expect(drawn.tiffRepresentation == wanted.tiffRepresentation)
         #expect(StickyStyle.displaySymbolName != StickyStyle.symbolName)
     }
 

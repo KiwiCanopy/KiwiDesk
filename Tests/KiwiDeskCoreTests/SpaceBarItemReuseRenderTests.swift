@@ -62,9 +62,17 @@ struct SpaceBarItemReuseRenderTests {
         let inside = items.map(\.subviews)
         #expect(items.allSatisfy { $0.appViews.count == 2 })
         manager.sync([Self.bar(active: 2)])
-        #expect(overlay.itemViews.elementsEqual(items, by: ===))
+        let keepsItems = SpaceBarItemReuseTests.same(
+            overlay.itemViews,
+            items
+        )
+        #expect(keepsItems)
         for (item, before) in zip(overlay.itemViews, inside) {
-            #expect(item.subviews.elementsEqual(before, by: ===))
+            let keepsViews = SpaceBarItemReuseTests.same(
+                item.subviews,
+                before
+            )
+            #expect(keepsViews)
         }
         #expect(overlay.itemViews[1].isActive)
     }
