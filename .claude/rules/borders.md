@@ -158,11 +158,19 @@ keeps these:
 - **An animating ring moves inside its panel rather than
   resizing it** — a panel resize hands WindowServer a fenced
   transaction the main actor waits on, every frame, GPU idle or
-  not (#1937, device 2026-10-03). While `isAnimating` holds, the
-  manager offers the ring's screen as `room`, the panel takes it
-  once and the ring's layers move inside; a ring outside the
-  room, and every settled render, takes an exact panel
-  (`BorderMovingRoomTests`).
+  not (#1937, device 2026-10-03). Every ring writer takes its
+  room from the one `BorderManager.room(for:screen:)`: while
+  `isAnimating` holds, the ring's screen outset by its own size,
+  so an edge ring or one arriving from a parked corner still
+  fits; the panel takes the room once and the ring's layers move
+  inside. A live ring's panel returns to the ring's own frame at
+  the first render after `isAnimating` ends — the late resync at
+  the latest — while a ring retired mid-flight keeps the room,
+  alpha 0, until it returns, since shrinking it would put the
+  resize back on the switch path (`BorderMovingRoomTests`). A
+  room-sized panel spans its screen, so a reader of the front
+  windows leaves KiwiDesk's own out (`FloatDetection.normalFrames`,
+  `BorderMovingRoomTests` ▸ `ownWindowsLeaveFrontFrames`).
 
 The WindowServer `.hide` arm still orders a ring out. A
 KiwiDesk Space switch parks windows by moving them, so it raises

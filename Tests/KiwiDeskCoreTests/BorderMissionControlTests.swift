@@ -26,7 +26,8 @@ struct BorderMissionControlTests {
             cornerStyle: .rounded,
             cornerRadius: 16,
             colorHex: "#FF0000",
-            screen: nil
+            screen: nil,
+            room: nil
         )
         defer { overlay.hide() }
         let behavior = try #require(panel.panelBehavior)

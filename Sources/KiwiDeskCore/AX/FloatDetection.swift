@@ -77,9 +77,20 @@ public enum FloatDetection {
                 [.optionOnScreenOnly, .excludeDesktopElements],
                 kCGNullWindowID
             ) as? [[String: Any]] ?? []
-        return list.compactMap { info in
+        return normalFrames(in: list, ownPID: getpid())
+    }
+
+    /// Layer-0 visible frames of `list`, KiwiDesk's own windows
+    /// left out: no own overlay is ever a presentation, and an
+    /// animating ring's panel spans its screen (#1937).
+    static func normalFrames(
+        in list: [[String: Any]],
+        ownPID: pid_t
+    ) -> [CGRect] {
+        list.compactMap { info in
             guard info[kCGWindowLayer as String] as? Int == 0,
-                (info[kCGWindowAlpha as String] as? Double ?? 0) > 0
+                (info[kCGWindowAlpha as String] as? Double ?? 0) > 0,
+                info[kCGWindowOwnerPID as String] as? pid_t != ownPID
             else { return nil }
             return (info[kCGWindowBounds as String] as? [String: Any])
                 .flatMap {

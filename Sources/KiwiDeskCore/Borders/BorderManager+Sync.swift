@@ -59,15 +59,17 @@ extension BorderManager {
                 animating: isAnimating(spec.window),
                 commanded: commandedFrame(spec.window)
             )
+            let screen = screen(for: frame)
             overlay.update(
                 frame: frame,
                 width: spec.width,
                 cornerStyle: spec.cornerStyle,
                 cornerRadius: cornerRadius(for: spec.window),
                 colorHex: spec.colorHex,
-                screen: screen(for: frame),
+                screen: screen,
                 glowBlur: spec.glowBlur,
-                sheen: spec.sheen
+                sheen: spec.sheen,
+                room: room(for: spec.window, screen: screen)
             )
             // Without the WindowServer stream no reorder event
             // tells a shown ring its target moved, so every sync
@@ -142,10 +144,26 @@ extension BorderManager {
             glowBlur: spec.glowBlur,
             sheen: spec.sheen,
             restoreVisibility: restoreVisibility,
-            // An animating ring moves inside a screen-sized panel
-            // rather than resizing it per frame, which waits on
-            // WindowServer (#1937); the settle resizes it back.
-            room: isAnimating(id) ? screen?.frame : nil
+            room: room(for: id, screen: screen)
         )
+    }
+
+    /// Where an animating ring may move without its panel
+    /// resizing, which waits on WindowServer every frame (#1937):
+    /// its screen outset by the screen's own size, so a ring at an
+    /// edge or arriving from a parked corner still fits. Nil once
+    /// settled, which takes an exact panel.
+    func room(for id: WindowID, screen: NSScreen?) -> CGRect? {
+        guard isAnimating(id) else { return nil }
+        #if DEBUG
+            if let roomScreenOverride {
+                return Self.room(around: roomScreenOverride)
+            }
+        #endif
+        return screen.map { Self.room(around: $0.frame) }
+    }
+
+    nonisolated static func room(around screen: CGRect) -> CGRect {
+        screen.insetBy(dx: -screen.width, dy: -screen.height)
     }
 }

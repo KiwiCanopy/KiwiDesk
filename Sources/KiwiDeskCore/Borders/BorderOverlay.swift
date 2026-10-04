@@ -94,7 +94,7 @@ final class BorderOverlay {
         glowBlur: CGFloat = 0,
         sheen: CGFloat = 0,
         restoreVisibility: Bool = false,
-        room: CGRect? = nil
+        room: CGRect?
     ) {
         lastFrame = frame
         lastWidth = width

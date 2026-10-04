@@ -84,6 +84,11 @@ public final class BorderManager {
     var onLog: @MainActor (String) -> Void = CoreLog.write
     /// True while local animation drives this window (#594).
     var isAnimating: @MainActor (WindowID) -> Bool = { _ in false }
+    #if DEBUG
+        /// Test-only: the screen frame `room(for:screen:)` uses in
+        /// place of the host's. Production must not read it.
+        var roomScreenOverride: CGRect?
+    #endif
 
     /// Engine's commanded instant target while echo is pending (#881).
     var commandedFrame: @MainActor (WindowID) -> CGRect? = {
