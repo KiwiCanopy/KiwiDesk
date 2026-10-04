@@ -23,7 +23,8 @@ struct BorderRestackTests {
                 systemRadius: 10
             ),
             colorHex: "#FF0000",
-            screen: nil
+            screen: nil,
+            room: nil
         )
     }
 

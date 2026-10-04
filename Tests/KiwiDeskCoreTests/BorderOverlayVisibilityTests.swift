@@ -68,7 +68,8 @@ private final class RecordingBorderBackend: BorderOverlayBackend {
     func update(
         geometry: BorderGeometry,
         colorHex: String,
-        screen: NSScreen?
+        screen: NSScreen?,
+        room: CGRect?
     ) {
         calls.append(.update)
     }

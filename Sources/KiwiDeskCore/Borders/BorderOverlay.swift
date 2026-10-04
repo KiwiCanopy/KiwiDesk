@@ -6,10 +6,13 @@ import AppKit
 @MainActor
 protocol BorderOverlayBackend: AnyObject {
     var orderMode: BorderGeometry.Order { get }
+    /// `room` is where the ring may move without its panel
+    /// resizing, nil for an exact panel (#1937).
     func update(
         geometry: BorderGeometry,
         colorHex: String,
-        screen: NSScreen?
+        screen: NSScreen?,
+        room: CGRect?
     )
     func order(relativeTo windowNumber: CGWindowID)
     func hide()
@@ -90,7 +93,8 @@ final class BorderOverlay {
         screen: NSScreen?,
         glowBlur: CGFloat = 0,
         sheen: CGFloat = 0,
-        restoreVisibility: Bool = false
+        restoreVisibility: Bool = false,
+        room: CGRect? = nil
     ) {
         lastFrame = frame
         lastWidth = width
@@ -104,7 +108,8 @@ final class BorderOverlay {
         backend.update(
             geometry: geometry(),
             colorHex: colorHex,
-            screen: screen
+            screen: screen,
+            room: room
         )
         if shouldRestore {
             order(relativeTo: targetWindow)
@@ -141,7 +146,8 @@ final class BorderOverlay {
         backend.update(
             geometry: geometry(),
             colorHex: colorHex ?? lastColorHex,
-            screen: lastScreen
+            screen: lastScreen,
+            room: nil
         )
     }
 

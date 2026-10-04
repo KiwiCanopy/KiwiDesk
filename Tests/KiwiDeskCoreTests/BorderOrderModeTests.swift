@@ -99,7 +99,8 @@ private final class GeometryCapturingBackend: BorderOverlayBackend {
     func update(
         geometry: BorderGeometry,
         colorHex: String,
-        screen: NSScreen?
+        screen: NSScreen?,
+        room: CGRect?
     ) {
         lastGeometry = geometry
     }

@@ -131,16 +131,21 @@ extension BorderManager {
     ) {
         guard let overlay = overlays[id], let spec = specs[id]
         else { return }
+        let screen = screen(for: windowFrame)
         overlay.update(
             frame: windowFrame,
             width: spec.width,
             cornerStyle: spec.cornerStyle,
             cornerRadius: cornerRadius(for: id),
             colorHex: spec.colorHex,
-            screen: screen(for: windowFrame),
+            screen: screen,
             glowBlur: spec.glowBlur,
             sheen: spec.sheen,
-            restoreVisibility: restoreVisibility
+            restoreVisibility: restoreVisibility,
+            // An animating ring moves inside a screen-sized panel
+            // rather than resizing it per frame, which waits on
+            // WindowServer (#1937); the settle resizes it back.
+            room: isAnimating(id) ? screen?.frame : nil
         )
     }
 }

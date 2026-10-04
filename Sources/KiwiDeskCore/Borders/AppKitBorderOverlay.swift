@@ -11,6 +11,11 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         panel?.orderOut(nil)
     }
 
+    /// Holds the ring's layers where the ring sits in its panel,
+    /// which may be larger than the ring while it moves (#1937).
+    private let container = CALayer()
+    /// The frame last handed to AppKit, in AppKit coordinates.
+    private var placedFrame: CGRect?
     private let shape = CAShapeLayer()
     /// Secondary shadow layer stacked under ring for edge bloom density
     /// (#533).
@@ -42,6 +47,8 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         /// Test-only: orders AppKit performed. Production must not
         /// read it.
         private(set) var appKitOrders = 0
+        /// Test-only: panel frames handed to AppKit.
+        private(set) var frameSets = 0
     #endif
 
     init(
@@ -60,6 +67,23 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// render.
     var panelBehavior: NSWindow.CollectionBehavior? {
         panel?.collectionBehavior
+    }
+
+    /// The panel's frame and the ring's place in it, AppKit
+    /// coordinates, nil before the first render.
+    var panelFrame: CGRect? { placedFrame }
+    var ringFrameInPanel: CGRect { container.frame }
+
+    /// The panel's frame for a ring: `room` while it holds the
+    /// whole ring, else the ring's own. A panel resize hands
+    /// WindowServer a fenced transaction the main actor waits on,
+    /// per frame of an animation (#1937).
+    nonisolated static func panelFrame(
+        for ring: CGRect,
+        room: CGRect?
+    ) -> CGRect {
+        guard let room, room.contains(ring) else { return ring }
+        return room
     }
 
     /// The panel's window number, nil before the first render.
@@ -100,19 +124,26 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     func update(
         geometry: BorderGeometry,
         colorHex: String,
-        screen: NSScreen?
+        screen: NSScreen?,
+        room: CGRect?
     ) {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        panel.setFrame(
-            GeometryUtils.flip(
-                geometry.overlayFrame,
-                primaryHeight: GeometryUtils.primaryHeight
-            ),
-            display: false
+        let ring = GeometryUtils.flip(
+            geometry.overlayFrame,
+            primaryHeight: GeometryUtils.primaryHeight
         )
+        let frame = Self.panelFrame(for: ring, room: room)
+        if frame != placedFrame {
+            panel.setFrame(frame, display: false)
+            placedFrame = frame
+            #if DEBUG
+                frameSets += 1
+            #endif
+        }
+        container.frame = ring.offsetBy(dx: -frame.minX, dy: -frame.minY)
         let bounds = CGRect(
             origin: .zero,
             size: geometry.overlayFrame.size
@@ -305,9 +336,10 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         view.wantsLayer = true
         // Boost below the ring so the stacked bloom never paints
         // over the crisp stroke.
-        view.layer?.addSublayer(glowBoost)
-        view.layer?.addSublayer(shape)
-        view.layer?.addSublayer(sheen)
+        view.layer?.addSublayer(container)
+        container.addSublayer(glowBoost)
+        container.addSublayer(shape)
+        container.addSublayer(sheen)
         panel.contentView = view
         return panel
     }

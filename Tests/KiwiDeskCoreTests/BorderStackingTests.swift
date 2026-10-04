@@ -129,7 +129,8 @@ struct BorderStackingTests {
                 glowBlur: glow
             ),
             colorHex: "#FF0000",
-            screen: nil
+            screen: nil,
+            room: nil
         )
     }
 

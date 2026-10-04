@@ -155,6 +155,14 @@ keeps these:
   take AppKit (`BorderRestackTests`). This orders the AppKit
   panel and draws nothing: the `.transient` section below still
   binds.
+- **An animating ring moves inside its panel rather than
+  resizing it** — a panel resize hands WindowServer a fenced
+  transaction the main actor waits on, every frame, GPU idle or
+  not (#1937, device 2026-10-03). While `isAnimating` holds, the
+  manager offers the ring's screen as `room`, the panel takes it
+  once and the ring's layers move inside; a ring outside the
+  room, and every settled render, takes an exact panel
+  (`BorderMovingRoomTests`).
 
 The WindowServer `.hide` arm still orders a ring out. A
 KiwiDesk Space switch parks windows by moving them, so it raises
