@@ -35,6 +35,10 @@ extension EventLoop {
     /// list is walked only for an unwatched app the gate lets in,
     /// since every record in it is a LaunchServices round trip
     /// after any activation (#1936).
+    ///
+    /// The synchronous door, for a caller with no off-main hop —
+    /// the suites; the scheduled heal takes `requestHealSweep`,
+    /// since this read waits on WindowServer on the main actor.
     func healSweep() {
         guard isRunning else { return }
         healSweep(census: onScreenNormalWindowIDs())
@@ -44,8 +48,10 @@ extension EventLoop {
     /// calls `done` unless the returned read was cancelled (#1956):
     /// the read waits for WindowServer to take this process's
     /// pending window updates, which ran up to ~340 ms on the main
-    /// actor when a tick met a Space switch.
-    @discardableResult
+    /// actor when a tick met a Space switch. The census may be a
+    /// read old at delivery; an id it names that left meanwhile
+    /// costs one reconcile and goes quiet. The caller tracks the
+    /// task, or teardown cannot cancel it.
     func requestHealSweep(
         then done: @escaping @MainActor () -> Void
     ) -> Task<Void, Never> {

@@ -24,8 +24,17 @@ import Testing
 struct AdoptionHealScheduleTests {
     @MainActor
     private final class Box {
-        var censusReads = 0
         var windowQueries = 0
+        /// Read off the main actor (#1956), so counted under a lock.
+        let census = CensusCounter()
+        var censusReads: Int { census.count }
+    }
+
+    private final class CensusCounter: @unchecked Sendable {
+        private let lock = NSLock()
+        private var reads = 0
+        func note() { lock.withLock { reads += 1 } }
+        var count: Int { lock.withLock { reads } }
     }
 
     /// Inert healthy observer: attach installs it, nothing
@@ -69,8 +78,9 @@ struct AdoptionHealScheduleTests {
             box.windowQueries += 1
             return []
         }
+        let counter = box.census
         loop.onScreenNormalWindowIDs = {
-            box.censusReads += 1
+            counter.note()
             return [:]
         }
         runWholeScan(loop)
@@ -143,6 +153,43 @@ struct AdoptionHealScheduleTests {
         #expect(read != nil)
         await read?.value
         #expect(recorder.onMain == [false])
+    }
+
+    /// A semaphore wait, kept out of the async context.
+    nonisolated private static func block(on semaphore: DispatchSemaphore) {
+        semaphore.wait()
+    }
+
+    /// #1956: teardown cancels a read in flight, and a cancelled
+    /// read neither sweeps nor re-arms — a stopped core's heal
+    /// chain stays stopped.
+    @Test("a heal read cancelled in flight never re-arms")
+    func cancelledReadDoesNotRearm() async {
+        let (core, box) = makeCore()
+        defer {
+            core.deferred.cancelAll()
+            core.eventLoop.stop()
+        }
+        let started = DispatchSemaphore(value: 0)
+        let release = DispatchSemaphore(value: 0)
+        let counter = box.census
+        core.eventLoop.onScreenNormalWindowIDs = {
+            counter.note()
+            started.signal()
+            release.wait()
+            return [:]
+        }
+        core.timings.adoptionHealInterval = .milliseconds(1)
+        core.scheduleAdoptionHeal()
+        await core.deferred.task(for: .adoptionHeal)?.value
+        let read = core.deferred.task(for: .adoptionHealRead)
+        #expect(read != nil)
+        await Task.detached { Self.block(on: started) }.value
+        core.deferred.cancelAll()
+        release.signal()
+        await read?.value
+        #expect(box.censusReads == 1)
+        #expect(core.deferred.task(for: .adoptionHeal) == nil)
     }
 
     @Test("the re-track task reconciles every queued pid")
