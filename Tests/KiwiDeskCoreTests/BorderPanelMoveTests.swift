@@ -132,8 +132,8 @@ struct BorderPanelMoveTests {
         #expect(ring.frameSets == 2)
     }
 
-    /// Holds `hasWindow` and the window-number guard as a pair: a
-    /// panel never ordered in has no window number either.
+    /// A deferred panel has no window number until AppKit first
+    /// orders it in, and the move needs one.
     @Test("A panel never ordered in takes AppKit")
     func neverOrderedTakesAppKit() {
         let spy = Spy()

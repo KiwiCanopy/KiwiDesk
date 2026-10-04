@@ -19,7 +19,9 @@ enum MainRunLoopPass {
 
     private static func install() {
         // Ordered last among the before-waiting observers, so it
-        // counts after Core Animation's commit has run.
+        // counts after Core Animation's commit has run. Not on exit:
+        // a run that exits without waiting left AppKit's frame
+        // unsent, and a move after it was lost (device 2026-10-05).
         let observer = CFRunLoopObserverCreateWithHandler(
             nil,
             CFRunLoopActivity.beforeWaiting.rawValue,

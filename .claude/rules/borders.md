@@ -174,8 +174,13 @@ keeps these:
   a SkyLight move only once WindowServer's moved event reaches its
   event loop, and a `setFrame` equal to a stale cache is skipped.
   The sticky mark's panel still takes `setFrame` per tick,
-  unmeasured on the switch path; moving it the same way takes
-  `BorderManager.movePanel`, not a second seam.
+  unmeasured on the switch path. **A second panel moved this way
+  shares the ring's whole placement** — the frame of record, the
+  pass gate, the stamp on the order-in that creates the window —
+  never the move alone, which a same-pass `setFrame` or
+  `orderFrontRegardless` loses; its move is a closure over
+  `BorderManager.movePanel` wired once in Core, not a second
+  live seam.
 - **An animating ring that changes size moves inside its panel
   rather than resizing it** — a panel resize hands WindowServer a
   fenced transaction the main actor waits on, every frame, GPU
