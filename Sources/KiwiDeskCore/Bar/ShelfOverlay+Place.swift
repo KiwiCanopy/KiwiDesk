@@ -20,72 +20,68 @@ extension ShelfOverlay {
         // Nothing joins and nothing moves: the stand would commit
         // no write, and its flush is a synchronous layout pass of
         // every bar view (#1942).
-        guard
-            sections.contains(where: {
-                standsMove($0, in: strip, horizontal: horizontal)
-            })
-        else {
+        let writes = standWrites(sections, in: strip, horizontal: horizontal)
+        guard !writes.isEmpty else {
             WorkMeter.shared.add(\.shelfStandsSkipped)
             return false
         }
         BarMotion.standCommitted {
-            for section in sections
-            where section.view.superview !== stripView {
-                let frame = Self.slotFrame(section, in: strip)
-                stripView.addSubview(
-                    section.view,
-                    positioned: .below,
-                    relativeTo: divider
-                )
-                section.view.frame = Self.collapsed(
-                    frame,
-                    to: Self.facing(frame, others: sections, in: strip),
-                    horizontal: horizontal
-                )
-                section.view.alphaValue = 0
-            }
-            for section in sections
-            where section.view.superview === stripView {
-                guard
-                    let start = glideStart(
-                        section,
-                        in: strip,
-                        horizontal: horizontal
+            for (section, write) in writes {
+                switch write {
+                case .join(let frame):
+                    stripView.addSubview(
+                        section.view,
+                        positioned: .below,
+                        relativeTo: divider
                     )
-                else { continue }
-                section.view.frame = start
+                    section.view.frame = frame
+                    section.view.alphaValue = 0
+                case .start(let frame):
+                    section.view.frame = frame
+                }
             }
         }
         return true
     }
 
-    /// Whether standing `section` writes anything: it joins, or
-    /// its glide start is not where it stands.
-    func standsMove(
-        _ section: Section,
-        in strip: CGRect,
-        horizontal: Bool
-    ) -> Bool {
-        guard section.view.superview === stripView else { return true }
-        return glideStart(section, in: strip, horizontal: horizontal)
-            .map { $0 != section.view.frame } ?? false
+    /// What standing a section writes: a joining one is added
+    /// collapsed and transparent, one on the strip moves to its
+    /// glide start.
+    enum StandWrite: Equatable {
+        case join(CGRect)
+        case start(CGRect)
     }
 
-    /// An on-strip section's glide start; nil before it was placed.
-    private func glideStart(
-        _ section: Section,
+    /// The stand's writes, decided once: the one derivation both
+    /// whether to stand and what to stand read.
+    func standWrites(
+        _ sections: [Section],
         in strip: CGRect,
         horizontal: Bool
-    ) -> CGRect? {
-        guard let drawn = placedContent[ObjectIdentifier(section.view)]
-        else { return nil }
-        return Self.glideStart(
-            from: section.view.frame,
-            drawn: drawn,
-            content: section.content,
-            to: Self.slotFrame(section, in: strip),
-            horizontal: horizontal
-        )
+    ) -> [(Section, StandWrite)] {
+        sections.compactMap { section in
+            let slot = Self.slotFrame(section, in: strip)
+            guard section.view.superview === stripView else {
+                let frame = Self.collapsed(
+                    slot,
+                    to: Self.facing(slot, others: sections, in: strip),
+                    horizontal: horizontal
+                )
+                return (section, .join(frame))
+            }
+            guard
+                let drawn = placedContent[ObjectIdentifier(section.view)]
+            else { return nil }
+            let start = Self.glideStart(
+                from: section.view.frame,
+                drawn: drawn,
+                content: section.content,
+                to: slot,
+                horizontal: horizontal
+            )
+            return start == section.view.frame
+                ? nil : (section, .start(start))
+        }
     }
 
     /// A section's frame on the strip: origin and size in ONE

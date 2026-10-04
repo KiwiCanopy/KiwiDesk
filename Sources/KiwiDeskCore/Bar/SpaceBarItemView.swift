@@ -203,7 +203,8 @@ final class SpaceBarItemView: NSView {
         // late) and the glyphs still fading out (#1528 item 21).
         let repeats = keepsSpace && walk == nil && self.drawn == drawn
         if !repeats { pendingWalk = walk }
-        if self.identity != identity {
+        let changesSpace = self.identity != identity
+        if changesSpace {
             cancelSpringSweep()
             isDragHovered = false
             // A pointer resting on the Space this slot drew must
@@ -225,7 +226,11 @@ final class SpaceBarItemView: NSView {
         self.horizontal = horizontal
         self.style = style
         self.stateMarkColors = stateMarkColors
-        syncAppViews(startsWalk: walk != nil, keepsLeaving: repeats)
+        syncAppViews(
+            startsWalk: walk != nil,
+            keepsLeaving: repeats,
+            remints: changesSpace
+        )
         syncTargets()
         restyle()
         needsLayout = true

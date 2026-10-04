@@ -4,9 +4,14 @@ import AppKit
 /// the views the last one placed, slot by slot, and mints only
 /// what the new `apps` adds — a switch that changes no app list
 /// mints nothing. A walk re-mints, since its glyphs carry motion
-/// of their own (#1528 item 21).
+/// of their own (#1528 item 21), and so does a slot handed another
+/// Space, whose glyphs must not finish the last Space's walk.
 extension SpaceBarItemView {
-    func syncAppViews(startsWalk: Bool, keepsLeaving: Bool) {
+    func syncAppViews(
+        startsWalk: Bool,
+        keepsLeaving: Bool,
+        remints: Bool
+    ) {
         // A walk keeps the glyphs it carries off, so they fade
         // under their disc rather than vanish (#1528 item 21).
         let leaving =
@@ -15,7 +20,7 @@ extension SpaceBarItemView {
             leavingViews.forEach { $0.removeFromSuperview() }
             leavingViews = leaving
         }
-        if startsWalk {
+        if startsWalk || remints {
             appViews.filter { view in
                 !leaving.contains { $0 === view }
             }.forEach { $0.removeFromSuperview() }
@@ -30,13 +35,13 @@ extension SpaceBarItemView {
         syncGlyphs()
         syncCountBadges()
         stickyBadgeViews = syncStateBadges(stickyBadgeViews) { app in
-            app.sticky
+            style.stickyBadge && app.sticky
                 ? StickyStyle.symbolName(for: app.stickyScope)
                     ?? StickyStyle.symbolName
                 : nil
         }
         floatingBadgeViews = syncStateBadges(floatingBadgeViews) {
-            $0.floating ? Self.floatingSymbol : nil
+            style.stickyBadge && $0.floating ? Self.floatingSymbol : nil
         }
     }
 
@@ -84,8 +89,9 @@ extension SpaceBarItemView {
         }
     }
 
-    /// The state marks for `apps`: a mark only on an app `symbol`
-    /// names one for, reused where one stands.
+    /// The state marks for `apps`: a mark only where `symbol`
+    /// names one — the badge drawn, the switch included — reused
+    /// where one stands.
     private func syncStateBadges(
         _ old: [StateBadgeView?],
         symbol: (App) -> String?
@@ -108,7 +114,7 @@ extension SpaceBarItemView {
     }
 
     private func addMinted(_ view: NSView, below sibling: NSView? = nil) {
-        WorkMeter.shared.add(\.barViewsMinted)
+        WorkMeter.shared.add(\.spaceBarViewsMinted)
         if let sibling {
             addSubview(view, positioned: .below, relativeTo: sibling)
         } else {

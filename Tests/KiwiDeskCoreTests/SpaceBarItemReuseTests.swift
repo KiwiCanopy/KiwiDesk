@@ -36,15 +36,19 @@ struct SpaceBarItemReuseTests {
     private static func configure(
         _ view: SpaceBarItemView,
         apps: [SpaceBarItemView.App],
-        active: Bool
+        active: Bool,
+        space: String = "1",
+        badges: Bool = true
     ) {
+        var style = SpaceBarLook()
+        style.stickyBadge = badges
         view.configure(
-            identity: .space(SpaceID("1")),
+            identity: .space(SpaceID(space)),
             spaceGlyph: .text("1", tinted: true),
             apps: apps,
             active: active,
             horizontal: true,
-            style: SpaceBarLook(),
+            style: style,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
                 floating: "#ffffff"
@@ -139,5 +143,44 @@ struct SpaceBarItemReuseTests {
         #expect(view.stickyBadgeViews[0] === badge)
         #expect(badge.symbolName == StickyStyle.displaySymbolName)
         #expect(StickyStyle.displaySymbolName != StickyStyle.symbolName)
+    }
+
+    @Test("A reused slot takes its new app's icon and count")
+    func reusedSlotTakesNewContent() throws {
+        let view = Self.view()
+        Self.configure(view, apps: [Self.app(1), Self.app(2)], active: true)
+        let image = try #require(view.appViews[1] as? NSImageView)
+        let badge = view.badgeViews[1]
+        var next = Self.app(5)
+        next.windows = [WindowID(2)]
+        Self.configure(view, apps: [Self.app(1), next], active: true)
+        #expect(view.appViews[1] === image)
+        #expect(image.image === next.icon)
+        #expect(view.badgeViews[1] === badge)
+        #expect(badge.stringValue == "5")
+        #expect(!badge.isHidden)
+    }
+
+    @Test("A slot handed another Space re-mints its views")
+    func otherSpaceRemints() throws {
+        let view = Self.view()
+        Self.configure(view, apps: [Self.app(1)], active: true)
+        let glyph = try #require(view.appViews.first)
+        Self.configure(view, apps: [Self.app(1)], active: true, space: "2")
+        #expect(view.appViews.first !== glyph)
+        #expect(glyph.superview == nil)
+    }
+
+    @Test("With the badge switch off no state badge is minted")
+    func switchOffMintsNoBadge() {
+        let view = Self.view()
+        Self.configure(
+            view,
+            apps: [Self.app(1, sticky: true, floating: true)],
+            active: true,
+            badges: false
+        )
+        #expect(view.stickyBadgeViews == [nil])
+        #expect(view.floatingBadgeViews == [nil])
     }
 }

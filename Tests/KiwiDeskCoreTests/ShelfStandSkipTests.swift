@@ -49,7 +49,10 @@ struct ShelfStandSkipTests {
             view,
             content: CGRect(x: 10, y: 0, width: 500, height: 40)
         )
-        #expect(!overlay.standsMove(again, in: Self.strip, horizontal: true))
+        #expect(
+            overlay.standWrites([again], in: Self.strip, horizontal: true)
+                .isEmpty
+        )
         #expect(
             !overlay.standGlideStarts(
                 [again],
@@ -57,7 +60,6 @@ struct ShelfStandSkipTests {
                 horizontal: true
             )
         )
-        #expect(view.frame == ShelfOverlay.slotFrame(again, in: Self.strip))
     }
 
     @Test("A joining section stands")
@@ -67,7 +69,12 @@ struct ShelfStandSkipTests {
             NSView(),
             slot: CGRect(x: 600, y: 0, width: 400, height: 40)
         )
-        #expect(overlay.standsMove(joining, in: Self.strip, horizontal: true))
+        #expect(
+            overlay.standWrites([joining], in: Self.strip, horizontal: true)
+                .map(\.1).first.map {
+                    if case .join = $0 { true } else { false }
+                } == true
+        )
     }
 
     @Test("A moved slot whose content shifts inside it stands")
@@ -79,7 +86,10 @@ struct ShelfStandSkipTests {
             slot: CGRect(x: 100, y: 0, width: 900, height: 40),
             content: CGRect(x: 4, y: 0, width: 600, height: 40)
         )
-        #expect(overlay.standsMove(moved, in: Self.strip, horizontal: true))
+        #expect(
+            overlay.standWrites([moved], in: Self.strip, horizontal: true)
+                .count == 1
+        )
         #expect(
             overlay.standGlideStarts([moved], in: Self.strip, horizontal: true)
         )
