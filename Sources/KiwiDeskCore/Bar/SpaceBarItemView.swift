@@ -44,8 +44,9 @@ final class SpaceBarItemView: NSView {
     /// walk lands (#1528 item 21).
     var leavingViews: [NSView] = []
     var badgeViews: [NSTextField] = []
-    var stickyBadgeViews: [StateBadgeView] = []
-    var floatingBadgeViews: [StateBadgeView] = []
+    /// One per glyph, nil where that app wears no such mark (#1942).
+    var stickyBadgeViews: [StateBadgeView?] = []
+    var floatingBadgeViews: [StateBadgeView?] = []
     let overflowBadge = SpaceBarItemView.makeBadge()
     /// The leading `+n` disc, before the glyphs (#1528 item 17).
     let leadingBadge = SpaceBarItemView.makeBadge()
@@ -231,59 +232,5 @@ final class SpaceBarItemView: NSView {
         setAccessibilityElement(true)
         setAccessibilityRole(space == nil ? .image : .button)
         setAccessibilityLabel(axLabel)
-    }
-
-    private func syncAppViews(startsWalk: Bool, keepsLeaving: Bool) {
-        // A walk keeps the glyphs it carries off, so they fade
-        // under their disc rather than vanish (#1528 item 21).
-        let leaving =
-            startsWalk ? Self.leaving(appViews, walk: pendingWalk) : []
-        if !keepsLeaving {
-            leavingViews.forEach { $0.removeFromSuperview() }
-            leavingViews = leaving
-        }
-        appViews.filter { view in
-            !leaving.contains { $0 === view }
-        }.forEach { $0.removeFromSuperview() }
-        badgeViews.forEach { $0.removeFromSuperview() }
-        stickyBadgeViews.forEach { $0.removeFromSuperview() }
-        floatingBadgeViews.forEach { $0.removeFromSuperview() }
-        appViews = apps.map { app in
-            // Beneath the discs, which a walking glyph passes under.
-            if app.glyph != nil {
-                let tf = NSTextField(labelWithString: "")
-                tf.alignment = .center
-                tf.setAccessibilityElement(false)
-                addSubview(tf, positioned: .below, relativeTo: overflowBadge)
-                return tf
-            }
-            let iv = NSImageView()
-            iv.image = app.icon
-            iv.imageScaling = .scaleProportionallyUpOrDown
-            iv.setAccessibilityElement(false)
-            addSubview(iv, positioned: .below, relativeTo: overflowBadge)
-            return iv
-        }
-        badgeViews = apps.map { _ in
-            let badge = Self.makeBadge()
-            addSubview(badge)
-            return badge
-        }
-        stickyBadgeViews = apps.map { app in
-            let badge = StateBadgeView(
-                symbolName: StickyStyle.symbolName(
-                    for: app.stickyScope
-                ) ?? StickyStyle.symbolName
-            )
-            addSubview(badge)
-            return badge
-        }
-        floatingBadgeViews = apps.map { _ in
-            let badge = StateBadgeView(
-                symbolName: Self.floatingSymbol
-            )
-            addSubview(badge)
-            return badge
-        }
     }
 }

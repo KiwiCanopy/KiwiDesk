@@ -176,6 +176,14 @@ twice, was a question the user answered twice. The argument is
   the bars' app icons come from the one `BarIconCache`: a fresh
   `NSImage` per read never compares equal and costs a
   LaunchServices round trip besides.
+- **A render that changes no app list mints no view (#1942).** A
+  Space item reuses its glyph and badge views slot by slot and
+  mints a state badge only for an app wearing that state; a
+  shelf show whose sections all keep their slots stands nothing,
+  since the stand's flush lays out every bar view
+  synchronously. Each was the bars' largest share of a Space
+  switch. `SpaceBarItemReuseTests` ▸ `switchKeepsViews` pins the
+  item's subview identity, `ShelfStandSkipTests` the stand.
 - **Stand a bar down through the one
   `KiwiCore.shelfStandsDown(on:)`**, read once per display in
   `updateBars()` for both bars — a native-fullscreen Space
