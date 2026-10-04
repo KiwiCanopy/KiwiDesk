@@ -171,14 +171,21 @@ struct ProcessPolicyReadingTests {
         }
         loop.reconcileAll()
         #expect(loop.policy(of: parent) == .accessory)
-        // A window's adoption reads once.
-        loop.activationPolicy = { _ in .regular }
-        loop.track(
+        // The heal's walk, opened by an unwatched app, files the
+        // watched one's policy too.
+        loop.runningApplications = { self.listing }
+        box.census[other] = [WindowID(3)]
+        loop.healSweep()
+        #expect(loop.policy(of: parent) == .regular)
+        // A created window reads once, ahead of its verdicts.
+        loop.activationPolicy = { _ in .accessory }
+        loop.handle(
+            kAXWindowCreatedNotification,
             AXUIElementCreateApplication(parent),
             pid: parent,
             app: app(parent).ref
         )
-        #expect(loop.policy(of: parent) == .regular)
+        #expect(loop.policy(of: parent) == .accessory)
     }
 
     @Test("a record lost for a moment keeps a running process")

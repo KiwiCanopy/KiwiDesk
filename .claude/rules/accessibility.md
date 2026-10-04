@@ -228,28 +228,27 @@ editing AX code:
   policy last FILED, else LaunchServices' answer; and one door
   files it, `notePolicy`, which keeps the policy last read
   while `ProcessIdentity.runs` says the process is alive and
-  files `.prohibited` once it is gone. A per-event path never
-  reads LaunchServices on the main actor — a read is a
-  synchronous XPC round trip, every AX notification asks the
-  policy, and an app activation invalidates even a retained
-  `NSRunningApplication`'s cache: 1.2 s of main thread in 30 s
-  of Space switching (#1936, device 2026-10-03). So a policy is
-  filed where a fresh one is already in hand or is worth one
-  read — the off-main window-list read, a pass that walked the
-  list, and one read per adopted window through
-  `refreshPolicy`, since an app flips its policy without
-  activating — and a new filer joins `ProcessIdentitySeamTests`'
-  census with its reason. The reading's hidden state is one
-  read old, so only the live `appIsHidden` may drop an app's
-  windows (`ReconcileSnapshotTests` ▸
-  `unhideDuringTheReadKeepsWindows`). For the same reason the heal sweep walks
-  the running-app list only for an unwatched app its gate lets
-  in — every record in a fresh list is a round trip
+  files `.prohibited` once it is gone. An observed process's
+  policy is read through `policy(of:)` on every notification
+  path, never from LaunchServices, which is a synchronous XPC
+  round trip that an app activation re-arms even on a retained
+  `NSRunningApplication`: 1.2 s of main thread in 30 s of Space
+  switching (#1936, device 2026-10-03). A fresh read is filed
+  only where one is already in hand or is worth its one read —
+  the off-main window-list read, a pass that walked the list,
+  and a created or returning window through `refreshPolicy`,
+  since an app flips its policy without activating — and a new
+  filer joins `ProcessIdentitySeamTests`' census with its
+  reason. For the round-trip reason the heal sweep walks the
+  running-app list only for an unwatched app its gate lets in
   (`ProcessPolicyReadingTests` ▸
-  `healWalksTheListOnlyForAnUnwatchedApp`). The reconcile and notification
-  ownership gates, the boot sweep's step and the float and
-  overlay verdicts take it, and a new reader of a policy takes
-  it too (`ProcessPolicyReadingTests` ▸
+  `healWalksTheListOnlyForAnUnwatchedApp`). The reading's hidden
+  state is one read old, so only the live `appIsHidden` may
+  drop an app's windows (`ReconcileSnapshotTests` ▸
+  `unhideDuringTheReadKeepsWindows`). The reconcile and
+  notification ownership gates, the boot sweep's step and the
+  float and overlay verdicts take `policy(of:)`, and a new
+  reader of a policy takes it too (`ProcessPolicyReadingTests` ▸
   `lostRecordKeepsARunningProcess`, `lostRecordDetachesAGoneProcess`,
   `keptPolicyFollowsTheLastRead`,
   `observedProcessAsksNothing`, `freshReadsAreFiled`;

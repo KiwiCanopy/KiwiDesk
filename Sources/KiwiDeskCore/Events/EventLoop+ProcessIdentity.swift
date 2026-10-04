@@ -131,7 +131,7 @@ extension EventLoop {
     }
 
     /// One fresh LaunchServices read, filed — for a window's
-    /// adoption, never per notification (#1936).
+    /// creation or return, never every notification (#1936).
     func refreshPolicy(of pid: pid_t) {
         notePolicy(activationPolicy(pid), of: pid)
     }

@@ -199,12 +199,13 @@ struct ProcessIdentitySeamTests {
                     "EventLoop+ReconcileAll.swift",
                 ]
         )
-        // One fresh read per adopted window, never per event.
+        // One fresh read per created or returning window, never
+        // every notification.
         #expect(
             try sites(of: "refreshPolicy(")
                 == [
+                    "EventLoop+Notifications.swift",
                     "EventLoop+ProcessIdentity.swift",
-                    "EventLoop+Tracking.swift",
                 ]
         )
         // A record is looked up under `Events/` only where a seam

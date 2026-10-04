@@ -31,9 +31,6 @@ extension EventLoop {
         // discriminates it (`HiddenAppWindowTests` says so in
         // its own words).
         guard !appIsHidden(pid) else { return }
-        // The create-time verdicts below read the policy, which an
-        // app can flip without activating (#1936).
-        refreshPolicy(of: pid)
         let role = AXHelper.role(of: element)
         guard role == kAXWindowRole,
             !AXHelper.isMinimized(element),
