@@ -139,11 +139,18 @@ struct ProcessPolicyReadingTests {
         box.listings = 0
         loop.healSweep()
         #expect(box.listings == 0)
-        // An unwatched app the gate lets in is looked up.
+        // A quieted unwatched app asks nothing of the list.
         box.census[other] = [WindowID(3)]
+        loop.healQuiet[other] = [WindowID(3)]
+        loop.healSweep()
+        #expect(box.listings == 0)
+        // Two unwatched apps the gate lets in: one walk.
+        box.census[child] = [WindowID(2)]
+        loop.healQuiet = [:]
         loop.healSweep()
         #expect(box.listings == 1)
         #expect(loop.observes(pid: other))
+        #expect(loop.observes(pid: child))
     }
 
     @Test("a record lost for a moment keeps a running process")

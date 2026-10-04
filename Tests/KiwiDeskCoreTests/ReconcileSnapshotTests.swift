@@ -29,6 +29,9 @@ struct ReconcileSnapshotTests {
     @MainActor
     private final class Box {
         var applying = false
+        var reading = false
+        /// LaunchServices seams asked outside the off-main read.
+        var askedOutsideRead: [String] = []
         /// Seam calls made while the list applied.
         var askedWhileApplying: [String] = []
         var fullscreen = false
@@ -78,6 +81,7 @@ struct ReconcileSnapshotTests {
         loop.activationPolicy = { _ in
             MainActor.assumeIsolated {
                 box.asked("policy")
+                if !box.reading { box.askedOutsideRead.append("policy") }
                 return box.policy
             }
         }
@@ -85,10 +89,12 @@ struct ReconcileSnapshotTests {
         loop.appIsHidden = { _ in
             MainActor.assumeIsolated {
                 box.asked("hidden")
+                if !box.reading { box.askedOutsideRead.append("hidden") }
                 return box.hidden
             }
         }
         loop.frontmostPID = { nil }
+        loop.processIdentity.runs = { _ in true }
         let one = elementOne
         let two = elementTwo
         let (first, second) = (first, second)
@@ -126,7 +132,13 @@ struct ReconcileSnapshotTests {
         }
         loop.axReads.dispatchOverride = { _, work in
             MainActor.assumeIsolated {
-                if box.held != nil { box.held?.append(work) } else { work() }
+                if box.held != nil {
+                    box.held?.append(work)
+                } else {
+                    box.reading = true
+                    work()
+                    box.reading = false
+                }
             }
         }
         loop.onEvent = { event in
@@ -270,5 +282,7 @@ struct ReconcileSnapshotTests {
         loop.reconcileOffMain(pid: pid, app: ref)
         #expect(box.events.contains("hidden w41"))
         #expect(box.askedWhileApplying.isEmpty, "\(box.askedWhileApplying)")
+        // Both are read on the read's own thread, never at request.
+        #expect(box.askedOutsideRead.isEmpty, "\(box.askedOutsideRead)")
     }
 }
