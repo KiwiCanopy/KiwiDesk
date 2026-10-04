@@ -133,24 +133,36 @@ struct BorderMovingRoomTests {
         #expect(backend.rooms.last == .some(nil))
     }
 
-    @Test("KiwiDesk's own windows are never a front presentation")
-    func ownWindowsLeaveFrontFrames() {
-        let bounds: [String: Any] = [
-            "X": 0, "Y": 0, "Width": 1728, "Height": 1117,
-        ]
-        let row: (pid_t) -> [String: Any] = { pid in
+    @Test("A room stays inside AppKit's window limit")
+    func roomIsCapped() {
+        let wide = CGRect(x: 0, y: 0, width: 5120, height: 2160)
+        let room = BorderManager.room(around: wide)
+        #expect(room.width == wide.width + 2 * BorderManager.roomReach)
+        #expect(room.width < 10000)
+    }
+
+    @Test("KiwiDesk's chrome is never a front presentation")
+    func ownChromeLeavesFrontFrames() {
+        let row: (pid_t, Int, CGFloat) -> [String: Any] = {
+            pid,
+            number,
+            x in
             [
                 kCGWindowLayer as String: 0,
                 kCGWindowAlpha as String: 1.0,
                 kCGWindowOwnerPID as String: pid,
-                kCGWindowBounds as String: bounds,
+                kCGWindowNumber as String: number,
+                kCGWindowBounds as String: [
+                    "X": x, "Y": 0, "Width": 100, "Height": 100,
+                ],
             ]
         }
+        // A ring panel (own, chrome), the tiled Settings window
+        // (own, not chrome) and another app's window.
         let frames = FloatDetection.normalFrames(
-            in: [row(42), row(77)],
-            ownPID: 42
-        )
-        #expect(frames.count == 1)
+            in: [row(42, 5, 0), row(42, 6, 200), row(77, 9, 400)]
+        ) { pid, number in pid == 42 && number == 5 }
+        #expect(frames.map(\.minX) == [200, 400])
     }
 }
 

@@ -71,26 +71,32 @@ public enum FloatDetection {
     /// Every on-screen, visible normal-layer (0) window's bounds,
     /// FRONT to back — the order the WindowServer composites
     /// them in (#1787). CG bounds are top-left, as AX frames are.
-    public static func frontToBackNormalFrames() -> [CGRect] {
+    public static func frontToBackNormalFrames(
+        isOwnChrome: (pid_t, Int) -> Bool
+    ) -> [CGRect] {
         let list =
             CGWindowListCopyWindowInfo(
                 [.optionOnScreenOnly, .excludeDesktopElements],
                 kCGNullWindowID
             ) as? [[String: Any]] ?? []
-        return normalFrames(in: list, ownPID: getpid())
+        return normalFrames(in: list, isOwnChrome: isOwnChrome)
     }
 
-    /// Layer-0 visible frames of `list`, KiwiDesk's own windows
-    /// left out: no own overlay is ever a presentation, and an
-    /// animating ring's panel spans its screen (#1937).
+    /// Layer-0 visible frames of `list`, KiwiDesk's chrome left
+    /// out (`isOwnChrome` of the owner pid and window number): no
+    /// overlay is ever a presentation, and an animating ring's
+    /// panel spans its screen (#1937). A tiled own window stays.
     static func normalFrames(
         in list: [[String: Any]],
-        ownPID: pid_t
+        isOwnChrome: (pid_t, Int) -> Bool
     ) -> [CGRect] {
         list.compactMap { info in
             guard info[kCGWindowLayer as String] as? Int == 0,
                 (info[kCGWindowAlpha as String] as? Double ?? 0) > 0,
-                info[kCGWindowOwnerPID as String] as? pid_t != ownPID
+                !isOwnChrome(
+                    info[kCGWindowOwnerPID as String] as? pid_t ?? 0,
+                    info[kCGWindowNumber as String] as? Int ?? 0
+                )
             else { return nil }
             return (info[kCGWindowBounds as String] as? [String: Any])
                 .flatMap {

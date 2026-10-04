@@ -37,7 +37,12 @@ final class ShelfManager {
     /// presentation stand-down (#1787). Pinned to `[]` by both
     /// `makeTestCore` twins.
     var frontWindowFrames: @MainActor () -> [CGRect] = {
-        FloatDetection.frontToBackNormalFrames()
+        let own = getpid()
+        // KiwiDesk's chrome is never a presentation, and a moving
+        // ring's panel spans its screen (#1937).
+        return FloatDetection.frontToBackNormalFrames { pid, number in
+            pid == own && EventLoop.isOwnChrome(number: number)
+        }
     }
 
     /// Which shelf an overlay draws: a display's, on one edge.

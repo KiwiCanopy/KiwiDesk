@@ -38,9 +38,11 @@ struct OwnWindowTilingSeamTests {
         // The constant's own file: the name and the literal, so
         // two hits.
         "Sources/KiwiDeskCore/Events/OwnWindowTiling.swift": 2,
-        // The read side — `shouldForceFloat`'s own-window arm.
+        // The read side — `shouldForceFloat`'s own-window arm,
+        // and `isOwnChrome`, which keeps the marked window out of
+        // the chrome the front-window reader skips (#1937).
         "Sources/KiwiDeskCore/Events/EventLoop+WindowPolicy.swift":
-            1,
+            2,
         // The second read side (#935): the dialog classifier
         // exempts the marked window from the close-return raise
         // stand-down — a read of the mark, never a stamp.

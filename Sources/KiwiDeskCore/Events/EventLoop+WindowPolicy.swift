@@ -163,6 +163,13 @@ extension EventLoop {
         NSApplication.shared.windows.first { $0.windowNumber == number }
     }
 
+    /// An own window that does not tile — every own window but
+    /// the marked one: the bars, the rings, the panels (#1937).
+    static func isOwnChrome(number: Int) -> Bool {
+        ownWindow(number: number)?.identifier?.rawValue
+            != OwnWindowTiling.identifier
+    }
+
     /// The inverse, for a GUI handing Core one of its own
     /// windows (#1281): nil where AppKit reports no window
     /// device, which it does as a number `<= 0`.
