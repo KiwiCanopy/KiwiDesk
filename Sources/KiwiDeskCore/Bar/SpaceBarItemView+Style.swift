@@ -80,21 +80,26 @@ extension SpaceBarItemView {
     /// Styles sticky / floating corner state badges (#414).
     private func styleStateBadges() {
         for (index, app) in apps.enumerated() {
-            guard index < stickyBadgeViews.count,
-                index < floatingBadgeViews.count
-            else { break }
-            applyStateBadge(
-                stickyBadgeViews[index],
-                shown: style.stickyBadge && app.sticky,
-                markHex: stateMarkColors.sticky,
-                appFocused: app.focused
-            )
-            applyStateBadge(
-                floatingBadgeViews[index],
-                shown: style.stickyBadge && app.floating,
-                markHex: stateMarkColors.floating,
-                appFocused: app.focused
-            )
+            if index < stickyBadgeViews.count,
+                let badge = stickyBadgeViews[index]
+            {
+                applyStateBadge(
+                    badge,
+                    shown: style.stickyBadge && app.sticky,
+                    markHex: stateMarkColors.sticky,
+                    appFocused: app.focused
+                )
+            }
+            if index < floatingBadgeViews.count,
+                let badge = floatingBadgeViews[index]
+            {
+                applyStateBadge(
+                    badge,
+                    shown: style.stickyBadge && app.floating,
+                    markHex: stateMarkColors.floating,
+                    appFocused: app.focused
+                )
+            }
         }
     }
 
