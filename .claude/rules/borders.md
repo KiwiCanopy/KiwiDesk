@@ -160,9 +160,13 @@ keeps these:
   transaction the main actor waits on, every frame, GPU idle or
   not (#1937, device 2026-10-03). Every ring writer takes its
   room from the one `BorderManager.room(for:screen:)`: while
-  `isAnimating` holds, the ring's screen outset by up to
-  `roomReach`, capped so the panel stays inside AppKit's window
-  size limit on the widest display; the panel takes the room
+  `isAnimating` holds, the ring's screen outset by up to one
+  screen per axis — so a ring parked in the stash corner or
+  sliding in from it fits, whose exact-panel moves the main
+  actor waited ~500 ms on mid-switch (#1956,
+  `BorderMovingRoomTests` ▸ `roomHoldsParkedRing`) — capped by
+  `roomLimit` inside AppKit's window size limit on the widest
+  display; the panel takes the room
   once and the ring's layers move inside, and a ring outside it
   — far into a parked corner — takes an exact panel for those
   frames. A live ring's panel returns to the ring's own frame at

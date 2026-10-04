@@ -138,8 +138,32 @@ struct BorderMovingRoomTests {
     func roomIsCapped() {
         let wide = CGRect(x: 0, y: 0, width: 5120, height: 2160)
         let room = BorderManager.room(around: wide)
-        #expect(room.width == wide.width + 2 * BorderManager.roomReach)
-        #expect(room.width < 10000)
+        #expect(room.width <= BorderManager.roomLimit)
+        #expect(room.height <= BorderManager.roomLimit)
+        #expect(BorderManager.roomLimit < 10000)
+        #expect(room.contains(wide))
+    }
+
+    /// #1956: the ring of a window parked in the stash corner —
+    /// mostly past the screen, a sliver on it — or sliding in from
+    /// there fits the room, so it never takes an exact panel whose
+    /// every move the main actor waited ~500 ms on mid-switch.
+    @Test("A room holds a ring parked in the corner")
+    func roomHoldsParkedRing() {
+        let screen = CGRect(x: 0, y: 0, width: 1728, height: 1117)
+        let room = BorderManager.room(around: screen)
+        // Measured on the owner's desk: a 1372×963 ring parked at
+        // the bottom-right corner, AppKit coordinates.
+        let parked = CGRect(x: 1622, y: -842, width: 1372, height: 963)
+        #expect(room.contains(parked))
+        // A screen-sized window parked one pixel in still fits.
+        let whole = CGRect(
+            x: screen.maxX - 1,
+            y: screen.minY - screen.height + 1,
+            width: screen.width,
+            height: screen.height
+        )
+        #expect(room.contains(whole))
     }
 
     @Test("KiwiDesk's chrome is never a front presentation")

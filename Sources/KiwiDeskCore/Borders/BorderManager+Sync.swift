@@ -150,9 +150,9 @@ extension BorderManager {
 
     /// Where an animating ring may move without its panel
     /// resizing, which waits on WindowServer every frame (#1937):
-    /// its screen outset by up to `roomReach`, so a ring at an edge
-    /// or arriving from near a parked corner still fits. Nil once
-    /// settled, which takes an exact panel.
+    /// its screen outset by up to a screen each way, so a ring at
+    /// an edge or sliding in from a parked corner still fits
+    /// (#1956). Nil once settled, which takes an exact panel.
     func room(for id: WindowID, screen: NSScreen?) -> CGRect? {
         guard isAnimating(id) else { return nil }
         var frame = screen?.frame
@@ -162,12 +162,15 @@ extension BorderManager {
         return frame.map(Self.room(around:))
     }
 
-    /// The outset is capped so the panel stays inside AppKit's
-    /// window size limit on the widest display.
+    /// The outset is up to one screen per axis, capped so the
+    /// panel stays inside AppKit's window size limit on the widest
+    /// display.
     nonisolated static func room(around screen: CGRect) -> CGRect {
-        let reach = min(roomReach, screen.width, screen.height)
-        return screen.insetBy(dx: -reach, dy: -reach)
+        let dx = min(screen.width, (roomLimit - screen.width) / 2)
+        let dy = min(screen.height, (roomLimit - screen.height) / 2)
+        return screen.insetBy(dx: -max(dx, 0), dy: -max(dy, 0))
     }
 
-    nonisolated static let roomReach: CGFloat = 1000
+    /// Below AppKit's 10,000 pt window size limit.
+    nonisolated static let roomLimit: CGFloat = 9600
 }
