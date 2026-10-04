@@ -35,6 +35,8 @@ struct ProcessPolicyReadingTests {
         var active: [pid_t: Bool] = [:]
         var events: [KiwiEvent] = []
         var focused: [WindowID] = []
+        var policyReads = 0
+        var listings = 0
     }
 
     private static let bundle = "test.kiwi.browser"
@@ -77,7 +79,10 @@ struct ProcessPolicyReadingTests {
             box.windowQueries.append(pid)
             return []
         }
-        loop.activationPolicy = { _ in .regular }
+        loop.activationPolicy = { _ in
+            box.policyReads += 1
+            return .regular
+        }
         loop.onScreenNormalWindowIDs = { box.census }
         loop.onEvent = { event in
             box.events.append(event)
@@ -94,7 +99,10 @@ struct ProcessPolicyReadingTests {
         loop.runningApplications = { [] }
         #expect(loop.beginScan())
         loop.scanChunk(budget: nil)
-        loop.runningApplications = { self.listing }
+        loop.runningApplications = {
+            box.listings += 1
+            return self.listing
+        }
         box.alive = [
             parent: app(parent), child: app(child),
             other: app(other, bundle: "test.kiwi.other"),
@@ -104,6 +112,91 @@ struct ProcessPolicyReadingTests {
 
     // MARK: - The policy reading
 
+    @Test("an observed process answers without asking LaunchServices")
+    func observedProcessAsksNothing() {
+        // Every AX notification asks the policy; a LaunchServices
+        // read on main is a synchronous XPC round trip (#1936).
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)]]
+        loop.healSweep()
+        box.policyReads = 0
+        #expect(loop.policy(of: parent) == .regular)
+        loop.reconcile(pid: parent, app: app(parent).ref)
+        #expect(box.policyReads == 0)
+        // A process never observed still asks.
+        _ = loop.policy(of: other)
+        #expect(box.policyReads == 1)
+    }
+
+    @Test("a heal over watched apps never walks the app list")
+    func healWalksTheListOnlyForAnUnwatchedApp() {
+        // Every record in the list is a LaunchServices round trip
+        // after any activation (#1936).
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)]]
+        loop.healSweep()
+        #expect(loop.observes(pid: parent))
+        box.listings = 0
+        loop.healSweep()
+        #expect(box.listings == 0)
+        // A quieted unwatched app asks nothing of the list.
+        box.census[other] = [WindowID(3)]
+        loop.healQuiet[other] = [WindowID(3)]
+        loop.healSweep()
+        #expect(box.listings == 0)
+        // Two unwatched apps the gate lets in: one walk.
+        box.census[child] = [WindowID(2)]
+        loop.healQuiet = [:]
+        loop.healSweep()
+        #expect(box.listings == 1)
+        #expect(loop.observes(pid: other))
+        #expect(loop.observes(pid: child))
+    }
+
+    @Test("every pass already holding a fresh policy files it")
+    func freshReadsAreFiled() {
+        // An app can flip its policy without activating, so the
+        // reads a pass already made refresh the filed one (#1936).
+        let (loop, box) = makeLoop()
+        box.census = [parent: [WindowID(1)]]
+        loop.healSweep()
+        loop.runningApplications = {
+            [
+                RunningApp(
+                    pid: self.parent,
+                    activationPolicy: .accessory,
+                    ref: self.app(self.parent).ref
+                )
+            ]
+        }
+        loop.reconcileAll()
+        #expect(loop.policy(of: parent) == .accessory)
+        // The heal's walk, opened by an unwatched app, files the
+        // watched one's policy too.
+        loop.runningApplications = { self.listing }
+        box.census[other] = [WindowID(3)]
+        loop.healSweep()
+        #expect(loop.policy(of: parent) == .regular)
+        // A created window reads once, ahead of its verdicts.
+        loop.activationPolicy = { _ in .accessory }
+        loop.handle(
+            kAXWindowCreatedNotification,
+            AXUIElementCreateApplication(parent),
+            pid: parent,
+            app: app(parent).ref
+        )
+        #expect(loop.policy(of: parent) == .accessory)
+        // So does a window returning from the Dock.
+        loop.activationPolicy = { _ in .regular }
+        loop.handle(
+            kAXWindowDeminiaturizedNotification,
+            AXUIElementCreateApplication(parent),
+            pid: parent,
+            app: app(parent).ref
+        )
+        #expect(loop.policy(of: parent) == .regular)
+    }
+
     @Test("a record lost for a moment keeps a running process")
     func lostRecordKeepsARunningProcess() {
         let (loop, box) = makeLoop()
@@ -111,17 +204,16 @@ struct ProcessPolicyReadingTests {
         loop.healSweep()
         var logs: [String] = []
         loop.onLog = { logs.append($0) }
-        loop.activationPolicy = { _ in nil }
-        #expect(loop.policy(of: parent) == .regular)
+        loop.notePolicy(nil, of: parent)
+        loop.notePolicy(nil, of: parent)
         #expect(loop.policy(of: parent) == .regular)
         // One absence, one line.
         #expect(logs.filter { $0.hasPrefix("ownership:") }.count == 1)
         loop.reconcile(pid: parent, app: app(parent).ref)
         #expect(loop.observes(pid: parent))
         // The record back, then lost again: news again.
-        loop.activationPolicy = { _ in .regular }
-        #expect(loop.policy(of: parent) == .regular)
-        loop.activationPolicy = { _ in nil }
+        loop.notePolicy(.regular, of: parent)
+        loop.notePolicy(nil, of: parent)
         #expect(loop.policy(of: parent) == .regular)
         #expect(logs.filter { $0.hasPrefix("ownership:") }.count == 2)
     }
@@ -149,8 +241,8 @@ struct ProcessPolicyReadingTests {
         let (loop, box) = makeLoop()
         box.census = [parent: [WindowID(1)]]
         loop.healSweep()
-        loop.activationPolicy = { _ in nil }
         box.alive[parent] = nil
+        loop.notePolicy(nil, of: parent)
         #expect(loop.policy(of: parent) == .prohibited)
         loop.reconcile(pid: parent, app: app(parent).ref)
         #expect(!loop.observes(pid: parent))
@@ -168,9 +260,9 @@ struct ProcessPolicyReadingTests {
         let (loop, box) = makeLoop()
         box.census = [parent: [WindowID(1)]]
         loop.healSweep()
-        loop.activationPolicy = { _ in .accessory }
+        loop.notePolicy(.accessory, of: parent)
         #expect(loop.policy(of: parent) == .accessory)
-        loop.activationPolicy = { _ in nil }
+        loop.notePolicy(nil, of: parent)
         #expect(loop.policy(of: parent) == .accessory)
     }
 

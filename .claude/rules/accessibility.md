@@ -224,15 +224,36 @@ editing AX code:
   activated (device, 2026-09-30, the listed process too), and
   `?? .prohibited` at an ownership gate detached it with every
   window it held. So a process's activation policy has ONE
-  reading, `EventLoop.policy(of:)`: LaunchServices' answer,
-  else — while `ProcessIdentity.runs` says the process is alive
-  — the policy last read; `.prohibited` only for a process that
-  is gone or never observed. The reconcile and notification
-  ownership gates, the boot sweep's step and the float and
-  overlay verdicts take it, and a new reader of a policy takes
-  it too (`ProcessPolicyReadingTests` ▸
+  reading, `EventLoop.policy(of:)`: for an observed process the
+  policy last FILED, else LaunchServices' answer; and one door
+  files it, `notePolicy`, which keeps the policy last read
+  while `ProcessIdentity.runs` says the process is alive and
+  files `.prohibited` once it is gone. An observed process's
+  policy is read through `policy(of:)` on every notification
+  path, never from LaunchServices, which is a synchronous XPC
+  round trip that an app activation re-arms even on a retained
+  `NSRunningApplication`: 1.2 s of main thread in 30 s of Space
+  switching (#1936, device 2026-10-03). A fresh read is filed
+  only where one is already in hand or is worth its one read —
+  the off-main window-list read, a pass that walked the list,
+  and a created or returning window through `refreshPolicy`,
+  since an app flips its policy without activating — and a new
+  filer joins `ProcessIdentitySeamTests`' census with its
+  reason. For the round-trip reason the heal sweep walks the
+  running-app list only for an unwatched app its gate lets in
+  (`ProcessPolicyReadingTests` ▸
+  `healWalksTheListOnlyForAnUnwatchedApp`). The reading's hidden
+  state is one read old, so only the live `appIsHidden` may
+  drop an app's windows (`ReconcileSnapshotTests` ▸
+  `unhideDuringTheReadKeepsWindows`). The reconcile and
+  notification ownership gates, the boot sweep's step and the
+  float and overlay verdicts take `policy(of:)`, and a new
+  reader of a policy takes it too (`ProcessPolicyReadingTests` ▸
   `lostRecordKeepsARunningProcess`, `lostRecordDetachesAGoneProcess`,
-  `keptPolicyFollowsTheLastRead`; `ProcessIdentitySeamTests` ▸
+  `keptPolicyFollowsTheLastRead`,
+  `observedProcessAsksNothing`, `freshReadsAreFiled`;
+  `ReconcileSnapshotTests` ▸
+  `readingCarriesPolicyAndHidden`; `ProcessIdentitySeamTests` ▸
   `policyHasOneReading`).
 - **A shadow window never becomes a tile (#1785).** A window
   with no title-bar button and no AX child beside a buttoned

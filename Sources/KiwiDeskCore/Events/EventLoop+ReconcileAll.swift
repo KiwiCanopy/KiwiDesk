@@ -60,6 +60,7 @@ extension EventLoop {
         let apps = isRunning ? liveApps() : runningApplications()
         for app in apps {
             syncObservation(for: app, scanWindowsAtAttach: false)
+            notePolicy(app.activationPolicy, of: app.pid)
         }
         // Before the census: `loadConfig` runs this pass ahead
         // of the scan, with nothing observed — a WindowServer
@@ -80,7 +81,7 @@ extension EventLoop {
         // into a re-key (#308 review). Genuine switches coalesce via
         // the per-window reconciles the AX notifications drive.
         for pid in targets {
-            reconcile(pid: pid, app: AppRef(pid: pid), coalesceTabs: false)
+            reconcile(pid: pid, app: appRef(of: pid), coalesceTabs: false)
         }
         let skipped = observed.count - targets.count
         if skipped > 0 {
@@ -143,7 +144,7 @@ extension EventLoop {
         for (pid, ids) in census where observers[pid] != nil {
             let tracked = Set(elements[pid, default: [:]].keys)
             guard !ids.subtracting(tracked).isEmpty else { continue }
-            reconcile(pid: pid, app: AppRef(pid: pid), coalesceTabs: false)
+            reconcile(pid: pid, app: appRef(of: pid), coalesceTabs: false)
         }
     }
 }

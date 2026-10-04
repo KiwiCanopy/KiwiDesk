@@ -32,6 +32,9 @@ extension EventLoop {
         }
         switch note {
         case kAXWindowCreatedNotification:
+            // A new window's overlay and float verdicts read the
+            // policy, which an app flips without activating (#1936).
+            refreshPolicy(of: pid)
             if Self.isStandardWindow(element) {
                 warmAccessibilityTree(pid: pid)
             }
@@ -90,6 +93,7 @@ extension EventLoop {
             // so always diff against the live window list.
             reconcile(pid: pid, app: app)
         case kAXWindowDeminiaturizedNotification:
+            refreshPolicy(of: pid)
             track(element, pid: pid, app: app)
         case kAXFocusedWindowChangedNotification:
             handleFocusedWindowChanged(element, pid: pid, app: app)
