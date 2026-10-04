@@ -155,12 +155,11 @@ extension BorderManager {
     /// settled, which takes an exact panel.
     func room(for id: WindowID, screen: NSScreen?) -> CGRect? {
         guard isAnimating(id) else { return nil }
+        var frame = screen?.frame
         #if DEBUG
-            if let roomScreenOverride {
-                return Self.room(around: roomScreenOverride)
-            }
+            frame = roomScreenOverride ?? frame
         #endif
-        return screen.map { Self.room(around: $0.frame) }
+        return frame.map(Self.room(around:))
     }
 
     /// The outset is capped so the panel stays inside AppKit's

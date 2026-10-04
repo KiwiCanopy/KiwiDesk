@@ -71,7 +71,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
 
     /// The panel's frame and the ring's place in it, AppKit
     /// coordinates, nil before the first render.
-    var panelFrame: CGRect? { placedFrame }
+    var panelFrame: CGRect? { panel?.frame }
     var ringFrameInPanel: CGRect { container.frame }
 
     /// The panel's frame for a ring: `room` while it holds the

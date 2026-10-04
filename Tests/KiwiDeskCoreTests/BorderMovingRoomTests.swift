@@ -49,7 +49,8 @@ struct BorderMovingRoomTests {
         let ring = CGRect(x: 100, y: 100, width: 400, height: 300)
         #expect(AppKitBorderOverlay.panelFrame(for: ring, room: room) == room)
         #expect(AppKitBorderOverlay.panelFrame(for: ring, room: nil) == ring)
-        let outside = ring.offsetBy(dx: 1900, dy: 0)
+        // Straddling the room's edge is outside it.
+        let outside = ring.offsetBy(dx: 1800, dy: 0)
         #expect(
             AppKitBorderOverlay.panelFrame(for: outside, room: room)
                 == outside
@@ -157,12 +158,39 @@ struct BorderMovingRoomTests {
                 ],
             ]
         }
+        var raised = row(77, 10, 600)
+        raised[kCGWindowLayer as String] = 3
+        var clear = row(77, 11, 800)
+        clear[kCGWindowAlpha as String] = 0.0
         // A ring panel (own, chrome), the tiled Settings window
-        // (own, not chrome) and another app's window.
+        // (own, not chrome), another app's window, and two rows no
+        // presentation is: a raised layer and an invisible one.
         let frames = FloatDetection.normalFrames(
-            in: [row(42, 5, 0), row(42, 6, 200), row(77, 9, 400)]
+            in: [
+                row(42, 5, 0), row(42, 6, 200), row(77, 9, 400),
+                raised, clear,
+            ]
         ) { pid, number in pid == 42 && number == 5 }
         #expect(frames.map(\.minX) == [200, 400])
+    }
+}
+
+extension BorderMovingRoomTests {
+    /// The production room comes from the screen the ring renders
+    /// on; every other manager clause pins it.
+    @Test(
+        "An animating ring's room comes from its screen",
+        .enabled(if: !NSScreen.screens.isEmpty)
+    )
+    func roomComesFromTheScreen() throws {
+        let border = BorderManager()
+        defer { border.clear() }
+        let screen = try #require(NSScreen.screens.first)
+        border.isAnimating = { _ in true }
+        #expect(
+            border.room(for: WindowID(9), screen: screen)
+                == BorderManager.room(around: screen.frame)
+        )
     }
 }
 
