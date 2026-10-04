@@ -60,7 +60,7 @@ struct BorderMovingRoomTests {
     @Test("A room holds a ring at its screen's edge or past it")
     func roomCoversEdges() {
         let screen = CGRect(x: 0, y: 0, width: 1728, height: 1117)
-        let room = BorderManager.room(around: screen)
+        let room = BorderManager.room(around: screen, scale: 2)
         // A ring whose glow reaches past the edge, and one sliding
         // in from a parked corner, both fit.
         #expect(room.contains(CGRect(x: -12, y: -12, width: 600, height: 400)))
@@ -124,7 +124,7 @@ struct BorderMovingRoomTests {
         border.sync([spec], alive: nil, reassertOrder: false)
         #expect(backend.rooms.last == .some(nil))
         border.isAnimating = { _ in true }
-        let room = BorderManager.room(around: screen)
+        let room = BorderManager.room(around: screen, scale: 2)
         border.sync([spec], alive: nil, reassertOrder: false)
         #expect(backend.rooms.last == room)
         border.apply(WindowID(9), windowFrame: frame)
@@ -137,9 +137,45 @@ struct BorderMovingRoomTests {
     @Test("A room stays inside AppKit's window limit")
     func roomIsCapped() {
         let wide = CGRect(x: 0, y: 0, width: 5120, height: 2160)
-        let room = BorderManager.room(around: wide)
-        #expect(room.width == wide.width + 2 * BorderManager.roomReach)
-        #expect(room.width < 10000)
+        let room = BorderManager.room(around: wide, scale: 2)
+        #expect(room.width <= BorderManager.roomLimit)
+        #expect(room.height <= BorderManager.roomLimit)
+        #expect(BorderManager.roomLimit < 10000)
+        #expect(room.contains(wide))
+    }
+
+    /// #1956: the ring of a window parked in the stash corner —
+    /// mostly past the screen, a sliver on it — or sliding in from
+    /// there fits the room, so it never takes an exact panel whose
+    /// every move the main actor waited ~500 ms on mid-switch.
+    @Test("A room holds a ring parked in the corner")
+    func roomHoldsParkedRing() {
+        let screen = CGRect(x: 0, y: 0, width: 1728, height: 1117)
+        let room = BorderManager.room(around: screen, scale: 2)
+        // Measured on the owner's desk: a 1372×963 ring parked at
+        // the bottom-right corner, AppKit coordinates.
+        let parked = CGRect(x: 1622, y: -842, width: 1372, height: 963)
+        #expect(room.contains(parked))
+        // The widest ring around a screen-sized window, parked in
+        // either corner. Built in AX coordinates: the room is
+        // symmetric about a screen at the origin, so the flip to
+        // AppKit's keeps containment.
+        for corner in [TilingEngine.HideCorner.bottomRight, .bottomLeft] {
+            let window = TilingEngine.stashFrame(
+                screen,
+                in: screen,
+                corner: corner
+            )
+            let ringFrame = BorderGeometry.compute(
+                windowFrame: window,
+                width: BorderStyle.maxWidth,
+                cornerStyle: .rounded,
+                order: .below,
+                systemRadius: 10,
+                glowBlur: BorderStyle.maxGlowSize
+            ).overlayFrame
+            #expect(room.contains(ringFrame), "\(corner)")
+        }
     }
 
     @Test("KiwiDesk's chrome is never a front presentation")
@@ -189,7 +225,10 @@ extension BorderMovingRoomTests {
         border.isAnimating = { _ in true }
         #expect(
             border.room(for: WindowID(9), screen: screen)
-                == BorderManager.room(around: screen.frame)
+                == BorderManager.room(
+                    around: screen.frame,
+                    scale: screen.backingScaleFactor
+                )
         )
     }
 }

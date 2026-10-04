@@ -150,24 +150,48 @@ extension BorderManager {
 
     /// Where an animating ring may move without its panel
     /// resizing, which waits on WindowServer every frame (#1937):
-    /// its screen outset by up to `roomReach`, so a ring at an edge
-    /// or arriving from near a parked corner still fits. Nil once
-    /// settled, which takes an exact panel.
+    /// its screen outset by up to a screen each way, so a ring at
+    /// an edge or sliding in from a parked corner still fits
+    /// (#1956). Nil once settled, which takes an exact panel.
     func room(for id: WindowID, screen: NSScreen?) -> CGRect? {
         guard isAnimating(id) else { return nil }
         var frame = screen?.frame
         #if DEBUG
             frame = roomScreenOverride ?? frame
         #endif
-        return frame.map(Self.room(around:))
+        let scale = screen?.backingScaleFactor ?? 2
+        return frame.map { Self.room(around: $0, scale: scale) }
     }
 
-    /// The outset is capped so the panel stays inside AppKit's
-    /// window size limit on the widest display.
-    nonisolated static func room(around screen: CGRect) -> CGRect {
-        let reach = min(roomReach, screen.width, screen.height)
-        return screen.insetBy(dx: -reach, dy: -reach)
+    /// The outset is a screen plus the widest ring's reach per
+    /// axis, so a ring parked in the stash corner fits (#1956),
+    /// capped by `roomLimit` points and `roomPixelLimit` pixels at
+    /// `scale`. A wider desk parks rings past it; those take the
+    /// exact panel.
+    nonisolated static func room(
+        around screen: CGRect,
+        scale: CGFloat
+    ) -> CGRect {
+        let limit = min(roomLimit, roomPixelLimit / max(scale, 1))
+        let dx = min(
+            screen.width + ringReachLimit,
+            (limit - screen.width) / 2
+        )
+        let dy = min(
+            screen.height + ringReachLimit,
+            (limit - screen.height) / 2
+        )
+        return screen.insetBy(dx: -max(dx, 0), dy: -max(dy, 0))
     }
 
-    nonisolated static let roomReach: CGFloat = 1000
+    /// The farthest any ring draws past its window: the widest
+    /// stroke plus the largest glow.
+    nonisolated static let ringReachLimit =
+        BorderStyle.maxWidth + BorderStyle.maxGlowSize
+
+    /// Below AppKit's 10,000 pt window size limit.
+    nonisolated static let roomLimit: CGFloat = 9600
+
+    /// Below the 16,384 px surface limit a 2x panel would pass.
+    nonisolated static let roomPixelLimit: CGFloat = 16000
 }
