@@ -485,7 +485,7 @@ Bar's badge shows *which* windows are sticky either way. (Lua:
 [`sticky.set_color`](lua-reference.md#stickyset_color),
 [`floating.set_color`](lua-reference.md#floatingset_color).)
 
-## KiwiShelf & Bars
+## KiwiShelf
 
 **Thickness** runs 20–80 pt on the **KiwiShelf** card; Lua
 ([`kiwishelf.set_thickness`](lua-reference.md#kiwishelfset_thickness))

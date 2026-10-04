@@ -100,7 +100,7 @@ activation, focus ring and accessibility child, which a
 
 A pointer whose sentence names a **location** takes a
 breadcrumb headed by the destination's own title
-("KiwiShelf & Bars ▸ App Bar"), not the section name alone: a
+("KiwiShelf ▸ App Bar"), not the section name alone: a
 link reading "App Bar" names no card Home shows, and only a
 `▸`-shaped value enters `SidebarCrossReferenceTests`. A pointer whose sentence
 names the **feature itself** — a sentence turning on whether
@@ -1367,7 +1367,7 @@ header `?` scopes the CARD, so it answers for a greyed block,
 while ONE greyed row inside a live card takes a
 `CrossReferenceRow` directly beneath its grid, outside the
 dimmed subtree — the KiwiShelf colours card's *Focused window*
-row, whose gating picker lives on KiwiShelf & Bars, draws
+row, whose gating picker lives on KiwiShelf, draws
 `AdvancedColorsHelp.focusedItemReference` there, and the Border
 colours card's *Unfocused windows* row draws
 `unfocusedReference` the same way while the ring is on, each

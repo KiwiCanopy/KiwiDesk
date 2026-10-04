@@ -39,6 +39,8 @@ public final class WorkMeter: @unchecked Sendable {
         public var borderMaxNanos = 0
         public var barShowsSkipped = 0
         public var shelfShowsSkipped = 0
+        public var spaceBarViewsMinted = 0
+        public var shelfStandsSkipped = 0
         public var framesIssued = 0
         public var framesSkipped = 0
         public var parksIssued = 0
@@ -252,6 +254,8 @@ extension WorkMeter {
             "bar_renders_per_switch": per(c.barRenders, c.spaceSwitches),
             "bar_shows_skipped": count(c.barShowsSkipped),
             "shelf_shows_skipped": count(c.shelfShowsSkipped),
+            "space_bar_views_minted": count(c.spaceBarViewsMinted),
+            "shelf_stands_skipped": count(c.shelfStandsSkipped),
             "border_syncs": count(c.borderSyncs),
             "border_ms_mean": perMs(c.borderNanos, c.borderSyncs),
             "border_ms_max": ms(c.borderMaxNanos),

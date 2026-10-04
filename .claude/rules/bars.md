@@ -176,6 +176,14 @@ twice, was a question the user answered twice. The argument is
   the bars' app icons come from the one `BarIconCache`: a fresh
   `NSImage` per read never compares equal and costs a
   LaunchServices round trip besides.
+- **Reuse a Space item's glyph and badge views slot by slot,
+  and mint a state badge only where it is drawn (#1942).** A
+  switch that changes no app list then mints nothing; a walk and
+  a slot handed another Space re-mint, since a reused glyph would
+  finish motion it never started. `SpaceBarItemReuseTests` ▸
+  `switchKeepsViews` pins one item's subview identity and
+  `SpaceBarItemReuseRenderTests` ▸ `switchMintsNothing` the same
+  through `SpaceBarManager.sync`.
 - **Stand a bar down through the one
   `KiwiCore.shelfStandsDown(on:)`**, read once per display in
   `updateBars()` for both bars — a native-fullscreen Space
@@ -259,7 +267,12 @@ twice, was a question the user answered twice. The argument is
   start that held it slid the section in from the side (device,
   2026-10-01). `ShelfSectionGlideTests` holds the three; that the
   start is flushed is review's, since no headless render reads
-  the animator's from-value. The glide's length is the user's
+  the animator's from-value. **Stand nothing where nothing joins
+  and no start differs from where its section stands** (#1942):
+  the flush lays out every bar view synchronously, so the one
+  `standWrites` list decides both whether to stand and what to
+  write (`ShelfStandSkipTests` ▸ `unchangedSlotSkips`). The
+  glide's length is the user's
   `animations.shelf_duration`, `BarMotion.shelfGlide` set in
   `updateBars()` (`ShelfGlideSettingsTests`).
 - **A section joining a fused shelf grows out of the section it

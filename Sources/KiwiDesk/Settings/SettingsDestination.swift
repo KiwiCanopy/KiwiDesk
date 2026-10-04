@@ -55,7 +55,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
             )
         case .gapsAndBorders:
             return L("destination.gaps_borders", "Gaps & Borders")
-        case .bars: return L("destination.bars", "KiwiShelf & Bars")
+        case .bars: return L("destination.bars", "KiwiShelf")
         case .profiles: return L("destination.profiles", "Profiles")
         case .shortcuts:
             return L("destination.shortcuts", "Shortcuts & Gestures")
