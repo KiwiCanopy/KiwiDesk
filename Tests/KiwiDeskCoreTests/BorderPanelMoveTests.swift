@@ -132,6 +132,8 @@ struct BorderPanelMoveTests {
         #expect(ring.frameSets == 2)
     }
 
+    /// Holds `hasWindow` and the window-number guard as a pair: a
+    /// panel never ordered in has no window number either.
     @Test("A panel never ordered in takes AppKit")
     func neverOrderedTakesAppKit() {
         let spy = Spy()
@@ -166,11 +168,14 @@ struct BorderPanelMoveTests {
         #expect(spy.moves.count == 1)
     }
 
+    /// Placed a pass earlier, so only the order-in's own stamp
+    /// keeps the move out of the pass AppKit creates the window in.
     @Test("The pass that first orders the panel in stays AppKit's")
     func firstShowPassStaysAppKit() {
         let spy = Spy()
         let ring = ring(spy)
         render(ring, at: start)
+        spy.pass += 1
         ring.order(relativeTo: 7)
         render(ring, at: moved)
         #expect(spy.moves.isEmpty)

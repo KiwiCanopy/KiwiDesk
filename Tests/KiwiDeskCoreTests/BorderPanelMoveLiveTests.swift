@@ -19,7 +19,7 @@ struct BorderPanelMoveLiveTests {
     private let moved = CGPoint(x: -8_800, y: -8_960)
 
     @Test("A SkyLight move lands where the ring was placed")
-    func moveLandsAndAppKitFollows() throws {
+    func moveLandsAtTopLeft() throws {
         let target = makeTarget()
         defer { target.orderOut(nil) }
         let ring = AppKitBorderOverlay(
