@@ -215,4 +215,19 @@ struct SpaceBarItemReuseTests {
         #expect(view.stickyBadgeViews == [nil])
         #expect(view.floatingBadgeViews == [nil])
     }
+
+    @Test("An app leaving with a state badge takes its badge along")
+    func departingBadgeLeaves() throws {
+        let view = Self.view()
+        Self.configure(
+            view,
+            apps: [Self.app(1), Self.app(2, sticky: true, floating: true)],
+            active: true
+        )
+        let sticky = try #require(view.stickyBadgeViews[1])
+        let floating = try #require(view.floatingBadgeViews[1])
+        Self.configure(view, apps: [Self.app(1)], active: true)
+        #expect(sticky.superview == nil)
+        #expect(floating.superview == nil)
+    }
 }
