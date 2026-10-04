@@ -186,6 +186,15 @@ struct ProcessPolicyReadingTests {
             app: app(parent).ref
         )
         #expect(loop.policy(of: parent) == .accessory)
+        // So does a window returning from the Dock.
+        loop.activationPolicy = { _ in .regular }
+        loop.handle(
+            kAXWindowDeminiaturizedNotification,
+            AXUIElementCreateApplication(parent),
+            pid: parent,
+            app: app(parent).ref
+        )
+        #expect(loop.policy(of: parent) == .regular)
     }
 
     @Test("a record lost for a moment keeps a running process")
