@@ -155,6 +155,25 @@ keeps these:
   take AppKit (`BorderRestackTests`). This orders the AppKit
   panel and draws nothing: the `.transient` section below still
   binds.
+- **An animating ring moves inside its panel rather than
+  resizing it** — a panel resize hands WindowServer a fenced
+  transaction the main actor waits on, every frame, GPU idle or
+  not (#1937, device 2026-10-03). Every ring writer takes its
+  room from the one `BorderManager.room(for:screen:)`: while
+  `isAnimating` holds, the ring's screen outset by up to
+  `roomReach`, capped so the panel stays inside AppKit's window
+  size limit on the widest display; the panel takes the room
+  once and the ring's layers move inside, and a ring outside it
+  — far into a parked corner — takes an exact panel for those
+  frames. A live ring's panel returns to the ring's own frame at
+  the first render after `isAnimating` ends — the late resync at
+  the latest — while a ring retired mid-flight keeps the room,
+  alpha 0, until it returns, since shrinking it would put the
+  resize back on the switch path (`BorderMovingRoomTests`). A
+  room-sized panel spans its screen, so a reader of the front
+  windows leaves KiwiDesk's chrome out — every own window but a
+  tiled one (`FloatDetection.normalFrames`,
+  `BorderMovingRoomTests` ▸ `ownWindowsLeaveFrontFrames`).
 
 The WindowServer `.hide` arm still orders a ring out. A
 KiwiDesk Space switch parks windows by moving them, so it raises

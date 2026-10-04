@@ -18,7 +18,8 @@ struct BorderOverlayVisibilityTests {
             cornerStyle: .rounded,
             cornerRadius: 16,
             colorHex: "#FF0000",
-            screen: nil
+            screen: nil,
+            room: nil
         )
         overlay.order(relativeTo: 7)
         backend.calls = []
@@ -31,7 +32,8 @@ struct BorderOverlayVisibilityTests {
             cornerRadius: 16,
             colorHex: "#FF0000",
             screen: nil,
-            restoreVisibility: true
+            restoreVisibility: true,
+            room: nil
         )
         overlay.update(
             frame: frame,
@@ -40,7 +42,8 @@ struct BorderOverlayVisibilityTests {
             cornerRadius: 16,
             colorHex: "#FF0000",
             screen: nil,
-            restoreVisibility: true
+            restoreVisibility: true,
+            room: nil
         )
 
         #expect(
@@ -68,7 +71,8 @@ private final class RecordingBorderBackend: BorderOverlayBackend {
     func update(
         geometry: BorderGeometry,
         colorHex: String,
-        screen: NSScreen?
+        screen: NSScreen?,
+        room: CGRect?
     ) {
         calls.append(.update)
     }

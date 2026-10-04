@@ -113,7 +113,8 @@ private final class SilentBackend: BorderOverlayBackend {
     func update(
         geometry: BorderGeometry,
         colorHex: String,
-        screen: NSScreen?
+        screen: NSScreen?,
+        room: CGRect?
     ) {}
     func order(relativeTo windowNumber: CGWindowID) {}
     func hide() {}
@@ -127,7 +128,8 @@ private final class CountingBackend: BorderOverlayBackend {
     func update(
         geometry: BorderGeometry,
         colorHex: String,
-        screen: NSScreen?
+        screen: NSScreen?,
+        room: CGRect?
     ) {}
     func order(relativeTo windowNumber: CGWindowID) { onOrder() }
     func hide() {}

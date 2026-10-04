@@ -59,15 +59,17 @@ extension BorderManager {
                 animating: isAnimating(spec.window),
                 commanded: commandedFrame(spec.window)
             )
+            let screen = screen(for: frame)
             overlay.update(
                 frame: frame,
                 width: spec.width,
                 cornerStyle: spec.cornerStyle,
                 cornerRadius: cornerRadius(for: spec.window),
                 colorHex: spec.colorHex,
-                screen: screen(for: frame),
+                screen: screen,
                 glowBlur: spec.glowBlur,
-                sheen: spec.sheen
+                sheen: spec.sheen,
+                room: room(for: spec.window, screen: screen)
             )
             // Without the WindowServer stream no reorder event
             // tells a shown ring its target moved, so every sync
@@ -131,16 +133,41 @@ extension BorderManager {
     ) {
         guard let overlay = overlays[id], let spec = specs[id]
         else { return }
+        let screen = screen(for: windowFrame)
         overlay.update(
             frame: windowFrame,
             width: spec.width,
             cornerStyle: spec.cornerStyle,
             cornerRadius: cornerRadius(for: id),
             colorHex: spec.colorHex,
-            screen: screen(for: windowFrame),
+            screen: screen,
             glowBlur: spec.glowBlur,
             sheen: spec.sheen,
-            restoreVisibility: restoreVisibility
+            restoreVisibility: restoreVisibility,
+            room: room(for: id, screen: screen)
         )
     }
+
+    /// Where an animating ring may move without its panel
+    /// resizing, which waits on WindowServer every frame (#1937):
+    /// its screen outset by up to `roomReach`, so a ring at an edge
+    /// or arriving from near a parked corner still fits. Nil once
+    /// settled, which takes an exact panel.
+    func room(for id: WindowID, screen: NSScreen?) -> CGRect? {
+        guard isAnimating(id) else { return nil }
+        var frame = screen?.frame
+        #if DEBUG
+            frame = roomScreenOverride ?? frame
+        #endif
+        return frame.map(Self.room(around:))
+    }
+
+    /// The outset is capped so the panel stays inside AppKit's
+    /// window size limit on the widest display.
+    nonisolated static func room(around screen: CGRect) -> CGRect {
+        let reach = min(roomReach, screen.width, screen.height)
+        return screen.insetBy(dx: -reach, dy: -reach)
+    }
+
+    nonisolated static let roomReach: CGFloat = 1000
 }

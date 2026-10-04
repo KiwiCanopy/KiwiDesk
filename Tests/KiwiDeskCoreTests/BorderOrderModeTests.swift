@@ -22,7 +22,8 @@ struct BorderOrderModeTests {
             cornerStyle: .rounded,
             cornerRadius: 16,
             colorHex: "#0A84FF",
-            screen: nil
+            screen: nil,
+            room: nil
         )
         let expected = BorderGeometry.compute(
             windowFrame: frame,
@@ -48,7 +49,8 @@ struct BorderOrderModeTests {
             cornerStyle: .rounded,
             cornerRadius: 10,
             colorHex: "#0A84FF",
-            screen: nil
+            screen: nil,
+            room: nil
         )
         let atTen = BorderGeometry.compute(
             windowFrame: frame,
@@ -78,7 +80,8 @@ struct BorderOrderModeTests {
             cornerStyle: .rounded,
             cornerRadius: 16,
             colorHex: "#0A84FF",
-            screen: nil
+            screen: nil,
+            room: nil
         )
         #expect(
             backend.lastGeometry?.lineWidth
@@ -99,7 +102,8 @@ private final class GeometryCapturingBackend: BorderOverlayBackend {
     func update(
         geometry: BorderGeometry,
         colorHex: String,
-        screen: NSScreen?
+        screen: NSScreen?,
+        room: CGRect?
     ) {
         lastGeometry = geometry
     }

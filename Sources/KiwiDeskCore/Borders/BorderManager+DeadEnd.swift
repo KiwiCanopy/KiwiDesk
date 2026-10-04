@@ -31,7 +31,8 @@ extension BorderManager {
                 cornerRadius: cornerRadius(for: window),
                 colorHex: colorHex,
                 screen: screen,
-                glowBlur: 0
+                glowBlur: 0,
+                room: nil
             )
             ring.order(relativeTo: window.raw)
             overlay = ring
