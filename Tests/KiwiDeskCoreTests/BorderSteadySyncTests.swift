@@ -36,7 +36,7 @@ struct BorderSteadySyncTests {
     func syncHoldsFrameWhileAnimating() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         border.sync([spec(1, frame: start)])
         border.isAnimating = { _ in true }
         // The ring rides the tick out to the target...
@@ -62,7 +62,7 @@ struct BorderSteadySyncTests {
     func syncStillRecolorsWhileAnimating() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         border.sync([spec(1, frame: start)])
         border.isAnimating = { _ in true }
         border.follow(
@@ -83,7 +83,7 @@ struct BorderSteadySyncTests {
     func newRingMidAnimationUsesSpec() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         border.isAnimating = { _ in true }
         // No held frame to prefer — one tick behind beats no ring.
         border.sync([spec(2, frame: stale)])
@@ -94,7 +94,7 @@ struct BorderSteadySyncTests {
     func retirementUnaffectedWhileAnimating() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         border.sync([spec(1, frame: start), spec(2, frame: stale)])
         border.isAnimating = { _ in true }
         border.sync([spec(1, frame: start)])

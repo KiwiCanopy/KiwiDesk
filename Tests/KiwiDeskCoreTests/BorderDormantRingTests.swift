@@ -27,7 +27,7 @@ struct BorderDormantRingTests {
     func retiredRingReturns() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         defer { border.clear() }
         border.sync([spec(1), spec(2)])
         let ring = border.overlays[WindowID(1)]
@@ -45,7 +45,7 @@ struct BorderDormantRingTests {
     func returningRingDropsHeldFrame() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         defer { border.clear() }
         let rest = CGRect(x: 0, y: 0, width: 400, height: 300)
         let parked = CGRect(x: 1700, y: 1000, width: 400, height: 300)
@@ -72,7 +72,7 @@ struct BorderDormantRingTests {
     func dormantRingFades() throws {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         defer { border.clear() }
         border.sync([spec(1)])
         let ring = try #require(border.overlays[WindowID(1)])
@@ -88,7 +88,7 @@ struct BorderDormantRingTests {
     func watchRequestSurvivesSwitch() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         defer { border.clear() }
         var requests: [Set<WindowID>] = []
         border.watchOverride = {
@@ -106,7 +106,7 @@ struct BorderDormantRingTests {
     func cornerRadiusLifetime() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         defer { border.clear() }
         border.sync([spec(1)])
         #expect(border.cornerRadii[WindowID(1)] != nil)
@@ -155,7 +155,7 @@ struct BorderDormantRingTests {
     func bumpTeardownKeepsDormantRadius() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         defer { border.clear() }
         border.sync([spec(1)])
         border.sync([])

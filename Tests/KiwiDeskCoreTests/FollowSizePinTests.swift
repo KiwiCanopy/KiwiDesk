@@ -26,7 +26,7 @@ struct FollowSizePinTests {
     func pinnedTickCorrectsRing() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         border.sync([
             BorderManager.Spec(
                 window: WindowID(1),
@@ -88,7 +88,7 @@ struct FollowSizePinTests {
     func echoIgnoresPin() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         border.sync([
             BorderManager.Spec(
                 window: WindowID(1),

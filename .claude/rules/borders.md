@@ -155,15 +155,26 @@ keeps these:
   take AppKit (`BorderRestackTests`). This orders the AppKit
   panel and draws nothing: the `.transient` section below still
   binds.
-- **An ordered-in panel the ring's size moves through
+- **A ring panel that keeps the ring's size moves through
   `SkyLight.moveWindow`, never AppKit's `setFrame`** — mid-animation
-  too, so it takes no room. `setFrame` ties the move to the next
-  commit with a fence, and while another app's window transaction
-  held WindowServer up the ring's commit waited ~500 ms on it, the
-  fence's timeout (#1956, `BorderPanelMoveTests`). AppKit learns
-  the frame from WindowServer's moved event; the first show, a
-  panel ordered out since, a size change and a missing symbol take
-  AppKit.
+  too, so it takes no room — once WindowServer has its window and
+  AppKit has not set its frame in the current main run loop pass
+  (`MainRunLoopPass`). `setFrame` ties the move to the next commit
+  with a fence, and while another app's window transaction held
+  WindowServer up the ring's commit waited ~500 ms on it (#1956);
+  a SkyLight move issued in a pass where AppKit set the frame, or
+  first ordered the panel in, reaches WindowServer first and is
+  overwritten at that pass's commit (device-checked macOS 27.0.1,
+  2026-10-05). The first show, a size change and a missing symbol
+  take AppKit (`BorderPanelMoveTests`; the move landing is
+  `BorderPanelMoveLiveTests`', the seams `BorderPanelSeamTests`').
+  **Keep the backend's `placedFrame` the panel's frame of record,
+  and read no decision off `panel.frame`**: AppKit's cache follows
+  a SkyLight move only once WindowServer's moved event reaches its
+  event loop, and a `setFrame` equal to a stale cache is skipped.
+  The sticky mark's panel still takes `setFrame` per tick,
+  unmeasured on the switch path; moving it the same way takes the
+  manager's one `movePanel` seam, not a second one.
 - **An animating ring that changes size moves inside its panel
   rather than resizing it** — a panel resize hands WindowServer a
   fenced transaction the main actor waits on, every frame, GPU
@@ -173,8 +184,10 @@ keeps these:
   screen plus the widest ring's reach per axis, capped by
   `roomLimit` points and `roomPixelLimit` pixels — so on a
   screen the caps leave whole, a ring parked in the stash corner
-  or sliding in from it fits, whose exact-panel moves the main
-  actor waited ~500 ms on mid-switch (#1956,
+  or sliding in from it fits — one that also changes size, or
+  moves where the SkyLight move is missing — whose exact-panel
+  moves the main actor waited ~500 ms on mid-switch before the
+  bullet above (#1956,
   `BorderMovingRoomTests` ▸ `roomHoldsParkedRing`); on a wider
   desk the caps cut first and a parked ring can fall outside.
   The panel takes the room once and the ring's layers move

@@ -74,9 +74,9 @@ public final class BorderManager {
     /// it to the AppKit fallback (#1925).
     var restack: (CGWindowID, Bool, CGWindowID) -> Bool =
         SkyLight.orderWindow
-    /// A ring's panel move, live by default; a test core pins it
-    /// to the AppKit fallback (#1956).
-    var moveWindow: (CGWindowID, CGPoint) -> Bool =
+    /// A ring's panel move, live by default and its one live
+    /// default; a test core pins it to the AppKit fallback (#1956).
+    var movePanel: (CGWindowID, CGPoint) -> Bool =
         SkyLight.moveWindow
     #if DEBUG
         /// Test-only: builds ring backends and stands in for the
@@ -221,7 +221,7 @@ public final class BorderManager {
             order: activeOrder,
             levelOf: windowLevel,
             restack: restack,
-            move: moveWindow
+            movePanel: movePanel
         )
     }
 

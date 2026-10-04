@@ -90,7 +90,7 @@ func makeTestCore(
     // on every sync otherwise (#1868).
     core.borders.windowLevel = { _ in nil }
     core.borders.restack = { _, _, _ in false }
-    core.borders.moveWindow = { _, _ in false }
+    core.borders.movePanel = { _, _ in false }
     // `prepare_restart` reads the developer's real LaunchAgent
     // plist otherwise (#930); a suite that means one injects it.
     core.inPlaceRestart.serviceProgram = { nil }

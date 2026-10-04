@@ -70,7 +70,7 @@ struct BorderOrderReassertTests {
     func steadySyncOrdersOnlyWhatItMust() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
-        border.moveWindow = { _, _ in false }
+        border.movePanel = { _, _ in false }
         defer { border.clear() }
         var orders = 0
         border.backendFactory = { CountingBackend { orders += 1 } }

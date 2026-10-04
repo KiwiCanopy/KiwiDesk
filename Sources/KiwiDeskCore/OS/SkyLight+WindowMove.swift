@@ -1,11 +1,9 @@
 import CoreGraphics
 
-/// Moves one of OUR windows in a committed transaction (#1956):
-/// AppKit's `setFrame` ties a move to the next Core Animation
-/// commit with a fence, and a WindowServer read on the main actor
-/// waits for that fence while another app's window transaction
-/// holds WindowServer up. The commit waits for no reply; AppKit
-/// learns the new frame from WindowServer's moved event.
+/// Moves one of OUR windows in a committed transaction, without
+/// AppKit's fence (#1956). The commit waits for no reply, and
+/// AppKit's cached frame follows WindowServer's moved event
+/// (device-checked macOS 27.0.1, 2026-10-05).
 extension SkyLight {
     typealias TransactionMoveFn =
         @convention(c) (CFTypeRef, CGWindowID, CGPoint) -> CGError
@@ -18,6 +16,8 @@ extension SkyLight {
     /// Moves `window`'s top-left corner to `origin`, in global
     /// display coordinates with a top-left origin; false when a
     /// symbol is missing, and the caller moves through AppKit.
+    /// The mutators return no usable status: a refused window id
+    /// answers like a moved one (device 2026-10-05).
     static func moveWindow(
         _ window: CGWindowID,
         to origin: CGPoint

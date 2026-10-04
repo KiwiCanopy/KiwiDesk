@@ -15,7 +15,11 @@ struct BorderMissionControlTests {
         arguments: [BorderGeometry.Order.below, .above]
     )
     func ringIsTransientPanel(order: BorderGeometry.Order) throws {
-        let overlay = BorderOverlay(window: 7, order: order)
+        let overlay = BorderOverlay(
+            window: 7,
+            order: order,
+            movePanel: { _, _ in false }
+        )
         let panel = try #require(
             overlay.backend as? AppKitBorderOverlay
         )
