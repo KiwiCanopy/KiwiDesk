@@ -32,15 +32,20 @@ public struct StateMarkColors: Sendable, Equatable {
 /// (#414, #429).
 final class StateBadgeView: NSView {
     let symbol = NSImageView()
+    /// The mark's SF Symbol; a reused badge re-images on a change.
+    var symbolName: String {
+        didSet {
+            guard symbolName != oldValue else { return }
+            symbol.image = Self.image(symbolName)
+        }
+    }
 
     init(symbolName: String) {
+        self.symbolName = symbolName
         super.init(frame: .zero)
         wantsLayer = true
         layer?.masksToBounds = true
-        symbol.image = NSImage(
-            systemSymbolName: symbolName,
-            accessibilityDescription: nil
-        )
+        symbol.image = Self.image(symbolName)
         symbol.imageScaling = .scaleProportionallyUpOrDown
         symbol.setAccessibilityElement(false)
         addSubview(symbol)
@@ -49,6 +54,10 @@ final class StateBadgeView: NSView {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
+
+    private static func image(_ name: String) -> NSImage? {
+        NSImage(systemSymbolName: name, accessibilityDescription: nil)
+    }
 
     override var isFlipped: Bool { true }
 

@@ -22,7 +22,7 @@ Powerful when you reach for it, never in your way.
 [![Homebrew](https://img.shields.io/badge/Homebrew-cask-8DB354)](https://github.com/KiwiCanopy/homebrew-tap)
 [![Release](https://img.shields.io/github/v/release/KiwiCanopy/KiwiDesk?color=8DB354&label=Release)](https://github.com/KiwiCanopy/KiwiDesk/releases/latest)
 
-[Website](https://kiwidesk.kiwicanopy.com/) · [Docs](https://kiwidesk.kiwicanopy.com/docs/) · [Quick Start](https://kiwidesk.kiwicanopy.com/docs/user-guide/) · [Recipes](https://kiwidesk.kiwicanopy.com/docs/recipes/) · [Changelog](https://kiwidesk.kiwicanopy.com/changelog/) · [Roadmap](ROADMAP.md) · [Sponsor](https://github.com/sponsors/KiwiCanopy)
+[Website](https://kiwidesk.kiwicanopy.com/) · [Docs](https://kiwidesk.kiwicanopy.com/docs/) · [Quick Start](https://kiwidesk.kiwicanopy.com/docs/user-guide/) · [Recipes](https://kiwidesk.kiwicanopy.com/docs/recipes/) · [Changelog](https://kiwidesk.kiwicanopy.com/changelog/) · [Roadmap](ROADMAP.md) · [Discord](https://discord.gg/bYeTrJyZyS) · [Sponsor](https://github.com/sponsors/KiwiCanopy)
 
 <img src="assets/demo-scrolling.gif" width="800"
   alt="Windows gliding sideways through the scrolling layout as focus moves between them">

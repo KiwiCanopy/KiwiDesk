@@ -49,10 +49,14 @@ struct BarTextFieldCensusTests {
             reason: "the overflow count's number"
         ),
         "SpaceBarItemView.swift": Entry(
-            count: 3,
+            count: 2,
             door: ("BarTextGlyph.frame(", "SpaceBarItemView+Layout.swift"),
-            reason: "identifier and app glyphs (frame), badges "
-                + "(IndicatorBarBadgeCell)"
+            reason: "identifier (frame), badges (IndicatorBarBadgeCell)"
+        ),
+        "SpaceBarItemView+AppViews.swift": Entry(
+            count: 1,
+            door: ("BarTextGlyph.frame(", "SpaceBarItemView+Layout.swift"),
+            reason: "App Font app glyphs (frame), minted per slot (#1942)"
         ),
         "SpaceBarOverlay+FrontApp.swift": Entry(
             count: 1,

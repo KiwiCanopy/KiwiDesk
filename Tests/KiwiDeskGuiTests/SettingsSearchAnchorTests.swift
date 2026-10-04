@@ -90,7 +90,7 @@ struct SettingsSearchAnchorTests {
             // is the destination alone — not "Bars › App Bar ›
             // App Bar".
             #expect(
-                row?.path == ["KiwiShelf & Bars"],
+                row?.path == ["KiwiShelf"],
                 Comment(rawValue: query)
             )
         }

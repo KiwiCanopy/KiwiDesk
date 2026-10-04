@@ -42,7 +42,7 @@ extension SpaceBarItemView {
         var steps: [BarMotion.WalkStep] = []
         for (index, glyph) in appViews.enumerated() {
             let arrives = entering.contains(index)
-            let badges: [[NSView]] = [
+            let badges: [[NSView?]] = [
                 badgeViews, stickyBadgeViews, floatingBadgeViews,
             ]
             let parts =
