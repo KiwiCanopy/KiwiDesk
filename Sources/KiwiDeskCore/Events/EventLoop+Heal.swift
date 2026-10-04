@@ -37,7 +37,32 @@ extension EventLoop {
     /// after any activation (#1936).
     func healSweep() {
         guard isRunning else { return }
-        let census = onScreenNormalWindowIDs()
+        healSweep(census: onScreenNormalWindowIDs())
+    }
+
+    /// Reads the census off the main actor, then sweeps on it and
+    /// calls `done` unless the returned read was cancelled (#1956):
+    /// the read waits for WindowServer to take this process's
+    /// pending window updates, which ran up to ~340 ms on the main
+    /// actor when a tick met a Space switch.
+    @discardableResult
+    func requestHealSweep(
+        then done: @escaping @MainActor () -> Void
+    ) -> Task<Void, Never> {
+        nonisolated(unsafe) let read = onScreenNormalWindowIDs
+        return Task.detached(priority: .utility) { [weak self] in
+            let census = read()
+            await MainActor.run {
+                guard !Task.isCancelled else { return }
+                self?.healSweep(census: census)
+                done()
+            }
+        }
+    }
+
+    /// One sweep over `census`, a snapshot taken by the caller.
+    func healSweep(census: [pid_t: Set<WindowID>]) {
+        guard isRunning else { return }
         var quiet: [pid_t: Set<WindowID>] = [:]
         var unwatched: [pid_t: RunningApp]?
         forgetExitedUnlisted()

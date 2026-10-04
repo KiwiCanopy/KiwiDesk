@@ -97,6 +97,11 @@ struct AdoptionHealScheduleTests {
         core.scheduleAdoptionHeal()
         let armed = core.deferred.task(for: .adoptionHeal)
         await armed?.value
+        // The census is read off the main actor (#1956); the sweep
+        // and the re-arm land when it answers.
+        let read = core.deferred.task(for: .adoptionHealRead)
+        #expect(read != nil)
+        await read?.value
         // The fired task really swept (the census was read) …
         #expect(box.censusReads == 1)
         // … and re-armed itself: the slot now holds a NEW task,
@@ -104,6 +109,40 @@ struct AdoptionHealScheduleTests {
         let rearmed = core.deferred.task(for: .adoptionHeal)
         #expect(rearmed != nil)
         #expect(rearmed != armed)
+    }
+
+    /// Where the census is read, recorded from the reading thread.
+    private final class ThreadRecorder: @unchecked Sendable {
+        private let lock = NSLock()
+        private var reads: [Bool] = []
+        func note() {
+            lock.withLock { reads.append(Thread.isMainThread) }
+        }
+        var onMain: [Bool] { lock.withLock { reads } }
+    }
+
+    /// #1956: the census read waits for WindowServer to take this
+    /// process's pending window updates, so the scheduled sweep
+    /// reads it off the main actor.
+    @Test("the scheduled heal reads its census off the main actor")
+    func healReadsCensusOffMain() async {
+        let (core, _) = makeCore()
+        defer {
+            core.deferred.cancelAll()
+            core.eventLoop.stop()
+        }
+        let recorder = ThreadRecorder()
+        core.eventLoop.onScreenNormalWindowIDs = {
+            recorder.note()
+            return [:]
+        }
+        core.timings.adoptionHealInterval = .milliseconds(1)
+        core.scheduleAdoptionHeal()
+        await core.deferred.task(for: .adoptionHeal)?.value
+        let read = core.deferred.task(for: .adoptionHealRead)
+        #expect(read != nil)
+        await read?.value
+        #expect(recorder.onMain == [false])
     }
 
     @Test("the re-track task reconciles every queued pid")
