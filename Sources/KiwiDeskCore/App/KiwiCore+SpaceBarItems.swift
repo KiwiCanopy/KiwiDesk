@@ -63,8 +63,9 @@ extension KiwiCore {
             listed.filter { !floats.contains($0.0) }
             + listed.filter { floats.contains($0.0) }
         let windows = pairs.map { $0.0 }
+        let expanded = expandsSpaceTitles(in: space, style: style)
         let groups =
-            style.groupAdjacentWindows
+            style.groupAdjacentWindows && !expanded
             ? Self.adjacentRuns(
                 of: pairs.map { $0.1 },
                 specials: pairs.map { $0.2 }
@@ -89,6 +90,14 @@ extension KiwiCore {
         let window = drawn.window
         let apps = groups[window].compactMap { group in
             spaceBarApp(group: group, space: space, style: style)
+                .map { app in
+                    inlineSpaceBarApp(
+                        app,
+                        space: space,
+                        style: style,
+                        expanded: expanded
+                    )
+                }
         }
         // A side hiding the focused window tints its disc (#376).
         // It reads the SYSTEM focus, like every glyph beside it —

@@ -109,6 +109,32 @@ struct GlyphSizeSpaceBarTests {
         }
     }
 
+    @Test("Inline titles use the content depth and shelf font")
+    func inlineTitleFollowsContent() throws {
+        var look = Self.look()
+        look.fontFamily = "Menlo"
+        let chip = SpaceBarItemView(
+            frame: CGRect(x: 0, y: 0, width: 240, height: Self.depth)
+        )
+        var app = Self.app("Notes")
+        app.inlineTitle = "Document"
+        chip.configure(
+            identity: .space("1"),
+            spaceGlyph: .text("1", tinted: true),
+            apps: [app],
+            active: true,
+            horizontal: true,
+            style: look,
+            stateMarkColors: StateMarkColors(sticky: "", floating: "")
+        )
+        chip.layout()
+        let field = try #require(chip.titleViews.first)
+        let font = try #require(field.font)
+        #expect(font.familyName == "Menlo")
+        #expect(font.pointSize == look.titleFontSize(forDepth: Self.depth))
+        #expect(field.frame.maxX < chip.bounds.maxX)
+    }
+
     /// The in-item rule is content: as long as the content allows,
     /// centred on the item's full depth.
     @Test("The identifier divider sits on the midline at content length")

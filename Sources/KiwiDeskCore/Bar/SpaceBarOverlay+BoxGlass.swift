@@ -17,6 +17,14 @@ extension SpaceBarOverlay {
     ) {
         let n = min(frames.count, itemViews.count)
         syncBoxGlassCount(n)
+        if resizesInlineTitles {
+            BarMotion.standCommitted {
+                for i in 0..<n {
+                    standResize(boxGlasses[i], at: frames[i])
+                    standResize(boxTints[i], at: frames[i])
+                }
+            }
+        }
         for i in 0..<n {
             let radius = SpaceBarItemView.boxRadius(
                 look: style,

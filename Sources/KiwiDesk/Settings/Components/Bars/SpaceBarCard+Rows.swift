@@ -37,6 +37,37 @@ extension SpaceBarCard {
                 .foregroundStyle(.secondary)
                 .padding(.leading, 20)
             }
+        case .spaceBarExpandActive:
+            ToggleRow(
+                label: L(
+                    "space_bar.expand_active_space",
+                    "Expand active Space"
+                ),
+                isOn: style.expandActiveSpace,
+                help: L(
+                    "space_bar.expand_active_space.help",
+                    "Keeps the Space each display shows expanded, "
+                        + "with an icon and title for each window. "
+                        + "Windows stay separate in this Space; "
+                        + "grouping still applies to other Spaces. "
+                        + "Vertical bars keep icons only."
+                )
+            )
+        case .spaceBarShowHoverTitles:
+            ToggleRow(
+                label: L(
+                    "space_bar.show_hover_titles",
+                    "Show titles on hover"
+                ),
+                isOn: style.showHoverTitles,
+                help: L(
+                    "space_bar.show_hover_titles.help",
+                    "Hover over an app in another Space to reveal "
+                        + "its window title inline, or the app name "
+                        + "for a group of windows. Vertical bars "
+                        + "keep icons only."
+                )
+            )
         case .spaceBarGroupAdjacent:
             ToggleRow(
                 label: L(

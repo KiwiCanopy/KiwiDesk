@@ -35,6 +35,11 @@ extension SpaceBarOverlay {
         return items.enumerated().map { index, item in
             let length = SpaceBarItemView.autoLength(
                 appCount: item.apps.count,
+                titleExtent: SpaceBarItemView.inlineTitleExtent(
+                    item.apps,
+                    depth: depth,
+                    look: look
+                ),
                 discs: item.discs,
                 marked: item.marker != nil,
                 identifierInk: item.marker == nil

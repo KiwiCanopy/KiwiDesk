@@ -30,6 +30,7 @@ extension SpaceBarItemView {
     /// (#1790).
     static func autoLength(
         appCount: Int,
+        titleExtent: CGFloat = 0,
         discs: Int = 0,
         marked: Bool = false,
         identifierInk: CGFloat? = nil,
@@ -50,7 +51,7 @@ extension SpaceBarItemView {
                 collapsed: collapsed
             )
             + divider
-            + CGFloat(slots) * cell + gaps
+            + CGFloat(slots) * cell + gaps + titleExtent
     }
 
     /// How far in from each end an item's content starts: `pad`
@@ -119,10 +120,11 @@ extension SpaceBarItemView {
             if index > 0 { cursor += glyphGap }
             place(view, at: cursor, cell: cell)
             if index < glyphTargets.count {
-                glyphTargets[index].frame = cellRect(
-                    at: cursor,
-                    cell: cell
-                )
+                var target = cellRect(at: cursor, cell: cell)
+                if horizontal {
+                    target.size.width += inlineTitleWidth(at: index)
+                }
+                glyphTargets[index].frame = target
             }
             if index < badgeViews.count {
                 layoutBadge(
@@ -136,7 +138,8 @@ extension SpaceBarItemView {
                 onCellAt: cursor,
                 cell: cell
             )
-            cursor += cell
+            layoutInlineTitle(at: index, after: cursor + cell)
+            cursor += cell + inlineTitleWidth(at: index)
         }
         if collapse == nil, !after.windows.isEmpty {
             if !appViews.isEmpty { cursor += glyphGap }
@@ -149,7 +152,9 @@ extension SpaceBarItemView {
             overflowTarget?.frame = cellRect(at: cursor, cell: cell)
             cursor += cell
         }
-        slideGlyphs(pitch: cell + glyphGap)
+        let handlesInlineWalk = pendingInlineWalk
+        playTitleReveal()
+        if !handlesInlineWalk { slideGlyphs(pitch: cell + glyphGap) }
         layoutAccent()
     }
 

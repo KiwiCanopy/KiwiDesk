@@ -44,6 +44,7 @@ extension SpaceBarOverlay {
     func syncItemViewCount(_ count: Int) {
         while itemViews.count > count {
             let view = itemViews.removeLast()
+            view.clearTitleHover()
             // A chip leaving under the pointer ends its hold (#1528).
             view.setPointerInside(false)
             view.removeFromSuperview()

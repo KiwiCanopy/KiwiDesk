@@ -6,6 +6,8 @@ enum SpaceBarKey: String, CaseIterable, Hashable {
     case spaceBarHideEmpty = "settings.spaceBarStyle.hideEmpty"
     case spaceBarGroupAdjacent =
         "settings.spaceBarStyle.groupAdjacentWindows"
+    case spaceBarExpandActive = "settings.spaceBarStyle.expandActiveSpace"
+    case spaceBarShowHoverTitles = "settings.spaceBarStyle.showHoverTitles"
     case spaceBarShowFrontApp = "settings.spaceBarStyle.showFrontApp"
     case spaceBarSpringDelay = "settings.spaceBarStyle.springDelay"
     case spaceBarInactiveContent =
@@ -30,7 +32,8 @@ extension SpaceBarKey {
             // the KiwiShelf card's Show group, which has none.
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarHideEmpty, .spaceBarShowFrontApp,
-            .spaceBarGroupAdjacent,
+            .spaceBarGroupAdjacent, .spaceBarExpandActive,
+            .spaceBarShowHoverTitles,
             .spaceBarActiveIndicator, .spaceBarSpringDelay,
             .spaceBarGlyphSpan, .spaceBarGlyphGap,
             .spaceBarInactiveContent, .spaceBarItemLabel:
@@ -89,6 +92,16 @@ extension SpaceBarKey {
             return .text(
                 "space_bar.group_adjacent",
                 help: "space_bar.group_adjacent.help"
+            )
+        case .spaceBarExpandActive:
+            return .text(
+                "space_bar.expand_active_space",
+                help: "space_bar.expand_active_space.help"
+            )
+        case .spaceBarShowHoverTitles:
+            return .text(
+                "space_bar.show_hover_titles",
+                help: "space_bar.show_hover_titles.help"
             )
         case .spaceBarShowFrontApp:
             return .text(
