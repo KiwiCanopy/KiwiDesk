@@ -111,6 +111,10 @@ struct BatchSizingRoutingTests {
             Site(names: 3, promises: 0),
         "KiwiDeskCore/Tiling/TilingEngine.swift":
             Site(names: 5, promises: 0),
+        // One window's turn in the retile (#1944): threads the
+        // retile's promise into `applyFrame` unchanged.
+        "KiwiDeskCore/Tiling/TilingEngine+Issue.swift":
+            Site(names: 3, promises: 0),
         // `applyFrame` (the animate-or-instant policy) moved
         // here when #677's additions hit the main file's line
         // ceiling; it still only threads the caller's promise.
