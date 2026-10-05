@@ -12657,6 +12657,20 @@ stored bar's number onto the shelf rather than letting the
 default in, so the argument that no migration is owed carries
 over unchanged.
 
+One exception narrows "every screen": Glass, and so the first-run
+profile, thins the shelf to 32 pt when the MAIN screen is shorter
+than 1000 pt (#1952, owner ruling 2026-10-04). It is a height
+rule rather than a class, because a 13" and a 16" MacBook are one
+class and only the short panels pay the chrome — 40 pt twice is
+over 8% of a 956 pt screen. It stays one number on every screen,
+decided by the main one like every value no layout owns, and is
+not a second default a user has to know about: it is the value
+the slider shows, and only a fresh seed or picking Glass again
+takes it, so no stored file moves and plugging in a screen moves
+no bar. A separate "Compact" look was refused for the reason in
+*A bundled look is total*: a first run shows Glass, and Glass is
+also the shape reset (`StarterCompactShelfTests`).
+
 **"Which palette am I on" is computed, never remembered.**
 (#757.) The shelf marks the card whose colors the config it is
 editing currently carries — it stores no "last applied palette"

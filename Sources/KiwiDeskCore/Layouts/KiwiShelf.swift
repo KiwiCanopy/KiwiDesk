@@ -30,7 +30,8 @@ public struct KiwiShelf: Sendable, Equatable {
     /// padded up to — a Space Bar needing less keeps its need.
     public var minimum: CGFloat = 30
     /// Depth of the strip (pt): 40 on every screen class (owner
-    /// ruling 2026-09-13, #1359; `BarThicknessDefaultTests`).
+    /// ruling 2026-09-13, #1359; `BarThicknessDefaultTests`); the
+    /// starter thins it on a short main screen (#1952).
     public var thickness: CGFloat = 40
     /// Distance from the screen border (pt); 0 is flush (#1516).
     public var outerMargin: CGFloat = 0

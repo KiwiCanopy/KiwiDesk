@@ -10,7 +10,8 @@ import Testing
 /// pinned here — a retune is a docstring edit, not a red suite.
 /// What is pinned is the shape: the default clears the floor, and
 /// the starter tuning gives no screen class a thinner shelf,
-/// which is where 28 lived before the ruling.
+/// which is where 28 lived before the ruling. A short MAIN screen
+/// is a height rule, not a class (#1952, `StarterCompactShelfTests`).
 @Suite("Bar thickness default")
 struct BarThicknessDefaultTests {
     @Test("the shelf's default clears the floor")
