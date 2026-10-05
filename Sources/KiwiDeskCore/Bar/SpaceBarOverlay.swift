@@ -135,7 +135,7 @@ public final class SpaceBarOverlay {
     /// Holds the run — items, their glass, the layer rule and an
     /// unpinned front segment — inside `itemContainer`; a scroll
     /// moves this one view, never each item.
-    let itemRun = AppBarOverlay.FlippedView()
+    let itemRun = AppBarOverlay.RunView()
     /// What a scroll re-reads without a render.
     var scrollRun: ScrollRun?
     /// Hidden-entry counts on each fading end (#1517).
