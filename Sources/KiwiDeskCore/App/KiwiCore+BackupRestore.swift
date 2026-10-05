@@ -106,6 +106,8 @@ extension KiwiCore {
         if bundle.config != nil {
             takeRestoredAppWide(from: bundle)
             takeRestoredSharedLook(from: bundle)
+        } else {
+            forgetAppWideCaptures()
         }
         let outcome = try writeIncoming(bundle)
 

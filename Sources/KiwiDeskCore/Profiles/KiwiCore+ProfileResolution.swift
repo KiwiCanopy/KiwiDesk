@@ -308,9 +308,12 @@ extension KiwiCore {
         )
         // Capture-live: the standard was just adopted onto
         // live above, so live IS what this profile records.
-        try saveProfile(
-            buildProfile(name: name, modes: nil)
-        )
+        let saved = buildProfile(name: name, modes: nil)
+        try saveProfile(saved)
+        // Saving and adopting a stored profile is its first apply,
+        // so owed #1741 and #1752 crossings end here too (#1952).
+        adoptAppWide(from: saved)
+        adoptSharedLook(from: saved)
         // A preset can define more spaces than the first-run seed
         // authored digit shortcuts for; bind the newcomers
         // additively so ⌃⌥N covers them too (#485).
