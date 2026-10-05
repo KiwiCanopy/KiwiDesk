@@ -197,6 +197,14 @@ func makeTestCore(
     // suite return foreign reports to an own window. Pin "not in
     // the strip"; the return suite states the reading itself.
     core.mouse.pointerInMenuBarStrip = { false }
+    // Same class, process-wide (#1971's flake): every core hears
+    // EVERY key-window change in the test process, so another
+    // suite's window or post re-synced this one's rings mid-test.
+    // Unhook it; `OwnKeyWindowRefreshTests` re-wires explicitly.
+    for token in core.borders.ownKeyWindowObservers {
+        NotificationCenter.default.removeObserver(token)
+    }
+    core.borders.ownKeyWindowObservers = []
     // Same class again (#1665): a bar item's hover is re-read from
     // the resting pointer at every shelf relayout, and a fixture's
     // bar sits at the top of the primary screen, where a hand on
