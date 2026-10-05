@@ -127,12 +127,13 @@ second cancel the other:
   commanded frames to the target while the window never moved, and
   no echo and no WindowServer event is coming.
 
-## The switch path makes no WindowServer round trip for a ring
+## The switch path adds no ring round trip beyond its ruled re-stacks
 
 A WindowServer call a ring makes on the main actor waits for its
 answer, and while WindowServer is GPU-bound one answer took
-390 ms (#1925, 2026-10-03). So a change to the ring's switch path
-keeps these:
+390 ms (#1925, 2026-10-03). A re-stack is such a call that a ring
+cannot drop (#1962), so a change to the ring's switch path keeps
+these:
 
 - **A ring `sync` retires goes dormant, never ordered out** —
   alpha 0, still ordered in, its corner radius kept — and comes
@@ -148,13 +149,20 @@ keeps these:
   new, revived or hidden — unless no WindowServer stream reports
   its target moving; the two settle passes re-stack every ring
   (`BorderOrderReassertTests`).
-- **An ordered-in panel re-stacks through `restack`**, a SkyLight
-  transaction, never AppKit's `order(_:relativeTo:)`, which looks
-  the other app's window rights up synchronously first; the
-  first show, the first after an order-out and a missing symbol
-  take AppKit (`BorderRestackTests`). This orders the AppKit
-  panel and draws nothing: the `.transient` section below still
-  binds.
+- **A ring re-stacks through AppKit's `order(_:relativeTo:)`, and
+  only from a ruled trigger** — `sync`'s `ordersRing` gate
+  (`needsOrder`, a settle pass, no WindowServer stream), the
+  WindowServer reorder and unhide events, the unhide's restore of
+  visibility, and the dead-end ring. A new caller is a new round
+  trip on the switch path and owes its ruling in
+  `BorderOrderCensusTests`' `allowed` map; a front-order ring's
+  level read is a second one (`levelOf`). The order is AppKit's
+  because WindowServer applies no SkyLight order to an AppKit
+  panel ([os-private-apis.md](os-private-apis.md), #1962) — that
+  it MOVES the ring is `BorderStackingTests` ▸
+  `reorderMovesTheRing`, which reads the stack back. This orders
+  the AppKit panel and draws nothing: the `.transient` section
+  below still binds.
 - **A ring panel that keeps the ring's size moves through
   `SkyLight.moveWindow`, never AppKit's `setFrame`** — mid-animation
   too, so it takes no room — once WindowServer has its window and

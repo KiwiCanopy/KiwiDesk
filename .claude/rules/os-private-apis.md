@@ -105,6 +105,26 @@ Every one of the following binds whoever touches them:
   ([state-and-layout.md](state-and-layout.md)). A future macOS
   that applies the ADD earns a re-probe with the census as the
   witness, never a re-read of item 5.
+- **No SkyLight ORDER applies to an AppKit-owned window
+  (#1962).** Probed 2026-10-05 on macOS 27.0.1 with the stack read
+  back from `CGWindowListCopyWindowInfo`, in the same run-loop pass
+  and after it: `SLSTransactionOrderWindow` committed with
+  `SLSTransactionCommit`, `SLSOrderWindow` (which returns 0) and
+  `SLSTransactionOrderWindowGroup` with a plain commit all left an
+  `NSPanel` where it was. AppKit's own `order(_:relativeTo:)` makes
+  that group call with the same arguments, commits through
+  `sls_transaction_commit_ca`, and applies it through
+  `SLSWindowBridgedOrder`. A SkyLight MOVE of the same panel
+  (`SLSTransactionMoveWindowWithGroup`) does apply (#1956). So an
+  own window is re-stacked through AppKit, and Core resolves none
+  of those order symbols (`BorderOrderCensusTests`).
+- **A SkyLight C-symbol write is verified the WMBridge way too:
+  by a live re-query a no-op would fail** — `BorderPanelMoveLiveTests`
+  for the move, `BorderStackingTests` ▸ `reorderMovesTheRing` for
+  the order — never by its status, which means nothing, and never
+  by a device check a no-op passes as well. #1925's re-stack was
+  "device-checked" and moved nothing, because a ring that never
+  moves still starts out behind its window.
 - **The per-Desktop window list is one `dlsym` symbol, read
   through one builder, reached through one seam (#1146).**
   `SLSCopyWindowsWithOptionsAndTags` (`SkyLight+WindowCensus.swift`,

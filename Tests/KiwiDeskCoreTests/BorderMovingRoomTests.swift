@@ -118,7 +118,6 @@ struct BorderMovingRoomTests {
     @Test("Both writers offer the room only mid-animation")
     func managerOffersRoomWhileAnimating() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         defer { border.clear() }
         let backend = RoomCapturingBackend()

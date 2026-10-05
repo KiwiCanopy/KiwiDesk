@@ -70,10 +70,6 @@ public final class BorderManager {
     /// live by default; a test core pins it (#1868).
     var windowLevel: (CGWindowID) -> Int? =
         AppKitBorderOverlay.windowLayer
-    /// A ring's re-stack write, live by default; a test core pins
-    /// it to the AppKit fallback (#1925).
-    var restack: (CGWindowID, Bool, CGWindowID) -> Bool =
-        SkyLight.orderWindow
     /// A ring's panel move, live by default and its one live
     /// default; a test core pins it to the AppKit fallback (#1956).
     var movePanel: (CGWindowID, CGPoint) -> Bool =
@@ -220,7 +216,6 @@ public final class BorderManager {
             window: window.raw,
             order: activeOrder,
             levelOf: windowLevel,
-            restack: restack,
             movePanel: movePanel
         )
     }
