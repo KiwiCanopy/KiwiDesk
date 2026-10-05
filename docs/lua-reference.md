@@ -39,12 +39,8 @@ event hooks and custom Lua. For the GUI workflow, see the
 [user guide](user-guide.md).
 
 :::unreleased
-When an update migrates one of these files to a newer format,
-KiwiDesk first keeps the original in
-`~/.config/KiwiDesk/migration-backups/`, one copy per file, under
-the file's own path with `.pre-v<format>` added. An older version
-can read that copy. If the folder is a dotfiles checkout, add
-`migration-backups/` to its `.gitignore`.
+A migrated file's previous version is kept in
+`migration-backups/` — see the [user guide](user-guide.md#the-guijson-file).
 :::
 
 ### What coexists with the Settings app, and what doesn't

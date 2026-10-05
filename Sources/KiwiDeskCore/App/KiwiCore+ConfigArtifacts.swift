@@ -58,6 +58,11 @@ public enum ConfigArtifact: CaseIterable {
 }
 
 extension KiwiCore {
+    /// Where a migrated rewrite keeps the original (#1880).
+    var migrationBackups: URL {
+        Self.migrationBackups(in: configDirectory)
+    }
+
     /// Where each artifact lives.
     func url(of artifact: ConfigArtifact) -> URL {
         switch artifact {
@@ -65,9 +70,7 @@ extension KiwiCore {
         case .profiles: return profiles.directory
         case .palettes: return paletteLibrary.url
         case .looks: return lookLibrary.url
-        case .migrationBackups:
-            return guiConfigStore.url.deletingLastPathComponent()
-                .appendingPathComponent(MigrationBackup.folderName)
+        case .migrationBackups: return migrationBackups
         }
     }
 

@@ -9,7 +9,9 @@ extension KiwiCore {
     /// The look library, built on demand — stateless like
     /// `paletteLibrary`, and public for the same one-owner reason.
     public var lookLibrary: LookStore {
-        LookStore(directory: configDirectory)
+        let store = LookStore(directory: configDirectory)
+        store.migrationBackups = migrationBackups
+        return store
     }
 
     /// The bundled looks, Glass derived for the screens the

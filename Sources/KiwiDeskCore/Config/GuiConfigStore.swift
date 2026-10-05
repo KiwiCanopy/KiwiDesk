@@ -40,6 +40,10 @@ public struct GuiConfigStore {
     /// crossing is owed or the config is Lua-owned.
     public var liveLook: LookBody?
 
+    /// Where a migrated rewrite keeps the original (#1880), set by
+    /// the core that owns the config directory; nil keeps none.
+    var migrationBackups: URL?
+
     public init(directory: URL) {
         self.url = directory.appendingPathComponent("gui.json")
     }
@@ -55,15 +59,11 @@ public struct GuiConfigStore {
         guard var data = try? Data(contentsOf: url) else {
             return nil
         }
-        if let migrated = ConfigMigration.migrated(data) {
-            MigrationBackup.write(
-                migrated,
-                replacing: data,
-                at: url,
-                configDirectory: url.deletingLastPathComponent()
-            )
-            data = migrated
-        }
+        data = MigrationBackup.migrateInPlace(
+            data,
+            at: url,
+            backups: migrationBackups
+        )
         return try? JSONDecoder().decode(
             GuiConfig.self,
             from: data
