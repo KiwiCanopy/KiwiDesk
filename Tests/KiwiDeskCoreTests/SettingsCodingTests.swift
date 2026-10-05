@@ -134,7 +134,7 @@ struct SettingsCodingTests {
         // Toggles (issue #11) and duration knobs (issue #51).
         // Keys mirror the Lua names per the one-vocabulary rule.
         let animations = try object(root["animations"])
-        #expect(animations["on_space_change"] as? Bool == false)
+        #expect(animations["on_space_change"] as? Bool == true)
         #expect(animations["on_scrolling"] as? Bool == true)
         #expect(animations["on_window_resize"] as? Bool == true)
         #expect(animations["on_window_swap"] as? Bool == true)

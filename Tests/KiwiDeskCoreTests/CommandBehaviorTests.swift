@@ -35,20 +35,20 @@ struct CommandBehaviorTests {
             args: [.number(300)]
         )
         #expect(core.tiler.animation.durationMS == 300)
-        // Defaults: space change off, scrolling on (issue #11).
-        #expect(!core.tiler.settings.animations.onSpaceChange)
+        // Defaults: space change on (#1931), scrolling on (#11).
+        #expect(core.tiler.settings.animations.onSpaceChange)
         #expect(core.tiler.settings.animations.onScrolling)
         // Each toggle round-trips in *both* directions.
-        core.execute(
-            "animations.set_on_space_change",
-            args: [.bool(true)]
-        )
-        #expect(core.tiler.settings.animations.onSpaceChange)
         core.execute(
             "animations.set_on_space_change",
             args: [.bool(false)]
         )
         #expect(!core.tiler.settings.animations.onSpaceChange)
+        core.execute(
+            "animations.set_on_space_change",
+            args: [.bool(true)]
+        )
+        #expect(core.tiler.settings.animations.onSpaceChange)
         core.execute(
             "animations.set_on_scrolling",
             args: [.bool(false)]

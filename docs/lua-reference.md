@@ -821,11 +821,12 @@ its layout mode, app rules, monitor pins, and any keybindings.
 Switching spaces parks the other spaces' tiled windows in a
 corner of their screen — [Parking is not a Desktop
 move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
-owns the model. The switch is instant by default.
+owns the model.
 
 :::unreleased
-With `animations.set_on_space_change` on, the switch plays the
-plate slide ([animations.set_on_space_change](#animationsset_on_space_change)).
+By default the switch plays the plate slide
+([animations.set_on_space_change](#animationsset_on_space_change));
+off, it is instant.
 :::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
@@ -5475,7 +5476,12 @@ animations.set_size_rate(0)    -- back to per-tick default
 
 ### animations.set_on_space_change
 
-**Expects:** `true` or `false` (default `false`).
+**Expects:** `true` or `false`.
+
+:::unreleased
+Defaults to `true`. A profile saved by an earlier release keeps
+the value it stored.
+:::
 
 **Does:** enables or disables the animation of an explicit
 Space switch — `focus_space`, a Space Bar click, the scroll
