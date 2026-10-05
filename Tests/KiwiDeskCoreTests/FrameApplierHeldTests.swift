@@ -83,7 +83,7 @@ struct FrameApplierHeldTests {
         let applier = makeApplier(counts)
         applier.holdWrites([w], until: .now() + 60)
         applier.applyInstant(w, frame, setSize: false)
-        applier.releaseHolds([w])
+        applier.releaseAllHolds()
         try await waitForWrite(counts)
         #expect(counts.withLock { $0.positions } == 1)
     }

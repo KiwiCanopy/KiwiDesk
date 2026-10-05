@@ -136,6 +136,22 @@ struct SpaceSlideSwitchTests {
         #expect(!core.tiler.applier.held.isHeld(w3))
     }
 
+    /// Any other activation of the screen — a Desktop switch, a
+    /// drop — ends the play at its retile, holds released.
+    @Test(
+        "another activation overtaking a play ends it",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func overtakenPlayEnds() throws {
+        let (core, _) = try makeCore(slide: true)
+        core.execute("focus_space", args: [.string("2")])
+        try #require(core.tiler.applier.held.isHeld(w3))
+        core.state.workspaces.activate(SpaceID(1))
+        core.retile(pass: .reissue)
+        #expect(!core.spaceSlide.isPlaying)
+        #expect(!core.tiler.applier.held.isHeld(w3))
+    }
+
     /// A follow's moved window is filed into the target while it is
     /// still on screen: it goes with the user, neither held nor
     /// left standing under a plate that slides away.

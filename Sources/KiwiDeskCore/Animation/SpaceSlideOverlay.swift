@@ -55,7 +55,7 @@ final class SpaceSlideOverlay {
     /// frame, the axis and direction (+1: the new page enters from
     /// the trailing side), the plates over the windows shown now,
     /// the windows that stay (sticky) — both in AX coordinates —
-    /// and the windows whose writes the switch holds.
+    /// and the Space the screen will show.
     struct Press {
         let display: DisplayID
         let screen: CGRect
@@ -63,15 +63,16 @@ final class SpaceSlideOverlay {
         let direction: CGFloat
         let outgoing: [SpaceSlidePlan.Plate]
         let holes: [CGRect]
-        let holding: Set<WindowID>
+        let space: SpaceID
         let glass: Bool
     }
 
-    /// What a press decided: when the strip lands, and the holds a
-    /// dropped play leaves for the caller to release now.
+    /// What a press decided: when the strip lands, and whether it
+    /// dropped a play on another screen, whose holds the caller
+    /// then releases.
     struct Pressed {
         let landAt: CFTimeInterval
-        let released: Set<WindowID>
+        let dropped: Bool
     }
 
     struct Play {
@@ -86,8 +87,9 @@ final class SpaceSlideOverlay {
         var pages: [CGFloat: NSView] = [:]
         var motion = SpaceSlideStrip()
         var target: CGFloat = 0
-        /// Every window a press of this play holds.
-        var held: Set<WindowID> = []
+        /// The Space the play lands on; a screen showing another
+        /// has been switched past it.
+        var space: SpaceID
         /// The windows the last incoming page plates.
         var incoming: [WindowID] = []
         var landAt: CFTimeInterval = 0
@@ -108,11 +110,12 @@ final class SpaceSlideOverlay {
     /// the landing the held writes wait for is read off it.
     func press(_ press: Press) -> Pressed {
         let now = clock()
-        var released: Set<WindowID> = []
+        var dropped = false
         if let play,
             play.display != press.display || play.axis != press.axis
         {
-            released = end()
+            end()
+            dropped = true
         }
         var fadeFrom: Float?
         var current: Play
@@ -151,7 +154,7 @@ final class SpaceSlideOverlay {
             begin: planned
         )
         current.target = page
-        current.held.formUnion(press.holding)
+        current.space = press.space
         current.landAt = current.motion.begin + current.motion.settleTime()
         current.liftAt = current.landAt + SpaceSlidePlan.landMargin
         CATransaction.begin()
@@ -178,7 +181,7 @@ final class SpaceSlideOverlay {
         // wait for the switch's own main-thread work.
         CATransaction.flush()
         play = current
-        return Pressed(landAt: current.landAt, released: released)
+        return Pressed(landAt: current.landAt, dropped: dropped)
     }
 
     /// Adds the incoming page where the press aimed the strip and
@@ -211,13 +214,11 @@ final class SpaceSlideOverlay {
         play = current
     }
 
-    /// Drops the play at once and leaves the panel dormant;
-    /// returns the windows it held, for the caller to release.
-    @discardableResult
-    func end() -> Set<WindowID> {
+    /// Drops the play at once and leaves the panel dormant.
+    func end() {
         teardown?.cancel()
         teardown = nil
-        guard let current = play else { return [] }
+        guard let current = play else { return }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         current.fader.removeAllAnimations()
@@ -231,7 +232,6 @@ final class SpaceSlideOverlay {
         current.holeHost.layer?.mask = nil
         CATransaction.commit()
         play = nil
-        return current.held
     }
 
     private func scheduleLift(_ current: inout Play, now: CFTimeInterval) {

@@ -8,7 +8,7 @@ import Foundation
 /// own queue AT the deadline, so a main-thread stall delays no
 /// landing; a later write for a staged window replaces its frame
 /// (latest wins, a size set is never dropped). Its entries live
-/// one landing: a release, `releaseNow` or `dropAll` ends them, and
+/// one landing: a release, `releaseAll` or `dropAll` ends them, and
 /// an expired deadline is pruned at the next hold. A native-tab
 /// re-key inside a hold lands the staged frame on the old element
 /// — accepted, the window being one landing behind at worst.
@@ -88,13 +88,13 @@ final class HeldWrites: @unchecked Sendable {
         return .staged(deadline)
     }
 
-    /// Ends the holds on `ids` now; returns those with a staged
+    /// Ends every hold now; returns the windows with a staged
     /// write, which the caller sends at once.
-    func releaseNow(_ ids: Set<WindowID>) -> [WindowID] {
+    func releaseAll() -> [WindowID] {
         lock.lock()
         defer { lock.unlock() }
-        for id in ids { deadlines[id] = nil }
-        return ids.filter { staged[$0] != nil }
+        deadlines = [:]
+        return Array(staged.keys)
     }
 
     /// Forgets every hold and staged write — KiwiDesk is stopping,
@@ -136,10 +136,10 @@ extension FrameApplier {
         held.hold(ids, until: deadline)
     }
 
-    /// Ends the holds on `ids` — a play an instant switch or a
-    /// switch on another screen dropped — and sends what they kept.
-    func releaseHolds(_ ids: Set<WindowID>) {
-        for id in held.releaseNow(ids) { releaseHeld(id, at: .now()) }
+    /// Ends every hold — the plate slide's play was dropped — and
+    /// sends what they kept. The holds are the slide's alone.
+    func releaseAllHolds() {
+        for id in held.releaseAll() { releaseHeld(id, at: .now()) }
     }
 
     /// Stages `frame` for a held window; true when it was held, so

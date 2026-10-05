@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The strip's spring (#1956): critically damped, so it never
-/// overshoots, within 2 % of rest at `settle` — when the held
+/// overshoots, within 2 % of rest at its landing — when the held
 /// writes leave — and a press mid-flight carries the speed on.
 @Suite("Plate slide strip spring (#1956)")
 struct SpaceSlideStripTests {

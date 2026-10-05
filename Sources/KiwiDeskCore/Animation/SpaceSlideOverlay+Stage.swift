@@ -33,7 +33,8 @@ extension SpaceSlideOverlay {
             fader: root.layer ?? CALayer(),
             holeHost: holeHost,
             strip: strip,
-            glass: press.glass
+            glass: press.glass,
+            space: press.space
         )
     }
 

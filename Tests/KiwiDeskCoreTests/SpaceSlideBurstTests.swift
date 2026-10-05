@@ -26,8 +26,7 @@ struct SpaceSlideBurstTests {
 
     private func press(
         _ overlay: SpaceSlideOverlay,
-        display: DisplayID = DisplayID(1),
-        holding: Set<WindowID> = []
+        display: DisplayID = DisplayID(1)
     ) -> SpaceSlideOverlay.Pressed {
         overlay.press(
             SpaceSlideOverlay.Press(
@@ -37,7 +36,7 @@ struct SpaceSlideBurstTests {
                 direction: 1,
                 outgoing: [],
                 holes: [],
-                holding: holding,
+                space: SpaceID("2"),
                 glass: false
             )
         )
@@ -86,17 +85,14 @@ struct SpaceSlideBurstTests {
         #expect(first.landAt == motion.begin + motion.settleTime())
     }
 
-    @Test("a press on another screen hands back the dropped holds")
-    func otherScreenReleases() {
+    @Test("a press on another screen says it dropped the play")
+    func otherScreenDrops() {
         let clock = Clock()
         let overlay = makeOverlay(clock)
         defer { overlay.end() }
-        let a: Set = [WindowID(1), WindowID(2)]
-        let b: Set = [WindowID(3)]
-        #expect(press(overlay, holding: a).released.isEmpty)
-        let other = press(overlay, display: DisplayID(2), holding: b)
-        #expect(other.released == a)
-        #expect(overlay.end() == b)
+        #expect(!press(overlay).dropped)
+        #expect(!press(overlay).dropped)
+        #expect(press(overlay, display: DisplayID(2)).dropped)
     }
 
     @Test("a long burst keeps a bounded strip")

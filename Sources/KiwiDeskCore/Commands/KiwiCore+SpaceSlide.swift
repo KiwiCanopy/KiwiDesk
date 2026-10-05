@@ -71,11 +71,11 @@ extension KiwiCore {
                     slidePlates(of: $0, stack: stack, in: page)
                 } ?? [],
                 holes: holes,
-                holding: Set(incoming.map(\.id)),
+                space: target,
                 glass: glass
             )
         )
-        tiler.applier.releaseHolds(pressed.released)
+        if pressed.dropped { tiler.applier.releaseAllHolds() }
         let wait = max(pressed.landAt - spaceSlide.clock(), 0)
         tiler.applier.holdWrites(incoming.map(\.id), until: .now() + wait)
         return SpaceSlideRun(
@@ -106,7 +106,18 @@ extension KiwiCore {
     /// writes it held.
     func endSpaceSlide() {
         guard spaceSlide.isPlaying else { return }
-        tiler.applier.releaseHolds(spaceSlide.end())
+        spaceSlide.end()
+        tiler.applier.releaseAllHolds()
+    }
+
+    /// Ends a play whose screen another activation took past its
+    /// Space — a Desktop switch, a drop, a crossing — asked at the
+    /// head of every retile, so no activation door needs its own.
+    func endSpaceSlideIfOvertaken() {
+        guard let play = spaceSlide.play,
+            state.workspaces.activeSpace(on: play.display) != play.space
+        else { return }
+        endSpaceSlide()
     }
 
     /// `space`'s plates on `page`, from the frames last sent —

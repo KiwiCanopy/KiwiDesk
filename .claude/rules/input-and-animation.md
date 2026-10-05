@@ -732,8 +732,10 @@ editing here:
   and release them from the app's own queue at the landing —
   KiwiDesk's own window, whose queue is main, excepted — once,
   inside one Enhanced UI hold (`FrameApplierHeldTests`); a play
-  that ends early releases what it held
-  (`SpaceSlideSwitchTests` ▸ `instantSwitchReleasesHolds`), and
+  that ends early releases what it held, whichever activation
+  overtook it — asked once at the head of every retile, never per
+  activation door (`SpaceSlideSwitchTests` ▸
+  `instantSwitchReleasesHolds`, `overtakenPlayEnds`), and
   the quit gather drops every hold, being the one frame write
   outside the applier. Move KiwiDesk's own window through AppKit
   inside the caller's turn, never on a later main-queue turn
