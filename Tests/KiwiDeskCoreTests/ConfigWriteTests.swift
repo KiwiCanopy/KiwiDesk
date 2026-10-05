@@ -32,7 +32,7 @@ private func richConfig() -> GuiConfig {
     config.settings.kiwishelf.thickness = 44
     config.settings.monocle.appBar.titleCap = 7
     config.settings.mouseResize = .snapBack
-    config.settings.animations.onSpaceChange = true
+    config.settings.animations.onSpaceChange = false
     config.settings.animations.onScrolling = false
     config.settings.placementOverride[SpaceID("mail")] = .last
     config.spaces = [

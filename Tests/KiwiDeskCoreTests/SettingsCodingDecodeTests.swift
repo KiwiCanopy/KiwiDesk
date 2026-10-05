@@ -50,7 +50,7 @@ struct SettingsCodingDecodeTests {
         settings.spaceBarStyle.stickyBadge = false
         settings.gapsOverride[SpaceID(2)] = .uniform(4)
         settings.placementOverride[SpaceID("mail")] = .last
-        settings.animations.onSpaceChange = true
+        settings.animations.onSpaceChange = false
         settings.animations.onScrolling = false
         settings.animations.onWindowResize = false
         settings.animations.onWindowSwap = false
@@ -88,12 +88,12 @@ struct SettingsCodingDecodeTests {
 
     @Test("A partial animations object keeps the other default")
     func partialAnimationsDecode() throws {
-        let json = #"{"animations":{"on_space_change":true}}"#
+        let json = #"{"animations":{"on_space_change":false}}"#
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
             from: Data(json.utf8)
         )
-        #expect(decoded.animations.onSpaceChange)
+        #expect(!decoded.animations.onSpaceChange)
         // on_scrolling absent — keeps its `true` default.
         #expect(decoded.animations.onScrolling)
         // Duration knobs absent — keep their 150 ms defaults.

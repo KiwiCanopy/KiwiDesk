@@ -280,7 +280,7 @@ exports nothing.
 | | `debug_log` | [message] |
 | Animation | `animations.set_duration` | ms (50–1000); persisted per-profile |
 | | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration, persisted per-profile |
-| | `animations.set_on_space_change` | true\|false (default false) |
+| | `animations.set_on_space_change` | true\|false; the plate slide on a Space switch, persisted per-profile |
 | | `animations.set_on_scrolling` | true\|false (default true) |
 | | `animations.set_on_window_resize` | true\|false (default true) |
 | | `animations.set_on_window_swap` | true\|false (default true) |
@@ -343,6 +343,11 @@ exports nothing.
 | | `track.set_overflow_style` | `cascade_all\|cascade_overflow` (default `cascade_all` for track) |
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
+
+:::unreleased
+`animations.set_on_space_change` defaults to `true`. A profile
+saved by an earlier release keeps the value it stored.
+:::
 
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last
