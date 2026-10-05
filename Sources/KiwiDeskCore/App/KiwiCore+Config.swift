@@ -79,8 +79,9 @@ extension KiwiCore {
         let seedGuiConfig = !guiConfigStore.exists && !luaOwnsSettings
         if seedGuiConfig {
             try? guiConfigStore.save(guiConfigSeed())
-            // The seed owes the #1752 crossing the read above
-            // could not see; the Starter seed's save ends it (#1952).
+            // The Starter seed's save elects the shared look NOW
+            // (#1952), so its crossing must be owed; #1741 has no
+            // legacy file to cross yet and ends at the next load.
             prepareSharedLook()
         }
         // The starter setup's profile-scoped half is materialized
