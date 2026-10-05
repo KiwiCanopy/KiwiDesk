@@ -705,6 +705,11 @@ the two as equals.
 The reveal-strip read `MouseTracker.pointerInMenuBarStrip`
 (#1532) is the same class a third time — a live pointer read a
 focus arm decides on — pinned false beside the mask.
+The process-wide key-window stream every core is wired to at
+bootstrap (`wireOwnKeyWindowRefresh`) is the same class without a
+read: any window turning key in the test process re-synced every
+live core's rings, so both twins unhook it and only its own suite
+re-wires (#1971's flake, `KeyWindowStreamPinTests`).
 `MouseButtonSeamGuardTests` holds each read to its homes AND
 every pin into both twins, a deletion from both being silent
 otherwise; it is a sibling of `MachineTouchTests`
