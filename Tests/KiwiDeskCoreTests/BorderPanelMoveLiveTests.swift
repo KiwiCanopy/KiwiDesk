@@ -44,6 +44,16 @@ struct BorderPanelMoveLiveTests {
         #expect(pump { bounds(of: number) == topLeft })
     }
 
+    /// The same-pass refusal rests on this: the counter stands
+    /// still within a pass and moves once the run loop waits.
+    @Test("The pass counter holds within a pass and moves after it")
+    func passCounterTracksTheRunLoop() {
+        let first = MainRunLoopPass.current()
+        #expect(MainRunLoopPass.current() == first)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+        #expect(MainRunLoopPass.current() != first)
+    }
+
     @Test("The manager's seam reaches the ring's panel")
     func managerSeamReachesThePanel() {
         let border = BorderManager()
