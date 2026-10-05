@@ -3073,8 +3073,12 @@ ordered in, dormant and empty between plays; everything that
 moves is a layer. KiwiDesk's own windows move through AppKit
 inside the switch's own turn, since the main queue would run
 their park only after it. A slow app's window can still land
-after the plates have faded; whether the focus ring waits for
-it is tracked in #1959.
+after the plates have faded, and its focus ring waits for it: the
+ring appears on the window's own report near the frame it was
+sent, or at a 300 ms cap, and never before the plates lift
+(#1959). Inside a Space the ring still leads a focus move, since
+there the moving ring is the cue; after a switch a leading ring
+would sit on an empty spot.
 :::
 
 **A resize span is the layout region, not the display

@@ -19,10 +19,14 @@ protocol BorderOverlayBackend: AnyObject {
     /// Fades the ring out (or back) without ordering it out, so a
     /// retired ring costs no WindowServer round trip (#1925).
     func setDormant(_ dormant: Bool)
+    /// Shows a dormant ring, fading in unless `reduceMotion`
+    /// (#1959).
+    func reveal(reduceMotion: Bool)
 }
 
 extension BorderOverlayBackend {
     func setDormant(_ dormant: Bool) {}
+    func reveal(reduceMotion: Bool) { setDormant(false) }
 }
 
 /// One window's focus ring (#285, #357): keeps the last render's
@@ -44,6 +48,8 @@ final class BorderOverlay {
     private var isHidden = false
     /// Retired by `sync` but kept for its window's return (#1925).
     private(set) var isDormant = false
+    /// Ordered in dormant for its window's arrival (#1959).
+    private(set) var isArrivalHeld = false
     private var hasOrdered = false
 
     /// Whether a steady `sync` must order the ring in: AppKit
@@ -115,15 +121,37 @@ final class BorderOverlay {
         }
     }
 
-    func order(relativeTo windowNumber: CGWindowID) {
+    /// `revealing: false` orders the ring in dormant and HOLDS it
+    /// there for a window that has not arrived yet (#1959): no
+    /// later order shows it — a reorder event, an unhide — only
+    /// `reveal` or a retire ends the hold.
+    func order(
+        relativeTo windowNumber: CGWindowID,
+        revealing: Bool = true
+    ) {
         targetWindow = windowNumber
         isHidden = false
+        if !revealing {
+            isArrivalHeld = true
+            if !isDormant {
+                isDormant = true
+                backend.setDormant(true)
+            }
+        }
         hasOrdered = true
         backend.order(relativeTo: windowNumber)
-        if isDormant {
+        if isDormant, !isArrivalHeld {
             isDormant = false
             backend.setDormant(false)
         }
+    }
+
+    /// Shows a ring held for its window's arrival (#1959).
+    func reveal(reduceMotion: Bool) {
+        isArrivalHeld = false
+        guard isDormant else { return }
+        isDormant = false
+        backend.reveal(reduceMotion: reduceMotion)
     }
 
     /// Parks the ring invisibly for its window's return (#1925);
@@ -131,6 +159,7 @@ final class BorderOverlay {
     /// held frame, or an animated return flashes the ring where
     /// it rested before its window slides in.
     func retire() {
+        isArrivalHeld = false
         isDormant = true
         lastFrame = nil
         backend.setDormant(true)
