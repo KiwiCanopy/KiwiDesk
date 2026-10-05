@@ -3039,11 +3039,12 @@ its own. A
 file from before it fills the leaf from the switch's agreement,
 the #1620/#1621 crossing's shape, so an upgrade never opens the
 switch reading "differ". With glass off, under Reduce
-Transparency or before macOS 26 the plates take the window
-background material, which reads as SOLID: what sets Liquid Glass
-apart cannot be seen in a fade and a 0.28 s move, so any
-see-through blur reads as glass there, and turning glass off must
-look like glass is off. Reduce Motion takes the
+Transparency or before macOS 26 the plates take the blur nearest
+the shortcuts panel's own fallback, so the two surfaces keep one
+look. Mid-slide that blur reads close to glass — what sets Liquid
+Glass apart barely shows in a fade and a 0.28 s move — and a solid
+material that would set glass-off apart was tried on the device
+and refused for not matching the panel. Reduce Motion takes the
 instant switch. There is no style picker and no pace control:
 one transition is less surface to maintain, and a stored `true`
 reads as the plate slide, so no migration is owed.

@@ -791,8 +791,8 @@ KiwiDesk.set_shortcut_panel_liquid_glass(true)
 **Does:** draws the plates a Space switch slides
 ([animations.set_on_space_change](#animationsset_on_space_change))
 in macOS&nbsp;26 Liquid Glass, the shortcuts panel's `.regular`
-glass. Off, or below macOS&nbsp;26, they draw a solid material.
-Read at the next switch.
+glass. Off, or below macOS&nbsp;26, they draw a blurred material,
+as the panel does. Read at the next switch.
 
 Stored as `space_switch.liquid_glass` in the profile. Also stood
 down while macOS's Reduce transparency is on, the stored value

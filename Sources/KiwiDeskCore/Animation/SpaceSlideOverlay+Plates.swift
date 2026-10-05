@@ -46,9 +46,9 @@ extension SpaceSlideOverlay {
     }
 
     /// One plate: Liquid Glass (`.regular`, the shortcuts panel's)
-    /// or, where the gate stands glass down, a material that reads
-    /// as SOLID — a see-through blur reads as glass while it moves,
-    /// so glass off must look solid (#1956) — with the app icon centred
+    /// or, where the gate stands glass down, the behind-window blur
+    /// nearest the shortcuts panel's `.regularMaterial` (owner,
+    /// device, #1956) — with the app icon centred
     /// on the part of the window the page shows, on a pile's front
     /// face only.
     private func plateView(
@@ -80,8 +80,8 @@ extension SpaceSlideOverlay {
             return glass
         }
         let material = NSVisualEffectView(frame: rect)
-        material.material = .windowBackground
-        material.blendingMode = .withinWindow
+        material.material = .popover
+        material.blendingMode = .behindWindow
         material.state = .active
         material.wantsLayer = true
         material.layer?.cornerRadius = radius
