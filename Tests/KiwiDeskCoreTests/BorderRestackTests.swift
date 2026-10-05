@@ -30,7 +30,10 @@ struct BorderRestackTests {
 
     @Test("The first order is AppKit's; later ones re-stack")
     func reorderSkipsAppKit() {
-        let ring = AppKitBorderOverlay(order: .below)
+        let ring = AppKitBorderOverlay(
+            order: .below,
+            movePanel: { _, _ in false }
+        )
         var restacks: [CGWindowID] = []
         ring.restack = { _, _, target in
             restacks.append(target)
@@ -52,7 +55,10 @@ struct BorderRestackTests {
 
     @Test("A missing symbol falls back to AppKit's order")
     func absentSymbolFallsBack() {
-        let ring = AppKitBorderOverlay(order: .below)
+        let ring = AppKitBorderOverlay(
+            order: .below,
+            movePanel: { _, _ in false }
+        )
         var asked = 0
         ring.restack = { _, _, _ in
             asked += 1

@@ -29,7 +29,10 @@ struct BorderStackingTests {
         // the two, never in front of everything.
         let cover = makeTarget(level: level)
         defer { cover.orderOut(nil) }
-        let ring = AppKitBorderOverlay(order: order)
+        let ring = AppKitBorderOverlay(
+            order: order,
+            movePanel: { _, _ in false }
+        )
         render(ring, order: order, glow: 0)
         defer { ring.hide() }
         _ = onScreenStack(waitingFor: [
@@ -60,6 +63,7 @@ struct BorderStackingTests {
     func managerLevelSeamReachesTheRing() throws {
         let manager = BorderManager()
         manager.restack = { _, _, _ in false }
+        manager.movePanel = { _, _ in false }
         manager.setDrawOrder(.front)
         manager.windowLevel = { _ in 5 }
         let overlay = manager.makeOverlay(for: WindowID(7))
@@ -72,7 +76,10 @@ struct BorderStackingTests {
 
     @Test("A front glow is cut out of its window")
     func frontGlowSparesTheWindow() throws {
-        let ring = AppKitBorderOverlay(order: .above)
+        let ring = AppKitBorderOverlay(
+            order: .above,
+            movePanel: { _, _ in false }
+        )
         render(ring, order: .above, glow: 8)
         defer { ring.hide() }
         let masks = ring.glowMaskPaths
