@@ -103,7 +103,9 @@ extension KiwiCore {
             // frame lands in one instant set, and a write the
             // plate slide still holds folds into the held one
             // (#1956).
-            self.retile(animated: false, pass: .reissue)
+            self.tiler.meter.settle {
+                self.retile(animated: false, pass: .reissue)
+            }
             self.reassertSwitchFocus(
                 priorFrontmost: priorFrontmost,
                 context: "space settle"

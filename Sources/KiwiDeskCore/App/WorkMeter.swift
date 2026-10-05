@@ -45,6 +45,16 @@ public final class WorkMeter: @unchecked Sendable {
         public var framesSkipped = 0
         public var parksIssued = 0
         public var parksSkipped = 0
+        /// The share of the four above the Space switch's settle
+        /// pass issued (#1964).
+        public var settleFramesIssued = 0
+        public var settleFramesSkipped = 0
+        public var settleParksIssued = 0
+        public var settleParksSkipped = 0
+        /// Of the settle's issued parks and frames, those an echo
+        /// had already confirmed (#1964): the rest may be a rescue.
+        public var settleParksConfirmed = 0
+        public var settleFramesConfirmed = 0
         public var framesCoalesced = 0
         public var queuedJobs = 0
         public var queueWaitNanos = 0
@@ -58,6 +68,7 @@ public final class WorkMeter: @unchecked Sendable {
 
     private let lock = NSLock()
     private var counts = Counts()
+    private var settling = false
     private var since: UInt64
 
     /// Monotonic nanoseconds; replaceable so a test pins time.
@@ -77,6 +88,35 @@ public final class WorkMeter: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         counts[keyPath: key] += amount
+        if settling, let share = Self.settleShare(of: key) {
+            counts[keyPath: share] += amount
+        }
+    }
+
+    private static func settleShare(
+        of key: WritableKeyPath<Counts, Int>
+    ) -> WritableKeyPath<Counts, Int>? {
+        switch key {
+        case \.framesIssued: \.settleFramesIssued
+        case \.framesSkipped: \.settleFramesSkipped
+        case \.parksIssued: \.settleParksIssued
+        case \.parksSkipped: \.settleParksSkipped
+        default: nil
+        }
+    }
+
+    /// Adds one to `key` only inside the settle's scope.
+    func addInSettle(_ key: WritableKeyPath<Counts, Int>) {
+        lock.lock()
+        defer { lock.unlock() }
+        if settling { counts[keyPath: key] += 1 }
+    }
+
+    /// Counts what `body` issues as the settle's share too.
+    func settle<T>(_ body: () -> T) -> T {
+        lock.withLock { settling = true }
+        defer { lock.withLock { settling = false } }
+        return body()
     }
 
     /// Adds a duration to a total, raising its maximum.
@@ -263,6 +303,12 @@ extension WorkMeter {
             "frames_skipped": count(c.framesSkipped),
             "parks_issued": count(c.parksIssued),
             "parks_skipped": count(c.parksSkipped),
+            "settle_frames_issued": count(c.settleFramesIssued),
+            "settle_frames_skipped": count(c.settleFramesSkipped),
+            "settle_parks_issued": count(c.settleParksIssued),
+            "settle_parks_skipped": count(c.settleParksSkipped),
+            "settle_parks_confirmed": count(c.settleParksConfirmed),
+            "settle_frames_confirmed": count(c.settleFramesConfirmed),
             "frames_coalesced": count(c.framesCoalesced),
             "queued_jobs": count(c.queuedJobs),
             "queue_wait_us_mean": perUs(c.queueWaitNanos, c.queuedJobs),
