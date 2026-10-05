@@ -34,9 +34,13 @@ paths:
   - "Sources/KiwiDeskCore/Tiling/DragOverlay.swift"
   - "Sources/KiwiDeskCore/Tiling/DragMarkerView.swift"
   - "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Glass.swift"
-  # ...and the two sites that decide their glass through the gate.
+  # The Space switch's plates (#1956): untinted `.regular` glass by
+  # the issue's ruling, the shortcuts panel's.
+  - "Sources/KiwiDeskCore/Animation/SpaceSlideOverlay+Plates.swift"
+  # ...and the sites that decide their glass through the gate.
   - "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
+  - "Sources/KiwiDeskCore/Commands/KiwiCore+SpaceSlide.swift"
 ---
 
 # Bars (App Bar & Space Bar overlays)

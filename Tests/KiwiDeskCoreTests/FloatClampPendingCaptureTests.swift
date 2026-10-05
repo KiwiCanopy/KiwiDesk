@@ -113,9 +113,8 @@ struct FloatClampPendingCaptureTests {
         #expect(core.tiler.stashOriginal(Self.window) == commanded)
     }
 
-    /// A switch's restore slides the float (#1909); the sweep
-    /// retargets that slide clear of the bar rather than
-    /// snapping it.
+    /// A float already sliding is retargeted clear of the bar
+    /// rather than snapped.
     @Test(
         "A covered capture mid-slide is retargeted, not snapped",
         .enabled(if: NSScreen.main != nil)
@@ -144,9 +143,10 @@ struct FloatClampPendingCaptureTests {
             height: 300
         )
         core.tiler.seedStash(Self.window, frame: capture)
-        core.tiler.restoreStashed(
-            state: core.state,
-            frames: [:],
+        core.tiler.applyFrame(
+            Self.window,
+            from: clear,
+            to: capture,
             animated: true
         )
         #expect(

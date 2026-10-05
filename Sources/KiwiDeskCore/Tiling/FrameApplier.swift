@@ -15,7 +15,15 @@ final class FrameApplier {
     private let pending = PendingFrames()
     private let recent = RecentApplies()
     private let instantTargets = InstantTargets()
-    private let enhancedUI = EnhancedUIHolds()
+    let enhancedUI = EnhancedUIHolds()
+    /// Writes the plate slide holds until it lands (#1956).
+    let held = HeldWrites()
+
+    /// Moves one of KiwiDesk's own windows through AppKit, in
+    /// this turn; false where no own window answers, and the AX
+    /// write goes ahead. A test records it.
+    var ownWindowMove: @MainActor (WindowID, CGRect, Bool) -> Bool =
+        FrameApplier.moveOwnWindow
 
     /// The AX writes the queues perform; a test counts them.
     var writer = FrameWriter.live
@@ -102,6 +110,7 @@ final class FrameApplier {
         // precede the stamp (#1254).
         recent.record(id, now: clock())
         issued(id, frame)
+        if stageHeld(id, frame, setSize: setSize) { return }
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
@@ -159,10 +168,17 @@ final class FrameApplier {
         instantTargets.record(id, frame: frame, now: clock())
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
+        if stageHeld(id, frame, setSize: setSize) { return }
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
         else { return }
+        // Our own window moves now, inside the caller's turn: the
+        // main queue would run it only after that turn (#1956).
+        if pid == getpid(), ownWindowMove(id, frame, setSize) {
+            recentStamp(id)
+            return
+        }
         nonisolated(unsafe) let target = element
         let recent = recent
         let clock = clock
@@ -187,7 +203,14 @@ final class FrameApplier {
         }
     }
 
-    private func queue(for pid: pid_t) -> DispatchQueue {
+    /// Stamps a set's return from a queue block (#1254).
+    var recentStamp: @Sendable (WindowID) -> Void {
+        let recent = recent
+        let clock = clock
+        return { recent.record($0, now: clock()) }
+    }
+
+    func queue(for pid: pid_t) -> DispatchQueue {
         // Own process runs on main queue to prevent AppKit thread traps
         // (#678 Phase 5).
         if pid == getpid() {
@@ -231,105 +254,10 @@ final class FrameApplier {
         enhancedUI.retire(pid, leftOn: leftOn)
     }
 
-    private static func pid(of element: AXUIElement) -> pid_t? {
+    static func pid(of element: AXUIElement) -> pid_t? {
         var pid: pid_t = 0
         guard AXUIElementGetPid(element, &pid) == .success
         else { return nil }
         return pid
-    }
-}
-
-/// Instant-set target frames awaiting AX echo (#881).
-private final class InstantTargets: @unchecked Sendable {
-    private typealias Entry = (frame: CGRect, at: TimeInterval)
-    private let lock = NSLock()
-    private var entries: [WindowID: Entry] = [:]
-
-    func record(_ id: WindowID, frame: CGRect, now: TimeInterval) {
-        lock.lock()
-        defer { lock.unlock() }
-        entries[id] = (frame, now)
-    }
-
-    func frame(
-        _ id: WindowID,
-        within interval: TimeInterval,
-        now: TimeInterval
-    ) -> CGRect? {
-        lock.lock()
-        defer { lock.unlock() }
-        guard let entry = entries[id] else { return nil }
-        if now - entry.at > interval {
-            entries[id] = nil
-            return nil
-        }
-        return entry.frame
-    }
-
-    func clear(_ id: WindowID) {
-        lock.lock()
-        defer { lock.unlock() }
-        entries[id] = nil
-    }
-}
-
-/// Recent frame application timestamps for echo suppression.
-private final class RecentApplies: @unchecked Sendable {
-    private let lock = NSLock()
-    private var stamps: [WindowID: TimeInterval] = [:]
-
-    func record(_ id: WindowID, now: TimeInterval) {
-        lock.lock()
-        defer { lock.unlock() }
-        stamps[id] = now
-    }
-
-    func isRecent(
-        _ id: WindowID,
-        within interval: TimeInterval,
-        now: TimeInterval
-    ) -> Bool {
-        lock.lock()
-        defer { lock.unlock() }
-        guard let stamp = stamps[id] else { return false }
-        if now - stamp > interval {
-            stamps[id] = nil
-            return false
-        }
-        return true
-    }
-}
-
-/// Pending frames per window shared across threads.
-private final class PendingFrames: @unchecked Sendable {
-    struct Entry {
-        let element: AXUIElement
-        var frame: CGRect
-        var setSize: Bool
-    }
-
-    private let lock = NSLock()
-    private var entries: [WindowID: Entry] = [:]
-
-    /// Stores the newest frame; returns true when an apply is
-    /// already scheduled. A pending size change survives being
-    /// overwritten by a position-only frame.
-    func put(_ id: WindowID, _ entry: Entry) -> Bool {
-        lock.lock()
-        defer { lock.unlock() }
-        if let existing = entries.removeValue(forKey: id) {
-            var merged = entry
-            merged.setSize = entry.setSize || existing.setSize
-            entries[id] = merged
-            return true
-        }
-        entries[id] = entry
-        return false
-    }
-
-    func take(_ id: WindowID) -> Entry? {
-        lock.lock()
-        defer { lock.unlock() }
-        return entries.removeValue(forKey: id)
     }
 }

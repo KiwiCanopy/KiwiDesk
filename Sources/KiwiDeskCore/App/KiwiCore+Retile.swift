@@ -30,7 +30,6 @@ extension KiwiCore {
         animated: Bool? = nil,
         pass: RetilePass = .event,
         newlyCreatedWindow: WindowID? = nil,
-        stashAnimated: Bool = false,
         sizing: BatchSizing = .mayInstantSize
     ) {
         // The whole main-actor cost of a pass, bars and rings
@@ -41,6 +40,8 @@ extension KiwiCore {
         // every membership change retiles, so this is its one
         // choke point too, ahead of anything that lays it out.
         // A temporary one the same way, once armed (#1790).
+        // A plate slide another activation took past (#1956).
+        endSpaceSlideIfOvertaken()
         let heldRetired = retireEmptiedHeldSpaces()
         if retireEmptiedTemporarySpaces() || heldRetired {
             resolveSpaceDisplays()
@@ -79,7 +80,6 @@ extension KiwiCore {
                 ?? tiler.settings.animations.onRelayout,
             pass: pass,
             newlyCreatedWindow: newlyCreatedWindow,
-            stashAnimated: stashAnimated,
             sizing: sizing
         )
         // A retile-channel observation confirmed a bound
@@ -101,7 +101,6 @@ extension KiwiCore {
                 animated: animated
                     ?? tiler.settings.animations.onRelayout,
                 pass: .event,
-                stashAnimated: stashAnimated,
                 sizing: sizing
             )
         }

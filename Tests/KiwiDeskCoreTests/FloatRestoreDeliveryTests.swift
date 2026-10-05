@@ -5,14 +5,13 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A coordinated Space switch slides a parked float back in from
-/// its corner, as it slides the tiled windows (#1909, #207), and
-/// a later instant pass leaves that slide to land. A slide needs
-/// a display link, so a host with no screen skips. Screens pinned
-/// (#531).
-@Suite("Float restore slides on a switch (#1909)", .serialized)
+/// A parked float comes back in one instant set on every pass, a
+/// Space switch's included: the plate slide draws the motion, so
+/// the window itself never slides (#1956, retiring #1909's slide).
+/// Screens pinned (#531).
+@Suite("Float restore delivers at once (#1956)", .serialized)
 @MainActor
-struct FloatRestoreSlideTests {
+struct FloatRestoreDeliveryTests {
     private let id = WindowID(1)
     private let screen = CGRect(x: 0, y: 0, width: 1920, height: 1080)
     private let corner = CGRect(x: 1919, y: 1032, width: 300, height: 200)
@@ -45,33 +44,7 @@ struct FloatRestoreSlideTests {
         return (engine, state)
     }
 
-    @Test(
-        "The switch pass slides the float in",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func switchSlides() {
-        let (engine, state) = makeEngine()
-        engine.restoreStashed(state: state, frames: [:], animated: true)
-        #expect(engine.animation.targetFrame(window: id) == original)
-        #expect(engine.recentInstantTarget(id) == nil)
-        engine.animation.cancelAll(snapToTargets: false)
-    }
-
-    @Test(
-        "An instant pass leaves the slide to land",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func settleKeepsTheSlide() {
-        let (engine, state) = makeEngine()
-        engine.restoreStashed(state: state, frames: [:], animated: true)
-        // The settle's pass, 300 ms on, mid-slide.
-        engine.restoreStashed(state: state, frames: [:])
-        #expect(engine.animation.targetFrame(window: id) == original)
-        #expect(engine.recentInstantTarget(id) == nil)
-        engine.animation.cancelAll(snapToTargets: false)
-    }
-
-    @Test("Every other pass delivers the float at once")
+    @Test("A pass delivers the float at once")
     func otherPassesSnap() {
         let (engine, state) = makeEngine()
         engine.restoreStashed(state: state, frames: [:])
@@ -80,10 +53,10 @@ struct FloatRestoreSlideTests {
     }
 
     @Test(
-        "The switch retile hands its animation to the restore",
+        "A switch delivers the float at once",
         .enabled(if: NSScreen.main != nil)
     )
-    func switchRetileWiresTheSlide() {
+    func switchDeliversAtOnce() {
         let core = makeTestCore()
         core.tiler.applier.clock = { 0 }
         core.tiler.visibleBounds = { [screen] _ in screen }
@@ -92,7 +65,7 @@ struct FloatRestoreSlideTests {
         core.state.apply(.windowCreated(float))
         core.tiler.stashedFrames[id] = original
         core.spaceSwitchRetile()
-        #expect(core.tiler.animation.targetFrame(window: id) == original)
-        core.tiler.animation.cancelAll(snapToTargets: false)
+        #expect(core.tiler.animation.targetFrame(window: id) == nil)
+        #expect(core.tiler.recentInstantTarget(id) == original)
     }
 }

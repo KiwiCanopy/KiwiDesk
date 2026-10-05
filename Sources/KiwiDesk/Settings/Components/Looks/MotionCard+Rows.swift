@@ -32,13 +32,12 @@ extension MotionCard {
             .searchAnchored(
                 SettingsCatalog.colors.motionMore.children.animateSpaceSwitches
             )
-            // Coordinated out+in transition caption (#207).
+            // The plate slide (#1956).
             Text(
                 L(
                     "behavior.animations.space_change.caption",
-                    "Windows slide out of the Space you're "
-                        + "leaving and into the one you're "
-                        + "switching to."
+                    "Plates cover your windows and slide to the "
+                        + "Space you're switching to."
                 )
             )
             .font(.caption)

@@ -80,5 +80,10 @@ extension TilingSettings {
             shortcutPanelLiquidGlass,
             forKey: .liquidGlass
         )
+        var spaceSwitch = container.nestedContainer(
+            keyedBy: SpaceSwitchKeys.self,
+            forKey: .spaceSwitch
+        )
+        try spaceSwitch.encode(spaceSwitchLiquidGlass, forKey: .liquidGlass)
     }
 }

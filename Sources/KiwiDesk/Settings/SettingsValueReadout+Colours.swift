@@ -32,6 +32,12 @@ extension SettingsValueReadout {
                 old.settings.stickyStyle.liquidGlass,
                 new.settings.stickyStyle.liquidGlass
             )
+        case .spaceSwitchLiquidGlass:
+            return coloursOnOffRow(
+                census,
+                old.settings.spaceSwitchLiquidGlass,
+                new.settings.spaceSwitchLiquidGlass
+            )
         case .borderSheen:
             return coloursRow(
                 census,

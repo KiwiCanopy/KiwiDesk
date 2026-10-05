@@ -2977,6 +2977,89 @@ the animations master like it. The #881 sentence above,
 is still the swap, and the card is what the eye follows across
 it.
 
+:::unreleased
+**A Space switch plays a drawn plate slide; the windows move
+once, underneath (#1956).** With `animations.on_space_change`
+on, an explicit switch — a follow and a launch follow included,
+since each changes which Space you are looking at — fades a plate in over each window the
+screen shows, parks those windows AT the press, moves the plates
+as one rigid strip one screen page in the Space Bar's reading
+direction on a critically damped spring — no overshoot, so the
+strip never swings past the page it lands on — lands the
+incoming windows under their plates and fades the plates out.
+`SpaceSlidePlan` holds the times. It retires the corner
+slide (#207), which animated the windows themselves: every
+frame of it was an AX write to every window of two Spaces, and
+a slow app's write sticks for half a second inside its own
+commit, so the corner slide paid in main-thread stalls exactly
+where the switch was meant to feel smooth (measured on the
+owner's desk, the issue's tables). The plate slide sends each
+window one write, as the instant switch does, and draws the
+motion in the render server.
+
+*Why plates, and not a blur or a picture of the windows.* A
+blur dissolve was built on the device and dropped: a blur reads
+as something in front of your work, and a jump still showed as
+blurred shapes. A picture of the real windows needs Screen
+Recording, which the owner ruled out for an animation (#1391's
+measurement). A plate per window, carrying its app's icon on
+the part the screen shows, says what moved and where without a
+pixel of the window. The desktop picture was tried as a ground
+and dropped: reading the file triggers a folder-access prompt.
+
+*The timing follows the apps, not the clock.* An app performs a
+park 60–100 ms after the write leaves, so the strip waits
+120 ms after the press; the incoming writes are HELD per window
+until the strip has settled and leave from each app's own queue
+at that deadline, so a stalled main turn delays no landing; the
+plates lift once the landed windows have had their own time to
+show. A press while the strip still moves carries its position
+and speed into the next page rather than restarting, and a
+window whose write was still held never showed, so the strip
+need not wait for it to park.
+
+*Piles show one face.* Every member of a pile keeps a plate at
+its frame; only the front face carries an icon — the focus if
+it is in the pile, else the WindowServer's front-most member,
+read once at the press, since parking moves frames and never
+restacks. A plate wholly behind another is dropped, so a
+Monocle Space shows one plate, and a scrolling row only its
+on-screen columns. One builder draws both directions. A sticky
+window stays on screen through the switch, so it draws no plate
+and the strip is cut around it, and a follow's moved window,
+already on screen in the Space it goes to, travels with the user
+uncovered — the one thing that makes a follow look different.
+
+*What it wears.* The shortcuts panel's glass — `.regular`
+Liquid Glass, each pile one container so overlapping plates read
+as glass on glass — on a leaf of their own,
+`space_switch.liquid_glass`, which the one Liquid Glass switch
+writes beside the others, since every surface it covers keeps
+its own. A
+file from before it fills the leaf from the switch's agreement,
+the #1620/#1621 crossing's shape, so an upgrade never opens the
+switch reading "differ". With glass off, under Reduce
+Transparency or before macOS 26 the plates take the blur nearest
+the shortcuts panel's own fallback, so the two surfaces keep one
+look. Mid-slide that blur reads close to glass — what sets Liquid
+Glass apart barely shows in a fade and a 0.28 s move — and a solid
+material that would set glass-off apart was tried on the device
+and refused for not matching the panel. Reduce Motion takes the
+instant switch. There is no style picker and no pace control:
+one transition is less surface to maintain, and a stored `true`
+reads as the plate slide, so no migration is owed.
+
+*One panel per screen, ordered in once.* Moving or re-ordering
+a panel per switch queues behind the compositor exactly when
+the switch is busiest (#1960), so each screen's panel stays
+ordered in, dormant and empty between plays; everything that
+moves is a layer. KiwiDesk's own windows move through AppKit
+inside the switch's own turn, since the main queue would run
+their park only after it. A slow app's window can still land
+after the plates have faded; whether the focus ring waits for
+it is tracked in #1959.
+:::
+
 **A resize span is the layout region, not the display
 (#537).** Anything that divides a delta by a span — or
 compares a slot against a midpoint — reads
@@ -12910,10 +12993,14 @@ the shelf's Fill is then the only one there is.
 draws it.** (#1307, 2026-09-07; #1517.) Three surfaces — the two
 bars and the ⌃⌥K shortcuts panel (#1295) — under two
 independent per-bar settings and a constant is the shape one row
-on Colours & Animations replaces: it writes every glass leaf —
+on Looks & Animations replaces: it writes every glass leaf —
 the shelf's, which both bars read, the panel's, and (below) the
 drag visuals' and the sticky mark's — stored side by side in the
 profile.
+
+:::unreleased
+The Space switch plates' leaf joins them (#1956).
+:::
 
 **Profile-scoped, and the alternative was not merely riskier but
 unbuildable.** Moving the value app-wide into `gui.json` needed a

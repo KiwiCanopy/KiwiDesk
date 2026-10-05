@@ -125,12 +125,12 @@ struct MoveToSpaceTests {
         // Slot geometry needs a real screen (headless CI skips).
         guard NSScreen.main != nil else { return }
         let core = makeCore()
-        // Drive the observable animated apply path and let the
-        // settle re-run use it too.
+        // Every frame either pass issues, instant or animated,
+        // reaches the applier's sink (#930).
         core.tiler.settings.animations.onSpaceChange = true
         core.tiler.animation.isEnabled = false
         var applies: [WindowID: Int] = [:]
-        core.tiler.animation.apply = { id, _, _ in
+        core.tiler.applier.issued = { id, _ in
             applies[id, default: 0] += 1
         }
         addWindow(core, 1)

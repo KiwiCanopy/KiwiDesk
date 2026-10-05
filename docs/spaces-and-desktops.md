@@ -239,8 +239,8 @@ follows it either way:
 ## Parking is not a Desktop move
 
 When a Space is not being shown on any screen, KiwiDesk **parks**
-its windows: it slides them into a bottom corner of their own
-screen, leaving a hair of each at the edge, and slides them back
+its windows: it moves them into a bottom corner of their own
+screen, leaving a hair of each at the edge, and moves them back
 when their Space is shown again.
 
 **A parked window has not gone anywhere.** It is still on the

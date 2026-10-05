@@ -195,6 +195,8 @@ extension KiwiCore {
     /// windows stay wherever the WM left them.
     func gatherWindows() {
         guard eventLoop.isRunning else { return }
+        // A slide's held landing must not undo the gather (#1956).
+        tiler.applier.held.dropAll()
         let primaryH = GeometryUtils.primaryHeight
         // Snapshot once: frames and the raise circle below MUST
         // partition identically (shared `partition`), so both

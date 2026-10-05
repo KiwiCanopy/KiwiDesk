@@ -52,7 +52,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// alone.
     /// 20 = a layer holds one chord per navigation action (#1797),
     /// which reaches a bundle's `config` and its `[Profile]` alike.
-    public static let currentFormat = 20
+    /// 21 = the Space switch plates' Liquid Glass leaf filled
+    /// (#1956), on `[Profile]` alone.
+    public static let currentFormat = 21
 
     public let format: Int
 

@@ -135,38 +135,6 @@ struct WorkMeterTests {
         #expect(c.parksSkipped == 1)
     }
 
-    @Test("An exit slide counts a park; a park onto it is skipped")
-    func animatedParkCounts() {
-        // The slide needs a display link (headless CI skips).
-        guard let screen = NSScreen.main, screen.kiwiDisplay != nil
-        else { return }
-        let engine = TilingEngine()
-        let m = meter()
-        engine.meter = m
-        let bounds = CGRect(x: 0, y: 25, width: 1920, height: 1055)
-        let window = ManagedWindow(
-            id: WindowID(1),
-            pid: 100,
-            appName: "App",
-            frame: CGRect(x: 100, y: 100, width: 800, height: 600)
-        )
-        for animated in [true, false] {
-            engine.stash(
-                window,
-                in: bounds,
-                corner: .bottomRight,
-                force: true,
-                animated: animated,
-                capturesOriginal: false
-            )
-        }
-        let c = m.snapshot(reset: false).counts
-        engine.animation.cancelAll(snapToTargets: false)
-        // The slide issued; the instant park found it in flight.
-        #expect(c.parksIssued == 1)
-        #expect(c.parksSkipped == 1)
-    }
-
     @Test("A pass counts the frames it issues and the ones it skips")
     func framesCount() throws {
         guard NSScreen.main != nil else { return }

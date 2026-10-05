@@ -7,6 +7,7 @@ enum ColoursKey: String, CaseIterable, Hashable {
         "settings.shortcutPanelLiquidGlass"
     case dragLiquidGlass = "settings.dragLiquidGlass"
     case stickyLiquidGlass = "settings.stickyStyle.liquidGlass"
+    case spaceSwitchLiquidGlass = "settings.spaceSwitchLiquidGlass"
     case borderSheen = "settings.borderStyle.sheen"
     case animationsMaster = "settings.animations (master)"
     case animationsOnSpaceChange = "settings.animations.onSpaceChange"
@@ -53,7 +54,7 @@ extension ColoursKey {
                 gate: .runtime(.liquidGlassUnavailable)
             )
         case .shortcutPanelLiquidGlass, .dragLiquidGlass,
-            .stickyLiquidGlass:
+            .stickyLiquidGlass, .spaceSwitchLiquidGlass:
             // Written by the master row, never its own row —
             // and reachable from Lua like the shelf's leaf.
             return .luaOnly
@@ -142,7 +143,7 @@ extension ColoursKey {
     var text: SettingRowText {
         switch self {
         case .shortcutPanelLiquidGlass, .dragLiquidGlass,
-            .stickyLiquidGlass:
+            .stickyLiquidGlass, .spaceSwitchLiquidGlass:
             return .none
         case .borderSheen:
             return .text("colors.sheen", caption: "colors.sheen.caption")

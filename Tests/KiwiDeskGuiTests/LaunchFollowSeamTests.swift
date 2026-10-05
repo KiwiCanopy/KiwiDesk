@@ -46,7 +46,7 @@ struct LaunchFollowSeamTests {
         // retile, and the arrival's #45 start-at-target carried
         // into the switch's own pass.
         (
-            "newlyCreatedWindow: newcomer,",
+            "newlyCreatedWindow: newcomer",
             "KiwiCore+SpaceTransition.swift", 1
         ),
         ("launchFollow.claim(", followFile, 1),

@@ -21,9 +21,10 @@ extension KiwiCore {
         // apart from "the user moved on since".
         let priorFrontmost = frontmostPIDProvider?()
         tiler.meter.noteSpaceSwitch()  // #1508
+        let slide = spaceSlideIntent(to: space)
         state.workspaces.activate(space)
         logSpaceContents(space)
-        spaceSwitchRetile()
+        spaceSwitchRetile(slide: slide)
         // Floats and sticky windows come back above the
         // tiled plane, then real (AX) focus lands on the
         // space's last focused window — otherwise keystrokes

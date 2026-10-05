@@ -196,8 +196,8 @@ extension KiwiCore {
                 if pending != nil {
                     tiler.seedStash(id, frame: clamped)
                 }
-                // A slide in flight (a switch's restore, #1909) is
-                // retargeted rather than snapped.
+                // A slide in flight is retargeted rather than
+                // snapped.
                 tiler.applyFrame(
                     id,
                     from: window.frame,

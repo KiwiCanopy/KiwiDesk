@@ -8,15 +8,36 @@ typealias BarFrameMove = @MainActor (NSView, CGRect, Bool) -> Void
 /// macOS 26 Liquid Glass plate wrapper for bar backgrounds
 /// (`NSGlassEffectView`, #390).
 enum GlassPlate {
-    /// Creates fresh NSGlassEffectView instance on macOS 26+.
+    /// Creates fresh NSGlassEffectView instance on macOS 26+:
+    /// `.clear`, or `.regular` — the shortcuts panel's, which the
+    /// Space-switch plates wear (#1956).
     @MainActor
-    static func make() -> NSView? {
+    static func make(regular: Bool = false) -> NSView? {
         if #available(macOS 26, *) {
             let view = NSGlassEffectView()
-            view.style = .clear
+            view.style = regular ? .regular : .clear
             return view
         }
         return nil
+    }
+
+    /// A glass container on macOS 26+: the glass views inside its
+    /// content render together, glass on glass (#1956).
+    @MainActor
+    static func makeContainer() -> NSView? {
+        if #available(macOS 26, *) {
+            return NSGlassEffectContainerView()
+        }
+        return nil
+    }
+
+    /// Embeds `content` into a container from `makeContainer`.
+    @MainActor
+    static func setContainerContent(_ view: NSView, _ content: NSView) {
+        guard #available(macOS 26, *),
+            let container = view as? NSGlassEffectContainerView
+        else { return }
+        container.contentView = content
     }
 
     /// Configures plate frame and corner radius. The plate takes no

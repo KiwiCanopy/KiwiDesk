@@ -1,69 +1,47 @@
-import AppKit
 import Foundation
 
-/// The coordinated virtual-space-switch transition (#207).
+/// The retile behind a Space switch (#207, #1956).
 ///
-/// With `animations.on_space_change` on, a switch used to
-/// animate only the INCOMING windows (in from the stash corner)
-/// while the outgoing ones vanished instantly — an asymmetric
-/// transition that read as unfinished against the symmetric
-/// native Spaces swipe. Coordinated, both directions animate
-/// CONCURRENTLY in one retile pass: the outgoing windows slide
-/// out to their stash corner (`stashInactive(animated: true)`
-/// makes today's instant park visible) while the incoming ones
-/// slide in from it — the native swipe's own shape (the old
-/// desktop slides off as the new one slides in), one animation
-/// length total. A sequenced out-then-in variant was tried and
-/// rejected on device (owner, 2026-07-24): it doubled the
-/// transition time, and its quiet all-parked moment put a
-/// spotlight on the corner re-issue's OS clamp correction.
-///
-/// State (active space, focus, bars, events) commits up front
-/// exactly as it always did; only the outgoing frame
-/// application gains motion.
+/// State (active space, focus, bars, events) commits up front; the
+/// frames then land in one instant pass. An explicit switch with
+/// `animations.on_space_change` on plays the plate slide around
+/// that pass (`prepareSpaceSlide`, `runSpaceSlide`, #1956): the
+/// motion is drawn, and the windows still move once each.
 ///
 /// Native macOS Space switches are untouched: AX cannot address
 /// an inactive desktop's windows, so that path stays instant in
 /// both directions (accepted limitation, #25/#26).
 extension KiwiCore {
-    /// The retile behind an explicit virtual-space switch —
-    /// the authority for the switch's animation policy.
-    /// Instant (both directions) when `on_space_change` is off;
-    /// the coordinated concurrent out+in when it is on. Always a
-    /// `.reissue` pass (#1488): a switch must push past the
-    /// "already there" tolerance, whose state frames lag behind
-    /// AX echoes during rapid switching, and probes nothing —
-    /// it is not an apply.
+    /// Always a `.reissue` pass (#1488): a switch must push past
+    /// the "already there" tolerance, whose state frames lag
+    /// behind AX echoes during rapid switching, and probes
+    /// nothing — it is not an apply.
     ///
-    /// Three switch-shaped retiles deliberately do NOT route
-    /// here — do not "unify" them onto this policy:
-    /// - The 300 ms settle re-assert (`scheduleSpaceSettle`)
-    ///   keeps an instant park: its job is re-issuing frames a
-    ///   slow-AX app dropped, and an animated stash would start
-    ///   a fresh visible slide 300 ms after the switch (plus
-    ///   corner-to-corner springs and `beginAnimating` EUI
-    ///   churn for every already-parked window). Mid-transition
-    ///   it relies on `stash()`'s in-flight skip to leave the
-    ///   exit slide running.
-    /// - The Space Bar spring switch stays instant: mid-drag,
-    ///   an animation would fight the pointer and the
-    ///   drag-exempt window.
-    /// - `delete_space` of the shown space retiles under the
-    ///   relayout policy: a structural edit, not navigation.
+    /// `slide` is the screen an EXPLICIT switch changes, read
+    /// before it activated (`spaceSlideIntent`); only navigation
+    /// passes one — boot, wake, a restore, a display follow and a
+    /// Space moved between screens retile instantly. The 300 ms
+    /// settle re-assert and the Space Bar spring switch do not
+    /// route here at all.
     /// `newcomer` is a window arriving with this switch (#1599's
     /// launch follow), given the arrival's #45 start-at-target.
-    func spaceSwitchRetile(newcomer: WindowID? = nil) {
+    func spaceSwitchRetile(
+        newcomer: WindowID? = nil,
+        slide: SpaceSlideIntent? = nil
+    ) {
         // A Monocle flip owed on the Space being left is DROPPED
         // with its play (#1391): the switch's own raise picks the
         // focus, and the plate must not linger over the arrival.
         dropMonocleFlip()
-        let animated =
-            tiler.settings.animations.onSpaceChange
+        let run = slide.flatMap(prepareSpaceSlide)
+        // A navigation that stands the slide down cuts a running
+        // one; anything else is the head-of-retile check's.
+        if slide != nil, run == nil { endSpaceSlide() }
         retile(
-            animated: animated,
+            animated: false,
             pass: .reissue,
-            newlyCreatedWindow: newcomer,
-            stashAnimated: animated
+            newlyCreatedWindow: newcomer
         )
+        if let run { runSpaceSlide(run) }
     }
 }

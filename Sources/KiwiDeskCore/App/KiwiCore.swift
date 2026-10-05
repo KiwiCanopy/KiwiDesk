@@ -23,13 +23,13 @@ public final class KiwiCore {
     let dragCrossing = DragCrossingCoordinator()
     /// Glyph-vs-image icon decisions: bars, shortcuts panel (#294).
     public let appFont = AppFontResolver()
-    /// Focus-window border overlays (#278) and their sibling,
-    /// the on-window sticky marks (#414) — both driven from
-    /// `retile()` (`updateBorders()`, `updateStickyMarks()`).
+    /// Focus-window border overlays (#278) and their sibling, the
+    /// on-window sticky marks (#414), both driven from `retile()`.
     public let borders = BorderManager()
     public let stickyMarks = StickyMarkManager()
-    /// The Monocle focus flip (#1391), `focusWithMonocleFlip`'s.
+    /// Drawn transitions: Monocle flip (#1391), plate slide (#1956).
     let monocleFlip = MonocleFlipOverlay()
+    let spaceSlide = SpaceSlideOverlay()
     /// The focus a playing flip owes at its landing (#1391) —
     /// landed, dropped and carried in `KiwiCore+MonocleFlip`.
     var pendingMonocleFocus: (from: WindowID, to: WindowID, warp: Bool)?

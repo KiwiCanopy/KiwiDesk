@@ -1,0 +1,124 @@
+import AppKit
+import QuartzCore
+import Testing
+
+@testable import KiwiDeskCore
+
+/// A burst of presses on the plate slide (#1956), on the overlay
+/// alone with its clock pinned: a press while the strip moves
+/// carries its speed on, a press after the windows landed waits
+/// for their park again, and a press on another screen hands back
+/// the holds of the play it drops. The panel is never ordered in.
+@Suite("Plate slide bursts (#1956)", .serialized)
+@MainActor
+struct SpaceSlideBurstTests {
+    private final class Clock {
+        var now: CFTimeInterval = 100
+    }
+
+    private func makeOverlay(_ clock: Clock) -> SpaceSlideOverlay {
+        let overlay = SpaceSlideOverlay()
+        overlay.present = { _ in }
+        overlay.reduceMotion = { false }
+        overlay.clock = { clock.now }
+        return overlay
+    }
+
+    private func press(
+        _ overlay: SpaceSlideOverlay,
+        display: DisplayID = DisplayID(1)
+    ) -> SpaceSlideOverlay.Pressed {
+        overlay.press(
+            SpaceSlideOverlay.Press(
+                display: display,
+                screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
+                axis: .horizontal,
+                direction: 1,
+                outgoing: [],
+                holes: [],
+                space: SpaceID("2"),
+                glass: false
+            )
+        )
+    }
+
+    @Test("a press mid-flight goes on at the strip's speed")
+    func burstGoesOn() throws {
+        let clock = Clock()
+        let overlay = makeOverlay(clock)
+        defer { overlay.end() }
+        let first = press(overlay)
+        overlay.run(incoming: [], holes: [])
+        let start = try #require(overlay.play?.motion.begin)
+        #expect(start == 100 + SpaceSlidePlan.stripDelay)
+        clock.now = start + 0.1
+        let second = press(overlay)
+        let motion = try #require(overlay.play?.motion)
+        #expect(motion.begin == clock.now)
+        #expect(motion.velocity > 0)
+        #expect(motion.to == 2000)
+        #expect(second.landAt > first.landAt)
+    }
+
+    @Test("a press after the landing waits for the park again")
+    func landedPressWaits() throws {
+        let clock = Clock()
+        let overlay = makeOverlay(clock)
+        defer { overlay.end() }
+        let first = press(overlay)
+        overlay.run(incoming: [], holes: [])
+        // Landed, but the spring still creeps toward rest.
+        clock.now = first.landAt + 0.01
+        _ = press(overlay)
+        let motion = try #require(overlay.play?.motion)
+        #expect(motion.begin == clock.now + SpaceSlidePlan.stripDelay)
+        #expect(motion.velocity == 0)
+    }
+
+    /// Mid-flight the strip carries its speed into the next page,
+    /// which lands at a different time than a strip from rest.
+    @Test("the landing is solved from the motion played")
+    func landingFollowsTheMotion() throws {
+        let clock = Clock()
+        let overlay = makeOverlay(clock)
+        defer { overlay.end() }
+        _ = press(overlay)
+        overlay.run(incoming: [], holes: [])
+        clock.now = try #require(overlay.play?.motion.begin) + 0.1
+        let second = press(overlay)
+        let motion = try #require(overlay.play?.motion)
+        #expect(motion.velocity != 0)
+        #expect(second.landAt == motion.begin + motion.settleTime())
+        let rest = SpaceSlideStrip(
+            from: motion.from,
+            to: motion.to,
+            velocity: 0,
+            begin: motion.begin
+        )
+        #expect(motion.settleTime() != rest.settleTime())
+    }
+
+    @Test("a press on another screen says it dropped the play")
+    func otherScreenDrops() {
+        let clock = Clock()
+        let overlay = makeOverlay(clock)
+        defer { overlay.end() }
+        #expect(!press(overlay).dropped)
+        #expect(!press(overlay).dropped)
+        #expect(press(overlay, display: DisplayID(2)).dropped)
+    }
+
+    @Test("a long burst keeps a bounded strip")
+    func pagesStayBounded() throws {
+        let clock = Clock()
+        let overlay = makeOverlay(clock)
+        defer { overlay.end() }
+        for step in 0..<8 {
+            clock.now = 100 + Double(step) * 0.05
+            _ = press(overlay)
+            overlay.run(incoming: [], holes: [])
+        }
+        let pages = try #require(overlay.play?.pages.count)
+        #expect(pages <= 5)
+    }
+}

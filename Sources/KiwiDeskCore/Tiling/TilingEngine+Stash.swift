@@ -120,20 +120,13 @@ extension TilingEngine {
     /// back through `restoreStashed`, from the frame captured
     /// here on their first stash.
     ///
-    /// `animated: true` is the exit half of a coordinated
-    /// space switch (#207): the park becomes a visible slide
-    /// to the corner, running concurrently with the entrance
-    /// in the same retile pass. Every other caller keeps the
-    /// instant default.
-    ///
     /// `forcesDepartures` forces the parks `StashDepartures` owes
     /// (#1508); every other window takes the "already parked"
     /// check.
     func stashInactive(
         state: StateCoordinator,
         fallback: NSScreen,
-        forcesDepartures: Bool,
-        animated: Bool = false
+        forcesDepartures: Bool
     ) {
         // Every space shown on some display stays in place; only
         // spaces visible on NO display are parked. On one monitor
@@ -192,7 +185,6 @@ extension TilingEngine {
                     in: bounds,
                     corner: corner,
                     force: forced.contains(space.id),
-                    animated: animated,
                     // A floating-MODE space's members ride the
                     // float capture/restore cycle whatever their
                     // own flag (#500): its layout places nothing
@@ -229,7 +221,6 @@ extension TilingEngine {
         in bounds: CGRect,
         corner: HideCorner,
         force: Bool,
-        animated: Bool = false,
         capturesOriginal: Bool
     ) {
         let target = Self.stashFrame(
@@ -261,31 +252,6 @@ extension TilingEngine {
             !Self.looksStashed(window.frame, in: bounds)
         {
             stashedFrames[window.id] = window.frame
-        }
-        if animated {
-            // The exit half of a coordinated switch (#207):
-            // slide to the corner. A window still flying IN
-            // retargets in place (spring carry-over), so a
-            // rapid bounce stays smooth.
-            meter.add(\.parksIssued)
-            applyFrame(
-                window.id,
-                from: window.frame,
-                to: target,
-                animated: true
-            )
-            return
-        }
-        // An instant park must not snap a window already
-        // sliding to this corner (#207): an event-driven retile
-        // or the 300 ms settle landing mid-exit would otherwise
-        // cancel the slide and teleport the window. Let the
-        // animation finish; it ends at this exact target.
-        if let inFlight = animation.targetFrame(
-            window: window.id
-        ), Self.close(inFlight, to: target) {
-            meter.add(\.parksSkipped)
-            return
         }
         animation.cancel(window: window.id)
         meter.add(\.parksIssued)

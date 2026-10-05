@@ -82,6 +82,13 @@ struct ProfileLookOwnMigrationTests {
             with: "",
             options: .regularExpression
         )
+        // The plates' glass leaf a pre-#1956 profile gains, the
+        // envelope's too.
+        .replacingOccurrences(
+            of: #""space_switch":\{"liquid_glass":(true|false)\},?"#,
+            with: "",
+            options: .regularExpression
+        )
     }
 
     @Test("a current profile's absent look stays shared")

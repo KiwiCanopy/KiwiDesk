@@ -33,20 +33,41 @@ extension ConfigMigration {
                 $0.range(of: Data("\"\(glassSettingsKey)\"".utf8))
                     != nil
             },
-            rewriting: withOverlayGlass,
-            editing: surgicallyFilledOverlayGlass
+            rewriting: {
+                withGlass(
+                    $0,
+                    groups: overlayGlassGroups,
+                    sources: overlayGlassSources
+                )
+            },
+            editing: {
+                surgicallyFilledGlass(
+                    $0,
+                    groups: overlayGlassGroups,
+                    sources: overlayGlassSources
+                )
+            }
         )
     }
 
     /// The two paths #1369's step walks: the root's `settings` and
-    /// each inline profile's.
-    static func withOverlayGlass(_ node: Any) -> (Any, Bool) {
+    /// each inline profile's — each `groups` leaf filled from the
+    /// agreement of `sources` (#1620/#1621, #1956).
+    static func withGlass(
+        _ node: Any,
+        groups: [String],
+        sources: [String]
+    ) -> (Any, Bool) {
         guard var root = node as? [String: Any] else {
             return (node, false)
         }
         var changed = false
         if let settings = root[glassSettingsKey] as? [String: Any] {
-            let (filled, did) = filledOverlayGlass(settings)
+            let (filled, did) = filledGlass(
+                settings,
+                groups: groups,
+                sources: sources
+            )
             if did {
                 root[glassSettingsKey] = filled
                 changed = true
@@ -59,7 +80,11 @@ extension ConfigMigration {
                     let settings = profiles[index][glassSettingsKey]
                         as? [String: Any]
                 else { continue }
-                let (filled, one) = filledOverlayGlass(settings)
+                let (filled, one) = filledGlass(
+                    settings,
+                    groups: groups,
+                    sources: sources
+                )
                 guard one else { continue }
                 profiles[index][glassSettingsKey] = filled
                 did = true
@@ -75,23 +100,28 @@ extension ConfigMigration {
     /// The switch's reading of one settings object: the leaves'
     /// value where they agree, off where they do not. An absent
     /// source leaf reads as its default, on.
-    static func overlayGlassAgreement(_ settings: [String: Any]) -> Bool {
-        let values = overlayGlassSources.map {
+    static func glassAgreement(
+        _ settings: [String: Any],
+        sources: [String]
+    ) -> Bool {
+        let values = sources.map {
             (settings[$0] as? [String: Any])?[glassLeafKey] as? Bool
                 ?? true
         }
         return Set(values).count == 1 ? values[0] : false
     }
 
-    /// One `TilingSettings` object: each overlay group takes the
+    /// One `TilingSettings` object: each of `groups` takes the
     /// agreement where it carries no leaf.
-    static func filledOverlayGlass(
-        _ settings: [String: Any]
+    static func filledGlass(
+        _ settings: [String: Any],
+        groups: [String],
+        sources: [String]
     ) -> ([String: Any], Bool) {
-        let value = overlayGlassAgreement(settings)
+        let value = glassAgreement(settings, sources: sources)
         var out = settings
         var changed = false
-        for group in overlayGlassGroups {
+        for group in groups {
             guard out[group] == nil || out[group] is [String: Any]
             else { continue }
             var object = out[group] as? [String: Any] ?? [:]
@@ -110,14 +140,20 @@ extension ConfigMigration {
     /// in after each `settings` opener. Anything else stands down to
     /// the walk, and `surgicallyApplying`'s compare is the net for a
     /// stray edit.
-    static func surgicallyFilledOverlayGlass(_ text: String) -> Data? {
+    static func surgicallyFilledGlass(
+        _ text: String,
+        groups: [String],
+        sources: [String]
+    ) -> Data? {
         guard
             let root = try? JSONSerialization.jsonObject(
                 with: Data(text.utf8)
             ) as? [String: Any]
         else { return nil }
         let objects = overlaySettingsObjects(in: root)
-        let values = Set(objects.map(overlayGlassAgreement))
+        let values = Set(
+            objects.map { glassAgreement($0, sources: sources) }
+        )
         guard values.count == 1, let on = values.first else {
             return nil
         }
@@ -127,7 +163,7 @@ extension ConfigMigration {
         guard openers == objects.count, openers > 0 else { return nil }
         var out = text
         var absent: [String] = []
-        for group in overlayGlassGroups {
+        for group in groups {
             let present = objects.filter { $0[group] != nil }
             if present.isEmpty {
                 absent.append(group)
