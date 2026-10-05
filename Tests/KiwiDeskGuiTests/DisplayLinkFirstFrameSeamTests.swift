@@ -24,7 +24,10 @@ struct DisplayLinkFirstFrameSeamTests {
             )
         )
         let body = String(source[start.upperBound..<end.lowerBound])
-        #expect(body.contains("Self.step("))
+        let call = try #require(body.range(of: "Self.step("))
+        // An early exit ahead of the step is the dropped tick.
+        #expect(!body[..<call.lowerBound].contains("return"))
+        #expect(body[call.lowerBound...].contains("last: lastTimestamp"))
         #expect(body.components(separatedBy: "onTick(").count == 2)
     }
 }
