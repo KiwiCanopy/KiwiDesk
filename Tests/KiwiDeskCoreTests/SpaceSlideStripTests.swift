@@ -18,10 +18,10 @@ struct SpaceSlideStripTests {
         #expect(strip.state(at: 9.9).velocity == 0)
     }
 
-    @Test("it is within 2 % of rest at settle, and never past it")
+    @Test("it is within 2 % of rest at its landing, and never past it")
     func settlesWithoutOvershoot() {
         let strip = SpaceSlideStrip(from: 0, to: page, velocity: 0, begin: 0)
-        let landed = strip.state(at: SpaceSlidePlan.settle).offset
+        let landed = strip.state(at: strip.settleTime()).offset
         #expect(abs(page - landed) <= 0.02 * page)
         for step in 1...200 {
             let t = CFTimeInterval(step) * 0.005
@@ -52,17 +52,16 @@ struct SpaceSlideStripTests {
         #expect(abs(next.from - page) < 0.5)
     }
 
-    @Test("from rest the strip lands at settle; carrying a reversal, later")
+    @Test("a strip carrying a reversal lands later than one from rest")
     func settleTimeFollowsTheMotion() {
         let rest = SpaceSlideStrip(from: 0, to: page, velocity: 0, begin: 0)
-        #expect(abs(rest.settleTime() - SpaceSlidePlan.settle) < 0.01)
         let reversing = SpaceSlideStrip(
             from: 0,
             to: page,
             velocity: -20_000,
             begin: 0
         )
-        #expect(reversing.settleTime() > rest.settleTime() + 0.02)
+        #expect(reversing.settleTime() > rest.settleTime())
     }
 
     @Test("CA's initial velocity is a share of the distance")

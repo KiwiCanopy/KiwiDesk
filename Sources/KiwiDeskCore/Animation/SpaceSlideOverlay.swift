@@ -88,6 +88,8 @@ final class SpaceSlideOverlay {
         var target: CGFloat = 0
         /// Every window a press of this play holds.
         var held: Set<WindowID> = []
+        /// The windows the last incoming page plates.
+        var incoming: [WindowID] = []
         var landAt: CFTimeInterval = 0
         var liftAt: CFTimeInterval = 0
 
@@ -187,6 +189,7 @@ final class SpaceSlideOverlay {
         CATransaction.setDisableActions(true)
         setHoles(holes, in: current)
         replacePage(at: current.target, with: incoming, in: &current)
+        current.incoming = incoming.map(\.id)
         prunePages(&current)
         let keyPath = Self.keyPath(current.axis)
         let layer = current.strip.layer

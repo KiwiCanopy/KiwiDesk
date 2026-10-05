@@ -48,8 +48,8 @@ extension KiwiCore {
         // A window the switch filed into the target while it is
         // still on screen — a follow's moved window, a launch's
         // new one — goes with the user: neither covered nor held.
-        let incoming = slideMembers(of: target).filter {
-            !SpaceSlidePlan.shows(sentFrame($0.id) ?? $0.frame, on: page)
+        let (shown, incoming) = slideMembers(of: target).partitioned {
+            SpaceSlidePlan.shows(sentFrame($0.id) ?? $0.frame, on: page)
         }
         let holes = stickyHoles(on: intent.display, in: page)
         let glass = LiquidGlassGate.rendered(
@@ -83,7 +83,8 @@ extension KiwiCore {
             display: intent.display,
             page: page,
             stack: stack,
-            holes: holes
+            holes: holes,
+            goesAlong: Set(shown.map(\.id))
         )
     }
 
@@ -95,7 +96,7 @@ extension KiwiCore {
                 of: run.target,
                 stack: run.stack,
                 in: run.page
-            ),
+            ).filter { !run.goesAlong.contains($0.id) },
             holes: run.holes
                 + stickyHoles(on: run.display, in: run.page)
         )
@@ -178,4 +179,25 @@ struct SpaceSlideRun {
     let page: CGRect
     let stack: [UInt32: Int]
     let holes: [CGRect]
+    /// Target members already on screen at the press: they move
+    /// with the user, so no plate and no hold.
+    let goesAlong: Set<WindowID>
+}
+
+extension Array {
+    /// The elements `isIn` accepts, then the rest, each in order.
+    fileprivate func partitioned(
+        by isIn: (Element) -> Bool
+    ) -> ([Element], [Element]) {
+        var yes: [Element] = []
+        var no: [Element] = []
+        for element in self {
+            if isIn(element) {
+                yes.append(element)
+            } else {
+                no.append(element)
+            }
+        }
+        return (yes, no)
+    }
 }

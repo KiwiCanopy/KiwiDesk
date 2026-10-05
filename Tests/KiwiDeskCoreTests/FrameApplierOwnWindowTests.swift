@@ -1,6 +1,7 @@
 import ApplicationServices
 import CoreGraphics
 import Testing
+import os
 
 @testable import KiwiDeskCore
 
@@ -48,6 +49,23 @@ struct FrameApplierOwnWindowTests {
         #expect(moves.all.count == 1)
         #expect(moves.all.first?.1 == frame)
         #expect(moves.all.first?.2 == false)
+    }
+
+    /// The AppKit move stamps its own echo after the set, as the
+    /// queue path does (#1254): the clock moves past the enqueue
+    /// stamp's grace inside the move, so only that stamp answers.
+    @Test("the own-window move stamps its echo after the set")
+    func ownWindowMoveStampsAfter() {
+        let moves = Moves()
+        let applier = makeApplier(pid: getpid(), moves)
+        let now = OSAllocatedUnfairLock<TimeInterval>(initialState: 100)
+        applier.clock = { now.withLock { $0 } }
+        applier.ownWindowMove = { _, _, _ in
+            now.withLock { $0 = 101.5 }
+            return true
+        }
+        applier.applyInstant(w, frame, setSize: false)
+        #expect(applier.didRecentlySetFrame(w))
     }
 
     @Test("another app's window never takes the AppKit move")

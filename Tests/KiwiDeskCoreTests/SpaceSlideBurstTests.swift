@@ -82,10 +82,8 @@ struct SpaceSlideBurstTests {
         let overlay = makeOverlay(clock)
         defer { overlay.end() }
         let first = press(overlay)
-        let begin = try #require(overlay.play?.motion.begin)
-        #expect(
-            abs(first.landAt - begin - SpaceSlidePlan.settle) < 0.01
-        )
+        let motion = try #require(overlay.play?.motion)
+        #expect(first.landAt == motion.begin + motion.settleTime())
     }
 
     @Test("a press on another screen hands back the dropped holds")

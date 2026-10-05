@@ -32,20 +32,41 @@ struct SpaceSlideSeamTests {
         }
     }
 
-    /// Both frame-write entry points of the applier stage a held
-    /// window's write; a third entry point owes the same.
+    /// Every applier member that writes a frame stages a held
+    /// window's write first — found by what it cannot avoid, the
+    /// writer's frame call, so a new write path is caught by its
+    /// write rather than by a list. The hold's own release, which
+    /// performs the staged write, is the one member exempt.
     @Test("every applier write path reaches the hold")
     func writePathsReachTheHold() throws {
-        for function in ["apply", "applyInstant"] {
-            let body = try SourceScan.functionBody(
-                of: function,
-                in: "FrameApplier.swift",
-                under: "Tiling"
+        let tiling = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore/Tiling"
+        )
+        let files = try FileManager.default.contentsOfDirectory(
+            atPath: tiling.path
+        ).filter { $0.hasPrefix("FrameApplier") && $0.hasSuffix(".swift") }
+        var writers: [String] = []
+        for file in files {
+            let source = try SourceScan.strippedSource(
+                at: tiling.appendingPathComponent(file)
             )
-            #expect(
-                body.occurrences(of: "stageHeld(") == 1,
-                "\(function) does not stage a held write"
-            )
+            for (name, body) in SourceScan.memberBodies(in: source)
+            where body.contains("writer.setFrame(")
+                || body.contains("writer.setPosition(")
+            {
+                writers.append(name)
+                guard !Self.releases.contains(name) else { continue }
+                #expect(
+                    body.contains("stageHeld("),
+                    "\(file) ▸ \(name) writes a frame without the hold"
+                )
+            }
         }
+        // The scan must find the two entry points, or it read
+        // nothing and passed for it.
+        #expect(Set(writers).isSuperset(of: ["apply", "applyInstant"]))
     }
+
+    /// The hold's release writes the frame it staged.
+    private static let releases: Set<String> = ["write"]
 }

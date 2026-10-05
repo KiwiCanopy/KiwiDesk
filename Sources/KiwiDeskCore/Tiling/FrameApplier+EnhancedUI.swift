@@ -94,12 +94,18 @@ final class EnhancedUIHolds: @unchecked Sendable {
         atRest: Bool,
         ifGeneration generation: Int
     ) -> Bool {
-        lock.lock()
-        let current = generations[pid, default: 0] == generation
-        lock.unlock()
-        guard current else { return false }
-        noteQueued(pid, atRest: atRest, instant: true)
-        return true
+        // One lock span: a retire between the compare and the note
+        // would re-create the retired app's entry.
+        with { apps in
+            guard generations[pid, default: 0] == generation else {
+                return false
+            }
+            var app = apps[pid, default: App()]
+            app.atRest = atRest
+            app.queuedInstants += 1
+            apps[pid] = app
+            return true
+        }
     }
 
     /// Main actor, when the loop stops owning the app: the value

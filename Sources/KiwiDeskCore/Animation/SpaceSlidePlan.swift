@@ -11,11 +11,9 @@ enum SpaceSlidePlan {
     /// The strip waits this long after a press: the outgoing parks
     /// leave AT the press, and apps take 60–100 ms to perform one.
     static let stripDelay: TimeInterval = 0.12
-    /// The strip's critically damped spring response.
+    /// The strip's critically damped spring response; when it
+    /// lands is solved from each motion (`SpaceSlideStrip`).
     static let response: TimeInterval = 0.30
-    /// When the spring is within 2 % of rest: the held incoming
-    /// writes leave here.
-    static let settle: TimeInterval = 0.28
     /// The landed writes' own time to show before the plates lift.
     static let landMargin: TimeInterval = 0.06
     /// The plates fade out over the landed windows.

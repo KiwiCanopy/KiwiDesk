@@ -161,6 +161,10 @@ struct SpaceSlideSwitchTests {
         defer { core.spaceSlide.end() }
         #expect(core.tiler.applier.held.isHeld(w3))
         #expect(!core.tiler.applier.held.isHeld(moved))
+        // Nor plated: a plate would land over it, already there.
+        let incoming = try #require(core.spaceSlide.play?.incoming)
+        #expect(incoming.contains(w3))
+        #expect(!incoming.contains(moved))
     }
 
     @Test(
