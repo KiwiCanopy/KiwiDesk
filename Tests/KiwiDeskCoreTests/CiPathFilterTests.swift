@@ -173,32 +173,26 @@ struct CiPathFilterTests {
                 block?.contains("needs: changes") == true,
                 "\(job) does not depend on the changes job"
             )
-            let gate = Self.code(of: block ?? "")
+            let gate = Self.jobGate(job, in: yaml) ?? ""
             #expect(
                 gate.contains("needs.changes.outputs.run == 'true'"),
                 "\(job) is not gated on the changes outcome"
             )
             // A bare `if:` implies success(), so a failed filter
             // skips the job and the skip passes a required check
-            // with nothing run (#1984). The status function is what
-            // makes the failure arm reachable at all.
+            // with nothing run (#1984). The disjunction is the
+            // shape: `&&` would skip every normal PR. `!cancelled()`
+            // reaches the failure arm; `always()` would also start
+            // a run `cancel-in-progress` superseded.
             #expect(
-                gate.contains("needs.changes.result != 'success'")
-                    && (gate.contains("!cancelled()")
-                        || gate.contains("always()")),
+                gate.hasPrefix("!cancelled() && (")
+                    && gate.contains(
+                        "(needs.changes.result != 'success' || "
+                            + "needs.changes.outputs.run == 'true')"
+                    ),
                 "\(job) is skipped, not run, when the filter fails"
             )
         }
-    }
-
-    /// A job block with comment lines dropped and whitespace
-    /// collapsed, so a folded `if:` reads as one expression.
-    static func code(of block: String) -> String {
-        block
-            .split(separator: "\n")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.hasPrefix("#") }
-            .joined(separator: " ")
     }
 
     @Test("Every exemption is still load-bearing")
