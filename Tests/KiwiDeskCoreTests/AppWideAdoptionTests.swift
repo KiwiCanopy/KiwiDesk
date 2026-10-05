@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -81,6 +82,31 @@ struct AppWideAdoptionTests {
         let stored = try #require(core.guiConfigStore.load()?.appWide)
         #expect(stored.refusalSound)
         #expect(stored.quitGridTargetDepth == 9)
+    }
+
+    /// A preset saved and adopted by `applyStandard` is a first
+    /// apply of a stored profile too (#1952): the crossing ends
+    /// there, on the settled values, and not a boot later.
+    @Test("a saved preset ends the crossing")
+    func savedPresetEndsTheCrossing() throws {
+        let core = try makeGuiCore()
+        try saveLegacy("Work", sound: true, depth: 9, in: core)
+        prepare(core)
+        core.state.apply(
+            .displaysChanged([
+                Display(
+                    id: DisplayID(10),
+                    name: "D",
+                    frame: CGRect(x: 0, y: 0, width: 1920, height: 1080)
+                )
+            ])
+        )
+        let preset = try #require(
+            StandardProfiles.workflows.first { $0.screenCount == 1 }
+        )
+        try core.applyStandard(preset)
+        #expect(core.appWideLedger.owed == nil)
+        #expect(core.guiConfigStore.load()?.appWide != nil)
     }
 
     /// One-shot: a second profile with different stored values
