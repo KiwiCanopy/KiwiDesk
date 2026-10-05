@@ -14,20 +14,26 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// Holds the ring's layers where the ring sits in its panel,
     /// which may be larger than the ring while it moves (#1937).
     private let container = CALayer()
-    /// The frame last handed to AppKit, in AppKit coordinates.
+    /// The panel's frame of record, in AppKit coordinates. AppKit's
+    /// own `panel.frame` lags a SkyLight move until WindowServer's
+    /// moved event lands, so no decision reads it (#1956).
     private var placedFrame: CGRect?
-    private let shape = CAShapeLayer()
+    /// The main run loop pass in which AppKit last set the frame or
+    /// first ordered the panel in; AppKit sends both at that pass's
+    /// commit, over a SkyLight move issued before it (#1956).
+    private var appKitPass: UInt64?
+    let shape = CAShapeLayer()
     /// Secondary shadow layer stacked under ring for edge bloom density
     /// (#533).
-    private let glowBoost = CAShapeLayer()
+    let glowBoost = CAShapeLayer()
     /// The sheen ramp over the stroke (#1644), masked to it, so
     /// the bloom below keeps the plain stroke's shadow.
-    private let sheen = CAGradientLayer()
-    private let sheenMask = CAShapeLayer()
+    let sheen = CAGradientLayer()
+    let sheenMask = CAShapeLayer()
     /// Cut the bloom's interior out of the two shadow layers, so
     /// an above-order glow never paints over its window.
-    private let shapeGlowMask = CAShapeLayer()
-    private let boostGlowMask = CAShapeLayer()
+    let shapeGlowMask = CAShapeLayer()
+    let boostGlowMask = CAShapeLayer()
 
     /// Stacks relative to the target window: `below` preserves
     /// popover occlusion (#320), `above` is `draw_order` front.
@@ -39,6 +45,11 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// Re-stacks an ordered-in panel without AppKit's per-order
     /// rights lookup (#1925); false sends it through AppKit.
     var restack: (CGWindowID, Bool, CGWindowID) -> Bool
+    /// Moves the panel's window to a top-left origin without
+    /// AppKit's fence (#1956); false sends it through AppKit.
+    var movePanel: (CGWindowID, CGPoint) -> Bool
+    /// The main run loop's pass count (`MainRunLoopPass`).
+    private let pass: @MainActor () -> UInt64
     /// Ordered in by AppKit and not ordered out since: the panel's
     /// physical state, beside `BorderOverlay.needsOrder`, which is
     /// the manager's policy — keep the two apart.
@@ -49,6 +60,8 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         private(set) var appKitOrders = 0
         /// Test-only: panel frames handed to AppKit.
         private(set) var frameSets = 0
+        /// Test-only: panel moves handed to SkyLight.
+        private(set) var skyLightMoves = 0
     #endif
 
     init(
@@ -56,11 +69,16 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         levelOf: @escaping (CGWindowID) -> Int? =
             AppKitBorderOverlay.windowLayer,
         restack: @escaping (CGWindowID, Bool, CGWindowID) -> Bool =
-            SkyLight.orderWindow
+            SkyLight.orderWindow,
+        movePanel: @escaping (CGWindowID, CGPoint) -> Bool,
+        pass: @escaping @MainActor () -> UInt64 =
+            MainRunLoopPass.current
     ) {
         orderMode = order
         self.levelOf = levelOf
         self.restack = restack
+        self.movePanel = movePanel
+        self.pass = pass
     }
 
     /// The panel's Spaces/Exposé behavior, nil before the first
@@ -69,9 +87,12 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         panel?.collectionBehavior
     }
 
-    /// The panel's frame and the ring's place in it, AppKit
-    /// coordinates, nil before the first render.
-    var panelFrame: CGRect? { panel?.frame }
+    #if DEBUG
+        /// Test-only: AppKit's cached frame, which lags a SkyLight
+        /// move; production reads `placedFrame` (#1956).
+        var panelFrame: CGRect? { panel?.frame }
+    #endif
+    /// The ring's place in its panel, AppKit coordinates.
     var ringFrameInPanel: CGRect { container.frame }
 
     /// The panel's frame for a ring: `room` while it holds the
@@ -135,14 +156,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
             geometry.overlayFrame,
             primaryHeight: GeometryUtils.primaryHeight
         )
-        let frame = Self.panelFrame(for: ring, room: room)
-        if frame != placedFrame {
-            panel.setFrame(frame, display: false)
-            placedFrame = frame
-            #if DEBUG
-                frameSets += 1
-            #endif
-        }
+        let frame = place(panel, holding: ring, room: room)
         container.frame = ring.offsetBy(dx: -frame.minX, dy: -frame.minY)
         let bounds = CGRect(
             origin: .zero,
@@ -171,96 +185,51 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         CATransaction.commit()
     }
 
-    /// Renders outer glow halo from filled silhouette (#358, #533).
-    private func applyGlow(
-        geometry: BorderGeometry,
-        rect: CGRect,
-        colorHex: String
-    ) {
-        guard geometry.glowMargin > 0 else {
-            shape.shadowOpacity = 0
-            shape.shadowColor = nil
-            shape.shadowPath = nil
-            glowBoost.shadowOpacity = 0
-            glowBoost.shadowColor = nil
-            glowBoost.shadowPath = nil
-            shape.mask = nil
-            glowBoost.mask = nil
-            return
+    /// Puts the panel where it holds `ring` and returns its frame:
+    /// a panel the ring's size moves through SkyLight, mid-animation
+    /// too, once WindowServer has its window (a window number, kept
+    /// through an order-out) and AppKit has not set its frame this
+    /// pass (#1956); else AppKit, the room while it holds the ring
+    /// (#1937).
+    private func place(
+        _ panel: NSPanel,
+        holding ring: CGRect,
+        room: CGRect?
+    ) -> CGRect {
+        if panel.windowNumber > 0, appKitPass != pass(),
+            let placed = placedFrame,
+            placed.size == ring.size,
+            placed == ring || moveThroughSkyLight(panel, to: ring)
+        {
+            placedFrame = ring
+            return ring
         }
-        let half = geometry.lineWidth / 2
-        let radius = geometry.cornerRadius
-        let outerRadius = radius <= 0 ? 0 : radius + half
-        let silhouette = CGPath(
-            roundedRect: rect.insetBy(dx: -half, dy: -half),
-            cornerWidth: outerRadius,
-            cornerHeight: outerRadius,
-            transform: nil
-        )
-        let glow = NSColor.kiwiGlow(hex: colorHex)
-        shape.shadowColor = glow
-        shape.shadowRadius = geometry.glowMargin
-        shape.shadowOpacity = 1
-        shape.shadowOffset = .zero
-        shape.shadowPath = silhouette
-        glowBoost.frame = shape.frame
-        glowBoost.shadowColor = glow
-        glowBoost.shadowRadius = geometry.glowMargin / 2
-        glowBoost.shadowOpacity = 1
-        glowBoost.shadowOffset = .zero
-        glowBoost.shadowPath = silhouette
-        let inner = rect.insetBy(dx: half, dy: half)
-        let innerRadius = max(0, radius - half)
-        let cutout = CGMutablePath()
-        cutout.addRect(shape.bounds)
-        if inner.width > 0, inner.height > 0 {
-            cutout.addRoundedRect(
-                in: inner,
-                cornerWidth: min(innerRadius, inner.width / 2),
-                cornerHeight: min(innerRadius, inner.height / 2)
-            )
+        let frame = Self.panelFrame(for: ring, room: room)
+        if frame != placedFrame {
+            panel.setFrame(frame, display: false)
+            placedFrame = frame
+            appKitPass = pass()
+            #if DEBUG
+                frameSets += 1
+            #endif
         }
-        for (layer, mask) in [
-            (shape, shapeGlowMask), (glowBoost, boostGlowMask),
-        ] {
-            mask.frame = layer.bounds
-            mask.path = cutout
-            mask.fillRule = .evenOdd
-            layer.mask = mask
-        }
+        return frame
     }
 
-    /// Paints the sheen ramp over the stroke's own extent (#1644).
-    private func applySheen(
-        geometry: BorderGeometry,
-        rect: CGRect,
-        colorHex: String
-    ) {
-        sheen.isHidden = geometry.sheen == 0
-        guard geometry.sheen != 0 else { return }
-        let half = geometry.lineWidth / 2
-        sheen.frame = rect.insetBy(dx: -half, dy: -half)
-        sheen.contentsScale = shape.contentsScale
-        sheenMask.frame = sheen.bounds
-        sheenMask.path = CGPath(
-            roundedRect: rect.offsetBy(
-                dx: half - rect.minX,
-                dy: half - rect.minY
-            ),
-            cornerWidth: geometry.cornerRadius,
-            cornerHeight: geometry.cornerRadius,
-            transform: nil
-        )
-        sheenMask.lineWidth = geometry.lineWidth
-        sheenMask.strokeColor = NSColor.black.cgColor
-        sheenMask.fillColor = nil
-        sheenMask.contentsScale = shape.contentsScale
-        sheen.mask = sheenMask
-        BorderSheen.paint(
-            sheen,
-            hex: colorHex,
-            strength: geometry.sheen
-        )
+    private func moveThroughSkyLight(
+        _ panel: NSPanel,
+        to frame: CGRect
+    ) -> Bool {
+        let topLeft = GeometryUtils.flip(
+            frame,
+            primaryHeight: GeometryUtils.primaryHeight
+        ).origin
+        guard movePanel(CGWindowID(panel.windowNumber), topLeft)
+        else { return false }
+        #if DEBUG
+            skyLightMoves += 1
+        #endif
+        return true
     }
 
     /// Orders the ring in directly behind or above the target.
@@ -282,6 +251,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         {
             return
         }
+        let createsWindow = panel.windowNumber <= 0
         panel.order(
             orderMode == .above ? .above : .below,
             relativeTo: Int(windowNumber)
@@ -289,6 +259,9 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         #if DEBUG
             appKitOrders += 1
         #endif
+        if createsWindow {
+            appKitPass = pass()
+        }
         isOrderedIn = true
     }
 

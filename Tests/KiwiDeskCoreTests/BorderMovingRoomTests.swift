@@ -38,7 +38,10 @@ struct BorderMovingRoomTests {
     /// The panel an exact render at `origin` takes, outset so a ring
     /// moving 400 pt from there still fits.
     private func room(around origin: CGPoint) -> CGRect {
-        let exact = AppKitBorderOverlay(order: .below)
+        let exact = AppKitBorderOverlay(
+            order: .below,
+            movePanel: { _, _ in false }
+        )
         render(exact, at: origin, room: nil)
         return (exact.panelFrame ?? .zero).insetBy(dx: -1000, dy: -1000)
     }
@@ -73,8 +76,14 @@ struct BorderMovingRoomTests {
     func movingRingResizesOnce() {
         let start = CGPoint(x: 100, y: 200)
         let room = room(around: start)
-        let ring = AppKitBorderOverlay(order: .below)
-        let exact = AppKitBorderOverlay(order: .below)
+        let ring = AppKitBorderOverlay(
+            order: .below,
+            movePanel: { _, _ in false }
+        )
+        let exact = AppKitBorderOverlay(
+            order: .below,
+            movePanel: { _, _ in false }
+        )
         for step in 0..<10 {
             let origin = CGPoint(x: start.x + CGFloat(step * 40), y: start.y)
             render(ring, at: origin, room: room)
@@ -94,7 +103,10 @@ struct BorderMovingRoomTests {
     func settleShrinksPanel() {
         let start = CGPoint(x: 100, y: 200)
         let room = room(around: start)
-        let ring = AppKitBorderOverlay(order: .below)
+        let ring = AppKitBorderOverlay(
+            order: .below,
+            movePanel: { _, _ in false }
+        )
         render(ring, at: start, room: room)
         #expect(ring.panelFrame == room)
         render(ring, at: CGPoint(x: 140, y: 200), room: nil)
@@ -107,6 +119,7 @@ struct BorderMovingRoomTests {
     func managerOffersRoomWhileAnimating() {
         let border = BorderManager()
         border.restack = { _, _, _ in false }
+        border.movePanel = { _, _ in false }
         defer { border.clear() }
         let backend = RoomCapturingBackend()
         border.backendFactory = { backend }

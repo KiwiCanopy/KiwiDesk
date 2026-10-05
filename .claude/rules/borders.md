@@ -155,17 +155,45 @@ keeps these:
   take AppKit (`BorderRestackTests`). This orders the AppKit
   panel and draws nothing: the `.transient` section below still
   binds.
-- **An animating ring moves inside its panel rather than
-  resizing it** — a panel resize hands WindowServer a fenced
-  transaction the main actor waits on, every frame, GPU idle or
-  not (#1937, device 2026-10-03). Every ring writer takes its
+- **A ring panel that keeps the ring's size moves through
+  `SkyLight.moveWindow`, never AppKit's `setFrame`** — mid-animation
+  too, so it takes no room — once WindowServer has its window and
+  AppKit has not set its frame in the current main run loop pass
+  (`MainRunLoopPass`). `setFrame` ties the move to the next commit
+  with a fence, and while another app's window transaction held
+  WindowServer up the ring's commit waited ~500 ms on it (#1956);
+  a SkyLight move issued in a pass where AppKit set the frame, or
+  first ordered the panel in, reaches WindowServer first and is
+  overwritten at that pass's commit, while an alpha, level or
+  order change in the pass leaves it standing (device-checked
+  macOS 27.0.1, 2026-10-05). The first show, a size change and a missing symbol
+  take AppKit (`BorderPanelMoveTests`; the move landing is
+  `BorderPanelMoveLiveTests`', the seams `BorderPanelSeamTests`').
+  **Keep the backend's `placedFrame` the panel's frame of record,
+  and read no decision off `panel.frame`**: AppKit's cache follows
+  a SkyLight move only once WindowServer's moved event reaches its
+  event loop, and a `setFrame` equal to a stale cache is skipped.
+  The sticky mark's panel still takes `setFrame` per tick,
+  unmeasured on the switch path. **A second panel moved this way
+  shares the ring's whole placement** — the frame of record, the
+  pass gate, the stamp on the order-in that creates the window —
+  never the move alone, which a same-pass `setFrame` or
+  `orderFrontRegardless` loses; its move is a closure over
+  `BorderManager.movePanel` wired once in Core, not a second
+  live seam.
+- **An animating ring that changes size moves inside its panel
+  rather than resizing it** — a panel resize hands WindowServer a
+  fenced transaction the main actor waits on, every frame, GPU
+  idle or not (#1937, device 2026-10-03). Every ring writer takes its
   room from the one `BorderManager.room(for:screen:)`: while
   `isAnimating` holds, the ring's screen outset by up to one
   screen plus the widest ring's reach per axis, capped by
   `roomLimit` points and `roomPixelLimit` pixels — so on a
   screen the caps leave whole, a ring parked in the stash corner
-  or sliding in from it fits, whose exact-panel moves the main
-  actor waited ~500 ms on mid-switch (#1956,
+  or sliding in from it fits — one that also changes size, or
+  moves where the SkyLight move is missing — whose exact-panel
+  moves the main actor waited ~500 ms on mid-switch before the
+  bullet above (#1956,
   `BorderMovingRoomTests` ▸ `roomHoldsParkedRing`); on a wider
   desk the caps cut first and a parked ring can fall outside.
   The panel takes the room once and the ring's layers move
