@@ -11,7 +11,7 @@
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",
     "@astrojs/sitemap": "^3.7.4",
-    "@astrojs/starlight": "^0.42.4",
+    "@astrojs/starlight": "^0.42.5",
     "@iconify-json/lucide": "^1.2.138",
     "@mermaid-js/layout-elk": "^0.2.2",
     "astro": "^7.3.5",
