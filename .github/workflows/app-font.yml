@@ -150,7 +150,7 @@ jobs:
             '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -c "$branch"
           git add Sources/KiwiDeskCore/Resources/AppFont
-          git commit -m "chore(bar): re-vendor app font $TAG"
+          git commit -m "chore(bar): update sketchybar-app-font to $TAG"
           git push origin "$branch"
           # A heredoc into a file, not an inline --body: the body is
           # Markdown, and any indentation shell would keep turns a
@@ -172,5 +172,5 @@ jobs:
           [upstream]: https://github.com/kvndrsslr/sketchybar-app-font
           EOF
           gh pr create --base "$BASE" --head "$branch" \
-            --title "chore(bar): re-vendor app font $TAG" \
+            --title "chore(bar): update sketchybar-app-font to $TAG" \
             --body-file "$body"
