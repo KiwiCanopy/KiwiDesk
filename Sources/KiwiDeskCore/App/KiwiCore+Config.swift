@@ -79,6 +79,9 @@ extension KiwiCore {
         let seedGuiConfig = !guiConfigStore.exists && !luaOwnsSettings
         if seedGuiConfig {
             try? guiConfigStore.save(guiConfigSeed())
+            // The seed owes the #1752 crossing the read above
+            // could not see; the Starter seed's save ends it (#1952).
+            prepareSharedLook()
         }
         // The starter setup's profile-scoped half is materialized
         // (once displays are known, below) only on a TRULY fresh

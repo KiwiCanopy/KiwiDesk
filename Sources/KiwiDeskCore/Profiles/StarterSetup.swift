@@ -183,7 +183,8 @@ public enum StarterSetup {
     /// default `.top`, so no stored profile moves (#1528).
     public static let appBarEdge = AppBarEdge.bottom
 
-    /// A MAIN screen shorter than this (pt) gets `compactThickness`
+    /// A MAIN screen whose full frame (not visible) height is under
+    /// this (pt) gets `compactThickness`
     /// on every screen's shelf (#1952): the 13" and 14" MacBook
     /// defaults (900, 956, 982) fall under it, the 16" (1117)
     /// does not. Starter-only, like `appBarEdge`, so Glass and the

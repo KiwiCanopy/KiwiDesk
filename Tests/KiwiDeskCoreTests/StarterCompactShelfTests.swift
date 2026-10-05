@@ -69,6 +69,8 @@ struct StarterCompactShelfTests {
         }
     }
 
+    /// Drives the production order: `loadConfig` on an empty
+    /// config directory reads the ledger before it seeds gui.json.
     @Test("first run seeds gui.json's shared look from Glass")
     func firstRunSeedsTheCompactLook() throws {
         let core = makeTestCore(
@@ -77,7 +79,7 @@ struct StarterCompactShelfTests {
                     "kiwi-compact-\(UUID().uuidString)"
                 )
         )
-        try core.guiConfigStore.save(GuiConfig())
+        #expect(!core.guiConfigStore.exists)
         core.state.apply(
             .displaysChanged([
                 Display(
@@ -87,8 +89,7 @@ struct StarterCompactShelfTests {
                 )
             ])
         )
-        core.prepareSharedLook()
-        core.seedFirstRunStarterProfile()
+        core.loadConfig()
         let look = try #require(core.guiConfigStore.load()?.look)
         #expect(
             look.worn(over: TilingSettings()).kiwishelf.thickness

@@ -38,16 +38,12 @@ extension KiwiCore {
         // keeps this profile.
         state.apply(.displaysChanged(displays))
         do {
-            let name = try applyStandard(
+            try applyStandard(
                 StarterSetup.standardLayout(
                     displays: displays,
                     mainID: PositionalDisplays.liveMainID
                 )
             )
-            // The shared look is Glass as derived NOW (#1952); the
-            // monitor change that follows finds Starter current and
-            // applies nothing, so the crossing would wait a boot.
-            adoptSharedLook(from: try profiles.read(name: name))
         } catch {
             onLog(
                 "first run: could not seed the Starter profile: "
