@@ -9,7 +9,9 @@ import Testing
 /// group order with a plain commit all left a probe panel where it
 /// was (macOS 27.0.1, 2026-10-05), so #1925's re-stack never moved
 /// a ring. Every order of an ordered-in ring therefore goes through
-/// AppKit, whose order commits through the bridge.
+/// AppKit, whose order commits through the bridge. That the order
+/// MOVES the panel is `BorderStackingTests` ▸ `reorderMovesTheRing`;
+/// which sites may order is `BorderOrderCensusTests`.
 @Suite("Border ring re-stack")
 @MainActor
 struct BorderRestackTests {
@@ -44,33 +46,5 @@ struct BorderRestackTests {
         #expect(!ring.isOrderedIn)
         ring.order(relativeTo: 7)
         #expect(ring.appKitOrders == 4)
-    }
-
-    /// The symbols the probe found inert stay out of Core, so the
-    /// no-op cannot come back as an optimisation.
-    @Test("no SkyLight window order is resolved in Core")
-    func noSkyLightOrder() throws {
-        let core = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .appendingPathComponent("Sources/KiwiDeskCore")
-        let files = try FileManager.default.subpathsOfDirectory(
-            atPath: core.path
-        ).filter { $0.hasSuffix(".swift") }
-        #expect(files.count > 100)
-        var hits: [String] = []
-        for file in files {
-            let text = try String(
-                contentsOf: core.appendingPathComponent(file),
-                encoding: .utf8
-            )
-            for name in [
-                "\"SLSTransactionOrderWindow", "\"SLSOrderWindow",
-            ] where text.contains(name) {
-                hits.append("\(file): \(name)")
-            }
-        }
-        #expect(hits.isEmpty, "found \(hits)")
     }
 }

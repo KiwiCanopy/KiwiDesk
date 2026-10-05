@@ -1,8 +1,7 @@
 import CoreGraphics
 
 /// The committed SkyLight transaction a ring panel's move rides
-/// (#1956). It carries no ORDER: WindowServer applies none to an
-/// AppKit panel, so a ring re-stacks through AppKit (#1962).
+/// (#1956); os-private-apis.md says why it carries no order (#1962).
 extension SkyLight {
     typealias TransactionCreateFn =
         @convention(c) (ConnectionID) -> Unmanaged<CFTypeRef>?
