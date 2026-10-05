@@ -94,4 +94,30 @@ struct AppWideSeamTests {
             )
         }
     }
+
+    /// A capture follows its profile FILE (#1975): every Core
+    /// door that deletes or renames one also moves the capture,
+    /// since a behavioural suite reaches only the doors that exist.
+    @Test("every profile delete or rename moves the capture")
+    func captureFollowsEveryDoor() throws {
+        let doors = [
+            ("profiles.delete(", "forgetAppWideCapture(of:"),
+            ("profiles.rename(", "renameAppWideCapture("),
+        ]
+        for (door, follow) in doors {
+            var callers: [String] = []
+            for file in try SourceScan.swiftSources(under: Self.core) {
+                let source = SourceScan.stripComments(
+                    try String(contentsOf: file, encoding: .utf8)
+                )
+                guard source.contains(door) else { continue }
+                callers.append(file.lastPathComponent)
+                #expect(
+                    source.contains(follow),
+                    "\(file.lastPathComponent) calls \(door) alone"
+                )
+            }
+            #expect(!callers.isEmpty, "no caller of \(door) found")
+        }
+    }
 }

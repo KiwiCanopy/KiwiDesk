@@ -82,6 +82,13 @@ extension KiwiCore {
         appWideLedger.owed?[name] = nil
     }
 
+    /// A restore that replaces the profiles without a `gui.json`
+    /// (#1975): every capture named a replaced file, so the
+    /// reload re-captures from the restored ones.
+    func forgetAppWideCaptures() {
+        appWideLedger.owed = nil
+    }
+
     /// `forgetAppWideCapture`'s rename twin (#1975).
     func renameAppWideCapture(_ old: String, to new: String) {
         guard let captured = appWideLedger.owed?[old] else { return }

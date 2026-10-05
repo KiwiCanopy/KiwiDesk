@@ -568,10 +568,12 @@ holds the secondary-switch decision including its nil case.
     the setup (`AppWideAdoptionTests` ▸
     `luaOwnedBesideSidecarAdoptsNothing`).
   - Keep a capture with the FILE it was read from: a profile
-    delete forgets it and a rename re-keys it, so a later profile
-    under that name crosses on the settled values — a new door
-    that deletes or renames a profile takes the same call
-    (#1975, `AppWideCaptureFollowsTests`).
+    delete forgets it, a rename re-keys it and a restore that
+    replaces the profiles without a `gui.json` drops them all, so
+    a later profile under that name crosses on the settled values
+    (#1975, `AppWideCaptureFollowsTests`); a new door calling
+    `profiles.delete(` or `profiles.rename(` takes the same call
+    (`AppWideSeamTests` ▸ `captureFollowsEveryDoor`).
   - Give a new member of `AppWideSettings` a crossing of its
     own: the ledger's crossing is per group of settings, and on
     an install that has adopted it has already ended, so a

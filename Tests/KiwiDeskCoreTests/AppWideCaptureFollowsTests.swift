@@ -87,4 +87,20 @@ struct AppWideCaptureFollowsTests {
         run("load_profile", "Work", core)
         #expect(core.appWide == AppWideSettings())
     }
+
+    @Test("a restore without gui.json drops every capture")
+    func configlessRestoreForgets() throws {
+        let core = try makeGuiCore()
+        try saveLegacy("Coding", in: core)
+        core.prepareAppWide()
+        let bundle = SetupBundle(
+            writtenBy: "test",
+            config: nil,
+            profiles: [profile(named: "Coding")],
+            palettes: []
+        )
+        try core.restoreSetup(from: bundle) { _ in }
+        run("load_profile", "Coding", core)
+        #expect(core.appWide == AppWideSettings())
+    }
 }
