@@ -95,6 +95,20 @@ struct FrameApplierHeldTests {
         #expect(counts.withLock { $0.positions } == 1)
     }
 
+    /// The loop let go of the app before the landing: the write
+    /// still leaves, and toggles nothing on an app no longer owned.
+    @Test("a release after the app's retire toggles no EUI")
+    func retiredAppTakesNoHold() async throws {
+        let counts = OSAllocatedUnfairLock(initialState: Counts())
+        let applier = makeApplier(counts)
+        applier.holdWrites([w], until: .now() + 0.1)
+        applier.applyInstant(w, frame, setSize: false)
+        applier.retireApp(1, leftOn: true)
+        try await waitForWrite(counts)
+        #expect(counts.withLock { $0.positions } == 1)
+        #expect(counts.withLock { $0.eui }.isEmpty)
+    }
+
     @Test("releasing a hold sends its write now")
     func releaseSendsNow() async throws {
         let counts = OSAllocatedUnfairLock(initialState: Counts())

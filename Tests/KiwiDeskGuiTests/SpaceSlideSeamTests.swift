@@ -67,6 +67,18 @@ struct SpaceSlideSeamTests {
         #expect(Set(writers).isSuperset(of: ["apply", "applyInstant"]))
     }
 
+    /// The quit gather is the one frame write outside the applier,
+    /// so it drops every hold first, or a landing undoes it.
+    @Test("the quit gather drops every hold")
+    func gatherDropsTheHolds() throws {
+        let body = try SourceScan.functionBody(
+            of: "gatherWindows",
+            in: "KiwiCore+Teardown.swift",
+            under: "App"
+        )
+        #expect(body.occurrences(of: "held.dropAll()") == 1)
+    }
+
     /// The hold's release writes the frame it staged.
     private static let releases: Set<String> = ["write"]
 }

@@ -75,14 +75,27 @@ struct SpaceSlideBurstTests {
         #expect(motion.velocity == 0)
     }
 
+    /// Mid-flight the strip carries its speed into the next page,
+    /// which lands at a different time than a strip from rest.
     @Test("the landing is solved from the motion played")
     func landingFollowsTheMotion() throws {
         let clock = Clock()
         let overlay = makeOverlay(clock)
         defer { overlay.end() }
-        let first = press(overlay)
+        _ = press(overlay)
+        overlay.run(incoming: [], holes: [])
+        clock.now = try #require(overlay.play?.motion.begin) + 0.1
+        let second = press(overlay)
         let motion = try #require(overlay.play?.motion)
-        #expect(first.landAt == motion.begin + motion.settleTime())
+        #expect(motion.velocity != 0)
+        #expect(second.landAt == motion.begin + motion.settleTime())
+        let rest = SpaceSlideStrip(
+            from: motion.from,
+            to: motion.to,
+            velocity: 0,
+            begin: motion.begin
+        )
+        #expect(motion.settleTime() != rest.settleTime())
     }
 
     @Test("a press on another screen says it dropped the play")

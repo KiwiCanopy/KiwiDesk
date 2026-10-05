@@ -2980,7 +2980,8 @@ it.
 :::unreleased
 **A Space switch plays a drawn plate slide; the windows move
 once, underneath (#1956).** With `animations.on_space_change`
-on, an explicit switch fades a plate in over each window the
+on, an explicit switch — a follow and a launch follow included,
+since each changes which Space you are looking at — fades a plate in over each window the
 screen shows, parks those windows AT the press, moves the plates
 as one rigid strip one screen page in the Space Bar's reading
 direction on a critically damped spring — no overshoot, so the
@@ -3025,7 +3026,9 @@ restacks. A plate wholly behind another is dropped, so a
 Monocle Space shows one plate, and a scrolling row only its
 on-screen columns. One builder draws both directions. A sticky
 window stays on screen through the switch, so it draws no plate
-and the strip is cut around it.
+and the strip is cut around it, and a follow's moved window,
+already on screen in the Space it goes to, travels with the user
+uncovered — the one thing that makes a follow look different.
 
 *What it wears.* The shortcuts panel's glass — `.regular`
 Liquid Glass, each pile one container so overlapping plates read
@@ -3036,7 +3039,11 @@ its own. A
 file from before it fills the leaf from the switch's agreement,
 the #1620/#1621 crossing's shape, so an upgrade never opens the
 switch reading "differ". With glass off, under Reduce
-Transparency or before macOS 26 the plates take the material. Reduce Motion takes the
+Transparency or before macOS 26 the plates take the window
+background material, which reads as SOLID: what sets Liquid Glass
+apart cannot be seen in a fade and a 0.28 s move, so any
+see-through blur reads as glass there, and turning glass off must
+look like glass is off. Reduce Motion takes the
 instant switch. There is no style picker and no pace control:
 one transition is less surface to maintain, and a stored `true`
 reads as the plate slide, so no migration is owed.

@@ -149,6 +149,25 @@ struct SpaceSlideSwitchTests {
         #expect(!core.tiler.applier.held.isHeld(w3, now: t0))
     }
 
+    /// A press that drops the running play — here the strip's axis
+    /// changed under it — releases what that play held at once.
+    @Test(
+        "a press dropping the play releases its holds",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func droppedPlayReleasesHolds() throws {
+        let (core, _) = try makeCore(slide: true)
+        let t0 = DispatchTime.now()
+        core.execute("focus_space", args: [.string("2")])
+        defer { core.spaceSlide.end() }
+        try #require(core.tiler.applier.held.isHeld(w3, now: t0))
+        core.tiler.settings.spaceBarStyle.edge = .left
+        core.execute("focus_space", args: [.string("1")])
+        #expect(core.spaceSlide.play?.axis == .vertical)
+        #expect(!core.tiler.applier.held.isHeld(w3, now: t0))
+        #expect(core.tiler.applier.held.isHeld(w1, now: t0))
+    }
+
     /// Any other activation of the screen — a Desktop switch, a
     /// drop — ends the play at its retile, holds released.
     @Test(
