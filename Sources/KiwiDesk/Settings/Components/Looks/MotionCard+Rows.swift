@@ -42,6 +42,9 @@ extension MotionCard {
             )
             .font(.caption)
             .foregroundStyle(.secondary)
+            // The window toggles and their duration form one group
+            // apart from the slide, which it does not pace (#1932).
+            Divider()
         case .animationsOnWindowResize:
             Toggle(
                 L(
@@ -76,15 +79,24 @@ extension MotionCard {
                 SettingsCatalog.colors.motionMore.children.animateLayoutReflows
             )
         case .animationsDurationMS:
-            Divider()
-            // Paces the animation toggles above (#51).
+            // Paces the three window toggles above (#51, #1932).
             StepperRow(
-                label: L("behavior.animations.duration", "Duration"),
+                label: L(
+                    "behavior.animations.window_duration",
+                    "Window duration"
+                ),
                 value: animations.durationMS,
                 in: AnimationSettings.durationBand,
                 step: 10,
-                suffix: "ms"
+                suffix: "ms",
+                help: L(
+                    "behavior.animations.window_duration.help",
+                    "How long a window takes to reach its new place "
+                        + "when it resizes, swaps or reflows. A longer "
+                        + "duration is slower."
+                )
             )
+            .modifier(GreyOut(active: !pacesAWindowAnimation))
             .searchAnchored(
                 SettingsCatalog.colors.motionMore.children.animationDuration
             )
@@ -114,7 +126,12 @@ extension MotionCard {
                 value: animations.shelfDurationMS,
                 in: AnimationSettings.shelfDurationBand,
                 step: 50,
-                suffix: "ms"
+                suffix: "ms",
+                help: L(
+                    "behavior.animations.shelf_duration.help",
+                    "How long the bars take to grow, shrink, fade "
+                        + "and glide into place."
+                )
             )
             .modifier(GreyOut(active: !animations.onShelf.wrappedValue))
             .searchAnchored(
@@ -131,5 +148,12 @@ extension MotionCard {
 
     var animations: Binding<AnimationSettings> {
         $model.config.settings.animations
+    }
+
+    /// Whether any animation the window duration paces is on.
+    var pacesAWindowAnimation: Bool {
+        let value = animations.wrappedValue
+        return value.onWindowResize || value.onWindowSwap
+            || value.onRelayout
     }
 }
