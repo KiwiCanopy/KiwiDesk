@@ -1991,6 +1991,11 @@ kiwishelf.set_minimum(40)
 **Does:** sets the shelf's thickness — both bars' — carved out of
 the layout.
 
+:::unreleased
+The starter setup seeds `32` when the main screen is shorter than
+1000 pt.
+:::
+
 **Example:**
 
 ```lua

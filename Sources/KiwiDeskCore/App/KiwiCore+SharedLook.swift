@@ -53,8 +53,9 @@ extension KiwiCore {
     }
 
     /// Ends an owed crossing at the first apply of a STORED
-    /// profile — a built-in lends nothing: its look becomes the
-    /// shared one (`crossWith`).
+    /// profile — `apply(profile:)`, or `applyStandard` saving one
+    /// — a built-in lends nothing: its look becomes the shared one
+    /// (`crossWith`).
     func adoptSharedLook(from profile: Profile) {
         guard sharedLookLedger.owed, isGuiManaged,
             profiles.list().contains(profile.name)
