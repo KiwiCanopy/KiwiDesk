@@ -112,13 +112,14 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         show()
     }
 
-    /// Shows dashboard window, reloading config if not dirty (#455).
+    /// Shows the dashboard window: a fresh open on Home, an open
+    /// one where it is (`SettingsModel.prepareToShow`, #1970).
     func show() {
-        if !model.isDirty {
-            model.reload()
-        }
-        model.destination = nil
-        model.nav.resetSurfaces()
+        model.prepareToShow(
+            windowShown: window.map {
+                $0.isVisible || $0.isMiniaturized
+            } ?? false
+        )
         if let window {
             // Core first (#1281): a bare order-front of a window
             // the row just panned out reports a clickless focus,
