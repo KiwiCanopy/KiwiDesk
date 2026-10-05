@@ -24,7 +24,9 @@ struct OwnKeyWindowRefreshTests {
                 )
         )
         // `makeTestCore` unhooks the process-wide stream; this
-        // suite is its one consumer.
+        // suite is its one consumer, and still hears every real
+        // key window in the process — safe while no other core
+        // listens (`KeyWindowStreamPinTests`).
         core.wireOwnKeyWindowRefresh()
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1200, height: 800)
