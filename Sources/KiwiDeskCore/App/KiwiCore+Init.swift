@@ -36,8 +36,15 @@ extension KiwiCore {
     static func makeProfileManager(
         in directory: URL
     ) -> ProfileManager {
-        ProfileManager(
+        let manager = ProfileManager(
             directory: directory.appendingPathComponent("profiles")
         )
+        manager.migrationBackups = migrationBackups(in: directory)
+        return manager
+    }
+
+    /// The one home of the migration copies (#1880).
+    static func migrationBackups(in directory: URL) -> URL {
+        directory.appendingPathComponent(MigrationBackup.folderName)
     }
 }

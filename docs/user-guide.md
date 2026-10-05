@@ -132,9 +132,8 @@ Advanced ▸ Discard Saved Window Arrangement** clears it.
 **General ▸ Advanced ▸ Export KiwiDesk Backup…** writes one file
 with your settings, every profile and your saved palettes;
 **Restore from Backup…** puts it back. Not included: `init.lua`
-and the remembered window arrangement. KiwiDesk keeps no backups
-of its own; for continuous sync see [The gui.json
-File](#the-guijson-file).
+and the remembered window arrangement. For continuous sync see
+[The gui.json File](#the-guijson-file).
 
 Restoring **replaces**, it does not merge, and what it replaces
 goes to the **Trash**. On the way, the remembered window
@@ -170,6 +169,19 @@ hand-written setup, the first time you Save in Settings.
 > does not travel: grant Accessibility on each Mac, and expect
 > display layout and macOS Desktops to resolve against what is
 > connected there.
+
+:::unreleased
+When an update moves `gui.json`, a profile, your palettes or your
+looks to a newer file format, KiwiDesk first keeps the file as it
+was in `~/.config/KiwiDesk/migration-backups/`, under its own path
+with `.pre-v<format>` added; `<format>` is the file's own format
+number, not a KiwiDesk version. One copy is kept per file: the
+file before its latest migration. To go back to an older KiwiDesk,
+quit it, copy that file over the original and drop the suffix. A
+backup does not carry the folder, and Reset All Settings leaves
+it. In a synced or dotfiles folder, add `migration-backups/` to
+its `.gitignore`.
+:::
 
 ```json
 {

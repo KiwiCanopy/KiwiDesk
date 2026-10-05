@@ -19,6 +19,9 @@ public enum ConfigArtifact: CaseIterable {
     case palettes
     /// The saved look library (#1684).
     case looks
+    /// The copies a migration keeps of the files it rewrote
+    /// (#1880, `MigrationBackup`).
+    case migrationBackups
 
     /// What a backup carries.
     ///
@@ -36,21 +39,30 @@ public enum ConfigArtifact: CaseIterable {
     public var travelsInABackup: Bool {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return true
+        case .migrationBackups: return false
         }
     }
 
     /// Why anything answering `false` to `travelsInABackup` stays
-    /// behind. Empty today, and kept as a declared slot rather
-    /// than dropped: its absence is what would make a future
-    /// exclusion look like an omission instead of a decision.
+    /// behind: an exclusion is a decision on record, never an
+    /// omission (`SetupBundleArtifactTests`).
     public var leftBehindBecause: String? {
         switch self {
         case .guiConfig, .profiles, .palettes, .looks: return nil
+        case .migrationBackups:
+            return "a copy of this Mac's files at an older format, "
+                + "for a downgrade here; the backup carries the "
+                + "current files"
         }
     }
 }
 
 extension KiwiCore {
+    /// Where a migrated rewrite keeps the original (#1880).
+    var migrationBackups: URL {
+        Self.migrationBackups(in: configDirectory)
+    }
+
     /// Where each artifact lives.
     func url(of artifact: ConfigArtifact) -> URL {
         switch artifact {
@@ -58,6 +70,7 @@ extension KiwiCore {
         case .profiles: return profiles.directory
         case .palettes: return paletteLibrary.url
         case .looks: return lookLibrary.url
+        case .migrationBackups: return migrationBackups
         }
     }
 

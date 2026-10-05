@@ -38,6 +38,11 @@ The Settings app stores its settings in
 event hooks and custom Lua. For the GUI workflow, see the
 [user guide](user-guide.md).
 
+:::unreleased
+A migrated file's previous version is kept in
+`migration-backups/` — see the [user guide](user-guide.md#the-guijson-file).
+:::
+
 ### What coexists with the Settings app, and what doesn't
 
 Whether the Settings app or `init.lua` owns your configuration

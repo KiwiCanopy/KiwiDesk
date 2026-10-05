@@ -18,6 +18,10 @@ public final class LookStore {
     /// URL to `looks.json`.
     public var url: URL { fileURL }
 
+    /// Where a migrated rewrite keeps the original (#1880), set by
+    /// the core that owns the config directory; nil keeps none.
+    var migrationBackups: URL?
+
     public init(directory: URL) {
         fileURL = directory.appendingPathComponent("looks.json")
     }
@@ -29,10 +33,11 @@ public final class LookStore {
         guard var data = try? Data(contentsOf: fileURL) else {
             return nil
         }
-        if let migrated = ConfigMigration.migrated(data) {
-            data = migrated
-            try? migrated.write(to: fileURL, options: .atomic)
-        }
+        data = MigrationBackup.migrateInPlace(
+            data,
+            at: fileURL,
+            backups: migrationBackups
+        )
         guard
             let doc = try? JSONDecoder().decode(
                 LookDocument.self,

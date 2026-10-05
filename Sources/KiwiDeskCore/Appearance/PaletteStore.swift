@@ -16,6 +16,10 @@ public final class PaletteStore {
     /// URL to `palettes.json` (#606).
     public var url: URL { fileURL }
 
+    /// Where a migrated rewrite keeps the original (#1880), set by
+    /// the core that owns the config directory; nil keeps none.
+    var migrationBackups: URL?
+
     public init(directory: URL) {
         fileURL = directory.appendingPathComponent("palettes.json")
     }
@@ -30,10 +34,11 @@ public final class PaletteStore {
         guard var data = try? Data(contentsOf: fileURL) else {
             return nil
         }
-        if let migrated = ConfigMigration.migrated(data) {
-            data = migrated
-            try? migrated.write(to: fileURL, options: .atomic)
-        }
+        data = MigrationBackup.migrateInPlace(
+            data,
+            at: fileURL,
+            backups: migrationBackups
+        )
         guard
             let doc = try? JSONDecoder().decode(
                 PaletteDocument.self,
