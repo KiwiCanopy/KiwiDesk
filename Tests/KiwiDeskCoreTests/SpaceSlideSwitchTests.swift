@@ -73,12 +73,15 @@ struct SpaceSlideSwitchTests {
     )
     func incomingIsHeld() throws {
         let (core, _) = try makeCore(slide: true)
+        // Hold reads are pinned to before the switch: a deadline read
+        // against a later wall clock ages out on a starved runner.
+        let t0 = DispatchTime.now()
         core.execute("focus_space", args: [.string("2")])
         defer { core.spaceSlide.end() }
         #expect(core.spaceSlide.isPlaying)
-        #expect(core.tiler.applier.held.isHeld(w3))
+        #expect(core.tiler.applier.held.isHeld(w3, now: t0))
         #expect(core.tiler.applier.held.isStaged(w3))
-        #expect(!core.tiler.applier.held.isHeld(w1))
+        #expect(!core.tiler.applier.held.isHeld(w1, now: t0))
         #expect(!core.tiler.applier.held.isStaged(w1))
         #expect(core.tiler.animation.activeCount == 0)
         // One page out, one in.
@@ -91,9 +94,10 @@ struct SpaceSlideSwitchTests {
     )
     func reduceMotionIsInstant() throws {
         let (core, _) = try makeCore(slide: false)
+        let t0 = DispatchTime.now()
         core.execute("focus_space", args: [.string("2")])
         #expect(!core.spaceSlide.isPlaying)
-        #expect(!core.tiler.applier.held.isHeld(w3))
+        #expect(!core.tiler.applier.held.isHeld(w3, now: t0))
     }
 
     @Test(
@@ -102,10 +106,13 @@ struct SpaceSlideSwitchTests {
     )
     func settingOffIsInstant() throws {
         let (core, _) = try makeCore(slide: true)
+        // Hold reads are pinned to before the switch: a deadline read
+        // against a later wall clock ages out on a starved runner.
+        let t0 = DispatchTime.now()
         core.tiler.settings.animations.onSpaceChange = false
         core.execute("focus_space", args: [.string("2")])
         #expect(!core.spaceSlide.isPlaying)
-        #expect(!core.tiler.applier.held.isHeld(w3))
+        #expect(!core.tiler.applier.held.isHeld(w3, now: t0))
     }
 
     /// A display follow, a wake or a restore retiles through the
@@ -116,9 +123,12 @@ struct SpaceSlideSwitchTests {
     )
     func onlyNavigationPlays() throws {
         let (core, _) = try makeCore(slide: true)
+        // Hold reads are pinned to before the switch: a deadline read
+        // against a later wall clock ages out on a starved runner.
+        let t0 = DispatchTime.now()
         core.applyFocusedSpaceSwitch(to: SpaceID(2))
         #expect(!core.spaceSlide.isPlaying)
-        #expect(!core.tiler.applier.held.isHeld(w3))
+        #expect(!core.tiler.applier.held.isHeld(w3, now: t0))
     }
 
     /// An instant switch inside a play ends it and sends what it
@@ -129,11 +139,14 @@ struct SpaceSlideSwitchTests {
     )
     func instantSwitchReleasesHolds() throws {
         let (core, _) = try makeCore(slide: true)
+        // Hold reads are pinned to before the switch: a deadline read
+        // against a later wall clock ages out on a starved runner.
+        let t0 = DispatchTime.now()
         core.execute("focus_space", args: [.string("2")])
-        try #require(core.tiler.applier.held.isHeld(w3))
+        try #require(core.tiler.applier.held.isHeld(w3, now: t0))
         core.applyFocusedSpaceSwitch(to: SpaceID(1))
         #expect(!core.spaceSlide.isPlaying)
-        #expect(!core.tiler.applier.held.isHeld(w3))
+        #expect(!core.tiler.applier.held.isHeld(w3, now: t0))
     }
 
     /// Any other activation of the screen — a Desktop switch, a
@@ -144,12 +157,15 @@ struct SpaceSlideSwitchTests {
     )
     func overtakenPlayEnds() throws {
         let (core, _) = try makeCore(slide: true)
+        // Hold reads are pinned to before the switch: a deadline read
+        // against a later wall clock ages out on a starved runner.
+        let t0 = DispatchTime.now()
         core.execute("focus_space", args: [.string("2")])
-        try #require(core.tiler.applier.held.isHeld(w3))
+        try #require(core.tiler.applier.held.isHeld(w3, now: t0))
         core.state.workspaces.activate(SpaceID(1))
         core.retile(pass: .reissue)
         #expect(!core.spaceSlide.isPlaying)
-        #expect(!core.tiler.applier.held.isHeld(w3))
+        #expect(!core.tiler.applier.held.isHeld(w3, now: t0))
     }
 
     /// A follow's moved window is filed into the target while it is
@@ -161,6 +177,9 @@ struct SpaceSlideSwitchTests {
     )
     func shownTargetMemberIsNotHeld() throws {
         let (core, _) = try makeCore(slide: true)
+        // Hold reads are pinned to before the switch: a deadline read
+        // against a later wall clock ages out on a starved runner.
+        let t0 = DispatchTime.now()
         let moved = WindowID(4)
         core.state.apply(
             .windowCreated(
@@ -175,8 +194,8 @@ struct SpaceSlideSwitchTests {
         core.state.workspaces.add(moved, to: SpaceID(2))
         core.execute("focus_space", args: [.string("2")])
         defer { core.spaceSlide.end() }
-        #expect(core.tiler.applier.held.isHeld(w3))
-        #expect(!core.tiler.applier.held.isHeld(moved))
+        #expect(core.tiler.applier.held.isHeld(w3, now: t0))
+        #expect(!core.tiler.applier.held.isHeld(moved, now: t0))
         // Nor plated: a plate would land over it, already there.
         let incoming = try #require(core.spaceSlide.play?.incoming)
         #expect(incoming.contains(w3))
@@ -245,6 +264,40 @@ struct SpaceSlideSwitchTests {
         let ids = core.slidePlates(of: SpaceID(1), stack: [:], in: page)
             .map(\.id)
         #expect(Set(ids) == [w1, w2])
+    }
+
+    /// A floating-mode Space's members are all floats (#1178): the
+    /// focus then draws above a flag-floating neighbour, which the
+    /// flag alone would put on top.
+    @Test(
+        "a floating Space's plates take the effective float tier",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func floatingSpaceTakesTheEffectiveTier() throws {
+        let (core, _) = try makeCore(slide: true)
+        let float = WindowID(6)
+        let w1Frame = try #require(core.state.windows[w1]?.frame)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: float,
+                    pid: 2,
+                    appName: "B",
+                    frame: w1Frame.offsetBy(dx: 60, dy: 60),
+                    isFloating: true
+                )
+            )
+        )
+        core.state.workspaces.add(float, to: SpaceID(1))
+        core.state.workspaces.focus(w1, in: SpaceID(1))
+        let page = CGRect(x: -5000, y: -5000, width: 10_000, height: 10_000)
+        let order = { (core: KiwiCore) in
+            core.slidePlates(of: SpaceID(1), stack: [:], in: page)
+                .map(\.id).filter { $0 == self.w1 || $0 == float }
+        }
+        #expect(order(core) == [w1, float])
+        core.state.workspaces.setMode(SpaceID(1), .floating)
+        #expect(order(core) == [float, w1])
     }
 
     @Test(

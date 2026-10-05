@@ -96,6 +96,39 @@ struct SpaceSlidePlanTests {
         #expect(plates.compactMap(\.iconPid) == [1])
     }
 
+    /// A float in front of the tiled focus in one pile: the draw
+    /// order puts the float last, yet the face is the focus.
+    @Test("the focus is the face even under a float")
+    func focusOutranksAFloatInFront() {
+        let tiled = CGRect(x: 0, y: 0, width: 600, height: 600)
+        let float = CGRect(x: 100, y: 100, width: 300, height: 300)
+        let plates = SpaceSlidePlan.plates(
+            [
+                entry(1, tiled, pid: 1),
+                entry(2, float, pid: 2, floating: true),
+            ],
+            focus: WindowID(1),
+            stack: [:],
+            in: page
+        )
+        #expect(plates.last?.id == WindowID(2))
+        #expect(plates.compactMap(\.iconPid) == [1])
+    }
+
+    @Test("a window thin on one axis draws no plate")
+    func oneAxisSliverIsDropped() {
+        let plates = SpaceSlidePlan.plates(
+            [
+                entry(1, CGRect(x: 0, y: 0, width: 600, height: 10)),
+                entry(2, CGRect(x: 0, y: 100, width: 10, height: 600)),
+            ],
+            focus: nil,
+            stack: [:],
+            in: page
+        )
+        #expect(plates.isEmpty)
+    }
+
     @Test("floats draw above the tiled plane")
     func floatsDrawAbove() {
         let plates = SpaceSlidePlan.plates(
@@ -130,16 +163,17 @@ struct SpaceSlidePlanTests {
 
     @Test("an icon smaller than its floor is dropped")
     func iconFloor() {
+        // The shortest side whose icon reaches the floor, derived.
+        let edge = SpaceSlidePlan.iconMinimum / SpaceSlidePlan.iconShare
         #expect(
             SpaceSlidePlan.iconSide(
-                on: CGRect(x: 0, y: 0, width: 600, height: 99)
+                on: CGRect(x: 0, y: 0, width: 4000, height: edge - 1)
             ) == nil
         )
-        #expect(
-            SpaceSlidePlan.iconSide(
-                on: CGRect(x: 0, y: 0, width: 600, height: 100)
-            ) == SpaceSlidePlan.iconMinimum
+        let side = SpaceSlidePlan.iconSide(
+            on: CGRect(x: 0, y: 0, width: 4000, height: edge)
         )
+        #expect(abs((side ?? 0) - SpaceSlidePlan.iconMinimum) < 0.001)
         #expect(
             SpaceSlidePlan.iconSide(
                 on: CGRect(x: 0, y: 0, width: 4000, height: 4000)

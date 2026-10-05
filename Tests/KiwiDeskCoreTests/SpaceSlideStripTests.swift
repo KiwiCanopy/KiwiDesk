@@ -77,16 +77,31 @@ struct SpaceSlideStripTests {
         #expect(flat.normalizedVelocity == 0)
     }
 
-    @Test("CA's spring is the modelled one")
-    func caSpringMatches() {
-        let spring = CASpringAnimation()
-        spring.mass = 1
-        spring.stiffness = SpaceSlideStrip.stiffness
-        spring.damping = SpaceSlideStrip.damping
-        // Critically damped: damping² == 4·k·m.
-        let ratio =
-            spring.damping
-            / (2 * (spring.stiffness * spring.mass).squareRoot())
-        #expect(abs(ratio - 1) < 0.0001)
+    /// The spring the strip plays is `BarMotion.slideSpring`'s, so
+    /// its parameters are read off that, never built here.
+    @Test("the played spring is the modelled one")
+    @MainActor
+    func playedSpringMatches() throws {
+        let strip = SpaceSlideStrip(
+            from: 0,
+            to: page,
+            velocity: 500,
+            begin: 7
+        )
+        let spring = try #require(
+            BarMotion.slideSpring(
+                keyPath: "transform.translation.x",
+                strip: strip,
+                reduceMotion: false
+            ) as? CASpringAnimation
+        )
+        // Critically damped at the modelled frequency.
+        let omega = (spring.stiffness / spring.mass).squareRoot()
+        #expect(abs(omega - SpaceSlideStrip.omega) < 0.0001)
+        #expect(abs(spring.damping - 2 * omega * spring.mass) < 0.0001)
+        #expect(spring.fromValue as? CGFloat == 0)
+        #expect(spring.toValue as? CGFloat == page)
+        #expect(spring.initialVelocity == strip.normalizedVelocity)
+        #expect(spring.beginTime == 7)
     }
 }

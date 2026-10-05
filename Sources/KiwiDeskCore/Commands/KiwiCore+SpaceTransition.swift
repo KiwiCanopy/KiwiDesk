@@ -34,7 +34,9 @@ extension KiwiCore {
         // focus, and the plate must not linger over the arrival.
         dropMonocleFlip()
         let run = slide.flatMap(prepareSpaceSlide)
-        if run == nil { endSpaceSlide() }
+        // A navigation that stands the slide down cuts a running
+        // one; anything else is the head-of-retile check's.
+        if slide != nil, run == nil { endSpaceSlide() }
         retile(
             animated: false,
             pass: .reissue,

@@ -77,6 +77,24 @@ struct FrameApplierHeldTests {
         #expect(counts.withLock { $0.positions } == 1)
     }
 
+    /// A burst holds a staged window again past its first landing:
+    /// the first release finds the later deadline, reschedules,
+    /// and the write leaves once, no earlier than the second.
+    @Test("a window held again lands at the later landing, once")
+    func reheldWindowLandsLater() async throws {
+        let counts = OSAllocatedUnfairLock(initialState: Counts())
+        let applier = makeApplier(counts)
+        applier.holdWrites([w], until: .now() + 0.05)
+        applier.applyInstant(w, frame, setSize: false)
+        let later = DispatchTime.now() + 0.2
+        applier.holdWrites([w], until: later)
+        try await waitForWrite(counts)
+        #expect(counts.withLock { $0.positions } == 1)
+        #expect(DispatchTime.now() >= later)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(counts.withLock { $0.positions } == 1)
+    }
+
     @Test("releasing a hold sends its write now")
     func releaseSendsNow() async throws {
         let counts = OSAllocatedUnfairLock(initialState: Counts())
