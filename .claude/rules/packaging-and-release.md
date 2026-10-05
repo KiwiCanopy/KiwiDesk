@@ -696,7 +696,10 @@ save the same macOS minutes; only the second survives
 `scripts/protect-main.sh` (#487). `ci.yml` therefore always
 triggers, and a cheap `ubuntu-latest` `changes` job reads
 `.github/ci-ignore.txt` and gates the two macOS jobs on its
-output.
+output — and on its failure too: a gated job runs when `changes`
+did not succeed, since the bare `if:` implies `success()` and a
+failed filter would otherwise skip the build and pass the check
+with nothing run (#1984, `CiPathFilterTests`).
 
 **Add an entry to `.github/ci-ignore.txt` only when no test, no
 build step and no lint step reads the path** — and audit all three,

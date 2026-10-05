@@ -145,7 +145,12 @@ jobs:
 
   build-lint-test:
     needs: changes
-    if: needs.changes.outputs.run == 'true'
+    # A failed or timed-out filter runs everything: a bare `if:`
+    # implies success(), and the skip it makes passes a required
+    # check with nothing run (#1984).
+    if: >-
+      ${{ !cancelled() && (needs.changes.result != 'success'
+      || needs.changes.outputs.run == 'true') }}
     name: Build, Lint & Test
     # xcode-27 (macOS 27, Xcode 27 GA — a preview image, #1500):
     # the toolchain the tree is developed on. The tree needs at
@@ -212,7 +217,12 @@ jobs:
 
   release-build:
     needs: changes
-    if: needs.changes.outputs.run == 'true'
+    # A failed or timed-out filter runs everything: a bare `if:`
+    # implies success(), and the skip it makes passes a required
+    # check with nothing run (#1984).
+    if: >-
+      ${{ !cancelled() && (needs.changes.result != 'success'
+      || needs.changes.outputs.run == 'true') }}
     name: Release Build
     # A sibling job, not a fourth step in build-lint-test: `swift
     # test` there already compiles the tree in debug, so building
