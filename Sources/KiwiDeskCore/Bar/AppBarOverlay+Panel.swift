@@ -35,6 +35,22 @@ extension AppBarOverlay {
         #endif
     }
 
+    /// A section's scrolled run: its frame is the viewport's
+    /// (`ShelfOverflow.runFrame`) while its items overhang it, so
+    /// a hit is bounded by the clipping container, never by this
+    /// frame, or a scrolled run's trailing items take no click
+    /// (#1965).
+    final class RunView: FlippedView {
+        override func hitTest(_ point: NSPoint) -> NSView? {
+            guard !isHidden else { return nil }
+            let local = convert(point, from: superview)
+            for view in subviews.reversed() {
+                if let hit = view.hitTest(local) { return hit }
+            }
+            return bounds.contains(local) ? self : nil
+        }
+    }
+
     /// Resolves the section's own glass hosting (#407).
     func glassHosting(_ style: AppBarLook) -> GlassHosting {
         GlassHosting.resolve(
