@@ -91,16 +91,9 @@ struct BorderOrderReassertTests {
         #expect(orders == 7)
     }
 
-    /// The drop pass is awaited, so the flag is read after a main
-    /// queue turn; any window in the test process turning key then
-    /// re-syncs every wired core steady (`wireOwnKeyWindowRefresh`),
-    /// so this core is unhooked from that process-global stream.
     @Test("A retile syncs steady; both settle passes re-stack")
     func settlePassesReassert() async {
         let core = makeTestCore()
-        for token in core.borders.ownKeyWindowObservers {
-            NotificationCenter.default.removeObserver(token)
-        }
         core.updateBorders()
         #expect(core.borders.lastSyncReassertedOrder == false)
         core.runBorderResync()

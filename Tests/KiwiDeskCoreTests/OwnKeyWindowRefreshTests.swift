@@ -23,6 +23,9 @@ struct OwnKeyWindowRefreshTests {
                     "kiwi-own-key-refresh-\(UUID().uuidString)"
                 )
         )
+        // `makeTestCore` unhooks the process-wide stream; this
+        // suite is its one consumer.
+        core.wireOwnKeyWindowRefresh()
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1200, height: 800)
         }
