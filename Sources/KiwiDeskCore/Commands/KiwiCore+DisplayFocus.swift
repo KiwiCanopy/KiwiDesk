@@ -83,7 +83,7 @@ extension KiwiCore {
     /// one copy: the frontmost pid is captured before the raise
     /// can change it (the settle's dropped-activate detection,
     /// #463); the focus skips its own retile because the
-    /// coordinated switch retile below owns placement — a
+    /// switch retile below owns placement — a
     /// second retile would spring windows from stale
     /// stash-corner frames (#11); and the settle is armed after
     /// the emit so subscribers see the switch before its

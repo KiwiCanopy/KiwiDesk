@@ -178,11 +178,10 @@ struct SpaceSwitchGlassMigrationTests {
         #expect(ConfigMigration.migratingAbsentSpaceSwitchGlass(data) == nil)
     }
 
-    /// The whole chain from before the drag and sticky leaves
-    /// (#1620/#1621): this step reads them, so it runs after the
-    /// step that fills them — an off switch reaches the plates.
-    @Test("an off switch from before the overlay leaves reaches the plates")
-    func runsAfterTheOverlayStep() throws {
+    /// An off switch from before the drag and sticky leaves
+    /// (#1620/#1621) reaches the plates through the whole chain.
+    @Test("an off switch from before #1620 reaches the plates")
+    func oldOffSwitchReachesThePlates() throws {
         var settings = try Self.settings(
             [false, false, false, false],
             dropGroup: true

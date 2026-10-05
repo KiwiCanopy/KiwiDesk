@@ -33,7 +33,7 @@ struct OverlayGlassGateTests {
         ),
         (
             file: "Commands/KiwiCore+SpaceSlide.swift",
-            function: "func spaceSlidePress(",
+            function: "func prepareSpaceSlide(",
             stored: "glass: tiler.settings.spaceSwitchLiquidGlass"
         ),
     ]

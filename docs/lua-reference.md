@@ -791,13 +791,13 @@ KiwiDesk.set_shortcut_panel_liquid_glass(true)
 **Does:** draws the plates a Space switch slides
 ([animations.set_on_space_change](#animationsset_on_space_change))
 in macOS&nbsp;26 Liquid Glass, the shortcuts panel's `.regular`
-glass. Off, or below macOS&nbsp;26, they draw the material the
-panel falls back to. Read at the next switch.
+glass. Off, or below macOS&nbsp;26, they draw a translucent
+material. Read at the next switch.
 
 Stored as `space_switch.liquid_glass` in the profile. Also stood
 down while macOS's Reduce transparency is on, the stored value
 untouched. The GUI twin is the one **Liquid Glass** switch on
-Colours &amp; Animations.
+Looks &amp; Animations.
 
 **Example:**
 
@@ -825,9 +825,7 @@ owns the model. The switch is instant by default.
 
 :::unreleased
 With `animations.set_on_space_change` on, the switch plays the
-plate slide: plates cover the windows, slide to the new Space and
-fade over its windows, which still move only once (see
-Animations).
+plate slide ([animations.set_on_space_change](#animationsset_on_space_change)).
 :::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
@@ -2098,8 +2096,12 @@ and the sticky mark their flat look. The stored values are
 untouched, so the glass and the alpha return the moment the
 setting goes off (#1374).
 
+:::unreleased
+The Space switch's plates draw their material then too.
+:::
+
 Settings has no KiwiShelf row for this (#1307): one **Liquid
-Glass** switch on Colours &amp; Animations writes this leaf, the
+Glass** switch on Looks &amp; Animations writes this leaf, the
 shortcuts panel's
 ([set_shortcut_panel_liquid_glass](#set_shortcut_panel_liquid_glass)),
 the drag visuals' ([drag.set_liquid_glass](#dragset_liquid_glass))
@@ -3298,7 +3300,7 @@ the top each stroke keeps its colour exactly, so the colour's own
 contrast still holds there. The unfocused border never takes it.
 
 Settings shows it as **Sheen**, a slider beneath the **Liquid
-Glass** switch on Colours &amp; Animations, reading `+50%`,
+Glass** switch on Looks &amp; Animations, reading `+50%`,
 `−50%` or **Off**. The Liquid Glass switch does not change it.
 
 **Example:**
@@ -5476,20 +5478,19 @@ animations.set_size_rate(0)    -- back to per-tick default
 **Expects:** `true` or `false` (default `false`).
 
 **Does:** enables or disables the animation of an explicit
-Space switch (`focus_space`, a Space Bar click, a
-move-and-follow).
+Space switch — `focus_space`, a Space Bar click, the scroll
+Space step, a move-and-follow or a launch follow.
 
 :::unreleased
 On, a switch plays the plate slide: a plate with its app's icon
 fades in over each window on the screen, the plates slide as one
 strip one screen toward the new Space — across for a Space Bar
-on the top or bottom edge, down for one on a side — and fade out
-over the windows that arrive. The windows themselves move once
-each, under the plates, so the slide costs no more window moves
-than the instant switch. The plates wear Liquid Glass
+on the top or bottom edge, up or down for one on a side — and
+fade out over the windows that arrive. The windows themselves
+move once each, under the plates. The plates wear Liquid Glass
 ([set_space_switch_liquid_glass](#set_space_switch_liquid_glass));
-Reduce Motion keeps the switch instant. A slow app's window can land
-just after the plates fade.
+Reduce Motion keeps the switch instant
+([Accepted limitations](accepted-limitations.md)).
 :::
 
 macOS Desktop switches are never animated in either direction —

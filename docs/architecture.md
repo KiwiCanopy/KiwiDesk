@@ -175,6 +175,13 @@ default `.event` pass (`RetilePass`). A reissue forces the park
 of only the Spaces that just left view; a window parked longer
 keeps its place (`StashDepartures`).
 
+An explicit Space switch with switch animation on wraps that
+reissue in the plate slide (`Commands/KiwiCore+SpaceSlide`):
+before the pass, the overlay in `Animation/` covers the windows
+shown and the incoming windows' writes are held in the
+`FrameApplier`'s hold; after it, the strip runs, and each held
+write leaves from its app's queue when the strip lands (#1956).
+
 A commanded focus in a Monocle Space goes through the flip door
 (`App/KiwiCore+MonocleFlip`), which plays the card flip from
 `Animation/` and lands the ordinary `focusWindow` once the blur

@@ -11,7 +11,7 @@ import QuartzCore
 /// delays none of it. `SpaceSlidePlan` decides what is drawn.
 @MainActor
 final class SpaceSlideOverlay {
-    private var panels: [DisplayID: NSPanel] = [:]
+    var panels: [DisplayID: NSPanel] = [:]
 
     /// AppKit keeps a visible panel alive after its owner is gone
     /// (#1868).
@@ -44,23 +44,34 @@ final class SpaceSlideOverlay {
         }
         return order
     }
-    /// An app's icon by pid.
+    /// An app's icon by pid, from the one cache the bars share.
     var icon: @MainActor (pid_t) -> NSImage? = {
-        NSRunningApplication(processIdentifier: $0)?.icon
+        BarIconCache.icon(pid: $0)
     }
     /// The render-server clock every time here is measured on.
     var clock: @MainActor () -> CFTimeInterval = { CACurrentMediaTime() }
 
     /// One switch's request: the screen it plays on, its Cocoa
-    /// frame, the axis, the plates over the windows shown now and
-    /// the windows that stay (sticky), both in AX coordinates.
+    /// frame, the axis and direction (+1: the new page enters from
+    /// the trailing side), the plates over the windows shown now,
+    /// the windows that stay (sticky) — both in AX coordinates —
+    /// and the windows whose writes the switch holds.
     struct Press {
         let display: DisplayID
         let screen: CGRect
         let axis: SpaceSlidePlan.Axis
+        let direction: CGFloat
         let outgoing: [SpaceSlidePlan.Plate]
         let holes: [CGRect]
+        let holding: Set<WindowID>
         let glass: Bool
+    }
+
+    /// What a press decided: when the strip lands, and the holds a
+    /// dropped play leaves for the caller to release now.
+    struct Pressed {
+        let landAt: CFTimeInterval
+        let released: Set<WindowID>
     }
 
     struct Play {
@@ -75,8 +86,8 @@ final class SpaceSlideOverlay {
         var pages: [CGFloat: NSView] = [:]
         var motion = SpaceSlideStrip()
         var target: CGFloat = 0
-        var pressAt: CFTimeInterval = 0
-        var plannedBegin: CFTimeInterval = 0
+        /// Every window a press of this play holds.
+        var held: Set<WindowID> = []
         var landAt: CFTimeInterval = 0
         var liftAt: CFTimeInterval = 0
 
@@ -90,38 +101,61 @@ final class SpaceSlideOverlay {
 
     var isPlaying: Bool { play != nil }
 
-    /// Starts or carries on a play and covers the windows shown
-    /// now; returns the render time the strip lands, which is when
-    /// the incoming windows' held writes may leave.
-    func press(_ press: Press) -> CFTimeInterval {
+    /// Starts or carries on a play: covers the windows shown now
+    /// and decides the strip's whole motion toward the new page —
+    /// the landing the held writes wait for is read off it.
+    func press(_ press: Press) -> Pressed {
         let now = clock()
-        if let play, play.display != press.display || play.axis != press.axis {
-            end()
+        var released: Set<WindowID> = []
+        if let play,
+            play.display != press.display || play.axis != press.axis
+        {
+            released = end()
         }
         var fadeFrom: Float?
         var current: Play
+        var planned: CFTimeInterval
         if let play {
             current = play
             current.glass = press.glass
             if now >= play.liftAt {
                 fadeFrom = play.fader.presentation()?.opacity ?? 0
             }
-            // Windows already landed need the park's time again;
-            // ones still held never showed, so the strip goes on.
-            current.plannedBegin =
-                now >= play.landAt
-                ? now + SpaceSlidePlan.stripDelay
-                : max(now, play.motion.begin)
+            if now >= play.landAt {
+                // Landed windows need the park's time again: the
+                // strip rests where it is and waits for them.
+                let rest = play.motion.state(at: now).offset
+                current.motion = SpaceSlideStrip(
+                    from: rest,
+                    to: rest,
+                    velocity: 0,
+                    begin: now
+                )
+                planned = now + SpaceSlidePlan.stripDelay
+            } else {
+                // Held windows never showed: the strip goes on.
+                planned = max(now, play.motion.begin)
+            }
         } else {
             current = start(press)
-            current.plannedBegin = now + SpaceSlidePlan.stripDelay
+            planned = now + SpaceSlidePlan.stripDelay
             fadeFrom = 0
         }
-        current.pressAt = now
+        let outgoing = current.target
+        let page = outgoing + press.direction * current.pageLength
+        current.motion = current.motion.retargeted(
+            to: page,
+            at: now,
+            begin: planned
+        )
+        current.target = page
+        current.held.formUnion(press.holding)
+        current.landAt = current.motion.begin + current.motion.settleTime()
+        current.liftAt = current.landAt + SpaceSlidePlan.landMargin
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         setHoles(press.holes, in: current)
-        replacePage(at: current.target, with: press.outgoing, in: &current)
+        replacePage(at: outgoing, with: press.outgoing, in: &current)
         current.fader.opacity = 1
         if let from = fadeFrom {
             current.fader.removeAnimation(forKey: "out")
@@ -136,47 +170,28 @@ final class SpaceSlideOverlay {
                 forKey: "in"
             )
         }
-        let begin =
-            current.motion.retargeted(
-                to: current.target,
-                at: now,
-                begin: current.plannedBegin
-            ).begin
-        current.landAt = begin + SpaceSlidePlan.settle
-        current.liftAt = current.landAt + SpaceSlidePlan.landMargin
         scheduleLift(&current, now: now)
         CATransaction.commit()
         // Ahead of the retile in this same turn: the fade must not
         // wait for the switch's own main-thread work.
         CATransaction.flush()
         play = current
-        return current.landAt
+        return Pressed(landAt: current.landAt, released: released)
     }
 
-    /// Adds the incoming page one page toward `direction` (+1:
-    /// from the trailing side) and runs the strip there from where
-    /// it is, at the speed it has.
-    func run(
-        incoming: [SpaceSlidePlan.Plate],
-        direction: CGFloat,
-        holes: [CGRect]
-    ) {
+    /// Adds the incoming page where the press aimed the strip and
+    /// runs the motion the press decided.
+    func run(incoming: [SpaceSlidePlan.Plate], holes: [CGRect]) {
         guard var current = play else { return }
-        let page = current.target + direction * current.pageLength
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         setHoles(holes, in: current)
-        replacePage(at: page, with: incoming, in: &current)
-        current.motion = current.motion.retargeted(
-            to: page,
-            at: current.pressAt,
-            begin: current.plannedBegin
-        )
-        current.target = page
+        replacePage(at: current.target, with: incoming, in: &current)
+        prunePages(&current)
         let keyPath = Self.keyPath(current.axis)
         let layer = current.strip.layer
         layer?.setValue(
-            Self.translation(page, current.axis),
+            Self.translation(current.target, current.axis),
             forKeyPath: keyPath
         )
         layer?.removeAnimation(forKey: "strip")
@@ -193,11 +208,13 @@ final class SpaceSlideOverlay {
         play = current
     }
 
-    /// Drops the play at once and leaves the panel dormant.
-    func end() {
+    /// Drops the play at once and leaves the panel dormant;
+    /// returns the windows it held, for the caller to release.
+    @discardableResult
+    func end() -> Set<WindowID> {
         teardown?.cancel()
         teardown = nil
-        guard let current = play else { return }
+        guard let current = play else { return [] }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         current.fader.removeAllAnimations()
@@ -211,6 +228,7 @@ final class SpaceSlideOverlay {
         current.holeHost.layer?.mask = nil
         CATransaction.commit()
         play = nil
+        return current.held
     }
 
     private func scheduleLift(_ current: inout Play, now: CFTimeInterval) {
@@ -232,118 +250,5 @@ final class SpaceSlideOverlay {
             deadline: .now() + max(idle, 0),
             execute: item
         )
-    }
-
-    /// A fresh play on `press.display`'s panel, ordering the panel
-    /// in the first time only.
-    private func start(_ press: Press) -> Play {
-        let panel = panels[press.display] ?? Self.makePanel()
-        panels[press.display] = panel
-        if panel.frame != press.screen {
-            panel.setFrame(press.screen, display: false)
-        }
-        let bounds = CGRect(origin: .zero, size: press.screen.size)
-        let root = NSView(frame: bounds)
-        root.wantsLayer = true
-        root.layer?.opacity = 0
-        let holeHost = NSView(frame: bounds)
-        holeHost.wantsLayer = true
-        root.addSubview(holeHost)
-        let strip = NSView(frame: bounds)
-        strip.wantsLayer = true
-        holeHost.addSubview(strip)
-        panel.contentView = root
-        if !panel.isVisible { present(panel) }
-        return Play(
-            display: press.display,
-            panel: panel,
-            screen: press.screen,
-            axis: press.axis,
-            fader: root.layer ?? CALayer(),
-            holeHost: holeHost,
-            strip: strip,
-            glass: press.glass
-        )
-    }
-
-    /// The sticky windows stay on screen above the plates: a hole
-    /// in the strip's host, fixed to the screen while it moves.
-    private func setHoles(_ holes: [CGRect], in current: Play) {
-        guard !holes.isEmpty else {
-            current.holeHost.layer?.mask = nil
-            return
-        }
-        let bounds = current.holeHost.bounds
-        let path = CGMutablePath()
-        path.addRect(bounds)
-        for hole in holes { path.addRect(local(hole, in: current)) }
-        let mask = CAShapeLayer()
-        mask.frame = bounds
-        mask.path = path
-        mask.fillRule = .evenOdd
-        current.holeHost.layer?.mask = mask
-    }
-
-    private func replacePage(
-        at offset: CGFloat,
-        with plates: [SpaceSlidePlan.Plate],
-        in current: inout Play
-    ) {
-        current.pages[offset]?.removeFromSuperview()
-        let page = pageView(plates, at: offset, in: current)
-        current.strip.addSubview(page)
-        current.pages[offset] = page
-    }
-
-    /// A page's place in the strip: across to the right, or down
-    /// for a side bar — the later Space follows on.
-    static func pageOrigin(_ offset: CGFloat, _ axis: SpaceSlidePlan.Axis)
-        -> CGPoint
-    {
-        axis == .horizontal
-            ? CGPoint(x: offset, y: 0) : CGPoint(x: 0, y: -offset)
-    }
-
-    static func keyPath(_ axis: SpaceSlidePlan.Axis) -> String {
-        axis == .horizontal
-            ? "transform.translation.x" : "transform.translation.y"
-    }
-
-    /// The strip's translation that shows the page at `offset`.
-    static func translation(
-        _ offset: CGFloat,
-        _ axis: SpaceSlidePlan.Axis
-    ) -> CGFloat {
-        axis == .horizontal ? -offset : offset
-    }
-
-    static func translated(
-        _ motion: SpaceSlideStrip,
-        _ axis: SpaceSlidePlan.Axis
-    ) -> SpaceSlideStrip {
-        let sign: CGFloat = axis == .horizontal ? -1 : 1
-        return SpaceSlideStrip(
-            from: sign * motion.from,
-            to: sign * motion.to,
-            velocity: sign * motion.velocity,
-            begin: motion.begin
-        )
-    }
-
-    /// `rect` (AX) in the panel's own coordinates.
-    func local(_ rect: CGRect, in current: Play) -> CGRect {
-        GeometryUtils.flip(rect, primaryHeight: GeometryUtils.primaryHeight)
-            .offsetBy(dx: -current.screen.minX, dy: -current.screen.minY)
-    }
-
-    private static func makePanel() -> NSPanel {
-        let panel = BarPanel.makeNonActivating()
-        panel.level = NSWindow.Level(rawValue: BarPanel.level.rawValue - 1)
-        panel.ignoresMouseEvents = true
-        // On every Desktop, since it is ordered in once and stays.
-        panel.collectionBehavior = [
-            .transient, .ignoresCycle, .canJoinAllSpaces, .stationary,
-        ]
-        return panel
     }
 }

@@ -29,72 +29,83 @@ extension KiwiCore {
             || spaceSlide.reduceMotion()
     }
 
-    /// Plays the slide around the switch's retile into the active
-    /// Space; false where it stands down, and the caller retiles
-    /// instantly.
-    func playSpaceSlide(
-        _ intent: SpaceSlideIntent,
-        arriving: WindowID?
-    ) -> Bool {
+    /// Starts the slide ahead of the switch's one retile: covers
+    /// what the screen shows, decides the strip's motion and holds
+    /// the incoming windows' writes until it lands. Nil where it
+    /// stands down, and the switch is instant.
+    func prepareSpaceSlide(_ intent: SpaceSlideIntent) -> SpaceSlideRun? {
+        guard !spaceSlideStandsDown,
+            let target = state.workspaces.activeSpace,
+            let screen = screen(for: intent.display)
+        else { return nil }
         // The one stack read, at the press: parking moves frames
         // and never restacks, so it answers both directions.
-        guard !spaceSlideStandsDown,
-            let target = state.workspaces.activeSpace
-        else { return false }
         let stack = spaceSlide.stackOrder()
-        guard let press = spaceSlidePress(intent, stack: stack)
-        else { return false }
-        let landAt = spaceSlide.press(press)
-        let incoming = slideMembers(of: target).map(\.id)
-        let wait = max(landAt - spaceSlide.clock(), 0)
-        tiler.applier.holdWrites(incoming, until: .now() + wait)
-        retile(
-            animated: false,
-            pass: .reissue,
-            newlyCreatedWindow: arriving
+        let page = GeometryUtils.flip(
+            screen.frame,
+            primaryHeight: GeometryUtils.primaryHeight
         )
-        let page = press.screen.flippedToAX
-        spaceSlide.run(
-            incoming: slidePlates(
-                of: target,
-                stack: stack,
-                in: page
-            ),
-            direction: SpaceSlidePlan.direction(
-                from: intent.leaving,
-                to: target,
-                order: state.workspaces.order
-            ),
-            holes: press.holes + stickyHoles(in: page, sent: true)
-        )
-        return true
-    }
-
-    /// The press for `intent`: the screen, its axis and glass, and
-    /// the plates over what it shows now.
-    private func spaceSlidePress(
-        _ intent: SpaceSlideIntent,
-        stack: [UInt32: Int]
-    ) -> SpaceSlideOverlay.Press? {
-        guard let screen = screen(for: intent.display) else {
-            return nil
+        // A window the switch filed into the target while it is
+        // still on screen — a follow's moved window, a launch's
+        // new one — goes with the user: neither covered nor held.
+        let incoming = slideMembers(of: target).filter {
+            !SpaceSlidePlan.shows(sentFrame($0.id) ?? $0.frame, on: page)
         }
-        let page = screen.frame.flippedToAX
+        let holes = stickyHoles(on: intent.display, in: page)
         let glass = LiquidGlassGate.rendered(
             glass: tiler.settings.spaceSwitchLiquidGlass
         )
-        return SpaceSlideOverlay.Press(
-            display: intent.display,
-            screen: screen.frame,
-            axis: SpaceSlidePlan.axis(
-                spaceBarEdge: tiler.settings.spaceBarStyle.edge
-            ),
-            outgoing: intent.leaving.map {
-                slidePlates(of: $0, stack: stack, in: page)
-            } ?? [],
-            holes: stickyHoles(in: page, sent: false),
-            glass: glass
+        let pressed = spaceSlide.press(
+            SpaceSlideOverlay.Press(
+                display: intent.display,
+                screen: screen.frame,
+                axis: SpaceSlidePlan.axis(
+                    spaceBarEdge: tiler.settings.spaceBarStyle.edge
+                ),
+                direction: SpaceSlidePlan.direction(
+                    from: intent.leaving,
+                    to: target,
+                    order: state.workspaces.order
+                ),
+                outgoing: intent.leaving.map {
+                    slidePlates(of: $0, stack: stack, in: page)
+                } ?? [],
+                holes: holes,
+                holding: Set(incoming.map(\.id)),
+                glass: glass
+            )
         )
+        tiler.applier.releaseHolds(pressed.released)
+        let wait = max(pressed.landAt - spaceSlide.clock(), 0)
+        tiler.applier.holdWrites(incoming.map(\.id), until: .now() + wait)
+        return SpaceSlideRun(
+            target: target,
+            display: intent.display,
+            page: page,
+            stack: stack,
+            holes: holes
+        )
+    }
+
+    /// Runs the strip once the switch's retile has sent the
+    /// incoming frames, which the incoming page is built from.
+    func runSpaceSlide(_ run: SpaceSlideRun) {
+        spaceSlide.run(
+            incoming: slidePlates(
+                of: run.target,
+                stack: run.stack,
+                in: run.page
+            ),
+            holes: run.holes
+                + stickyHoles(on: run.display, in: run.page)
+        )
+    }
+
+    /// Ends a play an instant switch overtakes, releasing the
+    /// writes it held.
+    func endSpaceSlide() {
+        guard spaceSlide.isPlaying else { return }
+        tiler.applier.releaseHolds(spaceSlide.end())
     }
 
     /// `space`'s plates on `page`, from the frames last sent —
@@ -109,7 +120,7 @@ extension KiwiCore {
             slideMembers(of: space).map {
                 SpaceSlidePlan.Entry(
                     id: $0.id,
-                    frame: tiler.commandedFrame(of: $0.id) ?? $0.frame,
+                    frame: sentFrame($0.id) ?? $0.frame,
                     pid: $0.pid,
                     floats: EffectiveFloat.applies(
                         isFloating: $0.isFloating,
@@ -123,34 +134,48 @@ extension KiwiCore {
         )
     }
 
-    /// The members a slide moves: a sticky window stays on screen
-    /// and a full-screen one is on its own Desktop.
+    /// The frame last sent to `id`; a burst's held window never
+    /// showed it.
+    private func sentFrame(_ id: WindowID) -> CGRect? {
+        tiler.commandedFrame(of: id)
+    }
+
+    /// The members a slide moves: a window the stash keeps on
+    /// screen (#445) stays put, and a full-screen one is on its
+    /// own Desktop.
     private func slideMembers(of space: SpaceID) -> [ManagedWindow] {
         (state.workspaces[space]?.windows ?? []).compactMap {
             state.windows[$0]
-        }.filter { !$0.isSticky && !$0.isFullscreen }
+        }.filter {
+            !$0.isFullscreen
+                && !state.stickyExemptFromStash($0, onSpace: space)
+        }
     }
 
-    /// The sticky windows on `page` — where they are, or where the
-    /// switch just sent them — which the plates leave uncovered.
-    private func stickyHoles(in page: CGRect, sent: Bool) -> [CGRect] {
-        state.windows.all.compactMap { window in
-            guard window.isSticky, !window.isFullscreen else {
-                return nil
-            }
-            let frame =
-                sent
-                ? tiler.commandedFrame(of: window.id) ?? window.frame
-                : window.frame
-            return frame.intersects(page) ? frame : nil
+    /// The sticky windows the screen renders through the switch,
+    /// from the render verdict (#1225), where they are and where
+    /// the switch sent them; the plates leave them uncovered.
+    private func stickyHoles(
+        on display: DisplayID,
+        in page: CGRect
+    ) -> [CGRect] {
+        state.windows.all.flatMap { window -> [CGRect] in
+            guard !window.isFullscreen,
+                let shown = state.stickyRenderSpace(of: window),
+                state.workspaces.display(of: shown) == display
+            else { return [] }
+            return [window.frame, sentFrame(window.id)]
+                .compactMap { $0 }
+                .filter { $0.intersects(page) }
         }
     }
 }
 
-extension CGRect {
-    /// A Cocoa screen rect in AX coordinates.
-    @MainActor
-    fileprivate var flippedToAX: CGRect {
-        GeometryUtils.flip(self, primaryHeight: GeometryUtils.primaryHeight)
-    }
+/// What a prepared slide needs once the switch's retile ran.
+struct SpaceSlideRun {
+    let target: SpaceID
+    let display: DisplayID
+    let page: CGRect
+    let stack: [UInt32: Int]
+    let holes: [CGRect]
 }

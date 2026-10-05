@@ -2977,15 +2977,16 @@ the animations master like it. The #881 sentence above,
 is still the swap, and the card is what the eye follows across
 it.
 
+:::unreleased
 **A Space switch plays a drawn plate slide; the windows move
 once, underneath (#1956).** With `animations.on_space_change`
-on, an explicit switch — `focus_space`, a Space Bar click, a
-move-and-follow — fades a plate in over each window the screen
-shows (80 ms), parks those windows AT the press, moves the
-plates as one rigid strip one screen page in the Space Bar's
-reading direction on a critically damped spring (0.30 s
-response, no overshoot), lands the incoming windows under their
-plates and fades the plates out (180 ms). It retires the corner
+on, an explicit switch fades a plate in over each window the
+screen shows, parks those windows AT the press, moves the plates
+as one rigid strip one screen page in the Space Bar's reading
+direction on a critically damped spring — no overshoot, so the
+strip never swings past the page it lands on — lands the
+incoming windows under their plates and fades the plates out.
+`SpaceSlidePlan` holds the times. It retires the corner
 slide (#207), which animated the windows themselves: every
 frame of it was an AX write to every window of two Spaces, and
 a slow app's write sticks for half a second inside its own
@@ -3047,8 +3048,9 @@ ordered in, dormant and empty between plays; everything that
 moves is a layer. KiwiDesk's own windows move through AppKit
 inside the switch's own turn, since the main queue would run
 their park only after it. A slow app's window can still land
-after the plates have faded, and when the focus ring appears
-beside it is #1959's ruling.
+after the plates have faded; whether the focus ring waits for
+it is tracked in #1959.
+:::
 
 **A resize span is the layout region, not the display
 (#537).** Anything that divides a delta by a span — or
@@ -12983,10 +12985,14 @@ the shelf's Fill is then the only one there is.
 draws it.** (#1307, 2026-09-07; #1517.) Three surfaces — the two
 bars and the ⌃⌥K shortcuts panel (#1295) — under two
 independent per-bar settings and a constant is the shape one row
-on Colours & Animations replaces: it writes every glass leaf —
+on Looks & Animations replaces: it writes every glass leaf —
 the shelf's, which both bars read, the panel's, and (below) the
 drag visuals' and the sticky mark's — stored side by side in the
 profile.
+
+:::unreleased
+The Space switch plates' leaf joins them (#1956).
+:::
 
 **Profile-scoped, and the alternative was not merely riskier but
 unbuildable.** Moving the value app-wide into `gui.json` needed a

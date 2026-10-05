@@ -5,9 +5,8 @@ import Foundation
 /// State (active space, focus, bars, events) commits up front; the
 /// frames then land in one instant pass. An explicit switch with
 /// `animations.on_space_change` on plays the plate slide around
-/// that pass (`playSpaceSlide`): the motion is drawn, and the
-/// windows still move once each. The corner slide that animated
-/// the windows themselves is retired (#1956).
+/// that pass (`prepareSpaceSlide`, `runSpaceSlide`, #1956): the
+/// motion is drawn, and the windows still move once each.
 ///
 /// Native macOS Space switches are untouched: AX cannot address
 /// an inactive desktop's windows, so that path stays instant in
@@ -34,13 +33,13 @@ extension KiwiCore {
         // with its play (#1391): the switch's own raise picks the
         // focus, and the plate must not linger over the arrival.
         dropMonocleFlip()
-        if let slide, playSpaceSlide(slide, arriving: newcomer) {
-            return
-        }
+        let run = slide.flatMap(prepareSpaceSlide)
+        if run == nil { endSpaceSlide() }
         retile(
             animated: false,
             pass: .reissue,
             newlyCreatedWindow: newcomer
         )
+        if let run { runSpaceSlide(run) }
     }
 }

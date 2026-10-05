@@ -285,8 +285,8 @@ extension KiwiCore {
         }
         if !follow {
             // The follow branch retiled inside `followSwitch`
-            // (a follow IS a space switch — same coordinated
-            // out+in policy, #207, same force contract).
+            // (a follow IS a space switch — same policy and force
+            // contract).
             retile(animated: true)
         }
     }

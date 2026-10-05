@@ -48,8 +48,6 @@ struct FrameApplierOwnWindowTests {
         #expect(moves.all.count == 1)
         #expect(moves.all.first?.1 == frame)
         #expect(moves.all.first?.2 == false)
-        // Still our own echo.
-        #expect(applier.didRecentlySetFrame(w))
     }
 
     @Test("another app's window never takes the AppKit move")

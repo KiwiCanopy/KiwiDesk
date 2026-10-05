@@ -1,4 +1,5 @@
 import AppKit
+import ApplicationServices
 import CoreGraphics
 import Foundation
 import Testing
@@ -6,12 +7,15 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The plate slide on an explicit switch (#1956), driven through
-/// the real `focus_space`: the incoming window's write is held
-/// until the strip lands, nothing animates, and the switch sends
-/// exactly the frames the instant switch sends — the slide is
-/// drawn, never paid for in window moves. The panel and the stack
-/// read are pinned inert by `makeTestCore`; the main screen is the
-/// fixture's display, so a headless host skips (#531).
+/// the real `focus_space`: the incoming window's write is STAGED
+/// until the strip lands, nothing animates with the engine on, and
+/// the switch sends exactly the frames the instant switch sends —
+/// the slide is drawn, never paid for in window moves. Every
+/// window answers with an element of a pid nothing writes to (the
+/// writer is inert), so a held write really stages. The panel and
+/// the stack read are pinned inert by `makeTestCore`; the main
+/// screen is the fixture's display, so a headless host skips
+/// (#531).
 @Suite("Plate slide switch (#1956)", .serialized)
 @MainActor
 struct SpaceSlideSwitchTests {
@@ -41,6 +45,15 @@ struct SpaceSlideSwitchTests {
         core.state.workspaces.activate(SpaceID(1))
         core.retile()
         try echo(core, [w1, w2, w3])
+        // From here a switch that animated would start springs.
+        core.tiler.animation.isEnabled = true
+        let element = AXUIElementCreateApplication(1)
+        core.tiler.applier.elementProvider = { _ in element }
+        core.tiler.applier.writer = FrameWriter(
+            setFrame: { _, _ in },
+            setPosition: { _, _ in },
+            writeEUI: { _, _ in }
+        )
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
         return (core, meter)
@@ -64,7 +77,9 @@ struct SpaceSlideSwitchTests {
         defer { core.spaceSlide.end() }
         #expect(core.spaceSlide.isPlaying)
         #expect(core.tiler.applier.held.isHeld(w3))
+        #expect(core.tiler.applier.held.isStaged(w3))
         #expect(!core.tiler.applier.held.isHeld(w1))
+        #expect(!core.tiler.applier.held.isStaged(w1))
         #expect(core.tiler.animation.activeCount == 0)
         // One page out, one in.
         #expect(core.spaceSlide.play?.pages.count == 2)
@@ -104,6 +119,48 @@ struct SpaceSlideSwitchTests {
         core.applyFocusedSpaceSwitch(to: SpaceID(2))
         #expect(!core.spaceSlide.isPlaying)
         #expect(!core.tiler.applier.held.isHeld(w3))
+    }
+
+    /// An instant switch inside a play ends it and sends what it
+    /// held, or those windows would wait under no plate.
+    @Test(
+        "an instant switch overtaking a play releases its holds",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func instantSwitchReleasesHolds() throws {
+        let (core, _) = try makeCore(slide: true)
+        core.execute("focus_space", args: [.string("2")])
+        try #require(core.tiler.applier.held.isHeld(w3))
+        core.applyFocusedSpaceSwitch(to: SpaceID(1))
+        #expect(!core.spaceSlide.isPlaying)
+        #expect(!core.tiler.applier.held.isHeld(w3))
+    }
+
+    /// A follow's moved window is filed into the target while it is
+    /// still on screen: it goes with the user, neither held nor
+    /// left standing under a plate that slides away.
+    @Test(
+        "a window already on screen in the target is not held",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func shownTargetMemberIsNotHeld() throws {
+        let (core, _) = try makeCore(slide: true)
+        let moved = WindowID(4)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: moved,
+                    pid: 1,
+                    appName: "A",
+                    frame: CGRect(x: 100, y: 100, width: 400, height: 300)
+                )
+            )
+        )
+        core.state.workspaces.add(moved, to: SpaceID(2))
+        core.execute("focus_space", args: [.string("2")])
+        defer { core.spaceSlide.end() }
+        #expect(core.tiler.applier.held.isHeld(w3))
+        #expect(!core.tiler.applier.held.isHeld(moved))
     }
 
     @Test(

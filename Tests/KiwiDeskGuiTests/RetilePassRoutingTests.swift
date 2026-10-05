@@ -72,9 +72,6 @@ struct RetilePassRoutingTests {
         // "already there" check, and which asks for no probe.
         "KiwiDeskCore/Commands/KiwiCore+SpaceTransition.swift":
             Site(applies: 0, reissues: 1),
-        // The plate slide's switch pass (#1956).
-        "KiwiDeskCore/Commands/KiwiCore+SpaceSlide.swift":
-            Site(applies: 0, reissues: 1),
         // The switch's 300 ms settle re-issue (#207).
         "KiwiDeskCore/Commands/KiwiCore+SpaceFocusHandoff.swift":
             Site(applies: 0, reissues: 1),

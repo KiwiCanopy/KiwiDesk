@@ -52,6 +52,19 @@ struct SpaceSlideStripTests {
         #expect(abs(next.from - page) < 0.5)
     }
 
+    @Test("from rest the strip lands at settle; carrying a reversal, later")
+    func settleTimeFollowsTheMotion() {
+        let rest = SpaceSlideStrip(from: 0, to: page, velocity: 0, begin: 0)
+        #expect(abs(rest.settleTime() - SpaceSlidePlan.settle) < 0.01)
+        let reversing = SpaceSlideStrip(
+            from: 0,
+            to: page,
+            velocity: -20_000,
+            begin: 0
+        )
+        #expect(reversing.settleTime() > rest.settleTime() + 0.02)
+    }
+
     @Test("CA's initial velocity is a share of the distance")
     func normalizedVelocity() {
         let strip = SpaceSlideStrip(

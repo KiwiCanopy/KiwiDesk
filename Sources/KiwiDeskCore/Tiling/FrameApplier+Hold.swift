@@ -7,7 +7,11 @@ import Foundation
 /// strip does. A held write is staged here and sent from the app's
 /// own queue AT the deadline, so a main-thread stall delays no
 /// landing; a later write for a staged window replaces its frame
-/// (latest wins, a size set is never dropped).
+/// (latest wins, a size set is never dropped). Its entries live
+/// one landing: a release, `releaseNow` or `dropAll` ends them, and
+/// an expired deadline is pruned at the next hold. A native-tab
+/// re-key inside a hold lands the staged frame on the old element
+/// — accepted, the window being one landing behind at worst.
 final class HeldWrites: @unchecked Sendable {
     struct Entry: Equatable {
         var frame: CGRect
@@ -39,9 +43,20 @@ final class HeldWrites: @unchecked Sendable {
     func hold(_ ids: some Sequence<WindowID>, until deadline: DispatchTime) {
         lock.lock()
         defer { lock.unlock() }
+        let now = DispatchTime.now()
+        deadlines = deadlines.filter {
+            now < $0.value || staged[$0.key] != nil
+        }
         for id in ids {
             deadlines[id] = max(deadlines[id] ?? deadline, deadline)
         }
+    }
+
+    /// Whether a write to `id` is staged.
+    func isStaged(_ id: WindowID) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return staged[id] != nil
     }
 
     /// Whether `id` is held at `now`.
@@ -73,6 +88,24 @@ final class HeldWrites: @unchecked Sendable {
         return .staged(deadline)
     }
 
+    /// Ends the holds on `ids` now; returns those with a staged
+    /// write, which the caller sends at once.
+    func releaseNow(_ ids: Set<WindowID>) -> [WindowID] {
+        lock.lock()
+        defer { lock.unlock() }
+        for id in ids { deadlines[id] = nil }
+        return ids.filter { staged[$0] != nil }
+    }
+
+    /// Forgets every hold and staged write — KiwiDesk is stopping,
+    /// and a landing after the quit gather would undo it.
+    func dropAll() {
+        lock.lock()
+        defer { lock.unlock() }
+        deadlines = [:]
+        staged = [:]
+    }
+
     /// Drops `id`'s staged write, which no element can take; the
     /// hold stands.
     func drop(_ id: WindowID) {
@@ -101,6 +134,12 @@ extension FrameApplier {
         until deadline: DispatchTime
     ) {
         held.hold(ids, until: deadline)
+    }
+
+    /// Ends the holds on `ids` — a play an instant switch or a
+    /// switch on another screen dropped — and sends what they kept.
+    func releaseHolds(_ ids: Set<WindowID>) {
+        for id in held.releaseNow(ids) { releaseHeld(id, at: .now()) }
     }
 
     /// Stages `frame` for a held window; true when it was held, so
@@ -141,7 +180,10 @@ extension FrameApplier {
         }
         // Noted at the release, not here: a hold noted now would
         // keep the app's running instant batch open until it fires.
+        // The generation tells a release the loop let go of the app
+        // meanwhile, which then toggles nothing.
         let atRest = own ? false : enhancedUIAtRest(pid)
+        let generation = holds.generation(pid)
         queue(for: pid).asyncAfter(deadline: deadline) {
             switch held.release(id) {
             case .write(let entry):
@@ -151,11 +193,16 @@ extension FrameApplier {
                             Self.write(entry, target, writer)
                         }
                     }
-                } else {
-                    holds.noteQueued(pid, atRest: atRest, instant: true)
+                } else if holds.noteQueued(
+                    pid,
+                    atRest: atRest,
+                    ifGeneration: generation
+                ) {
                     holds.beginInstant(pid, writer)
                     Self.write(entry, target, writer)
                     holds.endInstant(pid, writer)
+                } else {
+                    Self.write(entry, target, writer)
                 }
                 recent(id)  // as `apply`, #1254
             case .later(let later):

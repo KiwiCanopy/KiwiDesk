@@ -49,10 +49,6 @@ struct LaunchFollowSeamTests {
             "newlyCreatedWindow: newcomer",
             "KiwiCore+SpaceTransition.swift", 1
         ),
-        (
-            "newlyCreatedWindow: arriving",
-            "KiwiCore+SpaceSlide.swift", 1
-        ),
         ("launchFollow.claim(", followFile, 1),
         ("= claimLaunchFollow(", "KiwiCore+Events.swift", 1),
         ("payLaunchFollow($0.0, into: $0.1)", "KiwiCore+Events.swift", 1),

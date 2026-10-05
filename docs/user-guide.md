@@ -521,7 +521,7 @@ flat look instead.
 It covers the floating mark too.
 
 :::unreleased
-And the plates a Space switch slides.
+It covers the plates a Space switch slides too.
 :::
 
 On by default, on every surface. While macOS's **Reduce

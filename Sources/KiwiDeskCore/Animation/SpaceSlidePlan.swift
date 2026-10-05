@@ -95,11 +95,8 @@ enum SpaceSlidePlan {
         in bounds: CGRect
     ) -> [Plate] {
         let clipped: [(Entry, CGRect)] = entries.compactMap {
-            let inside = $0.frame.intersection(bounds)
-            guard !inside.isNull, inside.width >= minimumSide,
-                inside.height >= minimumSide
-            else { return nil }
-            return ($0, inside)
+            shows($0.frame, on: bounds)
+                ? ($0, $0.frame.intersection(bounds)) : nil
         }
         let ordered = clipped.sorted {
             key($0.0, focus, stack) < key($1.0, focus, stack)
@@ -132,6 +129,14 @@ enum SpaceSlidePlan {
                 pile: piles[index]
             )
         }
+    }
+
+    /// Whether `frame` shows on `page` enough to draw a plate — a
+    /// parked window's hair at the corner does not.
+    static func shows(_ frame: CGRect, on page: CGRect) -> Bool {
+        let inside = frame.intersection(page)
+        return !inside.isNull && inside.width >= minimumSide
+            && inside.height >= minimumSide
     }
 
     /// The icon's side on a plate, nil where it would be smaller

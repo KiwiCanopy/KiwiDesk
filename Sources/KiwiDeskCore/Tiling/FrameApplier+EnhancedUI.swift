@@ -51,6 +51,9 @@ final class EnhancedUIHolds: @unchecked Sendable {
 
     private let lock = NSLock()
     private var apps: [pid_t: App] = [:]
+    /// Bumped each time the loop retires an app, so a note made
+    /// off the main actor can tell it no longer owns the app.
+    private var generations: [pid_t: Int] = [:]
 
     private func with<T>(_ body: (inout [pid_t: App]) -> T) -> T {
         lock.lock()
@@ -74,9 +77,37 @@ final class EnhancedUIHolds: @unchecked Sendable {
         }
     }
 
+    /// Main actor, when a held write is staged: the retire count
+    /// its release compares against.
+    func generation(_ pid: pid_t) -> Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return generations[pid, default: 0]
+    }
+
+    /// From the app's queue, at a held write's release (#1956):
+    /// `noteQueued` for an instant set, unless the loop retired the
+    /// app since `generation` was read — false then, and the set
+    /// takes no hold.
+    func noteQueued(
+        _ pid: pid_t,
+        atRest: Bool,
+        ifGeneration generation: Int
+    ) -> Bool {
+        lock.lock()
+        let current = generations[pid, default: 0] == generation
+        lock.unlock()
+        guard current else { return false }
+        noteQueued(pid, atRest: atRest, instant: true)
+        return true
+    }
+
     /// Main actor, when the loop stops owning the app: the value
     /// it left the flag at, which a hold still open restores.
     func retire(_ pid: pid_t, leftOn: Bool) {
+        lock.lock()
+        generations[pid, default: 0] += 1
+        lock.unlock()
         with { apps in
             guard var app = apps[pid] else { return }
             app.atRest = leftOn
