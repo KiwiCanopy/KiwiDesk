@@ -70,10 +70,6 @@ public final class BorderManager {
     /// live by default; a test core pins it (#1868).
     var windowLevel: (CGWindowID) -> Int? =
         AppKitBorderOverlay.windowLayer
-    /// A ring's re-stack write, live by default; a test core pins
-    /// it to the AppKit fallback (#1925).
-    var restack: (CGWindowID, Bool, CGWindowID) -> Bool =
-        SkyLight.orderWindow
     /// A ring's panel move, live by default and its one live
     /// default; a test core pins it to the AppKit fallback (#1956).
     var movePanel: (CGWindowID, CGPoint) -> Bool =
@@ -112,6 +108,23 @@ public final class BorderManager {
     /// Windows tracked for state mark z-order without active rings
     /// — every window wearing a mark (#414, #1799).
     var markTracked: Set<WindowID> = []
+    /// The ring a Space switch keeps dormant until its window
+    /// arrives (#1959, `BorderManager+Arrival`).
+    var arrival: ArrivalHold?
+    /// The render-server clock the hold is timed on, the slide's.
+    var arrivalClock: @MainActor () -> CFTimeInterval = {
+        CACurrentMediaTime()
+    }
+    /// Runs the hold's next check after a delay; a test steps it.
+    var scheduleArrivalCheck:
+        @MainActor (TimeInterval, @escaping @MainActor () -> Void) -> Void =
+            { delay, check in
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    MainActor.assumeIsolated { check() }
+                }
+            }
+    /// The Reduce Motion read the reveal names (borders.md).
+    var reduceMotion: @MainActor () -> Bool = { BarMotion.isReduced }
 
     /// Drives the dead-end rubber-band bounce (#436).
     let bumpAnimator = BorderBumpAnimator()
@@ -180,6 +193,7 @@ public final class BorderManager {
         specs = [:]
         cornerRadii = [:]
         markTracked = []
+        arrival = nil
         _ = eventSource?.watch([])
     }
 
@@ -220,7 +234,6 @@ public final class BorderManager {
             window: window.raw,
             order: activeOrder,
             levelOf: windowLevel,
-            restack: restack,
             movePanel: movePanel
         )
     }

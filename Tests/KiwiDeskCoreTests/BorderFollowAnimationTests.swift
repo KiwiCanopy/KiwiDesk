@@ -26,7 +26,6 @@ struct BorderFollowAnimationTests {
     @Test("Animation tick drives the ring even under WS tracking")
     func animationTickAppliesUnderTracking() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.sync([spec(1)])
         // Force the stream live AFTER sync (`sync` re-runs the
@@ -63,7 +62,6 @@ struct BorderFollowAnimationTests {
     @Test("AX echo stands down while our animation drives it")
     func axEchoSuppressedWhileAnimating() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.sync([spec(1)])
         // Stream down (AX fallback path) — the WS guard alone
@@ -93,7 +91,6 @@ struct BorderFollowAnimationTests {
     @Test("AX echo stands down while the WindowServer tracks it")
     func axEchoSuppressedWhenTracked() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.sync([spec(1)])
         border.skyLightActive = true
@@ -130,7 +127,6 @@ struct BorderReconcileAnimationTests {
     @Test("reconcile stands down mid-animation, resumes settled")
     func reconcileGatedOnAnimation() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.sync([spec(1)])
         let real = CGRect(x: 20, y: 20, width: 400, height: 300)

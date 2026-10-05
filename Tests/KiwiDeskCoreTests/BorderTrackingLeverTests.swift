@@ -14,7 +14,6 @@ struct BorderTrackingLeverTests {
     @Test("Any non-empty value arms the lever; absent leaves it off")
     func environmentDecode() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.configureFromEnvironment([:])
         #expect(!border.windowServerTrackingDisabled)
@@ -33,7 +32,6 @@ struct BorderTrackingLeverTests {
     @Test("Armed, the subscription never attaches or goes active")
     func subscriptionStandsDown() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.configureFromEnvironment([
             "KIWIDESK_NO_WS_TRACKING": "yes"

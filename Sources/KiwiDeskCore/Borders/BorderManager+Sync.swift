@@ -74,12 +74,13 @@ extension BorderManager {
             // Without the WindowServer stream no reorder event
             // tells a shown ring its target moved, so every sync
             // re-stacks.
+            let held = ordersDormant(spec.window, overlay: overlay)
             if Self.ordersRing(
                 reassert: reassertOrder,
                 needsOrder: overlay.needsOrder,
                 tracked: skyLightActive
             ) {
-                overlay.order(relativeTo: spec.window.raw)
+                overlay.order(relativeTo: spec.window.raw, revealing: !held)
             }
         }
     }
@@ -112,6 +113,9 @@ extension BorderManager {
             )
         else { return }
         apply(id, windowFrame: frame)
+        if source == .axEcho {
+            noteArrivalReport(id, frame: windowFrame)
+        }
     }
 
     /// Returns last rendered frame for testing (#596).

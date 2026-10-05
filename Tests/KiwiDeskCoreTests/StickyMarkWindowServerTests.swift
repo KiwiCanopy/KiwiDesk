@@ -22,7 +22,6 @@ struct StickyChipWindowServerTeeTests {
     @Test("A reorder event tees even for an unbordered window")
     func reorderTeeFiresWithoutOverlay() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         var reasserted: [WindowID] = []
         border.onWindowReordered = { reasserted.append($0) }
@@ -37,7 +36,6 @@ struct StickyChipWindowServerTeeTests {
     @Test("Unhide (followAndReorder) also tees the mark re-assert")
     func unhideTeesReassert() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         var reasserted: [WindowID] = []
         border.onWindowReordered = { reasserted.append($0) }
@@ -49,7 +47,6 @@ struct StickyChipWindowServerTeeTests {
     @Test("A stale delivery we watch neither way is dropped")
     func staleDeliveryDropped() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         var reasserted: [WindowID] = []
         border.onWindowReordered = { reasserted.append($0) }
@@ -62,7 +59,6 @@ struct StickyChipWindowServerTeeTests {
     @Test("markUsesWindowServerTracking follows the watch set")
     func markTrackingReflectsStickySet() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.setMarkTracked([WindowID(7)])
         #expect(border.markTracked == [WindowID(7)])
@@ -79,7 +75,6 @@ struct StickyChipWindowServerTeeTests {
     @Test("A dead stream never claims WS tracking")
     func noTrackingWhenStreamDown() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.setMarkTracked([WindowID(7)])
         // `skyLightActive` false — the mark must keep following AX

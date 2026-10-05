@@ -1746,12 +1746,13 @@ SkyLight window stays composited over the Mission Control
 overview at its desktop frame whatever Space it is pinned to,
 where the panel's `.transient` hides it with the desktop
 (#1917). A front-order panel takes its target's window level, so
-a raised target's band never covers the ring. Re-stacking an
-ordered-in panel behind its target is the one private WRITE: a
-SkyLight transaction, because AppKit's relative order looks the
-other app's window up synchronously first and that answer stalls
-a Space switch under GPU load, with AppKit's order as the
-fallback (#1925). Direct mouse
+a raised target's band never covers the ring. Re-stacking the
+panel is AppKit's relative order, a synchronous WindowServer
+answer that stalls a Space switch under GPU load, so only a
+ruled trigger re-stacks a ring (#1925): WindowServer applies no
+SkyLight order to an AppKit panel, and the transaction #1925
+first used for it moved nothing (#1962). Moving the panel is the
+ring's one private WRITE (#1956). Direct mouse
 drags use one movement authority: WindowServer bounds whenever its event
 surface is active, otherwise the stable AX/AppKit fallback. No path
 projects a border from cursor motion, so macOS edge/corner dwell holds
@@ -3072,8 +3073,12 @@ ordered in, dormant and empty between plays; everything that
 moves is a layer. KiwiDesk's own windows move through AppKit
 inside the switch's own turn, since the main queue would run
 their park only after it. A slow app's window can still land
-after the plates have faded; whether the focus ring waits for
-it is tracked in #1959.
+after the plates have faded, and its focus ring waits for it: the
+ring appears on the window's own report near the frame it was
+sent, or at a 300 ms cap, and never before the plates lift
+(#1959). Inside a Space the ring still leads a focus move, since
+there the moving ring is the cue; after a switch a leading ring
+would sit on an empty spot.
 :::
 
 **A resize span is the layout region, not the display

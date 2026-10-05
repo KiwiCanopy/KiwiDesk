@@ -86,6 +86,13 @@ func makeTestCore(
     core.spaceSlide.reduceMotion = { true }
     core.spaceSlide.present = { _ in }
     core.spaceSlide.stackOrder = { [:] }
+    // The focused ring's arrival hold (#1959) reads the render
+    // clock, the host's Reduce Motion and a live timer: frozen and
+    // inert here, so ring visibility after a switch never depends
+    // on how fast the runner is. An arrival suite steps them.
+    core.borders.arrivalClock = { 0 }
+    core.borders.scheduleArrivalCheck = { _, _ in }
+    core.borders.reduceMotion = { true }
     // Same class again (#596): bootstrap reads the
     // `KIWIDESK_NO_WS_TRACKING` QA lever from the real process
     // environment, so a developer who has it exported would get a
@@ -97,7 +104,6 @@ func makeTestCore(
     // A front-order ring reads its target's level from WindowServer
     // on every sync otherwise (#1868).
     core.borders.windowLevel = { _ in nil }
-    core.borders.restack = { _, _, _ in false }
     core.borders.movePanel = { _, _ in false }
     // `prepare_restart` reads the developer's real LaunchAgent
     // plist otherwise (#930); a suite that means one injects it.
