@@ -95,6 +95,10 @@ public final class ProfileManager {
     /// this manager was made, and no settle has run since (#1530).
     public internal(set) var owesSetSettle: Bool
 
+    /// Where a migrated rewrite keeps the original (#1880), set by
+    /// the core that owns the config directory; nil keeps none.
+    var migrationBackups: URL?
+
     public init(directory: URL) {
         self.directory = directory
         owesSetSettle = Self.owesSettle(in: directory)
@@ -231,11 +235,12 @@ public final class ProfileManager {
     public func read(name: String) throws -> Profile {
         let file = url(for: try validated(name))
         var data = try Data(contentsOf: file)
-        if let migrated = ConfigMigration.migrated(data) {
-            data = migrated
-            // Writes migrated raw bytes directly to preserve unknown keys.
-            try? migrated.write(to: file, options: .atomic)
-        }
+        // Raw bytes, to preserve unknown keys.
+        data = MigrationBackup.migrateInPlace(
+            data,
+            at: file,
+            backups: migrationBackups
+        )
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(Profile.self, from: data)

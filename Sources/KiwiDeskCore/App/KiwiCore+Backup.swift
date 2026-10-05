@@ -21,7 +21,9 @@ extension KiwiCore {
     /// that existed because of an access modifier rather than a
     /// design decision (`architect-reviewer`, 2026-08-17).
     public var paletteLibrary: PaletteStore {
-        PaletteStore(directory: configDirectory)
+        let store = PaletteStore(directory: configDirectory)
+        store.migrationBackups = migrationBackups
+        return store
     }
 
     /// Everything this install would put in a backup.

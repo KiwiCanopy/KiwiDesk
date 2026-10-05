@@ -80,21 +80,38 @@ public final class DisplayLinkDriver {
     @objc private func fire(_ link: CADisplayLink) {
         let now = link.timestamp
         defer { lastTimestamp = now }
-        guard let last = lastTimestamp else {
-            // First tick after start: no dt yet.
-            return
-        }
-        let dt = now - last
-        guard dt > 0 else { return }
-        if let line = Self.stallReport(
-            gap: dt,
-            displayID: displayID
-        ) {
+        if let last = lastTimestamp,
+            let line = Self.stallReport(
+                gap: now - last,
+                displayID: displayID
+            )
+        {
             onLog(line)
         }
-        // Clamp huge gaps (e.g. after sleep) to one nominal
-        // frame so springs never explode.
-        let nominal = link.targetTimestamp - now
-        onTick(min(dt, max(nominal, 1.0 / 30.0)))
+        guard
+            let dt = Self.step(
+                now: now,
+                last: lastTimestamp,
+                target: link.targetTimestamp
+            )
+        else { return }
+        onTick(dt)
+    }
+
+    /// The time a tick advances the clock by, nil for none. The
+    /// first tick after a start steps one nominal frame, so motion
+    /// begins on the first frame shown (#1878); later ticks take
+    /// the gap, clamped to a frame so a gap after sleep never
+    /// explodes a spring.
+    nonisolated static func step(
+        now: CFTimeInterval,
+        last: CFTimeInterval?,
+        target: CFTimeInterval
+    ) -> TimeInterval? {
+        let nominal = target - now
+        guard let last else { return nominal > 0 ? nominal : nil }
+        let dt = now - last
+        guard dt > 0 else { return nil }
+        return min(dt, max(nominal, 1.0 / 30.0))
     }
 }
