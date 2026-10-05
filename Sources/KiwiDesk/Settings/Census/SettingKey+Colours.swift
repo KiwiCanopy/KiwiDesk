@@ -169,14 +169,20 @@ extension ColoursKey {
         case .animationsOnRelayout:
             return .text("behavior.animations.relayout")
         case .animationsDurationMS:
-            return .text("behavior.animations.duration")
+            return .text(
+                "behavior.animations.window_duration",
+                help: "behavior.animations.window_duration.help"
+            )
         case .animationsOnShelf:
             return .text(
                 "behavior.animations.shelf",
                 help: "behavior.animations.shelf.help"
             )
         case .animationsShelfDurationMS:
-            return .text("behavior.animations.shelf_duration")
+            return .text(
+                "behavior.animations.shelf_duration",
+                help: "behavior.animations.shelf_duration.help"
+            )
         case .animationsOnScrolling:
             return .text(
                 "scroll_grid.animate_focus_shifts",
