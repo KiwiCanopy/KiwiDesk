@@ -87,6 +87,7 @@ extension KiwiCore {
     /// reload re-captures from the restored ones.
     func forgetAppWideCaptures() {
         appWideLedger.owed = nil
+        appWideLedger.backup = nil
     }
 
     /// `forgetAppWideCapture`'s rename twin (#1975).

@@ -123,8 +123,11 @@ struct AppWideSeamTests {
                     callers.removeLast()
                     continue
                 }
+                func count(_ needle: String) -> Int {
+                    source.components(separatedBy: needle).count - 1
+                }
                 #expect(
-                    follow.contains { source.contains($0) },
+                    follow.map(count).reduce(0, +) >= count(door),
                     "\(file.lastPathComponent) calls \(door) alone"
                 )
             }
