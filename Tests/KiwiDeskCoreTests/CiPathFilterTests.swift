@@ -185,11 +185,9 @@ struct CiPathFilterTests {
             // reaches the failure arm; `always()` would also start
             // a run `cancel-in-progress` superseded.
             #expect(
-                gate.hasPrefix("!cancelled() && (")
-                    && gate.contains(
-                        "(needs.changes.result != 'success' || "
-                            + "needs.changes.outputs.run == 'true')"
-                    ),
+                gate
+                    == "!cancelled() && (needs.changes.result != "
+                    + "'success' || needs.changes.outputs.run == 'true')",
                 "\(job) is skipped, not run, when the filter fails"
             )
         }
