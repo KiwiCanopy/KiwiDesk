@@ -3,10 +3,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A scrolled, overflowing run takes a click on every entry it
-/// shows (#1965): the run's frame is the viewport's while its
-/// trailing entries overhang it, so the hit must reach them
-/// through the clipping container rather than stop at the run.
+/// A scrolled, overflowing run takes a click and a hover on every
+/// entry it shows (#1965): AppKit clips both an item's hit test
+/// and its tracking area to the run's frame, so that frame must
+/// hold every entry the viewport shows.
 @Suite("Shelf run hit-testing", .serialized)
 @MainActor
 struct ShelfRunHitTests {
@@ -16,7 +16,7 @@ struct ShelfRunHitTests {
 
     /// Hit-tests `entry`'s centre at the clipping container, the
     /// way a click descends from the panel, after proving the
-    /// point lies past the run's own frame.
+    /// entry is shown and lies wholly inside the run's frame.
     private func hit(
         _ entry: NSView,
         container: NSView,
@@ -29,14 +29,16 @@ struct ShelfRunHitTests {
             container.bounds.contains(inContainer),
             "the last entry is not on screen"
         )
-        try #require(
-            !run.frame.contains(inContainer),
-            "the entry does not overhang the run; nothing is tested"
+        let inRun = entry.convert(entry.bounds, to: container)
+        let slack = -ShelfOverflow.clipTolerance
+        #expect(
+            run.frame.insetBy(dx: slack, dy: slack).contains(inRun),
+            "a shown entry overhangs the run: no click or hover"
         )
         return container.hitTest(entry.convert(centre, to: parent))
     }
 
-    @Test("The App Bar's last entry takes a click once scrolled")
+    @Test("The App Bar's last entry takes a click and hover once scrolled")
     func appBarLastEntryHits() throws {
         let overlay = AppBarOverlay()
         let items = (1...10).map {
@@ -63,7 +65,7 @@ struct ShelfRunHitTests {
         #expect(hit?.isDescendant(of: last) == true)
     }
 
-    @Test("The Space Bar's last entry takes a click once scrolled")
+    @Test("The Space Bar's last entry takes a click and hover once scrolled")
     func spaceBarLastEntryHits() throws {
         let overlay = SpaceBarOverlay()
         let items = (1...30).map { n in

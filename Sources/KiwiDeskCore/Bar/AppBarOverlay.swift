@@ -55,7 +55,7 @@ public final class AppBarOverlay {
     /// Holds the items and their glass inside the clipping
     /// `itemContainer`; a scroll moves this one view, never each
     /// item, so per-item glass redraws nothing per event.
-    let itemRun = RunView()
+    let itemRun = FlippedView()
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
@@ -230,7 +230,7 @@ public final class AppBarOverlay {
             horizontal: m.horizontal
         )
         let frames = Self.itemFrames(
-            in: CGRect(origin: .zero, size: runFrame.size),
+            in: CGRect(origin: .zero, size: viewport.size),
             m: m
         )
         let runStart: CGFloat

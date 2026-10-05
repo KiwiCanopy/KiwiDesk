@@ -57,17 +57,30 @@ public enum ShelfOverflow {
         return min(max(offset, 0), total - viewport)
     }
 
-    /// A section's run-view frame in its viewport: the viewport's
-    /// size, shifted back along the axis by the scroll offset. The
-    /// run carries the scroll, so its items keep their frames.
+    /// A section's run-view frame in its viewport: shifted back
+    /// along the axis by the scroll offset and lengthened by it, so
+    /// it reaches the viewport's far edge and holds every item the
+    /// viewport shows. AppKit clips an item's clicks and tracking
+    /// areas to this frame (#1965). Items lay out in the viewport's
+    /// size, never this one.
     public static func runFrame(
         in viewport: CGRect,
         offset: CGFloat,
         horizontal: Bool
     ) -> CGRect {
         horizontal
-            ? viewport.offsetBy(dx: -offset, dy: 0)
-            : viewport.offsetBy(dx: 0, dy: -offset)
+            ? CGRect(
+                x: viewport.minX - offset,
+                y: viewport.minY,
+                width: viewport.width + offset,
+                height: viewport.height
+            )
+            : CGRect(
+                x: viewport.minX,
+                y: viewport.minY - offset,
+                width: viewport.width,
+                height: viewport.height + offset
+            )
     }
 
     /// How far from a viewport edge a followed item is kept: past
