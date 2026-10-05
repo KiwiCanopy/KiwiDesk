@@ -74,6 +74,21 @@ extension KiwiCore {
         appWideLedger.owed = owed
     }
 
+    /// A capture is the FILE's, filed under its name (#1975): a
+    /// deleted profile's leaves with it, and a renamed one's
+    /// follows it, so a later profile under that name never
+    /// adopts another file's values.
+    func forgetAppWideCapture(of name: String) {
+        appWideLedger.owed?[name] = nil
+    }
+
+    /// `forgetAppWideCapture`'s rename twin (#1975).
+    func renameAppWideCapture(_ old: String, to new: String) {
+        guard let captured = appWideLedger.owed?[old] else { return }
+        appWideLedger.owed?[old] = nil
+        appWideLedger.owed?[new] = captured
+    }
+
     /// Ends an owed crossing at the first profile apply with the
     /// incoming — live — profile's captured values; a profile that
     /// carried none keeps the settled ones (the defaults at an

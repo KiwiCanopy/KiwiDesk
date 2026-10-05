@@ -39,6 +39,7 @@ extension KiwiCore {
                 // nothing left to describe. Before the monitor
                 // change, which may apply another profile.
                 self.state.profilePartitioning.forget(name)
+                self.forgetAppWideCapture(of: name)
                 self.handleMonitorChange()
                 // A broken profile's issue clears with it.
                 self.refreshConfigIssues()

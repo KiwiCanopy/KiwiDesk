@@ -567,6 +567,11 @@ holds the secondary-switch decision including its nil case.
     owed, and the apply-time adoption stands down while it owns
     the setup (`AppWideAdoptionTests` ▸
     `luaOwnedBesideSidecarAdoptsNothing`).
+  - Keep a capture with the FILE it was read from: a profile
+    delete forgets it and a rename re-keys it, so a later profile
+    under that name crosses on the settled values — a new door
+    that deletes or renames a profile takes the same call
+    (#1975, `AppWideCaptureFollowsTests`).
   - Give a new member of `AppWideSettings` a crossing of its
     own: the ledger's crossing is per group of settings, and on
     an install that has adopted it has already ended, so a
