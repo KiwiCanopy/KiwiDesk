@@ -98,11 +98,17 @@ struct AppWideSeamTests {
     /// A capture follows its profile FILE (#1975): every Core
     /// door that deletes or renames one also moves the capture,
     /// since a behavioural suite reaches only the doors that exist.
-    @Test("every profile delete or rename moves the capture")
+    @Test("every profile delete, rename or discard moves the capture")
     func captureFollowsEveryDoor() throws {
+        // A wholesale discard is the third spelling: restore and
+        // reset each name a forget of every capture.
         let doors = [
-            ("profiles.delete(", "forgetAppWideCapture(of:"),
-            ("profiles.rename(", "renameAppWideCapture("),
+            ("profiles.delete(", ["forgetAppWideCapture(of:"]),
+            ("profiles.rename(", ["renameAppWideCapture("]),
+            (
+                "discardArtifacts(",
+                ["forgetAppWideCaptures(", "resetAppWide("]
+            ),
         ]
         for (door, follow) in doors {
             var callers: [String] = []
@@ -112,8 +118,13 @@ struct AppWideSeamTests {
                 )
                 guard source.contains(door) else { continue }
                 callers.append(file.lastPathComponent)
+                // The door's own home declares it.
+                guard !source.contains("func \(door)") else {
+                    callers.removeLast()
+                    continue
+                }
                 #expect(
-                    source.contains(follow),
+                    follow.contains { source.contains($0) },
                     "\(file.lastPathComponent) calls \(door) alone"
                 )
             }
