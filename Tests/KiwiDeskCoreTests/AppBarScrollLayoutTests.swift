@@ -212,14 +212,15 @@ struct AppBarScrollLayoutTests {
             offset: 250,
             horizontal: true
         )
-        #expect(run.minX == -250 && run.width == viewport.width)
+        #expect(run.minX == -250 && run.maxX == viewport.maxX)
         #expect(frames[3].minX + run.minX == 50)
         let vertical = ShelfOverflow.runFrame(
             in: viewport,
             offset: 40,
             horizontal: false
         )
-        #expect(vertical.minY == -40 && vertical.minX == 0)
+        #expect(vertical.minY == -40 && vertical.maxY == viewport.maxY)
+        #expect(vertical.minX == 0)
     }
 
     @Test("Frames line up along the axis, centered as a group")

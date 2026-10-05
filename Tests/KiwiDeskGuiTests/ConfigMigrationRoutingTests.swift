@@ -40,9 +40,12 @@ struct ConfigMigrationRoutingTests {
 
     /// Every file that decodes one of those shapes, and whether
     /// it must route. `true` = must name
-    /// `ConfigMigration.migrated`; `false` = exempt, with the
-    /// reason recorded beside it. **This map is the census** —
-    /// the rule files point here rather than restating it.
+    /// `ConfigMigration.migrated`, or the rewriting door
+    /// `MigrationBackup.migrateInPlace`
+    /// (`MigrationRewriteRoutingTests`); `false` = exempt, with
+    /// the reason recorded beside it. **This map is the
+    /// census** — the rule files point here rather than
+    /// restating it.
     private let readers: [String: Bool] = [
         "Profiles/ProfileManager.swift": true,
         // The one-time settle's crossing check (#1530) decodes a
@@ -85,9 +88,11 @@ struct ConfigMigrationRoutingTests {
                 file.path.hasPrefix(prefix)
                 ? String(file.path.dropFirst(prefix.count))
                 : file.path
-            found[key] = source.contains(
-                "ConfigMigration.migrated"
-            )
+            // A rewriting store migrates through the #1880 door,
+            // which calls the migration for it.
+            found[key] =
+                source.contains("ConfigMigration.migrated")
+                || source.contains("MigrationBackup.migrateInPlace(")
         }
         for (file, routes) in found.sorted(by: { $0.key < $1.key }) {
             let unlisted =
