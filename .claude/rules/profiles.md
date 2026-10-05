@@ -135,7 +135,11 @@ change here:
   the minimum window size the MAIN screen's, and the gaps the
   shipped default on every screen, which clears the default ring
   and keeps Glass a first run's look** (#1662, #1739,
-  `StarterTuningTests`, `LookCatalogSeamTests`). `StarterSetup.settings(sizes:)`
+  `StarterTuningTests`, `LookCatalogSeamTests`). The shelf depth
+  steps down by the MAIN screen's full frame height in
+  `StarterSetup.settings(sizes:)` alone, never in the shape
+  tuning every preset shares (#1952, `StarterCompactShelfTests`
+  ▸ `presetsKeepTheDefault`). `StarterSetup.settings(sizes:)`
   hands `StarterTuning.settings(mainShape:hosts:)` the hosts from
   `StarterSetup.hosts`, derived from the one walk; take that
   door, never a bare `StarterTuning` call with hand-made hosts.
