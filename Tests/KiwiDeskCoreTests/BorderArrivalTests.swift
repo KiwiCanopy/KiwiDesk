@@ -204,24 +204,23 @@ struct BorderArrivalTests {
         #expect(border.arrival == nil)
     }
 
-    @Test("a Space switch holds the arriving Space's focused ring")
-    func switchHoldsTheAnchor() {
-        let core = makeTestCore()
-        core.tiler.visibleBounds = { _ in
-            CGRect(x: 0, y: 0, width: 1200, height: 800)
-        }
-        for (id, space) in [(WindowID(1), 1), (WindowID(2), 2)] {
-            core.state.apply(
-                .windowCreated(
-                    ManagedWindow(id: id, pid: 1, appName: "A")
-                )
-            )
-            core.state.workspaces.add(id, to: SpaceID(space))
-        }
-        core.state.workspaces.stampFocus(WindowID(2), in: SpaceID(2))
-        core.retile()
-        core.borders.scheduleArrivalCheck = { _, _ in }
-        core.execute("focus_space", args: [.string("2")])
-        #expect(core.borders.arrival?.window == WindowID(2))
+    /// A held ring is ordered in already: a steady sync inside the
+    /// hold orders it no more (#1925's round trip), keeps it held,
+    /// and the cap still reveals it.
+    @Test("steady syncs inside a hold add no order")
+    func heldRingTakesNoFurtherOrder() throws {
+        let clock = Clock()
+        let border = manager(clock)
+        border.watchOverride = { _ in true }
+        defer { border.clear() }
+        let panel = try heldRing(border)
+        let ordered = panel.appKitOrders
+        border.sync([spec()], alive: nil, reassertOrder: false)
+        border.sync([spec()], alive: nil, reassertOrder: false)
+        #expect(panel.appKitOrders == ordered)
+        #expect(panel.panelAlpha == 0)
+        #expect(border.arrival != nil)
+        clock.advance(to: 100 + BorderManager.arrivalCap)
+        #expect(panel.panelAlpha == 1)
     }
 }

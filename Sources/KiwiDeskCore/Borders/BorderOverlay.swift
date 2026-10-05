@@ -56,7 +56,11 @@ final class BorderOverlay {
     /// pays a WindowServer round trip per order against another
     /// app's window, so a shown ring is left to the reorder
     /// events and the settle passes (#1925).
-    var needsOrder: Bool { !hasOrdered || isHidden || isDormant }
+    /// A ring held for its window's arrival is ordered in already,
+    /// so it costs no further order (#1959).
+    var needsOrder: Bool {
+        !hasOrdered || isHidden || (isDormant && !isArrivalHeld)
+    }
     /// Dead-end rubber-band offset (#436).
     private var bumpOffset = CGVector.zero
 
@@ -144,6 +148,12 @@ final class BorderOverlay {
             isDormant = false
             backend.setDormant(false)
         }
+    }
+
+    /// Ends a hold without showing the ring: the next order shows
+    /// it if its window is still wanted (#1959).
+    func releaseArrival() {
+        isArrivalHeld = false
     }
 
     /// Shows a ring held for its window's arrival (#1959).

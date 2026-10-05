@@ -48,6 +48,23 @@ struct BorderOrderCensusTests {
         )
     }
 
+    /// The #1959 hold is armed in one door, the switch's own
+    /// retile, which knows whether the switch un-parks its anchor;
+    /// a second switch path arming its own would hold a ring with
+    /// nothing to arrive (borders.md).
+    @Test("one door arms the ring's arrival hold")
+    func arrivalHoldHasOneDoor() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "holdArrival(of:",
+            under: Self.root.appendingPathComponent("Sources/KiwiDeskCore")
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent)
+                == ["KiwiCore+SpaceTransition.swift"],
+            "found \(sites.map(\.site))"
+        )
+    }
+
     @Test("no SkyLight window order is resolved")
     func noSkyLightOrder() throws {
         var files: [URL] = []

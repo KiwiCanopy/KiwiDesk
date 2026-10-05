@@ -193,6 +193,7 @@ public final class BorderManager {
         specs = [:]
         cornerRadii = [:]
         markTracked = []
+        arrival = nil
         _ = eventSource?.watch([])
     }
 

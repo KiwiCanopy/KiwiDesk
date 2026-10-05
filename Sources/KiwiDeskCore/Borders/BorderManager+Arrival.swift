@@ -34,9 +34,10 @@ extension BorderManager {
         of window: WindowID,
         notBefore: @escaping @MainActor () -> CFTimeInterval? = { nil }
     ) {
-        // A hold this switch replaces must not strand its ring.
+        // A hold this switch replaces must not strand its ring; the
+        // next order shows it only if its window is still wanted.
         if let old = arrival, old.window != window {
-            overlays[old.window]?.reveal(reduceMotion: true)
+            overlays[old.window]?.releaseArrival()
         }
         arrival = ArrivalHold(
             window: window,
@@ -52,27 +53,33 @@ extension BorderManager {
     /// hold, since there is nothing left to wait for.
     func ordersDormant(_ window: WindowID, overlay: BorderOverlay) -> Bool {
         guard arrival?.window == window else { return false }
-        guard overlay.needsOrder else {
+        guard overlay.isArrivalHeld || overlay.needsOrder else {
             arrival = nil
             return false
         }
-        if arrival?.target == nil {
-            arrival?.target = commandedFrame(window)
-        }
+        refreshArrivalTarget()
         return true
+    }
+
+    /// Keeps the frame the switch sent: a later retile that moves
+    /// the window replaces it, a stale echo's retired (nil)
+    /// commanded frame does not.
+    private func refreshArrivalTarget() {
+        guard let window = arrival?.window,
+            let sent = commandedFrame(window)
+        else { return }
+        arrival?.target = sent
     }
 
     /// A report of `window` at `frame` — an AX echo or a
     /// WindowServer move — reveals a held ring once it lands near
     /// the frame we sent.
     func noteArrivalReport(_ window: WindowID, frame: CGRect) {
-        guard var hold = arrival, hold.window == window, !hold.arrived
+        guard arrival?.window == window, arrival?.arrived == false
         else { return }
-        if hold.target == nil {
-            hold.target = commandedFrame(window)
-            arrival = hold
-        }
-        guard let sent = hold.target ?? specs[window]?.frame,
+        refreshArrivalTarget()
+        guard var hold = arrival,
+            let sent = hold.target ?? specs[window]?.frame,
             abs(frame.minX - sent.minX) <= Self.arrivalTolerance,
             abs(frame.minY - sent.minY) <= Self.arrivalTolerance
         else { return }
