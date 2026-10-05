@@ -56,6 +56,11 @@ extension APIReference {
                 + "shortcuts panel.",
             .boolean("enabled")
         ),
+        "set_space_switch_liquid_glass": APIRecord(
+            "Draws the Space switch's plates in macOS 26 Liquid "
+                + "Glass.",
+            .boolean("enabled")
+        ),
         "set_new_window_placement_override": APIRecord(
             "Overrides where new windows land for one Space.",
             .space("space"),

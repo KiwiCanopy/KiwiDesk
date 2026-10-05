@@ -30,7 +30,6 @@ extension KiwiCore {
         animated: Bool? = nil,
         pass: RetilePass = .event,
         newlyCreatedWindow: WindowID? = nil,
-        stashAnimated: Bool = false,
         sizing: BatchSizing = .mayInstantSize
     ) {
         // The whole main-actor cost of a pass, bars and rings
@@ -79,7 +78,6 @@ extension KiwiCore {
                 ?? tiler.settings.animations.onRelayout,
             pass: pass,
             newlyCreatedWindow: newlyCreatedWindow,
-            stashAnimated: stashAnimated,
             sizing: sizing
         )
         // A retile-channel observation confirmed a bound
@@ -101,7 +99,6 @@ extension KiwiCore {
                 animated: animated
                     ?? tiler.settings.animations.onRelayout,
                 pass: .event,
-                stashAnimated: stashAnimated,
                 sizing: sizing
             )
         }

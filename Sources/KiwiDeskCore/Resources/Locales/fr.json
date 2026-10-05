@@ -147,7 +147,7 @@
   "behavior.animations.shelf.help": "Quand les deux barres partagent un bord, l'App Bar se déploie hors de la Space Bar et s'y rétracte ; une barre sur son propre bord apparaît et disparaît en fondu ; les barres glissent vers leur nouvelle place. Désactivé, ou avec « Réduire les animations » activé, elles bougent instantanément.",
   "behavior.animations.shelf_duration": "Durée de KiwiShelf",
   "behavior.animations.space_change": "Animer les changements d'espace",
-  "behavior.animations.space_change.caption": "Les fenêtres sortent en glissant de l'espace que vous quittez et entrent dans celui vers lequel vous basculez.",
+  "behavior.animations.space_change.caption": "Des plaques recouvrent vos fenêtres et glissent vers l'espace vers lequel vous basculez.",
   "behavior.animations.title": "Animations",
   "behavior.animations.window_resize": "Animer les redimensionnements",
   "behavior.animations.window_swap": "Animer les échanges de fenêtres",

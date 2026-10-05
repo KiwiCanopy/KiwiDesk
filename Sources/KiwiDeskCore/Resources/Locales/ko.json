@@ -147,7 +147,7 @@
   "behavior.animations.shelf.help": "두 바가 같은 가장자리에 있으면 App Bar가 Space Bar에서 펼쳐져 나오고 다시 그 안으로 접힙니다. 가장자리를 혼자 쓰는 바는 서서히 나타나고 사라집니다. 각 바는 새 위치로 부드럽게 이동합니다. 끄거나 ‘동작 줄이기’가 켜져 있으면 즉시 이동합니다.",
   "behavior.animations.shelf_duration": "KiwiShelf 지속 시간",
   "behavior.animations.space_change": "공간 전환 애니메이션",
-  "behavior.animations.space_change.caption": "윈도우가 떠나는 공간에서 미끄러져 나가고 전환하는 공간으로 들어옵니다.",
+  "behavior.animations.space_change.caption": "판이 윈도우를 덮고 전환하는 공간으로 미끄러져 갑니다.",
   "behavior.animations.title": "애니메이션",
   "behavior.animations.window_resize": "윈도우 크기 조절 애니메이션",
   "behavior.animations.window_swap": "윈도우 교체 애니메이션",

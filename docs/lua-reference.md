@@ -783,6 +783,29 @@ what it writes.
 KiwiDesk.set_shortcut_panel_liquid_glass(true)
 ```
 
+:::unreleased
+### set_space_switch_liquid_glass
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** draws the plates a Space switch slides
+([animations.set_on_space_change](#animationsset_on_space_change))
+in macOS&nbsp;26 Liquid Glass, the shortcuts panel's `.regular`
+glass. Off, or below macOS&nbsp;26, they draw the material the
+panel falls back to. Read at the next switch.
+
+Stored as `space_switch.liquid_glass` in the profile. Also stood
+down while macOS's Reduce transparency is on, the stored value
+untouched. The GUI twin is the one **Liquid Glass** switch on
+Colours &amp; Animations.
+
+**Example:**
+
+```lua
+KiwiDesk.set_space_switch_liquid_glass(true)
+```
+:::
+
 ### Space Identity
 
 Spaces are identified by **strings or numbers** — `1` and `"1"`
@@ -798,9 +821,15 @@ its layout mode, app rules, monitor pins, and any keybindings.
 Switching spaces parks the other spaces' tiled windows in a
 corner of their screen — [Parking is not a Desktop
 move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
-owns the model. The switch is instant by default; with
-`animations.set_on_space_change` it animates as a coordinated
-slide, out to the corner and in from it (see Animations).
+owns the model. The switch is instant by default.
+
+:::unreleased
+With `animations.set_on_space_change` on, the switch plays the
+plate slide: plates cover the windows, slide to the new Space and
+fade over its windows, which still move only once (see
+Animations).
+:::
+
 Focusing a hidden window (cmd+tab) pulls its space forward.
 Floating windows, picture-in-picture included, are never parked
 and stay visible across all spaces.
@@ -2076,7 +2105,14 @@ shortcuts panel's
 the drag visuals' ([drag.set_liquid_glass](#dragset_liquid_glass))
 and the sticky mark's
 ([sticky.set_liquid_glass](#stickyset_liquid_glass)) together,
-and shows on only when all of them are on. This verb sets the
+and shows on only when all of them are on.
+
+:::unreleased
+It writes the Space switch plates' leaf too
+([set_space_switch_liquid_glass](#set_space_switch_liquid_glass)).
+:::
+
+This verb sets the
 bars alone; setting them apart is a Lua-only state, and the
 Settings switch then reads off and says so in its `?`.
 
@@ -5439,13 +5475,22 @@ animations.set_size_rate(0)    -- back to per-tick default
 
 **Expects:** `true` or `false` (default `false`).
 
-**Does:** enables or disables the coordinated animation when
-switching spaces: the outgoing windows slide out to the hiding
-corner while the incoming ones slide in from it — one toggle
-drives both directions. Off (the default) is faster: a
-coordinated switch animates *both* spaces' windows at once, and
-slow-responding apps (Electron/WebKit) can fall behind on the
-extra per-frame window moves and stutter.
+**Does:** enables or disables the animation of an explicit
+Space switch (`focus_space`, a Space Bar click, a
+move-and-follow).
+
+:::unreleased
+On, a switch plays the plate slide: a plate with its app's icon
+fades in over each window on the screen, the plates slide as one
+strip one screen toward the new Space — across for a Space Bar
+on the top or bottom edge, down for one on a side — and fade out
+over the windows that arrive. The windows themselves move once
+each, under the plates, so the slide costs no more window moves
+than the instant switch. The plates wear Liquid Glass
+([set_space_switch_liquid_glass](#set_space_switch_liquid_glass));
+Reduce Motion keeps the switch instant. A slow app's window can land
+just after the plates fade.
+:::
 
 macOS Desktop switches are never animated in either direction —
 macOS stops reporting an inactive Desktop's windows to

@@ -34,7 +34,7 @@ struct SettingsCodingTests {
                 "mouse_resize", "new_window_placement_override",
                 "shortcut_panel",
                 "floating", "resize", "space",
-                "space_bar",
+                "space_bar", "space_switch",
                 "sticky", "swap_skips_cascade",
             ]
         )

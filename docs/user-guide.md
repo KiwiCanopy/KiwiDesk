@@ -520,6 +520,10 @@ flat look instead.
 
 It covers the floating mark too.
 
+:::unreleased
+And the plates a Space switch slides.
+:::
+
 On by default, on every surface. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,
 each surface draws its look without glass — the bars their Boxed

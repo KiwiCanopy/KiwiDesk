@@ -147,7 +147,7 @@
   "behavior.animations.shelf.help": "While both bars share an edge, the App Bar grows out of the Space Bar and shrinks back into it; a bar on an edge of its own fades in and out; the bars glide to their new places. Off, or with Reduce Motion on, they move at once.",
   "behavior.animations.shelf_duration": "KiwiShelf duration",
   "behavior.animations.space_change": "Animate Space switches",
-  "behavior.animations.space_change.caption": "Windows slide out of the Space you're leaving and into the one you're switching to.",
+  "behavior.animations.space_change.caption": "Plates cover your windows and slide to the Space you're switching to.",
   "behavior.animations.title": "Animations",
   "behavior.animations.window_resize": "Animate window resizes",
   "behavior.animations.window_swap": "Animate window swaps",

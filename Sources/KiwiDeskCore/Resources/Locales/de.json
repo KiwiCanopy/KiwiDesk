@@ -147,7 +147,7 @@
   "behavior.animations.shelf.help": "Teilen sich beide Leisten eine Kante, wächst die App Bar aus der Space Bar heraus und schrumpft wieder in sie hinein; eine Leiste an einer eigenen Kante wird ein- und ausgeblendet; die Leisten gleiten an ihren neuen Platz. Ausgeschaltet oder bei aktiviertem „Bewegung reduzieren“ bewegen sie sich sofort.",
   "behavior.animations.shelf_duration": "KiwiShelf-Dauer",
   "behavior.animations.space_change": "Space-Wechsel animieren",
-  "behavior.animations.space_change.caption": "Fenster gleiten aus dem Space, den du verlässt, hinaus und in den Space hinein, zu dem du wechselst.",
+  "behavior.animations.space_change.caption": "Flächen decken deine Fenster ab und gleiten zu dem Space, zu dem du wechselst.",
   "behavior.animations.title": "Animationen",
   "behavior.animations.window_resize": "Größenänderung von Fenstern animieren",
   "behavior.animations.window_swap": "Fenstertausch animieren",

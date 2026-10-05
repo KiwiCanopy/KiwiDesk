@@ -99,6 +99,7 @@ extension KiwiCore {
         arriving: Bool = false
     ) {
         let priorFrontmost = frontmostPIDProvider?()
+        let slide = spaceSlideIntent(to: target)
         state.workspaces.activate(target)
         focusWindow(id, refocusRetile: false, warp: true)
         emitSpaceChange()
@@ -106,7 +107,7 @@ extension KiwiCore {
             target,
             priorFrontmost: priorFrontmost
         )
-        spaceSwitchRetile(newcomer: arriving ? id : nil)
+        spaceSwitchRetile(newcomer: arriving ? id : nil, slide: slide)
         raiseLandingFloats(thenFocus: id)
     }
 

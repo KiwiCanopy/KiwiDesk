@@ -223,10 +223,6 @@ public final class TilingEngine {
     /// past corroborated bounds once (#1055). The parks they
     /// force are only the ones `StashDepartures` owes (#1508).
     ///
-    /// `stashAnimated` turns the park and the float restore into
-    /// slides — the coordinated space switch (#207, #1909), out
-    /// and in at once. Every other retile keeps them instant.
-    ///
     /// `sizing` is the caller's promise about how every window in
     /// this pass gets its size (#593); promising them all
     /// spring-sized lets a shrinking pane slide its shared edge
@@ -239,7 +235,6 @@ public final class TilingEngine {
         animated: Bool = true,
         pass: RetilePass = .event,
         newlyCreatedWindow: WindowID? = nil,
-        stashAnimated: Bool = false,
         sizing: BatchSizing = .mayInstantSize
     ) {
         guard
@@ -278,14 +273,9 @@ public final class TilingEngine {
             stashInactive(
                 state: state,
                 fallback: screen,
-                forcesDepartures: pass.reissues,
-                animated: stashAnimated
+                forcesDepartures: pass.reissues
             )
-            restoreStashed(
-                state: state,
-                frames: frames,
-                animated: stashAnimated
-            )
+            restoreStashed(state: state, frames: frames)
         }
     }
 }

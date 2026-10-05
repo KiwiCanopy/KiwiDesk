@@ -147,7 +147,7 @@
   "behavior.animations.shelf.help": "両方のバーが同じ端にあるときは、App BarがSpace Barから広がるように現れ、縮みながらそこへ戻ります。端に単独で置かれたバーはフェードしながら現れたり消えたりします。各バーは新しい位置へ滑らかに移動します。オフにした場合、または「視差効果を減らす」がオンの場合は、すぐに移動します。",
   "behavior.animations.shelf_duration": "KiwiShelfの継続時間",
   "behavior.animations.space_change": "スペースの切り替えをアニメーション表示",
-  "behavior.animations.space_change.caption": "ウインドウが、離れるスペースからスライドして出て、切り替え先のスペースへ入ります。",
+  "behavior.animations.space_change.caption": "プレートがウインドウを覆い、切り替え先のスペースへスライドします。",
   "behavior.animations.title": "アニメーション",
   "behavior.animations.window_resize": "ウインドウのサイズ変更をアニメーション表示",
   "behavior.animations.window_swap": "ウインドウの入れ替えをアニメーション表示",

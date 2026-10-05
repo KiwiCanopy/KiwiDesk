@@ -99,16 +99,11 @@ extension KiwiCore {
                 Date().timeIntervalSince(self.lastDesktopSwitch)
                     > DesktopSwitch.settle
             else { return }
-            // Deliberately NOT `spaceSwitchRetile()` (#207):
-            // the re-issue keeps the instant park so a dropped
-            // park lands in one set, not a late visible slide;
-            // a still-running exit slide is protected by
-            // `stash()`'s in-flight skip.
-            self.retile(
-                animated: self.tiler.settings
-                    .animations.onSpaceChange,
-                pass: .reissue
-            )
+            // Deliberately NOT `spaceSwitchRetile()`: a dropped
+            // frame lands in one instant set, and a write the
+            // plate slide still holds folds into the held one
+            // (#1956).
+            self.retile(animated: false, pass: .reissue)
             self.reassertSwitchFocus(
                 priorFrontmost: priorFrontmost,
                 context: "space settle"

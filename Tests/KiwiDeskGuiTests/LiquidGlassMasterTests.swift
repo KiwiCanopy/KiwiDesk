@@ -43,6 +43,7 @@ struct LiquidGlassMasterTests {
             \.shortcutPanelLiquidGlass,
             \.dragLiquidGlass,
             \.stickyStyle.liquidGlass,
+            \.spaceSwitchLiquidGlass,
         ]
 
     /// The shipped default, pinned ONCE (#1369): the migration's

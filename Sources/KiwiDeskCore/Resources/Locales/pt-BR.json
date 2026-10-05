@@ -147,7 +147,7 @@
   "behavior.animations.shelf.help": "Quando as duas barras compartilham uma borda, a App Bar cresce a partir da Space Bar e encolhe de volta para dentro dela; uma barra sozinha em uma borda aparece e desaparece gradualmente; as barras deslizam para o novo lugar. Desativado, ou com “Reduzir movimento” ativado, elas se movem na hora.",
   "behavior.animations.shelf_duration": "Duração do KiwiShelf",
   "behavior.animations.space_change": "Animar as trocas de espaço",
-  "behavior.animations.space_change.caption": "As janelas saem deslizando do espaço que você deixa e entram naquele para o qual você vai.",
+  "behavior.animations.space_change.caption": "Placas cobrem suas janelas e deslizam até o espaço para o qual você vai.",
   "behavior.animations.title": "Animações",
   "behavior.animations.window_resize": "Animar os redimensionamentos de janelas",
   "behavior.animations.window_swap": "Animar as trocas de janelas",

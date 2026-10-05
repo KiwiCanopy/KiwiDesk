@@ -19,9 +19,11 @@ extension APIReference {
             .integer("milliseconds")
         ),
         "set_on_space_change": APIRecord(
-            "Enables or disables animation when switching Spaces.",
+            "Enables or disables the plate slide when switching "
+                + "Spaces.",
             .boolean("enabled")
         ),
+
         "set_on_scrolling": APIRecord(
             "Enables or disables the layout slide when scrolling.",
             .boolean("enabled")

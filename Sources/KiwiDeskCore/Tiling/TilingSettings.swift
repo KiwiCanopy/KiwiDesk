@@ -46,6 +46,9 @@ public struct TilingSettings: Sendable, Equatable {
     /// Defaults ON with them (owner ruling 2026-09-10), so the
     /// row's "all three" reading is never false on a fresh setup.
     public var shortcutPanelLiquidGlass = true
+    /// Liquid Glass on the Space switch's plates (#1956), a leaf of
+    /// the same switch; off, they take the material.
+    public var spaceSwitchLiquidGlass = true
     /// Space spawn placement overrides (`placement.override[space_id]`).
     public var placementOverride: [SpaceID: SpawnPlacement] =
         [:]

@@ -28,6 +28,7 @@ extension TilingSettings: Codable {
         case mouse
         case mouseResize = "mouse_resize"
         case shortcutPanel = "shortcut_panel"
+        case spaceSwitch = "space_switch"
         case resize
         case space
     }
@@ -43,6 +44,11 @@ extension TilingSettings: Codable {
     /// The shortcuts panel's own group (#1307) — a surface, so
     /// it nests like `app_bar` rather than sitting flat.
     enum ShortcutPanelKeys: String, CodingKey {
+        case liquidGlass = "liquid_glass"
+    }
+
+    /// The Space switch's plates (#1956), a surface like the panel.
+    enum SpaceSwitchKeys: String, CodingKey {
         case liquidGlass = "liquid_glass"
     }
 
@@ -150,6 +156,20 @@ extension TilingSettings: Codable {
         try decodeSpace(from: container)
         try decodeResize(from: container)
         try decodeShortcutPanel(from: container)
+        try decodeSpaceSwitch(from: container)
+    }
+
+    private mutating func decodeSpaceSwitch(
+        from container: Container
+    ) throws {
+        guard container.contains(.spaceSwitch) else { return }
+        let group = try container.nestedContainer(
+            keyedBy: SpaceSwitchKeys.self,
+            forKey: .spaceSwitch
+        )
+        spaceSwitchLiquidGlass =
+            try group.decodeIfPresent(Bool.self, forKey: .liquidGlass)
+            ?? TilingSettings().spaceSwitchLiquidGlass
     }
 
     private mutating func decodeResize(

@@ -147,7 +147,7 @@
   "behavior.animations.shelf.help": "Когда обе панели стоят у одного края, App Bar вырастает из Space Bar и сжимается обратно в неё; панель, которая одна занимает свой край, плавно появляется и исчезает; панели скользят на новое место. Если выключено или включено «Уменьшение движения», они перемещаются сразу.",
   "behavior.animations.shelf_duration": "Длительность KiwiShelf",
   "behavior.animations.space_change": "Анимировать переключение пространств",
-  "behavior.animations.space_change.caption": "Окна выезжают из пространства, которое ты покидаешь, и въезжают в то, на которое переключаешься.",
+  "behavior.animations.space_change.caption": "Пластины накрывают твои окна и скользят к пространству, на которое ты переключаешься.",
   "behavior.animations.title": "Анимации",
   "behavior.animations.window_resize": "Анимировать изменение размера окон",
   "behavior.animations.window_swap": "Анимировать обмен окон местами",

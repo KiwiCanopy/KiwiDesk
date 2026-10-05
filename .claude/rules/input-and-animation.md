@@ -720,6 +720,31 @@ editing here:
   And the overlay starts no motion of its own: its turn and
   fades are `BarMotion`'s censused members
   (`BarMotionSeamTests`), so Core's motion keeps one home.
+- **A Space switch's motion is DRAWN, and each window still
+  moves once (#1956).** The plate slide is a picture over the
+  windows, never an animation of them: the switch's pass stays
+  the instant one, so a change that re-animates window frames on
+  a switch, or adds a write per window, re-opens the corner
+  slide's per-frame AX cost (`SpaceSlideSwitchTests` ▸
+  `slideCostsNoExtraWork`). Four obligations. The incoming
+  windows' writes are HELD per window in `FrameApplier`'s
+  `HeldWrites` and leave from each app's own queue at the
+  landing, never from a main-thread timer (`HeldWritesTests`);
+  a new write path to a window reaches the hold, as `apply` and
+  `applyInstant` do. KiwiDesk's own window moves through AppKit
+  inside the caller's turn, never on a later main-queue turn
+  (`FrameApplierOwnWindowTests`). Order the overlay's panel in
+  once per screen and never move it during a play — what moves
+  is a layer timed from the press, through `BarMotion`'s
+  censused members (`BarMotionSeamTests`); the panel half is
+  review's, since no fixture orders a panel in. And the
+  slide plays only for navigation that passes a
+  `SpaceSlideIntent`; boot, wake, a restore and a display follow
+  retile instantly (`SpaceSlideSwitchTests` ▸
+  `onlyNavigationPlays`). Its Reduce Motion read, panel and stack
+  read are pinned inert in both `makeTestCore` twins. The product
+  ruling is `docs/design-decisions.md` ▸ *A Space switch plays a
+  drawn plate slide*.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and
