@@ -18,6 +18,9 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+Shelf*.swift"
   # The looks (#1684): which bar fields a look may set.
   - "Sources/KiwiDeskCore/Appearance/*Look*.swift"
+  # The app-icon readers outside Bar: one icon source (#1901).
+  - "Sources/KiwiDeskCore/App/KiwiCore+MonocleFlip.swift"
+  - "Sources/KiwiDeskCore/Animation/SpaceSlideOverlay.swift"
   # The Settings preview asks ShelfArrangement and the hard floor
   # like the live plan does; a hand placement there is this
   # file's defect, not gui.md's.
@@ -179,7 +182,11 @@ twice, was a question the user answered twice. The argument is
   (`BarRenderSkipTests`). Keep the input comparable, which is why
   the bars' app icons come from the one `BarIconCache`: a fresh
   `NSImage` per read never compares equal and costs a
-  LaunchServices round trip besides.
+  LaunchServices round trip besides. Any other Core surface that
+  draws an app's icon — the Monocle flip's card, the Space
+  switch's plates — reads it there too, since an app activation
+  makes every retained `NSRunningApplication` read again (#1936,
+  `AppIconSourceSeamTests`).
 - **Reuse a Space item's glyph and badge views slot by slot,
   and mint a state badge only where it is drawn (#1942).** A
   switch that changes no app list then mints nothing; a walk and
