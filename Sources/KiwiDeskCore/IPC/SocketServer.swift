@@ -24,8 +24,19 @@ public final class SocketServer {
 
     public var isRunning: Bool { listener != nil }
 
+    /// A socket another process still answers on (#1881).
+    public struct SocketInUse: Error, CustomStringConvertible {
+        public let path: String
+        public var description: String {
+            "another process is listening on \(path)"
+        }
+    }
+
     public func start() throws {
         guard listener == nil else { return }
+        // A live first instance's socket is never unlinked; a stale
+        // file left by a crash is (#1881).
+        if Self.isLive(path) { throw SocketInUse(path: path) }
         try? FileManager.default.removeItem(atPath: path)
         let parameters = NWParameters.tcp
         parameters.requiredLocalEndpoint = NWEndpoint.unix(
@@ -38,8 +49,37 @@ public final class SocketServer {
                 self?.accept(connection)
             }
         }
+        // The socket file only, owner-only once bound; never the
+        // folder, which may be a dotfiles symlink (#1881).
+        let path = self.path
+        listener.stateUpdateHandler = { state in
+            if case .ready = state { chmod(path, 0o600) }
+        }
         listener.start(queue: .main)
         self.listener = listener
+    }
+
+    /// Whether something accepts a connection on `path` — a plain
+    /// AF_UNIX connect, which a stale file refuses at once.
+    nonisolated static func isLive(_ path: String) -> Bool {
+        let fd = socket(AF_UNIX, SOCK_STREAM, 0)
+        guard fd >= 0 else { return false }
+        defer { Darwin.close(fd) }
+        var address = sockaddr_un()
+        address.sun_family = sa_family_t(AF_UNIX)
+        let bytes = Array(path.utf8)
+        let capacity = MemoryLayout.size(ofValue: address.sun_path)
+        guard bytes.count < capacity else { return false }
+        withUnsafeMutableBytes(of: &address.sun_path) { raw in
+            raw.copyBytes(from: bytes)
+        }
+        let size = socklen_t(MemoryLayout<sockaddr_un>.size)
+        let result = withUnsafePointer(to: &address) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                connect(fd, $0, size)
+            }
+        }
+        return result == 0
     }
 
     public func stop() {
