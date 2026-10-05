@@ -223,6 +223,50 @@ no `.hide` (no order-out on the 1↔2 runs' panel polls, macOS 27,
 and those stay off the path above until a measurement says
 otherwise.
 
+## After a Space switch the focused ring arrives with its window
+
+The ring leads a focus move inside a Space — there the moving ring
+is the cue for where focus went — but after a Space switch it would
+sit on an empty spot while a slow app's window catches up (#1959,
+owner ruling). So a switch that brings its anchor out of the park
+holds that anchor's ring through `BorderManager.holdArrival`,
+armed in the one door that knows it, `spaceSwitchRetile`
+(`BorderOrderCensusTests` ▸ `arrivalHoldHasOneDoor`); a window
+already shown — a focus follow onto a Space a screen shows, a
+wake, a restore — keeps its leading ring, and native Desktop
+switches never hold (`BorderArrivalWiringTests`). It keeps to
+these:
+
+- **The held ring is ordered in dormant and revealed, never
+  created late** — `sync` orders it with `revealing: false`, so the
+  reveal is an alpha change and costs no round trip. The hold
+  lives on the overlay, so NO order shows it — the switch's own
+  raise fires a reorder and an unhide, and on the device those
+  showed the ring ~300 ms early — only `reveal` or a retire ends
+  it (`BorderArrivalTests` ▸ `windowServerOrderKeepsTheHold`).
+  Being ordered in, a held ring needs no further order, so a
+  steady sync costs it no round trip (`heldRingTakesNoFurtherOrder`).
+  A ring already showing (a window travelling with the user) is
+  not held, and a hold a burst replaces RELEASES its ring rather
+  than showing it.
+- **Only the window's own report reveals it**: an AX echo
+  (`.axEcho`) or a WindowServer reconcile landing within
+  `arrivalTolerance` of the frame the switch sent, which the hold
+  KEEPS from its first read: a stale echo from the corner retires
+  the commanded frame before the window lands (device,
+  2026-10-05). Our own animation ticks are not the window
+  arriving. A window that never reports gets its ring at
+  `arrivalCap` (`BorderArrivalTests`).
+- **Never ahead of the slide's plates lifting**: the hold reads
+  `spaceSlide.play?.liftAt` live, since a burst press moves it
+  (`BorderArrivalTests` ▸ `liftGatesTheReveal`,
+  `BorderArrivalWiringTests` ▸ `holdReadsTheSlidesLift`).
+- **The reveal fades through `BarMotion.slideFade`, handed the
+  manager's `reduceMotion` read**, so Reduce Motion cuts it in —
+  stated, not guarded, as the section on a cue's Reduce Motion
+  read below says of every cue. Both `makeTestCore` twins pin the
+  hold's clock, timer and that read.
+
 ## The overlay panels join every Space
 
 Both overlay panels carry `.canJoinAllSpaces` in their

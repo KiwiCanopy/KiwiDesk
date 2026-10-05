@@ -86,6 +86,13 @@ func makeTestCore(
     core.spaceSlide.reduceMotion = { true }
     core.spaceSlide.present = { _ in }
     core.spaceSlide.stackOrder = { [:] }
+    // The focused ring's arrival hold (#1959) reads the render
+    // clock, the host's Reduce Motion and a live timer: frozen and
+    // inert here, so ring visibility after a switch never depends
+    // on how fast the runner is. An arrival suite steps them.
+    core.borders.arrivalClock = { 0 }
+    core.borders.scheduleArrivalCheck = { _, _ in }
+    core.borders.reduceMotion = { true }
     // Same class again (#596): bootstrap reads the
     // `KIWIDESK_NO_WS_TRACKING` QA lever from the real process
     // environment, so a developer who has it exported would get a

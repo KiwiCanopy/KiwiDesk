@@ -264,6 +264,36 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         panel?.alphaValue = dormant ? 0 : 1
     }
 
+    /// Fades a dormant ring in over its content's layer: a
+    /// window's own alpha takes no Core Animation (#1959).
+    func reveal(reduceMotion: Bool) {
+        guard let layer = panel?.contentView?.layer else {
+            panel?.alphaValue = 1
+            return
+        }
+        // The fade reaches the render server ahead of the window's
+        // alpha, or one frame draws the ring whole.
+        CATransaction.begin()
+        layer.removeAnimation(forKey: "reveal")
+        layer.add(
+            BarMotion.slideFade(
+                from: 0,
+                to: 1,
+                begin: CACurrentMediaTime(),
+                duration: Self.revealDuration,
+                reduceMotion: reduceMotion
+            ),
+            forKey: "reveal"
+        )
+        CATransaction.commit()
+        CATransaction.flush()
+        panel?.alphaValue = 1
+    }
+
+    /// The reveal's length: a cue that the window has arrived,
+    /// shorter than the plates' own fade (#1959).
+    static let revealDuration: CFTimeInterval = 0.15
+
     private func makePanel() -> NSPanel {
         // BorderOverlayPanel avoids frame clamping on top edge (#436).
         let panel = BorderOverlayPanel(

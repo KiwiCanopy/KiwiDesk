@@ -37,6 +37,18 @@ extension KiwiCore {
         // A navigation that stands the slide down cuts a running
         // one; anything else is the head-of-retile check's.
         if slide != nil, run == nil { endSpaceSlide() }
+        // The focused ring appears with its window, never ahead of
+        // the plates lifting (#1959) — a window this switch brings
+        // out of its park; one already shown keeps its ring.
+        if let space = activeSpace,
+            let anchor = state.focusAnchor(of: space),
+            let frame = state.windows[anchor]?.frame,
+            tiler.looksStashed(frame)
+        {
+            borders.holdArrival(of: anchor) { [weak self] in
+                self?.spaceSlide.play?.liftAt
+            }
+        }
         retile(
             animated: false,
             pass: .reissue,
