@@ -35,7 +35,6 @@ struct BorderSteadySyncTests {
     @Test("A sync mid-animation holds the last commanded frame")
     func syncHoldsFrameWhileAnimating() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.sync([spec(1, frame: start)])
         border.isAnimating = { _ in true }
@@ -61,7 +60,6 @@ struct BorderSteadySyncTests {
     @Test("Only geometry stands down — sync still recolors")
     func syncStillRecolorsWhileAnimating() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.sync([spec(1, frame: start)])
         border.isAnimating = { _ in true }
@@ -82,7 +80,6 @@ struct BorderSteadySyncTests {
     @Test("A ring created mid-animation takes the spec frame")
     func newRingMidAnimationUsesSpec() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.isAnimating = { _ in true }
         // No held frame to prefer — one tick behind beats no ring.
@@ -93,7 +90,6 @@ struct BorderSteadySyncTests {
     @Test("Retirement is unaffected mid-animation")
     func retirementUnaffectedWhileAnimating() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.sync([spec(1, frame: start), spec(2, frame: stale)])
         border.isAnimating = { _ in true }

@@ -4,12 +4,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// #1925: AppKit's `order(_:relativeTo:)` against another app's
-/// window looks that window's rights up synchronously first — the
-/// last ring cost on a Space switch, up to 390 ms per order while
-/// WindowServer was GPU-bound. An ordered-in panel re-stacks in a
-/// SkyLight transaction instead; only the first show, and the
-/// first after an order-out, goes through AppKit.
+/// #1962: WindowServer applies no SkyLight order to an AppKit
+/// panel — `SLSTransactionOrderWindow`, `SLSOrderWindow` and the
+/// group order with a plain commit all left a probe panel where it
+/// was (macOS 27.0.1, 2026-10-05), so #1925's re-stack never moved
+/// a ring. Every order of an ordered-in ring therefore goes through
+/// AppKit, whose order commits through the bridge.
 @Suite("Border ring re-stack")
 @MainActor
 struct BorderRestackTests {
@@ -28,47 +28,49 @@ struct BorderRestackTests {
         )
     }
 
-    @Test("The first order is AppKit's; later ones re-stack")
-    func reorderSkipsAppKit() {
+    @Test("every order of a ring goes through AppKit")
+    func everyOrderIsAppKits() {
         let ring = AppKitBorderOverlay(
             order: .below,
             movePanel: { _, _ in false }
         )
-        var restacks: [CGWindowID] = []
-        ring.restack = { _, _, target in
-            restacks.append(target)
-            return true
-        }
         render(ring)
         ring.order(relativeTo: 7)
-        #expect(restacks.isEmpty)
         #expect(ring.isOrderedIn)
         ring.order(relativeTo: 7)
-        ring.order(relativeTo: 7)
-        #expect(restacks == [7, 7])
+        ring.order(relativeTo: 8)
+        #expect(ring.appKitOrders == 3)
         ring.hide()
         #expect(!ring.isOrderedIn)
         ring.order(relativeTo: 7)
-        #expect(restacks == [7, 7])
-        #expect(ring.appKitOrders == 2)
+        #expect(ring.appKitOrders == 4)
     }
 
-    @Test("A missing symbol falls back to AppKit's order")
-    func absentSymbolFallsBack() {
-        let ring = AppKitBorderOverlay(
-            order: .below,
-            movePanel: { _, _ in false }
-        )
-        var asked = 0
-        ring.restack = { _, _, _ in
-            asked += 1
-            return false
+    /// The symbols the probe found inert stay out of Core, so the
+    /// no-op cannot come back as an optimisation.
+    @Test("no SkyLight window order is resolved in Core")
+    func noSkyLightOrder() throws {
+        let core = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        let files = try FileManager.default.subpathsOfDirectory(
+            atPath: core.path
+        ).filter { $0.hasSuffix(".swift") }
+        #expect(files.count > 100)
+        var hits: [String] = []
+        for file in files {
+            let text = try String(
+                contentsOf: core.appendingPathComponent(file),
+                encoding: .utf8
+            )
+            for name in [
+                "\"SLSTransactionOrderWindow", "\"SLSOrderWindow",
+            ] where text.contains(name) {
+                hits.append("\(file): \(name)")
+            }
         }
-        render(ring)
-        ring.order(relativeTo: 7)
-        ring.order(relativeTo: 7)
-        #expect(asked == 1)
-        #expect(ring.appKitOrders == 2)
-        #expect(ring.isOrderedIn)
+        #expect(hits.isEmpty, "found \(hits)")
     }
 }

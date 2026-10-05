@@ -21,7 +21,6 @@ struct BorderPanelMoveTests {
     private func ring(_ spy: Spy) -> AppKitBorderOverlay {
         AppKitBorderOverlay(
             order: .below,
-            restack: { _, _, _ in true },
             movePanel: { _, origin in
                 spy.moves.append(origin)
                 return spy.answers

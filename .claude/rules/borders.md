@@ -127,11 +127,12 @@ second cancel the other:
   commanded frames to the target while the window never moved, and
   no echo and no WindowServer event is coming.
 
-## The switch path makes no WindowServer round trip for a ring
+## The switch path keeps a ring's WindowServer round trips to its re-stacks
 
 A WindowServer call a ring makes on the main actor waits for its
 answer, and while WindowServer is GPU-bound one answer took
-390 ms (#1925, 2026-10-03). So a change to the ring's switch path
+390 ms (#1925, 2026-10-03). The re-stack is the one such call a
+ring cannot drop (#1962), so a change to the ring's switch path
 keeps these:
 
 - **A ring `sync` retires goes dormant, never ordered out** —
@@ -148,13 +149,17 @@ keeps these:
   new, revived or hidden — unless no WindowServer stream reports
   its target moving; the two settle passes re-stack every ring
   (`BorderOrderReassertTests`).
-- **An ordered-in panel re-stacks through `restack`**, a SkyLight
-  transaction, never AppKit's `order(_:relativeTo:)`, which looks
-  the other app's window rights up synchronously first; the
-  first show, the first after an order-out and a missing symbol
-  take AppKit (`BorderRestackTests`). This orders the AppKit
-  panel and draws nothing: the `.transient` section below still
-  binds.
+- **A ring is re-stacked through AppKit's `order(_:relativeTo:)`,
+  every time** — the one round trip this path keeps, so the
+  `needsOrder` gate above is what bounds it. WindowServer applies
+  no SkyLight order to an AppKit panel: `SLSTransactionOrderWindow`,
+  `SLSOrderWindow` and the group order with a plain commit all
+  left a probe panel in place, while AppKit's own order commits
+  through the bridge (`SLSWindowBridgedOrder`; macOS 27.0.1,
+  2026-10-05, #1962). So a SkyLight re-stack is a no-op that reads
+  as a success, and Core resolves none (`BorderRestackTests`).
+  This orders the AppKit panel and draws nothing: the
+  `.transient` section below still binds.
 - **A ring panel that keeps the ring's size moves through
   `SkyLight.moveWindow`, never AppKit's `setFrame`** — mid-animation
   too, so it takes no room — once WindowServer has its window and

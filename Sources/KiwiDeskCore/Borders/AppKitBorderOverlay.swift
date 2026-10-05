@@ -42,9 +42,6 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// above-order panel takes it, or a raised target's band
     /// would cover the ring.
     private let levelOf: (CGWindowID) -> Int?
-    /// Re-stacks an ordered-in panel without AppKit's per-order
-    /// rights lookup (#1925); false sends it through AppKit.
-    var restack: (CGWindowID, Bool, CGWindowID) -> Bool
     /// Moves the panel's window to a top-left origin without
     /// AppKit's fence (#1956); false sends it through AppKit.
     var movePanel: (CGWindowID, CGPoint) -> Bool
@@ -68,15 +65,12 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         order: BorderGeometry.Order = .below,
         levelOf: @escaping (CGWindowID) -> Int? =
             AppKitBorderOverlay.windowLayer,
-        restack: @escaping (CGWindowID, Bool, CGWindowID) -> Bool =
-            SkyLight.orderWindow,
         movePanel: @escaping (CGWindowID, CGPoint) -> Bool,
         pass: @escaping @MainActor () -> UInt64 =
             MainRunLoopPass.current
     ) {
         orderMode = order
         self.levelOf = levelOf
-        self.restack = restack
         self.movePanel = movePanel
         self.pass = pass
     }
@@ -242,15 +236,8 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         {
             panel.level = NSWindow.Level(rawValue: raw)
         }
-        if isOrderedIn,
-            restack(
-                CGWindowID(panel.windowNumber),
-                orderMode == .above,
-                windowNumber
-            )
-        {
-            return
-        }
+        // AppKit's order, every time: WindowServer applies no
+        // SkyLight order to an AppKit panel (#1962).
         let createsWindow = panel.windowNumber <= 0
         panel.order(
             orderMode == .above ? .above : .below,

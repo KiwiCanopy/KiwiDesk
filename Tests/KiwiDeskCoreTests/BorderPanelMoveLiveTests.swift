@@ -58,7 +58,6 @@ struct BorderPanelMoveLiveTests {
     func managerSeamReachesThePanel() {
         let border = BorderManager()
         defer { border.clear() }
-        border.restack = { _, _, _ in false }
         var moves = 0
         border.movePanel = { _, _ in
             moves += 1

@@ -69,7 +69,6 @@ struct BorderOrderReassertTests {
     @Test("Under tracking a steady sync re-stacks no shown ring")
     func steadySyncOrdersOnlyWhatItMust() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         defer { border.clear() }
         var orders = 0
