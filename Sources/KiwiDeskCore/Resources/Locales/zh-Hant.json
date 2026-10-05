@@ -150,7 +150,7 @@
   "behavior.animations.space_change.caption": "薄板會蓋住你的視窗，並滑向你要切換到的空間。",
   "behavior.animations.title": "動畫",
   "behavior.animations.window_duration": "視窗時間長度",
-  "behavior.animations.window_duration.help": "視窗在變更尺寸、互換或佈局重排時抵達新位置所需的時間。時間長度越長，速度越慢。",
+  "behavior.animations.window_duration.help": "視窗在移動、變更尺寸、互換或佈局重排時抵達新位置所需的時間。時間長度越長，速度越慢。",
   "behavior.animations.window_resize": "為視窗尺寸變更加上動畫",
   "behavior.animations.window_swap": "為視窗互換加上動畫",
   "behavior.mouse.follows_focus": "將指標移至取得焦點的視窗",

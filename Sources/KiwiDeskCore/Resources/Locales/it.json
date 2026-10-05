@@ -150,7 +150,7 @@
   "behavior.animations.space_change.caption": "Delle piastre coprono le tue finestre e scorrono verso lo spazio a cui passi.",
   "behavior.animations.title": "Animazioni",
   "behavior.animations.window_duration": "Durata delle finestre",
-  "behavior.animations.window_duration.help": "Quanto impiega una finestra a raggiungere il suo nuovo posto quando viene ridimensionata, scambiata o ridisposta. Una durata maggiore è più lenta.",
+  "behavior.animations.window_duration.help": "Quanto impiega una finestra a raggiungere il suo nuovo posto quando si muove, viene ridimensionata, scambiata o ridisposta. Una durata maggiore è più lenta.",
   "behavior.animations.window_resize": "Anima i ridimensionamenti delle finestre",
   "behavior.animations.window_swap": "Anima gli scambi di finestre",
   "behavior.mouse.follows_focus": "Porta il puntatore sulla finestra che riceve il focus",

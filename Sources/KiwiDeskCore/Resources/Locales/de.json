@@ -150,7 +150,7 @@
   "behavior.animations.space_change.caption": "Flächen decken deine Fenster ab und gleiten in den Space, zu dem du wechselst.",
   "behavior.animations.title": "Animationen",
   "behavior.animations.window_duration": "Fenster-Dauer",
-  "behavior.animations.window_duration.help": "Wie lange ein Fenster bei einer Größenänderung, einem Fenstertausch oder einer Layout-Anpassung braucht, um seinen neuen Platz zu erreichen. Eine längere Dauer ist langsamer.",
+  "behavior.animations.window_duration.help": "Wie lange ein Fenster bei einer Bewegung, einer Größenänderung, einem Fenstertausch oder einer Layout-Anpassung braucht, um seinen neuen Platz zu erreichen. Eine längere Dauer ist langsamer.",
   "behavior.animations.window_resize": "Größenänderung von Fenstern animieren",
   "behavior.animations.window_swap": "Fenstertausch animieren",
   "behavior.mouse.follows_focus": "Mauszeiger zum Fenster bewegen, das den Fokus erhält",

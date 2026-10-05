@@ -150,7 +150,7 @@
   "behavior.animations.space_change.caption": "Des plaques recouvrent vos fenêtres et glissent jusqu'à l'espace vers lequel vous basculez.",
   "behavior.animations.title": "Animations",
   "behavior.animations.window_duration": "Durée des fenêtres",
-  "behavior.animations.window_duration.help": "Le temps que met une fenêtre pour rejoindre sa nouvelle place lorsqu'elle est redimensionnée, échangée ou réagencée. Une durée plus longue est plus lente.",
+  "behavior.animations.window_duration.help": "Le temps que met une fenêtre pour rejoindre sa nouvelle place lorsqu'elle se déplace, est redimensionnée, échangée ou réagencée. Une durée plus longue est plus lente.",
   "behavior.animations.window_resize": "Animer les redimensionnements",
   "behavior.animations.window_swap": "Animer les échanges de fenêtres",
   "behavior.mouse.follows_focus": "Amener le pointeur sur la fenêtre qui devient active",

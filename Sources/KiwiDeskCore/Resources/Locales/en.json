@@ -150,7 +150,7 @@
   "behavior.animations.space_change.caption": "Plates cover your windows and slide to the Space you're switching to.",
   "behavior.animations.title": "Animations",
   "behavior.animations.window_duration": "Window duration",
-  "behavior.animations.window_duration.help": "How long a window takes to reach its new place when it resizes, swaps or reflows. A longer duration is slower.",
+  "behavior.animations.window_duration.help": "How long a window takes to reach its new place when it moves, resizes, swaps or reflows. A longer duration is slower.",
   "behavior.animations.window_resize": "Animate window resizes",
   "behavior.animations.window_swap": "Animate window swaps",
   "behavior.mouse.follows_focus": "Move the pointer to the window that gets focus",

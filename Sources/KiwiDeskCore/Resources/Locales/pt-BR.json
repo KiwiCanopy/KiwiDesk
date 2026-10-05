@@ -150,7 +150,7 @@
   "behavior.animations.space_change.caption": "Placas cobrem suas janelas e deslizam até o espaço para o qual você vai.",
   "behavior.animations.title": "Animações",
   "behavior.animations.window_duration": "Duração das janelas",
-  "behavior.animations.window_duration.help": "Quanto tempo uma janela leva para chegar ao novo lugar quando é redimensionada, trocada ou rearranjada no layout. Uma duração maior é mais lenta.",
+  "behavior.animations.window_duration.help": "Quanto tempo uma janela leva para chegar ao novo lugar quando se move, é redimensionada, trocada ou rearranjada no layout. Uma duração maior é mais lenta.",
   "behavior.animations.window_resize": "Animar os redimensionamentos de janelas",
   "behavior.animations.window_swap": "Animar as trocas de janelas",
   "behavior.mouse.follows_focus": "Levar o cursor até a janela que recebe o foco",

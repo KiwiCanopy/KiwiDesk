@@ -79,7 +79,9 @@ extension MotionCard {
                 SettingsCatalog.colors.motionMore.children.animateLayoutReflows
             )
         case .animationsDurationMS:
-            // Paces the three window toggles above (#51, #1932).
+            // Paces the window toggles above and the window moves
+            // no toggle governs, so it greys only with the master
+            // (#51, #1932).
             StepperRow(
                 label: L(
                     "behavior.animations.window_duration",
@@ -92,11 +94,10 @@ extension MotionCard {
                 help: L(
                     "behavior.animations.window_duration.help",
                     "How long a window takes to reach its new place "
-                        + "when it resizes, swaps or reflows. A longer "
-                        + "duration is slower."
+                        + "when it moves, resizes, swaps or reflows. A "
+                        + "longer duration is slower."
                 )
             )
-            .modifier(GreyOut(active: !pacesAWindowAnimation))
             .searchAnchored(
                 SettingsCatalog.colors.motionMore.children.animationDuration
             )
@@ -148,12 +149,5 @@ extension MotionCard {
 
     var animations: Binding<AnimationSettings> {
         $model.config.settings.animations
-    }
-
-    /// Whether any animation the window duration paces is on.
-    var pacesAWindowAnimation: Bool {
-        let value = animations.wrappedValue
-        return value.onWindowResize || value.onWindowSwap
-            || value.onRelayout
     }
 }

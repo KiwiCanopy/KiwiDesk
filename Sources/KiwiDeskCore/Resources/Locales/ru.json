@@ -150,7 +150,7 @@
   "behavior.animations.space_change.caption": "Пластины накрывают твои окна и скользят к пространству, на которое ты переключаешься.",
   "behavior.animations.title": "Анимации",
   "behavior.animations.window_duration": "Длительность окон",
-  "behavior.animations.window_duration.help": "Сколько времени окно добирается до нового места при изменении размера, обмене местами или перестроении раскладки. Чем больше длительность, тем медленнее.",
+  "behavior.animations.window_duration.help": "Сколько времени окно добирается до нового места при перемещении, изменении размера, обмене местами или перестроении раскладки. Чем больше длительность, тем медленнее.",
   "behavior.animations.window_resize": "Анимировать изменение размера окон",
   "behavior.animations.window_swap": "Анимировать обмен окон местами",
   "behavior.mouse.follows_focus": "Перемещать указатель к окну, получившему фокус",
