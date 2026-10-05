@@ -30,8 +30,13 @@ public final class LookStore {
             return nil
         }
         if let migrated = ConfigMigration.migrated(data) {
+            MigrationBackup.write(
+                migrated,
+                replacing: data,
+                at: fileURL,
+                configDirectory: fileURL.deletingLastPathComponent()
+            )
             data = migrated
-            try? migrated.write(to: fileURL, options: .atomic)
         }
         guard
             let doc = try? JSONDecoder().decode(

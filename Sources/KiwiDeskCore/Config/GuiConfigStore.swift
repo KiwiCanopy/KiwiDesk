@@ -56,8 +56,13 @@ public struct GuiConfigStore {
             return nil
         }
         if let migrated = ConfigMigration.migrated(data) {
+            MigrationBackup.write(
+                migrated,
+                replacing: data,
+                at: url,
+                configDirectory: url.deletingLastPathComponent()
+            )
             data = migrated
-            try? migrated.write(to: url, options: .atomic)
         }
         return try? JSONDecoder().decode(
             GuiConfig.self,

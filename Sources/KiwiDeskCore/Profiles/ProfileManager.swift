@@ -232,9 +232,14 @@ public final class ProfileManager {
         let file = url(for: try validated(name))
         var data = try Data(contentsOf: file)
         if let migrated = ConfigMigration.migrated(data) {
+            // Raw bytes, to preserve unknown keys.
+            MigrationBackup.write(
+                migrated,
+                replacing: data,
+                at: file,
+                configDirectory: directory.deletingLastPathComponent()
+            )
             data = migrated
-            // Writes migrated raw bytes directly to preserve unknown keys.
-            try? migrated.write(to: file, options: .atomic)
         }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
