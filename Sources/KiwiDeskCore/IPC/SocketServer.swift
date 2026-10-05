@@ -52,15 +52,21 @@ public final class SocketServer {
         // The socket file only, owner-only once bound; never the
         // folder, which may be a dotfiles symlink (#1881).
         let path = self.path
-        listener.stateUpdateHandler = { state in
-            if case .ready = state { chmod(path, 0o600) }
+        listener.stateUpdateHandler = { [weak self] state in
+            guard case .ready = state, chmod(path, 0o600) != 0 else {
+                return
+            }
+            MainActor.assumeIsolated {
+                self?.onLog("socket: could not restrict \(path)")
+            }
         }
         listener.start(queue: .main)
         self.listener = listener
     }
 
     /// Whether something accepts a connection on `path` — a plain
-    /// AF_UNIX connect, which a stale file refuses at once.
+    /// AF_UNIX connect, which a stale file refuses at once. A path
+    /// too long to probe reads as live.
     nonisolated static func isLive(_ path: String) -> Bool {
         let fd = socket(AF_UNIX, SOCK_STREAM, 0)
         guard fd >= 0 else { return false }
@@ -69,7 +75,8 @@ public final class SocketServer {
         address.sun_family = sa_family_t(AF_UNIX)
         let bytes = Array(path.utf8)
         let capacity = MemoryLayout.size(ofValue: address.sun_path)
-        guard bytes.count < capacity else { return false }
+        // Too long to probe: refuse rather than unlink a live one.
+        guard bytes.count < capacity else { return true }
         withUnsafeMutableBytes(of: &address.sun_path) { raw in
             raw.copyBytes(from: bytes)
         }
@@ -83,13 +90,16 @@ public final class SocketServer {
     }
 
     public func stop() {
+        // Only a server that bound the path removes it: a refused
+        // start must not unlink the live socket on its quit (#1881).
+        let bound = listener != nil
         listener?.cancel()
         listener = nil
         for client in clients.values {
             close(client)
         }
         clients = [:]
-        try? FileManager.default.removeItem(atPath: path)
+        if bound { try? FileManager.default.removeItem(atPath: path) }
     }
 
     private func accept(_ connection: NWConnection) {

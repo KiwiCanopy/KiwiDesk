@@ -51,6 +51,9 @@ struct SocketServerOwnershipTests {
             try second.start()
         }
         #expect(!second.isRunning)
+        // The refused server's quit leaves the live socket alone.
+        second.stop()
+        #expect(FileManager.default.fileExists(atPath: path))
         #expect(SocketServer.isLive(path))
     }
 
