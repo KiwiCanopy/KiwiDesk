@@ -62,12 +62,16 @@ struct SourceScanArgumentsTests {
         #expect(SourceScan.literal(Array(#""open"#), from: 0) == nil)
     }
 
-    @Test("a comma inside the English never adds a label slot")
-    func englishCommaIsNoSlot() {
+    @Test("the English never adds a label slot")
+    func englishIsNoSlot() {
+        // A label after the inner comma: a mis-split leaves it an
+        // argument of its own. A label beside the English literal:
+        // counting the English argument would count it.
         let bodies = [
             #""k", "a, b", L("x.y")"#,
-            "\"k\", #\"a \"b, c\" d\"#, L(\"x.y\")",
-            "\"k\", \"\"\"\na \"b, c\" d\n\"\"\", L(\"x.y\")",
+            "\"k\", #\"a \"b, L(\"z\") c\" d\"#, L(\"x.y\")",
+            "\"k\", \"\"\"\na \"b, L(\"z\") c\" d\n\"\"\", L(\"x.y\")",
+            #""k", "a" + L("z"), L("x.y")"#,
         ]
         for body in bodies {
             #expect(
