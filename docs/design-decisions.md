@@ -4514,7 +4514,9 @@ floating-mode, at the drop (#1686, below beside #492).
 back** ([#1427](https://github.com/KiwiCanopy/KiwiDesk/issues/1427),
 owner ruling 2026-10-06). [Principle] A window pushed down until its
 bottom passes the usable area — the screen edge, or the top of a
-bar on that edge, which is `floatBounds` — keeps its top edge where
+bar on that edge, less the focus ring's reach as every float
+placement keeps it (`floatGrowBounds`; the outer gap is a layout
+reservation and is not followed) — keeps its top edge where
 it was dropped and loses height from the bottom. Moving it back up
 would undo the move the user just made. A clipped strip below the
 border is not a position anyone chose, so this is a narrower
