@@ -2,7 +2,9 @@ import AppKit
 
 /// The menu a Space Bar glyph group or `+n` opens (#1528): one row
 /// per window, handed a list rather than a chip so #1518's
-/// right-click rows can reuse it.
+/// right-click rows can reuse it. A glyph's rows are one app's, so
+/// they list titles under an app header; `+n`'s mix apps and keep
+/// the icon and name (#1947).
 @MainActor
 enum SpaceBarWindowMenu {
     struct Row: Equatable {
@@ -18,7 +20,17 @@ enum SpaceBarWindowMenu {
     static let titleCap = 60
     static let iconSide: CGFloat = 16
 
-    /// The row's text: the app, then its title where it has one.
+    /// A glyph row's text: the title alone, an untitled window
+    /// named by a placeholder rather than left blank.
+    static func titleText(_ row: Row) -> String {
+        guard !row.title.isEmpty else {
+            return L("space_bar.menu.untitled", "Untitled Window")
+        }
+        return AppBarStyle.cappedTitle(row.title, to: titleCap)
+    }
+
+    /// An overflow row's text: the app, then its title where it
+    /// has one.
     static func text(_ row: Row) -> String {
         guard !row.title.isEmpty else { return row.app }
         return L(
@@ -31,14 +43,19 @@ enum SpaceBarWindowMenu {
 
     static func make(
         _ rows: [Row],
+        kind: SpaceBarGlyphPick.Kind,
         onPick: @escaping @MainActor (WindowID) -> Void
     ) -> NSMenu {
         let menu = NSMenu()
         menu.autoenablesItems = false
         let handler = Handler(onPick: onPick)
+        let oneApp = kind == .glyph
+        if oneApp, let app = rows.first?.app {
+            menu.addItem(.sectionHeader(title: app))
+        }
         for row in rows {
             let item = NSMenuItem(
-                title: text(row),
+                title: oneApp ? titleText(row) : text(row),
                 action: #selector(Handler.pick(_:)),
                 keyEquivalent: ""
             )
@@ -48,8 +65,10 @@ enum SpaceBarWindowMenu {
             item.representedObject = Pick(row.window, handler)
             item.isEnabled = row.enabled
             if row.title.count > titleCap { item.toolTip = row.title }
-            item.image = row.icon.map(scaled)
-            showImage(item)
+            if !oneApp {
+                item.image = row.icon.map(scaled)
+                showImage(item)
+            }
             menu.addItem(item)
         }
         return menu

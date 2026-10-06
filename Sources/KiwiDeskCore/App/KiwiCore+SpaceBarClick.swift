@@ -33,7 +33,8 @@ extension KiwiCore {
         let rows = spaceBarMenuRows(pick.windows)
         guard !rows.isEmpty else { return }
         let space = pick.space
-        let menu = SpaceBarWindowMenu.make(rows) { [weak self] id in
+        let menu = SpaceBarWindowMenu.make(rows, kind: pick.kind) {
+            [weak self] id in
             self?.focusFromSpaceBar(id, on: space)
         }
         spaceBars.glyphActions.present(menu, pick.anchor)

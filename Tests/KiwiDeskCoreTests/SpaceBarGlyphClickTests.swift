@@ -166,12 +166,12 @@ struct SpaceBarGlyphClickTests {
         core.pickFromSpaceBar(pick([2, 3], on: two))
         #expect(core.activeSpace?.id == one)
         let shown = try #require(menu())
-        #expect(
-            shown.items.map(\.title)
-                == ["Mail — Inbox", "Mail — Draft"]
-        )
-        #expect(shown.items.allSatisfy { $0.isEnabled })
-        pickRow(shown, at: 1)
+        // One app's rows: titles under an app header (#1947).
+        #expect(shown.items.map(\.title) == ["Mail", "Inbox", "Draft"])
+        #expect(shown.items[0].isSectionHeader)
+        let rows = shown.items.dropFirst()
+        #expect(rows.allSatisfy { $0.isEnabled && $0.image == nil })
+        pickRow(shown, at: 2)
         #expect(core.activeSpace?.id == two)
         #expect(core.state.workspaces[two]?.focused == WindowID(3))
     }
@@ -183,7 +183,8 @@ struct SpaceBarGlyphClickTests {
         core.pickFromSpaceBar(pick([4], on: two, .overflow))
         #expect(core.activeSpace?.id == one)
         let shown = try #require(menu())
-        #expect(shown.items.count == 1)
+        // Mixed apps: no header, each row names its app.
+        #expect(shown.items.map(\.title) == ["Web — Doc"])
         pickRow(shown, at: 0)
         #expect(core.activeSpace?.id == two)
         #expect(core.state.workspaces[two]?.focused == WindowID(4))
@@ -203,7 +204,9 @@ struct SpaceBarGlyphClickTests {
             icon: nil,
             enabled: false
         )
-        let menu = SpaceBarWindowMenu.make([row]) { _ in }
+        let menu = SpaceBarWindowMenu.make([row], kind: .overflow) {
+            _ in
+        }
         let item = menu.items[0]
         #expect(item.title.hasSuffix("…"))
         #expect(item.toolTip == long)
@@ -217,7 +220,8 @@ struct SpaceBarGlyphClickTests {
                     icon: nil,
                     enabled: true
                 )
-            ]
+            ],
+            kind: .overflow
         ) { _ in }
         #expect(short.items[0].isEnabled)
         #expect(short.items[0].title == "Web")
@@ -231,9 +235,29 @@ struct SpaceBarGlyphClickTests {
                     icon: nil,
                     enabled: true
                 )
-            ]
+            ],
+            kind: .overflow
         ) { _ in }
         #expect(titled.items[0].toolTip == nil)
+    }
+
+    @Test("A glyph's untitled window takes a placeholder row")
+    func untitledGlyphRow() {
+        LocalizationManager.shared.select("en")
+        let menu = SpaceBarWindowMenu.make(
+            [
+                .init(
+                    window: WindowID(9),
+                    app: "Web",
+                    title: "",
+                    icon: NSImage(size: NSSize(width: 32, height: 32)),
+                    enabled: true
+                )
+            ],
+            kind: .glyph
+        ) { _ in }
+        #expect(menu.items.map(\.title) == ["Web", "Untitled Window"])
+        #expect(menu.items[1].image == nil)
     }
 
     @Test("The hover title is the app, then each window's title")
