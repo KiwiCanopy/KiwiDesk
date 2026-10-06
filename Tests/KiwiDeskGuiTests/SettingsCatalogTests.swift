@@ -121,7 +121,8 @@ struct SettingsCatalogTests {
         // 126 since #1752: the Shared look card.
         // 128 since #1838: the Motion drawer's shelf toggle and
         // duration rows.
-        #expect(allEntries.count == 128)
+        // 129 since #1931: the Space switch duration row.
+        #expect(allEntries.count == 129)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

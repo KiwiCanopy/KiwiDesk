@@ -148,6 +148,8 @@
   "behavior.animations.shelf_duration.help": "Quanto impiegano le barre a espandersi, ritrarsi, apparire e scomparire in dissolvenza e scivolare al loro posto.",
   "behavior.animations.space_change": "Anima i cambi di spazio",
   "behavior.animations.space_change.caption": "Delle piastre coprono le tue finestre e scorrono verso lo spazio a cui passi.",
+  "behavior.animations.space_change_duration": "Durata dei cambi di spazio",
+  "behavior.animations.space_change_duration.help": "Quanto impiegano le piastre a scorrere verso lo spazio a cui passi. Una durata maggiore è più lenta.",
   "behavior.animations.title": "Animazioni",
   "behavior.animations.window_duration": "Durata delle finestre",
   "behavior.animations.window_duration.help": "Quanto impiega una finestra a raggiungere il suo nuovo posto quando si muove, viene ridimensionata, scambiata o ridisposta. Una durata maggiore è più lenta.",

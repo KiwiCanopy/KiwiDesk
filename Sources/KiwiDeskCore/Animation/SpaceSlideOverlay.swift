@@ -55,7 +55,8 @@ final class SpaceSlideOverlay {
     /// frame, the axis and direction (+1: the new page enters from
     /// the trailing side), the plates over the windows shown now,
     /// the windows that stay (sticky) — both in AX coordinates —
-    /// and the Space the screen will show.
+    /// the Space the screen will show, and the pace the strip and
+    /// fades play at (`AnimationSettings.spaceSlidePace`, #1931).
     struct Press {
         let display: DisplayID
         let screen: CGRect
@@ -65,6 +66,7 @@ final class SpaceSlideOverlay {
         let holes: [CGRect]
         let space: SpaceID
         let glass: Bool
+        var pace: Double = 1
     }
 
     /// What a press decided: when the strip lands, and whether it
@@ -84,6 +86,7 @@ final class SpaceSlideOverlay {
         let holeHost: NSView
         let strip: NSView
         var glass: Bool
+        var pace: Double = 1
         var pages: [CGFloat: NSView] = [:]
         var motion = SpaceSlideStrip()
         var target: CGFloat = 0
@@ -123,6 +126,7 @@ final class SpaceSlideOverlay {
         if let play {
             current = play
             current.glass = press.glass
+            current.pace = press.pace
             if now >= play.liftAt {
                 fadeFrom = play.fader.presentation()?.opacity ?? 0
             }
@@ -151,7 +155,8 @@ final class SpaceSlideOverlay {
         current.motion = current.motion.retargeted(
             to: page,
             at: now,
-            begin: planned
+            begin: planned,
+            response: SpaceSlidePlan.response * current.pace
         )
         current.target = page
         current.space = press.space
@@ -169,7 +174,8 @@ final class SpaceSlideOverlay {
                     from: from,
                     to: 1,
                     begin: now,
-                    duration: SpaceSlidePlan.fadeIn * Double(1 - from),
+                    duration: SpaceSlidePlan.fadeIn * current.pace
+                        * Double(1 - from),
                     reduceMotion: reduceMotion()
                 ),
                 forKey: "in"
@@ -240,7 +246,7 @@ final class SpaceSlideOverlay {
                 from: 1,
                 to: 0,
                 begin: current.liftAt,
-                duration: SpaceSlidePlan.fadeOut,
+                duration: SpaceSlidePlan.fadeOut * current.pace,
                 reduceMotion: reduceMotion()
             ),
             forKey: "out"
@@ -248,7 +254,8 @@ final class SpaceSlideOverlay {
         teardown?.cancel()
         let item = DispatchWorkItem { [weak self] in self?.end() }
         teardown = item
-        let idle = current.liftAt + SpaceSlidePlan.fadeOut - now + 0.05
+        let fadeOut = SpaceSlidePlan.fadeOut * current.pace
+        let idle = current.liftAt + fadeOut - now + 0.05
         DispatchQueue.main.asyncAfter(
             deadline: .now() + max(idle, 0),
             execute: item

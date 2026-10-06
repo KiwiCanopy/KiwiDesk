@@ -148,6 +148,8 @@
   "behavior.animations.shelf_duration.help": "Сколько времени панели вырастают, сжимаются, плавно появляются и исчезают и скользят на своё место.",
   "behavior.animations.space_change": "Анимировать переключение пространств",
   "behavior.animations.space_change.caption": "Пластины накрывают твои окна и скользят к пространству, на которое ты переключаешься.",
+  "behavior.animations.space_change_duration": "Длительность переключения пространств",
+  "behavior.animations.space_change_duration.help": "Сколько времени пластины скользят к пространству, на которое ты переключаешься. Чем больше длительность, тем медленнее.",
   "behavior.animations.title": "Анимации",
   "behavior.animations.window_duration": "Длительность окон",
   "behavior.animations.window_duration.help": "Сколько времени окно добирается до нового места при перемещении, изменении размера, обмене местами или перестроении раскладки. Чем больше длительность, тем медленнее.",

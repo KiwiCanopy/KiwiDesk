@@ -148,6 +148,8 @@
   "behavior.animations.shelf_duration.help": "Le temps que mettent les barres pour se déployer, se rétracter, apparaître et disparaître en fondu, et glisser à leur place.",
   "behavior.animations.space_change": "Animer les changements d'espace",
   "behavior.animations.space_change.caption": "Des plaques recouvrent vos fenêtres et glissent jusqu'à l'espace vers lequel vous basculez.",
+  "behavior.animations.space_change_duration": "Durée des changements d'espace",
+  "behavior.animations.space_change_duration.help": "Le temps que mettent les plaques pour glisser jusqu'à l'espace vers lequel vous basculez. Une durée plus longue est plus lente.",
   "behavior.animations.title": "Animations",
   "behavior.animations.window_duration": "Durée des fenêtres",
   "behavior.animations.window_duration.help": "Le temps que met une fenêtre pour rejoindre sa nouvelle place lorsqu'elle se déplace, est redimensionnée, échangée ou réagencée. Une durée plus longue est plus lente.",

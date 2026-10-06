@@ -148,6 +148,8 @@
   "behavior.animations.shelf_duration.help": "Cuánto tardan las barras en crecer, encogerse, aparecer y desaparecer con un fundido y deslizarse a su sitio.",
   "behavior.animations.space_change": "Animar los cambios de espacio",
   "behavior.animations.space_change.caption": "Unas placas cubren tus ventanas y se deslizan hasta el espacio al que cambias.",
+  "behavior.animations.space_change_duration": "Duración de los cambios de espacio",
+  "behavior.animations.space_change_duration.help": "Cuánto tardan las placas en deslizarse hasta el espacio al que cambias. Una duración mayor es más lenta.",
   "behavior.animations.title": "Animaciones",
   "behavior.animations.window_duration": "Duración de las ventanas",
   "behavior.animations.window_duration.help": "Cuánto tarda una ventana en llegar a su nuevo sitio cuando se mueve, cambia de tamaño, se intercambia o se reajusta el diseño. Una duración mayor es más lenta.",

@@ -11,6 +11,8 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case borderSheen = "settings.borderStyle.sheen"
     case animationsMaster = "settings.animations (master)"
     case animationsOnSpaceChange = "settings.animations.onSpaceChange"
+    case animationsSpaceChangeDurationMS =
+        "settings.animations.spaceChangeDurationMS"
     case animationsOnWindowResize = "settings.animations.onWindowResize"
     case animationsOnWindowSwap = "settings.animations.onWindowSwap"
     case animationsOnRelayout = "settings.animations.onRelayout"
@@ -78,6 +80,15 @@ extension ColoursKey {
                 .motion,
                 .showMore,
                 gate: .setting(.colours(.animationsMaster))
+            )
+        case .animationsSpaceChangeDurationMS:
+            // Paces the slide alone, so greys with its toggle,
+            // which the master turns off (#1931).
+            return .row(
+                .coloursAndMotion,
+                .motion,
+                .showMore,
+                gate: .setting(.colours(.animationsOnSpaceChange))
             )
         case .animationsOnShelf:
             // Not under the master: the shelf glides whatever the
@@ -161,6 +172,11 @@ extension ColoursKey {
             return .text(
                 "behavior.animations.space_change",
                 caption: "behavior.animations.space_change.caption"
+            )
+        case .animationsSpaceChangeDurationMS:
+            return .text(
+                "behavior.animations.space_change_duration",
+                help: "behavior.animations.space_change_duration.help"
             )
         case .animationsOnWindowResize:
             return .text("behavior.animations.window_resize")

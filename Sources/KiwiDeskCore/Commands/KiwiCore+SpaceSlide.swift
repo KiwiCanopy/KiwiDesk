@@ -72,7 +72,8 @@ extension KiwiCore {
                 } ?? [],
                 holes: holes,
                 space: target,
-                glass: glass
+                glass: glass,
+                pace: tiler.settings.animations.spaceSlidePace
             )
         )
         if pressed.dropped { tiler.applier.releaseAllHolds() }

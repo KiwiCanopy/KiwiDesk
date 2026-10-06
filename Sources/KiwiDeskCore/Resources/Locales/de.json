@@ -148,6 +148,8 @@
   "behavior.animations.shelf_duration.help": "Wie lange die Leisten brauchen, um zu wachsen, zu schrumpfen, ein- und auszublenden und an ihren Platz zu gleiten.",
   "behavior.animations.space_change": "Space-Wechsel animieren",
   "behavior.animations.space_change.caption": "Flächen decken deine Fenster ab und gleiten in den Space, zu dem du wechselst.",
+  "behavior.animations.space_change_duration": "Space-Wechsel-Dauer",
+  "behavior.animations.space_change_duration.help": "Wie lange die Flächen brauchen, um in den Space zu gleiten, zu dem du wechselst. Eine längere Dauer ist langsamer.",
   "behavior.animations.title": "Animationen",
   "behavior.animations.window_duration": "Fenster-Dauer",
   "behavior.animations.window_duration.help": "Wie lange ein Fenster bei einer Bewegung, einer Größenänderung, einem Fenstertausch oder einer Layout-Anpassung braucht, um seinen neuen Platz zu erreichen. Eine längere Dauer ist langsamer.",

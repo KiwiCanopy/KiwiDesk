@@ -42,6 +42,30 @@ extension MotionCard {
             )
             .font(.caption)
             .foregroundStyle(.secondary)
+        case .animationsSpaceChangeDurationMS:
+            StepperRow(
+                label: L(
+                    "behavior.animations.space_change_duration",
+                    "Space switch duration"
+                ),
+                value: animations.spaceChangeDurationMS,
+                in: AnimationSettings.spaceChangeDurationBand,
+                step: 10,
+                suffix: "ms",
+                help: L(
+                    "behavior.animations.space_change_duration.help",
+                    "How long the plates take to slide to the Space "
+                        + "you're switching to. A longer duration is "
+                        + "slower."
+                )
+            )
+            .modifier(
+                GreyOut(active: !animations.onSpaceChange.wrappedValue)
+            )
+            .searchAnchored(
+                SettingsCatalog.colors.motionMore.children
+                    .spaceSwitchDuration
+            )
             // The window toggles and their duration form one group
             // apart from the slide, which it does not pace (#1932).
             Divider()

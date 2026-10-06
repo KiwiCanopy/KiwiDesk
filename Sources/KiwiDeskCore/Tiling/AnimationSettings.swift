@@ -8,6 +8,17 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// (`SpaceChangeDefaultTests`).
     public var onSpaceChange = true
 
+    /// The plate slide's pace in milliseconds (#1931): the strip's
+    /// spring response, its fades scaling with it. The default is
+    /// the slide's own timing, so an unset file plays as before.
+    public var spaceChangeDurationMS = spaceChangeDefaultMS {
+        didSet {
+            spaceChangeDurationMS = Self.clampSpaceChangeMS(
+                spaceChangeDurationMS
+            )
+        }
+    }
+
     /// Animate scrolling layout viewport shifts.
     public var onScrolling = true
 
@@ -65,12 +76,26 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// The flip's band: below 100 ms the plate is a flash, not a
     /// turn.
     public static let flipDurationBand = 100...1000
+    /// The plate slide's default: `SpaceSlidePlan.response`.
+    public static let spaceChangeDefaultMS = Int(
+        (SpaceSlidePlan.response * 1000).rounded()
+    )
+    /// The slide's band: below it the strip is a jump; above it a
+    /// switch outlasts the hand that pressed it.
+    public static let spaceChangeDurationBand = 150...1000
     /// The shelf glide's band (owner, 2026-09-30): below half a
     /// second it barely reads on a decelerating curve.
     public static let shelfDurationBand = 500...2000
 
     static func clampMS(_ ms: Int) -> Int {
         min(max(ms, durationBand.lowerBound), durationBand.upperBound)
+    }
+
+    static func clampSpaceChangeMS(_ ms: Int) -> Int {
+        min(
+            max(ms, spaceChangeDurationBand.lowerBound),
+            spaceChangeDurationBand.upperBound
+        )
     }
 
     static func clampShelfMS(_ ms: Int) -> Int {
@@ -89,6 +114,7 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
 
     private enum CodingKeys: String, CodingKey {
         case onSpaceChange = "on_space_change"
+        case spaceChangeDurationMS = "space_change_duration"
         case onScrolling = "on_scrolling"
         case onWindowResize = "on_window_resize"
         case onWindowSwap = "on_window_swap"
@@ -112,6 +138,12 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 Bool.self,
                 forKey: .onSpaceChange
             ) ?? true
+        spaceChangeDurationMS = Self.clampSpaceChangeMS(
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .spaceChangeDurationMS
+            ) ?? Self.spaceChangeDefaultMS
+        )
         onScrolling =
             try container.decodeIfPresent(
                 Bool.self,
@@ -166,6 +198,11 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 forKey: .shelfDurationMS
             ) ?? 750
         )
+    }
+
+    /// The plate slide's timings as a share of the plan's own.
+    var spaceSlidePace: Double {
+        Double(spaceChangeDurationMS) / Double(Self.spaceChangeDefaultMS)
     }
 
     /// The shelf glide's length in seconds, nothing while it is off.

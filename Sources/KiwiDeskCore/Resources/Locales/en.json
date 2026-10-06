@@ -148,6 +148,8 @@
   "behavior.animations.shelf_duration.help": "How long the bars take to grow, shrink, fade and glide into place.",
   "behavior.animations.space_change": "Animate Space switches",
   "behavior.animations.space_change.caption": "Plates cover your windows and slide to the Space you're switching to.",
+  "behavior.animations.space_change_duration": "Space switch duration",
+  "behavior.animations.space_change_duration.help": "How long the plates take to slide to the Space you're switching to. A longer duration is slower.",
   "behavior.animations.title": "Animations",
   "behavior.animations.window_duration": "Window duration",
   "behavior.animations.window_duration.help": "How long a window takes to reach its new place when it moves, resizes, swaps or reflows. A longer duration is slower.",

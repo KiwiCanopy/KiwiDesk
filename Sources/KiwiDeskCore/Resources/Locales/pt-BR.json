@@ -148,6 +148,8 @@
   "behavior.animations.shelf_duration.help": "Quanto tempo as barras levam para crescer, encolher, aparecer e desaparecer gradualmente e deslizar para o lugar.",
   "behavior.animations.space_change": "Animar as trocas de espaço",
   "behavior.animations.space_change.caption": "Placas cobrem suas janelas e deslizam até o espaço para o qual você vai.",
+  "behavior.animations.space_change_duration": "Duração das trocas de espaço",
+  "behavior.animations.space_change_duration.help": "Quanto tempo as placas levam para deslizar até o espaço para o qual você vai. Uma duração maior é mais lenta.",
   "behavior.animations.title": "Animações",
   "behavior.animations.window_duration": "Duração das janelas",
   "behavior.animations.window_duration.help": "Quanto tempo uma janela leva para chegar ao novo lugar quando se move, é redimensionada, trocada ou rearranjada no layout. Uma duração maior é mais lenta.",

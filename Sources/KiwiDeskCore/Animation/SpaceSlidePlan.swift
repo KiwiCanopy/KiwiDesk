@@ -6,6 +6,10 @@ import Foundation
 /// shows. `SpaceSlideOverlay` draws what this decides; the ruling
 /// behind every number is #1956's body ▸ "Ruling update".
 enum SpaceSlidePlan {
+    // `fadeIn`, `response` and `fadeOut` are the default pace and
+    // scale with `animations.space_change_duration` (#1931);
+    // `stripDelay` and `landMargin` wait on apps, and do not.
+
     /// The plates fade in over the windows shown now.
     static let fadeIn: TimeInterval = 0.08
     /// The strip waits this long after a press: the outgoing parks

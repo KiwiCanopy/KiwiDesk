@@ -33,7 +33,8 @@ extension SpaceSlideOverlay {
             from: sign * motion.from,
             to: sign * motion.to,
             velocity: sign * motion.velocity,
-            begin: motion.begin
+            begin: motion.begin,
+            response: motion.response
         )
     }
 
