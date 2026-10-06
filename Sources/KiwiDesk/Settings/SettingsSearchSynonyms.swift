@@ -84,6 +84,8 @@ enum SettingsSearchSynonyms {
         // the setting stores (#1020).
         case .colours(.animationsDurationMS):
             return ["speed", "animation speed"]
+        case .colours(.animationsSpaceChangeDurationMS):
+            return ["speed", "space speed", "slide speed", "transition"]
         case .colours(.animationsScrollDurationMS):
             return ["speed", "scroll speed", "scrolling speed"]
         case .colours(.animationsOnMonocleFocus):

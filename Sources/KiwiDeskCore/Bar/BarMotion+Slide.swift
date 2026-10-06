@@ -39,8 +39,8 @@ extension BarMotion {
     ) -> CAAnimation {
         let spring = CASpringAnimation(keyPath: keyPath)
         spring.mass = 1
-        spring.stiffness = SpaceSlideStrip.stiffness
-        spring.damping = SpaceSlideStrip.damping
+        spring.stiffness = strip.stiffness
+        spring.damping = strip.damping
         spring.fromValue = reduceMotion ? strip.to : strip.from
         spring.toValue = strip.to
         spring.initialVelocity =

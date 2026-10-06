@@ -34,7 +34,12 @@ struct SpaceSlideStripTests {
         let strip = SpaceSlideStrip(from: 0, to: page, velocity: 0, begin: 0)
         let at: CFTimeInterval = 0.1
         let before = strip.state(at: at)
-        let next = strip.retargeted(to: 2 * page, at: at, begin: at + 0.12)
+        let next = strip.retargeted(
+            to: 2 * page,
+            at: at,
+            begin: at + 0.12,
+            response: strip.response
+        )
         #expect(next.begin == at)
         #expect(abs(next.from - before.offset) < 0.001)
         #expect(abs(next.velocity - before.velocity) < 0.001)
@@ -46,7 +51,12 @@ struct SpaceSlideStripTests {
     @Test("a press on a resting strip waits for the planned start")
     func restingStripWaits() {
         let strip = SpaceSlideStrip(from: 0, to: page, velocity: 0, begin: 0)
-        let next = strip.retargeted(to: 2 * page, at: 5, begin: 5.12)
+        let next = strip.retargeted(
+            to: 2 * page,
+            at: 5,
+            begin: 5.12,
+            response: strip.response
+        )
         #expect(next.begin == 5.12)
         #expect(next.velocity == 0)
         #expect(abs(next.from - page) < 0.5)
@@ -78,7 +88,8 @@ struct SpaceSlideStripTests {
     }
 
     /// The spring the strip plays is `BarMotion.slideSpring`'s, so
-    /// its parameters are read off that, never built here.
+    /// its parameters are read off that, never built here — on a
+    /// paced response, which the played spring must carry (#1931).
     @Test("the played spring is the modelled one")
     @MainActor
     func playedSpringMatches() throws {
@@ -86,7 +97,8 @@ struct SpaceSlideStripTests {
             from: 0,
             to: page,
             velocity: 500,
-            begin: 7
+            begin: 7,
+            response: 0.5
         )
         let spring = try #require(
             BarMotion.slideSpring(
@@ -97,7 +109,8 @@ struct SpaceSlideStripTests {
         )
         // Critically damped at the modelled frequency.
         let omega = (spring.stiffness / spring.mass).squareRoot()
-        #expect(abs(omega - SpaceSlideStrip.omega) < 0.0001)
+        #expect(abs(omega - strip.omega) < 0.0001)
+        #expect(abs(omega - 2 * .pi / 0.5) < 0.0001)
         #expect(abs(spring.damping - 2 * omega * spring.mass) < 0.0001)
         #expect(spring.fromValue as? CGFloat == 0)
         #expect(spring.toValue as? CGFloat == page)

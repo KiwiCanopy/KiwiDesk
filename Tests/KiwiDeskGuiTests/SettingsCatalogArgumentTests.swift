@@ -214,7 +214,8 @@ struct SettingsCatalogArgumentTests {
         // 95 since #1519: the Space step's recorder.
         // 96 since #1752: the Shared look card's.
         // 98 since #1838: the shelf toggle's and duration's.
-        #expect(direct.values.reduce(0, +) == 98)
+        // 99 since #1931: the Space switch duration's.
+        #expect(direct.values.reduce(0, +) == 99)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

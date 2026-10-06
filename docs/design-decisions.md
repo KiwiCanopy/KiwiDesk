@@ -3098,12 +3098,24 @@ switch reading "differ". With glass off, under Reduce
 Transparency or before macOS 26 the plates take the blur nearest
 the shortcuts panel's own fallback, so the two surfaces keep one
 look. Mid-slide that blur reads close to glass — what sets Liquid
-Glass apart barely shows in a fade and a 0.28 s move — and a solid
+Glass apart barely shows in a fade and a half-second move — and
+a solid
 material that would set glass-off apart was tried on the device
 and refused for not matching the panel. Reduce Motion takes the
-instant switch. There is no style picker and no pace control:
-one transition is less surface to maintain, and a stored `true`
-reads as the plate slide, so no migration is owed.
+instant switch. There is no style picker: one transition is
+less surface to maintain, and a stored `true` reads as the plate
+slide, so no migration is owed.
+
+*Its own pace (#1931).* `animations.space_change_duration` is the
+strip's spring response, and both fades scale with it from the
+times they were tuned at (300 ms). Its default is 550 ms — the
+owner found the plan's own timing too brisk for the motion met
+most — and no crossing is owed, since the leaf ships with the
+slide itself. The two waits on apps — the strip's
+delay for the parks and the landed windows' margin — do not
+scale: they measure how long an app takes, which no pace
+changes. `animations.duration` keeps pacing windows only, since
+the slide moves none.
 
 *On by default (#1931).* The switch is the motion a user meets
 most, and the slide is what tells them which way they went, so a

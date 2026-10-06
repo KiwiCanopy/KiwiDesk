@@ -148,6 +148,8 @@
   "behavior.animations.shelf_duration.help": "各列展開、縮回、淡入淡出以及滑到新位置所需的時間。",
   "behavior.animations.space_change": "為空間切換加上動畫",
   "behavior.animations.space_change.caption": "薄板會蓋住你的視窗，並滑向你要切換到的空間。",
+  "behavior.animations.space_change_duration": "空間切換時間長度",
+  "behavior.animations.space_change_duration.help": "薄板滑向你要切換到的空間所需的時間。時間長度越長，速度越慢。",
   "behavior.animations.title": "動畫",
   "behavior.animations.window_duration": "視窗時間長度",
   "behavior.animations.window_duration.help": "視窗在移動、變更尺寸、互換或佈局重排時抵達新位置所需的時間。時間長度越長，速度越慢。",

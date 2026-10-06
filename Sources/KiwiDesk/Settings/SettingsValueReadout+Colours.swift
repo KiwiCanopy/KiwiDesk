@@ -85,6 +85,12 @@ extension SettingsValueReadout {
                 o.onRelayout,
                 n.onRelayout
             )
+        case .animationsSpaceChangeDurationMS:
+            return coloursRow(
+                census,
+                milliseconds(Double(o.spaceChangeDurationMS)),
+                milliseconds(Double(n.spaceChangeDurationMS))
+            )
         case .animationsDurationMS:
             return coloursRow(
                 census,

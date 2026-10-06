@@ -134,6 +134,13 @@ extension KiwiCore {
             tiler.settings.animations.onShelf = on
             updateBars()
             return .ok()
+        case "animations.set_space_change_duration":
+            // The plate slide's pace (#1931); read at each press.
+            guard let ms = args.first?.intValue else {
+                return .fail("expected milliseconds")
+            }
+            tiler.settings.animations.spaceChangeDurationMS = ms
+            return .ok()
         case "animations.set_shelf_duration":
             // The shelf glide's pace (#1838).
             guard let ms = args.first?.intValue else {

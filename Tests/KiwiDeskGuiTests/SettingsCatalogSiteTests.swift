@@ -95,7 +95,8 @@ struct SettingsCatalogSiteTests {
         // 120 since #1752: the Shared look card.
         // 122 since #1838: the Motion drawer's shelf toggle and
         // duration rows.
-        #expect(names.count == 122)
+        // 123 since #1931: the Space switch duration row.
+        #expect(names.count == 123)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

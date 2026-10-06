@@ -34,6 +34,7 @@ extension SpaceSlideOverlay {
             holeHost: holeHost,
             strip: strip,
             glass: press.glass,
+            pace: press.pace,
             space: press.space
         )
     }

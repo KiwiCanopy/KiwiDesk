@@ -148,6 +148,8 @@
   "behavior.animations.shelf_duration.help": "バーが広がったり縮んだり、フェードしたり、新しい位置へ滑らかに移動したりするのにかかる時間です。",
   "behavior.animations.space_change": "スペースの切り替えをアニメーション表示",
   "behavior.animations.space_change.caption": "プレートがウインドウを覆い、切り替え先のスペースへスライドします。",
+  "behavior.animations.space_change_duration": "スペースの切り替えの継続時間",
+  "behavior.animations.space_change_duration.help": "プレートが切り替え先のスペースへスライドするのにかかる時間です。継続時間が長いほど遅くなります。",
   "behavior.animations.title": "アニメーション",
   "behavior.animations.window_duration": "ウインドウの継続時間",
   "behavior.animations.window_duration.help": "移動、サイズ変更、入れ替え、レイアウトの再配置のときに、ウインドウが新しい位置に収まるまでにかかる時間です。継続時間が長いほど遅くなります。",

@@ -111,7 +111,8 @@ public enum APIReference {
     public static let namespaces: [String: [String]] = [
         "animations": [
             "set_duration", "set_scroll_duration",
-            "set_on_space_change", "set_on_scrolling",
+            "set_on_space_change", "set_space_change_duration",
+            "set_on_scrolling",
             "set_on_window_resize", "set_on_window_swap",
             "set_on_relayout",
             "set_on_monocle_focus", "set_monocle_flip_duration",

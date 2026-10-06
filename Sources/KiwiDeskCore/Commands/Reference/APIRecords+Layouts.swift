@@ -41,6 +41,10 @@ extension APIReference {
             "Enables or disables animation on layout reflows.",
             .boolean("enabled")
         ),
+        "set_space_change_duration": APIRecord(
+            "Sets the Space-switch slide's pace in milliseconds.",
+            .integer("milliseconds")
+        ),
         "set_on_monocle_focus": APIRecord(
             "Enables or disables the card flip when focus moves "
                 + "between Monocle windows.",

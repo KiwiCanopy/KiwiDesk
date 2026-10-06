@@ -36,6 +36,7 @@ enum ColorsRowOrder {
     /// Motion card disclosure rows.
     static let motionMore: [SettingKey] = [
         .colours(.animationsOnSpaceChange),
+        .colours(.animationsSpaceChangeDurationMS),
         .colours(.animationsOnWindowResize),
         .colours(.animationsOnWindowSwap),
         .colours(.animationsOnRelayout),

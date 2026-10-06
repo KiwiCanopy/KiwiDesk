@@ -16,16 +16,16 @@ struct SpaceSlideStrip: Equatable {
     /// Render-server time the spring starts; it holds `from`
     /// until then.
     var begin: CFTimeInterval = 0
+    /// The spring's response: the plan's, scaled by the pace.
+    var response: TimeInterval = SpaceSlidePlan.response(at: 1)
 
-    /// The spring's natural frequency: response 0.30 s.
-    static var omega: CGFloat {
-        2 * .pi / CGFloat(SpaceSlidePlan.response)
-    }
+    /// The spring's natural frequency.
+    var omega: CGFloat { 2 * .pi / CGFloat(response) }
 
     /// `CASpringAnimation`'s parameters for the same spring:
     /// mass 1, damping ratio 1 — no overshoot.
-    static var stiffness: CGFloat { omega * omega }
-    static var damping: CGFloat { 2 * omega }
+    var stiffness: CGFloat { omega * omega }
+    var damping: CGFloat { 2 * omega }
 
     /// The strip's offset and velocity at render time `now`.
     func state(at now: CFTimeInterval) -> (
@@ -33,7 +33,7 @@ struct SpaceSlideStrip: Equatable {
     ) {
         guard now > begin else { return (from, 0) }
         let t = CGFloat(now - begin)
-        let w = Self.omega
+        let w = omega
         let d0 = from - to
         let decay = exp(-w * t)
         let d = (d0 + (velocity + w * d0) * t) * decay
@@ -42,13 +42,14 @@ struct SpaceSlideStrip: Equatable {
     }
 
     /// The motion a press at `now` starts: from where the strip is,
-    /// at the speed it has, toward `target`, beginning at `begin`.
-    /// A strip already moving begins at once — waiting would stop
-    /// it dead for the delay.
+    /// at the speed it has, toward `target`, beginning at `begin`,
+    /// on the spring `response` gives. A strip already moving
+    /// begins at once — waiting would stop it dead for the delay.
     func retargeted(
         to target: CGFloat,
         at now: CFTimeInterval,
-        begin planned: CFTimeInterval
+        begin planned: CFTimeInterval,
+        response: TimeInterval
     ) -> SpaceSlideStrip {
         let current = state(at: now)
         let moving = abs(current.velocity) > 1
@@ -56,7 +57,8 @@ struct SpaceSlideStrip: Equatable {
             from: current.offset,
             to: target,
             velocity: moving ? current.velocity : 0,
-            begin: moving ? now : planned
+            begin: moving ? now : planned,
+            response: response
         )
     }
 
