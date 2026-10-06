@@ -173,10 +173,11 @@ extension KiwiCore {
         }
     }
 
-    /// A window's row in a submenu: its title, else its app's name.
+    /// A window's row in a submenu: the glyph menu's own name for
+    /// it (#1947).
     func windowTitle(_ id: WindowID) -> String {
         guard let window = state.windows[id] else { return "" }
-        return window.title.isEmpty ? window.appName : window.title
+        return SpaceBarWindowMenu.windowName(window.title)
     }
 
 }

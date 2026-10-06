@@ -20,13 +20,17 @@ enum SpaceBarWindowMenu {
     static let titleCap = 60
     static let iconSide: CGFloat = 16
 
-    /// A glyph row's text: the title alone, an untitled window
-    /// named by a placeholder rather than left blank.
+    /// A window named by its title alone — a glyph row here, a
+    /// window submenu of the bars' right-click menus — or, untitled,
+    /// by a placeholder rather than left blank (#1947).
+    static func windowName(_ title: String) -> String {
+        title.isEmpty
+            ? L("space_bar.menu.untitled", "Untitled Window") : title
+    }
+
+    /// A glyph row's text: its window's name, capped.
     static func titleText(_ row: Row) -> String {
-        guard !row.title.isEmpty else {
-            return L("space_bar.menu.untitled", "Untitled Window")
-        }
-        return AppBarStyle.cappedTitle(row.title, to: titleCap)
+        AppBarStyle.cappedTitle(windowName(row.title), to: titleCap)
     }
 
     /// An overflow row's text: the app, then its title where it

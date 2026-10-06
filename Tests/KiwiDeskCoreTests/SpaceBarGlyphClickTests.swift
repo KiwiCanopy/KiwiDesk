@@ -260,6 +260,32 @@ struct SpaceBarGlyphClickTests {
         #expect(menu.items[1].image == nil)
     }
 
+    @Test("A glyph row caps a long title; the right-click names alike")
+    func glyphRowCapsAndRightClickAgrees() {
+        LocalizationManager.shared.select("en")
+        let long = String(
+            repeating: "x",
+            count: SpaceBarWindowMenu.titleCap + 5
+        )
+        let menu = SpaceBarWindowMenu.make(
+            [
+                .init(
+                    window: WindowID(9),
+                    app: "Web",
+                    title: long,
+                    icon: nil,
+                    enabled: true
+                )
+            ],
+            kind: .glyph
+        ) { _ in }
+        #expect(menu.items[1].title.hasSuffix("…"))
+        #expect(menu.items[1].toolTip == long)
+        let core = seededCore()
+        core.state.apply(.windowCreated(window(8, app: "Web", title: "")))
+        #expect(core.windowTitle(WindowID(8)) == "Untitled Window")
+    }
+
     @Test("The hover title is the app, then each window's title")
     func tooltipListsTitles() {
         let core = seededCore()
