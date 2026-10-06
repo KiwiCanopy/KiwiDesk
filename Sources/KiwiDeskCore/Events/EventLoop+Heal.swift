@@ -142,10 +142,16 @@ extension EventLoop {
         healQuiet = quiet
     }
 
-    /// Re-opens the gate for every quieted id. A locked session
-    /// lists windows whose elements answer as the application
-    /// (#1285), so a failure recorded then is no verdict on the
-    /// window; the next heal asks again.
+    /// The session came back (unlock, wake): an AX verdict read
+    /// while it rested is no evidence, since a locked session lists
+    /// windows whose elements answer as the application (#1285).
+    /// The one list of what a return forgets.
+    func sessionDidReturn() {
+        forgetHealQuiet()
+    }
+
+    /// Re-opens the gate for every quieted id; the next heal
+    /// asks again.
     func forgetHealQuiet() {
         let count = healQuiet.values.reduce(0) { $0 + $1.count }
         guard count > 0 else { return }

@@ -14,13 +14,13 @@ struct HealReopenOnReturnTests {
     private let pid: pid_t = 1285
     private let id = WindowID(12_850)
 
-    @Test("forgetting the ledger re-opens the heal's gate")
-    func forgetReopensTheGate() {
+    @Test("a return re-opens the heal's gate")
+    func returnReopensTheGate() {
         let loop = EventLoop()
         loop.onLog = { _ in }
         loop.healQuiet[pid] = [id]
         #expect(!loop.opensGate(pid: pid, missing: [id]))
-        loop.forgetHealQuiet()
+        loop.sessionDidReturn()
         #expect(loop.healQuiet.isEmpty)
         #expect(loop.opensGate(pid: pid, missing: [id]))
     }
@@ -34,6 +34,8 @@ struct HealReopenOnReturnTests {
         manager.onReturn = { returns += 1 }
         manager.systemDidReturn(.direct)
         #expect(returns == 1)
+        // A rest leg past its guard announces nothing.
+        manager.isEnabled = true
         manager.systemWillRest(.lock)
         #expect(returns == 1)
     }

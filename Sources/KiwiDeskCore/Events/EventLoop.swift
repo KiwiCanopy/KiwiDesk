@@ -157,7 +157,8 @@ public final class EventLoop {
     /// it can never adopt (an ignored layer-0 panel) costs one
     /// reconcile total instead of one per tick, while any NEW
     /// census id still opens the gate (#675). Pruned to the
-    /// live census each pass.
+    /// live census each pass, and forgotten on every return leg
+    /// (`sessionDidReturn`, #1285).
     var healQuiet: [pid_t: Set<WindowID>] = [:]
 
     /// Set for exactly the synchronous span of a Desktop

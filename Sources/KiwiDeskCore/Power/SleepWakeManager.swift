@@ -1,7 +1,8 @@
 import AppKit
 import Foundation
 
-/// Preserves and restores window state across sleep/wake and lock/unlock.
+/// Preserves and restores window state across sleep/wake and
+/// lock/unlock, and announces every return leg (`onReturn`).
 @MainActor
 public final class SleepWakeManager {
     public var isEnabled = true

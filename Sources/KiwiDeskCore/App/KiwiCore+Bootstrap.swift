@@ -214,7 +214,7 @@ extension KiwiCore {
         }
         sleepWake.sessionPresence = { .live() }
         sleepWake.onReturn = { [weak self] in
-            self?.eventLoop.forgetHealQuiet()
+            self?.eventLoop.sessionDidReturn()
         }
     }
 }
