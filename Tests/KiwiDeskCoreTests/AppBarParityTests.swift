@@ -99,7 +99,7 @@ struct AppBarCommandParityTests {
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
         .edge(.left), .activeIndicator(.outline), .titleCap(40),
-        .groupAdjacentWindows(false),
+        .groupAdjacentWindows(true),
     ]
 
     @Test("Each command sets one matching field on style and bar")
