@@ -65,20 +65,4 @@ extension StateCoordinator {
             remembered: pendingFilings(in: id)
         )
     }
-
-    /// The windows filed in Space `id` that have not arrived, as
-    /// a snapshot carries them (#1646, #2008).
-    func pendingFilings(in id: SpaceID) -> [WindowID] {
-        rememberedSpaces.filter {
-            guard $0.value.space == id,
-                windows[$0.key] == nil,
-                !closedDepartures.contains($0.key)
-            else { return false }
-            // An unjudged restored filing is not carried again.
-            if case .restored = $0.value {
-                return !unjudgedFilings.contains($0.key)
-            }
-            return true
-        }.keys.sorted { $0.raw < $1.raw }
-    }
 }

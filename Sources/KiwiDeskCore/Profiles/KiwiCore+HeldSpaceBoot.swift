@@ -83,12 +83,7 @@ extension KiwiCore {
     func settleHeldSpacesAtBoot(_ plan: BootHolds) {
         guard !plan.remembered.isEmpty else { return }
         for (space, windows) in plan.remembered {
-            for id in windows
-            where state.windows[id] == nil
-                && state.rememberedSpaces[id] == nil
-            {
-                state.remember(id, in: space)
-            }
+            state.refilePending(windows, in: space)
         }
         // With no arrangement live (a hand-written config) nothing
         // goes home and nothing is pinned, as at a reconnect.

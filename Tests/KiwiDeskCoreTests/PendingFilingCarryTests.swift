@@ -1,15 +1,17 @@
+import CoreGraphics
 import Foundation
 import Testing
 
 @testable import KiwiDeskCore
 
 /// A stop before a filed window arrives keeps its filing (#2008):
-/// the snapshot carries every Space's not-yet-arrived windows, and
-/// the next start files each back where it was. Measured on device:
-/// a boot under the lock tracked 1 of 12 windows, and a stop then
-/// put the other 11 on the active Space.
+/// every capture carries each Space's not-yet-arrived windows and
+/// the frames owed at their arrival, and the next start files each
+/// back where it was.
 @Suite("Pending filings ride the snapshot (#2008)")
+@MainActor
 struct PendingFilingCarryTests {
+    private let owed = CGRect(x: 40, y: 50, width: 600, height: 400)
     private let late = WindowID(2008)
 
     private func desk() -> StateCoordinator {
@@ -62,6 +64,46 @@ struct PendingFilingCarryTests {
         var state = desk()
         state.closedDepartures.insert(late)
         #expect(try record(2, in: state.snapshot()).pending.isEmpty)
+    }
+
+    @Test("a departure is carried; an unjudged filing is not")
+    func departureCarriedUnjudgedNot() throws {
+        var state = desk()
+        let away = WindowID(2009)
+        state.rememberedSpaces[away] = .departed(SpaceID(2))
+        state.unjudgedFilings.insert(late)
+        state.restoredFrames[late] = owed
+        let snapshot = state.snapshot()
+        #expect(try record(2, in: snapshot).pending == [away.raw])
+        #expect(!snapshot.windows.contains { $0.windowID == late })
+    }
+
+    @Test("both captures carry the filing and its owed frame")
+    func bothCapturesCarry() throws {
+        for inPlace in [false, true] {
+            let core = makeTestCore()
+            core.state.workspaces.ensureSpace(SpaceID(2))
+            core.state.remember(late, in: SpaceID(2))
+            core.state.restoredFrames[late] = owed
+            let snapshot = core.sessionSnapshot(inPlace: inPlace)
+            #expect(try record(2, in: snapshot).pending == [late.raw])
+            #expect(
+                snapshot.windows.first { $0.windowID == late }?.frame
+                    == owed
+            )
+        }
+    }
+
+    @Test("a wake replay leaves the filings to the live process")
+    func wakeReplayDropsPending() throws {
+        let snapshot = desk().snapshot()
+        let core = makeTestCore()
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1440, height: 900)
+        }
+        core.state.workspaces.ensureSpace(SpaceID(2))
+        core.restoreAndSettleAfterWake(snapshot)
+        #expect(core.state.rememberedSpace(of: late) == nil)
     }
 
     @Test("an older snapshot without the key decodes")

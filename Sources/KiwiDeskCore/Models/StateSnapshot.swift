@@ -240,12 +240,7 @@ extension StateCoordinator {
                     )
                 }
             }
-            for raw in record.pending {
-                let id = WindowID(raw)
-                guard windows[id] == nil, rememberedSpaces[id] == nil
-                else { continue }
-                remember(id, in: space)
-            }
+            refilePending(record.pending.map(WindowID.init), in: space)
             adoptSession(record, in: space)
         }
         for record in snapshot.windows {
@@ -266,15 +261,8 @@ extension StateCoordinator {
                     id: $0.id,
                     frame: $0.frame
                 )
-            },
-            spaces: workspaces.allSpaces.map {
-                StateSnapshot.SpaceRecord(
-                    space: $0,
-                    held: heldRecord(of: $0.id),
-                    pending: heldSpaces[$0.id] == nil
-                        ? pendingFilings(in: $0.id) : []
-                )
-            },
+            } + owedFrameRecords(),
+            spaces: workspaces.allSpaces.map { spaceRecord(of: $0) },
             activeSpace: workspaces.activeSpace?.raw
         )
     }
