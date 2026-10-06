@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDesk
 
 /// Where the slow-boot notice sits (#1715): under a visible item,
-/// clamped inside the screen, else top-right below the menu bar;
+/// clamped inside the screen, else top-centre below the menu bar;
 /// an item in the notch's gap anchors nothing.
 @Suite("Slow-boot notice anchor (#1715)")
 struct BootNoticeAnchorTests {
@@ -41,16 +41,15 @@ struct BootNoticeAnchorTests {
         #expect(origin.x == screen.maxX - inset - size.width)
     }
 
-    @Test("with no item the notice sits top-right")
-    func fallsBackTopRight() {
+    @Test("with no item the notice sits top-centre")
+    func fallsBackTopCentre() {
         let origin = BootNoticeAnchor.origin(
             size: size,
             screen: screen,
             menuBar: menuBar,
             item: nil
         )
-        let inset = BootNoticeAnchor.fallbackInset
-        #expect(origin == CGPoint(x: screen.maxX - inset - 300, y: top))
+        #expect(origin == CGPoint(x: screen.midX - 150, y: top))
     }
 
     @Test("an item in the notch gap or off screen anchors nothing")

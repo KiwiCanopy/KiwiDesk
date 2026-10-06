@@ -14778,8 +14778,8 @@ each objection in turn:
   focus or the mouse, and it leaves by itself at ready, after
   at least 1 s on screen so it never flickers.
 - **An anchor under a notch:** it centres under the item where
-  the item is visible, and otherwise sits top-right below the
-  menu bar, where macOS puts system status.
+  the item is visible, and otherwise sits top-centre below the
+  menu bar — under the notch, where the item went.
 
 It says the tour's sentence word for word (`BootCountText`): the
 number counts apps gone through, and "Arranging your windows · N

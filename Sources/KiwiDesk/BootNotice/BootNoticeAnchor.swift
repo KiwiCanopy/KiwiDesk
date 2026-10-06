@@ -2,16 +2,14 @@ import AppKit
 
 /// Where the slow-boot notice sits (#1715), in AppKit screen
 /// coordinates (y up): under KiwiDesk's menu-bar item where that
-/// item is visible, else top-right below the menu bar, where
-/// macOS puts system status. Pure so a test places it without a
-/// screen.
+/// item is visible, else top-centre below the menu bar — under
+/// the notch where there is one (owner ruling 2026-10-07). Pure
+/// so a test places it without a screen.
 enum BootNoticeAnchor {
     /// Below the menu bar's bottom edge.
     static let gap: CGFloat = 6
     /// The least distance from a screen edge.
     static let inset: CGFloat = 8
-    /// The fallback's right inset: the notification column's.
-    static let fallbackInset: CGFloat = 16
 
     /// The notice's origin for `size` on `screen`, `menuBar` tall,
     /// centred on `item` when one is given.
@@ -23,7 +21,7 @@ enum BootNoticeAnchor {
     ) -> CGPoint {
         let x =
             item.map { $0.midX - size.width / 2 }
-            ?? screen.maxX - fallbackInset - size.width
+            ?? screen.midX - size.width / 2
         let clamped = min(
             max(x, screen.minX + inset),
             screen.maxX - inset - size.width
