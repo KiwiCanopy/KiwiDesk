@@ -150,6 +150,29 @@ struct MotionGateTests {
         desk.core.retile(pass: .event, sizing: .mayInstantSize)
         #expect(desk.gate.owed?.pass == .apply)
         #expect(desk.gate.owed?.sizing == .mayInstantSize)
+        desk.gate.dropAll()
+        desk.core.retile(sizing: .mayInstantSize)
+        desk.core.retile(sizing: .allSpringSized)
+        #expect(desk.gate.owed?.sizing == .mayInstantSize)
+    }
+
+    /// The retile that pays a debt lays out what was owed: a held
+    /// re-issue still forces frames the paying event pass would
+    /// skip as already in place.
+    @Test("The paying retile lays out the debt, not only its own pass")
+    func payingRetileLaysOutDebt() throws {
+        let desk = try Desk()
+        _ = BootRestoreFixture.settle(desk.core)
+        // The fixture's settle swaps the tee out; take it back.
+        desk.core.tiler.applier.issued = { [unowned desk] id, _ in
+            desk.issued.append(id)
+        }
+        desk.issued = []
+        desk.stillFor = 0
+        desk.core.retile(pass: .reissue)
+        #expect(desk.issued.isEmpty)
+        desk.core.withUserMotion { desk.core.retile() }
+        #expect(!desk.issued.isEmpty)
     }
 
     /// Holding a switch would split the desk (owner, 2026-10-06).
