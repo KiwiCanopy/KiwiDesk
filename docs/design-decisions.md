@@ -4519,7 +4519,7 @@ it was dropped and loses height from the bottom. Moving it back up
 would undo the move the user just made. A clipped strip below the
 border is not a position anyone chose, so this is a narrower
 reading of #1091's "a float's position is the user's", not an
-exception to it. Four limits keep it narrow:
+exception to it. Three limits keep it narrow:
 
 - It runs on a hand drop only, never from a retile net, so a
   float parked half off-screen by any other means stays where
@@ -4533,8 +4533,6 @@ exception to it. Four limits keep it narrow:
   its title bar is out of reach. A bottom "peek" with the title
   bar showing is therefore reachable only at the window's
   minimum height.
-- A window covering a whole screen is presenting and keeps its
-  frame (#1787).
 :::
 
 **Floating a tiled window centres it at a derived size
