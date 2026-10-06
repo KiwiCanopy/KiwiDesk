@@ -19,6 +19,7 @@ extension AppDelegate {
             opensWindow: trusted && !tourOwns,
             narration: bootNarration
         )
+        bootNotice.narratedElsewhere = narrated
         if !narrated {
             Task {
                 await whatsNew.launched(

@@ -23,6 +23,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     let onboardingModel = OnboardingModel()
     /// Boot's count for a relaunched "What's new" (#1667).
     let bootNarration = BootNarration()
+    /// The slow-boot notice (#1715).
+    let bootNotice = BootNoticeController()
     /// Cached dashboard controller to avoid constructing on refresh.
     private(set) var dashboardIfCreated: SettingsWindowController?
     var dashboard: SettingsWindowController {
@@ -164,6 +166,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.statusItem?.setBootPhase(phase)
             self?.onboardingModel.bootPhase = phase
             self?.bootNarration.phase = phase
+            self?.bootNotice.phase(phase)
         }
         // Sparkle's relaunch is an in-place restart (#930).
         updater.onWillRelaunch = { [weak self] in
@@ -176,6 +179,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.showAccessibilityHelp()
         }
         self.statusItem = statusItem
+        wireBootNotice()
 
         // The error surface (#68 §3.7): the badge and the
         // standalone panel track the last config load.
