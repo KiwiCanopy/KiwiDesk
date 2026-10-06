@@ -96,18 +96,7 @@ public final class AXApplicationObserver {
         else { return nil }
         observer = created
 
-        let refcon = Unmanaged.passUnretained(self).toOpaque()
-        for name in Self.appNotifications {
-            let result = AXObserverAddNotification(
-                created,
-                appElement,
-                name as CFString,
-                refcon
-            )
-            if !Self.registered(result) {
-                failedAppNotifications.insert(name)
-            }
-        }
+        failedAppNotifications = register(Self.appNotifications)
         for mode in runLoopModes {
             CFRunLoopAddSource(
                 CFRunLoopGetMain(),
@@ -122,25 +111,60 @@ public final class AXApplicationObserver {
             || result == .notificationAlreadyRegistered
     }
 
+    /// Adds `names` on the app element, answering those left
+    /// unregistered.
+    private func register(_ names: [String]) -> Set<String> {
+        guard let observer else { return Set(names) }
+        let refcon = Unmanaged.passUnretained(self).toOpaque()
+        let element = appElement
+        return Self.register(names) { name in
+            AXObserverAddNotification(
+                observer,
+                element,
+                name as CFString,
+                refcon
+            )
+        }
+    }
+
+    /// An add that took this long spent most of a messaging
+    /// timeout, and the app will spend it again on each add left.
+    static let stalledAdd = Duration.milliseconds(
+        Int(EventLoop.axMessagingTimeoutSeconds * 500)
+    )
+
+    /// Registers `names` in order, answering the ones left
+    /// unregistered. Stops at the first add that stalls and leaves
+    /// the rest to repair, so an unresponsive app costs one
+    /// timeout instead of one per add (#837).
+    static func register(
+        _ names: [String],
+        now: () -> ContinuousClock.Instant = { .now },
+        add: (String) -> AXError
+    ) -> Set<String> {
+        var failed: Set<String> = []
+        for (index, name) in names.enumerated() {
+            let began = now()
+            if !registered(add(name)) { failed.insert(name) }
+            if began.duration(to: now()) >= stalledAdd {
+                failed.formUnion(names[(index + 1)...])
+                break
+            }
+        }
+        return failed
+    }
+
     public var needsRegistrationRepair: Bool {
         !failedAppNotifications.isEmpty
     }
 
     /// Re-attempts failed app-level notification registrations (#675).
     public func repairRegistration() {
-        guard let observer else { return }
-        let refcon = Unmanaged.passUnretained(self).toOpaque()
-        for name in failedAppNotifications {
-            let result = AXObserverAddNotification(
-                observer,
-                appElement,
-                name as CFString,
-                refcon
+        failedAppNotifications = register(
+            Self.appNotifications.filter(
+                failedAppNotifications.contains
             )
-            if Self.registered(result) {
-                failedAppNotifications.remove(name)
-            }
-        }
+        )
     }
 
     /// Registers per-window notifications for a window element.
