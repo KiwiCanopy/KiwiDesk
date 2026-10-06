@@ -35,10 +35,14 @@ extension EventLoop {
     /// every later tick. Reads go off the main actor; an
     /// unwatched app attaches through the heal's funnel, gated by
     /// the ledger read-only so an ignored agent is walked once.
+    /// KiwiDesk's own process is no arrival: its new panels would
+    /// open the gate until a heal tick quiets them, re-reading
+    /// ourselves on every wake (#1087 sitting).
     func wakeSweep(census: [pid_t: Set<WindowID>]) {
         guard isRunning else { return }
         var unwatched: [pid_t: RunningApp]?
-        for pid in census.keys.sorted() where Self.isProcessID(pid) {
+        for pid in census.keys.sorted()
+        where Self.isProcessID(pid) && !Self.isOwnProcess(pid) {
             guard let ids = census[pid], !ids.isEmpty else { continue }
             let missing = ids.subtracting(
                 Set(elements[pid, default: [:]].keys)
