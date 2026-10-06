@@ -103,9 +103,7 @@ struct GapsAndBordersCensusRenderTests {
         // nothing.
         #expect(files.count >= 6)
         for file in files {
-            let source = SourceScan.blankingCommentsAndLiterals(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            let source = try SourceScan.blankedSource(at: file)
             let squashed = source.split(
                 whereSeparator: \.isWhitespace
             ).joined()

@@ -144,7 +144,7 @@ struct AnnouncedValueTests {
         let word = Array(needle)
         var i = cursor
         while i + word.count < text.count {
-            if Array(text[i..<i + word.count]) == word,
+            if text[i..<i + word.count].elementsEqual(word),
                 i == 0 || !SourceScan.isIdentifier(text[i - 1], orDot: false),
                 !SourceScan.isIdentifier(text[i + word.count], orDot: false)
             {

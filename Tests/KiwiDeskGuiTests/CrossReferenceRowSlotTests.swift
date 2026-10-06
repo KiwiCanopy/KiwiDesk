@@ -278,7 +278,7 @@ struct CrossReferenceRowSlotTests {
         var out: [String] = []
         var i = 0
         while i + wanted.count <= text.count {
-            guard Array(text[i..<(i + wanted.count)]) == wanted
+            guard text[i..<(i + wanted.count)].elementsEqual(wanted)
             else {
                 i += 1
                 continue

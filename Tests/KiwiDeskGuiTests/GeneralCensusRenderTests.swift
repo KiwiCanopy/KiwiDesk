@@ -105,9 +105,7 @@ struct GeneralCensusRenderTests {
         // nothing.
         #expect(files.count >= 4)
         for file in files {
-            let source = SourceScan.blankingCommentsAndLiterals(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            let source = try SourceScan.blankedSource(at: file)
             let squashed = source.split(
                 whereSeparator: \.isWhitespace
             ).joined()

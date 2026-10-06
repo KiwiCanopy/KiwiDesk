@@ -8,6 +8,7 @@ extension SourceScan {
     nonisolated(unsafe) private static var sourcesCache: [URL: [URL]] = [:]
     nonisolated(unsafe) private static var rawFileCache: [URL: String] = [:]
     nonisolated(unsafe) private static var strippedCache: [URL: String] = [:]
+    nonisolated(unsafe) private static var blankedCache: [URL: String] = [:]
     nonisolated(unsafe) private static var stripLocks: [URL: NSLock] = [:]
 
     /// Reads raw string contents of `url`, cached in-memory
@@ -45,6 +46,18 @@ extension SourceScan {
         let stripped = stripComments(try rawSource(at: url))
         cacheLock.withLock { strippedCache[url] = stripped }
         return stripped
+    }
+
+    /// `url` with comments AND literals blanked, cached across
+    /// suites like `strippedSource` (#1894): callers re-blanked
+    /// both trees per test.
+    static func blankedSource(at url: URL) throws -> String {
+        if let cached = cacheLock.withLock({ blankedCache[url] }) {
+            return cached
+        }
+        let blanked = blankingCommentsAndLiterals(try rawSource(at: url))
+        cacheLock.withLock { blankedCache[url] = blanked }
+        return blanked
     }
 
     /// Every target directory under `Sources/` or `Tests/`,

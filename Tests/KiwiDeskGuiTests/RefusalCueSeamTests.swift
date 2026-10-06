@@ -23,13 +23,18 @@ struct RefusalCueSeamTests {
             .joined()
     }
 
+    /// `url` through the family's strip cache, whitespace dropped
+    /// (#1894: re-stripping both trees per test cost a CPU).
+    private static func file(_ url: URL) throws -> String {
+        try SourceScan.strippedSource(at: url)
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+    }
+
     private static func core(_ file: String) throws -> String {
-        stripped(
-            try String(
-                contentsOf: root.appendingPathComponent(
-                    "Sources/KiwiDeskCore/\(file)"
-                ),
-                encoding: .utf8
+        try Self.file(
+            root.appendingPathComponent(
+                "Sources/KiwiDeskCore/\(file)"
             )
         )
     }
@@ -39,9 +44,7 @@ struct RefusalCueSeamTests {
         for file in try SourceScan.swiftSources(
             under: root.appendingPathComponent("Sources/\(target)")
         ) {
-            joined += stripped(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            joined += try Self.file(file)
         }
         return joined
     }
@@ -251,13 +254,10 @@ struct RefusalCueSeamTests {
         // The GUI's one beep is the settings row's own preview —
         // it plays the cue being described, next to no refusal.
         let gui = try Self.tree("KiwiDesk")
-        let general = Self.stripped(
-            try String(
-                contentsOf: Self.root.appendingPathComponent(
-                    "Sources/KiwiDesk/Settings/Sections/"
-                        + "GeneralSection+AppWide.swift"
-                ),
-                encoding: .utf8
+        let general = try Self.file(
+            Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/"
+                    + "GeneralSection+AppWide.swift"
             )
         )
         #expect(general.occurrences(of: "NSSound.beep()") == 1)
@@ -277,9 +277,7 @@ struct RefusalCueSeamTests {
         )
         var callers: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: core) {
-            let text = Self.stripped(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            let text = try Self.file(file)
             let calls =
                 text.occurrences(of: "flashRefusalPill(")
                 - text.occurrences(of: "funcflashRefusalPill(")
@@ -296,9 +294,9 @@ struct RefusalCueSeamTests {
         // is called once in Core, from the door's own body.
         var primitive = 0
         for file in try SourceScan.swiftSources(under: core) {
-            primitive += Self.stripped(
-                try String(contentsOf: file, encoding: .utf8)
-            ).occurrences(of: "borders.flashSizeLimitPill(")
+            primitive += try Self.file(file).occurrences(
+                of: "borders.flashSizeLimitPill("
+            )
         }
         let door = Self.stripped(
             try SourceScan.functionBody(
