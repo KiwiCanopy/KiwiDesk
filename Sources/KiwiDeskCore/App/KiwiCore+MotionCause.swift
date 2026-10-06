@@ -32,6 +32,12 @@ extension KiwiCore {
 
     /// Deferred tails carry their scheduler's cause, late (Ruling 2).
     func wireMotionCause() {
+        tiler.motionGate.cause = { [weak self] in
+            self?.motionCause ?? .ambient
+        }
+        tiler.motionGate.clock = { [applier = tiler.applier] in
+            applier.clock()
+        }
         tiler.motionGate.quiescence.buttonsDown = { [weak self] in
             (self?.mouse.pressedButtons() ?? 0) != 0
         }

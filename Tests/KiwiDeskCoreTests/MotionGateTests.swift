@@ -153,13 +153,24 @@ struct MotionGateTests {
     }
 
     /// Holding a switch would split the desk (owner, 2026-10-06).
-    @Test("A Space or Desktop switch is never held")
+    @Test("A switch the user watches is never held")
     func switchNeverWaits() throws {
         let desk = try Desk()
         desk.stillFor = 0
-        desk.core.retile(pass: .reissue)
+        desk.core.spaceSwitchRetile(asSwitch: true)
         #expect(!desk.issued.isEmpty)
         #expect(desk.gate.owed == nil)
+    }
+
+    /// Boot, the wake replay and a sweep activate a Space too, but
+    /// nobody is watching a switch: they wait like ambient motion.
+    @Test("A boot or wake activation waits for the hand")
+    func activationWaits() throws {
+        let desk = try Desk()
+        desk.stillFor = 0
+        desk.core.spaceSwitchRetile(asSwitch: false)
+        #expect(desk.issued.isEmpty)
+        #expect(desk.gate.owed?.pass == .reissue)
     }
 
     /// What was owed rides the admitted pass, so a weaker pass
@@ -201,6 +212,19 @@ struct MotionGateTests {
         #expect(desk.core.pendingZOrderRestore)
         desk.stillFor = 10
         desk.poll()
+        #expect(!desk.core.pendingZOrderRestore)
+    }
+
+    /// A control's own pass that pays the debt runs the restore
+    /// that waited, even when it animates nothing.
+    @Test("A user pass paying the debt runs a waiting restore")
+    func userPassRunsWaitingRestore() throws {
+        let desk = try Desk()
+        desk.stillFor = 0
+        desk.core.retile()
+        desk.core.scheduleZOrderRestore()
+        #expect(desk.core.pendingZOrderRestore)
+        desk.core.withUserMotion { desk.core.retile() }
         #expect(!desk.core.pendingZOrderRestore)
     }
 

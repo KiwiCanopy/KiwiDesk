@@ -623,3 +623,6 @@ editing AX code:
   take longer**: it is chunked now (#801), so the last app in
   its queue is warmed at 1 s plus the sweep's own duration
   rather than at 1 s — and a sweep-budgeted app later still.
+- **Boot's and the wake replay's layout passes wait for the
+  hand to rest (#804)**: their state lands at once, the pass is
+  owed — state-and-layout.md ▸ Window motion says whose it is.

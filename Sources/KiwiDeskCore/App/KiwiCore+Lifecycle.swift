@@ -78,7 +78,7 @@ extension KiwiCore {
         if state.workspaces.activeSpace == landed {
             activateSpaceOfFocusedWindow()
             if state.workspaces.activeSpace != landed {
-                spaceSwitchRetile()
+                spaceSwitchRetile(asSwitch: false)
                 emitSpaceChange()
             }
         }

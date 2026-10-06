@@ -27,7 +27,7 @@ extension KiwiCore {
         if remembered == nil {
             seedStartupFocus(frontmost: trustedFrontmostTracked())
         }
-        spaceSwitchRetile()
+        spaceSwitchRetile(asSwitch: false)
         emitSpaceChange()
         if let remembered {
             // `warp: false`: the pointer is wherever the user

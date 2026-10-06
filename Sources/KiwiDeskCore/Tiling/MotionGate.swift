@@ -63,17 +63,28 @@ final class MotionGate {
     private var owedSince: TimeInterval?
     private var armed = false
     private var releasing = false
+    private var switching = false
+
+    /// Runs `body` as a switch the user is watching — a Space or
+    /// Desktop switch, a display follow — which never waits:
+    /// holding it would split the desk, the bars showing a Space
+    /// whose windows are not there (owner ruling 2026-10-06). Boot,
+    /// the wake replay and a switch's settle are not switches.
+    func exemptingSwitch(_ body: () -> Void) {
+        let outer = switching
+        switching = true
+        defer { switching = outer }
+        body()
+    }
 
     /// The pass to run now — `pass` with any debt merged in, so
     /// what was owed is never lost to a weaker pass — or nil when
-    /// it waits. A Space or Desktop switch (`.reissue`) never
-    /// waits: holding it would split the desk, the bars showing a
-    /// Space whose windows are not there (owner ruling 2026-10-06).
+    /// it waits.
     func admit(_ pass: Owed) -> Owed? {
         if releasing { return pass }
         let cause = cause()
         let heldFor = owedSince.map { clock() - $0 }
-        var user = pass.pass == .reissue
+        var user = switching
         if case .user(_, late: false) = cause { user = true }
         if user || quiescence.admits(heldFor: heldFor) {
             let run = owed.map { $0.merged(with: pass) } ?? pass

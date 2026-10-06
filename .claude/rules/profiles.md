@@ -1464,3 +1464,7 @@ one value, never another Bool beside it (#1507). The wider rule
 
 One vocabulary across Lua and profile JSON — see
 [config-vocabulary.md](config-vocabulary.md).
+- **A profile apply or a monitor settle is a layout pass the
+  motion gate may hold (#804)**: its state lands at once and its
+  retile is owed until the hand rests — state-and-layout.md ▸
+  Window motion says whose it is.

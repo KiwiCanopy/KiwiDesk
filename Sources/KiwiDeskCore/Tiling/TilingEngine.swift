@@ -205,8 +205,6 @@ public final class TilingEngine {
             applier.apply(id, frame, setSize: setSize)
             self?.onFrameApplied(id, frame)
         }
-        motionGate.cause = { [applier] in applier.cause() }
-        motionGate.clock = { [applier] in applier.clock() }
         animation.onAnimationStart = { [applier] id in
             applier.beginAnimating(id)
         }

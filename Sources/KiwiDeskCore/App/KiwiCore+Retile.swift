@@ -51,6 +51,7 @@ extension KiwiCore {
             newlyCreatedWindow: newlyCreatedWindow,
             sizing: sizing
         )
+        let paying = tiler.motionGate.owed != nil
         guard let run = tiler.motionGate.admit(asked) else {
             updateBars()
             updateBorders()
@@ -62,9 +63,18 @@ extension KiwiCore {
         let newlyCreatedWindow = run.newlyCreatedWindow
         let sizing = run.sizing
         // The whole main-actor cost of a pass that runs, bars and
-        // rings included (#1508).
-        let finish = tiler.meter.beginRetile(pass)
+        // rings included, filed under the caller's own pass (#1508).
+        let finish = tiler.meter.beginRetile(asked.pass)
         defer { finish() }
+        // A z-order restore that waited for the debt rides this
+        // pass's settle, or runs now when nothing animates.
+        defer {
+            if paying, pendingZOrderRestore,
+                tiler.animation.activeCount == 0
+            {
+                runPendingZOrderRestore()
+            }
+        }
         // Session weights are validated at WRITE time against
         // the membership at press time; a membership or span
         // change afterwards can leave them infeasible, and the

@@ -1199,3 +1199,7 @@ reaches.
   (`appBarActiveIndex`). `AppBarFloatTests` ▸ `floatsTrailTheRow`
   holds the order and `AppBarFloatOverlayTests` ▸
   `floatDoesNotReorder` the drop.
+- **A bar click, menu row or drop is user motion (#804)** and
+  opens `withUserMotion`; a held layout pass still refreshes the
+  bars at once — state-and-layout.md ▸ Window motion says whose
+  it is.

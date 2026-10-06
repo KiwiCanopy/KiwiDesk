@@ -25,7 +25,12 @@ extension KiwiCore {
     /// route here at all.
     /// `newcomer` is a window arriving with this switch (#1599's
     /// launch follow), given the arrival's #45 start-at-target.
+    ///
+    /// `asSwitch` says whether this is a switch the user is
+    /// watching, which the motion gate never holds (#804), or a
+    /// boot, wake or sweep activation, which waits for the hand.
     func spaceSwitchRetile(
+        asSwitch: Bool,
         newcomer: WindowID? = nil,
         slide: SpaceSlideIntent? = nil
     ) {
@@ -49,11 +54,18 @@ extension KiwiCore {
                 self?.spaceSlide.play?.liftAt
             }
         }
-        retile(
-            animated: false,
-            pass: .reissue,
-            newlyCreatedWindow: newcomer
-        )
+        let pass = { [self] in
+            retile(
+                animated: false,
+                pass: .reissue,
+                newlyCreatedWindow: newcomer
+            )
+        }
+        if asSwitch {
+            tiler.motionGate.exemptingSwitch(pass)
+        } else {
+            pass()
+        }
         if let run { runSpaceSlide(run) }
     }
 }

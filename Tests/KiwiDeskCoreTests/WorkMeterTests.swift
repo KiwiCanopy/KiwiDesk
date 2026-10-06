@@ -184,7 +184,7 @@ struct WorkMeterTests {
         core.switchSpace(to: SpaceID(2), warp: false)
         // A switch retile outside the switch door (boot, wake,
         // restore) is no switch.
-        core.spaceSwitchRetile()
+        core.spaceSwitchRetile(asSwitch: true)
         let c = m.snapshot(reset: false).counts
         #expect(c.events == 1)
         #expect(c.spaceSwitches == 1)

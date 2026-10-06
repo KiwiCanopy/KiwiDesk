@@ -1902,10 +1902,13 @@ editing here:
   asked by `KiwiCore.retile` alone: what waits is the PASS, owed
   and re-run against the state as it then is, never a stored
   frame, so a held pass sends, stamps and asks nothing, and a
-  pass that runs carries the debt merged in. A Space or Desktop
-  switch (`.reissue`) is never held, and a z-order restore waits
-  for an owed pass as for an animation. State, bars and rings
-  move at once. A frame written outside a layout pass stays
+  pass that runs carries the debt merged in (so a run may draw
+  a stronger pass than its caller spelled; the meter files the
+  caller's). A switch the user watches is never held, and every
+  `spaceSwitchRetile` caller states `asSwitch`, boot, wake and a
+  sweep stating false; a z-order restore waits for an owed pass
+  as for an animation. State, bars and rings move at once; the
+  pre-render heals ride the pass. A frame written outside a layout pass stays
   ungated by ruling until #1991 (owner, 2026-10-06). The
   engine's pass is driven only from that door
   (`MotionScopeCensusTests` ▸ `passesAskTheGate`,
