@@ -172,6 +172,8 @@ struct WindowServerWakeUpTests {
         )
         box.drain()
         #expect(box.listReads == 0)
+        // Nor does it look the app up: no wake-up is logged.
+        #expect(!box.logs.contains { $0.hasPrefix("wake-up") })
     }
 
     @Test("an unanswered destroy of a tracked window wakes its app")
