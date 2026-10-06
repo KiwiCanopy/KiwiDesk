@@ -41,6 +41,7 @@ extension AppBarItemView {
             boxBorder,
             shelf: style.shelf,
             surface: .box,
+            under: isActive ? style.activeIndicator : nil,
             cornerRadius: radius,
             sheen: style.sheen
         )

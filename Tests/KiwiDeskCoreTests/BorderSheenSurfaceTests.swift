@@ -132,6 +132,7 @@ struct BorderSheenSurfaceTests {
             view,
             shelf: shelf,
             surface: .plate,
+            under: nil,
             cornerRadius: 6,
             sheen: -1
         )
@@ -142,6 +143,7 @@ struct BorderSheenSurfaceTests {
             view,
             shelf: shelf,
             surface: .plate,
+            under: nil,
             cornerRadius: 6,
             sheen: 0
         )

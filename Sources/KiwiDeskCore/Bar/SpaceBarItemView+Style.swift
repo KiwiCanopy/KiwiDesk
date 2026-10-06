@@ -16,6 +16,7 @@ extension SpaceBarItemView {
             boxBorder,
             shelf: style.shelf,
             surface: .box,
+            under: isActive ? style.activeIndicator : nil,
             cornerRadius: cornerRadius,
             sheen: style.sheen
         )

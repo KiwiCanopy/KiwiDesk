@@ -125,7 +125,9 @@ struct BarStripView: View {
                     .overlay(
                         PreviewPlateEdge(
                             spec: spec,
-                            corner: spec.itemCorner
+                            corner: spec.itemCorner,
+                            outlined: item.active
+                                && spec.indicator.strokesBoxEdge
                         )
                     )
                 )

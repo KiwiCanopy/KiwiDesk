@@ -8,6 +8,9 @@ import SwiftUI
 struct PreviewPlateEdge: View {
     let spec: HomeCardBarsTile.BarSpec
     let corner: CGFloat
+    /// An active box whose outline strokes this edge, so the
+    /// border stands down under it as on the bar (#1924).
+    var outlined = false
     @Environment(\.schematicPalette) private var palette
 
     /// The border this edge strokes — its hex and width — or nil
@@ -16,8 +19,15 @@ struct PreviewPlateEdge: View {
         spec.borderWidth > 0 ? (spec.borderColor, spec.borderWidth) : nil
     }
 
+    /// Whether the border stands down under the box's outline;
+    /// the hairline never does, as the outline is not drawn
+    /// beside it.
+    var standsDown: Bool { outlined && border != nil }
+
     var body: some View {
-        if let border {
+        if standsDown {
+            EmptyView()
+        } else if let border {
             RoundedRectangle(cornerRadius: corner)
                 .strokeBorder(
                     SheenPaint.style(border.hex, sheen: spec.sheen),

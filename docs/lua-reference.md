@@ -2178,6 +2178,11 @@ it takes no tint and stays under Reduce transparency. The width
 and the [`border_color`](#kiwishelf-colours) are kept while it is
 off.
 
+:::unreleased
+The active item's box drops it under the `outline` indicator,
+which already strokes that edge.
+:::
+
 **Example:**
 
 ```lua

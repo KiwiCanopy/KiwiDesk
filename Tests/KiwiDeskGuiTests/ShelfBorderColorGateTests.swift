@@ -161,6 +161,27 @@ struct ShelfBorderPreviewTests {
         #expect(PreviewPlateEdge(spec: off, corner: 4).border == nil)
     }
 
+    /// An active outlined box's border stands down, as on the
+    /// bar (#1924); the hairline a border-less draft draws stays.
+    @Test("An outlined box's preview edge stands its border down")
+    func outlinedEdgeStandsDown() throws {
+        let on = try #require(Self.specs(Self.tile(border: true)).first)
+        let outlined = PreviewPlateEdge(spec: on, corner: 4, outlined: true)
+        #expect(outlined.standsDown)
+        #expect(!PreviewPlateEdge(spec: on, corner: 4).standsDown)
+        let off = try #require(Self.specs(Self.tile(border: false)).first)
+        let hairline = PreviewPlateEdge(spec: off, corner: 4, outlined: true)
+        #expect(!hairline.standsDown)
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent("HomeCardPlate+BarStrip.swift")
+        let source = try SourceScan.strippedSource(at: url)
+        #expect(
+            source.contains("strokesBoxEdge"),
+            "the boxed pip no longer hands its outline to the edge"
+        )
+    }
+
     /// The strips draw that edge on every plate and box they
     /// paint: the bar strip's plate and box, the shelf strip's one
     /// plate. A site that goes back to a bare hairline reds here.

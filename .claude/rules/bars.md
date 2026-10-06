@@ -1065,15 +1065,20 @@ Boxed.
   `borderColor`, never the stored width. The rim is its own
   fill-less, click-through view framed to the surface, so it
   strokes on the edge, never inset: above the plate or the
-  chip's glass, and beneath an item's active outline, which
-  strokes over it. `ShelfBorderSeamTests` holds the one home:
-  only the painter reads the drawn width in Core, and in `Bar/`
-  the only layer-border colour written beside it is the active
-  indicator's. `ShelfBorderDrawingTests` builds the plate (solid,
-  glass, under Reduce transparency), both bars' boxes and the
-  chip and holds the stroke, its place in the order, and its
-  absence while off; a new rimmed surface owes that suite a
-  clause.
+  chip's glass. A box's rim stands down under an active indicator
+  that strokes the box's own edge — the outline, never the edge
+  mark — through the one `ShelfBorder.yields`, each site handing
+  the painter the indicator it draws over the rim, never a
+  verdict, and the Settings preview asking the same
+  `strokesBoxEdge` (#1924, `ShelfBorderDrawingTests` ▸
+  `outlineStandsTheRimDown`). `ShelfBorderSeamTests` holds the
+  one home: only the painter reads the drawn width in Core, and
+  in `Bar/` the only layer-border colour written beside it is
+  the active indicator's. `ShelfBorderPlateTests` builds the
+  plate (solid, glass, under Reduce transparency) and
+  `ShelfBorderDrawingTests` both bars' boxes and the chip; they
+  hold the stroke, its place in the order, and its absence while
+  off, and a new rimmed surface owes one of them a clause.
 - **A preview of the shelf draws the draft's border**: the
   Settings Bars preview through `PreviewPlateEdge` on every
   plate and box, from its `BarSpec` (`ShelfBorderPreviewTests` ▸
