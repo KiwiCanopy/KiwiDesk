@@ -185,6 +185,22 @@ struct SpaceChangeDurationTests {
         #expect(abs(try fade(play, "out") - 0.36) < 1e-9)
     }
 
+    /// A press after the landing waits the parks' fixed delay
+    /// again, whatever the new pace.
+    @Test("a press after the landing keeps the fixed delay")
+    func landedPressKeepsTheDelay() throws {
+        let clock = Clock()
+        let overlay = makeOverlay(clock)
+        defer { overlay.end() }
+        let first = press(overlay, pace: 1)
+        overlay.run(incoming: [], holes: [])
+        clock.now = first.landAt + 0.01
+        press(overlay, pace: 2)
+        let motion = try #require(overlay.play?.motion)
+        #expect(motion.begin == clock.now + SpaceSlidePlan.stripDelay)
+        #expect(motion.response == SpaceSlidePlan.response(at: 2))
+    }
+
     /// The switch hands the overlay the setting's pace at the press.
     @Test(
         "a switch plays at the configured pace",
