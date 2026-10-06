@@ -51,9 +51,7 @@ extension SourceScan {
                 // from there and then jump the cursor past
                 // whatever it consumed — fail-open, real frames
                 // silently unscanned.
-                if text[index] == "\"" || text[index] == "#",
-                    let literal = literal(text, from: index)
-                {
+                if let literal = literal(text, from: index) {
                     index = literal.end
                     continue
                 }
@@ -135,9 +133,7 @@ extension SourceScan {
         var found = [key.value]
         var index = key.end
         while index < text.count {
-            if text[index] == "\"" || text[index] == "#",
-                let literal = literal(text, from: index)
-            {
+            if let literal = literal(text, from: index) {
                 index = literal.end
                 continue
             }
@@ -223,7 +219,7 @@ extension SourceScan {
     /// call or a `+`-concatenated English read as one argument
     /// each; an argument counts when `labelHit` finds a label in
     /// it — the one recogniser `keyLiterals` reads with too.
-    private static func labelSlotCount(
+    static func labelSlotCount(
         in body: String,
         destinations: [String: String]
     ) -> Int {
@@ -242,9 +238,7 @@ extension SourceScan {
     ) -> Bool {
         var index = 0
         while index < argument.count {
-            if argument[index] == "\"" || argument[index] == "#",
-                let literal = literal(argument, from: index)
-            {
+            if let literal = literal(argument, from: index) {
                 index = literal.end
                 continue
             }

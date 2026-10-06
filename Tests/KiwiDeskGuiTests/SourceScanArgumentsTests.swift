@@ -18,9 +18,11 @@ struct SourceScanArgumentsTests {
 
     @Test("a comma inside any literal shape never splits")
     func literalCommasStayInside() {
-        let plain = #""a, b", x"#
-        let triple = "\"\"\"\na, b\n\"\"\", x"
-        let raw = ##"#"a, "b""#, x"##
+        // An odd quote ahead of the inner comma: a plain-quote
+        // toggle mis-pairs there and splits at `b, c`.
+        let plain = #""a \"b, c\" d", x"#
+        let triple = "\"\"\"\na \"b, c\" d\n\"\"\", x"
+        let raw = "#\"a \"b, c\" d\"#, x"
         for source in [plain, triple, raw] {
             let arguments = SourceScan.topLevelArguments(of: source)
             #expect(arguments.count == 2, "\(source): \(arguments)")
@@ -48,7 +50,7 @@ struct SourceScanArgumentsTests {
             (#""key.a""#, "key.a"),
             (#""a\"b""#, #"a\"b"#),
             ("\"\"\"\nx\n\"\"\"", "\nx\n"),
-            (##"#"a"b"#"##, #"a"b"#),
+            ("#\"a\"b\"#", "a\"b"),
         ]
         for (source, value) in cases {
             let text = Array(source)
@@ -58,5 +60,21 @@ struct SourceScanArgumentsTests {
         }
         #expect(SourceScan.literal(Array("#if"), from: 0) == nil)
         #expect(SourceScan.literal(Array(#""open"#), from: 0) == nil)
+    }
+
+    @Test("a comma inside the English never adds a label slot")
+    func englishCommaIsNoSlot() {
+        let bodies = [
+            #""k", "a, b", L("x.y")"#,
+            "\"k\", #\"a \"b, c\" d\"#, L(\"x.y\")",
+            "\"k\", \"\"\"\na \"b, c\" d\n\"\"\", L(\"x.y\")",
+        ]
+        for body in bodies {
+            #expect(
+                SourceScan.labelSlotCount(in: body, destinations: [:])
+                    == 1,
+                "\(body)"
+            )
+        }
     }
 }

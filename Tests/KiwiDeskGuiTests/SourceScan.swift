@@ -206,11 +206,10 @@ enum SourceScan {
     /// nil when nothing starts there. Handles the three shapes
     /// the scanned trees use — `"…"` with escapes, `"""…"""`, and
     /// the raw `#"…"#` — because each of them can legally carry a
-    /// `/*` that is not a comment. `balanced` and `stripped` (and
-    /// through it the blanker, #1320) route here. A sibling that
-    /// still carries a plain-quote toggle of its own states its
-    /// residue where it lives, and is routed here the day it
-    /// bites — never copied.
+    /// `/*` that is not a comment. `balanced`, `stripped` (and
+    /// through it the blanker, #1320) and `literal` (and through
+    /// it `topLevelArguments`, #1899) route here; a walker that
+    /// reads literals routes here too, never a toggle of its own.
     ///
     /// Residue, stated because it fails OPEN: an interpolation
     /// carrying a nested literal (`"\(dict["k"])"`) desyncs the
@@ -240,7 +239,6 @@ enum SourceScan {
         else { return nil }
         let start = i + span.delimiter
         let stop = span.end - span.delimiter
-        guard start <= stop else { return nil }
         return (String(text[start..<stop]), span.end)
     }
 

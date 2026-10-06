@@ -53,13 +53,8 @@ extension SourceScan {
 
     /// Everything before the first top-level comma, collapsed to
     /// single spaces — `topLevelArguments`' first element.
-    ///
-    /// Internal, not private: `ReduceMotionGateTests` asks the
-    /// same question of `.animation(_:value:)` — which argument
-    /// is the ANIMATION — and a second splitter beside this one
-    /// was the weaker copy, so an argument carrying a quoted
-    /// comma split wrong and the gate read a truncated expression
-    /// (code review, #1069).
+    /// Internal: `ReduceMotionGateTests` reads the animation
+    /// argument through it (#1069).
     static func firstArgument(of args: String) -> String {
         normalize(topLevelArguments(of: args)[0])
     }
@@ -75,9 +70,7 @@ extension SourceScan {
         var arguments: [String] = [""]
         var index = 0
         while index < text.count {
-            if text[index] == "\"" || text[index] == "#",
-                let literal = literal(text, from: index)
-            {
+            if let literal = literal(text, from: index) {
                 arguments[arguments.count - 1]
                     .append(contentsOf: text[index..<literal.end])
                 index = literal.end
