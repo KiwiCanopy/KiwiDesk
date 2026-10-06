@@ -6,11 +6,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// **An activation's, a focus change's and a close's reconcile
-/// read the window list OFF the main actor** (#1930, #1888): a
-/// slow app's list read held the main actor for up to 700 ms on
-/// every Space switch under GPU load, and up to 930 ms on one
-/// Finder close.
+/// **An activation's, a focus change's and a reported close's
+/// reconcile read the window list OFF the main actor** (#1930,
+/// #1888): a slow app's list read held the main actor for up to
+/// 700 ms on every Space switch under GPU load, and up to 930 ms
+/// on one Finder close.
 ///
 /// Driven through `appActivated` on stubbed seams, the list read
 /// captured for the test to pump: nothing the list decides lands
@@ -167,8 +167,8 @@ struct ReconcileOffMainTests {
         #expect(box.listReads == 1)
     }
 
-    @Test("a close the map cannot name reconciles off main")
-    func unmappedDestroyReadsOffMain() {
+    @Test("a close the map cannot name reconciles at once")
+    func unmappedDestroyReconcilesInline() {
         let (loop, box) = makeLoop()
         loop.handle(
             kAXUIElementDestroyedNotification,
@@ -176,9 +176,21 @@ struct ReconcileOffMainTests {
             pid: pid,
             app: ref
         )
-        #expect(box.listReads == 0, "list read inline (#1888)")
-        #expect(box.destroyed.isEmpty, "reconciled inline")
-        box.drain()
+        // Its removal must beat the successor's focus report (#936).
+        #expect(box.listReads == 1)
+        #expect(box.destroyed == [id])
+    }
+
+    @Test("a deferred tab-carrier close reconciles at once")
+    func deferredDestroyReconcilesInline() {
+        let (loop, box) = makeLoop()
+        loop.tabCarriers.insert(id)
+        loop.handle(
+            kAXUIElementDestroyedNotification,
+            AXUIElementCreateApplication(pid),
+            pid: pid,
+            app: ref
+        )
         #expect(box.listReads == 1)
         #expect(box.destroyed == [id])
     }
@@ -197,6 +209,21 @@ struct ReconcileOffMainTests {
         box.drain()
         #expect(box.listReads == 1)
         #expect(box.destroyed == [id])
+    }
+
+    @Test("a minimize reports at once, its list read off main")
+    func minimizeReportsInline() {
+        let (loop, box) = makeLoop()
+        loop.handle(
+            kAXWindowMiniaturizedNotification,
+            AXUIElementCreateApplication(pid),
+            pid: pid,
+            app: ref
+        )
+        #expect(box.destroyed == [id])
+        #expect(box.listReads == 0, "list read inline (#1888)")
+        box.drain()
+        #expect(box.listReads == 1)
     }
 
     @Test("a window tracked during the read stays tracked")

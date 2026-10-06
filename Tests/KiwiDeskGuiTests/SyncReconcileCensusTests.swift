@@ -41,9 +41,11 @@ struct SyncReconcileCensusTests {
         // The transient re-track and the distrust follow-up
         // (#675, #1157), each on its own scheduled slot.
         "App/KiwiCore+Lifecycle.swift": 2,
-        // The tabbed create; the destroy/minimize net reads off
-        // main (#1888).
-        "Events/EventLoop+Notifications.swift": 1,
+        // The tabbed create, and a close the arm deferred or could
+        // not name, whose removal must precede the successor's
+        // focus report (#936); a reported close reads off main
+        // (#1888).
+        "Events/EventLoop+Notifications.swift": 2,
         // A hide or unhide (#913).
         "Events/EventLoop+Apps.swift": 1,
         // The Desktop reaps after a move, a switch, a launch.

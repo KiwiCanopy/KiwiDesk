@@ -79,12 +79,6 @@ struct FullscreenDestroyArmTests {
         wire(loop, box)
         let own = pid_t(getpid())
         loop.observers[own] = FakeObserver()
-        // The close arm's list read runs off main (#1888); read
-        // and apply it inline so the sweep lands before the asserts.
-        loop.axReads.dispatchOverride = { _, work in work() }
-        loop.axReads.deliver = { work in
-            MainActor.assumeIsolated { work() }
-        }
         return (loop, box, own)
     }
 

@@ -55,6 +55,7 @@ extension EventLoop {
             }
         case kAXUIElementDestroyedNotification,
             kAXWindowMiniaturizedNotification:
+            var reported = false
             if let id = trackedWindowID(
                 of: element,
                 pid: pid,
@@ -86,13 +87,21 @@ extension EventLoop {
                                 == kAXWindowMiniaturizedNotification
                         )
                     )
+                    reported = true
                 }
             }
             // Destroyed elements often cannot be mapped back
             // (and some apps skip the notification entirely),
-            // so always diff against the live window list — read
-            // off the main actor (#1888).
-            reconcileOffMain(pid: pid, app: app)
+            // so always diff against the live window list. A close
+            // reported above needs only that net, read off main
+            // (#1888); a deferred or unnamed one must land before
+            // the successor's focus report, or the close-return
+            // raise stands down (#936).
+            if reported {
+                reconcileOffMain(pid: pid, app: app)
+            } else {
+                reconcile(pid: pid, app: app)
+            }
         case kAXWindowDeminiaturizedNotification:
             refreshPolicy(of: pid)
             track(element, pid: pid, app: app)
