@@ -91,13 +91,12 @@ extension StateCoordinator {
     ) -> StateSnapshot {
         var snapshot = snapshot()
         snapshot.spaces = workspaces.allSpaces.map {
-            StateSnapshot.SpaceRecord(
-                space: $0,
+            spaceRecord(
+                of: $0,
                 session: StateSnapshot.SpaceSession(
                     space: $0,
                     monocleShown: monocleShown[$0.id]
-                ),
-                held: heldRecord(of: $0.id)
+                )
             )
         }
         snapshot.windows = snapshot.windows.map { record in

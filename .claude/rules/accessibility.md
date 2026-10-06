@@ -214,11 +214,26 @@ editing AX code:
   takes the same shape: a needle anchored to `finishBoot`'s own
   closing brace, since the tail is not test-drivable but a call
   MOVED out of it heals nothing.
+- **An AX verdict read while the session rested is no evidence
+  (#1285).** A locked session lists an app's windows but every
+  element answers as the application, so a boot under the lock
+  tracks nothing and the heal quiets every census id. A ledger
+  that latches an AX failure is forgotten on every return leg
+  through the one `EventLoop.sessionDidReturn`, which
+  `SleepWakeManager.onReturn` calls ahead of the wake-restore
+  gate (`HealReopenOnReturnTests`); a new such ledger joins that
+  function. The heal's next tick then asks again, so a desk
+  booted under a lock fills within one heal interval of the
+  unlock.
 - **A WindowServer window create or destroy only WAKES the AX
   path (#1877); it never tracks, files or removes a window.** A
   create runs one wake sweep after a 300 ms grace, once per grace
-  however many creates arrive, skipping KiwiDesk's own windows
-  (`WindowServerHealPullTests`): the heal's census and gate,
+  however many creates arrive (`WindowServerHealPullTests`); a
+  create of KiwiDesk's own window wakes nothing — review's, as
+  no fixture builds the real window `EventLoop.ownWindow` reads —
+  and the sweep never re-reads KiwiDesk's own process, whose new panels
+  would open the gate on every wake (`WindowServerWakeUpTests` ▸
+  `wakeSweepSkipsOwnProcess`): the heal's census and gate,
   read off the main actor, and every re-read through
   `reconcileOffMain`. It reads the quiet ledger and NEVER writes
   it — a window not listed yet 300 ms after its create would be
