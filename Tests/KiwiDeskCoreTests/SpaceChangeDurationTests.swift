@@ -148,11 +148,13 @@ struct SpaceChangeDurationTests {
             overlay.run(incoming: [], holes: [])
             let play = try #require(overlay.play)
             let response = SpaceSlidePlan.response(at: pace)
-            #expect(response == 0.3 * pace)
+            #expect(response == SpaceSlidePlan.response(at: 1) * pace)
             #expect(play.motion.response == response)
             #expect(abs(try playedOmega(play) - 2 * .pi / response) < 1e-6)
-            #expect(abs(try fade(play, "in") - 0.08 * pace) < 1e-9)
-            #expect(abs(try fade(play, "out") - 0.18 * pace) < 1e-9)
+            let fadeIn = SpaceSlidePlan.fadeIn(at: 1) * pace
+            let fadeOut = SpaceSlidePlan.fadeOut(at: 1) * pace
+            #expect(abs(try fade(play, "in") - fadeIn) < 1e-9)
+            #expect(abs(try fade(play, "out") - fadeOut) < 1e-9)
             #expect(play.motion.begin == 100 + SpaceSlidePlan.stripDelay)
             #expect(
                 abs(play.liftAt - pressed.landAt - SpaceSlidePlan.landMargin)
@@ -181,8 +183,14 @@ struct SpaceChangeDurationTests {
         let play = try #require(overlay.play)
         #expect(play.pace == 2)
         #expect(play.motion.response == SpaceSlidePlan.response(at: 2))
-        #expect(abs(try playedOmega(play) - 2 * .pi / 0.6) < 1e-6)
-        #expect(abs(try fade(play, "out") - 0.36) < 1e-9)
+        #expect(
+            abs(try playedOmega(play) - 2 * .pi / play.motion.response)
+                < 1e-6
+        )
+        #expect(
+            abs(try fade(play, "out") - 2 * SpaceSlidePlan.fadeOut(at: 1))
+                < 1e-9
+        )
     }
 
     /// A press after the landing waits the parks' fixed delay
