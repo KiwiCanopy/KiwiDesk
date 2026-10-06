@@ -9,7 +9,28 @@ extension KiwiCore {
         spaceBars.contextMenus = shelves.contextMenus
         appBars.contextMenus = shelves.contextMenus
         shelves.contextMenus.rows = { [weak self] in
-            self?.barMenuRows($0) ?? []
+            guard let self else { return [] }
+            return self.userDriven(self.barMenuRows($0))
+        }
+    }
+
+    /// A menu row is a KiwiDesk control: its action runs as user
+    /// motion (#804).
+    private func userDriven(_ rows: [BarMenuRow]) -> [BarMenuRow] {
+        rows.map { row in
+            var row = row
+            switch row.kind {
+            case .action(let perform):
+                row.kind = .action { [weak self] in
+                    guard let self else { return perform() }
+                    self.withUserMotion(perform)
+                }
+            case .submenu(let children):
+                row.kind = .submenu(userDriven(children))
+            case .separator:
+                break
+            }
+            return row
         }
     }
 

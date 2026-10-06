@@ -108,10 +108,12 @@ extension SettingsModel {
         // A failed checklist write stops the Save, as the stored
         // door's does: the ticks stay staged with its warning.
         guard saveLookReach() else { return false }
-        core.applyProfileScopedState(
-            from: config,
-            applyingModesFor: edited
-        )
+        core.withUserMotion {
+            core.applyProfileScopedState(
+                from: config,
+                applyingModesFor: edited
+            )
+        }
         var saved = true
         do {
             try core.persistProfile(
@@ -152,18 +154,22 @@ extension SettingsModel {
     }
 
     func loadProfile(named name: String) {
-        _ = core.execute(
-            "load_profile",
-            args: [.string(name)]
-        )
+        core.withUserMotion {
+            _ = core.execute(
+                "load_profile",
+                args: [.string(name)]
+            )
+        }
         reload()
     }
 
     func deleteProfile(named name: String) {
-        _ = core.execute(
-            "delete_profile",
-            args: [.string(name)]
-        )
+        core.withUserMotion {
+            _ = core.execute(
+                "delete_profile",
+                args: [.string(name)]
+            )
+        }
         reload()
     }
 
@@ -198,7 +204,7 @@ extension SettingsModel {
     /// Applies standard layout preset as saved profile (#53).
     func applyStandardPreset(_ layout: StandardLayout) {
         do {
-            try core.applyStandard(layout)
+            try core.withUserMotion { try core.applyStandard(layout) }
         } catch {
             profileWarning = L(
                 "profiles.apply_failed",

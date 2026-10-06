@@ -1885,6 +1885,19 @@ editing here:
   in `RetilePassRoutingTests`' `allowed` map — the one copy of
   who chooses what (`SpaceSwitchReissueTests`,
   `RetileBoundSkipTests` ▸ `reissueIssuesTheBound`).
+- **Window motion says whose it is (#804 ▸ Ruling).** An entry
+  point a KiwiDesk control drives — a Settings action, the quick
+  menu, the tour, a bar click, menu row or drop, a window drag, a
+  scroll gesture — runs its work inside `withUserMotion`, and a
+  new one joins `MotionScopeCensusTests`' map with its reason; a
+  hotkey and a hold-glide step read as user motion through their
+  own flags, and the CLI/IPC socket stays ambient by ruling. A
+  new `DeferredTasks.Key` states in `carriesCause` whether its
+  body carries its scheduler's cause, late, or runs ambient —
+  the switch is exhaustive, so the compiler asks. The scope is
+  entered only in `KiwiCore+MotionCause` (the census's one-home
+  clause). The input-quiescence gate reads it at `FrameApplier`;
+  until then it changes nothing (`MotionCauseTests`).
 - **A re-issuing pass forces only the parks a departure owes
   (#1508)**, or every switch re-parks every hidden window — the
   per-switch cost `get_work_counters` measures as

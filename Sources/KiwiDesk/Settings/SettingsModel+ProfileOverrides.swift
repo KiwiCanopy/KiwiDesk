@@ -68,8 +68,10 @@ extension SettingsModel {
             return
         }
         persistBindingsIfEdited()
-        core.commitSharedLook(ofProfile: name)
-        core.reapplyIfInEffect(name)
+        core.withUserMotion {
+            core.commitSharedLook(ofProfile: name)
+            core.reapplyIfInEffect(name)
+        }
         reload()
     }
 

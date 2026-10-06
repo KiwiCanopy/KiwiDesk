@@ -69,7 +69,31 @@ final class DeferredTasks {
         /// The profile choice a screen-count change waits on
         /// until the reports stop (#1612).
         case monitorSettle
+
+        /// Whether a body in this slot runs as its scheduler's
+        /// motion, late (#804 ▸ Ruling 2), or always as ambient
+        /// motion: a slot coalescing many callers, or one the
+        /// system alone schedules, belongs to no one press.
+        var carriesCause: Bool {
+            switch self {
+            case .focusFollow, .spaceSettle, .moveSettle,
+                .desktopSettle, .desktopMoveReap, .desktopFollowReap,
+                .desktopSwitchVerify, .borderDropSettle, .floatRaise,
+                .stripRecentre, .awayReachReap, .monitorSettle:
+                return true
+            case .startupSweep, .bootScan, .deferredBootApps,
+                .borderResync, .adoptionHeal, .adoptionHealRead,
+                .transientRetrack, .removalRecheck, .barTitleRefresh,
+                .awayCensus, .menuBarRemeasure:
+                return false
+            }
+        }
     }
+    /// The motion cause in scope when a task is scheduled, and the
+    /// door that runs a body under one (#804); `KiwiCore` wires
+    /// both at bootstrap. Unwired, every body runs as it always did.
+    var captureCause: @MainActor () -> MotionCause = { .ambient }
+    var runUnder: @MainActor (MotionCause, () -> Void) -> Void = { $1() }
 
     private var tasks: [Key: Task<Void, Never>] = [:]
     private var burstStarts: [Key: ContinuousClock.Instant] = [:]
@@ -88,6 +112,8 @@ final class DeferredTasks {
         tasks[key]?.cancel()
         tasks[key] = nil
 
+        let cause = key.carriesCause ? captureCause().asTail : .ambient
+        let run = runUnder
         let start = burstStarts[key] ?? ContinuousClock.now
         if let maxWait, ContinuousClock.now - start >= maxWait {
             burstStarts[key] = nil
@@ -110,7 +136,7 @@ final class DeferredTasks {
             try? await Task.sleep(for: sleepDuration)
             guard !Task.isCancelled else { return }
             burstStarts[key] = nil
-            body()
+            run(cause, body)
         }
     }
 

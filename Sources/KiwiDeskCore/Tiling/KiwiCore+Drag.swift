@@ -17,10 +17,14 @@ extension KiwiCore {
                 || self.tiler.didRecentlySetFrame(id)
         }
         drag.onDragMove = { [weak self] id, start, frame in
-            self?.handleDragMove(id, start: start, frame: frame)
+            self?.withUserMotion {
+                self?.handleDragMove(id, start: start, frame: frame)
+            }
         }
         drag.onDragEnd = { [weak self] id, start, frame in
-            self?.handleDragEnd(id, start: start, frame: frame)
+            self?.withUserMotion {
+                self?.handleDragEnd(id, start: start, frame: frame)
+            }
         }
         drag.isMousePressed = { [weak self] in
             self?.mouse.leftButtonHeld == true

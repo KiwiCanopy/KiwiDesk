@@ -20,7 +20,9 @@ extension KiwiCore {
                 .kiwiDisplayID
         }
         dragCrossing.onCross = { [weak self] id, display in
-            self?.performLiveCrossing(id, onto: display)
+            self?.withUserMotion {
+                self?.performLiveCrossing(id, onto: display)
+            }
         }
     }
 
