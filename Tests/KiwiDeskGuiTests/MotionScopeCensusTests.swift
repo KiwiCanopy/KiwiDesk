@@ -20,7 +20,8 @@ import Testing
 /// a scoped body (`DispatchQueue.main.async`, `Task`) reads as
 /// scoped though it runs outside; and Core's own wiring is held by
 /// the opener counts alone, so a new bar, drag or scroll closure
-/// that never opens the scope is review's.
+/// that never opens the scope is review's; and the body's brace
+/// walk counts a brace inside a string literal.
 @Suite("Motion scope census (#804)")
 struct MotionScopeCensusTests {
     private static let sources = SourceScan.repoRoot(
@@ -91,6 +92,11 @@ struct MotionScopeCensusTests {
         let found = try Self.counts(of: "applier.motion")
         #expect(
             found == ["KiwiDeskCore/App/KiwiCore+MotionCause.swift": 4]
+        )
+        // The gate's reading is wired once, to the one fold.
+        let wired = try Self.counts(of: "applier.cause =")
+        #expect(
+            wired == ["KiwiDeskCore/App/KiwiCore+MotionCause.swift": 1]
         )
     }
 
