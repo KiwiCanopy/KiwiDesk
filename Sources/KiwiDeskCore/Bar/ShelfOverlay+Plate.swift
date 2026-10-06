@@ -21,6 +21,7 @@ extension ShelfOverlay {
             plateBorder,
             shelf: shelf,
             surface: .plate,
+            under: nil,
             cornerRadius: radius,
             sheen: sheen
         )

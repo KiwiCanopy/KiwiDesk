@@ -16,6 +16,7 @@ extension SpaceBarItemView {
             boxBorder,
             shelf: style.shelf,
             surface: .box,
+            under: drawnIndicator,
             cornerRadius: cornerRadius,
             sheen: style.sheen
         )
@@ -261,8 +262,14 @@ extension SpaceBarItemView {
             ? 1 : style.activeDimFactor
     }
 
+    /// The active indicator this item draws, nil while it draws
+    /// none: the accent and the rim beneath it read it alike.
+    var drawnIndicator: SpaceBarStyle.ActiveIndicator? {
+        isActive ? style.activeIndicator : nil
+    }
+
     private func styleAccent() {
-        accent.isHidden = !isActive
+        accent.isHidden = drawnIndicator == nil
         accent.paint = BarAccent.sheen(
             style.highlightColor,
             outline: style.activeIndicator == .outline
@@ -281,7 +288,7 @@ extension SpaceBarItemView {
                 BarAccent.outline(
                     in: bounds,
                     radius: cornerRadius,
-                    boxed: style.hasBox
+                    shelf: style.shelf
                 ).radius
         case .edgeMark:
             accent.layer?.borderWidth = 0

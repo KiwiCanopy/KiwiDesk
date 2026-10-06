@@ -41,7 +41,7 @@ extension SpaceBarOverlay {
             let ring = BarAccent.outline(
                 in: bounds,
                 radius: radius,
-                boxed: style.hasBox
+                shelf: style.shelf
             )
             frontAccent.frame = ring.frame
             layer.backgroundColor = nil

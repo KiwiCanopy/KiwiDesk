@@ -161,6 +161,40 @@ struct ShelfBorderPreviewTests {
         #expect(PreviewPlateEdge(spec: off, corner: 4).border == nil)
     }
 
+    /// An active outlined box's border stands down, as on the
+    /// bar (#1924); an edge mark keeps it, and the hairline a
+    /// border-less draft draws stays.
+    @Test("An outlined box's preview edge stands its border down")
+    func outlinedEdgeStandsDown() throws {
+        let on = try #require(Self.specs(Self.tile(border: true)).first)
+        func edge(
+            _ spec: HomeCardBarsTile.BarSpec,
+            _ under: AppBarStyle.ActiveIndicator?
+        ) -> PreviewPlateEdge {
+            PreviewPlateEdge(spec: spec, corner: 4, under: under)
+        }
+        #expect(edge(on, .outline).standsDown)
+        #expect(!edge(on, .edgeMark).standsDown)
+        #expect(!edge(on, nil).standsDown)
+        let off = try #require(Self.specs(Self.tile(border: false)).first)
+        #expect(!edge(off, .outline).standsDown)
+    }
+
+    /// The boxed pip hands its edge the indicator it draws, and
+    /// only while active; the plates draw none.
+    @Test("The boxed pip hands its edge its own indicator")
+    func pipHandsItsIndicator() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent("HomeCardPlate+BarStrip.swift")
+        let source = try SourceScan.strippedSource(at: url)
+        let needle = "under: item.active ? spec.indicator : nil"
+        let hits = source.components(separatedBy: needle).count - 1
+        #expect(hits == 1, "\(hits)")
+        let anyUnder = source.components(separatedBy: "under:").count - 1
+        #expect(anyUnder == 1, "a second edge takes an indicator")
+    }
+
     /// The strips draw that edge on every plate and box they
     /// paint: the bar strip's plate and box, the shelf strip's one
     /// plate. A site that goes back to a bare hairline reds here.

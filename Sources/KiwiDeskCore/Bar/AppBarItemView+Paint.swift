@@ -41,6 +41,7 @@ extension AppBarItemView {
             boxBorder,
             shelf: style.shelf,
             surface: .box,
+            under: drawnIndicator,
             cornerRadius: radius,
             sheen: style.sheen
         )
@@ -87,6 +88,15 @@ extension AppBarItemView {
         guard isActive else { return .none }
         return style.activeIndicator == .outline
             ? .outline : .edgeMark
+    }
+
+    /// The indicator `accentMode` draws, for the rim beneath it.
+    var drawnIndicator: AppBarStyle.ActiveIndicator? {
+        switch accentMode {
+        case .none: nil
+        case .outline: .outline
+        case .edgeMark: .edgeMark
+        }
     }
 
     /// Applies stroke or fill to active indicator layer (`layoutAccent`).
