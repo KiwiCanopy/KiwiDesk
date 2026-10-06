@@ -234,4 +234,25 @@ struct SpaceBarGlyphClickTests {
                 == "Web\nDoc"
         )
     }
+
+    @Test("The glyph menu's event sits at its cell's lower-left corner")
+    func contextEventSitsAtTheCell() throws {
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 200, height: 40),
+            styleMask: .borderless,
+            backing: .buffered,
+            defer: true
+        )
+        let cell = NSView(frame: NSRect(x: 30, y: 8, width: 20, height: 20))
+        window.contentView?.addSubview(cell)
+        let event = try #require(
+            SpaceBarGlyphActions.contextEvent(at: cell)
+        )
+        #expect(event.type == .rightMouseDown)
+        #expect(event.windowNumber == window.windowNumber)
+        #expect(event.locationInWindow == NSPoint(x: 30, y: 8))
+        #expect(
+            SpaceBarGlyphActions.contextEvent(at: NSView()) == nil
+        )
+    }
 }

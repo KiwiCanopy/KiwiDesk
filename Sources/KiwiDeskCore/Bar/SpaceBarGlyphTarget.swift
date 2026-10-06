@@ -27,12 +27,33 @@ final class SpaceBarGlyphActions {
     /// Read at hover time, so a title is current without the bar
     /// re-rendering on every title change (#1514).
     var tooltip: @MainActor ([WindowID]) -> String? = { _ in nil }
-    /// Pops a menu under its target — modal, so a test swaps it.
+    /// Pops a menu at its target as a context menu, the chrome the
+    /// bar's right-click menu wears (#1850) — modal, so a test
+    /// swaps it.
     var present: @MainActor (NSMenu, NSView) -> Void = { menu, anchor in
-        menu.popUp(
-            positioning: nil,
-            at: NSPoint(x: 0, y: anchor.isFlipped ? anchor.bounds.maxY : 0),
-            in: anchor
+        guard let event = SpaceBarGlyphActions.contextEvent(at: anchor)
+        else { return }
+        NSMenu.popUpContextMenu(menu, with: event, for: anchor)
+    }
+
+    /// A context-menu event at `anchor`'s lower-left corner, so the
+    /// menu opens at the cell whatever input picked it.
+    static func contextEvent(at anchor: NSView) -> NSEvent? {
+        guard let window = anchor.window else { return nil }
+        let corner = NSPoint(
+            x: 0,
+            y: anchor.isFlipped ? anchor.bounds.maxY : 0
+        )
+        return NSEvent.mouseEvent(
+            with: .rightMouseDown,
+            location: anchor.convert(corner, to: nil),
+            modifierFlags: [],
+            timestamp: ProcessInfo.processInfo.systemUptime,
+            windowNumber: window.windowNumber,
+            context: nil,
+            eventNumber: 0,
+            clickCount: 1,
+            pressure: 1
         )
     }
 }
