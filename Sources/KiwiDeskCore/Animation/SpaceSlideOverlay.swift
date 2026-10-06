@@ -66,7 +66,7 @@ final class SpaceSlideOverlay {
         let holes: [CGRect]
         let space: SpaceID
         let glass: Bool
-        var pace: Double = 1
+        let pace: Double
     }
 
     /// What a press decided: when the strip lands, and whether it
@@ -86,7 +86,7 @@ final class SpaceSlideOverlay {
         let holeHost: NSView
         let strip: NSView
         var glass: Bool
-        var pace: Double = 1
+        var pace: Double
         var pages: [CGFloat: NSView] = [:]
         var motion = SpaceSlideStrip()
         var target: CGFloat = 0
@@ -156,7 +156,7 @@ final class SpaceSlideOverlay {
             to: page,
             at: now,
             begin: planned,
-            response: SpaceSlidePlan.response * current.pace
+            response: SpaceSlidePlan.response(at: current.pace)
         )
         current.target = page
         current.space = press.space
@@ -174,7 +174,7 @@ final class SpaceSlideOverlay {
                     from: from,
                     to: 1,
                     begin: now,
-                    duration: SpaceSlidePlan.fadeIn * current.pace
+                    duration: SpaceSlidePlan.fadeIn(at: current.pace)
                         * Double(1 - from),
                     reduceMotion: reduceMotion()
                 ),
@@ -246,7 +246,7 @@ final class SpaceSlideOverlay {
                 from: 1,
                 to: 0,
                 begin: current.liftAt,
-                duration: SpaceSlidePlan.fadeOut * current.pace,
+                duration: SpaceSlidePlan.fadeOut(at: current.pace),
                 reduceMotion: reduceMotion()
             ),
             forKey: "out"
@@ -254,7 +254,7 @@ final class SpaceSlideOverlay {
         teardown?.cancel()
         let item = DispatchWorkItem { [weak self] in self?.end() }
         teardown = item
-        let fadeOut = SpaceSlidePlan.fadeOut * current.pace
+        let fadeOut = SpaceSlidePlan.fadeOut(at: current.pace)
         let idle = current.liftAt + fadeOut - now + 0.05
         DispatchQueue.main.asyncAfter(
             deadline: .now() + max(idle, 0),

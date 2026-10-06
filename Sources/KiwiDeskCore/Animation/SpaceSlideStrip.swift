@@ -17,7 +17,7 @@ struct SpaceSlideStrip: Equatable {
     /// until then.
     var begin: CFTimeInterval = 0
     /// The spring's response: the plan's, scaled by the pace.
-    var response: TimeInterval = SpaceSlidePlan.response
+    var response: TimeInterval = SpaceSlidePlan.response(at: 1)
 
     /// The spring's natural frequency.
     var omega: CGFloat { 2 * .pi / CGFloat(response) }
@@ -49,7 +49,7 @@ struct SpaceSlideStrip: Equatable {
         to target: CGFloat,
         at now: CFTimeInterval,
         begin planned: CFTimeInterval,
-        response: TimeInterval = SpaceSlidePlan.response
+        response: TimeInterval
     ) -> SpaceSlideStrip {
         let current = state(at: now)
         let moving = abs(current.velocity) > 1

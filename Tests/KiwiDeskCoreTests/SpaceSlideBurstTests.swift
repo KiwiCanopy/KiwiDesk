@@ -37,7 +37,8 @@ struct SpaceSlideBurstTests {
                 outgoing: [],
                 holes: [],
                 space: SpaceID("2"),
-                glass: false
+                glass: false,
+                pace: 1
             )
         )
     }

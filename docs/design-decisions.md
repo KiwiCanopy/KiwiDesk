@@ -3098,7 +3098,8 @@ switch reading "differ". With glass off, under Reduce
 Transparency or before macOS 26 the plates take the blur nearest
 the shortcuts panel's own fallback, so the two surfaces keep one
 look. Mid-slide that blur reads close to glass — what sets Liquid
-Glass apart barely shows in a fade and a 0.28 s move — and a solid
+Glass apart barely shows in a fade and a 0.28 s move at the
+default pace — and a solid
 material that would set glass-off apart was tried on the device
 and refused for not matching the panel. Reduce Motion takes the
 instant switch. There is no style picker: one transition is

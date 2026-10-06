@@ -983,6 +983,13 @@ The shelf's own glide is the one chrome motion with rows on that
 card — **Animate KiwiShelf** and its duration — and Reduce Motion
 still wins over them (#1838).
 
+:::unreleased
+The Space-switch plate slide is the second: drawn chrome that
+moves no window, with **Animate Space switches** and **Space
+switch duration** on that card, and Reduce Motion winning over
+both (#1956, #1931).
+:::
+
 Nothing is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays
 put, so the sentence it belongs to is still marked, and the

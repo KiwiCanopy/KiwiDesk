@@ -21,7 +21,7 @@ struct SpaceChangeDurationTests {
         let animations = AnimationSettings()
         #expect(
             Double(animations.spaceChangeDurationMS) / 1000
-                == SpaceSlidePlan.response
+                == SpaceSlidePlan.response(at: 1)
         )
         #expect(animations.spaceSlidePace == 1)
         let decoded = try JSONDecoder().decode(
@@ -84,16 +84,20 @@ struct SpaceChangeDurationTests {
         )
     }
 
-    private func pressedPlay(
-        pace: Double
-    ) throws -> (SpaceSlideOverlay.Play, CFTimeInterval) {
-        let clock = Clock()
+    private func makeOverlay(_ clock: Clock) -> SpaceSlideOverlay {
         let overlay = SpaceSlideOverlay()
         overlay.present = { _ in }
         overlay.reduceMotion = { false }
         overlay.clock = { clock.now }
-        defer { overlay.end() }
-        let pressed = overlay.press(
+        return overlay
+    }
+
+    @discardableResult
+    private func press(
+        _ overlay: SpaceSlideOverlay,
+        pace: Double
+    ) -> SpaceSlideOverlay.Pressed {
+        overlay.press(
             SpaceSlideOverlay.Press(
                 display: DisplayID(1),
                 screen: CGRect(x: 0, y: 0, width: 1000, height: 800),
@@ -106,31 +110,79 @@ struct SpaceChangeDurationTests {
                 pace: pace
             )
         )
-        let play = try #require(overlay.play)
-        let fade = try #require(
-            play.fader.animation(forKey: "out") as? CABasicAnimation
+    }
+
+    private func fade(
+        _ play: SpaceSlideOverlay.Play,
+        _ key: String
+    ) throws -> CFTimeInterval {
+        try #require(
+            play.fader.animation(forKey: key) as? CABasicAnimation
+        ).duration
+    }
+
+    /// The spring the render server plays — not the model beside
+    /// it — as its natural frequency.
+    private func playedOmega(_ play: SpaceSlideOverlay.Play) throws
+        -> CGFloat
+    {
+        let spring = try #require(
+            play.strip.layer?.animation(forKey: "strip")
+                as? CASpringAnimation
         )
-        #expect(abs(fade.duration - SpaceSlidePlan.fadeOut * pace) < 1e-9)
-        #expect(
-            abs(play.liftAt - pressed.landAt - SpaceSlidePlan.landMargin)
-                < 1e-9
-        )
-        return (play, pressed.landAt)
+        return (spring.stiffness / spring.mass).squareRoot()
     }
 
     /// A doubled pace doubles the spring and the fades; the strip
-    /// still waits the parks' fixed delay.
+    /// still waits the parks' fixed delay, and the plates the
+    /// landed windows' fixed margin.
     @Test("the pace scales the strip and the fades, not the waits")
     func paceScalesTheSlide() throws {
-        let (base, baseLand) = try pressedPlay(pace: 1)
-        let (slow, slowLand) = try pressedPlay(pace: 2)
-        #expect(base.motion.response == SpaceSlidePlan.response)
-        #expect(slow.motion.response == 2 * SpaceSlidePlan.response)
-        #expect(slow.motion.begin == 100 + SpaceSlidePlan.stripDelay)
-        #expect(base.motion.begin == slow.motion.begin)
-        let baseTravel = baseLand - base.motion.begin
-        let slowTravel = slowLand - slow.motion.begin
-        #expect(abs(slowTravel - 2 * baseTravel) < 0.011)
+        var lands: [Double: CFTimeInterval] = [:]
+        var begins: [Double: CFTimeInterval] = [:]
+        for pace in [1.0, 2.0] {
+            let clock = Clock()
+            let overlay = makeOverlay(clock)
+            defer { overlay.end() }
+            let pressed = press(overlay, pace: pace)
+            overlay.run(incoming: [], holes: [])
+            let play = try #require(overlay.play)
+            let response = SpaceSlidePlan.response(at: pace)
+            #expect(response == 0.3 * pace)
+            #expect(play.motion.response == response)
+            #expect(abs(try playedOmega(play) - 2 * .pi / response) < 1e-6)
+            #expect(abs(try fade(play, "in") - 0.08 * pace) < 1e-9)
+            #expect(abs(try fade(play, "out") - 0.18 * pace) < 1e-9)
+            #expect(play.motion.begin == 100 + SpaceSlidePlan.stripDelay)
+            #expect(
+                abs(play.liftAt - pressed.landAt - SpaceSlidePlan.landMargin)
+                    < 1e-9
+            )
+            lands[pace] = pressed.landAt
+            begins[pace] = play.motion.begin
+        }
+        let base = try #require(lands[1]) - #require(begins[1])
+        let slow = try #require(lands[2]) - #require(begins[2])
+        #expect(abs(slow - 2 * base) < 0.011)
+    }
+
+    /// A press mid-flight at a new pace re-paces the play: the
+    /// retargeted spring and the rescheduled lift follow it.
+    @Test("a burst press carries its own pace")
+    func burstTakesTheNewPace() throws {
+        let clock = Clock()
+        let overlay = makeOverlay(clock)
+        defer { overlay.end() }
+        press(overlay, pace: 1)
+        overlay.run(incoming: [], holes: [])
+        clock.now = try #require(overlay.play?.motion.begin) + 0.1
+        press(overlay, pace: 2)
+        overlay.run(incoming: [], holes: [])
+        let play = try #require(overlay.play)
+        #expect(play.pace == 2)
+        #expect(play.motion.response == SpaceSlidePlan.response(at: 2))
+        #expect(abs(try playedOmega(play) - 2 * .pi / 0.6) < 1e-6)
+        #expect(abs(try fade(play, "out") - 0.36) < 1e-9)
     }
 
     /// The switch hands the overlay the setting's pace at the press.
@@ -160,6 +212,6 @@ struct SpaceChangeDurationTests {
         defer { core.endSpaceSlide() }
         let play = try #require(core.spaceSlide.play)
         #expect(play.pace == 2)
-        #expect(play.motion.response == 2 * SpaceSlidePlan.response)
+        #expect(play.motion.response == SpaceSlidePlan.response(at: 2))
     }
 }

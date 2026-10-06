@@ -346,9 +346,9 @@ exports nothing.
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
 :::unreleased
-`animations.set_on_space_change` defaults to `true`. A profile
-saved by an earlier release keeps the value it stored.
-`animations.set_space_change_duration` paces that slide.
+`animations.set_on_space_change` defaults to `true`, and
+`animations.set_space_change_duration` is new. A profile saved by
+an earlier release keeps the value it stored.
 :::
 
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,

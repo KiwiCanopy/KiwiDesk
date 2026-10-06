@@ -82,10 +82,10 @@ enum SettingsSearchSynonyms {
             return ["motion", "movement"]
         // Speed is the word people reach for; duration is what
         // the setting stores (#1020).
-        case .colours(.animationsSpaceChangeDurationMS):
-            return ["speed", "space speed", "slide speed", "transition"]
         case .colours(.animationsDurationMS):
             return ["speed", "animation speed"]
+        case .colours(.animationsSpaceChangeDurationMS):
+            return ["speed", "space speed", "slide speed", "transition"]
         case .colours(.animationsScrollDurationMS):
             return ["speed", "scroll speed", "scrolling speed"]
         case .colours(.animationsOnMonocleFocus):

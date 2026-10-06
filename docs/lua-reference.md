@@ -5533,9 +5533,9 @@ animations.set_on_space_change(false)
 
 **Does:** sets the pace of the plate slide a Space switch plays
 ([animations.set_on_space_change](#animationsset_on_space_change)):
-how long the plates take to slide to the new Space. Their fades
-scale with it, so a longer value is a slower switch throughout.
-Window motion keeps its own pace
+how long the plates take to slide to the new Space, their fades
+scaling with it. It has no effect while `set_on_space_change` is
+off or Reduce Motion is on. Window motion keeps its own pace
 ([animations.set_duration](#animationsset_duration)). Read at
 the next switch.
 
