@@ -2011,6 +2011,21 @@ let a bar click forge the escape for a stamped window under the
 strip. The painted strips (`shownStrips`, the #242 authority)
 are the mask.
 
+**An own window the GUI just brought forward is honored by
+presence, not order** ([#1861](https://github.com/KiwiCanopy/KiwiDesk/issues/1861)).
+The front is KiwiDesk's own intent, so the window's focus report
+is never read as a z-order echo, whichever raise stamped the
+window last. Order cannot serve here: when one own window
+replaces another, the closing window's destroy reaches Core after
+the front, and the close-return restack's stamp is the newer of
+the two. The intent lasts the echo window's ~1 s and ends early
+once focus is honored on a tracked window of another app (an
+untracked one leaves it to age out), since the user going
+elsewhere makes a later echo of that window a raise again. The
+accepted cost: inside that second, a re-raise of the fronted
+window while the user moves between KiwiDesk's own windows is
+honored rather than reverted.
+
 ### A placement bounce is the app's answer, not the user's (#1161)
 
 **[Rationale]**
