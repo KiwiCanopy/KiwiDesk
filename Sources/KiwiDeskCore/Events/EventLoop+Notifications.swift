@@ -55,7 +55,7 @@ extension EventLoop {
             }
         case kAXUIElementDestroyedNotification,
             kAXWindowMiniaturizedNotification:
-            var reported = false
+            var deferred = false
             if let id = trackedWindowID(
                 of: element,
                 pid: pid,
@@ -77,7 +77,7 @@ extension EventLoop {
                         || appHasTabCarrier(pid: pid)
                         || expectedAbsence(of: id) != nil
                 {
-                    // Deferred to reconcile.
+                    deferred = true
                 } else {
                     releaseWindowRegistration(id, pid: pid)
                     onEvent(
@@ -87,20 +87,18 @@ extension EventLoop {
                                 == kAXWindowMiniaturizedNotification
                         )
                     )
-                    reported = true
                 }
             }
-            // Destroyed elements often cannot be mapped back
-            // (and some apps skip the notification entirely),
-            // so always diff against the live window list. A close
-            // reported above needs only that net, read off main
-            // (#1888); a deferred or unnamed one must land before
-            // the successor's focus report, or the close-return
-            // raise stands down (#936).
-            if reported {
-                reconcileOffMain(pid: pid, app: app)
-            } else {
+            // Some apps skip the notification, so always diff
+            // against the live window list, read off main (#1888).
+            // An unnamed element's window was already swept; a
+            // deferred close's removal is the reconcile's, and must
+            // land before the successor's focus report or the
+            // close-return raise stands down (#936).
+            if deferred {
                 reconcile(pid: pid, app: app)
+            } else {
+                reconcileOffMain(pid: pid, app: app)
             }
         case kAXWindowDeminiaturizedNotification:
             refreshPolicy(of: pid)

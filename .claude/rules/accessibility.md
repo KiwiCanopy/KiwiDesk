@@ -24,10 +24,10 @@ editing AX code:
 
 - AX calls are slow and can block. Never call them inside tight
   loops or layout math — snapshot state first, then compute.
-- **The activation, focus and reported-close arms read OFF the
-  main actor (#1930, #1888).** `appActivated`,
-  `handleFocusedWindowChanged` and a close the destroy/minimize
-  arm already reported reconcile through `reconcileOffMain`, and
+- **The activation, focus and close arms read OFF the main
+  actor (#1930, #1888).** `appActivated`,
+  `handleFocusedWindowChanged` and the destroy/minimize arm
+  reconcile through `reconcileOffMain`, and
   the activation reads its focused window through
   `requestFocusedWindowID`; a new
   event-driven caller takes the same doors or joins
@@ -38,10 +38,12 @@ editing AX code:
   2026-10-03), on every Space switch that touched it; one
   Finder close cost up to 930 ms in the destroy arm's
   reconcile (2026-10-06). A close the arm DEFERS (a tab
-  carrier, an expected absence) or cannot name stays
-  synchronous: its removal must land before the successor's
+  carrier, an expected absence) stays synchronous: its removal
+  is the reconcile's and must land before the successor's
   focus report, or the close-return raise stands down (#936,
-  `ReconcileOffMainTests`). Three
+  `ReconcileOffMainTests`). An unnamed close's window was
+  already swept, so it reads off main like a reported one.
+  Three
   obligations come with an off-main read:
   - **The flight stays out of the sweep.** The list is up to one
     read old when it applies, so `PrefetchedWindows` keeps a

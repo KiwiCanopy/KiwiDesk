@@ -167,8 +167,8 @@ struct ReconcileOffMainTests {
         #expect(box.listReads == 1)
     }
 
-    @Test("a close the map cannot name reconciles at once")
-    func unmappedDestroyReconcilesInline() {
+    @Test("a close the map cannot name reconciles off main")
+    func unmappedDestroyReadsOffMain() {
         let (loop, box) = makeLoop()
         loop.handle(
             kAXUIElementDestroyedNotification,
@@ -176,7 +176,10 @@ struct ReconcileOffMainTests {
             pid: pid,
             app: ref
         )
-        // Its removal must beat the successor's focus report (#936).
+        // Its window was swept ahead of the notification, so only
+        // a skipped close is left for the read (#1888).
+        #expect(box.listReads == 0, "list read inline (#1888)")
+        box.drain()
         #expect(box.listReads == 1)
         #expect(box.destroyed == [id])
     }
