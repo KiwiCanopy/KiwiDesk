@@ -50,6 +50,7 @@ struct BootNoticeWiringTests {
         for needle in [
             "!narratedElsewhere", "!tourShowing()",
             "!screenStandsDown(screen)",
+            "shown && window.occlusionState.contains(.visible)",
         ] {
             #expect(controller.occurrences(of: needle) == 1, "\(needle)")
         }

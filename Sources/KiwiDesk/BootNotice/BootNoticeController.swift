@@ -115,9 +115,11 @@ final class BootNoticeController {
     private func place() {
         guard let panel, let screen = targetScreen() else { return }
         let size = CGSize(width: model.width, height: 26)
+        // An auto-hidden bar still reports its item visible.
+        let shown = NSMenu.menuBarVisible()
         let item = statusButton()?.window.flatMap { window in
             let frame = window.frame
-            return window.occlusionState.contains(.visible)
+            return shown && window.occlusionState.contains(.visible)
                 && BootNoticeAnchor.anchors(
                     item: frame,
                     screen: screen.frame,
