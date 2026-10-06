@@ -45,10 +45,11 @@ struct MotionScopeCensusTests {
         "KiwiDesk/AppDelegate.swift": 4,
         // The tour's shelf paint and its revert.
         "KiwiDesk/AppDelegate+OnboardingLooks.swift": 2,
-        // Settings: Save, load, delete, a preset, a restore, a
-        // reset, an app-wide change, a claim, a stored-profile
-        // edit, the Lua editor's apply.
-        "KiwiDesk/Settings/SettingsModel+Profiles.swift": 4,
+        // Settings: Save and its config reload, load, delete, a
+        // preset, a restore, a reset, an app-wide change, a claim,
+        // a stored-profile edit, the Lua editor's apply.
+        "KiwiDesk/Settings/SettingsModel+Profiles.swift": 5,
+        "KiwiDesk/Settings/SettingsModel+Globals.swift": 1,
         "KiwiDesk/Settings/SettingsModel+ProfileOverrides.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Backup.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Reset.swift": 1,
@@ -74,15 +75,103 @@ struct MotionScopeCensusTests {
         }
     }
 
-    /// The raw scope is entered only by the door and the deferred
-    /// re-establishment beside it, so a cause cannot be forged at
-    /// a call site.
+    /// The raw scope is reached only by the reader, the door and
+    /// the deferred re-establishment, so a cause cannot be forged
+    /// at a call site — counted by the property, which an alias
+    /// still spells.
     @Test("The scope is entered in its one home")
     func scopeHasOneHome() throws {
-        let found = try Self.counts(of: "motion.with(")
+        let found = try Self.counts(of: "applier.motion")
         #expect(
-            found == ["KiwiDeskCore/App/KiwiCore+MotionCause.swift": 2]
+            found == ["KiwiDeskCore/App/KiwiCore+MotionCause.swift": 4]
         )
+    }
+
+    /// Core doors that move windows when the GUI calls them.
+    private static let motionDoors = [
+        "execute", "loadConfig", "saveGuiConfig",
+        "applyProfileScopedState", "applyStandard", "restoreSetup",
+        "restoreShelf", "paintShelf", "reapplyIfInEffect",
+        "resetAllSettings", "claimMonitorSet", "commitSharedLook",
+        "setAppWide",
+    ]
+
+    /// GUI call sites of a motion door left outside the scope on
+    /// purpose, by file → count, each with its reason.
+    private static let unscopedDoors: [String: Int] = [
+        // `set_default_profile` writes a file and moves nothing.
+        "KiwiDesk/Settings/SettingsModel+Profiles.swift": 1
+    ]
+
+    /// The omission half the opener count cannot see: a GUI call
+    /// of a door that moves windows sits inside a `withUserMotion`
+    /// closure, or is ruled above.
+    @Test("Every GUI motion door runs inside the user scope")
+    func guiDoorsAreScoped() throws {
+        let gui = Self.sources.appendingPathComponent("KiwiDesk")
+        let prefix = Self.sources.path + "/"
+        let doors = Self.motionDoors.joined(separator: "|")
+        let call = try NSRegularExpression(
+            pattern: #"\bcore\.(\#(doors))\("#
+        )
+        var unscoped: [String: Int] = [:]
+        var reached = 0
+        for file in try SourceScan.swiftSources(under: gui) {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let chars = Array(text.utf16)
+            let regions = Self.scopeRegions(in: chars)
+            let range = NSRange(location: 0, length: chars.count)
+            for match in call.matches(in: text, range: range) {
+                reached += 1
+                let at = match.range.location
+                guard !regions.contains(where: { $0.contains(at) })
+                else { continue }
+                let key = String(file.path.dropFirst(prefix.count))
+                unscoped[key, default: 0] += 1
+            }
+        }
+        #expect(reached > 15, "the scan reached too few door calls")
+        #expect(
+            unscoped == Self.unscopedDoors,
+            "unscoped GUI motion doors: \(unscoped) (#804)"
+        )
+    }
+
+    /// The brace-balanced body after each `withUserMotion`.
+    private static func scopeRegions(
+        in chars: [UInt16]
+    ) -> [Range<Int>] {
+        let needle = Array("withUserMotion".utf16)
+        let open = UInt16(UInt8(ascii: "{"))
+        let close = UInt16(UInt8(ascii: "}"))
+        var regions: [Range<Int>] = []
+        var index = 0
+        while index + needle.count <= chars.count {
+            guard Array(chars[index..<index + needle.count]) == needle
+            else {
+                index += 1
+                continue
+            }
+            var cursor = index + needle.count
+            while cursor < chars.count, chars[cursor] != open {
+                cursor += 1
+            }
+            var depth = 0
+            let start = cursor
+            while cursor < chars.count {
+                if chars[cursor] == open { depth += 1 }
+                if chars[cursor] == close {
+                    depth -= 1
+                    if depth == 0 { break }
+                }
+                cursor += 1
+            }
+            regions.append(start..<cursor)
+            index += needle.count
+        }
+        return regions
     }
 
     private static func counts(

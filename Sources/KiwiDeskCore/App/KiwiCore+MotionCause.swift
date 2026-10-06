@@ -32,6 +32,9 @@ extension KiwiCore {
 
     /// Deferred tails carry their scheduler's cause, late (Ruling 2).
     func wireMotionCause() {
+        tiler.applier.cause = { [weak self] in
+            self?.motionCause ?? .ambient
+        }
         deferred.captureCause = { [weak self] in
             self?.motionCause ?? .ambient
         }

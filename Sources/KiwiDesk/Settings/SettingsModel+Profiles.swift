@@ -147,7 +147,9 @@ extension SettingsModel {
     private func persistGlobalsIfNeeded() {
         guard globalsChanged else { return }
         do {
-            try core.saveGuiConfig(sidecarConfig)
+            try core.withUserMotion {
+                try core.saveGuiConfig(sidecarConfig)
+            }
         } catch {
             core.onLog("settings save failed: \(error)")
         }

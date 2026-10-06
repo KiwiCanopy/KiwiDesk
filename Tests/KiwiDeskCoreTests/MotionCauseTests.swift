@@ -53,6 +53,48 @@ struct MotionCauseTests {
         #expect(core.motionCause == .user(pressedAt: pressed, late: false))
     }
 
+    @Test("A hotkey's fire is user motion")
+    func hotkeyIsUser() {
+        let core = makeCore()
+        var seen: MotionCause?
+        core.keys.simulatingFire { seen = core.motionCause }
+        #expect(seen == .user(pressedAt: pressed, late: false))
+    }
+
+    /// The frame applier reads the same full cause the reader
+    /// folds, so the gate at the door sees a hotkey too.
+    @Test("The frame applier's reading is the core's")
+    func applierReadsTheFold() {
+        let core = makeCore()
+        var seen: MotionCause?
+        core.keys.simulatingFire { seen = core.tiler.applier.cause() }
+        #expect(seen == .user(pressedAt: pressed, late: false))
+        #expect(core.tiler.applier.cause() == .ambient)
+    }
+
+    /// A burst past its bound runs inside the caller's own call:
+    /// a carried slot keeps that cause, an uncarried one is ambient.
+    @Test("The bounded burst path keeps the per-slot ruling")
+    func boundedBurstKeepsRuling() {
+        let core = makeCore()
+        var carried: MotionCause?
+        var uncarried: MotionCause?
+        core.withUserMotion {
+            core.deferred.schedule(
+                .spaceSettle,
+                after: .seconds(5),
+                maxWait: .zero
+            ) { carried = core.motionCause }
+            core.deferred.schedule(
+                .barTitleRefresh,
+                after: .seconds(5),
+                maxWait: .zero
+            ) { uncarried = core.motionCause }
+        }
+        #expect(carried == .user(pressedAt: pressed, late: false))
+        #expect(uncarried == .ambient)
+    }
+
     @Test("A tail a control's call schedules is user motion, late")
     func carriedTailIsLate() async {
         let core = makeCore()

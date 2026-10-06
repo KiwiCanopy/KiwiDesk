@@ -1896,8 +1896,9 @@ editing here:
   body carries its scheduler's cause, late, or runs ambient —
   the switch is exhaustive, so the compiler asks. The scope is
   entered only in `KiwiCore+MotionCause` (the census's one-home
-  clause). The input-quiescence gate reads it at `FrameApplier`;
-  until then it changes nothing (`MotionCauseTests`).
+  clause). The input-quiescence gate reads it at `FrameApplier`
+  through the one `cause` reading, and the change that lands the
+  gate rewrites this bullet with it.
 - **A re-issuing pass forces only the parks a departure owes
   (#1508)**, or every switch re-parks every hidden window — the
   per-switch cost `get_work_counters` measures as

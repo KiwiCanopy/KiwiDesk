@@ -18,9 +18,11 @@ final class FrameApplier {
     let enhancedUI = EnhancedUIHolds()
     /// Writes the plate slide holds until it lands (#1956).
     let held = HeldWrites()
-    /// Whose motion the writes in this turn are (#804); read by the
-    /// input-quiescence gate.
+    /// Whose motion the writes in this turn are (#804): the open
+    /// scope, and the one full reading (`KiwiCore.motionCause`,
+    /// wired at bootstrap) the input-quiescence gate will take.
     let motion = MotionScope()
+    var cause: @MainActor () -> MotionCause = { .ambient }
 
     /// Moves one of KiwiDesk's own windows through AppKit, in
     /// this turn; false where no own window answers, and the AX

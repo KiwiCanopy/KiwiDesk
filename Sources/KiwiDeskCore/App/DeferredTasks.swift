@@ -79,12 +79,13 @@ final class DeferredTasks {
             case .focusFollow, .spaceSettle, .moveSettle,
                 .desktopSettle, .desktopMoveReap, .desktopFollowReap,
                 .desktopSwitchVerify, .borderDropSettle, .floatRaise,
-                .stripRecentre, .awayReachReap, .monitorSettle:
+                .awayReachReap:
                 return true
             case .startupSweep, .bootScan, .deferredBootApps,
                 .borderResync, .adoptionHeal, .adoptionHealRead,
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
-                .awayCensus, .menuBarRemeasure:
+                .awayCensus, .menuBarRemeasure, .stripRecentre,
+                .monitorSettle:
                 return false
             }
         }
@@ -117,7 +118,9 @@ final class DeferredTasks {
         let start = burstStarts[key] ?? ContinuousClock.now
         if let maxWait, ContinuousClock.now - start >= maxWait {
             burstStarts[key] = nil
-            body()
+            // Still inside the caller's own call: its cause stands,
+            // unless the slot belongs to no one press.
+            key.carriesCause ? body() : run(.ambient, body)
             return
         }
 
