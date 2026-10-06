@@ -130,7 +130,7 @@ struct SnapshotStoreCensusTests {
             (.behind, "an age-bounded echo ledger (#1254)"),
         "tiler.animation.animations[]":
             (.behind, "an animation in flight"),
-        "tiler.animation.heldSize":
+        "tiler.animation.ticks.heldSize":
             (.behind, "an animation in flight (#45)"),
         "borders.cornerRadii": (.behind, "render state, redrawn"),
         "borders.overlays": (.behind, "render state, redrawn"),

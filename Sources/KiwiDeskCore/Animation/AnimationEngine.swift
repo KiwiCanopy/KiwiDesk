@@ -64,11 +64,9 @@ public final class AnimationEngine {
     private var storedDurationMS = 150
     private var storedScrollDurationMS = 150
     var storedSizeRateHz: Int?
-    var sizeElapsed: [WindowID: TimeInterval] = [:]
     var animations: [DisplayID: [WindowID: FrameAnimation]] = [:]
     var drivers: [DisplayID: DisplayLinkDriver] = [:]
-    var lastApplied: [WindowID: CGRect] = [:]
-    var heldSize: [WindowID: CGSize] = [:]
+    var ticks = WindowTickLedger()
     /// Commanded base for floating glide accumulation (#1090, #881).
     var glideBase = GlideCommandedBase()
 
@@ -132,7 +130,7 @@ public final class AnimationEngine {
                 existing.sizing == .mayInstantSize
             {
                 existing.reseatSize(
-                    heldSize[window]
+                    ticks.heldSize[window]
                         ?? Self.rounded(existing.frame).size
                 )
             }
@@ -141,7 +139,7 @@ public final class AnimationEngine {
         } else {
             onAnimationStart(window)
             if isNewWindow {
-                heldSize[window] = target.size
+                ticks.heldSize[window] = target.size
                 apply(
                     window,
                     CGRect(
@@ -161,7 +159,7 @@ public final class AnimationEngine {
                         sizing: sizing
                     )
             } else {
-                heldSize[window] = current.size
+                ticks.heldSize[window] = current.size
                 animations[display, default: [:]][window] =
                     FrameAnimation(
                         from: current,
@@ -172,13 +170,6 @@ public final class AnimationEngine {
             }
         }
         startDriver(for: display, screen: screen)
-    }
-
-    /// Clears per-window bookkeeping caches.
-    func clearState(_ id: WindowID) {
-        lastApplied[id] = nil
-        heldSize[id] = nil
-        sizeElapsed[id] = nil
     }
 
     @discardableResult
