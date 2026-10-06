@@ -32,13 +32,13 @@ extension AnimationEngine {
             if settled {
                 apply(id, animation.frame, true)
                 perWindow[id] = nil
-                clearState(id)
+                ticks.forget(id)
                 onWindowSettled(id, animation.frame)
                 onAnimationEnd(id)
             } else {
                 // Stepwise size stepping per axis (#45, #47, #593).
                 let held =
-                    heldSize[id]
+                    ticks.heldSize[id]
                     ?? Self.rounded(animation.frame).size
                 let stepped = SizeStep.step(
                     policy: sizePolicy,
@@ -48,13 +48,13 @@ extension AnimationEngine {
                     spring: animation.frame.size,
                     pastHalfway: animation.pastHalfway,
                     rateHz: storedSizeRateHz,
-                    elapsed: sizeElapsed[id] ?? 0,
+                    elapsed: ticks.sizeElapsed[id] ?? 0,
                     dt: dt
                 )
-                sizeElapsed[id] = stepped.elapsed
+                ticks.sizeElapsed[id] = stepped.elapsed
                 let size = stepped.size
-                let previous = heldSize[id]
-                heldSize[id] = size
+                let previous = ticks.heldSize[id]
+                ticks.heldSize[id] = size
                 let frame = CGRect(
                     x: animation.frame.origin.x.rounded(),
                     y: animation.frame.origin.y.rounded(),
@@ -66,8 +66,8 @@ extension AnimationEngine {
                         $0.width.rounded() != frame.width
                             || $0.height.rounded() != frame.height
                     } ?? true
-                if setSize || lastApplied[id] != frame {
-                    lastApplied[id] = frame
+                if setSize || ticks.lastApplied[id] != frame {
+                    ticks.lastApplied[id] = frame
                     apply(id, frame, setSize)
                 }
                 perWindow[id] = animation
