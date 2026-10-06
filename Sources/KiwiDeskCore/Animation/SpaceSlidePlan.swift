@@ -6,6 +6,12 @@ import Foundation
 /// shows. `SpaceSlideOverlay` draws what this decides; the ruling
 /// behind every number is #1956's body ▸ "Ruling update".
 enum SpaceSlidePlan {
+    /// The spring response the fades below are tuned against, in
+    /// ms: a stored `animations.space_change_duration` is read as a
+    /// share of it, so retuning it re-means every stored value
+    /// (profiles.md, #1931).
+    static let baseResponseMS = 300
+
     /// The plates fade in over the windows shown now, at `pace`
     /// (`AnimationSettings.spaceSlidePace`, #1931).
     static func fadeIn(at pace: Double) -> TimeInterval { 0.08 * pace }
@@ -13,11 +19,10 @@ enum SpaceSlidePlan {
     /// leave AT the press, and apps take 60–100 ms to perform one.
     static let stripDelay: TimeInterval = 0.12
     /// The strip's critically damped spring response at `pace` —
-    /// the stored `animations.space_change_duration` itself, so its
-    /// default is the one home of this number; when it lands is
-    /// solved from each motion (`SpaceSlideStrip`).
+    /// the stored duration itself; when it lands is solved from
+    /// each motion (`SpaceSlideStrip`).
     static func response(at pace: Double) -> TimeInterval {
-        TimeInterval(AnimationSettings.spaceChangeDefaultMS) / 1000 * pace
+        TimeInterval(baseResponseMS) / 1000 * pace
     }
     /// The landed writes' own time to show before the plates lift.
     static let landMargin: TimeInterval = 0.06

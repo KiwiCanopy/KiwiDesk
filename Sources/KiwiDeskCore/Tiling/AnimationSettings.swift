@@ -76,10 +76,10 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// The flip's band: below 100 ms the plate is a flash, not a
     /// turn.
     public static let flipDurationBand = 100...1000
-    /// The plate slide's default, and the strip's base response
-    /// `SpaceSlidePlan` paces from: retuning it moves a stored
-    /// default and owes profiles.md's crossing question (#1369).
-    public static let spaceChangeDefaultMS = 300
+    /// The plate slide's default (owner, 2026-10-06: calmer than
+    /// the plan's own timing). Moving it moves a stored default and
+    /// owes profiles.md's crossing question (#1369).
+    public static let spaceChangeDefaultMS = 550
     /// The slide's band: below it the strip is a jump; above it a
     /// switch outlasts the hand that pressed it.
     public static let spaceChangeDurationBand = 150...1000
@@ -202,7 +202,8 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
 
     /// The plate slide's timings as a share of the plan's own.
     var spaceSlidePace: Double {
-        Double(spaceChangeDurationMS) / Double(Self.spaceChangeDefaultMS)
+        Double(spaceChangeDurationMS)
+            / Double(SpaceSlidePlan.baseResponseMS)
     }
 
     /// The shelf glide's length in seconds, nothing while it is off.

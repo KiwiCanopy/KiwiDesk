@@ -16,19 +16,28 @@ struct SpaceChangeDurationTests {
         var now: CFTimeInterval = 100
     }
 
-    @Test("the default is the slide's own timing")
-    func defaultIsTodaysTiming() throws {
-        let animations = AnimationSettings()
-        #expect(
-            Double(animations.spaceChangeDurationMS) / 1000
-                == SpaceSlidePlan.response(at: 1)
-        )
-        #expect(animations.spaceSlidePace == 1)
+    /// The stored number IS the strip's spring response, and a
+    /// file without the key plays the default.
+    @Test("the stored duration is the response the strip plays")
+    func storedDurationIsTheResponse() throws {
+        for ms in [150, AnimationSettings.spaceChangeDefaultMS, 1000] {
+            var animations = AnimationSettings()
+            animations.spaceChangeDurationMS = ms
+            #expect(
+                abs(
+                    SpaceSlidePlan.response(at: animations.spaceSlidePace)
+                        - Double(ms) / 1000
+                ) < 1e-9
+            )
+        }
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
             from: Data(#"{"animations":{}}"#.utf8)
         )
-        #expect(decoded.animations.spaceSlidePace == 1)
+        #expect(
+            decoded.animations.spaceChangeDurationMS
+                == AnimationSettings.spaceChangeDefaultMS
+        )
     }
 
     @Test("the wire key is the Lua name with set_ stripped")
@@ -219,7 +228,7 @@ struct SpaceChangeDurationTests {
         let core = makeTestCore()
         core.tiler.animation.isEnabled = false
         core.tiler.settings.animations.onSpaceChange = true
-        core.tiler.settings.animations.spaceChangeDurationMS = 600
+        core.tiler.settings.animations.spaceChangeDurationMS = 900
         core.spaceSlide.reduceMotion = { false }
         for (id, space): (UInt32, Int) in [(1, 1), (2, 2)] {
             core.state.apply(
@@ -235,7 +244,7 @@ struct SpaceChangeDurationTests {
         core.execute("focus_space", args: [.string("2")])
         defer { core.endSpaceSlide() }
         let play = try #require(core.spaceSlide.play)
-        #expect(play.pace == 2)
-        #expect(play.motion.response == SpaceSlidePlan.response(at: 2))
+        #expect(play.pace == 3)
+        #expect(play.motion.response == SpaceSlidePlan.response(at: 3))
     }
 }
