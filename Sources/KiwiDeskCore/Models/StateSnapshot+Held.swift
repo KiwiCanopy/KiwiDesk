@@ -60,7 +60,16 @@ extension StateCoordinator {
     /// snapshot lists, so it ends at a restart.
     func heldRecord(of id: SpaceID) -> StateSnapshot.HeldRecord? {
         guard let origin = heldSpaces[id] else { return nil }
-        let remembered = rememberedSpaces.filter {
+        return StateSnapshot.HeldRecord(
+            origin: origin,
+            remembered: pendingFilings(in: id)
+        )
+    }
+
+    /// The windows filed in Space `id` that have not arrived, as
+    /// a snapshot carries them (#1646, #2008).
+    func pendingFilings(in id: SpaceID) -> [WindowID] {
+        rememberedSpaces.filter {
             guard $0.value.space == id,
                 windows[$0.key] == nil,
                 !closedDepartures.contains($0.key)
@@ -71,9 +80,5 @@ extension StateCoordinator {
             }
             return true
         }.keys.sorted { $0.raw < $1.raw }
-        return StateSnapshot.HeldRecord(
-            origin: origin,
-            remembered: remembered
-        )
     }
 }
