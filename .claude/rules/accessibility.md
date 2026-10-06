@@ -217,8 +217,11 @@ editing AX code:
 - **A WindowServer window create or destroy only WAKES the AX
   path (#1877); it never tracks, files or removes a window.** A
   create runs one wake sweep after a 300 ms grace, once per grace
-  however many creates arrive, skipping KiwiDesk's own windows
-  (`WindowServerHealPullTests`): the heal's census and gate,
+  however many creates arrive, a create of KiwiDesk's own
+  window waking nothing (`WindowServerHealPullTests`) and the
+  sweep never re-reading KiwiDesk's own process, whose new panels
+  would open the gate on every wake (`WindowServerWakeUpTests` ▸
+  `wakeSweepSkipsOwnProcess`): the heal's census and gate,
   read off the main actor, and every re-read through
   `reconcileOffMain`. It reads the quiet ledger and NEVER writes
   it — a window not listed yet 300 ms after its create would be
