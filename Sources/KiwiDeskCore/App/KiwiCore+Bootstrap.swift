@@ -46,6 +46,7 @@ extension KiwiCore {
         tiler.animation.onLog = log
         strandDetector.onLog = log
         mouse.scroll.onLog = log
+        tiler.motionGate.onLog = log
         wireScrollPan()
         wireScrollSpaceStep()
         // QA lever (#596), read once: `KIWIDESK_NO_WS_TRACKING`
@@ -201,7 +202,10 @@ extension KiwiCore {
             self?.stickyReachAwaitsCarry(id) ?? false
         }
         sleepWake.captureState = { [weak self] in
-            self?.sessionSnapshot()
+            // Resting cancels the wake replay, and its held motion
+            // with it (#804 ▸ Ruling 8).
+            self?.tiler.motionGate.dropAll()
+            return self?.sessionSnapshot()
         }
         // The wake leg pays the adopted focus for real (#1130);
         // the crash leg above keeps the bare replay.

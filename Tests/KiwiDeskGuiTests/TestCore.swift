@@ -173,6 +173,10 @@ func makeTestCore(
     // "nothing held"; a test that wants the branch states the
     // mask itself.
     core.mouse.pressedButtons = { 0 }
+    // The motion gate's mouse-quiet read defaults LIVE (#804):
+    // pin "the mouse is at rest", so every pass is admitted
+    // unless a test states otherwise.
+    core.tiler.motionGate.quiescence.sinceMouseMoved = { .infinity }
     // Same class, tenth time (#1532): the reveal-strip read
     // defaults LIVE, so a developer parking the pointer at the
     // top edge with the bar auto-hidden would have every focus

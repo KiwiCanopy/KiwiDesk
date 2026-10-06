@@ -103,6 +103,28 @@ struct MotionScopeCensusTests {
         )
     }
 
+    /// The gate is asked at the engine's two frame doors, and no
+    /// write reaches the applier around them: the animation's tick
+    /// (admitted at its start) and the instant door's own set are
+    /// the two sends (#804).
+    @Test("Every frame write passes the gate's two doors")
+    func framesPassTheGate() throws {
+        let asks = try Self.counts(of: "motionGate.holds(")
+        #expect(
+            asks == ["KiwiDeskCore/Tiling/TilingEngine+Layout.swift": 2]
+        )
+        var sends = try Self.counts(of: "applier.apply(")
+        sends.merge(try Self.counts(of: "applier.applyInstant(")) {
+            $0 + $1
+        }
+        #expect(
+            sends == [
+                "KiwiDeskCore/Tiling/TilingEngine.swift": 1,
+                "KiwiDeskCore/Tiling/TilingEngine+Layout.swift": 1,
+            ]
+        )
+    }
+
     /// Core doors that move windows when the GUI calls them.
     private static let motionDoors = [
         "execute", "loadConfig", "saveGuiConfig",

@@ -13,6 +13,7 @@ extension KiwiCore {
     public func discardSavedArrangement() {
         crash.discardSavedSnapshots()
         sleepWake.dropHeldSnapshot()
+        tiler.motionGate.dropAll()  // a held replay goes too (#804)
         state.forgetRememberedSpaces()
         forgetDesktopFocus()
         // #1230: both of this lane's records are saved

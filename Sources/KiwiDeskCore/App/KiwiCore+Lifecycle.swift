@@ -198,6 +198,7 @@ extension KiwiCore {
         // re-adopts them where they are. A failed relaunch leaves
         // the desk as a crash does, and its snapshot restores it.
         let inPlace = takeInPlaceRestart()
+        tiler.motionGate.dropAll()  // the gather owns the motion now
         // Retire focus rings first: the gather below moves windows
         // by direct AX (no animation tee), so a ring left up would
         // sit stranded over the scattered desktop.

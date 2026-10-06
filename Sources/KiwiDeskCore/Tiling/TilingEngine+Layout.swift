@@ -243,18 +243,11 @@ extension TilingEngine {
     /// Applies one frame through the shared animate-or-instant
     /// policy: animated when asked (and a screen exists),
     /// otherwise an instant, echo-tracked set with any
-    /// in-flight animation cancelled. The single authority for
-    /// this policy — `retile` and the floating keyboard resize
-    /// both route here; never copy the branch (a copy already
-    /// drifted once, dropping the cancel). The animation screen
-    /// is the display the target frame lands on (multi-monitor:
-    /// one `DisplayLink` per monitor), falling back to main.
-    ///
-    /// `sizing` says why this frame is being applied (#593);
-    /// it reaches `SizeStep` through the animation and decides
-    /// whether a shrinking axis may slide instead of snapping.
-    /// `.mayInstantSize` is the default because mismarking is asymmetric —
-    /// see `BatchSizing`.
+    /// in-flight animation cancelled — the one copy of the branch
+    /// (a copy once dropped the cancel). It animates on the screen
+    /// the target lands on, else main. `sizing` (#593) decides
+    /// whether a shrinking axis may slide; `BatchSizing` argues the
+    /// default. The motion gate asks first (#804).
     public func applyFrame(
         _ id: WindowID,
         from current: CGRect,
@@ -263,6 +256,14 @@ extension TilingEngine {
         isNewWindow: Bool = false,
         sizing: BatchSizing = .mayInstantSize
     ) {
+        let move = MotionGate.Held.frame(
+            from: current,
+            to: target,
+            animated: animated,
+            isNew: isNewWindow,
+            sizing: sizing
+        )
+        if motionGate.holds(id, move) { return }
         // Every engine frame retires the open size ask (#1694);
         // the layout loop re-opens one with `recordAsk` right
         // after its own `applyFrame`, so only a LAYOUT frame is
@@ -292,20 +293,16 @@ extension TilingEngine {
         }
     }
 
-    /// Sets a frame directly (no animation) through the frame
-    /// pipeline, so it is echo-tracked like animated frames.
-    /// Uses the EUI-bracketed instant path so an un-animated
-    /// placement (space switch / stash with animation off) snaps
-    /// cleanly instead of triggering the app's own move
-    /// animation (which stutters on slow-AX apps). A park at the
-    /// right corner passes `setSize: false`: its size is the
-    /// window's own, so the move is one AX call, not three
-    /// (#1508).
+    /// Sets a frame instantly through the echo-tracked pipeline,
+    /// EUI-bracketed so the app's own move animation (which
+    /// stutters on slow-AX apps) never plays. A corner park passes
+    /// `setSize: false` — one AX call, not three (#1508).
     public func setFrame(
         _ id: WindowID,
         _ frame: CGRect,
         setSize: Bool = true
     ) {
+        if motionGate.holds(id, .set(frame, setSize: setSize)) { return }
         boundLearner.supersedeAsk(id)  // as `applyFrame`, #1694
         placements.stamp(id, target: frame)
         applier.applyInstant(id, frame, setSize: setSize)

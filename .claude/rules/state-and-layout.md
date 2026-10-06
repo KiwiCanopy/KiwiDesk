@@ -1896,9 +1896,18 @@ editing here:
   body carries its scheduler's cause, late, or runs ambient —
   the switch is exhaustive, so the compiler asks. The scope is
   entered only in `KiwiCore+MotionCause` (the census's one-home
-  clause). The input-quiescence gate will read it at
-  `FrameApplier` through the one `cause` reading, and the change that lands the
-  gate rewrites this bullet with it.
+  clause). **Ambient motion and a late user tail wait for the
+  hand to rest** — buttons up and the mouse quiet, past the
+  patience bound buttons up alone — in the one `MotionGate`,
+  asked at the engine's two frame doors (`applyFrame`,
+  `setFrame`) ahead of their placement stamp and ask retirement,
+  and the layout loop records no ask for a held move; a
+  control's own motion passes and discharges every held one.
+  Only motion waits: state, bars and rings move at once, and an
+  animation the gate admitted ticks unasked, as does a write the
+  #1956 hold releases. A new frame door asks the gate, or the
+  census's door clause reds (`MotionScopeCensusTests`,
+  `MotionGateTests`).
 - **A re-issuing pass forces only the parks a departure owes
   (#1508)**, or every switch re-parks every hidden window — the
   per-switch cost `get_work_counters` measures as

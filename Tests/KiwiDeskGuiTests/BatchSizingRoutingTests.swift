@@ -119,7 +119,11 @@ struct BatchSizingRoutingTests {
         // here when #677's additions hit the main file's line
         // ceiling; it still only threads the caller's promise.
         "KiwiDeskCore/Tiling/TilingEngine+Layout.swift":
-            Site(names: 4, promises: 0),
+            Site(names: 6, promises: 0),
+        // The motion gate (#804) holds a move and sends it back
+        // through `applyFrame` with the caller's promise unchanged.
+        "KiwiDeskCore/Tiling/MotionGate.swift":
+            Site(names: 6, promises: 0),
         // Two more names since the #677 placement pass: the
         // wrapper re-runs the SAME caller promise after a
         // mid-retile bound confirmation — it threads `sizing`
