@@ -190,12 +190,10 @@ public final class KiwiCore {
     /// The last #1532 reveal return; `KiwiCore+MenuBarRevealReturn`.
     var menuBarRevealReturnAt: Date?
 
-    /// Z-order restores whose raises have not re-asserted focus
-    /// yet (#186); their echoes lack provenance (#152), so the
-    /// mouse warp holds while any restore is in flight. A count —
-    /// restores overlap. WARP-scoped (#689): `warpMouseToFocused`
-    /// and `runPendingMouseWarp` are the only readers; a consumer
-    /// outside the warp closes #152's gap properly instead.
+    /// Z-order restores not yet re-asserted (#186): their echoes
+    /// lack provenance (#152), so the warp holds while one is in
+    /// flight. A count; WARP-scoped (#689) — `warpMouseToFocused`
+    /// and `runPendingMouseWarp` alone read it.
     var zOrderRestoresInFlight = 0
 
     /// The warp a draining restore held (#689): recorded while
@@ -248,6 +246,8 @@ public final class KiwiCore {
     var desktopMoveDepartures: [WindowID: Date] = [:]
     /// A `.returned` window's arrival time (#1345).
     var recentReturns: [WindowID: Date] = [:]
+    /// The GUI's fronts of its own windows (#1861, `KiwiCore+OwnFront`).
+    var ownFronts: [WindowID: Date] = [:]
     /// The mode each space was last DRAWN in (#1177) — the
     /// entry-into-floating gather's one arm, `KiwiCore+FloatGather`.
     var drawnSpaceModes: [SpaceID: LayoutMode] = [:]
