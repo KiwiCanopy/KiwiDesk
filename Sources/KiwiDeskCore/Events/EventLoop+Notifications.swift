@@ -90,8 +90,9 @@ extension EventLoop {
             }
             // Destroyed elements often cannot be mapped back
             // (and some apps skip the notification entirely),
-            // so always diff against the live window list.
-            reconcile(pid: pid, app: app)
+            // so always diff against the live window list — read
+            // off the main actor (#1888).
+            reconcileOffMain(pid: pid, app: app)
         case kAXWindowDeminiaturizedNotification:
             refreshPolicy(of: pid)
             track(element, pid: pid, app: app)
