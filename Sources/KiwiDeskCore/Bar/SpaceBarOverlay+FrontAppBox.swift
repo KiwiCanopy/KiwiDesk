@@ -42,6 +42,7 @@ extension SpaceBarOverlay {
             frontBorder,
             shelf: style.shelf,
             surface: .box,
+            under: style.activeIndicator,
             cornerRadius: radius,
             sheen: style.sheen
         )

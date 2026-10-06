@@ -25,6 +25,11 @@ extension AppBarStyle {
     public enum ActiveIndicator: String, Sendable, Codable, CaseIterable {
         case outline
         case edgeMark = "edge_mark"
+
+        /// Whether it strokes its box's own edge, so the shelf's
+        /// border there would be a second line (#1924). An edge
+        /// mark leaves the edge to the border.
+        public var strokesBoxEdge: Bool { self == .outline }
     }
 
     /// Item group alignment along the bar's axis (#293 QA).

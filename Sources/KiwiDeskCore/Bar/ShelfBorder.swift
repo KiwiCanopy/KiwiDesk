@@ -24,22 +24,35 @@ enum ShelfBorder {
         }
     }
 
+    /// Whether a box's rim stands down for the active indicator
+    /// drawn over it (#1924): one that strokes the box's edge.
+    static func yields(
+        _ surface: Surface,
+        to indicator: AppBarStyle.ActiveIndicator?
+    ) -> Bool {
+        surface == .box && indicator?.strokesBoxEdge == true
+    }
+
     /// Paints `view` as the border of the `surface` whose frame it
     /// already holds: `KiwiShelf.drawnBorderWidth` in the shelf's
     /// border colour on `cornerRadius`, hidden where the shelf
-    /// does not rim that surface or the border is off. With `sheen`
-    /// (#1644) the rim draws its ramp in place of the layer's flat
-    /// stroke.
+    /// does not rim that surface, the border is off, or the rim
+    /// `yields` to `indicator` — the active indicator drawn over
+    /// it, nil where none is. With `sheen` (#1644) the rim draws
+    /// its ramp in place of the layer's flat stroke.
     @MainActor
     static func paint(
         _ view: SheenRimView,
         shelf: KiwiShelf,
         surface: Surface,
+        under indicator: AppBarStyle.ActiveIndicator?,
         cornerRadius: CGFloat,
         sheen: CGFloat
     ) {
-        let width =
-            rims(surface, on: shelf) ? shelf.drawnBorderWidth : 0
+        let drawn =
+            rims(surface, on: shelf)
+            && !yields(surface, to: indicator)
+        let width = drawn ? shelf.drawnBorderWidth : 0
         view.wantsLayer = true
         view.isHidden = width == 0
         guard let layer = view.layer else { return }

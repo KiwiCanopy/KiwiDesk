@@ -161,7 +161,7 @@ extension AppBarItemView {
         let ring = BarAccent.outline(
             in: bounds,
             radius: style.resolvedCornerRadius(forThickness: crossThickness),
-            boxed: style.hasBox
+            shelf: style.shelf
         )
         accent.frame = ring.frame
         accent.layer?.cornerRadius = ring.radius
