@@ -33,8 +33,9 @@ extension KiwiCore {
             self?.spaceBars.clearDragFeedback()
         }
         spaceBarDrop.spring = { [weak self] target, window in
-            self?.springSwitchSpace(to: target, dragging: window)
-                ?? false
+            self?.withUserMotion {
+                self?.springSwitchSpace(to: target, dragging: window)
+            } ?? false
         }
     }
 

@@ -19,7 +19,9 @@ extension SettingsModel {
     /// held it without a warning (ruled, #1530).
     func claimScreenSetup(_ monitors: [String], for name: String) {
         do {
-            try core.claimMonitorSet(monitors, for: name)
+            try core.withUserMotion {
+                try core.claimMonitorSet(monitors, for: name)
+            }
             adoptClaimedPins()
         } catch {
             profileWarning = L(

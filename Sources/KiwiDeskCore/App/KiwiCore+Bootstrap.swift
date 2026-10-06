@@ -54,12 +54,17 @@ extension KiwiCore {
         wireDrag()
         wireOwnKeyWindowRefresh()
         wireHoldGlide()
+        wireMotionCause()
         wireSpaceBarLayerRefresh()
         appBars.onSelect = { [weak self] id in
-            self?.focusWithMonocleFlip(id, step: nil)
+            self?.withUserMotion {
+                self?.focusWithMonocleFlip(id, step: nil)
+            }
         }
         spaceBars.onSelectSpace = { [weak self] id in
-            _ = self?.focusSpace([.string(id.raw)])
+            self?.withUserMotion {
+                _ = self?.focusSpace([.string(id.raw)])
+            }
         }
         wireSpaceBarGlyphs()
         wireBarMenus()
@@ -68,10 +73,14 @@ extension KiwiCore {
             self?.updateBars()
         }
         shelves.onMinimum = { [weak self] percent, committed in
-            self?.dragShelfMinimum(percent, committed: committed)
+            self?.withUserMotion {
+                self?.dragShelfMinimum(percent, committed: committed)
+            }
         }
         appBars.onMove = { [weak self] space, from, to in
-            self?.moveBarItem(space: space, from: from, to: to)
+            self?.withUserMotion {
+                self?.moveBarItem(space: space, from: from, to: to)
+            }
         }
         tiler.animation.onAllAnimationsEnded = { [weak self] in
             self?.animationsDidSettle()

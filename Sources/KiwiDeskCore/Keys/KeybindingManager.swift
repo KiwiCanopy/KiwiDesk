@@ -217,6 +217,16 @@ public final class KeybindingManager {
         activate(currentLayer)
     }
 
+    #if DEBUG
+        /// Test-only: runs `body` inside a fire's scope (#804).
+        func simulatingFire(_ body: () -> Void) {
+            let wasFiring = isFiring
+            isFiring = true
+            defer { isFiring = wasFiring }
+            body()
+        }
+    #endif
+
     func fire(ref: Int32, combo: KeyCombo) {
         guard let lua else { return }
         let wasFiring = isFiring

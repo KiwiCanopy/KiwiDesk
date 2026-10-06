@@ -79,10 +79,13 @@ extension SettingsModel {
     func restoreBackup(_ bundle: SetupBundle) -> SetupBundleError? {
         defer { reload() }
         do {
-            let outcome = try core.restoreSetup(
-                from: bundle,
-                trash: KiwiCore.moveToTrash
-            )
+            let outcome = try core.withUserMotion {
+                () throws(SetupBundleError) in
+                try core.restoreSetup(
+                    from: bundle,
+                    trash: KiwiCore.moveToTrash
+                )
+            }
             // A partial restore is not a failure, but must not
             // read as unqualified success either.
             lastRestoreOutcome = outcome.isClean ? nil : outcome

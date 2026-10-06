@@ -8,8 +8,8 @@ import AppKit
 /// `focusSpace`.
 extension KiwiCore {
     func wireSpaceBarGlyphs() {
-        spaceBars.glyphActions.pick = { [weak self] in
-            self?.pickFromSpaceBar($0)
+        spaceBars.glyphActions.pick = { [weak self] pick in
+            self?.withUserMotion { self?.pickFromSpaceBar(pick) }
         }
         spaceBars.glyphActions.tooltip = { [weak self] in
             self?.spaceBarTooltip($0)

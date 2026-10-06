@@ -71,7 +71,9 @@ extension SettingsModel {
                 // when permission arrives.
                 try core.guiConfigStore.save(sidecarConfig)
             } else {
-                try core.saveGuiConfig(sidecarConfig)
+                try core.withUserMotion {
+                    try core.saveGuiConfig(sidecarConfig)
+                }
             }
         } catch {
             profileWarning = L(
