@@ -329,12 +329,15 @@ extension KiwiCore {
         {
             scheduleFocusFollow(id)
         } else if activeSpace?.mode.isFocusDriven == true {
-            // A foreign STICKY focus also lands here (its
-            // follow is exempt above): the retile is
-            // idempotent — the fold set focus in the
-            // window's home space, not this one — so it
-            // costs one no-op pass. Deliberate.
-            retileWithScrollDuration()
+            // A foreign STICKY focus lands here too (follow
+            // exempt above): one idempotent no-op pass, by
+            // design. Our own raise's echo finishes that
+            // command's pan, so it moves as user motion (#804).
+            if selfEcho {
+                withUserMotion { retileWithScrollDuration() }
+            } else {
+                retileWithScrollDuration()
+            }
         }
         // Keep floats above the just-focused tiled window
         // (#418). Skipped on a self-echo so the raise's own

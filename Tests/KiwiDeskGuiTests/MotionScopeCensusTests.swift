@@ -39,6 +39,9 @@ struct MotionScopeCensusTests {
         // App Bar and Space Bar clicks, the divider drag, the App
         // Bar reorder drop.
         "KiwiDeskCore/App/KiwiCore+Bootstrap.swift": 4,
+        // The echo of KiwiDesk's own focus raise finishing the
+        // command's pan in a focus-driven layout.
+        "KiwiDeskCore/App/KiwiCore+FocusEvents.swift": 1,
         // A Space Bar glyph pick.
         "KiwiDeskCore/App/KiwiCore+SpaceBarClick.swift": 1,
         // Every bar menu row's action.

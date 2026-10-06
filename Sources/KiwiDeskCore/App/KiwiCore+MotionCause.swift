@@ -15,13 +15,14 @@ extension KiwiCore {
         return .ambient
     }
 
-    /// Runs `body` as motion a KiwiDesk control asked for. An open
-    /// user scope keeps its own press time.
+    /// Runs `body` as motion a KiwiDesk control is making now. An
+    /// open immediate user scope keeps its own press time; a late
+    /// one is made immediate.
     @discardableResult
     public func withUserMotion<T, E: Error>(
         _ body: () throws(E) -> T
     ) throws(E) -> T {
-        if case .user? = tiler.applier.motion.current {
+        if case .user(_, late: false)? = tiler.applier.motion.current {
             return try body()
         }
         return try tiler.applier.motion.with(
