@@ -169,8 +169,10 @@ struct SpaceBarGlyphClickTests {
         // One app's rows: titles under an app header (#1947).
         #expect(shown.items.map(\.title) == ["Mail", "Inbox", "Draft"])
         #expect(shown.items[0].isSectionHeader)
-        let rows = shown.items.dropFirst()
-        #expect(rows.allSatisfy { $0.isEnabled && $0.image == nil })
+        // Icons stand down on glyph rows: `untitledGlyphRow`, since
+        // this fixture's windows have no icon to drop.
+        let enabled = shown.items.dropFirst().allSatisfy { $0.isEnabled }
+        #expect(enabled)
         pickRow(shown, at: 2)
         #expect(core.activeSpace?.id == two)
         #expect(core.state.workspaces[two]?.focused == WindowID(3))
@@ -178,6 +180,7 @@ struct SpaceBarGlyphClickTests {
 
     @Test("+n opens its menu even for one window, switching nothing")
     func overflowOpensAMenu() throws {
+        LocalizationManager.shared.select("en")
         let core = seededCore()
         let menu = capturingMenus(core)
         core.pickFromSpaceBar(pick([4], on: two, .overflow))
