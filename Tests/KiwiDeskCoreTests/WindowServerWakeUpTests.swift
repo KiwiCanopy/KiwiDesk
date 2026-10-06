@@ -139,6 +139,7 @@ struct WindowServerWakeUpTests {
         loop.stop()
         // Re-seeded, so only the running guard can refuse.
         loop.elements[pid] = [id: AXUIElementCreateApplication(pid)]
+        loop.observers[pid] = FakeObserver()
         loop.windowServerDestroyed(id)
         box.drain()
         #expect(box.listReads == 0)
