@@ -154,6 +154,28 @@ struct ShelfBorderDrawingTests {
         )
     }
 
+    /// With the rim gone, the outline is the box's edge, so it
+    /// hugs the box whether the box is solid or glass; only an
+    /// item on the plate insets it (#1924).
+    @Test("The outline hugs a box, solid or glass", arguments: [false, true])
+    func outlineHugsTheBox(glass: Bool) {
+        let shelf = Border.bordered(Border.boxed(glass: glass))
+        let space = spaceItem(shelf, indicator: .outline)
+        #expect(space.accent.frame == space.bounds)
+        let app = appItem(shelf, indicator: .outline)
+        #expect(app.accent.frame == app.bounds)
+        var plain = shelf
+        plain.backgroundStyle = .plain
+        let onPlate = spaceItem(plain, indicator: .outline)
+        #expect(
+            onPlate.accent.frame
+                == onPlate.bounds.insetBy(
+                    dx: BarAccent.capsuleInset,
+                    dy: BarAccent.capsuleInset
+                )
+        )
+    }
+
     /// The chip IS the focused window, so its outline is always
     /// drawn and its rim always stands down under it.
     @Test(

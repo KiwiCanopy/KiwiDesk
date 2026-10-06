@@ -288,7 +288,7 @@ extension SpaceBarItemView {
                 BarAccent.outline(
                     in: bounds,
                     radius: cornerRadius,
-                    boxed: style.hasBox
+                    boxed: !style.shelf.drawsPlate
                 ).radius
         case .edgeMark:
             accent.layer?.borderWidth = 0

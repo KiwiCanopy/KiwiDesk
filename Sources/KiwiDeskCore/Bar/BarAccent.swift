@@ -19,9 +19,10 @@ public enum BarAccent {
     public static let activeUnfocusedAlpha: CGFloat = 0.6
 
     /// The outline's frame and corner radius in an item's
-    /// `bounds` rounded at `radius`: a box hugs it, an unboxed
-    /// item insets `capsuleInset` (QA 2026-07-19) — both bars'
-    /// items' and the front chip's. The Space item's drop ring
+    /// `bounds` rounded at `radius`: a box — solid or glass —
+    /// hugs it, an item on the plate insets `capsuleInset` (QA
+    /// 2026-07-19, #1924) — both bars' items' and the front
+    /// chip's. The Space item's drop ring
     /// draws its own path, morphing into this one.
     public static func outline(
         in bounds: CGRect,
