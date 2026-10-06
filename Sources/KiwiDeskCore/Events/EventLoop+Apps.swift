@@ -98,6 +98,7 @@ extension EventLoop {
         displayWatch.start { [weak self] in
             self?.publishDisplays()
         }
+        startWindowServerWakeUp()
     }
 
     private func appLaunched(_ app: NSRunningApplication) {
