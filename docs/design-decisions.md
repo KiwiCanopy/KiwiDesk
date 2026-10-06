@@ -2013,14 +2013,17 @@ are the mask.
 
 **An own window the GUI just brought forward is honored by
 presence, not order** ([#1861](https://github.com/KiwiCanopy/KiwiDesk/issues/1861)).
-When one of KiwiDesk's own chrome windows replaces another, the
-closing window's destroy reaches Core after the GUI fronted the
-new one, and the close-return restack stamps the new window as a
-z-order raise. Its focus report then reads as our echo and was
-reverted to the window the close handed focus back to. Order
-cannot rescue it, since the stamp is the newer of the two. The
-front is an intent, so its report wins whichever raise stamped
-the window last, inside the same ~1 s bound.
+The front is KiwiDesk's own intent, so the window's focus report
+is never read as a z-order echo, whichever raise stamped the
+window last. Order cannot serve here: when one own window
+replaces another, the closing window's destroy reaches Core after
+the front, and the close-return restack's stamp is the newer of
+the two. The intent lasts the echo window's ~1 s and ends early
+once focus is honored in another app, since the user going
+elsewhere makes a later echo of that window a raise again. The
+accepted cost: inside that second, a re-raise of the fronted
+window while the user moves between KiwiDesk's own windows is
+honored rather than reverted.
 
 ### A placement bounce is the app's answer, not the user's (#1161)
 

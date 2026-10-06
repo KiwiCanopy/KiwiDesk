@@ -65,14 +65,19 @@ struct OwnFrontWiringTests {
         )
     }
 
-    /// The door has one GUI caller, the hook: a site calling it
-    /// beside `forceFront` would be a second, partial wiring.
+    /// The door has one caller in either tree, the hook — a site
+    /// beside `forceFront` would be a second, partial wiring. The
+    /// declaration itself is the other site.
     @Test("the door is reached through the hook alone")
     func doorHasOneCaller() throws {
         let sites = try SourceScan.identifierSites(
             of: "noteOwnFront(",
-            under: Self.gui
+            under: Self.root.appendingPathComponent("Sources")
         )
-        #expect(sites.map(\.file.lastPathComponent) == ["AppDelegate.swift"])
+        #expect(
+            sites.map(\.file.lastPathComponent).sorted() == [
+                "AppDelegate.swift", "KiwiCore+OwnFront.swift",
+            ]
+        )
     }
 }

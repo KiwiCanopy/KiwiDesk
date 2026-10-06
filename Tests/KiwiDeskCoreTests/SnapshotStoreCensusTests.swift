@@ -118,6 +118,8 @@ struct SnapshotStoreCensusTests {
             (.behind, "a close's mark, consumed at the next arrival"),
         "state.awayWindows":
             (.behind, "re-seeded from the compositor at boot (#1146)"),
+        "ownFronts":
+            (.behind, "an age-bounded intent ledger (#1861)"),
         "drawnSpaceModes":
             (.behind, "settled by the replay itself (#1177)"),
         "tiler.placements.entries":
@@ -179,6 +181,7 @@ struct SnapshotStoreCensusTests {
         core.state.closedDepartures.insert(WindowID(9))
         core.state.focusRecency[WindowID(1)] = .init(pid: 7, tick: 1)
         core.tiler.monocleShownMembers[shown] = WindowID(1)
+        core.ownFronts[WindowID(1)] = core.wallClock()
         core.state.profilePartitioning.record(
             [Space(id: hidden, windows: [WindowID(4)])],
             as: .profile("Other")

@@ -54,6 +54,9 @@ extension KiwiCore {
         followFocus.rekey(old: old, new: new)
         pendingSpace.rekey(old: old, new: new)
         rekeyDesktopFocus(old: old, new: new)
+        if let fronted = ownFronts.removeValue(forKey: old) {
+            ownFronts[new] = fronted
+        }
         // The two #1345 ledgers are id-keyed too: a returning tab
         // carrier's restore report and a moved carrier's vanish
         // arrive under the fresh id.

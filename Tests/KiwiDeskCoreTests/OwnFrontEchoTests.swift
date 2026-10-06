@@ -12,7 +12,7 @@ private final class Clock {
 }
 
 /// `settings` focused, `chrome` a second own window — the #1861
-/// shape: Settings tiled, the replacing chrome window beside it.
+/// shape — and w3, another app's window.
 @MainActor
 private func makeDesk() -> (
     core: KiwiCore, clock: Clock, settings: WindowID, chrome: WindowID
@@ -25,13 +25,14 @@ private func makeDesk() -> (
     }
     let clock = Clock()
     core.wallClock = { clock.now }
-    for id in 1...2 {
+    let own = pid_t(ProcessInfo.processInfo.processIdentifier)
+    for id in 1...3 {
         core.state.apply(
             .windowCreated(
                 ManagedWindow(
                     id: WindowID(UInt32(id)),
-                    pid: 7,
-                    appName: "KiwiDesk",
+                    pid: id == 3 ? 7 : own,
+                    appName: id == 3 ? "Other" : "KiwiDesk",
                     frame: CGRect(
                         x: 100 * id,
                         y: 100,
@@ -85,6 +86,48 @@ struct OwnFrontEchoTests {
         clock.advance(0.05)
         core.handle(.windowFocused(chrome))
         #expect(core.activeSpace?.focused == settings)
+    }
+
+    /// The user going to another app ends the front: a later
+    /// raise's echo of the fronted window is reverted again.
+    @Test("Focus honored in another app retires the front")
+    func otherAppRetiresFront() {
+        let (core, clock, _, chrome) = makeDesk()
+        let other = WindowID(3)
+        core.noteOwnFront(number: Int(chrome.raw))
+        clock.advance(0.1)
+        core.handle(.windowFocused(other))
+        #expect(core.activeSpace?.focused == other)
+        clock.advance(0.1)
+        _ = core.stampZOrderRaise([chrome], excluding: other)
+        clock.advance(0.1)
+        core.handle(.windowFocused(chrome))
+        #expect(core.activeSpace?.focused == other)
+    }
+
+    /// A shuffle among our own windows keeps it: the window a
+    /// close hands focus back to may report in between.
+    @Test("Focus honored on another own window keeps the front")
+    func ownShuffleKeepsFront() {
+        let (core, clock, settings, chrome) = makeDesk()
+        core.noteOwnFront(number: Int(chrome.raw))
+        clock.advance(0.05)
+        core.handle(.windowFocused(settings))
+        clock.advance(0.05)
+        _ = core.stampZOrderRaise([chrome], excluding: settings)
+        clock.advance(0.1)
+        core.handle(.windowFocused(chrome))
+        #expect(core.activeSpace?.focused == chrome)
+    }
+
+    @Test("A native tab switch carries the front to the new id")
+    func frontFollowsRekey() {
+        let (core, _, _, chrome) = makeDesk()
+        core.noteOwnFront(number: Int(chrome.raw))
+        let tab = WindowID(40)
+        core.handleWindowRekeyed(old: chrome, new: tab)
+        #expect(core.ownFronts[chrome] == nil)
+        #expect(core.ownFronts[tab] != nil)
     }
 
     @Test("A gone window's front is forgotten; no number is ignored")
