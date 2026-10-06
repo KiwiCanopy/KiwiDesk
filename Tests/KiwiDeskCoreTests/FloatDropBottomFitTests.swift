@@ -201,6 +201,9 @@ struct FloatDropBottomFitTests {
         )
         let issued = try #require(core.tiler.recentInstantTarget(id))
         #expect(issued.origin == drop.origin)
-        #expect(issued.maxY == bounds.maxY)
+        // The ring's reach stays clear at the screen edge too.
+        let reach = core.floatRingInset
+        #expect(reach > 0)
+        #expect(issued.maxY == bounds.maxY - reach)
     }
 }
