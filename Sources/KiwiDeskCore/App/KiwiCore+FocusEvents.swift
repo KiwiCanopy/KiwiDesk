@@ -77,12 +77,14 @@ extension KiwiCore {
         // honored that duplicate as deliberate focus (#689).
         // Only a clickless app/cmd-tab focus inside the window
         // is eaten, the documented trade.
+        // Nor for an own window the GUI just fronted (#1861).
         if let stamp = zOrderRaiseEchoes[id],
             now.timeIntervalSince(stamp)
                 < Self.zOrderRaiseEchoWindow,
             let intended = effects.focusBefore, intended != id,
             !selfRaiseVetoesRevert(id, now: now),
-            !recentClickReached(id, now: now)
+            !recentClickReached(id, now: now),
+            !ownFrontIntended(id, now: now)
         {
             onLog(
                 "focus: w\(id.raw) z-order echo reverted "
@@ -264,6 +266,7 @@ extension KiwiCore {
         }
         // State and the OS agree again (#1130).
         disarmWakeFocusHeal()
+        retireOwnFronts(honoring: id)
         let honoredApp: String =
             state.windows[id]?.appName ?? "?"
         let honoredBefore: String = describe(

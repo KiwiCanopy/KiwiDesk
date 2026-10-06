@@ -804,7 +804,14 @@ editing here:
   (`siblingRaiseOutranks`), and a self-raise vetoes the z-order
   revert only when NEWER than the z-order stamp
   (`selfRaiseVetoesRevert`) — a presence test threads the
-  restore's own echo past both nets. A ledger is cleared where
+  restore's own echo past both nets. A presence read needs
+  its own ruling here; the one so far is an own window the GUI
+  fronted, which escapes the revert (`ownFronts`), since the
+  front is an intent and the close-return restack stamps the
+  window AFTER it — minted through `forceFront`'s hook into
+  `noteOwnFront(number:)` alone and retired once focus is
+  honored on a tracked window of another app (#1861, `OwnFrontEchoTests`,
+  `OwnFrontWiringTests` ▸ `doorHasOneCaller`). A ledger is cleared where
   its id dies (`forgetGoneWindow`) and rekeyed on a tab switch,
   and a CONSUMER of the self ledger reads a stamp's liveness
   through `selfRaiseStamp(_:now:)` rather than comparing the stamp

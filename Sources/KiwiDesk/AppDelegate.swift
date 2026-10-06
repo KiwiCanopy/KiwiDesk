@@ -132,6 +132,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.uiBridge.onShowShortcuts = { [weak shortcutsPanel] in
             shortcutsPanel?.toggle()
         }
+        // Every forceFront is an own front Core honors (#1861).
+        NSApplication.ownFrontNote = { [weak core] number in
+            core?.noteOwnFront(number: number)
+        }
         // Opens or raises Settings without toggling (#678).
         core.uiBridge.onOpenSettings = { [weak self] in
             self?.dashboard.show()

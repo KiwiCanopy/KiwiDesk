@@ -69,6 +69,7 @@ extension KiwiCore {
         selfRaiseStamps[id] = nil
         zOrderRaiseEchoes[id] = nil
         recentReturns[id] = nil
+        ownFronts[id] = nil
         tiler.unsolicitedCorrections.forget(id)
         tiler.placements.forget(id)
         if let pid {
