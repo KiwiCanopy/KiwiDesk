@@ -7,9 +7,11 @@ import Testing
 @testable import KiwiDeskCore
 
 /// **A WindowServer destroy wakes the AX path only for a window
-/// still tracked** (#1877), and reads its app off the main actor.
+/// still tracked, and a create's wake sweep only for an app
+/// showing an untracked window — through the heal's gate, never
+/// its ledger** (#1877). Both read their app off the main actor.
 /// The list read is captured for the test to pump —
-/// `ReconcileOffMainTests`' fixture shape. The create half is
+/// `ReconcileOffMainTests`' fixture shape. The pull itself is
 /// `WindowServerHealPullTests`'.
 @Suite("WindowServer wake-up (#1877)")
 @MainActor
@@ -135,7 +137,45 @@ struct WindowServerWakeUpTests {
     func stoppedLoopIsQuiet() {
         let (loop, box) = makeLoop()
         loop.stop()
+        // Re-seeded, so only the running guard can refuse.
+        loop.elements[pid] = [id: AXUIElementCreateApplication(pid)]
         loop.windowServerDestroyed(id)
+        box.drain()
+        #expect(box.listReads == 0)
+    }
+
+    @Test("a wake sweep re-reads an app showing an untracked window")
+    func wakeSweepReadsOffMain() {
+        let (loop, box) = makeLoop()
+        loop.wakeSweep(census: [pid: [id, fresh]])
+        #expect(box.listReads == 0, "read inline")
+        box.drain()
+        #expect(box.listReads == 1)
+    }
+
+    @Test("a wake sweep that adopts nothing quiets nothing")
+    func wakeSweepWritesNoLedger() {
+        // The list lags the census: the read adopts nothing, and
+        // the next heal tick must still try (#1877 review).
+        let (loop, box) = makeLoop()
+        loop.wakeSweep(census: [pid: [id, fresh]])
+        box.drain()
+        #expect(loop.healQuiet.isEmpty)
+    }
+
+    @Test("a wake sweep honours ids the heal already quieted")
+    func wakeSweepReadsTheGate() {
+        let (loop, box) = makeLoop()
+        loop.healQuiet[pid] = [fresh]
+        loop.wakeSweep(census: [pid: [id, fresh]])
+        box.drain()
+        #expect(box.listReads == 0)
+    }
+
+    @Test("a wake sweep leaves a fully tracked app alone")
+    func wakeSweepSkipsTracked() {
+        let (loop, box) = makeLoop()
+        loop.wakeSweep(census: [pid: [id]])
         box.drain()
         #expect(box.listReads == 0)
     }

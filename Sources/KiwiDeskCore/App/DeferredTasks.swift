@@ -40,7 +40,8 @@ final class DeferredTasks {
         /// The heal's census read off the main actor (#1956);
         /// tracked so teardown cancels it before it re-arms.
         case adoptionHealRead
-        /// A WindowServer create pulling the heal forward (#1877).
+        /// A WindowServer create's wake sweep and its census read
+        /// (#1877).
         case adoptionHealWake
         /// Re-tracks windows dropped mid-launch (#675).
         case transientRetrack

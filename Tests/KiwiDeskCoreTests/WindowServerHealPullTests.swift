@@ -3,12 +3,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// **A WindowServer create pulls the adoption heal forward, once
-/// per grace** (#1877): the heal's census, gate and unwatched-app
-/// attach do the adopting, so a create only moves WHEN it runs. A
-/// burst of creates must never push the pulled heal later, or a
-/// chatty app's popups starve it.
-@Suite("WindowServer create pulls the heal (#1877)")
+/// **A WindowServer create runs one wake sweep per grace** (#1877),
+/// beside the heal's cadence rather than in its place. A burst of
+/// creates must never push the sweep later, or a chatty app's
+/// popups starve it.
+@Suite("WindowServer create pulls a wake sweep (#1877)")
 @MainActor
 struct WindowServerHealPullTests {
     private func runningCore() -> KiwiCore {
@@ -23,7 +22,7 @@ struct WindowServerHealPullTests {
         return core
     }
 
-    @Test("a create schedules the pulled heal; a burst keeps it")
+    @Test("a create schedules the sweep; a burst keeps it")
     func burstKeepsTheFirstPull() throws {
         let core = runningCore()
         core.windowServerChanged(.created, id: WindowID(41))
@@ -33,16 +32,23 @@ struct WindowServerHealPullTests {
         #expect(second == first, "a burst re-armed the pull")
     }
 
-    @Test("the pulled heal runs the sweep and re-arms the cadence")
-    func pulledHealSweeps() async throws {
+    @Test("the pull runs one wake sweep and leaves the heal alone")
+    func pullRunsTheWakeSweep() async throws {
         let core = runningCore()
         core.windowServerChanged(.created, id: WindowID(41))
-        let pull = try #require(core.deferred.task(for: .adoptionHealWake))
-        await pull.value
-        #expect(!core.deferred.isScheduled(.adoptionHealWake))
-        let read = try #require(core.deferred.task(for: .adoptionHealRead))
+        let wait = try #require(
+            core.deferred.task(for: .adoptionHealWake)
+        )
+        await wait.value
+        // The wait handed over to the census read.
+        let read = try #require(
+            core.deferred.task(for: .adoptionHealWake)
+        )
         await read.value
-        #expect(core.deferred.isScheduled(.adoptionHeal))
+        #expect(!core.deferred.isScheduled(.adoptionHealWake))
+        // The heal's own cadence is not this pull's to move.
+        #expect(!core.deferred.isScheduled(.adoptionHeal))
+        #expect(!core.deferred.isScheduled(.adoptionHealRead))
     }
 
     @Test("a stopped loop pulls nothing")

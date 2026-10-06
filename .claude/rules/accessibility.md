@@ -206,19 +206,23 @@ editing AX code:
   MOVED out of it heals nothing.
 - **A WindowServer window create or destroy only WAKES the AX
   path (#1877); it never tracks, files or removes a window.** A
-  create pulls the adoption heal above forward to a 300 ms grace,
-  once per grace however many creates arrive, so the heal's
-  census, gate, quiet ledger and unwatched-app attach decide
-  everything (`WindowServerHealPullTests`). A destroy re-reads,
-  through `reconcileOffMain`, only the app still tracking that
-  window (`WindowServerWakeUpTests`). Neither path reads
-  WindowServer on the main actor: the notify callback runs inside
-  the event-port drain the border pump's flush waits on. The
-  symbol and payload facts are
+  create runs one wake sweep after a 300 ms grace, once per grace
+  however many creates arrive, skipping KiwiDesk's own windows
+  (`WindowServerHealPullTests`): the heal's census and gate,
+  read off the main actor, and every re-read through
+  `reconcileOffMain`. It reads the quiet ledger and NEVER writes
+  it — a window not listed yet 300 ms after its create would be
+  hushed for every later tick, the #1023 shape
+  `reconcileOnScreenArrivals` refuses for the same reason — and
+  it leaves the heal's own cadence alone. A destroy re-reads only
+  the app still tracking that window (`WindowServerWakeUpTests`).
+  Neither path reads WindowServer on the main actor: the notify
+  callback runs inside the event-port drain the border pump's
+  flush waits on. The symbol and payload facts are
   [os-private-apis.md](os-private-apis.md)'s. Residue: a window
   created hidden and ordered in later (Electron's `show: false`)
-  is not on the census when the pulled heal runs, so it waits for
-  the next tick, as before.
+  is not on the census when the sweep runs, so it waits for the
+  heal's next tick, as before.
 - **Every pass that attaches apps reads `liveApps`, and a pid
   ≤ 0 never attaches (#1785).** The raw running-app list has no
   entry that could adopt a LaunchServices child — listed with

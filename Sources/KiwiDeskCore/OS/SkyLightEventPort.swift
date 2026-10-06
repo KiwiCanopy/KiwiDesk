@@ -62,7 +62,7 @@ final class SkyLightEventPort {
     let connection: SkyLight.ConnectionID
     private let machPort: CFMachPort
     private let runLoopSource: CFRunLoopSource
-    private var registered: Set<UInt32> = []
+    private var registered: [UInt32: UnsafeRawPointer] = [:]
     private var drainObservers: [(begin: () -> Void, end: () -> Void)] = []
 
     private init?() {
@@ -109,12 +109,15 @@ final class SkyLightEventPort {
     /// per process (registration has no unregister); true when
     /// the code is registered. Registering here is what makes a
     /// proc hear anything, since this port is the one drained.
+    /// A code another proc holds is refused, never shared
+    /// silently.
     func register(code: UInt32, _ proc: NotifyProc) -> Bool {
-        if registered.contains(code) { return true }
+        let key = unsafeBitCast(proc, to: UnsafeRawPointer.self)
+        if let holder = registered[code] { return holder == key }
         guard let registerNotify = Self.registerNotify,
             registerNotify(proc, code, nil) == .success
         else { return false }
-        registered.insert(code)
+        registered[code] = key
         return true
     }
 
