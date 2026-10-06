@@ -54,7 +54,7 @@ struct SnapshotStoreCensusTests {
         "state.stickyReachOverrides":
             (.inPlace, "a reach pin set by hand"),
         "state.rememberedSpaces":
-            (.always, "written by the replay itself for a late window"),
+            (.always, "carried as each Space's pending filings (#2008)"),
         "tiler.monocleShownMembers":
             (.inPlace, "the member Monocle shows under a float focus"),
         "tiler.stashedFrames":
@@ -107,7 +107,7 @@ struct SnapshotStoreCensusTests {
                 "a Space's windows in that record, adopted at boot (#1802)"
             ),
         "state.restoredFrames":
-            (.behind, "the replay's own debt, written by it"),
+            (.always, "rides a window record beside its filing (#2008)"),
         "state.departedSlots":
             (.behind, "a Desktop departure's slot (#1207)"),
         "state.unjudgedFilings":

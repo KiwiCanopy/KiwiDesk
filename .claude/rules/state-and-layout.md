@@ -1786,7 +1786,13 @@ editing here:
   per saved profile and per composed Standard, keyed by the
   arrangement and Space name (#1802, #1829,
   `ProfilePartitioningRestartTests` ▸
-  `unreadableRecordIsIsolated`). Each record decodes its
+  `unreadableRecordIsIsolated`), and each Space record's
+  `pending` key. Every Space record a capture builds carries
+  the windows that Space filed and that have not arrived —
+  `pending`, or a held Space's `held.remembered` — through the
+  one `StateCoordinator.spaceRecord(of:session:)`, quit and
+  in-place stop alike (#2008, `PendingFilingCarryTests`). Each
+  record decodes its
   payload on its own and a payload it cannot read costs only
   itself — sizing starts fresh, the arrangement restores
   (`SnapshotCarryCensusTests` ▸

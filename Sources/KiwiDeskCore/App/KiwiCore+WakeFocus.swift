@@ -20,7 +20,7 @@ extension KiwiCore {
     /// lay out for the focus that stays; a tracked one is paid
     /// as a real focus after it.
     func restoreAndSettleAfterWake(_ snapshot: StateSnapshot) {
-        restore(snapshot)
+        restore(snapshot.droppingPending())
         let remembered = focusedWindowID.flatMap {
             state.windows[$0] != nil ? $0 : nil
         }
