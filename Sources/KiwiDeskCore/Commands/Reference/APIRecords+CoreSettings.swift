@@ -53,7 +53,7 @@ extension APIReference {
         ),
         "set_shortcut_panel_liquid_glass": APIRecord(
             "Lays a macOS 26 Liquid Glass material over the "
-                + "shortcuts panel.",
+                + "shortcuts panel and the slow-boot notice.",
             .boolean("enabled")
         ),
         "set_space_switch_liquid_glass": APIRecord(

@@ -773,6 +773,11 @@ glass is untinted: it draws `.regular` where the bars draw
 Stored as `shortcut_panel.liquid_glass` in the profile, so a
 profile switch can change the panel's material.
 
+:::unreleased
+The slow-boot notice reads this leaf too: it draws its capsule
+in the same material (#1715).
+:::
+
 Also stood down while macOS's Reduce transparency is on, the
 stored value untouched
 ([Liquid Glass](#kiwishelfset_liquid_glass)).
@@ -2122,7 +2127,8 @@ and shows on only when all of them are on.
 
 :::unreleased
 It writes the Space switch plates' leaf too
-([set_space_switch_liquid_glass](#set_space_switch_liquid_glass)).
+([set_space_switch_liquid_glass](#set_space_switch_liquid_glass)),
+and the slow-boot notice follows the shortcuts panel's.
 :::
 
 This verb sets the

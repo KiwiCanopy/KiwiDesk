@@ -1764,6 +1764,15 @@ being a static state it draws either way.
 
 ## Strings
 
+- **A surface narrating the boot count reads
+  `BootCountText.line(for:)`**, the one author of that sentence
+  (#1715). The grant screen, the relaunched "What's new" and the
+  slow-boot notice all say it word for word, so a reader of two
+  never meets two numbers; a surface writing its own "N of M"
+  is the drift the owner's wording pick closed. The quick menu's
+  count row predates the rule and is its known residue. No guard
+  sees a new surface; review does.
+
 Nearly every `L()` call site in the repo is in this tree, so the
 authoring rules apply here even though the catalogs live in Core:
 
