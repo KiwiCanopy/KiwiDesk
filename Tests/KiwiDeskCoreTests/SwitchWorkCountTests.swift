@@ -8,7 +8,9 @@ import Testing
 /// **The work a Space switch and a retile do, counted** (#1884):
 /// a change that silently re-parks every hidden window or retiles
 /// more per event reds here. Counts, never times (#344); each pin
-/// is derived from the fixture's shape where it is asserted.
+/// is derived from the fixture's shape where it is asserted. A
+/// frame or park counted here is one engine ASK, the unit behind
+/// the AX writes an injected meter does not count.
 /// Display pinned (#531), animation off, the ask ledger's clock
 /// frozen by `makeTestCore` (#1456).
 @Suite("Switch and retile work counts (#1884)", .serialized)
@@ -91,18 +93,32 @@ struct SwitchWorkCountTests {
     }
 
     @Test("The switch's settle re-sends what got no echo")
-    func settleWork() throws {
+    func settleUnechoed() throws {
         guard NSScreen.main != nil else { return }
         let (core, meter) = makeCore()
         try settle(core, meter)
         core.execute("focus_space", args: [.string("2")])
         _ = meter.snapshot(reset: true)
-        // The settle's pass (`scheduleSpaceSettle`), no echo yet.
+        // The settle's pass, called by hand rather than through
+        // `scheduleSpaceSettle`: a change to that pass's shape
+        // leaves these pins green.
         core.retile(animated: false, pass: .reissue)
         let c = meter.snapshot(reset: false).counts
-        // The switch's whole set again: #1964 (parked) asks
-        // whether an echoed park should skip instead; a fix
-        // there re-baselines this pin.
+        // No answer yet: every park and frame is re-sent.
+        #expect(c.parksIssued == shown.count)
+        #expect(c.framesIssued == incoming.count)
+    }
+
+    @Test("The switch's settle re-sends what an echo confirmed")
+    func settleEchoed() throws {
+        guard NSScreen.main != nil else { return }
+        let (core, meter) = makeCore()
+        core.execute("focus_space", args: [.string("2")])
+        try settle(core, meter)
+        core.retile(animated: false, pass: .reissue)
+        let c = meter.snapshot(reset: false).counts
+        // Today's behaviour, which #1964 (parked) asks whether to
+        // keep: a fix that skips an echoed park re-baselines this.
         #expect(c.parksIssued == shown.count)
         #expect(c.framesIssued == incoming.count)
     }
@@ -128,7 +144,10 @@ struct SwitchWorkCountTests {
         let parked = shown.count + hidden.count
         #expect(c.events == arrivals.count)
         #expect(c.retiles == arrivals.count)
-        #expect(c.framesIssued + c.framesSkipped == 3 + 4 + 5)
+        let weighed = (1...arrivals.count).reduce(0) {
+            $0 + incoming.count + $1
+        }
+        #expect(c.framesIssued + c.framesSkipped == weighed)
         #expect(c.framesIssued >= arrivals.count)
         #expect(c.parksIssued == 0)
         #expect(c.parksSkipped == parked * arrivals.count)
