@@ -240,6 +240,9 @@ func makeTestCore(
     // a starved runner's second aged out of its echo window.
     let frozen = Date()
     core.wallClock = { frozen }
+    // The host's menu-bar setting decides which correction a
+    // fixture's usable area takes (#1894): pinned to a drawn bar.
+    GeometryUtils.menuBarAutoHidesOverride = false
     // AppKit's screen area is a WindowServer round trip (#1868):
     // read once per screen; the #1386 correction stays live.
     GeometryUtils.appKitVisibleFrameOverride = { screen in
