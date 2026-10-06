@@ -114,11 +114,22 @@ struct SwitchWorkCountTests {
         guard NSScreen.main != nil else { return }
         let (core, meter) = makeCore()
         core.execute("focus_space", args: [.string("2")])
-        try settle(core, meter)
+        // Through the event arm, so each echo retires its instant
+        // target as a real one does — #1964's reading of
+        // "answered"; the applier's clock is frozen (#1456).
+        for id in shown + incoming + hidden {
+            let frame = try #require(core.tiler.placements.recent(id))
+            core.handle(.windowResized(id, frame))
+        }
+        // The fixture reaches "answered": every park retired.
+        for id in shown {
+            #expect(core.tiler.recentInstantTarget(id) == nil)
+        }
+        _ = meter.snapshot(reset: true)
         core.retile(animated: false, pass: .reissue)
         let c = meter.snapshot(reset: false).counts
-        // Today's behaviour, which #1964 (parked) asks whether to
-        // keep: a fix that skips an echoed park re-baselines this.
+        // Today's behaviour, which #1964 asks whether to keep: a
+        // fix that skips a confirmed park re-baselines this.
         #expect(c.parksIssued == shown.count)
         #expect(c.framesIssued == incoming.count)
     }

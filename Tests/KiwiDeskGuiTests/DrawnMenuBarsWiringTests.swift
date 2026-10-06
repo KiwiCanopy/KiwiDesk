@@ -189,6 +189,13 @@ struct DrawnMenuBarsWiringTests {
                 memo.contains("testAppKitFrames[key]"),
                 .init(rawValue: "\(target)'s override does not memoize")
             )
+            // The host's menu-bar setting is pinned too (#1894).
+            #expect(
+                text.contains(
+                    "GeometryUtils.menuBarAutoHidesOverride = false"
+                ),
+                .init(rawValue: "\(target) reads the host's menu bar")
+            )
         }
         let geometry = try source(
             "Sources/KiwiDeskCore/Tiling/GeometryUtils.swift"
@@ -209,5 +216,13 @@ struct DrawnMenuBarsWiringTests {
             )
         )
         #expect(appKit.contains("appKitVisibleFrameOverride(screen)"))
+        // And the menu-bar reading consults its pin (#1894).
+        let hides = try #require(
+            SourceScan.declarationBody(
+                after: "public static var menuBarAutoHides: Bool",
+                in: geometry
+            )
+        )
+        #expect(hides.contains("menuBarAutoHidesOverride"))
     }
 }
