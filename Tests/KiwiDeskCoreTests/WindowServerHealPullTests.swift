@@ -39,16 +39,29 @@ struct WindowServerHealPullTests {
         let wait = try #require(
             core.deferred.task(for: .adoptionHealWake)
         )
+        let reads = CensusReads()
+        core.eventLoop.onScreenNormalWindowIDs = {
+            reads.count()
+            return [:]
+        }
         await wait.value
-        // The wait handed over to the census read.
-        let read = try #require(
-            core.deferred.task(for: .adoptionHealWake)
-        )
-        await read.value
+        // The wait handed over to the census read, whose own
+        // completion clears the handle: on a loaded runner it can
+        // be gone before this line, so the read count is the proof.
+        await core.deferred.task(for: .adoptionHealWake)?.value
+        #expect(reads.total == 1)
         #expect(!core.deferred.isScheduled(.adoptionHealWake))
         // The heal's own cadence is not this pull's to move.
         #expect(!core.deferred.isScheduled(.adoptionHeal))
         #expect(!core.deferred.isScheduled(.adoptionHealRead))
+    }
+
+    /// The census is read off the main actor.
+    private final class CensusReads: @unchecked Sendable {
+        private let lock = NSLock()
+        private var reads = 0
+        func count() { lock.withLock { reads += 1 } }
+        var total: Int { lock.withLock { reads } }
     }
 
     @Test("a stopped loop pulls nothing")
