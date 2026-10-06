@@ -1,55 +1,76 @@
 import Foundation
 import KiwiDeskCore
 
-/// When the slow-boot notice shows and leaves (#1715): only past
-/// the threshold, and once shown at least `minimumShown`, so it
-/// never flickers. Pure over uptime seconds so a test drives it
-/// without a clock.
+/// Every decision the slow-boot notice makes (#1715), pure over
+/// uptime seconds so a test drives it without a clock or a panel:
+/// it shows only past the threshold, stays at least
+/// `minimumShown` so it never flickers, stands down for good once
+/// a stand-down meets it, and starts over with each boot.
 struct BootNoticeTimeline: Equatable {
     /// Boot that reaches ready sooner never sees the notice; at
     /// 1 s it would flash on ordinary desks (owner ruling).
     static let threshold: TimeInterval = 2
     static let minimumShown: TimeInterval = 1
 
+    /// What the controller does next.
+    enum Effect: Equatable {
+        case none
+        /// Ask `showsAt` again at this time.
+        case showAt(TimeInterval)
+        /// Drop a pending show; nothing is up.
+        case cancel
+        case hideAt(TimeInterval)
+        case hideNow
+    }
+
     /// When boot left `.idle`, not process launch, so a delayed
     /// Accessibility grant does not count.
     private(set) var began: TimeInterval?
     private(set) var shownAt: TimeInterval?
     private(set) var ready = false
+    /// A stand-down met this boot: it does not show again.
+    private(set) var stoodDown = false
 
-    /// Feeds a phase change; returns when the notice is due, if a
-    /// show should be scheduled now.
+    /// Feeds a phase change. `standsDown` is whether anything
+    /// stands the notice down right now.
     mutating func phase(
         _ phase: BootPhase,
-        at now: TimeInterval
-    ) -> TimeInterval? {
+        at now: TimeInterval,
+        standsDown: Bool
+    ) -> Effect {
         switch phase {
         case .idle:
-            return nil
+            // A stop (a revoked grant) ends this boot; the next
+            // start is a boot of its own.
+            let wasShown = shownAt != nil
+            self = BootNoticeTimeline()
+            return wasShown ? .hideNow : .cancel
         case .scanning:
             ready = false
-            guard began == nil else { return nil }
+            if standsDown {
+                stoodDown = true
+                return shownAt != nil ? .hideNow : .cancel
+            }
+            guard began == nil else { return .none }
             began = now
-            return now + Self.threshold
+            return .showAt(now + Self.threshold)
         case .ready:
             ready = true
-            return nil
+            guard let shownAt, !stoodDown else { return .cancel }
+            return .hideAt(max(now, shownAt + Self.minimumShown))
         }
     }
 
-    /// Whether a due show still applies: boot has not finished.
-    func showsAt(_ now: TimeInterval) -> Bool {
-        guard let began, !ready, shownAt == nil else { return false }
+    /// Whether a due show applies: past the threshold, boot still
+    /// running, nothing standing it down.
+    func showsAt(_ now: TimeInterval, standsDown: Bool) -> Bool {
+        guard let began, !ready, shownAt == nil, !stoodDown,
+            !standsDown
+        else { return false }
         return now >= began + Self.threshold
     }
 
     mutating func shown(at now: TimeInterval) {
         shownAt = now
-    }
-
-    /// When a shown notice may leave once boot is ready.
-    func hideTime(readyAt now: TimeInterval) -> TimeInterval? {
-        guard let shownAt else { return nil }
-        return max(now, shownAt + Self.minimumShown)
     }
 }

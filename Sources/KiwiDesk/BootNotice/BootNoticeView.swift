@@ -13,6 +13,14 @@ final class BootNoticeModel: ObservableObject {
     var liquidGlass = true
 
     static let fade: TimeInterval = 0.2
+    static let height: CGFloat = 26
+    static let textSize: CGFloat = 11.5
+    static let glyphSize: CGFloat = 12
+    static let spacing: CGFloat = 4
+    static let leading: CGFloat = 8
+    static let trailing: CGFloat = 12
+    /// Everything but the text, for the fixed width.
+    static let chrome = leading + glyphSize + spacing + trailing
 }
 
 /// One line on a capsule: KiwiDesk's menu-bar glyph, then the boot
@@ -31,17 +39,21 @@ struct BootNoticeView: View {
     }
 
     private var capsule: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: BootNoticeModel.spacing) {
             glyph
             Text(model.line)
-                .font(.system(size: 11.5, weight: .medium))
+                .font(.system(size: BootNoticeModel.textSize, weight: .medium))
                 .monospacedDigit()
                 .lineLimit(1)
                 .truncationMode(.tail)
         }
-        .padding(.leading, 8)
-        .padding(.trailing, 12)
-        .frame(width: model.width, height: 26, alignment: .leading)
+        .padding(.leading, BootNoticeModel.leading)
+        .padding(.trailing, BootNoticeModel.trailing)
+        .frame(
+            width: model.width,
+            height: BootNoticeModel.height,
+            alignment: .leading
+        )
         .glassChrome(
             in: Capsule(),
             // `.regular` carries text, as the ⌃⌥K panel does.
@@ -57,8 +69,11 @@ struct BootNoticeView: View {
                 .renderingMode(.template)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 12, height: 12)
-                .foregroundStyle(.secondary)
+                .frame(
+                    width: BootNoticeModel.glyphSize,
+                    height: BootNoticeModel.glyphSize
+                )
+                .foregroundStyle(.primary)
                 .accessibilityHidden(true)
         }
     }

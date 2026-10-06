@@ -11,7 +11,7 @@ extension AppDelegate {
             self?.onboardingWindow?.isVisible == true
         }
         bootNotice.screenStandsDown = { [weak self] screen in
-            self?.core.standsDown(on: screen) ?? false
+            self?.core.shelfStandsDown(on: screen) ?? false
         }
         bootNotice.liquidGlass = { [weak self] in
             self?.core.tiler.settings.shortcutPanelLiquidGlass ?? true

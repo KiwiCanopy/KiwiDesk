@@ -48,7 +48,7 @@ extension KiwiCore {
 
     /// The same answer for a GUI surface on `screen` — the
     /// slow-boot notice (#1715).
-    public func standsDown(on screen: NSScreen) -> Bool {
+    public func shelfStandsDown(on screen: NSScreen) -> Bool {
         guard let number = screen.screenNumber else { return false }
         return shelfStandsDown(on: DisplayID(number))
     }

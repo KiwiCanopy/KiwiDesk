@@ -38,7 +38,7 @@ struct BootNoticeWiringTests {
         let wiring = try source("AppDelegate+BootNotice.swift")
         for needle in [
             "onboardingWindow?.isVisible == true",
-            "core.standsDown(on: screen)",
+            "core.shelfStandsDown(on: screen)",
             "shortcutPanelLiquidGlass",
             "statusItem?.anchorButton",
         ] {
@@ -48,8 +48,9 @@ struct BootNoticeWiringTests {
             "BootNotice/BootNoticeController.swift"
         )
         for needle in [
-            "!narratedElsewhere", "!tourShowing()",
-            "!screenStandsDown(screen)",
+            "narratedElsewhere || tourShowing()",
+            "targetScreen().map(screenStandsDown)",
+            "timeline.showsAt(now(), standsDown: standsDown())",
             "shown && window.occlusionState.contains(.visible)",
         ] {
             #expect(controller.occurrences(of: needle) == 1, "\(needle)")

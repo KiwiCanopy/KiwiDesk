@@ -33,36 +33,51 @@ final class BootNoticeController {
     }
 
     func phase(_ phase: BootPhase) {
+        if case .scanning(_, let count) = phase { total = count }
         if let line = BootCountText.line(for: phase) {
             model.line = line
+        } else if case .ready = phase, total > 0 {
+            // The hold says the finished count, not the last tick.
+            model.line =
+                BootCountText.line(
+                    for: .scanning(scanned: total, total: total)
+                ) ?? model.line
         }
-        if case .scanning(_, let count) = phase { total = count }
-        if let due = timeline.phase(phase, at: now()) {
+        switch timeline.phase(
+            phase,
+            at: now(),
+            standsDown: standsDown()
+        ) {
+        case .none:
+            if model.visible { place() }
+        case .showAt(let due):
             schedule(&showWork, at: due) { [weak self] in
                 self?.showIfDue()
             }
-        }
-        if model.visible, tourShowing() {
-            hide()
-            return
-        }
-        if case .ready = phase {
+        case .cancel:
             showWork?.cancel()
-            if let at = timeline.hideTime(readyAt: now()) {
-                schedule(&hideWork, at: at) { [weak self] in
-                    self?.hide()
-                }
+        case .hideAt(let at):
+            showWork?.cancel()
+            schedule(&hideWork, at: at) { [weak self] in
+                self?.hide()
             }
-        } else if model.visible {
-            place()
+        case .hideNow:
+            showWork?.cancel()
+            hideWork?.cancel()
+            hide()
         }
     }
 
+    /// Re-read at every count update: a tour or a presentation
+    /// that starts while the notice is up stands it down then.
+    private func standsDown() -> Bool {
+        narratedElsewhere || tourShowing()
+            || targetScreen().map(screenStandsDown) ?? false
+    }
+
     private func showIfDue() {
-        guard timeline.showsAt(now()), !narratedElsewhere, !tourShowing()
+        guard timeline.showsAt(now(), standsDown: standsDown())
         else { return }
-        let screen = targetScreen()
-        guard let screen, !screenStandsDown(screen) else { return }
         timeline.shown(at: now())
         model.liquidGlass = liquidGlass()
         model.width = fixedWidth()
@@ -76,7 +91,7 @@ final class BootNoticeController {
             notification: .announcementRequested,
             userInfo: [
                 .announcement: model.line,
-                .priority: NSAccessibilityPriorityLevel.medium.rawValue,
+                .priority: NSAccessibilityPriorityLevel.high.rawValue,
             ]
         )
     }
@@ -102,19 +117,21 @@ final class BootNoticeController {
                 for: .scanning(scanned: total, total: total)
             ) ?? model.line
         let font = NSFont.monospacedDigitSystemFont(
-            ofSize: 11.5,
+            ofSize: BootNoticeModel.textSize,
             weight: .medium
         )
         let text = (widest as NSString).size(
             withAttributes: [.font: font]
         ).width
-        // Leading 8 + glyph 12 + spacing 4 + trailing 12.
-        return min(ceil(text) + 36, 360)
+        return min(ceil(text) + BootNoticeModel.chrome, 360)
     }
 
     private func place() {
         guard let panel, let screen = targetScreen() else { return }
-        let size = CGSize(width: model.width, height: 26)
+        let size = CGSize(
+            width: model.width,
+            height: BootNoticeModel.height
+        )
         // An auto-hidden bar still reports its item visible.
         let shown = NSMenu.menuBarVisible()
         let item = statusButton()?.window.flatMap { window in
@@ -135,9 +152,9 @@ final class BootNoticeController {
         panel.setFrame(CGRect(origin: origin, size: size), display: true)
     }
 
-    /// The screen of the active menu bar, else the main one.
+    /// The screen of the item's menu bar, else the active one.
     private func targetScreen() -> NSScreen? {
-        statusButton()?.window?.screen ?? NSScreen.screens.first
+        statusButton()?.window?.screen ?? NSScreen.main
     }
 
     private func makePanel() -> NSPanel {

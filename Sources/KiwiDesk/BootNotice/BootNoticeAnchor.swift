@@ -57,6 +57,8 @@ enum BootNoticeAnchor {
 
     /// The menu bar's height on `screen`, shown or auto-hidden, so
     /// the notice does not jump when a hidden bar slides down.
+    /// Not `DrawnMenuBars`, which reads the bar as drawn and so
+    /// answers nothing while it hides.
     @MainActor
     static func menuBarHeight(of screen: NSScreen) -> CGFloat {
         max(
