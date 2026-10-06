@@ -51,10 +51,6 @@ public final class WorkMeter: @unchecked Sendable {
         public var settleFramesSkipped = 0
         public var settleParksIssued = 0
         public var settleParksSkipped = 0
-        /// Of the settle's issued parks and frames, those an echo
-        /// had already confirmed (#1964): the rest may be a rescue.
-        public var settleParksConfirmed = 0
-        public var settleFramesConfirmed = 0
         public var framesCoalesced = 0
         public var queuedJobs = 0
         public var queueWaitNanos = 0
@@ -103,13 +99,6 @@ public final class WorkMeter: @unchecked Sendable {
         case \.parksSkipped: \.settleParksSkipped
         default: nil
         }
-    }
-
-    /// Adds one to `key` only inside the settle's scope.
-    func addInSettle(_ key: WritableKeyPath<Counts, Int>) {
-        lock.lock()
-        defer { lock.unlock() }
-        if settling { counts[keyPath: key] += 1 }
     }
 
     /// Counts what `body` issues as the settle's share too.
@@ -307,8 +296,6 @@ extension WorkMeter {
             "settle_frames_skipped": count(c.settleFramesSkipped),
             "settle_parks_issued": count(c.settleParksIssued),
             "settle_parks_skipped": count(c.settleParksSkipped),
-            "settle_parks_confirmed": count(c.settleParksConfirmed),
-            "settle_frames_confirmed": count(c.settleFramesConfirmed),
             "frames_coalesced": count(c.framesCoalesced),
             "queued_jobs": count(c.queuedJobs),
             "queue_wait_us_mean": perUs(c.queueWaitNanos, c.queuedJobs),

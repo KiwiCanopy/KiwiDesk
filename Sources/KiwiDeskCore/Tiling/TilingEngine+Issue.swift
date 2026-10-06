@@ -68,13 +68,6 @@ extension TilingEngine {
             return
         }
         meter.add(\.framesIssued)
-        if echoConfirmed(
-            id,
-            commanded: sent,
-            atTarget: Self.close(current, to: target)
-        ) {
-            meter.addInSettle(\.settleFramesConfirmed)
-        }
         let issued = probe?.frame ?? target
         applyFrame(
             id,
@@ -90,20 +83,5 @@ extension TilingEngine {
             settledFrom: settledNow
                 ? current.size : probe?.baseline
         )
-    }
-}
-
-extension TilingEngine {
-    /// Whether the app answered our last set of `id` and the state
-    /// frame it reported already sits at the target (`atTarget`) (#1964):
-    /// a set inside the echo grace whose instant target an echo
-    /// retired — the stamp and the target share one grace, so a
-    /// retired target beside a live stamp is an echo, never expiry.
-    func echoConfirmed(
-        _ id: WindowID,
-        commanded: CGRect?,
-        atTarget: Bool
-    ) -> Bool {
-        atTarget && commanded == nil && didRecentlySetFrame(id)
     }
 }

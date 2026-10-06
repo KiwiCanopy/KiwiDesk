@@ -255,13 +255,6 @@ extension TilingEngine {
         }
         animation.cancel(window: window.id)
         meter.add(\.parksIssued)
-        if echoConfirmed(
-            window.id,
-            commanded: commanded,
-            atTarget: Self.parked(window.frame, at: target)
-        ) {
-            meter.addInSettle(\.settleParksConfirmed)
-        }
         // Only the right corner's x is width-free; the left one
         // is measured from the state width, which the size write
         // makes true (#1508).
