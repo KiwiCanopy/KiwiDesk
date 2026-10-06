@@ -213,5 +213,8 @@ extension KiwiCore {
             self?.liveFingerprints ?? []
         }
         sleepWake.sessionPresence = { .live() }
+        sleepWake.onReturn = { [weak self] in
+            self?.eventLoop.forgetHealQuiet()
+        }
     }
 }

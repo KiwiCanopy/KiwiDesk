@@ -16,6 +16,11 @@ public final class SleepWakeManager {
 
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
+    /// Every return leg (wake, unlock), whether or not a replay
+    /// is armed or `isEnabled` is on: what was read while the
+    /// session rested is not evidence (#1285).
+    public var onReturn: @MainActor () -> Void = {}
+
     /// Display topology of a held snapshot, re-read when the
     /// delayed restore fires — replaying onto changed geometry is
     /// what scrambled wakes (#633). Compared as a sorted MULTISET,
@@ -143,6 +148,7 @@ public final class SleepWakeManager {
     }
 
     func systemDidReturn(_ leg: Leg) {
+        onReturn()
         guard isEnabled else { return }
         guard let saved = snapshot else {
             onLog(
