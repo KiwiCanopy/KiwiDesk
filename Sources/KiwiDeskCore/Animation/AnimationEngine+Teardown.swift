@@ -5,7 +5,7 @@ extension AnimationEngine {
     /// Stops animating a window, leaving it where it is.
     public func cancel(window: WindowID) {
         if removeAnimation(for: window) != nil {
-            clearState(window)
+            ticks.forget(window)
             onAnimationEnd(window)
             notifyIfIdle()
         }
@@ -24,9 +24,7 @@ extension AnimationEngine {
         }
         let wasActive = activeCount > 0
         animations = [:]
-        lastApplied = [:]
-        heldSize = [:]
-        sizeElapsed = [:]
+        ticks = WindowTickLedger()
         for driver in drivers.values {
             driver.stop()
         }
@@ -48,7 +46,7 @@ extension AnimationEngine {
             var removedAny = false
             for (id, animation) in animations[display] ?? [:] {
                 apply(id, animation.targetFrame, true)
-                clearState(id)
+                ticks.forget(id)
                 onAnimationEnd(id)
                 removedAny = true
             }
