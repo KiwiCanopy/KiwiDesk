@@ -159,6 +159,17 @@ Every one of the following binds whoever touches them:
   `allNormalWindowOwners`' docstring. And the census is
   downstream of the removal: the sweep never reads it
   ([accessibility.md](accessibility.md)).
+- **WindowServer's window create/destroy notifications are a
+  WAKE-UP, never a source of truth (#1877).** Codes 1325/1326
+  through `SLSRegisterNotifyProc`, window id at payload offset 8
+  (probed 2026-10-06, macOS 27, recorded on #1877); what a hit
+  may do is [accessibility.md](accessibility.md)'s. **The main
+  connection's event port has ONE owner, `SkyLightEventPort`**,
+  and every notify-proc consumer registers its codes through it
+  and drains through it, never through a second `CFMachPort` on
+  the same port: a proc hears nothing until the port is drained,
+  and a second port splits the drain
+  (`SkyLightEventPortSeamTests`).
 - **The space-pointer write performs no transition (#1023).**
   `ManagedDisplaySetCurrentSpaceOperation` moves the pointer and
   composites the target's windows, but never hides the origin's

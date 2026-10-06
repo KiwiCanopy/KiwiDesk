@@ -146,7 +146,7 @@ extension EventLoop {
     /// failed a heal — a quieted id (an ignored panel that will
     /// never track) costs one reconcile total, while any NEW
     /// census id re-opens the gate at once.
-    private func opensGate(
+    func opensGate(
         pid: pid_t,
         missing: Set<WindowID>
     ) -> Bool {

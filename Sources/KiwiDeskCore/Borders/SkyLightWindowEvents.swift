@@ -2,14 +2,6 @@ import CoreFoundation
 import CoreGraphics
 import Darwin
 
-fileprivate typealias SkyLightNotifyProc =
-    @convention(c) (
-        UInt32,
-        UnsafeMutableRawPointer?,
-        Int,
-        UnsafeMutableRawPointer?
-    ) -> Void
-
 /// Process-lifetime WindowServer notification pump for focus
 /// borders (#285 Tier 2). Registration has no reliable public
 /// unregister seam, so callbacks never retain a `BorderManager`;
@@ -54,62 +46,24 @@ final class SkyLightWindowEvents {
         case hide
     }
 
-    fileprivate typealias RegisterNotifyFn =
-        @convention(c) (
-            SkyLightNotifyProc?, UInt32, UnsafeMutableRawPointer?
-        ) -> CGError
     typealias RequestNotificationsFn =
         @convention(c) (
             SkyLight.ConnectionID,
             UnsafeMutablePointer<CGWindowID>?,
             Int32
         ) -> CGError
-    typealias GetEventPortFn =
-        @convention(c) (
-            SkyLight.ConnectionID,
-            UnsafeMutablePointer<mach_port_t>
-        ) -> CGError
-    typealias NextEventFn =
-        @convention(c) (
-            SkyLight.ConnectionID
-        ) -> Unmanaged<CGEvent>?
-    typealias SetMachPortOptionsFn =
-        @convention(c) (
-            CFMachPort, Int32
-        ) -> Void
 
     static let shared: SkyLightWindowEvents? = SkyLightWindowEvents()
     private static weak var active: SkyLightWindowEvents?
 
-    private static let registerNotify: RegisterNotifyFn? =
-        SkyLight.symbol(
-            "SLSRegisterNotifyProc",
-            as: RegisterNotifyFn.self
-        )
     private static let requestNotifications: RequestNotificationsFn? =
         SkyLight.symbol(
             "SLSRequestNotificationsForWindows",
             as: RequestNotificationsFn.self
         )
-    private static let getEventPort: GetEventPortFn? =
-        SkyLight.symbol(
-            "SLSGetEventPort",
-            as: GetEventPortFn.self
-        )
-    private static let nextEvent: NextEventFn? = SkyLight.symbol(
-        "SLEventCreateNextEvent",
-        as: NextEventFn.self
-    )
-    private static let setMachPortOptions: SetMachPortOptionsFn? =
-        coreFoundationSymbol(
-            "_CFMachPortSetOptions",
-            as: SetMachPortOptionsFn.self
-        )
 
     private weak var manager: BorderManager?
     private let connection: SkyLight.ConnectionID
-    private let machPort: CFMachPort
-    private let runLoopSource: CFRunLoopSource
     private var lastRequested: Set<WindowID>?
     private lazy var deliveryQueue = SkyLightWindowEventQueue {
         [weak self] event in
@@ -120,56 +74,24 @@ final class SkyLightWindowEvents {
     }
 
     private init?() {
-        guard let connection = SkyLight.connection,
+        guard let port = SkyLightEventPort.shared,
             SkyLight.getWindowBounds != nil,
-            let registerNotify = Self.registerNotify,
-            let getEventPort = Self.getEventPort,
-            Self.requestNotifications != nil,
-            Self.nextEvent != nil,
-            let setMachPortOptions = Self.setMachPortOptions
+            Self.requestNotifications != nil
         else { return nil }
-
-        var eventPort: mach_port_t = 0
-        guard getEventPort(connection, &eventPort) == .success,
-            eventPort != 0
-        else { return nil }
-        var shouldFreeInfo = DarwinBoolean(false)
-        guard
-            let machPort = CFMachPortCreateWithPort(
-                nil,
-                eventPort,
-                skyLightEventPortCallback,
-                nil,
-                &shouldFreeInfo
-            )
-        else { return nil }
-        setMachPortOptions(machPort, 0x40)
-        guard
-            let source = CFMachPortCreateRunLoopSource(
-                nil,
-                machPort,
-                0
-            )
-        else { return nil }
-
         for kind in Kind.allCases {
             guard
-                registerNotify(
-                    skyLightWindowNotifyCallback,
-                    kind.rawValue,
-                    nil
-                ) == .success
+                port.register(
+                    code: kind.rawValue,
+                    skyLightWindowNotifyCallback
+                )
             else { return nil }
         }
-        self.connection = connection
-        self.machPort = machPort
-        runLoopSource = source
-        CFRunLoopAddSource(
-            CFRunLoopGetMain(),
-            source,
-            CFRunLoopMode.commonModes
-        )
+        connection = port.connection
         Self.active = self
+        port.observeDrain(
+            begin: { [weak self] in self?.deliveryQueue.beginDrain() },
+            end: { [weak self] in self?.deliveryQueue.endDrain() }
+        )
     }
 
     func attach(_ manager: BorderManager) {
@@ -212,33 +134,9 @@ final class SkyLightWindowEvents {
             window: WindowID(window)
         )
     }
-
-    fileprivate static func drain() {
-        guard let active, let connection = SkyLight.connection,
-            let nextEvent
-        else { return }
-        active.deliveryQueue.beginDrain()
-        defer { active.deliveryQueue.endDrain() }
-        while let event = nextEvent(connection) {
-            _ = event.takeRetainedValue()
-        }
-    }
-
-    private static func coreFoundationSymbol<T>(
-        _ name: String,
-        as type: T.Type
-    ) -> T? {
-        let path =
-            "/System/Library/Frameworks/"
-            + "CoreFoundation.framework/CoreFoundation"
-        guard let handle = dlopen(path, RTLD_LAZY),
-            let raw = dlsym(handle, name)
-        else { return nil }
-        return unsafeBitCast(raw, to: type)
-    }
 }
 
-private let skyLightWindowNotifyCallback: SkyLightNotifyProc = {
+private let skyLightWindowNotifyCallback: SkyLightEventPort.NotifyProc = {
     event,
     data,
     length,
@@ -259,21 +157,5 @@ private let skyLightWindowNotifyCallback: SkyLightNotifyProc = {
         MainActor.assumeIsolated { send() }
     } else {
         DispatchQueue.main.async(execute: send)
-    }
-}
-
-private func skyLightEventPortCallback(
-    _ port: CFMachPort?,
-    _ message: UnsafeMutableRawPointer?,
-    _ size: CFIndex,
-    _ context: UnsafeMutableRawPointer?
-) {
-    let drain: @MainActor @Sendable () -> Void = {
-        SkyLightWindowEvents.drain()
-    }
-    if pthread_main_np() != 0 {
-        MainActor.assumeIsolated { drain() }
-    } else {
-        DispatchQueue.main.async(execute: drain)
     }
 }

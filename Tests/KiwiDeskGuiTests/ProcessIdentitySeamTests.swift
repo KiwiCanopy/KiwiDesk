@@ -187,9 +187,10 @@ struct ProcessIdentitySeamTests {
         // An observed process's policy is filed through one door:
         // a main-actor read is a LaunchServices round trip per AX
         // notification (#1936).
-        // The filers: the off-main reading's apply, and the two
-        // passes that already hold a fresh list (`reconcileAll`,
-        // the heal's walk); a new one joins with its reason.
+        // The filers: the off-main reading's apply, and the passes
+        // that already hold a fresh list (`reconcileAll`, the
+        // heal's walk, the #1877 wake sweep's walk); a new one
+        // joins with its reason.
         #expect(
             try sites(of: "notePolicy(")
                 == [
@@ -197,6 +198,7 @@ struct ProcessIdentitySeamTests {
                     "EventLoop+ProcessIdentity.swift",
                     "EventLoop+Reconcile.swift",
                     "EventLoop+ReconcileAll.swift",
+                    "EventLoop+WindowServerWakeUp.swift",
                 ]
         )
         // One fresh read per created or returning window, never

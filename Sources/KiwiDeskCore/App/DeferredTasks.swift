@@ -40,6 +40,9 @@ final class DeferredTasks {
         /// The heal's census read off the main actor (#1956);
         /// tracked so teardown cancels it before it re-arms.
         case adoptionHealRead
+        /// A WindowServer create's wake sweep and its census read
+        /// (#1877).
+        case adoptionHealWake
         /// Re-tracks windows dropped mid-launch (#675).
         case transientRetrack
         /// Re-reads an app whose sweep removal was distrusted
@@ -83,6 +86,7 @@ final class DeferredTasks {
                 return true
             case .startupSweep, .bootScan, .deferredBootApps,
                 .borderResync, .adoptionHeal, .adoptionHealRead,
+                .adoptionHealWake,
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
                 .monitorSettle:
