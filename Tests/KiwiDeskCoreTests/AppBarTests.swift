@@ -20,6 +20,27 @@ private func makeCore() -> KiwiCore {
 
 @Suite("App bar override resolution")
 struct AppBarOverrideTests {
+    /// The App Bar lists every window; the Space Bar still groups.
+    /// No `ConfigMigration` is owed because the profile encoder
+    /// writes the group whole: every stored profile carries its
+    /// own value either way (#1369's question).
+    @Test("A fresh App Bar does not group, and stores the choice")
+    func appBarDoesNotGroupByDefault() throws {
+        #expect(!AppBarStyle().groupAdjacentWindows)
+        #expect(SpaceBarStyle().groupAdjacentWindows)
+        for value in [false, true] {
+            var settings = TilingSettings()
+            settings.appBarStyle.groupAdjacentWindows = value
+            let data = try JSONEncoder().encode(settings)
+            let root = try JSONSerialization.jsonObject(with: data)
+            let appBar = (root as? [String: Any])?["app_bar"]
+            let stored = (appBar as? [String: Any])?[
+                "group_adjacent_windows"
+            ]
+            #expect(stored as? Bool == value)
+        }
+    }
+
     @Test("Unset fields inherit the global style")
     func inheritance() {
         var global = AppBarStyle()

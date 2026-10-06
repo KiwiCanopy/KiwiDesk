@@ -2,9 +2,9 @@ import Foundation
 import Testing
 
 /// The ring panel's WindowServer writes stay behind their seams
-/// (#1925, #1956): the SkyLight re-stack and move default LIVE on
-/// `BorderManager` alone, and both `makeTestCore` twins pin them,
-/// with the level read beside them, to the AppKit fallback. Twin
+/// (#1956): the SkyLight move defaults LIVE on `BorderManager`
+/// alone, and both `makeTestCore` twins pin it, with the level read
+/// beside it, to the AppKit fallback. Twin
 /// IDENTITY is `MachineTouchTests`'; a pin deleted from both twins
 /// passes it, which is the half held here. And a default regressed
 /// to the fallback reds nothing behavioural — every suite pins the
@@ -34,7 +34,6 @@ struct BorderPanelSeamTests {
                 at: tests.appendingPathComponent("\(twin)/TestCore.swift")
             )
             for pin in [
-                "core.borders.restack = { _, _, _ in false }",
                 "core.borders.movePanel = { _, _ in false }",
                 "core.borders.windowLevel = { _ in nil }",
             ] {
@@ -43,7 +42,7 @@ struct BorderPanelSeamTests {
         }
     }
 
-    @Test("the manager's panel writes default to the live SkyLight ones")
+    @Test("the manager's panel move defaults to the live SkyLight one")
     func managerDefaultsAreLive() throws {
         let source = Self.flattened(
             try SourceScan.strippedSource(
@@ -53,12 +52,6 @@ struct BorderPanelSeamTests {
             )
         )
         try #require(!source.isEmpty)
-        #expect(
-            source.contains(
-                "var restack: (CGWindowID, Bool, CGWindowID) -> Bool "
-                    + "= SkyLight.orderWindow"
-            )
-        )
         #expect(
             source.contains(
                 "var movePanel: (CGWindowID, CGPoint) -> Bool "

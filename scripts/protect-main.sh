@@ -82,7 +82,8 @@
 # PR touching only ignored paths leaves them *skipped*, and GitHub
 # counts a skipped job as satisfying a required check. Filtering at
 # the trigger instead would leave the workflow unreported and every
-# such PR stuck on "Expected". CiPathFilterTests keeps that shape;
+# such PR stuck on "Expected". A FAILED `changes` job runs them
+# instead, never skips them (#1984). CiPathFilterTests keeps that shape;
 # packaging-and-release.md ("CI") carries the argument. The CLA
 # check is safe to require for a different reason: it runs on
 # every pull_request_target with no path filter, so it always

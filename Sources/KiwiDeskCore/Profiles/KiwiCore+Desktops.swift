@@ -168,7 +168,9 @@ extension KiwiCore {
             // (#670's per-display verdicts).
             let before = state.workspaces.activeSpace
             moveSwitchedDisplaySpaces(diff, in: snapshot)
-            retile(animated: false, pass: .reissue)
+            tiler.motionGate.exemptingSwitch {
+                retile(animated: false, pass: .reissue)
+            }
             updateBars()
             // Swiping the display that HOLDS the active Space
             // moves it, and a silent active-Space change is one
@@ -193,7 +195,9 @@ extension KiwiCore {
                 // Never animate here: this desktop's windows
                 // just (re)appeared, there is nothing to fly
                 // around.
-                retile(animated: false, pass: .reissue)
+                tiler.motionGate.exemptingSwitch {
+                    retile(animated: false, pass: .reissue)
+                }
                 emitSpaceChange()
             } else if !snapshot.currentSpaceIsUser(
                 on: snapshot.mainUUID

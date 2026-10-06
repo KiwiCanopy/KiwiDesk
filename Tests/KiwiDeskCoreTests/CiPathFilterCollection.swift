@@ -130,6 +130,34 @@ extension CiPathFilterTests {
         return lines[start..<end].joined(separator: "\n")
     }
 
+    /// A job's own `if:` expression — the four-space key and its
+    /// folded continuation lines, comments dropped, `${{ }}` and
+    /// whitespace collapsed — so a step's `if:` cannot answer for
+    /// the job's gate.
+    static func jobGate(_ name: String, in yaml: String) -> String? {
+        guard let block = jobBlock(name, in: yaml) else { return nil }
+        let lines = block.split(separator: "\n").map(String.init)
+        guard
+            let start = lines.firstIndex(where: {
+                $0.hasPrefix("    if:")
+            })
+        else { return nil }
+        var parts = [String(lines[start].dropFirst("    if:".count))]
+        for line in lines[(start + 1)...] {
+            guard line.hasPrefix("     ") else { break }
+            let text = line.trimmingCharacters(in: .whitespaces)
+            if !text.hasPrefix("#") { parts.append(text) }
+        }
+        return
+            parts
+            .joined(separator: " ")
+            .replacingOccurrences(of: ">-", with: "")
+            .replacingOccurrences(of: "${{", with: "")
+            .replacingOccurrences(of: "}}", with: "")
+            .split(whereSeparator: \.isWhitespace)
+            .joined(separator: " ")
+    }
+
     static func ignoreFile(under root: URL) -> URL {
         root
             .appendingPathComponent(".github")

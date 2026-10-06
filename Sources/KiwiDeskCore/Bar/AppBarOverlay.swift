@@ -230,7 +230,7 @@ public final class AppBarOverlay {
             horizontal: m.horizontal
         )
         let frames = Self.itemFrames(
-            in: CGRect(origin: .zero, size: runFrame.size),
+            in: CGRect(origin: .zero, size: viewport.size),
             m: m
         )
         let runStart: CGFloat

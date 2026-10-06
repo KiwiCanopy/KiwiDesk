@@ -58,6 +58,7 @@ extension EventBus: LogSeamOwner {}
 extension EventLoop: LogSeamOwner {}
 extension ExecLauncher: LogSeamOwner {}
 extension KeybindingManager: LogSeamOwner {}
+extension MotionGate: LogSeamOwner {}
 extension ProfileManager: LogSeamOwner {}
 extension ScrollGestures: LogSeamOwner {}
 extension SleepWakeManager: LogSeamOwner {}

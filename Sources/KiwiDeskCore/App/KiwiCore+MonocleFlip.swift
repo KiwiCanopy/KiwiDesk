@@ -132,9 +132,8 @@ extension KiwiCore {
     }
 
     private func face(of id: WindowID) -> MonocleFlipOverlay.Face {
-        let icon = state.windows[id].flatMap { window in
-            NSRunningApplication(processIdentifier: window.pid)?
-                .icon
+        let icon = state.windows[id].flatMap {
+            BarIconCache.icon(pid: $0.pid)
         }
         return MonocleFlipOverlay.Face(icon: icon)
     }

@@ -75,11 +75,17 @@ func makeTestCore(
     core.spaceSlide.reduceMotion = { true }
     core.spaceSlide.present = { _ in }
     core.spaceSlide.stackOrder = { [:] }
+    // The focused ring's arrival hold (#1959) reads the render
+    // clock, the host's Reduce Motion and a live timer: frozen and
+    // inert here, so ring visibility after a switch never depends
+    // on how fast the runner is. An arrival suite steps them.
+    core.borders.arrivalClock = { 0 }
+    core.borders.scheduleArrivalCheck = { _, _ in }
+    core.borders.reduceMotion = { true }
     core.borders.windowServerTrackingDisabled = false
     // A front-order ring reads its target's level from WindowServer
     // on every sync otherwise (#1868).
     core.borders.windowLevel = { _ in nil }
-    core.borders.restack = { _, _, _ in false }
     core.borders.movePanel = { _, _ in false }
     // `prepare_restart` reads the developer's real LaunchAgent
     // plist otherwise (#930); a suite that means one injects it.
@@ -167,12 +173,24 @@ func makeTestCore(
     // "nothing held"; a test that wants the branch states the
     // mask itself.
     core.mouse.pressedButtons = { 0 }
+    // The motion gate's mouse-quiet read defaults LIVE (#804):
+    // pin "the mouse is at rest", so every pass is admitted
+    // unless a test states otherwise.
+    core.tiler.motionGate.quiescence.sinceMouseMoved = { .infinity }
     // Same class, tenth time (#1532): the reveal-strip read
     // defaults LIVE, so a developer parking the pointer at the
     // top edge with the bar auto-hidden would have every focus
     // suite return foreign reports to an own window. Pin "not in
     // the strip"; the return suite states the reading itself.
     core.mouse.pointerInMenuBarStrip = { false }
+    // Same class, process-wide (#1971's flake): every core hears
+    // EVERY key-window change in the test process, so another
+    // suite's window or post re-synced this one's rings mid-test.
+    // Unhook it; `OwnKeyWindowRefreshTests` re-wires explicitly.
+    for token in core.borders.ownKeyWindowObservers {
+        NotificationCenter.default.removeObserver(token)
+    }
+    core.borders.ownKeyWindowObservers = []
     // Same class again (#1665): a bar item's hover is re-read from
     // the resting pointer at every shelf relayout, and a fixture's
     // bar sits at the top of the primary screen, where a hand on

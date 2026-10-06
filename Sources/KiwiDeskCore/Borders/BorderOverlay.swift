@@ -19,10 +19,14 @@ protocol BorderOverlayBackend: AnyObject {
     /// Fades the ring out (or back) without ordering it out, so a
     /// retired ring costs no WindowServer round trip (#1925).
     func setDormant(_ dormant: Bool)
+    /// Shows a dormant ring, fading in unless `reduceMotion`
+    /// (#1959).
+    func reveal(reduceMotion: Bool)
 }
 
 extension BorderOverlayBackend {
     func setDormant(_ dormant: Bool) {}
+    func reveal(reduceMotion: Bool) { setDormant(false) }
 }
 
 /// One window's focus ring (#285, #357): keeps the last render's
@@ -44,13 +48,19 @@ final class BorderOverlay {
     private var isHidden = false
     /// Retired by `sync` but kept for its window's return (#1925).
     private(set) var isDormant = false
+    /// Ordered in dormant for its window's arrival (#1959).
+    private(set) var isArrivalHeld = false
     private var hasOrdered = false
 
     /// Whether a steady `sync` must order the ring in: AppKit
     /// pays a WindowServer round trip per order against another
     /// app's window, so a shown ring is left to the reorder
     /// events and the settle passes (#1925).
-    var needsOrder: Bool { !hasOrdered || isHidden || isDormant }
+    /// A ring held for its window's arrival is ordered in already,
+    /// so it costs no further order (#1959).
+    var needsOrder: Bool {
+        !hasOrdered || isHidden || (isDormant && !isArrivalHeld)
+    }
     /// Dead-end rubber-band offset (#436).
     private var bumpOffset = CGVector.zero
 
@@ -60,15 +70,12 @@ final class BorderOverlay {
         order: BorderGeometry.Order,
         levelOf: @escaping (CGWindowID) -> Int? =
             AppKitBorderOverlay.windowLayer,
-        restack: @escaping (CGWindowID, Bool, CGWindowID) -> Bool =
-            SkyLight.orderWindow,
         movePanel: @escaping (CGWindowID, CGPoint) -> Bool
     ) {
         targetWindow = window
         backend = AppKitBorderOverlay(
             order: order,
             levelOf: levelOf,
-            restack: restack,
             movePanel: movePanel
         )
     }
@@ -118,15 +125,43 @@ final class BorderOverlay {
         }
     }
 
-    func order(relativeTo windowNumber: CGWindowID) {
+    /// `revealing: false` orders the ring in dormant and HOLDS it
+    /// there for a window that has not arrived yet (#1959): no
+    /// later order shows it — a reorder event, an unhide — only
+    /// `reveal` or a retire ends the hold.
+    func order(
+        relativeTo windowNumber: CGWindowID,
+        revealing: Bool = true
+    ) {
         targetWindow = windowNumber
         isHidden = false
+        if !revealing {
+            isArrivalHeld = true
+            if !isDormant {
+                isDormant = true
+                backend.setDormant(true)
+            }
+        }
         hasOrdered = true
         backend.order(relativeTo: windowNumber)
-        if isDormant {
+        if isDormant, !isArrivalHeld {
             isDormant = false
             backend.setDormant(false)
         }
+    }
+
+    /// Ends a hold without showing the ring: the next order shows
+    /// it if its window is still wanted (#1959).
+    func releaseArrival() {
+        isArrivalHeld = false
+    }
+
+    /// Shows a ring held for its window's arrival (#1959).
+    func reveal(reduceMotion: Bool) {
+        isArrivalHeld = false
+        guard isDormant else { return }
+        isDormant = false
+        backend.reveal(reduceMotion: reduceMotion)
     }
 
     /// Parks the ring invisibly for its window's return (#1925);
@@ -134,6 +169,7 @@ final class BorderOverlay {
     /// held frame, or an animated return flashes the ring where
     /// it rested before its window slides in.
     func retire() {
+        isArrivalHeld = false
         isDormant = true
         lastFrame = nil
         backend.setDormant(true)

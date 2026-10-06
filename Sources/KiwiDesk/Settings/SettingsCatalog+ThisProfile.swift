@@ -106,8 +106,8 @@ struct MotionMoreControls: Sendable {
         "Animate layout reflows"
     )
     let animationDuration = SettingsControl(
-        "behavior.animations.duration",
-        "Duration"
+        "behavior.animations.window_duration",
+        "Window duration"
     )
     let animateShelf = SettingsControl(
         "behavior.animations.shelf",

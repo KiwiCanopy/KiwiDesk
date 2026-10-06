@@ -11,6 +11,13 @@ extension NSApplication {
     @MainActor func forceFront(_ window: NSWindow) {
         window.makeKeyAndOrderFront(nil)
         window.orderFrontRegardless()
+        // After the order-in, which gives a deferred window its
+        // number; before the activation its report answers (#1861).
+        Self.ownFrontNote?(window.windowNumber)
         activate(ignoringOtherApps: true)
     }
+
+    /// Core's `noteOwnFront(number:)`, installed once at launch by
+    /// `AppDelegate`; nil wherever no core boots (#1861).
+    @MainActor static var ownFrontNote: ((Int) -> Void)?
 }

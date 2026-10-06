@@ -804,7 +804,14 @@ editing here:
   (`siblingRaiseOutranks`), and a self-raise vetoes the z-order
   revert only when NEWER than the z-order stamp
   (`selfRaiseVetoesRevert`) — a presence test threads the
-  restore's own echo past both nets. A ledger is cleared where
+  restore's own echo past both nets. A presence read needs
+  its own ruling here; the one so far is an own window the GUI
+  fronted, which escapes the revert (`ownFronts`), since the
+  front is an intent and the close-return restack stamps the
+  window AFTER it — minted through `forceFront`'s hook into
+  `noteOwnFront(number:)` alone and retired once focus is
+  honored on a tracked window of another app (#1861, `OwnFrontEchoTests`,
+  `OwnFrontWiringTests` ▸ `doorHasOneCaller`). A ledger is cleared where
   its id dies (`forgetGoneWindow`) and rekeyed on a tab switch,
   and a CONSUMER of the self ledger reads a stamp's liveness
   through `selfRaiseStamp(_:now:)` rather than comparing the stamp
@@ -1878,6 +1885,34 @@ editing here:
   in `RetilePassRoutingTests`' `allowed` map — the one copy of
   who chooses what (`SpaceSwitchReissueTests`,
   `RetileBoundSkipTests` ▸ `reissueIssuesTheBound`).
+- **Window motion says whose it is (#804 ▸ Ruling).** An entry
+  point a KiwiDesk control drives — a Settings action, the quick
+  menu, the tour, a bar click, menu row or drop, a window drag, a
+  scroll gesture — runs its work inside `withUserMotion`, and a
+  new one joins `MotionScopeCensusTests`' map with its reason; a
+  hotkey and a hold-glide step read as user motion through their
+  own flags, and the CLI/IPC socket stays ambient by ruling. A
+  new `DeferredTasks.Key` states in `carriesCause` whether its
+  body carries its scheduler's cause, late, or runs ambient —
+  the switch is exhaustive, so the compiler asks. The scope is
+  entered only in `KiwiCore+MotionCause` (the census's one-home
+  clause). **Ambient motion and a late user tail wait for the
+  hand to rest** — buttons up and the mouse quiet, past the
+  patience bound buttons up alone — in the one `MotionGate`,
+  asked by `KiwiCore.retile` alone: what waits is the PASS, owed
+  and re-run against the state as it then is, never a stored
+  frame, so a held pass sends, stamps and asks nothing, and a
+  pass that runs carries the debt merged in (so a run may draw
+  a stronger pass than its caller spelled; the meter files the
+  caller's). A switch the user watches is never held, and every
+  `spaceSwitchRetile` caller states `asSwitch`, boot, wake and a
+  sweep stating false; a z-order restore waits for an owed pass
+  as for an animation. State, bars and rings move at once; the
+  pre-render heals ride the pass. A frame written outside a layout pass stays
+  ungated by ruling until #1991 (owner, 2026-10-06). The
+  engine's pass is driven only from that door
+  (`MotionScopeCensusTests` ▸ `passesAskTheGate`,
+  `MotionGateTests`).
 - **A re-issuing pass forces only the parks a departure owes
   (#1508)**, or every switch re-parks every hidden window — the
   per-switch cost `get_work_counters` measures as

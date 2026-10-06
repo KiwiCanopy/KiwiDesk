@@ -98,10 +98,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             )
         }
         statusItem.onLoadProfile = { [weak self] name in
-            _ = self?.core.execute(
-                "load_profile",
-                args: [.string(name)]
-            )
+            self?.core.withUserMotion {
+                _ = self?.core.execute(
+                    "load_profile",
+                    args: [.string(name)]
+                )
+            }
         }
         statusItem.layoutInfoProvider = { [weak self] in
             guard let self else { return LayoutMenuInfo.empty }
@@ -111,7 +113,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             let args: [JSONValue] =
                 space.map { [.string($0.raw), .string(mode.rawValue)] }
                 ?? [.string(mode.rawValue)]
-            _ = self?.core.execute("set_mode", args: args)
+            self?.core.withUserMotion {
+                _ = self?.core.execute("set_mode", args: args)
+            }
             // Nothing to tell Settings: a quick-menu switch is
             // session-only, and since #1179 the draft narrates
             // the PROFILE rather than the session.
@@ -131,6 +135,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // Hotkey toggles the shortcuts reference panel (#330).
         core.uiBridge.onShowShortcuts = { [weak shortcutsPanel] in
             shortcutsPanel?.toggle()
+        }
+        // Every forceFront is an own front Core honors (#1861).
+        NSApplication.ownFrontNote = { [weak core] number in
+            core?.noteOwnFront(number: number)
         }
         // Opens or raises Settings without toggling (#678).
         core.uiBridge.onOpenSettings = { [weak self] in
@@ -172,14 +180,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // The error surface (#68 §3.7): the badge and the
         // standalone panel track the last config load.
         configIssues.model.onReload = { [weak self] in
-            self?.core.loadConfig()
+            self?.core.withUserMotion { self?.core.loadConfig() }
         }
         // `delete_profile` clears the issue row and badge (#246).
         configIssues.model.onDeleteProfile = { [weak self] name in
-            _ = self?.core.execute(
-                "delete_profile",
-                args: [.string(name)]
-            )
+            self?.core.withUserMotion {
+                _ = self?.core.execute(
+                    "delete_profile",
+                    args: [.string(name)]
+                )
+            }
             // Keep an already-open dashboard's greyed row in sync (#246).
             self?.dashboardIfCreated?.refreshProfiles()
         }

@@ -9,6 +9,6 @@ extension SettingsModel {
 
     func setAppWide(_ change: (inout AppWideSettings) -> Void) {
         objectWillChange.send()
-        core.setAppWide(persisting: true, change)
+        core.withUserMotion { core.setAppWide(persisting: true, change) }
     }
 }

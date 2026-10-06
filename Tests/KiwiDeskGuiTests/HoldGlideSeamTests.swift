@@ -218,6 +218,9 @@ struct HoldGlideSeamTests {
         // that is the shape to keep, since the scope must be
         // sampled once per write rather than re-read around a
         // call that could change it.
+        //
+        // The fourth is #804's motion cause: a glide step reads
+        // as user motion, a press of its own, in one place.
         let reads = try Self.sites(of: "isApplyingGlideStep")
         let byFile = Dictionary(
             grouping: reads,
@@ -241,6 +244,7 @@ struct HoldGlideSeamTests {
             \(byFile["KiwiCore+ResizeFloating.swift"]?.count ?? 0)
             """
         )
+        #expect(byFile["KiwiCore+MotionCause.swift"]?.count == 1)
         #expect(
             Set(byFile.keys) == [
                 "HoldGlide.swift",
@@ -248,6 +252,7 @@ struct HoldGlideSeamTests {
                 "KeybindingManager+HoldGlide.swift",
                 "KiwiCore+Resize.swift",
                 "KiwiCore+ResizeFloating.swift",
+                "KiwiCore+MotionCause.swift",
             ],
             .init(
                 rawValue: "unexpected isApplyingGlideStep site "

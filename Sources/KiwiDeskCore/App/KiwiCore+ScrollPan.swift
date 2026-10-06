@@ -40,7 +40,9 @@ extension KiwiCore {
     func wireScrollPan() {
         let session = ScrollPanSession()
         mouse.scroll.setHandler(.pan) { [weak self] event in
-            self?.handleScrollPan(event, session: session)
+            self?.withUserMotion {
+                self?.handleScrollPan(event, session: session)
+            }
         }
     }
 

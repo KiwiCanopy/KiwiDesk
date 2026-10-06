@@ -32,10 +32,6 @@ extension KiwiCore {
         newlyCreatedWindow: WindowID? = nil,
         sizing: BatchSizing = .mayInstantSize
     ) {
-        // The whole main-actor cost of a pass, bars and rings
-        // included (#1508).
-        let finish = tiler.meter.beginRetile(pass)
-        defer { finish() }
         // A held Space retires the moment it empties (#1507) —
         // every membership change retiles, so this is its one
         // choke point too, ahead of anything that lays it out.
@@ -46,6 +42,38 @@ extension KiwiCore {
         if retireEmptiedTemporarySpaces() || heldRetired {
             resolveSpaceDisplays()
             emitSpaceChange()
+        }
+        // Ambient motion waits for the hand to rest (#804): the pass
+        // is owed and re-run then; state, bars and rings move now.
+        let asked = MotionGate.Owed(
+            animated: animated,
+            pass: pass,
+            newlyCreatedWindow: newlyCreatedWindow,
+            sizing: sizing
+        )
+        let paying = tiler.motionGate.owed != nil
+        guard let run = tiler.motionGate.admit(asked) else {
+            updateBars()
+            updateBorders()
+            updateStickyMarks()
+            return
+        }
+        let animated = run.animated
+        let pass = run.pass
+        let newlyCreatedWindow = run.newlyCreatedWindow
+        let sizing = run.sizing
+        // The whole main-actor cost of a pass that runs, bars and
+        // rings included, filed under the caller's own pass (#1508).
+        let finish = tiler.meter.beginRetile(asked.pass)
+        defer { finish() }
+        // A z-order restore that waited for the debt rides this
+        // pass's settle, or runs now when nothing animates.
+        defer {
+            if paying, pendingZOrderRestore,
+                tiler.animation.activeCount == 0
+            {
+                runPendingZOrderRestore()
+            }
         }
         // Session weights are validated at WRITE time against
         // the membership at press time; a membership or span

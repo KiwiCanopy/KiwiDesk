@@ -12,7 +12,7 @@ extension SettingsModel {
                 atomically: true,
                 encoding: .utf8
             )
-            core.loadConfig()
+            core.withUserMotion { core.loadConfig() }
             reload()
             // Free-form Lua isn't checked at input time, so set or
             // clear the conflict banner from the reloaded config.

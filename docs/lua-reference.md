@@ -38,6 +38,11 @@ The Settings app stores its settings in
 event hooks and custom Lua. For the GUI workflow, see the
 [user guide](user-guide.md).
 
+:::unreleased
+A migrated file's previous version is kept in
+`migration-backups/` — see the [user guide](user-guide.md#the-guijson-file).
+:::
+
 ### What coexists with the Settings app, and what doesn't
 
 Whether the Settings app or `init.lua` owns your configuration
@@ -821,11 +826,12 @@ its layout mode, app rules, monitor pins, and any keybindings.
 Switching spaces parks the other spaces' tiled windows in a
 corner of their screen — [Parking is not a Desktop
 move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
-owns the model. The switch is instant by default.
+owns the model.
 
 :::unreleased
-With `animations.set_on_space_change` on, the switch plays the
-plate slide ([animations.set_on_space_change](#animationsset_on_space_change)).
+By default the switch plays the plate slide
+([animations.set_on_space_change](#animationsset_on_space_change));
+off, it is instant.
 :::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
@@ -1990,6 +1996,11 @@ kiwishelf.set_minimum(40)
 **Does:** sets the shelf's thickness — both bars' — carved out of
 the layout.
 
+:::unreleased
+The starter setup seeds `32` when the main screen is shorter than
+1000 pt.
+:::
+
 **Example:**
 
 ```lua
@@ -2528,7 +2539,12 @@ app_bar.set_title_cap(25)
 
 ### app_bar.set_group_adjacent_windows
 
-**Expects:** `true` or `false` (default `true`).
+:::unreleased
+**Expects:** `true` or `false` (default `false`). A profile saved
+by an earlier release keeps the value it stored; a built-in
+Standard, and an `init.lua` that never sets it, take the new
+default.
+:::
 
 **Does:** if true, collapses adjacent same-app windows into one
 item with a count badge; same-app windows that are not adjacent
@@ -5475,7 +5491,12 @@ animations.set_size_rate(0)    -- back to per-tick default
 
 ### animations.set_on_space_change
 
-**Expects:** `true` or `false` (default `false`).
+**Expects:** `true` or `false`.
+
+:::unreleased
+Defaults to `true`. A profile saved by an earlier release keeps
+the value it stored.
+:::
 
 **Does:** enables or disables the animation of an explicit
 Space switch — `focus_space`, a Space Bar click, the scroll

@@ -25,7 +25,12 @@ extension KiwiCore {
     /// route here at all.
     /// `newcomer` is a window arriving with this switch (#1599's
     /// launch follow), given the arrival's #45 start-at-target.
+    ///
+    /// `asSwitch` says whether this is a switch the user is
+    /// watching, which the motion gate never holds (#804), or a
+    /// boot, wake or sweep activation, which waits for the hand.
     func spaceSwitchRetile(
+        asSwitch: Bool,
         newcomer: WindowID? = nil,
         slide: SpaceSlideIntent? = nil
     ) {
@@ -37,11 +42,30 @@ extension KiwiCore {
         // A navigation that stands the slide down cuts a running
         // one; anything else is the head-of-retile check's.
         if slide != nil, run == nil { endSpaceSlide() }
-        retile(
-            animated: false,
-            pass: .reissue,
-            newlyCreatedWindow: newcomer
-        )
+        // The focused ring appears with its window, never ahead of
+        // the plates lifting (#1959) — a window this switch brings
+        // out of its park; one already shown keeps its ring.
+        if let space = activeSpace,
+            let anchor = state.focusAnchor(of: space),
+            let frame = state.windows[anchor]?.frame,
+            tiler.looksStashed(frame)
+        {
+            borders.holdArrival(of: anchor) { [weak self] in
+                self?.spaceSlide.play?.liftAt
+            }
+        }
+        let pass = { [self] in
+            retile(
+                animated: false,
+                pass: .reissue,
+                newlyCreatedWindow: newcomer
+            )
+        }
+        if asSwitch {
+            tiler.motionGate.exemptingSwitch(pass)
+        } else {
+            pass()
+        }
         if let run { runSpaceSlide(run) }
     }
 }

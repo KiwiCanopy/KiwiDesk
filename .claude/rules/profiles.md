@@ -135,7 +135,11 @@ change here:
   the minimum window size the MAIN screen's, and the gaps the
   shipped default on every screen, which clears the default ring
   and keeps Glass a first run's look** (#1662, #1739,
-  `StarterTuningTests`, `LookCatalogSeamTests`). `StarterSetup.settings(sizes:)`
+  `StarterTuningTests`, `LookCatalogSeamTests`). The shelf depth
+  steps down by the MAIN screen's full frame height in
+  `StarterSetup.settings(sizes:)` alone, never in the shape
+  tuning every preset shares (#1952, `StarterCompactShelfTests`
+  ▸ `presetsKeepTheDefault`). `StarterSetup.settings(sizes:)`
   hands `StarterTuning.settings(mainShape:hosts:)` the hosts from
   `StarterSetup.hosts`, derived from the one walk; take that
   door, never a bare `StarterTuning` call with hand-made hosts.
@@ -567,6 +571,13 @@ holds the secondary-switch decision including its nil case.
     owed, and the apply-time adoption stands down while it owns
     the setup (`AppWideAdoptionTests` ▸
     `luaOwnedBesideSidecarAdoptsNothing`).
+  - Keep a capture with the FILE it was read from: a profile
+    delete forgets it, a rename re-keys it and a restore that
+    replaces the profiles without a `gui.json` drops them all, so
+    a later profile under that name crosses on the settled values
+    (#1975, `AppWideCaptureFollowsTests`); a new door calling
+    `profiles.delete(` or `profiles.rename(` takes the same call
+    (`AppWideSeamTests` ▸ `captureFollowsEveryDoor`).
   - Give a new member of `AppWideSettings` a crossing of its
     own: the ledger's crossing is per group of settings, and on
     an install that has adopted it has already ended, so a
@@ -1453,3 +1464,7 @@ one value, never another Bool beside it (#1507). The wider rule
 
 One vocabulary across Lua and profile JSON — see
 [config-vocabulary.md](config-vocabulary.md).
+- **A profile apply or a monitor settle is a layout pass the
+  motion gate may hold (#804)**: its state lands at once and its
+  retile is owed until the hand rests — state-and-layout.md ▸
+  Window motion says whose it is.

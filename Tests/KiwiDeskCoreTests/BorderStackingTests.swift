@@ -59,10 +59,55 @@ struct BorderStackingTests {
         }
     }
 
+    /// #1962: a re-stack is read back from WindowServer, never
+    /// counted — the SkyLight one was issued and moved nothing.
+    @Test("An ordered-in ring re-stacks behind a new target")
+    func reorderMovesTheRing() throws {
+        let target = makeTarget(level: .normal)
+        defer { target.orderOut(nil) }
+        let cover = makeTarget(level: .normal)
+        defer { cover.orderOut(nil) }
+        let ring = AppKitBorderOverlay(
+            order: .below,
+            movePanel: { _, _ in false }
+        )
+        render(ring, order: .below, glow: 0)
+        defer { ring.hide() }
+        _ = onScreenStack(waitingFor: [
+            target.windowNumber, cover.windowNumber,
+        ])
+        ring.order(relativeTo: CGWindowID(target.windowNumber))
+        let ringNumber = try #require(ring.panelNumber)
+        _ = onScreenStack(waitingFor: [ringNumber])
+        ring.order(relativeTo: CGWindowID(cover.windowNumber))
+        var stack: [Int] = []
+        for _ in 0..<100 {
+            stack = onScreenStack(waitingFor: [ringNumber])
+            if Self.isDirectlyBehind(ringNumber, cover.windowNumber, stack) {
+                break
+            }
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+        }
+        #expect(
+            Self.isDirectlyBehind(ringNumber, cover.windowNumber, stack),
+            "stack \(stack)"
+        )
+    }
+
+    private static func isDirectlyBehind(
+        _ ring: Int,
+        _ window: Int,
+        _ stack: [Int]
+    ) -> Bool {
+        guard let w = stack.firstIndex(of: window),
+            let r = stack.firstIndex(of: ring)
+        else { return false }
+        return r == w + 1
+    }
+
     @Test("A manager's ring reads the level through its seam")
     func managerLevelSeamReachesTheRing() throws {
         let manager = BorderManager()
-        manager.restack = { _, _, _ in false }
         manager.movePanel = { _, _ in false }
         manager.setDrawOrder(.front)
         manager.windowLevel = { _ in 5 }

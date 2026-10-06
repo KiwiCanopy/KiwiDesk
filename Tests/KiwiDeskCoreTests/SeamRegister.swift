@@ -33,6 +33,7 @@ enum SeamRegister {
         "EventLoop",
         "ExecLauncher",
         "KeybindingManager",
+        "MotionGate",
         "ProfileManager",
         "ScrollGestures",
         "SleepWakeManager",

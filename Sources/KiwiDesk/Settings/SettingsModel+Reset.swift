@@ -10,7 +10,9 @@ extension SettingsModel {
 
     /// Tier 2: resets core state and reloads freshly seeded configuration.
     func resetAllSettings() {
-        core.resetAllSettings(trash: KiwiCore.moveToTrash)
+        core.withUserMotion {
+            core.resetAllSettings(trash: KiwiCore.moveToTrash)
+        }
         reload()
     }
 

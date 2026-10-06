@@ -95,6 +95,7 @@ struct SetupBundleArtifactTests {
                 case .profiles: !bundle.profiles.isEmpty
                 case .palettes: !bundle.palettes.isEmpty
                 case .looks: !(bundle.looks ?? []).isEmpty
+                case .migrationBackups: false
                 }
             #expect(
                 carried,
@@ -113,12 +114,9 @@ struct SetupBundleArtifactTests {
         }
     }
 
-    /// Vacuous today, deliberately and statedly: nothing answers
-    /// `travelsInABackup == false`, so the loop walks nothing. It
-    /// is kept as the standing check on a future exclusion rather
-    /// than deleted, and says so instead of implying coverage.
+    /// Walks the migration copies (#1880), the one exclusion.
     ///
-    /// Also stated, since it is the direction this cannot see: an
+    /// Stated, since it is the direction this cannot see: an
     /// artifact flipped to `false` **with** a reason passes here
     /// while `exportSetup` still carries it —
     /// `travellingArtifactsAreInTheBundle` is what would have to

@@ -85,6 +85,7 @@ extension BorderManager {
             restoreVisibility: restoreVisibility
         )
         onFrameReconciled(id, frame)
+        noteArrivalReport(id, frame: frame)
         return true
     }
 

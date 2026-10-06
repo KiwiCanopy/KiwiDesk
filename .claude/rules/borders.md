@@ -127,12 +127,13 @@ second cancel the other:
   commanded frames to the target while the window never moved, and
   no echo and no WindowServer event is coming.
 
-## The switch path makes no WindowServer round trip for a ring
+## The switch path adds no ring round trip beyond its ruled re-stacks
 
 A WindowServer call a ring makes on the main actor waits for its
 answer, and while WindowServer is GPU-bound one answer took
-390 ms (#1925, 2026-10-03). So a change to the ring's switch path
-keeps these:
+390 ms (#1925, 2026-10-03). A re-stack is such a call that a ring
+cannot drop (#1962), so a change to the ring's switch path keeps
+these:
 
 - **A ring `sync` retires goes dormant, never ordered out** —
   alpha 0, still ordered in, its corner radius kept — and comes
@@ -148,13 +149,20 @@ keeps these:
   new, revived or hidden — unless no WindowServer stream reports
   its target moving; the two settle passes re-stack every ring
   (`BorderOrderReassertTests`).
-- **An ordered-in panel re-stacks through `restack`**, a SkyLight
-  transaction, never AppKit's `order(_:relativeTo:)`, which looks
-  the other app's window rights up synchronously first; the
-  first show, the first after an order-out and a missing symbol
-  take AppKit (`BorderRestackTests`). This orders the AppKit
-  panel and draws nothing: the `.transient` section below still
-  binds.
+- **A ring re-stacks through AppKit's `order(_:relativeTo:)`, and
+  only from a ruled trigger** — `sync`'s `ordersRing` gate
+  (`needsOrder`, a settle pass, no WindowServer stream), the
+  WindowServer reorder and unhide events, the unhide's restore of
+  visibility, and the dead-end ring. A new caller is a new round
+  trip on the switch path and owes its ruling in
+  `BorderOrderCensusTests`' `allowed` map; a front-order ring's
+  level read is a second one (`levelOf`). The order is AppKit's
+  because WindowServer applies no SkyLight order to an AppKit
+  panel ([os-private-apis.md](os-private-apis.md), #1962) — that
+  it MOVES the ring is `BorderStackingTests` ▸
+  `reorderMovesTheRing`, which reads the stack back. This orders
+  the AppKit panel and draws nothing: the `.transient` section
+  below still binds.
 - **A ring panel that keeps the ring's size moves through
   `SkyLight.moveWindow`, never AppKit's `setFrame`** — mid-animation
   too, so it takes no room — once WindowServer has its window and
@@ -214,6 +222,50 @@ no `.hide` (no order-out on the 1↔2 runs' panel polls, macOS 27,
 2026-10-03); a minimize, a hidden app or a Desktop switch does,
 and those stay off the path above until a measurement says
 otherwise.
+
+## After a Space switch the focused ring arrives with its window
+
+The ring leads a focus move inside a Space — there the moving ring
+is the cue for where focus went — but after a Space switch it would
+sit on an empty spot while a slow app's window catches up (#1959,
+owner ruling). So a switch that brings its anchor out of the park
+holds that anchor's ring through `BorderManager.holdArrival`,
+armed in the one door that knows it, `spaceSwitchRetile`
+(`BorderOrderCensusTests` ▸ `arrivalHoldHasOneDoor`); a window
+already shown — a focus follow onto a Space a screen shows, a
+wake, a restore — keeps its leading ring, and native Desktop
+switches never hold (`BorderArrivalWiringTests`). It keeps to
+these:
+
+- **The held ring is ordered in dormant and revealed, never
+  created late** — `sync` orders it with `revealing: false`, so the
+  reveal is an alpha change and costs no round trip. The hold
+  lives on the overlay, so NO order shows it — the switch's own
+  raise fires a reorder and an unhide, and on the device those
+  showed the ring ~300 ms early — only `reveal` or a retire ends
+  it (`BorderArrivalTests` ▸ `windowServerOrderKeepsTheHold`).
+  Being ordered in, a held ring needs no further order, so a
+  steady sync costs it no round trip (`heldRingTakesNoFurtherOrder`).
+  A ring already showing (a window travelling with the user) is
+  not held, and a hold a burst replaces RELEASES its ring rather
+  than showing it.
+- **Only the window's own report reveals it**: an AX echo
+  (`.axEcho`) or a WindowServer reconcile landing within
+  `arrivalTolerance` of the frame the switch sent, which the hold
+  KEEPS from its first read: a stale echo from the corner retires
+  the commanded frame before the window lands (device,
+  2026-10-05). Our own animation ticks are not the window
+  arriving. A window that never reports gets its ring at
+  `arrivalCap` (`BorderArrivalTests`).
+- **Never ahead of the slide's plates lifting**: the hold reads
+  `spaceSlide.play?.liftAt` live, since a burst press moves it
+  (`BorderArrivalTests` ▸ `liftGatesTheReveal`,
+  `BorderArrivalWiringTests` ▸ `holdReadsTheSlidesLift`).
+- **The reveal fades through `BarMotion.slideFade`, handed the
+  manager's `reduceMotion` read**, so Reduce Motion cuts it in —
+  stated, not guarded, as the section on a cue's Reduce Motion
+  read below says of every cue. Both `makeTestCore` twins pin the
+  hold's clock, timer and that read.
 
 ## The overlay panels join every Space
 

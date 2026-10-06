@@ -335,9 +335,10 @@ extension HomeSurfacingTests {
             "ifisDirty{"
                 + "HomeFirstRunState.retire(preferences)}"
         ],
-        "Settings/SettingsWindowController.swift": [
-            // Home is the entry point on every open.
-            "model.destination=nil"
+        "Settings/SettingsWindowController.swift": ["model.prepareToShow("],
+        // Home on every FRESH open; a shown window keeps its page.
+        "Settings/SettingsModel+Show.swift": [
+            "guard!windowShownelse{return}destination=nil"
         ],
         "Settings/HomeFirstRunBanner.swift": [
             // Dismiss retires permanently and unmounts.

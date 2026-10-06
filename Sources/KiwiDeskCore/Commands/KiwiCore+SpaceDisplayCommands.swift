@@ -64,7 +64,7 @@ extension KiwiCore {
         // display; floats have no layout frame, so each one
         // re-anchors explicitly (#444).
         reanchorFloats(of: space)
-        spaceSwitchRetile()
+        spaceSwitchRetile(asSwitch: true)
         emitSpaceChange()
         return .ok()
     }

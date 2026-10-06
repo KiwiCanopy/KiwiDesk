@@ -25,7 +25,6 @@ struct FollowSizePinTests {
     @Test("A pinned tick renders the answer on the ring")
     func pinnedTickCorrectsRing() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.sync([
             BorderManager.Spec(
@@ -87,7 +86,6 @@ struct FollowSizePinTests {
     @Test("An echo ignores the pin — it is already reality")
     func echoIgnoresPin() {
         let border = BorderManager()
-        border.restack = { _, _, _ in false }
         border.movePanel = { _, _ in false }
         border.sync([
             BorderManager.Spec(

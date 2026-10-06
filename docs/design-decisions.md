@@ -1746,12 +1746,13 @@ SkyLight window stays composited over the Mission Control
 overview at its desktop frame whatever Space it is pinned to,
 where the panel's `.transient` hides it with the desktop
 (#1917). A front-order panel takes its target's window level, so
-a raised target's band never covers the ring. Re-stacking an
-ordered-in panel behind its target is the one private WRITE: a
-SkyLight transaction, because AppKit's relative order looks the
-other app's window up synchronously first and that answer stalls
-a Space switch under GPU load, with AppKit's order as the
-fallback (#1925). Direct mouse
+a raised target's band never covers the ring. Re-stacking the
+panel is AppKit's relative order, a synchronous WindowServer
+answer that stalls a Space switch under GPU load, so only a
+ruled trigger re-stacks a ring (#1925): WindowServer applies no
+SkyLight order to an AppKit panel, and the transaction #1925
+first used for it moved nothing (#1962). Moving the panel is the
+ring's one private WRITE (#1956). Direct mouse
 drags use one movement authority: WindowServer bounds whenever its event
 surface is active, otherwise the stable AX/AppKit fallback. No path
 projects a border from cursor motion, so macOS edge/corner dwell holds
@@ -2009,6 +2010,61 @@ window beneath a provenance it never earned — which would also
 let a bar click forge the escape for a stamped window under the
 strip. The painted strips (`shownStrips`, the #242 authority)
 are the mask.
+
+**An own window the GUI just brought forward is honored by
+presence, not order** ([#1861](https://github.com/KiwiCanopy/KiwiDesk/issues/1861)).
+The front is KiwiDesk's own intent, so the window's focus report
+is never read as a z-order echo, whichever raise stamped the
+window last. Order cannot serve here: when one own window
+replaces another, the closing window's destroy reaches Core after
+the front, and the close-return restack's stamp is the newer of
+the two. The intent lasts the echo window's ~1 s and ends early
+once focus is honored on a tracked window of another app (an
+untracked one leaves it to age out), since the user going
+elsewhere makes a later echo of that window a raise again. The
+accepted cost: inside that second, a re-raise of the fronted
+window while the user moves between KiwiDesk's own windows is
+honored rather than reverted.
+
+:::unreleased
+### Windows KiwiDesk moves on its own wait for your hand to rest (#804)
+
+**[Rationale]**
+
+A click is aimed 100–300 ms before the finger lands. A retile that
+moves a window inside that window of time delivers the press and
+release to whatever now sits under the pointer, and the sharpest
+case needs no second window: a resize slides a different control
+of the same window under the cursor. So motion KiwiDesk makes on
+its own — an app's own event, boot, a display change, the wake
+replay, a command over the CLI — waits until no button is down
+and the mouse has been still for about 300 ms, and past about 3 s
+of waiting for buttons up alone. Motion a KiwiDesk control is
+making right now never waits: a hotkey, a menu row, a Settings
+action, a bar click, a drag or a scroll gesture moves at once,
+and takes anything held with it. A tail a command schedules (the
+switch's settle, a follow's reap, a launch follow) is the
+command's own but lands later, when the next click may already be
+aimed, so it waits like ambient motion. Keyboard activity never
+counts: moving a window steals no keystroke.
+
+What waits is the layout pass, never its frames. A held pass is
+owed and run again once the hand rests, against the windows as
+they are by then, so nothing stale lands: a later pass, a closed
+window or a changed screen is simply part of what it lays out.
+Your own next pass carries the debt with it. A Space or Desktop
+switch is never held, wherever it comes from: holding it would
+show the new Space in the bar while the old windows stay up. The windows'
+records, the bars and the rings move at once, and a held pass
+stamps nothing, no placement and no size ask, so a frame that was
+never written is never judged against an echo. A frame written
+outside a layout pass, such as a restore's own writes or a new
+float's placement, is not held: those are #1991's. Of two
+windows arriving during one hold, only the newer keeps its
+start-at-target entrance. The cost: after you stop the
+mouse, an ambient reflow lands up to ~300 ms later than it did,
+and while you hold a button it does not land at all.
+:::
 
 ### A placement bounce is the app's answer, not the user's (#1161)
 
@@ -3049,6 +3105,22 @@ instant switch. There is no style picker and no pace control:
 one transition is less surface to maintain, and a stored `true`
 reads as the plate slide, so no migration is owed.
 
+*On by default (#1931).* The switch is the motion a user meets
+most, and the slide is what tells them which way they went, so a
+new install plays it. The cost is the GPU: switching
+back-to-back, Liquid Glass plates hold it at 55–65 % against
+33 % for the instant switch, which is why glass off, Reduce
+Motion and the toggle itself stay one step away. No migration is
+owed, on #1359's thickness argument: `on_space_change` predates
+the first tag and the settings encoder writes `animations` whole,
+so every saved profile keeps the value it stored and only a fresh
+seed takes the new one (`SpaceChangeDefaultTests`). What has no
+file takes the new default on upgrade, and that is accepted: a
+composed Standard, and an `init.lua` config that never calls the
+setter, start playing the slide. The animations master still
+restores the defaults rather than turning every motion on, so it
+brings the slide back with the rest.
+
 *One panel per screen, ordered in once.* Moving or re-ordering
 a panel per switch queues behind the compositor exactly when
 the switch is busiest (#1960), so each screen's panel stays
@@ -3056,8 +3128,12 @@ ordered in, dormant and empty between plays; everything that
 moves is a layer. KiwiDesk's own windows move through AppKit
 inside the switch's own turn, since the main queue would run
 their park only after it. A slow app's window can still land
-after the plates have faded; whether the focus ring waits for
-it is tracked in #1959.
+after the plates have faded, and its focus ring waits for it: the
+ring appears on the window's own report near the frame it was
+sent, or at a 300 ms cap, and never before the plates lift
+(#1959). Inside a Space the ring still leads a focus move, since
+there the moving ring is the cue; after a switch a leading ring
+would sit on an empty spot.
 :::
 
 **A resize span is the layout region, not the display
@@ -12259,6 +12335,23 @@ The default being the old behaviour is also why the setting owes
 no crossing: an absent key meant grouped before and means grouped
 now, so no stored file, built-in layout or `init.lua` changes.
 
+**The App Bar lists every window by default; grouping is its
+option.** (Owner ruling 2026-10-06.) The two bars split here
+because they show different things: the Space Bar draws glyphs
+under a span, where grouping first is what keeps the overview
+(above), while the App Bar draws each window's title, so a
+grouped item hides windows the row has room to name. The App
+Bar's `group_adjacent_windows` therefore defaults off.
+
+The flip owes no crossing for a stored file: the `app_bar` group
+is encoded whole in every profile, a backup bundle included, so
+each file already carries the value it was saved with
+(`AppBarOverrideTests` ▸ `appBarDoesNotGroupByDefault` pins the
+key in the `TilingSettings` encoding). What does change, and is
+accepted, is every arrangement with no file to carry it: a
+composed Standard, built from code defaults, and an `init.lua`
+that never sets the value now show the App Bar ungrouped.
+
 **[Principle] A Space Bar glyph reaches its window; a list never
 switches by itself.** (#1528, owner rulings 2026-09-20 and
 2026-09-27.) On every Space, a glyph standing for one window
@@ -12635,6 +12728,22 @@ holding `thickness` is `kiwishelf`, whose every field
 stored bar's number onto the shelf rather than letting the
 default in, so the argument that no migration is owed carries
 over unchanged.
+
+:::unreleased
+One exception narrows "every screen": Glass, and so the first-run
+profile, thins the shelf to 32 pt when the MAIN screen's full
+frame is shorter than 1000 pt (#1952, owner ruling 2026-10-04). It is a height
+rule rather than a class, because a 13" and a 16" MacBook are one
+class and only the short panels pay the chrome — 40 pt twice is
+over 8% of a 956 pt screen. It stays one number on every screen,
+decided by the main one like every value no layout owns, and is
+not a second default a user has to know about: it is the value
+the slider shows, and only a fresh seed or picking Glass again
+takes it, so no stored file moves and plugging in a screen moves
+no bar. A separate "Compact" look was refused for the reason in
+*A bundled look is total*: a first run shows Glass, and Glass is
+also the shape reset (`StarterCompactShelfTests`).
+:::
 
 **"Which palette am I on" is computed, never remembered.**
 (#757.) The shelf marks the card whose colors the config it is

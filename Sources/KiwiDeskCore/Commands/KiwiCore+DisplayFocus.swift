@@ -71,7 +71,7 @@ extension KiwiCore {
     /// caller adds its own raise / warp / settle afterwards.
     func applyFocusedSpaceSwitch(to space: SpaceID) {
         state.workspaces.activate(space)
-        spaceSwitchRetile()
+        spaceSwitchRetile(asSwitch: true)
         emitSpaceChange()
     }
 
@@ -107,7 +107,11 @@ extension KiwiCore {
             target,
             priorFrontmost: priorFrontmost
         )
-        spaceSwitchRetile(newcomer: arriving ? id : nil, slide: slide)
+        spaceSwitchRetile(
+            asSwitch: true,
+            newcomer: arriving ? id : nil,
+            slide: slide
+        )
         raiseLandingFloats(thenFocus: id)
     }
 

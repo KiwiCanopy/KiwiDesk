@@ -42,9 +42,6 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// above-order panel takes it, or a raised target's band
     /// would cover the ring.
     private let levelOf: (CGWindowID) -> Int?
-    /// Re-stacks an ordered-in panel without AppKit's per-order
-    /// rights lookup (#1925); false sends it through AppKit.
-    var restack: (CGWindowID, Bool, CGWindowID) -> Bool
     /// Moves the panel's window to a top-left origin without
     /// AppKit's fence (#1956); false sends it through AppKit.
     var movePanel: (CGWindowID, CGPoint) -> Bool
@@ -68,15 +65,12 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         order: BorderGeometry.Order = .below,
         levelOf: @escaping (CGWindowID) -> Int? =
             AppKitBorderOverlay.windowLayer,
-        restack: @escaping (CGWindowID, Bool, CGWindowID) -> Bool =
-            SkyLight.orderWindow,
         movePanel: @escaping (CGWindowID, CGPoint) -> Bool,
         pass: @escaping @MainActor () -> UInt64 =
             MainRunLoopPass.current
     ) {
         orderMode = order
         self.levelOf = levelOf
-        self.restack = restack
         self.movePanel = movePanel
         self.pass = pass
     }
@@ -242,15 +236,8 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         {
             panel.level = NSWindow.Level(rawValue: raw)
         }
-        if isOrderedIn,
-            restack(
-                CGWindowID(panel.windowNumber),
-                orderMode == .above,
-                windowNumber
-            )
-        {
-            return
-        }
+        // AppKit's order, every time: WindowServer applies no
+        // SkyLight order to an AppKit panel (#1962).
         let createsWindow = panel.windowNumber <= 0
         panel.order(
             orderMode == .above ? .above : .below,
@@ -276,6 +263,36 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     func setDormant(_ dormant: Bool) {
         panel?.alphaValue = dormant ? 0 : 1
     }
+
+    /// Fades a dormant ring in over its content's layer: a
+    /// window's own alpha takes no Core Animation (#1959).
+    func reveal(reduceMotion: Bool) {
+        guard let layer = panel?.contentView?.layer else {
+            panel?.alphaValue = 1
+            return
+        }
+        // The fade reaches the render server ahead of the window's
+        // alpha, or one frame draws the ring whole.
+        CATransaction.begin()
+        layer.removeAnimation(forKey: "reveal")
+        layer.add(
+            BarMotion.slideFade(
+                from: 0,
+                to: 1,
+                begin: CACurrentMediaTime(),
+                duration: Self.revealDuration,
+                reduceMotion: reduceMotion
+            ),
+            forKey: "reveal"
+        )
+        CATransaction.commit()
+        CATransaction.flush()
+        panel?.alphaValue = 1
+    }
+
+    /// The reveal's length: a cue that the window has arrived,
+    /// shorter than the plates' own fade (#1959).
+    static let revealDuration: CFTimeInterval = 0.15
 
     private func makePanel() -> NSPanel {
         // BorderOverlayPanel avoids frame clamping on top edge (#436).

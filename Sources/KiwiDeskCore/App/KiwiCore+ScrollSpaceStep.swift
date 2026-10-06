@@ -34,7 +34,9 @@ extension KiwiCore {
     func wireScrollSpaceStep() {
         let session = ScrollSpaceStepSession()
         mouse.scroll.setHandler(.step) { [weak self] event in
-            self?.handleScrollSpaceStep(event, session: session)
+            self?.withUserMotion {
+                self?.handleScrollSpaceStep(event, session: session)
+            }
         }
     }
 
