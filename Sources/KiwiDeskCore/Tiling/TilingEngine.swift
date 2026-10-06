@@ -115,7 +115,7 @@ public final class TilingEngine {
 
     /// Which Spaces' parks a re-issuing pass forces (#1508).
     var stashDepartures = StashDepartures()
-    /// The input-quiescence gate at the two frame doors (#804).
+    /// The input-quiescence gate `KiwiCore.retile` asks (#804).
     let motionGate = MotionGate()
 
     /// Resolves the AX element of a window (wired to the
@@ -207,9 +207,6 @@ public final class TilingEngine {
         }
         motionGate.cause = { [applier] in applier.cause() }
         motionGate.clock = { [applier] in applier.clock() }
-        motionGate.release = { [weak self] id, move in
-            self?.releaseHeldMotion(id, move)
-        }
         animation.onAnimationStart = { [applier] id in
             applier.beginAnimating(id)
         }

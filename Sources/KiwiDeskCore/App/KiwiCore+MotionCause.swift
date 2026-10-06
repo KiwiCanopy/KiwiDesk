@@ -35,6 +35,14 @@ extension KiwiCore {
         tiler.motionGate.quiescence.buttonsDown = { [weak self] in
             (self?.mouse.pressedButtons() ?? 0) != 0
         }
+        tiler.motionGate.release = { [weak self] owed in
+            self?.retile(
+                animated: owed.animated,
+                pass: owed.pass,
+                newlyCreatedWindow: owed.newlyCreatedWindow,
+                sizing: owed.sizing
+            )
+        }
         tiler.applier.cause = { [weak self] in
             self?.motionCause ?? .ambient
         }

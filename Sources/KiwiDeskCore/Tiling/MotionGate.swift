@@ -1,30 +1,50 @@
 import CoreGraphics
 import Foundation
 
-/// The input-quiescence gate (#804 ▸ Ruling): ambient window motion,
-/// and a user call's late tail, wait for the hand to rest; motion a
-/// KiwiDesk control is making right now passes, and discharges every
-/// held one with it. Asked at the engine's two frame doors
-/// (`applyFrame`, `setFrame`) BEFORE they stamp the placement or
-/// retire an ask, so a held move records nothing until it is sent.
-/// Only motion waits: state, the bars and the rings move at once.
+/// The input-quiescence gate (#804 ▸ Ruling): an ambient layout
+/// pass, and a user call's late tail, wait for the hand to rest.
+/// What waits is the PASS, never its frames: a held pass becomes a
+/// retile owed, re-run against the state as it is when the hand
+/// rests — so a later pass, a cancelled tail, a changed screen or
+/// a closed window is judged afresh, and the layout loop records
+/// its asks and stamps its placements only for frames it sends. A
+/// pass a KiwiDesk control makes right now runs, and pays the debt
+/// with it. Asked once, by `KiwiCore.retile`.
 @MainActor
 final class MotionGate {
-    /// One held move, latest per window.
-    enum Held: Equatable {
-        case frame(
-            from: CGRect,
-            to: CGRect,
-            animated: Bool,
-            isNew: Bool,
-            sizing: BatchSizing
-        )
-        case set(CGRect, setSize: Bool)
+    /// One owed pass: the strongest of the passes it stands for.
+    struct Owed: Equatable {
+        var animated: Bool?
+        var pass: RetilePass
+        var newlyCreatedWindow: WindowID?
+        var sizing: BatchSizing
+
+        /// Two held passes as one: the stronger pass, a spring
+        /// promise only when both made it (#593), the newest
+        /// window and animation choice.
+        func merged(with newer: Owed) -> Owed {
+            Owed(
+                animated: newer.animated ?? animated,
+                pass: Self.rank(newer.pass) > Self.rank(pass)
+                    ? newer.pass : pass,
+                newlyCreatedWindow: newer.newlyCreatedWindow
+                    ?? newlyCreatedWindow,
+                sizing: sizing == newer.sizing ? sizing : .mayInstantSize
+            )
+        }
+
+        private static func rank(_ pass: RetilePass) -> Int {
+            switch pass {
+            case .event: return 0
+            case .reissue: return 1
+            case .apply: return 2
+            }
+        }
     }
 
     let quiescence = InputQuiescence()
-    /// The cause of the write being asked about — the applier's
-    /// one reading.
+    /// The cause of the pass being asked about — the applier's one
+    /// reading.
     var cause: @MainActor () -> MotionCause = { .ambient }
     var clock: @MainActor () -> TimeInterval = { 0 }
     /// Re-asks after `delay`; a test drives it by hand.
@@ -35,46 +55,42 @@ final class MotionGate {
                     MainActor.assumeIsolated(work)
                 }
             }
-    /// Sends one released move back through its door.
-    var release: @MainActor (WindowID, Held) -> Void = { _, _ in }
+    /// Runs the owed pass, now admitted.
+    var release: @MainActor (Owed) -> Void = { _ in }
     var onLog: @MainActor (String) -> Void = CoreLog.write
 
-    private(set) var held: [WindowID: Held] = [:]
-    private var heldSince: TimeInterval?
+    private(set) var owed: Owed?
+    private var owedSince: TimeInterval?
     private var armed = false
     private var releasing = false
 
-    func isHolding(_ id: WindowID) -> Bool { held[id] != nil }
-
-    /// Whether this write to `id` waits; true means the door sends
-    /// nothing now.
-    func holds(_ id: WindowID, _ move: Held) -> Bool {
-        guard !releasing else { return false }
+    /// Whether this layout pass waits; true means the caller lays
+    /// nothing out now. An admitted pass pays any debt, since it
+    /// re-derives every frame the owed one would have sent.
+    func defers(_ pass: Owed) -> Bool {
+        if releasing { return false }
         let cause = cause()
-        if case .user(_, late: false) = cause {
-            held[id] = nil
-            flush(why: "a user pass")
+        let heldFor = owedSince.map { clock() - $0 }
+        var user = false
+        if case .user(_, late: false) = cause { user = true }
+        if user || quiescence.admits(heldFor: heldFor) {
+            settle(why: user ? "a user pass" : "the hand rests")
             return false
         }
-        let heldFor = heldSince.map { clock() - $0 }
-        if quiescence.admits(heldFor: heldFor) {
-            flush(why: "the hand rests")
-            return false
-        }
-        held[id] = merged(held[id], move)
-        if heldSince == nil {
-            heldSince = clock()
-            onLog("motion held: \(Self.describe(cause))")
+        owed = owed.map { $0.merged(with: pass) } ?? pass
+        if owedSince == nil {
+            owedSince = clock()
+            onLog("layout held: \(Self.describe(cause))")
         }
         arm()
         return true
     }
 
-    /// Forgets every held move: KiwiDesk is stopping or resting,
-    /// or the saved arrangement was discarded.
+    /// Forgets the debt: KiwiDesk is stopping, and the gather owns
+    /// the motion now.
     func dropAll() {
-        held = [:]
-        heldSince = nil
+        owed = nil
+        owedSince = nil
     }
 
     private func arm() {
@@ -83,76 +99,33 @@ final class MotionGate {
         schedule(InputQuiescence.poll) { [weak self] in
             guard let self else { return }
             self.armed = false
-            guard !self.held.isEmpty else {
-                self.heldSince = nil
-                return
+            guard let owed = self.owed else { return }
+            let heldFor = self.owedSince.map { self.clock() - $0 }
+            guard self.quiescence.admits(heldFor: heldFor) else {
+                return self.arm()
             }
-            let heldFor = self.heldSince.map { self.clock() - $0 }
-            if self.quiescence.admits(heldFor: heldFor) {
-                self.flush(why: "the hand rests")
-            } else {
-                self.arm()
-            }
+            self.settle(why: "the hand rests")
+            self.releasing = true
+            defer { self.releasing = false }
+            self.release(owed)
         }
     }
 
-    private func flush(why: String) {
-        guard !held.isEmpty else {
-            heldSince = nil
-            return
-        }
-        let moves = held
-        let waited = heldSince.map { clock() - $0 } ?? 0
-        held = [:]
-        heldSince = nil
+    /// The debt is paid — by the release, or by an admitted pass.
+    private func settle(why: String) {
+        guard owed != nil else { return }
+        let waited = owedSince.map { clock() - $0 } ?? 0
+        owed = nil
+        owedSince = nil
         onLog(
-            "motion released after \(Int(waited * 1000)) ms "
-                + "(\(moves.count) window(s), \(why))"
+            "layout released after \(Int(waited * 1000)) ms (\(why))"
         )
-        releasing = true
-        defer { releasing = false }
-        for (id, move) in moves { release(id, move) }
-    }
-
-    /// Latest wins; a size set is never dropped, and a slide keeps
-    /// the frame it starts from, since the window has not moved.
-    private func merged(_ old: Held?, _ new: Held) -> Held {
-        switch (old, new) {
-        case (.set(_, let wasSized)?, .set(let frame, let sized)):
-            return .set(frame, setSize: wasSized || sized)
-        case (
-            .frame(let from, _, _, _, _)?,
-            .frame(_, let to, let a, let n, let s)
-        ):
-            return .frame(from: from, to: to, animated: a, isNew: n, sizing: s)
-        default:
-            return new
-        }
     }
 
     private static func describe(_ cause: MotionCause) -> String {
         switch cause {
         case .ambient: return "ambient"
         case .user: return "user, late"
-        }
-    }
-}
-
-extension TilingEngine {
-    /// Sends a move the gate released back through its own door.
-    func releaseHeldMotion(_ id: WindowID, _ move: MotionGate.Held) {
-        switch move {
-        case .frame(let from, let to, let animated, let isNew, let sizing):
-            applyFrame(
-                id,
-                from: from,
-                to: to,
-                animated: animated,
-                isNewWindow: isNew,
-                sizing: sizing
-            )
-        case .set(let frame, let setSize):
-            setFrame(id, frame, setSize: setSize)
         }
     }
 }

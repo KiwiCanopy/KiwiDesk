@@ -1899,14 +1899,14 @@ editing here:
   clause). **Ambient motion and a late user tail wait for the
   hand to rest** — buttons up and the mouse quiet, past the
   patience bound buttons up alone — in the one `MotionGate`,
-  asked at the engine's two frame doors (`applyFrame`,
-  `setFrame`) ahead of their placement stamp and ask retirement,
-  and the layout loop records no ask for a held move; a
-  control's own motion passes and discharges every held one.
-  Only motion waits: state, bars and rings move at once, and an
-  animation the gate admitted ticks unasked, as does a write the
-  #1956 hold releases. A new frame door asks the gate, or the
-  census's door clause reds (`MotionScopeCensusTests`,
+  asked by `KiwiCore.retile` alone: what waits is the PASS, owed
+  and re-run against the state as it then is, never a stored
+  frame, so a held pass sends, stamps and asks nothing, and a
+  pass a control makes now runs and pays the debt. State, bars
+  and rings move at once. A frame written outside a layout pass
+  (a restore's own writes, a float's placement) is not gated
+  yet. The engine's pass is driven only from that door
+  (`MotionScopeCensusTests` ▸ `passesAskTheGate`,
   `MotionGateTests`).
 - **A re-issuing pass forces only the parks a departure owes
   (#1508)**, or every switch re-parks every hidden window — the

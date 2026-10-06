@@ -17,13 +17,19 @@ final class InputQuiescence {
     /// Whether any mouse button is down — `MouseTracker`'s one
     /// read, wired at bootstrap; unwired, no button is down.
     var buttonsDown: @MainActor () -> Bool = { false }
-    /// Seconds since the mouse last moved, from WindowServer's own
-    /// record — no event monitor, no permission.
+    /// Seconds since the mouse last moved, a drag included, from
+    /// WindowServer's own record — no event monitor, no permission.
     var sinceMouseMoved: @MainActor () -> TimeInterval = {
-        CGEventSource.secondsSinceLastEventType(
-            .combinedSessionState,
-            eventType: .mouseMoved
-        )
+        let moves: [CGEventType] = [
+            .mouseMoved, .leftMouseDragged, .rightMouseDragged,
+            .otherMouseDragged,
+        ]
+        return moves.map {
+            CGEventSource.secondsSinceLastEventType(
+                .combinedSessionState,
+                eventType: $0
+            )
+        }.min() ?? .infinity
     }
 
     /// Whether ambient motion may run now, given how long it has

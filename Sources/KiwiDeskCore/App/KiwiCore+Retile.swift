@@ -47,6 +47,20 @@ extension KiwiCore {
             resolveSpaceDisplays()
             emitSpaceChange()
         }
+        // Ambient motion waits for the hand to rest (#804): the pass
+        // is owed and re-run then; state, bars and rings move now.
+        let owed = MotionGate.Owed(
+            animated: animated,
+            pass: pass,
+            newlyCreatedWindow: newlyCreatedWindow,
+            sizing: sizing
+        )
+        if tiler.motionGate.defers(owed) {
+            updateBars()
+            updateBorders()
+            updateStickyMarks()
+            return
+        }
         // Session weights are validated at WRITE time against
         // the membership at press time; a membership or span
         // change afterwards can leave them infeasible, and the

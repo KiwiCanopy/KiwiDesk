@@ -2048,12 +2048,18 @@ command's own but lands later, when the next click may already be
 aimed, so it waits like ambient motion. Keyboard activity never
 counts: moving a window steals no keystroke.
 
-Only motion waits. The windows' records, the bars and the rings
-move at once, and a held move stamps nothing — no placement, no
-size ask — until it is actually sent, so a frame that was never
-written is never judged against an echo. The cost: after you stop
-the mouse, an ambient reflow lands up to ~300 ms later than it
-did, and while you hold a button it does not land at all.
+What waits is the layout pass, never its frames. A held pass is
+owed and run again once the hand rests, against the windows as
+they are by then, so nothing stale lands: a later pass, a closed
+window or a changed screen is simply part of what it lays out.
+Your own next pass pays the debt the same way. The windows'
+records, the bars and the rings move at once, and a held pass
+stamps nothing, no placement and no size ask, so a frame that was
+never written is never judged against an echo. A frame written
+outside a layout pass, such as a restore's own writes or a new
+float's placement, is not held yet. The cost: after you stop the
+mouse, an ambient reflow lands up to ~300 ms later than it did,
+and while you hold a button it does not land at all.
 :::
 
 ### A placement bounce is the app's answer, not the user's (#1161)

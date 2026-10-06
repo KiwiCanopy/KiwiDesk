@@ -77,8 +77,6 @@ extension TilingEngine {
             isNewWindow: isNew,
             sizing: promised
         )
-        // A held move sent nothing, so it asks nothing (#804).
-        guard !motionGate.isHolding(id) else { return }
         boundLearner.recordAsk(
             id,
             size: issued.size,
