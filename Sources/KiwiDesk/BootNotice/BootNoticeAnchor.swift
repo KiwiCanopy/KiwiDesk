@@ -61,6 +61,10 @@ enum BootNoticeAnchor {
     /// the notice does not jump when a hidden bar slides down.
     @MainActor
     static func menuBarHeight(of screen: NSScreen) -> CGFloat {
-        max(screen.safeAreaInsets.top, NSStatusBar.system.thickness)
+        max(
+            screen.safeAreaInsets.top,
+            NSApp.mainMenu?.menuBarHeight ?? 0,
+            24
+        )
     }
 }

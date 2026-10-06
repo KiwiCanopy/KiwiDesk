@@ -13120,7 +13120,9 @@ drag visuals' and the sticky mark's — stored side by side in the
 profile.
 
 :::unreleased
-The Space switch plates' leaf joins them (#1956).
+The Space switch plates' leaf joins them (#1956). The slow-boot
+notice (#1715) reads the panel's leaf rather than storing one of
+its own.
 :::
 
 **Profile-scoped, and the alternative was not merely riskier but
@@ -14760,6 +14762,32 @@ dismissal policy and an anchor under a notch); and a **command
 queue** during boot (a retile queued at second 2 firing at second
 9 is a worse surprise than the one being removed, and a new state
 machine paid on every boot to save seconds on heavy ones).
+
+:::unreleased
+**A slow boot earns a quiet notice; the HUD stays rejected for
+every other boot** ([#1715](https://github.com/KiwiCanopy/KiwiDesk/issues/1715),
+owner rulings 2026-09-27 and 2026-10-06). On a login boot, the
+dimmed mark and the menu's count row are easy to miss, so a boot
+not ready 2 s after it began shows one capsule near the
+KiwiDesk item. What sets it apart from the rejected HUD answers
+each objection in turn:
+
+- **Uninvited at every login:** it appears only past the
+  threshold, which a light session never reaches.
+- **A dismissal policy:** it has none to need. It never takes
+  focus or the mouse, and it leaves by itself at ready, after
+  at least 1 s on screen so it never flickers.
+- **An anchor under a notch:** it centres under the item where
+  the item is visible, and otherwise sits top-right below the
+  menu bar, where macOS puts system status.
+
+It says the tour's sentence word for word (`BootCountText`): the
+number counts apps gone through, and "Arranging your windows · N
+of M" would have read as a window count. It stands down where the
+shelf does (full screen, a presentation), while the tour owns the
+screen, and after an update relaunch, where "What's new" already
+narrates the boot. The full-screen overlay stays rejected.
+:::
 
 **One slow app is deferred, never abandoned.** Chunking cannot
 divide a single app's AX work: on the measured session one app's

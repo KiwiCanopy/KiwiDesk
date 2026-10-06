@@ -154,8 +154,10 @@ final class BootNoticeController {
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
         panel.hidesOnDeactivate = false
+        let model = self.model
         panel.contentView = NSHostingView(
-            rootView: BootNoticeView(model: model)
+            rootView: LocaleScopedRoot { BootNoticeView(model: model) }
+                .environmentObject(LocalizationManager.shared)
         )
         return panel
     }
