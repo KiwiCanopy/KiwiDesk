@@ -27,8 +27,9 @@ editing AX code:
 - **The activation, focus and reported-close arms read OFF the
   main actor (#1930, #1888).** `appActivated`,
   `handleFocusedWindowChanged` and a close the destroy/minimize
-  arm already reported reconcile through `reconcileOffMain`, and the activation reads
-  its focused window through `requestFocusedWindowID`; a new
+  arm already reported reconcile through `reconcileOffMain`, and
+  the activation reads its focused window through
+  `requestFocusedWindowID`; a new
   event-driven caller takes the same doors or joins
   `SyncReconcileCensusTests`' `allowed` map with its reason. The
   cost of these reads is the APP's: System Settings answered its
