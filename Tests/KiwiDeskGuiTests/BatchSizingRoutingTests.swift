@@ -132,7 +132,7 @@ struct BatchSizingRoutingTests {
         // mid-retile bound confirmation — it threads `sizing`
         // through unchanged and promises nothing of its own.
         "KiwiDeskCore/App/KiwiCore+Retile.swift":
-            Site(names: 8, promises: 0),
+            Site(names: 10, promises: 0),
         // The per-dispatch flag the layout setters raise.
         "KiwiDeskCore/App/KiwiCore.swift":
             Site(names: 1, promises: 0),

@@ -152,6 +152,58 @@ struct MotionGateTests {
         #expect(desk.gate.owed?.sizing == .mayInstantSize)
     }
 
+    /// Holding a switch would split the desk (owner, 2026-10-06).
+    @Test("A Space or Desktop switch is never held")
+    func switchNeverWaits() throws {
+        let desk = try Desk()
+        desk.stillFor = 0
+        desk.core.retile(pass: .reissue)
+        #expect(!desk.issued.isEmpty)
+        #expect(desk.gate.owed == nil)
+    }
+
+    /// What was owed rides the admitted pass, so a weaker pass
+    /// never drops an apply's probe or a new window's entrance.
+    @Test("An admitted pass carries the debt")
+    func admittedPassCarriesDebt() throws {
+        let desk = try Desk()
+        desk.stillFor = 0
+        let owed = MotionGate.Owed(
+            animated: nil,
+            pass: .apply,
+            newlyCreatedWindow: WindowID(2),
+            sizing: .mayInstantSize
+        )
+        #expect(desk.gate.admit(owed) == nil)
+        let run = desk.core.withUserMotion {
+            desk.gate.admit(
+                MotionGate.Owed(
+                    animated: true,
+                    pass: .event,
+                    newlyCreatedWindow: nil,
+                    sizing: .mayInstantSize
+                )
+            )
+        }
+        #expect(run?.pass == .apply)
+        #expect(run?.newlyCreatedWindow == WindowID(2))
+        #expect(desk.gate.owed == nil)
+    }
+
+    /// The restore orders the frames the pass draws (#153), so it
+    /// waits for an owed pass as for an animation.
+    @Test("A z-order restore waits for the owed pass")
+    func restoreWaitsForOwedPass() throws {
+        let desk = try Desk()
+        desk.stillFor = 0
+        desk.core.retile()
+        desk.core.scheduleZOrderRestore()
+        #expect(desk.core.pendingZOrderRestore)
+        desk.stillFor = 10
+        desk.poll()
+        #expect(!desk.core.pendingZOrderRestore)
+    }
+
     @Test("Stopping forgets the debt")
     func dropForgets() throws {
         let desk = try Desk()

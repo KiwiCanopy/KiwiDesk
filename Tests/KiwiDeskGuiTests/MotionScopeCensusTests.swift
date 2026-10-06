@@ -108,7 +108,7 @@ struct MotionScopeCensusTests {
     /// else, so no pass can lay windows out around it (#804).
     @Test("Every layout pass asks the gate")
     func passesAskTheGate() throws {
-        let asks = try Self.counts(of: "motionGate.defers(")
+        let asks = try Self.counts(of: "motionGate.admit(")
         #expect(asks == ["KiwiDeskCore/App/KiwiCore+Retile.swift": 1])
         let passes = try Self.counts(of: "tiler.retile(")
         #expect(passes == ["KiwiDeskCore/App/KiwiCore+Retile.swift": 2])

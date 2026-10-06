@@ -32,10 +32,6 @@ extension KiwiCore {
         newlyCreatedWindow: WindowID? = nil,
         sizing: BatchSizing = .mayInstantSize
     ) {
-        // The whole main-actor cost of a pass, bars and rings
-        // included (#1508).
-        let finish = tiler.meter.beginRetile(pass)
-        defer { finish() }
         // A held Space retires the moment it empties (#1507) —
         // every membership change retiles, so this is its one
         // choke point too, ahead of anything that lays it out.
@@ -49,18 +45,26 @@ extension KiwiCore {
         }
         // Ambient motion waits for the hand to rest (#804): the pass
         // is owed and re-run then; state, bars and rings move now.
-        let owed = MotionGate.Owed(
+        let asked = MotionGate.Owed(
             animated: animated,
             pass: pass,
             newlyCreatedWindow: newlyCreatedWindow,
             sizing: sizing
         )
-        if tiler.motionGate.defers(owed) {
+        guard let run = tiler.motionGate.admit(asked) else {
             updateBars()
             updateBorders()
             updateStickyMarks()
             return
         }
+        let animated = run.animated
+        let pass = run.pass
+        let newlyCreatedWindow = run.newlyCreatedWindow
+        let sizing = run.sizing
+        // The whole main-actor cost of a pass that runs, bars and
+        // rings included (#1508).
+        let finish = tiler.meter.beginRetile(pass)
+        defer { finish() }
         // Session weights are validated at WRITE time against
         // the membership at press time; a membership or span
         // change afterwards can leave them infeasible, and the

@@ -2052,12 +2052,16 @@ What waits is the layout pass, never its frames. A held pass is
 owed and run again once the hand rests, against the windows as
 they are by then, so nothing stale lands: a later pass, a closed
 window or a changed screen is simply part of what it lays out.
-Your own next pass pays the debt the same way. The windows'
+Your own next pass carries the debt with it. A Space or Desktop
+switch is never held, wherever it comes from: holding it would
+show the new Space in the bar while the old windows stay up. The windows'
 records, the bars and the rings move at once, and a held pass
 stamps nothing, no placement and no size ask, so a frame that was
 never written is never judged against an echo. A frame written
 outside a layout pass, such as a restore's own writes or a new
-float's placement, is not held yet. The cost: after you stop the
+float's placement, is not held: those are #1991's. Of two
+windows arriving during one hold, only the newer keeps its
+start-at-target entrance. The cost: after you stop the
 mouse, an ambient reflow lands up to ~300 ms later than it did,
 and while you hold a button it does not land at all.
 :::

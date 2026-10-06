@@ -8,7 +8,7 @@ import Foundation
 /// rests — so a later pass, a cancelled tail, a changed screen or
 /// a closed window is judged afresh, and the layout loop records
 /// its asks and stamps its placements only for frames it sends. A
-/// pass a KiwiDesk control makes right now runs, and pays the debt
+/// pass a KiwiDesk control makes right now runs, carrying the debt
 /// with it. Asked once, by `KiwiCore.retile`.
 @MainActor
 final class MotionGate {
@@ -64,18 +64,21 @@ final class MotionGate {
     private var armed = false
     private var releasing = false
 
-    /// Whether this layout pass waits; true means the caller lays
-    /// nothing out now. An admitted pass pays any debt, since it
-    /// re-derives every frame the owed one would have sent.
-    func defers(_ pass: Owed) -> Bool {
-        if releasing { return false }
+    /// The pass to run now — `pass` with any debt merged in, so
+    /// what was owed is never lost to a weaker pass — or nil when
+    /// it waits. A Space or Desktop switch (`.reissue`) never
+    /// waits: holding it would split the desk, the bars showing a
+    /// Space whose windows are not there (owner ruling 2026-10-06).
+    func admit(_ pass: Owed) -> Owed? {
+        if releasing { return pass }
         let cause = cause()
         let heldFor = owedSince.map { clock() - $0 }
-        var user = false
+        var user = pass.pass == .reissue
         if case .user(_, late: false) = cause { user = true }
         if user || quiescence.admits(heldFor: heldFor) {
+            let run = owed.map { $0.merged(with: pass) } ?? pass
             settle(why: user ? "a user pass" : "the hand rests")
-            return false
+            return run
         }
         owed = owed.map { $0.merged(with: pass) } ?? pass
         if owedSince == nil {
@@ -83,7 +86,7 @@ final class MotionGate {
             onLog("layout held: \(Self.describe(cause))")
         }
         arm()
-        return true
+        return nil
     }
 
     /// Forgets the debt: KiwiDesk is stopping, and the gather owns
