@@ -56,7 +56,10 @@ struct FloatDropBottomFitTests {
 
     /// A core showing a bottom Space Bar over the window's space,
     /// one flag float at `frame`; nil without a screen to paint on.
-    private func barredCore(frame: CGRect) -> KiwiCore? {
+    private func barredCore(
+        frame: CGRect,
+        edge: AppBarEdge = .bottom
+    ) -> KiwiCore? {
         guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
@@ -78,7 +81,7 @@ struct FloatDropBottomFitTests {
         )
         core.resolveSpaceDisplays(mainID: display.id)
         core.tiler.settings.spaceBarStyle.enabled = true
-        core.tiler.settings.barEdge = .bottom
+        core.tiler.settings.barEdge = edge
         core.tiler.settings.kiwishelf.thickness = 40
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
@@ -138,6 +141,27 @@ struct FloatDropBottomFitTests {
         let issued = try #require(core.tiler.recentInstantTarget(id))
         #expect(issued.height == 200)
         #expect(issued.maxY <= strip.minY)
+    }
+
+    @Test(
+        "a top bar's push past the bottom is trimmed too",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func topBarPushIsTrimmed() throws {
+        let screen = try #require(NSScreen.screens.first).frame
+        let frame = CGRect(
+            x: screen.minX + 100,
+            y: screen.minY,
+            width: 600,
+            height: screen.height - 10
+        )
+        let core = try #require(barredCore(frame: frame, edge: .top))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let strip = try #require(core.spaceBars.shownStrips.first?.1)
+        drop(core, frame)
+        let issued = try #require(core.tiler.recentInstantTarget(id))
+        #expect(issued.minY >= strip.maxY)
+        #expect(issued.maxY <= screen.maxY)
     }
 
     @Test(
