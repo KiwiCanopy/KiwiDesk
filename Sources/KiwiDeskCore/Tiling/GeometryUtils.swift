@@ -123,12 +123,25 @@ public enum GeometryUtils {
 
     /// True when the macOS menu bar is configured to auto-hide.
     public static var menuBarAutoHides: Bool {
+        #if DEBUG
+            if let menuBarAutoHidesOverride {
+                return menuBarAutoHidesOverride
+            }
+        #endif
         let domain = UserDefaults.standard.persistentDomain(
             forName: UserDefaults.globalDomain
         )
         return (domain?["_HIHideMenuBar"] as? NSNumber)?
             .boolValue ?? false
     }
+
+    #if DEBUG
+        /// Test seam over `menuBarAutoHides`; nil reads the host's
+        /// global default. A test core pins it, so a fixture's
+        /// usable area never follows the developer's menu-bar
+        /// setting (#1894).
+        nonisolated(unsafe) static var menuBarAutoHidesOverride: Bool?
+    #endif
 
     /// Extends visibleFrame top edge over menu bar while preserving notch
     /// safeTop.
