@@ -14768,8 +14768,10 @@ machine paid on every boot to save seconds on heavy ones).
 every other boot** ([#1715](https://github.com/KiwiCanopy/KiwiDesk/issues/1715),
 owner rulings 2026-09-27 and 2026-10-06). On a login boot, the
 dimmed mark and the menu's count row are easy to miss, so a boot
-not ready 2 s after it began shows one capsule near the
-KiwiDesk item. What sets it apart from the rejected HUD answers
+not ready 3 s after it began shows one capsule near the
+KiwiDesk item. The first ruling said ~2 s; a warm boot of the
+owner's 50-app desk measured 2.1–2.7 s, which would have
+flashed it on every relaunch. What sets it apart from the rejected HUD answers
 each objection in turn:
 
 - **Uninvited at every login:** it appears only past the

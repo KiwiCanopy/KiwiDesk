@@ -27,12 +27,13 @@ struct BootNoticeTimelineTests {
         #expect(timeline.phase(.idle, at: 5, standsDown: false) == .cancel)
         let effect = timeline.phase(scanning, at: 10, standsDown: false)
         #expect(effect == .showAt(10 + T.threshold))
-        #expect(!timeline.showsAt(11.9, standsDown: false))
-        #expect(timeline.showsAt(12, standsDown: false))
-        #expect(!timeline.showsAt(12, standsDown: true))
+        let due = 10 + T.threshold
+        #expect(!timeline.showsAt(due - 0.1, standsDown: false))
+        #expect(timeline.showsAt(due, standsDown: false))
+        #expect(!timeline.showsAt(due, standsDown: true))
         // A later count does not push the show back.
         #expect(timeline.phase(scanning, at: 11, standsDown: false) == .none)
-        #expect(timeline.showsAt(12, standsDown: false))
+        #expect(timeline.showsAt(due, standsDown: false))
     }
 
     @Test("a boot ready before the threshold never shows")
@@ -40,7 +41,7 @@ struct BootNoticeTimelineTests {
         var timeline = T()
         _ = timeline.phase(scanning, at: 10, standsDown: false)
         #expect(timeline.phase(.ready, at: 11.5, standsDown: false) == .cancel)
-        #expect(!timeline.showsAt(12, standsDown: false))
+        #expect(!timeline.showsAt(10 + T.threshold, standsDown: false))
     }
 
     @Test("a shown notice stays at least the minimum")
@@ -67,7 +68,7 @@ struct BootNoticeTimelineTests {
         var timeline = T()
         _ = timeline.phase(scanning, at: 10, standsDown: false)
         #expect(timeline.phase(scanning, at: 11, standsDown: true) == .cancel)
-        #expect(!timeline.showsAt(12, standsDown: false))
+        #expect(!timeline.showsAt(10 + T.threshold, standsDown: false))
     }
 
     @Test("a stop hides a shown notice and the next boot starts over")
@@ -76,6 +77,6 @@ struct BootNoticeTimelineTests {
         #expect(timeline.phase(.idle, at: 13, standsDown: false) == .hideNow)
         let effect = timeline.phase(scanning, at: 30, standsDown: false)
         #expect(effect == .showAt(30 + T.threshold))
-        #expect(timeline.showsAt(32, standsDown: false))
+        #expect(timeline.showsAt(30 + T.threshold, standsDown: false))
     }
 }

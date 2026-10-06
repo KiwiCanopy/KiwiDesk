@@ -7,9 +7,10 @@ import KiwiDeskCore
 /// `minimumShown` so it never flickers, stands down for good once
 /// a stand-down meets it, and starts over with each boot.
 struct BootNoticeTimeline: Equatable {
-    /// Boot that reaches ready sooner never sees the notice; at
-    /// 1 s it would flash on ordinary desks (owner ruling).
-    static let threshold: TimeInterval = 2
+    /// Boot that reaches ready sooner never sees the notice. A warm
+    /// boot of a 50-app desk measured 2.1–2.7 s, so 2 s flashed it
+    /// on every relaunch (owner ruling 2026-10-07).
+    static let threshold: TimeInterval = 3
     static let minimumShown: TimeInterval = 1
 
     /// What the controller does next.
