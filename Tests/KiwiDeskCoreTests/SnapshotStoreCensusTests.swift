@@ -223,7 +223,7 @@ struct SnapshotStoreCensusTests {
         for named in [
             "state.floatFrames", "tiler.boundLearner.lastAsks",
             "state.userFloated", "tiler.monocleShownMembers",
-            "state.heldSpaces", "state.temporaryArmed",
+            "state.heldSpaces", "state.temporaryArmed", "ownFronts",
             "tiler.stashDepartures.owed",
             "state.profilePartitioning.byArrangement[][]",
         ] {

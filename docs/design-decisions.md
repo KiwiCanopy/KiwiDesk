@@ -2019,7 +2019,8 @@ window last. Order cannot serve here: when one own window
 replaces another, the closing window's destroy reaches Core after
 the front, and the close-return restack's stamp is the newer of
 the two. The intent lasts the echo window's ~1 s and ends early
-once focus is honored in another app, since the user going
+once focus is honored on a tracked window of another app (an
+untracked one leaves it to age out), since the user going
 elsewhere makes a later echo of that window a raise again. The
 accepted cost: inside that second, a re-raise of the fronted
 window while the user moves between KiwiDesk's own windows is

@@ -9,11 +9,6 @@ extension KiwiCore {
     /// since the report it outranks is aged on that bound.
     static let ownFrontWindow: TimeInterval = zOrderRaiseEchoWindow
 
-    /// This process — whose windows are the ones a front names.
-    var ownProcessID: pid_t {
-        pid_t(ProcessInfo.processInfo.processIdentifier)
-    }
-
     /// The GUI's front of own window `number`, reached through
     /// `NSApplication.forceFront` alone. Main actor; prunes by
     /// age. A number that is no window id is ignored.
@@ -38,7 +33,8 @@ extension KiwiCore {
         return now.timeIntervalSince(at) < Self.ownFrontWindow
     }
 
-    /// Ends every front once focus is honored in ANOTHER app: the
+    /// Ends every front once focus is honored on a tracked window of
+    /// ANOTHER app (an untracked one leaves it to age out): the
     /// user went elsewhere, so a later echo of a fronted window is
     /// a raise again, not that front's report. A shuffle among our
     /// own windows keeps them — the window a close hands focus
@@ -46,7 +42,7 @@ extension KiwiCore {
     func retireOwnFronts(honoring id: WindowID) {
         guard !ownFronts.isEmpty,
             let pid = state.windows[id]?.pid,
-            pid != ownProcessID
+            !EventLoop.isOwnProcess(pid)
         else { return }
         ownFronts.removeAll()
     }

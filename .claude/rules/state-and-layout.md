@@ -810,7 +810,7 @@ editing here:
   front is an intent and the close-return restack stamps the
   window AFTER it — minted through `forceFront`'s hook into
   `noteOwnFront(number:)` alone and retired once focus is
-  honored in another app (#1861, `OwnFrontEchoTests`,
+  honored on a tracked window of another app (#1861, `OwnFrontEchoTests`,
   `OwnFrontWiringTests` ▸ `doorHasOneCaller`). A ledger is cleared where
   its id dies (`forgetGoneWindow`) and rekeyed on a tab switch,
   and a CONSUMER of the self ledger reads a stamp's liveness
