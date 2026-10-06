@@ -1,7 +1,6 @@
 import Foundation
 
-/// Quote-aware source scrubbing, and the member a source offset
-/// sits in.
+/// Quote-aware source scrubbing.
 ///
 /// These live in the `SourceScan` family rather than beside their
 /// caller for the reason that family exists: a second copy of a
@@ -22,55 +21,5 @@ extension SourceScan {
         _ source: String
     ) -> String {
         stripped(Array(source), blanking: true)
-    }
-
-    /// Every member kind that can hold a view.
-    ///
-    /// An UNRECOGNISED kind is the dangerous case for any caller
-    /// keying an allow-list on a member name: the name would stay
-    /// whatever the last parsed member was, so a `subscript` or
-    /// `init` written after an exempt member inherits its
-    /// exemption. guard-prover shipped that mutation past a cut
-    /// listing only `var` and `func`. A kind still missing
-    /// degrades the same way — add one rather than assuming the
-    /// shape is unreachable.
-    static let memberKeywords = [
-        "var ", "func ", "let ", "subscript", "init",
-        "struct ", "enum ", "extension ",
-    ]
-
-    /// The member a source offset sits in — the nearest preceding
-    /// declaration name, or the bare keyword for an unnamed one
-    /// (`subscript(`, `init(`), which must RESET rather than fall
-    /// through to the previous member.
-    static func enclosingMember(
-        of source: String,
-        at offset: String.Index
-    ) -> String {
-        var name = "<file scope>"
-        var cursor = source.startIndex
-        while cursor < offset {
-            let lineEnd =
-                source[cursor...].firstIndex(of: "\n")
-                ?? source.endIndex
-            let line = source[cursor..<lineEnd]
-            for keyword in memberKeywords {
-                guard let range = line.range(of: keyword) else {
-                    continue
-                }
-                let rest = line[range.upperBound...]
-                let identifier = rest.prefix {
-                    $0.isLetter || $0.isNumber || $0 == "_"
-                }
-                name =
-                    identifier.isEmpty
-                    ? keyword.trimmingCharacters(in: .whitespaces)
-                    : String(identifier)
-            }
-            cursor =
-                lineEnd < source.endIndex
-                ? source.index(after: lineEnd) : source.endIndex
-        }
-        return name
     }
 }
