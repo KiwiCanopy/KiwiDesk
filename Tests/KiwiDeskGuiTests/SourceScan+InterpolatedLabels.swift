@@ -51,9 +51,7 @@ extension SourceScan {
                 // from there and then jump the cursor past
                 // whatever it consumed — fail-open, real frames
                 // silently unscanned.
-                if text[index] == "\"",
-                    let literal = literal(text, from: index)
-                {
+                if let literal = literal(text, from: index) {
                     index = literal.end
                     continue
                 }
@@ -135,9 +133,7 @@ extension SourceScan {
         var found = [key.value]
         var index = key.end
         while index < text.count {
-            if text[index] == "\"",
-                let literal = literal(text, from: index)
-            {
+            if let literal = literal(text, from: index) {
                 index = literal.end
                 continue
             }
@@ -223,38 +219,13 @@ extension SourceScan {
     /// call or a `+`-concatenated English read as one argument
     /// each; an argument counts when `labelHit` finds a label in
     /// it — the one recogniser `keyLiterals` reads with too.
-    private static func labelSlotCount(
+    static func labelSlotCount(
         in body: String,
         destinations: [String: String]
     ) -> Int {
-        let text = Array(body)
-        var depth = 0
-        var arguments: [[Character]] = [[]]
-        var index = 0
-        while index < text.count {
-            if text[index] == "\"",
-                let literal = literal(text, from: index)
-            {
-                arguments[arguments.count - 1]
-                    .append(contentsOf: text[index..<literal.end])
-                index = literal.end
-                continue
-            }
-            switch text[index] {
-            case "(", "[", "{": depth += 1
-            case ")", "]", "}": depth -= 1
-            case "," where depth == 0:
-                arguments.append([])
-                index += 1
-                continue
-            default: break
-            }
-            arguments[arguments.count - 1].append(text[index])
-            index += 1
-        }
         // key, English, then the interpolated arguments.
-        return arguments.dropFirst(2).filter {
-            carriesLabel($0, destinations: destinations)
+        topLevelArguments(of: body).dropFirst(2).filter {
+            carriesLabel(Array($0), destinations: destinations)
         }.count
     }
 
@@ -267,9 +238,7 @@ extension SourceScan {
     ) -> Bool {
         var index = 0
         while index < argument.count {
-            if argument[index] == "\"",
-                let literal = literal(argument, from: index)
-            {
+            if let literal = literal(argument, from: index) {
                 index = literal.end
                 continue
             }
@@ -283,35 +252,5 @@ extension SourceScan {
             index += 1
         }
         return false
-    }
-
-    /// Plain-quote walk: knows neither `"""` nor `#"…"#`, and is
-    /// routed through `SourceScan.literalSpan` the day that bites
-    /// (#1320), never widened here.
-    private static func literal(
-        _ text: [Character],
-        from start: Int
-    ) -> (value: String, end: Int)? {
-        guard start < text.count, text[start] == "\"" else {
-            return nil
-        }
-        var index = start + 1
-        var value = ""
-        while index < text.count {
-            if text[index] == "\\", index + 1 < text.count {
-                // A key never contains an escape; an English
-                // literal may, and we only need to skip past it.
-                value.append(text[index])
-                value.append(text[index + 1])
-                index += 2
-                continue
-            }
-            if text[index] == "\"" {
-                return (value, index + 1)
-            }
-            value.append(text[index])
-            index += 1
-        }
-        return nil
     }
 }

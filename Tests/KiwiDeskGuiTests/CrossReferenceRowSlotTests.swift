@@ -307,35 +307,7 @@ struct CrossReferenceRowSlotTests {
         _ label: String,
         in arguments: String
     ) -> String? {
-        var depth = 0
-        var inString = false
-        var previous: Character?
-        var parts: [String] = []
-        var current = ""
-        for character in arguments {
-            if inString {
-                current.append(character)
-                if character == "\"", previous != "\\" {
-                    inString = false
-                }
-                previous = character
-                continue
-            }
-            switch character {
-            case "\"": inString = true
-            case "(", "[", "{": depth += 1
-            case ")", "]", "}": depth -= 1
-            case "," where depth == 0:
-                parts.append(current)
-                current = ""
-                previous = character
-                continue
-            default: break
-            }
-            current.append(character)
-            previous = character
-        }
-        parts.append(current)
+        let parts = SourceScan.topLevelArguments(of: arguments)
         let prefix = "\(label):"
         return
             parts
