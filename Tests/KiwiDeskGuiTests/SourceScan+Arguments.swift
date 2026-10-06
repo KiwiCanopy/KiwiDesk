@@ -52,50 +52,50 @@ extension SourceScan {
     }
 
     /// Everything before the first top-level comma, collapsed to
-    /// single spaces (string- and nesting-aware).
+    /// single spaces — `topLevelArguments`' first element.
     ///
     /// Internal, not private: `ReduceMotionGateTests` asks the
     /// same question of `.animation(_:value:)` — which argument
     /// is the ANIMATION — and a second splitter beside this one
-    /// was the weaker copy, tracking bracket depth but not
-    /// string literals, so an argument carrying a quoted comma
-    /// split wrong and the gate read a truncated expression
-    /// (code review, #1069). That is the drift this file's
-    /// header names. Its quote tracking is a plain toggle — no
-    /// `"""`, no `#"…"#` — routed through `literalSpan` the day
-    /// that bites (#1320).
+    /// was the weaker copy, so an argument carrying a quoted
+    /// comma split wrong and the gate read a truncated expression
+    /// (code review, #1069).
     static func firstArgument(of args: String) -> String {
+        normalize(topLevelArguments(of: args)[0])
+    }
+
+    /// `args` split at its top-level commas, each argument
+    /// verbatim: nesting-aware, and literal-aware through
+    /// `literal(_:from:)`, so a comma inside `"…"`, `"""…"""` or
+    /// `#"…"#` never splits. The family's one splitter (#1899).
+    /// Never empty: no argument text reads as one empty argument.
+    static func topLevelArguments(of args: String) -> [String] {
+        let text = Array(args)
         var depth = 0
-        var inString = false
-        var result = ""
-        var previous: Character?
-        for character in args {
-            if inString {
-                result.append(character)
-                if character == "\"", previous != "\\" {
-                    inString = false
-                }
-                previous = character
+        var arguments: [String] = [""]
+        var index = 0
+        while index < text.count {
+            if text[index] == "\"" || text[index] == "#",
+                let literal = literal(text, from: index)
+            {
+                arguments[arguments.count - 1]
+                    .append(contentsOf: text[index..<literal.end])
+                index = literal.end
                 continue
             }
-            switch character {
-            case "\"":
-                inString = true
-            case "(", "[", "{":
-                depth += 1
-            case ")", "]", "}":
-                depth -= 1
-            case ",":
-                if depth == 0 {
-                    return normalize(result)
-                }
-            default:
-                break
+            switch text[index] {
+            case "(", "[", "{": depth += 1
+            case ")", "]", "}": depth -= 1
+            case "," where depth == 0:
+                arguments.append("")
+                index += 1
+                continue
+            default: break
             }
-            result.append(character)
-            previous = character
+            arguments[arguments.count - 1].append(text[index])
+            index += 1
         }
-        return normalize(result)
+        return arguments
     }
 
     private static func normalize(_ text: String) -> String {

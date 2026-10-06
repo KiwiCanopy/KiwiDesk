@@ -227,6 +227,23 @@ enum SourceScan {
         literalSpan(text, from: i)?.end
     }
 
+    /// The literal starting at `i` — its interior, escapes kept
+    /// verbatim, and the index just past it — on `literalSpan`'s
+    /// grammar, for a caller that reads a literal's VALUE (a key)
+    /// rather than skipping it (#1899).
+    static func literal(
+        _ text: [Character],
+        from i: Int
+    ) -> (value: String, end: Int)? {
+        guard i < text.count,
+            let span = literalSpan(text, from: i)
+        else { return nil }
+        let start = i + span.delimiter
+        let stop = span.end - span.delimiter
+        guard start <= stop else { return nil }
+        return (String(text[start..<stop]), span.end)
+    }
+
     /// `literalEnd` plus the width of the literal's delimiter —
     /// what the blanking policy needs to keep the delimiters and
     /// blank only the interior, position for position.
