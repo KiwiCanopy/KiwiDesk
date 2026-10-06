@@ -142,6 +142,23 @@ extension EventLoop {
         healQuiet = quiet
     }
 
+    /// The session came back (unlock, wake): an AX verdict read
+    /// while it rested is no evidence, since a locked session lists
+    /// windows whose elements answer as the application (#1285).
+    /// The one list of what a return forgets.
+    func sessionDidReturn() {
+        forgetHealQuiet()
+    }
+
+    /// Re-opens the gate for every quieted id; the next heal
+    /// asks again.
+    func forgetHealQuiet() {
+        let count = healQuiet.values.reduce(0) { $0 + $1.count }
+        guard count > 0 else { return }
+        healQuiet = [:]
+        onLog("adoption heal: re-opened \(count) quieted window(s)")
+    }
+
     /// The gate opens only for a missing id that has not already
     /// failed a heal — a quieted id (an ignored panel that will
     /// never track) costs one reconcile total, while any NEW

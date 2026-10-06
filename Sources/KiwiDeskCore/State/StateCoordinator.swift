@@ -91,7 +91,7 @@ public struct StateCoordinator: Sendable {
     /// emptying one deletes it. Whether a Space IS temporary is
     /// derived (`KiwiCore.isTemporary`); only this is stored.
     var temporaryArmed: Set<SpaceID> = []
-    /// Restored held filings boot could not judge (#1646): the
+    /// Restored filings boot could not judge (#1646): the
     /// WindowServer did not answer whether they still exist, so
     /// the snapshot does not carry them again and a closed window
     /// holds a Space across one restart at most.

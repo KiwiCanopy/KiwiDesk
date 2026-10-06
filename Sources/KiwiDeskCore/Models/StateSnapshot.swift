@@ -59,16 +59,22 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         /// Whether the Space is temporary, in every snapshot
         /// (#1790, `KiwiCore+TemporarySpaceBoot`).
         public var temporary: TemporaryRecord?
+        /// Windows filed here that have not arrived — a late
+        /// window's restore filing, a Desktop departure (#2008).
+        /// A held Space carries them on `held` instead.
+        public var pending: [UInt32]
 
         public init(
             space: Space,
             session: SpaceSession? = nil,
             held: HeldRecord? = nil,
-            temporary: TemporaryRecord? = nil
+            temporary: TemporaryRecord? = nil,
+            pending: [WindowID] = []
         ) {
             self.session = session
             self.held = held
             self.temporary = temporary
+            self.pending = pending.map(\.raw)
             self.id = space.id.raw
             self.mode = space.mode
             self.windows = space.windows.map(\.raw)
@@ -83,6 +89,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
 
         private enum CodingKeys: String, CodingKey {
             case id, mode, windows, focused, session, held, temporary
+            case pending
             case trackBreaks = "track_breaks"
             case trackWeights = "track_weights"
         }
@@ -122,6 +129,9 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
                 TemporaryRecord.self,
                 forKey: .temporary
             )
+            pending =
+                (try? c.decodeIfPresent([UInt32].self, forKey: .pending))
+                ?? []
         }
 
         /// This record under another id (#1646's boot renumber).
@@ -230,6 +240,7 @@ extension StateCoordinator {
                     )
                 }
             }
+            refilePending(record.pending.map(WindowID.init), in: space)
             adoptSession(record, in: space)
         }
         for record in snapshot.windows {
@@ -250,13 +261,8 @@ extension StateCoordinator {
                     id: $0.id,
                     frame: $0.frame
                 )
-            },
-            spaces: workspaces.allSpaces.map {
-                StateSnapshot.SpaceRecord(
-                    space: $0,
-                    held: heldRecord(of: $0.id)
-                )
-            },
+            } + owedFrameRecords(),
+            spaces: workspaces.allSpaces.map { spaceRecord(of: $0) },
             activeSpace: workspaces.activeSpace?.raw
         )
     }

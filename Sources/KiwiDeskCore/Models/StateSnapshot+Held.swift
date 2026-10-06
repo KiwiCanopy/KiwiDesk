@@ -60,20 +60,9 @@ extension StateCoordinator {
     /// snapshot lists, so it ends at a restart.
     func heldRecord(of id: SpaceID) -> StateSnapshot.HeldRecord? {
         guard let origin = heldSpaces[id] else { return nil }
-        let remembered = rememberedSpaces.filter {
-            guard $0.value.space == id,
-                windows[$0.key] == nil,
-                !closedDepartures.contains($0.key)
-            else { return false }
-            // An unjudged restored filing is not carried again.
-            if case .restored = $0.value {
-                return !unjudgedFilings.contains($0.key)
-            }
-            return true
-        }.keys.sorted { $0.raw < $1.raw }
         return StateSnapshot.HeldRecord(
             origin: origin,
-            remembered: remembered
+            remembered: pendingFilings(in: id)
         )
     }
 }

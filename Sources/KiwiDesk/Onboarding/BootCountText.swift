@@ -1,8 +1,9 @@
 import KiwiDeskCore
 
 /// The boot count in words — the one author of the sentence the
-/// grant screen and the relaunched "What's new" both read
-/// (design-decisions ▸ Boot: the wait is narrated, never hidden).
+/// grant screen, the relaunched "What's new" and the slow-boot
+/// notice read (design-decisions ▸ Boot: the wait is narrated,
+/// never hidden; #1715).
 @MainActor
 enum BootCountText {
     /// Nil unless boot is still going through the open apps.
