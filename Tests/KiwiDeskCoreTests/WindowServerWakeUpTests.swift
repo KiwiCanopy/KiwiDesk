@@ -173,6 +173,19 @@ struct WindowServerWakeUpTests {
         #expect(box.listReads == 0)
     }
 
+    /// Our own panels (rings, shelf) are on screen and untracked;
+    /// the heal quiets them once, the wake must never re-read us.
+    @Test("a wake sweep never re-reads KiwiDesk's own process")
+    func wakeSweepSkipsOwnProcess() {
+        let (loop, box) = makeLoop()
+        let own = getpid()
+        loop.observers[own] = FakeObserver()
+        loop.wakeSweep(census: [own: [fresh]])
+        box.drain()
+        #expect(box.listReads == 0)
+        #expect(!box.logs.contains { $0.hasPrefix("wake-up") })
+    }
+
     @Test("a wake sweep leaves a fully tracked app alone")
     func wakeSweepSkipsTracked() {
         let (loop, box) = makeLoop()
