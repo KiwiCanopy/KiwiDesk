@@ -21,7 +21,10 @@ import Testing
 /// scoped though it runs outside; and Core's own wiring is held by
 /// the opener counts alone, so a new bar, drag or scroll closure
 /// that never opens the scope is review's; and the body's brace
-/// walk counts a brace inside a string literal.
+/// walk counts a brace inside a string literal. Counts are per
+/// file, so a swap inside one file passes the opener clause; a
+/// door reached through a renamed receiver, or the scope reached
+/// through `applier` held in a local, is unseen.
 @Suite("Motion scope census (#804)")
 struct MotionScopeCensusTests {
     private static let sources = SourceScan.repoRoot(
@@ -53,10 +56,10 @@ struct MotionScopeCensusTests {
         "KiwiDesk/AppDelegate.swift": 4,
         // The tour's shelf paint and its revert.
         "KiwiDesk/AppDelegate+OnboardingLooks.swift": 2,
-        // Settings: Save and its config reload, load, delete, a
-        // preset, a restore, a reset, an app-wide change, a claim,
+        // Settings: Save and its config reload, load, delete, set
+        // default, a preset, a restore, a reset, an app-wide change, a claim,
         // a stored-profile edit, the Lua editor's apply.
-        "KiwiDesk/Settings/SettingsModel+Profiles.swift": 5,
+        "KiwiDesk/Settings/SettingsModel+Profiles.swift": 6,
         "KiwiDesk/Settings/SettingsModel+Globals.swift": 1,
         "KiwiDesk/Settings/SettingsModel+ProfileOverrides.swift": 1,
         "KiwiDesk/Settings/SettingsModel+Backup.swift": 1,
@@ -111,10 +114,9 @@ struct MotionScopeCensusTests {
 
     /// GUI call sites of a motion door left outside the scope on
     /// purpose, by file and door → count, each with its reason.
-    private static let unscopedDoors: [String: Int] = [
-        // `set_default_profile` writes a file and moves nothing.
-        "KiwiDesk/Settings/SettingsModel+Profiles.swift execute": 1
-    ]
+    /// Empty: a call that moves nothing still costs nothing scoped,
+    /// and a door named here would hide a sibling call behind it.
+    private static let unscopedDoors: [String: Int] = [:]
 
     /// The omission half the opener count cannot see: a GUI call
     /// of a door that moves windows sits inside a `withUserMotion`

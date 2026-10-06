@@ -176,10 +176,12 @@ extension SettingsModel {
     }
 
     func makeDefault(named name: String) {
-        _ = core.execute(
-            "set_default_profile",
-            args: [.string(name)]
-        )
+        core.withUserMotion {
+            _ = core.execute(
+                "set_default_profile",
+                args: [.string(name)]
+            )
+        }
         refreshProfiles()
     }
 
