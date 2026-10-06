@@ -15,7 +15,8 @@ import Testing
 ///    shape saved the same minutes but skipped the *workflow*, and
 ///    a workflow that does not run reports no check at all — which
 ///    deadlocks a required status check, unlike a job skipped by
-///    `if:`, which satisfies one (#487).
+///    `if:`, which satisfies one (#487) — which is also why a
+///    gated job must run, not skip, when the filter fails (#1984).
 /// 2. Every entry is an exact path or `dir/**`. The other checks
 ///    are prefix relations over plain strings, so `*` and `?` are
 ///    ordinary characters to them: `Package.*` would ignore
@@ -172,10 +173,22 @@ struct CiPathFilterTests {
                 block?.contains("needs: changes") == true,
                 "\(job) does not depend on the changes job"
             )
+            let gate = Self.jobGate(job, in: yaml) ?? ""
             #expect(
-                block?.contains("if: needs.changes.outputs.run == 'true'")
-                    == true,
+                gate.contains("needs.changes.outputs.run == 'true'"),
                 "\(job) is not gated on the changes outcome"
+            )
+            // A bare `if:` implies success(), so a failed filter
+            // skips the job and the skip passes a required check
+            // with nothing run (#1984). The disjunction is the
+            // shape: `&&` would skip every normal PR. `!cancelled()`
+            // reaches the failure arm; `always()` would also start
+            // a run `cancel-in-progress` superseded.
+            #expect(
+                gate
+                    == "!cancelled() && (needs.changes.result != "
+                    + "'success' || needs.changes.outputs.run == 'true')",
+                "\(job) is skipped, not run, when the filter fails"
             )
         }
     }
