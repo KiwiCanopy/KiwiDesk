@@ -731,12 +731,10 @@ test` run needs that AGENTS.md §4 calls optional, which is why
 `SparkleKeyDerivationTests` carries an `.enabled(if:)` rather
 than redding a host without it — one inert `true` child when
 `FirstRunSeedTests`' executed hooks fixture fires, scratch
-`UserDefaults` suites cleaned on both sides,
-`GeometryUtils.menuBarAutoHides`, a read-only
-global-defaults lookup that only reaches fixtures which didn't
-pin their bounds, and one read-only `NSScreen.screens` read per
-lifecycle suite that drives `EventLoop.beginScan()` with faked
-seams (`publishDisplays`; the suites set
+`UserDefaults` suites cleaned on both sides, and one read-only
+`NSScreen.screens` read per lifecycle suite that drives
+`EventLoop.beginScan()` with faked seams (`publishDisplays`; the
+suites set
 `registersWorkspaceObservers = false`, so no live workspace
 observer outlives the test), and two read-only console-session
 reads (`CGSessionCopyCurrentDictionary`) per
