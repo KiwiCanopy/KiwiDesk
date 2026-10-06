@@ -52,6 +52,9 @@ struct FloatDropBottomFitTests {
     func parkedBelowIsLeft() {
         let frame = CGRect(x: 100, y: 850, width: 600, height: 500)
         #expect(fit(frame) == frame)
+        // Exactly at the border counts as past it.
+        let edge = CGRect(x: 100, y: region.maxY, width: 600, height: 500)
+        #expect(fit(edge) == edge)
     }
 
     /// A core showing a bottom Space Bar over the window's space,
