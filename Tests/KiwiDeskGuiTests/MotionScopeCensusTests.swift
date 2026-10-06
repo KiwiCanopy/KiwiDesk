@@ -14,6 +14,13 @@ import Testing
 ///
 /// The scope itself is written in one home: `KiwiCore+MotionCause`
 /// (the door and the deferred re-establishment).
+///
+/// Stated limits: the GUI clause knows the doors it lists, so a new
+/// door is review's until listed; a door inside an escaping hop in
+/// a scoped body (`DispatchQueue.main.async`, `Task`) reads as
+/// scoped though it runs outside; and Core's own wiring is held by
+/// the opener counts alone, so a new bar, drag or scroll closure
+/// that never opens the scope is review's.
 @Suite("Motion scope census (#804)")
 struct MotionScopeCensusTests {
     private static let sources = SourceScan.repoRoot(
@@ -97,10 +104,10 @@ struct MotionScopeCensusTests {
     ]
 
     /// GUI call sites of a motion door left outside the scope on
-    /// purpose, by file → count, each with its reason.
+    /// purpose, by file and door → count, each with its reason.
     private static let unscopedDoors: [String: Int] = [
         // `set_default_profile` writes a file and moves nothing.
-        "KiwiDesk/Settings/SettingsModel+Profiles.swift": 1
+        "KiwiDesk/Settings/SettingsModel+Profiles.swift execute": 1
     ]
 
     /// The omission half the opener count cannot see: a GUI call
@@ -112,7 +119,7 @@ struct MotionScopeCensusTests {
         let prefix = Self.sources.path + "/"
         let doors = Self.motionDoors.joined(separator: "|")
         let call = try NSRegularExpression(
-            pattern: #"\bcore\.(\#(doors))\("#
+            pattern: #"\bcore\??\.(\#(doors))\("#
         )
         var unscoped: [String: Int] = [:]
         var reached = 0
@@ -128,8 +135,11 @@ struct MotionScopeCensusTests {
                 let at = match.range.location
                 guard !regions.contains(where: { $0.contains(at) })
                 else { continue }
-                let key = String(file.path.dropFirst(prefix.count))
-                unscoped[key, default: 0] += 1
+                let door = (text as NSString).substring(
+                    with: match.range(at: 1)
+                )
+                let path = String(file.path.dropFirst(prefix.count))
+                unscoped["\(path) \(door)", default: 0] += 1
             }
         }
         #expect(reached > 15, "the scan reached too few door calls")
@@ -154,9 +164,19 @@ struct MotionScopeCensusTests {
                 index += 1
                 continue
             }
+            // The body must follow the name, past only blanks, a
+            // `(` or a `try`: a brace-less call scopes no block.
             var cursor = index + needle.count
+            var gap = ""
             while cursor < chars.count, chars[cursor] != open {
+                gap.append(Character(UnicodeScalar(chars[cursor])!))
                 cursor += 1
+            }
+            let filler = gap.replacingOccurrences(of: "try", with: "")
+                .filter { !" \n\t(".contains($0) }
+            guard filler.isEmpty, cursor < chars.count else {
+                index += needle.count
+                continue
             }
             var depth = 0
             let start = cursor
