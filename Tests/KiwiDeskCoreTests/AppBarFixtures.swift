@@ -27,7 +27,7 @@ enum AppBarFixtures {
         bar.enabled = false
         bar.activeIndicator = .edgeMark
         bar.titleCap = 60
-        bar.groupAdjacentWindows = true
+        bar.groupAdjacentWindows = false
         return bar
     }
 
