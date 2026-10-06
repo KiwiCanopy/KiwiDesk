@@ -6,8 +6,8 @@ import Testing
 /// hears nothing until the port is drained, and a second
 /// `CFMachPort` on the same port splits the drain, so the border
 /// pump and the wake-up both drain through `SkyLightEventPort`.
-/// The wake-up's sink is set only by `startWindowServerWakeUp`,
-/// so a dropped call leaves AX alone and reds nothing else.
+/// The wake-up starts at boot and stops at teardown; a dropped
+/// call leaves the AX path alone and reds nothing else.
 @Suite("SkyLight event port seam (#1877)")
 struct SkyLightEventPortSeamTests {
     private let root = SourceScan.repoRoot(from: #filePath)
@@ -23,35 +23,43 @@ struct SkyLightEventPortSeamTests {
         return found
     }
 
-    @Test("one owner creates and drains the event port")
+    @Test("one owner creates, drains and registers on the port")
     func onePortOwner() throws {
+        let owner = ["SkyLightEventPort.swift": 1]
+        #expect(try hits("CFMachPortCreateWithPort(") == owner)
+        #expect(try hits("\"SLEventCreateNextEvent\"") == owner)
+        #expect(try hits("\"SLSRegisterNotifyProc\"") == owner)
+        // Both consumers register through the port, and the pump
+        // brackets the drain for its synchronous flush.
         #expect(
-            try hits("CFMachPortCreateWithPort(")
-                == ["SkyLightEventPort.swift": 1]
-        )
-        #expect(
-            try hits("\"SLEventCreateNextEvent\"")
-                == ["SkyLightEventPort.swift": 1]
-        )
-        #expect(
-            try hits("SkyLightEventPort.shared")
+            try hits("port.register(")
                 == [
                     "SkyLightWindowEvents.swift": 1,
                     "SkyLightWindowLifecycle.swift": 1,
                 ]
         )
+        #expect(
+            try hits("port.observeDrain(")
+                == ["SkyLightWindowEvents.swift": 1]
+        )
     }
 
-    @Test("the wake-up starts with the workspace observers")
+    @Test("the wake-up starts at boot and stops at teardown")
     func wakeUpIsWired() throws {
         var calls = try hits("startWindowServerWakeUp()")
         for (file, count) in try hits("func startWindowServerWakeUp()") {
             calls[file, default: 0] -= count
         }
-        #expect(calls.filter { $0.value > 0 } == ["EventLoop+Apps.swift": 1])
         #expect(
-            try hits("SkyLightWindowLifecycle.sink =")
-                == ["EventLoop+WindowServerWakeUp.swift": 1]
+            calls.filter { $0.value > 0 } == ["KiwiCore+Boot.swift": 1]
+        )
+        #expect(
+            try hits("SkyLightWindowLifecycle.start")
+                == ["KiwiCore+WindowServerWakeUp.swift": 1]
+        )
+        #expect(
+            try hits("SkyLightWindowLifecycle.stop()")
+                == ["KiwiCore+Lifecycle.swift": 1]
         )
     }
 }

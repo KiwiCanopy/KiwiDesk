@@ -222,6 +222,7 @@ extension KiwiCore {
         // armed timeout watchdogs — they must not SIGTERM a
         // child after teardown (a start() may reuse the launcher).
         exec.cancelWatchdogs()
+        SkyLightWindowLifecycle.stop()
         deferred.cancelAll()
         mouse.stop()
         eventLoop.stop()

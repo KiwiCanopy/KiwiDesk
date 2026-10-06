@@ -6,12 +6,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// **A WindowServer create or destroy wakes the AX path only
-/// where it went unanswered** (#1877): an observed app's window
-/// the AX notifications never adopted, shown at layer 0, or a
-/// tracked window whose destroy never came. Driven through the
-/// handler the grace-delayed sink calls, the list read captured
-/// for the test to pump — `ReconcileOffMainTests`' fixture shape.
+/// **A WindowServer destroy wakes the AX path only for a window
+/// still tracked** (#1877), and reads its app off the main actor.
+/// The list read is captured for the test to pump —
+/// `ReconcileOffMainTests`' fixture shape. The create half is
+/// `WindowServerHealPullTests`'.
 @Suite("WindowServer wake-up (#1877)")
 @MainActor
 struct WindowServerWakeUpTests {
@@ -113,78 +112,11 @@ struct WindowServerWakeUpTests {
 
     private let fresh = WindowID(33)
 
-    @Test("an unanswered create of a shown window wakes its app")
-    func unansweredCreateWakes() {
-        let (loop, box) = makeLoop()
-        loop.windowServerChanged(
-            .created,
-            id: fresh,
-            owner: pid,
-            shownNormal: true
-        )
-        #expect(box.listReads == 0, "read inline")
-        box.drain()
-        #expect(box.listReads == 1)
-    }
-
-    @Test("a create the AX path already adopted costs no read")
-    func adoptedCreateIsQuiet() {
-        let (loop, box) = makeLoop()
-        loop.windowServerChanged(
-            .created,
-            id: id,
-            owner: pid,
-            shownNormal: true
-        )
-        box.drain()
-        #expect(box.listReads == 0)
-    }
-
-    @Test("a popup that never shows at layer 0 costs no read")
-    func unshownCreateIsQuiet() {
-        let (loop, box) = makeLoop()
-        loop.windowServerChanged(
-            .created,
-            id: fresh,
-            owner: pid,
-            shownNormal: false
-        )
-        box.drain()
-        #expect(box.listReads == 0)
-    }
-
-    @Test("an unobserved app is the launch notification's, not ours")
-    func unobservedCreateIsQuiet() {
-        let (loop, box) = makeLoop()
-        for owner in [pid_t(515_515), getpid()] {
-            loop.windowServerChanged(
-                .created,
-                id: fresh,
-                owner: owner,
-                shownNormal: true
-            )
-        }
-        loop.windowServerChanged(
-            .created,
-            id: fresh,
-            owner: nil,
-            shownNormal: true
-        )
-        box.drain()
-        #expect(box.listReads == 0)
-        // Nor does it look the app up: no wake-up is logged.
-        #expect(!box.logs.contains { $0.hasPrefix("wake-up") })
-    }
-
     @Test("an unanswered destroy of a tracked window wakes its app")
     func unansweredDestroyWakes() {
         let (loop, box) = makeLoop()
-        loop.windowServerChanged(
-            .destroyed,
-            id: id,
-            owner: nil,
-            shownNormal: false
-        )
+        loop.windowServerDestroyed(id)
+        #expect(box.listReads == 0, "read inline")
         #expect(box.destroyed.isEmpty, "reconciled inline")
         box.drain()
         #expect(box.destroyed == [id])
@@ -193,12 +125,17 @@ struct WindowServerWakeUpTests {
     @Test("a destroy of an untracked window costs no read")
     func untrackedDestroyIsQuiet() {
         let (loop, box) = makeLoop()
-        loop.windowServerChanged(
-            .destroyed,
-            id: fresh,
-            owner: nil,
-            shownNormal: false
-        )
+        loop.windowServerDestroyed(fresh)
+        box.drain()
+        #expect(box.listReads == 0)
+        #expect(!box.logs.contains { $0.hasPrefix("wake-up") })
+    }
+
+    @Test("a stopped loop wakes nothing")
+    func stoppedLoopIsQuiet() {
+        let (loop, box) = makeLoop()
+        loop.stop()
+        loop.windowServerDestroyed(id)
         box.drain()
         #expect(box.listReads == 0)
     }

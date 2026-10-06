@@ -24,6 +24,17 @@ final class SkyLightEventPort {
         @convention(c) (
             CFMachPort, Int32
         ) -> Void
+    typealias NotifyProc =
+        @convention(c) (
+            UInt32,
+            UnsafeMutableRawPointer?,
+            Int,
+            UnsafeMutableRawPointer?
+        ) -> Void
+    typealias RegisterNotifyFn =
+        @convention(c) (
+            NotifyProc?, UInt32, UnsafeMutableRawPointer?
+        ) -> CGError
 
     static let shared: SkyLightEventPort? = SkyLightEventPort()
     private static weak var active: SkyLightEventPort?
@@ -37,6 +48,11 @@ final class SkyLightEventPort {
         "SLEventCreateNextEvent",
         as: NextEventFn.self
     )
+    private static let registerNotify: RegisterNotifyFn? =
+        SkyLight.symbol(
+            "SLSRegisterNotifyProc",
+            as: RegisterNotifyFn.self
+        )
     private static let setMachPortOptions: SetMachPortOptionsFn? =
         coreFoundationSymbol(
             "_CFMachPortSetOptions",
@@ -46,12 +62,14 @@ final class SkyLightEventPort {
     let connection: SkyLight.ConnectionID
     private let machPort: CFMachPort
     private let runLoopSource: CFRunLoopSource
+    private var registered: Set<UInt32> = []
     private var drainObservers: [(begin: () -> Void, end: () -> Void)] = []
 
     private init?() {
         guard let connection = SkyLight.connection,
             let getEventPort = Self.getEventPort,
             Self.nextEvent != nil,
+            Self.registerNotify != nil,
             let setMachPortOptions = Self.setMachPortOptions
         else { return nil }
         var eventPort: mach_port_t = 0
@@ -85,6 +103,19 @@ final class SkyLightEventPort {
             CFRunLoopMode.commonModes
         )
         Self.active = self
+    }
+
+    /// Registers `proc` for `code` on this port, once per code
+    /// per process (registration has no unregister); true when
+    /// the code is registered. Registering here is what makes a
+    /// proc hear anything, since this port is the one drained.
+    func register(code: UInt32, _ proc: NotifyProc) -> Bool {
+        if registered.contains(code) { return true }
+        guard let registerNotify = Self.registerNotify,
+            registerNotify(proc, code, nil) == .success
+        else { return false }
+        registered.insert(code)
+        return true
     }
 
     /// Brackets every drain: `begin` before the notify procs

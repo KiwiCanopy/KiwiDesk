@@ -14,6 +14,8 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+Tabs.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Heal.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+WindowPolicy.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+WindowServerWakeUp.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+WindowServerWakeUp.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
 ---
 
@@ -202,6 +204,21 @@ editing AX code:
   takes the same shape: a needle anchored to `finishBoot`'s own
   closing brace, since the tail is not test-drivable but a call
   MOVED out of it heals nothing.
+- **A WindowServer window create or destroy only WAKES the AX
+  path (#1877); it never tracks, files or removes a window.** A
+  create pulls the adoption heal above forward to a 300 ms grace,
+  once per grace however many creates arrive, so the heal's
+  census, gate, quiet ledger and unwatched-app attach decide
+  everything (`WindowServerHealPullTests`). A destroy re-reads,
+  through `reconcileOffMain`, only the app still tracking that
+  window (`WindowServerWakeUpTests`). Neither path reads
+  WindowServer on the main actor: the notify callback runs inside
+  the event-port drain the border pump's flush waits on. The
+  symbol and payload facts are
+  [os-private-apis.md](os-private-apis.md)'s. Residue: a window
+  created hidden and ordered in later (Electron's `show: false`)
+  is not on the census when the pulled heal runs, so it waits for
+  the next tick, as before.
 - **Every pass that attaches apps reads `liveApps`, and a pid
   ≤ 0 never attaches (#1785).** The raw running-app list has no
   entry that could adopt a LaunchServices child — listed with

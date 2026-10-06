@@ -2,14 +2,6 @@ import CoreFoundation
 import CoreGraphics
 import Darwin
 
-fileprivate typealias SkyLightNotifyProc =
-    @convention(c) (
-        UInt32,
-        UnsafeMutableRawPointer?,
-        Int,
-        UnsafeMutableRawPointer?
-    ) -> Void
-
 /// Process-lifetime WindowServer notification pump for focus
 /// borders (#285 Tier 2). Registration has no reliable public
 /// unregister seam, so callbacks never retain a `BorderManager`;
@@ -54,10 +46,6 @@ final class SkyLightWindowEvents {
         case hide
     }
 
-    fileprivate typealias RegisterNotifyFn =
-        @convention(c) (
-            SkyLightNotifyProc?, UInt32, UnsafeMutableRawPointer?
-        ) -> CGError
     typealias RequestNotificationsFn =
         @convention(c) (
             SkyLight.ConnectionID,
@@ -68,11 +56,6 @@ final class SkyLightWindowEvents {
     static let shared: SkyLightWindowEvents? = SkyLightWindowEvents()
     private static weak var active: SkyLightWindowEvents?
 
-    private static let registerNotify: RegisterNotifyFn? =
-        SkyLight.symbol(
-            "SLSRegisterNotifyProc",
-            as: RegisterNotifyFn.self
-        )
     private static let requestNotifications: RequestNotificationsFn? =
         SkyLight.symbol(
             "SLSRequestNotificationsForWindows",
@@ -93,16 +76,14 @@ final class SkyLightWindowEvents {
     private init?() {
         guard let port = SkyLightEventPort.shared,
             SkyLight.getWindowBounds != nil,
-            let registerNotify = Self.registerNotify,
             Self.requestNotifications != nil
         else { return nil }
         for kind in Kind.allCases {
             guard
-                registerNotify(
-                    skyLightWindowNotifyCallback,
-                    kind.rawValue,
-                    nil
-                ) == .success
+                port.register(
+                    code: kind.rawValue,
+                    skyLightWindowNotifyCallback
+                )
             else { return nil }
         }
         connection = port.connection
@@ -155,7 +136,7 @@ final class SkyLightWindowEvents {
     }
 }
 
-private let skyLightWindowNotifyCallback: SkyLightNotifyProc = {
+private let skyLightWindowNotifyCallback: SkyLightEventPort.NotifyProc = {
     event,
     data,
     length,
