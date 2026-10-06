@@ -64,7 +64,7 @@ struct FloatRestoreDeliveryTests {
         core.tiler.settings.animations.onSpaceChange = true
         core.state.apply(.windowCreated(float))
         core.tiler.stashedFrames[id] = original
-        core.spaceSwitchRetile()
+        core.spaceSwitchRetile(asSwitch: false)
         #expect(core.tiler.animation.targetFrame(window: id) == nil)
         #expect(core.tiler.recentInstantTarget(id) == original)
     }

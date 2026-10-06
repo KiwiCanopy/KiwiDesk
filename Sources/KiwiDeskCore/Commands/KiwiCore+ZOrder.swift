@@ -36,7 +36,9 @@ extension KiwiCore {
     /// red-proof, not this comment's permission.
     func scheduleZOrderRestore() {
         pendingZOrderRestore = true
-        if tiler.animation.activeCount == 0 {
+        // An owed pass has not drawn yet (#804): the restore waits
+        // for it, as for an animation (#153's ordering).
+        if tiler.animation.activeCount == 0, tiler.motionGate.owed == nil {
             runPendingZOrderRestore()
         }
     }

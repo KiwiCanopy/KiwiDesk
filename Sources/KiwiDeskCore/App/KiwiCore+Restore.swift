@@ -142,7 +142,7 @@ extension KiwiCore {
         adoptCarriedPartitioning(from: session)
         activateSpaceOfFocusedWindow()
         seedStartupFocus()
-        spaceSwitchRetile()
+        spaceSwitchRetile(asSwitch: false)
         emitSpaceChange()
         signposter.endInterval("sessionRestore", span)
         onLog("restored previous session arrangement")

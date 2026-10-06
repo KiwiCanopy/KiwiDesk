@@ -762,3 +762,7 @@ editing here:
   forcing the overlays onto their AX fallback for the whole run
   (#596). `KIWIDESK_STRAND_LOG` is inert by comparison — it only
   logs (#47).
+- **A drag, scroll gesture or hold-glide step is user motion
+  (#804)**, and the motion gate reads mouse quiet and buttons
+  through seams `makeTestCore` pins — state-and-layout.md ▸
+  Window motion says whose it is.

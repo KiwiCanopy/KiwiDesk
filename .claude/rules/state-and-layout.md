@@ -1896,9 +1896,23 @@ editing here:
   body carries its scheduler's cause, late, or runs ambient —
   the switch is exhaustive, so the compiler asks. The scope is
   entered only in `KiwiCore+MotionCause` (the census's one-home
-  clause). The input-quiescence gate will read it at
-  `FrameApplier` through the one `cause` reading, and the change that lands the
-  gate rewrites this bullet with it.
+  clause). **Ambient motion and a late user tail wait for the
+  hand to rest** — buttons up and the mouse quiet, past the
+  patience bound buttons up alone — in the one `MotionGate`,
+  asked by `KiwiCore.retile` alone: what waits is the PASS, owed
+  and re-run against the state as it then is, never a stored
+  frame, so a held pass sends, stamps and asks nothing, and a
+  pass that runs carries the debt merged in (so a run may draw
+  a stronger pass than its caller spelled; the meter files the
+  caller's). A switch the user watches is never held, and every
+  `spaceSwitchRetile` caller states `asSwitch`, boot, wake and a
+  sweep stating false; a z-order restore waits for an owed pass
+  as for an animation. State, bars and rings move at once; the
+  pre-render heals ride the pass. A frame written outside a layout pass stays
+  ungated by ruling until #1991 (owner, 2026-10-06). The
+  engine's pass is driven only from that door
+  (`MotionScopeCensusTests` ▸ `passesAskTheGate`,
+  `MotionGateTests`).
 - **A re-issuing pass forces only the parks a departure owes
   (#1508)**, or every switch re-parks every hidden window — the
   per-switch cost `get_work_counters` measures as

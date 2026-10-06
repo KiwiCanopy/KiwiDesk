@@ -115,6 +115,8 @@ public final class TilingEngine {
 
     /// Which Spaces' parks a re-issuing pass forces (#1508).
     var stashDepartures = StashDepartures()
+    /// The input-quiescence gate `KiwiCore.retile` asks (#804).
+    let motionGate = MotionGate()
 
     /// Resolves the AX element of a window (wired to the
     /// event loop's registry).

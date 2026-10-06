@@ -45,6 +45,20 @@ struct MotionCauseTests {
         #expect(inner == .user(pressedAt: pressed, late: false))
     }
 
+    /// A command finishing its own motion from inside a late tail
+    /// (the echo of its raise) moves now (#804).
+    @Test("An opener inside a late tail makes the motion immediate")
+    func openerLiftsLateTail() {
+        let core = makeCore()
+        let earlier = Date(timeIntervalSinceReferenceDate: 5)
+        let inner = core.tiler.applier.motion.with(
+            .user(pressedAt: earlier, late: true)
+        ) {
+            core.withUserMotion { core.motionCause }
+        }
+        #expect(inner == .user(pressedAt: pressed, late: false))
+    }
+
     @Test("A hold-glide step is a press of its own")
     func glideStepIsUser() {
         let core = makeCore()

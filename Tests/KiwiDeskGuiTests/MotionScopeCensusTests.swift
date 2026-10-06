@@ -39,6 +39,9 @@ struct MotionScopeCensusTests {
         // App Bar and Space Bar clicks, the divider drag, the App
         // Bar reorder drop.
         "KiwiDeskCore/App/KiwiCore+Bootstrap.swift": 4,
+        // The echo of KiwiDesk's own focus raise finishing the
+        // command's pan in a focus-driven layout.
+        "KiwiDeskCore/App/KiwiCore+FocusEvents.swift": 1,
         // A Space Bar glyph pick.
         "KiwiDeskCore/App/KiwiCore+SpaceBarClick.swift": 1,
         // Every bar menu row's action.
@@ -101,6 +104,17 @@ struct MotionScopeCensusTests {
         #expect(
             wired == ["KiwiDeskCore/App/KiwiCore+MotionCause.swift": 1]
         )
+    }
+
+    /// Every layout pass asks the gate: it is asked in the one
+    /// retile door, and the engine's pass is driven from nowhere
+    /// else, so no pass can lay windows out around it (#804).
+    @Test("Every layout pass asks the gate")
+    func passesAskTheGate() throws {
+        let asks = try Self.counts(of: "motionGate.admit(")
+        #expect(asks == ["KiwiDeskCore/App/KiwiCore+Retile.swift": 1])
+        let passes = try Self.counts(of: "tiler.retile(")
+        #expect(passes == ["KiwiDeskCore/App/KiwiCore+Retile.swift": 2])
     }
 
     /// Core doors that move windows when the GUI calls them.
