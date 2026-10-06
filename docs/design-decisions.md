@@ -4509,6 +4509,26 @@ this issue's strand by another door. This answers ARRIVALS; a
 hand DROP on another display re-files every float, flag or
 floating-mode, at the drop (#1686, below beside #492).
 
+:::unreleased
+**A float dropped past the bottom is shrunk to fit, never moved
+back** ([#1427](https://github.com/KiwiCanopy/KiwiDesk/issues/1427),
+owner ruling 2026-10-06). [Principle] A window pushed down until its
+bottom passes the usable area — the screen edge, or the top of a
+bar on that edge, which is `floatBounds` — keeps its top edge where
+it was dropped and loses height from the bottom. Moving it back up
+would undo the move the user just made. A clipped strip below the
+border is not a position anyone chose, so this is a narrower
+reading of #1091's "a float's position is the user's", not an
+exception to it. Three limits keep it narrow:
+
+- It runs on the drop only, never on a retile, so a float parked
+  half off-screen by any other means stays where it is.
+- It stops at the window's minimum height (the configured
+  minimum, or a corroborated app minimum); past that, the rest
+  stays clipped rather than the window moving.
+- A window whose top is already past the border is left alone.
+:::
+
 **Floating a tiled window centres it at a derived size
 (#1674).** [Principle] The frame a window
 has when an explicit float verb fires — `make_floating`, or a

@@ -111,9 +111,9 @@ extension KiwiCore {
             // Ahead of the clamp, so it judges the strips of the
             // Space the window now belongs to.
             relocateDroppedFloat(id)
-            let clamped = floatFrameClampedClearOfBars(
+            let clamped = floatDropFit(
                 id,
-                frame: frame
+                frame: floatFrameClampedClearOfBars(id, frame: frame)
             )
             if clamped != frame {
                 tiler.applyFrame(
