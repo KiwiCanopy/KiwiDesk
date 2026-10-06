@@ -36,10 +36,16 @@ struct BootNoticeWiringTests {
     @Test("every stand-down and anchor read is wired")
     func readsAreWired() throws {
         let wiring = try source("AppDelegate+BootNotice.swift")
+        // Assignment form: a closure built and never assigned
+        // must not satisfy the needle.
         for needle in [
+            "bootNotice.tourShowing = {",
             "onboardingWindow?.isVisible == true",
+            "bootNotice.screenStandsDown = {",
             "core.shelfStandsDown(on: screen)",
+            "bootNotice.liquidGlass = {",
             "shortcutPanelLiquidGlass",
+            "bootNotice.statusButton = {",
             "statusItem?.anchorButton",
         ] {
             #expect(wiring.occurrences(of: needle) == 1, "\(needle)")
@@ -52,6 +58,9 @@ struct BootNoticeWiringTests {
             "targetScreen().map(screenStandsDown)",
             "timeline.showsAt(now(), standsDown: standsDown())",
             "shown && window.occlusionState.contains(.visible)",
+            "let shown = NSMenu.menuBarVisible()",
+            "case .hideAt(let at):",
+            "self?.hide()",
         ] {
             #expect(controller.occurrences(of: needle) == 1, "\(needle)")
         }

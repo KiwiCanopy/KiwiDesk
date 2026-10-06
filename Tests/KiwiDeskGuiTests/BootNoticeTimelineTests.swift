@@ -32,6 +32,7 @@ struct BootNoticeTimelineTests {
         #expect(!timeline.showsAt(12, standsDown: true))
         // A later count does not push the show back.
         #expect(timeline.phase(scanning, at: 11, standsDown: false) == .none)
+        #expect(timeline.showsAt(12, standsDown: false))
     }
 
     @Test("a boot ready before the threshold never shows")

@@ -28,56 +28,51 @@ struct BootNoticeAnchorTests {
         #expect(origin == CGPoint(x: 1215 - 150, y: top))
     }
 
-    @Test("an item at the edge keeps the notice inside the screen")
-    func clampsAtTheEdge() {
-        let item = CGRect(x: 1690, y: 1085, width: 30, height: 32)
-        let origin = BootNoticeAnchor.origin(
-            size: size,
-            screen: screen,
-            menuBar: menuBar,
-            item: item
-        )
+    @Test("an item at either edge keeps the notice inside the screen")
+    func clampsAtBothEdges() {
+        // A screen right of the primary, so a `width` read for a
+        // `maxX` cannot pass.
+        let right = screen.offsetBy(dx: 1728, dy: 0)
         let inset = BootNoticeAnchor.inset
-        #expect(origin.x == screen.maxX - inset - size.width)
+        func x(_ itemX: CGFloat) -> CGFloat {
+            BootNoticeAnchor.origin(
+                size: size,
+                screen: right,
+                menuBar: menuBar,
+                item: CGRect(x: itemX, y: 1085, width: 30, height: 32)
+            ).x
+        }
+        #expect(x(right.maxX - 38) == right.maxX - inset - size.width)
+        #expect(x(right.minX + 2) == right.minX + inset)
     }
 
     @Test("with no item the notice sits top-centre")
     func fallsBackTopCentre() {
+        let right = screen.offsetBy(dx: 1728, dy: 0)
         let origin = BootNoticeAnchor.origin(
             size: size,
-            screen: screen,
+            screen: right,
             menuBar: menuBar,
             item: nil
         )
-        #expect(origin == CGPoint(x: screen.midX - 150, y: top))
+        #expect(origin == CGPoint(x: right.midX - 150, y: top))
     }
 
-    @Test("an item in the notch gap or off screen anchors nothing")
+    @Test("only an item wholly on screen and clear of the notch anchors")
     func notchAndOffScreenAnchorNothing() {
         let gap: ClosedRange<CGFloat> = 771.5...956.5
-        let beside = CGRect(x: 1200, y: 1085, width: 30, height: 32)
-        let behind = CGRect(x: 800, y: 1085, width: 30, height: 32)
-        let away = CGRect(x: 2000, y: 1085, width: 30, height: 32)
-        #expect(
+        func anchors(_ x: CGFloat, notch: Bool = true) -> Bool {
             BootNoticeAnchor.anchors(
-                item: beside,
+                item: CGRect(x: x, y: 1085, width: 30, height: 32),
                 screen: screen,
-                notchGap: gap
+                notchGap: notch ? gap : nil
             )
-        )
-        #expect(
-            !BootNoticeAnchor.anchors(
-                item: behind,
-                screen: screen,
-                notchGap: gap
-            )
-        )
-        #expect(
-            !BootNoticeAnchor.anchors(
-                item: away,
-                screen: screen,
-                notchGap: nil
-            )
-        )
+        }
+        #expect(anchors(1200))  // right of the notch
+        #expect(anchors(700))  // left of the notch
+        #expect(!anchors(800))  // behind it
+        #expect(!anchors(760))  // straddling its edge
+        #expect(!anchors(1710, notch: false))  // partly off screen
+        #expect(!anchors(2000, notch: false))  // off screen
     }
 }
