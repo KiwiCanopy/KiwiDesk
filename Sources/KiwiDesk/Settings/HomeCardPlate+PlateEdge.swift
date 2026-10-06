@@ -8,9 +8,10 @@ import SwiftUI
 struct PreviewPlateEdge: View {
     let spec: HomeCardBarsTile.BarSpec
     let corner: CGFloat
-    /// An active box whose outline strokes this edge, so the
-    /// border stands down under it as on the bar (#1924).
-    var outlined = false
+    /// The active indicator drawn over this edge, nil where none
+    /// is; the border stands down under one that strokes the
+    /// box's edge, as on the bar (#1924).
+    var under: AppBarStyle.ActiveIndicator? = nil
     @Environment(\.schematicPalette) private var palette
 
     /// The border this edge strokes — its hex and width — or nil
@@ -19,10 +20,12 @@ struct PreviewPlateEdge: View {
         spec.borderWidth > 0 ? (spec.borderColor, spec.borderWidth) : nil
     }
 
-    /// Whether the border stands down under the box's outline;
-    /// the hairline never does, as the outline is not drawn
-    /// beside it.
-    var standsDown: Bool { outlined && border != nil }
+    /// Whether the border stands down under the indicator. The
+    /// hairline is the schematic's own edge, not the shelf's
+    /// border, so it stays (#1924).
+    var standsDown: Bool {
+        border != nil && under?.strokesBoxEdge == true
+    }
 
     var body: some View {
         if standsDown {

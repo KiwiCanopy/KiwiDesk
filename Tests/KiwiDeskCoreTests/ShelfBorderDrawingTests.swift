@@ -3,48 +3,19 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The border reaches every surface it rims (#1679), built
-/// through the real views: the shelf's plate under Plain, each
-/// item's box under Boxed on both bars, and the Space Bar's
-/// front-app chip — and nothing while the switch is off.
+private typealias Border = ShelfBorderFixture
+
+/// The border reaches every box it rims (#1679), built through
+/// the real views: each item's box under Boxed on both bars and
+/// the Space Bar's front-app chip — nothing while the switch is
+/// off, and nothing under an active outline (#1924). The plate's
+/// rim is `ShelfBorderPlateTests`'.
 @Suite("Shelf border drawing")
 @MainActor
 struct ShelfBorderDrawingTests {
-    private static let width: CGFloat = 3
-    private static let color = "#FF000080"
-
     /// The machine's Reduce transparency setting is a default this
     /// fixture reasons from, so it is pinned off (#660, #1374).
     init() { LiquidGlassGate.override = { false } }
-
-    private static func bordered(
-        _ shelf: KiwiShelf = KiwiShelf(),
-        on: Bool = true
-    ) -> KiwiShelf {
-        var shelf = shelf
-        shelf.border = on
-        shelf.borderWidth = width
-        shelf.borderColor = color
-        return shelf
-    }
-
-    /// `view` strokes the shelf's border: shown, at the width, in
-    /// the colour, on `bounds`-sized frame `frame`.
-    private func expectStroke(
-        _ view: NSView,
-        frame: CGRect,
-        _ comment: Comment? = nil
-    ) {
-        #expect(!view.isHidden, comment)
-        #expect(view.layer?.borderWidth == Self.width, comment)
-        #expect(
-            view.layer?.borderColor
-                == NSColor(kiwiHex: Self.color).cgColor,
-            comment
-        )
-        #expect(view.layer?.backgroundColor == nil, comment)
-        #expect(view.frame == frame, comment)
-    }
 
     // MARK: - Boxes
 
@@ -108,23 +79,16 @@ struct ShelfBorderDrawingTests {
         return view
     }
 
-    private static func boxed(glass: Bool) -> KiwiShelf {
-        var shelf = KiwiShelf()
-        shelf.backgroundStyle = .boxed
-        shelf.liquidGlass = glass
-        return shelf
-    }
-
     /// Solid boxes and glass ones alike: under glass the item
     /// view is the glass's content, so it carries the rim too.
     @Test("Both bars' boxes stroke the border", arguments: [false, true])
     func boxesStroke(glass: Bool) {
-        let shelf = Self.bordered(Self.boxed(glass: glass))
+        let shelf = Border.bordered(Border.boxed(glass: glass))
         let space = spaceItem(shelf)
-        expectStroke(space.boxBorder, frame: space.bounds, "space")
+        Border.expectStroke(space.boxBorder, frame: space.bounds, "space")
         #expect(space.boxBorder.layer?.cornerRadius == space.cornerRadius)
         let app = appItem(shelf)
-        expectStroke(app.boxBorder, frame: app.bounds, "app")
+        Border.expectStroke(app.boxBorder, frame: app.bounds, "app")
         #expect(
             app.boxBorder.layer?.cornerRadius
                 == app.style.resolvedCornerRadius(
@@ -133,10 +97,10 @@ struct ShelfBorderDrawingTests {
         )
     }
 
-    /// The active outline strokes OVER the border, never under it.
-    @Test("A box's border sits beneath the active outline")
+    /// The active indicator draws OVER the rim, never under it.
+    @Test("A box's border sits beneath the active indicator")
     func borderBeneathOutline() {
-        let shelf = Self.bordered(Self.boxed(glass: false))
+        let shelf = Border.bordered(Border.boxed(glass: false))
         let space = spaceItem(shelf)
         let app = appItem(shelf)
         for (view, border, clip) in [
@@ -152,9 +116,9 @@ struct ShelfBorderDrawingTests {
 
     @Test("Plain items and a switched-off border draw no box rim")
     func noRimOffOrPlain() {
-        var plain = Self.bordered()
+        var plain = Border.bordered()
         plain.backgroundStyle = .plain
-        let off = Self.bordered(Self.boxed(glass: false), on: false)
+        let off = Border.bordered(Border.boxed(glass: false), on: false)
         for shelf in [plain, off] {
             #expect(spaceItem(shelf).boxBorder.isHidden)
             #expect(appItem(shelf).boxBorder.isHidden)
@@ -169,17 +133,21 @@ struct ShelfBorderDrawingTests {
         arguments: [false, true]
     )
     func outlineStandsTheRimDown(glass: Bool) {
-        let shelf = Self.bordered(Self.boxed(glass: glass))
+        let shelf = Border.bordered(Border.boxed(glass: glass))
         #expect(spaceItem(shelf, indicator: .outline).boxBorder.isHidden)
         #expect(appItem(shelf, indicator: .outline).boxBorder.isHidden)
         let idle = spaceItem(shelf, active: false, indicator: .outline)
-        expectStroke(idle.boxBorder, frame: idle.bounds, "idle space")
+        Border.expectStroke(idle.boxBorder, frame: idle.bounds, "idle space")
         let idleApp = appItem(shelf, active: false, indicator: .outline)
-        expectStroke(idleApp.boxBorder, frame: idleApp.bounds, "idle app")
+        Border.expectStroke(
+            idleApp.boxBorder,
+            frame: idleApp.bounds,
+            "idle app"
+        )
         let marked = spaceItem(shelf, indicator: .edgeMark)
-        expectStroke(marked.boxBorder, frame: marked.bounds, "mark")
+        Border.expectStroke(marked.boxBorder, frame: marked.bounds, "mark")
         let markedApp = appItem(shelf, indicator: .edgeMark)
-        expectStroke(
+        Border.expectStroke(
             markedApp.boxBorder,
             frame: markedApp.bounds,
             "app mark"
@@ -188,13 +156,18 @@ struct ShelfBorderDrawingTests {
 
     /// The chip IS the focused window, so its outline is always
     /// drawn and its rim always stands down under it.
-    @Test("The front-app chip's outline stands its rim down")
-    func frontChipOutlineStandsTheRimDown() throws {
-        let shelf = Self.bordered(Self.boxed(glass: false))
+    @Test(
+        "The front-app chip's outline stands its rim down",
+        arguments: [false, true]
+    )
+    func frontChipOutlineStandsTheRimDown(glass: Bool) throws {
+        if glass { guard #available(macOS 26, *) else { return } }
+        let shelf = Border.bordered(Border.boxed(glass: glass))
         let outlined = try frontOverlay(shelf, indicator: .outline)
         #expect(outlined.frontBorder.isHidden)
         let marked = try frontOverlay(shelf, indicator: .edgeMark)
-        expectStroke(marked.frontBorder, frame: marked.frontBox.frame)
+        #expect(!marked.frontBorder.isHidden)
+        #expect(marked.frontBorder.layer?.borderWidth == Border.width)
     }
 
     // MARK: - The front-app chip
@@ -224,11 +197,11 @@ struct ShelfBorderDrawingTests {
     @Test("The front-app chip strokes the border")
     func frontChipStrokes() throws {
         let overlay = try frontOverlay(
-            Self.bordered(Self.boxed(glass: false))
+            Border.bordered(Border.boxed(glass: false))
         )
-        expectStroke(overlay.frontBorder, frame: overlay.frontBox.frame)
+        Border.expectStroke(overlay.frontBorder, frame: overlay.frontBox.frame)
         let off = try frontOverlay(
-            Self.bordered(Self.boxed(glass: false), on: false)
+            Border.bordered(Border.boxed(glass: false), on: false)
         )
         #expect(off.frontBorder.isHidden)
     }
@@ -239,11 +212,11 @@ struct ShelfBorderDrawingTests {
     func frontChipRimAboveGlass() throws {
         guard #available(macOS 26, *) else { return }
         let overlay = try frontOverlay(
-            Self.bordered(Self.boxed(glass: true))
+            Border.bordered(Border.boxed(glass: true))
         )
         let glass = try #require(overlay.frontGlass)
         #expect(!glass.isHidden)
-        expectStroke(overlay.frontBorder, frame: glass.frame)
+        Border.expectStroke(overlay.frontBorder, frame: glass.frame)
         let host = try #require(glass.superview)
         #expect(overlay.frontBorder.superview === host)
         let order = host.subviews

@@ -126,8 +126,7 @@ struct BarStripView: View {
                         PreviewPlateEdge(
                             spec: spec,
                             corner: spec.itemCorner,
-                            outlined: item.active
-                                && spec.indicator.strokesBoxEdge
+                            under: item.active ? spec.indicator : nil
                         )
                     )
                 )

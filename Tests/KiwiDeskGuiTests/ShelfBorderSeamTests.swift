@@ -38,6 +38,21 @@ struct ShelfBorderSeamTests {
         #expect(hits == Self.readers, "\(hits)")
     }
 
+    /// Whether an indicator stands a rim down is `ShelfBorder.yields`'
+    /// alone (#1924): in Core only it asks `strokesBoxEdge`, beside
+    /// the property's own declaration.
+    @Test("Only the painter asks whether an indicator strokes the edge")
+    func onePainterAsksTheEdge() throws {
+        var hits: Set<String> = []
+        for file in try SourceScan.swiftSources(under: Self.coreRoot) {
+            let source = try SourceScan.strippedSource(at: file)
+            if source.contains("strokesBoxEdge") {
+                hits.insert(file.lastPathComponent)
+            }
+        }
+        #expect(hits == [Self.home, "AppBarStyle+Enums.swift"], "\(hits)")
+    }
+
     /// The active indicator's outline, the one other layer border
     /// `Bar/` strokes: file and write count per channel, so a new
     /// write — even one spelled like the accent's — reds until it
