@@ -1073,8 +1073,9 @@ Boxed.
   `strokesBoxEdge` (#1924, `ShelfBorderDrawingTests` ▸
   `outlineStandsTheRimDown`) — so the outline IS that edge and
   hugs any box, solid or glass, insetting only on the plate
-  (`ShelfBorderDrawingTests` ▸ `outlineHugsTheBox`). `ShelfBorderSeamTests` holds the
-  one home: only the painter reads the drawn width in Core, and
+  (`ShelfBorderDrawingTests` ▸ `outlineHugsTheBox`), where
+  `BarAccent.hugsBox` is the one answer. `ShelfBorderSeamTests`
+  holds the one home: only the painter reads the drawn width in Core, and
   in `Bar/` the only layer-border colour written beside it is
   the active indicator's. `ShelfBorderPlateTests` builds the
   plate (solid, glass, under Reduce transparency) and

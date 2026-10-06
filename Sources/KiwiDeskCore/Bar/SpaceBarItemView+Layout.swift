@@ -260,7 +260,7 @@ extension SpaceBarItemView {
                 BarAccent.outline(
                     in: bounds,
                     radius: cornerRadius,
-                    boxed: !style.shelf.drawsPlate
+                    shelf: style.shelf
                 ).frame
         case .edgeMark:
             accent.frame = BarAccent.edgeMarkFrame(

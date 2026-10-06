@@ -53,6 +53,18 @@ struct ShelfBorderSeamTests {
         #expect(hits == [Self.home, "AppBarStyle+Enums.swift"], "\(hits)")
     }
 
+    /// The drop ring morphs into the outline, so it hugs where
+    /// the outline does, asking `BarAccent.hugsBox` (#1924).
+    @Test("The drop ring asks where the outline hugs")
+    func dropRingAsksTheOutline() throws {
+        let url = Self.coreRoot
+            .appendingPathComponent("Bar")
+            .appendingPathComponent("SpaceBarItemView+DragDrop.swift")
+        let source = try SourceScan.strippedSource(at: url)
+        #expect(source.contains("= BarAccent.hugsBox(style.shelf)"))
+        #expect(!source.contains("hasBox"))
+    }
+
     /// The active indicator's outline, the one other layer border
     /// `Bar/` strokes: file and write count per channel, so a new
     /// write — even one spelled like the accent's — reds until it

@@ -21,7 +21,7 @@ extension SpaceBarItemView {
         // Boxed, solid or glass, the inset capsule on the plate
         // (QA 2026-07-19 — a square sweep would poke past the hug
         // plate's corners exactly like the old square accent).
-        let boxed = !style.shelf.drawsPlate
+        let boxed = BarAccent.hugsBox(style.shelf)
         // The ring morphs into the outline, so it strokes alike.
         springRing.lineWidth = style.resolvedHighlightWidth
         var inset = springRing.lineWidth / 2

@@ -162,6 +162,7 @@ struct ShelfBorderDrawingTests {
         let shelf = Border.bordered(Border.boxed(glass: glass))
         let space = spaceItem(shelf, indicator: .outline)
         #expect(space.accent.frame == space.bounds)
+        #expect(space.accent.layer?.cornerRadius == space.cornerRadius)
         let app = appItem(shelf, indicator: .outline)
         #expect(app.accent.frame == app.bounds)
         var plain = shelf
@@ -187,6 +188,10 @@ struct ShelfBorderDrawingTests {
         let shelf = Border.bordered(Border.boxed(glass: glass))
         let outlined = try frontOverlay(shelf, indicator: .outline)
         #expect(outlined.frontBorder.isHidden)
+        #expect(
+            outlined.frontAccent.frame == outlined.frontAccentClip.bounds,
+            "the chip's outline hugs its box"
+        )
         let marked = try frontOverlay(shelf, indicator: .edgeMark)
         #expect(!marked.frontBorder.isHidden)
         #expect(marked.frontBorder.layer?.borderWidth == Border.width)
@@ -244,5 +249,15 @@ struct ShelfBorderDrawingTests {
         let order = host.subviews
         let rim = try #require(order.firstIndex(of: overlay.frontBorder))
         #expect(try #require(order.firstIndex(of: glass)) < rim)
+    }
+
+    /// One answer for where the outline sits (#1924): a box,
+    /// solid or glass, takes it flush; the plate insets it. The
+    /// drop ring morphs into the outline, so it asks the same.
+    @Test("Whether the outline hugs is BarAccent's one answer")
+    func hugsBoxIsOneAnswer() {
+        #expect(BarAccent.hugsBox(Border.boxed(glass: false)))
+        #expect(BarAccent.hugsBox(Border.boxed(glass: true)))
+        #expect(!BarAccent.hugsBox(KiwiShelf()))
     }
 }
