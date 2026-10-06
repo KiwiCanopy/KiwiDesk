@@ -4519,14 +4519,22 @@ it was dropped and loses height from the bottom. Moving it back up
 would undo the move the user just made. A clipped strip below the
 border is not a position anyone chose, so this is a narrower
 reading of #1091's "a float's position is the user's", not an
-exception to it. Three limits keep it narrow:
+exception to it. Four limits keep it narrow:
 
-- It runs on the drop only, never on a retile, so a float parked
-  half off-screen by any other means stays where it is.
+- It runs on a hand drop only, never from a retile net, so a
+  float parked half off-screen by any other means stays where
+  it is.
 - It stops at the window's minimum height (the configured
-  minimum, or a corroborated app minimum); past that, the rest
-  stays clipped rather than the window moving.
-- A window whose top is already past the border is left alone.
+  minimum, or a corroborated app minimum). Past that, at the
+  screen edge the rest stays clipped rather than the window
+  moving; under a bar on that edge the bar still lifts it
+  clear, since a bar reserves its edge for every window (#242).
+- A window whose top is already past the border is left alone:
+  its title bar is out of reach. A bottom "peek" with the title
+  bar showing is therefore reachable only at the window's
+  minimum height.
+- A window covering a whole screen is presenting and keeps its
+  frame (#1787).
 :::
 
 **Floating a tiled window centres it at a derived size

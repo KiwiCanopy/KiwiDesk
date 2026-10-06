@@ -1844,7 +1844,13 @@ editing here:
   retile and would drag back a window parked half off-screen by
   hand (`FloatRegionFitTests`; the net's own routing is
   `FloatRegionSeamTests`, since no behavioural test can see
-  which entry the sweep calls). **A SIZE ask that an app can
+  which entry the sweep calls). The one bottom-edge fit — a
+  float dropped past the bottom keeps its top and is shrunk —
+  runs on a hand DROP alone, through the one
+  `floatFrameFittedOnDrop`, and never from a retile net, which
+  would shrink a window parked there by hand (#1427,
+  `FloatDropBottomFitTests`, `FloatRegionSeamTests` ▸
+  `dropFitHasOneCaller`). **A SIZE ask that an app can
   refuse owes a memo** — that net runs every retile, and unlike
   a position, a size is genuinely refusable, so an app whose
   minimum exceeds the region is re-asked forever without one;
