@@ -1071,7 +1071,9 @@ Boxed.
   the painter the indicator it draws over the rim, never a
   verdict, and the Settings preview asking the same
   `strokesBoxEdge` (#1924, `ShelfBorderDrawingTests` ▸
-  `outlineStandsTheRimDown`). `ShelfBorderSeamTests` holds the
+  `outlineStandsTheRimDown`) — so the outline IS that edge and
+  hugs any box, solid or glass, insetting only on the plate
+  (`ShelfBorderDrawingTests` ▸ `outlineHugsTheBox`). `ShelfBorderSeamTests` holds the
   one home: only the painter reads the drawn width in Core, and
   in `Bar/` the only layer-border colour written beside it is
   the active indicator's. `ShelfBorderPlateTests` builds the
