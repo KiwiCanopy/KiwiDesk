@@ -53,11 +53,13 @@ extension KiwiCore {
         )
         let paying = tiler.motionGate.owed != nil
         guard let run = tiler.motionGate.admit(asked) else {
+            tiler.meter.add(\.passesHeld)
             updateBars()
             updateBorders()
             updateStickyMarks()
             return
         }
+        if paying { tiler.meter.add(\.passesMerged) }
         let animated = run.animated
         let pass = run.pass
         let newlyCreatedWindow = run.newlyCreatedWindow

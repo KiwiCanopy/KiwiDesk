@@ -6,8 +6,8 @@ argument-hint: "[optional: two space names, rounds, or a baseline to compare aga
 A performance claim about the engine is a before/after pair of
 counter readings from the same desk under the same load, never a
 reading of the code. The counters are `WorkMeter`'s
-(`Sources/KiwiDeskCore/App/WorkMeter.swift` — its `report` is the
-one list of what they are); this procedure is how to read them so
+(`Sources/KiwiDeskCore/App/WorkMeter.swift`; its `report`, in
+`WorkMeter+Report.swift`, is the one list of what they are); this procedure is how to read them so
 two readings compare.
 
 The tools are in `scripts/` beside this file. Write every output
@@ -75,7 +75,7 @@ The per-switch figures are the ones that answer #1508:
 and `frames_issued` over `space_switches`, `retile_ms_mean`/`max`,
 `queue_wait_ms_max`. Compare a change against its own
 before-bundle on the same pair, the same rounds and the same
-load, and report the deltas. Two readings to keep straight:
+load, and report the deltas. Three readings to keep straight:
 
 - `space_switches` counts the switch door (`focus_space`, the
   scroll step) and nothing else — not boot, wake or a Desktop
@@ -83,6 +83,12 @@ load, and report the deltas. Two readings to keep straight:
   per-switch denominator.
 - `retile_ms` CONTAINS `bar_ms` and `border_ms`: a saving in the
   bars lowers both, and counting it twice is the mistake.
+- the `settle_*` counters are the Space switch settle's SHARE
+  of `parks_*`, `frames_*` and `passes_*` (#1964), never added
+  to them; `settle_parks_issued` over `space_switches` is what
+  the settle re-sends. A `settle_passes_held` or
+  `settle_passes_merged` above zero means the motion gate moved
+  work out of or into the share, so that run's share is skewed.
 
 `ax_off_main_us_mean` is the per-call cost the load inflates;
 `ax_main_*` is what blocks the main actor.

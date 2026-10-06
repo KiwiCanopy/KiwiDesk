@@ -14,8 +14,8 @@ in the repo. The fix is the caller's.
 - `.claude/skills/measure-work/SKILL.md` — the procedure. Follow
   its steps in order and use its scripts; do not improvise a
   second method beside it.
-- `Sources/KiwiDeskCore/App/WorkMeter.swift` — what each counter
-  counts.
+- `Sources/KiwiDeskCore/App/WorkMeter.swift` and
+  `WorkMeter+Report.swift` — what each counter counts.
 - `.claude/skills/verify-gate/SKILL.md` ▸ Fast inner loop — the
   gate slot a bundle build takes.
 
