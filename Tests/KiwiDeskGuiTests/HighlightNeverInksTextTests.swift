@@ -6,7 +6,13 @@ import Testing
 /// ratio (`HighlightSeparationTests`) ONLY because it marks and
 /// never inks. So every use names the view it colours, and that
 /// view is never text — the nearest view constructor before each
-/// use is not a `Text(` or a `Label(`.
+/// use is not a `Text(` or a `Label(`. Two spellings that would
+/// slip past that reading are refused outright: the gold handed
+/// to `.tint(`, which reaches every label beneath it, and a local
+/// binding of it (`let gold = SettingsTheme.highlight`), whose
+/// later uses this scan cannot follow. A CONTAINER holding both an
+/// `Image` and a `Text` and coloured as a whole is left to review:
+/// the nearest constructor is whichever was written last.
 @Suite("Highlight gold never inks text (#2038)")
 struct HighlightNeverInksTextTests {
     /// Repo-relative path → what the gold colours there. Exact
@@ -23,6 +29,14 @@ struct HighlightNeverInksTextTests {
         "Text(", "Label(", "Image(", "Rectangle(", "RoundedRectangle(",
         "Circle(", "Capsule(", "shape.",
     ]
+
+    /// The modifier call the use is an argument of: the last
+    /// `.name(` before it, across line breaks.
+    private static let modifier = #"\.(\w+)\([^()]*$"#
+    /// A binding whose value expression holds the use: `let`/`var`,
+    /// a name, an optional type, `=`, then no statement boundary.
+    private static let binding =
+        #"\b(let|var)\s+\w+(\s*:\s*[\w.]+)?\s*=(?!=)[^;{}()]*$"#
 
     @Test("every gold use is classified and colours no text")
     func goldInksNoText() throws {
@@ -54,6 +68,30 @@ struct HighlightNeverInksTextTests {
                 )
                 found.insert(path)
                 let before = source[..<hit.lowerBound]
+                let recent = String(before.suffix(300))
+                if let call = recent.range(
+                    of: Self.modifier,
+                    options: .regularExpression
+                ) {
+                    #expect(
+                        !recent[call].hasPrefix(".tint("),
+                        Comment(
+                            rawValue: "\(path): the gold as a tint "
+                                + "inks every label beneath it"
+                        )
+                    )
+                }
+                #expect(
+                    recent.range(
+                        of: Self.binding,
+                        options: .regularExpression
+                    ) == nil,
+                    Comment(
+                        rawValue: "\(path): a binding of the gold "
+                            + "hides its uses from this scan — "
+                            + "spell SettingsTheme.highlight at each"
+                    )
+                )
                 let nearest = Self.views.compactMap { view in
                     before.range(of: view, options: .backwards).map {
                         (view, $0.lowerBound)
