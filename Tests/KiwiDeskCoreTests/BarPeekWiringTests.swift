@@ -202,8 +202,13 @@ struct BarPeekWiringTests {
         let closed = try #require(
             SpaceBarGlyphActions.contextEvent(at: web, menu: menu.size)
         )
+        // The event sits AppKit's measured inset off the corner, so
+        // the menu WINDOW's top-left lands on it.
+        let inset = SpaceBarGlyphActions.contextMenuInset
+        let event = window.convertPoint(toScreen: closed.locationInWindow)
         #expect(
-            window.convertPoint(toScreen: closed.locationInWindow) == expected
+            CGPoint(x: event.x + inset.width, y: event.y + inset.height)
+                == expected
         )
         steps.run()
         let panel = try #require(core.shelves.peek.panel.panel)

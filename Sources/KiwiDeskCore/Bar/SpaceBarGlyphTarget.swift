@@ -41,11 +41,17 @@ final class SpaceBarGlyphActions {
         NSMenu.popUpContextMenu(menu, with: event, for: anchor)
     }
 
-    /// A context-menu event where a `menu`-sized menu meets the
-    /// peek's bar-side edge for `anchor` — so the menu's rows land
-    /// where the peek's were (#1946) — or at `anchor`'s lower-left
+    /// How far `popUpContextMenu`'s window top-left lands from its
+    /// event point: 1 pt right and 6 pt above, measured on macOS 27
+    /// for glyph and `+n` menus alike (#1946).
+    static let contextMenuInset = CGSize(width: 1, height: 6)
+
+    /// A context-menu event whose menu window meets the peek's
+    /// bar-side edge for `anchor` — so the menu's rows land where
+    /// the peek's were (#1946) — or hangs from `anchor`'s lower-left
     /// corner for a view no peek reads, so the menu opens at the
-    /// cell whatever input picked it.
+    /// cell whatever input picked it; `contextMenuInset` corrects
+    /// for where AppKit puts the window.
     static func contextEvent(
         at anchor: NSView,
         menu: CGSize
@@ -55,10 +61,15 @@ final class SpaceBarGlyphActions {
             x: 0,
             y: anchor.isFlipped ? anchor.bounds.maxY : 0
         )
-        let location =
+        let point =
             peekMenuTopLeft(of: anchor, menu: menu)
             .map(window.convertPoint(fromScreen:))
             ?? anchor.convert(corner, to: nil)
+        let inset = contextMenuInset
+        let location = NSPoint(
+            x: point.x - inset.width,
+            y: point.y - inset.height
+        )
         return NSEvent.mouseEvent(
             with: .rightMouseDown,
             location: location,
