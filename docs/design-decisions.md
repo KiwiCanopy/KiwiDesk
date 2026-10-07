@@ -12446,8 +12446,10 @@ switches by itself.** (#1528, owner rulings 2026-09-20 and
 switches to that Space and focuses the window; the rest of the
 item — identifier, divider, padding — switches and lands on the
 Space's last-focused window. A glyph standing for several
-windows, and `+n`, open a menu of those windows and switch
-nothing until a row is picked.
+windows, and `+n`, list those windows — the hover peek, shown at
+once and held — and switch nothing until a row is picked. A peek
+row is that pick, as a menu row is: one focus path, whichever
+list the user picked from.
 
 The glyph is the only thing on screen naming a window on a Space
 you are not looking at, so it is where a click can say which
@@ -12459,42 +12461,84 @@ which window the switch lands on. A target standing for several windows must not
 choose for the user: any guess (the most recent, the first) is
 wrong often enough to teach distrust of the click, and a switch
 fired before the choice moves the screen under a menu the user
-may still dismiss. So the menu opens where the user is, and
+may still dismiss. So the list opens where the user is, and
 dismissing it costs nothing. The hover peek reads its windows
 when it shows rather than being drawn into the render, so it is
 current without the bar re-rendering on every title change. A
 setting to turn glyph clicks off waits for misclicks measured on
 a device (#1514).
 
-**[Trade-off] A bar item's hover peek.** (#1946, owner ruling
-2026-10-07 from an HTML preview.) Hovering a Space Bar glyph, a
-`+n` disc or an App Bar item that hides its text shows a
-read-only label in the bar's own look, in place of the system
-tooltip. The tooltip could not be restyled, waited the tooltip
-delay, and listed the same windows the click menu lists in
-another face, so two surfaces fought over one list. The peek is
-the list in the bar's face; the menu is its actionable version,
-and a press turns one into the other: the peek closes on the
-press, and a multi-window glyph's menu meets the peek on its
-bar-side edge, the one nearest the press — placed by the menu's
-own size, computed whether a peek showed or not — so its rows
-land where the peek's rows were, and on a bottom or right-hand
-bar the menu grows away from the bar as the peek did rather than
-hanging from the peek's top-left corner over the bar. The peek
-centres on its item, opening away from the bar's edge.
+**[Trade-off] A bar item's hover peek.** (#1946, owner rulings
+2026-10-07 from an HTML preview and two device eyeballs.)
+Hovering a Space Bar glyph, a `+n` disc or an App Bar item that
+hides its text shows the windows it stands for in the bar's own
+look, in place of the system tooltip. The tooltip could not be
+restyled, waited the tooltip delay, and listed the same windows
+the click menu lists in another face, so two surfaces fought
+over one list. The peek centres on its item, opening away from
+the bar's edge.
+
+The peek acts: every row is its window's button, on every peek,
+picked on the release inside the row, a drag off it cancelling
+as a button's does (#2044). A row-shaped list the user cannot act
+on is a trap — the hand reaches into it to click a row, and a
+panel deaf to the mouse lets that click fall through to the
+window underneath and focus another app, a misclick with a side
+effect on a surface built to look pickable. macOS shows no such
+list: Stage Manager and Mission Control act on the surface you
+previewed, and the Dock's hover label is one word that promises
+nothing. So a left click on a multi-window glyph or `+n` shows
+the same peek at once, without the dwell, and holds it until a
+click outside, a pick or the pointer leaving, while a one-window
+glyph still picks on the click; two lists for one set of windows
+is the fight the tooltip lost. A pick takes the one focus path a
+menu row takes, KiwiDesk's own windows included (#1281), and is
+judged when it is performed: a window the focus door refuses
+draws the refusal pill rather than a greyed row, since greying
+on hover needs the compositor read a show and every swap cannot
+afford (#1925). The row under the pointer takes the shelf's own
+hover ink, so a bar's hover means one thing wherever it shows.
+The panel takes the mouse yet never activates, so a click on a
+row leaves the app the user is in frontmost until the pick moves
+the focus; it is never key, so Escape is not one of its exits.
+
+The native menu stays as the peek's twin where the peek cannot
+reach. VoiceOver's press on a glyph opens it: the peek is hidden
+from accessibility, and the menu brings the keyboard and the
+rotor for free. A list taller than its room ends on "N more", a
+button opening the menu, which scrolls where the peek never
+does. The right-click menu is #1518's, unchanged. The
+context-menu chrome a left click wore (#1850) is therefore those
+two paths' alone.
+
+Between the item and the peek lies a gap the pointer crosses to
+reach a row, and a peek wider than its item overhangs the
+neighbours. The peek holds while the pointer stays inside the
+hull of the item's peek-facing edge and the peek's bar-facing
+edge, with both rectangles: inside it no neighbour swaps in and
+the peek does not close; outside it the peek closes and cools as
+it always did. The hull spans no neighbour's own rectangle, so
+moving along the bar still swaps at once — a grace that took the
+neighbours in would make the whole bar sticky.
+
+It still never opens a menu on hover. A hover-opened menu runs a
+modal tracking loop that eats the next click, and no macOS
+surface does that; an untracked panel runs no loop, which is why
+the peek may act where a hovered menu may not.
 
 What it shows is ruled whole: the app on top, smaller and
-semibold like the menu's section header, so the peek reads as the
-menu before a click, a step under the titles in ink — the item
+semibold like the menu's section header, so the peek reads as
+the menu's twin, a step under the titles in ink — the item
 ink at three quarters of its alpha, DERIVED the way the empty
 Space ink is: the step is taken only where it holds the idle
 floor on both grounds the peek draws on, and a palette that
 cannot hold it, a user's own included, keeps the full ink; one
 row per window, hairlines between, so a title that
 wraps still reads as one window; every window counted, an
-untitled one as the menu names it, while a lone window titled
-exactly as its app shows the header alone rather than the same
-word twice; the count as a window glyph and a bare number in the
+untitled one as the menu names it, and a lone window titled
+exactly as its app keeps its row under the header — a header
+with no row reads as an app with no window, and a row is now
+something to click; the count as a window glyph and a bare number in the
 bar's own badge pill, ringed in the hairlines' ink so it holds its
 edge on any ground, only from two windows, so it needs no word and
 no plural — the glyph taking the header's derived step of the
@@ -12523,17 +12567,10 @@ taller than that keeps the windows that fit, in order, and marks
 the cut at the edge away from the bar with a chevron and "N more"
 in the secondary ink (owner ruling): the chevron points where the
 hidden rows are — down under a top bar, up over a bottom one,
-whose peek keeps the windows nearest the bar — and tells the user
-the click menu holds the rest. The peek itself never scrolls: it
-takes no mouse event by ruling, and the menu is the scrollable
-list. The frame counts no noun, so no locale has to agree with the
+whose peek keeps the windows nearest the bar — and the line is
+the button that opens the menu holding the rest. The peek itself
+never scrolls; the menu is the scrollable list. The frame counts no noun, so no locale has to agree with the
 number. No title is ever capped on its own.
-
-It never acts and never opens a menu on hover. A hover-opened
-menu runs a tracking loop that eats the next click, and no macOS
-surface does that; the panel takes no mouse event, so it needs no
-grace region, and it is hidden from VoiceOver, which keeps the
-item's label and the menu.
 
 Timing has one home, `BarPeek.Timing`. A first peek waits a short
 dwell, because a zero dwell flashes a label every time the
