@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 
 /// Window state persistence across unclean shutdowns and restarts.
@@ -20,7 +21,8 @@ public final class CrashRecovery {
 
     /// Boot time provider to discard stale pre-boot window IDs (#633).
     public var bootTime: () -> Date = SystemBoot.time
-    /// The clock `inPlaceSessionBound` is measured on.
+    /// The clock `inPlaceSessionBound` and
+    /// `logoutFreezeBound` are measured on.
     public var now: () -> Date = { Date() }
 
     /// How long after its stop an in-place snapshot's session
@@ -29,6 +31,21 @@ public final class CrashRecovery {
     /// left for a much later launch restores the arrangement and
     /// starts sizing fresh, as any launch after a quit does.
     public static let inPlaceSessionBound: TimeInterval = 120
+
+    /// Where the logout signal arrives (#1385); a test hands a
+    /// private center.
+    public var workspaceCenter: NotificationCenter =
+        NSWorkspace.shared.notificationCenter
+
+    /// How long a logout's freeze holds (#1385). macOS posts no
+    /// counterpart when an app's refusal cancels the logout, so a
+    /// freeze must lift on its own; the measured logout closed
+    /// every app within 7 s of the first close.
+    public static let logoutFreezeBound: TimeInterval = 120
+
+    /// When the logout froze the autosave, or nil (#1385).
+    private(set) var frozenAt: Date?
+    private var powerOffToken: NSObjectProtocol?
 
     private let fileURL: URL
     private let sessionURL: URL
@@ -58,6 +75,7 @@ public final class CrashRecovery {
         }
         RunLoop.main.add(timer, forMode: .common)
         self.timer = timer
+        observePowerOff()
         // First autosave immediately: the session file was
         // already consumed by this launch, so a crash inside the
         // first interval would lose the arrangement (#633).
@@ -76,6 +94,10 @@ public final class CrashRecovery {
     ) {
         timer?.invalidate()
         timer = nil
+        if let powerOffToken {
+            workspaceCenter.removeObserver(powerOffToken)
+        }
+        powerOffToken = nil
         let capture = inPlace ? captureInPlaceState : captureState
         if !preservingSession, let snapshot = capture(),
             let data = try? JSONEncoder().encode(snapshot)
@@ -140,8 +162,18 @@ public final class CrashRecovery {
         try? FileManager.default.removeItem(at: sessionURL)
     }
 
-    /// Writes one snapshot now (also called by the timer).
+    /// Stops autosaving (#1385): the window closes macOS performs
+    /// during a logout must not overwrite the last arrangement.
+    /// Lifts past `logoutFreezeBound`.
+    public func freezeForLogout() {
+        frozenAt = now()
+        onLog("autosave frozen: logout or power-off began")
+    }
+
+    /// Writes one snapshot now (also called by the timer), unless
+    /// a logout froze it.
     public func autosave() {
+        guard !autosaveIsFrozen() else { return }
         guard let snapshot = captureState() else { return }
         guard
             let data = try? JSONEncoder().encode(snapshot)
@@ -153,6 +185,30 @@ public final class CrashRecovery {
         guard (try? data.write(to: fileURL, options: .atomic)) != nil
         else { return }
         onAutosaved()
+    }
+
+    /// `NSWorkspace.willPowerOffNotification` — logout, restart
+    /// and shut down alike (#1385).
+    private func observePowerOff() {
+        guard powerOffToken == nil else { return }
+        powerOffToken = workspaceCenter.addObserver(
+            forName: NSWorkspace.willPowerOffNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.freezeForLogout()
+            }
+        }
+    }
+
+    private func autosaveIsFrozen() -> Bool {
+        guard let frozenAt else { return false }
+        let age = now().timeIntervalSince(frozenAt)
+        if age <= Self.logoutFreezeBound { return true }
+        self.frozenAt = nil
+        onLog("autosave resumed: the logout did not proceed")
+        return false
     }
 
     private func readSnapshot() -> StateSnapshot? {
