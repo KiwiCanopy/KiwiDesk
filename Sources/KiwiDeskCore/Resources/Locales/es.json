@@ -1484,6 +1484,7 @@
   "space_bar.item_label.identifier": "Nombre o icono",
   "space_bar.item_label.layout": "Diseño",
   "space_bar.menu.row": "%1$@ — %2$@",
+  "space_bar.menu.untitled": "Sin título",
   "space_bar.overflow.after.ax": "Ventanas posteriores no mostradas: %1$d",
   "space_bar.overflow.before.ax": "Ventanas anteriores no mostradas: %1$d",
   "space_bar.show_front_app": "Mostrar aplicación en primer plano",

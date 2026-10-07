@@ -166,74 +166,51 @@ struct SpaceBarGlyphClickTests {
         core.pickFromSpaceBar(pick([2, 3], on: two))
         #expect(core.activeSpace?.id == one)
         let shown = try #require(menu())
-        #expect(
-            shown.items.map(\.title)
-                == ["Mail — Inbox", "Mail — Draft"]
-        )
-        #expect(shown.items.allSatisfy { $0.isEnabled })
-        pickRow(shown, at: 1)
+        // One app's rows: titles under an app header (#1947).
+        #expect(shown.items.map(\.title) == ["Mail", "Inbox", "Draft"])
+        #expect(shown.items[0].isSectionHeader)
+        // Icons stand down on glyph rows: `untitledGlyphRow`, since
+        // this fixture's windows have no icon to drop.
+        let enabled = shown.items.dropFirst().allSatisfy { $0.isEnabled }
+        #expect(enabled)
+        pickRow(shown, at: 2)
         #expect(core.activeSpace?.id == two)
         #expect(core.state.workspaces[two]?.focused == WindowID(3))
     }
 
     @Test("+n opens its menu even for one window, switching nothing")
     func overflowOpensAMenu() throws {
+        LocalizationManager.shared.select("en")
         let core = seededCore()
         let menu = capturingMenus(core)
         core.pickFromSpaceBar(pick([4], on: two, .overflow))
         #expect(core.activeSpace?.id == one)
         let shown = try #require(menu())
-        #expect(shown.items.count == 1)
+        // Mixed apps: no header, each row names its app.
+        #expect(shown.items.map(\.title) == ["Web — Doc"])
         pickRow(shown, at: 0)
         #expect(core.activeSpace?.id == two)
         #expect(core.state.workspaces[two]?.focused == WindowID(4))
     }
 
-    @Test("A long title is cut in the row and whole in its tooltip")
-    func longTitleIsCut() {
+    @Test("The right-click names an untitled window as the glyph menu")
+    func rightClickNamesUntitledAlike() {
         LocalizationManager.shared.select("en")
-        let long = String(
-            repeating: "x",
-            count: SpaceBarWindowMenu.titleCap + 5
-        )
-        let row = SpaceBarWindowMenu.Row(
-            window: WindowID(9),
-            app: "Web",
-            title: long,
-            icon: nil,
-            enabled: false
-        )
-        let menu = SpaceBarWindowMenu.make([row]) { _ in }
-        let item = menu.items[0]
-        #expect(item.title.hasSuffix("…"))
-        #expect(item.toolTip == long)
-        #expect(!item.isEnabled)
-        let short = SpaceBarWindowMenu.make(
-            [
-                .init(
-                    window: WindowID(9),
-                    app: "Web",
-                    title: "",
-                    icon: nil,
-                    enabled: true
-                )
-            ]
-        ) { _ in }
-        #expect(short.items[0].isEnabled)
-        #expect(short.items[0].title == "Web")
-        #expect(short.items[0].toolTip == nil)
-        let titled = SpaceBarWindowMenu.make(
-            [
-                .init(
-                    window: WindowID(9),
-                    app: "Web",
-                    title: "Inbox",
-                    icon: nil,
-                    enabled: true
-                )
-            ]
-        ) { _ in }
-        #expect(titled.items[0].toolTip == nil)
+        let core = seededCore()
+        core.state.apply(.windowCreated(window(8, app: "Web", title: "")))
+        #expect(core.windowRowName(WindowID(8)) == "Untitled Window")
+        // A pill names the window outside its app's menu.
+        #expect(core.windowTitle(WindowID(8)) == "Web")
+        // Every per-window submenu takes the row name: move, float
+        // and close each list window 8 as the placeholder.
+        let rows = core.barMenuRows(.glyph([WindowID(4), WindowID(8)]))
+        let untitled = rows.compactMap { row -> String? in
+            guard case .submenu(let items) = row.kind,
+                items.count == 2
+            else { return nil }
+            return items[1].title
+        }
+        #expect(untitled == Array(repeating: "Untitled Window", count: 3))
     }
 
     @Test("The hover title is the app, then each window's title")
@@ -257,4 +234,5 @@ struct SpaceBarGlyphClickTests {
                 == "Web\nDoc"
         )
     }
+
 }

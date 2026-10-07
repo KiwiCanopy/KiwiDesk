@@ -1484,6 +1484,7 @@
   "space_bar.item_label.identifier": "이름 또는 아이콘",
   "space_bar.item_label.layout": "레이아웃",
   "space_bar.menu.row": "%1$@ — %2$@",
+  "space_bar.menu.untitled": "제목 없음",
   "space_bar.overflow.after.ax": "표시되지 않은 뒤쪽 윈도우: %1$d",
   "space_bar.overflow.before.ax": "표시되지 않은 앞쪽 윈도우: %1$d",
   "space_bar.show_front_app": "최전면 앱 표시",
