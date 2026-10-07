@@ -234,4 +234,5 @@ struct SpaceBarGlyphClickTests {
                 == "Web\nDoc"
         )
     }
+
 }

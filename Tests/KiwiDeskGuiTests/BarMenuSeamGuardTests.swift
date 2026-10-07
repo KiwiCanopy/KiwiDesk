@@ -9,6 +9,10 @@ import Testing
 /// twins-identical scan in `MachineTouchTests` sees only a
 /// one-sided deletion. The `MouseButtonSeamGuardTests` shape.
 ///
+/// The glyph menu also pops as a CONTEXT menu, the right-click
+/// menu's chrome (#1850): a pop-up-button `popUp(positioning:)`
+/// draws different chrome on macOS 26+.
+///
 /// Residue: each needle is one spelling, so a pin re-written
 /// equivalently reads as missing. Fail-closed, and the message
 /// names the target it is missing from.
@@ -33,5 +37,23 @@ struct BarMenuSeamGuardTests {
                 .init(rawValue: "\(target) misses a pin")
             )
         }
+    }
+
+    @Test("the glyph menu pops as a context menu at its cell")
+    func glyphMenuWearsContextChrome() throws {
+        let file = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore/Bar/SpaceBarGlyphTarget.swift"
+        )
+        let source = try SourceScan.strippedSource(at: file)
+        let count = { (needle: String) in
+            source.components(separatedBy: needle).count - 1
+        }
+        #expect(
+            count(
+                "NSMenu.popUpContextMenu(menu, with: event, for: anchor)"
+            ) == 1
+        )
+        #expect(count("contextEvent(at: anchor)") == 1)
+        #expect(count("popUp(positioning:") == 0)
     }
 }
