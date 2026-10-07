@@ -17,8 +17,11 @@ final class BarPeekBody: NSView {
         static let countSize: CGFloat = 11.5
         static let pillHeight: CGFloat = 18
         static let pillPad: CGFloat = 6
-        /// The window glyph before the count, and its gap to it.
-        static let pillGlyphSize: CGFloat = 11
+        /// `macwindow`'s ink height per point at `.regular`, measured
+        /// on macOS 27 (0.89–0.90 at 100–200 pt): the glyph's size
+        /// is the count's cap height over this (#1946).
+        static let pillGlyphInkPerPoint: CGFloat = 0.9
+        /// The window glyph's gap to the count.
         static let pillGlyphGap: CGFloat = 3
         /// The pill's ring, in the hairlines' ink.
         static let pillRing: CGFloat = 1

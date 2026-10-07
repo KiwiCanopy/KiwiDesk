@@ -92,27 +92,25 @@ final class BarPeekPill: NSView {
         layer?.borderWidth = M.pillRing
         layer?.borderColor =
             BarDivider.color(textColor: shelf.itemColor).cgColor
-        glyph.image = NSImage(
-            systemSymbolName: "macwindow",
-            accessibilityDescription: nil
-        )?.withSymbolConfiguration(
-            .init(pointSize: M.pillGlyphSize, weight: .semibold)
-        )
+        let font = shelf.badgeFont(ofSize: M.countSize, emphasis: .semibold)
+        glyph.image = Self.glyphImage(for: font)
         glyph.contentTintColor = NSColor(
             kiwiHex: shelf.peekPillGlyphColor
         )
         glyph.setAccessibilityElement(false)
         number.stringValue = "\(count)"
-        number.font = shelf.badgeFont(ofSize: M.countSize, emphasis: .semibold)
+        number.font = font
         number.textColor = ink
         number.layer?.backgroundColor = nil
         let text = ceil(number.cell?.cellSize.width ?? 0)
-        let glyphWidth = ceil(glyph.image?.size.width ?? M.pillGlyphSize)
+        let size = glyph.image?.size ?? .zero
+        // The symbol's ink sits centred in its image, so centring
+        // the image centres it on the number's figures (#1946).
         glyph.frame = CGRect(
             x: M.pillPad,
-            y: (M.pillHeight - M.pillGlyphSize) / 2,
-            width: glyphWidth,
-            height: M.pillGlyphSize
+            y: (M.pillHeight - size.height) / 2,
+            width: ceil(size.width),
+            height: size.height
         )
         number.frame = CGRect(
             x: glyph.frame.maxX + M.pillGlyphGap,
@@ -125,6 +123,22 @@ final class BarPeekPill: NSView {
         frame.size = CGSize(
             width: max(M.pillHeight, number.frame.maxX + M.pillPad),
             height: M.pillHeight
+        )
+    }
+
+    /// The point size at which `macwindow` draws as tall as the cap
+    /// height of `font` — the count beside it — so a small-capped
+    /// face never draws a glyph that dwarfs its number.
+    static func glyphPointSize(for font: NSFont) -> CGFloat {
+        font.capHeight / BarPeekBody.Metrics.pillGlyphInkPerPoint
+    }
+
+    static func glyphImage(for font: NSFont) -> NSImage? {
+        NSImage(
+            systemSymbolName: "macwindow",
+            accessibilityDescription: nil
+        )?.withSymbolConfiguration(
+            .init(pointSize: glyphPointSize(for: font), weight: .regular)
         )
     }
 
