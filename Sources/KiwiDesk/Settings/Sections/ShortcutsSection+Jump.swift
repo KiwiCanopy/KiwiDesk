@@ -9,7 +9,8 @@ extension ShortcutsSection {
         ShortcutsJumpBar(
             marked: jumpReading.marked,
             underlapped: jumpReading.underlapped,
-            readout: editingReadout
+            readout: editingReadout(ShortcutsJumpBar.shownName(selected)),
+            spokenReadout: editingReadout(selected)
         ) { group in
             jump(to: group, proxy: proxy)
         }
@@ -17,14 +18,15 @@ extension ShortcutsSection {
 
     /// Names the edited layer once there is a choice — the one
     /// `layersExist` reading, asked rather than counted (#1127).
-    private var editingReadout: String? {
+    /// Drawn with the name cut to fit, spoken with it whole.
+    private func editingReadout(_ name: String) -> String? {
         guard ShortcutsGates(config: model.config).layersExist else {
             return nil
         }
         return L(
             "shortcuts.editing_layer",
             "Editing the \u{201C}%1$@\u{201D} layer",
-            ShortcutsJumpBar.shownName(selected)
+            name
         )
     }
 

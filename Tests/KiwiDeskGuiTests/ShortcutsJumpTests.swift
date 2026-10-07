@@ -1,5 +1,6 @@
 import CoreGraphics
 import Foundation
+import KiwiDeskCore
 import SwiftUI
 import Testing
 
@@ -8,7 +9,7 @@ import Testing
 /// The Shortcuts & Gestures jump chips (#1520): which groups get
 /// one, which chip the bar marks as the page scrolls, and the
 /// wiring a reading of the pure parts cannot see.
-@Suite("Shortcuts jump chips")
+@Suite("Shortcuts jump chips", .serialized)
 @MainActor
 struct ShortcutsJumpTests {
     /// The ruled chips, in page order, labelled by each group's
@@ -212,6 +213,9 @@ struct ShortcutsJumpTests {
     /// no line.
     @Test("the readout moves under the chips rather than eliding")
     func readoutDropsALine() throws {
+        // The chips' titles are translated text (#740).
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
         let name = ShortcutsJumpBar.shownName(
             String(repeating: "W", count: 40)
         )
@@ -295,6 +299,16 @@ struct ShortcutsJumpTests {
         // Squeezed, so the English reads without its space.
         #expect(bar.contains("L(\"shortcuts.jump.label\",\"Jumpto\")"))
         #expect(bar.contains(".accessibilityAddTraits(marked?.isSelected:[])"))
+        // The readout speaks the full layer name it may draw cut.
+        #expect(bar.contains(".accessibilityLabel(spokenReadout??text)"))
+        let jump = try Self.source("Sections/ShortcutsSection+Jump.swift")
+        #expect(
+            jump.contains(
+                "readout:editingReadout("
+                    + "ShortcutsJumpBar.shownName(selected)),"
+                    + "spokenReadout:editingReadout(selected)"
+            )
+        )
     }
 
     /// Hover never erases the marking (#1173): each layer's colour

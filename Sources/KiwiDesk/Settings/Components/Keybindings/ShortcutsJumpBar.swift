@@ -10,6 +10,9 @@ struct ShortcutsJumpBar: View {
     let underlapped: Bool
     /// "Editing the “x” layer", or nil where there is no choice.
     let readout: String?
+    /// The same sentence with the layer's full name, for
+    /// VoiceOver; nil speaks what is drawn.
+    var spokenReadout: String? = nil
     let jump: (ShortcutsJumpGroup) -> Void
     @Environment(\.settingsWidth) private var width
 
@@ -71,6 +74,7 @@ struct ShortcutsJumpBar: View {
         Text(text)
             .font(.subheadline)
             .foregroundStyle(SettingsTheme.ink2)
+            .accessibilityLabel(spokenReadout ?? text)
     }
 
     private var chips: some View {
