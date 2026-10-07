@@ -5,11 +5,13 @@ import Foundation
 /// from `EventLoop+Apps` for file size (§2).
 extension EventLoop {
     /// Reads the activated app's focused window off the main
-    /// actor (#1930) and reports it at delivery.
+    /// actor (#1930) and reports it at delivery — `commanded`,
+    /// through the focus command rather than as the app's report.
     func requestActivationFocus(
         pid: pid_t,
         app: RunningApp,
-        event requested: ContinuousClock.Instant
+        event requested: ContinuousClock.Instant,
+        commanded: Bool = false
     ) {
         let ticket = focusOrder.issueTicket()
         requestFocusedWindowID(pid: pid) { [weak self] id in
@@ -18,7 +20,8 @@ extension EventLoop {
                 pid: pid,
                 app: app,
                 requested: requested,
-                ticket: ticket
+                ticket: ticket,
+                commanded: commanded
             )
         }
     }
@@ -27,7 +30,10 @@ extension EventLoop {
     /// the activation's focus (#2027): the activation's own report
     /// can settle on the hide drop before the unhide's read lists
     /// the window back, which a Dock click to a hidden app does.
-    /// Judged at delivery like the activation's.
+    /// Judged at delivery like the activation's, and landed as a
+    /// focus command: the unhide's retile just placed the window,
+    /// so the app's own report would read as a placement bounce
+    /// (#1161, device 2026-10-07).
     func focusUnhiddenWindow(
         pid: pid_t,
         ref: AppRef,
@@ -45,7 +51,8 @@ extension EventLoop {
                 activationPolicy: policy(of: pid),
                 ref: ref
             ),
-            event: event
+            event: event,
+            commanded: true
         )
     }
 
@@ -61,6 +68,7 @@ extension EventLoop {
         app: RunningApp,
         requested: ContinuousClock.Instant,
         ticket: Int,
+        commanded: Bool,
         settled: Bool = false
     ) {
         guard lastActivePid == pid, observers[pid] != nil,
@@ -84,7 +92,12 @@ extension EventLoop {
         // focus, though, so the dismiss report can be distrusted
         // later (#244).
         if elements[pid]?[id] != nil {
-            reportActivationFocus(id, pid: pid, ticket: ticket)
+            if commanded {
+                focusOrder.noteEmitted(ticket, pid: pid)
+                onUnhideFocus(id)
+            } else {
+                reportActivationFocus(id, pid: pid, ticket: ticket)
+            }
             return
         }
         guard settled else {
@@ -99,6 +112,7 @@ extension EventLoop {
                     app: app,
                     requested: requested,
                     ticket: ticket,
+                    commanded: commanded,
                     settled: true
                 )
             }

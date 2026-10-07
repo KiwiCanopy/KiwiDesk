@@ -39,6 +39,8 @@ struct ReconcileOffMainRecheckTests {
         var hiddenEvents: [WindowID] = []
         var destroyed: [WindowID] = []
         var focused: [WindowID] = []
+        /// Focus commands asked through `onUnhideFocus`.
+        var commanded: [WindowID] = []
         var reads: [@Sendable () -> Void] = []
         var deliveries: [@MainActor @Sendable () -> Void] = []
 
@@ -99,6 +101,7 @@ struct ReconcileOffMainRecheckTests {
         let id = id
         loop.resolveWindowID = { _ in id }
         loop.shadows.focusedWindow = { _ in id }
+        loop.onUnhideFocus = { box.commanded.append($0) }
         loop.axReads.deliver = { work in
             MainActor.assumeIsolated { box.deliveries.append(work) }
         }
@@ -200,7 +203,10 @@ struct ReconcileOffMainRecheckTests {
         loop.elements[pid] = [id: AXUIElementCreateApplication(pid)]
     }
 
-    @Test("an unhide of the active app focuses what it adopts")
+    /// A focus COMMAND, not the app's report: the unhide's retile
+    /// just placed the window, so a report would be bounced
+    /// (#1161, device 2026-10-07).
+    @Test("an unhide of the active app commands what it adopts")
     func unhideFocusesTheActiveApp() {
         let loop = EventLoop()
         let box = Box()
@@ -208,7 +214,8 @@ struct ReconcileOffMainRecheckTests {
         activateHidden(loop, box)
         box.drain()
         #expect(box.idle)
-        #expect(box.focused == [id], "the activation focus was lost")
+        #expect(box.commanded == [id], "the activation focus was lost")
+        #expect(box.focused.isEmpty, "reported, not commanded")
     }
 
     @Test("another app activated meanwhile keeps its focus")
@@ -220,6 +227,7 @@ struct ReconcileOffMainRecheckTests {
         loop.lastActivePid = pid + 1
         box.drain()
         #expect(box.idle)
+        #expect(box.commanded.isEmpty)
         #expect(box.focused.isEmpty)
     }
 

@@ -35,8 +35,12 @@ editing AX code:
   `reconcileOffMain` — an unhide that adopts a window of the
   active app then re-asks the activation's focus through
   `requestActivationFocus`, since the activation's own report
-  can settle on the hide drop first
-  (`ReconcileOffMainRecheckTests` ▸ `unhideFocusesTheActiveApp`) —
+  can settle on the hide drop first, and lands it as the focus
+  command (`onUnhideFocus`), since the unhide's retile just
+  placed the window and a report would read as its #1161
+  bounce (`ReconcileOffMainRecheckTests` ▸
+  `unhideFocusesTheActiveApp`, `PlacementIntentTests` ▸
+  `unhideFocusIsHonored`) —
   and the activation reads its focused window through
   `requestFocusedWindowID`; a new
   event-driven caller takes the same doors or joins
