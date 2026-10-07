@@ -8036,10 +8036,12 @@ Three consequences, each reachable another way and rejected:
   detaches into a card over the content — draggable, and
   clamped so it always lands whole inside the window, since
   a card dragged off a 720 pt edge has no scrollbar or menu
-  to bring it back. Between 900 and 1200 the card opens with
-  the screen; below 900 it waits behind "Show preview". One
-  card, two defaults — not two features — so that an area
-  offering a preview always has exactly one way to it.
+  to bring it back. Below 1200 it waits behind "Show
+  preview" in every band: a card that opened with the screen
+  covered the rows the user came to edit on every navigation
+  (#1854). Opening it is per-mount, like the close, so a
+  window grown back past 1200 docks the column again. So an
+  area offering a preview always has exactly one way to it.
 - **The reflow swaps the LAYOUT, not the view.** A row below
   900 puts its label above its control, and it must stay the
   same row while it does: tear the subtree down at the

@@ -2382,6 +2382,12 @@ which follows the focused window's colour until you set it.
   overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
   you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
 
+:::unreleased
+An App Bar window that is not focused draws its title and glyph
+in the same idle ink as an identifier on a Space you are not on:
+`kiwishelf.set_item_color` at 60% of its own alpha.
+:::
+
 `kiwishelf.set_border_color` sets the
 [border](#kiwishelfset_border)'s colour (default `#EAF3EE59`, the
 item colour at 35% opacity). Every bundled palette carries one.

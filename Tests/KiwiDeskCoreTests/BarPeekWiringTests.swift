@@ -134,16 +134,16 @@ struct BarPeekWiringTests {
         #expect(titles(core) == nil)
     }
 
-    @Test("A press on the glyph closes the peek before its click")
+    @Test("A press closes the peek; the release picks")
     func pressCloses() throws {
         let core = seededCore()
         let steps = Steps()
         defer { close(core) }
         let (_, web) = try hovered(core, steps: steps)
         steps.run()
-        let click = try #require(
+        let event = { (type: NSEvent.EventType) in
             NSEvent.mouseEvent(
-                with: .leftMouseDown,
+                with: type,
                 location: .zero,
                 modifierFlags: [],
                 timestamp: 0,
@@ -153,17 +153,21 @@ struct BarPeekWiringTests {
                 clickCount: 1,
                 pressure: 1
             )
-        )
+        }
+        let press = try #require(event(.leftMouseDown))
+        let release = try #require(event(.leftMouseUp))
         // The pick is stubbed: no switch or relayout may close the
-        // peek for it, and it records whether the press closed it
-        // FIRST.
+        // peek for it, and it records whether the press had closed
+        // it by the time the release picks (#2044 picks on release).
         let closedFirst = Box()
         core.spaceBars.glyphActions.pick = { _ in
             closedFirst.value = core.shelves.peek.panel.drawn == nil
         }
-        web.mouseDown(with: click)
+        web.mouseDown(with: press)
+        #expect(titles(core) == nil, "the press closes it")
+        #expect(closedFirst.value == nil, "the press does not pick")
+        web.mouseUp(with: release)
         #expect(closedFirst.value == true, "closed before the pick")
-        #expect(titles(core) == nil)
     }
 
     @MainActor

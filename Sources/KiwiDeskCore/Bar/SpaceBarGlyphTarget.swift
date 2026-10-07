@@ -91,6 +91,8 @@ final class SpaceBarGlyphTarget: NSView {
     let members: [WindowID]
     let kind: SpaceBarGlyphPick.Kind
     weak var actions: SpaceBarGlyphActions?
+    /// A press this target took, owed its pick on the release.
+    private var pressed = false
 
     init(
         space: SpaceID,
@@ -126,13 +128,28 @@ final class SpaceBarGlyphTarget: NSView {
         kind == .glyph ? .glyph(members) : .overflow(members)
     }
 
-    /// A press closes the peek before it picks, so a multi-window
-    /// glyph's list visibly becomes its menu (#1946); a
+    /// A press closes the peek, so a multi-window glyph's list
+    /// visibly becomes its menu on the release (#1946); a
     /// Control-click's menu closes it as any menu does.
     override func mouseDown(with event: NSEvent) {
         guard !openControlClickMenu(event) else { return }
         actions?.peek?.dismiss()
+        pressed = true
+    }
+
+    /// A click picks on its release inside the target (#2044): a
+    /// menu popped on the press reads that release as a miss and
+    /// closes. Dragging away cancels, as a button does.
+    override func mouseUp(with event: NSEvent) {
+        defer { pressed = false }
+        guard pressed, releasesInside(event) else { return }
         actions?.pick(pick)
+    }
+
+    private func releasesInside(_ event: NSEvent) -> Bool {
+        guard event.window != nil else { return true }
+        let point = convert(event.locationInWindow, from: nil)
+        return bounds.contains(point)
     }
 
     override func accessibilityPerformPress() -> Bool {

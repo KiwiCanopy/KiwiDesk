@@ -214,11 +214,11 @@ struct DetailPanelTests {
             "Sources/KiwiDesk/Settings/SettingsView.swift"
         )
         #expect(!shell.contains("panel_collapsed"))
-        #expect(shell.contains("@StatevarpreviewShown:Bool?"))
+        #expect(shell.contains("@StatevarpreviewShown=false"))
         #expect(
             shell.contains(
                 ".onChange(of:model.destination){_,_in"
-                    + "previewShown=nil}"
+                    + "previewShown=false}"
             )
         )
         // The card's answer never reaches the preferences seam
