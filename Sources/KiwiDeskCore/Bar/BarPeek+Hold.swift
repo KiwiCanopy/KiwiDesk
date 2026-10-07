@@ -19,9 +19,12 @@ extension BarPeek {
         static let holdPoll: TimeInterval = 0.05
     }
 
-    /// Whether the pointer is inside the shown peek's hull.
+    /// Whether the pointer is inside the shown peek's hull. Only a
+    /// list holds: a one-window peek has no row worth reaching for,
+    /// so it closes as the pointer leaves its item (owner, #1946).
     var holdsPointer: Bool {
-        guard let shown, let item = shown.frame,
+        guard let shown, shown.source.windows.count > 1,
+            let item = shown.frame,
             let peek = panel.panel?.frame, panel.isShown
         else { return false }
         return BarPeekHull.contains(

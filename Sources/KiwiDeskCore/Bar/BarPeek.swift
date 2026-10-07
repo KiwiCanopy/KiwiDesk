@@ -175,13 +175,18 @@ final class BarPeek {
 
     /// A click on a multi-window glyph or `+n` (#1946): its peek
     /// shows at once, with no dwell, and holds — pinned — until a
-    /// click outside, a pick, or the pointer leaving the hull.
+    /// click outside, a pick, the pointer leaving the hull, or a
+    /// second click on the same item, which closes it.
     func pin(
         _ anchor: NSView,
         source: BarPeekSource,
         space: SpaceID?,
         edge: AppBarEdge
     ) {
+        if pinned, Self.same(shown, anchor, source) {
+            dismiss()
+            return
+        }
         spent = nil
         if !Self.same(shown, anchor, source) {
             present(

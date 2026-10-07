@@ -30,19 +30,28 @@ struct BarPeekActionTests {
     func hullHoldsThePeek() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
-        rig.hover(rig.first)
+        rig.hover(rig.first, 1, 2)
         rig.step()
         rig.pointer = try gap(rig)
         rig.hover(nil)
-        #expect(rig.shownTitles == ["Window 1"], "held in the gap")
+        #expect(
+            rig.shownTitles == ["Window 1", "Window 2"],
+            "held in the gap"
+        )
         #expect(rig.peek.holding)
         #expect(rig.dwells.last == BarPeek.Timing.holdPoll)
         rig.step()
-        #expect(rig.shownTitles == ["Window 1"], "still in the hull")
+        #expect(
+            rig.shownTitles == ["Window 1", "Window 2"],
+            "still in the hull"
+        )
         let peek = try #require(rig.peek.panel.panel?.frame)
         rig.pointer = CGPoint(x: peek.midX, y: peek.midY)
         rig.step()
-        #expect(rig.shownTitles == ["Window 1"], "on the peek itself")
+        #expect(
+            rig.shownTitles == ["Window 1", "Window 2"],
+            "on the peek itself"
+        )
         rig.pointer = CGPoint(x: peek.maxX + 200, y: peek.midY)
         rig.step()
         #expect(rig.peek.panel.drawn == nil, "out of the hull it closes")
@@ -67,15 +76,33 @@ struct BarPeekActionTests {
     func neighbourSwapOnlyOutsideTheHull() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
-        rig.hover(rig.first)
+        rig.hover(rig.first, 1, 3)
         rig.step()
         rig.pointer = try gap(rig)
         rig.hover(rig.second, 2)
-        #expect(rig.shownTitles == ["Window 1"], "the swap is held")
+        #expect(
+            rig.shownTitles == ["Window 1", "Window 3"],
+            "the swap is held"
+        )
         let neighbour = rig.screen(rig.second)
         rig.pointer = CGPoint(x: neighbour.midX, y: neighbour.midY)
         rig.hover(rig.second, 2)
         #expect(rig.shownTitles == ["Window 2"], "the bar still swaps")
+    }
+
+    /// A one-window peek has no row worth reaching for, so it never
+    /// holds: it closes as the pointer leaves its item (#1946).
+    @Test("A one-window peek closes in the gap; only a list holds")
+    func oneWindowPeekNeverHolds() throws {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        rig.hover(rig.first)
+        rig.step()
+        rig.pointer = try gap(rig)
+        #expect(!rig.peek.holdsPointer)
+        rig.hover(nil)
+        #expect(rig.peek.panel.drawn == nil)
+        #expect(!rig.peek.holding)
     }
 
     // MARK: - The pin
@@ -97,6 +124,25 @@ struct BarPeekActionTests {
         rig.hover(nil)
         #expect(rig.peek.panel.drawn == nil)
         #expect(!rig.peek.pinned)
+    }
+
+    @Test("A second click on the pinned item closes its peek")
+    func secondClickCloses() {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        let source = BarPeekSource.glyph([WindowID(1), WindowID(2)])
+        for _ in 0..<2 {
+            rig.peek.pin(
+                rig.first,
+                source: source,
+                space: SpaceID("1"),
+                edge: .top
+            )
+        }
+        #expect(rig.peek.panel.drawn == nil, "the second click closes")
+        #expect(!rig.peek.pinned)
+        rig.hover(rig.first, 1, 2)
+        #expect(rig.dwells.isEmpty, "shut until the pointer leaves")
     }
 
     // MARK: - The rows
