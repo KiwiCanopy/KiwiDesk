@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import SwiftUI
 
@@ -55,19 +56,43 @@ struct ShortcutsJumpPage: Equatable {
 /// near the end may never bring its header to the bar.
 struct ShortcutsJumpHold: Equatable {
     let group: ShortcutsJumpGroup
-    /// Geometry changing before this is the jump's own scroll.
+    /// The scroll offset moving before this is the jump's own
+    /// scroll.
     let until: Date
+    /// Where the jump's scroll left the content's top: the last
+    /// offset seen inside the window.
+    private(set) var landed: CGFloat?
 
-    init(_ group: ShortcutsJumpGroup, at now: Date) {
+    init(
+        _ group: ShortcutsJumpGroup,
+        at now: Date,
+        offset: CGFloat?
+    ) {
         self.group = group
         until = now.addingTimeInterval(
             SettingsReveal.scroll + SettingsReveal.settle + 0.2
         )
+        landed = offset
     }
 
-    /// The hold a geometry change at `now` leaves standing.
-    func surviving(at now: Date) -> ShortcutsJumpHold? {
-        now <= until ? self : nil
+    /// The hold a measurement at `now` leaves standing. Only a
+    /// scroll releases it: the content's top moving off where the
+    /// jump landed, once the jump's own scroll is over. A banner
+    /// or a growing row moves cards, never that offset.
+    func surviving(
+        offset: CGFloat?,
+        at now: Date
+    ) -> ShortcutsJumpHold? {
+        var next = self
+        guard now > until else {
+            next.landed = offset ?? landed
+            return next
+        }
+        guard let offset, let landed else {
+            next.landed = offset ?? landed
+            return next
+        }
+        return abs(offset - landed) > 0.5 ? nil : self
     }
 }
 
@@ -119,9 +144,10 @@ struct ShortcutsJumpReading: Equatable {
 
 /// The page geometry and a held chip, kept off the view's state
 /// so a scroll frame re-renders the bar only when its reading
-/// changes.
+/// changes. Observable only so a `@StateObject` builds it once;
+/// it publishes nothing.
 @MainActor
-final class ShortcutsJumpTracker {
+final class ShortcutsJumpTracker: ObservableObject {
     private var page = ShortcutsJumpPage()
     private var hold: ShortcutsJumpHold?
 
@@ -146,12 +172,16 @@ final class ShortcutsJumpTracker {
         to group: ShortcutsJumpGroup,
         at now: Date = Date()
     ) -> ShortcutsJumpReading {
-        hold = ShortcutsJumpHold(group, at: now)
+        hold = ShortcutsJumpHold(
+            group,
+            at: now,
+            offset: page.content?.minY
+        )
         return ShortcutsJumpReading.read(page, holding: group)
     }
 
     private func moved(at now: Date) -> ShortcutsJumpReading {
-        hold = hold?.surviving(at: now)
+        hold = hold?.surviving(offset: page.content?.minY, at: now)
         return ShortcutsJumpReading.read(page, holding: hold?.group)
     }
 }

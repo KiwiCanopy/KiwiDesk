@@ -16,28 +16,61 @@ struct ShortcutsJumpBar: View {
     /// Gaps between chips and between wrapped lines.
     static let spacing: CGFloat = 6
 
+    /// The longest layer name the readout spells whole; a longer
+    /// one is cut inside the sentence, never the sentence itself.
+    static let nameLimit = 32
+
+    /// `name`, cut to `nameLimit` with an ellipsis.
+    static func shownName(_ name: String) -> String {
+        guard name.count > nameLimit else { return name }
+        return String(name.prefix(nameLimit - 1)) + "…"
+    }
+
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
-            // The chips lay out first; a long layer name gives way.
-            chips.layoutPriority(1)
-            Spacer(minLength: 0)
-            // Header chrome, so it goes with the chrome step.
-            if let readout, !width.collapsesChrome {
-                Text(readout)
-                    .font(.subheadline)
-                    .foregroundStyle(SettingsTheme.ink2)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
+        content
+            // Full width in every arrangement, so the ground and
+            // the hairline span the pane.
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .padding(.vertical, 8)
+            .background(SettingsTheme.page)
+            .overlay(alignment: .bottom) {
+                if underlapped {
+                    SettingsTheme.hairline.frame(height: 1)
+                }
             }
-        }
-        .padding(.horizontal, SettingsMetrics.paneInset)
-        .padding(.vertical, 8)
-        .background(SettingsTheme.page)
-        .overlay(alignment: .bottom) {
-            if underlapped {
-                SettingsTheme.hairline.frame(height: 1)
+    }
+
+    /// Header chrome, so it goes with the chrome step.
+    private var shownReadout: String? {
+        width.collapsesChrome ? nil : readout
+    }
+
+    /// Beside the chips where both fit on one line; otherwise on a
+    /// line of its own under them, wrapping rather than eliding.
+    @ViewBuilder private var content: some View {
+        if let shownReadout {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    chips
+                    Spacer(minLength: 0)
+                    readoutText(shownReadout).fixedSize()
+                }
+                VStack(alignment: .leading, spacing: Self.spacing) {
+                    chips
+                    readoutText(shownReadout)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
+        } else {
+            chips
         }
+    }
+
+    private func readoutText(_ text: String) -> some View {
+        Text(text)
+            .font(.subheadline)
+            .foregroundStyle(SettingsTheme.ink2)
     }
 
     private var chips: some View {
@@ -115,7 +148,7 @@ struct ShortcutsJumpChip: View {
     /// The semibold width is reserved under either weight.
     private var label: some View {
         ZStack {
-            text(.semibold).hidden()
+            text(.semibold).hidden().accessibilityHidden(true)
             text(marked ? .semibold : .regular)
         }
     }

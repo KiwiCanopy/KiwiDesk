@@ -536,7 +536,9 @@ whose scope differs; it rides the chip before it, so a wrap never
 starts a line with it. The bar sits on the page ground and grows
 its lower hairline only once content slides under it; a readout
 at its trailing end is header chrome, the first thing a narrowing
-window drops. Chips jump within one page; tabs, which show one
+window drops, and takes a line of its own under the chips where
+it does not fit beside them — a name inside it is shortened
+before the sentence ever is. Chips jump within one page; tabs, which show one
 view at a time, stay the update window's control.
 :::
 

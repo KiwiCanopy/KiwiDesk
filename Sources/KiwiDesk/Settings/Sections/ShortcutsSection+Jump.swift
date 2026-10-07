@@ -24,7 +24,7 @@ extension ShortcutsSection {
         return L(
             "shortcuts.editing_layer",
             "Editing the \u{201C}%1$@\u{201D} layer",
-            selected
+            ShortcutsJumpBar.shownName(selected)
         )
     }
 

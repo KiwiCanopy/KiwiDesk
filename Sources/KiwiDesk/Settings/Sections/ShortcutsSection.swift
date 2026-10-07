@@ -19,7 +19,7 @@ struct ShortcutsSection: View {
     /// still shut on every visit.
     @State var gesturesExpanded = false
     @State var jumpReading = ShortcutsJumpReading()
-    @State var jumpTracker = ShortcutsJumpTracker()
+    @StateObject var jumpTracker = ShortcutsJumpTracker()
     @StateObject private var coordinator =
         RecorderCoordinator()
 
@@ -91,8 +91,6 @@ struct ShortcutsSection: View {
                 SettingsMetrics.paneInset
             )
             .shortcutsJumpSlot(.content)
-            // The chips' groups report under their anchor ids.
-            .environment(\.measuresSectionFrames, true)
             .environment(\.keybindingLayerName, selected)
             // One live read per section render (#1105), so
             // every row narrates the same verdict (#1126).
@@ -103,7 +101,8 @@ struct ShortcutsSection: View {
             .environmentObject(coordinator)
         }
         .shortcutsJumpSlot(.viewport)
-        .coordinateSpace(name: SettingsSectionFrames.space)
+        // The chips' groups report under their anchor ids.
+        .mapsSectionFrames()
         .onPreferenceChange(ShortcutsJumpFrames.self) { frames in
             show(jumpTracker.slots(frames))
         }

@@ -19,6 +19,15 @@ private struct MeasuresSectionFramesKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+extension View {
+    /// Opts a page's scroll view in: its section cards report
+    /// their frames, in the space this names on it.
+    func mapsSectionFrames() -> some View {
+        environment(\.measuresSectionFrames, true)
+            .coordinateSpace(name: SettingsSectionFrames.space)
+    }
+}
+
 extension EnvironmentValues {
     /// Whether section cards report `SettingsSectionFrames`.
     var measuresSectionFrames: Bool {

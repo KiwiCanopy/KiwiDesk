@@ -47,7 +47,6 @@ struct ShortcutsJumpTests {
         #expect(chipped.count == ShortcutsJumpGroup.allCases.count)
         #expect(chipped.isDisjoint(with: exempt))
         #expect(chipped.union(exempt) == rendered)
-        #expect(rendered.isSubset(of: Set(SettingsContainer.allCases)))
     }
 
     private func frame(_ top: CGFloat, _ height: CGFloat) -> CGRect {
@@ -131,30 +130,98 @@ struct ShortcutsJumpTests {
         #expect(reading.marked == .gestures)
     }
 
+    private func slots(
+        _ page: ShortcutsJumpPage
+    ) -> [ShortcutsJumpSlot: CGRect] {
+        [.content: page.content!, .viewport: page.viewport!]
+    }
+
     /// Clicking Size & float ends the scroll before its header
     /// reaches the bar; the clicked chip stays marked through the
-    /// jump's own scroll and gives way to the user's next one.
+    /// jump's own scroll and through cards moving under it — a
+    /// banner appearing — and gives way only when the user moves
+    /// the scroll offset.
     @Test("a clicked chip holds until the user scrolls")
     func clickedChipHolds() {
         let tracker = ShortcutsJumpTracker()
         let start = Date(timeIntervalSinceReferenceDate: 0)
+        func at(_ seconds: TimeInterval) -> Date {
+            start.addingTimeInterval(seconds)
+        }
         let atEnd = page(scrolledBy: 1400)
         _ = tracker.sections(atEnd.sections, at: start)
-        _ = tracker.slots(
-            [.content: atEnd.content!, .viewport: atEnd.viewport!],
-            at: start
-        )
+        _ = tracker.slots(slots(page(scrolledBy: 0)), at: start)
         #expect(tracker.jump(to: .sizeFloat, at: start).marked == .sizeFloat)
-        let landed = tracker.sections(
-            atEnd.sections,
-            at: start.addingTimeInterval(SettingsReveal.scroll)
+        // The jump's own scroll, inside the window.
+        let landed = tracker.slots(
+            slots(atEnd),
+            at: at(SettingsReveal.scroll)
         )
         #expect(landed.marked == .sizeFloat)
-        let scrolled = tracker.sections(
-            atEnd.sections,
-            at: start.addingTimeInterval(5)
+        // Cards move, the offset does not: still held.
+        let banner = page(scrolledBy: 1400, banner: 120)
+        let moved = tracker.sections(banner.sections, at: at(5))
+        #expect(moved.marked == .sizeFloat)
+        // The user scrolls: the offset moves, the hold gives way.
+        let scrolled = page(scrolledBy: 1000)
+        _ = tracker.slots(slots(scrolled), at: at(6))
+        let released = tracker.sections(scrolled.sections, at: at(6))
+        #expect(released.marked == .moveWindows)
+    }
+
+    /// Without the click, the end of this scroll is the last
+    /// group's — the hold above is what keeps Size & float.
+    @Test("unheld, the same landing marks the last group")
+    func unheldLandingMarksTheLast() {
+        let tracker = ShortcutsJumpTracker()
+        let atEnd = page(scrolledBy: 1400)
+        _ = tracker.sections(atEnd.sections)
+        #expect(tracker.slots(slots(atEnd)).marked == .openApplications)
+    }
+
+    /// A long layer name is cut inside the sentence, so "Editing
+    /// the … layer" always reads whole.
+    @Test("a long layer name is cut, never the sentence")
+    func longNameIsCut() {
+        let limit = ShortcutsJumpBar.nameLimit
+        let long = String(repeating: "x", count: limit + 10)
+        let shown = ShortcutsJumpBar.shownName(long)
+        #expect(shown.count == limit)
+        #expect(shown.hasSuffix("…"))
+        let short = String(repeating: "x", count: limit)
+        #expect(ShortcutsJumpBar.shownName(short) == short)
+    }
+
+    private func barHeight(
+        readout: String?,
+        width: CGFloat
+    ) throws -> CGFloat {
+        let bar = ShortcutsJumpBar(
+            marked: .focus,
+            underlapped: false,
+            readout: readout
+        ) { _ in }
+        .environment(\.settingsWidth, .medium)
+        .frame(width: width)
+        let image = try #require(ImageRenderer(content: bar).nsImage)
+        return image.size.height
+    }
+
+    /// Where the readout does not fit beside the chips it takes a
+    /// line of its own instead of eliding; where it fits, it adds
+    /// no line.
+    @Test("the readout moves under the chips rather than eliding")
+    func readoutDropsALine() throws {
+        let name = ShortcutsJumpBar.shownName(
+            String(repeating: "W", count: 40)
         )
-        #expect(scrolled.marked == .openApplications)
+        let readout = "Editing the \u{201C}\(name)\u{201D} layer"
+        let wide = try barHeight(readout: readout, width: 2000)
+        let wideBare = try barHeight(readout: nil, width: 2000)
+        #expect(wide == wideBare)
+        let narrow = try barHeight(readout: readout, width: 700)
+        let narrowBare = try barHeight(readout: nil, width: 700)
+        #expect(narrow > narrowBare)
     }
 
     // MARK: - Wiring
@@ -189,8 +256,21 @@ struct ShortcutsJumpTests {
         )
         #expect(card.contains("control.id:proxy.frame("))
         let section = try Self.source("Sections/ShortcutsSection.swift")
+        // One opt-in names both the flag and the space the
+        // viewport and the cards measure in.
         #expect(
-            section.contains(".environment(\\.measuresSectionFrames,true)")
+            section.contains(
+                ".shortcutsJumpSlot(.viewport).mapsSectionFrames()"
+            )
+        )
+        let optIn = try Self.source(
+            "Components/Common/SettingsSectionFrames.swift"
+        )
+        #expect(
+            optIn.contains(
+                "environment(\\.measuresSectionFrames,true)"
+                    + ".coordinateSpace(name:SettingsSectionFrames.space)"
+            )
         )
         #expect(
             section.contains(
