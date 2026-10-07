@@ -63,7 +63,9 @@ struct BarMenuHeaderTests {
         var style = SpaceBarLook()
         style.showFrontApp = true
         let manager = SpaceBarManager()
-        manager.contextMenus = BarContextMenus()
+        let menus = BarContextMenus()
+        menus.rows = { hit in [.action("\(hit)") {}] }
+        manager.contextMenus = menus
         let front = SpaceBarItemView.App(
             name: "App9",
             icon: NSImage(size: NSSize(width: 16, height: 16)),
@@ -104,6 +106,12 @@ struct BarMenuHeaderTests {
         #expect(overlay.frontHit(at: inside) == .appItem([WindowID(9)]))
         #expect(overlay.root.hitAt(inside) == .appItem([WindowID(9)]))
         #expect(overlay.frontHit(at: NSPoint(x: -50, y: -50)) == nil)
+        // VoiceOver reads the rows per query, not from the render.
+        let rows = "\(BarHit.appItem([WindowID(9)]))"
+        #expect(icon.accessibilityCustomActions()?.map(\.name) == [rows])
+        menus.rows = { _ in [.action("later") {}] }
+        #expect(icon.accessibilityCustomActions()?.map(\.name) == ["later"])
+        withExtendedLifetime(menus) {}
         overlay.frontWindows = []
         #expect(overlay.frontHit(at: inside) == nil)
         #expect(overlay.frontMenuHit == .empty)

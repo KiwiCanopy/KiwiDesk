@@ -196,9 +196,9 @@ public final class SpaceBarOverlay {
     let frontAccent = SheenRimView()
     let frontAccentClip = AppBarOverlay.FlippedView()
     let frontDivider = NSView()
-    let frontIcon = NSImageView()
-    let frontGlyph: NSTextField = {
-        let tf = NSTextField(labelWithString: "")
+    let frontIcon = FrontChipIcon()
+    let frontGlyph: FrontChipGlyph = {
+        let tf = FrontChipGlyph(labelWithString: "")
         tf.alignment = .center
         tf.setAccessibilityElement(false)
         return tf

@@ -15,14 +15,46 @@ extension SpaceBarOverlay {
     /// nil outside it.
     func frontHit(at point: NSPoint) -> BarHit? {
         guard !frontWindows.isEmpty else { return nil }
-        // The box where the style draws one, else the content.
-        let shown = [frontBox, frontIcon, frontGlyph, frontName]
+        // Whatever draws the chip — box, glass or indicator — and
+        // its content; a part the run clips out is not drawn.
+        let drawn: [NSView?] = [
+            frontBox, frontGlass, frontAccentClip, frontIcon,
+            frontGlyph, frontName,
+        ]
+        let shown = drawn.compactMap { $0 }
             .filter { !$0.isHidden }
             .compactMap { view in
                 view.superview.map { root.convert(view.frame, from: $0) }
             }
         guard let first = shown.first else { return nil }
-        let segment = shown.dropFirst().reduce(first) { $0.union($1) }
+        var segment = shown.dropFirst().reduce(first) { $0.union($1) }
+        if frontIcon.isDescendant(of: itemContainer)
+            || frontName.isDescendant(of: itemContainer)
+        {
+            segment = segment.intersection(itemContainer.frame)
+        }
         return segment.contains(point) ? frontMenuHit : nil
+    }
+}
+
+/// The front chip's icon and text glyph, answering VoiceOver per
+/// query so the rows stay as current as the right-click's (#2024).
+final class FrontChipIcon: NSImageView {
+    var actions: () -> [NSAccessibilityCustomAction] = { [] }
+
+    override func accessibilityCustomActions()
+        -> [NSAccessibilityCustomAction]?
+    {
+        actions()
+    }
+}
+
+final class FrontChipGlyph: NSTextField {
+    var actions: () -> [NSAccessibilityCustomAction] = { [] }
+
+    override func accessibilityCustomActions()
+        -> [NSAccessibilityCustomAction]?
+    {
+        actions()
     }
 }
