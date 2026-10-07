@@ -84,7 +84,11 @@ struct StartTilingWiringTests {
         let mark = try #require(
             press.range(of: "TilingConsent.markStarted()")
         )
+        let sync = try #require(press.range(of: "syncCoreHold()"))
         let start = try #require(press.range(of: "startManaging()"))
+        // Before the sync too, or the surfaces keep the idle hold
+        // while the core runs.
+        #expect(mark.lowerBound < sync.lowerBound)
         #expect(mark.lowerBound < start.lowerBound)
     }
 

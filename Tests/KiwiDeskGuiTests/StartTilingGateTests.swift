@@ -74,6 +74,11 @@ struct StartTilingGateTests {
             CoreHold.of(isTrusted: false, hasStarted: true)
                 == .permissionMissing
         )
+        // A first run: the grant is owed before any press.
+        #expect(
+            CoreHold.of(isTrusted: false, hasStarted: false)
+                == .permissionMissing
+        )
         #expect(
             CoreHold.of(isTrusted: true, hasStarted: false)
                 == .notStarted
