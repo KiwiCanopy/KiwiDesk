@@ -23,10 +23,10 @@ extension KiwiCore {
     /// 3. the event loop still observes that pid;
     /// 4. no ignored panel is latched for that pid.
     ///
-    /// Any nil/mismatch fails closed. A self-raise in flight is not
-    /// a bypass: the command is allowed only once the OS frontmost
-    /// pid actually matches, so an activation race rejects a
-    /// shortcut rather than mutating a hidden window.
+    /// Any nil/mismatch fails closed. A self-raise in flight is a
+    /// bypass for `focus` alone, which acts on no content
+    /// (`ownRaiseInFlight`, #1812); every other verb waits until
+    /// the OS frontmost pid actually matches.
     func focusedCommandDenial(
         for command: String,
         _ args: [JSONValue]
@@ -40,6 +40,13 @@ extension KiwiCore {
         // window this seam diagnoses.
         let front = frontmostPID()
         if foregroundOwned(front: front) { return nil }
+        if ownRaiseInFlight(command, front: front) {
+            onLog(
+                "preflight (#292): allowed \(command) — own raise "
+                    + "toward the anchor in flight (#1812)"
+            )
+            return nil
+        }
         // The wake heal (#1130), one-shot and time-bounded: the
         // wake payment's activation can be refused, so re-seed
         // from the real frontmost (a blocking AX read, paid at
@@ -79,6 +86,28 @@ extension KiwiCore {
             !ignoredPanel.active.contains(focused.pid)
         else { return false }
         return true
+    }
+
+    /// Whether `focus` may run with only the frontmost clause
+    /// failing (#1812): KiwiDesk's own raise toward the anchor is
+    /// pending a pan or stamped within `selfRaiseEchoWindow`, and
+    /// the frontmost app is managed — an unmanaged window in front
+    /// stays #292's refusal.
+    private func ownRaiseInFlight(
+        _ command: String,
+        front: pid_t?
+    ) -> Bool {
+        guard command == "focus",
+            let focused = focusedWindow,
+            let front,
+            eventLoop.observes(pid: focused.pid),
+            !ignoredPanel.active.contains(focused.pid),
+            pendingFocusRaise == focused.id
+                || freshSelfRaise(focused.id, now: wallClock())
+        else { return false }
+        return state.windows.all.contains {
+            owns(front: front, pid: $0.pid)
+        }
     }
 
     /// Whether the frontmost process is `pid`'s app — the
