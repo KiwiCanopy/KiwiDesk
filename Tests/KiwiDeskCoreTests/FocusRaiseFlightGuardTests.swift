@@ -130,11 +130,22 @@ struct FocusRaiseFlightGuardTests {
         #expect(preflight(core, "focus")?.error == Self.generic)
     }
 
+    @Test("An unobserved anchor app refuses")
+    func unobservedAnchorRefuses() {
+        let core = makeCore()
+        core.stampSelfRaise(anchor, now: core.wallClock())
+        core.eventLoop.observers[getpid()] = nil
+        #expect(preflight(core, "focus")?.error == Self.generic)
+    }
+
     @Test("The bypass rides the real dispatch")
     func executeHonorsTheBypass() {
         let core = makeCore()
+        var logs: [String] = []
+        core.onLog = { logs.append($0) }
         core.stampSelfRaise(anchor, now: core.wallClock())
         let response = core.execute("focus", args: [.string("left")])
         #expect(response.error != Self.generic)
+        #expect(logs.contains { $0.contains("allowed focus") })
     }
 }
