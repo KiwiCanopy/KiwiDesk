@@ -152,25 +152,33 @@ struct StartTilingWiringTests {
         )
     }
 
-    /// Every surface takes its hold from the one sync, never a
-    /// flag pushed past it.
+    /// Every surface takes its hold from the one sync: each
+    /// writer is called once there, and nowhere else but the
+    /// dashboard's creation seed, which pushes the same reading.
     @Test("the surfaces are written from one reading")
     func oneReadingWritesTheSurfaces() throws {
-        let tree = try guiTree().filter {
-            $0.name != "AppDelegate+Permissions.swift"
-        }
-        for needle in [
-            "setTilingIdle(", "setCoreHold(", ".hasStartedTiling =",
-        ] {
-            let writers = tree.filter { file in
-                file.text.contains(needle)
-                    && !file.text.contains("func \(needle)")
+        let expected: [String: [String: Int]] = [
+            "setWarning(": ["AppDelegate+Permissions.swift": 1],
+            "setTilingIdle(": ["AppDelegate+Permissions.swift": 1],
+            ".hasStartedTiling =": ["AppDelegate+Permissions.swift": 1],
+            ".isTrusted =": ["AppDelegate+Permissions.swift": 1],
+            "setCoreHold(": [
+                "AppDelegate+Permissions.swift": 1,
+                "AppDelegate.swift": 1,
+            ],
+        ]
+        let tree = try guiTree()
+        for (needle, want) in expected {
+            var calls: [String: Int] = [:]
+            for file in tree {
+                let n =
+                    count(needle, in: file.text)
+                    - count("func \(needle)", in: file.text)
+                if n > 0 { calls[file.name] = n }
             }
-            .map(\.name)
-            #expect(
-                writers.allSatisfy { $0 == "AppDelegate.swift" },
-                "\(needle) written outside the sync: \(writers)"
-            )
+            #expect(calls == want, "\(needle): \(calls)")
         }
+        let seed = try source("AppDelegate.swift")
+        #expect(seed.contains("created.setCoreHold(coreHold)"))
     }
 }

@@ -478,8 +478,9 @@ request to tile; a new start path (a resume row, a restart)
 spelling `core.start()` itself would tile a first run without
 asking. Every surface narrating why management is not running
 reads the one `CoreHold` value `syncCoreHold()` pushes, never a
-flag of its own. `StartTilingGateTests` holds the door's guard
-and the census of who calls it; the argument is
+flag of its own. `StartTilingWiringTests` holds the door's
+guard, `core.start()` spelled nowhere else and the one sync
+writing every surface; the argument is
 `docs/design-decisions.md` ▸ Granting Accessibility is not a
 request to tile.
 

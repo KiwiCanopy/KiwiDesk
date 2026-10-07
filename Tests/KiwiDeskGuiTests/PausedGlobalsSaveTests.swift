@@ -158,9 +158,9 @@ struct PausedGlobalsSaveTests {
             configDirectory: directory,
             hotkeyRegistrar: PausedRegistrar()
         )
-        // NO reload() and NO permissionPaused here on purpose.
+        // NO reload() and NO coreHold here on purpose.
         // `SettingsModel.init` seeds before the app ever calls
-        // `setPermissionPaused`, so the first seed must already
+        // `setCoreHold`, so the first seed must already
         // be correct — an earlier cut of this fix gated on that
         // flag and the test hid the gap by re-seeding.
         let model = makeTestModel(core: core)

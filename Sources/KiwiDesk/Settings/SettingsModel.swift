@@ -223,8 +223,6 @@ final class SettingsModel: ObservableObject {
     /// the paused and not-started banners and the save gates
     /// (#516, #2050).
     @Published var coreHold: CoreHold = .running
-    /// Accessibility is missing.
-    var permissionPaused: Bool { coreHold == .permissionMissing }
     /// Routes the idle banner's Start Tiling.
     var onStartTiling: () -> Void = {}
     /// The way back to a hidden What's new after a spotlight row's
