@@ -15,6 +15,9 @@ struct AppBarIdleInkTests {
     ) -> AppBarItemView {
         var style = AppBarLook()
         style.shelf.itemColor = "#EAF3EE"
+        // Distinct from the item colour, so a dropped hover
+        // branch reds rather than matching by coincidence.
+        style.shelf.hoverItemColor = "#AACB5D"
         let view = AppBarItemView(
             frame: NSRect(x: 0, y: 0, width: 120, height: 32)
         )
