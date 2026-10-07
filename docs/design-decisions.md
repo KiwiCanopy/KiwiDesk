@@ -12475,9 +12475,12 @@ the list in the bar's face; the menu is its actionable version,
 and a press turns one into the other: the peek closes on the
 press, and a multi-window glyph's menu opens where it stood.
 
-What it shows is ruled whole: the app on top in the menu's
-section-header style, so the peek reads as the menu before a
-click; one row per window, hairlines between, so a title that
+What it shows is ruled whole: the app on top, smaller and
+semibold like the menu's section header, so the peek reads as the
+menu before a click — but in the full item ink rather than a
+dimmed one, since weight and size already carry the hierarchy and
+a dimmed ink's legibility depends on a palette nobody can check in
+advance, a user's own included; one row per window, hairlines between, so a title that
 wraps still reads as one window; every window counted, an
 untitled one as the menu names it; the count as a bare number in
 the bar's own badge pill, only from two windows, so it needs no
@@ -12494,8 +12497,8 @@ The peek's glass takes ONE tint over its whole height, the ruled
 exception to the fade a detached surface takes (#1620): the bars'
 fade runs across a strip a glyph tall, but a panel of text read
 top to bottom would end on near-clear glass where a long title
-wraps. The ink is the shelf's own, measured on that ground on
-every bundled palette (`PeekInkContrastTests`).
+wraps. The ink is the shelf's own item ink, measured on that
+ground on every bundled palette (`PeekInkContrastTests`).
 
 Its height is capped to the usable room on its side of the strip,
 so a long `+n` never covers its bar or the item it names; what

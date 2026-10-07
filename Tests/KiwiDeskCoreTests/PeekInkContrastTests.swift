@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The hover peek's ink stays legible on its own ground (#1946):
-/// titles in the shelf's item ink, the app header in its idle ink,
+/// titles and the app header alike in the shelf's full item ink,
 /// on the plate's Fill — capped at `GlassTint.maxAlpha` as glass
 /// and uniform over the whole panel (`GlassTint.applyUniform`), or
 /// as stored where the glass is off. Measured as
@@ -15,20 +15,6 @@ import Testing
 @Suite("Hover peek ink contrast")
 struct PeekInkContrastTests {
     private static let floor = KiwiShelf.idleInkFloor
-
-    /// Palettes whose IDLE header falls short of the floor on the
-    /// glass ground over a white wallpaper, measured 2026-10-07:
-    /// Monochrome 2.11, Nightfall 2.16. The bars' own glass plate
-    /// sits on the same capped ground, which `IdleItemContrastTests`
-    /// measures only at the stored Fill, so this is not the peek's
-    /// alone; and the flat blend ignores the #1308 dark pin these
-    /// dark Fills take. OPEN for the owner (#1946 review): a
-    /// stronger header ink, a higher uniform alpha, or acceptance.
-    /// An entry that clears the floor reds, so it cannot outlive
-    /// its shortfall.
-    private static let glassHeaderShortfall: Set<String> = [
-        "Monochrome", "Nightfall",
-    ]
 
     /// `fill` at `min(its alpha, cap)`, as an `#RRGGBBAA` hex.
     private func capped(_ fill: String, at cap: CGFloat) -> String? {
@@ -54,7 +40,6 @@ struct PeekInkContrastTests {
     @Test("Every bundled palette's peek ink clears the floor")
     func peekInkStaysLegible() throws {
         var measured = 0
-        var short: Set<String> = []
         for palette in PaletteCatalog.bundled() {
             let item = try #require(
                 palette.colors["kiwishelf.item_color"],
@@ -68,40 +53,31 @@ struct PeekInkContrastTests {
             shelf.itemColor = item
             let glass = try #require(capped(fill, at: GlassTint.maxAlpha))
             for ground in [fill, glass] {
-                for ink in [shelf.itemColor, shelf.idleItemColor] {
-                    for wallpaper in ["#FFFFFF", "#000000"] {
-                        let value = try #require(
-                            contrast(
-                                ink: ink,
-                                ground: ground,
-                                on: wallpaper
-                            )
+                // Titles and header share the one ink (owner
+                // ruling on #1946), so the one ink is measured.
+                let ink = shelf.itemColor
+                for wallpaper in ["#FFFFFF", "#000000"] {
+                    let value = try #require(
+                        contrast(
+                            ink: ink,
+                            ground: ground,
+                            on: wallpaper
                         )
-                        measured += 1
-                        if ground == glass, ink == shelf.idleItemColor,
-                            Self.glassHeaderShortfall.contains(palette.name)
-                        {
-                            if wallpaper == "#FFFFFF" {
-                                short.insert(palette.name)
-                                #expect(value < Self.floor, "\(palette.name)")
-                                continue
-                            }
-                        }
-                        #expect(
-                            value >= Self.floor,
-                            Comment(
-                                rawValue:
-                                    "\(palette.name) \(ink) on "
-                                    + "\(ground) over \(wallpaper): "
-                                    + "\(value)"
-                            )
+                    )
+                    measured += 1
+                    #expect(
+                        value >= Self.floor,
+                        Comment(
+                            rawValue:
+                                "\(palette.name) \(ink) on "
+                                + "\(ground) over \(wallpaper): "
+                                + "\(value)"
                         )
-                    }
+                    )
                 }
             }
         }
-        #expect(measured == PaletteCatalog.bundled().count * 8)
-        #expect(short == Self.glassHeaderShortfall)
+        #expect(measured == PaletteCatalog.bundled().count * 4)
         #expect(measured > 0)
     }
 }

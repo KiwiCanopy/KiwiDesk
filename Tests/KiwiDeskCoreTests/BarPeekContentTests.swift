@@ -124,7 +124,8 @@ struct BarPeekContentTests {
 
     // MARK: - The drawing
 
-    /// The owner's look: the header in the idle ink, titles in the
+    /// The owner's look: the header in the full item ink (its
+    /// weight and size carry the hierarchy), titles in the
     /// item ink, the count in the bar's badge, a hairline between
     /// every two windows and every two apps.
     @Test("The body draws the shelf's inks, pill and hairlines")
@@ -149,7 +150,7 @@ struct BarPeekContentTests {
         let header = try #require(body.labels.first)
         #expect(header.stringValue == "A")
         #expect(
-            header.textColor == NSColor(kiwiHex: shelf.idleItemColor)
+            header.textColor == NSColor(kiwiHex: shelf.itemColor)
         )
         let one = try #require(body.labels.dropFirst().first)
         #expect(one.textColor == NSColor(kiwiHex: shelf.itemColor))

@@ -1,7 +1,7 @@
 import AppKit
 
 /// The peek's text (#1946, the owner's ruling): each group's
-/// header — the app in the menus' section-header style, its icon
+/// header — the app, smaller and semibold in the item ink, its icon
 /// on `+n`, its count pill from two windows — above one wrapped
 /// row per window, hairlines between. Rebuilt on every show, so
 /// nothing it draws outlives the content Core read.
@@ -57,7 +57,6 @@ final class BarPeekBody: NSView {
         setAccessibilityElement(false)
         ruleInk = BarDivider.color(textColor: shelf.itemColor)
         let ink = NSColor(kiwiHex: shelf.itemColor)
-        let headerInk = NSColor(kiwiHex: shelf.idleItemColor)
         let textFont = shelf.textFont(ofSize: Metrics.textSize)
         let headerFont = shelf.textFont(
             ofSize: Metrics.headerSize,
@@ -66,7 +65,10 @@ final class BarPeekBody: NSView {
         let groups = content.groups.map { group in
             Built(
                 group: group,
-                header: Self.label(group.app, headerFont, headerInk),
+                // Full ink: weight and size carry the hierarchy,
+                // and a dimmed ink's legibility rides on a palette
+                // nobody can pre-check (owner ruling on #1946).
+                header: Self.label(group.app, headerFont, ink),
                 rows: group.titles.map { Self.label($0, textFont, ink) },
                 pill: group.count.map { pill($0, shelf: shelf) }
             )
