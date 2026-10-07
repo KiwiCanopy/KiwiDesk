@@ -1398,6 +1398,7 @@
   "shortcuts.import.help": "Lee los atajos activos en init.lua y los añade aquí, emparejando cada combinación de teclas. Las acciones conocidas se ordenan en los grupos de abajo; el resto va a parar a «%1$@». Revisa y luego Guarda.",
   "shortcuts.imported_note": "Atajos importados — revisa abajo y luego pulsa «%1$@».",
   "shortcuts.inactive.caption": "Estos atajos apuntan a espacios que no están en la lista actual. Siguen funcionando — al pulsar uno se vuelve a crear su espacio — y conservan su combinación. Reasígnalos o elimínalos aquí; volverán a activarse cuando reaparezca su espacio.",
+  "shortcuts.inactive.layer_caption": "Estos atajos cambian a una capa que no está en la lista de capas de este perfil. Reasígnalos o elimínalos aquí.",
   "shortcuts.layer_name": "Nombre de la capa",
   "shortcuts.layers.caption": "Las capas son conjuntos de atajos alternativos — solo se activan los atajos de la capa activa. Asigna una tecla abajo para cambiar entre ellas. «default» es la capa estándar y siempre es la activa al iniciar la aplicación.",
   "shortcuts.lua_placeholder": "Lua, ej: KiwiDesk.reload_config()",

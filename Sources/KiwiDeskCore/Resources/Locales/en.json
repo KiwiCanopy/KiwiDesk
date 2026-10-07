@@ -1402,6 +1402,7 @@
   "shortcuts.import.help": "Reads the shortcuts active in init.lua and adds them here, matching each combo. Known actions sort into the groups below; anything else lands in “%1$@”. Review, then Save.",
   "shortcuts.imported_note": "Shortcuts imported — review below, then %1$@.",
   "shortcuts.inactive.caption": "These shortcuts target Spaces that are not in the current Space list. They still work — pressing one recreates its Space — and they keep their key combo. Rebind or remove them here; they become active again when their Space returns.",
+  "shortcuts.inactive.layer_caption": "These shortcuts switch to a layer that is not in this profile's layer list. Rebind or remove them here.",
   "shortcuts.layer_name": "Layer name",
   "shortcuts.layers.caption": "Layers are alternate shortcut sets — only the active layer's shortcuts fire. Bind a key below to switch between them. “default” is the standard layer and is always the active one after the app starts.",
   "shortcuts.lua_placeholder": "Lua, e.g. KiwiDesk.reload_config()",

@@ -1,7 +1,8 @@
 import AppKit
 import KiwiDeskCore
 
-/// Layer switching command generation and rename refactoring (#4).
+/// Layer switching command generation, rename and delete (#4,
+/// #2016).
 extension KeybindingCatalog {
 
     /// Authors layer switch command matching import classifier syntax (#4).
@@ -17,6 +18,19 @@ extension KeybindingCatalog {
                 )
             }
         )
+    }
+
+    /// The layer a catalog-authored switch row names, or nil for
+    /// any other Lua.
+    static func switchTarget(of lua: String) -> String? {
+        let prefix = "KiwiDesk.switch_layer("
+        guard lua.hasPrefix(prefix), lua.hasSuffix(")"),
+            let name = LuaLiteral.parseString(
+                String(lua.dropFirst(prefix.count).dropLast(1))
+            ),
+            switchLayerCommand(name).lua == lua
+        else { return nil }
+        return name
     }
 
     /// Renames a layer across all configuration bindings, rewritten
@@ -44,6 +58,24 @@ extension KeybindingCatalog {
                 }
                 return binding
             }
+            return layer
+        }
+    }
+
+    /// Deletes a layer and every row switching to it (#2016). Only
+    /// that one name: a switch row to a layer `init.lua` defines
+    /// reads as dangling to this config. On the live page the rows
+    /// leave every profile that shares them, as the layer's own
+    /// rows do (`RuleReachDraft.defaultReach`).
+    static func deleteLayer(
+        in layers: [KeyLayer],
+        named name: String
+    ) -> [KeyLayer] {
+        guard name != KeyLayer.defaultName else { return layers }
+        let switchTo = switchLayerCommand(name).lua
+        return layers.filter { $0.name != name }.map { layer in
+            var layer = layer
+            layer.bindings.removeAll { $0.lua == switchTo }
             return layer
         }
     }
