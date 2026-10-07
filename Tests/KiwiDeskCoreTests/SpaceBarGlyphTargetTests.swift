@@ -24,6 +24,18 @@ struct SpaceBarGlyphTargetTests {
         pressure: 1
     )!
 
+    private static let release = NSEvent.mouseEvent(
+        with: .leftMouseUp,
+        location: .zero,
+        modifierFlags: [],
+        timestamp: 0,
+        windowNumber: 0,
+        context: nil,
+        eventNumber: 0,
+        clickCount: 1,
+        pressure: 0
+    )!
+
     private func app(
         _ name: String,
         _ windows: [UInt32]
@@ -144,6 +156,7 @@ struct SpaceBarGlyphTargetTests {
         item.onSelect = { switched.append($0) }
         let mail = try #require(item.glyphTargets.first)
         mail.mouseDown(with: Self.click)
+        mail.mouseUp(with: Self.release)
         let more = try #require(item.overflowTarget)
         #expect(more.accessibilityPerformPress())
         #expect(picks.map(\.kind) == [.glyph, .overflow])
@@ -155,6 +168,26 @@ struct SpaceBarGlyphTargetTests {
         #expect(switched.isEmpty)
         item.mouseDown(with: Self.click)
         #expect(switched == [SpaceID("2")])
+    }
+
+    /// A menu popped on the press read the release as a miss and
+    /// closed (#2044), so the pick waits for the release.
+    @Test("A target picks on the release, never on the press")
+    func picksOnRelease() throws {
+        let actions = SpaceBarGlyphActions()
+        var picks = 0
+        actions.pick = { _ in picks += 1 }
+        let more = try #require(
+            view(overflow: [5, 6], actions: actions).overflowTarget
+        )
+        more.mouseUp(with: Self.release)
+        #expect(picks == 0, "a release with no press picked")
+        more.mouseDown(with: Self.click)
+        #expect(picks == 0, "the press picked")
+        more.mouseUp(with: Self.release)
+        #expect(picks == 1)
+        more.mouseUp(with: Self.release)
+        #expect(picks == 1, "one press picked twice")
     }
 
     @Test("+n has a target only while it draws")
