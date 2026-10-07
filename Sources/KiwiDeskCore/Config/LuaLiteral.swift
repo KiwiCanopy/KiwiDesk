@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 
 /// Formats and parses Swift values as Lua source literals for config writer.
-enum LuaLiteral {
+public enum LuaLiteral {
     /// Formats numbers with minimal round-trippable precision.
     static func number(_ value: Double) -> String {
         guard value.isFinite else { return "0" }
@@ -37,7 +37,7 @@ enum LuaLiteral {
     }
 
     /// Inverse of string(_:) recognizing canonical quoted literals (#92).
-    static func parseString(_ literal: String) -> String? {
+    public static func parseString(_ literal: String) -> String? {
         guard literal.count >= 2, literal.hasPrefix("\""),
             literal.hasSuffix("\"")
         else { return nil }

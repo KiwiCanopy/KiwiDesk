@@ -1,9 +1,12 @@
 import KiwiDeskCore
 
 /// Determines orphaned catalog commands for deleted spaces
-/// (#92). A third surface asking "is this binding inactive?" asks
-/// HERE rather than re-deriving — two surfaces disagreeing about
-/// what is inactive is the whole defect #820 was.
+/// (#92) and, where the caller names its layers, deleted layers
+/// (#2016) — listed and never pruned, since a layer `init.lua`
+/// defines is absent from the config. A surface asking "is this
+/// binding inactive?" asks HERE rather than re-deriving — two
+/// surfaces disagreeing about what is inactive is the whole
+/// defect #820 was.
 enum OrphanedShortcuts {
     /// Reconstructs navigation commands for bindings targeting inactive spaces
     /// (`NavRow`, `SpaceLuaArg`, #92, #820).
@@ -11,6 +14,7 @@ enum OrphanedShortcuts {
     static func commands(
         bindings: [KeyBinding],
         spaces: [SpaceID],
+        layers: [String]? = nil,
         icons: [SpaceID: String] = [:]
     ) -> [NavCommand] {
         let live = Set(spaces)
@@ -18,6 +22,18 @@ enum OrphanedShortcuts {
         var commands: [NavCommand] = []
         for binding in bindings
         where binding.kind == .navigation {
+            if let layers,
+                let layer = KeybindingCatalog.switchTarget(
+                    of: binding.lua
+                ),
+                !layers.contains(layer),
+                seen.insert(binding.lua).inserted
+            {
+                commands.append(
+                    KeybindingCatalog.switchLayerCommand(layer)
+                )
+                continue
+            }
             guard
                 let space = SpaceLuaArg.targetSpace(
                     of: binding.lua

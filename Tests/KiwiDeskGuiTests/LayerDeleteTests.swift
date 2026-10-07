@@ -4,10 +4,11 @@ import Testing
 
 @testable import KiwiDesk
 
-/// #2016: deleting a layer deletes every row that switches to it —
-/// such a row does nothing, and no Settings row is drawn to remove
-/// it by. Only that name goes: a switch row to a layer `init.lua`
-/// defines reads as dangling to the GUI config.
+/// #2016: deleting a layer deletes every row that switches to it,
+/// and a switch row to a layer no longer listed is drawn as
+/// inactive so it can be removed. Only that name is deleted: a
+/// switch row to a layer `init.lua` defines reads as dangling to
+/// the GUI config.
 @Suite("Layer delete (#2016)")
 struct LayerDeleteTests {
     private func switchRow(_ name: String) -> KeyBinding {
@@ -63,6 +64,64 @@ struct LayerDeleteTests {
             source.components(separatedBy: needle).count - 1
         }
         #expect(count("KeybindingCatalog.deleteLayer(") == 1)
-        #expect(count("layers.removeAll") == 0)
+    }
+
+    @Test("a switch row names its layer, any other Lua names none")
+    func switchTargetParses() {
+        let lua = KeybindingCatalog.switchLayerCommand("deep \"work\"").lua
+        #expect(KeybindingCatalog.switchTarget(of: lua) == "deep \"work\"")
+        #expect(
+            KeybindingCatalog.switchTarget(
+                of: "KiwiDesk.focus_space(\"1\")"
+            ) == nil
+        )
+        #expect(
+            KeybindingCatalog.switchTarget(
+                of: "KiwiDesk.switch_layer(name)"
+            ) == nil
+        )
+    }
+
+    /// A switch row to a layer no longer listed is drawn where it can
+    /// be removed — the Inactive group, the panel and the reset all
+    /// ask `OrphanedShortcuts` with the layer list (#820's one
+    /// question), and listed never pruned: `init.lua` may define it.
+    @Test("a switch to an absent layer is an inactive row")
+    @MainActor
+    func absentLayerSwitchIsInactive() {
+        let rows = [switchRow("gone"), switchRow("focus")]
+        let commands = OrphanedShortcuts.commands(
+            bindings: rows,
+            spaces: [],
+            layers: [KeyLayer.defaultName, "focus"]
+        )
+        #expect(
+            commands.map(\.lua)
+                == [KeybindingCatalog.switchLayerCommand("gone").lua]
+        )
+        #expect(
+            OrphanedShortcuts.commands(bindings: rows, spaces: []).isEmpty
+        )
+    }
+
+    @Test("every inactive surface hands over its layers")
+    func surfacesPassTheirLayers() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var calls = 0
+        var withLayers = 0
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = try SourceScan.strippedSource(at: file)
+            let parts = source.components(
+                separatedBy: "OrphanedShortcuts.commands("
+            )
+            for part in parts.dropFirst() {
+                calls += 1
+                let args = part.prefix(while: { $0 != ")" })
+                if args.contains("layers:") { withLayers += 1 }
+            }
+        }
+        #expect(calls == 3)
+        #expect(withLayers == calls)
     }
 }

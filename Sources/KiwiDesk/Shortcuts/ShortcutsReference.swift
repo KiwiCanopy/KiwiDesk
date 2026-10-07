@@ -83,6 +83,7 @@ enum ShortcutsReferenceBuilder {
         let inactive = buildInactive(
             layer,
             spaces: spaces,
+            layers: layerNames,
             spaceIcons: spaceIcons,
             rows: rows
         )

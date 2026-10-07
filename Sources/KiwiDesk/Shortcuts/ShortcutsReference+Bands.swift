@@ -90,6 +90,7 @@ extension ShortcutsReferenceBuilder {
     static func buildInactive(
         _ layer: KeyLayer,
         spaces: [SpaceID],
+        layers: [String],
         spaceIcons: [SpaceID: String],
         rows: ([NavCommand]) -> [ShortcutRow]
     ) -> [ShortcutRow] {
@@ -97,6 +98,7 @@ extension ShortcutsReferenceBuilder {
             OrphanedShortcuts.commands(
                 bindings: layer.bindings,
                 spaces: spaces,
+                layers: layers,
                 icons: spaceIcons
             )
         )

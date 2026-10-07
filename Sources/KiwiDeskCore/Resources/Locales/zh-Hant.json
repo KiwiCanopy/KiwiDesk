@@ -1398,6 +1398,7 @@
   "shortcuts.import.help": "讀取 init.lua 中生效的快速鍵，並依各自的組合鍵逐一對應後加入這裡。已知動作會歸入下方的群組；其餘的則會進入「%1$@」。請檢閱後儲存。",
   "shortcuts.imported_note": "快速鍵已輸入 — 請在下方檢閱後「%1$@」。",
   "shortcuts.inactive.caption": "這些快速鍵指向不在目前空間列表中的空間。它們仍然可用 — 按下其中一個就會重建它的空間 — 而且會保留原本的組合鍵。你可以在此重新綁定或移除它們；當它們的空間回來時就會再次生效。",
+  "shortcuts.inactive.layer_caption": "這些快速鍵會切換到不在此描述檔層列表中的層。你可以在此重新綁定或移除它們。",
   "shortcuts.layer_name": "層名稱",
   "shortcuts.layers.caption": "層是可替換的快速鍵組合 — 只有作用中層的快速鍵會觸發。請在下方綁定一個按鍵以在它們之間切換。「default」是標準層，App 啟動後一律由它生效。",
   "shortcuts.lua_placeholder": "Lua，例如 KiwiDesk.reload_config()",
