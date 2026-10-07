@@ -62,23 +62,46 @@ final class BarPeek {
     private var generation = 0
     private(set) lazy var panel = BarPeekPanel()
     /// Any menu opening — a glyph's, a right-click's — closes the
-    /// peek, which would otherwise stand beside it (#1946).
-    private var menuToken: NSObjectProtocol?
+    /// peek, which would otherwise stand beside it, and none opens
+    /// while one tracks: the relayout re-reads the pointer the
+    /// click left on the item (#1946).
+    private var menuTokens: [NSObjectProtocol] = []
+    private var menusTracking = 0
+    private let menuCentre: NotificationCenter
 
-    init() {
-        menuToken = NotificationCenter.default.addObserver(
-            forName: NSMenu.didBeginTrackingNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.dismiss() }
-        }
+    /// `menus` posts the menus' tracking: the app's, or a test's
+    /// own, so a test's menu never reaches another suite's peek.
+    init(menus centre: NotificationCenter = .default) {
+        menuCentre = centre
+        menuTokens = [
+            centre.addObserver(
+                forName: NSMenu.didBeginTrackingNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated { self?.menuBegan() }
+            },
+            centre.addObserver(
+                forName: NSMenu.didEndTrackingNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated { self?.menuEnded() }
+            },
+        ]
     }
 
     isolated deinit {
-        if let menuToken {
-            NotificationCenter.default.removeObserver(menuToken)
-        }
+        menuTokens.forEach(menuCentre.removeObserver)
+    }
+
+    private func menuBegan() {
+        menusTracking += 1
+        dismiss()
+    }
+
+    private func menuEnded() {
+        menusTracking = max(menusTracking - 1, 0)
     }
 
     /// What `reporter` — an item view — finds under the pointer:
@@ -104,7 +127,8 @@ final class BarPeek {
         }
         // A reused item view standing for other windows is a new
         // anchor, so the source is compared beside the view.
-        guard !Self.same(spent, anchor, source),
+        guard menusTracking == 0,
+            !Self.same(spent, anchor, source),
             !Self.same(shown, anchor, source),
             !Self.same(pending, anchor, source)
         else { return }
@@ -119,6 +143,7 @@ final class BarPeek {
         let ticket = generation
         schedule(Timing.dwell) { [weak self] in
             guard let self, ticket == self.generation,
+                self.menusTracking == 0,
                 let pending = self.pending
             else { return }
             self.present(pending, fades: true)
@@ -136,10 +161,11 @@ final class BarPeek {
     }
 
     /// A press or a scroll took the item: it closes at once and
-    /// stays shut until the pointer leaves it.
+    /// stays shut until the pointer leaves it — a second dismiss,
+    /// the press's menu opening, keeps that mark.
     func dismiss() {
         generation += 1
-        spent = shown ?? pending
+        spent = shown ?? pending ?? spent
         pending = nil
         closedAt = nil
         guard shown != nil else { return }

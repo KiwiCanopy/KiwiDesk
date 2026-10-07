@@ -21,7 +21,8 @@ struct BarPeekTests {
     /// whose dwell is stepped by hand.
     @MainActor
     private final class Rig {
-        let peek = BarPeek()
+        let menus = NotificationCenter()
+        lazy var peek = BarPeek(menus: menus)
         let window = NSPanel(
             contentRect: CGRect(x: 200, y: 800, width: 400, height: 40),
             styleMask: [.borderless],
@@ -207,7 +208,7 @@ struct BarPeekTests {
         rig.hover(rig.first)
         rig.step()
         #expect(rig.shownTitles == ["Window 1"], "was shown")
-        NotificationCenter.default.post(
+        rig.menus.post(
             name: NSMenu.didBeginTrackingNotification,
             object: NSMenu()
         )
