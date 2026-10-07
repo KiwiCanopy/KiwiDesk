@@ -685,16 +685,16 @@ carry no duplicate preview (`DetailPanelTests` holds the offer
 set and the removed in-card mounts; the ruling is in
 `docs/design-decisions.md` ▸ two columns).
 
-**The panel keeps its column only above 1200 pt.** Between 900
-and 1200 it detaches into a card floating over the content —
-draggable by its grab bar, closable, and always landing whole
-inside the window; below 900 the same card waits behind a
-"Show preview" button. An area that offers a preview always
-has exactly one way to it at every width, and the pill's
-centring offset answers to the docked form alone. The card's
-close is per-mount, never a stored preference: navigating
-clears the answer, and above 1200 the panel takes its column
-back whatever the answer was.
+**The panel keeps its column only above 1200 pt.** Below that
+it waits behind a "Show preview" button, which opens it as a
+card floating over the content — draggable by its grab bar,
+closable, and always landing whole inside the window. An area
+that offers a preview always has exactly one way to it at
+every width, and the pill's centring offset answers to the
+docked form alone. Opening and closing the card are
+per-mount, never a stored preference: navigating clears the
+answer, and above 1200 the panel takes its column back
+whatever the answer was.
 
 **A picture of something that is not the draft goes in a
 SHEET, not the panel** (#859): the preset preview is a sheet

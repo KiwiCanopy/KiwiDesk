@@ -16,17 +16,13 @@ struct LoginItemCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            DropdownRow(
+            ToggleRow(
                 label: startLabel,
-                spokenValue: nil,
-                help: startHelp
-            ) {
-                Toggle("", isOn: loginBinding)
-                    .labelsHidden()
-                    .disabled(loginInert)
-            }
-            confirmation
-            caption
+                isOn: loginBinding,
+                help: startHelp,
+                disabled: loginInert
+            )
+            notices
         }
         .onAppear { model.refreshAutoStart() }
         .onReceive(
@@ -36,18 +32,25 @@ struct LoginItemCard: View {
         ) { _ in model.refreshAutoStart() }
     }
 
-    /// Row label key (`SettingsMetrics.labelColumn`, #818, #864).
+    /// The checkbox's label (#818, #864).
     private var startLabel: String {
         L("general.login_item.start", "Start at login")
     }
 
-    /// Field-level help (#94, #1071).
+    /// Field-level help (#94, #1071), the mechanism after it.
     private var startHelp: String {
-        L(
-            "general.login_item.start_help_login_only",
-            "KiwiDesk opens when you sign in, so your windows "
-                + "are arranged from the start."
-        )
+        [
+            L(
+                "general.login_item.start_help_login_only",
+                "KiwiDesk opens when you sign in, so your windows "
+                    + "are arranged from the start."
+            ),
+            L(
+                "general.login_item.stored_by_macos",
+                "Read live from macOS, stored there too — may "
+                    + "need approval in System Settings."
+            ),
+        ].joined(separator: "\n\n")
     }
 
     /// Toggle greyed state (#171, #342): the durable reason (an
@@ -118,17 +121,28 @@ struct LoginItemCard: View {
         }
     }
 
-    /// Read-through caption and state notices.
-    @ViewBuilder private var caption: some View {
-        Text(
-            L(
-                "general.login_item.stored_by_macos",
-                "Read live from macOS, stored there too — may "
-                    + "need approval in System Settings."
-            )
-        )
-        .font(.caption)
-        .foregroundStyle(.secondary)
+    /// The lines under the checkbox, indented to its label: the
+    /// inert reason first, directly under the control, then the
+    /// confirmation and the approval notice.
+    private var notices: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            // Checked independently from requiresApproval (#1071).
+            if let reason = model.generalGates.inertReason(
+                for: .general(.startAtLogin)
+            ) {
+                Text(GeneralGateHelp.sentence(for: reason))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            confirmation
+            approval
+        }
+        .padding(.leading, ToggleRow.captionIndent)
+    }
+
+    /// The approval notice and its way to System Settings.
+    @ViewBuilder private var approval: some View {
         if model.autoStart.requiresApproval {
             HStack(spacing: 8) {
                 Text(
@@ -139,6 +153,7 @@ struct LoginItemCard: View {
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
                 Button(
                     L(
                         "general.login_item.open_login_items",
@@ -151,18 +166,5 @@ struct LoginItemCard: View {
                 .settingsActionButton()
             }
         }
-        // Checked independently from requiresApproval branch (#1071).
-        if let reason = model.generalGates.inertReason(
-            for: .general(.startAtLogin)
-        ) {
-            unavailableCaption(GeneralGateHelp.sentence(for: reason))
-        }
-    }
-
-    /// Shared styling for the two greyed-state captions.
-    private func unavailableCaption(_ text: String) -> some View {
-        Text(text)
-            .font(.caption)
-            .foregroundStyle(.secondary)
     }
 }

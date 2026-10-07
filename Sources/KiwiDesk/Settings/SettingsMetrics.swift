@@ -21,6 +21,9 @@ enum SettingsMetrics {
     /// Native checkbox width estimate.
     static let checkboxWidth: CGFloat = 18
 
+    /// Gap between a native checkbox and its label.
+    static let checkboxLabelGap: CGFloat = 2
+
     /// Label column inside `OverrideChrome` aligned to the shared axis (#95).
     static let overrideLabelColumn: CGFloat =
         labelColumn - (2 * overrideRowInset + checkboxWidth)
