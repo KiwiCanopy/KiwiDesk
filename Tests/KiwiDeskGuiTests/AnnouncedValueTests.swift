@@ -34,8 +34,8 @@ import Testing
 /// string-init is invisible to it (none exists under the roots
 /// today), and a label that lands on a wrapper's PARAMETER
 /// (`DropdownRow`) is out of its reach, which is why that
-/// wrapper is pinned by its own needle below and its nil escape
-/// by an `allowed` map.
+/// wrapper is pinned by its own needle in
+/// `AnnouncedValuePinTests`, its value a required `String`.
 struct AnnouncedValueTests {
     /// File basename → how many labelled pickers/menus it holds.
     private static let labelled: [String: Int] = [
