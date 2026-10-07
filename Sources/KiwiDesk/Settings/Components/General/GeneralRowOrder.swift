@@ -1,9 +1,8 @@
 /// Display order for General area settings rows
 /// (`GeneralCensusRenderTests`, #678 turn 14b).
 enum GeneralRowOrder {
-    /// Non-profile settings applying immediately, in three
-    /// divider-bounded clusters: look, launch and update, behavior
-    /// (#2032).
+    /// Non-profile settings applying immediately, in the drawn
+    /// order (#2032).
     static let appliesImmediately: [SettingKey] = [
         .general(.language),
         .general(.appearance),

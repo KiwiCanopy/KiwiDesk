@@ -1200,8 +1200,8 @@ claim; the obligations a change here takes on:
   AX title (the dated observation is the design decision cited
   below), so `DropdownRow` takes the selected option's title
   from its site as a required argument, an on/off control
-  taking `ToggleRow` instead (#2032,
-  `AnnouncedValuePinTests`); `SettingsSlider` takes
+  taking `ToggleRow` instead (#2032, `ToggleRowShapeTests`);
+  `SettingsSlider` takes
   `label` and `spokenValue` as required arguments and re-earns
   the Tab stop and arrow keys a custom-drawn view has no claim
   to; `SettingsRowLabel`'s text is drawn, not spoken, since every

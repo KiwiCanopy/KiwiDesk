@@ -64,7 +64,7 @@ struct AnnouncedValuePinTests {
         #expect(body.contains(".accessibilityValue(spokenValue)"))
         // No nil escape (#2032): an on/off control takes
         // `ToggleRow`, so the value is a required `String`.
-        #expect(body.contains("let spokenValue: String"))
+        #expect(body.contains("let spokenValue: String\n"))
         #expect(!body.contains("spokenValue: String?"))
     }
 

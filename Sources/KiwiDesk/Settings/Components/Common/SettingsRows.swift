@@ -177,7 +177,8 @@ struct ToggleRow: View {
     var disabled: Bool = false
 
     /// A line under the row starts at the checkbox's label.
-    static let captionIndent: CGFloat = 20
+    static let captionIndent: CGFloat =
+        SettingsMetrics.checkboxWidth + SettingsMetrics.checkboxLabelGap
 
     var body: some View {
         HStack(spacing: 4) {
