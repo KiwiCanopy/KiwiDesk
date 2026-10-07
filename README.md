@@ -34,7 +34,7 @@ Powerful when you reach for it, never in your way.
 I love tiling window managers, but I could never recommend one to a
 friend who doesn't live in a terminal. On the Mac they all want a
 config file first; they feel like a nerd's toy. KiwiDesk is the one I
-can hand over: it tiles your windows the moment it starts, everything
+can hand over: it tiles your windows the moment you say go, everything
 is a slider or a switch in a real Settings window, and going deeper
 feels like learning a feature rather than hacking a file. When you do
 want the file, it is there: Lua config, a CLI and a socket, the whole
@@ -59,7 +59,7 @@ same signed, notarized app; the cask additionally puts the `kiwidesk`
 CLI on your `PATH`. Either way KiwiDesk checks for updates itself.
 
 On first launch a wizard walks you through the Accessibility
-permission, then tiles your windows straight away. Everything past
+permission; nothing moves until you press **Start Tiling**. Everything past
 that — Settings, the CLI, Lua — is in the
 **[Quick Start](https://kiwidesk.kiwicanopy.com/docs/user-guide/)**.
 

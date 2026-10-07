@@ -6861,8 +6861,9 @@ and resized the window I was reading", which is the fear a new
 tiling user arrives with.
 
 **The demonstration is already happening; the tour narrates it.**
-The moment the grant lands, management starts and every window
-behind the tour is arranged — over the following seconds (#801),
+The moment the user presses Start Tiling (#2050), management
+starts and every window behind the tour is arranged — over the
+following seconds (#801),
 the screen narrating that wait rather than claiming a finished job
 (▸ *Boot: the wait is narrated, never hidden*). That is a better
 demonstration than tiling the tour could ever be — the user's own
@@ -6952,6 +6953,48 @@ symbol that merely resembles it teaches the wrong shape. And the
 picture is a picture: it is not a control, it points at nothing
 off-window, and it needs no permission, no screen geometry and no
 guess about where the item ended up.
+
+### Granting Accessibility is not a request to tile (#2050)
+
+**[Principle]**
+
+**The permission and the start are two decisions, and only the
+second moves a window.** The grant step asks for what macOS
+needs; nothing is arranged until the user presses **Start
+Tiling**, which the grant page offers greyed beside Open System
+Settings and then as its default once the grant lands. A user
+who met KiwiDesk rearranging every open window the moment they
+flipped the switch read it as a bug and uninstalled, and nothing
+on screen offered a way back. Zero configuration is kept — the
+press asks for no choice — so "works at once" survives while
+"acts without asking" goes.
+
+The press is remembered in three states, not two. A first run
+records "not started" before the grant page appears; an install
+that predates the gate has no record at all, and is counted as
+started when it launches already trusted. A two-state flag would
+read a first run that granted, closed the tour and relaunched as
+the second kind, and tile without asking on the next launch —
+the report itself, one launch later. Once pressed, a revoke and
+re-grant resumes on its own: that user already said go.
+
+Closing the tour without pressing leaves KiwiDesk idle, and the
+start stays reachable without the tour: a **Start Tiling** row
+heads the quick menu, Settings carries a banner with the same
+button, and the menu-bar icon is drawn dimmed — the starting
+phase's treatment, so the icon reads "not doing anything yet"
+from launch to the end of boot. The warning triangle was ruled
+out because its words say "permission required", which would be
+false, and because it makes a choice look like a fault; the
+#1013 update dot was ruled out as the idle mark because it
+belongs to offers. Unlike the warning and the starting phase,
+idle does not outrank that dot: it can last indefinitely, and an
+update is something an idle app can still take, so the dot rides
+the dimmed icon.
+
+An undo of the first arrangement is not owed by this ruling:
+once nothing moves unasked, the surprise it would undo is gone,
+and a restore is weighed on demand rather than as a safety net.
 
 ### The tour's progress row is derived, never a fixed counter
 

@@ -22,8 +22,9 @@ extension SettingsModel {
     var primarySaveAction: PrimarySaveAction {
         if editingLua { return .saveLua }
         if editingStoredProfile { return .updateStoredProfile }
-        // Permission-paused global changes only write gui.json (#516).
-        if permissionPaused, core.isGuiManaged, globalsChanged {
+        // Global changes while the core is not running only write
+        // gui.json (#516, #2050).
+        if coreHold != .running, core.isGuiManaged, globalsChanged {
             return .saveGlobalsOnly
         }
         if activeProfile != nil { return .updateActiveProfile }

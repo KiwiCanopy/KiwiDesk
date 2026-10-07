@@ -85,9 +85,8 @@ extension KiwiCore {
         defersEventRetiles = true
         defersWindowRuleReconcileToSweep = true
         guard eventLoop.beginScan() else {
-            // Unreachable today — `startManaging()` runs at launch
-            // or on a false→true permission transition, and a
-            // revoke calls `stop()` first — but silent on every
+            // Unreachable while `start()` runs only on a first
+            // start or after `stop()` — but silent on every
             // count if it ever is reached: no tail, no phase, and
             // an open `boot` span. Say so and close the span.
             defersEventRetiles = false
