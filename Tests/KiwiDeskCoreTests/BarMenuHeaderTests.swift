@@ -111,9 +111,61 @@ struct BarMenuHeaderTests {
         #expect(icon.accessibilityCustomActions()?.map(\.name) == [rows])
         menus.rows = { _ in [.action("later") {}] }
         #expect(icon.accessibilityCustomActions()?.map(\.name) == ["later"])
-        withExtendedLifetime(menus) {}
-        overlay.frontWindows = []
-        #expect(overlay.frontHit(at: inside) == nil)
+        // The text glyph reads them live too.
+        let glyph = SpaceBarItemView.App(
+            name: "App9",
+            icon: nil,
+            glyph: "A",
+            focused: false,
+            count: 1,
+            windows: [WindowID(9)]
+        )
+        show(overlay, front: glyph, style: style)
+        menus.rows = { _ in [.action("again") {}] }
+        #expect(
+            overlay.frontGlyph.accessibilityCustomActions()?.map(\.name)
+                == ["again"]
+        )
+        // A render with no front app forgets its windows.
+        show(overlay, front: nil, style: style)
+        #expect(overlay.frontWindows.isEmpty)
         #expect(overlay.frontMenuHit == .empty)
+        withExtendedLifetime(menus) {}
+    }
+
+    private func show(
+        _ overlay: SpaceBarOverlay,
+        front: SpaceBarItemView.App?,
+        style: SpaceBarLook
+    ) {
+        overlay.show(
+            items: overlay.lastShown?.items ?? [],
+            frontApp: front,
+            strip: CGRect(x: 0, y: 0, width: 800, height: 32),
+            style: style,
+            stateMarkColors: StateMarkColors(
+                sticky: "#ffffff",
+                floating: "#ffffff"
+            )
+        )
+    }
+
+    /// The chip's area is every drawn piece — box, glass, indicator,
+    /// content — cut to the run that clips it.
+    @Test("the chip's area unions what draws it, cut to its clip")
+    func chipAreaUnionsAndClips() {
+        let box = CGRect(x: 100, y: 0, width: 40, height: 30)
+        let pad = CGRect(x: 90, y: 0, width: 60, height: 30)
+        #expect(
+            SpaceBarOverlay.chipArea([box, pad], clip: nil)
+                == pad
+        )
+        #expect(
+            SpaceBarOverlay.chipArea(
+                [box, pad],
+                clip: CGRect(x: 0, y: 0, width: 120, height: 30)
+            ) == CGRect(x: 90, y: 0, width: 30, height: 30)
+        )
+        #expect(SpaceBarOverlay.chipArea([], clip: nil) == nil)
     }
 }

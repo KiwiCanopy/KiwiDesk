@@ -26,14 +26,24 @@ extension SpaceBarOverlay {
             .compactMap { view in
                 view.superview.map { root.convert(view.frame, from: $0) }
             }
-        guard let first = shown.first else { return nil }
-        var segment = shown.dropFirst().reduce(first) { $0.union($1) }
-        if frontIcon.isDescendant(of: itemContainer)
+        let clipped =
+            frontIcon.isDescendant(of: itemContainer)
             || frontName.isDescendant(of: itemContainer)
-        {
-            segment = segment.intersection(itemContainer.frame)
-        }
+        guard
+            let segment = Self.chipArea(
+                shown,
+                clip: clipped ? itemContainer.frame : nil
+            )
+        else { return nil }
         return segment.contains(point) ? frontMenuHit : nil
+    }
+
+    /// The area `drawn` covers, cut to `clip` where a container
+    /// clips it; nil where nothing is drawn.
+    static func chipArea(_ drawn: [CGRect], clip: CGRect?) -> CGRect? {
+        guard let first = drawn.first else { return nil }
+        let union = drawn.dropFirst().reduce(first) { $0.union($1) }
+        return clip.map { union.intersection($0) } ?? union
     }
 }
 
