@@ -162,7 +162,7 @@ extension SpaceBarItemView {
             shelf: style.shelf,
             first: isFirstInRun,
             last: isLastInRun,
-            outlined: style.activeIndicator == .outline,
+            outlined: style.activeIndicator.drawsOutline,
             horizontal: horizontal
         )
     }
@@ -272,7 +272,7 @@ extension SpaceBarItemView {
         accent.isHidden = drawnIndicator == nil
         accent.paint = BarAccent.sheen(
             style.highlightColor,
-            outline: style.activeIndicator == .outline
+            outline: style.activeIndicator.drawsOutline
                 ? style.resolvedHighlightWidth : nil,
             strength: style.sheen,
             drawn: isActive

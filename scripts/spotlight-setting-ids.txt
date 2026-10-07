@@ -1,0 +1,210 @@
+(action) app_rules.add_float
+(action) app_rules.add_space
+(action) border.fit_gaps
+(action) border.fit_gaps.extra_spacing
+(action) general.advanced.backup.export
+(action) general.advanced.backup.restore
+(action) general.advanced.discard_arrangement
+(action) general.advanced.edit_lua
+(action) general.advanced.log.export
+(action) general.advanced.log.range
+(action) general.advanced.reset_all
+(action) look.applies_to
+(action) look.delete
+(action) look.export
+(action) look.import
+(action) look.keep_previous_colors
+(action) look.rename
+(action) look.save
+(action) monitors.orphan_pin.clear
+(action) palette.delete
+(action) palette.export
+(action) palette.import
+(action) palette.rename
+(action) palette.save
+(action) presets.apply
+(action) presets.layouts
+(action) profiles.delete
+(action) profiles.load
+(action) profiles.rename
+(action) profiles.sets.move
+(action) shortcuts.import
+(action) shortcuts.restore_defaults
+(action) space_override.reset_all
+(action) spaces.delete
+(link) palettes.neon_glow_hint
+(readonly) general.advanced.config_file
+(readonly) mac_checklist.click_wallpaper
+(readonly) mac_checklist.double_click_title
+(readonly) mac_checklist.edge_tiling
+(readonly) mac_checklist.habit.big_windows
+(readonly) mac_checklist.habit.dock
+(readonly) mac_checklist.habit.float
+(readonly) mac_checklist.habit.hide
+(readonly) mac_checklist.habit.keyboard
+(readonly) mac_checklist.rearrange_spaces
+(readonly) mac_checklist.stage_manager
+(readonly) mac_checklist.switch_on_activate
+(readonly) monitors.fingerprints
+(state) monitors.placementUnavailable
+AutoStartManager (no stored pref)
+UserDefaults.SUAutomaticallyUpdate (Sparkle)
+UserDefaults.appearance
+UserDefaults.language
+appWide.quitGridTargetDepth
+appWide.refusalSound
+config.appRules[app]
+config.floatRules
+config.layers[].icon
+config.mainSpaces
+config.scrollGesture.longSwipes
+config.scrollGesture.naturalMouse
+config.scrollGesture.naturalTrackpad
+config.scrollGesture.pan
+config.scrollGesture.spaceStep
+config.scrollGesture.stepDistance
+keybinding.grow_height
+keybinding.grow_width
+keybinding.open_settings
+keybinding.show_shortcuts
+keybinding.shrink_height
+keybinding.shrink_width
+keybinding.toggle_display_sticky
+keybinding.toggle_floating
+keybinding.toggle_sticky
+profile.isDefault
+settings.animations (master)
+settings.animations.durationMS
+settings.animations.monocleFlipDurationMS
+settings.animations.onMonocleFocus
+settings.animations.onRelayout
+settings.animations.onScrolling
+settings.animations.onShelf
+settings.animations.onSpaceChange
+settings.animations.onWindowResize
+settings.animations.onWindowSwap
+settings.animations.scrollDurationMS
+settings.animations.shelfDurationMS
+settings.animations.spaceChangeDurationMS
+settings.appBarStyle.activeIndicator
+settings.appBarStyle.edge
+settings.appBarStyle.groupAdjacentWindows
+settings.appBarStyle.titleCap
+settings.borderStyle.cornerStyle
+settings.borderStyle.enabled
+settings.borderStyle.focusedColor
+settings.borderStyle.glow
+settings.borderStyle.glowSize
+settings.borderStyle.glowSize (auto)
+settings.borderStyle.sheen
+settings.borderStyle.unfocusedColor
+settings.borderStyle.unfocusedEnabled
+settings.borderStyle.width
+settings.bsp.newWindowPlacement
+settings.bsp.splitRatioH
+settings.bsp.splitRatioV
+settings.bsp.strategy
+settings.dragDropZone.border
+settings.dragDropZone.borderColor
+settings.dragDropZone.enabled
+settings.dragDropZone.fill
+settings.dragDropZone.fillColor
+settings.dragGhost.border
+settings.dragGhost.borderColor
+settings.dragGhost.enabled
+settings.dragGhost.fill
+settings.dragGhost.fillColor
+settings.floatingStyle.color
+settings.floatingStyle.mark
+settings.gapsGlobal.inner (master)
+settings.gapsGlobal.inner.horizontal
+settings.gapsGlobal.inner.vertical
+settings.gapsGlobal.outer (master)
+settings.gapsGlobal.outer.bottom
+settings.gapsGlobal.outer.left
+settings.gapsGlobal.outer.right
+settings.gapsGlobal.outer.top
+settings.grid.autoSize
+settings.grid.columns
+settings.grid.fillEmptyCells
+settings.grid.newWindowPlacement
+settings.grid.rows
+settings.grid.splitDirection
+settings.grid.type
+settings.kiwishelf.activeItemColor
+settings.kiwishelf.alignment
+settings.kiwishelf.backgroundFit
+settings.kiwishelf.backgroundStyle
+settings.kiwishelf.border
+settings.kiwishelf.borderColor
+settings.kiwishelf.borderWidth
+settings.kiwishelf.cornerRoundness
+settings.kiwishelf.fillColor
+settings.kiwishelf.fontFamily
+settings.kiwishelf.fontSize
+settings.kiwishelf.fontSize (auto)
+settings.kiwishelf.fontWeight
+settings.kiwishelf.glyphSize
+settings.kiwishelf.glyphSize (auto)
+settings.kiwishelf.groupBadgeColor
+settings.kiwishelf.groupBadgeTextColor
+settings.kiwishelf.highlightColor
+settings.kiwishelf.highlightWidth
+settings.kiwishelf.hoverFillColor
+settings.kiwishelf.hoverItemColor
+settings.kiwishelf.iconSource
+settings.kiwishelf.innerMargin
+settings.kiwishelf.itemColor
+settings.kiwishelf.itemGap
+settings.kiwishelf.liquidGlass (master)
+settings.kiwishelf.minimum
+settings.kiwishelf.order
+settings.kiwishelf.outerMargin
+settings.kiwishelf.thickness
+settings.minWindowSize
+settings.monocle.appBar.enabled
+settings.monocle.hideStyle
+settings.monocle.newWindowPlacement
+settings.monocle.orientation
+settings.monocle.wrapFocus
+settings.mouse.followsFocus
+settings.mouseResize
+settings.scrolling.anchor
+settings.scrolling.appBar.enabled
+settings.scrolling.fillWhenAlone
+settings.scrolling.newWindowPlacement
+settings.scrolling.orientation
+settings.scrolling.slotSize (unit)
+settings.scrolling.wrapFocus
+settings.spaceBarStyle.activeIndicator
+settings.spaceBarStyle.edge
+settings.spaceBarStyle.edge (master)
+settings.spaceBarStyle.enabled
+settings.spaceBarStyle.focusedHighlightColor
+settings.spaceBarStyle.focusedItemColor
+settings.spaceBarStyle.frontAppTitleCap
+settings.spaceBarStyle.glyphGap
+settings.spaceBarStyle.glyphSpan
+settings.spaceBarStyle.groupAdjacentWindows
+settings.spaceBarStyle.hideEmpty
+settings.spaceBarStyle.inactiveContent
+settings.spaceBarStyle.itemLabel
+settings.spaceBarStyle.showFrontApp
+settings.spaceBarStyle.springDelay
+settings.stack.fillWhenAlone
+settings.stack.masterCount
+settings.stack.masterOrientation
+settings.stack.masterRatio
+settings.stack.newWindowPlacement
+settings.stack.overflowStyle
+settings.stack.stackPosition
+settings.stickyStyle.color
+settings.stickyStyle.desktopReach
+settings.stickyStyle.mark
+settings.track.autoTracks
+settings.track.axis
+settings.track.limit
+settings.track.newWindow
+settings.track.newWindowPosition
+settings.track.overflowStyle
+settings.track.wrapFocus

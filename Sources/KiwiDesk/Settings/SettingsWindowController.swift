@@ -88,8 +88,22 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// Shows Settings where a bar menu's row lands (#1518): the
     /// page, and the card or row on it, as the search would.
     func show(landing: SettingsLanding) {
-        model.nav.pendingReveal = SettingsAnchor(landing: landing)
+        model.land(on: SettingsAnchor(landing: landing))
         show()
+    }
+
+    /// Shows Settings on a What's new spotlight row's control,
+    /// with the way back (#2038 ruling ▸ handoff); `show()` is the
+    /// own-window door (#1281).
+    func follow(_ trail: WhatsNewTrail) {
+        model.follow(trail)
+        show()
+    }
+
+    /// The trail's window is in front again or answered: the
+    /// banner goes, nothing is called back.
+    func endWhatsNewTrail() {
+        model.whatsNewTrail = nil
     }
 
     /// The live Spaces the profile does not hold changed (#1790).
@@ -106,9 +120,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     /// Shows dashboard navigated to destination (#326).
     func show(navigatingTo destination: SettingsDestination) {
-        model.nav.pendingReveal = SettingsAnchor(
-            destination: destination
-        )
+        model.land(on: SettingsAnchor(destination: destination))
         show()
     }
 
@@ -186,5 +198,6 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.setRecorderArmed(false)
         model.cancelPendingDiscard()
         ColorPanelController.shared.dismiss()
+        model.settingsClosed()
     }
 }

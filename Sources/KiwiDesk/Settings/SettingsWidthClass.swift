@@ -31,9 +31,6 @@ enum SettingsWidthClass: String, CaseIterable, Sendable {
     /// Whether preview panel docks into its own column beside content.
     var docksPanel: Bool { self == .wide }
 
-    /// Whether detached preview card defaults to open without explicit summon.
-    var floatsPreviewByDefault: Bool { self == .medium }
-
     /// Whether labelled row stacks its control beneath the label.
     var stacksRows: Bool { self == .compact || self == .tight }
 

@@ -23,10 +23,12 @@ struct SettingsNavigationResetTests {
     /// A reveal is requested from outside and consumed by the
     /// apply that renders it; the flash pair and the reveal
     /// target belong to that same in-flight request, and the
-    /// counter is monotonic by construction.
+    /// counters are monotonic by construction — the trail's
+    /// focus request (#2038) is a change signal, never a value.
     private static let survivesReset: Set<String> = [
         "pendingReveal", "pendingModeNotice", "pendingScroll",
         "flash", "flashToken", "revealTarget", "homeReturnFocus",
+        "trailFocusRequest",
     ]
 
     /// Every field set away from its fresh value, so a field the
@@ -43,6 +45,7 @@ struct SettingsNavigationResetTests {
         nav.spaceOverridesFocus = SpaceID("code")
         nav.homeReturnFocus = .shortcuts
         nav.navigationMovesFocus = true
+        nav.trailFocusRequest = 3
         return nav
     }
 

@@ -53,7 +53,7 @@ extension AppBarItemView {
             shelf: style.shelf,
             first: isFirstInRun,
             last: isLastInRun,
-            outlined: style.activeIndicator == .outline,
+            outlined: style.activeIndicator.drawsOutline,
             horizontal: horizontal
         )
     }
@@ -82,48 +82,36 @@ extension AppBarItemView {
         return style.hasBox ? style.fillColor : "#00000000"
     }
 
-    /// Active item indicator appearance mode.
-    enum AccentMode { case none, outline, edgeMark }
-
-    var accentMode: AccentMode {
-        guard isActive else { return .none }
-        return style.activeIndicator == .outline
-            ? .outline : .edgeMark
-    }
-
-    /// The indicator `accentMode` draws, for the rim beneath it.
+    /// The indicator this item draws, nil while inactive — read by
+    /// the accent paint and layout, and the rim beneath it.
     var drawnIndicator: AppBarStyle.ActiveIndicator? {
-        switch accentMode {
-        case .none: nil
-        case .outline: .outline
-        case .edgeMark: .edgeMark
-        }
+        isActive ? style.activeIndicator : nil
     }
 
     /// Applies stroke or fill to active indicator layer (`layoutAccent`).
     func applyAccent() {
         layer?.borderWidth = 0
         let ink = BarAccent.flatInk(style.highlightColor, sheen: style.sheen)
-        switch accentMode {
-        case .none:
+        switch drawnIndicator {
+        case nil:
             accent.isHidden = true
-        case .outline:
+        case .outline?:
             accent.isHidden = false
             accent.layer?.borderWidth = style.resolvedHighlightWidth
             accent.layer?.borderColor = ink
             accent.layer?.backgroundColor =
                 NSColor.clear.cgColor
-        case .edgeMark:
+        case .edgeMark?:
             accent.isHidden = false
             accent.layer?.borderWidth = 0
             accent.layer?.backgroundColor = ink
         }
         accent.paint = BarAccent.sheen(
             style.highlightColor,
-            outline: accentMode == .outline
+            outline: drawnIndicator?.drawsOutline == true
                 ? style.resolvedHighlightWidth : nil,
             strength: style.sheen,
-            drawn: accentMode != .none
+            drawn: drawnIndicator != nil
         )
     }
 }

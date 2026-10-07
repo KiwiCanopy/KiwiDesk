@@ -3,11 +3,13 @@ import SwiftUI
 @testable import KiwiDesk
 
 /// The update window's pairings (#1542), measured by the one
-/// contrast suite and kept here for its length: the Highlights
-/// panel's gold edge and inks over its gold-washed card and the
-/// failed glyph on the footer, and the tab strip's ink over its
-/// track; a tab's list sits on the page, whose inks the main
-/// list already measures.
+/// contrast suite and kept here for its length: the inks over
+/// the Highlights panel's gold-washed card and the failed glyph
+/// on the footer, and the tab strip's ink over its track; a
+/// tab's list sits on the page, whose inks the main list already
+/// measures. The gold itself marks and never inks, so its edge
+/// is floored by colour-vision separation instead
+/// (`HighlightSeparationTests`, #2038).
 extension SettingsThemeContrastTests {
     private static let highlightWash = (
         color: SettingsTheme.highlight,
@@ -15,13 +17,6 @@ extension SettingsThemeContrastTests {
     )
 
     static let updateWindow: [Pairing] = [
-        Pairing(
-            "highlight edge on the washed Highlights",
-            SettingsTheme.highlight,
-            on: SettingsTheme.card,
-            washedWith: highlightWash,
-            floor: 3.0
-        ),
         Pairing(
             "ink on the washed Highlights",
             SettingsTheme.ink,

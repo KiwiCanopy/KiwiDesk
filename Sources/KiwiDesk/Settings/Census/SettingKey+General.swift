@@ -94,7 +94,13 @@ extension GeneralKey {
                 help: "general.quit_pile_depth.help"
             )
         case .startAtLogin:
-            return .text("general.login_item.start")
+            // The `?` joins this key with
+            // `general.login_item.stored_by_macos`; it stands for
+            // the pair (#2032).
+            return .text(
+                "general.login_item.start",
+                help: "general.login_item.start_help_login_only"
+            )
         case .installUpdatesAutomatically:
             return .text(
                 "general.updates.install_automatically",

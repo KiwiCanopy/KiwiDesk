@@ -12,27 +12,26 @@ struct AutoInstallRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            DropdownRow(
+            ToggleRow(
                 label: L(
                     "general.updates.install_automatically",
                     "Install updates automatically"
                 ),
-                spokenValue: nil,
+                isOn: binding,
                 help: L(
                     "general.updates.install_automatically.help",
                     "KiwiDesk downloads updates on its own and installs "
                         + "them the next time it quits. It never restarts "
                         + "by itself."
-                )
-            ) {
-                Toggle("", isOn: binding)
-                    .labelsHidden()
-                    .disabled(reason != nil)
-            }
+                ),
+                disabled: reason != nil
+            )
             if let reason {
                 Text(GeneralGateHelp.sentence(for: reason))
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink3)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, ToggleRow.captionIndent)
             }
         }
     }

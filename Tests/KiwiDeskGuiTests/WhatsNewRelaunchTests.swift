@@ -154,7 +154,7 @@ struct WhatsNewRelaunchTests {
         #expect(!grant.contains("onboarding.grant.arranging.count"))
         let chrome = try SourceScan.strippedSource(
             at: root.appendingPathComponent(
-                "Sources/KiwiDesk/Updates/UpdateWindowChrome.swift"
+                "Sources/KiwiDesk/Updates/WhatsNewWindowController.swift"
             )
         )
         #expect(

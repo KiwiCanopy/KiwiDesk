@@ -1,8 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The newest summary in one gold-edged panel, with every merged
-/// version's "Before you update" beneath it (#1542 ruling).
+/// The newest summary in one gold-edged panel — as prose, or as
+/// its intro sentence over the spotlight rows (#2038) — with
+/// every merged version's "Before you update" beneath it (#1542
+/// ruling).
 struct UpdateHighlightsPanel: View {
     let digest: UpdateNotesDigest
     /// Failed steps the gold back to a plain card.
@@ -14,11 +16,15 @@ struct UpdateHighlightsPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
             label
-            Text(UpdateNotesMarkdown.text(digest.summary))
-                .font(.system(size: 14))
-                .lineSpacing(4)
-                .foregroundStyle(SettingsTheme.ink)
-                .fixedSize(horizontal: false, vertical: true)
+            if digest.spotlight.isEmpty {
+                Text(UpdateNotesMarkdown.text(digest.summary))
+                    .font(.system(size: 14))
+                    .lineSpacing(4)
+                    .foregroundStyle(SettingsTheme.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                UpdateSpotlightRows(digest: digest, failed: failed)
+            }
             if !digest.cautions.isEmpty { cautions }
         }
         .padding(.horizontal, 17)

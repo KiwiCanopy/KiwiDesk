@@ -26,6 +26,13 @@ enum UpdateWindowSlot {
         }
     }
 
+    /// A waiting update offer — the one window a hidden What's new
+    /// yields to (#1542 "outranked by a waiting update", #2038).
+    var isOffer: Bool {
+        if case .offer = self { return true }
+        return false
+    }
+
     /// The up-to-date answer, which Home narrates while it is open.
     var isAnswer: Bool {
         if case .upToDate = self { return true }
