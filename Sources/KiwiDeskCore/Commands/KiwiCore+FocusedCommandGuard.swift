@@ -95,9 +95,10 @@ extension KiwiCore {
 
     /// Whether `command` may run with only the frontmost clause
     /// failing (#1812): the verb is exempt, the anchor is the
-    /// target of our raise in flight, and the app in front is
-    /// still the managed app that raise LEFT — so a switch the
-    /// user made since is #292's refusal, never ours to override.
+    /// target of our raise in flight, and the managed app that
+    /// raise LEFT is in front with no activation or press since —
+    /// so a switch the user made is #292's refusal, never ours to
+    /// override.
     private func ownRaiseInFlight(
         _ command: String,
         front: pid_t?
@@ -107,14 +108,8 @@ extension KiwiCore {
             let front,
             let flight = raiseFlight,
             anchorManaged(focused),
-            flight.inFlight(
-                toward: focused.id,
-                pending: pendingFocusRaise,
-                now: wallClock(),
-                // Our raise is in flight as long as its echo is
-                // believed ours (#887).
-                bound: Self.selfRaiseEchoWindow
-            ),
+            raiseFlightLive(flight, toward: focused.id),
+            !pressedSince(flight),
             owns(front: front, pid: flight.leftPID),
             !ignoredPanel.active.contains(front)
         else { return false }
@@ -123,19 +118,42 @@ extension KiwiCore {
         }
     }
 
-    /// Records the focus command's raise toward `id` and the app
+    /// The one liveness reading of a flight: its raise is in
+    /// flight as long as its echo is believed ours (#887).
+    private func raiseFlightLive(
+        _ flight: RaiseFlight,
+        toward id: WindowID
+    ) -> Bool {
+        flight.inFlight(
+            toward: id,
+            pending: pendingFocusRaise,
+            now: wallClock(),
+            bound: Self.selfRaiseEchoWindow
+        )
+    }
+
+    /// Whether the user pressed since the raise — a click is
+    /// their choice, never ours to override (#1161's escape).
+    private func pressedSince(_ flight: RaiseFlight) -> Bool {
+        guard let click = lastLeftClick else { return false }
+        return click.at > flight.raisedAt
+    }
+
+    /// Ends the flight at any app activation: the raise landed,
+    /// or the user switched apps — either way the preflight's
+    /// own clauses answer from here.
+    func endRaiseFlight() {
+        raiseFlight = nil
+    }
+
+    /// Records a `focusWindow` raise toward `id` and the app
     /// in front as it was issued — the app the raise leaves. A
     /// re-assert of a target still in flight keeps the record, or
     /// an app the user switched to since would read as the one
     /// left.
     func noteRaiseFlight(to id: WindowID) {
         if let flight = raiseFlight,
-            flight.inFlight(
-                toward: id,
-                pending: pendingFocusRaise,
-                now: wallClock(),
-                bound: Self.selfRaiseEchoWindow
-            )
+            raiseFlightLive(flight, toward: id)
         {
             return
         }

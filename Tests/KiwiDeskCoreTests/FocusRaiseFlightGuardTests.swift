@@ -245,4 +245,40 @@ struct FocusRaiseFlightGuardTests {
         _ = preflight(core, "focus")
         #expect(core.wakeFocusHealArmedAt == nil)
     }
+
+    /// The raise landed and the user went back to the app it
+    /// left: that activation ends the flight, so the press is
+    /// #292's refusal again.
+    @Test("An app activation ends the flight")
+    func activationEndsTheFlight() {
+        let core = makeCore()
+        raise(core, to: anchor)
+        core.eventLoop.onAppActivated(
+            AppActivation(
+                pid: previousPID,
+                bundleID: nil,
+                launchedAt: nil
+            )
+        )
+        #expect(core.raiseFlight == nil)
+        #expect(preflight(core, "focus")?.error == Self.generic)
+    }
+
+    @Test("A press after the raise refuses")
+    func pressSinceRaiseRefuses() {
+        let core = makeCore()
+        raise(core, to: anchor)
+        core.lastLeftClick = (
+            core.wallClock().addingTimeInterval(0.1),
+            .zero,
+            nil
+        )
+        #expect(preflight(core, "focus")?.error == Self.generic)
+        core.lastLeftClick = (
+            core.wallClock().addingTimeInterval(-0.1),
+            .zero,
+            nil
+        )
+        #expect(preflight(core, "focus") == nil)
+    }
 }

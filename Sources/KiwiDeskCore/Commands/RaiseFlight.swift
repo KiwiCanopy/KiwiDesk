@@ -1,10 +1,11 @@
 import Foundation
 
-/// The focus command's raise in flight (#1812): which window it
+/// A `focusWindow` raise in flight (#1812): which window it
 /// raises, the frontmost process when it was issued — the app
 /// the raise leaves — and when the raise was sent. The #292
 /// preflight reads it to let `focus` through while that app is
-/// still in front; it is never an echo ledger.
+/// still in front; any app activation ends it
+/// (`endRaiseFlight`), and it is never an echo ledger.
 struct RaiseFlight: Equatable {
     private(set) var target: WindowID
     let leftPID: pid_t

@@ -2662,16 +2662,18 @@ to stop in between.
 So `focus` alone passes the preflight while KiwiDesk's own raise
 toward the anchor is in flight — pending a scrolling pan, or sent
 within the self-raise echo window — and the app in front is still
-the managed app that raise LEFT, recorded when the focus command
-issued it. That is not the case #292 guards: the window `focus`
+the managed app that raise LEFT, recorded as `focusWindow`
+issued it, with no app activation and no press since. That is not the case #292 guards: the window `focus`
 acts from is the one KiwiDesk just raised, not a hidden one, and
 `focus` changes no window's content, size or membership — it
 moves state, pans to the target and raises.
 
 It is an order question, never a presence one. A fresh raise says
-nothing about whether the user switched apps since, so a switch
-to any other app, managed or not, keeps the refusal, as do an
-ignored panel, an unobserved app and a stale raise. The one-shot
+nothing about whether the user switched apps since, so any
+activation or click after the raise ends the bypass — a switch
+away and a switch back to the app the raise left alike — and an
+ignored panel, an unobserved app and a stale raise keep the
+refusal too. The one-shot
 wake heal (#1130) is asked first, so a wake payment macOS
 declined reseeds rather than riding the bypass.
 
