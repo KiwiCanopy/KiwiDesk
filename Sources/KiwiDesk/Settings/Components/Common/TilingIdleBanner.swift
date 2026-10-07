@@ -33,5 +33,11 @@ struct TilingIdleBanner: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(SettingsTheme.sunken)
         )
+        // The neutral fill barely parts from the page ground, so
+        // the edge carries the banner's shape.
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(SettingsTheme.hairline, lineWidth: 1)
+        )
     }
 }
