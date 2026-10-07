@@ -28,6 +28,9 @@ struct OnboardingGrantPhaseTests {
         LocalizationManager.shared.select("en")
         let model = OnboardingModel()
         model.isTrusted = trusted
+        // These states narrate an arrangement the user started;
+        // the not-started page is `StartTilingGateTests`'.
+        model.hasStartedTiling = trusted
         model.bootPhase = phase
         return OnboardingView(model: model)
     }

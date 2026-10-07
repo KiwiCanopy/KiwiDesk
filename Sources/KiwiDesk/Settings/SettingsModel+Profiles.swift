@@ -7,6 +7,16 @@ extension SettingsModel {
     /// Explains why profile saving is blocked when accessibility is disabled
     /// (#335, #516).
     var profileSaveBlockedReason: String? {
+        if tilingIdle, !permissionPaused {
+            // The core has not run, so no screen is known (#2050).
+            return L(
+                "profiles.save_blocked_idle",
+                "KiwiDesk isn't tiling yet, so no screens are "
+                    + "detected. Start tiling first — a profile "
+                    + "saved now would capture no screens and "
+                    + "never resolve."
+            )
+        }
         guard permissionPaused else { return nil }
         return L(
             "profiles.save_blocked_paused",

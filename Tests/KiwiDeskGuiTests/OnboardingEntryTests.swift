@@ -22,21 +22,43 @@ struct OnboardingEntryTests {
     @Test("a trusted replay skips the grant step")
     func trustedReplaySkipsGrant() {
         #expect(
-            OnboardingEntry.replayStep(isTrusted: true) == .spaces
+            OnboardingEntry.replayStep(
+                isTrusted: true,
+                hasStartedTiling: true
+            ) == .spaces
+        )
+    }
+
+    /// The grant page is where Start Tiling lives (#2050): a
+    /// replay that skipped it would open on spaces nothing has
+    /// arranged, with the one button that starts it out of reach.
+    @Test("a replay before Start Tiling opens on the grant step")
+    func idleReplayStartsAtGrant() {
+        #expect(
+            OnboardingEntry.replayStep(
+                isTrusted: true,
+                hasStartedTiling: false
+            ) == .grant
         )
     }
 
     @Test("an untrusted replay still opens on the grant step")
     func untrustedReplayStartsAtGrant() {
         #expect(
-            OnboardingEntry.replayStep(isTrusted: false) == .grant
+            OnboardingEntry.replayStep(
+                isTrusted: false,
+                hasStartedTiling: false
+            ) == .grant
         )
         // And the step it lands on is one the tour does not count
         // as having said anything — closing there must not mark
         // the discovery flag.
         #expect(
-            !OnboardingEntry.replayStep(isTrusted: false)
-                .isClosingBeat
+            !OnboardingEntry.replayStep(
+                isTrusted: false,
+                hasStartedTiling: false
+            )
+            .isClosingBeat
         )
     }
 }

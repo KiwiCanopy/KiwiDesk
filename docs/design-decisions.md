@@ -557,7 +557,9 @@ every draw, so light and dark still follow, and the shape alone
 still separates the mark for colour-vision deficiency. Nothing
 moves, so Reduce Motion has nothing to gate. It rides only the
 healthy glyphs, because a permission warning or a config error
-outranks an offer. The updates row is retitled in place — "Update
+outranks an offer — and so does a KiwiDesk not tiling yet
+(#2050), whose dimmed icon would otherwise carry a dot for an
+update to an app that is not doing anything. The updates row is retitled in place — "Update
 Available…" — rather than doubled: Sparkle's own door for
 bringing the waiting alert forward is `checkForUpdates`, the row's
 existing action, and `canCheckForUpdates` stays true while the
@@ -6952,6 +6954,45 @@ symbol that merely resembles it teaches the wrong shape. And the
 picture is a picture: it is not a control, it points at nothing
 off-window, and it needs no permission, no screen geometry and no
 guess about where the item ended up.
+
+### Granting Accessibility is not a request to tile (#2050)
+
+**[Principle]**
+
+**The permission and the start are two decisions, and only the
+second moves a window.** The grant step asks for what macOS
+needs; nothing is arranged until the user presses **Start
+Tiling**, which the grant page offers greyed beside Open System
+Settings and then as its default once the grant lands. A user
+who met KiwiDesk rearranging every open window the moment they
+flipped the switch read it as a bug and uninstalled, and nothing
+on screen offered a way back. Zero configuration is kept — the
+press asks for no choice — so "works at once" survives while
+"acts without asking" goes.
+
+The press is remembered in three states, not two. A first run
+records "not started" before the grant page appears; an install
+that predates the gate has no record at all, and is counted as
+started when it launches already trusted. A two-state flag would
+read a first run that granted, closed the tour and relaunched as
+the second kind, and tile without asking on the next launch —
+the report itself, one launch later. Once pressed, a revoke and
+re-grant resumes on its own: that user already said go.
+
+Closing the tour without pressing leaves KiwiDesk idle, and the
+start stays reachable without the tour: a **Start Tiling** row
+heads the quick menu, Settings carries a banner with the same
+button, and the menu-bar icon is drawn dimmed — the starting
+phase's treatment, so the icon reads "not doing anything yet"
+from launch to the end of boot. The warning triangle was ruled
+out because its words say "permission required", which would be
+false, and because it makes a choice look like a fault; the
+update dot was ruled out because #1013 gives it to offers. The
+idle state outranks that dot like the other states that do.
+
+Restoring the arrangement from before the start is a separate,
+undecided question (#2051): once nothing moves unasked, the
+surprise it would undo is gone.
 
 ### The tour's progress row is derived, never a fixed counter
 

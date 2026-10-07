@@ -686,6 +686,11 @@ the space list and Desktop bindings carry no monitor set, so
 **Save** still writes `gui.json` for them and keeps counting the
 layout edits until you grant access.
 
+:::unreleased
+The same holds before you press **Start Tiling** for the first
+time: until then KiwiDesk detects no displays either.
+:::
+
 Neither live save carries a keybinding override: to give a
 profile its own shortcuts, pick it in the banner while it isn't
 loaded and edit its Shortcuts & Gestures page.
@@ -1059,6 +1064,14 @@ triangle and the quick menu's **Window Management Paused…** row
 reopens the permission tour. Add KiwiDesk under System Settings ›
 Privacy & Security › Accessibility; management resumes on its
 own.
+
+:::unreleased
+**Permission granted, but nothing is tiled?**  
+Granting Accessibility does not start tiling on its own — the
+first time, you press **Start Tiling**, in the setup window, the
+quick menu or the banner at the top of Settings. Until then the
+menu bar icon is dimmed and your windows stay where they are.
+:::
 
 **Settings window won't open, or KiwiDesk seems stuck?**  
 Run `kiwidesk service restart` in a terminal, or quit and reopen

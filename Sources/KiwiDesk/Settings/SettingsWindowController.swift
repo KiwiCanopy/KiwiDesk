@@ -57,6 +57,16 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.permissionPaused = paused
     }
 
+    /// Sets whether the dashboard shows the not-tiling banner.
+    func setTilingIdle(_ idle: Bool) {
+        model.tilingIdle = idle
+    }
+
+    /// Routes the not-tiling banner's Start Tiling (#2050).
+    func setStartTiling(_ handler: @escaping () -> Void) {
+        model.onStartTiling = handler
+    }
+
     /// Routes welcome tour replay (#678).
     func setShowTour(_ handler: @escaping () -> Void) {
         model.onShowTour = handler

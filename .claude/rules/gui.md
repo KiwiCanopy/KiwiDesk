@@ -381,7 +381,8 @@ read-not-stored scan). The mark is a coloured NON-template
 composite — the owner ruled orange — whose handler resolves the
 bar's label colour at draw time; it is composited in `render()`
 alone, AFTER the states that outrank an offer — a permission
-warning, the starting phase, a config error — and on both
+warning, the not-started idle (#2050), the starting phase, a
+config error — and on both
 channels whether or not an image exists, since a mode icon that
 is no SF Symbol takes the title fallback; the updates row EXISTS
 only while an update was found — the pending reminder or the

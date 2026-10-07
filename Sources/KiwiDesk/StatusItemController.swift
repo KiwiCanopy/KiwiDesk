@@ -47,6 +47,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// (#1542), read from the updater's coordinator at every render.
     var whatsNewWaiting: String? { updater.whatsNew?.waiting?.version }
     var onShowAccessibilityHelp: () -> Void = {}
+    /// The Start Tiling row's action (#2050).
+    var onStartTiling: () -> Void = {}
     var onLoadProfile: (String) -> Void = { _ in }
     /// Saved profiles, pulled fresh each menu open; broken entries
     /// stay listed but disabled — greyed, not hidden (#246, #171).
@@ -72,6 +74,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// Distinct badge so the two causes never blur (§3.7); mutated
     /// only via `setConfigError`, the same rule as `warning`.
     private(set) var configError = false
+    /// Trusted but Start Tiling not pressed yet (#2050) — a choice,
+    /// never a fault, so it takes no warning glyph.
+    private(set) var tilingIdle = false
     /// The active layer and, while the Space Bar is off, the
     /// Space each screen shows (#1413); nil until Core publishes.
     private(set) var spaceMark: StatusSpaceMark?
@@ -94,6 +99,12 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// Sets missing-permission warning icon state.
     func setWarning(_ warning: Bool) {
         self.warning = warning
+        render()
+    }
+
+    /// Sets the not-started state (#2050).
+    func setTilingIdle(_ idle: Bool) {
+        tilingIdle = idle
         render()
     }
 
@@ -129,7 +140,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     private func render() {
         guard let button = item.button else { return }
-        button.appearsDisabled = starting
+        button.appearsDisabled = starting || tilingIdle
         if warning {
             setStatusSymbol(
                 "exclamationmark.triangle.fill",
@@ -143,6 +154,17 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                     "KiwiDesk needs Accessibility permission. "
                         + "Window management is paused."
                 )
+            )
+            return
+        }
+        if tilingIdle {
+            button.toolTip = L(
+                "menu.status.idle.tooltip",
+                "KiwiDesk isn't tiling yet — open the menu to start."
+            )
+            applyBrandIcon(
+                to: button,
+                a11y: L("menu.status.idle.a11y", "KiwiDesk (not tiling)")
             )
             return
         }
@@ -190,9 +212,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             )
         }
         // The mark, on both channels and in ONE place (#1013):
-        // after the early returns above, so a warning, the
-        // starting phase and a config error outrank an offer on
-        // the glyph AND the name.
+        // after the early returns above, so a warning, the idle
+        // state, the starting phase and a config error outrank an
+        // offer on the glyph AND the name.
         guard let mark = markNarration else { return }
         if let image = button.image {
             button.image = Self.badged(image)

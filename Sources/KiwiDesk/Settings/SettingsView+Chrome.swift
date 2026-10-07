@@ -24,6 +24,10 @@ extension SettingsView {
                 )
                 .padding(.horizontal, 12)
                 .padding(.top, 10)
+            } else if model.tilingIdle {
+                TilingIdleBanner(onStart: model.onStartTiling)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 10)
             }
             if let trail = model.whatsNewTrail {
                 WhatsNewTrailBanner(

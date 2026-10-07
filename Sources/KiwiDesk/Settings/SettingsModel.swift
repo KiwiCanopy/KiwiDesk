@@ -222,6 +222,11 @@ final class SettingsModel: ObservableObject {
     /// True when macOS Accessibility is missing; drives
     /// `PermissionPausedBanner`.
     @Published var permissionPaused = false
+    /// Trusted, but Start Tiling not pressed yet; drives
+    /// `TilingIdleBanner` (#2050).
+    @Published var tilingIdle = false
+    /// Routes the idle banner's Start Tiling.
+    var onStartTiling: () -> Void = {}
     /// The way back to a hidden What's new after a spotlight row's
     /// "Show me"; drives `WhatsNewTrailBanner` (#2038).
     @Published var whatsNewTrail: WhatsNewTrail?
