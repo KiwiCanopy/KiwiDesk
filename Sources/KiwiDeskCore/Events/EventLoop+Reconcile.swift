@@ -16,13 +16,16 @@ extension EventLoop {
     /// `reconcileAll` (native-Space switch / reload / wake), where
     /// same-app windows across spaces tile to identical frames and
     /// must not merge (#308). `prefetched` is a list read off
-    /// the main actor (`reconcileOffMain`, #1930).
+    /// the main actor (`reconcileOffMain`, #1930). False only
+    /// where `prefetched` skipped a hidden app's list and the live
+    /// seam says unhidden: nothing was swept, and a read is owed.
+    @discardableResult
     func reconcile(
         pid: pid_t,
         app: AppRef,
         coalesceTabs: Bool = true,
         prefetched: PrefetchedWindows? = nil
-    ) {
+    ) -> Bool {
         // Per-app timing (#672): mirrors `attach` — the window
         // list and warmup below are the same blocking AX calls,
         // and the startup sweep runs this for every app.
@@ -54,7 +57,7 @@ extension EventLoop {
             )
         else {
             detach(pid: pid, restoreEnhancedUI: true)
-            return
+            return true
         }
         // A fresh-launch app can refuse the app-level
         // notification adds and then sit silent forever (#675).
@@ -73,7 +76,8 @@ extension EventLoop {
         // held their tiles until the app quit.
         //
         // Deliberately the one path that reaches the sweep
-        // WITHOUT reading the window list, where every abort
+        // WITHOUT reading the window list — the off-main read
+        // skips it for a hidden app (#2027) — where every abort
         // below returns before it. The reasons do not collide:
         // an abort holds a partial list, and sweeping one would
         // untrack whatever it never reached, while "hidden"
@@ -112,8 +116,11 @@ extension EventLoop {
                 coalesceTabs: false,
                 hidden: true
             )
-            return
+            return true
         }
+        // A list skipped for a hide is no answer about any window,
+        // so an unhide during that read sweeps nothing (#2027).
+        guard prefetched?.listRead != false else { return false }
         let isAccessory = Self.classifiesAsOverlay(
             pid: pid,
             activationPolicy: activationPolicy
@@ -147,7 +154,7 @@ extension EventLoop {
                     ref: app,
                     spentMs: budget.spentMs
                 )
-                return
+                return true
             }
             // A cold app may not answer the baseline EUI read at
             // attach time. Retry on later reconciles until one
@@ -174,7 +181,7 @@ extension EventLoop {
                     ref: app,
                     spentMs: budget.spentMs
                 )
-                return
+                return true
             }
             let resolved: WindowID? =
                 if let read { read.id } else { resolveWindowID(element) }
@@ -296,5 +303,6 @@ extension EventLoop {
         ) {
             deferBootWork(pid: pid, ref: app, spentMs: budget.spentMs)
         }
+        return true
     }
 }

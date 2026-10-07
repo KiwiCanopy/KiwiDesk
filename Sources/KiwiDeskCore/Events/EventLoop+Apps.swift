@@ -132,7 +132,8 @@ extension EventLoop {
     /// The two directions are not equally reliable, though, and
     /// the asymmetry belongs here rather than in `reconcile`,
     /// because this is where the single arm is claimed. Hiding
-    /// is a total answer needing no AX at all. Unhiding depends
+    /// is a total answer needing no AX at all, so its off-main
+    /// read skips the list (#2027). Unhiding depends
     /// on a window-list read that can race a cold tree, so it
     /// is the direction that leans on a backstop — the
     /// census-gated heal, which sees the app again the moment
@@ -149,9 +150,9 @@ extension EventLoop {
     /// the direction from the notification is safe: measured on
     /// device (2026-08-22, macOS 26.6.2), the flag already
     /// reads its settled value when its own notification
-    /// fires, in both directions. The list is read off the main
-    /// actor (#2027), and only the live seam, asked as the
-    /// reading applies, may say hidden (#1936).
+    /// fires, in both directions. Only the live seam, asked as
+    /// the reading applies, may say hidden (#1936); a skipped
+    /// list meeting an unhide is answered by a read that lists.
     ///
     /// Descriptor-shaped, like `runningApplications`: a test
     /// cannot build an `NSRunningApplication` for a made-up pid,

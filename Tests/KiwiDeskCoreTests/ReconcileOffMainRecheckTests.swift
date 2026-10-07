@@ -118,6 +118,7 @@ struct ReconcileOffMainRecheckTests {
         loop.appHideChanged(pid: pid, ref: ref)
         #expect(box.listReads == 0, "hide read inline (#2027)")
         box.read()
+        #expect(box.listReads == 0, "a hidden app's list was read")
         // The reading saw the app hidden; the unhide lands before
         // it applies, and only the live seam may say hidden.
         box.hidden = false
@@ -126,6 +127,32 @@ struct ReconcileOffMainRecheckTests {
         #expect(box.hiddenEvents.isEmpty)
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[id] != nil)
+        #expect(box.listReads == 1)
+    }
+
+    @Test("a skipped list meeting an unhide sweeps nothing")
+    func skippedListOwesAListingRead() {
+        // No unhide request parks behind the read here, so the
+        // apply itself owes the read that lists, and what waited
+        // on the skipped one waits for it.
+        let loop = EventLoop()
+        let box = Box()
+        wire(loop, box)
+        var settled = 0
+        box.hidden = true
+        loop.reconcileOffMain(pid: pid, app: ref) { settled += 1 }
+        box.read()
+        box.hidden = false
+        box.deliver()
+        #expect(box.destroyed.isEmpty, "an empty skip was swept")
+        #expect(box.hiddenEvents.isEmpty)
+        #expect(settled == 0, "ran before a listing read")
+        #expect(!box.reads.isEmpty, "no listing read owed")
+        box.drain()
+        #expect(box.listReads == 1)
+        #expect(settled == 1)
+        #expect(loop.elements[pid]?[id] != nil)
+        #expect(box.destroyed.isEmpty)
     }
 
     @Test("a hide landing mid-read is applied by the read after")

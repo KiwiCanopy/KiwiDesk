@@ -279,12 +279,12 @@ struct HiddenAppWindowTests {
         // the gesture rather than whenever something else
         // happens to reconcile the app.
         //
-        // The hidden half reads a hide EFFECT, not the absence
-        // of a window read: `windowQueries == 1` after the hide
-        // is satisfied identically by the wired arm, by an arm
-        // that returned early, and by a reconcile that skipped
-        // the sweep — three states the test claims to tell
-        // apart. Only the emitted event does.
+        // The hidden half reads a hide EFFECT as well as the
+        // absence of a window read: an unchanged `windowQueries`
+        // is also what an arm that returned early leaves, so
+        // only the emitted event tells the wired arm apart. The
+        // count pins that the off-main read skips the list for a
+        // hidden app (#2027).
         let (loop, box) = makeLoop()
         var work: [@Sendable () -> Void] = []
         loop.axReads.deliver = { run in
@@ -305,6 +305,7 @@ struct HiddenAppWindowTests {
         #expect(box.hiddenEvents.isEmpty, "hide read inline (#2027)")
         drain()
         #expect(box.hiddenEvents == [WindowID(11)])
+        #expect(box.windowQueries == 1, "a hide listed (#2027)")
     }
 
     @Test("an unobserved app's hide reconciles nothing")

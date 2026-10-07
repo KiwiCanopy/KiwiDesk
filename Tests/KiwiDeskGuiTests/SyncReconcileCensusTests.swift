@@ -34,7 +34,11 @@ struct SyncReconcileCensusTests {
         // Boot's pass (#801/#803); its deferred completion reads
         // off main (#1795).
         "Events/EventLoop+BootScan.swift": 1,
-        // The adoption heal (#675).
+        // The adoption heal (#675): `settleHeal` reads what the
+        // reconcile adopted in the same turn to rule each missing
+        // id quiet, and the sweep replaces the quiet ledger whole.
+        // Its gate admits only an app the census shows with an
+        // untracked window.
         "Events/EventLoop+Heal.swift": 2,
         // The Desktop-switch bulk pass (#308).
         "Events/EventLoop+ReconcileAll.swift": 2,
