@@ -27,10 +27,11 @@ extension AppBarItemView {
     /// does not show all of it (#1514's ruling).
     var hidesText: Bool { titleCut || !drawsTextInFull }
 
-    /// What the peek shows for this item: its windows, where it
-    /// hides text; nil where it draws everything already.
+    /// What the peek shows for this item: a group's windows,
+    /// always, as a multi-window glyph's (owner, #1946); a single
+    /// item's window where it hides text (#1514); nil else.
     var peekSource: BarPeekSource? {
-        hidesText ? .appItem(members) : nil
+        count > 1 || hidesText ? .appItem(members) : nil
     }
 
     /// Reports the pointer's reading to the peek — every hover

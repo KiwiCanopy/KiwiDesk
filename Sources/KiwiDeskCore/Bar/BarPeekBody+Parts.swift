@@ -87,6 +87,11 @@ final class BarPeekPill: NSView {
         layer?.backgroundColor =
             NSColor(kiwiHex: shelf.groupBadgeColor).cgColor
         layer?.cornerRadius = M.pillHeight / 2
+        // A ring in the row hairlines' ink, so the pill holds its
+        // edge on a ground near the badge fill (owner, device).
+        layer?.borderWidth = M.pillRing
+        layer?.borderColor =
+            BarDivider.color(textColor: shelf.itemColor).cgColor
         glyph.image = NSImage(
             systemSymbolName: "macwindow",
             accessibilityDescription: nil

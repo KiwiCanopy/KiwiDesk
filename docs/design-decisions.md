@@ -12473,7 +12473,10 @@ delay, and listed the same windows the click menu lists in
 another face, so two surfaces fought over one list. The peek is
 the list in the bar's face; the menu is its actionable version,
 and a press turns one into the other: the peek closes on the
-press, and a multi-window glyph's menu opens where it stood.
+press, and a multi-window glyph's menu opens at the peek's own
+top-left corner — computed whether a peek showed or not — so its
+rows land where the peek's rows were. The peek centres on its
+item, opening away from the bar's edge.
 
 What it shows is ruled whole: the app on top, smaller and
 semibold like the menu's section header, so the peek reads as the
@@ -12481,20 +12484,23 @@ menu before a click, a step under the titles in ink — the item
 ink at three quarters of its alpha, DERIVED the way the empty
 Space ink is: the step is taken only where it holds the idle
 floor on both grounds the peek draws on, and a palette that
-cannot hold it, a user's own included, keeps the full ink; one row per window, hairlines between, so a title that
+cannot hold it, a user's own included, keeps the full ink; one
+row per window, hairlines between, so a title that
 wraps still reads as one window; every window counted, an
 untitled one as the menu names it, while a lone window titled
 exactly as its app shows the header alone rather than the same
-word twice; the count as a window glyph and a
-bare number in the bar's own badge pill, only from two windows,
-so it needs no word and no plural; titles wrapped whole, since the peek exists to show what
+word twice; the count as a window glyph and a bare number in the
+bar's own badge pill, ringed in the hairlines' ink so it holds its
+edge on any ground, only from two windows, so it needs no word and
+no plural; titles wrapped whole, since the peek exists to show what
 the bar cuts. `+n` mixes apps, so its groups carry their icons.
 The face is the bar's, at one fixed reading size: the strip-depth
 ladders would shrink it with a thin bar, which is where the peek
-is most needed. An App Bar item that hides its text peeks every
-window it stands for, so a collapsed group lists each member's
-title with the count — where #1514's tooltip named the app alone:
-every window counts.
+is most needed. An App Bar GROUP always peeks every window it
+stands for, as a multi-window glyph does, since its name hides
+the windows whether or not it is drawn whole — where #1514's
+tooltip named the app alone; a single App Bar item still peeks
+only where it hides its title (#1514).
 
 The peek's glass takes ONE tint over its whole height, the ruled
 exception to the fade a detached surface takes (#1620): the bars'

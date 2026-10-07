@@ -44,18 +44,10 @@ final class BarPeekPanel {
         // The one place the stored shelf becomes the drawn one
         // (#1374): glass stands down while transparency is reduced.
         let shelf = LiquidGlassGate.rendered(stored)
-        let size = Self.capped(
-            body.build(
-                content,
-                shelf: shelf,
-                maxHeight: Self.room(
-                    edge: edge,
-                    strip: strip,
-                    visible: visible
-                ),
-                // The cut is at the far edge from the bar.
-                cutAtTop: edge == .bottom
-            ),
+        let size = Self.fittedSize(
+            of: body,
+            content,
+            shelf: shelf,
             edge: edge,
             strip: strip,
             visible: visible
@@ -134,9 +126,34 @@ final class BarPeekPanel {
         return max(room, 0)
     }
 
+    /// `content` laid out in `body` within the room on the far
+    /// side of the strip, the panel's size — the one measure the
+    /// show and the menu's anchor (`BarPeek.topLeft`) both take.
+    static func fittedSize(
+        of body: BarPeekBody,
+        _ content: BarPeekContent,
+        shelf: KiwiShelf,
+        edge: AppBarEdge,
+        strip: CGRect,
+        visible: CGRect
+    ) -> CGSize {
+        capped(
+            body.build(
+                content,
+                shelf: shelf,
+                maxHeight: room(edge: edge, strip: strip, visible: visible),
+                // The cut is at the far edge from the bar.
+                cutAtTop: edge == .bottom
+            ),
+            edge: edge,
+            strip: strip,
+            visible: visible
+        )
+    }
+
     /// Where the panel opens: across the strip from the bar's
-    /// edge, a gap off it, leading-aligned with the item and kept
-    /// inside the usable area.
+    /// edge, a gap off it, centred on the item (owner, device) and
+    /// kept inside the usable area.
     nonisolated static func origin(
         size: CGSize,
         edge: AppBarEdge,
@@ -149,23 +166,23 @@ final class BarPeekPanel {
         switch edge {
         case .top:
             point = CGPoint(
-                x: anchor.minX - M.padH,
+                x: anchor.midX - size.width / 2,
                 y: strip.minY - M.stripGap - size.height
             )
         case .bottom:
             point = CGPoint(
-                x: anchor.minX - M.padH,
+                x: anchor.midX - size.width / 2,
                 y: strip.maxY + M.stripGap
             )
         case .left:
             point = CGPoint(
                 x: strip.maxX + M.stripGap,
-                y: anchor.maxY + M.padV - size.height
+                y: anchor.midY - size.height / 2
             )
         case .right:
             point = CGPoint(
                 x: strip.minX - M.stripGap - size.width,
-                y: anchor.maxY + M.padV - size.height
+                y: anchor.midY - size.height / 2
             )
         }
         let margin = M.screenMargin
@@ -177,7 +194,9 @@ final class BarPeekPanel {
             max(point.y, screen.minY + margin),
             max(screen.maxY - margin - size.height, screen.minY + margin)
         )
-        return point
+        // Whole points, as AppKit frames a window, so the menu the
+        // click opens (`BarPeek.topLeft`) lands on the peek's corner.
+        return CGPoint(x: point.x.rounded(), y: point.y.rounded())
     }
 
     private func paint(_ shelf: KiwiShelf, edge: AppBarEdge, size: CGSize) {

@@ -14,12 +14,14 @@ final class BarPeekBody: NSView {
         static let textSize: CGFloat = 13
         /// The header's size: the menus' section header.
         static let headerSize: CGFloat = 11
-        static let countSize: CGFloat = 10.5
-        static let pillHeight: CGFloat = 16
-        static let pillPad: CGFloat = 5
+        static let countSize: CGFloat = 11.5
+        static let pillHeight: CGFloat = 18
+        static let pillPad: CGFloat = 6
         /// The window glyph before the count, and its gap to it.
-        static let pillGlyphSize: CGFloat = 9
-        static let pillGlyphGap: CGFloat = 2
+        static let pillGlyphSize: CGFloat = 11
+        static let pillGlyphGap: CGFloat = 3
+        /// The pill's ring, in the hairlines' ink.
+        static let pillRing: CGFloat = 1
         /// The whole panel's widest; a title wraps inside it.
         static let maxWidth: CGFloat = 280
         static let padH: CGFloat = 12

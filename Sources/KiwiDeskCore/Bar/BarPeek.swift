@@ -198,10 +198,47 @@ final class BarPeek {
             edge: anchor.edge,
             anchor: frame,
             strip: window.frame,
-            visible: window.screen.map(GeometryUtils.visibleFrame(of:))
-                ?? window.frame,
+            visible: Self.visible(of: window),
             fades: fades
         )
+    }
+
+    /// Where the peek's top-left corner stands, or would, for
+    /// `anchor` — in screen coordinates — so the menu a click opens
+    /// lays its rows where the peek's were (owner, device). Read
+    /// whether a peek shows or not.
+    func topLeft(
+        for anchor: NSView,
+        source: BarPeekSource,
+        edge: AppBarEdge
+    ) -> CGPoint? {
+        guard let window = anchor.window,
+            let frame = Self.screenFrame(of: anchor),
+            let content = content(source), !content.groups.isEmpty,
+            let shelf = shelf(window)
+        else { return nil }
+        let visible = Self.visible(of: window)
+        let size = BarPeekPanel.fittedSize(
+            of: BarPeekBody(),
+            content,
+            shelf: shelf,
+            edge: edge,
+            strip: window.frame,
+            visible: visible
+        )
+        let origin = BarPeekPanel.origin(
+            size: size,
+            edge: edge,
+            anchor: frame,
+            strip: window.frame,
+            visible: visible
+        )
+        return CGPoint(x: origin.x, y: origin.y + size.height)
+    }
+
+    /// The usable area of `window`'s screen.
+    private static func visible(of window: NSWindow) -> CGRect {
+        window.screen.map(GeometryUtils.visibleFrame(of:)) ?? window.frame
     }
 
     /// The view's frame on screen; nil off a shown window.

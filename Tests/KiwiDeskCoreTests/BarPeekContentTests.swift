@@ -205,6 +205,12 @@ struct BarPeekContentTests {
         #expect(pill.glyph.image != nil)
         #expect(pill.glyph.frame.maxX <= pill.number.frame.minX)
         #expect(pill.frame.height == BarPeekBody.Metrics.pillHeight)
+        // A ring in the hairlines' ink, the one rule colour.
+        #expect(pill.layer?.borderWidth == BarPeekBody.Metrics.pillRing)
+        #expect(
+            pill.layer?.borderColor
+                == BarDivider.color(textColor: shelf.itemColor).cgColor
+        )
         // Two between A's three windows, one between the apps.
         #expect(body.rules.count == 3)
         #expect(
@@ -255,8 +261,9 @@ struct BarPeekContentTests {
 
     // MARK: - Placement
 
-    /// Opens away from the bar's edge, across the strip and off it.
-    @Test("It opens away from the bar's edge, on its screen")
+    /// Opens away from the bar's edge, across the strip and off it,
+    /// centred on its item (owner, device).
+    @Test("It opens away from the bar's edge, centred, on its screen")
     func opensAwayFromTheEdge() {
         let screen = CGRect(x: 0, y: 0, width: 1440, height: 900)
         let size = CGSize(width: 200, height: 80)
@@ -270,6 +277,7 @@ struct BarPeekContentTests {
             visible: screen
         )
         #expect(below.y + size.height <= top.minY)
+        #expect(below.x + size.width / 2 == anchor.midX)
         let bottom = CGRect(x: 0, y: 0, width: 1440, height: 40)
         let above = BarPeekPanel.origin(
             size: size,
@@ -279,6 +287,7 @@ struct BarPeekContentTests {
             visible: screen
         )
         #expect(above.y >= bottom.maxY)
+        #expect(above.x + size.width / 2 == 310)
         let left = CGRect(x: 0, y: 0, width: 40, height: 900)
         let beside = BarPeekPanel.origin(
             size: size,
@@ -288,6 +297,7 @@ struct BarPeekContentTests {
             visible: screen
         )
         #expect(beside.x >= left.maxX)
+        #expect(beside.y + size.height / 2 == 410)
         // An item at the screen's end keeps the peek on screen.
         let edge = BarPeekPanel.origin(
             size: size,

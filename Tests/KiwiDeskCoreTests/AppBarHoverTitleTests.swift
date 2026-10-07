@@ -85,7 +85,7 @@ struct AppBarHoverTitleTests {
         return view
     }
 
-    @Test("A fully drawn title owes no peek; hidden text does")
+    @Test("A whole title owes no peek; hidden text and a group do")
     func onlyHiddenTextAsks() throws {
         let core = core(title: "Downloads")
         let shown = try item(core)
@@ -94,6 +94,31 @@ struct AppBarHoverTitleTests {
         let cut = try item(core, titleCut: true)
         #expect(cut.peekSource == .appItem([WindowID(1)]))
         #expect(titles(core, cut.peekSource) == ["Downloads"])
+        // A group peeks its windows even with its name drawn whole,
+        // as a multi-window glyph does (owner, #1946).
+        core.state.apply(
+            .windowCreated(titledWindow(2, app: "Finder", title: "Desktop"))
+        )
+        core.appBars.sync([
+            paintedAppBar(
+                items: [
+                    AppBarOverlay.Item(
+                        id: WindowID(1),
+                        text: "Finder",
+                        icon: nil,
+                        count: 2,
+                        members: [WindowID(1), WindowID(2)]
+                    )
+                ]
+            )
+        ])
+        let overlay = try #require(
+            core.appBars.overlayForTesting(barTitleDisplay)
+        )
+        let group = try #require(overlay.itemViews.first)
+        group.layout()
+        #expect(group.drawsTextInFull)
+        #expect(group.peekSource == .appItem([WindowID(1), WindowID(2)]))
     }
 
     @Test("A vertical bar's item draws no label and owes the title")

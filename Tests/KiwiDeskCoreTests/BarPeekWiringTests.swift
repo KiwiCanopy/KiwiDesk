@@ -171,6 +171,35 @@ struct BarPeekWiringTests {
         var value: Bool?
     }
 
+    /// The menu a click opens pops where the peek's top-left
+    /// stands, shown or not, so its rows land where the peek's were
+    /// (owner, device).
+    @Test("The glyph menu opens at the peek's top-left")
+    func menuOpensAtThePeek() throws {
+        let core = seededCore()
+        let steps = Steps()
+        defer { close(core) }
+        let (item, web) = try hovered(core, steps: steps)
+        let window = try #require(web.window)
+        let expected = try #require(
+            core.shelves.peek.topLeft(
+                for: web,
+                source: web.peekSource,
+                edge: item.style.edge
+            )
+        )
+        let closed = try #require(SpaceBarGlyphActions.contextEvent(at: web))
+        #expect(
+            window.convertPoint(toScreen: closed.locationInWindow) == expected
+        )
+        steps.run()
+        let panel = try #require(core.shelves.peek.panel.panel)
+        #expect(
+            CGPoint(x: panel.frame.minX, y: panel.frame.maxY) == expected,
+            "the shown peek stands where the menu will"
+        )
+    }
+
     /// A shelf the bars stop drawing on — a fullscreen stand-down,
     /// the bars turned off, its display gone — takes its peek with
     /// it; the panel joins every Space and would stay up over the

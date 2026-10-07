@@ -564,7 +564,8 @@ Obligations:
   the refresh gate above no arm only because nothing caches it;
   a view that keeps a title brings back the stale one with no
   gate watching (`SpaceBarGlyphWiringTests` ▸ `peekIsReadAtShow`,
-  `AppBarHoverTitleTests` ▸ `peekIsReadAtShow`). An App Bar item
+  `AppBarHoverTitleTests` ▸ `peekIsReadAtShow`). An App Bar group
+  always asks, as a multi-window glyph does; a single App Bar item
   asks only where it hides text — Core's cut verdict
   (`barItemTitle`, the one branch the item text also takes) or a
   label it did not draw in full (#1514). No bar view registers

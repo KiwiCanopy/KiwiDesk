@@ -37,17 +37,23 @@ final class SpaceBarGlyphActions {
         NSMenu.popUpContextMenu(menu, with: event, for: anchor)
     }
 
-    /// A context-menu event at `anchor`'s lower-left corner, so the
-    /// menu opens at the cell whatever input picked it.
+    /// A context-menu event where the peek's top-left corner
+    /// stands for `anchor` — so the menu's rows land where the
+    /// peek's were (#1946) — or at `anchor`'s lower-left corner for
+    /// a view no peek reads, so the menu opens at the cell whatever
+    /// input picked it.
     static func contextEvent(at anchor: NSView) -> NSEvent? {
         guard let window = anchor.window else { return nil }
         let corner = NSPoint(
             x: 0,
             y: anchor.isFlipped ? anchor.bounds.maxY : 0
         )
+        let location =
+            peekTopLeft(of: anchor).map(window.convertPoint(fromScreen:))
+            ?? anchor.convert(corner, to: nil)
         return NSEvent.mouseEvent(
             with: .rightMouseDown,
-            location: anchor.convert(corner, to: nil),
+            location: location,
             modifierFlags: [],
             timestamp: 0,
             windowNumber: window.windowNumber,
@@ -55,6 +61,22 @@ final class SpaceBarGlyphActions {
             eventNumber: 0,
             clickCount: 1,
             pressure: 1
+        )
+    }
+}
+
+extension SpaceBarGlyphActions {
+    /// The peek's top-left for a glyph target, as the peek would
+    /// stand at it; nil for any other view.
+    static func peekTopLeft(of anchor: NSView) -> CGPoint? {
+        guard let target = anchor as? SpaceBarGlyphTarget,
+            let item = target.superview as? SpaceBarItemView,
+            let peek = target.actions?.peek
+        else { return nil }
+        return peek.topLeft(
+            for: target,
+            source: target.peekSource,
+            edge: item.style.edge
         )
     }
 }
