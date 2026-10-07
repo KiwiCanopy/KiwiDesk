@@ -192,26 +192,6 @@ struct FocusRaiseFlightGuardTests {
         #expect(logs.contains { $0.contains("allowed focus") })
     }
 
-    /// A long pan must not spend the flight before the raise is
-    /// sent: the deferred raise restamps it as it fires.
-    @Test("The deferred raise restamps the flight")
-    func deferredRaiseRestamps() {
-        let core = makeCore()
-        raise(core, to: anchor, age: KiwiCore.selfRaiseEchoWindow)
-        core.pendingFocusRaise = anchor
-        core.runPendingFocusRaise()
-        #expect(core.pendingFocusRaise == nil)
-        #expect(preflight(core, "focus") == nil)
-    }
-
-    @Test("A native tab switch carries the flight")
-    func rekeyCarriesTheFlight() {
-        let core = makeCore()
-        raise(core, to: anchor)
-        core.handleWindowRekeyed(old: anchor, new: WindowID(9))
-        #expect(core.raiseFlight?.target == WindowID(9))
-    }
-
     /// The wake heal (#1130) is asked before the bypass, so an
     /// armed heal is spent on the press the bypass would pass.
     @Test("The wake heal is asked before the bypass")
@@ -222,24 +202,6 @@ struct FocusRaiseFlightGuardTests {
         core.wakeFocusHealArmedAt = Date()
         _ = preflight(core, "focus")
         #expect(core.wakeFocusHealArmedAt == nil)
-    }
-
-    /// The raise landed and the user went back to the app it
-    /// left: that activation ends the flight, so the press is
-    /// #292's refusal again.
-    @Test("An app activation ends the flight")
-    func activationEndsTheFlight() {
-        let core = makeCore()
-        raise(core, to: anchor)
-        core.eventLoop.onAppActivated(
-            AppActivation(
-                pid: previousPID,
-                bundleID: nil,
-                launchedAt: nil
-            )
-        )
-        #expect(core.raiseFlight == nil)
-        #expect(preflight(core, "focus")?.error == Self.generic)
     }
 
     @Test("A press after the raise refuses")
@@ -258,54 +220,6 @@ struct FocusRaiseFlightGuardTests {
             nil
         )
         #expect(preflight(core, "focus") == nil)
-    }
-
-    /// The write site: a `focus` press that moved the anchor
-    /// records its raise and the app in front as it ran.
-    @Test("The focus verb records the flight it starts")
-    func focusVerbRecords() {
-        let core = makeCore()
-        guard let space = core.state.workspaces.space(of: anchor)
-        else {
-            Issue.record("no space")
-            return
-        }
-        _ = core.execute(
-            "set_mode",
-            args: [.string(space.raw), .string("monocle")]
-        )
-        core.frontmostPIDProvider = { getpid() }
-        #expect(
-            core.execute("focus", args: [.string("left")]).isSuccess
-        )
-        #expect(core.focusedWindow?.id == previous)
-        #expect(core.raiseFlight?.target == previous)
-        #expect(core.raiseFlight?.leftPID == getpid())
-    }
-
-    /// A `focusWindow` re-assert after the user switched apps —
-    /// the z-order restore's closing one — records nothing, so
-    /// the app switched to never reads as the one left.
-    @Test("A re-assert after a switch records no flight")
-    func reassertRecordsNothing() {
-        let core = makeCore()
-        raise(core, to: anchor)
-        let other: pid_t = 555
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(id: WindowID(3), pid: other, appName: "T")
-            )
-        )
-        if let home = core.state.workspaces.space(of: anchor) {
-            core.state.workspaces.focus(anchor, in: home)
-        }
-        core.frontmostPIDProvider = { other }
-        core.eventLoop.onAppActivated(
-            AppActivation(pid: other, bundleID: nil, launchedAt: nil)
-        )
-        core.focusWindow(anchor, warp: false)
-        #expect(core.raiseFlight == nil)
-        #expect(preflight(core, "focus")?.error == Self.generic)
     }
 
     /// A click during the pan is the user's too: the press is

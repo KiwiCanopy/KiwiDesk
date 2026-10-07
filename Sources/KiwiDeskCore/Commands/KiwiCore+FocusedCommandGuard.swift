@@ -149,13 +149,15 @@ extension KiwiCore {
 
     /// The `focus` verb: navigates, and records the raise it
     /// started with the app in front as the press ran — the app
-    /// the raise leaves. A press that moved nothing records
-    /// nothing.
+    /// the raise leaves. The target is the focus a Monocle flip
+    /// still owes, or else the anchor (#1391); a press that moved
+    /// nothing records nothing.
     func focusRecordingFlight(_ args: [JSONValue]) -> CommandResponse {
         let front = frontmostPIDProvider?()
         let before = focusedWindowID
         let response = navigate(args, swapping: false)
-        if let front, let after = focusedWindowID, after != before {
+        let after = pendingMonocleFocus?.to ?? focusedWindowID
+        if let front, let after, after != before {
             raiseFlight = RaiseFlight(
                 target: after,
                 leftPID: front,
