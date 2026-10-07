@@ -58,11 +58,12 @@ extension AppBarItemView {
         )
     }
 
+    /// An idle item's text takes the Space Bar's idle ink (#1938).
     var textColorHex: String {
         if isHovered { return style.hoverItemColor }
         return isActive
             ? style.activeItemColor
-            : style.itemColor
+            : style.idleItemColor
     }
 
     /// Whether a box background should be painted
