@@ -31,9 +31,9 @@ struct SyncReconcileCensusTests {
         // The off-main door itself: an unobserved app, and the
         // apply of the list read.
         "Events/EventLoop+ReconcileOffMain.swift": 2,
-        // Boot's pass and its deferred completion (#801/#803).
+        // Boot's pass (#801/#803); its deferred completion reads
+        // off main (#1795).
         "Events/EventLoop+BootScan.swift": 1,
-        "App/KiwiCore+Boot.swift": 1,
         // The adoption heal (#675).
         "Events/EventLoop+Heal.swift": 2,
         // The Desktop-switch bulk pass (#308).
@@ -72,6 +72,24 @@ struct SyncReconcileCensusTests {
             counts == allowed,
             "census and tree disagree: \(counts)"
         )
+    }
+
+    /// The boot drain left the census for the off-main door
+    /// (#1795), and must keep the bulk shape it had (#308) — its
+    /// behaviour suite lists no windows, so only the call says so.
+    @Test("the boot drain reads off main with the bulk shape")
+    func bootDrainKeepsTheBulkShape() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
+            )
+        let source = try SourceScan.strippedSource(at: file)
+        let call =
+            "self.eventLoop.reconcileOffMain(\n"
+            + "                pid: pid,\n"
+            + "                app: ref,\n"
+            + "                coalesceTabs: false\n"
+        #expect(source.components(separatedBy: call).count - 1 == 1)
     }
 
     @Test("the needle matches the call shapes it names")

@@ -37,6 +37,9 @@ struct BootPhaseTests {
         var windowQueries = 0
         var clock = ContinuousClock.now
         var step: Duration = .milliseconds(10)
+        /// Off-main list reads, run at once unless `holdReads`.
+        var reads: [@Sendable () -> Void] = []
+        var holdReads = false
     }
 
     private func makeCore(
@@ -84,6 +87,12 @@ struct BootPhaseTests {
         loop.monotonicNow = {
             box.clock = box.clock.advanced(by: box.step)
             return box.clock
+        }
+        loop.axReads.deliver = { work in
+            MainActor.assumeIsolated { work() }
+        }
+        loop.axReads.dispatchOverride = { _, work in
+            if box.holdReads { box.reads.append(work) } else { work() }
         }
         return (core, box)
     }
@@ -226,5 +235,57 @@ struct BootPhaseTests {
                 $0.hasPrefix("deferred app: slow.two")
             }
         )
+    }
+
+    /// #1795: the completion reads its app's list off the main
+    /// actor, and the app stays queued while that read is out, so
+    /// a second drain joins the chain rather than starting one.
+    @Test("a deferred app's list is read off main, one chain at a time")
+    func aDeferredAppReadsOffMain() async {
+        let (core, box) = makeCore(apps: 0)
+        defer {
+            core.deferred.cancelAll()
+            core.eventLoop.stop()
+        }
+        #expect(core.eventLoop.beginScan())
+        core.eventLoop.scanChunk(budget: nil)
+        let first: pid_t = 671_011
+        let second: pid_t = 671_012
+        for pid in [first, second] {
+            core.eventLoop.attach(
+                pid: pid,
+                activationPolicy: .regular,
+                ref: AppRef(bundleID: "slow", name: "Slow"),
+                scanWindowsAtAttach: false
+            )
+        }
+        box.windowQueries = 0
+        box.holdReads = true
+
+        core.drainDeferredBootApps([
+            (first, AppRef(bundleID: "slow.one", name: "One"))
+        ])
+        await core.deferred.task(for: .deferredBootApps)?.value
+        // Asked, not read: the main actor never waited on the app.
+        #expect(box.reads.count == 1)
+        #expect(box.windowQueries == 0)
+        #expect(core.eventLoop.bootScan.pendingDrain.count == 1)
+
+        core.drainDeferredBootApps([
+            (second, AppRef(bundleID: "slow.two", name: "Two"))
+        ])
+        await core.deferred.task(for: .deferredBootApps)?.value
+        // Queued behind the read in flight; no second read asked.
+        #expect(core.eventLoop.bootScan.pendingDrain.count == 2)
+        #expect(box.reads.count == 1)
+
+        box.reads.removeFirst()()
+        #expect(box.windowQueries == 1)
+        #expect(
+            box.lines.contains { $0.hasPrefix("deferred app: slow.one") }
+        )
+        #expect(core.eventLoop.bootScan.pendingDrain.count == 1)
+        await core.deferred.task(for: .deferredBootApps)?.value
+        #expect(box.reads.count == 1)
     }
 }
