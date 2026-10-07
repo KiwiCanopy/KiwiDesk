@@ -37,9 +37,7 @@ struct GesturesShelfEntries: View {
         GestureEntry(
             L(
                 "shortcuts.gestures.glyph_click",
-                "Click an app icon to go to its Space and focus it. "
-                    + "An app with several windows there opens a "
-                    + "menu of them."
+                "Click an app icon to go to its Space and focus it."
             ),
             surface: .spaceBar,
             settings: settings,
@@ -48,25 +46,14 @@ struct GesturesShelfEntries: View {
         GestureRule()
         GestureEntry(
             L(
-                "shortcuts.gestures.overflow_menu",
-                "Click +n for a menu of the windows it hides. "
-                    + "Nothing switches until you pick one."
+                "shortcuts.gestures.glyph_peek",
+                "Point at an app icon or +n to see its windows; click "
+                    + "one to go to it. Nothing switches until you do."
             ),
             surface: .spaceBar,
             settings: settings,
             pace: .steps
-        ) { GesturePicture.OverflowMenu(t: $0) }
-        GestureRule()
-        GestureEntry(
-            L(
-                "shortcuts.gestures.glyph_hover",
-                "Point at an app icon to see the app and the "
-                    + "titles of its windows."
-            ),
-            surface: .spaceBar,
-            settings: settings,
-            pace: .steps
-        ) { GesturePicture.GlyphHover(t: $0) }
+        ) { GesturePicture.GlyphPeek(t: $0) }
         GestureRule()
         GestureEntry(
             L(
