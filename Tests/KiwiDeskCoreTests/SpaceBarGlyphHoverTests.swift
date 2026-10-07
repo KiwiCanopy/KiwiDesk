@@ -133,7 +133,7 @@ struct SpaceBarGlyphHoverTests {
         #expect(item.appViews.allSatisfy { $0.alphaValue == 1 })
     }
 
-    @Test("A menu row asks for its icon to be shown")
+    @Test("An overflow row asks for its icon to be shown")
     func menuRowShowsItsIcon() throws {
         let menu = SpaceBarWindowMenu.make(
             [
@@ -144,7 +144,8 @@ struct SpaceBarGlyphHoverTests {
                     icon: NSImage(size: NSSize(width: 32, height: 32)),
                     enabled: true
                 )
-            ]
+            ],
+            kind: .overflow
         ) { _ in }
         let item = menu.items[0]
         #expect(item.image?.size == NSSize(width: 16, height: 16))

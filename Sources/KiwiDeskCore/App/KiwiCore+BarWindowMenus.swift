@@ -60,7 +60,7 @@ extension KiwiCore {
             return .action(title, enabled: closes(id)) { close(id) }
         }
         let rows = windows.map { id in
-            BarMenuRow.action(windowTitle(id), enabled: closes(id)) {
+            BarMenuRow.action(windowRowName(id), enabled: closes(id)) {
                 close(id)
             }
         }
@@ -95,7 +95,7 @@ extension KiwiCore {
             return .action(title, enabled: movable(id)) { move(id) }
         }
         let rows = windows.map { id in
-            BarMenuRow.action(windowTitle(id), enabled: movable(id)) {
+            BarMenuRow.action(windowRowName(id), enabled: movable(id)) {
                 move(id)
             }
         }
@@ -128,7 +128,7 @@ extension KiwiCore {
             let floats = state.windows[id]?.isFloating == true
             let refusal = floats ? tileRefusal(of: id) : nil
             return BarMenuRow.action(
-                windowTitle(id),
+                windowRowName(id),
                 enabled: refusal == nil,
                 checked: floats,
                 subtitle: refusal?.sentence
@@ -173,7 +173,15 @@ extension KiwiCore {
         }
     }
 
-    /// A window's row in a submenu: its title, else its app's name.
+    /// A window's row in a submenu: the glyph menu's own name for
+    /// it (#1947), since the app is the menu's context.
+    func windowRowName(_ id: WindowID) -> String {
+        guard let window = state.windows[id] else { return "" }
+        return SpaceBarWindowMenu.windowName(window.title)
+    }
+
+    /// A window named outside its app's menu — a refusal pill — by
+    /// its title, else its app's name.
     func windowTitle(_ id: WindowID) -> String {
         guard let window = state.windows[id] else { return "" }
         return window.title.isEmpty ? window.appName : window.title

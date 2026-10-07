@@ -111,7 +111,7 @@ struct CoreLocalizationBoundaryTests {
         // A glyph target's VoiceOver name and each side's `+n`
         // target's (#1528).
         "Bar/SpaceBarItemView+Targets.swift": 3,
-        "Bar/SpaceBarWindowMenu.swift": 1,
+        "Bar/SpaceBarWindowMenu.swift": 2,
         // The shelf's overflow counts, a button each for VoiceOver
         // (#1517): before and after.
         "Bar/ShelfCountView.swift": 2,

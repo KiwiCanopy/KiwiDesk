@@ -1483,6 +1483,7 @@
   "space_bar.item_label.identifier": "Nome ou ícone",
   "space_bar.item_label.layout": "Layout",
   "space_bar.menu.row": "%1$@ — %2$@",
+  "space_bar.menu.untitled": "Sem título",
   "space_bar.overflow.after.ax": "Janelas posteriores não exibidas: %1$d",
   "space_bar.overflow.before.ax": "Janelas anteriores não exibidas: %1$d",
   "space_bar.show_front_app": "Mostrar app em primeiro plano",
