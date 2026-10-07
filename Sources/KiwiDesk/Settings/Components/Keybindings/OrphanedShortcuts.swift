@@ -56,6 +56,18 @@ enum OrphanedShortcuts {
         return commands
     }
 
+    /// Which captions the Inactive group draws for `commands`: the
+    /// Spaces one for any non-switch row, the layers one for any
+    /// switch row (#2016).
+    static func captions(
+        for commands: [NavCommand]
+    ) -> (spaces: Bool, layers: Bool) {
+        let switches = commands.filter {
+            KeybindingCatalog.switchTarget(of: $0.lua) != nil
+        }
+        return (switches.count < commands.count, !switches.isEmpty)
+    }
+
     /// Generates per-space family commands (`ShortcutsFamilyRows`,
     /// `KeybindingCatalog.desktopOffer`, `OrphanedShortcutsTests`, #92).
     @MainActor

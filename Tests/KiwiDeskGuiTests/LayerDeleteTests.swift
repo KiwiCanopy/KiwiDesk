@@ -80,6 +80,13 @@ struct LayerDeleteTests {
                 of: "KiwiDesk.switch_layer(name)"
             ) == nil
         )
+        // A raw control character parses but is not what the
+        // catalog writes, so the drawn row would not address it.
+        #expect(
+            KeybindingCatalog.switchTarget(
+                of: "KiwiDesk.switch_layer(\"a\tb\")"
+            ) == nil
+        )
     }
 
     /// A switch row to a layer no longer listed is drawn where it can
@@ -89,7 +96,7 @@ struct LayerDeleteTests {
     @Test("a switch to an absent layer is an inactive row")
     @MainActor
     func absentLayerSwitchIsInactive() {
-        let rows = [switchRow("gone"), switchRow("focus")]
+        let rows = [switchRow("gone"), switchRow("focus"), switchRow("gone")]
         let commands = OrphanedShortcuts.commands(
             bindings: rows,
             spaces: [],
@@ -102,6 +109,22 @@ struct LayerDeleteTests {
         #expect(
             OrphanedShortcuts.commands(bindings: rows, spaces: []).isEmpty
         )
+    }
+
+    @Test("the Inactive group captions what it lists")
+    @MainActor
+    func captionsFollowTheRows() {
+        let gone = KeybindingCatalog.switchLayerCommand("gone")
+        let space = OrphanedShortcuts.perSpaceCommands(
+            for: SpaceID("9"),
+            icons: [:]
+        )[0]
+        let only = OrphanedShortcuts.captions(for: [gone])
+        #expect(!only.spaces && only.layers)
+        let none = OrphanedShortcuts.captions(for: [space])
+        #expect(none.spaces && !none.layers)
+        let both = OrphanedShortcuts.captions(for: [space, gone])
+        #expect(both.spaces && both.layers)
     }
 
     @Test("every inactive surface hands over its layers")
@@ -123,5 +146,25 @@ struct LayerDeleteTests {
         }
         #expect(calls == 3)
         #expect(withLayers == calls)
+        // And each hands over the layers it shows, never a stand-in.
+        let values = [
+            "Settings/Sections/ShortcutsSection.swift":
+                "layers: model.config.layers.map(\\.name)",
+            "Settings/Components/Keybindings/OrphanedShortcutsGroup.swift":
+                "layers: layers,",
+            "Settings/SettingsModel+Reset.swift":
+                "layers: config.layers.map(\\.name)",
+            "Shortcuts/ShortcutsReference.swift": "layers: layerNames,",
+            "Shortcuts/ShortcutsReference+Bands.swift": "layers: layers,",
+        ]
+        for (path, needle) in values {
+            let source = try SourceScan.strippedSource(
+                at: root.appendingPathComponent(path)
+            )
+            #expect(
+                source.components(separatedBy: needle).count == 2,
+                "\(path)"
+            )
+        }
     }
 }

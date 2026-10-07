@@ -19,19 +19,13 @@ struct OrphanedShortcutsGroup: View {
             layers: layers,
             icons: model.config.settings.spaceIcons
         )
-        let switches = commands.filter {
-            KeybindingCatalog.switchTarget(of: $0.lua) != nil
-        }
+        let captions = OrphanedShortcuts.captions(for: commands)
         if !commands.isEmpty {
             SettingsSection(
                 SettingsCatalog.shortcuts.inactiveShortcuts
             ) {
-                if switches.count < commands.count {
-                    captionText(caption)
-                }
-                if !switches.isEmpty {
-                    captionText(layerCaption)
-                }
+                if captions.spaces { captionText(caption) }
+                if captions.layers { captionText(layerCaption) }
                 // Dimmed as a block: the rows stay fully
                 // interactive, but read as parked rather
                 // than part of the live space list.
