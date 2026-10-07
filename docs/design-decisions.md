@@ -12555,7 +12555,13 @@ overflows, the item is a fixed span + 2 cells: a `+n` on each side
 of the span in the middle, span + 1 glyphs and one `+n` at an end,
 so a focus change never reflows the items after it — which is why
 the setting is a *span* and not a *cap*, one glyph more showing at
-an end. The two `+n` stay discs rather than the section's count
+an end. A `+n` hides two groups or more (#2052): a disc and a
+glyph take one cell each, so a disc standing for a single group
+spends the cell and hides the app for nothing — the glyph says
+more, and its own count badge already counts its windows. A side
+that would hide one group draws it, the strip clamping to that
+end, and a row of span + 2 groups draws whole. The two `+n` stay
+discs rather than the section's count
 chips: a count chip pages the section, a disc lists windows, and
 one shape keeps one verb.
 

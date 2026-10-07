@@ -2676,6 +2676,12 @@ its hidden *windows*. It limits glyphs per
 Space only, not how many Spaces the bar shows. Replaces
 `set_glyph_cap`, which now fails naming it.
 
+:::unreleased
+A `+n` hides two glyphs or more: a side that would hide one
+draws that glyph in the badge's place, so a row of span + 2
+glyphs shows whole.
+:::
+
 **Example:**
 
 ```lua

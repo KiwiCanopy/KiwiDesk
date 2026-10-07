@@ -82,6 +82,29 @@ struct SpaceBarCentredStripTests {
         #expect(built.discs == 1)
     }
 
+    /// Seven groups at span 5 fill the cells a disc would take:
+    /// the trailing group of two windows draws its own glyph and
+    /// count rather than a `+2` disc hiding it (#2052).
+    @Test("a side hiding one group draws its glyph, not a disc")
+    func oneHiddenGroupDrawsItsGlyph() throws {
+        let core = makeCore()
+        core.state.workspaces.assign(one, to: display)
+        core.state.workspaces.activate(one)
+        for id in UInt32(1)...6 {
+            core.state.apply(.windowCreated(window(id, app: "App\(id)")))
+        }
+        for id in UInt32(7)...8 {
+            core.state.apply(.windowCreated(window(id, app: "Twin")))
+        }
+        core.state.apply(.windowFocused(WindowID(1)))
+        let built = try item(core, one)
+        #expect(built.apps.count == 7)
+        #expect(built.apps.last?.windows == [WindowID(7), WindowID(8)])
+        #expect(built.before.windows.isEmpty)
+        #expect(built.after.windows.isEmpty)
+        #expect(built.discs == 0)
+    }
+
     /// The chip's measured length is the same wherever the focus
     /// sits — the shelf plans the length the chip draws.
     @Test("the chip's length never moves with the focus")

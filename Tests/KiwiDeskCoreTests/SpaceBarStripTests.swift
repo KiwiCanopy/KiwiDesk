@@ -9,11 +9,13 @@ import Testing
 @Suite("Space Bar centred strip")
 struct SpaceBarStripTests {
     /// Nine groups, span 5: every anchor's window, the ends
-    /// clamped to span + 1 glyphs, the middle span glyphs.
+    /// clamped to span + 1 glyphs, the middle span glyphs — and
+    /// an anchor whose centred window would hide one group on a
+    /// side clamped to that end instead (#2052).
     @Test("the window centres on the anchor and clamps at the ends")
     func windowCentresAndClamps() {
         let expected: [Range<Int>] = [
-            0..<6, 0..<6, 0..<6, 1..<6, 2..<7, 3..<8, 3..<9, 3..<9,
+            0..<6, 0..<6, 0..<6, 0..<6, 2..<7, 3..<9, 3..<9, 3..<9,
             3..<9,
         ]
         for anchor in 0..<9 {
@@ -35,8 +37,30 @@ struct SpaceBarStripTests {
     @Test("a row that fits draws whole, with no anchor from the start")
     func fitsAndDefaults() {
         #expect(SpaceBarStrip.window(count: 6, span: 5, anchor: 5) == 0..<6)
+        // span + 2 groups fill the cells the discs would take.
+        #expect(SpaceBarStrip.window(count: 7, span: 5, anchor: 3) == 0..<7)
         #expect(SpaceBarStrip.window(count: 0, span: 5, anchor: nil) == 0..<0)
         #expect(SpaceBarStrip.window(count: 9, span: 5, anchor: nil) == 0..<6)
+    }
+
+    /// Every window `window` draws over a sweep of spans and of
+    /// rows that overflow them, for every anchor and for none.
+    private func sweep(
+        _ body: (_ window: Range<Int>, _ count: Int, _ span: Int) -> Void
+    ) {
+        for span in SpaceBarStyle.glyphSpanRange {
+            for count in (span + 2)...(span + 9) {
+                let anchors = [nil] + (0..<count).map(Optional.some)
+                for anchor in anchors {
+                    let window = SpaceBarStrip.window(
+                        count: count,
+                        span: span,
+                        anchor: anchor
+                    )
+                    body(window, count, span)
+                }
+            }
+        }
     }
 
     /// The chip spends span + 2 cells whatever the anchor, so a
@@ -44,21 +68,39 @@ struct SpaceBarStripTests {
     /// glyphs drawn plus one cell per side that hides a group.
     @Test("an overflowing chip keeps one width")
     func fixedWidth() {
-        for count in 7...12 {
-            for anchor in 0..<count {
-                let window = SpaceBarStrip.window(
-                    count: count,
-                    span: 5,
-                    anchor: anchor
-                )
-                let discs =
-                    (window.lowerBound > 0 ? 1 : 0)
-                    + (window.upperBound < count ? 1 : 0)
-                #expect(
-                    window.count + discs == 7,
-                    "count \(count), anchor \(anchor)"
-                )
-            }
+        sweep { window, count, span in
+            let discs =
+                (window.lowerBound > 0 ? 1 : 0)
+                + (window.upperBound < count ? 1 : 0)
+            #expect(
+                window.count + discs == span + 2,
+                "count \(count), span \(span), window \(window)"
+            )
+        }
+    }
+
+    /// A disc and a glyph take one cell each, so a side hiding a
+    /// single group draws that group's glyph (#2052).
+    @Test("a disc always hides two groups or more")
+    func discHidesTwoOrMore() {
+        sweep { window, count, span in
+            let hiddenBefore = window.lowerBound
+            let hiddenAfter = count - window.upperBound
+            #expect(
+                hiddenBefore != 1 && hiddenAfter != 1,
+                "count \(count), span \(span), window \(window)"
+            )
+        }
+    }
+
+    /// Every window the row draws is one a held strip may keep.
+    @Test("every drawn window is one a hold accepts")
+    func drawnWindowsRoundTrip() {
+        sweep { window, count, span in
+            #expect(
+                SpaceBarStrip.isWindow(window, count: count, span: span),
+                "count \(count), span \(span), window \(window)"
+            )
         }
     }
 
@@ -75,6 +117,11 @@ struct SpaceBarStripTests {
         #expect(drawn(3..<9).holds(count: 9, span: 5))
         #expect(!drawn(0..<5).holds(count: 9, span: 5))
         #expect(!drawn(4..<9).holds(count: 9, span: 5))
+        // A side hiding one group is never drawn (#2052).
+        #expect(!drawn(1..<6).holds(count: 9, span: 5))
+        #expect(!drawn(3..<8).holds(count: 9, span: 5))
+        #expect(!drawn(0..<6, of: 7).holds(count: 7, span: 5))
+        #expect(drawn(0..<7, of: 7).holds(count: 7, span: 5))
         #expect(drawn(0..<4, of: 4).holds(count: 4, span: 5))
         // A row that gained or lost a group shifts every index:
         // even a shape it could draw is not the one held.
@@ -87,9 +134,9 @@ struct SpaceBarStripTests {
     func middleStep() {
         #expect(
             SpaceBarStrip.Walk.between(
-                drawn(2..<7),
+                drawn(2..<7, of: 10),
                 leadingDisc: true,
-                drawn(3..<8),
+                drawn(3..<8, of: 10),
                 leadingDisc: true
             )
                 == .init(
@@ -100,9 +147,9 @@ struct SpaceBarStripTests {
         )
         #expect(
             SpaceBarStrip.Walk.between(
-                drawn(3..<8),
+                drawn(3..<8, of: 10),
                 leadingDisc: true,
-                drawn(2..<7),
+                drawn(2..<7, of: 10),
                 leadingDisc: true
             )
                 == .init(
@@ -114,16 +161,17 @@ struct SpaceBarStripTests {
     }
 
     /// Leaving the row's start, the disc appears in the first
-    /// glyph's cell: nothing travels, that glyph fades under it.
+    /// glyph's cell hiding two groups (#2052): the kept glyphs
+    /// travel one cell, the first two fade under the disc.
     @Test("a disc appearing takes the cell of the glyph it hides")
     func discAppears() {
         #expect(
             SpaceBarStrip.Walk.between(
                 drawn(0..<6),
                 leadingDisc: false,
-                drawn(1..<6),
+                drawn(2..<7),
                 leadingDisc: true
-            ) == .init(cells: 0, leavingFront: 1)
+            ) == .init(cells: 1, leavingFront: 2, enteringBack: 1)
         )
     }
 
@@ -131,9 +179,9 @@ struct SpaceBarStripTests {
     func noWalk() {
         #expect(
             SpaceBarStrip.Walk.between(
-                drawn(1..<6),
+                drawn(2..<7),
                 leadingDisc: true,
-                drawn(1..<6),
+                drawn(2..<7),
                 leadingDisc: true
             ) == nil
         )
@@ -141,7 +189,7 @@ struct SpaceBarStripTests {
             SpaceBarStrip.Walk.between(
                 nil,
                 leadingDisc: false,
-                drawn(1..<6),
+                drawn(2..<7),
                 leadingDisc: true
             ) == nil
         )
