@@ -38,9 +38,8 @@ extension KiwiShelf {
     /// The badge fill against the plate, at its worst over both
     /// grounds and both wallpapers; nil where a colour is unreadable.
     public var peekPillSeparation: Double? {
-        let grounds = [fillColor, fill(cappedAt: GlassTint.maxAlpha)]
         var worst: Double?
-        for ground in grounds {
+        for ground in peekGrounds {
             guard
                 let ratio = worstContrast(groupBadgeColor, nil, on: ground)
             else { return nil }
@@ -56,8 +55,7 @@ extension KiwiShelf {
     /// white and black; `ink` itself otherwise.
     func peekStep(_ ink: String, beneath layer: String?) -> String {
         let dimmed = Self.hex(ink, atShare: Self.peekHeaderAlpha)
-        let grounds = [fillColor, fill(cappedAt: GlassTint.maxAlpha)]
-        for ground in grounds {
+        for ground in peekGrounds {
             guard
                 let ratio = worstContrast(
                     dimmed,
@@ -69,6 +67,12 @@ extension KiwiShelf {
             else { return ink }
         }
         return dimmed
+    }
+
+    /// The two grounds the peek draws on: the stored Fill, and the
+    /// Fill as glass tints it, capped at `GlassTint.maxAlpha`.
+    var peekGrounds: [String] {
+        [fillColor, fill(cappedAt: GlassTint.maxAlpha)]
     }
 
     /// `fillColor` at no more than `cap` alpha, as `#RRGGBBAA`;

@@ -127,6 +127,9 @@ func makeTestCore(
     core.shelves.peek.schedule = { _, _ in }
     // The hold reads the live pointer (#1946): off every screen.
     core.shelves.peek.pointerOnScreen = { CGPoint(x: -1e6, y: -1e6) }
+    // The cool-down is age-bounded (#1456): its clock frozen, as
+    // the applier's is; a peek suite moves its own.
+    core.shelves.peek.now = { 0 }
     // A bar menu's Quit row terminates a real app (#1518).
     core.shelves.contextMenus.terminateApp = { _ in }
     // New Window activates the target's app and both window

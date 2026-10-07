@@ -5,8 +5,8 @@ import Testing
 /// `makeTestCore` twins (#1518, #1528): the Quit row's
 /// `terminateApp`, whose live default terminates the real process
 /// owning a fixture pid, the glyph menu's modal `present`, the
-/// hover peek's dwell timer, which would open a panel, and its
-/// hold's live pointer read (#1946).
+/// hover peek's dwell timer, which would open a panel, its hold's
+/// live pointer read, and its cool-down's clock (#1946, #1456).
 /// Deleting a pin from both twins is otherwise silent — the
 /// twins-identical scan in `MachineTouchTests` sees only a
 /// one-sided deletion. The `MouseButtonSeamGuardTests` shape.
@@ -41,7 +41,8 @@ struct BarMenuSeamGuardTests {
                     )
                     && source.contains(
                         "shelves.peek.pointerOnScreen = {"
-                    ),
+                    )
+                    && source.contains("shelves.peek.now = { 0 }"),
                 .init(rawValue: "\(target) misses a pin")
             )
         }
