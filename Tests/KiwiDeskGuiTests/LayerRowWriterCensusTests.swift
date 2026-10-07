@@ -55,7 +55,11 @@ struct LayerRowWriterCensusTests {
             (1, "layer editor: writes back the rows it was handed"),
         "KiwiDesk/Settings/Components/Keybindings/"
             + "KeybindingCatalog+Layers.swift":
-            (1, "layer rename: rewrites Lua in place, adds no row"),
+            (
+                2,
+                "layer rename: rewrites Lua in place, adds no row;"
+                    + " layer delete: removes rows, adds none"
+            ),
         "KiwiDesk/Shortcuts/ShortcutsReference.swift":
             (1, "shortcuts panel: removes rows from a copy it draws"),
         "KiwiDeskCore/Config/KeyLayer.swift":

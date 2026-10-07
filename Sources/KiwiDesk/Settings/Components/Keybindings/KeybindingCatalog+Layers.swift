@@ -1,7 +1,8 @@
 import AppKit
 import KiwiDeskCore
 
-/// Layer switching command generation and rename refactoring (#4).
+/// Layer switching command generation, rename and delete (#4,
+/// #2016).
 extension KeybindingCatalog {
 
     /// Authors layer switch command matching import classifier syntax (#4).
@@ -44,6 +45,23 @@ extension KeybindingCatalog {
                 }
                 return binding
             }
+            return layer
+        }
+    }
+
+    /// Deletes a layer and every row switching to it — a row that
+    /// switches to a deleted layer does nothing and has no row to
+    /// remove it by (#2016). Only that one name: a switch row to a
+    /// layer `init.lua` defines reads as dangling to this config.
+    static func deleteLayer(
+        in layers: [KeyLayer],
+        named name: String
+    ) -> [KeyLayer] {
+        guard name != KeyLayer.defaultName else { return layers }
+        let switchTo = switchLayerCommand(name).lua
+        return layers.filter { $0.name != name }.map { layer in
+            var layer = layer
+            layer.bindings.removeAll { $0.lua == switchTo }
             return layer
         }
     }
