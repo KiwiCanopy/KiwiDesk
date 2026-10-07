@@ -7,7 +7,8 @@ import Testing
 /// The hover peek's timing (#1946, the owner's ruling): a dwell
 /// before the first show, an instant swap while one shows, a
 /// cool-down after, and a press or a moved item closing it until
-/// the pointer leaves. The value is `BarPeekContentTests`'.
+/// the pointer leaves. The value is `BarPeekContentTests`'; the
+/// hold, the pin and the rows are `BarPeekActionTests`'.
 @Suite("Bar hover peek", .serialized)
 @MainActor
 struct BarPeekTests {
@@ -17,76 +18,7 @@ struct BarPeekTests {
 
     // MARK: - Timing
 
-    /// A host window with two anchors in one reporter, and a peek
-    /// whose dwell is stepped by hand.
-    @MainActor
-    private final class Rig {
-        let menus = NotificationCenter()
-        lazy var peek = BarPeek(menus: menus)
-        let window = NSPanel(
-            contentRect: CGRect(x: 200, y: 800, width: 400, height: 40),
-            styleMask: [.borderless],
-            backing: .buffered,
-            defer: false
-        )
-        let item = NSView(frame: CGRect(x: 0, y: 0, width: 200, height: 40))
-        let first = NSView(frame: CGRect(x: 10, y: 10, width: 20, height: 20))
-        let second = NSView(frame: CGRect(x: 40, y: 10, width: 20, height: 20))
-        var steps: [@MainActor () -> Void] = []
-        var dwells: [TimeInterval] = []
-        var clock: TimeInterval = 100
-
-        init() {
-            window.contentView?.addSubview(item)
-            item.addSubview(first)
-            item.addSubview(second)
-            window.orderFrontRegardless()
-            peek.content = { source in
-                BarPeekContent(
-                    rows: source.windows.map {
-                        BarWindowRow(
-                            window: $0,
-                            pid: 1,
-                            app: "App",
-                            title: "Window \($0.raw)",
-                            icon: nil
-                        )
-                    }
-                )
-            }
-            peek.schedule = { [unowned self] delay, body in
-                dwells.append(delay)
-                steps.append(body)
-            }
-            peek.now = { [unowned self] in clock }
-            peek.shelf = { _ in KiwiShelf() }
-        }
-
-        func hover(_ anchor: NSView?, _ id: UInt32 = 1) {
-            peek.pointer(
-                in: item,
-                on: anchor,
-                source: anchor.map { _ in .glyph([WindowID(id)]) },
-                edge: .top
-            )
-        }
-
-        func step() {
-            let pending = steps
-            steps = []
-            pending.forEach { $0() }
-        }
-
-        var shownTitles: [String]? {
-            peek.panel.drawn?.groups.flatMap(\.titles)
-        }
-
-        func close() {
-            peek.dismiss()
-            peek.panel.panel?.orderOut(nil)
-            window.orderOut(nil)
-        }
-    }
+    private typealias Rig = BarPeekRig
 
     @Test("A first peek waits out the dwell, then shows")
     func dwellThenShow() {
@@ -254,21 +186,35 @@ struct BarPeekTests {
         #expect(rig.shownTitles == ["Window 7"])
     }
 
-    @Test("The peek panel is read-only, above the bars and unspoken")
-    func panelIsReadOnly() throws {
+    /// The panel takes the mouse for its rows yet never activates
+    /// KiwiDesk or turns key (#1946): a click on a row leaves the
+    /// user's app frontmost until the pick moves the focus.
+    @Test("The peek panel takes clicks without activating, unspoken")
+    func panelTakesClicksWithoutActivating() throws {
         let rig = Rig()
         defer { rig.close() }
         rig.hover(rig.first)
         rig.step()
         let panel = try #require(rig.peek.panel.panel)
-        #expect(panel.ignoresMouseEvents)
+        #expect(!panel.ignoresMouseEvents)
+        #expect(panel.styleMask.contains(.nonactivatingPanel))
+        #expect(!panel.canBecomeKey)
+        #expect(!panel.canBecomeMain)
         #expect(panel.level == BarPanel.aboveLevel)
         #expect(!panel.isAccessibilityElement())
-        #expect(!panel.canBecomeKey)
         #expect(
             rig.peek.panel.body.labels.allSatisfy {
                 !$0.isAccessibilityElement()
             }
         )
+        // A label never swallows the press meant for its row.
+        let row = try #require(rig.peek.panel.body.targets.first)
+        let body = rig.peek.panel.body
+        let inParent = body.convert(
+            CGPoint(x: row.frame.midX, y: row.frame.midY),
+            to: body.superview
+        )
+        #expect(body.hitTest(inParent) === body)
+        #expect(body.acceptsFirstMouse(for: nil))
     }
 }

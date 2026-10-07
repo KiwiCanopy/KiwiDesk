@@ -85,6 +85,7 @@ extension SpaceBarItemView {
             in: self,
             on: anchor,
             source: source,
+            space: space,
             edge: style.edge
         )
     }

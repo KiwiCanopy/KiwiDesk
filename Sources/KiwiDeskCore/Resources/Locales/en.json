@@ -1659,5 +1659,6 @@
   "updates.state.up_to_date_window_open": "Up to date · close the update window to check again",
   "updates.try_again": "Try again",
   "window_action.refusal.no_close_button": "“%1$@” has no close button",
-  "window_action.refusal.no_new_window": "%1$@ has no New Window command"
+  "window_action.refusal.no_new_window": "%1$@ has no New Window command",
+  "window_action.refusal.on_another_desktop": "“%1$@” is on another Desktop"
 }

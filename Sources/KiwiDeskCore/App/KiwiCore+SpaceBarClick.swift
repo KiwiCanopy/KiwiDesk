@@ -1,15 +1,19 @@
 import AppKit
 
 /// What a click on a Space Bar glyph or `+n` does (#1528, the
-/// owner rulings in its body): a one-window glyph switches to its
-/// Space and focuses that window; a glyph standing for several
-/// windows, and `+n`, open a menu of them and switch nothing until
-/// a row is picked. A click elsewhere on the chip stays
-/// `focusSpace`.
+/// owner rulings in its body, and #1946's): a one-window glyph
+/// switches to its Space and focuses that window; a glyph standing
+/// for several windows, and `+n`, show their peek at once, pinned,
+/// and switch nothing until a row is picked — VoiceOver's press
+/// opening the native menu instead. A click elsewhere on the chip
+/// stays `focusSpace`.
 extension KiwiCore {
     func wireSpaceBarGlyphs() {
         spaceBars.glyphActions.pick = { [weak self] pick in
             self?.withUserMotion { self?.pickFromSpaceBar(pick) }
+        }
+        spaceBars.glyphActions.accessibilityPress = { [weak self] pick in
+            self?.pressSpaceBarGlyph(pick)
         }
         // A strip held under the pointer re-centres as it leaves
         // (#1528 item 21), through the one bar refresh — deferred,
@@ -24,17 +28,70 @@ extension KiwiCore {
 
     func pickFromSpaceBar(_ pick: SpaceBarGlyphPick) {
         if pick.kind == .glyph, pick.windows.count == 1 {
+            shelves.peek.dismiss()
             focusFromSpaceBar(pick.windows[0], on: pick.space)
             return
         }
-        let rows = spaceBarMenuRows(pick.windows)
-        guard !rows.isEmpty else { return }
-        let space = pick.space
-        let menu = SpaceBarWindowMenu.make(rows, kind: pick.kind) {
-            [weak self] id in
-            self?.focusFromSpaceBar(id, on: space)
+        // No menu: the list is the peek, its rows the picks.
+        spaceBars.glyphActions.pinPeek(pick)
+    }
+
+    /// VoiceOver's press on a glyph: a list's native menu at the
+    /// target, the peek's accessible twin; a one-window glyph picks.
+    func pressSpaceBarGlyph(_ pick: SpaceBarGlyphPick) {
+        guard pick.kind == .overflow || pick.windows.count > 1 else {
+            spaceBars.glyphActions.pick(pick)
+            return
         }
-        spaceBars.glyphActions.present(menu, pick.anchor)
+        presentBarWindowMenu(
+            pick.windows,
+            kind: pick.kind,
+            space: pick.space,
+            at: pick.anchor
+        )
+    }
+
+    /// The full menu of `windows` at `anchor` — VoiceOver's press
+    /// and the peek's "N more" (#1946) — its rows the one bar-row
+    /// pick a peek row takes.
+    func presentBarWindowMenu(
+        _ windows: [WindowID],
+        kind: SpaceBarGlyphPick.Kind,
+        space: SpaceID?,
+        at anchor: NSView
+    ) {
+        let rows = spaceBarMenuRows(windows)
+        guard !rows.isEmpty else { return }
+        let menu = SpaceBarWindowMenu.make(rows, kind: kind) {
+            [weak self] id in
+            self?.pickBarRow(id, on: space)
+        }
+        spaceBars.glyphActions.present(menu, anchor)
+    }
+
+    /// The one pick a bar list's row takes — a peek row's and a
+    /// window menu row's alike (#1946): judged as it is performed,
+    /// so a window the focus door refuses draws the refusal pill
+    /// rather than a row greyed on hover (#1925). `space` is the
+    /// chip's; an App Bar row has none and takes the Space its
+    /// window is filed in, shown where the App Bar draws it.
+    func pickBarRow(_ window: WindowID, on space: SpaceID?) {
+        withUserMotion {
+            guard !raiseCrossesDesktops(window) else {
+                cueWindowAction(
+                    .onAnotherDesktop(
+                        window: SpaceBarWindowMenu.windowName(
+                            state.windows[window]?.title ?? ""
+                        )
+                    ),
+                    on: window
+                )
+                return
+            }
+            guard let space = space ?? state.workspaces.space(of: window)
+            else { return }
+            focusFromSpaceBar(window, on: space)
+        }
     }
 
     /// Switches to `space` landing on `window` through the one

@@ -2,7 +2,8 @@ import AppKit
 
 /// What a click on a Space Bar glyph or `+n` asks for (#1528).
 /// The item hands it over; Core decides between a switch-and-focus
-/// and a menu, so the view carries no policy.
+/// and the list — the peek, or for VoiceOver the menu — so the view
+/// carries no policy.
 struct SpaceBarGlyphPick {
     enum Kind: Equatable {
         /// An app glyph: the windows it stands for, in row order.
@@ -14,7 +15,7 @@ struct SpaceBarGlyphPick {
     let space: SpaceID
     let windows: [WindowID]
     let kind: Kind
-    /// Where a menu opens; the target view itself.
+    /// Where the peek or a menu opens; the target view itself.
     let anchor: NSView
 }
 
@@ -28,40 +29,32 @@ final class SpaceBarGlyphActions {
     /// when it shows, so a title is current without the bar
     /// re-rendering on every title change (#1514).
     weak var peek: BarPeek?
+    /// VoiceOver's press: Core opens a list's native menu at the
+    /// target — the peek's accessible twin (#1946) — and picks a
+    /// one-window glyph, as a click does.
+    var accessibilityPress: @MainActor (SpaceBarGlyphPick) -> Void = {
+        _ in
+    }
     /// Pops a menu at its target as a context menu, the chrome the
     /// bar's right-click menu wears (#1850) — modal, so a test
     /// swaps it.
     var present: @MainActor (NSMenu, NSView) -> Void = { menu, anchor in
-        guard
-            let event = SpaceBarGlyphActions.contextEvent(
-                at: anchor,
-                menu: menu.size
-            )
+        guard let event = SpaceBarGlyphActions.contextEvent(at: anchor)
         else { return }
         NSMenu.popUpContextMenu(menu, with: event, for: anchor)
     }
 
-    /// A context-menu event where a `menu`-sized menu meets the
-    /// peek's bar-side edge for `anchor` — so the menu's rows land
-    /// where the peek's were (#1946) — or at `anchor`'s lower-left
-    /// corner for a view no peek reads, so the menu opens at the
-    /// cell whatever input picked it.
-    static func contextEvent(
-        at anchor: NSView,
-        menu: CGSize
-    ) -> NSEvent? {
+    /// A context-menu event at `anchor`'s lower-left corner, so the
+    /// menu opens at the cell whatever input picked it.
+    static func contextEvent(at anchor: NSView) -> NSEvent? {
         guard let window = anchor.window else { return nil }
         let corner = NSPoint(
             x: 0,
             y: anchor.isFlipped ? anchor.bounds.maxY : 0
         )
-        let location =
-            peekMenuTopLeft(of: anchor, menu: menu)
-            .map(window.convertPoint(fromScreen:))
-            ?? anchor.convert(corner, to: nil)
         return NSEvent.mouseEvent(
             with: .rightMouseDown,
-            location: location,
+            location: anchor.convert(corner, to: nil),
             modifierFlags: [],
             timestamp: 0,
             windowNumber: window.windowNumber,
@@ -71,24 +64,18 @@ final class SpaceBarGlyphActions {
             pressure: 1
         )
     }
-}
 
-extension SpaceBarGlyphActions {
-    /// Where a `menu`-sized menu's top-left stands against the peek
-    /// a glyph target shows, or would; nil for any other view.
-    static func peekMenuTopLeft(
-        of anchor: NSView,
-        menu: CGSize
-    ) -> CGPoint? {
-        guard let target = anchor as? SpaceBarGlyphTarget,
-            let item = target.superview as? SpaceBarItemView,
-            let peek = target.actions?.peek
-        else { return nil }
-        return peek.menuTopLeft(
-            for: target,
+    /// A click on a list — a multi-window glyph or `+n` — shows its
+    /// peek at once and pins it (#1946); nothing else pins.
+    func pinPeek(_ pick: SpaceBarGlyphPick) {
+        guard let target = pick.anchor as? SpaceBarGlyphTarget,
+            let item = target.superview as? SpaceBarItemView
+        else { return }
+        peek?.pin(
+            target,
             source: target.peekSource,
-            edge: item.style.edge,
-            menu: menu
+            space: pick.space,
+            edge: item.style.edge
         )
     }
 }
@@ -140,12 +127,11 @@ final class SpaceBarGlyphTarget: NSView {
         kind == .glyph ? .glyph(members) : .overflow(members)
     }
 
-    /// A press closes the peek, so a multi-window glyph's list
-    /// visibly becomes its menu on the release (#1946); a
-    /// Control-click's menu closes it as any menu does.
+    /// A press arms the pick; the peek stays, since a list's click
+    /// pins it (#1946). A Control-click's menu closes it as any
+    /// menu does.
     override func mouseDown(with event: NSEvent) {
         guard !openControlClickMenu(event) else { return }
-        actions?.peek?.dismiss()
         pressed = true
     }
 
@@ -166,7 +152,7 @@ final class SpaceBarGlyphTarget: NSView {
 
     override func accessibilityPerformPress() -> Bool {
         actions?.peek?.dismiss()
-        actions?.pick(pick)
+        actions?.accessibilityPress(pick)
         return true
     }
 }

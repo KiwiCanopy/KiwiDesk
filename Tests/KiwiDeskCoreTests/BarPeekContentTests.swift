@@ -68,39 +68,29 @@ struct BarPeekContentTests {
         #expect(two.groups[0].count == 2)
     }
 
-    /// A lone window titled as its app would repeat the header
-    /// word for word, so the header stands alone (owner, device);
-    /// a different title, or several windows, keep their rows.
-    @Test("A lone window titled as its app shows the header alone")
-    func titleEqualToAppIsNotRepeated() {
+    /// A lone window titled as its app keeps its row under the
+    /// header (owner ruling amendment 2): a header with no row reads
+    /// as an app with no window, and the row is what a click picks.
+    @Test("A lone window titled as its app keeps its row")
+    func titleEqualToAppKeepsItsRow() throws {
         LocalizationManager.shared.select("en")
         let same = BarPeekContent(
-            rows: [row(1, app: "Claude", title: " Claude ")]
+            rows: [row(1, app: "Claude", title: "Claude")]
         )
         #expect(same.groups.map(\.app) == ["Claude"])
-        #expect(same.groups.map(\.titles) == [[]])
+        #expect(same.groups.map(\.titles) == [["Claude"]])
         #expect(same.groups.map(\.windowCount) == [1])
-        let other = BarPeekContent(
-            rows: [row(1, app: "Claude", title: "New chat")]
-        )
-        #expect(other.groups.map(\.titles) == [["New chat"]])
-        let two = BarPeekContent(
-            rows: [
-                row(1, app: "Claude", title: "Claude"),
-                row(2, app: "Claude", title: "New chat"),
-            ]
-        )
-        #expect(two.groups.map(\.titles) == [["Claude", "New chat"]])
-        #expect(two.groups.map(\.count) == [2])
-        let untitled = BarPeekContent(
-            rows: [row(1, app: "Claude", title: "")]
-        )
-        #expect(untitled.groups.map(\.titles) == [["Untitled Window"]])
-        // The header-only peek draws one label and no hairline.
         let body = BarPeekBody()
         _ = body.build(same, shelf: KiwiShelf())
-        #expect(body.labels.map(\.stringValue) == ["Claude"])
-        #expect(body.rules.isEmpty)
+        // The faint header above a full-ink row, which is a button.
+        #expect(body.labels.map(\.stringValue) == ["Claude", "Claude"])
+        let header = try #require(body.labels.first)
+        let title = try #require(body.labels.last)
+        #expect(
+            header.textColor == NSColor(kiwiHex: KiwiShelf().peekHeaderColor)
+        )
+        #expect(title.textColor == NSColor(kiwiHex: KiwiShelf().itemColor))
+        #expect(body.targets.map(\.action) == [.window(WindowID(1))])
     }
 
     /// `+n` mixes apps: one group each, in first-seen order, with
@@ -216,7 +206,10 @@ struct BarPeekContentTests {
         )
         #expect(pill.frame.height == BarPeekBody.Metrics.pillHeight)
         // A ring in the hairlines' ink, the one rule colour.
-        #expect(pill.layer?.borderWidth == BarPeekBody.Metrics.pillRing)
+        #expect(
+            pill.layer?.borderWidth
+                == (shelf.peekPillNeedsRing ? BarPeekBody.Metrics.pillRing : 0)
+        )
         #expect(
             pill.layer?.borderColor
                 == BarDivider.color(textColor: shelf.itemColor).cgColor

@@ -1,6 +1,8 @@
 import AppKit
 
-/// The menu a Space Bar glyph group or `+n` opens (#1528): one row
+/// The menu of a Space Bar glyph group's or `+n`'s windows — the
+/// peek's twin, opened by VoiceOver's press and "N more" (#1528,
+/// #1946): one row
 /// per window, handed a list rather than a chip so #1518's
 /// right-click rows can reuse it. A glyph's rows are one app's, so
 /// they list titles under an app header; `+n`'s mix apps and keep

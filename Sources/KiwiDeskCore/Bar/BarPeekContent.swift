@@ -21,17 +21,25 @@ enum BarPeekSource: Equatable {
 
 /// What a peek shows (#1946, the owner's ruling): one group per
 /// app, its header above its windows, every window a row — an
-/// untitled one named as the glyph menu names it (#1947).
+/// untitled one named as the glyph menu names it (#1947) — and
+/// each row its window's button.
 struct BarPeekContent: Equatable {
+    /// One window's row: the window it picks, and its name.
+    struct Row: Equatable {
+        let window: WindowID
+        let title: String
+    }
+
     struct Group: Equatable {
         let app: String
         /// The app's icon, only where the rows mix apps (`+n`).
         let icon: NSImage?
-        /// One per window shown, in row order — none for a lone
-        /// window titled as its app, which the header already names.
-        let titles: [String]
+        /// One per window shown, in row order.
+        let rows: [Row]
         /// Every window the group stands for, shown or not.
         let windowCount: Int
+
+        var titles: [String] { rows.map(\.title) }
 
         /// The header's count pill: from two windows, as a bare
         /// number, so it needs no localized frame.
@@ -57,16 +65,16 @@ struct BarPeekContent: Equatable {
         var left = count
         var kept: [Group] = []
         for group in fromEnd ? groups.reversed() : groups where left > 0 {
-            let titles =
+            let rows =
                 fromEnd
-                ? Array(group.titles.suffix(left))
-                : Array(group.titles.prefix(left))
-            left -= titles.count
+                ? Array(group.rows.suffix(left))
+                : Array(group.rows.prefix(left))
+            left -= rows.count
             kept.append(
                 Group(
                     app: group.app,
                     icon: group.icon,
-                    titles: titles,
+                    rows: rows,
                     windowCount: group.windowCount
                 )
             )
@@ -75,39 +83,32 @@ struct BarPeekContent: Equatable {
     }
 
     /// Groups `rows` per app NAME in first-seen order, every row
-    /// kept — the key the bars group by, so a glyph standing for
-    /// sibling processes of one app (#1785) is one group. Icons mark
-    /// the groups only where the rows mix apps — `+n`, or any list
-    /// that does.
+    /// kept — a lone window titled as its app included (owner,
+    /// #1946) — on the key the bars group by, so a glyph standing
+    /// for sibling processes of one app (#1785) is one group. Icons
+    /// mark the groups only where the rows mix apps.
     @MainActor
     init(rows: [BarWindowRow]) {
         var order: [BarWindowRow] = []
-        var titles: [String: [String]] = [:]
+        var grouped: [String: [Row]] = [:]
         for row in rows {
-            if titles[row.app] == nil { order.append(row) }
-            titles[row.app, default: []].append(
-                SpaceBarWindowMenu.windowName(row.title)
+            if grouped[row.app] == nil { order.append(row) }
+            grouped[row.app, default: []].append(
+                Row(
+                    window: row.window,
+                    title: SpaceBarWindowMenu.windowName(row.title)
+                )
             )
         }
         let mixed = order.count > 1
         groups = order.map { first in
-            let all = titles[first.app] ?? []
+            let all = grouped[first.app] ?? []
             return Group(
                 app: first.app,
                 icon: mixed ? first.icon : nil,
-                titles: Self.namesItsApp(all, first.app) ? [] : all,
+                rows: all,
                 windowCount: all.count
             )
         }
-    }
-
-    /// A lone window titled as its app (owner, device 2026-10-07):
-    /// a row would repeat the header word for word. Several windows
-    /// keep every row, since the rows count them.
-    private static func namesItsApp(_ titles: [String], _ app: String) -> Bool
-    {
-        titles.count == 1
-            && titles[0].trimmingCharacters(in: .whitespacesAndNewlines)
-                == app.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

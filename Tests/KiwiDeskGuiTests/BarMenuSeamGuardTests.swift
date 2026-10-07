@@ -4,8 +4,9 @@ import Testing
 /// The bar menus' two machine-touching seams stay pinned in BOTH
 /// `makeTestCore` twins (#1518, #1528): the Quit row's
 /// `terminateApp`, whose live default terminates the real process
-/// owning a fixture pid, the glyph menu's modal `present`, and the
-/// hover peek's dwell timer, which would open a panel (#1946).
+/// owning a fixture pid, the glyph menu's modal `present`, the
+/// hover peek's dwell timer, which would open a panel, and its
+/// hold's live pointer read (#1946).
 /// Deleting a pin from both twins is otherwise silent — the
 /// twins-identical scan in `MachineTouchTests` sees only a
 /// one-sided deletion. The `MouseButtonSeamGuardTests` shape.
@@ -37,6 +38,9 @@ struct BarMenuSeamGuardTests {
                     )
                     && source.contains(
                         "shelves.peek.schedule = { _, _ in }"
+                    )
+                    && source.contains(
+                        "shelves.peek.pointerOnScreen = {"
                     ),
                 .init(rawValue: "\(target) misses a pin")
             )
@@ -57,10 +61,7 @@ struct BarMenuSeamGuardTests {
                 "NSMenu.popUpContextMenu(menu, with: event, for: anchor)"
             ) == 1
         )
-        // The event sits at the anchor, sized by the menu it pops.
-        #expect(count("SpaceBarGlyphActions.contextEvent(") == 1)
-        #expect(count("at: anchor,") == 1)
-        #expect(count("menu: menu.size") == 1)
+        #expect(count("contextEvent(at: anchor)") == 1)
         #expect(count("popUp(positioning:") == 0)
     }
 }

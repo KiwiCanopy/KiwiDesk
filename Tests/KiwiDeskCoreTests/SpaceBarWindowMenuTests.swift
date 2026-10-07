@@ -128,10 +128,9 @@ struct SpaceBarWindowMenuTests {
 
     /// #1850: the list pops as a context menu at its cell, so the
     /// event lands on the cell's lower-left corner in its window —
-    /// whatever the menu's size, which only a peek's edge reads.
+    /// VoiceOver's press and the peek's "N more" (#1946).
     @Test("The glyph menu's event sits at its cell's lower-left corner")
     func contextEventSitsAtTheCell() throws {
-        let menu = CGSize(width: 160, height: 120)
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 200, height: 40),
             styleMask: .borderless,
@@ -146,18 +145,15 @@ struct SpaceBarWindowMenuTests {
         window.contentView?.addSubview(cell)
         window.contentView?.addSubview(flipped)
         let event = try #require(
-            SpaceBarGlyphActions.contextEvent(at: cell, menu: menu)
+            SpaceBarGlyphActions.contextEvent(at: cell)
         )
         #expect(event.type == .rightMouseDown)
         #expect(event.windowNumber == window.windowNumber)
         #expect(event.locationInWindow == NSPoint(x: 30, y: 8))
-        let corner = SpaceBarGlyphActions.contextEvent(
-            at: flipped,
-            menu: menu
-        )
+        let corner = SpaceBarGlyphActions.contextEvent(at: flipped)
         #expect(corner?.locationInWindow == NSPoint(x: 60, y: 8))
         #expect(
-            SpaceBarGlyphActions.contextEvent(at: NSView(), menu: menu) == nil
+            SpaceBarGlyphActions.contextEvent(at: NSView()) == nil
         )
     }
 }

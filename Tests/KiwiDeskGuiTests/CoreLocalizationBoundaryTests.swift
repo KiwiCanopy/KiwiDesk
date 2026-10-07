@@ -129,9 +129,10 @@ struct CoreLocalizationBoundaryTests {
         // A Space chip's New Space and Delete Space rows and why a
         // Delete is greyed (#1790), on the same Core-drawn menu.
         "App/KiwiCore+SpaceChipLifecycle.swift": 9,
-        // The window actions' refusal pills (#1518), which Core
-        // draws on the window, as the resize pills are.
-        "Commands/WindowActionRefusal.swift": 2,
+        // The window actions' and bar list rows' refusal pills
+        // (#1518, #1946), which Core draws on the window, as the
+        // resize pills are.
+        "Commands/WindowActionRefusal.swift": 3,
         "Bar/BarMenu.swift": 3,
         "Bar/LayoutModeRows.swift": 8,
     ]

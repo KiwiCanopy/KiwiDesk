@@ -23,6 +23,32 @@ extension KiwiShelf {
         peekStep(groupBadgeTextColor, beneath: groupBadgeColor)
     }
 
+    /// The badge fill's weakest separation from the peek's grounds
+    /// below which the count pill draws its ring (#1946): WCAG's
+    /// non-text floor for a shape that must read as one.
+    public static let peekPillRingFloor = 3.0
+
+    /// Whether the count pill needs its ring: its fill separates from
+    /// either ground the header step judges by less than
+    /// `peekPillRingFloor`, over either wallpaper — or cannot be read.
+    public var peekPillNeedsRing: Bool {
+        peekPillSeparation.map { $0 < Self.peekPillRingFloor } ?? true
+    }
+
+    /// The badge fill against the plate, at its worst over both
+    /// grounds and both wallpapers; nil where a colour is unreadable.
+    public var peekPillSeparation: Double? {
+        let grounds = [fillColor, fill(cappedAt: GlassTint.maxAlpha)]
+        var worst: Double?
+        for ground in grounds {
+            guard
+                let ratio = worstContrast(groupBadgeColor, nil, on: ground)
+            else { return nil }
+            worst = min(worst ?? ratio, ratio)
+        }
+        return worst
+    }
+
     /// `ink` at `peekHeaderAlpha` of its own alpha where that holds
     /// `idleInkFloor` on both grounds the peek draws on — the
     /// stored Fill, and the Fill as glass tints it, capped at

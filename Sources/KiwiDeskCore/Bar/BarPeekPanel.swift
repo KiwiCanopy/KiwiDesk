@@ -1,9 +1,9 @@
 import AppKit
 
-/// The peek's one panel (#1946): non-activating, above the bars,
-/// deaf to the mouse and hidden from accessibility — read-only,
-/// so it never takes a click or a hover, and VoiceOver keeps the
-/// item's label and its menu. Its ground is the shelf's plate:
+/// The peek's one panel (#1946): above the bars, taking the mouse
+/// for its rows yet non-activating and never key, so a click on a
+/// row never activates KiwiDesk; hidden from accessibility, where
+/// the glyph's menu is its twin. Its ground is the shelf's plate:
 /// glass through `GlassTint.apply`, or the solid Fill.
 @MainActor
 final class BarPeekPanel {
@@ -66,6 +66,7 @@ final class BarPeekPanel {
         panel.invalidateShadow()
         leaving = nil
         drawn = content
+        panel.ignoresMouseEvents = false
         if !panel.isVisible {
             panel.alphaValue = fades ? 0 : 1
             panel.orderFrontRegardless()
@@ -77,6 +78,8 @@ final class BarPeekPanel {
     func hide(animated: Bool) {
         drawn = nil
         guard let panel, panel.isVisible else { return }
+        // A fading peek takes no click.
+        panel.ignoresMouseEvents = true
         let token = UUID()
         leaving = token
         BarMotion.fadePeek(panel, to: 0, animated: animated) {
@@ -127,8 +130,7 @@ final class BarPeekPanel {
     }
 
     /// `content` laid out in `body` within the room on the far
-    /// side of the strip, the panel's size — the one measure the
-    /// show and the menu's anchor (`BarPeek.menuTopLeft`) both take.
+    /// side of the strip, the panel's size.
     static func fittedSize(
         of body: BarPeekBody,
         _ content: BarPeekContent,
@@ -194,8 +196,7 @@ final class BarPeekPanel {
             max(point.y, screen.minY + margin),
             max(screen.maxY - margin - size.height, screen.minY + margin)
         )
-        // Whole points, as AppKit frames a window, so the menu the
-        // click opens (`BarPeek.menuTopLeft`) meets the peek's edge.
+        // Whole points, as AppKit frames a window.
         return CGPoint(x: point.x.rounded(), y: point.y.rounded())
     }
 
@@ -244,7 +245,6 @@ final class BarPeekPanel {
     private func makePanel() -> NSPanel {
         let panel = BarPanel.makeNonActivating()
         panel.level = BarPanel.aboveLevel
-        panel.ignoresMouseEvents = true
         panel.hasShadow = true
         panel.setAccessibilityElement(false)
         root.wantsLayer = true

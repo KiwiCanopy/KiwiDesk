@@ -7,7 +7,8 @@ import Testing
 /// The hover peek's ink stays legible on its own ground (#1946):
 /// titles in the shelf's item ink, the app header at its derived
 /// `peekHeaderColor`, and the count pill's window glyph at its
-/// derived `peekPillGlyphColor` over the badge fill — on the
+/// derived `peekPillGlyphColor` over the badge fill, and a hovered
+/// row's `hoverItemColor` over its `hoverFillColor` — on the
 /// plate's Fill, capped at `GlassTint.maxAlpha` as glass and
 /// uniform over the whole panel (`GlassTint.applyUniform`), or as
 /// stored where the glass is off. Measured as
@@ -68,11 +69,13 @@ struct PeekInkContrastTests {
             )
             // Titles in the item ink, the header at its derived step,
             // the pill glyph at its step over the badge fill (owner
-            // rulings on #1946) — three pairings per ground.
+            // rulings on #1946) — four pairings per ground.
             let pairings: [(String, String?)] = [
                 (shelf.itemColor, nil),
                 (shelf.peekHeaderColor, nil),
                 (shelf.peekPillGlyphColor, shelf.groupBadgeColor),
+                // A hovered row: the shelf's item hover (amendment 2).
+                (shelf.hoverItemColor, shelf.hoverFillColor),
             ]
             for ground in [shelf.fillColor, glass] {
                 for (ink, layer) in pairings {
@@ -99,7 +102,7 @@ struct PeekInkContrastTests {
                 }
             }
         }
-        #expect(measured == PaletteCatalog.bundled().count * 12)
+        #expect(measured == PaletteCatalog.bundled().count * 16)
         #expect(measured > 0)
     }
 

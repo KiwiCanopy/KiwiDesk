@@ -6,8 +6,8 @@ import Testing
 
 /// The hover peek through the real Space Bar (#1946): the item's
 /// hover reading reaches the shelf's one peek, the dwell opens it
-/// with Core's content, and the pointer leaving, a press on the
-/// glyph, a strip scroll and its shelf leaving each close it.
+/// with Core's content, and the pointer leaving, a one-window
+/// glyph's pick, a strip scroll and its shelf leaving each close it.
 @Suite("Bar hover peek wiring", .serialized)
 @MainActor
 struct BarPeekWiringTests {
@@ -135,8 +135,11 @@ struct BarPeekWiringTests {
         #expect(titles(core) == nil)
     }
 
-    @Test("A press closes the peek; the release picks")
-    func pressCloses() throws {
+    /// A one-window glyph's click is a pick (#1946): the press
+    /// leaves the peek, and the release picks through Core, which
+    /// closes it and switches (#2044 picks on the release).
+    @Test("A one-window glyph's release picks and closes the peek")
+    func releasePicksAndCloses() throws {
         let core = seededCore()
         let steps = Steps()
         defer { close(core) }
@@ -156,65 +159,13 @@ struct BarPeekWiringTests {
                 pressure: 1
             )
         }
-        let press = try #require(event(.leftMouseDown))
-        let release = try #require(event(.leftMouseUp))
-        // The pick is stubbed: no switch or relayout may close the
-        // peek for it, and it records whether the press had closed
-        // it by the time the release picks (#2044 picks on release).
-        let closedFirst = Box()
-        core.spaceBars.glyphActions.pick = { _ in
-            closedFirst.value = core.shelves.peek.panel.drawn == nil
-        }
-        web.mouseDown(with: press)
-        #expect(titles(core) == nil, "the press closes it")
-        #expect(closedFirst.value == nil, "the press does not pick")
-        web.mouseUp(with: release)
-        #expect(closedFirst.value == true, "closed before the pick")
-    }
-
-    @MainActor
-    final class Box {
-        var value: Bool?
-    }
-
-    /// The menu a click opens meets the peek on its bar-side edge,
-    /// shown or not, sized by the menu handed over, so its rows land
-    /// where the peek's were (owner, device).
-    @Test("The glyph menu opens on the peek's bar-side edge")
-    func menuOpensAtThePeek() throws {
-        let core = seededCore()
-        let steps = Steps()
-        defer { close(core) }
-        let (item, web) = try hovered(core, steps: steps)
-        let window = try #require(web.window)
-        let menu = NSMenu()
-        for title in ["Doc", "Two", "Three", "Four", "Five"] {
-            menu.addItem(withTitle: title, action: nil, keyEquivalent: "")
-        }
-        let expected = try #require(
-            core.shelves.peek.menuTopLeft(
-                for: web,
-                source: web.peekSource,
-                edge: item.style.edge,
-                menu: menu.size
-            )
-        )
-        let closed = try #require(
-            SpaceBarGlyphActions.contextEvent(at: web, menu: menu.size)
-        )
-        #expect(
-            window.convertPoint(toScreen: closed.locationInWindow) == expected
-        )
-        steps.run()
-        let panel = try #require(core.shelves.peek.panel.panel)
-        // A top bar: the bar-side edge is the peek's top, and the
-        // menu hangs from it on the peek's leading edge.
-        #expect(item.style.edge == .top)
-        #expect(
-            panel.frame.maxY == expected.y,
-            "the shown peek's bar-side edge is the menu's"
-        )
-        #expect(panel.frame.minX == expected.x)
+        web.mouseDown(with: try #require(event(.leftMouseDown)))
+        #expect(titles(core) == ["Doc"], "the press keeps it")
+        #expect(core.activeSpace?.id == one, "the press does not pick")
+        web.mouseUp(with: try #require(event(.leftMouseUp)))
+        #expect(titles(core) == nil, "the pick closes it")
+        #expect(core.activeSpace?.id == two)
+        #expect(core.state.workspaces.lastFocused == WindowID(4))
     }
 
     /// A shelf the bars stop drawing on — a fullscreen stand-down,

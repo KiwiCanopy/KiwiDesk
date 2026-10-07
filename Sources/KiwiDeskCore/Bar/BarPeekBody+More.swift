@@ -2,8 +2,8 @@ import AppKit
 
 /// A peek taller than its room (#1946, owner ruling): it keeps the
 /// windows that fit and marks the cut with a chevron and the count
-/// of the rest — a cue that the click menu holds them, since the
-/// peek takes no mouse event and never scrolls. The cut is at the
+/// of the rest — a button opening the menu that holds them, since
+/// the peek never scrolls. The cut is at the
 /// far edge from the bar, so on a bottom bar the peek keeps the
 /// LAST windows and the chevron points up at the hidden ones.
 extension BarPeekBody {
@@ -87,6 +87,17 @@ extension BarPeekBody {
         addSubview(more.label)
         moreChevron = more.chevron
         moreLabel = more.label
-        return top + max(height, line)
+        let end = top + max(height, line)
+        addTarget(
+            .more,
+            around: CGRect(
+                x: Metrics.padH,
+                y: top,
+                width: inset + Self.natural(more.label),
+                height: end - top
+            ),
+            inks: [more.label, more.chevron]
+        )
+        return end
     }
 }

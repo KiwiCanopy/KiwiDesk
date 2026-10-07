@@ -6,8 +6,9 @@ import Testing
 
 /// A click on a Space Bar glyph or `+n` (#1528, rulings 8–10): a
 /// one-window glyph switches to its Space AND lands on that
-/// window; a group glyph and `+n` open a menu and switch nothing
-/// until a row is picked.
+/// window; a group glyph and `+n` list their windows — the peek on
+/// a click, the native menu for VoiceOver (#1946) — and switch
+/// nothing until a row is picked.
 @MainActor
 private func makeCore() -> KiwiCore {
     makeTestCore(
@@ -158,12 +159,18 @@ struct SpaceBarGlyphClickTests {
         #expect(core.state.workspaces[one]?.focused == WindowID(5))
     }
 
-    @Test("A group glyph opens its menu and switches nothing")
-    func groupOpensAMenu() throws {
+    /// A click on a list opens no menu — the peek is its list
+    /// (`BarPeekClickTests`) — while VoiceOver's press opens the
+    /// native menu, the peek's accessible twin (#1946).
+    @Test("A group glyph's click opens no menu; VoiceOver's press does")
+    func groupOpensAMenuForVoiceOver() throws {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         let menu = capturingMenus(core)
         core.pickFromSpaceBar(pick([2, 3], on: two))
+        #expect(menu() == nil, "a click shows the peek instead")
+        #expect(core.activeSpace?.id == one)
+        core.pressSpaceBarGlyph(pick([2, 3], on: two))
         #expect(core.activeSpace?.id == one)
         let shown = try #require(menu())
         // One app's rows: titles under an app header (#1947).
@@ -178,12 +185,14 @@ struct SpaceBarGlyphClickTests {
         #expect(core.state.workspaces[two]?.focused == WindowID(3))
     }
 
-    @Test("+n opens its menu even for one window, switching nothing")
-    func overflowOpensAMenu() throws {
+    @Test("+n's VoiceOver menu lists even one window, switching nothing")
+    func overflowOpensAMenuForVoiceOver() throws {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         let menu = capturingMenus(core)
         core.pickFromSpaceBar(pick([4], on: two, .overflow))
+        #expect(menu() == nil, "a click shows the peek instead")
+        core.pressSpaceBarGlyph(pick([4], on: two, .overflow))
         #expect(core.activeSpace?.id == one)
         let shown = try #require(menu())
         // Mixed apps: no header, each row names its app.

@@ -53,8 +53,10 @@ struct MouseButtonSeamGuardTests {
     /// over): the drag pipeline's cursor seam (#1103), the
     /// reveal-strip seam beside `pressedButtons`, and the GUI's
     /// shortcuts panel placing itself under the pointer at open —
-    /// a one-shot position no suite measures.
+    /// a one-shot position no suite measures — and the hover
+    /// peek's hull hold, pinned by both `makeTestCore` twins (#1946).
     private static let pointerHomes = [
+        "BarPeek.swift",
         "KiwiCore+Drag.swift",
         "MouseTracker.swift",
         "ShortcutsPanelController.swift",

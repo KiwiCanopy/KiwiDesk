@@ -157,14 +157,17 @@ struct SpaceBarGlyphTargetTests {
         let mail = try #require(item.glyphTargets.first)
         mail.mouseDown(with: Self.click)
         mail.mouseUp(with: Self.release)
+        // VoiceOver's press takes its own door, where Core opens a
+        // list's menu (#1946).
+        var pressed: [SpaceBarGlyphPick] = []
+        actions.accessibilityPress = { pressed.append($0) }
         let more = try #require(item.overflowTarget)
         #expect(more.accessibilityPerformPress())
-        #expect(picks.map(\.kind) == [.glyph, .overflow])
-        #expect(
-            picks.map(\.windows)
-                == [[WindowID(2), WindowID(3)], [WindowID(5), WindowID(6)]]
-        )
-        #expect(picks.allSatisfy { $0.space == SpaceID("2") })
+        #expect(picks.map(\.kind) == [.glyph])
+        #expect(picks.map(\.windows) == [[WindowID(2), WindowID(3)]])
+        #expect(pressed.map(\.kind) == [.overflow])
+        #expect(pressed.map(\.windows) == [[WindowID(5), WindowID(6)]])
+        #expect((picks + pressed).allSatisfy { $0.space == SpaceID("2") })
         #expect(switched.isEmpty)
         item.mouseDown(with: Self.click)
         #expect(switched == [SpaceID("2")])

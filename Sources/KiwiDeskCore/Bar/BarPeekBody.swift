@@ -1,10 +1,11 @@
 import AppKit
 
-/// The peek's text (#1946, the owner's ruling): each group's
+/// The peek's text (#1946, the owner's rulings): each group's
 /// header — the app, smaller and semibold in the item ink, its icon
 /// on `+n`, its count pill from two windows — above one wrapped
-/// row per window, hairlines between. Rebuilt on every show, so
-/// nothing it draws outlives the content Core read.
+/// row per window, hairlines between, each row its window's button
+/// (`BarPeekBody+Targets`). Rebuilt on every show, so nothing it
+/// draws outlives the content Core read.
 @MainActor
 final class BarPeekBody: NSView {
     /// The peek's geometry and reading sizes, one home.
@@ -43,6 +44,10 @@ final class BarPeekBody: NSView {
         /// The gap between the bar's panel and the peek.
         static let stripGap: CGFloat = 6
         static let screenMargin: CGFloat = 8
+        /// How far a button's hover fill reaches past its text.
+        static let hoverPadH: CGFloat = 6
+        static let hoverPadV: CGFloat = 3
+        static let hoverRadius: CGFloat = 6
     }
 
     override var isFlipped: Bool { true }
@@ -59,6 +64,18 @@ final class BarPeekBody: NSView {
     var moreChevron: NSImageView?
     /// The hairlines' ink: the bar's rule tier (`BarDivider`).
     private(set) var ruleInk = NSColor.clear
+    /// The buttons the last build laid out, top to bottom, and the
+    /// shelf whose inks they wear (`BarPeekBody+Targets`).
+    var targets: [Target] = []
+    var shelf = KiwiShelf()
+    /// The button under the pointer, and the one a press took.
+    var hovered: Int?
+    var pressed: Int?
+    /// The one fill drawn under the hovered button.
+    let highlight = NSView()
+    /// A row's window picked, or "N more" pressed — the peek's.
+    var onPick: @MainActor (WindowID) -> Void = { _ in }
+    var onMore: @MainActor () -> Void = {}
 
     /// Lays `content` out in `shelf`'s face and ink, with a "more"
     /// line where `hidden` windows did not fit — above the list
@@ -76,6 +93,7 @@ final class BarPeekBody: NSView {
         rules = []
         moreLabel = nil
         moreChevron = nil
+        resetTargets(shelf)
         setAccessibilityElement(false)
         ruleInk = BarDivider.color(textColor: shelf.itemColor)
         let ink = NSColor(kiwiHex: shelf.itemColor)
@@ -210,6 +228,11 @@ final class BarPeekBody: NSView {
                 height: height
             )
             add(row)
+            addTarget(
+                .window(built.group.rows[index].window),
+                around: row.frame,
+                inks: [row]
+            )
             y += height
         }
         return y
