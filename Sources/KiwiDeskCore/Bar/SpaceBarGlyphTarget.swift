@@ -48,7 +48,7 @@ final class SpaceBarGlyphActions {
             with: .rightMouseDown,
             location: anchor.convert(corner, to: nil),
             modifierFlags: [],
-            timestamp: ProcessInfo.processInfo.systemUptime,
+            timestamp: 0,
             windowNumber: window.windowNumber,
             context: nil,
             eventNumber: 0,
