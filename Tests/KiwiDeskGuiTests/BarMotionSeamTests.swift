@@ -106,6 +106,8 @@ struct BarMotionSeamTests {
         "setFrame": ["travels(", "isReduced"],
         "setAlpha": ["fades(", "isReduced"],
         "fades": [],
+        "fadePeek": ["peekFadeDuration(", "isReduced"],
+        "peekFadeDuration": ["fades("],
         "afterGroupGlide": ["plateGlideDuration(", "isReduced"],
         "shelfGlideLength": ["plateGlideDuration(", "isReduced"],
         "standCommitted": [],

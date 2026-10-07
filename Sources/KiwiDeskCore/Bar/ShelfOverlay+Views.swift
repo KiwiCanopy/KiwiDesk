@@ -28,9 +28,6 @@ extension ShelfOverlay {
 
     func makePanel() -> NSPanel {
         let panel = BarPanel.makeNonActivating()
-        // KiwiDesk is never the active app; a glyph's hover title
-        // would otherwise never show (#1514).
-        panel.allowsToolTipsWhenApplicationIsInactive = true
         content.wantsLayer = true
         content.layer?.masksToBounds = true
         panel.contentView = content

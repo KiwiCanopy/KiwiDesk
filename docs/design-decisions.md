@@ -12458,11 +12458,52 @@ choose for the user: any guess (the most recent, the first) is
 wrong often enough to teach distrust of the click, and a switch
 fired before the choice moves the screen under a menu the user
 may still dismiss. So the menu opens where the user is, and
-dismissing it costs nothing. The hover title is read when the
-pointer settles rather than drawn into the render, so it is
+dismissing it costs nothing. The hover peek reads its windows
+when it shows rather than being drawn into the render, so it is
 current without the bar re-rendering on every title change. A
 setting to turn glyph clicks off waits for misclicks measured on
 a device (#1514).
+
+**[Trade-off] A bar item's hover peek.** (#1946, owner ruling
+2026-10-07 from an HTML preview.) Hovering a Space Bar glyph, a
+`+n` disc or an App Bar item that hides its text shows a
+read-only label in the bar's own look, in place of the system
+tooltip. The tooltip could not be restyled, waited the tooltip
+delay, and listed the same windows the click menu lists in
+another face, so two surfaces fought over one list. The peek is
+the list in the bar's face; the menu is its actionable version,
+and a press turns one into the other: the peek closes on the
+press, and a multi-window glyph's menu opens where it stood.
+
+What it shows is ruled whole: the app on top in the menu's
+section-header style, so the peek reads as the menu before a
+click; one row per window, hairlines between, so a title that
+wraps still reads as one window; every window counted, an
+untitled one as the menu names it; the count as a bare number in
+the bar's own badge pill, only from two windows, so it needs no
+plural; titles wrapped whole, since the peek exists to show what
+the bar cuts. `+n` mixes apps, so its groups carry their icons.
+The face is the bar's, at one fixed reading size: the strip-depth
+ladders would shrink it with a thin bar, which is where the peek
+is most needed.
+
+It never acts and never opens a menu on hover. A hover-opened
+menu runs a tracking loop that eats the next click, and no macOS
+surface does that; the panel takes no mouse event, so it needs no
+grace region, and it is hidden from VoiceOver, which keeps the
+item's label and the menu.
+
+Timing has one home, `BarPeek.Timing`. A first peek waits a short
+dwell, because a zero dwell flashes a label every time the
+pointer crosses a top bar on its way to the menu bar; once one
+shows, the next item swaps in at once, and for a short cool-down
+after it closes, so moving along the bar reads as one peek. The
+dwell is shorter than Settings' tooltip delay (Hover help appears
+sooner than AppKit's default) on purpose and does not overturn
+it: a bar item's peek answers a glance at a strip the pointer
+passes all day, while Settings' help answers a reader who stopped
+to ask. A dwell is not motion, so Reduce Motion keeps it and
+drops only the fade.
 
 **A Space's strip centres on its focus, holds under the pointer,
 and does not scroll.** (#1528 items 17–22, owner rulings

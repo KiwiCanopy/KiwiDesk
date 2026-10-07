@@ -43,6 +43,13 @@ struct BarTextFieldCensusTests {
             door: nil,
             reason: "measures a width, draws nothing"
         ),
+        "BarPeekBody+Parts.swift": Entry(
+            count: 1,
+            door: nil,
+            reason: "the hover peek's wrapped lines (#1946), laid by "
+                + "their line box off the strip; its count pill is "
+                + "SpaceBarItemView.makeBadge's"
+        ),
         "ShelfCountView.swift": Entry(
             count: 1,
             door: ("BarTextGlyph.originY(", "ShelfCountView.swift"),

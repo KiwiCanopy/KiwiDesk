@@ -13,6 +13,9 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarRun.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBar.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBarGroups.swift"
+  # The hover peek's content (#1946): built at show time from the
+  # glyph menu's rows, a third title channel.
+  - "Sources/KiwiDeskCore/App/KiwiCore+BarPeek.swift"
   # The one shelf (#1517): where a bar field lives, the one
   # reservation, the one placement rule, the retired verbs.
   - "Sources/KiwiDeskCore/App/KiwiCore+Shelf*.swift"
@@ -549,19 +552,36 @@ Obligations:
   debounce (`KiwiCore+BarTitles`), never by consumers
   pre-filtering on what an item draws — the old content gate was
   that pre-filter, and it is what dropped the announced channel.
-- **A hover title is read when it shows — through
-  `SpaceBarGlyphActions.tooltip` on a Space Bar glyph,
-  `AppBarItemActions.tooltip` on an App Bar item — and never
-  stored on a view.** It is a third title channel, and it owes
+- **Both bars feed ONE hover peek, read when it shows and never
+  stored on a view** (#1946). An item hands the shelf's one
+  `BarPeek` its WINDOWS (`BarPeekSource`), never a string, and
+  Core builds the content as the peek shows, through the one
+  `KiwiCore.barPeekContent` over the glyph menu's
+  `spaceBarMenuRows`. It is a third title channel, and it owes
   the refresh gate above no arm only because nothing caches it;
-  a view that keeps the string brings back the stale title with
-  no gate watching (`SpaceBarGlyphWiringTests` ▸
-  `tooltipIsReadAtHover`, `AppBarHoverTitleTests` ▸
-  `tooltipIsReadAtHover`). An App Bar item asks only where it
-  hides text — Core's cut verdict (`barItemTitle`, the one
-  branch the item text also takes) or a label it did not draw
-  in full (#1514) — and both bars build the string through the
-  one `KiwiCore.hoverTitle(app:titles:)`.
+  a view that keeps a title brings back the stale one with no
+  gate watching (`SpaceBarGlyphWiringTests` ▸ `peekIsReadAtShow`,
+  `AppBarHoverTitleTests` ▸ `peekIsReadAtShow`). An App Bar item
+  asks only where it hides text — Core's cut verdict
+  (`barItemTitle`, the one branch the item text also takes) or a
+  label it did not draw in full (#1514). No bar view registers
+  the system tooltip the peek replaced
+  (`BarPeekSeamTests` ▸ `noBarTooltip`).
+- **Report every hover reading to the peek from the item's one
+  hover gate (`applyHover`), the relayout's re-read included, and
+  close it on a press, a strip scroll and a relayout that moved
+  its item** — `ShelfManager.relayout` re-checks the peeked item
+  after the hover re-read (`BarPeekSeamTests` ▸
+  `relayoutChecksAfterTheReRead`, `BarPeekWiringTests`). Its
+  timing lives in `BarPeek.Timing` and nowhere beside it; its
+  fade is `BarMotion`'s; its glass is decided once in
+  `BarPeekPanel.show` through the gate (`BarPeekSeamTests` ▸
+  `peekTakesTheGate`); its text asks `BarFont` at the peek's own
+  fixed size, never the strip-depth ladders (`BarFontSiteTests` ▸
+  `hoverPeek`). The panel is deaf to the mouse and hidden from
+  accessibility: VoiceOver keeps the item's label and the menu
+  (`BarPeekTests` ▸ `panelIsReadOnly`). The argument is
+  `docs/design-decisions.md` ▸ A bar item's hover peek.
 
 ## A Space Bar glyph is a click target the item owns (#1528)
 

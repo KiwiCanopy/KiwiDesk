@@ -11,9 +11,6 @@ extension KiwiCore {
         spaceBars.glyphActions.pick = { [weak self] pick in
             self?.withUserMotion { self?.pickFromSpaceBar(pick) }
         }
-        spaceBars.glyphActions.tooltip = { [weak self] in
-            self?.spaceBarTooltip($0)
-        }
         // A strip held under the pointer re-centres as it leaves
         // (#1528 item 21), through the one bar refresh — deferred,
         // since a hold can end inside a render or a relayout.
@@ -76,16 +73,5 @@ extension KiwiCore {
                 enabled: !raiseCrossesDesktops(id)
             )
         }
-    }
-
-    /// The app on the first line, then one line per window title
-    /// (#1514's ruling); read at hover, so it is never stale.
-    func spaceBarTooltip(_ windows: [WindowID]) -> String? {
-        let members = windows.compactMap { state.windows[$0] }
-        guard let first = members.first else { return nil }
-        return Self.hoverTitle(
-            app: first.appName,
-            titles: members.map(\.title).filter { !$0.isEmpty }
-        )
     }
 }

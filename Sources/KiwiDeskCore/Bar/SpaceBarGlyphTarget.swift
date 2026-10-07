@@ -24,9 +24,10 @@ struct SpaceBarGlyphPick {
 @MainActor
 final class SpaceBarGlyphActions {
     var pick: @MainActor (SpaceBarGlyphPick) -> Void = { _ in }
-    /// Read at hover time, so a title is current without the bar
+    /// The bars' one hover peek (#1946), which reads its content
+    /// when it shows, so a title is current without the bar
     /// re-rendering on every title change (#1514).
-    var tooltip: @MainActor ([WindowID]) -> String? = { _ in nil }
+    weak var peek: BarPeek?
     /// Pops a menu at its target as a context menu, the chrome the
     /// bar's right-click menu wears (#1850) — modal, so a test
     /// swaps it.
@@ -68,7 +69,6 @@ final class SpaceBarGlyphTarget: NSView {
     let members: [WindowID]
     let kind: SpaceBarGlyphPick.Kind
     weak var actions: SpaceBarGlyphActions?
-    private var tipTag: NSView.ToolTipTag?
 
     init(
         space: SpaceID,
@@ -99,32 +99,23 @@ final class SpaceBarGlyphTarget: NSView {
         )
     }
 
+    /// What the peek shows for this target (#1946).
+    var peekSource: BarPeekSource {
+        kind == .glyph ? .glyph(members) : .overflow(members)
+    }
+
+    /// A press closes the peek before it picks, so a multi-window
+    /// glyph's list visibly becomes its menu (#1946); a
+    /// Control-click's menu closes it as any menu does.
     override func mouseDown(with event: NSEvent) {
         guard !openControlClickMenu(event) else { return }
+        actions?.peek?.dismiss()
         actions?.pick(pick)
     }
 
     override func accessibilityPerformPress() -> Bool {
+        actions?.peek?.dismiss()
         actions?.pick(pick)
         return true
-    }
-
-    override func setFrameSize(_ newSize: NSSize) {
-        super.setFrameSize(newSize)
-        if let tipTag { removeToolTip(tipTag) }
-        // The `+n` badge's list is its click; a glyph names itself.
-        guard kind == .glyph else { return }
-        tipTag = addToolTip(bounds, owner: self, userData: nil)
-    }
-}
-
-extension SpaceBarGlyphTarget: NSViewToolTipOwner {
-    func view(
-        _ view: NSView,
-        stringForToolTip tag: NSView.ToolTipTag,
-        point: NSPoint,
-        userData data: UnsafeMutableRawPointer?
-    ) -> String {
-        actions?.tooltip(members) ?? ""
     }
 }

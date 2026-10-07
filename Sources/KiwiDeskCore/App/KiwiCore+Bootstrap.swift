@@ -69,7 +69,7 @@ extension KiwiCore {
         }
         wireSpaceBarGlyphs()
         wireBarMenus()
-        wireAppBarHoverTitle()
+        wireBarPeek()
         appFont.onLoad = { [weak self] in
             self?.updateBars()
         }

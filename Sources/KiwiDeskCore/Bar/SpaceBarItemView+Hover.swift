@@ -28,6 +28,7 @@ extension SpaceBarItemView {
     }
 
     override func mouseExited(with event: NSEvent) {
+        reportPeek(nil)
         setPointerInside(false)
         guard isHovered || hoveredTarget != nil else { return }
         isHovered = false
@@ -60,6 +61,7 @@ extension SpaceBarItemView {
         _ ownsPointer: Bool,
         target: SpaceBarGlyphTarget?
     ) {
+        reportPeek(ownsPointer ? target : nil)
         setPointerInside(ownsPointer)
         let hovered = !isActive && space != nil && ownsPointer
         guard hovered != isHovered || target !== hoveredTarget else {
@@ -77,5 +79,16 @@ extension SpaceBarItemView {
         guard inside != pointerInside else { return }
         pointerInside = inside
         if let space { onPointerInside(space, drawn, inside) }
+    }
+
+    /// Hands the peek the target under the pointer (#1946) —
+    /// every hover reading, the relayout's re-read included.
+    func reportPeek(_ target: SpaceBarGlyphTarget?) {
+        glyphActions?.peek?.pointer(
+            in: self,
+            on: target,
+            source: target?.peekSource,
+            edge: style.edge
+        )
     }
 }

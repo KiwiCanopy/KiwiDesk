@@ -55,6 +55,9 @@ final class ShelfManager {
     /// The bars' context menus (#1518) — the one instance; Core
     /// sets its rows and hands it to both bar managers.
     let contextMenus = BarContextMenus()
+    /// The bars' one hover peek (#1946); Core sets its content and
+    /// hands it to both bar managers.
+    let peek = BarPeek()
     /// Set while `updateBars` syncs the two bars: their renders
     /// would otherwise re-lay the shelf against the previous plan
     /// before `sync` hands it the new one.
@@ -146,6 +149,8 @@ final class ShelfManager {
         shelf.space?.syncHoverToPointer()
         shelf.app?.syncHoverToPointer()
         overlay.handle.syncHoverToPointer()
+        // The peek's item may have moved under it, or left.
+        peek.syncToAnchor()
     }
 
     /// The displays with a shelf still fading out: a bar manager

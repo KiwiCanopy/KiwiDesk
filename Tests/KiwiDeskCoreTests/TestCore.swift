@@ -122,6 +122,9 @@ func makeTestCore(
     core.openOrFocus.openApp = { _, _ in false }
     // A Space Bar menu pops modally and would hang the run (#1528).
     core.spaceBars.glyphActions.present = { _, _ in }
+    // A hover's dwell would open the peek's panel on a live
+    // timer (#1946); a peek suite steps its own.
+    core.shelves.peek.schedule = { _, _ in }
     // A bar menu's Quit row terminates a real app (#1518).
     core.shelves.contextMenus.terminateApp = { _ in }
     // New Window activates the target's app and both window

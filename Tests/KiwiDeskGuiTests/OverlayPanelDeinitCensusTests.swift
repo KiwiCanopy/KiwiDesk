@@ -222,6 +222,7 @@ struct OverlayPanelDeinitCensusTests {
         for expected in [
             "ShelfOverlay", "StickyMarkOverlay", "SizeLimitOverlay",
             "Marker", "MonocleFlipOverlay", "AppKitBorderOverlay",
+            "BarPeekPanel",
         ] {
             #expect(
                 owners.contains(expected),

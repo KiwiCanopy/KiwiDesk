@@ -4,7 +4,8 @@ import Testing
 /// The bar menus' two machine-touching seams stay pinned in BOTH
 /// `makeTestCore` twins (#1518, #1528): the Quit row's
 /// `terminateApp`, whose live default terminates the real process
-/// owning a fixture pid, and the glyph menu's modal `present`.
+/// owning a fixture pid, the glyph menu's modal `present`, and the
+/// hover peek's dwell timer, which would open a panel (#1946).
 /// Deleting a pin from both twins is otherwise silent — the
 /// twins-identical scan in `MachineTouchTests` sees only a
 /// one-sided deletion. The `MouseButtonSeamGuardTests` shape.
@@ -33,6 +34,9 @@ struct BarMenuSeamGuardTests {
                 )
                     && source.contains(
                         "spaceBars.glyphActions.present = { _, _ in }"
+                    )
+                    && source.contains(
+                        "shelves.peek.schedule = { _, _ in }"
                     ),
                 .init(rawValue: "\(target) misses a pin")
             )
