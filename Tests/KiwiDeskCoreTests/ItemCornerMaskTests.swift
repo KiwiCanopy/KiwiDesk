@@ -116,4 +116,45 @@ struct ItemCornerMaskTests {
             }
         }
     }
+
+    /// The App Bar's twin of the outlined Space plate: on a plate
+    /// the outline rounds every item's ends, the edge mark only
+    /// the run's (#2029) — so the item must ask its indicator.
+    @Test("An outlined App Bar plate rounds every item's ends")
+    func outlinedAppPlateRoundsEveryItem() throws {
+        for indicator in AppBarStyle.ActiveIndicator.allCases {
+            var look = AppBarLook()
+            look.shelf = Fixture.shelf(100, boxed: false)
+            look.bar.activeIndicator = indicator
+            look.edge = .top
+            let manager = AppBarManager()
+            manager.sync([
+                AppBarManager.Bar(
+                    display: barTitleDisplay,
+                    space: SpaceID("1"),
+                    items: (1...3).map {
+                        appBarItem(UInt32($0), text: "Downloads")
+                    },
+                    activeIndex: 0,
+                    strip: Fixture.strip(),
+                    style: look,
+                    capAxis: 1440
+                )
+            ])
+            let overlay = try #require(
+                manager.overlayForTesting(barTitleDisplay)
+            )
+            let views = overlay.itemViews.filter { !$0.isHidden }
+            #expect(views.count == 3)
+            let outlined = indicator == .outline
+            for (index, view) in views.enumerated() {
+                view.layoutSubtreeIfNeeded()
+                view.applyCornerRadius()
+                let round = try Self.rounds(view.layer)
+                let note = Comment(rawValue: "\(indicator) #\(index)")
+                #expect(round.leading == (outlined || index == 0), note)
+                #expect(round.trailing == (outlined || index == 2), note)
+            }
+        }
+    }
 }
