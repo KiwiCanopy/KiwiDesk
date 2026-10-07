@@ -28,10 +28,16 @@ extension ShortcutsSection {
         )
     }
 
+    /// Re-renders the bar only when its reading changed.
+    func show(_ reading: ShortcutsJumpReading) {
+        if reading != jumpReading { jumpReading = reading }
+    }
+
     private func jump(
         to group: ShortcutsJumpGroup,
         proxy: ScrollViewProxy
     ) {
+        show(jumpTracker.jump(to: group))
         if group == .gestures { gesturesExpanded = true }
         withAnimation(
             reduceMotion

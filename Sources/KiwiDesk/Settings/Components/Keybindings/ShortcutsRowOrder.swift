@@ -1,8 +1,12 @@
 /// Display order definitions for Shortcuts settings section (#678,
 /// `ShortcutsCensusRenderTests`).
 enum ShortcutsRowOrder {
-    /// Containers drawn with bespoke views rather than a standard list loop.
+    /// Containers holding a non-empty order list that a bespoke
+    /// view draws rather than a standard list loop — Open
+    /// applications for its app list, though its KiwiDesk rows
+    /// are walked (#1520).
     static let bespokeContainers: Set<SettingsContainer> = [
+        .openApplications,
         .layers,
         .luaBindings,
         .defaultShortcuts,

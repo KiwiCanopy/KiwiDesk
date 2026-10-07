@@ -214,20 +214,49 @@ struct KiwiDeskKeyRows: View {
     let expander: ShortcutsFamilyRows
 
     var body: some View {
-        Text(L("app.name", "KiwiDesk"))
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-            .padding(.top, 4)
+        // The in-card heading idiom, heading trait included.
+        GestureGroupHeading(
+            title: L("app.name", "KiwiDesk"),
+            followsGroup: true
+        )
         ForEach(
             ShortcutsRowOrder.openApplicationsKiwiDesk,
             id: \.id
         ) { key in
-            KeybindingFamilyRows(
-                model: model,
-                bindings: $bindings,
-                key: key,
-                expander: expander
+            anchored(key) {
+                KeybindingFamilyRows(
+                    model: model,
+                    bindings: $bindings,
+                    key: key,
+                    expander: expander
+                )
+            }
+        }
+    }
+
+    /// The family wrapped in ONE view carrying its catalog anchor
+    /// (#277): a family emits several views, and an anchor on the
+    /// bare family would mount one id per child.
+    @ViewBuilder private func anchored<Family: View>(
+        _ key: SettingKey,
+        @ViewBuilder family: () -> Family
+    ) -> some View {
+        switch key {
+        case .shortcuts(.showShortcuts):
+            VStack(alignment: .leading, spacing: 8) { family() }
+                .searchAnchored(
+                    SettingsCatalog.shortcuts.showShortcutsBinding
+                )
+        case .shortcuts(.openSettings):
+            VStack(alignment: .leading, spacing: 8) { family() }
+                .searchAnchored(
+                    SettingsCatalog.shortcuts.openSettingsBinding
+                )
+        default:
+            let _ = assertionFailure(
+                "unanchored KiwiDesk keys row: \(key.id)"
             )
+            family()
         }
     }
 }

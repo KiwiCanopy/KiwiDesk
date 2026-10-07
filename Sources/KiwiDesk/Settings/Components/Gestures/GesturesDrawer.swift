@@ -8,7 +8,8 @@ import SwiftUI
 /// with its feature, never before, and one whose surface is off
 /// greys with a pointer to where it turns on. The user's own click
 /// open plays the first picture once per visit (owner ruling
-/// 2026-09-29); a search or Go to opens it without. It mounts
+/// 2026-09-29); a search, Go to or its jump chip (#1520) opens it
+/// without. It mounts
 /// inside the section's `keybindingLayerName` scope, so a gesture
 /// recorder (#1656, #1519) must never read that value: a gesture modifier
 /// belongs to no layer.

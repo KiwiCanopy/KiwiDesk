@@ -241,9 +241,9 @@ struct SettingsSearchIndexTests {
                 // way in #1116 — a new census row landing,
                 // not an anchor going missing.
                 // 12 since #1255 — the same row leaving.
-                // 12 since #1520: the General drawer's two rows
-                // sit at rest under Open applications.
-                .shortcuts: 12,
+                // 10 since #277: the two General rows' anchors,
+                // kept under Open applications (#1520).
+                .shortcuts: 10,
                 // 4 since #1022: the one `app_rules.add_rule`
                 // action became two, one picker per rule, because
                 // a row can no longer be a no-op — a new census

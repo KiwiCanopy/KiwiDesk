@@ -293,7 +293,7 @@ struct SettingsThemeContrastTests {
             on: SettingsTheme.page,
             washedWith: (
                 SettingsTheme.accent,
-                ShortcutsJumpChip.markedWash
+                Double(SettingsTheme.jumpChipMarkedOpacity)
             )
         ),
         Pairing(
@@ -302,7 +302,7 @@ struct SettingsThemeContrastTests {
             on: SettingsTheme.cardHover,
             washedWith: (
                 SettingsTheme.accent,
-                ShortcutsJumpChip.markedWash
+                Double(SettingsTheme.jumpChipMarkedOpacity)
             )
         ),
     ]

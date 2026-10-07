@@ -10309,6 +10309,13 @@ card that opens on a first visit needs a stored "seen" flag and
 then changes shape on the second; search opens it on a hit, and its
 summary does the telling while it is shut.
 
+:::unreleased
+Since the layer's name moved onto the pinned jump bar (#1520), the
+separation is carried by the rule after the Mouse & trackpad chip
+and by the Layers card, which leads everything layer-scoped: the
+card above it belongs to no layer.
+:::
+
 **Its entries are grouped by where the hand is** — on your
 windows, on the KiwiShelf, anywhere holding a modifier — never by
 gesture type, which is grouping by widget. That grouping is also
@@ -10524,18 +10531,16 @@ intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
 
 :::unreleased
 **The page is mapped by pinned jump chips, never split into tabs**
-(#1520, owner ruling 2026-10-01). The per-app shortcut — the
-answer to "switch to the Space an app has windows in" — sat in
-the fourth of five groups, well below the fold of a list the
-reader had no map of, and users asked for it without finding it.
-Tabs were the owner's first lean, being easy to click, and were
-refused after both were drawn side by side: a tab hides every
+(#1520, owner ruling 2026-10-01). A group well below the fold of
+a long list is undiscoverable without a map — the per-app
+shortcut, which answers "switch to the Space an app has windows
+in", is the costly case. Tabs are easier to click but hide every
 group but one, so a conflict banner or a search hit lands on a
 page whose siblings are out of sight, and search would have to
 switch tabs as it opens drawers (#1250). Chips keep the page one
-page. They are pinned, which answers the cost that made tabs
-tempting — with chips at the top of a long list, reaching the
-next group meant scrolling back up first. Tabs stay the update
+page. Pinned, they also answer what tabs avoid — with chips at
+the top of a long list, reaching the next group would mean
+scrolling back up first. Tabs stay the update
 window's control, which shows separate views one at a time;
 chips jump within one view. Moving *Open applications* up was
 refused too: it trades one group's discoverability for
@@ -10567,9 +10572,12 @@ stays refused, every row in Settings being a control.
 **The marked chip is the group under the bar.** A group is
 current once its header has reached the bar and while its card
 is still under it, so scrolling past Mouse & trackpad into the
-layer chrome marks nothing — no chip names what is there. At the
-end of the scroll the last group is marked, since a short final
-group's header can never reach the bar. Marking is a fill on a
+layer chrome marks nothing — no chip names what is there.
+Unscrolled, the first group is marked, whatever banner sits above
+it. A clicked chip stays marked until the user scrolls, since a
+group near the end may never bring its header to the bar; a
+scroll the user takes to the end marks the last group for the
+same reason. Marking is a fill on a
 layer of its own and hover a neutral fill beneath it (#1173): a
 pointer resting on the marked chip must not read as unmarking it.
 :::

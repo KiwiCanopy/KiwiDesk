@@ -1399,7 +1399,7 @@
   "shortcuts.imported_note": "Tastenkürzel importiert — überprüfe sie unten und dann %1$@.",
   "shortcuts.inactive.caption": "Diese Tastenkürzel zeigen auf Spaces, die nicht in der aktuellen Space-Liste sind. Sie funktionieren weiterhin — beim Drücken wird ihr Space neu erstellt — und behalten ihre Tastenkombination. Du kannst sie hier neu belegen oder entfernen; sobald ihr Space zurückkehrt, werden sie wieder aktiv.",
   "shortcuts.inactive.layer_caption": "Diese Tastenkürzel wechseln zu einer Ebene, die nicht in der Ebenenliste dieses Profils steht. Belege sie hier neu oder entferne sie.",
-  "shortcuts.jump.label": "Springen zu",
+  "shortcuts.jump.label": "Direkt zu",
   "shortcuts.layer_name": "Ebenenname",
   "shortcuts.layers.caption": "Ebenen sind alternative Tastenkürzel-Sets — es reagieren immer nur die Kürzel der aktiven Ebene. Weise unten eine Taste zu, um zwischen ihnen zu wechseln. „default“ ist die Standard-Ebene und nach dem Start der App immer die aktive.",
   "shortcuts.lua_placeholder": "Lua, z. B. KiwiDesk.reload_config()",

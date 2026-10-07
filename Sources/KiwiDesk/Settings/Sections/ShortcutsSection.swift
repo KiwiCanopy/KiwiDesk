@@ -19,6 +19,7 @@ struct ShortcutsSection: View {
     /// still shut on every visit.
     @State var gesturesExpanded = false
     @State var jumpReading = ShortcutsJumpReading()
+    @State var jumpTracker = ShortcutsJumpTracker()
     @StateObject private var coordinator =
         RecorderCoordinator()
 
@@ -90,6 +91,8 @@ struct ShortcutsSection: View {
                 SettingsMetrics.paneInset
             )
             .shortcutsJumpSlot(.content)
+            // The chips' groups report under their anchor ids.
+            .environment(\.measuresSectionFrames, true)
             .environment(\.keybindingLayerName, selected)
             // One live read per section render (#1105), so
             // every row narrates the same verdict (#1126).
@@ -100,20 +103,22 @@ struct ShortcutsSection: View {
             .environmentObject(coordinator)
         }
         .shortcutsJumpSlot(.viewport)
-        .coordinateSpace(name: ShortcutsJumpSlot.space)
+        .coordinateSpace(name: SettingsSectionFrames.space)
         .onPreferenceChange(ShortcutsJumpFrames.self) { frames in
-            let reading = ShortcutsJumpReading.read(frames)
-            if reading != jumpReading { jumpReading = reading }
+            show(jumpTracker.slots(frames))
+        }
+        .onPreferenceChange(SettingsSectionFrames.self) { frames in
+            show(jumpTracker.sections(frames))
         }
     }
 
     @ViewBuilder private var header: some View {
         KeybindingConflictBanner(model: model)
-        // Above the layer header, so nothing in it reads as
-        // per-layer (#1726, amending the 2026-08-04 ruling that
-        // the layers card leads the section).
+        // Above the layer header, set off by the jump bar's rule
+        // after its chip, so nothing in it reads as per-layer
+        // (#1726, #1520; amending the 2026-08-04 ruling that the
+        // layers card leads the section).
         GesturesDrawer(model: model, expanded: $gesturesExpanded)
-            .shortcutsJumpSlot(.group(.gestures))
         ShortcutsHeader(model: model, selected: selection)
         layersCard
     }
@@ -133,25 +138,21 @@ struct ShortcutsSection: View {
             bindings: bindingsBinding,
             expander: expander
         )
-        .shortcutsJumpSlot(.group(.focus))
         MoveWindowsGroup(
             model: model,
             bindings: bindingsBinding,
             expander: expander
         )
-        .shortcutsJumpSlot(.group(.moveWindows))
         SizeFloatGroup(
             model: model,
             bindings: bindingsBinding,
             expander: expander
         )
-        .shortcutsJumpSlot(.group(.sizeFloat))
         ApplicationsGroup(
             model: model,
             bindings: bindingsBinding,
             expander: expander
         )
-        .shortcutsJumpSlot(.group(.openApplications))
     }
 
     @ViewBuilder private var tail: some View {

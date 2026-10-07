@@ -74,6 +74,17 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.open_applications",
         "Open applications"
     )
+    /// Open applications ▸ KiwiDesk's two rows, keyed on their
+    /// census label keys (the `L()` sites are `KeybindingCatalog`'s)
+    /// so a hit lands on the row (#1520).
+    let showShortcutsBinding = SettingsControl(
+        "keybinding.show_shortcuts",
+        "Show shortcuts panel"
+    )
+    let openSettingsBinding = SettingsControl(
+        "keybinding.open_settings",
+        "Open Settings"
+    )
     let inactiveShortcuts = SettingsControl(
         "shortcuts.section.inactive",
         "Inactive shortcuts"

@@ -18,7 +18,8 @@ struct ShortcutsJumpBar: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
-            chips
+            // The chips lay out first; a long layer name gives way.
+            chips.layoutPriority(1)
             Spacer(minLength: 0)
             // Header chrome, so it goes with the chrome step.
             if let readout, !width.collapsesChrome {
@@ -26,7 +27,7 @@ struct ShortcutsJumpBar: View {
                     .font(.subheadline)
                     .foregroundStyle(SettingsTheme.ink2)
                     .lineLimit(1)
-                    .fixedSize()
+                    .truncationMode(.middle)
             }
         }
         .padding(.horizontal, SettingsMetrics.paneInset)
@@ -79,37 +80,26 @@ struct ShortcutsJumpBar: View {
 }
 
 /// A content-sized hairline capsule. Marked: a soft accent fill
-/// and a semibold label in neutral ink. Hover lifts a neutral fill
-/// on a layer of its own beneath the marking, which it never
-/// replaces (#1173).
+/// and a semibold label in neutral ink, its width reserved so the
+/// marking never reflows the row. Hover lifts a neutral fill on a
+/// layer beneath the marking — each layer's colour is a function
+/// of its own state alone, so a hover cannot erase the marking
+/// (#1173).
 struct ShortcutsJumpChip: View {
     let title: String
     let marked: Bool
     let action: () -> Void
     @State private var hovered = false
 
-    /// The marked chip's accent wash over the page ground.
-    static let markedWash: Double = 0.18
-
     var body: some View {
         Button(action: action) {
-            Text(title)
-                .font(.subheadline.weight(marked ? .semibold : .regular))
-                .foregroundStyle(SettingsTheme.ink)
-                .lineLimit(1)
-                .fixedSize()
+            label
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
                 .background {
                     ZStack {
-                        Capsule().fill(
-                            hovered ? SettingsTheme.cardHover : .clear
-                        )
-                        Capsule().fill(
-                            SettingsTheme.accent.opacity(
-                                marked ? Self.markedWash : 0
-                            )
-                        )
+                        Capsule().fill(Self.hoverFill(hovered))
+                        Capsule().fill(Self.markFill(marked))
                     }
                 }
                 .overlay {
@@ -120,5 +110,33 @@ struct ShortcutsJumpChip: View {
         .buttonStyle(.plain)
         .onHover { hovered = $0 }
         .accessibilityAddTraits(marked ? .isSelected : [])
+    }
+
+    /// The semibold width is reserved under either weight.
+    private var label: some View {
+        ZStack {
+            text(.semibold).hidden()
+            text(marked ? .semibold : .regular)
+        }
+    }
+
+    private func text(_ weight: Font.Weight) -> some View {
+        Text(title)
+            .font(.subheadline.weight(weight))
+            .foregroundStyle(SettingsTheme.ink)
+            .lineLimit(1)
+            .fixedSize()
+    }
+
+    /// The pointer's layer, beneath the marking.
+    static func hoverFill(_ hovered: Bool) -> Color {
+        hovered ? SettingsTheme.cardHover : .clear
+    }
+
+    /// The marking's layer, over the pointer's.
+    static func markFill(_ marked: Bool) -> Color {
+        SettingsTheme.accent.opacity(
+            marked ? SettingsTheme.jumpChipMarkedOpacity : 0
+        )
     }
 }

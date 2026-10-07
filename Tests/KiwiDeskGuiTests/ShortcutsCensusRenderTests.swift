@@ -17,9 +17,8 @@ import Testing
 /// that a family added to one reaches the screen. Which
 /// containers is data (`ShortcutsRowOrder.bespokeContainers`),
 /// asserted by `ShortcutsBespokeContainerTests`, this suite's
-/// split-off half — Open applications left that set when its
-/// KiwiDesk rows began to be walked (#1520), while its app list
-/// is still membership only.
+/// split-off half. Open applications stays in that set for its
+/// app list while its KiwiDesk rows are walked (#1520).
 ///
 /// Set equality, not sequence: ORDER is the renderer's to own and
 /// is deliberately not pinned here, exactly as in
