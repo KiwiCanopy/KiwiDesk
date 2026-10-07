@@ -19,9 +19,10 @@ enum TilingConsent {
         return defaults.bool(forKey: key)
     }
 
-    /// Settles the state at launch. A finished tour or a granted
-    /// permission marks an install from before the gate; anything
-    /// else is a first run, which waits for Start Tiling.
+    /// Settles the state at launch. A granted permission, or the
+    /// discovery beat already shown (`OnboardingDiscovery`), marks
+    /// an install from before the gate; anything else is a first
+    /// run, which waits for Start Tiling.
     static func seedAtLaunch(
         isTrusted: Bool,
         _ defaults: UserDefaults = .standard

@@ -476,9 +476,9 @@ reads `.running` — the permission granted AND Start Tiling
 pressed, as `TilingConsent` records it.** A grant alone is not a
 request to tile; a new start path (a resume row, a restart)
 spelling `core.start()` itself would tile a first run without
-asking. Every surface narrating why management is not running
-reads the one `CoreHold` value `syncCoreHold()` pushes, never a
-flag of its own. `StartTilingWiringTests` holds the door's
+asking. A surface's hold state — why management is not
+running — is written only from `syncCoreHold()`, which derives
+the one `CoreHold` reading. `StartTilingWiringTests` holds the door's
 guard, `core.start()` spelled nowhere else and the one sync
 writing every surface; the argument is
 `docs/design-decisions.md` ▸ Granting Accessibility is not a
