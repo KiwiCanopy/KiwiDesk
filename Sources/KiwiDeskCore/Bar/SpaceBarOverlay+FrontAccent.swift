@@ -23,11 +23,11 @@ extension SpaceBarOverlay {
             shelf: style.shelf,
             first: false,
             last: true,
-            outlined: style.activeIndicator == .outline,
+            outlined: style.activeIndicator.drawsOutline,
             horizontal: horizontal
         )
         let hex = style.resolvedFocusedHighlightColor
-        let outline = style.activeIndicator == .outline
+        let outline = style.activeIndicator.drawsOutline
         let bounds = frontAccentClip.bounds
         frontAccent.paint = BarAccent.sheen(
             hex,

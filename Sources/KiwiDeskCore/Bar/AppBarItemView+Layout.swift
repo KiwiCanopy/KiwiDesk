@@ -83,7 +83,7 @@ extension AppBarItemView {
             ),
             first: first,
             last: last,
-            outlined: look.activeIndicator == .outline
+            outlined: look.activeIndicator.drawsOutline
         )
         return ItemEnds(
             leading: edgePadding + ends.leading,
@@ -149,10 +149,10 @@ extension AppBarItemView {
 
     private func layoutAccent() {
         guard !accent.isHidden else { return }
-        switch accentMode {
-        case .outline: layoutRing()
-        case .edgeMark: layoutEdgeMark()
-        case .none: break
+        switch drawnIndicator {
+        case .outline?: layoutRing()
+        case .edgeMark?: layoutEdgeMark()
+        case nil: break
         }
     }
 
