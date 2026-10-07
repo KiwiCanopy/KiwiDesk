@@ -9,19 +9,38 @@ extension KiwiShelf {
     /// carrying the rest of the hierarchy.
     public static let peekHeaderAlpha: CGFloat = 0.75
 
-    /// The peek's header ink: `itemColor` at `peekHeaderAlpha`
-    /// where that holds `idleInkFloor` on both grounds the peek
-    /// draws on — the stored Fill, and the Fill as glass tints it,
-    /// capped at `GlassTint.maxAlpha` — over white and black; the
-    /// full item ink otherwise, so a custom palette nobody measured
-    /// never loses its header.
+    /// The peek's header ink: `itemColor` taken a `peekStep`
+    /// down, so a custom palette nobody measured never loses its
+    /// header.
     public var peekHeaderColor: String {
-        let dimmed = itemColor(atShare: Self.peekHeaderAlpha)
+        peekStep(itemColor, beneath: nil)
+    }
+
+    /// The count pill's window glyph: the badge ink taken the
+    /// header's step down over the badge fill, so it reads as
+    /// faint as the header; the number keeps the full badge ink.
+    public var peekPillGlyphColor: String {
+        peekStep(groupBadgeTextColor, beneath: groupBadgeColor)
+    }
+
+    /// `ink` at `peekHeaderAlpha` of its own alpha where that holds
+    /// `idleInkFloor` on both grounds the peek draws on — the
+    /// stored Fill, and the Fill as glass tints it, capped at
+    /// `GlassTint.maxAlpha` — each under `layer` where given, over
+    /// white and black; `ink` itself otherwise.
+    func peekStep(_ ink: String, beneath layer: String?) -> String {
+        let dimmed = Self.hex(ink, atShare: Self.peekHeaderAlpha)
         let grounds = [fillColor, fill(cappedAt: GlassTint.maxAlpha)]
         for ground in grounds {
-            guard let ratio = worstContrast(dimmed, nil, on: ground),
+            guard
+                let ratio = worstContrast(
+                    dimmed,
+                    nil,
+                    on: ground,
+                    beneath: layer
+                ),
                 ratio >= Self.idleInkFloor
-            else { return itemColor }
+            else { return ink }
         }
         return dimmed
     }

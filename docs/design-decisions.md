@@ -12494,8 +12494,11 @@ exactly as its app shows the header alone rather than the same
 word twice; the count as a window glyph and a bare number in the
 bar's own badge pill, ringed in the hairlines' ink so it holds its
 edge on any ground, only from two windows, so it needs no word and
-no plural; titles wrapped whole, since the peek exists to show what
-the bar cuts. `+n` mixes apps, so its groups carry their icons.
+no plural — the glyph taking the header's derived step of the
+badge ink over the badge fill, so it reads as faint as the app
+line, while the number keeps the full badge ink; titles wrapped
+whole, since the peek exists to show what the bar cuts. `+n`
+mixes apps, so its groups carry their icons.
 The face is the bar's, at one fixed reading size: the strip-depth
 ladders would shrink it with a thin bar, which is where the peek
 is most needed. An App Bar GROUP always peeks every window it

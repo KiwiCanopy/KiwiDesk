@@ -71,8 +71,8 @@ extension BarPeekBody {
     }
 }
 
-/// The peek's count pill (#1946): `macwindow` then the number, both
-/// in the badge ink, on the badge fill.
+/// The peek's count pill (#1946): `macwindow` in the header's step of
+/// the badge ink, then the number in the full badge ink, on the fill.
 @MainActor
 final class BarPeekPill: NSView {
     let glyph = NSImageView()
@@ -98,7 +98,9 @@ final class BarPeekPill: NSView {
         )?.withSymbolConfiguration(
             .init(pointSize: M.pillGlyphSize, weight: .semibold)
         )
-        glyph.contentTintColor = ink
+        glyph.contentTintColor = NSColor(
+            kiwiHex: shelf.peekPillGlyphColor
+        )
         glyph.setAccessibilityElement(false)
         number.stringValue = "\(count)"
         number.font = shelf.badgeFont(ofSize: M.countSize, emphasis: .semibold)

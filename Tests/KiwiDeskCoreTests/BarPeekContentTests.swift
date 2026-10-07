@@ -204,6 +204,16 @@ struct BarPeekContentTests {
         // The window glyph leads the number inside the pill.
         #expect(pill.glyph.image != nil)
         #expect(pill.glyph.frame.maxX <= pill.number.frame.minX)
+        // The glyph at the header's step, the number at full ink.
+        #expect(shelf.peekPillGlyphColor != shelf.groupBadgeTextColor)
+        #expect(
+            pill.glyph.contentTintColor
+                == NSColor(kiwiHex: shelf.peekPillGlyphColor)
+        )
+        #expect(
+            pill.number.textColor
+                == NSColor(kiwiHex: shelf.groupBadgeTextColor)
+        )
         #expect(pill.frame.height == BarPeekBody.Metrics.pillHeight)
         // A ring in the hairlines' ink, the one rule colour.
         #expect(pill.layer?.borderWidth == BarPeekBody.Metrics.pillRing)

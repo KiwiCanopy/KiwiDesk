@@ -179,10 +179,16 @@ public struct KiwiShelf: Sendable, Equatable {
     /// `itemColor` at `share` of its own alpha, as `#RRGGBBAA`;
     /// an unparseable colour passes through.
     func itemColor(atShare share: CGFloat) -> String {
-        let body = itemColor.uppercased().drop { $0 == "#" }
+        Self.hex(itemColor, atShare: share)
+    }
+
+    /// `hex` at `share` of its own alpha, as `#RRGGBBAA`; an
+    /// unparseable colour passes through.
+    static func hex(_ hex: String, atShare share: CGFloat) -> String {
+        let body = hex.uppercased().drop { $0 == "#" }
         guard body.count == 6 || body.count == 8,
             body.allSatisfy(\.isHexDigit)
-        else { return itemColor }
+        else { return hex }
         let alpha =
             body.count == 8 ? Int(body.suffix(2), radix: 16) ?? 255 : 255
         let scaled = Int((CGFloat(alpha) * share).rounded())

@@ -52,15 +52,19 @@ extension KiwiShelf {
 
     /// The lower of the two wallpapers' contrasts between `ink`
     /// and `other` (the plate where nil), each composited over the
-    /// plate `fill`; nil where a colour does not parse.
+    /// plate `fill` — and over `layer` on that plate where given,
+    /// as a badge fill is; nil where a colour does not parse.
     func worstContrast(
         _ ink: String,
         _ other: String?,
-        on fill: String
+        on fill: String,
+        beneath layer: String? = nil
     ) -> Double? {
         var worst: Double?
         for ground in Self.inkGrounds {
-            guard let plate = Self.composite(fill, over: ground),
+            guard let shelf = Self.composite(fill, over: ground),
+                let plate = layer.map({ Self.composite($0, over: shelf) })
+                    ?? shelf,
                 let a = Self.composite(ink, over: plate),
                 let b = other.map({ Self.composite($0, over: plate) })
                     ?? plate,
