@@ -12539,8 +12539,11 @@ untitled one as the menu names it, and a lone window titled
 exactly as its app keeps its row under the header — a header
 with no row reads as an app with no window, and a row is now
 something to click; the count as a window glyph and a bare number in the
-bar's own badge pill, ringed in the hairlines' ink so it holds its
-edge on any ground, only from two windows, so it needs no word and
+bar's own badge pill, ringed in the hairlines' ink only where its
+fill separates from the peek's grounds by less than the 3:1
+non-text floor — derived on the header step's two grounds, so a
+fill that holds its own edge draws no extra line — only from two
+windows, so it needs no word and
 no plural — the glyph taking the header's derived step of the
 badge ink over the badge fill, so it reads as faint as the app
 line, while the number keeps the full badge ink; titles wrapped

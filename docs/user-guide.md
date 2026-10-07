@@ -548,9 +548,17 @@ One bar per display, listing that display's Spaces in profile
 order. Click a Space to switch to it.
 
 Click an app glyph to switch to its Space and focus that window.
-A glyph with a count badge, and a `+n` badge, open a menu of
-the windows they stand for instead; nothing switches until you
-pick a row.
+
+:::unreleased
+Resting the pointer on a glyph, a `+n` badge or an App Bar item
+that cuts its title lists its windows beside the bar; click a row
+to switch to that window. Clicking a glyph with a count badge, or
+a `+n` badge, shows the same list at once and keeps it open until
+you pick a row, click elsewhere or move the pointer away; nothing
+switches until you pick. A list too long for the screen ends in
+**N more**, which opens a menu of every window. With VoiceOver,
+pressing the glyph opens that menu.
+:::
 
 A Space holding more apps than fit keeps its focused app in the
 middle, with a `+n` on each side for the rest — at either end of

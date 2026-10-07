@@ -16,6 +16,8 @@ paths:
   # The hover peek's content (#1946): built at show time from the
   # glyph menu's rows, a third title channel.
   - "Sources/KiwiDeskCore/App/KiwiCore+BarPeek.swift"
+  # A glyph click and every bar list row's pick (#1528, #1946).
+  - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarClick.swift"
   # The one shelf (#1517): where a bar field lives, the one
   # reservation, the one placement rule, the retired verbs.
   - "Sources/KiwiDeskCore/App/KiwiCore+Shelf*.swift"
@@ -573,35 +575,57 @@ Obligations:
   (`BarPeekSeamTests` ▸ `noBarTooltip`).
 - **Report every hover reading to the peek from the item's one
   hover gate (`applyHover`) — the pointer's exit and the
-  relayout's re-read included — and close it on a press, a strip
-  scroll, any menu opening, a relayout that moved its item, and
-  its shelf leaving**: `ShelfManager.relayout` re-checks the
-  peeked item after the hover re-read, and `ShelfManager.sync`'s
-  hide arm is the one home for "its shelf left" — a fullscreen or
-  presentation stand-down, the bars turned off, a display gone —
-  since the panel joins every Space and would stay up over the
-  fullscreen app (`BarPeekSeamTests` ▸
+  relayout's re-read included — and close it on a click outside,
+  a pick, a strip scroll, any menu opening, a relayout that moved
+  its item, and its shelf leaving**: `ShelfManager.relayout`
+  re-checks the peeked item after the hover re-read, and
+  `ShelfManager.sync`'s hide arm is the one home for "its shelf
+  left" — a fullscreen or presentation stand-down, the bars
+  turned off, a display gone — since the panel joins every Space
+  and would stay up over the fullscreen app (`BarPeekSeamTests` ▸
   `relayoutChecksAfterTheReRead`, `BarPeekWiringTests` ▸
-  `shelfLeavingCloses`). **Every view that anchors the peek
-  dismisses it on a press**, after its Control-click guard
-  (`BarPeekSeamTests` ▸ `anchorsDismissOnPress`, whose `anchors`
-  map, derived from the `peek?.pointer(` callers, is the one copy
-  of who anchors it). Its timing lives in `BarPeek.Timing` and
+  `shelfLeavingCloses`). A press the press fan-out hears is a
+  click outside, since neither arm hears a bar or the peek. **An
+  anchor answers a press as its click rules** — an App Bar item's
+  press is a pick and closes the peek after its Control-click
+  guard, a glyph's only arms its click, which Core turns into a
+  pin or a pick (`BarPeekSeamTests` ▸ `anchorsAnswerAPress`,
+  whose `anchors` map, derived from the `peek?.pointer(`
+  callers, is the one copy of who anchors it). **The peek holds
+  while the pointer is inside `BarPeekHull`** — the item, the
+  peek and the bridge between their facing edges, which spans no
+  neighbour's rect — where no neighbour swaps in; leaving it
+  closes and cools (`BarPeekHullTests`, `BarPeekActionTests`).
+  Its timing lives in `BarPeek.Timing` and
   nowhere beside it; its fade is `BarMotion`'s; its glass is
   decided once in `BarPeekPanel.show` through the gate
   (`BarPeekSeamTests` ▸ `peekTakesTheGate`) and tinted UNIFORMLY
   through `GlassTint.applyUniform`, the ruled exception to the
   detached-surface fade (`PeekInkContrastTests` measures the ink
-  on that ground); its shelf is the one `ShelfManager` drew the
-  anchor's panel with; its text asks `BarFont` at the peek's own
-  fixed size, never the strip-depth ladders (`BarFontSiteTests` ▸
-  `hoverPeek`); a list taller than its room keeps what fits and
-  closes on the one "more" line (`BarPeekBody+More`,
-  `BarPeekFitTests` ▸ `tallPeekKeepsWhatFits`). The panel is
-  deaf to the mouse and hidden from
-  accessibility: VoiceOver keeps the item's label and the menu
-  (`BarPeekTests` ▸ `panelIsReadOnly`). The argument is
-  `docs/design-decisions.md` ▸ A bar item's hover peek.
+  on that ground, a hovered row's included, and the count pill
+  draws its ring only where `KiwiShelf.peekPillNeedsRing` says,
+  `PeekPillRingTests`); its shelf is the one
+  `ShelfManager` drew the anchor's panel with; its text asks
+  `BarFont` at the peek's own fixed size, never the strip-depth
+  ladders (`BarFontSiteTests` ▸ `hoverPeek`); a list taller than
+  its room keeps what fits and closes on the one "more" line
+  (`BarPeekBody+More`, `BarPeekFitTests` ▸
+  `tallPeekKeepsWhatFits`, `moreCountsHiddenRows`).
+- **Every peek row is its window's button, picked through the
+  one `pickBarRow` a window menu row takes** (#1946 amendment 2)
+  — on the release inside the row, a drag off it cancelling
+  (#2044), and judged when performed: a refused window cues
+  through `flashRefusalPill` and is never greyed, since the peek
+  reads no compositor on hover (`BarPeekSeamTests` ▸
+  `oneBarRowPick`, `BarPeekActionTests`, `BarPeekClickTests` ▸
+  `refusedRowCues`). A left click on a list glyph or `+n` pins
+  the peek at once and pops no menu; VoiceOver's press and "N
+  more" open the native menu at the anchor
+  (`BarPeekClickTests`). The panel takes the mouse but is
+  non-activating and never key, and hidden from accessibility
+  (`BarPeekTests` ▸ `panelTakesClicksWithoutActivating`). The
+  argument is `docs/design-decisions.md` ▸ A bar item's hover
+  peek.
 
 ## A Space Bar glyph is a click target the item owns (#1528)
 
@@ -613,13 +637,15 @@ Obligations:
   target list**, or subview order decides who takes the click —
   a render re-adds the glyph views above kept targets
   (`SpaceBarGlyphTargetTests` ▸ `hitTestPrefersTheTarget`).
-- **A menu a bar click opens is built by `SpaceBarWindowMenu`
-  and shown through `SpaceBarGlyphActions.present`**, which both
-  `makeTestCore` twins pin, since a modal menu hangs a run. Its
-  rows' enablement is the focus door's own refusal, greyed and
-  never hidden (`SpaceBarGlyphWiringTests` ▸
-  `refusedRowIsGreyed`); that no second builder exists is
-  review's.
+- **A window menu — VoiceOver's press on a list glyph, the
+  peek's "N more" — is built by `SpaceBarWindowMenu` in the one
+  `presentBarWindowMenu` and shown through
+  `SpaceBarGlyphActions.present`**, which both `makeTestCore`
+  twins pin, since a modal menu hangs a run. Its rows' enablement
+  is the focus door's own refusal, greyed and never hidden
+  (`SpaceBarGlyphWiringTests` ▸ `refusedRowIsGreyed`); that no
+  second builder exists is `BarPeekSeamTests` ▸
+  `oneBarRowPick`'s.
 - **Which groups a Space item draws is `SpaceBarStrip.window`,
   and its length reads the same arithmetic** — the builder takes
   the window, `autoLength` counts the drawn glyphs plus one cell
