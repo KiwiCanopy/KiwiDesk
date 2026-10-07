@@ -8,34 +8,19 @@ extension GeneralSection {
     /// The refusal cue's audible half (#1255). Previews on
     /// switch-on, the way macOS's own alert-sound picker does.
     @ViewBuilder var refusalSoundRow: some View {
-        // The card's row shape, like Start at login: the label's
-        // column, the switch beside it or under it.
-        DropdownRow(label: refusalLabel, spokenValue: nil) {
-            Toggle(
-                "",
-                isOn: Binding(
-                    get: { model.appWide.refusalSound },
-                    set: { on in
-                        model.setAppWide { $0.refusalSound = on }
-                        if on { NSSound.beep() }
-                    }
-                )
-            )
-            .labelsHidden()
-            .disabled(appWideReason(.refusalSound) != nil)
-        }
-        appWideReasonText(.refusalSound)
-        Text(
-            L(
-                "general.refusal_sound.help",
-                "A blocked action always shows a message on "
-                    + "the window — at a size limit, or where "
-                    + "the layout has nothing to resize. This "
-                    + "adds the system alert sound to it."
-            )
+        ToggleRow(
+            label: refusalLabel,
+            isOn: Binding(
+                get: { model.appWide.refusalSound },
+                set: { on in
+                    model.setAppWide { $0.refusalSound = on }
+                    if on { NSSound.beep() }
+                }
+            ),
+            help: refusalHelp,
+            disabled: appWideReason(.refusalSound) != nil
         )
-        .font(.caption)
-        .foregroundStyle(.secondary)
+        appWideReasonText(.refusalSound, underToggle: true)
     }
 
     /// The quit grid's density target (`quit.grid_target_depth`,
@@ -58,6 +43,7 @@ extension GeneralSection {
             )
             .disabled(appWideReason(.quitGridTargetDepth) != nil)
         }
+        appWideReasonText(.quitGridTargetDepth)
         Text(
             L(
                 "general.quit_pile_depth.caption",
@@ -68,13 +54,23 @@ extension GeneralSection {
         )
         .font(.caption)
         .foregroundStyle(.secondary)
-        appWideReasonText(.quitGridTargetDepth)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var refusalLabel: String {
         L(
             "general.refusal_sound",
-            "Play the alert sound when an action can't apply"
+            "Play a sound when an action is blocked"
+        )
+    }
+
+    private var refusalHelp: String {
+        L(
+            "general.refusal_sound.help",
+            "A blocked action always shows a message on "
+                + "the window — at a size limit, or where "
+                + "the layout has nothing to resize. This "
+                + "adds the system alert sound to it."
         )
     }
 
@@ -100,13 +96,21 @@ extension GeneralSection {
         model.generalGates.inertReason(for: .general(key))
     }
 
+    /// Drawn directly under the control; `underToggle` indents
+    /// it to the checkbox's label.
     @ViewBuilder private func appWideReasonText(
-        _ key: GeneralKey
+        _ key: GeneralKey,
+        underToggle: Bool = false
     ) -> some View {
         if let reason = appWideReason(key) {
             Text(GeneralGateHelp.sentence(for: reason))
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink3)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(
+                    .leading,
+                    underToggle ? ToggleRow.captionIndent : 0
+                )
         }
     }
 }

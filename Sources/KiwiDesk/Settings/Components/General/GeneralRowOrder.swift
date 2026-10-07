@@ -1,14 +1,15 @@
 /// Display order for General area settings rows
 /// (`GeneralCensusRenderTests`, #678 turn 14b).
 enum GeneralRowOrder {
-    /// Non-profile settings applying immediately.
+    /// Non-profile settings applying immediately, in the drawn
+    /// order (#2032).
     static let appliesImmediately: [SettingKey] = [
         .general(.language),
         .general(.appearance),
-        .general(.refusalSound),
         .general(.startAtLogin),
-        .general(.quitGridTargetDepth),
         .general(.installUpdatesAutomatically),
+        .general(.refusalSound),
+        .general(.quitGridTargetDepth),
     ]
 
     /// Advanced configuration and reset rows in ascending severity
