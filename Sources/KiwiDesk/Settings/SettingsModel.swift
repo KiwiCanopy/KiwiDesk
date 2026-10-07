@@ -222,6 +222,9 @@ final class SettingsModel: ObservableObject {
     /// True when macOS Accessibility is missing; drives
     /// `PermissionPausedBanner`.
     @Published var permissionPaused = false
+    /// The way back to a hidden What's new after a spotlight row's
+    /// "Show me"; drives `WhatsNewTrailBanner` (#2038).
+    @Published var whatsNewTrail: WhatsNewTrail?
     /// Routes paused banner button to macOS System Settings pane.
     var onResolvePermission: () -> Void = {}
     /// Reveals profile file in Finder (`AppDelegate+Onboarding`, #246).

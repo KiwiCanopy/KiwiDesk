@@ -25,6 +25,16 @@ extension SettingsView {
                 .padding(.horizontal, 12)
                 .padding(.top, 10)
             }
+            if let trail = model.whatsNewTrail {
+                WhatsNewTrailBanner(
+                    trail: trail,
+                    next: model.followNext,
+                    back: model.returnToWhatsNew,
+                    dismiss: model.dismissWhatsNew
+                )
+                .padding(.horizontal, 12)
+                .padding(.top, 10)
+            }
             if let notice = model.searchModeNotice {
                 SettingsSearchNotice(text: notice)
                     .padding(.horizontal, 12)

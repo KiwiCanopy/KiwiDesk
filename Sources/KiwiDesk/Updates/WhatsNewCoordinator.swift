@@ -23,6 +23,9 @@ final class WhatsNewCoordinator {
     var now: () -> Date = Date.init
     /// Puts the window on screen; a test records it instead.
     var presents: (WhatsNewWindowController) -> Void = { $0.present() }
+    /// Opens Settings on a spotlight row's control with the way
+    /// back (#2038 ruling ▸ handoff); the app sets it.
+    var showsInSettings: (WhatsNewTrail) -> Void = { _ in }
     /// Nudged whenever `waiting` changes.
     var onWaitingChanged: () -> Void = {}
 
@@ -124,7 +127,8 @@ final class WhatsNewCoordinator {
             ?? WhatsNewWindowController(
                 offer: offer,
                 narration: narration,
-                next: next?.current(at: now())
+                next: next?.current(at: now()),
+                showsInSettings: { [weak self] in self?.showsInSettings($0) }
             ) { [weak self] in
                 self?.answered()
             }

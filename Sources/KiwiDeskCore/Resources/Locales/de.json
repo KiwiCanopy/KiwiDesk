@@ -1637,6 +1637,7 @@
   "update.window.notes_tabs": "Release-Notes",
   "update.window.preparing": "Wird vorbereitet…",
   "update.window.released": "Veröffentlicht am %1$@",
+  "update.window.spotlight.show_me": "Zeig es mir",
   "update.window.title": "KiwiDesk %1$@ ist verfügbar",
   "update.window.try_again": "Erneut versuchen",
   "update.window.up_to_date_subtitle": "%1$@ ist die neueste Version",
@@ -1658,6 +1659,10 @@
   "updates.state.up_to_date_checked": "Auf dem neuesten Stand · zuletzt geprüft %1$@",
   "updates.state.up_to_date_window_open": "Auf dem neuesten Stand · schließe das Update-Fenster, um erneut zu prüfen",
   "updates.try_again": "Erneut versuchen",
+  "whatsnew.trail.back": "Zurück zu „Neu in KiwiDesk“",
+  "whatsnew.trail.dismiss": "Schließen",
+  "whatsnew.trail.from": "Aus „Neu in KiwiDesk“",
+  "whatsnew.trail.next": "Weiter: %1$@",
   "window_action.refusal.no_close_button": "„%1$@“ hat keine Schließen-Taste",
   "window_action.refusal.no_new_window": "%1$@ hat keinen Befehl „Neues Fenster“"
 }

@@ -1637,6 +1637,7 @@
   "update.window.notes_tabs": "릴리스 노트",
   "update.window.preparing": "준비 중…",
   "update.window.released": "출시일: %1$@",
+  "update.window.spotlight.show_me": "보기",
   "update.window.title": "KiwiDesk %1$@ 사용 가능",
   "update.window.try_again": "다시 시도",
   "update.window.up_to_date_subtitle": "최신 버전은 %1$@입니다",
@@ -1658,6 +1659,10 @@
   "updates.state.up_to_date_checked": "최신 상태 · 마지막 확인 %1$@",
   "updates.state.up_to_date_window_open": "최신 상태 · 다시 확인하려면 업데이트 윈도우를 닫으십시오",
   "updates.try_again": "다시 시도",
+  "whatsnew.trail.back": "새로운 기능으로 돌아가기",
+  "whatsnew.trail.dismiss": "닫기",
+  "whatsnew.trail.from": "새로운 기능에서",
+  "whatsnew.trail.next": "다음: %1$@",
   "window_action.refusal.no_close_button": "‘%1$@’에는 닫기 버튼이 없습니다",
   "window_action.refusal.no_new_window": "%1$@에는 ‘새로운 윈도우’ 명령이 없습니다"
 }

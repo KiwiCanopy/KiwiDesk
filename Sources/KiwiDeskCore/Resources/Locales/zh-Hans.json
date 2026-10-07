@@ -1637,6 +1637,7 @@
   "update.window.notes_tabs": "发行说明",
   "update.window.preparing": "正在准备…",
   "update.window.released": "发布于 %1$@",
+  "update.window.spotlight.show_me": "带我去看",
   "update.window.title": "KiwiDesk %1$@ 已可用",
   "update.window.try_again": "重试",
   "update.window.up_to_date_subtitle": "%1$@ 是最新版本",
@@ -1658,6 +1659,10 @@
   "updates.state.up_to_date_checked": "已是最新版本 · 上次检查：%1$@",
   "updates.state.up_to_date_window_open": "已是最新版本 · 关闭更新窗口即可再次检查",
   "updates.try_again": "重试",
+  "whatsnew.trail.back": "返回新功能",
+  "whatsnew.trail.dismiss": "忽略",
+  "whatsnew.trail.from": "来自新功能",
+  "whatsnew.trail.next": "下一项：%1$@",
   "window_action.refusal.no_close_button": "“%1$@”没有关闭按钮",
   "window_action.refusal.no_new_window": "%1$@ 没有“新建窗口”命令"
 }

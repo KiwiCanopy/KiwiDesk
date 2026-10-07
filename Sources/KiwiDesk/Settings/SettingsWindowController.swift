@@ -92,6 +92,14 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         show()
     }
 
+    /// Shows Settings on a What's new spotlight row's control,
+    /// with the way back (#2038 ruling ▸ handoff); `show()` is the
+    /// own-window door (#1281).
+    func follow(_ trail: WhatsNewTrail) {
+        model.follow(trail)
+        show()
+    }
+
     /// The live Spaces the profile does not hold changed (#1790).
     func showLiveOnlySpaces(_ spaces: [LiveOnlySpace]) {
         model.liveOnlySpaces = spaces
@@ -186,5 +194,6 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.setRecorderArmed(false)
         model.cancelPendingDiscard()
         ColorPanelController.shared.dismiss()
+        model.settingsClosed()
     }
 }

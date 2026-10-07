@@ -10,6 +10,9 @@ extension AppDelegate {
     /// never over the tour, and before boot so it narrates it.
     func offerWhatsNew(origin: LaunchOrigin, trusted: Bool) {
         guard let whatsNew = updater.whatsNew else { return }
+        whatsNew.showsInSettings = { [weak self] trail in
+            self?.dashboard.follow(trail)
+        }
         let tourOwns = OnboardingDiscovery.shouldResume(
             isTrusted: trusted
         )

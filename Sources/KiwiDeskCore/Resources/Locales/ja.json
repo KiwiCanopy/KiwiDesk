@@ -1637,6 +1637,7 @@
   "update.window.notes_tabs": "リリースノート",
   "update.window.preparing": "準備中…",
   "update.window.released": "リリース日: %1$@",
+  "update.window.spotlight.show_me": "見てみる",
   "update.window.title": "KiwiDesk %1$@ が利用可能です",
   "update.window.try_again": "再試行",
   "update.window.up_to_date_subtitle": "%1$@ が最新バージョンです",
@@ -1658,6 +1659,10 @@
   "updates.state.up_to_date_checked": "最新の状態です · 最終確認は%1$@",
   "updates.state.up_to_date_window_open": "最新の状態です · もう一度確認するにはアップデートウインドウを閉じてください",
   "updates.try_again": "再試行",
+  "whatsnew.trail.back": "新機能に戻る",
+  "whatsnew.trail.dismiss": "閉じる",
+  "whatsnew.trail.from": "新機能から",
+  "whatsnew.trail.next": "次へ：%1$@",
   "window_action.refusal.no_close_button": "「%1$@」には閉じるボタンがありません",
   "window_action.refusal.no_new_window": "%1$@には「新規ウインドウ」コマンドがありません"
 }

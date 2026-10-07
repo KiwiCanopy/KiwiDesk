@@ -140,6 +140,18 @@ many there are is set by the release feed rather than by us, so
 the strip falls back to a menu on the same selection wherever it
 does not fit.
 
+The Highlights tab's spotlight rows (#2038) are the one place a
+link is dropped rather than greyed: "Show me ›" trails a row only
+where this build can land on its setting, because a greyed link
+to a setting the build no longer has promises something nothing
+can keep. The row is one VoiceOver element, title and line, with
+"Show me" as its action. Following one, Settings carries a banner
+in the search notice's surface with the paused banner's buttons —
+Next, Back to What's new, Dismiss — whose Next is absent on the
+last linked row, likewise not greyed;
+`docs/design-decisions.md` ▸ *What's new leads with a spotlight*
+argues both.
+
 Every shipped segmented strip fits a full-width row at the
 720 pt minimum (`SettingsWidthClass.minimum`), measured against
 all ten locales (#95): the widest is Mouse resize action at
