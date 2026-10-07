@@ -129,6 +129,44 @@ struct AppBarHoverTitleTests {
         #expect(titles(core, view.peekSource) == ["Desktop"])
     }
 
+    /// A collapsed group draws its app name, so where it hides that
+    /// it peeks EVERY member's title with the count — every window
+    /// counts (#1946), which retires #1514's "a group lists no
+    /// title" for the peek.
+    @Test("A collapsed group's peek lists every member")
+    func groupListsEveryMember() throws {
+        let core = core(title: "Downloads")
+        core.state.apply(
+            .windowCreated(titledWindow(2, app: "Finder", title: "Desktop"))
+        )
+        core.appBars.sync([
+            paintedAppBar(
+                edge: .left,
+                items: [
+                    AppBarOverlay.Item(
+                        id: WindowID(1),
+                        text: "Finder",
+                        icon: nil,
+                        count: 2,
+                        members: [WindowID(1), WindowID(2)]
+                    )
+                ]
+            )
+        ])
+        let overlay = try #require(
+            core.appBars.overlayForTesting(barTitleDisplay)
+        )
+        let view = try #require(overlay.itemViews.first)
+        view.layout()
+        #expect(view.peekSource == .appItem([WindowID(1), WindowID(2)]))
+        let content = try #require(
+            view.peekSource.flatMap(core.barPeekContent)
+        )
+        #expect(content.groups.map(\.app) == ["Finder"])
+        #expect(content.groups.map(\.titles) == [["Downloads", "Desktop"]])
+        #expect(content.groups.map(\.count) == [2])
+    }
+
     @Test("An item reports its hover to the shelf's one peek")
     func itemReachesThePeek() throws {
         let core = core(title: "Downloads")

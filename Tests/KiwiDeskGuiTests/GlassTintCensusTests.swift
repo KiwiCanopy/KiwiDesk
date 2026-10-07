@@ -23,7 +23,10 @@ struct GlassTintCensusTests {
         "fade": [],
         "pinnedAppearance": ["drawsGlass", "wantsLightInk"],
         "sits": ["subviews"],
-        "apply": ["rendered(", "fade(", "pinnedAppearance(", "sits("],
+        // Both doors take the one painter (#1946's uniform tint).
+        "apply": ["paint("],
+        "applyUniform": ["paint("],
+        "paint": ["rendered(", "fade(", "pinnedAppearance(", "sits("],
     ]
 
     /// Ways a member puts a colour on screen. One whose body

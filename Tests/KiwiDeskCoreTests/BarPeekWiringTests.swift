@@ -7,7 +7,7 @@ import Testing
 /// The hover peek through the real Space Bar (#1946): the item's
 /// hover reading reaches the shelf's one peek, the dwell opens it
 /// with Core's content, and the pointer leaving, a press on the
-/// glyph and a strip scroll each close it.
+/// glyph, a strip scroll and its shelf leaving each close it.
 @Suite("Bar hover peek wiring", .serialized)
 @MainActor
 struct BarPeekWiringTests {
@@ -154,10 +154,37 @@ struct BarPeekWiringTests {
                 pressure: 1
             )
         )
+        // The pick is stubbed: no switch or relayout may close the
+        // peek for it, and it records whether the press closed it
+        // FIRST.
+        let closedFirst = Box()
+        core.spaceBars.glyphActions.pick = { _ in
+            closedFirst.value = core.shelves.peek.panel.drawn == nil
+        }
         web.mouseDown(with: click)
+        #expect(closedFirst.value == true, "closed before the pick")
         #expect(titles(core) == nil)
-        // The click still did its own work.
-        #expect(core.activeSpace?.id == two)
+    }
+
+    @MainActor
+    final class Box {
+        var value: Bool?
+    }
+
+    /// A shelf the bars stop drawing on — a fullscreen stand-down,
+    /// the bars turned off, its display gone — takes its peek with
+    /// it; the panel joins every Space and would stay up over the
+    /// fullscreen app.
+    @Test("A shelf leaving under a shown peek closes it")
+    func shelfLeavingCloses() throws {
+        let core = seededCore()
+        let steps = Steps()
+        defer { close(core) }
+        _ = try hovered(core, steps: steps)
+        steps.run()
+        #expect(titles(core) == ["Doc"])
+        core.shelves.sync([])
+        #expect(titles(core) == nil)
     }
 
     @Test("A strip scroll closes the peek")

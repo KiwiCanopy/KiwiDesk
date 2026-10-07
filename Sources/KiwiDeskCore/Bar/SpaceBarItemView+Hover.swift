@@ -28,12 +28,7 @@ extension SpaceBarItemView {
     }
 
     override func mouseExited(with event: NSEvent) {
-        reportPeek(nil)
-        setPointerInside(false)
-        guard isHovered || hoveredTarget != nil else { return }
-        isHovered = false
-        hoveredTarget = nil
-        restyle()
+        applyHover(false, target: nil)
     }
 
     /// Hovered only while the pointer is on THIS view — a count

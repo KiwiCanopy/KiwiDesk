@@ -43,15 +43,14 @@ struct BarPeekTests {
             peek.content = { source in
                 BarPeekContent(
                     rows: source.windows.map {
-                        SpaceBarWindowMenu.Row(
+                        BarWindowRow(
                             window: $0,
+                            pid: 1,
                             app: "App",
                             title: "Window \($0.raw)",
-                            icon: nil,
-                            enabled: true
+                            icon: nil
                         )
-                    },
-                    icons: false
+                    }
                 )
             }
             peek.schedule = { [unowned self] delay, body in
@@ -59,6 +58,7 @@ struct BarPeekTests {
                 steps.append(body)
             }
             peek.now = { [unowned self] in clock }
+            peek.shelf = { _ in KiwiShelf() }
         }
 
         func hover(_ anchor: NSView?, _ id: UInt32 = 1) {

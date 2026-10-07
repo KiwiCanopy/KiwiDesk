@@ -163,10 +163,7 @@ final class AppBarItemView: NSView {
     }
 
     override func mouseExited(with event: NSEvent) {
-        reportPeek(ownsPointer: false)
-        guard isHovered else { return }
-        isHovered = false
-        applyColors()
+        applyHover(false)
     }
 
     /// Hovered only while the pointer is on THIS view — a count

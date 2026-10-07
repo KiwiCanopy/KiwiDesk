@@ -59,10 +59,9 @@ final class BarPeekBody: NSView {
         let ink = NSColor(kiwiHex: shelf.itemColor)
         let headerInk = NSColor(kiwiHex: shelf.idleItemColor)
         let textFont = shelf.textFont(ofSize: Metrics.textSize)
-        let headerFont = BarFont.font(
-            family: shelf.fontFamily,
-            weight: BarFontWeight.semibold.value,
-            size: Metrics.headerSize
+        let headerFont = shelf.textFont(
+            ofSize: Metrics.headerSize,
+            emphasis: .semibold
         )
         let groups = content.groups.map { group in
             Built(
@@ -72,7 +71,8 @@ final class BarPeekBody: NSView {
                 pill: group.count.map { pill($0, shelf: shelf) }
             )
         }
-        // Only `+n` carries icons; its rows sit under the name.
+        // Icons mark mixed apps (`+n`); their rows sit under the
+        // name.
         let indent =
             content.groups.contains { $0.icon != nil }
             ? Metrics.iconSide + Metrics.iconGap : 0

@@ -61,16 +61,30 @@ extension KiwiCore {
     func spaceBarMenuRows(
         _ windows: [WindowID]
     ) -> [SpaceBarWindowMenu.Row] {
-        windows.compactMap { id in
-            guard let window = state.windows[id] else { return nil }
-            return SpaceBarWindowMenu.Row(
-                window: id,
-                app: window.appName,
-                title: window.title,
-                icon: BarIconCache.icon(pid: window.pid),
+        barWindowRows(windows).map { row in
+            SpaceBarWindowMenu.Row(
+                window: row.window,
+                app: row.app,
+                title: row.title,
+                icon: row.icon,
                 // The focus door's own refusal (#1345): a row it
                 // would refuse is greyed, never hidden (#802).
-                enabled: !raiseCrossesDesktops(id)
+                enabled: !raiseCrossesDesktops(row.window)
+            )
+        }
+    }
+
+    /// `windows` as the bar lists name them, from state alone — no
+    /// compositor read, so a hover may ask it (#1946).
+    func barWindowRows(_ windows: [WindowID]) -> [BarWindowRow] {
+        windows.compactMap { id in
+            guard let window = state.windows[id] else { return nil }
+            return BarWindowRow(
+                window: id,
+                pid: window.pid,
+                app: window.appName,
+                title: window.title,
+                icon: BarIconCache.icon(pid: window.pid)
             )
         }
     }

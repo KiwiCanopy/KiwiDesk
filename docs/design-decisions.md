@@ -12485,7 +12485,23 @@ plural; titles wrapped whole, since the peek exists to show what
 the bar cuts. `+n` mixes apps, so its groups carry their icons.
 The face is the bar's, at one fixed reading size: the strip-depth
 ladders would shrink it with a thin bar, which is where the peek
-is most needed.
+is most needed. An App Bar item that hides its text peeks every
+window it stands for, so a collapsed group lists each member's
+title with the count — where #1514's tooltip named the app alone:
+every window counts.
+
+The peek's glass takes ONE tint over its whole height, the ruled
+exception to the fade a detached surface takes (#1620): the bars'
+fade runs across a strip a glyph tall, but a panel of text read
+top to bottom would end on near-clear glass where a long title
+wraps. The ink is the shelf's own, measured on that ground on
+every bundled palette (`PeekInkContrastTests`).
+
+Its height is capped to the usable room on its side of the strip,
+so a long `+n` never covers its bar or the item it names; what
+passes the cap is clipped, an accepted loss for a list that long,
+since the menu a click opens carries every row. No title is ever
+capped on its own.
 
 It never acts and never opens a menu on hover. A hover-opened
 menu runs a tracking loop that eats the next click, and no macOS

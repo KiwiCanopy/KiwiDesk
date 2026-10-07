@@ -29,8 +29,9 @@ final class BarPeek {
     var content: @MainActor (BarPeekSource) -> BarPeekContent? = { _ in
         nil
     }
-    /// The stored shelf the peek wears; its render gates it.
-    var shelf: @MainActor () -> KiwiShelf = { KiwiShelf() }
+    /// The stored shelf the bar panel `window` draws, which the
+    /// peek wears — `ShelfManager`'s; its render gates it.
+    var shelf: @MainActor (NSWindow) -> KiwiShelf? = { _ in nil }
     /// Runs `body` after a delay; both `makeTestCore` twins pin it
     /// inert, so no fixture's hover opens a panel.
     var schedule: BarPeekSchedule = { delay, body in
@@ -146,6 +147,15 @@ final class BarPeek {
         panel.hide(animated: false)
     }
 
+    /// The shelf drawn in `window` left — stood down, turned off,
+    /// its display gone: a peek standing on it closes with it.
+    func shelfLeft(_ window: NSWindow?) {
+        guard let window,
+            (shown ?? pending)?.view?.window === window
+        else { return }
+        dismiss()
+    }
+
     /// A render or a switch that moved the peeked item, or took it
     /// off screen, closes the peek — the relayout's tail.
     func syncToAnchor() {
@@ -170,7 +180,8 @@ final class BarPeek {
         guard let view = anchor.view, let window = view.window,
             let frame = Self.screenFrame(of: view),
             let content = content(anchor.source),
-            !content.groups.isEmpty
+            !content.groups.isEmpty,
+            let shelf = shelf(window)
         else {
             if shown != nil {
                 shown = nil
@@ -183,11 +194,12 @@ final class BarPeek {
         shown = placed
         panel.show(
             content,
-            shelf: shelf(),
+            shelf: shelf,
             edge: anchor.edge,
             anchor: frame,
             strip: window.frame,
-            screen: window.screen?.frame ?? window.frame,
+            visible: window.screen.map(GeometryUtils.visibleFrame(of:))
+                ?? window.frame,
             fades: fades
         )
     }

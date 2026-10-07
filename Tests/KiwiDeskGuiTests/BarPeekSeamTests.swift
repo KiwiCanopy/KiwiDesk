@@ -3,8 +3,9 @@ import Testing
 
 /// The hover peek's wiring a behavioural test cannot see (#1946):
 /// its glass decided through the one gate where it renders, its
-/// item re-checked after the shelf's hover re-read, and no bar view
-/// left registering the system tooltip it replaces.
+/// item re-checked after the shelf's hover re-read, its content read
+/// from state alone, every anchor closing it on a press, and no bar
+/// view left registering the system tooltip it replaces.
 @Suite("Bar hover peek seams (#1946)")
 struct BarPeekSeamTests {
     private static var bar: URL {
@@ -64,19 +65,117 @@ struct BarPeekSeamTests {
         #expect(reRead.upperBound <= check.lowerBound)
     }
 
-    /// The peek replaced the system tooltip on every bar item; a
-    /// menu row's tooltip (`SpaceBarWindowMenu`) is a menu's, not
-    /// a bar view's.
+    /// The peek replaced the system tooltip on every bar item. A
+    /// menu ROW's tooltip — `SpaceBarWindowMenu`'s `NSMenuItem`,
+    /// which carries a cut title whole — is a menu's, not a bar
+    /// view's, and is the one exemption.
+    private static let tooltipExempt = [
+        "SpaceBarWindowMenu.swift": "an NSMenuItem's toolTip, a menu row's"
+    ]
+
     @Test("no bar view registers a system tooltip")
     func noBarTooltip() throws {
         var found: [String] = []
+        var exemptSeen: Set<String> = []
         for file in try SourceScan.swiftSources(under: Self.bar) {
+            let name = file.lastPathComponent
             let text = try SourceScan.strippedSource(at: file)
-            for needle in ["addToolTip(", "NSViewToolTipOwner"]
+            for needle in ["addToolTip(", "NSViewToolTipOwner", "toolTip ="]
             where text.contains(needle) {
-                found.append("\(file.lastPathComponent): \(needle)")
+                if Self.tooltipExempt[name] != nil, needle == "toolTip =" {
+                    exemptSeen.insert(name)
+                    continue
+                }
+                found.append("\(name): \(needle)")
             }
         }
         #expect(found.isEmpty, "\(found)")
+        // The exemption still fires, so the needle still matches.
+        #expect(exemptSeen == Set(Self.tooltipExempt.keys))
+    }
+
+    /// The peek's content is read on every show and swap — the
+    /// relayout's re-read on the switch path included — so it reads
+    /// STATE alone: the menu rows' enablement asks the compositor
+    /// twice a window (#1925) and may log a raise refusal.
+    @Test("the peek's content path reads no compositor")
+    func contentReadsStateOnly() throws {
+        let app = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore/App")
+        let content = try #require(
+            SourceScan.declarationBody(
+                after: "func barPeekContent(",
+                in: try SourceScan.strippedSource(
+                    at: app.appendingPathComponent("KiwiCore+BarPeek.swift")
+                )
+            )
+        )
+        #expect(content.contains("barWindowRows("))
+        let rows = try #require(
+            SourceScan.declarationBody(
+                after: "func barWindowRows(",
+                in: try SourceScan.strippedSource(
+                    at: app.appendingPathComponent(
+                        "KiwiCore+SpaceBarClick.swift"
+                    )
+                )
+            )
+        )
+        let bodies = [
+            ("barPeekContent", content),
+            ("barWindowRows", rows),
+        ]
+        for (name, body) in bodies {
+            for needle in ["raiseCrossesDesktops", "spaceBarMenuRows("] {
+                #expect(!body.contains(needle), "\(name) reaches \(needle)")
+            }
+        }
+        for file in ["BarPeek.swift", "BarPeekContent.swift"] {
+            #expect(
+                !(try Self.source(file)).contains("raiseCrossesDesktops"),
+                "\(file)"
+            )
+        }
+    }
+
+    /// Every view that reports the pointer to the peek, and the
+    /// view it hands as the anchor — the one copy of who anchors
+    /// it. Derived from the `peek?.pointer(` callers, so a new
+    /// anchoring view reds until it is written here.
+    private static let anchors: [String: String] = [
+        "SpaceBarItemView+Hover.swift": "SpaceBarGlyphTarget.swift",
+        "AppBarItemView+HoverTitle.swift": "AppBarItemView.swift",
+    ]
+
+    /// A press on an anchor closes the peek (#1946) — after the
+    /// Control-click guard, whose menu closes it as any menu does.
+    @Test("every view that anchors the peek dismisses it on press")
+    func anchorsDismissOnPress() throws {
+        var reporters: Set<String> = []
+        for file in try SourceScan.swiftSources(under: Self.bar) {
+            let text = try SourceScan.strippedSource(at: file)
+            if text.contains("peek?.pointer(") {
+                reporters.insert(file.lastPathComponent)
+            }
+        }
+        #expect(reporters == Set(Self.anchors.keys), "\(reporters)")
+        for anchor in Set(Self.anchors.values) {
+            let body = try #require(
+                SourceScan.declarationBody(
+                    after: "func mouseDown(",
+                    in: try Self.source(anchor)
+                ),
+                "\(anchor) takes no press"
+            )
+            let guardHit = try #require(
+                body.range(of: "openControlClickMenu("),
+                "\(anchor)"
+            )
+            let dismiss = try #require(
+                body.range(of: "peek?.dismiss()"),
+                "\(anchor) does not close the peek on a press"
+            )
+            #expect(guardHit.upperBound <= dismiss.lowerBound, "\(anchor)")
+        }
     }
 }

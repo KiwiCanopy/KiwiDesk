@@ -556,8 +556,11 @@ Obligations:
   stored on a view** (#1946). An item hands the shelf's one
   `BarPeek` its WINDOWS (`BarPeekSource`), never a string, and
   Core builds the content as the peek shows, through the one
-  `KiwiCore.barPeekContent` over the glyph menu's
-  `spaceBarMenuRows`. It is a third title channel, and it owes
+  `KiwiCore.barPeekContent` over the state-only `barWindowRows`
+  the glyph menu's rows are built from — never the menu rows
+  themselves, whose enablement reads the compositor on every
+  show and swap (#1925; `BarPeekSeamTests` ▸
+  `contentReadsStateOnly`). It is a third title channel, and it owes
   the refresh gate above no arm only because nothing caches it;
   a view that keeps a title brings back the stale one with no
   gate watching (`SpaceBarGlyphWiringTests` ▸ `peekIsReadAtShow`,
@@ -568,15 +571,28 @@ Obligations:
   the system tooltip the peek replaced
   (`BarPeekSeamTests` ▸ `noBarTooltip`).
 - **Report every hover reading to the peek from the item's one
-  hover gate (`applyHover`), the relayout's re-read included, and
-  close it on a press, a strip scroll and a relayout that moved
-  its item** — `ShelfManager.relayout` re-checks the peeked item
-  after the hover re-read (`BarPeekSeamTests` ▸
-  `relayoutChecksAfterTheReRead`, `BarPeekWiringTests`). Its
-  timing lives in `BarPeek.Timing` and nowhere beside it; its
-  fade is `BarMotion`'s; its glass is decided once in
-  `BarPeekPanel.show` through the gate (`BarPeekSeamTests` ▸
-  `peekTakesTheGate`); its text asks `BarFont` at the peek's own
+  hover gate (`applyHover`) — the pointer's exit and the
+  relayout's re-read included — and close it on a press, a strip
+  scroll, any menu opening, a relayout that moved its item, and
+  its shelf leaving**: `ShelfManager.relayout` re-checks the
+  peeked item after the hover re-read, and `ShelfManager.sync`'s
+  hide arm is the one home for "its shelf left" — a fullscreen or
+  presentation stand-down, the bars turned off, a display gone —
+  since the panel joins every Space and would stay up over the
+  fullscreen app (`BarPeekSeamTests` ▸
+  `relayoutChecksAfterTheReRead`, `BarPeekWiringTests` ▸
+  `shelfLeavingCloses`). **Every view that anchors the peek
+  dismisses it on a press**, after its Control-click guard
+  (`BarPeekSeamTests` ▸ `anchorsDismissOnPress`, whose `anchors`
+  map, derived from the `peek?.pointer(` callers, is the one copy
+  of who anchors it). Its timing lives in `BarPeek.Timing` and
+  nowhere beside it; its fade is `BarMotion`'s; its glass is
+  decided once in `BarPeekPanel.show` through the gate
+  (`BarPeekSeamTests` ▸ `peekTakesTheGate`) and tinted UNIFORMLY
+  through `GlassTint.applyUniform`, the ruled exception to the
+  detached-surface fade (`PeekInkContrastTests` measures the ink
+  on that ground); its shelf is the one `ShelfManager` drew the
+  anchor's panel with; its text asks `BarFont` at the peek's own
   fixed size, never the strip-depth ladders (`BarFontSiteTests` ▸
   `hoverPeek`). The panel is deaf to the mouse and hidden from
   accessibility: VoiceOver keeps the item's label and the menu
@@ -912,7 +928,10 @@ Obligations:
   fixture on another edge can see (`GlassTintFadeTests`,
   `GlassTintCensusTests` ▸ `applyTakesAFillNotAColour`), and the
   backdrop paints nothing of its own (`GlassTintCensusTests` ▸
-  `backdropPaintsNothing`). An EMPTY Fill is no colour there —
+  `backdropPaintsNothing`). A READING surface takes no fade at
+  all, through `GlassTint.applyUniform` — the hover peek alone,
+  by the owner's ruling on #1946; a second one argues its own
+  design-decisions entry first. An EMPTY Fill is no colour there —
   clear glass, nothing pinned — which the drag marker's fill-off
   and the sticky mark's Automatic both hand it
   (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`).

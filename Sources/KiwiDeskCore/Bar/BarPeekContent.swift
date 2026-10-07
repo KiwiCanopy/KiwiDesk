@@ -17,12 +17,6 @@ enum BarPeekSource: Equatable {
             ids
         }
     }
-
-    /// Only `+n` mixes apps, so only its headers carry icons.
-    var showsIcons: Bool {
-        if case .overflow = self { return true }
-        return false
-    }
 }
 
 /// What a peek shows (#1946, the owner's ruling): one group per
@@ -31,7 +25,7 @@ enum BarPeekSource: Equatable {
 struct BarPeekContent: Equatable {
     struct Group: Equatable {
         let app: String
-        /// The app's icon, on `+n` only, where the rows mix apps.
+        /// The app's icon, only where the rows mix apps (`+n`).
         let icon: NSImage?
         /// One per window, in row order; never empty.
         let titles: [String]
@@ -49,26 +43,25 @@ struct BarPeekContent: Equatable {
 
     let groups: [Group]
 
-    /// Groups `rows` by app in first-seen order, every row kept.
+    /// Groups `rows` per app process in first-seen order, every row
+    /// kept, the app's name the header. Icons mark the groups only
+    /// where the rows mix apps — `+n`, or any list that does.
     @MainActor
-    init(rows: [SpaceBarWindowMenu.Row], icons: Bool) {
-        var order: [String] = []
-        var titles: [String: [String]] = [:]
-        var firstIcon: [String: NSImage?] = [:]
+    init(rows: [BarWindowRow]) {
+        var order: [BarWindowRow] = []
+        var titles: [pid_t: [String]] = [:]
         for row in rows {
-            if titles[row.app] == nil {
-                order.append(row.app)
-                firstIcon[row.app] = row.icon
-            }
-            titles[row.app, default: []].append(
+            if titles[row.pid] == nil { order.append(row) }
+            titles[row.pid, default: []].append(
                 SpaceBarWindowMenu.windowName(row.title)
             )
         }
-        groups = order.map { app in
+        let mixed = order.count > 1
+        groups = order.map { first in
             Group(
-                app: app,
-                icon: icons ? firstIcon[app] ?? nil : nil,
-                titles: titles[app] ?? []
+                app: first.app,
+                icon: mixed ? first.icon : nil,
+                titles: titles[first.pid] ?? []
             )
         }
     }

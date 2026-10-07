@@ -28,22 +28,28 @@ final class BarPeekPanel {
     var isShown: Bool { panel?.isVisible == true && drawn != nil }
 
     /// Shows `content` at the item framed `anchor` on a bar of
-    /// `edge` whose panel is `strip`, opening away from the edge,
-    /// all in AppKit screen coordinates. A swap writes in place;
-    /// `fades` fades a first show in.
+    /// `edge` whose panel is `strip`, opening away from the edge
+    /// inside the screen's usable area `visible`, all in AppKit
+    /// screen coordinates. A swap writes in place; `fades` fades a
+    /// first show in.
     func show(
         _ content: BarPeekContent,
         shelf stored: KiwiShelf,
         edge: AppBarEdge,
         anchor: CGRect,
         strip: CGRect,
-        screen: CGRect,
+        visible: CGRect,
         fades: Bool
     ) {
         // The one place the stored shelf becomes the drawn one
         // (#1374): glass stands down while transparency is reduced.
         let shelf = LiquidGlassGate.rendered(stored)
-        let size = body.build(content, shelf: shelf)
+        let size = Self.capped(
+            body.build(content, shelf: shelf),
+            edge: edge,
+            strip: strip,
+            visible: visible
+        )
         let panel = self.panel ?? makePanel()
         self.panel = panel
         let origin = Self.origin(
@@ -51,7 +57,7 @@ final class BarPeekPanel {
             edge: edge,
             anchor: anchor,
             strip: strip,
-            screen: screen
+            visible: visible
         )
         panel.setFrame(CGRect(origin: origin, size: size), display: false)
         paint(shelf, edge: edge, size: size)
@@ -79,15 +85,41 @@ final class BarPeekPanel {
         }
     }
 
+    /// The panel's size, its height bounded by the usable room
+    /// on the far side of the strip, so a tall peek never covers
+    /// its bar or item; what passes the bound is clipped, and no
+    /// title is capped on its own (#1946).
+    nonisolated static func capped(
+        _ size: CGSize,
+        edge: AppBarEdge,
+        strip: CGRect,
+        visible: CGRect
+    ) -> CGSize {
+        typealias M = BarPeekBody.Metrics
+        let room: CGFloat
+        switch edge {
+        case .top:
+            room = strip.minY - M.stripGap - visible.minY - M.screenMargin
+        case .bottom:
+            room = visible.maxY - M.screenMargin - strip.maxY - M.stripGap
+        case .left, .right:
+            room = visible.height - 2 * M.screenMargin
+        }
+        return CGSize(
+            width: size.width,
+            height: max(min(size.height, room), 0)
+        )
+    }
+
     /// Where the panel opens: across the strip from the bar's
     /// edge, a gap off it, leading-aligned with the item and kept
-    /// on its screen.
+    /// inside the usable area.
     nonisolated static func origin(
         size: CGSize,
         edge: AppBarEdge,
         anchor: CGRect,
         strip: CGRect,
-        screen: CGRect
+        visible screen: CGRect
     ) -> CGPoint {
         typealias M = BarPeekBody.Metrics
         var point: CGPoint
@@ -134,13 +166,13 @@ final class BarPeekPanel {
             glass.isHidden = false
             GlassPlate.setContent(glass, body)
             GlassPlate.update(glass, frame: bounds, cornerRadius: radius)
-            GlassTint.apply(
+            // A reading panel: one tint over its whole height.
+            GlassTint.applyUniform(
                 tint,
                 below: glass,
                 frame: bounds,
                 cornerRadius: radius,
-                hex: shelf.fillColor,
-                edge: edge
+                hex: shelf.fillColor
             )
             return
         }

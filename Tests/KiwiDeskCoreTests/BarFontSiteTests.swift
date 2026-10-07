@@ -250,15 +250,14 @@ struct BarFontSiteTests {
         _ = body.build(
             BarPeekContent(
                 rows: [1, 2].map {
-                    SpaceBarWindowMenu.Row(
+                    BarWindowRow(
                         window: WindowID($0),
+                        pid: 1,
                         app: "Zed",
                         title: "Window \($0)",
-                        icon: nil,
-                        enabled: true
+                        icon: nil
                     )
-                },
-                icons: false
+                }
             ),
             shelf: Self.shelf
         )

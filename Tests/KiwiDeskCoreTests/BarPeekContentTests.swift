@@ -15,18 +15,21 @@ struct BarPeekContentTests {
         LiquidGlassGate.override = { false }
     }
 
+    /// A row of `app`'s process — one pid per app name unless
+    /// `pid` says otherwise.
     private func row(
         _ id: UInt32,
         app: String,
         title: String,
-        icon: NSImage? = nil
-    ) -> SpaceBarWindowMenu.Row {
-        SpaceBarWindowMenu.Row(
+        icon: NSImage? = nil,
+        pid: pid_t? = nil
+    ) -> BarWindowRow {
+        BarWindowRow(
             window: WindowID(id),
+            pid: pid ?? pid_t(app.unicodeScalars.map(\.value).reduce(0, +)),
             app: app,
             title: title,
-            icon: icon,
-            enabled: true
+            icon: icon
         )
     }
 
@@ -40,8 +43,7 @@ struct BarPeekContentTests {
                 row(1, app: "Code", title: "AGENTS.md"),
                 row(2, app: "Code", title: ""),
                 row(3, app: "Code", title: "Bar.swift"),
-            ],
-            icons: false
+            ]
         )
         #expect(content.groups.count == 1)
         #expect(
@@ -54,23 +56,21 @@ struct BarPeekContentTests {
     @Test("The count shows from two windows, never for one")
     func countFromTwo() {
         let one = BarPeekContent(
-            rows: [row(1, app: "Notes", title: "A")],
-            icons: false
+            rows: [row(1, app: "Notes", title: "A")]
         )
         #expect(one.groups[0].count == nil)
         let two = BarPeekContent(
             rows: [
                 row(1, app: "Notes", title: "A"),
                 row(2, app: "Notes", title: "B"),
-            ],
-            icons: false
+            ]
         )
         #expect(two.groups[0].count == 2)
     }
 
     /// `+n` mixes apps: one group each, in first-seen order, with
     /// the app's icon, and a count only where a group has two.
-    @Test("+n groups its windows per app, with icons")
+    @Test("Mixed apps group per app, with icons")
     func overflowGroups() {
         let icon = NSImage(size: NSSize(width: 16, height: 16))
         let content = BarPeekContent(
@@ -78,8 +78,7 @@ struct BarPeekContentTests {
                 row(1, app: "Messages", title: "Book club", icon: icon),
                 row(2, app: "Figma", title: "Hover peek", icon: icon),
                 row(3, app: "Figma", title: "Canvas", icon: icon),
-            ],
-            icons: BarPeekSource.overflow([]).showsIcons
+            ]
         )
         #expect(content.groups.map(\.app) == ["Messages", "Figma"])
         #expect(
@@ -88,9 +87,39 @@ struct BarPeekContentTests {
         )
         #expect(content.groups.map(\.count) == [nil, 2])
         #expect(content.groups.allSatisfy { $0.icon === icon })
-        // A glyph and an App Bar item name one app, so no icon.
-        #expect(!BarPeekSource.glyph([]).showsIcons)
-        #expect(!BarPeekSource.appItem([]).showsIcons)
+    }
+
+    /// Icons answer "which app?", so a list of one app — a glyph,
+    /// an App Bar item, or a `+n` hiding one app — carries none,
+    /// whatever asked for it (#1945 feeds the same rows).
+    @Test("One app's rows carry no icon")
+    func oneAppNoIcon() {
+        let icon = NSImage(size: NSSize(width: 16, height: 16))
+        let content = BarPeekContent(
+            rows: [
+                row(1, app: "Figma", title: "A", icon: icon),
+                row(2, app: "Figma", title: "B", icon: icon),
+            ]
+        )
+        #expect(content.groups.count == 1)
+        #expect(content.groups[0].icon == nil)
+    }
+
+    /// Two processes sharing a name are two apps: grouped by pid,
+    /// each headed by its own name.
+    @Test("Groups key on the process, not the name")
+    func groupsKeyOnThePid() {
+        let content = BarPeekContent(
+            rows: [
+                row(1, app: "Chrome", title: "Work", pid: 10),
+                row(2, app: "Chrome", title: "Home", pid: 20),
+                row(3, app: "Chrome", title: "Mail", pid: 10),
+            ]
+        )
+        #expect(content.groups.map(\.app) == ["Chrome", "Chrome"])
+        #expect(
+            content.groups.map(\.titles) == [["Work", "Mail"], ["Home"]]
+        )
     }
 
     // MARK: - The drawing
@@ -111,8 +140,7 @@ struct BarPeekContentTests {
                     row(2, app: "A", title: "Two"),
                     row(3, app: "A", title: "Three"),
                     row(4, app: "B", title: "Four"),
-                ],
-                icons: true
+                ]
             ),
             shelf: shelf
         )
@@ -150,8 +178,7 @@ struct BarPeekContentTests {
         let body = BarPeekBody()
         let size = body.build(
             BarPeekContent(
-                rows: [row(1, app: "Code", title: long)],
-                icons: false
+                rows: [row(1, app: "Code", title: long)]
             ),
             shelf: KiwiShelf()
         )
@@ -177,7 +204,7 @@ struct BarPeekContentTests {
             edge: .top,
             anchor: anchor,
             strip: top,
-            screen: screen
+            visible: screen
         )
         #expect(below.y + size.height <= top.minY)
         let bottom = CGRect(x: 0, y: 0, width: 1440, height: 40)
@@ -186,7 +213,7 @@ struct BarPeekContentTests {
             edge: .bottom,
             anchor: CGRect(x: 300, y: 10, width: 20, height: 20),
             strip: bottom,
-            screen: screen
+            visible: screen
         )
         #expect(above.y >= bottom.maxY)
         let left = CGRect(x: 0, y: 0, width: 40, height: 900)
@@ -195,7 +222,7 @@ struct BarPeekContentTests {
             edge: .left,
             anchor: CGRect(x: 10, y: 400, width: 20, height: 20),
             strip: left,
-            screen: screen
+            visible: screen
         )
         #expect(beside.x >= left.maxX)
         // An item at the screen's end keeps the peek on screen.
@@ -204,8 +231,52 @@ struct BarPeekContentTests {
             edge: .top,
             anchor: CGRect(x: 1430, y: 870, width: 10, height: 20),
             strip: top,
-            screen: screen
+            visible: screen
         )
         #expect(edge.x + size.width <= screen.maxX)
+    }
+
+    /// A peek taller than the usable room on its side is cut to it,
+    /// so it never covers its bar; one that fits keeps its height.
+    @Test("A tall peek is capped to the usable area")
+    func tallPeekIsCapped() {
+        // The menu bar and the Dock leave a smaller usable area.
+        let visible = CGRect(x: 0, y: 80, width: 1440, height: 790)
+        let top = CGRect(x: 0, y: 830, width: 1440, height: 40)
+        let tall = CGSize(width: 200, height: 2000)
+        let capped = BarPeekPanel.capped(
+            tall,
+            edge: .top,
+            strip: top,
+            visible: visible
+        )
+        #expect(capped.width == tall.width)
+        #expect(capped.height < tall.height)
+        let origin = BarPeekPanel.origin(
+            size: capped,
+            edge: .top,
+            anchor: CGRect(x: 300, y: 840, width: 20, height: 20),
+            strip: top,
+            visible: visible
+        )
+        #expect(origin.y >= visible.minY)
+        #expect(origin.y + capped.height <= top.minY)
+        let bottom = CGRect(x: 0, y: 80, width: 1440, height: 40)
+        let up = BarPeekPanel.capped(
+            tall,
+            edge: .bottom,
+            strip: bottom,
+            visible: visible
+        )
+        #expect(bottom.maxY + up.height <= visible.maxY)
+        let small = CGSize(width: 200, height: 80)
+        #expect(
+            BarPeekPanel.capped(
+                small,
+                edge: .top,
+                strip: top,
+                visible: visible
+            ) == small
+        )
     }
 }
