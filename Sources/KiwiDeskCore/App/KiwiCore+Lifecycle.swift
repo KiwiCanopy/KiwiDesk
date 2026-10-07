@@ -150,6 +150,7 @@ extension KiwiCore {
     /// argument beside the value. Drains every pid queued since
     /// the fire was armed (`markTransientDrop` arms only from
     /// idle, so a drip of drops cannot push the deadline back).
+    /// Each list is read off the main actor (#2027).
     func scheduleTransientRetrack() {
         deferred.schedule(
             .transientRetrack,
@@ -158,7 +159,7 @@ extension KiwiCore {
             guard let self, self.eventLoop.isRunning
             else { return }
             for pid in self.eventLoop.drainPendingRetrack() {
-                self.eventLoop.reconcile(
+                self.eventLoop.reconcileOffMain(
                     pid: pid,
                     app: AppRef(pid: pid)
                 )
@@ -172,7 +173,9 @@ extension KiwiCore {
     /// deadline. `coalesceTabs: false`: the pass can carry a
     /// Desktop switch's departed windows as vanished beside a
     /// late arrival at the same tiled frame, the #308 bogus
-    /// re-key — a missed merge is the safe direction.
+    /// re-key — a missed merge is the safe direction. Each list
+    /// is read off the main actor (#2027); the gate judges the
+    /// reading when it applies, as for any sweep.
     func scheduleRemovalRecheck() {
         deferred.schedule(
             .removalRecheck,
@@ -183,7 +186,7 @@ extension KiwiCore {
             let pids =
                 self.eventLoop.drainPendingRemovalRecheck()
             for pid in pids {
-                self.eventLoop.reconcile(
+                self.eventLoop.reconcileOffMain(
                     pid: pid,
                     app: AppRef(pid: pid),
                     coalesceTabs: false

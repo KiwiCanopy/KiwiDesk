@@ -34,19 +34,18 @@ struct SyncReconcileCensusTests {
         // Boot's pass (#801/#803); its deferred completion reads
         // off main (#1795).
         "Events/EventLoop+BootScan.swift": 1,
-        // The adoption heal (#675).
+        // The adoption heal (#675): `settleHeal` reads what the
+        // reconcile adopted in the same turn to rule each missing
+        // id quiet, and the sweep replaces the quiet ledger whole.
+        // Its gate admits only an app the census shows with an
+        // untracked window.
         "Events/EventLoop+Heal.swift": 2,
         // The Desktop-switch bulk pass (#308).
         "Events/EventLoop+ReconcileAll.swift": 2,
-        // The transient re-track and the distrust follow-up
-        // (#675, #1157), each on its own scheduled slot.
-        "App/KiwiCore+Lifecycle.swift": 2,
         // The tabbed create, and a close the arm deferred, whose
         // removal must precede the successor's focus report
         // (#936); every other close reads off main (#1888).
         "Events/EventLoop+Notifications.swift": 2,
-        // A hide or unhide (#913).
-        "Events/EventLoop+Apps.swift": 1,
         // The Desktop reaps after a move, a switch, a launch.
         "Commands/KiwiCore+DesktopMove.swift": 1,
         "Commands/KiwiCore+DesktopSwitch.swift": 1,

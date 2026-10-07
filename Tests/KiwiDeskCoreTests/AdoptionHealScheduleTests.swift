@@ -25,9 +25,15 @@ struct AdoptionHealScheduleTests {
     @MainActor
     private final class Box {
         var windowQueries = 0
+        /// Off-main list reads, run by the test (#2027).
+        var work: [@Sendable () -> Void] = []
         /// Read off the main actor (#1956), so counted under a lock.
         let census = CensusCounter()
         var censusReads: Int { census.count }
+
+        func drain() {
+            while !work.isEmpty { work.removeFirst()() }
+        }
     }
 
     private final class CensusCounter: @unchecked Sendable {
@@ -77,6 +83,12 @@ struct AdoptionHealScheduleTests {
         loop.axWindows = { _ in
             box.windowQueries += 1
             return []
+        }
+        loop.axReads.deliver = { run in
+            MainActor.assumeIsolated { run() }
+        }
+        loop.axReads.dispatchOverride = { _, run in
+            box.work.append(run)
         }
         let counter = box.census
         loop.onScreenNormalWindowIDs = {
@@ -216,9 +228,12 @@ struct AdoptionHealScheduleTests {
             id: WindowID(7)
         )
         await core.deferred.task(for: .transientRetrack)?.value
-        // The fired task drained the queue and reconciled the
-        // pid — visible as its AX window snapshot.
-        #expect(box.windowQueries == 1)
+        // The fired task drained the queue and asked the pid's
+        // list off the main actor (#2027) — visible as its AX
+        // window snapshot once the read runs.
         #expect(core.eventLoop.drainPendingRetrack().isEmpty)
+        #expect(box.windowQueries == 0, "list read inline (#2027)")
+        box.drain()
+        #expect(box.windowQueries == 1)
     }
 }
