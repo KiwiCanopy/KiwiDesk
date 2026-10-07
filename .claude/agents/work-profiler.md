@@ -26,7 +26,8 @@ in the repo. The fix is the caller's.
    detached checkout in your scratchpad for it, and remove it
    after). Never measure the build that happens to be running.
 2. Swap in, measure each bundle on the same Space pair, the same
-   rounds, idle and `--load`, each condition twice, and restore
+   rounds, idle, `--load` and `--gpu-load` (the skill's step 3 says
+   what each needs), each condition twice, and restore
    the previous instance after EVERY bundle, failure included.
 3. Report per bundle and condition: windows per Space, the
    per-switch figures the skill lists, and the delta between
