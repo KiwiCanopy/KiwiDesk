@@ -160,7 +160,7 @@ struct SettingsResponsiveOrderTests {
     func previewIsAlwaysReachable() {
         for width in supportedWidths {
             let band = SettingsWidthClass.of(width: width)
-            for answer in [nil, true, false] as [Bool?] {
+            for answer in [true, false] {
                 let form = SettingsPreviewForm.at(
                     band,
                     shown: answer
@@ -191,21 +191,16 @@ struct SettingsResponsiveOrderTests {
     @Test("no undocked band opens the card unasked")
     func noBandOpensTheCard() {
         #expect(
-            SettingsPreviewForm.at(.medium, shown: nil) == .offer
+            SettingsPreviewForm.at(.medium, shown: false) == .offer
         )
         #expect(
-            SettingsPreviewForm.at(.compact, shown: nil) == .offer
+            SettingsPreviewForm.at(.compact, shown: false) == .offer
         )
         #expect(
-            SettingsPreviewForm.at(.tight, shown: nil) == .offer
+            SettingsPreviewForm.at(.tight, shown: false) == .offer
         )
-        // And the answer overrides the default in both
-        // directions, which is what makes it one card rather
-        // than two behaviours.
-        #expect(
-            SettingsPreviewForm.at(.medium, shown: false)
-                == .offer
-        )
+        // The shell starts every mount at `false`
+        // (`DetailPanelTests`); opening it is the user's alone.
         #expect(
             SettingsPreviewForm.at(.tight, shown: true)
                 == .floating
