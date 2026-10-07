@@ -185,14 +185,13 @@ struct SettingsResponsiveOrderTests {
         }
     }
 
-    /// The band defaults, stated once: the 1100 pt frame draws
-    /// the card open and the 820 pt frame draws "Show preview"
-    /// — the whole difference between the two narrow bands.
-    @Test("only the medium band opens the card unasked")
-    func mediumOpensTheCard() {
+    /// Below the docking width no band opens the card unasked:
+    /// a card covering the rows on every navigation is what the
+    /// user came to edit hidden (#1854).
+    @Test("no undocked band opens the card unasked")
+    func noBandOpensTheCard() {
         #expect(
-            SettingsPreviewForm.at(.medium, shown: nil)
-                == .floating
+            SettingsPreviewForm.at(.medium, shown: nil) == .offer
         )
         #expect(
             SettingsPreviewForm.at(.compact, shown: nil) == .offer

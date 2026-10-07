@@ -10,13 +10,13 @@ enum SettingsPreviewForm: String, CaseIterable, Sendable {
     case offer
 
     /// Resolves preview form; `shown` is the user's answer this
-    /// mount, nil while the band's own default stands.
+    /// mount, nil until they open or close the card. Below the
+    /// docking width the card waits to be opened (#1854).
     static func at(
         _ width: SettingsWidthClass,
         shown: Bool?
     ) -> SettingsPreviewForm {
         if width.docksPanel { return .docked }
-        return (shown ?? width.floatsPreviewByDefault)
-            ? .floating : .offer
+        return shown == true ? .floating : .offer
     }
 }
