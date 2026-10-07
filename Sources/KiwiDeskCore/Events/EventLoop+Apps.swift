@@ -149,7 +149,9 @@ extension EventLoop {
     /// the direction from the notification is safe: measured on
     /// device (2026-08-22, macOS 26.6.2), the flag already
     /// reads its settled value when its own notification
-    /// fires, in both directions.
+    /// fires, in both directions. The list is read off the main
+    /// actor (#2027), and only the live seam, asked as the
+    /// reading applies, may say hidden (#1936).
     ///
     /// Descriptor-shaped, like `runningApplications`: a test
     /// cannot build an `NSRunningApplication` for a made-up pid,
@@ -161,7 +163,7 @@ extension EventLoop {
         // (mirrors `appActivated`'s guard). Nor has an unnamed
         // pid (#1785): a child's hide is the heal's to settle.
         guard observers[pid] != nil else { return }
-        reconcile(pid: pid, app: ref)
+        reconcileOffMain(pid: pid, app: ref)
     }
 
     /// Closing an app's last window moves focus to a DIFFERENT

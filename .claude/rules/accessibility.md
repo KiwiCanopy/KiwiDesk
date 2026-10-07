@@ -26,10 +26,13 @@ editing AX code:
 
 - AX calls are slow and can block. Never call them inside tight
   loops or layout math — snapshot state first, then compute.
-- **The activation, focus and close arms read OFF the main
-  actor (#1930, #1888).** `appActivated`,
-  `handleFocusedWindowChanged` and the destroy/minimize arm
-  reconcile through `reconcileOffMain`, and
+- **The activation, focus, close and hide arms, and the
+  #1157/#675 one-shots, read OFF the main actor (#1930,
+  #1888, #2027).** `appActivated`,
+  `handleFocusedWindowChanged`, the destroy/minimize arm,
+  `appHideChanged`, `scheduleRemovalRecheck` and
+  `scheduleTransientRetrack` reconcile through
+  `reconcileOffMain`, and
   the activation reads its focused window through
   `requestFocusedWindowID`; a new
   event-driven caller takes the same doors or joins
@@ -73,8 +76,9 @@ editing AX code:
   request time, as the tracked set is. A window the read did not
   cover (tracked during the flight, or appeared and handed to
   `track`) is read the way the synchronous reconcile reads it.
-  `ReconcileOffMainTests`, `ReconcileOffMainDebtTests` and
-  `ReconcileSnapshotTests` hold the behaviour.
+  `ReconcileOffMainTests`, `ReconcileOffMainDebtTests`,
+  `ReconcileOffMainRecheckTests` and `ReconcileSnapshotTests`
+  hold the behaviour.
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever

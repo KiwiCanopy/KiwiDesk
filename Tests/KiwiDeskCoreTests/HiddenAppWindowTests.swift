@@ -273,7 +273,7 @@ struct HiddenAppWindowTests {
         #expect(box.windowQueries == 1)
     }
 
-    @Test("a hide or unhide reconciles the app at once")
+    @Test("a hide or unhide reconciles the app off main")
     func hideChangeFunnelsToReconcile() {
         // Both directions take one arm, so the release lands on
         // the gesture rather than whenever something else
@@ -286,15 +286,24 @@ struct HiddenAppWindowTests {
         // the sweep — three states the test claims to tell
         // apart. Only the emitted event does.
         let (loop, box) = makeLoop()
+        var work: [@Sendable () -> Void] = []
+        loop.axReads.deliver = { run in
+            MainActor.assumeIsolated { run() }
+        }
+        loop.axReads.dispatchOverride = { _, run in work.append(run) }
+        let drain = { while !work.isEmpty { work.removeFirst()() } }
         attach(loop)
         loop.elements[pid] = [WindowID(11): dummyElement]
         box.listed = [WindowID(11)]
         loop.appHideChanged(pid: pid, ref: ref)
+        #expect(box.windowQueries == 0, "list read inline (#2027)")
+        drain()
         #expect(box.windowQueries == 1)
         #expect(box.hiddenEvents.isEmpty)
         box.hidden = true
         loop.appHideChanged(pid: pid, ref: ref)
-        #expect(box.windowQueries == 1)
+        #expect(box.hiddenEvents.isEmpty, "hide read inline (#2027)")
+        drain()
         #expect(box.hiddenEvents == [WindowID(11)])
     }
 
