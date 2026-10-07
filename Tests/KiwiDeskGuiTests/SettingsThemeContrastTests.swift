@@ -284,6 +284,27 @@ struct SettingsThemeContrastTests {
                 Double(SettingsTheme.searchNoticeFillOpacity)
             )
         ),
+        // The marked jump chip on the pinned bar's page ground,
+        // and under the pointer, where the hover fill lies
+        // beneath the wash (#1520).
+        Pairing(
+            "ink on the marked jump chip",
+            SettingsTheme.ink,
+            on: SettingsTheme.page,
+            washedWith: (
+                SettingsTheme.accent,
+                ShortcutsJumpChip.markedWash
+            )
+        ),
+        Pairing(
+            "ink on the hovered marked jump chip",
+            SettingsTheme.ink,
+            on: SettingsTheme.cardHover,
+            washedWith: (
+                SettingsTheme.accent,
+                ShortcutsJumpChip.markedWash
+            )
+        ),
     ]
 
     @Test("every drawn pairing clears its floor in both modes")

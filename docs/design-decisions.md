@@ -8257,8 +8257,7 @@ This does not overturn #1021's tier, which is about drawers — a
 drawer qualifies the card it sits in, and a header louder than
 that card's own title inverts the hierarchy the other way. The
 test is the container's relation to the page, never its size or
-how many rows it holds. `GeneralShortcutsGroup` meets it too and
-is still a drawer, left for its own change.
+how many rows it holds.
 
 Both kinds draw the one `SettingsDisclosureButton` — chevron,
 full-row button, hover, the heading trait where the row is the
@@ -10522,6 +10521,58 @@ hand's spacing on the tap's own clock, never the main actor's,
 where a busy switch would squash deliberate notches into a
 burst. The number is provisional until a device logs notch
 intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
+
+:::unreleased
+**The page is mapped by pinned jump chips, never split into tabs**
+(#1520, owner ruling 2026-10-01). The per-app shortcut — the
+answer to "switch to the Space an app has windows in" — sat in
+the fourth of five groups, well below the fold of a list the
+reader had no map of, and users asked for it without finding it.
+Tabs were the owner's first lean, being easy to click, and were
+refused after both were drawn side by side: a tab hides every
+group but one, so a conflict banner or a search hit lands on a
+page whose siblings are out of sight, and search would have to
+switch tabs as it opens drawers (#1250). Chips keep the page one
+page. They are pinned, which answers the cost that made tabs
+tempting — with chips at the top of a long list, reaching the
+next group meant scrolling back up first. Tabs stay the update
+window's control, which shows separate views one at a time;
+chips jump within one view. Moving *Open applications* up was
+refused too: it trades one group's discoverability for
+another's, and the group's rank is fine once a map exists.
+
+**Layers gets no chip.** It picks which layer every group below
+edits — scope, not a destination — and it is absent in Simple,
+so a chip for it would come and go. The bar carries the edited
+layer's name instead, in words, at its trailing end, and that
+readout is the first thing a narrowing window drops since it is
+header chrome. **Mouse & trackpad gets the first chip**, set off
+by a rule because everything after it is scoped to one layer and
+it is not; its click opens the card as well, which stays fully
+collapsed otherwise — a first-item-open state would be a third
+collapsible kind and split its search children (#277). The chip
+pinned above it is what keeps the shut card from being
+overlooked at the top of the page.
+
+**Fewer groups, chosen by what a header tells apart.** The
+General drawer — two rows, Show shortcuts panel and Open
+Settings — folds into Open applications under a "KiwiDesk"
+subheading: both open something by key, and a two-row drawer was
+a disclosure guarding almost nothing. Focus and Move windows stay
+apart although they share keys: merged they run 17–23 rows, and
+the header is what tells "where focus goes" from "where a window
+goes" on the same arrows. The section keeps its name: *Controls*
+stays refused, every row in Settings being a control.
+
+**The marked chip is the group under the bar.** A group is
+current once its header has reached the bar and while its card
+is still under it, so scrolling past Mouse & trackpad into the
+layer chrome marks nothing — no chip names what is there. At the
+end of the scroll the last group is marked, since a short final
+group's header can never reach the bar. Marking is a fill on a
+layer of its own and hover a neutral fill beneath it (#1173): a
+pointer resting on the marked chip must not read as unmarking it.
+:::
 
 ### Overrides & appearance
 

@@ -14,7 +14,8 @@ import SwiftUI
 /// belongs to no layer.
 struct GesturesDrawer: View {
     @ObservedObject var model: SettingsModel
-    @State private var expanded = false
+    /// The section's, so its jump chip can open the card (#1520).
+    @Binding var expanded: Bool
     /// Per visit, like `expanded`: the first click open arms the
     /// first entry's play, which spends it.
     @State private var played = false

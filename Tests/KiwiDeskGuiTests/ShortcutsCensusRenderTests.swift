@@ -10,13 +10,16 @@ import Testing
 /// names, so a census row added, retiered or moved without a
 /// renderer update is a red test.
 ///
-/// **The promise is weaker for three containers**, and reading
-/// it as unqualified is how a control ships invisible: the app
-/// list, the layer strip and the raw-Lua drawer are bespoke
-/// views, so their lists guard membership and nothing checks
-/// that a family added to one reaches the screen. Which three
-/// is data (`ShortcutsRowOrder.bespokeContainers`), asserted by
-/// `ShortcutsBespokeContainerTests`, this suite's split-off half.
+/// **The promise is weaker for bespoke views**, and reading it
+/// as unqualified is how a control ships invisible: the layer
+/// strip, the raw-Lua drawer and the app list are drawn by their
+/// own views, so their lists guard membership and nothing checks
+/// that a family added to one reaches the screen. Which
+/// containers is data (`ShortcutsRowOrder.bespokeContainers`),
+/// asserted by `ShortcutsBespokeContainerTests`, this suite's
+/// split-off half — Open applications left that set when its
+/// KiwiDesk rows began to be walked (#1520), while its app list
+/// is still membership only.
 ///
 /// Set equality, not sequence: ORDER is the renderer's to own and
 /// is deliberately not pinned here, exactly as in
@@ -113,26 +116,19 @@ struct ShortcutsCensusRenderTests {
         )
     }
 
-    /// Bespoke container — membership only (see the suite note).
-    @Test("Open applications renders the census's family")
+    /// Two lists, one tier (#1520): the app list is drawn by its
+    /// own view — membership only (see the suite note) — and the
+    /// KiwiDesk rows the retired General drawer held are walked
+    /// under their subheading. The pair partitions the
+    /// container, so a family moved between them still reds on
+    /// the duplicate.
+    @Test("Open applications renders the census's families")
     func openApplicationsTier() {
-        pin(
-            ShortcutsRowOrder.openApplicationsAtRest,
-            .openApplications,
-            .atRest,
-            "open applications"
-        )
-    }
-
-    @Test("General keys renders the census's show-more family")
-    func generalKeysTier() {
-        pin(
-            ShortcutsRowOrder.generalKeysMore,
-            .generalKeys,
-            .showMore,
-            "general keys"
-        )
-        #expect(censusRows(.generalKeys, .atRest).isEmpty)
+        let apps = ShortcutsRowOrder.openApplicationsAtRest
+        let own = ShortcutsRowOrder.openApplicationsKiwiDesk
+        pin(apps + own, .openApplications, .atRest, "open applications")
+        #expect(!apps.isEmpty && !own.isEmpty)
+        #expect(censusRows(.openApplications, .showMore).isEmpty)
     }
 
     /// `.immediate`, not `.showMore`: a configured layer is the
@@ -227,12 +223,12 @@ struct ShortcutsCensusRenderTests {
     /// renderer to publish its mounted containers as data, which
     /// no area does yet — until one does, a deleted card is a
     /// reviewer's catch.
-    @Test("Shortcuts holds exactly the nine rendered containers")
+    @Test("Shortcuts holds exactly the eight rendered containers")
     func shortcutsContainers() {
         #expect(
             Self.containers(of: .shortcuts) == [
                 .focus, .moveWindows, .sizeAndFloat,
-                .openApplications, .generalKeys, .layers,
+                .openApplications, .layers,
                 .luaBindings, .defaultShortcuts, .gestures,
             ]
         )

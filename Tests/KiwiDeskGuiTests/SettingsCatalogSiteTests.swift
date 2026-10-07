@@ -96,7 +96,9 @@ struct SettingsCatalogSiteTests {
         // 122 since #1838: the Motion drawer's shelf toggle and
         // duration rows.
         // 123 since #1931: the Space switch duration row.
-        #expect(names.count == 123)
+        // 120 since #1520: Shortcuts' General drawer and its two
+        // rows left.
+        #expect(names.count == 120)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

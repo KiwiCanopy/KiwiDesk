@@ -516,6 +516,30 @@ the answer. A non-interactive value state in a control row (the
 slot size's "Default — orientation standard") renders in the
 same capsule language rather than as bare gray prose.
 
+:::unreleased
+**Jump chips are the capsule language as buttons** (#1520). A long
+page whose groups the reader needs a map of — Shortcuts & Gestures
+is the one — pins a row of chips over its scroll, one per group,
+in page order, each labelled by its group's own title. A chip is
+content-sized and wears the hairline capsule at the small control
+size, with no count and never a truncation: the row wraps instead
+of scrolling. The chip for the group under the bar is marked with
+a soft accent fill and a semibold label, the ink staying neutral
+(the accent marks fills, never text); hover lays a neutral fill
+on a layer of its own beneath that, so pointing at the marked
+chip never unmarks it. A chip is a button, the marked one
+announced as selected, and the row is one container named
+"Jump to". A click puts the group's header under the bar, and
+arrives without travelling under Reduce Motion. A chip whose
+card is collapsible opens it too. A thin rule may separate chips
+whose scope differs; it rides the chip before it, so a wrap never
+starts a line with it. The bar sits on the page ground and grows
+its lower hairline only once content slides under it; a readout
+at its trailing end is header chrome, the first thing a narrowing
+window drops. Chips jump within one page; tabs, which show one
+view at a time, stay the update window's control.
+:::
+
 **An "Automatic" color well shows adaptivity as a shape, not
 an absence** (#429). Almost every color setting stores a
 concrete hex, but a few default to an *adaptive* system color

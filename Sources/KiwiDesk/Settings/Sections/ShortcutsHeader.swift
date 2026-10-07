@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Header for Shortcuts section with active layer label, Import, and Restore
-/// Defaults (#4, #1096).
+/// Header for Shortcuts section with Import and Restore Defaults
+/// (#4, #1096).
 struct ShortcutsHeader: View {
     @ObservedObject var model: SettingsModel
     @Binding var selected: String
@@ -11,8 +11,9 @@ struct ShortcutsHeader: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // The edited layer is named on the pinned jump bar
+            // (#1520).
             HStack(spacing: 8) {
-                editingLabel
                 Spacer()
                 if model.hasCustomLua,
                     !model.editingStoredProfile
@@ -61,25 +62,6 @@ struct ShortcutsHeader: View {
                 ),
             ShortcutsReferenceBuilder.glyphs(entry.kept.combo)
         )
-    }
-
-    /// Names the active layer once there is a choice — the one
-    /// `layersExist` reading, asked rather than counted (#1127).
-    /// Only the CONDITION is shared with the preview panel: this
-    /// names the selection, the panel the layer it drew, which
-    /// differ for the frame between a delete and the repair.
-    @ViewBuilder private var editingLabel: some View {
-        if ShortcutsGates(config: model.config).layersExist {
-            Text(
-                L(
-                    "shortcuts.editing_layer",
-                    "Editing the \u{201C}%1$@\u{201D} layer",
-                    selected
-                )
-            )
-            .font(.callout)
-            .foregroundStyle(.secondary)
-        }
     }
 
     /// Restores shipped shortcut defaults onto default layer (#1096).

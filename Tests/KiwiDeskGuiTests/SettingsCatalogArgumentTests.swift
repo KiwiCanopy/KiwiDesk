@@ -215,7 +215,9 @@ struct SettingsCatalogArgumentTests {
         // 96 since #1752: the Shared look card's.
         // 98 since #1838: the shelf toggle's and duration's.
         // 99 since #1931: the Space switch duration's.
-        #expect(direct.values.reduce(0, +) == 99)
+        // 96 since #1520: Shortcuts ▸ General's drawer and its
+        // two rows left.
+        #expect(direct.values.reduce(0, +) == 96)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

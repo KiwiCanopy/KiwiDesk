@@ -38,8 +38,9 @@ struct ShortcutsBespokeContainerTests {
             ("moveWindowsAtRest", .moveWindows),
             ("sizeAndFloatAtRest", .sizeAndFloat),
             ("sizeAndFloatMore", .sizeAndFloat),
-            ("generalKeysMore", .generalKeys),
             ("openApplicationsAtRest", .openApplications),
+            // The KiwiDesk rows under Open applications (#1520).
+            ("openApplicationsKiwiDesk", .openApplications),
             ("layersMore", .layers),
             ("luaBindingsMore", .luaBindings),
             ("luaBindingsAtRest", .luaBindings),

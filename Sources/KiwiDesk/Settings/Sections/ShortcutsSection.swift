@@ -12,9 +12,13 @@ import SwiftUI
 /// conflict detection (#35).
 struct ShortcutsSection: View {
     @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
+    var reduceMotion
     @ObservedObject var model: SettingsModel
     @State private var advancedExpanded = false
+    /// Lifted so the Mouse & trackpad chip opens the card (#1520);
+    /// still shut on every visit.
+    @State var gesturesExpanded = false
+    @State var jumpReading = ShortcutsJumpReading()
     @StateObject private var coordinator =
         RecorderCoordinator()
 
@@ -29,31 +33,19 @@ struct ShortcutsSection: View {
         )
     }
 
-    private var selected: String {
+    var selected: String {
         model.nav.shortcutsLayerSelection
     }
 
     var body: some View {
         ScrollViewReader { proxy in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    header
-                    actionGroups
-                    tail
-                }
-                .padding(
-                    [.horizontal, .bottom],
-                    SettingsMetrics.paneInset
-                )
-                .environment(\.keybindingLayerName, selected)
-                // One live read per section render (#1105), so
-                // every row narrates the same verdict (#1126).
-                .environment(
-                    \.disabledSystemShortcuts,
-                    model.disabledSystemShortcuts()
-                )
-                .environmentObject(coordinator)
+            VStack(spacing: 0) {
+                jumpBar(proxy)
+                page
             }
+            // A container, so the pane's title names it rather
+            // than renaming every chip beneath (#812).
+            .accessibilityElement(children: .contain)
             .onChange(of: coordinator.scrollTarget) {
                 _,
                 target in
@@ -86,12 +78,42 @@ struct ShortcutsSection: View {
         }
     }
 
+    private var page: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                header
+                actionGroups
+                tail
+            }
+            .padding(
+                [.horizontal, .bottom],
+                SettingsMetrics.paneInset
+            )
+            .shortcutsJumpSlot(.content)
+            .environment(\.keybindingLayerName, selected)
+            // One live read per section render (#1105), so
+            // every row narrates the same verdict (#1126).
+            .environment(
+                \.disabledSystemShortcuts,
+                model.disabledSystemShortcuts()
+            )
+            .environmentObject(coordinator)
+        }
+        .shortcutsJumpSlot(.viewport)
+        .coordinateSpace(name: ShortcutsJumpSlot.space)
+        .onPreferenceChange(ShortcutsJumpFrames.self) { frames in
+            let reading = ShortcutsJumpReading.read(frames)
+            if reading != jumpReading { jumpReading = reading }
+        }
+    }
+
     @ViewBuilder private var header: some View {
         KeybindingConflictBanner(model: model)
         // Above the layer header, so nothing in it reads as
         // per-layer (#1726, amending the 2026-08-04 ruling that
         // the layers card leads the section).
-        GesturesDrawer(model: model)
+        GesturesDrawer(model: model, expanded: $gesturesExpanded)
+            .shortcutsJumpSlot(.group(.gestures))
         ShortcutsHeader(model: model, selected: selection)
         layersCard
     }
@@ -111,22 +133,25 @@ struct ShortcutsSection: View {
             bindings: bindingsBinding,
             expander: expander
         )
+        .shortcutsJumpSlot(.group(.focus))
         MoveWindowsGroup(
             model: model,
             bindings: bindingsBinding,
             expander: expander
         )
+        .shortcutsJumpSlot(.group(.moveWindows))
         SizeFloatGroup(
             model: model,
             bindings: bindingsBinding,
             expander: expander
         )
-        ApplicationsGroup(model: model, bindings: bindingsBinding)
-        GeneralShortcutsGroup(
+        .shortcutsJumpSlot(.group(.sizeFloat))
+        ApplicationsGroup(
             model: model,
             bindings: bindingsBinding,
             expander: expander
         )
+        .shortcutsJumpSlot(.group(.openApplications))
     }
 
     @ViewBuilder private var tail: some View {

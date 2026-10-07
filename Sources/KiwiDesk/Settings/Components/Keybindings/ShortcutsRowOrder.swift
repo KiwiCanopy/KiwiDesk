@@ -3,7 +3,6 @@
 enum ShortcutsRowOrder {
     /// Containers drawn with bespoke views rather than a standard list loop.
     static let bespokeContainers: Set<SettingsContainer> = [
-        .openApplications,
         .layers,
         .luaBindings,
         .defaultShortcuts,
@@ -104,13 +103,14 @@ enum ShortcutsRowOrder {
     /// key can draw.
     static let sizeAndFloatMore: [SettingKey] = []
 
-    /// Open applications group order.
+    /// Open applications group order: the per-app list, drawn by
+    /// its own view.
     static let openApplicationsAtRest: [SettingKey] = [
         .shortcuts(.openApplications)
     ]
 
-    /// General shortcuts behind disclosure.
-    static let generalKeysMore: [SettingKey] = [
+    /// Open applications ▸ KiwiDesk, below the app list (#1520).
+    static let openApplicationsKiwiDesk: [SettingKey] = [
         .shortcuts(.showShortcuts),
         .shortcuts(.openSettings),
     ]
