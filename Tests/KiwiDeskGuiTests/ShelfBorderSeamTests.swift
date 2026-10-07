@@ -59,12 +59,19 @@ struct ShelfBorderSeamTests {
     /// Whether an indicator draws an outline is `drawsOutline`'s
     /// alone (#2029): across Core and the GUI only its declaration
     /// compares to `.outline`, so a third kind or a change to
-    /// which kinds outline answers everywhere at once. Exhaustive
-    /// `case .outline:` dispatches are the compiler's, not this.
+    /// which kinds outline answers everywhere at once. A
+    /// comparison is `==`, `!=` or `~=` either way round, however
+    /// the case is qualified, or an `if`/`guard case … =` match;
+    /// an exhaustive switch's `case .outline:` arm is the
+    /// compiler's to hold, not this.
     @Test("Only drawsOutline compares an indicator to .outline")
     func oneHomeSpellsTheOutline() throws {
         let pattern = try NSRegularExpression(
-            pattern: #"[!=]=\s*\.outline\b|\.outline\s*[!=]="#
+            pattern: [
+                #"[!=~]=\s*[A-Za-z_.]*\.outline\b"#,
+                #"\.outline\??\s*[!=~]="#,
+                #"\bcase\s+[A-Za-z_.]*\.outline\??\s*=(?!=)"#,
+            ].joined(separator: "|")
         )
         let gui = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk")
