@@ -185,8 +185,9 @@ struct GreyOutParityTests {
         // its own widget now.
         ("PresetCard.swift", ".disabled(reason != nil)", 1),
         // The automatic-install switch greys where Sparkle
-        // refuses it (#1542).
-        ("AutoInstallRow.swift", ".disabled(reason != nil)", 1),
+        // refuses it (#1542) — through `ToggleRow`'s `disabled:`,
+        // which greys the checkbox and keeps the `?` live (#2032).
+        ("AutoInstallRow.swift", "disabled: reason != nil", 1),
     ]
 
     @Test("every gated editor still greys off its own switch")

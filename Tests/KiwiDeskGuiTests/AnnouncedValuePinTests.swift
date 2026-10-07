@@ -6,7 +6,7 @@ import Testing
 /// ceiling. That suite owns the walker and the labelled census;
 /// this one pins the individual seams a walker cannot reach:
 /// the shared row label, the slider seam, `DropdownRow`, the
-/// heading census, the nil-spoken-value map and the save pill's
+/// heading census and the save pill's
 /// cancellable announcement. The docstrings on each test carry
 /// their own arguments.
 struct AnnouncedValuePinTests {
@@ -62,6 +62,10 @@ struct AnnouncedValuePinTests {
         let body = source[row.lowerBound...]
         #expect(body.contains(".accessibilityLabel(label)"))
         #expect(body.contains(".accessibilityValue(spokenValue)"))
+        // No nil escape (#2032): an on/off control takes
+        // `ToggleRow`, so the value is a required `String`.
+        #expect(body.contains("let spokenValue: String"))
+        #expect(!body.contains("spokenValue: String?"))
     }
 
     /// A title component carries `.isHeader`, so the headings
@@ -121,43 +125,6 @@ struct AnnouncedValuePinTests {
                     + "— a title lost its trait, or a new title "
                     + "component joins `headings` in the same "
                     + "change"
-            )
-        )
-    }
-
-    /// `DropdownRow`'s `spokenValue: nil` escape exists for a
-    /// `Toggle`, whose on/off survives a label — around a
-    /// `Picker` it re-ships the #812 defect with every guard
-    /// green, because the walker cannot see a label that lands
-    /// on a parameter. The map is the one copy of who may.
-    private static let nilSpokenValue: [String: Int] = [
-        "LoginItemCard.swift": 1,
-        "AutoInstallRow.swift": 1,
-        // #1741: the alert-sound switch, a Toggle in the card's
-        // row shape like Start at login.
-        "GeneralSection+AppWide.swift": 1,
-    ]
-
-    @Test("a nil spoken value is for a Toggle, and enumerated")
-    func nilSpokenValuesAreEnumerated() throws {
-        var found: [String: Int] = [:]
-        for url in try ChromeScanRoots.sources(from: #filePath) {
-            let count = SourceScan.stripComments(
-                try String(contentsOf: url, encoding: .utf8)
-            )
-            .occurrences(of: "spokenValue: nil")
-            if count > 0 {
-                found[url.lastPathComponent] = count
-            }
-        }
-        #expect(
-            found == Self.nilSpokenValue,
-            Comment(
-                rawValue:
-                    "a new `spokenValue: nil` site: \(found) — "
-                    + "legal only around a control whose state "
-                    + "IS its value; join the map with the "
-                    + "argument, or state the value"
             )
         )
     }

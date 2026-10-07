@@ -1199,8 +1199,9 @@ claim; the obligations a change here takes on:
   is labelled. A `.menu` picker under `labelsHidden` keeps no
   AX title (the dated observation is the design decision cited
   below), so `DropdownRow` takes the selected option's title
-  from its site, its `spokenValue: nil` escape enumerated by
-  the same suite; `SettingsSlider` takes
+  from its site as a required argument, an on/off control
+  taking `ToggleRow` instead (#2032,
+  `AnnouncedValuePinTests`); `SettingsSlider` takes
   `label` and `spokenValue` as required arguments and re-earns
   the Tab stop and arrow keys a custom-drawn view has no claim
   to; `SettingsRowLabel`'s text is drawn, not spoken, since every

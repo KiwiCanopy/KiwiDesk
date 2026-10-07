@@ -66,19 +66,13 @@ struct GeneralSection: View {
                     }
                 }
             }
-            Text(
-                L(
-                    "general.language.applies",
-                    "Changes the moment you pick one."
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
             appearanceRow
-            refusalSoundRow
+            Divider()
             LoginItemCard(model: model)
-            quitPileDepthRow
             AutoInstallRow(model: model, setting: model.updater.autoInstall)
+            Divider()
+            refusalSoundRow
+            quitPileDepthRow
         }
     }
 
