@@ -31,9 +31,9 @@ struct SyncReconcileCensusTests {
         // The off-main door itself: an unobserved app, and the
         // apply of the list read.
         "Events/EventLoop+ReconcileOffMain.swift": 2,
-        // Boot's pass and its deferred completion (#801/#803).
+        // Boot's pass (#801/#803); its deferred completion reads
+        // off main (#1795).
         "Events/EventLoop+BootScan.swift": 1,
-        "App/KiwiCore+Boot.swift": 1,
         // The adoption heal (#675).
         "Events/EventLoop+Heal.swift": 2,
         // The Desktop-switch bulk pass (#308).

@@ -235,4 +235,20 @@ struct ReconcileOffMainDebtTests {
         #expect(!box.dispatched.contains(stranger))
         #expect(box.listReads == 1)
     }
+
+    /// #1795: a bulk request parked behind a read keeps its
+    /// `coalesceTabs: false` (#308) whichever request came first.
+    @Test("a parked bulk request keeps its no-coalesce shape")
+    func parkedBulkRequestKeepsItsShape() {
+        let (loop, box) = makeLoop()
+        loop.reconcileOffMain(pid: pid, app: ref)
+        loop.reconcileOffMain(pid: pid, app: ref, coalesceTabs: false)
+        loop.reconcileOffMain(pid: pid, app: ref)
+        #expect(loop.offMain.next[pid]?.coalesceTabs == false)
+        box.drain()
+        #expect(loop.offMain.next[pid] == nil)
+        loop.reconcileOffMain(pid: pid, app: ref)
+        loop.reconcileOffMain(pid: pid, app: ref)
+        #expect(loop.offMain.next[pid]?.coalesceTabs == true)
+    }
 }
