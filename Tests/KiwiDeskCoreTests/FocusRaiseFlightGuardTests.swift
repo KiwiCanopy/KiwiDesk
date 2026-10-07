@@ -59,16 +59,19 @@ struct FocusRaiseFlightGuardTests {
         core.focusedCommandDenial(for: command, [.string("left")])
     }
 
-    /// Our raise toward `id`, issued with the previous app in
-    /// front, `age` seconds ago on the core's frozen clock.
+    /// A `focus` press's raise toward `id`, issued with the
+    /// previous app in front, `age` seconds ago on the core's
+    /// frozen clock.
     private func raise(
         _ core: KiwiCore,
         to id: WindowID,
         age: TimeInterval = 0
     ) {
-        core.noteRaiseFlight(to: id)
-        core.raiseFlight?.raisedAt = core.wallClock()
-            .addingTimeInterval(-age)
+        core.raiseFlight = RaiseFlight(
+            target: id,
+            leftPID: previousPID,
+            issuedAt: core.wallClock().addingTimeInterval(-age)
+        )
     }
 
     @Test("A fresh raise toward the anchor lets focus through")
@@ -149,7 +152,11 @@ struct FocusRaiseFlightGuardTests {
     func unmanagedLeftAppRefuses() {
         let core = makeCore()
         core.frontmostPIDProvider = { 777 }
-        raise(core, to: anchor)
+        core.raiseFlight = RaiseFlight(
+            target: anchor,
+            leftPID: 777,
+            issuedAt: core.wallClock()
+        )
         #expect(preflight(core, "focus")?.error == Self.generic)
     }
 
@@ -183,35 +190,6 @@ struct FocusRaiseFlightGuardTests {
         let response = core.execute("focus", args: [.string("left")])
         #expect(response.error != Self.generic)
         #expect(logs.contains { $0.contains("allowed focus") })
-    }
-
-    /// The write site: a focus command records its raise and
-    /// the app in front, and the deferred raise restamps it.
-    @Test("focusWindow records the flight it starts")
-    func focusWindowRecords() {
-        let core = makeCore()
-        core.focusWindow(previous, warp: false)
-        #expect(core.raiseFlight?.target == previous)
-        #expect(core.raiseFlight?.leftPID == previousPID)
-    }
-
-    @Test("A re-assert of the target keeps the app it left")
-    func reassertKeepsLeftApp() {
-        let core = makeCore()
-        raise(core, to: anchor)
-        let other: pid_t = 555
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(id: WindowID(3), pid: other, appName: "T")
-            )
-        )
-        if let home = core.state.workspaces.space(of: anchor) {
-            core.state.workspaces.focus(anchor, in: home)
-        }
-        core.frontmostPIDProvider = { other }
-        core.focusWindow(anchor, warp: false)
-        #expect(core.raiseFlight?.leftPID == previousPID)
-        #expect(preflight(core, "focus")?.error == Self.generic)
     }
 
     /// A long pan must not spend the flight before the raise is
@@ -280,5 +258,70 @@ struct FocusRaiseFlightGuardTests {
             nil
         )
         #expect(preflight(core, "focus") == nil)
+    }
+
+    /// The write site: a `focus` press that moved the anchor
+    /// records its raise and the app in front as it ran.
+    @Test("The focus verb records the flight it starts")
+    func focusVerbRecords() {
+        let core = makeCore()
+        guard let space = core.state.workspaces.space(of: anchor)
+        else {
+            Issue.record("no space")
+            return
+        }
+        _ = core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("monocle")]
+        )
+        core.frontmostPIDProvider = { getpid() }
+        #expect(
+            core.execute("focus", args: [.string("left")]).isSuccess
+        )
+        #expect(core.focusedWindow?.id == previous)
+        #expect(core.raiseFlight?.target == previous)
+        #expect(core.raiseFlight?.leftPID == getpid())
+    }
+
+    /// A `focusWindow` re-assert after the user switched apps —
+    /// the z-order restore's closing one — records nothing, so
+    /// the app switched to never reads as the one left.
+    @Test("A re-assert after a switch records no flight")
+    func reassertRecordsNothing() {
+        let core = makeCore()
+        raise(core, to: anchor)
+        let other: pid_t = 555
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(3), pid: other, appName: "T")
+            )
+        )
+        if let home = core.state.workspaces.space(of: anchor) {
+            core.state.workspaces.focus(anchor, in: home)
+        }
+        core.frontmostPIDProvider = { other }
+        core.eventLoop.onAppActivated(
+            AppActivation(pid: other, bundleID: nil, launchedAt: nil)
+        )
+        core.focusWindow(anchor, warp: false)
+        #expect(core.raiseFlight == nil)
+        #expect(preflight(core, "focus")?.error == Self.generic)
+    }
+
+    /// A click during the pan is the user's too: the press is
+    /// judged against the `focus` press, not the deferred raise's
+    /// later restamp.
+    @Test("A click mid-pan refuses")
+    func clickMidPanRefuses() {
+        let core = makeCore()
+        raise(core, to: anchor, age: 0.5)
+        core.lastLeftClick = (
+            core.wallClock().addingTimeInterval(-0.2),
+            .zero,
+            nil
+        )
+        core.pendingFocusRaise = anchor
+        core.runPendingFocusRaise()
+        #expect(preflight(core, "focus")?.error == Self.generic)
     }
 }

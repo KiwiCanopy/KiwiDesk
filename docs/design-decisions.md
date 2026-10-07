@@ -2662,8 +2662,9 @@ to stop in between.
 So `focus` alone passes the preflight while KiwiDesk's own raise
 toward the anchor is in flight — pending a scrolling pan, or sent
 within the self-raise echo window — and the app in front is still
-the managed app that raise LEFT, recorded as `focusWindow`
-issued it, with no app activation and no press since. That is not the case #292 guards: the window `focus`
+the managed app that raise LEFT, recorded by the `focus` press
+itself — never by a re-assert of the same focus — with no app
+activation and no click since. That is not the case #292 guards: the window `focus`
 acts from is the one KiwiDesk just raised, not a hidden one, and
 `focus` changes no window's content, size or membership — it
 moves state, pans to the target and raises.

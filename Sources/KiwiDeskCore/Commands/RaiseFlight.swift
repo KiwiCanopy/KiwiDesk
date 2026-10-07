@@ -1,15 +1,24 @@
 import Foundation
 
-/// A `focusWindow` raise in flight (#1812): which window it
-/// raises, the frontmost process when it was issued — the app
-/// the raise leaves — and when the raise was sent. The #292
-/// preflight reads it to let `focus` through while that app is
-/// still in front; any app activation ends it
-/// (`endRaiseFlight`), and it is never an echo ledger.
+/// A `focus` verb's raise in flight (#1812): which window it
+/// raises, the frontmost process when the press ran — the app
+/// the raise leaves — when the press ran, and when the raise was
+/// sent. Written by the verb alone, never by a `focusWindow`
+/// re-assert; any app activation ends it (`endRaiseFlight`). The
+/// #292 preflight reads it to let `focus` through while that app
+/// is still in front; it is never an echo ledger.
 struct RaiseFlight: Equatable {
     private(set) var target: WindowID
     let leftPID: pid_t
-    var raisedAt: Date
+    let issuedAt: Date
+    private(set) var raisedAt: Date
+
+    init(target: WindowID, leftPID: pid_t, issuedAt: Date) {
+        self.target = target
+        self.leftPID = leftPID
+        self.issuedAt = issuedAt
+        raisedAt = issuedAt
+    }
 
     /// Follows a native tab switch's fresh id (#308).
     mutating func rekey(old: WindowID, new: WindowID) {

@@ -118,8 +118,8 @@ extension KiwiCore {
         }
     }
 
-    /// The one liveness reading of a flight: its raise is in
-    /// flight as long as its echo is believed ours (#887).
+    /// A flight's raise is in flight as long as its echo is
+    /// believed ours (#887).
     private func raiseFlightLive(
         _ flight: RaiseFlight,
         toward id: WindowID
@@ -132,11 +132,12 @@ extension KiwiCore {
         )
     }
 
-    /// Whether the user pressed since the raise — a click is
-    /// their choice, never ours to override (#1161's escape).
+    /// Whether the user clicked since the `focus` press, mid-pan
+    /// included — a click is their choice, never ours to
+    /// override (#1161's escape).
     private func pressedSince(_ flight: RaiseFlight) -> Bool {
         guard let click = lastLeftClick else { return false }
-        return click.at > flight.raisedAt
+        return click.at > flight.issuedAt
     }
 
     /// Ends the flight at any app activation: the raise landed,
@@ -146,26 +147,22 @@ extension KiwiCore {
         raiseFlight = nil
     }
 
-    /// Records a `focusWindow` raise toward `id` and the app
-    /// in front as it was issued — the app the raise leaves. A
-    /// re-assert of a target still in flight keeps the record, or
-    /// an app the user switched to since would read as the one
-    /// left.
-    func noteRaiseFlight(to id: WindowID) {
-        if let flight = raiseFlight,
-            raiseFlightLive(flight, toward: id)
-        {
-            return
+    /// The `focus` verb: navigates, and records the raise it
+    /// started with the app in front as the press ran — the app
+    /// the raise leaves. A press that moved nothing records
+    /// nothing.
+    func focusRecordingFlight(_ args: [JSONValue]) -> CommandResponse {
+        let front = frontmostPIDProvider?()
+        let before = focusedWindowID
+        let response = navigate(args, swapping: false)
+        if let front, let after = focusedWindowID, after != before {
+            raiseFlight = RaiseFlight(
+                target: after,
+                leftPID: front,
+                issuedAt: wallClock()
+            )
         }
-        guard let front = frontmostPIDProvider?() else {
-            raiseFlight = nil
-            return
-        }
-        raiseFlight = RaiseFlight(
-            target: id,
-            leftPID: front,
-            raisedAt: wallClock()
-        )
+        return response
     }
 
     /// Whether the frontmost process is `pid`'s app — the

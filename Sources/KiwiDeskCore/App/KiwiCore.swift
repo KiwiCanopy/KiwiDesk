@@ -90,7 +90,7 @@ public final class KiwiCore {
     /// A scrolling focus raise waiting for the pan to settle
     /// (#143); one slot, so only the last target raises.
     var pendingFocusRaise: WindowID?
-    /// A `focusWindow` raise in flight (#1812).
+    /// A `focus` press's raise in flight (#1812).
     var raiseFlight: RaiseFlight?
 
     /// When KiwiDesk's own AX raise of each window was issued

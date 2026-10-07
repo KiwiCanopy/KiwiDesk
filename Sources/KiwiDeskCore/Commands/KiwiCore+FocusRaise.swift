@@ -99,7 +99,6 @@ extension KiwiCore {
         if activeSpace?.focused != id {
             eventLoop.lastCommandedFocus = .now
         }
-        noteRaiseFlight(to: id)
         // The anchor, not `activeSpace?.focused`: stepping off a
         // tiled-sticky traveler must classify the scroll pan
         // direction from the traveler's slot, not from the stale
