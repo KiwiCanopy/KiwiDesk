@@ -66,7 +66,7 @@ struct ShortcutsJumpReadoutTests {
         #expect(narrowBare == wideBare)
         let line = try #require(
             ImageRenderer(
-                content: Text(readout).font(.subheadline).fixedSize()
+                content: Text(readout).font(.callout).fixedSize()
             ).nsImage
         ).size.height
         let expected = narrowBare + ShortcutsJumpBar.spacing + line

@@ -35,7 +35,7 @@ struct ShortcutsJumpBar: View {
             // the hairline span the pane.
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, SettingsMetrics.paneInset)
-            .padding(.vertical, 8)
+            .padding(.vertical, 10)
             .background(SettingsTheme.page)
             .overlay(alignment: .bottom) {
                 if underlapped {
@@ -72,7 +72,7 @@ struct ShortcutsJumpBar: View {
 
     private func readoutText(_ text: String) -> some View {
         Text(text)
-            .font(.subheadline)
+            .font(.callout)
             .foregroundStyle(SettingsTheme.ink2)
             .accessibilityLabel(spokenReadout ?? text)
     }
@@ -98,7 +98,7 @@ struct ShortcutsJumpBar: View {
             HStack(spacing: Self.spacing) {
                 chip(group)
                 SettingsTheme.hairline
-                    .frame(width: 1, height: 16)
+                    .frame(width: 1, height: 18)
                     .accessibilityHidden(true)
             }
         } else {
@@ -116,9 +116,9 @@ struct ShortcutsJumpBar: View {
     }
 }
 
-/// A content-sized hairline capsule at the regular control size,
+/// A content-sized hairline capsule at the large-control height,
 /// its label at the size of the header it jumps to (owner
-/// amendment 2, #1520). Marked: a soft accent fill
+/// amendments 2 and 3, #1520). Marked: a soft accent fill
 /// and a semibold label in neutral ink, its width reserved so the
 /// marking never reflows the row. Hover lifts a neutral fill on a
 /// layer beneath the marking — each layer's colour is a function
@@ -133,8 +133,8 @@ struct ShortcutsJumpChip: View {
     var body: some View {
         Button(action: action) {
             label
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 6)
                 .background {
                     ZStack {
                         Capsule().fill(Self.hoverFill(hovered))

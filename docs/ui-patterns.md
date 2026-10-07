@@ -521,8 +521,8 @@ same capsule language rather than as bare gray prose.
 page whose groups the reader needs a map of — Shortcuts & Gestures
 is the one — pins a row of chips over its scroll, one per group,
 in page order, each labelled by its group's own title. A chip is
-content-sized and wears the hairline capsule at the regular
-control size, the label at the size of the header it jumps to,
+content-sized and wears a large-control capsule, the label at
+the size of the header it jumps to,
 with no count and never a truncation: the row wraps instead
 of scrolling. The chip for the group under the bar is marked with
 a soft accent fill and a semibold label, the ink staying neutral
