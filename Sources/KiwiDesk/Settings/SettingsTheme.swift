@@ -96,6 +96,23 @@ enum SettingsTheme {
         darkAlpha: 0.16
     )
 
+    /// The same chip held down: deeper than the lift.
+    static let chipPressed = token(
+        light: 0x12_25_1A,
+        dark: 0xE6_EC_E6,
+        lightAlpha: 0.16,
+        darkAlpha: 0.22
+    )
+
+    /// A button chip's edge, constant in every state — what tells
+    /// it from a passive hairline capsule (#1520 amendment 5).
+    static let chipEdge = token(
+        light: 0x12_25_1A,
+        dark: 0xE6_EC_E6,
+        lightAlpha: 0.24,
+        darkAlpha: 0.20
+    )
+
     // MARK: - Ink
 
     /// Primary text: titles, row labels, card headings.

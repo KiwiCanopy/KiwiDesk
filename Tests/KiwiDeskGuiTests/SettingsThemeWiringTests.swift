@@ -44,6 +44,8 @@ struct SettingsThemeWiringTests {
         "planeRing": "SettingsFooter.swift",
         "chipRest": "ShortcutsJumpBar.swift",
         "chipHover": "ShortcutsJumpBar.swift",
+        "chipPressed": "ShortcutsJumpBar.swift",
+        "chipEdge": "ShortcutsJumpBar.swift",
         "ink": "SettingsHeaderBar.swift",
         "ink2": "SettingsHeaderBar+Status.swift",
         "ink3": "SettingsSearchField.swift",

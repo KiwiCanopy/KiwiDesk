@@ -279,27 +279,57 @@ struct ShortcutsJumpTests {
         )
     }
 
-    /// Hover never erases the marking (#1173): each layer's colour
-    /// is a function of its own state alone — the signatures admit
-    /// nothing else — and the marking draws over the pointer's.
-    @Test("hover and marking are separate layers")
+    /// Neither hover nor press erases the marking (#1173): each
+    /// layer's colour is a function of its own state alone — the
+    /// signatures admit nothing else — and the marking draws over
+    /// the pointer's, under an edge no state moves (#1520
+    /// amendment 5), never the passive capsule's hairline.
+    @Test("pointer and marking are separate layers under the edge")
     func hoverKeepsTheMarking() throws {
         #expect(
             ShortcutsJumpChip.markFill(true)
                 != ShortcutsJumpChip.markFill(false)
         )
         #expect(
-            ShortcutsJumpChip.restFill(true)
-                != ShortcutsJumpChip.restFill(false)
+            ShortcutsJumpChip.restFill(pressed: false, hovered: true)
+                != ShortcutsJumpChip.restFill(
+                    pressed: false,
+                    hovered: false
+                )
         )
+        for hovered in [false, true] {
+            #expect(
+                ShortcutsJumpChip.restFill(
+                    pressed: true,
+                    hovered: hovered
+                )
+                    != ShortcutsJumpChip.restFill(
+                        pressed: false,
+                        hovered: hovered
+                    )
+            )
+        }
         let bar = try Self.source(
             "Components/Keybindings/ShortcutsJumpBar.swift"
         )
         #expect(
             bar.contains(
-                "ZStack{Capsule().fill(Self.restFill(hovered))"
-                    + "Capsule().fill(Self.markFill(marked))}"
+                ".buttonStyle(ShortcutsJumpChipStyle(marked:marked))"
             )
         )
+        #expect(
+            bar.contains(
+                "ZStack{Capsule().fill(ShortcutsJumpChip.restFill("
+                    + "pressed:configuration.isPressed,hovered:hovered))"
+                    + "Capsule().fill(ShortcutsJumpChip.markFill(marked))}"
+            )
+        )
+        #expect(
+            bar.contains(
+                ".overlay{Capsule().strokeBorder("
+                    + "SettingsTheme.chipEdge,lineWidth:1)}"
+            )
+        )
+        #expect(!bar.contains("strokeBorder(SettingsTheme.hairline"))
     }
 }

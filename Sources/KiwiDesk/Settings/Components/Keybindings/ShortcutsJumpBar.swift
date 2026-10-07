@@ -116,39 +116,23 @@ struct ShortcutsJumpBar: View {
     }
 }
 
-/// A content-sized hairline capsule at the large-control height,
-/// its label at the size of the header it jumps to (owner
-/// amendments 2 and 3, #1520). Marked: a soft accent fill
-/// and a semibold label in neutral ink, its width reserved so the
-/// marking never reflows the row. A resting fill gives the chip its
-/// shape and lifts under the pointer, on a
-/// layer beneath the marking — each layer's colour is a function
-/// of its own state alone, so a hover cannot erase the marking
-/// (#1173).
+/// A content-sized capsule at the large-control height, its label
+/// at the size of the header it jumps to (owner amendments 2 and
+/// 3, #1520). Marked: a soft accent fill and a semibold label in
+/// neutral ink, its width reserved so the marking never reflows
+/// the row.
 struct ShortcutsJumpChip: View {
     let title: String
     let marked: Bool
     let action: () -> Void
-    @State private var hovered = false
 
     var body: some View {
         Button(action: action) {
             label
                 .padding(.horizontal, 14)
                 .padding(.vertical, 6)
-                .background {
-                    ZStack {
-                        Capsule().fill(Self.restFill(hovered))
-                        Capsule().fill(Self.markFill(marked))
-                    }
-                }
-                .overlay {
-                    Capsule().strokeBorder(SettingsTheme.hairline)
-                }
-                .contentShape(Capsule())
         }
-        .buttonStyle(.plain)
-        .onHover { hovered = $0 }
+        .buttonStyle(ShortcutsJumpChipStyle(marked: marked))
         .accessibilityAddTraits(marked ? .isSelected : [])
     }
 
@@ -168,10 +152,11 @@ struct ShortcutsJumpChip: View {
             .fixedSize()
     }
 
-    /// The chip's own shape, lifting under the pointer; beneath
-    /// the marking (#1520 amendment 4).
-    static func restFill(_ hovered: Bool) -> Color {
-        hovered ? SettingsTheme.chipHover : SettingsTheme.chipRest
+    /// The chip's own shape, answering the pointer alone; beneath
+    /// the marking (#1520 amendments 4 and 5).
+    static func restFill(pressed: Bool, hovered: Bool) -> Color {
+        if pressed { return SettingsTheme.chipPressed }
+        return hovered ? SettingsTheme.chipHover : SettingsTheme.chipRest
     }
 
     /// The marking's layer, over the pointer's.
@@ -179,5 +164,47 @@ struct ShortcutsJumpChip: View {
         SettingsTheme.accent.opacity(
             marked ? SettingsTheme.jumpChipMarkedOpacity : 0
         )
+    }
+}
+
+/// The jump chip's face: the pointer's layer beneath the marking's
+/// — each a function of its own state alone, so neither a hover
+/// nor a press can erase the marking (#1173) — under an edge that
+/// no state moves. No animation, no shadow (#1520 amendment 5).
+struct ShortcutsJumpChipStyle: ButtonStyle {
+    let marked: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        Face(configuration: configuration, marked: marked)
+    }
+
+    /// A real `View`, so the hover is state it can hold.
+    private struct Face: View {
+        let configuration: Configuration
+        let marked: Bool
+        @State private var hovered = false
+
+        var body: some View {
+            configuration.label
+                .background {
+                    ZStack {
+                        Capsule().fill(
+                            ShortcutsJumpChip.restFill(
+                                pressed: configuration.isPressed,
+                                hovered: hovered
+                            )
+                        )
+                        Capsule().fill(ShortcutsJumpChip.markFill(marked))
+                    }
+                }
+                .overlay {
+                    Capsule().strokeBorder(
+                        SettingsTheme.chipEdge,
+                        lineWidth: 1
+                    )
+                }
+                .contentShape([.interaction, .focusEffect], Capsule())
+                .onHover { hovered = $0 }
+        }
     }
 }
