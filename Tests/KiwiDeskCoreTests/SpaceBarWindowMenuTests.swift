@@ -127,9 +127,8 @@ struct SpaceBarWindowMenuTests {
     }
 
     /// #1850: the list pops as a context menu at its cell, so the
-    /// menu window hangs from the cell's lower-left corner — the
-    /// event sits there less AppKit's measured inset — whatever the
-    /// menu's size, which only a peek's edge reads.
+    /// event lands on the cell's lower-left corner in its window —
+    /// whatever the menu's size, which only a peek's edge reads.
     @Test("The glyph menu's event sits at its cell's lower-left corner")
     func contextEventSitsAtTheCell() throws {
         let menu = CGSize(width: 160, height: 120)
@@ -151,19 +150,12 @@ struct SpaceBarWindowMenuTests {
         )
         #expect(event.type == .rightMouseDown)
         #expect(event.windowNumber == window.windowNumber)
-        let inset = SpaceBarGlyphActions.contextMenuInset
-        #expect(
-            event.locationInWindow
-                == NSPoint(x: 30 - inset.width, y: 8 - inset.height)
-        )
+        #expect(event.locationInWindow == NSPoint(x: 30, y: 8))
         let corner = SpaceBarGlyphActions.contextEvent(
             at: flipped,
             menu: menu
         )
-        #expect(
-            corner?.locationInWindow
-                == NSPoint(x: 60 - inset.width, y: 8 - inset.height)
-        )
+        #expect(corner?.locationInWindow == NSPoint(x: 60, y: 8))
         #expect(
             SpaceBarGlyphActions.contextEvent(at: NSView(), menu: menu) == nil
         )
