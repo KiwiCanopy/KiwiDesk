@@ -188,6 +188,13 @@ struct GreyOutParityTests {
         // refuses it (#1542) — through `ToggleRow`'s `disabled:`,
         // which greys the checkbox and keeps the `?` live (#2032).
         ("AutoInstallRow.swift", "disabled: reason != nil", 1),
+        // Its two siblings on the card, greyed the same way.
+        ("LoginItemCard.swift", "disabled: loginInert", 1),
+        (
+            "GeneralSection+AppWide.swift",
+            "disabled: appWideReason(.refusalSound) != nil",
+            1
+        ),
     ]
 
     @Test("every gated editor still greys off its own switch")

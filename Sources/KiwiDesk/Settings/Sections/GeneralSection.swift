@@ -67,10 +67,8 @@ struct GeneralSection: View {
                 }
             }
             appearanceRow
-            Divider()
             LoginItemCard(model: model)
             AutoInstallRow(model: model, setting: model.updater.autoInstall)
-            Divider()
             refusalSoundRow
             quitPileDepthRow
         }

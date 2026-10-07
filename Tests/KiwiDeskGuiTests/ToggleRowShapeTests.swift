@@ -50,6 +50,7 @@ struct ToggleRowShapeTests {
         let files = try SourceScan.swiftSources(
             under: root.appendingPathComponent("Sources/KiwiDesk")
         )
+        var occurrences = 0
         var rows = 0
         var offenders: [String] = []
         for file in files {
@@ -58,8 +59,16 @@ struct ToggleRowShapeTests {
                     try String(contentsOf: file, encoding: .utf8)
                 )
             )
-            for start in Self.starts(of: "DropdownRow(", in: text) {
-                var cursor = start + "DropdownRow".count
+            let calls =
+                Self.starts(of: "DropdownRow(", in: text).map {
+                    $0 + "DropdownRow".count
+                }
+                + Self.starts(of: "DropdownRow.init(", in: text).map {
+                    $0 + "DropdownRow.init".count
+                }
+            occurrences += calls.count
+            for open in calls {
+                var cursor = open
                 guard
                     SourceScan.balanced(
                         text,
@@ -80,8 +89,11 @@ struct ToggleRowShapeTests {
                 }
             }
         }
-        // The scan found its input before asserting about it.
-        #expect(rows >= 2)
+        // Every call parsed: a row the walker could not read
+        // reds here rather than being skipped, and a scan that
+        // found nothing reds too.
+        #expect(occurrences > 0)
+        #expect(rows == occurrences)
         #expect(
             offenders.isEmpty,
             Comment(
