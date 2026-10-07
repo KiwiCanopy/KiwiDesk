@@ -7,8 +7,8 @@ import SwiftUI
 /// scrolling. It sits on the page ground, and draws its lower
 /// hairline once content slides under it.
 struct ShortcutsJumpBar: View {
-    let marked: ShortcutsJumpGroup?
-    let underlapped: Bool
+    /// The one reader of `tracker.reading` (#1520).
+    let tracker: ShortcutsJumpTracker
     /// "Editing the “x” layer", or nil where there is no choice.
     let readout: String?
     /// The same sentence with the layer's full name, for
@@ -39,7 +39,7 @@ struct ShortcutsJumpBar: View {
             .padding(.vertical, 10)
             .background(SettingsTheme.page)
             .overlay(alignment: .bottom) {
-                if underlapped {
+                if tracker.reading.underlapped {
                     SettingsTheme.hairline.frame(height: 1)
                 }
             }
@@ -126,7 +126,7 @@ struct ShortcutsJumpBar: View {
     private func chip(_ group: ShortcutsJumpGroup) -> some View {
         ShortcutsJumpChip(
             title: group.control.text,
-            marked: marked == group
+            marked: tracker.reading.marked == group
         ) {
             jump(group)
         }

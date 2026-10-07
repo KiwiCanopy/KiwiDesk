@@ -33,8 +33,7 @@ struct ShortcutsJumpReadoutTests {
         band: SettingsWidthClass = .medium
     ) throws -> CGFloat {
         let bar = ShortcutsJumpBar(
-            marked: .focus,
-            underlapped: false,
+            tracker: ShortcutsJumpTracker(),
             readout: readout
         ) { _ in }
         .environment(\.settingsWidth, band)

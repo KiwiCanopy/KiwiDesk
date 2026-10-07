@@ -7,8 +7,7 @@ import SwiftUI
 extension ShortcutsSection {
     func jumpBar(_ proxy: ScrollViewProxy) -> some View {
         ShortcutsJumpBar(
-            marked: jumpReading.marked,
-            underlapped: jumpReading.underlapped,
+            tracker: jumpTracker,
             readout: editingReadout(ShortcutsJumpBar.shownName(selected)),
             spokenReadout: editingReadout(selected)
         ) { group in
@@ -30,16 +29,11 @@ extension ShortcutsSection {
         )
     }
 
-    /// Re-renders the bar only when its reading changed.
-    func show(_ reading: ShortcutsJumpReading) {
-        if reading != jumpReading { jumpReading = reading }
-    }
-
     private func jump(
         to group: ShortcutsJumpGroup,
         proxy: ScrollViewProxy
     ) {
-        show(jumpTracker.jump(to: group))
+        jumpTracker.jump(to: group)
         if group == .gestures { gesturesExpanded = true }
         withAnimation(
             reduceMotion

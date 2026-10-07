@@ -18,8 +18,9 @@ struct ShortcutsSection: View {
     /// Lifted so the Mouse & trackpad chip opens the card (#1520);
     /// still shut on every visit.
     @State var gesturesExpanded = false
-    @State var jumpReading = ShortcutsJumpReading()
-    @StateObject var jumpTracker = ShortcutsJumpTracker()
+    /// `@State`, never an observed object: the body must not
+    /// subscribe to the reading only the bar draws (#1520).
+    @State var jumpTracker = ShortcutsJumpTracker()
     @StateObject private var coordinator =
         RecorderCoordinator()
 
@@ -104,10 +105,10 @@ struct ShortcutsSection: View {
         // The chips' groups report under their anchor ids.
         .mapsSectionFrames()
         .onPreferenceChange(ShortcutsJumpFrames.self) { frames in
-            show(jumpTracker.slots(frames))
+            jumpTracker.slots(frames)
         }
         .onPreferenceChange(SettingsSectionFrames.self) { frames in
-            show(jumpTracker.sections(frames))
+            jumpTracker.sections(frames)
         }
     }
 

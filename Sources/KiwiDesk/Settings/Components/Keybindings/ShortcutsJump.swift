@@ -1,4 +1,3 @@
-import Combine
 import Foundation
 import SwiftUI
 
@@ -142,15 +141,18 @@ struct ShortcutsJumpReading: Equatable {
     }
 }
 
-/// The page geometry and a held chip, kept off the view's state
-/// so a scroll frame re-renders the bar only when its reading
-/// changes. Observable only so a `@StateObject` builds it once;
-/// it publishes nothing.
+/// The page geometry, a held chip and the bar's reading. Held
+/// in the section's `@State` and read by `ShortcutsJumpBar`
+/// alone, so a changed reading re-renders the bar and never the
+/// page under it (#1520); geometry writes notify nobody.
 @MainActor
-final class ShortcutsJumpTracker: ObservableObject {
-    private var page = ShortcutsJumpPage()
-    private var hold: ShortcutsJumpHold?
+@Observable
+final class ShortcutsJumpTracker {
+    private(set) var reading = ShortcutsJumpReading()
+    @ObservationIgnored private var page = ShortcutsJumpPage()
+    @ObservationIgnored private var hold: ShortcutsJumpHold?
 
+    @discardableResult
     func sections(
         _ frames: [String: CGRect],
         at now: Date = Date()
@@ -159,6 +161,7 @@ final class ShortcutsJumpTracker: ObservableObject {
         return moved(at: now)
     }
 
+    @discardableResult
     func slots(
         _ frames: [ShortcutsJumpSlot: CGRect],
         at now: Date = Date()
@@ -168,6 +171,7 @@ final class ShortcutsJumpTracker: ObservableObject {
         return moved(at: now)
     }
 
+    @discardableResult
     func jump(
         to group: ShortcutsJumpGroup,
         at now: Date = Date()
@@ -177,12 +181,24 @@ final class ShortcutsJumpTracker: ObservableObject {
             at: now,
             offset: page.content?.minY
         )
-        return ShortcutsJumpReading.read(page, holding: group)
+        return publish(ShortcutsJumpReading.read(page, holding: group))
     }
 
     private func moved(at now: Date) -> ShortcutsJumpReading {
         hold = hold?.surviving(offset: page.content?.minY, at: now)
-        return ShortcutsJumpReading.read(page, holding: hold?.group)
+        return publish(
+            ShortcutsJumpReading.read(page, holding: hold?.group)
+        )
+    }
+
+    /// The preferences re-measure on every scroll frame; the
+    /// reading being `Equatable`, an unchanged write notifies
+    /// nobody (`ShortcutsJumpInvalidationTests`).
+    private func publish(
+        _ next: ShortcutsJumpReading
+    ) -> ShortcutsJumpReading {
+        reading = next
+        return next
     }
 }
 
