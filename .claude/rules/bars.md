@@ -584,18 +584,35 @@ Obligations:
   turned off, a display gone — since the panel joins every Space
   and would stay up over the fullscreen app (`BarPeekSeamTests` ▸
   `relayoutChecksAfterTheReRead`, `BarPeekWiringTests` ▸
-  `shelfLeavingCloses`). A press the press fan-out hears is a
-  click outside, since neither arm hears a bar or the peek. **An
-  anchor answers a press as its click rules** — an App Bar item's
-  press is a pick and closes the peek after its Control-click
-  guard, a glyph's only arms its click, which Core turns into a
-  pin or a pick (`BarPeekSeamTests` ▸ `anchorsAnswerAPress`,
-  whose `anchors` map, derived from the `peek?.pointer(`
-  callers, is the one copy of who anchors it). **The peek holds
-  while the pointer is inside `BarPeekHull`** — the item, the
-  peek and the bridge between their facing edges, which spans no
-  neighbour's rect — where no neighbour swaps in; leaving it
-  closes and cools (`BarPeekHullTests`, `BarPeekActionTests`).
+  `shelfLeavingCloses`). **A press in a bar closes the peek at
+  ONE point**, the shelf panel's `ShelfPanel.sendEvent`, which
+  hands every press — an item, the plate, the divider's grip, a
+  count — to `BarPeek.pressed(on:)` before the view takes it,
+  sparing only a Space Bar glyph, whose release decides; a view's
+  own press handler never re-spells the dismissal, so one that
+  takes its own press cannot leave a peek standing
+  (`BarPeekSeamTests` ▸ `onePressDismissal`,
+  `BarPeekClickTests` ▸ `pressOnTheShelfCloses`). A press the
+  press fan-out hears is a click outside KiwiDesk, since neither
+  of its arms hears a bar or the peek; the `anchors` map in
+  `BarPeekSeamTests` ▸ `anchorsAreListed`, derived from the
+  `peek?.pointer(` callers, is the one copy of who anchors it.
+  **Whether a source is a LIST is the one
+  `BarPeekSource.isList`** — an overflow disc, however few
+  windows it hides, or more than one window — read by the click,
+  VoiceOver's press and the hold alike, never a count beside it
+  (`BarPeekHoldTests` ▸ `overflowOfOneHolds`, `BarPeekSeamTests`
+  ▸ `glyphClickRouting`). **Only a list's peek holds, while the
+  pointer is inside `BarPeekHull`** — the item, the peek and the
+  bridge between their facing edges, which spans no neighbour's
+  rect — where no neighbour swaps in; leaving it closes and
+  cools. A one-window peek is a LABEL: it closes as the pointer
+  leaves its item, so its row is never reached by the pointer
+  (`BarPeekActionTests` ▸ `oneWindowPeekNeverHolds`,
+  `BarPeekHullTests`). The hold polls only the gap: the peek
+  body's own tracking stops the poll as the pointer enters it and
+  re-reads the hull as it leaves (`BarPeekHoldTests` ▸
+  `holdPollsOnlyTheGap`).
   Its timing lives in `BarPeek.Timing` and
   nowhere beside it; its fade is `BarMotion`'s; its glass is
   decided once in `BarPeekPanel.show` through the gate
@@ -612,17 +629,25 @@ Obligations:
   (`BarPeekBody+More`, `BarPeekFitTests` ▸
   `tallPeekKeepsWhatFits`, `moreCountsHiddenRows`).
 - **Every peek row is its window's button, picked through the
-  one `pickBarRow` a window menu row takes** (#1946 amendment 2)
-  — on the release inside the row, a drag off it cancelling
-  (#2044), and judged when performed: a refused window cues
-  through `flashRefusalPill` and is never greyed, since the peek
-  reads no compositor on hover (`BarPeekSeamTests` ▸
-  `oneBarRowPick`, `BarPeekActionTests`, `BarPeekClickTests` ▸
-  `refusedRowCues`). A left click on a list glyph or `+n` pins
-  the peek at once, or closes the one already shown, and pops no
-  menu; VoiceOver's press and "N
-  more" open the native menu at the anchor
-  (`BarPeekClickTests`). The panel takes the mouse but is
+  one `pickBarRow` a window menu row takes, which does what
+  clicking that window's bar item does** (#1946 amendment 2) —
+  on the release inside the row, a drag off it cancelling
+  (#2044), and judged when performed, never greyed, since the
+  peek reads no compositor on hover. A Space Bar row takes its
+  glyph's `focusFromSpaceBar`, a window the raise gate refuses
+  taking the chip's plain switch there and nowhere beside it; an
+  App Bar row carries no Space and takes its item's
+  `selectFromAppBar`, so a traveler is focused where the bar
+  draws it rather than on its home Space (`BarPeekSeamTests` ▸
+  `oneBarRowPick`, `BarPeekClickTests` ▸
+  `refusedRowTakesThePlainSwitch`, `BarPeekAppBarRowTests` ▸
+  `travelerRowActsAsItsItem`). A left click on a list TOGGLES
+  its peek: it closes one already shown — the hover's or a
+  click's — and otherwise shows it at once, with no dwell, to
+  hold as any list's does; it pops no menu. VoiceOver's press
+  and "N more" open the native menu at the anchor
+  (`BarPeekActionTests` ▸ `secondClickCloses`,
+  `clickClosesAHoverPeek`, `BarPeekClickTests`). The panel takes the mouse but is
   non-activating and never key, and hidden from accessibility
   (`BarPeekTests` ▸ `panelTakesClicksWithoutActivating`). The
   argument is `docs/design-decisions.md` ▸ A bar item's hover
