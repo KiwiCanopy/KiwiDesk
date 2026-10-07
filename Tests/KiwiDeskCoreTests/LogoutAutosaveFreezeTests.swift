@@ -163,4 +163,16 @@ struct LogoutAutosaveFreezeTests {
         #expect(frozen == nil)
         withExtendedLifetime(token) {}
     }
+
+    /// macOS posts the power-off notification on the workspace's
+    /// own center alone, so the shipped default must be that one.
+    @Test("The default center is the workspace's own")
+    func defaultCenterIsTheWorkspaces() {
+        let workspace = NSWorkspace.shared.notificationCenter
+        let dir = FileManager.default.temporaryDirectory
+        let fresh = CrashRecovery(directory: dir).workspaceCenter
+        #expect(fresh === workspace)
+        let wired = makeTestCore().crash.workspaceCenter
+        #expect(wired === workspace)
+    }
 }

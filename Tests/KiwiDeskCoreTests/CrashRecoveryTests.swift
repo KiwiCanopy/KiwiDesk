@@ -23,6 +23,9 @@ struct CrashRecoveryTests {
         )
         let recovery = CrashRecovery(directory: dir)
         recovery.onLog = { _ in }
+        // `start()` observes it; the shared workspace center is
+        // process-global, so a test hands a private one (#1385).
+        recovery.workspaceCenter = NotificationCenter()
         return (recovery, dir)
     }
 
