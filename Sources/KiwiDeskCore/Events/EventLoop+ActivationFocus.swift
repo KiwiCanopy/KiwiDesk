@@ -23,6 +23,32 @@ extension EventLoop {
         }
     }
 
+    /// An unhide that adopted windows of the active app re-asks
+    /// the activation's focus (#2027): the activation's own report
+    /// can settle on the hide drop before the unhide's read lists
+    /// the window back, which a Dock click to a hidden app does.
+    /// Judged at delivery like the activation's.
+    func focusUnhiddenWindow(
+        pid: pid_t,
+        ref: AppRef,
+        trackedBefore: Set<WindowID>,
+        event: ContinuousClock.Instant
+    ) {
+        let tracked = Set(elements[pid, default: [:]].keys)
+        guard lastActivePid == pid,
+            !tracked.subtracting(trackedBefore).isEmpty
+        else { return }
+        requestActivationFocus(
+            pid: pid,
+            app: RunningApp(
+                pid: pid,
+                activationPolicy: policy(of: pid),
+                ref: ref
+            ),
+            event: event
+        )
+    }
+
     /// The activation's focus report, judged at delivery (#1930):
     /// a later activation, a newer report the app emitted or a
     /// commanded focus supersedes it. An untracked window waits

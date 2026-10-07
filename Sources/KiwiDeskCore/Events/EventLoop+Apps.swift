@@ -164,7 +164,16 @@ extension EventLoop {
         // (mirrors `appActivated`'s guard). Nor has an unnamed
         // pid (#1785): a child's hide is the heal's to settle.
         guard observers[pid] != nil else { return }
-        reconcileOffMain(pid: pid, app: ref)
+        let event = ContinuousClock.now
+        let tracked = Set(elements[pid, default: [:]].keys)
+        reconcileOffMain(pid: pid, app: ref) { [weak self] in
+            self?.focusUnhiddenWindow(
+                pid: pid,
+                ref: ref,
+                trackedBefore: tracked,
+                event: event
+            )
+        }
     }
 
     /// Closing an app's last window moves focus to a DIFFERENT

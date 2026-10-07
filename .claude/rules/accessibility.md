@@ -32,8 +32,12 @@ editing AX code:
   `handleFocusedWindowChanged`, the destroy/minimize arm,
   `appHideChanged`, `scheduleRemovalRecheck` and
   `scheduleTransientRetrack` reconcile through
-  `reconcileOffMain`, and
-  the activation reads its focused window through
+  `reconcileOffMain` — an unhide that adopts a window of the
+  active app then re-asks the activation's focus through
+  `requestActivationFocus`, since the activation's own report
+  can settle on the hide drop first
+  (`ReconcileOffMainRecheckTests` ▸ `unhideFocusesTheActiveApp`) —
+  and the activation reads its focused window through
   `requestFocusedWindowID`; a new
   event-driven caller takes the same doors or joins
   `SyncReconcileCensusTests`' `allowed` map with its reason. The

@@ -38,6 +38,7 @@ struct ReconcileOffMainRecheckTests {
         var reading = false
         var hiddenEvents: [WindowID] = []
         var destroyed: [WindowID] = []
+        var focused: [WindowID] = []
         var reads: [@Sendable () -> Void] = []
         var deliveries: [@MainActor @Sendable () -> Void] = []
 
@@ -97,6 +98,7 @@ struct ReconcileOffMainRecheckTests {
         }
         let id = id
         loop.resolveWindowID = { _ in id }
+        loop.shadows.focusedWindow = { _ in id }
         loop.axReads.deliver = { work in
             MainActor.assumeIsolated { box.deliveries.append(work) }
         }
@@ -107,6 +109,7 @@ struct ReconcileOffMainRecheckTests {
             switch event {
             case .windowHidden(let id): box.hiddenEvents.append(id)
             case .windowDestroyed(let id, _): box.destroyed.append(id)
+            case .windowFocused(let id): box.focused.append(id)
             default: break
             }
         }
@@ -173,6 +176,51 @@ struct ReconcileOffMainRecheckTests {
         #expect(settled == 1)
         #expect(loop.elements[pid]?[id] != nil)
         #expect(box.destroyed.isEmpty)
+    }
+
+    /// Hidden with window 31 dropped, then a Dock click: the
+    /// activation's reads settle while the app still reads hidden,
+    /// and the unhide follows it (device, 2026-10-07).
+    private func activateHidden(_ loop: EventLoop, _ box: Box) {
+        box.hidden = true
+        loop.appHideChanged(pid: pid, ref: ref)
+        box.drain()
+        #expect(loop.elements[pid]?[id] == nil)
+        loop.appActivated(
+            RunningApp(pid: pid, activationPolicy: .regular, ref: ref),
+            launchedAt: nil
+        )
+        box.drain()
+        #expect(box.focused.isEmpty)
+        box.hidden = false
+        loop.appHideChanged(pid: pid, ref: ref)
+        // `track` needs live AX, so the window the unhide's read
+        // lists is seeded as its adoption would file it.
+        box.read()
+        loop.elements[pid] = [id: AXUIElementCreateApplication(pid)]
+    }
+
+    @Test("an unhide of the active app focuses what it adopts")
+    func unhideFocusesTheActiveApp() {
+        let loop = EventLoop()
+        let box = Box()
+        wire(loop, box)
+        activateHidden(loop, box)
+        box.drain()
+        #expect(box.idle)
+        #expect(box.focused == [id], "the activation focus was lost")
+    }
+
+    @Test("another app activated meanwhile keeps its focus")
+    func unhideYieldsToANewerActivation() {
+        let loop = EventLoop()
+        let box = Box()
+        wire(loop, box)
+        activateHidden(loop, box)
+        loop.lastActivePid = pid + 1
+        box.drain()
+        #expect(box.idle)
+        #expect(box.focused.isEmpty)
     }
 
     @Test("a hide landing mid-read is applied by the read after")
