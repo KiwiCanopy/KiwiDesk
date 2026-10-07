@@ -23,13 +23,14 @@ extension EventLoop {
 
     /// Per-app wall-clock bound for a queued boot step.
     ///
-    /// 500 ms sits clear of the healthy band — Electron/WebKit
-    /// answer lazily at 100–300 ms (accessibility.md) — and
-    /// inside one AX messaging timeout
-    /// (`axMessagingTimeoutSeconds`), so an app that spent a
-    /// whole timeout on its first call is deferred instead of
-    /// paying that price again for every window it lists.
-    static let bootAppBudget: Duration = .milliseconds(500)
+    /// Half a messaging timeout (`axMessagingTimeoutSeconds`),
+    /// shared with the observer's stalled add so the two move
+    /// together: clear of the healthy band (Electron/WebKit answer
+    /// lazily at 100–300 ms, accessibility.md) yet inside one
+    /// timeout, so an app that spent a whole timeout on its first
+    /// call is deferred instead of paying that price again for
+    /// every window it lists.
+    static let bootAppBudget = AXApplicationObserver.stalledAdd
 
     /// A checkpoint an app's boot work consults between blocking
     /// AX calls. Outside a queued boot step every call answers

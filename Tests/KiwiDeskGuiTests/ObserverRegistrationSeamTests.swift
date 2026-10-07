@@ -2,33 +2,48 @@ import Foundation
 import Testing
 
 /// #837: the install and the repair both take the one bounded
-/// `register`, so neither can loop over every notification on an
-/// app that stalls. `ObserverRegistrationBoundTests` pins the
-/// bound; this pins that both sites reach it, and that the only
-/// other add is the per-window one.
+/// `register`, both record its stall, the repair is gated on the
+/// back-off and ordered with the stalled add last, and a session's
+/// return forgets the stall (#1285). `ObserverRegistrationBoundTests`
+/// pins the pure decisions; this pins that each site reaches them.
 @Suite("Observer registration wiring (#837)")
 struct ObserverRegistrationSeamTests {
+    private static let root = SourceScan.repoRoot(from: #filePath)
+
+    private func count(_ needle: String, in path: String) throws -> Int {
+        let source = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(path)
+        )
+        return source.components(separatedBy: needle).count - 1
+    }
+
     @Test("install and repair register through the one bounded loop")
     func bothSitesTakeTheBound() throws {
-        let file = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDeskCore/AX/AXApplicationObserver.swift"
-            )
-        let source = try SourceScan.strippedSource(at: file)
-        let count = { (needle: String) in
-            source.components(separatedBy: needle).count - 1
-        }
+        let file = "Sources/KiwiDeskCore/AX/AXApplicationObserver.swift"
         #expect(
-            count("failedAppNotifications = register(Self.appNotifications)")
+            try count("record(register(Self.appNotifications))", in: file)
                 == 1
         )
         #expect(
-            count(
-                "failedAppNotifications = register(\n"
-                    + "            Self.appNotifications.filter("
+            try count(
+                "record(\n            register(\n"
+                    + "                Self.repairOrder(",
+                in: file
             ) == 1
         )
+        #expect(try count("stalledAt: stalledAt,", in: file) == 1)
         // The bounded loop's add and the per-window one.
-        #expect(count("AXObserverAddNotification(") == 2)
+        #expect(try count("AXObserverAddNotification(", in: file) == 2)
+    }
+
+    @Test("a session's return forgets every observer's stall")
+    func sessionReturnForgetsTheStall() throws {
+        #expect(
+            try count(
+                "for observer in observers.values { "
+                    + "observer.forgetRepairStall() }",
+                in: "Sources/KiwiDeskCore/Events/EventLoop+Heal.swift"
+            ) == 1
+        )
     }
 }

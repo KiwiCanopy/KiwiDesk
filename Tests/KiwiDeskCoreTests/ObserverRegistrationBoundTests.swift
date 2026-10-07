@@ -19,10 +19,10 @@ struct ObserverRegistrationBoundTests {
         stalls: Set<String>,
         refused: Set<String> = [],
         cost: Duration = AXApplicationObserver.stalledAdd
-    ) -> (failed: Set<String>, asked: [String]) {
+    ) -> (failed: Set<String>, asked: [String], stalled: String?) {
         var clock = ContinuousClock.now
         var asked: [String] = []
-        let failed = AXApplicationObserver.register(
+        let result = AXApplicationObserver.register(
             names,
             now: { clock }
         ) { name in
@@ -30,7 +30,7 @@ struct ObserverRegistrationBoundTests {
             if stalls.contains(name) { clock = clock.advanced(by: cost) }
             return refused.contains(name) ? .cannotComplete : .success
         }
-        return (failed, asked)
+        return (result.failed, asked, result.stalled)
     }
 
     @Test("a responsive app is asked for every notification")
@@ -38,6 +38,7 @@ struct ObserverRegistrationBoundTests {
         let result = run(stalls: [], refused: ["b"])
         #expect(result.asked == names)
         #expect(result.failed == ["b"])
+        #expect(result.stalled == nil)
     }
 
     @Test("a stalled add ends the registration, the rest left failed")
@@ -45,6 +46,7 @@ struct ObserverRegistrationBoundTests {
         let result = run(stalls: ["b"], refused: ["b"])
         #expect(result.asked == ["a", "b"])
         #expect(result.failed == ["b", "c", "d"])
+        #expect(result.stalled == "b")
     }
 
     @Test("a stalled add that lands still counts as registered")
@@ -63,5 +65,57 @@ struct ObserverRegistrationBoundTests {
         )
         #expect(result.asked == names)
         #expect(result.failed.isEmpty)
+    }
+
+    @Test("a stall backs repair off until the window passes")
+    func stallBacksRepairOff() {
+        let stalled = ContinuousClock.now
+        let due = { (after: Duration) in
+            AXApplicationObserver.repairDue(
+                failed: true,
+                stalledAt: stalled,
+                now: stalled.advanced(by: after)
+            )
+        }
+        #expect(!due(.zero))
+        #expect(!due(AXApplicationObserver.repairBackoff - .seconds(1)))
+        #expect(due(AXApplicationObserver.repairBackoff))
+        #expect(
+            AXApplicationObserver.repairDue(
+                failed: true,
+                stalledAt: nil,
+                now: stalled
+            )
+        )
+        #expect(
+            !AXApplicationObserver.repairDue(
+                failed: false,
+                stalledAt: nil,
+                now: stalled
+            )
+        )
+    }
+
+    @Test("repair asks the add that stalled last")
+    func repairAsksTheStalledAddLast() {
+        let failed: Set<String> = [
+            kAXWindowCreatedNotification,
+            kAXFocusedWindowChangedNotification,
+            kAXWindowMiniaturizedNotification,
+        ]
+        #expect(
+            AXApplicationObserver.repairOrder(
+                failed: failed,
+                stalled: kAXWindowCreatedNotification
+            ) == [
+                kAXFocusedWindowChangedNotification,
+                kAXWindowMiniaturizedNotification,
+                kAXWindowCreatedNotification,
+            ]
+        )
+        #expect(
+            AXApplicationObserver.repairOrder(failed: failed, stalled: nil)
+                .first == kAXWindowCreatedNotification
+        )
     }
 }

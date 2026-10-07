@@ -35,7 +35,15 @@ protocol AppObserving: AnyObject {
     /// Reconciles call this opportunistically; the census-gated
     /// adoption-heal sweep is the guaranteed backstop (#675).
     func repairRegistration()
+    /// Forgets a stalled repair's back-off, so the next touchpoint
+    /// repairs again — a stall read while the session rested is no
+    /// evidence (#1285).
+    func forgetRepairStall()
     func invalidate()
+}
+
+extension AppObserving {
+    func forgetRepairStall() {}
 }
 
 extension AXApplicationObserver: AppObserving {}
@@ -54,6 +62,12 @@ public final class AXApplicationObserver {
     private let runLoopModes: [CFRunLoopMode]
     /// App notifications that failed initial registration (#675).
     private var failedAppNotifications: Set<String> = []
+    /// When a registration last stalled; repair backs off from it.
+    private var stalledAt: ContinuousClock.Instant?
+    /// The add that stalled, retried LAST so the others get asked.
+    private var stalledName: String?
+    /// The clock the back-off is read on; a test moves it.
+    var now: () -> ContinuousClock.Instant = { .now }
 
     private static let appNotifications: [String] = [
         kAXWindowCreatedNotification,
@@ -96,7 +110,7 @@ public final class AXApplicationObserver {
         else { return nil }
         observer = created
 
-        failedAppNotifications = register(Self.appNotifications)
+        record(register(Self.appNotifications))
         for mode in runLoopModes {
             CFRunLoopAddSource(
                 CFRunLoopGetMain(),
@@ -113,11 +127,11 @@ public final class AXApplicationObserver {
 
     /// Adds `names` on the app element, answering those left
     /// unregistered.
-    private func register(_ names: [String]) -> Set<String> {
-        guard let observer else { return Set(names) }
+    private func register(_ names: [String]) -> Registration {
+        guard let observer else { return (Set(names), nil) }
         let refcon = Unmanaged.passUnretained(self).toOpaque()
         let element = appElement
-        return Self.register(names) { name in
+        return Self.register(names, now: now) { name in
             AXObserverAddNotification(
                 observer,
                 element,
@@ -133,38 +147,83 @@ public final class AXApplicationObserver {
         Int(EventLoop.axMessagingTimeoutSeconds * 500)
     )
 
-    /// Registers `names` in order, answering the ones left
-    /// unregistered. Stops at the first add that stalls and leaves
-    /// the rest to repair, so an unresponsive app costs one
-    /// timeout instead of one per add (#837).
+    /// The names left unregistered, and the add that stalled.
+    typealias Registration = (failed: Set<String>, stalled: String?)
+
+    /// Registers `names` in order. Stops at the first add that
+    /// stalls and leaves the rest to repair, so an unresponsive
+    /// app costs one timeout instead of one per add (#837).
     static func register(
         _ names: [String],
-        now: () -> ContinuousClock.Instant = { .now },
+        now: () -> ContinuousClock.Instant,
         add: (String) -> AXError
-    ) -> Set<String> {
+    ) -> Registration {
         var failed: Set<String> = []
         for (index, name) in names.enumerated() {
             let began = now()
             if !registered(add(name)) { failed.insert(name) }
             if began.duration(to: now()) >= stalledAdd {
                 failed.formUnion(names[(index + 1)...])
-                break
+                return (failed, name)
             }
         }
-        return failed
+        return (failed, nil)
     }
 
     public var needsRegistrationRepair: Bool {
-        !failedAppNotifications.isEmpty
+        Self.repairDue(
+            failed: !failedAppNotifications.isEmpty,
+            stalledAt: stalledAt,
+            now: now()
+        )
+    }
+
+    /// How long a stalled app is left alone before repair asks it
+    /// again: each ask costs the main actor a messaging timeout,
+    /// and every reconcile touchpoint asks (#837).
+    static let repairBackoff = Duration.seconds(30)
+
+    /// Whether a repair is owed: something failed, and no stall
+    /// inside the back-off says the app will not answer.
+    static func repairDue(
+        failed: Bool,
+        stalledAt: ContinuousClock.Instant?,
+        now: ContinuousClock.Instant
+    ) -> Bool {
+        guard failed else { return false }
+        guard let stalledAt else { return true }
+        return stalledAt.duration(to: now) >= repairBackoff
+    }
+
+    public func forgetRepairStall() { stalledAt = nil }
+
+    private func record(_ result: Registration) {
+        failedAppNotifications = result.failed
+        stalledName = result.stalled
+        stalledAt = result.stalled == nil ? nil : now()
     }
 
     /// Re-attempts failed app-level notification registrations (#675).
     public func repairRegistration() {
-        failedAppNotifications = register(
-            Self.appNotifications.filter(
-                failedAppNotifications.contains
+        record(
+            register(
+                Self.repairOrder(
+                    failed: failedAppNotifications,
+                    stalled: stalledName
+                )
             )
         )
+    }
+
+    /// The failed notifications in declared order, the one that
+    /// stalled last moved to the back.
+    static func repairOrder(
+        failed: Set<String>,
+        stalled: String?
+    ) -> [String] {
+        let names = appNotifications.filter(failed.contains)
+        return names.filter { $0 != stalled }
+            + names.filter { $0 == stalled }
     }
 
     /// Registers per-window notifications for a window element.

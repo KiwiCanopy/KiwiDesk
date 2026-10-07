@@ -148,6 +148,7 @@ extension EventLoop {
     /// The one list of what a return forgets.
     func sessionDidReturn() {
         forgetHealQuiet()
+        for observer in observers.values { observer.forgetRepairStall() }
     }
 
     /// Re-opens the gate for every quieted id; the next heal
