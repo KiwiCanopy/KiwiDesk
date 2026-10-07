@@ -162,7 +162,10 @@ below, so it corrects itself when a seventh is added.
   KiwiDesk's own raise toward the anchor is in flight and the app
   that raise LEFT is still in front — an order question asked of
   the one `RaiseFlight` record, never of the echo ledger's
-  presence. Widening the list
+  presence. That record is written by the `focus` verb's wrapper
+  alone; a raise path only restamps or rekeys it, since a
+  re-assert that records names the app the user switched to as
+  the one left (`RaiseFlightWriterCensusTests`). Widening the list
   is a ruling, not a tidy-up; `FocusRaiseFlightGuardTests` ▸
   `otherVerbsRefuse` holds every verb outside it to the refusal.
 

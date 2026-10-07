@@ -25,7 +25,7 @@ struct RaiseFlight: Equatable {
         if target == old { target = new }
     }
 
-    /// Restamps a deferred raise when it is actually sent.
+    /// Restamps the flight when `raiseWindow` sends its raise.
     mutating func raised(_ id: WindowID, at now: Date) {
         if id == target { raisedAt = now }
     }

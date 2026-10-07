@@ -72,7 +72,6 @@ extension KiwiCore {
             state.workspaces.space(of: pending.to)
                 == state.workspaces.activeSpace
         else { return }
-        raiseFlight?.raised(pending.to, at: wallClock())
         focusWindow(pending.to, warp: pending.warp)
     }
 

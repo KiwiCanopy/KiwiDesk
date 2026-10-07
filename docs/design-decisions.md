@@ -2671,12 +2671,12 @@ moves state, pans to the target and raises.
 
 It is an order question, never a presence one. A fresh raise says
 nothing about whether the user switched apps since, so any
-activation or click after the raise ends the bypass — a switch
-away and a switch back to the app the raise left alike — and an
-ignored panel, an unobserved app and a stale raise keep the
-refusal too. The one-shot
-wake heal (#1130) is asked first, so a wake payment macOS
-declined reseeds rather than riding the bypass.
+activation after the raise, or click after the press, ends the
+bypass — a switch away and a switch back to the app the raise
+left alike — and an ignored panel, an unobserved app and a stale
+raise keep the refusal too. The one-shot wake heal (#1130) is
+asked first, so a wake payment macOS declined reseeds rather than
+riding the bypass.
 
 Every other focused verb still waits for the foreground. `swap`,
 `resize`, `move_to_space` and the rest act on the window itself —
