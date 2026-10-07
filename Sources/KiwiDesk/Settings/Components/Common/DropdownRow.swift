@@ -6,9 +6,9 @@ import SwiftUI
 /// gives the choice back as the VALUE (`AnnouncedValueTests`).
 struct DropdownRow<P: View>: View {
     let label: String
-    /// Selected option's title, spoken as the value; `nil` only for
-    /// a `Toggle`, whose on/off state survives a label.
-    let spokenValue: String?
+    /// Selected option's title, spoken as the value. Required: an
+    /// on/off control takes `ToggleRow`, never this row (#2032).
+    let spokenValue: String
     /// Optional help popover text (#94).
     var help: String? = nil
     @ViewBuilder let picker: P
@@ -18,28 +18,18 @@ struct DropdownRow<P: View>: View {
             SettingsRowLabel(label: label, help: help)
         } control: {
             HStack {
-                named(
-                    picker
-                        .labelsHidden()
-                        .pickerStyle(.menu)
-                        .neutralMenuLabel()
-                        .controlSize(.large)
-                )
+                // Named AFTER `labelsHidden` — the order the Spaces
+                // mode picker uses; before it, the name never
+                // reached the pop-up on device (owner, #812).
+                picker
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .neutralMenuLabel()
+                    .controlSize(.large)
+                    .accessibilityLabel(label)
+                    .accessibilityValue(spokenValue)
                 Spacer()
             }
-        }
-    }
-
-    // Applied AFTER `labelsHidden` — the order the Spaces mode
-    // picker uses; before it, the name never reached the pop-up
-    // on device (owner, #812 session 2).
-    @ViewBuilder private func named<V: View>(_ picker: V) -> some View {
-        if let spokenValue {
-            picker
-                .accessibilityLabel(label)
-                .accessibilityValue(spokenValue)
-        } else {
-            picker.accessibilityLabel(label)
         }
     }
 }

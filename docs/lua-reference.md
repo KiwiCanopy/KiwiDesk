@@ -740,8 +740,8 @@ answers, when the hotkey fire is over.
 The retired `resize.feedback` key is dropped by the one-shot
 migration, its value not carried across.
 
-The GUI twin is **General ▸ Play the alert sound when an action
-can't apply**. The setting is app-wide: it is stored in
+The GUI twin is **General ▸ Play a sound when an action is
+blocked**. The setting is app-wide: it is stored in
 `gui.json` as `refusal.sound`, no profile carries it, and
 loading a profile never changes it. A GUI-managed setup takes
 it once from the first saved profile loaded after the upgrade,

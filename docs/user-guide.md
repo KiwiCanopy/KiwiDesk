@@ -114,7 +114,7 @@ login item. Crash supervision is command-line only:
 KiwiDesk after a crash, never after a deliberate Quit ([CLI
 reference](cli.md)). While that service runs, **Start at login**
 shows as on and stops being editable; `kiwidesk service stop`
-gives the switch back.
+gives the checkbox back.
 
 ## Wake & Restart
 
@@ -221,8 +221,8 @@ its `.gitignore`.
   inside `function() ... end`), **`kind`** ("navigation",
   "application", or "custom") and **`label`**.
 
-**`refusal`** holds `sound`, the alert sound when an action
-can't apply, and **`quit`** holds `grid_target_depth`, the
+**`refusal`** holds `sound`, the alert sound when an action is
+blocked, and **`quit`** holds `grid_target_depth`, the
 windows per pile on quit, beside `layout`, how windows are
 spread on quit. The first two are set on **General**; `layout`
 is set from Lua (`quit.set_layout`).
@@ -277,7 +277,7 @@ keybindings runs on every reload.
   and per-layout / per-space tuning, space-to-monitor pins, the
   Main role and the fallback space.
 
-The alert sound when an action can't apply and the windows per
+The alert sound when an action is blocked and the windows per
 pile on quit are global too: they sit in `gui.json`, and loading
 a profile never changes them.
 
