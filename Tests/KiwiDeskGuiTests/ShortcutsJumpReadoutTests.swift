@@ -91,11 +91,11 @@ struct ShortcutsJumpReadoutTests {
         #expect(abs(height - (narrowBare + 2 * (gap + line))) < 1)
     }
 
-    /// Leading, by owner ruling (amendment 6, returning amendment
-    /// 5's centring): every line starts at the leading inset. The
-    /// caption line rides over the chips and goes at the chrome
-    /// step; its caption draws the row's VoiceOver name, silent to
-    /// VoiceOver, with the readout at its end. Shape, not value.
+    /// Leading (#1520 amendment 6): every line starts at the
+    /// leading inset. The caption line rides over the chips and
+    /// goes at the chrome step; its caption draws the row's
+    /// VoiceOver name, silent to VoiceOver, with the readout at
+    /// its end. Shape, not value.
     @Test("the row leads under its caption line")
     func rowLeads() throws {
         let bar = try Self.source(
@@ -119,13 +119,14 @@ struct ShortcutsJumpReadoutTests {
                     + ".accessibilityHidden(true)"
             )
         )
-        #expect(
-            bar.contains(
-                "HStack(alignment:.firstTextBaseline,spacing:0){"
-                    + "captionSpacer(minLength:12)"
-                    + "readoutText(readout).fixedSize()}"
-            )
+        // The caption, a spacer, the readout at the end: the
+        // spacing and the spacer's minimum are tuning, not shape.
+        let line = try Regex(
+            #"HStack\(alignment:\.firstTextBaseline[^{]*\)\{"#
+                + #"captionSpacer\([^)]*\)"#
+                + #"readoutText\(readout\)\.fixedSize\(\)\}"#
         )
+        #expect(bar.contains(line))
     }
 
     private static func source(_ path: String) throws -> String {

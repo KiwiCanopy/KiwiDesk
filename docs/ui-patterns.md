@@ -532,9 +532,8 @@ label, the ink staying neutral (the accent marks fills, never
 text); the rest fill, its
 lift and its press sit on a layer of their own beneath that, so
 pointing at or pressing the marked chip never unmarks it, and
-the edge stays the same neutral line in every state. Its face is
-the one custom button style beside the accent fill, and like
-every button it takes no shadow. A chip is a button, the marked one
+the edge stays the same neutral line in every state. Like every
+button it takes no shadow. A chip is a button, the marked one
 announced as selected, and the row is one container named
 and captioned "Jump to", the caption on a line of its own above
 the chips. A click puts the group's header under the bar, and

@@ -8257,7 +8257,8 @@ This does not overturn #1021's tier, which is about drawers — a
 drawer qualifies the card it sits in, and a header louder than
 that card's own title inverts the hierarchy the other way. The
 test is the container's relation to the page, never its size or
-how many rows it holds.
+how many rows it holds. `GeneralShortcutsGroup` meets it too and
+is still a drawer, left for its own change.
 
 Both kinds draw the one `SettingsDisclosureButton` — chevron,
 full-row button, hover, the heading trait where the row is the
@@ -10589,24 +10590,19 @@ own rest fill the container hairline all but vanishes in dark,
 so the row read as labels. The chip therefore draws an edge of
 its own, `chipEdge`, which must separate from the rest fill it
 rims by more than the container hairline separates from the
-page, and which no state moves: the edge says "button", the
-fills say what the pointer is doing. A press deepens the pointer's
-layer (`chipPressed`), which still sits beneath the marking, so
+page, in either appearance (`SettingsThemeContrastTests` ▸
+`chipEdgeOutreadsHairline`), and which no state moves: the edge
+says "button", the fills say what the pointer is doing. A press
+deepens the pointer's layer (`chipPressed`), which still sits beneath the marking, so
 holding down the marked chip cannot unmark it either. **No
 shadow**: buttons take none (ui-patterns ▸ *Buttons take a native
 style*), the thumb's shadow being the settings' sign for
 "movable", and the edge already carries what a shadow would.
 
-**The row leads** (#1520 amendment 6, owner ruling 2026-10-07).
-Every wrapped line starts at the leading inset, where the pane's
-headers start and where the eye returns after each line; a
-centred wrapped row reads as a tag cloud, and centred segments
-mean tabs on macOS. Centring was tried on the device and
-returned. The
-edge is 18 % in light against 20 % in dark — the owner's pick
-from a side-by-side of 24, 18, 14 and no edge — and at either
-weight it must still outread the container hairline
-(`SettingsThemeContrastTests` ▸ `chipEdgeOutreadsHairline`).
+**The row leads** (#1520 amendment 6). Every wrapped line starts
+at the leading inset, where the pane's headers start and where
+the eye returns after each line; a centred wrapped row reads as
+a tag cloud, and centred segments mean tabs on macOS.
 
 **The row says what it is.** A "Jump to" caption sits on a line
 of its own above the chips: the row's VoiceOver name, drawn, and
@@ -10618,11 +10614,13 @@ beside the chips. The caption takes the readout's face —
 `.callout` in `ink2`, never `ink3`, which reads as dimmed — and
 the whole line leaves at the chrome step, being header chrome,
 the bare chips remaining. No colon: the form's labels take
-none, and a colon's spacing is per-locale. The designer argued
-for the caption inline before the first chip, which keeps the
-pinned bar one line shorter; the owner preferred the label on a
-line of its own. A card-header tier above the row was refused,
-since on a pinned bar it reads as a frozen section title, and
+none, and a colon's spacing is per-locale. The caption takes a
+line of its own rather than leading the chips inline, though
+that makes the pinned bar a line taller: the top of a pane is
+easily passed over, so what sits there only informs — a quiet
+caption, never a container header. A card-header tier above the
+row was refused, since on a pinned bar it reads as a frozen
+section title, and
 its semibold would equal the marked chip's "you are here". An
 instruction such as "Click to jump there" was
 refused as well: it names one input of several. The caption

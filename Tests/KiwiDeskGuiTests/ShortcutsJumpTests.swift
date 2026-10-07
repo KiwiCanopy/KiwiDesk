@@ -166,24 +166,22 @@ struct ShortcutsJumpTests {
             start.addingTimeInterval(seconds)
         }
         let atEnd = page(scrolledBy: 1400)
-        _ = tracker.sections(atEnd.sections, at: start)
-        _ = tracker.slots(slots(page(scrolledBy: 0)), at: start)
-        #expect(tracker.jump(to: .sizeFloat, at: start).marked == .sizeFloat)
+        tracker.sections(atEnd.sections, at: start)
+        tracker.slots(slots(page(scrolledBy: 0)), at: start)
+        tracker.jump(to: .sizeFloat, at: start)
+        #expect(tracker.reading.marked == .sizeFloat)
         // The jump's own scroll, inside the window.
-        let landed = tracker.slots(
-            slots(atEnd),
-            at: at(SettingsReveal.scroll)
-        )
-        #expect(landed.marked == .sizeFloat)
+        tracker.slots(slots(atEnd), at: at(SettingsReveal.scroll))
+        #expect(tracker.reading.marked == .sizeFloat)
         // Cards move, the offset does not: still held.
         let banner = page(scrolledBy: 1400, banner: 120)
-        let moved = tracker.sections(banner.sections, at: at(5))
-        #expect(moved.marked == .sizeFloat)
+        tracker.sections(banner.sections, at: at(5))
+        #expect(tracker.reading.marked == .sizeFloat)
         // The user scrolls: the offset moves, the hold gives way.
         let scrolled = page(scrolledBy: 1000)
-        _ = tracker.slots(slots(scrolled), at: at(6))
-        let released = tracker.sections(scrolled.sections, at: at(6))
-        #expect(released.marked == .moveWindows)
+        tracker.slots(slots(scrolled), at: at(6))
+        tracker.sections(scrolled.sections, at: at(6))
+        #expect(tracker.reading.marked == .moveWindows)
     }
 
     /// Without the click, the end of this scroll is the last
@@ -192,8 +190,9 @@ struct ShortcutsJumpTests {
     func unheldLandingMarksTheLast() {
         let tracker = ShortcutsJumpTracker()
         let atEnd = page(scrolledBy: 1400)
-        _ = tracker.sections(atEnd.sections)
-        #expect(tracker.slots(slots(atEnd)).marked == .openApplications)
+        tracker.sections(atEnd.sections)
+        tracker.slots(slots(atEnd))
+        #expect(tracker.reading.marked == .openApplications)
     }
 
     // MARK: - Wiring

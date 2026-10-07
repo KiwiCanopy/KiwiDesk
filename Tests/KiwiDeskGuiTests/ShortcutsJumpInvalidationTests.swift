@@ -55,7 +55,7 @@ struct ShortcutsJumpInvalidationTests {
     @Test("the reading is published, and only when it changes")
     func publishesOnlyChanges() {
         let tracker = ShortcutsJumpTracker()
-        _ = tracker.sections(focusUnderTheBar)
+        tracker.sections(focusUnderTheBar)
         let changed = notifies(tracker) {
             tracker.slots(scrolled)
         }
