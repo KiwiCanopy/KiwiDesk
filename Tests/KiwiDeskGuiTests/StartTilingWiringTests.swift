@@ -122,6 +122,13 @@ struct StartTilingWiringTests {
                     + "self?.startTiling() }"
             )
         )
+        let hop = try #require(
+            SourceScan.declarationBody(
+                after: "func setStartTiling(",
+                in: try source("Settings/SettingsWindowController.swift")
+            )
+        )
+        #expect(hop.contains("model.onStartTiling = handler"))
         let tour = try source("AppDelegate+Onboarding.swift")
         #expect(
             tour.contains(
