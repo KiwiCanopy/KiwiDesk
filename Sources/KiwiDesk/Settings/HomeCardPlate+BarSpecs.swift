@@ -118,7 +118,7 @@ extension HomeCardBarsTile {
             var item = BarItem(
                 color: active
                     ? style.activeItemColor
-                    : style.itemColor,
+                    : style.idleItemColor,
                 length: 20 * scale
             )
             if scale > 1 {
