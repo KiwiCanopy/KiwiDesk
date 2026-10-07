@@ -56,7 +56,7 @@ extension SettingsTheme {
 
     /// The update window's Highlights wash over `card`
     /// (`SettingsThemeContrastTests`, #1542).
-    static let highlightWashOpacity: CGFloat = 0.08
+    static let highlightWashOpacity: CGFloat = 0.06
 
     /// Display card stand scale and clamp metrics
     /// (`MonitorsChromeWiringTests`, #758).

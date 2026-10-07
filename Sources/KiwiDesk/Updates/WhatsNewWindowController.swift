@@ -16,7 +16,8 @@ final class WhatsNewWindowController: NSObject, NSWindowDelegate {
     private let done: () -> Void
     private let showMe: SpotlightShowMe
     private var window: NSWindow?
-    /// Whether a "Show me" has the window hidden, unanswered.
+    /// Whether a "Show me" has the window hidden, unanswered —
+    /// what a Settings close asks before re-presenting it.
     private(set) var hidden = false
 
     /// Puts the window forward; a test records it instead.

@@ -722,6 +722,14 @@ description beside the structured notes, so a copy that predates
 this window keeps Sparkle's; the window first appears for the
 update after 2.0.0.
 
+**The Highlights gold marks, never inks (#2038).** The panel's
+edge, its ★ and the spotlight rows' symbols are gold; no text is.
+So its separation from the washed card is measured with
+`ColorVision`, as the mode-gated frame's is, rather than held to a
+luminance ratio: the house floors no card boundary, and the text
+beside every mark carries the meaning. The relaxed floor holds only
+while the gold colours no text.
+
 **A fixes-only patch still opens the window (#2038).** With no
 spotlight and no caution, Apple's own updates leave only a mark;
 this window opens as it always has — the prose and the Fixed tab —

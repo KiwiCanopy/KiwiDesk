@@ -120,9 +120,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     /// Shows dashboard navigated to destination (#326).
     func show(navigatingTo destination: SettingsDestination) {
-        model.nav.pendingReveal = SettingsAnchor(
-            destination: destination
-        )
+        model.land(on: SettingsAnchor(destination: destination))
         show()
     }
 

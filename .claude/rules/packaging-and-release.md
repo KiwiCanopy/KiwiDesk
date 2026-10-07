@@ -528,7 +528,10 @@ both tokens optional, the summary then ONE intro sentence; a
 `{setting:…}` names an id "Show me" can land on, listed
 build-free in `scripts/spotlight-setting-ids.txt` and held to
 the census by `SpotlightScriptParityTests` ▸
-`landableListMatches`, and `--release` reads the TAG's own copy.
+`landableListMatches`, and `--release` reads the TAG's own copy;
+`changelog.yml` fetches that one tag before every publication
+check — an unconditional shallow fetch, accepted over a lazy one
+inside the script, which a body naming no setting would not need.
 A patch's prose stays within `PATCH_PROSE_MAX_SENTENCES` and
 `PATCH_PROSE_MAX_CHARS`. The list and the patch cap bind a
 PUBLICATION read (`--body`, `--release`) and never `--all`,

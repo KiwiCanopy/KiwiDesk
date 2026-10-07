@@ -136,124 +136,43 @@ struct WhatsNewHandoffTests {
         #expect(!controller.hidden)
     }
 
-    @Test("Settings closing under an update window leaves it hidden")
-    func settingsCloseYieldsToUpdateWindow() async throws {
+    /// Only a waiting offer outranks the notes (#1542); the user's
+    /// own check and its answer do not.
+    @Test("the slot a hidden What's new yields to is an offer alone")
+    func onlyAnOfferHoldsItBack() throws {
+        let session = UpdateSession(reply: { _ in })
+        let offer = UpdateOffer.whatsNew(
+            items: WhatsNewFixture.items(["9999.2.0"]),
+            since: "9999.1.0",
+            current: "9999.2.0"
+        )
+        let notes = try #require(offer)
+        #expect(
+            UpdateWindowSlot.offer(
+                UpdateWindowController(offer: notes, session: session)
+            ).isOffer
+        )
+        #expect(
+            !UpdateWindowSlot.checking(
+                UpdateCheckingWindowController(cancel: {})
+            ).isOffer
+        )
+        #expect(
+            !UpdateWindowSlot.upToDate(
+                UpToDateWindowController(offer: notes, next: nil, done: {})
+            ).isOffer
+        )
+    }
+
+    @Test("Settings closing under an update offer leaves it hidden")
+    func settingsCloseYieldsToUpdateOffer() async throws {
         let (coordinator, controller, _, log) =
             try await Self.coordinator()
-        coordinator.updateWindowOpen = { true }
+        coordinator.updateOfferOpen = { true }
         coordinator.showMe(try Self.row(controller))
         try #require(log.trails.first).settingsClosed()
         #expect(log.fronted.count == 1)
         #expect(controller.hidden)
         #expect(coordinator.waiting != nil)
-    }
-}
-
-/// What a fixture cannot see: the close, the bootstrap and the
-/// focus statement reaching the trail (#2038).
-@Suite("What's new trail wiring (#2038)")
-struct WhatsNewTrailWiringTests {
-    private static let gui = SourceScan.repoRoot(from: #filePath)
-        .appendingPathComponent("Sources/KiwiDesk")
-
-    private static func body(
-        of declaration: String,
-        in file: String
-    ) throws -> String {
-        let source = SourceScan.stripComments(
-            try String(
-                contentsOf: gui.appendingPathComponent(file),
-                encoding: .utf8
-            )
-        )
-        return try #require(
-            SourceScan.declarationBody(after: declaration, in: source)
-        )
-    }
-
-    private static func squashed(_ text: String) -> String {
-        text.split(whereSeparator: \.isWhitespace).joined()
-    }
-
-    @Test("the Settings window's close ends the trail")
-    func settingsCloseReachesTheModel() throws {
-        let body = try Self.body(
-            of: "func windowWillClose(",
-            in: "Settings/SettingsWindowController.swift"
-        )
-        #expect(body.contains("model.settingsClosed()"))
-    }
-
-    @Test("bootstrap wires the trail once, both halves")
-    func bootstrapWiresTheTrail() throws {
-        let launch = try Self.body(
-            of: "func applicationDidFinishLaunching(",
-            in: "AppDelegate.swift"
-        )
-        #expect(launch.contains("wireWhatsNewTrail()"))
-        let wire = try Self.body(
-            of: "func wireWhatsNewTrail(",
-            in: "AppDelegate+WhatsNew.swift"
-        )
-        #expect(wire.contains("whatsNew.showsInSettings = {"))
-        #expect(wire.contains("dashboard.follow(trail)"))
-        #expect(wire.contains("whatsNew.endsTrail = {"))
-        #expect(wire.contains("endWhatsNewTrail()"))
-        let offer = try Self.body(
-            of: "func offerWhatsNew(",
-            in: "AppDelegate+WhatsNew.swift"
-        )
-        #expect(!offer.contains("showsInSettings"))
-    }
-
-    @Test("the updater tells What's new when an update window is up")
-    func updaterWiresTheSlot() throws {
-        let source = SourceScan.stripComments(
-            try String(
-                contentsOf: Self.gui.appendingPathComponent(
-                    "Updates/AppUpdater.swift"
-                ),
-                encoding: .utf8
-            )
-        )
-        #expect(
-            Self.squashed(source).contains(
-                "whatsNew?.updateWindowOpen={[driver]indriver.current!=nil}"
-            )
-        )
-    }
-
-    /// The shell outlives the banner (#996) and the statement asks
-    /// the recorded input source (#991).
-    @Test("the shell states the trail's focus, gated on the input source")
-    func shellStatesTrailFocus() throws {
-        let source = Self.squashed(
-            SourceScan.stripComments(
-                try String(
-                    contentsOf: Self.gui.appendingPathComponent(
-                        "Settings/SettingsView.swift"
-                    ),
-                    encoding: .utf8
-                )
-            )
-        )
-        #expect(
-            source.contains(
-                ".onChange(of:model.nav.trailFocusRequest){_,_in"
-                    + "ifmodel.destination!=nil,"
-                    + "model.nav.navigationMovesFocus{"
-                    + "contentFocused=true}}"
-            )
-        )
-    }
-
-    @Test("a bar menu's landing takes the one external door")
-    func barLandingTakesTheDoor() throws {
-        let body = try Self.body(
-            of: "func show(landing: SettingsLanding) {",
-            in: "Settings/SettingsWindowController.swift"
-        )
-        #expect(body.contains("model.land(on:"))
-        #expect(!body.contains("pendingReveal"))
     }
 }

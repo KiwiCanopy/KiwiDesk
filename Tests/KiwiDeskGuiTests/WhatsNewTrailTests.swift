@@ -138,40 +138,14 @@ struct WhatsNewTrailTests {
 
     // MARK: - The one external-landing door
 
-    /// A destination the Simple mode does not offer, and one it does.
-    private static func destinations(
-        _ model: SettingsModel
-    ) throws -> (hidden: SettingsDestination, offered: SettingsDestination) {
-        let all =
-            SettingsDestination.thisProfile
-            + SettingsDestination.wholeApp
-        func offered(_ d: SettingsDestination) -> Bool {
-            HomeCardOrder.isOffered(
-                d,
-                mode: .simple,
-                displayCount: model.displays.count,
-                editingStoredProfile: model.editingStoredProfile
-            )
-        }
-        let reachable = all.filter {
-            $0.isReachable(editingStoredProfile: model.editingStoredProfile)
-        }
-        return (
-            try #require(reachable.first { !offered($0) }),
-            try #require(reachable.first { offered($0) })
-        )
-    }
-
-    @Test("a landing arms the mode notice only where it flips the mode")
-    func landingArmsNoticeOnFlip() throws {
+    /// Armed on every landing: the reveal announces only a flip it
+    /// made, on the destination it resolved
+    /// (`WhatsNewTrailWiringTests` ▸ `revealAnnouncesResolved`).
+    @Test("a landing arms the reveal and the mode notice")
+    func landingArmsRevealAndNotice() {
         let model = makeTestModel()
-        model.setSettingsMode(.simple)
-        let (hidden, offered) = try Self.destinations(model)
-        model.land(on: SettingsAnchor(destination: offered))
-        #expect(model.nav.pendingModeNotice == nil)
-        #expect(model.nav.pendingReveal?.destination == offered)
-        model.land(on: SettingsAnchor(destination: hidden))
-        #expect(model.nav.pendingModeNotice == hidden)
-        #expect(model.nav.pendingReveal?.destination == hidden)
+        model.land(on: SettingsAnchor(destination: .shortcuts))
+        #expect(model.nav.pendingModeNotice == .shortcuts)
+        #expect(model.nav.pendingReveal?.destination == .shortcuts)
     }
 }

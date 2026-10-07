@@ -30,9 +30,11 @@ final class WhatsNewCoordinator {
     /// Takes the trail's banner down without answering it — the
     /// window it leads back to is in front again or answered.
     var endsTrail: () -> Void = {}
-    /// Whether an update window holds the screen; a hidden What's
-    /// new is not fronted over it when Settings closes.
-    var updateWindowOpen: () -> Bool = { false }
+    /// Whether a waiting update offer is on screen; it outranks
+    /// the notes (#1542), so a hidden What's new is not fronted
+    /// over it when Settings closes. The user's own check and its
+    /// answer do not hold it back.
+    var updateOfferOpen: () -> Bool = { false }
     /// Nudged whenever `waiting` changes.
     var onWaitingChanged: () -> Void = {}
 
@@ -166,10 +168,10 @@ final class WhatsNewCoordinator {
     }
 
     /// Settings closed on the trail: What's new comes back, unless
-    /// an update window is in front — it then waits, hidden, for
-    /// the quick menu's row.
+    /// an update offer is in front — it then waits, hidden, for
+    /// the quick menu's row. A no-op unless a "Show me" hid it.
     private func settingsClosed() {
-        guard !updateWindowOpen() else { return }
+        guard window?.hidden == true, !updateOfferOpen() else { return }
         show()
     }
 
