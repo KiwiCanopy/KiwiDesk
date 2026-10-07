@@ -1660,7 +1660,7 @@
   "updates.state.up_to_date_window_open": "Actualizado · cierra la ventana de actualización para volver a comprobar",
   "updates.try_again": "Reintentar",
   "whatsnew.trail.back": "Volver a Novedades",
-  "whatsnew.trail.dismiss": "Descartar",
+  "whatsnew.trail.dismiss": "Cerrar",
   "whatsnew.trail.from": "Desde Novedades",
   "whatsnew.trail.next": "Siguiente: %1$@",
   "window_action.refusal.no_close_button": "«%1$@» no tiene botón de cerrar",

@@ -57,7 +57,17 @@ extension ChangelogRefusal {
             body: body(
                 spotlight: "- **Faster** — a line. {setting:no.such.key}"
             ),
-            fragment: "not in the Settings census"
+            fragment: "cannot land on"
+        ),
+        // A real census id "Show me" can never land on: a
+        // per-Space instance is a link, never a search row.
+        ChangelogRefusal(
+            name: "a census id no search row lands on",
+            body: body(
+                spotlight: "- **Gaps** — a line. "
+                    + "{setting:settings.gapsOverride[space]}"
+            ),
+            fragment: "cannot land on"
         ),
         ChangelogRefusal(
             name: "an unknown token in a spotlight row",

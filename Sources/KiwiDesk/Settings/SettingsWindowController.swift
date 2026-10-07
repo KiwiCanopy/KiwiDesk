@@ -88,7 +88,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// Shows Settings where a bar menu's row lands (#1518): the
     /// page, and the card or row on it, as the search would.
     func show(landing: SettingsLanding) {
-        model.nav.pendingReveal = SettingsAnchor(landing: landing)
+        model.land(on: SettingsAnchor(landing: landing))
         show()
     }
 
@@ -98,6 +98,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     func follow(_ trail: WhatsNewTrail) {
         model.follow(trail)
         show()
+    }
+
+    /// The trail's window is in front again or answered: the
+    /// banner goes, nothing is called back.
+    func endWhatsNewTrail() {
+        model.whatsNewTrail = nil
     }
 
     /// The live Spaces the profile does not hold changed (#1790).

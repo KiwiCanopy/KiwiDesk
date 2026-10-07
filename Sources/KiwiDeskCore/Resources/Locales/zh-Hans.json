@@ -1659,9 +1659,9 @@
   "updates.state.up_to_date_checked": "已是最新版本 · 上次检查：%1$@",
   "updates.state.up_to_date_window_open": "已是最新版本 · 关闭更新窗口即可再次检查",
   "updates.try_again": "重试",
-  "whatsnew.trail.back": "返回新功能",
-  "whatsnew.trail.dismiss": "忽略",
-  "whatsnew.trail.from": "来自新功能",
+  "whatsnew.trail.back": "返回“新功能”",
+  "whatsnew.trail.dismiss": "关闭",
+  "whatsnew.trail.from": "来自“新功能”",
   "whatsnew.trail.next": "下一项：%1$@",
   "window_action.refusal.no_close_button": "“%1$@”没有关闭按钮",
   "window_action.refusal.no_new_window": "%1$@ 没有“新建窗口”命令"

@@ -24,8 +24,15 @@ final class WhatsNewCoordinator {
     /// Puts the window on screen; a test records it instead.
     var presents: (WhatsNewWindowController) -> Void = { $0.present() }
     /// Opens Settings on a spotlight row's control with the way
-    /// back (#2038 ruling ▸ handoff); the app sets it.
+    /// back (#2038 ruling ▸ handoff); the app sets it once, with
+    /// `endsTrail` beside it.
     var showsInSettings: (WhatsNewTrail) -> Void = { _ in }
+    /// Takes the trail's banner down without answering it — the
+    /// window it leads back to is in front again or answered.
+    var endsTrail: () -> Void = {}
+    /// Whether an update window holds the screen; a hidden What's
+    /// new is not fronted over it when Settings closes.
+    var updateWindowOpen: () -> Bool = { false }
     /// Nudged whenever `waiting` changes.
     var onWaitingChanged: () -> Void = {}
 
@@ -120,6 +127,8 @@ final class WhatsNewCoordinator {
 
     /// Opens the window: at a user-started launch, or from the
     /// quick menu's row.
+    /// The one door that puts What's new in front — so it is
+    /// where a trail back to it ends (#2038).
     func show() {
         guard let offer = waiting else { return }
         let window =
@@ -128,15 +137,44 @@ final class WhatsNewCoordinator {
                 offer: offer,
                 narration: narration,
                 next: next?.current(at: now()),
-                showsInSettings: { [weak self] in self?.showsInSettings($0) }
+                showMe: { [weak self] in self?.showMe($0) }
             ) { [weak self] in
                 self?.answered()
             }
         self.window = window
+        endsTrail()
         presents(window)
     }
 
+    /// "Show me" (#2038 ruling ▸ handoff): What's new hides
+    /// unanswered and Settings lands on the row, carrying the way
+    /// back. A row this build cannot land on draws no link, so
+    /// the guard is a net.
+    func showMe(_ entry: UpdateNotesDigest.SpotlightEntry) {
+        guard let window,
+            let trail = WhatsNewTrail(
+                spotlight: window.offer.digest?.spotlight ?? [],
+                picked: entry,
+                landing: SpotlightLanding.anchor(for:),
+                back: { [weak self] in self?.show() },
+                dismiss: { [weak self] in self?.window?.finish() },
+                settingsClosed: { [weak self] in self?.settingsClosed() }
+            )
+        else { return }
+        window.hide()
+        showsInSettings(trail)
+    }
+
+    /// Settings closed on the trail: What's new comes back, unless
+    /// an update window is in front — it then waits, hidden, for
+    /// the quick menu's row.
+    private func settingsClosed() {
+        guard !updateWindowOpen() else { return }
+        show()
+    }
+
     private func answered() {
+        endsTrail()
         record.markAnswered(current)
         window = nil
         narration = nil

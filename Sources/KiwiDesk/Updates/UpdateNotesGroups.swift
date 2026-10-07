@@ -23,7 +23,7 @@ struct UpdateHighlightsPanel: View {
                     .foregroundStyle(SettingsTheme.ink)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                UpdateSpotlightRows(digest: digest)
+                UpdateSpotlightRows(digest: digest, failed: failed)
             }
             if !digest.cautions.isEmpty { cautions }
         }

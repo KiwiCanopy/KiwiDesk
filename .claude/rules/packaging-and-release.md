@@ -521,16 +521,19 @@ present only when it carries a bullet, one bullet per change
 (#1542, held by `ChangelogParserTests` ▸ `malformedBodyRefused`;
 a release before 2.0.0 keeps its free titles, and
 `--body <file> --tag <tag>` checks one of those). A release MAY
-open its sections with `### Spotlight` (#2038): one to four rows
-`- **Title** — one line. {setting:<census id>} {symbol:<sf name>}`,
+open its sections with `### Spotlight` (#2038): up to
+`SPOTLIGHT_MAX_ROWS` rows
+`- **Title** — one line. {setting:<id>} {symbol:<sf name>}`,
 both tokens optional, the summary then ONE intro sentence; a
-`{setting:…}` names a `SettingKey` id, read build-free by
-`changelog-sync --census-ids` and held to the census by
-`WhatsNewTrailTests` ▸ `censusDumpMatches`. A patch's prose is at
-most two sentences and 280 characters. The census and the patch
-cap bind a PUBLICATION read (`--body`, `--release`) and never
-`--all`, which must not strip history of its block over a later
-rename (`ChangelogParserTests` ▸ `malformedBodyRefused`,
+`{setting:…}` names an id "Show me" can land on, listed
+build-free in `scripts/spotlight-setting-ids.txt` and held to
+the census by `SpotlightScriptParityTests` ▸
+`landableListMatches`, and `--release` reads the TAG's own copy.
+A patch's prose stays within `PATCH_PROSE_MAX_SENTENCES` and
+`PATCH_PROSE_MAX_CHARS`. The list and the patch cap bind a
+PUBLICATION read (`--body`, `--release`) and never `--all`,
+which must not strip history of its block over a later rename
+(`ChangelogParserTests` ▸ `malformedBodyRefused`,
 `ChangelogSpotlightTests`); the rows reach the feed as the
 optional `spotlight` key, no format bump
 (`AppcastStructuredNotesTests`). Every reader of

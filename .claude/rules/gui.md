@@ -450,6 +450,19 @@ first; a new direct-launch path owes a marker of its own
 (`UpdatePromptWiringTests` ▸ the launch origin,
 `WhatsNewSurfaceTests`).
 
+**A spotlight row's "Show me" hides What's new WITHOUT answering
+it, and every way out of the trail ends it (#2038).** Settings
+lands on the row's control through `SettingsModel.land(on:)` —
+the one door an outside surface lands Settings through, a bar
+menu's row included — and carries a banner back; the trail has
+ONE owner, `WhatsNewCoordinator`, which ends it whenever What's
+new is fronted or answered, so the banner never outlives the
+window its Back returns to, and a Settings close re-presents a
+hidden What's new unless an update window holds the screen
+(`WhatsNewHandoffTests`, `WhatsNewTrailWiringTests`). Its Next
+and × state focus from the shell like any navigation (#991,
+#996).
+
 ## A window that must clear the bars derives its level
 
 The bars render at `BarPanel.level`. **A window that must not be

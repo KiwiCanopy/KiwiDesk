@@ -62,19 +62,20 @@ reaches people who did not ask to read anything.
    the goal.
 5. **Propose the Highlights tab's shape: prose OR a spotlight.**
    Every release, and the owner rules which. A spotlight is one
-   intro sentence and one to four `### Spotlight` rows, drawn
-   from the New and Improved bullets a user would want to FIND
-   in Settings — `{setting:…}` naming the control's census id
-   (`scripts/changelog-sync --census-ids` lists them) — plus
+   intro sentence and up to `SPOTLIGHT_MAX_ROWS` `### Spotlight`
+   rows, drawn from the New and Improved bullets a user would
+   want to FIND in Settings — `{setting:…}` naming the control's
+   id (`scripts/changelog-sync --census-ids` lists them) — plus
    behaviour noticed without configuring anything, as a row
    with no setting. A Lua-only change never gets a row, and a
    fixes-only release gets none: it stays prose. Each row's
    change stays a bullet in its section. Pick a symbol that
    depicts the object, never a state or an action. Prose opens
    with a summary sentence that stands alone; a PATCH's prose
-   is at most two sentences and 280 characters, since What's
-   new may show it above older rows (`--body <file> --tag
-   <tag>` checks the cap). The grammar is
+   stays within `changelog-sync`'s `PATCH_PROSE_MAX_SENTENCES`
+   and `PATCH_PROSE_MAX_CHARS`, since What's new may show it
+   above older rows (`--body <file> --tag <tag>` checks the
+   cap). The grammar is
    `packaging-and-release.md`'s, the argument
    `docs/design-decisions.md` ▸ *What's new leads with a
    spotlight*.

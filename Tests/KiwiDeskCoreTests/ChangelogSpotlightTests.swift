@@ -126,6 +126,60 @@ struct ChangelogSpotlightTests {
         #expect(run.status == 0, "\(run.stderr)")
     }
 
+    /// The list is read only when a row names a setting: a body
+    /// with none never touches it, so an unreadable list cannot
+    /// refuse a release that does not need it.
+    @Test("the landable list is read only for a `{setting:…}`")
+    func censusReadLazily() throws {
+        func run(_ body: String) throws -> ScriptRun {
+            let file = FileManager.default.temporaryDirectory
+                .appendingPathComponent("lazy-\(UUID().uuidString).md")
+            try body.write(to: file, atomically: true, encoding: .utf8)
+            defer { try? FileManager.default.removeItem(at: file) }
+            return try runPythonScript(
+                at: Self.script,
+                arguments: [
+                    "--body", file.path, "--census", "/no/such/list",
+                ]
+            )
+        }
+        let plain = try run(
+            rows("x").replacingOccurrences(of: " {setting:x}", with: "")
+        )
+        #expect(plain.status == 0, "\(plain.stderr)")
+        let named = try run(rows("x"))
+        #expect(named.status != 0)
+        #expect(named.stderr.contains("cannot read /no/such/list"))
+    }
+
+    /// A publication check reads the TAG's own list, so a setting
+    /// renamed on main after the tag cannot refuse a valid row.
+    @Test("--release reads the landable list at the tag")
+    func releaseReadsTheTag() throws {
+        let tag = "v9999.7.0"
+        let release: [String: Any] = [
+            "tag_name": tag,
+            "published_at": "2026-10-20T10:00:00Z",
+            "draft": false,
+            "html_url": "https://example.invalid/release",
+            "body": rows("config.layers"),
+            "assets": [],
+        ]
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("tag-\(UUID().uuidString).json")
+        try JSONSerialization.data(withJSONObject: [release]).write(to: file)
+        defer { try? FileManager.default.removeItem(at: file) }
+        let run = try runPythonScript(
+            at: Self.script,
+            arguments: [
+                "--release", tag, "--check", "--releases", file.path,
+                "--output", "-",
+            ]
+        )
+        #expect(run.status != 0)
+        #expect(run.stderr.contains("at \(tag) — fetch the tag first"))
+    }
+
     private func entry(body: String) throws -> [String: Any] {
         let release: [String: Any] = [
             "tag_name": "v2.2.0",

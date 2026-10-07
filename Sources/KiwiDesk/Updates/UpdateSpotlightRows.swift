@@ -7,6 +7,8 @@ import SwiftUI
 /// never beside it.
 struct UpdateSpotlightRows: View {
     let digest: UpdateNotesDigest
+    /// Failed steps the gold symbols back, as the panel's star.
+    let failed: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -20,7 +22,11 @@ struct UpdateSpotlightRows: View {
                     Array(digest.spotlight.enumerated()),
                     id: \.offset
                 ) { _, entry in
-                    UpdateSpotlightRow(entry: entry, tag: digest.tag(entry))
+                    UpdateSpotlightRow(
+                        entry: entry,
+                        tag: digest.tag(entry),
+                        failed: failed
+                    )
                 }
             }
             .padding(.top, 6)
@@ -36,6 +42,7 @@ struct UpdateSpotlightRows: View {
 struct UpdateSpotlightRow: View {
     let entry: UpdateNotesDigest.SpotlightEntry
     let tag: String?
+    let failed: Bool
 
     @Environment(\.spotlightShowMe) private var showMe
 
@@ -63,7 +70,11 @@ struct UpdateSpotlightRow: View {
             if let symbol {
                 Image(systemName: symbol)
                     .font(.system(size: 24, weight: .regular))
-                    .foregroundStyle(SettingsTheme.accent)
+                    // The panel's gold, as its edge and star: accent
+                    // marks controls (owner, 2026-10-07).
+                    .foregroundStyle(
+                        failed ? SettingsTheme.ink3 : SettingsTheme.highlight
+                    )
                     .frame(width: 28, height: 28)
             }
             VStack(alignment: .leading, spacing: 1) {

@@ -786,8 +786,7 @@ first, capped at four by trimming the oldest version's; a row from
 an older version carries its version after the title. The intro is
 always the newest version's own: its intro sentence, or — for a
 patch told in prose — that prose in full, which is why a patch's
-prose is capped at two sentences and 280 characters while a minor's
-is not. The exception is a minor or major with no rows: its prose
+prose is capped at a couple of sentences while a minor's is not. The exception is a minor or major with no rows: its prose
 stands alone and older rows are dropped, since a minor's prose is
 written to be read whole and is never cut to an intro. That edge
 is rare by construction — the curator gives a minor rows — and

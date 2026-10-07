@@ -52,13 +52,20 @@ struct SettingsNavigation {
     /// Originating card destination when popping back to Home.
     var homeReturnFocus: SettingsDestination?
 
-    /// Whether the navigation that last moved `destination`
+    /// Whether the navigation that last moved `destination` — or
+    /// changed the What's new trail's shape in place (#2038) —
     /// would have moved focus on the platform's own (#991).
-    /// Written in ONE place — `SettingsModel.destination`'s
-    /// `didSet` — and meaningful only to a statement fired BY
-    /// that write, so a reader at an unpaired moment would get
-    /// the verdict for whatever navigated last.
+    /// Written from `SettingsInputSource` at two moments only —
+    /// `SettingsModel.destination`'s `didSet`, and the trail's
+    /// in-place navigations, which move no destination
+    /// (`SettingsModel+WhatsNewTrail`) — and meaningful only to a
+    /// statement fired BY that write, so a reader at an unpaired
+    /// moment would get the verdict for whatever navigated last.
     var navigationMovesFocus = false
+
+    /// Bumped by the trail's Next and × (#2038): the shell, which
+    /// outlives the banner, states the focus destination (#996).
+    var trailFocusRequest = 0
 
     /// Resets transient surface selections to default — for window
     /// open and an edit-target switch: moving these off view-local

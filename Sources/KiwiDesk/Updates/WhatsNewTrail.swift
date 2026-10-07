@@ -4,7 +4,8 @@ import SwiftUI
 /// The way back from Settings to What's new after a spotlight
 /// row's "Show me" (#2038 ruling ▸ handoff): the rows this build
 /// can land on, in digest order, the one landed on, and What's
-/// new's two answers. A value, so the banner's rules are pinned
+/// new's answers, which `WhatsNewCoordinator` — the trail's one
+/// owner — supplies. A value, so the banner's rules are pinned
 /// without a window (`WhatsNewTrailTests`).
 struct WhatsNewTrail {
     struct Stop: Equatable {
@@ -19,6 +20,8 @@ struct WhatsNewTrail {
     let back: @MainActor () -> Void
     /// Finishes What's new — its Done.
     let dismiss: @MainActor () -> Void
+    /// Settings closed with What's new still hidden.
+    let settingsClosed: @MainActor () -> Void
 
     var current: Stop { stops[index] }
 
@@ -43,7 +46,8 @@ struct WhatsNewTrail {
         picked: UpdateNotesDigest.SpotlightEntry,
         landing: (String?) -> SettingsAnchor?,
         back: @escaping @MainActor () -> Void,
-        dismiss: @escaping @MainActor () -> Void
+        dismiss: @escaping @MainActor () -> Void,
+        settingsClosed: @escaping @MainActor () -> Void
     ) {
         var stops: [Stop] = []
         var index: Int?
@@ -59,6 +63,7 @@ struct WhatsNewTrail {
         self.index = index
         self.back = back
         self.dismiss = dismiss
+        self.settingsClosed = settingsClosed
     }
 }
 

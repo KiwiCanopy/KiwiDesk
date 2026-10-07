@@ -5,10 +5,10 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// "Show me" and the way back (#2038 ruling ▸ handoff): What's new
-/// hides without finishing, Settings carries a banner whose Next
-/// walks the linked rows, and ×, Back and the Settings close each
-/// end it.
+/// The trail as a value and as Settings draws it (#2038 ruling ▸
+/// handoff): Next walks the linked rows, and ×, Back and the
+/// Settings close each end the banner. The window's half is
+/// `WhatsNewHandoffTests`.
 @MainActor
 @Suite("What's new trail (#2038)", .serialized)
 struct WhatsNewTrailTests {
@@ -35,9 +35,10 @@ struct WhatsNewTrailTests {
         return SettingsAnchor(destination: .shortcuts, anchor: id)
     }
 
-    private final class Log {
+    final class Log {
         var back = 0
         var dismissed = 0
+        var closed = 0
     }
 
     private static func trail(
@@ -49,7 +50,8 @@ struct WhatsNewTrailTests {
             picked: rows[picked],
             landing: landing,
             back: { log.back += 1 },
-            dismiss: { log.dismissed += 1 }
+            dismiss: { log.dismissed += 1 },
+            settingsClosed: { log.closed += 1 }
         )
     }
 
@@ -84,162 +86,92 @@ struct WhatsNewTrailTests {
     func followLands() throws {
         let model = model(with: try #require(Self.trail()))
         #expect(model.nav.pendingReveal?.anchor == "a")
-        #expect(model.nav.pendingModeNotice == .shortcuts)
+        let before = model.nav.trailFocusRequest
         model.followNext()
         #expect(model.whatsNewTrail?.current.title == "B")
         #expect(model.nav.pendingReveal?.anchor == "b")
+        // Next states the newly landed control (#991).
+        #expect(model.nav.trailFocusRequest == before + 1)
+        // On the last row Next is absent: no landing, no statement.
+        model.followNext()
+        #expect(model.nav.trailFocusRequest == before + 1)
     }
 
-    @Test("× clears the banner and finishes What's new")
+    @Test("× clears the banner, finishes What's new, states focus")
     func dismissEnds() throws {
         let log = Log()
         let model = model(with: try #require(Self.trail(log: log)))
+        let before = model.nav.trailFocusRequest
         model.dismissWhatsNew()
         #expect(model.whatsNewTrail == nil)
         #expect(log.dismissed == 1)
         #expect(log.back == 0)
+        #expect(model.nav.trailFocusRequest == before + 1)
     }
 
-    @Test("Back clears the banner and re-presents What's new")
+    /// Back states nothing in Settings: the focus goes with What's
+    /// new's window, which the coordinator fronts.
+    @Test("Back clears the banner and returns to What's new")
     func backEnds() throws {
         let log = Log()
         let model = model(with: try #require(Self.trail(log: log)))
+        let before = model.nav.trailFocusRequest
         model.returnToWhatsNew()
         #expect(model.whatsNewTrail == nil)
         #expect(log.back == 1)
         #expect(log.dismissed == 0)
+        #expect(model.nav.trailFocusRequest == before)
     }
 
-    @Test("closing Settings clears the banner and re-presents it")
+    @Test("closing Settings clears the banner and tells the owner")
     func settingsCloseEnds() throws {
         let log = Log()
         let model = model(with: try #require(Self.trail(log: log)))
         model.settingsClosed()
         #expect(model.whatsNewTrail == nil)
-        #expect(log.back == 1)
+        #expect(log.closed == 1)
+        #expect(log.back == 0)
         // Once: a second close has no trail to answer.
         model.settingsClosed()
-        #expect(log.back == 1)
+        #expect(log.closed == 1)
     }
 
-    // MARK: - The window
+    // MARK: - The one external-landing door
 
-    /// A real census id this build lands on.
-    private static func linkedID() throws -> String {
-        try #require(
-            SettingsSearchIndex.rows().compactMap(\.key?.id).first
-        )
-    }
-
-    private static func offer(setting: String) throws -> UpdateOffer {
-        let notes = """
-            {"format":1,"summary":"Intro.","sections":\
-            [{"type":"new","title":"New","items":["N"]}],\
-            "spotlight":[{"title":"Row","line":"L.",\
-            "setting":"\(setting)"}]}
-            """
-        return try #require(
-            UpdateOffer.whatsNew(
-                items: [
-                    .init(
-                        version: "2.2.0",
-                        shown: "2.2.0",
-                        released: nil,
-                        notes: notes
-                    )
-                ],
-                since: "2.1.0",
-                current: "2.2.0"
+    /// A destination the Simple mode does not offer, and one it does.
+    private static func destinations(
+        _ model: SettingsModel
+    ) throws -> (hidden: SettingsDestination, offered: SettingsDestination) {
+        let all =
+            SettingsDestination.thisProfile
+            + SettingsDestination.wholeApp
+        func offered(_ d: SettingsDestination) -> Bool {
+            HomeCardOrder.isOffered(
+                d,
+                mode: .simple,
+                displayCount: model.displays.count,
+                editingStoredProfile: model.editingStoredProfile
             )
+        }
+        let reachable = all.filter {
+            $0.isReachable(editingStoredProfile: model.editingStoredProfile)
+        }
+        return (
+            try #require(reachable.first { !offered($0) }),
+            try #require(reachable.first { offered($0) })
         )
     }
 
-    @Test("Show me hides What's new without finishing it; Back returns")
-    func showMeHidesAndBackReturns() throws {
-        let offer = try Self.offer(setting: try Self.linkedID())
-        var done = 0
-        var handed: [WhatsNewTrail] = []
-        let controller = WhatsNewWindowController(
-            offer: offer,
-            narration: nil,
-            next: nil,
-            showsInSettings: { handed.append($0) }
-        ) { done += 1 }
-        var reshown: [NSWindow] = []
-        controller.reshows = { reshown.append($0) }
-        let window = controller.makeWindow()
-        let row = try #require(offer.digest?.spotlight.first)
-
-        controller.showMe(row)
-        #expect(done == 0)
-        #expect(!controller.isShown)
-        let trail = try #require(handed.first)
-        #expect(trail.current.title == "Row")
-
-        trail.back()
-        #expect(reshown.count == 1)
-        #expect(reshown.first === window)
-        #expect(done == 0)
-
-        trail.dismiss()
-        #expect(done == 1)
-    }
-
-    /// The census reading `changelog-sync` checks rows against,
-    /// held to the census itself — the script reads Swift source
-    /// so a draft needs no build.
-    @Test("the script's census ids are SettingKey's")
-    func censusDumpMatches() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-        let run = try GuiScriptFixture.python([
-            root.appendingPathComponent("scripts/changelog-sync").path,
-            "--census-ids",
-        ])
-        #expect(run.status == 0, "\(run.stderr)")
-        let dumped = Set(run.stdout.split(separator: "\n").map(String.init))
-        #expect(dumped == Set(SettingKey.allCases.map(\.id)))
-    }
-}
-
-/// The Settings close re-shows a hidden What's new (#2038 ruling
-/// ▸ handoff 6): the model's answer is pinned above; what a test
-/// cannot see is the window's close reaching it.
-@Suite("What's new trail wiring (#2038)")
-struct WhatsNewTrailWiringTests {
-    private static let gui = SourceScan.repoRoot(from: #filePath)
-        .appendingPathComponent("Sources/KiwiDesk")
-
-    private static func body(
-        of declaration: String,
-        in file: String
-    ) throws -> String {
-        let source = SourceScan.stripComments(
-            try String(
-                contentsOf: gui.appendingPathComponent(file),
-                encoding: .utf8
-            )
-        )
-        return try #require(
-            SourceScan.declarationBody(after: declaration, in: source)
-        )
-    }
-
-    @Test("the Settings window's close ends the trail")
-    func settingsCloseReachesTheModel() throws {
-        let body = try Self.body(
-            of: "func windowWillClose(",
-            in: "Settings/SettingsWindowController.swift"
-        )
-        #expect(body.contains("model.settingsClosed()"))
-    }
-
-    @Test("the app hands What's new's trail to Settings")
-    func appWiresTheHandoff() throws {
-        let body = try Self.body(
-            of: "func offerWhatsNew(",
-            in: "AppDelegate+WhatsNew.swift"
-        )
-        #expect(body.contains("whatsNew.showsInSettings = {"))
-        #expect(body.contains("dashboard.follow(trail)"))
+    @Test("a landing arms the mode notice only where it flips the mode")
+    func landingArmsNoticeOnFlip() throws {
+        let model = makeTestModel()
+        model.setSettingsMode(.simple)
+        let (hidden, offered) = try Self.destinations(model)
+        model.land(on: SettingsAnchor(destination: offered))
+        #expect(model.nav.pendingModeNotice == nil)
+        #expect(model.nav.pendingReveal?.destination == offered)
+        model.land(on: SettingsAnchor(destination: hidden))
+        #expect(model.nav.pendingModeNotice == hidden)
+        #expect(model.nav.pendingReveal?.destination == hidden)
     }
 }
