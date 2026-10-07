@@ -143,7 +143,9 @@ final class ShelfManager {
         let overlay = overlays[key] ?? ShelfOverlay()
         overlays[key] = overlay
         overlay.onLeft = { [weak self] in self?.retire(key) }
-        overlay.onPress = { [weak self] in self?.peek.pressed(on: $0) }
+        overlay.onPress = { [weak self] in
+            self?.peek.pressed(on: $0, type: $1)
+        }
         overlay.contextMenus = contextMenus
         overlay.handle.onMinimum = { [weak self] percent, committed in
             self?.onMinimum(percent, committed)

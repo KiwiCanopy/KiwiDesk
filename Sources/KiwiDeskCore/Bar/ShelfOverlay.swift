@@ -38,8 +38,12 @@ final class ShelfOverlay {
     /// Fires once the shelf has left the screen — at once, or when
     /// its fade-out lands; `ShelfManager` retires it there.
     var onLeft: @MainActor () -> Void = {}
-    /// A press on the panel, with the view it hit (`ShelfPanel`).
-    var onPress: @MainActor (NSView?) -> Void = { _ in }
+    /// A press on the panel, with the view it hit and its type
+    /// (`ShelfPanel`).
+    var onPress: @MainActor (NSView?, NSEvent.EventType) -> Void = {
+        _,
+        _ in
+    }
     /// Whether a fade-out is in flight.
     var isLeaving: Bool { leaving != nil }
     /// Schedules a landing once the plate glide has run — the

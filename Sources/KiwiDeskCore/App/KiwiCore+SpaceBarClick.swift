@@ -3,8 +3,8 @@ import AppKit
 /// What a click on a Space Bar glyph or `+n` does (#1528, the
 /// owner rulings in its body, and #1946's): a one-window glyph
 /// switches to its Space and focuses that window; a glyph standing
-/// for several windows, and `+n`, show their peek at once, pinned,
-/// and switch nothing until a row is picked — VoiceOver's press
+/// for several windows, and `+n`, toggle their peek at once, and
+/// switch nothing until a row is picked — VoiceOver's press
 /// opening the native menu instead. A click elsewhere on the chip
 /// stays `focusSpace`.
 extension KiwiCore {
@@ -33,7 +33,7 @@ extension KiwiCore {
             return
         }
         // No menu: the list is the peek, its rows the picks.
-        spaceBars.glyphActions.pinPeek(pick)
+        spaceBars.glyphActions.togglePeek(pick)
     }
 
     /// VoiceOver's press on a glyph: a list's native menu at the

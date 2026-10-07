@@ -46,8 +46,9 @@ extension GesturePicture {
         }
         @Environment(\.schematicPalette) private var palette
 
-        /// The peek, its app line on top and two window rows.
-        private static let peek = CGRect(x: 22, y: 22, width: 86, height: 32)
+        /// The peek: its app line on top and the glyph's three
+        /// window rows, as its badge counts.
+        private static let peek = CGRect(x: 22, y: 22, width: 86, height: 38)
         /// The second line of the peek, the one the pointer picks.
         private static let row = CGRect(x: 25, y: 33, width: 66, height: 7)
 
@@ -62,7 +63,7 @@ extension GesturePicture {
                 ink.glyph(at: CGPoint(x: 38, y: 8), focused: true)
                 ink.label("3", at: CGPoint(x: 41, y: 1))
                 ink.label("+2", at: CGPoint(x: 52, y: 3))
-                ink.panel(Self.peek, rows: 3, titled: true)
+                ink.panel(Self.peek, rows: 4, titled: true)
                     .opacity(gestureStage(t, 0.3, 0.45))
                 ink.target(Self.row, radius: 2)
                     .opacity(gestureStage(t, 0.7, 0.8))

@@ -8,7 +8,7 @@ import Testing
 /// before the first show, an instant swap while one shows, a
 /// cool-down after, and a press or a moved item closing it until
 /// the pointer leaves. The value is `BarPeekContentTests`'; the
-/// hold, the pin and the rows are `BarPeekActionTests`'.
+/// hold, the toggle and the rows are `BarPeekActionTests`'.
 @Suite("Bar hover peek", .serialized)
 @MainActor
 struct BarPeekTests {
@@ -116,7 +116,7 @@ struct BarPeekTests {
         rig.step()
         #expect(rig.shownTitles == ["Window 3"], "was shown")
         #expect(rig.peek.shown?.view === item)
-        rig.peek.pressed(on: item)
+        rig.peek.pressed(on: item, type: .leftMouseDown)
         #expect(rig.peek.panel.drawn == nil)
     }
 

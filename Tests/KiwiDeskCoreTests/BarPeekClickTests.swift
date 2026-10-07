@@ -104,7 +104,7 @@ struct BarPeekClickTests {
     }
 
     @Test("A list glyph's click shows its peek at once and pops no menu")
-    func clickPinsThePeek() throws {
+    func clickTogglesThePeek() throws {
         let core = seededCore()
         defer { close(core) }
         var menus = 0

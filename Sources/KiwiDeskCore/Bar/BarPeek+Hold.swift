@@ -17,6 +17,10 @@ extension BarPeek {
         /// How often a held peek re-reads the pointer while it
         /// crosses the gap no view tracks (`BarPeekHull`).
         static let holdPoll: TimeInterval = 0.05
+        /// How often a held peek re-reads the pointer while its
+        /// body reports it inside: slow, since the body's exit
+        /// normally ends it, and only a lost exit needs it.
+        static let insideRecheck: TimeInterval = 0.5
     }
 
     /// Whether the pointer is inside the shown peek's hull. Only a
@@ -59,11 +63,13 @@ extension BarPeek {
     }
 
     /// A press in a bar panel (`ShelfPanel`), on `hit`: a click
-    /// outside the peek, which closes it — except on a Space Bar
-    /// glyph, whose release decides: a list's click toggles the
-    /// peek, a one-window glyph's picks.
-    func pressed(on hit: NSView?) {
-        guard !(hit is SpaceBarGlyphTarget) else { return }
+    /// outside the peek, which closes it — except a left press on
+    /// a Space Bar glyph, whose release decides: a list's click
+    /// toggles the peek, a one-window glyph's picks. Any other
+    /// button's press on a glyph closes it.
+    func pressed(on hit: NSView?, type: NSEvent.EventType) {
+        guard type != .leftMouseDown || !(hit is SpaceBarGlyphTarget)
+        else { return }
         dismiss()
     }
 
@@ -89,7 +95,7 @@ extension BarPeek {
         made.body.onPick = { [weak self] in self?.picked($0) }
         made.body.onMore = { [weak self] in self?.openedMore() }
         made.body.onPointerInside = { [weak self] in
-            self?.pointerInPeek($0)
+            self?.bodyReported(inside: $0)
         }
         return made
     }

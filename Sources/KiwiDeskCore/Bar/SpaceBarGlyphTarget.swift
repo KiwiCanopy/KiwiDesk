@@ -70,13 +70,13 @@ final class SpaceBarGlyphActions {
         )
     }
 
-    /// A click on a list — a multi-window glyph or `+n` — shows its
-    /// peek at once and pins it (#1946); nothing else pins.
-    func pinPeek(_ pick: SpaceBarGlyphPick) {
+    /// A click on a list — a multi-window glyph or `+n` — toggles
+    /// its peek (#1946): it shows at once, or closes where shown.
+    func togglePeek(_ pick: SpaceBarGlyphPick) {
         guard let target = pick.anchor as? SpaceBarGlyphTarget,
             let item = target.superview as? SpaceBarItemView
         else { return }
-        peek?.pin(
+        peek?.toggle(
             target,
             source: target.peekSource,
             space: pick.space,
@@ -131,8 +131,8 @@ final class SpaceBarGlyphTarget: NSView {
     var peekSource: BarPeekSource { pick.peekSource }
 
     /// A press arms the pick; the peek stays, since a list's click
-    /// pins it (#1946). A Control-click's menu closes it as any
-    /// menu does.
+    /// toggles it on the release (#1946). A Control-click's menu
+    /// closes it as any menu does.
     override func mouseDown(with event: NSEvent) {
         guard !openControlClickMenu(event) else { return }
         pressed = true

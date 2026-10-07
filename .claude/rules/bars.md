@@ -587,8 +587,10 @@ Obligations:
   `shelfLeavingCloses`). **A press in a bar closes the peek at
   ONE point**, the shelf panel's `ShelfPanel.sendEvent`, which
   hands every press — an item, the plate, the divider's grip, a
-  count — to `BarPeek.pressed(on:)` before the view takes it,
-  sparing only a Space Bar glyph, whose release decides; a view's
+  count — to `BarPeek.pressed(on:type:)` before the view takes
+  it, sparing only a LEFT press on a Space Bar glyph, whose
+  release decides (`BarPeekHoldTests` ▸
+  `otherPressOnAGlyphCloses`); a view's
   own press handler never re-spells the dismissal, so one that
   takes its own press cannot leave a peek standing
   (`BarPeekSeamTests` ▸ `onePressDismissal`,
@@ -609,10 +611,12 @@ Obligations:
   cools. A one-window peek is a LABEL: it closes as the pointer
   leaves its item, so its row is never reached by the pointer
   (`BarPeekActionTests` ▸ `oneWindowPeekNeverHolds`,
-  `BarPeekHullTests`). The hold polls only the gap: the peek
-  body's own tracking stops the poll as the pointer enters it and
-  re-reads the hull as it leaves (`BarPeekHoldTests` ▸
-  `holdPollsOnlyTheGap`).
+  `BarPeekHullTests`). The hold polls the gap fast and the body
+  slowly: the peek body's own tracking slows the poll to
+  `Timing.insideRecheck` as the pointer enters it and re-reads
+  the hull as it leaves, the slow re-read healing an exit the
+  body never got (`BarPeekHoldTests` ▸ `holdPollsTheGapFast`,
+  `lostExitHeals`).
   Its timing lives in `BarPeek.Timing` and
   nowhere beside it; its fade is `BarMotion`'s; its glass is
   decided once in `BarPeekPanel.show` through the gate
@@ -647,11 +651,11 @@ Obligations:
   hold as any list's does; it pops no menu. VoiceOver's press
   and "N more" open the native menu at the anchor
   (`BarPeekActionTests` ▸ `secondClickCloses`,
-  `clickClosesAHoverPeek`, `BarPeekClickTests`). The panel takes the mouse but is
-  non-activating and never key, and hidden from accessibility
-  (`BarPeekTests` ▸ `panelTakesClicksWithoutActivating`). The
-  argument is `docs/design-decisions.md` ▸ A bar item's hover
-  peek.
+  `clickClosesAHoverPeek`, `BarPeekClickTests`). The panel takes
+  the mouse but is non-activating and never key, and hidden from
+  accessibility (`BarPeekTests` ▸
+  `panelTakesClicksWithoutActivating`). The argument is
+  `docs/design-decisions.md` ▸ A bar item's hover peek.
 
 ## A Space Bar glyph is a click target the item owns (#1528)
 

@@ -56,7 +56,8 @@ final class BarPeek {
     /// Stamps every timer it schedules; a phase change outdates them.
     private var generation = 0
     /// The pointer is inside the peek's body, whose own tracking
-    /// reports it, so a held peek polls only across the gap.
+    /// reports it, so a held peek polls the gap fast and re-reads
+    /// slowly inside, which heals an exit the body never got.
     private var pointerInPeek = false
     private(set) lazy var panel = wiredPanel()
     /// Any menu opening — a right-click's, "N more"'s — closes the
@@ -167,7 +168,7 @@ final class BarPeek {
     /// closes; otherwise it shows at once, with no dwell, and holds
     /// as any list's does, until a click outside, a pick, or the
     /// pointer leaving the hull.
-    func pin(
+    func toggle(
         _ anchor: NSView,
         source: BarPeekSource,
         space: SpaceID?,
@@ -223,13 +224,14 @@ final class BarPeek {
         guard !held else { return }
         phase = .showing(anchor, holding: true)
         generation += 1
-        if !pointerInPeek { poll(generation) }
+        poll(generation)
     }
 
     /// The peek's body reports the pointer entering or leaving it:
-    /// inside, the hold's poll stops; leaving it, the hull is read
-    /// again — a held peek polls the gap, or closes outside it.
-    func pointerInPeek(_ inside: Bool) {
+    /// inside, the hold's poll slows to `Timing.insideRecheck`;
+    /// leaving it, the hull is read again — a held peek polls the
+    /// gap, or closes outside it.
+    func bodyReported(inside: Bool) {
         pointerInPeek = inside
         guard holding, !inside else { return }
         guard holdsPointer else {
@@ -240,10 +242,14 @@ final class BarPeek {
         poll(generation)
     }
 
+    /// Re-reads the hull while the peek holds: across the gap at
+    /// `holdPoll`, inside the body at `insideRecheck`, since an
+    /// exit can be lost (a view moved under a resting pointer gets
+    /// none, #1665; a press dragged out with the button held).
     private func poll(_ ticket: Int) {
-        schedule(Timing.holdPoll) { [weak self] in
-            guard let self, self.holding, ticket == self.generation,
-                !self.pointerInPeek
+        let delay = pointerInPeek ? Timing.insideRecheck : Timing.holdPoll
+        schedule(delay) { [weak self] in
+            guard let self, self.holding, ticket == self.generation
             else { return }
             guard self.holdsPointer else {
                 self.leave()

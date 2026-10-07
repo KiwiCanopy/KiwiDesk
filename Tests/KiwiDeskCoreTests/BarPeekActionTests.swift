@@ -96,13 +96,13 @@ struct BarPeekActionTests {
         #expect(!rig.peek.holding)
     }
 
-    // MARK: - The pin
+    // MARK: - The toggle
 
-    @Test("A click pins the peek at once, with no dwell")
-    func clickPinsAtOnce() throws {
+    @Test("A click shows the peek at once, with no dwell")
+    func clickTogglesAtOnce() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
-        rig.peek.pin(
+        rig.peek.toggle(
             rig.first,
             source: .glyph([WindowID(1), WindowID(2)]),
             space: SpaceID("1"),
@@ -128,7 +128,7 @@ struct BarPeekActionTests {
         rig.hover(rig.first, 1, 2)
         rig.step()
         #expect(rig.shownTitles == ["Window 1", "Window 2"])
-        rig.peek.pin(
+        rig.peek.toggle(
             rig.first,
             source: .glyph([WindowID(1), WindowID(2)]),
             space: SpaceID("1"),
@@ -139,13 +139,13 @@ struct BarPeekActionTests {
         #expect(rig.dwells.count == 1, "shut until the pointer leaves")
     }
 
-    @Test("A second click on the pinned item closes its peek")
+    @Test("A second click on the toggled item closes its peek")
     func secondClickCloses() {
         let rig = BarPeekRig()
         defer { rig.close() }
         let source = BarPeekSource.glyph([WindowID(1), WindowID(2)])
         for _ in 0..<2 {
-            rig.peek.pin(
+            rig.peek.toggle(
                 rig.first,
                 source: source,
                 space: SpaceID("1"),

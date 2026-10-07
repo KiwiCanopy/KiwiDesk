@@ -35,7 +35,7 @@ extension ShelfOverlay {
                 defer: true
             )
         )
-        panel.onPress = { [weak self] in self?.onPress($0) }
+        panel.onPress = { [weak self] in self?.onPress($0, $1) }
         content.wantsLayer = true
         content.layer?.masksToBounds = true
         panel.contentView = content

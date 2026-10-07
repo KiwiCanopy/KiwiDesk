@@ -5,7 +5,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// How a list's peek holds and what closes it (#1946): the hold
-/// polls only the gap its body's tracking cannot see, and a press
+/// polls the gap its body's tracking cannot see, re-reads slowly
+/// inside the body in case its exit is lost, and a press
 /// anywhere in a bar reaches it through the shelf panel's one press
 /// point.
 @Suite("Bar hover peek hold and press", .serialized)
@@ -26,7 +27,7 @@ struct BarPeekHoldTests {
         #expect(source.isList)
         #expect(!BarPeekSource.glyph([WindowID(7)]).isList)
         #expect(!BarPeekSource.appItem([WindowID(7)]).isList)
-        rig.peek.pin(
+        rig.peek.toggle(
             rig.first,
             source: source,
             space: SpaceID("1"),
@@ -44,11 +45,11 @@ struct BarPeekHoldTests {
     }
 
     /// Inside the peek its body's own tracking reports the pointer,
-    /// so the hold polls only across the gap: entering stops the
-    /// poll, leaving into the gap restarts it, and leaving the hull
-    /// closes the peek on that report.
-    @Test("The hold polls only the gap")
-    func holdPollsOnlyTheGap() throws {
+    /// so the hold polls the gap fast and slows inside: entering
+    /// slows the poll, leaving into the gap restarts it fast, and
+    /// leaving the hull closes the peek on that report.
+    @Test("The hold polls the gap fast and the body slowly")
+    func holdPollsTheGapFast() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
         rig.hover(rig.first, 1, 2)
@@ -56,19 +57,46 @@ struct BarPeekHoldTests {
         rig.pointer = try rig.gap()
         rig.hover(nil)
         #expect(rig.steps.count == 1, "polling the gap")
+        #expect(rig.dwells.last == BarPeek.Timing.holdPoll)
         let peek = try #require(rig.peek.panel.panel?.frame)
         rig.pointer = CGPoint(x: peek.midX, y: peek.midY)
         rig.peek.panel.body.onPointerInside(true)
         rig.step()
-        #expect(rig.steps.isEmpty, "no poll inside the peek")
+        #expect(rig.steps.count == 1, "a slow re-read inside")
+        #expect(rig.dwells.last == BarPeek.Timing.insideRecheck)
+        #expect(BarPeek.Timing.insideRecheck > BarPeek.Timing.holdPoll)
         #expect(rig.shownTitles == ["Window 1", "Window 2"])
         rig.pointer = try rig.gap()
         rig.peek.panel.body.onPointerInside(false)
-        #expect(rig.steps.count == 1, "the gap polls again")
+        #expect(rig.dwells.last == BarPeek.Timing.holdPoll, "fast again")
         rig.peek.panel.body.onPointerInside(true)
         rig.pointer = CGPoint(x: peek.maxX + 200, y: peek.midY)
         rig.peek.panel.body.onPointerInside(false)
         #expect(rig.peek.panel.drawn == nil, "out of the hull it closes")
+    }
+
+    /// A lost exit — a view moved under a resting pointer gets none
+    /// (#1665), a press dragged out with the button held — leaves
+    /// the body reporting inside; the slow re-read closes the peek
+    /// once the pointer is outside the hull.
+    @Test("A lost exit heals on the slow re-read")
+    func lostExitHeals() throws {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        rig.hover(rig.first, 1, 2)
+        rig.step()
+        rig.pointer = try rig.gap()
+        rig.hover(nil)
+        let peek = try #require(rig.peek.panel.panel?.frame)
+        rig.pointer = CGPoint(x: peek.midX, y: peek.midY)
+        rig.peek.panel.body.onPointerInside(true)
+        rig.step()
+        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        // The pointer leaves the hull and no exit arrives.
+        rig.pointer = CGPoint(x: peek.maxX + 200, y: peek.midY)
+        rig.step()
+        #expect(rig.peek.panel.drawn == nil, "the re-read closes it")
+        #expect(!rig.peek.holding)
     }
 
     /// The body's tracking area is what reports: its enter and exit
@@ -106,8 +134,9 @@ struct BarPeekHoldTests {
     // MARK: - A press in a bar
 
     /// `ShelfPanel` hands every press in a bar to the peek: it
-    /// closes, save on a Space Bar glyph, whose release decides.
-    @Test("A press in a bar closes the peek, save on a glyph")
+    /// closes, save a left press on a Space Bar glyph, whose
+    /// release decides — another button's press there closes it.
+    @Test("A press in a bar closes the peek, save a left one on a glyph")
     func pressInABarCloses() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
@@ -119,12 +148,31 @@ struct BarPeekHoldTests {
             kind: .glyph,
             label: "App"
         )
-        rig.peek.pressed(on: glyph)
+        rig.peek.pressed(on: glyph, type: .leftMouseDown)
         #expect(rig.shownTitles == ["Window 1", "Window 2"])
-        rig.peek.pressed(on: NSView())
+        rig.peek.pressed(on: NSView(), type: .leftMouseDown)
         #expect(rig.peek.panel.drawn == nil)
         rig.hover(rig.first, 1, 2)
         #expect(rig.dwells.count == 1, "shut until the pointer leaves")
+    }
+
+    /// Only a left press on a glyph waits for its release: a
+    /// middle (other) button's press there closes the peek.
+    @Test("An other-button press on a glyph closes the peek")
+    func otherPressOnAGlyphCloses() throws {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        rig.hover(rig.first, 1, 2)
+        rig.step()
+        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        let glyph = SpaceBarGlyphTarget(
+            space: SpaceID("1"),
+            windows: [WindowID(1), WindowID(2)],
+            kind: .glyph,
+            label: "App"
+        )
+        rig.peek.pressed(on: glyph, type: .otherMouseDown)
+        #expect(rig.peek.panel.drawn == nil, "a middle press closes")
     }
 
     /// The panel's own `sendEvent` reports each press, with the
@@ -145,7 +193,11 @@ struct BarPeekHoldTests {
         content.addSubview(count)
         panel.contentView = content
         var hits: [NSView?] = []
-        panel.onPress = { hits.append($0) }
+        var types: [NSEvent.EventType] = []
+        panel.onPress = {
+            hits.append($0)
+            types.append($1)
+        }
         for type: NSEvent.EventType in [
             .leftMouseDown, .leftMouseUp, .rightMouseDown, .otherMouseDown,
             .mouseMoved,
@@ -167,5 +219,9 @@ struct BarPeekHoldTests {
         }
         #expect(hits.count == 3, "the three presses, nothing else")
         #expect(hits.allSatisfy { $0 === count })
+        #expect(
+            types == [.leftMouseDown, .rightMouseDown, .otherMouseDown],
+            "each press carries its own type"
+        )
     }
 }

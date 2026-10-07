@@ -45,6 +45,44 @@ struct MonocleFlipSeamTests {
         )
     }
 
+    /// The count above is met by `selectFromAppBar`'s own body,
+    /// so the App Bar's clicks are pinned at their callers: the
+    /// item click's `onSelect` closure and `pickBarRow`'s
+    /// nil-Space branch, a peek row of the App Bar (#1946).
+    @Test("The App Bar click and its peek row take the door")
+    func appBarClicksReachTheDoor() throws {
+        let boot = Self.core.appendingPathComponent(
+            "App/KiwiCore+Bootstrap.swift"
+        )
+        let closure = SourceScan.declarationBody(
+            after: "appBars.onSelect = {",
+            in: try SourceScan.strippedSource(at: boot)
+        )
+        #expect(
+            closure?.contains("selectFromAppBar(") == true,
+            "onSelect: \(closure ?? "absent")"
+        )
+        let pick = try SourceScan.functionBody(
+            of: "pickBarRow",
+            in: "KiwiCore+SpaceBarClick.swift",
+            under: "App"
+        )
+        let branch = SourceScan.declarationBody(
+            after: "guard let space else",
+            in: pick
+        )
+        #expect(
+            branch?.contains("selectFromAppBar(") == true,
+            "nil-Space branch: \(branch ?? "absent")"
+        )
+        let door = try SourceScan.functionBody(
+            of: "selectFromAppBar",
+            in: "KiwiCore+SpaceBarClick.swift",
+            under: "App"
+        )
+        #expect(door.contains("focusWithMonocleFlip("))
+    }
+
     /// The door lands the owed focus through `focusWindow`,
     /// falls through to it where no flip plays, and lands a
     /// burst's press at once: three spellings, all in the door.
