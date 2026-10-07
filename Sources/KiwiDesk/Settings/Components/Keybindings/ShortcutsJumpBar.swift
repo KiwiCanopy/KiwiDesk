@@ -98,7 +98,7 @@ struct ShortcutsJumpBar: View {
             HStack(spacing: Self.spacing) {
                 chip(group)
                 SettingsTheme.hairline
-                    .frame(width: 1, height: 14)
+                    .frame(width: 1, height: 16)
                     .accessibilityHidden(true)
             }
         } else {
@@ -116,7 +116,9 @@ struct ShortcutsJumpBar: View {
     }
 }
 
-/// A content-sized hairline capsule. Marked: a soft accent fill
+/// A content-sized hairline capsule at the regular control size,
+/// its label at the size of the header it jumps to (owner
+/// amendment 2, #1520). Marked: a soft accent fill
 /// and a semibold label in neutral ink, its width reserved so the
 /// marking never reflows the row. Hover lifts a neutral fill on a
 /// layer beneath the marking — each layer's colour is a function
@@ -131,8 +133,8 @@ struct ShortcutsJumpChip: View {
     var body: some View {
         Button(action: action) {
             label
-                .padding(.horizontal, 10)
-                .padding(.vertical, 3)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
                 .background {
                     ZStack {
                         Capsule().fill(Self.hoverFill(hovered))
@@ -159,7 +161,7 @@ struct ShortcutsJumpChip: View {
 
     private func text(_ weight: Font.Weight) -> some View {
         Text(title)
-            .font(.subheadline.weight(weight))
+            .font(.body.weight(weight))
             .foregroundStyle(SettingsTheme.ink)
             .lineLimit(1)
             .fixedSize()

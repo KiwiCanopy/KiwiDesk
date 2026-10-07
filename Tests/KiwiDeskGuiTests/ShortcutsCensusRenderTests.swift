@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import Testing
 
@@ -128,6 +129,54 @@ struct ShortcutsCensusRenderTests {
         pin(apps + own, .openApplications, .atRest, "open applications")
         #expect(!apps.isEmpty && !own.isEmpty)
         #expect(censusRows(.openApplications, .showMore).isEmpty)
+    }
+
+    /// The walked half of Open applications draws its WHOLE list:
+    /// the `ForEach` takes `openApplicationsKiwiDesk` as it stands
+    /// (a `.prefix` or filter on it drops a row the census still
+    /// places), each key has its own anchored arm, and the group
+    /// mounts the rows.
+    @Test("Open applications draws every KiwiDesk row")
+    func kiwiDeskRowsAreAllDrawn() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Keybindings"
+            )
+        func squeezed(_ file: String) throws -> String {
+            SourceScan.stripComments(
+                try String(
+                    contentsOf: root.appendingPathComponent(file),
+                    encoding: .utf8
+                )
+            )
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+        }
+        let groups = try squeezed("KeybindingGroups.swift")
+        let rows = try #require(
+            SourceScan.declarationBody(
+                after: "structKiwiDeskKeyRows",
+                in: groups
+            )
+        )
+        #expect(
+            rows.contains(
+                "ForEach(ShortcutsRowOrder.openApplicationsKiwiDesk,"
+                    + "id:\\.id)"
+            )
+        )
+        for key in ShortcutsRowOrder.openApplicationsKiwiDesk {
+            guard case .shortcuts(let family) = key else {
+                Issue.record("not a shortcuts key: \(key)")
+                continue
+            }
+            #expect(
+                rows.contains("case.shortcuts(.\(family)):"),
+                Comment(rawValue: "\(family)")
+            )
+        }
+        let apps = try squeezed("KeybindingAppGroup.swift")
+        #expect(apps.occurrences(of: "KiwiDeskKeyRows(") == 1)
     }
 
     /// `.immediate`, not `.showMore`: a configured layer is the

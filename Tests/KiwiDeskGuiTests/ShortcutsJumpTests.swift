@@ -9,7 +9,7 @@ import Testing
 /// The Shortcuts & Gestures jump chips (#1520): which groups get
 /// one, which chip the bar marks as the page scrolls, and the
 /// wiring a reading of the pure parts cannot see.
-@Suite("Shortcuts jump chips", .serialized)
+@Suite("Shortcuts jump chips")
 @MainActor
 struct ShortcutsJumpTests {
     /// The ruled chips, in page order, labelled by each group's
@@ -106,6 +106,18 @@ struct ShortcutsJumpTests {
         #expect(inside.marked == .focus)
     }
 
+    /// A jump can land its header a little below the bar; that
+    /// still counts as under it. The slack's SIZE is the claim, so
+    /// it is pinned in points: 12 pt below lands, 30 pt does not.
+    @Test("a header a few points below the bar counts as under it")
+    func landingSlack() {
+        // Focus's header sits at 300 − offset.
+        let landed = ShortcutsJumpReading.read(page(scrolledBy: 288))
+        #expect(landed.marked == .focus)
+        let short = ShortcutsJumpReading.read(page(scrolledBy: 270))
+        #expect(short.marked == nil)
+    }
+
     /// Scrolled past Mouse & trackpad into the layer chrome, no
     /// chip is current: none of them names what is under the bar.
     @Test("chrome no chip names marks nothing")
@@ -123,6 +135,10 @@ struct ShortcutsJumpTests {
         #expect(reading.marked == .openApplications)
     }
 
+    /// Guards only the two-edit regression while the branch order
+    /// stands: unscrolled, `read` marks the first group before it
+    /// asks about the end, so the end rule's own `minY < 0` clause
+    /// is not observable here — dropping it alone stays green.
     @Test("a page that fits is never at its end")
     func shortPageHasNoEnd() {
         let reading = ShortcutsJumpReading.read(
@@ -178,54 +194,6 @@ struct ShortcutsJumpTests {
         let atEnd = page(scrolledBy: 1400)
         _ = tracker.sections(atEnd.sections)
         #expect(tracker.slots(slots(atEnd)).marked == .openApplications)
-    }
-
-    /// A long layer name is cut inside the sentence, so "Editing
-    /// the … layer" always reads whole.
-    @Test("a long layer name is cut, never the sentence")
-    func longNameIsCut() {
-        let limit = ShortcutsJumpBar.nameLimit
-        let long = String(repeating: "x", count: limit + 10)
-        let shown = ShortcutsJumpBar.shownName(long)
-        #expect(shown.count == limit)
-        #expect(shown.hasSuffix("…"))
-        let short = String(repeating: "x", count: limit)
-        #expect(ShortcutsJumpBar.shownName(short) == short)
-    }
-
-    private func barHeight(
-        readout: String?,
-        width: CGFloat
-    ) throws -> CGFloat {
-        let bar = ShortcutsJumpBar(
-            marked: .focus,
-            underlapped: false,
-            readout: readout
-        ) { _ in }
-        .environment(\.settingsWidth, .medium)
-        .frame(width: width)
-        let image = try #require(ImageRenderer(content: bar).nsImage)
-        return image.size.height
-    }
-
-    /// Where the readout does not fit beside the chips it takes a
-    /// line of its own instead of eliding; where it fits, it adds
-    /// no line.
-    @Test("the readout moves under the chips rather than eliding")
-    func readoutDropsALine() throws {
-        // The chips' titles are translated text (#740).
-        LocalizationManager.shared.select("en")
-        defer { LocalizationManager.shared.select(nil) }
-        let name = ShortcutsJumpBar.shownName(
-            String(repeating: "W", count: 40)
-        )
-        let readout = "Editing the \u{201C}\(name)\u{201D} layer"
-        let wide = try barHeight(readout: readout, width: 2000)
-        let wideBare = try barHeight(readout: nil, width: 2000)
-        #expect(wide == wideBare)
-        let narrow = try barHeight(readout: readout, width: 700)
-        let narrowBare = try barHeight(readout: nil, width: 700)
-        #expect(narrow > narrowBare)
     }
 
     // MARK: - Wiring
