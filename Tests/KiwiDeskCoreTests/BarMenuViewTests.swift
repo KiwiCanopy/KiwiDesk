@@ -197,8 +197,8 @@ struct BarMenuViewTests {
     }
 
     /// VoiceOver reaches an App Bar item's rows and the front-app
-    /// chip's shelf section (#1518), each finding the menu source
-    /// through the surface above it.
+    /// chip's window rows (#1518, #2024), each finding the menu
+    /// source through the surface above it.
     @Test("an App Bar item and the front-app chip speak their rows")
     func appBarAndFrontChipSpeakTheShelf() throws {
         let menus = BarContextMenus()
@@ -240,7 +240,9 @@ struct BarMenuViewTests {
         let overlay = try #require(manager.overlayForTesting(display))
         let actions: [NSAccessibilityCustomAction]? =
             overlay.frontIcon.accessibilityCustomActions()
-        #expect(actions?.map { $0.name } == ["empty"])
+        // The chip speaks its window's rows (#2024).
+        let front = "\(BarHit.appItem([WindowID(9)]))"
+        #expect(actions?.map { $0.name } == [front])
         // A text glyph fronts the chip where the app has one.
         var glyph = app(9)
         glyph = SpaceBarItemView.App(
@@ -263,6 +265,6 @@ struct BarMenuViewTests {
         )
         let spoken: [NSAccessibilityCustomAction]? =
             overlay.frontGlyph.accessibilityCustomActions()
-        #expect(spoken?.map { $0.name } == ["empty"])
+        #expect(spoken?.map { $0.name } == [front])
     }
 }

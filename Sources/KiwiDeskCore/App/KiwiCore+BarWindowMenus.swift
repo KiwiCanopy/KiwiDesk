@@ -16,7 +16,8 @@ extension KiwiCore {
         let live = windows.filter { state.windows[$0] != nil }
         guard let app = live.first.flatMap({ state.windows[$0] })
         else { return [] }
-        var rows = [newWindowRow(app)]
+        // The app's name heads its rows on every surface (#2024).
+        var rows: [BarMenuRow] = [.header(app.appName), newWindowRow(app)]
         if movable { rows.append(moveRow(live)) }
         rows.append(floatRow(live))
         rows.append(appRulesRow(app))

@@ -9,6 +9,10 @@ struct BarMenuRow {
         case action(@MainActor () -> Void)
         case submenu([BarMenuRow])
         case separator
+        /// A section header naming what the rows below act on
+        /// (#2024). Drawn in the menu only: VoiceOver's actions
+        /// skip it, since it acts on nothing.
+        case header
     }
 
     var title: String
@@ -22,6 +26,10 @@ struct BarMenuRow {
 
     static var separator: BarMenuRow {
         BarMenuRow(title: "", kind: .separator)
+    }
+
+    static func header(_ title: String) -> BarMenuRow {
+        BarMenuRow(title: title, kind: .header)
     }
 
     static func action(
@@ -96,7 +104,7 @@ enum BarMenu {
                     L("bar.menu.ax.subtitled", "%1$@, %2$@", current, $0)
                 } ?? current
             switch row.kind {
-            case .separator:
+            case .separator, .header:
                 return []
             case .submenu(let children):
                 return accessibilityActions(children, parent: name)
@@ -113,6 +121,7 @@ enum BarMenu {
 
     private static func item(_ row: BarMenuRow) -> NSMenuItem {
         if row.isSeparator { return .separator() }
+        if case .header = row.kind { return .sectionHeader(title: row.title) }
         let item = NSMenuItem(
             title: row.title,
             action: nil,
@@ -133,7 +142,7 @@ enum BarMenu {
             item.subtitle = subtitle
         }
         switch row.kind {
-        case .separator:
+        case .separator, .header:
             break
         case .submenu(let rows):
             item.submenu = make(rows)
