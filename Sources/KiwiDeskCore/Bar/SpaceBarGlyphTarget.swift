@@ -69,6 +69,8 @@ final class SpaceBarGlyphTarget: NSView {
     let kind: SpaceBarGlyphPick.Kind
     weak var actions: SpaceBarGlyphActions?
     private var tipTag: NSView.ToolTipTag?
+    /// A press this target took, owed its pick on the release.
+    private var pressed = false
 
     init(
         space: SpaceID,
@@ -101,7 +103,22 @@ final class SpaceBarGlyphTarget: NSView {
 
     override func mouseDown(with event: NSEvent) {
         guard !openControlClickMenu(event) else { return }
+        pressed = true
+    }
+
+    /// A click picks on its release inside the target (#2044): a
+    /// menu popped on the press reads that release as a miss and
+    /// closes. Dragging away cancels, as a button does.
+    override func mouseUp(with event: NSEvent) {
+        defer { pressed = false }
+        guard pressed, releasesInside(event) else { return }
         actions?.pick(pick)
+    }
+
+    private func releasesInside(_ event: NSEvent) -> Bool {
+        guard event.window != nil else { return true }
+        let point = convert(event.locationInWindow, from: nil)
+        return bounds.contains(point)
     }
 
     override func accessibilityPerformPress() -> Bool {
