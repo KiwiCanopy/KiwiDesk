@@ -185,10 +185,12 @@ enum SettingsTheme {
         dark: 0xEA_F3_EE
     )
 
-    /// Kiwi Gold: the update window's Highlights border and mark
-    /// (#1542). Darker in light mode to clear 3:1 on its washed
-    /// card (`SettingsThemeContrastTests`).
-    static let highlight = token(light: 0xA6_7E_17, dark: 0xD9_A5_21)
+    /// Kiwi Gold: the update window's Highlights edge, ★ and
+    /// spotlight symbols (#1542, #2038) — marks only, never text,
+    /// so its floor is colour-vision separation from the washed
+    /// card (`HighlightSeparationTests`), not a luminance ratio;
+    /// `HighlightNeverInksTextTests` holds the "never text".
+    static let highlight = token(light: 0xE0_A8_00, dark: 0xED_B2_1C)
 
     // MARK: - States
 

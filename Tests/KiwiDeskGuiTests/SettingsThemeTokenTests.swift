@@ -222,12 +222,12 @@ struct SettingsThemeTokenTests {
             0xE0_82_76,
             SettingsTheme.danger
         ),
-        // Kiwi Gold (#1542): darker in light mode, where the
-        // mid gold misses 3:1 on the washed card.
+        // Kiwi Gold (#1542, owner retune 2026-10-07): a mark,
+        // never text — `HighlightSeparationTests` floors it.
         Pin(
             "highlight",
-            0xA6_7E_17,
-            0xD9_A5_21,
+            0xE0_A8_00,
+            0xED_B2_1C,
             SettingsTheme.highlight
         ),
         Pin(

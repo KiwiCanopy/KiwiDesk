@@ -740,8 +740,8 @@ answers, when the hotkey fire is over.
 The retired `resize.feedback` key is dropped by the one-shot
 migration, its value not carried across.
 
-The GUI twin is **General ▸ Play the alert sound when an action
-can't apply**. The setting is app-wide: it is stored in
+The GUI twin is **General ▸ Play a sound when an action is
+blocked**. The setting is app-wide: it is stored in
 `gui.json` as `refusal.sound`, no profile carries it, and
 loading a profile never changes it. A GUI-managed setup takes
 it once from the first saved profile loaded after the upgrade,
@@ -2381,6 +2381,12 @@ which follows the focused window's colour until you set it.
   `kiwishelf.set_group_badge_text_color` — the count and `+n`
   overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
   you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
+
+:::unreleased
+An App Bar window that is not focused draws its title and glyph
+in the same idle ink as an identifier on a Space you are not on:
+`kiwishelf.set_item_color` at 60% of its own alpha.
+:::
 
 `kiwishelf.set_border_color` sets the
 [border](#kiwishelfset_border)'s colour (default `#EAF3EE59`, the

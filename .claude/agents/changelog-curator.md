@@ -60,15 +60,34 @@ reaches people who did not ask to read anything.
    `python3 scripts/changelog-sync --body <file>`. It refuses
    rather than half-rendering, so a green run is the floor, not
    the goal.
-5. **Carry the sponsor paragraph above the block**, verbatim
+5. **Propose the Highlights tab's shape: prose OR a spotlight.**
+   Every release, and the owner rules which. A spotlight is one
+   intro sentence and up to `SPOTLIGHT_MAX_ROWS` `### Spotlight`
+   rows, drawn from the New and Improved bullets a user would
+   want to FIND in Settings — `{setting:…}` naming the control's
+   id (`scripts/changelog-sync --census-ids` lists them) — plus
+   behaviour noticed without configuring anything, as a row
+   with no setting. A Lua-only change never gets a row, and a
+   fixes-only release gets none: it stays prose. Each row's
+   change stays a bullet in its section. Pick a symbol that
+   depicts the object, never a state or an action. Prose opens
+   with a summary sentence that stands alone; a PATCH's prose
+   stays within `changelog-sync`'s `PATCH_PROSE_MAX_SENTENCES`
+   and `PATCH_PROSE_MAX_CHARS`, since What's new may show it
+   above older rows (`--body <file> --tag <tag>` checks the
+   cap). The grammar is
+   `packaging-and-release.md`'s, the argument
+   `docs/design-decisions.md` ▸ *What's new leads with a
+   spotlight*.
+6. **Carry the sponsor paragraph above the block**, verbatim
    from the previous release's body (`gh release view <tag>`),
    so the whole draft pastes as the release body;
    `packaging-and-release.md` owns the body's shape and where
    the paragraph reaches.
-6. **Keep the Sources table current** — outside the block, since
+7. **Keep the Sources table current** — outside the block, since
    the parser refuses issue numbers inside it. It is how the
    next reader traces a bullet back.
-7. **Move the Coverage marker last**, naming the commit you read
+8. **Move the Coverage marker last**, naming the commit you read
    to, so the next curation appends.
 
 ## What not to write

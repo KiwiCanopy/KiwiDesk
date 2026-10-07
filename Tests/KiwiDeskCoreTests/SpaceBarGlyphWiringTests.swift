@@ -117,11 +117,25 @@ struct SpaceBarGlyphWiringTests {
         pressure: 1
     )!
 
+    private static let release = NSEvent.mouseEvent(
+        with: .leftMouseUp,
+        location: .zero,
+        modifierFlags: [],
+        timestamp: 0,
+        windowNumber: 0,
+        context: nil,
+        eventNumber: 0,
+        clickCount: 1,
+        pressure: 0
+    )!
+
     @Test("A click on a rendered glyph reaches Core")
     func renderedClickReachesCore() throws {
         let core = seededCore()
         render(core)
-        try target(core, on: two).mouseDown(with: Self.click)
+        let web = try target(core, on: two)
+        web.mouseDown(with: Self.click)
+        web.mouseUp(with: Self.release)
         #expect(core.activeSpace?.id == two)
         #expect(core.state.workspaces.lastFocused == WindowID(4))
     }

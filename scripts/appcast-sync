@@ -472,6 +472,17 @@ def structured_notes(entry: dict | None) -> str | None:
     }
     if entry.get("heads"):
         document["heads"] = entry["heads"]
+    # Optional, like `heads` (#2038): a shipped window ignores a
+    # key it does not know, so the rows need no format bump.
+    if entry.get("spotlight"):
+        document["spotlight"] = [
+            {
+                key: row[key]
+                for key in ("title", "line", "setting", "symbol")
+                if row.get(key)
+            }
+            for row in entry["spotlight"]
+        ]
     text = json.dumps(document, ensure_ascii=False, separators=(",", ":"))
     return text.replace("]]>", "]]\\u003e")
 

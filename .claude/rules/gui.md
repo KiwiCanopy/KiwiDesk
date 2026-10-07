@@ -381,7 +381,9 @@ read-not-stored scan). The mark is a coloured NON-template
 composite — the owner ruled orange — whose handler resolves the
 bar's label colour at draw time; it is composited in `render()`
 alone, AFTER the states that outrank an offer — a permission
-warning, the starting phase, a config error — and on both
+warning, the starting phase, a config error, never the
+not-started idle, whose dimmed icon carries it (#2050,
+`StartTilingGateTests`) — and on both
 channels whether or not an image exists, since a mode icon that
 is no SF Symbol takes the title fallback; the updates row EXISTS
 only while an update was found — the pending reminder or the
@@ -449,6 +451,38 @@ told by `ServiceManager.launchMarker` in its environment, read
 first; a new direct-launch path owes a marker of its own
 (`UpdatePromptWiringTests` ▸ the launch origin,
 `WhatsNewSurfaceTests`).
+
+**A spotlight row's "Show me" hides What's new WITHOUT answering
+it, and every way out of the trail ends it (#2038).** Settings
+lands on the row's control through `SettingsModel.land(on:)` —
+the one writer of `pendingReveal` in the window controller and
+the model, so a bar menu's row, the tour and an adoption land
+the same way and a mode flip is announced alike — and carries a
+banner back; the trail has ONE owner, `WhatsNewCoordinator`,
+which ends it whenever What's new is fronted or answered, so the
+banner never outlives the window its Back returns to, and a
+Settings close re-presents a hidden What's new unless a waiting
+update OFFER holds the screen — the user's own check and its
+answer do not (#1542's rank; `WhatsNewHandoffTests`,
+`WhatsNewTrailWiringTests`). Its Next and × move no
+destination, so `stateTrailFocus` records the input source
+itself before the shell states focus (#991, #996).
+
+## Window management starts through one door (#2050)
+
+**Every path that starts window management calls
+`AppDelegate.startManaging()`, which refuses unless `coreHold`
+reads `.running` — the permission granted AND Start Tiling
+pressed, as `TilingConsent` records it.** A grant alone is not a
+request to tile; a new start path (a resume row, a restart)
+spelling `core.start()` itself would tile a first run without
+asking. A surface's hold state — why management is not
+running — is written only from `syncCoreHold()`, which derives
+the one `CoreHold` reading. `StartTilingWiringTests` holds the door's
+guard, `core.start()` spelled nowhere else and the one sync
+writing every surface; the argument is
+`docs/design-decisions.md` ▸ Granting Accessibility is not a
+request to tile.
 
 ## A window that must clear the bars derives its level
 
@@ -1199,8 +1233,10 @@ claim; the obligations a change here takes on:
   is labelled. A `.menu` picker under `labelsHidden` keeps no
   AX title (the dated observation is the design decision cited
   below), so `DropdownRow` takes the selected option's title
-  from its site, its `spokenValue: nil` escape enumerated by
-  the same suite; `SettingsSlider` takes
+  from its site as a required argument
+  (`AnnouncedValuePinTests`), an on/off control taking
+  `ToggleRow` instead (#2032, `ToggleRowShapeTests`);
+  `SettingsSlider` takes
   `label` and `spokenValue` as required arguments and re-earns
   the Tab stop and arrow keys a custom-drawn view has no claim
   to; `SettingsRowLabel`'s text is drawn, not spoken, since every

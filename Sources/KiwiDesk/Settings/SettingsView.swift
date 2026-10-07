@@ -10,9 +10,9 @@ struct SettingsView: View {
     /// Scroll and flash task for pending reveal, held so a second
     /// search click supersedes the first instead of overlapping.
     @State var revealTask: Task<Void, Never>?
-    /// Preview card state per mount; nil follows width class default
-    /// (`DetailPanelTests`).
-    @State var previewShown: Bool?
+    /// Whether the user opened the preview card this mount; false
+    /// offers "Show preview" (#1854, `DetailPanelTests`).
+    @State var previewShown = false
     /// Arrival destination: the pane the raise below focuses, and
     /// the one element that is also the area's named target
     /// (#996). Non-private — `contentColumn` is in an extension.
@@ -45,7 +45,7 @@ struct SettingsView: View {
                 // "not now" must not outlive the band it was given
                 // in (architecture review, 2026-08-11).
                 .onChange(of: width) { _, now in
-                    if now.docksPanel { previewShown = nil }
+                    if now.docksPanel { previewShown = false }
                 }
         }
         .frame(
@@ -98,7 +98,7 @@ struct SettingsView: View {
         }
         .onAppear { apply(model.nav.pendingReveal) }
         .onChange(of: model.destination) { _, _ in
-            previewShown = nil
+            previewShown = false
         }
         // The Mac Checklist's one read (#1365), at the shell so
         // the Home card and the section count the same snapshot:
@@ -145,6 +145,16 @@ struct SettingsView: View {
         // navigation states nothing (#998).
         .onChange(of: model.destination) { _, now in
             if now != nil, model.nav.navigationMovesFocus {
+                contentFocused = true
+            }
+        }
+        // The What's new trail's Next and × (#2038): focus to the
+        // landed control's pane while one is drawn, else the
+        // window's default — the banner they remove cannot hold it.
+        .onChange(of: model.nav.trailFocusRequest) { _, _ in
+            if model.destination != nil,
+                model.nav.navigationMovesFocus
+            {
                 contentFocused = true
             }
         }

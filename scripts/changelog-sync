@@ -34,6 +34,10 @@ Three modes, and the difference between them is the guard:
         malformed is kept the same way, with a warning, so ONE
         bad historical body cannot red every future publish.
 
+    scripts/changelog-sync --census-ids
+        Print the setting ids a spotlight row may name (#2038),
+        with no build.
+
 Why a parser is the guard rather than a template: a template is a
 suggestion and drifts on the release someone is in a hurry for,
 while the page cannot render a body it cannot read.
@@ -78,6 +82,122 @@ TYPED_FROM = (2, 0, 0)
 # The paragraph a typed summary may close in: what changes for
 # everyone who updates. Its text travels as the entry's `heads`.
 HEADS_MARKER = "**Before you update:**"
+
+# The optional spotlight (#2038): a typed release's Highlights
+# tab is EITHER the prose summary OR one intro sentence and up to
+# four rows — design-decisions ▸ *What's new leads with a
+# spotlight*. It is the first `###`, it is no type (each row's
+# change stays a bullet in its own section), and it travels as
+# the entry's `spotlight` list.
+SPOTLIGHT_HEADING = "Spotlight"
+SPOTLIGHT_MAX_ROWS = 4
+# "One intro sentence": one paragraph, one sentence, no longer
+# than this. A summary past it is prose, which the rows replace
+# rather than sit beside.
+SPOTLIGHT_INTRO_MAX = 160
+# A PATCH's prose stands as the intro above rows merged from the
+# versions it follows (#2038 ruling ▸ rows win), so a published
+# patch summary is held to this; a minor's or major's prose is
+# only ever shown alone and stays uncapped.
+PATCH_PROSE_MAX_SENTENCES = 2
+PATCH_PROSE_MAX_CHARS = 280
+# `- **Title** — one line. {setting:<census id>} {symbol:<name>}`.
+# A census id may itself hold one level of braces
+# (`…_{prev,next}_track`), so a token's value allows one nested
+# pair rather than stopping at the first `}`.
+_SPOTLIGHT_ROW = re.compile(
+    r"^\*\*(?P<title>[^*]+?)\*\*\s*(?:[—–-]\s*)?(?P<rest>.*)$"
+)
+_SPOTLIGHT_TOKEN = re.compile(
+    r"\{(?P<kind>[a-z]+):(?P<value>(?:[^{}]|\{[^{}]*\})*)\}"
+)
+_SPOTLIGHT_TOKENS = ("setting", "symbol")
+_SF_SYMBOL_NAME = re.compile(r"^[a-z0-9]+(?:\.[a-z0-9]+)*$")
+# A sentence break: an end mark, any closing quote, bracket or
+# emphasis, whitespace, then anything but a lower-case letter —
+# so "macOS 26.1" (no whitespace) and "e.g. Safari" (a listed
+# abbreviation) are not breaks.
+_SENTENCE_BREAK = re.compile(
+    r"(?P<word>\S*?)[.!?][\"'”’)\]*_`]*\s+(?=[^\sa-z])"
+)
+_ABBREVIATIONS = {"e.g", "i.e", "etc", "vs", "cf", "approx"}
+
+
+def sentence_count(text: str) -> int:
+    """How many sentences `text` holds, for the two caps above."""
+    breaks = 0
+    for match in _SENTENCE_BREAK.finditer(text.strip()):
+        word = match.group("word").lstrip("(\"'“‘*_").lower()
+        if word not in _ABBREVIATIONS:
+            breaks += 1
+    return breaks + 1 if text.strip() else 0
+
+# The settings a `{setting:…}` token may name (#2038): the census
+# ids "Show me" can land on in ANY build — a search row, minus the
+# machine-dependent drops (glass, the desktop bridge) the window
+# takes at runtime. A committed list so the check needs no build;
+# `SpotlightScriptParityTests` holds it to
+# `SettingsSearchIndex.structurallyIndexes`.
+LANDABLE_IDS = "scripts/spotlight-setting-ids.txt"
+
+
+class Census:
+    """The landable ids, read on first ask — a body naming no
+    setting reads nothing. `ref` reads the list from that git
+    revision (a published release's TAG, so its own tree decides),
+    `path` from a file (the guard suite's seam), neither from the
+    working tree. Fails closed: an unreadable list exits rather
+    than shrinking the set."""
+
+    def __init__(
+        self, ref: str | None = None, path: str | None = None
+    ) -> None:
+        self.ref = ref
+        self.path = path
+        self._ids: set[str] | None = None
+
+    def ids(self) -> set[str]:
+        if self._ids is None:
+            self._ids = self._read()
+        return self._ids
+
+    def _read(self) -> set[str]:
+        if self.ref is not None:
+            result = subprocess.run(
+                ["git", "show", f"{self.ref}:{LANDABLE_IDS}"],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if result.returncode != 0:
+                print(
+                    f"changelog-sync: cannot read {LANDABLE_IDS} at "
+                    f"{self.ref} — fetch the tag first "
+                    f"({result.stderr.strip()}).",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            text = result.stdout
+        else:
+            source = Path(self.path) if self.path else ROOT / LANDABLE_IDS
+            try:
+                text = source.read_text("utf-8")
+            except OSError as error:
+                print(
+                    f"changelog-sync: cannot read {source} ({error}).",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+        ids = {line for line in text.split("\n") if line.strip()}
+        if not ids:
+            print(
+                f"changelog-sync: {LANDABLE_IDS} lists no setting.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        return ids
+
 
 _H1 = re.compile(r"^#(?!#)")
 _H2 = re.compile(r"^##(?!#)\s+(?P<title>.+?)\s*$")
@@ -324,11 +444,17 @@ def parse_curated(
     lines: list[str],
     problems: list[str] | None = None,
     typed: bool = True,
-) -> tuple[str, list[dict], str]:
-    """The curated block → (summary, sections, heads). `heads` is
-    the typed grammar's optional "Before you update" paragraph,
-    empty when absent. Raises NotesError carrying every
-    structural problem found."""
+    census: Census | None = None,
+) -> tuple[str, list[dict], str, list[dict]]:
+    """The curated block → (summary, sections, heads, spotlight).
+    `heads` is the typed grammar's optional "Before you update"
+    paragraph, empty when absent; `spotlight` the typed grammar's
+    optional rows, empty when absent. `census` marks a
+    PUBLICATION read (`--body`, `--release`): the ids a row's
+    `{setting:…}` must belong to, and the patch prose cap held
+    with it. None is a history read (`--all`), which a later
+    census or a later clause must not strip of its block. Raises
+    NotesError carrying every structural problem found."""
     problems = list(problems or [])
     summary_parts: list[str] = []
     paragraphs: list[list[str]] = [[]]
@@ -453,6 +579,30 @@ def parse_curated(
     if current is not None:
         sections.append(current)
 
+    spotlight: list[dict] = []
+    spot_at = [
+        i
+        for i, section in enumerate(sections)
+        if section["title"] == SPOTLIGHT_HEADING
+    ]
+    if typed and spot_at:
+        if spot_at != [0]:
+            problems.append(
+                f"`### {SPOTLIGHT_HEADING}` must be the first "
+                "section, once, right under the summary."
+            )
+        if not sections[spot_at[0]]["items"]:
+            problems.append(
+                f"`### {SPOTLIGHT_HEADING}` is empty. Leave it out "
+                "for a release told in prose."
+            )
+        spotlight = parse_spotlight(
+            sections[spot_at[0]]["items"], problems, census
+        )
+        sections = [
+            s for i, s in enumerate(sections) if i not in spot_at
+        ]
+
     heads = ""
     written = [" ".join(p).strip() for p in paragraphs if p]
     if typed:
@@ -488,6 +638,10 @@ def parse_curated(
             written = written[: marked[0]] + written[marked[0] + 1:]
         summary_parts = written
     summary = " ".join(summary_parts).strip()
+    if spotlight and summary:
+        intro_problem(summary_parts, problems)
+    elif typed and census is not None and is_patch(tag):
+        patch_prose_problem(summary, problems)
     if not summary:
         problems.append(
             f"no summary: `## {HIGHLIGHTS_HEADING}` must be "
@@ -549,6 +703,13 @@ def parse_curated(
         )
         for item in section["items"]:
             slots.append((f"section {section['title']!r}", item))
+    for row in spotlight:
+        slots.append(
+            (f"spotlight row {row['title']!r}", row["title"])
+        )
+        slots.append(
+            (f"spotlight row {row['title']!r}", row["line"])
+        )
     for where, text in slots:
         hit = _ISSUE_REF.search(text)
         if hit:
@@ -562,15 +723,141 @@ def parse_curated(
 
     if problems:
         raise NotesError(tag, problems)
-    return summary, sections, heads
+    return summary, sections, heads, spotlight
+
+
+def parse_spotlight(
+    items: list[str],
+    problems: list[str],
+    census: Census | None,
+) -> list[dict]:
+    """The `### Spotlight` bullets → rows of `title`, `line` and
+    the optional `setting` and `symbol`, appending a problem for
+    every row the window could not draw as written."""
+    if len(items) > SPOTLIGHT_MAX_ROWS:
+        problems.append(
+            f"{len(items)} spotlight rows. At most "
+            f"{SPOTLIGHT_MAX_ROWS}: the rows are signposts, and the "
+            "full record is the sections below."
+        )
+    rows: list[dict] = []
+    for item in items:
+        tokens: dict[str, str] = {}
+        for match in _SPOTLIGHT_TOKEN.finditer(item):
+            kind = match.group("kind")
+            value = match.group("value").strip()
+            if kind not in _SPOTLIGHT_TOKENS:
+                problems.append(
+                    f"spotlight row {item!r}: unknown token "
+                    f"`{{{kind}:…}}`. A row takes "
+                    + " and ".join(
+                        f"`{{{k}:…}}`" for k in _SPOTLIGHT_TOKENS
+                    )
+                    + "."
+                )
+            elif kind in tokens:
+                problems.append(
+                    f"spotlight row {item!r}: a second "
+                    f"`{{{kind}:…}}`. One each."
+                )
+            else:
+                tokens[kind] = value
+        text = _SPOTLIGHT_TOKEN.sub("", item).strip()
+        match = _SPOTLIGHT_ROW.match(text)
+        if not match or not match.group("title").strip():
+            problems.append(
+                f"spotlight row {item!r} has no title. A row "
+                "opens with its bold title: `- **Title** — one "
+                "line.`"
+            )
+            continue
+        title = match.group("title").strip()
+        line = match.group("rest").strip()
+        if not line:
+            problems.append(
+                f"spotlight row {title!r} has no line after its "
+                "title — say what the reader gains."
+            )
+        setting = tokens.get("setting")
+        if setting is not None and census is not None:
+            if setting not in census.ids():
+                problems.append(
+                    f"spotlight row {title!r} names setting "
+                    f"{setting!r}, which \"Show me\" cannot land "
+                    f"on — it is not in {LANDABLE_IDS}. Name an id "
+                    "it lists (`scripts/changelog-sync --census-ids`"
+                    "), or drop the token for a row with no Settings "
+                    "home."
+                )
+        symbol = tokens.get("symbol")
+        if symbol is not None and not _SF_SYMBOL_NAME.match(symbol):
+            problems.append(
+                f"spotlight row {title!r}: {symbol!r} is not an "
+                "SF Symbol name (lower-case, dot-separated)."
+            )
+        row = {"title": title, "line": line}
+        if setting:
+            row["setting"] = setting
+        if symbol:
+            row["symbol"] = symbol
+        rows.append(row)
+    return rows
+
+
+def intro_problem(paragraphs: list[str], problems: list[str]) -> None:
+    """Beside rows the summary is ONE intro sentence: one
+    paragraph, one sentence end, at most `SPOTLIGHT_INTRO_MAX`
+    characters. Longer is the prose the rows replace (#2038
+    ruling) — the tab carries one or the other, never both."""
+    text = " ".join(paragraphs).strip()
+    if (
+        len(paragraphs) > 1
+        or len(text) > SPOTLIGHT_INTRO_MAX
+        or sentence_count(text) > 1
+    ):
+        problems.append(
+            "the summary is prose beside spotlight rows. With "
+            f"`### {SPOTLIGHT_HEADING}` the summary is one intro "
+            f"sentence of at most {SPOTLIGHT_INTRO_MAX} characters "
+            "— the rows replace the prose, never sit beside it."
+        )
+
+
+def is_patch(tag: str | None) -> bool:
+    """Whether a tag names a patch, `x.y.z` with z > 0. A draft
+    checked without `--tag` is not known to be one."""
+    version = tag_version(tag)
+    return version is not None and version[2] > 0
+
+
+def patch_prose_problem(summary: str, problems: list[str]) -> None:
+    """A patch's prose may become the intro above older rows, so
+    it is held to `PATCH_PROSE_MAX_SENTENCES` sentences and
+    `PATCH_PROSE_MAX_CHARS` characters (#2038 ruling)."""
+    sentences = sentence_count(summary)
+    if (
+        sentences > PATCH_PROSE_MAX_SENTENCES
+        or len(summary) > PATCH_PROSE_MAX_CHARS
+    ):
+        problems.append(
+            f"a patch summary of {sentences} sentence(s) and "
+            f"{len(summary)} characters. A patch's prose is at most "
+            f"{PATCH_PROSE_MAX_SENTENCES} sentences and "
+            f"{PATCH_PROSE_MAX_CHARS} characters — What's new may "
+            "show it above the rows of the versions it follows."
+        )
 
 
 def parse_release_body(
-    tag: str, body: str, typed: bool | None = None
-) -> tuple[str, list[dict], str]:
-    """A whole release body → (summary, sections, heads),
-    strictly, under the grammar `is_typed(tag)` picks unless
-    `typed` says otherwise. The
+    tag: str,
+    body: str,
+    typed: bool | None = None,
+    census: Census | None = None,
+) -> tuple[str, list[dict], str, list[dict]]:
+    """A whole release body → (summary, sections, heads,
+    spotlight), strictly, under the grammar `is_typed(tag)` picks
+    unless `typed` says otherwise; `census` as `parse_curated`
+    takes it. The
     "no block at all" case is its own NotesError so `--all` can
     tell it apart from a body that is merely malformed."""
     found, lines, problems = split_body(body or "")
@@ -598,6 +885,7 @@ def parse_release_body(
         lines,
         problems,
         is_typed(tag) if typed is None else typed,
+        census,
     )
 
 
@@ -677,7 +965,7 @@ def download_url(release: dict) -> str | None:
 
 
 def build_entry(
-    release: dict, strict: bool
+    release: dict, strict: bool, census: Census | None = None
 ) -> tuple[dict, str]:
     """Returns (entry, warning). In non-strict mode a body the
     parser refuses yields an entry WITHOUT a curated block plus a
@@ -709,9 +997,13 @@ def build_entry(
     download = download_url(release)
     if download:
         entry["download"] = download
+    # `census` marks a publication check (`--release`), held to
+    # the tag's own list; `--all` re-reads history, which a later
+    # rename must not strip of its block — the window drops a link
+    # it does not know at runtime (#2038).
     try:
-        summary, sections, heads = parse_release_body(
-            tag, release.get("body") or ""
+        summary, sections, heads, spotlight = parse_release_body(
+            tag, release.get("body") or "", census=census
         )
     except NotesError as error:
         if strict:
@@ -721,6 +1013,8 @@ def build_entry(
     # Absent, never empty, like `download`: readers test the key.
     if heads:
         entry["heads"] = heads
+    if spotlight:
+        entry["spotlight"] = spotlight
     if is_typed(tag):
         kinds = dict(SECTION_TYPES)
         sections = [
@@ -843,15 +1137,17 @@ def _report(error: NotesError) -> int:
 # Modes
 
 
-def run_body(path: str, tag: str | None = None) -> int:
+def run_body(
+    path: str, tag: str | None = None, census: str | None = None
+) -> int:
     try:
         body = Path(path).read_text(encoding="utf-8")
     except OSError as error:
         print(f"changelog-sync: {error}", file=sys.stderr)
         return 1
     try:
-        summary, sections, heads = parse_release_body(
-            tag or path, body, is_typed(tag)
+        summary, sections, heads, spotlight = parse_release_body(
+            tag or path, body, is_typed(tag), Census(path=census)
         )
     except NotesError as error:
         return _report(error)
@@ -863,6 +1159,13 @@ def run_body(path: str, tag: str | None = None) -> int:
     print(f"  summary: {summary}")
     if heads:
         print(f"  before you update: {heads}")
+    for row in spotlight:
+        extras = "".join(
+            f" {{{key}:{row[key]}}}"
+            for key in ("setting", "symbol")
+            if key in row
+        )
+        print(f"  spotlight: {row['title']} — {row['line']}{extras}")
     for section in sections:
         print(
             f"  ### {section['title']} "
@@ -912,6 +1215,7 @@ def run_release(
     check: bool,
     releases: str | None = None,
     output: str | None = None,
+    census: str | None = None,
 ) -> int:
     """One published release, merged into the committed file.
 
@@ -926,7 +1230,9 @@ def run_release(
     on the repository's own release history."""
     try:
         entry, _ = build_entry(
-            fetch_release(tag, releases), strict=True
+            fetch_release(tag, releases),
+            strict=True,
+            census=Census(path=census) if census else Census(ref=tag),
         )
     except NotesError as error:
         return _report(error)
@@ -964,6 +1270,12 @@ def main(argv: list[str]) -> int:
         "warning",
     )
     group.add_argument(
+        "--census-ids",
+        action="store_true",
+        help="print every setting id a spotlight row's "
+        "`{setting:…}` may name, one per line — no build",
+    )
+    group.add_argument(
         "--release",
         metavar="TAG",
         help="one published release, strictly: a missing or "
@@ -975,6 +1287,13 @@ def main(argv: list[str]) -> int:
         help="with --body: the tag the draft will carry, which "
         "picks the grammar — a tag before v2.0.0 takes the free "
         "section titles; no tag means a new release (typed)",
+    )
+    parser.add_argument(
+        "--census",
+        metavar="FILE",
+        help=f"read the landable setting ids from FILE instead of "
+        f"{LANDABLE_IDS} (in --release mode, instead of the tag's "
+        "own copy)",
     )
     parser.add_argument(
         "--check",
@@ -1021,12 +1340,16 @@ def main(argv: list[str]) -> int:
             f"--tag {args.tag!r} carries no version; give the "
             "tag the release will have, e.g. v2.0.0"
         )
+    if args.census_ids:
+        for census_id in sorted(Census(path=args.census).ids()):
+            print(census_id)
+        return 0
     if args.body:
-        return run_body(args.body, args.tag)
+        return run_body(args.body, args.tag, args.census)
     if args.all:
         return run_all(args.check, args.releases, args.output)
     return run_release(
-        args.release, args.check, args.releases, args.output
+        args.release, args.check, args.releases, args.output, args.census
     )
 
 

@@ -45,6 +45,9 @@ struct WindowListReading: @unchecked Sendable {
     /// without a record.
     let policy: NSApplication.ActivationPolicy?
     let hidden: Bool
+    /// False where a hidden app's list was skipped (#2027): the
+    /// empty list then speaks for no window.
+    var listRead = true
 }
 
 /// Reads a list's windows OFF the main actor (#1933). The seams

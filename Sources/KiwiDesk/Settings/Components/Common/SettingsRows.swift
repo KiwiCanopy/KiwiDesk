@@ -168,16 +168,23 @@ extension View {
 /// Labeled checkbox toggle row with optional help popover (#94).
 /// The `?` is a sibling after the toggle, never nested in its
 /// label — an independent hit target and rotor stop the Toggle
-/// would otherwise swallow.
+/// would otherwise swallow. `disabled` greys the checkbox alone:
+/// a `.disabled` on the row would kill the `?` too (#527).
 struct ToggleRow: View {
     let label: String
     @Binding var isOn: Bool
     var help: String? = nil
+    var disabled: Bool = false
+
+    /// A line under the row starts at the checkbox's label.
+    static let captionIndent: CGFloat =
+        SettingsMetrics.checkboxWidth + SettingsMetrics.checkboxLabelGap
 
     var body: some View {
         HStack(spacing: 4) {
             Toggle(isOn: $isOn) { Text(label) }
                 .fixedSize()
+                .disabled(disabled)
             if let help {
                 HelpButton(explanation: help, subject: label)
             }

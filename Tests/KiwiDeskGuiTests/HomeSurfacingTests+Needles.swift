@@ -34,7 +34,7 @@ extension HomeSurfacingTests {
             // absence is what both docs would then describe
             // wrongly (architecture review, 2026-08-11).
             ".onChange(of:width){_,nowin"
-                + "ifnow.docksPanel{previewShown=nil}}",
+                + "ifnow.docksPanel{previewShown=false}}",
             // The Mac Checklist's one read (#1365) is the
             // shell's, so the Home card and the section count
             // one snapshot: on appear, and again when the window
@@ -177,9 +177,9 @@ extension HomeSurfacingTests {
             // whole run (flip, announce, land), so the ORDER
             // stays pinned, not just each statement's existence.
             "ensureModeAdmits(resolved.destination)"
-                + "ifletarmedNotice,wasSimple,"
+                + "ifarmedNotice!=nil,wasSimple,"
                 + "model.settingsMode==.powerUser{"
-                + "model.noteSearchModeSwitch(armedNotice)}"
+                + "model.noteSearchModeSwitch(resolved.destination)}"
                 + "model.destination=resolved.destination",
             // The reveal CONSUMES the armed notice
             // unconditionally (a refused request must not leave

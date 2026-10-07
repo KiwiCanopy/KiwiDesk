@@ -160,7 +160,7 @@ struct SettingsResponsiveOrderTests {
     func previewIsAlwaysReachable() {
         for width in supportedWidths {
             let band = SettingsWidthClass.of(width: width)
-            for answer in [nil, true, false] as [Bool?] {
+            for answer in [true, false] {
                 let form = SettingsPreviewForm.at(
                     band,
                     shown: answer
@@ -185,28 +185,22 @@ struct SettingsResponsiveOrderTests {
         }
     }
 
-    /// The band defaults, stated once: the 1100 pt frame draws
-    /// the card open and the 820 pt frame draws "Show preview"
-    /// — the whole difference between the two narrow bands.
-    @Test("only the medium band opens the card unasked")
-    func mediumOpensTheCard() {
+    /// Below the docking width no band opens the card unasked:
+    /// a card covering the rows on every navigation is what the
+    /// user came to edit hidden (#1854).
+    @Test("no undocked band opens the card unasked")
+    func noBandOpensTheCard() {
         #expect(
-            SettingsPreviewForm.at(.medium, shown: nil)
-                == .floating
+            SettingsPreviewForm.at(.medium, shown: false) == .offer
         )
         #expect(
-            SettingsPreviewForm.at(.compact, shown: nil) == .offer
+            SettingsPreviewForm.at(.compact, shown: false) == .offer
         )
         #expect(
-            SettingsPreviewForm.at(.tight, shown: nil) == .offer
+            SettingsPreviewForm.at(.tight, shown: false) == .offer
         )
-        // And the answer overrides the default in both
-        // directions, which is what makes it one card rather
-        // than two behaviours.
-        #expect(
-            SettingsPreviewForm.at(.medium, shown: false)
-                == .offer
-        )
+        // The shell starts every mount at `false`
+        // (`DetailPanelTests`); opening it is the user's alone.
         #expect(
             SettingsPreviewForm.at(.tight, shown: true)
                 == .floating

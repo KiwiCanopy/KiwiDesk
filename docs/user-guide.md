@@ -117,7 +117,7 @@ login item. Crash supervision is command-line only:
 KiwiDesk after a crash, never after a deliberate Quit ([CLI
 reference](cli.md)). While that service runs, **Start at login**
 shows as on and stops being editable; `kiwidesk service stop`
-gives the switch back.
+gives the checkbox back.
 
 ## Wake & Restart
 
@@ -224,8 +224,8 @@ its `.gitignore`.
   inside `function() ... end`), **`kind`** ("navigation",
   "application", or "custom") and **`label`**.
 
-**`refusal`** holds `sound`, the alert sound when an action
-can't apply, and **`quit`** holds `grid_target_depth`, the
+**`refusal`** holds `sound`, the alert sound when an action is
+blocked, and **`quit`** holds `grid_target_depth`, the
 windows per pile on quit, beside `layout`, how windows are
 spread on quit. The first two are set on **General**; `layout`
 is set from Lua (`quit.set_layout`).
@@ -280,7 +280,7 @@ keybindings runs on every reload.
   and per-layout / per-space tuning, space-to-monitor pins, the
   Main role and the fallback space.
 
-The alert sound when an action can't apply and the windows per
+The alert sound when an action is blocked and the windows per
 pile on quit are global too: they sit in `gui.json`, and loading
 a profile never changes them.
 
@@ -689,6 +689,11 @@ the space list and Desktop bindings carry no monitor set, so
 **Save** still writes `gui.json` for them and keeps counting the
 layout edits until you grant access.
 
+:::unreleased
+The same holds before you press **Start Tiling** for the first
+time: until then KiwiDesk detects no displays either.
+:::
+
 Neither live save carries a keybinding override: to give a
 profile its own shortcuts, pick it in the banner while it isn't
 loaded and edit its Shortcuts & Gestures page.
@@ -1062,6 +1067,13 @@ triangle and the quick menu's **Window Management Paused…** row
 reopens the permission tour. Add KiwiDesk under System Settings ›
 Privacy & Security › Accessibility; management resumes on its
 own.
+
+:::unreleased
+**Permission granted, but nothing is tiled?**  
+Granting Accessibility does not start tiling on its own: the
+first time, press **Start Tiling** — in the permission tour, the
+quick menu or the banner at the top of Settings.
+:::
 
 **Settings window won't open, or KiwiDesk seems stuck?**  
 Run `kiwidesk service restart` in a terminal, or quit and reopen
