@@ -32,6 +32,12 @@ struct ObserverRegistrationSeamTests {
             ) == 1
         )
         #expect(try count("stalledAt: stalledAt,", in: file) == 1)
+        // The instance wrapper reaches the bounded static, on the
+        // observer's own clock.
+        #expect(
+            try count("return Self.register(names, now: now) {", in: file)
+                == 1
+        )
         // The bounded loop's add and the per-window one.
         #expect(try count("AXObserverAddNotification(", in: file) == 2)
     }
