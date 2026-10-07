@@ -31,6 +31,7 @@ struct ReconcileOffMainDebtTests {
     private final class Box {
         var focused: [WindowID] = []
         var destroyed: [WindowID] = []
+        var rekeyed: [WindowID] = []
         var logs: [String] = []
         var listReads = 0
         var focusReads = 0
@@ -115,6 +116,7 @@ struct ReconcileOffMainDebtTests {
             switch event {
             case .windowFocused(let id): box.focused.append(id)
             case .windowDestroyed(let id, _): box.destroyed.append(id)
+            case .windowRekeyed(let from, _): box.rekeyed.append(from)
             default: break
             }
         }
@@ -250,5 +252,49 @@ struct ReconcileOffMainDebtTests {
         loop.reconcileOffMain(pid: pid, app: ref)
         loop.reconcileOffMain(pid: pid, app: ref)
         #expect(loop.offMain.next[pid]?.coalesceTabs == true)
+    }
+
+    /// Window 21, a tab carrier, vanishes as 22 appears at its frame
+    /// — a native tab switch, unless the reconcile was asked the
+    /// bulk shape. Each request runs to its delivered read.
+    private func tabSwitch(
+        _ ask: (EventLoop) -> Void
+    ) -> Box {
+        let (loop, box) = makeLoop()
+        loop.trackedFrames[id] = .zero
+        loop.tabCarriers.insert(id)
+        box.listed = [WindowID(22)]
+        ask(loop)
+        box.drain()
+        return box
+    }
+
+    /// #1795: `coalesceTabs` reaches the reconcile a read delivers,
+    /// asked directly and parked behind a read in flight (#308).
+    @Test("the read's reconcile takes the asked coalescing")
+    func coalescingReachesTheReconcile() {
+        let coalesced = tabSwitch {
+            $0.reconcileOffMain(pid: pid, app: ref)
+        }
+        #expect(coalesced.rekeyed == [id])
+        let bulk = tabSwitch {
+            $0.reconcileOffMain(pid: pid, app: ref, coalesceTabs: false)
+        }
+        #expect(bulk.rekeyed.isEmpty)
+        #expect(bulk.destroyed == [id])
+        // Parked behind a read that still lists 21: the next read,
+        // the debt's, sees the switch and keeps the bulk shape.
+        let (loop, box) = makeLoop()
+        loop.trackedFrames[id] = .zero
+        loop.tabCarriers.insert(id)
+        box.listed = [id]
+        loop.reconcileOffMain(pid: pid, app: ref)
+        loop.reconcileOffMain(pid: pid, app: ref, coalesceTabs: false)
+        box.run(0)
+        #expect(box.work.count == 1)
+        box.listed = [WindowID(22)]
+        box.run(0)
+        #expect(box.rekeyed.isEmpty)
+        #expect(box.destroyed == [id])
     }
 }
