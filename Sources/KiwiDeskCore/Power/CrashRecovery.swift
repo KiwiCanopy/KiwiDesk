@@ -21,6 +21,9 @@ public final class CrashRecovery {
 
     /// Boot time provider to discard stale pre-boot window IDs (#633).
     public var bootTime: () -> Date = SystemBoot.time
+    /// The login session a write stamps and a read must match
+    /// (#1385, `LoginSession`).
+    public var loginSession: () -> Int32? = LoginSession.current
     /// The clock `inPlaceSessionBound` and
     /// `logoutFreezeBound` are measured on.
     public var now: () -> Date = { Date() }
@@ -33,8 +36,7 @@ public final class CrashRecovery {
     public static let inPlaceSessionBound: TimeInterval = 120
 
     /// Where the logout signal arrives (#1385); a test hands a
-    /// private center. A deliberate seam: the other NSWorkspace
-    /// observers read the shared center. Read at `start()`.
+    /// private center. Read at `start()`.
     public var workspaceCenter: NotificationCenter =
         NSWorkspace.shared.notificationCenter
 
@@ -110,36 +112,19 @@ public final class CrashRecovery {
             return
         }
         let capture = inPlace ? captureInPlaceState : captureState
-        if !preservingSession, let snapshot = capture(),
-            let data = try? JSONEncoder().encode(snapshot)
-        {
-            try? data.write(to: sessionURL, options: .atomic)
+        if !preservingSession, let snapshot = capture() {
+            write(snapshot, to: sessionURL)
         }
         try? FileManager.default.removeItem(at: fileURL)
     }
 
-    /// Consumes and deletes saved session snapshot if from current boot
-    /// (#633).
+    /// Consumes and deletes the saved session snapshot, returned
+    /// if `readGated` admits it.
     public func consumeSession() -> StateSnapshot? {
         defer {
             try? FileManager.default.removeItem(at: sessionURL)
         }
-        guard let data = try? Data(contentsOf: sessionURL)
-        else { return nil }
-        guard
-            let snapshot = try? JSONDecoder().decode(
-                StateSnapshot.self,
-                from: data
-            )
-        else { return nil }
-        guard snapshot.capturedAt >= bootTime() else {
-            onLog(
-                "session snapshot predates this boot; "
-                    + "discarded"
-            )
-            return nil
-        }
-        return snapshot
+        return readGated(sessionURL, kind: "session")
     }
 
     /// The arrangement boot restores (#930): the session a clean
@@ -154,7 +139,7 @@ public final class CrashRecovery {
             onLog("in-place session memory too old; dropped")
             session = taken.droppingSessions()
         }
-        let crashed = readSnapshot()
+        let crashed = readGated(fileURL, kind: "crash")
         try? FileManager.default.removeItem(at: fileURL)
         guard let crashed,
             session.map({ crashed.capturedAt > $0.capturedAt })
@@ -186,16 +171,23 @@ public final class CrashRecovery {
     public func autosave() {
         guard !isFrozenForLogout() else { return }
         guard let snapshot = captureState() else { return }
-        guard
-            let data = try? JSONEncoder().encode(snapshot)
-        else { return }
         try? FileManager.default.createDirectory(
             at: fileURL.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
-        guard (try? data.write(to: fileURL, options: .atomic)) != nil
-        else { return }
+        guard write(snapshot, to: fileURL) else { return }
         onAutosaved()
+    }
+
+    /// Writes `snapshot` stamped with this login session (#1385);
+    /// true only when the file landed.
+    @discardableResult
+    private func write(_ snapshot: StateSnapshot, to url: URL) -> Bool {
+        var stamped = snapshot
+        stamped.loginSession = loginSession()
+        guard let data = try? JSONEncoder().encode(stamped)
+        else { return false }
+        return (try? data.write(to: url, options: .atomic)) != nil
     }
 
     /// `NSWorkspace.willPowerOffNotification` — logout, restart
@@ -215,8 +207,9 @@ public final class CrashRecovery {
         powerOff = (token, center)
     }
 
-    /// The one reading every snapshot writer asks (#1385): true
-    /// inside `logoutFreezeBound` of a freeze, lifting it past.
+    /// The reading every snapshot writer asks (#1385): true
+    /// inside `logoutFreezeBound` of a freeze. The first read past
+    /// the bound lifts the freeze and logs that it did.
     func isFrozenForLogout() -> Bool {
         guard let frozenAt else { return false }
         let age = now().timeIntervalSince(frozenAt)
@@ -226,23 +219,39 @@ public final class CrashRecovery {
         return false
     }
 
-    private func readSnapshot() -> StateSnapshot? {
-        guard
-            let data = try? Data(contentsOf: fileURL)
-        else { return nil }
-        guard
+    /// The read both files take: decoded, then dropped unless
+    /// written this boot (#633) and in this login session (#1385),
+    /// since a logout without a reboot reuses window ids.
+    private func readGated(_ url: URL, kind: String) -> StateSnapshot? {
+        guard let data = try? Data(contentsOf: url),
             let snapshot = try? JSONDecoder().decode(
                 StateSnapshot.self,
                 from: data
             )
         else { return nil }
         guard snapshot.capturedAt >= bootTime() else {
+            onLog("\(kind) snapshot predates this boot; discarded")
+            return nil
+        }
+        guard isThisLogin(snapshot) else {
             onLog(
-                "crash snapshot predates this boot; discarded"
+                "\(kind) snapshot is from another login session; "
+                    + "discarded"
             )
-            try? FileManager.default.removeItem(at: fileURL)
             return nil
         }
         return snapshot
+    }
+
+    /// A stamp matches only a readable, equal live id. An
+    /// unstamped file is an older build's: admitted only as its
+    /// announced relaunch (#930), in-place and inside its bound.
+    private func isThisLogin(_ snapshot: StateSnapshot) -> Bool {
+        guard let stamp = snapshot.loginSession else {
+            return snapshot.carriesSessions
+                && now().timeIntervalSince(snapshot.capturedAt)
+                    <= Self.inPlaceSessionBound
+        }
+        return stamp == loginSession()
     }
 }

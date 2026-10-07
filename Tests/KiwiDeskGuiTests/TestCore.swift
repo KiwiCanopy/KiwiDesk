@@ -93,6 +93,9 @@ func makeTestCore(
     // The #1385 measurement reads a real user default otherwise,
     // which `defaults write -g` reaches; a suite opts in itself.
     core.crash.restoreKeys.isOptedIn = { false }
+    // The snapshot's login-session stamp reads the host's audit
+    // session (#1385); a session suite states its own.
+    core.crash.loginSession = { 1 }
     // Same class, third time (#673): `openOrFocus`'s four seams
     // default LIVE, and unlike the two above their touch fires on
     // COMMAND EXECUTION, not on init — so a suite that executes

@@ -152,6 +152,9 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     /// Every arrangement's #1230 record (#1802, #1829,
     /// `StateSnapshot+ProfileRecords`).
     public var arrangementRecords: ArrangementRecords?
+    /// The login session the file was written in, stamped by
+    /// `CrashRecovery`'s write (#1385); nil in an older build's.
+    public var loginSession: Int32?
 
     public init(
         windows: [WindowRecord],
@@ -169,7 +172,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case windows, spaces, activeSpace, capturedAt, arrangement
-        case arrangementRecords
+        case arrangementRecords, loginSession
     }
 
     public init(from decoder: Decoder) throws {
@@ -190,6 +193,11 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         arrangementRecords = try? c.decodeIfPresent(
             ArrangementRecords.self,
             forKey: .arrangementRecords
+        )
+        // Unreadable reads as unstamped, which the gate refuses.
+        loginSession = try? c.decodeIfPresent(
+            Int32.self,
+            forKey: .loginSession
         )
     }
 }

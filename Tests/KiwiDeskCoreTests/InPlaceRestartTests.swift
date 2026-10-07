@@ -161,6 +161,9 @@ struct InPlaceRestartTests {
             core.state.workspaces.ensureSpace(SpaceID("1"))
             core.boot.reachedReady = true
             core.crash.onLog = { _ in }
+            // The freeze is age-bounded: a fixed clock (#1456).
+            let frozeAt = Date(timeIntervalSince1970: 9000)
+            core.crash.now = { frozeAt }
             core.crash.freezeForLogout()
             if announced { core.announceUpdateRelaunch() }
             core.stop()
