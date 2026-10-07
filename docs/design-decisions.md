@@ -10549,9 +10549,9 @@ another's, and the group's rank is fine once a map exists.
 **Layers gets no chip.** It picks which layer every group below
 edits — scope, not a destination — and it is absent in Simple,
 so a chip for it would come and go. The bar carries the edited
-layer's name instead, in words, at its trailing end, and that
-readout is the first thing a narrowing window drops since it is
-header chrome. **Mouse & trackpad gets the first chip**, set off
+layer's name instead, in words, on a line of its own under the
+chips, and that readout is the first thing a narrowing window
+drops since it is header chrome. **Mouse & trackpad gets the first chip**, set off
 by a rule because everything after it is scoped to one layer and
 it is not; its click opens the card as well, which stays fully
 collapsed otherwise — a first-item-open state would be a third
@@ -10580,6 +10580,30 @@ scroll the user takes to the end marks the last group for the
 same reason. Marking is a fill on a
 layer of its own and hover a neutral fill beneath it (#1173): a
 pointer resting on the marked chip must not read as unmarking it.
+
+**A chip must read as a button before it is pointed at** (#1520
+amendment 5, owner ruling 2026-10-07). A hairline capsule is the
+passive chip's vocabulary — a badge, a tag — and on the chip's
+own rest fill the container hairline all but vanishes in dark,
+so the row read as labels. The chip therefore draws an edge of
+its own, `chipEdge`, which must separate from the rest fill it
+rims by more than the container hairline separates from the
+page, and which no state moves: the edge says "button", the
+fills say what the pointer is doing. A press deepens the pointer's
+layer (`chipPressed`), which still sits beneath the marking, so
+holding down the marked chip cannot unmark it either. **No
+shadow**: buttons take none (ui-patterns ▸ *Buttons take a native
+style*), the thumb's shadow being the settings' sign for
+"movable", and the edge already carries what a shadow would.
+
+**The row is centred**, every wrapped line of chips and the
+layer readout under them. The designer argued for leading, which
+is where a list's content starts and where the eye returns after
+each row; the owner ruled centred, because the row reads as
+navigation across the page — a menu over it — rather than as the
+first line of the list below. Centring is also why the readout
+always takes its own line: beside the chips it would pull the
+centred row off its axis.
 :::
 
 ### Overrides & appearance
