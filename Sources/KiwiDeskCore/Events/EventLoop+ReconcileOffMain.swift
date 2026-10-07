@@ -73,6 +73,10 @@ struct OffMainReconcile {
     struct Debt {
         var app: AppRef
         var then: [@MainActor () -> Void]
+        /// False once any request asked the bulk shape (#308): a
+        /// tab switch parked behind a bulk read sweeps as a close
+        /// and a create, the safe side of the false merge.
+        var coalesceTabs = true
     }
 
     var reading: [pid_t: Read] = [:]
@@ -137,14 +141,17 @@ extension EventLoop {
     /// and focus change. `then` runs after a reconcile whose read
     /// began after this request, on the main actor. An app
     /// KiwiDesk does not observe is reconciled at once, which
-    /// reads nothing of it.
+    /// reads nothing of it. A `then` always runs, or is dropped
+    /// with every debt by a stop — never alone: the boot drain's
+    /// one chain rests on it (#1795).
     func reconcileOffMain(
         pid: pid_t,
         app: AppRef,
+        coalesceTabs: Bool = true,
         then: (@MainActor () -> Void)? = nil
     ) {
         guard observers[pid] != nil else {
-            reconcile(pid: pid, app: app)
+            reconcile(pid: pid, app: app, coalesceTabs: coalesceTabs)
             then?()
             return
         }
@@ -153,9 +160,15 @@ extension EventLoop {
             offMain.next[pid, default: .init(app: app, then: [])]
                 .then += owed
             offMain.next[pid]?.app = app
+            if !coalesceTabs { offMain.next[pid]?.coalesceTabs = false }
             return
         }
-        readWindowList(pid: pid, app: app, then: owed)
+        readWindowList(
+            pid: pid,
+            app: app,
+            coalesceTabs: coalesceTabs,
+            then: owed
+        )
     }
 
     /// Runs `then` once tracking is settled by a read begun after
@@ -184,6 +197,7 @@ extension EventLoop {
     private func readWindowList(
         pid: pid_t,
         app: AppRef,
+        coalesceTabs: Bool,
         then: [@MainActor () -> Void]
     ) {
         let ticket = offMain.startRead(pid: pid, then: then)
@@ -211,6 +225,7 @@ extension EventLoop {
                 reading,
                 pid: pid,
                 app: app,
+                coalesceTabs: coalesceTabs,
                 tracked: tracked,
                 writesAtRead: writesAtRead,
                 ticket: ticket
@@ -222,6 +237,7 @@ extension EventLoop {
         _ reading: WindowListReading,
         pid: pid_t,
         app: AppRef,
+        coalesceTabs: Bool,
         tracked: Set<WindowID>,
         writesAtRead: Int,
         ticket: Int
@@ -232,6 +248,7 @@ extension EventLoop {
         reconcile(
             pid: pid,
             app: app,
+            coalesceTabs: coalesceTabs,
             prefetched: PrefetchedWindows(
                 elements: reading.elements,
                 trackedAtRead: tracked,
@@ -245,7 +262,11 @@ extension EventLoop {
         // The next read starts before the owed run, so a `then`
         // asking again joins the read after it.
         if let debt {
-            reconcileOffMain(pid: pid, app: debt.app)
+            reconcileOffMain(
+                pid: pid,
+                app: debt.app,
+                coalesceTabs: debt.coalesceTabs
+            )
             if offMain.reading[pid] != nil {
                 offMain.reading[pid]?.then += debt.then
             } else {

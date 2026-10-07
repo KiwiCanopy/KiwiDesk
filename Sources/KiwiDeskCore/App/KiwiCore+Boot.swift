@@ -229,11 +229,11 @@ extension KiwiCore {
         // "Is a chain already running" is DERIVED from the queue
         // rather than stored beside it — one fact, not two that
         // can disagree. The precondition that makes the
-        // derivation safe: nothing between the `removeFirst()`
-        // below and its `scheduleNextDeferredApp()` suspends, so
-        // the queue is empty-with-a-live-chain only inside one
-        // synchronous body. An `await` added there would buy a
-        // second chain (architect review, 2026-08-12).
+        // derivation safe: the app in flight stays at the head
+        // until its off-main read lands, and its `removeFirst()`
+        // and `scheduleNextDeferredApp()` share one synchronous
+        // body, so the queue is never empty-with-a-live-chain
+        // (architect review, 2026-08-12; #1795).
         let wasRunning = !eventLoop.bootScan.pendingDrain.isEmpty
         eventLoop.bootScan.pendingDrain.append(contentsOf: queue)
         guard !wasRunning else { return }
@@ -249,29 +249,34 @@ extension KiwiCore {
             guard let self, self.eventLoop.isRunning,
                 !self.eventLoop.bootScan.pendingDrain.isEmpty
             else { return }
-            let (pid, ref) = self.eventLoop.bootScan.pendingDrain
-                .removeFirst()
+            let (pid, ref) = self.eventLoop.bootScan.pendingDrain[0]
             let begin = ContinuousClock.now
             // `coalesceTabs: false`, exactly as the pass step
             // this completes passed it: this is the same bulk
             // discovery, so a window closed between the abort and
             // now must not false-merge with an appearing sibling
-            // at the same frame (#308).
-            self.eventLoop.reconcile(
+            // at the same frame (#308). The list is read off the
+            // main actor: the app already proved slow (#1795).
+            self.eventLoop.reconcileOffMain(
                 pid: pid,
                 app: ref,
                 coalesceTabs: false
-            )
-            let ms = begin.duration(to: .now).wholeMilliseconds
-            self.onLog(
-                "deferred app: \(ref.bundleID ?? ref.name) "
-                    + "completed in \(ms)ms"
-            )
-            // Its windows are new to the layout, so the
-            // arrangement they belong in has to be recomputed —
-            // the same reason the scan's own tail retiles once.
-            self.retile()
-            self.scheduleNextDeferredApp()
+            ) { [weak self] in
+                guard let self,
+                    !self.eventLoop.bootScan.pendingDrain.isEmpty
+                else { return }
+                self.eventLoop.bootScan.pendingDrain.removeFirst()
+                let ms = begin.duration(to: .now).wholeMilliseconds
+                self.onLog(
+                    "deferred app: \(ref.bundleID ?? ref.name) "
+                        + "completed in \(ms)ms"
+                )
+                // Its windows are new to the layout, so the
+                // arrangement they belong in has to be recomputed —
+                // the same reason the scan's own tail retiles once.
+                self.retile()
+                self.scheduleNextDeferredApp()
+            }
         }
     }
 
