@@ -231,6 +231,42 @@ struct ReconcileOffMainRecheckTests {
         #expect(box.focused.isEmpty)
     }
 
+    @Test("an activation landing during the focus read wins")
+    func unhideFocusYieldsAtDelivery() {
+        let loop = EventLoop()
+        let box = Box()
+        wire(loop, box)
+        activateHidden(loop, box)
+        // The unhide's reconcile lands and asks the focus; another
+        // app activates while that read is in flight.
+        box.deliver()
+        #expect(!box.reads.isEmpty, "no focus read asked")
+        loop.lastActivePid = pid + 1
+        box.drain()
+        #expect(box.idle)
+        #expect(box.commanded.isEmpty)
+    }
+
+    @Test("a hide, or an unhide adopting nothing, commands nothing")
+    func unhideWithoutAdoptionCommandsNothing() {
+        let loop = EventLoop()
+        let box = Box()
+        wire(loop, box)
+        loop.lastActivePid = pid
+        box.hidden = true
+        loop.appHideChanged(pid: pid, ref: ref)
+        box.drain()
+        #expect(box.commanded.isEmpty)
+        // Already tracked again by the time the unhide's read
+        // lands: the activation's own report owns that focus.
+        loop.elements[pid] = [id: AXUIElementCreateApplication(pid)]
+        box.hidden = false
+        loop.appHideChanged(pid: pid, ref: ref)
+        box.drain()
+        #expect(box.idle)
+        #expect(box.commanded.isEmpty)
+    }
+
     @Test("a hide landing mid-read is applied by the read after")
     func hideDuringAReadDropsOnTheNext() {
         let loop = EventLoop()
