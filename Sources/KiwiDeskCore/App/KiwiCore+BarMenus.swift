@@ -27,7 +27,7 @@ extension KiwiCore {
                 }
             case .submenu(let children):
                 row.kind = .submenu(userDriven(children))
-            case .separator:
+            case .separator, .header:
                 break
             }
             return row

@@ -12,6 +12,7 @@ extension SpaceBarOverlay {
         style: SpaceBarLook,
         horizontal: Bool
     ) {
+        frontWindows = app?.windows ?? []
         guard let app else {
             [
                 frontBox, frontBorder, frontAccentClip, frontDivider,
@@ -314,10 +315,10 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// The shelf section as VoiceOver actions (#1518): the front-app
+    /// The segment's menu as VoiceOver actions (#1518, #2024): the
     /// chip is a plain label or image, so it carries them as a list
     /// rather than answering per query.
     private var shelfActions: [NSAccessibilityCustomAction] {
-        contextMenus?.accessibilityActions(for: .empty) ?? []
+        contextMenus?.accessibilityActions(for: frontMenuHit) ?? []
     }
 }

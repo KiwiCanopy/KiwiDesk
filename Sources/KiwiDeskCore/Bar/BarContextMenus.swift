@@ -70,8 +70,12 @@ extension NSView {
 class BarMenuView: AppBarOverlay.FlippedView {
     weak var contextMenus: BarContextMenus?
     var hit = BarHit.empty
+    /// A hit for a point in this view's coordinates that no item
+    /// view answers itself — the front-app segment's (#2024).
+    var hitAt: (NSPoint) -> BarHit? = { _ in nil }
 
     override func menu(for event: NSEvent) -> NSMenu? {
-        contextMenus?.menu(for: hit)
+        let point = convert(event.locationInWindow, from: nil)
+        return contextMenus?.menu(for: hitAt(point) ?? hit)
     }
 }

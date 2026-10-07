@@ -71,5 +71,6 @@ extension SpaceBarOverlay {
         root.addSubview(backCount)
         root.addSubview(forwardCount)
         root.onScroll = { [weak self] in self?.scroll($0) ?? false }
+        root.hitAt = { [weak self] in self?.frontHit(at: $0) }
     }
 }

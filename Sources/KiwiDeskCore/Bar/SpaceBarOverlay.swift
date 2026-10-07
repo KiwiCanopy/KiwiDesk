@@ -187,6 +187,8 @@ public final class SpaceBarOverlay {
     }()
     // Optional trailing front-app segment (#293).
     let frontBox = NSView()
+    /// The windows the shown front-app segment stands for (#2024).
+    var frontWindows: [WindowID] = []
     /// The chip's border (#1679), above its box or glass.
     let frontBorder = ShelfBorder.make()
     /// The chip's active indicator (#1856), clipped to the chip,
