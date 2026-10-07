@@ -74,6 +74,24 @@ struct SyncReconcileCensusTests {
         )
     }
 
+    /// The boot drain left the census for the off-main door
+    /// (#1795), and must keep the bulk shape it had (#308) — its
+    /// behaviour suite lists no windows, so only the call says so.
+    @Test("the boot drain reads off main with the bulk shape")
+    func bootDrainKeepsTheBulkShape() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
+            )
+        let source = try SourceScan.strippedSource(at: file)
+        let call =
+            "self.eventLoop.reconcileOffMain(\n"
+            + "                pid: pid,\n"
+            + "                app: ref,\n"
+            + "                coalesceTabs: false\n"
+        #expect(source.components(separatedBy: call).count - 1 == 1)
+    }
+
     @Test("the needle matches the call shapes it names")
     func needleMatchesItsSubject() {
         #expect(Self.calls(in: "reconcile(pid: pid, app: app)") == 1)
