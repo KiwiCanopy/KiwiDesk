@@ -194,4 +194,55 @@ struct FocusRaiseFlightGuardTests {
         #expect(core.raiseFlight?.target == previous)
         #expect(core.raiseFlight?.leftPID == previousPID)
     }
+
+    @Test("A re-assert of the target keeps the app it left")
+    func reassertKeepsLeftApp() {
+        let core = makeCore()
+        raise(core, to: anchor)
+        let other: pid_t = 555
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(3), pid: other, appName: "T")
+            )
+        )
+        if let home = core.state.workspaces.space(of: anchor) {
+            core.state.workspaces.focus(anchor, in: home)
+        }
+        core.frontmostPIDProvider = { other }
+        core.focusWindow(anchor, warp: false)
+        #expect(core.raiseFlight?.leftPID == previousPID)
+        #expect(preflight(core, "focus")?.error == Self.generic)
+    }
+
+    /// A long pan must not spend the flight before the raise is
+    /// sent: the deferred raise restamps it as it fires.
+    @Test("The deferred raise restamps the flight")
+    func deferredRaiseRestamps() {
+        let core = makeCore()
+        raise(core, to: anchor, age: KiwiCore.selfRaiseEchoWindow)
+        core.pendingFocusRaise = anchor
+        core.runPendingFocusRaise()
+        #expect(core.pendingFocusRaise == nil)
+        #expect(preflight(core, "focus") == nil)
+    }
+
+    @Test("A native tab switch carries the flight")
+    func rekeyCarriesTheFlight() {
+        let core = makeCore()
+        raise(core, to: anchor)
+        core.handleWindowRekeyed(old: anchor, new: WindowID(9))
+        #expect(core.raiseFlight?.target == WindowID(9))
+    }
+
+    /// The wake heal (#1130) is asked before the bypass, so an
+    /// armed heal is spent on the press the bypass would pass.
+    @Test("The wake heal is asked before the bypass")
+    func wakeHealComesFirst() {
+        let core = makeCore()
+        raise(core, to: anchor)
+        core.trustedFrontmostProvider = { [previous] in previous }
+        core.wakeFocusHealArmedAt = Date()
+        _ = preflight(core, "focus")
+        #expect(core.wakeFocusHealArmedAt == nil)
+    }
 }

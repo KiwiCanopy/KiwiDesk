@@ -124,8 +124,21 @@ extension KiwiCore {
     }
 
     /// Records the focus command's raise toward `id` and the app
-    /// in front as it was issued — the app the raise leaves.
+    /// in front as it was issued — the app the raise leaves. A
+    /// re-assert of a target still in flight keeps the record, or
+    /// an app the user switched to since would read as the one
+    /// left.
     func noteRaiseFlight(to id: WindowID) {
+        if let flight = raiseFlight,
+            flight.inFlight(
+                toward: id,
+                pending: pendingFocusRaise,
+                now: wallClock(),
+                bound: Self.selfRaiseEchoWindow
+            )
+        {
+            return
+        }
         guard let front = frontmostPIDProvider?() else {
             raiseFlight = nil
             return

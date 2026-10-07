@@ -6,9 +6,14 @@ import Foundation
 /// preflight reads it to let `focus` through while that app is
 /// still in front; it is never an echo ledger.
 struct RaiseFlight: Equatable {
-    let target: WindowID
+    private(set) var target: WindowID
     let leftPID: pid_t
     var raisedAt: Date
+
+    /// Follows a native tab switch's fresh id (#308).
+    mutating func rekey(old: WindowID, new: WindowID) {
+        if target == old { target = new }
+    }
 
     /// Restamps a deferred raise when it is actually sent.
     mutating func raised(_ id: WindowID, at now: Date) {
