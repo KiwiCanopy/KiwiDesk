@@ -73,7 +73,9 @@ struct OffMainReconcile {
     struct Debt {
         var app: AppRef
         var then: [@MainActor () -> Void]
-        /// False once any request asked the bulk shape (#308).
+        /// False once any request asked the bulk shape (#308): a
+        /// tab switch parked behind a bulk read sweeps as a close
+        /// and a create, the safe side of the false merge.
         var coalesceTabs = true
     }
 
@@ -139,7 +141,9 @@ extension EventLoop {
     /// and focus change. `then` runs after a reconcile whose read
     /// began after this request, on the main actor. An app
     /// KiwiDesk does not observe is reconciled at once, which
-    /// reads nothing of it.
+    /// reads nothing of it. A `then` always runs, or is dropped
+    /// with every debt by a stop — never alone: the boot drain's
+    /// one chain rests on it (#1795).
     func reconcileOffMain(
         pid: pid_t,
         app: AppRef,
