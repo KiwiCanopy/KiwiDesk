@@ -134,7 +134,8 @@ struct ShortcutsSection: View {
         OrphanedShortcutsGroup(
             model: model,
             bindings: bindingsBinding,
-            spaces: model.config.spaces
+            spaces: model.config.spaces,
+            layers: model.config.layers.map(\.name)
         )
         advancedDrawer
     }

@@ -1398,6 +1398,7 @@
   "shortcuts.import.help": "Lê os atalhos ativos no init.lua e os adiciona aqui, correspondendo cada combinação de teclas. As ações conhecidas são distribuídas nos grupos abaixo; qualquer outra vai para “%1$@”. Revise e depois salve.",
   "shortcuts.imported_note": "Atalhos importados — revise abaixo e depois use “%1$@”.",
   "shortcuts.inactive.caption": "Estes atalhos apontam para espaços que não estão na lista atual. Eles continuam funcionando — pressionar um recria o seu espaço — e mantêm a combinação de teclas. Reatribua-os ou remova-os aqui; eles voltam a ficar ativos quando o espaço correspondente retorna.",
+  "shortcuts.inactive.layer_caption": "Estes atalhos alternam para uma camada que não está na lista de camadas deste perfil. Reatribua-os ou remova-os aqui.",
   "shortcuts.layer_name": "Nome da camada",
   "shortcuts.layers.caption": "As camadas são conjuntos alternativos de atalhos — só os atalhos da camada ativa funcionam. Associe uma tecla abaixo para alternar entre elas. “default” é a camada padrão e é sempre a ativa depois que o app inicia.",
   "shortcuts.lua_placeholder": "Lua, por exemplo KiwiDesk.reload_config()",

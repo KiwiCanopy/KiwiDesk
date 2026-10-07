@@ -58,7 +58,8 @@ extension SettingsModel {
         return Set(
             OrphanedShortcuts.commands(
                 bindings: layer.bindings,
-                spaces: config.spaces
+                spaces: config.spaces,
+                layers: config.layers.map(\.name)
             )
             .map(\.lua)
         )

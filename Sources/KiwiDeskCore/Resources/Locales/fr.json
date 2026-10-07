@@ -1398,6 +1398,7 @@
   "shortcuts.import.help": "Lit les raccourcis actifs dans init.lua et les ajoute ici en faisant correspondre chaque combinaison de touches. Les actions connues sont réparties dans les groupes ci-dessous ; tout le reste atterrit dans « %1$@ ». Vérifiez, puis Enregistrez.",
   "shortcuts.imported_note": "Raccourcis importés — vérifiez ci-dessous, puis « %1$@ ».",
   "shortcuts.inactive.caption": "Ces raccourcis ciblent des espaces absents de la liste actuelle. Ils fonctionnent toujours — appuyer sur l'un d'eux récrée son espace — et conservent leur combinaison. Réassignez-les ou supprimez-les ici ; ils redeviennent actifs à la réapparition de leur espace.",
+  "shortcuts.inactive.layer_caption": "Ces raccourcis basculent vers un calque absent de la liste des calques de ce profil. Réattribuez-les ou supprimez-les ici.",
   "shortcuts.layer_name": "Nom du calque",
   "shortcuts.layers.caption": "Les calques sont des ensembles de raccourcis alternatifs — seuls les raccourcis du calque actif se déclenchent. Associez une touche ci-dessous pour basculer entre eux. « default » est le calque standard et reste actif au démarrage de l'application.",
   "shortcuts.lua_placeholder": "Lua, ex : KiwiDesk.reload_config()",

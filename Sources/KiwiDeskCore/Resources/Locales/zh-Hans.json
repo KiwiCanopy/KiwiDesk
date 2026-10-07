@@ -1398,6 +1398,7 @@
   "shortcuts.import.help": "读取 init.lua 中生效的快捷键，按各自的组合键逐一匹配后添加到这里。已知操作会归入下方的分组；其余的都会进入“%1$@”。请检查后存储。",
   "shortcuts.imported_note": "已导入快捷键 — 请在下方检查后“%1$@”。",
   "shortcuts.inactive.caption": "这些快捷键指向的空间不在当前空间列表中。它们依然可用 — 按下其中一个会重新创建对应空间 — 并保留原有的按键组合。你可以在这里重新指定或移除；对应空间恢复后它们会重新生效。",
+  "shortcuts.inactive.layer_caption": "这些快捷键会切换到不在此描述文件层列表中的层。你可以在这里重新指定或移除它们。",
   "shortcuts.layer_name": "层名称",
   "shortcuts.layers.caption": "层是可切换的快捷键集合 — 只有当前层的快捷键会生效。请在下方绑定一个按键以在层之间切换。“default”是标准层，App 启动后始终由它生效。",
   "shortcuts.lua_placeholder": "Lua，例如 KiwiDesk.reload_config()",

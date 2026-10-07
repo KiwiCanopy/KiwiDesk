@@ -234,9 +234,10 @@ struct LayerStripEditor: View {
     /// 2026-08-12).
     private func deleteLayer() {
         guard selected != KeyLayer.defaultName else { return }
-        model.config.layers.removeAll {
-            $0.name == selected
-        }
+        model.config.layers = KeybindingCatalog.deleteLayer(
+            in: model.config.layers,
+            named: selected
+        )
         selected = KeyLayer.defaultName
         focusedChip =
             stripSurvivesDeletion
