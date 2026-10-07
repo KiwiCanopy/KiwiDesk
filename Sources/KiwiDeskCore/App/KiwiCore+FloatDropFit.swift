@@ -59,17 +59,16 @@ extension KiwiCore {
         return dropBottomFit(id, frame: clamped)
     }
 
-    /// The bottom limit is the region's, less the ring inset the
-    /// bar clamp keeps where a bar is painted on that edge.
+    /// The bottom limit is `floatGrowBounds`': the ring's reach
+    /// stays clear at a bar and at the screen edge alike (owner
+    /// device check, 2026-10-07).
     private func dropBottomFit(_ id: WindowID, frame: CGRect) -> CGRect {
         guard let space = state.workspaces.space(of: id),
-            let region = floatBounds(on: space)
+            let region = floatGrowBounds(on: space)
         else { return frame }
-        let barBelow = paintedStrips(forSpace: space)
-            .contains { $0.edge == .bottom }
         return Self.bottomFit(
             frame,
-            limit: region.maxY - (barBelow ? floatRingInset : 0),
+            limit: region.maxY,
             floor: CGFloat(effectiveMinSize(of: id, axis: "y"))
         )
     }
