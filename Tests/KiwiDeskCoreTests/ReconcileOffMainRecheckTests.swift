@@ -32,6 +32,10 @@ struct ReconcileOffMainRecheckTests {
     private final class Box {
         var listReads = 0
         var hidden = false
+        /// What the off-main read sees, where it differs from the
+        /// live seam's `hidden`.
+        var readHidden: Bool?
+        var reading = false
         var hiddenEvents: [WindowID] = []
         var destroyed: [WindowID] = []
         var reads: [@Sendable () -> Void] = []
@@ -39,15 +43,21 @@ struct ReconcileOffMainRecheckTests {
 
         /// Runs every queued read, leaving its delivery queued.
         func read() {
+            reading = true
             while !reads.isEmpty { reads.removeFirst()() }
+            reading = false
         }
+
+        var idle: Bool { reads.isEmpty && deliveries.isEmpty }
 
         func deliver() {
             while !deliveries.isEmpty { deliveries.removeFirst()() }
         }
 
+        /// Bounded, so a read chain that never ends reds a test
+        /// instead of hanging it.
         func drain() {
-            while !reads.isEmpty || !deliveries.isEmpty {
+            for _ in 0..<20 where !idle {
                 read()
                 deliver()
             }
@@ -76,7 +86,9 @@ struct ReconcileOffMainRecheckTests {
         loop.onScreenNormalWindowIDs = { [:] }
         loop.frontmostPID = { nil }
         loop.appIsHidden = { _ in
-            MainActor.assumeIsolated { box.hidden }
+            MainActor.assumeIsolated {
+                box.reading ? box.readHidden ?? box.hidden : box.hidden
+            }
         }
         let element = AXUIElementCreateApplication(pid)
         loop.axWindows = { _ in
@@ -114,8 +126,10 @@ struct ReconcileOffMainRecheckTests {
         let loop = EventLoop()
         let box = Box()
         wire(loop, box)
+        var settled = 0
         box.hidden = true
-        loop.appHideChanged(pid: pid, ref: ref)
+        // The arm's own request, with what waits on it (#1795).
+        loop.reconcileOffMain(pid: pid, app: ref) { settled += 1 }
         #expect(box.listReads == 0, "hide read inline (#2027)")
         box.read()
         #expect(box.listReads == 0, "a hidden app's list was read")
@@ -123,7 +137,11 @@ struct ReconcileOffMainRecheckTests {
         // it applies, and only the live seam may say hidden.
         box.hidden = false
         loop.appHideChanged(pid: pid, ref: ref)
+        box.deliver()
+        #expect(settled == 0, "ran on the skipped list")
         box.drain()
+        #expect(box.idle)
+        #expect(settled == 1)
         #expect(box.hiddenEvents.isEmpty)
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[id] != nil)
@@ -139,16 +157,18 @@ struct ReconcileOffMainRecheckTests {
         let box = Box()
         wire(loop, box)
         var settled = 0
-        box.hidden = true
+        // The off-main read keeps answering hidden, so only the
+        // forced listing read ends the chain.
+        box.readHidden = true
         loop.reconcileOffMain(pid: pid, app: ref) { settled += 1 }
         box.read()
-        box.hidden = false
         box.deliver()
         #expect(box.destroyed.isEmpty, "an empty skip was swept")
         #expect(box.hiddenEvents.isEmpty)
         #expect(settled == 0, "ran before a listing read")
         #expect(!box.reads.isEmpty, "no listing read owed")
         box.drain()
+        #expect(box.idle, "the read chain did not end")
         #expect(box.listReads == 1)
         #expect(settled == 1)
         #expect(loop.elements[pid]?[id] != nil)
