@@ -33,19 +33,23 @@ public final class CrashRecovery {
     public static let inPlaceSessionBound: TimeInterval = 120
 
     /// Where the logout signal arrives (#1385); a test hands a
-    /// private center.
+    /// private center. A deliberate seam: the other NSWorkspace
+    /// observers read the shared center. Read at `start()`.
     public var workspaceCenter: NotificationCenter =
         NSWorkspace.shared.notificationCenter
 
     /// How long a logout's freeze holds (#1385). macOS posts no
     /// counterpart when an app's refusal cancels the logout, so a
-    /// freeze must lift on its own; the measured logout closed
-    /// every app within 7 s of the first close.
+    /// freeze must lift on its own; 7 s is one measured logout. A
+    /// logout held open past the bound (a save sheet answered
+    /// late) is the accepted loss.
     public static let logoutFreezeBound: TimeInterval = 120
 
-    /// When the logout froze the autosave, or nil (#1385).
+    /// When the logout froze the snapshot writes, or nil (#1385).
     private(set) var frozenAt: Date?
-    private var powerOffToken: NSObjectProtocol?
+    /// The power-off observer and the center it was added on.
+    private(set) var powerOff:
+        (token: NSObjectProtocol, center: NotificationCenter)?
 
     private let fileURL: URL
     private let sessionURL: URL
@@ -87,17 +91,24 @@ public final class CrashRecovery {
     /// is the case (#801): a quit mid-scan would write a fraction
     /// of the desk over the arrangement this launch had not
     /// restored yet. The crash marker still goes. `inPlace` takes
-    /// `captureInPlaceState` (#930).
+    /// `captureInPlaceState` (#930). While a logout froze the
+    /// writes, the stop writes nothing and keeps the autosave, the
+    /// desk being emptied by then (#1385); an announced in-place
+    /// restart outranks the freeze, its windows still live.
     public func shutdownCleanly(
         preservingSession: Bool = false,
         inPlace: Bool = false
     ) {
         timer?.invalidate()
         timer = nil
-        if let powerOffToken {
-            workspaceCenter.removeObserver(powerOffToken)
+        if let powerOff {
+            powerOff.center.removeObserver(powerOff.token)
         }
-        powerOffToken = nil
+        powerOff = nil
+        if !inPlace, isFrozenForLogout() {
+            onLog("stopped during a logout; pre-logout autosave kept")
+            return
+        }
         let capture = inPlace ? captureInPlaceState : captureState
         if !preservingSession, let snapshot = capture(),
             let data = try? JSONEncoder().encode(snapshot)
@@ -162,9 +173,9 @@ public final class CrashRecovery {
         try? FileManager.default.removeItem(at: sessionURL)
     }
 
-    /// Stops autosaving (#1385): the window closes macOS performs
-    /// during a logout must not overwrite the last arrangement.
-    /// Lifts past `logoutFreezeBound`.
+    /// Stops the snapshot writes (#1385): the window closes macOS
+    /// performs during a logout must not overwrite the last
+    /// arrangement. Lifts past `logoutFreezeBound`.
     public func freezeForLogout() {
         frozenAt = now()
         onLog("autosave frozen: logout or power-off began")
@@ -173,7 +184,7 @@ public final class CrashRecovery {
     /// Writes one snapshot now (also called by the timer), unless
     /// a logout froze it.
     public func autosave() {
-        guard !autosaveIsFrozen() else { return }
+        guard !isFrozenForLogout() else { return }
         guard let snapshot = captureState() else { return }
         guard
             let data = try? JSONEncoder().encode(snapshot)
@@ -190,8 +201,9 @@ public final class CrashRecovery {
     /// `NSWorkspace.willPowerOffNotification` — logout, restart
     /// and shut down alike (#1385).
     private func observePowerOff() {
-        guard powerOffToken == nil else { return }
-        powerOffToken = workspaceCenter.addObserver(
+        guard powerOff == nil else { return }
+        let center = workspaceCenter
+        let token = center.addObserver(
             forName: NSWorkspace.willPowerOffNotification,
             object: nil,
             queue: .main
@@ -200,9 +212,12 @@ public final class CrashRecovery {
                 self?.freezeForLogout()
             }
         }
+        powerOff = (token, center)
     }
 
-    private func autosaveIsFrozen() -> Bool {
+    /// The one reading every snapshot writer asks (#1385): true
+    /// inside `logoutFreezeBound` of a freeze, lifting it past.
+    func isFrozenForLogout() -> Bool {
         guard let frozenAt else { return false }
         let age = now().timeIntervalSince(frozenAt)
         if age <= Self.logoutFreezeBound { return true }

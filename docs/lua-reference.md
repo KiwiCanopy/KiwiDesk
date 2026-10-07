@@ -5758,13 +5758,6 @@ that was active at quit. This works within one login session
 are re-tiled fresh). Crashes restore from the last autosave
 (30 s interval) instead.
 
-:::unreleased
-The autosave stops once a logout, restart or shut down begins,
-so the windows macOS closes on the way out are not saved over
-the last arrangement. If the logout is cancelled, it resumes
-within two minutes.
-:::
-
 On quit, KiwiDesk moves each managed tiled window
 back onto the monitor its space is assigned to and arranges them
 per `quit.layout` (see `quit.set_layout` below). Floating

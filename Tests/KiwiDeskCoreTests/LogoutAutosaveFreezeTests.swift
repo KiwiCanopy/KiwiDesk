@@ -124,4 +124,43 @@ struct LogoutAutosaveFreezeTests {
         let read = autosaved(in: dir)
         #expect(read == full.windows.map(\.id))
     }
+
+    /// A logout ends in KiwiDesk's own clean stop, by when the
+    /// desk is emptied: the stop writes no session over the
+    /// pre-logout autosave and keeps that file for the next boot.
+    @Test("A frozen clean stop keeps the pre-logout autosave")
+    func frozenStopKeepsTheAutosave() throws {
+        let (recovery, dir) = try makeRecovery()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let full = desk([1, 2, 3])
+        recovery.captureState = { full }
+        recovery.autosave()
+        recovery.freezeForLogout()
+        recovery.captureState = { desk([1]) }
+        recovery.shutdownCleanly()
+        let read = autosaved(in: dir)
+        #expect(read == full.windows.map(\.id))
+    }
+
+    /// The stop removes the observer from the center `start()`
+    /// added it on, whatever `workspaceCenter` names by then. The
+    /// token is held so its release cannot stand in for a removal.
+    @Test("The stop removes the observer from its own center")
+    func stopRemovesFromTheAddingCenter() throws {
+        let (recovery, dir) = try makeRecovery()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        recovery.interval = 3600
+        let added = recovery.workspaceCenter
+        recovery.start()
+        let token = try #require(recovery.powerOff?.token)
+        recovery.workspaceCenter = NotificationCenter()
+        recovery.shutdownCleanly(preservingSession: true)
+        added.post(
+            name: NSWorkspace.willPowerOffNotification,
+            object: nil
+        )
+        let frozen = recovery.frozenAt
+        #expect(frozen == nil)
+        withExtendedLifetime(token) {}
+    }
 }

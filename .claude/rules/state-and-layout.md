@@ -1836,6 +1836,14 @@ editing here:
   (Sparkle's relaunch) or `prepare_restart` (`service restart`,
   identity-gated), and only `stop()` consumes it, within its
   bound (`InPlaceRestartTests`, `InPlaceRestartWiringTests`).
+- **A snapshot write, and a capture-time log, honours the logout
+  freeze through the one `CrashRecovery.isFrozenForLogout`
+  (#1385).** From `NSWorkspace.willPowerOffNotification` macOS
+  closes the other apps' windows before KiwiDesk's own stop, so a
+  write past it saves an emptied desk over the last real
+  arrangement; only an announced in-place restart outranks it
+  (`LogoutAutosaveFreezeTests` ▸ `frozenStopKeepsTheAutosave`,
+  `InPlaceRestartTests` ▸ `inPlaceOutranksLogoutFreeze`).
 - **A restore pays an untracked window's frame at its arrival
   (#1362).** The replay sets frames on TRACKED windows only; a
   slow app's window adopted later kept the boot scan's tile on
