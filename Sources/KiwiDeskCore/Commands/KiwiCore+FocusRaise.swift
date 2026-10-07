@@ -53,6 +53,7 @@ extension KiwiCore {
     /// The one AX raise call behind both the immediate and the
     /// deferred focus paths.
     func raiseWindow(_ id: WindowID) {
+        raiseFlight?.raised(id, at: wallClock())
         if let window = state.windows[id],
             let element = eventLoop.element(for: id)
         {

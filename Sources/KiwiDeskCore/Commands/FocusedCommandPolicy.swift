@@ -29,6 +29,13 @@ public enum FocusedCommandPolicy {
         "stack.demote",
     ]
 
+    /// Focused verbs the #292 preflight lets through while
+    /// KiwiDesk's own raise toward the anchor is in flight
+    /// (#1812). A verb joins only if it changes no window's
+    /// content, size or membership; `FocusRaiseFlightGuardTests`
+    /// holds every other verb to the refusal.
+    public static let raiseFlightExempt: Set<String> = ["focus"]
+
     /// Checks if command targets implicit focused window (`KiwiCore.execute`).
     public static func isFocused(_ command: String) -> Bool {
         focusedCommands.contains(command)

@@ -2644,6 +2644,52 @@ pins the wake leg's payment, the crash leg's stand-down, the
 gone-window seed and the heal; `WakeFocusSeamTests` pins the
 wiring no unit fixture can see.
 
+:::unreleased
+### Focus may run through KiwiDesk's own raise; nothing else may
+
+**[Rationale]**
+
+The #292 preflight refuses an implicit-focused shortcut while the
+macOS frontmost app is not the focused window's. A focus command
+moves the anchor at once and raises the target, and the target's
+app comes forward some time later: the target's own focus report
+arrived 0.04–0.27 s after a refused press, and later while a slow
+Accessibility responder holds the main actor
+([#1812](https://github.com/KiwiCanopy/KiwiDesk/issues/1812)).
+A focus key pressed inside that gap is refused, and the keys seem
+to stop in between.
+
+So `focus` alone passes the preflight while KiwiDesk's own raise
+toward the anchor is in flight — pending a scrolling pan, or sent
+within the self-raise echo window — and the app in front is still
+the managed app that raise LEFT, recorded by the `focus` press
+itself — never by a re-assert of the same focus — with no app
+activation and no click since. That is not the case #292 guards: the window `focus`
+acts from is the one KiwiDesk just raised, not a hidden one, and
+`focus` changes no window's content, size or membership — it
+moves state, pans to the target and raises.
+
+It is an order question, never a presence one. A fresh raise says
+nothing about whether the user switched apps since, so any
+activation after the raise, or click after the press, ends the
+bypass — a switch away and a switch back to the app the raise
+left alike — and an ignored panel, an unobserved app and a stale
+raise keep the refusal too. The one-shot wake heal (#1130) is
+asked first, so a wake payment macOS declined reseeds rather than
+riding the bypass.
+
+Every other focused verb still waits for the foreground. `swap`,
+`resize`, `move_to_space` and the rest act on the window itself —
+`resize` writes stored sizes and moves the neighbours — which is
+exactly what #292 protects, so a press inside the gap is refused
+as before and pressed again. A hold-and-retry queue could cover
+them, at the cost of ordering and key-repeat rules for a gap a
+tenth of a second long; none is built, and the issue records the
+shape one would take (owner, 2026-10-07).
+`FocusRaiseFlightGuardTests` holds the bypass, each refusal it
+keeps, and every other verb.
+:::
+
 ### Layout and resize behavior
 
 **[Rationale]**

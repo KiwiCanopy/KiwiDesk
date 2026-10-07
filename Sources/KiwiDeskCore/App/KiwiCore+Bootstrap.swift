@@ -180,6 +180,7 @@ extension KiwiCore {
         }
         eventLoop.onAppActivated = { [weak self] activation in
             self?.noteAppActivation(activation)
+            self?.endRaiseFlight()
         }
         eventLoop.onTransientDrop = { [weak self] in
             self?.scheduleTransientRetrack()

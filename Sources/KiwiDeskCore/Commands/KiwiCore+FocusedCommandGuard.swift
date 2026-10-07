@@ -23,10 +23,10 @@ extension KiwiCore {
     /// 3. the event loop still observes that pid;
     /// 4. no ignored panel is latched for that pid.
     ///
-    /// Any nil/mismatch fails closed. A self-raise in flight is not
-    /// a bypass: the command is allowed only once the OS frontmost
-    /// pid actually matches, so an activation race rejects a
-    /// shortcut rather than mutating a hidden window.
+    /// Any nil/mismatch fails closed. KiwiDesk's own raise in
+    /// flight lets the verbs `FocusedCommandPolicy.raiseFlightExempt`
+    /// names through (`ownRaiseInFlight`, #1812); every other verb
+    /// waits until the OS frontmost pid actually matches.
     func focusedCommandDenial(
         for command: String,
         _ args: [JSONValue]
@@ -53,6 +53,13 @@ extension KiwiCore {
                 return nil
             }
         }
+        if ownRaiseInFlight(command, front: front) {
+            onLog(
+                "preflight (#292): allowed \(command) — own raise "
+                    + "toward the anchor in flight (#1812)"
+            )
+            return nil
+        }
         // The hotkey path discards the response, so a denial
         // is otherwise invisible — the "#483 `_and_follow`
         // does nothing" trap. Log which clause denied: the
@@ -72,13 +79,92 @@ extension KiwiCore {
     /// The #292 ownership clauses in one place, so the wake heal
     /// (#1130) re-asks the same question after its reseed.
     private func foregroundOwned(front: pid_t?) -> Bool {
-        guard let focused = focusedWindow,
+        guard let focused = focusedWindow, let front else {
+            return false
+        }
+        return owns(front: front, pid: focused.pid)
+            && anchorManaged(focused)
+    }
+
+    /// The clauses that do not read the frontmost app: the loop
+    /// observes the anchor's app and no ignored panel is latched.
+    private func anchorManaged(_ focused: ManagedWindow) -> Bool {
+        eventLoop.observes(pid: focused.pid)
+            && !ignoredPanel.active.contains(focused.pid)
+    }
+
+    /// Whether `command` may run with only the frontmost clause
+    /// failing (#1812): the verb is exempt, the anchor is the
+    /// target of our raise in flight, and the managed app that
+    /// raise LEFT is in front with no activation or press since —
+    /// so a switch the user made is #292's refusal, never ours to
+    /// override.
+    private func ownRaiseInFlight(
+        _ command: String,
+        front: pid_t?
+    ) -> Bool {
+        guard FocusedCommandPolicy.raiseFlightExempt.contains(command),
+            let focused = focusedWindow,
             let front,
-            owns(front: front, pid: focused.pid),
-            eventLoop.observes(pid: focused.pid),
-            !ignoredPanel.active.contains(focused.pid)
+            let flight = raiseFlight,
+            anchorManaged(focused),
+            raiseFlightLive(flight, toward: focused.id),
+            !pressedSince(flight),
+            owns(front: front, pid: flight.leftPID),
+            !ignoredPanel.active.contains(front)
         else { return false }
-        return true
+        return Set(state.windows.all.map(\.pid)).contains {
+            owns(front: flight.leftPID, pid: $0)
+        }
+    }
+
+    /// A flight's raise is in flight as long as its echo is
+    /// believed ours (#887).
+    private func raiseFlightLive(
+        _ flight: RaiseFlight,
+        toward id: WindowID
+    ) -> Bool {
+        flight.inFlight(
+            toward: id,
+            pending: pendingFocusRaise,
+            now: wallClock(),
+            bound: Self.selfRaiseEchoWindow
+        )
+    }
+
+    /// Whether the user clicked since the `focus` press, mid-pan
+    /// included — a click is their choice, never ours to
+    /// override (#1161's escape).
+    private func pressedSince(_ flight: RaiseFlight) -> Bool {
+        guard let click = lastLeftClick else { return false }
+        return click.at > flight.issuedAt
+    }
+
+    /// Ends the flight at any app activation: the raise landed,
+    /// or the user switched apps — either way the preflight's
+    /// own clauses answer from here.
+    func endRaiseFlight() {
+        raiseFlight = nil
+    }
+
+    /// The `focus` verb: navigates, and records the raise it
+    /// started with the app in front as the press ran — the app
+    /// the raise leaves. The target is the focus a Monocle flip
+    /// still owes, or else the anchor (#1391); a press that moved
+    /// nothing records nothing.
+    func focusRecordingFlight(_ args: [JSONValue]) -> CommandResponse {
+        let front = frontmostPIDProvider?()
+        let before = focusedWindowID
+        let response = navigate(args, swapping: false)
+        let after = pendingMonocleFocus?.to ?? focusedWindowID
+        if let front, let after, after != before {
+            raiseFlight = RaiseFlight(
+                target: after,
+                leftPID: front,
+                issuedAt: wallClock()
+            )
+        }
+        return response
     }
 
     /// Whether the frontmost process is `pid`'s app — the

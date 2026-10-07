@@ -30,6 +30,7 @@ extension KiwiCore {
         if pendingFocusRaise == old {
             pendingFocusRaise = new
         }
+        raiseFlight?.rekey(old: old, new: new)
         if let pending = pendingMonocleFocus {
             pendingMonocleFocus = (
                 from: pending.from == old ? new : pending.from,

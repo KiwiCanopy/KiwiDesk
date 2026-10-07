@@ -19,7 +19,7 @@ extension KiwiCore {
         }
         switch command {
         case "focus":
-            return navigate(args, swapping: false)
+            return focusRecordingFlight(args)
         case "swap":
             return navigate(args, swapping: true)
         case "focus_space":

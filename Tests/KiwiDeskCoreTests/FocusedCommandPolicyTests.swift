@@ -105,4 +105,13 @@ struct FocusedCommandPolicyTests {
             )
         }
     }
+
+    @Test("The raise-flight exemption is a set of focused verbs")
+    func raiseFlightExemptIsFocused() {
+        #expect(
+            FocusedCommandPolicy.raiseFlightExempt.isSubset(
+                of: FocusedCommandPolicy.focusedCommands
+            )
+        )
+    }
 }
