@@ -8,7 +8,10 @@ import Testing
 /// control, and the census mapping reads the container. This
 /// suite holds the pair together at the render site — the view
 /// titling its card with the group's control draws the rows the
-/// census places in the group's container.
+/// census places in the group's container. It proves a witness is
+/// SPELLED in that view's declaration, not that it is mounted: a
+/// helper member that names the rows but is never drawn stays
+/// green, so a green here reads "names", never "draws".
 @Suite("Shortcuts jump group pairing")
 @MainActor
 struct ShortcutsJumpPairingTests {
