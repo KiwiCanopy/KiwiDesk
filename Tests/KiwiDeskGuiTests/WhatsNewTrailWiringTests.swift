@@ -120,9 +120,13 @@ struct WhatsNewTrailWiringTests {
                     try String(contentsOf: file, encoding: .utf8)
                 )
             )
+            // Writes only: a `==` read is not a writer.
+            func occurrences(_ needle: String) -> Int {
+                source.components(separatedBy: needle).count - 1
+            }
             let count =
-                source.components(separatedBy: "pendingReveal=")
-                .count - 1
+                occurrences("pendingReveal=")
+                - occurrences("pendingReveal==")
             writers += Array(repeating: file.lastPathComponent, count: count)
         }
         #expect(writers == ["SettingsModel+WhatsNewTrail.swift"])

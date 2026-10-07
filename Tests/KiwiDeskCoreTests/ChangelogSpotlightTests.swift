@@ -12,9 +12,11 @@ struct ChangelogSpotlightTests {
         .appendingPathComponent("scripts")
         .appendingPathComponent("changelog-sync")
 
-    private func parse(_ body: String, tag: String? = nil) throws
-        -> ScriptRun
-    {
+    private func parse(
+        _ body: String,
+        tag: String? = nil,
+        census: URL? = nil
+    ) throws -> ScriptRun {
         let file = FileManager.default.temporaryDirectory
             .appendingPathComponent("spotlight-\(UUID().uuidString).md")
         try body.write(to: file, atomically: true, encoding: .utf8)
@@ -23,21 +25,14 @@ struct ChangelogSpotlightTests {
             at: Self.script,
             arguments: ["--body", file.path]
                 + (tag.map { ["--tag", $0] } ?? [])
+                + (census.map { ["--census", $0.path] } ?? [])
         )
     }
 
-    /// A census id this tree declares, read off the script's own
-    /// dump — one holding braces where there is one, since a
-    /// token must not stop at the id's first `}`.
-    private func censusID() throws -> String {
-        let run = try runPythonScript(
-            at: Self.script,
-            arguments: ["--census-ids"]
-        )
-        #expect(run.status == 0, "\(run.stderr)")
-        let ids = run.stdout.split(separator: "\n").map(String.init)
-        return try #require(ids.first { $0.contains("{") } ?? ids.first)
-    }
+    /// A landable id holding a brace pair, as census ids may
+    /// (`keybinding.swap_with_{prev,next}_track`): a token that
+    /// stopped at the first `}` would read a different id.
+    private static let bracedID = "keybinding.swap_with_{prev,next}_track"
 
     private func rows(_ id: String) -> String {
         """
@@ -61,8 +56,18 @@ struct ChangelogSpotlightTests {
     /// and the rows carried with their tokens.
     @Test("a spotlight body parses, its rows reported")
     func spotlightAccepted() throws {
-        let id = try censusID()
-        let run = try parse(rows(id))
+        let id = Self.bracedID
+        // Its own list, so the braced id is there whatever the
+        // tree's list holds.
+        let census = FileManager.default.temporaryDirectory
+            .appendingPathComponent("census-\(UUID().uuidString).txt")
+        try "config.layers\n\(id)\n".write(
+            to: census,
+            atomically: true,
+            encoding: .utf8
+        )
+        defer { try? FileManager.default.removeItem(at: census) }
+        let run = try parse(rows(id), census: census)
         #expect(run.status == 0, "\(run.stderr)")
         #expect(
             run.stdout.contains(
@@ -207,7 +212,7 @@ struct ChangelogSpotlightTests {
 
     @Test("the rows reach changelog.json as `spotlight`")
     func spotlightWritten() throws {
-        let id = try censusID()
+        let id = Self.bracedID
         let written =
             try entry(body: rows(id))["spotlight"] as? [[String: String]]
         #expect(written?.count == 2)
