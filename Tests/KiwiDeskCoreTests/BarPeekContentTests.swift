@@ -68,6 +68,41 @@ struct BarPeekContentTests {
         #expect(two.groups[0].count == 2)
     }
 
+    /// A lone window titled as its app would repeat the header
+    /// word for word, so the header stands alone (owner, device);
+    /// a different title, or several windows, keep their rows.
+    @Test("A lone window titled as its app shows the header alone")
+    func titleEqualToAppIsNotRepeated() {
+        LocalizationManager.shared.select("en")
+        let same = BarPeekContent(
+            rows: [row(1, app: "Claude", title: " Claude ")]
+        )
+        #expect(same.groups.map(\.app) == ["Claude"])
+        #expect(same.groups.map(\.titles) == [[]])
+        #expect(same.groups.map(\.windowCount) == [1])
+        let other = BarPeekContent(
+            rows: [row(1, app: "Claude", title: "New chat")]
+        )
+        #expect(other.groups.map(\.titles) == [["New chat"]])
+        let two = BarPeekContent(
+            rows: [
+                row(1, app: "Claude", title: "Claude"),
+                row(2, app: "Claude", title: "New chat"),
+            ]
+        )
+        #expect(two.groups.map(\.titles) == [["Claude", "New chat"]])
+        #expect(two.groups.map(\.count) == [2])
+        let untitled = BarPeekContent(
+            rows: [row(1, app: "Claude", title: "")]
+        )
+        #expect(untitled.groups.map(\.titles) == [["Untitled Window"]])
+        // The header-only peek draws one label and no hairline.
+        let body = BarPeekBody()
+        _ = body.build(same, shelf: KiwiShelf())
+        #expect(body.labels.map(\.stringValue) == ["Claude"])
+        #expect(body.rules.isEmpty)
+    }
+
     /// `+n` mixes apps: one group each, in first-seen order, with
     /// the app's icon, and a count only where a group has two.
     @Test("Mixed apps group per app, with icons")
@@ -135,7 +170,6 @@ struct BarPeekContentTests {
     @Test("The body draws the shelf's inks, pill and hairlines")
     func bodyDrawsTheRuledLook() throws {
         var shelf = KiwiShelf()
-        shelf.itemColor = "#102030"
         shelf.groupBadgeColor = "#445566"
         let body = BarPeekBody()
         _ = body.build(
@@ -153,23 +187,47 @@ struct BarPeekContentTests {
         #expect(body.labels.count == 6)
         let header = try #require(body.labels.first)
         #expect(header.stringValue == "A")
+        // The derived step under the titles (owner ruling).
+        #expect(shelf.peekHeaderColor != shelf.itemColor)
         #expect(
-            header.textColor == NSColor(kiwiHex: shelf.itemColor)
+            header.textColor == NSColor(kiwiHex: shelf.peekHeaderColor)
         )
         let one = try #require(body.labels.dropFirst().first)
         #expect(one.textColor == NSColor(kiwiHex: shelf.itemColor))
         // Only A has two or more windows.
-        #expect(body.pills.map(\.stringValue) == ["3"])
+        #expect(body.pills.map(\.number.stringValue) == ["3"])
+        let pill = try #require(body.pills.first)
         #expect(
-            body.pills.first?.layer?.backgroundColor
+            pill.layer?.backgroundColor
                 == NSColor(kiwiHex: shelf.groupBadgeColor).cgColor
         )
+        // The window glyph leads the number inside the pill.
+        #expect(pill.glyph.image != nil)
+        #expect(pill.glyph.frame.maxX <= pill.number.frame.minX)
+        #expect(pill.frame.height == BarPeekBody.Metrics.pillHeight)
         // Two between A's three windows, one between the apps.
         #expect(body.rules.count == 3)
         #expect(
             body.rules.allSatisfy {
                 $0.frame.height == BarDivider.ruleThickness
             }
+        )
+    }
+
+    /// The header's step is derived: a palette where 0.75 of its
+    /// item ink would miss the floor on the peek's grounds keeps the
+    /// full ink — a custom palette nobody measured.
+    @Test("A low-contrast palette's header falls back to full ink")
+    func headerFallsBackToFullInk() {
+        var shelf = KiwiShelf()
+        shelf.itemColor = "#5A5A5A"
+        shelf.fillColor = "#3A3A3CB3"
+        #expect(shelf.peekHeaderColor == shelf.itemColor)
+        // The default palette holds the step.
+        let kiwi = KiwiShelf()
+        #expect(
+            kiwi.peekHeaderColor
+                == kiwi.itemColor(atShare: KiwiShelf.peekHeaderAlpha)
         )
     }
 

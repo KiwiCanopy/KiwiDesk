@@ -27,7 +27,8 @@ struct BarPeekContent: Equatable {
         let app: String
         /// The app's icon, only where the rows mix apps (`+n`).
         let icon: NSImage?
-        /// One per window shown, in row order; never empty.
+        /// One per window shown, in row order — none for a lone
+        /// window titled as its app, which the header already names.
         let titles: [String]
         /// Every window the group stands for, shown or not.
         let windowCount: Int
@@ -94,9 +95,19 @@ struct BarPeekContent: Equatable {
             return Group(
                 app: first.app,
                 icon: mixed ? first.icon : nil,
-                titles: all,
+                titles: Self.namesItsApp(all, first.app) ? [] : all,
                 windowCount: all.count
             )
         }
+    }
+
+    /// A lone window titled as its app (owner, device 2026-10-07):
+    /// a row would repeat the header word for word. Several windows
+    /// keep every row, since the rows count them.
+    private static func namesItsApp(_ titles: [String], _ app: String) -> Bool
+    {
+        titles.count == 1
+            && titles[0].trimmingCharacters(in: .whitespacesAndNewlines)
+                == app.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

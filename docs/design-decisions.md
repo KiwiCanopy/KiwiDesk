@@ -12477,14 +12477,17 @@ press, and a multi-window glyph's menu opens where it stood.
 
 What it shows is ruled whole: the app on top, smaller and
 semibold like the menu's section header, so the peek reads as the
-menu before a click — but in the full item ink rather than a
-dimmed one, since weight and size already carry the hierarchy and
-a dimmed ink's legibility depends on a palette nobody can check in
-advance, a user's own included; one row per window, hairlines between, so a title that
+menu before a click, a step under the titles in ink — the item
+ink at three quarters of its alpha, DERIVED the way the empty
+Space ink is: the step is taken only where it holds the idle
+floor on both grounds the peek draws on, and a palette that
+cannot hold it, a user's own included, keeps the full ink; one row per window, hairlines between, so a title that
 wraps still reads as one window; every window counted, an
-untitled one as the menu names it; the count as a bare number in
-the bar's own badge pill, only from two windows, so it needs no
-plural; titles wrapped whole, since the peek exists to show what
+untitled one as the menu names it, while a lone window titled
+exactly as its app shows the header alone rather than the same
+word twice; the count as a window glyph and a
+bare number in the bar's own badge pill, only from two windows,
+so it needs no word and no plural; titles wrapped whole, since the peek exists to show what
 the bar cuts. `+n` mixes apps, so its groups carry their icons.
 The face is the bar's, at one fixed reading size: the strip-depth
 ladders would shrink it with a thin bar, which is where the peek

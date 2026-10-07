@@ -263,7 +263,7 @@ struct BarFontSiteTests {
         )
         #expect(body.labels.count == 3)
         #expect(body.pills.count == 1)
-        for field in body.labels + body.pills {
+        for field in body.labels + body.pills.map(\.number) {
             #expect(field.font?.familyName == Self.family)
         }
         let titles = body.labels.dropFirst()

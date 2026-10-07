@@ -61,7 +61,7 @@ struct BarPeekFitTests {
         )
         // The chevron points down at the rows cut below.
         #expect(body.moreChevron?.identifier?.rawValue == "chevron.down")
-        #expect(body.pills.map(\.stringValue) == ["14"])
+        #expect(body.pills.map(\.number.stringValue) == ["14"])
         #expect(more.frame.maxY <= size.height)
         let lastTitle = try #require(body.labels.last)
         #expect(more.frame.minY > lastTitle.frame.maxY, "the cut is below")

@@ -14,9 +14,12 @@ final class BarPeekBody: NSView {
         static let textSize: CGFloat = 13
         /// The header's size: the menus' section header.
         static let headerSize: CGFloat = 11
-        static let countSize: CGFloat = 10
+        static let countSize: CGFloat = 10.5
         static let pillHeight: CGFloat = 16
-        static let pillPad: CGFloat = 4
+        static let pillPad: CGFloat = 5
+        /// The window glyph before the count, and its gap to it.
+        static let pillGlyphSize: CGFloat = 9
+        static let pillGlyphGap: CGFloat = 2
         /// The whole panel's widest; a title wraps inside it.
         static let maxWidth: CGFloat = 280
         static let padH: CGFloat = 12
@@ -42,7 +45,7 @@ final class BarPeekBody: NSView {
     /// What the last build drew, top to bottom: headers and
     /// titles, the count pills, the icons and the hairlines.
     private(set) var labels: [NSTextField] = []
-    private(set) var pills: [NSTextField] = []
+    private(set) var pills: [BarPeekPill] = []
     private(set) var icons: [NSImageView] = []
     var rules: [NSView] = []
     /// The "more" line's count and chevron, where the room cut
@@ -71,6 +74,7 @@ final class BarPeekBody: NSView {
         setAccessibilityElement(false)
         ruleInk = BarDivider.color(textColor: shelf.itemColor)
         let ink = NSColor(kiwiHex: shelf.itemColor)
+        let headerInk = NSColor(kiwiHex: shelf.peekHeaderColor)
         let textFont = shelf.textFont(ofSize: Metrics.textSize)
         let headerFont = shelf.textFont(
             ofSize: Metrics.headerSize,
@@ -79,10 +83,9 @@ final class BarPeekBody: NSView {
         let groups = content.groups.map { group in
             Built(
                 group: group,
-                // Full ink: weight and size carry the hierarchy,
-                // and a dimmed ink's legibility rides on a palette
-                // nobody can pre-check (owner ruling on #1946).
-                header: Self.label(group.app, headerFont, ink),
+                // A derived step under the titles, full ink where
+                // the palette cannot hold it (owner ruling, #1946).
+                header: Self.label(group.app, headerFont, headerInk),
                 rows: group.titles.map { Self.label($0, textFont, ink) },
                 pill: group.count.map { pill($0, shelf: shelf) }
             )
@@ -129,7 +132,7 @@ final class BarPeekBody: NSView {
         let group: BarPeekContent.Group
         let header: NSTextField
         let rows: [NSTextField]
-        let pill: NSTextField?
+        let pill: BarPeekPill?
 
         /// The width it reads at on one line each.
         @MainActor
@@ -186,7 +189,8 @@ final class BarPeekBody: NSView {
             addSubview(pill)
             pills.append(pill)
         }
-        var y = top + max(nameHeight, line) + Metrics.headerGap
+        let gap = built.rows.isEmpty ? 0 : Metrics.headerGap
+        var y = top + max(nameHeight, line) + gap
         let rowWidth = max(width - indent, 1)
         for (index, row) in built.rows.enumerated() {
             if index > 0 {

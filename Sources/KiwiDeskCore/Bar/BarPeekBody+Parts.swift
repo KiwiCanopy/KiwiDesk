@@ -48,25 +48,10 @@ extension BarPeekBody {
         return ceil(font.ascender - font.descender + font.leading)
     }
 
-    /// The count as a bare number in the bar's group badge — the
-    /// glyph's own badge, in its colours and face.
-    func pill(_ count: Int, shelf: KiwiShelf) -> NSTextField {
-        let pill = SpaceBarItemView.makeBadge()
-        pill.stringValue = "\(count)"
-        pill.font = shelf.badgeFont(
-            ofSize: Metrics.countSize,
-            emphasis: .bold
-        )
-        pill.textColor = NSColor(kiwiHex: shelf.groupBadgeTextColor)
-        pill.layer?.backgroundColor =
-            NSColor(kiwiHex: shelf.groupBadgeColor).cgColor
-        pill.layer?.cornerRadius = Metrics.pillHeight / 2
-        let text = ceil(pill.cell?.cellSize.width ?? 0)
-        pill.frame.size = CGSize(
-            width: max(Metrics.pillHeight, text + 2 * Metrics.pillPad),
-            height: Metrics.pillHeight
-        )
-        return pill
+    /// The count in the bar's group badge: a window glyph, then the
+    /// bare number — no noun, so no localized frame (owner ruling).
+    func pill(_ count: Int, shelf: KiwiShelf) -> BarPeekPill {
+        BarPeekPill(count, shelf: shelf)
     }
 
     /// A hairline at `y`, `x` in from the text's lead.
@@ -84,4 +69,58 @@ extension BarPeekBody {
         addSubview(rule)
         rules.append(rule)
     }
+}
+
+/// The peek's count pill (#1946): `macwindow` then the number, both
+/// in the badge ink, on the badge fill.
+@MainActor
+final class BarPeekPill: NSView {
+    let glyph = NSImageView()
+    let number = SpaceBarItemView.makeBadge()
+
+    init(_ count: Int, shelf: KiwiShelf) {
+        typealias M = BarPeekBody.Metrics
+        super.init(frame: .zero)
+        wantsLayer = true
+        setAccessibilityElement(false)
+        let ink = NSColor(kiwiHex: shelf.groupBadgeTextColor)
+        layer?.backgroundColor =
+            NSColor(kiwiHex: shelf.groupBadgeColor).cgColor
+        layer?.cornerRadius = M.pillHeight / 2
+        glyph.image = NSImage(
+            systemSymbolName: "macwindow",
+            accessibilityDescription: nil
+        )?.withSymbolConfiguration(
+            .init(pointSize: M.pillGlyphSize, weight: .semibold)
+        )
+        glyph.contentTintColor = ink
+        glyph.setAccessibilityElement(false)
+        number.stringValue = "\(count)"
+        number.font = shelf.badgeFont(ofSize: M.countSize, emphasis: .semibold)
+        number.textColor = ink
+        number.layer?.backgroundColor = nil
+        let text = ceil(number.cell?.cellSize.width ?? 0)
+        let glyphWidth = ceil(glyph.image?.size.width ?? M.pillGlyphSize)
+        glyph.frame = CGRect(
+            x: M.pillPad,
+            y: (M.pillHeight - M.pillGlyphSize) / 2,
+            width: glyphWidth,
+            height: M.pillGlyphSize
+        )
+        number.frame = CGRect(
+            x: glyph.frame.maxX + M.pillGlyphGap,
+            y: 0,
+            width: text,
+            height: M.pillHeight
+        )
+        addSubview(glyph)
+        addSubview(number)
+        frame.size = CGSize(
+            width: max(M.pillHeight, number.frame.maxX + M.pillPad),
+            height: M.pillHeight
+        )
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError() }
 }

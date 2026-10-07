@@ -5,7 +5,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The hover peek's ink stays legible on its own ground (#1946):
-/// titles and the app header alike in the shelf's full item ink,
+/// titles in the shelf's item ink, the app header at its derived
+/// `peekHeaderColor`,
 /// on the plate's Fill — capped at `GlassTint.maxAlpha` as glass
 /// and uniform over the whole panel (`GlassTint.applyUniform`), or
 /// as stored where the glass is off. Measured as
@@ -53,31 +54,32 @@ struct PeekInkContrastTests {
             shelf.itemColor = item
             let glass = try #require(capped(fill, at: GlassTint.maxAlpha))
             for ground in [fill, glass] {
-                // Titles and header share the one ink (owner
-                // ruling on #1946), so the one ink is measured.
-                let ink = shelf.itemColor
-                for wallpaper in ["#FFFFFF", "#000000"] {
-                    let value = try #require(
-                        contrast(
-                            ink: ink,
-                            ground: ground,
-                            on: wallpaper
+                // Titles in the item ink, the header at its derived
+                // step (owner ruling on #1946) — two pairings.
+                for ink in [shelf.itemColor, shelf.peekHeaderColor] {
+                    for wallpaper in ["#FFFFFF", "#000000"] {
+                        let value = try #require(
+                            contrast(
+                                ink: ink,
+                                ground: ground,
+                                on: wallpaper
+                            )
                         )
-                    )
-                    measured += 1
-                    #expect(
-                        value >= Self.floor,
-                        Comment(
-                            rawValue:
-                                "\(palette.name) \(ink) on "
-                                + "\(ground) over \(wallpaper): "
-                                + "\(value)"
+                        measured += 1
+                        #expect(
+                            value >= Self.floor,
+                            Comment(
+                                rawValue:
+                                    "\(palette.name) \(ink) on "
+                                    + "\(ground) over \(wallpaper): "
+                                    + "\(value)"
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
-        #expect(measured == PaletteCatalog.bundled().count * 4)
+        #expect(measured == PaletteCatalog.bundled().count * 8)
         #expect(measured > 0)
     }
 }

@@ -33,10 +33,10 @@ extension KiwiShelf {
         for hundredths in stride(from: top, through: 0, by: -1) {
             let share = CGFloat(hundredths) / 100
             let ink = itemColor(atShare: share)
-            guard let step = worstContrast(occupied, ink),
+            guard let step = worstContrast(occupied, ink, on: fillColor),
                 step >= Self.emptyInkStep
             else { continue }
-            guard let floor = worstContrast(ink, nil),
+            guard let floor = worstContrast(ink, nil, on: fillColor),
                 floor >= Self.idleInkFloor
             else { return nil }
             return share
@@ -51,12 +51,16 @@ extension KiwiShelf {
     }
 
     /// The lower of the two wallpapers' contrasts between `ink`
-    /// and `other` (the plate where nil), each composited over
-    /// the plate; nil where a colour does not parse.
-    private func worstContrast(_ ink: String, _ other: String?) -> Double? {
+    /// and `other` (the plate where nil), each composited over the
+    /// plate `fill`; nil where a colour does not parse.
+    func worstContrast(
+        _ ink: String,
+        _ other: String?,
+        on fill: String
+    ) -> Double? {
         var worst: Double?
         for ground in Self.inkGrounds {
-            guard let plate = Self.composite(fillColor, over: ground),
+            guard let plate = Self.composite(fill, over: ground),
                 let a = Self.composite(ink, over: plate),
                 let b = other.map({ Self.composite($0, over: plate) })
                     ?? plate,
