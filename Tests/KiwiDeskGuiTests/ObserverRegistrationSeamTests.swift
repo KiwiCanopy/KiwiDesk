@@ -1,14 +1,17 @@
 import Foundation
 import Testing
 
-/// #837: the install and the repair both take the one bounded
-/// `register`, both record its stall, the repair is gated on the
-/// back-off and ordered with the stalled add last, and a session's
-/// return forgets the stall (#1285). `ObserverRegistrationBoundTests`
-/// pins the pure decisions; this pins that each site reaches them.
+/// #837: the observer keeps no registration state of its own — the
+/// install and the repair file their outcome in the one
+/// `ObserverRegistrationLedger`, the repair is asked in its order
+/// and gated on its back-off, a session's return forgets its stall
+/// (#1285), and the wrapper reaches the bounded `register`.
+/// `ObserverRegistrationBoundTests` pins the ledger and the loop;
+/// this pins that each observer member reaches them.
 @Suite("Observer registration wiring (#837)")
 struct ObserverRegistrationSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
+    private let file = "Sources/KiwiDeskCore/AX/AXApplicationObserver.swift"
 
     private func count(_ needle: String, in path: String) throws -> Int {
         let source = try SourceScan.strippedSource(
@@ -17,27 +20,24 @@ struct ObserverRegistrationSeamTests {
         return source.components(separatedBy: needle).count - 1
     }
 
-    @Test("install and repair register through the one bounded loop")
-    func bothSitesTakeTheBound() throws {
-        let file = "Sources/KiwiDeskCore/AX/AXApplicationObserver.swift"
-        #expect(
-            try count("record(register(Self.appNotifications))", in: file)
-                == 1
-        )
-        #expect(
-            try count(
-                "record(\n            register(\n"
-                    + "                Self.repairOrder(",
-                in: file
-            ) == 1
-        )
-        #expect(try count("stalledAt: stalledAt,", in: file) == 1)
-        // The instance wrapper reaches the bounded static, on the
-        // observer's own clock.
-        #expect(
-            try count("return Self.register(names, now: now) {", in: file)
-                == 1
-        )
+    @Test("each observer member reaches the ledger and the bound")
+    func membersReachTheLedger() throws {
+        let needles = [
+            "ledger.record(register(Self.appNotifications), at: now())",
+            "ledger.record(\n"
+                + "            register(ledger.repairOrder("
+                + "of: Self.appNotifications)),\n"
+                + "            at: now()\n",
+            "public var needsRegistrationRepair: Bool {\n"
+                + "        ledger.needsRepair(now: now())\n    }",
+            "public func forgetRepairStall() { ledger.forgetStall() }",
+            // The wrapper reaches the bounded static, on the
+            // observer's own clock.
+            "return Self.register(names, now: now) {",
+        ]
+        for needle in needles {
+            #expect(try count(needle, in: file) == 1, "\(needle)")
+        }
         // The bounded loop's add and the per-window one.
         #expect(try count("AXObserverAddNotification(", in: file) == 2)
     }

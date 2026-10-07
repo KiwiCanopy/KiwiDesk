@@ -69,53 +69,35 @@ struct ObserverRegistrationBoundTests {
 
     @Test("a stall backs repair off until the window passes")
     func stallBacksRepairOff() {
-        let stalled = ContinuousClock.now
-        let due = { (after: Duration) in
-            AXApplicationObserver.repairDue(
-                failed: true,
-                stalledAt: stalled,
-                now: stalled.advanced(by: after)
-            )
-        }
-        #expect(!due(.zero))
-        #expect(!due(AXApplicationObserver.repairBackoff - .seconds(1)))
-        #expect(due(AXApplicationObserver.repairBackoff))
+        let start = ContinuousClock.now
+        let backoff = ObserverRegistrationLedger.repairBackoff
+        var ledger = ObserverRegistrationLedger()
+        #expect(!ledger.needsRepair(now: start))
+        ledger.record((["a", "b", "c"], stalled: "a"), at: start)
+        #expect(!ledger.needsRepair(now: start))
         #expect(
-            AXApplicationObserver.repairDue(
-                failed: true,
-                stalledAt: nil,
-                now: stalled
+            !ledger.needsRepair(
+                now: start.advanced(by: backoff - .seconds(1))
             )
         )
-        #expect(
-            !AXApplicationObserver.repairDue(
-                failed: false,
-                stalledAt: nil,
-                now: stalled
-            )
-        )
+        #expect(ledger.needsRepair(now: start.advanced(by: backoff)))
+        // A session's return forgets the stall at once.
+        ledger.forgetStall()
+        #expect(ledger.needsRepair(now: start))
+        // A refusal with no stall is owed at once.
+        ledger.record((["b"], stalled: nil), at: start)
+        #expect(ledger.needsRepair(now: start))
+        ledger.record(([], stalled: nil), at: start)
+        #expect(!ledger.needsRepair(now: start))
     }
 
-    @Test("repair asks the add that stalled last")
+    @Test("repair asks only the failed adds, the stalled one last")
     func repairAsksTheStalledAddLast() {
-        let failed: Set<String> = [
-            kAXWindowCreatedNotification,
-            kAXFocusedWindowChangedNotification,
-            kAXWindowMiniaturizedNotification,
-        ]
-        #expect(
-            AXApplicationObserver.repairOrder(
-                failed: failed,
-                stalled: kAXWindowCreatedNotification
-            ) == [
-                kAXFocusedWindowChangedNotification,
-                kAXWindowMiniaturizedNotification,
-                kAXWindowCreatedNotification,
-            ]
-        )
-        #expect(
-            AXApplicationObserver.repairOrder(failed: failed, stalled: nil)
-                .first == kAXWindowCreatedNotification
-        )
+        let declared = ["a", "b", "c", "d"]
+        var ledger = ObserverRegistrationLedger()
+        ledger.record((["a", "c", "d"], stalled: "a"), at: .now)
+        #expect(ledger.repairOrder(of: declared) == ["c", "d", "a"])
+        ledger.record((["a", "c"], stalled: nil), at: .now)
+        #expect(ledger.repairOrder(of: declared) == ["a", "c"])
     }
 }
