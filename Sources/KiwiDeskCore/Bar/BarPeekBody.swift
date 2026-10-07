@@ -28,6 +28,8 @@ final class BarPeekBody: NSView {
         static let groupGap: CGFloat = 8
         static let iconSide: CGFloat = 16
         static let iconGap: CGFloat = 5
+        /// The "more" line's chevron.
+        static let chevronSide: CGFloat = 12
         static let pillGap: CGFloat = 8
         static let cornerRadius: CGFloat = 11
         /// The gap between the bar's panel and the peek.
@@ -43,17 +45,29 @@ final class BarPeekBody: NSView {
     private(set) var pills: [NSTextField] = []
     private(set) var icons: [NSImageView] = []
     var rules: [NSView] = []
+    /// The "more" line's count and chevron, where the room cut
+    /// the list (`BarPeekBody+More`).
+    var moreLabel: NSTextField?
+    var moreChevron: NSImageView?
     /// The hairlines' ink: the bar's rule tier (`BarDivider`).
     private(set) var ruleInk = NSColor.clear
 
-    /// Lays `content` out in `shelf`'s face and ink; returns the
-    /// panel's size.
-    func build(_ content: BarPeekContent, shelf: KiwiShelf) -> CGSize {
+    /// Lays `content` out in `shelf`'s face and ink, with a "more"
+    /// line where `hidden` windows did not fit — above the list
+    /// when `cutAtTop`, else below it; returns the panel's size.
+    func layout(
+        _ content: BarPeekContent,
+        shelf: KiwiShelf,
+        hidden: Int,
+        cutAtTop: Bool = false
+    ) -> CGSize {
         subviews.forEach { $0.removeFromSuperview() }
         labels = []
         pills = []
         icons = []
         rules = []
+        moreLabel = nil
+        moreChevron = nil
         setAccessibilityElement(false)
         ruleInk = BarDivider.color(textColor: shelf.itemColor)
         let ink = NSColor(kiwiHex: shelf.itemColor)
@@ -78,17 +92,29 @@ final class BarPeekBody: NSView {
         let indent =
             content.groups.contains { $0.icon != nil }
             ? Metrics.iconSide + Metrics.iconGap : 0
+        let more =
+            hidden > 0
+            ? moreLine(hidden, shelf: shelf, up: cutAtTop) : nil
         let width = min(
             Metrics.maxWidth - 2 * Metrics.padH,
-            groups.map { $0.need(indent: indent) }.max() ?? 0
+            max(
+                groups.map { $0.need(indent: indent) }.max() ?? 0,
+                more?.width ?? 0
+            )
         )
         var y = Metrics.padV
+        if let more, cutAtTop {
+            y = place(more, at: y, width: width) + Metrics.rowGap
+        }
         for (index, built) in groups.enumerated() {
             if index > 0 {
                 addRule(at: y + Metrics.groupGap, x: 0, width: width)
                 y += 2 * Metrics.groupGap + BarDivider.ruleThickness
             }
             y = place(built, at: y, width: width, indent: indent)
+        }
+        if let more, !cutAtTop {
+            y = place(more, at: y + Metrics.rowGap, width: width)
         }
         let size = CGSize(
             width: ceil(width + 2 * Metrics.padH),

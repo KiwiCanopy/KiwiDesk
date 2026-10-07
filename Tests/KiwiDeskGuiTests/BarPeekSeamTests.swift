@@ -126,25 +126,37 @@ struct BarPeekSeamTests {
             ("barWindowRows", rows),
         ]
         for (name, body) in bodies {
-            for needle in ["raiseCrossesDesktops", "spaceBarMenuRows("] {
-                #expect(!body.contains(needle), "\(name) reaches \(needle)")
+            for needle in Self.compositorReads where body.contains(needle) {
+                Issue.record("\(name) reaches \(needle)")
             }
         }
-        for file in ["BarPeek.swift", "BarPeekContent.swift"] {
-            #expect(
-                !(try Self.source(file)).contains("raiseCrossesDesktops"),
-                "\(file)"
-            )
+        for file in try SourceScan.swiftSources(under: Self.bar)
+        where file.lastPathComponent.hasPrefix("BarPeek") {
+            let text = try SourceScan.strippedSource(at: file)
+            for needle in Self.compositorReads where text.contains(needle) {
+                Issue.record("\(file.lastPathComponent) reaches \(needle)")
+            }
         }
     }
 
+    /// The compositor's seams, as a class: the focus door's raise
+    /// gate, the on-screen and shown-Desktop reads, the WindowServer
+    /// window list, the Desktop reads — and the menu rows, which
+    /// take the raise gate.
+    private static let compositorReads = [
+        "raiseCrossesDesktops", "windowIsOnScreen(",
+        "windowIsOnShownDesktop(", "FloatDetection.", "NativeSpaces.",
+        "spaceBarMenuRows(",
+    ]
+
     /// Every view that reports the pointer to the peek, and the
-    /// view it hands as the anchor — the one copy of who anchors
-    /// it. Derived from the `peek?.pointer(` callers, so a new
-    /// anchoring view reds until it is written here.
-    private static let anchors: [String: String] = [
-        "SpaceBarItemView+Hover.swift": "SpaceBarGlyphTarget.swift",
-        "AppBarItemView+HoverTitle.swift": "AppBarItemView.swift",
+    /// views it may hand as the anchor — the one copy of who
+    /// anchors it. Derived from the `peek?.pointer(` callers, so a
+    /// new reporter reds until it is written here; a reporter
+    /// gaining an anchor (#1945's collapsed chip) widens its set.
+    private static let anchors: [String: Set<String>] = [
+        "SpaceBarItemView+Hover.swift": ["SpaceBarGlyphTarget.swift"],
+        "AppBarItemView+HoverTitle.swift": ["AppBarItemView.swift"],
     ]
 
     /// A press on an anchor closes the peek (#1946) — after the
@@ -159,7 +171,7 @@ struct BarPeekSeamTests {
             }
         }
         #expect(reporters == Set(Self.anchors.keys), "\(reporters)")
-        for anchor in Set(Self.anchors.values) {
+        for anchor in Set(Self.anchors.values.joined()) {
             let body = try #require(
                 SourceScan.declarationBody(
                     after: "func mouseDown(",

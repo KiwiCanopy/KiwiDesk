@@ -34,6 +34,8 @@ struct SymbolClassifierSeamTests {
             "measures a `.symbol` verdict's ink for a lone chip's ends",
         "Sources/KiwiDeskCore/Bar/StateBadgeView.swift":
             "builds a badge image from a fixed name",
+        "Sources/KiwiDeskCore/Bar/BarPeekBody+More.swift":
+            "builds the peek's more-line chevron from a fixed name",
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Marker.swift":
             "builds the Space marker's image from a fixed name",
         "Sources/KiwiDeskCore/Borders/StickyMarkOverlay.swift":

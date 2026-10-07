@@ -594,7 +594,10 @@ Obligations:
   on that ground); its shelf is the one `ShelfManager` drew the
   anchor's panel with; its text asks `BarFont` at the peek's own
   fixed size, never the strip-depth ladders (`BarFontSiteTests` ▸
-  `hoverPeek`). The panel is deaf to the mouse and hidden from
+  `hoverPeek`); a list taller than its room keeps what fits and
+  closes on the one "more" line (`BarPeekBody+More`,
+  `BarPeekFitTests` ▸ `tallPeekKeepsWhatFits`). The panel is
+  deaf to the mouse and hidden from
   accessibility: VoiceOver keeps the item's label and the menu
   (`BarPeekTests` ▸ `panelIsReadOnly`). The argument is
   `docs/design-decisions.md` ▸ A bar item's hover peek.

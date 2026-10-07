@@ -12501,10 +12501,16 @@ wraps. The ink is the shelf's own item ink, measured on that
 ground on every bundled palette (`PeekInkContrastTests`).
 
 Its height is capped to the usable room on its side of the strip,
-so a long `+n` never covers its bar or the item it names; what
-passes the cap is clipped, an accepted loss for a list that long,
-since the menu a click opens carries every row. No title is ever
-capped on its own.
+so a long `+n` never covers its bar or the item it names. A list
+taller than that keeps the windows that fit, in order, and marks
+the cut at the edge away from the bar with a chevron and "N more"
+in the secondary ink (owner ruling): the chevron points where the
+hidden rows are — down under a top bar, up over a bottom one,
+whose peek keeps the windows nearest the bar — and tells the user
+the click menu holds the rest. The peek itself never scrolls: it
+takes no mouse event by ruling, and the menu is the scrollable
+list. The frame counts no noun, so no locale has to agree with the
+number. No title is ever capped on its own.
 
 It never acts and never opens a menu on hover. A hover-opened
 menu runs a tracking loop that eats the next click, and no macOS

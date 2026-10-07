@@ -138,10 +138,13 @@ struct SpaceBarGlyphHoverTests {
         let menu = SpaceBarWindowMenu.make(
             [
                 .init(
-                    window: WindowID(4),
-                    app: "Web",
-                    title: "Doc",
-                    icon: NSImage(size: NSSize(width: 32, height: 32)),
+                    row: BarWindowRow(
+                        window: WindowID(4),
+                        pid: 1,
+                        app: "Web",
+                        title: "Doc",
+                        icon: NSImage(size: NSSize(width: 32, height: 32))
+                    ),
                     enabled: true
                 )
             ],

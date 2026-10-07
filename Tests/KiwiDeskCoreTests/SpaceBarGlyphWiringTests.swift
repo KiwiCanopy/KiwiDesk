@@ -202,7 +202,7 @@ struct SpaceBarGlyphWiringTests {
         let core = seededCore()
         core.windowIsOnScreen = { $0 == WindowID(4) ? false : nil }
         let rows = core.spaceBarMenuRows([WindowID(4), WindowID(1)])
-        #expect(rows.map(\.window) == [WindowID(4), WindowID(1)])
+        #expect(rows.map(\.row.window) == [WindowID(4), WindowID(1)])
         #expect(rows.map(\.enabled) == [false, true])
     }
 }

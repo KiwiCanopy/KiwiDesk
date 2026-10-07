@@ -63,10 +63,7 @@ extension KiwiCore {
     ) -> [SpaceBarWindowMenu.Row] {
         barWindowRows(windows).map { row in
             SpaceBarWindowMenu.Row(
-                window: row.window,
-                app: row.app,
-                title: row.title,
-                icon: row.icon,
+                row: row,
                 // The focus door's own refusal (#1345): a row it
                 // would refuse is greyed, never hidden (#802).
                 enabled: !raiseCrossesDesktops(row.window)

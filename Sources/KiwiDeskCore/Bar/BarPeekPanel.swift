@@ -45,7 +45,17 @@ final class BarPeekPanel {
         // (#1374): glass stands down while transparency is reduced.
         let shelf = LiquidGlassGate.rendered(stored)
         let size = Self.capped(
-            body.build(content, shelf: shelf),
+            body.build(
+                content,
+                shelf: shelf,
+                maxHeight: Self.room(
+                    edge: edge,
+                    strip: strip,
+                    visible: visible
+                ),
+                // The cut is at the far edge from the bar.
+                cutAtTop: edge == .bottom
+            ),
             edge: edge,
             strip: strip,
             visible: visible
@@ -87,14 +97,30 @@ final class BarPeekPanel {
 
     /// The panel's size, its height bounded by the usable room
     /// on the far side of the strip, so a tall peek never covers
-    /// its bar or item; what passes the bound is clipped, and no
-    /// title is capped on its own (#1946).
+    /// its bar or item. The body fits itself to that room first
+    /// (`BarPeekBody+More`); only what still passes it is clipped,
+    /// and no title is capped on its own (#1946).
     nonisolated static func capped(
         _ size: CGSize,
         edge: AppBarEdge,
         strip: CGRect,
         visible: CGRect
     ) -> CGSize {
+        CGSize(
+            width: size.width,
+            height: min(
+                size.height,
+                room(edge: edge, strip: strip, visible: visible)
+            )
+        )
+    }
+
+    /// The usable height on the far side of the strip.
+    nonisolated static func room(
+        edge: AppBarEdge,
+        strip: CGRect,
+        visible: CGRect
+    ) -> CGFloat {
         typealias M = BarPeekBody.Metrics
         let room: CGFloat
         switch edge {
@@ -105,10 +131,7 @@ final class BarPeekPanel {
         case .left, .right:
             room = visible.height - 2 * M.screenMargin
         }
-        return CGSize(
-            width: size.width,
-            height: max(min(size.height, room), 0)
-        )
+        return max(room, 0)
     }
 
     /// Where the panel opens: across the strip from the bar's

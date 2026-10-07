@@ -7,11 +7,10 @@ import AppKit
 /// the icon and name (#1947).
 @MainActor
 enum SpaceBarWindowMenu {
+    /// A window as the bar lists name it, and what only the menu
+    /// adds: whether the focus door would take it (#1345).
     struct Row: Equatable {
-        let window: WindowID
-        let app: String
-        let title: String
-        let icon: NSImage?
+        let row: BarWindowRow
         let enabled: Bool
     }
 
@@ -29,13 +28,13 @@ enum SpaceBarWindowMenu {
     }
 
     /// A glyph row's text: its window's name, capped.
-    static func titleText(_ row: Row) -> String {
+    static func titleText(_ row: BarWindowRow) -> String {
         AppBarStyle.cappedTitle(windowName(row.title), to: titleCap)
     }
 
     /// An overflow row's text: the app, then its title where it
     /// has one.
-    static func text(_ row: Row) -> String {
+    static func text(_ row: BarWindowRow) -> String {
         guard !row.title.isEmpty else { return row.app }
         return L(
             "space_bar.menu.row",
@@ -54,10 +53,11 @@ enum SpaceBarWindowMenu {
         menu.autoenablesItems = false
         let handler = Handler(onPick: onPick)
         let oneApp = kind == .glyph
-        if oneApp, let app = rows.first?.app {
+        if oneApp, let app = rows.first?.row.app {
             menu.addItem(.sectionHeader(title: app))
         }
-        for row in rows {
+        for entry in rows {
+            let row = entry.row
             let item = NSMenuItem(
                 title: oneApp ? titleText(row) : text(row),
                 action: #selector(Handler.pick(_:)),
@@ -67,7 +67,7 @@ enum SpaceBarWindowMenu {
             // `target` is weak: the rows keep the handler alive
             // for as long as the menu is.
             item.representedObject = Pick(row.window, handler)
-            item.isEnabled = row.enabled
+            item.isEnabled = entry.enabled
             if row.title.count > titleCap { item.toolTip = row.title }
             if !oneApp {
                 item.image = row.icon.map(scaled)

@@ -105,21 +105,25 @@ struct BarPeekContentTests {
         #expect(content.groups[0].icon == nil)
     }
 
-    /// Two processes sharing a name are two apps: grouped by pid,
-    /// each headed by its own name.
-    @Test("Groups key on the process, not the name")
-    func groupsKeyOnThePid() {
+    /// A glyph's run may span sibling processes of one app (#1785,
+    /// Orion): the bars group by app name, so the peek does too —
+    /// one group, every window, and no icon, since it names one app.
+    @Test("Sibling processes of one app are one group")
+    func siblingProcessesShareAGroup() {
+        let icon = NSImage(size: NSSize(width: 16, height: 16))
         let content = BarPeekContent(
             rows: [
-                row(1, app: "Chrome", title: "Work", pid: 10),
-                row(2, app: "Chrome", title: "Home", pid: 20),
-                row(3, app: "Chrome", title: "Mail", pid: 10),
+                row(1, app: "Orion", title: "Work", icon: icon, pid: 10),
+                row(2, app: "Orion", title: "Home", icon: icon, pid: 20),
+                row(3, app: "Orion", title: "Mail", icon: icon, pid: 10),
             ]
         )
-        #expect(content.groups.map(\.app) == ["Chrome", "Chrome"])
+        #expect(content.groups.map(\.app) == ["Orion"])
         #expect(
-            content.groups.map(\.titles) == [["Work", "Mail"], ["Home"]]
+            content.groups.map(\.titles) == [["Work", "Home", "Mail"]]
         )
+        #expect(content.groups.map(\.count) == [3])
+        #expect(content.groups[0].icon == nil)
     }
 
     // MARK: - The drawing
@@ -235,49 +239,5 @@ struct BarPeekContentTests {
             visible: screen
         )
         #expect(edge.x + size.width <= screen.maxX)
-    }
-
-    /// A peek taller than the usable room on its side is cut to it,
-    /// so it never covers its bar; one that fits keeps its height.
-    @Test("A tall peek is capped to the usable area")
-    func tallPeekIsCapped() {
-        // The menu bar and the Dock leave a smaller usable area.
-        let visible = CGRect(x: 0, y: 80, width: 1440, height: 790)
-        let top = CGRect(x: 0, y: 830, width: 1440, height: 40)
-        let tall = CGSize(width: 200, height: 2000)
-        let capped = BarPeekPanel.capped(
-            tall,
-            edge: .top,
-            strip: top,
-            visible: visible
-        )
-        #expect(capped.width == tall.width)
-        #expect(capped.height < tall.height)
-        let origin = BarPeekPanel.origin(
-            size: capped,
-            edge: .top,
-            anchor: CGRect(x: 300, y: 840, width: 20, height: 20),
-            strip: top,
-            visible: visible
-        )
-        #expect(origin.y >= visible.minY)
-        #expect(origin.y + capped.height <= top.minY)
-        let bottom = CGRect(x: 0, y: 80, width: 1440, height: 40)
-        let up = BarPeekPanel.capped(
-            tall,
-            edge: .bottom,
-            strip: bottom,
-            visible: visible
-        )
-        #expect(bottom.maxY + up.height <= visible.maxY)
-        let small = CGSize(width: 200, height: 80)
-        #expect(
-            BarPeekPanel.capped(
-                small,
-                edge: .top,
-                strip: top,
-                visible: visible
-            ) == small
-        )
     }
 }
