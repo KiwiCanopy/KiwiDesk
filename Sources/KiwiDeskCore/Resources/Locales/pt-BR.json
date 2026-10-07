@@ -1636,6 +1636,7 @@
   "update.window.notes_tabs": "Notas da versão",
   "update.window.preparing": "Preparando…",
   "update.window.released": "Lançada em %1$@",
+  "update.window.spotlight.show_me": "Ver",
   "update.window.title": "KiwiDesk %1$@ está disponível",
   "update.window.try_again": "Tentar novamente",
   "update.window.up_to_date_subtitle": "%1$@ é a versão mais recente",
@@ -1657,6 +1658,10 @@
   "updates.state.up_to_date_checked": "Atualizado · última verificação %1$@",
   "updates.state.up_to_date_window_open": "Atualizado · feche a janela de atualização para verificar de novo",
   "updates.try_again": "Tentar novamente",
+  "whatsnew.trail.back": "Voltar às Novidades",
+  "whatsnew.trail.dismiss": "Fechar",
+  "whatsnew.trail.from": "Das Novidades",
+  "whatsnew.trail.next": "Próximo: %1$@",
   "window_action.refusal.no_close_button": "“%1$@” não tem botão de fechar",
   "window_action.refusal.no_new_window": "%1$@ não tem o comando “Nova Janela”"
 }

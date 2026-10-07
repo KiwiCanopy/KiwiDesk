@@ -148,6 +148,16 @@ struct SettingsView: View {
                 contentFocused = true
             }
         }
+        // The What's new trail's Next and × (#2038): focus to the
+        // landed control's pane while one is drawn, else the
+        // window's default — the banner they remove cannot hold it.
+        .onChange(of: model.nav.trailFocusRequest) { _, _ in
+            if model.destination != nil,
+                model.nav.navigationMovesFocus
+            {
+                contentFocused = true
+            }
+        }
         .environment(\.settingsNavigate) { destination in
             // Third #18 enforcement point beside the grid's offer
             // filter and the onChange repair, which only fires on

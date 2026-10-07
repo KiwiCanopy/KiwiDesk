@@ -31,8 +31,18 @@ struct UpdateNotesDigest: Equatable {
         let text: String
     }
 
-    /// The offered version's summary, for the Highlights panel.
+    /// A spotlight row with the version it came from (#2038).
+    struct SpotlightEntry: Equatable {
+        let row: ReleaseNotes.SpotlightRow
+        let version: String
+    }
+
+    /// The offered version's summary, for the Highlights panel —
+    /// its one intro sentence while `spotlight` has rows.
     let summary: String
+    /// The Highlights rows, newest first, at most
+    /// `spotlightCap`; empty draws the summary as prose.
+    var spotlight: [SpotlightEntry] = []
     /// Every merged version's "Before you update", newest first.
     let cautions: [Caution]
     let groups: [Group]
@@ -96,6 +106,7 @@ struct UpdateNotesDigest: Equatable {
         }
         return UpdateNotesDigest(
             summary: offeredNotes.summary,
+            spotlight: spotlight(readable),
             cautions: readable.compactMap { version, notes in
                 notes.heads.map { Caution(version: version, text: $0) }
             },
@@ -103,6 +114,44 @@ struct UpdateNotesDigest: Equatable {
             versions: readable.map(\.0),
             unreadable: unreadable
         )
+    }
+
+    /// The most rows the Highlights tab draws (#2038).
+    static let spotlightCap = 4
+
+    /// Which rows the Highlights tab draws, newest first — the
+    /// one home of the mixed-version rule (#2038 ruling ▸ rows
+    /// win): rows when any covered version has them, unless the
+    /// newest is a minor or major with none, whose prose then
+    /// stands alone. The intro is always the newest version's
+    /// summary — its intro sentence, or a patch's capped prose.
+    /// Capped by trimming the oldest version's rows first.
+    static func spotlight(
+        _ readable: [(String, ReleaseNotes)]
+    ) -> [SpotlightEntry] {
+        guard let newest = readable.first,
+            !newest.1.spotlight.isEmpty || isPatch(newest.0)
+        else { return [] }
+        let merged = readable.flatMap { version, notes in
+            notes.spotlight.map {
+                SpotlightEntry(row: $0, version: version)
+            }
+        }
+        return Array(merged.prefix(spotlightCap))
+    }
+
+    /// `x.y.z` with z > 0, read off the leading digits so a
+    /// suffix does not hide it.
+    static func isPatch(_ version: String) -> Bool {
+        let parts = version.split(separator: ".")
+        guard parts.count >= 3 else { return false }
+        return (Int(parts[2].prefix { $0.isNumber }) ?? 0) > 0
+    }
+
+    /// The version a row is tagged with: only a row older than
+    /// the newest covered version carries one (#2038 ruling).
+    func tag(_ entry: SpotlightEntry) -> String? {
+        entry.version == versions.first ? nil : entry.version
     }
 
     /// Known types in their fixed order, unknown ones in the order

@@ -722,6 +722,84 @@ description beside the structured notes, so a copy that predates
 this window keeps Sparkle's; the window first appears for the
 update after 2.0.0.
 
+**The Highlights gold marks, never inks (#2038).** The panel's
+edge, its ★ and the spotlight rows' symbols are gold; no text is.
+So its separation from the washed card is measured with
+`ColorVision`, as the mode-gated frame's is, rather than held to a
+luminance ratio: the house floors no card boundary, and the text
+beside every mark carries the meaning. The relaxed floor holds only
+while the gold colours no text.
+
+**A fixes-only patch still opens the window (#2038).** With no
+spotlight and no caution, Apple's own updates leave only a mark;
+this window opens as it always has — the prose and the Fixed tab —
+because the reader who reported a bug is the one who should see
+it fixed, and a mark tells them nothing.
+
+### What's new leads with a spotlight (#2038)
+
+**[Rationale]**
+
+**The Highlights tab carries EITHER the prose summary OR one
+intro sentence and up to four spotlight rows, decided per
+release — never both.** Two paragraphs of prose answer "what is
+new" only to someone who reads them; a row — an SF Symbol, a
+two-to-four-word title, one line of what the reader gains — is
+read at a glance, which is the shape of Apple's own What's New
+sheet. The rows replace the prose rather than sitting above it,
+so the window keeps its height: it is already sized to its
+tallest tab. Every row's change stays a bullet in its New or
+Improved tab — the row is the signpost, the tab the record — so
+nothing exists only as a row. A release decides: the curator
+proposes rows, the owner rules rows or prose.
+
+**A row's symbol depicts the object, never a state or an
+action.** Sparkles read as Apple Intelligence and an up-arrow as
+Install — the same misreadings that kept symbols off the tab
+strip. A name the running system does not know draws no icon
+rather than a placeholder.
+
+**"Show me ›" exists only where the running build can land on
+the setting, and is dropped — not greyed — where it cannot.**
+Greying is how Settings says "this is here, just not now"; a link
+to a setting this build no longer has (renamed, moved) points at
+nothing ever, so a greyed one is a promise with no way to keep
+it. The census id is checked twice for that reason: at
+publication against the tree, and at runtime against the build.
+Behaviour you notice without configuring anything gets a row with
+no link, and a Lua-only change gets no row: the window speaks to
+everyone who updated, and the rows to the Settings they can open.
+
+**"Show me" hides What's new and Settings carries the way back.**
+Leaving What's new open behind Settings fails on this app: it is
+an own floating window, so the float-tier raise either lifts it
+back over the control just landed on or leaves it buried under the
+tiles. So What's new hides without being answered, Settings lands
+on the control the way a search pick does — switching to the
+Power User mode where the control lives there — and a banner across
+the Settings shell offers the next linked row, the way back, and a
+dismissal. It survives navigation inside Settings and has no
+timeout, because a reader exploring a setting is not done with the
+notes; closing Settings brings What's new back rather than
+answering it silently, since only the reader's own Done or × says
+the notes were read. Nothing on that path writes: the rows are
+signposts, and a control inside the notes would be a third write
+path beside the draft and Lua, on a launch where boot may still
+be re-tiling. No animation is per release either — the notes are
+written after the build.
+
+**Across skipped versions, rows win.** A reader crossing several
+releases sees rows when any of them has rows, newest version's
+first, capped at four by trimming the oldest version's; a row from
+an older version carries its version after the title. The intro is
+always the newest version's own: its intro sentence, or — for a
+patch told in prose — that prose in full, which is why a patch's
+prose is capped at a couple of sentences while a minor's is not. The exception is a minor or major with no rows: its prose
+stands alone and older rows are dropped, since a minor's prose is
+written to be read whole and is never cut to an intro. That edge
+is rare by construction — the curator gives a minor rows — and
+accepted. Every covered version's caution stays, as before.
+
 ### Linking the notes is not opening a channel
 
 **[Rationale]**

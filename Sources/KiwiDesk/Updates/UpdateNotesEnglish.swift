@@ -17,6 +17,15 @@ enum UpdateNotesEnglish {
 
     static func asOf(_ day: String) -> String { "As of \(day)" }
 
+    /// A spotlight row's version tag, after its title (#2038):
+    /// " · 2.1" — a minor's trailing ".0" dropped.
+    static func rowTag(_ version: String) -> String {
+        let short =
+            version.hasSuffix(".0") && version.split(separator: ".").count == 3
+            ? String(version.dropLast(2)) : version
+        return " \u{00B7} \(short)"
+    }
+
     /// The version after an entry, in brackets.
     static func entryVersion(_ version: String) -> String {
         " (\(version))"
