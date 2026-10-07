@@ -1070,7 +1070,7 @@
   "onboarding.looks.body": "Wähle einen Look, und KiwiDesk ändert sich mit jedem Klick: die Leisten, die deine Spaces und Fenster zeigen, der Rahmen um das fokussierte Fenster und die Farben von beidem. Eine Palette weiter unten färbt den gewählten Look neu ein.",
   "onboarding.looks.draft_pending": "In den Einstellungen gibt es ungesicherte Änderungen. Klicke dort auf „%1$@“ oder „%2$@“, um hier einen Look zu wählen.",
   "onboarding.looks.hint": "Beides kannst du später unter %1$@ ▸ %2$@ ändern.",
-  "onboarding.looks.revert": "Änderungen verwerfen",
+  "onboarding.looks.revert": "Verwerfen",
   "onboarding.looks.title": "Wähle einen Look für KiwiDesk",
   "onboarding.progress.axlabel": "Einrichtungsfortschritt",
   "onboarding.progress.axvalue": "Schritt %1$d von %2$d",

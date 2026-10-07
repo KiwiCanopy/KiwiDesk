@@ -1070,7 +1070,7 @@
   "onboarding.looks.body": "Elige un look y KiwiDesk cambia a cada clic: las barras que muestran tus Espacios y ventanas, el contorno alrededor de la ventana enfocada y los colores de ambos. Una paleta de abajo vuelve a pintar el look que elijas.",
   "onboarding.looks.draft_pending": "Ajustes tiene cambios que no has guardado. Haz clic allí en «%1$@» o «%2$@» para elegir un look aquí.",
   "onboarding.looks.hint": "Puedes cambiar ambos más adelante en %1$@ ▸ %2$@.",
-  "onboarding.looks.revert": "Revertir cambios",
+  "onboarding.looks.revert": "Revertir",
   "onboarding.looks.title": "Elige el look de KiwiDesk",
   "onboarding.progress.axlabel": "Progreso de la configuración",
   "onboarding.progress.axvalue": "Paso %1$d de %2$d",

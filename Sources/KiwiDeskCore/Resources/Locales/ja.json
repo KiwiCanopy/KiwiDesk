@@ -1070,7 +1070,7 @@
   "onboarding.looks.body": "デザインを選ぶと、クリックするたびにKiwiDeskが変わります。スペースとウインドウを表示するバー、フォーカス中のウインドウを囲むボーダー、そしてその両方のカラーです。下のパレットで、選んだデザインを塗り替えられます。",
   "onboarding.looks.draft_pending": "設定に保存していない変更があります。ここでデザインを選ぶには、設定で「%1$@」または「%2$@」を選んでください。",
   "onboarding.looks.hint": "どちらも、あとから%1$@ ▸ %2$@で変更できます。",
-  "onboarding.looks.revert": "変更を元に戻す",
+  "onboarding.looks.revert": "元に戻す",
   "onboarding.looks.title": "KiwiDeskのデザインを選ぶ",
   "onboarding.progress.axlabel": "設定の進行状況",
   "onboarding.progress.axvalue": "%2$dステップ中%1$dステップ目",
