@@ -1,18 +1,14 @@
 import Foundation
 
-/// Why `new_window`, `close_window` or a bar list's row did
-/// nothing, found only at perform time (#1518, #1946): the lists
-/// offer their rows from state alone, so they refuse when picked
-/// instead of greying.
+/// Why `new_window` or `close_window` did nothing, found only once
+/// the AX walk ran (#1518): the menu offers the rows from state
+/// alone, so they refuse at perform time instead of greying.
 /// Core draws the cue itself — nothing crosses into the GUI (#96).
 enum WindowActionRefusal: Equatable {
     /// The app has no enabled File ▸ New Window.
     case noNewWindow(app: String)
     /// The window has no enabled close button.
     case noCloseButton(window: String)
-    /// A bar list's row names a window on a Desktop no display
-    /// shows; focusing it would switch Desktops (#1345, #1946).
-    case onAnotherDesktop(window: String)
 
     /// The pill's glyph: there is no such action here.
     var pillSymbol: String { "nosign" }
@@ -34,12 +30,6 @@ enum WindowActionRefusal: Equatable {
                 "“%1$@” has no close button",
                 window
             )
-        case .onAnotherDesktop(let window):
-            L(
-                "window_action.refusal.on_another_desktop",
-                "“%1$@” is on another Desktop",
-                window
-            )
         }
     }
 
@@ -48,7 +38,6 @@ enum WindowActionRefusal: Equatable {
         switch self {
         case .noNewWindow: "no enabled New Window item"
         case .noCloseButton: "no enabled close button"
-        case .onAnotherDesktop: "bar row on an unshown Desktop"
         }
     }
 }

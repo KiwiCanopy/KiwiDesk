@@ -27,7 +27,7 @@ extension KiwiCore {
     }
 
     func pickFromSpaceBar(_ pick: SpaceBarGlyphPick) {
-        if pick.kind == .glyph, pick.windows.count == 1 {
+        guard pick.peekSource.isList else {
             shelves.peek.dismiss()
             focusFromSpaceBar(pick.windows[0], on: pick.space)
             return
@@ -39,7 +39,7 @@ extension KiwiCore {
     /// VoiceOver's press on a glyph: a list's native menu at the
     /// target, the peek's accessible twin; a one-window glyph picks.
     func pressSpaceBarGlyph(_ pick: SpaceBarGlyphPick) {
-        guard pick.kind == .overflow || pick.windows.count > 1 else {
+        guard pick.peekSource.isList else {
             spaceBars.glyphActions.pick(pick)
             return
         }
@@ -70,28 +70,25 @@ extension KiwiCore {
     }
 
     /// The one pick a bar list's row takes — a peek row's and a
-    /// window menu row's alike (#1946): judged as it is performed,
-    /// so a window the focus door refuses draws the refusal pill
-    /// rather than a row greyed on hover (#1925). `space` is the
-    /// chip's; an App Bar row has none and takes the Space its
-    /// window is filed in, shown where the App Bar draws it.
+    /// window menu row's alike (#1946): the click on that window's
+    /// own bar item. `space` is the chip's, and the row does what
+    /// its glyph does; an App Bar row has none and does what its
+    /// App Bar item does, on the Space that bar draws it in.
     func pickBarRow(_ window: WindowID, on space: SpaceID?) {
         withUserMotion {
-            guard !raiseCrossesDesktops(window) else {
-                cueWindowAction(
-                    .onAnotherDesktop(
-                        window: SpaceBarWindowMenu.windowName(
-                            state.windows[window]?.title ?? ""
-                        )
-                    ),
-                    on: window
-                )
+            guard let space else {
+                selectFromAppBar(window)
                 return
             }
-            guard let space = space ?? state.workspaces.space(of: window)
-            else { return }
             focusFromSpaceBar(window, on: space)
         }
+    }
+
+    /// A click on an App Bar item, or its peek row: focuses the
+    /// window where the bar draws it — a traveler included, which
+    /// its home Space would switch away from.
+    func selectFromAppBar(_ window: WindowID) {
+        focusWithMonocleFlip(window, step: nil)
     }
 
     /// Switches to `space` landing on `window` through the one
@@ -99,7 +96,8 @@ extension KiwiCore {
     /// active. A menu row picked after its window left `space` —
     /// the menu is modal, the loop keeps running — is dropped; a
     /// window the raise gate refuses (#1345) takes the chip's plain
-    /// switch instead, so the Space still hands focus over.
+    /// switch instead, so the Space still hands focus over — the
+    /// one policy a glyph, a peek row and a menu row share.
     func focusFromSpaceBar(_ window: WindowID, on space: SpaceID) {
         guard let members = state.workspaces[space],
             state.effectiveMembers(of: members).contains(window)

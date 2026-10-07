@@ -4,24 +4,15 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The actionable peek (#1946, owner ruling amendment 2): it holds
-/// while the pointer is inside its hull, a click pins it at once,
-/// and its rows pick on a release inside them — a drag off one
-/// cancelling — while "N more" opens the menu.
+/// The actionable peek (#1946, owner ruling amendment 2): a list's
+/// peek holds while the pointer is inside its hull, a click shows it
+/// at once or closes it, and its rows pick on a release inside them
+/// — a drag off one cancelling — while "N more" opens the menu.
 @Suite("Bar hover peek actions", .serialized)
 @MainActor
 struct BarPeekActionTests {
     init() {
         LiquidGlassGate.override = { false }
-    }
-
-    /// A point in the gap between the item and the peek: below the
-    /// item's bottom edge and above the peek's top, on a top bar.
-    private func gap(_ rig: BarPeekRig) throws -> CGPoint {
-        let item = rig.screen(rig.first)
-        let peek = try #require(rig.peek.panel.panel?.frame)
-        #expect(peek.maxY < item.minY, "a top bar's peek opens below")
-        return CGPoint(x: item.midX, y: (peek.maxY + item.minY) / 2)
     }
 
     // MARK: - The hull
@@ -32,7 +23,7 @@ struct BarPeekActionTests {
         defer { rig.close() }
         rig.hover(rig.first, 1, 2)
         rig.step()
-        rig.pointer = try gap(rig)
+        rig.pointer = try rig.gap()
         rig.hover(nil)
         #expect(
             rig.shownTitles == ["Window 1", "Window 2"],
@@ -78,7 +69,7 @@ struct BarPeekActionTests {
         defer { rig.close() }
         rig.hover(rig.first, 1, 3)
         rig.step()
-        rig.pointer = try gap(rig)
+        rig.pointer = try rig.gap()
         rig.hover(rig.second, 2)
         #expect(
             rig.shownTitles == ["Window 1", "Window 3"],
@@ -98,7 +89,7 @@ struct BarPeekActionTests {
         defer { rig.close() }
         rig.hover(rig.first)
         rig.step()
-        rig.pointer = try gap(rig)
+        rig.pointer = try rig.gap()
         #expect(!rig.peek.holdsPointer)
         rig.hover(nil)
         #expect(rig.peek.panel.drawn == nil)
@@ -108,7 +99,7 @@ struct BarPeekActionTests {
     // MARK: - The pin
 
     @Test("A click pins the peek at once, with no dwell")
-    func clickPinsAtOnce() {
+    func clickPinsAtOnce() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
         rig.peek.pin(
@@ -117,13 +108,17 @@ struct BarPeekActionTests {
             space: SpaceID("1"),
             edge: .top
         )
-        #expect(rig.dwells.isEmpty)
+        #expect(rig.dwells.isEmpty, "no dwell")
         #expect(rig.shownTitles == ["Window 1", "Window 2"])
-        #expect(rig.peek.pinned)
-        // Leaving the hull ends the pin.
+        // A list's peek: it holds in the hull, as a hover's does.
+        rig.pointer = try rig.gap()
         rig.hover(nil)
+        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        #expect(rig.peek.holding)
+        // Leaving the hull closes it.
+        rig.pointer = CGPoint(x: -1e6, y: -1e6)
+        rig.step()
         #expect(rig.peek.panel.drawn == nil)
-        #expect(!rig.peek.pinned)
     }
 
     @Test("A click on an item whose hover peek shows closes it")
@@ -140,7 +135,8 @@ struct BarPeekActionTests {
             edge: .top
         )
         #expect(rig.peek.panel.drawn == nil, "the click closes it")
-        #expect(!rig.peek.pinned)
+        rig.hover(rig.first, 1, 2)
+        #expect(rig.dwells.count == 1, "shut until the pointer leaves")
     }
 
     @Test("A second click on the pinned item closes its peek")
@@ -157,7 +153,6 @@ struct BarPeekActionTests {
             )
         }
         #expect(rig.peek.panel.drawn == nil, "the second click closes")
-        #expect(!rig.peek.pinned)
         rig.hover(rig.first, 1, 2)
         #expect(rig.dwells.isEmpty, "shut until the pointer leaves")
     }

@@ -27,7 +27,15 @@ extension ShelfOverlay {
     }
 
     func makePanel() -> NSPanel {
-        let panel = BarPanel.makeNonActivating()
+        let panel = BarPanel.configure(
+            ShelfPanel(
+                contentRect: .zero,
+                styleMask: BarPanel.styleMask,
+                backing: .buffered,
+                defer: true
+            )
+        )
+        panel.onPress = { [weak self] in self?.onPress($0) }
         content.wantsLayer = true
         content.layer?.masksToBounds = true
         panel.contentView = content

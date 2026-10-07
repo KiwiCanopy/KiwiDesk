@@ -167,17 +167,8 @@ struct BarPeekSeamTests {
         "AppBarItemView+HoverTitle.swift": ["AppBarItemView.swift"],
     ]
 
-    /// What an anchor's press does to the peek (#1946, amendment
-    /// 2): an App Bar item's press is a pick, so it closes the peek
-    /// after its Control-click guard; a glyph's press only arms its
-    /// click, which Core turns into a pin or a pick.
-    private static let pressDismisses = [
-        "AppBarItemView.swift": true,
-        "SpaceBarGlyphTarget.swift": false,
-    ]
-
-    @Test("every anchor answers a press as its click rules")
-    func anchorsAnswerAPress() throws {
+    @Test("every anchor reports the pointer from the listed files")
+    func anchorsAreListed() throws {
         var reporters: Set<String> = []
         for file in try SourceScan.swiftSources(under: Self.bar) {
             let text = try SourceScan.strippedSource(at: file)
@@ -186,31 +177,82 @@ struct BarPeekSeamTests {
             }
         }
         #expect(reporters == Set(Self.anchors.keys), "\(reporters)")
-        let anchors = Set(Self.anchors.values.joined())
-        #expect(anchors == Set(Self.pressDismisses.keys))
-        for anchor in anchors {
-            let body = try #require(
-                SourceScan.declarationBody(
-                    after: "func mouseDown(",
-                    in: try Self.source(anchor)
-                ),
-                "\(anchor) takes no press"
+    }
+
+    /// A press in a bar closes the peek at ONE point (#1946): the
+    /// shelf panel's `sendEvent` hands every press to `onPress`,
+    /// which the overlay forwards and the manager wires to the
+    /// peek — so a view that takes its own press (the count, the
+    /// divider's grip, the plate) cannot leave a peek standing,
+    /// and no view's press handler re-spells the dismissal.
+    @Test("a press in a bar closes the peek at one point")
+    func onePressDismissal() throws {
+        let send = try #require(
+            SourceScan.declarationBody(
+                after: "override func sendEvent(",
+                in: try Self.source("ShelfPanel.swift")
             )
-            let guardHit = try #require(
-                body.range(of: "openControlClickMenu("),
-                "\(anchor)"
+        )
+        for type in [".leftMouseDown", ".rightMouseDown", ".otherMouseDown"] {
+            #expect(send.contains(type), "\(type)")
+        }
+        let press = try #require(send.range(of: "onPress("))
+        let forward = try #require(send.range(of: "super.sendEvent("))
+        #expect(press.upperBound <= forward.lowerBound)
+        let made = try #require(
+            SourceScan.declarationBody(
+                after: "func makePanel(",
+                in: try Self.source("ShelfOverlay+Views.swift")
             )
-            let dismiss = body.range(of: "peek?.dismiss()")
-            #expect(
-                (dismiss != nil) == Self.pressDismisses[anchor],
-                "\(anchor)"
+        )
+        #expect(made.contains("ShelfPanel("))
+        #expect(made.contains("panel.onPress = {"))
+        let relayout = try #require(
+            SourceScan.declarationBody(
+                after: "func relayout(",
+                in: try Self.source("ShelfManager.swift")
             )
-            if let dismiss {
-                #expect(guardHit.upperBound <= dismiss.lowerBound, "\(anchor)")
+        )
+        #expect(relayout.contains("peek.pressed(on:"))
+        let pressed = try #require(
+            SourceScan.declarationBody(
+                after: "func pressed(on",
+                in: try Self.source("BarPeek+Hold.swift")
+            )
+        )
+        #expect(pressed.contains("dismiss()"))
+        // No press handler in the bars spells the dismissal again.
+        let handlers = [
+            "func mouseDown(", "func rightMouseDown(",
+            "func otherMouseDown(",
+        ]
+        var spelled: [String] = []
+        var seen = 0
+        for file in try SourceScan.swiftSources(under: Self.bar) {
+            let text = try SourceScan.strippedSource(at: file)
+            for handler in handlers {
+                guard
+                    let body = SourceScan.declarationBody(
+                        after: handler,
+                        in: text
+                    )
+                else { continue }
+                seen += 1
+                if body.contains(".dismiss()") {
+                    spelled.append("\(file.lastPathComponent) \(handler)")
+                }
             }
         }
+        // The scan still reaches the bars' press handlers.
+        #expect(seen >= 5, "found \(seen)")
+        #expect(spelled.isEmpty, "\(spelled)")
+    }
+
+    @Test("a glyph's click picks or pins as its list predicate rules")
+    func glyphClickRouting() throws {
         // A glyph's click: a one-window glyph's pick closes the peek
-        // ahead of its focus; a list pins it.
+        // ahead of its focus; a list pins it — told apart by the
+        // one list predicate, as VoiceOver's press is.
         let click = try #require(
             SourceScan.declarationBody(
                 after: "func pickFromSpaceBar(",
@@ -222,6 +264,17 @@ struct BarPeekSeamTests {
         #expect(closes.upperBound <= focus.lowerBound)
         #expect(click.contains("pinPeek(pick)"))
         #expect(!click.contains("SpaceBarWindowMenu.make("))
+        #expect(click.contains("pick.peekSource.isList"))
+        let press = try #require(
+            SourceScan.declarationBody(
+                after: "func pressSpaceBarGlyph(",
+                in: try Self.app("KiwiCore+SpaceBarClick.swift")
+            )
+        )
+        #expect(press.contains("pick.peekSource.isList"))
+        for body in [click, press] {
+            #expect(!body.contains("windows.count"))
+        }
     }
 
     private static func app(_ file: String) throws -> String {

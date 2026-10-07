@@ -112,11 +112,6 @@ extension BarPeekBody {
         if let image = view as? NSImageView { image.contentTintColor = ink }
     }
 
-    /// Asked once, on the first hover: a cursor set from a panel
-    /// that never activates otherwise holds only while KiwiDesk is
-    /// frontmost (`SkyLight.allowBackgroundCursor`).
-    private static let backgroundCursor = SkyLight.allowBackgroundCursor()
-
     // MARK: - Events
 
     /// The whole body takes the mouse, so its labels never swallow
@@ -149,9 +144,10 @@ extension BarPeekBody {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        _ = Self.backgroundCursor
+        SkyLight.ensureBackgroundCursor()
         NSCursor.arrow.set()
         setHovered(target(at: local(event)))
+        onPointerInside(true)
     }
 
     override func mouseMoved(with event: NSEvent) {
@@ -161,6 +157,7 @@ extension BarPeekBody {
     }
 
     override func mouseExited(with event: NSEvent) {
+        onPointerInside(false)
         guard pressed == nil else { return }
         setHovered(nil)
     }

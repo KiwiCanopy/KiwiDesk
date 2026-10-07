@@ -56,7 +56,7 @@ struct BarPeekFitTests {
         #expect(!titles.isEmpty)
         #expect(titles == (1...titles.count).map { "Note \($0)" })
         let more = try #require(body.moreLabel)
-        #expect(more.stringValue == "\(14 - titles.count) more")
+        #expect(more.stringValue == "More windows: \(14 - titles.count)")
         #expect(
             more.textColor == NSColor(kiwiHex: KiwiShelf().idleItemColor)
         )
@@ -92,7 +92,7 @@ struct BarPeekFitTests {
         let first = 14 - titles.count + 1
         #expect(titles == (first...14).map { "Note \($0)" })
         let more = try #require(body.moreLabel)
-        #expect(more.stringValue == "\(first - 1) more")
+        #expect(more.stringValue == "More windows: \(first - 1)")
         #expect(body.moreChevron?.identifier?.rawValue == "chevron.up")
         let header = try #require(body.labels.first)
         #expect(more.frame.maxY < header.frame.minY, "the cut is above")
@@ -183,7 +183,7 @@ struct BarPeekFitTests {
         let drawn = body.targets.filter { $0.action != .more }.count
         #expect(body.labels.contains { $0.stringValue == "Claude" })
         #expect(drawn > 1, "the lone window's row is above the cut")
-        #expect(more.stringValue == "\(rows - drawn) more")
+        #expect(more.stringValue == "More windows: \(rows - drawn)")
         #expect(rows - drawn == 15 - drawn, "every window is a row")
     }
 }

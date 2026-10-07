@@ -109,7 +109,6 @@ final class AppBarItemView: NSView {
 
     override func mouseDown(with event: NSEvent) {
         guard !openControlClickMenu(event) else { return }
-        itemActions?.peek?.dismiss()
         pressLocation = event.locationInWindow
     }
 

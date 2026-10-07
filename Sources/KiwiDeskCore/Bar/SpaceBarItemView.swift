@@ -167,11 +167,8 @@ final class SpaceBarItemView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
 
-    /// A press on the chip outside its glyphs is a click outside
-    /// the peek (#1946).
     override func mouseDown(with event: NSEvent) {
         guard !openControlClickMenu(event) else { return }
-        glyphActions?.peek?.dismiss()
         guard !isActive, let space else { return }
         onSelect(space)
     }

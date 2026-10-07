@@ -17,6 +17,11 @@ struct SpaceBarGlyphPick {
     let kind: Kind
     /// Where the peek or a menu opens; the target view itself.
     let anchor: NSView
+
+    /// What the peek shows for this pick (#1946).
+    var peekSource: BarPeekSource {
+        kind == .glyph ? .glyph(windows) : .overflow(windows)
+    }
 }
 
 /// Core's answers for the glyph targets, set once at bootstrap and
@@ -123,9 +128,7 @@ final class SpaceBarGlyphTarget: NSView {
     }
 
     /// What the peek shows for this target (#1946).
-    var peekSource: BarPeekSource {
-        kind == .glyph ? .glyph(members) : .overflow(members)
-    }
+    var peekSource: BarPeekSource { pick.peekSource }
 
     /// A press arms the pick; the peek stays, since a list's click
     /// pins it (#1946). A Control-click's menu closes it as any

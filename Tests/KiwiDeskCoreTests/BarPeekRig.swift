@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import Testing
 
 @testable import KiwiDeskCore
 
@@ -78,6 +79,15 @@ final class BarPeekRig {
 
     var shownTitles: [String]? {
         peek.panel.drawn?.groups.flatMap(\.titles)
+    }
+
+    /// A point in the gap between `first` and the shown peek: below
+    /// the item's bottom edge and above the peek's top, on a top bar.
+    func gap() throws -> CGPoint {
+        let item = screen(first)
+        let peek = try #require(peek.panel.panel?.frame)
+        #expect(peek.maxY < item.minY, "a top bar's peek opens below")
+        return CGPoint(x: item.midX, y: (peek.maxY + item.minY) / 2)
     }
 
     /// `view`'s frame on screen.

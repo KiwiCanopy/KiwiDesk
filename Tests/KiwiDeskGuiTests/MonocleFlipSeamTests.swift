@@ -17,15 +17,16 @@ struct MonocleFlipSeamTests {
     )
     private static let door = "KiwiCore+MonocleFlip.swift"
 
-    /// The commanded sites: `navigate`'s Monocle cycle, the App
-    /// Bar click, `pull_or_spawn`'s focus of a window in the
-    /// active Space, and a Space Bar glyph click on the active
-    /// Space (#1528) — the ruling's list, and nothing reported.
-    private static let sites: Set<String> = [
-        "KiwiCore+MonocleCommands.swift",
-        "KiwiCore+Bootstrap.swift",
-        "KiwiCore+LaunchCycle.swift",
-        "KiwiCore+SpaceBarClick.swift",
+    /// The commanded sites, per file: `navigate`'s Monocle cycle,
+    /// `pull_or_spawn`'s focus of a window in the active Space, and
+    /// the bar clicks — an App Bar item or its peek row
+    /// (`selectFromAppBar`, #1946) and a Space Bar glyph click on
+    /// the active Space (#1528) — the ruling's list, and nothing
+    /// reported.
+    private static let sites: [String: Int] = [
+        "KiwiCore+MonocleCommands.swift": 1,
+        "KiwiCore+LaunchCycle.swift": 1,
+        "KiwiCore+SpaceBarClick.swift": 2,
     ]
 
     @Test("The four commanded sites take the door, and no other")
@@ -34,9 +35,12 @@ struct MonocleFlipSeamTests {
             of: "focusWithMonocleFlip(",
             under: Self.core
         ).filter { $0.file.lastPathComponent != Self.door }
-        let files = hits.map { $0.file.lastPathComponent }
+        let files = Dictionary(
+            hits.map { ($0.file.lastPathComponent, 1) },
+            uniquingKeysWith: +
+        )
         #expect(
-            Set(files) == Self.sites && files.count == 4,
+            files == Self.sites,
             "door callers: \(hits.map(\.site))"
         )
     }

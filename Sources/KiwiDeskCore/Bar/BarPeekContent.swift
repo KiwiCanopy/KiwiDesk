@@ -17,6 +17,16 @@ enum BarPeekSource: Equatable {
             ids
         }
     }
+
+    /// Whether this is a LIST — an overflow disc, which stands for
+    /// windows the chip did not draw however few, or more than one
+    /// window — the one predicate a click, VoiceOver's press and
+    /// the hull's hold read (#1946). A one-window glyph or App Bar
+    /// item is a label: its click picks, its peek never holds.
+    var isList: Bool {
+        if case .overflow = self { return true }
+        return windows.count > 1
+    }
 }
 
 /// What a peek shows (#1946, the owner's ruling): one group per

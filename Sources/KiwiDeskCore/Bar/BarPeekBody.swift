@@ -76,6 +76,9 @@ final class BarPeekBody: NSView {
     /// A row's window picked, or "N more" pressed — the peek's.
     var onPick: @MainActor (WindowID) -> Void = { _ in }
     var onMore: @MainActor () -> Void = {}
+    /// The pointer entered (true) or left the body — its own
+    /// tracking, so a held peek polls only the gap (#1946).
+    var onPointerInside: @MainActor (Bool) -> Void = { _ in }
 
     /// Lays `content` out in `shelf`'s face and ink, with a "more"
     /// line where `hidden` windows did not fit — above the list

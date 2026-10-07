@@ -95,9 +95,10 @@ struct BarPeekTests {
         #expect(rig.shownTitles == ["Window 1"])
     }
 
-    /// An App Bar item anchoring the peek closes it on a press, as a
-    /// glyph does — the item through its own hover report and its
-    /// own `mouseDown`.
+    /// An App Bar item anchoring the peek closes it on a press — the
+    /// item through its own hover report, the press through the
+    /// shelf panel's one press point (`ShelfPanel`), which hands
+    /// the peek the view it hit.
     @Test("A press on an App Bar item closes its peek")
     func appBarPressDismisses() throws {
         let rig = Rig()
@@ -115,20 +116,7 @@ struct BarPeekTests {
         rig.step()
         #expect(rig.shownTitles == ["Window 3"], "was shown")
         #expect(rig.peek.shown?.view === item)
-        let press = try #require(
-            NSEvent.mouseEvent(
-                with: .leftMouseDown,
-                location: .zero,
-                modifierFlags: [],
-                timestamp: 0,
-                windowNumber: 0,
-                context: nil,
-                eventNumber: 0,
-                clickCount: 1,
-                pressure: 1
-            )
-        )
-        item.mouseDown(with: press)
+        rig.peek.pressed(on: item)
         #expect(rig.peek.panel.drawn == nil)
     }
 

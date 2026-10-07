@@ -48,29 +48,16 @@ final class BarPeek {
         NSEvent.mouseLocation
     }
 
-    /// An item the peek stands at: what it shows, where it stood.
-    struct Anchor {
-        weak var view: NSView?
-        let source: BarPeekSource
-        /// The Space Bar chip's Space; nil on the App Bar.
-        let space: SpaceID?
-        let edge: AppBarEdge
-        var frame: CGRect?
-    }
-
-    private(set) var shown: Anchor?
-    private(set) var pending: Anchor?
-    /// A click on a list showed it at once (#1946): it holds until
-    /// a click outside, a pick, or the pointer leaving the hull.
-    private(set) var pinned = false
-    /// The pointer left the item for the hull: the peek holds while
-    /// a poll finds it there.
-    var holding = false
+    private(set) var phase = Phase.idle
     /// An anchor a click or a move closed: it peeks again only
     /// once the pointer has left it, as a tooltip does.
     private var spent: Anchor?
     private var closedAt: TimeInterval?
-    var generation = 0
+    /// Stamps every timer it schedules; a phase change outdates them.
+    private var generation = 0
+    /// The pointer is inside the peek's body, whose own tracking
+    /// reports it, so a held peek polls only across the gap.
+    private var pointerInPeek = false
     private(set) lazy var panel = wiredPanel()
     /// Any menu opening — a right-click's, "N more"'s — closes the
     /// peek, which would otherwise stand beside it, and none opens
@@ -138,8 +125,10 @@ final class BarPeek {
             return
         }
         // Back on its own item, a held peek stops polling.
-        if Self.same(shown, anchor, source) {
-            holding = false
+        if case .showing(let held, _) = phase,
+            Self.same(held, anchor, source)
+        {
+            phase = .showing(held, holding: false)
             return
         }
         // A reused item view standing for other windows is a new
@@ -161,7 +150,7 @@ final class BarPeek {
             present(next, fades: false)
             return
         }
-        pending = next
+        phase = .dwelling(next)
         generation += 1
         let ticket = generation
         schedule(Timing.dwell) { [weak self] in
@@ -173,11 +162,11 @@ final class BarPeek {
         }
     }
 
-    /// A click on a multi-window glyph or `+n` (#1946) toggles its
-    /// peek: one already showing — the hover's, or a click's —
+    /// A click on a list (#1946, `BarPeekSource.isList`) toggles
+    /// its peek: one already showing — the hover's, or a click's —
     /// closes; otherwise it shows at once, with no dwell, and holds
-    /// — pinned — until a click outside, a pick, or the pointer
-    /// leaving the hull.
+    /// as any list's does, until a click outside, a pick, or the
+    /// pointer leaving the hull.
     func pin(
         _ anchor: NSView,
         source: BarPeekSource,
@@ -189,23 +178,17 @@ final class BarPeek {
             return
         }
         spent = nil
-        if !Self.same(shown, anchor, source) {
-            present(
-                Anchor(view: anchor, source: source, space: space, edge: edge),
-                fades: false
-            )
-        }
-        pinned = shown != nil
+        present(
+            Anchor(view: anchor, source: source, space: space, edge: edge),
+            fades: false
+        )
     }
 
     /// The pointer left the peeked item for good: it fades and cools.
     func leave() {
-        generation += 1
-        pending = nil
-        holding = false
-        pinned = false
-        guard shown != nil else { return }
-        shown = nil
+        let was = shown
+        close()
+        guard was != nil else { return }
         closedAt = now()
         panel.hide(animated: true)
     }
@@ -214,36 +197,59 @@ final class BarPeek {
     /// and stays shut until the pointer leaves it — a second
     /// dismiss, the press's menu opening, keeps that mark.
     func dismiss() {
-        generation += 1
+        let was = shown
         spent = shown ?? pending ?? spent
-        pending = nil
+        close()
         closedAt = nil
-        holding = false
-        pinned = false
-        guard shown != nil else { return }
-        shown = nil
+        guard was != nil else { return }
         panel.hide(animated: false)
     }
 
-    /// The shelf drawn in `window` left — stood down, turned off,
-    /// its display gone: a peek standing on it closes with it.
-    func shelfLeft(_ window: NSWindow?) {
-        guard let window,
-            (shown ?? pending)?.view?.window === window
-        else { return }
-        dismiss()
+    private func close() {
+        generation += 1
+        phase = .idle
+        pointerInPeek = false
     }
 
-    /// A render or a switch that moved the peeked item, or took it
-    /// off screen, closes the peek — the relayout's tail.
-    func syncToAnchor() {
-        guard let anchor = shown else { return }
-        guard let view = anchor.view,
-            let frame = Self.screenFrame(of: view),
-            frame == anchor.frame
+    /// The item reported the pointer gone: inside the hull a list's
+    /// peek holds, re-reading the pointer across the gap no view
+    /// tracks; outside it, or for a label, it closes.
+    func released() {
+        guard case .showing(let anchor, let held) = phase, holdsPointer
         else {
-            dismiss()
+            leave()
             return
+        }
+        guard !held else { return }
+        phase = .showing(anchor, holding: true)
+        generation += 1
+        if !pointerInPeek { poll(generation) }
+    }
+
+    /// The peek's body reports the pointer entering or leaving it:
+    /// inside, the hold's poll stops; leaving it, the hull is read
+    /// again — a held peek polls the gap, or closes outside it.
+    func pointerInPeek(_ inside: Bool) {
+        pointerInPeek = inside
+        guard holding, !inside else { return }
+        guard holdsPointer else {
+            leave()
+            return
+        }
+        generation += 1
+        poll(generation)
+    }
+
+    private func poll(_ ticket: Int) {
+        schedule(Timing.holdPoll) { [weak self] in
+            guard let self, self.holding, ticket == self.generation,
+                !self.pointerInPeek
+            else { return }
+            guard self.holdsPointer else {
+                self.leave()
+                return
+            }
+            self.poll(ticket)
         }
     }
 
@@ -252,26 +258,21 @@ final class BarPeek {
         return now() - closedAt < Timing.coolDown
     }
 
-    func present(_ anchor: Anchor, fades: Bool) {
-        generation += 1
-        pending = nil
-        holding = false
-        pinned = false
+    private func present(_ anchor: Anchor, fades: Bool) {
+        let was = shown
+        close()
         guard let view = anchor.view, let window = view.window,
             let frame = Self.screenFrame(of: view),
             let content = content(anchor.source),
             !content.groups.isEmpty,
             let shelf = shelf(window)
         else {
-            if shown != nil {
-                shown = nil
-                panel.hide(animated: false)
-            }
+            if was != nil { panel.hide(animated: false) }
             return
         }
         var placed = anchor
         placed.frame = frame
-        shown = placed
+        phase = .showing(placed, holding: false)
         panel.show(
             content,
             shelf: shelf,

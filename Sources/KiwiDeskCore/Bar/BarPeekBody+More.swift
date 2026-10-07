@@ -40,13 +40,13 @@ extension BarPeekBody {
     }
 
     /// The chevron, pointing where the hidden rows are, and the
-    /// count in the secondary ink. "%1$d more" counts no noun, so
-    /// no locale has to agree with the number (localization.md).
+    /// count in the secondary ink, last behind its label, so no
+    /// locale has to agree with the number (localization.md).
     func moreLine(_ hidden: Int, shelf: KiwiShelf, up: Bool) -> MoreLine {
         let ink = NSColor(kiwiHex: shelf.idleItemColor)
         let font = shelf.textFont(ofSize: Metrics.headerSize)
         let label = Self.label(
-            L("bar.peek.more", "%1$d more", hidden),
+            L("bar.peek.more", "More windows: %1$d", hidden),
             font,
             ink
         )

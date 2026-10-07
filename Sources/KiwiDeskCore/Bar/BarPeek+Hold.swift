@@ -20,10 +20,11 @@ extension BarPeek {
     }
 
     /// Whether the pointer is inside the shown peek's hull. Only a
-    /// list holds: a one-window peek has no row worth reaching for,
-    /// so it closes as the pointer leaves its item (owner, #1946).
+    /// list holds (`BarPeekSource.isList`): a one-window peek is a
+    /// label, so it closes as the pointer leaves its item (owner,
+    /// #1946).
     var holdsPointer: Bool {
-        guard let shown, shown.source.windows.count > 1,
+        guard let shown, shown.source.isList,
             let item = shown.frame,
             let peek = panel.panel?.frame, panel.isShown
         else { return false }
@@ -35,30 +36,35 @@ extension BarPeek {
         )
     }
 
-    /// The item reported the pointer gone: inside the hull the peek
-    /// holds, re-reading the pointer across the gap no view tracks;
-    /// outside it, it closes.
-    func released() {
-        guard shown != nil, holdsPointer else {
-            leave()
-            return
-        }
-        guard !holding else { return }
-        holding = true
-        generation += 1
-        poll(generation)
+    /// The shelf drawn in `window` left — stood down, turned off,
+    /// its display gone: a peek standing on it closes with it.
+    func shelfLeft(_ window: NSWindow?) {
+        guard let window,
+            (shown ?? pending)?.view?.window === window
+        else { return }
+        dismiss()
     }
 
-    private func poll(_ ticket: Int) {
-        schedule(Timing.holdPoll) { [weak self] in
-            guard let self, self.holding, ticket == self.generation
-            else { return }
-            guard self.holdsPointer else {
-                self.leave()
-                return
-            }
-            self.poll(ticket)
+    /// A render or a switch that moved the peeked item, or took it
+    /// off screen, closes the peek — the relayout's tail.
+    func syncToAnchor() {
+        guard let anchor = shown else { return }
+        guard let view = anchor.view,
+            let frame = Self.screenFrame(of: view),
+            frame == anchor.frame
+        else {
+            dismiss()
+            return
         }
+    }
+
+    /// A press in a bar panel (`ShelfPanel`), on `hit`: a click
+    /// outside the peek, which closes it — except on a Space Bar
+    /// glyph, whose release decides: a list's click toggles the
+    /// peek, a one-window glyph's picks.
+    func pressed(on hit: NSView?) {
+        guard !(hit is SpaceBarGlyphTarget) else { return }
+        dismiss()
     }
 
     /// A row's window picked: the peek closes and Core focuses it.
@@ -82,6 +88,9 @@ extension BarPeek {
         let made = BarPeekPanel()
         made.body.onPick = { [weak self] in self?.picked($0) }
         made.body.onMore = { [weak self] in self?.openedMore() }
+        made.body.onPointerInside = { [weak self] in
+            self?.pointerInPeek($0)
+        }
         return made
     }
 
