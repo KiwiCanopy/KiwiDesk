@@ -1067,10 +1067,9 @@ own.
 
 :::unreleased
 **Permission granted, but nothing is tiled?**  
-Granting Accessibility does not start tiling on its own — the
-first time, you press **Start Tiling**, in the setup window, the
-quick menu or the banner at the top of Settings. Until then the
-menu bar icon is dimmed and your windows stay where they are.
+Granting Accessibility does not start tiling on its own: the
+first time, press **Start Tiling** — in the permission tour, the
+quick menu or the banner at the top of Settings.
 :::
 
 **Settings window won't open, or KiwiDesk seems stuck?**  

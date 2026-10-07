@@ -24,9 +24,7 @@ extension SettingsModel {
         if editingStoredProfile { return .updateStoredProfile }
         // Global changes while the core is not running only write
         // gui.json (#516, #2050).
-        if permissionPaused || tilingIdle, core.isGuiManaged,
-            globalsChanged
-        {
+        if coreHold != .running, core.isGuiManaged, globalsChanged {
             return .saveGlobalsOnly
         }
         if activeProfile != nil { return .updateActiveProfile }

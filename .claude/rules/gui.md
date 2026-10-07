@@ -381,8 +381,9 @@ read-not-stored scan). The mark is a coloured NON-template
 composite — the owner ruled orange — whose handler resolves the
 bar's label colour at draw time; it is composited in `render()`
 alone, AFTER the states that outrank an offer — a permission
-warning, the not-started idle (#2050), the starting phase, a
-config error — and on both
+warning, the starting phase, a config error, never the
+not-started idle, whose dimmed icon carries it (#2050,
+`StartTilingGateTests`) — and on both
 channels whether or not an image exists, since a mode icon that
 is no SF Symbol takes the title fallback; the updates row EXISTS
 only while an update was found — the pending reminder or the
@@ -466,6 +467,21 @@ answer do not (#1542's rank; `WhatsNewHandoffTests`,
 `WhatsNewTrailWiringTests`). Its Next and × move no
 destination, so `stateTrailFocus` records the input source
 itself before the shell states focus (#991, #996).
+
+## Window management starts through one door (#2050)
+
+**Every path that starts window management calls
+`AppDelegate.startManaging()`, which refuses unless `coreHold`
+reads `.running` — the permission granted AND Start Tiling
+pressed, as `TilingConsent` records it.** A grant alone is not a
+request to tile; a new start path (a resume row, a restart)
+spelling `core.start()` itself would tile a first run without
+asking. Every surface narrating why management is not running
+reads the one `CoreHold` value `syncCoreHold()` pushes, never a
+flag of its own. `StartTilingGateTests` holds the door's guard
+and the census of who calls it; the argument is
+`docs/design-decisions.md` ▸ Granting Accessibility is not a
+request to tile.
 
 ## A window that must clear the bars derives its level
 

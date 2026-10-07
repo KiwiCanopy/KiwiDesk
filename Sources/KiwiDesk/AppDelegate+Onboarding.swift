@@ -38,8 +38,7 @@ extension AppDelegate {
             NSApp.forceFront(window)
             return
         }
-        onboardingModel.isTrusted = permissions.isTrusted
-        onboardingModel.hasStartedTiling = hasStartedTiling
+        syncCoreHold()
         onboardingModel.onStartTiling = { [weak self] in
             self?.startTiling()
         }

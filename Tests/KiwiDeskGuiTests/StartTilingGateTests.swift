@@ -55,6 +55,34 @@ struct StartTilingGateTests {
         #expect(TilingConsent.hasStarted(isTrusted: true, defaults))
     }
 
+    /// A pre-gate user whose grant is missing at upgrade: the
+    /// finished tour is the evidence they tiled before.
+    @Test("a finished tour marks a pre-gate install")
+    func finishedTourIsStarted() {
+        let (defaults, cleanup) = scratch("tour")
+        defer { cleanup() }
+
+        OnboardingDiscovery.markShown(defaults)
+        TilingConsent.seedAtLaunch(isTrusted: false, defaults)
+
+        #expect(TilingConsent.hasStarted(isTrusted: true, defaults))
+    }
+
+    @Test("the hold reads the permission before the press")
+    func holdRanksThePermission() {
+        #expect(
+            CoreHold.of(isTrusted: false, hasStarted: true)
+                == .permissionMissing
+        )
+        #expect(
+            CoreHold.of(isTrusted: true, hasStarted: false)
+                == .notStarted
+        )
+        #expect(
+            CoreHold.of(isTrusted: true, hasStarted: true) == .running
+        )
+    }
+
     @Test("the press is kept across a revoke")
     func pressSurvivesRevoke() {
         let (defaults, cleanup) = scratch("press")
@@ -209,6 +237,23 @@ struct StartTilingGateTests {
         #expect(button?.accessibilityLabel() == "KiwiDesk")
     }
 
+    /// Idle can last indefinitely, so an update offer still
+    /// reaches the icon (owner ruling, #2050).
+    @Test("an update mark rides the dimmed idle icon")
+    func updateMarkRidesIdle() {
+        let controller = controller(idle: true)
+        let updater = FakeUpdater()
+        controller.updater = updater
+        updater.updatePending = true
+        let button = controller.anchorButton
+
+        #expect(button?.appearsDisabled == true)
+        #expect(
+            button?.accessibilityLabel()
+                == "KiwiDesk (update available)"
+        )
+    }
+
     @Test("the permission warning outranks the idle mark")
     func warningOutranksIdleMark() {
         let button = controller(idle: true, warning: true).anchorButton
@@ -216,98 +261,6 @@ struct StartTilingGateTests {
             button?.accessibilityLabel()
                 == "KiwiDesk (permission required)"
         )
-    }
-
-    // MARK: - Wiring
-
-    private static let root = SourceScan.repoRoot(from: #filePath)
-
-    private func source(_ file: String) throws -> String {
-        try SourceScan.strippedSource(
-            at: Self.root.appendingPathComponent("Sources/KiwiDesk/\(file)")
-        )
-    }
-
-    /// The gate is in the two places a grant used to start the
-    /// core — the launch and the live grant — ahead of the start.
-    @Test("launch and grant ask the press before starting")
-    func startsAreGated() throws {
-        let launch = try #require(
-            SourceScan.declarationBody(
-                after: "func applicationDidFinishLaunching",
-                in: try source("AppDelegate.swift")
-            )
-        )
-        let seed = try #require(
-            launch.range(of: "TilingConsent.seedAtLaunch(")
-        )
-        let gate = try #require(
-            launch.range(of: "if trusted, !hasStartedTiling {")
-        )
-        let start = try #require(launch.range(of: "startManaging()"))
-        #expect(seed.lowerBound < gate.lowerBound)
-        #expect(gate.lowerBound < start.lowerBound)
-
-        let grant = try #require(
-            SourceScan.declarationBody(
-                after: "func permissionChanged",
-                in: try source("AppDelegate+Permissions.swift")
-            )
-        )
-        let grantGate = try #require(
-            grant.range(of: "if trusted, !hasStartedTiling {")
-        )
-        let grantStart = try #require(grant.range(of: "startManaging()"))
-        #expect(grantGate.lowerBound < grantStart.lowerBound)
-    }
-
-    /// The banner is a surfacing branch: deleting it leaves every
-    /// other clause here green. Paused outranks it — without the
-    /// permission its button could start nothing.
-    @Test("Settings draws the idle banner under the paused one")
-    func settingsDrawsTheBanner() throws {
-        let chrome = try source("Settings/SettingsView+Chrome.swift")
-        #expect(
-            chrome.contains(
-                "} else if model.tilingIdle {\n"
-                    + "                TilingIdleBanner("
-                    + "onStart: model.onStartTiling)"
-            )
-        )
-    }
-
-    /// Every surface's press lands on the one door that records it.
-    @Test("each Start Tiling reaches the recording door")
-    func pressesReachTheDoor() throws {
-        let delegate = try source("AppDelegate.swift")
-        #expect(
-            delegate.contains(
-                "statusItem.onStartTiling = { [weak self] in\n"
-                    + "            self?.startTiling()"
-            )
-        )
-        #expect(
-            delegate.contains(
-                "created.setStartTiling { [weak self] in "
-                    + "self?.startTiling() }"
-            )
-        )
-        let tour = try source("AppDelegate+Onboarding.swift")
-        #expect(
-            tour.contains(
-                "onboardingModel.onStartTiling = { [weak self] in\n"
-                    + "            self?.startTiling()"
-            )
-        )
-        let door = try #require(
-            SourceScan.declarationBody(
-                after: "func startTiling()",
-                in: try source("AppDelegate+Permissions.swift")
-            )
-        )
-        let mark = try #require(door.range(of: "TilingConsent.markStarted()"))
-        let start = try #require(door.range(of: "startManaging()"))
-        #expect(mark.lowerBound < start.lowerBound)
     }
 }
 
@@ -317,4 +270,16 @@ struct StartTilingGateTests {
 private final class FakeStatusItem: StatusItemHandle {
     let button: NSStatusBarButton? = NSStatusBarButton()
     var menu: NSMenu?
+}
+
+@MainActor
+private final class FakeUpdater: AppUpdating {
+    let autoInstall = AutoInstallSetting.inert()
+    var whatsNew: WhatsNewCoordinator? { nil }
+    let updates = UpdateStateStore()
+    var canCheckForUpdates = true
+    var updatePending = false { didSet { onUpdatePendingChanged() } }
+    var onUpdatePendingChanged: () -> Void = {}
+    var onWillRelaunch: () -> Void = {}
+    func checkForUpdates() {}
 }

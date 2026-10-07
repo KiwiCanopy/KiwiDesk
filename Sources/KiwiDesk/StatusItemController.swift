@@ -166,6 +166,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                 to: button,
                 a11y: L("menu.status.idle.a11y", "KiwiDesk (not tiling)")
             )
+            // An offer still rides a dimmed icon: idle can last
+            // indefinitely, and an update is actionable (#2050).
+            applyMark(to: button)
             return
         }
         if starting {
@@ -211,10 +214,14 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                 a11y: L("menu.status.a11y", "KiwiDesk")
             )
         }
-        // The mark, on both channels and in ONE place (#1013):
-        // after the early returns above, so a warning, the idle
-        // state, the starting phase and a config error outrank an
-        // offer on the glyph AND the name.
+        // After the early returns above, so a warning, the
+        // starting phase and a config error outrank an offer on
+        // the glyph AND the name (#1013).
+        applyMark(to: button)
+    }
+
+    /// The mark, on both channels and in ONE place (#1013).
+    private func applyMark(to button: NSStatusBarButton) {
         guard let mark = markNarration else { return }
         if let image = button.image {
             button.image = Self.badged(image)

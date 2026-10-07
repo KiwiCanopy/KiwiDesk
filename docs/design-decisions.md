@@ -557,9 +557,7 @@ every draw, so light and dark still follow, and the shape alone
 still separates the mark for colour-vision deficiency. Nothing
 moves, so Reduce Motion has nothing to gate. It rides only the
 healthy glyphs, because a permission warning or a config error
-outranks an offer — and so does a KiwiDesk not tiling yet
-(#2050), whose dimmed icon would otherwise carry a dot for an
-update to an app that is not doing anything. The updates row is retitled in place — "Update
+outranks an offer. The updates row is retitled in place — "Update
 Available…" — rather than doubled: Sparkle's own door for
 bringing the waiting alert forward is `checkForUpdates`, the row's
 existing action, and `canCheckForUpdates` stays true while the
@@ -6863,8 +6861,9 @@ and resized the window I was reading", which is the fear a new
 tiling user arrives with.
 
 **The demonstration is already happening; the tour narrates it.**
-The moment the grant lands, management starts and every window
-behind the tour is arranged — over the following seconds (#801),
+The moment the user presses Start Tiling (#2050), management
+starts and every window behind the tour is arranged — over the
+following seconds (#801),
 the screen narrating that wait rather than claiming a finished job
 (▸ *Boot: the wait is narrated, never hidden*). That is a better
 demonstration than tiling the tour could ever be — the user's own
@@ -6987,12 +6986,15 @@ phase's treatment, so the icon reads "not doing anything yet"
 from launch to the end of boot. The warning triangle was ruled
 out because its words say "permission required", which would be
 false, and because it makes a choice look like a fault; the
-update dot was ruled out because #1013 gives it to offers. The
-idle state outranks that dot like the other states that do.
+#1013 update dot was ruled out as the idle mark because it
+belongs to offers. Unlike the warning and the starting phase,
+idle does not outrank that dot: it can last indefinitely, and an
+update is something an idle app can still take, so the dot rides
+the dimmed icon.
 
-Restoring the arrangement from before the start is a separate,
-undecided question (#2051): once nothing moves unasked, the
-surprise it would undo is gone.
+An undo of the first arrangement is not owed by this ruling:
+once nothing moves unasked, the surprise it would undo is gone,
+and a restore is weighed on demand rather than as a safety net.
 
 ### The tour's progress row is derived, never a fixed counter
 

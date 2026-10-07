@@ -52,14 +52,9 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.onRevealProfile = handler
     }
 
-    /// Sets whether dashboard displays permission paused banner.
-    func setPermissionPaused(_ paused: Bool) {
-        model.permissionPaused = paused
-    }
-
-    /// Sets whether the dashboard shows the not-tiling banner.
-    func setTilingIdle(_ idle: Bool) {
-        model.tilingIdle = idle
+    /// Sets why window management is not running (#2050).
+    func setCoreHold(_ hold: CoreHold) {
+        model.coreHold = hold
     }
 
     /// Routes the not-tiling banner's Start Tiling (#2050).

@@ -219,12 +219,12 @@ final class SettingsModel: ObservableObject {
     /// (`setMacChecklistTick`), the `settingsMode` shape.
     @Published var macChecklistTicks: Set<MacSetting> = []
 
-    /// True when macOS Accessibility is missing; drives
-    /// `PermissionPausedBanner`.
-    @Published var permissionPaused = false
-    /// Trusted, but Start Tiling not pressed yet; drives
-    /// `TilingIdleBanner` (#2050).
-    @Published var tilingIdle = false
+    /// Why window management is not running, if it is not; drives
+    /// the paused and not-started banners and the save gates
+    /// (#516, #2050).
+    @Published var coreHold: CoreHold = .running
+    /// Accessibility is missing.
+    var permissionPaused: Bool { coreHold == .permissionMissing }
     /// Routes the idle banner's Start Tiling.
     var onStartTiling: () -> Void = {}
     /// The way back to a hidden What's new after a spotlight row's

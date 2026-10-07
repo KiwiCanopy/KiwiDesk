@@ -1053,7 +1053,7 @@
   "onboarding.grant.granted": "Erlaubnis erteilt",
   "onboarding.grant.lead": "macOS erlaubt einer App erst dann, Fenster zu bewegen, wenn du es zulässt. Ohne diese Freigabe funktioniert hier nichts.",
   "onboarding.grant.own_window": "Fenster wie dieses werden nie gekachelt, weil sie wieder verschwinden.",
-  "onboarding.grant.ready.body": "%1$@ ordnet die Fenster an, die du gerade geöffnet hast. Bis du darauf klickst, bewegt sich nichts.",
+  "onboarding.grant.ready.body": "„%1$@“ ordnet die Fenster an, die du gerade geöffnet hast. Bis du darauf klickst, bewegt sich nichts.",
   "onboarding.grant.ready.hint": "Noch nicht so weit? Starte jederzeit über das KiwiDesk-Menü in der Menüleiste.",
   "onboarding.grant.ready.title": "KiwiDesk ist bereit",
   "onboarding.grant.step.enable": "KiwiDesk einschalten",

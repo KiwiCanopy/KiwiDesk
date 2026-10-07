@@ -50,7 +50,7 @@ struct PausedGlobalsSaveTests {
     @Test("a pending global routes Save away from the gate")
     func pausedGlobalEditOffersSave() throws {
         let (model, _) = try makeModel()
-        model.permissionPaused = true
+        model.coreHold = .permissionMissing
         editGlobal(model)
         #expect(model.globalsChanged)
         #expect(model.primarySaveAction == .saveGlobalsOnly)
@@ -62,7 +62,7 @@ struct PausedGlobalsSaveTests {
     @Test("no global change leaves the profile gate in force")
     func pausedWithoutGlobalEditKeepsGate() throws {
         let (model, _) = try makeModel()
-        model.permissionPaused = true
+        model.coreHold = .permissionMissing
         editTiling(model)
         #expect(!model.globalsChanged)
         #expect(model.primarySaveAction != .saveGlobalsOnly)
@@ -75,7 +75,7 @@ struct PausedGlobalsSaveTests {
     @Test("the two unblocked verbs are not rerouted")
     func unblockedVerbsKeepTheirAction() throws {
         let (model, _) = try makeModel()
-        model.permissionPaused = true
+        model.coreHold = .permissionMissing
         editGlobal(model)
         model.showLuaEditor = true
         #expect(model.primarySaveAction == .saveLua)
@@ -87,7 +87,7 @@ struct PausedGlobalsSaveTests {
     @Test("the save reaches disk while paused")
     func globalsReachDisk() throws {
         let (model, core) = try makeModel()
-        model.permissionPaused = true
+        model.coreHold = .permissionMissing
         editGlobal(model)
         model.saveGlobalsWhilePaused()
         #expect(
@@ -104,7 +104,7 @@ struct PausedGlobalsSaveTests {
     @Test("tiling edits survive and keep the footer dirty")
     func tilingStaysDirtyAfterGlobalsSave() throws {
         let (model, _) = try makeModel()
-        model.permissionPaused = true
+        model.coreHold = .permissionMissing
         editGlobal(model)
         editTiling(model)
         let staged = model.config.settings.gapsGlobal.inner
@@ -125,7 +125,7 @@ struct PausedGlobalsSaveTests {
     @Test("a globals-only edit ends clean")
     func globalsOnlyEditEndsClean() throws {
         let (model, _) = try makeModel()
-        model.permissionPaused = true
+        model.coreHold = .permissionMissing
         editGlobal(model)
         model.saveGlobalsWhilePaused()
         #expect(!model.isDirty)
@@ -171,7 +171,7 @@ struct PausedGlobalsSaveTests {
             ]
         )
 
-        model.permissionPaused = true
+        model.coreHold = .permissionMissing
         editGlobal(model)
         model.saveGlobalsWhilePaused()
 
@@ -218,7 +218,7 @@ struct PausedGlobalsSaveTests {
             hotkeyRegistrar: PausedRegistrar()
         )
         let model = makeTestModel(core: core)
-        model.permissionPaused = true
+        model.coreHold = .permissionMissing
         #expect(core.lua == nil, "fixture is not a cold core")
 
         editGlobal(model)
@@ -260,7 +260,7 @@ struct PausedGlobalsSaveTests {
             hotkeyRegistrar: PausedRegistrar()
         )
         let model = makeTestModel(core: core)
-        model.permissionPaused = true
+        model.coreHold = .permissionMissing
         model.reload()
 
         #expect(!core.isGuiManaged)
@@ -279,7 +279,7 @@ struct PausedGlobalsSaveTests {
         core.execute("save_profile", args: [.string("p")])
         // The page follows the profile now live, or the Save refuses.
         model.reload()
-        model.permissionPaused = true
+        model.coreHold = .permissionMissing
         _ = core.execute(
             "create_space",
             args: [.string("scratch")]

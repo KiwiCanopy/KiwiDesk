@@ -40,11 +40,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.replayOnboardingTour()
         }
         created.setUpdater(updater)
-        created.setPermissionPaused(!permissions.isTrusted)
         created.setStartTiling { [weak self] in self?.startTiling() }
-        created.setTilingIdle(
-            permissions.isTrusted && !hasStartedTiling
-        )
+        created.setCoreHold(coreHold)
         dashboardIfCreated = created
         return created
     }
@@ -258,9 +255,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         let trusted = permissions.isTrusted
         TilingConsent.seedAtLaunch(isTrusted: trusted)
         offerWhatsNew(origin: origin, trusted: trusted)
-        if trusted, !hasStartedTiling {
+        syncCoreHold()
+        if coreHold == .notStarted {
             // Granted, but Start Tiling never pressed (#2050).
-            showTilingIdle()
             showOnboarding(at: .grant)
         } else if trusted {
             startManaging()
@@ -270,7 +267,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 showOnboarding(at: .keys)
             }
         } else {
-            statusItem.setWarning(true)
             showOnboarding(at: .grant)
         }
     }

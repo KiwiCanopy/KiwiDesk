@@ -14,20 +14,23 @@ extension SettingsView {
             SettingsHeaderBar(model: model)
                 // Lift header z-index so search dropdown paints over content.
                 .zIndex(1)
-            // The paused banner outranks the per-section Lua one:
-            // missing Accessibility makes the whole dashboard
+            // The hold banners outrank the per-section Lua one:
+            // with the core not running the whole dashboard is
             // inert. Gated here (not self-gating) so the padding
             // never reserves empty space when trusted.
-            if model.permissionPaused {
+            switch model.coreHold {
+            case .permissionMissing:
                 PermissionPausedBanner(
                     onResolve: model.onResolvePermission
                 )
                 .padding(.horizontal, 12)
                 .padding(.top, 10)
-            } else if model.tilingIdle {
+            case .notStarted:
                 TilingIdleBanner(onStart: model.onStartTiling)
                     .padding(.horizontal, 12)
                     .padding(.top, 10)
+            case .running:
+                EmptyView()
             }
             if let trail = model.whatsNewTrail {
                 WhatsNewTrailBanner(

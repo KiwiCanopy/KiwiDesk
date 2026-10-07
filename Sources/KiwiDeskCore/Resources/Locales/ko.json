@@ -1054,7 +1054,7 @@
   "onboarding.grant.lead": "macOS는 사용자가 허용한 뒤에야 앱이 윈도우를 옮기도록 합니다. 이 권한을 켜기 전까지는 여기서 아무것도 작동하지 않습니다.",
   "onboarding.grant.own_window": "이런 윈도우는 곧 사라지므로 타일 배치되지 않습니다.",
   "onboarding.grant.ready.body": "‘%1$@’을(를) 누르면 지금 열려 있는 윈도우가 정돈됩니다. 누르기 전에는 아무것도 움직이지 않습니다.",
-  "onboarding.grant.ready.hint": "아직 시작하지 않으시겠습니까? 메뉴 막대의 KiwiDesk 메뉴에서 언제든지 시작할 수 있습니다.",
+  "onboarding.grant.ready.hint": "아직 준비가 되지 않았습니까? 메뉴 막대의 KiwiDesk 메뉴에서 언제든지 시작할 수 있습니다.",
   "onboarding.grant.ready.title": "KiwiDesk가 준비되었습니다",
   "onboarding.grant.step.enable": "KiwiDesk 켜기",
   "onboarding.grant.step.open": "개인정보 보호 및 보안 ▸ 손쉬운 사용 열기",

@@ -7,7 +7,18 @@ extension SettingsModel {
     /// Explains why profile saving is blocked when accessibility is disabled
     /// (#335, #516).
     var profileSaveBlockedReason: String? {
-        if tilingIdle, !permissionPaused {
+        switch coreHold {
+        case .running:
+            return nil
+        case .permissionMissing:
+            return L(
+                "profiles.save_blocked_paused",
+                "Window management is paused because Accessibility "
+                    + "access is off, so no displays are detected. "
+                    + "Grant access first — a profile saved now would "
+                    + "capture no monitors and never resolve."
+            )
+        case .notStarted:
             // The core has not run, so no screen is known (#2050).
             return L(
                 "profiles.save_blocked_idle",
@@ -17,14 +28,6 @@ extension SettingsModel {
                     + "never resolve."
             )
         }
-        guard permissionPaused else { return nil }
-        return L(
-            "profiles.save_blocked_paused",
-            "Window management is paused because Accessibility "
-                + "access is off, so no displays are detected. "
-                + "Grant access first — a profile saved now would "
-                + "capture no monitors and never resolve."
-        )
     }
 
     /// Whether active profile matches connected screen count for update.
