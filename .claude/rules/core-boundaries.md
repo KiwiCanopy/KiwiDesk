@@ -157,11 +157,12 @@ below, so it corrects itself when a seventh is added.
 
   **The preflight's one other bypass is a verb list, and a verb
   joins it only if it changes no window's content, size or
-  membership (#1812).** `FocusedCommandPolicy.raiseFlightExempt`
-  (`focus` alone) passes while KiwiDesk's own raise toward the
-  anchor is in flight and the app that raise LEFT is still in
-  front — an order question asked of the one `RaiseFlight`
-  record, never of the echo ledger's presence. Widening the list
+  membership (#1812).** A verb in
+  `FocusedCommandPolicy.raiseFlightExempt` passes while
+  KiwiDesk's own raise toward the anchor is in flight and the app
+  that raise LEFT is still in front — an order question asked of
+  the one `RaiseFlight` record, never of the echo ledger's
+  presence. Widening the list
   is a ruling, not a tidy-up; `FocusRaiseFlightGuardTests` ▸
   `otherVerbsRefuse` holds every verb outside it to the refusal.
 
