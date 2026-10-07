@@ -6,10 +6,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The jump bar's layer readout and line placement (#1520), split
-/// from `ShortcutsJumpTests` at the §2.1 ceiling: it never elides
-/// the sentence — a long name is cut inside it — and it takes a
-/// centred line of its own under the centred chips.
+/// The jump bar's layer readout (#1520), split from
+/// `ShortcutsJumpTests` at the §2.1 ceiling: it never elides the
+/// sentence — a long name is cut inside it — and it rides the
+/// caption line over the chips.
 /// Serialized: one clause pins the process-wide locale.
 @Suite("Shortcuts jump readout", .serialized)
 @MainActor
@@ -29,27 +29,36 @@ struct ShortcutsJumpReadoutTests {
 
     private func barHeight(
         readout: String?,
-        width: CGFloat
+        width: CGFloat,
+        band: SettingsWidthClass = .medium
     ) throws -> CGFloat {
         let bar = ShortcutsJumpBar(
             marked: .focus,
             underlapped: false,
             readout: readout
         ) { _ in }
-        .environment(\.settingsWidth, .medium)
+        .environment(\.settingsWidth, band)
         .frame(width: width)
         let image = try #require(ImageRenderer(content: bar).nsImage)
         return image.size.height
     }
 
-    /// The readout always takes a line of its own under the chips
-    /// (#1520 amendment 5), even where it would fit beside them.
-    /// Derived rather than compared: at either width the bar is
-    /// the bare chips' ONE line plus the gap plus the readout's
-    /// own line — a readout beside the chips adds nothing at the
-    /// wide width, and one squeezed in wraps them at the narrow.
-    @Test("the readout sits on its own line under the chips")
-    func readoutTakesItsOwnLine() throws {
+    private func textSize(_ text: String) throws -> CGSize {
+        try #require(
+            ImageRenderer(
+                content: Text(text).font(.callout).fixedSize()
+            ).nsImage
+        ).size
+    }
+
+    /// The readout rides the caption line over the chips, wrapping
+    /// under the caption where both do not fit, and never elides.
+    /// Derived rather than compared: the bar is the bare chips (the
+    /// chrome step's bar at the same width) plus one gap and line
+    /// per line of the caption's — a readout beside the chips would
+    /// wrap or widen them instead, which "taller" cannot tell apart.
+    @Test("the readout sits on the caption line over the chips")
+    func readoutRidesTheCaptionLine() throws {
         // The chips' titles are translated text (#740).
         LocalizationManager.shared.select("en")
         defer { LocalizationManager.shared.select(nil) }
@@ -57,59 +66,67 @@ struct ShortcutsJumpReadoutTests {
             String(repeating: "W", count: 40)
         )
         let readout = "Editing the \u{201C}\(name)\u{201D} layer"
-        let line = try #require(
-            ImageRenderer(
-                content: Text(readout).font(.callout).fixedSize()
-            ).nsImage
-        ).size.height
-        let wideBare = try barHeight(readout: nil, width: 2000)
-        for width: CGFloat in [2000, 700] {
-            let bare = try barHeight(readout: nil, width: width)
-            // Premise: bare, the chips still fit one line here.
-            #expect(bare == wideBare)
-            let shown = try barHeight(readout: readout, width: width)
-            let expected = bare + ShortcutsJumpBar.spacing + line
-            #expect(abs(shown - expected) < 1, "width \(width)")
+        let gap = ShortcutsJumpBar.spacing
+        let line = try textSize(readout).height
+        let wide: CGFloat = 2000
+        let wideBare = try barHeight(
+            readout: nil,
+            width: wide,
+            band: .tight
+        )
+        // One caption line, with or without the readout on it.
+        for shown in [readout, nil] as [String?] {
+            let height = try barHeight(readout: shown, width: wide)
+            #expect(abs(height - (wideBare + gap + line)) < 1)
         }
+        // Too narrow for caption and readout side by side, wide
+        // enough for the readout alone: it wraps under the caption.
+        let readoutWidth = try textSize(readout).width
+        let narrow = readoutWidth + 2 * SettingsMetrics.paneInset + gap
+        let narrowBare = try barHeight(
+            readout: nil,
+            width: narrow,
+            band: .tight
+        )
+        let height = try barHeight(readout: readout, width: narrow)
+        #expect(abs(height - (narrowBare + 2 * (gap + line))) < 1)
     }
 
-    /// Centred, by owner ruling (amendment 5): every wrapped line
-    /// of chips and the readout under them. Shape, not value — the
-    /// one flow layout places the line by its alignment, the bar
-    /// asks it for `.center`, and the readout centres its lines.
-    @Test("the chips and the readout are centred")
-    func chipsAreCentred() throws {
-        let slack: CGFloat = 40
-        #expect(
-            FlowLayout.lineOffset(100, in: 100 + slack, alignment: .center)
-                == slack / 2
-        )
-        #expect(
-            FlowLayout.lineOffset(100, in: 100 + slack, alignment: .leading)
-                == 0
-        )
-        // A line wider than the layout starts at its edge.
-        #expect(
-            FlowLayout.lineOffset(200, in: 100, alignment: .center) == 0
-        )
+    /// Leading, by owner ruling (amendment 6, returning amendment
+    /// 5's centring): every line starts at the leading inset. The
+    /// caption line rides over the chips and goes at the chrome
+    /// step; its caption draws the row's VoiceOver name, silent to
+    /// VoiceOver, with the readout at its end. Shape, not value.
+    @Test("the row leads under its caption line")
+    func rowLeads() throws {
         let bar = try Self.source(
             "Components/Keybindings/ShortcutsJumpBar.swift"
         )
+        #expect(bar.contains("FlowLayout(spacing:Self.spacing){"))
+        #expect(!bar.contains("FlowLayout(spacing:Self.spacing,alignment"))
+        #expect(bar.contains(".frame(maxWidth:.infinity,alignment:.leading)"))
         #expect(
-            bar.contains("FlowLayout(spacing:Self.spacing,alignment:.center)")
+            bar.contains(
+                "VStack(alignment:.leading,spacing:Self.spacing){"
+                    + "if!width.collapsesChrome{captionLine}chips}"
+            )
+        )
+        #expect(bar.contains("L(\"shortcuts.jump.label\",\"Jumpto\")"))
+        #expect(
+            bar.contains(
+                "Text(label).font(.callout)"
+                    + ".foregroundStyle(SettingsTheme.ink2)"
+                    + ".lineLimit(1).fixedSize()"
+                    + ".accessibilityHidden(true)"
+            )
         )
         #expect(
             bar.contains(
-                "VStack(alignment:.center,spacing:Self.spacing){chips"
-                    + "ifletshownReadout{readoutText(shownReadout)"
-                    + ".multilineTextAlignment(.center)"
+                "HStack(alignment:.firstTextBaseline,spacing:0){"
+                    + "captionSpacer(minLength:12)"
+                    + "readoutText(readout).fixedSize()}"
             )
         )
-        #expect(!bar.contains("ViewThatFits"))
-        let flow = try Self.source("FlowLayout.swift")
-        // The offset is applied to every placed item.
-        #expect(flow.contains("x:bounds.minX+lead+item.x"))
-        #expect(flow.contains("letlead=Self.lineOffset(row.width,"))
     }
 
     private static func source(_ path: String) throws -> String {

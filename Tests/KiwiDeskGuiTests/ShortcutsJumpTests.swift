@@ -257,7 +257,7 @@ struct ShortcutsJumpTests {
     }
 
     /// The row is one named container of buttons, the marked one
-    /// selected.
+    /// selected, its name drawn once as a caption over it.
     @Test("the chips announce as one named row")
     func chipsAnnounce() throws {
         let bar = try Self.source(
@@ -266,6 +266,8 @@ struct ShortcutsJumpTests {
         #expect(bar.contains(".accessibilityElement(children:.contain)"))
         // Squeezed, so the English reads without its space.
         #expect(bar.contains("L(\"shortcuts.jump.label\",\"Jumpto\")"))
+        // Drawn once by the caption (`ShortcutsJumpReadoutTests`).
+        #expect(bar.contains(".accessibilityLabel(label)"))
         #expect(bar.contains(".accessibilityAddTraits(marked?.isSelected:[])"))
         // The readout speaks the full layer name it may draw cut.
         #expect(bar.contains(".accessibilityLabel(spokenReadout??text)"))

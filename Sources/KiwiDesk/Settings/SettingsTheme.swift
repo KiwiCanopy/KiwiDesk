@@ -105,11 +105,11 @@ enum SettingsTheme {
     )
 
     /// A button chip's edge, constant in every state — what tells
-    /// it from a passive hairline capsule (#1520 amendment 5).
+    /// it from a passive hairline capsule (#1520 amendments 5, 6).
     static let chipEdge = token(
         light: 0x12_25_1A,
         dark: 0xE6_EC_E6,
-        lightAlpha: 0.24,
+        lightAlpha: 0.18,
         darkAlpha: 0.20
     )
 

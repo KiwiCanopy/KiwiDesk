@@ -10549,9 +10549,10 @@ another's, and the group's rank is fine once a map exists.
 **Layers gets no chip.** It picks which layer every group below
 edits — scope, not a destination — and it is absent in Simple,
 so a chip for it would come and go. The bar carries the edited
-layer's name instead, in words, on a line of its own under the
-chips, and that readout is the first thing a narrowing window
-drops since it is header chrome. **Mouse & trackpad gets the first chip**, set off
+layer's name instead, in words, at the trailing end of the
+caption line over the chips, and that line is the first thing a
+narrowing window drops since it is header chrome. **Mouse &
+trackpad gets the first chip**, set off
 by a rule because everything after it is scoped to one layer and
 it is not; its click opens the card as well, which stays fully
 collapsed otherwise — a first-item-open state would be a third
@@ -10596,14 +10597,38 @@ shadow**: buttons take none (ui-patterns ▸ *Buttons take a native
 style*), the thumb's shadow being the settings' sign for
 "movable", and the edge already carries what a shadow would.
 
-**The row is centred**, every wrapped line of chips and the
-layer readout under them. The designer argued for leading, which
-is where a list's content starts and where the eye returns after
-each row; the owner ruled centred, because the row reads as
-navigation across the page — a menu over it — rather than as the
-first line of the list below. Centring is also why the readout
-always takes its own line: beside the chips it would pull the
-centred row off its axis.
+**The row leads** (#1520 amendment 6, owner ruling 2026-10-07).
+Every wrapped line starts at the leading inset, where the pane's
+headers start and where the eye returns after each line; a
+centred wrapped row reads as a tag cloud, and centred segments
+mean tabs on macOS. Centring was tried on the device and
+returned. The
+edge is 18 % in light against 20 % in dark — the owner's pick
+from a side-by-side of 24, 18, 14 and no edge — and at either
+weight it must still outread the container hairline
+(`SettingsThemeContrastTests` ▸ `chipEdgeOutreadsHairline`).
+
+**The row says what it is.** A "Jump to" caption sits on a line
+of its own above the chips: the row's VoiceOver name, drawn, and
+hidden from VoiceOver so it is not spoken twice. The edited
+layer's readout moves onto that line, at its trailing end, so
+the chips below are only chips; where caption and readout do
+not fit side by side the readout wraps under the caption, never
+beside the chips. The caption takes the readout's face —
+`.callout` in `ink2`, never `ink3`, which reads as dimmed — and
+the whole line leaves at the chrome step, being header chrome,
+the bare chips remaining. No colon: the form's labels take
+none, and a colon's spacing is per-locale. The designer argued
+for the caption inline before the first chip, which keeps the
+pinned bar one line shorter; the owner preferred the label on a
+line of its own. A card-header tier above the row was refused,
+since on a pinned bar it reads as a frozen section title, and
+its semibold would equal the marked chip's "you are here". An
+instruction such as "Click to jump there" was
+refused as well: it names one input of several. The caption
+does not replace the edge — it labels the row once, where the
+edge tells each chip from a passive capsule on every look, and
+without the edge a dark jump chip is `chipSurface()` again.
 :::
 
 ### Overrides & appearance

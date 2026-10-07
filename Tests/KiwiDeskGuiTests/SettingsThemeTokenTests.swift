@@ -162,7 +162,7 @@ struct SettingsThemeTokenTests {
             0x12_25_1A,
             0xE6_EC_E6,
             SettingsTheme.chipEdge,
-            lightAlpha: 0.24,
+            lightAlpha: 0.18,
             darkAlpha: 0.20
         ),
         Pin("ink", 0x12_25_1A, 0xE6_EC_E6, SettingsTheme.ink),

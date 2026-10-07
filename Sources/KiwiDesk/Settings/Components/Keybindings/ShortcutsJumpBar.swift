@@ -1,11 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The pinned jump bar over Shortcuts & Gestures (#1520): one chip
-/// per group, wrapping rather than scrolling, each line centred,
-/// and the edited layer's name on a centred line under them
-/// (owner, amendment 5). It sits on the page ground, and draws its
-/// lower hairline once content slides under it.
+/// The pinned jump bar over Shortcuts & Gestures (#1520): a "Jump
+/// to" caption line carrying the edited layer's name at its
+/// trailing end, over one chip per group, wrapping rather than
+/// scrolling. It sits on the page ground, and draws its lower
+/// hairline once content slides under it.
 struct ShortcutsJumpBar: View {
     let marked: ShortcutsJumpGroup?
     let underlapped: Bool
@@ -34,7 +34,7 @@ struct ShortcutsJumpBar: View {
         content
             // Full width in every arrangement, so the ground and
             // the hairline span the pane.
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, SettingsMetrics.paneInset)
             .padding(.vertical, 10)
             .background(SettingsTheme.page)
@@ -45,21 +45,33 @@ struct ShortcutsJumpBar: View {
             }
     }
 
-    /// Header chrome, so it goes with the chrome step.
-    private var shownReadout: String? {
-        width.collapsesChrome ? nil : readout
+    /// The caption line over the chips; header chrome, so it goes
+    /// with the chrome step and leaves the bare chips.
+    private var content: some View {
+        VStack(alignment: .leading, spacing: Self.spacing) {
+            if !width.collapsesChrome { captionLine }
+            chips
+        }
     }
 
-    /// Always a line of its own under the chips, wrapping rather
-    /// than eliding.
-    private var content: some View {
-        VStack(alignment: .center, spacing: Self.spacing) {
-            chips
-            if let shownReadout {
-                readoutText(shownReadout)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
+    /// The caption, and the readout at its trailing end where both
+    /// fit; otherwise the readout wraps under the caption.
+    @ViewBuilder private var captionLine: some View {
+        if let readout {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: 0) {
+                    caption
+                    Spacer(minLength: 12)
+                    readoutText(readout).fixedSize()
+                }
+                VStack(alignment: .leading, spacing: Self.spacing) {
+                    caption
+                    readoutText(readout)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
+        } else {
+            caption
         }
     }
 
@@ -71,20 +83,32 @@ struct ShortcutsJumpBar: View {
     }
 
     private var chips: some View {
-        FlowLayout(spacing: Self.spacing, alignment: .center) {
+        FlowLayout(spacing: Self.spacing) {
             ForEach(ShortcutsJumpGroup.allCases, id: \.self) { group in
-                chipRun(group)
+                ruledChip(group)
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(
-            L("shortcuts.jump.label", "Jump to")
-        )
+        .accessibilityLabel(label)
+    }
+
+    /// The row's name: spoken by the container, drawn by the
+    /// caption (#1520 amendment 6).
+    private var label: String { L("shortcuts.jump.label", "Jump to") }
+
+    /// Hidden from VoiceOver: the container already speaks it.
+    private var caption: some View {
+        Text(label)
+            .font(.callout)
+            .foregroundStyle(SettingsTheme.ink2)
+            .lineLimit(1)
+            .fixedSize()
+            .accessibilityHidden(true)
     }
 
     /// A rule rides the chip it follows, so a wrap can never start
     /// a line with it.
-    @ViewBuilder private func chipRun(
+    @ViewBuilder private func ruledChip(
         _ group: ShortcutsJumpGroup
     ) -> some View {
         if group.ruledAfter {
