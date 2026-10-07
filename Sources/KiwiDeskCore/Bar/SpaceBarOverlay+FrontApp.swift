@@ -183,7 +183,7 @@ extension SpaceBarOverlay {
             ),
             first: false,
             last: true,
-            outlined: style.activeIndicator == .outline
+            outlined: style.activeIndicator.drawsOutline
         )
         return ItemEnds(
             leading: pad + ends.leading,

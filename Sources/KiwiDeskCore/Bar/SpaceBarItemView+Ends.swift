@@ -169,7 +169,7 @@ extension SpaceBarItemView {
             clearance: endClearance(look: look, depth: depth),
             first: first,
             last: last,
-            outlined: look.activeIndicator == .outline
+            outlined: look.activeIndicator.drawsOutline
         )
     }
 }
