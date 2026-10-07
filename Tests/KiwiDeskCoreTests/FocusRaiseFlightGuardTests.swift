@@ -59,12 +59,24 @@ struct FocusRaiseFlightGuardTests {
         core.focusedCommandDenial(for: command, [.string("left")])
     }
 
-    @Test("A fresh self-raise of the anchor lets focus through")
+    /// Our raise toward `id`, issued with the previous app in
+    /// front, `age` seconds ago on the core's frozen clock.
+    private func raise(
+        _ core: KiwiCore,
+        to id: WindowID,
+        age: TimeInterval = 0
+    ) {
+        core.noteRaiseFlight(to: id)
+        core.raiseFlight?.raisedAt = core.wallClock()
+            .addingTimeInterval(-age)
+    }
+
+    @Test("A fresh raise toward the anchor lets focus through")
     func freshRaiseAllowsFocus() {
         let core = makeCore()
         var logs: [String] = []
         core.onLog = { logs.append($0) }
-        core.stampSelfRaise(anchor, now: core.wallClock())
+        raise(core, to: anchor)
         #expect(preflight(core, "focus") == nil)
         #expect(logs.contains { $0.contains("own raise") })
     }
@@ -72,6 +84,7 @@ struct FocusRaiseFlightGuardTests {
     @Test("A raise deferred behind a pan lets focus through")
     func pendingRaiseAllowsFocus() {
         let core = makeCore()
+        raise(core, to: anchor, age: 10)
         core.pendingFocusRaise = anchor
         #expect(preflight(core, "focus") == nil)
     }
@@ -85,7 +98,7 @@ struct FocusRaiseFlightGuardTests {
     @Test("A raise of another window does not count")
     func otherWindowsRaiseRefuses() {
         let core = makeCore()
-        core.stampSelfRaise(previous, now: core.wallClock())
+        raise(core, to: previous)
         core.pendingFocusRaise = previous
         #expect(preflight(core, "focus")?.error == Self.generic)
     }
@@ -93,20 +106,19 @@ struct FocusRaiseFlightGuardTests {
     @Test("A stale raise is refused")
     func staleRaiseRefuses() {
         let core = makeCore()
-        let past = core.wallClock().addingTimeInterval(
-            -KiwiCore.selfRaiseEchoWindow
-        )
-        core.stampSelfRaise(anchor, now: past)
+        raise(core, to: anchor, age: KiwiCore.selfRaiseEchoWindow)
         #expect(preflight(core, "focus")?.error == Self.generic)
     }
 
     @Test("Every other focused verb stays refused")
     func otherVerbsRefuse() {
         let core = makeCore()
-        core.stampSelfRaise(anchor, now: core.wallClock())
+        raise(core, to: anchor)
         core.pendingFocusRaise = anchor
-        for verb in FocusedCommandPolicy.focusedCommands
-        where verb != "focus" {
+        let refused = FocusedCommandPolicy.focusedCommands
+            .subtracting(FocusedCommandPolicy.raiseFlightExempt)
+        #expect(refused.count > 1)
+        for verb in refused {
             #expect(
                 core.focusedCommandDenial(for: verb, []) != nil,
                 "\(verb) passed the preflight"
@@ -114,26 +126,50 @@ struct FocusRaiseFlightGuardTests {
         }
     }
 
-    @Test("An unmanaged app in front is #292's refusal")
-    func unmanagedFrontRefuses() {
+    /// The user switched to another managed app after our raise:
+    /// a fresh raise must not override their choice.
+    @Test("Another managed app in front is #292's refusal")
+    func switchedAppRefuses() {
         let core = makeCore()
-        core.stampSelfRaise(anchor, now: core.wallClock())
-        core.frontmostPIDProvider = { 777 }
+        raise(core, to: anchor)
+        let third: pid_t = 555
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(3), pid: third, appName: "T")
+            )
+        )
+        let home = core.state.workspaces.space(of: anchor)
+        if let home { core.state.workspaces.focus(anchor, in: home) }
+        #expect(core.focusedWindow?.id == anchor)
+        core.frontmostPIDProvider = { third }
         #expect(preflight(core, "focus")?.error == Self.generic)
     }
 
-    @Test("An ignored panel latched on the anchor refuses")
-    func latchedPanelRefuses() {
+    @Test("A raise that left an unmanaged app is refused")
+    func unmanagedLeftAppRefuses() {
         let core = makeCore()
-        core.stampSelfRaise(anchor, now: core.wallClock())
-        core.ignoredPanel.active.insert(getpid())
+        core.frontmostPIDProvider = { 777 }
+        raise(core, to: anchor)
         #expect(preflight(core, "focus")?.error == Self.generic)
+    }
+
+    @Test("An ignored panel latched on either app refuses")
+    func latchedPanelRefuses() {
+        for pid in [getpid(), previousPID] {
+            let core = makeCore()
+            raise(core, to: anchor)
+            core.ignoredPanel.active.insert(pid)
+            #expect(
+                preflight(core, "focus")?.error == Self.generic,
+                "panel on \(pid)"
+            )
+        }
     }
 
     @Test("An unobserved anchor app refuses")
     func unobservedAnchorRefuses() {
         let core = makeCore()
-        core.stampSelfRaise(anchor, now: core.wallClock())
+        raise(core, to: anchor)
         core.eventLoop.observers[getpid()] = nil
         #expect(preflight(core, "focus")?.error == Self.generic)
     }
@@ -143,9 +179,19 @@ struct FocusRaiseFlightGuardTests {
         let core = makeCore()
         var logs: [String] = []
         core.onLog = { logs.append($0) }
-        core.stampSelfRaise(anchor, now: core.wallClock())
+        raise(core, to: anchor)
         let response = core.execute("focus", args: [.string("left")])
         #expect(response.error != Self.generic)
         #expect(logs.contains { $0.contains("allowed focus") })
+    }
+
+    /// The write site: a focus command records its raise and
+    /// the app in front, and the deferred raise restamps it.
+    @Test("focusWindow records the flight it starts")
+    func focusWindowRecords() {
+        let core = makeCore()
+        core.focusWindow(previous, warp: false)
+        #expect(core.raiseFlight?.target == previous)
+        #expect(core.raiseFlight?.leftPID == previousPID)
     }
 }

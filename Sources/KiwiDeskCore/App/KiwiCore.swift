@@ -87,11 +87,11 @@ public final class KiwiCore {
     /// raise left by a dispatch whose retile never ran.
     var commandSizing: BatchSizing = .mayInstantSize
 
-    /// A scrolling focus move whose AX raise is waiting for
-    /// the pan to settle (#143) — a single slot, so rapid
-    /// focus commands supersede each other and only the last
-    /// target raises (see runPendingFocusRaise).
+    /// A scrolling focus raise waiting for the pan to settle
+    /// (#143); one slot, so only the last target raises.
     var pendingFocusRaise: WindowID?
+    /// The focus command's raise in flight (#1812).
+    var raiseFlight: RaiseFlight?
 
     /// When KiwiDesk's own AX raise of each window was issued
     /// (#152): a report for a window raised within

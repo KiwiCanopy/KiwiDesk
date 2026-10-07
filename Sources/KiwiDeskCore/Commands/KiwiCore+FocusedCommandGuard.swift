@@ -23,10 +23,10 @@ extension KiwiCore {
     /// 3. the event loop still observes that pid;
     /// 4. no ignored panel is latched for that pid.
     ///
-    /// Any nil/mismatch fails closed. A self-raise in flight is a
-    /// bypass for `focus` alone, which acts on no content
-    /// (`ownRaiseInFlight`, #1812); every other verb waits until
-    /// the OS frontmost pid actually matches.
+    /// Any nil/mismatch fails closed. KiwiDesk's own raise in
+    /// flight lets the verbs `FocusedCommandPolicy.raiseFlightExempt`
+    /// names through (`ownRaiseInFlight`, #1812); every other verb
+    /// waits until the OS frontmost pid actually matches.
     func focusedCommandDenial(
         for command: String,
         _ args: [JSONValue]
@@ -40,13 +40,6 @@ extension KiwiCore {
         // window this seam diagnoses.
         let front = frontmostPID()
         if foregroundOwned(front: front) { return nil }
-        if ownRaiseInFlight(command, front: front) {
-            onLog(
-                "preflight (#292): allowed \(command) — own raise "
-                    + "toward the anchor in flight (#1812)"
-            )
-            return nil
-        }
         // The wake heal (#1130), one-shot and time-bounded: the
         // wake payment's activation can be refused, so re-seed
         // from the real frontmost (a blocking AX read, paid at
@@ -59,6 +52,13 @@ extension KiwiCore {
                 )
                 return nil
             }
+        }
+        if ownRaiseInFlight(command, front: front) {
+            onLog(
+                "preflight (#292): allowed \(command) — own raise "
+                    + "toward the anchor in flight (#1812)"
+            )
+            return nil
         }
         // The hotkey path discards the response, so a denial
         // is otherwise invisible — the "#483 `_and_follow`
@@ -79,35 +79,62 @@ extension KiwiCore {
     /// The #292 ownership clauses in one place, so the wake heal
     /// (#1130) re-asks the same question after its reseed.
     private func foregroundOwned(front: pid_t?) -> Bool {
-        guard let focused = focusedWindow,
-            let front,
-            owns(front: front, pid: focused.pid),
-            eventLoop.observes(pid: focused.pid),
-            !ignoredPanel.active.contains(focused.pid)
-        else { return false }
-        return true
+        guard let focused = focusedWindow, let front else {
+            return false
+        }
+        return owns(front: front, pid: focused.pid)
+            && anchorManaged(focused)
     }
 
-    /// Whether `focus` may run with only the frontmost clause
-    /// failing (#1812): KiwiDesk's own raise toward the anchor is
-    /// pending a pan or stamped within `selfRaiseEchoWindow`, and
-    /// the frontmost app is managed — an unmanaged window in front
-    /// stays #292's refusal.
+    /// The clauses that do not read the frontmost app: the loop
+    /// observes the anchor's app and no ignored panel is latched.
+    private func anchorManaged(_ focused: ManagedWindow) -> Bool {
+        eventLoop.observes(pid: focused.pid)
+            && !ignoredPanel.active.contains(focused.pid)
+    }
+
+    /// Whether `command` may run with only the frontmost clause
+    /// failing (#1812): the verb is exempt, the anchor is the
+    /// target of our raise in flight, and the app in front is
+    /// still the managed app that raise LEFT — so a switch the
+    /// user made since is #292's refusal, never ours to override.
     private func ownRaiseInFlight(
         _ command: String,
         front: pid_t?
     ) -> Bool {
-        guard command == "focus",
+        guard FocusedCommandPolicy.raiseFlightExempt.contains(command),
             let focused = focusedWindow,
             let front,
-            eventLoop.observes(pid: focused.pid),
-            !ignoredPanel.active.contains(focused.pid),
-            pendingFocusRaise == focused.id
-                || freshSelfRaise(focused.id, now: wallClock())
+            let flight = raiseFlight,
+            anchorManaged(focused),
+            flight.inFlight(
+                toward: focused.id,
+                pending: pendingFocusRaise,
+                now: wallClock(),
+                // Our raise is in flight as long as its echo is
+                // believed ours (#887).
+                bound: Self.selfRaiseEchoWindow
+            ),
+            owns(front: front, pid: flight.leftPID),
+            !ignoredPanel.active.contains(front)
         else { return false }
-        return state.windows.all.contains {
-            owns(front: front, pid: $0.pid)
+        return Set(state.windows.all.map(\.pid)).contains {
+            owns(front: flight.leftPID, pid: $0)
         }
+    }
+
+    /// Records the focus command's raise toward `id` and the app
+    /// in front as it was issued — the app the raise leaves.
+    func noteRaiseFlight(to id: WindowID) {
+        guard let front = frontmostPIDProvider?() else {
+            raiseFlight = nil
+            return
+        }
+        raiseFlight = RaiseFlight(
+            target: id,
+            leftPID: front,
+            raisedAt: wallClock()
+        )
     }
 
     /// Whether the frontmost process is `pid`'s app — the
