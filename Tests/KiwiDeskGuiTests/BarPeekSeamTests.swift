@@ -80,13 +80,16 @@ struct BarPeekSeamTests {
         for file in try SourceScan.swiftSources(under: Self.bar) {
             let name = file.lastPathComponent
             let text = try SourceScan.strippedSource(at: file)
-            for needle in ["addToolTip(", "NSViewToolTipOwner", "toolTip ="]
+            for needle in ["addToolTip(", "NSViewToolTipOwner"]
             where text.contains(needle) {
-                if Self.tooltipExempt[name] != nil, needle == "toolTip =" {
-                    exemptSeen.insert(name)
-                    continue
-                }
                 found.append("\(name): \(needle)")
+            }
+            // An assignment however it is spaced, never a comparison.
+            guard text.contains(/toolTip\s*=(?!=)/) else { continue }
+            if Self.tooltipExempt[name] != nil {
+                exemptSeen.insert(name)
+            } else {
+                found.append("\(name): toolTip =")
             }
         }
         #expect(found.isEmpty, "\(found)")
@@ -130,8 +133,12 @@ struct BarPeekSeamTests {
                 Issue.record("\(name) reaches \(needle)")
             }
         }
+        // A level down: the rows' one call out of state, the icon.
+        #expect(rows.contains("BarIconCache.icon("))
         for file in try SourceScan.swiftSources(under: Self.bar)
-        where file.lastPathComponent.hasPrefix("BarPeek") {
+        where file.lastPathComponent.hasPrefix("BarPeek")
+            || file.lastPathComponent == "BarIconCache.swift"
+        {
             let text = try SourceScan.strippedSource(at: file)
             for needle in Self.compositorReads where text.contains(needle) {
                 Issue.record("\(file.lastPathComponent) reaches \(needle)")

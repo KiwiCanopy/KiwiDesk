@@ -128,6 +128,7 @@ struct BarPeekTests {
         defer { rig.close() }
         rig.hover(rig.first)
         rig.step()
+        #expect(rig.shownTitles == ["Window 1"], "was shown")
         rig.hover(nil)
         #expect(rig.peek.panel.drawn == nil)
         rig.clock += BarPeek.Timing.coolDown / 2
@@ -149,6 +150,7 @@ struct BarPeekTests {
         defer { rig.close() }
         rig.hover(rig.first)
         rig.step()
+        #expect(rig.shownTitles == ["Window 1"], "was shown")
         rig.peek.dismiss()
         #expect(rig.peek.panel.drawn == nil)
         rig.hover(rig.first)
@@ -160,6 +162,43 @@ struct BarPeekTests {
         #expect(rig.shownTitles == ["Window 1"])
     }
 
+    /// An App Bar item anchoring the peek closes it on a press, as a
+    /// glyph does — the item through its own hover report and its
+    /// own `mouseDown`.
+    @Test("A press on an App Bar item closes its peek")
+    func appBarPressDismisses() throws {
+        let rig = Rig()
+        defer { rig.close() }
+        let actions = AppBarItemActions()
+        actions.peek = rig.peek
+        let item = AppBarItemView(
+            frame: CGRect(x: 100, y: 10, width: 40, height: 20)
+        )
+        item.itemActions = actions
+        item.members = [WindowID(3)]
+        rig.window.contentView?.addSubview(item)
+        try #require(item.peekSource != nil, "the item hides its text")
+        item.reportPeek(ownsPointer: true)
+        rig.step()
+        #expect(rig.shownTitles == ["Window 3"], "was shown")
+        #expect(rig.peek.shown?.view === item)
+        let press = try #require(
+            NSEvent.mouseEvent(
+                with: .leftMouseDown,
+                location: .zero,
+                modifierFlags: [],
+                timestamp: 0,
+                windowNumber: 0,
+                context: nil,
+                eventNumber: 0,
+                clickCount: 1,
+                pressure: 1
+            )
+        )
+        item.mouseDown(with: press)
+        #expect(rig.peek.panel.drawn == nil)
+    }
+
     /// A right-click's or a Control-click's menu closes it too.
     @Test("Any menu opening closes the peek")
     func menuCloses() {
@@ -167,6 +206,7 @@ struct BarPeekTests {
         defer { rig.close() }
         rig.hover(rig.first)
         rig.step()
+        #expect(rig.shownTitles == ["Window 1"], "was shown")
         NotificationCenter.default.post(
             name: NSMenu.didBeginTrackingNotification,
             object: NSMenu()
@@ -196,6 +236,7 @@ struct BarPeekTests {
         defer { rig.close() }
         rig.hover(rig.first)
         rig.step()
+        #expect(rig.shownTitles == ["Window 1"], "was shown")
         rig.first.removeFromSuperview()
         rig.peek.syncToAnchor()
         #expect(rig.peek.panel.drawn == nil)
