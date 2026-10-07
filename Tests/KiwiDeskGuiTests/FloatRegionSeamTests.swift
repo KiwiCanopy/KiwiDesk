@@ -85,6 +85,25 @@ struct FloatRegionSeamTests {
         )
     }
 
+    /// The drop's bottom fit (#1427) shrinks a float the user
+    /// pushed past the bottom; called from a retile net it would
+    /// shrink one parked there by hand. One caller, the drop arm.
+    @Test("The drop fit has one caller: the drop arm")
+    func dropFitHasOneCaller() throws {
+        let core = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore"
+        )
+        var callers: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: core) {
+            let source = try SourceScan.strippedSource(at: file)
+            let calls =
+                source.occurrences(of: "floatFrameFittedOnDrop(")
+                - source.occurrences(of: "func floatFrameFittedOnDrop(")
+            if calls > 0 { callers[file.lastPathComponent] = calls }
+        }
+        #expect(callers == ["KiwiCore+Drag.swift": 1])
+    }
+
     /// The brace-balanced body that opens at or after `start`.
     /// A per-file private helper, per tests.md's convention —
     /// nothing else needs it yet.

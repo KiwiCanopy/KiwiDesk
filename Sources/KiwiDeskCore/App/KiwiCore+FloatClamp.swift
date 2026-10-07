@@ -141,15 +141,17 @@ extension KiwiCore {
                 effectiveMinSize(of: id, axis: "y")
             )
             if result.width > region.width + slack {
-                result.size.width = max(
-                    region.width,
-                    min(floorW, result.width)
+                result.size.width = Self.floorWinsExtent(
+                    result.width,
+                    room: region.width,
+                    floor: floorW
                 )
             }
             if result.height > region.height + slack {
-                result.size.height = max(
-                    region.height,
-                    min(floorH, result.height)
+                result.size.height = Self.floorWinsExtent(
+                    result.height,
+                    room: region.height,
+                    floor: floorH
                 )
             }
         }
