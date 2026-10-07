@@ -120,7 +120,8 @@ struct ShortcutsJumpBar: View {
 /// its label at the size of the header it jumps to (owner
 /// amendments 2 and 3, #1520). Marked: a soft accent fill
 /// and a semibold label in neutral ink, its width reserved so the
-/// marking never reflows the row. Hover lifts a neutral fill on a
+/// marking never reflows the row. A resting fill gives the chip its
+/// shape and lifts under the pointer, on a
 /// layer beneath the marking — each layer's colour is a function
 /// of its own state alone, so a hover cannot erase the marking
 /// (#1173).
@@ -137,7 +138,7 @@ struct ShortcutsJumpChip: View {
                 .padding(.vertical, 6)
                 .background {
                     ZStack {
-                        Capsule().fill(Self.hoverFill(hovered))
+                        Capsule().fill(Self.restFill(hovered))
                         Capsule().fill(Self.markFill(marked))
                     }
                 }
@@ -167,9 +168,10 @@ struct ShortcutsJumpChip: View {
             .fixedSize()
     }
 
-    /// The pointer's layer, beneath the marking.
-    static func hoverFill(_ hovered: Bool) -> Color {
-        hovered ? SettingsTheme.cardHover : .clear
+    /// The chip's own shape, lifting under the pointer; beneath
+    /// the marking (#1520 amendment 4).
+    static func restFill(_ hovered: Bool) -> Color {
+        hovered ? SettingsTheme.chipHover : SettingsTheme.chipRest
     }
 
     /// The marking's layer, over the pointer's.

@@ -52,11 +52,15 @@ struct SettingsThemeContrastTests {
         /// accent wash moves the ground toward the ink's own
         /// hue, which is the direction that costs ratio.
         let wash: (color: Color, alpha: Double)?
+        /// Translucent TOKENS laid under the wash, each at its
+        /// own per-appearance alpha — a chip's rest fill (#1520).
+        let layers: [Color]
 
         init(
             _ name: String,
             _ ink: Color,
             on surface: Color,
+            layers: [Color] = [],
             washedWith wash: (color: Color, alpha: Double)? =
                 nil,
             floor: Double = 4.5,
@@ -65,6 +69,7 @@ struct SettingsThemeContrastTests {
             self.name = name
             self.ink = ink
             self.surface = surface
+            self.layers = layers
             self.wash = wash
             self.floor = floor
             self.inkAlpha = inkAlpha
@@ -284,27 +289,6 @@ struct SettingsThemeContrastTests {
                 Double(SettingsTheme.searchNoticeFillOpacity)
             )
         ),
-        // The marked jump chip on the pinned bar's page ground,
-        // and under the pointer, where the hover fill lies
-        // beneath the wash (#1520).
-        Pairing(
-            "ink on the marked jump chip",
-            SettingsTheme.ink,
-            on: SettingsTheme.page,
-            washedWith: (
-                SettingsTheme.accent,
-                Double(SettingsTheme.jumpChipMarkedOpacity)
-            )
-        ),
-        Pairing(
-            "ink on the hovered marked jump chip",
-            SettingsTheme.ink,
-            on: SettingsTheme.cardHover,
-            washedWith: (
-                SettingsTheme.accent,
-                Double(SettingsTheme.jumpChipMarkedOpacity)
-            )
-        ),
     ]
 
     @Test("every drawn pairing clears its floor in both modes")
@@ -312,11 +296,12 @@ struct SettingsThemeContrastTests {
         // A scan that measured nothing would pass having
         // looked at nothing (#635).
         #expect(!pairings.isEmpty)
-        for pairing in pairings + Self.updateWindow {
+        for pairing in pairings + Self.updateWindow + Self.jumpChips {
             for dark in [false, true] {
                 let ratio = try ThemeContrast.contrast(
                     pairing.ink,
                     over: pairing.surface,
+                    layers: pairing.layers,
                     wash: pairing.wash,
                     inkAlpha: pairing.inkAlpha,
                     dark: dark

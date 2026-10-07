@@ -128,6 +128,25 @@ struct SettingsThemeTokenTests {
             lightAlpha: 0,
             darkAlpha: 0.14
         ),
+        // A chip's rest fill and its lift (#1520): the ink at a
+        // per-mode alpha, stronger in dark, where a 6 % lift does
+        // not read.
+        Pin(
+            "chipRest",
+            0x12_25_1A,
+            0xE6_EC_E6,
+            SettingsTheme.chipRest,
+            lightAlpha: 0.06,
+            darkAlpha: 0.10
+        ),
+        Pin(
+            "chipHover",
+            0x12_25_1A,
+            0xE6_EC_E6,
+            SettingsTheme.chipHover,
+            lightAlpha: 0.11,
+            darkAlpha: 0.16
+        ),
         Pin("ink", 0x12_25_1A, 0xE6_EC_E6, SettingsTheme.ink),
         Pin("ink2", 0x55_63_5C, 0xA8_B3_A9, SettingsTheme.ink2),
         Pin("ink3", 0x64_72_6A, 0x98_A2_96, SettingsTheme.ink3),

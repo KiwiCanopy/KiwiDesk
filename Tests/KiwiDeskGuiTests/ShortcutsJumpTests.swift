@@ -289,15 +289,15 @@ struct ShortcutsJumpTests {
                 != ShortcutsJumpChip.markFill(false)
         )
         #expect(
-            ShortcutsJumpChip.hoverFill(true)
-                != ShortcutsJumpChip.hoverFill(false)
+            ShortcutsJumpChip.restFill(true)
+                != ShortcutsJumpChip.restFill(false)
         )
         let bar = try Self.source(
             "Components/Keybindings/ShortcutsJumpBar.swift"
         )
         #expect(
             bar.contains(
-                "ZStack{Capsule().fill(Self.hoverFill(hovered))"
+                "ZStack{Capsule().fill(Self.restFill(hovered))"
                     + "Capsule().fill(Self.markFill(marked))}"
             )
         )

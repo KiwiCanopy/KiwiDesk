@@ -521,14 +521,15 @@ same capsule language rather than as bare gray prose.
 page whose groups the reader needs a map of — Shortcuts & Gestures
 is the one — pins a row of chips over its scroll, one per group,
 in page order, each labelled by its group's own title. A chip is
-content-sized and wears a large-control capsule, the label at
-the size of the header it jumps to,
-with no count and never a truncation: the row wraps instead
-of scrolling. The chip for the group under the bar is marked with
-a soft accent fill and a semibold label, the ink staying neutral
-(the accent marks fills, never text); hover lays a neutral fill
-on a layer of its own beneath that, so pointing at the marked
-chip never unmarks it. A chip is a button, the marked one
+content-sized and wears the hairline capsule over the chip rest
+fill, lifting on hover, at the large-control height with the
+label at the size of the header it jumps to, with no count and
+never a truncation: the row wraps instead of scrolling. The chip
+for the group under the bar is marked with a soft accent fill
+and a semibold label, the ink staying neutral (the accent marks
+fills, never text); the rest fill and its lift sit on a layer of
+their own beneath that, so pointing at the marked chip never
+unmarks it. A chip is a button, the marked one
 announced as selected, and the row is one container named
 "Jump to". A click puts the group's header under the bar, and
 arrives without travelling under Reduce Motion. A chip whose
@@ -539,8 +540,8 @@ its lower hairline only once content slides under it; a readout
 at its trailing end is header chrome, the first thing a narrowing
 window drops, and takes a line of its own under the chips where
 it does not fit beside them — a name inside it is shortened
-before the sentence ever is. Chips jump within one page; tabs, which show one
-view at a time, stay the update window's control.
+before the sentence ever is. Chips jump within one page; tabs,
+which show one view at a time, stay the update window's control.
 :::
 
 **An "Automatic" color well shows adaptivity as a shape, not
@@ -1111,6 +1112,12 @@ control also needs an explicit accessibility label (and concise
 hint when the action is not obvious), a visible keyboard-focus
 state, and a recognizable rest treatment or list context —
 `.help()` and hover alone do not make a control discoverable.
+
+:::unreleased
+A chip's rest and hover fills are the `chipRest` / `chipHover`
+tokens, stronger in dark, where a 6 % lift does not read — the
+jump chips take them (#1520).
+:::
 
 **Inapplicable controls are greyed, not hidden.** When a
 setting makes another control inert — Auto-size grid overrides

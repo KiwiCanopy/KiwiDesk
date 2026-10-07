@@ -42,6 +42,8 @@ struct SettingsThemeWiringTests {
         "keyConflict": "KeyboardBoard.swift",
         "hairline": "SettingsDetailPanel.swift",
         "planeRing": "SettingsFooter.swift",
+        "chipRest": "ShortcutsJumpBar.swift",
+        "chipHover": "ShortcutsJumpBar.swift",
         "ink": "SettingsHeaderBar.swift",
         "ink2": "SettingsHeaderBar+Status.swift",
         "ink3": "SettingsSearchField.swift",

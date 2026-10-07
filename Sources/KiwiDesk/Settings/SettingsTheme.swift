@@ -80,6 +80,22 @@ enum SettingsTheme {
         darkAlpha: 0.14
     )
 
+    /// A chip-shaped control's resting fill — its shape (#1520).
+    static let chipRest = token(
+        light: 0x12_25_1A,
+        dark: 0xE6_EC_E6,
+        lightAlpha: 0.06,
+        darkAlpha: 0.10
+    )
+
+    /// The same chip under the pointer: the ruled lift.
+    static let chipHover = token(
+        light: 0x12_25_1A,
+        dark: 0xE6_EC_E6,
+        lightAlpha: 0.11,
+        darkAlpha: 0.16
+    )
+
     // MARK: - Ink
 
     /// Primary text: titles, row labels, card headings.
