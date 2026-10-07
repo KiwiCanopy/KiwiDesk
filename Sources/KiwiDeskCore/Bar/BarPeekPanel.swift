@@ -128,7 +128,7 @@ final class BarPeekPanel {
 
     /// `content` laid out in `body` within the room on the far
     /// side of the strip, the panel's size — the one measure the
-    /// show and the menu's anchor (`BarPeek.topLeft`) both take.
+    /// show and the menu's anchor (`BarPeek.menuTopLeft`) both take.
     static func fittedSize(
         of body: BarPeekBody,
         _ content: BarPeekContent,
@@ -195,7 +195,7 @@ final class BarPeekPanel {
             max(screen.maxY - margin - size.height, screen.minY + margin)
         )
         // Whole points, as AppKit frames a window, so the menu the
-        // click opens (`BarPeek.topLeft`) lands on the peek's corner.
+        // click opens (`BarPeek.menuTopLeft`) meets the peek's edge.
         return CGPoint(x: point.x.rounded(), y: point.y.rounded())
     }
 

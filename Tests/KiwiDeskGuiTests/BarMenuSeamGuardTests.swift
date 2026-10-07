@@ -57,7 +57,10 @@ struct BarMenuSeamGuardTests {
                 "NSMenu.popUpContextMenu(menu, with: event, for: anchor)"
             ) == 1
         )
-        #expect(count("contextEvent(at: anchor)") == 1)
+        // The event sits at the anchor, sized by the menu it pops.
+        #expect(count("SpaceBarGlyphActions.contextEvent(") == 1)
+        #expect(count("at: anchor,") == 1)
+        #expect(count("menu: menu.size") == 1)
         #expect(count("popUp(positioning:") == 0)
     }
 }

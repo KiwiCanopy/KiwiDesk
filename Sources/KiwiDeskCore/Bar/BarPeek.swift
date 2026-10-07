@@ -203,14 +203,16 @@ final class BarPeek {
         )
     }
 
-    /// Where the peek's top-left corner stands, or would, for
-    /// `anchor` — in screen coordinates — so the menu a click opens
-    /// lays its rows where the peek's were (owner, device). Read
-    /// whether a peek shows or not.
-    func topLeft(
+    /// Where a `menu`-sized menu's top-left corner stands so it
+    /// meets the peek on its bar-side edge, as the peek stands, or
+    /// would, for `anchor` — in screen coordinates — so the menu a
+    /// click opens lays its rows where the peek's were (owner,
+    /// device). Read whether a peek shows or not.
+    func menuTopLeft(
         for anchor: NSView,
         source: BarPeekSource,
-        edge: AppBarEdge
+        edge: AppBarEdge,
+        menu: CGSize
     ) -> CGPoint? {
         guard let window = anchor.window,
             let frame = Self.screenFrame(of: anchor),
@@ -233,7 +235,12 @@ final class BarPeek {
             strip: window.frame,
             visible: visible
         )
-        return CGPoint(x: origin.x, y: origin.y + size.height)
+        return BarPeekPanel.menuTopLeft(
+            peek: CGRect(origin: origin, size: size),
+            menu: menu,
+            edge: edge,
+            visible: visible
+        )
     }
 
     /// The usable area of `window`'s screen.

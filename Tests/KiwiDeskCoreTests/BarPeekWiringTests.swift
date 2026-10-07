@@ -129,6 +129,7 @@ struct BarPeekWiringTests {
         defer { close(core) }
         let (item, _) = try hovered(core, steps: steps)
         steps.run()
+        try #require(titles(core) == ["Doc"], "was shown")
         BarHoverHit.pointerOverride = { _ in BarHoverHit.offWindow }
         item.syncHoverToPointer()
         #expect(titles(core) == nil)
@@ -141,6 +142,7 @@ struct BarPeekWiringTests {
         defer { close(core) }
         let (_, web) = try hovered(core, steps: steps)
         steps.run()
+        try #require(titles(core) == ["Doc"], "was shown")
         let event = { (type: NSEvent.EventType) in
             NSEvent.mouseEvent(
                 with: type,
@@ -175,33 +177,44 @@ struct BarPeekWiringTests {
         var value: Bool?
     }
 
-    /// The menu a click opens pops where the peek's top-left
-    /// stands, shown or not, so its rows land where the peek's were
-    /// (owner, device).
-    @Test("The glyph menu opens at the peek's top-left")
+    /// The menu a click opens meets the peek on its bar-side edge,
+    /// shown or not, sized by the menu handed over, so its rows land
+    /// where the peek's were (owner, device).
+    @Test("The glyph menu opens on the peek's bar-side edge")
     func menuOpensAtThePeek() throws {
         let core = seededCore()
         let steps = Steps()
         defer { close(core) }
         let (item, web) = try hovered(core, steps: steps)
         let window = try #require(web.window)
+        let menu = NSMenu()
+        for title in ["Doc", "Two", "Three", "Four", "Five"] {
+            menu.addItem(withTitle: title, action: nil, keyEquivalent: "")
+        }
         let expected = try #require(
-            core.shelves.peek.topLeft(
+            core.shelves.peek.menuTopLeft(
                 for: web,
                 source: web.peekSource,
-                edge: item.style.edge
+                edge: item.style.edge,
+                menu: menu.size
             )
         )
-        let closed = try #require(SpaceBarGlyphActions.contextEvent(at: web))
+        let closed = try #require(
+            SpaceBarGlyphActions.contextEvent(at: web, menu: menu.size)
+        )
         #expect(
             window.convertPoint(toScreen: closed.locationInWindow) == expected
         )
         steps.run()
         let panel = try #require(core.shelves.peek.panel.panel)
+        // A top bar: the bar-side edge is the peek's top, and the
+        // menu hangs from it on the peek's leading edge.
+        #expect(item.style.edge == .top)
         #expect(
-            CGPoint(x: panel.frame.minX, y: panel.frame.maxY) == expected,
-            "the shown peek stands where the menu will"
+            panel.frame.maxY == expected.y,
+            "the shown peek's bar-side edge is the menu's"
         )
+        #expect(panel.frame.minX == expected.x)
     }
 
     /// A shelf the bars stop drawing on — a fullscreen stand-down,
@@ -227,6 +240,7 @@ struct BarPeekWiringTests {
         defer { close(core) }
         _ = try hovered(core, steps: steps)
         steps.run()
+        try #require(titles(core) == ["Doc"], "was shown")
         let overlay = try #require(core.spaceBars.overlayForTesting(display))
         _ = overlay.root.onScroll(.init(x: 0, y: -4, precise: true))
         #expect(titles(core) == nil)

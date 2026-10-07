@@ -32,24 +32,32 @@ final class SpaceBarGlyphActions {
     /// bar's right-click menu wears (#1850) — modal, so a test
     /// swaps it.
     var present: @MainActor (NSMenu, NSView) -> Void = { menu, anchor in
-        guard let event = SpaceBarGlyphActions.contextEvent(at: anchor)
+        guard
+            let event = SpaceBarGlyphActions.contextEvent(
+                at: anchor,
+                menu: menu.size
+            )
         else { return }
         NSMenu.popUpContextMenu(menu, with: event, for: anchor)
     }
 
-    /// A context-menu event where the peek's top-left corner
-    /// stands for `anchor` — so the menu's rows land where the
-    /// peek's were (#1946) — or at `anchor`'s lower-left corner for
-    /// a view no peek reads, so the menu opens at the cell whatever
-    /// input picked it.
-    static func contextEvent(at anchor: NSView) -> NSEvent? {
+    /// A context-menu event where a `menu`-sized menu meets the
+    /// peek's bar-side edge for `anchor` — so the menu's rows land
+    /// where the peek's were (#1946) — or at `anchor`'s lower-left
+    /// corner for a view no peek reads, so the menu opens at the
+    /// cell whatever input picked it.
+    static func contextEvent(
+        at anchor: NSView,
+        menu: CGSize
+    ) -> NSEvent? {
         guard let window = anchor.window else { return nil }
         let corner = NSPoint(
             x: 0,
             y: anchor.isFlipped ? anchor.bounds.maxY : 0
         )
         let location =
-            peekTopLeft(of: anchor).map(window.convertPoint(fromScreen:))
+            peekMenuTopLeft(of: anchor, menu: menu)
+            .map(window.convertPoint(fromScreen:))
             ?? anchor.convert(corner, to: nil)
         return NSEvent.mouseEvent(
             with: .rightMouseDown,
@@ -66,17 +74,21 @@ final class SpaceBarGlyphActions {
 }
 
 extension SpaceBarGlyphActions {
-    /// The peek's top-left for a glyph target, as the peek would
-    /// stand at it; nil for any other view.
-    static func peekTopLeft(of anchor: NSView) -> CGPoint? {
+    /// Where a `menu`-sized menu's top-left stands against the peek
+    /// a glyph target shows, or would; nil for any other view.
+    static func peekMenuTopLeft(
+        of anchor: NSView,
+        menu: CGSize
+    ) -> CGPoint? {
         guard let target = anchor as? SpaceBarGlyphTarget,
             let item = target.superview as? SpaceBarItemView,
             let peek = target.actions?.peek
         else { return nil }
-        return peek.topLeft(
+        return peek.menuTopLeft(
             for: target,
             source: target.peekSource,
-            edge: item.style.edge
+            edge: item.style.edge,
+            menu: menu
         )
     }
 }

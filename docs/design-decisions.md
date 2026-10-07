@@ -12475,10 +12475,13 @@ delay, and listed the same windows the click menu lists in
 another face, so two surfaces fought over one list. The peek is
 the list in the bar's face; the menu is its actionable version,
 and a press turns one into the other: the peek closes on the
-press, and a multi-window glyph's menu opens at the peek's own
-top-left corner — computed whether a peek showed or not — so its
-rows land where the peek's rows were. The peek centres on its
-item, opening away from the bar's edge.
+press, and a multi-window glyph's menu meets the peek on its
+bar-side edge, the one nearest the press — placed by the menu's
+own size, computed whether a peek showed or not — so its rows
+land where the peek's rows were, and on a bottom or right-hand
+bar the menu grows away from the bar as the peek did rather than
+hanging from the peek's top-left corner over the bar. The peek
+centres on its item, opening away from the bar's edge.
 
 What it shows is ruled whole: the app on top, smaller and
 semibold like the menu's section header, so the peek reads as the

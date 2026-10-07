@@ -162,4 +162,80 @@ struct BarPeekFitTests {
             ) == small
         )
     }
+
+    // MARK: - The click menu against the peek
+
+    private static let screen = CGRect(x: 0, y: 80, width: 1440, height: 790)
+    /// Taller than every peek below, so a menu anchored on the
+    /// wrong edge lands visibly off the bar-side one.
+    private static let menu = CGSize(width: 240, height: 180)
+
+    /// The menu's frame for its top-left corner, y up: it hangs
+    /// down from the point.
+    private func menuFrame(at topLeft: CGPoint) -> CGRect {
+        CGRect(
+            x: topLeft.x,
+            y: topLeft.y - Self.menu.height,
+            width: Self.menu.width,
+            height: Self.menu.height
+        )
+    }
+
+    /// The menu meets the peek on the edge nearest the bar, and
+    /// lines up with the peek along it (owner, device: a menu
+    /// anchored on the far corner landed higher than the peek).
+    @Test(
+        "The menu meets the peek on its bar-side edge",
+        arguments: AppBarEdge.allCases
+    )
+    func menuMeetsTheBarSideEdge(_ edge: AppBarEdge) {
+        let peek = CGRect(x: 400, y: 400, width: 200, height: 60)
+        #expect(Self.menu.height > peek.height)
+        let menu = menuFrame(
+            at: BarPeekPanel.menuTopLeft(
+                peek: peek,
+                menu: Self.menu,
+                edge: edge,
+                visible: Self.screen
+            )
+        )
+        switch edge {
+        case .top, .left:
+            #expect(menu.maxY == peek.maxY, "\(edge)")
+            #expect(menu.minX == peek.minX, "\(edge)")
+        case .bottom:
+            #expect(menu.minY == peek.minY, "\(edge)")
+            #expect(menu.minX == peek.minX, "\(edge)")
+        case .right:
+            #expect(menu.maxY == peek.maxY, "\(edge)")
+            #expect(menu.maxX == peek.maxX, "\(edge)")
+        }
+    }
+
+    /// A peek at the screen's corner keeps its menu inside the
+    /// usable area, a margin in, on whole points.
+    @Test(
+        "The menu stays inside the usable area",
+        arguments: AppBarEdge.allCases
+    )
+    func menuIsClamped(_ edge: AppBarEdge) {
+        let margin = BarPeekBody.Metrics.screenMargin
+        let inset = Self.screen.insetBy(dx: margin, dy: margin)
+        let corners = [
+            CGRect(x: 1380.4, y: 85.6, width: 50, height: 40),
+            CGRect(x: 2.3, y: 830.2, width: 50, height: 36),
+        ]
+        for peek in corners {
+            let point = BarPeekPanel.menuTopLeft(
+                peek: peek,
+                menu: Self.menu,
+                edge: edge,
+                visible: Self.screen
+            )
+            let menu = menuFrame(at: point)
+            #expect(inset.contains(menu), "\(edge) \(peek): \(menu)")
+            #expect(point.x == point.x.rounded(), "\(edge)")
+            #expect(point.y == point.y.rounded(), "\(edge)")
+        }
+    }
 }
