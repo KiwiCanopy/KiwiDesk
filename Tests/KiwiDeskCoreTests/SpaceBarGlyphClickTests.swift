@@ -201,6 +201,16 @@ struct SpaceBarGlyphClickTests {
         #expect(core.windowRowName(WindowID(8)) == "Untitled Window")
         // A pill names the window outside its app's menu.
         #expect(core.windowTitle(WindowID(8)) == "Web")
+        // Every per-window submenu takes the row name: move, float
+        // and close each list window 8 as the placeholder.
+        let rows = core.barMenuRows(.glyph([WindowID(4), WindowID(8)]))
+        let untitled = rows.compactMap { row -> String? in
+            guard case .submenu(let items) = row.kind,
+                items.count == 2
+            else { return nil }
+            return items[1].title
+        }
+        #expect(untitled == Array(repeating: "Untitled Window", count: 3))
     }
 
     @Test("The hover title is the app, then each window's title")
