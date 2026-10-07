@@ -12423,22 +12423,14 @@ The default being the old behaviour is also why the setting owes
 no crossing: an absent key meant grouped before and means grouped
 now, so no stored file, built-in layout or `init.lua` changes.
 
-**The App Bar lists every window by default; grouping is its
-option.** (Owner ruling 2026-10-06.) The two bars split here
-because they show different things: the Space Bar draws glyphs
-under a span, where grouping first is what keeps the overview
-(above), while the App Bar draws each window's title, so a
-grouped item hides windows the row has room to name. The App
-Bar's `group_adjacent_windows` therefore defaults off.
-
-The flip owes no crossing for a stored file: the `app_bar` group
-is encoded whole in every profile, a backup bundle included, so
-each file already carries the value it was saved with
-(`AppBarOverrideTests` ▸ `appBarDoesNotGroupByDefault` pins the
-key in the `TilingSettings` encoding). What does change, and is
-accepted, is every arrangement with no file to carry it: a
-composed Standard, built from code defaults, and an `init.lua`
-that never sets the value now show the App Bar ungrouped.
+**Both bars group adjacent windows by default.** (Owner ruling
+2026-10-07, #1946.) The App Bar briefly listed every window by
+default, because a grouped item hid windows the row had room to
+name. The actionable hover peek removes that cost: a group of two
+or more windows always peeks, and every row in it picks its
+window, so grouping keeps the row short without putting any
+window out of reach. Ungrouping stays the App Bar's option, for a
+user who wants every title drawn in the row itself.
 
 **[Principle] A Space Bar glyph reaches its window; a list never
 switches by itself.** (#1528, owner rulings 2026-09-20 and

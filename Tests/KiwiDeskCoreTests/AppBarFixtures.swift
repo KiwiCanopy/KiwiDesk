@@ -17,7 +17,7 @@ enum AppBarFixtures {
         // Non-default: the App Bar ships Edge mark (#1517).
         style.activeIndicator = .outline
         style.titleCap = 40
-        style.groupAdjacentWindows = true
+        style.groupAdjacentWindows = false
         style.edge = .left
         return style
     }
@@ -27,7 +27,7 @@ enum AppBarFixtures {
         bar.enabled = false
         bar.activeIndicator = .edgeMark
         bar.titleCap = 60
-        bar.groupAdjacentWindows = false
+        bar.groupAdjacentWindows = true
         return bar
     }
 
