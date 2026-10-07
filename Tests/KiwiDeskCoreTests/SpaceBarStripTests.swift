@@ -160,19 +160,45 @@ struct SpaceBarStripTests {
         )
     }
 
-    /// Leaving the row's start, the disc appears in the first
-    /// glyph's cell hiding two groups (#2052): the kept glyphs
-    /// travel one cell, the first two fade under the disc.
-    @Test("a disc appearing takes the cell of the glyph it hides")
-    func discAppears() {
-        #expect(
+    /// Leaving the row's start moves the window two groups while
+    /// the kept glyphs travel one cell (#2052): the second glyph
+    /// walks into the disc's cell, and the first, which would walk
+    /// off the chip, fades in place under the disc instead.
+    @Test("a disc appearing fades the glyph past the chip in place")
+    func discAppears() throws {
+        let walk = try #require(
             SpaceBarStrip.Walk.between(
                 drawn(0..<6),
                 leadingDisc: false,
                 drawn(2..<7),
                 leadingDisc: true
-            ) == .init(cells: 1, leavingFront: 2, enteringBack: 1)
+            )
         )
+        #expect(walk == .init(cells: 1, leavingFront: 2, enteringBack: 1))
+        // Carried off: groups 0 and 1, resting at cells -1 and 0.
+        #expect(
+            walk.travel(resting: -1, cellCount: 7) == .init(from: 0, to: 0)
+        )
+        #expect(walk.travel(resting: 0, cellCount: 7) == .init(from: 1, to: 0))
+        // Kept: group 2 walks from cell 2 to cell 1.
+        #expect(walk.travel(resting: 1, cellCount: 7) == .init(from: 2, to: 1))
+    }
+
+    /// The mirror at the row's end: the last group, brought in
+    /// two cells past the walk's one, fades in at its own cell.
+    @Test("a disc leaving the end fades the glyph past it in place")
+    func discLeavesTheEnd() throws {
+        let walk = try #require(
+            SpaceBarStrip.Walk.between(
+                drawn(2..<7),
+                leadingDisc: true,
+                drawn(3..<9),
+                leadingDisc: true
+            )
+        )
+        #expect(walk == .init(cells: 1, leavingFront: 1, enteringBack: 2))
+        #expect(walk.travel(resting: 6, cellCount: 7) == .init(from: 6, to: 6))
+        #expect(walk.travel(resting: 5, cellCount: 7) == .init(from: 6, to: 5))
     }
 
     @Test("an unchanged or unknown strip plays no walk")

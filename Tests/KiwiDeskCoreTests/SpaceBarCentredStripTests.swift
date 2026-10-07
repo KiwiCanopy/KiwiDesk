@@ -47,11 +47,21 @@ struct SpaceBarCentredStripTests {
         return core
     }
 
+    /// The look every clause reasons from, pinned rather than
+    /// read off the defaults (#660): a span of five glyphs, and
+    /// adjacent windows of one app grouped into one glyph.
+    private static var look: SpaceBarLook {
+        var look = SpaceBarLook()
+        look.bar.glyphSpan = 5
+        look.bar.groupAdjacentWindows = true
+        return look
+    }
+
     private func item(_ core: KiwiCore, _ space: SpaceID) throws
         -> SpaceBarOverlay.Item
     {
         try #require(
-            core.spaceBarItems(display: display, style: SpaceBarLook())
+            core.spaceBarItems(display: display, style: Self.look)
                 .first { $0.space == space }
         )
     }
@@ -118,7 +128,7 @@ struct SpaceBarCentredStripTests {
                 SpaceBarOverlay.itemLengths(
                     [built],
                     depth: 32,
-                    look: SpaceBarLook(),
+                    look: Self.look,
                     frontFollows: false
                 )[0]
             )

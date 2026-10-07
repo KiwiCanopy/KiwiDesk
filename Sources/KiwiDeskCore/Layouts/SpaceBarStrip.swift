@@ -88,6 +88,25 @@ public enum SpaceBarStrip {
         public var enteringFront = 0
         public var enteringBack = 0
 
+        /// One glyph's travel, in the chip's cells.
+        public struct Travel: Equatable, Sendable {
+            public var from: Int
+            public var to: Int
+        }
+
+        /// The travel of the glyph whose cell in the new strip is
+        /// `rest` — one carried off counting the cell it would
+        /// take there — on a chip of `cellCount` cells: from
+        /// `rest + cells` to `rest`, both clamped to the chip, so
+        /// a boundary step that moves the window two groups fades
+        /// the extra glyph in place instead of walking it over a
+        /// neighbouring chip (#2052).
+        public func travel(resting rest: Int, cellCount: Int) -> Travel {
+            let last = max(cellCount - 1, 0)
+            let inside = { (cell: Int) in min(max(cell, 0), last) }
+            return Travel(from: inside(rest + cells), to: inside(rest))
+        }
+
         /// The walk from `old` to `new`; nil when nothing moves,
         /// when the row's group count changed under it — a window
         /// opened or closed shifts every index — and when the two windows
