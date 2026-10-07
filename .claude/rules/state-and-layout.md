@@ -1851,13 +1851,17 @@ editing here:
   `inPlaceOutranksLogoutFreeze`).
 - **A snapshot is read only in the login session that wrote it
   (#1385).** A logout without a reboot passes the boot gate
-  (#633) and reuses window ids, so every write stamps the
-  session through `CrashRecovery`'s `write` and both files are
-  read through its `readGated`, which drops a file from another
-  login beside the boot gate; an unstamped file is admitted only
-  as an older build's announced relaunch, and a new snapshot
-  file or reader takes the same two doors
-  (`LoginSessionGateTests`).
+  (#633) and reuses window ids, so a write stamps the session
+  through `CrashRecovery`'s `write`, refusing when the session
+  is unreadable, and a read goes through its `readGated`, which
+  drops a file from another login beside the boot gate; an
+  unstamped file is admitted only as an older build's announced
+  relaunch (`LoginSessionGateTests` holds the two doors'
+  verdicts). A new snapshot file, writer or reader owes the same
+  two doors. That is review's, not a guard's: no suite can see a
+  third door, and the structure is what keeps one rare —
+  `fileURL` and `sessionURL` are private to `CrashRecovery`, so
+  any new door is written inside that file, beside the two.
 - **A restore pays an untracked window's frame at its arrival
   (#1362).** The replay sets frames on TRACKED windows only; a
   slow app's window adopted later kept the boot scan's tile on

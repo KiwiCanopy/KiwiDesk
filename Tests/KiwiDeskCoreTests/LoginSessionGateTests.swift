@@ -102,6 +102,35 @@ struct LoginSessionGateTests {
         #expect(read == nil)
     }
 
+    /// The write side of the same stake: an unreadable session
+    /// writes no stamp-less file, so the autosave already there
+    /// stays and a stop leaves no session file.
+    @Test("An unreadable session at write time writes no file")
+    func unreadableSessionRefusesTheWrite() throws {
+        let dir = try makeDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        write("crash", in: dir)
+        let crash = dir.appendingPathComponent(".state_snapshot")
+        let kept = try Data(contentsOf: crash)
+        var logged: [String] = []
+        let blind = recovery(dir, session: nil) { logged.append($0) }
+        let other = desk(inPlace: true)
+        blind.captureState = { other }
+        blind.autosave()
+        let after = try Data(contentsOf: crash)
+        #expect(after == kept)
+        blind.shutdownCleanly()
+        let session = dir.appendingPathComponent(".session_snapshot")
+        let wroteSession = FileManager.default.fileExists(
+            atPath: session.path
+        )
+        #expect(!wroteSession)
+        let refusals = logged.filter {
+            $0.contains("login session unreadable")
+        }
+        #expect(refusals.count == 2)
+    }
+
     /// An older build stamps nothing. Its autosave and its plain
     /// stop are refused; its announced relaunch, in-place and
     /// inside `inPlaceSessionBound`, still restores.
@@ -131,7 +160,9 @@ struct LoginSessionGateTests {
     }
 
     /// The wiring: a fresh recovery stamps the host's audit
-    /// session, which reads on this host and holds within it.
+    /// session, which reads on this host and holds within it. Its
+    /// oracle is `LoginSession.current` itself, so a constant
+    /// there passes too; that the id is the asid was measured.
     @Test("The default stamp is the live audit session")
     func defaultStampIsTheLiveSession() throws {
         let dir = try makeDir()

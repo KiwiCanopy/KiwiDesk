@@ -30,10 +30,10 @@ struct CrashRecoveryTests {
         return (recovery, dir)
     }
 
-    /// Stamped as every recovery here writes it: the suite pins
-    /// the login session to 1 (#1385).
+    /// Unstamped, as a capture returns it: the writer stamps the
+    /// login session, which this suite pins to 1 (#1385).
     private func snapshot(at date: Date) -> StateSnapshot {
-        var snapshot = StateSnapshot(
+        StateSnapshot(
             windows: [
                 .init(
                     id: WindowID(1),
@@ -49,8 +49,13 @@ struct CrashRecoveryTests {
             activeSpace: "1",
             capturedAt: date
         )
-        snapshot.loginSession = 1
-        return snapshot
+    }
+
+    /// What a read returns for `snapshot`: the writer's stamp on it.
+    private func stamped(_ snapshot: StateSnapshot) -> StateSnapshot {
+        var stamped = snapshot
+        stamped.loginSession = 1
+        return stamped
     }
 
     /// A failed relaunch leaves an in-place snapshot for whatever
@@ -171,7 +176,7 @@ struct CrashRecoveryTests {
         third.onLog = { _ in }
         third.loginSession = { 1 }
         third.bootTime = { .distantPast }
-        #expect(third.consumeSession() == previous)
+        #expect(third.consumeSession() == stamped(previous))
     }
 
     @Test("Unclean shutdown restores the autosaved state")
@@ -189,7 +194,7 @@ struct CrashRecoveryTests {
         second.onLog = { _ in }
         second.loginSession = { 1 }
         second.bootTime = { .distantPast }
-        #expect(second.takeBootSnapshot() == sample)
+        #expect(second.takeBootSnapshot() == stamped(sample))
         // Consumed: the autosave that follows is this launch's.
         #expect(second.takeBootSnapshot() == nil)
         second.shutdownCleanly()
@@ -212,7 +217,7 @@ struct CrashRecoveryTests {
         second.onLog = { _ in }
         second.loginSession = { 1 }
         second.bootTime = { .distantPast }
-        #expect(second.takeBootSnapshot() == newer)
+        #expect(second.takeBootSnapshot() == stamped(newer))
 
         let (third, thirdDir) = try makeRecovery()
         defer { try? FileManager.default.removeItem(at: thirdDir) }
@@ -231,7 +236,7 @@ struct CrashRecoveryTests {
         fourth.onLog = { _ in }
         fourth.loginSession = { 1 }
         fourth.bootTime = { .distantPast }
-        #expect(fourth.takeBootSnapshot() == newer)
+        #expect(fourth.takeBootSnapshot() == stamped(newer))
     }
 
     @Test("Clean shutdown leaves nothing to restore")
@@ -250,7 +255,7 @@ struct CrashRecoveryTests {
         second.loginSession = { 1 }
         second.bootTime = { .distantPast }
         // The session file is the arrangement; no crash replay.
-        #expect(second.takeBootSnapshot() == sample)
+        #expect(second.takeBootSnapshot() == stamped(sample))
         #expect(second.takeBootSnapshot() == nil)
         second.shutdownCleanly()
     }

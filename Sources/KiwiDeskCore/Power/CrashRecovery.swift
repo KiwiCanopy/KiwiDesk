@@ -180,11 +180,17 @@ public final class CrashRecovery {
     }
 
     /// Writes `snapshot` stamped with this login session (#1385);
-    /// true only when the file landed.
+    /// true only when the file landed. An unreadable session
+    /// refuses the write and keeps the file there: a stamp-less
+    /// file reads as an older build's.
     @discardableResult
     private func write(_ snapshot: StateSnapshot, to url: URL) -> Bool {
+        guard let session = loginSession() else {
+            onLog("login session unreadable; snapshot not written")
+            return false
+        }
         var stamped = snapshot
-        stamped.loginSession = loginSession()
+        stamped.loginSession = session
         guard let data = try? JSONEncoder().encode(stamped)
         else { return false }
         return (try? data.write(to: url, options: .atomic)) != nil

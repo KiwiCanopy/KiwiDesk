@@ -112,7 +112,9 @@ struct HeldSpaceRestartTests {
         let dir = a.configDirectory.appendingPathComponent("snap")
         let writer = CrashRecovery(directory: dir)
         writer.captureState = { [weak a] in a?.sessionSnapshot() }
+        writer.loginSession = { 1 }
         let reader = CrashRecovery(directory: dir)
+        reader.loginSession = { 1 }
         reader.bootTime = { .distantPast }
         reader.onLog = { _ in }
         writer.autosave()

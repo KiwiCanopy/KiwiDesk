@@ -7,7 +7,8 @@ import Testing
 
 /// The logout freeze of the crash autosave (#1385): once a logout
 /// begins, the window closes macOS performs must not overwrite the
-/// last arrangement. Boot time and the freeze clock are injected.
+/// last arrangement. Boot time, the freeze clock and the login
+/// session (#1385) are injected.
 @Suite("Logout autosave freeze", .serialized)
 @MainActor
 struct LogoutAutosaveFreezeTests {
@@ -24,6 +25,7 @@ struct LogoutAutosaveFreezeTests {
         )
         let recovery = CrashRecovery(directory: dir)
         recovery.onLog = { _ in }
+        recovery.loginSession = { 1 }
         recovery.workspaceCenter = NotificationCenter()
         let frozeAt = frozeAt
         recovery.now = { frozeAt }
@@ -48,6 +50,7 @@ struct LogoutAutosaveFreezeTests {
     private func autosaved(in dir: URL) -> [UInt32]? {
         let reader = CrashRecovery(directory: dir)
         reader.onLog = { _ in }
+        reader.loginSession = { 1 }
         reader.bootTime = { .distantPast }
         return reader.takeBootSnapshot()?.windows.map(\.id)
     }
