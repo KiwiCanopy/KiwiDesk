@@ -65,9 +65,11 @@ struct BarTextFieldCensusTests {
                 + "draws nothing"
         ),
         "SpaceBarOverlay.swift": Entry(
-            count: 2,
+            count: 1,
             door: ("BarTextGlyph.originY(", "SpaceBarOverlay+FrontApp.swift"),
-            reason: "front-app glyph (frame) and name (originY)"
+            reason: "front-app name (originY); the glyph is a "
+                + "FrontChipGlyph (#2024), framed through "
+                + "BarTextGlyph.frame in SpaceBarOverlay+FrontApp"
         ),
     ]
 
