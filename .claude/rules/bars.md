@@ -619,7 +619,8 @@ Obligations:
   reads no compositor on hover (`BarPeekSeamTests` ▸
   `oneBarRowPick`, `BarPeekActionTests`, `BarPeekClickTests` ▸
   `refusedRowCues`). A left click on a list glyph or `+n` pins
-  the peek at once and pops no menu; VoiceOver's press and "N
+  the peek at once, or closes the one already shown, and pops no
+  menu; VoiceOver's press and "N
   more" open the native menu at the anchor
   (`BarPeekClickTests`). The panel takes the mouse but is
   non-activating and never key, and hidden from accessibility

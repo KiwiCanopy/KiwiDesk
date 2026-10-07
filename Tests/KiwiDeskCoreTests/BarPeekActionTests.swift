@@ -126,6 +126,23 @@ struct BarPeekActionTests {
         #expect(!rig.peek.pinned)
     }
 
+    @Test("A click on an item whose hover peek shows closes it")
+    func clickClosesAHoverPeek() {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        rig.hover(rig.first, 1, 2)
+        rig.step()
+        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        rig.peek.pin(
+            rig.first,
+            source: .glyph([WindowID(1), WindowID(2)]),
+            space: SpaceID("1"),
+            edge: .top
+        )
+        #expect(rig.peek.panel.drawn == nil, "the click closes it")
+        #expect(!rig.peek.pinned)
+    }
+
     @Test("A second click on the pinned item closes its peek")
     func secondClickCloses() {
         let rig = BarPeekRig()

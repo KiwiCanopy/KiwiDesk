@@ -12481,7 +12481,9 @@ list: Stage Manager and Mission Control act on the surface you
 previewed, and the Dock's hover label is one word that promises
 nothing. So a left click on a multi-window glyph or `+n` shows
 the same peek at once, without the dwell, and holds it until a
-click outside, a pick or the pointer leaving, while a one-window
+click outside, a pick or the pointer leaving — or closes it where
+it already shows, since a hover peek holds on its own and a click
+re-opening what is open would mean nothing — while a one-window
 glyph still picks on the click; two lists for one set of windows
 is the fight the tooltip lost. A pick takes the one focus path a
 menu row takes, KiwiDesk's own windows included (#1281), and is

@@ -553,9 +553,10 @@ Click an app glyph to switch to its Space and focus that window.
 Resting the pointer on a glyph, a `+n` badge or an App Bar item
 that cuts its title lists its windows beside the bar; click a row
 to switch to that window. Clicking a glyph with a count badge, or
-a `+n` badge, shows the same list at once and keeps it open until
-you pick a row, click elsewhere or move the pointer away; nothing
-switches until you pick. A list too long for the screen ends in
+a `+n` badge, shows the same list at once, or closes it if it is
+already open; an open list stays until you pick a row, click
+elsewhere or move the pointer away. Nothing switches until you
+pick. A list too long for the screen ends in
 **N more**, which opens a menu of every window. With VoiceOver,
 pressing the glyph opens that menu.
 :::
