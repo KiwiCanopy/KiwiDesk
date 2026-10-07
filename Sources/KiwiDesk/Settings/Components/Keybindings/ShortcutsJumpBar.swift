@@ -2,9 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The pinned jump bar over Shortcuts & Gestures (#1520): one chip
-/// per group, wrapping rather than scrolling, and the edited
-/// layer's name at the trailing end. It sits on the page ground,
-/// and draws its lower hairline once content slides under it.
+/// per group, wrapping rather than scrolling, each line centred,
+/// and the edited layer's name on a centred line under them
+/// (owner, amendment 5). It sits on the page ground, and draws its
+/// lower hairline once content slides under it.
 struct ShortcutsJumpBar: View {
     let marked: ShortcutsJumpGroup?
     let underlapped: Bool
@@ -33,7 +34,7 @@ struct ShortcutsJumpBar: View {
         content
             // Full width in every arrangement, so the ground and
             // the hairline span the pane.
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, SettingsMetrics.paneInset)
             .padding(.vertical, 10)
             .background(SettingsTheme.page)
@@ -49,24 +50,16 @@ struct ShortcutsJumpBar: View {
         width.collapsesChrome ? nil : readout
     }
 
-    /// Beside the chips where both fit on one line; otherwise on a
-    /// line of its own under them, wrapping rather than eliding.
-    @ViewBuilder private var content: some View {
-        if let shownReadout {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline, spacing: 12) {
-                    chips
-                    Spacer(minLength: 0)
-                    readoutText(shownReadout).fixedSize()
-                }
-                VStack(alignment: .leading, spacing: Self.spacing) {
-                    chips
-                    readoutText(shownReadout)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        } else {
+    /// Always a line of its own under the chips, wrapping rather
+    /// than eliding.
+    private var content: some View {
+        VStack(alignment: .center, spacing: Self.spacing) {
             chips
+            if let shownReadout {
+                readoutText(shownReadout)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 
@@ -78,7 +71,7 @@ struct ShortcutsJumpBar: View {
     }
 
     private var chips: some View {
-        FlowLayout(spacing: Self.spacing) {
+        FlowLayout(spacing: Self.spacing, alignment: .center) {
             ForEach(ShortcutsJumpGroup.allCases, id: \.self) { group in
                 chipRun(group)
             }
