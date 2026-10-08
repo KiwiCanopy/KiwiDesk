@@ -75,11 +75,34 @@ struct SettingsSection<Content: View>: View {
         self.content = content()
     }
 
+    @Environment(\.measuresSectionFrames)
+    private var measuresFrames
+
     var body: some View {
         if let control {
             core.searchAnchorCard(control)
+                .background { frameReport(control) }
         } else {
             core
+        }
+    }
+
+    /// The card's frame keyed by the same id its anchor takes, so
+    /// a page mapping its sections names each by one key (#1520).
+    @ViewBuilder private func frameReport(
+        _ control: SettingsControl
+    ) -> some View {
+        if measuresFrames {
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: SettingsSectionFrames.self,
+                    value: [
+                        control.id: proxy.frame(
+                            in: .named(SettingsSectionFrames.space)
+                        )
+                    ]
+                )
+            }
         }
     }
 

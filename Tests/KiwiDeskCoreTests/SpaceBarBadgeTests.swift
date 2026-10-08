@@ -158,6 +158,7 @@ struct SpaceBarBadgeTests {
         core.state.workspaces.activate(SpaceID("2"))
         core.state.apply(.windowCreated(window(4, app: "Note")))
         core.state.apply(.windowCreated(window(5, app: "Zed")))
+        core.state.apply(.windowCreated(window(6, app: "Vim")))
         core.state.apply(.windowFocused(WindowID(4)))
         core.state.apply(.windowFocused(WindowID(3)))
         var style = SpaceBarLook()
@@ -169,18 +170,18 @@ struct SpaceBarBadgeTests {
         #expect(centred.apps.map(\.name).contains("Term"))
         core.spaceBars.stripHover(
             SpaceID("2"),
-            .init(window: 0..<2, count: 3),
+            .init(window: 0..<2, count: 4),
             inside: true
         )
         let item = try #require(
             core.spaceBarItems(display: display, style: style)
                 .first { $0.space == SpaceID("2") }
         )
-        // The traveler is the hidden one, and it holds the
-        // system focus while the Space's own slot stays on a
-        // visible member.
+        // The traveler is among the hidden (a disc hides two
+        // groups or more, #2052), and it holds the system focus
+        // while the Space's own slot stays on a visible member.
         #expect(item.apps.map(\.name) == ["Note", "Zed"])
-        #expect(item.after.windows.count == 1)
+        #expect(item.after.windows == [WindowID(3), WindowID(6)])
         #expect(core.state.workspaces[SpaceID("2")]?.focused == WindowID(4))
         #expect(item.after.holdsFocus)
     }

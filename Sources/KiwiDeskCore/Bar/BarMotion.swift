@@ -13,10 +13,20 @@ import QuartzCore
 /// the gate costs the drop ring, are in
 /// `.claude/rules/bars.md` ▸ the bars start motion in one file.
 enum BarMotion {
+    #if DEBUG
+        /// Test seam over the OS read; nil reads the machine. The
+        /// spelled `= nil` ends the declaration for
+        /// `BarMotionSeamTests`' member walker.
+        @MainActor static var reducedOverride: Bool? = nil
+    #endif
+
     /// Whether the user asked the system for less motion.
     @MainActor
     static var isReduced: Bool {
-        NSWorkspace.shared
+        #if DEBUG
+            if let reducedOverride { return reducedOverride }
+        #endif
+        return NSWorkspace.shared
             .accessibilityDisplayShouldReduceMotion
     }
 

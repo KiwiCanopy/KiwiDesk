@@ -190,6 +190,36 @@ struct PlacementIntentTests {
         )
     }
 
+    /// An unhide's focus is the focus command (#2027): the
+    /// unhide's retile placed the window, and the app's report of
+    /// it must not read as that placement's bounce. Driven through
+    /// the hook bootstrap installs, not the command by hand.
+    @Test("An unhide's focus of a placed window is honored")
+    func unhideFocusIsHonored() {
+        let (core, target, other) = makeFixture()
+        core.tiler.placements.stamp(target, target: offscreen)
+        core.eventLoop.onUnhideFocus(target)
+        let log = Log()
+        core.onLog = { log.lines.append($0) }
+        core.handle(.windowFocused(target))
+        #expect(core.activeSpace?.focused == target)
+        #expect(
+            !log.lines.contains {
+                $0.contains("placement bounce distrusted")
+            }
+        )
+        // The intent was the unhide's alone: a later clickless
+        // focus of another placed window still bounces.
+        core.tiler.placements.stamp(other, target: offscreen)
+        core.handle(.windowFocused(other))
+        #expect(core.activeSpace?.focused == target)
+        #expect(
+            log.lines.contains {
+                $0.contains("w2 placement bounce distrusted")
+            }
+        )
+    }
+
     @Test("Without the intent the same report is bounced")
     func unintendedReportIsBounced() {
         let (core, target, other) = makeFixture()

@@ -95,6 +95,9 @@ final class SparkleUpdater: AppUpdating {
             host: host,
             feedURL: { [updater] in updater.feedURL }
         )
+        whatsNew?.updateOfferOpen = { [driver] in
+            driver.current?.isOffer ?? false
+        }
         // Sparkle takes the switch only while it checks on its own
         // (`allowsAutomaticUpdates`); both values are KVO.
         autoInstall = AutoInstallSetting(

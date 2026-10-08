@@ -2382,6 +2382,12 @@ which follows the focused window's colour until you set it.
   overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
   you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
 
+:::unreleased
+An App Bar window that is not focused draws its title and glyph
+in the same idle ink as an identifier on a Space you are not on:
+`kiwishelf.set_item_color` at 60% of its own alpha.
+:::
+
 `kiwishelf.set_border_color` sets the
 [border](#kiwishelfset_border)'s colour (default `#EAF3EE59`, the
 item colour at 35% opacity). Every bundled palette carries one.
@@ -2550,12 +2556,7 @@ app_bar.set_title_cap(25)
 
 ### app_bar.set_group_adjacent_windows
 
-:::unreleased
-**Expects:** `true` or `false` (default `false`). A profile saved
-by an earlier release keeps the value it stored; a built-in
-Standard, and an `init.lua` that never sets it, take the new
-default.
-:::
+**Expects:** `true` or `false` (default `true`).
 
 **Does:** if true, collapses adjacent same-app windows into one
 item with a count badge; same-app windows that are not adjacent
@@ -2669,6 +2670,12 @@ or app *groups* while grouping is on — while each `+n` counts
 its hidden *windows*. It limits glyphs per
 Space only, not how many Spaces the bar shows. Replaces
 `set_glyph_cap`, which now fails naming it.
+
+:::unreleased
+A `+n` hides two glyphs or more: a side that would hide one
+draws that glyph in the badge's place, so a row of span + 2
+glyphs shows whole.
+:::
 
 **Example:**
 
@@ -2811,10 +2818,13 @@ space_bar.set_front_app_title_cap(25)
 
 **Expects:** boolean (default `true`).
 
+:::unreleased
 **Does:** collapses adjacent windows of one app in a Space item
-into one glyph with a count badge; clicking it opens a menu of
-its windows. Off, each window draws its own glyph and one click
-focuses it. `glyph_span` counts glyphs either way.
+into one glyph with a count badge; clicking it lists its windows
+beside the bar, each row focusing its window. Off, each window
+draws its own glyph and one click focuses it. `glyph_span` counts
+glyphs either way.
+:::
 
 **Example:**
 
@@ -4333,9 +4343,13 @@ at the active layer's bindings — or closes it if it is already
 open. It is the panel behind the menu bar's *View Shortcuts…*
 row; the bound combo shows beside that row and in the panel's
 close hint. Seeded to **⌃⌥K** in the base layer and in every
-layer you create, and offered under **Shortcuts & Gestures ▸
-General** ("Show shortcuts panel"), where you can rebind or clear
+layer you create.
+
+:::unreleased
+Offered under **Shortcuts & Gestures ▸ Open applications ▸
+KiwiDesk** ("Show shortcuts panel"), where you can rebind or clear
 it per layer.
+:::
 
 **Example:**
 
@@ -4356,8 +4370,12 @@ opening Settings from the menu bar. Unsaved edits survive that;
 only the place you were reading resets.
 
 Seeded on **`⌃⌥,`** in the base layer and in every layer you
-create in Settings, and offered under **Shortcuts & Gestures ▸
-General** ("Open Settings"), where you can rebind it per layer.
+create in Settings.
+
+:::unreleased
+Offered under **Shortcuts & Gestures ▸ Open applications ▸
+KiwiDesk** ("Open Settings"), where you can rebind it per layer.
+:::
 
 **Example:**
 

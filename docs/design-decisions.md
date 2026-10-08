@@ -722,6 +722,84 @@ description beside the structured notes, so a copy that predates
 this window keeps Sparkle's; the window first appears for the
 update after 2.0.0.
 
+**The Highlights gold marks, never inks (#2038).** The panel's
+edge, its ★ and the spotlight rows' symbols are gold; no text is.
+So its separation from the washed card is measured with
+`ColorVision`, as the mode-gated frame's is, rather than held to a
+luminance ratio: the house floors no card boundary, and the text
+beside every mark carries the meaning. The relaxed floor holds only
+while the gold colours no text.
+
+**A fixes-only patch still opens the window (#2038).** With no
+spotlight and no caution, Apple's own updates leave only a mark;
+this window opens as it always has — the prose and the Fixed tab —
+because the reader who reported a bug is the one who should see
+it fixed, and a mark tells them nothing.
+
+### What's new leads with a spotlight (#2038)
+
+**[Rationale]**
+
+**The Highlights tab carries EITHER the prose summary OR one
+intro sentence and up to four spotlight rows, decided per
+release — never both.** Two paragraphs of prose answer "what is
+new" only to someone who reads them; a row — an SF Symbol, a
+two-to-four-word title, one line of what the reader gains — is
+read at a glance, which is the shape of Apple's own What's New
+sheet. The rows replace the prose rather than sitting above it,
+so the window keeps its height: it is already sized to its
+tallest tab. Every row's change stays a bullet in its New or
+Improved tab — the row is the signpost, the tab the record — so
+nothing exists only as a row. A release decides: the curator
+proposes rows, the owner rules rows or prose.
+
+**A row's symbol depicts the object, never a state or an
+action.** Sparkles read as Apple Intelligence and an up-arrow as
+Install — the same misreadings that kept symbols off the tab
+strip. A name the running system does not know draws no icon
+rather than a placeholder.
+
+**"Show me ›" exists only where the running build can land on
+the setting, and is dropped — not greyed — where it cannot.**
+Greying is how Settings says "this is here, just not now"; a link
+to a setting this build no longer has (renamed, moved) points at
+nothing ever, so a greyed one is a promise with no way to keep
+it. The census id is checked twice for that reason: at
+publication against the tree, and at runtime against the build.
+Behaviour you notice without configuring anything gets a row with
+no link, and a Lua-only change gets no row: the window speaks to
+everyone who updated, and the rows to the Settings they can open.
+
+**"Show me" hides What's new and Settings carries the way back.**
+Leaving What's new open behind Settings fails on this app: it is
+an own floating window, so the float-tier raise either lifts it
+back over the control just landed on or leaves it buried under the
+tiles. So What's new hides without being answered, Settings lands
+on the control the way a search pick does — switching to the
+Power User mode where the control lives there — and a banner across
+the Settings shell offers the next linked row, the way back, and a
+dismissal. It survives navigation inside Settings and has no
+timeout, because a reader exploring a setting is not done with the
+notes; closing Settings brings What's new back rather than
+answering it silently, since only the reader's own Done or × says
+the notes were read. Nothing on that path writes: the rows are
+signposts, and a control inside the notes would be a third write
+path beside the draft and Lua, on a launch where boot may still
+be re-tiling. No animation is per release either — the notes are
+written after the build.
+
+**Across skipped versions, rows win.** A reader crossing several
+releases sees rows when any of them has rows, newest version's
+first, capped at four by trimming the oldest version's; a row from
+an older version carries its version after the title. The intro is
+always the newest version's own: its intro sentence, or — for a
+patch told in prose — that prose in full, which is why a patch's
+prose is capped at a couple of sentences while a minor's is not. The exception is a minor or major with no rows: its prose
+stands alone and older rows are dropped, since a minor's prose is
+written to be read whole and is never cut to an intro. That edge
+is rare by construction — the curator gives a minor rows — and
+accepted. Every covered version's caution stays, as before.
+
 ### Linking the notes is not opening a channel
 
 **[Rationale]**
@@ -6783,8 +6861,9 @@ and resized the window I was reading", which is the fear a new
 tiling user arrives with.
 
 **The demonstration is already happening; the tour narrates it.**
-The moment the grant lands, management starts and every window
-behind the tour is arranged — over the following seconds (#801),
+The moment the user presses Start Tiling (#2050), management
+starts and every window behind the tour is arranged — over the
+following seconds (#801),
 the screen narrating that wait rather than claiming a finished job
 (▸ *Boot: the wait is narrated, never hidden*). That is a better
 demonstration than tiling the tour could ever be — the user's own
@@ -6874,6 +6953,48 @@ symbol that merely resembles it teaches the wrong shape. And the
 picture is a picture: it is not a control, it points at nothing
 off-window, and it needs no permission, no screen geometry and no
 guess about where the item ended up.
+
+### Granting Accessibility is not a request to tile (#2050)
+
+**[Principle]**
+
+**The permission and the start are two decisions, and only the
+second moves a window.** The grant step asks for what macOS
+needs; nothing is arranged until the user presses **Start
+Tiling**, which the grant page offers greyed beside Open System
+Settings and then as its default once the grant lands. A user
+who met KiwiDesk rearranging every open window the moment they
+flipped the switch read it as a bug and uninstalled, and nothing
+on screen offered a way back. Zero configuration is kept — the
+press asks for no choice — so "works at once" survives while
+"acts without asking" goes.
+
+The press is remembered in three states, not two. A first run
+records "not started" before the grant page appears; an install
+that predates the gate has no record at all, and is counted as
+started when it launches already trusted. A two-state flag would
+read a first run that granted, closed the tour and relaunched as
+the second kind, and tile without asking on the next launch —
+the report itself, one launch later. Once pressed, a revoke and
+re-grant resumes on its own: that user already said go.
+
+Closing the tour without pressing leaves KiwiDesk idle, and the
+start stays reachable without the tour: a **Start Tiling** row
+heads the quick menu, Settings carries a banner with the same
+button, and the menu-bar icon is drawn dimmed — the starting
+phase's treatment, so the icon reads "not doing anything yet"
+from launch to the end of boot. The warning triangle was ruled
+out because its words say "permission required", which would be
+false, and because it makes a choice look like a fault; the
+#1013 update dot was ruled out as the idle mark because it
+belongs to offers. Unlike the warning and the starting phase,
+idle does not outrank that dot: it can last indefinitely, and an
+update is something an idle app can still take, so the dot rides
+the dimmed icon.
+
+An undo of the first arrangement is not owed by this ruling:
+once nothing moves unasked, the surprise it would undo is gone,
+and a restore is weighed on demand rather than as a safety net.
 
 ### The tour's progress row is derived, never a fixed counter
 
@@ -8036,10 +8157,12 @@ Three consequences, each reachable another way and rejected:
   detaches into a card over the content — draggable, and
   clamped so it always lands whole inside the window, since
   a card dragged off a 720 pt edge has no scrollbar or menu
-  to bring it back. Between 900 and 1200 the card opens with
-  the screen; below 900 it waits behind "Show preview". One
-  card, two defaults — not two features — so that an area
-  offering a preview always has exactly one way to it.
+  to bring it back. Below 1200 it waits behind "Show
+  preview" in every band: a card that opened with the screen
+  covered the rows the user came to edit on every navigation
+  (#1854). Opening it is per-mount, like the close, so a
+  window grown back past 1200 docks the column again. So an
+  area offering a preview always has exactly one way to it.
 - **The reflow swaps the LAYOUT, not the view.** A row below
   900 puts its label above its control, and it must stay the
   same row while it does: tear the subtree down at the
@@ -10310,6 +10433,13 @@ card that opens on a first visit needs a stored "seen" flag and
 then changes shape on the second; search opens it on a hit, and its
 summary does the telling while it is shut.
 
+:::unreleased
+Since the layer's name moved onto the pinned jump bar (#1520), the
+separation is carried by the rule after the Mouse & trackpad chip
+and by the Layers card, which leads everything layer-scoped: the
+card above it belongs to no layer.
+:::
+
 **Its entries are grouped by where the hand is** — on your
 windows, on the KiwiShelf, anywhere holding a modifier — never by
 gesture type, which is grouping by widget. That grouping is also
@@ -10522,6 +10652,105 @@ hand's spacing on the tap's own clock, never the main actor's,
 where a busy switch would squash deliberate notches into a
 burst. The number is provisional until a device logs notch
 intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
+
+:::unreleased
+**The page is mapped by pinned jump chips, never split into tabs**
+(#1520, owner ruling 2026-10-01). A group well below the fold of
+a long list is undiscoverable without a map — the per-app
+shortcut, which answers "switch to the Space an app has windows
+in", is the costly case. Tabs are easier to click but hide every
+group but one, so a conflict banner or a search hit lands on a
+page whose siblings are out of sight, and search would have to
+switch tabs as it opens drawers (#1250). Chips keep the page one
+page. Pinned, they also answer what tabs avoid — with chips at
+the top of a long list, reaching the next group would mean
+scrolling back up first. Tabs stay the update
+window's control, which shows separate views one at a time;
+chips jump within one view. Moving *Open applications* up was
+refused too: it trades one group's discoverability for
+another's, and the group's rank is fine once a map exists.
+
+**Layers gets no chip.** It picks which layer every group below
+edits — scope, not a destination — and it is absent in Simple,
+so a chip for it would come and go. The bar carries the edited
+layer's name instead, in words, at the trailing end of the
+caption line over the chips, and that line is the first thing a
+narrowing window drops since it is header chrome. **Mouse &
+trackpad gets the first chip**, set off
+by a rule because everything after it is scoped to one layer and
+it is not; its click opens the card as well, which stays fully
+collapsed otherwise — a first-item-open state would be a third
+collapsible kind and split its search children (#277). The chip
+pinned above it is what keeps the shut card from being
+overlooked at the top of the page.
+
+**Fewer groups, chosen by what a header tells apart.** The
+General drawer — two rows, Show shortcuts panel and Open
+Settings — folds into Open applications under a "KiwiDesk"
+subheading: both open something by key, and a two-row drawer was
+a disclosure guarding almost nothing. Focus and Move windows stay
+apart although they share keys: merged they run 17–23 rows, and
+the header is what tells "where focus goes" from "where a window
+goes" on the same arrows. The section keeps its name: *Controls*
+stays refused, every row in Settings being a control.
+
+**The marked chip is the group under the bar.** A group is
+current once its header has reached the bar and while its card
+is still under it, so scrolling past Mouse & trackpad into the
+layer chrome marks nothing — no chip names what is there.
+Unscrolled, the first group is marked, whatever banner sits above
+it. A clicked chip stays marked until the user scrolls, since a
+group near the end may never bring its header to the bar; a
+scroll the user takes to the end marks the last group for the
+same reason. Marking is a fill on a
+layer of its own and hover a neutral fill beneath it (#1173): a
+pointer resting on the marked chip must not read as unmarking it.
+
+**A chip must read as a button before it is pointed at** (#1520
+amendment 5, owner ruling 2026-10-07). A hairline capsule is the
+passive chip's vocabulary — a badge, a tag — and on the chip's
+own rest fill the container hairline all but vanishes in dark,
+so the row read as labels. The chip therefore draws an edge of
+its own, `chipEdge`, which must separate from the rest fill it
+rims by more than the container hairline separates from the
+page, in either appearance (`SettingsThemeContrastTests` ▸
+`chipEdgeOutreadsHairline`), and which no state moves: the edge
+says "button", the fills say what the pointer is doing. A press
+deepens the pointer's layer (`chipPressed`), which still sits beneath the marking, so
+holding down the marked chip cannot unmark it either. **No
+shadow**: buttons take none (ui-patterns ▸ *Buttons take a native
+style*), the thumb's shadow being the settings' sign for
+"movable", and the edge already carries what a shadow would.
+
+**The row leads** (#1520 amendment 6). Every wrapped line starts
+at the leading inset, where the pane's headers start and where
+the eye returns after each line; a centred wrapped row reads as
+a tag cloud, and centred segments mean tabs on macOS.
+
+**The row says what it is.** A "Jump to" caption sits on a line
+of its own above the chips: the row's VoiceOver name, drawn, and
+hidden from VoiceOver so it is not spoken twice. The edited
+layer's readout moves onto that line, at its trailing end, so
+the chips below are only chips; where caption and readout do
+not fit side by side the readout wraps under the caption, never
+beside the chips. The caption takes the readout's face —
+`.callout` in `ink2`, never `ink3`, which reads as dimmed — and
+the whole line leaves at the chrome step, being header chrome,
+the bare chips remaining. No colon: the form's labels take
+none, and a colon's spacing is per-locale. The caption takes a
+line of its own rather than leading the chips inline, though
+that makes the pinned bar a line taller: the top of a pane is
+easily passed over, so what sits there only informs — a quiet
+caption, never a container header. A card-header tier above the
+row was refused, since on a pinned bar it reads as a frozen
+section title, and
+its semibold would equal the marked chip's "you are here". An
+instruction such as "Click to jump there" was
+refused as well: it names one input of several. The caption
+does not replace the edge — it labels the row once, where the
+edge tells each chip from a passive capsule on every look, and
+without the edge a dark jump chip is `chipSurface()` again.
+:::
 
 ### Overrides & appearance
 
@@ -12421,22 +12650,15 @@ The default being the old behaviour is also why the setting owes
 no crossing: an absent key meant grouped before and means grouped
 now, so no stored file, built-in layout or `init.lua` changes.
 
-**The App Bar lists every window by default; grouping is its
-option.** (Owner ruling 2026-10-06.) The two bars split here
-because they show different things: the Space Bar draws glyphs
-under a span, where grouping first is what keeps the overview
-(above), while the App Bar draws each window's title, so a
-grouped item hides windows the row has room to name. The App
-Bar's `group_adjacent_windows` therefore defaults off.
-
-The flip owes no crossing for a stored file: the `app_bar` group
-is encoded whole in every profile, a backup bundle included, so
-each file already carries the value it was saved with
-(`AppBarOverrideTests` ▸ `appBarDoesNotGroupByDefault` pins the
-key in the `TilingSettings` encoding). What does change, and is
-accepted, is every arrangement with no file to carry it: a
-composed Standard, built from code defaults, and an `init.lua`
-that never sets the value now show the App Bar ungrouped.
+**Both bars group adjacent windows by default.** (Owner ruling
+2026-10-07, #1946.) Grouping costs a window only if the group
+hides it, and the hover peek hides nothing: a group of two or
+more windows always peeks, holds while the pointer crosses to
+it, and every row in it picks its window. So grouping keeps the
+row short — the overview a bar exists for — and no window falls
+out of reach. Ungrouping stays the App Bar's option, for a user
+who wants every title drawn in the row itself, and one default
+for both bars means a user reads one rule rather than two.
 
 **[Principle] A Space Bar glyph reaches its window; a list never
 switches by itself.** (#1528, owner rulings 2026-09-20 and
@@ -12444,8 +12666,10 @@ switches by itself.** (#1528, owner rulings 2026-09-20 and
 switches to that Space and focuses the window; the rest of the
 item — identifier, divider, padding — switches and lands on the
 Space's last-focused window. A glyph standing for several
-windows, and `+n`, open a menu of those windows and switch
-nothing until a row is picked.
+windows, and `+n`, list those windows — the hover peek, shown at
+once and held — and switch nothing until a row is picked. A peek
+row is that pick, as a menu row is: one focus path, whichever
+list the user picked from.
 
 The glyph is the only thing on screen naming a window on a Space
 you are not looking at, so it is where a click can say which
@@ -12457,12 +12681,147 @@ which window the switch lands on. A target standing for several windows must not
 choose for the user: any guess (the most recent, the first) is
 wrong often enough to teach distrust of the click, and a switch
 fired before the choice moves the screen under a menu the user
-may still dismiss. So the menu opens where the user is, and
-dismissing it costs nothing. The hover title is read when the
-pointer settles rather than drawn into the render, so it is
+may still dismiss. So the list opens where the user is, and
+dismissing it costs nothing. The hover peek reads its windows
+when it shows rather than being drawn into the render, so it is
 current without the bar re-rendering on every title change. A
 setting to turn glyph clicks off waits for misclicks measured on
 a device (#1514).
+
+**[Trade-off] A bar item's hover peek.** (#1946, owner rulings
+2026-10-07 from an HTML preview and two device eyeballs.)
+Hovering a Space Bar glyph, a `+n` disc or an App Bar item that
+hides its text shows the windows it stands for in the bar's own
+look, in place of the system tooltip. The tooltip could not be
+restyled, waited the tooltip delay, and listed the same windows
+the click menu lists in another face, so two surfaces fought
+over one list. The peek centres on its item, opening away from
+the bar's edge.
+
+The peek acts: every row is its window's button, on every list,
+picked on the release inside the row, a drag off it cancelling
+as a button's does (#2044). A row-shaped list the user cannot act
+on is a trap — the hand reaches into it to click a row, and a
+panel deaf to the mouse lets that click fall through to the
+window underneath and focus another app, a misclick with a side
+effect on a surface built to look pickable. macOS shows no such
+list: Stage Manager and Mission Control act on the surface you
+previewed, and the Dock's hover label is one word that promises
+nothing. So a left click on a LIST — a multi-window glyph, or
+`+n` however few windows it hides — TOGGLES its peek: where one
+already shows, the hover's or a click's, the click closes it;
+otherwise it shows the peek at once, without the dwell, held as
+any list's is. A hover peek already holds on its own, so a click
+re-opening what is open would mean nothing, and a control that
+opens on one click and closes on the next is the one a hand
+already knows from every disclosure on the Mac. A one-window
+glyph still picks on the click; two lists for one set of windows
+is the fight the tooltip lost. A pick does what clicking that
+window's own bar item does — one focus path for a glyph, its
+peek row and its menu row, KiwiDesk's own windows included
+(#1281) — and is judged when it is performed, since greying on
+hover needs the compositor read a show and every swap cannot
+afford (#1925): a window on a Desktop no screen shows takes the
+glyph's plain switch to its Space, as the glyph's click does,
+rather than a second policy of its own; an App Bar row focuses
+its window where that bar draws it, as the item does, so a
+travelling sticky window is not chased to its home Space. The row under the pointer takes the shelf's own
+hover ink, so a bar's hover means one thing wherever it shows.
+The panel takes the mouse yet never activates, so a click on a
+row leaves the app the user is in frontmost until the pick moves
+the focus; it is never key, so Escape is not one of its exits.
+
+The native menu stays as the peek's twin where the peek cannot
+reach. VoiceOver's press on a glyph opens it: the peek is hidden
+from accessibility, and the menu brings the keyboard and the
+rotor for free. A list taller than its room ends on "More windows: N", a
+button opening the menu, which scrolls where the peek never
+does. The right-click menu is #1518's, unchanged. The
+context-menu chrome a left click wore (#1850) is therefore those
+two paths' alone.
+
+Between the item and the peek lies a gap the pointer crosses to
+reach a row, and a peek wider than its item overhangs the
+neighbours. A LIST's peek holds while the pointer stays inside
+the hull of the item's peek-facing edge and the peek's bar-facing
+edge, with both rectangles: inside it no neighbour swaps in and
+the peek does not close; outside it the peek closes and cools as
+it always did. The hull spans no neighbour's own rectangle, so
+moving along the bar still swaps at once — a grace that took the
+neighbours in would make the whole bar sticky. A one-window
+peek does not hold: it is a label, its one row the item the
+pointer is already on, so there is nothing to reach for, and a
+label that lingered over the bar would cover the neighbours the
+pointer is moving to. Whether a peek is a list is asked once of
+what it stands for, so a click, VoiceOver's press and the hold
+cannot disagree about the same disc.
+
+It still never opens a menu on hover. A hover-opened menu runs a
+modal tracking loop that eats the next click, and no macOS
+surface does that; an untracked panel runs no loop, which is why
+the peek may act where a hovered menu may not.
+
+What it shows is ruled whole: the app on top, smaller and
+semibold like the menu's section header, so the peek reads as
+the menu's twin, a step under the titles in ink — the item
+ink at three quarters of its alpha, DERIVED the way the empty
+Space ink is: the step is taken only where it holds the idle
+floor on both grounds the peek draws on, and a palette that
+cannot hold it, a user's own included, keeps the full ink; one
+row per window, hairlines between, so a title that
+wraps still reads as one window; every window counted, an
+untitled one as the menu names it, and a lone window titled
+exactly as its app keeps its row under the header — a header
+with no row reads as an app with no window, and a row is now
+something to click; the count as a window glyph and a bare number in the
+bar's own badge pill, ringed in the hairlines' ink only where its
+fill separates from the peek's grounds by less than the 3:1
+non-text floor — derived on the header step's two grounds, so a
+fill that holds its own edge draws no extra line — only from two
+windows, so it needs no word and
+no plural — the glyph taking the header's derived step of the
+badge ink over the badge fill, so it reads as faint as the app
+line, while the number keeps the full badge ink; titles wrapped
+whole, since the peek exists to show what the bar cuts. `+n`
+mixes apps, so its groups carry their icons.
+The face is the bar's, at one fixed reading size: the strip-depth
+ladders would shrink it with a thin bar, which is where the peek
+is most needed. An App Bar GROUP always peeks every window it
+stands for, as a multi-window glyph does, since its name hides
+the windows whether or not it is drawn whole — where #1514's
+tooltip named the app alone; a single App Bar item still peeks
+only where it hides its title (#1514).
+
+The peek's glass takes ONE tint over its whole height, the ruled
+exception to the fade a detached surface takes (#1620): the bars'
+fade runs across a strip a glyph tall, but a panel of text read
+top to bottom would end on near-clear glass where a long title
+wraps. The ink is the shelf's own item ink, measured on that
+ground on every bundled palette (`PeekInkContrastTests`).
+
+Its height is capped to the usable room on its side of the strip,
+so a long `+n` never covers its bar or the item it names. A list
+taller than that keeps the windows that fit, in order, and marks
+the cut at the edge away from the bar with a chevron and "More windows: N"
+in the secondary ink (owner ruling): the chevron points where the
+hidden rows are — down under a top bar, up over a bottom one,
+whose peek keeps the windows nearest the bar — and the line is
+the button that opens the menu holding the rest. The peek itself
+never scrolls; the menu is the scrollable list. The count
+stands last behind its label, so no locale has to agree with the
+number. No title is ever capped on its own.
+
+Timing has one home, `BarPeek.Timing`. A first peek waits a short
+dwell, because a zero dwell flashes a label every time the
+pointer crosses a top bar on its way to the menu bar; once one
+shows, the next item swaps in at once, and for a short cool-down
+after it closes, so moving along the bar reads as one peek. The
+dwell is shorter than Settings' tooltip delay (Hover help appears
+sooner than AppKit's default) on purpose and does not overturn
+it: a bar item's peek answers a glance at a strip the pointer
+passes all day, while Settings' help answers a reader who stopped
+to ask. A dwell is not motion, so Reduce Motion keeps it and
+drops only the fade.
 
 **A Space's strip centres on its focus, holds under the pointer,
 and does not scroll.** (#1528 items 17–22, owner rulings
@@ -12475,7 +12834,13 @@ overflows, the item is a fixed span + 2 cells: a `+n` on each side
 of the span in the middle, span + 1 glyphs and one `+n` at an end,
 so a focus change never reflows the items after it — which is why
 the setting is a *span* and not a *cap*, one glyph more showing at
-an end. The two `+n` stay discs rather than the section's count
+an end. A `+n` hides two groups or more (#2052): a disc and a
+glyph take one cell each, so a disc standing for a single group
+spends the cell and hides the app for nothing — the glyph says
+more, and its own count badge already counts its windows. A side
+that would hide one group draws it, the strip clamping to that
+end, and a row of span + 2 groups draws whole. The two `+n` stay
+discs rather than the section's count
 chips: a count chip pages the section, a disc lists windows, and
 one shape keeps one verb.
 

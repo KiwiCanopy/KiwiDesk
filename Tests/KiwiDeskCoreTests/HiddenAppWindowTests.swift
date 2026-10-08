@@ -273,29 +273,39 @@ struct HiddenAppWindowTests {
         #expect(box.windowQueries == 1)
     }
 
-    @Test("a hide or unhide reconciles the app at once")
+    @Test("a hide or unhide reconciles the app off main")
     func hideChangeFunnelsToReconcile() {
         // Both directions take one arm, so the release lands on
         // the gesture rather than whenever something else
         // happens to reconcile the app.
         //
-        // The hidden half reads a hide EFFECT, not the absence
-        // of a window read: `windowQueries == 1` after the hide
-        // is satisfied identically by the wired arm, by an arm
-        // that returned early, and by a reconcile that skipped
-        // the sweep — three states the test claims to tell
-        // apart. Only the emitted event does.
+        // The hidden half reads a hide EFFECT as well as the
+        // absence of a window read: an unchanged `windowQueries`
+        // is also what an arm that returned early leaves, so
+        // only the emitted event tells the wired arm apart. The
+        // count pins that the off-main read skips the list for a
+        // hidden app (#2027).
         let (loop, box) = makeLoop()
+        var work: [@Sendable () -> Void] = []
+        loop.axReads.deliver = { run in
+            MainActor.assumeIsolated { run() }
+        }
+        loop.axReads.dispatchOverride = { _, run in work.append(run) }
+        let drain = { while !work.isEmpty { work.removeFirst()() } }
         attach(loop)
         loop.elements[pid] = [WindowID(11): dummyElement]
         box.listed = [WindowID(11)]
         loop.appHideChanged(pid: pid, ref: ref)
+        #expect(box.windowQueries == 0, "list read inline (#2027)")
+        drain()
         #expect(box.windowQueries == 1)
         #expect(box.hiddenEvents.isEmpty)
         box.hidden = true
         loop.appHideChanged(pid: pid, ref: ref)
-        #expect(box.windowQueries == 1)
+        #expect(box.hiddenEvents.isEmpty, "hide read inline (#2027)")
+        drain()
         #expect(box.hiddenEvents == [WindowID(11)])
+        #expect(box.windowQueries == 1, "a hide listed (#2027)")
     }
 
     @Test("an unobserved app's hide reconciles nothing")

@@ -10,6 +10,25 @@ import Testing
 @Suite("Space bar window menu rows")
 @MainActor
 struct SpaceBarWindowMenuTests {
+    private static func row(
+        _ window: WindowID,
+        app: String,
+        title: String,
+        icon: NSImage?,
+        enabled: Bool
+    ) -> SpaceBarWindowMenu.Row {
+        SpaceBarWindowMenu.Row(
+            row: BarWindowRow(
+                window: window,
+                pid: 1,
+                app: app,
+                title: title,
+                icon: icon
+            ),
+            enabled: enabled
+        )
+    }
+
     @Test("A long title is cut in the row and whole in its tooltip")
     func longTitleIsCut() {
         LocalizationManager.shared.select("en")
@@ -17,8 +36,8 @@ struct SpaceBarWindowMenuTests {
             repeating: "x",
             count: SpaceBarWindowMenu.titleCap + 5
         )
-        let row = SpaceBarWindowMenu.Row(
-            window: WindowID(9),
+        let row = Self.row(
+            WindowID(9),
             app: "Web",
             title: long,
             icon: nil,
@@ -33,8 +52,8 @@ struct SpaceBarWindowMenuTests {
         #expect(!item.isEnabled)
         let short = SpaceBarWindowMenu.make(
             [
-                .init(
-                    window: WindowID(9),
+                Self.row(
+                    WindowID(9),
                     app: "Web",
                     title: "",
                     icon: nil,
@@ -48,8 +67,8 @@ struct SpaceBarWindowMenuTests {
         #expect(short.items[0].toolTip == nil)
         let titled = SpaceBarWindowMenu.make(
             [
-                .init(
-                    window: WindowID(9),
+                Self.row(
+                    WindowID(9),
                     app: "Web",
                     title: "Inbox",
                     icon: nil,
@@ -66,8 +85,8 @@ struct SpaceBarWindowMenuTests {
         LocalizationManager.shared.select("en")
         let menu = SpaceBarWindowMenu.make(
             [
-                .init(
-                    window: WindowID(9),
+                Self.row(
+                    WindowID(9),
                     app: "Web",
                     title: "",
                     icon: NSImage(size: NSSize(width: 32, height: 32)),
@@ -89,8 +108,8 @@ struct SpaceBarWindowMenuTests {
         )
         let menu = SpaceBarWindowMenu.make(
             [
-                .init(
-                    window: WindowID(9),
+                Self.row(
+                    WindowID(9),
                     app: "Web",
                     title: long,
                     icon: nil,
@@ -108,7 +127,8 @@ struct SpaceBarWindowMenuTests {
     }
 
     /// #1850: the list pops as a context menu at its cell, so the
-    /// event lands on the cell's lower-left corner in its window.
+    /// event lands on the cell's lower-left corner in its window —
+    /// VoiceOver's press and the peek's "N more" (#1946).
     @Test("The glyph menu's event sits at its cell's lower-left corner")
     func contextEventSitsAtTheCell() throws {
         let window = NSWindow(

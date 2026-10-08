@@ -13,6 +13,11 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarRun.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBar.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBarGroups.swift"
+  # The hover peek's content (#1946): built at show time from the
+  # glyph menu's rows, a third title channel.
+  - "Sources/KiwiDeskCore/App/KiwiCore+BarPeek.swift"
+  # A glyph click and every bar list row's pick (#1528, #1946).
+  - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarClick.swift"
   # The one shelf (#1517): where a bar field lives, the one
   # reservation, the one placement rule, the retired verbs.
   - "Sources/KiwiDeskCore/App/KiwiCore+Shelf*.swift"
@@ -549,19 +554,108 @@ Obligations:
   debounce (`KiwiCore+BarTitles`), never by consumers
   pre-filtering on what an item draws — the old content gate was
   that pre-filter, and it is what dropped the announced channel.
-- **A hover title is read when it shows — through
-  `SpaceBarGlyphActions.tooltip` on a Space Bar glyph,
-  `AppBarItemActions.tooltip` on an App Bar item — and never
-  stored on a view.** It is a third title channel, and it owes
+- **Both bars feed ONE hover peek, read when it shows and never
+  stored on a view** (#1946). An item hands the shelf's one
+  `BarPeek` its WINDOWS (`BarPeekSource`), never a string, and
+  Core builds the content as the peek shows, through the one
+  `KiwiCore.barPeekContent` over the state-only `barWindowRows`
+  the glyph menu's rows are built from — never the menu rows
+  themselves, whose enablement reads the compositor on every
+  show and swap (#1925; `BarPeekSeamTests` ▸
+  `contentReadsStateOnly`). It is a third title channel, and it owes
   the refresh gate above no arm only because nothing caches it;
-  a view that keeps the string brings back the stale title with
-  no gate watching (`SpaceBarGlyphWiringTests` ▸
-  `tooltipIsReadAtHover`, `AppBarHoverTitleTests` ▸
-  `tooltipIsReadAtHover`). An App Bar item asks only where it
-  hides text — Core's cut verdict (`barItemTitle`, the one
-  branch the item text also takes) or a label it did not draw
-  in full (#1514) — and both bars build the string through the
-  one `KiwiCore.hoverTitle(app:titles:)`.
+  a view that keeps a title brings back the stale one with no
+  gate watching (`SpaceBarGlyphWiringTests` ▸ `peekIsReadAtShow`,
+  `AppBarHoverTitleTests` ▸ `peekIsReadAtShow`). An App Bar group
+  always asks, as a multi-window glyph does; a single App Bar item
+  asks only where it hides text — Core's cut verdict
+  (`barItemTitle`, the one branch the item text also takes) or a
+  label it did not draw in full (#1514). No bar view registers
+  the system tooltip the peek replaced
+  (`BarPeekSeamTests` ▸ `noBarTooltip`).
+- **Report every hover reading to the peek from the item's one
+  hover gate (`applyHover`) — the pointer's exit and the
+  relayout's re-read included — and close it on a click outside,
+  a pick, a strip scroll, any menu opening, a relayout that moved
+  its item, and its shelf leaving**: `ShelfManager.relayout`
+  re-checks the peeked item after the hover re-read, and
+  `ShelfManager.sync`'s hide arm is the one home for "its shelf
+  left" — a fullscreen or presentation stand-down, the bars
+  turned off, a display gone — since the panel joins every Space
+  and would stay up over the fullscreen app (`BarPeekSeamTests` ▸
+  `relayoutChecksAfterTheReRead`, `BarPeekWiringTests` ▸
+  `shelfLeavingCloses`). **A press in a bar closes the peek at
+  ONE point**, the shelf panel's `ShelfPanel.sendEvent`, which
+  hands every press — an item, the plate, the divider's grip, a
+  count — to `BarPeek.pressed(on:type:)` before the view takes
+  it, sparing only a LEFT press on a Space Bar glyph, whose
+  release decides (`BarPeekHoldTests` ▸
+  `otherPressOnAGlyphCloses`); a view's
+  own press handler never re-spells the dismissal, so one that
+  takes its own press cannot leave a peek standing
+  (`BarPeekSeamTests` ▸ `onePressDismissal`,
+  `BarPeekClickTests` ▸ `pressOnTheShelfCloses`). A press the
+  press fan-out hears is a click outside KiwiDesk, since neither
+  of its arms hears a bar or the peek; the `anchors` map in
+  `BarPeekSeamTests` ▸ `anchorsAreListed`, derived from the
+  `peek?.pointer(` callers, is the one copy of who anchors it.
+  **Whether a source is a LIST is the one
+  `BarPeekSource.isList`** — an overflow disc, however few
+  windows it hides, or more than one window — read by the click,
+  VoiceOver's press and the hold alike, never a count beside it
+  (`BarPeekHoldTests` ▸ `overflowOfOneHolds`, `BarPeekSeamTests`
+  ▸ `glyphClickRouting`). **Only a list's peek holds, while the
+  pointer is inside `BarPeekHull`** — the item, the peek and the
+  bridge between their facing edges, which spans no neighbour's
+  rect — where no neighbour swaps in; leaving it closes and
+  cools. A one-window peek is a LABEL: it closes as the pointer
+  leaves its item, so its row is never reached by the pointer
+  (`BarPeekActionTests` ▸ `oneWindowPeekNeverHolds`,
+  `BarPeekHullTests`). The hold polls the gap fast and the body
+  slowly: the peek body's own tracking slows the poll to
+  `Timing.insideRecheck` as the pointer enters it and re-reads
+  the hull as it leaves, the slow re-read healing an exit the
+  body never got (`BarPeekHoldTests` ▸ `holdPollsTheGapFast`,
+  `lostExitHeals`).
+  Its timing lives in `BarPeek.Timing` and
+  nowhere beside it; its fade is `BarMotion`'s; its glass is
+  decided once in `BarPeekPanel.show` through the gate
+  (`BarPeekSeamTests` ▸ `peekTakesTheGate`) and tinted UNIFORMLY
+  through `GlassTint.applyUniform`, the ruled exception to the
+  detached-surface fade (`PeekInkContrastTests` measures the ink
+  on that ground, a hovered row's included, and the count pill
+  draws its ring only where `KiwiShelf.peekPillNeedsRing` says,
+  `PeekPillRingTests`); its shelf is the one
+  `ShelfManager` drew the anchor's panel with; its text asks
+  `BarFont` at the peek's own fixed size, never the strip-depth
+  ladders (`BarFontSiteTests` ▸ `hoverPeek`); a list taller than
+  its room keeps what fits and closes on the one "more" line
+  (`BarPeekBody+More`, `BarPeekFitTests` ▸
+  `tallPeekKeepsWhatFits`, `moreCountsHiddenRows`).
+- **Every peek row is its window's button, picked through the
+  one `pickBarRow` a window menu row takes, which does what
+  clicking that window's bar item does** (#1946 amendment 2) —
+  on the release inside the row, a drag off it cancelling
+  (#2044), and judged when performed, never greyed, since the
+  peek reads no compositor on hover. A Space Bar row takes its
+  glyph's `focusFromSpaceBar`, a window the raise gate refuses
+  taking the chip's plain switch there and nowhere beside it; an
+  App Bar row carries no Space and takes its item's
+  `selectFromAppBar`, so a traveler is focused where the bar
+  draws it rather than on its home Space (`BarPeekSeamTests` ▸
+  `oneBarRowPick`, `BarPeekClickTests` ▸
+  `refusedRowTakesThePlainSwitch`, `BarPeekAppBarRowTests` ▸
+  `travelerRowActsAsItsItem`). A left click on a list TOGGLES
+  its peek: it closes one already shown — the hover's or a
+  click's — and otherwise shows it at once, with no dwell, to
+  hold as any list's does; it pops no menu. VoiceOver's press
+  and "N more" open the native menu at the anchor
+  (`BarPeekActionTests` ▸ `secondClickCloses`,
+  `clickClosesAHoverPeek`, `BarPeekClickTests`). The panel takes
+  the mouse but is non-activating and never key, and hidden from
+  accessibility (`BarPeekTests` ▸
+  `panelTakesClicksWithoutActivating`). The argument is
+  `docs/design-decisions.md` ▸ A bar item's hover peek.
 
 ## A Space Bar glyph is a click target the item owns (#1528)
 
@@ -573,13 +667,15 @@ Obligations:
   target list**, or subview order decides who takes the click —
   a render re-adds the glyph views above kept targets
   (`SpaceBarGlyphTargetTests` ▸ `hitTestPrefersTheTarget`).
-- **A menu a bar click opens is built by `SpaceBarWindowMenu`
-  and shown through `SpaceBarGlyphActions.present`**, which both
-  `makeTestCore` twins pin, since a modal menu hangs a run. Its
-  rows' enablement is the focus door's own refusal, greyed and
-  never hidden (`SpaceBarGlyphWiringTests` ▸
-  `refusedRowIsGreyed`); that no second builder exists is
-  review's.
+- **A window menu — VoiceOver's press on a list glyph, the
+  peek's "N more" — is built by `SpaceBarWindowMenu` in the one
+  `presentBarWindowMenu` and shown through
+  `SpaceBarGlyphActions.present`**, which both `makeTestCore`
+  twins pin, since a modal menu hangs a run. Its rows' enablement
+  is the focus door's own refusal, greyed and never hidden
+  (`SpaceBarGlyphWiringTests` ▸ `refusedRowIsGreyed`); that no
+  second builder exists is `BarPeekSeamTests` ▸
+  `oneBarRowPick`'s.
 - **Which groups a Space item draws is `SpaceBarStrip.window`,
   and its length reads the same arithmetic** — the builder takes
   the window, `autoLength` counts the drawn glyphs plus one cell
@@ -892,7 +988,10 @@ Obligations:
   fixture on another edge can see (`GlassTintFadeTests`,
   `GlassTintCensusTests` ▸ `applyTakesAFillNotAColour`), and the
   backdrop paints nothing of its own (`GlassTintCensusTests` ▸
-  `backdropPaintsNothing`). An EMPTY Fill is no colour there —
+  `backdropPaintsNothing`). A READING surface takes no fade at
+  all, through `GlassTint.applyUniform` — the hover peek alone,
+  by the owner's ruling on #1946; a second one argues its own
+  design-decisions entry first. An EMPTY Fill is no colour there —
   clear glass, nothing pinned — which the drag marker's fill-off
   and the sticky mark's Automatic both hand it
   (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`).
@@ -1074,9 +1173,17 @@ Boxed.
   `outlineStandsTheRimDown`) — so the outline IS that edge and
   hugs any box, solid or glass, insetting only on the plate
   (`ShelfBorderDrawingTests` ▸ `outlineHugsTheBox`), where
-  `BarAccent.hugsBox` is the one answer. `ShelfBorderSeamTests`
-  holds the one home: only the painter reads the drawn width in Core, and
-  in `Bar/` the only layer-border colour written beside it is
+  `BarAccent.hugsBox` is the one answer. Whether an indicator
+  draws an outline at all is a different question — the plate's
+  outline draws without stroking a box edge — answered by the
+  one `ActiveIndicator.drawsOutline`, and no site compares an
+  indicator to `.outline` beside it; `strokesBoxEdge` derives
+  from it only while a rimmed box is exactly where the outline
+  hugs (#2029, `ShelfBorderSeamTests` ▸ `oneHomeSpellsTheOutline`
+  and `ShelfBorderSeamTests` ▸ `rimmedBoxIsWhereTheOutlineHugs`).
+  `ShelfBorderSeamTests` holds the one home: only the painter
+  reads the drawn width in Core, and in `Bar/` the only
+  layer-border colour written beside it is
   the active indicator's. `ShelfBorderPlateTests` builds the
   plate (solid, glass, under Reduce transparency) and
   `ShelfBorderDrawingTests` both bars' boxes and the chip; they

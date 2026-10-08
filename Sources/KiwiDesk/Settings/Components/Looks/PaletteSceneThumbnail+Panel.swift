@@ -87,8 +87,8 @@ extension PaletteSceneThumbnail {
         }
     }
 
-    /// The idle Space ink, from the one home the live bar reads
-    /// (`KiwiShelf.idleItemColor`).
+    /// The idle ink both bars draw, from the one home the live
+    /// bar reads (`KiwiShelf.idleItemColor`).
     private var idleInk: Color {
         var shelf = KiwiShelf()
         shelf.itemColor =
@@ -96,9 +96,10 @@ extension PaletteSceneThumbnail {
         return Color(kiwiHex: shelf.idleItemColor)
     }
 
+    /// Unfocused App Bar items take the same idle ink (#1938).
     private var appBarStrip: some View {
         barPlate(fill: color("kiwishelf.fill_color")) {
-            item(color("kiwishelf.item_color"))
+            item(idleInk)
             item(
                 color("kiwishelf.active_item_color"),
                 highlight: sheened("kiwishelf.highlight_color")
@@ -109,7 +110,7 @@ extension PaletteSceneThumbnail {
                     ink: color("kiwishelf.group_badge_text_color")
                 )
             }
-            item(color("kiwishelf.item_color").opacity(0.55))
+            item(idleInk)
         }
     }
 

@@ -240,4 +240,37 @@ struct BarFontSiteTests {
         )
         #expect(label.font?.familyName == Self.family)
     }
+
+    /// The peek's header, titles and count pill all draw the
+    /// shelf's family, at the peek's own reading size (#1946).
+    @Test("The hover peek draws the family")
+    func hoverPeek() throws {
+        try #require(BarFont.isInstalled(Self.family))
+        let body = BarPeekBody()
+        _ = body.build(
+            BarPeekContent(
+                rows: [1, 2].map {
+                    BarWindowRow(
+                        window: WindowID($0),
+                        pid: 1,
+                        app: "Zed",
+                        title: "Window \($0)",
+                        icon: nil
+                    )
+                }
+            ),
+            shelf: Self.shelf
+        )
+        #expect(body.labels.count == 3)
+        #expect(body.pills.count == 1)
+        for field in body.labels + body.pills.map(\.number) {
+            #expect(field.font?.familyName == Self.family)
+        }
+        let titles = body.labels.dropFirst()
+        #expect(
+            titles.allSatisfy {
+                $0.font?.pointSize == BarPeekBody.Metrics.textSize
+            }
+        )
+    }
 }

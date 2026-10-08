@@ -28,11 +28,7 @@ extension SpaceBarItemView {
     }
 
     override func mouseExited(with event: NSEvent) {
-        setPointerInside(false)
-        guard isHovered || hoveredTarget != nil else { return }
-        isHovered = false
-        hoveredTarget = nil
-        restyle()
+        applyHover(false, target: nil)
     }
 
     /// Hovered only while the pointer is on THIS view — a count
@@ -60,6 +56,8 @@ extension SpaceBarItemView {
         _ ownsPointer: Bool,
         target: SpaceBarGlyphTarget?
     ) {
+        let peeked = ownsPointer ? target : nil
+        reportPeek(peeked, source: peeked?.peekSource)
         setPointerInside(ownsPointer)
         let hovered = !isActive && space != nil && ownsPointer
         guard hovered != isHovered || target !== hoveredTarget else {
@@ -77,5 +75,18 @@ extension SpaceBarItemView {
         guard inside != pointerInside else { return }
         pointerInside = inside
         if let space { onPointerInside(space, drawn, inside) }
+    }
+
+    /// Hands the peek the view under the pointer and what it shows
+    /// (#1946) — every hover reading, the relayout's re-read
+    /// included. Any view of the chip may anchor it (#1945).
+    func reportPeek(_ anchor: NSView?, source: BarPeekSource?) {
+        glyphActions?.peek?.pointer(
+            in: self,
+            on: anchor,
+            source: source,
+            space: space,
+            edge: style.edge
+        )
     }
 }

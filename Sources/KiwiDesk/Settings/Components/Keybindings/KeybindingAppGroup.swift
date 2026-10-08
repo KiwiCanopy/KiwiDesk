@@ -6,6 +6,7 @@ import SwiftUI
 struct ApplicationsGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
+    let expander: ShortcutsFamilyRows
     @Environment(\.disabledSystemShortcuts)
     var disabledSystemShortcuts
     @Environment(\.keybindingLayerName)
@@ -61,6 +62,11 @@ struct ApplicationsGroup: View {
                 }
             }
             addRow
+            KiwiDeskKeyRows(
+                model: model,
+                bindings: $bindings,
+                expander: expander
+            )
         }
         .onAppear(perform: recomputeOrder)
         // The section view is reused across modes (no per-mode

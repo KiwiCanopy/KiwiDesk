@@ -1,7 +1,10 @@
 /// Display order definitions for Shortcuts settings section (#678,
 /// `ShortcutsCensusRenderTests`).
 enum ShortcutsRowOrder {
-    /// Containers drawn with bespoke views rather than a standard list loop.
+    /// Containers holding a non-empty order list that a bespoke
+    /// view draws rather than a standard list loop — Open
+    /// applications for its app list, though its KiwiDesk rows
+    /// are walked (#1520).
     static let bespokeContainers: Set<SettingsContainer> = [
         .openApplications,
         .layers,
@@ -104,13 +107,14 @@ enum ShortcutsRowOrder {
     /// key can draw.
     static let sizeAndFloatMore: [SettingKey] = []
 
-    /// Open applications group order.
+    /// Open applications group order: the per-app list, drawn by
+    /// its own view.
     static let openApplicationsAtRest: [SettingKey] = [
         .shortcuts(.openApplications)
     ]
 
-    /// General shortcuts behind disclosure.
-    static let generalKeysMore: [SettingKey] = [
+    /// Open applications ▸ KiwiDesk, below the app list (#1520).
+    static let openApplicationsKiwiDesk: [SettingKey] = [
         .shortcuts(.showShortcuts),
         .shortcuts(.openSettings),
     ]

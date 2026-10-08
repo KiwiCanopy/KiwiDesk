@@ -31,14 +31,26 @@ enum ThemeContrast {
     static func contrast(
         _ ink: Color,
         over surface: Color,
+        layers: [Color] = [],
         wash: (color: Color, alpha: Double)? = nil,
         inkAlpha: Double,
         dark: Bool
     ) throws -> Double {
         let inkRGB = try resolved(ink, dark: dark)
         var surfaceRGB = try resolved(surface, dark: dark)
-        // The wash lands first — the ink is drawn on the
+        // Translucent TOKENS land first, each at the alpha it
+        // resolves to in this appearance (a chip's rest fill,
+        // #1520), then the wash — the ink is drawn on the
         // composite, not on the bare token.
+        for layer in layers {
+            let rgb = try resolved(layer, dark: dark)
+            let alpha = try resolvedAlpha(layer, dark: dark)
+            surfaceRGB = (
+                r: alpha * rgb.r + (1 - alpha) * surfaceRGB.r,
+                g: alpha * rgb.g + (1 - alpha) * surfaceRGB.g,
+                b: alpha * rgb.b + (1 - alpha) * surfaceRGB.b
+            )
+        }
         if let wash {
             let washRGB = try resolved(wash.color, dark: dark)
             surfaceRGB = (
@@ -84,6 +96,22 @@ enum ThemeContrast {
             Double(srgb.greenComponent),
             Double(srgb.blueComponent)
         )
+    }
+
+    /// The token's alpha under one appearance, by the same path.
+    static func resolvedAlpha(
+        _ color: Color,
+        dark: Bool
+    ) throws -> Double {
+        let appearance = try #require(
+            NSAppearance(named: dark ? .darkAqua : .aqua)
+        )
+        var resolvedColor: NSColor?
+        appearance.performAsCurrentDrawingAppearance {
+            resolvedColor =
+                NSColor(color).usingColorSpace(.sRGB)
+        }
+        return Double(try #require(resolvedColor).alphaComponent)
     }
 
     static func luminance(

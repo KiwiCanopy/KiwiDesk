@@ -17,15 +17,16 @@ struct MonocleFlipSeamTests {
     )
     private static let door = "KiwiCore+MonocleFlip.swift"
 
-    /// The commanded sites: `navigate`'s Monocle cycle, the App
-    /// Bar click, `pull_or_spawn`'s focus of a window in the
-    /// active Space, and a Space Bar glyph click on the active
-    /// Space (#1528) — the ruling's list, and nothing reported.
-    private static let sites: Set<String> = [
-        "KiwiCore+MonocleCommands.swift",
-        "KiwiCore+Bootstrap.swift",
-        "KiwiCore+LaunchCycle.swift",
-        "KiwiCore+SpaceBarClick.swift",
+    /// The commanded sites, per file: `navigate`'s Monocle cycle,
+    /// `pull_or_spawn`'s focus of a window in the active Space, and
+    /// the bar clicks — an App Bar item or its peek row
+    /// (`selectFromAppBar`, #1946) and a Space Bar glyph click on
+    /// the active Space (#1528) — the ruling's list, and nothing
+    /// reported.
+    private static let sites: [String: Int] = [
+        "KiwiCore+MonocleCommands.swift": 1,
+        "KiwiCore+LaunchCycle.swift": 1,
+        "KiwiCore+SpaceBarClick.swift": 2,
     ]
 
     @Test("The four commanded sites take the door, and no other")
@@ -34,11 +35,52 @@ struct MonocleFlipSeamTests {
             of: "focusWithMonocleFlip(",
             under: Self.core
         ).filter { $0.file.lastPathComponent != Self.door }
-        let files = hits.map { $0.file.lastPathComponent }
+        let files = Dictionary(
+            hits.map { ($0.file.lastPathComponent, 1) },
+            uniquingKeysWith: +
+        )
         #expect(
-            Set(files) == Self.sites && files.count == 4,
+            files == Self.sites,
             "door callers: \(hits.map(\.site))"
         )
+    }
+
+    /// The count above is met by `selectFromAppBar`'s own body,
+    /// so the App Bar's clicks are pinned at their callers: the
+    /// item click's `onSelect` closure and `pickBarRow`'s
+    /// nil-Space branch, a peek row of the App Bar (#1946).
+    @Test("The App Bar click and its peek row take the door")
+    func appBarClicksReachTheDoor() throws {
+        let boot = Self.core.appendingPathComponent(
+            "App/KiwiCore+Bootstrap.swift"
+        )
+        let closure = SourceScan.declarationBody(
+            after: "appBars.onSelect = {",
+            in: try SourceScan.strippedSource(at: boot)
+        )
+        #expect(
+            closure?.contains("selectFromAppBar(") == true,
+            "onSelect: \(closure ?? "absent")"
+        )
+        let pick = try SourceScan.functionBody(
+            of: "pickBarRow",
+            in: "KiwiCore+SpaceBarClick.swift",
+            under: "App"
+        )
+        let branch = SourceScan.declarationBody(
+            after: "guard let space else",
+            in: pick
+        )
+        #expect(
+            branch?.contains("selectFromAppBar(") == true,
+            "nil-Space branch: \(branch ?? "absent")"
+        )
+        let door = try SourceScan.functionBody(
+            of: "selectFromAppBar",
+            in: "KiwiCore+SpaceBarClick.swift",
+            under: "App"
+        )
+        #expect(door.contains("focusWithMonocleFlip("))
     }
 
     /// The door lands the owed focus through `focusWindow`,

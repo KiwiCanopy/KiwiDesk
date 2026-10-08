@@ -219,9 +219,15 @@ final class SettingsModel: ObservableObject {
     /// (`setMacChecklistTick`), the `settingsMode` shape.
     @Published var macChecklistTicks: Set<MacSetting> = []
 
-    /// True when macOS Accessibility is missing; drives
-    /// `PermissionPausedBanner`.
-    @Published var permissionPaused = false
+    /// Why window management is not running, if it is not; drives
+    /// the paused and not-started banners and the save gates
+    /// (#516, #2050).
+    @Published var coreHold: CoreHold = .running
+    /// Routes the idle banner's Start Tiling.
+    var onStartTiling: () -> Void = {}
+    /// The way back to a hidden What's new after a spotlight row's
+    /// "Show me"; drives `WhatsNewTrailBanner` (#2038).
+    @Published var whatsNewTrail: WhatsNewTrail?
     /// Routes paused banner button to macOS System Settings pane.
     var onResolvePermission: () -> Void = {}
     /// Reveals profile file in Finder (`AppDelegate+Onboarding`, #246).

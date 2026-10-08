@@ -42,8 +42,9 @@ struct MotionScopeCensusTests {
         // The echo of KiwiDesk's own focus raise finishing the
         // command's pan in a focus-driven layout.
         "KiwiDeskCore/App/KiwiCore+FocusEvents.swift": 1,
-        // A Space Bar glyph pick.
-        "KiwiDeskCore/App/KiwiCore+SpaceBarClick.swift": 1,
+        // A Space Bar glyph pick, and a bar list row's pick — a
+        // peek row's or a window menu row's (#1946).
+        "KiwiDeskCore/App/KiwiCore+SpaceBarClick.swift": 2,
         // Every bar menu row's action.
         "KiwiDeskCore/App/KiwiCore+BarMenus.swift": 1,
         // The scroll gestures' two consumers.

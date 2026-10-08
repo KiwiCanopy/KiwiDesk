@@ -40,7 +40,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.replayOnboardingTour()
         }
         created.setUpdater(updater)
-        created.setPermissionPaused(!permissions.isTrusted)
+        created.setStartTiling { [weak self] in self?.startTiling() }
+        created.setCoreHold(coreHold)
         dashboardIfCreated = created
         return created
     }
@@ -178,6 +179,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         statusItem.onShowAccessibilityHelp = { [weak self] in
             self?.showAccessibilityHelp()
         }
+        statusItem.onStartTiling = { [weak self] in
+            self?.startTiling()
+        }
         self.statusItem = statusItem
         wireBootNotice()
 
@@ -208,6 +212,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             )
         }
         wireBarMenus()
+        wireWhatsNewTrail()
         core.onConfigIssuesChange = { [weak self] issues in
             self?.statusItem?.setConfigError(!issues.isEmpty)
             self?.configIssues.model.issues = issues
@@ -248,8 +253,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         permissions.start()
 
         let trusted = permissions.isTrusted
+        TilingConsent.seedAtLaunch(isTrusted: trusted)
         offerWhatsNew(origin: origin, trusted: trusted)
-        if trusted {
+        syncCoreHold()
+        if coreHold == .notStarted {
+            // Granted, but Start Tiling never pressed (#2050).
+            showOnboarding(at: .grant)
+        } else if trusted {
             startManaging()
             if OnboardingDiscovery.shouldResume(
                 isTrusted: trusted
@@ -257,7 +267,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 showOnboarding(at: .keys)
             }
         } else {
-            statusItem.setWarning(true)
             showOnboarding(at: .grant)
         }
     }
@@ -278,30 +287,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             settingsTarget: self,
             settingsAction: #selector(openDashboardFromMenu)
         )
-    }
-
-    // MARK: - Permission transitions
-
-    private func permissionChanged(_ trusted: Bool) {
-        onboardingModel.isTrusted = trusted
-        // Keep an already-open dashboard's paused banner in sync.
-        dashboardIfCreated?.setPermissionPaused(!trusted)
-        if trusted {
-            statusItem?.setWarning(false)
-            // Float wizard above windows being tiled (#331).
-            floatOnboardingAboveManagedWindows()
-            startManaging()
-        } else {
-            // Revoked mid-session: pause management and reopen at grant step.
-            core.stop()
-            statusItem?.setWarning(true)
-            notifyPermissionLost()
-            showOnboarding(at: .grant)
-        }
-    }
-
-    private func startManaging() {
-        statusItem?.setWarning(false)
-        core.start()
     }
 }

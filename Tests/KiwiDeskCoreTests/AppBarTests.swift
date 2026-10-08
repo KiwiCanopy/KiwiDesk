@@ -20,14 +20,20 @@ private func makeCore() -> KiwiCore {
 
 @Suite("App bar override resolution")
 struct AppBarOverrideTests {
-    /// The App Bar lists every window; the Space Bar still groups.
-    /// No `ConfigMigration` is owed because the profile encoder
-    /// writes the group whole: every stored profile carries its
-    /// own value either way (#1369's question).
-    @Test("A fresh App Bar does not group, and stores the choice")
-    func appBarDoesNotGroupByDefault() throws {
-        #expect(!AppBarStyle().groupAdjacentWindows)
+    /// Both bars group by default: the hover peek reaches every
+    /// grouped window (#1946).
+    @Test("A fresh App Bar groups, as the Space Bar does")
+    func appBarGroupsByDefault() {
+        #expect(AppBarStyle().groupAdjacentWindows)
         #expect(SpaceBarStyle().groupAdjacentWindows)
+    }
+
+    /// The profile encoder writes the App Bar group whole, so every
+    /// stored profile carries its own `group_adjacent_windows`
+    /// either way — why a future default flip owes no
+    /// `ConfigMigration` (#1369's question).
+    @Test("The App Bar's grouping is stored whatever its value")
+    func groupingIsAlwaysEncoded() throws {
         for value in [false, true] {
             var settings = TilingSettings()
             settings.appBarStyle.groupAdjacentWindows = value

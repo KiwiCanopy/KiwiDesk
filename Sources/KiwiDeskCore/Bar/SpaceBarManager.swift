@@ -41,8 +41,8 @@ public final class SpaceBarManager {
         _ in
     }
 
-    /// What a glyph or `+n` click does, and a glyph's tooltip
-    /// (#1528) — Core sets both at bootstrap.
+    /// What a glyph or `+n` click does, and the hover peek
+    /// (#1528, #1946) — Core sets both at bootstrap.
     let glyphActions = SpaceBarGlyphActions()
     /// The shelf's context menus (#1518), set by Core at bootstrap.
     weak var contextMenus: BarContextMenus?

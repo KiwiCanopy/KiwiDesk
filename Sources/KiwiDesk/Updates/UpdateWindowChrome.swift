@@ -8,16 +8,23 @@ import SwiftUI
 /// opening at its content between the ruled heights.
 @MainActor
 enum UpdateWindowChrome {
+    /// `showMe` is a spotlight row's hand-off to Settings (#2038),
+    /// which only What's new offers.
     static func window(
         offer: UpdateOffer,
-        mode: UpdateWindowMode
+        mode: UpdateWindowMode,
+        showMe: SpotlightShowMe? = nil
     ) -> NSWindow {
         window(
-            root: UpdateWindowView(offer: offer, mode: mode),
+            root: UpdateWindowView(offer: offer, mode: mode)
+                .environment(\.spotlightShowMe, showMe),
             // The probe has no window, so no title-bar inset.
             height: UpdateWindowMetrics.height(
-                fitting: fittingHeight(offer: offer, mode: mode)
-                    + UpdateWindowMetrics.titleBar
+                fitting: fittingHeight(
+                    offer: offer,
+                    mode: mode,
+                    showMe: showMe
+                ) + UpdateWindowMetrics.titleBar
             )
         )
     }
@@ -54,78 +61,19 @@ enum UpdateWindowChrome {
     /// once so the window opens at its content and scrolls beyond.
     private static func fittingHeight(
         offer: UpdateOffer,
-        mode: UpdateWindowMode
+        mode: UpdateWindowMode,
+        showMe: SpotlightShowMe?
     ) -> CGFloat {
         let unscrolled = UpdateWindowView(
             offer: offer,
             mode: mode,
             measuring: true
         )
+        .environment(\.spotlightShowMe, showMe)
         let probe = NSHostingView(
             rootView: LocaleScopedRoot { unscrolled }
                 .environmentObject(LocalizationManager.shared)
         )
         return probe.fittingSize.height
-    }
-}
-
-/// "What's new in X" (#1542 ruling ▸ After the update): the same
-/// window with one Done. Its close is Done too.
-@MainActor
-final class WhatsNewWindowController: NSObject, NSWindowDelegate {
-    let offer: UpdateOffer
-    /// Internal so a test sees what the relaunch handed on.
-    let narration: BootNarration?
-    /// Internal so a test sees what the window was handed.
-    let next: NextOnMyList?
-    private let done: () -> Void
-    private var window: NSWindow?
-
-    init(
-        offer: UpdateOffer,
-        narration: BootNarration?,
-        next: NextOnMyList?,
-        done: @escaping () -> Void
-    ) {
-        self.offer = offer
-        self.narration = narration
-        self.next = next
-        self.done = done
-        super.init()
-    }
-
-    /// Brings it forward: the user started this launch, or asked
-    /// for it from the quick menu.
-    func present() {
-        let window = self.window ?? makeWindow()
-        if !window.isVisible { window.center() }
-        NSApp.forceFront(window)
-    }
-
-    /// Internal so a test takes the production window and hands
-    /// it the close.
-    func makeWindow() -> NSWindow {
-        let window = UpdateWindowChrome.window(
-            offer: offer,
-            mode: .whatsNew(narration: narration, next: next) {
-                [weak self] in
-                self?.finish()
-            }
-        )
-        window.delegate = self
-        self.window = window
-        return window
-    }
-
-    private func finish() {
-        window?.delegate = nil
-        window?.orderOut(nil)
-        window = nil
-        done()
-    }
-
-    func windowShouldClose(_ sender: NSWindow) -> Bool {
-        finish()
-        return false
     }
 }

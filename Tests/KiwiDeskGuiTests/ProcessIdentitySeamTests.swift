@@ -167,6 +167,7 @@ struct ProcessIdentitySeamTests {
         #expect(
             try sites(of: "policy(of: pid)")
                 == [
+                    "EventLoop+ActivationFocus.swift",
                     "EventLoop+BootScan.swift",
                     "EventLoop+Notifications.swift",
                     "EventLoop+Reconcile.swift",

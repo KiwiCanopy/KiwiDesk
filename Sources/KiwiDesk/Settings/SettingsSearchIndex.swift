@@ -75,12 +75,8 @@ enum SettingsSearchIndex {
         #if DEBUG
             if refusedOverride.contains(key) { return false }
         #endif
+        guard structurallyIndexes(key) else { return false }
         let placement = key.placement
-        guard placement.area != nil,
-            indexedTiers.contains(placement.tier),
-            SettingsCensusLabel.label(for: key) != nil,
-            !key.id.contains("[space]")
-        else { return false }
         let conditions =
             placement.gate?.runtimeConditions ?? []
         if placement.hiddenWithoutGlass { return false }
@@ -92,6 +88,20 @@ enum SettingsSearchIndex {
             return false
         }
         return true
+    }
+
+    /// The half of `indexes` no machine changes — an area, an
+    /// indexed tier, a static label, not a `[space]` instance. A
+    /// What's new row may name only such a key, held at
+    /// publication against `scripts/spotlight-setting-ids.txt`
+    /// (#2038, `SpotlightScriptParityTests`); glass and the desktop
+    /// bridge are left to the runtime drop.
+    static func structurallyIndexes(_ key: SettingKey) -> Bool {
+        let placement = key.placement
+        return placement.area != nil
+            && indexedTiers.contains(placement.tier)
+            && SettingsCensusLabel.label(for: key) != nil
+            && !key.id.contains("[space]")
     }
 
     /// Builds index in destination order: census settings followed by

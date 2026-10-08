@@ -153,7 +153,13 @@ jobs:
           # PR has not merged yet, main's file is missing that
           # release, and a merge-one-entry write would carry the
           # gap forward silently. A full rebuild cannot.
+          #
+          # The tag itself is fetched for that check: a spotlight
+          # row's `{setting:…}` is held to the TAG's own list of
+          # landable settings (#2038), and this job checks out main.
           if [ -n "$TAG" ]; then
+            git fetch --no-tags --depth=1 origin \
+              "refs/tags/$TAG:refs/tags/$TAG"
             python3 scripts/changelog-sync --release "$TAG" --check
           fi
           python3 scripts/changelog-sync --all

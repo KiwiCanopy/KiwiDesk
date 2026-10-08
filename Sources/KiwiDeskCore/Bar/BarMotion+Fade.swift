@@ -51,6 +51,51 @@ extension BarMotion {
         animated && !reduceMotion
     }
 
+    /// The hover peek's fade (#1946): short, so the label reads as
+    /// appearing rather than arriving; never a slide.
+    static let peekFade: TimeInterval = 0.1
+
+    /// The peek fade's length: none where it is not animated or
+    /// under Reduce Motion, which snaps.
+    static func peekFadeDuration(
+        _ animated: Bool,
+        reduceMotion: Bool
+    ) -> TimeInterval {
+        fades(animated, reduceMotion: reduceMotion) ? peekFade : 0
+    }
+
+    /// Fades the peek's `panel` to `alpha`; `landed` runs once it
+    /// is there — inline where nothing fades, else on a timer of
+    /// the fade's length, as `playWalk` lands.
+    @MainActor
+    static func fadePeek(
+        _ panel: NSWindow,
+        to alpha: CGFloat,
+        animated: Bool,
+        landed: @escaping @MainActor () -> Void = {}
+    ) {
+        let span = peekFadeDuration(animated, reduceMotion: isReduced)
+        guard span > 0 else {
+            // Replaces a fade still running, which a bare write
+            // would leave to finish over it.
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0
+                panel.animator().alphaValue = alpha
+            }
+            panel.alphaValue = alpha
+            landed()
+            return
+        }
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = span
+            panel.animator().alphaValue = alpha
+        }
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(span))
+            landed()
+        }
+    }
+
     /// The share of the plate glide a dissolve's OUT-fade takes
     /// (#1838): the old row goes early while the new keeps fading
     /// in over the whole glide, so a longer old row is not seen

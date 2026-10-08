@@ -22,7 +22,7 @@ struct ShortcutsBespokeContainerTests {
     /// this suite. So the scan asks which `ShortcutsRowOrder`
     /// lists appear inside a `ForEach(` and maps them back to
     /// their containers.
-    @Test("bespoke containers are the ones no ForEach walks")
+    @Test("bespoke containers hold a list no ForEach walks")
     func bespokeContainersAreDeclared() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk")
@@ -33,30 +33,73 @@ struct ShortcutsBespokeContainerTests {
             )
         }
         // Each order list, and the container it serves.
-        let lists: [(String, SettingsContainer)] = [
-            ("focusAtRest", .focus),
-            ("moveWindowsAtRest", .moveWindows),
-            ("sizeAndFloatAtRest", .sizeAndFloat),
-            ("sizeAndFloatMore", .sizeAndFloat),
-            ("generalKeysMore", .generalKeys),
-            ("openApplicationsAtRest", .openApplications),
-            ("layersMore", .layers),
-            ("luaBindingsMore", .luaBindings),
-            ("luaBindingsAtRest", .luaBindings),
-            ("defaultShortcutsAtRest", .defaultShortcuts),
+        let lists: [(String, SettingsContainer, [SettingKey])] = [
+            (
+                "focusAtRest", .focus,
+                ShortcutsRowOrder.focusAtRest
+            ),
+            (
+                "moveWindowsAtRest", .moveWindows,
+                ShortcutsRowOrder.moveWindowsAtRest
+            ),
+            (
+                "sizeAndFloatAtRest", .sizeAndFloat,
+                ShortcutsRowOrder.sizeAndFloatAtRest
+            ),
+            (
+                "sizeAndFloatMore", .sizeAndFloat,
+                ShortcutsRowOrder.sizeAndFloatMore
+            ),
+            (
+                "openApplicationsAtRest", .openApplications,
+                ShortcutsRowOrder.openApplicationsAtRest
+            ),
+            // The KiwiDesk rows under Open applications (#1520).
+            (
+                "openApplicationsKiwiDesk", .openApplications,
+                ShortcutsRowOrder.openApplicationsKiwiDesk
+            ),
+            (
+                "layersMore", .layers,
+                ShortcutsRowOrder.layersMore
+            ),
+            (
+                "luaBindingsMore", .luaBindings,
+                ShortcutsRowOrder.luaBindingsMore
+            ),
+            (
+                "luaBindingsAtRest", .luaBindings,
+                ShortcutsRowOrder.luaBindingsAtRest
+            ),
+            (
+                "defaultShortcutsAtRest", .defaultShortcuts,
+                ShortcutsRowOrder.defaultShortcutsAtRest
+            ),
             // The Mouse & trackpad drawer's two settings (#1726).
-            ("gesturesMore", .gestures),
+            (
+                "gesturesMore", .gestures,
+                ShortcutsRowOrder.gesturesMore
+            ),
             // Walked by `DesktopShortcutsOffer`, which takes its
             // list as a `keys:` PARAMETER rather than walking it
             // here — so `isWalked` reads the `ForEach` inside
             // that view. Without these two rows the register
             // silently stops being the census of this area's
             // order lists (#1125, architect + code review).
-            ("focusDesktopFamilies", .focus),
-            ("moveWindowsDesktopFamilies", .moveWindows),
+            (
+                "focusDesktopFamilies", .focus,
+                ShortcutsRowOrder.focusDesktopFamilies
+            ),
+            (
+                "moveWindowsDesktopFamilies", .moveWindows,
+                ShortcutsRowOrder.moveWindowsDesktopFamilies
+            ),
             // Same shape, one mount: `TrackShortcutsOffer(keys:)`
             // (#1440).
-            ("moveWindowsTrackFamilies", .moveWindows),
+            (
+                "moveWindowsTrackFamilies", .moveWindows,
+                ShortcutsRowOrder.moveWindowsTrackFamilies
+            ),
         ]
         // The table above is a CENSUS of the order lists, held
         // both ways against the declarations themselves (#1121):
@@ -85,16 +128,18 @@ struct ShortcutsBespokeContainerTests {
             whereSeparator: \.isWhitespace
         )
         .joined()
-        var walked: Set<SettingsContainer> = []
-        for (name, container) in lists
-        where isWalked(name, in: rendered, squeezed: squeezed) {
-            walked.insert(container)
+        // A container is bespoke while it holds a non-empty list
+        // no `ForEach` walks: Open applications' app list stays
+        // bespoke beside its walked KiwiDesk rows (#1520), and an
+        // empty list (`sizeAndFloatMore`) draws nothing either way.
+        var bespoke: Set<SettingsContainer> = []
+        for (name, container, keys) in lists
+        where !keys.isEmpty
+            && !isWalked(name, in: rendered, squeezed: squeezed)
+        {
+            bespoke.insert(container)
         }
-        let all = Set(lists.map(\.1))
-        #expect(
-            ShortcutsRowOrder.bespokeContainers
-                == all.subtracting(walked)
-        )
+        #expect(ShortcutsRowOrder.bespokeContainers == bespoke)
         #expect(
             ShortcutsRowOrder.bespokeContainers
                 .isSubset(

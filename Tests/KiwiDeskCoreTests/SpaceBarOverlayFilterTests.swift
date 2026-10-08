@@ -128,6 +128,7 @@ struct SpaceBarOverlayFilterTests {
         core.state.apply(
             .windowCreated(window(3, app: "Mail", overlay: true))
         )
+        core.state.apply(.windowCreated(window(5, app: "Pad")))
         core.state.apply(.windowFocused(WindowID(1)))
         let item = try #require(
             core.spaceBarItems(display: display, style: style)
@@ -135,9 +136,9 @@ struct SpaceBarOverlayFilterTests {
         )
         // Span 1 at the row's start draws two (#1528 item 20).
         #expect(item.apps.map(\.name) == ["Web", "Term"])
-        // Mail alone is hidden: the overlay is not a window the
-        // "+n" promises the user can reach.
-        #expect(item.after.windows.count == 1)
+        // Mail and Pad are hidden: the overlay is not a window
+        // the "+n" promises the user can reach.
+        #expect(item.after.windows == [WindowID(2), WindowID(5)])
     }
 
     /// The two sides of what the filter does to focus, ruled

@@ -136,26 +136,28 @@ struct SpaceBarStickyScreenTests {
         // A third app on Space 1 gives the built-in's item a disc
         // too, so its clause below has a badge to refuse.
         core.state.apply(.windowCreated(window(7, app: "Chat")))
+        core.state.apply(.windowCreated(window(9, app: "Pad")))
         // Term joins the Dell's Space and takes the focus; the
         // user then moves to the built-in WITHOUT focusing
         // anything there, so the system focus is still a window
         // hidden past the Dell's cap while Space 1 is active.
         core.state.workspaces.activate(SpaceID("3"))
         core.state.apply(.windowCreated(window(6, app: "Vim")))
+        core.state.apply(.windowCreated(window(8, app: "Zed")))
         core.state.apply(.windowCreated(window(5, app: "Term")))
         core.state.apply(.windowFocused(WindowID(5)))
         core.state.workspaces.activate(SpaceID("1"))
         var style = SpaceBarLook()
         style.glyphSpan = 1
-        // A strip held on the Dell's first two keeps Term behind
-        // its trailing badge (#1528 item 21).
+        // A strip held on the Dell's first two keeps Zed and Term
+        // behind its trailing badge (#1528 item 21, #2052).
         core.spaceBars.stripHover(
             SpaceID("3"),
-            .init(window: 0..<2, count: 3),
+            .init(window: 0..<2, count: 4),
             inside: true
         )
         let away = try item(core, dell, "3", style)
-        #expect(away.after.windows.count == 1)
+        #expect(away.after.windows == [WindowID(8), WindowID(5)])
         #expect(!away.after.holdsFocus)
         // Nor does the active screen claim it: the focus is not
         // behind ITS badge either, so neither bar tints.

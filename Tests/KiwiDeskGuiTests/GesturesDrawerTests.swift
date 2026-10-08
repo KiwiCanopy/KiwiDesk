@@ -92,8 +92,7 @@ struct GesturesDrawerTests {
             ("shortcuts.gestures.follow_focus", "windows"),
             ("shortcuts.gestures.drop_on_space", "spaceBar"),
             ("shortcuts.gestures.glyph_click", "spaceBar"),
-            ("shortcuts.gestures.overflow_menu", "spaceBar"),
-            ("shortcuts.gestures.glyph_hover", "spaceBar"),
+            ("shortcuts.gestures.glyph_peek", "spaceBar"),
             ("shortcuts.gestures.shelf_scroll", "shelf"),
             ("shortcuts.gestures.context_menu", "shelf"),
             ("shortcuts.gestures.app_bar", "appBar"),
@@ -178,7 +177,7 @@ struct GesturesDrawerTests {
             "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
         )
         let drawer = try #require(
-            body.range(of: "GesturesDrawer(model: model)")
+            body.range(of: "GesturesDrawer(model: model,")
         )
         let header = try #require(body.range(of: "ShortcutsHeader("))
         #expect(drawer.lowerBound < header.lowerBound)

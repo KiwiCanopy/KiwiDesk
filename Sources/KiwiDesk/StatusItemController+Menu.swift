@@ -10,6 +10,18 @@ extension StatusItemController {
         let phase = bootPhase
 
         var warnings: [NSMenuItem] = []
+        // Never beside the paused row: no grant, no start (#2050).
+        if tilingIdle, !warning {
+            let start = NSMenuItem(
+                title: L("common.start_tiling", "Start Tiling"),
+                action: #selector(startTiling),
+                keyEquivalent: ""
+            )
+            start.target = self
+            start.image = symbol("play.fill")
+            start.isEnabled = true
+            warnings.append(start)
+        }
         if warning {
             let paused = NSMenuItem(
                 title: L(
@@ -74,13 +86,15 @@ extension StatusItemController {
             )
             menu.addItem(current)
         }
-        // Dim rather than hide during boot scanning (#171).
+        // Dim rather than hide during boot scanning (#171), and
+        // until Start Tiling makes them work (#2050).
+        let inert = phase.isStarting || tilingIdle
         let layout = layoutItem()
-        layout.isEnabled = !phase.isStarting
+        layout.isEnabled = !inert
         menu.addItem(layout)
         if hasSwitchTarget {
             let switcher = switchProfileItem(profiles)
-            switcher.isEnabled = !phase.isStarting
+            switcher.isEnabled = !inert
             menu.addItem(switcher)
         }
 
@@ -269,6 +283,10 @@ extension StatusItemController {
 
     @objc private func showConfigIssues() {
         onShowConfigIssues()
+    }
+
+    @objc private func startTiling() {
+        onStartTiling()
     }
 
     @objc private func showAccessibilityHelp() {

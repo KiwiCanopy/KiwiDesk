@@ -27,10 +27,10 @@ extension SettingsView {
         else { return }
         let wasSimple = model.settingsMode == .simple
         ensureModeAdmits(resolved.destination)
-        if let armedNotice, wasSimple,
+        if armedNotice != nil, wasSimple,
             model.settingsMode == .powerUser
         {
-            model.noteSearchModeSwitch(armedNotice)
+            model.noteSearchModeSwitch(resolved.destination)
         }
         model.destination = resolved.destination
         var scroll = resolved.scroll

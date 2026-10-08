@@ -14,12 +14,24 @@ public enum BarPanel {
     /// Creates non-activating, transparent, all-spaces panel for bar overlays.
     @MainActor
     static func makeNonActivating() -> NSPanel {
-        let panel = NSPanel(
-            contentRect: .zero,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: true
+        configure(
+            NSPanel(
+                contentRect: .zero,
+                styleMask: styleMask,
+                backing: .buffered,
+                defer: true
+            )
         )
+    }
+
+    /// The bar overlays' panel style.
+    static let styleMask: NSWindow.StyleMask = [
+        .borderless, .nonactivatingPanel,
+    ]
+
+    /// Makes `panel` a bar overlay's — a subclass's too.
+    @MainActor
+    static func configure<Panel: NSPanel>(_ panel: Panel) -> Panel {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = false
