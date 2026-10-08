@@ -53,6 +53,11 @@ final class BarPeekRig {
         }
         peek.now = { [unowned self] in clock }
         peek.pointerOnScreen = { [unowned self] in pointer }
+        // A runner's screen may not hold the host window, which
+        // would fit every list into the window's own frame.
+        peek.visibleArea = { _ in
+            CGRect(x: 0, y: 0, width: 1920, height: 1200)
+        }
         peek.shelf = { _ in KiwiShelf() }
         peek.pick = { [unowned self] id, space in picks.append((id, space)) }
         peek.openMenu = { [unowned self] source, _, _ in

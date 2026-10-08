@@ -47,6 +47,12 @@ final class BarPeek {
     var pointerOnScreen: @MainActor () -> CGPoint = {
         NSEvent.mouseLocation
     }
+    /// The usable area the peek is fitted into for `window`'s
+    /// screen; a test pins it, since a runner's screen may not
+    /// hold the host window at all.
+    var visibleArea: @MainActor (NSWindow) -> CGRect = {
+        BarPeek.visible(of: $0)
+    }
 
     private(set) var phase = Phase.idle
     /// An anchor a click or a move closed: it peeks again only
@@ -285,7 +291,7 @@ final class BarPeek {
             edge: anchor.edge,
             anchor: frame,
             strip: window.frame,
-            visible: Self.visible(of: window),
+            visible: visibleArea(window),
             fades: fades
         )
     }
