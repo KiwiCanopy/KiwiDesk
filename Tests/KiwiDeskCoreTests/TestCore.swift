@@ -108,6 +108,9 @@ func makeTestCore(
     // `prepare_restart` reads the developer's real LaunchAgent
     // plist otherwise (#930); a suite that means one injects it.
     core.inPlaceRestart.serviceProgram = { nil }
+    // The #1385 measurement reads a real user default otherwise,
+    // which `defaults write -g` reaches; a suite opts in itself.
+    core.crash.restoreKeys.isOptedIn = { false }
     // Same class, third time (#673): `openOrFocus`'s four seams
     // default LIVE, and unlike the two above their touch fires on
     // COMMAND EXECUTION, not on init — so a suite that executes
