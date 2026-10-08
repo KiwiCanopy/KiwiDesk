@@ -139,9 +139,7 @@ struct MonitorsCensusRenderTests {
         // (guard-prover, 2026-08-04).
         #expect(files.count >= 13)
         for file in files {
-            let source = SourceScan.blankingCommentsAndLiterals(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            let source = try SourceScan.blankedSource(at: file)
             let squashed = source.split(
                 whereSeparator: \.isWhitespace
             ).joined()
