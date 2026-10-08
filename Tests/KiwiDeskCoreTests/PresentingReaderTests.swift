@@ -148,6 +148,9 @@ struct PresentingReaderTests {
             args: [.string(space.raw), .string("scrolling")]
         )
         core.tiler.placements.forgetAll()
+        // Control: the same small placement in this setup bounces.
+        core.tiler.placements.stamp(show, target: Self.small)
+        #expect(core.placementBounce(show, now: core.wallClock()) != nil)
         core.tiler.placements.stamp(show, target: Self.screen)
         #expect(core.placementBounce(show, now: core.wallClock()) == nil)
     }
@@ -171,5 +174,22 @@ struct PresentingReaderTests {
         core.handle(.windowResized(show, Self.small))
         #expect(core.borders.specs[show] != nil)
         #expect(core.stickyMarks.overlays[show] != nil)
+    }
+
+    /// The door asks EFFECTIVE float: a member of a floating-mode
+    /// Space presents with no flag, and a native-fullscreen
+    /// window never does — its own exemption owns it.
+    @Test("The door reads floating mode and leaves fullscreen out")
+    func doorGates() throws {
+        let member = makeCore(frame: Self.screen, floating: false)
+        let space = try #require(member.state.workspaces.space(of: show))
+        member.state.workspaces.setMode(space, .floating)
+        #expect(member.presents(show, at: Self.screen))
+
+        let native = makeCore(frame: Self.screen)
+        native.state.apply(
+            .windowFullscreenChanged(show, isFullscreen: true)
+        )
+        #expect(!native.presents(show, at: Self.screen))
     }
 }
