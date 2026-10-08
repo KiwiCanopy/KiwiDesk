@@ -316,7 +316,11 @@ twice, was a question the user answered twice. The argument is
   on the glass — a glass's own alpha shows the tint behind it
   bare (device, 2026-10-01 and 2026-10-08) — and no box resizes,
   since its content re-lays every frame (#1842,
-  `AppBarDissolveTests`). A bar
+  `AppBarDissolveTests`). A box glass never leaves the `BoxHost`
+  it was minted in: a z-order move fronts the host, and a box
+  leaves only through `dropBox`, since the host is found through
+  the glass and a glass moved out leaks it and fades bare
+  (`AppBarBoxHostTests`). A bar
   manager hides its display's overlay and never drops it — a bar
   coming back is the same section re-shown — retiring only a
   display that left (`BarManagerKeepTests`); its `hide()` tears
