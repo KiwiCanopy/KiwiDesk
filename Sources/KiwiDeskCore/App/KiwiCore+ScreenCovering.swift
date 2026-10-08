@@ -38,6 +38,23 @@ extension KiwiCore {
         tiler.allScreenFrames().contains { Self.covers(frame, $0) }
     }
 
+    /// Whether window `id` at `frame` (AX) is PRESENTING — the
+    /// one door a reader of a tracked window asks (#1788): an
+    /// EFFECTIVE float, never a tiled slot a gapless layout may
+    /// size to a screen, and never native fullscreen, which its
+    /// own exemption owns.
+    func presents(_ id: WindowID, at frame: CGRect) -> Bool {
+        guard let window = state.windows[id], !window.isFullscreen,
+            EffectiveFloat.applies(
+                isFloating: window.isFloating,
+                mode: state.workspaces.space(of: id).flatMap {
+                    state.workspaces[$0]?.mode
+                }
+            )
+        else { return false }
+        return coversAScreen(frame)
+    }
+
     /// Whether the shelf stands down on `display`: a native
     /// fullscreen Space (#670) or a presentation in front. Both
     /// bars ask this one answer.

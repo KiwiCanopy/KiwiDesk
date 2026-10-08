@@ -110,10 +110,15 @@ extension KiwiCore {
         // keep their home-space slot (no destroy fires), but fill
         // the display, so a ring would show only at the corners.
         // Travelers ARE included (a tiled-sticky window can go
-        // fullscreen).
+        // fullscreen). A presenting float has the same geometry
+        // (#1788).
         let fullscreen = Set(
-            (space.windows + travelers).filter {
-                state.windows[$0]?.isFullscreen == true
+            (space.windows + travelers).filter { id in
+                guard let window = state.windows[id] else {
+                    return false
+                }
+                return window.isFullscreen
+                    || presents(id, at: window.frame)
             }
         )
         let slots = (space.windows + travelers).compactMap {
@@ -171,8 +176,9 @@ extension KiwiCore {
     /// The rings to show for one space. Focused window always
     /// (when borders are on), unless it is a transient overlay
     /// (`overlays` — a launcher/panel that momentarily takes focus,
-    /// #300) or in native fullscreen (`fullscreen` — it fills the
-    /// display, a ring would show only at the corners); every
+    /// #300) or in native fullscreen or presenting (`fullscreen` —
+    /// it fills the display, a ring would show only at the
+    /// corners; #1788); every
     /// other visible slot — tiled or floating — only when
     /// `unfocusedEnabled` and the space isn't monocle. Overlays and
     /// fullscreen windows never get a ring. Cascade members

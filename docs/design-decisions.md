@@ -4448,7 +4448,18 @@ needs the window's AX subrole, which state does not carry; the
 cost is a bar hidden behind a window the user sized to cover it.
 Every other reader of a window is ruled against the verdict one
 verb at a time
-([#1788](https://github.com/KiwiCanopy/KiwiDesk/issues/1788)).
+([#1788](https://github.com/KiwiCanopy/KiwiDesk/issues/1788)),
+through the one `presents` door, which asks an effective float
+alone — a gapless layout sizes a tiled slot to its screen, and
+that is no show. Ruled so far: the focus ring and the on-window
+marks stand down over a show as they do over native fullscreen,
+since a ring would draw at its corners and a mark over the
+slide; and the #1161 placement distrust never bounces a show's
+focus, judged on the window's frame and on the placement both —
+the stash restore, a placement verb and the strand recovery all
+write a show's frame back, and the restore's echo may trail the
+show's own focus. One predicate in the distrust closes the class
+where a skip per writer would each have to be remembered.
 
 **A resize nobody asked for is corrected on its own event
 (#1358).** [Principle] macOS's title-bar double-click zoom, its

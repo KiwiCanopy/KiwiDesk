@@ -27,6 +27,11 @@ extension KiwiCore {
             glass: tiler.settings.stickyStyle.liquidGlass
         )
         return state.windows.all.compactMap { window in
+            // A presenting window wears no mark over its show
+            // (#1788).
+            guard !presents(window.id, at: window.frame) else {
+                return nil
+            }
             var glyphs: [StickyMarkManager.Glyph] = []
             if stickyMark, window.isSticky {
                 glyphs.append(
