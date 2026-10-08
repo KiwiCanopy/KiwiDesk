@@ -52,6 +52,13 @@ final class ShelfManager {
     }
 
     private var overlays: [Key: ShelfOverlay] = [:]
+    #if DEBUG
+        /// Whether a shelf orders its panel in. Off in both
+        /// `makeTestCore` twins, where every suite rendering a bar
+        /// would otherwise put a real window on screen (#1894);
+        /// placement and wiring run either way.
+        var ordersPanels = true
+    #endif
     /// The bars' context menus (#1518) — the one instance; Core
     /// sets its rows and hands it to both bar managers.
     let contextMenus = BarContextMenus()
@@ -142,6 +149,9 @@ final class ShelfManager {
         }
         let overlay = overlays[key] ?? ShelfOverlay()
         overlays[key] = overlay
+        #if DEBUG
+            overlay.ordersPanel = ordersPanels
+        #endif
         overlay.onLeft = { [weak self] in self?.retire(key) }
         overlay.onPress = { [weak self] in
             self?.peek.pressed(on: $0, type: $1)
@@ -186,6 +196,11 @@ final class ShelfManager {
     }
 
     #if DEBUG
+        /// How many shelves have their panel ordered in.
+        var orderedPanelCount: Int {
+            overlays.values.filter(\.isVisible).count
+        }
+
         /// The display's shelf on `edge`, or its one shelf when
         /// `edge` is nil and it has exactly one.
         func overlayForTesting(
