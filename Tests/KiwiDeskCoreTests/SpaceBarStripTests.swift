@@ -130,15 +130,41 @@ struct SpaceBarStripTests {
         #expect(!drawn(2..<7, of: 7).holds(count: 7, span: 5))
     }
 
+    /// The walk fixtures' span, and the cells its chip spends.
+    private static let span = 5
+    private static let cellCount = span + 2
+
+    /// The walk between two strips, each held to be one the row
+    /// draws, so a fixture edited to an undrawable shape reds
+    /// rather than measuring a chip that cannot exist; each
+    /// leading disc is derived from its window.
+    private func walk(
+        _ old: Range<Int>?,
+        of oldCount: Int = 9,
+        to new: Range<Int>,
+        grownTo newCount: Int? = nil
+    ) -> SpaceBarStrip.Walk? {
+        let newCount = newCount ?? oldCount
+        let strips = [old.map { ($0, oldCount) }, (new, newCount)]
+        for case (let window, let count)? in strips {
+            #expect(
+                drawn(window, of: count)
+                    .holds(count: count, span: Self.span),
+                "fixture \(window) of \(count) is not drawable"
+            )
+        }
+        return SpaceBarStrip.Walk.between(
+            old.map { drawn($0, of: oldCount) },
+            leadingDisc: (old?.lowerBound ?? 0) > 0,
+            drawn(new, of: newCount),
+            leadingDisc: new.lowerBound > 0
+        )
+    }
+
     @Test("a step through the middle walks one cell, one glyph each end")
     func middleStep() {
         #expect(
-            SpaceBarStrip.Walk.between(
-                drawn(2..<7, of: 10),
-                leadingDisc: true,
-                drawn(3..<8, of: 10),
-                leadingDisc: true
-            )
+            walk(2..<7, of: 10, to: 3..<8)
                 == .init(
                     cells: 1,
                     leavingFront: 1,
@@ -146,12 +172,7 @@ struct SpaceBarStripTests {
                 )
         )
         #expect(
-            SpaceBarStrip.Walk.between(
-                drawn(3..<8, of: 10),
-                leadingDisc: true,
-                drawn(2..<7, of: 10),
-                leadingDisc: true
-            )
+            walk(3..<8, of: 10, to: 2..<7)
                 == .init(
                     cells: -1,
                     leavingBack: 1,
@@ -166,95 +187,56 @@ struct SpaceBarStripTests {
     /// off the chip, fades in place under the disc instead.
     @Test("a disc appearing fades the glyph past the chip in place")
     func discAppears() throws {
-        let walk = try #require(
-            SpaceBarStrip.Walk.between(
-                drawn(0..<6),
-                leadingDisc: false,
-                drawn(2..<7),
-                leadingDisc: true
-            )
-        )
-        #expect(walk == .init(cells: 1, leavingFront: 2, enteringBack: 1))
+        let step = try #require(walk(0..<6, to: 2..<7))
+        let cells = Self.cellCount
+        #expect(step == .init(cells: 1, leavingFront: 2, enteringBack: 1))
         // Carried off: groups 0 and 1, resting at cells -1 and 0.
         #expect(
-            walk.travel(resting: -1, cellCount: 7) == .init(from: 0, to: 0)
+            step.travel(resting: -1, cellCount: cells) == .init(from: 0, to: 0)
         )
-        #expect(walk.travel(resting: 0, cellCount: 7) == .init(from: 1, to: 0))
+        #expect(
+            step.travel(resting: 0, cellCount: cells) == .init(from: 1, to: 0)
+        )
         // Kept: group 2 walks from cell 2 to cell 1.
-        #expect(walk.travel(resting: 1, cellCount: 7) == .init(from: 2, to: 1))
+        #expect(
+            step.travel(resting: 1, cellCount: cells) == .init(from: 2, to: 1)
+        )
     }
 
     /// The mirror at the row's end: the last group, brought in
     /// two cells past the walk's one, fades in at its own cell.
     @Test("a disc leaving the end fades the glyph past it in place")
     func discLeavesTheEnd() throws {
-        let walk = try #require(
-            SpaceBarStrip.Walk.between(
-                drawn(2..<7),
-                leadingDisc: true,
-                drawn(3..<9),
-                leadingDisc: true
-            )
+        let step = try #require(walk(2..<7, to: 3..<9))
+        let cells = Self.cellCount
+        #expect(step == .init(cells: 1, leavingFront: 1, enteringBack: 2))
+        #expect(
+            step.travel(resting: 6, cellCount: cells) == .init(from: 6, to: 6)
         )
-        #expect(walk == .init(cells: 1, leavingFront: 1, enteringBack: 2))
-        #expect(walk.travel(resting: 6, cellCount: 7) == .init(from: 6, to: 6))
-        #expect(walk.travel(resting: 5, cellCount: 7) == .init(from: 6, to: 5))
+        #expect(
+            step.travel(resting: 5, cellCount: cells) == .init(from: 6, to: 5)
+        )
     }
 
     @Test("an unchanged or unknown strip plays no walk")
     func noWalk() {
-        #expect(
-            SpaceBarStrip.Walk.between(
-                drawn(2..<7),
-                leadingDisc: true,
-                drawn(2..<7),
-                leadingDisc: true
-            ) == nil
-        )
-        #expect(
-            SpaceBarStrip.Walk.between(
-                nil,
-                leadingDisc: false,
-                drawn(2..<7),
-                leadingDisc: true
-            ) == nil
-        )
+        #expect(walk(2..<7, to: 2..<7) == nil)
+        #expect(walk(nil, to: 2..<7) == nil)
     }
 
     /// A window opened or closed shifts every index, so the same
     /// numbers name other apps: nothing walks.
     @Test("a row that changed plays no walk")
     func changedRowNoWalk() {
-        #expect(
-            SpaceBarStrip.Walk.between(
-                drawn(2..<7),
-                leadingDisc: true,
-                drawn(3..<8, of: 10),
-                leadingDisc: true
-            ) == nil
-        )
+        #expect(walk(2..<7, to: 3..<8, grownTo: 10) == nil)
     }
 
     /// A jump from one end to the other shares no glyph: walking
     /// it would slide glyphs across the neighbouring chips.
     @Test("a jump that shares no group plays no walk")
     func jumpNoWalk() {
-        #expect(
-            SpaceBarStrip.Walk.between(
-                drawn(0..<6, of: 14),
-                leadingDisc: false,
-                drawn(8..<14, of: 14),
-                leadingDisc: true
-            ) == nil
-        )
+        #expect(walk(0..<6, of: 14, to: 8..<14) == nil)
         // One shared group still walks.
-        #expect(
-            SpaceBarStrip.Walk.between(
-                drawn(0..<6, of: 14),
-                leadingDisc: false,
-                drawn(5..<10, of: 14),
-                leadingDisc: true
-            ) != nil
-        )
+        #expect(walk(0..<6, of: 14, to: 5..<10) != nil)
     }
 }

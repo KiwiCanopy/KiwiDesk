@@ -11,6 +11,11 @@ import Testing
 /// first or last cell over a neighbouring chip. Measured on the
 /// laid-out chip — each glyph's resting frame and its walk's
 /// slide — across every span and a run of counts, both ways.
+///
+/// Reduce Motion is pinned off INSIDE each test body through
+/// `BarMotion.reducedOverride`, synchronously on the main actor
+/// with a `defer` restore, so no other suite observes it: with it
+/// on no walk plays and every start check passes unmeasured.
 @Suite("Space Bar strip walk stays on the chip")
 @MainActor
 struct SpaceBarStripWalkBoundsTests {
@@ -96,6 +101,14 @@ struct SpaceBarStripWalkBoundsTests {
     ) {
         let view = makeView(span: span)
         configure(view, window: old, count: count)
+        // Where each glyph stood before the step: by group for the
+        // kept ones, by view for the ones carried off.
+        var oldCell: [Int: CGFloat] = [:]
+        var oldView: [ObjectIdentifier: CGFloat] = [:]
+        for (index, glyph) in view.appViews.enumerated() {
+            oldCell[old.lowerBound + index] = glyph.frame.midX
+            oldView[ObjectIdentifier(glyph)] = glyph.frame.midX
+        }
         configure(view, window: new, count: count)
         let cell = view.cellLength
         guard let first = view.glyphTargets.first?.frame,
@@ -118,11 +131,54 @@ struct SpaceBarStripWalkBoundsTests {
                 )
             }
         }
+        // A step whose strips share a group walks a kept glyph;
+        // without one every start above is its rest and measured
+        // nothing. A jump sharing none walks nothing by design.
+        let walks = view.appViews.contains {
+            $0.layer?.animation(forKey: "kiwi.walk.slide") != nil
+        }
+        #expect(
+            walks == old.overlaps(new),
+            "\(context): a kept glyph walks only on a shared group"
+        )
+        // Every glyph the old strip drew starts where it stood:
+        // the walk exactly, not merely somewhere on the chip.
+        for (index, glyph) in view.appViews.enumerated() {
+            let group = new.lowerBound + index
+            guard let was = oldCell[group] else { continue }
+            let start = glyph.frame.midX + slide(of: glyph)
+            #expect(
+                abs(start - was) < 0.5,
+                "\(context): group \(group) starts \(start), was \(was)"
+            )
+        }
+        for glyph in view.leavingViews {
+            guard let was = oldView[ObjectIdentifier(glyph)] else {
+                Issue.record("\(context): a leaving glyph never drawn")
+                continue
+            }
+            let start = glyph.frame.midX + slide(of: glyph)
+            #expect(
+                abs(start - was) < 0.5,
+                "\(context): leaving glyph starts \(start), was \(was)"
+            )
+        }
+    }
+
+    /// Runs `body` with Reduce Motion pinned off, restored after.
+    private func motionOn(_ body: () -> Void) {
+        BarMotion.reducedOverride = false
+        defer { BarMotion.reducedOverride = nil }
+        body()
     }
 
     @Test("a one-step focus move keeps every glyph on the chip")
     func oneStepStaysInside() {
         LocalizationManager.shared.select("en")
+        motionOn { sweepOneSteps() }
+    }
+
+    private func sweepOneSteps() {
         for span in SpaceBarStyle.glyphSpanRange {
             for count in (span + 3)...(span + 6) {
                 let windows = (0..<count).map {
@@ -158,9 +214,11 @@ struct SpaceBarStripWalkBoundsTests {
     @Test("the steps off and onto each end stay on the chip")
     func boundaryStepsStayInside() {
         LocalizationManager.shared.select("en")
-        expectInside(span: 5, count: 9, from: 0..<6, to: 2..<7)
-        expectInside(span: 5, count: 9, from: 2..<7, to: 0..<6)
-        expectInside(span: 5, count: 9, from: 2..<7, to: 3..<9)
-        expectInside(span: 5, count: 9, from: 3..<9, to: 2..<7)
+        motionOn {
+            expectInside(span: 5, count: 9, from: 0..<6, to: 2..<7)
+            expectInside(span: 5, count: 9, from: 2..<7, to: 0..<6)
+            expectInside(span: 5, count: 9, from: 2..<7, to: 3..<9)
+            expectInside(span: 5, count: 9, from: 3..<9, to: 2..<7)
+        }
     }
 }
