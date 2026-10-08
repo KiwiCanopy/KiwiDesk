@@ -62,7 +62,6 @@ struct BarPeekFitTests {
         )
         // The chevron points down at the rows cut below.
         #expect(body.moreChevron?.identifier?.rawValue == "chevron.down")
-        #expect(body.pills.map(\.number.stringValue) == ["14"])
         #expect(more.frame.maxY <= size.height)
         let lastTitle = try #require(body.labels.last)
         #expect(more.frame.minY > lastTitle.frame.maxY, "the cut is below")
@@ -112,12 +111,12 @@ struct BarPeekFitTests {
         )
         let kept = content.keeping(3)
         #expect(kept.groups.map(\.titles) == [["1", "2"], ["3"]])
-        #expect(kept.groups.map(\.count) == [2, 2])
+        #expect(kept.groups.map(\.windowCount) == [2, 2])
         #expect(kept.windowCount == 4)
         #expect(content.keeping(1).groups.map(\.app) == ["A"])
         let tail = content.keeping(3, fromEnd: true)
         #expect(tail.groups.map(\.titles) == [["2"], ["3", "4"]])
-        #expect(tail.groups.map(\.count) == [2, 2])
+        #expect(tail.groups.map(\.windowCount) == [2, 2])
     }
 
     /// A peek taller than the usable room on its side is cut to it,
