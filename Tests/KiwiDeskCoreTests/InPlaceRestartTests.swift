@@ -146,6 +146,41 @@ struct InPlaceRestartTests {
             )
         }
     }
+
+    /// An announced relaunch outranks the logout freeze (#1385):
+    /// its windows are live, so it still writes its session; an
+    /// unannounced stop under the freeze writes none.
+    @Test("an announced relaunch outranks the logout freeze")
+    func inPlaceOutranksLogoutFreeze() throws {
+        for announced in [true, false] {
+            let core = core()
+            try FileManager.default.createDirectory(
+                at: core.configDirectory,
+                withIntermediateDirectories: true
+            )
+            core.state.workspaces.ensureSpace(SpaceID("1"))
+            core.boot.reachedReady = true
+            core.crash.onLog = { _ in }
+            // The freeze is age-bounded: a fixed clock (#1456).
+            let frozeAt = Date(timeIntervalSince1970: 9000)
+            core.crash.now = { frozeAt }
+            core.crash.freezeForLogout()
+            if announced { core.announceUpdateRelaunch() }
+            core.stop()
+            let url = core.configDirectory.appendingPathComponent(
+                ".session_snapshot"
+            )
+            let text = try? String(contentsOf: url, encoding: .utf8)
+            if announced {
+                #expect(text?.contains("\"session\"") == true)
+            } else {
+                #expect(text == nil)
+            }
+            try? FileManager.default.removeItem(
+                at: core.configDirectory
+            )
+        }
+    }
 }
 
 /// `CodeIdentity` against real signed code (#930 ruling 3).

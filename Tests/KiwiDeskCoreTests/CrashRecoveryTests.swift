@@ -23,9 +23,15 @@ struct CrashRecoveryTests {
         )
         let recovery = CrashRecovery(directory: dir)
         recovery.onLog = { _ in }
+        recovery.loginSession = { 1 }
+        // `start()` observes it; the shared workspace center is
+        // process-global, so a test hands a private one (#1385).
+        recovery.workspaceCenter = NotificationCenter()
         return (recovery, dir)
     }
 
+    /// Unstamped, as a capture returns it: the writer stamps the
+    /// login session, which this suite pins to 1 (#1385).
     private func snapshot(at date: Date) -> StateSnapshot {
         StateSnapshot(
             windows: [
@@ -43,6 +49,13 @@ struct CrashRecoveryTests {
             activeSpace: "1",
             capturedAt: date
         )
+    }
+
+    /// What a read returns for `snapshot`: the writer's stamp on it.
+    private func stamped(_ snapshot: StateSnapshot) -> StateSnapshot {
+        var stamped = snapshot
+        stamped.loginSession = 1
+        return stamped
     }
 
     /// A failed relaunch leaves an in-place snapshot for whatever
@@ -65,6 +78,7 @@ struct CrashRecoveryTests {
             recovery.shutdownCleanly(inPlace: true)
             let next = CrashRecovery(directory: dir)
             next.onLog = { _ in }
+            next.loginSession = { 1 }
             next.bootTime = { .distantPast }
             next.now = { captured.addingTimeInterval(age) }
             let taken = try #require(next.takeBootSnapshot())
@@ -149,6 +163,7 @@ struct CrashRecoveryTests {
         // partial desk, and it must not land in the file.
         let second = CrashRecovery(directory: dir)
         second.onLog = { _ in }
+        second.loginSession = { 1 }
         second.bootTime = { .distantPast }
         second.captureState = {
             self.snapshot(at: Date(timeIntervalSince1970: 2000))
@@ -159,8 +174,9 @@ struct CrashRecoveryTests {
         // still the one waiting for the next.
         let third = CrashRecovery(directory: dir)
         third.onLog = { _ in }
+        third.loginSession = { 1 }
         third.bootTime = { .distantPast }
-        #expect(third.consumeSession() == previous)
+        #expect(third.consumeSession() == stamped(previous))
     }
 
     @Test("Unclean shutdown restores the autosaved state")
@@ -176,8 +192,9 @@ struct CrashRecoveryTests {
         // Simulate a crash: new instance, same directory.
         let second = CrashRecovery(directory: dir)
         second.onLog = { _ in }
+        second.loginSession = { 1 }
         second.bootTime = { .distantPast }
-        #expect(second.takeBootSnapshot() == sample)
+        #expect(second.takeBootSnapshot() == stamped(sample))
         // Consumed: the autosave that follows is this launch's.
         #expect(second.takeBootSnapshot() == nil)
         second.shutdownCleanly()
@@ -198,8 +215,9 @@ struct CrashRecoveryTests {
         recovery.autosave()
         let second = CrashRecovery(directory: dir)
         second.onLog = { _ in }
+        second.loginSession = { 1 }
         second.bootTime = { .distantPast }
-        #expect(second.takeBootSnapshot() == newer)
+        #expect(second.takeBootSnapshot() == stamped(newer))
 
         let (third, thirdDir) = try makeRecovery()
         defer { try? FileManager.default.removeItem(at: thirdDir) }
@@ -216,8 +234,9 @@ struct CrashRecoveryTests {
         try kept.write(to: crashFile)
         let fourth = CrashRecovery(directory: thirdDir)
         fourth.onLog = { _ in }
+        fourth.loginSession = { 1 }
         fourth.bootTime = { .distantPast }
-        #expect(fourth.takeBootSnapshot() == newer)
+        #expect(fourth.takeBootSnapshot() == stamped(newer))
     }
 
     @Test("Clean shutdown leaves nothing to restore")
@@ -233,9 +252,10 @@ struct CrashRecoveryTests {
 
         let second = CrashRecovery(directory: dir)
         second.onLog = { _ in }
+        second.loginSession = { 1 }
         second.bootTime = { .distantPast }
         // The session file is the arrangement; no crash replay.
-        #expect(second.takeBootSnapshot() == sample)
+        #expect(second.takeBootSnapshot() == stamped(sample))
         #expect(second.takeBootSnapshot() == nil)
         second.shutdownCleanly()
     }
@@ -251,6 +271,7 @@ struct CrashRecoveryTests {
         let second = CrashRecovery(directory: dir)
         var logged: [String] = []
         second.onLog = { logged.append($0) }
+        second.loginSession = { 1 }
         second.bootTime = {
             Date(timeIntervalSince1970: 2000)
         }

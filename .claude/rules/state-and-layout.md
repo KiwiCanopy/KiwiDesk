@@ -12,6 +12,10 @@ paths:
   # glob it too — they own the mirror and the naming halves,
   # this one owns the shape.
   - "Sources/KiwiDeskCore/Models/**"
+  # The snapshot's writes and its boot read live here, so the
+  # snapshot bullets below govern it; the rest of Power is not
+  # state.
+  - "Sources/KiwiDeskCore/Power/CrashRecovery.swift"
 ---
 
 # State, tiling & layout
@@ -1836,6 +1840,28 @@ editing here:
   (Sparkle's relaunch) or `prepare_restart` (`service restart`,
   identity-gated), and only `stop()` consumes it, within its
   bound (`InPlaceRestartTests`, `InPlaceRestartWiringTests`).
+- **A snapshot write honours the logout freeze through
+  `CrashRecovery.isFrozenForLogout` (#1385).** On the macOS 27.0
+  restart measured on 2026-10-07, macOS closed the other apps'
+  windows before KiwiDesk's own stop, so a write once
+  `NSWorkspace.willPowerOffNotification` has posted saves an
+  emptied desk over the last real arrangement; only an announced
+  in-place restart outranks it (`LogoutAutosaveFreezeTests` ▸
+  `frozenStopKeepsTheAutosave`, `InPlaceRestartTests` ▸
+  `inPlaceOutranksLogoutFreeze`).
+- **A snapshot is read only in the login session that wrote it
+  (#1385).** A logout without a reboot passes the boot gate
+  (#633) and reuses window ids, so a write stamps the session
+  through `CrashRecovery`'s `write`, refusing when the session
+  is unreadable, and a read goes through its `readGated`, which
+  drops a file from another login beside the boot gate; an
+  unstamped file is admitted only as an older build's announced
+  relaunch (`LoginSessionGateTests` holds the two doors'
+  verdicts). A new snapshot file, writer or reader owes the same
+  two doors. That is review's, not a guard's: no suite can see a
+  third door, and the structure is what keeps one rare —
+  `fileURL` and `sessionURL` are private to `CrashRecovery`, so
+  any new door is written inside that file, beside the two.
 - **A restore pays an untracked window's frame at its arrival
   (#1362).** The replay sets frames on TRACKED windows only; a
   slow app's window adopted later kept the boot scan's tile on
