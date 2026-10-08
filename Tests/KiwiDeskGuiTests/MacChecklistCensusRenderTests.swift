@@ -112,9 +112,7 @@ struct MacChecklistCensusRenderTests {
             "Sources/KiwiDesk/Settings/Sections/"
                 + "MacChecklistSection.swift"
         )
-        let source = SourceScan.blankingCommentsAndLiterals(
-            try String(contentsOf: section, encoding: .utf8)
-        )
+        let source = try SourceScan.blankedSource(at: section)
         let squashed = source.split(
             whereSeparator: \.isWhitespace
         ).joined()

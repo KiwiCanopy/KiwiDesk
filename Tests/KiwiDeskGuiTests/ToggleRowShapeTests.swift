@@ -54,11 +54,7 @@ struct ToggleRowShapeTests {
         var rows = 0
         var offenders: [String] = []
         for file in files {
-            let text = Array(
-                SourceScan.blankingCommentsAndLiterals(
-                    try String(contentsOf: file, encoding: .utf8)
-                )
-            )
+            let text = Array(try SourceScan.blankedSource(at: file))
             let calls =
                 Self.starts(of: "DropdownRow(", in: text).map {
                     $0 + "DropdownRow".count

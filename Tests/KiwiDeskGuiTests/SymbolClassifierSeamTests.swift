@@ -73,9 +73,7 @@ struct SymbolClassifierSeamTests {
             )
             for file in files {
                 scanned += 1
-                let source = SourceScan.blankingCommentsAndLiterals(
-                    try String(contentsOf: file, encoding: .utf8)
-                )
+                let source = try SourceScan.blankedSource(at: file)
                 if source.contains("systemSymbolName:") {
                     found.insert(
                         file.path.replacingOccurrences(
@@ -141,9 +139,7 @@ struct SymbolClassifierSeamTests {
             )
             for file in files {
                 scanned += 1
-                let source = SourceScan.blankingCommentsAndLiterals(
-                    try String(contentsOf: file, encoding: .utf8)
-                )
+                let source = try SourceScan.blankedSource(at: file)
                 if source.contains(compare) {
                     found.insert(
                         file.path.replacingOccurrences(
@@ -175,9 +171,7 @@ struct SymbolClassifierSeamTests {
             )
             for file in files {
                 scanned += 1
-                let source = SourceScan.blankingCommentsAndLiterals(
-                    try String(contentsOf: file, encoding: .utf8)
-                )
+                let source = try SourceScan.blankedSource(at: file)
                 if source.contains(binding) {
                     found.insert(
                         file.path.replacingOccurrences(

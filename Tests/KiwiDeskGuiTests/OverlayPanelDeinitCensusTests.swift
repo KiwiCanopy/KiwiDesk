@@ -36,9 +36,7 @@ struct OverlayPanelDeinitCensusTests {
         ).map {
             (
                 $0.lastPathComponent,
-                SourceScan.blankingCommentsAndLiterals(
-                    try SourceScan.rawSource(at: $0)
-                )
+                try SourceScan.blankedSource(at: $0)
             )
         }
     }
