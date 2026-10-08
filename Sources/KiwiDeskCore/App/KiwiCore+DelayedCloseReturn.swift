@@ -15,24 +15,20 @@ struct DelayedCloseDebt {
     var followed = false
 }
 
-/// The delayed-close return (#2002, owner ruling 2026-10-06): a
-/// close the distrust refused is confirmed only after macOS has
-/// keyed the app's window on another Space and our focus follow
-/// has switched there, so the removal no longer loses the focus
-/// and the #936 raise never runs. The heal re-files the removal
-/// as if it had landed when the episode opened and hands it to
-/// the ONE close-return tail, which raises the closed window's
-/// Space fallback. Every let-out leaves today's behavior:
-/// - no open distrust episode on the window the report left —
-///   an undelayed close, or the #1930 order;
-/// - a successor on the closed window's own Space;
-/// - a report that was our own raise's echo or carried click
-///   provenance, or any later honored report for a third window;
-/// - a left press or a commanded focus after the note, or a
-///   Space switch that was not our follow of the successor —
-///   the user acting during the episode;
-/// - a confirmation past `delayedCloseBound`.
-/// `DelayedCloseReturnTests` pins the heal and each let-out.
+/// The removal facts the close-return tail acts on, and the
+/// Space it owes a return to — nil for every removal the debt
+/// does not cover.
+struct CloseReturnFacts {
+    let effects: AppliedEffects
+    let owedSpace: SpaceID?
+}
+
+/// The delayed-close return (#2002): the debt's one home — the
+/// fourth member of the #951/#958/#1532 one-machine family. It
+/// changes FACTS only; the Space switch and the raise are the
+/// close-return tail's. The let-outs and who may switch are
+/// state-and-layout.md's; `DelayedCloseReturnTests` the verdicts,
+/// `DelayedCloseSeamTests` the writer and call sites.
 extension KiwiCore {
     /// How long a noted debt may wait for its confirmation: one
     /// more `transientRetrackDelay` than the follow-ups an
@@ -44,8 +40,7 @@ extension KiwiCore {
         return Double(EventLoop.removalRecheckCap + 1) * seconds
     }
 
-    /// Notes or voids the debt at an HONORED focus report: called
-    /// once, from `handleWindowFocused`'s honored path.
+    /// Notes or voids the debt at an honored focus report.
     func noteDelayedClose(
         _ id: WindowID,
         after effects: AppliedEffects,
@@ -53,11 +48,11 @@ extension KiwiCore {
     ) {
         // The successor's own duplicate, or the follow's echo.
         if delayedCloseDebt?.successor == id { return }
-        delayedCloseDebt = nil
+        retireDelayedClose(touching: nil, why: "focus moved")
         let now = wallClock()
         guard !selfEcho,
             let before = effects.focusBefore, before != id,
-            eventLoop.removalDistrusted[before] != nil,
+            eventLoop.delaysClose(of: before),
             let closing = state.windows[before],
             state.windows[id]?.pid == closing.pid,
             let space = state.workspaces.space(of: before),
@@ -78,46 +73,61 @@ extension KiwiCore {
         )
     }
 
-    /// Marks the debt's successor as carried by our own follow —
-    /// called from `landFocusFollow` alone.
+    /// Marks the debt's successor as carried by our own follow.
     func noteDelayedCloseFollowed(_ id: WindowID) {
         guard delayedCloseDebt?.successor == id else { return }
         delayedCloseDebt?.followed = true
     }
 
-    /// The removal facts the close-return tail reads: `effects`
-    /// unchanged, or — where the debt is owed — switched back to
-    /// the closed window's Space and re-filed as a focus loss.
+    /// Drops the debt when its episode ends without a close or
+    /// either window is re-keyed; `nil` drops it unconditionally.
+    func retireDelayedClose(touching ids: Set<WindowID>?, why: String) {
+        guard let debt = delayedCloseDebt else { return }
+        if let ids, !ids.contains(debt.closing),
+            !ids.contains(debt.successor)
+        {
+            return
+        }
+        delayedCloseDebt = nil
+        onLog(
+            "close distrust: w\(debt.closing.raw) debt retired — "
+                + "\(why) (#2002)"
+        )
+    }
+
+    /// The facts the close-return tail reads for this removal:
+    /// unchanged, or — where the debt is owed — re-filed as the
+    /// focus loss it was, with the Space the return is owed in.
     func healDelayedClose(
         _ event: KiwiEvent,
         reason: WindowGoneReason?,
         effects: AppliedEffects
-    ) -> AppliedEffects {
+    ) -> CloseReturnFacts {
+        let unchanged = CloseReturnFacts(effects: effects, owedSpace: nil)
         guard let debt = delayedCloseDebt,
             let id = event.goneWindowID,
             id == debt.closing || id == debt.successor
-        else { return effects }
+        else { return unchanged }
         delayedCloseDebt = nil
         guard id == debt.closing, reason == .closed,
             let removed = effects.removedWindow, !removed.focusLost,
             removed.space == debt.space
-        else { return effects }
+        else { return unchanged }
         if let why = delayedCloseStandDown(debt) {
             onLog(
                 "close distrust: w\(id.raw) confirmed late — "
                     + "return stood down (\(why)) (#2002)"
             )
-            return effects
+            return unchanged
         }
         onLog(
-            "close distrust: w\(id.raw) confirmed late — returning "
-                + "to space \(debt.space.raw) over "
+            "close distrust: w\(id.raw) confirmed late — return owed "
+                + "in space \(debt.space.raw) over "
                 + "w\(debt.successor.raw) (#2002)"
         )
-        applyFocusedSpaceSwitch(to: debt.space)
         var healed = effects
         healed.removedWindow = removed.losingFocus
-        return healed
+        return CloseReturnFacts(effects: healed, owedSpace: debt.space)
     }
 
     /// Why the owed return stands down, nil where it runs.
@@ -133,12 +143,28 @@ extension KiwiCore {
             state.workspaces.space(of: debt.successor) == active,
             activeSpace?.focused == debt.successor
         else { return "focus moved on" }
-        if let press = lastLeftClick?.at, press >= debt.noted {
-            return "a press"
-        }
+        guard let next = state.workspaces[debt.space]?.focused,
+            state.windows[next]?.isFullscreen != true
+        else { return "no raisable fallback" }
+        if leftPress(since: debt.noted) { return "a press" }
         if eventLoop.focusCommanded(since: debt.mark) {
             return "a commanded focus"
         }
         return nil
+    }
+}
+
+extension AppliedEffects.RemovedWindow {
+    /// The re-filing as a focus loss — `healDelayedClose`'s alone.
+    fileprivate var losingFocus: Self {
+        Self(
+            app: app,
+            bundleID: bundleID,
+            pid: pid,
+            isTransientOverlay: isTransientOverlay,
+            space: space,
+            focusLost: true,
+            tiledSlot: tiledSlot
+        )
     }
 }

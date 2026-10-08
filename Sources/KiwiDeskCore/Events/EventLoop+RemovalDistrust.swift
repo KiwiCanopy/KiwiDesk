@@ -141,6 +141,26 @@ extension EventLoop {
         detectedFullscreen[id] == true || fullscreenSpaceHosts(id)
     }
 
+    /// Whether `id` sits in an episode the CENSUS refusal opened —
+    /// a close the distrust is delaying — and not one an
+    /// expected-absence arm explains: the #2002 debt's one
+    /// reading of the machine.
+    func delaysClose(of id: WindowID) -> Bool {
+        removalDistrusted[id] != nil && expectedAbsence(of: id) == nil
+    }
+
+    /// A window back in the AX list ends its episode (#1157), so
+    /// a later absence is refused — and logged — afresh; the core
+    /// hears which ended without a close (#2002).
+    func endRemovalEpisodes(relisted live: Set<WindowID>) {
+        let ended = Set(removalDistrusted.keys).intersection(live)
+        guard !ended.isEmpty else { return }
+        removalDistrusted = removalDistrusted.filter {
+            !ended.contains($0.key)
+        }
+        onRemovalEpisodesEnded(ended)
+    }
+
     /// Hands the pids owed a distrust follow-up to the scheduled
     /// task and clears the queue (#1157).
     func drainPendingRemovalRecheck() -> Set<pid_t> {

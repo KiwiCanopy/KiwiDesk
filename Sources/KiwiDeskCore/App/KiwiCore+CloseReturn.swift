@@ -13,13 +13,16 @@ extension KiwiCore {
         willRetile: Bool
     ) {
         // A close the distrust delayed past a same-app focus on
-        // another Space is re-filed as the focus loss it was
-        // (#2002); every other removal passes through unchanged.
-        let effects = healDelayedClose(
+        // another Space is re-filed as the focus loss it was, owed
+        // in its own Space (#2002); every other removal passes
+        // through unchanged.
+        let facts = healDelayedClose(
             event,
             reason: goneReason,
             effects: foldEffects
         )
+        let effects = facts.effects
+        let owedSpace = facts.owedSpace
         // Closing or minimizing the focused window hands focus
         // to the space's fallback (state picked one; this raise
         // makes it real). A fallback on a Desktop nobody shows is
@@ -46,14 +49,19 @@ extension KiwiCore {
             )
         if effects.removedWindow?.focusLost == true,
             !closeReturnRaiseStandsDown,
-            let next = activeSpace?.focused,
+            let next = owedSpace.map({ state.workspaces[$0]?.focused })
+                ?? activeSpace?.focused,
             // Belt to the fold's re-pick (#670): never raise a
             // fullscreen fallback — it would switch the user
             // to its Space on a plain window close.
             state.windows[next]?.isFullscreen != true
         {
+            // The owed return's switch, on the raise's branch
+            // alone; the switch retile placed the Space, so the
+            // focus takes none of its own (#11, #2002).
+            if let owedSpace { applyFocusedSpaceSwitch(to: owedSpace) }
             onLog("close-return: raising w\(next.raw)")
-            focusWindow(next, warp: true)
+            focusWindow(next, refocusRetile: owedSpace == nil, warp: true)
             armCloseReturnRestack(
                 to: next,
                 fromRemovedSlot: effects.removedWindow?.tiledSlot

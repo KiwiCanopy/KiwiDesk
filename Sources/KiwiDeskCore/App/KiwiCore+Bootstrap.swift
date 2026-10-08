@@ -197,6 +197,9 @@ extension KiwiCore {
         eventLoop.onRemovalDistrust = { [weak self] in
             self?.scheduleRemovalRecheck()
         }
+        eventLoop.onRemovalEpisodesEnded = { [weak self] ids in
+            self?.retireDelayedClose(touching: ids, why: "re-listed")
+        }
         eventLoop.carriedWindows = { [weak self] in
             self?.stickyReachInFlight() ?? []
         }
