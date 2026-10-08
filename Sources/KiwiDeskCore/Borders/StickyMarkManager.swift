@@ -123,9 +123,9 @@ public final class StickyMarkManager {
                     commanded: commandedFrame(spec.window)
                 )
             )
-            if BorderManager.ordersRing(
+            if BorderManager.ordersOverlay(
                 reassert: reassertOrder,
-                needsOrder: !overlay.hasOrdered,
+                needsOrder: overlay.needsOrder,
                 tracked: isWindowServerTracked(spec.window)
             ) {
                 overlay.order()
@@ -156,6 +156,11 @@ public final class StickyMarkManager {
     /// (`onFrameReconciled`).
     public func reposition(_ id: WindowID, windowFrame: CGRect) {
         overlays[id]?.update(frame: windowFrame)
+    }
+
+    /// Owes `id`'s mark a stack at the next sync (#2026).
+    func oweOrder(_ id: WindowID) {
+        overlays[id]?.oweOrder()
     }
 
     /// Re-orders mark above window following z-order changes

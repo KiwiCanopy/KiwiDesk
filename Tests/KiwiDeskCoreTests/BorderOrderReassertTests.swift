@@ -24,28 +24,28 @@ struct BorderOrderReassertTests {
     @Test("A steady sync orders only a ring that is not shown")
     func steadySyncSkipsShownRing() {
         #expect(
-            !BorderManager.ordersRing(
+            !BorderManager.ordersOverlay(
                 reassert: false,
                 needsOrder: false,
                 tracked: true
             )
         )
         #expect(
-            BorderManager.ordersRing(
+            BorderManager.ordersOverlay(
                 reassert: false,
                 needsOrder: true,
                 tracked: true
             )
         )
         #expect(
-            BorderManager.ordersRing(
+            BorderManager.ordersOverlay(
                 reassert: true,
                 needsOrder: false,
                 tracked: true
             )
         )
         #expect(
-            BorderManager.ordersRing(
+            BorderManager.ordersOverlay(
                 reassert: false,
                 needsOrder: false,
                 tracked: false
