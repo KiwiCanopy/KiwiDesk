@@ -42,6 +42,10 @@ extension KiwiCore {
         if retireEmptiedTemporarySpaces() || heldRetired {
             resolveSpaceDisplays()
             emitSpaceChange()
+        } else if placeUnplacedSpaces() {
+            // A Space some door created by an undeclared id takes
+            // its screen here, every other placement left (#1994).
+            emitSpaceChange()
         }
         // Ambient motion waits for the hand to rest (#804): the pass
         // is owed and re-run then; state, bars and rings move now.
