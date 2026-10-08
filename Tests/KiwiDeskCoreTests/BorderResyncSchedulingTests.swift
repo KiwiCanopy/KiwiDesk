@@ -150,6 +150,26 @@ struct BorderResyncSchedulingTests {
         #expect(core.stickyMarks.lastFrame(id) == real)
     }
 
+    @Test("The re-sync re-stacks a tracked mark (#2026)")
+    func resyncRestacksTheMark() throws {
+        let core = makeTestCore()
+        let id = seed(
+            core,
+            frame: CGRect(x: 12, y: 34, width: 500, height: 400),
+            isSticky: true
+        )
+        core.tiler.settings.stickyStyle.mark = true
+        core.stickyMarks.isWindowServerTracked = { _ in true }
+        core.updateStickyMarks()
+        core.updateStickyMarks()
+        let mark = try #require(core.stickyMarks.overlays[id])
+        #expect(mark.orderCount == 1)
+        // A steady sync leaves a tracked mark to the reorder events;
+        // the settle pass is the one that re-stacks it.
+        core.runBorderResync()
+        #expect(mark.orderCount == 2)
+    }
+
     @Test("The grace outlasts a slow app's post-settle catch-up")
     func resyncDelayCoversTheCatchUpWindow() {
         // 100–300 ms on Electron/WebKit; 213 ms measured on device
