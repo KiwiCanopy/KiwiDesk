@@ -329,7 +329,11 @@ extension KiwiCore {
         if willRetile, followed != true {
             retile(newlyCreatedWindow: newlyCreatedWindow)
         } else if crossedScreenCover(event, before: preEventFrame) {
-            updateBars()  // #1787
+            // Every reader of the verdict, since no retile runs
+            // (#1787, #1788).
+            updateBars()
+            updateBorders()
+            updateStickyMarks()
         }
         settleDetectedFlip(detectedFlip)
         runCloseReturnTail(

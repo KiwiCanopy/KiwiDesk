@@ -23,7 +23,12 @@ extension KiwiCore {
     func placementBounce(_ id: WindowID, now: Date) -> CGRect? {
         guard let placed = tiler.placements.recent(id),
             !recentClickReached(id, now: now),
-            let actual = state.windows[id]?.frame
+            let actual = state.windows[id]?.frame,
+            // A show's first focus is its app starting it, never
+            // an answer to our write — judged on both frames, the
+            // echo of a restore of the show may trail its focus
+            // (#1788).
+            !presents(id, at: actual), !presents(id, at: placed)
         else { return nil }
         if let space = state.workspaces.space(of: id),
             space == state.workspaces.activeSpace,

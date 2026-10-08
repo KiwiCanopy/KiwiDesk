@@ -33,7 +33,7 @@ struct BorderOwnKeyWindowTests {
             focused: w1,
             slots: slots,
             overlays: [],
-            fullscreen: [],
+            fillsDisplay: [],
             isMonocle: false,
             focusedRingSuppressed: true,
             sheen: 0
@@ -50,7 +50,7 @@ struct BorderOwnKeyWindowTests {
             focused: w1,
             slots: slots,
             overlays: [],
-            fullscreen: [],
+            fillsDisplay: [],
             isMonocle: false,
             focusedRingSuppressed: true,
             sheen: 0
