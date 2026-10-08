@@ -129,5 +129,27 @@ extension SettingsThemeContrastTests {
         )
     }
 
-    static let chips: [Pairing] = segments + buttonChips + iconChips
+    /// A choice chip's label — a layer, a preset share or weight
+    /// — when chosen, on the accent wash in place of the rest
+    /// fill; unchosen it is a button chip's (`buttonChips`, and
+    /// the jump chips' rows for the page).
+    private static let choiceChips: [Pairing] =
+        [
+            ("card", SettingsTheme.card),
+            ("sunken", SettingsTheme.sunken),
+            ("page", SettingsTheme.page),
+        ].map { name, ground in
+            Pairing(
+                "ink on a chosen choice chip on \(name)",
+                SettingsTheme.ink,
+                on: ground,
+                washedWith: (
+                    SettingsTheme.accent,
+                    ChoiceChip.selectedWashOpacity
+                )
+            )
+        }
+
+    static let chips: [Pairing] =
+        segments + buttonChips + iconChips + choiceChips
 }

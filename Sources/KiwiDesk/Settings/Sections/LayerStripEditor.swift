@@ -66,13 +66,9 @@ struct LayerStripEditor: View {
             Image(systemName: "plus")
                 .padding(.horizontal, 8)
                 .padding(.vertical, 5)
-                .background(
-                    Capsule().fill(
-                        Color.secondary.opacity(
-                            isEnabled && addLayerHovered
-                                ? 0.18 : 0.12
-                        )
-                    )
+                .choiceChip(
+                    hovering: isEnabled && addLayerHovered,
+                    edged: false
                 )
                 .animation(hoverAnimation, value: addLayerHovered)
         }
