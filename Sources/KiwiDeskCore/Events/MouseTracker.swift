@@ -232,10 +232,14 @@ public final class MouseTracker {
     /// Deliberately NOT `recordDown` — it skips the flip and the
     /// fan-out, and seeds `.otherApp`, which a `recordUp` must
     /// then name to close.
-    func seedPress(at location: CGPoint, clickCount: Int = 1) {
+    func seedPress(
+        at location: CGPoint,
+        clickCount: Int = 1,
+        downAt: Date = Date()
+    ) {
         press = Press(
             location: location,
-            downAt: Date(),
+            downAt: downAt,
             origin: .otherApp,
             clickCount: clickCount
         )

@@ -73,7 +73,9 @@ public final class DragCoordinator {
         late: Bool = false,
         previous: CGRect? = nil
     ) {
-        guard !isAnimating(id) else {
+        // A late flick's press came after our last write, so its
+        // move is no echo of ours (#1798).
+        guard late || !isAnimating(id) else {
             cancel(id)
             return
         }

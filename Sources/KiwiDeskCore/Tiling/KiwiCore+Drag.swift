@@ -84,9 +84,21 @@ extension KiwiCore {
         guard !mouse.leftButtonHeld, !drag.hasGesture(id),
             let previous, frame.size == previous.size,
             let press = recentSinglePress,
-            previous.contains(press.location)
+            previous.contains(press.location),
+            pressFollowsOwnWrite(press, id)
         else { return false }
         return dropLandsUnmanaged(id)
+    }
+
+    /// Whether `press` began after the engine's last frame-set of
+    /// `id`: a move then answers the hand, never our write, so a
+    /// second flick inside the echo grace still counts (#1798).
+    private func pressFollowsOwnWrite(
+        _ press: MouseTracker.Press,
+        _ id: WindowID
+    ) -> Bool {
+        guard let setAge = tiler.secondsSinceSet(id) else { return true }
+        return wallClock().timeIntervalSince(press.downAt) < setAge
     }
 
     /// Whether the drop leaves `id` where nothing will place it

@@ -225,4 +225,43 @@ struct FloatFlickDropTests {
 
         #expect(!core.drag.hasGesture(Self.window))
     }
+
+    /// A second flick inside the echo grace of the first one's
+    /// clamp still clamps: its press began after our write. A move
+    /// whose press came BEFORE the write stays our echo. Clocks
+    /// pinned: the write is 0.5 s old, inside the 1 s grace.
+    @Test(
+        "A press newer than our write is a flick, an older one an echo",
+        .enabled(if: NSScreen.main != nil),
+        arguments: [
+            (pressAge: 0.1, flick: true), (pressAge: 2.0, flick: false),
+        ]
+    )
+    func pressAfterOwnWriteWins(pressAge: Double, flick: Bool) throws {
+        let screen = try #require(NSScreen.screens.first)
+        let (start, flicked) = frames(screen)
+        let core = try #require(
+            makeBarredCore(mode: .floating, frame: start)
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        // Our last write of the window, then half a second on.
+        core.tiler.applyFrame(
+            Self.window,
+            from: start,
+            to: start,
+            animated: false
+        )
+        core.tiler.applier.clock = { 0.5 }
+        try #require(core.tiler.didRecentlySetFrame(Self.window))
+        let now = core.wallClock()
+        core.mouse.seedPress(
+            at: CGPoint(x: start.midX, y: start.minY + 10),
+            downAt: now.addingTimeInterval(-pressAge)
+        )
+        core.mouse.seedRelease(at: now)
+
+        core.handle(.windowMoved(Self.window, flicked))
+
+        #expect(core.drag.hasGesture(Self.window) == flick)
+    }
 }

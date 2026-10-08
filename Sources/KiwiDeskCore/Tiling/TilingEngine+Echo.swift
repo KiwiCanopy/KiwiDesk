@@ -14,4 +14,9 @@ extension TilingEngine {
     public func didRecentlySetFrame(_ id: WindowID) -> Bool {
         applier.didRecentlySetFrame(id)
     }
+
+    /// Seconds since the engine last set the window's frame.
+    func secondsSinceSet(_ id: WindowID) -> TimeInterval? {
+        applier.secondsSinceSet(id)
+    }
 }
