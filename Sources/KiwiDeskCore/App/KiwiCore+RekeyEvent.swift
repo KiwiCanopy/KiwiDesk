@@ -31,6 +31,8 @@ extension KiwiCore {
             pendingFocusRaise = new
         }
         raiseFlight?.rekey(old: old, new: new)
+        // The re-key releases the episode, so its debt goes too.
+        retireDelayedClose(touching: [old, new], why: "re-keyed")
         if let pending = pendingMonocleFocus {
             pendingMonocleFocus = (
                 from: pending.from == old ? new : pending.from,

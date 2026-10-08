@@ -106,12 +106,7 @@ extension EventLoop {
                 displayBounds: displayBounds
             )
         }
-        // A window back in the AX list ends its distrust episode
-        // (#1157), so a later absence is refused — and logged —
-        // afresh.
-        removalDistrusted = removalDistrusted.filter {
-            !live.contains($0.key)
-        }
+        endRemovalEpisodes(relisted: live)
         // Genuine closes: emit the destroy the eager path deferred.
         // A candidate is checked against ONE census per sweep; a
         // window the compositor still shows was not closed

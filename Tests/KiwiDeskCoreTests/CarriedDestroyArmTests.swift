@@ -159,7 +159,7 @@ struct CarriedDestroyArmTests {
         // the carried vanish and kept the registration.
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[own]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)] == 1)
+        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
     }
 
 }

@@ -149,7 +149,7 @@ struct ReachDepartureRemovalTests {
         // State AND registration kept: the dead element stays
         // registered until the reconcile re-elements the id.
         #expect(loop.elements[pid]?[window] != nil)
-        #expect(loop.removalDistrusted[window] == 1)
+        #expect(loop.removalDistrusted[window]?.arms == 1)
         #expect(loop.pendingRemovalRecheck.contains(pid))
         #expect(box.recheckFires == 1)
         #expect(awaitingLines(box) == 1)
@@ -173,7 +173,7 @@ struct ReachDepartureRemovalTests {
         open.lastDesktopChange = Date(timeIntervalSinceNow: 60)
         open.reconcile(pid: pid, app: ref)
         #expect(openBox.destroyed.isEmpty)
-        #expect(open.removalDistrusted[window] == 1)
+        #expect(open.removalDistrusted[window]?.arms == 1)
         // Closed inside the grace: the census clause stands down
         // and no arm refuses — a vanish nothing expects is removed.
         let (closed, closedBox) = makeLoop(awaits: false)
@@ -190,7 +190,7 @@ struct ReachDepartureRemovalTests {
         for arm in 1...EventLoop.removalRecheckCap {
             loop.reconcile(pid: pid, app: ref)
             #expect(box.destroyed.isEmpty)
-            #expect(loop.removalDistrusted[window] == arm)
+            #expect(loop.removalDistrusted[window]?.arms == arm)
             #expect(box.recheckFires == arm)
             _ = loop.drainPendingRemovalRecheck()
         }
@@ -274,7 +274,7 @@ struct ReachDepartureRemovalTests {
         // the vanish and kept the registration.
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[own]?[window] != nil)
-        #expect(loop.removalDistrusted[window] == 1)
+        #expect(loop.removalDistrusted[window]?.arms == 1)
     }
 
     @Test("an unawaited window's destroyed element is eager")

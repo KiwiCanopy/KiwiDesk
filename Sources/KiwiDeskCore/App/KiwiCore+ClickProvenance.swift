@@ -102,6 +102,13 @@ extension KiwiCore {
             < Self.zOrderRaiseEchoWindow
     }
 
+    /// Whether a left press landed at or after `instant` — the
+    /// delayed-close return's "the user acted since" (#2002).
+    func leftPress(since instant: Date) -> Bool {
+        guard let click = lastLeftClick else { return false }
+        return click.at >= instant
+    }
+
     /// The one press stamp (#687/#1281), both monitor arms'.
     /// Resolves which managed window the press reached NOW —
     /// press time is when the fact exists.
