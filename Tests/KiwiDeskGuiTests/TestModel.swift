@@ -45,6 +45,16 @@ func makeTestModel(
     // `.absent` answers mean shipped defaults. A suite testing
     // the checklist overrides `readMacSetting` per scenario.
     model.readMacSetting = { _ in .absent }
+    // #2092: never register with `SMAppService` — the live write
+    // registers the calling process, the test helper, as a login
+    // item. Answers as if the write landed on a registerable copy.
+    model.writeLoginItem = { enabled in
+        AutoStartStatus(
+            level: enabled ? .atLogin : .off,
+            unavailable: nil,
+            requiresApproval: false
+        )
+    }
     // #1145: pin the bridge capability FALSE, both mirrors — an
     // earlier bridge suite's `classResolverOverride` can leave
     // `WMBridge.isAvailable`'s process cache true, so the init's
