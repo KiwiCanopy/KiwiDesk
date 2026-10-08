@@ -98,7 +98,8 @@ editing AX code:
   only what the value carries. A dump lacking a fact a rule reads
   leaves that rule's column "not decidable", never guessed, and
   the expected table is KiwiDesk's own: AeroSpace's recorded
-  verdicts are never read, and a changed row is a ruling on that
+  verdicts are never read (`AXDumpCorpusTests` ▸
+  `readsNoVerdict`), and a changed row is a ruling on that
   app made in its own change.
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads

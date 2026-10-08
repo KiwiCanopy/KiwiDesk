@@ -88,7 +88,16 @@ struct AXDumpCorpusTests {
             "AxUiElementWindowType", "on-window-detected",
             "treeNodeParent", "Aero.workspace",
         ]
-        for file in ["AXDumpCorpus.swift", "AXDumpExpected.swift"] {
+        // The loader, the table and its parts: every `AXDump*`
+        // source but this suite, which names the keys it bans.
+        let files = try FileManager.default
+            .contentsOfDirectory(atPath: here.path)
+            .filter {
+                $0.hasPrefix("AXDump") && $0.hasSuffix(".swift")
+                    && $0 != "AXDumpCorpusTests.swift"
+            }
+        #expect(files.count >= 5, "the scan found \(files)")
+        for file in files {
             let source = try String(
                 contentsOf: here.appendingPathComponent(file),
                 encoding: .utf8

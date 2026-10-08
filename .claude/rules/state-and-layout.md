@@ -1579,7 +1579,12 @@ editing here:
   `detectionVerdict(for:)` or the detection beside it, and the
   verdict is composed only in `EventLoop.autoFloatVerdict` —
   `TileRefusalSeamTests` holds all three by census, so a new
-  reader names itself there. A user-float record never stands on
+  reader names itself there. Its pure half, `composeVerdict`,
+  takes the force-float reason from its caller, so only
+  `autoFloatVerdict` may call it in Core — a caller handing it
+  `forced: nil` would tile an accessory app or KiwiDesk's own
+  chrome; the recorded-dump corpus is its one test-target caller
+  (#1883, `TileRefusalSeamTests` ▸ `pureCompositionHasOneCaller`). A user-float record never stands on
   a window detection floats, from any door (`userFloated`'s
   fold, the reopen memory, the in-place restore;
   `TileReturnsToRulesTests`); the argument is
