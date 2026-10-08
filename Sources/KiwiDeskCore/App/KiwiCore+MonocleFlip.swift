@@ -3,7 +3,7 @@ import Foundation
 
 /// The one door a KiwiDesk-COMMANDED Monocle focus change takes
 /// (#1391): `navigate`'s cycle, the App Bar click and
-/// `pull_or_spawn`'s focus. It decides the flip, plays it, and
+/// `focus_or_spawn`'s focus. It decides the flip, plays it, and
 /// runs the ordinary `focusWindow` once the blur covers the
 /// surface — or at once where no flip plays. A press during a
 /// play lands at once too and RETARGETS the running card rather

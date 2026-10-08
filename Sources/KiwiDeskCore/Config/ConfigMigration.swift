@@ -10,7 +10,9 @@ import Foundation
 /// rewrites (`layers[].bindings[].lua` in gui.json and every
 /// profile): a renamed VERB breaks such a binding and is still
 /// not migrated — the crossing reaches the config VOCABULARY
-/// around the script, never the script (#1020). A RE-SCALED
+/// around the script, never the script (#1020) — save the one
+/// exact shape the GUI writes itself, which is the app's own
+/// format and crosses like any stored value (#1511). A RE-SCALED
 /// argument (#1354's `track.set_limit`) is the case that
 /// carve-out does not catch: the old spelling still runs and
 /// means one less, silently.
@@ -41,6 +43,7 @@ public enum ConfigMigration {
         migratingRetiredAppBarContent,
         migratingDuplicateSpaceChords,
         migratingAbsentSpaceSwitchGlass,
+        migratingRetiredPullOrSpawn,
     ]
 
     /// The file shapes a config root can take.

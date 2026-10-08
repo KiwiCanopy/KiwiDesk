@@ -243,13 +243,13 @@ struct OpenOrFocusRestoreTests {
 
     // MARK: - The command path
 
-    @Test("pull_or_spawn drives the restore for a running app")
+    @Test("focus_or_spawn drives the restore for a running app")
     func commandDrivesTheRestore() {
         let core = makeCore()
         let recorder = wire(core, visible: 0, minimized: [1])
         #expect(
             core.execute(
-                "pull_or_spawn",
+                "focus_or_spawn",
                 args: [.string("com.test.a")]
             ).isSuccess
         )
@@ -267,7 +267,7 @@ struct OpenOrFocusRestoreTests {
         let core = makeCore()
         let recorder = wire(core, visible: 0, minimized: [1])
         _ = core.execute(
-            "pull_or_spawn",
+            "focus_or_spawn",
             args: [.string("com.test.a")]
         )
         #expect(
@@ -286,7 +286,7 @@ struct OpenOrFocusRestoreTests {
         let core = makeCore()
         let recorder = wire(core, visible: 2, minimized: [1])
         _ = core.execute(
-            "pull_or_spawn",
+            "focus_or_spawn",
             args: [.string("com.test.a")]
         )
         #expect(recorder.log == [.activate(7)])
@@ -300,7 +300,7 @@ struct OpenOrFocusRestoreTests {
         let recorder = wire(core, visible: 0, minimized: [1])
         core.openOrFocus.runningAppPID = { _ in nil }
         _ = core.execute(
-            "pull_or_spawn",
+            "focus_or_spawn",
             args: [.string("com.test.does.not.exist")]
         )
         #expect(recorder.log.isEmpty)

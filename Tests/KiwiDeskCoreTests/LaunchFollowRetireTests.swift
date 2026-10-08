@@ -81,7 +81,7 @@ struct LaunchFollowRetireTests {
         launched.openOrFocus.openApp = { _, _ in true }
         #expect(
             launched.execute(
-                "pull_or_spawn",
+                "focus_or_spawn",
                 args: [.string(F.bundle)]
             ).isSuccess
         )
@@ -97,7 +97,7 @@ struct LaunchFollowRetireTests {
             pulled.openOrFocus.activate = { _ in }
             #expect(
                 pulled.execute(
-                    "pull_or_spawn",
+                    "focus_or_spawn",
                     args: [.string(F.bundle)]
                 ).isSuccess
             )

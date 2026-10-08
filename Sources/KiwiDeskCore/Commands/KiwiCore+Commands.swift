@@ -74,7 +74,7 @@ extension KiwiCore {
             // so it self-retiles under `on_window_swap`, the
             // same policy as its sibling `move_to_track`.
             return trackSwap(args)
-        case "pull_or_spawn":
+        case "focus_or_spawn":
             return launch(args, newInstance: false)
         case "spawn_new":
             return launch(args, newInstance: true)

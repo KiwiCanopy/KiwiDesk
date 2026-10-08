@@ -4,7 +4,7 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// #636: Open or Focus (`pull_or_spawn`) pulls a window forward
+/// #636: Open or Focus (`focus_or_spawn`) pulls a window forward
 /// on another space; the focused ring must land on it after the
 /// switch. The shortcut itself is a fire-and-forget
 /// `NSRunningApplication.activate()`, so everything KiwiDesk

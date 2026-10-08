@@ -55,7 +55,7 @@ struct OpenOrFocusPullTests {
     }
 
     private func press(_ core: KiwiCore) -> CommandResponse {
-        core.execute("pull_or_spawn", args: [.string(Self.bundle)])
+        core.execute("focus_or_spawn", args: [.string(Self.bundle)])
     }
 
     @Test("A window in another Space is reached by a switch")

@@ -54,7 +54,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// which reaches a bundle's `config` and its `[Profile]` alike.
     /// 21 = the Space switch plates' Liquid Glass leaf filled
     /// (#1956), on `[Profile]` alone.
-    public static let currentFormat = 21
+    /// 22 = a stored app shortcut calls `focus_or_spawn` (#1511),
+    /// which reaches a bundle's `config` and its `[Profile]` alike.
+    public static let currentFormat = 22
 
     public let format: Int
 

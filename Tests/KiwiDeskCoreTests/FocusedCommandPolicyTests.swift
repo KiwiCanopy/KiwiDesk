@@ -24,7 +24,7 @@ struct FocusedCommandPolicyTests {
         "pin_space_to_display",
         "create_space",
         "delete_space",
-        "pull_or_spawn",
+        "focus_or_spawn",
         "spawn_new",
         "get_state",
         "get_layout_info",

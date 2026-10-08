@@ -28,7 +28,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     ///
     /// **5 (#1797)**: a layer holds one chord per Space verb, so a
     /// top-up's extras are dropped.
-    public static let currentFormat = 5
+    ///
+    /// **6 (#1511)**: a stored app shortcut calls `focus_or_spawn`,
+    /// so a GUI-written `pull_or_spawn` call is renamed.
+    public static let currentFormat = 6
 
     public var format: Int = GuiConfig.currentFormat
     /// Active profile tiling parameters.

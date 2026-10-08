@@ -181,7 +181,7 @@ struct CommandTests {
         }
         #expect(windows.count == 1)
         // The bundle id is surfaced so a power user can read
-        // off the value app rules / pull_or_spawn take (#262).
+        // off the value app rules / focus_or_spawn take (#262).
         guard case .object(let window)? = windows.first else {
             Issue.record("expected window object")
             return

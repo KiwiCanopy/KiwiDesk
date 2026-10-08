@@ -1,7 +1,7 @@
 import Foundation
 
 /// Repeat presses of Open or Focus cycle the app's windows
-/// (#637): when `pull_or_spawn` fires while one of the target
+/// (#637): when `focus_or_spawn` fires while one of the target
 /// app's windows is already focused, the shortcut advances to
 /// the app's next window — space order, then slot order,
 /// wrapping — instead of re-activating an app that is already
@@ -13,7 +13,7 @@ import Foundation
 /// (`KiwiCore+LaunchReach`). Without the bridge the ring is the
 /// tracked windows alone.
 extension KiwiCore {
-    /// The already-focused branch of `pull_or_spawn`. Returns
+    /// The already-focused branch of `focus_or_spawn`. Returns
     /// `false` when cycling does not apply — the focused window
     /// is not this app's, the app is not the frontmost one, or
     /// it has fewer than two windows in the ring — so the caller
@@ -116,7 +116,7 @@ extension KiwiCore {
                 entry.window,
                 desktop: entry.desktop,
                 snapshot: reach.snapshot,
-                verb: "pull_or_spawn"
+                verb: "focus_or_spawn"
             )
         }
         guard

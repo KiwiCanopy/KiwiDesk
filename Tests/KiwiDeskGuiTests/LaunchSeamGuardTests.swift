@@ -8,7 +8,7 @@ import Testing
 /// `MachineTouchTests` pins `KiwiCore(` *construction* and
 /// `StatusItemSeamGuardTests` pins an initializer that seizes a
 /// resource, so neither stops a suite calling
-/// `execute("pull_or_spawn", …)` from inheriting a live
+/// `execute("focus_or_spawn", …)` from inheriting a live
 /// `NSWorkspace`.
 ///
 /// It already bit: a command-path test brought the real Finder

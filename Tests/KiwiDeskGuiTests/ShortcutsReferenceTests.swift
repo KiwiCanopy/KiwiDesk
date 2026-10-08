@@ -131,7 +131,7 @@ struct ShortcutsReferenceTests {
         let reference = build([
             binding(
                 "cmd+1",
-                "KiwiDesk.pull_or_spawn(\"com.apple.Safari\")",
+                "KiwiDesk.focus_or_spawn(\"com.apple.Safari\")",
                 .application
             )
         ])
@@ -147,7 +147,7 @@ struct ShortcutsReferenceTests {
         let reference = build([
             binding(
                 "cmd+1",
-                "KiwiDesk.pull_or_spawn(\"com.apple.safari\")",
+                "KiwiDesk.focus_or_spawn(\"com.apple.safari\")",
                 .application
             ),
             binding(

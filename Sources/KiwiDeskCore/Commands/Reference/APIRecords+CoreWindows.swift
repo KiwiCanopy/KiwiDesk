@@ -134,7 +134,7 @@ extension APIReference {
                 + "prev or next.",
             .text("direction")
         ),
-        "pull_or_spawn": APIRecord(
+        "focus_or_spawn": APIRecord(
             "Focuses an app's window, or launches a new instance.",
             .text("bundle_id")
         ),

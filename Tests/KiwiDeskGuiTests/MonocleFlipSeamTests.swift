@@ -18,7 +18,7 @@ struct MonocleFlipSeamTests {
     private static let door = "KiwiCore+MonocleFlip.swift"
 
     /// The commanded sites, per file: `navigate`'s Monocle cycle,
-    /// `pull_or_spawn`'s focus of a window in the active Space, and
+    /// `focus_or_spawn`'s focus of a window in the active Space, and
     /// the bar clicks — an App Bar item or its peek row
     /// (`selectFromAppBar`, #1946) and a Space Bar glyph click on
     /// the active Space (#1528) — the ruling's list, and nothing

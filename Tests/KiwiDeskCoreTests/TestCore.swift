@@ -111,7 +111,7 @@ func makeTestCore(
     // Same class, third time (#673): `openOrFocus`'s four seams
     // default LIVE, and unlike the two above their touch fires on
     // COMMAND EXECUTION, not on init — so a suite that executes
-    // `pull_or_spawn` inherits a real `NSWorkspace` lookup, a real
+    // `focus_or_spawn` inherits a real `NSWorkspace` lookup, a real
     // `activate()` and a real app launch without naming any of
     // them. That already shipped once: a command-path test brought
     // the real Finder forward on every run. Making "no app is
