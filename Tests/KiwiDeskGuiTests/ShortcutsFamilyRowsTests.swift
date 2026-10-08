@@ -54,6 +54,7 @@ struct ShortcutsFamilyRowsTests {
         let handDrawn: Set<SettingKey> = [
             .shortcuts(.layers),
             .shortcuts(.layersIcon),
+            .shortcuts(.layersReach),
             .shortcuts(.openApplications),
             .shortcuts(.advanced),
             .shortcuts(.import),

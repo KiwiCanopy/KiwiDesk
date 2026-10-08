@@ -1355,7 +1355,6 @@
   "shortcuts.app_behavior.open_or_focus": "Öffnen oder Fokussieren",
   "shortcuts.apps.all_bound": "„%1$@“ hat bereits für jede Art, sie zu öffnen, eine Taste. Ändere oben eines ihrer Tastenkürzel, um ihr ein anderes zu geben.",
   "shortcuts.apps.empty": "Noch hat keine App eine eigene Taste. Füge eine hinzu — ihre Taste bringt dich zum Fenster dieser App, wo immer es gerade ist, oder startet die App, falls sie nicht läuft.",
-  "shortcuts.base_layer_protected": "Basis-Ebenen können hier nicht entfernt werden",
   "shortcuts.choose_app": "App wählen…",
   "shortcuts.clear_shared.title": "Andere Profile verwenden dieses Tastenkürzel auch.",
   "shortcuts.delete_layer": "Ebene löschen",

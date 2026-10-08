@@ -1355,7 +1355,6 @@
   "shortcuts.app_behavior.open_or_focus": "열기 또는 포커스",
   "shortcuts.apps.all_bound": "‘%1$@’은(는) 열기 방식마다 이미 키가 지정되어 있습니다. 다른 키를 지정하려면 위에 있는 단축키 중 하나를 변경하십시오.",
   "shortcuts.apps.empty": "아직 자체 키가 지정된 앱이 없습니다. 하나를 추가하면 그 키로 해당 앱의 윈도우가 어디에 있든 그리로 이동하고, 앱이 실행 중이 아니면 앱을 실행합니다.",
-  "shortcuts.base_layer_protected": "기반 레이어는 여기서 제거할 수 없습니다",
   "shortcuts.choose_app": "선택 app…",
   "shortcuts.clear_shared.title": "다른 프로필도 이 단축키를 사용합니다.",
   "shortcuts.delete_layer": "레이어 삭제",

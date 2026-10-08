@@ -1355,7 +1355,6 @@
   "shortcuts.app_behavior.open_or_focus": "Apri o porta in primo piano",
   "shortcuts.apps.all_bound": "«%1$@» ha già un tasto per ogni modo di aprirla. Cambia una delle sue scorciatoie qui sopra per dargliene un'altra.",
   "shortcuts.apps.empty": "Nessuna app ha ancora un tasto tutto suo. Aggiungine una: il suo tasto ti porterà alla finestra di quell'app, ovunque si trovi, oppure avvierà l'app se non è in esecuzione.",
-  "shortcuts.base_layer_protected": "I livelli di base non si possono rimuovere qui",
   "shortcuts.choose_app": "Scegli app…",
   "shortcuts.clear_shared.title": "Anche altri profili usano questa scorciatoia.",
   "shortcuts.delete_layer": "Elimina livello",

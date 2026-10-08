@@ -15,6 +15,8 @@ struct NameEditPopover: View {
     let confirmLabel: (String) -> String
     let isValid: (String) -> Bool
     let notice: (String) -> String?
+    /// Why the typed name is refused, drawn in the danger ink.
+    let problem: (String) -> String?
     let onConfirm: (String) -> Void
     let width: CGFloat
     @State private var name: String
@@ -26,6 +28,7 @@ struct NameEditPopover: View {
         confirmLabel: @escaping (String) -> String,
         isValid: @escaping (String) -> Bool,
         notice: @escaping (String) -> String? = { _ in nil },
+        problem: @escaping (String) -> String? = { _ in nil },
         onConfirm: @escaping (String) -> Void
     ) {
         self.seed = seed
@@ -34,6 +37,7 @@ struct NameEditPopover: View {
         self.confirmLabel = confirmLabel
         self.isValid = isValid
         self.notice = notice
+        self.problem = problem
         self.onConfirm = onConfirm
         _name = State(initialValue: seed)
     }
@@ -48,6 +52,13 @@ struct NameEditPopover: View {
                 Text(notice)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink3)
+                    .frame(width: width, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if let problem = problem(name) {
+                Text(problem)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.danger)
                     .frame(width: width, alignment: .leading)
                     .fixedSize(horizontal: false, vertical: true)
             }

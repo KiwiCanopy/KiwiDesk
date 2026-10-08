@@ -113,12 +113,12 @@ struct SettingsBorderedSealTests {
             "SpaceOverrideRows+Footer.swift": (
                 1, "role: .destructive", "reset-all"
             ),
-            "LayerStripEditor.swift": (
+            "LayerHeader.swift": (
                 1, "role: .destructive",
                 "delete layer; #770's hand-pairing suppressed "
                     + "its red, carried through by #771's seal "
                     + "until this fix — its sealed sibling is "
-                    + "rename"
+                    + "rename (moved from the strip, #2022)"
             ),
             "KeyRecorderField.swift": (
                 1, ".tint(buttonTint)",

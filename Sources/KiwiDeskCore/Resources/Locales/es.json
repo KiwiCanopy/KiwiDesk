@@ -1355,7 +1355,6 @@
   "shortcuts.app_behavior.open_or_focus": "Abrir o Enfocar",
   "shortcuts.apps.all_bound": "«%1$@» ya tiene una tecla para cada forma de abrirla. Cambia uno de sus atajos de arriba para darle otro.",
   "shortcuts.apps.empty": "Todavía ninguna app tiene una tecla propia. Añade una y su tecla te llevará a la ventana de esa app, esté donde esté, o iniciará la app si no está en ejecución.",
-  "shortcuts.base_layer_protected": "Las capas base no se pueden eliminar aquí",
   "shortcuts.choose_app": "Elegir aplicación…",
   "shortcuts.clear_shared.title": "Otros perfiles también usan este atajo.",
   "shortcuts.delete_layer": "Eliminar capa",

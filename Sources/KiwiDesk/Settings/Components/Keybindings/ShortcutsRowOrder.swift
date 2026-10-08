@@ -122,6 +122,7 @@ enum ShortcutsRowOrder {
     /// Layers group order behind disclosure.
     static let layersMore: [SettingKey] = [
         .shortcuts(.layers),
+        .shortcuts(.layersReach),
         .shortcuts(.layersIcon),
         .shortcuts(.switchToLayer),
     ]

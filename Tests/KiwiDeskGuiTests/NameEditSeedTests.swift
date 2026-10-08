@@ -96,7 +96,7 @@ struct NameEditSeedTests {
             "the add-a-layer popover names something that does "
             + "not exist yet, so it opens with an empty field "
             + "and a correctly disabled confirm — the RENAME "
-            + "popover in this same file is presented by item"
+            + "popover, in `LayerHeader`, is presented by item"
     ]
 
     @Test("a popover with a text field is presented by item")

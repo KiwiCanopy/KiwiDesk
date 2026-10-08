@@ -25,7 +25,7 @@ struct ShortcutsGates {
         guard key.placement.gate != nil else { return nil }
         switch key {
         case .shortcuts(.layers), .shortcuts(.layersIcon),
-            .shortcuts(.switchToLayer):
+            .shortcuts(.layersReach), .shortcuts(.switchToLayer):
             // `default` always exists, so a SECOND entry is what
             // "the user configured a layer" means — presence, not
             // a count.
@@ -89,6 +89,7 @@ struct ShortcutsGates {
     static let resolved: Set<SettingKey> = [
         .shortcuts(.layers),
         .shortcuts(.layersIcon),
+        .shortcuts(.layersReach),
         .shortcuts(.switchToLayer),
         .shortcuts(.focusDesktop),
         .shortcuts(.moveToDesktop),

@@ -68,6 +68,28 @@ struct AnnouncedValuePinTests {
         #expect(!body.contains("spokenValue: String?"))
     }
 
+    /// A layer's "Applies to" is a `Button` the walker does not
+    /// match, named for VoiceOver — so it gives the reading back
+    /// as its value, as the App Rules column does (#2022).
+    @Test("a layer's Applies to names and values itself")
+    func layerReachAnnouncesBoth() throws {
+        let source = try Self.source(
+            "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                + "LayerReachControl.swift"
+        )
+        let control = try #require(
+            source.range(of: "struct LayerReachControl")
+        )
+        let words = try #require(source.range(of: "enum LayerReachWords"))
+        let body = source[control.lowerBound..<words.lowerBound]
+        #expect(body.contains(".accessibilityLabel("))
+        #expect(
+            body.contains(
+                ".accessibilityValue(RuleReachWords.spoken(reading))"
+            )
+        )
+    }
+
     /// A title component carries `.isHeader`, so the headings
     /// rotor walks an area card by card. The scan DERIVES which
     /// files declare the trait and the map only makes silence

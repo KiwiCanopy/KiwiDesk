@@ -92,7 +92,8 @@ struct ShortcutsFamilyRows {
                 layerNames
                 .filter { $0 != currentLayer }
                 .map(KeybindingCatalog.switchLayerCommand)
-        case .layers, .layersIcon, .openApplications, .advanced,
+        case .layers, .layersIcon, .layersReach, .openApplications,
+            .advanced,
             .`import`, .restoreDefaults, .scrollPan, .scrollLongSwipes,
             .scrollStepDistance, .scrollNaturalTrackpad,
             .scrollNaturalMouse, .scrollSpaceStep:

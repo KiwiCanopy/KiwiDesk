@@ -22,6 +22,10 @@ extension SettingsValueReadout {
             .openSettings, .switchToLayer, .openApplications,
             .advanced, .`import`, .restoreDefaults:
             return []
+        // A layer's profiles are no config field: the checklist's own
+        // rows carry them (`layerDiffRows`, #2022).
+        case .layersReach:
+            return []
         case .scrollPan, .scrollLongSwipes, .scrollStepDistance,
             .scrollNaturalTrackpad, .scrollNaturalMouse, .scrollSpaceStep:
             return scrollGestureRows(key, old: old, new: new)

@@ -1355,7 +1355,6 @@
   "shortcuts.app_behavior.open_or_focus": "Ouvrir ou Activer",
   "shortcuts.apps.all_bound": "« %1$@ » a déjà une touche pour chaque façon de l'ouvrir. Modifiez l'un de ses raccourcis ci-dessus pour lui en attribuer un autre.",
   "shortcuts.apps.empty": "Aucune app n'a encore de touche à elle. Ajoutez-en une : sa touche vous amènera à la fenêtre de cette app, où qu'elle soit, ou lancera l'app si elle n'est pas ouverte.",
-  "shortcuts.base_layer_protected": "Les calques de base ne peuvent pas être supprimés ici",
   "shortcuts.choose_app": "Choisir l'application…",
   "shortcuts.clear_shared.title": "D'autres profils utilisent aussi ce raccourci.",
   "shortcuts.delete_layer": "Supprimer le calque",

@@ -170,6 +170,8 @@ struct IconHoverChipTests {
         let checklist = try source(
             "Components/AppRules/RuleReachChecklist.swift"
         )
-        #expect(checklist.contains(".disabled(locked || follows)"))
+        #expect(
+            checklist.contains(".disabled(locked || follows || lacking)")
+        )
     }
 }

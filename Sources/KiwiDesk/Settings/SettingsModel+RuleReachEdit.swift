@@ -29,6 +29,9 @@ struct RuleReachReading: Equatable {
     /// different action, in that action's words — ticking takes
     /// the key over.
     var takenBy: [String: String] = [:]
+    /// Profiles without a shortcut's layer (#2022) — their box
+    /// greys.
+    var lacking: Set<String> = []
 
     /// Whether `profile`'s box is the edited profile's, locked.
     func isLocked(_ profile: String) -> Bool { profile == editing }
@@ -88,6 +91,10 @@ extension SettingsModel {
             )
         else { return nil }
         row.takenBy = keyTakers(key, in: reach, editing: row.editing)
+        let layer = RuleReachTable<String>.keyParts(key).layer
+        if let holders = layerReach(layer)?.users {
+            row.lacking = Set(row.profiles).subtracting(holders)
+        }
         return row
     }
 
@@ -277,7 +284,7 @@ extension SettingsModel {
         _ family: RuleFamily,
         _ app: String
     ) -> RuleReach? {
-        guard let stored = ruleReachStored, let editing = reachProfile
+        guard let stored = layeredReach, let editing = reachProfile
         else { return nil }
         let key = family.key(app)
         switch family {

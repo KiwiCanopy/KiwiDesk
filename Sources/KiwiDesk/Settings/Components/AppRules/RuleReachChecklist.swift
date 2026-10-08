@@ -94,6 +94,9 @@ struct RuleReachChecklist: View {
         let leftOut = reading.leftOut.contains(profile)
         let locked = reading.isLocked(profile)
         let follows = reading.follows(profile)
+        // A shortcut's box greys where its layer is not (#2022): a
+        // tick there would make the layer of one row.
+        let lacking = reading.lacking.contains(profile)
         return VStack(alignment: .leading, spacing: 1) {
             Toggle(
                 isOn: Binding(
@@ -103,15 +106,22 @@ struct RuleReachChecklist: View {
             ) {
                 HStack(spacing: 4) {
                     Text(profile)
-                    if let mark = mark(profile, reading) {
+                    if let mark = RuleReachWords.mark(profile, reading) {
                         Text(mark).foregroundStyle(SettingsTheme.ink3)
                     }
                 }
             }
             .toggleStyle(.checkbox)
-            .disabled(locked || follows)
+            .disabled(locked || follows || lacking)
             .help(hint(locked: locked, follows: follows))
-            if let own {
+            if lacking {
+                caption(
+                    LayerReachWords.lacking(
+                        RuleReachTable<String>.keyParts(app).layer
+                    ),
+                    warning: true
+                )
+            } else if let own {
                 caption(
                     reading.ownIsShared.contains(profile)
                         ? L(
@@ -163,18 +173,6 @@ struct RuleReachChecklist: View {
                 warning ? SettingsTheme.warningInk : SettingsTheme.ink3
             )
             .padding(.leading, 20)
-    }
-
-    private func mark(_ profile: String, _ reading: RuleReachReading)
-        -> String?
-    {
-        if profile == reading.editing {
-            return L("app_rules.reach.this_profile", "this profile")
-        }
-        if profile == reading.loaded {
-            return L("app_rules.reach.loaded", "loaded")
-        }
-        return nil
     }
 
     private func hint(locked: Bool, follows: Bool) -> String {

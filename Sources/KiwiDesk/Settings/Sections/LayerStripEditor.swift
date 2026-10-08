@@ -7,7 +7,6 @@ struct LayerStripEditor: View {
     @Binding var selected: String
     @State private var addingLayer = false
     @State private var newLayer = ""
-    @State private var renameRequest: NameEditRequest?
     @State private var addLayerHovered = false
     /// Keyboard focus target following layer deletion (#816).
     @FocusState private var focusedChip: String?
@@ -21,7 +20,11 @@ struct LayerStripEditor: View {
             Text(layersCaption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            selectedLayerHeader
+            LayerHeader(model: model, selected: $selected) {
+                selected = KeyLayer.defaultName
+                focusedChip =
+                    stripSurvivesDeletion ? KeyLayer.defaultName : nil
+            }
         }
         .onChange(of: isEnabled) { _, now in
             if !now { addLayerHovered = false }
@@ -100,109 +103,6 @@ struct LayerStripEditor: View {
         reduceMotion ? nil : .easeOut(duration: 0.12)
     }
 
-    /// Header controls for selected custom layer (base layers protected, #55).
-    @ViewBuilder private var selectedLayerHeader: some View {
-        if selected != KeyLayer.defaultName {
-            HStack(spacing: 10) {
-                Text(L("shortcuts.menu_bar_icon", "Menu bar icon"))
-                    .foregroundStyle(.secondary)
-                IconPicker(icon: iconBinding, preview: .menuBar)
-                Spacer()
-                if canDeleteSelected {
-                    renameLayerButton
-                    Button(
-                        L("shortcuts.delete_layer", "Delete layer"),
-                        role: .destructive,
-                        action: deleteLayer
-                    )
-                    .buttonStyle(.bordered)
-                } else {
-                    Text(
-                        L(
-                            "shortcuts.base_layer_protected",
-                            "Base layers can't be removed here"
-                        )
-                    )
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                }
-            }
-            .font(.callout)
-        }
-    }
-
-    private var layerIndex: Int {
-        model.config.layers.firstIndex {
-            $0.name == selected
-        } ?? 0
-    }
-
-    private var iconBinding: Binding<String> {
-        Binding(
-            get: {
-                model.config.layers[layerIndex].icon ?? ""
-            },
-            set: {
-                model.config.layers[layerIndex].icon =
-                    $0.isEmpty ? nil : $0
-            }
-        )
-    }
-
-    /// Layer rename button (#55, #843).
-    private var renameLayerButton: some View {
-        Button(L("shortcuts.rename_ellipsis", "Rename…")) {
-            renameRequest = NameEditRequest(
-                seed: selected,
-                subject: selected
-            )
-        }
-        .settingsActionButton()
-        .popover(item: $renameRequest) { request in
-            NameEditPopover(
-                seed: request.seed,
-                placeholder: layerNamePlaceholder,
-                width: 140,
-                confirmLabel: { _ in
-                    L("shortcuts.rename", "Rename")
-                },
-                isValid: { canRenameLayer($0) }
-            ) { draft in
-                renameLayer(draft)
-            }
-        }
-    }
-
-    private func canRenameLayer(_ typed: String) -> Bool {
-        let name = typed.trimmed
-        return !name.isEmpty && name != selected
-            && !model.config.layers.contains {
-                $0.name == name
-            }
-    }
-
-    private func renameLayer(_ typed: String) {
-        guard canRenameLayer(typed) else { return }
-        let new = typed.trimmed
-        model.config.layers = KeybindingCatalog.renameLayer(
-            in: model.config.layers,
-            from: selected,
-            to: new
-        )
-        selected = new
-        renameRequest = nil
-    }
-
-    private var canDeleteSelected: Bool {
-        guard selected != KeyLayer.defaultName else {
-            return false
-        }
-        guard let base = model.profileEditingBaseLayers else {
-            return true
-        }
-        return !base.contains { $0.name == selected }
-    }
-
     private var canAddLayer: Bool {
         let name = newLayer.trimmed
         return !name.isEmpty
@@ -226,20 +126,8 @@ struct LayerStripEditor: View {
         addingLayer = false
     }
 
-    /// Focus follows selection or clears if card disappears (#816, code review
-    /// 2026-08-12).
-    private func deleteLayer() {
-        guard selected != KeyLayer.defaultName else { return }
-        model.config.layers = KeybindingCatalog.deleteLayer(
-            in: model.config.layers,
-            named: selected
-        )
-        selected = KeyLayer.defaultName
-        focusedChip =
-            stripSurvivesDeletion
-            ? KeyLayer.defaultName : nil
-    }
-
+    /// Focus follows selection or clears if card disappears (#816,
+    /// code review 2026-08-12).
     private var stripSurvivesDeletion: Bool {
         LayersCard.isOffered(
             config: model.config,

@@ -79,4 +79,24 @@ extension KeybindingCatalog {
             return layer
         }
     }
+
+    /// `layer` placed into `layers` after the last layer `order`
+    /// puts before it, or first; a list already holding it is
+    /// returned as it is (#2022).
+    static func insertLayer(
+        _ layer: KeyLayer,
+        into layers: [KeyLayer],
+        order: [String]
+    ) -> [KeyLayer] {
+        guard !layers.contains(where: { $0.name == layer.name }) else {
+            return layers
+        }
+        let earlier = order.prefix { $0 != layer.name }
+        let at =
+            layers.lastIndex { earlier.contains($0.name) }.map { $0 + 1 }
+            ?? 0
+        var result = layers
+        result.insert(layer, at: at)
+        return result
+    }
 }

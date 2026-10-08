@@ -295,5 +295,7 @@ extension InterpolatedLabelTests {
         // reason the switch that draws the segment, both by key.
         "space_bar.color.focused_highlight.help": 1,
         "colors.front_app_off.help": 2,
+        // A layer's locked box points at Delete layer (#2022).
+        "shortcuts.layer_reach.locked_help": 1,
     ]
 }

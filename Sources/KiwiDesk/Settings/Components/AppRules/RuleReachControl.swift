@@ -84,6 +84,26 @@ enum RuleReachWords {
         }
     }
 
+    /// The words beside a profile's box: "this profile" for the
+    /// edited one and "loaded" for the loaded one — both, when the
+    /// edited profile is the loaded one (#2022).
+    static func mark(_ profile: String, _ reading: RuleReachReading)
+        -> String?
+    {
+        let this = profile == reading.editing
+        let loaded = profile == reading.loaded
+        if this && loaded {
+            return L(
+                "app_rules.reach.this_profile_loaded",
+                "this profile, loaded"
+            )
+        }
+        if this {
+            return L("app_rules.reach.this_profile", "this profile")
+        }
+        return loaded ? L("app_rules.reach.loaded", "loaded") : nil
+    }
+
     /// The trash's "this profile" choice.
     static func removeHere(_ reading: RuleReachReading) -> String {
         L("app_rules.remove.here", "Remove from %1$@", reading.editing)
