@@ -1,5 +1,5 @@
 ---
-description: Measure the work KiwiDesk does per Space switch on the real desk — build a bundle, swap it in for the running instance, switch Spaces through the CLI idle and with every core loaded, read `get_work_counters`, put the previous build back. Use before and after a change that should make switching or retiling cheaper (#1508 and its follow-ups), to compare two builds, or when a user reports lag while switching.
+description: Measure the work KiwiDesk does per Space switch on the real desk — build a bundle, swap it in for the running instance, switch Spaces through the CLI idle, with every core loaded and with the GPU held busy, read `get_work_counters`, put the previous build back. Use before and after a change that should make switching or retiling cheaper (#1508 and its follow-ups), to compare two builds, or when a user reports lag while switching.
 argument-hint: "[optional: two space names, rounds, or a baseline to compare against]"
 ---
 
@@ -51,7 +51,23 @@ S=.claude/skills/measure-work/scripts/measure-switches.sh
 APP=<scratch>/<label>/KiwiDesk.app
 $S $APP <a> <b> 10            # idle
 $S $APP <a> <b> 10 --load     # one `yes` per core
+$S $APP <a> <b> 10 --gpu-load # a WebGL2 shader holding the GPU
 ```
+
+`--gpu-load` (#2030) is the condition several switch stalls only
+showed under (#1925, #1956, #1508). It serves `gpu-load.html`
+beside the script on 127.0.0.1 (Safari refuses WebGL from
+`file:///private/tmp`), opens it in Safari, and refuses to measure
+until `ioreg`'s Device Utilization reads 90 % or more — a
+draw-call-bound page such as WebGL Aquarium never gets there on an
+M1 Max and is a CPU load in disguise. The run sits inside
+`caffeinate -d`, because a display sleeping mid-run zeroes the
+trace, and the GPU trace's minimum and mean print to stderr; a
+minimum far under 90 means the load lapsed and the run does not
+count. Everything it started — server, tab, caffeinate, sampler —
+is torn down on exit, Ctrl-C included, since a forgotten full load
+skews the next reading. GPU numbers compare only with GPU numbers
+from the same machine, like the CPU condition.
 
 Ten rounds is twenty switches, each with its settle. Run each
 condition twice; a pair that disagrees by more than a quarter is
