@@ -150,7 +150,7 @@ these:
   its target moving; the two settle passes re-stack every ring
   (`BorderOrderReassertTests`).
 - **A ring re-stacks through AppKit's `order(_:relativeTo:)`, and
-  only from a ruled trigger** — `sync`'s `ordersRing` gate
+  only from a ruled trigger** — `sync`'s `ordersOverlay` gate
   (`needsOrder`, a settle pass, no WindowServer stream), the
   WindowServer reorder and unhide events, the unhide's restore of
   visibility, and the dead-end ring. A new caller is a new round
@@ -162,10 +162,11 @@ these:
   it MOVES the ring is `BorderStackingTests` ▸
   `reorderMovesTheRing`, which reads the stack back. This orders
   the AppKit panel and draws nothing: the `.transient` section
-  below still binds. A sticky mark takes the same gate through
-  `StickyMarkManager.sync` and the reorder events through
-  `reassert`, its stacking un-counted by that census since it is
-  spelled `order(.above, relativeTo:)` (#2026,
+  below still binds. A sticky mark stacks under the same rule —
+  `sync`'s `ordersOverlay` gate and the reorder events'
+  `reassert`, a carry owing its mark a stack — and a new caller of
+  its `order()` owes its ruling in the census's mark clause (#2026,
+  `BorderOrderCensusTests` ▸ `markOrderSitesAreCensused`,
   `StickyMarkOrderTests`).
 - **A ring panel that keeps the ring's size moves through
   `SkyLight.moveWindow`, never AppKit's `setFrame`** — mid-animation

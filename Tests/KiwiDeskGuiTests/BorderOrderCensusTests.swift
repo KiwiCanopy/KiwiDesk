@@ -22,7 +22,7 @@ struct BorderOrderCensusTests {
         ),
         "BorderManager+Sync.swift": (
             1,
-            "sync, gated by `ordersRing`: needsOrder, a settle "
+            "sync, gated by `ordersOverlay`: needsOrder, a settle "
                 + "pass or no WindowServer stream"
         ),
         "BorderManager+SkyLight.swift": (
@@ -44,6 +44,25 @@ struct BorderOrderCensusTests {
         }
         #expect(
             counts == Self.allowed.mapValues(\.count),
+            "found \(sites.map(\.site))"
+        )
+    }
+
+    /// A sticky mark's stack is the same round trip (#2026): its
+    /// callers are the sync behind `ordersOverlay` and the
+    /// WindowServer reorder events' `reassert`, beside the one
+    /// definition in the overlay.
+    @Test("only the ruled sites stack a sticky mark")
+    func markOrderSitesAreCensused() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "order()",
+            under: Self.root.appendingPathComponent("Sources/KiwiDeskCore")
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent).sorted() == [
+                "StickyMarkManager.swift", "StickyMarkManager.swift",
+                "StickyMarkOverlay.swift",
+            ],
             "found \(sites.map(\.site))"
         )
     }
