@@ -143,13 +143,14 @@ extension KiwiCore {
         guard now.timeIntervalSince(debt.noted) < delayedCloseBound
         else { return "expired" }
         guard debt.followed else { return "no follow of the successor" }
-        let active = state.workspaces.activeSpace
-        guard active != debt.space,
-            state.workspaces.space(of: debt.successor) == active,
+        // A Space's focus is one of its members, so the second
+        // clause also places the successor in the active Space.
+        guard state.workspaces.activeSpace != debt.space,
             activeSpace?.focused == debt.successor
         else { return "focus moved on" }
-        guard let next = state.workspaces[debt.space]?.focused,
-            state.windows[next]?.isFullscreen != true
+        // The fold's re-pick never focuses a fullscreen window
+        // (#670), and the tail's belt still refuses one.
+        guard state.workspaces[debt.space]?.focused != nil
         else { return "no raisable fallback" }
         // From the OPENING: a Dock or Window-menu pick that keyed
         // the successor lands before its report; the close click

@@ -42,12 +42,11 @@ struct DelayedCloseReturnTests {
         }
         fx.refuse(core)
         core.handle(.windowFocused(fx.successor))
-        let deadline = Date().addingTimeInterval(10)
-        while core.state.workspaces.activeSpace != "2",
-            Date() < deadline
-        {
-            try await Task.sleep(for: .milliseconds(20))
-        }
+        // The follow's own handle, awaited — never a wall-clock poll,
+        // which a starved main actor outlives (tests.md, #344).
+        let follow = try #require(core.deferred.task(for: .focusFollow))
+        await follow.value
+        #expect(core.state.workspaces.activeSpace == "2")
         #expect(core.delayedCloseDebt?.followed == true)
         fx.confirmClose(core)
         fx.expectReturned(core, log)

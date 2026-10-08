@@ -152,12 +152,14 @@ struct DelayedCloseLetOutTests {
 
     @Test("A re-key of either window retires the debt")
     func rekeyRetires() {
-        let (core, log) = fx.makeCore()
-        defer { fx.tearDown() }
-        fx.refuse(core)
-        fx.keySuccessor(core)
-        core.handle(.windowRekeyed(fx.successor, WindowID(9)))
-        #expect(core.delayedCloseDebt == nil)
-        #expect(log.has("debt retired — re-keyed"))
+        for rekeyed in [fx.successor, fx.closing] {
+            let (core, log) = fx.makeCore()
+            defer { fx.tearDown() }
+            fx.refuse(core)
+            fx.keySuccessor(core)
+            core.handle(.windowRekeyed(rekeyed, WindowID(9)))
+            #expect(core.delayedCloseDebt == nil, "w\(rekeyed.raw)")
+            #expect(log.has("debt retired — re-keyed"))
+        }
     }
 }

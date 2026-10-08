@@ -93,13 +93,23 @@ struct DelayedCloseFixture {
     /// synchronous main-actor span — the house pattern that keeps
     /// it safe beside other suites, `.serialized` ordering this
     /// suite alone.
-    func confirmClose(_ core: KiwiCore) {
+    func confirmClose(_ core: KiwiCore, minimized: Bool = false) {
         NativeSpaces.spacesOverride = authorityTopology(
             mainCurrent: 10,
             secondaryCurrent: 20
         )
         defer { NativeSpaces.spacesOverride = nil }
-        core.handle(.windowDestroyed(closing, wasMinimized: false))
+        core.handle(.windowDestroyed(closing, wasMinimized: minimized))
+    }
+
+    /// A window of a third app on the successor's Space.
+    func addBystander(_ core: KiwiCore) -> WindowID {
+        let id = WindowID(5)
+        core.state.windows.upsert(
+            ManagedWindow(id: id, pid: 80, appName: "App80")
+        )
+        core.state.workspaces.add(id, to: "2")
+        return id
     }
 
     func expectReturned(_ core: KiwiCore, _ log: Log) {
