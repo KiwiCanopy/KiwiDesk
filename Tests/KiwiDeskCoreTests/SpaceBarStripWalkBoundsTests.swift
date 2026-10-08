@@ -141,8 +141,9 @@ struct SpaceBarStripWalkBoundsTests {
             walks == old.overlaps(new),
             "\(context): a kept glyph walks only on a shared group"
         )
-        // Every glyph the old strip drew starts where it stood:
-        // the walk exactly, not merely somewhere on the chip.
+        // A kept glyph starts where it stood: the walk exactly,
+        // not merely somewhere on the chip.
+        var travel: CGFloat?
         for (index, glyph) in view.appViews.enumerated() {
             let group = new.lowerBound + index
             guard let was = oldCell[group] else { continue }
@@ -151,16 +152,24 @@ struct SpaceBarStripWalkBoundsTests {
                 abs(start - was) < 0.5,
                 "\(context): group \(group) starts \(start), was \(was)"
             )
+            travel = glyph.frame.midX - was
         }
+        // A glyph carried off travels that same walk, held to the
+        // chip's end cells, where it fades in place (#2052).
+        guard let travel else { return }
+        let ends = (low + cell / 2)...(high - cell / 2)
         for glyph in view.leavingViews {
             guard let was = oldView[ObjectIdentifier(glyph)] else {
                 Issue.record("\(context): a leaving glyph never drawn")
                 continue
             }
-            let start = glyph.frame.midX + slide(of: glyph)
+            let rest = min(
+                max(was + travel, ends.lowerBound),
+                ends.upperBound
+            )
             #expect(
-                abs(start - was) < 0.5,
-                "\(context): leaving glyph starts \(start), was \(was)"
+                abs(glyph.frame.midX - rest) < 0.5,
+                "\(context): leaving at \(glyph.frame.midX), owed \(rest)"
             )
         }
     }
