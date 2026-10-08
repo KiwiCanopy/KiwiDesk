@@ -52,13 +52,8 @@ final class ShelfDividerHandle: NSView {
         cursor.set()
     }
 
-    /// Asked once, on the first hover: a cursor set from a panel
-    /// that never activates otherwise holds only while KiwiDesk is
-    /// frontmost (`SkyLight.allowBackgroundCursor`).
-    private static let backgroundCursor = SkyLight.allowBackgroundCursor()
-
     override func mouseEntered(with event: NSEvent) {
-        _ = Self.backgroundCursor
+        SkyLight.ensureBackgroundCursor()
         cursor.set()
         setHovered(true)
     }
@@ -89,7 +84,7 @@ final class ShelfDividerHandle: NSView {
         guard hovered != isHovered else { return }
         // The cursor follows the ink, as the enter and exit set it.
         if hovered {
-            _ = Self.backgroundCursor
+            SkyLight.ensureBackgroundCursor()
             cursor.set()
         } else {
             NSCursor.arrow.set()

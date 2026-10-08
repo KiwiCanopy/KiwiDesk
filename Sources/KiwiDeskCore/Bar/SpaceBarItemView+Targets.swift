@@ -6,7 +6,7 @@ import AppKit
 extension SpaceBarItemView {
     /// Rebuilt with the glyphs, but a target whose windows did not
     /// change is kept, so a render under a resting pointer does not
-    /// restart its tooltip.
+    /// restart its peek.
     func syncTargets() {
         guard let space else {
             glyphTargets.forEach { $0.removeFromSuperview() }

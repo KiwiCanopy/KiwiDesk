@@ -17,9 +17,7 @@ public struct AppBarStyle: Sendable, Equatable {
     /// Longest title drawn per item before tail-truncation (#1171).
     public var titleCap = 10
     /// Group adjacent windows of the same app with a count badge.
-    /// Off by default, unlike the Space Bar's: one row per window
-    /// reads better where titles are shown.
-    public var groupAdjacentWindows = false
+    public var groupAdjacentWindows = true
 
     public init() {}
 

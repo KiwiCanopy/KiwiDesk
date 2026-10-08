@@ -143,11 +143,15 @@ struct ShelfBorderSeamTests {
     /// reset to 0, which draws nothing; so does the front chip's
     /// indicator (#1856), the Space item's accent laid on the chip.
     private static let allowedColor: [String: Int] = [
+        // The hover peek's count pill ring, in the hairline ink
+        // (#1946) — a badge's edge, not a surface's rim.
+        "BarPeekBody+Parts.swift": 1,
         "AppBarItemView+Paint.swift": 1,
         "SpaceBarItemView+Style.swift": 1,
         "SpaceBarOverlay+FrontAccent.swift": 1,
     ]
     private static let allowedWidth: [String: Int] = [
+        "BarPeekBody+Parts.swift": 1,
         "AppBarItemView+Paint.swift": 3,
         "SpaceBarItemView+Style.swift": 2,
         "SpaceBarOverlay+FrontAccent.swift": 2,

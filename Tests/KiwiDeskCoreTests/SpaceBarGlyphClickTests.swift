@@ -6,8 +6,9 @@ import Testing
 
 /// A click on a Space Bar glyph or `+n` (#1528, rulings 8–10): a
 /// one-window glyph switches to its Space AND lands on that
-/// window; a group glyph and `+n` open a menu and switch nothing
-/// until a row is picked.
+/// window; a group glyph and `+n` list their windows — the peek on
+/// a click, the native menu for VoiceOver (#1946) — and switch
+/// nothing until a row is picked.
 @MainActor
 private func makeCore() -> KiwiCore {
     makeTestCore(
@@ -161,12 +162,18 @@ struct SpaceBarGlyphClickTests {
         #expect(core.state.workspaces[one]?.focused == WindowID(5))
     }
 
-    @Test("A group glyph opens its menu and switches nothing")
-    func groupOpensAMenu() throws {
+    /// A click on a list opens no menu — the peek is its list
+    /// (`BarPeekClickTests`) — while VoiceOver's press opens the
+    /// native menu, the peek's accessible twin (#1946).
+    @Test("A group glyph's click opens no menu; VoiceOver's press does")
+    func groupOpensAMenuForVoiceOver() throws {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         let menu = capturingMenus(core)
         core.pickFromSpaceBar(pick([2, 3], on: two))
+        #expect(menu() == nil, "a click shows the peek instead")
+        #expect(core.activeSpace?.id == one)
+        core.pressSpaceBarGlyph(pick([2, 3], on: two))
         #expect(core.activeSpace?.id == one)
         let shown = try #require(menu())
         // One app's rows: titles under an app header (#1947).
@@ -181,12 +188,14 @@ struct SpaceBarGlyphClickTests {
         #expect(core.state.workspaces[two]?.focused == WindowID(3))
     }
 
-    @Test("+n opens its menu even for one window, switching nothing")
-    func overflowOpensAMenu() throws {
+    @Test("+n's VoiceOver menu lists even one window, switching nothing")
+    func overflowOpensAMenuForVoiceOver() throws {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         let menu = capturingMenus(core)
         core.pickFromSpaceBar(pick([4], on: two, .overflow))
+        #expect(menu() == nil, "a click shows the peek instead")
+        core.pressSpaceBarGlyph(pick([4], on: two, .overflow))
         #expect(core.activeSpace?.id == one)
         let shown = try #require(menu())
         // Mixed apps: no header, each row names its app.
@@ -216,25 +225,42 @@ struct SpaceBarGlyphClickTests {
         #expect(untitled == Array(repeating: "Untitled Window", count: 3))
     }
 
-    @Test("The hover title is the app, then each window's title")
-    func tooltipListsTitles() {
+    /// Every window counts (#1946): an untitled one is a row named
+    /// as the glyph menu names it, and the count rides the header
+    /// from two windows.
+    @Test("The peek lists every window under its app")
+    func peekListsEveryWindow() throws {
+        LocalizationManager.shared.select("en")
         let core = seededCore()
-        #expect(
-            core.spaceBarTooltip([WindowID(2), WindowID(3)])
-                == "Mail\nInbox\nDraft"
+        let mail = try #require(
+            core.barPeekContent(.glyph([WindowID(2), WindowID(3)]))
         )
-        #expect(core.spaceBarTooltip([WindowID(4)]) == "Web\nDoc")
-        #expect(core.spaceBarTooltip([WindowID(99)]) == nil)
+        #expect(mail.groups.map(\.app) == ["Mail"])
+        #expect(mail.groups.map(\.titles) == [["Inbox", "Draft"]])
+        #expect(mail.groups.map(\.count) == [2])
+        let web = try #require(core.barPeekContent(.glyph([WindowID(4)])))
+        #expect(web.groups.map(\.titles) == [["Doc"]])
+        #expect(web.groups.map(\.count) == [nil])
+        core.state.windows.updateTitle(WindowID(3), title: "")
+        let untitled = try #require(
+            core.barPeekContent(.glyph([WindowID(2), WindowID(3)]))
+        )
+        #expect(
+            untitled.groups.map(\.titles) == [["Inbox", "Untitled Window"]]
+        )
+        #expect(untitled.groups.map(\.count) == [2])
+        #expect(core.barPeekContent(.glyph([WindowID(99)])) == nil)
     }
 
     @Test("The bootstrap wires the targets to the click routing")
-    func bootstrapWiresThePick() {
+    func bootstrapWiresThePick() throws {
         let core = seededCore()
         core.spaceBars.glyphActions.pick(pick([4], on: two))
         #expect(core.activeSpace?.id == two)
+        let peek = try #require(core.spaceBars.glyphActions.peek)
         #expect(
-            core.spaceBars.glyphActions.tooltip([WindowID(4)])
-                == "Web\nDoc"
+            peek.content(.glyph([WindowID(4)]))?.groups.map(\.titles)
+                == [["Doc"]]
         )
     }
 

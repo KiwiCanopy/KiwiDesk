@@ -77,6 +77,12 @@ extension AppBarOverlay {
         root.addSubview(itemContainer)
         root.addSubview(backCount)
         root.addSubview(forwardCount)
-        root.onScroll = { [weak self] in self?.scroll($0) ?? false }
+        // A scroll closes the peek first (#1946); one resting
+        // on an item the scroll brings under the pointer
+        // dwells again.
+        root.onScroll = { [weak self] delta in
+            self?.itemActions?.peek?.dismiss()
+            return self?.scroll(delta) ?? false
+        }
     }
 }

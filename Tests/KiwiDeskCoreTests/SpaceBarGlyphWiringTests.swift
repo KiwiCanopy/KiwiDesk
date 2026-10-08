@@ -5,8 +5,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// #1528's glyph targets end to end: a click on a target the real
-/// render built reaches Core, the hover title is asked of Core when
-/// it shows, the shelf panel lets it show in an inactive app, a
+/// render built reaches Core, the hover peek is asked of Core when
+/// it shows (#1946), a
 /// traveler's glyph lands on the traveler, a stale menu pick is
 /// dropped, and a row the focus door refuses is greyed. Split from
 /// `SpaceBarGlyphClickTests` for the file ceiling.
@@ -140,31 +140,20 @@ struct SpaceBarGlyphWiringTests {
         #expect(core.state.workspaces.lastFocused == WindowID(4))
     }
 
-    @Test("A rendered glyph asks Core for its title when it shows")
-    func tooltipIsReadAtHover() throws {
+    /// The target hands the peek its WINDOWS, never a string, so
+    /// a title is whatever state holds when the peek shows (#1946).
+    @Test("A rendered glyph's peek is read when it shows")
+    func peekIsReadAtShow() throws {
         let core = seededCore()
         render(core)
         let web = try target(core, on: two)
-        let tip = {
-            web.view(
-                web,
-                stringForToolTip: 0,
-                point: .zero,
-                userData: nil
-            )
+        #expect(web.peekSource == .glyph([WindowID(4)]))
+        let titles = {
+            core.barPeekContent(web.peekSource)?.groups.flatMap(\.titles)
         }
-        #expect(tip() == "Web\nDoc")
+        #expect(titles() == ["Doc"])
         core.state.windows.updateTitle(WindowID(4), title: "Renamed")
-        #expect(tip() == "Web\nRenamed")
-    }
-
-    @Test("The shelf panel shows tooltips while KiwiDesk is inactive")
-    func panelAllowsInactiveTooltips() throws {
-        let core = seededCore()
-        render(core)
-        let shelf = try #require(core.shelves.overlayForTesting(display))
-        let panel = try #require(shelf.panel)
-        #expect(panel.allowsToolTipsWhenApplicationIsInactive)
+        #expect(titles() == ["Renamed"])
     }
 
     @Test("A traveler's glyph lands on the traveler, not its home")
@@ -227,7 +216,7 @@ struct SpaceBarGlyphWiringTests {
         let core = seededCore()
         core.windowIsOnScreen = { $0 == WindowID(4) ? false : nil }
         let rows = core.spaceBarMenuRows([WindowID(4), WindowID(1)])
-        #expect(rows.map(\.window) == [WindowID(4), WindowID(1)])
+        #expect(rows.map(\.row.window) == [WindowID(4), WindowID(1)])
         #expect(rows.map(\.enabled) == [false, true])
     }
 }

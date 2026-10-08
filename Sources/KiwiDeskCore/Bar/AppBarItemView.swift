@@ -68,7 +68,6 @@ final class AppBarItemView: NSView {
     weak var itemActions: AppBarItemActions?
     /// Core cut the title at `title_cap` (#1514).
     private(set) var titleCut = false
-    var tipTag: NSView.ToolTipTag?
     var onDragMoved: (AppBarItemView, CGPoint) -> Void = { _, _ in }
     var onDragEnded: (AppBarItemView) -> Void = { _ in }
 
@@ -163,9 +162,7 @@ final class AppBarItemView: NSView {
     }
 
     override func mouseExited(with event: NSEvent) {
-        guard isHovered else { return }
-        isHovered = false
-        applyColors()
+        applyHover(false)
     }
 
     /// Hovered only while the pointer is on THIS view — a count
@@ -180,6 +177,8 @@ final class AppBarItemView: NSView {
     }
 
     private func applyHover(_ ownsPointer: Bool) {
+        // The peek reads an inert item too: it may hide its title.
+        reportPeek(ownsPointer: ownsPointer)
         let hovered = !isInert && ownsPointer
         guard hovered != isHovered else { return }
         isHovered = hovered

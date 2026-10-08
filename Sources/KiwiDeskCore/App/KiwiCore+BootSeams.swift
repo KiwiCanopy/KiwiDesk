@@ -70,6 +70,10 @@ extension KiwiCore {
         // frames live in.
         mouse.onLeftMouseDown = { [weak self] point, origin in
             self?.stampLeftClick(at: GeometryUtils.axPoint(point))
+            // Neither arm hears a press on a bar or the peek, so
+            // every press it does hear is a click outside the peek
+            // (#1946).
+            self?.shelves.peek.dismiss()
             // The display follow stands down for our own
             // window's press: its bar-overlay exemption is the
             // global monitor's blindness (#446, #1281).

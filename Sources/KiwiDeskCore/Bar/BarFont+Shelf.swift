@@ -12,6 +12,17 @@ extension KiwiShelf {
         )
     }
 
+    /// Bar text at `size` at a weight of its own, the shelf's
+    /// family kept — a header that must out-weigh the text beneath
+    /// it, as the hover peek's app line does (#1946).
+    @MainActor
+    public func textFont(
+        ofSize size: CGFloat,
+        emphasis: BarFontWeight
+    ) -> NSFont {
+        BarFont.font(family: fontFamily, weight: emphasis.value, size: size)
+    }
+
     /// A count badge at `size`: the shelf's family at the badge's
     /// own `emphasis`, since a count must out-weigh the text it
     /// counts. A chosen family's digits are tabular so a count

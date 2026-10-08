@@ -5,16 +5,15 @@ import AppKit
 /// `SpaceBarGlyphActions`, where #1518's menu joins it.
 @MainActor
 final class AppBarItemActions {
-    /// The hover title for a window and the item's group size,
-    /// read when the tooltip shows (#1514).
-    var tooltip: @MainActor (WindowID, Int) -> String? = { _, _ in
-        nil
-    }
+    /// The bars' one hover peek (#1946), which reads the item's
+    /// windows when it shows, so a renamed window needs no
+    /// refresh (bars.md).
+    weak var peek: BarPeek?
 }
 
-/// The hover title is asked for when it shows, never stored, so a
-/// renamed window needs no refresh (bars.md).
-extension AppBarItemView: NSViewToolTipOwner {
+/// The item's hover peek (#1946): asked for only where the item
+/// hides text (#1514's ruling).
+extension AppBarItemView {
     /// Whether the label shows all of its text: false when it is
     /// hidden (icon content, a vertical bar) or its width cuts it.
     var drawsTextInFull: Bool {
@@ -28,19 +27,21 @@ extension AppBarItemView: NSViewToolTipOwner {
     /// does not show all of it (#1514's ruling).
     var hidesText: Bool { titleCut || !drawsTextInFull }
 
-    override func setFrameSize(_ newSize: NSSize) {
-        super.setFrameSize(newSize)
-        if let tipTag { removeToolTip(tipTag) }
-        tipTag = addToolTip(bounds, owner: self, userData: nil)
+    /// What the peek shows for this item: a group's windows,
+    /// always, as a multi-window glyph's (owner, #1946); a single
+    /// item's window where it hides text (#1514); nil else.
+    var peekSource: BarPeekSource? {
+        count > 1 || hidesText ? .appItem(members) : nil
     }
 
-    func view(
-        _ view: NSView,
-        stringForToolTip tag: NSView.ToolTipTag,
-        point: NSPoint,
-        userData data: UnsafeMutableRawPointer?
-    ) -> String {
-        guard hidesText else { return "" }
-        return itemActions?.tooltip(windowID, count) ?? ""
+    /// Reports the pointer's reading to the peek — every hover
+    /// reading, the relayout's re-read included.
+    func reportPeek(ownsPointer: Bool) {
+        itemActions?.peek?.pointer(
+            in: self,
+            on: ownsPointer ? self : nil,
+            source: ownsPointer ? peekSource : nil,
+            edge: edge
+        )
     }
 }

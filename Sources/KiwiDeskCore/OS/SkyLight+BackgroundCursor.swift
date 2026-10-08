@@ -33,4 +33,14 @@ extension SkyLight {
             kCFBooleanTrue
         ) == 0
     }
+
+    /// Asked once, on a panel's first hover — the shelf divider's
+    /// and the peek's: a cursor set from a panel that never
+    /// activates holds only with the property set. The one home
+    /// of the request.
+    static func ensureBackgroundCursor() {
+        _ = backgroundCursorAllowed
+    }
+
+    private static let backgroundCursorAllowed = allowBackgroundCursor()
 }

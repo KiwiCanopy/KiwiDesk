@@ -181,4 +181,76 @@ struct GlassTintFadeTests {
             #expect(tint.gradient?.startPoint == Self.anchor(edge))
         }
     }
+
+    // MARK: - The uniform exception (#1946)
+
+    /// Both ends' alphas of a painted backdrop.
+    private static func alphas(_ tint: GlassBackdrop) -> [CGFloat] {
+        (tint.gradient?.colors as? [CGColor] ?? []).map(\.alpha)
+    }
+
+    /// A reading panel takes ONE tint over its whole height: both
+    /// ends carry the anchor, where a fade would drop to the floor.
+    @Test("The uniform tint carries the anchor end to end")
+    func uniformTintHasNoFade() throws {
+        try #require(Self.drawsGlass, "no glass below macOS 26")
+        let parent = NSView(frame: Self.frame)
+        let glass = NSView(frame: Self.frame)
+        parent.addSubview(glass)
+        let backdrop = GlassBackdrop()
+        GlassTint.applyUniform(
+            backdrop,
+            below: glass,
+            frame: Self.frame,
+            cornerRadius: 4,
+            hex: "#14201CB3"
+        )
+        try #require(!backdrop.isHidden, "the tint was not painted")
+        let alphas = Self.alphas(backdrop)
+        try #require(alphas.count == 2, "\(alphas)")
+        #expect(alphas[0] == alphas[1], "\(alphas)")
+        #expect(alphas[0] > 0)
+    }
+
+    /// The consumer: the hover peek's panel paints the uniform tint
+    /// on a bottom bar too, where a fade would run from its edge.
+    @Test("The hover peek's glass takes the uniform tint")
+    func peekTakesTheUniformTint() throws {
+        try #require(Self.drawsGlass, "no glass below macOS 26")
+        var shelf = KiwiShelf()
+        shelf.fillColor = "#14201CB3"
+        shelf.liquidGlass = true
+        shelf.backgroundStyle = .plain
+        try #require(shelf.glassEnabled)
+        let peek = BarPeekPanel()
+        defer { peek.panel?.orderOut(nil) }
+        peek.show(
+            BarPeekContent(
+                rows: [
+                    BarWindowRow(
+                        window: WindowID(1),
+                        pid: 1,
+                        app: "App",
+                        title: "One",
+                        icon: nil
+                    )
+                ]
+            ),
+            shelf: shelf,
+            edge: .bottom,
+            anchor: CGRect(x: 300, y: 10, width: 20, height: 20),
+            strip: CGRect(x: 0, y: 0, width: 1440, height: 40),
+            visible: CGRect(x: 0, y: 0, width: 1440, height: 900),
+            fades: false
+        )
+        let root = try #require(peek.panel?.contentView)
+        let tint = try #require(
+            root.subviews.compactMap { $0 as? GlassBackdrop }.first,
+            "the peek has no tint"
+        )
+        try #require(!tint.isHidden, "the peek's tint was not painted")
+        let alphas = Self.alphas(tint)
+        try #require(alphas.count == 2, "\(alphas)")
+        #expect(alphas[0] == alphas[1], "\(alphas)")
+    }
 }

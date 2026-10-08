@@ -37,8 +37,7 @@ private func groups(
 @Suite("Monocle grouping & reorder", .serialized)
 @MainActor
 struct MonocleGroupingTests {
-    /// A monocle space with one window per name, ids 1...n, its
-    /// App Bar grouping on (off by default).
+    /// A monocle space with one window per name, ids 1...n.
     private func makeNamedCore(
         _ names: [String]
     ) -> KiwiCore {
@@ -46,10 +45,6 @@ struct MonocleGroupingTests {
         core.execute(
             "set_mode",
             args: [.string("1"), .string("monocle")]
-        )
-        core.execute(
-            "app_bar.set_group_adjacent_windows",
-            args: [.bool(true)]
         )
         for (index, name) in names.enumerated() {
             core.state.apply(

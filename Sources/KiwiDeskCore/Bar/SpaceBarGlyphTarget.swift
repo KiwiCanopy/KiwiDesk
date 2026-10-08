@@ -2,7 +2,8 @@ import AppKit
 
 /// What a click on a Space Bar glyph or `+n` asks for (#1528).
 /// The item hands it over; Core decides between a switch-and-focus
-/// and a menu, so the view carries no policy.
+/// and the list — the peek, or for VoiceOver the menu — so the view
+/// carries no policy.
 struct SpaceBarGlyphPick {
     enum Kind: Equatable {
         /// An app glyph: the windows it stands for, in row order.
@@ -14,8 +15,13 @@ struct SpaceBarGlyphPick {
     let space: SpaceID
     let windows: [WindowID]
     let kind: Kind
-    /// Where a menu opens; the target view itself.
+    /// Where the peek or a menu opens; the target view itself.
     let anchor: NSView
+
+    /// What the peek shows for this pick (#1946).
+    var peekSource: BarPeekSource {
+        kind == .glyph ? .glyph(windows) : .overflow(windows)
+    }
 }
 
 /// Core's answers for the glyph targets, set once at bootstrap and
@@ -24,9 +30,16 @@ struct SpaceBarGlyphPick {
 @MainActor
 final class SpaceBarGlyphActions {
     var pick: @MainActor (SpaceBarGlyphPick) -> Void = { _ in }
-    /// Read at hover time, so a title is current without the bar
+    /// The bars' one hover peek (#1946), which reads its content
+    /// when it shows, so a title is current without the bar
     /// re-rendering on every title change (#1514).
-    var tooltip: @MainActor ([WindowID]) -> String? = { _ in nil }
+    weak var peek: BarPeek?
+    /// VoiceOver's press: Core opens a list's native menu at the
+    /// target — the peek's accessible twin (#1946) — and picks a
+    /// one-window glyph, as a click does.
+    var accessibilityPress: @MainActor (SpaceBarGlyphPick) -> Void = {
+        _ in
+    }
     /// Pops a menu at its target as a context menu, the chrome the
     /// bar's right-click menu wears (#1850) — modal, so a test
     /// swaps it.
@@ -56,6 +69,20 @@ final class SpaceBarGlyphActions {
             pressure: 1
         )
     }
+
+    /// A click on a list — a multi-window glyph or `+n` — toggles
+    /// its peek (#1946): it shows at once, or closes where shown.
+    func togglePeek(_ pick: SpaceBarGlyphPick) {
+        guard let target = pick.anchor as? SpaceBarGlyphTarget,
+            let item = target.superview as? SpaceBarItemView
+        else { return }
+        peek?.toggle(
+            target,
+            source: target.peekSource,
+            space: pick.space,
+            edge: item.style.edge
+        )
+    }
 }
 
 /// One click target on a Space Bar item (#1528): a transparent
@@ -68,7 +95,6 @@ final class SpaceBarGlyphTarget: NSView {
     let members: [WindowID]
     let kind: SpaceBarGlyphPick.Kind
     weak var actions: SpaceBarGlyphActions?
-    private var tipTag: NSView.ToolTipTag?
     /// A press this target took, owed its pick on the release.
     private var pressed = false
 
@@ -101,6 +127,12 @@ final class SpaceBarGlyphTarget: NSView {
         )
     }
 
+    /// What the peek shows for this target (#1946).
+    var peekSource: BarPeekSource { pick.peekSource }
+
+    /// A press arms the pick; the peek stays, since a list's click
+    /// toggles it on the release (#1946). A Control-click's menu
+    /// closes it as any menu does.
     override func mouseDown(with event: NSEvent) {
         guard !openControlClickMenu(event) else { return }
         pressed = true
@@ -122,26 +154,8 @@ final class SpaceBarGlyphTarget: NSView {
     }
 
     override func accessibilityPerformPress() -> Bool {
-        actions?.pick(pick)
+        actions?.peek?.dismiss()
+        actions?.accessibilityPress(pick)
         return true
-    }
-
-    override func setFrameSize(_ newSize: NSSize) {
-        super.setFrameSize(newSize)
-        if let tipTag { removeToolTip(tipTag) }
-        // The `+n` badge's list is its click; a glyph names itself.
-        guard kind == .glyph else { return }
-        tipTag = addToolTip(bounds, owner: self, userData: nil)
-    }
-}
-
-extension SpaceBarGlyphTarget: NSViewToolTipOwner {
-    func view(
-        _ view: NSView,
-        stringForToolTip tag: NSView.ToolTipTag,
-        point: NSPoint,
-        userData data: UnsafeMutableRawPointer?
-    ) -> String {
-        actions?.tooltip(members) ?? ""
     }
 }

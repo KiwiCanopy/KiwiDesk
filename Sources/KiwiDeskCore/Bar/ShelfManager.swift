@@ -55,6 +55,21 @@ final class ShelfManager {
     /// The bars' context menus (#1518) — the one instance; Core
     /// sets its rows and hands it to both bar managers.
     let contextMenus = BarContextMenus()
+    /// The bars' one hover peek (#1946); Core sets its content and
+    /// hands it to both bar managers.
+    let peek = BarPeek()
+
+    init() {
+        peek.shelf = { [weak self] window in
+            self?.shelf(drawnIn: window)
+        }
+    }
+
+    /// The shelf a bar panel draws — the peek wears it.
+    func shelf(drawnIn window: NSWindow) -> KiwiShelf? {
+        overlays.first { $0.value.panel === window }
+            .flatMap { last[$0.key]?.shelf }
+    }
     /// Set while `updateBars` syncs the two bars: their renders
     /// would otherwise re-lay the shelf against the previous plan
     /// before `sync` hands it the new one.
@@ -77,6 +92,9 @@ final class ShelfManager {
             last[key] = nil
         }
         for (key, overlay) in overlays where !wanted.contains(key) {
+            // Stood down, turned off or its display gone: a peek
+            // standing on this shelf leaves with it (#1946).
+            peek.shelfLeft(overlay.panel)
             overlay.hide(animated: true)
         }
         for shelf in shelves {
@@ -125,6 +143,9 @@ final class ShelfManager {
         let overlay = overlays[key] ?? ShelfOverlay()
         overlays[key] = overlay
         overlay.onLeft = { [weak self] in self?.retire(key) }
+        overlay.onPress = { [weak self] in
+            self?.peek.pressed(on: $0, type: $1)
+        }
         overlay.contextMenus = contextMenus
         overlay.handle.onMinimum = { [weak self] percent, committed in
             self?.onMinimum(percent, committed)
@@ -146,6 +167,8 @@ final class ShelfManager {
         shelf.space?.syncHoverToPointer()
         shelf.app?.syncHoverToPointer()
         overlay.handle.syncHoverToPointer()
+        // The peek's item may have moved under it, or left.
+        peek.syncToAnchor()
     }
 
     /// The displays with a shelf still fading out: a bar manager
