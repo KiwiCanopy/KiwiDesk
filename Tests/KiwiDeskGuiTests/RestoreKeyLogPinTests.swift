@@ -17,10 +17,15 @@ struct RestoreKeyLogPinTests {
                     "Tests/\(target)/TestCore.swift"
                 )
             )
+            // Scoped to the factory: a pin anywhere else is dead.
+            let body = SourceScan.declarationBody(
+                after: "func makeTestCore(",
+                in: source
+            )
             #expect(
-                source.contains(
+                body?.contains(
                     "core.crash.restoreKeys.isOptedIn = { false }"
-                ),
+                ) == true,
                 .init(rawValue: "\(target) misses the pin")
             )
         }
