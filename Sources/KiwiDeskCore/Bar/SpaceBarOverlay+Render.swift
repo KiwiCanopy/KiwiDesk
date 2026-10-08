@@ -4,8 +4,13 @@ import AppKit
 extension SpaceBarOverlay {
     /// Executes one layout pass over the last shown state;
     /// `slotChanged` says the section's slot is not the one the
-    /// last pass drew into.
-    func render(followingActive: Bool, slotChanged: Bool = false) {
+    /// last pass drew into, and `frontMoves` that the front segment
+    /// joins or leaves it (#1903).
+    func render(
+        followingActive: Bool,
+        slotChanged: Bool = false,
+        frontMoves: Bool = false
+    ) {
         guard let state = lastShown else { return }
         let items = state.items
         let frontApp = state.frontApp
@@ -224,14 +229,21 @@ extension SpaceBarOverlay {
             nameBound: pinFront ? axis : viewport + scrollOffset
         )
         frontPlacement = placement
-        renderFrontSegment(
-            frontApp,
-            after: placement.after,
-            strip: strip,
-            nameBound: placement.nameBound,
-            style: style,
-            horizontal: horizontal
-        )
+        let shrinks =
+            frontMoves && frontApp == nil
+            && shrinkFront(horizontal: horizontal)
+        if !shrinks {
+            frontLeaving = false
+            renderFrontSegment(
+                frontApp,
+                after: placement.after,
+                strip: strip,
+                nameBound: placement.nameBound,
+                style: style,
+                horizontal: horizontal
+            )
+            if frontMoves { growFront(horizontal: horizontal) }
+        }
         BarMotion.runLayout {
             installGlassHosting(
                 hosting,

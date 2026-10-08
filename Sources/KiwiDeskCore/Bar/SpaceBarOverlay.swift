@@ -141,6 +141,9 @@ public final class SpaceBarOverlay {
     /// Where the last render placed the front segment, which a
     /// content redraw keeps (#2086).
     var frontPlacement: FrontPlacement?
+    /// The front segment is gliding shut (#1903); a render that
+    /// draws it again ends the shrink.
+    var frontLeaving = false
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
@@ -274,11 +277,17 @@ public final class SpaceBarOverlay {
         // A slot that moved or resized hands the motion to the
         // shelf's glide, so the chips land (#1838).
         let slotChanged = lastShown.map { $0.strip != strip } ?? false
+        // The segment joins or leaves a SHOWN bar with motion; the
+        // first show after a hide lands it (#1903).
+        let frontMoves =
+            isVisible
+            && (lastShown?.frontApp == nil) != (frontApp == nil)
         lastShown = next
         let active = items.first(where: \.active)?.space
         render(
             followingActive: follow.follows(active),
-            slotChanged: slotChanged
+            slotChanged: slotChanged,
+            frontMoves: frontMoves
         )
     }
 
@@ -301,6 +310,7 @@ public final class SpaceBarOverlay {
         scrollGeom = nil
         scrollRun = nil
         frontPlacement = nil
+        frontLeaving = false
         cancelDragAutoScroll()
         root.isHidden = true
         onRendered()

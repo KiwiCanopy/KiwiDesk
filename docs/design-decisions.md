@@ -13120,7 +13120,12 @@ measured once per face costs nothing per change. With every
 frame then fixed, a focus change redraws content alone — the
 Space item's glyph tints and the segment's icon and name — and
 never runs the frame pass, which would re-place glass and views
-that do not move.
+that do not move. The segment joining or leaving a shown bar —
+the App Bar leaving or joining a fused shelf hands it the place
+— grows out of the run's end and shrinks back into it on the
+plate glide, the motion a joining section makes (#1903), so the
+two changes of one plan move together rather than one gliding
+while the other pops.
 
 **The bars honour Reduce Motion, and the ring MARKS rather than
 counts down.** (#1078.) A bar is chrome KiwiDesk draws, so it

@@ -306,7 +306,15 @@ twice, was a question the user answered twice. The argument is
   ruling, #1838). The fade-out keeps the panel until it lands,
   a show meanwhile fades it back, the shelf reports leaving
   exactly once, and `ShelfManager` retires it only then
-  (`ShelfFadeTests`). Never hold a strip reserved for a shelf that is fading
+  (`ShelfFadeTests`). The Space Bar's front-app segment, joining
+  or leaving a SHOWN bar, does the same inside its section: it
+  grows out of the run's end on the plate glide and shrinks back
+  into it (`SpaceBarOverlay+FrontGrow`), its glass cutting, its
+  windows dropped as a target at once, and snapping where no glide
+  plays; the first show after a hide lands it (#1903,
+  `FrontAppGrowTests`; the motion itself is review's and the
+  device's, since no headless render reads the animator).
+  Never hold a strip reserved for a shelf that is fading
   out:
   the windows take it the instant the switch lands and the fading
   shelf draws over their edge.
