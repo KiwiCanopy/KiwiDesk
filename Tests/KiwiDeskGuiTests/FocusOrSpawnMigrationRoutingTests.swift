@@ -12,7 +12,9 @@ import Testing
 ///
 /// Known limit: a `lua` key is seen as an explicit `case lua`
 /// CodingKey or a stored `lua: String` in a Codable file; one
-/// spelled through a renamed key or a non-String type is not.
+/// spelled through a renamed key or a non-String type is not, nor
+/// a `lua: String` on a type that is Codable only through a
+/// protocol declared in another file.
 @Suite("Focus or spawn migration scope (#1511)")
 struct FocusOrSpawnMigrationRoutingTests {
     private var sources: URL {
@@ -41,7 +43,10 @@ struct FocusOrSpawnMigrationRoutingTests {
 
     @Test("the retired verb is named by the step and the retired list")
     func retiredVerbIsTheStepsAlone() throws {
-        let named = try scan { $0.contains("\"pull_or_spawn\"") }
+        // The verb token, so a composed call names it as well.
+        let named = try scan {
+            matches("\\bpull_or_spawn\\b", in: $0)
+        }
         #expect(
             named == [
                 "KiwiDeskCore/Config/ConfigMigration+FocusOrSpawn.swift",
