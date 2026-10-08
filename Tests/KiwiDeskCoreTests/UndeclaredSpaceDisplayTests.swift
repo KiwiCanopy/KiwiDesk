@@ -46,14 +46,67 @@ struct UndeclaredSpaceDisplayTests {
         #expect(core.state.workspaces.activeSpace(on: display) == scratch)
     }
 
-    /// The switch gives it a screen ahead of the slide's read, so
-    /// the first visit slides too. The main screen is the fixture's
-    /// display, so a headless host skips (#531).
-    @Test(
-        "a first visit to it slides",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func firstVisitSlides() throws {
+    /// The net at the head of `retile`: a door with no placement of
+    /// its own — `set_mode` naming a new id — still gets a chip.
+    @Test("naming it in set_mode gives it a chip")
+    func setModeTargetHasAChip() throws {
+        let core = try desk.docked()
+        core.execute("set_mode", args: [.string(scratch.raw), .string("bsp")])
+        #expect(try hasChip(core))
+    }
+
+    /// Placing the new Space touches no other: a hand move of
+    /// Space 3 holds until a monitor re-resolve, never a filing.
+    @Test("placing it leaves a hand-moved Space where it is")
+    func placementKeepsAHandMove() throws {
+        let core = try desk.docked()
+        core.execute(
+            "move_space_to_display",
+            args: [.string("3"), .string(desk.builtIn.name)]
+        )
+        #expect(
+            core.state.workspaces.display(of: SpaceID(3)) == desk.builtIn.id
+        )
+        core.execute(
+            "move_to_space",
+            args: [.string(scratch.raw), .number(13)]
+        )
+        #expect(core.state.workspaces.display(of: scratch) != nil)
+        #expect(
+            core.state.workspaces.display(of: SpaceID(3)) == desk.builtIn.id
+        )
+    }
+
+    /// The sticky gate is told where the new Space WILL lay out: a
+    /// display-sticky window may not move into a Space on its own
+    /// screen, and a refused move creates nothing (#1150).
+    @Test("a display-sticky window is refused it on its own screen")
+    func stickyGateKnowsTheLanding() throws {
+        let core = makeTestCore()
+        let display = DisplayID(1)
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: display,
+                name: "A",
+                frame: CGRect(x: 0, y: 0, width: 1920, height: 1080)
+            )
+        )
+        let window = WindowID(1)
+        core.state.apply(
+            .windowCreated(ManagedWindow(id: window, pid: 1, appName: "A"))
+        )
+        let origin = try #require(core.state.workspaces.space(of: window))
+        core.state.workspaces.assign(origin, to: display)
+        #expect(core.execute("make_display_sticky").isSuccess)
+        core.execute("move_to_space", args: [.string(scratch.raw)])
+        #expect(core.state.workspaces[scratch] == nil)
+        #expect(core.state.workspaces.space(of: window) == origin)
+    }
+
+    /// One screen, Space 1 shown with one window — the plate
+    /// slide's ground. The main screen is the fixture's display, so
+    /// a headless host skips (#531).
+    private func slideCore() throws -> (KiwiCore, DisplayID) {
         let screen = try #require(NSScreen.main)
         let display = try #require(screen.kiwiDisplayID)
         let core = makeTestCore()
@@ -71,16 +124,45 @@ struct UndeclaredSpaceDisplayTests {
         core.state.workspaces.upsertDisplay(
             Display(id: display, name: "MAIN", frame: screen.frame)
         )
-        let window = WindowID(1)
-        core.state.apply(
-            .windowCreated(ManagedWindow(id: window, pid: 1, appName: "A"))
-        )
-        core.state.workspaces.add(window, to: SpaceID(1))
+        for id in [WindowID(1), WindowID(2)] {
+            core.state.apply(
+                .windowCreated(ManagedWindow(id: id, pid: 1, appName: "A"))
+            )
+            core.state.workspaces.add(id, to: SpaceID(1))
+        }
         core.state.workspaces.assign(SpaceID(1), to: display)
         core.state.workspaces.activate(SpaceID(1))
         core.retile()
         #expect(core.state.workspaces[scratch] == nil)
+        return (core, display)
+    }
+
+    /// The switch gives it a screen ahead of the slide's read, so
+    /// the first visit slides too.
+    @Test(
+        "a first visit to it slides",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func firstVisitSlides() throws {
+        let (core, display) = try slideCore()
         core.execute("focus_space", args: [.string(scratch.raw)])
+        defer { core.spaceSlide.end() }
+        #expect(core.state.workspaces.display(of: scratch) == display)
+        #expect(core.spaceSlide.isPlaying)
+    }
+
+    /// A move-and-follow files the window first, and the filing
+    /// places the target before the follow reads its slide.
+    @Test(
+        "a move-and-follow into it slides",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func followSlides() throws {
+        let (core, display) = try slideCore()
+        core.execute(
+            "move_to_space_and_follow",
+            args: [.string(scratch.raw), .number(2)]
+        )
         defer { core.spaceSlide.end() }
         #expect(core.state.workspaces.display(of: scratch) == display)
         #expect(core.spaceSlide.isPlaying)

@@ -228,8 +228,9 @@ editing here:
   re-home splits on, and the explicit name outranks that
   re-home. A Space assigned to another screen than the
   Desktop's is REFUSED at the parse — the layout would carry
-  the window back (#1010) — and a Space no screen owns yet is
-  accepted on ONE screen only: with more it has no settled
+  the window back (#1010) — and a Space no screen owns yet (one
+  not yet created: #1994 places a live one at its next retile)
+  is accepted on ONE screen only: with more it has no settled
   screen (the layout falls back to the key window's, the
   placement resolve to the menu bar's — two readings, and
   #1150's review found them disagreeing), so it is refused with

@@ -17,11 +17,7 @@ extension KiwiCore {
         // The one unresolvable state; resolve() below can then
         // never return nil.
         guard !displays.isEmpty else { return }
-        let assignment =
-            ProfileComposition.compose(
-                displays: displays,
-                mainID: mainID
-            )?.assignment ?? [:]
+        let assignment = composedAssignment(displays, mainID: mainID)
         let previous = Dictionary(
             uniqueKeysWithValues: state.workspaces.allSpaces.compactMap {
                 space in
@@ -32,19 +28,14 @@ extension KiwiCore {
         )
         for space in state.workspaces.allSpaces {
             guard
-                let resolved = SpacePlacement.resolve(
-                    space: space.id,
-                    pins: spacePins,
-                    mainSpaces: mainSpaces,
+                let display = resolvedDisplay(
+                    of: space.id,
                     displays: displays,
                     mainID: mainID,
                     assignment: assignment
                 )
             else { continue }
-            state.workspaces.assign(
-                space.id,
-                to: resolved.display.id
-            )
+            state.workspaces.assign(space.id, to: display)
         }
         // A display the resolve left with no space is healed
         // HERE (#1175), before relocation is judged: a reused
@@ -67,19 +58,81 @@ extension KiwiCore {
         }
     }
 
-    /// Places every Space no resolve has seen — one a command or a
-    /// restart's replay created by id — on its screen (#1994). A
-    /// Space without one has no chip, no `activeSpace(on:)` and no
-    /// slide. True when it resolved; a desk with no screen waits.
+    /// Places each Space with no screen — one a command or a
+    /// restart's replay created by an undeclared id — where the
+    /// resolve's precedence would, touching no other Space (#1994).
+    /// Without one it has no chip, no `activeSpace(on:)` and no
+    /// slide. Adding a Space empties no screen and relocates none,
+    /// so neither the heal nor the float re-anchor is owed. True
+    /// when it placed one.
     @discardableResult
-    func placeUnplacedSpaces() -> Bool {
-        let workspaces = state.workspaces
-        guard !workspaces.allDisplays.isEmpty,
-            workspaces.allSpaces.contains(where: {
-                workspaces.display(of: $0.id) == nil
-            })
-        else { return false }
-        resolveSpaceDisplays()
+    func placeUnplacedSpaces(
+        mainID: DisplayID = PositionalDisplays.liveMainID
+    ) -> Bool {
+        let displays = state.workspaces.allDisplays
+        let unplaced = state.workspaces.allSpaces.map(\.id).filter {
+            state.workspaces.display(of: $0) == nil
+        }
+        guard !displays.isEmpty, !unplaced.isEmpty else { return false }
+        let assignment = composedAssignment(displays, mainID: mainID)
+        for space in unplaced {
+            guard
+                let display = resolvedDisplay(
+                    of: space,
+                    displays: displays,
+                    mainID: mainID,
+                    assignment: assignment
+                )
+            else { continue }
+            state.workspaces.assign(space, to: display)
+        }
         return true
+    }
+
+    /// The screen `space` lays out on: its assignment, else where
+    /// the precedence would place it — asked before a Space named
+    /// by an undeclared id exists (#1994). Nil with no screen.
+    func landingDisplay(
+        of space: SpaceID,
+        mainID: DisplayID = PositionalDisplays.liveMainID
+    ) -> DisplayID? {
+        if let display = state.workspaces.display(of: space) {
+            return display
+        }
+        let displays = state.workspaces.allDisplays
+        return resolvedDisplay(
+            of: space,
+            displays: displays,
+            mainID: mainID,
+            assignment: composedAssignment(displays, mainID: mainID)
+        )
+    }
+
+    private func composedAssignment(
+        _ displays: [Display],
+        mainID: DisplayID
+    ) -> [SpaceID: DisplayID] {
+        ProfileComposition.compose(
+            displays: displays,
+            mainID: mainID
+        )?.assignment ?? [:]
+    }
+
+    /// The one copy of the `SpacePlacement` call every placement
+    /// takes; nil only with no screen.
+    private func resolvedDisplay(
+        of space: SpaceID,
+        displays: [Display],
+        mainID: DisplayID,
+        assignment: [SpaceID: DisplayID]
+    ) -> DisplayID? {
+        SpacePlacement.resolve(
+            space: space,
+            pins: spacePins,
+            mainSpaces: mainSpaces,
+            displays: displays,
+            mainID: mainID,
+            assignment: assignment
+        )?.display.id
     }
 }

@@ -116,6 +116,9 @@ extension KiwiCore {
             state.workspaces.lastFocused == window
             || target == state.workspaces.activeSpace
         addFocusedToSpace(window, to: target)
+        // A target named by an undeclared id takes its screen now:
+        // the re-anchor and a follow's slide read it (#1994).
+        placeUnplacedSpaces()
         if from != target,
             !placeEnteringFloat(window, wasFloat: wasFloat)
         {
@@ -218,7 +221,14 @@ extension KiwiCore {
         follow: Bool
     ) {
         let from = state.workspaces.space(of: window)
-        if stickyMoveRefused(window, to: target) { return }
+        // Told where an undeclared target WILL lay out (#1994).
+        if stickyMoveRefused(
+            window,
+            to: target,
+            landingOn: landingDisplay(of: target)
+        ) {
+            return
+        }
         // Captured before the focus reassign below overwrites it:
         // whether the moved window currently holds OS key focus.
         // Only then must an emptied origin yield focus (#446).
