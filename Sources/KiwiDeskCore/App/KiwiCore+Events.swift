@@ -188,6 +188,7 @@ extension KiwiCore {
             drag.windowMoved(
                 id,
                 frame: frame,
+                validated: isLateFloatMove(id, previous: preEventFrame),
                 previous: preEventFrame
             )
         case .windowResized(let id, let frame):

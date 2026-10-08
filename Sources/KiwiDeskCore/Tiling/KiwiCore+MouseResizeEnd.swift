@@ -25,10 +25,7 @@ extension KiwiCore {
         if mouse.leftButtonHeld || drag.hasGesture(id) {
             return true
         }
-        guard let press = mouse.press,
-            let up = press.upAt,
-            Date().timeIntervalSince(up) < 1,
-            press.clickCount < 2,
+        guard let press = recentSinglePress,
             let slot = tiler.calculatedFrames(
                 state: state
             )[id]
