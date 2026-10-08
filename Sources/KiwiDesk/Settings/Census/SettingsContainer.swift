@@ -12,7 +12,6 @@ enum SettingsContainer: CaseIterable, Hashable {
     case focusBorder
     case gaps
     case general
-    case generalKeys
     case glass
     case grid
     case habits
@@ -67,7 +66,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             return .runtime(.reduceMotion)
         case .advanced, .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
-            .focus, .gaps, .general, .generalKeys, .grid,
+            .focus, .gaps, .general, .grid,
             .habits, .kiwishelf, .appliesImmediately, .layers,
             .looks, .luaBindings,
             .monitorFingerprints, .monocle, .gestures,

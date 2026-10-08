@@ -12,9 +12,12 @@ covers what those cannot say — how things interact, where a
 setting lives, why a move was refused, and the files behind it.
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
-**⌘,** while a KiwiDesk window is key. **Shortcuts & Gestures ▸
-General** offers a rebindable **Open Settings** row for a global
-key.
+**⌘,** while a KiwiDesk window is key.
+
+:::unreleased
+**Shortcuts & Gestures ▸ Open applications** offers a rebindable
+**Open Settings** row for a global key, under **KiwiDesk**.
+:::
 
 That row ships on **`⌃⌥,`**, a [default
 shortcut](#default-shortcuts), so Settings opens from anywhere.

@@ -80,6 +80,39 @@ enum SettingsTheme {
         darkAlpha: 0.14
     )
 
+    /// A chip-shaped control's resting fill — its shape (#1520).
+    static let chipRest = token(
+        light: 0x12_25_1A,
+        dark: 0xE6_EC_E6,
+        lightAlpha: 0.06,
+        darkAlpha: 0.10
+    )
+
+    /// The same chip under the pointer: the ruled lift.
+    static let chipHover = token(
+        light: 0x12_25_1A,
+        dark: 0xE6_EC_E6,
+        lightAlpha: 0.11,
+        darkAlpha: 0.16
+    )
+
+    /// The same chip held down: deeper than the lift.
+    static let chipPressed = token(
+        light: 0x12_25_1A,
+        dark: 0xE6_EC_E6,
+        lightAlpha: 0.16,
+        darkAlpha: 0.22
+    )
+
+    /// A button chip's edge, constant in every state — what tells
+    /// it from a passive hairline capsule (#1520 amendments 5, 6).
+    static let chipEdge = token(
+        light: 0x12_25_1A,
+        dark: 0xE6_EC_E6,
+        lightAlpha: 0.18,
+        darkAlpha: 0.20
+    )
+
     // MARK: - Ink
 
     /// Primary text: titles, row labels, card headings.

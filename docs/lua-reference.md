@@ -4339,9 +4339,13 @@ at the active layer's bindings — or closes it if it is already
 open. It is the panel behind the menu bar's *View Shortcuts…*
 row; the bound combo shows beside that row and in the panel's
 close hint. Seeded to **⌃⌥K** in the base layer and in every
-layer you create, and offered under **Shortcuts & Gestures ▸
-General** ("Show shortcuts panel"), where you can rebind or clear
+layer you create.
+
+:::unreleased
+Offered under **Shortcuts & Gestures ▸ Open applications ▸
+KiwiDesk** ("Show shortcuts panel"), where you can rebind or clear
 it per layer.
+:::
 
 **Example:**
 
@@ -4362,8 +4366,12 @@ opening Settings from the menu bar. Unsaved edits survive that;
 only the place you were reading resets.
 
 Seeded on **`⌃⌥,`** in the base layer and in every layer you
-create in Settings, and offered under **Shortcuts & Gestures ▸
-General** ("Open Settings"), where you can rebind it per layer.
+create in Settings.
+
+:::unreleased
+Offered under **Shortcuts & Gestures ▸ Open applications ▸
+KiwiDesk** ("Open Settings"), where you can rebind it per layer.
+:::
 
 **Example:**
 

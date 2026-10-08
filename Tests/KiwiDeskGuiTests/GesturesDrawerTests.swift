@@ -178,7 +178,7 @@ struct GesturesDrawerTests {
             "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
         )
         let drawer = try #require(
-            body.range(of: "GesturesDrawer(model: model)")
+            body.range(of: "GesturesDrawer(model: model,")
         )
         let header = try #require(body.range(of: "ShortcutsHeader("))
         #expect(drawer.lowerBound < header.lowerBound)

@@ -528,6 +528,40 @@ the answer. A non-interactive value state in a control row (the
 slot size's "Default — orientation standard") renders in the
 same capsule language rather than as bare gray prose.
 
+:::unreleased
+**Jump chips are the capsule language as buttons** (#1520). A long
+page whose groups the reader needs a map of — Shortcuts & Gestures
+is the one — pins a row of chips over its scroll, one per group,
+in page order, each labelled by its group's own title. A chip is
+content-sized and wears its own edge over the chip rest fill —
+never the passive capsule's hairline — lifting on hover and
+deepening while pressed, at the large-control height with the
+label at the size of the header it jumps to, with no count and
+never a truncation: the row wraps instead of scrolling, every
+line starting at the leading inset. The chip for the group
+under the bar is marked with a soft accent fill and a semibold
+label, the ink staying neutral (the accent marks fills, never
+text); the rest fill, its
+lift and its press sit on a layer of their own beneath that, so
+pointing at or pressing the marked chip never unmarks it, and
+the edge stays the same neutral line in every state. Like every
+button it takes no shadow. A chip is a button, the marked one
+announced as selected, and the row is one container named
+and captioned "Jump to", the caption on a line of its own above
+the chips. A click puts the group's header under the bar, and
+arrives without travelling under Reduce Motion. A chip whose
+card is collapsible opens it too. A thin rule may separate chips
+whose scope differs; it rides the chip before it, so a wrap never
+starts a line with it. The bar sits on the page ground and grows
+its lower hairline only once content slides under it. The
+caption line carries a readout at its trailing end, wrapping
+under the caption where both do not fit; the line is header
+chrome, the first thing a narrowing window drops — a name
+inside the readout is shortened before the sentence ever is,
+and the bare chips remain. Chips jump within one page; tabs,
+which show one view at a time, stay the update window's control.
+:::
+
 **An "Automatic" color well shows adaptivity as a shape, not
 an absence** (#429). Almost every color setting stores a
 concrete hex, but a few default to an *adaptive* system color
@@ -1096,6 +1130,16 @@ control also needs an explicit accessibility label (and concise
 hint when the action is not obvious), a visible keyboard-focus
 state, and a recognizable rest treatment or list context —
 `.help()` and hover alone do not make a control discoverable.
+
+:::unreleased
+A chip's rest, hover and pressed fills are the `chipRest` /
+`chipHover` / `chipPressed` tokens, stronger in dark, where a 6 %
+lift does not read — the jump chips take them (#1520). A chip
+that is a button also takes `chipEdge`, constant across states:
+the hairline capsule is the passive chip's vocabulary, so a
+button chip is told apart by its edge before it is ever pointed
+at.
+:::
 
 **Inapplicable controls are greyed, not hidden.** When a
 setting makes another control inert — Auto-size grid overrides

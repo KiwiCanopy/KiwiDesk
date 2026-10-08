@@ -10433,6 +10433,13 @@ card that opens on a first visit needs a stored "seen" flag and
 then changes shape on the second; search opens it on a hit, and its
 summary does the telling while it is shut.
 
+:::unreleased
+Since the layer's name moved onto the pinned jump bar (#1520), the
+separation is carried by the rule after the Mouse & trackpad chip
+and by the Layers card, which leads everything layer-scoped: the
+card above it belongs to no layer.
+:::
+
 **Its entries are grouped by where the hand is** — on your
 windows, on the KiwiShelf, anywhere holding a modifier — never by
 gesture type, which is grouping by widget. That grouping is also
@@ -10645,6 +10652,105 @@ hand's spacing on the tap's own clock, never the main actor's,
 where a busy switch would squash deliberate notches into a
 burst. The number is provisional until a device logs notch
 intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
+
+:::unreleased
+**The page is mapped by pinned jump chips, never split into tabs**
+(#1520, owner ruling 2026-10-01). A group well below the fold of
+a long list is undiscoverable without a map — the per-app
+shortcut, which answers "switch to the Space an app has windows
+in", is the costly case. Tabs are easier to click but hide every
+group but one, so a conflict banner or a search hit lands on a
+page whose siblings are out of sight, and search would have to
+switch tabs as it opens drawers (#1250). Chips keep the page one
+page. Pinned, they also answer what tabs avoid — with chips at
+the top of a long list, reaching the next group would mean
+scrolling back up first. Tabs stay the update
+window's control, which shows separate views one at a time;
+chips jump within one view. Moving *Open applications* up was
+refused too: it trades one group's discoverability for
+another's, and the group's rank is fine once a map exists.
+
+**Layers gets no chip.** It picks which layer every group below
+edits — scope, not a destination — and it is absent in Simple,
+so a chip for it would come and go. The bar carries the edited
+layer's name instead, in words, at the trailing end of the
+caption line over the chips, and that line is the first thing a
+narrowing window drops since it is header chrome. **Mouse &
+trackpad gets the first chip**, set off
+by a rule because everything after it is scoped to one layer and
+it is not; its click opens the card as well, which stays fully
+collapsed otherwise — a first-item-open state would be a third
+collapsible kind and split its search children (#277). The chip
+pinned above it is what keeps the shut card from being
+overlooked at the top of the page.
+
+**Fewer groups, chosen by what a header tells apart.** The
+General drawer — two rows, Show shortcuts panel and Open
+Settings — folds into Open applications under a "KiwiDesk"
+subheading: both open something by key, and a two-row drawer was
+a disclosure guarding almost nothing. Focus and Move windows stay
+apart although they share keys: merged they run 17–23 rows, and
+the header is what tells "where focus goes" from "where a window
+goes" on the same arrows. The section keeps its name: *Controls*
+stays refused, every row in Settings being a control.
+
+**The marked chip is the group under the bar.** A group is
+current once its header has reached the bar and while its card
+is still under it, so scrolling past Mouse & trackpad into the
+layer chrome marks nothing — no chip names what is there.
+Unscrolled, the first group is marked, whatever banner sits above
+it. A clicked chip stays marked until the user scrolls, since a
+group near the end may never bring its header to the bar; a
+scroll the user takes to the end marks the last group for the
+same reason. Marking is a fill on a
+layer of its own and hover a neutral fill beneath it (#1173): a
+pointer resting on the marked chip must not read as unmarking it.
+
+**A chip must read as a button before it is pointed at** (#1520
+amendment 5, owner ruling 2026-10-07). A hairline capsule is the
+passive chip's vocabulary — a badge, a tag — and on the chip's
+own rest fill the container hairline all but vanishes in dark,
+so the row read as labels. The chip therefore draws an edge of
+its own, `chipEdge`, which must separate from the rest fill it
+rims by more than the container hairline separates from the
+page, in either appearance (`SettingsThemeContrastTests` ▸
+`chipEdgeOutreadsHairline`), and which no state moves: the edge
+says "button", the fills say what the pointer is doing. A press
+deepens the pointer's layer (`chipPressed`), which still sits beneath the marking, so
+holding down the marked chip cannot unmark it either. **No
+shadow**: buttons take none (ui-patterns ▸ *Buttons take a native
+style*), the thumb's shadow being the settings' sign for
+"movable", and the edge already carries what a shadow would.
+
+**The row leads** (#1520 amendment 6). Every wrapped line starts
+at the leading inset, where the pane's headers start and where
+the eye returns after each line; a centred wrapped row reads as
+a tag cloud, and centred segments mean tabs on macOS.
+
+**The row says what it is.** A "Jump to" caption sits on a line
+of its own above the chips: the row's VoiceOver name, drawn, and
+hidden from VoiceOver so it is not spoken twice. The edited
+layer's readout moves onto that line, at its trailing end, so
+the chips below are only chips; where caption and readout do
+not fit side by side the readout wraps under the caption, never
+beside the chips. The caption takes the readout's face —
+`.callout` in `ink2`, never `ink3`, which reads as dimmed — and
+the whole line leaves at the chrome step, being header chrome,
+the bare chips remaining. No colon: the form's labels take
+none, and a colon's spacing is per-locale. The caption takes a
+line of its own rather than leading the chips inline, though
+that makes the pinned bar a line taller: the top of a pane is
+easily passed over, so what sits there only informs — a quiet
+caption, never a container header. A card-header tier above the
+row was refused, since on a pinned bar it reads as a frozen
+section title, and
+its semibold would equal the marked chip's "you are here". An
+instruction such as "Click to jump there" was
+refused as well: it names one input of several. The caption
+does not replace the edge — it labels the row once, where the
+edge tells each chip from a passive capsule on every look, and
+without the edge a dark jump chip is `chipSurface()` again.
+:::
 
 ### Overrides & appearance
 
