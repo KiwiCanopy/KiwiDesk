@@ -239,22 +239,23 @@ struct KeyboardLayerWiringTests {
         )
     }
 
-    /// The header names the same layer under the same condition,
-    /// so it asks the same resolver. It was the copy the panel's
-    /// retired docstring pointed at, and nothing scanned it —
+    /// The jump bar's readout names the same layer under the same
+    /// condition, so it asks the same resolver. It moved off the
+    /// header with #1520; nothing else scans it —
     /// `ShortcutsGateTests` is keyed on `LayersCard` and the
     /// clause above on the panel (re-review 2026-09-04).
-    @Test("the header asks the gate whether to name the layer")
-    func headerAsksTheResolver() throws {
-        let header = try Self.source(
-            "Sections/ShortcutsHeader.swift"
+    @Test("the jump bar asks the gate whether to name the layer")
+    func readoutAsksTheResolver() throws {
+        let readout = try Self.source(
+            "Sections/ShortcutsSection+Jump.swift"
         )
         #expect(
-            header.contains(
+            readout.contains(
                 "ShortcutsGates(config:model.config).layersExist"
             )
         )
-        #expect(header.occurrences(of: "layers.count") == 0)
+        #expect(readout.contains("\"shortcuts.editing_layer\""))
+        #expect(readout.occurrences(of: "layers.count") == 0)
     }
 }
 

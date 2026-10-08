@@ -84,9 +84,11 @@ extension ShortcutsKey {
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .toggleFloating, .toggleSticky, .toggleDisplaySticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
-        case .showShortcuts, .openSettings:
-            return .row(.shortcuts, .generalKeys, .showMore)
         case .openApplications:
+            return .row(.shortcuts, .openApplications, .atRest)
+        // KiwiDesk's own two chords, under the group's "KiwiDesk"
+        // subheading since the General drawer folded in (#1520).
+        case .showShortcuts, .openSettings:
             return .row(.shortcuts, .openApplications, .atRest)
         case .advanced:
             return .row(.shortcuts, .luaBindings, .showMore)

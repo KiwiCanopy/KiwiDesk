@@ -106,7 +106,7 @@ extension SettingsModel {
         // the one recognisable state where it silently replaced
         // the authored list: the boot default of an AX-off cold
         // boot (#77, #326). Keyed on the DATA, since
-        // `permissionPaused` arrives only after the first reload
+        // `coreHold` arrives only after the first reload
         // (#516), and kept this narrow: a broader subset test
         // would resurrect a space deleted at runtime but unsaved.
         let bootDefault = [SpaceID(1)]

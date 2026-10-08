@@ -122,7 +122,9 @@ struct SettingsCatalogTests {
         // 128 since #1838: the Motion drawer's shelf toggle and
         // duration rows.
         // 129 since #1931: the Space switch duration row.
-        #expect(allEntries.count == 129)
+        // 128 since #1520: Shortcuts' General drawer left; its
+        // two rows stay as Open applications' controls.
+        #expect(allEntries.count == 128)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

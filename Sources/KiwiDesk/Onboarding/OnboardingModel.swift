@@ -40,6 +40,9 @@ final class OnboardingModel {
         }
     }
     var isTrusted = false
+    /// Whether the user has asked tiling to start; a granted
+    /// permission alone moves no window (#2050, `TilingConsent`).
+    var hasStartedTiling = false
     /// Boot progress seeded and kept current by `AppDelegate` (#802).
     var bootPhase: BootPhase = .ready
     /// Closing card "open at login" checkbox state (#342).
@@ -73,6 +76,8 @@ final class OnboardingModel {
     /// testable without touching `SMAppService`.
     var onSetLoginItem: (Bool) -> Void = { _ in }
     var onOpenSettings: () -> Void = {}
+    /// Starts window management — the grant page's Start Tiling.
+    var onStartTiling: () -> Void = {}
     /// The closing page's ONE exit (#1365): ends the tour inside
     /// Settings, at the Mac Checklist — the card reaches a new
     /// user only if the tour hands them to it.
@@ -175,6 +180,13 @@ final class OnboardingModel {
 
     func continueAfterAccessibility() {
         advance()
+    }
+
+    /// The tour stays on the grant page, which narrates the
+    /// arrangement it starts; Continue then moves on.
+    func startTiling() {
+        guard isTrusted, !hasStartedTiling else { return }
+        onStartTiling()
     }
 
     /// The looks step is always next (#1720).
