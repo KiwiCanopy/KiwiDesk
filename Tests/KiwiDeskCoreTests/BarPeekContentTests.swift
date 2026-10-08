@@ -50,22 +50,7 @@ struct BarPeekContentTests {
             content.groups[0].titles
                 == ["AGENTS.md", "Untitled Window", "Bar.swift"]
         )
-        #expect(content.groups[0].count == 3)
-    }
-
-    @Test("The count shows from two windows, never for one")
-    func countFromTwo() {
-        let one = BarPeekContent(
-            rows: [row(1, app: "Notes", title: "A")]
-        )
-        #expect(one.groups[0].count == nil)
-        let two = BarPeekContent(
-            rows: [
-                row(1, app: "Notes", title: "A"),
-                row(2, app: "Notes", title: "B"),
-            ]
-        )
-        #expect(two.groups[0].count == 2)
+        #expect(content.groups[0].windowCount == 3)
     }
 
     /// A lone window titled as its app keeps its row under the
@@ -110,7 +95,7 @@ struct BarPeekContentTests {
             content.groups.map(\.titles)
                 == [["Book club"], ["Hover peek", "Canvas"]]
         )
-        #expect(content.groups.map(\.count) == [nil, 2])
+        #expect(content.groups.map(\.windowCount) == [1, 2])
         #expect(content.groups.allSatisfy { $0.icon === icon })
     }
 
@@ -147,7 +132,7 @@ struct BarPeekContentTests {
         #expect(
             content.groups.map(\.titles) == [["Work", "Home", "Mail"]]
         )
-        #expect(content.groups.map(\.count) == [3])
+        #expect(content.groups.map(\.windowCount) == [3])
         #expect(content.groups[0].icon == nil)
     }
 
@@ -157,10 +142,9 @@ struct BarPeekContentTests {
     /// weight and size carry the hierarchy), titles in the
     /// item ink, the count in the bar's badge, a hairline between
     /// every two windows and every two apps.
-    @Test("The body draws the shelf's inks, pill and hairlines")
+    @Test("The body draws the shelf's inks and hairlines")
     func bodyDrawsTheRuledLook() throws {
-        var shelf = KiwiShelf()
-        shelf.groupBadgeColor = "#445566"
+        let shelf = KiwiShelf()
         let body = BarPeekBody()
         _ = body.build(
             BarPeekContent(
@@ -184,35 +168,13 @@ struct BarPeekContentTests {
         )
         let one = try #require(body.labels.dropFirst().first)
         #expect(one.textColor == NSColor(kiwiHex: shelf.itemColor))
-        // Only A has two or more windows.
-        #expect(body.pills.map(\.number.stringValue) == ["3"])
-        let pill = try #require(body.pills.first)
+        // No count beside a header: the bar's glyph already shows
+        // it. The body draws its labels, hairlines and hover fill.
+        let drawn: [NSView] = body.labels + body.rules + [body.highlight]
         #expect(
-            pill.layer?.backgroundColor
-                == NSColor(kiwiHex: shelf.groupBadgeColor).cgColor
-        )
-        // The window glyph leads the number inside the pill.
-        #expect(pill.glyph.image != nil)
-        #expect(pill.glyph.frame.maxX <= pill.number.frame.minX)
-        // The glyph at the header's step, the number at full ink.
-        #expect(shelf.peekPillGlyphColor != shelf.groupBadgeTextColor)
-        #expect(
-            pill.glyph.contentTintColor
-                == NSColor(kiwiHex: shelf.peekPillGlyphColor)
-        )
-        #expect(
-            pill.number.textColor
-                == NSColor(kiwiHex: shelf.groupBadgeTextColor)
-        )
-        #expect(pill.frame.height == BarPeekBody.Metrics.pillHeight)
-        // A ring in the hairlines' ink, the one rule colour.
-        #expect(
-            pill.layer?.borderWidth
-                == (shelf.peekPillNeedsRing ? BarPeekBody.Metrics.pillRing : 0)
-        )
-        #expect(
-            pill.layer?.borderColor
-                == BarDivider.color(textColor: shelf.itemColor).cgColor
+            body.subviews.allSatisfy { view in
+                drawn.contains { $0 === view }
+            }
         )
         // Two between A's three windows, one between the apps.
         #expect(body.rules.count == 3)
