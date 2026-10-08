@@ -4,10 +4,20 @@ import Foundation
 /// Positional monitor ordering for hardware-agnostic space layout defaults
 /// (#53).
 public enum PositionalDisplays {
-    /// ID of current main display (menu bar display).
-    public static var liveMainID: DisplayID {
-        DisplayID(CGMainDisplayID())
+    /// ID of current main display (menu bar display); a test core
+    /// memoizes it, the read being a WindowServer round trip
+    /// (#1894, `ScreenListSeamTests`).
+    @MainActor public static var liveMainID: DisplayID {
+        #if DEBUG
+            if let mainIDOverride { return mainIDOverride() }
+        #endif
+        return DisplayID(CGMainDisplayID())
     }
+
+    #if DEBUG
+        /// Test seam over `liveMainID`; nil reads the machine.
+        @MainActor static var mainIDOverride: (() -> DisplayID)?
+    #endif
 
     /// Orders displays with main first, then secondaries
     /// left-to-right, remaining ties broken deterministically
