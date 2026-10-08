@@ -31,7 +31,11 @@ bite large test PRs:
   it; AppKit's screen area takes
   `GeometryUtils.appKitVisibleFrameOverride`, memoized in both
   twins with the #1386 correction over it still live
-  (`DrawnMenuBarsWiringTests` ▸ `twinsMemoizeTheAppKitRead`). When a target's
+  (`DrawnMenuBarsWiringTests` ▸ `twinsMemoizeTheAppKitRead`),
+  and a Core read of the screen list or the main screen goes
+  through `ScreenList`, never `NSScreen.screens` / `.main`
+  beside it, so both twins' memo answers every reader alike
+  (#1894, `ScreenListSeamTests` ▸ `coreReadsThroughTheDoor`). When a target's
   time grows or turns bimodal, measure through the
   `profile-tests` skill (`.claude/skills/profile-tests/SKILL.md`;
   the `test-profiler` agent runs it) before tuning parallelism.

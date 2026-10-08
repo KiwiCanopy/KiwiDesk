@@ -186,7 +186,7 @@ public final class TilingEngine {
     /// #523 leak, one hook over — and adjacency suites inject a
     /// fabricated list instead. Production never writes it.
     var allScreenBounds: @MainActor () -> [CGRect] = {
-        NSScreen.screens.map {
+        ScreenList.all.map {
             GeometryUtils.axVisibleFrame(of: $0)
         }
     }
@@ -194,7 +194,7 @@ public final class TilingEngine {
     /// Every screen's WHOLE AX frame, menu bar and Dock included
     /// (#1787); `allScreenBounds`' sibling, pinned the same way.
     var allScreenFrames: @MainActor () -> [CGRect] = {
-        NSScreen.screens.map(KiwiCore.axFrame(of:))
+        ScreenList.all.map(KiwiCore.axFrame(of:))
     }
 
     public init() {
@@ -240,8 +240,7 @@ public final class TilingEngine {
         sizing: BatchSizing = .mayInstantSize
     ) {
         guard
-            let screen = NSScreen.main
-                ?? NSScreen.screens.first
+            let screen = ScreenList.mainOrFirst
         else { return }
         // An apply probes past bounds once; the one door (#1055).
         withForcedPass(pass.probes) {

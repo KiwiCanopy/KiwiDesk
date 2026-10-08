@@ -59,7 +59,7 @@ public final class MouseTracker {
         else { return false }
         return GeometryUtils.pointerInMenuBarStrip(
             NSEvent.mouseLocation,
-            screens: NSScreen.screens.map {
+            screens: ScreenList.all.map {
                 GeometryUtils.MenuBarScreen(
                     frame: $0.frame,
                     band: GeometryUtils.menuBarBand(

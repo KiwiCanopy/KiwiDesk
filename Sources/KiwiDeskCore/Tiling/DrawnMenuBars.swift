@@ -58,7 +58,7 @@ public enum DrawnMenuBars {
     static func refresh(bars: [CGRect]) -> Bool {
         let fresh = bottoms(
             of: bars,
-            screens: NSScreen.screens.compactMap { screen in
+            screens: ScreenList.all.compactMap { screen in
                 screen.screenNumber.map { ($0, screen.frame) }
             },
             primaryHeight: GeometryUtils.primaryHeight

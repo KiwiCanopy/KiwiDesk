@@ -126,6 +126,10 @@ left `.github/ci-ignore.txt`. Settings ▸ About opens the texts by
 those names: `LicenseDocuments.Document` is the GUI's roster and
 `LicenseDocumentsTests` pins it equal to the script's `for doc
 in` list, so a rename on either side moves the other or reds.
+Third-party TEST data is no bundle component: it stays under
+`Tests/` with its license beside it, never in `Vendor/*`, whose
+every directory the roster derives (#1883, `AXDumpCorpusTests` ▸
+`noticeBesideTheData`).
 
 It **discovers the signing identity** from the keychain. That
 string is not a secret (any user can read it out of a shipped

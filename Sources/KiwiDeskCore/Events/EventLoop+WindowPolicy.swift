@@ -116,43 +116,15 @@ extension EventLoop {
         Self.forceFloatReason(
             pid: pid,
             activationPolicy: policy(of: pid),
-            tilesAsOwnWindow: Self.isOwnProcess(pid)
-                && ownWindowIdentifier(id)
-                    == OwnWindowTiling.identifier
+            tilesAsOwnWindow: tilesAsOwnWindow(pid: pid, id: id)
         )
     }
 
-    /// Where detection's half of a verdict comes from: the
-    /// element, asked now, or what an off-main read found (#1933).
-    enum FloatDetectionSource {
-        case element(AXUIElement, layer: Int?)
-        case read(AutoFloatReason?)
-    }
-
-    /// The automatic verdict for one tracked window (#1810) — the
-    /// one composition `track` and `recheckFloat` both take.
-    func autoFloatVerdict(
-        _ source: FloatDetectionSource,
-        id: WindowID,
-        pid: pid_t,
-        bundleID: String?
-    ) -> FloatVerdict {
-        if let forced = forceFloatReason(pid: pid, id: id) {
-            return .floats(forced)
-        }
-        switch source {
-        case .element(let element, let layer):
-            return FloatVerdict(
-                FloatDetection.autoFloatReason(
-                    element: element,
-                    bundleID: bundleID,
-                    layer: layer,
-                    rules: floatRules
-                )
-            )
-        case .read(let reason):
-            return FloatVerdict(reason)
-        }
+    /// Whether `id` is the own window that tiles, read through the
+    /// `ownWindowIdentifier` seam.
+    func tilesAsOwnWindow(pid: pid_t, id: WindowID) -> Bool {
+        Self.isOwnProcess(pid)
+            && ownWindowIdentifier(id) == OwnWindowTiling.identifier
     }
 
     /// Maps an own window id to its `NSWindow` — the one place

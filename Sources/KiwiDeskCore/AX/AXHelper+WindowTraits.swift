@@ -29,6 +29,13 @@ struct WindowTraits: Equatable {
     let childCount: Int?
     let frame: CGRect
 
+    /// The title-bar buttons' readings folded into one: true for
+    /// any present, else nil where one did not answer.
+    static func titlebarButton(from buttons: [Bool?]) -> Bool? {
+        if buttons.contains(true) { return true }
+        return buttons.contains(nil) ? nil : false
+    }
+
     var reading: ShellReading {
         .of(button: hasTitlebarButton, children: childCount)
     }
@@ -110,8 +117,7 @@ extension AXHelper {
         let children = items[titlebarButtons.count]
         return WindowTraits(
             id: id,
-            hasTitlebarButton: buttons.contains(true)
-                ? true : buttons.contains(nil) ? nil : false,
+            hasTitlebarButton: WindowTraits.titlebarButton(from: buttons),
             childCount: (children as? [AnyObject])?.count
                 ?? (carries(children) == false ? 0 : nil),
             frame: frame(

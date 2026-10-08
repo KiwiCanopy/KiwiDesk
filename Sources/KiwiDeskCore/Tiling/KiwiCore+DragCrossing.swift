@@ -15,7 +15,7 @@ extension KiwiCore {
     /// Wires the crossing coordinator (once, from `wireDrag`).
     func wireDragCrossing() {
         dragCrossing.displayAt = { point in
-            NSScreen.screens
+            ScreenList.all
                 .first { $0.frame.contains(point) }?
                 .kiwiDisplayID
         }
