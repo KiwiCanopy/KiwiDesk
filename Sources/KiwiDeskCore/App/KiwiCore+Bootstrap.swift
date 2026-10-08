@@ -11,6 +11,10 @@ extension KiwiCore {
         crash.captureInPlaceState = { [weak self] in
             self?.sessionSnapshot(inPlace: true)
         }
+        let restoreKeys = RestoreKeyLog()
+        crash.onAutosaved = { [weak self] in
+            if let self { restoreKeys.autosave(self) }
+        }
         // Every diagnostic seam in Core is wired here, together,
         // through one forwarding closure (core-boundaries.md).
         // Together so that a seam missing from the group is
