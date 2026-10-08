@@ -9,9 +9,11 @@ import CoreGraphics
 /// `border.enabled` (the mark is a border sibling, not a border
 /// feature).
 extension KiwiCore {
-    func updateStickyMarks() {
+    /// `reassertOrder` re-stacks every mark, as the settle passes
+    /// do for the rings (#2026).
+    func updateStickyMarks(reassertOrder: Bool = false) {
         let specs = stickyMarkSpecs()
-        stickyMarks.sync(specs)
+        stickyMarks.sync(specs, reassertOrder: reassertOrder)
         // Fold marked windows into the ring's WS watch set so the
         // mark gets z-order/frame events even with no border (#414).
         borders.setMarkTracked(Set(specs.map(\.window)))

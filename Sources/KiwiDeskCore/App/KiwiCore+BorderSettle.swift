@@ -106,6 +106,6 @@ extension KiwiCore {
     /// ungated rather than growing a second guard.
     func runBorderResync() {
         updateBorders(reassertOrder: true)
-        updateStickyMarks()
+        updateStickyMarks(reassertOrder: true)
     }
 }

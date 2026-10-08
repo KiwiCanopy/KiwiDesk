@@ -33,6 +33,13 @@ final class StickyMarkOverlay {
     private var expandWork: DispatchWorkItem?
     private var collapseWork: DispatchWorkItem?
     private(set) var lastFrame: CGRect?
+    /// Whether the mark has been stacked since it was last shown,
+    /// so a steady sync can leave it to the reorder events (#2026).
+    private(set) var hasOrdered = false
+    #if DEBUG
+        /// Stacks performed, for the steady-sync guard (#2026).
+        private(set) var orderCount = 0
+    #endif
 
     init(window: CGWindowID) {
         target = window
@@ -55,7 +62,12 @@ final class StickyMarkOverlay {
 
     /// Stacks mark above target window.
     func order() {
-        panel?.order(.above, relativeTo: Int(target))
+        guard let panel else { return }
+        panel.order(.above, relativeTo: Int(target))
+        hasOrdered = true
+        #if DEBUG
+            orderCount += 1
+        #endif
     }
 
     /// Whether the plate carries a sticky glyph — the pills are
@@ -128,6 +140,7 @@ final class StickyMarkOverlay {
         currentWidth = collapsedWidth
         plate.setNameShown(false, animated: false, duration: 0)
         panel?.orderOut(nil)
+        hasOrdered = false
     }
 
     /// Briefly expands mark into a pill after snap-back settles (#421).
