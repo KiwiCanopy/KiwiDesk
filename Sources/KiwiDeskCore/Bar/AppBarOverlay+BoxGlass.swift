@@ -54,10 +54,7 @@ extension AppBarOverlay {
     private func syncBoxGlassCount(_ n: Int) {
         while boxGlasses.count > n {
             // Its item left in this render's `syncItemViews`.
-            let glass = boxGlasses.removeLast()
-            GlassPlate.release(glass)
-            glass.removeFromSuperview()
-            boxTints.removeLast().removeFromSuperview()
+            Self.dropBox(boxGlasses.removeLast(), boxTints.removeLast())
         }
         while boxGlasses.count < n {
             guard let pair = makeBoxGlass() else { break }
@@ -66,11 +63,31 @@ extension AppBarOverlay {
         }
     }
 
-    /// A fresh glass and tint in the run — the pool's one mint.
+    /// A fresh glass and tint in the run, inside a `BoxHost` of
+    /// their own (#1842) — the pool's one mint.
     private func makeBoxGlass() -> (glass: NSView, tint: GlassBackdrop)? {
         guard let glass = GlassPlate.make() else { return nil }
-        itemRun.addSubview(glass)
+        let host = BoxHost(frame: itemRun.bounds)
+        host.autoresizingMask = [.width, .height]
+        host.wantsLayer = true
+        itemRun.addSubview(host)
+        host.addSubview(glass)
         return (glass, GlassBackdrop())
+    }
+
+    /// The box a glass is composited in (#1842); nil for a view no
+    /// box hosts, which every minted glass is.
+    static func boxHost(of glass: NSView) -> BoxHost? {
+        glass.superview as? BoxHost
+    }
+
+    /// Takes a box out for good — glass released (#1730), tint and
+    /// host removed: the pool's one drop.
+    static func dropBox(_ glass: NSView, _ tint: GlassBackdrop?) {
+        GlassPlate.release(glass)
+        tint?.removeFromSuperview()
+        boxHost(of: glass)?.removeFromSuperview()
+        glass.removeFromSuperview()
     }
 
     /// Re-orders the glass pool to follow `ids`, by the window each
@@ -96,11 +113,7 @@ extension AppBarOverlay {
                 break
             }
         }
-        for host in unpaired.values {
-            GlassPlate.release(host.glass)
-            host.glass.removeFromSuperview()
-            host.tint.removeFromSuperview()
-        }
+        for host in unpaired.values { Self.dropBox(host.glass, host.tint) }
         boxGlasses = glasses
         boxTints = tints
         boxGlassOwners = Array(ids.prefix(glasses.count))
@@ -133,7 +146,7 @@ extension AppBarOverlay {
                 GlassPlate.release(glass)
                 itemRun.addSubview(item)
             }
-            glass.removeFromSuperview()
+            Self.dropBox(glass, nil)
         }
         boxGlasses.removeAll()
         for tint in boxTints { tint.removeFromSuperview() }
