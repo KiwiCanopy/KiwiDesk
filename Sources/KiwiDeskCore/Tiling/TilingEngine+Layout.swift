@@ -129,11 +129,11 @@ extension TilingEngine {
             guard
                 let id = state.workspaces.activeSpace,
                 let space = state.workspaces[id],
-                let screen = NSScreen.main ?? NSScreen.screens.first
+                let screen = ScreenList.mainOrFirst
             else { return [] }
             return [(space, screen)]
         }
-        let fallback = NSScreen.main ?? NSScreen.screens.first
+        let fallback = ScreenList.mainOrFirst
         // Keyed by physical screen (frame origin — stable across
         // the fresh `NSScreen` instances `NSScreen.screens` may
         // hand back), so a screen hosts exactly ONE space. Two
@@ -214,13 +214,13 @@ extension TilingEngine {
         {
             return screen
         }
-        return NSScreen.main ?? NSScreen.screens.first
+        return ScreenList.mainOrFirst
     }
 
     /// The `NSScreen` backing a display id, matched by
     /// `CGDirectDisplayID`.
     static func screen(for display: DisplayID) -> NSScreen? {
-        NSScreen.screens.first { $0.kiwiDisplayID == display }
+        ScreenList.all.first { $0.kiwiDisplayID == display }
     }
 
     /// The `NSScreen` a frame (AX coords) mostly sits on — the
@@ -229,7 +229,7 @@ extension TilingEngine {
     /// frame overlaps no screen (a stashed corner may barely
     /// graze one; callers fall back to main).
     static func screen(containing frame: CGRect) -> NSScreen? {
-        let screens = NSScreen.screens
+        let screens = ScreenList.all
         let rects = screens.map(GeometryUtils.axVisibleFrame)
         guard
             let rect = GeometryUtils.rect(
@@ -271,8 +271,7 @@ extension TilingEngine {
         placements.stamp(id, target: target)
         if animated,
             let screen = Self.screen(containing: target)
-                ?? NSScreen.main
-                ?? NSScreen.screens.first
+                ?? ScreenList.mainOrFirst
         {
             // The slide is the newer ask: an instant set it
             // supersedes must not vouch for the window once the

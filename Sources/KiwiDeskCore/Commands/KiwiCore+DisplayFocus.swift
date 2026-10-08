@@ -34,7 +34,7 @@ extension KiwiCore {
         // bar overlays are exempt for free — a global monitor
         // never sees events routed to our own windows.
         guard
-            let screen = NSScreen.screens.first(where: {
+            let screen = ScreenList.all.first(where: {
                 GeometryUtils.visibleFrame(of: $0)
                     .contains(cocoaPoint)
             }),

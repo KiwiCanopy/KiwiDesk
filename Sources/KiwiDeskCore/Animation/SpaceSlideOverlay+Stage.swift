@@ -83,7 +83,7 @@ extension SpaceSlideOverlay {
 
     /// Orders out the panel of a screen no longer connected.
     private func retireGonePanels() {
-        let live = Set(NSScreen.screens.compactMap(\.kiwiDisplayID))
+        let live = Set(ScreenList.all.compactMap(\.kiwiDisplayID))
         for (display, panel) in panels where !live.contains(display) {
             panel.orderOut(nil)
             panels[display] = nil

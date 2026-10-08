@@ -143,7 +143,7 @@ extension TilingEngine {
         // two consumers of `ScreenNeighbors.detect` can never
         // disagree about the arrangement, and a pinned fixture
         // pins them together. The per-window screen PICK below
-        // legitimately stays on `NSScreen.screens` — it needs
+        // legitimately stays on `ScreenList.all` — it needs
         // screen objects, not rects.
         let allVisible = allScreenBounds()
         for space in state.workspaces.allSpaces
@@ -165,7 +165,7 @@ extension TilingEngine {
                     )
                 else { continue }
                 let screen =
-                    NSScreen.screens.first {
+                    ScreenList.all.first {
                         GeometryUtils.axVisibleFrame(of: $0)
                             .intersects(window.frame)
                     } ?? fallback

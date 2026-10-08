@@ -46,7 +46,7 @@ extension KiwiCore {
             ),
             let sourceScreen = TilingEngine.screen(
                 containing: base
-            ) ?? NSScreen.main ?? NSScreen.screens.first
+            ) ?? ScreenList.mainOrFirst
         else { return }
         let source = GeometryUtils.axVisibleFrame(
             of: sourceScreen

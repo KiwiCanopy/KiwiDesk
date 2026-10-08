@@ -23,7 +23,7 @@ extension KiwiCore {
         guard NativeSpaces.activeSpaceIsUser(),
             let space = activeSpace,
             let app = appBarContent(space: space, settings: settings),
-            let screen = NSScreen.main ?? NSScreen.screens.first,
+            let screen = ScreenList.mainOrFirst,
             let plan = shelfPlans(
                 visible: GeometryUtils.axVisibleFrame(of: screen),
                 settings: settings,

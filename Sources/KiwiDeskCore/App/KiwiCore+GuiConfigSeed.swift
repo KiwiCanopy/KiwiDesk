@@ -159,7 +159,7 @@ extension KiwiCore {
     func starterDisplays() -> [Display] {
         let live = state.workspaces.allDisplays
         if !live.isEmpty { return live }
-        return NSScreen.screens.compactMap { $0.kiwiDisplay }
+        return ScreenList.all.compactMap { $0.kiwiDisplay }
     }
 
     /// `starterDisplays().count`, floored at one — a Mac always

@@ -258,6 +258,14 @@ func makeTestCore(
     // The host's menu-bar setting decides which correction a
     // fixture's usable area takes (#1894): pinned to a drawn bar.
     GeometryUtils.menuBarAutoHidesOverride = false
+    // The screen list is a WindowServer round trip on every
+    // retile (#1894): read once per process.
+    ScreenList.override = {
+        if let known = testScreens { return known }
+        let live = NSScreen.screens
+        testScreens = live
+        return live
+    }
     // AppKit's screen area is a WindowServer round trip (#1868):
     // read once per screen; the #1386 correction stays live.
     GeometryUtils.appKitVisibleFrameOverride = { screen in
@@ -269,6 +277,9 @@ func makeTestCore(
     }
     return core
 }
+
+/// `makeTestCore`'s per-process memo of the screen list.
+@MainActor private var testScreens: [NSScreen]?
 
 /// `makeTestCore`'s per-process memo of AppKit's screen areas.
 @MainActor private var testAppKitFrames: [DisplayID: CGRect] = [:]
