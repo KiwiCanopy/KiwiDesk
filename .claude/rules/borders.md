@@ -162,7 +162,11 @@ these:
   it MOVES the ring is `BorderStackingTests` ▸
   `reorderMovesTheRing`, which reads the stack back. This orders
   the AppKit panel and draws nothing: the `.transient` section
-  below still binds.
+  below still binds. A sticky mark takes the same gate through
+  `StickyMarkManager.sync` and the reorder events through
+  `reassert`, its stacking un-counted by that census since it is
+  spelled `order(.above, relativeTo:)` (#2026,
+  `StickyMarkOrderTests`).
 - **A ring panel that keeps the ring's size moves through
   `SkyLight.moveWindow`, never AppKit's `setFrame`** — mid-animation
   too, so it takes no room — once WindowServer has its window and

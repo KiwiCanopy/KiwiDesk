@@ -95,7 +95,11 @@ public final class StickyMarkManager {
     }
 
     /// Synchronizes visible marks to desired specs (#596).
-    public func sync(_ desired: [Spec]) {
+    /// `reassertOrder` re-stacks every mark — the settle passes';
+    /// a steady sync stacks only a mark that needs it, the
+    /// WindowServer reorder events keeping the rest (#2026, as
+    /// the ring's #1925).
+    public func sync(_ desired: [Spec], reassertOrder: Bool = false) {
         let wanted = Set(desired.map(\.window))
         for (id, overlay) in overlays
         where !wanted.contains(id) {
@@ -119,7 +123,13 @@ public final class StickyMarkManager {
                     commanded: commandedFrame(spec.window)
                 )
             )
-            overlay.order()
+            if BorderManager.ordersRing(
+                reassert: reassertOrder,
+                needsOrder: !overlay.hasOrdered,
+                tracked: isWindowServerTracked(spec.window)
+            ) {
+                overlay.order()
+            }
         }
     }
 
