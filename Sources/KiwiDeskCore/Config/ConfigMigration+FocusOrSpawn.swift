@@ -1,15 +1,11 @@
 import Foundation
 
-/// Renames the Open or Focus call inside a stored binding's `lua`
-/// (#1511, `FocusOrSpawnMigrationTests`): `pull_or_spawn` went TO
-/// a window and never pulled one, so the verb is `focus_or_spawn`.
-/// The Settings app menu writes `KiwiDesk.pull_or_spawn("<id>")`
-/// as every app shortcut's default, so without the step every one
-/// would refuse on update. Only that exact shape crosses — the
-/// app's own format, which `KeybindingCatalog.appCommand` writes;
-/// any other Lua beside it is the user's script and stays loud.
-/// It reaches every `lua` value at any depth: `gui.json`'s layers,
-/// a profile's layer override, a bundle's inline copies.
+/// Renames a stored `lua` value, under that key at any depth, that is
+/// exactly `KiwiDesk.pull_or_spawn("<id>")` — one quoted argument with
+/// no quote inside — to `focus_or_spawn` (#1511,
+/// `FocusOrSpawnMigrationTests`). Any other spelling is left alone.
+/// No format floor, deliberately: the rename is idempotent, and one
+/// shared `file:` floor cannot state gui.json's 6 and a profile's 17.
 extension ConfigMigration {
     /// Spelled rather than derived: a historical step keeps naming
     /// what it was written to name.
@@ -32,9 +28,8 @@ extension ConfigMigration {
         )
     }
 
-    /// `lua` with its verb renamed when it is exactly a stored
-    /// Open or Focus call — one quoted argument with no quote
-    /// inside it — else nil.
+    /// `lua` with its verb renamed when it is exactly the stored
+    /// call, else nil.
     static func renamedOpenOrFocusCall(_ lua: String) -> String? {
         let prefix = "KiwiDesk.\(retiredFocusOrSpawnVerb)(\""
         let suffix = "\")"
@@ -46,9 +41,9 @@ extension ConfigMigration {
         return "KiwiDesk.\(focusOrSpawnVerb)(\"\(inner)\")"
     }
 
-    /// The text with every JSON string that spells a stored Open
-    /// or Focus call renamed where it stands; the envelope discards
-    /// an edit that reached a string the walk did not.
+    /// The text with every JSON string spelling the stored call
+    /// renamed where it stands; the envelope discards an edit that
+    /// reached a string the walk did not.
     private static func surgicallyRenamedOpenOrFocusCalls(
         _ text: String
     ) -> Data? {

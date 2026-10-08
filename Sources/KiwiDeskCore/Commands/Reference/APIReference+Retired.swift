@@ -57,9 +57,7 @@ extension APIReference {
         map["drag.set_ghost_border_width"] = "border.set_width"
         map["drag.set_drop_zone_border_width"] = "border.set_width"
         map["drag.set_corner_radius"] = "border.set_corner_style"
-        // It goes TO the window and never pulled one (#1511).
-        map[ConfigMigration.retiredFocusOrSpawnVerb] =
-            ConfigMigration.focusOrSpawnVerb
+        map["pull_or_spawn"] = "focus_or_spawn"
         for verb in retiredReasons.keys { map[verb] = .some(nil) }
         return map
     }()
