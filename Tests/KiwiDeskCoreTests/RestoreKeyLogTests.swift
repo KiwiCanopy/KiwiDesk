@@ -9,7 +9,7 @@ private typealias F = BootRestoreFixture
 /// The #1385 step 2 measurement (`RestoreKeyLog`): one line per
 /// window at the autosave and at boot adoption, read through the
 /// core's `onLog` seam; an autosave that repeats the last logged
-/// batch logs nothing; and without the opt-in neither site logs.
+/// batch logs nothing; and opted out, neither site logs.
 /// Removed with the measurement.
 @Suite("Restore key measurement (#1385)", .serialized)
 @MainActor
@@ -76,11 +76,8 @@ struct RestoreKeyLogTests {
         return core
     }
 
-    @Test(
-        "Not opted in, neither site logs",
-        .enabled(if: NSScreen.main != nil)
-    )
-    func offByDefaultLogsNothing() throws {
+    @Test("Opted out, the autosave logs no key")
+    func optedOutAutosaveIsGated() {
         let (core, dir) = Self.autosaveCore(optedIn: false)
         defer { try? FileManager.default.removeItem(at: dir) }
         var lines: [String] = []
@@ -88,11 +85,18 @@ struct RestoreKeyLogTests {
         Self.file(core)
         core.crash.autosave()
         #expect(Self.keyLines(lines).isEmpty)
+    }
 
-        let boot = try Self.bootCore(optedIn: false)
-        boot.onLog = { lines.append($0) }
-        Self.file(boot)
-        boot.arrangeBootDesk(session: nil)
+    @Test(
+        "Opted out, boot adoption logs no key",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func optedOutBootIsGated() throws {
+        let core = try Self.bootCore(optedIn: false)
+        var lines: [String] = []
+        core.onLog = { lines.append($0) }
+        Self.file(core)
+        core.arrangeBootDesk(session: nil)
         #expect(Self.keyLines(lines).isEmpty)
     }
 

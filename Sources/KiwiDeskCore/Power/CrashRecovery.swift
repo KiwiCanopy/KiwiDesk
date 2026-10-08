@@ -150,7 +150,8 @@ public final class CrashRecovery {
             at: fileURL.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
-        try? data.write(to: fileURL, options: .atomic)
+        guard (try? data.write(to: fileURL, options: .atomic)) != nil
+        else { return }
         onAutosaved()
     }
 

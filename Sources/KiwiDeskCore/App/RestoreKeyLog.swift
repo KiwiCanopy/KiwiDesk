@@ -17,8 +17,15 @@ import Foundation
 ///     defaults write com.kiwicanopy.kiwidesk RestoreKeyLog -bool YES
 ///     defaults delete com.kiwicanopy.kiwidesk RestoreKeyLog
 ///
+/// Reading a restart: compare the `phase=boot` batch against the
+/// last `phase=autosave` batch logged BEFORE the logout began.
+/// Until step 1's logout freeze lands (a separate branch), later
+/// autosave batches can show the desk shrinking as macOS closes
+/// the apps.
+///
 /// Removal: this file, `CrashRecovery.restoreKeys` and
-/// `onAutosaved`, their wiring and the call in `arrangeBootDesk`.
+/// `onAutosaved`, their wiring, the call in `arrangeBootDesk`,
+/// the `makeTestCore` pins and `RestoreKeyLogPinTests`.
 @MainActor
 final class RestoreKeyLog {
     enum Phase: String {
