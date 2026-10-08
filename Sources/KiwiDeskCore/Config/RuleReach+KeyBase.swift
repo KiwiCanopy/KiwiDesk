@@ -31,16 +31,19 @@ extension RuleReachTable where Value == String {
     ) -> [KeyLayer] {
         // The base's layer SET and order are the layered stored
         // base's (#2022): a layer the draft dropped or left out is
-        // decided there, once. Only a layer new to every file joins
-        // from the page, where a shared row now lives in it.
+        // decided there, once. A layer the base lacks joins from the
+        // page only where it is new to the page's own file too, or a
+        // shared row now lives in it.
         let sharedLayers = Set(base.keys.map { Self.keyParts($0).layer })
         let baseNames = Set(storedBase.map(\.name))
+        let ownNames = Set(storedPage.map(\.name))
         var layers = storedBase.map { shared in
             page.first { $0.name == shared.name } ?? shared
         }
         for (at, layer) in page.enumerated()
         where !baseNames.contains(layer.name)
-            && sharedLayers.contains(layer.name)
+            && (!ownNames.contains(layer.name)
+                || sharedLayers.contains(layer.name))
         {
             let previous = page[..<at].last { earlier in
                 layers.contains { $0.name == earlier.name }

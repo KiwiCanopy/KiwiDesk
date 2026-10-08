@@ -75,6 +75,12 @@ struct LayerReachLifecycleTests {
         let model = try makeModel()
         model.renameLayer("Gaming", to: "Play")
         model.renameLayer("Chat", to: "Gaming")
+        // The layered files themselves: the loaded page's row encode
+        // would otherwise rebuild a merged layer from the page.
+        let layered = try #require(model.layeredReach)
+        let pass = layered.storedKeyLayers(for: "Home")
+        #expect(pass.filter { $0.name == "Play" }.count == 1)
+        #expect(rows(pass, "Gaming") == [chat])
         model.updateActiveProfile()
 
         let home = try layers(model, "Home")
