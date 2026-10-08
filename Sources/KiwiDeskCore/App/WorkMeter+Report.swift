@@ -40,6 +40,7 @@ extension WorkMeter {
             "bar_ms_max": ms(c.barMaxNanos),
             "bar_renders_per_switch": per(c.barRenders, c.spaceSwitches),
             "bar_shows_skipped": count(c.barShowsSkipped),
+            "bar_content_redraws": count(c.barContentRedraws),
             "shelf_shows_skipped": count(c.shelfShowsSkipped),
             "space_bar_views_minted": count(c.spaceBarViewsMinted),
             "shelf_stands_skipped": count(c.shelfStandsSkipped),

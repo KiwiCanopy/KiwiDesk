@@ -13139,6 +13139,29 @@ per display means per-display content, consistent with every
 other per-display fact in the bar; a secondary display shows
 its own space's remembered focus.
 
+**The front-app segment has a fixed length.** (#2086, owner
+ruling 2026-10-08.) The segment draws its name in a slot as long
+as `front_app_title_cap` characters of the bar font's average
+glyph — a longer name cut with "…", a shorter one centred in the
+slot by its ink, the icon never moving — never as long as the
+name. The icon is what the eye tracks between focus changes, so
+it keeps its place; leaving a short name at the slot's start
+left a dead gap under an indicator that spans the whole chip. A segment sized to its name moved
+the section's end on every focus change, which re-centred a
+centred run and slid the divider and the App Bar beside it: the
+bar jumped as focus moved between apps. The cap already bounds
+how much of a title shows, so it is the length to hold; one
+measured once per face costs nothing per change. With every
+frame then fixed, a focus change redraws content alone — the
+Space item's glyph tints and the segment's icon and name — and
+never runs the frame pass, which would re-place glass and views
+that do not move. The segment joining or leaving a shown bar —
+the App Bar leaving or joining a fused shelf hands it the place
+— grows out of the run's end and shrinks back into it on the
+plate glide, the motion a joining section makes (#1903), so the
+two changes of one plan move together rather than one gliding
+while the other pops.
+
 **The bars honour Reduce Motion, and the ring MARKS rather than
 counts down.** (#1078.) A bar is chrome KiwiDesk draws, so it
 owes the same stand-down the Settings window gives: the setting

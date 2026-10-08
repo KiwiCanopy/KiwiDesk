@@ -25,6 +25,8 @@ extension SpaceBarOverlay {
             return
         }
         attachFrontViewsIfNeeded()
+        // A shrink cut short by a hide leaves its alpha at 0 (#1903).
+        frontGrowViews.forEach { $0.alphaValue = 1 }
         let depth = horizontal ? strip.height : strip.width
         let cell = SpaceBarItemView.cell(
             contentDepth: style.contentDepth(forDepth: depth)
@@ -70,8 +72,9 @@ extension SpaceBarOverlay {
     /// The axis length the front segment DRAWS from the run's
     /// `frontStart` (#409): the section rule, a gap, the chip —
     /// its ends, the glyph cell and, on a horizontal bar, a pad
-    /// and the title as `layoutFrontName` sizes it. The gap before
-    /// the rule is the run's (`runTotal`), so a hugging plate ends
+    /// and the name's fixed `titleSlot`, never the name itself, so
+    /// a focus change moves nothing (#2086). The gap before the
+    /// rule is the run's (`runTotal`), so a hugging plate ends
     /// where the chip does.
     func frontExtent(
         _ app: SpaceBarItemView.App?,
@@ -79,7 +82,7 @@ extension SpaceBarOverlay {
         horizontal: Bool,
         style: SpaceBarLook
     ) -> CGFloat {
-        guard let app else { return 0 }
+        guard app != nil else { return 0 }
         let cell = SpaceBarItemView.cell(
             contentDepth: style.contentDepth(forDepth: depth)
         )
@@ -87,17 +90,8 @@ extension SpaceBarOverlay {
             BarDivider.sectionThickness + style.itemGap
             + Self.chipEndPad(style, depth: depth).total + cell
         if horizontal {
-            // What is DRAWN, not the app name: measuring a
-            // different string than `layoutFrontName` lays out
-            // slides the whole Space run off its alignment.
             extent +=
-                SpaceBarItemView.pad
-                + Self.titleWidth(
-                    app.title ?? app.name,
-                    font: style.shelf.textFont(
-                        ofSize: style.titleFontSize(forDepth: depth)
-                    )
-                )
+                SpaceBarItemView.pad + Self.titleSlot(style, depth: depth)
         }
         return extent
     }
@@ -292,6 +286,7 @@ extension SpaceBarOverlay {
         frontName.font = style.shelf.textFont(ofSize: size)
         frontName.textColor = accent
         frontName.lineBreakMode = .byTruncatingTail
+        frontName.alignment = .center
         frontName.sizeToFit()
         let height = frontName.frame.height
         // Clamp to the viewport's remaining length so a long name
@@ -302,15 +297,23 @@ extension SpaceBarOverlay {
             Self.chipEndPad(style, depth: depth).trailing
         )
         let available = max(viewport - offset - trailing, 0)
+        let slot = min(Self.titleSlot(style, depth: depth), available)
+        frontNameEnd = offset + slot
+        let span = Self.nameSpan(
+            frontName,
+            natural: frontName.frame.width,
+            slotStart: offset,
+            slot: slot
+        )
         frontName.frame = CGRect(
-            x: offset,
+            x: span.lowerBound,
             y: BarTextGlyph.originY(
                 centredOn: depth / 2,
                 for: frontName,
                 band: .caps,
                 height: height
             ),
-            width: min(frontName.frame.width, available),
+            width: span.upperBound - span.lowerBound,
             height: height
         )
     }

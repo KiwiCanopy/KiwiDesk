@@ -77,8 +77,7 @@ extension SpaceBarOverlay {
         let content: NSView = app.glyph != nil ? frontGlyph : frontIcon
         let end =
             horizontal
-            ? (frontName.isHidden
-                ? content.frame.maxX : frontName.frame.maxX)
+            ? (frontName.isHidden ? content.frame.maxX : frontNameEnd)
             : content.frame.maxY
         let length = max(end - start, cell) + endPad.total
         let cross = max(cell + pad * 2, depth)
