@@ -34,9 +34,11 @@ final class StickyMarkOverlay {
     private var collapseWork: DispatchWorkItem?
     private(set) var lastFrame: CGRect?
     /// Whether the mark has been stacked against its window since
-    /// it was last brought on screen, so a steady sync can leave it
-    /// to the reorder events (#2026).
-    private(set) var hasOrdered = false
+    /// it was last brought on screen or carried, so a steady sync
+    /// can leave it to the reorder events (#2026).
+    private var hasOrdered = false
+    /// Whether a sync owes this mark a stack (#2026).
+    var needsOrder: Bool { !hasOrdered }
     #if DEBUG
         /// Stacks performed, for the steady-sync guard (#2026).
         private(set) var orderCount = 0
@@ -65,6 +67,10 @@ final class StickyMarkOverlay {
             hasOrdered = false
         }
     }
+
+    /// Owes the mark a stack at the next sync: its window was
+    /// carried to another Desktop, which may report no reorder.
+    func oweOrder() { hasOrdered = false }
 
     /// Stacks mark above target window.
     func order() {

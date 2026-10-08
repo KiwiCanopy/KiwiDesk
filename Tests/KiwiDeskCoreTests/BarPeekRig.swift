@@ -34,7 +34,7 @@ final class BarPeekRig {
         item.addSubview(first)
         item.addSubview(second)
         window.orderFrontRegardless()
-        peek.content = { source in
+        peek.content = { source, _ in
             BarPeekContent(
                 rows: source.windows.map {
                     BarWindowRow(

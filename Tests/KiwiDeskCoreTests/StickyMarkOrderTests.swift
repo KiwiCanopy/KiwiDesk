@@ -63,4 +63,18 @@ struct StickyMarkOrderTests {
 
         #expect(mark.orderCount == 2)
     }
+
+    @Test("a carried mark is owed a stack at the next sync")
+    func carriedMarkOrders() throws {
+        let manager = StickyMarkManager()
+        defer { manager.clear() }
+        manager.isWindowServerTracked = { _ in true }
+        manager.sync([spec(1)])
+        let mark = try #require(manager.overlays[WindowID(1)])
+
+        manager.oweOrder(WindowID(1))
+        manager.sync([spec(1)])
+
+        #expect(mark.orderCount == 2)
+    }
 }

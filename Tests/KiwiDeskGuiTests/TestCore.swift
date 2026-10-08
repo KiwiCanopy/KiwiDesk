@@ -256,6 +256,13 @@ func makeTestCore(
         testScreens = live
         return live
     }
+    // So is the main display's id (#1894): read once per process.
+    PositionalDisplays.mainIDOverride = {
+        if let known = testMainID { return known }
+        let live = DisplayID(CGMainDisplayID())
+        testMainID = live
+        return live
+    }
     // AppKit's screen area is a WindowServer round trip (#1868):
     // read once per screen; the #1386 correction stays live.
     GeometryUtils.appKitVisibleFrameOverride = { screen in
@@ -270,6 +277,9 @@ func makeTestCore(
 
 /// `makeTestCore`'s per-process memo of the screen list.
 @MainActor private var testScreens: [NSScreen]?
+
+/// `makeTestCore`'s per-process memo of the main display's id.
+@MainActor private var testMainID: DisplayID?
 
 /// `makeTestCore`'s per-process memo of AppKit's screen areas.
 @MainActor private var testAppKitFrames: [DisplayID: CGRect] = [:]

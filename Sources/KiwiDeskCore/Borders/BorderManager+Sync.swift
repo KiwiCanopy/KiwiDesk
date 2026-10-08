@@ -75,7 +75,7 @@ extension BorderManager {
             // tells a shown ring its target moved, so every sync
             // re-stacks.
             let held = ordersDormant(spec.window, overlay: overlay)
-            if Self.ordersRing(
+            if Self.ordersOverlay(
                 reassert: reassertOrder,
                 needsOrder: overlay.needsOrder,
                 tracked: skyLightActive
@@ -85,10 +85,11 @@ extension BorderManager {
         }
     }
 
-    /// Whether `sync` orders a ring: a settle pass re-stacks all,
-    /// a steady one only a ring not yet shown, unless no
-    /// WindowServer stream reports its target moving (#1925).
-    static func ordersRing(
+    /// Whether a sync orders a ring or a sticky mark: a settle pass
+    /// re-stacks all, a steady one only an overlay not yet stacked,
+    /// unless no WindowServer stream reports its target moving
+    /// (#1925, #2026).
+    static func ordersOverlay(
         reassert: Bool,
         needsOrder: Bool,
         tracked: Bool

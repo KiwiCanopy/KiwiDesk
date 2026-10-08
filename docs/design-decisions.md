@@ -12770,16 +12770,19 @@ out of reach. Ungrouping stays the App Bar's option, for a user
 who wants every title drawn in the row itself, and one default
 for both bars means a user reads one rule rather than two.
 
-**[Principle] A Space Bar glyph reaches its window; a list never
+**[Principle] A Space Bar glyph reaches its windows; `+n` never
 switches by itself.** (#1528, owner rulings 2026-09-20 and
-2026-09-27.) On every Space, a glyph standing for one window
-switches to that Space and focuses the window; the rest of the
-item — identifier, divider, padding — switches and lands on the
-Space's last-focused window. A glyph standing for several
-windows, and `+n`, list those windows — the hover peek, shown at
-once and held — and switch nothing until a row is picked. A peek
-row is that pick, as a menu row is: one focus path, whichever
-list the user picked from.
+2026-09-27; #2063, 2026-10-08.) On every Space, a glyph standing
+for one window switches to that Space and focuses the window; the
+rest of the item — identifier, divider, padding — switches and
+lands on the Space's last-focused window. A glyph standing for
+several windows focuses them in its peek's order: the one after
+the window holding the focus, wrapping, or the first where the
+focus is none of them — with the peek shown at once, its check on
+the window landed. `+n` lists its windows — the hover peek, shown
+at once and held — and switches nothing until a row is picked. A
+peek row is that pick, as a menu row is: one focus path,
+whichever list the user picked from.
 
 The glyph is the only thing on screen naming a window on a Space
 you are not looking at, so it is where a click can say which
@@ -12787,12 +12790,18 @@ window it means; one target per item left an overview the user
 could read and not act on. Every glyph click on another Space
 still switches, because a window on another Space cannot take
 the focus while its Space stays hidden — the glyph refines only
-which window the switch lands on. A target standing for several windows must not
-choose for the user: any guess (the most recent, the first) is
-wrong often enough to teach distrust of the click, and a switch
-fired before the choice moves the screen under a menu the user
-may still dismiss. So the list opens where the user is, and
-dismissing it costs nothing. The hover peek reads its windows
+which window the switch lands on. A target standing for several
+windows may choose only where the user can SEE the choice: a
+glyph's click that only opened its list read on the device as a
+click that did nothing, and a guess the user cannot see (the most
+recent) teaches distrust of the click. The peek makes the choice
+visible — its check marks the window holding the focus, its order
+says which one the next click takes — so the click is a walk the
+user can predict and correct with one more click. The position is
+read from the focus rather than stored, so it survives the peek
+closing and starts over once the focus leaves the app's windows,
+and no ledger has to be retired. `+n` stays a list: its windows
+are several apps', so there is no "next" a hand could predict. The hover peek reads its windows
 when it shows rather than being drawn into the render, so it is
 current without the bar re-rendering on every title change. A
 setting to turn glyph clicks off waits for misclicks measured on
@@ -12817,16 +12826,39 @@ window underneath and focus another app, a misclick with a side
 effect on a surface built to look pickable. macOS shows no such
 list: Stage Manager and Mission Control act on the surface you
 previewed, and the Dock's hover label is one word that promises
-nothing. So a left click on a LIST — a multi-window glyph, or
-`+n` however few windows it hides — TOGGLES its peek: where one
-already shows, the hover's or a click's, the click closes it;
-otherwise it shows the peek at once, without the dwell, held as
-any list's is. A hover peek already holds on its own, so a click
-re-opening what is open would mean nothing, and a control that
-opens on one click and closes on the next is the one a hand
-already knows from every disclosure on the Mac. A one-window
-glyph still picks on the click; two lists for one set of windows
-is the fight the tooltip lost. A pick does what clicking that
+nothing. So a left click on a list OPENS its peek and never
+closes it (#2063, amending a toggle): where none shows, at once,
+without the dwell or the cool-down, held as any list's is; where
+one already shows, the hover's or a click's, the click changes
+nothing. A toggle was argued from the disclosure idiom, but a
+disclosure does not also open on hover, and this list does: the
+common path is a hover then a click, and a toggle closed the list
+the hand was reaching for — a click that read as doing nothing.
+Open-only also keeps an accidental double click harmless, and the
+peek still closes the way every list's does: the pointer leaving
+its hold, a press elsewhere, or a pick. A multi-window glyph's
+click focuses its next window first (the principle above), so its
+peek is re-read with the check on the window landed; `+n` focuses
+nothing. A one-window glyph still picks on the click; two lists
+for one set of windows is the fight the tooltip lost.
+
+A list's row for the window holding the system focus — read only
+on the active Space, the one that carries it — ends in a
+checkmark, in a column PAST the titles' wrap width, on every row
+of every list peek checked or not. A leading gutter is a menu's
+idiom, but most peeks name another Space's windows and never hold
+the focus, so a gutter would indent every one of them for a mark
+they never draw; a column inside the wrap width would re-wrap a
+long title the moment focus reached it. Past the width, a peek
+gains only trailing padding and no title moves. The check sits
+beside the first line of a wrapped title, centred on its capitals
+— the name the user recognises, and a band a tall face cannot
+drift — in the row's own ink, the checked row's hover fill
+reaching over it. It is persistent rather than a flash: a mark
+that faded would leave the next click unpredictable, and a fact
+that only snaps needs no Reduce Motion gate. The window menu, the
+peek's twin, marks the same window with its native leading check.
+A pick does what clicking that
 window's own bar item does — one focus path for a glyph, its
 peek row and its menu row, KiwiDesk's own windows included
 (#1281) — and is judged when it is performed, since greying on

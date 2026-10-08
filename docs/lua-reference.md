@@ -2823,8 +2823,9 @@ space_bar.set_front_app_title_cap(25)
 
 :::unreleased
 **Does:** collapses adjacent windows of one app in a Space item
-into one glyph with a count badge; clicking it lists its windows
-beside the bar, each row focusing its window. Off, each window
+into one glyph with a count badge; clicking it focuses its
+windows in turn and lists them beside the bar, each row focusing
+its window. Off, each window
 draws its own glyph and one click focuses it. `glyph_span` counts
 glyphs either way.
 :::
