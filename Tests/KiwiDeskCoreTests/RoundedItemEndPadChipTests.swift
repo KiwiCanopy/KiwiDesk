@@ -40,9 +40,11 @@ struct RoundedItemEndPadChipTests {
                 #expect(!overlay.frontBox.isHidden)
                 let box = overlay.frontBox.frame
                 let icon = overlay.frontIcon.frame
-                let name = overlay.frontName.frame
+                // The name's SLOT ends the chip, whatever the name's
+                // own width (#2086).
+                let slotEnd = overlay.frontNameEnd
                 #expect(abs(icon.minX - box.minX - end) <= 0.5)
-                #expect(abs(box.maxX - name.maxX - end) <= 0.5)
+                #expect(abs(box.maxX - slotEnd - end) <= 0.5)
             }
         }
     }

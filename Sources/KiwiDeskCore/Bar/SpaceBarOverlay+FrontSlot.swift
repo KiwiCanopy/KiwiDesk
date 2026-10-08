@@ -32,6 +32,29 @@ extension SpaceBarOverlay {
         )
     }
 
+    /// Where `field` draws inside its slot (#2086, owner ruling): a
+    /// name that fits has its INK centred on the slot — the icon
+    /// beside it never moves — and one that does not fills it from
+    /// its start, cut with "…". `natural` is the field's fitted
+    /// width; the field centres its advance in its own frame.
+    @MainActor
+    static func nameSpan(
+        _ field: NSTextField,
+        natural: CGFloat,
+        slotStart: CGFloat,
+        slot: CGFloat
+    ) -> ClosedRange<CGFloat> {
+        guard natural < slot else {
+            return slotStart...(slotStart + slot)
+        }
+        let origin = BarTextGlyph.metrics(of: field).originX(
+            centringInkOn: slotStart + slot / 2,
+            frameWidth: natural
+        )
+        let x = min(max(origin, slotStart), slotStart + slot - natural)
+        return x...(x + natural)
+    }
+
     private struct SlotKey: Hashable {
         let font: String
         let size: CGFloat

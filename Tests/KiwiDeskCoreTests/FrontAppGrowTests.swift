@@ -58,6 +58,27 @@ struct FrontAppGrowTests {
         #expect(overlay.frontMenuHit == .empty)
     }
 
+    /// The run re-places when the segment joins or leaves, and its
+    /// items glide beside the grow — only for the same items in the
+    /// same slot, which the shelf's own glide does not move.
+    @Test("The run glides when the segment joins or leaves")
+    func runGlidesWithTheSegment() {
+        let glides = { (sameItems: Bool, sameSlot: Bool, moves: Bool) in
+            SpaceBarOverlay.itemsGlide(
+                content: .apps,
+                from: nil,
+                to: nil,
+                sameItems: sameItems,
+                sameSlot: sameSlot,
+                frontMoves: moves
+            )
+        }
+        #expect(glides(true, true, true))
+        #expect(!glides(true, true, false))
+        #expect(!glides(true, false, true))
+        #expect(!glides(false, true, true))
+    }
+
     @Test("A segment drawn again ends the shrink")
     func reshownEndsTheShrink() throws {
         BarMotion.reducedOverride = false

@@ -144,6 +144,9 @@ public final class SpaceBarOverlay {
     /// The front segment is gliding shut (#1903); a render that
     /// draws it again ends the shrink.
     var frontLeaving = false
+    /// Where the front name's slot ends, which the chip reaches to
+    /// whatever the name's own width (#2086).
+    var frontNameEnd: CGFloat = 0
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)

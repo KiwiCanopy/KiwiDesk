@@ -196,7 +196,8 @@ extension SpaceBarOverlay {
         let glides = recordGlide(
             items,
             content: style.inactiveContent,
-            slotChanged: slotChanged
+            slotChanged: slotChanged,
+            frontMoves: frontMoves
         )
         BarMotion.runLayout { moveFrame(itemRun, runFrame, glides) }
         placeItems(itemFrames, glides: glides)
@@ -231,7 +232,7 @@ extension SpaceBarOverlay {
         frontPlacement = placement
         let shrinks =
             frontMoves && frontApp == nil
-            && shrinkFront(horizontal: horizontal)
+            && shrinkFront(into: placement.after, horizontal: horizontal)
         if !shrinks {
             frontLeaving = false
             renderFrontSegment(

@@ -13110,8 +13110,11 @@ its own space's remembered focus.
 **The front-app segment has a fixed length.** (#2086, owner
 ruling 2026-10-08.) The segment draws its name in a slot as long
 as `front_app_title_cap` characters of the bar font's average
-glyph — a longer name cut with "…", a shorter one sitting inside
-— never as long as the name. A segment sized to its name moved
+glyph — a longer name cut with "…", a shorter one centred in the
+slot by its ink, the icon never moving — never as long as the
+name. The icon is what the eye tracks between focus changes, so
+it keeps its place; leaving a short name at the slot's start
+left a dead gap under an indicator that spans the whole chip. A segment sized to its name moved
 the section's end on every focus change, which re-centred a
 centred run and slid the divider and the App Bar beside it: the
 bar jumped as focus moved between apps. The cap already bounds

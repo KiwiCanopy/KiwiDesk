@@ -160,7 +160,10 @@ twice, was a question the user answered twice. The argument is
 - **The front-app segment's length is its fixed name slot,
   never its name** (#2086): `frontExtent` and the name's frame
   read the one `SpaceBarOverlay.titleSlot`, the title cap in the
-  bar font, so a focus change moves no frame. A show that keeps
+  bar font, so a focus change moves no frame — the chip ending at
+  the slot's end (`frontNameEnd`), never the name's, and a short
+  name's INK centred in the slot through `nameSpan`, the icon
+  never moving. A show that keeps
   every frame — `keepsGeometry`, which compares the front extent
   beside the item lengths — redraws content alone
   (`redrawContent`) and never the frame pass; a new input that

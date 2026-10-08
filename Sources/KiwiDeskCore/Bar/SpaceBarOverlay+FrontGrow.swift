@@ -39,19 +39,24 @@ extension SpaceBarOverlay {
         }
     }
 
-    /// Glides the shown segment shut into its leading edge, then
-    /// hides it — unless a render drew it again meanwhile; false,
-    /// shrinking nothing, where no glide plays (Reduce Motion, the
-    /// shelf animation off). It stops being a target and its glass
-    /// cuts at once.
-    func shrinkFront(horizontal: Bool) -> Bool {
+    /// Glides the shown segment shut into `end` — where the run now
+    /// ends, so it shrinks into the run as the run re-places rather
+    /// than under its last item — then hides it, unless a render
+    /// drew it again meanwhile; false, shrinking nothing, where no
+    /// glide plays (Reduce Motion, the shelf animation off). It
+    /// stops being a target and its glass cuts at once.
+    func shrinkFront(into end: CGFloat, horizontal: Bool) -> Bool {
         let views = frontGrowViews.filter { !$0.isHidden }
-        guard BarMotion.shelfGlideLength > 0,
-            let lead = Self.leadingEdge(
-                views.map(\.frame),
-                horizontal: horizontal
-            )
-        else { return false }
+        guard BarMotion.shelfGlideLength > 0, !views.isEmpty else {
+            return false
+        }
+        // A segment pinned outside the run sits in another host,
+        // where the run's end means nothing: it shuts in place.
+        let lead =
+            frontDivider.superview === itemRun
+            ? end
+            : Self.leadingEdge(views.map(\.frame), horizontal: horizontal)
+                ?? end
         frontLeaving = true
         frontWindows = []
         updateFrontGlass(

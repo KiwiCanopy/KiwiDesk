@@ -284,6 +284,7 @@ extension SpaceBarOverlay {
         frontName.font = style.shelf.textFont(ofSize: size)
         frontName.textColor = accent
         frontName.lineBreakMode = .byTruncatingTail
+        frontName.alignment = .center
         frontName.sizeToFit()
         let height = frontName.frame.height
         // Clamp to the viewport's remaining length so a long name
@@ -294,16 +295,23 @@ extension SpaceBarOverlay {
             Self.chipEndPad(style, depth: depth).trailing
         )
         let available = max(viewport - offset - trailing, 0)
-        let slot = Self.titleSlot(style, depth: depth)
+        let slot = min(Self.titleSlot(style, depth: depth), available)
+        frontNameEnd = offset + slot
+        let span = Self.nameSpan(
+            frontName,
+            natural: frontName.frame.width,
+            slotStart: offset,
+            slot: slot
+        )
         frontName.frame = CGRect(
-            x: offset,
+            x: span.lowerBound,
             y: BarTextGlyph.originY(
                 centredOn: depth / 2,
                 for: frontName,
                 band: .caps,
                 height: height
             ),
-            width: min(slot, available),
+            width: span.upperBound - span.lowerBound,
             height: height
         )
     }

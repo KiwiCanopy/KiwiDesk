@@ -2806,9 +2806,9 @@ nothing else on the Space Bar draws a title.
 
 :::unreleased
 The segment is always as long as this many characters of the
-bar's font: a longer title ends in "…", a shorter one sits
-inside, so a change of focus or title never moves the Space Bar
-or the shelf beside it.
+bar's font: a longer title ends in "…", a shorter one is centred
+after the icon, so a change of focus or title never moves the
+Space Bar or the shelf beside it.
 :::
 
 **Example:**

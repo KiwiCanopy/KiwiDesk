@@ -13,17 +13,20 @@ extension SpaceBarOverlay {
     /// shelf glides the whole section from where its content was
     /// drawn and a run gliding inside it would pull that content
     /// away from the start (#1838). The shelf plate and section
-    /// divider take the shelf's own glide; the front-app segment
-    /// lands.
+    /// divider take the shelf's own glide. A front-app segment
+    /// joining or leaving the same items in the same slot re-places
+    /// the run, which glides beside its grow or shrink (#1903).
     nonisolated static func itemsGlide(
         content: SpaceBarStyle.InactiveContent,
         from shown: SpaceID?,
         to expanded: SpaceID?,
         sameItems: Bool,
-        sameSlot: Bool
+        sameSlot: Bool,
+        frontMoves: Bool = false
     ) -> Bool {
-        content != .apps && sameItems && sameSlot && shown != nil
-            && shown != expanded
+        guard sameItems, sameSlot else { return false }
+        return frontMoves
+            || (content != .apps && shown != nil && shown != expanded)
     }
 
     /// Decides this render's glide and records what it drew, so
@@ -31,7 +34,8 @@ extension SpaceBarOverlay {
     func recordGlide(
         _ items: [Item],
         content: SpaceBarStyle.InactiveContent,
-        slotChanged: Bool
+        slotChanged: Bool,
+        frontMoves: Bool
     ) -> Bool {
         let expanded = activeIndex(items).flatMap { items[$0].space }
         let identities = items.map(\.identity)
@@ -40,7 +44,8 @@ extension SpaceBarOverlay {
             from: shownExpanded,
             to: expanded,
             sameItems: identities == shownIdentities,
-            sameSlot: !slotChanged
+            sameSlot: !slotChanged,
+            frontMoves: frontMoves
         )
         shownExpanded = expanded
         shownIdentities = identities
