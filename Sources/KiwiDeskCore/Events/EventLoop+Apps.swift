@@ -250,7 +250,7 @@ extension EventLoop {
 
     func publishDisplays() {
         DrawnMenuBars.refresh(bars: displayWatch.readDrawnMenuBars())
-        let displays = NSScreen.screens.compactMap { screen in
+        let displays = ScreenList.all.compactMap { screen in
             screen.kiwiDisplay
         }
         onEvent(.displaysChanged(displays))

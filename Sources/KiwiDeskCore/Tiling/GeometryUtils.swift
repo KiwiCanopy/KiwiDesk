@@ -42,7 +42,7 @@ public enum GeometryUtils {
     /// Height of the primary display (Cocoa origin screen).
     @MainActor
     public static var primaryHeight: CGFloat {
-        NSScreen.screens.first?.frame.height ?? 0
+        ScreenList.all.first?.frame.height ?? 0
     }
 
     /// Flips a screen point between Cocoa and AX coordinates.
@@ -222,7 +222,7 @@ extension GeometryUtils {
     /// one lookup (#1656, #1519).
     @MainActor
     static func display(at point: CGPoint) -> DisplayID? {
-        let screens = NSScreen.screens
+        let screens = ScreenList.all
         guard
             let index = screenIndex(
                 holding: axPoint(point),

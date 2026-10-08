@@ -15,7 +15,7 @@ extension KiwiCore {
         for space: SpaceID?,
         settings: TilingSettings
     ) -> Int? {
-        let screens = NSScreen.screens
+        let screens = ScreenList.all
         let own = space.flatMap { TilingEngine.screen(for: $0, in: state) }
         let widest = Self.widest(of: screens.map(\.frame)).map { screens[$0] }
         guard let screen = own ?? widest else { return nil }

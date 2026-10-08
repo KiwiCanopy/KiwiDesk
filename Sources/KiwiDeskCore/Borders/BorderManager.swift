@@ -240,6 +240,6 @@ public final class BorderManager {
 
     /// Display containing majority of frame for pixel scaling (#449).
     func screen(for frame: CGRect) -> NSScreen? {
-        TilingEngine.screen(containing: frame) ?? NSScreen.main
+        TilingEngine.screen(containing: frame) ?? ScreenList.main
     }
 }

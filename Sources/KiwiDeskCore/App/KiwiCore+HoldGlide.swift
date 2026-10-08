@@ -68,7 +68,7 @@ extension KiwiCore {
                         for: $0.id,
                         in: self.state
                     )
-                } ?? NSScreen.main
+                } ?? ScreenList.main
             guard let screen else { return {} }
             let driver = DisplayLinkDriver(screen: screen) { dt in
                 tick(dt)
