@@ -12139,18 +12139,20 @@ a supported format floor rather than guessing whether older configs
 still exist.
 
 :::unreleased
-**A binding the GUI wrote is the app's format, not the user's
-script ([#1511](https://github.com/KiwiCanopy/KiwiDesk/issues/1511)).**
-The charter keeps Lua out of every crossing, including the Lua
-stored inside a binding in `gui.json` or a profile: a renamed verb
-there fails loudly, naming its replacement. That holds for Lua a
-user typed. An app shortcut made in Settings is different — the
-app menu writes one exact call, `KiwiDesk.focus_or_spawn("<id>")`,
-and the user never saw it as code — so a rename of that verb
-crosses that exact shape like any stored value (`pull_or_spawn`
-became `focus_or_spawn` this way), while every other spelling
-still fails loudly. Left out, a rename breaks every app shortcut
-ever made in Settings on the update, which is the
+**A verb the GUI writes into a stored binding is a stored value
+([#1511](https://github.com/KiwiCanopy/KiwiDesk/issues/1511)).**
+The charter keeps the user's Lua out of every crossing: a renamed
+verb in `init.lua`, or in a binding someone wrote by hand, fails
+loudly, naming its replacement. Each Settings catalog row, though
+— an app shortcut, a Space jump, a resize, a layer switch — writes
+one exact call into the binding's `lua`, so that spelling is the
+app's own format and a rename of its verb owes the crossing any
+stored value owes. The rule is by SPELLING: the exact shape the
+GUI writes crosses, whoever typed it — a custom row typed that way
+crosses too, and gating on the row's `kind` would be wrong, since
+a missing `kind` decodes as custom — while every other spelling
+still fails loudly. Without it a rename breaks every shortcut ever
+made in Settings on the update, which is the
 stranger-hand-edits-JSON outcome above.
 :::
 

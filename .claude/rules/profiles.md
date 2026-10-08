@@ -486,6 +486,17 @@ holds the secondary-switch decision including its nil case.
   was true while the author was the only user, and v0.9.7 shipped
   to others. A lenient decoder is still banned; it never ends,
   where a rewrite does.
+- **A verb the GUI writes into a stored binding is a stored
+  value (#1511).** A Settings catalog row writes one exact call
+  into `layers[].bindings[].lua`, so renaming a verb any row
+  writes owes a one-shot step that renames that exact shape —
+  matched by SPELLING, never by the row's `kind`, since a missing
+  `kind` decodes as custom — whoever typed it, at every home of a
+  stored layer: `gui.json`, a profile's override, a bundle's
+  inline copies. Any other spelling is the user's script and
+  stays loud through `APIReference.retired`. The instance is
+  `FocusOrSpawnMigrationTests`, scoped by
+  `FocusOrSpawnMigrationRoutingTests`.
 - **A stored value's ABSENCE is a value too: a default flip on a
   sparsely-encoded leaf owes the same crossing.** Under the old
   build an absent key meant the old default, so a file below the
