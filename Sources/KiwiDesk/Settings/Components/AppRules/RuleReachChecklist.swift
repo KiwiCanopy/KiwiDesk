@@ -76,7 +76,7 @@ struct RuleReachChecklist: View {
                 )
             )
             .toggleStyle(.checkbox)
-            .disabled(!reading.shared && !reading.layerShared)
+            .disabled(!reading.allTickable)
             caption(RuleReachWords.allCaption(reading), warning: false)
         }
     }

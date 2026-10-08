@@ -119,12 +119,7 @@ struct LayerStripEditor: View {
     }
 
     private var canAddLayer: Bool {
-        let name = newLayer.trimmed
-        return !name.isEmpty
-            && !model.config.layers.contains {
-                $0.name == name
-            }
-            && model.layerAddClash(name) == nil
+        model.canAddLayer(newLayer.trimmed)
     }
 
     private func addLayer() {

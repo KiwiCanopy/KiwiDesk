@@ -31,9 +31,7 @@ struct RuleReachControl: View {
             }
         }
         .buttonStyle(.borderless)
-        .foregroundStyle(
-            reading.shared ? SettingsTheme.ink2 : SettingsTheme.ink
-        )
+        .foregroundStyle(RuleReachWords.ink(reading))
         .frame(minWidth: SettingsMetrics.ruleReachColumn, alignment: .leading)
         .help(RuleReachWords.spoken(reading))
         .accessibilityLabel(L("app_rules.reach", "Applies to"))
@@ -108,7 +106,7 @@ enum RuleReachWords {
     /// because the row's layer is not shared, why (#2022): a dim is
     /// not a sentence.
     static func allCaption(_ reading: RuleReachReading) -> String {
-        guard reading.shared || reading.layerShared else {
+        guard reading.allTickable else {
             return L(
                 "shortcuts.layer_reach.row_not_shared",
                 "Only some profiles have this layer. To share the "
@@ -119,6 +117,11 @@ enum RuleReachWords {
             "app_rules.reach.all_caption",
             "Includes profiles you create later."
         )
+    }
+
+    /// The closed label's ink: a shared reading recedes.
+    static func ink(_ reading: RuleReachReading) -> Color {
+        reading.shared ? SettingsTheme.ink2 : SettingsTheme.ink
     }
 
     /// The trash's "this profile" choice.

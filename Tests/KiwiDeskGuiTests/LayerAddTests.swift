@@ -14,6 +14,16 @@ struct LayerAddTests {
     private let up = "KiwiDesk.focus(\"up\")"
     private let chat = "KiwiDesk.focus(\"down\")"
 
+    private var switchRow: KeyBinding {
+        let cmd = KeybindingCatalog.switchLayerCommand("Gaming")
+        return KeyBinding(
+            combo: "alt+g",
+            lua: cmd.lua,
+            kind: .navigation,
+            label: cmd.label
+        )
+    }
+
     /// gui.json shares Gaming; Work is loaded, Home and Travel are
     /// stored, and Home carries a layer of its own, Focus.
     private func makeModel() throws -> SettingsModel {
@@ -21,7 +31,7 @@ struct LayerAddTests {
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
         config.layers = [
-            KeyLayer(name: KeyLayer.defaultName),
+            KeyLayer(name: KeyLayer.defaultName, bindings: [switchRow]),
             KeyLayer(
                 name: "Gaming",
                 bindings: [KeyBinding(combo: "w", lua: up, kind: .navigation)]
@@ -97,9 +107,21 @@ struct LayerAddTests {
         #expect(model.addLayer("Gaming"))
         model.updateActiveProfile()
 
-        #expect(try layers(model, "Work").contains { $0.name == "Gaming" })
+        let work = try layers(model, "Work")
+        #expect(work.contains { $0.name == "Gaming" })
+        // The switch rows the delete took stay gone, here alone.
+        #expect(
+            !work.flatMap(\.bindings).contains { $0.lua == switchRow.lua }
+        )
         let base = model.core.guiConfigStore.load()?.layers ?? []
         #expect(base.contains { $0.name == "Gaming" })
+        #expect(base[0].bindings.contains { $0.lua == switchRow.lua })
+        // Every other holder keeps the layer.
+        for other in ["Home", "Travel"] {
+            #expect(
+                try layers(model, other).contains { $0.name == "Gaming" }
+            )
+        }
     }
 
     @Test("a stored page left out of a shared layer rejoins it by name")
@@ -109,6 +131,13 @@ struct LayerAddTests {
         model.updateActiveProfile()
         model.selectEditTarget("Home")
         #expect(model.addLayer("Gaming"))
+        // The layer pass places it, not only the stored page's diff.
+        let layered = try #require(model.layeredReach)
+        #expect(
+            layered.storedKeyLayers(for: "Home").contains {
+                $0.name == "Gaming"
+            }
+        )
         model.saveEditedProfile()
 
         let home = try layers(model, "Home")
@@ -142,5 +171,38 @@ struct LayerAddTests {
         model.setLayerProfile("Gaming", "Travel", false)
         model.setProfile(.key, key("Gaming", up), "Travel", true)
         #expect(model.reachEdits.reach[.key]?[key("Gaming", up)] == nil)
+    }
+
+    @Test("an imported layer named like another's own is renamed")
+    func importClashIsRenamed() throws {
+        let model = try makeModel()
+        model.importShortcuts([
+            KeyLayer(
+                name: "Focus",
+                bindings: [
+                    KeyBinding(combo: "alt+f", lua: chat, kind: .navigation)
+                ]
+            )
+        ])
+        #expect(model.config.layers.contains { $0.name == "Focus 2" })
+        #expect(!model.config.layers.contains { $0.name == "Focus" })
+        model.updateActiveProfile()
+        let home = try layers(model, "Home")
+        #expect(home.first { $0.name == "Focus" }?.bindings.isEmpty == true)
+    }
+
+    @Test("an imported shared layer this profile left rejoins it")
+    func importRejoins() throws {
+        let model = try makeModel()
+        model.deleteLayer("Gaming", .here)
+        model.importShortcuts([
+            KeyLayer(
+                name: "Gaming",
+                bindings: [KeyBinding(combo: "w", lua: up, kind: .navigation)]
+            )
+        ])
+        let edit = try #require(model.reachEdits.layers["Gaming"])
+        #expect(edit.stored == "Gaming")
+        #expect(edit.members?.shared == true)
     }
 }

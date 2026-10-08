@@ -24,9 +24,7 @@ struct LayerReachControl: View {
             }
         }
         .buttonStyle(.borderless)
-        .foregroundStyle(
-            reading.shared ? SettingsTheme.ink2 : SettingsTheme.ink
-        )
+        .foregroundStyle(RuleReachWords.ink(reading))
         .frame(minWidth: SettingsMetrics.ruleReachColumn, alignment: .leading)
         .help(RuleReachWords.spoken(reading))
         .accessibilityLabel(L("app_rules.reach", "Applies to"))

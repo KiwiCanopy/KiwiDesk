@@ -1,43 +1,82 @@
 import KiwiDeskCore
 
-/// Every layer the page gains is recorded as a membership the layer
-/// pass places (#2022) — Add and Import alike — so the page never
+/// What a layer the page would gain becomes (#2022).
+enum LayerAdmission: Equatable {
+    /// A layer no file holds: it starts where a new row does.
+    case new
+    /// A shared layer this profile leaves out: it rejoins it.
+    case rejoin
+    /// Another profile's own layer by that name: it would merge.
+    case clash(String)
+}
+
+/// Every layer the page gains goes through ONE decider,
+/// `layerAdmission`, and is recorded as a membership the layer pass
+/// places (#2022) — Add and Import alike — so the page never
 /// decides on its own which layers exist where.
 extension SettingsModel {
-    /// Adds `name` to the page and says whether it did. A name the
-    /// shared base holds puts this profile back in that layer; a
-    /// name only another profile's own layer holds is refused.
-    @discardableResult
-    func addLayer(_ name: String) -> Bool {
+    /// What adding `name` would do; nil for an empty name or one
+    /// the page already has.
+    func layerAdmission(_ name: String) -> LayerAdmission? {
         guard !name.isEmpty,
-            !config.layers.contains(where: { $0.name == name }),
-            layerAddClash(name) == nil
-        else { return false }
-        if let shared = layeredReach?.storedKeyBase.first(where: {
+            !config.layers.contains(where: { $0.name == name })
+        else { return nil }
+        if let holder = layerAddClash(name) { return .clash(holder) }
+        let shared = layeredReach?.storedKeyBase.contains {
             $0.name == name
-        }) {
-            rejoin(shared)
-            return true
         }
-        // Every layer carries the app-chrome rows (#602, #1381).
-        config.layers.append(
-            KeyLayer(name: name, bindings: DefaultKeybindings.appChromeRows())
-        )
-        recordCreated([name])
-        return true
+        return shared == true ? .rejoin : .new
+    }
+
+    /// Whether Add may take `name`.
+    func canAddLayer(_ name: String) -> Bool {
+        switch layerAdmission(name) {
+        case .new?, .rejoin?: true
+        case .clash?, nil: false
+        }
     }
 
     /// Whether adding `name` puts this profile back in a shared
     /// layer it leaves out, rather than making a new one.
     func layerAddRejoins(_ name: String) -> Bool {
-        !name.isEmpty
-            && !config.layers.contains { $0.name == name }
-            && layeredReach?.storedKeyBase.contains { $0.name == name } == true
+        layerAdmission(name) == .rejoin
+    }
+
+    /// Adds `name` to the page and says whether it did.
+    @discardableResult
+    func addLayer(_ name: String) -> Bool {
+        switch layerAdmission(name) {
+        case .rejoin?:
+            guard
+                let shared = layeredReach?.storedKeyBase.first(where: {
+                    $0.name == name
+                })
+            else { return false }
+            config.layers = KeybindingCatalog.insertLayer(
+                shared,
+                into: config.layers,
+                order: layeredReach?.storedKeyBase.map(\.name) ?? []
+            )
+            recordRejoined([name])
+            return true
+        case .new?:
+            // Every layer carries the app-chrome rows (#602, #1381).
+            config.layers.append(
+                KeyLayer(
+                    name: name,
+                    bindings: DefaultKeybindings.appChromeRows()
+                )
+            )
+            recordCreated([name])
+            return true
+        case .clash?, nil:
+            return false
+        }
     }
 
     /// The profile whose own layer already takes `name`: a new layer
     /// by that name would merge into it. A shared layer is rejoined
-    /// instead (`addLayer`), so it never clashes.
+    /// instead, so it never clashes.
     func layerAddClash(_ name: String) -> String? {
         guard let editing = reachProfile,
             let table = layeredReach?.layerTable,
@@ -48,11 +87,33 @@ extension SettingsModel {
     }
 
     /// Imports live Lua shortcuts into the page (`KeybindingMerge`,
-    /// #4): a layer the import brings is recorded like an added one.
+    /// #4). Each layer it brings takes `layerAdmission` as Add does;
+    /// one whose name another profile's own layer holds is imported
+    /// under the first free numbered name rather than merged.
     func importShortcuts(_ recovered: [KeyLayer]) {
-        let before = Set(config.layers.map(\.name))
+        var incoming = recovered
+        var taken = Set(config.layers.map(\.name))
+            .union(recovered.map(\.name))
+        var created: [String] = []
+        var rejoined: [String] = []
+        for layer in recovered {
+            switch layerAdmission(layer.name) {
+            case .new?: created.append(layer.name)
+            case .rejoin?: rejoined.append(layer.name)
+            case .clash?:
+                let free = freeLayerName(layer.name, taken: taken)
+                taken.insert(free)
+                incoming = KeybindingCatalog.renameLayer(
+                    in: incoming,
+                    from: layer.name,
+                    to: free
+                )
+                created.append(free)
+            case nil: break
+            }
+        }
         var updated = config
-        KeybindingMerge.merge(recovered: recovered, into: &updated)
+        KeybindingMerge.merge(recovered: incoming, into: &updated)
         KeybindingImportClassifier.classify(
             &updated,
             recoverResizeStep: true
@@ -61,9 +122,24 @@ extension SettingsModel {
         // action (#1807).
         droppedChords = NavigationChords.deduplicate(&updated)
         config = updated
-        recordCreated(
-            updated.layers.map(\.name).filter { !before.contains($0) }
-        )
+        recordCreated(created)
+        recordRejoined(rejoined)
+    }
+
+    /// `name 2`, `name 3`, … — the first no layer holds.
+    private func freeLayerName(_ name: String, taken: Set<String>)
+        -> String
+    {
+        var number = 2
+        while true {
+            let candidate = "\(name) \(number)"
+            if !taken.contains(candidate),
+                layerAdmission(candidate) == .new
+            {
+                return candidate
+            }
+            number += 1
+        }
     }
 
     /// Records each new page layer where a new row starts
@@ -97,26 +173,22 @@ extension SettingsModel {
         reachEdits = edits
     }
 
-    /// Puts the edited profile back in the shared layer `shared` by
-    /// ticking it into the layer's membership — over a draft's own
-    /// Delete from here too, whose switch rows stay gone.
-    private func rejoin(_ shared: KeyLayer) {
-        let name = shared.name
-        let holders = layerReach(name)?.users ?? []
-        config.layers = KeybindingCatalog.insertLayer(
-            shared,
-            into: config.layers,
-            order: layeredReach?.storedKeyBase.map(\.name) ?? []
-        )
-        guard let editing = reachProfile else { return }
+    /// Ticks the edited profile back into each shared layer — over a
+    /// draft's own Delete from here too, whose switch rows stay gone.
+    /// Every other holder keeps the layer.
+    private func recordRejoined(_ names: [String]) {
+        guard !names.isEmpty, let editing = reachProfile else { return }
         var edits = reachEdits
-        edits.layers[name] = LayerEdit(
-            stored: name,
-            members: LayerMembers(
-                shared: true,
-                profiles: holders.union([editing])
+        for name in names {
+            let holders = layerReach(name)?.users ?? []
+            edits.layers[name] = LayerEdit(
+                stored: name,
+                members: LayerMembers(
+                    shared: true,
+                    profiles: holders.union([editing])
+                )
             )
-        )
+        }
         reachEdits = edits
     }
 }
