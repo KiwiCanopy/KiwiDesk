@@ -8,6 +8,9 @@ struct DelayedCloseDebt {
     /// The closing window's Space — the one the close-return owes.
     let space: SpaceID
     let noted: Date
+    /// When the distrust episode opened — the instant the removal
+    /// is re-filed at, and the start of "the user acted since".
+    let episodeOpened: Date
     /// When it was noted, on the commanded-focus clock (#1088).
     let mark: ContinuousClock.Instant
     /// Our own focus follow carried the active Space to the
@@ -46,13 +49,14 @@ extension KiwiCore {
         after effects: AppliedEffects,
         selfEcho: Bool
     ) {
-        // The successor's own duplicate, or the follow's echo.
-        if delayedCloseDebt?.successor == id { return }
+        // The successor's own duplicate, the follow's echo, or any
+        // echo of our own raise (a landing float's) — none of them
+        // the user moving on.
+        if selfEcho || delayedCloseDebt?.successor == id { return }
         retireDelayedClose(touching: nil, why: "focus moved")
         let now = wallClock()
-        guard !selfEcho,
-            let before = effects.focusBefore, before != id,
-            eventLoop.delaysClose(of: before),
+        guard let before = effects.focusBefore, before != id,
+            let opened = eventLoop.delayedCloseOpened(before),
             let closing = state.windows[before],
             state.windows[id]?.pid == closing.pid,
             let space = state.workspaces.space(of: before),
@@ -64,6 +68,7 @@ extension KiwiCore {
             successor: id,
             space: space,
             noted: now,
+            episodeOpened: opened,
             mark: .now
         )
         onLog(
@@ -146,7 +151,10 @@ extension KiwiCore {
         guard let next = state.workspaces[debt.space]?.focused,
             state.windows[next]?.isFullscreen != true
         else { return "no raisable fallback" }
-        if leftPress(since: debt.noted) { return "a press" }
+        // From the OPENING: a Dock or Window-menu pick that keyed
+        // the successor lands before its report; the close click
+        // itself lands before the episode.
+        if leftPress(since: debt.episodeOpened) { return "a press" }
         if eventLoop.focusCommanded(since: debt.mark) {
             return "a commanded focus"
         }

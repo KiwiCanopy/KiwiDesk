@@ -121,10 +121,9 @@ public final class EventLoop {
     /// the "was a carrier" fact for a window that vanishes after a
     /// switch even though its element is gone (#308).
     var tabCarriers: Set<WindowID> = []
-    /// Sweep removals currently refused — absent from the AX
-    /// list, still on-census — as follow-ups spent per
-    /// continuous-absence episode (#1157).
-    var removalDistrusted: [WindowID: Int] = [:]
+    /// The open #1157 episodes (`RemovalEpisode`), on this clock.
+    var removalDistrusted: [WindowID: RemovalEpisode] = [:]
+    var wallClock: () -> Date = Date.init
     /// The windows sticky reach has carried and still holds IN
     /// FLIGHT (#1145) — the gate's carried arm reads it
     /// (`EventLoop+RemovalDistrust`). Wired in `KiwiCore+Bootstrap`

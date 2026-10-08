@@ -7,7 +7,7 @@ import Testing
 /// The #2002 let-outs that leave today's behaviour by never
 /// noting a debt, or by retiring it before the confirmation: each
 /// reds when its clause in `KiwiCore+DelayedCloseReturn` (or the
-/// distrust machine's `delaysClose` / episode end) is removed.
+/// distrust machine's recorded cause / episode end) is removed.
 @Suite("Delayed close return: let-outs (#2002)", .serialized)
 @MainActor
 struct DelayedCloseLetOutTests {
@@ -25,13 +25,23 @@ struct DelayedCloseLetOutTests {
         #expect(!log.has("close distrust: w"))
     }
 
-    /// An expected-absence arm's episode is not a delayed close.
+    /// An expected-absence arm's episode is not a delayed close —
+    /// judged on the cause recorded at the opening, so the arm
+    /// closing before the report changes nothing.
     @Test("A fullscreen-transition episode notes no debt")
     func expectedAbsenceNotesNothing() {
         let (core, log) = fx.makeCore()
         defer { fx.tearDown() }
-        fx.refuse(core)
         core.eventLoop.detectedFullscreen[fx.closing] = true
+        let closing = fx.closing
+        let refused = core.eventLoop.refusesExpectedRemoval(
+            closing,
+            pid: fx.app,
+            app: AppRef(bundleID: "com.example.app", name: "App"),
+            census: { [closing] }
+        )
+        #expect(refused)
+        core.eventLoop.detectedFullscreen[fx.closing] = nil
         fx.keySuccessor(core)
         #expect(core.delayedCloseDebt == nil)
         fx.confirmClose(core)
@@ -104,6 +114,25 @@ struct DelayedCloseLetOutTests {
         fx.confirmClose(core)
         #expect(!log.has("confirmed late"))
         #expect(!log.has("close-return: raising"))
+    }
+
+    /// A landing float's raise echo is ours, not the user moving
+    /// on: the debt survives it.
+    @Test("Our own raise's echo of a third window keeps the debt")
+    func selfEchoKeepsTheDebt() {
+        let (core, _) = fx.makeCore()
+        defer { fx.tearDown() }
+        fx.refuse(core)
+        fx.keySuccessor(core)
+        let other = WindowID(5)
+        core.state.windows.upsert(
+            ManagedWindow(id: other, pid: 80, appName: "App80")
+        )
+        core.state.workspaces.add(other, to: "2")
+        core.stampSelfRaise(other, now: core.wallClock())
+        core.handle(.windowFocused(other))
+        core.deferred.cancel(.focusFollow)
+        #expect(core.delayedCloseDebt != nil)
     }
 
     /// The episode ending without a close takes the debt with it,

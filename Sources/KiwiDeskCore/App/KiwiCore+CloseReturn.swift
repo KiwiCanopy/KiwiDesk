@@ -56,12 +56,16 @@ extension KiwiCore {
             // to its Space on a plain window close.
             state.windows[next]?.isFullscreen != true
         {
-            // The owed return's switch, on the raise's branch
-            // alone; the switch retile placed the Space, so the
-            // focus takes none of its own (#11, #2002).
-            if let owedSpace { applyFocusedSpaceSwitch(to: owedSpace) }
             onLog("close-return: raising w\(next.raw)")
-            focusWindow(next, refocusRetile: owedSpace == nil, warp: true)
+            // The owed return's switch, on the raise's branch
+            // alone, takes the one follow-shaped switch: its retile
+            // places the Space and lifts its floats (#11, #412,
+            // #2002).
+            if let owedSpace {
+                followSwitch(to: owedSpace, focusing: next)
+            } else {
+                focusWindow(next, warp: true)
+            }
             armCloseReturnRestack(
                 to: next,
                 fromRemovedSlot: effects.removedWindow?.tiledSlot

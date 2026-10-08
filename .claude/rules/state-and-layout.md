@@ -592,9 +592,10 @@ editing here:
   reading the developer's pointer would return foreign reports
   in every focus suite. The #2002 delayed-close debt is the
   fourth member and takes that shape:
-  `KiwiCore+DelayedCloseReturn.swift` is its one writer, noted at its one consulting site in
-  `handleWindowFocused`, marked by the focus follow's landing and
-  consumed by the close-return tail (`DelayedCloseSeamTests`). A
+  `KiwiCore+DelayedCloseReturn.swift` is its one writer, noted
+  at its one consulting site in `handleWindowFocused`, marked
+  by the focus follow's landing and consumed by the
+  close-return tail (`DelayedCloseSeamTests`). A
   further member takes the same one-home shape with its own
   consulting site there, and a new live host read on any arm
   takes a `MouseTracker` seam pinned in both twins
@@ -785,29 +786,28 @@ editing here:
   did before, removal and raise alike. A change keying the raise
   on anything but `focusLost` owes that order a test.
   **One re-filing reaches `focusLost`, and through the tail
-  alone (#2002):** a close the #1157 census refusal delayed
-  (`EventLoop.delaysClose(of:)`, never the raw episode map),
-  confirmed after macOS keyed the same app's window on ANOTHER
-  Space and our own follow switched there, is re-filed by
+  alone (#2002):** a close the #1157 census refusal delayed —
+  read through `EventLoop.delayedCloseOpened(_:)`, the cause and
+  opening instant the machine records when the episode OPENS,
+  never the raw episode map nor the arms' state now — confirmed
+  after macOS keyed the same app's window on ANOTHER Space and
+  our own follow switched there, is re-filed by
   `healDelayedClose` as the focus loss it was when the episode
   opened, with the Space the return is owed in. The heal changes
   FACTS only: the one Space switch is the close-return tail's,
   on the branch where its raise runs and after its stand-down
-  verdict, and that raise takes no focus retile of its own (the
-  switch retile placed the Space, #11). Nothing else switches
-  for the debt. It stands down for a press or a commanded focus
-  after the successor's report, any third honored report, a
-  switch that was not that follow, an owed Space with no
-  raisable fallback, and past `delayedCloseBound`; the debt dies
-  with its episode — re-listed or re-keyed — and an undelayed
-  close or a same-Space successor never reaches it
-  (`DelayedCloseReturnTests`, whose undistrusted case is the
-  #1930 order's test). **Accepted residue, awaiting the owner's
-  confirmation:** an in-app window cycle (⌘ plus the backtick
-  key) onto the successor, and a Space Bar pick
-  that changes nothing (the shown Space, or the successor's own
-  glyph), leave no record the heal can read, so the return still
-  runs over them; no new record is minted for them.
+  verdict, through the one follow-shaped `followSwitch`, so the
+  Space's float layer lifts (#412) and the raise takes no retile
+  of its own (#11). Nothing else switches for the debt. It
+  stands down for a press since the episode opened, a commanded
+  focus since the successor's report, any third honored report
+  (our own raise's echo is none), a switch that was not that
+  follow, an owed Space with no raisable fallback, and past
+  `delayedCloseBound`; the debt dies with its episode —
+  re-listed or re-keyed — and an undelayed close or a same-Space
+  successor never reaches it (`DelayedCloseReturnTests`,
+  `DelayedCloseLetOutTests`, whose undistrusted case is the
+  #1930 order's test).
   An arm in `focusWindow` guards against its own re-arm (the
   restore's closing re-assert calls back in) **semantically** —
   refuse because the focus is unchanged (`previousFocused !=

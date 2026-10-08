@@ -197,6 +197,10 @@ extension KiwiCore {
         eventLoop.onRemovalDistrust = { [weak self] in
             self?.scheduleRemovalRecheck()
         }
+        // The #2002 episode opening, on the core's one wall clock.
+        eventLoop.wallClock = { [weak self] in
+            self?.wallClock() ?? .distantPast
+        }
         eventLoop.onRemovalEpisodesEnded = { [weak self] ids in
             self?.retireDelayedClose(touching: ids, why: "re-listed")
         }

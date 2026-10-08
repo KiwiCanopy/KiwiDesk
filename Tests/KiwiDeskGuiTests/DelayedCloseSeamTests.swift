@@ -51,7 +51,18 @@ struct DelayedCloseSeamTests {
                     "KiwiCore+RekeyEvent.swift",
                 ]
             ),
-            ("delaysClose(", [h, "EventLoop+RemovalDistrust.swift"]),
+            (
+                "delayedCloseOpened(",
+                [h, "EventLoop+RemovalDistrust.swift"]
+            ),
+            // The episode's re-list end, which retires the debt.
+            (
+                "endRemovalEpisodes(",
+                [
+                    "EventLoop+RemovalDistrust.swift",
+                    "EventLoop+Tabs.swift",
+                ]
+            ),
         ]
         for (door, sites) in doors {
             let found = try files(of: door).sorted()
@@ -79,27 +90,28 @@ struct DelayedCloseSeamTests {
 
     /// The heal changes facts only: the switch is the tail's, on
     /// the raise branch after the stand-down verdict, and the
-    /// raise there takes no retile of its own (#11).
+    /// switch is the one follow-shaped `followSwitch`, whose retile
+    /// places the Space and lifts its floats (#11, #412).
     @Test("the owed switch is the tail's raise branch alone")
     func switchInTheRaiseBranch() throws {
         let heal = try source("App/" + Self.home)
-        #expect(!heal.contains("applyFocusedSpaceSwitch("))
-        #expect(!heal.contains("focusWindow("))
+        for spelling in [
+            "applyFocusedSpaceSwitch(", "followSwitch(", "focusWindow(",
+            "workspaces.activate(",
+        ] {
+            #expect(!heal.contains(spelling), "\(spelling)")
+        }
         let tail = try source("App/KiwiCore+CloseReturn.swift")
-        #expect(
-            tail.components(separatedBy: "applyFocusedSpaceSwitch(")
-                .count == 2
-        )
+        #expect(!tail.contains("applyFocusedSpaceSwitch("))
+        #expect(tail.components(separatedBy: "followSwitch(").count == 2)
         let verdict = try #require(
             tail.range(of: "!closeReturnRaiseStandsDown")
         )
         let owedSwitch = try #require(
-            tail.range(of: "applyFocusedSpaceSwitch(to: owedSpace)")
+            tail.range(of: "followSwitch(to: owedSpace, focusing: next)")
         )
-        let raise = try #require(
-            tail.range(of: "focusWindow(next, refocusRetile:")
-        )
+        let restack = try #require(tail.range(of: "armCloseReturnRestack("))
         #expect(verdict.lowerBound < owedSwitch.lowerBound)
-        #expect(owedSwitch.lowerBound < raise.lowerBound)
+        #expect(owedSwitch.lowerBound < restack.lowerBound)
     }
 }
