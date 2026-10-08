@@ -27,7 +27,8 @@ struct AXDump {
 
     /// The path below `AXDumps/`, without the extension.
     let name: String
-    private let values: [String: Any]
+    /// The dump, cut to `readKeys`.
+    let values: [String: Any]
 
     init(name: String, data: Data) throws {
         let object = try JSONSerialization.jsonObject(

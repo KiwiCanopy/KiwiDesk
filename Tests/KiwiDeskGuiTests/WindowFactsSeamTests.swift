@@ -52,39 +52,95 @@ struct WindowFactsSeamTests {
             ]
         )
         // Only the door assembles the value: a producer building
-        // it by hand reads its facts beside the door.
+        // it by hand reads its facts beside the door, in any of
+        // the spellings an initializer takes.
         #expect(
             Self.census("WindowFacts(", in: sources) == [
                 "AX/WindowFacts.swift": 1
             ]
         )
+        #expect(Self.census("WindowFacts.init(", in: sources) == [:])
+        let typedInit = #"WindowFacts\s*=\s*\.init\("#
+        for (file, source) in sources {
+            #expect(
+                source.range(of: typedInit, options: .regularExpression)
+                    == nil,
+                "\(file) builds WindowFacts through .init("
+            )
+        }
     }
 
-    @Test("detection reads no element, and the door reads both")
-    func detectionReadsFactsOnly() throws {
-        let detection = try SourceScan.strippedSource(
-            at: Self.root.appendingPathComponent(
-                "Sources/KiwiDeskCore/AX/FloatDetection.swift"
-            )
-        )
-        #expect(detection.contains("func autoFloatReason("))
-        let reads = [
-            "AXHelper.role(", "AXHelper.subrole(", "AXHelper.title(",
-        ]
-        for read in reads {
-            #expect(!detection.contains(read), "detection calls \(read)")
-        }
+    /// The title is a round trip on a live window: the door
+    /// defers it into the closure detection asks only where
+    /// structure tiles (`WindowFactsTests` holds the asking).
+    @Test("the door reads role and subrole, and defers the title")
+    func doorDefersTheTitle() throws {
         let door = try SourceScan.functionBody(
             of: "read",
             in: "WindowFacts.swift",
             under: "AX"
         )
         #expect(door.contains("AXHelper.subrole(of: element)"))
-        #expect(door.contains("AXHelper.title(of: element)"))
+        #expect(door.contains("{ AXHelper.title(of: element) }"))
+        #expect(door.occurrences(of: "AXHelper.title(") == 1)
+    }
+
+    /// Every `FloatDetection*` file, qualified or not (an
+    /// `extension AXHelper` spells the reads bare), save
+    /// `hasNativeTabs`, which reads children's roles for the tab
+    /// reconciler and is no part of detection.
+    @Test("detection reads no element")
+    func detectionReadsFactsOnly() throws {
+        let base = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore/AX"
+        )
+        let files = try SourceScan.swiftSources(under: base).filter {
+            $0.lastPathComponent.hasPrefix("FloatDetection")
+        }
+        #expect(files.count >= 2, "scanned \(files.count) files")
+        let tabs = try SourceScan.functionBody(
+            of: "hasNativeTabs",
+            in: "FloatDetection.swift",
+            under: "AX"
+        )
+        try #require(tabs.contains("role(of: $0)"))
+        var bodies = ""
+        for file in files {
+            bodies += try SourceScan.strippedSource(at: file)
+                .replacingOccurrences(of: tabs, with: "")
+        }
+        #expect(bodies.contains("func autoFloatReason("))
+        for read in ["role(of:", "subrole(of:", "title(of:"] {
+            #expect(!bodies.contains(read), "detection calls \(read)")
+        }
+    }
+
+    @Test("track hands its facts, and only the recheck an element")
+    func trackHandsItsFacts() throws {
+        let track = try SourceScan.functionBody(
+            of: "track",
+            in: "EventLoop+Tracking.swift",
+            under: "Events"
+        )
+        #expect(track.contains(".facts(facts)"))
+        #expect(!track.contains(".element("))
+        let sources = try Self.coreSources()
+        #expect(
+            Self.census(".element(", in: sources)[
+                "Events/EventLoop+Tracking.swift"
+            ] == 1
+        )
+        let recheck = try SourceScan.functionBody(
+            of: "recheckFloat",
+            in: "EventLoop+Tracking.swift",
+            under: "Events"
+        )
+        #expect(recheck.contains(".element(element, layer:"))
     }
 
     /// The live composition delegates to the pure one the corpus
-    /// replays, rather than composing beside it.
+    /// replays, handing it the loop's own rules and force-float
+    /// reason rather than composing beside it.
     @Test("the live verdict is the composition the corpus replays")
     func liveVerdictDelegates() throws {
         let live = try SourceScan.functionBody(
@@ -93,6 +149,9 @@ struct WindowFactsSeamTests {
             under: "Events"
         )
         #expect(live.contains("Self.composeVerdict("))
+        let forced = "forced: forceFloatReason(pid: pid, id: id)"
+        #expect(live.contains(forced))
+        #expect(live.contains("rules: floatRules"))
         #expect(!live.contains("FloatDetection.autoFloatReason("))
         let pure = try SourceScan.functionBody(
             of: "composeVerdict",

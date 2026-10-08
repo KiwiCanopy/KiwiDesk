@@ -8,6 +8,12 @@ import Testing
 /// under `AXDumps/`, against the table KiwiDesk keeps itself in
 /// `AXDumpExpected`. Off the main actor: it reads about 125 small
 /// files and touches no AppKit state.
+///
+/// The shell column is half a check: AeroSpace's dumper skips
+/// `AXChildren`, so a window with no title-bar button is never
+/// decidable and only `.furnished` rows say anything. A shadow
+/// regression on a buttonless window goes unseen here
+/// (`ShadowRuleTests` holds that rule on fixtures).
 @Suite("AX dump corpus (#1883)")
 struct AXDumpCorpusTests {
     static let directory = URL(fileURLWithPath: #filePath)
@@ -59,15 +65,17 @@ struct AXDumpCorpusTests {
 
     /// Non-vacuity: a loader that lost a fact would leave every
     /// row "not decidable" and still match a table frozen from it.
-    @Test("most dumps decide every rule")
+    /// Detection and admission only: the shell column cannot
+    /// carry this (see the suite's docstring).
+    @Test("most dumps decide detection and admission")
     func mostRowsDecide() throws {
         let dumps = try Self.corpus()
         let decided = dumps.filter {
             $0.verdict.detection != nil && $0.verdict.admission != nil
         }
         #expect(decided.count * 4 > dumps.count * 3)
-        #expect(dumps.contains { $0.verdict.shell != nil })
         #expect(dumps.contains { $0.verdict.detection == .tiles })
+        #expect(dumps.contains { $0.verdict.admission == .ignored })
     }
 
     /// AeroSpace's dumps carry its own classification beside the
@@ -82,6 +90,13 @@ struct AXDumpCorpusTests {
         ]
         let aero = AXDump.readKeys.filter { $0.hasPrefix("Aero.") }
         #expect(aero == facts)
+        // The init applies the allowlist: a verdict key in the
+        // file never reaches a reader.
+        let dump = try AXDump(
+            name: "probe",
+            data: Data(#"{"AXRole": "w", "Aero.workspace": "1"}"#.utf8)
+        )
+        #expect(Set(dump.values.keys) == ["AXRole"])
         let here = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
         let verdictKeys = [
