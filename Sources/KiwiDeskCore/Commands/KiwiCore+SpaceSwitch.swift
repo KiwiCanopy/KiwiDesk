@@ -21,6 +21,10 @@ extension KiwiCore {
         // apart from "the user moved on since".
         let priorFrontmost = frontmostPIDProvider?()
         tiler.meter.noteSpaceSwitch()  // #1508
+        // A first visit to an undeclared id gets its screen ahead
+        // of the slide's read, so it slides too (#1994).
+        state.workspaces.ensureSpace(space)
+        placeUnplacedSpaces()
         let slide = spaceSlideIntent(to: space)
         state.workspaces.activate(space)
         logSpaceContents(space)

@@ -38,9 +38,13 @@ extension KiwiCore {
         // A temporary one the same way, once armed (#1790).
         // A plate slide another activation took past (#1956).
         endSpaceSlideIfOvertaken()
+        // A Space a door created by id — a move's target, the
+        // restart's temporary replay — takes its screen here (#1994).
         let heldRetired = retireEmptiedHeldSpaces()
         if retireEmptiedTemporarySpaces() || heldRetired {
             resolveSpaceDisplays()
+            emitSpaceChange()
+        } else if placeUnplacedSpaces() {
             emitSpaceChange()
         }
         // Ambient motion waits for the hand to rest (#804): the pass

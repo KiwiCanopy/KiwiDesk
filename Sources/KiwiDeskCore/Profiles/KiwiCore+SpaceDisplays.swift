@@ -66,4 +66,20 @@ extension KiwiCore {
             reanchorFloats(of: space.id)
         }
     }
+
+    /// Places every Space no resolve has seen — one a command or a
+    /// restart's replay created by id — on its screen (#1994). A
+    /// Space without one has no chip, no `activeSpace(on:)` and no
+    /// slide. True when it resolved; a desk with no screen waits.
+    @discardableResult
+    func placeUnplacedSpaces() -> Bool {
+        let workspaces = state.workspaces
+        guard !workspaces.allDisplays.isEmpty,
+            workspaces.allSpaces.contains(where: {
+                workspaces.display(of: $0.id) == nil
+            })
+        else { return false }
+        resolveSpaceDisplays()
+        return true
+    }
 }
