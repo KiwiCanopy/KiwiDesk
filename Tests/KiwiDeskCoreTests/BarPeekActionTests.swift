@@ -96,13 +96,13 @@ struct BarPeekActionTests {
         #expect(!rig.peek.holding)
     }
 
-    // MARK: - The toggle
+    // MARK: - The click
 
     @Test("A click shows the peek at once, with no dwell")
-    func clickTogglesAtOnce() throws {
+    func clickShowsAtOnce() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
-        rig.peek.toggle(
+        rig.peek.show(
             rig.first,
             source: .glyph([WindowID(1), WindowID(2)]),
             space: SpaceID("1"),
@@ -121,46 +121,59 @@ struct BarPeekActionTests {
         #expect(rig.peek.panel.drawn == nil)
     }
 
-    @Test("A click on an item whose hover peek shows closes it")
-    func clickClosesAHoverPeek() {
+    /// Hover-then-click is the common path (#2063): the click must
+    /// not close the list the hand was reaching for.
+    @Test("A click on an item whose hover peek shows keeps it")
+    func clickKeepsAHoverPeek() {
         let rig = BarPeekRig()
         defer { rig.close() }
         rig.hover(rig.first, 1, 2)
         rig.step()
         #expect(rig.shownTitles == ["Window 1", "Window 2"])
-        rig.peek.toggle(
+        rig.peek.show(
             rig.first,
             source: .glyph([WindowID(1), WindowID(2)]),
             space: SpaceID("1"),
             edge: .top
         )
-        #expect(rig.peek.panel.drawn == nil, "the click closes it")
-        rig.hover(rig.first, 1, 2)
-        rig.step()
-        #expect(rig.dwells.count == 1, "shut until the pointer leaves")
-        // A dismissal, not a fade: no cool-down re-shows it at once.
-        #expect(rig.shownTitles == nil)
+        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+        #expect(rig.peek.shown?.view === rig.first)
     }
 
-    @Test("A second click on the toggled item closes its peek")
-    func secondClickCloses() {
+    @Test("A second click leaves the peek open")
+    func secondClickKeeps() {
         let rig = BarPeekRig()
         defer { rig.close() }
         let source = BarPeekSource.glyph([WindowID(1), WindowID(2)])
         for _ in 0..<2 {
-            rig.peek.toggle(
+            rig.peek.show(
                 rig.first,
                 source: source,
                 space: SpaceID("1"),
                 edge: .top
             )
         }
-        #expect(rig.peek.panel.drawn == nil, "the second click closes")
+        #expect(rig.shownTitles == ["Window 1", "Window 2"])
+    }
+
+    /// A dismissed item stays shut to hover until the pointer
+    /// leaves it; a click is the user's ask, so it opens at once.
+    @Test("A click reopens a dismissed peek at once")
+    func clickReopensADismissedPeek() {
+        let rig = BarPeekRig()
+        defer { rig.close() }
         rig.hover(rig.first, 1, 2)
         rig.step()
-        #expect(rig.dwells.isEmpty, "shut until the pointer leaves")
-        // A dismissal, not a fade: no cool-down re-shows it at once.
-        #expect(rig.shownTitles == nil)
+        rig.peek.dismiss()
+        rig.hover(rig.first, 1, 2)
+        #expect(rig.shownTitles == nil, "spent to hover")
+        rig.peek.show(
+            rig.first,
+            source: .glyph([WindowID(1), WindowID(2)]),
+            space: SpaceID("1"),
+            edge: .top
+        )
+        #expect(rig.shownTitles == ["Window 1", "Window 2"])
     }
 
     // MARK: - The rows
@@ -296,7 +309,7 @@ struct BarPeekActionTests {
         var opened = 0
         body.onMore = { opened += 1 }
         let ids = (1...30).map { WindowID(UInt32($0)) }
-        let content = try #require(rig.peek.content(.glyph(ids)))
+        let content = try #require(rig.peek.content(.glyph(ids), nil))
         _ = body.build(content, shelf: KiwiShelf(), maxHeight: 120)
         let more = try #require(
             body.targets.firstIndex { $0.action == .more }

@@ -149,7 +149,9 @@ struct SpaceBarGlyphWiringTests {
         let web = try target(core, on: two)
         #expect(web.peekSource == .glyph([WindowID(4)]))
         let titles = {
-            core.barPeekContent(web.peekSource)?.groups.flatMap(\.titles)
+            core.barPeekContent(web.peekSource, on: nil)?.groups.flatMap(
+                \.titles
+            )
         }
         #expect(titles() == ["Doc"])
         core.state.windows.updateTitle(WindowID(4), title: "Renamed")
@@ -215,7 +217,7 @@ struct SpaceBarGlyphWiringTests {
     func refusedRowIsGreyed() {
         let core = seededCore()
         core.windowIsOnScreen = { $0 == WindowID(4) ? false : nil }
-        let rows = core.spaceBarMenuRows([WindowID(4), WindowID(1)])
+        let rows = core.spaceBarMenuRows([WindowID(4), WindowID(1)], on: nil)
         #expect(rows.map(\.row.window) == [WindowID(4), WindowID(1)])
         #expect(rows.map(\.enabled) == [false, true])
     }

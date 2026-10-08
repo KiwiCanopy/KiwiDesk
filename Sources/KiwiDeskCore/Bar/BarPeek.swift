@@ -12,11 +12,10 @@ typealias BarPeekSchedule =
 /// `docs/design-decisions.md` ▸ A bar item's hover peek.
 @MainActor
 final class BarPeek {
-    /// The content for a source, read when the peek shows; nil
-    /// shows nothing.
-    var content: @MainActor (BarPeekSource) -> BarPeekContent? = { _ in
-        nil
-    }
+    /// The content for a source on a chip's Space (nil on the App
+    /// Bar), read when the peek shows; nil shows nothing.
+    var content: @MainActor (BarPeekSource, SpaceID?) -> BarPeekContent? =
+        { _, _ in nil }
     /// A row picked: its window, on the anchor's Space where it has
     /// one — Core's one bar-row pick, the glyph menu's too.
     var pick: @MainActor (WindowID, SpaceID?) -> Void = { _, _ in }
@@ -169,24 +168,40 @@ final class BarPeek {
         }
     }
 
-    /// A click on a list (#1946, `BarPeekSource.isList`) toggles
-    /// its peek: one already showing — the hover's, or a click's —
-    /// closes; otherwise it shows at once, with no dwell, and holds
-    /// as any list's does, until a click outside, a pick, or the
-    /// pointer leaving the hull.
-    func toggle(
+    /// A click on a list (`BarPeekSource.isList`): shows the peek
+    /// at `anchor` at once, with no dwell or cool-down — a fading one
+    /// included — or re-reads the one showing in place, and never
+    /// closes it (#2063). It holds as any list's does, until a click
+    /// outside, a pick, or the pointer leaving the hull.
+    func show(
         _ anchor: NSView,
         source: BarPeekSource,
         space: SpaceID?,
         edge: AppBarEdge
     ) {
-        if Self.same(shown, anchor, source) {
-            dismiss()
-            return
-        }
         spent = nil
         present(
             Anchor(view: anchor, source: source, space: space, edge: edge),
+            fades: false
+        )
+    }
+
+    /// Re-reads the shown peek's content, redrawn in place where it
+    /// changed, its phase kept: a focus moved while it stays open.
+    func reread() {
+        guard let anchor = shown, let frame = anchor.frame,
+            let window = anchor.view?.window,
+            let content = content(anchor.source, anchor.space),
+            !content.groups.isEmpty, content != panel.drawn,
+            let shelf = shelf(window)
+        else { return }
+        panel.show(
+            content,
+            shelf: shelf,
+            edge: anchor.edge,
+            anchor: frame,
+            strip: window.frame,
+            visible: visibleArea(window),
             fades: false
         )
     }
@@ -275,7 +290,7 @@ final class BarPeek {
         close()
         guard let view = anchor.view, let window = view.window,
             let frame = Self.screenFrame(of: view),
-            let content = content(anchor.source),
+            let content = content(anchor.source, anchor.space),
             !content.groups.isEmpty,
             let shelf = shelf(window)
         else {

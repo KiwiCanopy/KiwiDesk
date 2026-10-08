@@ -10,10 +10,12 @@ import AppKit
 @MainActor
 enum SpaceBarWindowMenu {
     /// A window as the bar lists name it, and what only the menu
-    /// adds: whether the focus door would take it (#1345).
+    /// adds: whether the focus door would take it (#1345), and
+    /// whether it holds the system focus — the peek's check (#2063).
     struct Row: Equatable {
         let row: BarWindowRow
         let enabled: Bool
+        var focused = false
     }
 
     /// A row's title past this many characters is cut, the whole
@@ -70,6 +72,7 @@ enum SpaceBarWindowMenu {
             // for as long as the menu is.
             item.representedObject = Pick(row.window, handler)
             item.isEnabled = entry.enabled
+            item.state = entry.focused ? .on : .off
             if row.title.count > titleCap { item.toolTip = row.title }
             if !oneApp {
                 item.image = row.icon.map(scaled)

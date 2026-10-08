@@ -1,12 +1,13 @@
 import AppKit
 
 /// What a click on a Space Bar glyph or `+n` does (#1528, the
-/// owner rulings in its body, and #1946's): a one-window glyph
-/// switches to its Space and focuses that window; a glyph standing
-/// for several windows, and `+n`, toggle their peek at once, and
-/// switch nothing until a row is picked — VoiceOver's press
-/// opening the native menu instead. A click elsewhere on the chip
-/// stays `focusSpace`.
+/// owner rulings in its body, #1946's and #2063's): a glyph
+/// switches to its Space and focuses a window — its one window,
+/// or for several the next in its peek's order (`glyphCycleTarget`)
+/// with the peek shown on it; `+n` shows its peek and switches
+/// nothing until a row is picked — VoiceOver's press opening the
+/// native menu instead. A list's click opens its peek and never
+/// closes it. A click elsewhere on the chip stays `focusSpace`.
 extension KiwiCore {
     func wireSpaceBarGlyphs() {
         spaceBars.glyphActions.pick = { [weak self] pick in
@@ -32,8 +33,17 @@ extension KiwiCore {
             focusFromSpaceBar(pick.windows[0], on: pick.space)
             return
         }
-        // No menu: the list is the peek, its rows the picks.
-        spaceBars.glyphActions.togglePeek(pick)
+        // No menu: the list is the peek, its rows the picks. A
+        // glyph focuses its next window first, so the check reads
+        // the window landed; `+n` mixes apps and has no next.
+        if pick.kind == .glyph, let next = glyphCycleTarget(pick) {
+            // A switch moves the chip, which closes the peek as any
+            // relayout moving its item does.
+            let switches = pick.space != activeSpace?.id
+            focusFromSpaceBar(next, on: pick.space)
+            guard !switches else { return }
+        }
+        spaceBars.glyphActions.showPeek(pick)
     }
 
     /// VoiceOver's press on a glyph: a list's native menu at the
@@ -60,7 +70,7 @@ extension KiwiCore {
         space: SpaceID?,
         at anchor: NSView
     ) {
-        let rows = spaceBarMenuRows(windows)
+        let rows = spaceBarMenuRows(windows, on: space)
         guard !rows.isEmpty else { return }
         let menu = SpaceBarWindowMenu.make(rows, kind: kind) {
             [weak self] id in
@@ -113,15 +123,20 @@ extension KiwiCore {
         followSwitch(to: space, focusing: window)
     }
 
+    /// `windows` as a window menu's rows, `space` the chip's — nil
+    /// on the App Bar — whose `barFocus` the native check marks.
     func spaceBarMenuRows(
-        _ windows: [WindowID]
+        _ windows: [WindowID],
+        on space: SpaceID?
     ) -> [SpaceBarWindowMenu.Row] {
-        barWindowRows(windows).map { row in
+        let focus = barFocus(on: space)
+        return barWindowRows(windows).map { row in
             SpaceBarWindowMenu.Row(
                 row: row,
                 // The focus door's own refusal (#1345): a row it
                 // would refuse is greyed, never hidden (#802).
-                enabled: !raiseCrossesDesktops(row.window)
+                enabled: !raiseCrossesDesktops(row.window),
+                focused: row.window == focus
             )
         }
     }
