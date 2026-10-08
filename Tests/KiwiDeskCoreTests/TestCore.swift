@@ -105,6 +105,11 @@ func makeTestCore(
     // on every sync otherwise (#1868).
     core.borders.windowLevel = { _ in nil }
     core.borders.movePanel = { _, _ in false }
+    // Every ring would build a real panel, and every sync read
+    // its window's corner radius from WindowServer (#1894); a suite
+    // testing the panel builds its own manager.
+    core.borders.backendFactory = { InertBorderBackend(orderMode: $0) }
+    core.borders.readCornerRadius = { _ in nil }
     // `prepare_restart` reads the developer's real LaunchAgent
     // plist otherwise (#930); a suite that means one injects it.
     core.inPlaceRestart.serviceProgram = { nil }
