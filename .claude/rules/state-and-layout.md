@@ -1605,6 +1605,18 @@ editing here:
   `ResizeRefusalAppBoundTests` builds the fixtures where the two
   terms disagree; the config-floor suites stamp the flag their
   fixtures earn.
+- **A tracked window's "is it presenting" is asked through the
+  one `KiwiCore.presents` door (#1788)**, which rules the float
+  gate once — a tiled slot a gapless layout sizes to its screen
+  is no show. The raw `covers` / `coversAScreen` stays for a
+  CANDIDATE frame whose float ruling its caller already made
+  (the fit, the gather) and for the verdict's own home;
+  `ScreenCoveringCallerCensusTests` reds a new raw caller until
+  it routes or names its reason. A reader of the verdict that
+  draws refreshes on the cover CROSSING too, since a move or
+  resize retiles nothing (`PresentingReaderTests` ▸
+  `crossingRefreshesRingAndMark`); the readers ruled so far are
+  the door's docstring.
 - **A window is tiled or floating, and detection's verdict is
   read through ONE door (#1810).** The float verbs and the bar
   menu's Float/Tile row ask `KiwiCore.tileRefusal(of:)`, never

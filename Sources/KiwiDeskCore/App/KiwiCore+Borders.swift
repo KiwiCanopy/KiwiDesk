@@ -14,8 +14,9 @@ import Foundation
 /// the ring sits behind its window, so an overlapped one shows
 /// where it peeks out). Monocle is always focused-only because
 /// only one window is visible; transient overlays
-/// (launchers/panels, #300) and native-fullscreen windows
-/// (display-filling — only the corners would show) never do.
+/// (launchers/panels, #300) and display-filling windows —
+/// native fullscreen or presenting, where only the corners would
+/// show — never do.
 extension KiwiCore {
     /// `reassertOrder` re-stacks every ring — the settle passes'
     /// job; a steady retile orders only rings that need it, the
@@ -106,13 +107,12 @@ extension KiwiCore {
                 state.windows[$0]?.isTransientOverlay == true
             }
         )
-        // Native-fullscreen windows never get one either: they
-        // keep their home-space slot (no destroy fires), but fill
-        // the display, so a ring would show only at the corners.
-        // Travelers ARE included (a tiled-sticky window can go
-        // fullscreen). A presenting float has the same geometry
-        // (#1788).
-        let fullscreen = Set(
+        // A window filling its display never gets one either — a
+        // ring would show only at the corners: native fullscreen
+        // (it keeps its home-space slot, no destroy fires) or a
+        // presenting float (#1788). Travelers ARE included (a
+        // tiled-sticky window can go fullscreen).
+        let fillsDisplay = Set(
             (space.windows + travelers).filter { id in
                 guard let window = state.windows[id] else {
                     return false
@@ -150,7 +150,7 @@ extension KiwiCore {
             focused: anchor,
             slots: slots,
             overlays: overlays,
-            fullscreen: fullscreen,
+            fillsDisplay: fillsDisplay,
             isMonocle: space.mode == .monocle,
             focusedRingSuppressed: suppressed,
             sheen: style.sheen
@@ -176,9 +176,9 @@ extension KiwiCore {
     /// The rings to show for one space. Focused window always
     /// (when borders are on), unless it is a transient overlay
     /// (`overlays` — a launcher/panel that momentarily takes focus,
-    /// #300) or in native fullscreen or presenting (`fullscreen` —
-    /// it fills the display, a ring would show only at the
-    /// corners; #1788); every
+    /// #300) or filling its display (`fillsDisplay` — native
+    /// fullscreen or presenting, #1788: a ring would show only at
+    /// the corners); every
     /// other visible slot — tiled or floating — only when
     /// `unfocusedEnabled` and the space isn't monocle. Overlays and
     /// fullscreen windows never get a ring. Cascade members
@@ -190,7 +190,7 @@ extension KiwiCore {
         focused: WindowID?,
         slots: [(id: WindowID, frame: CGRect)],
         overlays: Set<WindowID>,
-        fullscreen: Set<WindowID>,
+        fillsDisplay: Set<WindowID>,
         isMonocle: Bool,
         // No default (#878's defaulted-parameter lesson): a new
         // caller must answer whether an own untracked key window
@@ -208,13 +208,13 @@ extension KiwiCore {
         let width = style.clampedWidth
         var specs: [BorderManager.Spec] = []
         // A focused transient overlay (Spotlight/Raycast/Alfred)
-        // or native-fullscreen window gets no ring; a focused
+        // or display-filling window gets no ring; a focused
         // user-floated standard window still does. Suppression
         // (#933: an own untracked key window holds the real
         // focus) drops it too — the stale anchor joins the
         // unfocused rings below instead.
         if !overlays.contains(focused),
-            !fullscreen.contains(focused),
+            !fillsDisplay.contains(focused),
             !focusedRingSuppressed
         {
             specs.append(
@@ -235,7 +235,7 @@ extension KiwiCore {
         for slot in slots
         where (focusedRingSuppressed || slot.id != focused)
             && !overlays.contains(slot.id)
-            && !fullscreen.contains(slot.id)
+            && !fillsDisplay.contains(slot.id)
         {
             specs.append(
                 BorderManager.Spec(

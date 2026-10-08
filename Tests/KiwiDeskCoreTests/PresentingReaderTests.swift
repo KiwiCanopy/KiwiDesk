@@ -88,7 +88,6 @@ struct PresentingReaderTests {
     @Test("A tiled window filling the screen keeps its ring")
     func tiledSlotIsNoPresentation() {
         let core = makeCore(frame: Self.screen, floating: false)
-        core.state.apply(.windowMoved(show, Self.screen))
         #expect(!core.presents(show, at: Self.screen))
         #expect(
             core.desiredBorderSpecs().contains { $0.window == show }
@@ -112,8 +111,10 @@ struct PresentingReaderTests {
     }
 
     /// The scrolling arm reads the live entry alone, so without
-    /// the door a placement stamped on the show — a stash
-    /// restore — bounces its first focus back to the editor.
+    /// the door a window we placed small, whose app then starts
+    /// its show over the whole screen, has that show's first
+    /// focus bounced back to the editor. The placement stays
+    /// small in both cases, so only the ACTUAL frame decides.
     @Test("A show's first focus is never a placement bounce")
     func bounceStandsDown() {
         for (frame, bounced) in [
@@ -127,7 +128,7 @@ struct PresentingReaderTests {
             )
             core.state.workspaces.focus(editor, in: space)
             core.tiler.placements.forgetAll()
-            core.tiler.placements.stamp(show, target: frame)
+            core.tiler.placements.stamp(show, target: Self.small)
             core.handle(.windowFocused(show))
             #expect(
                 (core.activeSpace?.focused == editor) == bounced,
@@ -149,5 +150,26 @@ struct PresentingReaderTests {
         core.tiler.placements.forgetAll()
         core.tiler.placements.stamp(show, target: Self.screen)
         #expect(core.placementBounce(show, now: core.wallClock()) == nil)
+    }
+
+    /// A float growing into a show neither retiles nor reports a
+    /// focus, so the crossing itself re-reads the ring and the
+    /// mark — and the shrink back gives them back.
+    @Test("A float crossing into a show drops its ring and mark")
+    func crossingRefreshesRingAndMark() {
+        let core = makeCore(frame: Self.small)
+        core.state.setSticky(show, .global)
+        core.updateBorders()
+        core.updateStickyMarks()
+        #expect(core.borders.specs[show] != nil)
+        #expect(core.stickyMarks.overlays[show] != nil)
+
+        core.handle(.windowResized(show, Self.screen))
+        #expect(core.borders.specs[show] == nil)
+        #expect(core.stickyMarks.overlays[show] == nil)
+
+        core.handle(.windowResized(show, Self.small))
+        #expect(core.borders.specs[show] != nil)
+        #expect(core.stickyMarks.overlays[show] != nil)
     }
 }

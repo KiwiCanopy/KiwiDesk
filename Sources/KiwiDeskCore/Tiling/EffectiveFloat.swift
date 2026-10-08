@@ -40,11 +40,9 @@
 /// floating-mode member's frame is the user's, and the placement's cascade
 /// steps off every effective float of the Space
 /// (`FloatPlacementCommandTests`, `FloatMovePlacementTests`).
-/// The PRESENTING verdict (#1788, `KiwiCore.presents`) is ruled
-/// onto it: a tiled slot a gapless layout sizes to its screen is
-/// no slide show, so the ring, the marks and the #1161 bounce
-/// stand down only for an effective float
-/// (`PresentingReaderTests`).
+/// The PRESENTING door (#1788, `KiwiCore.presents`) routes
+/// through it — a tiled slot a gapless layout sizes to its screen
+/// is no slide show; that docstring rosters its own readers.
 /// Ruled to STAY on the flag: the Space Bar float badge and
 /// the group-breaking beside it (`KiwiCore+SpaceBarItems`), which
 /// mark the exception to a space's layout and in a floating-mode

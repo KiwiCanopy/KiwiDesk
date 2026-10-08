@@ -4459,7 +4459,10 @@ focus, judged on the window's frame and on the placement both —
 the stash restore, a placement verb and the strand recovery all
 write a show's frame back, and the restore's echo may trail the
 show's own focus. One predicate in the distrust closes the class
-where a skip per writer would each have to be remembered.
+where a skip per writer would each have to be remembered. A
+float growing into a show — a game toggling borderless, a show
+animating open past its focus — retiles nothing, so the cover
+crossing re-reads the ring and the marks beside the bars.
 
 **A resize nobody asked for is corrected on its own event
 (#1358).** [Principle] macOS's title-bar double-click zoom, its

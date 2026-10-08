@@ -42,7 +42,11 @@ extension KiwiCore {
     /// one door a reader of a tracked window asks (#1788): an
     /// EFFECTIVE float, never a tiled slot a gapless layout may
     /// size to a screen, and never native fullscreen, which its
-    /// own exemption owns.
+    /// own exemption owns. Ruled onto it: the focus ring, the
+    /// on-window marks and the #1161 placement bounce
+    /// (`PresentingReaderTests`). A raw `covers` /
+    /// `coversAScreen` caller is a register entry in
+    /// `ScreenCoveringCallerCensusTests`.
     func presents(_ id: WindowID, at frame: CGRect) -> Bool {
         guard let window = state.windows[id], !window.isFullscreen,
             EffectiveFloat.applies(
