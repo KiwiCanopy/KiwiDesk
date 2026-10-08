@@ -7,7 +7,7 @@ extension SettingsModel {
     func refreshAutoStart() {
         guard !autoStartBusy else { return }
         Task {
-            let status = await AutoStartManager.current()
+            let status = await readAutoStart()
             autoStart = status
             autoStartLoaded = true
         }
@@ -24,9 +24,7 @@ extension SettingsModel {
         guard autoStart.registerable || !enabled else { return }
         autoStartBusy = true
         Task {
-            let result = await AutoStartManager.setLoginItem(
-                enabled
-            )
+            let result = await writeLoginItem(enabled)
             autoStart = result
             autoStartLoaded = true
             autoStartBusy = false

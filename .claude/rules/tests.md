@@ -718,7 +718,13 @@ re-wires (#1971's flake, `KeyWindowStreamPinTests`).
 every pin into both twins, a deletion from both being silent
 otherwise; it is a sibling of `MachineTouchTests`
 because that file is at the §2.1 ceiling, the split
-`StatusItemSeamGuardTests` already carries. The key-repeat
+`StatusItemSeamGuardTests` already carries.
+Settings reaches `SMAppService` only through
+`SettingsModel.writeLoginItem` and `readAutoStart`, which
+`makeTestModel` pins — `mainApp` is the CALLING process, so a
+live write from a test registers the test helper as a login
+item (#2092); a new login-item or auto-start touch joins
+`LoginItemSeamTests`' `allowed` map with its home and count. The key-repeat
 delay `HoldGlide.initialDelay` reads is the same shape and
 stays residue: it is a system PREFERENCE rather than hand
 state, so it cannot move a red between runs, and the two

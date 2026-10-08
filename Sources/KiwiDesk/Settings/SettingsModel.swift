@@ -211,6 +211,18 @@ final class SettingsModel: ObservableObject {
     var readMacSetting: (MacSetting) -> MacSettingRaw =
         MacSettingRead.liveRead
 
+    /// Injectable login-item write (#2092). The live one registers
+    /// the CALLING process with `SMAppService` — in a test run,
+    /// the test helper — so `makeTestModel` injects an inert one.
+    var writeLoginItem: (Bool) async -> AutoStartStatus =
+        AutoStartManager.setLoginItem
+
+    /// Injectable auto-start read (#2092): the live one asks
+    /// `SMAppService` and spawns `launchctl`, so `makeTestModel`
+    /// injects a fixed answer.
+    var readAutoStart: () async -> AutoStartStatus =
+        AutoStartManager.current
+
     /// The checklist's last read, one snapshot so the Home card
     /// and the section count the same rows
     /// (`SettingsModel+MacChecklist`).
