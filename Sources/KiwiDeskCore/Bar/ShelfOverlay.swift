@@ -25,6 +25,10 @@ final class ShelfOverlay {
     private var drawn: Drawn?
 
     private(set) var panel: NSPanel?
+    #if DEBUG
+        /// Set by `ShelfManager.ordersPanels` (#1894).
+        var ordersPanel = true
+    #endif
 
     /// AppKit keeps a visible panel alive after its owner is gone,
     /// so a dropped overlay would leave it on screen (#1868).
@@ -189,6 +193,9 @@ final class ShelfOverlay {
             display: true
         )
         if !panel.isVisible {
+            #if DEBUG
+                guard ordersPanel else { return }
+            #endif
             guard travels else {
                 panel.orderFrontRegardless()
                 return

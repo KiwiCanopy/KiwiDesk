@@ -12,12 +12,15 @@ import Testing
 /// `updateBars` does.
 @MainActor
 private func makeCore() -> KiwiCore {
-    makeTestCore(
+    let core = makeTestCore(
         configDirectory: FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "kiwi-glyph-hover-\(UUID().uuidString)"
             )
     )
+    // The hover re-read rides the shelf's relayout (#1665, #1894).
+    core.shelves.ordersPanels = true
+    return core
 }
 
 private func window(_ id: UInt32, app: String) -> ManagedWindow {
