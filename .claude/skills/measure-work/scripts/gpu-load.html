@@ -1,0 +1,55 @@
+<!doctype html>
+<!-- GPU load for measure-switches.sh --gpu-load (#2030): one
+     full-window WebGL2 fragment shader with a long loop holds an
+     M1 Max at 96–100 % Device Utilization, where draw-call-bound
+     pages (WebGL Aquarium) stay a CPU load. Served from
+     127.0.0.1: Safari refuses WebGL from file:///private/tmp. -->
+<meta charset="utf-8">
+<title>KiwiDesk GPU load</title>
+<style>html,body,canvas{margin:0;width:100%;height:100%;
+background:#000;display:block;overflow:hidden}</style>
+<canvas id="c"></canvas>
+<script>
+const canvas = document.getElementById("c");
+const gl = canvas.getContext("webgl2");
+if (!gl) document.title = "KiwiDesk GPU load: no WebGL2";
+const ITERATIONS = 8000;
+const vs = `#version 300 es
+in vec2 p; void main() { gl_Position = vec4(p, 0.0, 1.0); }`;
+const fs = `#version 300 es
+precision highp float;
+uniform float t; out vec4 o;
+void main() {
+  vec2 uv = gl_FragCoord.xy * 0.001;
+  float a = t;
+  for (int i = 0; i < ${ITERATIONS}; i++) {
+    a = sin(a + uv.x) * cos(a - uv.y) + fract(a * 1.0001);
+  }
+  o = vec4(fract(a), fract(a * 0.7), fract(a * 0.3), 1.0);
+}`;
+function shader(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src); gl.compileShader(s); return s;
+}
+const prog = gl.createProgram();
+gl.attachShader(prog, shader(gl.VERTEX_SHADER, vs));
+gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, fs));
+gl.linkProgram(prog); gl.useProgram(prog);
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER,
+  new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(prog, "p");
+gl.enableVertexAttribArray(loc);
+gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+const tl = gl.getUniformLocation(prog, "t");
+function frame(now) {
+  canvas.width = innerWidth * devicePixelRatio;
+  canvas.height = innerHeight * devicePixelRatio;
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.uniform1f(tl, now * 0.001);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
