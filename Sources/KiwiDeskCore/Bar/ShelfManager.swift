@@ -52,11 +52,13 @@ final class ShelfManager {
     }
 
     private var overlays: [Key: ShelfOverlay] = [:]
-    /// Whether a shelf gets its panel. Off in both `makeTestCore`
-    /// twins, where every suite rendering a bar would otherwise put
-    /// a real panel on screen (#1894); a suite reading a shelf
-    /// turns it back on.
-    var drawsPanels = true
+    #if DEBUG
+        /// Whether a shelf orders its panel in. Off in both
+        /// `makeTestCore` twins, where every suite rendering a bar
+        /// would otherwise put a real window on screen (#1894);
+        /// placement and wiring run either way.
+        var ordersPanels = true
+    #endif
     /// The bars' context menus (#1518) — the one instance; Core
     /// sets its rows and hands it to both bar managers.
     let contextMenus = BarContextMenus()
@@ -121,8 +123,7 @@ final class ShelfManager {
 
     /// Re-lays one shelf from what its sections drew.
     func relayout(_ key: Key) {
-        guard !holdsRelayout, drawsPanels, let shelf = last[key]
-        else { return }
+        guard !holdsRelayout, let shelf = last[key] else { return }
         var sections: [ShelfOverlay.Section] = []
         if let space = shelf.space, space.isVisible,
             let slot = space.shownStrip
@@ -148,6 +149,9 @@ final class ShelfManager {
         }
         let overlay = overlays[key] ?? ShelfOverlay()
         overlays[key] = overlay
+        #if DEBUG
+            overlay.ordersPanel = ordersPanels
+        #endif
         overlay.onLeft = { [weak self] in self?.retire(key) }
         overlay.onPress = { [weak self] in
             self?.peek.pressed(on: $0, type: $1)
@@ -192,9 +196,9 @@ final class ShelfManager {
     }
 
     #if DEBUG
-        /// How many shelves hold a panel, ordered in or not.
-        var panelCount: Int {
-            overlays.values.filter { $0.panel != nil }.count
+        /// How many shelves have their panel ordered in.
+        var orderedPanelCount: Int {
+            overlays.values.filter(\.isVisible).count
         }
 
         /// The display's shelf on `edge`, or its one shelf when

@@ -6,7 +6,7 @@ import Testing
 /// reach this target's twin, so the pin is held here for both.
 @Suite("Shelf panel pin (#1894)")
 struct ShelfPanelPinTests {
-    @Test("both twins turn shelf panels off")
+    @Test("both twins hold shelf panels out")
     func twinsPinPanelsOff() throws {
         let repo = SourceScan.repoRoot(from: #filePath)
         for target in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
@@ -17,7 +17,7 @@ struct ShelfPanelPinTests {
             )
             #expect(
                 source.components(
-                    separatedBy: "core.shelves.drawsPanels = false"
+                    separatedBy: "core.shelves.ordersPanels = false"
                 ).count == 2,
                 .init(rawValue: "\(target) misses the pin")
             )

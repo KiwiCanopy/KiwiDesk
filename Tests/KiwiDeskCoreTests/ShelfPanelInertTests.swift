@@ -4,12 +4,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// **A test core draws no shelf panel unless its suite asks**
+/// **A test core orders no shelf panel in unless its suite asks**
 /// (#1894): a panel is a real window on the developer's screen,
 /// and a core outlives its test while a task still holds it, so
-/// one run put ~750 panels up. Counted on the core's own manager:
-/// suites run in parallel, so a process-wide count after a suite
-/// would read its neighbours'.
+/// one run put ~750 panels up. Placement still runs. Counted on
+/// the core's own manager: suites run in parallel, so a
+/// process-wide count after a suite would read its neighbours'.
 @Suite("Shelf panels in test cores (#1894)", .serialized)
 @MainActor
 struct ShelfPanelInertTests {
@@ -22,7 +22,7 @@ struct ShelfPanelInertTests {
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()
-        if let draws { core.shelves.drawsPanels = draws }
+        if let draws { core.shelves.ordersPanels = draws }
         core.tiler.visibleBounds = { _ in screen.frame }
         core.state.apply(.displaysChanged([display]))
         core.state.apply(
@@ -49,7 +49,7 @@ struct ShelfPanelInertTests {
     }
 
     @Test(
-        "A default twin renders its bars and holds no panel",
+        "A default twin places its shelf and orders no panel in",
         .enabled(if: NSScreen.main != nil)
     )
     func defaultTwinHoldsNoPanel() throws {
@@ -58,8 +58,14 @@ struct ShelfPanelInertTests {
         // The bars did render: the count below is not vacuous.
         #expect(core.spaceBars.shownOverlay(on: display) != nil)
         #expect(core.appBars.shownOverlay(on: display) != nil)
-        #expect(core.shelves.panelCount == 0)
-        #expect(core.shelves.overlayForTesting(display) == nil)
+        #expect(core.shelves.orderedPanelCount == 0)
+        // The shelf still placed its section: only the order-in
+        // is held back.
+        let shelf = try #require(core.shelves.overlayForTesting(display))
+        #expect(
+            core.spaceBars.shownOverlay(on: display)?.root.superview
+                === shelf.stripView
+        )
     }
 
     @Test(
@@ -69,7 +75,7 @@ struct ShelfPanelInertTests {
     func optInDrawsThePanel() throws {
         let (core, display) = try #require(makeCore(draws: true))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        #expect(core.shelves.panelCount == 1)
+        #expect(core.shelves.orderedPanelCount == 1)
         let shelf = try #require(core.shelves.overlayForTesting(display))
         _ = shelf.hide(animated: false)
     }

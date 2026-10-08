@@ -19,7 +19,7 @@ private func makeCore() -> KiwiCore {
             )
     )
     // The hover re-read rides the shelf's relayout (#1665, #1894).
-    core.shelves.drawsPanels = true
+    core.shelves.ordersPanels = true
     return core
 }
 
