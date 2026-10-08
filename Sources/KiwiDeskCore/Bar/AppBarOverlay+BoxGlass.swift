@@ -75,9 +75,10 @@ extension AppBarOverlay {
         return (glass, GlassBackdrop())
     }
 
-    /// The box a glass is composited in (#1842).
-    static func boxHost(of glass: NSView) -> NSView {
-        glass.superview as? BoxHost ?? glass
+    /// The box a glass is composited in (#1842); nil for a view no
+    /// box hosts, which every minted glass is.
+    static func boxHost(of glass: NSView) -> BoxHost? {
+        glass.superview as? BoxHost
     }
 
     /// Takes a box out for good — glass released (#1730), tint and
@@ -85,7 +86,7 @@ extension AppBarOverlay {
     static func dropBox(_ glass: NSView, _ tint: GlassBackdrop?) {
         GlassPlate.release(glass)
         tint?.removeFromSuperview()
-        boxHost(of: glass).removeFromSuperview()
+        boxHost(of: glass)?.removeFromSuperview()
         glass.removeFromSuperview()
     }
 

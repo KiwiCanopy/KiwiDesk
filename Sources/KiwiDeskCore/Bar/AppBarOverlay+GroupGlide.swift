@@ -79,7 +79,22 @@ extension AppBarOverlay {
                 if let host { unhost(view, from: host.glass, tint: host.tint) }
                 departures.append(Departure(view: view, into: target.id))
             } else if dissolving {
-                departures.append(Departure(view: view, into: nil, box: host))
+                // A box fades with its view only while it hosts it
+                // and the run keeps its boxes; else the view fades
+                // bare, as a gliding one already does.
+                let hosted = host.map {
+                    glass && GlassPlate.holds($0.glass, view)
+                }
+                if hosted == false, let host {
+                    unhost(view, from: host.glass, tint: host.tint)
+                }
+                departures.append(
+                    Departure(
+                        view: view,
+                        into: nil,
+                        box: hosted == true ? host : nil
+                    )
+                )
             } else {
                 Self.discard(view, glass: host?.glass, tint: host?.tint)
             }
@@ -125,12 +140,16 @@ extension AppBarOverlay {
         }
         let boxes = boxGlassHosts()
         for arrival in arrivals where arrival.from == .zero {
-            guard let glass = boxes[arrival.id]?.glass else { continue }
-            BarMotion.setAlpha(Self.boxHost(of: glass), to: 1, animated: true)
+            guard let glass = boxes[arrival.id]?.glass,
+                let host = Self.boxHost(of: glass)
+            else { continue }
+            BarMotion.setAlpha(host, to: 1, animated: true)
         }
         BarMotion.runDissolveOut {
             for departure in departures where departure.into == nil {
-                let fading = departure.box.map { Self.boxHost(of: $0.glass) }
+                let fading = departure.box.flatMap {
+                    Self.boxHost(of: $0.glass)
+                }
                 BarMotion.setAlpha(
                     fading ?? departure.view,
                     to: 0,
@@ -197,7 +216,7 @@ extension AppBarOverlay {
             if arrival.from != .zero { arrival.view.frame = arrival.from }
             arrival.view.alphaValue = 0
             if arrival.from == .zero, let glass = boxes[arrival.id]?.glass {
-                Self.boxHost(of: glass).alphaValue = 0
+                Self.boxHost(of: glass)?.alphaValue = 0
             }
         }
     }

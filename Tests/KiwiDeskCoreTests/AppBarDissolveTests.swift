@@ -145,7 +145,9 @@ struct AppBarDissolveTests {
             space: SpaceID("1")
         )
         let oldGlasses = overlay.boxGlasses
-        let oldHosts = oldGlasses.map { AppBarOverlay.boxHost(of: $0) }
+        let oldHosts = try oldGlasses.map {
+            try #require(AppBarOverlay.boxHost(of: $0))
+        }
         let oldViews = overlay.itemViews
         // Reduce Motion on, synchronously and restored before any
         // await, so every alpha write lands at once and no other
@@ -161,7 +163,6 @@ struct AppBarDissolveTests {
         BarMotion.reducedOverride = nil
         // Leaving boxes stay, each in its own host, still hosting
         // its view, and their HOST takes the fade — never the glass.
-        #expect(oldHosts.allSatisfy { $0 is AppBarOverlay.BoxHost })
         #expect(oldHosts.allSatisfy { $0.superview === overlay.itemRun })
         #expect(
             zip(oldGlasses, oldViews).allSatisfy {
@@ -178,8 +179,9 @@ struct AppBarDissolveTests {
         #expect(arriving.alphaValue == 1)
         #expect(arriving.frame.width > 0)
         #expect(GlassPlate.holds(arriving, overlay.itemViews[0]))
-        let arrivingHost = AppBarOverlay.boxHost(of: arriving)
-        #expect(arrivingHost is AppBarOverlay.BoxHost)
+        let arrivingHost = try #require(
+            AppBarOverlay.boxHost(of: arriving)
+        )
         #expect(arrivingHost.alphaValue == 1)
         for _ in 0..<150
         where oldHosts.contains(where: { $0.superview != nil }) {
