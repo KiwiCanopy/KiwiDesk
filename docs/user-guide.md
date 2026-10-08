@@ -557,7 +557,14 @@ pick a row.
 
 A Space holding more apps than fit keeps its focused app in the
 middle, with a `+n` on each side for the rest — at either end of
-the row one more glyph fits instead. While your pointer rests on
+the row one more glyph fits instead.
+
+:::unreleased
+A `+n` always stands for two glyphs or more: where only one would
+be hidden, that glyph shows in its place.
+:::
+
+While your pointer rests on
 a Space it holds still, so a second click lands where the first
 did; it re-centres once the pointer leaves. With **Other Spaces** set to *Window count*, a
 Space not on screen draws no glyphs, so a click anywhere on it
