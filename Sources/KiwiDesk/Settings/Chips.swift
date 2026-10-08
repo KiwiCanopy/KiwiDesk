@@ -67,6 +67,48 @@ extension View {
     }
 }
 
+/// A choice chip's surface — one of a set, its selection the rest
+/// affordance (`ShortcutLayerChip`, `PresetChip`, #2047). A text
+/// choice is a text button chip: the chip tokens plus the
+/// constant edge, the chosen one washed with the accent instead
+/// of resting. A glyph-only one (`edged: false`) takes no edge.
+enum ChoiceChip {
+    /// The chosen chip's accent wash, in place of the rest fill.
+    static let selectedWashOpacity = 0.25
+
+    static func fill(selected: Bool, hovering: Bool) -> Color {
+        if selected {
+            return SettingsTheme.accent.opacity(selectedWashOpacity)
+        }
+        return hovering ? SettingsTheme.chipHover : SettingsTheme.chipRest
+    }
+}
+
+extension View {
+    /// Paints a choice chip's capsule behind the label; `hovering`
+    /// arrives already gated on `isEnabled`.
+    func choiceChip(
+        selected: Bool = false,
+        hovering: Bool,
+        edged: Bool = true
+    ) -> some View {
+        foregroundStyle(SettingsTheme.ink)
+            .background(
+                Capsule().fill(
+                    ChoiceChip.fill(selected: selected, hovering: hovering)
+                )
+            )
+            .overlay {
+                if edged {
+                    Capsule().strokeBorder(
+                        SettingsTheme.chipEdge,
+                        lineWidth: 1
+                    )
+                }
+            }
+    }
+}
+
 /// Shared layout metrics for chip views.
 enum ChipMetrics {
     static let spacing: CGFloat = 6

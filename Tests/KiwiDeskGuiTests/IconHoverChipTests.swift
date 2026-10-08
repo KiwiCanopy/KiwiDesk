@@ -28,7 +28,18 @@ struct IconHoverChipTests {
     func chipRestsAtNothing() throws {
         let rows = try source("Components/Common/SettingsRows.swift")
         let chip = body(of: "iconHoverChip", in: rows)
-        #expect(chip.contains("restOpacity: resting ? 0.06 : 0,"))
+        // The whole call, so a dropped or retuned argument reds:
+        // the rest and lift are tokens, and a glyph-only chip
+        // takes no edge — no passive control shares its shape
+        // (#2047).
+        #expect(
+            squashed(chip).contains(
+                ".hoverHighlight(rest:resting?SettingsTheme.chipRest"
+                    + ":.clear,hover:SettingsTheme.chipHover,"
+                    + "edge:nil,"
+            )
+        )
+        #expect(!chip.contains(".opacity("))
         #expect(chip.contains("resting: Bool = false"))
         #expect(chip.contains("tint(SettingsTheme.ink2)"))
         #expect(
@@ -36,6 +47,51 @@ struct IconHoverChipTests {
                 "iconHoverChip("
             )
         )
+    }
+
+    /// The text button chip is the shared chip's default tier
+    /// (#2047): its arguments name the rest, hover and edge
+    /// tokens, and the chip paints exactly what it is handed —
+    /// the fill switches between them and the edge strokes.
+    @Test("the button chip tier names the tokens and the edge")
+    func buttonTierNamesTokens() throws {
+        let raw = try source("Components/Common/SettingsRows.swift")
+        let rows = squashed(raw)
+        let tier = squashed(body(of: "hoverHighlight", in: raw))
+        for needle in [
+            "rest:Color=SettingsTheme.chipRest,",
+            "hover:Color=SettingsTheme.chipHover,",
+            "edge:Color?=SettingsTheme.chipEdge,",
+            "rest:rest,hover:hover,edge:edge,",
+        ] {
+            #expect(tier.contains(needle), Comment(rawValue: needle))
+        }
+        for needle in [
+            ".fill(hovering&&isEnabled?hover:rest)",
+            ".strokeBorder(edge,lineWidth:1)",
+        ] {
+            #expect(rows.contains(needle), Comment(rawValue: needle))
+        }
+    }
+
+    private func squashed(_ text: String) -> String {
+        text.split(whereSeparator: \.isWhitespace).joined()
+    }
+
+    /// A full-row entry rests at nothing and lifts one rest step,
+    /// a theme token rather than a bare opacity (#2047). The whole
+    /// call, so a dropped or retuned argument reds.
+    @Test("a full-row entry lifts one chipRest step")
+    func rowLiftsOneRestStep() throws {
+        let rows = try source("Components/Common/SettingsRows.swift")
+        let row = body(of: "rowHoverHighlight", in: rows)
+        #expect(
+            squashed(row).contains(
+                "hoverHighlight(rest:.clear,"
+                    + "hover:SettingsTheme.chipRest,edge:nil,"
+            )
+        )
+        #expect(!row.contains(".opacity("))
     }
 
     @Test("the ? and both rule-trash branches take the one chip")

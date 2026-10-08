@@ -65,7 +65,10 @@ struct PresetChip: View {
                 .font(font)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
-                .background(Capsule().fill(fill))
+                .choiceChip(
+                    selected: selected,
+                    hovering: hovering && isEnabled
+                )
                 .animation(hoverAnimation, value: hovering)
         }
         .buttonStyle(.plain)
@@ -75,15 +78,6 @@ struct PresetChip: View {
         }
         .accessibilityLabel(title)
         .accessibilityAddTraits(selected ? [.isSelected] : [])
-    }
-
-    private var fill: Color {
-        if selected {
-            return SettingsTheme.accent.opacity(0.25)
-        }
-        return Color.secondary.opacity(
-            hovering && isEnabled ? 0.18 : 0.12
-        )
     }
 
     private var hoverAnimation: Animation? {

@@ -6,11 +6,10 @@ import Testing
 @testable import KiwiDesk
 
 /// What the #823 migration is worth only if nothing undoes it:
-/// the shared `SegmentedPicker` is the ONLY segmented chooser,
-/// its accent pill keeps an ink that clears AA, and the track it
-/// draws — a system colour, so invisible to
-/// `SettingsRawColorTests`' lens — is measured rather than
-/// assumed.
+/// the shared `SegmentedPicker` is the ONLY segmented chooser and
+/// its accent pill keeps an ink that clears AA. The track is the
+/// `trackFill` token, its labels measured with the chips
+/// (`SettingsThemeContrastTests.chips`, #2047).
 ///
 /// Split from `SettingsThemeContrastTests` because that suite is
 /// at the §2.1 ceiling; the WCAG arithmetic below is a per-file
@@ -80,6 +79,35 @@ struct SegmentedPickerCoverageTests {
         }
     }
 
+    /// The track and the segment lift are theme tokens (#2047),
+    /// measured in `SettingsThemeContrastTests.chips`: the track's
+    /// fill AND rim take `trackFill`, the unselected hover one
+    /// `chipRest` step, and no bare opacity of a hierarchical
+    /// colour paints beside them, whichever way it is spelled.
+    @Test("the picker draws its track and lift from the theme")
+    func trackAndLiftAreTokens() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Common"
+            )
+            .appendingPathComponent("SegmentedPicker.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+        for needle in [
+            ".background(Capsule().fill(SettingsTheme.trackFill))",
+            "Capsule().strokeBorder(SettingsTheme.trackFill,",
+            "?SettingsTheme.chipRest:.clear",
+        ] {
+            #expect(source.contains(needle), Comment(rawValue: needle))
+        }
+        for banned in [".primary.opacity(", ".secondary.opacity("] {
+            #expect(!source.contains(banned), Comment(rawValue: banned))
+        }
+    }
+
     /// The floor the pairing rests on, stated as the boundary
     /// rather than as today's value. `SettingsThemeContrastTests`
     /// asserts the shipped accent passes; it cannot say how much
@@ -133,63 +161,7 @@ struct SegmentedPickerCoverageTests {
         )
     }
 
-    /// The track and the UNSELECTED label, which appear in no
-    /// pairing list: the track is `Color.primary.opacity(0.08)`,
-    /// mode-varying, so it is not a fixed hue, an RGB literal or
-    /// a fixed white/black and escapes `SettingsRawColorTests`
-    /// entirely. Measured here rather than left as a gap the
-    /// migration widened by putting two more call sites on it.
-    @Test("the unselected label clears AA on the track")
-    func unselectedLabelOnTrack() throws {
-        for dark in [false, true] {
-            let ratio = try contrast(
-                SettingsTheme.ink,
-                over: SettingsTheme.card,
-                // READ from the control, never restated: the
-                // first cut carried its own 0.08 and measured
-                // two tokens while claiming to measure the
-                // track.
-                wash: (Color.primary, SegmentedPickerMetrics.trackAlpha),
-                dark: dark
-            )
-            #expect(
-                ratio >= 4.5,
-                Comment(
-                    rawValue: String(
-                        format: "ink on track %@: %.2f",
-                        dark ? "dark" : "light",
-                        ratio
-                    )
-                )
-            )
-        }
-    }
-
     // MARK: - WCAG arithmetic over resolved tokens
-
-    private func contrast(
-        _ ink: Color,
-        over surface: Color,
-        wash: (color: Color, alpha: Double)? = nil,
-        dark: Bool
-    ) throws -> Double {
-        let inkRGB = try resolved(ink, dark: dark)
-        var surfaceRGB = try resolved(surface, dark: dark)
-        if let wash {
-            let washRGB = try resolved(wash.color, dark: dark)
-            surfaceRGB = (
-                r: wash.alpha * washRGB.r
-                    + (1 - wash.alpha) * surfaceRGB.r,
-                g: wash.alpha * washRGB.g
-                    + (1 - wash.alpha) * surfaceRGB.g,
-                b: wash.alpha * washRGB.b
-                    + (1 - wash.alpha) * surfaceRGB.b
-            )
-        }
-        let la = luminance(inkRGB)
-        let lb = luminance(surfaceRGB)
-        return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
-    }
 
     private func resolved(
         _ color: Color,

@@ -192,14 +192,16 @@ struct ToggleRow: View {
     }
 }
 
-/// Hover-driven background highlight modifier for borderless controls.
+/// Hover-driven chip behind a borderless control: a rest fill, a
+/// hover lift and, for a text button chip, a constant edge.
 private struct HoverChip: ViewModifier {
     @State private var hovering = false
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
     @Environment(\.isEnabled) private var isEnabled
-    var restOpacity: Double
-    var hoverOpacity: Double
+    var rest: Color
+    var hover: Color
+    var edge: Color?
     var cornerRadius: CGFloat
     var padding: CGFloat
 
@@ -208,13 +210,14 @@ private struct HoverChip: ViewModifier {
             .padding(padding)
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .fill(
-                        Color.primary.opacity(
-                            hovering && isEnabled
-                                ? hoverOpacity : restOpacity
-                        )
-                    )
+                    .fill(hovering && isEnabled ? hover : rest)
             )
+            .overlay {
+                if let edge {
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .strokeBorder(edge, lineWidth: 1)
+                }
+            }
             .animation(
                 reduceMotion ? nil : .easeOut(duration: 0.12),
                 value: hovering
@@ -227,17 +230,21 @@ private struct HoverChip: ViewModifier {
 }
 
 extension View {
-    /// Adds hover background highlight to borderless controls.
+    /// The button chip tier by default: rest and hover fills from
+    /// the chip tokens and the text button chip's edge (#2047).
+    /// The icon and row tiers pass their own.
     func hoverHighlight(
-        restOpacity: Double = 0.06,
-        hoverOpacity: Double = 0.12,
+        rest: Color = SettingsTheme.chipRest,
+        hover: Color = SettingsTheme.chipHover,
+        edge: Color? = SettingsTheme.chipEdge,
         cornerRadius: CGFloat = 6,
         padding: CGFloat = 4
     ) -> some View {
         modifier(
             HoverChip(
-                restOpacity: restOpacity,
-                hoverOpacity: hoverOpacity,
+                rest: rest,
+                hover: hover,
+                edge: edge,
                 cornerRadius: cornerRadius,
                 padding: padding
             )
@@ -256,7 +263,9 @@ extension View {
     ) -> some View {
         tint(SettingsTheme.ink2)
             .hoverHighlight(
-                restOpacity: resting ? 0.06 : 0,
+                rest: resting ? SettingsTheme.chipRest : .clear,
+                hover: SettingsTheme.chipHover,
+                edge: nil,
                 cornerRadius: cornerRadius,
                 padding: padding
             )
@@ -279,15 +288,16 @@ extension View {
         .accessibilityLabel(label)
     }
 
-    /// Hover highlight for full-width row buttons starting with transparent
-    /// rest state (#956).
+    /// Hover highlight for full-width row buttons: rests at
+    /// nothing and lifts one `chipRest` step (#956, #2047).
     func rowHoverHighlight(
         cornerRadius: CGFloat = 5,
         padding: CGFloat = 0
     ) -> some View {
         hoverHighlight(
-            restOpacity: 0,
-            hoverOpacity: 0.06,
+            rest: .clear,
+            hover: SettingsTheme.chipRest,
+            edge: nil,
             cornerRadius: cornerRadius,
             padding: padding
         )

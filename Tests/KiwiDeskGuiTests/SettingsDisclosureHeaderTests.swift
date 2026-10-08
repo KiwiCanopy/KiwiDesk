@@ -186,8 +186,8 @@ struct SettingsDisclosureHeaderTests {
         let style = try squashed(Self.styleFile)
         // The FULL-ROW ladder, by its named seam — not the
         // icon-chip recipe this first took. `rowHoverHighlight`
-        // owns 0 → 0.06, so a retune moves every full-row
-        // control together, and no resting fill paints: at row
+        // owns nothing → `chipRest`, so a retune moves every
+        // full-row control together, and no resting fill paints: at row
         // width the chip's rest state is the one achromatic
         // band in a green-tinted window (#956, owner on device).
         #expect(
@@ -200,8 +200,8 @@ struct SettingsDisclosureHeaderTests {
             Comment(
                 rawValue:
                     "the header is back on the icon-chip cue, "
-                    + "whose 0.06 REST fill is what the owner "
-                    + "saw as grey at full-row area"
+                    + "whose chipRest REST fill is what the "
+                    + "owner saw as grey at full-row area"
             )
         )
         #expect(
