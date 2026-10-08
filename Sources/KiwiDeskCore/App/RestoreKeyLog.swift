@@ -9,8 +9,16 @@ import Foundation
 /// among its app's windows in the Space's flat array order;
 /// `appRank` the same over the whole desk, Spaces in workspace
 /// order. An autosave batch is logged only when it differs from
-/// the last one logged. Removal: this file, the call in
-/// `arrangeBootDesk`, `CrashRecovery.onAutosaved` and its wiring.
+/// the last one logged.
+///
+/// OFF unless opted in, since window titles reach the unified log
+/// unredacted. The flag is read once, at the first use (boot):
+///
+///     defaults write com.kiwicanopy.kiwidesk RestoreKeyLog -bool YES
+///     defaults delete com.kiwicanopy.kiwidesk RestoreKeyLog
+///
+/// Removal: this file, `CrashRecovery.restoreKeys` and
+/// `onAutosaved`, their wiring and the call in `arrangeBootDesk`.
 @MainActor
 final class RestoreKeyLog {
     enum Phase: String {
@@ -20,11 +28,19 @@ final class RestoreKeyLog {
 
     /// The prefix a `log show` predicate filters on.
     static let prefix = "restore-key:"
+    /// The opt-in user default.
+    static let defaultsKey = "RestoreKeyLog"
 
+    /// The opt-in read; a test injects its answer.
+    var isOptedIn: () -> Bool = {
+        UserDefaults.standard.bool(forKey: RestoreKeyLog.defaultsKey)
+    }
+    private lazy var enabled = isOptedIn()
     private var lastAutosave: [String]?
 
     /// Logs the autosave batch unless it repeats the last one.
     func autosave(_ core: KiwiCore) {
+        guard enabled else { return }
         let lines = Self.lines(.autosave, of: core.state)
         guard lines != lastAutosave else { return }
         lastAutosave = lines
@@ -32,8 +48,13 @@ final class RestoreKeyLog {
     }
 
     /// Logs every window the boot scan adopted.
-    static func boot(_ core: KiwiCore) {
-        emit(lines(.boot, of: core.state), phase: .boot, to: core.onLog)
+    func boot(_ core: KiwiCore) {
+        guard enabled else { return }
+        Self.emit(
+            Self.lines(.boot, of: core.state),
+            phase: .boot,
+            to: core.onLog
+        )
     }
 
     private static func emit(

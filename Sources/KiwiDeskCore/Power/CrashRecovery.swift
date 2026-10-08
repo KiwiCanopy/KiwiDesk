@@ -13,8 +13,9 @@ public final class CrashRecovery {
     public var captureInPlaceState: @MainActor () -> StateSnapshot? =
         { nil }
     public var onLog: @MainActor (String) -> Void = CoreLog.write
-    /// After each autosave write: the #1385 measurement's hook
-    /// (`RestoreKeyLog`), removed with it.
+    /// The #1385 measurement and its hook after each autosave
+    /// write (`RestoreKeyLog`), removed with it.
+    let restoreKeys = RestoreKeyLog()
     var onAutosaved: @MainActor () -> Void = {}
 
     /// Boot time provider to discard stale pre-boot window IDs (#633).

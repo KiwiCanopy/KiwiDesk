@@ -127,7 +127,7 @@ extension KiwiCore {
     /// (#207), the bar told where we landed. Internal so a test
     /// drives the boot tail; `finishBoot` is not test-drivable.
     func arrangeBootDesk(session: StateSnapshot?) {
-        RestoreKeyLog.boot(self)
+        crash.restoreKeys.boot(self)
         guard let session else {
             retile()
             return

@@ -9,7 +9,8 @@ private typealias F = BootRestoreFixture
 /// The #1385 step 2 measurement (`RestoreKeyLog`): one line per
 /// window at the autosave and at boot adoption, read through the
 /// core's `onLog` seam; an autosave that repeats the last logged
-/// batch logs nothing. Removed with the measurement.
+/// batch logs nothing; and without the opt-in neither site logs.
+/// Removed with the measurement.
 @Suite("Restore key measurement (#1385)", .serialized)
 @MainActor
 struct RestoreKeyLogTests {
@@ -58,14 +59,41 @@ struct RestoreKeyLogTests {
         lines.filter { $0.hasPrefix(RestoreKeyLog.prefix) }
     }
 
-    static func autosaveCore() -> (KiwiCore, URL) {
+    static func autosaveCore(optedIn: Bool = true) -> (KiwiCore, URL) {
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent("kiwi-rkey-\(UUID().uuidString)")
         let core = makeTestCore(configDirectory: dir)
         core.crash.captureState = { [weak core] in
             core?.state.snapshot()
         }
+        core.crash.restoreKeys.isOptedIn = { optedIn }
         return (core, dir)
+    }
+
+    static func bootCore(optedIn: Bool = true) throws -> KiwiCore {
+        let core = try #require(F.makeCore())
+        core.crash.restoreKeys.isOptedIn = { optedIn }
+        return core
+    }
+
+    @Test(
+        "Not opted in, neither site logs",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func offByDefaultLogsNothing() throws {
+        let (core, dir) = Self.autosaveCore(optedIn: false)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        var lines: [String] = []
+        core.onLog = { lines.append($0) }
+        Self.file(core)
+        core.crash.autosave()
+        #expect(Self.keyLines(lines).isEmpty)
+
+        let boot = try Self.bootCore(optedIn: false)
+        boot.onLog = { lines.append($0) }
+        Self.file(boot)
+        boot.arrangeBootDesk(session: nil)
+        #expect(Self.keyLines(lines).isEmpty)
     }
 
     @Test("An autosave logs each window's key")
@@ -105,7 +133,7 @@ struct RestoreKeyLogTests {
         .enabled(if: NSScreen.main != nil)
     )
     func bootLogsEachWindow() throws {
-        let core = try #require(F.makeCore())
+        let core = try Self.bootCore()
         var lines: [String] = []
         core.onLog = { lines.append($0) }
         Self.file(core)
