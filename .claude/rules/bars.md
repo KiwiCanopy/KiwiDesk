@@ -157,6 +157,15 @@ twice, was a question the user answered twice. The argument is
   segments and ▸ `frontAppYieldsToTheAppBar` the stand-down; no
   suite scans the Settings tree for a hand placement, so the GUI
   callers are review's.
+- **The front-app segment's length is its fixed name slot,
+  never its name** (#2086): `frontExtent` and the name's frame
+  read the one `SpaceBarOverlay.titleSlot`, the title cap in the
+  bar font, so a focus change moves no frame. A show that keeps
+  every frame — `keepsGeometry`, which compares the front extent
+  beside the item lengths — redraws content alone
+  (`redrawContent`) and never the frame pass; a new input that
+  changes geometry joins that comparison
+  (`FrontAppFixedLengthTests`).
 - **Refresh both bars through the one `KiwiCore.updateBars()`,
   never a single-bar sync.** It builds each display's plan once
   from both bars' content and syncs both managers from it, so a

@@ -94,7 +94,7 @@ struct GlyphSizeGlyphTests {
 
     /// The segment's measure lays its title out at the font the
     /// title draws, so the run's length is what is drawn.
-    @Test("The front-app segment measures the title it draws")
+    @Test("The front-app segment measures its fixed name slot")
     func frontExtentMeasuresTheDrawnTitle() throws {
         let manager = SpaceBarManager()
         let overlay = try overlay(glyphSize: 28, in: manager)
@@ -115,8 +115,11 @@ struct GlyphSizeGlyphTests {
             BarDivider.sectionThickness + look.itemGap
             + SpaceBarOverlay.chipEndPad(look, depth: Self.depth).total
             + cell + SpaceBarItemView.pad
-        // The title as its label sizes it, in the face it draws.
-        let title = SpaceBarOverlay.titleWidth("A window", font: drawn)
+        // The fixed name slot in the face it draws (#2086).
+        let title = SpaceBarOverlay.titleSlot(
+            cap: look.bar.resolvedFrontAppTitleCap,
+            font: drawn
+        )
         #expect(abs(extent - fixed - title) < 1e-9)
     }
 }

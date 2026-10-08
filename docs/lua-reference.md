@@ -2801,12 +2801,15 @@ space_bar.set_show_front_app(false)
 outside the range are clamped.
 
 **Does:** sets how much of the focused window's title the
-front-app segment shows. The segment always ellipsizes at the
-bar's edge; its length feeds the bar's alignment, so under
-`center` or `end` an uncapped title slides the run of Space
-items sideways every time the title changes. Inert while
-`show_front_app` is off — nothing else on the Space Bar draws a
-title.
+front-app segment shows. Inert while `show_front_app` is off —
+nothing else on the Space Bar draws a title.
+
+:::unreleased
+The segment is always as long as this many characters of the
+bar's font: a longer title ends in "…", a shorter one sits
+inside, so a change of focus or title never moves the Space Bar
+or the shelf beside it.
+:::
 
 **Example:**
 

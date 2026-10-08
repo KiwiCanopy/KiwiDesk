@@ -157,22 +157,27 @@ struct ShelfScrollRunTests {
 
     /// A front segment too long to pin scrolls with the run (#409):
     /// its name is cut at the viewport's end (#1763), so the scroll
-    /// door re-lays it — scrolled to the end the whole name shows,
-    /// as a render at that offset draws it.
+    /// door re-lays it — scrolled to the end the whole slot shows
+    /// (#2086), as a render at that offset draws it. The longest
+    /// cap on a narrow strip is what leaves it unpinned.
     @Test("An unpinned front name follows the scroll")
     func unpinnedFrontNameIsWhole() throws {
         let manager = SpaceBarManager()
         let base = paintedSpaceBar(front: WindowID(1), spaces: 60)
         var front = try #require(base.frontApp)
         front.title = String(repeating: "A long title ", count: 40)
+        var style = base.style
+        style.bar.frontAppTitleCap = AppBarStyle.titleCapRange.upperBound
+        var strip = base.strip
+        strip.size.width = 400
         manager.sync([
             SpaceBarManager.Bar(
                 display: base.display,
                 items: base.items,
                 frontApp: front,
                 frontWindow: base.frontWindow,
-                strip: base.strip,
-                style: base.style,
+                strip: strip,
+                style: style,
                 stateMarkColors: base.stateMarkColors
             )
         ])
@@ -184,7 +189,7 @@ struct ShelfScrollRunTests {
             "the segment is pinned, not scrolling with the run"
         )
         let name = overlay.frontName
-        let full = name.fittingSize.width
+        let full = SpaceBarOverlay.titleSlot(style, depth: strip.height)
         try #require(name.frame.width < full, "the fixture must cut")
         overlay.moveRun(to: .greatestFiniteMagnitude, animated: false)
         #expect(abs(name.frame.width - full) < 1)

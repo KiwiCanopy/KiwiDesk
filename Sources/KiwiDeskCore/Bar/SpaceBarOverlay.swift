@@ -138,6 +138,9 @@ public final class SpaceBarOverlay {
     let itemRun = AppBarOverlay.FlippedView()
     /// What a scroll re-reads without a render.
     var scrollRun: ScrollRun?
+    /// Where the last render placed the front segment, which a
+    /// content redraw keeps (#2086).
+    var frontPlacement: FrontPlacement?
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
@@ -256,6 +259,17 @@ public final class SpaceBarOverlay {
             WorkMeter.shared.add(\.barShowsSkipped)
             return
         }
+        // One that moves no frame — a focus change — redraws its
+        // content alone (#2086).
+        if isVisible, drawnEnvironment == environment,
+            let last = lastShown, let front = frontPlacement,
+            keepsGeometry(last, next)
+        {
+            lastShown = next
+            WorkMeter.shared.add(\.barContentRedraws)
+            redrawContent(since: last, at: front)
+            return
+        }
         drawnEnvironment = environment
         // A slot that moved or resized hands the motion to the
         // shelf's glide, so the chips land (#1838).
@@ -286,6 +300,7 @@ public final class SpaceBarOverlay {
         scrollOffset = 0
         scrollGeom = nil
         scrollRun = nil
+        frontPlacement = nil
         cancelDragAutoScroll()
         root.isHidden = true
         onRendered()

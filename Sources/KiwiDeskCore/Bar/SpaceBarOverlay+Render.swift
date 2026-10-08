@@ -198,19 +198,12 @@ extension SpaceBarOverlay {
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             view.glyphActions = glyphActions
-            view.configure(
-                identity: item.identity,
-                spaceGlyph: item.spaceGlyph,
-                apps: item.apps,
-                active: item.active,
+            configure(
+                view,
+                item,
                 horizontal: horizontal,
                 style: style,
-                stateMarkColors: stateMarkColors,
-                before: item.before,
-                after: item.after,
-                drawn: item.drawn,
-                marker: item.marker,
-                collapse: item.collapse
+                stateMarkColors: stateMarkColors
             )
             view.onSelect = { [weak self] space in
                 self?.onSelect(space)
@@ -226,11 +219,16 @@ extension SpaceBarOverlay {
             view.isFirstInRun = place.first
             view.isLastInRun = place.last
         }
+        let placement = FrontPlacement(
+            after: pinFront ? spacesAxis + gap : metrics.frontStart,
+            nameBound: pinFront ? axis : viewport + scrollOffset
+        )
+        frontPlacement = placement
         renderFrontSegment(
             frontApp,
-            after: pinFront ? spacesAxis + gap : metrics.frontStart,
+            after: placement.after,
             strip: strip,
-            nameBound: pinFront ? axis : viewport + scrollOffset,
+            nameBound: placement.nameBound,
             style: style,
             horizontal: horizontal
         )
