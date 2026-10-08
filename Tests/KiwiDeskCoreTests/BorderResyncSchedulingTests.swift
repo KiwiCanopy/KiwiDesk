@@ -170,6 +170,28 @@ struct BorderResyncSchedulingTests {
         #expect(mark.orderCount == 2)
     }
 
+    @Test("The drop's visibility pass re-stacks a tracked mark too")
+    func dropPassRestacksTheMark() async throws {
+        let core = makeTestCore()
+        let id = seed(
+            core,
+            frame: CGRect(x: 12, y: 34, width: 500, height: 400),
+            isSticky: true
+        )
+        core.tiler.settings.stickyStyle.mark = true
+        core.stickyMarks.isWindowServerTracked = { _ in true }
+        core.updateStickyMarks()
+        let mark = try #require(core.stickyMarks.overlays[id])
+        #expect(mark.orderCount == 1)
+
+        core.scheduleBorderDropReconcile()
+        let pass = core.deferred.task(for: .borderDropSettle)
+        #expect(pass != nil)
+        await pass?.value
+
+        #expect(mark.orderCount == 2)
+    }
+
     @Test("The grace outlasts a slow app's post-settle catch-up")
     func resyncDelayCoversTheCatchUpWindow() {
         // 100–300 ms on Electron/WebKit; 213 ms measured on device

@@ -54,6 +54,7 @@ extension KiwiCore {
             after: .milliseconds(animationMS + 50)
         ) { [weak self] in
             self?.updateBorders(reassertOrder: true)
+            self?.updateStickyMarks(reassertOrder: true)
         }
     }
 

@@ -35,8 +35,9 @@ extension KiwiCore {
     /// the old reason — "the next event is close" was an argument
     /// about a ~20 ms window. It holds because the overlays trail
     /// the *stacking* only, never the frame (`follow` and the
-    /// settle passes own that, see borders.md), and the restore
-    /// ends by re-asserting focus, which re-syncs them.
+    /// settle passes own that, see borders.md), and the stacking
+    /// comes back on the WindowServer reorder event or the late
+    /// re-sync, a steady sync no longer re-stacking (#1925, #2026).
     func animationsDidSettle() {
         runPendingZOrderRestore()
         runPendingFocusRaise()

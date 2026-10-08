@@ -48,4 +48,19 @@ struct StickyMarkOrderTests {
         manager.sync([spec(1)])
         #expect(orders(manager) == 2)
     }
+
+    @Test("a mark brought back on screen is stacked again")
+    func reshownMarkOrders() throws {
+        let manager = StickyMarkManager()
+        defer { manager.clear() }
+        manager.isWindowServerTracked = { _ in true }
+        manager.sync([spec(1)])
+        let mark = try #require(manager.overlays[WindowID(1)])
+        #expect(mark.orderCount == 1)
+
+        mark.orderOutForTest()
+        manager.sync([spec(1)])
+
+        #expect(mark.orderCount == 2)
+    }
 }

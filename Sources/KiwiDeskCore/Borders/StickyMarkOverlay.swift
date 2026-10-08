@@ -33,12 +33,16 @@ final class StickyMarkOverlay {
     private var expandWork: DispatchWorkItem?
     private var collapseWork: DispatchWorkItem?
     private(set) var lastFrame: CGRect?
-    /// Whether the mark has been stacked since it was last shown,
-    /// so a steady sync can leave it to the reorder events (#2026).
+    /// Whether the mark has been stacked against its window since
+    /// it was last brought on screen, so a steady sync can leave it
+    /// to the reorder events (#2026).
     private(set) var hasOrdered = false
     #if DEBUG
         /// Stacks performed, for the steady-sync guard (#2026).
         private(set) var orderCount = 0
+
+        /// Test-only: the panel taken off screen from outside.
+        func orderOutForTest() { panel?.orderOut(nil) }
     #endif
 
     init(window: CGWindowID) {
@@ -57,6 +61,8 @@ final class StickyMarkOverlay {
         )
         if !panel.isVisible {
             panel.orderFrontRegardless()
+            // In front of every app, not against its window yet.
+            hasOrdered = false
         }
     }
 
