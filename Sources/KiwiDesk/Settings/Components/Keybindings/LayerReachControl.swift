@@ -112,51 +112,49 @@ enum LayerReachWords {
 
     /// The everywhere button, on `removeEverywhere`'s ladder.
     static func deleteEverywhere(_ reading: RuleReachReading) -> String {
-        let users = reading.profiles.filter(reading.users.contains)
-        if users.count >= reading.profiles.count {
+        switch RuleReachWords.ladder(reading) {
+        case .every:
             return L(
                 "shortcuts.layer_delete.everywhere",
                 "Delete from every profile"
             )
-        }
-        if users.count == 2 {
+        case .pair(let first, let second):
             return L(
                 "shortcuts.layer_delete.pair",
                 "Delete from %1$@ and %2$@",
-                users[0],
-                users[1]
+                first,
+                second
+            )
+        case .count(let count):
+            return L(
+                "shortcuts.layer_delete.count",
+                "Delete from every profile using it (%1$d)",
+                count
             )
         }
-        return L(
-            "shortcuts.layer_delete.count",
-            "Delete from every profile using it (%1$d)",
-            users.count
-        )
     }
 
     /// Where a rename reaches; nil while it is the page's alone.
     static func renameReach(_ reading: RuleReachReading) -> String? {
-        let users = reading.profiles.filter(reading.users.contains)
-        if users.count >= reading.profiles.count {
+        switch RuleReachWords.ladder(reading) {
+        case .every:
             return L(
                 "shortcuts.layer_rename.everywhere",
                 "Renames it in every profile."
             )
-        }
-        switch users.count {
-        case 0, 1: return nil
-        case 2:
+        case .pair(let first, let second):
             return L(
                 "shortcuts.layer_rename.pair",
                 "Renames it in %1$@ and %2$@.",
-                users[0],
-                users[1]
+                first,
+                second
             )
-        default:
+        case .count(let count):
+            guard count > 1 else { return nil }
             return L(
                 "shortcuts.layer_rename.count",
                 "Renames it in profiles: %1$d.",
-                users.count
+                count
             )
         }
     }

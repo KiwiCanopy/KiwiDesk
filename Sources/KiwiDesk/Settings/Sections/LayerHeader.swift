@@ -27,7 +27,7 @@ struct LayerHeader: View {
                             layer: selected,
                             reading: reading
                         )
-                        .disabled(isLockedHere(reading))
+                        .disabled(model.layerLockedHere(selected))
                     }
                 }
                 actions(reading)
@@ -45,7 +45,7 @@ struct LayerHeader: View {
                 .foregroundStyle(.secondary)
             IconPicker(icon: iconBinding, preview: .menuBar)
             Spacer()
-            if isLockedHere(reading) {
+            if model.layerLockedHere(selected) {
                 Text(LayerReachWords.storedPage)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -66,18 +66,6 @@ struct LayerHeader: View {
     /// The row is drawn where there is a second profile to name.
     private func offersReach(_ reading: RuleReachReading) -> Bool {
         reading.profiles.count + reading.unreadable.count >= 2
-    }
-
-    /// A stored profile's page leaves a layer another profile
-    /// shares to the loaded page: the reading stays truthful, and
-    /// Rename and Delete give way to the sentence that says so.
-    private func isLockedHere(_ reading: RuleReachReading?) -> Bool {
-        guard model.editingProfile != nil else { return false }
-        guard let reading else {
-            return model.profileEditingBaseLayers?
-                .contains { $0.name == selected } ?? false
-        }
-        return reading.shared || reading.users.count > 1
     }
 
     private var layerIndex: Int {

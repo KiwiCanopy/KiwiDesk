@@ -1399,6 +1399,28 @@ globals write (`RuleReachIdentityTests` ▸ `failedReachKeepsBase`),
 and a rule half that landed before a failed tiling write is
 adopted as clean (`storedTilingFailureAdoptsRules`).
 
+**A layer edit enters the snapshot through the one layer pass
+(#2022).** Lay a layer's delete, rename or membership over the
+stored shortcut files through `RuleReachSnapshot.rewriteLayers`,
+called from `SettingsModel.layeredReach` alone and AHEAD of the
+row encode — a pass after a row edit is refused rather than
+dropping it (`LayerReachSnapshotTests` ▸
+`passAfterRowEncodeThrows`) — and apply every rename of a draft
+as ONE stored → page name map, or a chain merges two layers
+(`LayerReachLifecycleTests` ▸ `renameChain`). Judge what
+`saveRuleReach` writes against `fileKeyBase` and
+`fileKeyOverrides`, the files as read, never the layered copies:
+a profile whose override moved is written, an untouched one is
+not (`LayerReachSnapshotTests` ▸ `leaveOneOut`). A writer that
+drops a base layer clears every `leftOut` mark naming it
+(`LayerReachSnapshotTests` ▸ `dropClearsMarks`), and the loaded
+page's base takes its layer SET and order from the layered stored
+base, never re-derived from the page (`LayerReachSnapshotTests` ▸
+`pageBaseSetIsStored`). A row pick is keyed `layer␟lua`, so a
+layer renamed, deleted or narrowed moves, drops or trims its
+picks through the one `LayerRowPicks` (`LayerReachLifecycleTests`
+▸ `deleteHereDropsRowPick`).
+
 **The loaded profile's page holds its RESOLVED rules, so the
 draft is not the sidecar.** On the live target the draft's app
 and float rules are the loaded profile's resolved set — the

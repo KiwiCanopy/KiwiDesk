@@ -4,55 +4,6 @@ import KiwiDeskCore
 /// layer edits laid over the stored files, and the "Applies to"
 /// reading of one layer. A layer's tick IS membership.
 extension SettingsModel {
-    /// The stored rules with the draft's layer edits laid over the
-    /// shortcut files — what the key table encodes row edits
-    /// against. nil without a checklist.
-    var layeredReach: RuleReachSnapshot? {
-        layeredReach(reachEdits)
-    }
-
-    func layeredReach(_ edits: RuleReachEdits) -> RuleReachSnapshot? {
-        guard var snapshot = ruleReachStored, let editing = reachProfile
-        else { return ruleReachStored }
-        let everyone = snapshot.keyLayers.profiles
-        let deleted = edits.deletedLayers.sorted { $0.key < $1.key }
-        for (name, removal) in deleted {
-            let drop = { KeybindingCatalog.deleteLayer(in: $0, named: name) }
-            let reached = removal == .here ? [editing] : everyone
-            snapshot.rewriteLayers(
-                Dictionary(uniqueKeysWithValues: reached.map { ($0, drop) }),
-                base: removal == .here ? nil : drop
-            )
-        }
-        let edited = edits.layers.sorted { $0.key < $1.key }
-        for (page, edit) in edited {
-            guard let stored = edit.stored, stored != page else { continue }
-            let table = snapshot.layerTable
-            let rename = {
-                KeybindingCatalog.renameLayer(in: $0, from: stored, to: page)
-            }
-            let users = everyone.filter {
-                table.resolved(stored, for: $0) != nil
-            }
-            snapshot.rewriteLayers(
-                Dictionary(uniqueKeysWithValues: users.map { ($0, rename) }),
-                base: table.base[stored] != nil ? rename : nil
-            )
-        }
-        for (page, edit) in edited {
-            guard let members = edit.members,
-                let content = config.layers.first(where: { $0.name == page })
-            else { continue }
-            setMembership(
-                &snapshot,
-                content,
-                members,
-                editing: editing
-            )
-        }
-        return snapshot
-    }
-
     /// The "Applies to" reading of the page's layer `name`.
     func layerReach(
         _ name: String,
@@ -147,15 +98,23 @@ extension SettingsModel {
             edit.members = members
         }
         edits.layers[name] = edit.isInert(at: name) ? nil : edit
+        LayerRowPicks.keep(
+            &edits,
+            layer: name,
+            holders: (edit.members?.profiles ?? before?.users ?? [])
+                .union(reachProfile.map { [$0] } ?? [])
+        )
         reachEdits = edits
     }
 
     /// The name `name` is stored under: its edit's, else its own
-    /// where a profile or the base holds it and the draft did not
-    /// delete it. nil for a layer the draft created.
+    /// where a profile or the base holds it and no edit or delete of
+    /// the draft already claims that stored layer. nil for a layer
+    /// the draft created — a new layer is always new.
     func storedLayer(_ name: String) -> String? {
         if let edit = reachEdits.layers[name] { return edit.stored }
         guard reachEdits.deletedLayers[name] == nil,
+            !reachEdits.layers.values.contains(where: { $0.stored == name }),
             let table = ruleReachStored?.layerTable
         else { return nil }
         let held =
@@ -164,32 +123,20 @@ extension SettingsModel {
         return held ? name : nil
     }
 
-    private func setMembership(
-        _ snapshot: inout RuleReachSnapshot,
-        _ content: KeyLayer,
-        _ members: LayerMembers,
-        editing: String
-    ) {
-        let name = content.name
-        let table = snapshot.layerTable
-        let order = config.layers.map(\.name)
-        let add = {
-            KeybindingCatalog.insertLayer(content, into: $0, order: order)
+    /// Whether a stored page leaves `name` to the loaded page: it
+    /// is shared, judged on the STORED files so a tick in the open
+    /// popover cannot lock the control under the user.
+    func layerLockedHere(_ name: String) -> Bool {
+        guard editingProfile != nil else { return false }
+        guard let table = ruleReachStored?.layerTable else {
+            return profileEditingBaseLayers?.contains { $0.name == name }
+                ?? false
         }
-        let drop = { KeybindingCatalog.deleteLayer(in: $0, named: name) }
-        var transforms: [String: ([KeyLayer]) -> [KeyLayer]] = [:]
-        for profile in table.profiles {
-            let has = table.resolved(name, for: profile) != nil
-            let wants =
-                members.profiles.contains(profile) || profile == editing
-            if wants && !has { transforms[profile] = add }
-            if !wants && has { transforms[profile] = drop }
+        guard let stored = storedLayer(name) else { return false }
+        let holders = table.profiles.filter {
+            table.resolved(stored, for: $0) != nil
         }
-        let inBase = table.base[name] != nil
-        let base: (([KeyLayer]) -> [KeyLayer])? =
-            members.shared == inBase ? nil : (members.shared ? add : drop)
-        guard !transforms.isEmpty || base != nil else { return }
-        snapshot.rewriteLayers(transforms, base: base)
+        return table.base[stored] != nil || holders.count > 1
     }
 
     /// Whether two copies of a layer bind the same combos to the

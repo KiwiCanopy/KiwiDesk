@@ -58,7 +58,7 @@ struct LayerReachSnapshotTests {
         let core = try makeCore()
         let laptop = try bytes(core, "Laptop")
         var snapshot = try #require(core.ruleReachSnapshot())
-        snapshot.rewriteLayers(["Desk": dropping("Gaming")])
+        try snapshot.rewriteLayers(["Desk": dropping("Gaming")])
         #expect(snapshot.isEdited)
         #expect(snapshot.layerTable.leftOut("Gaming") == ["Desk"])
         try core.saveRuleReach(snapshot)
@@ -79,7 +79,7 @@ struct LayerReachSnapshotTests {
         let desk = try bytes(core, "Desk")
         var snapshot = try #require(core.ruleReachSnapshot())
         let drop = dropping("Gaming")
-        snapshot.rewriteLayers(
+        try snapshot.rewriteLayers(
             ["Desk": drop, "Laptop": drop, "Travel": drop],
             base: drop
         )
@@ -96,7 +96,7 @@ struct LayerReachSnapshotTests {
     func sharedToListed() throws {
         let core = try makeCore()
         var snapshot = try #require(core.ruleReachSnapshot())
-        snapshot.rewriteLayers(
+        try snapshot.rewriteLayers(
             ["Travel": dropping("Gaming")],
             base: dropping("Gaming")
         )
@@ -115,8 +115,56 @@ struct LayerReachSnapshotTests {
     func untouchedIsClean() throws {
         let core = try makeCore()
         var snapshot = try #require(core.ruleReachSnapshot())
-        snapshot.rewriteLayers([:])
+        try snapshot.rewriteLayers([:])
         #expect(!snapshot.isEdited)
+    }
+
+    @Test("a layer pass after a row encode is refused")
+    func passAfterRowEncodeThrows() throws {
+        let core = try makeCore()
+        var snapshot = try #require(core.ruleReachSnapshot())
+        snapshot.keyLayers.applyKey(
+            RuleReachTable<String>.keyID(layer: "Gaming", lua: "up()"),
+            value: "s",
+            reach: .shared(joining: []),
+            editing: "Desk"
+        )
+        #expect(throws: LayerPassError.afterRowEncode) {
+            try snapshot.rewriteLayers(["Desk": dropping("Gaming")])
+        }
+    }
+
+    @Test("dropping a base layer clears the marks naming it")
+    func dropClearsMarks() throws {
+        let core = try makeCore()
+        var snapshot = try #require(core.ruleReachSnapshot())
+        try snapshot.rewriteLayers(["Desk": dropping("Gaming")])
+        try core.saveRuleReach(snapshot)
+        var next = try #require(core.ruleReachSnapshot())
+        // Only Laptop and Travel are reached; Desk's mark must go.
+        let drop = dropping("Gaming")
+        try next.rewriteLayers(["Laptop": drop, "Travel": drop], base: drop)
+        try core.saveRuleReach(next)
+        #expect(try core.profiles.read(name: "Desk").layers == nil)
+    }
+
+    /// The base's layer set is the stored base's, never re-derived
+    /// from the page: a page missing a layer its profile still
+    /// holds does not take it out of the base.
+    @Test("the page never decides the base's layer set")
+    func pageBaseSetIsStored() {
+        let table = RuleReachTable<String>.keyLayers(
+            base: base,
+            overrides: [("Desk", nil)]
+        )
+        let derived = table.keyLayerBase(
+            page: [base[0]],
+            editing: "Desk",
+            storedPage: base,
+            storedBase: base,
+            templates: [:]
+        )
+        #expect(derived.map(\.name) == ["default", "Gaming"])
     }
 
     /// The loaded page lacks a shared layer its profile leaves out;

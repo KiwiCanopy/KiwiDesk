@@ -168,6 +168,9 @@ struct LayerReachModelTests {
     func clashWhereReached() throws {
         let model = try makeModel()
         #expect(model.layerRenameClash("Gaming", "Focus") == "Home")
+        // A listed layer Home is not in never reaches Home; a
+        // shared one would, through its left-out mark.
+        model.setLayerAllProfiles("Gaming", false)
         model.setLayerProfile("Gaming", "Home", false)
         #expect(model.layerRenameClash("Gaming", "Focus") == nil)
     }

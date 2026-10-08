@@ -113,26 +113,43 @@ enum RuleReachWords {
     /// named while there are two, counted past that, and "every
     /// profile" only when that is all of them.
     static func removeEverywhere(_ reading: RuleReachReading) -> String {
-        let users = reading.profiles.filter(reading.users.contains)
-        if users.count >= reading.profiles.count {
+        switch ladder(reading) {
+        case .every:
             return L(
                 "app_rules.remove.everywhere",
                 "Remove from every profile"
             )
-        }
-        if users.count == 2 {
+        case .pair(let first, let second):
             return L(
                 "app_rules.remove.pair",
                 "Remove from %1$@ and %2$@",
-                users[0],
-                users[1]
+                first,
+                second
+            )
+        case .count(let count):
+            return L(
+                "app_rules.remove.count",
+                "Remove from every profile using it (%1$d)",
+                count
             )
         }
-        return L(
-            "app_rules.remove.count",
-            "Remove from every profile using it (%1$d)",
-            users.count
-        )
+    }
+
+    /// Who a scope reaching every holder reaches, in the one shape
+    /// each such wording takes (#2022): every profile, only when
+    /// that is all of them; two by name, in menu order; else a
+    /// count.
+    enum Ladder: Equatable {
+        case every
+        case pair(String, String)
+        case count(Int)
+    }
+
+    static func ladder(_ reading: RuleReachReading) -> Ladder {
+        let users = reading.profiles.filter(reading.users.contains)
+        if users.count >= reading.profiles.count { return .every }
+        if users.count == 2 { return .pair(users[0], users[1]) }
+        return .count(users.count)
     }
 
     /// The ⚠ a shared row owes: a profile that differs does not

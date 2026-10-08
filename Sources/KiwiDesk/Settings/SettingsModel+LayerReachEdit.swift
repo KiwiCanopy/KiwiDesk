@@ -12,6 +12,7 @@ extension SettingsModel {
         var edits = reachEdits
         edits.layers[name] = nil
         if let stored { edits.deletedLayers[stored] = removal }
+        LayerRowPicks.deleted(&edits, layer: name)
         config.layers = KeybindingCatalog.deleteLayer(
             in: config.layers,
             named: name
@@ -28,8 +29,7 @@ extension SettingsModel {
             edits.layers.removeValue(forKey: old)
             ?? LayerEdit(stored: storedLayer(old))
         if !edit.isInert(at: new) { edits.layers[new] = edit }
-        edits.reach[.key] = rekeyed(edits.reach[.key], old, new)
-        edits.removal[.key] = rekeyed(edits.removal[.key], old, new)
+        LayerRowPicks.renamed(&edits, from: old, to: new)
         config.layers = KeybindingCatalog.renameLayer(
             in: config.layers,
             from: old,
@@ -50,16 +50,22 @@ extension SettingsModel {
         guard let editing, let row = layerReach(old),
             let reach = layeredReach
         else { return nil }
+        // A profile left out of a shared layer is reached too: its
+        // mark follows the rename, which would merge the layer into
+        // a layer of its own by that name.
+        let shared = reach.layerTable.base[old] != nil
         return row.profiles.first { profile in
-            profile != editing && row.users.contains(profile)
+            profile != editing && (shared || row.users.contains(profile))
                 && reach.storedKeyLayers(for: profile).contains {
                     $0.name == new
                 }
         }
     }
 
-    /// How many shortcuts a delete of `name` takes: its own rows
-    /// and every row on the page that switches to it.
+    /// How many shortcuts a delete of `name` takes from THIS page:
+    /// its own rows and every row here that switches to it. Another
+    /// profile's copy is named by the message's second sentence,
+    /// never counted, since its rows may differ.
     func layerDeleteCount(_ name: String) -> Int {
         let switchTo = KeybindingCatalog.switchLayerCommand(name).lua
         let own = config.layers.first { $0.name == name }?.bindings.count
@@ -81,24 +87,5 @@ extension SettingsModel {
         }
         let others = layerReach(name).map { $0.users.count > 1 } ?? false
         return others || switches || rows.contains { !chrome.contains($0.lua) }
-    }
-
-    private func rekeyed<V>(
-        _ map: [String: V]?,
-        _ old: String,
-        _ new: String
-    ) -> [String: V]? {
-        guard let map else { return nil }
-        let oldSwitch = KeybindingCatalog.switchLayerCommand(old).lua
-        let newSwitch = KeybindingCatalog.switchLayerCommand(new).lua
-        var result: [String: V] = [:]
-        for (key, value) in map {
-            var (layer, lua) = RuleReachTable<String>.keyParts(key)
-            if layer == old { layer = new }
-            if lua == oldSwitch { lua = newSwitch }
-            result[RuleReachTable<String>.keyID(layer: layer, lua: lua)] =
-                value
-        }
-        return result
     }
 }

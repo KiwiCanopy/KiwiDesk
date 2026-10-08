@@ -251,13 +251,19 @@ final class SettingsModel: ObservableObject {
     /// The App Rules families across the shared base and every
     /// profile, as stored (#1393); nil where no checklist is
     /// offered. Re-read by `reload()` alone.
-    var ruleReachStored: RuleReachSnapshot?
+    var ruleReachStored: RuleReachSnapshot? {
+        didSet { layeredCache = nil }
+    }
+    /// The last layer pass and what it read (#2022).
+    var layeredCache: LayeredReachCache?
     /// The profile whose page the draft is — pinned by `reload()`,
     /// because the loaded name can move under an open draft (a
     /// Save as New makes its profile current mid-save; a Desktop
     /// switch loads another), and encoding the page against the
     /// new name would bake its own rules into the shared base.
-    var reachPage: String?
+    var reachPage: String? {
+        didSet { layeredCache = nil }
+    }
     /// The draft's checklist choices over `ruleReachStored`.
     @Published var reachEdits = RuleReachEdits() {
         didSet {

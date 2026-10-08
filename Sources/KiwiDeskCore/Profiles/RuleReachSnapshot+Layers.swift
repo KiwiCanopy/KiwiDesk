@@ -12,11 +12,19 @@ extension RuleReachSnapshot {
     /// sparse diff against the new base. A profile no transform
     /// names keeps the layers it resolved, re-encoded only where
     /// the new base would change them or its override names a
-    /// layer the base no longer holds.
+    /// layer the base no longer holds — so a writer dropping a base
+    /// layer clears every left-out mark naming it.
+    ///
+    /// The layer pass runs AHEAD of the row encode: the key table is
+    /// rebuilt from the rewritten files, so it throws rather than
+    /// discard a row edit already encoded into it.
     public mutating func rewriteLayers(
         _ transforms: [String: ([KeyLayer]) -> [KeyLayer]],
         base: (([KeyLayer]) -> [KeyLayer])? = nil
-    ) {
+    ) throws {
+        guard keyLayers.baseTouched.isEmpty,
+            keyLayers.touched.values.allSatisfy(\.isEmpty)
+        else { throw LayerPassError.afterRowEncode }
         let profiles = keyLayers.profiles
         var before: [String: [KeyLayer]] = [:]
         for profile in profiles {
@@ -90,4 +98,10 @@ extension RuleReachSnapshot {
             profiles: keyLayers.profiles
         )
     }
+}
+
+/// Why a layer pass was refused.
+public enum LayerPassError: Error, Equatable {
+    /// The key table already holds row edits the pass would drop.
+    case afterRowEncode
 }
