@@ -2,7 +2,7 @@ import AppKit
 
 /// The peek's text (#1946, the owner's rulings): each group's
 /// header — the app, smaller and semibold in the item ink, its icon
-/// on `+n`, its count pill from two windows — above one wrapped
+/// on `+n` — above one wrapped
 /// row per window, hairlines between, each row its window's button
 /// (`BarPeekBody+Targets`). Rebuilt on every show, so nothing it
 /// draws outlives the content Core read.
@@ -15,17 +15,6 @@ final class BarPeekBody: NSView {
         static let textSize: CGFloat = 13
         /// The header's size: the menus' section header.
         static let headerSize: CGFloat = 11
-        static let countSize: CGFloat = 11.5
-        static let pillHeight: CGFloat = 18
-        static let pillPad: CGFloat = 6
-        /// `macwindow`'s ink height per point at `.regular`, measured
-        /// on macOS 27 (0.89–0.90 at 100–200 pt): the glyph's size
-        /// is the count's cap height over this (#1946).
-        static let pillGlyphInkPerPoint: CGFloat = 0.9
-        /// The window glyph's gap to the count.
-        static let pillGlyphGap: CGFloat = 3
-        /// The pill's ring, in the hairlines' ink.
-        static let pillRing: CGFloat = 1
         /// The whole panel's widest; a title wraps inside it.
         static let maxWidth: CGFloat = 280
         static let padH: CGFloat = 12
@@ -39,7 +28,6 @@ final class BarPeekBody: NSView {
         static let iconGap: CGFloat = 5
         /// The "more" line's chevron.
         static let chevronSide: CGFloat = 12
-        static let pillGap: CGFloat = 8
         static let cornerRadius: CGFloat = 11
         /// The gap between the bar's panel and the peek.
         static let stripGap: CGFloat = 6
@@ -53,9 +41,8 @@ final class BarPeekBody: NSView {
     override var isFlipped: Bool { true }
 
     /// What the last build drew, top to bottom: headers and
-    /// titles, the count pills, the icons and the hairlines.
+    /// titles, the icons and the hairlines.
     private(set) var labels: [NSTextField] = []
-    private(set) var pills: [BarPeekPill] = []
     private(set) var icons: [NSImageView] = []
     var rules: [NSView] = []
     /// The "more" line's count and chevron, where the room cut
@@ -91,7 +78,6 @@ final class BarPeekBody: NSView {
     ) -> CGSize {
         subviews.forEach { $0.removeFromSuperview() }
         labels = []
-        pills = []
         icons = []
         rules = []
         moreLabel = nil
@@ -112,8 +98,7 @@ final class BarPeekBody: NSView {
                 // A derived step under the titles, full ink where
                 // the palette cannot hold it (owner ruling, #1946).
                 header: Self.label(group.app, headerFont, headerInk),
-                rows: group.titles.map { Self.label($0, textFont, ink) },
-                pill: group.count.map { pill($0, shelf: shelf) }
+                rows: group.titles.map { Self.label($0, textFont, ink) }
             )
         }
         // Icons mark mixed apps (`+n`); their rows sit under the
@@ -158,17 +143,14 @@ final class BarPeekBody: NSView {
         let group: BarPeekContent.Group
         let header: NSTextField
         let rows: [NSTextField]
-        let pill: BarPeekPill?
 
         /// The width it reads at on one line each.
         @MainActor
         func need(indent: CGFloat) -> CGFloat {
-            let pillPart =
-                pill.map { $0.frame.width + Metrics.pillGap } ?? 0
             let iconPart = group.icon == nil ? 0 : indent
             let name = BarPeekBody.natural(header)
             let row = rows.map { BarPeekBody.natural($0) }.max() ?? 0
-            return max(iconPart + name + pillPart, indent + row)
+            return max(iconPart + name, indent + row)
         }
     }
 
@@ -181,9 +163,7 @@ final class BarPeekBody: NSView {
     ) -> CGFloat {
         let lead = Metrics.padH
         let iconPart = built.group.icon == nil ? 0 : indent
-        let pillPart =
-            built.pill.map { $0.frame.width + Metrics.pillGap } ?? 0
-        let nameWidth = max(width - iconPart - pillPart, 1)
+        let nameWidth = max(width - iconPart, 1)
         let nameHeight = Self.height(of: built.header, width: nameWidth)
         built.header.frame = CGRect(
             x: lead + iconPart,
@@ -192,7 +172,7 @@ final class BarPeekBody: NSView {
             height: nameHeight
         )
         add(built.header)
-        // The icon and the pill sit on the header's first line.
+        // The icon sits on the header's first line.
         let line = Self.lineHeight(built.header.font)
         if let image = built.group.icon {
             let icon = NSImageView(image: image)
@@ -206,14 +186,6 @@ final class BarPeekBody: NSView {
             )
             addSubview(icon)
             icons.append(icon)
-        }
-        if let pill = built.pill {
-            pill.frame.origin = CGPoint(
-                x: lead + width - pill.frame.width,
-                y: top + (line - Metrics.pillHeight) / 2
-            )
-            addSubview(pill)
-            pills.append(pill)
         }
         let gap = built.rows.isEmpty ? 0 : Metrics.headerGap
         var y = top + max(nameHeight, line) + gap

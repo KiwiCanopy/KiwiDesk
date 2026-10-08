@@ -51,15 +51,7 @@ struct BarPeekContent: Equatable {
 
         var titles: [String] { rows.map(\.title) }
 
-        /// The header's count pill: from two windows, as a bare
-        /// number, so it needs no localized frame.
-        var count: Int? {
-            windowCount >= BarPeekContent.countFloor ? windowCount : nil
-        }
     }
-
-    /// The fewest windows a header counts (owner ruling).
-    static let countFloor = 2
 
     let groups: [Group]
 
