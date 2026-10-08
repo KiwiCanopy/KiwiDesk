@@ -33,7 +33,7 @@ extension KiwiCore {
             let bar = placedBar(
                 app,
                 display: screen.kiwiDisplayID
-                    ?? DisplayID(CGMainDisplayID()),
+                    ?? PositionalDisplays.liveMainID,
                 plan: plan
             )
         else { return [] }

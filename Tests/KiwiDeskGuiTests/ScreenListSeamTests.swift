@@ -76,4 +76,42 @@ struct ScreenListSeamTests {
         #expect(door.occurrences(of: "return override() }") == 1)
         #expect(door.occurrences(of: "return override().first }") == 2)
     }
+
+    /// The main display's id is a round trip too: Core reads it in
+    /// `PositionalDisplays.liveMainID` (and the Desktop UUID's own
+    /// seam) alone, and both twins memoize the door.
+    @Test("the main display's id has one door, memoized in both twins")
+    func mainDisplayIDIsMemoized() throws {
+        let repo = SourceScan.repoRoot(from: #filePath)
+        let sites = try SourceScan.identifierSites(
+            of: "CGMainDisplayID",
+            under: repo.appendingPathComponent("Sources/KiwiDeskCore")
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent).sorted() == [
+                "NativeSpaces+Desktop.swift", "PositionalDisplays.swift",
+            ],
+            "found \(sites.map(\.site))"
+        )
+        for target in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
+            let text = try SourceScan.strippedSource(
+                at: repo.appendingPathComponent(
+                    "Tests/\(target)/TestCore.swift"
+                )
+            )
+            let memo = try #require(
+                text.range(of: "PositionalDisplays.mainIDOverride =")
+                    .map { String(text[$0.upperBound...].prefix(200)) },
+                .init(rawValue: "\(target) misses the main-id memo")
+            )
+            let check = memo.range(of: "if let known = testMainID")
+            let live = memo.range(of: "CGMainDisplayID")
+            #expect(
+                check != nil && live != nil
+                    && check!.lowerBound < live!.lowerBound
+                    && memo.contains("testMainID = live"),
+                .init(rawValue: "\(target)'s main id does not memoize")
+            )
+        }
+    }
 }
