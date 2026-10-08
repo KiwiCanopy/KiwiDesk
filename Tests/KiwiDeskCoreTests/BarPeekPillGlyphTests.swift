@@ -28,6 +28,8 @@ struct BarPeekPillGlyphTests {
             pill(family: "Bradley Hand"),
         ]
         var shares: [CGFloat] = []
+        var sizes: [CGFloat] = []
+        var heights: [CGFloat] = []
         for pill in faces {
             let font = try #require(pill.number.font)
             let size = BarPeekPill.glyphPointSize(for: font)
@@ -38,10 +40,22 @@ struct BarPeekPillGlyphTests {
             )
             #expect(pill.glyph.image?.size == expected)
             shares.append(font.capHeight / font.pointSize)
+            sizes.append(size)
+            heights.append(try #require(pill.glyph.image?.size.height))
         }
         // The two inputs differ on the axis the derivation reads.
         let gap = abs(shares[0] - shares[1])
         #expect(gap > 0.1)
+        // The drawn glyphs scale with the derived point sizes, so a
+        // glyph drawn at one fixed size whatever the face reds here;
+        // the slack is the image's whole-point height.
+        let drawn = heights[1] / heights[0]
+        let derived = sizes[1] / sizes[0]
+        #expect(
+            abs(drawn - derived) < 0.1,
+            "drawn \(heights), derived \(sizes)"
+        )
+        #expect(heights[0] - heights[1] >= 1, "\(heights)")
     }
 
     /// The glyph's image is centred on the pill's middle, where

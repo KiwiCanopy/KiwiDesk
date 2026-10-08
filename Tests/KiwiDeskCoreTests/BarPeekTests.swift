@@ -204,5 +204,13 @@ struct BarPeekTests {
         )
         #expect(body.hitTest(inParent) === body)
         #expect(body.acceptsFirstMouse(for: nil))
+        // A closing peek takes no click; the next show takes them
+        // again on the same panel.
+        rig.hover(nil)
+        #expect(panel.ignoresMouseEvents, "the fade takes no click")
+        rig.hover(rig.first)
+        #expect(rig.peek.panel.panel === panel)
+        #expect(rig.shownTitles == ["Window 1"])
+        #expect(!panel.ignoresMouseEvents, "a re-show takes clicks")
     }
 }

@@ -40,7 +40,9 @@ struct BarMenuSeamGuardTests {
                         "shelves.peek.schedule = { _, _ in }"
                     )
                     && source.contains(
-                        "shelves.peek.pointerOnScreen = {"
+                        // An off-screen constant, never a live read.
+                        "shelves.peek.pointerOnScreen = "
+                            + "{ CGPoint(x: -1e6, y: -1e6) }"
                     )
                     && source.contains("shelves.peek.now = { 0 }"),
                 .init(rawValue: "\(target) misses a pin")

@@ -136,7 +136,10 @@ struct BarPeekActionTests {
         )
         #expect(rig.peek.panel.drawn == nil, "the click closes it")
         rig.hover(rig.first, 1, 2)
+        rig.step()
         #expect(rig.dwells.count == 1, "shut until the pointer leaves")
+        // A dismissal, not a fade: no cool-down re-shows it at once.
+        #expect(rig.shownTitles == nil)
     }
 
     @Test("A second click on the toggled item closes its peek")
@@ -154,7 +157,10 @@ struct BarPeekActionTests {
         }
         #expect(rig.peek.panel.drawn == nil, "the second click closes")
         rig.hover(rig.first, 1, 2)
+        rig.step()
         #expect(rig.dwells.isEmpty, "shut until the pointer leaves")
+        // A dismissal, not a fade: no cool-down re-shows it at once.
+        #expect(rig.shownTitles == nil)
     }
 
     // MARK: - The rows
@@ -248,16 +254,22 @@ struct BarPeekActionTests {
     }
 
     /// The row under the pointer wears the shelf's own item hover,
-    /// its fill and its ink, and gives them back when it leaves.
+    /// its fill and its ink, and gives them back when it leaves. The
+    /// shelf's hover ink differs from its resting ink, which the
+    /// default shelf's does not, so both halves of the ink can red.
     @Test("The hovered row takes the shelf's item hover")
     func hoveredRowTakesTheShelfHover() throws {
         let rig = BarPeekRig()
         defer { rig.close() }
+        var shelf = KiwiShelf()
+        shelf.itemColor = "#EAF3EE"
+        shelf.hoverItemColor = "#102030"
+        rig.peek.shelf = { _ in shelf }
         rig.hover(rig.first, 1, 2)
         rig.step()
         let body = rig.peek.panel.body
-        let shelf = KiwiShelf()
         let label = try #require(body.targets[1].inks.first as? NSTextField)
+        #expect(label.textColor == NSColor(kiwiHex: shelf.itemColor))
         body.setHovered(1)
         #expect(!body.highlight.isHidden)
         #expect(body.highlight.frame == body.targets[1].frame)

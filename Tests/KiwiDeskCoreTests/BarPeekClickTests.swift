@@ -158,11 +158,21 @@ struct BarPeekClickTests {
     func refusedRowTakesThePlainSwitch() throws {
         let core = seededCore()
         defer { close(core) }
-        core.windowIsOnScreen = { $0 == WindowID(5) ? false : nil }
+        // Space 2 remembers Web 5 while Notes 1 holds the focus, and
+        // the gate refuses 4: the plain switch hands the focus to 5,
+        // while a follow onto the refused 4 moves no focus at all
+        // (the glyph's shape, `SpaceBarGlyphWiringTests`).
+        core.state.workspaces.focus(WindowID(5), in: two)
+        core.state.workspaces.focus(WindowID(1), in: one)
+        core.windowIsOnScreen = { $0 == WindowID(4) ? false : nil }
         let web = try webTarget(core)
         try click(web)
-        core.shelves.peek.panel.body.onPick(WindowID(5))
+        core.shelves.peek.panel.body.onPick(WindowID(4))
         #expect(core.activeSpace?.id == two, "the Space still switches")
+        #expect(
+            core.state.workspaces.lastFocused == WindowID(5),
+            "the plain switch's focus, not a follow onto the refused"
+        )
         #expect(core.shelves.peek.panel.drawn == nil)
     }
 

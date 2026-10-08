@@ -99,6 +99,65 @@ struct BarPeekHoldTests {
         #expect(!rig.peek.holding)
     }
 
+    /// The body reports the pointer inside before the item reports
+    /// it gone — the pointer crossed straight onto the peek — so the
+    /// hold starts already inside: its slow re-read still runs, and
+    /// closes the peek once the pointer leaves the hull unreported.
+    @Test("A hold that starts inside the body still re-reads")
+    func holdStartingInsideReReads() throws {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        rig.hover(rig.first, 1, 2)
+        rig.step()
+        let peek = try #require(rig.peek.panel.panel?.frame)
+        rig.pointer = CGPoint(x: peek.midX, y: peek.midY)
+        rig.peek.panel.body.onPointerInside(true)
+        #expect(rig.steps.isEmpty, "not holding yet")
+        rig.hover(nil)
+        #expect(rig.peek.holding)
+        #expect(rig.steps.count == 1, "the hold re-reads")
+        #expect(rig.dwells.last == BarPeek.Timing.insideRecheck)
+        // The pointer leaves the hull and no exit arrives.
+        rig.pointer = CGPoint(x: peek.maxX + 200, y: peek.midY)
+        rig.step()
+        #expect(rig.peek.panel.drawn == nil, "the re-read closes it")
+    }
+
+    /// The body's own enter, delivered as AppKit delivers it, tells
+    /// the hold the pointer is inside: the re-read slows.
+    @Test("The body's enter reaches the hold")
+    func bodyEnterReachesTheHold() throws {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        rig.hover(rig.first, 1, 2)
+        rig.step()
+        rig.pointer = try rig.gap()
+        rig.hover(nil)
+        #expect(rig.dwells.last == BarPeek.Timing.holdPoll)
+        let peek = try #require(rig.peek.panel.panel?.frame)
+        rig.pointer = CGPoint(x: peek.midX, y: peek.midY)
+        let entered = try #require(
+            NSEvent.enterExitEvent(
+                with: .mouseEntered,
+                location: .zero,
+                modifierFlags: [],
+                timestamp: 0,
+                windowNumber: 0,
+                context: nil,
+                eventNumber: 0,
+                trackingNumber: 0,
+                userData: nil
+            )
+        )
+        rig.peek.panel.body.mouseEntered(with: entered)
+        rig.step()
+        #expect(rig.steps.count == 1)
+        #expect(
+            rig.dwells.last == BarPeek.Timing.insideRecheck,
+            "the enter slowed the re-read"
+        )
+    }
+
     /// The body's tracking area is what reports: its enter and exit
     /// reach the peek's hold.
     @Test("The body's enter and exit reach the hold")

@@ -15,11 +15,15 @@ struct PeekPillRingTests {
 
     /// The badge fill's worst separation from the plate, measured
     /// here on `ColorVision` beside the derivation, not through it.
-    private func separation(_ shelf: KiwiShelf) -> Double? {
+    private func separation(
+        _ shelf: KiwiShelf,
+        storedOnly: Bool = false
+    ) -> Double? {
         var worst: Double?
-        let grounds = [
-            shelf.fillColor, shelf.fill(cappedAt: GlassTint.maxAlpha),
-        ]
+        let grounds =
+            storedOnly
+            ? [shelf.fillColor]
+            : [shelf.fillColor, shelf.fill(cappedAt: GlassTint.maxAlpha)]
         for ground in grounds {
             for wallpaper in Self.wallpapers {
                 guard
@@ -79,18 +83,48 @@ struct PeekPillRingTests {
         #expect(BarPeekPill(2, shelf: far).layer?.borderWidth == 0)
     }
 
+    /// An opaque black Fill holds a mid-grey badge apart; the same
+    /// Fill as glass caps it, over white, does not. Only the glass
+    /// ground fails the floor, so the ring is that ground's alone.
+    @Test("A badge only the glass ground fails still draws the ring")
+    func glassGroundAloneDrawsTheRing() throws {
+        var shelf = KiwiShelf()
+        shelf.fillColor = "#000000FF"
+        shelf.groupBadgeColor = "#8A8A8A"
+        let stored = try #require(separation(shelf, storedOnly: true))
+        let worst = try #require(separation(shelf))
+        #expect(stored >= KiwiShelf.peekPillRingFloor, "\(stored)")
+        #expect(worst < KiwiShelf.peekPillRingFloor, "\(worst)")
+        #expect(shelf.peekPillNeedsRing)
+        #expect(
+            BarPeekPill(2, shelf: shelf).layer?.borderWidth
+                == BarPeekBody.Metrics.pillRing
+        )
+    }
+
     /// The pill reads the one verdict: every bundled palette's pill
-    /// draws exactly the ring the derivation asks for.
+    /// draws exactly the ring the derivation asks for — and, since
+    /// every bundled palette needs it, a fixture needing none draws
+    /// none.
     @Test("The pill's ring follows the derivation")
-    func pillFollowsTheVerdict() {
-        for palette in PaletteCatalog.bundled() {
-            let shelf = painted(palette)
+    func pillFollowsTheVerdict() throws {
+        var far = KiwiShelf()
+        far.fillColor = "#000000FF"
+        far.groupBadgeColor = "#FFFFFF"
+        var shelves = PaletteCatalog.bundled().map {
+            ($0.name, painted($0))
+        }
+        shelves.append(("no-ring fixture", far))
+        for (name, shelf) in shelves {
+            let worst = try #require(separation(shelf))
             let expected: CGFloat =
-                shelf.peekPillNeedsRing ? BarPeekBody.Metrics.pillRing : 0
+                worst < KiwiShelf.peekPillRingFloor
+                ? BarPeekBody.Metrics.pillRing : 0
             #expect(
                 BarPeekPill(3, shelf: shelf).layer?.borderWidth == expected,
-                Comment(rawValue: palette.name)
+                Comment(rawValue: name)
             )
         }
+        #expect(BarPeekPill(3, shelf: far).layer?.borderWidth == 0)
     }
 }
