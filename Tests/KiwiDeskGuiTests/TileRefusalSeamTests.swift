@@ -104,46 +104,19 @@ struct TileRefusalSeamTests {
                     "Events/EventLoop+ListedWindows.swift": 1,
                 ]
         )
-        // The live composition takes the force-float reason and
-        // hands it to the pure one, which asks detection
-        // (`WindowFactsSeamTests` holds the delegation).
-        let live = try SourceScan.functionBody(
-            of: "autoFloatVerdict",
-            in: "EventLoop+FloatVerdict.swift",
-            under: "Events"
-        )
-        #expect(live.contains("forceFloatReason("))
+        // The pure composition derives the force-float reason
+        // and asks detection (`WindowFactsSeamTests` holds the
+        // live delegation).
         let composition = try SourceScan.functionBody(
             of: "composeVerdict",
             in: "EventLoop+FloatVerdict.swift",
             under: "Events"
         )
         #expect(composition.contains("FloatDetection.autoFloatReason("))
+        #expect(composition.contains("forceFloatReason("))
         // Both producers take the one composition.
         let tracking = sources["Events/EventLoop+Tracking.swift"] ?? ""
         // `track`, `recheckFloat` and its off-main twin (#1933).
         #expect(tracking.occurrences(of: "autoFloatVerdict(") == 3)
-    }
-
-    /// `composeVerdict` takes the force-float reason on trust: a
-    /// Core caller handing it `forced: nil` would tile an
-    /// accessory app or our own chrome with every suite green.
-    /// The corpus suite (#1883) is its one other caller, in the
-    /// test target this census does not read.
-    @Test("the pure composition is called by autoFloatVerdict alone")
-    func pureCompositionHasOneCaller() throws {
-        let sources = try Self.coreSources()
-        // Every spelling, the declaration included.
-        #expect(
-            Self.census("composeVerdict(", in: sources) == [
-                "Events/EventLoop+FloatVerdict.swift": 2
-            ]
-        )
-        let live = try SourceScan.functionBody(
-            of: "autoFloatVerdict",
-            in: "EventLoop+FloatVerdict.swift",
-            under: "Events"
-        )
-        #expect(live.occurrences(of: "Self.composeVerdict(") == 1)
     }
 }

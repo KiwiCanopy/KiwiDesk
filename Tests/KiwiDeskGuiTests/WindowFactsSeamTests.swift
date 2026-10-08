@@ -139,8 +139,8 @@ struct WindowFactsSeamTests {
     }
 
     /// The live composition delegates to the pure one the corpus
-    /// replays, handing it the loop's own rules and force-float
-    /// reason rather than composing beside it.
+    /// replays, handing it the loop's own rules, the app's policy
+    /// and the own-window mark rather than composing beside it.
     @Test("the live verdict is the composition the corpus replays")
     func liveVerdictDelegates() throws {
         let live = try SourceScan.functionBody(
@@ -149,8 +149,9 @@ struct WindowFactsSeamTests {
             under: "Events"
         )
         #expect(live.contains("Self.composeVerdict("))
-        let forced = "forced: forceFloatReason(pid: pid, id: id)"
-        #expect(live.contains(forced))
+        #expect(live.contains("activationPolicy: policy(of: pid)"))
+        let mark = "tilesAsOwnWindow: tilesAsOwnWindow(pid: pid, id: id)"
+        #expect(live.contains(mark))
         #expect(live.contains("rules: floatRules"))
         #expect(!live.contains("FloatDetection.autoFloatReason("))
         let pure = try SourceScan.functionBody(

@@ -86,8 +86,7 @@ struct AXDump {
             default: failed.contains("get.\(key)") ? nil : false
             }
         }
-        if buttons.contains(true) { return true }
-        return buttons.contains(nil) ? nil : false
+        return WindowTraits.titlebarButton(from: buttons)
     }
 
     /// AeroSpace skips `AXChildren`, so this is nil throughout
@@ -144,11 +143,9 @@ extension AXDump {
                     title
                 }
             ),
-            forced: EventLoop.forceFloatReason(
-                pid: Self.foreignPID,
-                activationPolicy: policy,
-                tilesAsOwnWindow: false
-            ),
+            pid: Self.foreignPID,
+            activationPolicy: policy,
+            tilesAsOwnWindow: false,
             bundleID: bundleID,
             rules: FloatRules()
         )

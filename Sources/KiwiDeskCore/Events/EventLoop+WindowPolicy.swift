@@ -116,10 +116,15 @@ extension EventLoop {
         Self.forceFloatReason(
             pid: pid,
             activationPolicy: policy(of: pid),
-            tilesAsOwnWindow: Self.isOwnProcess(pid)
-                && ownWindowIdentifier(id)
-                    == OwnWindowTiling.identifier
+            tilesAsOwnWindow: tilesAsOwnWindow(pid: pid, id: id)
         )
+    }
+
+    /// Whether `id` is the own window that tiles, read through the
+    /// `ownWindowIdentifier` seam.
+    func tilesAsOwnWindow(pid: pid_t, id: WindowID) -> Bool {
+        Self.isOwnProcess(pid)
+            && ownWindowIdentifier(id) == OwnWindowTiling.identifier
     }
 
     /// Maps an own window id to its `NSWindow` — the one place

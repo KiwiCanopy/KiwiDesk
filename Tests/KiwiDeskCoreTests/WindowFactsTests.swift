@@ -1,3 +1,4 @@
+import AppKit
 import ApplicationServices
 import Testing
 
@@ -70,7 +71,9 @@ struct WindowFactsTests {
                     asked = true
                 }
             ),
-            forced: .accessoryApp,
+            pid: 1,
+            activationPolicy: .accessory,
+            tilesAsOwnWindow: false,
             bundleID: "com.example.app",
             rules: FloatRules(["com.example.app:Title"])
         )
@@ -82,7 +85,9 @@ struct WindowFactsTests {
     func unforcedIsDetection() {
         let verdict = EventLoop.composeVerdict(
             .facts(Self.facts(subrole: kAXStandardWindowSubrole) {}),
-            forced: nil,
+            pid: 1,
+            activationPolicy: .regular,
+            tilesAsOwnWindow: false,
             bundleID: nil,
             rules: FloatRules()
         )
@@ -90,7 +95,9 @@ struct WindowFactsTests {
         #expect(
             EventLoop.composeVerdict(
                 .read(.rule),
-                forced: nil,
+                pid: 1,
+                activationPolicy: .regular,
+                tilesAsOwnWindow: false,
                 bundleID: nil,
                 rules: FloatRules()
             ) == .floats(.rule)

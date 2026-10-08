@@ -1,3 +1,4 @@
+import AppKit
 import ApplicationServices
 
 /// The automatic float verdict (#1810): the force-float reason
@@ -23,22 +24,32 @@ extension EventLoop {
     ) -> FloatVerdict {
         Self.composeVerdict(
             source,
-            forced: forceFloatReason(pid: pid, id: id),
+            pid: pid,
+            activationPolicy: policy(of: pid),
+            tilesAsOwnWindow: tilesAsOwnWindow(pid: pid, id: id),
             bundleID: bundleID,
             rules: floatRules
         )
     }
 
-    /// `autoFloatVerdict` over a force-float reason already
-    /// derived, pure where the source is: a forced float asks
+    /// `autoFloatVerdict` over the app's policy and the own-window
+    /// mark as read, pure where the source is: a forced float asks
     /// detection nothing (#1883 replays dumps through it).
     nonisolated static func composeVerdict(
         _ source: FloatDetectionSource,
-        forced: AutoFloatReason?,
+        pid: pid_t,
+        activationPolicy: NSApplication.ActivationPolicy,
+        tilesAsOwnWindow: Bool,
         bundleID: String?,
         rules: FloatRules
     ) -> FloatVerdict {
-        if let forced { return .floats(forced) }
+        if let forced = forceFloatReason(
+            pid: pid,
+            activationPolicy: activationPolicy,
+            tilesAsOwnWindow: tilesAsOwnWindow
+        ) {
+            return .floats(forced)
+        }
         let facts: WindowFacts
         switch source {
         case .facts(let read):

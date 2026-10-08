@@ -169,6 +169,7 @@ struct ProcessIdentitySeamTests {
                 == [
                     "EventLoop+ActivationFocus.swift",
                     "EventLoop+BootScan.swift",
+                    "EventLoop+FloatVerdict.swift",
                     "EventLoop+Notifications.swift",
                     "EventLoop+Reconcile.swift",
                     "EventLoop+WindowPolicy.swift",

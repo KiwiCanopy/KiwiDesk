@@ -88,8 +88,7 @@ editing AX code:
   `ReconcileOffMainTests`, `ReconcileOffMainDebtTests`,
   `ReconcileOffMainRecheckTests` and `ReconcileSnapshotTests`
   hold the behaviour.
-
-  **Float detection reads one plain input, `WindowFacts`, and
+- **Float detection reads one plain input, `WindowFacts`, and
   every live producer builds it through `WindowFacts.read`
   (#1883)** — `track`, the float recheck and the list read, held
   by `WindowFactsSeamTests`. A fact detection comes to need joins
@@ -99,8 +98,10 @@ editing AX code:
   leaves that rule's column "not decidable", never guessed, and
   the expected table is KiwiDesk's own: AeroSpace's recorded
   verdicts are never read (`AXDumpCorpusTests` ▸
-  `readsNoVerdict`), and a changed row is a ruling on that
-  app made in its own change.
+  `readsNoVerdict`). A row starts `.frozen` — today's verdict,
+  unjudged — and changing one is a ruling on that app, made in
+  its own change, that marks the row `.ruled` with its issue;
+  never an edit to make the suite pass.
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever
