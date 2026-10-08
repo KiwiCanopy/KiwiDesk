@@ -19,9 +19,8 @@ extension RuleReachTable where Value == String {
 
     /// The base as a LOADED page's layers hold it: the layered
     /// stored base's layers, each the page's copy where the page
-    /// has it, plus a layer new to every file that a shared row now
-    /// lives in; each key patched to the table's base, and an icon
-    /// the page left alone taken from the base.
+    /// has it; each key patched to the table's base, and an icon the
+    /// page left alone taken from the base.
     public func keyLayerBase(
         page: [KeyLayer],
         editing: String,
@@ -30,29 +29,10 @@ extension RuleReachTable where Value == String {
         templates: [String: KeyBinding]
     ) -> [KeyLayer] {
         // The base's layer SET and order are the layered stored
-        // base's (#2022): a layer the draft dropped or left out is
-        // decided there, once. A layer the base lacks joins from the
-        // page only where it is new to the page's own file too, or a
-        // shared row now lives in it.
-        let sharedLayers = Set(base.keys.map { Self.keyParts($0).layer })
-        let baseNames = Set(storedBase.map(\.name))
-        let ownNames = Set(storedPage.map(\.name))
+        // base's, decided by the layer pass alone (#2022): the page
+        // supplies a layer's copy, never a layer.
         var layers = storedBase.map { shared in
             page.first { $0.name == shared.name } ?? shared
-        }
-        for (at, layer) in page.enumerated()
-        where !baseNames.contains(layer.name)
-            && (!ownNames.contains(layer.name)
-                || sharedLayers.contains(layer.name))
-        {
-            let previous = page[..<at].last { earlier in
-                layers.contains { $0.name == earlier.name }
-            }
-            let index =
-                previous.flatMap { previous in
-                    layers.firstIndex { $0.name == previous.name }
-                }.map { $0 + 1 } ?? 0
-            layers.insert(layer, at: index)
         }
         for at in layers.indices {
             let name = layers[at].name

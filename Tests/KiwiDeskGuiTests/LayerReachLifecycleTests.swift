@@ -100,15 +100,27 @@ struct LayerReachLifecycleTests {
         #expect(rows(try layers(model, "Home"), "Play") == [up])
     }
 
-    @Test("Delete from Work drops a row pick of the layer")
-    func deleteHereDropsRowPick() throws {
+    @Test("a deleted layer takes its rows' picks with it")
+    func deleteDropsRowPicks() throws {
+        let model = try makeModel()
+        model.addLayer("Fresh")
+        let row = try #require(
+            model.config.layers.first { $0.name == "Fresh" }?.bindings.first
+        )
+        model.setAllProfiles(.key, key("Fresh", row.lua), false)
+        model.deleteLayer("Fresh", .everywhere)
+        #expect(model.reachEdits.isEmpty)
+        #expect(!model.copyWaitsOnReach)
+    }
+
+    @Test("a renamed layer's row picks follow the new name")
+    func renameMovesRowPicks() throws {
         let model = try makeModel()
         model.setAllProfiles(.key, key("Gaming", up), false)
-        model.deleteLayer("Gaming", .here)
-        model.updateActiveProfile()
-
-        #expect(rows(try layers(model, "Home"), "Gaming") == [up])
-        #expect(!(try layers(model, "Work")).contains { $0.name == "Gaming" })
+        model.renameLayer("Gaming", to: "Play")
+        let picks = model.reachEdits.reach[.key] ?? [:]
+        #expect(picks[key("Play", up)] != nil)
+        #expect(picks[key("Gaming", up)] == nil)
     }
 
     @Test("unticking a profile trims a row pick that listed it")
@@ -139,5 +151,50 @@ struct LayerReachLifecycleTests {
         #expect(model.layerRenameClash("Gaming", "Focus") == "Home")
         model.updateActiveProfile()
         #expect(model.layerRenameClash("Gaming", "Focus") == "Home")
+    }
+
+    /// A row added to a layer only some profiles have stays theirs:
+    /// it never puts the layer in the shared base (#2022 review).
+    @Test("a new row in a listed layer never shares the layer")
+    func listedLayerRowStaysListed() throws {
+        let model = try makeModel()
+        model.setLayerAllProfiles("Gaming", false)
+        model.setLayerProfile("Gaming", "Home", false)
+        model.updateActiveProfile()
+        let at = try #require(
+            model.config.layers.firstIndex { $0.name == "Gaming" }
+        )
+        model.config.layers[at].bindings.append(
+            KeyBinding(combo: "q", lua: chat, kind: .navigation)
+        )
+        let reading = try #require(model.keyReach(key("Gaming", chat)))
+        #expect(!reading.layerShared)
+        model.setAllProfiles(.key, key("Gaming", chat), true)
+        #expect(model.reachEdits.reach[.key]?[key("Gaming", chat)] == nil)
+        model.updateActiveProfile()
+
+        let base = model.core.guiConfigStore.load()?.layers ?? []
+        #expect(!base.contains { $0.name == "Gaming" })
+        #expect(!(try layers(model, "Home")).contains { $0.name == "Gaming" })
+        #expect(rows(try layers(model, "Travel"), "Gaming") == [up, chat])
+    }
+
+    @Test("a new layer is placed by the layer pass, where a new row is")
+    func newLayerIsPlaced() throws {
+        let model = try makeModel()
+        model.addLayer("Fresh")
+        model.updateActiveProfile()
+        let base = model.core.guiConfigStore.load()?.layers ?? []
+        #expect(base.contains { $0.name == "Fresh" })
+        #expect(try layers(model, "Travel").contains { $0.name == "Fresh" })
+    }
+
+    @Test("a new layer may not take a name another profile holds")
+    func addRefusesAHeldName() throws {
+        let model = try makeModel()
+        #expect(model.layerAddClash("Focus") == "Home")
+        model.deleteLayer("Gaming", .here)
+        #expect(model.layerAddClash("Gaming") == "Home")
+        #expect(model.layerAddClash("Fresh") == nil)
     }
 }

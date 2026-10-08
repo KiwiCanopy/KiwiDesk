@@ -82,14 +82,23 @@ struct LayerStripEditor: View {
             L("shortcuts.add_layer.help", "Add a layer")
         )
         .popover(isPresented: $addingLayer) {
-            HStack {
-                TextField(layerNamePlaceholder, text: $newLayer)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 140)
-                    .onSubmit(addLayer)
-                Button(L("shortcuts.add", "Add"), action: addLayer)
-                    .buttonStyle(.borderedProminent)
-                    .disabled(!canAddLayer)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    TextField(layerNamePlaceholder, text: $newLayer)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 140)
+                        .onSubmit(addLayer)
+                    Button(L("shortcuts.add", "Add"), action: addLayer)
+                        .buttonStyle(.borderedProminent)
+                        .disabled(!canAddLayer)
+                }
+                if let holder = model.layerAddClash(newLayer.trimmed) {
+                    Text(LayerReachWords.clash(holder, newLayer.trimmed))
+                        .font(.caption)
+                        .foregroundStyle(SettingsTheme.danger)
+                        .frame(width: 220, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .padding(10)
         }
@@ -109,18 +118,13 @@ struct LayerStripEditor: View {
             && !model.config.layers.contains {
                 $0.name == name
             }
+            && model.layerAddClash(name) == nil
     }
 
     private func addLayer() {
         let name = newLayer.trimmed
         guard canAddLayer else { return }
-        // Every layer carries the app-chrome rows (#602, #1381).
-        model.config.layers.append(
-            KeyLayer(
-                name: name,
-                bindings: DefaultKeybindings.appChromeRows()
-            )
-        )
+        model.addLayer(name)
         selected = name
         newLayer = ""
         addingLayer = false

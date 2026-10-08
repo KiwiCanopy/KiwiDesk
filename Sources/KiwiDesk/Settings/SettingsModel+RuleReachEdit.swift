@@ -32,6 +32,9 @@ struct RuleReachReading: Equatable {
     /// Profiles without a shortcut's layer (#2022) — their box
     /// greys.
     var lacking: Set<String> = []
+    /// Whether a shortcut's layer is the shared base's; All
+    /// profiles greys where it is not (#2022).
+    var layerShared = true
 
     /// Whether `profile`'s box is the edited profile's, locked.
     func isLocked(_ profile: String) -> Bool { profile == editing }
@@ -92,8 +95,9 @@ extension SettingsModel {
         else { return nil }
         row.takenBy = keyTakers(key, in: reach, editing: row.editing)
         let layer = RuleReachTable<String>.keyParts(key).layer
-        if let holders = layerReach(layer)?.users {
-            row.lacking = Set(row.profiles).subtracting(holders)
+        if let layerRow = layerReach(layer) {
+            row.lacking = Set(row.profiles).subtracting(layerRow.users)
+            row.layerShared = layerRow.shared
         }
         return row
     }
@@ -154,6 +158,9 @@ extension SettingsModel {
     /// Ticks or unticks "All profiles" on a row.
     func setAllProfiles(_ family: RuleFamily, _ app: String, _ on: Bool) {
         guard let row = reading(family, app) else { return }
+        // A row of a layer only some profiles have stays theirs: its
+        // All profiles would bring the layer back everywhere (#2022).
+        if on && !row.layerShared { return }
         let others = row.users.subtracting([row.editing])
         setReach(
             family,

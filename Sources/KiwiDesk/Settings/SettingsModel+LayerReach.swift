@@ -9,7 +9,7 @@ extension SettingsModel {
         _ name: String,
         edits: RuleReachEdits? = nil
     ) -> RuleReachReading? {
-        guard let reach = layeredReach(edits ?? reachEdits),
+        guard let reach = edits.map({ layeredReach($0) }) ?? layeredReach,
             let editing = reachProfile
         else { return nil }
         let table = reach.layerTable
@@ -92,7 +92,7 @@ extension SettingsModel {
         edits.layers[name] = edit
         // A pick equal to what the layer has without it is no pick.
         let before = layerReach(name, edits: edits)
-        if before?.shared != members.shared
+        if edit.stored == nil || before?.shared != members.shared
             || before?.users != members.profiles
         {
             edit.members = members
@@ -102,7 +102,8 @@ extension SettingsModel {
             &edits,
             layer: name,
             holders: (edit.members?.profiles ?? before?.users ?? [])
-                .union(reachProfile.map { [$0] } ?? [])
+                .union(reachProfile.map { [$0] } ?? []),
+            shared: edit.members?.shared ?? before?.shared ?? true
         )
         reachEdits = edits
     }

@@ -167,6 +167,24 @@ struct LayerReachSnapshotTests {
         #expect(derived.map(\.name) == ["default", "Gaming"])
     }
 
+    /// Nor does the page put a layer INTO the base, even one a
+    /// shared row lives in: joining is the layer pass's alone.
+    @Test("the page never joins a layer to the base")
+    func pageNeverJoinsLayer() {
+        let table = RuleReachTable<String>.keyLayers(
+            base: base,
+            overrides: [("Desk", nil)]
+        )
+        let derived = table.keyLayerBase(
+            page: base,
+            editing: "Desk",
+            storedPage: base,
+            storedBase: [base[0]],
+            templates: [:]
+        )
+        #expect(derived.map(\.name) == ["default"])
+    }
+
     /// The loaded page lacks a shared layer its profile leaves out;
     /// the base the page derives must keep it, in its place.
     @Test("the loaded page's base keeps a layer its profile left out")

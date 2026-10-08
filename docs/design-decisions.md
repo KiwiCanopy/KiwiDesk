@@ -8653,7 +8653,11 @@ channel only a pointer finds:
   layer is not reached and stays left out.
 - **A new layer starts where a new row does**: shared on the
   loaded profile's page, that profile's alone on a stored one
-  (`RuleReachDraft.defaultReach`). On a stored page a layer
+  (`RuleReachDraft.defaultReach`), recorded as the layer's
+  membership so the one layer pass places it — the page never
+  adds or drops a layer of the base. A name another profile still
+  holds is refused at Add, since the two layers would merge, and
+  a row added to a layer only some profiles have stays theirs. On a stored page a layer
   another profile shares is read but not renamed or deleted —
   that is the loaded page's, where the change is visible on
   screen — while a layer only that profile has stays editable.

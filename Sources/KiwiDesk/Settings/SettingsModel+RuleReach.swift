@@ -62,7 +62,13 @@ extension SettingsModel {
             current: pageKeys,
             editing: editing,
             isLoaded: reachIsLoaded,
-            reach: reachEdits.reach[.key] ?? [:],
+            reach: LayerRowPicks.scoped(
+                reachEdits.reach[.key] ?? [:],
+                page: pageKeys,
+                layers: snapshot.layerTable,
+                keys: snapshot.keyLayers,
+                editing: editing
+            ),
             removal: reachEdits.removal[.key] ?? [:]
         ) {
             $0.applyKey($1, value: $2, reach: $3, removal: $4, editing: $5)

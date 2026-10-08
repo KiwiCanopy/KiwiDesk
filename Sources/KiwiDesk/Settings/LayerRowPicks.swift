@@ -54,7 +54,8 @@ enum LayerRowPicks {
     static func keep(
         _ edits: inout RuleReachEdits,
         layer: String,
-        holders: Set<String>
+        holders: Set<String>,
+        shared: Bool
     ) {
         guard var picks = edits.reach[.key] else { return }
         for (key, reach) in picks
@@ -63,9 +64,44 @@ enum LayerRowPicks {
             case .listed(let members):
                 picks[key] = .listed(members.intersection(holders))
             case .shared(let joining):
-                picks[key] = .shared(joining: joining.intersection(holders))
+                picks[key] =
+                    shared
+                    ? .shared(joining: joining.intersection(holders))
+                    : .listed(holders)
             }
         }
         edits.reach[.key] = picks
+    }
+
+    /// The row picks the key encode takes: in a layer the base does
+    /// not share, a new row starts on the layer's holders and a
+    /// shared pick is theirs — one row must never put the layer back
+    /// in every profile, and in every profile created later.
+    static func scoped(
+        _ picks: [String: RuleReach],
+        page: [String: String],
+        layers: RuleReachTable<Bool>,
+        keys: RuleReachTable<String>,
+        editing: String
+    ) -> [String: RuleReach] {
+        var result = picks
+        for key in Set(page.keys).union(picks.keys) {
+            let layer = RuleReachTable<String>.keyParts(key).layer
+            guard layers.base[layer] == nil else { continue }
+            let holders = Set(
+                layers.profiles.filter {
+                    layers.resolved(layer, for: $0) != nil
+                }
+            ).union([editing])
+            switch picks[key] {
+            case .shared?:
+                result[key] = .listed(holders)
+            case nil where keys.resolved(key, for: editing) == nil:
+                result[key] = .listed(holders)
+            default:
+                break
+            }
+        }
+        return result
     }
 }

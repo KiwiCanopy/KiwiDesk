@@ -40,7 +40,7 @@ extension SettingsModel {
                 try membershipPass(&snapshot, content, members, editing)
             }
         } catch {
-            // Unreachable: the pass starts from the stored table.
+            assertionFailure("layer pass after a row encode: \(error)")
             return stored
         }
         return snapshot

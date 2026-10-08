@@ -1437,6 +1437,7 @@
   "shortcuts.layer_reach.lacking": "⚠ No “%1$@” layer here",
   "shortcuts.layer_reach.left_out": "⚠ Left out of this layer",
   "shortcuts.layer_reach.locked_help": "You're editing this profile. To take the layer out of it, use %1$@.",
+  "shortcuts.layer_reach.row_not_shared": "Only some profiles have this layer. To share the row, share the layer first.",
   "shortcuts.layer_reach.stored_page": "Shared layers are renamed and deleted on the loaded profile's page.",
   "shortcuts.layer_rename.clash": "%1$@ already has a “%2$@” layer.",
   "shortcuts.layer_rename.count": "Renames it in profiles: %1$d.",

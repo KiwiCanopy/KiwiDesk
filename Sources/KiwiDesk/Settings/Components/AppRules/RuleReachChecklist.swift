@@ -76,6 +76,16 @@ struct RuleReachChecklist: View {
                 )
             )
             .toggleStyle(.checkbox)
+            .disabled(!reading.shared && !reading.layerShared)
+            .help(
+                reading.layerShared
+                    ? ""
+                    : L(
+                        "shortcuts.layer_reach.row_not_shared",
+                        "Only some profiles have this layer. To share the "
+                            + "row, share the layer first."
+                    )
+            )
             caption(
                 L(
                     "app_rules.reach.all_caption",

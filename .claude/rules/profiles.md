@@ -1413,13 +1413,21 @@ as ONE stored → page name map, or a chain merges two layers
 a profile whose override moved is written, an untouched one is
 not (`LayerReachSnapshotTests` ▸ `leaveOneOut`). A writer that
 drops a base layer clears every `leftOut` mark naming it
-(`LayerReachSnapshotTests` ▸ `dropClearsMarks`), and the loaded
-page's base takes its layer SET and order from the layered stored
-base, never re-derived from the page (`LayerReachSnapshotTests` ▸
-`pageBaseSetIsStored`). A row pick is keyed `layer␟lua`, so a
-layer renamed, deleted or narrowed moves, drops or trims its
-picks through the one `LayerRowPicks` (`LayerReachLifecycleTests`
-▸ `deleteHereDropsRowPick`).
+(`LayerReachSnapshotTests` ▸ `dropClearsMarks`). The layer pass
+is the ONE decider of which layers exist where: the loaded page's
+base takes its layer SET and order from the layered stored base
+and never drops or adds a layer from the page
+(`LayerReachSnapshotTests` ▸ `pageBaseSetIsStored`,
+`pageNeverJoinsLayer`), so a new layer records where it starts as
+a membership the pass places (`LayerReachLifecycleTests` ▸
+`newLayerIsPlaced`) and a row in a layer the base does not share
+starts on that layer's holders, never shared
+(`LayerReachLifecycleTests` ▸ `listedLayerRowStaysListed`). A row
+pick is keyed `layer␟lua`, so a layer renamed, deleted or
+narrowed moves, drops or trims its picks through the one
+`LayerRowPicks` (`LayerReachLifecycleTests` ▸
+`renameMovesRowPicks`, `deleteDropsRowPicks`,
+`untickTrimsRowPick`).
 
 **The loaded profile's page holds its RESOLVED rules, so the
 draft is not the sidecar.** On the live target the draft's app

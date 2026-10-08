@@ -178,11 +178,11 @@ struct LayerReachModelTests {
     @Test("a new layer starts where a new row does")
     func newLayerDefaults() throws {
         let model = try makeModel()
-        model.config.layers.append(KeyLayer(name: "Fresh"))
+        model.addLayer("Fresh")
         #expect(try #require(model.layerReach("Fresh")).shared)
 
         model.selectEditTarget("Home")
-        model.config.layers.append(KeyLayer(name: "Fresh"))
+        model.addLayer("Fresh")
         let stored = try #require(model.layerReach("Fresh"))
         #expect(!stored.shared && stored.users == ["Home"])
     }
