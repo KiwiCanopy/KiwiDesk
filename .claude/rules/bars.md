@@ -311,10 +311,16 @@ twice, was a question the user answered twice. The argument is
   them in (`AppBarLandingTests`). A section wanted again before its
   leave lands leaves `leavingViews` and stays on the strip
   (`ShelfFadeTests` ▸ `reWantedSectionStays`).
-  On a boxed glass run the boxes CUT and only content dissolves:
-  a glass takes no alpha — at partial opacity it shows the tint
-  behind it bare — and no geometry — its content re-lays every
-  frame (both device, 2026-10-01) (`AppBarDissolveTests`). A bar
+  On a boxed glass run each box dissolves as ONE unit with its
+  tint, the fade on the `BoxHost` the pair is minted in and never
+  on the glass — a glass's own alpha shows the tint behind it
+  bare (device, 2026-10-01 and 2026-10-08) — and no box resizes,
+  since its content re-lays every frame (#1842,
+  `AppBarDissolveTests`). A box glass never leaves the `BoxHost`
+  it was minted in: a z-order move fronts the host, and a box
+  leaves only through `dropBox`, since the host is found through
+  the glass and a glass moved out leaks it and fades bare
+  (`AppBarBoxHostTests`). A bar
   manager hides its display's overlay and never drops it — a bar
   coming back is the same section re-shown — retiring only a
   display that left (`BarManagerKeepTests`); its `hide()` tears

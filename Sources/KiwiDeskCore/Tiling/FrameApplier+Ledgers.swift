@@ -61,6 +61,13 @@ final class RecentApplies: @unchecked Sendable {
         }
         return true
     }
+
+    /// Seconds since the window's last stamp, nil without one.
+    func age(_ id: WindowID, now: TimeInterval) -> TimeInterval? {
+        lock.lock()
+        defer { lock.unlock() }
+        return stamps[id].map { now - $0 }
+    }
 }
 
 /// Pending frames per window shared across threads.

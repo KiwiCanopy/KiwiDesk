@@ -4508,6 +4508,21 @@ memo of the same shape ends it: two consecutive corrections and
 the window is left standing until it is seen on its frame again
 or the memo ages out (`UnsolicitedResizeTests`).
 
+The same press record decides a MOVE that arrives after the
+release (#1798): AX throttles moves, so a flick into a bar strip
+can report its only move once the button is up, and a drag
+pipeline that asked for a held button never dropped it, so the
+bar clamp never ran. A move that keeps the window's size, on a
+float, after a single press inside it released under a second
+ago is that flick's drop. Floats only (owner ruling): the late
+gesture runs the drop's clamp and never a tile's swap, asks no
+Space Bar item (the pointer has moved on since the release), and
+claims no later resize, so a zoom stays this entry's to correct.
+The cost accepted: an app that moves its own float, size
+unchanged, within a second of a click inside it gets the drop's
+clamp and re-file, which only keeps it clear of the bars
+(`FloatFlickDropTests`).
+
 **A corner is never a float's original, and a stranded float is
 re-centred (#1352).** [Principle] The stash restores a parked
 float from the capture taken at its first park, and that capture
@@ -12422,14 +12437,15 @@ so a longer one is not seen beneath the new at half strength
 midway, while a slide would
 claim the same windows moved, and a cut, which is what a
 discarded view is, made the shrink read as the new row simply
-placed. On a boxed glass run the boxes
-cut and only the content dissolves: a glass at partial opacity
-shows the tint behind it bare, black for a moment on the shipped
-look, and a glass animating its width re-lays its content every
-frame (both device, 2026-10-01). A box fading as one unit with
-its tint needs the pair composited together, which the box
-hosting does not do yet
-([#1842](https://github.com/KiwiCanopy/KiwiDesk/issues/1842)). A window closing within a Space still
+placed. On a boxed glass run each box dissolves as one unit with
+its tint, through a host view of its own that the pair is minted
+in ([#1842](https://github.com/KiwiCanopy/KiwiDesk/issues/1842)):
+a glass's OWN alpha shows the tint behind it bare, black for a
+moment on the shipped look, while an ancestor's alpha composites
+the refracted pair together (both device, 2026-10-01 and
+2026-10-08), and a glass animating its width re-lays its content
+every frame, so a box never resizes on a dissolve. A window
+closing within a Space still
 leaves at once, and a group still folds its members. The
 curve stays decelerating — the motion answers the user's switch,
 and a curve that eases in reads as lag — while its length is

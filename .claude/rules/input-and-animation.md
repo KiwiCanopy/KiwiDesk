@@ -625,8 +625,10 @@ editing here:
   one tiled own window with no recorded press to classify its
   gesture by — so `isResizeGesture`'s trailing-event branch and
   the resize-vs-move ghost gate both went blind on it while
-  working for every other app. `MouseTracker`'s local arm closes
-  that, under two obligations:
+  working for every other app. Trailing events read the record
+  through the one `recentSinglePress`, which #1798's late float
+  move shares. `MouseTracker`'s local arm closes that, under two
+  obligations:
   - **Gate the recorded press on `OwnWindowTiling.identifier`**,
     read from the pressed window
     (`OwnPressMonitorSeamTests`, and

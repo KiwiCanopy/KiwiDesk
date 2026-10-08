@@ -35,6 +35,17 @@ extension AppBarOverlay {
         #endif
     }
 
+    /// One box's glass and tint, composited as a unit so a dissolve
+    /// fades the pair together — a glass's own alpha shows the tint
+    /// bare (#1842). Spans the run, so frames inside are the run's,
+    /// and lets presses through to what lies under its empty area.
+    final class BoxHost: FlippedView {
+        override func hitTest(_ point: NSPoint) -> NSView? {
+            let hit = super.hitTest(point)
+            return hit === self ? nil : hit
+        }
+    }
+
     /// Resolves the section's own glass hosting (#407).
     func glassHosting(_ style: AppBarLook) -> GlassHosting {
         GlassHosting.resolve(

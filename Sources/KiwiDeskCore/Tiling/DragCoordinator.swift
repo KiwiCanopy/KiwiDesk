@@ -42,6 +42,9 @@ public final class DragCoordinator {
     private var latestFrames: [WindowID: CGRect] = [:]
     /// First frame of in-flight gesture per window.
     private var startFrames: [WindowID: CGRect] = [:]
+    /// Gestures opened by a move that arrived after the release
+    /// (#1798): no live feedback ran, and their end owns no resize.
+    private var lateOpened: Set<WindowID> = []
 
     public init() {}
 
@@ -49,6 +52,12 @@ public final class DragCoordinator {
     /// recorded and its settle not yet fired.
     public func hasGesture(_ id: WindowID) -> Bool {
         startFrames[id] != nil
+    }
+
+    /// Whether `id`'s gesture was opened late (`windowMoved`'s
+    /// `late`), read by the drop and the resize classifier.
+    public func isLateGesture(_ id: WindowID) -> Bool {
+        lateOpened.contains(id)
     }
 
     /// Ingests a `windowMoved` event and schedules the debounce
@@ -61,13 +70,13 @@ public final class DragCoordinator {
         _ id: WindowID,
         frame: CGRect,
         validated: Bool = false,
+        late: Bool = false,
         previous: CGRect? = nil
     ) {
-        guard !isAnimating(id) else {
-            pending[id]?.cancel()
-            pending[id] = nil
-            latestFrames[id] = nil
-            startFrames[id] = nil
+        // A late flick's press came after our last write, so its
+        // move is no echo of ours (#1798).
+        guard late || !isAnimating(id) else {
+            cancel(id)
             return
         }
         if startFrames[id] == nil, !validated,
@@ -75,6 +84,7 @@ public final class DragCoordinator {
         {
             return
         }
+        if startFrames[id] == nil, late { lateOpened.insert(id) }
         latestFrames[id] = frame
         let start = startFrames[id] ?? previous ?? frame
         startFrames[id] = start
@@ -114,6 +124,7 @@ public final class DragCoordinator {
         pending[id] = nil
         latestFrames[id] = nil
         startFrames[id] = nil
+        lateOpened.remove(id)
     }
 
     private func settle(_ id: WindowID) {
@@ -124,11 +135,13 @@ public final class DragCoordinator {
         }
         guard let frame = latestFrames[id] else {
             startFrames[id] = nil
+            lateOpened.remove(id)
             return
         }
         let start = startFrames[id] ?? frame
         latestFrames[id] = nil
         startFrames[id] = nil
         onDragEnd(id, start, frame)
+        lateOpened.remove(id)
     }
 }

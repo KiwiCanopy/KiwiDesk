@@ -194,7 +194,6 @@ struct EchoClockSeamTests {
         "KiwiCore+SpaceFocusHandoff.swift": 2,  // debt
         "KiwiCore+StickyReach.swift": 3,  // debt
         "KiwiCore+UnsolicitedResize.swift": 1,  // debt
-        "KiwiCore+MouseResizeEnd.swift": 1,  // debt
         "TilingEngine+SizeBounds.swift": 2,  // debt
     ]
 
