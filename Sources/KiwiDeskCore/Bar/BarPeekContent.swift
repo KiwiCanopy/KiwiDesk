@@ -34,10 +34,12 @@ enum BarPeekSource: Equatable {
 /// untitled one named as the glyph menu names it (#1947) — and
 /// each row its window's button.
 struct BarPeekContent: Equatable {
-    /// One window's row: the window it picks, and its name.
+    /// One window's row: the window it picks, its name, and
+    /// whether it holds the system focus — its check (#2063).
     struct Row: Equatable {
         let window: WindowID
         let title: String
+        var focused = false
     }
 
     struct Group: Equatable {
@@ -54,11 +56,21 @@ struct BarPeekContent: Equatable {
     }
 
     let groups: [Group]
+    /// A list's peek reserves the trailing check column on every
+    /// row, checked or not, so no title moves with focus (#2063).
+    let checks: Bool
+
+    /// The windows shown, top to bottom — the order a glyph's
+    /// click cycles in (#2063).
+    var order: [WindowID] { groups.flatMap { $0.rows.map(\.window) } }
 
     /// Every window the peek stands for.
     var windowCount: Int { groups.reduce(0) { $0 + $1.windowCount } }
 
-    private init(groups: [Group]) { self.groups = groups }
+    private init(groups: [Group], checks: Bool) {
+        self.groups = groups
+        self.checks = checks
+    }
 
     /// `count` windows in order — the first, or the last
     /// `fromEnd` — each group keeping the count it stands for; a
@@ -81,16 +93,25 @@ struct BarPeekContent: Equatable {
                 )
             )
         }
-        return BarPeekContent(groups: fromEnd ? kept.reversed() : kept)
+        return BarPeekContent(
+            groups: fromEnd ? kept.reversed() : kept,
+            checks: checks
+        )
     }
 
     /// Groups `rows` per app NAME in first-seen order, every row
     /// kept — a lone window titled as its app included (owner,
     /// #1946) — on the key the bars group by, so a glyph standing
     /// for sibling processes of one app (#1785) is one group. Icons
-    /// mark the groups only where the rows mix apps.
+    /// mark the groups only where the rows mix apps. A list
+    /// (`checks`) checks the row of `focus` (#2063).
     @MainActor
-    init(rows: [BarWindowRow]) {
+    init(
+        rows: [BarWindowRow],
+        checks: Bool = false,
+        focus: WindowID? = nil
+    ) {
+        self.checks = checks
         var order: [BarWindowRow] = []
         var grouped: [String: [Row]] = [:]
         for row in rows {
@@ -98,7 +119,8 @@ struct BarPeekContent: Equatable {
             grouped[row.app, default: []].append(
                 Row(
                     window: row.window,
-                    title: SpaceBarWindowMenu.windowName(row.title)
+                    title: SpaceBarWindowMenu.windowName(row.title),
+                    focused: checks && row.window == focus
                 )
             )
         }

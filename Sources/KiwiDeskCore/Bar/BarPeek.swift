@@ -12,11 +12,10 @@ typealias BarPeekSchedule =
 /// `docs/design-decisions.md` ▸ A bar item's hover peek.
 @MainActor
 final class BarPeek {
-    /// The content for a source, read when the peek shows; nil
-    /// shows nothing.
-    var content: @MainActor (BarPeekSource) -> BarPeekContent? = { _ in
-        nil
-    }
+    /// The content for a source on a chip's Space (nil on the App
+    /// Bar), read when the peek shows; nil shows nothing.
+    var content: @MainActor (BarPeekSource, SpaceID?) -> BarPeekContent? =
+        { _, _ in nil }
     /// A row picked: its window, on the anchor's Space where it has
     /// one — Core's one bar-row pick, the glyph menu's too.
     var pick: @MainActor (WindowID, SpaceID?) -> Void = { _, _ in }
@@ -184,6 +183,19 @@ final class BarPeek {
             dismiss()
             return
         }
+        show(anchor, source: source, space: space, edge: edge)
+    }
+
+    /// Shows the peek at `anchor` at once, with no dwell — or, where
+    /// it shows already, re-reads it in place — held as any list's
+    /// is: a glyph's click after its focus moved, so the check
+    /// stands on the window it landed (#2063).
+    func show(
+        _ anchor: NSView,
+        source: BarPeekSource,
+        space: SpaceID?,
+        edge: AppBarEdge
+    ) {
         spent = nil
         present(
             Anchor(view: anchor, source: source, space: space, edge: edge),
@@ -275,7 +287,7 @@ final class BarPeek {
         close()
         guard let view = anchor.view, let window = view.window,
             let frame = Self.screenFrame(of: view),
-            let content = content(anchor.source),
+            let content = content(anchor.source, anchor.space),
             !content.groups.isEmpty,
             let shelf = shelf(window)
         else {

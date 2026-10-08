@@ -5,7 +5,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A click on a rendered list glyph (#1946, owner ruling amendment
-/// 2): it shows the peek at once and presents no menu, VoiceOver's
+/// 2; #2063): it focuses the glyph's next window and shows the peek
+/// at once, checked on that window, presenting no menu; VoiceOver's
 /// press presents the native menu once, a press elsewhere on the
 /// shelf closes it, and a peek row picks through Core's one bar-row
 /// pick — the window menu's — doing what the row's glyph does: a
@@ -100,29 +101,67 @@ struct BarPeekClickTests {
         target.mouseUp(with: try #require(event(.leftMouseUp)))
     }
 
+    /// Shows the glyph's peek as a hover would, without the click,
+    /// whose focus would move first (#2063).
+    private func showPeek(_ core: KiwiCore, _ web: SpaceBarGlyphTarget) {
+        core.shelves.peek.show(
+            web,
+            source: web.peekSource,
+            space: two,
+            edge: .top
+        )
+    }
+
     private func close(_ core: KiwiCore) {
         core.shelves.peek.dismiss()
         core.shelves.peek.panel.panel?.orderOut(nil)
     }
 
-    @Test("A list glyph's click shows its peek at once and pops no menu")
-    func clickTogglesThePeek() throws {
+    /// The peek stays up across clicks on the glyph's own Space,
+    /// re-read in place, so its check follows the window each click
+    /// landed (#2063); a click switching Spaces moves the chip, which
+    /// closes it as any relayout that moves its item does.
+    @Test("A list glyph's click focuses and shows its peek checked there")
+    func clickFocusesAndShowsThePeek() throws {
         let core = seededCore()
         defer { close(core) }
         var menus = 0
         core.spaceBars.glyphActions.present = { _, _ in menus += 1 }
         var dwells = 0
         core.shelves.peek.schedule = { _, _ in dwells += 1 }
+        let checked = {
+            core.shelves.peek.panel.drawn?.groups.flatMap(\.rows)
+                .filter(\.focused).map(\.window)
+        }
+        try click(try webTarget(core))
+        #expect(core.activeSpace?.id == two)
+        #expect(core.state.workspaces.lastFocused == WindowID(4))
         let web = try webTarget(core)
         try click(web)
         #expect(menus == 0)
         #expect(dwells == 0, "no dwell")
+        #expect(core.state.workspaces.lastFocused == WindowID(5))
         #expect(core.shelves.peek.shown?.view === web)
         #expect(
             core.shelves.peek.panel.drawn?.groups.flatMap(\.titles)
                 == ["Doc", "Mail"]
         )
-        #expect(core.activeSpace?.id == one, "nothing switches")
+        #expect(checked() == [WindowID(5)])
+        #expect(core.shelves.peek.panel.body.check != nil)
+        // The bar re-rendered for the focus change keeps the glyph
+        // where it was, so the peek survives its relayout.
+        // The pointer rests on the glyph, as a click leaves it: the
+        // render's hover re-read finds it inside the hull.
+        let rest = try #require(BarPeek.screenFrame(of: web))
+        core.shelves.peek.pointerOnScreen = {
+            CGPoint(x: rest.midX, y: rest.midY)
+        }
+        let after = try webTarget(core)
+        core.shelves.peek.syncToAnchor()
+        #expect(core.shelves.peek.shown?.view === after, "it stays")
+        try click(after)
+        #expect(core.state.workspaces.lastFocused == WindowID(4), "wraps")
+        #expect(checked() == [WindowID(4)])
     }
 
     @Test("VoiceOver's press on a list glyph opens the menu once")
@@ -146,7 +185,7 @@ struct BarPeekClickTests {
         let core = seededCore()
         defer { close(core) }
         let web = try webTarget(core)
-        try click(web)
+        showPeek(core, web)
         core.shelves.peek.panel.body.onPick(WindowID(5))
         #expect(core.activeSpace?.id == two)
         #expect(core.state.workspaces.lastFocused == WindowID(5))
@@ -168,7 +207,7 @@ struct BarPeekClickTests {
         core.state.workspaces.focus(WindowID(1), in: one)
         core.windowIsOnScreen = { $0 == WindowID(4) ? false : nil }
         let web = try webTarget(core)
-        try click(web)
+        showPeek(core, web)
         core.shelves.peek.panel.body.onPick(WindowID(4))
         #expect(core.activeSpace?.id == two, "the Space still switches")
         #expect(
@@ -187,7 +226,7 @@ struct BarPeekClickTests {
         let core = seededCore()
         defer { close(core) }
         let web = try webTarget(core)
-        try click(web)
+        showPeek(core, web)
         let panel = try #require(web.window as? ShelfPanel)
         let content = try #require(panel.contentView)
         let press = { (point: CGPoint) throws -> NSEvent in

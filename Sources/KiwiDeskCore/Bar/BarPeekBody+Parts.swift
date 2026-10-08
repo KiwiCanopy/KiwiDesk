@@ -48,6 +48,43 @@ extension BarPeekBody {
         return ceil(font.ascender - font.descender + font.leading)
     }
 
+    /// The focused row's check (#2063) at the trailing edge of its
+    /// column, ending at `columnEnd`, in the row's ink: centred on
+    /// the CAPS of the row's first line, never on the row or its
+    /// line box, so a wrapped title or a tall face keeps it on the
+    /// name.
+    func addCheck(beside row: NSTextField, columnEnd: CGFloat) -> NSImageView {
+        let mark = NSImageView()
+        mark.image = NSImage(
+            systemSymbolName: "checkmark",
+            accessibilityDescription: nil
+        )?.withSymbolConfiguration(
+            .init(pointSize: Metrics.checkSide, weight: .semibold)
+        )
+        mark.imageScaling = .scaleProportionallyDown
+        mark.contentTintColor = row.textColor
+        mark.setAccessibilityElement(false)
+        mark.identifier = NSUserInterfaceItemIdentifier("checkmark")
+        let side = Metrics.checkSide
+        var mid = row.frame.minY + side / 2
+        if let font = row.font, let cell = row.cell {
+            let caps = BarTextGlyph.span(of: .caps, font: font)
+            let baseline =
+                row.frame.minY + cell.titleRect(forBounds: row.bounds).minY
+                + font.ascender
+            mid = baseline - (caps.lowerBound + caps.upperBound) / 2
+        }
+        mark.frame = CGRect(
+            x: columnEnd - side,
+            y: mid - side / 2,
+            width: side,
+            height: side
+        )
+        addSubview(mark)
+        check = mark
+        return mark
+    }
+
     /// A hairline at `y`, `x` in from the text's lead.
     func addRule(at y: CGFloat, x: CGFloat, width: CGFloat) {
         let rule = NSView(

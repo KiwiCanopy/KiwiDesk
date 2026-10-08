@@ -11,7 +11,9 @@ extension KiwiCore {
         let peek = shelves.peek
         spaceBars.glyphActions.peek = peek
         appBars.itemActions.peek = peek
-        peek.content = { [weak self] in self?.barPeekContent($0) }
+        peek.content = { [weak self] source, space in
+            self?.barPeekContent(source, on: space)
+        }
         peek.pick = { [weak self] id, space in
             self?.pickBarRow(id, on: space)
         }
@@ -26,11 +28,44 @@ extension KiwiCore {
     }
 
     /// What a hovered item's peek shows: its windows as the glyph
-    /// menu lists them, every one a row; nil where none is left.
-    func barPeekContent(_ source: BarPeekSource) -> BarPeekContent? {
+    /// menu lists them, every one a row, a list's checking the
+    /// window `barFocus(on: space)` names (#2063); nil where none
+    /// is left.
+    func barPeekContent(
+        _ source: BarPeekSource,
+        on space: SpaceID? = nil
+    ) -> BarPeekContent? {
         let rows = barWindowRows(source.windows)
         guard !rows.isEmpty else { return nil }
-        return BarPeekContent(rows: rows)
+        return BarPeekContent(
+            rows: rows,
+            checks: source.isList,
+            focus: barFocus(on: space)
+        )
+    }
+
+    /// The window holding the system focus as a bar list reads it
+    /// (#2063): a playing Monocle flip's owed target, else
+    /// `lastFocused`, and only for the active Space — the one that
+    /// carries it (#1214). `space` is a Space Bar chip's; an App
+    /// Bar list has none, and a group never spans Spaces.
+    func barFocus(on space: SpaceID?) -> WindowID? {
+        guard space == nil || space == activeSpace?.id else { return nil }
+        return pendingMonocleFocus?.to ?? state.workspaces.lastFocused
+    }
+
+    /// The window a click on a multi-window glyph focuses (#2063):
+    /// the one after `barFocus` in its peek's order, wrapping, or
+    /// the first where the focus is none of them — derived from
+    /// focus, so no cycle position is stored.
+    func glyphCycleTarget(_ pick: SpaceBarGlyphPick) -> WindowID? {
+        let order =
+            barPeekContent(pick.peekSource, on: pick.space)?.order ?? []
+        guard let first = order.first else { return nil }
+        guard let focus = barFocus(on: pick.space),
+            let index = order.firstIndex(of: focus)
+        else { return first }
+        return order[(index + 1) % order.count]
     }
 }
 

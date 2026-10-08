@@ -296,7 +296,7 @@ struct BarPeekActionTests {
         var opened = 0
         body.onMore = { opened += 1 }
         let ids = (1...30).map { WindowID(UInt32($0)) }
-        let content = try #require(rig.peek.content(.glyph(ids)))
+        let content = try #require(rig.peek.content(.glyph(ids), nil))
         _ = body.build(content, shelf: KiwiShelf(), maxHeight: 120)
         let more = try #require(
             body.targets.firstIndex { $0.action == .more }

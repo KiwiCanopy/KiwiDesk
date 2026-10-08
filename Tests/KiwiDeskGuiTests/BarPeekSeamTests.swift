@@ -289,7 +289,8 @@ struct BarPeekSeamTests {
     /// `pickBarRow`, so the two lists cannot focus two ways (#1946):
     /// the menu has one builder, whose rows take it; the peek's
     /// pick takes it; and the focus behind it is called from that
-    /// door and the one-window glyph's click alone.
+    /// door and a glyph's click alone — its one window, or the
+    /// next of several (#2063).
     @Test("a peek row's pick is the window menu's pick")
     func oneBarRowPick() throws {
         let click = try Self.app("KiwiCore+SpaceBarClick.swift")
@@ -317,7 +318,8 @@ struct BarPeekSeamTests {
             )
         )
         #expect(picked.contains("pick(window, shown.space)"))
-        // Sources-wide: one menu builder, two focus call sites.
+        // Sources-wide: one menu builder, three focus call sites —
+        // the row door and the glyph click's two arms.
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources")
         var builders = 0
@@ -331,6 +333,13 @@ struct BarPeekSeamTests {
             if calls > 0 { focuses[file.lastPathComponent] = calls }
         }
         #expect(builders == 1)
-        #expect(focuses == ["KiwiCore+SpaceBarClick.swift": 2])
+        #expect(focuses == ["KiwiCore+SpaceBarClick.swift": 3])
+        let glyphClick = try #require(
+            SourceScan.declarationBody(
+                after: "func pickFromSpaceBar(",
+                in: click
+            )
+        )
+        #expect(glyphClick.occurrences(of: "focusFromSpaceBar(") == 2)
     }
 }

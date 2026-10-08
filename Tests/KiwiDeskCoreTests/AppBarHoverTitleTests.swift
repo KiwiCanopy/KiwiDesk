@@ -27,7 +27,7 @@ struct AppBarHoverTitleTests {
         _ core: KiwiCore,
         _ source: BarPeekSource?
     ) -> [String]? {
-        source.flatMap(core.barPeekContent)?.groups.flatMap(\.titles)
+        source.flatMap { core.barPeekContent($0) }?.groups.flatMap(\.titles)
     }
 
     @Test("The peek is the app, then the full title")
@@ -183,7 +183,7 @@ struct AppBarHoverTitleTests {
         view.layout()
         #expect(view.peekSource == .appItem([WindowID(1), WindowID(2)]))
         let content = try #require(
-            view.peekSource.flatMap(core.barPeekContent)
+            view.peekSource.flatMap { core.barPeekContent($0) }
         )
         #expect(content.groups.map(\.app) == ["Finder"])
         #expect(content.groups.map(\.titles) == [["Downloads", "Desktop"]])

@@ -36,6 +36,8 @@ struct SymbolClassifierSeamTests {
             "builds a badge image from a fixed name",
         "Sources/KiwiDeskCore/Bar/BarPeekBody+More.swift":
             "builds the peek's more-line chevron from a fixed name",
+        "Sources/KiwiDeskCore/Bar/BarPeekBody+Parts.swift":
+            "builds the peek's focus check from a fixed name",
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Marker.swift":
             "builds the Space marker's image from a fixed name",
         "Sources/KiwiDeskCore/Borders/StickyMarkOverlay.swift":

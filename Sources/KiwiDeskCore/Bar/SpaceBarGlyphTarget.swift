@@ -70,13 +70,28 @@ final class SpaceBarGlyphActions {
         )
     }
 
-    /// A click on a list — a multi-window glyph or `+n` — toggles
-    /// its peek (#1946): it shows at once, or closes where shown.
+    /// A click on `+n` toggles its peek (#1946): it shows at once,
+    /// or closes where shown.
     func togglePeek(_ pick: SpaceBarGlyphPick) {
         guard let target = pick.anchor as? SpaceBarGlyphTarget,
             let item = target.superview as? SpaceBarItemView
         else { return }
         peek?.toggle(
+            target,
+            source: target.peekSource,
+            space: pick.space,
+            edge: item.style.edge
+        )
+    }
+
+    /// A click on a multi-window glyph that focused a window shows
+    /// its peek at once, or re-reads it, the check on that window
+    /// (#2063).
+    func showPeek(_ pick: SpaceBarGlyphPick) {
+        guard let target = pick.anchor as? SpaceBarGlyphTarget,
+            let item = target.superview as? SpaceBarItemView
+        else { return }
+        peek?.show(
             target,
             source: target.peekSource,
             space: pick.space,

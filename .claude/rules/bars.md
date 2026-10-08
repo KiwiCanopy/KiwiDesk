@@ -643,13 +643,30 @@ Obligations:
   draws it rather than on its home Space (`BarPeekSeamTests` ▸
   `oneBarRowPick`, `BarPeekClickTests` ▸
   `refusedRowTakesThePlainSwitch`, `BarPeekAppBarRowTests` ▸
-  `travelerRowActsAsItsItem`). A left click on a list TOGGLES
+  `travelerRowActsAsItsItem`). A left click on `+n` TOGGLES
   its peek: it closes one already shown — the hover's or a
   click's — and otherwise shows it at once, with no dwell, to
-  hold as any list's does; it pops no menu. VoiceOver's press
-  and "N more" open the native menu at the anchor
+  hold as any list's does; it pops no menu. A left click on a
+  multi-window glyph FOCUSES its next window instead — the one
+  after `barFocus`, wrapping, or the first, in the peek's own
+  `order`, through the glyph's `focusFromSpaceBar` and never a
+  stored position (#2063) — and then shows its peek through
+  `BarPeek.show`, re-read in place. VoiceOver's press and "N
+  more" open the native menu at the anchor
   (`BarPeekActionTests` ▸ `secondClickCloses`,
-  `clickClosesAHoverPeek`, `BarPeekClickTests`). The panel takes
+  `clickClosesAHoverPeek`, `BarPeekClickTests`,
+  `BarGlyphCycleTests`, `BarPeekSeamTests` ▸ `oneBarRowPick`).
+- **"Which window holds the focus" is the one
+  `KiwiCore.barFocus(on:)` for a bar list** — a playing Monocle
+  flip's owed target, else `lastFocused`, on the active Space
+  alone — read by the glyph click's cycle, the peek's check and
+  the window menu's `.on` state alike (#2063,
+  `BarGlyphCycleTests` ▸ `owedMonocleFocusCounts`). A list's
+  check sits in `BarPeekBody.Metrics.checkColumn` PAST the
+  titles' wrap width on every row, checked or not, so no title
+  re-wraps, beside a wrapped title's first line in the row's
+  ink, and the checked row's hover target covers it
+  (`BarPeekCheckTests`); a label's peek reserves no column. The panel takes
   the mouse but is non-activating and never key, and hidden from
   accessibility (`BarPeekTests` ▸
   `panelTakesClicksWithoutActivating`). The argument is
