@@ -109,9 +109,17 @@ struct ScreenListSeamTests {
             #expect(
                 check != nil && live != nil
                     && check!.lowerBound < live!.lowerBound
+                    && memo.contains("return known")
                     && memo.contains("testMainID = live"),
                 .init(rawValue: "\(target)'s main id does not memoize")
             )
         }
+        // The door ANSWERS from the override, not just tests it.
+        let door = try SourceScan.strippedSource(
+            at: repo.appendingPathComponent(
+                "Sources/KiwiDeskCore/Profiles/PositionalDisplays.swift"
+            )
+        )
+        #expect(door.occurrences(of: "return mainIDOverride() }") == 1)
     }
 }

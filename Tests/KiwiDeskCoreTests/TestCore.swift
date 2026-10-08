@@ -297,7 +297,7 @@ func makeTestCore(
 @MainActor private var testScreens: [NSScreen]?
 
 /// `makeTestCore`'s per-process memo of the main display's id.
-nonisolated(unsafe) private var testMainID: DisplayID?
+@MainActor private var testMainID: DisplayID?
 
 /// `makeTestCore`'s per-process memo of AppKit's screen areas.
 @MainActor private var testAppKitFrames: [DisplayID: CGRect] = [:]

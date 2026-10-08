@@ -7,7 +7,7 @@ public enum PositionalDisplays {
     /// ID of current main display (menu bar display); a test core
     /// memoizes it, the read being a WindowServer round trip
     /// (#1894, `ScreenListSeamTests`).
-    public static var liveMainID: DisplayID {
+    @MainActor public static var liveMainID: DisplayID {
         #if DEBUG
             if let mainIDOverride { return mainIDOverride() }
         #endif
@@ -16,8 +16,7 @@ public enum PositionalDisplays {
 
     #if DEBUG
         /// Test seam over `liveMainID`; nil reads the machine.
-        nonisolated(unsafe) public static var mainIDOverride:
-            (() -> DisplayID)?
+        @MainActor static var mainIDOverride: (() -> DisplayID)?
     #endif
 
     /// Orders displays with main first, then secondaries
