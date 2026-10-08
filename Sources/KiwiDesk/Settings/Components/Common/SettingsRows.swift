@@ -263,8 +263,8 @@ extension View {
     ) -> some View {
         tint(SettingsTheme.ink2)
             .hoverHighlight(
-                rest: resting ? Color.primary.opacity(0.06) : .clear,
-                hover: Color.primary.opacity(0.12),
+                rest: resting ? SettingsTheme.chipRest : .clear,
+                hover: SettingsTheme.chipHover,
                 edge: nil,
                 cornerRadius: cornerRadius,
                 padding: padding

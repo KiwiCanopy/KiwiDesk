@@ -61,5 +61,73 @@ extension SettingsThemeContrastTests {
             ]
         }
 
-    static let chips: [Pairing] = segments + buttonChips
+    /// A glyph-only icon chip's glyph over its lift, on every
+    /// ground one is drawn on, at the glyph floor: `ink2` on a
+    /// card row (and at rest beside text), in a sunken field (the
+    /// search and recorder clears) and on the What's new trail
+    /// banner's accent wash; `ink3` on the floating panel's close
+    /// and the recorder's rejection row (card or sunken); `warningInk` on the
+    /// conflict banner's amber. The trail banner draws its wash
+    /// under the chip, the pairing the chip under the wash — a
+    /// near-equal composite of two translucent layers.
+    private static let iconChips: [Pairing] = [
+        icon("ink2", SettingsTheme.ink2, on: "card", SettingsTheme.card),
+        icon(
+            "ink2",
+            SettingsTheme.ink2,
+            on: "card, resting",
+            SettingsTheme.card,
+            layer: SettingsTheme.chipRest
+        ),
+        icon(
+            "ink2",
+            SettingsTheme.ink2,
+            on: "sunken",
+            SettingsTheme.sunken
+        ),
+        icon(
+            "ink2",
+            SettingsTheme.ink2,
+            on: "the trail banner",
+            SettingsTheme.card,
+            wash: (
+                SettingsTheme.accent,
+                Double(SettingsTheme.searchNoticeFillOpacity)
+            )
+        ),
+        icon("ink3", SettingsTheme.ink3, on: "panel", SettingsTheme.panel),
+        icon("ink3", SettingsTheme.ink3, on: "card", SettingsTheme.card),
+        icon(
+            "ink3",
+            SettingsTheme.ink3,
+            on: "sunken",
+            SettingsTheme.sunken
+        ),
+        icon(
+            "warningInk",
+            SettingsTheme.warningInk,
+            on: "warningSurface",
+            SettingsTheme.warningSurface
+        ),
+    ]
+
+    private static func icon(
+        _ inkName: String,
+        _ ink: Color,
+        on groundName: String,
+        _ ground: Color,
+        layer: Color = SettingsTheme.chipHover,
+        wash: (color: Color, alpha: Double)? = nil
+    ) -> Pairing {
+        Pairing(
+            "\(inkName) glyph on an icon chip on \(groundName)",
+            ink,
+            on: ground,
+            layers: [layer],
+            washedWith: wash,
+            floor: 3.0
+        )
+    }
+
+    static let chips: [Pairing] = segments + buttonChips + iconChips
 }

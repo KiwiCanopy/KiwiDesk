@@ -28,11 +28,18 @@ struct IconHoverChipTests {
     func chipRestsAtNothing() throws {
         let rows = try source("Components/Common/SettingsRows.swift")
         let chip = body(of: "iconHoverChip", in: rows)
+        // The whole call, so a dropped or retuned argument reds:
+        // the rest and lift are tokens, and a glyph-only chip
+        // takes no edge — no passive control shares its shape
+        // (#2047).
         #expect(
-            chip.contains(
-                "rest: resting ? Color.primary.opacity(0.06) : .clear,"
+            squashed(chip).contains(
+                ".hoverHighlight(rest:resting?SettingsTheme.chipRest"
+                    + ":.clear,hover:SettingsTheme.chipHover,"
+                    + "edge:nil,"
             )
         )
+        #expect(!chip.contains(".opacity("))
         #expect(chip.contains("resting: Bool = false"))
         #expect(chip.contains("tint(SettingsTheme.ink2)"))
         #expect(
