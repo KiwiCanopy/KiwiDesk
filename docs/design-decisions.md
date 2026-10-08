@@ -8622,8 +8622,10 @@ one action in one layer, its value the combo:
 (#2022, owner ruling 2026-10-07). A layer is a set of rows, so
 asking which profiles a layer belongs to row by row hid the one
 question a delete or a rename turns on. The selected layer's
-header leads with an **Applies to** row — App Rules' closed label
-and popover, never a control on the chip, which would be a
+header leads with an **Applies to** line — the shortcut rows'
+reach column's look, one line that never stacks like the menu bar
+icon line under it (owner ruling 2026-10-08), App Rules' closed
+label and popover — never a control on the chip, which would be a
 channel only a pointer finds:
 
 - **A shared layer may be left out whole.** The base keeps the

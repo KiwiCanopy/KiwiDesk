@@ -17,11 +17,15 @@ struct LayerHeader: View {
             let reading = model.layerReach(selected)
             VStack(alignment: .leading, spacing: 8) {
                 if let reading, offersReach(reading) {
-                    SettingsRowShape {
-                        SettingsRowLabel(
-                            label: L("app_rules.reach", "Applies to")
-                        )
-                    } control: {
+                    // One line, as the icon line below it (owner
+                    // ruling 2026-10-08): the label is drawn, the
+                    // control names itself.
+                    HStack(spacing: 10) {
+                        Text(L("app_rules.reach", "Applies to"))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .accessibilityHidden(true)
+                        Spacer(minLength: 8)
                         LayerReachControl(
                             model: model,
                             layer: selected,
