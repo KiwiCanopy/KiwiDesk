@@ -59,6 +59,48 @@ extension KiwiCore {
         return live == .zero ? fallback : live
     }
 
+    /// The last left press, while it is a SINGLE click released
+    /// under a second ago: the trailing-event window both late
+    /// gestures share (#1358, #1798).
+    var recentSinglePress: MouseTracker.Press? {
+        guard let press = mouse.press, let up = press.upAt,
+            wallClock().timeIntervalSince(up) < 1,
+            press.clickCount < 2
+        else { return nil }
+        return press
+    }
+
+    /// Whether a move arriving after the release is a fast
+    /// flick's only event (#1798): a single press on the window
+    /// released moments ago, and the window a float, so the late
+    /// gesture runs the drop clamp and never a tile's swap. AX
+    /// throttles moves, so a flick can report none while held. A
+    /// move that also resized is a zoom, #1358's to correct.
+    func isLateFlick(
+        _ id: WindowID,
+        frame: CGRect,
+        previous: CGRect?
+    ) -> Bool {
+        guard !mouse.leftButtonHeld, !drag.hasGesture(id),
+            let previous, frame.size == previous.size,
+            let press = recentSinglePress,
+            previous.contains(press.location),
+            pressFollowsOwnWrite(press, id)
+        else { return false }
+        return dropLandsUnmanaged(id)
+    }
+
+    /// Whether `press` began after the engine's last frame-set of
+    /// `id`: a move then answers the hand, never our write, so a
+    /// second flick inside the echo grace still counts (#1798).
+    private func pressFollowsOwnWrite(
+        _ press: MouseTracker.Press,
+        _ id: WindowID
+    ) -> Bool {
+        guard let setAge = tiler.secondsSinceSet(id) else { return true }
+        return wallClock().timeIntervalSince(press.downAt) < setAge
+    }
+
     /// Whether the drop leaves `id` where nothing will place it
     /// (#1178) — the space it LANDED in is the active one, so this
     /// is the one active-space door, named for the drop's question.
@@ -91,8 +133,13 @@ extension KiwiCore {
         // at spring time — so it falls through to the ordinary in-
         // space drop, which places it at the cursor's slot. Own-
         // space / off-bar also fall through unchanged.
-        switch spaceBarDrop.ended(id, cursor: drag.cursorLocation())
-        {
+        // A late-opened gesture armed nothing, and the cursor has
+        // moved on since its release (#1798).
+        let barDrop: SpaceBarDropCoordinator.Outcome =
+            drag.isLateGesture(id)
+            ? .none
+            : spaceBarDrop.ended(id, cursor: drag.cursorLocation())
+        switch barDrop {
         case .relocate(let target):
             moveWindow(id, to: target, follow: false)
             return

@@ -73,6 +73,12 @@ final class FrameApplier {
         recent.isRecent(id, within: Self.echoGrace, now: clock())
     }
 
+    /// Seconds since a frame-set for the window was last stamped,
+    /// on the applier's clock; nil when none is on record.
+    func secondsSinceSet(_ id: WindowID) -> TimeInterval? {
+        recent.age(id, now: clock())
+    }
+
     /// Commanded frame from recent `applyInstant` while echo is in flight
     /// (#881).
     func instantTarget(_ id: WindowID) -> CGRect? {

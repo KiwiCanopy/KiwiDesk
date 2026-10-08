@@ -22,13 +22,12 @@ extension KiwiCore {
         // whatever the press record says — read first, so the
         // verdict does not depend on the release's main-actor
         // hop landing before the AX event.
-        if mouse.leftButtonHeld || drag.hasGesture(id) {
+        if mouse.leftButtonHeld
+            || (drag.hasGesture(id) && !drag.isLateGesture(id))
+        {
             return true
         }
-        guard let press = mouse.press,
-            let up = press.upAt,
-            Date().timeIntervalSince(up) < 1,
-            press.clickCount < 2,
+        guard let press = recentSinglePress,
             let slot = tiler.calculatedFrames(
                 state: state
             )[id]
