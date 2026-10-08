@@ -965,8 +965,13 @@ the caps print, not which key fires.
 - **Applications** — *Open or Focus* focuses a running app's
   window or launches the app, and pressing again cycles its
   windows; which window each press reaches is in
-  [`pull_or_spawn`](lua-reference.md#pull_or_spawn). Add the
+  [`focus_or_spawn`](lua-reference.md#focus_or_spawn). Add the
   same app twice to bind one shortcut per behaviour.
+
+:::unreleased
+The verb behind *Open or Focus* is now `focus_or_spawn`, formerly
+`pull_or_spawn`; shortcuts made here are updated for you.
+:::
 
 A window that fills its whole screen — a slide show, a
 borderless-fullscreen game or player — is not held clear of the
