@@ -74,10 +74,16 @@ public final class BorderManager {
     /// default; a test core pins it to the AppKit fallback (#1956).
     var movePanel: (CGWindowID, CGPoint) -> Bool =
         SkyLight.moveWindow
+    /// A window's corner radius read, live by default; a test core
+    /// pins it (#1894).
+    var readCornerRadius: (CGWindowID) -> CGFloat? =
+        SkyLight.windowCornerRadius
     #if DEBUG
-        /// Test-only: builds ring backends and stands in for the
-        /// WindowServer request. Production must not set them.
-        var backendFactory: (() -> any BorderOverlayBackend)?
+        /// Test-only: builds ring backends in the manager's order and
+        /// stands in for the WindowServer request. Production must
+        /// not set them.
+        var backendFactory:
+            ((BorderGeometry.Order) -> any BorderOverlayBackend)?
         var watchOverride: ((Set<WindowID>) -> Bool)?
     #endif
     var reportedTrackingActive: Bool?
@@ -175,7 +181,7 @@ public final class BorderManager {
     func cornerRadius(for id: WindowID) -> CGFloat {
         if let cached = cornerRadii[id] { return cached }
         let resolved =
-            SkyLight.windowCornerRadius(id.raw)
+            readCornerRadius(id.raw)
             ?? GeometryUtils.systemWindowCornerRadius
         cornerRadii[id] = resolved
         return resolved
@@ -226,7 +232,7 @@ public final class BorderManager {
             if let backendFactory {
                 return BorderOverlay(
                     window: window.raw,
-                    backend: backendFactory()
+                    backend: backendFactory(activeOrder)
                 )
             }
         #endif

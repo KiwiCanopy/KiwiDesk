@@ -72,7 +72,9 @@ struct BorderOrderReassertTests {
         border.movePanel = { _, _ in false }
         defer { border.clear() }
         var orders = 0
-        border.backendFactory = { CountingBackend { orders += 1 } }
+        border.backendFactory = { _ in
+            CountingBackend { orders += 1 }
+        }
         border.watchOverride = { _ in true }
         let both = [spec(1), spec(2)]
         border.sync(both, alive: nil, reassertOrder: false)

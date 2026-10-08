@@ -36,6 +36,9 @@ struct BorderPanelSeamTests {
             for pin in [
                 "core.borders.movePanel = { _, _ in false }",
                 "core.borders.windowLevel = { _ in nil }",
+                "core.borders.backendFactory = "
+                    + "{ InertBorderBackend(orderMode: $0) }",
+                "core.borders.readCornerRadius = { _ in nil }",
             ] {
                 #expect(source.contains(pin), "\(twin) misses \(pin)")
             }
@@ -56,6 +59,36 @@ struct BorderPanelSeamTests {
             source.contains(
                 "var movePanel: (CGWindowID, CGPoint) -> Bool "
                     + "= SkyLight.moveWindow"
+            )
+        )
+    }
+
+    /// The corner-radius read is live on the manager and nowhere
+    /// else in Core, so a twin's pin covers every ring (#1894).
+    @Test("the corner-radius read has one live home, the manager's")
+    func liveCornerRadiusHasOneHome() throws {
+        let source = Self.flattened(
+            try SourceScan.strippedSource(
+                at: Self.core.appendingPathComponent(
+                    "Borders/BorderManager.swift"
+                )
+            )
+        )
+        #expect(
+            source.contains(
+                "var readCornerRadius: (CGWindowID) -> CGFloat? "
+                    + "= SkyLight.windowCornerRadius"
+            )
+        )
+        let sites = try SourceScan.identifierSites(
+            of: "SkyLight.windowCornerRadius",
+            under: Self.core
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent) == ["BorderManager.swift"],
+            .init(
+                rawValue: "found "
+                    + sites.map(\.site).joined(separator: ", ")
             )
         )
     }
