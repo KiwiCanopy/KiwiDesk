@@ -15,10 +15,12 @@ struct ShelfPanelPinTests {
                     "Tests/\(target)/TestCore.swift"
                 )
             )
+            // One write, and it is the pin: a later `= true` in the
+            // same twin would undo it.
             #expect(
-                source.components(
-                    separatedBy: "core.shelves.ordersPanels = false"
-                ).count == 2,
+                source.components(separatedBy: "ordersPanels =").count
+                    == 2
+                    && source.contains("core.shelves.ordersPanels = false"),
                 .init(rawValue: "\(target) misses the pin")
             )
         }
