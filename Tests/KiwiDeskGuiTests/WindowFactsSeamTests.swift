@@ -110,9 +110,82 @@ struct WindowFactsSeamTests {
                 .replacingOccurrences(of: tabs, with: "")
         }
         #expect(bodies.contains("func autoFloatReason("))
-        for read in ["role(of:", "subrole(of:", "title(of:"] {
+        let reads = ["role(of:", "subrole(of:", "title(of:", "attribute("]
+        for read in reads {
             #expect(!bodies.contains(read), "detection calls \(read)")
         }
+        // No element at all: the one left is `hasNativeTabs`'s own
+        // parameter, whose body the strip above removed.
+        #expect(bodies.occurrences(of: "AXUIElement") == 1)
+    }
+
+    /// A facts value handed to detection or the composition is
+    /// never assembled in the call: an `AXHelper.` read or a bare
+    /// `.init(` there is a fact read beside the door, which the
+    /// spelled-type census above cannot see.
+    @Test("no detection call reads its facts in the argument list")
+    func noFactsBuiltInTheCall() throws {
+        let sources = try Self.coreSources()
+        var calls = 0
+        for (file, source) in sources {
+            let text = Array(source)
+            for needle in ["autoFloatReason(", "composeVerdict("] {
+                for args in Self.arguments(of: needle, in: text) {
+                    calls += 1
+                    for read in ["AXHelper.", ".init("] {
+                        #expect(
+                            !args.contains(read),
+                            "\(file): \(needle) reads \(read)"
+                        )
+                    }
+                }
+            }
+        }
+        // The declarations, the live composition's call and the
+        // producers' detection calls, at the least.
+        #expect(calls >= 5, "found \(calls) calls")
+    }
+
+    /// Each balanced argument list following `needle` in `text`.
+    private static func arguments(
+        of needle: String,
+        in text: [Character]
+    ) -> [String] {
+        let marker = Array(needle)
+        var found: [String] = []
+        var index = 0
+        while index + marker.count <= text.count {
+            guard Array(text[index..<(index + marker.count)]) == marker
+            else {
+                index += 1
+                continue
+            }
+            var cursor = index + marker.count - 1
+            if let args = SourceScan.balanced(
+                text,
+                from: &cursor,
+                open: "(",
+                close: ")"
+            ) {
+                found.append(args)
+            }
+            index += marker.count
+        }
+        return found
+    }
+
+    /// The live trait read takes the one button fold the corpus
+    /// loader takes, so a fold copied back beside it reds here
+    /// rather than leaving the corpus on a rule nothing runs.
+    @Test("the live trait read folds its buttons through the one fold")
+    func traitsTakeTheFold() throws {
+        let traits = try SourceScan.functionBody(
+            of: "windowTraits",
+            in: "AXHelper+WindowTraits.swift",
+            under: "AX"
+        )
+        #expect(traits.contains("WindowTraits.titlebarButton(from:"))
+        #expect(!traits.contains("contains(true)"))
     }
 
     @Test("track hands its facts, and only the recheck an element")
@@ -149,10 +222,21 @@ struct WindowFactsSeamTests {
             under: "Events"
         )
         #expect(live.contains("Self.composeVerdict("))
-        #expect(live.contains("activationPolicy: policy(of: pid)"))
-        let mark = "tilesAsOwnWindow: tilesAsOwnWindow(pid: pid, id: id)"
-        #expect(live.contains(mark))
-        #expect(live.contains("rules: floatRules"))
+        // Terminated, so a value built on the live read does not
+        // pass for the read itself.
+        let inputs = [
+            #"activationPolicy:\s*policy\(of:\s*pid\)\s*,"#,
+            #"tilesAsOwnWindow:\s*tilesAsOwnWindow\(pid:\s*pid,"#
+                + #"\s*id:\s*id\)\s*,"#,
+            #"rules:\s*floatRules\s*\)"#,
+        ]
+        for input in inputs {
+            #expect(
+                live.range(of: input, options: .regularExpression)
+                    != nil,
+                "autoFloatVerdict no longer hands \(input)"
+            )
+        }
         #expect(!live.contains("FloatDetection.autoFloatReason("))
         let pure = try SourceScan.functionBody(
             of: "composeVerdict",

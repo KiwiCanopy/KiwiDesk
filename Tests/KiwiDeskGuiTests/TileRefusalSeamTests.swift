@@ -113,7 +113,9 @@ struct TileRefusalSeamTests {
             under: "Events"
         )
         #expect(composition.contains("FloatDetection.autoFloatReason("))
-        #expect(composition.contains("forceFloatReason("))
+        // Bound and used: a discarded reason forces nothing.
+        #expect(composition.contains("if let forced = forceFloatReason("))
+        #expect(composition.contains("return .floats(forced)"))
         // Both producers take the one composition.
         let tracking = sources["Events/EventLoop+Tracking.swift"] ?? ""
         // `track`, `recheckFloat` and its off-main twin (#1933).
