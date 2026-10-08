@@ -167,4 +167,21 @@ struct UndeclaredSpaceDisplayTests {
         #expect(core.state.workspaces.display(of: scratch) == display)
         #expect(core.spaceSlide.isPlaying)
     }
+
+    /// A launch follow's window is filed into its rule's Space by
+    /// the create fold, which places nothing; the follow places it
+    /// before it reads the slide.
+    @Test(
+        "a launch follow into it slides",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func launchFollowSlides() throws {
+        let (core, display) = try slideCore()
+        core.state.workspaces.add(WindowID(2), to: scratch)
+        #expect(core.state.workspaces.display(of: scratch) == nil)
+        core.followSwitch(to: scratch, focusing: WindowID(2))
+        defer { core.spaceSlide.end() }
+        #expect(core.state.workspaces.display(of: scratch) == display)
+        #expect(core.spaceSlide.isPlaying)
+    }
 }

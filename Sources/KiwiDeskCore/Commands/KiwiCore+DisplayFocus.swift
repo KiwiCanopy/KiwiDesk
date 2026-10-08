@@ -99,6 +99,9 @@ extension KiwiCore {
         arriving: Bool = false
     ) {
         let priorFrontmost = frontmostPIDProvider?()
+        // A launch follow arrives with its rule's undeclared Space
+        // filed but unplaced: place it before the slide reads it.
+        placeUnplacedSpaces()
         let slide = spaceSlideIntent(to: target)
         state.workspaces.activate(target)
         focusWindow(id, refocusRetile: false, warp: true)

@@ -34,7 +34,7 @@ struct CapturedSpacesCensusTests {
         "KiwiDeskCore/Profiles/KiwiCore+HeldSpaceBoot.swift":
             (1, "boot's renumber takes every live number (#1646)"),
         "KiwiDeskCore/Profiles/KiwiCore+SpaceDisplays.swift":
-            (4, "the display resolve places held Spaces too"),
+            (4, "the resolve and the unplaced net place held too"),
         "KiwiDeskCore/Profiles/KiwiCore+ProfileSpaces.swift":
             (1, "the restore's focus snapshot"),
         "KiwiDeskCore/Profiles/KiwiCore+TemporarySpaces.swift":

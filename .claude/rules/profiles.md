@@ -894,10 +894,13 @@ resolve, so it had no `spaceDisplay` entry, no chip, no
   path that reads a new Space's screen BEFORE its own retile
   places it first: the switch ahead of `spaceSlideIntent`
   (`UndeclaredSpaceDisplayTests` ▸ `firstVisitSlides`), the one
-  `fileMembership` ahead of the float re-anchor and a follow's
-  slide (`UndeclaredSpaceDisplayTests` ▸ `followSlides`), boot
-  ahead of its activation (`TemporarySpaceRestartTests` ▸
-  `restartPlacesUnpinned`).
+  `followSwitch` likewise, a launch follow's rule Space included
+  (`UndeclaredSpaceDisplayTests` ▸ `launchFollowSlides`), the one
+  `fileMembership` ahead of the float re-anchor, and boot ahead
+  of its activation — those two read `NSScreen` and the
+  frontmost app, which no fixture pins, so they have no test;
+  `TemporarySpaceRestartTests` ▸ `restartPlacesUnpinned` holds
+  only that the replayed Space comes back placed.
 - **A gate asked before the Space exists is told where it WILL
   lay out**, through `landingDisplay(of:)` — the sticky gate on
   a move to an undeclared id (`UndeclaredSpaceDisplayTests` ▸
