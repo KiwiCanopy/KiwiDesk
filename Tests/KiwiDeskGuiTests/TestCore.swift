@@ -204,6 +204,10 @@ func makeTestCore(
     // bar sits at the top of the primary screen, where a hand on
     // the menu bar rests. Pin "off every window".
     BarHoverHit.pointerOverride = { _ in BarHoverHit.offWindow }
+    // A shelf panel is a real window on the developer's screen,
+    // and a core outlives its test while a task still holds it
+    // (#1894): no panel unless the suite reads one.
+    core.shelves.drawsPanels = false
     // The drawn-menu-bar read (#1386) lists the host's real
     // WindowServer windows; a test's displays are fake.
     core.eventLoop.displayWatch.readDrawnMenuBars = { [] }

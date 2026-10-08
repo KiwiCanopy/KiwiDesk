@@ -52,6 +52,11 @@ final class ShelfManager {
     }
 
     private var overlays: [Key: ShelfOverlay] = [:]
+    /// Whether a shelf gets its panel. Off in both `makeTestCore`
+    /// twins, where every suite rendering a bar would otherwise put
+    /// a real panel on screen (#1894); a suite reading a shelf
+    /// turns it back on.
+    var drawsPanels = true
     /// The bars' context menus (#1518) — the one instance; Core
     /// sets its rows and hands it to both bar managers.
     let contextMenus = BarContextMenus()
@@ -116,7 +121,8 @@ final class ShelfManager {
 
     /// Re-lays one shelf from what its sections drew.
     func relayout(_ key: Key) {
-        guard !holdsRelayout, let shelf = last[key] else { return }
+        guard !holdsRelayout, drawsPanels, let shelf = last[key]
+        else { return }
         var sections: [ShelfOverlay.Section] = []
         if let space = shelf.space, space.isVisible,
             let slot = space.shownStrip
@@ -186,6 +192,11 @@ final class ShelfManager {
     }
 
     #if DEBUG
+        /// How many shelves hold a panel, ordered in or not.
+        var panelCount: Int {
+            overlays.values.filter { $0.panel != nil }.count
+        }
+
         /// The display's shelf on `edge`, or its one shelf when
         /// `edge` is nil and it has exactly one.
         func overlayForTesting(

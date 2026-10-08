@@ -23,6 +23,8 @@ struct BarPeekWiringTests {
     /// Space 1 active on Notes (1); Space 2 holds Web (4).
     private func seededCore() -> KiwiCore {
         let core = makeBarCore()
+        // The peek stands on the shelf's panel (#1894).
+        core.shelves.drawsPanels = true
         core.state.workspaces.assign(one, to: display)
         core.state.workspaces.assign(two, to: display)
         core.state.workspaces.activate(two)
