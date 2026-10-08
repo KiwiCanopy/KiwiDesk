@@ -111,6 +111,9 @@ let package = Package(
             name: "KiwiDeskCoreTests",
             dependencies: ["KiwiDeskCore"],
             path: "Tests/KiwiDeskCoreTests",
+            // AeroSpace's recorded AX dumps (#1883), read from
+            // source by path, so the bundle never carries them.
+            exclude: ["AXDumps"],
             swiftSettings: swiftSettings
         ),
         // GUI model tests (#64): SwiftPM ≥5.5 lets a test

@@ -14,6 +14,7 @@ paths:
   - "Sources/KiwiDeskCore/Events/EventLoop+Tabs.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+Heal.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+WindowPolicy.swift"
+  - "Sources/KiwiDeskCore/Events/EventLoop+FloatVerdict.swift"
   - "Sources/KiwiDeskCore/Events/EventLoop+WindowServerWakeUp.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+WindowServerWakeUp.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Boot.swift"
@@ -87,6 +88,18 @@ editing AX code:
   `ReconcileOffMainTests`, `ReconcileOffMainDebtTests`,
   `ReconcileOffMainRecheckTests` and `ReconcileSnapshotTests`
   hold the behaviour.
+
+  **Float detection reads one plain input, `WindowFacts`, and
+  every live producer builds it through `WindowFacts.read`
+  (#1883)** — `track`, the float recheck and the list read, held
+  by `WindowFactsSeamTests`. A fact detection comes to need joins
+  that value rather than being read beside it, because the
+  recorded real-app dumps `AXDumpCorpusTests` replays can carry
+  only what the value carries. A dump lacking a fact a rule reads
+  leaves that rule's column "not decidable", never guessed, and
+  the expected table is KiwiDesk's own: AeroSpace's recorded
+  verdicts are never read, and a changed row is a ruling on that
+  app made in its own change.
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever
