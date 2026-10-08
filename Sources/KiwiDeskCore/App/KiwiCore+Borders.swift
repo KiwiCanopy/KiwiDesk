@@ -181,7 +181,7 @@ extension KiwiCore {
     /// the corners); every
     /// other visible slot — tiled or floating — only when
     /// `unfocusedEnabled` and the space isn't monocle. Overlays and
-    /// fullscreen windows never get a ring. Cascade members
+    /// display-filling windows never get a ring. Cascade members
     /// remain independent: border presentation must not change the
     /// shared pile semantics used by navigation and swap. Pure over
     /// the flat slot list — no `self`, no AX.

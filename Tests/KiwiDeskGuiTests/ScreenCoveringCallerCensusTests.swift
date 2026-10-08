@@ -10,9 +10,11 @@ import Testing
 /// new raw caller is the drift #1788 closes, so it reds here
 /// until it routes through the door or names its reason.
 ///
-/// Pinned by COUNT per file over comment-stripped source: a
-/// routed site swapped for another raw read in the same file
-/// stays green, which the consumer suites own.
+/// Pinned by COUNT per file over comment-stripped source, each
+/// name matched whole — a call or a bare function reference
+/// alike, never inside a longer identifier. The trade: a raw read
+/// swapped for another raw read in a file already listed stays
+/// green, which the consumer suites own.
 @Suite("Screen-covering caller census")
 struct ScreenCoveringCallerCensusTests {
     /// Files spelling the raw verdict, with their reason.
@@ -29,6 +31,17 @@ struct ScreenCoveringCallerCensusTests {
         "App/KiwiCore+FloatGather.swift": 1,
     ]
 
+    /// `covers` or `coversAScreen` as a whole identifier.
+    private static func verdictHits(in source: String) -> Int {
+        let pattern = try! NSRegularExpression(
+            pattern: #"\bcovers(AScreen)?\b"#
+        )
+        return pattern.numberOfMatches(
+            in: source,
+            range: NSRange(source.startIndex..., in: source)
+        )
+    }
+
     @Test("every raw screen-covering read in Core is classified")
     func everyCallerIsClassified() throws {
         let root = SourceScan.repoRoot(from: #filePath)
@@ -38,9 +51,7 @@ struct ScreenCoveringCallerCensusTests {
         for file in try SourceScan.swiftSources(under: root) {
             let key = String(file.path.dropFirst(prefix.count))
             let source = try SourceScan.strippedSource(at: file)
-            let hits =
-                source.occurrences(of: "coversAScreen(")
-                + source.occurrences(of: "covers(")
+            let hits = Self.verdictHits(in: source)
             guard hits > 0 else { continue }
             counts[key] = hits
         }

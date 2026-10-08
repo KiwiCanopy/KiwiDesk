@@ -26,7 +26,7 @@ struct BorderSpecsTests {
         focused: WindowID?,
         slots: [(id: WindowID, frame: CGRect)],
         overlays: Set<WindowID> = [],
-        fullscreen: Set<WindowID> = [],
+        fillsDisplay: Set<WindowID> = [],
         monocle: Bool = false,
         sheen: CGFloat = 0
     ) -> [BorderManager.Spec] {
@@ -35,7 +35,7 @@ struct BorderSpecsTests {
             focused: focused,
             slots: slots,
             overlays: overlays,
-            fillsDisplay: fullscreen,
+            fillsDisplay: fillsDisplay,
             isMonocle: monocle,
             focusedRingSuppressed: false,
             sheen: sheen
@@ -209,7 +209,7 @@ struct BorderSpecsTests {
                 BorderStyle(),
                 focused: w1,
                 slots: disjoint,
-                fullscreen: [w1]
+                fillsDisplay: [w1]
             ).isEmpty
         )
     }
@@ -230,7 +230,7 @@ struct BorderSpecsTests {
             style,
             focused: w1,
             slots: slots,
-            fullscreen: [w2]
+            fillsDisplay: [w2]
         )
         #expect(Set(result.map(\.window)) == [w1, w3])
     }

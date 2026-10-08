@@ -1614,7 +1614,7 @@ editing here:
   `ScreenCoveringCallerCensusTests` reds a new raw caller until
   it routes or names its reason. A reader of the verdict that
   draws refreshes on the cover CROSSING too, since a move or
-  resize retiles nothing (`PresentingReaderTests` ▸
+  resize may retile nothing (`PresentingReaderTests` ▸
   `crossingRefreshesRingAndMark`); the readers ruled so far are
   the door's docstring.
 - **A window is tiled or floating, and detection's verdict is
