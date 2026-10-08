@@ -122,39 +122,6 @@ extension EventLoop {
         )
     }
 
-    /// Where detection's half of a verdict comes from: the
-    /// element, asked now, or what an off-main read found (#1933).
-    enum FloatDetectionSource {
-        case element(AXUIElement, layer: Int?)
-        case read(AutoFloatReason?)
-    }
-
-    /// The automatic verdict for one tracked window (#1810) — the
-    /// one composition `track` and `recheckFloat` both take.
-    func autoFloatVerdict(
-        _ source: FloatDetectionSource,
-        id: WindowID,
-        pid: pid_t,
-        bundleID: String?
-    ) -> FloatVerdict {
-        if let forced = forceFloatReason(pid: pid, id: id) {
-            return .floats(forced)
-        }
-        switch source {
-        case .element(let element, let layer):
-            return FloatVerdict(
-                FloatDetection.autoFloatReason(
-                    element: element,
-                    bundleID: bundleID,
-                    layer: layer,
-                    rules: floatRules
-                )
-            )
-        case .read(let reason):
-            return FloatVerdict(reason)
-        }
-    }
-
     /// Maps an own window id to its `NSWindow` — the one place
     /// AX identity meets AppKit identity, shared by the ignore
     /// gate (`canBecomeMain`) and by `ownWindowIdentifier`'s

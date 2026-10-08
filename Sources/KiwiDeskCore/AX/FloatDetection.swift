@@ -171,44 +171,23 @@ public enum FloatDetection {
         layer == nil && shouldFloat(role: role, subrole: subrole)
     }
 
-    /// Why an AX element floats by detection, or nil where it
-    /// tiles (#1810). Structure is asked before the rules, so a
+    /// Why a window floats by detection, or nil where it tiles
+    /// (#1810) — the one body every producer hands its facts to
+    /// (#1933, #1883). Structure is asked before the rules, so a
     /// dialog a rule also matches reports `.panel` — deleting the
     /// rule would not tile it.
-    @MainActor
     public static func autoFloatReason(
-        element: AXUIElement,
+        _ facts: WindowFacts,
         bundleID: String?,
-        layer: Int?,
         rules: FloatRules
     ) -> AutoFloatReason? {
-        autoFloatReason(
-            role: AXHelper.role(of: element),
-            subrole: AXHelper.subrole(of: element),
-            layer: layer,
-            bundleID: bundleID,
-            rules: rules
-        ) { AXHelper.title(of: element) }
-    }
-
-    /// Detection over values already read — the one body the
-    /// element variant and the off-main list read share (#1933).
-    /// `title` is asked only where structure tiles.
-    public static func autoFloatReason(
-        role: String,
-        subrole: String,
-        layer: Int?,
-        bundleID: String?,
-        rules: FloatRules,
-        title: () -> String
-    ) -> AutoFloatReason? {
         let structural = shouldFloat(
-            role: role,
-            subrole: subrole,
-            layer: layer ?? 0
+            role: facts.role,
+            subrole: facts.subrole,
+            layer: facts.layer ?? 0
         )
         return autoFloatReason(structural: structural) {
-            rules.matches(bundleID: bundleID, title: title())
+            rules.matches(bundleID: bundleID, title: facts.title())
         }
     }
 

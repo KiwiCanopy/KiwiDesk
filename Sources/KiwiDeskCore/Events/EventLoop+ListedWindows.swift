@@ -76,28 +76,28 @@ struct ListedWindowReader: @unchecked Sendable {
     ) -> ListedWindow {
         let id = resolve(element)
         let minimized = AXHelper.isMinimized(element)
-        let role = AXHelper.role(of: element)
-        let subrole = AXHelper.subrole(of: element)
+        let facts = WindowFacts.read(
+            element,
+            layer: id.flatMap { layers[$0] }
+        )
         var reading: TrackedReading?
         if let id, !minimized, tracked.contains(id) {
             reading = TrackedReading(
                 fullscreen: fullscreen(element),
                 frame: AXHelper.frame(of: element),
                 autoReason: FloatDetection.autoFloatReason(
-                    role: role,
-                    subrole: subrole,
-                    layer: layers[id],
+                    facts,
                     bundleID: bundleID,
                     rules: rules
-                ) { AXHelper.title(of: element) },
+                ),
                 traits: many ? traits(element, id) : nil
             )
         }
         return ListedWindow(
             id: id,
             minimized: minimized,
-            role: role,
-            subrole: subrole,
+            role: facts.role,
+            subrole: facts.subrole,
             tracked: reading
         )
     }
