@@ -9,17 +9,26 @@ public struct KeyLayerOverride: Sendable, Equatable {
     /// tombstone that lets one profile drop or move a shared
     /// shortcut (#1393). Never empty per layer.
     public var removed: [String: [String]]
+    /// Base layers this profile leaves out whole — the same mark
+    /// one level up, so a profile created later still gets the
+    /// shared layer (#2022). Never `default`, never repeated.
+    public var leftOut: [String]
 
     public init(
         layers: [KeyLayer] = [],
-        removed: [String: [String]] = [:]
+        removed: [String: [String]] = [:],
+        leftOut: [String] = []
     ) {
         self.layers = layers
         self.removed = removed.filter { !$0.value.isEmpty }
+        var seen: Set<String> = [KeyLayer.defaultName]
+        self.leftOut = leftOut.filter { seen.insert($0).inserted }
     }
 
     /// True when nothing diverges.
-    public var isEmpty: Bool { layers.isEmpty && removed.isEmpty }
+    public var isEmpty: Bool {
+        layers.isEmpty && removed.isEmpty && leftOut.isEmpty
+    }
 
     /// Count of things this override overrides (#678 turn 13a).
     /// Not `flatMap(\.bindings).count`: `diff` emits a layer with
@@ -29,9 +38,11 @@ public struct KeyLayerOverride: Sendable, Equatable {
     public var overrideCount: Int {
         layers.reduce(0) { $0 + max($1.bindings.count, 1) }
             + removed.values.reduce(0) { $0 + $1.count }
+            + leftOut.count
     }
 
-    /// Merges this override onto `base`: a left-out combo's base
+    /// Merges this override onto `base`: a left-out layer goes
+    /// whole — its own rows here too — a left-out combo's base
     /// rows go, then the override wins per combo IN PLACE;
     /// unmentioned base combos and layers survive.
     /// `KeybindingMerge` folds by the same key with the OPPOSITE
@@ -47,7 +58,8 @@ public struct KeyLayerOverride: Sendable, Equatable {
         }
         var result: [KeyLayer] = []
         var consumed: Set<String> = []
-        for baseLayer in base {
+        let dropped = Set(leftOut)
+        for baseLayer in base where !dropped.contains(baseLayer.name) {
             let over = overrideByName[baseLayer.name]
             let gone = removed[baseLayer.name] ?? []
             if over == nil && gone.isEmpty {
@@ -81,7 +93,9 @@ public struct KeyLayerOverride: Sendable, Equatable {
             consumed.insert(baseLayer.name)
         }
         for layer in layers
-        where !consumed.contains(layer.name) {
+        where !consumed.contains(layer.name)
+            && !dropped.contains(layer.name)
+        {
             result.append(layer)
         }
         return result
@@ -91,8 +105,9 @@ public struct KeyLayerOverride: Sendable, Equatable {
 extension KeyLayerOverride {
     /// Inverse of `resolved(onto:)` — nil when nothing diverges.
     /// A base combo `edited` no longer binds in a layer it keeps
-    /// is left out (#1393); a base layer `edited` drops entirely
-    /// survives, as does a cleared base icon.
+    /// is left out (#1393), and a base layer `edited` drops
+    /// entirely is left out whole (#2022); a cleared base icon
+    /// survives.
     public static func diff(
         base: [KeyLayer],
         edited: [KeyLayer]
@@ -137,76 +152,13 @@ extension KeyLayerOverride {
                 )
             }
         }
-        let over = KeyLayerOverride(layers: layers, removed: removed)
-        return over.isEmpty ? nil : over
-    }
-}
-
-/// One stored layer entry: the layer, plus the base combos it
-/// leaves out under `removed` (#1393). An entry carrying only
-/// removals is no diverging layer of its own.
-private struct KeyLayerOverrideEntry: Codable {
-    var layer: KeyLayer
-    var removed: [String]
-
-    private enum CodingKeys: String, CodingKey { case removed }
-
-    init(layer: KeyLayer, removed: [String]) {
-        self.layer = layer
-        self.removed = removed
-    }
-
-    init(from decoder: Decoder) throws {
-        layer = try KeyLayer(from: decoder)
-        removed =
-            try decoder.container(keyedBy: CodingKeys.self)
-            .decodeIfPresent([String].self, forKey: .removed) ?? []
-    }
-
-    func encode(to encoder: Encoder) throws {
-        try layer.encode(to: encoder)
-        guard !removed.isEmpty else { return }
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(removed, forKey: .removed)
-    }
-
-    var removalOnly: Bool {
-        !removed.isEmpty && layer.bindings.isEmpty && layer.icon == nil
-    }
-}
-
-extension KeyLayerOverride: Codable {
-    /// Decodes normalized sparse layer list (#31).
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        let entries = try container.decode([KeyLayerOverrideEntry].self)
-        var removed: [String: [String]] = [:]
-        for entry in entries where !entry.removed.isEmpty {
-            removed[entry.layer.name, default: []] += entry.removed
-        }
-        self.init(
-            layers: KeyLayer.normalized(
-                sparse: entries.filter { !$0.removalOnly }.map(\.layer)
-            ),
-            removed: removed
+        let kept = Set(edited.map(\.name))
+        let over = KeyLayerOverride(
+            layers: layers,
+            removed: removed,
+            leftOut: base.map(\.name).filter { !kept.contains($0) }
         )
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var entries = layers.map {
-            KeyLayerOverrideEntry(layer: $0, removed: removed[$0.name] ?? [])
-        }
-        let named = Set(layers.map(\.name))
-        for name in removed.keys.sorted() where !named.contains(name) {
-            entries.append(
-                KeyLayerOverrideEntry(
-                    layer: KeyLayer(name: name),
-                    removed: removed[name] ?? []
-                )
-            )
-        }
-        var container = encoder.singleValueContainer()
-        try container.encode(entries)
+        return over.isEmpty ? nil : over
     }
 }
 

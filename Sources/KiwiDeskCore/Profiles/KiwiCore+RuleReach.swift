@@ -10,8 +10,15 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     /// The scroll gestures, one field per key (#1656).
     public var scrollGestures: RuleReachTable<ScrollGestureValue>
     public let storedScrollBase: ScrollGestureBase
-    public let storedKeyBase: [KeyLayer]
-    public let storedKeyOverrides: [String: KeyLayerOverride]
+    /// The shortcut base and overrides the key table reads: the
+    /// files, with the draft's layer edits laid over them
+    /// (`rewriteLayers`, #2022).
+    public internal(set) var storedKeyBase: [KeyLayer]
+    public internal(set) var storedKeyOverrides: [String: KeyLayerOverride]
+    /// The shortcut base and overrides as the files hold them —
+    /// what a save compares against to know what it must write.
+    public let fileKeyBase: [KeyLayer]
+    public let fileKeyOverrides: [String: KeyLayerOverride]
     /// A row to write for each key, from the stored layers; the
     /// Settings draft adds its own before saving.
     public var keyTemplates: [String: KeyBinding]
@@ -45,6 +52,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         self.storedScrollBase = storedScrollBase
         self.storedKeyBase = storedKeyBase
         self.storedKeyOverrides = storedKeyOverrides
+        self.fileKeyBase = storedKeyBase
+        self.fileKeyOverrides = storedKeyOverrides
         self.keyTemplates = keyTemplates
         self.storedAppBase = storedAppBase
         self.storedFloatBase = storedFloatBase
@@ -57,9 +66,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         !appRules.baseTouched.isEmpty || !floatRules.baseTouched.isEmpty
             || !keyLayers.baseTouched.isEmpty
             || !scrollGestures.baseTouched.isEmpty
-            || (pageKeyBase.map {
-                !RuleReachTable<String>.sameShortcuts($0, storedKeyBase)
-            } ?? false)
+            || !RuleReachTable<String>.sameShortcuts(keyBase, fileKeyBase)
+            || storedKeyOverrides != fileKeyOverrides
             || appRules.touched.values.contains { !$0.isEmpty }
             || floatRules.touched.values.contains { !$0.isEmpty }
             || keyLayers.touched.values.contains { !$0.isEmpty }
@@ -170,7 +178,9 @@ extension KiwiCore {
             let appTouched = !(app.touched[name] ?? []).isEmpty
             let keyTouched =
                 name != page
-                && !(snapshot.keyLayers.touched[name] ?? []).isEmpty
+                && (!(snapshot.keyLayers.touched[name] ?? []).isEmpty
+                    || snapshot.storedKeyOverrides[name]
+                        != snapshot.fileKeyOverrides[name])
             let scrollTouched = !(scroll.touched[name] ?? []).isEmpty
             guard
                 appTouched || keyTouched || scrollTouched
@@ -202,7 +212,7 @@ extension KiwiCore {
             !snapshot.keyLayers.baseTouched.isEmpty
             || !RuleReachTable<String>.sameShortcuts(
                 snapshot.keyBase,
-                snapshot.storedKeyBase
+                snapshot.fileKeyBase
             )
         if !app.baseTouched.isEmpty || !float.baseTouched.isEmpty
             || !scroll.baseTouched.isEmpty || keysMoved
@@ -228,6 +238,7 @@ extension KiwiCore {
         refreshStructuredOverrides(
             keys: keysMoved
                 || snapshot.keyLayers.touched.values.contains { !$0.isEmpty }
+                || snapshot.storedKeyOverrides != snapshot.fileKeyOverrides
         )
     }
 }

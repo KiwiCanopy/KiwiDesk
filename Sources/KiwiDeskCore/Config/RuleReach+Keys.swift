@@ -142,8 +142,9 @@ extension RuleReachTable where Value == String {
     /// The base as a LOADED page's layers hold it: the page's
     /// layers, order and structure, each key patched to the table's
     /// base, a layer only the page profile's own override carried
-    /// dropped unless a shared row now lives in it, and an icon the
-    /// page left alone taken from the base.
+    /// dropped unless a shared row now lives in it, a shared layer
+    /// that profile leaves out kept, and an icon the page left
+    /// alone taken from the base.
     public func keyLayerBase(
         page: [KeyLayer],
         editing: String,
@@ -156,6 +157,23 @@ extension RuleReachTable where Value == String {
         let pageOwn = Set(storedPage.map(\.name)).subtracting(baseNames)
         var layers = page.filter { layer in
             !pageOwn.contains(layer.name) || sharedLayers.contains(layer.name)
+        }
+        // A shared layer the page's profile leaves out stays shared
+        // (#2022), in its base place.
+        let pageNames = Set(page.map(\.name))
+        let heldNames = Set(storedPage.map(\.name))
+        for (at, shared) in storedBase.enumerated()
+        where !pageNames.contains(shared.name)
+            && !heldNames.contains(shared.name)
+        {
+            let previous = storedBase[..<at].last { earlier in
+                layers.contains { $0.name == earlier.name }
+            }
+            let index =
+                previous.flatMap { previous in
+                    layers.firstIndex { $0.name == previous.name }
+                }.map { $0 + 1 } ?? 0
+            layers.insert(shared, at: index)
         }
         for at in layers.indices {
             let name = layers[at].name
