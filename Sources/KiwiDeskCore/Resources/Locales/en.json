@@ -1348,6 +1348,7 @@
   "shortcuts.add_binding": "Add binding",
   "shortcuts.add_layer.help": "Add a layer",
   "shortcuts.add_layer.rejoins": "Puts this profile back in the shared “%1$@” layer.",
+  "shortcuts.add_layer.stored_page": "Shared layers are joined on the loaded profile's page.",
   "shortcuts.advanced.caption": "Bind any Lua to a hotkey. This is the power-user escape hatch — the groups above cover the built-in actions.",
   "shortcuts.advanced.title": "Lua bindings",
   "shortcuts.app_behavior": "Launch behavior",

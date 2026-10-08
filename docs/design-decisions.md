@@ -8657,12 +8657,15 @@ channel only a pointer finds:
   loaded profile's page, that profile's alone on a stored one
   (`RuleReachDraft.defaultReach`), recorded as the layer's
   membership so the one layer pass places it — the page never
-  adds or drops a layer of the base. A name another profile still
-  holds is refused at Add, since the two layers would merge, and
-  a row added to a layer only some profiles have stays theirs. On a stored page a layer
-  another profile shares is read but not renamed or deleted —
-  that is the loaded page's, where the change is visible on
-  screen — while a layer only that profile has stays editable.
+  adds or drops a layer of the base. A name another profile's own
+  layer holds is refused at Add, since the two layers would merge;
+  the name of a shared layer the profile left out rejoins it on
+  the loaded page and is refused on a stored one (owner ruling
+  2026-10-08), and a row added to a layer only some profiles have
+  stays theirs. On a stored page a layer another profile shares is
+  read but not renamed, deleted or joined — that is the loaded
+  page's, where the change is visible on screen — while a layer
+  only that profile has stays editable.
 - **A shortcut row's checklist greys a profile without the
   row's layer**: ticking it there would build a layer of one row.
 :::

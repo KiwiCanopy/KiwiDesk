@@ -159,6 +159,14 @@ enum LayerReachWords {
         }
     }
 
+    /// Add refused on a stored page for a shared layer's name.
+    static var joinOnLoadedPage: String {
+        L(
+            "shortcuts.add_layer.stored_page",
+            "Shared layers are joined on the loaded profile's page."
+        )
+    }
+
     /// Adding the name of a shared layer this profile leaves out.
     static func rejoins(_ name: String) -> String {
         L(

@@ -98,6 +98,14 @@ struct LayerStripEditor: View {
                         .foregroundStyle(SettingsTheme.danger)
                         .frame(width: 220, alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
+                } else if model.layerAdmission(newLayer.trimmed)
+                    == .sharedElsewhere
+                {
+                    Text(LayerReachWords.joinOnLoadedPage)
+                        .font(.caption)
+                        .foregroundStyle(SettingsTheme.danger)
+                        .frame(width: 220, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 } else if model.layerAddRejoins(newLayer.trimmed) {
                     Text(LayerReachWords.rejoins(newLayer.trimmed))
                         .font(.caption)

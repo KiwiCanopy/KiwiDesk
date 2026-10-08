@@ -8,6 +8,9 @@ enum LayerAdmission: Equatable {
     case rejoin
     /// Another profile's own layer by that name: it would merge.
     case clash(String)
+    /// A shared layer this STORED page leaves out: it is joined on
+    /// the loaded profile's page (owner ruling, #2022).
+    case sharedElsewhere
 }
 
 /// Every layer the page gains goes through ONE decider,
@@ -25,14 +28,15 @@ extension SettingsModel {
         let shared = layeredReach?.storedKeyBase.contains {
             $0.name == name
         }
-        return shared == true ? .rejoin : .new
+        guard shared == true else { return .new }
+        return reachIsLoaded ? .rejoin : .sharedElsewhere
     }
 
     /// Whether Add may take `name`.
     func canAddLayer(_ name: String) -> Bool {
         switch layerAdmission(name) {
         case .new?, .rejoin?: true
-        case .clash?, nil: false
+        case .clash?, .sharedElsewhere?, nil: false
         }
     }
 
@@ -69,7 +73,7 @@ extension SettingsModel {
             )
             recordCreated([name])
             return true
-        case .clash?, nil:
+        case .clash?, .sharedElsewhere?, nil:
             return false
         }
     }
@@ -100,6 +104,16 @@ extension SettingsModel {
             switch layerAdmission(layer.name) {
             case .new?: created.append(layer.name)
             case .rejoin?: rejoined.append(layer.name)
+            case .sharedElsewhere?:
+                // Imported as its own layer, as a clash is.
+                let free = freeLayerName(layer.name, taken: taken)
+                taken.insert(free)
+                incoming = KeybindingCatalog.renameLayer(
+                    in: incoming,
+                    from: layer.name,
+                    to: free
+                )
+                created.append(free)
             case .clash?:
                 let free = freeLayerName(layer.name, taken: taken)
                 taken.insert(free)

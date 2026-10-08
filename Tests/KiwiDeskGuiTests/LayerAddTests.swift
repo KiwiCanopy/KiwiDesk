@@ -124,26 +124,18 @@ struct LayerAddTests {
         }
     }
 
-    @Test("a stored page left out of a shared layer rejoins it by name")
-    func storedLeftOutRejoins() throws {
+    /// Owner ruling (#2022): a stored page does not join a shared
+    /// layer by name — that happens on the loaded profile's page.
+    @Test("a stored page left out of a shared layer may not add it")
+    func storedLeftOutRefused() throws {
         let model = try makeModel()
         model.setLayerProfile("Gaming", "Home", false)
         model.updateActiveProfile()
         model.selectEditTarget("Home")
-        #expect(model.addLayer("Gaming"))
-        // The layer pass places it, not only the stored page's diff.
-        let layered = try #require(model.layeredReach)
-        #expect(
-            layered.storedKeyLayers(for: "Home").contains {
-                $0.name == "Gaming"
-            }
-        )
-        model.saveEditedProfile()
-
-        let home = try layers(model, "Home")
-        #expect(
-            home.first { $0.name == "Gaming" }?.bindings.map(\.lua) == [up]
-        )
+        #expect(model.layerAdmission("Gaming") == .sharedElsewhere)
+        #expect(!model.canAddLayer("Gaming"))
+        #expect(!model.addLayer("Gaming"))
+        #expect(!model.config.layers.contains { $0.name == "Gaming" })
     }
 
     @Test("a stored page's new row stays its own in a listed layer")
