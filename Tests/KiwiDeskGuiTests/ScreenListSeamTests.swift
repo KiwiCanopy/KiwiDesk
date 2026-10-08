@@ -1,24 +1,28 @@
 import Foundation
 import Testing
 
-/// **Tiling reads the screens through `ScreenList` alone, and
-/// both test cores memoize it** (#1894): a live `NSScreen` read
-/// on every retile was ~15 % of the Core target's blocked
-/// main-thread samples. A read beside the door escapes the memo
-/// silently, so the door is the one spelling in `Tiling/`.
+/// **Core reads the screens through `ScreenList` alone, and both
+/// test cores memoize it** (#1894): a live `NSScreen` read on
+/// every retile was ~15 % of the Core target's blocked
+/// main-thread samples, and a read beside the door both escapes
+/// the memo and gives a test core a second answer to "which
+/// screen is main". The door is the one spelling in Core.
 @Suite("Screen list seam (#1894)")
 struct ScreenListSeamTests {
     private static let door = "Tiling/ScreenList.swift"
 
-    @Test("Tiling spells NSScreen.screens and .main only in the door")
-    func tilingReadsThroughTheDoor() throws {
+    @Test("Core spells NSScreen.screens and .main only in the door")
+    func coreReadsThroughTheDoor() throws {
         let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDeskCore/Tiling")
+            .appendingPathComponent("Sources/KiwiDeskCore")
         var scanned = 0
         var offenders: [String] = []
         for file in try SourceScan.swiftSources(under: root) {
             scanned += 1
-            let name = "Tiling/" + file.lastPathComponent
+            let name =
+                file.path.components(
+                    separatedBy: "Sources/KiwiDeskCore/"
+                ).last ?? file.path
             guard name != Self.door else { continue }
             let source = try SourceScan.strippedSource(at: file)
             if source.contains("NSScreen.screens")
@@ -27,7 +31,7 @@ struct ScreenListSeamTests {
                 offenders.append(name)
             }
         }
-        #expect(scanned > 20, "scanned \(scanned) files")
+        #expect(scanned > 500, "scanned \(scanned) files")
         #expect(offenders.isEmpty, "\(offenders)")
     }
 
@@ -35,19 +39,22 @@ struct ScreenListSeamTests {
     func twinsMemoizeTheList() throws {
         let repo = SourceScan.repoRoot(from: #filePath)
         for target in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
-            let text = try String(
-                contentsOf: repo.appendingPathComponent(
+            let text = try SourceScan.strippedSource(
+                at: repo.appendingPathComponent(
                     "Tests/\(target)/TestCore.swift"
-                ),
-                encoding: .utf8
+                )
             )
             let memo = try #require(
                 text.range(of: "ScreenList.override =")
                     .map { String(text[$0.upperBound...].prefix(200)) },
                 .init(rawValue: "\(target) misses the memo")
             )
+            // Both halves: a memo written and never read back
+            // re-reads the machine every call.
             #expect(
-                memo.contains("testScreens = live"),
+                memo.contains("if let known = testScreens")
+                    && memo.contains("return known")
+                    && memo.contains("testScreens = live"),
                 .init(rawValue: "\(target)'s override does not memoize")
             )
         }
@@ -56,8 +63,9 @@ struct ScreenListSeamTests {
                 "Sources/KiwiDeskCore/\(Self.door)"
             )
         )
-        #expect(
-            door.components(separatedBy: "if let override").count == 3
-        )
+        // Each read ANSWERS from the override, not just tests it:
+        // `all` the list, `main` and `mainOrFirst` its first.
+        #expect(door.occurrences(of: "return override() }") == 1)
+        #expect(door.occurrences(of: "return override().first }") == 2)
     }
 }

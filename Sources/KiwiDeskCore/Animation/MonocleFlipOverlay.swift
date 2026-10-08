@@ -70,7 +70,7 @@ final class MonocleFlipOverlay {
         panel.contentView = root
         let reduceMotion = self.reduceMotion()
         let scale =
-            NSScreen.screens.first { $0.frame.intersects(cover) }?
+            ScreenList.all.first { $0.frame.intersects(cover) }?
             .backingScaleFactor ?? 2
         self.scale = scale
         let local = { (rect: CGRect) -> CGRect in

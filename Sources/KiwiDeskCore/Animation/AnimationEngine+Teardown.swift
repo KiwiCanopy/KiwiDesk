@@ -37,7 +37,7 @@ extension AnimationEngine {
     /// monitors.
     public func displaysChanged() {
         let connected = Set(
-            NSScreen.screens.compactMap { $0.kiwiDisplayID }
+            ScreenList.all.compactMap { $0.kiwiDisplayID }
         )
         for display in Array(drivers.keys)
         where !connected.contains(display) {
