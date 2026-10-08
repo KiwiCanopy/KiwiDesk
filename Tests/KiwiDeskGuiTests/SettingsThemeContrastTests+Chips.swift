@@ -152,4 +152,59 @@ extension SettingsThemeContrastTests {
 
     static let chips: [Pairing] =
         segments + buttonChips + iconChips + choiceChips
+
+    /// The opacity of the retired `primary` track, which read as a
+    /// well in light — #2047's defect was dark alone — so its
+    /// light separation is the floor the token may not drop under.
+    private static let retiredTrackAlpha = 0.08
+
+    /// A segmented track is a shape, not text: what keeps it
+    /// visible is its composite separating from the ground it
+    /// sits on, in both appearances, by no less than the retired
+    /// track did in light on that same ground.
+    @Test("a segmented track separates from every ground it sits on")
+    func trackSeparatesFromItsGround() throws {
+        let grounds = [
+            ("card", SettingsTheme.card),
+            ("sunken", SettingsTheme.sunken),
+            ("page", SettingsTheme.page),
+        ]
+        for (name, ground) in grounds {
+            // `primary` is itself translucent, so the retired
+            // track drew at the product of the two alphas.
+            let floor = try ThemeContrast.contrast(
+                Color.primary,
+                over: ground,
+                inkAlpha: Self.retiredTrackAlpha
+                    * ThemeContrast.resolvedAlpha(
+                        Color.primary,
+                        dark: false
+                    ),
+                dark: false
+            )
+            for dark in [false, true] {
+                let track = try ThemeContrast.contrast(
+                    SettingsTheme.trackFill,
+                    over: ground,
+                    inkAlpha: try ThemeContrast.resolvedAlpha(
+                        SettingsTheme.trackFill,
+                        dark: dark
+                    ),
+                    dark: dark
+                )
+                #expect(
+                    track >= floor,
+                    Comment(
+                        rawValue: "\(name) "
+                            + (dark ? "dark" : "light")
+                            + String(
+                                format: ": track %.3f under %.3f",
+                                track,
+                                floor
+                            )
+                    )
+                )
+            }
+        }
+    }
 }
