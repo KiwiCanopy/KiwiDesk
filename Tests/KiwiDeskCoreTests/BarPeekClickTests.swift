@@ -133,6 +133,9 @@ struct BarPeekClickTests {
             core.shelves.peek.panel.drawn?.groups.flatMap(\.rows)
                 .filter(\.focused).map(\.window)
         }
+        // The shelf lookup answers across the switch, so a peek the
+        // click showed would stand: the guard is what keeps it shut.
+        core.shelves.peek.shelf = { _ in KiwiShelf() }
         try click(try webTarget(core))
         #expect(core.activeSpace?.id == two)
         #expect(core.state.workspaces.lastFocused == WindowID(4))

@@ -132,6 +132,24 @@ struct BarGlyphCycleTests {
         #expect(core.state.workspaces.lastFocused == WindowID(2), "wraps")
     }
 
+    /// A flip owes Web 5 while `lastFocused` still names Mail 2:
+    /// the glyph's tint follows the list's check onto Web, so a
+    /// glyph and its peek never name two windows.
+    @Test("The glyph tint reads the owed Monocle focus too")
+    func tintReadsTheOwedFocus() throws {
+        let core = seededCore()
+        core.pickFromSpaceBar(pick())
+        core.pendingMonocleFocus = (
+            from: WindowID(2), to: WindowID(5), warp: false
+        )
+        let item = try #require(
+            core.spaceBarItems(display: display, style: SpaceBarLook())
+                .first { $0.space == two }
+        )
+        let tinted = item.apps.filter(\.focused).map(\.name)
+        #expect(tinted == ["Web"])
+    }
+
     @Test("The focus counts only on the active Space")
     func focusGatedOnTheActiveSpace() {
         let core = seededCore()
