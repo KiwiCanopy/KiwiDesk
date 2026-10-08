@@ -135,6 +135,7 @@ struct DisplayCard: View {
             )
             .font(.caption)
             .fontWeight(.medium)
+            .foregroundStyle(SettingsTheme.ink)
             .lineLimit(1)
             .frame(width: MonitorCardChips.markerWidth)
             .padding(.vertical, 3)

@@ -113,6 +113,7 @@ struct FollowsMainTray: View {
             Text(L("monitor_card.more_spaces", "+%1$d", count))
                 .font(.caption)
                 .fontWeight(.medium)
+                .foregroundStyle(SettingsTheme.ink)
                 .lineLimit(1)
                 .frame(width: MonitorCardChips.markerWidth)
                 .padding(.vertical, 3)

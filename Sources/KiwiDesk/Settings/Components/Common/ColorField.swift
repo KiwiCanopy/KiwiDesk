@@ -128,10 +128,10 @@ struct ColorSwatch: View {
         .onDisappear { ColorPanelController.shared.resign(token) }
     }
 
-    /// The color dot as a discrete pressable chip: its own
-    /// neutral background + hairline border carry the "button"
-    /// signifier, so the affordance never merges into a dark
-    /// fill the way a bare filled shape did. On an `automatic`
+    /// The color dot as a discrete pressable chip: the button
+    /// chip's fill and edge carry the "button" signifier, so the
+    /// affordance never merges into a dark fill the way a bare
+    /// filled shape did. On an `automatic`
     /// well with no color set it shows the adaptive split state
     /// instead of a color, and a right-click clears back to it.
     private var swatchButton: some View {
@@ -145,21 +145,9 @@ struct ColorSwatch: View {
                     )
                 )
                 .frame(width: 22, height: 22)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .strokeBorder(
-                            Color.primary.opacity(0.15),
-                            lineWidth: 1
-                        )
-                )
         }
         .buttonStyle(.plain)
-        .hoverHighlight(
-            restOpacity: 0.06,
-            hoverOpacity: 0.12,
-            cornerRadius: 6,
-            padding: 0
-        )
+        .hoverHighlight(cornerRadius: 6, padding: 0)
         .automaticMenu(automatic: automatic, hex: $hex, draft: $draft)
         .help(swatchHelp)
         .accessibilityLabel(

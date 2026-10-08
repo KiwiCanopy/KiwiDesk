@@ -37,5 +37,29 @@ extension SettingsThemeContrastTests {
             ]
         }
 
-    static let chips: [Pairing] = segments
+    /// A text button chip's label at rest and under the pointer —
+    /// a monitor card's `+n` on `sunken`, the tray's and the
+    /// collapsed screen-setups chip's on `card`.
+    private static let buttonChips: [Pairing] =
+        [
+            ("card", SettingsTheme.card),
+            ("sunken", SettingsTheme.sunken),
+        ].flatMap { name, ground in
+            [
+                Pairing(
+                    "ink on a resting button chip on \(name)",
+                    SettingsTheme.ink,
+                    on: ground,
+                    layers: [SettingsTheme.chipRest]
+                ),
+                Pairing(
+                    "ink on a hovered button chip on \(name)",
+                    SettingsTheme.ink,
+                    on: ground,
+                    layers: [SettingsTheme.chipHover]
+                ),
+            ]
+        }
+
+    static let chips: [Pairing] = segments + buttonChips
 }
