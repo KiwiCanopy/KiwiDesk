@@ -7,7 +7,7 @@ extension SettingsModel {
     func refreshAutoStart() {
         guard !autoStartBusy else { return }
         Task {
-            let status = await AutoStartManager.current()
+            let status = await readAutoStart()
             autoStart = status
             autoStartLoaded = true
         }

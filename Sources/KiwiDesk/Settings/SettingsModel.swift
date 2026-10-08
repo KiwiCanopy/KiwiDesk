@@ -217,6 +217,12 @@ final class SettingsModel: ObservableObject {
     var writeLoginItem: (Bool) async -> AutoStartStatus =
         AutoStartManager.setLoginItem
 
+    /// Injectable auto-start read (#2092): the live one asks
+    /// `SMAppService` and spawns `launchctl`, so `makeTestModel`
+    /// injects a fixed answer.
+    var readAutoStart: () async -> AutoStartStatus =
+        AutoStartManager.current
+
     /// The checklist's last read, one snapshot so the Home card
     /// and the section count the same rows
     /// (`SettingsModel+MacChecklist`).

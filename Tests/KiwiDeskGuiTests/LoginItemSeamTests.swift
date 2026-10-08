@@ -4,17 +4,15 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// The login-item write reaches `SMAppService` only through the
-/// `SettingsModel.writeLoginItem` seam (#2092). `mainApp`
-/// registers the CALLING process, so a setter that acted from a
-/// test registered Xcode's `swiftpm-testing-helper` as a login
-/// item on every GUI run — while `SMAppService` had no hit in
-/// `Tests/`, the #565 shape. A sibling of `MachineTouchTests`,
-/// which sits at the §2.1 ceiling.
+/// Settings reaches `SMAppService` only through the
+/// `SettingsModel.writeLoginItem` / `readAutoStart` seams, which
+/// `makeTestModel` pins (#2092, the #565 shape): `mainApp` is the
+/// CALLING process, so a live write from a test registers the
+/// test helper as a login item.
 ///
-/// Main-actor spend: one model, one setter drive awaited on its
-/// own write; the scans run off the main actor.
-@Suite("Login item write stays behind its seam")
+/// Main-actor spend: two models, each awaited on its own seam;
+/// the scans run off the main actor.
+@Suite("Login item stays behind its seam")
 struct LoginItemSeamTests {
     private static let root = SourceScan.repoRoot(
         from: #filePath
@@ -24,21 +22,43 @@ struct LoginItemSeamTests {
         root.appendingPathComponent("Sources/KiwiDesk"),
     ]
 
-    /// Generous: the poll exits the moment the write lands, so
+    /// Generous: the poll exits the moment the seam answers, so
     /// only a genuine hang waits this long (#344).
-    private static let writeHangGuard: Duration = .seconds(30)
+    private static let hangGuard: Duration = .seconds(30)
 
-    /// Where each live write may be spelled, and why — the one
-    /// copy of who may. The model's seam default is the only
-    /// route from Settings; Core's own call is the seam's live
-    /// body; the onboarding wiring feeds `OnboardingModel`'s
-    /// closure, whose default is a no-op.
-    private static let allowed: [String: String] = [
-        "AutoStartManager" + ".setLoginItem":
-            "SettingsModel.swift",
-        "LoginItemManager" + ".setEnabled":
-            "AutoStartManager.swift AppDelegate+Onboarding.swift",
+    /// Where each live touch may be spelled, and how often — the
+    /// one copy of who may. `SettingsModel` holds the seams'
+    /// defaults; Core's `LoginItemManager` is the one OS caller;
+    /// the onboarding wiring feeds `OnboardingModel`'s closure,
+    /// whose own default is a no-op.
+    private static let allowed: [String: [String: Int]] = [
+        "SMAppService" + ".mainApp": ["LoginItemManager.swift": 3],
+        "AutoStartManager" + ".setLoginItem": [
+            "SettingsModel.swift": 1
+        ],
+        "AutoStartManager" + ".current": ["SettingsModel.swift": 1],
+        "LoginItemManager" + ".setEnabled": [
+            "AutoStartManager.swift": 1,
+            "AppDelegate+Onboarding.swift": 1,
+        ],
     ]
+
+    private static let status = AutoStartStatus(
+        level: .off,
+        unavailable: nil,
+        requiresApproval: false
+    )
+
+    @MainActor
+    private static func settle(
+        _ busy: () -> Bool
+    ) async throws {
+        let clock = ContinuousClock()
+        let deadline = clock.now + hangGuard
+        while busy(), clock.now < deadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+    }
 
     @MainActor
     @Test("the setter writes through the injected seam")
@@ -53,43 +73,50 @@ struct LoginItemSeamTests {
                 requiresApproval: false
             )
         }
-        model.autoStart = AutoStartStatus(
-            level: .off,
-            unavailable: nil,
-            requiresApproval: false
-        )
+        model.autoStart = Self.status
         model.autoStartLoaded = true
         model.setLoginItem(true, reduceMotion: true)
         #expect(model.autoStartBusy)
-        let clock = ContinuousClock()
-        let deadline = clock.now + Self.writeHangGuard
-        while model.autoStartBusy, clock.now < deadline {
-            try await Task.sleep(for: .milliseconds(10))
-        }
+        try await Self.settle { model.autoStartBusy }
         #expect(written == [true])
         #expect(model.autoStart.level == .atLogin)
     }
 
-    @Test("every live write is spelled only where allowed")
-    func liveWritesStayHome() throws {
+    @MainActor
+    @Test("the refresh reads through the injected seam")
+    func refreshTakesTheSeam() async throws {
+        let model = makeTestModel()
+        var reads = 0
+        model.readAutoStart = {
+            reads += 1
+            return AutoStartStatus(
+                level: .atLoginWithAutoRestart,
+                unavailable: nil,
+                requiresApproval: false
+            )
+        }
+        model.refreshAutoStart()
+        try await Self.settle { !model.autoStartLoaded }
+        #expect(reads == 1)
+        #expect(model.autoStart.level == .atLoginWithAutoRestart)
+    }
+
+    @Test("every live touch is spelled only where allowed")
+    func liveTouchesStayHome() throws {
+        let testTrees = SourceScan.targetTrees(
+            under: Self.root.appendingPathComponent("Tests")
+        )
         for (needle, homes) in Self.allowed {
-            let files = homes.split(separator: " ").map(String.init)
             let sites = try Self.productionTrees.flatMap {
                 try SourceScan.identifierSites(of: needle, under: $0)
             }
-            let found = Set(sites.map(\.file.lastPathComponent))
-            #expect(
-                found == Set(files),
-                "\(needle) spelled in \(found.sorted())"
-            )
-            #expect(
-                sites.count == files.count,
-                "\(needle): a second spelling inside a home"
-            )
-            // A pin spelled as the live write is no pin.
-            let inTests = try SourceScan.targetTrees(
-                under: Self.root.appendingPathComponent("Tests")
-            ).flatMap {
+            var found: [String: Int] = [:]
+            for site in sites {
+                found[site.file.lastPathComponent, default: 0] += 1
+            }
+            #expect(found == homes, "\(needle) spelled at \(found)")
+            // A pin spelled as the live touch is no pin.
+            let inTests = try testTrees.flatMap {
                 try SourceScan.identifierSites(of: needle, under: $0)
             }
             #expect(
@@ -99,12 +126,17 @@ struct LoginItemSeamTests {
         }
     }
 
-    @Test("makeTestModel pins the write inert")
-    func factoryPinsTheWrite() throws {
+    @Test("makeTestModel pins both seams")
+    func factoryPinsTheSeams() throws {
         let file = Self.root.appendingPathComponent(
             "Tests/KiwiDeskGuiTests/TestModel.swift"
         )
         let source = try SourceScan.strippedSource(at: file)
-        #expect(source.occurrences(of: "model.writeLoginItem =") == 1)
+        for pin in ["writeLoginItem", "readAutoStart"] {
+            #expect(
+                source.occurrences(of: "model.\(pin) =") == 1,
+                "makeTestModel pins \(pin) once"
+            )
+        }
     }
 }
