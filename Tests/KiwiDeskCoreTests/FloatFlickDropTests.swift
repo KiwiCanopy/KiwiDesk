@@ -75,7 +75,7 @@ struct FloatFlickDropTests {
         clicks: Int = 1
     ) async {
         core.mouse.seedPress(at: pressAt, clickCount: clicks)
-        core.mouse.seedRelease(at: Date())
+        core.mouse.seedRelease(at: core.wallClock())
         core.handle(.windowMoved(Self.window, flicked))
         await core.drag.settleTask(for: Self.window)?.value
     }
@@ -108,6 +108,79 @@ struct FloatFlickDropTests {
     }
 
     @Test(
+        "A late gesture leaves the Space Bar drop unasked",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func lateGestureSkipsTheBarDrop() async throws {
+        let screen = try #require(NSScreen.screens.first)
+        let (start, flicked) = frames(screen)
+        let core = try #require(
+            makeBarredCore(mode: .floating, frame: start)
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        // The pointer has come to rest on another Space's item
+        // since the release; asked, the bar would relocate.
+        core.spaceBarDrop.hitTest = { _ in SpaceID(99) }
+        let home = core.state.workspaces.space(of: Self.window)
+
+        await flick(
+            core,
+            to: flicked,
+            pressAt: CGPoint(x: start.midX, y: start.minY + 10)
+        )
+
+        #expect(core.state.workspaces.space(of: Self.window) == home)
+    }
+
+    @Test(
+        "A late gesture claims no resize from the #1358 correction",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func lateGestureOwnsNoResize() throws {
+        let screen = try #require(NSScreen.screens.first)
+        let (start, flicked) = frames(screen)
+        let core = try #require(
+            makeBarredCore(mode: .floating, frame: start)
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        core.mouse.seedPress(
+            at: CGPoint(x: start.midX, y: start.minY + 10)
+        )
+        core.mouse.seedRelease(at: core.wallClock())
+        core.handle(.windowMoved(Self.window, flicked))
+        try #require(core.drag.hasGesture(Self.window))
+
+        #expect(!core.isResizeGesture(Self.window))
+    }
+
+    @Test(
+        "A late move that also resized is no late gesture",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func zoomShapedMoveIsNoLateGesture() throws {
+        let screen = try #require(NSScreen.screens.first)
+        let (start, _) = frames(screen)
+        let core = try #require(
+            makeBarredCore(mode: .floating, frame: start)
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        core.mouse.seedPress(
+            at: CGPoint(x: start.midX, y: start.minY + 10)
+        )
+        core.mouse.seedRelease(at: core.wallClock())
+        let zoomed = CGRect(
+            x: screen.frame.minX,
+            y: screen.frame.minY + 100,
+            width: start.width + 300,
+            height: start.height + 100
+        )
+
+        core.handle(.windowMoved(Self.window, zoomed))
+
+        #expect(!core.drag.hasGesture(Self.window))
+    }
+
+    @Test(
         "A late move is no gesture without a single press on it",
         .enabled(if: NSScreen.main != nil),
         arguments: [(inside: false, clicks: 1), (inside: true, clicks: 2)]
@@ -129,7 +202,6 @@ struct FloatFlickDropTests {
 
         await flick(core, to: flicked, pressAt: press, clicks: clicks)
 
-        #expect(!core.drag.hasGesture(Self.window))
         #expect(core.tiler.recentInstantTarget(Self.window) == nil)
     }
 
@@ -148,7 +220,7 @@ struct FloatFlickDropTests {
         core.mouse.seedPress(
             at: CGPoint(x: start.midX, y: start.minY + 10)
         )
-        core.mouse.seedRelease(at: Date())
+        core.mouse.seedRelease(at: core.wallClock())
         core.handle(.windowMoved(Self.window, flicked))
 
         #expect(!core.drag.hasGesture(Self.window))

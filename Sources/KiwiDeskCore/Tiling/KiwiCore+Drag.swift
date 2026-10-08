@@ -64,7 +64,8 @@ extension KiwiCore {
     /// gestures share (#1358, #1798).
     var recentSinglePress: MouseTracker.Press? {
         guard let press = mouse.press, let up = press.upAt,
-            Date().timeIntervalSince(up) < 1, press.clickCount < 2
+            wallClock().timeIntervalSince(up) < 1,
+            press.clickCount < 2
         else { return nil }
         return press
     }
@@ -73,12 +74,17 @@ extension KiwiCore {
     /// flick's only event (#1798): a single press on the window
     /// released moments ago, and the window a float, so the late
     /// gesture runs the drop clamp and never a tile's swap. AX
-    /// throttles moves, so a flick can report none while held.
-    func isLateFloatMove(_ id: WindowID, previous: CGRect?) -> Bool {
+    /// throttles moves, so a flick can report none while held. A
+    /// move that also resized is a zoom, #1358's to correct.
+    func isLateFlick(
+        _ id: WindowID,
+        frame: CGRect,
+        previous: CGRect?
+    ) -> Bool {
         guard !mouse.leftButtonHeld, !drag.hasGesture(id),
-            let previous, let press = recentSinglePress,
-            previous.contains(press.location),
-            !tiler.didRecentlySetFrame(id)
+            let previous, frame.size == previous.size,
+            let press = recentSinglePress,
+            previous.contains(press.location)
         else { return false }
         return dropLandsUnmanaged(id)
     }
@@ -115,8 +121,13 @@ extension KiwiCore {
         // at spring time — so it falls through to the ordinary in-
         // space drop, which places it at the cursor's slot. Own-
         // space / off-bar also fall through unchanged.
-        switch spaceBarDrop.ended(id, cursor: drag.cursorLocation())
-        {
+        // A late-opened gesture armed nothing, and the cursor has
+        // moved on since its release (#1798).
+        let barDrop: SpaceBarDropCoordinator.Outcome =
+            drag.isLateGesture(id)
+            ? .none
+            : spaceBarDrop.ended(id, cursor: drag.cursorLocation())
+        switch barDrop {
         case .relocate(let target):
             moveWindow(id, to: target, follow: false)
             return

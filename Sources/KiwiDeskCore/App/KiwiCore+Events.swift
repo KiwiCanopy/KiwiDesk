@@ -185,10 +185,12 @@ extension KiwiCore {
                 // Reality reported — state beats stamp (#881).
                 tiler.clearInstantTarget(id)
             }
+            let late = isLateFlick(id, frame: frame, previous: preEventFrame)
             drag.windowMoved(
                 id,
                 frame: frame,
-                validated: isLateFloatMove(id, previous: preEventFrame),
+                validated: late,
+                late: late,
                 previous: preEventFrame
             )
         case .windowResized(let id, let frame):
