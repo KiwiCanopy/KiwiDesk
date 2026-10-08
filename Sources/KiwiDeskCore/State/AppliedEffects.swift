@@ -60,3 +60,20 @@ public struct AppliedEffects: Sendable {
         let tiledSlot: Int?
     }
 }
+
+extension AppliedEffects.RemovedWindow {
+    /// This removal as if it landed while it still held its
+    /// Space's focus — the delayed-close return's re-filing
+    /// (#2002, `KiwiCore+DelayedCloseReturn`).
+    var losingFocus: Self {
+        Self(
+            app: app,
+            bundleID: bundleID,
+            pid: pid,
+            isTransientOverlay: isTransientOverlay,
+            space: space,
+            focusLost: true,
+            tiledSlot: tiledSlot
+        )
+    }
+}

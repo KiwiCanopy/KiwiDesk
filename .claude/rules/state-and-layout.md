@@ -780,6 +780,18 @@ editing here:
   nothing; where the report was dropped instead, it lands as it
   did before, removal and raise alike. A change keying the raise
   on anything but `focusLost` owes that order a test.
+  **One re-filing reaches `focusLost`, and through the tail
+  alone (#2002):** a close the #1157 distrust refused, confirmed
+  after macOS keyed the same app's window on ANOTHER Space and
+  our own follow switched there, is re-filed by
+  `healDelayedClose` as the focus loss it was when the episode
+  opened, and the ONE close-return tail raises its Space's
+  fallback — never a second raise path. It stands down for a
+  press or a commanded focus after the successor's report, any
+  third honored report, a switch that was not that follow, and
+  past `delayedCloseBound`; an undelayed close and a same-Space
+  successor never reach it (`DelayedCloseReturnTests`, whose
+  undistrusted case is the #1930 order's test).
   An arm in `focusWindow` guards against its own re-arm (the
   restore's closing re-assert calls back in) **semantically** —
   refuse because the focus is unchanged (`previousFocused !=

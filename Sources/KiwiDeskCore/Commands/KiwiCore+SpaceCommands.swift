@@ -66,6 +66,7 @@ extension KiwiCore {
     /// display already shows included, where it is harmless.
     func landFocusFollow(_ id: WindowID, on space: SpaceID) {
         applyFocusedSpaceSwitch(to: space)
+        noteDelayedCloseFollowed(id)  // #2002
         // The focus echo that triggered this follow found
         // the window on an inactive space, where the warp
         // guard skips; now that the space is forward the

@@ -8,10 +8,18 @@ import Foundation
 extension KiwiCore {
     func runCloseReturnTail(
         event: KiwiEvent,
-        effects: AppliedEffects,
+        effects foldEffects: AppliedEffects,
         goneReason: WindowGoneReason?,
         willRetile: Bool
     ) {
+        // A close the distrust delayed past a same-app focus on
+        // another Space is re-filed as the focus loss it was
+        // (#2002); every other removal passes through unchanged.
+        let effects = healDelayedClose(
+            event,
+            reason: goneReason,
+            effects: foldEffects
+        )
         // Closing or minimizing the focused window hands focus
         // to the space's fallback (state picked one; this raise
         // makes it real). A fallback on a Desktop nobody shows is
