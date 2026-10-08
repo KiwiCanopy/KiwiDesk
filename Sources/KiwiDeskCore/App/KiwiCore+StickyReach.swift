@@ -149,7 +149,10 @@ extension KiwiCore {
             // In flight only for a move that was DISPATCHED: a
             // refused one moved nothing, so nothing is expected
             // to vanish and ⌘W must not wait on it.
-            if performed { stickyReachInFlightAt[id] = Date() }
+            if performed {
+                stickyReachInFlightAt[id] = Date()
+                stickyMarks.oweOrder(id)
+            }
             onLog(
                 "reach: carry w\(id.raw) -> space \(current.id) "
                     + "performed=\(performed)"
