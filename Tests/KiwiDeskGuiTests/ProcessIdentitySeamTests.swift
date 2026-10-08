@@ -24,14 +24,21 @@ struct ProcessIdentitySeamTests {
     /// of its directories.
     private func sites(
         of needle: String,
-        under directory: String? = nil
+        under directory: String? = nil,
+        regex: Bool = false
     ) throws -> Set<String> {
         var found: Set<String> = []
         var scanned = 0
         let root = directory.map { core.appendingPathComponent($0) } ?? core
         for file in try SourceScan.swiftSources(under: root) {
             scanned += 1
-            if try SourceScan.strippedSource(at: file).contains(needle) {
+            let source = try SourceScan.strippedSource(at: file)
+            let hit =
+                regex
+                ? source.range(of: needle, options: .regularExpression)
+                    != nil
+                : source.contains(needle)
+            if hit {
                 found.insert(file.lastPathComponent)
             }
         }
@@ -169,6 +176,7 @@ struct ProcessIdentitySeamTests {
                 == [
                     "EventLoop+ActivationFocus.swift",
                     "EventLoop+BootScan.swift",
+                    "EventLoop+FloatVerdict.swift",
                     "EventLoop+Notifications.swift",
                     "EventLoop+Reconcile.swift",
                     "EventLoop+WindowPolicy.swift",
@@ -220,8 +228,9 @@ struct ProcessIdentitySeamTests {
         // spellings, `activationPolicy(` and `?? .prohibited`.
         #expect(
             try sites(
-                of: "NSRunningApplication(processIdentifier:",
-                under: "Events"
+                of: #"NSRunningApplication\(\s*processIdentifier:"#,
+                under: "Events",
+                regex: true
             ) == ["EventLoop+ProcessIdentity.swift", "EventLoop.swift"]
         )
     }

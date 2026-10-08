@@ -97,36 +97,28 @@ struct TileRefusalSeamTests {
         #expect(
             Self.census("FloatDetection.autoFloatReason(", in: sources)
                 == [
-                    "Events/EventLoop+WindowPolicy.swift": 1,
-                    // Detection's one pure body over values the
-                    // off-main list read found (#1933); the element
-                    // variant delegates to it, and the verdict is
-                    // composed in `autoFloatVerdict` as `.read`.
+                    "Events/EventLoop+FloatVerdict.swift": 1,
+                    // Detection's one body over the facts the
+                    // off-main list read found (#1933); the verdict
+                    // is composed in `autoFloatVerdict` as `.read`.
                     "Events/EventLoop+ListedWindows.swift": 1,
                 ]
         )
+        // The pure composition derives the force-float reason
+        // and asks detection (`WindowFactsSeamTests` holds the
+        // live delegation).
         let composition = try SourceScan.functionBody(
-            of: "autoFloatVerdict",
-            in: "EventLoop+WindowPolicy.swift",
+            of: "composeVerdict",
+            in: "EventLoop+FloatVerdict.swift",
             under: "Events"
         )
         #expect(composition.contains("FloatDetection.autoFloatReason("))
-        #expect(composition.contains("forceFloatReason("))
+        // Bound and used: a discarded reason forces nothing.
+        #expect(composition.contains("if let forced = forceFloatReason("))
+        #expect(composition.contains("return .floats(forced)"))
         // Both producers take the one composition.
         let tracking = sources["Events/EventLoop+Tracking.swift"] ?? ""
         // `track`, `recheckFloat` and its off-main twin (#1933).
         #expect(tracking.occurrences(of: "autoFloatVerdict(") == 3)
-        // The element variant delegates to the one pure body the
-        // off-main read calls, rather than composing beside it.
-        let element = try SourceScan.functionBody(
-            of: "autoFloatReason",
-            in: "FloatDetection.swift",
-            under: "AX"
-        )
-        // Handing the pure body the read values, not only the
-        // `structural:` tail an inline copy would still call.
-        #expect(element.contains("autoFloatReason("))
-        #expect(element.contains("subrole: AXHelper.subrole(of: element)"))
-        #expect(!element.contains("shouldFloat("))
     }
 }

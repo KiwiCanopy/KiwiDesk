@@ -41,13 +41,14 @@ extension EventLoop {
             )
         else { return }
         guard elements[pid]?[window.id] == nil else { return }
-        let subrole = AXHelper.subrole(of: element)
         // One WindowServer round trip feeds every
         // classification below (layer, alpha, bounds).
         let server = FloatDetection.serverSnapshot(
             of: window.id
         )
         let layer = server.layer
+        let facts = WindowFacts.read(element, role: role, layer: layer)
+        let subrole = facts.subrole
         let displays =
             layer == nil || layer == 0
             ? []
@@ -103,7 +104,7 @@ extension EventLoop {
             shadowVerdict(element, id: window.id, pid: pid) == .window
         else { return }
         let verdict = autoFloatVerdict(
-            .element(element, layer: layer),
+            .facts(facts),
             id: window.id,
             pid: pid,
             bundleID: app.bundleID
