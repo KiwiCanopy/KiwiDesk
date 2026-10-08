@@ -108,7 +108,7 @@ struct FullscreenDestroyArmTests {
         // the vanish and kept the registration.
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)] == 1)
+        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
     }
 
     @Test("a window the compositor hosts on a fullscreen Space defers too")
@@ -129,7 +129,7 @@ struct FullscreenDestroyArmTests {
         )
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)] == 1)
+        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
     }
 
     @Test("a window no arm expects destroys eagerly")

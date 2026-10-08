@@ -35,9 +35,10 @@ public final class EventLoop {
     var onAppActivated: @MainActor (AppActivation) -> Void = { _ in }
     /// The focus command for an unhidden window (#2027).
     var onUnhideFocus: @MainActor (WindowID) -> Void = { _ in }
-    /// Fired when a pid joins an idle `pendingRemovalRecheck`
-    /// (#1157), drained by the core's `scheduleRemovalRecheck`.
+    /// #1157's notices: a pid joined an idle `pendingRemovalRecheck`
+    /// (`scheduleRemovalRecheck`), and episodes ended re-listed.
     var onRemovalDistrust: @MainActor () -> Void = {}
+    var onRemovalEpisodesEnded: @MainActor (Set<WindowID>) -> Void = { _ in }
 
     /// User float rules from the Lua config (`float_rules`).
     /// Assigning does NOT resync `detectedFloating`: rules
@@ -120,10 +121,9 @@ public final class EventLoop {
     /// the "was a carrier" fact for a window that vanishes after a
     /// switch even though its element is gone (#308).
     var tabCarriers: Set<WindowID> = []
-    /// Sweep removals currently refused — absent from the AX
-    /// list, still on-census — as follow-ups spent per
-    /// continuous-absence episode (#1157).
-    var removalDistrusted: [WindowID: Int] = [:]
+    /// The open #1157 episodes (`RemovalEpisode`), on this clock.
+    var removalDistrusted: [WindowID: RemovalEpisode] = [:]
+    var wallClock: () -> Date = Date.init
     /// The windows sticky reach has carried and still holds IN
     /// FLIGHT (#1145) — the gate's carried arm reads it
     /// (`EventLoop+RemovalDistrust`). Wired in `KiwiCore+Bootstrap`
@@ -178,8 +178,7 @@ public final class EventLoop {
     /// Pids owed a one-shot re-track for a transient drop
     /// (#675); drained by the scheduled task.
     var pendingRetrack: Set<pid_t> = []
-    /// Pids owed a distrust follow-up reconcile (#1157), on
-    /// its own queue and slot; drained by the scheduled task.
+    /// Pids owed a #1157 follow-up, on its own queue and slot.
     var pendingRemovalRecheck: Set<pid_t> = []
     var workspaceTokens: [NSObjectProtocol] = []
     let displayWatch = DisplayWatch()

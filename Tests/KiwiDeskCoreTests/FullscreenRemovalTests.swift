@@ -152,7 +152,7 @@ struct FullscreenRemovalTests {
         // State AND registration kept: the dead element stays
         // registered until the reconcile re-elements the id.
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)] == 1)
+        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
         #expect(loop.pendingRemovalRecheck.contains(pid))
         #expect(box.recheckFires == 1)
         #expect(fullscreenLines(box) == 1)
@@ -173,7 +173,7 @@ struct FullscreenRemovalTests {
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[pid]?[WindowID(12)] != nil)
-        #expect(loop.removalDistrusted[WindowID(12)] == 1)
+        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
         #expect(fullscreenLines(box) == 1)
     }
 
@@ -207,7 +207,7 @@ struct FullscreenRemovalTests {
         loop.lastDesktopChange = Date()
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.isEmpty)
-        #expect(loop.removalDistrusted[WindowID(12)] == 1)
+        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
     }
 
     @Test("the census-blind budget is the episode's recheck budget")
@@ -220,7 +220,7 @@ struct FullscreenRemovalTests {
         for arm in 1...EventLoop.removalRecheckCap {
             loop.reconcile(pid: pid, app: ref)
             #expect(box.destroyed.isEmpty)
-            #expect(loop.removalDistrusted[WindowID(12)] == arm)
+            #expect(loop.removalDistrusted[WindowID(12)]?.arms == arm)
             #expect(box.recheckFires == arm)
             _ = loop.drainPendingRemovalRecheck()
         }
@@ -254,7 +254,7 @@ struct FullscreenRemovalTests {
         let (loop, box) = makeLoop()
         loop.detectedFullscreen[WindowID(12)] = true
         loop.elements[pid] = [WindowID(12): dummyElement]
-        loop.removalDistrusted[WindowID(12)] = 1
+        loop.removalDistrusted[WindowID(12)] = RemovalEpisode(arms: 1)
         box.listed = [WindowID(12)]
         box.fullscreenRead = false
         loop.reconcile(pid: pid, app: ref)
@@ -276,7 +276,7 @@ struct FullscreenRemovalTests {
         loop.detectedFullscreen[WindowID(12)] = false
         loop.fullscreenSpaceHosts = { $0 == WindowID(12) }
         loop.elements[pid] = [WindowID(12): dummyElement]
-        loop.removalDistrusted[WindowID(12)] = 1
+        loop.removalDistrusted[WindowID(12)] = RemovalEpisode(arms: 1)
         box.listed = [WindowID(12)]
         box.fullscreenRead = true
         loop.reconcile(pid: pid, app: ref)
