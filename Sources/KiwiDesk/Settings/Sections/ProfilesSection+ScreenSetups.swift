@@ -102,6 +102,7 @@ extension ProfilesSection {
                     .imageScale(.small)
             }
             .font(.caption2)
+            .foregroundStyle(SettingsTheme.ink)
         }
         .buttonStyle(.borderless)
         .hoverHighlight(cornerRadius: 5, padding: 3)

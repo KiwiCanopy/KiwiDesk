@@ -46,6 +46,7 @@ struct SettingsThemeWiringTests {
         "chipHover": "ShortcutsJumpBar.swift",
         "chipPressed": "ShortcutsJumpBar.swift",
         "chipEdge": "ShortcutsJumpBar.swift",
+        "trackFill": "SegmentedPicker.swift",
         "ink": "SettingsHeaderBar.swift",
         "ink2": "SettingsHeaderBar+Status.swift",
         "ink3": "SettingsSearchField.swift",
