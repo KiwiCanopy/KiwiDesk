@@ -25,9 +25,13 @@ struct ScreenListSeamTests {
                 ).last ?? file.path
             guard name != Self.door else { continue }
             let source = try SourceScan.strippedSource(at: file)
-            if source.contains("NSScreen.screens")
-                || source.contains("NSScreen.main")
-            {
+            // Whitespace-tolerant: swift-format may break the line
+            // before the member. An implicit `.main` on an
+            // `NSScreen?` is not seen (stated limit).
+            if source.range(
+                of: #"NSScreen\s*\.\s*(screens|main)\b"#,
+                options: .regularExpression
+            ) != nil {
                 offenders.append(name)
             }
         }
@@ -51,8 +55,12 @@ struct ScreenListSeamTests {
             )
             // Both halves: a memo written and never read back
             // re-reads the machine every call.
+            // In order: the memo answers before the machine is read.
+            let check = memo.range(of: "if let known = testScreens")
+            let live = memo.range(of: "NSScreen.screens")
             #expect(
-                memo.contains("if let known = testScreens")
+                check != nil && live != nil
+                    && check!.lowerBound < live!.lowerBound
                     && memo.contains("return known")
                     && memo.contains("testScreens = live"),
                 .init(rawValue: "\(target)'s override does not memoize")
