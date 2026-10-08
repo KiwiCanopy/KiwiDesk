@@ -235,21 +235,23 @@ struct SpaceBarGlyphClickTests {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         let mail = try #require(
-            core.barPeekContent(.glyph([WindowID(2), WindowID(3)]))
+            core.barPeekContent(.glyph([WindowID(2), WindowID(3)]), on: nil)
         )
         #expect(mail.groups.map(\.app) == ["Mail"])
         #expect(mail.groups.map(\.titles) == [["Inbox", "Draft"]])
         #expect(mail.groups.map(\.windowCount) == [2])
-        let web = try #require(core.barPeekContent(.glyph([WindowID(4)])))
+        let web = try #require(
+            core.barPeekContent(.glyph([WindowID(4)]), on: nil)
+        )
         #expect(web.groups.map(\.titles) == [["Doc"]])
         core.state.windows.updateTitle(WindowID(3), title: "")
         let untitled = try #require(
-            core.barPeekContent(.glyph([WindowID(2), WindowID(3)]))
+            core.barPeekContent(.glyph([WindowID(2), WindowID(3)]), on: nil)
         )
         #expect(
             untitled.groups.map(\.titles) == [["Inbox", "Untitled Window"]]
         )
-        #expect(core.barPeekContent(.glyph([WindowID(99)])) == nil)
+        #expect(core.barPeekContent(.glyph([WindowID(99)]), on: nil) == nil)
     }
 
     @Test("The bootstrap wires the targets to the click routing")

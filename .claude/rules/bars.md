@@ -662,21 +662,24 @@ Obligations:
   (`BarPeekActionTests` ▸ `secondClickCloses`,
   `clickClosesAHoverPeek`, `BarPeekClickTests`,
   `BarGlyphCycleTests`, `BarPeekSeamTests` ▸ `oneBarRowPick`).
-- **"Which window holds the focus" is the one
-  `KiwiCore.barFocus(on:)` for a bar list** — a playing Monocle
-  flip's owed target, else `lastFocused`, on the active Space
-  alone — read by the glyph click's cycle, the peek's check and
-  the window menu's `.on` state alike (#2063,
-  `BarGlyphCycleTests` ▸ `owedMonocleFocusCounts`). A list's
-  check sits in `BarPeekBody.Metrics.checkColumn` PAST the
-  titles' wrap width on every row, checked or not, so no title
-  re-wraps, beside a wrapped title's first line in the row's
-  ink, and the checked row's hover target covers it
-  (`BarPeekCheckTests`); a label's peek reserves no column. The panel takes
+  The cycle steps over a window the focus door refuses (#1345),
+  or the walk stalls on it (`BarGlyphCycleTests` ▸
+  `refusedWindowIsSteppedOver`); a click that switches Spaces
+  shows no peek, its chip having moved. The panel takes
   the mouse but is non-activating and never key, and hidden from
   accessibility (`BarPeekTests` ▸
   `panelTakesClicksWithoutActivating`). The argument is
   `docs/design-decisions.md` ▸ A bar item's hover peek.
+- **A list peek marks the focused window's row with a check**
+  (#2063), read through `barFocus(on:)` (below), in
+  `BarPeekBody.Metrics.checkColumn` PAST the titles' wrap width
+  on every row, checked or not, so no title re-wraps — beside a
+  wrapped title's first line in the row's ink, the checked row's
+  hover target covering it (`BarPeekCheckTests`); a label's peek
+  reserves no column. A shown peek re-reads its content at the
+  relayout's tail (`BarPeek.syncToAnchor`), so the check follows
+  a focus moved while it stays open (`BarPeekClickTests` ▸
+  `clickFocusesAndShowsThePeek`).
 
 ## A Space Bar glyph is a click target the item owns (#1528)
 
@@ -861,13 +864,18 @@ reading a bar still makes for itself:
   `Bar/**`, and the next new bar surface (#1229's overview
   panel) is written here.
 - A bar derivation answering *which window holds the SYSTEM
-  focus* — the glyph tint, the `+n` badge's — reads
-  `workspaces.lastFocused` and gates on the active Space, never
-  on the display's own shown one and never on a Space's
-  remembered `focused` slot. Those diverge on an injected ∞
-  traveler, which holds `lastFocused` and can never be the
-  membership-guarded `space.focused` (#431), and that is the one
-  case the `+n` tint exists for.
+  focus* — the glyph tint, the `+n` badge's, a list peek's check,
+  a glyph click's cycle, a window menu's state — reads the one
+  `KiwiCore.barFocus(on:)`: a playing Monocle flip's owed target,
+  else `workspaces.lastFocused`, gated on the active Space —
+  never on the display's own shown one and never on a Space's
+  remembered `focused` slot (`BarFocusSeamTests`, #2063). Those
+  diverge on an injected ∞ traveler, which holds `lastFocused`
+  and can never be the membership-guarded `space.focused` (#431),
+  and that is the one case the `+n` tint exists for; the owed
+  flip target keeps a glyph and its list naming one window
+  through a flip (`BarGlyphCycleTests` ▸
+  `owedMonocleFocusCounts`).
 - `currentSpace(on:)` answers *which Space is this screen
   showing*: the item that draws as active, the Space a bar is
   BUILT for, chrome coverage. It is a bare alias of

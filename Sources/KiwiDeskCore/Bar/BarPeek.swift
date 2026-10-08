@@ -203,6 +203,26 @@ final class BarPeek {
         )
     }
 
+    /// Re-reads the shown peek's content, redrawn in place where it
+    /// changed, its phase kept: a focus moved while it stays open.
+    func reread() {
+        guard let anchor = shown, let frame = anchor.frame,
+            let window = anchor.view?.window,
+            let content = content(anchor.source, anchor.space),
+            !content.groups.isEmpty, content != panel.drawn,
+            let shelf = shelf(window)
+        else { return }
+        panel.show(
+            content,
+            shelf: shelf,
+            edge: anchor.edge,
+            anchor: frame,
+            strip: window.frame,
+            visible: visibleArea(window),
+            fades: false
+        )
+    }
+
     /// The pointer left the peeked item for good: it fades and cools.
     func leave() {
         let was = shown

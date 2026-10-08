@@ -145,9 +145,9 @@ final class SpaceBarGlyphTarget: NSView {
     /// What the peek shows for this target (#1946).
     var peekSource: BarPeekSource { pick.peekSource }
 
-    /// A press arms the pick; the peek stays, since a list's click
-    /// toggles it on the release (#1946). A Control-click's menu
-    /// closes it as any menu does.
+    /// A press arms the pick; the peek stays, since the release
+    /// decides — `+n`'s click toggles it, a glyph's focuses (#1946,
+    /// #2063). A Control-click's menu closes it as any menu does.
     override func mouseDown(with event: NSEvent) {
         guard !openControlClickMenu(event) else { return }
         pressed = true

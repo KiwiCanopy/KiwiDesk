@@ -40,8 +40,13 @@ extension KiwiCore {
             spaceBars.glyphActions.togglePeek(pick)
             return
         }
-        // Focus first, so the peek's check reads the window landed.
+        // A switch moves the chip, which closes the peek as any
+        // relayout moving its item does; on its own Space the peek
+        // shows after the focus, so its check reads the window
+        // landed.
+        let switches = pick.space != activeSpace?.id
         focusFromSpaceBar(next, on: pick.space)
+        guard !switches else { return }
         spaceBars.glyphActions.showPeek(pick)
     }
 
@@ -69,7 +74,7 @@ extension KiwiCore {
         space: SpaceID?,
         at anchor: NSView
     ) {
-        let rows = spaceBarMenuRows(windows, focus: barFocus(on: space))
+        let rows = spaceBarMenuRows(windows, on: space)
         guard !rows.isEmpty else { return }
         let menu = SpaceBarWindowMenu.make(rows, kind: kind) {
             [weak self] id in
@@ -122,11 +127,14 @@ extension KiwiCore {
         followSwitch(to: space, focusing: window)
     }
 
+    /// `windows` as a window menu's rows, `space` the chip's — nil
+    /// on the App Bar — whose `barFocus` the native check marks.
     func spaceBarMenuRows(
         _ windows: [WindowID],
-        focus: WindowID? = nil
+        on space: SpaceID?
     ) -> [SpaceBarWindowMenu.Row] {
-        barWindowRows(windows).map { row in
+        let focus = barFocus(on: space)
+        return barWindowRows(windows).map { row in
             SpaceBarWindowMenu.Row(
                 row: row,
                 // The focus door's own refusal (#1345): a row it

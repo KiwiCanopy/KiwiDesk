@@ -136,6 +136,7 @@ struct BarPeekClickTests {
         try click(try webTarget(core))
         #expect(core.activeSpace?.id == two)
         #expect(core.state.workspaces.lastFocused == WindowID(4))
+        #expect(core.shelves.peek.shown == nil, "a switch shows none")
         let web = try webTarget(core)
         try click(web)
         #expect(menus == 0)
@@ -151,7 +152,8 @@ struct BarPeekClickTests {
         // The bar re-rendered for the focus change keeps the glyph
         // where it was, so the peek survives its relayout.
         // The pointer rests on the glyph, as a click leaves it: the
-        // render's hover re-read finds it inside the hull.
+        // re-render below re-reads the hover, which finds it inside
+        // the hull (without it the peek closes there).
         let rest = try #require(BarPeek.screenFrame(of: web))
         core.shelves.peek.pointerOnScreen = {
             CGPoint(x: rest.midX, y: rest.midY)
@@ -162,6 +164,37 @@ struct BarPeekClickTests {
         try click(after)
         #expect(core.state.workspaces.lastFocused == WindowID(4), "wraps")
         #expect(checked() == [WindowID(4)])
+        // A focus moved while it stays open — a key, a click on the
+        // window — reaches it through the relayout's re-read.
+        core.focusWindow(WindowID(5), warp: false)
+        _ = try webTarget(core)
+        #expect(core.shelves.peek.shown != nil)
+        #expect(checked() == [WindowID(5)], "the check follows")
+    }
+
+    /// `+n` mixes apps, so it keeps the toggle (#1946, #2063): a
+    /// click shows its peek and the next closes it, focusing
+    /// nothing.
+    @Test("A +n click still toggles its peek")
+    func overflowClickToggles() throws {
+        let core = seededCore()
+        defer { close(core) }
+        let web = try webTarget(core)
+        let disc = SpaceBarGlyphTarget(
+            space: two,
+            windows: [WindowID(4), WindowID(5)],
+            kind: .overflow,
+            label: "+2"
+        )
+        disc.actions = web.actions
+        disc.frame = web.frame
+        web.superview?.addSubview(disc)
+        try click(disc)
+        #expect(core.shelves.peek.shown?.view === disc)
+        #expect(core.activeSpace?.id == one, "nothing switches")
+        try click(disc)
+        #expect(core.shelves.peek.shown == nil)
+        #expect(core.state.workspaces.lastFocused == WindowID(1))
     }
 
     @Test("VoiceOver's press on a list glyph opens the menu once")

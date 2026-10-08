@@ -117,6 +117,21 @@ struct BarGlyphCycleTests {
         #expect(core.glyphCycleTarget(pick()) == WindowID(4))
     }
 
+    /// A window the focus door refuses (#1345) would leave the
+    /// focus where it was, so the next click would pick it again
+    /// and the walk would stall: the cycle steps over it.
+    @Test("A window the focus door refuses is stepped over")
+    func refusedWindowIsSteppedOver() {
+        let core = seededCore()
+        core.pickFromSpaceBar(pick())
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        core.windowIsOnScreen = { $0 == WindowID(3) ? false : nil }
+        core.pickFromSpaceBar(pick())
+        #expect(core.state.workspaces.lastFocused == WindowID(4))
+        core.pickFromSpaceBar(pick())
+        #expect(core.state.workspaces.lastFocused == WindowID(2), "wraps")
+    }
+
     @Test("The focus counts only on the active Space")
     func focusGatedOnTheActiveSpace() {
         let core = seededCore()

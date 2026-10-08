@@ -27,20 +27,22 @@ struct AppBarHoverTitleTests {
         _ core: KiwiCore,
         _ source: BarPeekSource?
     ) -> [String]? {
-        source.flatMap { core.barPeekContent($0) }?.groups.flatMap(\.titles)
+        source.flatMap { core.barPeekContent($0, on: nil) }?.groups.flatMap(
+            \.titles
+        )
     }
 
     @Test("The peek is the app, then the full title")
     func titleShape() throws {
         let core = core(title: "Downloads")
         let content = try #require(
-            core.barPeekContent(.appItem([WindowID(1)]))
+            core.barPeekContent(.appItem([WindowID(1)]), on: nil)
         )
         #expect(content.groups.map(\.app) == ["Finder"])
         #expect(content.groups.map(\.titles) == [["Downloads"]])
         // An App Bar header carries no icon; `+n` alone mixes apps.
         #expect(content.groups.first?.icon == nil)
-        #expect(core.barPeekContent(.appItem([WindowID(99)])) == nil)
+        #expect(core.barPeekContent(.appItem([WindowID(99)]), on: nil) == nil)
     }
 
     @Test("Core marks an item whose title it cut")
@@ -183,7 +185,7 @@ struct AppBarHoverTitleTests {
         view.layout()
         #expect(view.peekSource == .appItem([WindowID(1), WindowID(2)]))
         let content = try #require(
-            view.peekSource.flatMap { core.barPeekContent($0) }
+            view.peekSource.flatMap { core.barPeekContent($0, on: nil) }
         )
         #expect(content.groups.map(\.app) == ["Finder"])
         #expect(content.groups.map(\.titles) == [["Downloads", "Desktop"]])

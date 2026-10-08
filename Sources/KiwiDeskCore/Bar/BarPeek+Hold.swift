@@ -50,7 +50,8 @@ extension BarPeek {
     }
 
     /// A render or a switch that moved the peeked item, or took it
-    /// off screen, closes the peek — the relayout's tail.
+    /// off screen, closes the peek — the relayout's tail; one that
+    /// kept it re-reads it, so its check follows the focus (#2063).
     func syncToAnchor() {
         guard let anchor = shown else { return }
         guard let view = anchor.view,
@@ -60,12 +61,13 @@ extension BarPeek {
             dismiss()
             return
         }
+        reread()
     }
 
     /// A press in a bar panel (`ShelfPanel`), on `hit`: a click
     /// outside the peek, which closes it — except a left press on
-    /// a Space Bar glyph, whose release decides: a list's click
-    /// toggles the peek, a one-window glyph's picks. Any other
+    /// a Space Bar glyph, whose release decides: `+n`'s click
+    /// toggles the peek, a glyph's focuses (#2063). Any other
     /// button's press on a glyph closes it.
     func pressed(on hit: NSView?, type: NSEvent.EventType) {
         guard type != .leftMouseDown || !(hit is SpaceBarGlyphTarget)
