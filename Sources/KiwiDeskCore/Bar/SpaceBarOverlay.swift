@@ -141,9 +141,16 @@ public final class SpaceBarOverlay {
     /// Where the last render placed the front segment, which a
     /// content redraw keeps (#2086).
     var frontPlacement: FrontPlacement?
-    /// The front segment is gliding shut (#1903); a render that
-    /// draws it again ends the shrink.
-    var frontLeaving = false
+    /// The front segment's shrink in flight (#1903), stamped so only
+    /// the latest leave's landing hides it; a render that draws it
+    /// again ends the shrink.
+    var frontLeave: UUID?
+    var frontLeaving: Bool { frontLeave != nil }
+    /// Runs a shrink's landing once the glide lands; a test drains
+    /// it by hand, as the shelf's `afterGlide`.
+    var afterFrontGlide: (@escaping @MainActor () -> Void) -> Void = {
+        BarMotion.afterGroupGlide($0)
+    }
     /// Where the front name's slot ends, which the chip reaches to
     /// whatever the name's own width (#2086).
     var frontNameEnd: CGFloat = 0
@@ -313,7 +320,8 @@ public final class SpaceBarOverlay {
         scrollGeom = nil
         scrollRun = nil
         frontPlacement = nil
-        frontLeaving = false
+        frontLeave = nil
+        frontNameEnd = 0
         cancelDragAutoScroll()
         root.isHidden = true
         onRendered()

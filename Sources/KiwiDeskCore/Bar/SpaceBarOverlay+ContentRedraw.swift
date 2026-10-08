@@ -5,10 +5,18 @@ import AppKit
 /// renames the front segment, whose length is fixed, so the run,
 /// its glass and the shelf around it stay where they are.
 extension SpaceBarOverlay {
-    /// Where the last render placed the front segment.
+    /// Where the last render placed the front segment: its start,
+    /// and where its name may end — the axis while pinned, else the
+    /// viewport's end at the CURRENT scroll offset, which a manual
+    /// scroll moves without a render.
     struct FrontPlacement: Equatable {
         let after: CGFloat
-        let nameBound: CGFloat
+        let pinnedBound: CGFloat?
+        let viewport: CGFloat
+
+        func nameBound(scrollOffset: CGFloat) -> CGFloat {
+            pinnedBound ?? viewport + scrollOffset
+        }
     }
 
     /// Whether `next` draws every frame `last` drew: the same slot,
@@ -68,14 +76,17 @@ extension SpaceBarOverlay {
                 stateMarkColors: state.stateMarkColors
             )
         }
-        renderFrontSegment(
-            state.frontApp,
-            after: front.after,
-            strip: state.strip,
-            nameBound: front.nameBound,
-            style: style,
-            horizontal: horizontal
-        )
+        // A segment gliding shut stays on its glide (#1903).
+        if state.frontApp != nil || !frontLeaving {
+            renderFrontSegment(
+                state.frontApp,
+                after: front.after,
+                strip: state.strip,
+                nameBound: front.nameBound(scrollOffset: scrollOffset),
+                style: style,
+                horizontal: horizontal
+            )
+        }
         if let run = scrollRun {
             scrollRun = ScrollRun(
                 items: state.items,

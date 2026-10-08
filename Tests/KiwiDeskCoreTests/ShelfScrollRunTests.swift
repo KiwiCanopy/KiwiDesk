@@ -194,6 +194,21 @@ struct ShelfScrollRunTests {
         overlay.moveRun(to: .greatestFiniteMagnitude, animated: false)
         #expect(abs(name.frame.width - full) < 1)
         let scrolled = name.frame
+        // A focus change after the scroll redraws content alone,
+        // cutting at the CURRENT offset, never the render's (#2086).
+        front.title = String(repeating: "Another long title ", count: 40)
+        manager.sync([
+            SpaceBarManager.Bar(
+                display: base.display,
+                items: base.items,
+                frontApp: front,
+                frontWindow: base.frontWindow,
+                strip: strip,
+                style: style,
+                stateMarkColors: base.stateMarkColors
+            )
+        ])
+        #expect(name.frame == scrolled, "the content redraw kept it")
         overlay.render(followingActive: false)
         #expect(name.frame == scrolled)
     }

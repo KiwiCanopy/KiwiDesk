@@ -227,19 +227,20 @@ extension SpaceBarOverlay {
         }
         let placement = FrontPlacement(
             after: pinFront ? spacesAxis + gap : metrics.frontStart,
-            nameBound: pinFront ? axis : viewport + scrollOffset
+            pinnedBound: pinFront ? axis : nil,
+            viewport: viewport
         )
         frontPlacement = placement
         let shrinks =
             frontMoves && frontApp == nil
             && shrinkFront(into: placement.after, horizontal: horizontal)
         if !shrinks {
-            frontLeaving = false
+            frontLeave = nil
             renderFrontSegment(
                 frontApp,
                 after: placement.after,
                 strip: strip,
-                nameBound: placement.nameBound,
+                nameBound: placement.nameBound(scrollOffset: scrollOffset),
                 style: style,
                 horizontal: horizontal
             )

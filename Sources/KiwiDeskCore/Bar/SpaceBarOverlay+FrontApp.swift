@@ -25,6 +25,8 @@ extension SpaceBarOverlay {
             return
         }
         attachFrontViewsIfNeeded()
+        // A shrink cut short by a hide leaves its alpha at 0 (#1903).
+        frontGrowViews.forEach { $0.alphaValue = 1 }
         let depth = horizontal ? strip.height : strip.width
         let cell = SpaceBarItemView.cell(
             contentDepth: style.contentDepth(forDepth: depth)

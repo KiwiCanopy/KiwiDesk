@@ -9,7 +9,12 @@ extension SpaceBarOverlay {
     /// average lowercase glyph times the cap, the ellipsis past it,
     /// and the label's own cell padding. Memoized per face and cap.
     static func titleSlot(cap: Int, font: NSFont) -> CGFloat {
-        let key = SlotKey(font: font.fontName, size: font.pointSize, cap: cap)
+        let key = SlotKey(
+            font: font.fontName,
+            size: font.pointSize,
+            cap: cap,
+            fonts: BarFont.generation
+        )
         if let known = slots[key] { return known }
         let padding = titleWidth("", font: font)
         let alphabet = "abcdefghijklmnopqrstuvwxyz"
@@ -59,6 +64,8 @@ extension SpaceBarOverlay {
         let font: String
         let size: CGFloat
         let cap: Int
+        /// A font-set change re-measures (`BarFont.invalidate`).
+        let fonts: Int
     }
 
     private static var slots: [SlotKey: CGFloat] = [:]

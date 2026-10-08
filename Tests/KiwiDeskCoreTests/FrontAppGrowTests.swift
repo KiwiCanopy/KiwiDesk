@@ -79,6 +79,50 @@ struct FrontAppGrowTests {
         #expect(!glides(false, true, true))
     }
 
+    /// Only the latest leave's landing hides the segment: an
+    /// earlier shrink's landing, drained during a later one, leaves
+    /// it gliding (review, #1903).
+    @Test("A stale landing never cuts a later shrink")
+    func latestLeaveLands() throws {
+        BarMotion.reducedOverride = false
+        defer { BarMotion.reducedOverride = nil }
+        let manager = SpaceBarManager()
+        let overlay = try sync(manager, front: WindowID(1))
+        var landings: [@MainActor () -> Void] = []
+        overlay.afterFrontGlide = { landings.append($0) }
+        _ = try sync(manager, front: nil)
+        _ = try sync(manager, front: WindowID(1))
+        _ = try sync(manager, front: nil)
+        try #require(landings.count == 2)
+        landings[0]()
+        #expect(overlay.frontLeaving, "the earlier landing is stale")
+        #expect(!overlay.frontName.isHidden)
+        landings[1]()
+        #expect(!overlay.frontLeaving)
+        #expect(overlay.frontName.isHidden)
+        #expect(overlay.frontName.alphaValue == 1)
+    }
+
+    /// A hide inside the glide skips the landing; the next show
+    /// still draws the segment opaque (review blocker, #1903).
+    @Test("A shrink cut short by a hide leaves the next show opaque")
+    func hiddenShrinkShowsOpaque() throws {
+        BarMotion.reducedOverride = false
+        defer { BarMotion.reducedOverride = nil }
+        let manager = SpaceBarManager()
+        let overlay = try sync(manager, front: WindowID(1))
+        overlay.afterFrontGlide = { _ in }
+        _ = try sync(manager, front: nil)
+        // Where the shrink's fade leaves them on a device; headless,
+        // the animator writes no model value to read.
+        overlay.frontGrowViews.forEach { $0.alphaValue = 0 }
+        overlay.hide()
+        _ = try sync(manager, front: WindowID(1))
+        #expect(!overlay.frontName.isHidden)
+        #expect(overlay.frontName.alphaValue == 1)
+        #expect(overlay.frontIcon.alphaValue == 1)
+    }
+
     @Test("A segment drawn again ends the shrink")
     func reshownEndsTheShrink() throws {
         BarMotion.reducedOverride = false

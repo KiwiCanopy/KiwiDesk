@@ -57,7 +57,8 @@ extension SpaceBarOverlay {
             ? end
             : Self.leadingEdge(views.map(\.frame), horizontal: horizontal)
                 ?? end
-        frontLeaving = true
+        let leave = UUID()
+        frontLeave = leave
         frontWindows = []
         updateFrontGlass(
             nil,
@@ -78,9 +79,9 @@ extension SpaceBarOverlay {
                 BarMotion.setAlpha(view, to: 0, animated: true)
             }
         }
-        BarMotion.afterGroupGlide { [weak self] in
-            guard let self, self.frontLeaving else { return }
-            self.frontLeaving = false
+        afterFrontGlide { [weak self] in
+            guard let self, self.frontLeave == leave else { return }
+            self.frontLeave = nil
             for view in views {
                 view.isHidden = true
                 view.alphaValue = 1

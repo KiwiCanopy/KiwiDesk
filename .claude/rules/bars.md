@@ -166,9 +166,12 @@ twice, was a question the user answered twice. The argument is
   never moving. A show that keeps
   every frame — `keepsGeometry`, which compares the front extent
   beside the item lengths — redraws content alone
-  (`redrawContent`) and never the frame pass; a new input that
-  changes geometry joins that comparison
-  (`FrontAppFixedLengthTests`).
+  (`redrawContent`) and never the frame pass; a new stored field
+  of a show is classified as compared there or content-only, and
+  a content redraw lands a full render's frames
+  (`ContentRedrawCensusTests`, `FrontAppFixedLengthTests`). Its
+  name's cut reads the CURRENT scroll offset, which a manual
+  scroll moves without a render.
 - **Refresh both bars through the one `KiwiCore.updateBars()`,
   never a single-bar sync.** It builds each display's plan once
   from both bars' content and syncs both managers from it, so a
@@ -314,7 +317,11 @@ twice, was a question the user answered twice. The argument is
   grows out of the run's end on the plate glide and shrinks back
   into it (`SpaceBarOverlay+FrontGrow`), its glass cutting, its
   windows dropped as a target at once, and snapping where no glide
-  plays; the first show after a hide lands it (#1903,
+  plays; each leave is stamped and only its own landing — through
+  the overlay's `afterFrontGlide`, never a timer beside it —
+  hides it, and a drawn segment is always opaque; a focus change
+  inside the glide snaps the segment, accepted; the first show
+  after a hide lands it (#1903,
   `FrontAppGrowTests`; the motion itself is review's and the
   device's, since no headless render reads the animator).
   Never hold a strip reserved for a shelf that is fading
