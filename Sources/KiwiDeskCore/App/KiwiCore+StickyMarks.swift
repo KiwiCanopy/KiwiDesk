@@ -40,7 +40,11 @@ extension KiwiCore {
             if shown.contains(window.id) {
                 glyphs.append(.floating(color: floating.color))
             }
-            guard !glyphs.isEmpty else { return nil }
+            // A presenting window wears no mark over its show
+            // (#1788) — asked last, of a marked window alone.
+            guard !glyphs.isEmpty,
+                !presents(window.id, at: window.frame)
+            else { return nil }
             return StickyMarkManager.Spec(
                 window: window.id,
                 frame: window.frame,

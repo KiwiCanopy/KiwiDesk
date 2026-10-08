@@ -228,8 +228,10 @@ editing here:
   re-home splits on, and the explicit name outranks that
   re-home. A Space assigned to another screen than the
   Desktop's is REFUSED at the parse — the layout would carry
-  the window back (#1010) — and a Space no screen owns yet is
-  accepted on ONE screen only: with more it has no settled
+  the window back (#1010) — and a Space no screen owns yet (one
+  not yet created: a live one is placed before anything reads
+  its screen, see profiles.md for #1994)
+  is accepted on ONE screen only: with more it has no settled
   screen (the layout falls back to the key window's, the
   placement resolve to the menu bar's — two readings, and
   #1150's review found them disagreeing), so it is refused with
@@ -1605,6 +1607,18 @@ editing here:
   `ResizeRefusalAppBoundTests` builds the fixtures where the two
   terms disagree; the config-floor suites stamp the flag their
   fixtures earn.
+- **A tracked window's "is it presenting" is asked through the
+  one `KiwiCore.presents` door (#1788)**, which rules the float
+  gate once — a tiled slot a gapless layout sizes to its screen
+  is no show. The raw `covers` / `coversAScreen` stays for a
+  CANDIDATE frame whose float ruling its caller already made
+  (the fit, the gather) and for the verdict's own home;
+  `ScreenCoveringCallerCensusTests` reds a new raw caller until
+  it routes or names its reason. A reader of the verdict that
+  draws refreshes on the cover CROSSING too, since a move or
+  resize may retile nothing (`PresentingReaderTests` ▸
+  `crossingRefreshesRingAndMark`); the readers ruled so far are
+  the door's docstring.
 - **A window is tiled or floating, and detection's verdict is
   read through ONE door (#1810).** The float verbs and the bar
   menu's Float/Tile row ask `KiwiCore.tileRefusal(of:)`, never

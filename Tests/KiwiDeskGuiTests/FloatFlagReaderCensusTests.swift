@@ -57,6 +57,8 @@ struct FloatFlagReaderCensusTests {
         "State/StateCoordinator+Intents.swift": [.identity: 1],
         "Models/StateSnapshot+InPlace.swift": [.identity: 1],
         "App/KiwiCore+FloatClamp.swift": [.routed: 1],
+        // The presenting door (#1788).
+        "App/KiwiCore+ScreenCovering.swift": [.routed: 1],
         // A plate's draw tier (#1956).
         "Commands/KiwiCore+SpaceSlide.swift": [.routed: 1],
         // The verbs' gate, and the cascade's neighbour set (#1708).

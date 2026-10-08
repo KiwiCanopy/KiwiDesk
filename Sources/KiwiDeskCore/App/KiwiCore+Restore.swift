@@ -138,6 +138,8 @@ extension KiwiCore {
         let holds = restoreHeldSpaces(from: session)
         // The temporary ones too, on the same ground (#1790).
         restoreTemporarySpaces(from: holds.snapshot)
+        // Placed ahead of the activation below, which reads it.
+        placeUnplacedSpaces()
         restore(holds.snapshot)
         settleHeldSpacesAtBoot(holds)
         adoptCarriedPartitioning(from: session)

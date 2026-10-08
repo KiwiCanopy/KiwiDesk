@@ -93,6 +93,27 @@ struct TemporarySpaceRestartTests {
         #expect(b.isTemporary(scratch))
         #expect(b.state.workspaces[scratch]?.windows == [WindowID(12)])
         #expect(b.spacePins[scratch] == desk.dell.fingerprint)
+        // Laid out on its pinned screen, so the bar draws it (#1994).
+        #expect(b.state.workspaces.display(of: scratch) == desk.dell.id)
+    }
+
+    /// No pin: nothing in the replay names a screen, so the boot
+    /// resolve is the only thing that can give it one (#1994).
+    @Test("an unpinned one comes back on a screen, with its chip")
+    func restartPlacesUnpinned() throws {
+        let a = try desk.docked()
+        a.execute("move_to_space", args: [.string(scratch.raw), .number(12)])
+        #expect(a.isTemporary(scratch))
+        #expect(a.spacePins[scratch] == nil)
+        let b = boot(
+            from: a,
+            profile: "desk",
+            session: try crossed(a.sessionSnapshot())
+        )
+        #expect(b.isTemporary(scratch))
+        let display = try #require(b.state.workspaces.display(of: scratch))
+        let chips = b.spaceBarItems(display: display, style: SpaceBarLook())
+        #expect(chips.contains { $0.identity == .space(scratch) })
     }
 
     @Test("a restart into another arrangement is a switch")

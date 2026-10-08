@@ -872,6 +872,41 @@ space is healed*. The obligations:
   `SecondarySwitchTests` ▸ `secondaryNeverSelects` does since
   #1175.
 
+## A Space is never left without a screen (#1994)
+
+The mirror of #1175: a Space some door creates by an id nothing
+declares — `focus_space`, `move_to_space`, `set_mode`, an app
+rule, the restart's temporary replay — never reached the total
+resolve, so it had no `spaceDisplay` entry, no chip, no
+`activeSpace(on:)` and no slide. The obligations:
+
+- **Place only the unplaced.** `placeUnplacedSpaces` assigns
+  each Space with no screen through the resolve's own
+  `SpacePlacement` precedence and touches no other Space — a
+  full `resolveSpaceDisplays` there would revert
+  `move_space_to_display`'s session move on any filing
+  (`UndeclaredSpaceDisplayTests` ▸ `placementKeepsAHandMove`).
+  Adding a Space empties no screen and relocates none, so it
+  owes neither the heal nor the float re-anchor.
+- **The net is the head of `retile()`**, beside the held and
+  temporary retire, since every membership change retiles
+  (`UndeclaredSpaceDisplayTests` ▸ `setModeTargetHasAChip`). A
+  path that reads a new Space's screen BEFORE its own retile
+  places it first: the switch ahead of `spaceSlideIntent`
+  (`UndeclaredSpaceDisplayTests` ▸ `firstVisitSlides`), the one
+  `followSwitch` likewise, a launch follow's rule Space included
+  (`UndeclaredSpaceDisplayTests` ▸ `launchFollowSlides`), the one
+  `fileMembership` ahead of the float re-anchor, and boot ahead
+  of its activation — those two read `NSScreen` and the
+  frontmost app, which no fixture pins, so they have no test;
+  `TemporarySpaceRestartTests` ▸ `restartPlacesUnpinned` holds
+  only that the replayed Space comes back placed.
+- **A gate asked before the Space exists is told where it WILL
+  lay out**, through `landingDisplay(of:)` — the sticky gate on
+  a move to an undeclared id (`UndeclaredSpaceDisplayTests` ▸
+  `stickyGateKnowsTheLanding`), so a refused move still creates
+  nothing.
+
 ## A screen-count change settles before it chooses (#1612)
 
 macOS reports an in-between screen layout on some transitions

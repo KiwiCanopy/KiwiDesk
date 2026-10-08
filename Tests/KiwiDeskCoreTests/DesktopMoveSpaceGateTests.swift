@@ -147,8 +147,9 @@ struct DesktopMoveSpaceGateTests {
     }
 
     /// On ONE screen every reading agrees, so the same unowned
-    /// Space is accepted — and created at the CLAIM, unassigned,
-    /// never at the record.
+    /// Space is accepted — and created at the CLAIM, never at the
+    /// record, its screen the resolve's rather than a hand
+    /// assignment (#1994).
     @Test("An unowned Space on one screen is created at the claim")
     func unownedSpaceOnOneScreenIsCreated() {
         let core = makeCore()
@@ -170,7 +171,7 @@ struct DesktopMoveSpaceGateTests {
         #expect(core.state.workspaces[mail] == nil)
         core.handle(.windowDestroyed(window, wasMinimized: false))
         #expect(core.state.workspaces[mail] != nil)
-        #expect(core.state.workspaces.display(of: mail) == nil)
+        #expect(core.state.workspaces.display(of: mail) == DisplayID(1))
         #expect(core.state.rememberedSpace(of: window) == mail)
     }
 
