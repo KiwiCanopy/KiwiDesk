@@ -102,14 +102,10 @@ struct SegmentedPicker<Value: Hashable>: View {
         }
         .background { slidingPill }
         .padding(3)
-        .background(
-            Capsule().fill(
-                Color.primary.opacity(SegmentedPickerMetrics.trackAlpha)
-            )
-        )
+        .background(Capsule().fill(SettingsTheme.trackFill))
         .overlay(
             Capsule().strokeBorder(
-                Color.primary.opacity(SegmentedPickerMetrics.trackAlpha),
+                SettingsTheme.trackFill,
                 lineWidth: 0.5
             )
         )
@@ -213,11 +209,8 @@ struct SegmentedPicker<Value: Hashable>: View {
             .frame(maxWidth: .infinity)
             .background(
                 Capsule().fill(
-                    Color.primary.opacity(
-                        isEnabled && !selected
-                            && hoveredIndex == index
-                            ? 0.05 : 0
-                    )
+                    isEnabled && !selected && hoveredIndex == index
+                        ? SettingsTheme.chipRest : .clear
                 )
             )
             .animation(
@@ -263,10 +256,4 @@ struct SegmentedPicker<Value: Hashable>: View {
         Capsule()
             .fill(SettingsTheme.accent)
     }
-}
-
-/// Shared geometry metrics for segmented pickers
-/// (`SegmentedPickerCoverageTests`, 2026-08-12).
-enum SegmentedPickerMetrics {
-    static let trackAlpha = 0.08
 }

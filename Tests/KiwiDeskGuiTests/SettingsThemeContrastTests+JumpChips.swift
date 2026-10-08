@@ -60,37 +60,47 @@ extension SettingsThemeContrastTests {
     /// The chip's edge is what tells a button chip from a passive
     /// hairline capsule (#1520 amendment 5), so it must separate
     /// from the rest fill it rims by more than the container
-    /// hairline separates from the page — in both appearances.
-    @Test("the jump chip's edge outreads the container hairline")
+    /// hairline separates from the same ground — in both
+    /// appearances, on every ground a button chip stands on
+    /// (#2047).
+    @Test("a button chip's edge outreads the container hairline")
     func chipEdgeOutreadsHairline() throws {
-        for dark in [false, true] {
-            let edge = try ThemeContrast.contrast(
-                SettingsTheme.chipEdge,
-                over: SettingsTheme.page,
-                layers: [SettingsTheme.chipRest],
-                inkAlpha: try ThemeContrast.resolvedAlpha(
+        let grounds = [
+            ("page", SettingsTheme.page),
+            ("card", SettingsTheme.card),
+            ("sunken", SettingsTheme.sunken),
+        ]
+        for (name, ground) in grounds {
+            for dark in [false, true] {
+                let edge = try ThemeContrast.contrast(
                     SettingsTheme.chipEdge,
+                    over: ground,
+                    layers: [SettingsTheme.chipRest],
+                    inkAlpha: try ThemeContrast.resolvedAlpha(
+                        SettingsTheme.chipEdge,
+                        dark: dark
+                    ),
                     dark: dark
-                ),
-                dark: dark
-            )
-            let hairline = try ThemeContrast.contrast(
-                SettingsTheme.hairline,
-                over: SettingsTheme.page,
-                inkAlpha: 1,
-                dark: dark
-            )
-            #expect(
-                edge > hairline,
-                Comment(
-                    rawValue: (dark ? "dark" : "light")
-                        + String(
-                            format: ": edge %.2f, hairline %.2f",
-                            edge,
-                            hairline
-                        )
                 )
-            )
+                let hairline = try ThemeContrast.contrast(
+                    SettingsTheme.hairline,
+                    over: ground,
+                    inkAlpha: 1,
+                    dark: dark
+                )
+                #expect(
+                    edge > hairline,
+                    Comment(
+                        rawValue: "\(name) "
+                            + (dark ? "dark" : "light")
+                            + String(
+                                format: ": edge %.2f, hairline %.2f",
+                                edge,
+                                hairline
+                            )
+                    )
+                )
+            }
         }
     }
 }

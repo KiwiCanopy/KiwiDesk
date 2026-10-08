@@ -80,7 +80,8 @@ enum SettingsTheme {
         darkAlpha: 0.14
     )
 
-    /// A chip-shaped control's resting fill — its shape (#1520).
+    /// A chip's resting fill — its shape — and a full-row
+    /// entry's lift, on every chip tier (#1520, #2047).
     static let chipRest = token(
         light: 0x12_25_1A,
         dark: 0xE6_EC_E6,
@@ -88,7 +89,8 @@ enum SettingsTheme {
         darkAlpha: 0.10
     )
 
-    /// The same chip under the pointer: the ruled lift.
+    /// Any chip tier under the pointer: the ruled lift (#1520,
+    /// #2047).
     static let chipHover = token(
         light: 0x12_25_1A,
         dark: 0xE6_EC_E6,
@@ -104,13 +106,23 @@ enum SettingsTheme {
         darkAlpha: 0.22
     )
 
-    /// A button chip's edge, constant in every state — what tells
-    /// it from a passive hairline capsule (#1520 amendments 5, 6).
+    /// A text button chip's edge, constant in every state — what
+    /// tells it from a passive hairline capsule (#1520 amendments
+    /// 5, 6).
     static let chipEdge = token(
         light: 0x12_25_1A,
         dark: 0xE6_EC_E6,
         lightAlpha: 0.18,
         darkAlpha: 0.20
+    )
+
+    /// A segmented control's track — fill and rim — the well its
+    /// segments sit in (#2047).
+    static let trackFill = token(
+        light: 0x12_25_1A,
+        dark: 0xE6_EC_E6,
+        lightAlpha: 0.09,
+        darkAlpha: 0.12
     )
 
     // MARK: - Ink
