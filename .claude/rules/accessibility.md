@@ -26,11 +26,22 @@ editing AX code:
 
 - AX calls are slow and can block. Never call them inside tight
   loops or layout math — snapshot state first, then compute.
-- **The activation, focus and close arms read OFF the main
-  actor (#1930, #1888).** `appActivated`,
-  `handleFocusedWindowChanged` and the destroy/minimize arm
-  reconcile through `reconcileOffMain`, and
-  the activation reads its focused window through
+- **The activation, focus, close and hide arms, and the
+  #1157/#675 one-shots, read OFF the main actor (#1930,
+  #1888, #2027).** `appActivated`,
+  `handleFocusedWindowChanged`, the destroy/minimize arm,
+  `appHideChanged`, `scheduleRemovalRecheck` and
+  `scheduleTransientRetrack` reconcile through
+  `reconcileOffMain` — an unhide that adopts a window of the
+  active app then re-asks the activation's focus through
+  `requestActivationFocus`, since the activation's own report
+  can settle on the hide drop first, and lands it as the focus
+  command (`onUnhideFocus`), since the unhide's retile just
+  placed the window and a report would read as its #1161
+  bounce (`ReconcileOffMainRecheckTests` ▸
+  `unhideFocusesTheActiveApp`, `PlacementIntentTests` ▸
+  `unhideFocusIsHonored`) —
+  and the activation reads its focused window through
   `requestFocusedWindowID`; a new
   event-driven caller takes the same doors or joins
   `SyncReconcileCensusTests`' `allowed` map with its reason. The
@@ -73,8 +84,9 @@ editing AX code:
   request time, as the tracked set is. A window the read did not
   cover (tracked during the flight, or appeared and handed to
   `track`) is read the way the synchronous reconcile reads it.
-  `ReconcileOffMainTests`, `ReconcileOffMainDebtTests` and
-  `ReconcileSnapshotTests` hold the behaviour.
+  `ReconcileOffMainTests`, `ReconcileOffMainDebtTests`,
+  `ReconcileOffMainRecheckTests` and `ReconcileSnapshotTests`
+  hold the behaviour.
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever

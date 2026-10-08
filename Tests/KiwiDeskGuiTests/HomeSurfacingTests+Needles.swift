@@ -177,9 +177,9 @@ extension HomeSurfacingTests {
             // whole run (flip, announce, land), so the ORDER
             // stays pinned, not just each statement's existence.
             "ensureModeAdmits(resolved.destination)"
-                + "ifletarmedNotice,wasSimple,"
+                + "ifarmedNotice!=nil,wasSimple,"
                 + "model.settingsMode==.powerUser{"
-                + "model.noteSearchModeSwitch(armedNotice)}"
+                + "model.noteSearchModeSwitch(resolved.destination)}"
                 + "model.destination=resolved.destination",
             // The reveal CONSUMES the armed notice
             // unconditionally (a refused request must not leave

@@ -120,14 +120,17 @@ struct SpaceBarGlyphClickTests {
         core.state.workspaces.activate(two)
         core.state.apply(.windowCreated(window(5, app: "Term")))
         core.state.apply(.windowCreated(window(6, app: "Term")))
+        core.state.apply(.windowFocused(WindowID(4)))
+        core.state.apply(.windowCreated(window(7, app: "Zed")))
         core.state.workspaces.activate(one)
-        // New windows land after the focused Mail 2, so the row
-        // is Mail 2 · Term 5 6 · Mail 3 · Web 4. A strip held on
-        // Mail 3 hides a group of several windows before it and
-        // one after (#1528 items 17, 21).
+        // New windows land after the focused one, so the row is
+        // Mail 2 · Term 5 6 · Mail 3 · Web 4 · Zed 7. A strip held
+        // on Mail 3 hides two groups on each side, one of them of
+        // several windows (#1528 items 17, 21; a disc hides two
+        // groups or more, #2052).
         core.spaceBars.stripHover(
             two,
-            .init(window: 2..<3, count: 4),
+            .init(window: 2..<3, count: 5),
             inside: true
         )
         let built = try item(core, two, cap: 1)
@@ -136,7 +139,7 @@ struct SpaceBarGlyphClickTests {
             built.before.windows
                 == [WindowID(2), WindowID(5), WindowID(6)]
         )
-        #expect(built.after.windows == [WindowID(4)])
+        #expect(built.after.windows == [WindowID(4), WindowID(7)])
         #expect(built.discs == 2)
     }
 

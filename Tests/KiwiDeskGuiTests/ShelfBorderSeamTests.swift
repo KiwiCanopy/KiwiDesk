@@ -2,6 +2,7 @@ import Foundation
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// The shelf's border is painted in ONE place (#1679, bars.md):
 /// `ShelfBorder.paint` is the only Core reader of the drawn width,
@@ -51,6 +52,74 @@ struct ShelfBorderSeamTests {
             }
         }
         #expect(hits == [Self.home, "AppBarStyle+Enums.swift"], "\(hits)")
+    }
+
+    private static let enums = "AppBarStyle+Enums.swift"
+
+    /// Whether an indicator draws an outline is `drawsOutline`'s
+    /// alone (#2029): across Core and the GUI only its declaration
+    /// compares to `.outline`, so a third kind or a change to
+    /// which kinds outline answers everywhere at once. A
+    /// comparison is `==`, `!=` or `~=` either way round, however
+    /// the case is qualified, or an `if`/`guard case … =` match;
+    /// an exhaustive switch's `case .outline:` arm is the
+    /// compiler's to hold, not this.
+    @Test("Only drawsOutline compares an indicator to .outline")
+    func oneHomeSpellsTheOutline() throws {
+        let pattern = try NSRegularExpression(
+            pattern: [
+                #"[!=~]=\s*[A-Za-z_.]*\.outline\b"#,
+                #"\.outline\??\s*[!=~]="#,
+                #"\bcase\s+[A-Za-z_.]*\.outline\??\s*=(?!=)"#,
+            ].joined(separator: "|")
+        )
+        let gui = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var hits: Set<String> = []
+        for root in [Self.coreRoot, gui] {
+            var scanned = 0
+            for file in try SourceScan.swiftSources(under: root) {
+                scanned += 1
+                let source = try SourceScan.strippedSource(at: file)
+                let range = NSRange(source.startIndex..., in: source)
+                if pattern.firstMatch(in: source, range: range) != nil {
+                    hits.insert(file.lastPathComponent)
+                }
+            }
+            // A floor per root, so neither tree goes unscanned.
+            #expect(scanned >= 200, "\(root.path): \(scanned)")
+        }
+        #expect(hits == [Self.enums], "\(hits)")
+
+        let url = Self.coreRoot
+            .appendingPathComponent("Layouts")
+            .appendingPathComponent(Self.enums)
+        let body = SourceScan.declarationBody(
+            after: "var strokesBoxEdge: Bool",
+            in: try SourceScan.strippedSource(at: url)
+        )
+        #expect(body?.contains("drawsOutline") == true, "\(body ?? "")")
+        #expect(body?.contains(".outline") == false, "\(body ?? "")")
+    }
+
+    /// `strokesBoxEdge` may derive from `drawsOutline` only while
+    /// a rimmed box is exactly where the outline hugs (#2029).
+    @Test("A rimmed box is where the outline hugs, on every shape")
+    func rimmedBoxIsWhereTheOutlineHugs() {
+        var shelf = KiwiShelf()
+        let styles = type(of: shelf.backgroundStyle).allCases
+        let fits = type(of: shelf.backgroundFit).allCases
+        for style in styles {
+            for fit in fits {
+                shelf.backgroundStyle = style
+                shelf.backgroundFit = fit
+                #expect(
+                    ShelfBorder.rims(.box, on: shelf)
+                        == BarAccent.hugsBox(shelf),
+                    "\(style) \(fit)"
+                )
+            }
+        }
     }
 
     /// The drop ring morphs into the outline, so it hugs where

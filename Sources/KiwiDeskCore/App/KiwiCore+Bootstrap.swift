@@ -178,6 +178,10 @@ extension KiwiCore {
             self?.armIgnoredPanel(pid)
             self?.armAccessibilityReturn(bundleID: bundleID)
         }
+        // A command, so its report arrives intended (#1161).
+        eventLoop.onUnhideFocus = { [weak self] id in
+            self?.focusWindow(id, warp: false)
+        }
         eventLoop.onAppActivated = { [weak self] activation in
             self?.noteAppActivation(activation)
             self?.endRaiseFlight()

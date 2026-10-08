@@ -147,6 +147,7 @@ struct ChangelogParserTests {
     @Test(
         "each malformed body is refused, and says why",
         arguments: ChangelogRefusal.all + ChangelogRefusal.typed
+            + ChangelogRefusal.spotlight
     )
     func malformedBodyRefused(_ refusal: ChangelogRefusal) throws {
         let run = try parse(refusal.body)

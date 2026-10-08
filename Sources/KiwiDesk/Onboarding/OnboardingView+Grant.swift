@@ -18,25 +18,44 @@ extension OnboardingView {
                 grantSteps
             }
         } action: {
-            if model.isTrusted {
-                Button(L("onboarding.continue", "Continue")) {
-                    model.continueAfterAccessibility()
-                }
-                .kiwiProminentButton()
-                .keyboardShortcut(.defaultAction)
-            } else {
-                Button(
-                    L(
-                        "common.open_system_settings",
-                        "Open System Settings"
-                    )
-                ) {
-                    model.onOpenSettings()
-                }
-                .kiwiProminentButton()
-                .keyboardShortcut(.defaultAction)
-            }
+            grantActions
         }
+    }
+
+    /// Open System Settings leads until the grant lands; Start
+    /// Tiling waits greyed beside it, then leads (#2050).
+    @ViewBuilder private var grantActions: some View {
+        if !model.isTrusted {
+            Button(startTilingLabel) {}
+                .settingsActionButton()
+                .disabled(true)
+            Button(
+                L(
+                    "common.open_system_settings",
+                    "Open System Settings"
+                )
+            ) {
+                model.onOpenSettings()
+            }
+            .kiwiProminentButton()
+            .keyboardShortcut(.defaultAction)
+        } else if !model.hasStartedTiling {
+            Button(startTilingLabel) {
+                model.startTiling()
+            }
+            .kiwiProminentButton()
+            .keyboardShortcut(.defaultAction)
+        } else {
+            Button(L("onboarding.continue", "Continue")) {
+                model.continueAfterAccessibility()
+            }
+            .kiwiProminentButton()
+            .keyboardShortcut(.defaultAction)
+        }
+    }
+
+    private var startTilingLabel: String {
+        L("common.start_tiling", "Start Tiling")
     }
 
     /// Title string for current grant state (OnboardingGrantPhaseTests, #801).
@@ -46,6 +65,9 @@ extension OnboardingView {
                 "onboarding.grant.title",
                 "KiwiDesk needs Accessibility"
             )
+        }
+        guard model.hasStartedTiling else {
+            return L("onboarding.grant.ready.title", "KiwiDesk is ready")
         }
         return model.bootPhase == .ready
             ? L(
@@ -60,6 +82,14 @@ extension OnboardingView {
 
     var grantBody: String {
         guard model.isTrusted else { return grantLead }
+        guard model.hasStartedTiling else {
+            return L(
+                "onboarding.grant.ready.body",
+                "%1$@ arranges the windows you have open now. "
+                    + "Nothing moves until you press it.",
+                startTilingLabel
+            )
+        }
         guard model.bootPhase != .ready else { return grantedBody }
         return [
             L(
@@ -76,11 +106,19 @@ extension OnboardingView {
 
     /// Whether window arrangement scan is actively running (#801).
     var isArranging: Bool {
-        model.isTrusted && grantHintCount != nil
+        model.isTrusted && model.hasStartedTiling
+            && grantHintCount != nil
     }
 
     var grantHintForPhase: String? {
         guard model.isTrusted else { return grantHint }
+        guard model.hasStartedTiling else {
+            return L(
+                "onboarding.grant.ready.hint",
+                "Not ready yet? Start any time from the KiwiDesk "
+                    + "menu in the menu bar."
+            )
+        }
         return BootCountText.line(for: model.bootPhase)
     }
 

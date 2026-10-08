@@ -205,40 +205,38 @@ struct SizeFloatGroup: View {
     }
 }
 
-/// App-level shortcut hotkeys group (#330, #602).
-struct GeneralShortcutsGroup: View {
+/// KiwiDesk's own chords, folded into Open applications under a
+/// subheading of the app's name since the General drawer retired
+/// (#1520, #330, #602).
+struct KiwiDeskKeyRows: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let expander: ShortcutsFamilyRows
 
-    @State private var expanded = false
-
     var body: some View {
-        SettingsDisclosure(
-            SettingsCatalog.shortcuts.generalKeys,
-            chrome: .card,
-            isExpanded: $expanded
-        ) {
-            ForEach(
-                ShortcutsRowOrder.generalKeysMore,
-                id: \.id
-            ) { key in
-                anchored(key) {
-                    KeybindingFamilyRows(
-                        model: model,
-                        bindings: $bindings,
-                        key: key,
-                        expander: expander
-                    )
-                }
+        // The in-card heading idiom, heading trait included.
+        GestureGroupHeading(
+            title: L("app.name", "KiwiDesk"),
+            followsGroup: true
+        )
+        ForEach(
+            ShortcutsRowOrder.openApplicationsKiwiDesk,
+            id: \.id
+        ) { key in
+            anchored(key) {
+                KeybindingFamilyRows(
+                    model: model,
+                    bindings: $bindings,
+                    key: key,
+                    expander: expander
+                )
             }
-            .padding(.top, 8)
         }
     }
 
-    /// The family wrapped in ONE view carrying its catalog
-    /// anchor (#277): a family emits several views, and an
-    /// anchor on the bare family would mount one id per child.
+    /// The family wrapped in ONE view carrying its catalog anchor
+    /// (#277): a family emits several views, and an anchor on the
+    /// bare family would mount one id per child.
     @ViewBuilder private func anchored<Family: View>(
         _ key: SettingKey,
         @ViewBuilder family: () -> Family
@@ -247,18 +245,16 @@ struct GeneralShortcutsGroup: View {
         case .shortcuts(.showShortcuts):
             VStack(alignment: .leading, spacing: 8) { family() }
                 .searchAnchored(
-                    SettingsCatalog.shortcuts.generalKeys.children
-                        .showShortcutsBinding
+                    SettingsCatalog.shortcuts.showShortcutsBinding
                 )
         case .shortcuts(.openSettings):
             VStack(alignment: .leading, spacing: 8) { family() }
                 .searchAnchored(
-                    SettingsCatalog.shortcuts.generalKeys.children
-                        .openSettingsBinding
+                    SettingsCatalog.shortcuts.openSettingsBinding
                 )
         default:
             let _ = assertionFailure(
-                "unanchored General keys row: \(key.id)"
+                "unanchored KiwiDesk keys row: \(key.id)"
             )
             family()
         }

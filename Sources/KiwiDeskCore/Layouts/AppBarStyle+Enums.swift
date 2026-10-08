@@ -26,10 +26,18 @@ extension AppBarStyle {
         case outline
         case edgeMark = "edge_mark"
 
+        /// Whether it draws an outline rather than an edge mark —
+        /// the one home of that question (#2029).
+        public var drawsOutline: Bool { self == .outline }
+
         /// Whether it strokes its box's own edge, so the shelf's
         /// border there would be a second line (#1924). An edge
-        /// mark leaves the edge to the border.
-        public var strokesBoxEdge: Bool { self == .outline }
+        /// mark leaves the edge to the border. Premise: a rimmed
+        /// box is exactly where the outline hugs
+        /// (`ShelfBorder.rims(.box)` == `BarAccent.hugsBox`), so
+        /// this is `drawsOutline`; on the plate the outline insets
+        /// (#2029, `ShelfBorderSeamTests`).
+        public var strokesBoxEdge: Bool { drawsOutline }
     }
 
     /// Item group alignment along the bar's axis (#293 QA).

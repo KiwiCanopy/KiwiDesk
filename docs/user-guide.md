@@ -12,9 +12,12 @@ covers what those cannot say — how things interact, where a
 setting lives, why a move was refused, and the files behind it.
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
-**⌘,** while a KiwiDesk window is key. **Shortcuts & Gestures ▸
-General** offers a rebindable **Open Settings** row for a global
-key.
+**⌘,** while a KiwiDesk window is key.
+
+:::unreleased
+**Shortcuts & Gestures ▸ Open applications** offers a rebindable
+**Open Settings** row for a global key, under **KiwiDesk**.
+:::
 
 That row ships on **`⌃⌥,`**, a [default
 shortcut](#default-shortcuts), so Settings opens from anywhere.
@@ -565,7 +568,14 @@ With VoiceOver, pressing the glyph opens that menu.
 
 A Space holding more apps than fit keeps its focused app in the
 middle, with a `+n` on each side for the rest — at either end of
-the row one more glyph fits instead. While your pointer rests on
+the row one more glyph fits instead.
+
+:::unreleased
+A `+n` always stands for two glyphs or more: where only one would
+be hidden, that glyph shows in its place.
+:::
+
+While your pointer rests on
 a Space it holds still, so a second click lands where the first
 did; it re-centres once the pointer leaves. With **Other Spaces** set to *Window count*, a
 Space not on screen draws no glyphs, so a click anywhere on it
@@ -696,6 +706,11 @@ set is unavailable. Shortcuts, app rules, float and ignore rules,
 the space list and Desktop bindings carry no monitor set, so
 **Save** still writes `gui.json` for them and keeps counting the
 layout edits until you grant access.
+
+:::unreleased
+The same holds before you press **Start Tiling** for the first
+time: until then KiwiDesk detects no displays either.
+:::
 
 Neither live save carries a keybinding override: to give a
 profile its own shortcuts, pick it in the banner while it isn't
@@ -1070,6 +1085,13 @@ triangle and the quick menu's **Window Management Paused…** row
 reopens the permission tour. Add KiwiDesk under System Settings ›
 Privacy & Security › Accessibility; management resumes on its
 own.
+
+:::unreleased
+**Permission granted, but nothing is tiled?**  
+Granting Accessibility does not start tiling on its own: the
+first time, press **Start Tiling** — in the permission tour, the
+quick menu or the banner at the top of Settings.
+:::
 
 **Settings window won't open, or KiwiDesk seems stuck?**  
 Run `kiwidesk service restart` in a terminal, or quit and reopen

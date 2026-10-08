@@ -24,7 +24,8 @@ extension AppDelegate {
     func replayOnboardingTour() {
         showOnboarding(
             at: OnboardingEntry.replayStep(
-                isTrusted: permissions.isTrusted
+                isTrusted: permissions.isTrusted,
+                hasStartedTiling: hasStartedTiling
             )
         )
     }
@@ -37,7 +38,10 @@ extension AppDelegate {
             NSApp.forceFront(window)
             return
         }
-        onboardingModel.isTrusted = permissions.isTrusted
+        syncCoreHold()
+        onboardingModel.onStartTiling = { [weak self] in
+            self?.startTiling()
+        }
         // Seeded from current boot phase to prevent premature .ready (#802).
         onboardingModel.bootPhase = core.bootPhase
         onboardingModel.onOpenSettings = {

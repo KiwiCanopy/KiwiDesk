@@ -65,15 +65,12 @@ extension ShortcutsReferenceBuilder {
                     )
                 )
             ),
-            // The census's `generalKeys` container minus the
-            // panel's own opener. Without it a bound Open
-            // Settings fell through to Custom and rendered as raw
-            // untranslated Lua (#678 item 18).
+            // The editor's Open applications ▸ KiwiDesk rows
+            // (#1520) minus the panel's own opener. Without it a
+            // bound Open Settings fell through to Custom and
+            // rendered as raw untranslated Lua (#678 item 18).
             ShortcutSubgroup(
-                title: L(
-                    "shortcuts.section.general",
-                    "General"
-                ),
+                title: L("app.name", "KiwiDesk"),
                 rows: rows([KeybindingCatalog.openSettings])
             ),
             ShortcutSubgroup(

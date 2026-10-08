@@ -128,6 +128,43 @@ struct SettingsThemeTokenTests {
             lightAlpha: 0,
             darkAlpha: 0.14
         ),
+        // A chip's rest fill and its lift (#1520): the ink at a
+        // per-mode alpha, stronger in dark, where a 6 % lift does
+        // not read.
+        Pin(
+            "chipRest",
+            0x12_25_1A,
+            0xE6_EC_E6,
+            SettingsTheme.chipRest,
+            lightAlpha: 0.06,
+            darkAlpha: 0.10
+        ),
+        Pin(
+            "chipHover",
+            0x12_25_1A,
+            0xE6_EC_E6,
+            SettingsTheme.chipHover,
+            lightAlpha: 0.11,
+            darkAlpha: 0.16
+        ),
+        // Held down, and the edge no state moves (#1520
+        // amendment 5).
+        Pin(
+            "chipPressed",
+            0x12_25_1A,
+            0xE6_EC_E6,
+            SettingsTheme.chipPressed,
+            lightAlpha: 0.16,
+            darkAlpha: 0.22
+        ),
+        Pin(
+            "chipEdge",
+            0x12_25_1A,
+            0xE6_EC_E6,
+            SettingsTheme.chipEdge,
+            lightAlpha: 0.18,
+            darkAlpha: 0.20
+        ),
         Pin("ink", 0x12_25_1A, 0xE6_EC_E6, SettingsTheme.ink),
         Pin("ink2", 0x55_63_5C, 0xA8_B3_A9, SettingsTheme.ink2),
         Pin("ink3", 0x64_72_6A, 0x98_A2_96, SettingsTheme.ink3),
@@ -185,12 +222,12 @@ struct SettingsThemeTokenTests {
             0xE0_82_76,
             SettingsTheme.danger
         ),
-        // Kiwi Gold (#1542): darker in light mode, where the
-        // mid gold misses 3:1 on the washed card.
+        // Kiwi Gold (#1542, owner retune 2026-10-07): a mark,
+        // never text — `HighlightSeparationTests` floors it.
         Pin(
             "highlight",
-            0xA6_7E_17,
-            0xD9_A5_21,
+            0xE0_A8_00,
+            0xED_B2_1C,
             SettingsTheme.highlight
         ),
         Pin(

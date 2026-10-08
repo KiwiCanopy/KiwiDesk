@@ -20,6 +20,8 @@ struct PrefetchedWindows {
     /// (#1936); a nil `hidden` asks the main-actor seam.
     var policy: NSApplication.ActivationPolicy?
     var hidden: Bool?
+    /// False where the read skipped a hidden app's list (#2027).
+    var listRead = true
 
     /// What was read of the `index`th listed window, if anything.
     func window(at index: Int) -> ListedWindow? {
@@ -194,10 +196,13 @@ extension EventLoop {
         }
     }
 
+    /// A hidden app's list is skipped, since only the hide drop
+    /// can apply it, unless `listsWhenHidden` (#2027).
     private func readWindowList(
         pid: pid_t,
         app: AppRef,
         coalesceTabs: Bool,
+        listsWhenHidden: Bool = false,
         then: [@MainActor () -> Void]
     ) {
         let ticket = offMain.startRead(pid: pid, then: then)
@@ -211,6 +216,17 @@ extension EventLoop {
         nonisolated(unsafe) let readPolicy = activationPolicy
         nonisolated(unsafe) let readHidden = appIsHidden
         axReads.requestWindows(pid: pid) {
+            let hidden = readHidden(pid)
+            guard !hidden || listsWhenHidden else {
+                return WindowListReading(
+                    elements: [],
+                    windows: [],
+                    layers: [:],
+                    policy: readPolicy(pid),
+                    hidden: true,
+                    listRead: false
+                )
+            }
             let elements = read(pid)
             let layers = FloatDetection.windowLayers(pid: pid)
             return WindowListReading(
@@ -218,7 +234,7 @@ extension EventLoop {
                 windows: reader.read(elements, layers: layers),
                 layers: layers,
                 policy: readPolicy(pid),
-                hidden: readHidden(pid)
+                hidden: hidden
             )
         } onList: { [weak self] reading in
             self?.applyWindowList(
@@ -243,9 +259,9 @@ extension EventLoop {
         ticket: Int
     ) {
         guard offMain.reading[pid]?.ticket == ticket else { return }
-        let owed = offMain.reading.removeValue(forKey: pid)?.then ?? []
-        let debt = offMain.next.removeValue(forKey: pid)
-        reconcile(
+        var owed = offMain.reading.removeValue(forKey: pid)?.then ?? []
+        var debt = offMain.next.removeValue(forKey: pid)
+        let answered = reconcile(
             pid: pid,
             app: app,
             coalesceTabs: coalesceTabs,
@@ -256,9 +272,26 @@ extension EventLoop {
                 layers: reading.layers,
                 writesAtRead: writesAtRead,
                 policy: reading.policy,
-                hidden: reading.hidden
+                hidden: reading.hidden,
+                listRead: reading.listRead
             )
         )
+        // A skipped list met an unhide: what waited is owed by a
+        // read that lists, the parked one or a fresh one (#2027).
+        if !answered {
+            if let parked = debt {
+                debt?.then = owed + parked.then
+            } else {
+                readWindowList(
+                    pid: pid,
+                    app: app,
+                    coalesceTabs: coalesceTabs,
+                    listsWhenHidden: true,
+                    then: owed
+                )
+            }
+            owed = []
+        }
         // The next read starts before the owed run, so a `then`
         // asking again joins the read after it.
         if let debt {

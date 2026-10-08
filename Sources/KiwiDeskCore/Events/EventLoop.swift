@@ -28,15 +28,15 @@ public final class EventLoop {
     }
 
     /// Fired when a transient filter drops a window mid-launch
-    /// (#675). The pid is already queued in `pendingRetrack`;
-    /// the core schedules the one-shot re-track that drains it
-    /// (`scheduleTransientRetrack`).
+    /// (#675), queued in `pendingRetrack` for the core's one-shot
+    /// re-track (`scheduleTransientRetrack`).
     var onTransientDrop: @MainActor () -> Void = {}
     /// Every activation, ahead of its reconciles (#1599).
     var onAppActivated: @MainActor (AppActivation) -> Void = { _ in }
+    /// The focus command for an unhidden window (#2027).
+    var onUnhideFocus: @MainActor (WindowID) -> Void = { _ in }
     /// Fired when a pid joins an idle `pendingRemovalRecheck`
-    /// (#1157); the core schedules the follow-up reconcile that
-    /// drains it (`scheduleRemovalRecheck`).
+    /// (#1157), drained by the core's `scheduleRemovalRecheck`.
     var onRemovalDistrust: @MainActor () -> Void = {}
 
     /// User float rules from the Lua config (`float_rules`).

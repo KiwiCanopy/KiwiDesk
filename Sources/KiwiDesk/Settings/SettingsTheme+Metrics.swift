@@ -54,9 +54,13 @@ extension SettingsTheme {
     /// (`SettingsSearchNotice`, #678).
     static let searchNoticeFillOpacity: CGFloat = 0.12
 
+    /// The marked jump chip's accent wash over `page`
+    /// (`SettingsThemeContrastTests`, #1520).
+    static let jumpChipMarkedOpacity: CGFloat = 0.18
+
     /// The update window's Highlights wash over `card`
     /// (`SettingsThemeContrastTests`, #1542).
-    static let highlightWashOpacity: CGFloat = 0.08
+    static let highlightWashOpacity: CGFloat = 0.06
 
     /// Display card stand scale and clamp metrics
     /// (`MonitorsChromeWiringTests`, #758).

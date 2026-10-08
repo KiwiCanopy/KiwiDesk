@@ -16,7 +16,8 @@ struct AppcastStructuredNotesTests {
 
     private func feed(
         sections: [[String: Any]],
-        heads: String? = nil
+        heads: String? = nil,
+        spotlight: [[String: Any]]? = nil
     ) throws -> XMLDocument {
         var entry: [String: Any] = [
             "tag": Self.tag,
@@ -25,6 +26,7 @@ struct AppcastStructuredNotesTests {
             "sections": sections,
         ]
         if let heads { entry["heads"] = heads }
+        if let spotlight { entry["spotlight"] = spotlight }
         let notes = try AppcastFixture.write(
             [
                 "generated_by": "AppcastStructuredNotesTests",
@@ -96,6 +98,42 @@ struct AppcastStructuredNotesTests {
         // The HTML stays for every 1.x client.
         let description = try doc.nodes(forXPath: "//item/description")
         #expect(description.count == 1)
+    }
+
+    /// The spotlight rides as an optional key (#2038): a shipped
+    /// window ignores it, so the format stays.
+    @Test("spotlight rows ride the notes, the format unchanged")
+    func spotlightCarried() throws {
+        let doc = try feed(
+            sections: [["title": "New", "type": "new", "items": ["A"]]],
+            spotlight: [
+                ["title": "Faster", "line": "Sooner.", "symbol": "bolt"],
+                [
+                    "title": "Find", "line": "Chips.",
+                    "setting": "config.layers",
+                ],
+            ]
+        )
+        let notes = try decoded(doc)
+        #expect(notes["format"] as? Int == 1)
+        let rows = notes["spotlight"] as? [[String: String]]
+        #expect(
+            rows == [
+                ["title": "Faster", "line": "Sooner.", "symbol": "bolt"],
+                [
+                    "title": "Find", "line": "Chips.",
+                    "setting": "config.layers",
+                ],
+            ]
+        )
+    }
+
+    @Test("a release told in prose carries no spotlight key")
+    func proseCarriesNoSpotlight() throws {
+        let doc = try feed(
+            sections: [["title": "New", "type": "new", "items": ["A"]]]
+        )
+        #expect(try decoded(doc)["spotlight"] == nil)
     }
 
     /// A release before 2.0.0 has free sections the window does

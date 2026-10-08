@@ -1,9 +1,11 @@
 /// Which of a Space's app groups its chip draws (#1528 items
 /// 17 and 20): centred on the anchor group and clamped to the
-/// row. While the row holds more than `span + 1` groups the
+/// row. While the row holds more than `span + 2` groups the
 /// chip is a fixed `span + 2` cells — a `+N` disc on each side
 /// of `span` glyphs in the middle, `span + 1` glyphs and one
 /// disc at an end — so a focus change never changes its length.
+/// A disc hides two groups or more: one group's own glyph fills
+/// the cell its disc would (#2052).
 public enum SpaceBarStrip {
     /// One side's `+N` disc: the windows it hides, in row order,
     /// which its count draws and its menu lists, and whether the
@@ -40,19 +42,22 @@ public enum SpaceBarStrip {
     }
 
     /// The drawn groups for `count` groups: everything when
-    /// `count <= span + 1`, else centred on `anchor` and clamped.
-    /// An even span puts its extra glyph on the trailing side;
-    /// no anchor draws the start of the row.
+    /// `count <= span + 2`, else centred on `anchor` and clamped,
+    /// and clamped to the end too where a side would hide one
+    /// group. An even span puts its extra glyph on the trailing
+    /// side; no anchor draws the start of the row.
     public static func window(
         count: Int,
         span: Int,
         anchor: Int?
     ) -> Range<Int> {
         let span = max(span, 1)
-        guard count > span + 1 else { return 0..<max(count, 0) }
+        guard count > span + 2 else { return 0..<max(count, 0) }
         let lead = (anchor ?? 0) - (span - 1) / 2
-        if lead <= 0 { return 0..<(span + 1) }
-        if lead + span >= count { return (count - span - 1)..<count }
+        if lead <= 1 { return 0..<(span + 1) }
+        if lead + span >= count - 1 {
+            return (count - span - 1)..<count
+        }
         return lead..<(lead + span)
     }
 
@@ -64,11 +69,11 @@ public enum SpaceBarStrip {
         span: Int
     ) -> Bool {
         let span = max(span, 1)
-        guard count > span + 1 else { return range == 0..<max(count, 0) }
+        guard count > span + 2 else { return range == 0..<max(count, 0) }
         if range == 0..<(span + 1) { return true }
         if range == (count - span - 1)..<count { return true }
-        return range.count == span && range.lowerBound > 0
-            && range.upperBound < count
+        return range.count == span && range.lowerBound > 1
+            && range.upperBound < count - 1
     }
 
     /// How a chip's glyphs walk when its strip moves (#1528 item
@@ -82,6 +87,25 @@ public enum SpaceBarStrip {
         public var leavingBack = 0
         public var enteringFront = 0
         public var enteringBack = 0
+
+        /// One glyph's travel, in the chip's cells.
+        public struct Travel: Equatable, Sendable {
+            public var from: Int
+            public var to: Int
+        }
+
+        /// The travel of the glyph whose cell in the new strip is
+        /// `rest` — one carried off counting the cell it would
+        /// take there — on a chip of `cellCount` cells: from
+        /// `rest + cells` to `rest`, both clamped to the chip, so
+        /// a boundary step that moves the window two groups fades
+        /// the extra glyph in place instead of walking it over a
+        /// neighbouring chip (#2052).
+        public func travel(resting rest: Int, cellCount: Int) -> Travel {
+            let last = max(cellCount - 1, 0)
+            let inside = { (cell: Int) in min(max(cell, 0), last) }
+            return Travel(from: inside(rest + cells), to: inside(rest))
+        }
 
         /// The walk from `old` to `new`; nil when nothing moves,
         /// when the row's group count changed under it — a window
