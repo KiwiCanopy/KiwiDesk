@@ -98,8 +98,7 @@ extension KiwiCore {
         // carries it: on a second screen the shown Space is not
         // it (#1214), so a tint there marks a focus no glyph on
         // that bar wears.
-        let focus =
-            space.id == activeSpace?.id ? state.workspaces.lastFocused : nil
+        let focus = barFocus(on: space.id)
         let disc = { (windows: [WindowID]) in
             SpaceBarStrip.Disc(
                 windows: windows,
@@ -170,7 +169,7 @@ extension KiwiCore {
             // The SYSTEM focus, not this space's own memory:
             // a foreign sticky window can hold it (#414 QA —
             // its glyph was stuck on the unfocused dim tier).
-            focused: state.workspaces.lastFocused
+            focused: barFocus(on: space.id)
                 .map(group.contains) ?? false,
             count: group.count,
             // Badge inheritance (#414): a group aggregates its

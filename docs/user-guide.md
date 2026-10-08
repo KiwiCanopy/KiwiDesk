@@ -557,11 +557,14 @@ Resting the pointer on a glyph, a `+n` badge, an App Bar group of
 two or more windows, or an App Bar item that cuts its title shows
 its windows beside the bar. Where that is a list — a glyph with a
 count badge, a `+n` badge or an App Bar group — move the pointer
-onto it and click a row to switch to that window. Clicking a
-glyph with a count badge, or a `+n` badge, shows the list at
-once, or closes it if it is already open; an open list stays
-until you pick a row, click elsewhere or move the pointer away.
-Nothing switches until you pick. A list too long for the screen
+onto it and click a row to switch to that window. A check marks
+the window that has the focus.
+
+Clicking a glyph with a count badge focuses its first window and
+shows the list at once; each further click focuses the next one,
+from the checked window, and wraps at the end. Clicking a `+n`
+badge shows its list and switches nothing until you pick. An open list stays until you
+pick a row, click elsewhere or move the pointer away. A list too long for the screen
 ends in **More windows**, which opens a menu of every window.
 With VoiceOver, pressing the glyph opens that menu.
 :::

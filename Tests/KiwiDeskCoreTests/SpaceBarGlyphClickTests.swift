@@ -162,17 +162,20 @@ struct SpaceBarGlyphClickTests {
         #expect(core.state.workspaces[one]?.focused == WindowID(5))
     }
 
-    /// A click on a list opens no menu — the peek is its list
-    /// (`BarPeekClickTests`) — while VoiceOver's press opens the
-    /// native menu, the peek's accessible twin (#1946).
+    /// A click on a group glyph focuses one of its windows
+    /// (`BarGlyphCycleTests`, #2063) and opens no menu, while
+    /// VoiceOver's press opens the native menu, the peek's
+    /// accessible twin (#1946).
     @Test("A group glyph's click opens no menu; VoiceOver's press does")
     func groupOpensAMenuForVoiceOver() throws {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         let menu = capturingMenus(core)
-        core.pickFromSpaceBar(pick([2, 3], on: two))
-        #expect(menu() == nil, "a click shows the peek instead")
-        #expect(core.activeSpace?.id == one)
+        let clicked = seededCore()
+        clicked.spaceBars.glyphActions.present = { _, _ in
+            Issue.record("a click pops no menu")
+        }
+        clicked.pickFromSpaceBar(pick([2, 3], on: two))
         core.pressSpaceBarGlyph(pick([2, 3], on: two))
         #expect(core.activeSpace?.id == one)
         let shown = try #require(menu())
@@ -232,21 +235,23 @@ struct SpaceBarGlyphClickTests {
         LocalizationManager.shared.select("en")
         let core = seededCore()
         let mail = try #require(
-            core.barPeekContent(.glyph([WindowID(2), WindowID(3)]))
+            core.barPeekContent(.glyph([WindowID(2), WindowID(3)]), on: nil)
         )
         #expect(mail.groups.map(\.app) == ["Mail"])
         #expect(mail.groups.map(\.titles) == [["Inbox", "Draft"]])
         #expect(mail.groups.map(\.windowCount) == [2])
-        let web = try #require(core.barPeekContent(.glyph([WindowID(4)])))
+        let web = try #require(
+            core.barPeekContent(.glyph([WindowID(4)]), on: nil)
+        )
         #expect(web.groups.map(\.titles) == [["Doc"]])
         core.state.windows.updateTitle(WindowID(3), title: "")
         let untitled = try #require(
-            core.barPeekContent(.glyph([WindowID(2), WindowID(3)]))
+            core.barPeekContent(.glyph([WindowID(2), WindowID(3)]), on: nil)
         )
         #expect(
             untitled.groups.map(\.titles) == [["Inbox", "Untitled Window"]]
         )
-        #expect(core.barPeekContent(.glyph([WindowID(99)])) == nil)
+        #expect(core.barPeekContent(.glyph([WindowID(99)]), on: nil) == nil)
     }
 
     @Test("The bootstrap wires the targets to the click routing")
@@ -256,7 +261,7 @@ struct SpaceBarGlyphClickTests {
         #expect(core.activeSpace?.id == two)
         let peek = try #require(core.spaceBars.glyphActions.peek)
         #expect(
-            peek.content(.glyph([WindowID(4)]))?.groups.map(\.titles)
+            peek.content(.glyph([WindowID(4)]), nil)?.groups.map(\.titles)
                 == [["Doc"]]
         )
     }

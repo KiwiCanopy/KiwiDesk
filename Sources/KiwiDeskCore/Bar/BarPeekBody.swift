@@ -36,6 +36,10 @@ final class BarPeekBody: NSView {
         static let hoverPadH: CGFloat = 6
         static let hoverPadV: CGFloat = 3
         static let hoverRadius: CGFloat = 6
+        /// The focused row's check (#2063), and its column past the
+        /// titles' wrap width: the check plus a gap before it.
+        static let checkSide: CGFloat = 12
+        static let checkColumn: CGFloat = 16
     }
 
     override var isFlipped: Bool { true }
@@ -49,6 +53,8 @@ final class BarPeekBody: NSView {
     /// the list (`BarPeekBody+More`).
     var moreLabel: NSTextField?
     var moreChevron: NSImageView?
+    /// The focused row's check, where a list's last build drew one.
+    var check: NSImageView?
     /// The hairlines' ink: the bar's rule tier (`BarDivider`).
     private(set) var ruleInk = NSColor.clear
     /// The buttons the last build laid out, top to bottom, and the
@@ -82,6 +88,7 @@ final class BarPeekBody: NSView {
         rules = []
         moreLabel = nil
         moreChevron = nil
+        check = nil
         resetTargets(shelf)
         setAccessibilityElement(false)
         ruleInk = BarDivider.color(textColor: shelf.itemColor)
@@ -116,22 +123,35 @@ final class BarPeekBody: NSView {
                 more?.width ?? 0
             )
         )
+        // A list's check column sits past the wrap width, so titles
+        // wrap where they would without it (#2063).
+        let column = content.checks ? Metrics.checkColumn : 0
         var y = Metrics.padV
         if let more, cutAtTop {
             y = place(more, at: y, width: width) + Metrics.rowGap
         }
         for (index, built) in groups.enumerated() {
             if index > 0 {
-                addRule(at: y + Metrics.groupGap, x: 0, width: width)
+                addRule(
+                    at: y + Metrics.groupGap,
+                    x: 0,
+                    width: width + column
+                )
                 y += 2 * Metrics.groupGap + BarDivider.ruleThickness
             }
-            y = place(built, at: y, width: width, indent: indent)
+            y = place(
+                built,
+                at: y,
+                width: width,
+                indent: indent,
+                column: column
+            )
         }
         if let more, !cutAtTop {
             y = place(more, at: y + Metrics.rowGap, width: width)
         }
         let size = CGSize(
-            width: ceil(width + 2 * Metrics.padH),
+            width: ceil(width + column + 2 * Metrics.padH),
             height: ceil(y + Metrics.padV)
         )
         frame.size = size
@@ -154,12 +174,14 @@ final class BarPeekBody: NSView {
         }
     }
 
-    /// Places `built` from `top`; returns where it ends.
+    /// Places `built` from `top`, `column` the check's past
+    /// `width`; returns where it ends.
     private func place(
         _ built: Built,
         at top: CGFloat,
         width: CGFloat,
-        indent: CGFloat
+        indent: CGFloat,
+        column: CGFloat
     ) -> CGFloat {
         let lead = Metrics.padH
         let iconPart = built.group.icon == nil ? 0 : indent
@@ -192,7 +214,11 @@ final class BarPeekBody: NSView {
         let rowWidth = max(width - indent, 1)
         for (index, row) in built.rows.enumerated() {
             if index > 0 {
-                addRule(at: y + Metrics.rowGap, x: indent, width: rowWidth)
+                addRule(
+                    at: y + Metrics.rowGap,
+                    x: indent,
+                    width: rowWidth + column
+                )
                 y += 2 * Metrics.rowGap + BarDivider.ruleThickness
             }
             let height = Self.height(of: row, width: rowWidth)
@@ -203,10 +229,22 @@ final class BarPeekBody: NSView {
                 height: height
             )
             add(row)
+            guard built.group.rows[index].focused, column > 0 else {
+                addTarget(
+                    .window(built.group.rows[index].window),
+                    around: row.frame,
+                    inks: [row]
+                )
+                y += height
+                continue
+            }
+            // Its hover fill reaches over the column, so the check
+            // never sits half inside it.
+            let mark = addCheck(beside: row, columnEnd: lead + width + column)
             addTarget(
                 .window(built.group.rows[index].window),
-                around: row.frame,
-                inks: [row]
+                around: row.frame.union(mark.frame),
+                inks: [row, mark]
             )
             y += height
         }

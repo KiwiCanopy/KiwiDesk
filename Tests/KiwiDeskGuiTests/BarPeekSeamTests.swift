@@ -248,10 +248,10 @@ struct BarPeekSeamTests {
         #expect(spelled.isEmpty, "\(spelled)")
     }
 
-    @Test("a glyph's click picks or toggles as its list predicate rules")
+    @Test("a glyph's click picks or opens as its list predicate rules")
     func glyphClickRouting() throws {
         // A glyph's click: a one-window glyph's pick closes the peek
-        // ahead of its focus; a list toggles it — told apart by the
+        // ahead of its focus; a list opens it — told apart by the
         // one list predicate, as VoiceOver's press is.
         let click = try #require(
             SourceScan.declarationBody(
@@ -262,7 +262,7 @@ struct BarPeekSeamTests {
         let closes = try #require(click.range(of: "shelves.peek.dismiss()"))
         let focus = try #require(click.range(of: "focusFromSpaceBar("))
         #expect(closes.upperBound <= focus.lowerBound)
-        #expect(click.contains("togglePeek(pick)"))
+        #expect(click.contains("showPeek(pick)"))
         #expect(!click.contains("SpaceBarWindowMenu.make("))
         #expect(click.contains("pick.peekSource.isList"))
         let press = try #require(
@@ -289,7 +289,8 @@ struct BarPeekSeamTests {
     /// `pickBarRow`, so the two lists cannot focus two ways (#1946):
     /// the menu has one builder, whose rows take it; the peek's
     /// pick takes it; and the focus behind it is called from that
-    /// door and the one-window glyph's click alone.
+    /// door and a glyph's click alone — its one window, or the
+    /// next of several (#2063).
     @Test("a peek row's pick is the window menu's pick")
     func oneBarRowPick() throws {
         let click = try Self.app("KiwiCore+SpaceBarClick.swift")
@@ -317,7 +318,8 @@ struct BarPeekSeamTests {
             )
         )
         #expect(picked.contains("pick(window, shown.space)"))
-        // Sources-wide: one menu builder, two focus call sites.
+        // Sources-wide: one menu builder, three focus call sites —
+        // the row door and the glyph click's two arms.
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources")
         var builders = 0
@@ -331,6 +333,13 @@ struct BarPeekSeamTests {
             if calls > 0 { focuses[file.lastPathComponent] = calls }
         }
         #expect(builders == 1)
-        #expect(focuses == ["KiwiCore+SpaceBarClick.swift": 2])
+        #expect(focuses == ["KiwiCore+SpaceBarClick.swift": 3])
+        let glyphClick = try #require(
+            SourceScan.declarationBody(
+                after: "func pickFromSpaceBar(",
+                in: click
+            )
+        )
+        #expect(glyphClick.occurrences(of: "focusFromSpaceBar(") == 2)
     }
 }
