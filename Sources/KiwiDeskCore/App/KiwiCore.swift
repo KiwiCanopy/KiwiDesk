@@ -186,6 +186,8 @@ public final class KiwiCore {
 
     /// #958 steal debt; `KiwiCore+AccessibilityReturn.swift`.
     var accessibilityReturn: AccessibilityReturnDebt?
+    /// #2002 delayed-close debt; `KiwiCore+DelayedCloseReturn`.
+    var delayedCloseDebt: DelayedCloseDebt?
 
     /// The last #1532 reveal return; `KiwiCore+MenuBarRevealReturn`.
     var menuBarRevealReturnAt: Date?
@@ -199,8 +201,6 @@ public final class KiwiCore {
     /// The warp a draining restore held (#689): recorded while
     /// the counter above is up, fired when the last drain ends,
     /// staleness-checked (the `runPendingFocusRaise` pattern).
-    /// Without it, a focus change landing inside a drain lost
-    /// its warp forever.
     var pendingMouseWarp: WindowID?
 
     /// The machine tail of the warp (#186): reads the live

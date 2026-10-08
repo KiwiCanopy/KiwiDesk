@@ -21,9 +21,7 @@ struct HomeSupportStripTests {
                 .appendingPathComponent(
                     "Sources/KiwiDesk/Settings/Home/HomeSupportStrip.swift"
                 )
-            return SourceScan.blankingCommentsAndLiterals(
-                try String(contentsOf: url, encoding: .utf8)
-            )
+            return try SourceScan.blankedSource(at: url)
         }
     }
 

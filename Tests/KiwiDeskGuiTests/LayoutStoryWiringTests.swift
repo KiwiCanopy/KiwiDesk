@@ -81,7 +81,7 @@ struct LayoutStoryWiringTests {
         var calls: [String] = []
         var i = 0
         while i + needle.count <= text.count {
-            guard Array(text[i..<(i + needle.count)]) == needle else {
+            guard text[i..<(i + needle.count)].elementsEqual(needle) else {
                 i += 1
                 continue
             }

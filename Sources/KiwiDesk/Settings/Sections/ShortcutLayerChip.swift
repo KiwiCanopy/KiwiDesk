@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// One persistent Shortcuts layer chip. Selection is its rest
-/// affordance; an unselected chip only strengthens its existing
-/// fill on hover, with no geometry or cursor change.
+/// One persistent Shortcuts layer chip, a `ChoiceChip`: an
+/// unselected chip lifts its rest fill on hover, with no geometry
+/// or cursor change.
 struct ShortcutLayerChip: View {
     let name: String
     let selected: Bool
@@ -18,7 +18,10 @@ struct ShortcutLayerChip: View {
                 .font(.callout)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
-                .background(Capsule().fill(fill))
+                .choiceChip(
+                    selected: selected,
+                    hovering: hovering && isEnabled
+                )
                 .animation(hoverAnimation, value: hovering)
         }
         .buttonStyle(.plain)
@@ -27,15 +30,6 @@ struct ShortcutLayerChip: View {
             if !now { hovering = false }
         }
         .accessibilityAddTraits(selected ? [.isSelected] : [])
-    }
-
-    private var fill: Color {
-        if selected {
-            return SettingsTheme.accent.opacity(0.25)
-        }
-        return Color.secondary.opacity(
-            hovering && isEnabled ? 0.18 : 0.12
-        )
     }
 
     private var hoverAnimation: Animation? {

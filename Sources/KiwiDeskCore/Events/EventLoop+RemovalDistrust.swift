@@ -1,4 +1,17 @@
 import ApplicationServices
+import Foundation
+
+/// One #1157 continuous-absence episode, opened by its first
+/// refusal and ended by the re-list or the registration release.
+struct RemovalEpisode {
+    /// Follow-up arms spent against `removalRecheckCap`.
+    var arms = 0
+    /// When the first refusal opened it, on `EventLoop.wallClock`.
+    var opened: Date = .distantPast
+    /// The expected-absence arm that opened it; nil for a census
+    /// refusal — a close the distrust is delaying (#2002).
+    var cause: EventLoop.ExpectedAbsence?
+}
 
 /// The removal-distrust gate (#1157): a sweep close candidate
 /// the on-screen census still shows is refused, because the
@@ -39,14 +52,21 @@ extension EventLoop {
     /// left (`removalRecheckCap`), so a TRUE close still
     /// compositing at sweep time converges on the recheck
     /// one-shot instead of waiting for the next incidental pass.
+    /// `armed` is the arm open beside a census refusal: it names
+    /// the episode's cause without the blind log line.
     func refuseRemoval(
         _ id: WindowID,
         pid: pid_t,
         app: AppRef,
-        blind: ExpectedAbsence? = nil
+        blind: ExpectedAbsence? = nil,
+        armed: ExpectedAbsence? = nil
     ) {
-        let spent = removalDistrusted[id]
+        let spent = removalDistrusted[id]?.arms
         if spent == nil {
+            removalDistrusted[id] = RemovalEpisode(
+                opened: wallClock(),
+                cause: blind ?? armed
+            )
             let cause: String
             switch blind {
             case .carried:
@@ -65,12 +85,11 @@ extension EventLoop {
             )
         }
         let arms = spent ?? 0
-        removalDistrusted[id] = arms
         guard arms < Self.removalRecheckCap else { return }
         let wasIdle = pendingRemovalRecheck.isEmpty
         pendingRemovalRecheck.insert(pid)
         if wasIdle {
-            removalDistrusted[id] = arms + 1
+            removalDistrusted[id]?.arms = arms + 1
             onRemovalDistrust()
         }
     }
@@ -92,10 +111,10 @@ extension EventLoop {
     ) -> Bool {
         guard let arm = expectedAbsence(of: id) else { return false }
         if census().contains(id) {
-            refuseRemoval(id, pid: pid, app: app)
+            refuseRemoval(id, pid: pid, app: app, armed: arm)
             return true
         }
-        guard removalDistrusted[id, default: 0] < Self.removalRecheckCap
+        guard (removalDistrusted[id]?.arms ?? 0) < Self.removalRecheckCap
         else { return false }
         refuseRemoval(id, pid: pid, app: app, blind: arm)
         return true
@@ -139,6 +158,29 @@ extension EventLoop {
     /// close.
     func fullscreenRemovalArmIsOpen(for id: WindowID) -> Bool {
         detectedFullscreen[id] == true || fullscreenSpaceHosts(id)
+    }
+
+    /// When the episode a CENSUS refusal opened on `id` began — a
+    /// close the distrust is delaying — nil for no episode or one
+    /// an expected-absence arm opened: the #2002 debt's one
+    /// reading of the machine, judged on the cause recorded at
+    /// the opening rather than the arms' state now.
+    func delayedCloseOpened(_ id: WindowID) -> Date? {
+        guard let episode = removalDistrusted[id], episode.cause == nil
+        else { return nil }
+        return episode.opened
+    }
+
+    /// A window back in the AX list ends its episode (#1157), so
+    /// a later absence is refused — and logged — afresh; the core
+    /// hears which ended without a close (#2002).
+    func endRemovalEpisodes(relisted live: Set<WindowID>) {
+        let ended = Set(removalDistrusted.keys).intersection(live)
+        guard !ended.isEmpty else { return }
+        removalDistrusted = removalDistrusted.filter {
+            !ended.contains($0.key)
+        }
+        onRemovalEpisodesEnded(ended)
     }
 
     /// Hands the pids owed a distrust follow-up to the scheduled

@@ -24,6 +24,7 @@ struct ShelfSplitDriverTests {
             let display = screen.kiwiDisplay
         else { return nil }
         let core = makeTestCore()
+        core.shelves.ordersPanels = true
         core.tiler.visibleBounds = { _ in screen.frame }
         core.state.apply(.displaysChanged([display]))
         core.state.apply(

@@ -26,6 +26,8 @@ struct BarPeekClickTests {
     /// glyph of two windows.
     private func seededCore() -> KiwiCore {
         let core = makeBarCore()
+        // The peek stands on the shelf's panel (#1894).
+        core.shelves.ordersPanels = true
         core.state.workspaces.assign(one, to: display)
         core.state.workspaces.assign(two, to: display)
         core.state.workspaces.activate(two)
