@@ -81,7 +81,8 @@ public final class BorderManager {
     #if DEBUG
         /// Test-only: builds ring backends in the manager's order and
         /// stands in for the WindowServer request. Production must
-        /// not set them.
+        /// not set them; every test core sets the factory to the
+        /// inert backend, so a real panel needs its own manager.
         var backendFactory:
             ((BorderGeometry.Order) -> any BorderOverlayBackend)?
         var watchOverride: ((Set<WindowID>) -> Bool)?

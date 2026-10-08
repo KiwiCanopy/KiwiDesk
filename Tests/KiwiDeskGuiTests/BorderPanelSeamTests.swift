@@ -1,14 +1,14 @@
 import Foundation
 import Testing
 
-/// The ring panel's WindowServer writes stay behind their seams
-/// (#1956): the SkyLight move defaults LIVE on `BorderManager`
-/// alone, and both `makeTestCore` twins pin it, with the level read
-/// beside it, to the AppKit fallback. Twin
-/// IDENTITY is `MachineTouchTests`'; a pin deleted from both twins
-/// passes it, which is the half held here. And a default regressed
-/// to the fallback reds nothing behavioural — every suite pins the
-/// seam — so the live default is held by its spelling.
+/// The ring's WindowServer reads and writes stay behind their seams
+/// (#1956, #1894): both `makeTestCore` twins pin the inert backend
+/// and the corner-radius read, and keep the move and level pins as
+/// the backstop for a suite that clears the factory. Twin IDENTITY
+/// is `MachineTouchTests`'; a pin deleted from both twins passes it,
+/// which is the half held here. A live default regressed reds
+/// nothing behavioural, so it is held by its spelling, and its one
+/// home by the qualified call only.
 @Suite("Border panel seams stay injected")
 struct BorderPanelSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)

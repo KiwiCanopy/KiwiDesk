@@ -20,13 +20,23 @@ struct BorderTestCoreInertTests {
         )
     }
 
-    @Test("a synced ring takes the inert backend in the manager's order")
-    func syncedRingIsInert() throws {
+    @Test(
+        "a synced ring takes the inert backend in the manager's order",
+        arguments: [
+            (BorderStyle.DrawOrder.behind, BorderGeometry.Order.below),
+            (.front, .above),
+        ]
+    )
+    func syncedRingIsInert(
+        drawOrder: BorderStyle.DrawOrder,
+        expected: BorderGeometry.Order
+    ) throws {
         let core = makeTestCore()
         defer { core.borders.clear() }
+        core.borders.setDrawOrder(drawOrder)
         core.borders.sync([spec(7)])
         let ring = try #require(core.borders.overlays[WindowID(7)])
         let backend = try #require(ring.backend as? InertBorderBackend)
-        #expect(backend.orderMode == .below)
+        #expect(backend.orderMode == expected)
     }
 }

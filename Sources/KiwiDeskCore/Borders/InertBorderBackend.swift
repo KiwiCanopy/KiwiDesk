@@ -1,10 +1,8 @@
 import AppKit
 
 #if DEBUG
-    /// A ring backend that draws nothing and owns no window: every
-    /// `makeTestCore` ring takes it (#1894), so a fixture's sync
-    /// costs no WindowServer transaction. Suites that test the panel
-    /// build `AppKitBorderOverlay` themselves.
+    /// A ring backend that draws nothing and owns no window, so a
+    /// test core's sync costs no WindowServer transaction (#1894).
     @MainActor
     final class InertBorderBackend: BorderOverlayBackend {
         let orderMode: BorderGeometry.Order
