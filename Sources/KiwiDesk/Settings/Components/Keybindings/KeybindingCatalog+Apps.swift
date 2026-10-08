@@ -10,7 +10,7 @@ enum AppLaunchBehavior: String, CaseIterable {
 
     var verb: String {
         switch self {
-        case .openOrFocus: return "pull_or_spawn"
+        case .openOrFocus: return "focus_or_spawn"
         case .openNew: return "spawn_new"
         }
     }

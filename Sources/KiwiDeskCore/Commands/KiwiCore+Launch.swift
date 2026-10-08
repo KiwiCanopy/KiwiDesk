@@ -1,6 +1,6 @@
 import Foundation
 
-/// `pull_or_spawn` / `spawn_new` (#637, #673, #1146): the cycle,
+/// `focus_or_spawn` / `spawn_new` (#637, #673, #1146): the cycle,
 /// the reach onto an away Desktop, the one un-park, the activate
 /// and the launch — split from `KiwiCore+Commands.swift` at the
 /// §2.1 ceiling. Every machine touch goes through `openOrFocus`
@@ -49,7 +49,7 @@ extension KiwiCore {
                     first.window,
                     desktop: first.desktop,
                     snapshot: reach.snapshot,
-                    verb: "pull_or_spawn"
+                    verb: "focus_or_spawn"
                 )
             {
                 return .ok()

@@ -844,7 +844,7 @@ Floating windows, picture-in-picture included, are never parked
 and stay visible across all spaces.
 
 **Minimizing** a window removes it from its space. Restoring it
-— from the Dock, or via [`pull_or_spawn`](#pull_or_spawn) when
+— from the Dock, or via [`focus_or_spawn`](#focus_or_spawn) when
 the app has nothing left on screen — opens it in the space you
 are on at that moment, as a new window (an `app_rules` entry
 for its app still wins). **Hiding** an app (cmd+H, or an app
@@ -3784,7 +3784,7 @@ identifier](#finding-a-bundle-identifier).
 
 Opening a listed app takes you with it: when you launch it,
 reopen it with no window showing, or restore its minimized
-window yourself — a Dock click, Spotlight, `pull_or_spawn` —
+window yourself — a Dock click, Spotlight, `focus_or_spawn` —
 and the window goes to a space other than the one you are on,
 KiwiDesk switches to that space and focuses the window. A
 window an app opens on its own while another of its windows is
@@ -3818,7 +3818,7 @@ Profile overrides resolve the same way over a Lua-owned base.
 
 ### Finding a bundle identifier
 
-App rules and `pull_or_spawn` identify an app by its bundle
+App rules and `focus_or_spawn` identify an app by its bundle
 identifier. The Settings app's pickers list installed apps by
 name and store the identifier for you. To find one by hand:
 
@@ -4256,7 +4256,13 @@ floating.set_color("#8E5DE0")
 
 ## Launching Apps
 
-### pull_or_spawn
+### focus_or_spawn
+
+:::unreleased
+Renamed from `pull_or_spawn`, which is now refused with a Config
+Issue naming this verb. A shortcut made in Settings is updated for
+you; a call in your `init.lua` needs the new name.
+:::
 
 **Expects:** an app bundle identifier (e.g. `com.apple.safari`).
 See [Finding a bundle identifier](#finding-a-bundle-identifier).
@@ -4306,7 +4312,7 @@ asks it for a new window, the same as clicking it in the Dock.
 
 ```lua
 KiwiDesk.bind("ctrl+return", function()
-    KiwiDesk.pull_or_spawn("com.apple.safari")
+    KiwiDesk.focus_or_spawn("com.apple.safari")
 end)
 ```
 
@@ -4317,7 +4323,7 @@ See [Finding a bundle identifier](#finding-a-bundle-identifier).
 
 **Does:** always launches a new instance of the app, even if one
 is already running. Matching is keyed on the bundle id, like
-`pull_or_spawn`.
+`focus_or_spawn`.
 
 **Example:**
 
@@ -4329,7 +4335,7 @@ end)
 
 Both launch verbs are also reachable from the Settings app: an
 Open applications shortcut carries a per-row **Launch behavior**
-menu — *Open or Focus* (`pull_or_spawn`, the default) or *Open
+menu — *Open or Focus* (`focus_or_spawn`, the default) or *Open
 New* (`spawn_new`).
 
 ## User Interface
@@ -4780,7 +4786,7 @@ and an unknown space is JSON `null`; the Lua callback receives
 
 Every window event also carries the owning app's `bundle_id` —
 the identity key that app rules (`float_rules`, `app_rules`) and
-`pull_or_spawn` match on; the display `app` name is
+`focus_or_spawn` match on; the display `app` name is
 locale-dependent. It is the trailing Lua argument (skip it if
 you don't need it), `""` for unbundled processes; in the CLI
 event stream the key is `bundle_id`, JSON `null` when unknown.
@@ -5657,7 +5663,7 @@ and back for the previous one — the way the key pointed, on a
 `focus` step — about the vertical axis in a horizontal Monocle
 and the horizontal one in a vertical Monocle. It plays only for
 a focus change KiwiDesk itself commands — a `focus` step, an App
-Bar click, `pull_or_spawn` — never for one macOS made (⌘Tab, the
+Bar click, `focus_or_spawn` — never for one macOS made (⌘Tab, the
 Dock), and never onto a floating window. A plate whose next
 window is smaller (an app that refuses the full slot) lands on
 that window's own frame. macOS's Reduce Motion keeps the flip

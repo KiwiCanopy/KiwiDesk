@@ -1080,7 +1080,7 @@ Four constraints fall out, and they are the durable part:
   readers their desk is a mess describes someone else.
 - **A papercut is translated, not pasted.** `README.md` ▸
   *Solving macOS Papercuts* writes them for people who already
-  know "monocle", "spaces" and `pull_or_spawn`. Simple mode gets
+  know "monocle", "spaces" and `focus_or_spawn`. Simple mode gets
   the symptom and the relief, never the mechanism — and never a
   claim the app does not make: KiwiDesk does not change what
   ⌘Tab does, and nothing seeds a keystroke that makes a window
@@ -3128,7 +3128,7 @@ mid-flight — is the shape.
 
 *It plays only for a focus KiwiDesk COMMANDS, and the focus it
 owes is a ledger, not a closure.* A `focus` step, an App Bar
-click, `pull_or_spawn` — the door is `focusWithMonocleFlip`,
+click, `focus_or_spawn` — the door is `focusWithMonocleFlip`,
 which records `pendingMonocleFocus` and lands the ordinary
 `focusWindow` at the landing; every OS-reported focus (⌘Tab,
 the Dock) takes no door, since its swap already happened. The
@@ -10223,6 +10223,19 @@ only a second one inside that bound goes through, and the
 pointer leaving the edge, or a click, is what ends it.
 (`MenuBarRevealReturnTests`, `MenuBarRevealSeamTests`)
 
+:::unreleased
+**Open or Focus is `focus_or_spawn`, not `pull_or_spawn`
+([#1511](https://github.com/KiwiCanopy/KiwiDesk/issues/1511)).**
+The verb has never pulled a window: from its first version it
+went to the app's window where it was, and every extension since
+— the ring, the un-park, the reach onto another Desktop — goes
+there too. "Pull" misled readers into expecting the window to come
+to the current Space, and it would have meant the opposite of
+itself beside a verb that does gather windows. "Focus" is the
+vocabulary's word for going to something (`focus`,
+`focus_space`), and "spawn" keeps the pair with `spawn_new`.
+:::
+
 **Open-or-Focus cycles in canonical order, never
 most-recently-used.** A repeat press of the shortcut walks the
 app's tracked windows in space-creation order, then flat-array
@@ -12124,6 +12137,24 @@ following `SetupBundle.currentFormat`. Migrations key off the format
 rather than scanning payloads, and future migration removals establish
 a supported format floor rather than guessing whether older configs
 still exist.
+
+:::unreleased
+**A verb the GUI writes into a stored binding is a stored value
+([#1511](https://github.com/KiwiCanopy/KiwiDesk/issues/1511)).**
+The charter keeps the user's Lua out of every crossing: a renamed
+verb in `init.lua`, or in a binding someone wrote by hand, fails
+loudly, naming its replacement. Each Settings catalog row, though
+— an app shortcut, a Space jump, a resize, a layer switch — writes
+one exact call into the binding's `lua`, so that spelling is the
+app's own format and a rename of its verb owes the crossing any
+stored value owes. The rule is by SPELLING: the exact shape the
+GUI writes crosses, whoever typed it — a custom row typed that way
+crosses too, and gating on the row's `kind` would be wrong, since
+a missing `kind` decodes as custom — while every other spelling
+still fails loudly. Without it a rename breaks every shortcut ever
+made in Settings on the update, which is the
+stranger-hand-edits-JSON outcome above.
+:::
 
 The bar exists to tell one window from another, and the app name
 is the one label that provably cannot. Five Finder windows read

@@ -169,7 +169,7 @@ struct OpenOrFocusReachTests {
 
     private func press(_ core: KiwiCore) {
         #expect(
-            core.execute("pull_or_spawn", args: [.string(bundle)])
+            core.execute("focus_or_spawn", args: [.string(bundle)])
                 .isSuccess
         )
     }

@@ -9,13 +9,13 @@ import Testing
 /// both verbs, and non-app Lua stays unmatched.
 @Suite("App launch behavior")
 struct AppLaunchBehaviorTests {
-    @Test("open-or-focus round-trips through pull_or_spawn")
+    @Test("open-or-focus round-trips through focus_or_spawn")
     func openOrFocusRoundTrip() {
         let lua = KeybindingCatalog.appCommand(
             "com.apple.safari",
             behavior: .openOrFocus
         )
-        #expect(lua == "KiwiDesk.pull_or_spawn(\"com.apple.safari\")")
+        #expect(lua == "KiwiDesk.focus_or_spawn(\"com.apple.safari\")")
         #expect(
             KeybindingCatalog.appBundleID(from: lua)
                 == "com.apple.safari"
@@ -51,7 +51,7 @@ struct AppLaunchBehaviorTests {
         // existing call sites author open-or-focus unchanged.
         #expect(
             KeybindingCatalog.appCommand("com.a.b")
-                == "KiwiDesk.pull_or_spawn(\"com.a.b\")"
+                == "KiwiDesk.focus_or_spawn(\"com.a.b\")"
         )
     }
 
@@ -183,7 +183,7 @@ struct AppLaunchBehaviorTests {
             "KiwiDesk.reload_config()",
             // An embedded quote is escaped content the menu never
             // authors — stays unmatched.
-            "KiwiDesk.pull_or_spawn(\"a\"b\")",
+            "KiwiDesk.focus_or_spawn(\"a\"b\")",
         ] {
             #expect(KeybindingCatalog.appBundleID(from: lua) == nil)
             #expect(

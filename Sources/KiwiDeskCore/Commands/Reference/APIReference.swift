@@ -39,7 +39,7 @@ public enum APIReference {
             ("override_sticky_reach", "override_sticky_reach"),
             ("resize", "resize"),
             ("move_to_track", "move_to_track"),
-            ("pull_or_spawn", "pull_or_spawn"),
+            ("focus_or_spawn", "focus_or_spawn"),
             ("spawn_new", "spawn_new"),
             ("set_mode", "set_mode"),
             ("set_gap_global", "set_gap_global"),

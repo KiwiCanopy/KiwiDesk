@@ -247,7 +247,7 @@ exports nothing.
 | | `override_sticky_reach` | `on\|off\|auto` — pins the focused sticky window's Desktop reach against `sticky.set_desktop_reach` (`auto` clears the pin) |
 | | `resize` | `x\|y`, delta (px) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
-| Launch | `pull_or_spawn` | app bundle id (e.g. `com.apple.safari`) — a repeat press while its window is focused cycles the app's windows |
+| Launch | `focus_or_spawn` | app bundle id (e.g. `com.apple.safari`) — a repeat press while its window is focused cycles the app's windows |
 | | `spawn_new` | app bundle id |
 | System | `set_mode` | [space,] mode |
 | | `set_mouse_resize` | `layout\|snap_back` |
@@ -349,6 +349,11 @@ exports nothing.
 `animations.set_on_space_change` defaults to `true`, and
 `animations.set_space_change_duration` is new. A profile saved by
 an earlier release keeps the value it stored.
+:::
+
+:::unreleased
+`focus_or_spawn` was `pull_or_spawn`; the old name is refused,
+naming the new one.
 :::
 
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
@@ -533,7 +538,7 @@ stays silent: an empty filter is not the same request as no
 filter.
 
 Every window event carries `bundle_id` — the stable identity
-key (the one app rules and `pull_or_spawn` match on) — next to
+key (the one app rules and `focus_or_spawn` match on) — next to
 the locale-dependent display `app` name. It is JSON `null` for
 unbundled processes; the Lua callback receives it as the
 trailing positional argument, `""` when unknown.

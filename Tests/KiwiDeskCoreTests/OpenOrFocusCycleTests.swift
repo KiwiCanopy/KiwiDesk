@@ -4,7 +4,7 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// #637: a repeat press of Open or Focus (`pull_or_spawn`)
+/// #637: a repeat press of Open or Focus (`focus_or_spawn`)
 /// while one of the app's windows is already focused advances
 /// to the app's next tracked window — space order then slot
 /// order, wrapping — instead of re-activating. The cycle reads
@@ -65,7 +65,7 @@ struct OpenOrFocusCycleTests {
 
     private func press(_ core: KiwiCore) -> CommandResponse {
         core.execute(
-            "pull_or_spawn",
+            "focus_or_spawn",
             args: [.string(Self.bundle)]
         )
     }
