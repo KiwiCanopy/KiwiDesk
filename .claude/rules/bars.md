@@ -623,9 +623,7 @@ Obligations:
   (`BarPeekSeamTests` ▸ `peekTakesTheGate`) and tinted UNIFORMLY
   through `GlassTint.applyUniform`, the ruled exception to the
   detached-surface fade (`PeekInkContrastTests` measures the ink
-  on that ground, a hovered row's included, and the count pill
-  draws its ring only where `KiwiShelf.peekPillNeedsRing` says,
-  `PeekPillRingTests`); its shelf is the one
+  on that ground, a hovered row's included); its shelf is the one
   `ShelfManager` drew the anchor's panel with; its text asks
   `BarFont` at the peek's own fixed size, never the strip-depth
   ladders (`BarFontSiteTests` ▸ `hoverPeek`); a list taller than

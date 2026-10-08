@@ -38,8 +38,6 @@ struct AppBarHoverTitleTests {
         )
         #expect(content.groups.map(\.app) == ["Finder"])
         #expect(content.groups.map(\.titles) == [["Downloads"]])
-        // One window: the name alone, no count.
-        #expect(content.groups.first?.count == nil)
         // An App Bar header carries no icon; `+n` alone mixes apps.
         #expect(content.groups.first?.icon == nil)
         #expect(core.barPeekContent(.appItem([WindowID(99)])) == nil)
@@ -189,7 +187,7 @@ struct AppBarHoverTitleTests {
         )
         #expect(content.groups.map(\.app) == ["Finder"])
         #expect(content.groups.map(\.titles) == [["Downloads", "Desktop"]])
-        #expect(content.groups.map(\.count) == [2])
+        #expect(content.groups.map(\.windowCount) == [2])
     }
 
     @Test("An item reports its hover to the shelf's one peek")

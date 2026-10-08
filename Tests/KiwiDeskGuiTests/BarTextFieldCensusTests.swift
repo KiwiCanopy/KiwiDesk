@@ -47,8 +47,7 @@ struct BarTextFieldCensusTests {
             count: 1,
             door: nil,
             reason: "the hover peek's wrapped lines (#1946), laid by "
-                + "their line box off the strip; its count pill is "
-                + "SpaceBarItemView.makeBadge's"
+                + "their line box off the strip"
         ),
         "ShelfCountView.swift": Entry(
             count: 1,

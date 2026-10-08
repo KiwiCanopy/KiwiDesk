@@ -226,8 +226,7 @@ struct SpaceBarGlyphClickTests {
     }
 
     /// Every window counts (#1946): an untitled one is a row named
-    /// as the glyph menu names it, and the count rides the header
-    /// from two windows.
+    /// as the glyph menu names it.
     @Test("The peek lists every window under its app")
     func peekListsEveryWindow() throws {
         LocalizationManager.shared.select("en")
@@ -237,10 +236,9 @@ struct SpaceBarGlyphClickTests {
         )
         #expect(mail.groups.map(\.app) == ["Mail"])
         #expect(mail.groups.map(\.titles) == [["Inbox", "Draft"]])
-        #expect(mail.groups.map(\.count) == [2])
+        #expect(mail.groups.map(\.windowCount) == [2])
         let web = try #require(core.barPeekContent(.glyph([WindowID(4)])))
         #expect(web.groups.map(\.titles) == [["Doc"]])
-        #expect(web.groups.map(\.count) == [nil])
         core.state.windows.updateTitle(WindowID(3), title: "")
         let untitled = try #require(
             core.barPeekContent(.glyph([WindowID(2), WindowID(3)]))
@@ -248,7 +246,6 @@ struct SpaceBarGlyphClickTests {
         #expect(
             untitled.groups.map(\.titles) == [["Inbox", "Untitled Window"]]
         )
-        #expect(untitled.groups.map(\.count) == [2])
         #expect(core.barPeekContent(.glyph([WindowID(99)])) == nil)
     }
 

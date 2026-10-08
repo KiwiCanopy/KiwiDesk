@@ -6,15 +6,13 @@ import Testing
 
 /// The hover peek's ink stays legible on its own ground (#1946):
 /// titles in the shelf's item ink, the app header at its derived
-/// `peekHeaderColor`, and the count pill's window glyph at its
-/// derived `peekPillGlyphColor` over the badge fill, and a hovered
-/// row's `hoverItemColor` over its `hoverFillColor` — on the
-/// plate's Fill, capped at `GlassTint.maxAlpha` as glass and
-/// uniform over the whole panel (`GlassTint.applyUniform`), or as
-/// stored where the glass is off. Measured as
-/// `IdleItemContrastTests` measures the idle identifier: the ground
-/// composited over each wallpaper extreme, the ink over the ground,
-/// against the same floor, on every bundled palette.
+/// `peekHeaderColor`, and a hovered row's `hoverItemColor` over
+/// its `hoverFillColor` — on the plate's Fill, capped at
+/// `GlassTint.maxAlpha` as glass and uniform over the whole panel
+/// (`GlassTint.applyUniform`), or as stored where the glass is off.
+/// Measured as `IdleItemContrastTests` measures the idle identifier:
+/// the ground composited over each wallpaper extreme, the ink over
+/// the ground, against the same floor, on every bundled palette.
 @Suite("Hover peek ink contrast")
 struct PeekInkContrastTests {
     private static let floor = KiwiShelf.idleInkFloor
@@ -67,13 +65,11 @@ struct PeekInkContrastTests {
             let glass = try #require(
                 capped(shelf.fillColor, at: GlassTint.maxAlpha)
             )
-            // Titles in the item ink, the header at its derived step,
-            // the pill glyph at its step over the badge fill (owner
-            // rulings on #1946) — four pairings per ground.
+            // Titles in the item ink, the header at its derived step
+            // (owner rulings on #1946) — three pairings per ground.
             let pairings: [(String, String?)] = [
                 (shelf.itemColor, nil),
                 (shelf.peekHeaderColor, nil),
-                (shelf.peekPillGlyphColor, shelf.groupBadgeColor),
                 // A hovered row: the shelf's item hover (amendment 2).
                 (shelf.hoverItemColor, shelf.hoverFillColor),
             ]
@@ -102,35 +98,8 @@ struct PeekInkContrastTests {
                 }
             }
         }
-        #expect(measured == PaletteCatalog.bundled().count * 16)
+        #expect(measured == PaletteCatalog.bundled().count * 12)
         #expect(measured > 0)
-    }
-
-    /// Every bundled palette's badge holds the step, so the glyph
-    /// reads as faint as the header (owner, device eyeball).
-    @Test("Every bundled palette's pill glyph takes the step")
-    func pillGlyphTakesTheStep() {
-        for palette in PaletteCatalog.bundled() {
-            let shelf = painted(palette)
-            #expect(
-                shelf.peekPillGlyphColor
-                    == KiwiShelf.hex(
-                        shelf.groupBadgeTextColor,
-                        atShare: KiwiShelf.peekHeaderAlpha
-                    ),
-                Comment(rawValue: palette.name)
-            )
-        }
-    }
-
-    /// A light badge fill under white badge ink cannot carry the
-    /// step: the glyph keeps the full badge ink, as the number does.
-    @Test("A light badge fill keeps the glyph at full ink")
-    func lightBadgeKeepsFullInk() {
-        var shelf = KiwiShelf()
-        shelf.groupBadgeColor = "#E5E5EA"
-        shelf.groupBadgeTextColor = "#FFFFFF"
-        #expect(shelf.peekPillGlyphColor == shelf.groupBadgeTextColor)
     }
 
     /// The glass ground alone failing drops the step: an opaque mid

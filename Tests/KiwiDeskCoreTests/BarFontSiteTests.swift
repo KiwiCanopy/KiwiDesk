@@ -241,7 +241,7 @@ struct BarFontSiteTests {
         #expect(label.font?.familyName == Self.family)
     }
 
-    /// The peek's header, titles and count pill all draw the
+    /// The peek's header and titles all draw the
     /// shelf's family, at the peek's own reading size (#1946).
     @Test("The hover peek draws the family")
     func hoverPeek() throws {
@@ -262,8 +262,7 @@ struct BarFontSiteTests {
             shelf: Self.shelf
         )
         #expect(body.labels.count == 3)
-        #expect(body.pills.count == 1)
-        for field in body.labels + body.pills.map(\.number) {
+        for field in body.labels {
             #expect(field.font?.familyName == Self.family)
         }
         let titles = body.labels.dropFirst()
