@@ -649,19 +649,21 @@ Obligations:
   draws it rather than on its home Space (`BarPeekSeamTests` ▸
   `oneBarRowPick`, `BarPeekClickTests` ▸
   `refusedRowTakesThePlainSwitch`, `BarPeekAppBarRowTests` ▸
-  `travelerRowActsAsItsItem`). A left click on `+n` TOGGLES
-  its peek: it closes one already shown — the hover's or a
-  click's — and otherwise shows it at once, with no dwell, to
-  hold as any list's does; it pops no menu. A left click on a
-  multi-window glyph FOCUSES its next window instead — the one
-  after `barFocus`, wrapping, or the first, in the peek's own
-  `order`, through the glyph's `focusFromSpaceBar` and never a
-  stored position (#2063) — and then shows its peek through
-  `BarPeek.show`, re-read in place. VoiceOver's press and "N
-  more" open the native menu at the anchor
-  (`BarPeekActionTests` ▸ `secondClickCloses`,
-  `clickClosesAHoverPeek`, `BarPeekClickTests`,
-  `BarGlyphCycleTests`, `BarPeekSeamTests` ▸ `oneBarRowPick`).
+  `travelerRowActsAsItsItem`). A left click on a list OPENS its
+  peek and never closes it, through the one `BarPeek.show`: at
+  once where none shows — a fading one included, no dwell and no
+  cool-down — and re-read in place where one does, the hover's
+  or a click's; it pops no menu (#2063, amending #1946's
+  toggle). A multi-window glyph's click FOCUSES its next window
+  first — the one after `barFocus`, wrapping, or the first, in
+  the peek's own `order`, through the glyph's
+  `focusFromSpaceBar` and never a stored position — so the
+  check reads the window landed; `+n` focuses nothing.
+  VoiceOver's press and "N more" open the native menu at the
+  anchor (`BarPeekActionTests` ▸ `clickKeepsAHoverPeek`,
+  `secondClickKeeps`, `clickReopensADismissedPeek`,
+  `BarPeekClickTests`, `BarGlyphCycleTests`,
+  `BarPeekSeamTests` ▸ `oneBarRowPick`).
   The cycle steps over a window the focus door refuses (#1345),
   or the walk stalls on it (`BarGlyphCycleTests` ▸
   `refusedWindowIsSteppedOver`); a click that switches Spaces

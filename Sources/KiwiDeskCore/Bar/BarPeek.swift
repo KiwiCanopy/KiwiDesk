@@ -168,28 +168,11 @@ final class BarPeek {
         }
     }
 
-    /// A click on a list (#1946, `BarPeekSource.isList`) toggles
-    /// its peek: one already showing — the hover's, or a click's —
-    /// closes; otherwise it shows at once, with no dwell, and holds
-    /// as any list's does, until a click outside, a pick, or the
-    /// pointer leaving the hull.
-    func toggle(
-        _ anchor: NSView,
-        source: BarPeekSource,
-        space: SpaceID?,
-        edge: AppBarEdge
-    ) {
-        if Self.same(shown, anchor, source) {
-            dismiss()
-            return
-        }
-        show(anchor, source: source, space: space, edge: edge)
-    }
-
-    /// Shows the peek at `anchor` at once, with no dwell — or, where
-    /// it shows already, re-reads it in place — held as any list's
-    /// is: a glyph's click after its focus moved, so the check
-    /// stands on the window it landed (#2063).
+    /// A click on a list (`BarPeekSource.isList`): shows the peek
+    /// at `anchor` at once, with no dwell or cool-down — a fading one
+    /// included — or re-reads the one showing in place, and never
+    /// closes it (#2063). It holds as any list's does, until a click
+    /// outside, a pick, or the pointer leaving the hull.
     func show(
         _ anchor: NSView,
         source: BarPeekSource,

@@ -175,11 +175,10 @@ struct BarPeekClickTests {
         #expect(checked() == [WindowID(5)], "the check follows")
     }
 
-    /// `+n` mixes apps, so it keeps the toggle (#1946, #2063): a
-    /// click shows its peek and the next closes it, focusing
-    /// nothing.
-    @Test("A +n click still toggles its peek")
-    func overflowClickToggles() throws {
+    /// `+n` mixes apps, so it focuses nothing (#2063): a click shows
+    /// its peek, and a second leaves it open.
+    @Test("A +n click shows its peek and never closes it")
+    func overflowClickShows() throws {
         let core = seededCore()
         defer { close(core) }
         let web = try webTarget(core)
@@ -196,7 +195,7 @@ struct BarPeekClickTests {
         #expect(core.shelves.peek.shown?.view === disc)
         #expect(core.activeSpace?.id == one, "nothing switches")
         try click(disc)
-        #expect(core.shelves.peek.shown == nil)
+        #expect(core.shelves.peek.shown?.view === disc, "still open")
         #expect(core.state.workspaces.lastFocused == WindowID(1))
     }
 
@@ -256,7 +255,7 @@ struct BarPeekClickTests {
     /// The shelf panel's one press point: a press on the shelf off
     /// every glyph — the plate here, the divider's grip or a count
     /// alike — closes a peek the click showed; a press on the glyph
-    /// itself waits for its release, which toggles.
+    /// itself waits for its release, which opens it.
     @Test("A press on the shelf off the glyph closes the peek")
     func pressOnTheShelfCloses() throws {
         let core = seededCore()

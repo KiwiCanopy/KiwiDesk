@@ -563,8 +563,7 @@ the window that has the focus.
 Clicking a glyph with a count badge focuses its first window and
 shows the list at once; each further click focuses the next one,
 from the checked window, and wraps at the end. Clicking a `+n`
-badge shows its list, or closes it if it is already open, and
-switches nothing until you pick. An open list stays until you
+badge shows its list and switches nothing until you pick. An open list stays until you
 pick a row, click elsewhere or move the pointer away. A list too long for the screen
 ends in **More windows**, which opens a menu of every window.
 With VoiceOver, pressing the glyph opens that menu.

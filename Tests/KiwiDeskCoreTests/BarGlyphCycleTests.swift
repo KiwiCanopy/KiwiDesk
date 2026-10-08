@@ -7,8 +7,8 @@ import Testing
 /// A click on a multi-window Space Bar glyph focuses its windows in
 /// the peek's order (#2063, owner ruling): the one after the system
 /// focus, wrapping, or the first where the focus is none of them —
-/// derived from focus, never a stored position. `+n` keeps its
-/// toggle, and the window menu checks the same window.
+/// derived from focus, never a stored position. `+n` focuses
+/// nothing, and the window menu checks the same window.
 @Suite("Bar glyph click cycles", .serialized)
 @MainActor
 struct BarGlyphCycleTests {
@@ -158,8 +158,8 @@ struct BarGlyphCycleTests {
         #expect(core.barFocus(on: nil) == WindowID(1), "an App Bar list")
     }
 
-    @Test("+n keeps its toggle: a click switches and focuses nothing")
-    func overflowStillToggles() {
+    @Test("A +n click switches and focuses nothing")
+    func overflowFocusesNothing() {
         let core = seededCore()
         core.pickFromSpaceBar(pick(.overflow, [5]))
         core.pickFromSpaceBar(pick(.overflow, [4, 5]))

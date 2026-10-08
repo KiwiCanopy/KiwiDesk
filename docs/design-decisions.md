@@ -12826,18 +12826,21 @@ window underneath and focus another app, a misclick with a side
 effect on a surface built to look pickable. macOS shows no such
 list: Stage Manager and Mission Control act on the surface you
 previewed, and the Dock's hover label is one word that promises
-nothing. So a left click on `+n`, however few windows it hides,
-TOGGLES its peek: where one already shows, the hover's or a
-click's, the click closes it; otherwise it shows the peek at
-once, without the dwell, held as any list's is. A hover peek
-already holds on its own, so a click re-opening what is open
-would mean nothing, and a control that opens on one click and
-closes on the next is the one a hand already knows from every
-disclosure on the Mac. A multi-window glyph's click focuses its
-next window instead (#2063, the principle above) and shows its
-peek the same way, re-read in place so its check follows the
-click. A one-window glyph still picks on the click; two lists for
-one set of windows is the fight the tooltip lost.
+nothing. So a left click on a list OPENS its peek and never
+closes it (#2063, amending a toggle): where none shows, at once,
+without the dwell or the cool-down, held as any list's is; where
+one already shows, the hover's or a click's, the click changes
+nothing. A toggle was argued from the disclosure idiom, but a
+disclosure does not also open on hover, and this list does: the
+common path is a hover then a click, and a toggle closed the list
+the hand was reaching for — a click that read as doing nothing.
+Open-only also keeps an accidental double click harmless, and the
+peek still closes the way every list's does: the pointer leaving
+its hold, a press elsewhere, or a pick. A multi-window glyph's
+click focuses its next window first (the principle above), so its
+peek is re-read with the check on the window landed; `+n` focuses
+nothing. A one-window glyph still picks on the click; two lists
+for one set of windows is the fight the tooltip lost.
 
 A list's row for the window holding the system focus — read only
 on the active Space, the one that carries it — ends in a

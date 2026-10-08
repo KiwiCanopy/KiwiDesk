@@ -70,23 +70,9 @@ final class SpaceBarGlyphActions {
         )
     }
 
-    /// A click on `+n` toggles its peek (#1946): it shows at once,
-    /// or closes where shown.
-    func togglePeek(_ pick: SpaceBarGlyphPick) {
-        guard let target = pick.anchor as? SpaceBarGlyphTarget,
-            let item = target.superview as? SpaceBarItemView
-        else { return }
-        peek?.toggle(
-            target,
-            source: target.peekSource,
-            space: pick.space,
-            edge: item.style.edge
-        )
-    }
-
-    /// A click on a multi-window glyph that focused a window shows
-    /// its peek at once, or re-reads it, the check on that window
-    /// (#2063).
+    /// A click on a list shows its peek at once, or re-reads the
+    /// one showing, and never closes it (#2063): a glyph's after
+    /// its focus moved, so the check stands on the window landed.
     func showPeek(_ pick: SpaceBarGlyphPick) {
         guard let target = pick.anchor as? SpaceBarGlyphTarget,
             let item = target.superview as? SpaceBarItemView
@@ -146,8 +132,8 @@ final class SpaceBarGlyphTarget: NSView {
     var peekSource: BarPeekSource { pick.peekSource }
 
     /// A press arms the pick; the peek stays, since the release
-    /// decides — `+n`'s click toggles it, a glyph's focuses (#1946,
-    /// #2063). A Control-click's menu closes it as any menu does.
+    /// decides — a list's click opens it and never closes it
+    /// (#2063). A Control-click's menu closes it as any menu does.
     override func mouseDown(with event: NSEvent) {
         guard !openControlClickMenu(event) else { return }
         pressed = true
