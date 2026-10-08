@@ -205,4 +205,17 @@ struct LayerAddTests {
         #expect(edit.stored == "Gaming")
         #expect(edit.members?.shared == true)
     }
+
+    /// A name the draft deleted is no stored layer any more: a layer
+    /// added under it is new, never the deleted one come back.
+    @Test("a layer deleted everywhere leaves its name free")
+    func deletedNameIsNew() throws {
+        let model = try makeModel()
+        model.deleteLayer("Gaming", .everywhere)
+        #expect(model.storedLayer("Gaming") == nil)
+        #expect(model.layerAdmission("Gaming") == .new)
+        #expect(model.addLayer("Gaming"))
+        #expect(model.reachEdits.layers["Gaming"]?.stored == nil)
+        #expect(model.reachEdits.deletedLayers["Gaming"] == .everywhere)
+    }
 }

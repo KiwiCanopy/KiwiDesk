@@ -132,6 +132,18 @@ struct LayerReachSnapshotTests {
         #expect(throws: LayerPassError.afterRowEncode) {
             try snapshot.rewriteLayers(["Desk": dropping("Gaming")])
         }
+        // A row edit reaching one profile alone, base untouched.
+        var listed = try #require(core.ruleReachSnapshot())
+        listed.keyLayers.applyKey(
+            RuleReachTable<String>.keyID(layer: "Gaming", lua: "up()"),
+            value: "s",
+            reach: .listed(["Desk"]),
+            editing: "Desk"
+        )
+        #expect(listed.keyLayers.baseTouched.isEmpty)
+        #expect(throws: LayerPassError.afterRowEncode) {
+            try listed.rewriteLayers(["Desk": dropping("Gaming")])
+        }
     }
 
     @Test("dropping a base layer clears the marks naming it")

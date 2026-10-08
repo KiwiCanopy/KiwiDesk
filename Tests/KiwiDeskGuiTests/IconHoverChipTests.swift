@@ -173,5 +173,11 @@ struct IconHoverChipTests {
         #expect(
             checklist.contains(".disabled(locked || follows || lacking)")
         )
+        // The view's `lacking` is the model's, not a constant (#2022).
+        #expect(
+            checklist.contains(
+                "let lacking = reading.lacking.contains(profile)\n"
+            )
+        )
     }
 }
