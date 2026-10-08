@@ -56,7 +56,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// (#1956), on `[Profile]` alone.
     /// 22 = a stored app shortcut calls `focus_or_spawn` (#1511),
     /// which reaches a bundle's `config` and its `[Profile]` alike.
-    public static let currentFormat = 22
+    /// 23 = a layer override's left-out layer (#2022), on
+    /// `[Profile]` alone.
+    public static let currentFormat = 23
 
     public let format: Int
 

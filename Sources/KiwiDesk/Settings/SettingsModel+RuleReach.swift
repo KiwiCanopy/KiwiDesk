@@ -27,10 +27,10 @@ extension SettingsModel {
     /// one on screen.
     var reachLoaded: String? { reachIsLoaded ? reachPage : activeProfile }
 
-    /// The stored tables with the draft applied; nil without a
-    /// checklist.
+    /// The stored tables with the draft applied — its layer edits
+    /// first (`layeredReach`, #2022); nil without a checklist.
     var encodedReach: RuleReachSnapshot? {
-        guard var snapshot = ruleReachStored, let editing = reachProfile
+        guard var snapshot = layeredReach, let editing = reachProfile
         else { return nil }
         var pageTemplates: [String: KeyBinding] = [:]
         snapshot.appRules = RuleReachDraft.encode(
@@ -62,7 +62,14 @@ extension SettingsModel {
             current: pageKeys,
             editing: editing,
             isLoaded: reachIsLoaded,
-            reach: reachEdits.reach[.key] ?? [:],
+            reach: LayerRowPicks.scoped(
+                reachEdits.reach[.key] ?? [:],
+                page: pageKeys,
+                layers: snapshot.layerTable,
+                keys: snapshot.keyLayers,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            ),
             removal: reachEdits.removal[.key] ?? [:]
         ) {
             $0.applyKey($1, value: $2, reach: $3, removal: $4, editing: $5)

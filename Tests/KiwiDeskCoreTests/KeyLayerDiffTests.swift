@@ -34,7 +34,7 @@ private func layer(
 /// `resolved(onto:)` used by the override-layer Shortcuts tab
 /// (#55 phase 7). A base row missing from a layer `edited` keeps
 /// is a removed combo (#1393); a whole base layer `edited` drops
-/// is not expressible and passes through on resolve.
+/// is left out (#2022).
 @Suite("KeyLayerOverride.diff — sparse inverse (#55 phase 7)")
 struct KeyLayerDiffTests {
 
@@ -159,13 +159,16 @@ struct KeyLayerDiffTests {
         #expect(over.resolved(onto: base) == edited)
     }
 
-    @Test("A dropped base layer is not expressed and passes through")
-    func droppedLayerNotExpressed() {
+    /// A dropped base layer is left out whole (#2022) — it used
+    /// to pass through, so the next resolve brought it back.
+    @Test("A dropped base layer is left out and stays dropped")
+    func droppedLayerLeftOut() throws {
         let edited = [base[0]]
-        #expect(
+        let over = try #require(
             KeyLayerOverride.diff(base: base, edited: edited)
-                == nil
         )
+        #expect(over.leftOut == [base[1].name])
+        #expect(over.resolved(onto: base) == edited)
     }
 
     // MARK: - Round-trip properties

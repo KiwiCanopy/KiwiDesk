@@ -7,15 +7,18 @@ import KiwiDeskCore
 /// row (`SettingsValueReadout`).
 extension SettingsModel {
     func reachDiffRows() -> [SettingsDiffRow] {
-        guard let stored = ruleReachStored, let encoded = encodedReach,
+        // The layered snapshot is what the row edits encoded against:
+        // a layer edit is the layer rows' (#2022), never a row's.
+        guard let stored = layeredReach, let encoded = encodedReach,
             let editing = reachProfile
         else { return [] }
-        return rows(
-            .appRules(.appRules),
-            stored.appRules,
-            encoded.appRules,
-            editing: editing
-        ) { $0.raw }
+        return layerDiffRows()
+            + rows(
+                .appRules(.appRules),
+                stored.appRules,
+                encoded.appRules,
+                editing: editing
+            ) { $0.raw }
             + rows(
                 .appRules(.floatRules),
                 stored.floatRules,

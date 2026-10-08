@@ -8617,6 +8617,59 @@ one action in one layer, its value the combo:
   from the page's own structure, and both the rule write and the
   globals write read that one base.
 
+:::unreleased
+**A layer takes the checklist too, and its tick is membership**
+(#2022, owner ruling 2026-10-07). A layer is a set of rows, so
+asking which profiles a layer belongs to row by row hid the one
+question a delete or a rename turns on. The selected layer's
+header leads with an **Applies to** line — the shortcut rows'
+reach column's look, one line that never stacks like the menu bar
+icon line under it (owner ruling 2026-10-08), App Rules' closed
+label and popover — never a control on the chip, which would be a
+channel only a pointer finds:
+
+- **A shared layer may be left out whole.** The base keeps the
+  layer and a profile's override marks it left out
+  (`KeyLayerOverride.leftOut`, the per-combo removal one level
+  up), so every other profile and every later one still gets it
+  (`KeyLayerLeftOutTests`). Converting a shared layer into
+  per-profile copies instead was rejected: the profiles would
+  stop sharing it silently, and it contradicts the row ruling
+  that a removal is a mark, not a copy. The mark costs a
+  `Profile.currentFormat` bump, as the row's did, and no step.
+- **Unticking a profile takes the layer out of it at Save**,
+  under All profiles too, with no dialog: the popover is the
+  confirmation, and the save pill names each profile it leaves
+  or joins. The edited profile's box is locked — Delete is how a
+  layer leaves its own page. A layer edit is laid over the stored
+  files ahead of the key table (`RuleReachSnapshot.rewriteLayers`),
+  so a row edit encodes against the layers the draft already has
+  (`LayerReachSnapshotTests`, `LayerReachModelTests`).
+- **Delete asks how far** — this profile, or every profile that
+  has it — unless the layer holds only the app-chrome rows,
+  nothing switches to it and no other profile has it. Cancel is
+  the default, so a reflex Return deletes nothing.
+- **Rename never forks.** It renames the layer, and its switch
+  rows, in every profile the reading lists, and refuses a name
+  any of those profiles already has; a profile left out of the
+  layer is not reached and stays left out.
+- **A new layer starts where a new row does**: shared on the
+  loaded profile's page, that profile's alone on a stored one
+  (`RuleReachDraft.defaultReach`), recorded as the layer's
+  membership so the one layer pass places it — the page never
+  adds or drops a layer of the base. A name another profile's own
+  layer holds is refused at Add, since the two layers would merge;
+  the name of a shared layer the profile left out rejoins it on
+  the loaded page and is refused on a stored one (owner ruling
+  2026-10-08), and a row added to a layer only some profiles have
+  stays theirs. On a stored page a layer another profile shares is
+  read but not renamed, deleted or joined — that is the loaded
+  page's, where the change is visible on screen — while a layer
+  only that profile has stays editable.
+- **A shortcut row's checklist greys a profile without the
+  row's layer**: ticking it there would build a layer of one row.
+:::
+
 *The saves write different layers, by design.* The loaded
 profile's Save and a stored profile's Save touch **disjoint**
 field sets, because they edit different layers of the
@@ -9150,15 +9203,11 @@ that defines the layers, ahead of the action groups — the
 definition and its bindings read as one unit. The strip's
 caption also states that "default" is the standard layer and
 always the active one after an app start. Renaming a layer
-shares Delete's gate (base layers are protected in
-profile-override editing, #55) and rewrites the switch-layer
-rows of the config being edited through the catalog's
-single authority, so writer and import classifier keep
-matching byte-for-byte (#4). Scope: a stored profile whose
-sparse override targets the old name keeps it and
-resurfaces it as a standalone layer — the same accepted
-pre-release gap Delete has (the edit is a draft until Save,
-so stored files can't be chased at click time). Saved
+rewrites its switch-layer rows through the catalog's single
+authority, so writer and import classifier keep matching
+byte-for-byte (#4), and reaches every profile that has the
+layer (▸ Navigation & saving, *A layer takes the checklist
+too*). Saved
 profiles get the same affordance: a pencil beside the
 profile name renames immediately — file, adopted name, and
 Desktop bindings follow, like Delete and make default.

@@ -82,8 +82,10 @@ struct RuleReachKeyTests {
         #expect(combos[finderKey] == nil)
     }
 
-    @Test("A page's own layer structure survives into the base")
-    func pageStructureKept() {
+    /// The layer pass is the one decider of which layers exist
+    /// (#2022): a layer only on the page never joins the base here.
+    @Test("A page adds no layer to the base")
+    func pageAddsNoLayer() {
         var page = base
         page.append(KeyLayer(name: "gaming", icon: "gamecontroller"))
         let shared = table.keyLayerBase(
@@ -93,7 +95,7 @@ struct RuleReachKeyTests {
             storedBase: base,
             templates: templates
         )
-        #expect(shared.map(\.name) == ["default", "gaming"])
+        #expect(shared.map(\.name) == ["default"])
         #expect(RuleReachTable<String>.combos(shared)[key] == "ctrl+alt+t")
     }
 

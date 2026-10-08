@@ -23,12 +23,13 @@ public struct Profile: Codable, Sendable, Equatable {
     /// override holds one chord per navigation action (#1797), 16
     /// since the Space switch plates' Liquid Glass leaf is filled
     /// (#1956), 17 since a stored app shortcut calls
-    /// `focus_or_spawn` (#1511). The bump is what RUNS a step:
-    /// `needsMigration` short-circuits on it, so a step that must
-    /// reach this shape owes one whatever it rewrites — a retired
-    /// key decodes to the default and an absent leaf to the NEW
-    /// default, silently, without it.
-    public static let currentFormat = 17
+    /// `focus_or_spawn` (#1511), 18 since a layer override may leave
+    /// a shared layer out whole (#2022) — no step, as for 7. The
+    /// bump is what RUNS a step: `needsMigration` short-circuits on
+    /// it, so a step that must reach this shape owes one whatever it
+    /// rewrites — a retired key decodes to the default and an absent
+    /// leaf to the NEW default, silently, without it.
+    public static let currentFormat = 18
 
     public var format: Int
     public var name: String

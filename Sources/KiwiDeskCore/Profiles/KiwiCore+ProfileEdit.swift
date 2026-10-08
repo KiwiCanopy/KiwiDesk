@@ -152,6 +152,8 @@ extension KiwiCore {
             )
         } else {
             let base = sidecar ?? guiConfigSeed()
+            // A base layer the page lacks is a lasting left-out
+            // mark, not a pass-through (#2022).
             profile.layers = KeyLayerOverride.diff(
                 base: base.layers,
                 edited: config.layers

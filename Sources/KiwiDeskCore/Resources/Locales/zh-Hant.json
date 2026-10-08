@@ -1355,7 +1355,6 @@
   "shortcuts.app_behavior.open_or_focus": "打開或聚焦",
   "shortcuts.apps.all_bound": "「%1$@」的每種開啟方式都已有按鍵。請更改上方的某個快速鍵，為它指定另一個。",
   "shortcuts.apps.empty": "還沒有任何 App 擁有專屬按鍵。加入一個後，它的按鍵會帶你到該 App 的視窗，無論它在哪裡；如果 App 未執行則啟動它。",
-  "shortcuts.base_layer_protected": "基礎層無法在此移除",
   "shortcuts.choose_app": "選擇 App…",
   "shortcuts.clear_shared.title": "其他描述檔也在使用這個快速鍵。",
   "shortcuts.delete_layer": "刪除層",

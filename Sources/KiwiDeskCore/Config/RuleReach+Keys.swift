@@ -126,83 +126,6 @@ extension RuleReachTable where Value == String {
         rivals(of: key).first { resolved($0, for: profile) == combo }
     }
 
-    /// The base layers: `original` with each touched key's row
-    /// rebuilt from `templates`.
-    public func keyLayerBase(
-        original: [KeyLayer],
-        templates: [String: KeyBinding]
-    ) -> [KeyLayer] {
-        var layers = original
-        for key in baseTouched.sorted() {
-            Self.set(&layers, key, base[key], templates[key])
-        }
-        return layers
-    }
-
-    /// The base as a LOADED page's layers hold it: the page's
-    /// layers, order and structure, each key patched to the table's
-    /// base, a layer only the page profile's own override carried
-    /// dropped unless a shared row now lives in it, and an icon the
-    /// page left alone taken from the base.
-    public func keyLayerBase(
-        page: [KeyLayer],
-        editing: String,
-        storedPage: [KeyLayer],
-        storedBase: [KeyLayer],
-        templates: [String: KeyBinding]
-    ) -> [KeyLayer] {
-        let baseNames = Set(storedBase.map(\.name))
-        let sharedLayers = Set(base.keys.map { Self.keyParts($0).layer })
-        let pageOwn = Set(storedPage.map(\.name)).subtracting(baseNames)
-        var layers = page.filter { layer in
-            !pageOwn.contains(layer.name) || sharedLayers.contains(layer.name)
-        }
-        for at in layers.indices {
-            let name = layers[at].name
-            guard let shared = storedBase.first(where: { $0.name == name }),
-                let stored = storedPage.first(where: { $0.name == name }),
-                layers[at].icon == stored.icon
-            else { continue }
-            layers[at].icon = shared.icon
-        }
-        // An untouched action's rows are the page's, minus the ones
-        // its profile's OWN override added and plus the shared ones
-        // it left out or rebound — so a combo the profile moved
-        // stays its own, while an edit to a second shared combo
-        // lands. A touched action's row is the table's, and one
-        // the page's profile alone changed keeps the stored base.
-        let held = Self.allCombos(layers)
-        let storedPage = Self.allCombos(storedPage)
-        let stored = Self.allCombos(storedBase)
-        for key in Set(held.keys).union(stored.keys).union(baseTouched)
-            .sorted()
-        {
-            var target: [String]
-            if baseTouched.contains(key) {
-                target = base[key].map { [$0] } ?? []
-            } else if touched[editing]?.contains(key) == true {
-                target = stored[key] ?? []
-            } else {
-                target = held[key] ?? []
-                var own = storedPage[key] ?? []
-                var dropped: [String] = []
-                for combo in stored[key] ?? [] {
-                    if let at = own.firstIndex(of: combo) {
-                        own.remove(at: at)
-                    } else {
-                        dropped.append(combo)
-                    }
-                }
-                target.removeAll { own.contains($0) }
-                target += dropped.filter { !target.contains($0) }
-            }
-            if held[key] ?? [] != target {
-                Self.setRows(&layers, key, target, templates[key])
-            }
-        }
-        return layers
-    }
-
     /// `profile`'s override: its stored one resolved onto the NEW
     /// base, the touched keys rewritten, diffed back through the
     /// override primitive.
@@ -247,16 +170,17 @@ extension RuleReachTable where Value == String {
         _ template: KeyBinding?
     ) {
         let (name, lua) = keyParts(key)
-        var at = layers.firstIndex { $0.name == name }
+        let at = layers.firstIndex { $0.name == name }
         if let at {
             layers[at].bindings.removeAll { $0.lua == lua }
         }
         guard !combos.isEmpty, let template else { return }
-        if at == nil {
-            layers.append(KeyLayer(name: name))
-            at = layers.count - 1
+        // Which layers exist where is the layer pass's alone (#2022):
+        // a row never makes its layer.
+        guard let at else {
+            assertionFailure("row \(key) written where its layer is not")
+            return
         }
-        guard let at else { return }
         for combo in combos {
             var row = template
             row.combo = combo

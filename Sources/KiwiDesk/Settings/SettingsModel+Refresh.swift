@@ -118,19 +118,7 @@ extension SettingsModel {
 
     /// Imports live Lua shortcuts into current config (`KeybindingMerge`, #4).
     func importCurrentShortcuts() {
-        var updated = config
-        KeybindingMerge.merge(
-            recovered: core.recoverKeybindings(),
-            into: &updated
-        )
-        KeybindingImportClassifier.classify(
-            &updated,
-            recoverResizeStep: true
-        )
-        // After the classifier, which is what makes a row an
-        // action (#1807).
-        droppedChords = NavigationChords.deduplicate(&updated)
-        config = updated
+        importShortcuts(core.recoverKeybindings())
     }
 }
 

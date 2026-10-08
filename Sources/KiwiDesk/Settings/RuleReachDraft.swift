@@ -30,11 +30,36 @@ enum RuleFamily: Hashable {
 struct RuleReachEdits: Equatable {
     var reach: [RuleFamily: [String: RuleReach]] = [:]
     var removal: [RuleFamily: [String: RuleRemoval]] = [:]
+    /// Layer edits (#2022), keyed by the layer's name on the page.
+    var layers: [String: LayerEdit] = [:]
+    /// Stored layers the draft deleted, and how far.
+    var deletedLayers: [String: RuleRemoval] = [:]
 
     var isEmpty: Bool {
         reach.values.allSatisfy(\.isEmpty)
             && removal.values.allSatisfy(\.isEmpty)
+            && layers.isEmpty && deletedLayers.isEmpty
     }
+}
+
+/// One layer's draft edit (#2022): the name it is stored under,
+/// nil for a layer the draft created, and the profiles picked to
+/// hold it.
+struct LayerEdit: Equatable {
+    var stored: String?
+    var members: LayerMembers?
+
+    /// Whether the edit changes nothing a Save would write.
+    func isInert(at name: String) -> Bool {
+        members == nil && (stored == nil || stored == name)
+    }
+}
+
+/// Who holds a layer: the shared base (every profile created later
+/// too) or not, and the profiles that have it.
+struct LayerMembers: Equatable {
+    var shared: Bool
+    var profiles: Set<String>
 }
 
 /// Pure encoding of a draft onto the stored table: every app the

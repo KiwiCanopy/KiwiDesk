@@ -1,52 +1,5 @@
 import KiwiDeskCore
 
-/// One App Rules row's "Applies to" checklist, read off the draft
-/// (#1393). Every tick, ⚠ and label is relative to `editing`.
-struct RuleReachReading: Equatable {
-    let editing: String
-    let loaded: String?
-    /// Every readable profile, in the edit-target menu's order.
-    let profiles: [String]
-    let unreadable: [String]
-    /// Whether the row is the shared rule.
-    var shared: Bool
-    /// Whether a shared rule exists for this row's subject, which a
-    /// profile created later inherits.
-    let hasShared: Bool
-    /// The profiles that resolve this row's value, `editing` too —
-    /// or, while a picked list waits for a value, the ticked ones.
-    var users: Set<String>
-    /// Profiles resolving a DIFFERENT value, in its words.
-    let own: [String: String]
-    /// Those of `own` whose value is the shared rule.
-    let ownIsShared: Set<String>
-    /// Profiles that leave this shared rule out.
-    var leftOut: Set<String>
-    /// Profiles the draft's pick ticked into the shared rule — still
-    /// tickable until the Save, so a tick can be taken back.
-    var joined: Set<String> = []
-    /// A shortcut's combo that another profile binds to a
-    /// different action, in that action's words — ticking takes
-    /// the key over.
-    var takenBy: [String: String] = [:]
-
-    /// Whether `profile`'s box is the edited profile's, locked.
-    func isLocked(_ profile: String) -> Bool { profile == editing }
-
-    /// Whether `profile`'s box follows All profiles — ticked and
-    /// greyed. One with its own value, or left out, stays
-    /// tickable, which drops that value.
-    func follows(_ profile: String) -> Bool {
-        shared && own[profile] == nil && !leftOut.contains(profile)
-            && !joined.contains(profile)
-    }
-
-    /// The profiles the row ⚠ names, in menu order.
-    var differing: [String] {
-        profiles.filter { own[$0] != nil || leftOut.contains($0) }
-    }
-}
-
 extension SettingsModel {
     /// The checklist of a Space-list row; nil without a checklist.
     func spaceReach(_ app: String) -> RuleReachReading? {
@@ -88,6 +41,11 @@ extension SettingsModel {
             )
         else { return nil }
         row.takenBy = keyTakers(key, in: reach, editing: row.editing)
+        let layer = RuleReachTable<String>.keyParts(key).layer
+        if let layerRow = layerReach(layer) {
+            row.lacking = Set(row.profiles).subtracting(layerRow.users)
+            row.layerShared = layerRow.shared
+        }
         return row
     }
 
@@ -147,6 +105,9 @@ extension SettingsModel {
     /// Ticks or unticks "All profiles" on a row.
     func setAllProfiles(_ family: RuleFamily, _ app: String, _ on: Bool) {
         guard let row = reading(family, app) else { return }
+        // A row of a layer only some profiles have stays theirs: its
+        // All profiles would bring the layer back everywhere (#2022).
+        if on && !row.layerShared { return }
         let others = row.users.subtracting([row.editing])
         setReach(
             family,
@@ -166,6 +127,8 @@ extension SettingsModel {
     ) {
         guard let row = reading(family, app), profile != row.editing
         else { return }
+        // A box greyed for a missing layer is refused here too.
+        if on && row.lacking.contains(profile) { return }
         switch reach(family, app, row: row) {
         case .shared(let joining):
             // A tick under All profiles is a join the Save has not made
@@ -277,7 +240,7 @@ extension SettingsModel {
         _ family: RuleFamily,
         _ app: String
     ) -> RuleReach? {
-        guard let stored = ruleReachStored, let editing = reachProfile
+        guard let stored = layeredReach, let editing = reachProfile
         else { return nil }
         let key = family.key(app)
         switch family {

@@ -1355,7 +1355,6 @@
   "shortcuts.app_behavior.open_or_focus": "開く/前面に出す",
   "shortcuts.apps.all_bound": "「%1$@」には、開き方ごとにすでにキーが割り当てられています。別のキーを割り当てるには、上のショートカットのいずれかを変更してください。",
   "shortcuts.apps.empty": "自分専用のキーが割り当てられたアプリはまだありません。追加すると、そのキーで対象アプリのウインドウがどこにあってもそこへ移動し、起動していなければアプリを起動します。",
-  "shortcuts.base_layer_protected": "基本レイヤーはここでは削除できません",
   "shortcuts.choose_app": "選択 app…",
   "shortcuts.clear_shared.title": "ほかのプロファイルもこのショートカットを使用しています。",
   "shortcuts.delete_layer": "レイヤーを削除",

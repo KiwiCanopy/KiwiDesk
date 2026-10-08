@@ -34,6 +34,11 @@ struct ShortcutsHeader: View {
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.groupHeading)
             }
+            ForEach(Array(model.importRenames.enumerated()), id: \.offset) {
+                Text(LayerReachWords.importRenamed($0.element))
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.groupHeading)
+            }
         }
     }
 

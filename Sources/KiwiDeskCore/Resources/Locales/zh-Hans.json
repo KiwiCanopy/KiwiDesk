@@ -1355,7 +1355,6 @@
   "shortcuts.app_behavior.open_or_focus": "打开或聚焦",
   "shortcuts.apps.all_bound": "“%1$@”的每种打开方式都已有按键。请更改上方的某个快捷键，为它指定另一个。",
   "shortcuts.apps.empty": "还没有任何 App 拥有专属按键。添加一个后，它的按键会带你到该 App 的窗口，无论它在哪里；如果 App 未运行则启动它。",
-  "shortcuts.base_layer_protected": "基础层无法在此移除",
   "shortcuts.choose_app": "选择 App…",
   "shortcuts.clear_shared.title": "其他描述文件也在使用此快捷键。",
   "shortcuts.delete_layer": "删除层",

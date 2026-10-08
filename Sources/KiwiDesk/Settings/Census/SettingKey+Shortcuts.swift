@@ -3,6 +3,8 @@
 enum ShortcutsKey: String, CaseIterable, Hashable {
     case layers = "config.layers"
     case layersIcon = "config.layers[].icon"
+    /// Which profiles a layer belongs to (#2022).
+    case layersReach = "config.layers[].reach"
     case focusDir = "keybinding.focus_dir (x4)"
     case goToSpace = "keybinding.go_to_space (x N spaces)"
     case focusDesktop = "keybinding.focus_desktop (x N desktops)"
@@ -42,7 +44,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
 extension ShortcutsKey {
     var placement: SettingPlacement {
         switch self {
-        case .layers, .layersIcon, .switchToLayer:
+        case .layers, .layersIcon, .layersReach, .switchToLayer:
             // Surfaces at rest when configured layers exist.
             return .row(
                 .shortcuts,
@@ -128,6 +130,8 @@ extension ShortcutsKey {
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")
+        case .layersReach:
+            return .text("app_rules.reach")
         case .growWidth:
             return .text("keybinding.grow_width")
         case .shrinkWidth:

@@ -51,19 +51,31 @@ struct LayerDeleteTests {
         #expect(out == [base])
     }
 
-    /// The strip's Delete button takes the catalog's delete, or the
-    /// rows survive the layer again.
-    @Test("the strip deletes through the catalog")
-    func stripTakesTheCatalogDelete() throws {
-        let file = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Sections/LayerStripEditor.swift"
+    /// The header's Delete takes the model's delete, which takes the
+    /// catalog's, or the rows survive the layer again (#2022 moved
+    /// the delete onto the model, where it records its reach).
+    @Test("the header deletes through the catalog")
+    func headerTakesTheCatalogDelete() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        func count(_ path: String, _ needle: String) throws -> Int {
+            let source = try SourceScan.strippedSource(
+                at: root.appendingPathComponent(path)
             )
-        let source = try SourceScan.strippedSource(at: file)
-        let count = { (needle: String) in
-            source.components(separatedBy: needle).count - 1
+            return source.components(separatedBy: needle).count - 1
         }
-        #expect(count("KeybindingCatalog.deleteLayer(") == 1)
+        let settings = "Sources/KiwiDesk/Settings/"
+        #expect(
+            try count(
+                settings + "Sections/LayerHeader.swift",
+                "model.deleteLayer("
+            ) == 1
+        )
+        #expect(
+            try count(
+                settings + "SettingsModel+LayerReachEdit.swift",
+                "KeybindingCatalog.deleteLayer("
+            ) == 1
+        )
     }
 
     @Test("a switch row names its layer, any other Lua names none")
