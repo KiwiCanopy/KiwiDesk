@@ -67,7 +67,8 @@ extension SettingsModel {
                 page: pageKeys,
                 layers: snapshot.layerTable,
                 keys: snapshot.keyLayers,
-                editing: editing
+                editing: editing,
+                isLoaded: reachIsLoaded
             ),
             removal: reachEdits.removal[.key] ?? [:]
         ) {

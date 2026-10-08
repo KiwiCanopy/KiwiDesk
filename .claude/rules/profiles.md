@@ -1418,9 +1418,11 @@ is the ONE decider of which layers exist where: the loaded page's
 base takes its layer SET and order from the layered stored base
 and never drops or adds a layer from the page
 (`LayerReachSnapshotTests` ▸ `pageBaseSetIsStored`,
-`pageNeverJoinsLayer`), so a new layer records where it starts as
-a membership the pass places (`LayerReachLifecycleTests` ▸
-`newLayerIsPlaced`) and a row in a layer the base does not share
+`pageNeverJoinsLayer`), so every page-side layer creator — Add
+and Import — records where the layer starts as a membership the
+pass places (`LayerReachLifecycleTests` ▸ `newLayerIsPlaced`,
+`LayerAddTests` ▸ `importLandsWhereItReads`), and a row write
+never makes its layer (`RuleReachTable.setRows`) and a row in a layer the base does not share
 starts on that layer's holders, never shared
 (`LayerReachLifecycleTests` ▸ `listedLayerRowStaysListed`). A row
 pick is keyed `layer␟lua`, so a layer renamed, deleted or

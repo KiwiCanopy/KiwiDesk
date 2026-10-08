@@ -180,6 +180,8 @@ extension SettingsModel {
     ) {
         guard let row = reading(family, app), profile != row.editing
         else { return }
+        // A box greyed for a missing layer is refused here too.
+        if on && row.lacking.contains(profile) { return }
         switch reach(family, app, row: row) {
         case .shared(let joining):
             // A tick under All profiles is a join the Save has not made

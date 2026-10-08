@@ -82,7 +82,8 @@ enum LayerRowPicks {
         page: [String: String],
         layers: RuleReachTable<Bool>,
         keys: RuleReachTable<String>,
-        editing: String
+        editing: String,
+        isLoaded: Bool
     ) -> [String: RuleReach] {
         var result = picks
         for key in Set(page.keys).union(picks.keys) {
@@ -96,7 +97,7 @@ enum LayerRowPicks {
             switch picks[key] {
             case .shared?:
                 result[key] = .listed(holders)
-            case nil where keys.resolved(key, for: editing) == nil:
+            case nil where isLoaded && keys.resolved(key, for: editing) == nil:
                 result[key] = .listed(holders)
             default:
                 break

@@ -104,6 +104,23 @@ enum RuleReachWords {
         return loaded ? L("app_rules.reach.loaded", "loaded") : nil
     }
 
+    /// The caption under All profiles — or, where the box greys
+    /// because the row's layer is not shared, why (#2022): a dim is
+    /// not a sentence.
+    static func allCaption(_ reading: RuleReachReading) -> String {
+        guard reading.shared || reading.layerShared else {
+            return L(
+                "shortcuts.layer_reach.row_not_shared",
+                "Only some profiles have this layer. To share the "
+                    + "row, share the layer first."
+            )
+        }
+        return L(
+            "app_rules.reach.all_caption",
+            "Includes profiles you create later."
+        )
+    }
+
     /// The trash's "this profile" choice.
     static func removeHere(_ reading: RuleReachReading) -> String {
         L("app_rules.remove.here", "Remove from %1$@", reading.editing)

@@ -29,7 +29,7 @@ struct LayerRowWriterCensusTests {
                 "rename: rewrites Lua in place, then takes the dedupe"
                     + " (driven)"
             ),
-        "KiwiDesk/Settings/SettingsModel+Refresh.swift":
+        "KiwiDesk/Settings/SettingsModel+LayerAdd.swift":
             (1, "import: merges, then takes the dedupe (driven)"),
         "KiwiDeskCore/Profiles/KiwiCore+StarterRescale.swift":
             (

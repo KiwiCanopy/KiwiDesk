@@ -159,6 +159,15 @@ enum LayerReachWords {
         }
     }
 
+    /// Adding the name of a shared layer this profile leaves out.
+    static func rejoins(_ name: String) -> String {
+        L(
+            "shortcuts.add_layer.rejoins",
+            "Puts this profile back in the shared “%1$@” layer.",
+            name
+        )
+    }
+
     static func clash(_ profile: String, _ name: String) -> String {
         L(
             "shortcuts.layer_rename.clash",

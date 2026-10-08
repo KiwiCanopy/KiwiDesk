@@ -170,16 +170,17 @@ extension RuleReachTable where Value == String {
         _ template: KeyBinding?
     ) {
         let (name, lua) = keyParts(key)
-        var at = layers.firstIndex { $0.name == name }
+        let at = layers.firstIndex { $0.name == name }
         if let at {
             layers[at].bindings.removeAll { $0.lua == lua }
         }
         guard !combos.isEmpty, let template else { return }
-        if at == nil {
-            layers.append(KeyLayer(name: name))
-            at = layers.count - 1
+        // Which layers exist where is the layer pass's alone (#2022):
+        // a row never makes its layer.
+        guard let at else {
+            assertionFailure("row \(key) written where its layer is not")
+            return
         }
-        guard let at else { return }
         for combo in combos {
             var row = template
             row.combo = combo

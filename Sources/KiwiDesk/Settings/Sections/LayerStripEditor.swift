@@ -98,6 +98,12 @@ struct LayerStripEditor: View {
                         .foregroundStyle(SettingsTheme.danger)
                         .frame(width: 220, alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
+                } else if model.layerAddRejoins(newLayer.trimmed) {
+                    Text(LayerReachWords.rejoins(newLayer.trimmed))
+                        .font(.caption)
+                        .foregroundStyle(SettingsTheme.ink3)
+                        .frame(width: 220, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .padding(10)
@@ -123,8 +129,7 @@ struct LayerStripEditor: View {
 
     private func addLayer() {
         let name = newLayer.trimmed
-        guard canAddLayer else { return }
-        model.addLayer(name)
+        guard model.addLayer(name) else { return }
         selected = name
         newLayer = ""
         addingLayer = false

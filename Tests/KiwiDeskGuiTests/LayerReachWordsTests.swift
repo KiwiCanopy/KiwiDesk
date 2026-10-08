@@ -95,4 +95,22 @@ struct LayerReachWordsTests {
         )
         #expect(RuleReachWords.mark("Laptop", reading(["Desk"])) == nil)
     }
+
+    @Test("a greyed All profiles says why in its caption")
+    func greyedAllCaption() {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        var row = reading(["Desk"])
+        row.layerShared = false
+        #expect(
+            RuleReachWords.allCaption(row)
+                == "Only some profiles have this layer. To share the "
+                + "row, share the layer first."
+        )
+        row.layerShared = true
+        #expect(
+            RuleReachWords.allCaption(row)
+                == "Includes profiles you create later."
+        )
+    }
 }

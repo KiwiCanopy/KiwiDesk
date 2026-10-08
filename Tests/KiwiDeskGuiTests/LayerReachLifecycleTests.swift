@@ -188,13 +188,4 @@ struct LayerReachLifecycleTests {
         #expect(base.contains { $0.name == "Fresh" })
         #expect(try layers(model, "Travel").contains { $0.name == "Fresh" })
     }
-
-    @Test("a new layer may not take a name another profile holds")
-    func addRefusesAHeldName() throws {
-        let model = try makeModel()
-        #expect(model.layerAddClash("Focus") == "Home")
-        model.deleteLayer("Gaming", .here)
-        #expect(model.layerAddClash("Gaming") == "Home")
-        #expect(model.layerAddClash("Fresh") == nil)
-    }
 }

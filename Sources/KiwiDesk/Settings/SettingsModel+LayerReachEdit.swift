@@ -20,49 +20,6 @@ extension SettingsModel {
         reachEdits = edits
     }
 
-    /// Adds a layer to the page, carrying the app-chrome rows (#602,
-    /// #1381), and records where it starts — where a new row does
-    /// (`RuleReachDraft.defaultReach`) — so the layer pass, the one
-    /// decider of which layers exist where, places it (#2022).
-    func addLayer(_ name: String) {
-        config.layers.append(
-            KeyLayer(name: name, bindings: DefaultKeybindings.appChromeRows())
-        )
-        guard let editing = reachProfile,
-            let table = layeredReach?.layerTable
-        else { return }
-        let members: LayerMembers
-        switch RuleReachDraft.defaultReach(
-            of: name,
-            in: table,
-            editing: editing,
-            isLoaded: reachIsLoaded
-        ) {
-        case .shared:
-            members = LayerMembers(shared: true, profiles: Set(table.profiles))
-        case .listed(let profiles):
-            members = LayerMembers(
-                shared: false,
-                profiles: profiles.union([editing])
-            )
-        }
-        var edits = reachEdits
-        edits.layers[name] = LayerEdit(stored: nil, members: members)
-        reachEdits = edits
-    }
-
-    /// The profile that still holds a layer named `name`, which a
-    /// new layer may not take: it would merge into that one.
-    func layerAddClash(_ name: String) -> String? {
-        guard let editing = reachProfile,
-            let table = layeredReach?.layerTable
-        else { return nil }
-        let holder = profileMenuOrder.filter(table.profiles.contains)
-            .first { $0 != editing && table.resolved(name, for: $0) != nil }
-        if let holder { return holder }
-        return table.base[name] != nil ? editing : nil
-    }
-
     /// Renames the page's layer, and its switch rows, in every
     /// profile that has it. A row's own pick follows the new name.
     func renameLayer(_ old: String, to new: String) {
