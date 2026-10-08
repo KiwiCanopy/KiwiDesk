@@ -101,9 +101,7 @@ struct LayerHeader: View {
                 isValid: { canRename($0) },
                 notice: { _ in reading.flatMap(LayerReachWords.renameReach) },
                 problem: { typed in
-                    model.layerRenameClash(selected, typed.trimmed).map {
-                        LayerReachWords.clash($0, typed.trimmed)
-                    }
+                    model.layerRenameRefusal(selected, typed.trimmed)
                 }
             ) { typed in
                 let new = typed.trimmed
@@ -120,7 +118,7 @@ struct LayerHeader: View {
         let name = typed.trimmed
         return !name.isEmpty && name != selected
             && !model.config.layers.contains { $0.name == name }
-            && model.layerRenameClash(selected, name) == nil
+            && model.layerRenameRefusal(selected, name) == nil
     }
 
     private func requestDelete(_ reading: RuleReachReading?) {

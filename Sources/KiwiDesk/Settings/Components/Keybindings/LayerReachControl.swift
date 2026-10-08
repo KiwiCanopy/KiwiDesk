@@ -159,6 +159,32 @@ enum LayerReachWords {
         }
     }
 
+    /// Rename refused onto a shared layer this profile left out.
+    static func renameOntoShared(_ name: String) -> String {
+        L(
+            "shortcuts.layer_rename.shared",
+            "“%1$@” is a shared layer. Add it by name to join it.",
+            name
+        )
+    }
+
+    /// One line per layer an import took under a free name.
+    static func importRenamed(_ rename: LayerImportRename) -> String {
+        let reason: String
+        switch rename.reason {
+        case .clash(let holder): reason = clash(holder, rename.from)
+        case .sharedElsewhere: reason = joinOnLoadedPage
+        case .new, .rejoin: reason = ""
+        }
+        return L(
+            "shortcuts.import_renamed",
+            "Imported “%1$@” as “%2$@”: %3$@",
+            rename.from,
+            rename.to,
+            reason
+        )
+    }
+
     /// Add refused on a stored page for a shared layer's name.
     static var joinOnLoadedPage: String {
         L(

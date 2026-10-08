@@ -178,6 +178,15 @@ struct LayerAddTests {
         ])
         #expect(model.config.layers.contains { $0.name == "Focus 2" })
         #expect(!model.config.layers.contains { $0.name == "Focus" })
+        #expect(
+            model.importRenames == [
+                LayerImportRename(
+                    from: "Focus",
+                    to: "Focus 2",
+                    reason: .clash("Home")
+                )
+            ]
+        )
         model.updateActiveProfile()
         let home = try layers(model, "Home")
         #expect(home.first { $0.name == "Focus" }?.bindings.isEmpty == true)
@@ -209,5 +218,51 @@ struct LayerAddTests {
         #expect(model.addLayer("Gaming"))
         #expect(model.reachEdits.layers["Gaming"]?.stored == nil)
         #expect(model.reachEdits.deletedLayers["Gaming"] == .everywhere)
+    }
+
+    @Test("a stored page imports a left-out shared name as its own")
+    func storedImportOfSharedIsRenamed() throws {
+        let model = try makeModel()
+        model.setLayerProfile("Gaming", "Home", false)
+        model.updateActiveProfile()
+        model.selectEditTarget("Home")
+        model.importShortcuts([
+            KeyLayer(
+                name: "Gaming",
+                bindings: [KeyBinding(combo: "w", lua: up, kind: .navigation)]
+            )
+        ])
+        #expect(model.config.layers.contains { $0.name == "Gaming 2" })
+        #expect(!model.config.layers.contains { $0.name == "Gaming" })
+        #expect(model.importRenames.first?.reason == .sharedElsewhere)
+    }
+
+    @Test("a rename never takes a shared layer's name, loaded page")
+    func renameOntoSharedLoaded() throws {
+        let model = try makeModel()
+        model.deleteLayer("Gaming", .here)
+        #expect(model.addLayer("Mine"))
+        // Work's own layer alone, so no other holder's name clashes.
+        model.setLayerAllProfiles("Mine", false)
+        model.setLayerProfile("Mine", "Home", false)
+        model.setLayerProfile("Mine", "Travel", false)
+        #expect(model.layerRenameClash("Mine", "Gaming") == nil)
+        #expect(
+            model.layerRenameRefusal("Mine", "Gaming")
+                == LayerReachWords.renameOntoShared("Gaming")
+        )
+    }
+
+    @Test("a rename never takes a shared layer's name, stored page")
+    func renameOntoSharedStored() throws {
+        let model = try makeModel()
+        model.setLayerProfile("Gaming", "Home", false)
+        model.updateActiveProfile()
+        model.selectEditTarget("Home")
+        #expect(model.addLayer("Mine"))
+        #expect(
+            model.layerRenameRefusal("Mine", "Gaming")
+                == LayerReachWords.joinOnLoadedPage
+        )
     }
 }

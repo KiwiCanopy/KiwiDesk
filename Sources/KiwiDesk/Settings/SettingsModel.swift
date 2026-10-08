@@ -31,6 +31,8 @@ final class SettingsModel: ObservableObject {
     /// Chords the last import or adoption dropped as an action's
     /// second (#1807), named by the Shortcuts header until a reload.
     @Published var droppedChords: [NavigationChords.Dropped] = []
+    /// Layers the last import took under a free name (#2022).
+    @Published var importRenames: [LayerImportRename] = []
     /// True when init.lua has harmless custom Lua (coexistence banner).
     /// Always false when `forcedLuaEditor` is true.
     @Published var hasCustomLua = false

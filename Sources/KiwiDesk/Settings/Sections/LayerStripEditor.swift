@@ -92,24 +92,13 @@ struct LayerStripEditor: View {
                         .buttonStyle(.borderedProminent)
                         .disabled(!canAddLayer)
                 }
-                if let holder = model.layerAddClash(newLayer.trimmed) {
-                    Text(LayerReachWords.clash(holder, newLayer.trimmed))
+                if let caption = addCaption {
+                    Text(caption.text)
                         .font(.caption)
-                        .foregroundStyle(SettingsTheme.danger)
-                        .frame(width: 220, alignment: .leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                } else if model.layerAdmission(newLayer.trimmed)
-                    == .sharedElsewhere
-                {
-                    Text(LayerReachWords.joinOnLoadedPage)
-                        .font(.caption)
-                        .foregroundStyle(SettingsTheme.danger)
-                        .frame(width: 220, alignment: .leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                } else if model.layerAddRejoins(newLayer.trimmed) {
-                    Text(LayerReachWords.rejoins(newLayer.trimmed))
-                        .font(.caption)
-                        .foregroundStyle(SettingsTheme.ink3)
+                        .foregroundStyle(
+                            caption.refused
+                                ? SettingsTheme.danger : SettingsTheme.ink3
+                        )
                         .frame(width: 220, alignment: .leading)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -124,6 +113,22 @@ struct LayerStripEditor: View {
 
     private var hoverAnimation: Animation? {
         reduceMotion ? nil : .easeOut(duration: 0.12)
+    }
+
+    /// What Add does with the typed name, read off the one
+    /// decider; nil while it simply adds.
+    private var addCaption: (text: String, refused: Bool)? {
+        let name = newLayer.trimmed
+        switch model.layerAdmission(name) {
+        case .clash(let holder)?:
+            return (LayerReachWords.clash(holder, name), true)
+        case .sharedElsewhere?:
+            return (LayerReachWords.joinOnLoadedPage, true)
+        case .rejoin?:
+            return (LayerReachWords.rejoins(name), false)
+        case .new?, nil:
+            return nil
+        }
     }
 
     private var canAddLayer: Bool {

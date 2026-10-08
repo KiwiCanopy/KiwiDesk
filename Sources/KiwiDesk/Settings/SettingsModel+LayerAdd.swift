@@ -13,6 +13,13 @@ enum LayerAdmission: Equatable {
     case sharedElsewhere
 }
 
+/// An imported layer that took a free name, and why (#2022).
+struct LayerImportRename: Equatable {
+    let from: String
+    let to: String
+    let reason: LayerAdmission
+}
+
 /// Every layer the page gains goes through ONE decider,
 /// `layerAdmission`, and is recorded as a membership the layer pass
 /// places (#2022) — Add and Import alike — so the page never
@@ -30,6 +37,23 @@ extension SettingsModel {
         }
         guard shared == true else { return .new }
         return reachIsLoaded ? .rejoin : .sharedElsewhere
+    }
+
+    /// Why renaming the page's layer `old` to `new` is refused, in
+    /// words; nil when it may. A rename takes only a name the
+    /// decider calls `.new` — never a shared layer's, which Add
+    /// joins — and never one a profile the rename reaches holds.
+    func layerRenameRefusal(_ old: String, _ new: String) -> String? {
+        guard new != old else { return nil }
+        if let holder = layerRenameClash(old, new) {
+            return LayerReachWords.clash(holder, new)
+        }
+        switch layerAdmission(new) {
+        case .new?, nil: return nil
+        case .clash(let holder)?: return LayerReachWords.clash(holder, new)
+        case .rejoin?: return LayerReachWords.renameOntoShared(new)
+        case .sharedElsewhere?: return LayerReachWords.joinOnLoadedPage
+        }
     }
 
     /// Whether Add may take `name`.
@@ -100,12 +124,14 @@ extension SettingsModel {
             .union(recovered.map(\.name))
         var created: [String] = []
         var rejoined: [String] = []
+        var renames: [LayerImportRename] = []
         for layer in recovered {
             switch layerAdmission(layer.name) {
             case .new?: created.append(layer.name)
             case .rejoin?: rejoined.append(layer.name)
-            case .sharedElsewhere?:
-                // Imported as its own layer, as a clash is.
+            case .clash?, .sharedElsewhere?:
+                // Imported as its own layer under a free name, and
+                // said so (`importRenames`).
                 let free = freeLayerName(layer.name, taken: taken)
                 taken.insert(free)
                 incoming = KeybindingCatalog.renameLayer(
@@ -114,15 +140,13 @@ extension SettingsModel {
                     to: free
                 )
                 created.append(free)
-            case .clash?:
-                let free = freeLayerName(layer.name, taken: taken)
-                taken.insert(free)
-                incoming = KeybindingCatalog.renameLayer(
-                    in: incoming,
-                    from: layer.name,
-                    to: free
+                renames.append(
+                    LayerImportRename(
+                        from: layer.name,
+                        to: free,
+                        reason: layerAdmission(layer.name) ?? .new
+                    )
                 )
-                created.append(free)
             case nil: break
             }
         }
@@ -135,6 +159,7 @@ extension SettingsModel {
         // After the classifier, which is what makes a row an
         // action (#1807).
         droppedChords = NavigationChords.deduplicate(&updated)
+        importRenames = renames
         config = updated
         recordCreated(created)
         recordRejoined(rejoined)
