@@ -4,8 +4,13 @@ import AppKit
 extension SpaceBarOverlay {
     /// Executes one layout pass over the last shown state;
     /// `slotChanged` says the section's slot is not the one the
-    /// last pass drew into.
-    func render(followingActive: Bool, slotChanged: Bool = false) {
+    /// last pass drew into, and `frontMoves` that the front segment
+    /// joins or leaves it (#1903).
+    func render(
+        followingActive: Bool,
+        slotChanged: Bool = false,
+        frontMoves: Bool = false
+    ) {
         guard let state = lastShown else { return }
         let items = state.items
         let frontApp = state.frontApp
@@ -191,26 +196,20 @@ extension SpaceBarOverlay {
         let glides = recordGlide(
             items,
             content: style.inactiveContent,
-            slotChanged: slotChanged
+            slotChanged: slotChanged,
+            frontMoves: frontMoves
         )
         BarMotion.runLayout { moveFrame(itemRun, runFrame, glides) }
         placeItems(itemFrames, glides: glides)
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             view.glyphActions = glyphActions
-            view.configure(
-                identity: item.identity,
-                spaceGlyph: item.spaceGlyph,
-                apps: item.apps,
-                active: item.active,
+            configure(
+                view,
+                item,
                 horizontal: horizontal,
                 style: style,
-                stateMarkColors: stateMarkColors,
-                before: item.before,
-                after: item.after,
-                drawn: item.drawn,
-                marker: item.marker,
-                collapse: item.collapse
+                stateMarkColors: stateMarkColors
             )
             view.onSelect = { [weak self] space in
                 self?.onSelect(space)
@@ -226,14 +225,27 @@ extension SpaceBarOverlay {
             view.isFirstInRun = place.first
             view.isLastInRun = place.last
         }
-        renderFrontSegment(
-            frontApp,
+        let placement = FrontPlacement(
             after: pinFront ? spacesAxis + gap : metrics.frontStart,
-            strip: strip,
-            nameBound: pinFront ? axis : viewport + scrollOffset,
-            style: style,
-            horizontal: horizontal
+            pinnedBound: pinFront ? axis : nil,
+            viewport: viewport
         )
+        frontPlacement = placement
+        let shrinks =
+            frontMoves && frontApp == nil
+            && shrinkFront(into: placement.after, horizontal: horizontal)
+        if !shrinks {
+            frontLeave = nil
+            renderFrontSegment(
+                frontApp,
+                after: placement.after,
+                strip: strip,
+                nameBound: placement.nameBound(scrollOffset: scrollOffset),
+                style: style,
+                horizontal: horizontal
+            )
+            if frontMoves { growFront(horizontal: horizontal) }
+        }
         BarMotion.runLayout {
             installGlassHosting(
                 hosting,

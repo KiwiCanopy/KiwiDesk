@@ -138,6 +138,22 @@ public final class SpaceBarOverlay {
     let itemRun = AppBarOverlay.FlippedView()
     /// What a scroll re-reads without a render.
     var scrollRun: ScrollRun?
+    /// Where the last render placed the front segment, which a
+    /// content redraw keeps (#2086).
+    var frontPlacement: FrontPlacement?
+    /// The front segment's shrink in flight (#1903), stamped so only
+    /// the latest leave's landing hides it; a render that draws it
+    /// again ends the shrink.
+    var frontLeave: UUID?
+    var frontLeaving: Bool { frontLeave != nil }
+    /// Runs a shrink's landing once the glide lands; a test drains
+    /// it by hand, as the shelf's `afterGlide`.
+    var afterFrontGlide: (@escaping @MainActor () -> Void) -> Void = {
+        BarMotion.afterGroupGlide($0)
+    }
+    /// Where the front name's slot ends, which the chip reaches to
+    /// whatever the name's own width (#2086).
+    var frontNameEnd: CGFloat = 0
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
@@ -256,15 +272,32 @@ public final class SpaceBarOverlay {
             WorkMeter.shared.add(\.barShowsSkipped)
             return
         }
+        // One that moves no frame — a focus change — redraws its
+        // content alone (#2086).
+        if isVisible, drawnEnvironment == environment,
+            let last = lastShown, let front = frontPlacement,
+            keepsGeometry(last, next)
+        {
+            lastShown = next
+            WorkMeter.shared.add(\.barContentRedraws)
+            redrawContent(since: last, at: front)
+            return
+        }
         drawnEnvironment = environment
         // A slot that moved or resized hands the motion to the
         // shelf's glide, so the chips land (#1838).
         let slotChanged = lastShown.map { $0.strip != strip } ?? false
+        // The segment joins or leaves a SHOWN bar with motion; the
+        // first show after a hide lands it (#1903).
+        let frontMoves =
+            isVisible
+            && (lastShown?.frontApp == nil) != (frontApp == nil)
         lastShown = next
         let active = items.first(where: \.active)?.space
         render(
             followingActive: follow.follows(active),
-            slotChanged: slotChanged
+            slotChanged: slotChanged,
+            frontMoves: frontMoves
         )
     }
 
@@ -286,6 +319,9 @@ public final class SpaceBarOverlay {
         scrollOffset = 0
         scrollGeom = nil
         scrollRun = nil
+        frontPlacement = nil
+        frontLeave = nil
+        frontNameEnd = 0
         cancelDragAutoScroll()
         root.isHidden = true
         onRendered()

@@ -80,9 +80,13 @@ struct SpaceBarFrontAccentTests {
     }
 
     /// From a chip that drew to none: a fresh view is unhidden by
-    /// default, so the drawn state comes first.
+    /// default, so the drawn state comes first. Under Reduce Motion,
+    /// where the leaving segment snaps rather than shrinks (#1903,
+    /// `FrontAppGrowTests`).
     @Test("No front app draws no indicator")
     func hidesWithTheSegment() throws {
+        BarMotion.reducedOverride = true
+        defer { BarMotion.reducedOverride = nil }
         let manager = SpaceBarManager()
         for front in [WindowID(1), nil] as [WindowID?] {
             let base = paintedSpaceBar(front: front, spaces: 2)

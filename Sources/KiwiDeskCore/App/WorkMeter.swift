@@ -38,6 +38,9 @@ public final class WorkMeter: @unchecked Sendable {
         public var borderNanos = 0
         public var borderMaxNanos = 0
         public var barShowsSkipped = 0
+        /// Space Bar shows that moved no frame and redrew content
+        /// alone (#2086).
+        public var barContentRedraws = 0
         public var shelfShowsSkipped = 0
         public var spaceBarViewsMinted = 0
         public var shelfStandsSkipped = 0
