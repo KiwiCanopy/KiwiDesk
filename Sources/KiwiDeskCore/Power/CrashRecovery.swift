@@ -13,6 +13,10 @@ public final class CrashRecovery {
     public var captureInPlaceState: @MainActor () -> StateSnapshot? =
         { nil }
     public var onLog: @MainActor (String) -> Void = CoreLog.write
+    /// The #1385 measurement and its hook after each autosave
+    /// write (`RestoreKeyLog`), removed with it.
+    let restoreKeys = RestoreKeyLog()
+    var onAutosaved: @MainActor () -> Void = {}
 
     /// Boot time provider to discard stale pre-boot window IDs (#633).
     public var bootTime: () -> Date = SystemBoot.time
@@ -146,7 +150,9 @@ public final class CrashRecovery {
             at: fileURL.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
-        try? data.write(to: fileURL, options: .atomic)
+        guard (try? data.write(to: fileURL, options: .atomic)) != nil
+        else { return }
+        onAutosaved()
     }
 
     private func readSnapshot() -> StateSnapshot? {
