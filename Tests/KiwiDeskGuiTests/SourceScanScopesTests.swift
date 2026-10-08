@@ -33,9 +33,7 @@ struct SourceScanScopesTests {
             )
             for file in files {
                 let text =
-                    SourceScan.blankingCommentsAndLiterals(
-                        try SourceScan.rawSource(at: file)
-                    ) as NSString
+                    try SourceScan.blankedSource(at: file) as NSString
                 let scopes = SourceScan.scopeTree(of: text).scopes
                 let byOpen = Dictionary(
                     scopes.map { ($0.open, $0) },

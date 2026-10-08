@@ -38,9 +38,7 @@ struct QuickMenuBuilderCoverageTests {
             .union(QuickMenuBuilders.unchecked.keys)
         var found = 0
         for file in tree {
-            let text = SourceScan.blankingCommentsAndLiterals(
-                try String(contentsOf: file, encoding: .utf8)
-            )
+            let text = try SourceScan.blankedSource(at: file)
             guard text.contains("NSMenuItem(") else { continue }
             found += 1
             #expect(
