@@ -1114,40 +1114,41 @@ glyph's — while a glyph standing alone beside text keeps the
 chip's rest fill (`resting: true`), nothing else marking it as a
 button, and the `?` rests bare with no inset, its own circle
 being its shape; a chip-shaped control keeps its rest fill,
-which is its shape; custom full-row picker entries use a
-hover-only `0.06` fill; an unselected custom segment lifts by
-one rest step over its track, and a choice chip — a layer, a
-preset — rests and lifts as a button chip, the chosen one washed
-with the accent instead. A draggable token chip is the one case
-stated as an ORDER rather than a step, because its kinds are
-drawn apart by outline-versus-fill and hover must not spend that
-channel: the outlined kind's *hover* fill stays below the filled
-kind's *rest* fill, and the edge carries the rest of the lift —
-which is also the only channel the outlined kind has, having no
-fill to raise. No scale, movement, shadow, or pointing-hand
-cursor on ordinary buttons (the hand remains link-only).
-Disabled controls never react; under Reduce Motion the color
-change is immediate. Every such control also needs an explicit
-accessibility label (and concise hint when the action is not
-obvious), a visible keyboard-focus state, and a recognizable
-rest treatment or list context — `.help()` and hover alone do
-not make a control discoverable.
+which is its shape; custom full-row picker entries rest at
+nothing and take the chip's rest fill on hover alone; an
+unselected custom segment lifts by one rest step over its track,
+and a choice chip — a layer, a preset — rests and lifts as a
+button chip, the chosen one washed with the accent instead. A
+draggable token chip is the one case stated as an ORDER rather
+than a step, because its kinds are drawn apart by
+outline-versus-fill and hover must not spend that channel: the
+outlined kind's *hover* fill stays below the filled kind's
+*rest* fill, and the edge carries the rest of the lift — which
+is also the only channel the outlined kind has, having no fill
+to raise. No scale, movement, shadow, or pointing-hand cursor on
+ordinary buttons (the hand remains link-only). Disabled controls
+never react; under Reduce Motion the color change is immediate.
+Every such control also needs an explicit accessibility label
+(and concise hint when the action is not obvious), a visible
+keyboard-focus state, and a recognizable rest treatment or list
+context — `.help()` and hover alone do not make a control
+discoverable.
 
 :::unreleased
 Every chip fill in that ladder is a theme token, never a bare
 opacity. A chip rests at `chipRest`, lifts to `chipHover` and,
 where its style can see the press, deepens to `chipPressed`; a
-segment's lift is one `chipRest` step; a segmented control's
-track is `trackFill`, fill and rim. All are stronger in dark,
-where a 6 % lift on the near-black page does not read as a shape
-(#1520, #2047). The full-row entry keeps its `0.06` hover as a
-carve-out. A text chip that is a button also takes `chipEdge`,
-constant across states — the jump chips, a monitor card's `+n`,
-the collapsed screen-setups chip, a colour well's swatch, a
-layer or preset choice chip: the hairline capsule is the passive
-chip's vocabulary, so a button chip is told apart by its edge
-before it is ever pointed at. A glyph-only chip and a segmented
-track take no edge — no passive control shares their shape.
+full-row entry's hover and a segment's lift are one `chipRest`
+step; a segmented control's track is `trackFill`, fill and rim.
+All are stronger in dark, where a 6 % lift on the near-black
+page does not read as a shape (#1520, #2047). A text chip that
+is a button also takes `chipEdge`, constant across states — the
+jump chips, a monitor card's `+n`, the collapsed screen-setups
+chip, a colour well's swatch, a layer or preset choice chip: the
+hairline capsule is the passive chip's vocabulary, so a button
+chip is told apart by its edge before it is ever pointed at. A
+glyph-only chip and a segmented track take no edge — no passive
+control shares their shape.
 :::
 
 **Inapplicable controls are greyed, not hidden.** When a

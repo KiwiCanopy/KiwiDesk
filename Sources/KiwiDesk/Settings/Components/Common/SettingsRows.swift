@@ -288,15 +288,15 @@ extension View {
         .accessibilityLabel(label)
     }
 
-    /// Hover highlight for full-width row buttons starting with transparent
-    /// rest state (#956).
+    /// Hover highlight for full-width row buttons: rests at
+    /// nothing and lifts one `chipRest` step (#956, #2047).
     func rowHoverHighlight(
         cornerRadius: CGFloat = 5,
         padding: CGFloat = 0
     ) -> some View {
         hoverHighlight(
             rest: .clear,
-            hover: Color.primary.opacity(0.06),
+            hover: SettingsTheme.chipRest,
             edge: nil,
             cornerRadius: cornerRadius,
             padding: padding

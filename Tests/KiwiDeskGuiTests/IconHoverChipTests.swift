@@ -78,6 +78,22 @@ struct IconHoverChipTests {
         text.split(whereSeparator: \.isWhitespace).joined()
     }
 
+    /// A full-row entry rests at nothing and lifts one rest step,
+    /// a theme token rather than a bare opacity (#2047). The whole
+    /// call, so a dropped or retuned argument reds.
+    @Test("a full-row entry lifts one chipRest step")
+    func rowLiftsOneRestStep() throws {
+        let rows = try source("Components/Common/SettingsRows.swift")
+        let row = body(of: "rowHoverHighlight", in: rows)
+        #expect(
+            squashed(row).contains(
+                "hoverHighlight(rest:.clear,"
+                    + "hover:SettingsTheme.chipRest,edge:nil,"
+            )
+        )
+        #expect(!row.contains(".opacity("))
+    }
+
     @Test("the ? and both rule-trash branches take the one chip")
     func everyIconTakesIt() throws {
         let help = try source("Components/Common/HelpButton.swift")

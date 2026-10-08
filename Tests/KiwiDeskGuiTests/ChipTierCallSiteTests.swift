@@ -74,12 +74,9 @@ struct ChipTierCallSiteTests {
         #expect(calls > 0)
     }
 
-    /// A file whose hover fill is a ruled carve-out, and why.
-    private let carveOut: [String: String] = [
-        "SettingsRows.swift":
-            "the full-row entry's 0.06 hover, kept as a named "
-            + "carve-out from the chip tokens"
-    ]
+    /// A file whose hover fill is a ruled carve-out, and why —
+    /// none since the full-row entry took the `chipRest` lift.
+    private let carveOut: [String: String] = [:]
 
     /// A hierarchical colour's opacity with a hover state within
     /// reach is the faint fill #2047 retired, whichever control
