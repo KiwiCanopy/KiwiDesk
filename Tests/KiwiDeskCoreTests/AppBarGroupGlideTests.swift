@@ -200,11 +200,17 @@ struct AppBarGroupGlideTests {
                 GlassPlate.holds(overlay.boxGlasses[$0], overlay.itemViews[$0])
             }
         )
-        // Tints ride beside their glass in the run; the folded
-        // member's own view left with its glide's timer, not here.
+        // Each glass rides in its own box host with its tint
+        // (#1842); the folded member's own view left with its
+        // glide's timer, not here.
+        let hosts = overlay.itemRun.subviews.filter {
+            $0 is AppBarOverlay.BoxHost
+        }
+        #expect(hosts.count == expanded.count)
         #expect(
-            overlay.itemRun.subviews.filter { $0 is NSGlassEffectView }
-                .count == expanded.count
+            hosts.allSatisfy {
+                $0.subviews.filter { $0 is NSGlassEffectView }.count == 1
+            }
         )
         _ = settled
     }

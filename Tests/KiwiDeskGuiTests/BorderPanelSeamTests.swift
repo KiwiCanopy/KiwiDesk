@@ -1,14 +1,14 @@
 import Foundation
 import Testing
 
-/// The ring panel's WindowServer writes stay behind their seams
-/// (#1956): the SkyLight move defaults LIVE on `BorderManager`
-/// alone, and both `makeTestCore` twins pin it, with the level read
-/// beside it, to the AppKit fallback. Twin
-/// IDENTITY is `MachineTouchTests`'; a pin deleted from both twins
-/// passes it, which is the half held here. And a default regressed
-/// to the fallback reds nothing behavioural — every suite pins the
-/// seam — so the live default is held by its spelling.
+/// The ring's WindowServer reads and writes stay behind their seams
+/// (#1956, #1894): both `makeTestCore` twins pin the inert backend
+/// and the corner-radius read, and keep the move and level pins as
+/// the backstop for a suite that clears the factory. Twin IDENTITY
+/// is `MachineTouchTests`'; a pin deleted from both twins passes it,
+/// which is the half held here. A live default regressed reds
+/// nothing behavioural, so it is held by its spelling, and its one
+/// home by the qualified call only.
 @Suite("Border panel seams stay injected")
 struct BorderPanelSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -36,6 +36,9 @@ struct BorderPanelSeamTests {
             for pin in [
                 "core.borders.movePanel = { _, _ in false }",
                 "core.borders.windowLevel = { _ in nil }",
+                "core.borders.backendFactory = "
+                    + "{ InertBorderBackend(orderMode: $0) }",
+                "core.borders.readCornerRadius = { _ in nil }",
             ] {
                 #expect(source.contains(pin), "\(twin) misses \(pin)")
             }
@@ -56,6 +59,36 @@ struct BorderPanelSeamTests {
             source.contains(
                 "var movePanel: (CGWindowID, CGPoint) -> Bool "
                     + "= SkyLight.moveWindow"
+            )
+        )
+    }
+
+    /// The corner-radius read is live on the manager and nowhere
+    /// else in Core, so a twin's pin covers every ring (#1894).
+    @Test("the corner-radius read has one live home, the manager's")
+    func liveCornerRadiusHasOneHome() throws {
+        let source = Self.flattened(
+            try SourceScan.strippedSource(
+                at: Self.core.appendingPathComponent(
+                    "Borders/BorderManager.swift"
+                )
+            )
+        )
+        #expect(
+            source.contains(
+                "var readCornerRadius: (CGWindowID) -> CGFloat? "
+                    + "= SkyLight.windowCornerRadius"
+            )
+        )
+        let sites = try SourceScan.identifierSites(
+            of: "SkyLight.windowCornerRadius",
+            under: Self.core
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent) == ["BorderManager.swift"],
+            .init(
+                rawValue: "found "
+                    + sites.map(\.site).joined(separator: ", ")
             )
         )
     }

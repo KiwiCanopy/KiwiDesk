@@ -120,14 +120,13 @@ struct AppBarDissolveTests {
         #expect(stale.superview == nil)
     }
 
-    /// On a boxed glass run the boxes CUT and only content dissolves
-    /// (#1838): a leaving view is taken out of its glass, which goes
-    /// at once, and fades bare; an arriving one takes a fresh glass
-    /// at once and fades in inside it. A glass takes no alpha — at
-    /// partial opacity it shows the tint behind it bare — and no
-    /// geometry — its content re-lays every frame.
-    @Test("A boxed glass dissolve cuts the boxes and fades the content")
-    func glassDissolveCutsBoxes() async throws {
+    /// On a boxed glass run the BOXES dissolve with their content
+    /// (#1842): a glass's own alpha shows the tint behind it bare, so
+    /// each box fades as one unit through the `BoxHost` it was minted
+    /// in — a leaving one where it stands, still hosting its view,
+    /// an arriving one in from transparent.
+    @Test("A boxed glass dissolve fades each box as one unit")
+    func glassDissolveFadesBoxes() async throws {
         guard #available(macOS 26, *) else { return }
         let gate = LiquidGlassGate.override
         defer { LiquidGlassGate.override = gate }
@@ -146,7 +145,14 @@ struct AppBarDissolveTests {
             space: SpaceID("1")
         )
         let oldGlasses = overlay.boxGlasses
+        let oldHosts = try oldGlasses.map {
+            try #require(AppBarOverlay.boxHost(of: $0))
+        }
         let oldViews = overlay.itemViews
+        // Reduce Motion on, synchronously and restored before any
+        // await, so every alpha write lands at once and no other
+        // suite observes the pin.
+        BarMotion.reducedOverride = true
         overlay.show(
             items: [item(7)],
             activeIndex: nil,
@@ -154,21 +160,68 @@ struct AppBarDissolveTests {
             style: style,
             space: SpaceID("2")
         )
-        // Leaving boxes go at once; their views fade bare in the run.
-        #expect(oldGlasses.allSatisfy { $0.superview == nil })
-        #expect(oldViews.allSatisfy { $0.superview === overlay.itemRun })
-        // The arriving box is a fresh one, at full opacity, hosting
-        // its view.
+        BarMotion.reducedOverride = nil
+        // Leaving boxes stay, each in its own host, still hosting
+        // its view, and their HOST takes the fade — never the glass.
+        #expect(oldHosts.allSatisfy { $0.superview === overlay.itemRun })
+        #expect(
+            zip(oldGlasses, oldViews).allSatisfy {
+                GlassPlate.holds($0, $1)
+            }
+        )
+        #expect(oldHosts.allSatisfy { $0.alphaValue == 0 })
+        #expect(oldGlasses.allSatisfy { $0.alphaValue == 1 })
+        // The arriving box is a fresh one, hosting its view, its
+        // host standing transparent for the fade in.
         #expect(overlay.boxGlasses.count == 1)
         let arriving = try #require(overlay.boxGlasses.first)
         #expect(!oldGlasses.contains { $0 === arriving })
         #expect(arriving.alphaValue == 1)
         #expect(arriving.frame.width > 0)
         #expect(GlassPlate.holds(arriving, overlay.itemViews[0]))
+        let arrivingHost = try #require(
+            AppBarOverlay.boxHost(of: arriving)
+        )
+        #expect(arrivingHost.alphaValue == 1)
         for _ in 0..<150
-        where oldViews.contains(where: { $0.superview != nil }) {
+        where oldHosts.contains(where: { $0.superview != nil }) {
             try await Task.sleep(for: .milliseconds(20))
         }
+        // The landing takes the leaving boxes and views out.
+        #expect(oldHosts.allSatisfy { $0.superview == nil })
         #expect(oldViews.allSatisfy { $0.superview == nil })
+    }
+
+    /// Every box host spans the run (#1842), so the topmost would
+    /// swallow a press meant for a box beneath it unless an empty
+    /// host lets the press through.
+    @Test("A press reaches each box through the hosts above it")
+    func pressReachesEveryBox() throws {
+        guard #available(macOS 26, *) else { return }
+        let gate = LiquidGlassGate.override
+        defer { LiquidGlassGate.override = gate }
+        LiquidGlassGate.override = { false }
+        pinShelfGlide()
+        var style = AppBarLook()
+        style.liquidGlass = true
+        style.backgroundStyle = .boxed
+        let overlay = AppBarOverlay()
+        overlay.show(
+            items: [item(1), item(2), item(3)],
+            activeIndex: nil,
+            strip: CGRect(x: 0, y: 0, width: 900, height: 30),
+            style: style,
+            space: SpaceID("1")
+        )
+        // A glass lays its content out by constraints, on a pass.
+        overlay.itemRun.layoutSubtreeIfNeeded()
+        let parent = try #require(overlay.itemRun.superview)
+        for view in overlay.itemViews {
+            let centre = CGPoint(x: view.bounds.midX, y: view.bounds.midY)
+            let hit = overlay.itemRun.hitTest(
+                parent.convert(centre, from: view)
+            )
+            #expect(hit?.isDescendant(of: view) == true)
+        }
     }
 }
