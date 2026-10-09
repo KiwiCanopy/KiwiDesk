@@ -6,7 +6,8 @@ import Testing
 /// classified (a user filing must stamp the match through the one
 /// seam, or the title pass may undo it), the restore policy has
 /// one caller, and every window-removal arm reports its departure
-/// to the logout rollback.
+/// to the logout rollback. The census sees `workspaces.add(` only:
+/// an order primitive inside `withSpace { … }` is review's.
 @Suite("Cross-session seams (#1385)")
 struct CrossSessionSeamTests {
     private static let core = SourceScan.repoRoot(from: #filePath)

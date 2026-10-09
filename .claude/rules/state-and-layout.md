@@ -1901,8 +1901,14 @@ editing here:
   through the one seam, `addFocusedToSpace` — a drop's
   positional filing takes its `after:` form — so no late phase
   undoes it; a new `workspaces.add(` call site is classified in
-  `CrossSessionSeamTests`, and the late phases close the match
-  once the arrangement it armed in is no longer live
+  `CrossSessionSeamTests`. The match is pinned to the
+  arrangement live at arming, never the snapshot's: a login
+  under another arrangement than the logout's — docked, then
+  undocked — would otherwise starve both late phases
+  (`CrossSessionArrangementTests` ▸ `foreignBootFilesByName`). A
+  late phase files exactly as the ordinary restore does:
+  membership by name into a Space that exists, never a mode,
+  never a new Space; any later arrangement change closes it
   (`CrossSessionRestoreTests` ▸
   `arrangementChangeClosesTheMatch`). An
   in-place file that passes the gates is replayed by id and the
