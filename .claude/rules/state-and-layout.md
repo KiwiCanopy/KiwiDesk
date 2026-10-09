@@ -1828,7 +1828,10 @@ editing here:
   record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
   `HeldOrigin.Arrangement` keys and the snapshot's own
   `arrangement`, which every snapshot carries (#1646,
-  profiles.md), and its `arrangementRecords` — #1230's record
+  profiles.md), each window record's `app` and `title` — the
+  stable key a cross-session match reads (#1385) — and the
+  snapshot's `frozenForLogout` mark, and its
+  `arrangementRecords` — #1230's record
   per saved profile and per composed Standard, keyed by the
   arrangement and Space name (#1802, #1829,
   `ProfilePartitioningRestartTests` ▸
@@ -1862,7 +1865,16 @@ editing here:
   emptied desk over the last real arrangement; only an announced
   in-place restart outranks it (`LogoutAutosaveFreezeTests` ▸
   `frozenStopKeepsTheAutosave`, `InPlaceRestartTests` ▸
-  `inPlaceOutranksLogoutFreeze`).
+  `inPlaceOutranksLogoutFreeze`). The freeze's own write is the
+  second sanctioned exception: macOS quits the apps about 14 s
+  before the notice (2026-10-09), so the freeze writes back the
+  autosave from before the burst of closes — or the last one
+  when there was none — marked `frozenForLogout`
+  (`LogoutRollbackTests` ▸ `closesRollBack`, `appExitsRollBack`,
+  `onlyTheFreezeMarks`). The burst is read off the departures the
+  gone handler classified and the app exits, so a new path that
+  removes windows from state reports each departure to
+  `CrashRecovery.noteDeparture` with whether it was a close.
 - **A snapshot is read only in the login session that wrote it
   (#1385).** A logout without a reboot passes the boot gate
   (#633) and reuses window ids, so a write stamps the session
@@ -1876,6 +1888,22 @@ editing here:
   third door, and the structure is what keeps one rare —
   `fileURL` and `sessionURL` are private to `CrashRecovery`, so
   any new door is written inside that file, beside the two.
+- **A file the id gates refuse never has its ids replayed
+  (#1385).** It reaches boot only as `takeCrossSessionCandidate`,
+  and only when a logout's freeze wrote it — a plain Quit's file
+  never crosses a boot — consumed with the file, so once; and it
+  is applied only through `CrossSessionMatch` and
+  `StateSnapshot.rekeyed`, pairing by bundle id, then title once
+  the title pass has run, then rank, its late arrivals paid
+  through `remember` and `restoredFrames` like #1362's, its title
+  pass re-filing through `fileMembership(restoring:)`. An
+  in-place file that passes the gates is replayed by id and the
+  match never arms beside it (`CrossSessionRestoreTests` ▸
+  `sameSessionIsNeverMatched`, `plainQuitStartsFresh`,
+  `secondLaunchMatchesNothing`, `oldIDNamesNothing`,
+  `titlePassRespectsTheUser`). A new reader of a refused file
+  owes the same, and a new field of the snapshot's records is
+  classified for `rekeyed` (`CrossSessionRekeyParityTests`).
 - **A restore pays an untracked window's frame at its arrival
   (#1362).** The replay sets frames on TRACKED windows only; a
   slow app's window adopted later kept the boot scan's tile on
@@ -1890,7 +1918,10 @@ editing here:
   delivers it on a shown Space and the park keeps it for the
   activation; a layout frame outranks it on a tiled Space. It
   is id-keyed like `rememberedSpaces` and shares its lifetime
-  and its rekey (`WindowRekeyParityTests` counts it). The
+  and its rekey (`WindowRekeyParityTests` counts it). Its second
+  writer is `claimCrossSessionArrival`, which files a paired
+  arrival's Space and frame the same way before the fold
+  (`CrossSessionRestoreTests` ▸ `lateArrivalUntilTheClose`). The
   screen-home stand-down stays on the FLAG by ruling: a
   floating-mode member returning on another display follows
   the screen — the flag travels with the window and survives a

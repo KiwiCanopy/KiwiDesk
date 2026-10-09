@@ -251,11 +251,14 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         .enabled(if: NSScreen.main != nil)
     )
     func captureRecordsTheKeys() throws {
-        let core = try #require(
-            boot([window(10, "com.a", "Alpha"), window(11, "com.b", "Beta")])
-        )
+        var parked = window(11, "com.b", "Beta")
+        parked.isFloating = true
+        let core = try #require(boot([window(10, "com.a", "Alpha"), parked]))
         core.state.workspaces.add(WindowID(11), to: F.hidden)
         _ = F.settle(core)
+        // The parked float's record is `sessionSnapshot`'s own
+        // rewrite (`FloatRecovery`), which must keep the keys too.
+        #expect(core.tiler.stashOriginal(WindowID(11)) != nil)
         for snapshot in [
             core.state.snapshot(), core.sessionSnapshot(),
             core.sessionSnapshot(inPlace: true),

@@ -301,6 +301,15 @@ flowchart TD
 The startup sweep one second later takes the same chunked,
 budgeted path and re-tracks what cold AX trees under-reported.
 
+:::unreleased
+After a restart of the Mac the tail has no session to replay by
+id. A snapshot the logout freeze wrote is matched instead
+(`CrossSessionMatch`, #1385): the windows the scan paired by app
+are re-keyed into the same replay, a window that arrives later is
+filed before its create fold as a slow app's window is, and a
+pass about 30 s after launch pairs the rest by title.
+:::
+
 ---
 
 ## Where to go next
