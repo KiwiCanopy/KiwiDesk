@@ -10,34 +10,61 @@ import Testing
 struct BindingNameDoorTests {
     private let home = "KeybindingCatalog+DisplayName.swift"
 
-    /// Files whose label reads are not a binding's name, with how
-    /// many hits each holds and why.
+    /// Every `.label` READ in a binding-handling file outside the
+    /// home, by file, exact count and reason. Keyed on the subject
+    /// rather than on how it is compared: any new read reds until
+    /// it is routed through the door or classified here.
     private let allowed: [String: (count: Int, reason: String)] = [
         "KeybindingAppGroup+Row.swift": (
-            2,
+            4,
             "an application row's label IS the picked app's name; "
-                + "empty chooses the picker's placeholder"
-        )
+                + "empty picks the picker's placeholder"
+        ),
+        "KeybindingAppGroup.swift": (
+            2,
+            "application rows sort by their app-name label"
+        ),
+        "ShortcutsReference+Bands.swift": (
+            3,
+            "an application row's app-name label when no bundle id "
+                + "names it, and the rows' sort by that name"
+        ),
+        "KeybindingImportClassifier.swift": (
+            5,
+            "a NavCommand's or shape's label WRITTEN into a binding: "
+                + "the stored identifier, never displayed"
+        ),
+        "KeybindingCatalog+Layers.swift": (
+            1,
+            "a NavCommand's label written into a binding on rename"
+        ),
+        "KeybindingNavRow.swift": (
+            1,
+            "a NavCommand's label stored on the binding it creates"
+        ),
+        "KeyboardHoverReading.swift": (
+            1,
+            "a KeyLayer's chord label, not a binding's"
+        ),
+        "KeyboardCensus.swift": (
+            1,
+            "a KeyLayer's chord label, not a binding's"
+        ),
+        "ShortcutsPanelController+Reference.swift": (
+            1,
+            "a built ShortcutRow's display label"
+        ),
     ]
 
-    /// The hand-written spellings of "the label, else something":
-    /// an emptiness test of a label, or a label and a Lua/combo as
-    /// the two arms of one ternary or coalesce.
-    private let namingSpellings: [String] = [
-        #"label\.isEmpty"#,
-        #"\.label\s*==\s*"""#,
-        #"""\s*==\s*[\w.?\[\]]*\.label\b"#,
-        #"\.label\.count\s*==\s*0"#,
-        // A coalesced label only counts beside a Lua/combo arm: a
-        // `Mirror` child's optional label is no binding.
-        #"\.label\s*\?\?[^;{}]{0,200}?\.(lua|combo)\b"#,
-        #"\?\s*[\w.?\[\]()<>"]*\.(lua|combo)\s*:\s*[\w.?\[\]]*\.label\b"#,
-        #"\?\s*[\w.?\[\]]*\.label\s*:\s*[\w.?\[\]()<>"]*\.(lua|combo)\b"#,
-    ]
+    /// A file is in scope when it can hold a binding: it names the
+    /// type, the reach templates, or a binding. Lookaheads, not
+    /// `\b`: Swift's Unicode word boundary does not break inside
+    /// `label.count`.
+    private let scope = /KeyBinding|keyTemplates|binding|\.kept(?!\w)/
 
-    /// A binding's label handed to the label-keyed resolver.
-    private let resolverSpelling =
-        #"localizedLabel\(\s*for:\s*[\w.?\[\]]+\.label\s*(\?\?\s*""\s*)?,"#
+    /// A `.label` member read — `x.label`, `$0.label`, `x?.label`,
+    /// `t[k]?.label` — but not an assignment to one.
+    private let labelRead = /\.label(?!\w)(?!\s*=[^=])/
 
     private func sources() throws -> [(name: String, text: String)] {
         let root = SourceScan.repoRoot(from: #filePath)
@@ -56,12 +83,23 @@ struct BindingNameDoorTests {
         }
     }
 
-    private func hits(_ spellings: [String], in text: String) throws
-        -> Int
-    {
-        try spellings.reduce(0) {
-            $0 + text.matches(of: try Regex($1)).count
+    /// Label reads per in-scope file, literals and comments blanked
+    /// so a localization key spelling `.label` is no read.
+    private func labelReads() throws -> [String: Int] {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var result: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let text = try SourceScan.blankedSource(at: file)
+            guard text.firstMatch(of: scope) != nil else { continue }
+            let reads = reads(in: text)
+            if reads > 0 { result[file.lastPathComponent] = reads }
         }
+        return result
+    }
+
+    private func reads(in text: String) -> Int {
+        text.matches(of: labelRead).count
     }
 
     @Test("the door is declared once, in its home")
@@ -89,67 +127,38 @@ struct BindingNameDoorTests {
         #expect(body.contains("?? binding.lua"))
     }
 
-    @Test("the naming needles match every spelling they target")
-    func namingNeedlesFailClosed() throws {
-        let reverted = [
-            "x.label.isEmpty ? x.lua : x.label",
-            "if !binding.label.isEmpty { return binding.label }",
-            "binding.label == \"\" ? binding.lua : binding.label",
-            "\"\" == binding.label",
-            "holder.label.count == 0",
-            "let n = row?.label ?? \"\"\nreturn n.isEmpty\n"
-                + "    ? RuleReachTable<String>.keyParts(key).lua : n",
-            "flag ? holder.lua : holder.label",
-            "flag ? t[k]?.label : RuleReachTable<String>.keyParts(k).lua",
-            "flag ? entry.kept.label : entry.kept.combo",
+    @Test("the label needle reads the subject, however it is spelled")
+    func labelNeedleFailsClosed() {
+        let reads = [
+            "t.map { KeybindingCatalog.localizedLabel(for: $0.label) }",
+            "let n = row?.label ?? \"\"\nreturn n.isEmpty ? k.lua : n",
+            "binding.label != \"\" ? binding.label : binding.lua",
+            "templates[key]?.label.count == 0",
         ]
-        for spelling in reverted {
-            #expect(
-                try hits(namingSpellings, in: spelling) > 0,
-                "unmatched: \(spelling)"
-            )
+        for read in reads {
+            #expect(self.reads(in: read) > 0, "unmatched: \(read)")
         }
-        let resolver = try Regex(resolverSpelling)
-        for spelling in [
-            "localizedLabel(for: entry.binding.label,",
-            "localizedLabel(\n for: x?.label ?? \"\",",
-            "localizedLabel(for: reach.keyTemplates[k]?.label ?? \"\",",
-        ] {
-            #expect(
-                spelling.firstMatch(of: resolver) != nil,
-                "unmatched: \(spelling)"
-            )
-        }
-        // And a label STRING handed in stays legal.
-        #expect("localizedLabel(for: who,".firstMatch(of: resolver) == nil)
+        // A write is no read, and neither is a longer member.
+        #expect(self.reads(in: "binding.label = command.lua") == 0)
+        #expect(self.reads(in: "view.labelsHidden()") == 0)
+        // Scope admits a file that only reaches templates.
+        #expect("reach.keyTemplates[rival]".firstMatch(of: scope) != nil)
     }
 
-    @Test("no file names a binding around the door")
-    func noHandWrittenNaming() throws {
-        var seen: [String: Int] = [:]
-        for (name, text) in try sources() where name != home {
-            let count = try hits(namingSpellings, in: text)
-            guard count > 0 else { continue }
-            seen[name] = count
+    @Test("every binding label read is routed or classified")
+    func everyLabelReadIsClassified() throws {
+        let found = try labelReads()
+        // Non-vacuous: the classified files are really scanned.
+        #expect(found.count >= allowed.count)
+        for (name, count) in found where name != home {
             let message =
-                "\(name) names a label by hand \(count)x: name the "
-                + "binding through KeybindingCatalog.localizedName"
+                "\(name) reads .label \(count)x: name the binding "
+                + "through KeybindingCatalog.localizedName, or "
+                + "classify the read with its reason"
             #expect(allowed[name]?.count == count, "\(message)")
         }
-        // Every exemption still answers a real read, or it is stale.
         for (name, entry) in allowed {
-            #expect(seen[name] == entry.count, "\(name): stale")
-        }
-    }
-
-    @Test("no call hands a binding's raw label to the label resolver")
-    func noLabelResolverOnABinding() throws {
-        let pattern = try Regex(resolverSpelling)
-        for (name, text) in try sources() where name != home {
-            #expect(
-                text.firstMatch(of: pattern) == nil,
-                "\(name): pass the KeyBinding to localizedName(of:)"
-            )
+            #expect(found[name] == entry.count, "\(name): stale")
         }
     }
 

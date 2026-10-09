@@ -1902,3 +1902,7 @@ authoring rules apply here even though the catalogs live in Core:
 The tooling, the content guards and the "Core names, the
 GUI narrates" seam (#96) are in
 [localization.md](localization.md).
+
+Naming a `KeyBinding` for display has one door; the obligation
+and its guard are in [localization.md](localization.md) ▸ *Core
+names, the GUI narrates* (#2111).

@@ -78,7 +78,7 @@ extension SettingsModel {
             guard let rival = table.rival(of: key, for: profile, combo: combo)
             else { continue }
             // Named against THIS page's roster: a command only the
-            // rival profile declares (its own Space) reads English.
+            // rival profile declares reads English (#2116).
             result[profile] =
                 reach.keyTemplates[rival].map {
                     KeybindingCatalog.localizedName(of: $0, config: config)
