@@ -14,15 +14,8 @@ extension OnboardingView {
             footnoteAtBottom: true
         ) {
             menuBarIdentity
-            Toggle(
-                L(
-                    "onboarding.ready.open_at_login",
-                    "Start KiwiDesk at login"
-                ),
-                isOn: $model.openAtLogin
-            )
-            .toggleStyle(.checkbox)
-            .onboardingCard()
+            OnboardingLoginCheckbox(model: model)
+                .onboardingCard()
             starLine
         } action: {
             // The login commit stays on the ONE exit (#342); an
@@ -161,5 +154,31 @@ extension OnboardingView {
             "KiwiDesk is managing your windows now, with a setup "
                 + "chosen for your screens."
         )
+    }
+}
+
+/// The closing card's login checkbox: greyed on a copy that cannot
+/// be a login item, Settings' reason drawn outside the dim (#2094).
+struct OnboardingLoginCheckbox: View {
+    @Bindable var model: OnboardingModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Toggle(
+                L(
+                    "onboarding.ready.open_at_login",
+                    "Start KiwiDesk at login"
+                ),
+                isOn: $model.openAtLogin
+            )
+            .toggleStyle(.checkbox)
+            .disabled(model.loginItemReason != nil)
+            if let reason = model.loginItemReason {
+                Text(reason)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }

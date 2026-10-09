@@ -33,6 +33,8 @@ struct LoginItemSeamTests {
     /// whose own default is a no-op.
     private static let allowed: [String: [String: Int]] = [
         "SMAppService" + ".mainApp": ["LoginItemManager.swift": 3],
+        // Its declaration and `setEnabled`'s one argument (#2094).
+        "service" + "Write": ["LoginItemManager.swift": 2],
         "AutoStartManager" + ".setLoginItem": [
             "SettingsModel.swift": 1
         ],

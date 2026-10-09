@@ -1,5 +1,6 @@
 import Foundation
 import ServiceManagement
+import os
 
 /// Authority for the KiwiDesk login item via `SMAppService`
 /// (#342, #96). Not the only auto-start: the `kiwidesk service`
@@ -14,10 +15,16 @@ public enum LoginItemManager {
         // cannot be a stable login item is `.unavailable` whatever
         // `SMAppService` reports — even if a prior install left a
         // stale registration.
-        if let reason = unavailableReason(for: Bundle.main.bundleURL) {
+        if let reason = unavailableCopy {
             return .unavailable(reason)
         }
         return state(from: SMAppService.mainApp.status)
+    }
+
+    /// Why the running copy cannot be a login item, nil if it can.
+    /// A path check only, so the main actor may ask (#2094).
+    public static var unavailableCopy: LoginItemUnavailable? {
+        unavailableReason(for: Bundle.main.bundleURL)
     }
 
     /// Why bundle at `url` cannot register (nil if registerable).
@@ -31,23 +38,57 @@ public enum LoginItemManager {
         return nil
     }
 
-    /// Registers or unregisters the app as a login item and returns result.
+    /// Registers or unregisters the app as a login item and returns
+    /// the live state. A copy `unavailableReason` refuses is never
+    /// written, on OR off, whoever calls (#2094).
     @discardableResult
     public static func setEnabled(_ enabled: Bool) -> LoginItemState {
-        do {
-            if enabled {
-                try SMAppService.mainApp.register()
-            } else {
-                try SMAppService.mainApp.unregister()
-            }
-        } catch {
-            NSLog(
-                "KiwiDesk: login-item %@ failed: %@",
-                enabled ? "register" : "unregister",
-                String(describing: error)
-            )
+        guardedWrite(
+            enabled,
+            at: Bundle.main.bundleURL,
+            write: serviceWrite
+        )
+    }
+
+    /// `setEnabled` over an injected bundle URL, OS write and
+    /// re-read, so a test never reaches `SMAppService` (#2092).
+    /// Refuses both directions for an unstable copy (#2094).
+    static func guardedWrite(
+        _ enabled: Bool,
+        at url: URL,
+        write: (Bool) throws -> Void,
+        read: () -> LoginItemState = { current }
+    ) -> LoginItemState {
+        if let reason = unavailableReason(for: url) {
+            note("login-item write refused: \(reason)")
+            return .unavailable(reason)
         }
-        return current
+        do {
+            try write(enabled)
+        } catch {
+            let verb = enabled ? "register" : "unregister"
+            note("login-item \(verb) failed: \(error)")
+        }
+        return read()
+    }
+
+    /// The one live OS write behind `setEnabled`.
+    private static func serviceWrite(_ enabled: Bool) throws {
+        if enabled {
+            try SMAppService.mainApp.register()
+        } else {
+            try SMAppService.mainApp.unregister()
+        }
+    }
+
+    /// Unified logger, `.public` because macOS redacts `NSLog`.
+    private static let log = Logger(
+        subsystem: KiwiLog.subsystem,
+        category: "login-item"
+    )
+
+    private static func note(_ line: String) {
+        log.log("KiwiDesk: \(line, privacy: .public)")
     }
 
     /// Opens System Settings ▸ General ▸ Login Items.

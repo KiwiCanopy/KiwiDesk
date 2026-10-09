@@ -118,30 +118,46 @@ struct GeneralGateTests {
     /// than against a copy of the resolver's predicate — an
     /// earlier cut compared the resolver to a hand-written
     /// `level == .atLoginWithAutoRestart` and was `X == X`,
-    /// exercising neither side (code review, #1071).
+    /// exercising neither side (code review, #1071). An
+    /// unregisterable copy is refused by Core (#2094), so its seam
+    /// answers the unchanged status, and "refused" means nothing
+    /// changed and no confirmation flashed.
     @MainActor
     @Test("what greys is what the setter refuses")
-    func greyAndRefusalAgree() async {
-        for level in AutoStartLevel.allCases {
-            let gates = GeneralGates(autoStart: status(level))
+    func greyAndRefusalAgree() async throws {
+        let cases = AutoStartLevel.allCases.flatMap { level in
+            [true, false].map { (level, $0) }
+        }
+        for (level, registerable) in cases {
+            let before = status(level, registerable: registerable)
+            let gates = GeneralGates(autoStart: before)
             let inert =
                 gates.inertReason(for: .general(.startAtLogin))
                 != nil
-            // Drive the real model: a refusal leaves the status
-            // untouched, so `autoStartBusy` never arms.
             let model = makeTestModel()
-            model.autoStart = status(level)
+            model.autoStart = before
             model.autoStartLoaded = true
+            if !registerable {
+                model.writeLoginItem = { _ in before }
+            }
             model.setLoginItem(
                 !level.opensAtLogin,
                 reduceMotion: true
             )
-            let refused = !model.autoStartBusy
+            let clock = ContinuousClock()
+            let deadline = clock.now + .seconds(30)
+            while model.autoStartBusy, clock.now < deadline {
+                try await Task.sleep(for: .milliseconds(10))
+            }
+            let refused =
+                model.autoStartApplied == nil
+                && model.autoStart.level == level
             #expect(
                 inert == refused,
                 Comment(
                     rawValue:
-                        "from \(level) the switch is "
+                        "from \(level), registerable "
+                        + "\(registerable), the switch is "
                         + "\(inert ? "inert" : "live") but the "
                         + "model \(refused ? "refused" : "acted")"
                         + " — the grey and the guard disagree"
