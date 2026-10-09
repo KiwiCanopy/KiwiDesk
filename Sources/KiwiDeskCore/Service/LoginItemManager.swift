@@ -1,5 +1,6 @@
 import Foundation
 import ServiceManagement
+import os
 
 /// Authority for the KiwiDesk login item via `SMAppService`
 /// (#342, #96). Not the only auto-start: the `kiwidesk service`
@@ -31,23 +32,55 @@ public enum LoginItemManager {
         return nil
     }
 
-    /// Registers or unregisters the app as a login item and returns result.
+    /// Registers or unregisters the app as a login item and returns
+    /// the live state. A copy that cannot be a stable login item is
+    /// refused here, for every caller (#2094).
     @discardableResult
     public static func setEnabled(_ enabled: Bool) -> LoginItemState {
+        guardedWrite(
+            enabled,
+            at: Bundle.main.bundleURL,
+            write: serviceWrite
+        )
+    }
+
+    /// `setEnabled` over an injected bundle URL and OS write, so a
+    /// test never reaches `SMAppService` (#2094, #2092).
+    static func guardedWrite(
+        _ enabled: Bool,
+        at url: URL,
+        write: (Bool) throws -> Void
+    ) -> LoginItemState {
+        if let reason = unavailableReason(for: url) {
+            note("login-item write refused: \(reason)")
+            return .unavailable(reason)
+        }
         do {
-            if enabled {
-                try SMAppService.mainApp.register()
-            } else {
-                try SMAppService.mainApp.unregister()
-            }
+            try write(enabled)
         } catch {
-            NSLog(
-                "KiwiDesk: login-item %@ failed: %@",
-                enabled ? "register" : "unregister",
-                String(describing: error)
-            )
+            let verb = enabled ? "register" : "unregister"
+            note("login-item \(verb) failed: \(error)")
         }
         return current
+    }
+
+    /// The one live OS write behind `setEnabled`.
+    private static func serviceWrite(_ enabled: Bool) throws {
+        if enabled {
+            try SMAppService.mainApp.register()
+        } else {
+            try SMAppService.mainApp.unregister()
+        }
+    }
+
+    /// Unified logger, `.public` because macOS redacts `NSLog`.
+    private static let log = Logger(
+        subsystem: KiwiLog.subsystem,
+        category: "login-item"
+    )
+
+    private static func note(_ line: String) {
+        log.log("KiwiDesk: \(line, privacy: .public)")
     }
 
     /// Opens System Settings ▸ General ▸ Login Items.
