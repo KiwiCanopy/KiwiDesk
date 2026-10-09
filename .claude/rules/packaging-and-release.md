@@ -651,7 +651,10 @@ and locale checks with it.
 ## CI
 
 `.github/workflows/ci.yml` builds, lints, and tests on pushes to
-`main` and on PRs targeting it. Both jobs are gated on a `changes`
+`main` and on PRs targeting it — and on the same two events for a
+long-lived release branch, which is a merge target like `main`:
+**a branch PRs merge into joins both trigger lists before its
+first PR**, or those PRs merge with no CI at all. Both jobs are gated on a `changes`
 job, so a change confined to `.github/ci-ignore.txt`'s list leaves
 them skipped. A red build blocks merging. The release build runs
 as a separate job (#532), required on `main` exactly like the
