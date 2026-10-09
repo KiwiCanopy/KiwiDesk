@@ -249,10 +249,10 @@ public enum NativeSpaces {
 
     /// C signature of CGDisplayCreateUUIDFromDisplayID, which
     /// current SDKs no longer expose to Swift directly.
-    private typealias DisplayUUIDFn =
+    typealias DisplayUUIDFn =
         @convention(c) (UInt32) -> Unmanaged<CFUUID>?
 
-    private static let createDisplayUUID: DisplayUUIDFn? = {
+    static let createDisplayUUID: DisplayUUIDFn? = {
         // CoreGraphics is already loaded; look the symbol up
         // in the global namespace.
         guard

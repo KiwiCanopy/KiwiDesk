@@ -122,9 +122,12 @@ extension APIReference {
     /// calling it would do by accident (#930).
     /// `get_work_counters` is a measuring instrument (#1508): a
     /// config polling it would count its own work.
+    /// `self_test` reads the WindowServer once per private path
+    /// (#1889) — a diagnostic, never a config's to call.
     public static let cliOnly: [String] = [
         socketOnlyCommand,
         ServiceManager.prepareRestartCommand,
         "get_work_counters",
+        PrivatePathSelfTest.command,
     ]
 }

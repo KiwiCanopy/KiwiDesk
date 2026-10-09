@@ -27,8 +27,14 @@ struct SkyLightEventPortSeamTests {
     func onePortOwner() throws {
         let owner = ["SkyLightEventPort.swift": 1]
         #expect(try hits("CFMachPortCreateWithPort(") == owner)
-        #expect(try hits("\"SLEventCreateNextEvent\"") == owner)
-        #expect(try hits("\"SLSRegisterNotifyProc\"") == owner)
+        // Resolved by the owner; named once more by the
+        // `self_test` row, which resolves nothing (#1889).
+        let named = owner.merging(
+            ["SkyLightEventPort+SelfTest.swift": 1],
+            uniquingKeysWith: +
+        )
+        #expect(try hits("\"SLEventCreateNextEvent\"") == named)
+        #expect(try hits("\"SLSRegisterNotifyProc\"") == named)
         // Both consumers register through the port, and the pump
         // brackets the drain for its synchronous flush.
         #expect(

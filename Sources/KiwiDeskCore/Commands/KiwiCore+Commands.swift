@@ -128,6 +128,8 @@ extension KiwiCore {
                     reset: args.first?.boolValue ?? false
                 )
             )
+        case PrivatePathSelfTest.command:
+            return selfTest()
         case "get_layout_info":
             return layoutInfo()
         case "list_monitors":

@@ -124,6 +124,18 @@ final class SkyLightWindowEvents {
         return success
     }
 
+    /// The subscription `self_test` looks up and never calls
+    /// (#1889): a request would change which windows we hear.
+    static func selfTestProbes() -> [PrivatePathProbe] {
+        [
+            .write(
+                "SLSRequestNotificationsForWindows",
+                home: "SkyLightWindowEvents",
+                resolved: { requestNotifications != nil }
+            )
+        ]
+    }
+
     fileprivate static func deliver(
         code: UInt32,
         window: CGWindowID

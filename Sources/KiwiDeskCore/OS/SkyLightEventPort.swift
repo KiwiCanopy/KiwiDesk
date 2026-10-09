@@ -37,23 +37,23 @@ final class SkyLightEventPort {
         ) -> CGError
 
     static let shared: SkyLightEventPort? = SkyLightEventPort()
-    private static weak var active: SkyLightEventPort?
+    private(set) static weak var active: SkyLightEventPort?
 
-    private static let getEventPort: GetEventPortFn? =
+    static let getEventPort: GetEventPortFn? =
         SkyLight.symbol(
             "SLSGetEventPort",
             as: GetEventPortFn.self
         )
-    private static let nextEvent: NextEventFn? = SkyLight.symbol(
+    static let nextEvent: NextEventFn? = SkyLight.symbol(
         "SLEventCreateNextEvent",
         as: NextEventFn.self
     )
-    private static let registerNotify: RegisterNotifyFn? =
+    static let registerNotify: RegisterNotifyFn? =
         SkyLight.symbol(
             "SLSRegisterNotifyProc",
             as: RegisterNotifyFn.self
         )
-    private static let setMachPortOptions: SetMachPortOptionsFn? =
+    static let setMachPortOptions: SetMachPortOptionsFn? =
         coreFoundationSymbol(
             "_CFMachPortSetOptions",
             as: SetMachPortOptionsFn.self
@@ -120,6 +120,9 @@ final class SkyLightEventPort {
         registered[code] = key
         return true
     }
+
+    /// How many codes this port holds — the `self_test` reading.
+    var registeredCodeCount: Int { registered.count }
 
     /// Brackets every drain: `begin` before the notify procs
     /// fire for the drained events, `end` after.

@@ -105,6 +105,10 @@ extension APIReference {
                 + "reset, and resets them when passed true.",
             .boolean("reset", optional: true)
         ),
+        "self_test": APIRecord(
+            "Reports which private fast paths this macOS still "
+                + "answers, one verdict each, changing nothing."
+        ),
         "help": APIRecord(
             "Describes one command, or lists the whole API "
                 + "surface.",

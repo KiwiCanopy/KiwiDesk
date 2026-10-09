@@ -49,6 +49,8 @@ struct FocusedCommandPolicyTests {
         "prepare_restart",
         // Reads the engine's counters, touching no window (#1508).
         "get_work_counters",
+        // Reads the private paths, touching no window (#1889).
+        "self_test",
     ]
 
     /// A command that does not act on the implicit focused window:
