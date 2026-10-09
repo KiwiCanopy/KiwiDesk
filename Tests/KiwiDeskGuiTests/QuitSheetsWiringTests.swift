@@ -146,7 +146,8 @@ struct QuitSheetsWiringTests {
         expectOnce(
             [
                 "if dashboard.takeQuitAnswer() { return .terminateNow }",
-                "guard dashboard.quitAsksAboutDraft",
+                "guard dashboard.quitAsksAboutDraft else { "
+                    + "return .terminateNow }",
                 "dashboard.askBeforeQuit",
                 "NSApp.terminate(nil)",
             ],
@@ -159,7 +160,7 @@ struct QuitSheetsWiringTests {
         expectOnce(
             [
                 "window.map { $0.isVisible || $0.isMiniaturized }",
-                "var quitAsksAboutDraft: Bool { isShown && model.isDirty }",
+                "Self.quitAsks(shown: isShown, dirty: model.isDirty)",
                 "model.prepareToShow(windowShown: isShown)",
                 "model.askBeforeQuit(terminate: terminate)",
                 "guard model.draftLeave != nil else { return false }",

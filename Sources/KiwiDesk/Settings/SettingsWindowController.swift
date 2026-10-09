@@ -5,14 +5,20 @@ import SwiftUI
 /// Owns the dashboard window and its view model.
 @MainActor
 final class SettingsWindowController: NSObject, NSWindowDelegate {
-    private let model: SettingsModel
+    /// Internal so a test can drive the controller's verdicts
+    /// without opening its window.
+    let model: SettingsModel
     private var window: NSWindow?
 
     /// Initial open and minimum restore width
     /// (`SettingsWidthClass.panelBreakpoint`).
     static let firstRunWidth = SettingsWidthClass.panelBreakpoint
-    init(core: KiwiCore) {
-        self.model = SettingsModel(core: core)
+    convenience init(core: KiwiCore) {
+        self.init(model: SettingsModel(core: core))
+    }
+
+    init(model: SettingsModel) {
+        self.model = model
         super.init()
         observeWorkspaceTopology()
     }
@@ -93,7 +99,14 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     /// Settings is open with unsaved edits, so a quit asks first
     /// (#2049). Closed, nothing asks: no draft outlives the window.
-    var quitAsksAboutDraft: Bool { isShown && model.isDirty }
+    var quitAsksAboutDraft: Bool {
+        Self.quitAsks(shown: isShown, dirty: model.isDirty)
+    }
+
+    /// The quit question's one verdict: open AND unsaved.
+    static func quitAsks(shown: Bool, dirty: Bool) -> Bool {
+        shown && dirty
+    }
 
     /// Brings Settings forward and asks Save / Discard / Cancel,
     /// or leaves a question already up as it is; `terminate`
