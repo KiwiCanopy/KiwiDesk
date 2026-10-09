@@ -5802,6 +5802,22 @@ that was active at quit. This works within one login session
 are re-tiled fresh). Crashes restore from the last autosave
 (30 s interval) instead.
 
+:::unreleased
+A restart of the Mac, or a logout, that begins while KiwiDesk is
+running is the exception: KiwiDesk keeps the arrangement it had
+when the restart began, and the first launch after it matches the
+windows macOS reopens to it by app and title instead of by window
+id. An app with one window goes back to its space at launch; the
+others move into their spaces about 30 seconds later, once their
+titles have settled — never the window you are working in, nor
+one you moved since launch — and a window that reopens up to two minutes
+after launch is still placed. An app's windows that share one
+title go back to that app's spaces in no particular order. The
+arrangement is used once, by that first launch. After a plain
+Quit the next restart still starts fresh: quitting lets the
+arrangement go.
+:::
+
 On quit, KiwiDesk moves each managed tiled window
 back onto the screen its space is assigned to and arranges them
 per `quit.layout` (see `quit.set_layout` below). Floating

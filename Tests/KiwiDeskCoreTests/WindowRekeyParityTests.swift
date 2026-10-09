@@ -58,6 +58,7 @@ private func trackedFixture() -> StateCoordinator {
         )
     }
     state.setFloating(old, true)
+    state.crossSession.placed.insert(old)
     state.remember(old, in: SpaceID(1))
     state.restoredFrames[old] = CGRect(
         x: 1,
@@ -93,7 +94,8 @@ private func trackedFixture() -> StateCoordinator {
 /// `stickyReachOverrides` (#1145), `floatFrames` (#1675),
 /// `departedSlots` (#1207),
 /// `awayWindows` (#1146), `closedDepartures` (#1414),
-/// `unjudgedFilings` (#1646), `focusRecency` (#1840), plus
+/// `unjudgedFilings` (#1646), `focusRecency` (#1840),
+/// `crossSession.placed` (#1385), plus
 /// each space's `windows`, `stackWeights`, `trackBreaks`,
 /// `handedBreaks` (#1387), `trackWeights`. Bumping the fixture
 /// with a new id-keyed map
@@ -101,7 +103,7 @@ private func trackedFixture() -> StateCoordinator {
 /// clear it. The fixture's `scrollRest` is deliberately NOT
 /// counted: it holds a bare id, not a container, so reflection
 /// never renders it here (see the limitations above).
-private let expectedContainerCount = 16
+private let expectedContainerCount = 17
 
 /// The renderings of every WindowID-keyed container the shared
 /// walker (`idContainers`) finds.
