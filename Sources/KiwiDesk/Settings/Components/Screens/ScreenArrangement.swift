@@ -41,8 +41,14 @@ enum ScreenArrangement {
 
     /// Gap between tray and screen it hangs off.
     static let trayGap: CGFloat = 10
-    /// Dashed tray height.
-    static let trayHeight: CGFloat = 52
+    /// Dashed tray height for one chip row, derived from the
+    /// metrics `ScreenCardChips.rows` counts with, so the band
+    /// holds the row it reserves at any padding (#2065).
+    static let trayHeight: CGFloat =
+        ScreenCardChips.cardPadding * 2
+        + ScreenCardChips.trayHeaderHeight
+        + ScreenCardChips.stackSpacing
+        + ScreenCardChips.chipHeight
 
     /// Lays out arrangement inside `canvas` (`ScreenTray.fold`).
     static func layout(

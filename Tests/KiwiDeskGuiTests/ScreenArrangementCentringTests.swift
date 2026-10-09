@@ -4,10 +4,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Where the Screens picture sits in its container (#2065).
-/// Arithmetic on derived rectangles, as `ScreenArrangementTests`
-/// argues.
-@Suite("Screens picture centring (#2065)")
+/// Where the Screens picture sits in its container, and the tray
+/// band that the #2065 padding moved under (#2065). Arithmetic on
+/// derived rectangles, as `ScreenArrangementTests` argues.
+@Suite("Screens picture centring and tray band (#2065)")
 struct ScreenArrangementCentringTests {
     private let canvas = CGSize(width: 600, height: 200)
 
@@ -76,5 +76,36 @@ struct ScreenArrangementCentringTests {
         )
         #expect(origin.x == 0)
         #expect(origin.y == 40)
+    }
+
+    /// The tray band holds exactly the rows it reserved: the card
+    /// padding moved under a hand-typed band once, and `split`
+    /// then counted a row fewer than the band was grown for
+    /// (#2065 review).
+    @Test("the tray band holds the rows it reserves")
+    func trayBandHoldsItsRows() {
+        let step =
+            ScreenCardChips.chipHeight + ScreenCardChips.spacing
+        for width in [120.0, 260.0, 600.0] {
+            for chips in 0...24 {
+                let band = ScreenArrangement.trayHeight(
+                    chips: chips,
+                    width: width
+                )
+                let reserved =
+                    Int(
+                        ((band - ScreenArrangement.trayHeight) / step)
+                            .rounded()
+                    ) + 1
+                let held = ScreenCardChips.rows(
+                    in: CGSize(width: width, height: band),
+                    header: ScreenCardChips.trayHeaderHeight
+                )
+                #expect(
+                    held == reserved,
+                    "\(chips) chips at \(width) pt"
+                )
+            }
+        }
     }
 }
