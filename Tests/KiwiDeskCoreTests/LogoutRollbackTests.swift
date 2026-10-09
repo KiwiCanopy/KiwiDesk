@@ -249,4 +249,31 @@ struct LogoutRollbackTests {
         #expect(frozen?.frozenForLogout == true)
         #expect(frozen?.windows.map(\.id) == [1, 2])
     }
+
+    /// A cancelled logout: the freeze lifts past its bound, and the
+    /// first write after it replaces the marked file — an autosave
+    /// with an unmarked one, a Quit with its session.
+    @Test("The first write after a lifted freeze unmarks the file")
+    func liftedFreezeUnmarks() throws {
+        for quits in [false, true] {
+            let clock = Clock(start)
+            let (recovery, dir) = try makeRecovery(clock)
+            defer { try? FileManager.default.removeItem(at: dir) }
+            recovery.captureState = { self.desk([1, 2]) }
+            recovery.autosave()
+            recovery.freezeForLogout()
+            clock.advance(CrashRecovery.logoutFreezeBound + 1)
+            if quits {
+                recovery.shutdownCleanly()
+            } else {
+                recovery.autosave()
+            }
+            let reader = CrashRecovery(directory: dir)
+            reader.onLog = { _ in }
+            reader.loginSession = { 1 }
+            reader.bootTime = { .distantPast }
+            let read = reader.takeBootSnapshot()
+            #expect(read?.frozenForLogout == false, "quits: \(quits)")
+        }
+    }
 }

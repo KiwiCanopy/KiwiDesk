@@ -16,9 +16,10 @@ extension KiwiCore {
     /// re-keyed for the boot replay, or nil when no record carries
     /// a key (an older build's file).
     func armCrossSessionMatch(_ snapshot: StateSnapshot) -> StateSnapshot? {
-        var match = CrossSessionMatch(snapshot) {
-            state.workspaces[$0] != nil
-        }
+        var match = CrossSessionMatch(
+            snapshot,
+            arrangement: liveArrangement
+        ) { state.workspaces[$0] != nil }
         let waiting = match.pending.count
         guard waiting > 0 else {
             onLog("cross-session: no window carries a key; none matched")
@@ -52,7 +53,7 @@ extension KiwiCore {
     /// same-session restore is filed (#1362). It lands where a new
     /// window of that Space would, not in its old slot.
     func claimCrossSessionArrival(_ window: ManagedWindow) {
-        guard state.crossSession.isOpen,
+        guard crossSessionStillApplies(),
             state.windows[window.id] == nil,
             state.rememberedSpaces[window.id] == nil,
             !window.isTransientOverlay,
@@ -83,7 +84,7 @@ extension KiwiCore {
     /// focused window is paired but left where it is; a sticky one
     /// and one a user verb filed (`placed`) are never paired.
     func crossSessionSettlePass() {
-        guard state.crossSession.isOpen else { return }
+        guard crossSessionStillApplies() else { return }
         state.crossSession.settle()
         let pairs = state.crossSession.pairs(crossSessionCandidates())
         state.crossSession.commit(pairs)
@@ -105,6 +106,23 @@ extension KiwiCore {
             moved = true
         }
         if moved { retile() }
+    }
+
+    /// Whether the match is open under the arrangement it armed
+    /// in. A Load, a Desktop-bound switch or a monitor change in
+    /// between closes it: its records name another arrangement's
+    /// Spaces, and that switch's hold rules own the windows now.
+    private func crossSessionStillApplies() -> Bool {
+        guard state.crossSession.isOpen else { return false }
+        guard state.crossSession.arrangement != liveArrangement else {
+            return true
+        }
+        let missed = state.crossSession.close()
+        onLog(
+            "cross-session: the arrangement changed; closed with "
+                + "\(missed) window(s) unpaired"
+        )
+        return false
     }
 
     /// Ends the match at its bound.

@@ -1896,7 +1896,15 @@ editing here:
   `StateSnapshot.rekeyed`, pairing by bundle id, then title once
   the title pass has run, then rank, its late arrivals paid
   through `remember` and `restoredFrames` like #1362's, its title
-  pass re-filing through `fileMembership(restoring:)`. An
+  pass re-filing through `fileMembership(restoring:)`, its one
+  caller. A user filing while the match is open stamps it
+  through the one seam, `addFocusedToSpace` — a drop's
+  positional filing takes its `after:` form — so no late phase
+  undoes it; a new `workspaces.add(` call site is classified in
+  `CrossSessionSeamTests`, and the late phases close the match
+  once the arrangement it armed in is no longer live
+  (`CrossSessionRestoreTests` ▸
+  `arrangementChangeClosesTheMatch`). An
   in-place file that passes the gates is replayed by id and the
   match never arms beside it (`CrossSessionRestoreTests` ▸
   `sameSessionIsNeverMatched`, `plainQuitStartsFresh`,

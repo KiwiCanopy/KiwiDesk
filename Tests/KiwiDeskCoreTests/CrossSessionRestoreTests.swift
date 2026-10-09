@@ -212,6 +212,37 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         }
     }
 
+    /// A Load inside the open window: the records name the old
+    /// arrangement's Spaces, so neither late phase files anything.
+    @Test(
+        "Another arrangement going live closes the match",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func arrangementChangeClosesTheMatch() throws {
+        let core = try #require(
+            boot([
+                window(20, "com.ide", "Preview"),
+                window(21, "com.ide", "IDE"),
+            ])
+        )
+        leave(
+            previous([
+                (F.shown, "com.ide", "IDE"),
+                (F.hidden, "com.ide", "Preview"),
+                (F.hidden, "app.zen", "Zen Browser"),
+            ]),
+            in: core
+        )
+        arrange(core)
+        let other = core.buildProfile(name: "Other", modes: nil)
+        core.profiles.becameLive(other, fits: true)
+        core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
+        core.crossSessionSettlePass()
+        #expect(space(core, 30) == F.shown)
+        #expect(space(core, 20) == F.shown)
+        #expect(!core.state.crossSession.isOpen)
+    }
+
     @Test(
         "A stop closes the match",
         .enabled(if: NSScreen.main != nil)

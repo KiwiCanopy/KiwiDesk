@@ -117,7 +117,7 @@ extension KiwiCore {
         let takesFocus =
             state.workspaces.lastFocused == window
             || target == state.workspaces.activeSpace
-        addFocusedToSpace(window, to: target)
+        addFocusedToSpace(window, to: target, restoring: restoring)
         // A target named by an undeclared id takes its screen now:
         // the re-anchor and a follow's slide read it (#1994).
         placeUnplacedSpaces()
@@ -153,17 +153,22 @@ extension KiwiCore {
     /// window into any other mode keeps the historical append,
     /// and a floating window always appends (it has no track
     /// slot). Without this a `move_to_space` into a track space
-    /// silently dropped the window into the last track.
+    /// silently dropped the window into the last track. `after`
+    /// places it behind a member outside a track target (a drop).
+    /// The ONE user filing seam: every filing not `restoring`
+    /// stamps the cross-session match here (#1385).
     func addFocusedToSpace(
         _ window: WindowID,
-        to target: SpaceID
+        to target: SpaceID,
+        after anchor: WindowID? = nil,
+        restoring: Bool = false
     ) {
-        state.stampUserFiling(window)
+        if !restoring { state.stampUserFiling(window) }
         let floating = state.windows[window]?.isFloating == true
         guard !floating,
             state.workspaces[target]?.mode == .track
         else {
-            state.workspaces.add(window, to: target)
+            state.workspaces.add(window, to: target, after: anchor)
             return
         }
         let params = tiler.settings.resolvedTrack(for: target)

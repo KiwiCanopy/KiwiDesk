@@ -31,6 +31,9 @@ struct CrossSessionMatch: Sendable, Equatable {
         let title: String
     }
 
+    /// The arrangement live when the match armed: its records file
+    /// by Space NAME, which means nothing under another one.
+    private(set) var arrangement: HeldOrigin.Arrangement?
     /// Set by the title pass; titles pair only after it.
     private(set) var settled = false
     /// Waiting records, in the snapshot's Space-then-row order —
@@ -46,8 +49,10 @@ struct CrossSessionMatch: Sendable, Equatable {
     /// a Space `exists` admits; empty when none do.
     init(
         _ snapshot: StateSnapshot,
+        arrangement: HeldOrigin.Arrangement? = nil,
         exists: (SpaceID) -> Bool
     ) {
+        self.arrangement = arrangement
         let byID = Dictionary(
             snapshot.windows.map { ($0.id, $0) },
             uniquingKeysWith: { first, _ in first }
