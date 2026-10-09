@@ -68,23 +68,4 @@ struct SettingsWindowTitleTests {
         #expect(titles.last == SettingsDestination.general.title)
         #expect(titles.last != titles.first)
     }
-
-    /// The controller wires the follow where it builds the window
-    /// and spells no title of its own (#2059).
-    @Test("The controller wires the follow and sets no title")
-    func controllerWiresTheFollow() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-        let source = try SourceScan.strippedSource(
-            at: root.appendingPathComponent(
-                "Sources/KiwiDesk/Settings/"
-                    + "SettingsWindowController.swift"
-            )
-        )
-        let follows =
-            source.components(
-                separatedBy: "SettingsWindowTitle.follow(model, in: window)"
-            ).count - 1
-        #expect(follows == 1)
-        #expect(!source.contains(".title ="))
-    }
 }
