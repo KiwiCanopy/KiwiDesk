@@ -7,12 +7,7 @@ import AppKit
 /// notification clears them as well (`AppDelegate+Quit`).
 final class KiwiApplication: NSApplication {
     override func terminate(_ sender: Any?) {
-        guard
-            QuitSheets.clear(
-                windows,
-                keeper: delegate as? QuitSheetKeeper
-            )
-        else { return }
+        guard QuitSheets.clearOwnWindows() else { return }
         super.terminate(sender)
     }
 }

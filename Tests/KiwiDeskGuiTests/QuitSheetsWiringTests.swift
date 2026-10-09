@@ -41,14 +41,23 @@ struct QuitSheetsWiringTests {
             from: "override func terminate(_ sender: Any?)",
             to: "super.terminate(sender)"
         )
-        #expect(terminate.occurrences(of: "guard") == 1)
-        #expect(terminate.occurrences(of: "QuitSheets.clear(") == 1)
         #expect(
             terminate.occurrences(
-                of: "keeper: delegate as? QuitSheetKeeper"
+                of: "guard QuitSheets.clearOwnWindows() else { return }"
             ) == 1
         )
-        #expect(terminate.occurrences(of: "else { return }") == 1)
+        let sheets = try source("QuitSheets.swift")
+        let door = try body(
+            of: sheets,
+            from: "static func clearOwnWindows() -> Bool",
+            to: "}"
+        )
+        #expect(
+            door.occurrences(
+                of: "clear(NSApp.windows, keeper: "
+                    + "NSApp.delegate as? QuitSheetKeeper)"
+            ) == 1
+        )
     }
 
     @Test("the app launches as KiwiApplication")
@@ -67,10 +76,10 @@ struct QuitSheetsWiringTests {
         let observer = try body(
             of: quit,
             from: "NSWorkspace.willPowerOffNotification",
-            to: "keeper: NSApp.delegate as? QuitSheetKeeper"
+            to: "QuitSheets.clearOwnWindows()"
         )
-        #expect(observer.occurrences(of: "QuitSheets.clear(") == 1)
-        #expect(observer.occurrences(of: "NSApp.windows") == 1)
+        #expect(observer.occurrences(of: "queue: .main") == 1)
+        #expect(quit.occurrences(of: "QuitSheets.clearOwnWindows()") == 1)
     }
 
     @Test("SIGTERM reaches terminate in the common modes")

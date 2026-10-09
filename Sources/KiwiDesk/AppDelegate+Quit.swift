@@ -21,10 +21,7 @@ extension AppDelegate: QuitSheetKeeper {
                 queue: .main
             ) { _ in
                 MainActor.assumeIsolated {
-                    _ = QuitSheets.clear(
-                        NSApp.windows,
-                        keeper: NSApp.delegate as? QuitSheetKeeper
-                    )
+                    _ = QuitSheets.clearOwnWindows()
                 }
             }
     }

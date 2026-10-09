@@ -91,7 +91,7 @@ struct QuitSheetsTests {
         #expect(keeper.refusals == 0)
     }
 
-    @Test("a kept sheet stays, refuses the quit and is shown")
+    @Test("a kept sheet refuses the quit and closes nothing")
     func guardKeepsAsking() {
         let settings = FakeHost("settings")
         let discard = FakeHost("discard")
@@ -108,8 +108,9 @@ struct QuitSheetsTests {
         #expect(!proceeds)
         #expect(settings.hosted === discard)
         #expect(settings.ended.isEmpty)
-        // Another window's confirmation still closes.
-        #expect(other.hosted == nil)
+        // Nothing closes for a quit that does not happen.
+        #expect(other.hosted === about)
+        #expect(other.ended.isEmpty)
         #expect(keeper.refusals == 1)
     }
 

@@ -6927,9 +6927,11 @@ looking at must never hold up a restart: the user would meet
 "KiwiDesk interrupted restart" over a question they had forgotten.
 A dialog whose Cancel loses nothing — delete, reset, restore,
 the About or preset sheet, an open or save panel — is answered
-for them. The discard question is the one every Mac app keeps
-asking at a quit, and keeping it is the honest answer: the quit
-ends the draft too.
+for them. The discard question is different in kind: its subject
+is the unsaved draft itself, so answering it for the user is
+deciding about their work, which the owner's ruling reserves for
+them. A kept question closes nothing else either, since the quit
+it stops does not happen.
 
 **A new dialog is a confirmation unless it opts in.** The guard
 is one predicate, `SettingsModel.quitKeepsAsking`, read through
@@ -6937,8 +6939,12 @@ is one predicate, `SettingsModel.quitKeepsAsking`, read through
 any other is closed without a change here. AppKit closes only an
 `NSAlert` sheet on its own and refuses termination for any other
 sheet, which is why `KiwiApplication` clears them in front of
-`terminate(_:)` and the power-off notification clears them in
-front of a logout's quit event, which never reaches that method.
+`terminate(_:)`. A logout's quit event is refused before that
+method runs, so the power-off notification clears them too; that
+covers the logout only while macOS posts the notification ahead of
+the quit event, which is the ordering this relies on. An
+app-modal alert or panel is not a sheet: AppKit quits through it,
+once SIGTERM is delivered in the run loop's common modes.
 :::
 
 ### The tour is chrome, and chrome is not tiled

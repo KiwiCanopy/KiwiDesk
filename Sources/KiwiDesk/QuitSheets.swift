@@ -17,24 +17,28 @@ protocol QuitSheetKeeper: AnyObject {
 /// `.confirmationDialog` or `.sheet` — so the quit never arrives.
 @MainActor
 enum QuitSheets {
-    /// Ends every confirmation sheet as Cancel and answers whether
-    /// the quit may proceed: false while `keeper` keeps a sheet,
-    /// after telling it so.
+    /// The one door every quit path takes: the app's own windows,
+    /// kept by its delegate.
+    static func clearOwnWindows() -> Bool {
+        clear(NSApp.windows, keeper: NSApp.delegate as? QuitSheetKeeper)
+    }
+
+    /// Answers whether the quit may proceed. While `keeper` keeps
+    /// a sheet nothing closes and `keeper` is told; otherwise
+    /// every sheet ends as Cancel.
     static func clear(
         _ windows: [NSWindow],
         keeper: QuitSheetKeeper?
     ) -> Bool {
-        var kept = false
-        for window in windows
-        where window.sheetParent == nil && window.attachedSheet != nil {
-            if keeper?.keepsSheet(on: window) == true {
-                kept = true
-            } else {
-                endSheets(of: window)
-            }
+        let hosts = windows.filter {
+            $0.sheetParent == nil && $0.attachedSheet != nil
         }
-        if kept { keeper?.quitRefused() }
-        return !kept
+        if let keeper, hosts.contains(where: keeper.keepsSheet) {
+            keeper.quitRefused()
+            return false
+        }
+        hosts.forEach(endSheets)
+        return true
     }
 
     /// Innermost first; a sheet that will not leave stops the loop.

@@ -314,6 +314,19 @@ panel's verdict. Adding `.closable` instead is the wrong door: it
 routes through AppKit's `close()` and past the #952 activation
 hand-back.
 
+## A quit closes a dialog unless it guards unsaved work (#2049)
+
+**A new sheet or alert is a confirmation, and a quit, restart or
+logout closes it as Cancel; one whose subject is unsaved Settings
+work joins `SettingsModel.quitKeepsAsking` instead**, which stops
+the quit and brings Settings forward. Every quit path reaches
+`QuitSheets.clearOwnWindows()` — `KiwiApplication.terminate(_:)`
+and the power-off observer — so a new path calls that door rather
+than `NSApp.terminate` around it. `QuitSheetsTests` holds the
+verdicts and `QuitSheetsWiringTests` the paths; the argument is
+*A quit closes a confirmation; only unsaved work keeps asking* in
+`docs/design-decisions.md`.
+
 ## The Settings raise tells Core first (#1281)
 
 **The marked own window's raise goes through
