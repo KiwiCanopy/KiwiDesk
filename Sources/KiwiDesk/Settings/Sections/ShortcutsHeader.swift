@@ -59,12 +59,10 @@ struct ShortcutsHeader: View {
             "shortcuts.dropped_chord",
             "%1$@ left out: “%2$@” already has %3$@.",
             ShortcutsReferenceBuilder.glyphs(entry.dropped.combo),
-            entry.kept.label.isEmpty
-                ? entry.kept.lua
-                : KeybindingCatalog.localizedLabel(
-                    for: entry.kept.label,
-                    config: config
-                ),
+            KeybindingCatalog.localizedName(
+                of: entry.kept,
+                config: config
+            ),
             ShortcutsReferenceBuilder.glyphs(entry.kept.combo)
         )
     }

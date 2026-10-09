@@ -48,7 +48,8 @@ extension SettingsValueReadout {
                     census,
                     layer: layer,
                     old: previous.bindings,
-                    labels: labels
+                    labels: labels,
+                    config: new
                 )
             } else {
                 rows.append(
@@ -93,7 +94,8 @@ extension SettingsValueReadout {
         _ census: SettingKey,
         layer: KeyLayer,
         old: [KeyBinding],
-        labels: [String: String]
+        labels: [String: String],
+        config: GuiConfig
     ) -> [SettingsDiffRow] {
         let (removed, added) = shortcutsUnmatched(
             old: old,
@@ -118,6 +120,7 @@ extension SettingsValueReadout {
                         instance: binding.combo + ">"
                             + successor.combo,
                         labels: labels,
+                        config: config,
                         old: shortcutsCombo(binding.combo),
                         new: shortcutsCombo(successor.combo)
                     )
@@ -132,6 +135,7 @@ extension SettingsValueReadout {
                         instance: "-" + binding.combo
                             + "#\(unbound)",
                         labels: labels,
+                        config: config,
                         old: shortcutsCombo(binding.combo),
                         new: unset
                     )
@@ -146,6 +150,7 @@ extension SettingsValueReadout {
                     binding: binding,
                     instance: "+" + binding.combo + "#\(index)",
                     labels: labels,
+                    config: config,
                     old: unset,
                     new: shortcutsCombo(binding.combo)
                 )
@@ -160,12 +165,14 @@ extension SettingsValueReadout {
         binding: KeyBinding,
         instance: String,
         labels: [String: String],
+        config: GuiConfig,
         old: String,
         new: String
     ) -> SettingsDiffRow {
         let action = shortcutsBindingLabel(
             binding,
-            labels: labels
+            labels: labels,
+            config: config
         )
         let label =
             layer.isDefault
