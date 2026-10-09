@@ -2,13 +2,99 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "2.2.0",
+      "tag": "v2.2.0",
+      "date": "2026-10-09",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v2.2.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v2.2.0/KiwiDesk-2.2.0.dmg",
+      "summary": "KiwiDesk 2.2.0 is about speed: Spaces, focus and startup no longer wait on a slow app, and Space switches now slide past in a snappy 300 ms.",
+      "spotlight": [
+        {
+          "title": "Keeps up under load",
+          "line": "A Space switch now makes a third of the accessibility calls it did in 2.1.1.",
+          "symbol": "gauge.with.dots.needle.67percent"
+        },
+        {
+          "title": "Space switches slide",
+          "line": "The Space you leave and the one you pick glide past on plates with each app's icon, in 300 ms.",
+          "setting": "settings.animations.onSpaceChange",
+          "symbol": "rectangle.on.rectangle"
+        },
+        {
+          "title": "Windows on hover",
+          "line": "Rest the pointer on an app in the bars to list its windows, then click one to go there.",
+          "symbol": "list.bullet.rectangle"
+        },
+        {
+          "title": "Layers per profile",
+          "line": "Choose which profiles a keyboard layer belongs to.",
+          "setting": "config.layers[].reach",
+          "symbol": "keyboard"
+        }
+      ],
+      "sections": [
+        {
+          "title": "New",
+          "items": [
+            "**Space switches now slide:** the Space you leave and the one you pick glide past together on plates showing each app's icon, on by default at 300 ms, also in profiles saved before 2.2.0, since the old setting moved the windows themselves. KiwiDesk comes opinionated, but it's yours: turn it off or set its pace under Looks & Animations ▸ Animate Space switches. Reduce Motion keeps the switch instant.",
+            "**Rest the pointer on an app in the bars for a list of its windows**, the focused one checked; click a row to go straight to it.",
+            "**A keyboard layer can now choose which profiles it belongs to**, under Applies to in Shortcuts & Gestures.",
+            "**Shortcuts & Gestures now opens with a row of jump chips** that take you straight to a group.",
+            "**A slow start now shows a quiet notice under the menu-bar icon** until your windows are in place."
+          ],
+          "type": "new"
+        },
+        {
+          "title": "Improved",
+          "items": [
+            "**Switching Spaces, moving focus and starting up no longer wait on a slow app**, like System Settings or a busy GPU, and a new app's first window tiles right away. A Space switch now makes about a third of the accessibility calls 2.1.1 made and moves a quarter of the windows; the [performance page](https://kiwidesk.kiwicanopy.com/docs/performance) has the numbers.",
+            "**KiwiDesk no longer rearranges windows under your hand:** a window opening or closing while you drag waits until you rest.",
+            "**Focus shortcuts pressed quickly in a row now keep going** instead of stopping while the previous app comes forward.",
+            "**A click on a Space Bar icon that stands for several windows now steps through them**, and on another Space's icon goes there.",
+            "**The Space Bar's front app now keeps one length**, so nothing beside it shifts as focus moves, and it grows in and out as it comes and goes.",
+            "**Right-click menus in the bars now name the app at the top**, and the Space Bar's front app offers its window's actions too.",
+            "**A floating window dropped past the bottom of the screen now shrinks to fit** instead of hanging off it.",
+            "**Settings now reads more clearly in Dark Mode**, and a few names changed: KiwiShelf & Bars is now KiwiShelf, and the motion rows are Window duration and KiwiShelf duration.",
+            "**Before an update changes a settings file, KiwiDesk now keeps a copy** in `~/.config/KiwiDesk/migration-backups`.",
+            "**Granting Accessibility no longer rearranges your windows by itself:** a new setup starts tiling when you press Start Tiling."
+          ],
+          "type": "improved"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**The focus border no longer stays over Mission Control** on macOS 27 or sits on a slide show, and after a Space switch it arrives with its window.",
+            "**On a Scrolling Space, a window no longer jumps back and slides in again** right after a Space switch.",
+            "**Going to a Space that doesn't exist yet now shows it on the Space Bar** instead of an empty desk.",
+            "**Closing a window no longer sometimes takes you to the same app's window on another Space.**",
+            "**KiwiDesk started while the screen is locked now picks up your windows after you unlock.**",
+            "**The right-most items of a scrolled App Bar now take clicks.**",
+            "**A floating window flicked up under the menu bar or the shelf now comes back out.**",
+            "**Deleting a keyboard layer now removes the shortcuts that switch to it.**",
+            "**Opening Settings while it's open now keeps your page.**",
+            "**The welcome tour's Looks step is now translated** into every language KiwiDesk speaks."
+          ],
+          "type": "fixed"
+        },
+        {
+          "title": "Lua & CLI",
+          "items": [
+            "**If you write your own Lua config:** `pull_or_spawn` is now `focus_or_spawn`, the name for what it always did. Shortcuts you made in Settings are updated for you; a call in your own `init.lua` now fails and names `focus_or_spawn`.",
+            "**`animations.set_on_space_change` now defaults to on**, and the new `animations.set_space_change_duration` sets the slide's pace, 300 ms unless you set it. A config that calls the setter keeps its value."
+          ],
+          "type": "scripting"
+        }
+      ]
+    },
+    {
       "version": "2.1.1",
       "tag": "v2.1.1",
       "date": "2026-10-01",
       "prerelease": false,
       "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v2.1.1",
       "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v2.1.1/KiwiDesk-2.1.1.dmg",
-      "summary": "A small cleanup this time: a few quick findings I fixed while the bigger performance work is under way. Checking for updates now answers in KiwiDesk's own window, the front app on the Space Bar gets an indicator of its own, and fonts with old-style numbers sit straight on the bar.",
+      "summary": "A small cleanup this time: a few quick findings I fixed while the bigger performance work is underway. Checking for updates now answers in KiwiDesk's own window, the front app on the Space Bar gets an indicator of its own, and fonts with old-style numbers sit straight on the bar.",
       "sections": [
         {
           "title": "Improved",

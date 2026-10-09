@@ -38,10 +38,8 @@ The Settings app stores its settings in
 event hooks and custom Lua. For the GUI workflow, see the
 [user guide](user-guide.md).
 
-:::unreleased
 A migrated file's previous version is kept in
 `migration-backups/` — see the [user guide](user-guide.md#the-guijson-file).
-:::
 
 ### What coexists with the Settings app, and what doesn't
 
@@ -773,10 +771,8 @@ glass is untinted: it draws `.regular` where the bars draw
 Stored as `shortcut_panel.liquid_glass` in the profile, so a
 profile switch can change the panel's material.
 
-:::unreleased
 The slow-boot notice reads this leaf too: it draws its capsule
 in the same material (#1715).
-:::
 
 Also stood down while macOS's Reduce transparency is on, the
 stored value untouched
@@ -793,7 +789,6 @@ what it writes.
 KiwiDesk.set_shortcut_panel_liquid_glass(true)
 ```
 
-:::unreleased
 ### set_space_switch_liquid_glass
 
 **Expects:** `true` or `false` (default `true`).
@@ -814,7 +809,6 @@ Looks &amp; Animations.
 ```lua
 KiwiDesk.set_space_switch_liquid_glass(true)
 ```
-:::
 
 ### Space Identity
 
@@ -833,11 +827,9 @@ corner of their screen — [Parking is not a Desktop
 move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
 owns the model.
 
-:::unreleased
 By default the switch plays the plate slide
 ([animations.set_on_space_change](#animationsset_on_space_change));
 off, it is instant.
-:::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
 Floating windows, picture-in-picture included, are never parked
@@ -2001,10 +1993,8 @@ kiwishelf.set_minimum(40)
 **Does:** sets the shelf's thickness — both bars' — carved out of
 the layout.
 
-:::unreleased
 The starter setup seeds `32` when the main screen is shorter than
 1000 pt.
-:::
 
 **Example:**
 
@@ -2112,9 +2102,7 @@ and the sticky mark their flat look. The stored values are
 untouched, so the glass and the alpha return the moment the
 setting goes off (#1374).
 
-:::unreleased
 The Space switch's plates draw their material then too.
-:::
 
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
@@ -2125,11 +2113,9 @@ and the sticky mark's
 ([sticky.set_liquid_glass](#stickyset_liquid_glass)) together,
 and shows on only when all of them are on.
 
-:::unreleased
 It writes the Space switch plates' leaf too
 ([set_space_switch_liquid_glass](#set_space_switch_liquid_glass)),
 and the slow-boot notice follows the shortcuts panel's.
-:::
 
 This verb sets the
 bars alone; setting them apart is a Lua-only state, and the
@@ -2184,10 +2170,8 @@ it takes no tint and stays under Reduce transparency. The width
 and the [`border_color`](#kiwishelf-colours) are kept while it is
 off.
 
-:::unreleased
 The active item's box drops it under the `outline` indicator,
 which already strokes that edge.
-:::
 
 **Example:**
 
@@ -2382,11 +2366,9 @@ which follows the focused window's colour until you set it.
   overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
   you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
 
-:::unreleased
 An App Bar window that is not focused draws its title and glyph
 in the same idle ink as an identifier on a Space you are not on:
 `kiwishelf.set_item_color` at 60% of its own alpha.
-:::
 
 `kiwishelf.set_border_color` sets the
 [border](#kiwishelfset_border)'s colour (default `#EAF3EE59`, the
@@ -2671,11 +2653,9 @@ its hidden *windows*. It limits glyphs per
 Space only, not how many Spaces the bar shows. Replaces
 `set_glyph_cap`, which now fails naming it.
 
-:::unreleased
 A `+n` hides two glyphs or more: a side that would hide one
 draws that glyph in the badge's place, so a row of span + 2
 glyphs shows whole.
-:::
 
 **Example:**
 
@@ -2804,12 +2784,10 @@ outside the range are clamped.
 front-app segment shows. Inert while `show_front_app` is off —
 nothing else on the Space Bar draws a title.
 
-:::unreleased
 The segment is always as long as this many characters of the
 bar's font: a longer title ends in "…", a shorter one is centred
 after the icon, so a change of focus or title never moves the
 Space Bar or the shelf beside it.
-:::
 
 **Example:**
 
@@ -2821,14 +2799,12 @@ space_bar.set_front_app_title_cap(25)
 
 **Expects:** boolean (default `true`).
 
-:::unreleased
 **Does:** collapses adjacent windows of one app in a Space item
 into one glyph with a count badge; clicking it focuses its
 windows in turn and lists them beside the bar, each row focusing
 its window. Off, each window
 draws its own glyph and one click focuses it. `glyph_span` counts
 glyphs either way.
-:::
 
 **Example:**
 
@@ -3284,10 +3260,8 @@ set only `focused_color` and the glow follows. Its reach
 a hairline border gets a subtle rim and a thick one a
 proportional aura — override it with `set_glow_size` below.
 
-:::unreleased
 A glowing ring keeps the `draw_order` you chose, `"front"`
 included.
-:::
 
 The bloom counts as part of the ring's reach: `border.fit_gaps`
 sizes for it, and a floating window keeps that much off bars and
@@ -4262,11 +4236,9 @@ floating.set_color("#8E5DE0")
 
 ### focus_or_spawn
 
-:::unreleased
 Renamed from `pull_or_spawn`, which is now refused with a Config
 Issue naming this verb. A shortcut made in Settings is updated for
 you; a call in your `init.lua` needs the new name.
-:::
 
 **Expects:** an app bundle identifier (e.g. `com.apple.safari`).
 See [Finding a bundle identifier](#finding-a-bundle-identifier).
@@ -4355,11 +4327,9 @@ row; the bound combo shows beside that row and in the panel's
 close hint. Seeded to **⌃⌥K** in the base layer and in every
 layer you create.
 
-:::unreleased
 Offered under **Shortcuts & Gestures ▸ Open applications ▸
 KiwiDesk** ("Show shortcuts panel"), where you can rebind or clear
 it per layer.
-:::
 
 **Example:**
 
@@ -4382,10 +4352,8 @@ only the place you were reading resets.
 Seeded on **`⌃⌥,`** in the base layer and in every layer you
 create in Settings.
 
-:::unreleased
 Offered under **Shortcuts & Gestures ▸ Open applications ▸
 KiwiDesk** ("Open Settings"), where you can rebind it per layer.
-:::
 
 **Example:**
 
@@ -5532,17 +5500,14 @@ animations.set_size_rate(0)    -- back to per-tick default
 
 **Expects:** `true` or `false`.
 
-:::unreleased
 Defaults to `true`. A profile saved by an earlier release with it
 off is turned on once, unless its other animations are all off;
 while a saved profile is live, its value applies over this call.
-:::
 
 **Does:** enables or disables the animation of an explicit
 Space switch — `focus_space`, a Space Bar click, the scroll
 Space step, a move-and-follow or a launch follow.
 
-:::unreleased
 On, a switch plays the plate slide: a plate with its app's icon
 fades in over each window on the screen, the plates slide as one
 strip one screen toward the new Space — across for a Space Bar
@@ -5552,7 +5517,6 @@ move once each, under the plates. The plates wear Liquid Glass
 ([set_space_switch_liquid_glass](#set_space_switch_liquid_glass));
 Reduce Motion keeps the switch instant
 ([Accepted limitations](accepted-limitations.md)).
-:::
 
 macOS Desktop switches are never animated in either direction —
 macOS stops reporting an inactive Desktop's windows to
@@ -5565,7 +5529,6 @@ Accessibility (see
 animations.set_on_space_change(false)
 ```
 
-:::unreleased
 ### animations.set_space_change_duration
 
 **Expects:** a number (milliseconds, clamped 150–1000; default
@@ -5584,7 +5547,6 @@ the next switch.
 ```lua
 animations.set_space_change_duration(450)
 ```
-:::
 
 ### animations.set_on_scrolling
 

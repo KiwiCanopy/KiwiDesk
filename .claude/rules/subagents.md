@@ -71,6 +71,7 @@ by hand whenever you remove an agent.
 | `localization-auditor` | `L()` sites and the locale catalogs | audits or authors |
 | `site-engineer` | `site/` and its shipped output | audits or authors |
 | `changelog-curator` | A release's curated `## Highlights` block | audits or authors |
+| `roadmap-planner` | A release's issue order, lanes and fit (private plan) | drafts |
 | `test-profiler` | The test run's time, waits and windows | measures and reports |
 | `work-profiler` | The engine's work per Space switch, on the desk | measures and reports |
 
