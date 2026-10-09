@@ -349,7 +349,8 @@ exports nothing.
 `animations.set_on_space_change` defaults to `true`, and
 `animations.set_space_change_duration` is new. A profile saved by
 an earlier release with the slide off is turned on once, unless
-its other animations are all off.
+its other animations are all off; while a saved profile is live,
+its value applies over `init.lua`'s.
 :::
 
 :::unreleased

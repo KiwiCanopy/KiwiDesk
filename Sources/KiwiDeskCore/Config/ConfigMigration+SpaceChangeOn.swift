@@ -1,18 +1,19 @@
 import Foundation
 
 /// Turns a stored `animations.on_space_change: false` on once, in a
-/// file below the floor (#1931, `SpaceChangeOnMigrationTests`): the
-/// leaf's MEANING changed under the same key — before 2.2.0 it slid
-/// the windows themselves, now it plays the plate slide — and an
+/// file below the floor (#1931, `SpaceChangeOnMigrationTests`): an
 /// encoder that writes `animations` whole stored the old default in
-/// nearly every file. A group whose other master leaves are all off
-/// reads as the master switched off and keeps its `false`.
+/// nearly every file, so the value cannot be told from a choice —
+/// save where the master was switched off, which keeps its `false`.
+/// Reaches a profile root's `settings` and a bundle root's
+/// `profiles[].settings` by PATH, as the glass fill does.
 extension ConfigMigration {
     /// Spelled rather than derived: a historical step keeps naming
     /// what it was written to name.
     static let spaceChangeGroupKey = "animations"
     static let spaceChangeLeafKey = "on_space_change"
-    /// The master's other leaves (`AnimationSettings.anyEnabled`).
+    /// The leaves 2.1.1's animations master wrote off with the
+    /// slide (`MotionCard.animationsMasterBinding` at v2.1.1).
     static let spaceChangeMasterLeaves = [
         "on_window_resize", "on_window_swap", "on_relayout",
     ]
@@ -35,16 +36,57 @@ extension ConfigMigration {
         return surgicallyApplying(
             data,
             gate: {
-                $0.range(of: Data("\"\(spaceChangeLeafKey)\"".utf8))
+                $0.range(of: Data("\"\(glassSettingsKey)\"".utf8))
                     != nil
             },
-            rewriting: {
-                rewritingValues(of: $0, at: spaceChangeGroupKey) {
-                    ($0 as? [String: Any]).flatMap(turnedOnSpaceChange)
-                }
-            },
+            rewriting: withSpaceChangeOn,
             editing: surgicallyTurnedOnSpaceChange
         )
+    }
+
+    /// The two paths: the root's own `settings`, and each inline
+    /// profile's under `profiles`.
+    static func withSpaceChangeOn(_ node: Any) -> (Any, Bool) {
+        guard var root = node as? [String: Any] else {
+            return (node, false)
+        }
+        var changed = false
+        if let settings = root[glassSettingsKey] as? [String: Any],
+            let on = settingsWithSpaceChangeOn(settings)
+        {
+            root[glassSettingsKey] = on
+            changed = true
+        }
+        if var profiles = root[glassProfilesKey] as? [[String: Any]] {
+            var did = false
+            for (index, profile) in profiles.enumerated() {
+                guard
+                    let settings = profile[glassSettingsKey]
+                        as? [String: Any],
+                    let on = settingsWithSpaceChangeOn(settings)
+                else { continue }
+                profiles[index][glassSettingsKey] = on
+                did = true
+            }
+            if did {
+                root[glassProfilesKey] = profiles
+                changed = true
+            }
+        }
+        return (root, changed)
+    }
+
+    /// One `TilingSettings` object with its group turned on, or nil.
+    static func settingsWithSpaceChangeOn(
+        _ settings: [String: Any]
+    ) -> [String: Any]? {
+        guard
+            let group = settings[spaceChangeGroupKey] as? [String: Any],
+            let on = turnedOnSpaceChange(group)
+        else { return nil }
+        var out = settings
+        out[spaceChangeGroupKey] = on
+        return out
     }
 
     /// `group` with the leaf turned on, or nil where it stays: the
@@ -63,8 +105,11 @@ extension ConfigMigration {
     }
 
     /// The textual edit: each `animations` object the walk would
-    /// turn on has its leaf's `false` replaced where it stands. The
-    /// group holds no nested object, so one brace pair bounds it.
+    /// turn on has its leaf's `false` replaced where it stands —
+    /// by KEY, safe while `TilingSettings` alone declares the group
+    /// (`ConfigMigrationGlassRoutingTests` ▸ the `animations`
+    /// declarers). The group holds no nested object, so one brace
+    /// pair bounds it.
     private static func surgicallyTurnedOnSpaceChange(
         _ text: String
     ) -> Data? {

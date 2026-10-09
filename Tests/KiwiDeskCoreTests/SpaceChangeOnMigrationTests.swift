@@ -9,8 +9,10 @@ import Testing
 /// another question (profiles.md ▸ a value whose meaning changes).
 /// A group whose other master leaves are all off is the master
 /// switched off and keeps its `false`. Fixtures are the ENCODER's
-/// output, never hand-written JSON, and the in-place clause reads
-/// the TEXT, since a re-parse cannot tell an edit from a re-encode.
+/// values, never hand-written JSON, laid out COMPACT — a shape the
+/// fallback's pretty, sorted re-encode never writes — so the
+/// in-place clauses, which read the TEXT, can tell an edit from a
+/// re-encode.
 @Suite("Space switch slide turned on (#1931)")
 struct SpaceChangeOnMigrationTests {
     private static let leaf = "on_space_change"
@@ -38,7 +40,7 @@ struct SpaceChangeOnMigrationTests {
     }
 
     /// A profile root at `format`, the one before this step's by
-    /// default.
+    /// default, compact.
     private static func profile(
         _ settings: [String: Any],
         format: Int = ConfigMigration.spaceChangeOnProfileFormat - 1
@@ -47,9 +49,13 @@ struct SpaceChangeOnMigrationTests {
             withJSONObject: [
                 "format": format,
                 "monitor_sets": [], "name": "P", "settings": settings,
-            ] as [String: Any],
-            options: [.prettyPrinted, .sortedKeys]
+            ] as [String: Any]
         )
+    }
+
+    /// How many stored `false` slides `text` spells.
+    private static func offCount(_ text: String) -> Int {
+        text.components(separatedBy: "\"\(leaf)\":false").count - 1
     }
 
     private static func slide(_ settings: Any?) -> Bool? {
@@ -131,18 +137,18 @@ struct SpaceChangeOnMigrationTests {
                         ),
                     ],
                 ],
-            ] as [String: Any],
-            options: [.prettyPrinted, .sortedKeys]
+            ] as [String: Any]
         )
         let step = try #require(
             ConfigMigration.migratingSpaceChangeOn(bundle)
         )
         let text = try #require(String(data: bundle, encoding: .utf8))
         let edited = try #require(String(data: step, encoding: .utf8))
-        #expect(
-            edited.components(separatedBy: "\n").count
-                == text.components(separatedBy: "\n").count
-        )
+        // One `false` became `true` and nothing else moved: a
+        // re-encode would lay the file out pretty and sorted.
+        #expect(Self.offCount(text) == 2)
+        #expect(Self.offCount(edited) == 1)
+        #expect(edited.utf8.count == text.utf8.count - 1)
         // Through `migrated`: a bundle reaches the step only if its
         // format was bumped, which nothing else pins.
         let out = try #require(ConfigMigration.migrated(bundle))

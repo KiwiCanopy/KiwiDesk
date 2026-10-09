@@ -534,6 +534,16 @@ holds the secondary-switch decision including its nil case.
   the old number was never what they meant. The scrolling pitch
   share is the precedent (#1382, `ScrollingPitchTests`); a
   re-scale that fails either bound takes the crossing above.
+- **A default flip on a leaf the encoder writes WHOLE owes no
+  step (#1359) — re-defaulting the stored old value is a ruling,
+  bounded.** A step may turn a stored old default into the new
+  one only where a stored signal tells a deliberate choice apart
+  and that signal keeps it, the step reads the file's format as
+  the meaning-change clause above requires, and the design entry
+  states the cost to a user who chose the old value. The slide
+  turn-on is the precedent and its bound (#1931,
+  `SpaceChangeOnMigrationTests`: 2.1.1's master-off write keeps
+  the `false`); a flip with no such signal keeps #1359's answer.
 - **A per-profile value moving app-wide crosses by ADOPTION, a
   ruled shape beside `ConfigMigration` (#1741).** N profile
   files → one value is an election, and a byte-level step cannot
