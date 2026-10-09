@@ -239,8 +239,8 @@ exports nothing.
 | Window | `make_floating` | — |
 | | `make_tiled` | — |
 | | `toggle_floating` | — |
-| | `make_sticky` | — (sticky on every monitor) |
-| | `make_display_sticky` | — (sticky on this monitor only) |
+| | `make_sticky` | — (sticky on every screen) |
+| | `make_display_sticky` | — (sticky on this screen only) |
 | | `make_unsticky` | — |
 | | `toggle_sticky` | — |
 | | `toggle_display_sticky` | — |
@@ -268,8 +268,8 @@ exports nothing.
 | | `get_state` | — (returns `{active_space, spaces, windows, away_windows, monitor_count, desktop, exec_running}`; `desktop` is the main screen's current Desktop; `away_windows` lists the windows on Desktops no screen shows, each with `id`, `app`, `bundle_id`, `space_id` and `desktop`, and each space object carries its own `away_windows` ids) |
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |
-| Profiles | `save_profile` | name (updates in place when it exists; see [Profile Monitor Sets](lua-reference.md#profile-monitor-sets)) |
-| | `load_profile` | name (see [Profile Monitor Sets](lua-reference.md#profile-monitor-sets)) |
+| Profiles | `save_profile` | name (updates in place when it exists; see [Profile Screen Setups](lua-reference.md#profile-screen-setups)) |
+| | `load_profile` | name (see [Profile Screen Setups](lua-reference.md#profile-screen-setups)) |
 | | `delete_profile` | name |
 | | `set_default_profile` | name (its screen count's fallback) |
 | | `list_profiles` | — |
@@ -612,7 +612,7 @@ window, `vanished` then `closed`, and refreshing on
 
 `window_moved_to_space` fires when a window is explicitly
 moved to another space (`move_to_space`,
-with or without follow, or a drag onto another display — the
+with or without follow, or a drag onto another screen — the
 live crossing emits as the membership moves, so a drag pulled
 back before release emits once per crossing). A
 `move_to_desktop` onto a Desktop that lives on **another
@@ -641,7 +641,7 @@ screen — a swipe, Mission Control, or a `focus_desktop` /
 Desktop number now current on the screen that switched, that
 screen's positional number (`monitor`: 1 is the main screen,
 secondaries follow left to right — the same 1-based positional
-numbering a display argument takes), and the active profile:
+numbering a screen argument takes), and the active profile:
 
 ```json
 {"event": "desktop_change",

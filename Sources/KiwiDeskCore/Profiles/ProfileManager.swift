@@ -21,7 +21,7 @@ public enum ProfileError: Error, CustomStringConvertible {
             return "a profile named '\(name)' already exists"
         case .dormantDefault(let name):
             return
-                "'\(name)' holds no monitor set, so it cannot be "
+                "'\(name)' holds no screen setup, so it cannot be "
                 + "a screen count's default; load it first"
         }
     }

@@ -246,7 +246,11 @@ plain rebuild never posts. It reads the body through
 not fail the release: the page and the feed outrank a chat post,
 and an unset `DISCORD_RELEASE_WEBHOOK` skips with a notice
 (`DiscordAnnounceTests`). The webhook URL is the secret, so
-nothing prints it.
+nothing prints it. A block with Spotlight rows posts the rows and
+not its sections; an uncut post closes on its changes counted in a
+sentence, a cut one on the line naming what was cut, both on how
+to get the update; no post carries a download link
+(`DiscordAnnounceSpotlightTests`, `DiscordAnnounceTests`).
 
 **Three clauses decide whether a release enters the feed, and
 `scripts/appcast-sync` names the one that failed:** it is
@@ -735,6 +739,17 @@ workflow still consults the list and still gates on it, and states
 in its own doc comment what it cannot see. Read that before adding
 an entry; a deep multi-component path earns much weaker cover than
 a whole top-level directory.
+
+**The one skip beside the list is the release stamp (#2106)**:
+`scripts/ci-stamp-only` answers yes only for a `chore/stamp-*`
+branch whose sole change is one `semantic` literal in
+`KiwiDeskVersion.swift`. What gates that tree is downstream —
+`main`'s push CI, `release.sh`'s second run and `release.yml`'s
+`verify` on the tag — so a change that moves one of those owes the
+skip a fresh look. The `changes` job runs the script from the BASE
+commit and only for this repository's own branches, so neither a PR
+nor a fork judges itself, and a new skip clause joins that script
+rather than a second exception beside it (`CiStampOnlyTests`).
 
 **A workflow that changes the tree opens a PR; it never writes to
 `main`.** `.github/workflows/app-font.yml` watches the vendored

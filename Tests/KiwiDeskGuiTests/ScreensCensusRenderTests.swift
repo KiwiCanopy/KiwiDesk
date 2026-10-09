@@ -5,7 +5,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Monitors area against the census (#678 Phase 3, turn 13b).
+/// The Screens area against the census (#678 Phase 3, turn 13b).
 ///
 /// As in Profiles the promise is the WEAKER one: every container
 /// here is a bespoke view, and in this area the reason is as
@@ -13,8 +13,8 @@ import Testing
 /// its rows are positioned by the real display arrangement and
 /// there is no reading order for a `ForEach` to walk. The order
 /// lists record membership for the placement table and search.
-@Suite("Monitors render ↔ census parity")
-struct MonitorsCensusRenderTests {
+@Suite("Screens render ↔ census parity")
+struct ScreensCensusRenderTests {
     private func display(
         _ id: UInt32,
         _ name: String,
@@ -31,10 +31,10 @@ struct MonitorsCensusRenderTests {
     /// A picture with every kind of chip in it: one pinned, one
     /// automatic, one following main, and one pinned to hardware
     /// that is away.
-    private var expander: MonitorsFamilyRows {
+    private var expander: ScreensFamilyRows {
         let left = display(1, "Left")
         let right = display(2, "Right", x: 1500)
-        return MonitorsFamilyRows(
+        return ScreensFamilyRows(
             spaces: [
                 SpaceID("code"), SpaceID("web"),
                 SpaceID("chat"), SpaceID("media"),
@@ -59,7 +59,7 @@ struct MonitorsCensusRenderTests {
     ) -> Set<SettingKey> {
         Set(
             SettingKey.allCases.filter {
-                $0.placement.area == .monitors
+                $0.placement.area == .screens
                     && $0.placement.container == container
                     && [.atRest, .showMore]
                         .contains($0.placement.tier)
@@ -69,7 +69,7 @@ struct MonitorsCensusRenderTests {
 
     @Test("each container renders exactly its census rows")
     func listsMatchCensus() {
-        for (container, order) in MonitorsRowOrder.byContainer {
+        for (container, order) in ScreensRowOrder.byContainer {
             #expect(
                 Set(order) == censusRows(container),
                 Comment(
@@ -90,7 +90,7 @@ struct MonitorsCensusRenderTests {
     func containersMatch() {
         let declared = Set(
             SettingKey.allCases
-                .filter { $0.placement.area == .monitors }
+                .filter { $0.placement.area == .screens }
                 .filter {
                     [.atRest, .showMore]
                         .contains($0.placement.tier)
@@ -98,53 +98,51 @@ struct MonitorsCensusRenderTests {
                 .compactMap { $0.placement.container }
         )
         #expect(
-            declared == Set(MonitorsRowOrder.byContainer.keys)
+            declared == Set(ScreensRowOrder.byContainer.keys)
         )
     }
 
     /// The bespoke claim, read off the TREE rather than restated
     /// against another literal.
     ///
-    /// Stated limit: the needle is `ForEach(MonitorsRowOrder.`,
+    /// Stated limit: the needle is `ForEach(ScreensRowOrder.`,
     /// so a container walking a LOCAL COPY of a list passes. The
     /// `files.count` floor is what keeps the scan from passing
     /// over nothing at all.
     @Test("the bespoke containers really have no ForEach")
     func bespokeMeansNoForEach() throws {
         #expect(
-            MonitorsRowOrder.bespokeContainers
-                == Set(MonitorsRowOrder.byContainer.keys)
+            ScreensRowOrder.bespokeContainers
+                == Set(ScreensRowOrder.byContainer.keys)
         )
         let root = SourceScan.repoRoot(from: #filePath)
-        var files = try SourceScan.swiftSources(
+        let components = try SourceScan.swiftSources(
             under: root.appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Monitors"
+                "Sources/KiwiDesk/Settings/Components/Screens"
             )
         )
-        files += try SourceScan.swiftSources(
+        let sections = try SourceScan.swiftSources(
             under: root.appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Sections"
             )
         ).filter {
-            $0.lastPathComponent.hasPrefix("MonitorsSection")
+            $0.lastPathComponent.hasPrefix("ScreensSection")
         }
         // Assert the scan found its input before asserting about
         // it: an enumerator over a renamed directory yields [] and
         // every check below would pass for having looked at
-        // nothing.
-        //
-        // Tight, not merely non-zero: at a floor of 10 the whole
-        // `Sections/` half could stop being scanned and the
-        // Components half alone would still clear it
-        // (guard-prover, 2026-08-04).
-        #expect(files.count >= 13)
-        for file in files {
+        // nothing. One floor PER HALF: a shared floor let either
+        // half go unscanned while the other cleared it alone
+        // (guard-prover, 2026-08-04 and #865).
+        #expect(components.count >= 13)
+        #expect(sections.count >= 2)
+        for file in components + sections {
             let source = try SourceScan.blankedSource(at: file)
             let squashed = source.split(
                 whereSeparator: \.isWhitespace
             ).joined()
             #expect(
-                !squashed.contains("ForEach(MonitorsRowOrder."),
+                !squashed.contains("ForEach(ScreensRowOrder."),
                 Comment(
                     rawValue:
                         "\(file.lastPathComponent) walks an order "
@@ -158,14 +156,14 @@ struct MonitorsCensusRenderTests {
 
     /// Every key the area places expands to at least one row, and
     /// which keys draw NONE is data rather than a skipped branch.
-    /// Here the set is EMPTY: every Monitors key draws something,
+    /// Here the set is EMPTY: every Screens key draws something,
     /// the banner included — it is one row whose presence is its
     /// gate's answer, not a family that lost its rows.
     @Test("every placed key expands to rows")
     func familiesExpand() {
         let drawsNothing: Set<SettingKey> = []
         let placed = SettingKey.allCases.filter {
-            if case .monitors = $0 { return true }
+            if case .screens = $0 { return true }
             return false
         }
         #expect(!placed.isEmpty)
@@ -191,26 +189,26 @@ struct MonitorsCensusRenderTests {
     @Test("families expand once per instance")
     func instanceCounts() {
         #expect(
-            expander.rows(for: .monitors(.spacePins))
+            expander.rows(for: .screens(.spacePins))
                 == [.space("code"), .space("web")]
         )
         #expect(
-            expander.rows(for: .monitors(.mainSpaces))
+            expander.rows(for: .screens(.mainSpaces))
                 == [.space("chat")]
         )
         #expect(
-            expander.rows(for: .monitors(.orphanPinClear))
+            expander.rows(for: .screens(.orphanPinClear))
                 == [.orphan("media")]
         )
         #expect(
-            expander.rows(for: .monitors(.fingerprints))
+            expander.rows(for: .screens(.fingerprints))
                 == [
                     .display("Left:1500x1000"),
                     .display("Right:1500x1000"),
                 ]
         )
         #expect(
-            expander.rows(for: .monitors(.placementUnavailable))
+            expander.rows(for: .screens(.placementUnavailable))
                 == [.banner]
         )
     }
@@ -223,10 +221,10 @@ struct MonitorsCensusRenderTests {
     /// falls through all three, or shows up in two.
     @Test("the chip families partition the spaces")
     func everySpaceLandsExactlyOnce() {
-        let carded = expander.rows(for: .monitors(.spacePins))
-        let tray = expander.rows(for: .monitors(.mainSpaces))
+        let carded = expander.rows(for: .screens(.spacePins))
+        let tray = expander.rows(for: .screens(.mainSpaces))
         let orphans = expander.rows(
-            for: .monitors(.orphanPinClear)
+            for: .screens(.orphanPinClear)
         )
         let places =
             (carded ?? []).map(\.spaceName)
@@ -257,7 +255,7 @@ struct MonitorsCensusRenderTests {
         // reachable from Lua, which does not keep them exclusive.
         let left = display(1, "Twin")
         let right = display(2, "Twin", x: 1500)
-        let expander = MonitorsFamilyRows(
+        let expander = ScreensFamilyRows(
             spaces: [
                 SpaceID("code"), SpaceID("web"), SpaceID("both"),
             ],
@@ -275,9 +273,9 @@ struct MonitorsCensusRenderTests {
         )
         #expect(expander.hasAmbiguousDisplays)
         let places =
-            (expander.rows(for: .monitors(.spacePins)) ?? [])
-            + (expander.rows(for: .monitors(.mainSpaces)) ?? [])
-            + (expander.rows(for: .monitors(.orphanPinClear))
+            (expander.rows(for: .screens(.spacePins)) ?? [])
+            + (expander.rows(for: .screens(.mainSpaces)) ?? [])
+            + (expander.rows(for: .screens(.orphanPinClear))
                 ?? [])
         let named = places.compactMap(\.spaceName)
         #expect(named.count == places.count)
@@ -290,12 +288,12 @@ struct MonitorsCensusRenderTests {
             "a space is drawn nowhere"
         )
         #expect(
-            expander.rows(for: .monitors(.orphanPinClear))?
+            expander.rows(for: .screens(.orphanPinClear))?
                 .isEmpty == true
         )
     }
 
-    /// A key outside `MonitorsKey` expands to nil rather than to
+    /// A key outside `ScreensKey` expands to nil rather than to
     /// an empty list, so a renderer cannot mistake a foreign key
     /// for a family that lost its rows.
     @Test("a foreign key expands to nil")
@@ -304,7 +302,7 @@ struct MonitorsCensusRenderTests {
     }
 }
 
-extension MonitorsRowInstance {
+extension ScreensRowInstance {
     /// The space an instance names, for the partition guard.
     fileprivate var spaceName: String? {
         switch self {

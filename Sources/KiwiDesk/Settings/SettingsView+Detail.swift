@@ -13,8 +13,8 @@ extension SettingsView {
             SpacesSection(model: model)
         case .layoutDefaults:
             LayoutDefaultsSection(model: model)
-        case .monitors:
-            MonitorsSection(model: model)
+        case .screens:
+            ScreensSection(model: model)
         case .looks:
             LooksSection(model: model)
         case .advancedColors:

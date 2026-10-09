@@ -1,11 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Drop target tray for Spaces assigned to dynamic main display
-/// (`MonitorTray`, #36, #678).
+/// Drop target tray for Spaces assigned to dynamic main screen
+/// (`ScreenTray`, #36, #678).
 struct FollowsMainTray: View {
     @ObservedObject var model: SettingsModel
-    let rows: MonitorsFamilyRows
+    let rows: ScreensFamilyRows
     let size: CGSize
     @State private var targeted = false
     @State private var showingOverflow = false
@@ -13,12 +13,12 @@ struct FollowsMainTray: View {
     var body: some View {
         VStack(
             alignment: .leading,
-            spacing: MonitorCardChips.stackSpacing
+            spacing: ScreenCardChips.stackSpacing
         ) {
             header
             chips
         }
-        .padding(MonitorCardChips.cardPadding)
+        .padding(ScreenCardChips.cardPadding)
         .frame(
             maxWidth: .infinity,
             maxHeight: .infinity,
@@ -54,7 +54,7 @@ struct FollowsMainTray: View {
             Text(
                 L(
                     "monitor_card.follows_main",
-                    "Follows main display"
+                    "Follows main screen"
                 )
             )
             .font(.caption2)
@@ -63,7 +63,7 @@ struct FollowsMainTray: View {
             .truncationMode(.tail)
             Spacer(minLength: 0)
         }
-        .frame(height: MonitorCardChips.trayHeaderHeight)
+        .frame(height: ScreenCardChips.trayHeaderHeight)
     }
 
     @ViewBuilder private var chips: some View {
@@ -73,14 +73,14 @@ struct FollowsMainTray: View {
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         } else {
-            let split = MonitorCardChips.split(
+            let split = ScreenCardChips.split(
                 spaces,
                 in: size,
-                header: MonitorCardChips.trayHeaderHeight
+                header: ScreenCardChips.trayHeaderHeight
             )
             HStack(
                 alignment: .top,
-                spacing: MonitorCardChips.spacing
+                spacing: ScreenCardChips.spacing
             ) {
                 WrapChips(split.shown) { space in
                     chip(space)
@@ -102,7 +102,7 @@ struct FollowsMainTray: View {
     }
 
     /// Overflow chip showing popover with remaining spaces
-    /// (`MonitorCardChips`).
+    /// (`ScreenCardChips`).
     private func overflowChip(
         _ all: [SpaceID],
         _ count: Int
@@ -115,7 +115,7 @@ struct FollowsMainTray: View {
                 .fontWeight(.medium)
                 .foregroundStyle(SettingsTheme.ink)
                 .lineLimit(1)
-                .frame(width: MonitorCardChips.markerWidth)
+                .frame(width: ScreenCardChips.markerWidth)
                 .padding(.vertical, 3)
                 // The SHARED adaptive chip, not the pinned
                 // chip's fill: this opens a popover, and wearing
@@ -123,7 +123,7 @@ struct FollowsMainTray: View {
                 // chips' own rest cue (#1240). `padding: 0`
                 // keeps it inside the reserved marker column.
                 .hoverHighlight(
-                    cornerRadius: MonitorCardChips.chipHeight / 2,
+                    cornerRadius: ScreenCardChips.chipHeight / 2,
                     padding: 0
                 )
         }
@@ -131,7 +131,7 @@ struct FollowsMainTray: View {
         .accessibilityLabel(
             L(
                 "monitor_card.more_spaces.axlabel",
-                "%1$d more Spaces on this display",
+                "%1$d more Spaces on this screen",
                 count
             )
         )

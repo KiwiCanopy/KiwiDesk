@@ -1,18 +1,18 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Secondary cards for Monitors settings (#678 Phase 3, turn 13b).
-extension MonitorsSection {
-    /// Card displaying spaces pinned to absent displays (`MonitorsGates`).
+/// Secondary cards for Screens settings (#678 Phase 3, turn 13b).
+extension ScreensSection {
+    /// Card displaying spaces pinned to absent screens (`ScreensGates`).
     @ViewBuilder func orphanCard(
-        rows: MonitorsFamilyRows,
-        gates: MonitorsGates
+        rows: ScreensFamilyRows,
+        gates: ScreensGates
     ) -> some View {
-        if gates.inertReason(for: .monitors(.orphanPinClear))
+        if gates.inertReason(for: .screens(.orphanPinClear))
             == nil
         {
             SettingsSection(
-                SettingsCatalog.monitors.orphanPins
+                SettingsCatalog.screens.orphanPins
             ) {
                 ForEach(rows.orphans) { orphan in
                     orphanRow(orphan)
@@ -44,7 +44,7 @@ extension MonitorsSection {
             .accessibilityLabel(
                 L(
                     "monitors.orphan_pin.row_axlabel",
-                    "%1$@, waiting for monitor %2$@",
+                    "%1$@, waiting for screen %2$@",
                     orphanSentence(orphan.space),
                     orphan.fingerprint
                 )
@@ -58,7 +58,7 @@ extension MonitorsSection {
     }
 
     /// Formatted status sentence for a disconnected pin. Names
-    /// no display, because the runtime does not promise one:
+    /// no screen, because the runtime does not promise one:
     /// `SpacePlacement.resolve` answers `.pinnedAbsent` with the
     /// positional default's assignment (docs review 2026-08-04).
     /// "Space %1$@" keeps the noun — a bare numeral opening a
@@ -66,7 +66,7 @@ extension MonitorsSection {
     private func orphanSentence(_ space: SpaceID) -> String {
         L(
             "monitors.orphan_pin.sentence",
-            "Space %1$@ is pinned to a monitor that isn't "
+            "Space %1$@ is pinned to a screen that isn't "
                 + "attached, so it opens elsewhere for now.",
             space.raw
         )
@@ -80,12 +80,12 @@ extension MonitorsSection {
         )
     }
 
-    /// Read-only monitor hardware identification drawer.
+    /// Read-only screen hardware identification drawer.
     func fingerprintsDrawer(
-        rows: MonitorsFamilyRows
+        rows: ScreensFamilyRows
     ) -> some View {
         SettingsDisclosure(
-            SettingsCatalog.monitors.monitorFingerprints,
+            SettingsCatalog.screens.screenFingerprints,
             chrome: .card,
             isExpanded: $advancedExpanded
         ) {
@@ -94,7 +94,7 @@ extension MonitorsSection {
                     L(
                         "monitors.advanced.caption",
                         "Profiles reattach automatically when "
-                            + "a known monitor setup is "
+                            + "a known screen setup is "
                             + "reconnected."
                     )
                 )
@@ -110,7 +110,7 @@ extension MonitorsSection {
         }
     }
 
-    /// Row presenting display name and fingerprint (#540 rejected
+    /// Row presenting screen name and fingerprint (#540 rejected
     /// a per-row label as noise). VoiceOver is the case the drawer
     /// title does not cover — rows are stepped one at a time, so
     /// the row spoke a bare hex string: hence one combined element

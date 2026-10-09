@@ -144,7 +144,7 @@ struct HomeCardChromeTests {
     /// 2026-08-10 kept 360 as the ceiling when the four-column
     /// cap landed), the per-band cap, and the
     /// saturated grid centring — the width
-    /// `MonitorArrangementFitTests`' card canvas is derived
+    /// `ScreenArrangementFitTests`' card canvas is derived
     /// from the band's floor.
     ///
     /// The cap became the BAND's in #678 turn 17a, so this

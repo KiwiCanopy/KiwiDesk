@@ -246,7 +246,7 @@ extension KiwiCore {
             scope == .display
             ? L(
                 "sticky.display.pill",
-                "Can only be moved to a different display"
+                "Can only be moved to a different screen"
             )
             : L(
                 "sticky.everywhere.pill",

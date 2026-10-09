@@ -1415,12 +1415,12 @@ The same shape as the ruling above, one noun over, and harder
 to see because no single word was obviously wrong. English
 shipped three for one thing — *screen*, *display*,
 *monitor* — interleaved across adjacent surfaces rather than
-separated by area. Profiles is the whole defect in one pane: its
-caption says a profile is "remembered per **display**
-arrangement", the preset outline below it labels a screen "Main
-**screen**", and the Home card that opens the placement picture
-is called "**Monitors**" — three words for one thing, in one
-glance.
+separated by area. Profiles was the whole defect in one pane: its
+caption said a profile was "remembered per **display**
+arrangement", the preset outline below it labelled a screen "Main
+**screen**", and the Home card that opened the placement picture
+was called "**Monitors**" — three words for one thing, in one
+glance. That was the evidence the ruling was taken on.
 
 **The ruling: a physical screen is a *screen*. *Display* is
 reserved for quoting Apple's own controls. *Monitor* is
@@ -1459,21 +1459,53 @@ and was swept to it rather than the other way round. A pane whose
 every sentence says *screen* while its card says *Monitors* is
 the split, not a mitigation of it.
 
-**The ruling and the sweep are two decisions, and this entry
-takes only the first.** Deciding the winner costs a paragraph and
-makes every string authored afterwards correct; sweeping the
-existing ones reaches the settings census, a component directory,
-the site corpus and `docs/`, and it touches the wire wherever a
-Lua verb, an event name or a profile key spells one of the two
-words — which is its own ruling, and a set this entry derives
-rather than lists (`grep -E 'display|monitor'
-docs/lua-reference.md docs/cli.md` answers it, and answers it
-again after the next verb lands). Taking the ruling without the
-sweep leaves the corpus knowingly inconsistent rather than
-accidentally so, which is the cheaper of the two states and the
-only one that converges. The sweep is #865, off 1.0; the
-English-side obligation is `.claude/rules/config-vocabulary.md` ▸
-noun glossary.
+**A vocabulary ruling and its sweep are two decisions, ruling
+first.** Deciding the winner costs a paragraph and makes every
+string authored afterwards correct; sweeping the existing ones
+reaches the settings census, the search index, the site corpus
+and `docs/`. Ruling first leaves the corpus knowingly
+inconsistent rather than accidentally so, which is the cheaper of
+the two states and the only one that converges. For this noun the
+sweep is #865: the English copy, the page now called *Screens*,
+and the user-facing docs.
+
+**The wire stays, by ruling (owner, 2026-10-09).** A Lua verb, an
+event name or a profile key spelling *display* or *monitor* keeps
+it, and the set is derived rather than listed (`grep -E
+'display|monitor' docs/lua-reference.md docs/cli.md` answers it,
+and answers it again after the next verb lands). Copy is read and
+forgotten, so changing it costs only the strings; a wire name is
+typed into a user's `init.lua` and stored in their profiles, so a
+rename is a breaking change for every config that spells it and,
+for a stored key, a `ConfigMigration` crossing. A synonym is not
+worth that. A source identifier follows the page it names
+(`.claude/rules/gui.md` ▸ File layout) and stops at the same
+line: a stored or spelled identity keeps its spelling.
+
+**A retired noun stays findable.** People still arrive typing
+*monitor* or *display*, so the Settings search answers both
+through `SettingsSearchSynonyms` — the alternate-vocabulary home
+built for exactly this — rather than through a label that would
+reintroduce the split.
+
+**A noun swap keeps its translations.** A value whose noun
+moves from one synonym to another still names the same object for
+the same purpose, so its translation is not stale — it names that
+object in its own catalog's word, which is the next paragraph's
+business. `scripts/drop-key` is for a changed *meaning*; using it
+for a noun swap would replace every value the sweep changed, in
+every catalog, with English until a retranslation landed.
+
+**What the sweep left alone**, as Family C requires a sweep to
+list:
+
+| key | why it keeps its word |
+|---|---|
+| `general.language.display` | "Display language" — the verb sense, not the device |
+| `desktops.help` | quotes Apple's "Displays have separate Spaces" verbatim |
+| `colors.liquid_glass.reduce_transparency.help` | quotes Apple's path, Accessibility ▸ Display ▸ Reduce transparency |
+| `presets.coder_and_monitor.name` | "Coder & Monitor" is a preset's proper name |
+| a `KeyBinding` row's stored `label` (`Toggle display sticky`, `Make display sticky`) | a stored identity in the user's config, resolved to the drawn `keybinding.*_display_sticky` labels, which say *screen* |
 
 **What this does NOT decide: any catalog's own word.** Ruling the
 English winner tells `zh-Hans` nothing about 屏幕 versus 显示器 —
@@ -7904,7 +7936,7 @@ the #702 class of defect, at grid scale. So where an editor
 already owns the maths, the card calls it: the layout schematic
 family with its `SchematicPlacement` splice,
 `GapPreviewScale.mini` and `FocusBorderPreview`'s width remap on
-the Gaps & Borders tile, `MonitorArrangement.layout`, `BarsGates`'
+the Gaps & Borders tile, `ScreenArrangement.layout`, `BarsGates`'
 own shown-bar predicate. Where no editor maths exists, the picture
 is a readout of the draft, never a decorative sketch: one pane per
 declared space, the colour fan and swatch grid of the config's
@@ -15083,7 +15115,7 @@ never takes a slot in the chip's FLOW — the ⓧ rides the
 trailing-top corner as an overlay, and hover may change only its
 tint, never its presence or any metric — because the chips are
 sized by a flow layout whose arithmetic
-(`MonitorCardChips.minChipWidth`) must hold for both states, and
+(`ScreenCardChips.minChipWidth`) must hold for both states, and
 both a hover-revealed button and an in-flow trailing slot have
 shipped and died of that measurement. It is not free of the
 layout, though: a chip that HAS a badge reserves 6 pt more

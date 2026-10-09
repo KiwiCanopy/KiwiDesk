@@ -4,8 +4,8 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The two clamps on the Monitors picture (#678 Phase 3, turn
-/// 13b), split from `MonitorArrangementTests` on the file
+/// The two clamps on the Screens picture (#678 Phase 3, turn
+/// 13b), split from `ScreenArrangementTests` on the file
 /// ceiling.
 ///
 /// A card is a DROP TARGET, which is what makes a clamp
@@ -14,7 +14,7 @@ import Testing
 /// size ratio has a cap, and both are asserted here as
 /// arithmetic over the rectangles they produce.
 @Suite("Monitor arrangement clamps")
-struct MonitorClampTests {
+struct ScreenClampTests {
     /// AppKit's global space: y grows UP, the main display's
     /// bottom-left is the origin.
     private func display(
@@ -38,8 +38,8 @@ struct MonitorClampTests {
         _ displays: [Display],
         main: DisplayID? = nil,
         canvas: CGSize? = nil
-    ) -> MonitorArrangement.Layout {
-        MonitorArrangement.layout(
+    ) -> ScreenArrangement.Layout {
+        ScreenArrangement.layout(
             displays: displays,
             mainID: main ?? displays.first?.id,
             canvas: canvas ?? self.canvas
@@ -47,7 +47,7 @@ struct MonitorClampTests {
     }
 
     private func rect(
-        _ result: MonitorArrangement.Layout,
+        _ result: ScreenArrangement.Layout,
         _ id: UInt32
     ) throws -> CGRect {
         try #require(
@@ -62,7 +62,7 @@ struct MonitorClampTests {
     /// make the whole picture equal-sized cards again.
     @Test("at the ratio the cap stays away")
     func capIsInactiveAtTheThreshold() throws {
-        let ratio = MonitorArrangement.maxDrawnRatio
+        let ratio = ScreenArrangement.maxDrawnRatio
         let displays = [
             display(1, "Small", x: 0, y: 0, width: 1000, height: 800),
             display(
@@ -75,7 +75,7 @@ struct MonitorClampTests {
             ),
         ]
         let result = layout(displays)
-        #expect(!MonitorArrangement.isApproximate(displays))
+        #expect(!ScreenArrangement.isApproximate(displays))
         let small = try rect(result, 1)
         let wide = try rect(result, 2)
         #expect(abs(wide.width / small.width - ratio) < 0.001)
@@ -120,11 +120,11 @@ struct MonitorClampTests {
         #expect(
             abs(
                 big.width / laptop.width
-                    - MonitorArrangement.maxDrawnRatio
+                    - ScreenArrangement.maxDrawnRatio
             ) < 0.001
         )
         // …and silent, because 1.6% is not something to caption.
-        #expect(!MonitorArrangement.isApproximate(displays))
+        #expect(!ScreenArrangement.isApproximate(displays))
     }
 
     /// Past it the LARGER display is drawn down to exactly the
@@ -133,7 +133,7 @@ struct MonitorClampTests {
     /// to drop a space onto.
     @Test("past the ratio the larger display is capped")
     func capEngagesPastTheThreshold() throws {
-        let ratio = MonitorArrangement.maxDrawnRatio
+        let ratio = ScreenArrangement.maxDrawnRatio
         let displays = [
             display(1, "Laptop", x: 0, y: 0, width: 1000, height: 800),
             display(
@@ -146,7 +146,7 @@ struct MonitorClampTests {
             ),
         ]
         let result = layout(displays)
-        #expect(MonitorArrangement.isApproximate(displays))
+        #expect(ScreenArrangement.isApproximate(displays))
         let small = try rect(result, 1)
         let wide = try rect(result, 2)
         // The ultrawide's LONGEST side lands on the cap times the
@@ -210,7 +210,7 @@ struct MonitorClampTests {
         }
         let narrow = CGSize(width: 300, height: 240)
         let result = layout(displays, canvas: narrow)
-        let minimum = MonitorArrangement.minimumCard
+        let minimum = ScreenArrangement.minimumCard
         for drawn in result.displays {
             #expect(drawn.rect.width >= minimum.width - 0.001)
             #expect(drawn.rect.height >= minimum.height - 0.001)
@@ -233,18 +233,18 @@ struct MonitorClampTests {
     /// that matters: at the floor, a chip actually fits.
     @Test("the floor is exactly one chip's worth")
     func floorFitsOneChip() {
-        let minimum = MonitorArrangement.minimumCard
-        let area = MonitorCardChips.chipArea(in: minimum)
+        let minimum = ScreenArrangement.minimumCard
+        let area = ScreenCardChips.chipArea(in: minimum)
         // Lower bound: one chip fits, in both axes.
-        #expect(area.width >= MonitorCardChips.minChipWidth)
-        #expect(area.height >= MonitorCardChips.chipHeight)
+        #expect(area.width >= ScreenCardChips.minChipWidth)
+        #expect(area.height >= ScreenCardChips.chipHeight)
         // Upper bound: exactly one — the floor is the boundary,
         // not a comfortable margin past it.
-        #expect(MonitorCardChips.capacity(in: minimum) == 1)
+        #expect(ScreenCardChips.capacity(in: minimum) == 1)
         #expect(
             area.width
-                < MonitorCardChips.minChipWidth * 2
-                + MonitorCardChips.spacing
+                < ScreenCardChips.minChipWidth * 2
+                + ScreenCardChips.spacing
         )
     }
 
@@ -271,8 +271,8 @@ struct MonitorClampTests {
         // the tray, which is part of the content and so part of
         // what has to fit.
         let band =
-            MonitorArrangement.trayHeight
-            + MonitorArrangement.trayGap
+            ScreenArrangement.trayHeight
+            + ScreenArrangement.trayGap
         #expect(
             abs(card.height - (canvas.height - band)) < 0.001
         )
@@ -281,7 +281,7 @@ struct MonitorClampTests {
         )
         #expect(result.contentSize.width <= canvas.width + 0.001)
         #expect(
-            card.width > MonitorArrangement.minimumCard.width
+            card.width > ScreenArrangement.minimumCard.width
         )
     }
 

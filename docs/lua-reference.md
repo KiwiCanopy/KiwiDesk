@@ -178,8 +178,8 @@ following** it — you stay on the current space. The moved
 window becomes the target space's focused window, so the first
 time you switch there it is the window you land on.
 
-If the target space is shown on **another monitor**, a floating
-window is re-anchored onto that display: it keeps its
+If the target space is shown on **another screen**, a floating
+window is re-anchored onto that screen: it keeps its
 *proportional* position (a bottom-right float stays
 bottom-right), clamped inside the target's usable area. Tiled
 windows arrive through the layout; into a **floating-mode
@@ -350,31 +350,31 @@ KiwiDesk.move_to_desktop_and_follow(3, "mail")
 
 ### move_space_to_display
 
-**Expects:** a space identifier, then a display reference — a
-**number** (1-based position: `1` is the main display,
+**Expects:** a space identifier, then a screen reference — a
+**number** (1-based position: `1` is the main screen,
 `2` the next left-to-right) or a **string** matching a connected
-monitor's fingerprint (as printed by `list_monitors`) or name.
+screen's fingerprint (as printed by `list_monitors`) or name.
 
-**Does:** moves the whole space to that monitor **now** and
-shows it there (each monitor shows one space at a time). A
-later monitor change (dock/undock) re-resolves placement from
+**Does:** moves the whole space to that screen **now** and
+shows it there (each screen shows one space at a time). A
+later screen change (dock/undock) re-resolves placement from
 the pins; `pin_space_to_display` makes it stick. Creates the
 space if it does not exist. Floating members are re-anchored
-onto the new monitor, keeping their relative position.
+onto the new screen, keeping their relative position.
 
 **Example:**
 
 ```lua
-KiwiDesk.move_space_to_display("mail", 2)      -- second monitor
+KiwiDesk.move_space_to_display("mail", 2)      -- second screen
 KiwiDesk.move_space_to_display(3, "DELL U2723QE:3840x2160")
 ```
 
 ### pin_space_to_display
 
-**Expects:** a space identifier, then a display reference (same
+**Expects:** a space identifier, then a screen reference (same
 forms as `move_space_to_display`).
 
-**Does:** pins the space to that monitor by the monitor's
+**Does:** pins the space to that screen by the screen's
 fingerprint, so the assignment survives dock/undock. Overrides
 any Main-role assignment for the space. Creates the space if
 new.
@@ -384,7 +384,7 @@ and a pin set from Lua is a session override; under a
 Lua-managed config the pin persists across a relaunch.
 
 A screen this pin leaves with no space is seeded one — see
-[Profile Monitor Sets](#profile-monitor-sets).
+[Profile Screen Setups](#profile-screen-setups).
 
 **Example:**
 
@@ -400,7 +400,7 @@ KiwiDesk.pin_space_to_display("mail", 2)
 (the default) or `"profile"`. The scope may stand in the mode's
 place.
 
-**Does:** creates the space and resolves it onto a display.
+**Does:** creates the space and resolves it onto a screen.
 Spaces also appear the first time you reference one
 (`focus_space`, `move_to_space`, a keybinding); this verb
 creates one, and its mode, up front. If the space already
@@ -414,7 +414,7 @@ and Keep and a Settings Save never write it —
 only
 [`save_profile`](#save_profile-load_profile-delete_profile-set_default_profile)
 does. With `"profile"` the space is added to the live profile's
-file at once — its place, layout, monitor pin and icon — which is
+file at once — its place, layout, screen pin and icon — which is
 what **Add Space ‹name› to this profile** in Settings ▸ Spaces
 does. It is
 refused while no profile is live, and for a space `init.lua` or
@@ -451,7 +451,7 @@ save a profile), `init.lua` (a verb there references it — remove
 the call). Test the return, not the status (#1509).
 
 A screen this leaves with no space is seeded one — see
-[Profile Monitor Sets](#profile-monitor-sets).
+[Profile Screen Setups](#profile-screen-setups).
 
 **Example:**
 
@@ -693,26 +693,26 @@ KiwiDesk.set_float_placement("keep")
 
 **Expects:** `true` or `false` (default `true`).
 
-**Does:** whether a floating window re-anchored across displays
+**Does:** whether a floating window re-anchored across screens
 also scales its **size**. `true`: a float that crosses to a
-differently sized display is scaled by the per-axis ratio of
-the two displays — half of a 4K screen becomes half of a 1080p
+differently sized screen is scaled by the per-axis ratio of
+the two screens — half of a 4K screen becomes half of a 1080p
 one — as well as re-anchored to the same relative spot. Applies
-wherever a float crosses displays (`move_to_space`, moving a
-space to another display, a display-change sweep), and to
+wherever a float crosses screens (`move_to_space`, moving a
+space to another screen, a screen-change sweep), and to
 windows floating only because their space is in floating mode.
 The result stays fully on screen and clear of any App/Space
-Bar. `false` keeps the exact pixel size across displays: a
-too-wide window then overflows the edge of a smaller display
+Bar. `false` keeps the exact pixel size across screens: a
+too-wide window then overflows the edge of a smaller screen
 (macOS clamps a window's height but not its width), and the
-window keeps its aspect ratio between displays of different
+window keeps its aspect ratio between screens of different
 aspect ratios (16:9 → 16:10). Global (per profile, all spaces);
 no Settings toggle.
 
 **Example:**
 
 ```lua
--- keep a float's exact pixel size across displays
+-- keep a float's exact pixel size across screens
 KiwiDesk.set_float_scale_on_display_change(false)
 ```
 
@@ -813,12 +813,12 @@ KiwiDesk.set_space_switch_liquid_glass(true)
 ### Space Identity
 
 Spaces are identified by **strings or numbers** — `1` and `"1"`
-are the same space, `"code"` and `"Code"` are not. Monitors
+are the same space, `"code"` and `"Code"` are not. Screens
 carry no layout; windows live in spaces, and spaces are mapped
-to monitors (see *Profiles & Monitors* below). A space is
+to screens (see *Profiles & Screens* below). A space is
 renamed in place from the Settings app's **Spaces** section; the
 rename is persisted and follows the id everywhere it is used —
-its layout mode, app rules, monitor pins, and any keybindings.
+its layout mode, app rules, screen pins, and any keybindings.
 
 ### How inactive spaces hide their windows
 
@@ -843,7 +843,7 @@ for its app still wins). **Hiding** an app (cmd+H, or an app
 that hides itself on the red X) releases its tiles, and
 unhiding returns its windows to the space they came from.
 
-With **multiple monitors**, arrange your displays so no monitor
+With **multiple screens**, arrange them so no screen
 sits directly right of or below another one's bottom-right
 corner, or the parked windows peek onto the neighbor
 (illustrated in AeroSpace's [proper monitor arrangement
@@ -978,7 +978,7 @@ width with a left/right stack zone, the height with a top/bottom
 one (`stack.set_stack_position`). At layout time the *effective*
 ratio is clamped so both zones keep `min_window_size` (#44) —
 the stored value stays untouched and is honored again on a wider
-display; the cascade fallback only triggers when two min-size
+screen; the cascade fallback only triggers when two min-size
 zones cannot coexist at any ratio.
 
 **Example:**
@@ -1454,7 +1454,7 @@ grid.set_dimensions(3, 2)
 **Expects:** `true` or `false` (default `false`).
 
 **Does:** when true, derives the grid's dimensions from the
-display — as many columns and rows as fit at `min_window_size`
+screen — as many columns and rows as fit at `min_window_size`
 (`floor(usable / (min_window_size + gap))` per axis, at least
 1) — over the typed `columns`/`rows`. It caps a dynamic grid
 and fixes a rigid one alike. Windows past the resulting
@@ -1650,9 +1650,9 @@ wraps; refused when the space is not in track mode, no tiled
 window is focused, or no track lies that way. Also refused when
 the swap would touch the **overflow track** while it is folding
 two or more tracks together — under a fixed limit
-(`track.set_limit` with automatic tracks off) or on a display
+(`track.set_limit` with automatic tracks off) or on a screen
 too narrow to fit the tracks at `min_window_size`; raise the
-limit or widen the display to reorder the overflow.
+limit or widen the screen to reorder the overflow.
 
 **Example:**
 
@@ -1688,7 +1688,7 @@ the far edge, which collects the surplus (#192): a new
 `own_track` window past the normal tracks opens it, and further
 windows fold into it, rendered per `track.set_overflow_style`.
 `move_to_track` can open the overflow track but not go past it.
-A monitor that cannot fit the tracks at `min_window_size` shows
+A screen that cannot fit the tracks at `min_window_size` shows
 fewer at render time. The last positive value is remembered and
 restored when automatic is turned off again. A limit of 1 is
 refused (#1354).
@@ -1741,7 +1741,7 @@ track.set_auto_tracks(false)
   Falls back to joining once `track.set_limit` is reached.
 
 The fill-then-spill boundary is how many windows fit at
-`min_window_size`, so a smaller display spills sooner.
+`min_window_size`, so a smaller screen spills sooner.
 
 **Example:**
 
@@ -2455,8 +2455,8 @@ The **App Bar** lists the windows of the current space in the two
 layouts that can hide one — **monocle** and **scrolling**. Click
 an item to focus its window, drag it to reorder; a window in
 native fullscreen has no item until it returns. With several
-monitors each display shows its own bar, on that display, for the
-space it is showing, and dragging an item reorders that display's
+screens each screen shows its own bar, on that screen, for the
+space it is showing, and dragging an item reorders that screen's
 space.
 
 The space's floating windows follow the row, past a thin line and
@@ -2582,7 +2582,7 @@ scroll.set_app_bar_title_cap(20)  -- override for scrolling
 
 ## Space Bar
 
-The Space Bar (#293) lists, per display, that display's Spaces
+The Space Bar (#293) lists, per screen, that screen's Spaces
 in profile order: each item shows the Space's identifier (its
 configured icon, else the plain digits of a numeric id or a
 two-letter monogram of a named one), a divider, then a glyph per
@@ -2761,8 +2761,8 @@ space_bar.set_active_dim_factor(0.6)
 
 **Does:** shows a trailing front-app segment after the last
 Space item — a divider, then the glyph and the **title** of the
-focused window of the Space **this display currently shows**
-(per display, not the globally frontmost app). A window with no
+focused window of the Space **this screen currently shows**
+(per screen, not the globally frontmost app). A window with no
 title yet falls back to its app's name. On vertical (left/right)
 bars the segment is icon-only and the divider flips to a
 horizontal rule.
@@ -3868,7 +3868,7 @@ window. A window that floats only because its Space is in
 floating layout still floats there.
 
 Dragging a window out of a floating-layout Space onto a tiled
-Space on another display floats it the way `make_floating` does,
+Space on another screen floats it the way `make_floating` does,
 so it stays floating there; `make_tiled` undoes it.
 
 `make_auto` is retired, and `make_tiled` does its job: a call
@@ -3976,27 +3976,27 @@ overflows in its place.
 Sticky comes in two scopes:
 
 - **Sticky** (`make_sticky` / `toggle_sticky`) — present on
-  every space of **every** monitor. Wears the `infinity` (∞)
+  every space of **every** screen. Wears the `infinity` (∞)
   mark.
-- **Display sticky** (`make_display_sticky` /
+- **Screen sticky** (`make_display_sticky` /
   `toggle_display_sticky`) — present on every space of **one**
-  monitor: the display its home space lives on. Wears the
+  screen: the screen its home space lives on. Wears the
   `pin.fill` (📌) mark.
 
 Both share one off-switch (`make_unsticky`), and each verb sets
-its own scope outright — `make_sticky` on a display-sticky window
-turns it global, and vice versa. On a single monitor the two
+its own scope outright — `make_sticky` on a screen-sticky window
+turns it global, and vice versa. On a single screen the two
 scopes coincide.
 
 `move_to_space` is guarded: a **global** sticky refuses any
-target; a **display** sticky refuses a target on the *same*
-monitor and accepts one on *another* monitor, which re-homes it
-to that display. A refused move shows a brief pill on the
+target; a **screen** sticky refuses a target on the *same*
+screen and accepts one on *another* screen, which re-homes it
+to that screen. A refused move shows a brief pill on the
 window.
 
 A sticky window is marked in its top-right corner
 (`sticky.set_mark`; `infinity` for global, `pin.fill` for
-display), and the same per-scope badge rides its Space Bar
+screen), and the same per-scope badge rides its Space Bar
 glyph, listed under whichever space is current
 (`space_bar.set_sticky_badge`).
 
@@ -4016,8 +4016,8 @@ time: the one you are on.
 **Expects:** nothing.
 
 **Does:** marks the focused window **globally** sticky — visible
-on every space of every monitor. No mode argument: the window
-keeps its existing floating or tiled state. Overrides display
+on every space of every screen. No mode argument: the window
+keeps its existing floating or tiled state. Overrides screen
 sticky if the window already had it.
 
 **Example:**
@@ -4031,8 +4031,8 @@ KiwiDesk.make_sticky()
 **Expects:** nothing.
 
 **Does:** marks the focused window sticky to its **current
-monitor** — visible on every space of that one display, not on
-other monitors. Moving it to a space on another monitor re-homes
+screen** — visible on every space of that one screen, not on
+other screens. Moving it to a space on another screen re-homes
 it there. Overrides global sticky if the window already had it.
 
 **Example:**
@@ -4061,7 +4061,7 @@ KiwiDesk.make_unsticky()
 **Does:** flips the focused window between **global** sticky and
 off. Offered as a bindable row in the Settings shortcut list;
 the `make_*` verbs set a specific direction. Toggling global on
-a display-sticky window switches it to global.
+a screen-sticky window switches it to global.
 
 **Example:**
 
@@ -4075,10 +4075,10 @@ end)
 
 **Expects:** nothing.
 
-**Does:** flips the focused window between **display** sticky
-(its current monitor only) and off. Also offered in the Settings
-shortcut list. Toggling display on a global-sticky window
-switches it to display.
+**Does:** flips the focused window between **screen** sticky
+(its current screen only) and off. Also offered in the Settings
+shortcut list. Toggling screen sticky on a global-sticky window
+switches it to screen sticky.
 
 **Example:**
 
@@ -4533,12 +4533,12 @@ the ratio is stored either way.
 **Held, the chord glides (#1056, #1082).** A hotkey whose press
 ran exactly one command — a successful `resize` — keeps applying
 while you hold it: one step on the press, then, after your Mac's
-own key-repeat delay, a continuous **glide** on the display's
+own key-repeat delay, a continuous **glide** on the screen's
 frame clock. Each frame moves a fraction of *that binding's own
 delta*, at a speed in steps per second that starts gently and
 ramps up over a second or two. The amount moved is the frame's
 elapsed time × that speed, so the same hold travels the same
-distance on a 60 Hz display, a 120 Hz one, and a ProMotion panel
+distance on a 60 Hz screen, a 120 Hz one, and a ProMotion panel
 changing rate mid-hold.
 
 The glide re-issues the **`resize` command your press ran**,
@@ -4580,7 +4580,7 @@ What the `delta` adjusts depends on the layout:
   window the delta moves the left/top region. The write stops
   at the bound that keeps both regions at their effective
   minimums (per side, #933) within the area the layout fills
-  (#383) — the display minus any Space Bar strip.
+  (#383) — the screen minus any Space Bar strip.
 - **stack** — focus-aware (#67). `"x"` moves the master/stack
   split *in the direction that grows the focused window*: with
   a master focused, a positive delta raises the master ratio;
@@ -4622,7 +4622,7 @@ What the `delta` adjusts depends on the layout:
   the write-time clamp (see the accepted limitations).
 
 The area a layout fills, which every bound above is taken
-within, is the display minus the [KiwiShelf](#kiwishelf) strip
+within, is the screen minus the [KiwiShelf](#kiwishelf) strip
 wherever a bar draws in that layout (#1517).
 
 **Where the ratio write lands (#458):** in a **session layer
@@ -4636,7 +4636,7 @@ Session values behave like the stack's per-window weights:
 never saved to a profile, gone when KiwiDesk quits, reseeded from config
 on a real mode change, `reload_config`, `load_profile` (or any
 other explicit profile/preset/GUI apply), a Desktop switch or
-monitor change that loads a *different* profile, and dropped
+screen change that loads a *different* profile, and dropped
 for a
 field the moment you set it explicitly — its global
 (`bsp.set_ratio_h`, `stack.set_master_ratio`,
@@ -4720,7 +4720,7 @@ profile-switch shortcut — leave it in, or switch from the menu
 bar.
 
 Profiles re-resolve their bindings whenever they apply: on
-`load_profile`, on a monitor change, and on a Desktop binding
+`load_profile`, on a screen change, and on a Desktop binding
 switch. Switching profiles also returns you to the default
 layer.
 
@@ -4976,7 +4976,7 @@ KiwiDesk.on("space_change", function(space_id)
 end)
 ```
 
-## Profiles & Monitors
+## Profiles & Screens
 
 ### save_profile, load_profile, delete_profile, set_default_profile
 
@@ -4986,7 +4986,7 @@ end)
 - `load_profile(name)` — a name string.
 - `delete_profile(name)` — a name string.
 - `set_default_profile(name)` — a name string (sets the profile to
-  load for this monitor count when no exact match exists).
+  load for this screen count when no exact match exists).
 
 **Does:**
 
@@ -4998,12 +4998,12 @@ end)
 - `delete_profile` removes the profile; deleting the last profile of
   a count reverts that count to its built-in Standard.
 - `set_default_profile` marks a profile as the fallback for its
-  monitor count.
+  screen count.
 
-`save_profile` and `load_profile` also hand the connected monitor
-set to that profile, and `set_default_profile` refuses a profile
-that holds no set (see [Profile Monitor
-Sets](#profile-monitor-sets)).
+`save_profile` and `load_profile` also hand the connected screen
+setup to that profile, and `set_default_profile` refuses a profile
+that holds no setup (see [Profile Screen
+Setups](#profile-screen-setups)).
 
 **Example:**
 
@@ -5016,7 +5016,7 @@ KiwiDesk.set_default_profile("Developer Rig")
 
 **Profiles are the single source of truth for tiling.** A profile
 owns the gaps, per-space layout modes, layout parameters,
-animations, mouse-resize behavior, and the space→monitor
+animations, mouse-resize behavior, and the space→screen
 assignments — plus, optionally, **sparse keybinding and
 window-rule overrides** that shadow the base only while the
 profile is active. The global declarations live in `gui.json`
@@ -5051,7 +5051,7 @@ KiwiDesk.set_fallback_space("mail")
 - An SF Symbol name, emoji, single character, or `""` to clear.
 
 **Does:** sets a recognition icon next to the space name in the
-Spaces list, Monitors cards, and per-space shortcut rows. Icons ride
+Spaces list, Screens cards, and per-space shortcut rows. Icons ride
 the profile like every other tiling setting.
 
 **Example:**
@@ -5073,7 +5073,7 @@ KiwiDesk.set_space_icon("chat", "")  -- clear
   setup, as `list_monitors` prints them.
 
 **Does:** when that Desktop becomes current **on the main
-display** (the screen with the menu bar), KiwiDesk loads the
+screen** (the one with the menu bar), KiwiDesk loads the
 bound profile — its spaces, layouts, and settings — provided
 the profile is saved for the connected screen count; otherwise
 the binding stands aside, the current profile stays, and a
@@ -5081,7 +5081,7 @@ screen change picks by the connected screens instead. Desktops
 without a binding keep whatever profile is active. A binding
 takes effect when that Desktop next activates. With "Displays
 have separate Spaces" off, or with a single screen, the main
-display's Desktop is *the* Desktop. In a hand-written config
+screen's Desktop is *the* Desktop. In a hand-written config
 the call lives in `init.lua`; when the config is GUI-managed,
 bindings are stored in `gui.json` (`profile_bindings`) and
 edited in the Profiles section instead.
@@ -5108,8 +5108,8 @@ the same screen count **and** the same scope, so per count a
 Desktop holds one profile for all screen setups and one for each
 setup named, each of the profile's own screen count. Which entry
 loads, and that either loads over the profile that holds the
-connected setup, is the binding rung of [Profile Monitor
-Sets](#profile-monitor-sets).
+connected setup, is the binding rung of [Profile Screen
+Setups](#profile-screen-setups).
 
 ```lua
 -- Desktop 3 on two screens: "Dual" anywhere, "Studio" at the desk.
@@ -5157,19 +5157,19 @@ profile declares, or in its own space, now held, when the profile
 does not declare it (below).
 
 This happens on any profile CHANGE — an explicit `load_profile`,
-a Desktop binding swapping profiles under you, or a monitor
+a Desktop binding swapping profiles under you, or a screen
 change that resolves a different profile. Re-applying the
 profile that is *already* live changes nothing, so a reconnect
 that lands on the same profile leaves your layout alone.
 
 The record is per session and is not written to disk.
 
-**A monitor change holds a gone screen's spaces.** When a monitor
+**A screen change holds a gone screen's spaces.** When a screen
 change resolves a different profile, a space that lived on a
-monitor no longer connected — pinned there, or placed there by
+screen no longer connected — pinned there, or placed there by
 the Main role or by KiwiDesk — and still holds windows on any
 Desktop is *held* instead of pruned: it stays live on a remaining
-monitor, and where the incoming profile declares its name it takes
+screen, and where the incoming profile declares its name it takes
 the next number past the highest live one. A
 profile or Standard that later applies and declares a held
 space's current number moves it past the highest live number
@@ -5179,14 +5179,14 @@ does not reset its mode
 
 **Every switch holds what it does not name.** The same hold runs
 on every profile CHANGE — `load_profile` of another profile, a
-Desktop binding, a monitor change, or a built-in Standard taking
+Desktop binding, a screen change, or a built-in Standard taking
 over — for every live space the incoming profile or Standard does
 not declare by name and that still holds windows, whether its
-monitor left or stayed. An empty one is dropped. A space held
-while its monitor stayed goes home when the arrangement it left
+screen left or stayed. An empty one is dropped. A space held
+while its screen stayed goes home when the arrangement it left
 applies again and declares its original name, as below. Switching
 away from a hand-written `init.lua` with no profile or Standard
-live holds only a gone monitor's spaces, and forwards the rest to
+live holds only a gone screen's spaces, and forwards the rest to
 the fallback space
 ([#1790](https://github.com/KiwiCanopy/KiwiDesk/issues/1790)).
 
@@ -5199,15 +5199,15 @@ too, even where its own name is free, and a later renumber keeps
 the Space Bar in that order
 ([#1664](https://github.com/KiwiCanopy/KiwiDesk/issues/1664)).
 
-Once its monitor is back, a held space goes home when the
+Once its screen is back, a held space goes home when the
 arrangement then live is the one it left — the same profile, or
 the same Standard — and declares its original name: everything in
 it moves into that space, which takes the returning arrangement's
 mode, and the hold ends. This includes a reconnect that keeps the
 live profile. With a different arrangement, or the name
-undeclared, it stays held, pinned back to its monitor. With a
+undeclared, it stays held, pinned back to its screen. With a
 hand-written `init.lua` and no profile for the connected
-monitors, a reconnect only places spaces, and a held space stays
+screens, a reconnect only places spaces, and a held space stays
 held.
 
 A window the incoming profile remembers in one of its own spaces
@@ -5225,25 +5225,25 @@ never include one.
 
 Held spaces survive a KiwiDesk restart, an update and a crash:
 every session snapshot records them, and a held space whose
-monitor is connected at launch goes home at once by the rule
+screen is connected at launch goes home at once by the rule
 above. A held space whose windows were all closed meanwhile
 ends by the rule above once macOS confirms they are gone, and a
 restart of the Mac ends every hold
 ([#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646)).
 
-### Profile Monitor Sets
+### Profile Screen Setups
 
-A profile covers concrete **monitor sets** of one screen count — each a list
-of monitor fingerprints plus the space→monitor pins valid for that
+A profile covers concrete **screen setups** of one screen count — each a list
+of screen fingerprints plus the space→screen pins valid for that
 arrangement. Updating a profile while a new combination is connected
-teaches it that combination. When displays change, KiwiDesk resolves
+teaches it that combination. When screens change, KiwiDesk resolves
 in this order:
 
 1. **Desktop binding** — a profile bound to the Desktop your main
    screen is on and saved for the connected screen count
    ([bind_profile_to_desktop](#bind_profile_to_desktop)); a binding
    that cannot fire stands aside.
-2. **Exact match** — a profile stores exactly the connected monitors
+2. **Exact match** — a profile stores exactly the connected screens
    → loaded clean.
 3. **Count default** — the profile marked `default` for that screen
    count → loaded with the dirty flag.
@@ -5261,7 +5261,7 @@ Within the binding rung, a profile bound for exactly the connected
 screen setup comes before one bound for all screen setups.
 
 Every space always resolves to a screen: an explicit fingerprint pin
-wins, then the **Main** role (the space follows whatever display is
+wins, then the **Main** role (the space follows whatever screen is
 currently main — dock and undock without stale fingerprints), then
 the built-in positional default.
 
@@ -5273,10 +5273,10 @@ screen in. No file learns the seed until you save; `init.lua`
 never does.
 
 Explicitly loading a profile whose stored sets don't cover the
-connected monitors works, but the state loads *dirty* until you
+connected screens works, but the state loads *dirty* until you
 update the profile on this hardware or return to a covered set.
 
-A monitor set belongs to one profile. `save_profile` (unless
+A screen setup belongs to one profile. `save_profile` (unless
 another profile owns the set), `load_profile` of a profile saved
 for as many screens, and creating a profile hand the connected set
 to that profile and remove it from every other
@@ -5289,7 +5289,7 @@ backup, settle every set several profiles hold onto the one that
 loads it today (the alphabetically first); if that leaves the
 count's default without a set, the default moves to the profile
 that kept it. After that, start-up, a
-monitor change and a Desktop binding never move a set, so two
+screen change and a Desktop binding never move a set, so two
 hand-edited profiles that hold the same set still resolve as
 before. A profile left with no set is *dormant*:
 its file keeps `"monitor_sets": []` beside `"monitor_count"`, it is
@@ -5320,7 +5320,7 @@ stripped, grouped by namespace — `set_gap_override` becomes
       }
     }
   ],
-  "main_spaces": ["1"],       // follow the main display
+  "main_spaces": ["1"],       // follow the main screen
   "fallback_space": "1",      // rehome target
   "saved_at": "2026-07-04T12:00:00Z",
   "settings": {
@@ -5445,7 +5445,7 @@ from Settings. Set it from `init.lua` to make an override stick
 across launches.
 
 - `"smooth"` (default) — a growing axis follows the animation
-  continuously. By default the size updates **per display
+  continuously. By default the size updates **per screen
   tick** (matching the position channel, on any refresh rate),
   so slow-AX apps (Electron/WebKit: VS Code, Slack, Discord,
   Chrome) reflow once per frame; `animations.set_size_rate` can
@@ -5485,7 +5485,7 @@ restores the default **per-tick** behavior (no throttle).
 
 **Does:** caps how often the `"smooth"` policy emits a size-set,
 bounding a slow-AX app's reflow load. By default the size
-follows the display refresh (per-tick); set a lower rate only if
+follows the screen refresh (per-tick); set a lower rate only if
 a heavy app falls behind. It caps both directions. No effect
 under `"mid_slide"`. Engine-only, not persisted (#47, #593).
 
@@ -5688,8 +5688,8 @@ animations.set_shelf_duration(1000)
 **Does:** when `true`, restores window positions and focus after
 the machine wakes from sleep or the screen unlocks, after the
 specified delay (default 1500 ms). The restore is skipped when
-the display set changed while the machine was away (undock,
-monitor power-off); the monitor-change profile resolution wins
+the screen setup changed while the machine was away (undock,
+screen power-off); the screen-change profile resolution wins
 instead. A restore that does run finishes with a full retile,
 like any space switch, and focuses the remembered window —
 raises it and activates its app — so shortcuts act on it
@@ -5726,15 +5726,15 @@ are re-tiled fresh). Crashes restore from the last autosave
 (30 s interval) instead.
 
 On quit, KiwiDesk moves each managed tiled window
-back onto the monitor its space is assigned to and arranges them
+back onto the screen its space is assigned to and arranges them
 per `quit.layout` (see `quit.set_layout` below). Floating
 windows are left wherever they are. KiwiDesk keeps all managed
 windows on the single visible macOS Desktop (inactive spaces are
 parked off-screen at the peek corner, not on a different
 Desktop), so every reachable window lands there together.
-Windows on a display's background Desktops cannot be
+Windows on a screen's background Desktops cannot be
 repositioned without disabling SIP, which KiwiDesk never does —
-the visible Desktop per display is the arranged scope.
+the visible Desktop per screen is the arranged scope.
 
 Two restarts arrange nothing: an update's **Install and
 Relaunch**, and `kiwidesk service restart` of a running service
@@ -5753,7 +5753,7 @@ launch restores the arrangement.
 **Expects:** the string `"grid"`.
 
 **Does:** picks how remaining managed windows are spread on quit.
-`grid` builds a per-display grid and round-robin fills it —
+`grid` builds a per-screen grid and round-robin fills it —
 window 1 into cell 1, window 2 into cell 2, wrapping back to
 cell 1 and stacking. Windows sharing a cell cascade vertically
 like `overflow_all`, in **every** cell, so each title bar stays
@@ -5764,10 +5764,10 @@ stays visible and later cells sit above earlier ones (one window
 is exempt; see below). It waits for each raise to land before
 issuing the next.
 
-The whole restack is capped at one second across every display.
+The whole restack is capped at one second across every screen.
 The cap is a hard stop: once reached, the restack stops after at
 most one more raise — it does not carry on through the rest of
-the display it was on, and it does not start a display it had
+the screen it was on, and it does not start a screen it had
 not reached. Those windows keep whatever stacking the moves left
 them in.
 
@@ -5784,10 +5784,10 @@ other window.
 
 A pile's windows also shrink so the cascade ends at its own
 cell's bottom edge (floored at `min_window_size`), keeping piles
-from spilling into the row below. Each display sizes its own
+from spilling into the row below. Each screen sizes its own
 grid from its window count `N` and the density target `T` (see
 `quit.set_grid_target_depth` below), never past 4×4. One-shot
-teardown placement: windows stay on their own display, and
+teardown placement: windows stay on their own screen, and
 nothing is managed afterwards. Default: `grid`.
 
 The setting is app-wide: it is stored in `gui.json` as
@@ -5798,14 +5798,14 @@ The upgrade and a Lua-owned setup are as for
 the running value only, never `gui.json`.
 
 The grid fills before it stacks. Up to six windows each take a
-tile, split so the tiles come nearest square on that display: on
+tile, split so the tiles come nearest square on that screen: on
 16:9 one window fills it, two sit side by side, three share a
 row, four take 2×2, five and six 3×2. When the last row is short,
 its last window stretches across the rest — the window you were
-last working in, since it is placed last. A portrait display
+last working in, since it is placed last. A portrait screen
 mirrors this and fills column by column. Past six windows the
 grid is the smallest step of the ladder 3×2 → 4×2 → 4×3 → 4×4
-(mirrored on a portrait display) whose cells hold every window
+(mirrored on a portrait screen) whose cells hold every window
 in piles `T` deep — at the standard 5: up to 30 windows 3×2, up
 to 40 4×2, up to 60 4×3, beyond that 4×4. Windows pile only once
 they outnumber its cells; until then each still takes a tile.
@@ -5822,7 +5822,7 @@ quit.set_layout("grid")
 
 **Does:** sets the quit grid's density target — the stack depth a
 cell aims for before the grid grows. Grid dimensions stay
-automatic, calculated per display from that display's window
+automatic, calculated per screen from that screen's window
 count, and never pass 4×4; the target only moves the growth
 thresholds. It is not a hard maximum: past 4×4, additional
 windows keep cascading in its cells. Default: `5`.

@@ -3,7 +3,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Monitors views are wired to their seams (#678 Phase 3,
+/// The Screens views are wired to their seams (#678 Phase 3,
 /// turn 13b).
 ///
 /// General shipped a round-1 cut whose resolver was built only in
@@ -17,8 +17,8 @@ import Testing
 /// rather than per file, because a file-level "touches the
 /// resolver somewhere" check passes while one of several gates
 /// goes hand-rolled.
-@Suite("Monitors gate and seam wiring")
-struct MonitorsGateWiringTests {
+@Suite("Screens gate and seam wiring")
+struct ScreensGateWiringTests {
     private var settingsDir: URL {
         SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
@@ -46,11 +46,11 @@ struct MonitorsGateWiringTests {
             // gate of their own, because a second inverted copy
             // of the banner's condition is a thing that can drift
             // from it (architect review, 2026-08-04).
-            "Sections/MonitorsSection.swift": [
-                "inertReason(for:.monitors(.placementUnavailable))"
+            "Sections/ScreensSection.swift": [
+                "inertReason(for:.screens(.placementUnavailable))"
             ],
-            "Sections/MonitorsSection+Details.swift": [
-                "inertReason(for:.monitors(.orphanPinClear))"
+            "Sections/ScreensSection+Details.swift": [
+                "inertReason(for:.screens(.orphanPinClear))"
             ],
         ]
         for (name, needles) in consults {
@@ -70,7 +70,7 @@ struct MonitorsGateWiringTests {
     }
 
     /// The bespoke containers derive their instances from
-    /// `MonitorsFamilyRows`, not from re-derivations of their
+    /// `ScreensFamilyRows`, not from re-derivations of their
     /// own — otherwise the census guards assert over lists the
     /// screen never sees.
     ///
@@ -79,7 +79,7 @@ struct MonitorsGateWiringTests {
     @Test("the views consult the family seam")
     func viewsConsultTheFamilySeam() throws {
         let consults: [String: [String]] = [
-            "Components/Monitors/DisplayCard.swift": [
+            "Components/Screens/ScreenCard.swift": [
                 // The ASSIGNMENT site, not the call: the bare
                 // call appears twice in this file, and the
                 // tooltip's copy satisfied this needle while the
@@ -88,7 +88,7 @@ struct MonitorsGateWiringTests {
                 // suite (guard-prover, 2026-08-04).
                 "letassignments=rows.chips(on:display.fingerprint)"
             ],
-            "Components/Monitors/FollowsMainTray.swift": [
+            "Components/Screens/FollowsMainTray.swift": [
                 "rows.trayChips",
                 // The tray holds chips in a fixed band exactly as
                 // a card does, so it takes the same overflow
@@ -96,15 +96,15 @@ struct MonitorsGateWiringTests {
                 // container left, clipping every space past its
                 // first row along with that space's clear button
                 // and menu (architect review, 2026-08-04).
-                "MonitorCardChips.split(spaces,in:size,header:",
+                "ScreenCardChips.split(spaces,in:size,header:",
                 "overflowChip(spaces,split.overflow)",
             ],
-            "Sections/MonitorsSection+Details.swift": [
+            "Sections/ScreensSection+Details.swift": [
                 "rows.orphans",
                 "rows.orderedDisplays",
             ],
-            "Sections/MonitorsSection.swift": [
-                "model.monitorRows"
+            "Sections/ScreensSection.swift": [
+                "model.screenRows"
             ],
         ]
         for (name, needles) in consults {
@@ -143,7 +143,7 @@ struct MonitorsGateWiringTests {
     @Test("every surfacing branch is drawn, not just resolved")
     func surfacingBranchesAreDrawn() throws {
         let draws: [String: [String]] = [
-            "Sections/MonitorsSection.swift": [
+            "Sections/ScreensSection.swift": [
                 // The PICTURE, which is the branch the census no
                 // longer names: dropping the gate from
                 // `.spacePins` retired its needle too, and
@@ -161,10 +161,10 @@ struct MonitorsGateWiringTests {
                 // draw. Each is the ONLY consumer of its
                 // derivation, so deleting the `if` retires the
                 // whole promise silently.
-                "MonitorArrangement.isApproximate(rows.displays)",
+                "ScreenArrangement.isApproximate(rows.displays)",
                 "rows.hasAmbiguousDisplays",
             ],
-            "Components/Monitors/DisplayCard.swift": [
+            "Components/Screens/ScreenCard.swift": [
                 // The `+n` itself, not merely the arithmetic
                 // behind it: `cardCountsOverflow` stayed green
                 // with the marker deleted and the chips clipped
@@ -191,7 +191,7 @@ struct MonitorsGateWiringTests {
                 "isMain?SettingsTheme.accent",
                 ".compositingGroup().shadow(",
             ],
-            "Components/Monitors/SpaceAssignmentChip.swift": [
+            "Components/Screens/SpaceAssignmentChip.swift": [
                 // The clear-pin corner badge (#758): the overlay
                 // that mounts it, keyed on the USE site, and the
                 // glyph inside the branch — deleting either
@@ -200,7 +200,7 @@ struct MonitorsGateWiringTests {
                 ".overlay(alignment:.topTrailing){clearBadge}",
                 "Image(systemName:\"xmark.circle.fill\")",
             ],
-            "Sections/MonitorsSection+Details.swift": [
+            "Sections/ScreensSection+Details.swift": [
                 // The orphan row's spoken label: its value is a
                 // bare fingerprint hash, which VoiceOver steps
                 // through with no context unless the row says
@@ -232,7 +232,7 @@ struct MonitorsGateWiringTests {
     }
 
     // The picture-asks-the-arrangement and themed-metrics
-    // guards live in `MonitorsChromeWiringTests` — split there
+    // guards live in `ScreensChromeWiringTests` — split there
     // as this suite reached the 350-line ceiling.
 
     /// The card's chip capacity comes from the shared arithmetic,
@@ -241,9 +241,9 @@ struct MonitorsGateWiringTests {
     /// drag handle with them.
     @Test("the card counts its overflow rather than clipping")
     func cardCountsOverflow() throws {
-        let name = "Components/Monitors/DisplayCard.swift"
+        let name = "Components/Screens/ScreenCard.swift"
         let source = try squashed(name)
-        #expect(source.contains("MonitorCardChips.split("))
+        #expect(source.contains("ScreenCardChips.split("))
     }
 
     /// One sentence, one author: the card's tooltip and the line
@@ -261,7 +261,7 @@ struct MonitorsGateWiringTests {
     @Test("the readout sentence is authored once")
     func readoutIsAuthoredOnce() throws {
         let author =
-            "Components/Monitors/MonitorReadout.swift"
+            "Components/Screens/ScreenReadout.swift"
         let help = SourceScan.stripComments(try read(author))
         for key in [
             "monitors.selection.one",
@@ -270,15 +270,15 @@ struct MonitorsGateWiringTests {
         ] {
             #expect(help.contains(key))
             for name in [
-                "Sections/MonitorsSection.swift",
-                "Components/Monitors/DisplayCard.swift",
+                "Sections/ScreensSection.swift",
+                "Components/Screens/ScreenCard.swift",
             ] {
                 #expect(
                     !(try read(name)).contains(key),
                     Comment(
                         rawValue:
                             "\(name) re-authors \(key) — it must "
-                            + "come from MonitorReadout"
+                            + "come from ScreenReadout"
                     )
                 )
             }

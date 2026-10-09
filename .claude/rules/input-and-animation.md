@@ -405,7 +405,7 @@ editing here:
   the blind spot the route suites' log-line channel has — and
   pins the `focusWindow` stamp, which no behavior suite can
   see.
-- Use **one `DisplayLink` per monitor** (mixed refresh rates).
+- Use **one `DisplayLink` per screen** (mixed refresh rates).
   Never drive animations from a single global timer.
 - **Every `.windowFocused` the loop emits comes from the app
   macOS activated last, and a new emitter in `Events/` asks
