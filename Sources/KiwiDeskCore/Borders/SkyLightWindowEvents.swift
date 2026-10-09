@@ -56,11 +56,13 @@ final class SkyLightWindowEvents {
     static let shared: SkyLightWindowEvents? = SkyLightWindowEvents()
     private static weak var active: SkyLightWindowEvents?
 
-    private static let requestNotifications: RequestNotificationsFn? =
-        SkyLight.symbol(
-            "SLSRequestNotificationsForWindows",
-            as: RequestNotificationsFn.self
-        )
+    private static let requestNotificationsSymbol = SkyLight.symbol(
+        "SLSRequestNotificationsForWindows",
+        as: RequestNotificationsFn.self
+    )
+    private static var requestNotifications: RequestNotificationsFn? {
+        requestNotificationsSymbol.function
+    }
 
     private weak var manager: BorderManager?
     private let connection: SkyLight.ConnectionID
@@ -129,9 +131,8 @@ final class SkyLightWindowEvents {
     static func selfTestProbes() -> [PrivatePathProbe] {
         [
             .write(
-                "SLSRequestNotificationsForWindows",
-                home: "SkyLightWindowEvents",
-                resolved: { requestNotifications != nil }
+                requestNotificationsSymbol.resolution,
+                home: "SkyLightWindowEvents"
             )
         ]
     }

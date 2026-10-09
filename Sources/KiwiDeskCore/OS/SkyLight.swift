@@ -17,12 +17,19 @@ public enum SkyLight {
     /// Whether the framework loaded.
     static var isLoaded: Bool { handle != nil }
 
-    /// Resolves one C function pointer, or nil if unavailable.
-    static func symbol<T>(_ name: String, as type: T.Type) -> T? {
+    /// Resolves one C function pointer; nil `function` if
+    /// unavailable.
+    static func symbol<T>(
+        _ name: String,
+        as type: T.Type
+    ) -> PrivateSymbol<T> {
         guard let handle, let sym = dlsym(handle, name) else {
-            return nil
+            return PrivateSymbol(name: name, function: nil)
         }
-        return unsafeBitCast(sym, to: T.self)
+        return PrivateSymbol(
+            name: name,
+            function: unsafeBitCast(sym, to: T.self)
+        )
     }
 
     public typealias MainConnectionFn =
@@ -34,44 +41,57 @@ public enum SkyLight {
     public typealias DisplayCurrentSpaceFn =
         @convention(c) (ConnectionID, CFString) -> SpaceID
 
-    public static let mainConnection: MainConnectionFn? =
-        symbol(
-            "SLSMainConnectionID",
-            as: MainConnectionFn.self
-        )
+    static let mainConnectionSymbol = symbol(
+        "SLSMainConnectionID",
+        as: MainConnectionFn.self
+    )
+    public static var mainConnection: MainConnectionFn? {
+        mainConnectionSymbol.function
+    }
 
-    public static let getActiveSpace: GetActiveSpaceFn? =
-        symbol(
-            "SLSGetActiveSpace",
-            as: GetActiveSpaceFn.self
-        )
+    static let getActiveSpaceSymbol = symbol(
+        "SLSGetActiveSpace",
+        as: GetActiveSpaceFn.self
+    )
+    public static var getActiveSpace: GetActiveSpaceFn? {
+        getActiveSpaceSymbol.function
+    }
 
-    public static let copyManagedDisplaySpaces: CopyManagedDisplaySpacesFn? =
-        symbol(
-            "SLSCopyManagedDisplaySpaces",
-            as: CopyManagedDisplaySpacesFn.self
-        )
+    static let copyManagedDisplaySpacesSymbol = symbol(
+        "SLSCopyManagedDisplaySpaces",
+        as: CopyManagedDisplaySpacesFn.self
+    )
+    public static var copyManagedDisplaySpaces: CopyManagedDisplaySpacesFn? {
+        copyManagedDisplaySpacesSymbol.function
+    }
 
-    public static let displayCurrentSpace: DisplayCurrentSpaceFn? = symbol(
+    static let displayCurrentSpaceSymbol = symbol(
         "SLSManagedDisplayGetCurrentSpace",
         as: DisplayCurrentSpaceFn.self
     )
+    public static var displayCurrentSpace: DisplayCurrentSpaceFn? {
+        displayCurrentSpaceSymbol.function
+    }
 
     public typealias DisableUpdateFn =
         @convention(c) (ConnectionID) -> Int32
     public typealias ReenableUpdateFn =
         @convention(c) (ConnectionID) -> Int32
 
-    public static let disableUpdate: DisableUpdateFn? =
-        symbol(
-            "SLSDisableUpdate",
-            as: DisableUpdateFn.self
-        )
-    public static let reenableUpdate: ReenableUpdateFn? =
-        symbol(
-            "SLSReenableUpdate",
-            as: ReenableUpdateFn.self
-        )
+    static let disableUpdateSymbol = symbol(
+        "SLSDisableUpdate",
+        as: DisableUpdateFn.self
+    )
+    public static var disableUpdate: DisableUpdateFn? {
+        disableUpdateSymbol.function
+    }
+    static let reenableUpdateSymbol = symbol(
+        "SLSReenableUpdate",
+        as: ReenableUpdateFn.self
+    )
+    public static var reenableUpdate: ReenableUpdateFn? {
+        reenableUpdateSymbol.function
+    }
 
     /// True when the minimum set of space APIs resolved.
     public static var isAvailable: Bool {

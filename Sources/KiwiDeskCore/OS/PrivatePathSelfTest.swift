@@ -59,36 +59,15 @@ public enum PrivatePathSelfTest {
         _ kind: PrivatePathProbe.Kind
     ) -> String {
         switch verdict {
-        case .works(let text), .failed(let text),
+        case .works(let text), .answered(let text), .failed(let text),
             .inconclusive(let text):
             return text
         case .unexercised:
-            return "a write; the read-only run never calls it"
+            return "looked up only; the read-only run never calls it"
         case .absent:
             return kind == .symbol
                 ? "lookup failed; the public fallback runs"
                 : "class not found; the capability is absent"
         }
-    }
-}
-
-extension NativeSpaces {
-    /// The display-UUID symbol `self_test` probes (#1889).
-    @MainActor
-    static func selfTestProbes() -> [PrivatePathProbe] {
-        [
-            .read(
-                "CGDisplayCreateUUIDFromDisplayID",
-                home: "NativeSpaces",
-                resolved: { createDisplayUUID != nil },
-                verify: {
-                    let uuid = mainDisplayUUID()
-                    return PrivatePathVerify.answered(
-                        uuid,
-                        "main display \(uuid ?? "")"
-                    )
-                }
-            )
-        ]
     }
 }

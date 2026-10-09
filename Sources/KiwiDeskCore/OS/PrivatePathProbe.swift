@@ -4,9 +4,12 @@ import Foundation
 /// What `self_test` found for one private fast path (#1889).
 /// Detail strings are English: they reach the CLI only.
 public enum PrivatePathVerdict: Equatable, Sendable {
-    /// Resolved, and a read-only call answered and agreed with
-    /// an independent re-query.
+    /// Resolved, and a read-only call answered and agreed with a
+    /// second, independent reader.
     case works(String)
+    /// Resolved and answered, with no second reader to judge the
+    /// answer by: liveness only, and the detail says so.
+    case answered(String)
     /// Present, but a write the read-only run never performs.
     case unexercised
     /// The lookup answered nil: the public fallback (or, where
@@ -21,6 +24,7 @@ public enum PrivatePathVerdict: Equatable, Sendable {
     public var label: String {
         switch self {
         case .works: return "works"
+        case .answered: return "answered"
         case .unexercised: return "resolved"
         case .absent: return "absent"
         case .failed: return "failed"
@@ -30,13 +34,15 @@ public enum PrivatePathVerdict: Equatable, Sendable {
 
     /// Every label, in the order the report counts them.
     public static let labels = [
-        "works", "resolved", "absent", "failed", "inconclusive",
+        "works", "answered", "resolved", "absent", "failed",
+        "inconclusive",
     ]
 }
 
 /// One private fast path, probed through the home that resolves
 /// it — never re-resolved beside it (#1889, os-private-apis.md).
-/// Building a probe reads nothing; `check` is the read.
+/// Building a probe reads nothing but the lookup; `check` is the
+/// read.
 public struct PrivatePathProbe {
     public enum Kind: String, Sendable {
         /// A C function resolved with `dlsym`.
@@ -45,21 +51,31 @@ public struct PrivatePathProbe {
         case bridgeClass = "bridge_class"
     }
 
+    /// Whether the read-only run calls it (`read`) or only looks
+    /// it up (`write`).
+    enum Access: Sendable {
+        case read
+        case write
+    }
+
     public let name: String
     public let kind: Kind
     /// The type that resolves it: `SkyLight`, `WMBridge`, …
     public let home: String
+    let access: Access
     let check: @MainActor () -> PrivatePathVerdict
 
     init(
         _ name: String,
-        kind: Kind = .symbol,
+        kind: Kind,
         home: String,
+        access: Access,
         check: @escaping @MainActor () -> PrivatePathVerdict
     ) {
         self.name = name
         self.kind = kind
         self.home = home
+        self.access = access
         self.check = check
     }
 
@@ -72,7 +88,7 @@ public struct PrivatePathProbe {
         resolved: @escaping @MainActor () -> Bool,
         verify: @escaping @MainActor () -> PrivatePathVerdict
     ) -> PrivatePathProbe {
-        PrivatePathProbe(name, kind: kind, home: home) {
+        PrivatePathProbe(name, kind: kind, home: home, access: .read) {
             resolved() ? verify() : .absent
         }
     }
@@ -84,9 +100,31 @@ public struct PrivatePathProbe {
         home: String,
         resolved: @escaping @MainActor () -> Bool
     ) -> PrivatePathProbe {
-        PrivatePathProbe(name, kind: kind, home: home) {
+        PrivatePathProbe(name, kind: kind, home: home, access: .write) {
             resolved() ? .unexercised : .absent
         }
+    }
+
+    /// A C read, named and judged by its home's own lookup.
+    static func read(
+        _ symbol: SymbolResolution,
+        home: String,
+        verify: @escaping @MainActor () -> PrivatePathVerdict
+    ) -> PrivatePathProbe {
+        read(
+            symbol.name,
+            home: home,
+            resolved: { symbol.isResolved },
+            verify: verify
+        )
+    }
+
+    /// A C write, named by its home's own lookup.
+    static func write(
+        _ symbol: SymbolResolution,
+        home: String
+    ) -> PrivatePathProbe {
+        write(symbol.name, home: home, resolved: { symbol.isResolved })
     }
 }
 

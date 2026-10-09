@@ -236,8 +236,10 @@ kiwidesk self_test --json   # JSON, as a pipe also gets
 Each path gets one verdict:
 
 - `works` — it answered, and a second reading agreed.
-- `resolved` — it is there, but it writes, and the check never
-  calls a write.
+- `answered` — it answered, and nothing else can read the same
+  thing to check it: it is alive, no more.
+- `resolved` — it is there, but the check never calls it: it
+  writes, or calling it would take something KiwiDesk needs.
 - `absent` — macOS no longer has it; the fallback runs.
 - `failed` — it is there but answered nothing, or disagreed.
 - `inconclusive` — it is there, with nothing to check it against
@@ -248,6 +250,10 @@ changes no setting. The JSON carries `macos`, a `counts` object by
 verdict, and a `probes` array of `name`, `kind` (`symbol` or
 `bridge_class`), `home`, `verdict` and `detail`. CLI only — Lua
 cannot call it.
+
+The exit code is 2 when any path `failed`, and 0 otherwise —
+`absent`, `resolved` and `inconclusive` are findings, not
+failures. 1 still means the command itself did not get through.
 :::
 
 ## Commands

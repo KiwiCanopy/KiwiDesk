@@ -144,7 +144,9 @@ private func runSocketCommand(
                 Data("error: \(error)\n".utf8)
             )
         }
-        return response.isSuccess ? 0 : 1
+        guard response.isSuccess else { return 1 }
+        return command == PrivatePathSelfTest.command
+            ? CLISelfTest.exitCode(response.data) : 0
     } catch {
         FileHandle.standardError.write(
             Data("KiwiDesk: \(error)\n".utf8)

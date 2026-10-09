@@ -8,10 +8,13 @@ extension SkyLight {
     typealias TransactionMoveFn =
         @convention(c) (CFTypeRef, CGWindowID, CGPoint) -> CGError
 
-    static let transactionMove: TransactionMoveFn? = symbol(
+    static let transactionMoveSymbol = symbol(
         "SLSTransactionMoveWindowWithGroup",
         as: TransactionMoveFn.self
     )
+    static var transactionMove: TransactionMoveFn? {
+        transactionMoveSymbol.function
+    }
 
     /// Moves `window`'s top-left corner to `origin`, in global
     /// display coordinates with a top-left origin; false when a

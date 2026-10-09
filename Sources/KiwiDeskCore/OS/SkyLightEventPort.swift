@@ -37,27 +37,36 @@ final class SkyLightEventPort {
         ) -> CGError
 
     static let shared: SkyLightEventPort? = SkyLightEventPort()
-    private(set) static weak var active: SkyLightEventPort?
+    private static weak var active: SkyLightEventPort?
 
-    static let getEventPort: GetEventPortFn? =
-        SkyLight.symbol(
-            "SLSGetEventPort",
-            as: GetEventPortFn.self
-        )
-    static let nextEvent: NextEventFn? = SkyLight.symbol(
+    private static let getEventPortSymbol = SkyLight.symbol(
+        "SLSGetEventPort",
+        as: GetEventPortFn.self
+    )
+    private static var getEventPort: GetEventPortFn? {
+        getEventPortSymbol.function
+    }
+    private static let nextEventSymbol = SkyLight.symbol(
         "SLEventCreateNextEvent",
         as: NextEventFn.self
     )
-    static let registerNotify: RegisterNotifyFn? =
-        SkyLight.symbol(
-            "SLSRegisterNotifyProc",
-            as: RegisterNotifyFn.self
-        )
-    static let setMachPortOptions: SetMachPortOptionsFn? =
-        coreFoundationSymbol(
-            "_CFMachPortSetOptions",
-            as: SetMachPortOptionsFn.self
-        )
+    private static var nextEvent: NextEventFn? {
+        nextEventSymbol.function
+    }
+    private static let registerNotifySymbol = SkyLight.symbol(
+        "SLSRegisterNotifyProc",
+        as: RegisterNotifyFn.self
+    )
+    private static var registerNotify: RegisterNotifyFn? {
+        registerNotifySymbol.function
+    }
+    private static let setMachPortOptionsSymbol = coreFoundationSymbol(
+        "_CFMachPortSetOptions",
+        as: SetMachPortOptionsFn.self
+    )
+    private static var setMachPortOptions: SetMachPortOptionsFn? {
+        setMachPortOptionsSymbol.function
+    }
 
     let connection: SkyLight.ConnectionID
     private let machPort: CFMachPort
@@ -121,9 +130,6 @@ final class SkyLightEventPort {
         return true
     }
 
-    /// How many codes this port holds — the `self_test` reading.
-    var registeredCodeCount: Int { registered.count }
-
     /// Brackets every drain: `begin` before the notify procs
     /// fire for the drained events, `end` after.
     func observeDrain(
@@ -131,6 +137,35 @@ final class SkyLightEventPort {
         end: @escaping () -> Void
     ) {
         drainObservers.append((begin, end))
+    }
+
+    /// The port's symbols as `self_test` probes them (#1889), from
+    /// the RUNNING port only: `shared` would install one. Every
+    /// read row is liveness only — the port's own construction
+    /// and registrations are the call that answered.
+    static func selfTestProbes() -> [PrivatePathProbe] {
+        let home = "SkyLightEventPort"
+        let built: @MainActor () -> PrivatePathVerdict = {
+            active == nil
+                ? .inconclusive("no event port is running")
+                : .answered("the running port was built with it")
+        }
+        return [
+            .read(getEventPortSymbol.resolution, home: home, verify: built),
+            .read(
+                setMachPortOptionsSymbol.resolution,
+                home: home,
+                verify: built
+            ),
+            .read(registerNotifySymbol.resolution, home: home) {
+                let codes = active?.registered.count ?? 0
+                return codes == 0
+                    ? .inconclusive("no code is registered")
+                    : .answered("\(codes) codes registered")
+            },
+            // Calling it would consume events the drain is owed.
+            .write(nextEventSymbol.resolution, home: home),
+        ]
     }
 
     fileprivate static func drain() {
@@ -147,14 +182,17 @@ final class SkyLightEventPort {
     private static func coreFoundationSymbol<T>(
         _ name: String,
         as type: T.Type
-    ) -> T? {
+    ) -> PrivateSymbol<T> {
         let path =
             "/System/Library/Frameworks/"
             + "CoreFoundation.framework/CoreFoundation"
         guard let handle = dlopen(path, RTLD_LAZY),
             let raw = dlsym(handle, name)
-        else { return nil }
-        return unsafeBitCast(raw, to: type)
+        else { return PrivateSymbol(name: name, function: nil) }
+        return PrivateSymbol(
+            name: name,
+            function: unsafeBitCast(raw, to: type)
+        )
     }
 }
 

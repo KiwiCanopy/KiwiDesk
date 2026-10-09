@@ -28,7 +28,8 @@ struct CLISelfTestRenderTests {
         let reply = JSONValue.object([
             "macos": .string("Version 28.0"),
             "counts": .object([
-                "works": .number(1), "resolved": .number(0),
+                "works": .number(1), "answered": .number(2),
+                "resolved": .number(0),
                 "absent": .number(1), "failed": .number(0),
                 "inconclusive": .number(0),
             ]),
@@ -49,9 +50,37 @@ struct CLISelfTestRenderTests {
         #expect(skyRow.hasSuffix("Space 1"))
         #expect(
             lines.last
-                == "1 works, 0 resolved, 1 absent, 0 failed, "
-                + "0 inconclusive"
+                == "1 works, 2 answered, 0 resolved, 1 absent, "
+                + "0 failed, 0 inconclusive"
         )
+    }
+
+    @Test("a failed path exits 2; every other verdict exits 0")
+    func exitCodeReadsFailedCount() {
+        func reply(failed: Double) -> JSONValue {
+            .object([
+                "counts": .object([
+                    "failed": .number(failed), "absent": .number(3),
+                    "inconclusive": .number(2),
+                ])
+            ])
+        }
+        #expect(CLISelfTest.exitCode(reply(failed: 1)) == 2)
+        #expect(CLISelfTest.exitCode(reply(failed: 0)) == 0)
+        #expect(CLISelfTest.exitCode(nil) == 0)
+    }
+
+    /// The CLI takes both decisions from `CLISelfTest`, for the
+    /// verb alone — text or JSON and the exit code.
+    @Test("the CLI wires the options and the exit code")
+    func cliWiresSelfTest() throws {
+        let main = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent("Sources/KiwiDesk/CLIMain.swift")
+        )
+        #expect(main.occurrences(of: "CLISelfTest.parseOptions(") == 1)
+        #expect(main.occurrences(of: "CLISelfTest.exitCode(") == 1)
+        #expect(main.occurrences(of: "CLISelfTest.render(") == 1)
     }
 
     @Test("a reply of another shape is not rendered")

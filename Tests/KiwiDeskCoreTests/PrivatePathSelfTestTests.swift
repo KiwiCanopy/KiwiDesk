@@ -44,6 +44,25 @@ private final class WriteTripwire: NSObject {
     }
 }
 
+/// Stands in for every bridge READ: answers each read initialiser
+/// and dispatches to nil, counting the dispatch.
+private final class ReadStub: NSObject {
+    nonisolated(unsafe) static var performed = 0
+
+    override init() {}
+
+    @objc(initWithSpaceID:)
+    init(spaceID: UInt64) {}
+
+    @objc(initWithOptions:windows:)
+    init(options: UInt32, windows: NSArray) {}
+
+    @objc func performWithWMBridgeDelegate() -> AnyObject? {
+        Self.performed += 1
+        return nil
+    }
+}
+
 /// `self_test` (#1889): a verdict per private path, read-only.
 /// Serialized because the bridge's resolver seam is process-global.
 @Suite("self_test probes the private paths read-only", .serialized)
@@ -96,6 +115,9 @@ struct PrivatePathSelfTestTests {
     func reportOrdersAndCounts() {
         let probes: [PrivatePathProbe] = [
             .read("A", home: "H", resolved: { true }) { .works("ok") },
+            .read("A2", home: "H", resolved: { true }) {
+                .answered("live")
+            },
             .write("B", home: "H", resolved: { true }),
             .write("C", home: "H", resolved: { false }),
             .read("D", home: "H", resolved: { true }) { .failed("x") },
@@ -106,7 +128,10 @@ struct PrivatePathSelfTestTests {
         let reply = run(probes)
         #expect(
             verdicts(reply)
-                == ["works", "resolved", "absent", "failed", "inconclusive"]
+                == [
+                    "works", "answered", "resolved", "absent", "failed",
+                    "inconclusive",
+                ]
         )
         guard case .object(let counts)? = reply["counts"] else {
             Issue.record("no counts")
@@ -164,7 +189,7 @@ struct PrivatePathSelfTestTests {
                 .label == "failed"
         )
         #expect(PrivatePathVerify.connection(0).label == "failed")
-        #expect(PrivatePathVerify.connection(42).label == "works")
+        #expect(PrivatePathVerify.connection(42).label == "answered")
     }
 
     @Test("the bridge's answers are held against the C reads")
@@ -214,7 +239,7 @@ struct PrivatePathSelfTestTests {
         )
         #expect(
             PrivatePathVerify.hostedSpace(.hosted(4), of: own).label
-                == "works"
+                == "answered"
         )
     }
 
@@ -245,14 +270,34 @@ struct PrivatePathSelfTestTests {
         #expect(Set(classed) == Self.reads)
     }
 
+    /// Every read's `verify` RUNS — reads resolve to a stub that
+    /// answers nil, the context shows an own window, the active
+    /// Space is pinned — so a write called from inside a read's
+    /// verification trips the wire too.
     @Test("the read-only run never builds or dispatches a write")
     func writesAreNeverDispatched() {
         WriteTripwire.touched = 0
+        ReadStub.performed = 0
         WMBridge.classResolverOverride = { name in
-            Self.reads.contains(name) ? nil : WriteTripwire.self
+            Self.reads.contains(name)
+                ? ReadStub.self : WriteTripwire.self
         }
-        defer { WMBridge.classResolverOverride = nil }
-        let bridge = PrivatePathSelfTest.catalog(.empty)
+        NativeSpaces.activeSpaceIDOverride = 5
+        defer {
+            WMBridge.classResolverOverride = nil
+            NativeSpaces.activeSpaceIDOverride = nil
+        }
+        let context = PrivatePathContext(
+            ownWindow: {
+                PrivatePathContext.OwnWindow(
+                    id: 7,
+                    bounds: CGRect(x: 0, y: 0, width: 10, height: 10)
+                )
+            },
+            census: { nil },
+            spaceOfWindow: { _ in .hosted(5) }
+        )
+        let bridge = PrivatePathSelfTest.catalog(context)
             .filter { $0.kind == .bridgeClass }
         let reply = run(bridge)
         let writes = WMBridge.Operation.allCases.filter {
@@ -263,7 +308,28 @@ struct PrivatePathSelfTestTests {
             verdicts(reply).filter { $0 == "resolved" }.count
                 == writes.count
         )
+        // Non-vacuous: every read was dispatched and verified.
+        #expect(ReadStub.performed == Self.reads.count)
         #expect(WriteTripwire.touched == 0)
+    }
+
+    @Test("the census is judged by the public window list")
+    func censusNeedsTheOwnWindow() {
+        let own = PrivatePathContext.OwnWindow(id: 7, bounds: .zero)
+        let listed = DesktopCensus(
+            hosts: [WindowID(7): .init(space: 3, pid: 1, isUp: true)],
+            shown: [3]
+        )
+        let other = DesktopCensus(
+            hosts: [WindowID(8): .init(space: 3, pid: 1, isUp: true)],
+            shown: [3]
+        )
+        #expect(PrivatePathVerify.census(listed, of: own).label == "works")
+        #expect(
+            PrivatePathVerify.census(other, of: own).label
+                == "inconclusive"
+        )
+        #expect(PrivatePathVerify.census(nil, of: own).label == "failed")
     }
 
     @Test("self_test answers through the dispatcher")

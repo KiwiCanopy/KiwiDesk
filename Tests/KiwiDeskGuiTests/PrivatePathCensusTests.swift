@@ -8,8 +8,16 @@ import Testing
 /// (#1889). The resolvers are reached by string, so nothing in
 /// the compiler ties a new `dlsym` symbol to the self-test: this
 /// scan does, by reading each literal handed to a resolver.
-/// Bridge classes need no scan beyond the roster file — the probes
-/// are `WMBridge.Operation`'s cases, which `make` takes.
+///
+/// A probe row takes its name from the home's `PrivateSymbol`, so
+/// a name is spelled once — `nameIsSpelledOnce` holds that, and
+/// that no self-test file resolves anything itself.
+///
+/// The hand-mirrored pair that survives is deliberate: the C read
+/// roster below (and the bridge's in `PrivatePathSelfTestTests`)
+/// restates which paths the run CALLS, apart from the code that
+/// decides it, so a write reclassified as a read is a red here
+/// rather than a call on the desk.
 @Suite("Every private path is self-tested (#1889)")
 @MainActor
 struct PrivatePathCensusTests {
@@ -23,33 +31,67 @@ struct PrivatePathCensusTests {
             + "operations it sends are probed by class"
     ]
 
-    /// `symbol("X", as:` / `coreFoundationSymbol("X", as:` and
-    /// `dlsym(<handle>, "X")`, the three resolver spellings.
-    private static let patterns = [
-        #"\b(?:symbol|coreFoundationSymbol)\(\s*"([^"]+)"\s*,\s*as:"#,
-        #"\bdlsym\(\s*[^"()]*(?:\([^()]*\))?\s*,\s*"([^"]+)"\s*\)"#,
-        // The bridge roster: every operation's short name.
-        #"=\s*"([A-Za-z]+Operation)""#,
+    /// The C symbols the read-only run calls (or reads a past
+    /// call of). Everything else resolved by `dlsym` is looked up
+    /// only; a name moving onto this list is a reviewed decision.
+    private static let cReads: Set<String> = [
+        "SLSMainConnectionID", "SLSGetActiveSpace",
+        "SLSCopyManagedDisplaySpaces",
+        "SLSManagedDisplayGetCurrentSpace", "SLSGetWindowBounds",
+        "SLSCopyWindowsWithOptionsAndTags", "SLSCopySpacesForWindows",
+        "SLSWindowQueryWindows", "SLSWindowQueryResultCopyWindows",
+        "SLSWindowIteratorGetCount", "SLSWindowIteratorAdvance",
+        "SLSWindowIteratorGetCornerRadii", "SLSGetEventPort",
+        "_CFMachPortSetOptions", "SLSRegisterNotifyProc",
+        "CGDisplayCreateUUIDFromDisplayID",
     ]
 
+    /// The resolver spellings: the three named resolvers, a bare
+    /// `dlsym(<handle>, "X")`, and the bridge roster's raw values.
+    private static let resolverPatterns = [
+        #"\b(?:symbol|coreFoundationSymbol|globalSymbol)"#
+            + #"\(\s*"([^"]+)"\s*,\s*as:"#,
+        #"\bdlsym\(\s*[^"()]*(?:\([^()]*\))?\s*,\s*"([^"]+)"\s*\)"#,
+    ]
+    private static let operationPattern = #"=\s*"([A-Za-z]+Operation)""#
+
+    private func sources() throws -> [(URL, String)] {
+        let tree = Self.root.appendingPathComponent("Sources")
+        var out: [(URL, String)] = []
+        for root in SourceScan.targetTrees(under: tree) {
+            for file in try SourceScan.swiftSources(under: root) {
+                out.append(
+                    (
+                        file,
+                        SourceScan.stripComments(
+                            try String(contentsOf: file, encoding: .utf8)
+                        )
+                    )
+                )
+            }
+        }
+        return out
+    }
+
+    private func matches(
+        _ pattern: String,
+        in source: String
+    ) throws -> [String] {
+        let regex = try NSRegularExpression(pattern: pattern)
+        let range = NSRange(source.startIndex..., in: source)
+        return regex.matches(in: source, range: range).compactMap {
+            Range($0.range(at: 1), in: source).map { String(source[$0]) }
+        }
+    }
+
+    /// Name → file, for every literal a resolver is handed.
     private func resolvedLiterals() throws -> [String: String] {
         var found: [String: String] = [:]
-        let sources = Self.root.appendingPathComponent("Sources")
-        for tree in SourceScan.targetTrees(under: sources) {
-            for file in try SourceScan.swiftSources(under: tree) {
-                let source = SourceScan.stripComments(
-                    try String(contentsOf: file, encoding: .utf8)
-                )
-                for pattern in Self.patterns {
-                    let regex = try NSRegularExpression(pattern: pattern)
-                    let range = NSRange(source.startIndex..., in: source)
-                    for match in regex.matches(in: source, range: range) {
-                        guard
-                            let span = Range(match.range(at: 1), in: source)
-                        else { continue }
-                        found[String(source[span])] =
-                            file.lastPathComponent
-                    }
+        for (file, source) in try sources() {
+            let patterns = Self.resolverPatterns + [Self.operationPattern]
+            for pattern in patterns {
+                for name in try matches(pattern, in: source) {
+                    found[name] = file.lastPathComponent
                 }
             }
         }
@@ -65,6 +107,10 @@ struct PrivatePathCensusTests {
         // and the bridge roster at least.
         #expect(literals["SLSGetActiveSpace"] == "SkyLight.swift")
         #expect(literals["_CFMachPortSetOptions"] != nil)
+        #expect(
+            literals["CGDisplayCreateUUIDFromDisplayID"]
+                == "NativeSpaces.swift"
+        )
         #expect(
             literals["HideSpacesOperation"] == "WMBridge+Operation.swift"
         )
@@ -84,5 +130,50 @@ struct PrivatePathCensusTests {
         for name in Self.exempt.keys {
             #expect(literals[name] != nil, "\(name) is exempt but gone")
         }
+    }
+
+    /// A name is spelled once, at its lookup — a second spelling
+    /// is a second resolution or a row naming it by hand — and no
+    /// self-test file resolves anything.
+    @Test("a resolved name is spelled once, never in a self-test file")
+    func nameIsSpelledOnce() throws {
+        let literals = try resolvedLiterals()
+            .filter { Self.exempt[$0.key] == nil }
+        #expect(literals.count > 20)
+        let files = try sources()
+        for name in literals.keys.sorted() {
+            let spellings = files.filter {
+                $0.1.contains("\"\(name)\"")
+            }
+            #expect(
+                spellings.count == 1,
+                """
+                \(name) is spelled in \
+                \(spellings.map(\.0.lastPathComponent)) — take the \
+                name from its PrivateSymbol
+                """
+            )
+        }
+        for (file, source) in files {
+            let name = file.lastPathComponent
+            guard
+                name.hasSuffix("+SelfTest.swift")
+                    || name == "PrivatePathSelfTest.swift"
+            else { continue }
+            for pattern in Self.resolverPatterns {
+                #expect(
+                    try matches(pattern, in: source).isEmpty,
+                    "\(name) resolves a symbol itself"
+                )
+            }
+        }
+    }
+
+    @Test("only the listed C symbols are called by the run")
+    func cReadRosterIsPinned() {
+        let reads = PrivatePathSelfTest.catalog(.empty)
+            .filter { $0.kind == .symbol && $0.access == .read }
+            .map(\.name)
+        #expect(Set(reads) == Self.cReads)
     }
 }

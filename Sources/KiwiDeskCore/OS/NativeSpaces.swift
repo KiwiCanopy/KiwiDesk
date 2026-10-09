@@ -249,20 +249,38 @@ public enum NativeSpaces {
 
     /// C signature of CGDisplayCreateUUIDFromDisplayID, which
     /// current SDKs no longer expose to Swift directly.
-    typealias DisplayUUIDFn =
+    private typealias DisplayUUIDFn =
         @convention(c) (UInt32) -> Unmanaged<CFUUID>?
 
-    static let createDisplayUUID: DisplayUUIDFn? = {
-        // CoreGraphics is already loaded; look the symbol up
-        // in the global namespace.
-        guard
-            let sym = dlsym(
-                dlopen(nil, RTLD_LAZY),
-                "CGDisplayCreateUUIDFromDisplayID"
-            )
-        else { return nil }
-        return unsafeBitCast(sym, to: DisplayUUIDFn.self)
-    }()
+    private static let createDisplayUUIDSymbol = globalSymbol(
+        "CGDisplayCreateUUIDFromDisplayID",
+        as: DisplayUUIDFn.self
+    )
+
+    /// CoreGraphics is already loaded; look the symbol up in the
+    /// global namespace.
+    private static func globalSymbol<T>(
+        _ name: String,
+        as type: T.Type
+    ) -> PrivateSymbol<T> {
+        guard let sym = dlsym(dlopen(nil, RTLD_LAZY), name) else {
+            return PrivateSymbol(name: name, function: nil)
+        }
+        return PrivateSymbol(
+            name: name,
+            function: unsafeBitCast(sym, to: type)
+        )
+    }
+
+    private static var createDisplayUUID: DisplayUUIDFn? {
+        createDisplayUUIDSymbol.function
+    }
+
+    /// The display-UUID lookup for `self_test` (#1889) — its name
+    /// and whether it resolved, never the function.
+    static var displayUUIDResolution: SymbolResolution {
+        createDisplayUUIDSymbol.resolution
+    }
 
     /// Stable UUID string for a display, used by SkyLight APIs.
     public static func displayUUID(

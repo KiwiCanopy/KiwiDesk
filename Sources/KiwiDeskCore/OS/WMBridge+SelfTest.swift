@@ -41,6 +41,7 @@ extension WMBridge {
                 against: NativeSpaces.allSpaces()
             )
         case .spaceCopyName, .spaceCopyValues:
+            // Liveness only: the bridge is these values' one reader.
             guard let active = NativeSpaces.activeSpaceID() else {
                 return .inconclusive("no active Space to read")
             }
@@ -63,7 +64,12 @@ extension WMBridge {
                 against: context.spaceOfWindow(id),
                 of: own
             )
-        default:
+        // Writes never reach `verify`: `selfTestProbes` builds them
+        // with `.write`. Listed so a new case needs a ruling here.
+        case .moveWindowsToManagedSpace, .addWindowsToSpaces,
+            .removeWindowsFromSpaces, .managedDisplaySetCurrentSpace,
+            .hideSpaces, .spaceCreate, .spaceDestroy, .spaceSetName,
+            .spaceSetValues:
             return .unexercised
         }
     }

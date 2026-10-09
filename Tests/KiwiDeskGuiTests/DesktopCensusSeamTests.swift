@@ -17,8 +17,6 @@ struct DesktopCensusSeamTests {
     /// Spelled in two halves so this file is not its own hit.
     private static let builder = "NativeSpaces." + "desktopCensus("
 
-    /// Resolved once; the one other spelling is the `self_test`
-    /// row that names it (#1889), which resolves nothing itself.
     @Test("the symbol is spelled once, in the OS lane")
     func symbolSpelledOnce() throws {
         let sites = try SourceScan.identifierSites(
@@ -26,11 +24,9 @@ struct DesktopCensusSeamTests {
             under: Self.sources
         )
         #expect(
-            sites.map(\.file.lastPathComponent).sorted()
-                == [
-                    "SkyLight+SelfTest.swift",
-                    "SkyLight+WindowCensus.swift",
-                ],
+            sites.count == 1
+                && sites.first?.file.lastPathComponent
+                    == "SkyLight+WindowCensus.swift",
             .init(
                 rawValue: "found "
                     + sites.map(\.site).joined(separator: ", ")

@@ -11,7 +11,7 @@ enum PrivatePathVerify {
         guard let id, id != 0 else {
             return .failed("answered no connection")
         }
-        return .works("connection \(id)")
+        return .answered("connection \(id)")
     }
 
     /// The managed Desktop list, read by the C call.
@@ -22,7 +22,7 @@ enum PrivatePathVerify {
         guard !spaces.isEmpty else {
             return .failed("answered no Desktops")
         }
-        return .works("\(spaces.count) Spaces on \(displays) displays")
+        return .answered("\(spaces.count) Spaces on \(displays) displays")
     }
 
     /// The active Space must be one the managed list carries.
@@ -101,7 +101,7 @@ enum PrivatePathVerify {
         guard let own else { return noOwnWindow }
         switch reading {
         case .hosted(let space):
-            return .works("window \(own.id) on Space \(space)")
+            return .answered("window \(own.id) on Space \(space)")
         case .gone:
             return .inconclusive(
                 "window \(own.id) answered no Space"
@@ -109,6 +109,23 @@ enum PrivatePathVerify {
         case .unavailable:
             return .failed("the read could not be made")
         }
+    }
+
+    /// The per-Desktop census against the public window list: our
+    /// own on-screen window must be among the windows it hosts.
+    static func census(
+        _ census: DesktopCensus?,
+        of own: PrivatePathContext.OwnWindow?
+    ) -> PrivatePathVerdict {
+        guard let census else { return .failed("answered nil") }
+        guard let own else { return noOwnWindow }
+        guard let host = census.hosts[WindowID(own.id)] else {
+            return .inconclusive(
+                "window \(own.id) is not among the "
+                    + "\(census.hosts.count) listed"
+            )
+        }
+        return .works("window \(own.id) listed on Space \(host.space)")
     }
 
     /// The bridge's Desktop list against the C call's: the same
@@ -160,7 +177,7 @@ enum PrivatePathVerify {
         _ value: T?,
         _ what: String
     ) -> PrivatePathVerdict {
-        value == nil ? .failed("answered nil") : .works(what)
+        value == nil ? .failed("answered nil") : .answered(what)
     }
 
     static let noOwnWindow = PrivatePathVerdict.inconclusive(

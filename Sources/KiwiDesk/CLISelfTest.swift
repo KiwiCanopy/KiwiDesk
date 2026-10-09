@@ -15,6 +15,17 @@ enum CLISelfTest {
         }
     }
 
+    /// 2 when any path `failed` — distinct from an error's 1 —
+    /// else 0: absent, resolved and inconclusive are reports, not
+    /// failures. Read from `counts`, text and `--json` alike.
+    static func exitCode(_ data: JSONValue?) -> Int32 {
+        guard case .object(let reply)? = data,
+            case .object(let counts)? = reply["counts"],
+            case .number(let failed)? = counts["failed"]
+        else { return 0 }
+        return failed > 0 ? 2 : 0
+    }
+
     /// Nil when `data` is not the `self_test` shape.
     static func render(_ data: JSONValue) -> String? {
         guard case .object(let reply) = data,
