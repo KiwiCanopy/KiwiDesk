@@ -345,18 +345,14 @@ exports nothing.
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
-:::unreleased
 `animations.set_on_space_change` defaults to `true`, and
 `animations.set_space_change_duration` is new. A profile saved by
 an earlier release with the slide off is turned on once, unless
 its other animations are all off; while a saved profile is live,
 its value applies over `init.lua`'s.
-:::
 
-:::unreleased
 `focus_or_spawn` was `pull_or_spawn`; the old name is refused,
 naming the new one.
-:::
 
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last

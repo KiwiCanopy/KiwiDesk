@@ -14,10 +14,8 @@ setting lives, why a move was refused, and the files behind it.
 Open Settings from the KiwiDesk menu in the menu bar, or press
 **⌘,** while a KiwiDesk window is key.
 
-:::unreleased
 **Shortcuts & Gestures ▸ Open applications** offers a rebindable
 **Open Settings** row for a global key, under **KiwiDesk**.
-:::
 
 That row ships on **`⌃⌥,`**, a [default
 shortcut](#default-shortcuts), so Settings opens from anywhere.
@@ -173,7 +171,6 @@ hand-written setup, the first time you Save in Settings.
 > display layout and macOS Desktops to resolve against what is
 > connected there.
 
-:::unreleased
 When an update moves `gui.json`, a profile, your palettes or your
 looks to a newer file format, KiwiDesk first keeps the file as it
 was in `~/.config/KiwiDesk/migration-backups/`, under its own path
@@ -184,7 +181,6 @@ quit it, copy that file over the original and drop the suffix. A
 backup does not carry the folder, and Reset All Settings leaves
 it. In a synced or dotfiles folder, add `migration-backups/` to
 its `.gitignore`.
-:::
 
 ```json
 {
@@ -535,9 +531,7 @@ flat look instead.
 
 It covers the floating mark too.
 
-:::unreleased
 It covers the plates a Space switch slides too.
-:::
 
 On by default, on every surface. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,
@@ -552,7 +546,6 @@ order. Click a Space to switch to it.
 
 Click an app glyph to switch to its Space and focus that window.
 
-:::unreleased
 Resting the pointer on a glyph, a `+n` badge, an App Bar group of
 two or more windows, or an App Bar item that cuts its title shows
 its windows beside the bar. Where that is a list — a glyph with a
@@ -567,16 +560,13 @@ badge shows its list and switches nothing until you pick. An open list stays unt
 pick a row, click elsewhere or move the pointer away. A list too long for the screen
 ends in **More windows**, which opens a menu of every window.
 With VoiceOver, pressing the glyph opens that menu.
-:::
 
 A Space holding more apps than fit keeps its focused app in the
 middle, with a `+n` on each side for the rest — at either end of
 the row one more glyph fits instead.
 
-:::unreleased
 A `+n` always stands for two glyphs or more: where only one would
 be hidden, that glyph shows in its place.
-:::
 
 While your pointer rests on
 a Space it holds still, so a second click lands where the first
@@ -710,10 +700,8 @@ the space list and Desktop bindings carry no monitor set, so
 **Save** still writes `gui.json` for them and keeps counting the
 layout edits until you grant access.
 
-:::unreleased
 The same holds before you press **Start Tiling** for the first
 time: until then KiwiDesk detects no displays either.
-:::
 
 Neither live save carries a keybinding override: to give a
 profile its own shortcuts, pick it in the banner while it isn't
@@ -971,10 +959,8 @@ the caps print, not which key fires.
   [`focus_or_spawn`](lua-reference.md#focus_or_spawn). Add the
   same app twice to bind one shortcut per behaviour.
 
-:::unreleased
 The verb behind *Open or Focus* is now `focus_or_spawn`, formerly
 `pull_or_spawn`; shortcuts made here are updated for you.
-:::
 
 A window that fills its whole screen — a slide show, a
 borderless-fullscreen game or player — is not held clear of the
@@ -1094,12 +1080,10 @@ reopens the permission tour. Add KiwiDesk under System Settings ›
 Privacy & Security › Accessibility; management resumes on its
 own.
 
-:::unreleased
 **Permission granted, but nothing is tiled?**  
 Granting Accessibility does not start tiling on its own: the
 first time, press **Start Tiling** — in the permission tour, the
 quick menu or the banner at the top of Settings.
-:::
 
 **Settings window won't open, or KiwiDesk seems stuck?**  
 Run `kiwidesk service restart` in a terminal, or quit and reopen
