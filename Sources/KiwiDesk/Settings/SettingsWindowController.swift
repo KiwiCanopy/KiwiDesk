@@ -159,7 +159,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = L("app.name", "KiwiDesk")
+        SettingsWindowTitle.follow(model, in: window)
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         let toolbar = NSToolbar()
