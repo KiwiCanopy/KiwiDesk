@@ -6,6 +6,7 @@ import Foundation
 /// one vocabulary and their messages must not drift.
 enum SpaceBarCommandSetting {
     case enabled(Bool)
+    case reserve(Bool)
     case edge(AppBarEdge)
     case glyphSpan(Int)
     case glyphGap(CGFloat)
@@ -91,6 +92,7 @@ enum SpaceBarCommandSetting {
     private static var boolFields: [String: (Bool) -> SpaceBarCommandSetting] {
         [
             "enabled": Self.enabled,
+            "reserve": Self.reserve,
             "show_front_app": Self.showFrontApp,
             "hide_empty": Self.hideEmpty,
             "sticky_badge": Self.stickyBadge,
@@ -209,6 +211,7 @@ enum SpaceBarCommandSetting {
     func apply(to style: inout SpaceBarStyle) {
         switch self {
         case .enabled(let value): style.enabled = value
+        case .reserve(let value): style.reserve = value
         case .edge(let value): style.edge = value
         case .glyphSpan(let value): style.glyphSpan = value
         case .glyphGap(let value):

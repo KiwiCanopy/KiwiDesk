@@ -141,6 +141,13 @@ With the **Space Bar off**, switching a Space between a layout that shows an App
 
 The same holds, with the Space Bar on, for an App Bar on an edge of its own: its edge is reserved only in the layouts that show it, so switching a Space between Monocle or Scrolling and a layout without an App Bar moves its windows by the App Bar's strip ([#1731](https://github.com/KiwiCanopy/KiwiDesk/issues/1731); the ruling is in [design decisions](design-decisions.md)). Put both bars on one edge and the switch moves nothing again.
 
+:::unreleased
+Or set the bar not to reserve its strip at all
+([`space_bar.set_reserve`](lua-reference.md#space_barset_reserve),
+[`app_bar.set_reserve`](lua-reference.md#app_barset_reserve)): it
+then draws over the windows and no switch moves one.
+:::
+
 The light-`fill_color` glass row above also reaches surfaces that are not bars: the **sticky mark** on its default **Automatic** color, and a sticky or drag color light enough to pin nothing, are unpinned glass too. Over dark window content macOS may draw such a mark's glass dark while its glyph — the system label color under KiwiDesk's Appearance — stays dark. Not observed; reasoned from the mechanism ([#1621](https://github.com/KiwiCanopy/KiwiDesk/issues/1621)). A dark `sticky.set_color` pins the glass dark with a light glyph; `sticky.set_liquid_glass(false)` returns the badge with its disc.
 
 The **floating mark** is unpinned glass on the same terms, with

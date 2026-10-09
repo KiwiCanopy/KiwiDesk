@@ -10,6 +10,11 @@ extension APIReference {
                 + "edge the two share one KiwiShelf.",
             .choice("edge", AppBarEdge.self)
         ),
+        "set_reserve": APIRecord(
+            "Reserves the App Bar's strip; false draws it over "
+                + "the windows, the strip unclickable.",
+            .boolean("reserve")
+        ),
         "set_active_indicator": APIRecord(
             "Sets how the focused window's item is marked.",
             .choice(

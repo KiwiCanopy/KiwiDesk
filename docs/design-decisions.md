@@ -4459,6 +4459,15 @@ wherever it is drawn. The number is not invented for this — it is
 `BorderStyle.fittingGaps` already answers the same question for
 the layout with the same value on all four edges.
 
+:::unreleased
+Painted chrome counts only on an edge the layout reserves: a bar
+set not to reserve its strip keeps no float out, as it keeps no
+tiled window out ([*Reserved where a bar draws*](#app-bar), #1524).
+The same holds for the floating gather's strips and for the drop
+fit's lift clear of a bottom bar: both carve or clear only a
+strip on a reserved edge.
+:::
+
 A tempting alternative was rejected on that same principle: to
 follow `gap.outer` instead, so `border.fit_gaps` would cover
 floats. A gap is a layout *reservation* and nothing is painted
@@ -12405,6 +12414,25 @@ accepted: the move is the bar the user turned on for that
 layout appearing, while reserving everywhere left an empty
 strip — permanently, in every layout that draws nothing there —
 to spare it.
+
+:::unreleased
+*Shown is not reserved* ([#1524](https://github.com/KiwiCanopy/KiwiDesk/issues/1524)).
+Each bar carries a `reserve` flag, `space_bar.set_reserve` and
+`app_bar.set_reserve`: off, the bar still draws but the layout
+keeps its strip, so showing or hiding it moves no window — the
+primitive auto-hide (#761) reveals on. On an edge the two bars
+share, which is one strip, the edge stays reserved while EITHER
+bar reserves it; there is no shelf-wide master flag, since the
+two bars may sit on different edges and want different answers.
+The flag is Lua/CLI only and never a Settings row: with it off
+the bar's panel still spans the strip and takes the mouse there,
+a dead zone a row would have to explain in a sentence and the
+reference can. That cost is accepted; sizing the panel to the
+drawn plate, so clicks beside a short bar fall through, is a
+later improvement rather than a condition of the verb. It is
+global, never a layout's: like the edge, a reservation per
+layout would move windows on a layout switch.
+:::
 
 A split App Bar pays the same price with the Space Bar on — the
 reflow paragraph of *Amended* below.

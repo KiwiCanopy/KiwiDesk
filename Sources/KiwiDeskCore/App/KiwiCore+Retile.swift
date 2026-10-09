@@ -144,7 +144,37 @@ extension KiwiCore {
         // modes never write `scrollRest`, so this is a no-op
         // for them.
         persistScrollRest()
+        repaintBarsAndFloatNet(
+            animated: animated ?? tiler.settings.animations.onRelayout
+        ) {
+            updateRingsAndMarks()
+        }
+    }
+
+    /// The bars, then every step that reads the strips they paint
+    /// (`shownStrips`, through `reservedStrips`) — the one tail a
+    /// retile and a pass-less bar write (#1524) share, so a new
+    /// strip reader joins here. `between` runs after the bars and
+    /// before the readers.
+    func repaintBarsAndFloatNet(
+        animated: Bool,
+        between: () -> Void = {}
+    ) {
         updateBars()
+        between()
+        // Floats sit outside the layout loop, so a bar just
+        // switched on (or a window just turned floating) can leave
+        // one hidden under a top strip; correct it here. Must run
+        // after `updateBars()`: the clamp reads the strips it
+        // just painted (#242).
+        clampFloatsClearOfBars()
+        // A tiled sticky traveler on a floating-mode space of
+        // another display gets no frame from the layout (#1217).
+        rehomeFloatingTravelers(animated: animated)
+    }
+
+    /// Rings and sticky marks at the bars' freshness.
+    private func updateRingsAndMarks() {
         // Rings ride the same freshness as the bar: every
         // structural / focus / mode / settings retile. Runs after
         // the layout above so it reads the just-updated state
@@ -167,17 +197,5 @@ extension KiwiCore {
         if tiler.animation.activeCount > 0 {
             scheduleBorderDropReconcile()
         }
-        // Floats sit outside the layout loop above, so a bar just
-        // switched on (or a window just turned floating) can leave
-        // one hidden under a top strip; correct it here. Must run
-        // after `updateBars()`: the clamp reads the strips it
-        // just painted (#242).
-        clampFloatsClearOfBars()
-        // A tiled sticky traveler on a floating-mode space of
-        // another display gets no frame from the layout (#1217).
-        rehomeFloatingTravelers(
-            animated: animated
-                ?? tiler.settings.animations.onRelayout
-        )
     }
 }

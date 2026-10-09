@@ -175,6 +175,13 @@ default `.event` pass (`RetilePass`). A reissue forces the park
 of only the Spaces that just left view; a window parked longer
 keeps its place (`StashDepartures`).
 
+:::unreleased
+A `space_bar.*` or `app_bar.*` write that leaves every layout's
+`shelfReservation(in:)` — the input `layoutBounds` reads —
+unchanged runs no pass at all: it repaints the bars and
+re-clamps the floats (#1524).
+:::
+
 An explicit Space switch with switch animation on wraps that
 reissue in the plate slide (`Commands/KiwiCore+SpaceSlide`):
 before the pass, the overlay in `Animation/` covers the windows
