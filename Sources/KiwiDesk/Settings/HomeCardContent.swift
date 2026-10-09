@@ -82,7 +82,7 @@ enum HomeCardContent {
                 LayoutMode.allCases.count,
                 Int(settings.minWindowSize)
             )
-        case .monitors:
+        case .screens:
             return L(
                 "home.card.monitors.subtitle",
                 "%1$d connected · %2$d Spaces pinned",

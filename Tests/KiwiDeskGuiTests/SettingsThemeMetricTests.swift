@@ -19,7 +19,7 @@ import Testing
 /// claim: it holds that each one is DRAWN somewhere, not that it
 /// is drawn correctly. What "correctly" means is per-area and
 /// belongs to the area's own chrome suite —
-/// `MonitorsChromeWiringTests` pins the stand's whole ternary,
+/// `ScreensChromeWiringTests` pins the stand's whole ternary,
 /// `PaletteShelfChromeTests` pins that the tile frame reads both
 /// weights. A metric landing here without one of those is a
 /// metric with a name and no argument.
@@ -36,14 +36,14 @@ struct SettingsThemeMetricTests {
         "sectionRadius": "SettingsSection.swift",
         "disclosureRadius": "SettingsDisclosure.swift",
         "chipRadius": "Chips.swift",
-        "monitorCardStroke": "DisplayCard.swift",
-        "monitorCardStrokeSelected": "DisplayCard.swift",
-        "monitorStandScale": "MonitorsPicture.swift",
-        "monitorStandMin": "MonitorsPicture.swift",
-        "monitorStandMax": "MonitorsPicture.swift",
-        "monitorNeckScale": "MonitorsPicture.swift",
-        "monitorNeckMin": "MonitorsPicture.swift",
-        "monitorNeckMax": "MonitorsPicture.swift",
+        "screenCardStroke": "ScreenCard.swift",
+        "screenCardStrokeSelected": "ScreenCard.swift",
+        "screenStandScale": "ScreensPicture.swift",
+        "screenStandMin": "ScreensPicture.swift",
+        "screenStandMax": "ScreensPicture.swift",
+        "screenNeckScale": "ScreensPicture.swift",
+        "screenNeckMin": "ScreensPicture.swift",
+        "screenNeckMax": "ScreensPicture.swift",
         "paletteCardStroke": "PaletteTile.swift",
         "paletteCardStrokeApplied": "PaletteTile.swift",
         "containerStroke": "HomeCard.swift",

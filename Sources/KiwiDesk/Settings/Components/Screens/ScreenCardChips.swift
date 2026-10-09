@@ -1,8 +1,8 @@
 import CoreGraphics
 
-/// Calculates visible space chip capacity and overflow counts for display
+/// Calculates visible space chip capacity and overflow counts for screen
 /// cards (#678, #758).
-enum MonitorCardChips {
+enum ScreenCardChips {
     static let chipHeight: CGFloat = 22
     /// Narrowest chip; ~16 pt of deliberate breathing room since
     /// #758 moved the clear button — capacity is an UPPER bound,
@@ -13,7 +13,7 @@ enum MonitorCardChips {
     static let cardPadding: CGFloat = 6
     static let headerHeight: CGFloat = 16
     static let trayHeaderHeight: CGFloat = 14
-    /// Child spacing for chip stacks pinned in `MonitorsGateWiringTests`.
+    /// Child spacing for chip stacks pinned in `ScreensGateWiringTests`.
     static let stackSpacing: CGFloat = 2
     /// A COLUMN, not a slot: it narrows every row beside the wrap.
     /// BOUND — both markers frame themselves to it, or a `+123`
@@ -62,7 +62,7 @@ enum MonitorCardChips {
         // Zero is a real answer WITH the marker reserved: a card
         // at the floor shows the marker alone rather than a chip
         // pushed off the edge; plain capacity stays >= 1 —
-        // `MonitorArrangement.minimumCard`'s promise.
+        // `ScreenArrangement.minimumCard`'s promise.
         let perRow = max(
             reservingMarker ? 0 : 1,
             Int((usable + spacing) / (minChipWidth + spacing))
@@ -73,7 +73,7 @@ enum MonitorCardChips {
     /// Splits chips into visible items and overflow count. The
     /// count is never exactly one — `OverflowSplit` owns that rule
     /// (`monitor_card.more_spaces.axlabel` has no singular), and
-    /// `MonitorCardChipsTests` pins the property.
+    /// `ScreenCardChipsTests` pins the property.
     static func split<Chip>(
         _ chips: [Chip],
         in size: CGSize,

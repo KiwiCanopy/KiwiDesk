@@ -116,7 +116,7 @@ extension APIReference {
                 + "off."
         ),
         "toggle_display_sticky": APIRecord(
-            "Flips the focused window between display-sticky and "
+            "Flips the focused window between screen-sticky and "
                 + "off."
         ),
         "override_sticky_reach": APIRecord(

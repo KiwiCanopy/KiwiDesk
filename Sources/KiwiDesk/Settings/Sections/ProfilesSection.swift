@@ -47,7 +47,7 @@ struct ProfilesSection: View {
         L(
             "profiles.area.caption",
             "A profile is your whole setup, remembered per "
-                + "display arrangement."
+                + "screen arrangement."
         )
     }
 

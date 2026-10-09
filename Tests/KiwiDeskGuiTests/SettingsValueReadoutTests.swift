@@ -19,7 +19,7 @@ struct SettingsValueReadoutTests {
     /// Every assertion compares `L()` output to English, so
     /// each test pins the shared manager as its FIRST line —
     /// "System default" resolves the HOST's language
-    /// (`MonitorReadoutTests` is the standing idiom).
+    /// (`ScreenReadoutTests` is the standing idiom).
     private func pinEnglish() {
         LocalizationManager.shared.select("en")
     }
@@ -163,7 +163,7 @@ struct SettingsValueReadoutTests {
 
         edited = clean
         edited.mainSpaces = [SpaceID("a")]
-        expectRows(.monitors(.mainSpaces), clean, edited)
+        expectRows(.screens(.mainSpaces), clean, edited)
 
         edited = clean
         edited.layers[0].bindings = [
@@ -203,7 +203,7 @@ struct SettingsValueReadoutTests {
         pinBase.spaces = [SpaceID("a")]
         edited = pinBase
         edited.spacePins[SpaceID("a")] = "fp"
-        expectRows(.monitors(.spacePins), pinBase, edited)
+        expectRows(.screens(.spacePins), pinBase, edited)
 
         // Rename pairs positionally (same count, in-place map
         // — `spacesRenameRows`' zip), so the mutation keeps

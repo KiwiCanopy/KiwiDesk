@@ -1,13 +1,13 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Geometry for Monitors arrangement display (#678).
+/// Geometry for the Screens arrangement picture (#678).
 ///
-/// Displays are drawn in points from `Display.frame` without backing-scale
+/// Screens are drawn in points from `Display.frame` without backing-scale
 /// terms. Flips AppKit y-up coordinates to SwiftUI y-down. Tested by
-/// `MonitorArrangementTests` and `LayoutSchematicCountTests`.
-enum MonitorArrangement {
-    /// Drawn display rectangle in canvas coordinates.
+/// `ScreenArrangementTests` and `LayoutSchematicCountTests`.
+enum ScreenArrangement {
+    /// Drawn screen rectangle in canvas coordinates.
     struct Drawn: Equatable, Identifiable {
         let display: Display
         let rect: CGRect
@@ -15,15 +15,15 @@ enum MonitorArrangement {
         var id: DisplayID { display.id }
     }
 
-    /// Full arrangement layout: drawn displays, tray, content size.
+    /// Full arrangement layout: drawn screens, tray, content size.
     struct Layout: Equatable {
         var displays: [Drawn] = []
-        /// Dashed tray rectangle, or nil when no display is main.
+        /// Dashed tray rectangle, or nil when no screen is main.
         var tray: CGRect?
         var contentSize: CGSize = .zero
     }
 
-    /// Maximum ratio between longest sides of any two drawn displays.
+    /// Maximum ratio between longest sides of any two drawn screens.
     static let maxDrawnRatio: CGFloat = 2.5
 
     /// Scale factor threshold below which `isApproximate(_:)` reports true.
@@ -31,20 +31,20 @@ enum MonitorArrangement {
 
     /// Minimum card size holding header and at least one chip.
     static let minimumCard = CGSize(
-        width: MonitorCardChips.cardPadding * 2
-            + MonitorCardChips.minChipWidth,
-        height: MonitorCardChips.cardPadding * 2
-            + MonitorCardChips.headerHeight
-            + MonitorCardChips.stackSpacing
-            + MonitorCardChips.chipHeight
+        width: ScreenCardChips.cardPadding * 2
+            + ScreenCardChips.minChipWidth,
+        height: ScreenCardChips.cardPadding * 2
+            + ScreenCardChips.headerHeight
+            + ScreenCardChips.stackSpacing
+            + ScreenCardChips.chipHeight
     )
 
-    /// Gap between tray and display it hangs off.
+    /// Gap between tray and screen it hangs off.
     static let trayGap: CGFloat = 10
     /// Dashed tray height.
     static let trayHeight: CGFloat = 52
 
-    /// Lays out arrangement inside `canvas` (`MonitorTray.fold`).
+    /// Lays out arrangement inside `canvas` (`ScreenTray.fold`).
     static func layout(
         displays: [Display],
         mainID: DisplayID?,
@@ -86,14 +86,14 @@ enum MonitorArrangement {
             bare.displays = cards
             return bare
         }
-        return MonitorTray.fold(
+        return ScreenTray.fold(
             cards: cards,
             main: mainID,
             trayHeight: band
         )
     }
 
-    /// Whether scale cap pushed any display below `perceptibleClamp`.
+    /// Whether scale cap pushed any screen below `perceptibleClamp`.
     static func isApproximate(_ displays: [Display]) -> Bool {
         let drawable = displays.filter {
             $0.frame.width > 0 && $0.frame.height > 0
@@ -105,7 +105,7 @@ enum MonitorArrangement {
 
     // MARK: - The three steps
 
-    /// Step 1: ratio cap in point space preserving display centers.
+    /// Step 1: ratio cap in point space preserving screen centers.
     private static func capping(
         _ displays: [Display]
     ) -> [(display: Display, rect: CGRect, factor: CGFloat)] {

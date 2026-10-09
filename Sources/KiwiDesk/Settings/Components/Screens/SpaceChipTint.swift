@@ -30,7 +30,7 @@ enum SpaceChipTint {
 
     /// Capsule edge alpha. The WIDTH never varies by kind — a
     /// sub-point stroke is a half-pixel at 1x and can vanish on
-    /// an external screen, which is the display this page is
+    /// an external screen, which is the screen this page is
     /// about.
     static func stroke(auto: Bool, hovering: Bool) -> Double {
         switch (auto, hovering) {

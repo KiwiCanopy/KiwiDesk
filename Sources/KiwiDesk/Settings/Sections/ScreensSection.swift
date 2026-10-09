@@ -1,16 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Monitors configuration and visual arrangement view
-/// (#68 §3.13, #678 Phase 3 turn 13b, `MonitorArrangement`).
-struct MonitorsSection: View {
+/// Screens configuration and visual arrangement view
+/// (#68 §3.13, #678 Phase 3 turn 13b, `ScreenArrangement`).
+struct ScreensSection: View {
     @ObservedObject var model: SettingsModel
     @State var advancedExpanded = false
     @State var selection: DisplayID?
 
     var body: some View {
-        let rows = model.monitorRows
-        let gates = MonitorsGates(
+        let rows = model.screenRows
+        let gates = ScreensGates(
             editingStoredProfile: model.editingStoredProfile,
             placementEditable: model.placementEditable,
             hasOrphanedPins: !rows.orphans.isEmpty
@@ -32,24 +32,24 @@ struct MonitorsSection: View {
     private var areaCaption: String {
         L(
             "monitors.area.caption",
-            "Drag a Space onto the display it belongs to."
+            "Drag a Space onto the screen it belongs to."
         )
     }
 
     /// Renders placement canvas or unavailable state. ONE gate
     /// consult, not two: the cards carry no gate of their own
-    /// (`SettingKey+Monitors`) — the `else` is the banner's
+    /// (`SettingKey+Screens`) — the `else` is the banner's
     /// complement by construction, never an inverted copy that
     /// can drift.
     @ViewBuilder private func placementCard(
-        rows: MonitorsFamilyRows,
-        gates: MonitorsGates
+        rows: ScreensFamilyRows,
+        gates: ScreensGates
     ) -> some View {
         SettingsSection(
-            SettingsCatalog.monitors.spacePlacement
+            SettingsCatalog.screens.spacePlacement
         ) {
             if gates.inertReason(
-                for: .monitors(.placementUnavailable)
+                for: .screens(.placementUnavailable)
             ) == nil {
                 placementUnavailable
             } else {
@@ -59,25 +59,25 @@ struct MonitorsSection: View {
     }
 
     @ViewBuilder private func picture(
-        rows: MonitorsFamilyRows
+        rows: ScreensFamilyRows
     ) -> some View {
         if rows.displays.isEmpty {
             Text(
                 L(
                     "monitors.none_detected",
-                    "No monitors detected, so there's nothing to "
+                    "No screens detected, so there's nothing to "
                         + "place Spaces on. Windows still tile, "
                         + "all in a single Space."
                 )
             )
             .foregroundStyle(.secondary)
         } else {
-            MonitorsPicture(
+            ScreensPicture(
                 model: model,
                 rows: rows,
                 selection: $selection
             )
-            if MonitorArrangement.isApproximate(rows.displays) {
+            if ScreenArrangement.isApproximate(rows.displays) {
                 note(clampedNote)
             }
             if rows.hasAmbiguousDisplays {
@@ -94,21 +94,21 @@ struct MonitorsSection: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// Note shown when display ratios are clamped — said rather
+    /// Note shown when screen ratios are clamped — said rather
     /// than left to be noticed: a picture that quietly lies about
     /// proportion reads as a wrong arrangement. Shown only while
     /// the difference is visible
-    /// (`MonitorArrangement.perceptibleClamp` keeps it off the
-    /// common two-display desk).
+    /// (`ScreenArrangement.perceptibleClamp` keeps it off the
+    /// common two-screen desk).
     private var clampedNote: String {
         L(
             "monitors.picture.clamped",
-            "Sizes are approximate — these displays are too "
+            "Sizes are approximate — these screens are too "
                 + "different to draw to scale."
         )
     }
 
-    /// Note shown when displays share one fingerprint (same model
+    /// Note shown when screens share one fingerprint (same model
     /// and resolution) — which is what a pin is stored against, so
     /// KiwiDesk genuinely cannot tell them apart; the picture
     /// would otherwise show the same spaces on both cards
@@ -117,14 +117,14 @@ struct MonitorsSection: View {
     private var ambiguousNote: String {
         L(
             "monitors.picture.ambiguous",
-            "Some of these displays look identical to KiwiDesk, "
+            "Some of these screens look identical to KiwiDesk, "
                 + "so a Space pinned to one may open on another."
         )
     }
 
-    /// Description of spaces assigned to selected display.
+    /// Description of spaces assigned to selected screen.
     @ViewBuilder private func selectionReadout(
-        rows: MonitorsFamilyRows
+        rows: ScreensFamilyRows
     ) -> some View {
         if let display = rows.displays.first(where: {
             $0.id == selection
@@ -138,9 +138,9 @@ struct MonitorsSection: View {
 
     private func readout(
         for display: Display,
-        rows: MonitorsFamilyRows
+        rows: ScreensFamilyRows
     ) -> String {
-        MonitorReadout.sentence(
+        ScreenReadout.sentence(
             held: rows.held(
                 on: display,
                 isMain: model.mainDisplay?.id == display.id
@@ -154,7 +154,7 @@ struct MonitorsSection: View {
             Label(
                 L(
                     "monitors.not_connected",
-                    "Monitors not connected"
+                    "Screens not connected"
                 ),
                 systemImage:
                     "display.trianglebadge.exclamationmark"

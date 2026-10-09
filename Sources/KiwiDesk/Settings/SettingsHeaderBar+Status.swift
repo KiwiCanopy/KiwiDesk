@@ -86,7 +86,7 @@ extension SettingsHeaderBar {
             if model.updateHint != nil {
                 return L(
                     "profile_header.status.unsaved_monitor_count",
-                    "Unsaved monitor changes — this profile is "
+                    "Unsaved screen changes — this profile is "
                         + "for another screen count; %1$@ to "
                         + "keep them.",
                     L(
@@ -97,13 +97,13 @@ extension SettingsHeaderBar {
             }
             return L(
                 "profile_header.status.unsaved_monitor",
-                "Unsaved monitor changes — update the "
+                "Unsaved screen changes — update the "
                     + "profile to keep them."
             )
         case .noMatch:
             return L(
                 "profile_header.status.no_match",
-                "No profile matches this monitor setup."
+                "No profile matches this screen setup."
             )
         case nil:
             break
@@ -118,7 +118,7 @@ extension SettingsHeaderBar {
         if model.activeProfile == nil {
             return L(
                 "profile_header.status.no_match",
-                "No profile matches this monitor setup."
+                "No profile matches this screen setup."
             )
         }
         return nil

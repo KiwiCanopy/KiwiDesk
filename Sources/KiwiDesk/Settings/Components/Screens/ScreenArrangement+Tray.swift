@@ -1,8 +1,8 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Dynamic height calculation for follows-main monitor arrangement tray.
-extension MonitorArrangement {
+/// Dynamic height calculation for follows-main screen arrangement tray.
+extension ScreenArrangement {
     /// Computes tray height for the chip count: a constant clipped
     /// the heading once chips wrapped (owner 2026-08-04). Rows
     /// derive from the same `minChipWidth` the flow layout wraps
@@ -14,11 +14,11 @@ extension MonitorArrangement {
     ) -> CGFloat {
         guard chips > 1 else { return trayHeight }
         let usable = max(
-            width - MonitorCardChips.cardPadding * 2,
-            MonitorCardChips.minChipWidth
+            width - ScreenCardChips.cardPadding * 2,
+            ScreenCardChips.minChipWidth
         )
         let step =
-            MonitorCardChips.minChipWidth + ChipMetrics.spacing
+            ScreenCardChips.minChipWidth + ChipMetrics.spacing
         let perRow = max(
             1,
             Int((usable + ChipMetrics.spacing) / step)
@@ -30,6 +30,6 @@ extension MonitorArrangement {
         guard rows > 1 else { return trayHeight }
         return trayHeight
             + CGFloat(rows - 1)
-            * (MonitorCardChips.chipHeight + ChipMetrics.spacing)
+            * (ScreenCardChips.chipHeight + ChipMetrics.spacing)
     }
 }
