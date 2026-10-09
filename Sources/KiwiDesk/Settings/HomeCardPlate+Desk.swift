@@ -1,11 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Monitors and Behavior illustration tiles for Home card plates (#786).
+/// Screens and Behavior illustration tiles for Home card plates (#786).
 
-/// Monitors home card tile previewing live display arrangement
-/// (`MonitorArrangement`, #758).
-struct HomeCardMonitorsTile: View {
+/// Screens home card tile previewing live screen arrangement
+/// (`ScreenArrangement`, #758).
+struct HomeCardScreensTile: View {
     @ObservedObject var model: SettingsModel
     @Environment(\.schematicPalette) private var palette
 
@@ -15,7 +15,7 @@ struct HomeCardMonitorsTile: View {
     var body: some View {
         let mainID = PositionalDisplays.liveMainID
         GeometryReader { proxy in
-            let layout = MonitorArrangement.layout(
+            let layout = ScreenArrangement.layout(
                 displays: model.displays,
                 mainID: mainID,
                 canvas: proxy.size,
@@ -34,7 +34,7 @@ struct HomeCardMonitorsTile: View {
 
     /// Computes offset centering display layout union in canvas.
     private func centering(
-        _ layout: MonitorArrangement.Layout,
+        _ layout: ScreenArrangement.Layout,
         in canvas: CGSize
     ) -> CGSize {
         let rects = layout.displays.map(\.rect)
@@ -52,7 +52,7 @@ struct HomeCardMonitorsTile: View {
 
     @ViewBuilder
     private func display(
-        _ drawn: MonitorArrangement.Drawn,
+        _ drawn: ScreenArrangement.Drawn,
         main: Bool
     ) -> some View {
         let rect = drawn.rect

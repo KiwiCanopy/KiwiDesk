@@ -6,7 +6,8 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     // This Profile
     case spaces
     case layoutDefaults
-    case monitors
+    // The raw value keeps the page's pre-#865 name: it is an id.
+    case screens = "monitors"
     case looks
     case advancedColors
     case gapsAndBorders
@@ -27,7 +28,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     /// its Simple twin so the pair reads as a family
     /// (`HomeCardOrderTests` pins the shared membership).
     static let thisProfile: [SettingsDestination] = [
-        .spaces, .layoutDefaults, .monitors, .gapsAndBorders,
+        .spaces, .layoutDefaults, .screens, .gapsAndBorders,
         .bars, .looks, .advancedColors,
     ]
     /// Destinations scoped globally across the application. The
@@ -42,7 +43,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         switch self {
         case .spaces: return L("destination.spaces", "Spaces")
         case .layoutDefaults: return L("destination.layout", "Layout Defaults")
-        case .monitors: return L("destination.monitors", "Screens")
+        case .screens: return L("destination.monitors", "Screens")
         case .looks:
             return L(
                 "destination.looks",
@@ -72,7 +73,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         switch self {
         case .spaces: return "squares.below.rectangle"
         case .layoutDefaults: return "rectangle.3.group"
-        case .monitors: return "display.2"
+        case .screens: return "display.2"
         case .looks: return "paintbrush.fill"
         case .advancedColors: return "paintpalette.fill"
         case .gapsAndBorders: return "square.dashed.inset.filled"
@@ -91,7 +92,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .spaces: return .indigo
         case .layoutDefaults:
             return Color(red: 0.09, green: 0.47, blue: 0.53)
-        case .monitors: return .blue
+        case .screens: return .blue
         case .looks: return .purple
         case .advancedColors:
             return Color(red: 0.38, green: 0.20, blue: 0.60)

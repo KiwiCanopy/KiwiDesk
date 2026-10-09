@@ -17,7 +17,7 @@ struct HomeCardContentTests {
     ///
     /// The suite was reachable-but-passing rather than failing,
     /// which is why it outlived the round that fixed
-    /// `MonitorReadoutTests`: most assertions here are on digits,
+    /// `ScreenReadoutTests`: most assertions here are on digits,
     /// and a digit survives translation. `gapsAnswer` is the one
     /// that does not — it asserts that the outer value renders
     /// BEFORE the inner one, reasoning in its own comment from
@@ -28,7 +28,7 @@ struct HomeCardContentTests {
     /// would fail it for a translation reason wearing a layout
     /// bug's clothes.
     ///
-    /// Inside the body, not `init` — `MonitorReadoutTests` owns
+    /// Inside the body, not `init` — `ScreenReadoutTests` owns
     /// why.
     ///
     /// Main-actor cost, since this is a `@MainActor` suite sharing

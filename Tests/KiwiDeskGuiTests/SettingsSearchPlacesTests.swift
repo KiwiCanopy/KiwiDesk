@@ -147,7 +147,7 @@ struct SettingsSearchPlacesTests {
             notice?.contains("Advanced Colors") == true
         )
         // A second flip supersedes the first.
-        model.noteSearchModeSwitch(.monitors)
+        model.noteSearchModeSwitch(.screens)
         #expect(
             model.searchModeNotice?.contains("Screens") == true
         )

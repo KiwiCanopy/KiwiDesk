@@ -9,7 +9,7 @@ extension SettingsDestination {
         switch self {
         case .spaces: return .spacesAndLayouts
         case .layoutDefaults: return .layoutDefaults
-        case .monitors: return .monitors
+        case .screens: return .screens
         case .looks: return .coloursAndMotion
         case .advancedColors: return .advancedColours
         case .gapsAndBorders: return .gapsAndBorders
@@ -28,7 +28,7 @@ extension SettingsDestination {
         switch area {
         case .spacesAndLayouts: self = .spaces
         case .layoutDefaults: self = .layoutDefaults
-        case .monitors: self = .monitors
+        case .screens: self = .screens
         case .coloursAndMotion: self = .looks
         case .advancedColours: self = .advancedColors
         case .gapsAndBorders: self = .gapsAndBorders

@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDesk
 
 /// Where the dashed follows-main tray lands (#678 Phase 3, turn
-/// 13b), split from `MonitorArrangementTests` so neither file
+/// 13b), split from `ScreenArrangementTests` so neither file
 /// approaches the size ceiling.
 ///
 /// The tray hangs off the MAIN display rather than sitting in a
@@ -13,7 +13,7 @@ import Testing
 /// is a statement about that rectangle, so it has to move when
 /// the main badge does.
 @Suite("Follows-main tray placement")
-struct MonitorTrayTests {
+struct ScreenTrayTests {
     private func display(
         _ id: UInt32,
         x: CGFloat,
@@ -31,8 +31,8 @@ struct MonitorTrayTests {
     private func layout(
         _ displays: [Display],
         main: UInt32
-    ) -> MonitorArrangement.Layout {
-        MonitorArrangement.layout(
+    ) -> ScreenArrangement.Layout {
+        ScreenArrangement.layout(
             displays: displays,
             mainID: DisplayID(main),
             canvas: CGSize(width: 700, height: 240)
@@ -40,7 +40,7 @@ struct MonitorTrayTests {
     }
 
     private func card(
-        _ result: MonitorArrangement.Layout,
+        _ result: ScreenArrangement.Layout,
         _ id: UInt32
     ) throws -> CGRect {
         try #require(
@@ -113,7 +113,7 @@ struct MonitorTrayTests {
             abs(
                 result.contentSize.height
                     - (main.height + tray.height
-                        + MonitorArrangement.trayGap)
+                        + ScreenArrangement.trayGap)
             ) < 0.001
         )
     }
@@ -153,7 +153,7 @@ struct MonitorTrayTests {
                 ),
             ],
         ] {
-            let result = MonitorArrangement.layout(
+            let result = ScreenArrangement.layout(
                 displays: displays,
                 mainID: displays[0].id,
                 canvas: canvas
@@ -176,13 +176,13 @@ struct MonitorTrayTests {
     @Test("the tray is never narrower than a card minimum")
     func trayHasTheCardFloor() {
         let anchor = CGRect(x: 0, y: 0, width: 40, height: 40)
-        let placed = MonitorTray.rect(
+        let placed = ScreenTray.rect(
             anchoredTo: anchor,
             avoiding: []
         )
         #expect(
             placed.rect.width
-                == MonitorArrangement.minimumCard.width
+                == ScreenArrangement.minimumCard.width
         )
         #expect(placed.isAbove)
     }

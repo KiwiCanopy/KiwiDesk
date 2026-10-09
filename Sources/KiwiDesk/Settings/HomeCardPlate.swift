@@ -43,9 +43,9 @@ enum HomeCardPlate {
                     )
                 )
             }
-        case .monitors:
+        case .screens:
             return tile(padding: 8, settings: settings) {
-                HomeCardMonitorsTile(model: model)
+                HomeCardScreensTile(model: model)
             }
         case .advancedColors:
             return tile(padding: 11, settings: settings) {

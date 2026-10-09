@@ -1,7 +1,7 @@
 import KiwiDeskCore
 
-/// Instance representing expanded row in Monitors census (#678).
-enum MonitorsRowInstance: Hashable {
+/// Instance representing expanded row in Screens census (#678).
+enum ScreensRowInstance: Hashable {
     case space(String)
     case orphan(String)
     case display(String)
@@ -16,12 +16,12 @@ struct OrphanPin: Identifiable, Hashable {
     var id: String { space.raw }
 }
 
-/// Expands Monitors census keys into rendered instances (#678).
+/// Expands Screens census keys into rendered instances (#678).
 /// The views build one and READ it, never re-derive beside it —
-/// `MonitorsGateWiringTests` pins each call site — and the switch
+/// `ScreensGateWiringTests` pins each call site — and the switch
 /// is exhaustive so a new census key fails to compile until given
 /// an expansion.
-struct MonitorsFamilyRows {
+struct ScreensFamilyRows {
     let spaces: [SpaceID]
     let mainSpaces: Set<SpaceID>
     /// From the model's one `resolutions()` pass — the runtime's
@@ -96,30 +96,30 @@ struct MonitorsFamilyRows {
             .filter { seen.insert($0.space).inserted }
     }
 
-    func rows(for key: SettingKey) -> [MonitorsRowInstance]? {
-        guard case .monitors(let family) = key else { return nil }
+    func rows(for key: SettingKey) -> [ScreensRowInstance]? {
+        guard case .screens(let family) = key else { return nil }
         return rows(for: family)
     }
 
     private func rows(
-        for family: MonitorsKey
-    ) -> [MonitorsRowInstance]? {
+        for family: ScreensKey
+    ) -> [ScreensRowInstance]? {
         switch family {
         case .spacePins:
             return cardedSpaces.map {
-                MonitorsRowInstance.space($0.space.raw)
+                ScreensRowInstance.space($0.space.raw)
             }
         case .mainSpaces:
             return trayChips.map {
-                MonitorsRowInstance.space($0.raw)
+                ScreensRowInstance.space($0.raw)
             }
         case .orphanPinClear:
             return orphans.map {
-                MonitorsRowInstance.orphan($0.space.raw)
+                ScreensRowInstance.orphan($0.space.raw)
             }
         case .fingerprints:
             return orderedDisplays.map {
-                MonitorsRowInstance.display($0.fingerprint)
+                ScreensRowInstance.display($0.fingerprint)
             }
         case .placementUnavailable:
             // Exactly one row, always — on-screen is the GATE's

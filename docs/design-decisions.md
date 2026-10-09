@@ -7934,7 +7934,7 @@ the #702 class of defect, at grid scale. So where an editor
 already owns the maths, the card calls it: the layout schematic
 family with its `SchematicPlacement` splice,
 `GapPreviewScale.mini` and `FocusBorderPreview`'s width remap on
-the Gaps & Borders tile, `MonitorArrangement.layout`, `BarsGates`'
+the Gaps & Borders tile, `ScreenArrangement.layout`, `BarsGates`'
 own shown-bar predicate. Where no editor maths exists, the picture
 is a readout of the draft, never a decorative sketch: one pane per
 declared space, the colour fan and swatch grid of the config's
@@ -15113,7 +15113,7 @@ never takes a slot in the chip's FLOW — the ⓧ rides the
 trailing-top corner as an overlay, and hover may change only its
 tint, never its presence or any metric — because the chips are
 sized by a flow layout whose arithmetic
-(`MonitorCardChips.minChipWidth`) must hold for both states, and
+(`ScreenCardChips.minChipWidth`) must hold for both states, and
 both a hover-revealed button and an in-flow trailing slot have
 shipped and died of that measurement. It is not free of the
 layout, though: a chip that HAS a badge reserves 6 pt more

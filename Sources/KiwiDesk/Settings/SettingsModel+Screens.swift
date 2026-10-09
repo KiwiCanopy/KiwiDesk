@@ -32,13 +32,13 @@ extension SettingsModel {
         return resolved
     }
 
-    /// Monitors area row expansion model (`MonitorsFamilyRows`,
+    /// Screens area row expansion model (`ScreensFamilyRows`,
     /// #678 turn 13b). Frames are read LIVE off Core, never
     /// snapshotted onto the model: `SettingsWindowController`
     /// republishes on a display change, and a cached arrangement
     /// is what would go stale behind it.
-    var monitorRows: MonitorsFamilyRows {
-        MonitorsFamilyRows(
+    var screenRows: ScreensFamilyRows {
+        ScreensFamilyRows(
             spaces: config.spaces,
             mainSpaces: config.mainSpaces,
             resolutions: resolutions(),
@@ -71,7 +71,7 @@ extension SettingsModel {
     }
 
     /// Resolves human-readable monitor name from fingerprint.
-    func monitorName(_ fingerprint: String) -> String {
+    func screenName(_ fingerprint: String) -> String {
         displays.first {
             $0.fingerprint == fingerprint
         }?.name ?? fingerprint

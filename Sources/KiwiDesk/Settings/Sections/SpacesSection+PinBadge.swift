@@ -10,7 +10,7 @@ extension SpacesSection {
             connectedFingerprints: Set(
                 model.displays.map(\.fingerprint)
             ),
-            name: model.monitorName
+            name: model.screenName
         ) {
         case .none:
             EmptyView()

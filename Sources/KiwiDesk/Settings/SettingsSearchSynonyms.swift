@@ -35,7 +35,7 @@ enum SettingsSearchSynonyms {
         for destination: SettingsDestination
     ) -> [String] {
         switch destination {
-        case .monitors: return ["monitors", "displays"]
+        case .screens: return ["monitors", "displays"]
         default: return []
         }
     }
@@ -69,7 +69,7 @@ enum SettingsSearchSynonyms {
                 "direction",
             ]
         // "Monitor fingerprints" until #865 retired the noun.
-        case .monitors(.fingerprints):
+        case .screens(.fingerprints):
             return ["monitor fingerprints", "display fingerprints"]
         case .gaps(.outer): return ["margin", "padding"]
         case .gaps(.inner): return ["padding", "spacing"]

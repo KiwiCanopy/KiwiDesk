@@ -130,13 +130,13 @@ struct SettingsSearchTests {
         defer { reset() }
         for query in ["monitor", "Displays"] {
             #expect(
-                settings(query).contains(.destination(.monitors)),
+                settings(query).contains(.destination(.screens)),
                 Comment(rawValue: query)
             )
         }
         let hit = settings("monitor fingerprint").contains {
             guard case .setting(let row) = $0 else { return false }
-            return row.key == .monitors(.fingerprints)
+            return row.key == .screens(.fingerprints)
         }
         #expect(hit)
     }
@@ -173,7 +173,7 @@ struct SettingsSearchTests {
         pinEnglish()
         defer { reset() }
         for (query, destination) in [
-            ("fingerprint", SettingsDestination.monitors),
+            ("fingerprint", SettingsDestination.screens),
             ("per-edge", .gapsAndBorders),
             ("drop zone", .gapsAndBorders),
             ("lua bindings", .shortcuts),
@@ -191,7 +191,7 @@ struct SettingsSearchTests {
     /// The pill's predicate is the ONE offer predicate
     /// (`HomeCardOrder.isOffered`), never a hand-negated copy:
     /// a Power-User-only area flips in Simple mode, stays quiet
-    /// in Power User mode, and the Monitors display-count
+    /// in Power User mode, and the Screens screen-count
     /// promotion silences its pill exactly when it silences its
     /// gate.
     @Test("the mode pill derives from the offer predicate")
@@ -209,13 +209,13 @@ struct SettingsSearchTests {
         #expect(
             !SettingsSearch.switchesMode(advanced, context: power)
         )
-        let monitors = SettingsSearchResult.destination(.monitors)
+        let screens = SettingsSearchResult.destination(.screens)
         #expect(
-            SettingsSearch.switchesMode(monitors, context: simple)
+            SettingsSearch.switchesMode(screens, context: simple)
         )
         #expect(
             !SettingsSearch.switchesMode(
-                monitors,
+                screens,
                 context: SettingsSearchContext(
                     mode: .simple,
                     displayCount: 2

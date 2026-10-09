@@ -14,12 +14,12 @@ import Testing
 /// replaced the clip: a card that cannot show them all says how
 /// many it is holding back.
 @Suite("Display card chip capacity")
-struct MonitorCardChipsTests {
-    private let floor = MonitorArrangement.minimumCard
+struct ScreenCardChipsTests {
+    private let floor = ScreenArrangement.minimumCard
 
     @Test("the smallest card still holds one chip")
     func floorHoldsOne() {
-        #expect(MonitorCardChips.capacity(in: floor) == 1)
+        #expect(ScreenCardChips.capacity(in: floor) == 1)
     }
 
     /// The chip stacks hold exactly TWO children, so the one gap
@@ -31,16 +31,16 @@ struct MonitorCardChipsTests {
     /// stackSpacing)` — the same three terms `chipArea` itself
     /// subtracts, in the same order — so both sides came out of
     /// one expression and the test could not see that
-    /// `DisplayCard`'s stack had a third child and therefore a
+    /// `ScreenCard`'s stack had a third child and therefore a
     /// second gap (code review, 2026-08-04). What matters is not
     /// the formula but the layout it claims to model.
     @Test("the chip stacks hold two children and one gap")
     func stacksMatchTheArithmetic() throws {
         let dir = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Monitors"
+                "Sources/KiwiDesk/Settings/Components/Screens"
             )
-        for name in ["DisplayCard.swift", "FollowsMainTray.swift"] {
+        for name in ["ScreenCard.swift", "FollowsMainTray.swift"] {
             // The tray's header is the one whose height the
             // arithmetic cannot infer — the card frames its own,
             // the tray's is an unsized `.caption2`. Deleting that
@@ -58,7 +58,7 @@ struct MonitorCardChipsTests {
             if name == "FollowsMainTray.swift" {
                 #expect(
                     squashed.contains(
-                        ".frame(height:MonitorCardChips"
+                        ".frame(height:ScreenCardChips"
                             + ".trayHeaderHeight)"
                     ),
                     Comment(
@@ -73,7 +73,7 @@ struct MonitorCardChipsTests {
             // capacity subtracts, never a literal beside it.
             #expect(
                 squashed.contains(
-                    "spacing:MonitorCardChips.stackSpacing"
+                    "spacing:ScreenCardChips.stackSpacing"
                 ),
                 Comment(
                     rawValue:
@@ -91,7 +91,7 @@ struct MonitorCardChipsTests {
             // (guard-prover round 3, 2026-08-04).
             #expect(
                 squashed.contains(
-                    ".frame(width:MonitorCardChips.markerWidth)"
+                    ".frame(width:ScreenCardChips.markerWidth)"
                 ),
                 Comment(
                     rawValue:
@@ -104,7 +104,7 @@ struct MonitorCardChipsTests {
             // does not know about.
             #expect(
                 squashed.contains(
-                    "MonitorCardChips.stackSpacing){headerchips}"
+                    "ScreenCardChips.stackSpacing){headerchips}"
                 ),
                 Comment(
                     rawValue:
@@ -123,13 +123,13 @@ struct MonitorCardChipsTests {
     @Test("the marker's column is reserved, not its slot")
     func markerReservesItsColumn() {
         let card = CGSize(
-            width: floor.width + MonitorCardChips.minChipWidth
-                + MonitorCardChips.spacing,
-            height: floor.height + MonitorCardChips.chipHeight
-                + MonitorCardChips.spacing
+            width: floor.width + ScreenCardChips.minChipWidth
+                + ScreenCardChips.spacing,
+            height: floor.height + ScreenCardChips.chipHeight
+                + ScreenCardChips.spacing
         )
-        let plain = MonitorCardChips.capacity(in: card)
-        let reserved = MonitorCardChips.capacity(
+        let plain = ScreenCardChips.capacity(in: card)
+        let reserved = ScreenCardChips.capacity(
             in: card,
             reservingMarker: true
         )
@@ -137,15 +137,15 @@ struct MonitorCardChipsTests {
         // Everything shown fits BESIDE the marker: the shown
         // chips need no more width than the row has left once the
         // `+n` column is taken.
-        let split = MonitorCardChips.split(
+        let split = ScreenCardChips.split(
             Array(0..<12),
             in: card
         )
-        let area = MonitorCardChips.chipArea(in: card)
+        let area = ScreenCardChips.chipArea(in: card)
         // The row count comes from the production helper, not a
         // second copy of its formula — the first cut's copy had
         // already dropped the clamp (code review, 2026-08-04).
-        let rows = MonitorCardChips.rows(in: card)
+        let rows = ScreenCardChips.rows(in: card)
         // The WORST row, not the average: an uneven fill puts
         // more chips in the first row than the mean, and the mean
         // would let the guard weaken silently instead of failing.
@@ -154,12 +154,12 @@ struct MonitorCardChipsTests {
         let needed =
             perRow
             * Double(
-                MonitorCardChips.minChipWidth
-                    + MonitorCardChips.spacing
+                ScreenCardChips.minChipWidth
+                    + ScreenCardChips.spacing
             )
         #expect(
             needed
-                <= area.width - MonitorCardChips.markerWidth
+                <= area.width - ScreenCardChips.markerWidth
                 + 0.001
         )
     }
@@ -175,7 +175,7 @@ struct MonitorCardChipsTests {
         for count in 0..<12 {
             for side in [floor.width, 120.0, 260.0] {
                 let card = CGSize(width: side, height: floor.height)
-                let split = MonitorCardChips.split(
+                let split = ScreenCardChips.split(
                     Array(0..<count),
                     in: card
                 )
@@ -198,16 +198,16 @@ struct MonitorCardChipsTests {
     func capacityFollowsSize() {
         let taller = CGSize(
             width: floor.width,
-            height: floor.height + MonitorCardChips.chipHeight
-                + MonitorCardChips.spacing
+            height: floor.height + ScreenCardChips.chipHeight
+                + ScreenCardChips.spacing
         )
-        #expect(MonitorCardChips.capacity(in: taller) == 2)
+        #expect(ScreenCardChips.capacity(in: taller) == 2)
         let wider = CGSize(
-            width: floor.width + MonitorCardChips.minChipWidth
-                + MonitorCardChips.spacing,
+            width: floor.width + ScreenCardChips.minChipWidth
+                + ScreenCardChips.spacing,
             height: floor.height
         )
-        #expect(MonitorCardChips.capacity(in: wider) == 2)
+        #expect(ScreenCardChips.capacity(in: wider) == 2)
     }
 
     /// A card with room for everything shows everything and marks
@@ -216,7 +216,7 @@ struct MonitorCardChipsTests {
     func nothingHiddenWhenTheyFit() {
         let big = CGSize(width: 400, height: 300)
         let chips = Array(0..<4)
-        let split = MonitorCardChips.split(chips, in: big)
+        let split = ScreenCardChips.split(chips, in: big)
         #expect(split.overflow == 0)
         #expect(split.shown == chips)
     }
@@ -228,7 +228,7 @@ struct MonitorCardChipsTests {
     @Test("the overflow marker counts itself out")
     func overflowAccountsForItsOwnSlot() {
         let chips = Array(0..<5)
-        let split = MonitorCardChips.split(chips, in: floor)
+        let split = ScreenCardChips.split(chips, in: floor)
         // Capacity 1: the marker takes it, so nothing is shown
         // and all five are behind it.
         #expect(split.shown.isEmpty)
@@ -245,19 +245,19 @@ struct MonitorCardChipsTests {
     @Test("the marker's column costs a chip in every row")
     func oneOverHidesTwo() {
         let card = CGSize(
-            width: floor.width + MonitorCardChips.minChipWidth
-                + MonitorCardChips.spacing,
-            height: floor.height + MonitorCardChips.chipHeight
-                + MonitorCardChips.spacing
+            width: floor.width + ScreenCardChips.minChipWidth
+                + ScreenCardChips.spacing,
+            height: floor.height + ScreenCardChips.chipHeight
+                + ScreenCardChips.spacing
         )
-        #expect(MonitorCardChips.capacity(in: card) == 4)
+        #expect(ScreenCardChips.capacity(in: card) == 4)
         #expect(
-            MonitorCardChips.capacity(
+            ScreenCardChips.capacity(
                 in: card,
                 reservingMarker: true
             ) == 2
         )
-        let split = MonitorCardChips.split(Array(0..<5), in: card)
+        let split = ScreenCardChips.split(Array(0..<5), in: card)
         #expect(split.shown.count == 2)
         #expect(split.overflow == 3)
         #expect(split.shown.count + split.overflow == 5)

@@ -26,7 +26,7 @@ struct LayoutDefaultsControls: Sendable {
     )
 }
 
-struct MonitorsControls: Sendable {
+struct ScreensControls: Sendable {
     let spacePlacement = SettingsControl(
         "monitors.space_placement",
         "Space placement"
@@ -35,7 +35,7 @@ struct MonitorsControls: Sendable {
         "monitors.orphan_pins.title",
         "Pinned to disconnected screens"
     )
-    let monitorFingerprints = SettingsDrawer(
+    let screenFingerprints = SettingsDrawer(
         "monitors.advanced.title",
         "Screen fingerprints"
     )

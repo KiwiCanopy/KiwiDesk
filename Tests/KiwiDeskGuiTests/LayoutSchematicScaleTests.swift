@@ -84,7 +84,7 @@ struct LayoutSchematicScaleTests {
     /// Both are `if`s inside a `body`, and a surfacing branch
     /// leaves nothing behind for a property test to find: deleting
     /// either one keeps every assertion above green
-    /// (`MonitorsGateWiringTests`' `surfacingBranchesAreDrawn` is
+    /// (`ScreensGateWiringTests`' `surfacingBranchesAreDrawn` is
     /// the worked example this copies). Keyed on the branch WITH
     /// its body, over comment-stripped, whitespace-free source, so
     /// a comment quoting the call cannot stand in for it and the

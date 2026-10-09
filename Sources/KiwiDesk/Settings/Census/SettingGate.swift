@@ -27,7 +27,7 @@ enum SettingRuntimeGate: Hashable {
     /// Space pinned to a disconnected monitor.
     case orphanPinsExist
     /// Stored profile edited while monitors are disconnected.
-    case monitorsDisconnected
+    case screensDisconnected
     /// Palettes that carry neon Glow pairing (#578).
     case paletteGlowPairing
     /// A look click replaced colours no saved palette brings back,

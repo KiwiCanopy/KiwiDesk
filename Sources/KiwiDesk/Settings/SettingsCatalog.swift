@@ -14,7 +14,7 @@ import KiwiDeskCore
 enum SettingsCatalog {
     static let spaces = SpacesControls()
     static let layoutDefaults = LayoutDefaultsControls()
-    static let monitors = MonitorsControls()
+    static let screens = ScreensControls()
     static let colors = ColorsControls()
     static let advancedColors = AdvancedColorsControls()
     static let gapsAndBorders = GapsAndBordersControls()
@@ -37,7 +37,7 @@ enum SettingsCatalog {
         switch destination {
         case .spaces: return spaces
         case .layoutDefaults: return layoutDefaults
-        case .monitors: return monitors
+        case .screens: return screens
         case .looks: return colors
         case .advancedColors: return advancedColors
         case .gapsAndBorders: return gapsAndBorders

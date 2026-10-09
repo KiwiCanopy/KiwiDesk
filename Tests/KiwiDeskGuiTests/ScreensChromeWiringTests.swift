@@ -3,16 +3,16 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Monitors picture's CHROME is wired to its owners — the
-/// geometry to `MonitorArrangement`, the drawn numbers to
+/// The Screens picture's CHROME is wired to its owners — the
+/// geometry to `ScreenArrangement`, the drawn numbers to
 /// `SettingsTheme` (#758).
 ///
-/// Split from `MonitorsGateWiringTests` (the gate, seam and
+/// Split from `ScreensGateWiringTests` (the gate, seam and
 /// surfacing-branch needles) as that suite reached the 350-line
 /// ceiling; same needle idiom — whitespace-squashed,
 /// comment-stripped source, keyed on use sites.
-@Suite("Monitors chrome wiring")
-struct MonitorsChromeWiringTests {
+@Suite("Screens chrome wiring")
+struct ScreensChromeWiringTests {
     private var settingsDir: URL {
         SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
@@ -33,7 +33,7 @@ struct MonitorsChromeWiringTests {
             .joined()
     }
 
-    /// The picture asks `MonitorArrangement` for its geometry and
+    /// The picture asks `ScreenArrangement` for its geometry and
     /// computes none of its own.
     ///
     /// This is the #702 rule one surface over: a drawing that
@@ -42,12 +42,12 @@ struct MonitorsChromeWiringTests {
     /// shared function is also the only thing the geometry guards
     /// can see — a card positioned by arithmetic inline in the
     /// view would pass every assertion in
-    /// `MonitorArrangementTests` while drawing something else.
+    /// `ScreenArrangementTests` while drawing something else.
     @Test("the picture asks the arrangement for its geometry")
     func pictureAsksTheArrangement() throws {
-        let name = "Components/Monitors/MonitorsPicture.swift"
+        let name = "Components/Screens/ScreensPicture.swift"
         let source = try squashed(name)
-        #expect(source.contains("MonitorArrangement.layout("))
+        #expect(source.contains("ScreenArrangement.layout("))
         for forbidden in ["frame.minX", "frame.width", "NSScreen"] {
             #expect(
                 !source.contains(forbidden),
@@ -68,12 +68,12 @@ struct MonitorsChromeWiringTests {
     ///
     /// The stroke needle is the WHOLE ternary: the rest-weight
     /// name is a substring of the selected-weight name, so a
-    /// bare `monitorCardStroke` check would stay green with the
+    /// bare `screenCardStroke` check would stay green with the
     /// rest weight hardcoded back to a literal.
     @Test("the chrome reads its themed metrics")
     func chromeReadsThemedMetrics() throws {
         let picture = try squashed(
-            "Components/Monitors/MonitorsPicture.swift"
+            "Components/Screens/ScreensPicture.swift"
         )
         for needle in [
             "SettingsTheme.monitorStandScale",
@@ -87,23 +87,23 @@ struct MonitorsChromeWiringTests {
                 picture.contains(needle),
                 Comment(
                     rawValue:
-                        "MonitorsPicture no longer reads "
+                        "ScreensPicture no longer reads "
                         + "`\(needle)` — the stand's size went "
                         + "inline"
                 )
             )
         }
         let card = try squashed(
-            "Components/Monitors/DisplayCard.swift"
+            "Components/Screens/ScreenCard.swift"
         )
         #expect(
             card.contains(
-                "SettingsTheme.monitorCardStrokeSelected"
-                    + ":SettingsTheme.monitorCardStroke)"
+                "SettingsTheme.screenCardStrokeSelected"
+                    + ":SettingsTheme.screenCardStroke)"
             ),
             Comment(
                 rawValue:
-                    "DisplayCard's border no longer takes both "
+                    "ScreenCard's border no longer takes both "
                     + "weights from SettingsTheme"
             )
         )

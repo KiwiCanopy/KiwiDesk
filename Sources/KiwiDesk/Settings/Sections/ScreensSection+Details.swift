@@ -1,18 +1,18 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Secondary cards for Monitors settings (#678 Phase 3, turn 13b).
-extension MonitorsSection {
-    /// Card displaying spaces pinned to absent displays (`MonitorsGates`).
+/// Secondary cards for Screens settings (#678 Phase 3, turn 13b).
+extension ScreensSection {
+    /// Card displaying spaces pinned to absent displays (`ScreensGates`).
     @ViewBuilder func orphanCard(
-        rows: MonitorsFamilyRows,
-        gates: MonitorsGates
+        rows: ScreensFamilyRows,
+        gates: ScreensGates
     ) -> some View {
-        if gates.inertReason(for: .monitors(.orphanPinClear))
+        if gates.inertReason(for: .screens(.orphanPinClear))
             == nil
         {
             SettingsSection(
-                SettingsCatalog.monitors.orphanPins
+                SettingsCatalog.screens.orphanPins
             ) {
                 ForEach(rows.orphans) { orphan in
                     orphanRow(orphan)
@@ -82,10 +82,10 @@ extension MonitorsSection {
 
     /// Read-only monitor hardware identification drawer.
     func fingerprintsDrawer(
-        rows: MonitorsFamilyRows
+        rows: ScreensFamilyRows
     ) -> some View {
         SettingsDisclosure(
-            SettingsCatalog.monitors.monitorFingerprints,
+            SettingsCatalog.screens.screenFingerprints,
             chrome: .card,
             isExpanded: $advancedExpanded
         ) {

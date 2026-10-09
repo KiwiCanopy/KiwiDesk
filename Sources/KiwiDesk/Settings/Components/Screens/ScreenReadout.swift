@@ -8,7 +8,7 @@ import KiwiDeskCore
 /// is `WorkspaceManager.activeSpace(on:)` — per display,
 /// independent of macOS "separate Spaces" (#678 Phase 3).
 @MainActor
-enum MonitorReadout {
+enum ScreenReadout {
     /// Formatted status sentence. `held` counts what the display
     /// HOLDS, follows-main spaces included — counting only pinned
     /// chips made an everything-follows-main desk read "0 Spaces

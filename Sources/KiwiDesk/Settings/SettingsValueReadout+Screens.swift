@@ -1,22 +1,22 @@
 import KiwiDeskCore
 
-/// Monitors settings diff readout generators.
+/// Screens settings diff readout generators.
 extension SettingsValueReadout {
-    static func monitorsRows(
-        _ key: MonitorsKey,
+    static func screensRows(
+        _ key: ScreensKey,
         old: GuiConfig,
         new: GuiConfig
     ) -> [SettingsDiffRow] {
-        let census = SettingKey.monitors(key)
+        let census = SettingKey.screens(key)
         switch key {
         case .spacePins:
-            return monitorsPinRows(
+            return screensPinRows(
                 census,
                 old: old.spacePins,
                 new: new.spacePins
             )
         case .mainSpaces:
-            return monitorsMainRows(
+            return screensMainRows(
                 census,
                 old: old.mainSpaces,
                 new: new.mainSpaces
@@ -32,7 +32,7 @@ extension SettingsValueReadout {
     /// `name:WxH` fingerprint verbatim: no fingerprint→name
     /// helper exists, and a parser here would be a second copy
     /// of the fingerprint grammar.
-    private static func monitorsPinRows(
+    private static func screensPinRows(
         _ census: SettingKey,
         old: [SpaceID: String],
         new: [SpaceID: String]
@@ -53,7 +53,7 @@ extension SettingsValueReadout {
     }
 
     /// Diff rows for spaces joining or leaving the follows-main set.
-    private static func monitorsMainRows(
+    private static func screensMainRows(
         _ census: SettingKey,
         old: Set<SpaceID>,
         new: Set<SpaceID>

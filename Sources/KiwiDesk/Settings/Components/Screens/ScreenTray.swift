@@ -2,19 +2,19 @@ import CoreGraphics
 import KiwiDeskCore
 
 /// Positioning logic for "Follows main display" monitor tray (#678 Phase 3).
-enum MonitorTray {
+enum ScreenTray {
     /// Positions and normalizes the tray relative to the main
     /// display card. An id matching no card yields NO tray rather
     /// than a tray on some other display: a fallback would be a
     /// second derivation of which display is main —
     /// `SettingsModel.mainDisplay` exists to be the only copy.
     static func fold(
-        cards: [MonitorArrangement.Drawn],
+        cards: [ScreenArrangement.Drawn],
         main: DisplayID?,
-        trayHeight: CGFloat = MonitorArrangement.trayHeight
-    ) -> MonitorArrangement.Layout {
+        trayHeight: CGFloat = ScreenArrangement.trayHeight
+    ) -> ScreenArrangement.Layout {
         guard !cards.isEmpty else {
-            return MonitorArrangement.Layout()
+            return ScreenArrangement.Layout()
         }
         let anchor = cards.first { $0.id == main }
         let tray = anchor.map { anchored in
@@ -27,13 +27,13 @@ enum MonitorTray {
                 height: trayHeight
             )
         }
-        let bounds = MonitorArrangement.union(
+        let bounds = ScreenArrangement.union(
             cards.map(\.rect) + [tray?.rect].compactMap { $0 }
         )
         let shift = CGPoint(x: -bounds.minX, y: -bounds.minY)
-        return MonitorArrangement.Layout(
+        return ScreenArrangement.Layout(
             displays: cards.map {
-                MonitorArrangement.Drawn(
+                ScreenArrangement.Drawn(
                     display: $0.display,
                     rect: $0.rect.offsetBy(
                         dx: shift.x,
@@ -50,14 +50,14 @@ enum MonitorTray {
     static func rect(
         anchoredTo anchor: CGRect,
         avoiding others: [CGRect],
-        height: CGFloat = MonitorArrangement.trayHeight
+        height: CGFloat = ScreenArrangement.trayHeight
     ) -> (rect: CGRect, isAbove: Bool) {
         let width = max(
             anchor.width - inset * 2,
-            MonitorArrangement.minimumCard.width
+            ScreenArrangement.minimumCard.width
         )
         let x = anchor.midX - width / 2
-        let gap = MonitorArrangement.trayGap
+        let gap = ScreenArrangement.trayGap
         func band(_ y: CGFloat) -> CGRect {
             CGRect(x: x, y: y, width: width, height: height)
         }

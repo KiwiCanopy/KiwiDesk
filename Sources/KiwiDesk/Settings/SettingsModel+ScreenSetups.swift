@@ -59,7 +59,7 @@ extension SettingsModel {
                 guard !sized else {
                     return "\(parts.name) (\(parts.size))"
                 }
-                let connected = monitorName(fingerprint)
+                let connected = screenName(fingerprint)
                 return connected == fingerprint ? parts.name : connected
             }
         )

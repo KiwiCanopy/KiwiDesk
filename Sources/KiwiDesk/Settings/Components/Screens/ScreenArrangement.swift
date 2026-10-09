@@ -1,12 +1,12 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Geometry for Monitors arrangement display (#678).
+/// Geometry for Screens arrangement display (#678).
 ///
 /// Displays are drawn in points from `Display.frame` without backing-scale
 /// terms. Flips AppKit y-up coordinates to SwiftUI y-down. Tested by
-/// `MonitorArrangementTests` and `LayoutSchematicCountTests`.
-enum MonitorArrangement {
+/// `ScreenArrangementTests` and `LayoutSchematicCountTests`.
+enum ScreenArrangement {
     /// Drawn display rectangle in canvas coordinates.
     struct Drawn: Equatable, Identifiable {
         let display: Display
@@ -31,12 +31,12 @@ enum MonitorArrangement {
 
     /// Minimum card size holding header and at least one chip.
     static let minimumCard = CGSize(
-        width: MonitorCardChips.cardPadding * 2
-            + MonitorCardChips.minChipWidth,
-        height: MonitorCardChips.cardPadding * 2
-            + MonitorCardChips.headerHeight
-            + MonitorCardChips.stackSpacing
-            + MonitorCardChips.chipHeight
+        width: ScreenCardChips.cardPadding * 2
+            + ScreenCardChips.minChipWidth,
+        height: ScreenCardChips.cardPadding * 2
+            + ScreenCardChips.headerHeight
+            + ScreenCardChips.stackSpacing
+            + ScreenCardChips.chipHeight
     )
 
     /// Gap between tray and display it hangs off.
@@ -44,7 +44,7 @@ enum MonitorArrangement {
     /// Dashed tray height.
     static let trayHeight: CGFloat = 52
 
-    /// Lays out arrangement inside `canvas` (`MonitorTray.fold`).
+    /// Lays out arrangement inside `canvas` (`ScreenTray.fold`).
     static func layout(
         displays: [Display],
         mainID: DisplayID?,
@@ -86,7 +86,7 @@ enum MonitorArrangement {
             bare.displays = cards
             return bare
         }
-        return MonitorTray.fold(
+        return ScreenTray.fold(
             cards: cards,
             main: mainID,
             trayHeight: band

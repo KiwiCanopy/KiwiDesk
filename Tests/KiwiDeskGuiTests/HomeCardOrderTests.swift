@@ -5,7 +5,7 @@ import Testing
 /// Home's card offer (#678 turn 9): every destination has a
 /// card, the order is the frame's and stays stable across mode
 /// flips, and one predicate decides who is offered — Simple's
-/// eight, Power User's twelve, the Monitors auto-promotion, and the
+/// eight, Power User's twelve, the Screens auto-promotion, and the
 /// #18 stored-profile rule, never a hand-negated copy.
 @Suite("Home card order and offer")
 struct HomeCardOrderTests {
@@ -66,20 +66,20 @@ struct HomeCardOrderTests {
         )
     }
 
-    @Test("Monitors auto-promotes into Simple at two displays")
-    func monitorsPromotes() {
+    @Test("Screens auto-promotes into Simple at two screens")
+    func screensPromotes() {
         #expect(
             !offered(mode: .simple, displays: 1)
-                .contains(.monitors)
+                .contains(.screens)
         )
         let promoted = offered(mode: .simple, displays: 2)
-        #expect(promoted.contains(.monitors))
+        #expect(promoted.contains(.screens))
         #expect(promoted.count == 11)
         // Computed at read: one display again and the card is
         // gone — nothing stored the promotion.
         #expect(
             !offered(mode: .simple, displays: 1)
-                .contains(.monitors)
+                .contains(.screens)
         )
     }
 

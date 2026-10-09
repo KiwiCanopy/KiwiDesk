@@ -1,11 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Monitors spatial arrangement diagram with display cards and follows-main
+/// Screens spatial arrangement diagram with display cards and follows-main
 /// tray (#678 Phase 3).
-struct MonitorsPicture: View {
+struct ScreensPicture: View {
     @ObservedObject var model: SettingsModel
-    let rows: MonitorsFamilyRows
+    let rows: ScreensFamilyRows
     @Binding var selection: DisplayID?
 
     private static let canvasHeight: CGFloat = 240
@@ -69,8 +69,8 @@ struct MonitorsPicture: View {
 
     private func arrangement(
         for canvas: CGSize
-    ) -> MonitorArrangement.Layout {
-        MonitorArrangement.layout(
+    ) -> ScreenArrangement.Layout {
+        ScreenArrangement.layout(
             displays: rows.displays,
             mainID: model.mainDisplay?.id,
             canvas: canvas,
@@ -79,11 +79,11 @@ struct MonitorsPicture: View {
     }
 
     private func picture(
-        _ layout: MonitorArrangement.Layout
+        _ layout: ScreenArrangement.Layout
     ) -> some View {
         ZStack(alignment: .topLeading) {
             ForEach(layout.displays) { drawn in
-                DisplayCard(
+                ScreenCard(
                     model: model,
                     display: drawn.display,
                     rows: rows,
