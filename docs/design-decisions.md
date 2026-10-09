@@ -750,8 +750,9 @@ sheet. The rows replace the prose rather than sitting above it,
 so the window keeps its height: it is already sized to its
 tallest tab. Every row's change stays a bullet in its New or
 Improved tab — the row is the signpost, the tab the record — so
-nothing exists only as a row. A release decides: the curator
-proposes rows, the owner rules rows or prose.
+nothing exists only as a row. Rows are the default; prose is for
+a patch or a fixes-only release, which has nothing new to find,
+and the owner may overrule either for a release.
 
 **A row's symbol depicts the object, never a state or an
 action.** Sparkles read as Apple Intelligence and an up-arrow as
