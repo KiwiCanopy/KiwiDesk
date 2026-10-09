@@ -98,6 +98,7 @@ struct NavRow: View {
                 $0.kind == .navigation && $0.lua == lua
             },
             bindings: $bindings,
+            config: model.config,
             commit: { record($0) }
         )
     }

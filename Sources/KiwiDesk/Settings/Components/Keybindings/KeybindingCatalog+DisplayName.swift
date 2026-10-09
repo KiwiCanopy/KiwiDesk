@@ -35,4 +35,16 @@ extension KeybindingCatalog {
         else { return label }
         return match.resolvedLabel
     }
+
+    /// A binding's name as a sentence or checklist shows it: its
+    /// localized label, else its Lua when it stores none (#96,
+    /// #2111).
+    @MainActor static func localizedName(
+        of binding: KeyBinding,
+        config: GuiConfig
+    ) -> String {
+        binding.label.isEmpty
+            ? binding.lua
+            : localizedLabel(for: binding.label, config: config)
+    }
 }
