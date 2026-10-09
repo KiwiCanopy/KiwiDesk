@@ -171,7 +171,7 @@ public enum StarterSetup {
             sizes: sizes,
             hosts: hosts(sizes)
         )
-        settings.appBarStyle.edge = appBarEdge
+        settings.appBarStyle.setEdge(appBarEdge)
         if sizes[0].height < compactMainHeight {
             settings.kiwishelf.thickness = compactThickness
         }

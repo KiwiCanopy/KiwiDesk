@@ -1927,6 +1927,13 @@ meet at a corner, the Space Bar runs the whole edge and the App
 Bar stops at it.
 
 :::unreleased
+A bar's edge may also differ per screen — `set_edge`'s optional
+screen argument — and each screen reserves the edges its own
+bars sit on, so the bars may share one shelf on one screen and
+sit apart on another.
+:::
+
+:::unreleased
 An edge whose every bar has `reserve` off is not reserved
 ([`space_bar.set_reserve`](#space_barset_reserve)): its bar
 draws over the windows.
@@ -2504,6 +2511,11 @@ places:
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
 (default `"top"`; the starter setup seeds `"bottom"`).
 
+:::unreleased
+Then, optionally, a screen, named as
+[`space_bar.set_edge`](#space_barset_edge) names one.
+:::
+
 **Does:** sets the screen edge the App Bar sits on, for every
 layout — no layout sets its own. On the Space Bar's edge the two
 share one [KiwiShelf](#kiwishelf); on another edge each bar is
@@ -2515,6 +2527,15 @@ it does not follow a layout's orientation.
 ```lua
 app_bar.set_edge("bottom")
 ```
+
+:::unreleased
+With a screen, the edge is that screen's alone, as
+[`space_bar.set_edge`](#space_barset_edge) describes.
+
+```lua
+app_bar.set_edge("right", "LG HDR 4K:3840x2160")
+```
+:::
 
 :::unreleased
 ### app_bar.set_reserve
@@ -2703,6 +2724,13 @@ space_bar.set_reserve(false)
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
 (default `"top"`).
 
+:::unreleased
+Then, optionally, a screen, in the forms
+[`move_space_to_display`](#move_space_to_display) takes — a
+number, or a screen's fingerprint or name — or the fingerprint
+of a screen that is not connected, kept for when it is.
+:::
+
 **Does:** sets the screen edge the Space Bar sits on. On the App
 Bar's edge the two share one [KiwiShelf](#kiwishelf); on another
 edge each bar is its own, reserved as KiwiShelf describes. The
@@ -2713,6 +2741,27 @@ edge is absolute — it does not follow a layout's orientation.
 ```lua
 space_bar.set_edge("left")
 ```
+
+:::unreleased
+**Per screen:** with a screen, the bar takes that edge on that
+screen alone. A screen with no edge of its own uses the bar's,
+so a new screen needs no setup. Naming the bar's own edge
+returns a screen to it. The screens judged together are the
+active profile's screens, the connected ones and every screen
+with an edge of its own: once all of them sit on one edge, that
+edge becomes the bar's and the screens' own edges go, which
+moves no screen; a screen on another edge keeps them apart. A
+call without a screen sets the bar on every screen, clearing
+their own edges. A look sets the bars' edges and leaves each
+screen's own untouched. The edges are stored per profile, under
+`space_bar.edge_override` and `app_bar.edge_override`, keyed by
+fingerprint.
+
+```lua
+space_bar.set_edge("top")
+space_bar.set_edge("left", "LG HDR 4K:3840x2160")
+```
+:::
 
 ### space_bar.set_glyph_span
 
@@ -5813,9 +5862,10 @@ titles have settled — never the window you are working in, nor
 one you moved since launch — and a window that reopens up to two minutes
 after launch is still placed. An app's windows that share one
 title go back to that app's spaces in no particular order. The
-arrangement is used once, by that first launch. After a plain
-Quit the next restart still starts fresh: quitting lets the
-arrangement go.
+arrangement is used once, by that first launch. A plain Quit
+counts the same way when the restart or login that follows it
+begins within 10 minutes; later than that, the next launch starts
+fresh: quitting lets the arrangement go.
 :::
 
 :::unreleased
@@ -5833,14 +5883,25 @@ wait for an answer and discards them.
 
 On quit, KiwiDesk moves each managed tiled window
 back onto the screen its space is assigned to and arranges them
-per `quit.layout` (see `quit.set_layout` below). Floating
-windows are left wherever they are. KiwiDesk keeps all managed
-windows on the single visible macOS Desktop (inactive spaces are
-parked off-screen at the peek corner, not on a different
-Desktop), so every reachable window lands there together.
-Windows on a screen's background Desktops cannot be
+per `quit.layout` (see `quit.set_layout` below). KiwiDesk keeps
+all managed windows on the single visible macOS Desktop (inactive
+spaces are parked off-screen at the peek corner, not on a
+different Desktop), so every reachable window lands there
+together. Windows on a screen's background Desktops cannot be
 repositioned without disabling SIP, which KiwiDesk never does —
 the visible Desktop per screen is the arranged scope.
+
+:::unreleased
+Floating windows are arranged too, on every space, shown or not;
+a popup or other transient window is left alone. The next launch
+puts each one back — in its space, still floating, at the frame
+it had before the quit — a window you floated by hand included,
+and one whose app reopens it late. A restart of the Mac or a
+logout keeps them too, under the rules above. After a crash, a
+window you floated by hand comes back without its float, so it
+tiles again unless its space is in floating mode; only one that
+had not reopened yet since the last quit keeps it.
+:::
 
 Two restarts arrange nothing: an update's **Install and
 Relaunch**, and `kiwidesk service restart` of a running service
@@ -5848,9 +5909,10 @@ whose new program is signed like the running one. Windows stay
 where they are, hidden spaces' windows included, and the new
 process picks them up in place — along with the session's
 resized splits, weights and scroll positions and the windows you
-floated or made sticky by hand, which a quit and relaunch start
-fresh. Every other stop, `service stop` and an automatic update
-included, arranges per `quit.layout`. If the new process never
+floated or made sticky by hand; a quit and relaunch start the
+sizing and the sticky windows fresh. Every other stop,
+`service stop` and an automatic update included, arranges per
+`quit.layout`. If the new process never
 comes up, the windows stay as a crash leaves them, and the next
 launch restores the arrangement.
 

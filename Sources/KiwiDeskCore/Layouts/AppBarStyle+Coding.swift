@@ -11,6 +11,7 @@ extension AppBarStyle {
     /// `allCases`; do not drop it as "unused".
     enum CodingKeys: String, CodingKey, CaseIterable {
         case edge
+        case edgeOverride = "edge_override"
         case activeIndicator = "active_indicator"
         case titleCap = "title_cap"
         case groupAdjacentWindows = "group_adjacent_windows"
@@ -28,6 +29,11 @@ extension AppBarStyle {
                 AppBarEdge.self,
                 forKey: .edge
             ) ?? defaults.edge
+        edgeOverride =
+            try container.decodeIfPresent(
+                [String: AppBarEdge].self,
+                forKey: .edgeOverride
+            ) ?? defaults.edgeOverride
         activeIndicator =
             try container.decodeIfPresent(
                 ActiveIndicator.self,

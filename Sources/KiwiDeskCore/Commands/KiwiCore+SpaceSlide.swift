@@ -59,9 +59,7 @@ extension KiwiCore {
             SpaceSlideOverlay.Press(
                 display: intent.display,
                 screen: screen.frame,
-                axis: SpaceSlidePlan.axis(
-                    spaceBarEdge: tiler.settings.spaceBarStyle.edge
-                ),
+                axis: spaceSlideAxis(on: intent.display),
                 direction: SpaceSlidePlan.direction(
                     from: intent.leaving,
                     to: target,
@@ -159,10 +157,7 @@ extension KiwiCore {
     private func slideMembers(of space: SpaceID) -> [ManagedWindow] {
         (state.workspaces[space]?.windows ?? []).compactMap {
             state.windows[$0]
-        }.filter {
-            !$0.isFullscreen
-                && !state.stickyExemptFromStash($0, onSpace: space)
-        }
+        }.filter { state.parksOnInactive($0, in: space) }
     }
 
     /// The sticky windows the screen renders through the switch,

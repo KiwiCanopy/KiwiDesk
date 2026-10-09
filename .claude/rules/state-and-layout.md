@@ -124,7 +124,8 @@ editing here:
   (#242) owns its relationship to a bar. Which files qualify
   lives in that map, not here.
 - **A per-space override never carries `appBar`.** The shelf's
-  reservation is answered per layout MODE (`shelfEdges(in:)`), and
+  reservation is answered per layout MODE and per screen
+  (`shelfEdges(in:on:)`, #1948), and
   the App Bar a Space draws is its mode's; a per-space `appBar`
   would draw a bar where the reservation left the windows, or
   reserve a strip nothing draws on. `MonocleOverrideTests` and
@@ -1820,6 +1821,20 @@ editing here:
   `floatFrames` (#1675) and the size-bound learner's ledgers
   named as left behind. A Space's session is adopted AFTER its
   membership: re-filing a window drops its weight.
+- **A change that widens the quit gather carries what it
+  overwrites through `CrashRecovery.stopCarry` (#1864).** Session
+  state the next launch owes back because the gather moved the
+  window rides EVERY stop's capture — a quit's, an in-place
+  restart's and the logout freeze's kept file — and never a plain
+  autosave, so a crash, which moved nothing, still starts it
+  fresh — save a debt owed to a window not yet arrived, which
+  rides every capture, its float with it (#2008,
+  `QuitFloatReturnTests` ▸ `owedFloatRidesACrash`); the stop
+  captures BEFORE it gathers
+  (`StopCaptureOrderTests`). The hand float is the one carried,
+  since the gather places every float (`QuitFloatReturnTests` ▸
+  `onlyAStopCarries`), and `SnapshotStoreCensusTests` names such
+  a store's `.stop` tier.
 - **The in-place payload is a stored cross-version shape
   (#930).** Build N writes the session file and build N+1 reads
   it, so `SpaceSession`, `WindowSession`, `SessionRatios`'
@@ -1829,7 +1844,8 @@ editing here:
   `HeldOrigin.Arrangement` keys and the snapshot's own
   `arrangement`, which every snapshot carries (#1646,
   profiles.md), each window record's `app` and `title` — the
-  stable key a cross-session match reads (#1385) — and the
+  stable key a cross-session match reads (#1385) — and its
+  `floating`, the stop-carried hand float (#1864) — and the
   snapshot's `frozenForLogout` mark, and its
   `arrangementRecords` — #1230's record
   per saved profile and per composed Standard, keyed by the
@@ -1890,8 +1906,10 @@ editing here:
   any new door is written inside that file, beside the two.
 - **A file the id gates refuse never has its ids replayed
   (#1385).** It reaches boot only as `takeCrossSessionCandidate`,
-  and only when a logout's freeze wrote it — a plain Quit's file
-  never crosses a boot — consumed with the file, so once; and it
+  and only when a logout's freeze wrote it or a plain Quit's
+  boot or login began inside `CrashRecovery.quitCrossingBound`
+  (#1864, `QuitCrossingTests`) — consumed with the file, so
+  once; and it
   is applied only through `CrossSessionMatch` and
   `StateSnapshot.rekeyed`, pairing by bundle id, then title once
   the title pass has run, then rank, its late arrivals paid
@@ -1913,7 +1931,7 @@ editing here:
   `arrangementChangeClosesTheMatch`). An
   in-place file that passes the gates is replayed by id and the
   match never arms beside it (`CrossSessionRestoreTests` ▸
-  `sameSessionIsNeverMatched`, `plainQuitStartsFresh`,
+  `sameSessionIsNeverMatched`, `plainQuitCrossesInsideTheBound`,
   `secondLaunchMatchesNothing`, `oldIDNamesNothing`,
   `titlePassRespectsTheUser`). A new reader of a refused file
   owes the same, and a new field of the snapshot's records is
@@ -1999,8 +2017,9 @@ editing here:
   dispatch — save that a `space_bar.*` or `app_bar.*` write may
   skip the pass, running the one `repaintBarsAndFloatNet` tail
   (the bars, then every strip reader) instead, only while it leaves every layout's
-  `TilingSettings.shelfReservation(in:)` — the whole input
-  `layoutBounds(from:mode:)` reads — unchanged (#1524,
+  `TilingSettings.shelfReservation(in:on:)` on every connected
+  screen — the whole input `layoutBounds(from:mode:on:)`
+  reads — unchanged (#1524, #1948,
   `BarReserveCoreTests` ▸ `unchangedReservationSkipsTheRetile`).
   Event-driven retiles stay on the `.event` default so
   echo lag can't wobble windows. Profile applies classify

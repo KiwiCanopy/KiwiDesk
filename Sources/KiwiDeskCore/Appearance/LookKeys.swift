@@ -65,7 +65,14 @@ public enum LookKeys {
             + "under the window's own chrome — which one shows",
         "gap.override": "a Space's own exception to the global "
             + "gaps, set on that Space and kept through a look",
+        "space_bar.edge_override": screenEdges,
+        "app_bar.edge_override": screenEdges,
     ]
+
+    /// Why a bar's per-screen edges stay out (#1948).
+    private static let screenEdges =
+        "a screen's own edge names this Mac's screens, and kept "
+        + "through a look it stays the strongest"
 
     private static let functionality =
         "which items exist, what they show or what they do"

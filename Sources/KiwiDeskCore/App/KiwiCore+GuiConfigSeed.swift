@@ -148,15 +148,20 @@ extension KiwiCore {
         )
     }
 
-    /// Connected displays the starter is sized for. `loadConfig` runs
-    /// before the event loop's first `publishDisplays`, so live
-    /// state is still empty on a genuine first launch — fall back
-    /// to the same `NSScreen` source `publishDisplays` reads.
-    /// Prefers live state when present (tests seed displays there
-    /// to drive this deterministically). Read through
-    /// `starterSizes`, so the space count, the Starter profile and
-    /// Glass can't size to different displays.
+    /// Connected displays the starter is sized for
+    /// (`connectedDisplays()`). Read through `starterSizes`, so the
+    /// space count, the Starter profile and Glass can't size to
+    /// different displays.
     func starterDisplays() -> [Display] {
+        connectedDisplays()
+    }
+
+    /// The connected displays: the published ones, else — before
+    /// the event loop's first `publishDisplays`, as `loadConfig`
+    /// and a booting `init.lua` run — the same `NSScreen` source
+    /// `publishDisplays` reads. Live state wins when present
+    /// (tests seed displays there to drive this deterministically).
+    func connectedDisplays() -> [Display] {
         let live = state.workspaces.allDisplays
         if !live.isEmpty { return live }
         return ScreenList.all.compactMap { $0.kiwiDisplay }

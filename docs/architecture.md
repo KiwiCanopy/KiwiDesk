@@ -177,8 +177,8 @@ keeps its place (`StashDepartures`).
 
 :::unreleased
 A `space_bar.*` or `app_bar.*` write that leaves every layout's
-`shelfReservation(in:)` — the input `layoutBounds` reads —
-unchanged runs no pass at all: it repaints the bars and
+`shelfReservation(in:on:)` — the input `layoutBounds` reads —
+unchanged on every screen runs no pass at all: it repaints the bars and
 re-clamps the floats (#1524).
 :::
 
@@ -303,8 +303,9 @@ budgeted path and re-tracks what cold AX trees under-reported.
 
 :::unreleased
 After a restart of the Mac the tail has no session to replay by
-id. A snapshot the logout freeze wrote is matched instead
-(`CrossSessionMatch`, #1385): the windows the scan paired by app
+id. A snapshot the logout freeze wrote — or a plain Quit's,
+when the boot or login began within ten minutes of it (#1864) —
+is matched instead (`CrossSessionMatch`, #1385): the windows the scan paired by app
 are re-keyed into the same replay, a window that arrives later is
 filed before its create fold as a slow app's window is, and a
 pass about 30 s after launch pairs the rest by title.

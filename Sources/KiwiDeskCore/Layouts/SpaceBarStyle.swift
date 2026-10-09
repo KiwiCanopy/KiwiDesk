@@ -17,6 +17,9 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// same edge shares one shelf with it; on another, each bar
     /// is its own (#1731).
     public var edge: AppBarEdge = .top
+    /// A screen's own edge, keyed by its fingerprint (#1948); a
+    /// screen with none uses `edge`.
+    public var edgeOverride: [String: AppBarEdge] = [:]
     /// Max glyphs per Space item before "+n" badge (#376).
     /// Default 5.
     public var glyphSpan = 5
@@ -95,4 +98,4 @@ public struct SpaceBarStyle: Sendable, Equatable {
 /// placement from `TilingSettings+Coding` is deliberate — do not
 /// harmonize; `SpaceBarParityTests` and `SettingsCodingTests`
 /// backstop the residual hazard.
-extension SpaceBarStyle: Codable {}
+extension SpaceBarStyle: Codable, ScreenEdged {}

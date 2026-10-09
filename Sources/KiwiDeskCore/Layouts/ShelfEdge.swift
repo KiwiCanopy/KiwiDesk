@@ -16,7 +16,7 @@ public struct ShelfEdge: Sendable, Equatable {
 
 /// What the shelves take off a screen in one layout: the edges
 /// it reserves and each edge's depth — the whole input
-/// `TilingSettings.layoutBounds(from:mode:)` reads, so two equal
+/// `TilingSettings.layoutBounds(from:mode:on:)` reads, so two equal
 /// values leave every layout's bounds alone (#1524).
 public struct ShelfReservation: Sendable, Equatable {
     public let edges: [AppBarEdge]

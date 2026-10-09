@@ -77,7 +77,9 @@ struct InPlaceRestartNoMotionTests {
     private func proveNoMotion(_ mode: LayoutMode) throws {
         let a = try #require(Self.arrange(mode))
         let left = F.settle(a)
-        let session = try F.crossed(a.sessionSnapshot(inPlace: true))
+        let session = try F.crossed(
+            try #require(a.crash.stopCapture(inPlace: true))
+        )
         var scanned = Self.windows
         scanned[6].floating = false
         let (b, issued) = try #require(
@@ -145,7 +147,9 @@ struct InPlaceRestartNoMotionTests {
         a.state.workspaces.focus(float, in: F.shown)
         let left = F.settle(a)
         #expect(a.tiler.monocleShownMembers[F.shown] == WindowID(3))
-        let session = try F.crossed(a.sessionSnapshot(inPlace: true))
+        let session = try F.crossed(
+            try #require(a.crash.stopCapture(inPlace: true))
+        )
         // Both hand floats are scanned as the tiles they look like.
         let scanned = windows.map { window -> F.Window in
             var found = window
@@ -198,7 +202,9 @@ struct InPlaceRestartNoMotionTests {
             }
         )
         let left = F.settle(a)
-        let session = try F.crossed(a.sessionSnapshot(inPlace: true))
+        let session = try F.crossed(
+            try #require(a.crash.stopCapture(inPlace: true))
+        )
         let (b, issued) = try #require(
             F.processB(windows, left: left, session: session)
         )

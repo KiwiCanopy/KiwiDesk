@@ -94,12 +94,6 @@ extension KiwiCore {
         return response
     }
 
-    /// Every layout's layout-bounds input, read through the one
-    /// `shelfReservation(in:)` `layoutBounds` reads (#1524).
-    var shelfReservations: [ShelfReservation] {
-        LayoutMode.allCases.map(tiler.settings.shelfReservation(in:))
-    }
-
     /// Raised by a layout setter that only re-divides room among
     /// the windows already placed — a ratio or slot-size write —
     /// so this dispatch's trailing retile may slide a shrinking

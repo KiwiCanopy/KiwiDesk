@@ -62,13 +62,17 @@ extension KiwiCore {
                 // Not tracked yet (a slow app's window, #21):
                 // `adopt` filed its Space, and its frame is owed
                 // at its arrival (#1362) — the space it lands in
-                // may assign none, on another display.
+                // may assign none, on another display — beside a
+                // hand float a stop carried (#1864).
                 missing += 1
-                if !corner,
+                let floating = record.floating == true
+                if !corner || floating,
                     state.rememberedSpaces[record.windowID] != nil
                 {
-                    state.restoredFrames[record.windowID] =
-                        record.frame
+                    state.restoredFrames[record.windowID] = .init(
+                        frame: record.frame,
+                        floating: floating
+                    )
                 }
                 continue
             }
@@ -76,8 +80,11 @@ extension KiwiCore {
             // process held (#1352): SEED it, never set it — a set
             // lands on a window the forced park that follows
             // overwrites, and the seed door outranks the boot
-            // retile's centred seed.
-            if tiler.looksStashed(current) {
+            // retile's centred seed. A float the quit gathered off
+            // a hidden Space takes it too (#1864).
+            let float = restoresAsFloat(record.windowID)
+            let parks = float && (corner || parksNow(record.windowID))
+            if tiler.looksStashed(current) || parks {
                 if !corner {
                     tiler.seedStash(
                         record.windowID,
@@ -85,6 +92,12 @@ extension KiwiCore {
                     )
                 }
                 continue
+            }
+            // Seeded beside the set (#1864): the activation below
+            // may park it before the set's echo lands, and the park
+            // would keep the quit grid's frame as its original.
+            if float {
+                tiler.seedStash(record.windowID, frame: record.frame)
             }
             tiler.setFrame(record.windowID, record.frame)
         }
@@ -97,6 +110,27 @@ extension KiwiCore {
         }
     }
 
+    /// Whether a replayed window is an effective float in the Space
+    /// the replay filed it in: no layout places it, so its record
+    /// is the frame it returns to.
+    private func restoresAsFloat(_ id: WindowID) -> Bool {
+        let space = state.workspaces.space(of: id)
+        return EffectiveFloat.applies(
+            isFloating: state.windows[id]?.isFloating == true,
+            mode: space.flatMap { state.workspaces[$0]?.mode }
+        )
+    }
+
+    /// Whether the pass after the replay parks `id`: filed in a
+    /// Space no display shows, under the stash's own verdict.
+    private func parksNow(_ id: WindowID) -> Bool {
+        guard let space = state.workspaces.space(of: id),
+            let window = state.windows[id]
+        else { return false }
+        return !state.workspaces.visibleSpaces.contains(space)
+            && state.parksOnInactive(window, in: space)
+    }
+
     /// Pays a restored frame the arrival fold handed back
     /// (#1362): seeded, never set, so the arrival retile's own
     /// restore pass delivers it on a shown space and the park
@@ -107,7 +141,10 @@ extension KiwiCore {
         arrived window: WindowID,
         effects: AppliedEffects
     ) {
-        guard let frame = effects.restoredFrame else { return }
+        // A corner rides the debt only for its float (#1352).
+        guard let frame = effects.restoredFrame,
+            !tiler.looksStashed(frame)
+        else { return }
         tiler.seedStash(window, frame: frame)
         onLog(
             "restore: w\(window.raw) arrived late — its snapshot "

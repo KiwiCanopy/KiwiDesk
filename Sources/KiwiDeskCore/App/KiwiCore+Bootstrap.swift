@@ -11,6 +11,9 @@ extension KiwiCore {
         crash.captureInPlaceState = { [weak self] in
             self?.sessionSnapshot(inPlace: true)
         }
+        crash.stopCarry = { [weak self] snapshot in
+            self?.state.markingStopFloats(snapshot) ?? snapshot
+        }
         crash.onAutosaved = { [weak self] in
             if let self { crash.restoreKeys.autosave(self) }
         }
@@ -164,6 +167,12 @@ extension KiwiCore {
         socket.bus = bus
         tiler.elementProvider = { [weak self] id in
             self?.eventLoop.element(for: id)
+        }
+        // One screen identity for the engine and the bars (#1948).
+        tiler.screenFingerprint = { [weak self] screen in
+            screen.kiwiDisplayID.flatMap {
+                self?.screenFingerprint(of: $0)
+            }
         }
         // The loop owns whether an app's EUI is on at rest; the
         // applier's holds only borrow it (#1508).

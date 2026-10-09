@@ -12,7 +12,14 @@ extension KiwiCore {
     ///   (as printed by `list_monitors`), else by `name`.
     /// Nil when nothing matches (or no displays are connected).
     func resolveDisplayArg(_ arg: JSONValue?) -> DisplayID? {
-        let displays = state.workspaces.allDisplays
+        resolveDisplayArg(arg, among: state.workspaces.allDisplays)
+    }
+
+    /// `resolveDisplayArg(_:)` over `displays`.
+    func resolveDisplayArg(
+        _ arg: JSONValue?,
+        among displays: [Display]
+    ) -> DisplayID? {
         guard !displays.isEmpty else { return nil }
         // Index first: a numeric arg is positional, never a name.
         if let index = arg?.intValue {

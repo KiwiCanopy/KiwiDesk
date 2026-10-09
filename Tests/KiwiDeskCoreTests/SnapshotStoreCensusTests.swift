@@ -31,6 +31,9 @@ struct SnapshotStoreCensusTests {
         case always
         /// Only the in-place snapshot carries it.
         case inPlace
+        /// Every stop's snapshot carries it — a quit's and an
+        /// in-place one — never an autosave (#1864).
+        case stop
         /// Nothing carries it.
         case behind
     }
@@ -50,7 +53,7 @@ struct SnapshotStoreCensusTests {
         "state.workspaces.spaces[].handedBreaks":
             (.behind, "a break's provenance; draws nothing (#1387)"),
         "state.userFloated":
-            (.inPlace, "a float set by hand, which the scan cannot see"),
+            (.stop, "a float set by hand, which the scan cannot see"),
         "state.stickyReachOverrides":
             (.inPlace, "a reach pin set by hand"),
         "state.rememberedSpaces":
@@ -107,7 +110,11 @@ struct SnapshotStoreCensusTests {
                 "a Space's windows in that record, adopted at boot (#1802)"
             ),
         "state.restoredFrames":
-            (.always, "rides a window record beside its filing (#2008)"),
+            (
+                .always,
+                "rides a window record beside its filing (#2008), "
+                    + "with the hand float it is owed (#1864)"
+            ),
         "state.departedSlots":
             (.behind, "a Desktop departure's slot (#1207)"),
         "state.unjudgedFilings":
@@ -182,7 +189,10 @@ struct SnapshotStoreCensusTests {
         core.state.stickyReachOverrides[WindowID(2)] = true
         core.state.floatFrames[WindowID(1)] = .init(pid: 7, frame: .zero)
         core.state.remember(WindowID(9), in: shown)
-        core.state.restoredFrames[WindowID(9)] = .zero
+        core.state.restoredFrames[WindowID(9)] = .init(
+            frame: .zero,
+            floating: true
+        )
         core.state.departedSlots[WindowID(9)] = .init(rank: 0)
         core.state.closedDepartures.insert(WindowID(9))
         core.state.focusRecency[WindowID(1)] = .init(pid: 7, tick: 1)

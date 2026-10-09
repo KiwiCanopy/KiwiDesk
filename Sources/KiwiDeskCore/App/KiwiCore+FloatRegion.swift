@@ -168,7 +168,7 @@ extension KiwiCore {
 
     /// EVERY painted strip covering `space` on an edge the
     /// layout RESERVES — both bars, in one list. The edge is
-    /// judged by the one fold `shelfEdges(in:)`, never per
+    /// judged by the one fold `shelfEdges(in:on:)`, never per
     /// section: on a fused edge either bar's reserve holds the
     /// whole strip — the non-reserving bar's painted section
     /// included, where the reserving one paints nothing — so a
@@ -181,7 +181,11 @@ extension KiwiCore {
         forSpace space: SpaceID
     ) -> [(strip: CGRect, edge: AppBarEdge)] {
         let mode = state.workspaces[space]?.mode ?? .bsp
-        let reserved = tiler.settings.shelfEdges(in: mode)
+        let reserved = tiler.settings.shelfEdges(
+            in: mode,
+            on: state.workspaces.display(of: space)
+                .flatMap(screenFingerprint(of:))
+        )
         let painted =
             spaceBarStrips(forSpace: space)
             + appBars.strips(forSpace: space)
