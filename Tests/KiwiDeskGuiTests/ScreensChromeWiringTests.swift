@@ -108,4 +108,33 @@ struct ScreensChromeWiringTests {
             )
         )
     }
+
+    /// The picture places itself where `ScreenArrangement.origin`
+    /// says, so the centring the geometry suite proves is the
+    /// centring drawn (#2065).
+    @Test("the picture is placed at the arrangement's origin")
+    func pictureTakesTheOrigin() throws {
+        let picture = try squashed(
+            "Components/Screens/ScreensPicture.swift"
+        )
+        for needle in [
+            "ScreenArrangement.origin(of:layout.contentSize,in:canvas)",
+            ".padding(.leading,origin.x).padding(.top,origin.y)",
+            "letlayout=arrangement(for:canvas)",
+        ] {
+            #expect(picture.contains(needle), "lost `\(needle)`")
+        }
+    }
+
+    /// The tray's wrap arithmetic measures the row with
+    /// `chipArea`, the width the cards' capacity counts, rather
+    /// than a second spelling of it (#2065 review).
+    @Test("the tray height measures rows with chipArea")
+    func trayHeightTakesTheChipArea() throws {
+        let tray = try squashed(
+            "Components/Screens/ScreenArrangement+Tray.swift"
+        )
+        #expect(tray.contains("ScreenCardChips.chipArea("))
+        #expect(!tray.contains("cardPadding"))
+    }
 }

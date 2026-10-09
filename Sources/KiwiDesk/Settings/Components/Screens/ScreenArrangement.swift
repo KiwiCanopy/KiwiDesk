@@ -93,6 +93,19 @@ enum ScreenArrangement {
         )
     }
 
+    /// Where a picture of `content` size sits in `canvas`: its
+    /// bounding box centred on each axis it fits, at the origin
+    /// on an axis it overflows and scrolls (#2065).
+    static func origin(
+        of content: CGSize,
+        in canvas: CGSize
+    ) -> CGPoint {
+        CGPoint(
+            x: max(0, (canvas.width - content.width) / 2),
+            y: max(0, (canvas.height - content.height) / 2)
+        )
+    }
+
     /// Whether scale cap pushed any screen below `perceptibleClamp`.
     static func isApproximate(_ displays: [Display]) -> Bool {
         let drawable = displays.filter {
