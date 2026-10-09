@@ -282,6 +282,7 @@ extension KiwiCore {
             // Same forgetting as a destroy — the id can be
             // reused whether the window closed or its app hid.
             forgetGoneWindow(id, pid: goneWindowPID)
+            crash.noteDeparture(closed: false)  // #1385
             // `.hidden` rather than the timing classifier: a
             // hide is explicit, like a minimize, so there is
             // nothing to infer from how long ago the desktop

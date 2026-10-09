@@ -38,6 +38,9 @@ extension KiwiCore {
             wasMinimized: wasMinimized,
             presence: presence
         )
+        // A logout's burst of closes is told from this verdict
+        // (#1385, `LogoutRollback`).
+        crash.noteDeparture(closed: reason == .closed)
         var desktop: Int?
         if case .hosted(let space, true) = presence, !wasMinimized {
             // The eyeball's question (#1146): a fast app folding

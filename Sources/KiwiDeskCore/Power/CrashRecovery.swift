@@ -49,6 +49,9 @@ public final class CrashRecovery {
 
     /// When the logout froze the snapshot writes, or nil (#1385).
     private(set) var frozenAt: Date?
+    /// The recent autosaves and departures the freeze rolls back
+    /// over (#1385, `LogoutRollback`), on `now`.
+    private(set) var rollback = LogoutRollback()
     /// The power-off observer and the center it was added on.
     private(set) var powerOff:
         (token: NSObjectProtocol, center: NotificationCenter)?
@@ -162,8 +165,25 @@ public final class CrashRecovery {
     /// performs during a logout must not overwrite the last
     /// arrangement. Lifts past `logoutFreezeBound`.
     public func freezeForLogout() {
-        frozenAt = now()
+        let at = now()
+        frozenAt = at
         onLog("autosave frozen: logout or power-off began")
+        // macOS quit the apps before this notice (#1385): put back
+        // the autosave written before their closes.
+        guard let kept = rollback.preBurst(at: at),
+            write(kept.snapshot, to: fileURL)
+        else { return }
+        let age = Int(at.timeIntervalSince(kept.at))
+        onLog(
+            "autosave rolled back \(age)s, before the logout's "
+                + "closes: \(kept.snapshot.windows.count) windows"
+        )
+    }
+
+    /// One window left (#1385): `closed` is the gone handler's
+    /// `closed` arm, never re-derived here.
+    func noteDeparture(closed: Bool) {
+        rollback.noteDeparture(closed: closed, at: now())
     }
 
     /// Writes one snapshot now (also called by the timer), unless
@@ -176,6 +196,7 @@ public final class CrashRecovery {
             withIntermediateDirectories: true
         )
         guard write(snapshot, to: fileURL) else { return }
+        rollback.noteAutosave(snapshot, at: now())
         onAutosaved()
     }
 
