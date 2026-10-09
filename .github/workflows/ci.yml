@@ -76,6 +76,7 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
           FILTER: ${{ inputs.filter_paths }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           set -euo pipefail
           # Every unknown resolves to "run". A false negative here
@@ -115,6 +116,16 @@ jobs:
           if [ -z "$changed" ]; then
             echo "empty diff — running everything"
             echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # A release stamp alone has passed the gate twice already
+          # (#2106). The script is read from the BASE commit, so a
+          # PR cannot rewrite the rule that judges it; a base
+          # without the script answers no.
+          if [ "$EVENT" = "pull_request" ] \
+            && git show "${base}:scripts/ci-stamp-only" 2>/dev/null \
+              | bash -s -- "$HEAD_REF" "$base"; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           run=false
