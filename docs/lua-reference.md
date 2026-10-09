@@ -2753,8 +2753,7 @@ own and all are the same, that edge becomes the bar's and the
 screens' own edges go — a screen among them that follows the
 bar keeps them apart. A call without a screen sets the bar on
 every screen, clearing their own edges. A look sets the bars'
-edges and keeps each screen's own, dropping one that now equals
-its bar's. The edges are stored per profile, under
+edges and leaves each screen's own untouched. The edges are stored per profile, under
 `space_bar.edge_override` and `app_bar.edge_override`, keyed by
 fingerprint.
 

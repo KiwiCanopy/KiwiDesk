@@ -101,7 +101,7 @@ struct AppBarCommandParityTests {
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
         .edge(.left),
-        .screenEdge(.left, screen: "S:1x1", among: ["S:1x1", "T:1x1"]),
+        .screenEdge(.left, screen: "S:1x1"),
         .activeIndicator(.outline), .titleCap(40),
         .groupAdjacentWindows(false), .reserve(false),
     ]
@@ -112,7 +112,17 @@ struct AppBarCommandParityTests {
         for setting in Self.everySetting {
             var style = AppBarStyle()
             var bar = LayoutAppBar()
-            setting.apply(to: &style)
+            // A screened edge needs the screens a write judges, so
+            // `KiwiCore` applies it through the door (#1948).
+            if case .screenEdge(let edge, let screen) = setting {
+                style.setEdge(
+                    edge,
+                    on: screen,
+                    among: ScreenEdgeScope(screens: ["T:1x1"])
+                )
+            } else {
+                setting.apply(to: &style)
+            }
             setting.apply(to: &bar)
             let onStyle = changedFields(style, from: AppBarStyle())
             // `enabled` is bar-only, never a command target.
@@ -143,7 +153,7 @@ struct AppBarCommandParityTests {
     func parseCoverage() {
         for key in AppBarStyle.CodingKeys.allCases {
             let parsed = AppBarCommandSetting.parse(
-                field: APIReference.setterField(of: key.stringValue),
+                field: BarStyleKeys.setterField(of: key.stringValue),
                 args: sampleArgs(for: key)
             )
             #expect(
@@ -176,7 +186,7 @@ struct AppBarCommandParityTests {
     func appBarNamespaceParity() {
         let expected = Set(
             AppBarStyle.CodingKeys.allCases.map {
-                "set_\(APIReference.setterField(of: $0.stringValue))"
+                "set_\(BarStyleKeys.setterField(of: $0.stringValue))"
             }
         )
         #expect(

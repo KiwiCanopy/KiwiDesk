@@ -150,13 +150,16 @@ twice, was a question the user answered twice. The argument is
   `ScreenEdgeCoreTests` ▸ `livePlanPerDisplay`), and a caller of
   `barEdges(space:app:)` hands it settings `onScreen` resolved or
   names why not (`BarEdgeWriteCensusTests` ▸
-  `foldCallersAreCensused`). **Write a bar's edge through the
-  `ScreenEdged` doors** — `setEdge(_:)` for every screen,
-  `setEdge(_:on:among:)` for one, judged over
-  `KiwiCore.screenEdgeScope`, `setEdgeKeepingScreens(_:)` for a
-  look — so no entry equals its bar's edge and no caller
-  collapses by hand (`BarEdgeWriteCensusTests` ▸
-  `rawWritesAreCensused`). The empty map stays out of the JSON
+  `foldCallersAreCensused`), a Settings reader of a bar's own
+  edge naming its reason too (▸ `guiReadersAreCensused`).
+  **Write a bar's edge through the `ScreenEdged` doors** —
+  `setEdge(_:)` for every screen, `setEdge(_:on:among:)` for one,
+  judged over the one `KiwiCore.screenEdgeScope(monitorSets:)`
+  handed the written profile's monitor sets, and
+  `setEdgeKeepingScreens(_:)` for a look, which leaves the
+  entries exactly as they are — so a verb or Settings write keeps
+  no entry equal to its bar's edge and no caller collapses by
+  hand (`BarEdgeWriteCensusTests` ▸ `rawWritesAreCensused`). The empty map stays out of the JSON
   through a `KeyedEncodingContainer` overload whose scope is the
   TYPE `[String: AppBarEdge]`, module-wide: a store of that type
   that must encode an empty map takes a type of its own.

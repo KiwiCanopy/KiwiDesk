@@ -12773,10 +12773,13 @@ the connected screens and every screen holding an entry. Only
 when each screen of that set has an edge of its own and all
 agree do the entries become the bar's edge; a known screen that
 follows the bar blocks it, since collapsing would move that
-screen. The set is a union, so the result does not hang on
-which screens happen to be connected when a config runs.
+screen. The union keeps a known screen that is away in the set,
+so a monitor-set screen not connected while a config runs still
+blocks the collapse, as a connected screen without an entry
+does.
 
-A look sets the bars' edges and keeps each screen's own: the
+A look sets the bars' edges and leaves each screen's own
+untouched: the
 map names this Mac's screens, which a look shared to another Mac
 cannot know, and a screen's own edge is the most specific choice
 the user made, so it stays the strongest.

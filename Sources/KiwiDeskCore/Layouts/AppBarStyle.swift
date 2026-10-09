@@ -38,7 +38,7 @@ public struct AppBarStyle: Sendable, Equatable {
         let keys: [CodingKeys] = [.edge, .edgeOverride, .reserve]
         return Dictionary(
             uniqueKeysWithValues: keys.map { key in
-                let field = APIReference.setterField(
+                let field = BarStyleKeys.setterField(
                     of: key.stringValue
                 )
                 return (key, "app_bar.set_\(field)")

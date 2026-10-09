@@ -44,14 +44,30 @@ extension KiwiCore {
         }
     }
 
-    /// The ONE set a per-screen edge write judges its collapse
-    /// over (`ScreenEdged.setEdge(_:on:among:)`): the live
-    /// profile's monitor-set screens and the connected ones —
-    /// the entries' own screens are added by the write. Settings
-    /// hands the same door its draft's monitor set.
-    var screenEdgeScope: Set<String> {
-        let profile = profiles.active?.monitors ?? []
-        return profile.union(starterDisplays().map(\.fingerprint))
+    /// The ONE scope a per-screen edge write judges its collapse
+    /// over (`ScreenEdged.setEdge(_:on:among:)`): the screens of
+    /// `monitorSets` and the connected ones — the write adds the
+    /// entries' own. A writer hands it the monitor sets of the
+    /// profile it writes: the verb the live profile's
+    /// (`liveScreenEdgeScope`), a Settings writer its draft's,
+    /// never an empty list in their place.
+    public func screenEdgeScope(
+        monitorSets: [MonitorSet]
+    ) -> ScreenEdgeScope {
+        ScreenEdgeScope(
+            screens: Set(monitorSets.flatMap(\.monitors)).union(
+                connectedDisplays().map(\.fingerprint)
+            )
+        )
+    }
+
+    /// The scope for a write of the live settings: the adopted
+    /// profile's monitor sets, which follow every write of its
+    /// file (`ActiveProfile.refiled(_:)`).
+    var liveScreenEdgeScope: ScreenEdgeScope {
+        screenEdgeScope(
+            monitorSets: profiles.active?.monitorSets ?? []
+        )
     }
 
     /// `set_edge`'s arguments with the optional screen resolved
@@ -75,7 +91,7 @@ extension KiwiCore {
         ) {
             return .failure(error)
         }
-        let displays = starterDisplays()
+        let displays = connectedDisplays()
         let screen: String
         if let id = resolveDisplayArg(args[1], among: displays),
             let found = displays.first(where: { $0.id == id })

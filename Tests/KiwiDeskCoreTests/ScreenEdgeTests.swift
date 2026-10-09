@@ -27,7 +27,7 @@ struct ScreenEdgeTests {
         settings.spaceBarStyle.setEdge(
             studioEdge,
             on: Self.studio,
-            among: [Self.studio, Self.laptop]
+            among: ScreenEdgeScope(screens: [Self.studio, Self.laptop])
         )
         return settings
     }
@@ -36,7 +36,11 @@ struct ScreenEdgeTests {
     func resolution() {
         var style = SpaceBarStyle()
         style.edge = .top
-        style.setEdge(.left, on: Self.studio, among: [Self.laptop])
+        style.setEdge(
+            .left,
+            on: Self.studio,
+            among: ScreenEdgeScope(screens: [Self.laptop])
+        )
         #expect(style.edge(on: Self.studio) == .left)
         #expect(style.edge(on: Self.laptop) == .top)
         #expect(style.edge(on: "Unknown:640x480") == .top)
@@ -48,11 +52,23 @@ struct ScreenEdgeTests {
     func barEdgeFollows() {
         let both: Set = [Self.studio, Self.laptop]
         var style = AppBarStyle()
-        style.setEdge(.top, on: Self.studio, among: both)
+        style.setEdge(
+            .top,
+            on: Self.studio,
+            among: ScreenEdgeScope(screens: both)
+        )
         #expect(style.edgeOverride.isEmpty)
-        style.setEdge(.right, on: Self.studio, among: both)
+        style.setEdge(
+            .right,
+            on: Self.studio,
+            among: ScreenEdgeScope(screens: both)
+        )
         #expect(style.edgeOverride == [Self.studio: .right])
-        style.setEdge(.top, on: Self.studio, among: both)
+        style.setEdge(
+            .top,
+            on: Self.studio,
+            among: ScreenEdgeScope(screens: both)
+        )
         #expect(style.edgeOverride.isEmpty)
     }
 
@@ -60,8 +76,16 @@ struct ScreenEdgeTests {
     func screenlessClears() {
         var style = SpaceBarStyle()
         let all: Set = [Self.studio, Self.laptop, Self.away]
-        style.setEdge(.left, on: Self.studio, among: all)
-        style.setEdge(.right, on: Self.laptop, among: all)
+        style.setEdge(
+            .left,
+            on: Self.studio,
+            among: ScreenEdgeScope(screens: all)
+        )
+        style.setEdge(
+            .right,
+            on: Self.laptop,
+            among: ScreenEdgeScope(screens: all)
+        )
         style.setEdge(.bottom)
         #expect(style.edge == .bottom)
         #expect(style.edgeOverride.isEmpty)
@@ -74,38 +98,62 @@ struct ScreenEdgeTests {
     func collapse() {
         let both: Set = [Self.studio, Self.laptop]
         var style = SpaceBarStyle()
-        style.setEdge(.left, on: Self.studio, among: both)
+        style.setEdge(
+            .left,
+            on: Self.studio,
+            among: ScreenEdgeScope(screens: both)
+        )
         // The laptop still follows the bar: nothing collapses.
         #expect(style.edge == .top)
         #expect(style.edgeOverride == [Self.studio: .left])
-        style.setEdge(.left, on: Self.laptop, among: both)
+        style.setEdge(
+            .left,
+            on: Self.laptop,
+            among: ScreenEdgeScope(screens: both)
+        )
         #expect(style.edge == .left)
         #expect(style.edgeOverride.isEmpty)
         // A screen of the set beyond the entries blocks it.
         let three = both.union([Self.away])
-        style.setEdge(.right, on: Self.studio, among: three)
-        style.setEdge(.right, on: Self.laptop, among: three)
+        style.setEdge(
+            .right,
+            on: Self.studio,
+            among: ScreenEdgeScope(screens: three)
+        )
+        style.setEdge(
+            .right,
+            on: Self.laptop,
+            among: ScreenEdgeScope(screens: three)
+        )
         #expect(style.edge == .left)
         #expect(style.edgeOverride.count == 2)
         // With no other screen known, the one entry decides.
         var lone = SpaceBarStyle()
-        lone.setEdge(.left, on: Self.studio, among: [])
+        lone.setEdge(
+            .left,
+            on: Self.studio,
+            among: ScreenEdgeScope(screens: [])
+        )
         #expect(lone.edge == .left)
         #expect(lone.edgeOverride.isEmpty)
         // Disagreeing entries never collapse.
-        style.setEdge(.bottom, on: Self.away, among: three)
+        style.setEdge(
+            .bottom,
+            on: Self.away,
+            among: ScreenEdgeScope(screens: three)
+        )
         #expect(style.edgeOverride.count == 3)
     }
 
-    @Test("A look keeps each screen's own and drops what it equals")
+    @Test("A look keeps every screen's own, even one it equals")
     func lookKeepsScreens() {
-        let all: Set = [Self.studio, Self.laptop, Self.away]
         var style = SpaceBarStyle()
-        style.setEdge(.left, on: Self.studio, among: all)
-        style.setEdge(.right, on: Self.laptop, among: all)
+        style.edgeOverride = [Self.studio: .left, Self.laptop: .right]
         style.setEdgeKeepingScreens(.left)
         #expect(style.edge == .left)
-        #expect(style.edgeOverride == [Self.laptop: .right])
+        #expect(
+            style.edgeOverride == [Self.studio: .left, Self.laptop: .right]
+        )
     }
 
     @Test("The reserved edges are each screen's own")
@@ -139,7 +187,7 @@ struct ScreenEdgeTests {
         settings.appBarStyle.setEdge(
             .bottom,
             on: Self.studio,
-            among: [Self.studio, Self.laptop]
+            among: ScreenEdgeScope(screens: [Self.studio, Self.laptop])
         )
         #expect(
             settings.shelfEdges(in: .monocle, on: Self.studio)
@@ -165,7 +213,7 @@ struct ScreenEdgeTests {
         settings.appBarStyle.setEdge(
             .right,
             on: Self.studio,
-            among: [Self.studio, Self.laptop]
+            among: ScreenEdgeScope(screens: [Self.studio, Self.laptop])
         )
         #expect(settings.sharedBarEdge == .left)
         #expect(settings.uniformBarEdge == nil)

@@ -59,7 +59,7 @@ struct SpaceBarCommandParityTests {
     /// to differ from the field's default so the write shows.
     private static let everySetting: [SpaceBarCommandSetting] = [
         .enabled(false), .reserve(false), .edge(.left),
-        .screenEdge(.left, screen: "S:1x1", among: ["S:1x1", "T:1x1"]),
+        .screenEdge(.left, screen: "S:1x1"),
         .glyphSpan(8), .glyphGap(3), .frontAppTitleCap(40),
         .inactiveContent(.count), .itemLabel(.layout),
         .activeIndicator(.edgeMark),
@@ -77,7 +77,17 @@ struct SpaceBarCommandParityTests {
         var touched: Set<String> = []
         for setting in Self.everySetting {
             var style = SpaceBarStyle()
-            setting.apply(to: &style)
+            // A screened edge needs the screens a write judges, so
+            // `KiwiCore` applies it through the door (#1948).
+            if case .screenEdge(let edge, let screen) = setting {
+                style.setEdge(
+                    edge,
+                    on: screen,
+                    among: ScreenEdgeScope(screens: ["T:1x1"])
+                )
+            } else {
+                setting.apply(to: &style)
+            }
             let changed = changedFields(
                 style,
                 from: SpaceBarStyle()
@@ -93,7 +103,7 @@ struct SpaceBarCommandParityTests {
         for key in SpaceBarStyle.CodingKeys.allCases {
             let args = sampleArgs(for: key)
             let parsed = SpaceBarCommandSetting.parse(
-                field: APIReference.setterField(of: key.stringValue),
+                field: BarStyleKeys.setterField(of: key.stringValue),
                 args: args
             )
             #expect(

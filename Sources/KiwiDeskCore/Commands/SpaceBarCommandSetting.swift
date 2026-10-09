@@ -9,10 +9,11 @@ enum SpaceBarCommandSetting {
     case reserve(Bool)
     case edge(AppBarEdge)
     /// `set_edge(edge, screen)` — one screen's edge (#1948), the
-    /// screen resolved to its fingerprint and judged over `among`,
-    /// which the parse leaves empty and `KiwiCore` fills with its
-    /// `screenEdgeScope` (`scoped(to:)`) before it applies.
-    case screenEdge(AppBarEdge, screen: String, among: Set<String>)
+    /// screen resolved to its fingerprint. It needs the screens a
+    /// write judges, so `apply(to:)` writes nothing for it and
+    /// `KiwiCore` applies it through `ScreenEdged.setEdge(_:on:
+    /// among:)` with `screenEdgeScope(monitorSets:)`.
+    case screenEdge(AppBarEdge, screen: String)
     case glyphSpan(Int)
     case glyphGap(CGFloat)
     case groupAdjacentWindows(Bool)
@@ -74,7 +75,7 @@ enum SpaceBarCommandSetting {
         case "edge":
             return BarSettingChoice.edge(args).map { parsed in
                 parsed.screen.map {
-                    .screenEdge(parsed.edge, screen: $0, among: [])
+                    .screenEdge(parsed.edge, screen: $0)
                 } ?? .edge(parsed.edge)
             }
         case "active_indicator":
@@ -221,8 +222,7 @@ enum SpaceBarCommandSetting {
         case .enabled(let value): style.enabled = value
         case .reserve(let value): style.reserve = value
         case .edge(let value): style.setEdge(value)
-        case .screenEdge(let value, let screen, let screens):
-            style.setEdge(value, on: screen, among: screens)
+        case .screenEdge: break
         case .glyphSpan(let value): style.glyphSpan = value
         case .glyphGap(let value):
             style.glyphGap = SpaceBarStyle.clampGlyphGap(value)
@@ -249,15 +249,5 @@ enum SpaceBarCommandSetting {
         case .focusedHighlightColor(let value):
             style.focusedHighlightColor = value
         }
-    }
-}
-
-extension SpaceBarCommandSetting {
-    /// This setting with a screened edge judged over `screens`.
-    func scoped(to screens: Set<String>) -> Self {
-        guard case .screenEdge(let edge, let screen, _) = self else {
-            return self
-        }
-        return .screenEdge(edge, screen: screen, among: screens)
     }
 }

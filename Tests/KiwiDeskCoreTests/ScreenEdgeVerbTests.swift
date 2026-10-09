@@ -140,7 +140,41 @@ struct ScreenEdgeVerbTests {
                 settings: TilingSettings()
             )
         )
-        #expect(core.screenEdgeScope.contains(Self.away))
+        #expect(core.liveScreenEdgeScope.screens.contains(Self.away))
+        let verb = "space_bar.set_edge"
+        for screen in ["Left", "Right"] {
+            #expect(
+                edge(core, verb, .string("left"), .string(screen))
+                    .isSuccess
+            )
+        }
+        #expect(core.tiler.settings.spaceBarStyle.edge == .top)
+        #expect(core.tiler.settings.spaceBarStyle.edgeOverride.count == 2)
+    }
+
+    /// A set the live profile claims without an apply joins the
+    /// judged screens at once: the profile's file write re-files
+    /// its sets (`ActiveProfile.refiled(_:)`).
+    @Test("A claimed set's away screen blocks the collapse")
+    func claimedSetBlocksCollapse() throws {
+        let saved = PositionalDisplays.mainIDOverride
+        defer { PositionalDisplays.mainIDOverride = saved }
+        let core = makeCore()
+        let connected = [Self.left.fingerprint, Self.right.fingerprint]
+        try core.profiles.save(
+            Profile(
+                name: "Desk",
+                monitorSets: [MonitorSet(monitors: connected)],
+                spaceModes: [:],
+                settings: TilingSettings()
+            )
+        )
+        #expect(!core.liveScreenEdgeScope.screens.contains(Self.away))
+        try core.claimMonitorSet(
+            [Self.left.fingerprint, Self.away],
+            for: "Desk"
+        )
+        #expect(core.liveScreenEdgeScope.screens.contains(Self.away))
         let verb = "space_bar.set_edge"
         for screen in ["Left", "Right"] {
             #expect(
@@ -201,10 +235,12 @@ struct ScreenEdgeVerbTests {
         }
         #expect(settings.spaceBarStyle.edge == .bottom)
         #expect(settings.appBarStyle.edge == .bottom)
-        // The entry the look's edge now equals is dropped.
+        // Untouched, the entry the look's edge now equals too.
         #expect(
-            settings.spaceBarStyle.edgeOverride
-                == [Self.left.fingerprint: .left]
+            settings.spaceBarStyle.edgeOverride == [
+                Self.left.fingerprint: .left,
+                Self.right.fingerprint: .bottom,
+            ]
         )
         #expect(
             settings.appBarStyle.edgeOverride

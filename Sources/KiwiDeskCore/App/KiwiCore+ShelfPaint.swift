@@ -94,6 +94,12 @@ extension KiwiCore {
             before.monocle.appBar.activeIndicator
         settings.scrolling.appBar.activeIndicator =
             before.scrolling.appBar.activeIndicator
+        // A look leaves each screen's own edge alone (#1948); kept
+        // here too, so no later path that touches it strands it.
+        settings.spaceBarStyle.edgeOverride =
+            before.spaceBarStyle.edgeOverride
+        settings.appBarStyle.edgeOverride =
+            before.appBarStyle.edgeOverride
         return settings
     }
 

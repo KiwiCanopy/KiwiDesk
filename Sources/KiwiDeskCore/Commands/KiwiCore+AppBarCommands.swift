@@ -24,8 +24,15 @@ extension KiwiCore {
         switch AppBarCommandSetting.parse(field: field, args: given)
         {
         case .success(let setting):
-            setting.scoped(to: screenEdgeScope)
-                .apply(to: &tiler.settings.appBarStyle)
+            if case .screenEdge(let edge, let screen) = setting {
+                tiler.settings.appBarStyle.setEdge(
+                    edge,
+                    on: screen,
+                    among: liveScreenEdgeScope
+                )
+            } else {
+                setting.apply(to: &tiler.settings.appBarStyle)
+            }
             return .ok()
         case .failure(let error):
             return .fail(error.message)
@@ -54,8 +61,15 @@ extension KiwiCore {
             args: given
         ) {
         case .success(let setting):
-            setting.scoped(to: screenEdgeScope)
-                .apply(to: &tiler.settings.spaceBarStyle)
+            if case .screenEdge(let edge, let screen) = setting {
+                tiler.settings.spaceBarStyle.setEdge(
+                    edge,
+                    on: screen,
+                    among: liveScreenEdgeScope
+                )
+            } else {
+                setting.apply(to: &tiler.settings.spaceBarStyle)
+            }
             return .ok()
         case .failure(let error):
             return .fail(error.message)
