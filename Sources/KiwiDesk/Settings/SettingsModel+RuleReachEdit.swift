@@ -77,6 +77,8 @@ extension SettingsModel {
         for profile in table.profiles where profile != editing {
             guard let rival = table.rival(of: key, for: profile, combo: combo)
             else { continue }
+            // Named against THIS page's roster: a command only the
+            // rival profile declares (its own Space) reads English.
             result[profile] =
                 reach.keyTemplates[rival].map {
                     KeybindingCatalog.localizedName(of: $0, config: config)

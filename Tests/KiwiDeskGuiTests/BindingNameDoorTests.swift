@@ -4,26 +4,40 @@ import Testing
 /// A `KeyBinding` is named for display through ONE door,
 /// `KeybindingCatalog.localizedName(of:config:)` (#2111, #96): a
 /// hand-written "label, else Lua" shows the stored English
-/// identifier in every locale.
+/// identifier in every locale. The scan covers `Sources/KiwiDesk`;
+/// Core's conflict naming is #2116's.
 @Suite("Binding name door (#2111)")
 struct BindingNameDoorTests {
     private let home = "KeybindingCatalog+DisplayName.swift"
 
-    /// Files whose `label.isEmpty` reads are not a binding's name,
-    /// with how many each holds and why.
+    /// Files whose label reads are not a binding's name, with how
+    /// many hits each holds and why.
     private let allowed: [String: (count: Int, reason: String)] = [
         "KeybindingAppGroup+Row.swift": (
             2,
             "an application row's label IS the picked app's name; "
                 + "empty chooses the picker's placeholder"
-        ),
-        "SettingsValueReadout+ShortcutsGlyphs.swift": (
-            1,
-            "the diff readout names catalog commands from BOTH "
-                + "configs' resolved map first; what is left is a "
-                + "label no catalog command carries"
-        ),
+        )
     ]
+
+    /// The hand-written spellings of "the label, else something":
+    /// an emptiness test of a label, or a label and a Lua/combo as
+    /// the two arms of one ternary or coalesce.
+    private let namingSpellings: [String] = [
+        #"label\.isEmpty"#,
+        #"\.label\s*==\s*"""#,
+        #"""\s*==\s*[\w.?\[\]]*\.label\b"#,
+        #"\.label\.count\s*==\s*0"#,
+        // A coalesced label only counts beside a Lua/combo arm: a
+        // `Mirror` child's optional label is no binding.
+        #"\.label\s*\?\?[^;{}]{0,200}?\.(lua|combo)\b"#,
+        #"\?\s*[\w.?\[\]()<>"]*\.(lua|combo)\s*:\s*[\w.?\[\]]*\.label\b"#,
+        #"\?\s*[\w.?\[\]]*\.label\s*:\s*[\w.?\[\]()<>"]*\.(lua|combo)\b"#,
+    ]
+
+    /// A binding's label handed to the label-keyed resolver.
+    private let resolverSpelling =
+        #"localizedLabel\(\s*for:\s*[\w.?\[\]]+\.label\s*(\?\?\s*""\s*)?,"#
 
     private func sources() throws -> [(name: String, text: String)] {
         let root = SourceScan.repoRoot(from: #filePath)
@@ -42,8 +56,12 @@ struct BindingNameDoorTests {
         }
     }
 
-    private func count(_ needle: String, in text: String) -> Int {
-        text.components(separatedBy: needle).count - 1
+    private func hits(_ spellings: [String], in text: String) throws
+        -> Int
+    {
+        try spellings.reduce(0) {
+            $0 + text.matches(of: try Regex($1)).count
+        }
     }
 
     @Test("the door is declared once, in its home")
@@ -55,22 +73,68 @@ struct BindingNameDoorTests {
             ) != nil
         }
         #expect(doors.map(\.name) == [home])
-        // The fallback the door owns is really there to scan for.
-        let door = try #require(doors.first)
-        #expect(count("label.isEmpty", in: door.text) >= 1)
+        // The fallback the door owns is in the door's own body.
+        let door = try #require(doors.first).text
+        let start = try #require(
+            door.range(of: "static func localizedName(")
+        )
+        let end = try #require(
+            door.range(
+                of: "static func namedCommands(",
+                range: start.upperBound..<door.endIndex
+            )
+        )
+        let body = door[start.upperBound..<end.lowerBound]
+        #expect(body.contains("binding.label.isEmpty"))
+        #expect(body.contains("?? binding.lua"))
+    }
+
+    @Test("the naming needles match every spelling they target")
+    func namingNeedlesFailClosed() throws {
+        let reverted = [
+            "x.label.isEmpty ? x.lua : x.label",
+            "if !binding.label.isEmpty { return binding.label }",
+            "binding.label == \"\" ? binding.lua : binding.label",
+            "\"\" == binding.label",
+            "holder.label.count == 0",
+            "let n = row?.label ?? \"\"\nreturn n.isEmpty\n"
+                + "    ? RuleReachTable<String>.keyParts(key).lua : n",
+            "flag ? holder.lua : holder.label",
+            "flag ? t[k]?.label : RuleReachTable<String>.keyParts(k).lua",
+            "flag ? entry.kept.label : entry.kept.combo",
+        ]
+        for spelling in reverted {
+            #expect(
+                try hits(namingSpellings, in: spelling) > 0,
+                "unmatched: \(spelling)"
+            )
+        }
+        let resolver = try Regex(resolverSpelling)
+        for spelling in [
+            "localizedLabel(for: entry.binding.label,",
+            "localizedLabel(\n for: x?.label ?? \"\",",
+            "localizedLabel(for: reach.keyTemplates[k]?.label ?? \"\",",
+        ] {
+            #expect(
+                spelling.firstMatch(of: resolver) != nil,
+                "unmatched: \(spelling)"
+            )
+        }
+        // And a label STRING handed in stays legal.
+        #expect("localizedLabel(for: who,".firstMatch(of: resolver) == nil)
     }
 
     @Test("no file names a binding around the door")
     func noHandWrittenNaming() throws {
         var seen: [String: Int] = [:]
         for (name, text) in try sources() where name != home {
-            let hits = count("label.isEmpty", in: text)
-            guard hits > 0 else { continue }
-            seen[name] = hits
+            let count = try hits(namingSpellings, in: text)
+            guard count > 0 else { continue }
+            seen[name] = count
             let message =
-                "\(name) reads label.isEmpty \(hits)x: name the "
+                "\(name) names a label by hand \(count)x: name the "
                 + "binding through KeybindingCatalog.localizedName"
-            #expect(allowed[name]?.count == hits, "\(message)")
+            #expect(allowed[name]?.count == count, "\(message)")
         }
         // Every exemption still answers a real read, or it is stale.
         for (name, entry) in allowed {
@@ -80,7 +144,7 @@ struct BindingNameDoorTests {
 
     @Test("no call hands a binding's raw label to the label resolver")
     func noLabelResolverOnABinding() throws {
-        let pattern = /localizedLabel\(\s*for:\s*[\w.\[\]]+\.label\s*,/
+        let pattern = try Regex(resolverSpelling)
         for (name, text) in try sources() where name != home {
             #expect(
                 text.firstMatch(of: pattern) == nil,

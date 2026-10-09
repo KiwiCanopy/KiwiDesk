@@ -41,19 +41,32 @@ extension KeybindingCatalog {
     @MainActor private static func namedCommands(
         _ config: GuiConfig
     ) -> [NavCommand] {
-        var commands = navigationGroups(spaces: config.spaces)
-            .flatMap(\.commands)
-        commands += config.layers.map {
-            switchLayerCommand($0.name)
-        }
-        commands += resizeAndFloat(
-            step: Int(config.settings.resizeStep)
-        )
-        commands += stepFreeCommands
-        let desktops = desktopOffer(
-            live: [],
+        namedCommands(
+            spaces: config.spaces,
+            layerNames: config.layers.map(\.name),
+            steps: [Int(config.settings.resizeStep)],
             bindings: config.layers.flatMap(\.bindings)
         )
+    }
+
+    /// THE roster of nameable commands (#2111): the door and the
+    /// settings diff both read it, so a command added here is named
+    /// everywhere. Desktop rows read the BINDINGS, never a live
+    /// list, so an unplugged screen's row keeps its name.
+    @MainActor static func namedCommands(
+        spaces: [SpaceID],
+        layerNames: [String],
+        steps: [Int],
+        bindings: [KeyBinding]
+    ) -> [NavCommand] {
+        var commands = navigationGroups(spaces: spaces)
+            .flatMap(\.commands)
+        commands += layerNames.map(switchLayerCommand)
+        for step in steps {
+            commands += resizeAndFloat(step: step)
+        }
+        commands += stepFreeCommands
+        let desktops = desktopOffer(live: [], bindings: bindings)
         commands += goToDesktop(desktops.desktops)
         commands += moveToDesktop(desktops.desktops)
         return commands

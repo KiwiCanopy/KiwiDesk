@@ -112,6 +112,43 @@ struct BindingNameReachTests {
         #expect(!rows.contains { $0.label.contains(stored) })
     }
 
+    @Test("the settings diff names a make-sticky binding localized")
+    func readoutRowIsLocalized() throws {
+        LocalizationManager.shared.select("de")
+        defer { LocalizationManager.shared.select(nil) }
+        var clean = GuiConfig()
+        clean.layers = [KeyLayer(name: KeyLayer.defaultName)]
+        var edited = clean
+        let english = "Make sticky"
+        edited.layers[0].bindings = [
+            KeyBinding(
+                combo: "ctrl+alt+m",
+                lua: "KiwiDesk.make_sticky()",
+                kind: .navigation,
+                label: english
+            )
+        ]
+        let name = KeybindingCatalog.localizedLabel(
+            for: english,
+            config: edited
+        )
+        #expect(name != english)
+        let row = try #require(
+            SettingsValueReadout.rows(
+                for: .shortcuts(.layers),
+                old: clean,
+                new: edited
+            ).first
+        )
+        #expect(row.label == name)
+        // The readout's own roster names it, not only the fallback.
+        let labels = SettingsValueReadout.shortcutsActionLabels(
+            old: clean,
+            new: edited
+        )
+        #expect(labels["KiwiDesk.make_sticky()"] == name)
+    }
+
     @Test("a binding storing no label is named after its command")
     func unlabelledNamesTheCommand() {
         LocalizationManager.shared.select("de")

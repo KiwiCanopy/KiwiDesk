@@ -539,8 +539,9 @@ interpreter message carried as an associated value is the same
 class — `ConfigIssue.Kind.luaError` keeps it verbatim and
 localizes only the frame around it.
 
-A `KeyBinding` is named for display only through
-`KeybindingCatalog.localizedName(of:config:)` — never its stored
-`label`, which is an English identifier no locale shows on the
-row, nor a hand-written "label, else Lua" beside the door (#2111,
-`BindingNameDoorTests`).
+In `Sources/KiwiDesk`, a `KeyBinding` is named for display only
+through `KeybindingCatalog.localizedName(of:config:)`. Never use
+its stored `label`, which is an English identifier no locale
+shows on the row, and never a hand-written "label, else Lua"
+beside the door (#2111, `BindingNameDoorTests`). Core's conflict
+detection still names its own bindings until #2116 widens this.
