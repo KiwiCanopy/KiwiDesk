@@ -107,9 +107,11 @@ twice, was a question the user answered twice. The argument is
   one as its own Config Issue.
 - **Reserve each edge a bar draws on through the one
   `TilingSettings.layoutBounds(from:mode:)`, listed by the one
-  `shelfEdges(in:)`** — itself the one `barEdges(space:app:)`,
-  which the live plan (`KiwiCore.shelfPlans`) takes too, so the
-  strips drawn and the edges reserved are one list — the Space
+  `shelfEdges(in:)`, unless every bar drawing on that edge has
+  `reserve` off (#1524)** — `barEdges(space:app:)`'s reserving
+  subset, while the live plan (`KiwiCore.shelfPlans`) takes
+  `barEdges` whole, so the strips drawn and the edges reserved
+  come from one derivation — the Space
   Bar's edge in every layout
   while it is on, the App Bar's only in the layouts whose own
   App Bar is on and only where the Space Bar does not already
@@ -127,6 +129,26 @@ twice, was a question the user answered twice. The argument is
   MODE, so a per-space `appBar` would draw a bar where nothing is
   reserved — [state-and-layout.md](state-and-layout.md) owns that
   half, since the override types are its files.
+- **Fold a bar's `reserve` into the edge it sits on inside the
+  one `barEdges(space:app:)`, OR-combined at its dedup** — an
+  edge two bars share is one strip, so it reserves while EITHER
+  bar does, and a second "reserved edges" list beside it would
+  repeat the fusion. Shown and reserved are apart (#1524): the
+  live plan reads every edge `barEdges` lists, `shelfEdges(in:)`
+  keeps the reserving ones, the float region carves only the
+  painted strips on those edges (`KiwiCore.reservedStrips`),
+  and a bar write that leaves `shelfReservation(in:)` alone
+  repaints the bars and re-clamps the floats without a pass. `reserve` is a bar's own, global like
+  its edge (`AppBarStyle.layoutFixedKeys`). A per-screen edge
+  (#1948) resolves before this fold, never beside it. **A new
+  input to `layoutBounds` enters through `shelfReservation(in:)`,
+  and the skip comparison covers every axis that input is keyed
+  by** — a per-screen edge widens the per-mode comparison in
+  `layoutCommand` with the screen axis, or a bar write skips a
+  pass the bounds owed.
+  `BarReserveTests` holds the fold, `BarReserveCoreTests` the
+  float region and the skipped pass, `BarReserveVerbTests` the
+  global-only refusal.
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one

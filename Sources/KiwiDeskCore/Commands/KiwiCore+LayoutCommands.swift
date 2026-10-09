@@ -24,6 +24,10 @@ extension KiwiCore {
         if let retired = APIReference.retirement(of: command) {
             return .fail(retired)
         }
+        let reservation = shelfReservations
+        // Raised by the bars' own arms: their write may leave the
+        // layout bounds alone (#1524).
+        var barWrite = false
         let response: CommandResponse
         if command.hasPrefix("animations.") {
             response = animationsCommand(command, args)
@@ -40,8 +44,10 @@ extension KiwiCore {
         } else if command.hasPrefix("track.") {
             response = trackCommand(command, args)
         } else if command.hasPrefix("app_bar.") {
+            barWrite = true
             response = barCommand(command, args)
         } else if command.hasPrefix("space_bar.") {
+            barWrite = true
             response = spaceBarCommand(command, args)
         } else if command.hasPrefix("kiwishelf.") {
             response = kiwishelfCommand(command, args)
@@ -58,7 +64,19 @@ extension KiwiCore {
         } else {
             response = settingsCommand(command, args)
         }
-        if response.isSuccess {
+        if response.isSuccess, barWrite,
+            shelfReservations == reservation
+        {
+            // A bar write that left the layout bounds alone moves
+            // no tiled window: repaint the bars and re-run the
+            // float net, whose strips can still move at a corner
+            // (#1524, `BarReserveCoreTests` ▸
+            // `unchangedReservationSkipsTheRetile` and
+            // ▸ `skippedPassReclampsFloats`).
+            repaintBarsAndFloatNet(
+                animated: tiler.settings.animations.onRelayout
+            )
+        } else if response.isSuccess {
             // Forced: these are explicit config applies from
             // Lua/CLI (AGENTS.md §5) — un-forced, the engine's
             // ±2 pt tolerance would swallow a small ratio
@@ -74,6 +92,12 @@ extension KiwiCore {
             }
         }
         return response
+    }
+
+    /// Every layout's layout-bounds input, read through the one
+    /// `shelfReservation(in:)` `layoutBounds` reads (#1524).
+    var shelfReservations: [ShelfReservation] {
+        LayoutMode.allCases.map(tiler.settings.shelfReservation(in:))
     }
 
     /// Raised by a layout setter that only re-divides room among

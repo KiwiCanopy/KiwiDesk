@@ -136,7 +136,7 @@ struct HomeCardBarsTile: View {
         settings.barEdges(
             space: settings.spaceBarStyle.enabled,
             app: showsAppBar && appBarLook != nil
-        ).first?.isHorizontal ?? false
+        ).first?.edge.isHorizontal ?? false
     }
 
     private var columnsOuter: some View {

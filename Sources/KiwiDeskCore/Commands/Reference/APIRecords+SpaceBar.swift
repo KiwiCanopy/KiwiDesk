@@ -12,6 +12,11 @@ extension APIReference {
             "Shows or hides the Space Bar.",
             .boolean("enabled")
         ),
+        "set_reserve": APIRecord(
+            "Reserves the Space Bar's strip; false draws it over "
+                + "the windows, the strip unclickable.",
+            .boolean("reserve")
+        ),
         "set_edge": APIRecord(
             "Sets the Space Bar's screen edge; on the App Bar's "
                 + "edge the two share one KiwiShelf.",

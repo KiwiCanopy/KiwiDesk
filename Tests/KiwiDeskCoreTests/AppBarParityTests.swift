@@ -99,7 +99,7 @@ struct AppBarCommandParityTests {
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
         .edge(.left), .activeIndicator(.outline), .titleCap(40),
-        .groupAdjacentWindows(false),
+        .groupAdjacentWindows(false), .reserve(false),
     ]
 
     @Test("Each command sets one matching field on style and bar")
@@ -153,7 +153,7 @@ struct AppBarCommandParityTests {
         for key: AppBarStyle.CodingKeys
     ) -> [JSONValue] {
         switch key {
-        case .groupAdjacentWindows:
+        case .groupAdjacentWindows, .reserve:
             return [.bool(true)]
         case .edge: return [.string("left")]
         case .activeIndicator: return [.string("outline")]
