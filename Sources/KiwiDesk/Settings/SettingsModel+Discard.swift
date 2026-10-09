@@ -133,6 +133,11 @@ extension SettingsModel {
         pending.perform()
     }
 
+    /// Whether the open question guards unsaved work, so a quit
+    /// keeps asking rather than closing it (#2049): the discard
+    /// gate. A delete's confirm closes as Cancel like any other.
+    var quitKeepsAsking: Bool { pendingDiscard?.kind == .discard }
+
     /// Cancels a parked action — Cancel, and the disarm net on
     /// window close: the window is retained
     /// (`isReleasedWhenClosed = false`), so a parked closure could

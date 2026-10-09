@@ -85,6 +85,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// write over a tour paint (#1720); a stored profile's cannot.
     var hasUnsavedDraft: Bool { model.isDirty && model.target == .live }
 
+    /// Whether `window` is this one showing the discard question,
+    /// the one sheet a quit keeps asking (#2049, `QuitSheets`).
+    func guardsUnsavedWork(on window: NSWindow) -> Bool {
+        window === self.window && model.quitKeepsAsking
+    }
+
     /// Re-reads saved profiles list without discarding staged edits (#246).
     func refreshProfiles() {
         model.refreshProfiles()

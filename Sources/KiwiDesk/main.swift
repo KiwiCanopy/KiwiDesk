@@ -9,7 +9,8 @@ if CommandLine.arguments.count > 1 {
 // Holds `.accessory` for its whole life — content windows come
 // forward through `NSApp.forceFront`, never a policy flip
 // ("Permanent accessory mode", docs/design-decisions.md).
-let app = NSApplication.shared
+// The first `shared` read picks the class (#2049).
+let app = KiwiApplication.shared
 
 // Single-instance lock held for process lifetime (#196). Must
 // run before the delegate exists: a second KiwiCore would

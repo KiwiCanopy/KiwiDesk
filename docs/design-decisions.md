@@ -6914,6 +6914,33 @@ menu bar or hotkey. Ephemeral completion surfaces (the tour,
 Config Issues) stay un-miniaturizable so they are completed or
 dismissed rather than parked indefinitely.
 
+:::unreleased
+### A quit closes a confirmation; only unsaved work keeps asking (#2049)
+
+**[Principle]**
+
+**A quit, restart or logout that meets an open sheet closes it as
+Cancel, unless the sheet guards unsaved Settings work — the
+discard question — which keeps asking.** KiwiDesk runs in the
+background, so a dialog left open in a Settings window nobody is
+looking at must never hold up a restart: the user would meet
+"KiwiDesk interrupted restart" over a question they had forgotten.
+A dialog whose Cancel loses nothing — delete, reset, restore,
+the About or preset sheet, an open or save panel — is answered
+for them. The discard question is the one every Mac app keeps
+asking at a quit, and keeping it is the honest answer: the quit
+ends the draft too.
+
+**A new dialog is a confirmation unless it opts in.** The guard
+is one predicate, `SettingsModel.quitKeepsAsking`, read through
+`QuitSheetKeeper`; a dialog that holds unsaved work joins it, and
+any other is closed without a change here. AppKit closes only an
+`NSAlert` sheet on its own and refuses termination for any other
+sheet, which is why `KiwiApplication` clears them in front of
+`terminate(_:)` and the power-off notification clears them in
+front of a logout's quit event, which never reaches that method.
+:::
+
 ### The tour is chrome, and chrome is not tiled
 
 **[Principle]**

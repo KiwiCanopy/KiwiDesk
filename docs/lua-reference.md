@@ -5818,6 +5818,13 @@ Quit the next restart still starts fresh: quitting lets the
 arrangement go.
 :::
 
+:::unreleased
+A quit, restart or logout closes a dialog left open in KiwiDesk
+as if you had pressed Cancel. The one exception is Settings'
+"Discard unsaved changes?": it comes to the front and the quit
+stops, so you can answer it and quit again.
+:::
+
 On quit, KiwiDesk moves each managed tiled window
 back onto the screen its space is assigned to and arranges them
 per `quit.layout` (see `quit.set_layout` below). Floating
