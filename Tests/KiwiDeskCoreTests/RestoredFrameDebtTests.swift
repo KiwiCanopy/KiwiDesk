@@ -126,7 +126,9 @@ struct RestoredFrameDebtTests {
         )
         // The tracked one was set, not owed; a corner is no
         // original; a Space the profile dropped files nothing.
-        #expect(core.state.restoredFrames == [Self.late: Self.owed])
+        #expect(
+            core.state.restoredFrames == [Self.late: .init(frame: Self.owed)]
+        )
     }
 
     @Test(
@@ -135,7 +137,7 @@ struct RestoredFrameDebtTests {
     )
     func arrivalConsumesOnce() throws {
         let core = try #require(makeCore(mode: .floating))
-        core.state.restoredFrames[Self.late] = Self.owed
+        core.state.restoredFrames[Self.late] = .init(frame: Self.owed)
         core.state.remember(Self.late, in: "2")
         let first = core.state.apply(
             .windowCreated(window(Self.late, frame: Self.tile))
@@ -154,10 +156,10 @@ struct RestoredFrameDebtTests {
     @Test("The #634 reset and the away retirement drop it")
     func resetsDropIt() {
         var state = StateCoordinator(defaultSpace: "1")
-        state.restoredFrames[Self.late] = Self.owed
+        state.restoredFrames[Self.late] = .init(frame: Self.owed)
         state.forgetAway(Self.late)
         #expect(state.restoredFrames[Self.late] == nil)
-        state.restoredFrames[Self.late] = Self.owed
+        state.restoredFrames[Self.late] = .init(frame: Self.owed)
         state.forgetRememberedSpaces()
         #expect(state.restoredFrames.isEmpty)
     }

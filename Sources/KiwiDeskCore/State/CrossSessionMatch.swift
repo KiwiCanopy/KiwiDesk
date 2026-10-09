@@ -22,6 +22,8 @@ struct CrossSessionMatch: Sendable, Equatable {
         let app: String
         let title: String
         let frame: CGRect
+        /// A hand float the file carried (#1864).
+        var floating = false
     }
 
     /// A tracked or arriving window the match may take.
@@ -67,7 +69,8 @@ struct CrossSessionMatch: Sendable, Equatable {
                         space: SpaceID(space.id),
                         app: app,
                         title: record.title ?? "",
-                        frame: record.frame
+                        frame: record.frame,
+                        floating: record.floating == true
                     )
                 )
             }

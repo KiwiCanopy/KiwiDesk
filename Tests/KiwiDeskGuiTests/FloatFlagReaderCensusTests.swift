@@ -55,7 +55,11 @@ struct FloatFlagReaderCensusTests {
         // A user float restores only where detection tiles the
         // window, and at arrival the flag IS detection's (#1810).
         "State/StateCoordinator+Intents.swift": [.identity: 1],
-        "Models/StateSnapshot+InPlace.swift": [.identity: 1],
+        // A stop's carried hand float restores only where detection
+        // tiles the window (#1864, #1810).
+        "Models/StateSnapshot+StopFloats.swift": [.identity: 1],
+        // A replayed float's frame is the stash's to deliver (#1864).
+        "App/KiwiCore+Restore.swift": [.routed: 1],
         "App/KiwiCore+FloatClamp.swift": [.routed: 1],
         // The presenting door (#1788).
         "App/KiwiCore+ScreenCovering.swift": [.routed: 1],

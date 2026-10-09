@@ -13,14 +13,15 @@ import CoreGraphics
 /// Space). One-shot teardown placement: no live management
 /// after, and no cross-monitor pull.
 public enum WindowGather {
-    /// Returns a gather target for every tracked, tiled window.
+    /// Returns a gather target for every window
+    /// `StateCoordinator.gatherMembers` names, floats included
+    /// (#1864).
     ///
     /// `primaryHeight` is `NSScreen.screens.first?.frame.height`
     /// (Cocoa coordinates), used to flip `Display.visibleFrame`
     /// into AX (top-left) coordinates. Windows whose space has
     /// no display assignment fall back to the display with the
-    /// lowest raw ID (deterministic on multi-monitor). Floating
-    /// windows and windows with a zero-size frame are excluded.
+    /// lowest raw ID (deterministic on multi-monitor).
     ///
     /// Each display collects its own windows (space-iteration
     /// order) and sizes its own grid — see `QuitGridLayout`.
@@ -92,16 +93,8 @@ public enum WindowGather {
                     primaryHeight: primaryHeight
                 )
             }
-            // The owning derivation, not an open-coded filter
-            // (#670 re-review): the gather's domain IS the
-            // tiled members — floats keep their frames and a
-            // fullscreen window lives on its own macOS Space,
-            // where the grid can neither reach nor place it.
-            for windowID in state.localTiledMembers(of: space)
-            where state.windows[windowID]?.frame.size != .zero {
-                gathered[display.id, default: []]
-                    .append(windowID)
-            }
+            gathered[display.id, default: []] +=
+                state.gatherMembers(of: space)
         }
         return order.compactMap { id in
             guard
@@ -170,7 +163,7 @@ public enum WindowGather {
 }
 
 extension KiwiCore {
-    /// Moves each managed tiled window onto its owning monitor,
+    /// Moves each managed window onto its owning monitor,
     /// arranged per `quit.layout` within the display's visible
     /// area, so windows are not stranded in tiled frames after
     /// KiwiDesk exits.
