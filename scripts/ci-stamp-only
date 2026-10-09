@@ -1,0 +1,66 @@
+#!/bin/bash
+# Is this pull request a release stamp and nothing else? (#2106)
+#
+# Usage: scripts/ci-stamp-only <head-ref> <base-sha>
+#   Run inside the checkout, HEAD at the PR head. Exits 0 when the
+#   PR is a stamp alone, 1 otherwise; prints the reason either way.
+#
+# CI's `changes` job skips the two macOS jobs on a yes. What still
+# gates the stamped tree is downstream, and the skip is safe only
+# while it stays there: `main`'s push CI after the merge,
+# `release.sh`'s second run, which re-verifies a tree its first run
+# did not record, and `release.yml`'s `verify` job on the tag before
+# any artifact is built. All three clauses must hold, so the
+# exception cannot widen into a bypass for real edits to the version
+# file:
+#   1. the head branch is the one `release.sh` names,
+#      `chore/stamp-<version>`;
+#   2. the only changed file is the version file;
+#   3. the diff is one `semantic` literal replaced by another.
+# Every unknown answers no, which runs CI — the same rule the
+# `changes` job applies to itself.
+set -euo pipefail
+
+VERSION_FILE="Sources/KiwiDeskCore/App/KiwiDeskVersion.swift"
+LITERAL='^[-+]    public static let semantic = "[0-9]+\.[0-9]+\.[0-9]+"$'
+
+if [ "$#" -ne 2 ]; then
+    echo "usage: scripts/ci-stamp-only <head-ref> <base-sha>" >&2
+    exit 1
+fi
+head_ref="$1"
+base="$2"
+
+case "$head_ref" in
+    chore/stamp-*) ;;
+    *) echo "not a stamp branch: $head_ref"; exit 1 ;;
+esac
+
+if ! changed="$(git diff --name-only "$base"...HEAD 2>/dev/null)"; then
+    echo "no diff against $base"
+    exit 1
+fi
+if [ "$changed" != "$VERSION_FILE" ]; then
+    echo "changes more than $VERSION_FILE"
+    exit 1
+fi
+if [ "$(git diff --numstat "$base"...HEAD)" \
+    != "$(printf '1\t1\t%s' "$VERSION_FILE")" ]; then
+    echo "changes more than one line of $VERSION_FILE"
+    exit 1
+fi
+
+# The hunk body alone: everything after the first `@@`, so a content
+# line spelling `+++ ` or `--- ` is never mistaken for a file header.
+body="$(git diff -U0 "$base"...HEAD -- "$VERSION_FILE" \
+    | sed -n '/^@@/,$p' | grep -Ev '^@@' || true)"
+removed="$(printf '%s\n' "$body" | grep -c '^-' || true)"
+added="$(printf '%s\n' "$body" | grep -c '^+' || true)"
+if [ "$removed" != 1 ] || [ "$added" != 1 ] \
+    || printf '%s\n' "$body" | grep -Evq "$LITERAL"; then
+    echo "changes more than the semantic version literal"
+    exit 1
+fi
+
+echo "release stamp only: $head_ref"
+exit 0

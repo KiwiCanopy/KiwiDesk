@@ -651,7 +651,10 @@ and locale checks with it.
 ## CI
 
 `.github/workflows/ci.yml` builds, lints, and tests on pushes to
-`main` and on PRs targeting it. Both jobs are gated on a `changes`
+`main` and on PRs targeting it — and on the same two events for a
+long-lived release branch, which is a merge target like `main`:
+**a branch PRs merge into joins both trigger lists before its
+first PR**, or those PRs merge with no CI at all. Both jobs are gated on a `changes`
 job, so a change confined to `.github/ci-ignore.txt`'s list leaves
 them skipped. A red build blocks merging. The release build runs
 as a separate job (#532), required on `main` exactly like the
@@ -732,6 +735,17 @@ workflow still consults the list and still gates on it, and states
 in its own doc comment what it cannot see. Read that before adding
 an entry; a deep multi-component path earns much weaker cover than
 a whole top-level directory.
+
+**The one skip beside the list is the release stamp (#2106)**:
+`scripts/ci-stamp-only` answers yes only for a `chore/stamp-*`
+branch whose sole change is one `semantic` literal in
+`KiwiDeskVersion.swift`. What gates that tree is downstream —
+`main`'s push CI, `release.sh`'s second run and `release.yml`'s
+`verify` on the tag — so a change that moves one of those owes the
+skip a fresh look. The `changes` job runs the script from the BASE
+commit and only for this repository's own branches, so neither a PR
+nor a fork judges itself, and a new skip clause joins that script
+rather than a second exception beside it (`CiStampOnlyTests`).
 
 **A workflow that changes the tree opens a PR; it never writes to
 `main`.** `.github/workflows/app-font.yml` watches the vendored

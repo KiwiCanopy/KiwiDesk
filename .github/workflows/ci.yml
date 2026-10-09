@@ -3,7 +3,9 @@ name: CI
 # push runs post-merge on main; pull_request runs pre-merge on
 # branches. Scoping push to main avoids a duplicate run on every
 # PR-branch push (which would otherwise fire both push and
-# pull_request for the same commit).
+# pull_request for the same commit). A long-lived release branch
+# (release/3.0.0, owner ruling 2026-10-09) is a merge target like
+# main, so it takes both triggers too.
 #
 # The expensive jobs are gated on a `changes` job rather than on a
 # trigger-level `paths-ignore`, and that is the whole point: a
@@ -19,9 +21,9 @@ name: CI
 # entry may be added.
 on:
   push:
-    branches: [main]
+    branches: [main, release/3.0.0]
   pull_request:
-    branches: [main]
+    branches: [main, release/3.0.0]
   # Manual "Run workflow" button in the Actions tab. Additive — the
   # automatic triggers above still fire. Useful while the repo is
   # private, where macOS runners bill at a 10x multiplier against a
@@ -45,12 +47,14 @@ on:
         default: false
         type: boolean
 
-# A superseded PR run is cancelled; a push to main always finishes,
+# A superseded PR run is cancelled; a push to main or a release
+# branch always finishes,
 # so every merged commit gets a verdict and the README badge
 # (main's pushes only) never reads a cancelled run as failing.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main'
+    && !startsWith(github.ref, 'refs/heads/release/') }}
 
 jobs:
   changes:
@@ -76,6 +80,9 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
           FILTER: ${{ inputs.filter_paths }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           # Every unknown resolves to "run". A false negative here
@@ -115,6 +122,21 @@ jobs:
           if [ -z "$changed" ]; then
             echo "empty diff — running everything"
             echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # A release stamp alone skips (#2106); what gates it is
+          # downstream, scripts/ci-stamp-only says what. Only this
+          # repo's own branches, since a fork names its branch
+          # freely, and the judge is read from the BASE commit, so
+          # a PR cannot rewrite it; no script there answers no.
+          stamp_check=""
+          if [ "$EVENT" = "pull_request" ] && [ "$HEAD_REPO" = "$REPO" ]; then
+            stamp_check="$(git show "${base}:scripts/ci-stamp-only" \
+              2>/dev/null || true)"
+          fi
+          if [ -n "$stamp_check" ] \
+            && bash -c "$stamp_check" ci-stamp-only "$HEAD_REF" "$base"; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           run=false
