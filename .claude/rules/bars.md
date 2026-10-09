@@ -140,7 +140,12 @@ twice, was a question the user answered twice. The argument is
   and a bar write that leaves `shelfReservation(in:)` alone
   repaints the bars and re-clamps the floats without a pass. `reserve` is a bar's own, global like
   its edge (`AppBarStyle.layoutFixedKeys`). A per-screen edge
-  (#1948) resolves before this fold, never beside it.
+  (#1948) resolves before this fold, never beside it. **A new
+  input to `layoutBounds` enters through `shelfReservation(in:)`,
+  and the skip comparison covers every axis that input is keyed
+  by** — a per-screen edge widens the per-mode comparison in
+  `layoutCommand` with the screen axis, or a bar write skips a
+  pass the bounds owed.
   `BarReserveTests` holds the fold, `BarReserveCoreTests` the
   float region and the skipped pass, `BarReserveVerbTests` the
   global-only refusal.

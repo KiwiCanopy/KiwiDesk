@@ -68,13 +68,14 @@ extension KiwiCore {
             shelfReservations == reservation
         {
             // A bar write that left the layout bounds alone moves
-            // no tiled window: repaint the bars, and re-clamp the
-            // floats, whose strips can still move at a corner
+            // no tiled window: repaint the bars and re-run the
+            // float net, whose strips can still move at a corner
             // (#1524, `BarReserveCoreTests` ▸
             // `unchangedReservationSkipsTheRetile` and
             // ▸ `skippedPassReclampsFloats`).
-            updateBars()
-            clampFloatsClearOfBars()
+            repaintBarsAndFloatNet(
+                animated: tiler.settings.animations.onRelayout
+            )
         } else if response.isSuccess {
             // Forced: these are explicit config applies from
             // Lua/CLI (AGENTS.md §5) — un-forced, the engine's

@@ -1952,8 +1952,8 @@ editing here:
   Lua/CLI applies — `applyProfileScopedState`, `set_gap_*`,
   `set_min_window_size`, `set_mode`, the whole `layoutCommand`
   dispatch — save that a `space_bar.*` or `app_bar.*` write may
-  skip the pass, repainting the bars and re-clamping the floats
-  instead, only while it leaves every layout's
+  skip the pass, running the one `repaintBarsAndFloatNet` tail
+  (the bars, then every strip reader) instead, only while it leaves every layout's
   `TilingSettings.shelfReservation(in:)` — the whole input
   `layoutBounds(from:mode:)` reads — unchanged (#1524,
   `BarReserveCoreTests` ▸ `unchangedReservationSkipsTheRetile`).
