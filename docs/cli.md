@@ -348,7 +348,8 @@ exports nothing.
 :::unreleased
 `animations.set_on_space_change` defaults to `true`, and
 `animations.set_space_change_duration` is new. A profile saved by
-an earlier release keeps the value it stored.
+an earlier release with the slide off is turned on once, unless
+its other animations are all off.
 :::
 
 :::unreleased

@@ -58,7 +58,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// which reaches a bundle's `config` and its `[Profile]` alike.
     /// 23 = a layer override's left-out layer (#2022), on
     /// `[Profile]` alone.
-    public static let currentFormat = 23
+    /// 24 = a stored `on_space_change: false` turned on once
+    /// (#1931), on `[Profile]` alone.
+    public static let currentFormat = 24
 
     public let format: Int
 

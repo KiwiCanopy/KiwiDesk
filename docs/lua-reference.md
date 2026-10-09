@@ -5533,8 +5533,9 @@ animations.set_size_rate(0)    -- back to per-tick default
 **Expects:** `true` or `false`.
 
 :::unreleased
-Defaults to `true`. A profile saved by an earlier release keeps
-the value it stored.
+Defaults to `true`. A profile saved by an earlier release with it
+off is turned on once, unless its other animations are all off;
+a config that calls this keeps its value.
 :::
 
 **Does:** enables or disables the animation of an explicit

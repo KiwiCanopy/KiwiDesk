@@ -3,9 +3,9 @@ import Foundation
 /// Per-trigger animation configuration and duration settings (#11, #50).
 public struct AnimationSettings: Sendable, Equatable, Codable {
     /// Play the plate slide on a Space switch (#1956); off, the
-    /// switch is instant. On by default since #1931; no crossing
-    /// is owed while the encoder writes `animations` whole
-    /// (`SpaceChangeDefaultTests`).
+    /// switch is instant. On by default since #1931, and a file
+    /// from before turned on once, since the leaf used to slide
+    /// the windows themselves (`SpaceChangeOnMigrationTests`).
     public var onSpaceChange = true
 
     /// The plate slide's pace in milliseconds (#1931): the strip's

@@ -3253,14 +3253,21 @@ most, and the slide is what tells them which way they went, so a
 new install plays it. The cost is the GPU: switching
 back-to-back, Liquid Glass plates hold it at 55–65 % against
 33 % for the instant switch, which is why glass off, Reduce
-Motion and the toggle itself stay one step away. No migration is
-owed, on #1359's thickness argument: `on_space_change` predates
-the first tag and the settings encoder writes `animations` whole,
-so every saved profile keeps the value it stored and only a fresh
-seed takes the new one (`SpaceChangeDefaultTests`). What has no
-file takes the new default on upgrade, and that is accepted: a
-composed Standard, and an `init.lua` config that never calls the
-setter, start playing the slide. The animations master still
+Motion and the toggle itself stay one step away. A saved
+profile's `false` is turned on once at the crossing
+(`SpaceChangeOnMigrationTests`), though #1359's thickness
+argument would let it stand: the leaf's meaning changed under the
+same key — it used to slide the windows themselves, the heavy
+effect the plate slide replaced — and an encoder that writes
+`animations` whole stored the old default in nearly every file,
+so keeping it would hide the slide from almost every upgrade
+while a new install plays it. A `false` beside a master whose
+other leaves are all off is the master switched off and stays;
+a `false` chosen after the crossing stays, the step reading the
+file's format. The cost is a user who turned the old window slide
+off on purpose meeting a slide once, one toggle from off again.
+What has no file takes the new default on upgrade: a composed
+Standard, and an `init.lua` config that never calls the setter. The animations master still
 restores the defaults rather than turning every motion on, so it
 brings the slide back with the rest.
 
