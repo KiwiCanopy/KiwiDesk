@@ -4463,6 +4463,9 @@ the layout with the same value on all four edges.
 Painted chrome counts only on an edge the layout reserves: a bar
 set not to reserve its strip keeps no float out, as it keeps no
 tiled window out ([*Reserved where a bar draws*](#app-bar), #1524).
+The same holds for the floating gather's strips and for the drop
+fit's lift clear of a bottom bar: both carve or clear only a
+strip on a reserved edge.
 :::
 
 A tempting alternative was rejected on that same principle: to
@@ -4650,8 +4653,8 @@ beside a grid of the rest read as a mess, and the gathered
 windows lie exactly behind one another. The whole-space
 grid is what keeps a pile of columns findable rather than stacked
 at one edge, and it is laid inside the grow bound
-— the painted strips carved off (on a reserved edge, #1524) and
-the focus ring's reach reserved on every edge — so no gathered frame lands under a bar
+— the painted strips carved off and the focus ring's reach
+reserved on every edge — so no gathered frame lands under a bar
 and the clamp has nothing left to push; the judgment itself
 takes the correctness bound, or a float flush with a bare screen
 edge would count as outside.
@@ -4737,8 +4740,7 @@ exception to it. Three limits keep it narrow:
   minimum, or a corroborated app minimum). Past that, at the
   screen edge the rest stays clipped rather than the window
   moving; under a bar on that edge the bar still lifts it
-  clear, since a bar reserves its edge for every window (#242)
-  — unless it is set not to reserve it (#1524).
+  clear, since a bar reserves its edge for every window (#242).
 - A window whose top is already past the border is left alone:
   its title bar is out of reach. A bottom "peek" with the title
   bar showing is therefore reachable only at the window's
