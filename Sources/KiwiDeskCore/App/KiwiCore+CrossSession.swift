@@ -107,9 +107,21 @@ extension KiwiCore {
                 from: from,
                 restoring: true
             )
+            restoreCarriedFloat(pair)
             moved = true
         }
         if moved { retile() }
+    }
+
+    /// A title-pass pair's carried hand float (#1864): floated, and
+    /// its record's frame seeded for the stash to deliver — never a
+    /// corner — as the boot replay and an arrival pay theirs.
+    private func restoreCarriedFloat(_ pair: CrossSessionPair) {
+        guard pair.record.floating else { return }
+        state.floatByHand(pair.window)
+        if !tiler.looksStashed(pair.record.frame) {
+            tiler.seedStash(pair.window, frame: pair.record.frame)
+        }
     }
 
     /// Whether the match is open under the arrangement it armed

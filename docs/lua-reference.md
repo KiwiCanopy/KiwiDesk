@@ -5836,8 +5836,9 @@ puts each one back — in its space, still floating, at the frame
 it had before the quit — a window you floated by hand included,
 and one whose app reopens it late. A restart of the Mac or a
 logout keeps them too, under the rules above. After a crash, a
-window you floated by hand comes back without its float: it tiles
-again unless its space is in floating mode.
+window you floated by hand comes back without its float, so it
+tiles again unless its space is in floating mode; only one that
+had not reopened yet since the last quit keeps it.
 :::
 
 Two restarts arrange nothing: an update's **Install and

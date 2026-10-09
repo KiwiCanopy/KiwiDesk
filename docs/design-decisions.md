@@ -15538,8 +15538,9 @@ users rely on, and the two exits should not start to mean the
 same thing. For the same reason a snapshot a failed relaunch
 leaves behind gives up its session memory two minutes after the
 stop: the next launch, much later, is a launch after a quit, and
-restores the arrangement without the sizing. The payload is one build writing for the next, so a
-payload the reading build cannot decode costs only itself.
+restores the arrangement without the sizing. The payload is one
+build writing for the next, so a payload the reading build cannot
+decode costs only itself.
 
 :::unreleased
 ### A quit arranges floats too

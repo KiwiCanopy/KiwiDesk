@@ -58,7 +58,7 @@ public final class CrashRecovery {
     private(set) var rollback = LogoutRollback()
     /// The newest file the id gates refused at boot (#1385): its
     /// ids are never replayed, only its stable keys matched.
-    var crossSessionCandidate: StateSnapshot?
+    private(set) var crossSessionCandidate: StateSnapshot?
     /// The power-off observer and the center it was added on.
     private(set) var powerOff:
         (token: NSObjectProtocol, center: NotificationCenter)?
@@ -104,7 +104,9 @@ public final class CrashRecovery {
     /// of the desk over the arrangement this launch had not
     /// restored yet. The crash marker still goes. It writes
     /// `captured`, the caller's `stopCapture` taken before its
-    /// gather moved anything (#1864), else one taken now. While a
+    /// gather moved anything (#1864), else one taken now — so a
+    /// caller that gathers passes `captured:`, or the write keeps
+    /// the gathered frames. While a
     /// logout froze the
     /// writes, the stop writes nothing and keeps the autosave, the
     /// desk being emptied by then (#1385); an announced in-place
@@ -300,6 +302,29 @@ public final class CrashRecovery {
             return nil
         }
         return snapshot
+    }
+
+    /// Hands over the file the id gates refused at boot, once.
+    func takeCrossSessionCandidate() -> StateSnapshot? {
+        defer { crossSessionCandidate = nil }
+        return crossSessionCandidate
+    }
+
+    /// Keeps the newer of the refused files that may cross: one a
+    /// logout's freeze wrote, or a stop's session file (`quit`) —
+    /// a Quit's or a failed in-place relaunch's alike — whose boot
+    /// or login began inside `quitCrossingBound` (#1864).
+    private func keepForCrossSession(_ snapshot: StateSnapshot, quit: Bool) {
+        guard
+            snapshot.frozenForLogout
+                || quit && quitBeganInBound(snapshot)
+        else { return }
+        guard
+            crossSessionCandidate.map({
+                snapshot.capturedAt > $0.capturedAt
+            }) ?? true
+        else { return }
+        crossSessionCandidate = snapshot
     }
 
     /// A stamp matches only a readable, equal live id. An

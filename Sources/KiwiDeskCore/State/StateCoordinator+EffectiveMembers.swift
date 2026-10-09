@@ -91,8 +91,10 @@ extension StateCoordinator {
 
     /// Whether the stash parks `window` while `space` is not shown —
     /// the one per-window park verdict: a fullscreen window is on its
-    /// own Desktop (#670) and a sticky one may be exempt (#445). The
-    /// pointer's drag exemption is the engine's to add.
+    /// own Desktop (#670) and a sticky one may be exempt (#445).
+    /// It answers as if `space` were hidden: whether it is shown is
+    /// each asker's own input to pair with it, as the pointer's drag
+    /// exemption is the engine's.
     func parksOnInactive(
         _ window: ManagedWindow,
         in space: SpaceID

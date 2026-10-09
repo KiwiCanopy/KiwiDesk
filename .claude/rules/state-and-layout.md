@@ -1826,7 +1826,9 @@ editing here:
   window rides EVERY stop's capture — a quit's, an in-place
   restart's and the logout freeze's kept file — and never a plain
   autosave, so a crash, which moved nothing, still starts it
-  fresh; the stop captures BEFORE it gathers
+  fresh — save a debt owed to a window not yet arrived, which
+  rides every capture, its float with it (#2008); the stop
+  captures BEFORE it gathers
   (`StopCaptureOrderTests`). The hand float is the one carried,
   since the gather places every float (`QuitFloatReturnTests` ▸
   `onlyAStopCarries`), and `SnapshotStoreCensusTests` names such

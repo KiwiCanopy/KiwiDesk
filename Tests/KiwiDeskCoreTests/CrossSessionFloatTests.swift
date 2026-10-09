@@ -32,6 +32,33 @@ struct CrossSessionFloatTests: CrossSessionFixture {
         #expect(core.state.userFloated.contains(WindowID(10)))
     }
 
+    /// Two windows of one app pair only by title, at the pass.
+    @Test(
+        "a window paired by the title pass floats again, at its frame",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func titlePassFloats() throws {
+        let core = try #require(
+            boot([
+                window(20, "com.ide", "Preview"),
+                window(21, "com.ide", "IDE"),
+            ])
+        )
+        var desk = previous([
+            (F.shown, "com.ide", "IDE"),
+            (F.hidden, "com.ide", "Preview"),
+        ])
+        desk.windows[1].floating = true
+        leave(desk, in: core)
+        arrange(core)
+        #expect(!core.state.userFloated.contains(WindowID(20)))
+        core.crossSessionSettlePass()
+        #expect(space(core, 20) == F.hidden)
+        #expect(core.state.userFloated.contains(WindowID(20)))
+        #expect(!core.state.userFloated.contains(WindowID(21)))
+        #expect(core.tiler.stashOriginal(WindowID(20)) == Self.recorded)
+    }
+
     @Test(
         "a late arrival floats again, at its frame",
         .enabled(if: NSScreen.main != nil)

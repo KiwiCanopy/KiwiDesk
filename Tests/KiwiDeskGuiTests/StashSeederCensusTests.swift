@@ -40,6 +40,9 @@ struct StashSeederCensusTests {
         // The clamp correcting a pending capture in place, so
         // the echo consumes it (#1177).
         "App/KiwiCore+FloatClamp.swift": 1,
+        // The cross-session title pass's carried float, never a
+        // corner (#1864).
+        "App/KiwiCore+CrossSession.swift": 1,
         // The replay of a parked record, and the late arrival's
         // owed frame (#1352, #1362); and a replayed float's record
         // beside its set, never a corner, so a park ahead of the

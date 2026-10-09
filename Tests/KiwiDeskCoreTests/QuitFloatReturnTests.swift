@@ -233,6 +233,51 @@ struct QuitFloatReturnTests {
         #expect(b.tiler.stashOriginal(float) == before[float])
     }
 
+    /// The update relaunch onto this build reads an in-place file
+    /// an older build wrote, its hand float inside the session. The
+    /// fixture is this build's own file with the float moved back
+    /// there, never hand-written JSON.
+    @Test(
+        "a pre-#1864 in-place file's session float still floats",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func legacySessionFloatFloats() throws {
+        let a = try processA()
+        let left = F.settle(a)
+        let file = try #require(a.crash.stopCapture(inPlace: true))
+        var json = try #require(
+            JSONSerialization.jsonObject(with: JSONEncoder().encode(file))
+                as? [String: Any]
+        )
+        var windows = try #require(json["windows"] as? [[String: Any]])
+        var moved = 0
+        for index in windows.indices
+        where windows[index]["floating"] as? Bool == true {
+            windows[index].removeValue(forKey: "floating")
+            var session =
+                windows[index]["session"] as? [String: Any] ?? [:]
+            session["floating"] = true
+            windows[index]["session"] = session
+            moved += 1
+        }
+        #expect(moved == Self.handFloats.count)
+        json["windows"] = windows
+        let old = try JSONDecoder().decode(
+            StateSnapshot.self,
+            from: JSONSerialization.data(withJSONObject: json)
+        )
+        for id in Self.handFloats {
+            let record = old.windows.first { $0.windowID == id }
+            #expect(record?.floating == true)
+        }
+        let (b, _) = try #require(
+            F.processB(Self.scanned, left: left, session: old)
+        )
+        for id in Self.handFloats {
+            #expect(b.state.userFloated.contains(id), "w\(id.raw) tiled")
+        }
+    }
+
     @Test(
         "a stop carries the hand floats; an autosave carries none",
         .enabled(if: NSScreen.main != nil)
