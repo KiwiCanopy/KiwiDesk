@@ -27,6 +27,8 @@ extension SettingsModel {
             autoStart = result
             autoStartLoaded = true
             autoStartBusy = false
+            // Core refused an unstable copy: nothing was applied.
+            guard result.registerable else { return }  // #2094
             flashAutoStart(
                 result.level,
                 reduceMotion: reduceMotion
