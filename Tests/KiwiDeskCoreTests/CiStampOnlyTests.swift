@@ -131,6 +131,16 @@ struct CiStampOnlyTests {
             CiStampOnlyTests.version("2.2.0", commit: "abc1234"),
             CiStampOnlyTests.version("not-a-version"),
             CiStampOnlyTests.version("2.3.0") + "// note\n",
+            // Every line a version literal, the count wrong: the
+            // count check alone stops these.
+            CiStampOnlyTests.version("2.2.0").replacingOccurrences(
+                of: "    public static let semantic = \"2.2.0\"\n",
+                with: ""
+            ),
+            CiStampOnlyTests.version("2.3.0").replacingOccurrences(
+                of: "\"2.3.0\"\n",
+                with: "\"2.3.0\"\n    public static let semantic = \"2.4.0\"\n"
+            ),
         ]
     )
     func otherEditRuns(_ text: String) throws {
@@ -157,7 +167,11 @@ struct CiStampOnlyTests {
             step.split(separator: "\n").first { $0.contains(call) },
             "the changes step does not run the base commit's script"
         )
-        #expect(line.contains(#"[ "$EVENT" = "pull_request" ]"#))
+        #expect(
+            line.trimmingCharacters(in: .whitespaces).hasPrefix(
+                #"if [ "$EVENT" = "pull_request" ] && "# + call
+            )
+        )
         let after = try #require(
             step.range(of: call).map { step[$0.upperBound...] }
         )
