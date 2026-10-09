@@ -246,7 +246,11 @@ plain rebuild never posts. It reads the body through
 not fail the release: the page and the feed outrank a chat post,
 and an unset `DISCORD_RELEASE_WEBHOOK` skips with a notice
 (`DiscordAnnounceTests`). The webhook URL is the secret, so
-nothing prints it.
+nothing prints it. A block with Spotlight rows posts the rows and
+not its sections; an uncut post closes on its changes counted in a
+sentence, a cut one on the line naming what was cut, both on how
+to get the update; no post carries a download link
+(`DiscordAnnounceSpotlightTests`, `DiscordAnnounceTests`).
 
 **Three clauses decide whether a release enters the feed, and
 `scripts/appcast-sync` names the one that failed:** it is
