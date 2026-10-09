@@ -177,8 +177,8 @@ keeps its place (`StashDepartures`).
 
 :::unreleased
 A `space_bar.*` or `app_bar.*` write that leaves every layout's
-`shelfReservation(in:on:)` — the input `layoutBounds` reads — on
-every screen unchanged runs no pass at all: it repaints the bars and
+`shelfReservation(in:on:)` — the input `layoutBounds` reads —
+unchanged on every screen runs no pass at all: it repaints the bars and
 re-clamps the floats (#1524).
 :::
 

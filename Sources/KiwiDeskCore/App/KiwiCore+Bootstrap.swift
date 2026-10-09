@@ -165,6 +165,12 @@ extension KiwiCore {
         tiler.elementProvider = { [weak self] id in
             self?.eventLoop.element(for: id)
         }
+        // One screen identity for the engine and the bars (#1948).
+        tiler.screenFingerprint = { [weak self] screen in
+            screen.kiwiDisplayID.flatMap {
+                self?.screenFingerprint(of: $0)
+            }
+        }
         // The loop owns whether an app's EUI is on at rest; the
         // applier's holds only borrow it (#1508).
         tiler.applier.enhancedUIAtRest = { [weak self] pid in

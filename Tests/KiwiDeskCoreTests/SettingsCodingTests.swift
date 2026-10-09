@@ -269,8 +269,8 @@ struct SettingsCodingTests {
             #expect(try object(plain[bar])["edge"] as? String == "top")
             #expect(try object(plain[bar])["edge_override"] == nil)
         }
-        settings.spaceBarStyle.setEdge(.left, on: screen)
-        settings.appBarStyle.setEdge(.bottom, on: screen)
+        settings.spaceBarStyle.edgeOverride = [screen: .left]
+        settings.appBarStyle.edgeOverride = [screen: .bottom]
         let data = try JSONEncoder().encode(settings)
         let root = try object(JSONSerialization.jsonObject(with: data))
         for (bar, edge) in [("space_bar", "left"), ("app_bar", "bottom")] {

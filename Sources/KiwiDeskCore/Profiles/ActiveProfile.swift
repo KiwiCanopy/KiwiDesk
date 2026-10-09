@@ -24,24 +24,31 @@ struct ActiveProfile {
     /// Whether it is the starter setup — what the onboarding and
     /// Settings title ask without re-reading the file (#1662).
     let isStarterSetup: Bool
+    /// Every screen its monitor sets name — the screens a bar's
+    /// per-screen edge write judges beside the connected ones
+    /// (#1948, `KiwiCore.screenEdgeScope`).
+    let monitors: Set<String>
 
     init(_ profile: Profile) {
         name = profile.name
         declaredSpaces = profile.declaredSpaces
         monitorCount = profile.monitorCount
         isStarterSetup = profile.isStarterSetup
+        monitors = Set(profile.monitorSets.flatMap(\.monitors))
     }
 
     private init(
         name: String,
         declaredSpaces: Set<SpaceID>,
         monitorCount: Int,
-        isStarterSetup: Bool
+        isStarterSetup: Bool,
+        monitors: Set<String>
     ) {
         self.name = name
         self.declaredSpaces = declaredSpaces
         self.monitorCount = monitorCount
         self.isStarterSetup = isStarterSetup
+        self.monitors = monitors
     }
 
     /// A rename moves the name; the Spaces are unchanged by it.
@@ -50,7 +57,8 @@ struct ActiveProfile {
             name: new,
             declaredSpaces: declaredSpaces,
             monitorCount: monitorCount,
-            isStarterSetup: isStarterSetup
+            isStarterSetup: isStarterSetup,
+            monitors: monitors
         )
     }
 }

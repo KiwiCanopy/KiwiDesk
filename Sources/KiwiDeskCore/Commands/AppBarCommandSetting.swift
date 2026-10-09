@@ -20,8 +20,10 @@ struct AppBarSettingError: Error, Equatable,
 enum AppBarCommandSetting {
     case edge(AppBarEdge)
     /// `set_edge(edge, screen)` — one screen's edge (#1948), the
-    /// screen already resolved to its fingerprint.
-    case screenEdge(AppBarEdge, screen: String)
+    /// screen resolved to its fingerprint and judged over `among`,
+    /// which the parse leaves empty and `KiwiCore` fills with its
+    /// `screenEdgeScope` (`scoped(to:)`) before it applies.
+    case screenEdge(AppBarEdge, screen: String, among: Set<String>)
     case activeIndicator(AppBarStyle.ActiveIndicator)
     case titleCap(Int)
     case groupAdjacentWindows(Bool)
@@ -47,7 +49,7 @@ enum AppBarCommandSetting {
         case "edge":
             return BarSettingChoice.edge(args).map { parsed in
                 parsed.screen.map {
-                    .screenEdge(parsed.edge, screen: $0)
+                    .screenEdge(parsed.edge, screen: $0, among: [])
                 } ?? .edge(parsed.edge)
             }
         case "active_indicator":
@@ -95,8 +97,8 @@ enum AppBarCommandSetting {
     func apply(to style: inout AppBarStyle) {
         switch self {
         case .edge(let value): style.setEdge(value)
-        case .screenEdge(let value, let screen):
-            style.setEdge(value, on: screen)
+        case .screenEdge(let value, let screen, let screens):
+            style.setEdge(value, on: screen, among: screens)
         case .activeIndicator(let value):
             style.activeIndicator = value
         case .titleCap(let value): style.titleCap = value
@@ -117,5 +119,15 @@ enum AppBarCommandSetting {
         case .groupAdjacentWindows(let value):
             bar.groupAdjacentWindows = value
         }
+    }
+}
+
+extension AppBarCommandSetting {
+    /// This setting with a screened edge judged over `screens`.
+    func scoped(to screens: Set<String>) -> Self {
+        guard case .screenEdge(let edge, let screen, _) = self else {
+            return self
+        }
+        return .screenEdge(edge, screen: screen, among: screens)
     }
 }

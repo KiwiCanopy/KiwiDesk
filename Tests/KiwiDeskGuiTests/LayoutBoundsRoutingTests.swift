@@ -79,13 +79,14 @@ struct LayoutBoundsRoutingTests {
         // the placement-bounce distrust keys on.
         "App/KiwiCore+FocusDistrust.swift": 1,
         // The `layoutBounds(on:)` seam — the one legitimate
-        // consumer, and what every span reads through — plus the
-        // neighbor scan's own-screen rect (#878): adjacency
+        // consumer, and what every span reads through.
+        "Tiling/TilingEngine+LayoutBounds.swift": 1,
+        // The neighbor scan's own-screen rect (#878): adjacency
         // compares whole screens, so it measures NO span and
         // classifies NO midpoint, and reserving the bar strip
         // would falsely open an edge whose neighbor abuts the
         // strip's side.
-        "Tiling/TilingEngine+Layout.swift": 2,
+        "Tiling/TilingEngine+Layout.swift": 1,
         // The float REGION (#1091). It measures no span and classifies no
         // midpoint — it is a containment box for a window the
         // layout never places, and the resize divides its delta

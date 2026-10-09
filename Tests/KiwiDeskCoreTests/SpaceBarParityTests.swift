@@ -59,7 +59,7 @@ struct SpaceBarCommandParityTests {
     /// to differ from the field's default so the write shows.
     private static let everySetting: [SpaceBarCommandSetting] = [
         .enabled(false), .reserve(false), .edge(.left),
-        .screenEdge(.left, screen: "Screen:1x1"),
+        .screenEdge(.left, screen: "S:1x1", among: ["S:1x1", "T:1x1"]),
         .glyphSpan(8), .glyphGap(3), .frontAppTitleCap(40),
         .inactiveContent(.count), .itemLabel(.layout),
         .activeIndicator(.edgeMark),
@@ -93,7 +93,7 @@ struct SpaceBarCommandParityTests {
         for key in SpaceBarStyle.CodingKeys.allCases {
             let args = sampleArgs(for: key)
             let parsed = SpaceBarCommandSetting.parse(
-                field: setterField(of: key.stringValue),
+                field: APIReference.setterField(of: key.stringValue),
                 args: args
             )
             #expect(

@@ -50,13 +50,13 @@ vocabulary spans Lua and profile JSON:
   beside `X`, keyed by the scope's identifier** — a Space by its
   id, a screen by its `Display.fingerprint`:
   `space_bar.set_edge(edge, screen)` → `space_bar.edge_override`
-  beside `space_bar.edge` (#1948), the shape `gap.override`
-  already has beside `gap.global`. For the two bars the parity
-  suites derive the writing verb from that suffix
-  (`setterField(of:)` in `AppBarCommandParityTests` and
-  `SpaceBarCommandParityTests`), so a scoped map named another
-  way reds there as a missing verb; elsewhere the name is
-  review's.
+  beside `space_bar.edge` (#1948), the storage shape
+  `gap.override` has beside `gap.global`. For the two bars the
+  namespace parity derives the writing verb from that suffix
+  (`setterField(of:)`), so a scoped map named another way fails
+  as a missing verb (`AppBarCommandParityTests` ▸
+  `appBarNamespaceParity`, `SpaceBarCommandTests` ▸
+  `namespaceRegistered`); elsewhere the name is review's.
 - Groups are **singular** (`gap`, `layout`, `drag`); never invent
   synonyms or plurals.
 - When adding a setting, pick the Lua name first and derive the

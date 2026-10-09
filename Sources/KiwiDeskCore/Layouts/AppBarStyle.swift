@@ -34,11 +34,17 @@ public struct AppBarStyle: Sendable, Equatable {
     /// so `LayoutAppBar` mirrors every field but these (#1731);
     /// the reservation is the bar's, never a layout's (#1524),
     /// and a screen's edge is written by `set_edge` (#1948).
-    static let layoutFixedKeys: [CodingKeys: String] = [
-        .edge: "app_bar.set_edge",
-        .edgeOverride: "app_bar.set_edge",
-        .reserve: "app_bar.set_reserve",
-    ]
+    static let layoutFixedKeys: [CodingKeys: String] = {
+        let keys: [CodingKeys] = [.edge, .edgeOverride, .reserve]
+        return Dictionary(
+            uniqueKeysWithValues: keys.map { key in
+                let field = APIReference.setterField(
+                    of: key.stringValue
+                )
+                return (key, "app_bar.set_\(field)")
+            }
+        )
+    }()
 
     /// Clamps dim factor to valid range [0.05, 1.0].
     public static func clampDim(_ value: CGFloat) -> CGFloat {

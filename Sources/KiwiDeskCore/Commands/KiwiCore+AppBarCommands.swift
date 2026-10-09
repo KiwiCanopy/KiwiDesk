@@ -16,19 +16,16 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("app_bar.set_".count)
         )
-        guard
-            let args = field == "edge"
-                ? screenResolvedEdgeArgs(args) : args
-        else { return .fail(Self.unknownScreen) }
-        switch AppBarCommandSetting.parse(field: field, args: args)
+        let given: [JSONValue]
+        switch screenResolvedEdgeArgs(field: field, args) {
+        case .success(let resolved): given = resolved
+        case .failure(let error): return .fail(error.message)
+        }
+        switch AppBarCommandSetting.parse(field: field, args: given)
         {
         case .success(let setting):
-            setting.apply(to: &tiler.settings.appBarStyle)
-            if case .screenEdge = setting {
-                tiler.settings.appBarStyle.collapseScreenEdges(
-                    among: connectedScreens
-                )
-            }
+            setting.scoped(to: screenEdgeScope)
+                .apply(to: &tiler.settings.appBarStyle)
             return .ok()
         case .failure(let error):
             return .fail(error.message)
@@ -47,21 +44,18 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("space_bar.set_".count)
         )
-        guard
-            let args = field == "edge"
-                ? screenResolvedEdgeArgs(args) : args
-        else { return .fail(Self.unknownScreen) }
+        let given: [JSONValue]
+        switch screenResolvedEdgeArgs(field: field, args) {
+        case .success(let resolved): given = resolved
+        case .failure(let error): return .fail(error.message)
+        }
         switch SpaceBarCommandSetting.parse(
             field: field,
-            args: args
+            args: given
         ) {
         case .success(let setting):
-            setting.apply(to: &tiler.settings.spaceBarStyle)
-            if case .screenEdge = setting {
-                tiler.settings.spaceBarStyle.collapseScreenEdges(
-                    among: connectedScreens
-                )
-            }
+            setting.scoped(to: screenEdgeScope)
+                .apply(to: &tiler.settings.spaceBarStyle)
             return .ok()
         case .failure(let error):
             return .fail(error.message)

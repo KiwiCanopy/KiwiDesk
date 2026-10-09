@@ -198,11 +198,13 @@ public final class TilingEngine {
     }
 
     /// A screen's `Display.fingerprint`, the key of a bar's
-    /// per-screen edge (#1948). Read only while a bar has one
-    /// (`fingerprint(of:)`), so a fixture without one never
-    /// reaches the host's screens; a fixture with one pins it.
-    var screenFingerprint: @MainActor (NSScreen) -> String = {
-        Display.fingerprint(name: $0.localizedName, frame: $0.frame)
+    /// per-screen edge (#1948) — the published display's, which
+    /// `bootstrapCoreServices` wires to `KiwiCore.screenFingerprint
+    /// (of:)` so the engine and the bars read one identity; nil
+    /// for a screen no display answers, which takes the bars' own
+    /// edges.
+    var screenFingerprint: @MainActor (NSScreen) -> String? = { _ in
+        nil
     }
 
     /// The fingerprint `screen`'s bar edges resolve under in

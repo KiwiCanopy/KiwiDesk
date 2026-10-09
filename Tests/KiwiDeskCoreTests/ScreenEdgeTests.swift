@@ -7,12 +7,13 @@ import Testing
 /// A bar's edge per screen (#1948), as data: a screen's own edge
 /// wins, any other screen uses the bar's, the bar's own edge is
 /// never stored, and the entries collapse into the bar's edge
-/// once every screen agrees. The reservation reads the resolved
-/// edges through the one fold.
+/// once every screen of the judged set agrees. The reservation
+/// reads the resolved edges through the one fold.
 @Suite("Per-screen bar edges (#1948)")
 struct ScreenEdgeTests {
     static let studio = "Studio Display:5120x2880"
     static let laptop = "Built-in Retina Display:1512x982"
+    static let away = "LG HDR 4K:3840x2160"
     private let visible = CGRect(x: 0, y: 0, width: 1000, height: 800)
 
     /// Both bars on the top edge, 32 pt deep, the Space Bar's
@@ -23,7 +24,11 @@ struct ScreenEdgeTests {
         settings.kiwishelf.thickness = 32
         settings.kiwishelf.outerMargin = 0
         settings.kiwishelf.innerMargin = 0
-        settings.spaceBarStyle.setEdge(studioEdge, on: Self.studio)
+        settings.spaceBarStyle.setEdge(
+            studioEdge,
+            on: Self.studio,
+            among: [Self.studio, Self.laptop]
+        )
         return settings
     }
 
@@ -31,56 +36,76 @@ struct ScreenEdgeTests {
     func resolution() {
         var style = SpaceBarStyle()
         style.edge = .top
-        style.setEdge(.left, on: Self.studio)
+        style.setEdge(.left, on: Self.studio, among: [Self.laptop])
         #expect(style.edge(on: Self.studio) == .left)
         #expect(style.edge(on: Self.laptop) == .top)
         #expect(style.edge(on: "Unknown:640x480") == .top)
         #expect(style.edge(on: nil) == .top)
+        #expect(style.screensDiffer)
     }
 
     @Test("Picking the bar's own edge stores nothing")
     func barEdgeFollows() {
+        let both: Set = [Self.studio, Self.laptop]
         var style = AppBarStyle()
-        style.setEdge(.top, on: Self.studio)
+        style.setEdge(.top, on: Self.studio, among: both)
         #expect(style.edgeOverride.isEmpty)
-        style.setEdge(.right, on: Self.studio)
+        style.setEdge(.right, on: Self.studio, among: both)
         #expect(style.edgeOverride == [Self.studio: .right])
-        style.setEdge(.top, on: Self.studio)
+        style.setEdge(.top, on: Self.studio, among: both)
         #expect(style.edgeOverride.isEmpty)
     }
 
     @Test("A screen-less edge clears every screen's own")
     func screenlessClears() {
         var style = SpaceBarStyle()
-        style.setEdge(.left, on: Self.studio)
-        style.setEdge(.right, on: Self.laptop)
+        let all: Set = [Self.studio, Self.laptop, Self.away]
+        style.setEdge(.left, on: Self.studio, among: all)
+        style.setEdge(.right, on: Self.laptop, among: all)
         style.setEdge(.bottom)
         #expect(style.edge == .bottom)
         #expect(style.edgeOverride.isEmpty)
     }
 
-    @Test("Entries collapse into the bar's edge once every screen agrees")
+    /// The judged set is the screens handed in plus the entries'
+    /// own: a known screen that follows the bar blocks the
+    /// collapse, and with none the entries alone decide.
+    @Test("Entries collapse once every judged screen agrees")
     func collapse() {
         let both: Set = [Self.studio, Self.laptop]
         var style = SpaceBarStyle()
-        style.setEdge(.left, on: Self.studio)
+        style.setEdge(.left, on: Self.studio, among: both)
         // The laptop still follows the bar: nothing collapses.
-        style.collapseScreenEdges(among: both)
         #expect(style.edge == .top)
         #expect(style.edgeOverride == [Self.studio: .left])
-        // One screen alone says nothing about a later screen.
-        style.collapseScreenEdges(among: [Self.studio])
-        #expect(style.edge == .top)
-        style.setEdge(.left, on: Self.laptop)
-        style.collapseScreenEdges(among: both)
+        style.setEdge(.left, on: Self.laptop, among: both)
         #expect(style.edge == .left)
         #expect(style.edgeOverride.isEmpty)
-        // Disagreeing entries never collapse.
-        style.setEdge(.right, on: Self.studio)
-        style.setEdge(.bottom, on: Self.laptop)
-        style.collapseScreenEdges(among: both)
+        // A screen of the set beyond the entries blocks it.
+        let three = both.union([Self.away])
+        style.setEdge(.right, on: Self.studio, among: three)
+        style.setEdge(.right, on: Self.laptop, among: three)
         #expect(style.edge == .left)
         #expect(style.edgeOverride.count == 2)
+        // With no other screen known, the one entry decides.
+        var lone = SpaceBarStyle()
+        lone.setEdge(.left, on: Self.studio, among: [])
+        #expect(lone.edge == .left)
+        #expect(lone.edgeOverride.isEmpty)
+        // Disagreeing entries never collapse.
+        style.setEdge(.bottom, on: Self.away, among: three)
+        #expect(style.edgeOverride.count == 3)
+    }
+
+    @Test("A look keeps each screen's own and drops what it equals")
+    func lookKeepsScreens() {
+        let all: Set = [Self.studio, Self.laptop, Self.away]
+        var style = SpaceBarStyle()
+        style.setEdge(.left, on: Self.studio, among: all)
+        style.setEdge(.right, on: Self.laptop, among: all)
+        style.setEdgeKeepingScreens(.left)
+        #expect(style.edge == .left)
+        #expect(style.edgeOverride == [Self.laptop: .right])
     }
 
     @Test("The reserved edges are each screen's own")
@@ -111,7 +136,11 @@ struct ScreenEdgeTests {
     func foldPerScreen() {
         var settings = settings(studioEdge: .top)
         settings.monocle.appBar.enabled = true
-        settings.appBarStyle.setEdge(.bottom, on: Self.studio)
+        settings.appBarStyle.setEdge(
+            .bottom,
+            on: Self.studio,
+            among: [Self.studio, Self.laptop]
+        )
         #expect(
             settings.shelfEdges(in: .monocle, on: Self.studio)
                 == [.top, .bottom]
@@ -120,6 +149,25 @@ struct ScreenEdgeTests {
         let studio = settings.onScreen(Self.studio)
         #expect(studio.spaceBarStyle.edge == .top)
         #expect(studio.appBarStyle.edge == .bottom)
-        #expect(settings.onScreen(nil) == settings)
+        // A resolved copy holds no entry: resolving it again is
+        // a fixed point.
+        #expect(!studio.hasScreenEdges)
+        #expect(studio.onScreen(Self.laptop) == studio)
+    }
+
+    /// The Position master selects an edge only while the bars
+    /// share it on every screen.
+    @Test("A screen of its own leaves the Position master unset")
+    func uniformEdge() {
+        var settings = TilingSettings()
+        settings.barEdge = .left
+        #expect(settings.uniformBarEdge == .left)
+        settings.appBarStyle.setEdge(
+            .right,
+            on: Self.studio,
+            among: [Self.studio, Self.laptop]
+        )
+        #expect(settings.sharedBarEdge == .left)
+        #expect(settings.uniformBarEdge == nil)
     }
 }

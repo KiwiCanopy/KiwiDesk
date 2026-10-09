@@ -36,7 +36,6 @@ struct ScreenEdgeCoreTests {
         core.shelves.ordersPanels = true
         // Pin the display rather than inherit it (#531).
         core.tiler.visibleBounds = { _ in screen.frame }
-        core.tiler.screenFingerprint = { _ in display.fingerprint }
         core.state.apply(
             .displaysChanged(ghost ? [display, Self.ghost] : [display])
         )
@@ -77,7 +76,7 @@ struct ScreenEdgeCoreTests {
         core.tiler.visibleBounds = { _ in visible }
         core.tiler.settings.barEdge = .top
         core.tiler.settings.kiwishelf.thickness = 40
-        core.tiler.settings.spaceBarStyle.setEdge(.left, on: "A:1x1")
+        core.tiler.settings.spaceBarStyle.edgeOverride = ["A:1x1": .left]
         let space = Space(id: SpaceID("1"), mode: .bsp)
         core.tiler.screenFingerprint = { _ in "A:1x1" }
         let onA = core.tiler.layoutBounds(on: screen, for: space)
@@ -98,13 +97,14 @@ struct ScreenEdgeCoreTests {
         let (core, display, _) = try #require(makeCore(mode: .scrolling))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         // Another screen's edge leaves this one on the bar's.
-        core.tiler.settings.spaceBarStyle.setEdge(.left, on: "Other:1x1")
+        core.tiler.settings.spaceBarStyle.edgeOverride = [
+            "Other:1x1": .left
+        ]
         core.updateBars()
         #expect(core.spaceBars.shownStrips.first?.edge == .top)
-        core.tiler.settings.spaceBarStyle.setEdge(
-            .left,
-            on: display.fingerprint
-        )
+        core.tiler.settings.spaceBarStyle.edgeOverride = [
+            display.fingerprint: .left
+        ]
         core.updateBars()
         let space = try #require(core.spaceBars.shownStrips.first)
         let app = try #require(core.appBars.shownStrips.first)
@@ -131,10 +131,9 @@ struct ScreenEdgeCoreTests {
     func floatRegionPerScreen() throws {
         let (core, display, _) = try #require(makeCore(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        core.tiler.settings.spaceBarStyle.setEdge(
-            .left,
-            on: display.fingerprint
-        )
+        core.tiler.settings.spaceBarStyle.edgeOverride = [
+            display.fingerprint: .left
+        ]
         core.updateBars()
         let space = try #require(
             core.state.workspaces.space(of: Self.window)
@@ -143,6 +142,36 @@ struct ScreenEdgeCoreTests {
         #expect(strip.edge == .left)
         let region = try #require(core.floatBounds(on: space))
         #expect(region.minX >= strip.strip.maxX)
+    }
+
+    /// The engine reads the screen identity the bars read: the
+    /// published display's fingerprint, wired at bootstrap.
+    @Test(
+        "The engine's screen identity is the published display's",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func engineIdentityIsTheDisplays() throws {
+        let (core, display, screen) = try #require(makeCore(mode: .bsp))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        #expect(core.tiler.screenFingerprint(screen) == display.fingerprint)
+        core.state.apply(.displaysChanged([]))
+        #expect(core.tiler.screenFingerprint(screen) == nil)
+    }
+
+    /// A Space switch's plates slide across the Space Bar's edge
+    /// as the switching screen has it.
+    @Test(
+        "The slide's axis follows this screen's Space Bar edge",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func slideAxisPerScreen() throws {
+        let (core, display, _) = try #require(makeCore(mode: .bsp))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        #expect(core.spaceSlideAxis(on: display.id) == .horizontal)
+        core.tiler.settings.spaceBarStyle.edgeOverride = [
+            display.fingerprint: .left
+        ]
+        #expect(core.spaceSlideAxis(on: display.id) == .vertical)
     }
 
     private func passes(_ meter: WorkMeter) -> Int {

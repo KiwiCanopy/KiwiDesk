@@ -100,7 +100,8 @@ struct AppBarCommandParityTests {
     /// `applyParity` goes red if this list, either apply switch,
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
-        .edge(.left), .screenEdge(.left, screen: "Screen:1x1"),
+        .edge(.left),
+        .screenEdge(.left, screen: "S:1x1", among: ["S:1x1", "T:1x1"]),
         .activeIndicator(.outline), .titleCap(40),
         .groupAdjacentWindows(false), .reserve(false),
     ]
@@ -142,7 +143,7 @@ struct AppBarCommandParityTests {
     func parseCoverage() {
         for key in AppBarStyle.CodingKeys.allCases {
             let parsed = AppBarCommandSetting.parse(
-                field: setterField(of: key.stringValue),
+                field: APIReference.setterField(of: key.stringValue),
                 args: sampleArgs(for: key)
             )
             #expect(
@@ -175,7 +176,7 @@ struct AppBarCommandParityTests {
     func appBarNamespaceParity() {
         let expected = Set(
             AppBarStyle.CodingKeys.allCases.map {
-                "set_\(setterField(of: $0.stringValue))"
+                "set_\(APIReference.setterField(of: $0.stringValue))"
             }
         )
         #expect(

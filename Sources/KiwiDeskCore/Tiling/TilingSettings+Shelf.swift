@@ -23,13 +23,13 @@ extension TilingSettings {
     /// where it has one, else the bar's (#1948). The ONE
     /// per-screen step, taken before `barEdges(space:app:)` folds
     /// the edges, so the reservation and the live plan read one
-    /// answer; nil keeps each bar's own edge. Resolve once: the
-    /// copy keeps the entries but no longer the bars' own edges.
+    /// answer; nil keeps each bar's own edge. The copy holds no
+    /// entry, so resolving it again changes nothing.
     public func onScreen(_ screen: String?) -> TilingSettings {
-        guard let screen, hasScreenEdges else { return self }
+        guard hasScreenEdges else { return self }
         var out = self
-        out.spaceBarStyle.edge = spaceBarStyle.edge(on: screen)
-        out.appBarStyle.edge = appBarStyle.edge(on: screen)
+        out.spaceBarStyle.setEdge(spaceBarStyle.edge(on: screen))
+        out.appBarStyle.setEdge(appBarStyle.edge(on: screen))
         return out
     }
 
@@ -89,11 +89,22 @@ extension TilingSettings {
 
     /// The edge both bars sit on while they share one — one fused
     /// shelf — or nil while they are split, a bar per edge (#1731).
-    /// The one comparison: Settings' Position master shows it and
-    /// asks it for its `?`.
+    /// The one comparison of the bars' own edges; the Position
+    /// master asks `uniformBarEdge`, which adds the screens.
     public var sharedBarEdge: AppBarEdge? {
         spaceBarStyle.edge == appBarStyle.edge
             ? spaceBarStyle.edge : nil
+    }
+
+    /// The edge both bars sit on on EVERY screen — what Settings'
+    /// Position master selects — or nil while the bars differ or
+    /// a screen has an edge of its own (`ScreenEdged.screensDiffer`,
+    /// #1948): a level whose lower levels disagree shows none.
+    public var uniformBarEdge: AppBarEdge? {
+        guard !spaceBarStyle.screensDiffer,
+            !appBarStyle.screensDiffer
+        else { return nil }
+        return sharedBarEdge
     }
 
     /// Insets visible bounds by the reservation of every edge a

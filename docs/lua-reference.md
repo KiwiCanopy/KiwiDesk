@@ -2511,6 +2511,11 @@ places:
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
 (default `"top"`; the starter setup seeds `"bottom"`).
 
+:::unreleased
+Then, optionally, a screen, named as
+[`space_bar.set_edge`](#space_barset_edge) names one.
+:::
+
 **Does:** sets the screen edge the App Bar sits on, for every
 layout — no layout sets its own. On the Space Bar's edge the two
 share one [KiwiShelf](#kiwishelf); on another edge each bar is
@@ -2524,7 +2529,7 @@ app_bar.set_edge("bottom")
 ```
 
 :::unreleased
-A second argument sets the edge on one screen only, as
+With a screen, the edge is that screen's alone, as
 [`space_bar.set_edge`](#space_barset_edge) describes.
 
 ```lua
@@ -2719,6 +2724,13 @@ space_bar.set_reserve(false)
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
 (default `"top"`).
 
+:::unreleased
+Then, optionally, a screen, in the forms
+[`move_space_to_display`](#move_space_to_display) takes — a
+number, or a screen's fingerprint or name — or the fingerprint
+of a screen that is not connected, kept for when it is.
+:::
+
 **Does:** sets the screen edge the Space Bar sits on. On the App
 Bar's edge the two share one [KiwiShelf](#kiwishelf); on another
 edge each bar is its own, reserved as KiwiShelf describes. The
@@ -2731,18 +2743,18 @@ space_bar.set_edge("left")
 ```
 
 :::unreleased
-**Per screen:** an optional second argument names one screen,
-in the forms [`move_space_to_display`](#move_space_to_display)
-takes — a number, or a connected screen's fingerprint or name —
-and gives the bar that edge on that screen alone. A fingerprint
-of a screen that is not connected is kept for when it is. A
-screen with no edge of its own uses the bar's, so a new screen
-needs no setup. Naming the bar's own edge returns a screen to it,
-and once two or more connected screens all have the same edge of
-their own, that edge becomes the bar's. A call without a screen
-sets the bar on every screen, clearing their own edges. A look
-applied in Settings sets the bars' edges and leaves each
-screen's own in place. The edges are stored per profile, under
+**Per screen:** with a screen, the bar takes that edge on that
+screen alone. A screen with no edge of its own uses the bar's,
+so a new screen needs no setup. Naming the bar's own edge
+returns a screen to it. The screens judged together are the
+active profile's screens, the connected ones and every screen
+with an edge of its own: once each of them has an edge of its
+own and all are the same, that edge becomes the bar's and the
+screens' own edges go — a screen among them that follows the
+bar keeps them apart. A call without a screen sets the bar on
+every screen, clearing their own edges. A look sets the bars'
+edges and keeps each screen's own, dropping one that now equals
+its bar's. The edges are stored per profile, under
 `space_bar.edge_override` and `app_bar.edge_override`, keyed by
 fingerprint.
 

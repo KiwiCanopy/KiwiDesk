@@ -37,15 +37,15 @@ extension SettingsValueReadout {
             return screenEdgeRows(
                 census,
                 bar: .spaceBarEdge,
-                old.settings.spaceBarStyle.edgeOverride,
-                new.settings.spaceBarStyle.edgeOverride
+                old.settings.spaceBarStyle,
+                new.settings.spaceBarStyle
             )
         case .appBarScreenEdge:
             return screenEdgeRows(
                 census,
                 bar: .appBarEdge,
-                old.settings.appBarStyle.edgeOverride,
-                new.settings.appBarStyle.edgeOverride
+                old.settings.appBarStyle,
+                new.settings.appBarStyle
             )
         case .alignment:
             return spaceBarChoiceRow(
@@ -178,41 +178,46 @@ extension SettingsValueReadout {
     }
 
     /// The Position master's value: the edge both bars share, or
-    /// "mixed" while they are split (`TilingSettings.sharedBarEdge`).
+    /// "mixed" while they or their screens differ
+    /// (`TilingSettings.uniformBarEdge`).
     static func agreedEdge(_ settings: TilingSettings) -> String {
-        guard let edge = settings.sharedBarEdge else {
+        guard let edge = settings.uniformBarEdge else {
             return L("diff.value.mixed", "mixed")
         }
         return AppBarOptions.edge.first { $0.0 == edge }?.1 ?? ""
     }
 
     /// One row per screen whose own edge changed (#1948), under
-    /// its bar's edge label; a screen without one reads unset.
-    private static func screenEdgeRows(
+    /// its bar's edge label and the screen's whole fingerprint —
+    /// two models of one name differ by size — each side the
+    /// edge that screen actually gets.
+    private static func screenEdgeRows<Bar: ScreenEdged>(
         _ census: SettingKey,
         bar: KiwiShelfKey,
-        _ old: [String: AppBarEdge],
-        _ new: [String: AppBarEdge]
+        _ old: Bar,
+        _ new: Bar
     ) -> [SettingsDiffRow] {
         let base = label(for: .kiwishelf(bar))
-        let name: (AppBarEdge?) -> String = { edge in
-            edge.flatMap { edge in
-                AppBarOptions.edge.first { $0.0 == edge }?.1
-            } ?? unset
+        let name: (AppBarEdge) -> String = { edge in
+            AppBarOptions.edge.first { $0.0 == edge }?.1 ?? ""
         }
-        return Set(old.keys).union(new.keys)
-            .filter { old[$0] != new[$0] }
+        let screens = Set(old.edgeOverride.keys)
+            .union(new.edgeOverride.keys)
+        return
+            screens
+            .filter { old.edge(on: $0) != new.edge(on: $0) }
             .sorted()
             .map { screen in
-                .change(
+                let parts = Display.fingerprintParts(screen)
+                return .change(
                     census,
                     instance: screen,
                     label: instanceLabel(
                         base,
-                        Display.fingerprintParts(screen).name
+                        "\(parts.name) \(parts.size)"
                     ),
-                    old: name(old[screen]),
-                    new: name(new[screen])
+                    old: name(old.edge(on: screen)),
+                    new: name(new.edge(on: screen))
                 )
             }
     }

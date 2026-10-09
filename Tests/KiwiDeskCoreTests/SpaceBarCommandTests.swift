@@ -86,7 +86,7 @@ struct SpaceBarCommandTests {
         // every field has a `set_<key>` and nothing else.
         let expected = Set(
             SpaceBarStyle.CodingKeys.allCases.map {
-                "set_\(setterField(of: $0.stringValue))"
+                "set_\(APIReference.setterField(of: $0.stringValue))"
             }
         )
         #expect(Set(commands ?? []) == expected)
