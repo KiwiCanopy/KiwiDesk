@@ -24,7 +24,7 @@
 # before the next bundle's `up`, so every bundle starts fresh.
 # [extra.lua] is appended to the config, for a setting one release
 # has and an older one lacks — e.g. turning 2.2.0's Space-switch
-# slide off so it compares with a release that never animated.
+# slide off so it compares with a release whose default does not.
 set -uo pipefail
 EXE="Contents/MacOS/KiwiDesk"
 LINK="$HOME/.config/KiwiDesk"

@@ -118,10 +118,18 @@ bundle in one sitting:
 
 ```bash
 F=.claude/skills/measure-work/scripts/fixture-desk.sh
-$F up <scratch>/<label>/KiwiDesk.app <scratch>/fx-<label>
+$F up <scratch>/<label>/KiwiDesk.app <scratch>/fx-<label> [extra.lua]
 # measure pairs 2↔3, 3↔4 and 5↔6, idle / --load / --gpu-load
 $F down <scratch>/fx-<label>
 ```
+
+The fixture pins only the animation settings every measured
+release shares; a setting one release changes or lacks is stated
+per bundle in `extra.lua`, which `up` appends to the config — a
+*slide off* bundle appends `animations.set_on_space_change(false)`.
+Where the new release's default differs from the older one's,
+measure it both ways: with its default, and with `extra.lua`
+matching the older release, the like-for-like row.
 
 The owner switches to an EMPTY macOS Desktop first, by hand or by
 swipe — a `focus_desktop` switch leaves macOS's current Desktop
@@ -131,13 +139,19 @@ behind, and the fixture's windows open there instead. `up` replaces
 and none migrates, so an older bundle boots the same desk. Run `down`
 before the next bundle's `up`; every bundle starts on a fresh copy.
 
-Take two runs per condition; where the maxima of two runs disagree
-by more than a quarter, add runs and balance their ORDER across the
-bundles, since a long GPU sitting heats the machine and the later
-bundle pays for it. Then append one row per pair and condition to
-the table in `docs/performance.md`, the desk and the commits named
-above it, and keep the earlier rows: the table is the record
-across releases.
+Runs per condition follow §3; when more are added, balance their
+ORDER across the bundles, since a long GPU sitting heats the
+machine and the later bundle pays for it. Report counters only:
+a `frame clock stalled` count is no comparison across releases,
+since it fires only while the window-animation clock runs and a
+release whose switch pass is instant never starts it.
+
+Then add the release's own section to `docs/performance.md` —
+one table per pair, a row per bundle and load, the date, macOS
+version and commits named above it — measuring the previous
+release again in the same sitting, since times compare only
+within a table. `docs.md`'s row for that page says what may never
+change in an earlier section.
 
 ## What this is not
 
