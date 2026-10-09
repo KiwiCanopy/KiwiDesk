@@ -10,6 +10,12 @@ import Testing
 @Suite("WindowServer create pulls a wake sweep (#1877)")
 @MainActor
 struct WindowServerHealPullTests {
+    /// Window numbers no window of this process can hold: a create
+    /// naming one of the test process's own panels is dropped as
+    /// chrome, and a fresh runner numbers those panels low.
+    private static let arrival = WindowID(0x7FFF_FF01)
+    private static let burst = WindowID(0x7FFF_FF02)
+
     private func runningCore() -> KiwiCore {
         let core = makeTestCore()
         core.eventLoop.registersWorkspaceObservers = false
@@ -25,9 +31,9 @@ struct WindowServerHealPullTests {
     @Test("a create schedules the sweep; a burst keeps it")
     func burstKeepsTheFirstPull() throws {
         let core = runningCore()
-        core.windowServerChanged(.created, id: WindowID(41))
+        core.windowServerChanged(.created, id: Self.arrival)
         let first = try #require(core.deferred.task(for: .adoptionHealWake))
-        core.windowServerChanged(.created, id: WindowID(42))
+        core.windowServerChanged(.created, id: Self.burst)
         let second = core.deferred.task(for: .adoptionHealWake)
         #expect(second == first, "a burst re-armed the pull")
     }
@@ -35,7 +41,7 @@ struct WindowServerHealPullTests {
     @Test("the pull runs one wake sweep and leaves the heal alone")
     func pullRunsTheWakeSweep() async throws {
         let core = runningCore()
-        core.windowServerChanged(.created, id: WindowID(41))
+        core.windowServerChanged(.created, id: Self.arrival)
         let wait = try #require(
             core.deferred.task(for: .adoptionHealWake)
         )
@@ -67,7 +73,7 @@ struct WindowServerHealPullTests {
     @Test("a stopped loop pulls nothing")
     func stoppedLoopPullsNothing() {
         let core = makeTestCore()
-        core.windowServerChanged(.created, id: WindowID(41))
+        core.windowServerChanged(.created, id: Self.arrival)
         #expect(!core.deferred.isScheduled(.adoptionHealWake))
     }
 }
