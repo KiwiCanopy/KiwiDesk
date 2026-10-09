@@ -131,6 +131,8 @@ struct CiStampOnlyTests {
             CiStampOnlyTests.version("2.2.0", commit: "abc1234"),
             CiStampOnlyTests.version("not-a-version"),
             CiStampOnlyTests.version("2.3.0") + "// note\n",
+            // A content line spelling a diff header.
+            CiStampOnlyTests.version("2.3.0") + "++ injected\n",
             // Every line a version literal, the count wrong: the
             // count check alone stops these.
             CiStampOnlyTests.version("2.2.0").replacingOccurrences(
@@ -152,34 +154,43 @@ struct CiStampOnlyTests {
         )
     }
 
-    /// Read from the base commit, never the checked-out head, and
-    /// only for a pull request; its yes is the step's skip.
+    /// Read from the base commit, never the checked-out head, only
+    /// for a pull request from this repository (a fork names its
+    /// branch freely), and standing without `pipefail`: an empty
+    /// read is a no. Its yes, and only its yes, is the step's skip.
     @Test("ci.yml asks the base commit's script")
     func workflowReadsTheBaseScript() throws {
         let step = try workflowStep(
             "Decide whether the build jobs must run",
             in: workflowSource("ci.yml")
         )
-        let call =
-            #"git show "${base}:scripts/ci-stamp-only" 2>/dev/null"#
-            + #" | bash -s -- "$HEAD_REF" "$base"; then"#
-        let line = try #require(
-            step.split(separator: "\n").first { $0.contains(call) },
-            "the changes step does not run the base commit's script"
-        )
-        #expect(
-            line.trimmingCharacters(in: .whitespaces).hasPrefix(
-                #"if [ "$EVENT" = "pull_request" ] && "# + call
-            )
-        )
-        let after = try #require(
-            step.range(of: call).map { step[$0.upperBound...] }
-        )
-        let skip = #"echo "run=false" >> "$GITHUB_OUTPUT""#
-        let next = after.split(separator: "\n")
+        let lines = step.split(separator: "\n")
             .map { $0.trimmingCharacters(in: .whitespaces) }
-            .first { !$0.isEmpty }
-        #expect(next == skip)
+        for env in [
+            "HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}",
+            "REPO: ${{ github.repository }}",
+        ] {
+            #expect(lines.contains(env), "missing env \(env)")
+        }
+        let gate =
+            #"if [ "$EVENT" = "pull_request" ] "#
+            + #"&& [ "$HEAD_REPO" = "$REPO" ]; then"#
+        let read =
+            #"stamp_check="$(git show "${base}:scripts/ci-stamp-only" "#
+            + #"2>/dev/null || true)""#
+        let judge =
+            #"if [ -n "$stamp_check" ] "#
+            + #"&& bash -c "$stamp_check" ci-stamp-only "#
+            + #""$HEAD_REF" "$base"; then"#
+        let gateAt = try #require(lines.firstIndex(of: gate))
+        #expect(lines[gateAt + 1] == read)
+        let judgeAt = try #require(
+            lines.firstIndex(of: judge),
+            "the changes step does not judge by the base script"
+        )
+        #expect(judgeAt > gateAt + 1)
+        let next = lines[(judgeAt + 1)...].first { !$0.isEmpty }
+        #expect(next == #"echo "run=false" >> "$GITHUB_OUTPUT""#)
         #expect(!step.contains("scripts/ci-stamp-only \""))
     }
 }

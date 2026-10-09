@@ -5,12 +5,14 @@
 #   Run inside the checkout, HEAD at the PR head. Exits 0 when the
 #   PR is a stamp alone, 1 otherwise; prints the reason either way.
 #
-# CI's `changes` job skips the two macOS jobs on a yes. That is safe
-# only because the gate has already run twice on this exact tree:
-# `scripts/release.sh` verifies before it commits the stamp, and
-# `release.yml`'s `verify` job runs again on the tag before any
-# artifact is built. All three clauses must hold, so the exception
-# cannot widen into a bypass for real edits to the version file:
+# CI's `changes` job skips the two macOS jobs on a yes. What still
+# gates the stamped tree is downstream, and the skip is safe only
+# while it stays there: `main`'s push CI after the merge,
+# `release.sh`'s second run, which re-verifies a tree its first run
+# did not record, and `release.yml`'s `verify` job on the tag before
+# any artifact is built. All three clauses must hold, so the
+# exception cannot widen into a bypass for real edits to the version
+# file:
 #   1. the head branch is the one `release.sh` names,
 #      `chore/stamp-<version>`;
 #   2. the only changed file is the version file;
@@ -42,11 +44,16 @@ if [ "$changed" != "$VERSION_FILE" ]; then
     echo "changes more than $VERSION_FILE"
     exit 1
 fi
+if [ "$(git diff --numstat "$base"...HEAD)" \
+    != "$(printf '1\t1\t%s' "$VERSION_FILE")" ]; then
+    echo "changes more than one line of $VERSION_FILE"
+    exit 1
+fi
 
-# The hunk body alone: `-U0` drops context, and the file headers
-# (`---`/`+++`) are not changes.
+# The hunk body alone: everything after the first `@@`, so a content
+# line spelling `+++ ` or `--- ` is never mistaken for a file header.
 body="$(git diff -U0 "$base"...HEAD -- "$VERSION_FILE" \
-    | grep -E '^[-+]' | grep -Ev '^(---|\+\+\+) ' || true)"
+    | sed -n '/^@@/,$p' | grep -Ev '^@@' || true)"
 removed="$(printf '%s\n' "$body" | grep -c '^-' || true)"
 added="$(printf '%s\n' "$body" | grep -c '^+' || true)"
 if [ "$removed" != 1 ] || [ "$added" != 1 ] \

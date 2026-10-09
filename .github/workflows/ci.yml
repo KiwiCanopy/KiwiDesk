@@ -77,6 +77,8 @@ jobs:
           FILTER: ${{ inputs.filter_paths }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           # Every unknown resolves to "run". A false negative here
@@ -118,13 +120,18 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          # A release stamp alone has passed the gate twice already
-          # (#2106). The script is read from the BASE commit, so a
-          # PR cannot rewrite the rule that judges it; a base
-          # without the script answers no.
-          if [ "$EVENT" = "pull_request" ] \
-            && git show "${base}:scripts/ci-stamp-only" 2>/dev/null \
-              | bash -s -- "$HEAD_REF" "$base"; then
+          # A release stamp alone skips (#2106); what gates it is
+          # downstream, scripts/ci-stamp-only says what. Only this
+          # repo's own branches, since a fork names its branch
+          # freely, and the judge is read from the BASE commit, so
+          # a PR cannot rewrite it; no script there answers no.
+          stamp_check=""
+          if [ "$EVENT" = "pull_request" ] && [ "$HEAD_REPO" = "$REPO" ]; then
+            stamp_check="$(git show "${base}:scripts/ci-stamp-only" \
+              2>/dev/null || true)"
+          fi
+          if [ -n "$stamp_check" ] \
+            && bash -c "$stamp_check" ci-stamp-only "$HEAD_REF" "$base"; then
             echo "run=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
