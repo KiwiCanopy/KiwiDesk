@@ -44,6 +44,14 @@ extension StateCoordinator {
         }
     }
 
+    /// A filing by a user verb or drop while the cross-session
+    /// match is open: no restore pass may undo it (#1385). The two
+    /// filing seams, `addFocusedToSpace` and `insertDropped`, call it.
+    mutating func stampUserFiling(_ id: WindowID) {
+        guard crossSession.isOpen else { return }
+        crossSession.placed.insert(id)
+    }
+
     /// Records restored space association for untracked window
     /// (`rememberedSpaces`, #1010).
     mutating func remember(_ id: WindowID, in space: SpaceID) {

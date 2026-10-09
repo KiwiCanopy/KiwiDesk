@@ -117,10 +117,6 @@ extension KiwiCore {
         let takesFocus =
             state.workspaces.lastFocused == window
             || target == state.workspaces.activeSpace
-        // A user's filing is never undone by a restore pass (#1385).
-        if !restoring, state.crossSession.isOpen {
-            state.crossSession.placed.insert(window)
-        }
         addFocusedToSpace(window, to: target)
         // A target named by an undeclared id takes its screen now:
         // the re-anchor and a follow's slide read it (#1994).
@@ -162,6 +158,7 @@ extension KiwiCore {
         _ window: WindowID,
         to target: SpaceID
     ) {
+        state.stampUserFiling(window)
         let floating = state.windows[window]?.isFloating == true
         guard !floating,
             state.workspaces[target]?.mode == .track

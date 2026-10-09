@@ -5809,7 +5809,8 @@ when the restart began, and the first launch after it matches the
 windows macOS reopens to it by app and title instead of by window
 id. An app with one window goes back to its space at launch; the
 others move into their spaces about 30 seconds later, once their
-titles have settled, and a window that reopens up to two minutes
+titles have settled — never the window you are working in, nor
+one you moved since launch — and a window that reopens up to two minutes
 after launch is still placed. An app's windows that share one
 title go back to that app's spaces in no particular order. The
 arrangement is used once, by that first launch. After a plain

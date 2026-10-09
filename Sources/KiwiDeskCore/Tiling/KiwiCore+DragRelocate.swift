@@ -239,6 +239,7 @@ extension KiwiCore {
             let target,
             let targetIndex = dest.windows.firstIndex(of: target)
         {
+            state.stampUserFiling(id)
             state.workspaces.add(id, to: destID, after: target)
             state.workspaces.withSpace(destID) {
                 $0.move(id, to: targetIndex)

@@ -23,7 +23,7 @@ extension KiwiCore {
             source: .axEcho,
             pin: nil
         )
-        // Same policy as .windowMoved above: a genuine
+        // Same policy as `handle`'s `.windowMoved` arm: a genuine
         // user resize takes the window over.
         if !tiler.didRecentlySetFrame(id),
             !tiler.looksStashed(frame)

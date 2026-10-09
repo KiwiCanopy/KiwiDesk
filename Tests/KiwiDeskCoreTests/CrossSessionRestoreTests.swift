@@ -115,10 +115,8 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         leave(previous([(F.hidden, "com.a", "A")]), in: core)
         arrange(core)
         #expect(space(core, 10) == F.hidden)
-        core.crash.captureState = { core.sessionSnapshot() }
-        core.crash.autosave()
-        let second = core.crash.takeBootSnapshot()
-        #expect(second?.frozenForLogout == false)
+        // The next launch reads the same directory: nothing is left.
+        _ = core.crash.takeBootSnapshot()
         #expect(core.crash.takeCrossSessionCandidate() == nil)
     }
 
@@ -172,6 +170,7 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
                 window(20, "com.ide", "Preview"),
                 window(21, "com.ide", "IDE"),
                 window(22, "com.ide", "Notes"),
+                window(23, "com.ide", "Draft"),
             ])
         )
         leave(
@@ -179,16 +178,20 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
                 (F.shown, "com.ide", "IDE"),
                 (F.hidden, "com.ide", "Preview"),
                 (F.hidden, "com.ide", "Notes"),
+                (F.hidden, "com.ide", "Draft"),
             ]),
             in: core
         )
         arrange(core)
         core.moveWindow(WindowID(21), to: F.hidden, follow: false)
+        // A drag's drop files through its own seam, not the verb's.
+        core.insertDropped(WindowID(23), onto: WindowID(22), into: F.shown)
         core.state.workspaces.focus(WindowID(22), in: F.shown)
         core.crossSessionSettlePass()
         #expect(space(core, 20) == F.hidden)
         #expect(space(core, 21) == F.hidden)
         #expect(space(core, 22) == F.shown)
+        #expect(space(core, 23) == F.shown)
     }
 
     @Test(
