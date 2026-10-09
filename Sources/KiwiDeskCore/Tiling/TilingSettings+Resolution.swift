@@ -90,17 +90,18 @@ extension TilingSettings {
         spaceBarStyle.enabled || anyAppBarCanShow
     }
 
-    /// The edges a space laid out in `mode` reserves — the Space
-    /// Bar's, which draws in every layout, and that layout's own
-    /// App Bar's where it is on (#1517, #1731). A layout that
-    /// draws no bar keeps the whole screen; the price is that a
-    /// switch into a layout whose App Bar draws on an edge nothing
-    /// else holds moves windows by the strip.
+    /// The edges a space laid out in `mode` reserves — of the
+    /// edges `barEdges` lists for the Space Bar, which draws in
+    /// every layout, and that layout's own App Bar where it is
+    /// on (#1517, #1731), the ones that reserve (#1524). A layout
+    /// that draws no bar keeps the whole screen; the price is that
+    /// a switch into a layout whose App Bar draws on an edge
+    /// nothing else holds moves windows by the strip.
     public func shelfEdges(in mode: LayoutMode) -> [AppBarEdge] {
         barEdges(
             space: spaceBarStyle.enabled,
             app: appBarHost(for: mode)?.appBar.enabled == true
-        )
+        ).filter(\.reserves).map(\.edge)
     }
 
     /// The edges the shown bars sit on — the ONE list the
@@ -109,11 +110,32 @@ extension TilingSettings {
     /// bars are never stacked on one edge
     /// (`ShelfSplitGeometryTests` ▸ `edgesPerMode`) and
     /// `ShelfGeometry.strips` measures the Space Bar's whole edge.
-    public func barEdges(space: Bool, app: Bool) -> [AppBarEdge] {
-        var edges: [AppBarEdge] = []
-        if space { edges.append(spaceBarStyle.edge) }
-        if app, !edges.contains(appBarStyle.edge) {
-            edges.append(appBarStyle.edge)
+    /// A shared edge reserves while either bar on it does — the
+    /// fold is here, at the dedup, and nowhere beside it
+    /// (`BarReserveTests`, #1524).
+    public func barEdges(space: Bool, app: Bool) -> [ShelfEdge] {
+        var edges: [ShelfEdge] = []
+        if space {
+            edges.append(
+                ShelfEdge(
+                    spaceBarStyle.edge,
+                    reserves: spaceBarStyle.reserve
+                )
+            )
+        }
+        guard app else { return edges }
+        if let shared = edges.firstIndex(where: {
+            $0.edge == appBarStyle.edge
+        }) {
+            edges[shared].reserves =
+                edges[shared].reserves || appBarStyle.reserve
+        } else {
+            edges.append(
+                ShelfEdge(
+                    appBarStyle.edge,
+                    reserves: appBarStyle.reserve
+                )
+            )
         }
         return edges
     }

@@ -121,7 +121,8 @@ extension SpaceBarCard {
                         + "window there without switching."
                 )
             )
-        case .spaceBarEnabled, .spaceBarActiveDimFactor,
+        case .spaceBarEnabled, .spaceBarReserve,
+            .spaceBarActiveDimFactor,
             .spaceBarStickyBadge, .spaceBarFocusedItemColor,
             .spaceBarFocusedHighlightColor:
             let _ = assertionFailure(

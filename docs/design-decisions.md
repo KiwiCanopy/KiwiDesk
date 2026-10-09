@@ -4453,7 +4453,9 @@ paint at `BarPanel.level`, so a window flush against a strip has
 its outer sliver hidden; flush against a screen edge it is
 clipped instead. Insetting at bars only (device QA) is two rules
 where the principle gives one:
-**float geometry follows PAINTED chrome**, and a ring is painted
+**float geometry follows RESERVED chrome** — a painted strip on
+an edge the layout gives up, since a bar set to draw over the
+windows keeps no float out either (#1524) — and a ring reserves
 wherever it is drawn. The number is not invented for this — it is
 `BorderGeometry.outwardReach`, the renderer's own function, and
 `BorderStyle.fittingGaps` already answers the same question for

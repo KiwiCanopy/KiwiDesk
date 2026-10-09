@@ -24,6 +24,7 @@ extension KiwiCore {
         if let retired = APIReference.retirement(of: command) {
             return .fail(retired)
         }
+        let reservation = shelfReservation
         let response: CommandResponse
         if command.hasPrefix("animations.") {
             response = animationsCommand(command, args)
@@ -58,7 +59,14 @@ extension KiwiCore {
         } else {
             response = settingsCommand(command, args)
         }
-        if response.isSuccess {
+        if response.isSuccess, Self.isBarCommand(command),
+            shelfReservation == reservation
+        {
+            // A bar write that moved no reserved edge moves no
+            // window: repaint the bars alone (#1524,
+            // `BarReserveRetileTests`).
+            updateBars()
+        } else if response.isSuccess {
             // Forced: these are explicit config applies from
             // Lua/CLI (AGENTS.md §5) — un-forced, the engine's
             // ±2 pt tolerance would swallow a small ratio
@@ -74,6 +82,20 @@ extension KiwiCore {
             }
         }
         return response
+    }
+
+    /// Every layout's reserved shelf edges, read through the one
+    /// `shelfEdges(in:)` — what a bar write must move to owe a
+    /// retile (#1524).
+    var shelfReservation: [[AppBarEdge]] {
+        LayoutMode.allCases.map(tiler.settings.shelfEdges(in:))
+    }
+
+    /// The bars' own global setters — the ones whose write may
+    /// leave the reservation alone.
+    static func isBarCommand(_ command: String) -> Bool {
+        command.hasPrefix("space_bar.")
+            || command.hasPrefix("app_bar.")
     }
 
     /// Raised by a layout setter that only re-divides room among

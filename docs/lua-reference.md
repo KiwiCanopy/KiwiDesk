@@ -2497,6 +2497,35 @@ it does not follow a layout's orientation.
 app_bar.set_edge("bottom")
 ```
 
+:::unreleased
+### app_bar.set_reserve
+
+**Expects:** boolean (default `true`).
+
+**Does:** sets whether the layout gives up the App Bar's strip.
+With `false` the bar still shows but draws over the windows:
+tiled windows and floats use the strip as free room, and showing
+or hiding the bar no longer moves a window.
+
+The cost: the strip under the bar takes no clicks. The bar is
+one panel spanning its whole strip, so at the top edge the
+title bars beneath it, and at the bottom the status and scroll
+bars, cannot be clicked there, even beside a short bar.
+
+On an edge the two bars share, the strip stays reserved while
+either bar reserves it, so `false` frees it only when the
+Space Bar on that edge reserves nothing either — hidden, or
+its own [`space_bar.set_reserve`](#space_barset_reserve) off.
+
+Global only: no layout sets its own.
+
+**Example:**
+
+```lua
+app_bar.set_reserve(false)
+```
+:::
+
 ### app_bar.set_active_indicator
 
 **Expects:** `"outline"` or `"edge_mark"` (default
@@ -2620,6 +2649,37 @@ none is.
 ```lua
 space_bar.set_enabled(true)
 ```
+
+:::unreleased
+### space_bar.set_reserve
+
+**Expects:** boolean (default `true`).
+
+**Does:** sets whether the layout gives up the Space Bar's strip.
+With `false` the bar still shows but draws over the windows:
+tiled windows and floats use the strip as free room, and showing
+or hiding the bar no longer moves a window.
+
+The cost: the strip under the bar takes no clicks. The bar is
+one panel spanning its whole strip, so at the top edge the
+title bars beneath it, and at the bottom the status and scroll
+bars, cannot be clicked there, even beside a short bar.
+
+On an edge the two bars share, the strip stays reserved while
+either bar reserves it, so `false` frees it only when the
+App Bar on that edge reserves nothing either — hidden, or
+its own [`app_bar.set_reserve`](#app_barset_reserve) off.
+
+With the strip free, toggling
+[`space_bar.set_enabled`](#space_barset_enabled) from a key is
+cheap: it repaints the bar alone.
+
+**Example:**
+
+```lua
+space_bar.set_reserve(false)
+```
+:::
 
 ### space_bar.set_edge
 

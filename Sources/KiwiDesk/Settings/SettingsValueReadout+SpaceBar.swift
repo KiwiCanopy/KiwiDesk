@@ -15,6 +15,8 @@ extension SettingsValueReadout {
         switch key {
         case .spaceBarEnabled:
             return spaceBarOnOffRow(census, o.enabled, n.enabled)
+        case .spaceBarReserve:
+            return spaceBarOnOffRow(census, o.reserve, n.reserve)
         case .spaceBarActiveIndicator:
             return spaceBarChoiceRow(
                 census,

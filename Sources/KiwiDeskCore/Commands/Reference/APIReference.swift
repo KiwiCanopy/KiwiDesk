@@ -149,7 +149,8 @@ public enum APIReference {
             "set_app_bar_group_adjacent_windows",
         ],
         "space_bar": [
-            "set_enabled", "set_edge", "set_glyph_span", "set_glyph_gap",
+            "set_enabled", "set_reserve", "set_edge",
+            "set_glyph_span", "set_glyph_gap",
             "set_group_adjacent_windows", "set_inactive_content",
             "set_item_label",
             "set_active_indicator",
@@ -159,7 +160,8 @@ public enum APIReference {
             "set_focused_item_color", "set_focused_highlight_color",
         ],
         "app_bar": [
-            "set_edge", "set_active_indicator", "set_title_cap",
+            "set_edge", "set_reserve", "set_active_indicator",
+            "set_title_cap",
             "set_group_adjacent_windows",
         ],
         "kiwishelf": [
