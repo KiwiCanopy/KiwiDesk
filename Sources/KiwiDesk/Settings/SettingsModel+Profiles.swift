@@ -41,9 +41,9 @@ extension SettingsModel {
     }
 
     /// Tooltip explanation when active profile screen count differs from
-    /// connected displays.
+    /// connected screens.
     var updateHint: String? {
-        // No displays known (paused, or before the boot scan
+        // No screens known (paused, or before the boot scan
         // publishes) is not a mismatch; Core's gate says the
         // same (`DesktopBindingRefusal.displaysUnknown`).
         guard !displays.isEmpty, let name = activeProfile,
@@ -64,13 +64,13 @@ extension SettingsModel {
         )
     }
 
-    /// Persists edited tiling into active profile and refreshes monitor set.
+    /// Persists edited tiling into the active profile; refreshes its setup.
     func updateActiveProfile() {
         guard let name = activeProfile else { return }
         persist(named: name)
     }
 
-    /// Creates new profile with unique name capturing live monitor set.
+    /// Creates new profile with unique name capturing the live screen setup.
     func saveAsNewProfile(named name: String) {
         let trimmed = name.trimmingCharacters(
             in: .whitespaces

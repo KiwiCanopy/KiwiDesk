@@ -278,20 +278,22 @@ synonym:
   the same reason. A sentence naming both writes both words.
   Retired as names for a screen: *monitor*, *display*. The
   **wire is exempt**, as it is above: a Lua verb, an event name
-  or a profile key spelling either word keeps it — the owner
-  ruled the wire stays (#865, 2026-10-09) — and this bullet
-  governs copy alone; naming those here would be one list
+  or a profile key spelling either word keeps it, and this
+  bullet governs copy alone; naming those here would be one list
   rotting in two files, the same reason the bullet above names
   none. A **proper name** is not the common noun and is not
   bound here — the `Coder & Monitor` preset keeps its name.
 
   Two obligations, and no claim about what the corpus currently
   says: **author every new string to this**, and give a retired
-  noun a user still types to `SettingsSearchSynonyms` rather
-  than back to a label (`SettingsSearchTests` ▸
-  `retiredScreenNounsFindTheirPage`). #865 is the sweep; the
-  keys it deliberately left alone are listed in the design
-  entry below, as Family C requires. A locale
+  noun a user still types to search rather than back to a label
+  — a destination title's to
+  `SettingsSearchSynonyms.destinationTerms(for:)`, a row
+  label's to `SettingsSearchSynonyms.terms(for:)`
+  (`SettingsSearchTests` ▸ `retiredScreenNounsFindTheirPage`).
+  #865 is the sweep; the keys it deliberately left alone are
+  listed in `docs/design-decisions.md` ▸ Vocabulary: a screen is
+  a screen, as Family C requires. A locale
   applies the ladder to its OWN file: this settles the English,
   never which of a catalog's two candidates wins there
   (`docs/localization-naming.md` ▸ Family C, whose rule 2 is

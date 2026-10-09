@@ -62,12 +62,12 @@ extension SettingsTheme {
     /// (`SettingsThemeContrastTests`, #1542).
     static let highlightWashOpacity: CGFloat = 0.06
 
-    /// Display card stand scale and clamp metrics
+    /// Screen card stand scale and clamp metrics
     /// (`ScreensChromeWiringTests`, #758).
-    static let monitorStandScale: CGFloat = 0.52
-    static let monitorStandMin: CGFloat = 44
-    static let monitorStandMax: CGFloat = 320
-    static let monitorNeckScale: CGFloat = 0.26
-    static let monitorNeckMin: CGFloat = 14
-    static let monitorNeckMax: CGFloat = 44
+    static let screenStandScale: CGFloat = 0.52
+    static let screenStandMin: CGFloat = 44
+    static let screenStandMax: CGFloat = 320
+    static let screenNeckScale: CGFloat = 0.26
+    static let screenNeckMin: CGFloat = 14
+    static let screenNeckMax: CGFloat = 44
 }

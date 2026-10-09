@@ -120,11 +120,11 @@ extension APIReference {
         ),
         "save_profile": APIRecord(
             "Saves the current configuration to a profile, which "
-                + "claims the connected screen set.",
+                + "claims the connected screen setup.",
             .text("name")
         ),
         "load_profile": APIRecord(
-            "Loads a profile, claiming the connected screen set "
+            "Loads a profile, claiming the connected screen setup "
                 + "where its screen count fits.",
             .text("name")
         ),
@@ -134,7 +134,7 @@ extension APIReference {
         ),
         "set_default_profile": APIRecord(
             "Sets the fallback profile for its screen count; "
-                + "refuses one that holds no screen set.",
+                + "refuses one that holds no screen setup.",
             .text("name")
         ),
         "list_profiles": APIRecord(

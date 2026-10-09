@@ -3,7 +3,7 @@ import KiwiDeskCore
 /// Evaluates visibility and gating rules for the Screens area
 /// (#678 Phase 3, turn 13b, `ScreensGateTests`). Every gate here
 /// SURFACES rather than greys — not an exception to "grey don't
-/// hide" (gui.md): a picture of unattached monitors has nothing
+/// hide" (gui.md): a picture of unattached screens has nothing
 /// to dim, so the banner takes the picture's place and says so.
 /// The picture's own rows carry NO gate on purpose: one tag on
 /// both the banner and the rows it replaces would declare one
@@ -12,9 +12,9 @@ struct ScreensGates {
     /// Whether dashboard is editing stored profile rather than live config
     /// (#18).
     let editingStoredProfile: Bool
-    /// Whether edit target's displays are currently attached.
+    /// Whether edit target's screens are currently attached.
     let placementEditable: Bool
-    /// Whether any space is pinned to a currently disconnected display.
+    /// Whether any space is pinned to a currently disconnected screen.
     let hasOrphanedPins: Bool
 
     /// Reason why a control or card is withheld from view.

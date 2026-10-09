@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Display card in monitors arrangement preview (#678, #758).
+/// Screen card in the Screens arrangement preview (#678, #758).
 struct ScreenCard: View {
     @ObservedObject var model: SettingsModel
     let display: Display
@@ -36,7 +36,7 @@ struct ScreenCard: View {
         .background(plate)
         .overlay(border)
         .clipShape(RoundedRectangle(cornerRadius: 6))
-        // Main display accent glow (#758, ui-designer 2026-08-09).
+        // Main screen accent glow (#758, ui-designer 2026-08-09).
         .compositingGroup()
         .shadow(
             color: isMain
@@ -226,7 +226,7 @@ struct ScreenCard: View {
         selection = isSelected ? nil : display.id
     }
 
-    /// Pins dropped spaces to monitor fingerprint (#36).
+    /// Pins dropped spaces to screen fingerprint (#36).
     private func pin(_ items: [DraggableSpace]) -> Bool {
         var assigned = false
         for item in items {

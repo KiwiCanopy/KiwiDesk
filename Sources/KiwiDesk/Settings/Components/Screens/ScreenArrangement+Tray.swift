@@ -1,7 +1,7 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Dynamic height calculation for follows-main monitor arrangement tray.
+/// Dynamic height calculation for follows-main screen arrangement tray.
 extension ScreenArrangement {
     /// Computes tray height for the chip count: a constant clipped
     /// the heading once chips wrapped (owner 2026-08-04). Rows

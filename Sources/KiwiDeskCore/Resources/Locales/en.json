@@ -1196,7 +1196,7 @@
   "profile_header.title.standard": "Standard: %1$@",
   "profile_header.title.transient": "Transient layout",
   "profiles.apply_failed": "Applying failed: %1$@",
-  "profiles.area.caption": "A profile is your whole arrangement, remembered per screen setup.",
+  "profiles.area.caption": "A profile is your whole setup, remembered per screen arrangement.",
   "profiles.badge.default_for": "default · screens: %1$d",
   "profiles.badge.loaded": "loaded",
   "profiles.broken.malformed": "Not valid JSON — opening it will show where it broke.",

@@ -124,7 +124,7 @@ Lua-only (`enable_wake_restore`, `set_wake_restore_delay` in the
 KiwiDesk restores the arrangement captured when the Mac went to
 rest (on by default, after a 1500 ms delay) and puts focus back
 on the window you were in. A wake restore is skipped when the
-screen set changed during sleep; the screen-change profile
+screen setup changed during sleep; the screen-change profile
 switch takes over. If a restore leaves things wrong, **General ▸
 Advanced ▸ Discard Saved Window Arrangement** clears it.
 
@@ -682,7 +682,7 @@ keeps that look as its own.
 ### Saving
 
 **Save** writes to the current target and adds or refreshes the
-connected screen set; it is greyed when the connected screen
+connected screen setup; it is greyed when the connected screen
 count differs from the profile's. A screen setup the profile has
 no set for is itself an unsaved change, listed as a **Screens**
 row. On a temporary layout or a built-in Standard the slot reads
@@ -695,8 +695,8 @@ only when no other profile has it.
 
 While management is **paused** (Accessibility off), KiwiDesk
 detects no screens, so any save that captures the live screen
-set is unavailable. Shortcuts, app rules, float and ignore rules,
-the space list and Desktop bindings carry no screen set, so
+setup is unavailable. Shortcuts, app rules, float and ignore rules,
+the space list and Desktop bindings carry no screen setup, so
 **Save** still writes `gui.json` for them and keeps counting the
 layout edits until you grant access.
 

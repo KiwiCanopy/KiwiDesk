@@ -8,7 +8,7 @@ enum ScreensRowInstance: Hashable {
     case banner
 }
 
-/// Space pinned to a monitor currently disconnected.
+/// Space pinned to a screen currently disconnected.
 struct OrphanPin: Identifiable, Hashable {
     let space: SpaceID
     let fingerprint: String
@@ -30,18 +30,18 @@ struct ScreensFamilyRows {
     let pins: [SpaceID: String]
     let displays: [Display]
 
-    /// Connected displays in left-to-right desk reading order.
+    /// Connected screens in left-to-right desk reading order.
     var orderedDisplays: [Display] {
         DeskOrder.reading(displays)
     }
 
-    /// Whether connected displays share identical model and resolution
+    /// Whether connected screens share identical model and resolution
     /// fingerprint.
     var hasAmbiguousDisplays: Bool {
         Set(displays.map(\.fingerprint)).count < displays.count
     }
 
-    /// Space chips assigned to display card via pin or positional default
+    /// Space chips assigned to screen card via pin or positional default
     /// (#53).
     func chips(on fingerprint: String) -> [SpaceAssignment] {
         spaces.compactMap { space in
@@ -62,16 +62,16 @@ struct ScreensFamilyRows {
         spaces.filter { mainSpaces.contains($0) }
     }
 
-    /// Total spaces active on display including follows-main spaces on main
-    /// display.
+    /// Total spaces active on screen including follows-main spaces on main
+    /// screen.
     func held(on display: Display, isMain: Bool) -> Int {
         chips(on: display.fingerprint).count
             + (isMain ? trayChips.count : 0)
     }
 
-    /// Stored pins for currently disconnected displays — read from
+    /// Stored pins for currently disconnected screens — read from
     /// the SAVED pins (a resolution can only name a connected
-    /// display), keeping the user's intent visible and clearable;
+    /// screen), keeping the user's intent visible and clearable;
     /// follows-main spaces are excluded, the tray already draws
     /// them.
     var orphans: [OrphanPin] {
@@ -84,7 +84,7 @@ struct ScreensFamilyRows {
             .sorted { $0.space.raw < $1.space.raw }
     }
 
-    /// Deduplicated spaces assigned to display cards: fingerprint
+    /// Deduplicated spaces assigned to screen cards: fingerprint
     /// twins would each claim the same chips, double-counting the
     /// census expansion — the picture may draw both, the COUNT
     /// must not (code review, 2026-08-04).

@@ -509,7 +509,12 @@ Section bodies in `Settings/Sections/`, their widgets in
 where that area is a destination the directory carries the
 destination's name, so **renaming a destination renames its
 directory in the same change set** (Appearance became
-GapsAndBorders with its page in #678 Phase 3).
+GapsAndBorders with its page in #678 Phase 3; Monitors became
+Screens in #865). The rename reaches its Swift identifiers too,
+and stops at the stored and spelled identities: its localization
+keys and census raw ids keep the old spelling (census ids are
+spelled from the keys), and a retired title noun a user still
+types goes to `SettingsSearchSynonyms.destinationTerms(for:)`.
 Shell/model files and root-composed widgets live at `Settings/`
 root. `Common/`
 admits only primitives shared across multiple component areas;
@@ -567,10 +572,10 @@ one key into a row per live instance, which is what an order-list
 `ForEach` cannot express at all — the paragraph below owns that
 seam. Screens is the far end of the same argument and worth
 knowing before you look for a list to reorder: its placement
-container is a PICTURE, positioned by the real display
+container is a PICTURE, positioned by the real screen
 arrangement (`ScreenArrangement`), so its rows have no reading
-order to state — a card's place on screen is where that monitor
-is on the desk.
+order to state — a card's place in the picture is where that
+screen is on the desk.
 
 **The census's unit is a SETTING, and one setting may draw many
 rows.** A keybinding family is the worked case: `focusDir` is
@@ -587,7 +592,7 @@ Screens has the pair too (`ScreensFamilyRows`), and adds the
 case where several families must be read TOGETHER: its three
 placement families partition the declared spaces — carded (a
 chip), following main (a chip in the tray), or waiting on an
-absent monitor (a row of its own) — so each one's own count can
+absent screen (a row of its own) — so each one's own count can
 be right while a space falls through all three. Only a guard
 over the UNION sees that, so a family joining or leaving that
 partition joins `ScreensCensusRenderTests`'

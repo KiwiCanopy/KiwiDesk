@@ -1,6 +1,6 @@
 import CoreGraphics
 
-/// Calculates visible space chip capacity and overflow counts for display
+/// Calculates visible space chip capacity and overflow counts for screen
 /// cards (#678, #758).
 enum ScreenCardChips {
     static let chipHeight: CGFloat = 22

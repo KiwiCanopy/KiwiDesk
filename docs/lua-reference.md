@@ -384,7 +384,7 @@ and a pin set from Lua is a session override; under a
 Lua-managed config the pin persists across a relaunch.
 
 A screen this pin leaves with no space is seeded one — see
-[Profile Screen Sets](#profile-screen-sets).
+[Profile Screen Setups](#profile-screen-setups).
 
 **Example:**
 
@@ -451,7 +451,7 @@ save a profile), `init.lua` (a verb there references it — remove
 the call). Test the return, not the status (#1509).
 
 A screen this leaves with no space is seeded one — see
-[Profile Screen Sets](#profile-screen-sets).
+[Profile Screen Setups](#profile-screen-setups).
 
 **Example:**
 
@@ -5001,9 +5001,9 @@ end)
   screen count.
 
 `save_profile` and `load_profile` also hand the connected screen
-set to that profile, and `set_default_profile` refuses a profile
-that holds no set (see [Profile Screen
-Sets](#profile-screen-sets)).
+setup to that profile, and `set_default_profile` refuses a profile
+that holds no setup (see [Profile Screen
+Setups](#profile-screen-setups)).
 
 **Example:**
 
@@ -5109,7 +5109,7 @@ Desktop holds one profile for all screen setups and one for each
 setup named, each of the profile's own screen count. Which entry
 loads, and that either loads over the profile that holds the
 connected setup, is the binding rung of [Profile Screen
-Sets](#profile-screen-sets).
+Setups](#profile-screen-setups).
 
 ```lua
 -- Desktop 3 on two screens: "Dual" anywhere, "Studio" at the desk.
@@ -5231,9 +5231,9 @@ ends by the rule above once macOS confirms they are gone, and a
 restart of the Mac ends every hold
 ([#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646)).
 
-### Profile Screen Sets
+### Profile Screen Setups
 
-A profile covers concrete **screen sets** of one screen count — each a list
+A profile covers concrete **screen setups** of one screen count — each a list
 of screen fingerprints plus the space→screen pins valid for that
 arrangement. Updating a profile while a new combination is connected
 teaches it that combination. When screens change, KiwiDesk resolves
@@ -5276,7 +5276,7 @@ Explicitly loading a profile whose stored sets don't cover the
 connected screens works, but the state loads *dirty* until you
 update the profile on this hardware or return to a covered set.
 
-A screen set belongs to one profile. `save_profile` (unless
+A screen setup belongs to one profile. `save_profile` (unless
 another profile owns the set), `load_profile` of a profile saved
 for as many screens, and creating a profile hand the connected set
 to that profile and remove it from every other
@@ -5688,7 +5688,7 @@ animations.set_shelf_duration(1000)
 **Does:** when `true`, restores window positions and focus after
 the machine wakes from sleep or the screen unlocks, after the
 specified delay (default 1500 ms). The restore is skipped when
-the screen set changed while the machine was away (undock,
+the screen setup changed while the machine was away (undock,
 screen power-off); the screen-change profile resolution wins
 instead. A restore that does run finishes with a full retile,
 like any space switch, and focuses the remembered window —

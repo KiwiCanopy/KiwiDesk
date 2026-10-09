@@ -1,13 +1,13 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Geometry for Screens arrangement display (#678).
+/// Geometry for the Screens arrangement picture (#678).
 ///
-/// Displays are drawn in points from `Display.frame` without backing-scale
+/// Screens are drawn in points from `Display.frame` without backing-scale
 /// terms. Flips AppKit y-up coordinates to SwiftUI y-down. Tested by
 /// `ScreenArrangementTests` and `LayoutSchematicCountTests`.
 enum ScreenArrangement {
-    /// Drawn display rectangle in canvas coordinates.
+    /// Drawn screen rectangle in canvas coordinates.
     struct Drawn: Equatable, Identifiable {
         let display: Display
         let rect: CGRect
@@ -15,15 +15,15 @@ enum ScreenArrangement {
         var id: DisplayID { display.id }
     }
 
-    /// Full arrangement layout: drawn displays, tray, content size.
+    /// Full arrangement layout: drawn screens, tray, content size.
     struct Layout: Equatable {
         var displays: [Drawn] = []
-        /// Dashed tray rectangle, or nil when no display is main.
+        /// Dashed tray rectangle, or nil when no screen is main.
         var tray: CGRect?
         var contentSize: CGSize = .zero
     }
 
-    /// Maximum ratio between longest sides of any two drawn displays.
+    /// Maximum ratio between longest sides of any two drawn screens.
     static let maxDrawnRatio: CGFloat = 2.5
 
     /// Scale factor threshold below which `isApproximate(_:)` reports true.
@@ -39,7 +39,7 @@ enum ScreenArrangement {
             + ScreenCardChips.chipHeight
     )
 
-    /// Gap between tray and display it hangs off.
+    /// Gap between tray and screen it hangs off.
     static let trayGap: CGFloat = 10
     /// Dashed tray height.
     static let trayHeight: CGFloat = 52
@@ -93,7 +93,7 @@ enum ScreenArrangement {
         )
     }
 
-    /// Whether scale cap pushed any display below `perceptibleClamp`.
+    /// Whether scale cap pushed any screen below `perceptibleClamp`.
     static func isApproximate(_ displays: [Display]) -> Bool {
         let drawable = displays.filter {
             $0.frame.width > 0 && $0.frame.height > 0
@@ -105,7 +105,7 @@ enum ScreenArrangement {
 
     // MARK: - The three steps
 
-    /// Step 1: ratio cap in point space preserving display centers.
+    /// Step 1: ratio cap in point space preserving screen centers.
     private static func capping(
         _ displays: [Display]
     ) -> [(display: Display, rect: CGRect, factor: CGFloat)] {

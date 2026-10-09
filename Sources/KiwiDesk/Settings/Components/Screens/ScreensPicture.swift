@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Screens spatial arrangement diagram with display cards and follows-main
+/// Screens spatial arrangement diagram with screen cards and follows-main
 /// tray (#678 Phase 3).
 struct ScreensPicture: View {
     @ObservedObject var model: SettingsModel
@@ -39,22 +39,22 @@ struct ScreensPicture: View {
         .frame(height: Self.canvasHeight)
     }
 
-    /// Scaled display stand footer (#758, owner ruling 2026-08-04,
+    /// Scaled screen stand footer (#758, owner ruling 2026-08-04,
     /// 2026-08-09).
     private func stand(cardWidth: CGFloat) -> some View {
         let base = min(
             max(
-                cardWidth * SettingsTheme.monitorStandScale,
-                SettingsTheme.monitorStandMin
+                cardWidth * SettingsTheme.screenStandScale,
+                SettingsTheme.screenStandMin
             ),
-            SettingsTheme.monitorStandMax
+            SettingsTheme.screenStandMax
         )
         let neck = min(
             max(
-                base * SettingsTheme.monitorNeckScale,
-                SettingsTheme.monitorNeckMin
+                base * SettingsTheme.screenNeckScale,
+                SettingsTheme.screenNeckMin
             ),
-            SettingsTheme.monitorNeckMax
+            SettingsTheme.screenNeckMax
         )
         return VStack(spacing: 0) {
             Rectangle()

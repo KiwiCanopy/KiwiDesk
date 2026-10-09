@@ -112,6 +112,12 @@ and is retired for you at the next release —
 whole argument, and it is stated here because that file does not
 load for whoever edits `docs/**`.
 
+**A label rename is not behavior** (owner, 2026-10-09, #865): a
+doc may name a renamed label — a page title, a row, a button — on
+merge, without `:::unreleased`, and a reader on the last release
+meets the old label for a release. A change to what a control
+DOES still owes the marker, label rename or not.
+
 ## `docs/accepted-limitations.md`
 
 When a review or manual pass classifies a behavior as

@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One space's resolved placement: which display it lands on and
+/// One space's resolved placement: which screen it lands on and
 /// whether a person or a default put it there.
 struct SpaceAssignment: Identifiable, Hashable {
     enum Kind: Hashable {
@@ -15,7 +15,7 @@ struct SpaceAssignment: Identifiable, Hashable {
     var id: String { space.raw }
 }
 
-/// Space chip displaying placement on a monitor card (#758).
+/// Space chip displaying placement on a screen card (#758).
 ///
 /// Supports drag, context menu, VoiceOver actions, and keyboard menu chord
 /// via `.rowActions` (#678, #845).
@@ -24,7 +24,7 @@ struct SpaceAssignmentChip: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
     let kind: SpaceAssignment.Kind
-    /// Target displays for move actions in picture order.
+    /// Target screens for move actions in picture order.
     let displays: [Display]
     @FocusState private var focused: Bool
     @State private var hovering = false

@@ -1,12 +1,12 @@
 import CoreGraphics
 import KiwiDeskCore
 
-/// Positioning logic for "Follows main display" monitor tray (#678 Phase 3).
+/// Positioning logic for "Follows main screen" tray (#678 Phase 3).
 enum ScreenTray {
     /// Positions and normalizes the tray relative to the main
-    /// display card. An id matching no card yields NO tray rather
-    /// than a tray on some other display: a fallback would be a
-    /// second derivation of which display is main —
+    /// screen card. An id matching no card yields NO tray rather
+    /// than a tray on some other screen: a fallback would be a
+    /// second derivation of which screen is main —
     /// `SettingsModel.mainDisplay` exists to be the only copy.
     static func fold(
         cards: [ScreenArrangement.Drawn],
@@ -46,7 +46,7 @@ enum ScreenTray {
         )
     }
 
-    /// Computes pre-normalization tray rect avoiding colliding display cards.
+    /// Computes pre-normalization tray rect avoiding colliding screen cards.
     static func rect(
         anchoredTo anchor: CGRect,
         avoiding others: [CGRect],
@@ -72,7 +72,7 @@ enum ScreenTray {
         return (band(max(floor, anchor.maxY) + gap), false)
     }
 
-    /// How far the tray is drawn inside the display it hangs off,
+    /// How far the tray is drawn inside the screen it hangs off,
     /// so its edges never line up with a card's.
     private static let inset: CGFloat = 12
 }

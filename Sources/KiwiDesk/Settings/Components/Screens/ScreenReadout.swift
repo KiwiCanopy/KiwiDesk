@@ -1,15 +1,15 @@
 import KiwiDeskCore
 
-/// Monitor space occupancy and active space description —
+/// Screen space occupancy and active space description —
 /// authored once, read twice (caption + VoiceOver/hover). WHOLE
 /// sentences, never a composed frame: interpolating a count
 /// phrase into a second frame asks a translator to write around
 /// a blob they cannot see (l10n audit 2026-08-04). "is showing"
-/// is `WorkspaceManager.activeSpace(on:)` — per display,
+/// is `WorkspaceManager.activeSpace(on:)` — per screen,
 /// independent of macOS "separate Spaces" (#678 Phase 3).
 @MainActor
 enum ScreenReadout {
-    /// Formatted status sentence. `held` counts what the display
+    /// Formatted status sentence. `held` counts what the screen
     /// HOLDS, follows-main spaces included — counting only pinned
     /// chips made an everything-follows-main desk read "0 Spaces
     /// here" on every card (l10n audit 2026-08-04).
@@ -19,7 +19,7 @@ enum ScreenReadout {
     ) -> String {
         // Zero takes its own sentence whatever is showing: "0
         // Spaces here · Space X is showing" is reachable — a
-        // space can be up on a display no configured space
+        // space can be up on a screen no configured space
         // resolves to.
         guard let showing, held > 0 else { return silent(held) }
         switch held {

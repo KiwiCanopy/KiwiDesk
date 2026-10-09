@@ -8,7 +8,7 @@ enum ScreensRowOrder {
         .screens(.mainSpaces),
     ]
 
-    /// Orphaned monitor pins container rows.
+    /// Orphaned screen pins container rows.
     static let pinnedToDisconnectedScreens: [SettingKey] = [
         .screens(.orphanPinClear)
     ]

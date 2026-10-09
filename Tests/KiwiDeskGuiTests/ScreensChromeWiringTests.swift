@@ -76,12 +76,12 @@ struct ScreensChromeWiringTests {
             "Components/Screens/ScreensPicture.swift"
         )
         for needle in [
-            "SettingsTheme.monitorStandScale",
-            "SettingsTheme.monitorStandMin",
-            "SettingsTheme.monitorStandMax",
-            "SettingsTheme.monitorNeckScale",
-            "SettingsTheme.monitorNeckMin",
-            "SettingsTheme.monitorNeckMax",
+            "SettingsTheme.screenStandScale",
+            "SettingsTheme.screenStandMin",
+            "SettingsTheme.screenStandMax",
+            "SettingsTheme.screenNeckScale",
+            "SettingsTheme.screenNeckMin",
+            "SettingsTheme.screenNeckMax",
         ] {
             #expect(
                 picture.contains(needle),

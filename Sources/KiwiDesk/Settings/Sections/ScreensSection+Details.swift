@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Secondary cards for Screens settings (#678 Phase 3, turn 13b).
 extension ScreensSection {
-    /// Card displaying spaces pinned to absent displays (`ScreensGates`).
+    /// Card displaying spaces pinned to absent screens (`ScreensGates`).
     @ViewBuilder func orphanCard(
         rows: ScreensFamilyRows,
         gates: ScreensGates
@@ -58,7 +58,7 @@ extension ScreensSection {
     }
 
     /// Formatted status sentence for a disconnected pin. Names
-    /// no display, because the runtime does not promise one:
+    /// no screen, because the runtime does not promise one:
     /// `SpacePlacement.resolve` answers `.pinnedAbsent` with the
     /// positional default's assignment (docs review 2026-08-04).
     /// "Space %1$@" keeps the noun — a bare numeral opening a
@@ -80,7 +80,7 @@ extension ScreensSection {
         )
     }
 
-    /// Read-only monitor hardware identification drawer.
+    /// Read-only screen hardware identification drawer.
     func fingerprintsDrawer(
         rows: ScreensFamilyRows
     ) -> some View {
@@ -110,7 +110,7 @@ extension ScreensSection {
         }
     }
 
-    /// Row presenting display name and fingerprint (#540 rejected
+    /// Row presenting screen name and fingerprint (#540 rejected
     /// a per-row label as noise). VoiceOver is the case the drawer
     /// title does not cover — rows are stepped one at a time, so
     /// the row spoke a bare hex string: hence one combined element

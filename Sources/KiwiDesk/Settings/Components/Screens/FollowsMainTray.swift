@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Drop target tray for Spaces assigned to dynamic main display
+/// Drop target tray for Spaces assigned to dynamic main screen
 /// (`ScreenTray`, #36, #678).
 struct FollowsMainTray: View {
     @ObservedObject var model: SettingsModel

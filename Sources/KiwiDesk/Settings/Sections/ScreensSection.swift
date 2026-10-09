@@ -94,12 +94,12 @@ struct ScreensSection: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// Note shown when display ratios are clamped — said rather
+    /// Note shown when screen ratios are clamped — said rather
     /// than left to be noticed: a picture that quietly lies about
     /// proportion reads as a wrong arrangement. Shown only while
     /// the difference is visible
     /// (`ScreenArrangement.perceptibleClamp` keeps it off the
-    /// common two-display desk).
+    /// common two-screen desk).
     private var clampedNote: String {
         L(
             "monitors.picture.clamped",
@@ -108,7 +108,7 @@ struct ScreensSection: View {
         )
     }
 
-    /// Note shown when displays share one fingerprint (same model
+    /// Note shown when screens share one fingerprint (same model
     /// and resolution) — which is what a pin is stored against, so
     /// KiwiDesk genuinely cannot tell them apart; the picture
     /// would otherwise show the same spaces on both cards
@@ -122,7 +122,7 @@ struct ScreensSection: View {
         )
     }
 
-    /// Description of spaces assigned to selected display.
+    /// Description of spaces assigned to selected screen.
     @ViewBuilder private func selectionReadout(
         rows: ScreensFamilyRows
     ) -> some View {

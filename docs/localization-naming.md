@@ -86,8 +86,8 @@ sticky on this screen"** (#1094) — the qualifier is an ordinary
 phrase each locale renders in its own words around the fixed
 "Sticky" atom. Render "screen" with the catalog's own SCREEN
 word, never its *display* or *monitor* word: under Family C rule
-1, a qualifier that is the word naming the **Monitors**
-destination reads as a different destination, even where the
+1, a qualifier that is the word naming the
+`destination.monitors` destination reads as a different destination, even where the
 whole string differs.
 
 **`zh-Hans` is the measured exception.** It splits the English
@@ -95,9 +95,10 @@ whole string differs.
 for a countable one (`presets.screen_name.main` 主显示器,
 `profiles.screens.many` %1$d 台显示器) — so 显示器 IS its screen
 word here, and rule 2 is satisfied by the split. That it also
-equals `destination.monitors` is a pre-existing overlap belonging
-to #865: a locale whose own screen word collides with a
-destination label needs the destination renamed, not the row.
+equals `destination.monitors` is an overlap `zh-Hans`'s own
+rule-2 run settles, which is still owed: a locale whose own
+screen word collides with a destination label needs the
+destination renamed, not the row.
 
 ### What it requires
 

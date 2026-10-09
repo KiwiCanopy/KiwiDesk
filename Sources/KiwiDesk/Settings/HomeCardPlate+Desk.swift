@@ -91,7 +91,7 @@ struct HomeCardScreensTile: View {
 
     /// Stand shares from token scaling (#758).
     private func neck(width: CGFloat) -> some View {
-        let foot = width * SettingsTheme.monitorStandScale
+        let foot = width * SettingsTheme.screenStandScale
         return VStack(spacing: 0) {
             Rectangle()
                 .fill(
@@ -99,7 +99,7 @@ struct HomeCardScreensTile: View {
                         ?? SettingsTheme.ink2.opacity(0.4)
                 )
                 .frame(
-                    width: foot * SettingsTheme.monitorNeckScale,
+                    width: foot * SettingsTheme.screenNeckScale,
                     height: 5
                 )
             Capsule()

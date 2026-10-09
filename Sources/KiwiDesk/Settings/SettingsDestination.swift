@@ -6,8 +6,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     // This Profile
     case spaces
     case layoutDefaults
-    // The raw value keeps the page's pre-#865 name: it is an id.
-    case screens = "monitors"
+    case screens
     case looks
     case advancedColors
     case gapsAndBorders
