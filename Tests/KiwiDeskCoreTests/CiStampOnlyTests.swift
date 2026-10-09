@@ -134,7 +134,7 @@ struct CiStampOnlyTests {
             // A content line spelling a diff header.
             CiStampOnlyTests.version("2.3.0") + "++ injected\n",
             // Every line a version literal, the count wrong: the
-            // count check alone stops these.
+            // count check and the numstat check each stop these.
             CiStampOnlyTests.version("2.2.0").replacingOccurrences(
                 of: "    public static let semantic = \"2.2.0\"\n",
                 with: ""
