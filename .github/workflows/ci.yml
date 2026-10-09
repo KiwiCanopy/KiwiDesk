@@ -3,7 +3,9 @@ name: CI
 # push runs post-merge on main; pull_request runs pre-merge on
 # branches. Scoping push to main avoids a duplicate run on every
 # PR-branch push (which would otherwise fire both push and
-# pull_request for the same commit).
+# pull_request for the same commit). A long-lived release branch
+# (release/3.0.0, owner ruling 2026-10-09) is a merge target like
+# main, so it takes both triggers too.
 #
 # The expensive jobs are gated on a `changes` job rather than on a
 # trigger-level `paths-ignore`, and that is the whole point: a
@@ -19,9 +21,9 @@ name: CI
 # entry may be added.
 on:
   push:
-    branches: [main]
+    branches: [main, release/3.0.0]
   pull_request:
-    branches: [main]
+    branches: [main, release/3.0.0]
   # Manual "Run workflow" button in the Actions tab. Additive — the
   # automatic triggers above still fire. Useful while the repo is
   # private, where macOS runners bill at a 10x multiplier against a
@@ -45,12 +47,14 @@ on:
         default: false
         type: boolean
 
-# A superseded PR run is cancelled; a push to main always finishes,
+# A superseded PR run is cancelled; a push to main or a release
+# branch always finishes,
 # so every merged commit gets a verdict and the README badge
 # (main's pushes only) never reads a cancelled run as failing.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main'
+    && !startsWith(github.ref, 'refs/heads/release/') }}
 
 jobs:
   changes:
