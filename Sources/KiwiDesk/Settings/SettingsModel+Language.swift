@@ -10,7 +10,8 @@ extension SettingsModel {
     /// Persists language selection and updates LocalizationManager
     /// (nil = system default).
     func setLanguage(_ language: String?) {
-        LocalizationPreference.write(language)
+        LocalizationPreference.write(language, to: preferences)
         LocalizationManager.shared.select(language)
+        onWindowTitle?(SettingsWindowTitle.of(destination))
     }
 }

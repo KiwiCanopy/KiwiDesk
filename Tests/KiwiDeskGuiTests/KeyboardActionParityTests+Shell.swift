@@ -99,7 +99,7 @@ extension KeyboardActionParityTests {
             ShellWiring(
                 "SettingsModel.swift",
                 "didSet { nav.navigationMovesFocus = "
-                    + "SettingsInputSource.movesFocus }",
+                    + "SettingsInputSource.movesFocus",
                 "and the input source is recorded where every "
                     + "navigation path already passes — the "
                     + "destination write itself — so a path added "

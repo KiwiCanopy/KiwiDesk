@@ -65,7 +65,10 @@ final class SettingsModel: ObservableObject {
     /// through this property, and the read is only valid while
     /// the event that caused it is still being dispatched.
     @Published var destination: SettingsDestination? {
-        didSet { nav.navigationMovesFocus = SettingsInputSource.movesFocus }
+        didSet {
+            nav.navigationMovesFocus = SettingsInputSource.movesFocus
+            onWindowTitle?(SettingsWindowTitle.of(destination))
+        }
     }
     /// Simple or Power User mode; stored in `SettingsModePreference` (#678).
     @Published var settingsMode: SettingsMode = .simple
@@ -255,6 +258,12 @@ final class SettingsModel: ObservableObject {
     var onRevealProfile: (String) -> Void = { _ in }
     /// Routes banner button to voluntary welcome tour replay.
     var onShowTour: () -> Void = {}
+    /// Receives the window title on every area navigation and
+    /// language change (#2059), and once when set; wired by
+    /// `SettingsWindowTitle.follow`.
+    var onWindowTitle: ((String) -> Void)? {
+        didSet { onWindowTitle?(SettingsWindowTitle.of(destination)) }
+    }
     /// The update channel the Home footer and About read (#1536);
     /// inert until `AppDelegate` hands over the status item's.
     var updater: any AppUpdating = NoUpdater()

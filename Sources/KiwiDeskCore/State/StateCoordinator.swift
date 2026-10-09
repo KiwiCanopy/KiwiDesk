@@ -151,17 +151,6 @@ public struct StateCoordinator: Sendable {
     /// Sticky intent remembered across window close/reopen (#414, #445).
     var rememberedSticky: [WindowIdentity: StickyScope] = [:]
 
-    /// Stable close/reopen identity of a window (#160).
-    struct WindowIdentity: Hashable, Sendable {
-        let app: String
-        let title: String
-
-        init(of window: ManagedWindow) {
-            app = window.appName
-            title = window.title
-        }
-    }
-
     /// The id a first launch seeds before any config declares one.
     public static let placeholderID = SpaceID(1)
 

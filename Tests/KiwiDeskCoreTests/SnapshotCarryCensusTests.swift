@@ -39,6 +39,7 @@ struct SnapshotCarryCensusTests {
         "isTransientOverlay": "the scan classifies it",
         "isRaisedLayer": "the scan reads the window layer",
         "isFullscreen": "the scan reads the AX attribute",
+        "carriesOwnMark": "the scan reads the window mark",
         "frame":
             "carried as the record's frame, replayed through "
             + "the frame pipeline rather than as a field",

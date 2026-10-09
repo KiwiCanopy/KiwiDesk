@@ -67,7 +67,8 @@ struct WindowRekeyTests {
             stickyScope: .global,
             isTransientOverlay: true,
             isRaisedLayer: true,
-            isFullscreen: true
+            isFullscreen: true,
+            carriesOwnMark: true
         )
         // The fixture must touch every field, so a new field added
         // to ManagedWindow that withID forgets shows up as an extra
