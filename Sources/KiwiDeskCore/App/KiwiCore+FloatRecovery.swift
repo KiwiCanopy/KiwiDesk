@@ -86,7 +86,8 @@ extension KiwiCore {
                 frame: original,
                 session: record.session,
                 app: record.app,
-                title: record.title
+                title: record.title,
+                floating: record.floating
             )
         }
     }

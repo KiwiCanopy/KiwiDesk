@@ -15,6 +15,7 @@ extension StateCoordinator {
         if closedDepartures.remove(window.id) != nil {
             rememberedSpaces[window.id] = nil
             restoredFrames[window.id] = nil
+            restoredFloats.remove(window.id)
             retireDepartureRecord(of: window.id)
             effects.closedReturnPlacedAsNew = true
         }
@@ -32,6 +33,7 @@ extension StateCoordinator {
         // window outside that branch.
         defer { departedSlots[window.id]?.handedTo = nil }
         windows.upsert(window)
+        payRestoredFloat(of: window.id)
         restoreFloatOverride(of: window)
         restoreStickyIntent(of: window)
         // Screen wins on multi-monitor Desktop moves (#1010).

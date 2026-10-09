@@ -56,6 +56,11 @@ struct FloatFlagReaderCensusTests {
         // window, and at arrival the flag IS detection's (#1810).
         "State/StateCoordinator+Intents.swift": [.identity: 1],
         "Models/StateSnapshot+InPlace.swift": [.identity: 1],
+        // A stop's hand float, restored as the in-place one is
+        // (#1864).
+        "Models/StateSnapshot+StopFloats.swift": [.identity: 1],
+        // A replayed float's frame is the stash's to deliver (#1864).
+        "App/KiwiCore+Restore.swift": [.routed: 1],
         "App/KiwiCore+FloatClamp.swift": [.routed: 1],
         // The presenting door (#1788).
         "App/KiwiCore+ScreenCovering.swift": [.routed: 1],

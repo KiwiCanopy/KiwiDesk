@@ -13,13 +13,14 @@ import CoreGraphics
 /// Space). One-shot teardown placement: no live management
 /// after, and no cross-monitor pull.
 public enum WindowGather {
-    /// Returns a gather target for every tracked, tiled window.
+    /// Returns a gather target for every tracked window, tiled or
+    /// floating (#1864).
     ///
     /// `primaryHeight` is `NSScreen.screens.first?.frame.height`
     /// (Cocoa coordinates), used to flip `Display.visibleFrame`
     /// into AX (top-left) coordinates. Windows whose space has
     /// no display assignment fall back to the display with the
-    /// lowest raw ID (deterministic on multi-monitor). Floating
+    /// lowest raw ID (deterministic on multi-monitor). Fullscreen
     /// windows and windows with a zero-size frame are excluded.
     ///
     /// Each display collects its own windows (space-iteration
@@ -92,13 +93,8 @@ public enum WindowGather {
                     primaryHeight: primaryHeight
                 )
             }
-            // The owning derivation, not an open-coded filter
-            // (#670 re-review): the gather's domain IS the
-            // tiled members — floats keep their frames and a
-            // fullscreen window lives on its own macOS Space,
-            // where the grid can neither reach nor place it.
-            for windowID in state.localTiledMembers(of: space)
-            where state.windows[windowID]?.frame.size != .zero {
+            for windowID in space.windows
+            where gathers(state.windows[windowID]) {
                 gathered[display.id, default: []]
                     .append(windowID)
             }
@@ -120,6 +116,15 @@ public enum WindowGather {
                 windows: windows
             )
         }
+    }
+
+    /// The gather's domain: every member, floats of every Space
+    /// included (#1864) — a stop carries their state back — but no
+    /// fullscreen window, which lives on its own macOS Space where
+    /// the grid can neither reach nor place it (#670).
+    static func gathers(_ window: ManagedWindow?) -> Bool {
+        guard let window else { return false }
+        return !window.isFullscreen && window.frame.size != .zero
     }
 
     public static func targets(
@@ -170,7 +175,7 @@ public enum WindowGather {
 }
 
 extension KiwiCore {
-    /// Moves each managed tiled window onto its owning monitor,
+    /// Moves each managed window onto its owning monitor,
     /// arranged per `quit.layout` within the display's visible
     /// area, so windows are not stranded in tiled frames after
     /// KiwiDesk exits.

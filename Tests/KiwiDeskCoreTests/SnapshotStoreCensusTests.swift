@@ -31,6 +31,9 @@ struct SnapshotStoreCensusTests {
         case always
         /// Only the in-place snapshot carries it.
         case inPlace
+        /// Every stop's snapshot carries it — a quit's and an
+        /// in-place one — never an autosave (#1864).
+        case stop
         /// Nothing carries it.
         case behind
     }
@@ -50,7 +53,9 @@ struct SnapshotStoreCensusTests {
         "state.workspaces.spaces[].handedBreaks":
             (.behind, "a break's provenance; draws nothing (#1387)"),
         "state.userFloated":
-            (.inPlace, "a float set by hand, which the scan cannot see"),
+            (.stop, "a float set by hand, which the scan cannot see"),
+        "state.restoredFloats":
+            (.stop, "a stop's hand float owed at a late arrival (#1864)"),
         "state.stickyReachOverrides":
             (.inPlace, "a reach pin set by hand"),
         "state.rememberedSpaces":
@@ -183,6 +188,7 @@ struct SnapshotStoreCensusTests {
         core.state.floatFrames[WindowID(1)] = .init(pid: 7, frame: .zero)
         core.state.remember(WindowID(9), in: shown)
         core.state.restoredFrames[WindowID(9)] = .zero
+        core.state.restoredFloats.insert(WindowID(9))
         core.state.departedSlots[WindowID(9)] = .init(rank: 0)
         core.state.closedDepartures.insert(WindowID(9))
         core.state.focusRecency[WindowID(1)] = .init(pid: 7, tick: 1)
@@ -233,7 +239,7 @@ struct SnapshotStoreCensusTests {
             "state.heldSpaces", "state.temporaryArmed", "ownFronts",
             "tiler.stashDepartures.owed",
             "state.profilePartitioning.byArrangement[][]",
-            "state.crossSession.placed",
+            "state.crossSession.placed", "state.restoredFloats",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")
         }

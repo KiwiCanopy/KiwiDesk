@@ -11,6 +11,9 @@ extension KiwiCore {
         crash.captureInPlaceState = { [weak self] in
             self?.sessionSnapshot(inPlace: true)
         }
+        crash.stopCarry = { [weak self] snapshot in
+            self?.state.markingStopFloats(snapshot) ?? snapshot
+        }
         crash.onAutosaved = { [weak self] in
             if let self { crash.restoreKeys.autosave(self) }
         }

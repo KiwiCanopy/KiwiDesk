@@ -13,6 +13,10 @@ public final class CrashRecovery {
     /// the session memory only an in-place relaunch restores.
     public var captureInPlaceState: @MainActor () -> StateSnapshot? =
         { nil }
+    /// What a stop's capture adds to either one (#1864): the hand
+    /// floats, which an autosave never carries.
+    public var stopCarry: @MainActor (StateSnapshot) -> StateSnapshot =
+        { $0 }
     public var onLog: @MainActor (String) -> Void = CoreLog.write
     /// The #1385 measurement and its hook after each autosave
     /// write (`RestoreKeyLog`), removed with it.
@@ -99,7 +103,8 @@ public final class CrashRecovery {
     /// is the case (#801): a quit mid-scan would write a fraction
     /// of the desk over the arrangement this launch had not
     /// restored yet. The crash marker still goes. `inPlace` takes
-    /// `captureInPlaceState` (#930). While a logout froze the
+    /// `captureInPlaceState` (#930); either passes `stopCarry`
+    /// (#1864). While a logout froze the
     /// writes, the stop writes nothing and keeps the autosave, the
     /// desk being emptied by then (#1385); an announced in-place
     /// restart outranks the freeze, its windows still live.
@@ -118,7 +123,7 @@ public final class CrashRecovery {
             return
         }
         let capture = inPlace ? captureInPlaceState : captureState
-        if !preservingSession, let snapshot = capture() {
+        if !preservingSession, let snapshot = capture().map(stopCarry) {
             write(snapshot, to: sessionURL)
         }
         try? FileManager.default.removeItem(at: fileURL)

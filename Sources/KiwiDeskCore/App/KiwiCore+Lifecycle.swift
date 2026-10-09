@@ -210,7 +210,10 @@ extension KiwiCore {
         retireReduceTransparency()
         retireFontSet()
         // Gather windows onto their owning monitors before
-        // any subsystem teardown; AX must still be live here.
+        // any subsystem teardown; AX must still be live here. Its
+        // moves echo on a run-loop turn this stop never yields, so
+        // the capture below still reads each float's own frame
+        // (#1864).
         if inPlace {
             onLog("stop: in-place restart — windows left in place")
         } else {

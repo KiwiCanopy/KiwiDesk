@@ -13,23 +13,28 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         /// (#1385, `CrossSessionMatch`).
         public var app: String?
         public var title: String?
+        /// A hand float, `true` else nil, in a STOP's capture alone
+        /// (#1864, `StateSnapshot+StopFloats`).
+        public var floating: Bool?
 
         public init(
             id: WindowID,
             frame: CGRect,
             session: WindowSession? = nil,
             app: String? = nil,
-            title: String? = nil
+            title: String? = nil,
+            floating: Bool? = nil
         ) {
             self.id = id.raw
             self.frame = frame
             self.session = session
             self.app = app
             self.title = title
+            self.floating = floating
         }
 
         private enum CodingKeys: String, CodingKey {
-            case id, frame, session, app, title
+            case id, frame, session, app, title, floating
         }
 
         /// The in-place payload decodes on its own: one this build
@@ -45,6 +50,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
             )
             app = try? c.decodeIfPresent(String.self, forKey: .app)
             title = try? c.decodeIfPresent(String.self, forKey: .title)
+            floating = try? c.decodeIfPresent(Bool.self, forKey: .floating)
         }
 
         public var windowID: WindowID { WindowID(id) }
@@ -268,8 +274,10 @@ extension StateCoordinator {
             refilePending(record.pending.map(WindowID.init), in: space)
             adoptSession(record, in: space)
         }
+        restoredFloats = []
         for record in snapshot.windows {
             adoptSession(of: record)
+            adoptStopFloat(of: record)
         }
         if let active = snapshot.activeSpace,
             workspaces[SpaceID(active)] != nil

@@ -50,6 +50,8 @@ struct CrossSessionRekeyParityTests {
         "app": (.carried, "the stable key"),
         "title": (.carried, "the stable key"),
         "session": (.dropped, "in-place flags never cross a boot"),
+        "floating":
+            (.dropped, "a stop's hand float; the refused file is an autosave"),
     ]
 
     private static let frame = CGRect(x: 1, y: 2, width: 3, height: 4)
@@ -91,7 +93,8 @@ struct CrossSessionRekeyParityTests {
                         stickyReach: true
                     ),
                     app: "com.a",
-                    title: "A"
+                    title: "A",
+                    floating: true
                 )
             ],
             spaces: [space],

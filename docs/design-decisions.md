@@ -15532,7 +15532,8 @@ snapshot also carries the session's resized splits, weights and
 Scrolling rest, the Monocle hold, and the float and sticky flags
 set by hand, since without them the new process lays the desk
 out differently and the restart is visible after all. After a
-quit and relaunch they start fresh, as they always have: a
+quit and relaunch they start fresh, as they always have — the
+float flag excepted (*A quit arranges floats too*): a
 relaunch that resets sizing is a behaviour users rely on, and the
 two exits should not start to mean the same thing. For the same
 reason a snapshot a failed relaunch leaves behind gives up its
@@ -15540,6 +15541,35 @@ session memory two minutes after the stop: the next launch, much
 later, is a launch after a quit, and restores the arrangement
 alone. The payload is one build writing for the next, so a
 payload the reading build cannot decode costs only itself.
+
+:::unreleased
+### A quit arranges floats too
+
+**[Principle]**
+
+**The quit gather places every window it can reach.** A float
+left where KiwiDesk last put it is as stranded as a tile — a
+parked one sits in a screen corner — so the gather takes every
+Space's floats, shown or not, beside its tiles; only a
+native-fullscreen window, which lives on its own macOS Space,
+stays out ([#1864](https://github.com/KiwiCanopy/KiwiDesk/issues/1864)).
+
+**On the condition that the next launch gives them back.** No
+layout recomputes a float's frame, so the gather overwrites the
+only one it has, and is admitted only because a stop carries
+each float's state: its Space and frame, as every snapshot
+already did — a parked float's capture in place of its corner —
+and the float flag set by hand, which a quit used to start
+fresh. The flag rides a stop's capture alone, a quit's or an
+in-place restart's, never an autosave: a crash moved nothing, so
+it still starts the flag fresh as the trade-off above rules for
+sizing. A replayed float's frame is also handed to the stash —
+in place of the set where the window's Space is hidden — because
+the boot's activation can park the window before a set lands, and
+the park would keep the grid's frame as its original. A window
+that reopens after the replay
+takes its flag at arrival, beside its frame.
+:::
 
 :::unreleased
 ### A restart of the Mac restores by app and title

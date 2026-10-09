@@ -53,6 +53,10 @@ public struct StateCoordinator: Sendable {
     /// #152 exposure; a new `restore` refiles the whole map.
     var restoredFrames: [WindowID: CGRect] = [:]
 
+    /// A hand float a stop carried for a window not yet tracked
+    /// (#1864), `restoredFrames`' sibling with its lifetime.
+    var restoredFloats: Set<WindowID> = []
+
     /// The cross-session match while it is open (#1385,
     /// `KiwiCore+CrossSession`): a snapshot from another boot or
     /// login paired with reopened windows by app and title. Not
@@ -197,6 +201,9 @@ public struct StateCoordinator: Sendable {
         }
         if let frame = restoredFrames.removeValue(forKey: old) {
             restoredFrames[new] = frame
+        }
+        if restoredFloats.remove(old) != nil {
+            restoredFloats.insert(new)
         }
         if crossSession.placed.remove(old) != nil {
             crossSession.placed.insert(new)

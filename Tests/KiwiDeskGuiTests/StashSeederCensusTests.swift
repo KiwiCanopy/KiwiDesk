@@ -41,8 +41,10 @@ struct StashSeederCensusTests {
         // the echo consumes it (#1177).
         "App/KiwiCore+FloatClamp.swift": 1,
         // The replay of a parked record, and the late arrival's
-        // owed frame (#1352, #1362).
-        "App/KiwiCore+Restore.swift": 2,
+        // owed frame (#1352, #1362); and a replayed float's record
+        // beside its set, never a corner, so a park ahead of the
+        // set's echo keeps it rather than the quit grid's (#1864).
+        "App/KiwiCore+Restore.swift": 3,
     ]
 
     @Test("every seedStash( writer in Core is classified")

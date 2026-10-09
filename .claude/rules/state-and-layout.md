@@ -1811,7 +1811,11 @@ editing here:
   visible after all; it is written by the in-place stop's
   capture ALONE, so a quit, a crash and a wake still start sizing
   fresh, and a boot more than `CrashRecovery.inPlaceSessionBound`
-  after the capture drops it. A store that changes what a layout
+  after the capture drops it. What the quit gather overwrites
+  rides EVERY stop's capture through `CrashRecovery.stopCarry`
+  and never an autosave — the hand float, since the gather places
+  every float (#1864, `QuitFloatReturnTests` ▸
+  `onlyAStopCarries`). A store that changes what a layout
   draws rides it, or is named with its reason in a register:
   `SnapshotCarryCensusTests` round-trips every field of `Space`
   and `ManagedWindow` — `SessionRatios` and `ScrollRest` leaf by
