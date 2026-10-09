@@ -85,20 +85,23 @@ two scopes are **"Toggle sticky everywhere"** and **"Toggle
 sticky on this screen"** (#1094) — the qualifier is an ordinary
 phrase each locale renders in its own words around the fixed
 "Sticky" atom. Render "screen" with the catalog's own SCREEN
-word, never its *display* or *monitor* word: under Family C rule
-1, a qualifier that is the word naming the
-`destination.monitors` destination reads as a different destination, even where the
-whole string differs.
+word, never its *display* or *monitor* word. The
+`destination.monitors` destination is titled **Screens** and takes
+that same SCREEN word, as do its rows (**Screen pin**, **Screen
+fingerprints**) — so the qualifier and the destination name one
+concept, which is what Family C rule 1 asks; a *display* or
+*monitor* word beside them would read as a second one.
 
 **`zh-Hans` is the measured exception.** It splits the English
 "screen" by countability — 屏幕 where the sense is mass, 显示器
 for a countable one (`presets.screen_name.main` 主显示器,
 `profiles.screens.many` %1$d 台显示器) — so 显示器 IS its screen
-word here, and rule 2 is satisfied by the split. That it also
-equals `destination.monitors` is an overlap `zh-Hans`'s own
-rule-2 run settles, which is still owed: a locale whose own
-screen word collides with a destination label needs the
-destination renamed, not the row.
+word here, and rule 2 is satisfied by the split. Countable
+screens take 显示器 wherever they are listed or counted — the
+destination, `diff.drift.screens`, `menu.layout.all_screens`
+所有显示器 and "main screen" 主显示器 — so the destination title
+and those rows share one word because they share one concept,
+not by collision.
 
 ### What it requires
 
@@ -419,10 +422,12 @@ physical screen, where English carried three words. The winner is
 the English-side obligation is
 `.claude/rules/config-vocabulary.md` ▸ noun glossary, and the
 argument and the keep-list are `docs/design-decisions.md` ▸
-Vocabulary: a screen is a screen. #865 swept the English and left
-every translation as it was, since the meaning did not move. Each
-catalog's own rule-2 run — which the English ruling does **not**
-decide — is still owed, catalog by catalog.
+Vocabulary: a screen is a screen. #865 swept the English first and
+each catalog second, by its own rule-2 run — which the English
+ruling does **not** decide: each locale took its own majority
+SCREEN word, and a quoted Apple control keeps Apple's word. A
+string joining the family takes the word its catalog already
+uses, found by grepping that catalog.
 
 ### Why there is no per-locale word list here
 
