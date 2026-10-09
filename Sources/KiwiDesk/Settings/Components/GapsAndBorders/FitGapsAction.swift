@@ -183,13 +183,16 @@ struct FitGapsAction: View {
                 "border.fit_gaps.updated_inactive",
                 "Draft updated — %1$@ (⌘S) to persist; it "
                     + "applies when this profile is loaded.",
-                model.primarySaveLabel
+                L("footer.save", "Save")
             )
         case .saveAsNewProfile:
             return L(
                 "border.fit_gaps.updated_new",
                 "Draft updated — %1$@ to apply and persist.",
-                model.primarySaveLabel
+                L(
+                    "footer.save_as_new_profile",
+                    "Save as New Profile…"
+                )
             )
         case .saveGlobalsOnly:
             // Paused: Save writes gui.json only, and gaps are
@@ -206,7 +209,7 @@ struct FitGapsAction: View {
             return L(
                 "border.fit_gaps.updated",
                 "Draft updated — %1$@ (⌘S) to apply and persist.",
-                model.primarySaveLabel
+                L("footer.save", "Save")
             )
         }
     }

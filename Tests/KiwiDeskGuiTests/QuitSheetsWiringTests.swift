@@ -254,9 +254,14 @@ struct QuitSheetsWiringTests {
             ],
             in: leave
         )
+        // Fit Gaps names the verb by the same classifier; its
+        // labels stay literal `L(...)` arguments, which #818's
+        // `InterpolatedLabelTests` reads.
         let fit = try source(
             "Settings/Components/GapsAndBorders/FitGapsAction.swift"
         )
-        #expect(fit.occurrences(of: "model.primarySaveLabel") == 3)
+        #expect(
+            fit.occurrences(of: "switch model.primarySaveAction") == 1
+        )
     }
 }

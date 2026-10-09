@@ -31,9 +31,11 @@ extension SettingsModel {
         return .saveAsNewProfile
     }
 
-    /// The one primary Save (#2049): the footer's slot, the close /
-    /// quit question and `FitGapsAction` all read these, so their
-    /// verb, gate and effect cannot drift apart.
+    /// The one primary Save (#2049): the footer's slot and the
+    /// close / quit question both read these, so their verb, gate
+    /// and effect cannot drift apart. `FitGapsAction` names the
+    /// verb off `primarySaveAction` with literal labels, which
+    /// #818's interpolation guard reads.
     var primarySaveLabel: String {
         primarySaveAction == .saveAsNewProfile
             ? L("footer.save_as_new_profile", "Save as New Profile…")
