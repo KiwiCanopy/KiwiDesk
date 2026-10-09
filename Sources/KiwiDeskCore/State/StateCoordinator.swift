@@ -150,28 +150,6 @@ public struct StateCoordinator: Sendable {
     /// Sticky intent remembered across window close/reopen (#414, #445).
     var rememberedSticky: [WindowIdentity: StickyScope] = [:]
 
-    /// Stable close/reopen identity of a window (#160): app and
-    /// title, except that KiwiDesk's marked own window is keyed on
-    /// the mark, since its title names the area it shows (#2059).
-    struct WindowIdentity: Hashable, Sendable {
-        let app: String
-        let title: String
-
-        init(of window: ManagedWindow) {
-            app = window.appName
-            title =
-                window.carriesOwnMark
-                ? OwnWindowTiling.identifier : window.title
-        }
-
-        /// Whether `window` has an identity at all: an empty title
-        /// carries none, since every pre-title window of the app
-        /// would match it, unless the mark stands in for it.
-        static func exists(for window: ManagedWindow) -> Bool {
-            window.carriesOwnMark || !window.title.isEmpty
-        }
-    }
-
     /// The id a first launch seeds before any config declares one.
     public static let placeholderID = SpaceID(1)
 

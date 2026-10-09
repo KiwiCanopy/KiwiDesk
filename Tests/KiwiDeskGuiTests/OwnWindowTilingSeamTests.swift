@@ -30,8 +30,8 @@ struct OwnWindowTilingSeamTests {
     /// File path (repo-relative) -> how many times it may name
     /// the mark. **This map is the one copy of who may stamp
     /// it**: the Settings window controller, once, at window
-    /// construction — plus the declaration itself and the one
-    /// place the engine reads it back.
+    /// construction — plus the declaration itself and the read
+    /// sides listed below.
     private let allowed = [
         "Sources/KiwiDesk/Settings/SettingsWindowController.swift":
             1,
@@ -57,7 +57,8 @@ struct OwnWindowTilingSeamTests {
         // The fourth read side (#2059): the marked window's reopen
         // identity is the mark, not its area-named title. A read
         // of the mark's value as a key, never a stamp.
-        "Sources/KiwiDeskCore/State/StateCoordinator.swift": 1,
+        "Sources/KiwiDeskCore/State/StateCoordinator+Intents.swift":
+            1,
     ]
 
     /// BOTH source trees: Core builds its own `NSWindow`s (the

@@ -66,13 +66,23 @@ struct OwnWindowIdentityTests {
         }
     }
 
-    @Test("Navigating areas on a tiled window floats nothing")
-    func tiledWindowStaysTiled() {
+    /// A float remembered under an area's title — left by an
+    /// unmarked window of the same app — is not the marked
+    /// window's, so navigating onto that area picks nothing up.
+    @Test("An area title never picks up another window's float")
+    func areaTitleIsNotAnIdentity() {
         var state = StateCoordinator()
-        state.apply(.windowCreated(settings(1, title: "Settings")))
+        state.apply(
+            .windowCreated(
+                settings(1, title: "Shortcuts", marked: false)
+            )
+        )
+        state.setFloating(WindowID(1), true)
+        close(1, in: &state)
+        state.apply(.windowCreated(settings(2, title: "Settings")))
         for title in ["Shortcuts", "Profiles", "Settings"] {
-            state.apply(.windowTitleChanged(WindowID(1), title))
-            #expect(state.windows[WindowID(1)]?.isFloating == false)
+            state.apply(.windowTitleChanged(WindowID(2), title))
+            #expect(state.windows[WindowID(2)]?.isFloating == false)
         }
     }
 
