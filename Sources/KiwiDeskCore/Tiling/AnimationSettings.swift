@@ -76,10 +76,12 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// The flip's band: below 100 ms the plate is a flash, not a
     /// turn.
     public static let flipDurationBand = 100...1000
-    /// The plate slide's default (owner, 2026-10-06: calmer than
-    /// the plan's own timing). Moving it moves a stored default and
-    /// owes profiles.md's crossing question (#1369).
-    public static let spaceChangeDefaultMS = 550
+    /// The plate slide's default: its own timing (owner,
+    /// 2026-10-09, #1931 — the steadiest pace under GPU load, and a
+    /// slower one lengthens the blur, not the readable plates).
+    /// Moving it moves a stored default and owes profiles.md's
+    /// crossing question (#1369).
+    public static let spaceChangeDefaultMS = 300
     /// The slide's band: below it the strip is a jump; above it a
     /// switch outlasts the hand that pressed it.
     public static let spaceChangeDurationBand = 150...1000

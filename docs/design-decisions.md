@@ -3232,10 +3232,17 @@ slide, so no migration is owed.
 
 *Its own pace (#1931).* `animations.space_change_duration` is the
 strip's spring response, and both fades scale with it from the
-times they were tuned at (300 ms). Its default is 550 ms — the
-owner found the plan's own timing too brisk for the motion met
-most — and no crossing is owed, since the leaf ships with the
-slide itself. The two waits on apps — the strip's
+times they were tuned at (300 ms). Its default is that 300 ms.
+A slower pace does not buy readable icons: the strip crosses the
+screen too fast to read at any pace in the band, and what reads
+is the arriving plates at rest, which 550 ms lengthens by about
+45 ms while lengthening the whole slide by about 380 ms. Under a
+saturated GPU the switch work that overlaps the plates grows
+with the pace too, and 300 ms is the one pace measured steady
+there (#1931's numbers). If the arriving icons ever fail to
+register, the remedy is a short fixed hold on those plates, not
+a slower pace. No crossing is owed, since the leaf ships with
+the slide itself. The two waits on apps — the strip's
 delay for the parks and the landed windows' margin — do not
 scale: they measure how long an app takes, which no pace
 changes. `animations.duration` keeps pacing windows only, since
