@@ -16,14 +16,10 @@ extension KiwiCore {
             else { continue }
             for id in workspace.windows {
                 guard let window = state.windows[id],
-                    !window.isFullscreen,
                     id != tiler.dragExemptWindow,
-                    // Never parked ⇒ never stranded: the same
-                    // exemption the park decides on (#445).
-                    !state.stickyExemptFromStash(
-                        window,
-                        onSpace: space
-                    ),
+                    // Never parked ⇒ never stranded: the verdict
+                    // the park decides on (#445).
+                    state.parksOnInactive(window, in: space),
                     // EFFECTIVE float, never the flag (#1178).
                     EffectiveFloat.applies(
                         isFloating: window.isFloating,
@@ -81,13 +77,9 @@ extension KiwiCore {
         return snapshot.mappingWindowRecords { record in
             guard let original = tiler.stashOriginal(record.windowID)
             else { return record }
-            return StateSnapshot.WindowRecord(
-                id: record.windowID,
-                frame: original,
-                session: record.session,
-                app: record.app,
-                title: record.title
-            )
+            var copy = record
+            copy.frame = original
+            return copy
         }
     }
 }

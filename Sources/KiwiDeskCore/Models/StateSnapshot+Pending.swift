@@ -37,13 +37,17 @@ extension StateCoordinator {
         }.keys.sorted { $0.raw < $1.raw }
     }
 
-    /// The frames owed at those windows' arrival (#1362), as window
-    /// records, so a second stop keeps them too.
+    /// What those windows are owed at arrival (#1362, #1864), as
+    /// window records, so a second capture keeps it too.
     func owedFrameRecords() -> [StateSnapshot.WindowRecord] {
-        restoredFrames.compactMap { id, frame in
+        restoredFrames.compactMap { id, owed in
             windows[id] == nil && rememberedSpaces[id] != nil
                 && !unjudgedFilings.contains(id)
-                ? StateSnapshot.WindowRecord(id: id, frame: frame) : nil
+                ? StateSnapshot.WindowRecord(
+                    id: id,
+                    frame: owed.frame,
+                    floating: owed.floating ? true : nil
+                ) : nil
         }.sorted { $0.id < $1.id }
     }
 

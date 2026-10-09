@@ -5,7 +5,7 @@ import Foundation
 public struct StateSnapshot: Codable, Sendable, Equatable {
     public struct WindowRecord: Codable, Sendable, Equatable {
         public let id: UInt32
-        public let frame: CGRect
+        public var frame: CGRect
         /// In-place restarts only (#930, `StateSnapshot+InPlace`).
         public var session: WindowSession?
         /// The bundle id and title a snapshot from another boot or
@@ -13,23 +13,28 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         /// (#1385, `CrossSessionMatch`).
         public var app: String?
         public var title: String?
+        /// A hand float, `true` else nil, in a STOP's capture alone
+        /// (#1864, `StateSnapshot+StopFloats`).
+        public var floating: Bool?
 
         public init(
             id: WindowID,
             frame: CGRect,
             session: WindowSession? = nil,
             app: String? = nil,
-            title: String? = nil
+            title: String? = nil,
+            floating: Bool? = nil
         ) {
             self.id = id.raw
             self.frame = frame
             self.session = session
             self.app = app
             self.title = title
+            self.floating = floating
         }
 
         private enum CodingKeys: String, CodingKey {
-            case id, frame, session, app, title
+            case id, frame, session, app, title, floating
         }
 
         /// The in-place payload decodes on its own: one this build
@@ -45,6 +50,29 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
             )
             app = try? c.decodeIfPresent(String.self, forKey: .app)
             title = try? c.decodeIfPresent(String.self, forKey: .title)
+            floating =
+                (try? c.decodeIfPresent(Bool.self, forKey: .floating))
+                ?? Self.legacyFloat(in: c)
+        }
+
+        private enum LegacySessionKeys: String, CodingKey {
+            case floating
+        }
+
+        /// A pre-#1864 in-place stop wrote the hand float into the
+        /// session — the update relaunch onto this build reads it.
+        private static func legacyFloat(
+            in c: KeyedDecodingContainer<CodingKeys>
+        ) -> Bool? {
+            guard
+                let session = try? c.nestedContainer(
+                    keyedBy: LegacySessionKeys.self,
+                    forKey: .session
+                ),
+                (try? session.decodeIfPresent(Bool.self, forKey: .floating))
+                    == true
+            else { return nil }
+            return true
         }
 
         public var windowID: WindowID { WindowID(id) }
@@ -270,6 +298,7 @@ extension StateCoordinator {
         }
         for record in snapshot.windows {
             adoptSession(of: record)
+            adoptStopFloat(of: record)
         }
         if let active = snapshot.activeSpace,
             workspaces[SpaceID(active)] != nil

@@ -13,6 +13,10 @@ public final class CrashRecovery {
     /// the session memory only an in-place relaunch restores.
     public var captureInPlaceState: @MainActor () -> StateSnapshot? =
         { nil }
+    /// What a stop's capture adds to either one (#1864): the hand
+    /// floats, which an autosave never carries.
+    public var stopCarry: @MainActor (StateSnapshot) -> StateSnapshot =
+        { $0 }
     public var onLog: @MainActor (String) -> Void = CoreLog.write
     /// The #1385 measurement and its hook after each autosave
     /// write (`RestoreKeyLog`), removed with it.
@@ -98,14 +102,19 @@ public final class CrashRecovery {
     /// snapshot. `preservingSession: true` skips the save — boot
     /// is the case (#801): a quit mid-scan would write a fraction
     /// of the desk over the arrangement this launch had not
-    /// restored yet. The crash marker still goes. `inPlace` takes
-    /// `captureInPlaceState` (#930). While a logout froze the
+    /// restored yet. The crash marker still goes. It writes
+    /// `captured`, the caller's `stopCapture` taken before its
+    /// gather moved anything (#1864), else one taken now — so a
+    /// caller that gathers passes `captured:`, or the write keeps
+    /// the gathered frames. While a
+    /// logout froze the
     /// writes, the stop writes nothing and keeps the autosave, the
     /// desk being emptied by then (#1385); an announced in-place
     /// restart outranks the freeze, its windows still live.
     public func shutdownCleanly(
         preservingSession: Bool = false,
-        inPlace: Bool = false
+        inPlace: Bool = false,
+        captured: StateSnapshot? = nil
     ) {
         timer?.invalidate()
         timer = nil
@@ -117,11 +126,18 @@ public final class CrashRecovery {
             onLog("stopped during a logout; pre-logout autosave kept")
             return
         }
-        let capture = inPlace ? captureInPlaceState : captureState
-        if !preservingSession, let snapshot = capture() {
+        if !preservingSession,
+            let snapshot = captured ?? stopCapture(inPlace: inPlace)
+        {
             write(snapshot, to: sessionURL)
         }
         try? FileManager.default.removeItem(at: fileURL)
+    }
+
+    /// A stop's snapshot (#1864): `captureState`, or in place
+    /// `captureInPlaceState` (#930), passed through `stopCarry`.
+    public func stopCapture(inPlace: Bool) -> StateSnapshot? {
+        (inPlace ? captureInPlaceState : captureState)().map(stopCarry)
     }
 
     /// Consumes and deletes the saved session snapshot, returned
@@ -157,12 +173,6 @@ public final class CrashRecovery {
                 + "\(crashed.windows.count) windows"
         )
         return crashed
-    }
-
-    /// Hands over the file the id gates refused at boot, once.
-    func takeCrossSessionCandidate() -> StateSnapshot? {
-        defer { crossSessionCandidate = nil }
-        return crossSessionCandidate
     }
 
     /// Discards saved snapshot files (#634).
@@ -216,7 +226,9 @@ public final class CrashRecovery {
             withIntermediateDirectories: true
         )
         guard write(snapshot, to: fileURL) else { return }
-        rollback.noteAutosave(snapshot, at: now())
+        // The file a logout's freeze writes back is a stop's: its
+        // copy carries the hand floats, the crash file none (#1864).
+        rollback.noteAutosave(stopCarry(snapshot), at: now())
         onAutosaved()
     }
 
@@ -278,7 +290,7 @@ public final class CrashRecovery {
         else { return nil }
         guard snapshot.capturedAt >= bootTime() else {
             onLog("\(kind) snapshot predates this boot; discarded")
-            keepForCrossSession(snapshot)
+            keepForCrossSession(snapshot, quit: url == sessionURL)
             return nil
         }
         guard isThisLogin(snapshot) else {
@@ -286,34 +298,32 @@ public final class CrashRecovery {
                 "\(kind) snapshot is from another login session; "
                     + "discarded"
             )
-            keepForCrossSession(snapshot)
+            keepForCrossSession(snapshot, quit: url == sessionURL)
             return nil
         }
         return snapshot
     }
 
-    /// The newer of the refused files is the cross-session one,
-    /// and only a file a logout's freeze wrote: a plain Quit's
-    /// never crosses a boot (#1385 ruling, 2026-10-09).
-    private func keepForCrossSession(_ snapshot: StateSnapshot) {
-        guard snapshot.frozenForLogout else { return }
+    /// Hands over the file the id gates refused at boot, once.
+    func takeCrossSessionCandidate() -> StateSnapshot? {
+        defer { crossSessionCandidate = nil }
+        return crossSessionCandidate
+    }
+
+    /// Keeps the newer of the refused files that may cross: one a
+    /// logout's freeze wrote, or a stop's session file (`quit`) —
+    /// a Quit's or a failed in-place relaunch's alike — whose boot
+    /// or login began inside `quitCrossingBound` (#1864).
+    private func keepForCrossSession(_ snapshot: StateSnapshot, quit: Bool) {
+        guard
+            snapshot.frozenForLogout
+                || quit && quitBeganInBound(snapshot)
+        else { return }
         guard
             crossSessionCandidate.map({
                 snapshot.capturedAt > $0.capturedAt
             }) ?? true
         else { return }
         crossSessionCandidate = snapshot
-    }
-
-    /// A stamp matches only a readable, equal live id. An
-    /// unstamped file is an older build's: admitted only as its
-    /// announced relaunch (#930), in-place and inside its bound.
-    private func isThisLogin(_ snapshot: StateSnapshot) -> Bool {
-        guard let stamp = snapshot.loginSession else {
-            return snapshot.carriesSessions
-                && now().timeIntervalSince(snapshot.capturedAt)
-                    <= Self.inPlaceSessionBound
-        }
-        return stamp == loginSession()
     }
 }

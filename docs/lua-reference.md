@@ -5813,21 +5813,33 @@ titles have settled — never the window you are working in, nor
 one you moved since launch — and a window that reopens up to two minutes
 after launch is still placed. An app's windows that share one
 title go back to that app's spaces in no particular order. The
-arrangement is used once, by that first launch. After a plain
-Quit the next restart still starts fresh: quitting lets the
-arrangement go.
+arrangement is used once, by that first launch. A plain Quit
+counts the same way when the restart or login that follows it
+begins within 10 minutes; later than that, the next launch starts
+fresh: quitting lets the arrangement go.
 :::
 
 On quit, KiwiDesk moves each managed tiled window
 back onto the screen its space is assigned to and arranges them
-per `quit.layout` (see `quit.set_layout` below). Floating
-windows are left wherever they are. KiwiDesk keeps all managed
-windows on the single visible macOS Desktop (inactive spaces are
-parked off-screen at the peek corner, not on a different
-Desktop), so every reachable window lands there together.
-Windows on a screen's background Desktops cannot be
+per `quit.layout` (see `quit.set_layout` below). KiwiDesk keeps
+all managed windows on the single visible macOS Desktop (inactive
+spaces are parked off-screen at the peek corner, not on a
+different Desktop), so every reachable window lands there
+together. Windows on a screen's background Desktops cannot be
 repositioned without disabling SIP, which KiwiDesk never does —
 the visible Desktop per screen is the arranged scope.
+
+:::unreleased
+Floating windows are arranged too, on every space, shown or not;
+a popup or other transient window is left alone. The next launch
+puts each one back — in its space, still floating, at the frame
+it had before the quit — a window you floated by hand included,
+and one whose app reopens it late. A restart of the Mac or a
+logout keeps them too, under the rules above. After a crash, a
+window you floated by hand comes back without its float, so it
+tiles again unless its space is in floating mode; only one that
+had not reopened yet since the last quit keeps it.
+:::
 
 Two restarts arrange nothing: an update's **Install and
 Relaunch**, and `kiwidesk service restart` of a running service
@@ -5835,9 +5847,10 @@ whose new program is signed like the running one. Windows stay
 where they are, hidden spaces' windows included, and the new
 process picks them up in place — along with the session's
 resized splits, weights and scroll positions and the windows you
-floated or made sticky by hand, which a quit and relaunch start
-fresh. Every other stop, `service stop` and an automatic update
-included, arranges per `quit.layout`. If the new process never
+floated or made sticky by hand; a quit and relaunch start the
+sizing and the sticky windows fresh. Every other stop,
+`service stop` and an automatic update included, arranges per
+`quit.layout`. If the new process never
 comes up, the windows stay as a crash leaves them, and the next
 launch restores the arrangement.
 
