@@ -8,12 +8,13 @@ the full picture, and the
 [Discord](https://discord.gg/bYeTrJyZyS) is the place to talk about
 any of it.
 
-The last two releases were heavy on the outside: the shelf, the
-looks, the menus. But as with kiwis, the outside is what catches
-the eye, while the real quality shines from the inside, with
-fabulous taste. So besides a few small new features, the next
-update works under the hood — performance and cleanups — for an
-overall juicier KiwiDesk.
+2.2.0 made the inside fast: a switch now does a fraction of the
+work it used to. Next, KiwiDesk learns to keep your desk the way you
+left it, and to take its setup from your own AI assistant. After that
+comes input: focus that follows the mouse, a hyper key and trackpad
+gestures. Further out, KiwiDesk is growing from a window tiler into a
+way of shaping how you work with your whole desk, and something new
+is taking shape there.
 
 <!--
 KiwiDesk's "What's new" window shows the section below (#1813), so
@@ -28,8 +29,8 @@ that section is free.
 
 ## Next on my list
 
-_As of 2026-10-01_
+_As of 2026-10-09_
 
-- The inside of the kiwi: a faster start and a lighter touch while you work, with nothing new to learn
-- Design your whole desktop with your own AI assistant, just by asking
-- A few small things, like shortcuts for named Spaces and Spaces past ten
+- Your windows back in their places after a restart or after quitting KiwiDesk
+- Each screen's shelf with settings of its own, so a portrait screen and a wide one can differ
+- Set up your whole desk from your own AI assistant, just by asking
