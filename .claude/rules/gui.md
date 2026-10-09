@@ -320,13 +320,22 @@ hand-back.
 the one `QuitSheets.clearOwnWindows()`** — `KiwiApplication`'s
 `terminate(_:)` and the power-off observer call it, and a new
 quit path calls that door rather than `NSApp.terminate` around
-it. **Unsaved Settings edits are asked about only through
-`SettingsModel.leavingDraft`**, from the window's
-`windowShouldClose` and from `applicationShouldTerminate` while
-Settings is open, and never by a dialog of their own; a close
-that did not ask drops the draft, which never outlives the
-window, and a SIGTERM quits through `terminateDiscardingDraft`
-without asking. `QuitSheetsTests` and `DraftLeaveTests` hold the
+it; while the unsaved-edits question is up the door brings it
+forward and closes nothing. **Unsaved Settings edits are asked
+about only through `SettingsModel.leavingDraft`**, from the
+window's `windowShouldClose` and from `applicationShouldTerminate`
+while Settings is open — which CANCELS the quit and lets the
+answer quit again, never `.terminateLater`, whose modal-panel run
+loop mode deafens the AX observers (accessibility.md) — and never
+by a dialog of its own. **Any sheet a leave waits on settles the
+leave on its own dismissal**, not only from its buttons: a quit
+ending the sheet or a rebuild tearing its host down would
+otherwise orphan the leave, which then holds every later quit. Its
+Save is the model's one primary Save (`performPrimarySave`,
+`primarySaveEnabled`, `primarySaveLabel`), never a copy beside it.
+`windowWillClose` owns "no draft outlives the window" and a fresh
+open's reload is the backstop; a SIGTERM drops the draft and
+quits unasked. `QuitSheetsTests` and `DraftLeaveTests` hold the
 verdicts and `QuitSheetsWiringTests` the paths; the argument is
 *Unsaved edits ask at the window; a quit closes every dialog* in
 `docs/design-decisions.md`.

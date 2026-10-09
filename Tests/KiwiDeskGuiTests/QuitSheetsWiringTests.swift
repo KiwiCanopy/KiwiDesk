@@ -5,9 +5,10 @@ import Testing
 /// `terminate(_:)` override and the class the app is launched as,
 /// the power-off notification a logout's quit event follows,
 /// SIGTERM in the modes a modal panel runs and without asking,
-/// `applicationShouldTerminate`'s question, every close path's,
-/// and the dialog and naming prompt that answer it. A test of the
-/// doors alone cannot see a path that stopped calling them.
+/// `applicationShouldTerminate`'s cancel-and-ask, every close
+/// path's question, and the dialog, naming prompt and one primary
+/// Save that answer it. A test of the doors alone cannot see a
+/// path that stopped calling them.
 @Suite("Quit and close wiring (#2049)")
 struct QuitSheetsWiringTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -30,43 +31,50 @@ struct QuitSheetsWiringTests {
         return String(rest[..<tail.upperBound])
     }
 
-    @Test("terminate closes the sheets before AppKit decides")
-    func terminateClearsFirst() throws {
+    private func expectOnce(_ needles: [String], in text: String) {
+        for needle in needles {
+            #expect(text.occurrences(of: needle) == 1, "\(needle)")
+        }
+    }
+
+    @Test("terminate takes the one door, which fronts a waiting question")
+    func terminateTakesTheDoor() throws {
         let app = try source("KiwiApplication.swift")
-        #expect(
-            app.occurrences(
-                of: "final class KiwiApplication: NSApplication"
-            ) == 1
-        )
-        let terminate = try body(
-            of: app,
-            from: "override func terminate(_ sender: Any?)",
-            to: "super.terminate(sender)"
-        )
-        #expect(
-            terminate.occurrences(of: "QuitSheets.clearOwnWindows()") == 1
+        expectOnce(
+            [
+                "final class KiwiApplication: NSApplication",
+                "guard QuitSheets.clearOwnWindows() else { return }",
+                "super.terminate(sender)",
+            ],
+            in: app
         )
         let sheets = try source("QuitSheets.swift")
         let door = try body(
             of: sheets,
-            from: "static func clearOwnWindows()",
-            to: "}"
+            from: "static func clearOwnWindows() -> Bool",
+            to: "return true"
         )
-        #expect(door.occurrences(of: "clear(NSApp.windows)") == 1)
+        expectOnce(
+            [
+                "host?.frontPendingQuestion() == true { return false }",
+                "clear(NSApp.windows)",
+            ],
+            in: door
+        )
     }
 
     @Test("the app launches as KiwiApplication")
     func launchesAsTheSubclass() throws {
         let main = try source("main.swift")
-        #expect(
-            main.occurrences(of: "let app = KiwiApplication.shared") == 1
+        expectOnce(
+            ["let app = KiwiApplication.shared", "app.delegate = delegate"],
+            in: main
         )
         #expect(main.occurrences(of: "NSApplication.shared") == 0)
-        #expect(main.occurrences(of: "app.delegate = delegate") == 1)
     }
 
-    @Test("power-off closes the sheets ahead of the quit event")
-    func powerOffClears() throws {
+    @Test("power-off takes the door ahead of the quit event")
+    func powerOffTakesTheDoor() throws {
         let delegate = try source("AppDelegate.swift")
         #expect(delegate.occurrences(of: "wirePowerOffSheets()") == 1)
         let quit = try source("AppDelegate+Quit.swift")
@@ -81,7 +89,7 @@ struct QuitSheetsWiringTests {
         )
     }
 
-    @Test("SIGTERM quits in the common modes and asks nothing")
+    @Test("SIGTERM drops the draft, then quits in the common modes")
     func sigtermDiscards() throws {
         let delegate = try source("AppDelegate.swift")
         #expect(
@@ -96,73 +104,74 @@ struct QuitSheetsWiringTests {
             from: "static func install()",
             to: "return source"
         )
-        #expect(
-            install.occurrences(
-                of: "queue: .global(qos: .userInitiated)"
-            ) == 1
+        expectOnce(
+            [
+                "queue: .global(qos: .userInitiated)",
+                "handler: deliver",
+            ],
+            in: install
         )
-        #expect(install.occurrences(of: "handler: deliver") == 1)
         let deliver = try body(
             of: quit,
             from: "private static func deliver()",
             to: "CFRunLoopWakeUp(main)"
         )
-        #expect(
-            deliver.occurrences(
-                of: "CFRunLoopMode.commonModes.rawValue"
-            ) == 1
+        expectOnce(
+            [
+                "CFRunLoopMode.commonModes.rawValue",
+                "delegate.quitDiscardingDraft()",
+            ],
+            in: deliver
         )
-        #expect(
-            deliver.occurrences(of: "app.terminateDiscardingDraft()") == 1
-        )
-        let app = try source("KiwiApplication.swift")
         let discarding = try body(
-            of: app,
-            from: "func terminateDiscardingDraft()",
-            to: "terminate(nil)"
+            of: quit,
+            from: "func quitDiscardingDraft()",
+            to: "NSApp.terminate(nil)"
         )
         #expect(
-            discarding.occurrences(of: "quitDiscardsDraft = true") == 1
+            discarding.occurrences(
+                of: "dashboardIfCreated?.dropDraftForQuit()"
+            ) == 1
         )
     }
 
-    @Test("a quit AppKit asks about waits for the draft question")
-    func shouldTerminateAsks() throws {
+    @Test("a quit with unsaved edits is cancelled and asked again")
+    func shouldTerminateCancelsAndAsks() throws {
         let quit = try source("AppDelegate+Quit.swift")
         let ask = try body(
             of: quit,
             from: "func applicationShouldTerminate(",
-            to: "return .terminateLater"
+            to: "return .terminateCancel"
         )
-        for needle in [
-            "quitDiscardsDraft == true",
-            "dashboard.quitAsksAboutDraft",
-            "dashboard.askBeforeQuit",
-            "NSApp.reply(toApplicationShouldTerminate: proceed)",
-        ] {
-            #expect(ask.occurrences(of: needle) == 1, "\(needle)")
-        }
+        expectOnce(
+            [
+                "if dashboard.takeQuitAnswer() { return .terminateNow }",
+                "guard dashboard.quitAsksAboutDraft",
+                "dashboard.askBeforeQuit",
+                "NSApp.terminate(nil)",
+            ],
+            in: ask
+        )
+        #expect(quit.occurrences(of: "terminateLater") == 0)
         let controller = try source(
             "Settings/SettingsWindowController.swift"
         )
-        let asks = try body(
-            of: controller,
-            from: "var quitAsksAboutDraft: Bool",
-            to: "return model.isDirty"
-        )
-        #expect(
-            asks.occurrences(
-                of: "window.isVisible || window.isMiniaturized"
-            ) == 1
+        expectOnce(
+            [
+                "window.map { $0.isVisible || $0.isMiniaturized }",
+                "var quitAsksAboutDraft: Bool { isShown && model.isDirty }",
+                "model.prepareToShow(windowShown: isShown)",
+                "model.askBeforeQuit(terminate: terminate)",
+                "guard model.draftLeave != nil else { return false }",
+            ],
+            in: controller
         )
         let before = try body(
             of: controller,
             from: "func askBeforeQuit(",
-            to: "cancel: { reply(false) }"
+            to: "model.askBeforeQuit(terminate: terminate)"
         )
         #expect(before.occurrences(of: "show()") == 1)
-        #expect(before.occurrences(of: "model.leavingDraft(") == 1)
-        #expect(before.occurrences(of: ".quit,") == 1)
     }
 
     @Test("every close path asks, and a close drops the draft")
@@ -175,9 +184,10 @@ struct QuitSheetsWiringTests {
             from: "func windowShouldClose(_ sender: NSWindow) -> Bool",
             to: "return false"
         )
-        #expect(should.occurrences(of: "guard model.isDirty") == 1)
-        #expect(should.occurrences(of: "model.leavingDraft(") == 1)
-        #expect(should.occurrences(of: ".close,") == 1)
+        expectOnce(
+            ["guard model.isDirty", "model.leavingDraft(", ".close,"],
+            in: should
+        )
         let willClose = try body(
             of: controller,
             from: "func windowWillClose(",
@@ -189,29 +199,64 @@ struct QuitSheetsWiringTests {
         )
     }
 
-    @Test("the dialog and the naming prompt answer the leave")
+    @Test("the dialog and naming prompt settle the leave")
     func dialogAnswers() throws {
         let host = try source("Settings/DiscardConfirm.swift")
-        #expect(
-            host.occurrences(
-                of: "if !shown { model.discardDialogDismissed() }"
-            ) == 1
+        expectOnce(
+            [
+                "let shownID = model.pendingDiscard?.id",
+                "if !shown { model.discardDialogDismissed(shownID) }",
+                "leaveActions(pending)",
+            ],
+            in: host
         )
-        #expect(host.occurrences(of: "leaveActions(pending)") == 1)
         let actions = try source("Settings/DiscardConfirm+Leave.swift")
-        for needle in [
-            "model.saveAndLeave(pending)",
-            ".keyboardShortcut(.defaultAction)",
-            ".keyboardShortcut(\"d\")",
-            "model.cancelPendingDiscard()",
-        ] {
-            #expect(actions.occurrences(of: needle) == 1, "\(needle)")
-        }
+        expectOnce(
+            [
+                "model.saveAndLeave(pending)",
+                ".keyboardShortcut(.defaultAction)",
+                ".keyboardShortcut(\"d\")",
+                "model.cancelPendingDiscard()",
+                "pending.saveLabel == nil ? .defaultAction : nil",
+            ],
+            in: actions
+        )
         let footer = try source("Settings/SettingsFooter.swift")
-        #expect(
-            footer.occurrences(of: "onChange(of: model.leaveNamingRequested)")
-                == 1
+        expectOnce(
+            [
+                "onChange(of: model.newProfileNamingRequested)",
+                "if was && !now { model.namingEnded() }",
+                "if namingNewProfile { model.namingEnded() }",
+            ],
+            in: footer
         )
         #expect(footer.occurrences(of: "model.namingEnded()") == 2)
+    }
+
+    @Test("the footer, the question and Fit Gaps share one Save")
+    func onePrimarySave() throws {
+        let slots = try source("Settings/SettingsFooter+Slots.swift")
+        expectOnce(
+            [
+                "Button(model.primarySaveLabel) { "
+                    + "model.performPrimarySave() }",
+                ".disabled(!model.primarySaveEnabled)",
+                ".help(model.primarySaveBlockedReason ?? \"\")",
+            ],
+            in: slots
+        )
+        let leave = try source("Settings/SettingsModel+Leave.swift")
+        expectOnce(
+            [
+                "let canSave = primarySaveEnabled",
+                "saveLabel: canSave ? primarySaveLabel : nil",
+                "performPrimarySave()",
+            ],
+            in: leave
+        )
+        let fit = try source(
+            "Settings/Components/GapsAndBorders/FitGapsAction.swift"
+        )
+        #expect(fit.occurrences(of: "model.primarySaveLabel") == 3)
     }
 }

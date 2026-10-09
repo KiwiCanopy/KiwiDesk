@@ -83,8 +83,11 @@ final class SettingsModel: ObservableObject {
     @Published var pendingDiscard: PendingDiscard?
     /// The close or quit the unsaved-edits question holds (#2049).
     var draftLeave: DraftLeave?
-    /// Asks the footer for its naming prompt, a leave's Save.
-    @Published var leaveNamingRequested = false
+    /// Asks the footer for its naming prompt (`performPrimarySave`).
+    @Published var newProfileNamingRequested = false
+    /// A quit answered Save or Discard: the next quit goes ahead
+    /// without asking again (#2049).
+    var quitAnswered = false
     /// Clean baseline state compared against `isDirty`; set by `apply(_:)`.
     var cleanConfig = GuiConfig()
     var cleanLuaSource = ""

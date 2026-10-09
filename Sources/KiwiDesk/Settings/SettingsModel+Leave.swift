@@ -9,6 +9,7 @@ struct DraftLeave {
         case quit
     }
 
+    let intent: Intent
     let proceed: @MainActor () -> Void
     let cancel: @MainActor () -> Void
 }
@@ -26,17 +27,22 @@ extension SettingsModel {
     ) {
         guard isDirty else { return proceed() }
         finishLeave(proceeding: false)
-        draftLeave = DraftLeave(proceed: proceed, cancel: cancel)
-        let canSave = leaveCanSave
+        draftLeave = DraftLeave(
+            intent: intent,
+            proceed: proceed,
+            cancel: cancel
+        )
+        let canSave = primarySaveEnabled
         let lost = L(
             "discard.leave.message",
             "If you don't save, your changes will be lost."
         )
         pendingDiscard = PendingDiscard(
             kind: .leave(intent),
-            message: canSave ? lost : (leaveSaveBlockedReason ?? lost),
+            message: canSave
+                ? lost : (primarySaveBlockedReason ?? lost),
             confirmLabel: L("discard.leave.confirm", "Discard"),
-            saveLabel: canSave ? leaveSaveLabel : nil,
+            saveLabel: canSave ? primarySaveLabel : nil,
             perform: { [weak self] in
                 self?.revert()
                 self?.finishLeave(proceeding: true)
@@ -44,44 +50,58 @@ extension SettingsModel {
         )
     }
 
-    /// Save: the footer's own Save. A save that needs a name opens
-    /// the naming prompt and the leave waits for it; one that
-    /// fails keeps the draft and cancels the leave.
+    /// A quit while Settings is open with unsaved edits (#2049):
+    /// asks, or leaves the question already up as it is. An
+    /// update's in-place relaunch intent is withdrawn while the
+    /// question waits and announced again on the answer, so a
+    /// Cancel leaves none armed and a late answer still relaunches
+    /// in place. `terminate` runs once Save landed or Discard ran.
+    func askBeforeQuit(terminate: @escaping @MainActor () -> Void) {
+        guard draftLeave == nil else { return }
+        let relaunch = core.withdrawUpdateRelaunch()
+        leavingDraft(
+            .quit,
+            proceed: { [weak self] in
+                if relaunch { self?.core.announceUpdateRelaunch() }
+                self?.quitAnswered = true
+                terminate()
+            },
+            cancel: {}
+        )
+    }
+
+    /// Save: the one primary Save. One that needs a name opens the
+    /// naming prompt and the leave waits for it (`namingEnded`);
+    /// one that fails keeps the draft and cancels the leave.
     func saveAndLeave(_ pending: PendingDiscard) {
         pendingDiscard = nil
-        switch primarySaveAction {
-        case .saveAsNewProfile:
-            leaveNamingRequested = true
-            return
-        case .saveLua: saveLuaSource()
-        case .updateStoredProfile: saveEditedProfile()
-        case .updateActiveProfile: updateActiveProfile()
-        case .saveGlobalsOnly: saveGlobalsWhilePaused()
-        }
+        let needsName = primarySaveAction == .saveAsNewProfile
+        performPrimarySave()
+        guard !needsName else { return }
         finishLeave(proceeding: !isDirty)
     }
 
-    /// The naming prompt closed, saved or not: a waiting leave
-    /// goes ahead only if the save landed.
+    /// The naming prompt went away — saved, cancelled or torn
+    /// down: a waiting leave goes ahead only if the save landed.
     func namingEnded() {
         finishLeave(proceeding: !isDirty)
     }
 
-    /// The dialog went away without a button — AppKit ending the
-    /// sheet at a quit. Settled a turn later, so a button that
-    /// runs after this setter (SwiftUI does not contract the
-    /// order) answers first.
-    func discardDialogDismissed() {
-        guard let pending = pendingDiscard else { return }
-        guard pending.isLeave else { return pendingDiscard = nil }
+    /// The dialog presenting `id` went away. A leave is settled a
+    /// turn later, so a button that runs after this setter
+    /// (SwiftUI does not contract the order) answers first; only
+    /// the dismissed presentation is ever cancelled.
+    func discardDialogDismissed(_ id: UUID?) {
+        guard let id, pendingDiscard?.id == id else { return }
+        guard pendingDiscard?.isLeave == true else {
+            return pendingDiscard = nil
+        }
         CFRunLoopPerformBlock(
             CFRunLoopGetMain(),
             CFRunLoopMode.commonModes.rawValue
         ) { [weak self] in
             MainActor.assumeIsolated {
-                guard self?.pendingDiscard?.id == pending.id else {
-                    return
-                }
+                guard self?.pendingDiscard?.id == id else { return }
                 self?.cancelPendingDiscard()
             }
         }
@@ -94,27 +114,11 @@ extension SettingsModel {
         if proceeding { leave.proceed() } else { leave.cancel() }
     }
 
-    /// Whether the footer's Save could run now; the same gates
-    /// its button greys on (#335).
-    var leaveCanSave: Bool {
-        switch primarySaveAction {
-        case .saveLua, .updateStoredProfile, .saveGlobalsOnly:
-            return true
-        case .updateActiveProfile:
-            return profileSaveBlockedReason == nil && updateEnabled
-        case .saveAsNewProfile:
-            return profileSaveBlockedReason == nil
-        }
-    }
-
-    /// The existing reason a blocked Save shows.
-    var leaveSaveBlockedReason: String? {
-        profileSaveBlockedReason ?? updateHint
-    }
-
-    private var leaveSaveLabel: String {
-        primarySaveAction == .saveAsNewProfile
-            ? L("footer.save_as_new_profile", "Save as New Profile…")
-            : L("footer.save", "Save")
+    /// A quit that cannot wait for an answer (SIGTERM): the draft
+    /// and any question about it go.
+    func dropDraftForQuit() {
+        pendingDiscard = nil
+        draftLeave = nil
+        if isDirty { revert() }
     }
 }

@@ -10,7 +10,10 @@ struct DiscardConfirmation: ViewModifier {
     @ObservedObject var model: SettingsModel
 
     func body(content: Content) -> some View {
-        content.confirmationDialog(
+        // The presentation this render shows: its dismissal cancels
+        // that one and never whatever has taken the slot since.
+        let shownID = model.pendingDiscard?.id
+        return content.confirmationDialog(
             // Nothing presents without a pending value.
             model.pendingDiscard?.title ?? "",
             isPresented: Binding(
@@ -19,7 +22,7 @@ struct DiscardConfirmation: ViewModifier {
                     // Dismissal only. Confirm clears the state
                     // itself, before running, so this never has
                     // to win a race against a view swap.
-                    if !shown { model.discardDialogDismissed() }
+                    if !shown { model.discardDialogDismissed(shownID) }
                 }
             ),
             titleVisibility: .visible,

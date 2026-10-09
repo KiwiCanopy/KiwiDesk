@@ -2,24 +2,30 @@ import AppKit
 
 /// The quit paths (#2049): an open sheet never blocks one, and
 /// unsaved Settings edits ask before any quit that can wait.
-extension AppDelegate {
+extension AppDelegate: QuitQuestionHost {
     /// Every quit AppKit asks about — Quit, Install and Relaunch,
-    /// another app's quit event, a logout or restart — asks Save /
-    /// Discard / Cancel while Settings is open with unsaved edits.
-    /// A SIGTERM cannot wait, so it discards.
+    /// another app's quit event, a logout or restart — while
+    /// Settings is open with unsaved edits is CANCELLED and the
+    /// question shown; its answer quits again. Never
+    /// `.terminateLater`: that runs the run loop in the modal-panel
+    /// mode, where other apps' AX notifications are not delivered,
+    /// so tiling would go deaf while the question waits.
     func applicationShouldTerminate(
         _ sender: NSApplication
     ) -> NSApplication.TerminateReply {
-        if (sender as? KiwiApplication)?.quitDiscardsDraft == true {
+        guard let dashboard = dashboardIfCreated else {
             return .terminateNow
         }
-        guard let dashboard = dashboardIfCreated,
-            dashboard.quitAsksAboutDraft
-        else { return .terminateNow }
-        dashboard.askBeforeQuit { proceed in
-            NSApp.reply(toApplicationShouldTerminate: proceed)
+        if dashboard.takeQuitAnswer() { return .terminateNow }
+        guard dashboard.quitAsksAboutDraft else { return .terminateNow }
+        dashboard.askBeforeQuit {
+            DispatchQueue.main.async { NSApp.terminate(nil) }
         }
-        return .terminateLater
+        return .terminateCancel
+    }
+
+    func frontPendingQuestion() -> Bool {
+        dashboardIfCreated?.frontPendingQuestion() ?? false
     }
 
     /// A logout's or restart's quit event is refused by AppKit
@@ -33,9 +39,16 @@ extension AppDelegate {
                 queue: .main
             ) { _ in
                 MainActor.assumeIsolated {
-                    QuitSheets.clearOwnWindows()
+                    _ = QuitSheets.clearOwnWindows()
                 }
             }
+    }
+
+    /// SIGTERM cannot wait for an answer: the draft goes first,
+    /// so the quit has nothing to ask.
+    func quitDiscardingDraft() {
+        dashboardIfCreated?.dropDraftForQuit()
+        NSApp.terminate(nil)
     }
 }
 
@@ -60,10 +73,10 @@ enum QuitSignal {
         let main = CFRunLoopGetMain()
         CFRunLoopPerformBlock(main, CFRunLoopMode.commonModes.rawValue) {
             MainActor.assumeIsolated {
-                guard let app = NSApp as? KiwiApplication else {
+                guard let delegate = NSApp.delegate as? AppDelegate else {
                     return NSApp.terminate(nil)
                 }
-                app.terminateDiscardingDraft()
+                delegate.quitDiscardingDraft()
             }
         }
         CFRunLoopWakeUp(main)

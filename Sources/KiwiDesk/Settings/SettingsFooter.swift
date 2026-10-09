@@ -62,12 +62,21 @@ struct SettingsFooter: View {
                 execute: work
             )
         }
-        // A close or quit's Save that needs a name (#2049).
-        .onChange(of: model.leaveNamingRequested) { _, asked in
+        // The primary Save that needs a name (#2049).
+        .onChange(of: model.newProfileNamingRequested) { _, asked in
             guard asked else { return }
-            model.leaveNamingRequested = false
+            model.newProfileNamingRequested = false
             prefillNewProfileName()
             namingNewProfile = true
+        }
+        // A leave waiting on the prompt settles on its dismissal,
+        // however it went — a button, a quit ending the sheet, or
+        // this footer torn down by a width-class flip.
+        .onChange(of: namingNewProfile) { was, now in
+            if was && !now { model.namingEnded() }
+        }
+        .onDisappear {
+            if namingNewProfile { model.namingEnded() }
         }
         .alert(
             L(
@@ -85,12 +94,10 @@ struct SettingsFooter: View {
             Button(L("footer.save", "Save")) {
                 model.saveAsNewProfile(named: newProfileName)
                 newProfileName = ""
-                model.namingEnded()
             }
             .disabled(newProfileName.trimmed.isEmpty)
             Button(L("footer.cancel", "Cancel"), role: .cancel) {
                 newProfileName = ""
-                model.namingEnded()
             }
         } message: {
             Text(saveAsNewMessage)

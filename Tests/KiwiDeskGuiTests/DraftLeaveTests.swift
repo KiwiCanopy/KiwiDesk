@@ -73,7 +73,7 @@ struct DraftLeaveTests {
             pending.title == "Save your changes before closing Settings?"
         )
         #expect(pending.confirmLabel == "Discard")
-        #expect(pending.saveLabel != nil)
+        #expect(pending.saveLabel == model.primarySaveLabel)
         #expect(!pending.cancelIsDefault)
         #expect(outcome.proceeded == 0 && outcome.cancelled == 0)
         let quit = leave(model, .quit)
@@ -111,11 +111,25 @@ struct DraftLeaveTests {
     func dismissalCancelsLater() throws {
         let model = try makeDirtyModel()
         let outcome = leave(model)
-        model.discardDialogDismissed()
+        let shown = try #require(model.pendingDiscard)
+        model.discardDialogDismissed(shown.id)
         #expect(outcome.cancelled == 0)
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
         #expect(outcome.cancelled == 1)
         #expect(model.pendingDiscard == nil)
+    }
+
+    @Test("a dismissal cancels only the presentation it ended")
+    func dismissalNamesItsPresentation() throws {
+        let model = try makeDirtyModel()
+        let first = leave(model, .close)
+        let stale = try #require(model.pendingDiscard)
+        let second = leave(model, .quit)
+        #expect(first.cancelled == 1)
+        model.discardDialogDismissed(stale.id)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+        #expect(second.cancelled == 0)
+        #expect(model.pendingDiscard?.kind == .leave(.quit))
     }
 
     @Test("a button answering after the dismissal wins")
@@ -123,9 +137,23 @@ struct DraftLeaveTests {
         let model = try makeDirtyModel()
         let outcome = leave(model)
         let pending = try #require(model.pendingDiscard)
-        model.discardDialogDismissed()
+        model.discardDialogDismissed(pending.id)
         model.confirmPendingDiscard(pending)
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+        #expect(outcome.proceeded == 1)
+        #expect(outcome.cancelled == 0)
+    }
+
+    @Test("a Save that lands goes ahead")
+    func savedProceeds() throws {
+        let model = try makeDirtyModel()
+        // A global edit alone, which the paused Save writes whole.
+        model.revert()
+        model.config.appRules["com.example.app"] = SpaceID("2")
+        model.coreHold = .permissionMissing
+        #expect(model.primarySaveAction == .saveGlobalsOnly)
+        let outcome = leave(model)
+        model.saveAndLeave(try #require(model.pendingDiscard))
         #expect(outcome.proceeded == 1)
         #expect(outcome.cancelled == 0)
     }
@@ -138,13 +166,27 @@ struct DraftLeaveTests {
         let pending = try #require(model.pendingDiscard)
         #expect(pending.saveLabel == "Save as New Profile…")
         model.saveAndLeave(pending)
-        #expect(model.leaveNamingRequested)
+        #expect(model.newProfileNamingRequested)
         #expect(model.pendingDiscard == nil)
         #expect(outcome.proceeded == 0 && outcome.cancelled == 0)
-        // The prompt cancelled: nothing saved, the leave stops.
+        // The named save lands, then the prompt goes away.
+        model.saveAsNewProfile(named: "Desk")
+        model.namingEnded()
+        #expect(!model.isDirty)
+        #expect(outcome.proceeded == 1)
+    }
+
+    @Test("a failed or abandoned save cancels and keeps the draft")
+    func failedSaveCancels() throws {
+        let model = try makeDirtyModel()
+        let outcome = leave(model)
+        model.saveAndLeave(try #require(model.pendingDiscard))
+        // An empty name saves nothing; the prompt then goes away.
+        model.saveAsNewProfile(named: "   ")
         model.namingEnded()
         #expect(model.isDirty)
         #expect(outcome.cancelled == 1)
+        #expect(outcome.proceeded == 0)
     }
 
     @Test("a blocked Save offers Discard and Cancel with its reason")
@@ -152,10 +194,49 @@ struct DraftLeaveTests {
         let model = try makeDirtyModel()
         model.coreHold = .permissionMissing
         #expect(model.primarySaveAction == .saveAsNewProfile)
+        #expect(!model.primarySaveEnabled)
         _ = leave(model)
         let pending = try #require(model.pendingDiscard)
         #expect(pending.saveLabel == nil)
         #expect(pending.message == model.profileSaveBlockedReason)
+    }
+
+    @Test("a quit question withdraws an update relaunch until answered")
+    func relaunchWaitsOnTheAnswer() throws {
+        let model = try makeDirtyModel()
+        let core = model.core
+        var clock: TimeInterval = 100
+        core.inPlaceRestart.now = { clock }
+        core.announceUpdateRelaunch()
+        var quits = 0
+        model.askBeforeQuit { quits += 1 }
+        #expect(core.inPlaceRestart.announcedAt == nil)
+        // A re-entry leaves the question up rather than a second.
+        let shown = try #require(model.pendingDiscard)
+        model.askBeforeQuit { quits += 10 }
+        #expect(model.pendingDiscard?.id == shown.id)
+        model.cancelPendingDiscard()
+        #expect(core.inPlaceRestart.announcedAt == nil)
+        #expect(quits == 0)
+        // Answered past the 30 s bound: announced again at the answer.
+        core.announceUpdateRelaunch()
+        model.askBeforeQuit { quits += 1 }
+        clock += 40
+        model.confirmPendingDiscard(try #require(model.pendingDiscard))
+        #expect(quits == 1)
+        #expect(model.quitAnswered)
+        #expect(core.takeInPlaceRestart())
+    }
+
+    @Test("a SIGTERM's quit drops the draft and any question")
+    func sigtermDrops() throws {
+        let model = try makeDirtyModel()
+        let outcome = leave(model)
+        model.dropDraftForQuit()
+        #expect(!model.isDirty)
+        #expect(model.pendingDiscard == nil)
+        #expect(model.draftLeave == nil)
+        #expect(outcome.proceeded == 0)
     }
 
     @Test("a fresh open drops a draft; a raise keeps it")

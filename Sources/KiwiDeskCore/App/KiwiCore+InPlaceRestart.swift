@@ -44,6 +44,16 @@ extension KiwiCore {
         arm(.update)
     }
 
+    /// Withdraws an update's announcement while the quit it named
+    /// waits on the user (#2049); answers whether one was armed,
+    /// so the answer can announce it again.
+    public func withdrawUpdateRelaunch() -> Bool {
+        guard inPlaceRestart.announcedAt != nil else { return false }
+        inPlaceRestart.announcedAt = nil
+        onLog("in-place restart withdrawn: the quit is asking first")
+        return true
+    }
+
     /// `prepare_restart`: the CLI is about to replace a loaded
     /// service. Armed only when the program launchd will start
     /// satisfies this process's own requirement (ruling 3);

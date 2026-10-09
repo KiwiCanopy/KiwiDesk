@@ -85,24 +85,41 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// write over a tour paint (#1720); a stored profile's cannot.
     var hasUnsavedDraft: Bool { model.isDirty && model.target == .live }
 
-    /// Settings is open with unsaved edits, so a quit asks first
-    /// (#2049). Closed, nothing asks: no draft outlives the window.
-    var quitAsksAboutDraft: Bool {
-        guard let window,
-            window.isVisible || window.isMiniaturized
-        else { return false }
-        return model.isDirty
+    /// The one reading of "Settings is open": shown, or
+    /// minimized to the Dock (#1970, #2049).
+    private var isShown: Bool {
+        window.map { $0.isVisible || $0.isMiniaturized } ?? false
     }
 
-    /// Brings Settings forward and asks Save / Discard / Cancel;
-    /// `reply` is told whether the quit goes ahead.
-    func askBeforeQuit(reply: @escaping @MainActor (Bool) -> Void) {
+    /// Settings is open with unsaved edits, so a quit asks first
+    /// (#2049). Closed, nothing asks: no draft outlives the window.
+    var quitAsksAboutDraft: Bool { isShown && model.isDirty }
+
+    /// Brings Settings forward and asks Save / Discard / Cancel,
+    /// or leaves a question already up as it is; `terminate`
+    /// runs on Save landed or Discard.
+    func askBeforeQuit(terminate: @escaping @MainActor () -> Void) {
         show()
-        model.leavingDraft(
-            .quit,
-            proceed: { reply(true) },
-            cancel: { reply(false) }
-        )
+        model.askBeforeQuit(terminate: terminate)
+    }
+
+    /// A quit answered by the question passes once (#2049).
+    func takeQuitAnswer() -> Bool {
+        defer { model.quitAnswered = false }
+        return model.quitAnswered
+    }
+
+    /// Brings Settings forward while a close or quit waits on the
+    /// unsaved-edits question; false when none waits.
+    func frontPendingQuestion() -> Bool {
+        guard model.draftLeave != nil else { return false }
+        show()
+        return true
+    }
+
+    /// A SIGTERM's quit: the draft goes unasked (#2049).
+    func dropDraftForQuit() {
+        model.dropDraftForQuit()
     }
 
     /// Every close path — the close button, ⌘W, File ▸ Close —
@@ -164,11 +181,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// Shows the dashboard window: a fresh open on Home, an open
     /// one where it is (`SettingsModel.prepareToShow`, #1970).
     func show() {
-        model.prepareToShow(
-            windowShown: window.map {
-                $0.isVisible || $0.isMiniaturized
-            } ?? false
-        )
+        model.prepareToShow(windowShown: isShown)
         if let window {
             // Core first (#1281): a bare order-front of a window
             // the row just panned out reports a clickless focus,
@@ -231,8 +244,9 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     }
 
     /// Disarms recorder and cleans up state on window close (#213,
-    /// #515); a close that did not ask drops the draft, which never
-    /// outlives the window (#2049).
+    /// #515). Owns "no draft outlives the window" (#2049): a close
+    /// that did not ask drops it here; `prepareToShow`'s reload on
+    /// a fresh open is the backstop.
     func windowWillClose(_ notification: Notification) {
         model.setRecorderArmed(false)
         model.cancelPendingDiscard()
