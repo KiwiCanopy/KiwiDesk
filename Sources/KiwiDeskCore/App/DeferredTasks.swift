@@ -72,6 +72,10 @@ final class DeferredTasks {
         /// The profile choice a screen-count change waits on
         /// until the reports stop (#1612).
         case monitorSettle
+        /// The cross-session match's title pass and its close
+        /// (#1385, `KiwiCore+CrossSession`).
+        case crossSessionSettle
+        case crossSessionClose
 
         /// Whether a body in this slot runs as its scheduler's
         /// motion, late (#804 ▸ Ruling 2), or always as ambient
@@ -89,7 +93,7 @@ final class DeferredTasks {
                 .adoptionHealWake,
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
-                .monitorSettle:
+                .monitorSettle, .crossSessionSettle, .crossSessionClose:
                 return false
             }
         }
@@ -99,6 +103,12 @@ final class DeferredTasks {
     /// both at bootstrap. Unwired, every body runs as it always did.
     var captureCause: @MainActor () -> MotionCause = { .ambient }
     var runUnder: @MainActor (MotionCause, () -> Void) -> Void = { $1() }
+
+    /// The wait before a body runs, on the monotonic clock; a test
+    /// steps it to fire a long slot at once (#1385).
+    var sleep: @Sendable (Duration) async -> Void = {
+        try? await Task.sleep(for: $0)
+    }
 
     private var tasks: [Key: Task<Void, Never>] = [:]
     private var burstStarts: [Key: ContinuousClock.Instant] = [:]
@@ -139,8 +149,9 @@ final class DeferredTasks {
             sleepDuration = delay
         }
 
+        let sleep = sleep
         tasks[key] = Task { @MainActor in
-            try? await Task.sleep(for: sleepDuration)
+            await sleep(sleepDuration)
             guard !Task.isCancelled else { return }
             burstStarts[key] = nil
             run(cause, body)

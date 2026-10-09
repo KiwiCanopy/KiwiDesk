@@ -5035,12 +5035,10 @@ them re-ordered the row the return then rebuilt (#1387).
 
 The record rides the session snapshot, so a profile that is not
 live keeps it across a KiwiDesk quit, update or crash; it goes
-where the snapshot goes, which a Mac restart discards. It takes
-the replay's logout residue with it for longer: a record can sit
-unread until its profile returns, and a login that remints a
-remembered id then moves that window instead — the exposure the
-replay already accepts, so it is accepted here rather than gated
-on a session identity the replay does not have either (#1802).
+where the snapshot goes, which a Mac restart or a logout ends:
+the login-session gate refuses another login's file, records and
+all, and no restore across a restart re-keys a record (#1802,
+#1385).
 
 Its counterpart is deliberately NOT stored, and the reason is
 WHEN each record is authoritative rather than who owns the fact.
@@ -14909,9 +14907,10 @@ under another number takes every window it remembers along, a
 hidden app's too, or that window's return would re-create the
 retired number as an ordinary Space the next save captures. A hold whose Space no longer exists names nothing
 the snapshot records, so it ends at a restart. A restart of the
-Mac ends every hold without a separate store: macOS gives every
-reopened window a new identity, so a hold kept across it would
-hold nothing. The residue is in
+Mac ends every hold without a separate store: a hold names its
+windows by the ids they had before it, which a restart retires,
+and no restore re-keys a hold, so one kept across it would hold
+nothing. The residue is in
 [accepted limitations](accepted-limitations.md).
 
 **A replay under another arrangement keeps its declared modes.**
@@ -15520,6 +15519,12 @@ Space and slot, and a window left in place is set to the frame
 it already has. This holds for every launch, not only an
 in-place one.
 
+:::unreleased
+After a restart of the Mac the same replay carries the windows
+the cross-session match paired at boot, re-keyed onto their new
+ids, so they too land before the first pass.
+:::
+
 **[Trade-off]**
 
 **Sizing survives an in-place restart only.** The in-place
@@ -15535,6 +15540,62 @@ session memory two minutes after the stop: the next launch, much
 later, is a launch after a quit, and restores the arrangement
 alone. The payload is one build writing for the next, so a
 payload the reading build cannot decode costs only itself.
+
+:::unreleased
+### A restart of the Mac restores by app and title
+
+**[Rationale]**
+
+**Window ids never cross a boot or a login.** A `CGWindowID`
+belongs to one WindowServer session, and a logout mints a new
+login session that reuses low ids, so a snapshot from either side
+of one names nothing, or names the wrong window. Its ids are
+never replayed
+([#1385](https://github.com/KiwiCanopy/KiwiDesk/issues/1385)).
+Instead each window record carries a stable key — the app's
+bundle id and the window's title — and the windows macOS reopens
+are paired with the records by app, then by title, then by rank.
+Bundle id alone settles every app that reopens one window, which
+is most of a measured desk; titles help only once they settle,
+since boot-time titles are generic, empty or localized
+differently, so a title is read only after a pass about 30 s
+after launch; and late windows keep arriving for a minute, so
+the match stays open for two. Windows sharing one title cannot be
+told apart by any key KiwiDesk holds, so they go back to their
+app's Spaces in no particular order.
+
+**Earned by the shutdown, not by the passage of time.** Only a
+snapshot the logout freeze wrote crosses a boot, and only once,
+by the first launch after it. A plain Quit lets the arrangement
+go: someone who quits KiwiDesk, works without it and restarts has
+not asked for an old arrangement back, however recent. So there
+is no age limit and no setting — the freeze is the user's
+restart reaching a running KiwiDesk, which is the one case where
+putting the desk back is what was asked for.
+
+**The freeze became a rollback.** macOS quits the other apps
+about 14 s before KiwiDesk hears the power-off notification
+(measured 2026-10-09), so a freeze on that notice kept an
+autosave that already held 2 of 10 windows. The freeze therefore
+writes back the autosave from before the burst of closes, read
+off the departures the gone handler classified and the app exits.
+An earlier trigger on loginwindow's own window was ruled out as
+fragile. A hide, a minimize or a Desktop departure inside the
+burst's window stands the rollback down: such a burst is the
+user's own work, not macOS's quitting.
+
+**Deliberately left out.** Held and temporary Spaces, pending
+filings and the per-profile records are keyed by window ids alone,
+and the match admits only Spaces the arrangement declares at
+boot, so their windows land as new; the session sizing an
+in-place restart carries never crosses a boot either. Titles are
+stored in the snapshot to be matched, and kept out of the unified
+log, which records only app and Space per pair. The pass that
+places a window whose title settled late moves it quietly, with
+no focus change and no `window_moved_to_space` event, as the boot
+replay it completes does, and never moves the window the user is
+in or one the user moved since launch.
+:::
 
 ### A bulk reconcile asks the WindowServer before it asks Accessibility
 

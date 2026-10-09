@@ -84,7 +84,9 @@ extension KiwiCore {
             return StateSnapshot.WindowRecord(
                 id: record.windowID,
                 frame: original,
-                session: record.session
+                session: record.session,
+                app: record.app,
+                title: record.title
             )
         }
     }
