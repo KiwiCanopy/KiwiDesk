@@ -12,7 +12,7 @@ struct SpacePinBadgeTests {
     ]
 
     private func name(_ fingerprint: String) -> String {
-        // The GUI's `monitorName`: known fingerprints resolve to a
+        // The GUI's `screenName`: known fingerprints resolve to a
         // human name, an unknown one falls back to itself.
         [
             "LG:2560x1440": "LG 27",

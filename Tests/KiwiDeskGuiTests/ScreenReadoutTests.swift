@@ -15,11 +15,11 @@ import Testing
 /// where every space follows main). A source scan held the keys;
 /// nothing held the arithmetic that chooses between them.
 ///
-/// `@MainActor` because `MonitorReadout` is: `L()` routes through
+/// `@MainActor` because `ScreenReadout` is: `L()` routes through
 /// the main-actor locale catalog.
 @MainActor
 @Suite("Monitor readout sentence")
-struct MonitorReadoutTests {
+struct ScreenReadoutTests {
     /// Every assertion below compares `L()` output to English,
     /// so each test pins the shared manager as its FIRST line —
     /// "System default" resolves the HOST's language, and on a
@@ -50,7 +50,7 @@ struct MonitorReadoutTests {
     @Test("zero takes its own sentence")
     func zeroHasItsOwnPhrase() {
         pinEnglish()
-        let empty = MonitorReadout.sentence(held: 0, showing: nil)
+        let empty = ScreenReadout.sentence(held: 0, showing: nil)
         #expect(empty == "No Spaces here")
         #expect(!empty.contains("0"))
     }
@@ -61,7 +61,7 @@ struct MonitorReadoutTests {
     @Test("zero keeps its sentence when something is showing")
     func zeroIgnoresShowing() {
         pinEnglish()
-        let sentence = MonitorReadout.sentence(
+        let sentence = ScreenReadout.sentence(
             held: 0,
             showing: SpaceID("code")
         )
@@ -74,8 +74,8 @@ struct MonitorReadoutTests {
     @Test("one and many are different sentences")
     func countPhrasesDiffer() {
         pinEnglish()
-        let one = MonitorReadout.sentence(held: 1, showing: nil)
-        let many = MonitorReadout.sentence(held: 4, showing: nil)
+        let one = ScreenReadout.sentence(held: 1, showing: nil)
+        let many = ScreenReadout.sentence(held: 4, showing: nil)
         #expect(one == "1 Space here")
         #expect(many == "4 Spaces here")
         #expect(one != many)
@@ -87,7 +87,7 @@ struct MonitorReadoutTests {
     @Test("the showing clause names its Space")
     func showingNamesTheSpace() {
         pinEnglish()
-        let sentence = MonitorReadout.sentence(
+        let sentence = ScreenReadout.sentence(
             held: 3,
             showing: SpaceID("code")
         )
@@ -104,7 +104,7 @@ struct MonitorReadoutTests {
     func singularWithShowing() {
         pinEnglish()
         #expect(
-            MonitorReadout.sentence(
+            ScreenReadout.sentence(
                 held: 1,
                 showing: SpaceID("web")
             ) == "1 Space here · Space web is showing"
@@ -125,7 +125,7 @@ struct MonitorReadoutTests {
     func mainCountsTheTray() {
         pinEnglish()
         let desk = display(1)
-        let rows = MonitorsFamilyRows(
+        let rows = ScreensFamilyRows(
             spaces: [
                 SpaceID("code"), SpaceID("web"), SpaceID("chat"),
             ],
@@ -156,7 +156,7 @@ struct MonitorReadoutTests {
         let spaces = [
             SpaceID("code"), SpaceID("web"), SpaceID("chat"),
         ]
-        let rows = MonitorsFamilyRows(
+        let rows = ScreensFamilyRows(
             spaces: spaces,
             mainSpaces: Set(spaces),
             resolutions: Dictionary(
@@ -165,7 +165,7 @@ struct MonitorReadoutTests {
             pins: [:],
             displays: [desk]
         )
-        let sentence = MonitorReadout.sentence(
+        let sentence = ScreenReadout.sentence(
             held: rows.held(on: desk, isMain: true),
             showing: SpaceID("code")
         )

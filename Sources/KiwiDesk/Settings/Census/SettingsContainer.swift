@@ -20,7 +20,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case layers
     case looks
     case luaBindings
-    case monitorFingerprints
+    case screenFingerprints
     case monocle
     case motion
     case gestures
@@ -29,7 +29,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case optionalSettings
     case palettes
     case perSpaceOverrides
-    case pinnedToDisconnectedMonitors
+    case pinnedToDisconnectedScreens
     case presets
     case profilesPerMacOSSpace
     case savedProfiles
@@ -69,10 +69,10 @@ enum SettingsContainer: CaseIterable, Hashable {
             .focus, .gaps, .general, .grid,
             .habits, .kiwishelf, .appliesImmediately, .layers,
             .looks, .luaBindings,
-            .monitorFingerprints, .monocle, .gestures,
+            .screenFingerprints, .monocle, .gestures,
             .moveWindows, .openApplications,
             .optionalSettings, .palettes, .perSpaceOverrides,
-            .pinnedToDisconnectedMonitors, .presets,
+            .pinnedToDisconnectedScreens, .presets,
             .profilesPerMacOSSpace, .floatRules,
             .spaceRules,
             .savedProfiles, .scrolling, .sharedLook, .sizeAndFloat,

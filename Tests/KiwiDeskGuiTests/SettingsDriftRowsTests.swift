@@ -55,11 +55,11 @@ struct SettingsDriftRowsTests {
         let rows = SettingsDiffRowSource.rows(for: model)
         let row = try #require(rows.first)
         #expect(rows.count == 1)
-        #expect(row.key == .monitors(.fingerprints))
+        #expect(row.key == .screens(.fingerprints))
         #expect(row.changeNote?.contains("Desk") == true)
         // …and it jumps where the drift is visible.
         let anchor = try #require(SettingsDiffJump.anchor(for: row))
-        #expect(anchor.destination == .monitors)
+        #expect(anchor.destination == .screens)
         #expect(anchor.anchor == "monitors.advanced.title")
     }
 
@@ -167,7 +167,7 @@ struct SettingsDriftRowsTests {
         let row = try #require(
             SettingsDiffRowSource.driftRows(for: driftedModel()).first
         )
-        #expect(row.key == .monitors(.fingerprints))
+        #expect(row.key == .screens(.fingerprints))
         #expect(row.id != row.key.id)
         #expect(row.id.hasSuffix(SettingsDiffRowSource.driftInstance))
     }

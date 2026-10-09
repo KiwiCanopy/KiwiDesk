@@ -1,12 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Display card in monitors arrangement preview (#678, #758).
-struct DisplayCard: View {
+/// Screen card in the Screens arrangement preview (#678, #758).
+struct ScreenCard: View {
     @ObservedObject var model: SettingsModel
     let display: Display
     /// Row expansion from census.
-    let rows: MonitorsFamilyRows
+    let rows: ScreensFamilyRows
     /// Scaled dimensions from arrangement.
     let size: CGSize
     @Binding var selection: DisplayID?
@@ -16,12 +16,12 @@ struct DisplayCard: View {
     var body: some View {
         VStack(
             alignment: .leading,
-            spacing: MonitorCardChips.stackSpacing
+            spacing: ScreenCardChips.stackSpacing
         ) {
             header
             chips
         }
-        .padding(MonitorCardChips.cardPadding)
+        .padding(ScreenCardChips.cardPadding)
         .frame(
             maxWidth: .infinity,
             maxHeight: .infinity,
@@ -36,7 +36,7 @@ struct DisplayCard: View {
         .background(plate)
         .overlay(border)
         .clipShape(RoundedRectangle(cornerRadius: 6))
-        // Main display accent glow (#758, ui-designer 2026-08-09).
+        // Main screen accent glow (#758, ui-designer 2026-08-09).
         .compositingGroup()
         .shadow(
             color: isMain
@@ -86,7 +86,7 @@ struct DisplayCard: View {
             }
             Spacer(minLength: 0)
         }
-        .frame(height: MonitorCardChips.headerHeight)
+        .frame(height: ScreenCardChips.headerHeight)
     }
 
     @ViewBuilder private var chips: some View {
@@ -96,11 +96,11 @@ struct DisplayCard: View {
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         } else {
-            let split = MonitorCardChips.split(
+            let split = ScreenCardChips.split(
                 assignments,
                 in: size
             )
-            HStack(alignment: .top, spacing: MonitorCardChips.spacing) {
+            HStack(alignment: .top, spacing: ScreenCardChips.spacing) {
                 WrapChips(split.shown) { entry in
                     chip(entry)
                 }
@@ -137,7 +137,7 @@ struct DisplayCard: View {
             .fontWeight(.medium)
             .foregroundStyle(SettingsTheme.ink)
             .lineLimit(1)
-            .frame(width: MonitorCardChips.markerWidth)
+            .frame(width: ScreenCardChips.markerWidth)
             .padding(.vertical, 3)
             // The SHARED adaptive chip, not the pinned chip's
             // fill: this opens a popover, and wearing a drag
@@ -145,7 +145,7 @@ struct DisplayCard: View {
             // rest cue (#1240). `padding: 0` keeps it inside the
             // reserved marker column.
             .hoverHighlight(
-                cornerRadius: MonitorCardChips.chipHeight / 2,
+                cornerRadius: ScreenCardChips.chipHeight / 2,
                 padding: 0
             )
         }
@@ -153,7 +153,7 @@ struct DisplayCard: View {
         .accessibilityLabel(
             L(
                 "monitor_card.more_spaces.axlabel",
-                "%1$d more Spaces on this display",
+                "%1$d more Spaces on this screen",
                 count
             )
         )
@@ -197,14 +197,14 @@ struct DisplayCard: View {
                         SettingsTheme.ink3.opacity(0.5)
                     ),
                 lineWidth: isSelected
-                    ? SettingsTheme.monitorCardStrokeSelected
-                    : SettingsTheme.monitorCardStroke
+                    ? SettingsTheme.screenCardStrokeSelected
+                    : SettingsTheme.screenCardStroke
             )
     }
 
     /// Readout sentence describing assigned and showing spaces.
     private var readout: String {
-        MonitorReadout.sentence(
+        ScreenReadout.sentence(
             held: rows.held(on: display, isMain: isMain),
             showing: model.showingSpace(on: display.id)
         )
@@ -214,11 +214,11 @@ struct DisplayCard: View {
         isSelected
             ? L(
                 "monitors.deselect",
-                "Hide the Spaces on this display"
+                "Hide the Spaces on this screen"
             )
             : L(
                 "monitors.select",
-                "Show the Spaces on this display"
+                "Show the Spaces on this screen"
             )
     }
 
@@ -226,7 +226,7 @@ struct DisplayCard: View {
         selection = isSelected ? nil : display.id
     }
 
-    /// Pins dropped spaces to monitor fingerprint (#36).
+    /// Pins dropped spaces to screen fingerprint (#36).
     private func pin(_ items: [DraggableSpace]) -> Bool {
         var assigned = false
         for item in items {

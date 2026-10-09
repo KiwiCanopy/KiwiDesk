@@ -2,7 +2,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Monitors area's census gates (#678 Phase 3, turn 13b).
+/// The Screens area's census gates (#678 Phase 3, turn 13b).
 ///
 /// Every gate here SURFACES rather than greys, and one runtime
 /// condition drives two opposite outcomes — it surfaces the
@@ -10,14 +10,14 @@ import Testing
 /// in for. That pairing is the thing worth guarding: a resolver
 /// that answered one side and not the other would leave the page
 /// with both on screen, or neither.
-@Suite("Monitors gates")
-struct MonitorsGateTests {
+@Suite("Screens gates")
+struct ScreensGateTests {
     private func gates(
         editing: Bool = false,
         editable: Bool = true,
         orphans: Bool = false
-    ) -> MonitorsGates {
-        MonitorsGates(
+    ) -> ScreensGates {
+        ScreensGates(
             editingStoredProfile: editing,
             placementEditable: editable,
             hasOrphanedPins: orphans
@@ -29,7 +29,7 @@ struct MonitorsGateTests {
         let live = gates()
         #expect(
             live.inertReason(
-                for: .monitors(.placementUnavailable)
+                for: .screens(.placementUnavailable)
             ) == .pictureIsDrawable
         )
     }
@@ -42,7 +42,7 @@ struct MonitorsGateTests {
         let away = gates(editing: true, editable: false)
         #expect(
             away.inertReason(
-                for: .monitors(.placementUnavailable)
+                for: .screens(.placementUnavailable)
             ) == nil
         )
     }
@@ -54,14 +54,14 @@ struct MonitorsGateTests {
     /// stored-profile edit.
     @Test("both arms are needed to lose the picture")
     func conjunctionNeedsBothArms() {
-        #expect(!gates(editing: true, editable: true).monitorsDisconnected)
+        #expect(!gates(editing: true, editable: true).screensDisconnected)
         #expect(
             !gates(editing: false, editable: false)
-                .monitorsDisconnected
+                .screensDisconnected
         )
         #expect(
             gates(editing: true, editable: false)
-                .monitorsDisconnected
+                .screensDisconnected
         )
     }
 
@@ -69,12 +69,12 @@ struct MonitorsGateTests {
     func orphanCardSurfaces() {
         #expect(
             gates(orphans: false)
-                .inertReason(for: .monitors(.orphanPinClear))
+                .inertReason(for: .screens(.orphanPinClear))
                 == .noOrphanedPins
         )
         #expect(
             gates(orphans: true)
-                .inertReason(for: .monitors(.orphanPinClear))
+                .inertReason(for: .screens(.orphanPinClear))
                 == nil
         )
     }
@@ -85,7 +85,7 @@ struct MonitorsGateTests {
     func ungatedRowsStayPut() {
         #expect(
             gates(editing: true, editable: false)
-                .inertReason(for: .monitors(.fingerprints)) == nil
+                .inertReason(for: .screens(.fingerprints)) == nil
         )
     }
 
@@ -97,19 +97,19 @@ struct MonitorsGateTests {
     func everyGatedRowIsResolved() {
         let gated = Set(
             SettingKey.allCases.filter {
-                $0.placement.area == .monitors
+                $0.placement.area == .screens
                     && $0.placement.gate != nil
             }
         )
         #expect(!gated.isEmpty)
         #expect(
             gated
-                == MonitorsGates.resolved
-                .union(MonitorsGates.resolvedElsewhere)
+                == ScreensGates.resolved
+                .union(ScreensGates.resolvedElsewhere)
         )
         #expect(
-            MonitorsGates.resolved
-                .intersection(MonitorsGates.resolvedElsewhere)
+            ScreensGates.resolved
+                .intersection(ScreensGates.resolvedElsewhere)
                 .isEmpty
         )
     }
@@ -122,7 +122,7 @@ struct MonitorsGateTests {
     func noContainerGate() {
         let containers = Set(
             SettingKey.allCases
-                .filter { $0.placement.area == .monitors }
+                .filter { $0.placement.area == .screens }
                 .compactMap { $0.placement.container }
         )
         #expect(!containers.isEmpty)
@@ -132,7 +132,7 @@ struct MonitorsGateTests {
                 Comment(
                     rawValue:
                         "\(container) declares a container gate "
-                        + "that MonitorsGates cannot answer"
+                        + "that ScreensGates cannot answer"
                 )
             )
         }

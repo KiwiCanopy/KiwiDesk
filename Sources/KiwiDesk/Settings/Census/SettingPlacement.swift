@@ -15,7 +15,7 @@ enum SettingsArea: CaseIterable, Hashable {
     case bars
     case advancedColours
     case spacesAndLayouts
-    case monitors
+    case screens
     case profiles
     case appRules
     case general
@@ -24,7 +24,7 @@ enum SettingsArea: CaseIterable, Hashable {
     /// The mode an area first appears in.
     var minimumMode: SettingsMode {
         switch self {
-        case .advancedColours, .monitors:
+        case .advancedColours, .screens:
             return .powerUser
         case .layoutDefaults, .gapsAndBorders, .shortcuts,
             .coloursAndMotion, .bars, .spacesAndLayouts,
@@ -33,11 +33,11 @@ enum SettingsArea: CaseIterable, Hashable {
         }
     }
 
-    /// Effective minimum mode, promoting Monitors to Simple for multi-display.
+    /// Effective minimum mode, promoting Screens to Simple for multi-screen.
     func effectiveMinimumMode(
         displayCount: Int
     ) -> SettingsMode {
-        if self == .monitors, displayCount >= 2 {
+        if self == .screens, displayCount >= 2 {
             return .simple
         }
         return minimumMode

@@ -13,7 +13,7 @@ enum SettingKey: Hashable, CaseIterable {
     case layout(LayoutKey)
     case layoutAppBar(LayoutAppBarKey)
     case macChecklist(MacChecklistKey)
-    case monitors(MonitorsKey)
+    case screens(ScreensKey)
     case profiles(ProfilesKey)
     case shortcuts(ShortcutsKey)
     case spaceBar(SpaceBarKey)
@@ -31,7 +31,7 @@ enum SettingKey: Hashable, CaseIterable {
             + LayoutKey.allCases.map(Self.layout)
             + LayoutAppBarKey.allCases.map(Self.layoutAppBar)
             + MacChecklistKey.allCases.map(Self.macChecklist)
-            + MonitorsKey.allCases.map(Self.monitors)
+            + ScreensKey.allCases.map(Self.screens)
             + ProfilesKey.allCases.map(Self.profiles)
             + ShortcutsKey.allCases.map(Self.shortcuts)
             + SpaceBarKey.allCases.map(Self.spaceBar)
@@ -52,7 +52,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .layout(let k): return k.rawValue
         case .layoutAppBar(let k): return k.rawValue
         case .macChecklist(let k): return k.rawValue
-        case .monitors(let k): return k.rawValue
+        case .screens(let k): return k.rawValue
         case .profiles(let k): return k.rawValue
         case .shortcuts(let k): return k.rawValue
         case .spaceBar(let k): return k.rawValue
@@ -73,7 +73,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .layout(let k): return k.placement
         case .layoutAppBar(let k): return k.placement
         case .macChecklist(let k): return k.placement
-        case .monitors(let k): return k.placement
+        case .screens(let k): return k.placement
         case .profiles(let k): return k.placement
         case .shortcuts(let k): return k.placement
         case .spaceBar(let k): return k.placement
@@ -94,7 +94,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .layout(let k): return k.text
         case .layoutAppBar(let k): return k.text
         case .macChecklist(let k): return k.text
-        case .monitors(let k): return k.text
+        case .screens(let k): return k.text
         case .profiles(let k): return k.text
         case .shortcuts(let k): return k.text
         case .spaceBar(let k): return k.text

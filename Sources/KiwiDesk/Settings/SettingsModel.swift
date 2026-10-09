@@ -104,7 +104,7 @@ final class SettingsModel: ObservableObject {
     @Published var profileDirty = false
     /// Dashboard edit target: live config or stored profile (#18, #64).
     @Published var target: EditTarget = .live
-    /// Whether monitor placement canvas is editable for current target (#18).
+    /// Whether screen placement canvas is editable for current target (#18).
     @Published var placementEditable = true
     @Published var profiles: [String] = []
     /// `KiwiCore.isGuiManaged` and the sidecar's presence, read
@@ -112,7 +112,7 @@ final class SettingsModel: ObservableObject {
     /// per render (#1392).
     @Published var guiManaged = true
     @Published var sidecarExists = true
-    /// Rich rows for saved profiles: monitor sets, screen count, matches
+    /// Rich rows for saved profiles: screen setups, screen count, matches
     /// (#36).
     @Published var profileSummaries: [ProfileSummary] = []
     /// Un-decodable profiles shown greyed with reveal and delete
@@ -141,7 +141,7 @@ final class SettingsModel: ObservableObject {
         verdict: .none,
         screens: 0
     )
-    /// Dismissible warning from profile actions (e.g. monitor overlap).
+    /// Dismissible warning from profile actions (e.g. screen overlap).
     @Published var profileWarning: String?
 
     /// Main screen user Desktops by Mission Control number (#888).

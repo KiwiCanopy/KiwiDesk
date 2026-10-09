@@ -4,7 +4,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Monitors picture's geometry (#678 Phase 3, turn 13b).
+/// The Screens picture's geometry (#678 Phase 3, turn 13b).
 ///
 /// Every assertion here reads a DERIVED rectangle, never a scan
 /// for an input: a picture that takes the real frames and draws a
@@ -14,7 +14,7 @@ import Testing
 /// position, this ratio — and each one fails on the smallest edit
 /// that breaks the promise it names.
 @Suite("Monitor arrangement geometry")
-struct MonitorArrangementTests {
+struct ScreenArrangementTests {
     /// AppKit's global space: y grows UP, the main display's
     /// bottom-left is the origin.
     private func display(
@@ -38,8 +38,8 @@ struct MonitorArrangementTests {
         _ displays: [Display],
         main: DisplayID? = nil,
         canvas: CGSize? = nil
-    ) -> MonitorArrangement.Layout {
-        MonitorArrangement.layout(
+    ) -> ScreenArrangement.Layout {
+        ScreenArrangement.layout(
             displays: displays,
             mainID: main ?? displays.first?.id,
             canvas: canvas ?? self.canvas
@@ -47,7 +47,7 @@ struct MonitorArrangementTests {
     }
 
     private func rect(
-        _ result: MonitorArrangement.Layout,
+        _ result: ScreenArrangement.Layout,
         _ id: UInt32
     ) throws -> CGRect {
         try #require(

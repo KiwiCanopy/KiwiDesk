@@ -1,6 +1,6 @@
-/// Monitors: space placement pins and fingerprints.
+/// Screens: space placement pins and fingerprints.
 
-enum MonitorsKey: String, CaseIterable, Hashable {
+enum ScreensKey: String, CaseIterable, Hashable {
     case spacePins = "config.spacePins[space]"
     case mainSpaces = "config.mainSpaces"
     case orphanPinClear = "(action) monitors.orphan_pin.clear"
@@ -8,34 +8,34 @@ enum MonitorsKey: String, CaseIterable, Hashable {
     case placementUnavailable = "(state) monitors.placementUnavailable"
 }
 
-extension MonitorsKey {
+extension ScreensKey {
     var placement: SettingPlacement {
         switch self {
         case .spacePins, .mainSpaces:
             // Ungated: picture availability is governed by the banner gate
             // (#678).
-            return .row(.monitors, .spacePlacement, .atRest)
+            return .row(.screens, .spacePlacement, .atRest)
         case .orphanPinClear:
             return .row(
-                .monitors,
-                .pinnedToDisconnectedMonitors,
+                .screens,
+                .pinnedToDisconnectedScreens,
                 .atRest,
                 gate: .runtime(.orphanPinsExist)
             )
         case .fingerprints:
-            return .row(.monitors, .monitorFingerprints, .showMore)
+            return .row(.screens, .screenFingerprints, .showMore)
         case .placementUnavailable:
             return .row(
-                .monitors,
+                .screens,
                 .spacePlacement,
                 .atRest,
-                gate: .runtime(.monitorsDisconnected)
+                gate: .runtime(.screensDisconnected)
             )
         }
     }
 }
 
-extension MonitorsKey {
+extension ScreensKey {
     var text: SettingRowText {
         switch self {
         case .spacePins:

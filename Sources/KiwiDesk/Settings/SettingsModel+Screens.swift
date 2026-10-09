@@ -1,14 +1,14 @@
 import KiwiDeskCore
 
-/// Monitor layout model extension for `SettingsModel` (#678 turn 13b).
+/// Screen layout model extension for `SettingsModel` (#678 turn 13b).
 extension SettingsModel {
     /// Computes resolved placement for ALL spaces in one
     /// composition pass (#53, `SpacePlacement`): per-space calls
     /// re-composed the whole profile per card — quadratic exactly
     /// where this surface is most alive. One divergence from the
-    /// runtime: a pin to a disconnected monitor renders as pinned
+    /// runtime: a pin to a disconnected screen renders as pinned
     /// (the user's intent), while the runtime places the space on
-    /// the fallback display.
+    /// the fallback screen.
     func resolutions() -> [SpaceID: SpaceResolution] {
         let mainID = PositionalDisplays.liveMainID
         let assignment =
@@ -32,13 +32,13 @@ extension SettingsModel {
         return resolved
     }
 
-    /// Monitors area row expansion model (`MonitorsFamilyRows`,
+    /// Screens area row expansion model (`ScreensFamilyRows`,
     /// #678 turn 13b). Frames are read LIVE off Core, never
     /// snapshotted onto the model: `SettingsWindowController`
-    /// republishes on a display change, and a cached arrangement
+    /// republishes on a screen change, and a cached arrangement
     /// is what would go stale behind it.
-    var monitorRows: MonitorsFamilyRows {
-        MonitorsFamilyRows(
+    var screenRows: ScreensFamilyRows {
+        ScreensFamilyRows(
             spaces: config.spaces,
             mainSpaces: config.mainSpaces,
             resolutions: resolutions(),
@@ -47,7 +47,7 @@ extension SettingsModel {
         )
     }
 
-    /// Converts `SpacePlacement.Resolution` into display `SpaceResolution`.
+    /// Converts `SpacePlacement.Resolution` into the view `SpaceResolution`.
     private static func reading(
         _ resolved: SpacePlacement.Resolution?
     ) -> SpaceResolution {
@@ -70,17 +70,17 @@ extension SettingsModel {
         core.state.workspaces.activeSpace(on: display)
     }
 
-    /// Resolves human-readable monitor name from fingerprint.
-    func monitorName(_ fingerprint: String) -> String {
+    /// Resolves human-readable screen name from fingerprint.
+    func screenName(_ fingerprint: String) -> String {
         displays.first {
             $0.fingerprint == fingerprint
         }?.name ?? fingerprint
     }
 
-    /// Active main display (`PositionalDisplays.liveMainID`).
+    /// Active main screen (`PositionalDisplays.liveMainID`).
     /// ONE derivation, because the picture reads it twice — the
     /// tray and the "main" badge; a second derivation by
-    /// fingerprint produced two answers on a twin-monitor desk.
+    /// fingerprint produced two answers on a twin-screen desk.
     var mainDisplay: Display? {
         let mainID = PositionalDisplays.liveMainID
         return displays.first { $0.id == mainID }

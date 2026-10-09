@@ -86,8 +86,8 @@ sticky on this screen"** (#1094) — the qualifier is an ordinary
 phrase each locale renders in its own words around the fixed
 "Sticky" atom. Render "screen" with the catalog's own SCREEN
 word, never its *display* or *monitor* word: under Family C rule
-1, a qualifier that is the word naming the **Monitors**
-destination reads as a different destination, even where the
+1, a qualifier that is the word naming the
+`destination.monitors` destination reads as a different destination, even where the
 whole string differs.
 
 **`zh-Hans` is the measured exception.** It splits the English
@@ -95,9 +95,10 @@ whole string differs.
 for a countable one (`presets.screen_name.main` 主显示器,
 `profiles.screens.many` %1$d 台显示器) — so 显示器 IS its screen
 word here, and rule 2 is satisfied by the split. That it also
-equals `destination.monitors` is a pre-existing overlap belonging
-to #865: a locale whose own screen word collides with a
-destination label needs the destination renamed, not the row.
+equals `destination.monitors` is an overlap `zh-Hans`'s own
+rule-2 run settles, which is still owed: a locale whose own
+screen word collides with a destination label needs the
+destination renamed, not the row.
 
 ### What it requires
 
@@ -412,14 +413,16 @@ to stop, so the escape is ranked too. Take the first that fits.
 case — it makes the collision *visible*, not resolved. Steps 1–4
 are review's, like the rest of this family.
 
-**One concept is ruled and deliberately unswept**: the physical
-screen, where English carries three words. The winner is
+**One concept is swept in English and open per catalog**: the
+physical screen, where English carried three words. The winner is
 `screen`, `display` is reserved for quoting Apple's own controls,
 the English-side obligation is
 `.claude/rules/config-vocabulary.md` ▸ noun glossary, and the
-argument is `docs/design-decisions.md` ▸ Vocabulary: a screen is
-a screen. The sweep — including each catalog's own rule-2 run,
-which the English ruling does **not** decide — is #865.
+argument and the keep-list are `docs/design-decisions.md` ▸
+Vocabulary: a screen is a screen. #865 swept the English and left
+every translation as it was, since the meaning did not move. Each
+catalog's own rule-2 run — which the English ruling does **not**
+decide — is still owed, catalog by catalog.
 
 ### Why there is no per-locale word list here
 

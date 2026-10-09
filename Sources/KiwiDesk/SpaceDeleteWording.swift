@@ -11,12 +11,12 @@ enum SpaceDeleteWording {
         L(
             "spaces.delete_confirm.message",
             "This Space has customized settings — its "
-                + "layout overrides, monitor pin, and any "
+                + "layout overrides, screen pin, and any "
                 + "\u{201C}%1$@\u{201D} or \u{201C}%2$@\u{201D} "
                 + "role are removed too. You "
                 + "can add the Space back, but not its "
                 + "settings.",
-            L("monitor_card.follows_main", "Follows main display"),
+            L("monitor_card.follows_main", "Follows main screen"),
             L("spaces.fallback_badge", "Fallback")
         )
     }

@@ -24,7 +24,7 @@ import Testing
 /// cannot be "always subtract nothing" — the band still has to be
 /// reserved where a tray is actually drawn.
 @Suite("Monitor arrangement fits its canvas")
-struct MonitorArrangementFitTests {
+struct ScreenArrangementFitTests {
     private func display(
         _ id: UInt32,
         _ frame: CGRect
@@ -53,7 +53,7 @@ struct MonitorArrangementFitTests {
 
     /// The Home card's own thumbnail size: the desktop plate's
     /// interior at the grid's minimum card width (#786 —
-    /// `SettingsTheme.plateHeight` minus the Monitors tile's
+    /// `SettingsTheme.plateHeight` minus the Screens tile's
     /// 8 pt padding on each side and the plate's 4 pt
     /// `topAir`, inside a 240 pt card). Still SHORTER than
     /// `trayHeight + trayGap`, which is the case that broke.
@@ -65,7 +65,7 @@ struct MonitorArrangementFitTests {
     @Test("a chip-less canvas holds every display")
     func chipLessFitsTheCanvas() {
         for displays in [single, stacked] {
-            let layout = MonitorArrangement.layout(
+            let layout = ScreenArrangement.layout(
                 displays: displays,
                 mainID: DisplayID(1),
                 canvas: cardCanvas,
@@ -94,7 +94,7 @@ struct MonitorArrangementFitTests {
     @Test("a tray canvas leaves room for the tray")
     func trayCanvasReservesTheBand() throws {
         let canvas = CGSize(width: 420, height: 300)
-        let layout = MonitorArrangement.layout(
+        let layout = ScreenArrangement.layout(
             displays: single,
             mainID: DisplayID(1),
             canvas: canvas
@@ -118,7 +118,7 @@ struct MonitorArrangementFitTests {
     /// pushes it past the frame. That is what scrolled a
     /// one-display desk by a few points.
     ///
-    /// Asserted against the canvas `MonitorsPicture` actually
+    /// Asserted against the canvas `ScreensPicture` actually
     /// hands over (its 240 pt band less its 4 pt inset either
     /// side), so the test fails if either constant moves without
     /// the other.
@@ -129,7 +129,7 @@ struct MonitorArrangementFitTests {
             width: 520 - inset * 2,
             height: 240 - inset * 2
         )
-        let layout = MonitorArrangement.layout(
+        let layout = ScreenArrangement.layout(
             displays: single,
             mainID: DisplayID(1),
             canvas: canvas
@@ -152,12 +152,12 @@ struct MonitorArrangementFitTests {
     @Test("reserving the band changes the fit")
     func theFlagIsLoadBearing() {
         let canvas = CGSize(width: 420, height: 300)
-        let reserved = MonitorArrangement.layout(
+        let reserved = ScreenArrangement.layout(
             displays: single,
             mainID: DisplayID(1),
             canvas: canvas
         )
-        let bare = MonitorArrangement.layout(
+        let bare = ScreenArrangement.layout(
             displays: single,
             mainID: DisplayID(1),
             canvas: canvas,
@@ -187,12 +187,12 @@ struct MonitorArrangementFitTests {
     func trayGrowsWithItsChips() {
         // Narrow enough that three chips cannot share a row.
         let width: CGFloat = 120
-        let one = MonitorArrangement.trayHeight(
+        let one = ScreenArrangement.trayHeight(
             chips: 1,
             width: width
         )
-        #expect(one == MonitorArrangement.trayHeight)
-        let many = MonitorArrangement.trayHeight(
+        #expect(one == ScreenArrangement.trayHeight)
+        let many = ScreenArrangement.trayHeight(
             chips: 6,
             width: width
         )
@@ -204,7 +204,7 @@ struct MonitorArrangementFitTests {
         // otherwise the derivation is counting chips and
         // ignoring the width it has to fit them in.
         #expect(
-            MonitorArrangement.trayHeight(chips: 6, width: 1200)
+            ScreenArrangement.trayHeight(chips: 6, width: 1200)
                 < many
         )
     }
