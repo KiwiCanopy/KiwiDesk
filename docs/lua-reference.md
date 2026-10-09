@@ -5568,7 +5568,7 @@ animations.set_on_space_change(false)
 ### animations.set_space_change_duration
 
 **Expects:** a number (milliseconds, clamped 150–1000; default
-`550`).
+`300`).
 
 **Does:** sets the pace of the plate slide a Space switch plays
 ([animations.set_on_space_change](#animationsset_on_space_change)):
