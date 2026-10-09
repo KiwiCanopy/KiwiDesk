@@ -316,7 +316,8 @@ scripts.
   `--non-interactive` avoids a hang when piped; scope it with
   `--only claude`, `--minimal`, or `--uninstall`.
 - CI (`.github/workflows/ci.yml`) builds, lints and tests on
-  pushes to `main` and on PRs targeting it. Its two macOS jobs are
+  pushes to `main` and on PRs targeting it, and likewise for a
+  long-lived release branch (`release/3.0.0`). Its two macOS jobs are
   gated on a `changes` job, so a change confined to
   `.github/ci-ignore.txt`'s list leaves them skipped. A red build
   blocks merging. Adding an entry to that list needs
