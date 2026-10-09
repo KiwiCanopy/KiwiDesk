@@ -24,6 +24,11 @@ extension SettingsModel {
         suppressDirty = true
         config.apply(edit)
         cleanConfig.apply(edit)
+        // The write reached the base and other profiles, which the
+        // checklist's stored table reads (#1827).
+        if case .dropSpaceShortcuts = edit {
+            ruleReachStored = core.ruleReachSnapshot()
+        }
         suppressDirty = false
         recomputeDirty()
     }

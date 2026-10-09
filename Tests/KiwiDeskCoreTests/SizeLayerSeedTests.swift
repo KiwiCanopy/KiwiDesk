@@ -44,25 +44,47 @@ struct SizeLayerSeedTests {
         }
     }
 
-    /// ⌥⌘ is the SIZE base and carries nothing else. A positional
-    /// verb seeded onto it would undo the one fact the layer
-    /// exists to state, and would do it silently — every other
-    /// suite here reads Lua and labels, not the base.
+    /// ⌥⌘ is the SIZE base, plus ONE pressed exception: ⌥⌘Tab and
+    /// ⌥⌘⇧Tab walk the Space history (#1655, owner ruling
+    /// 2026-10-09), because ⌘ and ⌥ sit on the right of every Mac
+    /// keyboard. A positional verb seeded onto ⌥⌘ would undo the
+    /// one fact the layer exists to state, and would do it
+    /// silently — every other suite here reads Lua and labels, not
+    /// the base. The exception is pinned to its key, so it cannot
+    /// spread to a second one under cover of the first.
     ///
     /// The non-empty check is load-bearing rather than tidy: the
     /// loop below is skipped entirely when nothing is seeded on
     /// ⌥⌘, which is exactly the state after the regression this
     /// suite exists to catch, so without it the test would go
     /// green having looked at nothing.
-    @Test("⌥⌘ carries size and nothing else")
+    @Test("⌥⌘ carries size, and the Space history on Tab alone")
     func sizeLayerCarriesOnlySize() throws {
+        let tab = try #require(KeyCombo.keyCodes["tab"])
+        let history: Set<String> = [
+            "KiwiDesk.focus_space_back()",
+            "KiwiDesk.focus_space_forward()",
+        ]
         var onTheBase: [KeyBinding] = []
+        var historyRows = 0
         for row in seeded() {
             let combo = try #require(KeyCombo.parse(row.combo))
-            if combo.modifiers == sizeBase {
+            if history.contains(row.lua) {
+                historyRows += 1
+                #expect(combo.keyCode == tab, "\(row.combo) off Tab")
+                #expect(
+                    combo.modifiers.subtracting(.shift) == sizeBase,
+                    "\(row.combo) is history off ⌥⌘"
+                )
+                continue
+            }
+            if combo.modifiers.isSuperset(of: sizeBase),
+                !combo.modifiers.contains(.control)
+            {
                 onTheBase.append(row)
             }
         }
+        #expect(historyRows == 2, "the history pair is not seeded")
         #expect(!onTheBase.isEmpty, "nothing is seeded on ⌥⌘")
         for row in onTheBase {
             #expect(

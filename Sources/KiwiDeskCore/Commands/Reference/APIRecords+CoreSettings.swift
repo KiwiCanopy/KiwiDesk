@@ -51,6 +51,11 @@ extension APIReference {
                 + "keyboard action draws its refusal pill.",
             .boolean("enabled")
         ),
+        "set_space_history": APIRecord(
+            "Sets whether Space history is kept per screen or "
+                + "across every screen.",
+            .choice("kind", SpaceHistoryKind.self)
+        ),
         "set_shortcut_panel_liquid_glass": APIRecord(
             "Lays a macOS 26 Liquid Glass material over the "
                 + "shortcuts panel and the slow-boot notice.",

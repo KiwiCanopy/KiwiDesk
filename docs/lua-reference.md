@@ -169,6 +169,58 @@ KiwiDesk.focus_space(2)
 KiwiDesk.focus_space("mail")
 ```
 
+:::unreleased
+### focus_space_previous / focus_space_next
+
+**Expects:** nothing.
+
+**Does:** switches the focused window's screen to the previous or
+next Space in that screen's order — the Space Bar's, an empty
+Space included where the bar hides it. It stops at the first and
+last Space: there the focused window's ring bumps toward the
+step, as at the end of a row, and nothing switches. It never
+creates a Space. The ⌃⌥⌘ + scroll gesture takes the same step on
+the screen under the pointer.
+
+Seeded on `⌃⌥⌘←` and `⌃⌥⌘→` for a new setup; an existing one
+gets them through **Restore Defaults…**.
+
+**Example:**
+
+```lua
+KiwiDesk.focus_space_next()
+```
+
+### focus_space_back / focus_space_forward
+
+**Expects:** nothing.
+
+**Does:** goes back to the Space you were on before this one, and
+forward again — a browser's back and forward over the Spaces you
+visited, never over the Space order. Every arrival counts as a
+visit: a key, a Space Bar click, a move-and-follow, a macOS
+Desktop switch that brings a bound profile's Space. Back and
+forward only move along what you visited; visiting a Space any
+other way clears the forward half.
+
+[`set_space_history`](#set_space_history) says whose visits they
+walk: each screen's own (the default, acting on the focused
+window's screen) or one history across every screen. A visit to a
+Space that has since gone is skipped, and a held Space renumbered
+on a screen change keeps its visits. At the end of the history
+the focused window's ring bumps and nothing switches. The history
+starts fresh each time KiwiDesk starts.
+
+Seeded on `⌥⌘Tab` (back) and `⌥⌘⇧Tab` (forward) for a new setup;
+an existing one gets them through **Restore Defaults…**.
+
+**Example:**
+
+```lua
+KiwiDesk.focus_space_back()
+```
+:::
+
 ### move_to_space
 
 **Expects:** a space identifier.
@@ -763,6 +815,32 @@ the GUI** keeps the value `init.lua` set.
 ```lua
 KiwiDesk.set_refusal_sound(true)
 ```
+
+:::unreleased
+### set_space_history
+
+**Expects:** `"per_screen"` or `"all_screens"` (default
+`"per_screen"`).
+
+**Does:** which visits [`focus_space_back` and
+`focus_space_forward`](#focus_space_back--focus_space_forward)
+walk. `per_screen` keeps one history per screen and steps the
+screen the focused window is on; `all_screens` keeps one history
+across every screen, so going back may move you to another
+screen. With one screen the two are the same.
+
+It is stored like the shortcuts: `space_history` in `gui.json` is
+the value every profile uses, and a profile may keep its own,
+which the Settings row's **Applies to** writes. The verb sets the
+shared value for the running session and never reaches a file; a
+profile's own value still wins.
+
+**Example:**
+
+```lua
+KiwiDesk.set_space_history("all_screens")
+```
+:::
 
 ### set_shortcut_panel_liquid_glass
 

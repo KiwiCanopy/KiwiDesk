@@ -6,6 +6,10 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// Which profiles a layer belongs to (#2022).
     case layersReach = "config.layers[].reach"
     case focusDir = "keybinding.focus_dir (x4)"
+    /// The previous / next Space in the screen's order (#1655).
+    case spaceStep = "keybinding.space_{previous,next}"
+    /// Back / forward through the Space history (#1655).
+    case spaceHistoryStep = "keybinding.space_{back,forward}"
     case goToSpace = "keybinding.go_to_space (x N spaces)"
     case focusDesktop = "keybinding.focus_desktop (x N desktops)"
     case swapDir = "keybinding.swap_dir (x4)"
@@ -52,7 +56,7 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.layersExist)
             )
-        case .focusDir, .goToSpace:
+        case .focusDir, .spaceStep, .spaceHistoryStep, .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
         case .swapDir, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
@@ -124,7 +128,8 @@ extension ShortcutsKey {
     var text: SettingRowText {
         switch self {
         case .layers, .openApplications, .advanced, .focusDir,
-            .goToSpace, .swapDir, .moveWindowToTrack, .swapWithTrack,
+            .spaceStep, .spaceHistoryStep, .goToSpace, .swapDir,
+            .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
             .moveToDesktop, .moveToDesktopFollow, .switchToLayer:
             return .dynamic

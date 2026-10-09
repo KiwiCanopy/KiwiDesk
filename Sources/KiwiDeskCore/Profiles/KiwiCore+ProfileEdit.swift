@@ -29,13 +29,13 @@ extension KiwiCore {
         writingRules: Bool
     ) throws {
         var existing = try profiles.read(name: name)
-        let stored = (
-            existing.appRules, existing.floatRules, existing.scrollGesture
-        )
+        let stored = existing
         applyProfileEdits(from: config, onto: &existing)
         if !writingRules {
-            (existing.appRules, existing.floatRules, existing.scrollGesture) =
-                stored
+            existing.appRules = stored.appRules
+            existing.floatRules = stored.floatRules
+            existing.scrollGesture = stored.scrollGesture
+            existing.spaceHistory = stored.spaceHistory
         }
         try profiles.write(existing)
         refreshConfigIssues()
@@ -171,6 +171,9 @@ extension KiwiCore {
                 base: base.scrollGesture,
                 edited: config.scrollGesture
             )
+            profile.spaceHistory =
+                config.spaceHistory == base.spaceHistory
+                ? nil : config.spaceHistory
             // `ignoreRules` is deliberately untouched: the GUI has
             // no ignore editor, so even an inert hidden tombstone must
             // survive overwrite/copy until an external edit removes it.

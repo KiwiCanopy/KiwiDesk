@@ -101,6 +101,10 @@ struct SnapshotStoreCensusTests {
             (.always, "held Spaces, re-created at boot (#1646)"),
         "state.temporaryArmed":
             (.always, "temporary Spaces, re-created at boot (#1790)"),
+        "state.liveOnlyAtLastRetile":
+            (.behind, "re-derived at the first retile (#1827)"),
+        "spaceHistory.trails[].entries":
+            (.behind, "the Space history starts fresh, by ruling (#1655)"),
         "state.profilePartitioning.byArrangement[]":
             (
                 .always,

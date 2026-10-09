@@ -1,8 +1,9 @@
 import Foundation
 
 /// What a write of the live profile from outside Settings changes
-/// (#1518, #1790): the one value the door carries to the file and
-/// to an open draft alike, so the two cannot apply different edits.
+/// (#1518, #1790, #1827): the one value the door carries to the
+/// file and to an open draft alike, so the two cannot apply
+/// different edits.
 public enum LiveProfileEdit {
     /// A leaf of the settings — the tour's look, a bar row.
     case settings(SettingsEdit)
@@ -10,6 +11,9 @@ public enum LiveProfileEdit {
     case addSpace(SpaceID, AddedSpace)
     /// A Space removed from the profile (#1790).
     case removeSpace(SpaceID)
+    /// The shortcuts naming these gone Spaces, taken out of the
+    /// base and every profile (#1827, `dropShortcuts(naming:)`).
+    case dropSpaceShortcuts(Set<SpaceID>)
 }
 
 /// Where an added Space goes and what it carries: its place in
@@ -75,6 +79,8 @@ extension Profile {
             if fallbackSpace == id { fallbackSpace = nil }
             for set in monitorSets { upsert(set.pinning(id, to: nil)) }
             settings.removeSpace(id)
+        case .dropSpaceShortcuts(let spaces):
+            layers = layers?.removingRows(naming: spaces, baseRemoved: [:])
         }
     }
 }
@@ -103,6 +109,8 @@ extension GuiConfig {
             settings.spaceIcons[id] = added.icon
         case .removeSpace(let id):
             removeSpace(id)
+        case .dropSpaceShortcuts(let spaces):
+            layers = layers.removingRows(naming: spaces).layers
         }
     }
 }

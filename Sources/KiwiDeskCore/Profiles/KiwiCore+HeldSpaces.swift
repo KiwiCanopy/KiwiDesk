@@ -311,6 +311,7 @@ extension KiwiCore {
         // Every remembered window, up or not — a hidden app's
         // included — or it returns to the old number (#1669).
         state.renameRememberedSpace(source, to: target)
+        spaceHistory.trails.rekey(source, to: target)  // #1655
     }
 
     /// `WorkspaceManager.add` nils the focus trackers of a window

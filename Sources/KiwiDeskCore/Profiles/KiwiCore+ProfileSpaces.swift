@@ -147,6 +147,7 @@ extension KiwiCore {
         }
         state.workspaces.removeSpace(space)
         state.temporaryArmed.remove(space)
+        spaceHistory.trails.forget(space)  // #1655
     }
 
     /// Puts the incoming profile's own windows back in its own

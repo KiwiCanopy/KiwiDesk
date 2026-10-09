@@ -99,6 +99,9 @@ public struct StateCoordinator: Sendable {
     /// emptying one deletes it. Whether a Space IS temporary is
     /// derived (`KiwiCore.isTemporary`); only this is stored.
     var temporaryArmed: Set<SpaceID> = []
+    /// The Spaces temporary or held at the last retile (#1827): one
+    /// gone since takes its shortcuts (`KiwiCore+SpaceShortcutDrop`).
+    var liveOnlyAtLastRetile: Set<SpaceID> = []
     /// Restored filings boot could not judge (#1646): the
     /// WindowServer did not answer whether they still exist, so
     /// the snapshot does not carry them again and a closed window

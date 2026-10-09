@@ -34,6 +34,10 @@ struct ShortcutsFamilyRows {
         switch family {
         case .focusDir:
             return KeybindingCatalog.focusDirections
+        case .spaceStep:
+            return KeybindingCatalog.spaceStepRows
+        case .spaceHistoryStep:
+            return KeybindingCatalog.spaceHistoryRows
         case .goToSpace:
             return spaces.isEmpty
                 ? []

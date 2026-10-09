@@ -38,6 +38,7 @@ extension KiwiCore {
         // A temporary one the same way, once armed (#1790).
         // A plate slide another activation took past (#1956).
         endSpaceSlideIfOvertaken()
+        noteSpaceVisits()  // #1655: a Space shown without an event
         let heldRetired = retireEmptiedHeldSpaces()
         if retireEmptiedTemporarySpaces() || heldRetired {
             resolveSpaceDisplays()
@@ -47,6 +48,8 @@ extension KiwiCore {
             // its screen here, every other placement left (#1994).
             emitSpaceChange()
         }
+        // A temporary or held Space gone since takes its shortcuts.
+        retireLiveOnlyShortcuts()  // #1827
         // Ambient motion waits for the hand to rest (#804): the pass
         // is owed and re-run then; state, bars and rings move now.
         let asked = MotionGate.Owed(

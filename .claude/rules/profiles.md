@@ -45,13 +45,16 @@ because two real clients now remove drift — see
 ## The seeded keymap has two bases, plus one key
 
 - **Seed a HELD verb on `⌥⌘` and a PRESSED verb on the `⌃⌥`
-  ladder — never the reverse (#1075/#1094).** Size is the one verb
-  a user holds, so it is the only thing on `⌥⌘`; `⌘` on the
-  ladder means exactly one thing, "and follow", and giving it a
-  second sense is what the split removed. The toggles (`⌃⌥F`,
-  `⌃⌥S`, `⌃⌥P`) and app chrome (`⌃⌥K`, `⌃⌥,`) are pressed, so
-  they stay on the base tier as mnemonic keys
-  (`SizeLayerSeedTests`, `DefaultKeybindingsTests`).
+  ladder — never the reverse (#1075/#1094) — save the ONE ruled
+  exception, the Space history pair on `⌥⌘Tab` / `⌥⌘⇧Tab`
+  (#1655), which stays pinned to `Tab`.** Size is the one verb a
+  user holds, so it is the only held thing on `⌥⌘`, and no other
+  pressed verb joins the history pair there — a second key is a
+  ruling of its own, argued in `docs/design-decisions.md` ▸ "One
+  pressed exception rides `⌥⌘`". The toggles (`⌃⌥F`, `⌃⌥S`,
+  `⌃⌥P`) and app chrome (`⌃⌥K`, `⌃⌥,`) are pressed, so they stay
+  on the base tier as mnemonic keys (`SizeLayerSeedTests` ▸
+  `sizeLayerCarriesOnlySize`, `DefaultKeybindingsTests`).
 - **App chrome is seeded from the ONE `appChromeRows`, and
   every site that authors a layer takes it (#602/#1381).** The
   base seed and a GUI-created layer are two authoring sites, and
@@ -62,21 +65,21 @@ because two real clients now remove drift — see
   which is the one copy of who may; the seed reaches an
   EXISTING install only through Shortcuts ▸ Restore Defaults…
   (#1096), and prose naming a chrome chord says so.
-- **Never spend `⇧` on anything but "act on the window".** It
-  qualifies a positional row, so a lettered toggle never carries
-  it: `⌃⌥⇧S` did, and it was the one chord in the seed a user
-  who had learned the ladder read wrong (#1094,
-  `DefaultKeybindingsTests` ▸ `shiftNeverQualifiesALetter`).
-  Since #1176 the positional row it qualifies is a DIGIT — `⇧`
-  sends the window to a space, and the arrows escalate to `⌘`
-  instead, which now reads "act on the window, and stronger":
-  swap on the arrows beside move-and-follow on the digits. So
-  `⌘` on the ladder no longer means only "and follow", and the
-  tier an arrow may ride is derived per row rather than
-  restated (`DefaultKeybindingLadderTests` ▸
-  `arrowsRideTheirOwnTiers`). The ergonomics ruling behind the
-  swap, and the collision measure that turned out to endorse
-  it, are `docs/design-decisions.md`'s. Which letter each sticky scope
+- **Never spend `⇧` on anything but "act on the window" — or,
+  off a positional key, on reversing its unshifted twin, as
+  `⇧Tab` does everywhere on macOS (#1655).** It qualifies a
+  positional row, so a lettered toggle never carries it: `⌃⌥⇧S`
+  did, and it was the one chord in the seed a user who had
+  learned the ladder read wrong (#1094, `DefaultKeybindingsTests`
+  ▸ `shiftNeverQualifiesALetter`). On the ladder `⇧` acts on the
+  window on an arrow (swap) and on a digit (send it to a Space),
+  and `⌘` steps the Spaces on an arrow and sends-and-follows on a
+  digit, which is #1655's re-ruling of #1176; the tier an arrow
+  may ride, and the twin a `⇧` reversal needs, are derived per
+  row rather than restated (`DefaultKeybindingLadderTests` ▸
+  `arrowsRideTheirOwnTiers`, `shiftReversesItsTwin`). The
+  ergonomics rulings and the collision measure behind them are
+  `docs/design-decisions.md`'s. Which letter each sticky scope
   takes, why the screen-scoped one is named for a mark rather
   than a label, and why `D` was refused, are argued in
   `docs/design-decisions.md` ▸ "Size is not a positional verb" —
@@ -1251,6 +1254,17 @@ in the profile*. The obligations:
   what was declared — re-adopting there turned a removed Space
   temporary instead of deleting it. The door announces only after
   live has settled (`TemporarySpaceScopeTests`).
+- **Its shortcuts go with it, and a held Space's with its hold
+  (#1827).** `retireLiveOnlyShortcuts`, after the retires at the
+  head of `retile()`, is the one remover: a Space temporary or held
+  at the last retile and gone now takes every binding naming it
+  out of the base layers and every profile override, unless an
+  arrangement still declares it — that binding is #92's to keep.
+  It writes through `dropShortcuts(naming:)`, which re-registers
+  the keys and hands an open draft the same `LiveProfileEdit`. A
+  second remover beside it is the bug, and a path that drops a
+  Space without a retile is review's to catch
+  (`SpaceShortcutDropTests`, `LayerRowWriterCensusTests`).
 
 ## Resolve before layout, and merge per-field first
 

@@ -56,6 +56,7 @@ extension KiwiCore {
         config.scrollGesture =
             profile.scrollGesture?.resolved(onto: config.scrollGesture)
             ?? config.scrollGesture
+        config.spaceHistory = profile.spaceHistory ?? config.spaceHistory
     }
 
     /// Copies the live profile-scoped state into the model:
@@ -190,6 +191,7 @@ extension KiwiCore {
         config.ignoreRules = globalRuleBase.ignoreRules
         // The base `init.lua`'s verbs declared (#1656).
         config.scrollGesture = mouse.scroll.base
+        config.spaceHistory = spaceHistory.base
         var modes: [SpaceID: LayoutMode] = [:]
         var defined: [SpaceID] = []
         for space in capturedSpaces {

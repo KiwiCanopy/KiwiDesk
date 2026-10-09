@@ -123,7 +123,8 @@ struct BootWindowRuleReconcileTests {
                 RuleListOverride(rules: [$0: true])
             },
             profileIgnoreRules: nil,
-            profileScrollGesture: nil
+            profileScrollGesture: nil,
+            profileSpaceHistory: nil
         )
     }
 
