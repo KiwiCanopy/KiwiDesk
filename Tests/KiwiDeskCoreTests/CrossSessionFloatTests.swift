@@ -59,6 +59,38 @@ struct CrossSessionFloatTests: CrossSessionFixture {
         #expect(core.tiler.stashOriginal(WindowID(20)) == Self.recorded)
     }
 
+    /// A title pair already in its recorded Space is re-filed by
+    /// nothing, yet floats; the window the user is in floats where
+    /// it is, its frame not seeded.
+    @Test(
+        "a title pair in its own Space floats again",
+        .enabled(if: NSScreen.main != nil),
+        arguments: [false, true]
+    )
+    func titlePassFloatsInPlace(focused: Bool) throws {
+        let core = try #require(
+            boot([
+                window(20, "com.ide", "Preview"),
+                window(21, "com.ide", "IDE"),
+            ])
+        )
+        var desk = previous([
+            (F.shown, "com.ide", "IDE"),
+            (F.shown, "com.ide", "Preview"),
+        ])
+        desk.windows[1].floating = true
+        leave(desk, in: core)
+        arrange(core)
+        let user = WindowID(focused ? 20 : 21)
+        core.state.workspaces.focus(user, in: F.shown)
+        #expect(!core.state.userFloated.contains(WindowID(20)))
+        core.crossSessionSettlePass()
+        #expect(space(core, 20) == F.shown)
+        #expect(core.state.userFloated.contains(WindowID(20)))
+        let seeded = core.tiler.stashOriginal(WindowID(20))
+        #expect(seeded == (focused ? nil : Self.recorded))
+    }
+
     @Test(
         "a late arrival floats again, at its frame",
         .enabled(if: NSScreen.main != nil)

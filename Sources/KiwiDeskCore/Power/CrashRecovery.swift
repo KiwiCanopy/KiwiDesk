@@ -326,16 +326,4 @@ public final class CrashRecovery {
         else { return }
         crossSessionCandidate = snapshot
     }
-
-    /// A stamp matches only a readable, equal live id. An
-    /// unstamped file is an older build's: admitted only as its
-    /// announced relaunch (#930), in-place and inside its bound.
-    private func isThisLogin(_ snapshot: StateSnapshot) -> Bool {
-        guard let stamp = snapshot.loginSession else {
-            return snapshot.carriesSessions
-                && now().timeIntervalSince(snapshot.capturedAt)
-                    <= Self.inPlaceSessionBound
-        }
-        return stamp == loginSession()
-    }
 }

@@ -41,9 +41,11 @@ extension StateCoordinator {
     }
 
     /// Only where detection tiles the window (#1810): a window
-    /// detection floats takes no user record.
-    mutating func floatByHand(_ id: WindowID) {
-        guard windows[id]?.isFloating == false else { return }
+    /// detection floats takes no user record. True when it floated.
+    @discardableResult
+    mutating func floatByHand(_ id: WindowID) -> Bool {
+        guard windows[id]?.isFloating == false else { return false }
         setFloating(id, true)
+        return true
     }
 }

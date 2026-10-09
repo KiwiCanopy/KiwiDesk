@@ -233,6 +233,37 @@ struct QuitFloatReturnTests {
         #expect(b.tiler.stashOriginal(float) == before[float])
     }
 
+    /// The one autosave that carries a float (#2008): a debt owed
+    /// to a window not yet arrived rides every capture, so a crash
+    /// before it arrives still floats it at the next launch.
+    @Test(
+        "an owed hand float rides an autosave across a crash",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func owedFloatRidesACrash() throws {
+        let a = try processA()
+        let left = F.settle(a)
+        let session = try quit(a)
+        let late = Self.shownFloat
+        let early = Self.scanned.filter { $0.id != late }
+        let (b, _) = try #require(
+            F.processB(early, left: left, session: session)
+        )
+        b.onLog = { _ in }
+        #expect(b.state.restoredFrames[late]?.floating == true)
+        b.crash.loginSession = { 1 }
+        b.crash.bootTime = { .distantPast }
+        // No stop follows: the next launch reads the autosave.
+        b.crash.autosave()
+        let crashed = try #require(b.crash.takeBootSnapshot())
+        let owed = crashed.windows.first { $0.windowID == late }
+        #expect(owed?.floating == true)
+        let (c, _) = try #require(
+            F.processB(Self.scanned, left: left, session: crashed)
+        )
+        #expect(c.state.userFloated.contains(late))
+    }
+
     /// The update relaunch onto this build reads an in-place file
     /// an older build wrote, its hand float inside the session. The
     /// fixture is this build's own file with the float moved back

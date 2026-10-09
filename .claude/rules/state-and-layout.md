@@ -1827,7 +1827,8 @@ editing here:
   restart's and the logout freeze's kept file — and never a plain
   autosave, so a crash, which moved nothing, still starts it
   fresh — save a debt owed to a window not yet arrived, which
-  rides every capture, its float with it (#2008); the stop
+  rides every capture, its float with it (#2008,
+  `QuitFloatReturnTests` ▸ `owedFloatRidesACrash`); the stop
   captures BEFORE it gathers
   (`StopCaptureOrderTests`). The hand float is the one carried,
   since the gather places every float (`QuitFloatReturnTests` ▸

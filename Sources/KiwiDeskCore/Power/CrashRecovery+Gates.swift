@@ -1,7 +1,8 @@
 import Foundation
 
-/// When a plain Quit's file may cross a boot or a login (#1864);
-/// the candidate's writers stay in `CrashRecovery.swift`.
+/// The read gates' pure predicates: which login a file belongs to
+/// (#1385) and when a plain Quit's file may cross a boot or a login
+/// (#1864). The candidate's writers stay in `CrashRecovery.swift`.
 extension CrashRecovery {
     /// How soon after a plain Quit the next boot or login must
     /// begin for that Quit's file to cross it (#1864 ruling,
@@ -22,5 +23,17 @@ extension CrashRecovery {
         let began = snapshot.capturedAt < boot ? boot : now()
         return began.timeIntervalSince(snapshot.capturedAt)
             <= Self.quitCrossingBound
+    }
+
+    /// A stamp matches only a readable, equal live id. An
+    /// unstamped file is an older build's: admitted only as its
+    /// announced relaunch (#930), in-place and inside its bound.
+    func isThisLogin(_ snapshot: StateSnapshot) -> Bool {
+        guard let stamp = snapshot.loginSession else {
+            return snapshot.carriesSessions
+                && now().timeIntervalSince(snapshot.capturedAt)
+                    <= Self.inPlaceSessionBound
+        }
+        return stamp == loginSession()
     }
 }
