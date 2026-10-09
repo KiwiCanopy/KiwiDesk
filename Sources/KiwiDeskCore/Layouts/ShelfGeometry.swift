@@ -56,12 +56,7 @@ public enum ShelfGeometry {
         edges: [AppBarEdge],
         shelf: KiwiShelf
     ) -> CGRect {
-        edges.reduce(visible) { frame, edge in
-            AppBarGeometry.remaining(
-                frame,
-                edge: edge,
-                reserving: shelf.reservation
-            )
-        }
+        ShelfReservation(edges: edges, depth: shelf.reservation)
+            .remaining(in: visible)
     }
 }

@@ -13,6 +13,7 @@ enum SpaceBarFixtures {
         var style = SpaceBarStyle()
         // Non-default: the bar ships enabled (QA 2026-07-19).
         style.enabled = false
+        style.reserve = false
         style.edge = .left
         style.glyphSpan = 8
         style.glyphGap = 3

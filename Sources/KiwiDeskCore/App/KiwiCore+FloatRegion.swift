@@ -95,7 +95,7 @@ extension KiwiCore {
             )
         else { return nil }
         var region = tiler.visibleBounds(screen)
-        for (strip, edge) in paintedStrips(forSpace: space) {
+        for (strip, edge) in reservedStrips(forSpace: space) {
             // No ring reservation here, at a bar edge any more
             // than at a screen edge (guard-prover, 2026-08-29).
             // Carving one made this bound reserve at bars while
@@ -125,8 +125,9 @@ extension KiwiCore {
     /// hidden and one flush against a screen edge has it
     /// clipped. Reserving at bars but not at screen edges was
     /// two rules where the principle gives one — float geometry
-    /// follows PAINTED chrome, and a ring is painted wherever it
-    /// is drawn (device QA, 2026-08-29).
+    /// follows RESERVED chrome (#1524: a bar drawn over the
+    /// windows keeps no float out), and a ring reserves wherever
+    /// it is drawn (device QA, 2026-08-29).
     ///
     /// The number is not invented here: `BorderGeometry
     /// .outwardReach` is the renderer's own, and
@@ -165,17 +166,26 @@ extension KiwiCore {
         return region
     }
 
-    /// EVERY painted strip covering `space` — both bars, in one
-    /// list. One accessor rather than the `spaceBarStrips +
-    /// appBars.strips` expression repeated per consumer: a
-    /// space shows one bar or two on any edge, and a third bar
-    /// source must reach every site that asks "what chrome
-    /// covers this space" (architect review, 2026-08-29).
-    func paintedStrips(
+    /// EVERY painted strip covering `space` on an edge the
+    /// layout RESERVES — both bars, in one list. The edge is
+    /// judged by the one fold `shelfEdges(in:)`, never per
+    /// section: on a fused edge either bar's reserve holds the
+    /// whole strip — the non-reserving bar's painted section
+    /// included, where the reserving one paints nothing — so a
+    /// float is kept out where a tiled window is (#1524,
+    /// `BarReserveCoreTests` ▸ `fusedEdgeFoldCarvesUnpaintedReserver`).
+    /// One accessor so a third bar source reaches every site that
+    /// asks "what chrome covers this space" (architect review,
+    /// 2026-08-29).
+    func reservedStrips(
         forSpace space: SpaceID
     ) -> [(strip: CGRect, edge: AppBarEdge)] {
-        spaceBarStrips(forSpace: space)
+        let mode = state.workspaces[space]?.mode ?? .bsp
+        let reserved = tiler.settings.shelfEdges(in: mode)
+        let painted =
+            spaceBarStrips(forSpace: space)
             + appBars.strips(forSpace: space)
+        return painted.filter { reserved.contains($0.edge) }
     }
 
     /// The painted Space Bar strips covering `space`. The

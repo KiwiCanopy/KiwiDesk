@@ -48,8 +48,8 @@ extension KiwiCore {
     /// lower edge has nothing left to push up; then the bar clamp
     /// for the other edges; then the bottom again, for a window a
     /// top bar pushed down. Past the floor under a bottom bar the
-    /// clamp still lifts the window clear, since a bar reserves its
-    /// edge for every window (#242).
+    /// clamp still lifts the window clear, since a reserving bar
+    /// reserves its edge for every window (#242, #1524).
     func floatFrameFittedOnDrop(
         _ id: WindowID,
         frame: CGRect

@@ -14,6 +14,7 @@ extension AppBarStyle {
         case activeIndicator = "active_indicator"
         case titleCap = "title_cap"
         case groupAdjacentWindows = "group_adjacent_windows"
+        case reserve
     }
 
     /// Decodes AppBarStyle falling back to defaults for missing keys.
@@ -42,5 +43,10 @@ extension AppBarStyle {
                 Bool.self,
                 forKey: .groupAdjacentWindows
             ) ?? defaults.groupAdjacentWindows
+        reserve =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .reserve
+            ) ?? defaults.reserve
     }
 }

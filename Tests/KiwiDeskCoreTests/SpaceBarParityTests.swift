@@ -58,7 +58,7 @@ struct SpaceBarCommandParityTests {
     /// One representative setting per case, each value chosen
     /// to differ from the field's default so the write shows.
     private static let everySetting: [SpaceBarCommandSetting] = [
-        .enabled(false), .edge(.left),
+        .enabled(false), .reserve(false), .edge(.left),
         .glyphSpan(8), .glyphGap(3), .frontAppTitleCap(40),
         .inactiveContent(.count), .itemLabel(.layout),
         .activeIndicator(.edgeMark),
@@ -135,8 +135,8 @@ struct SpaceBarCommandParityTests {
         for key: SpaceBarStyle.CodingKeys
     ) -> [JSONValue] {
         switch key {
-        case .enabled, .showFrontApp, .hideEmpty, .stickyBadge,
-            .groupAdjacentWindows:
+        case .enabled, .reserve, .showFrontApp, .hideEmpty,
+            .stickyBadge, .groupAdjacentWindows:
             return [.bool(true)]
         case .activeIndicator: return [.string("edge_mark")]
         case .edge: return [.string("left")]

@@ -22,6 +22,7 @@ enum AppBarCommandSetting {
     case activeIndicator(AppBarStyle.ActiveIndicator)
     case titleCap(Int)
     case groupAdjacentWindows(Bool)
+    case reserve(Bool)
 
     /// Parses setter field name and arguments.
     static func parse(
@@ -55,6 +56,11 @@ enum AppBarCommandSetting {
                 return .failure("expected boolean")
             }
             return .success(.groupAdjacentWindows(flag))
+        case "reserve":
+            guard let flag = args.first?.boolValue else {
+                return .failure("expected boolean")
+            }
+            return .success(.reserve(flag))
         default:
             return nil
         }
@@ -88,6 +94,7 @@ enum AppBarCommandSetting {
         case .titleCap(let value): style.titleCap = value
         case .groupAdjacentWindows(let value):
             style.groupAdjacentWindows = value
+        case .reserve(let value): style.reserve = value
         }
     }
 
@@ -95,7 +102,7 @@ enum AppBarCommandSetting {
     /// field in `AppBarStyle.layoutFixedKeys` has none to write.
     func apply(to bar: inout LayoutAppBar) {
         switch self {
-        case .edge: break
+        case .edge, .reserve: break
         case .activeIndicator(let value):
             bar.activeIndicator = value
         case .titleCap(let value): bar.titleCap = value

@@ -532,6 +532,12 @@ bars and windows never overlap. An auto-hiding menu bar's strip
 is reclaimed. On MacBooks with a notch, the camera housing
 stays reserved.
 
+:::unreleased
+The one exception is a bar set not to reserve its strip
+([`space_bar.set_reserve`](#space_barset_reserve) and
+[`app_bar.set_reserve`](#app_barset_reserve)), which draws over the windows.
+:::
+
 **Example:**
 
 ```lua
@@ -1888,6 +1894,13 @@ by default). With the Space Bar off, switching a Space between a
 layout that shows an App Bar and one that does not moves its
 windows by the strip.
 
+:::unreleased
+A bar can also show without reserving:
+[`space_bar.set_reserve`](#space_barset_reserve) and
+[`app_bar.set_reserve`](#app_barset_reserve) draw it over the windows instead, and an edge
+stays reserved while either bar on it reserves.
+:::
+
 Both bars hide on a screen showing a native-fullscreen app and
 return with the Desktop.
 
@@ -1912,6 +1925,12 @@ the bars split, switching a Space into or out of such a layout
 moves its windows by the App Bar's strip. Where the two edges
 meet at a corner, the Space Bar runs the whole edge and the App
 Bar stops at it.
+
+:::unreleased
+An edge whose every bar has `reserve` off is not reserved
+([`space_bar.set_reserve`](#space_barset_reserve)): its bar
+draws over the windows.
+:::
 
 While both bars show they are one plate with two sections, in
 the order `set_order` gives them, placed along the edge as one
@@ -2497,6 +2516,36 @@ it does not follow a layout's orientation.
 app_bar.set_edge("bottom")
 ```
 
+:::unreleased
+### app_bar.set_reserve
+
+**Expects:** boolean (default `true`).
+
+**Does:** sets whether the layout gives up the App Bar's strip.
+With `false` the bar still shows but draws over the windows:
+tiled windows and floats use the strip as free room, and showing
+or hiding the bar no longer moves a window.
+
+The cost: the bar's panel spans its whole strip and takes the
+mouse there, so what lies under the strip can no longer be
+clicked through it — title bars under a top bar, status and
+scroll bars under a bottom one, the window edges under a left or
+right one.
+
+On an edge the two bars share, the strip stays reserved while
+either bar reserves it, so `false` frees it only when the
+Space Bar on that edge reserves nothing either — hidden, or
+its own [`space_bar.set_reserve`](#space_barset_reserve) off.
+
+Global only: no layout sets its own.
+
+**Example:**
+
+```lua
+app_bar.set_reserve(false)
+```
+:::
+
 ### app_bar.set_active_indicator
 
 **Expects:** `"outline"` or `"edge_mark"` (default
@@ -2620,6 +2669,34 @@ none is.
 ```lua
 space_bar.set_enabled(true)
 ```
+
+:::unreleased
+### space_bar.set_reserve
+
+**Expects:** boolean (default `true`).
+
+**Does:** sets whether the layout gives up the Space Bar's strip.
+With `false` the bar still shows but draws over the windows:
+tiled windows and floats use the strip as free room, and showing
+or hiding the bar no longer moves a window.
+
+The cost: the bar's panel spans its whole strip and takes the
+mouse there, so what lies under the strip can no longer be
+clicked through it — title bars under a top bar, status and
+scroll bars under a bottom one, the window edges under a left or
+right one.
+
+On an edge the two bars share, the strip stays reserved while
+either bar reserves it, so `false` frees it only when the
+App Bar on that edge reserves nothing either — hidden, or
+its own [`app_bar.set_reserve`](#app_barset_reserve) off.
+
+**Example:**
+
+```lua
+space_bar.set_reserve(false)
+```
+:::
 
 ### space_bar.set_edge
 
