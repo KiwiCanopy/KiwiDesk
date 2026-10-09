@@ -538,3 +538,9 @@ English: they are a machine contract, not UI copy. A Lua
 interpreter message carried as an associated value is the same
 class — `ConfigIssue.Kind.luaError` keeps it verbatim and
 localizes only the frame around it.
+
+A `KeyBinding` is named for display only through
+`KeybindingCatalog.localizedName(of:config:)` — never its stored
+`label`, which is an English identifier no locale shows on the
+row, nor a hand-written "label, else Lua" beside the door (#2111,
+`BindingNameDoorTests`).

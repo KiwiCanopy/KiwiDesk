@@ -32,10 +32,12 @@ extension SettingsModel {
                 encoded.keyLayers,
                 editing: editing,
                 name: { key in
-                    let row = encoded.keyTemplates[key]
-                    let label = row?.label ?? ""
-                    return label.isEmpty
-                        ? RuleReachTable<String>.keyParts(key).lua : label
+                    encoded.keyTemplates[key].map {
+                        KeybindingCatalog.localizedName(
+                            of: $0,
+                            config: config
+                        )
+                    } ?? RuleReachTable<String>.keyParts(key).lua
                 },
                 describe: { ShortcutsReferenceBuilder.glyphs($0) }
             )
