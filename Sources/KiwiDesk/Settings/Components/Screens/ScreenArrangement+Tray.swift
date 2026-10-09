@@ -14,7 +14,9 @@ extension ScreenArrangement {
     ) -> CGFloat {
         guard chips > 1 else { return trayHeight }
         let usable = max(
-            width - ScreenCardChips.cardPadding * 2,
+            ScreenCardChips.chipArea(
+                in: CGSize(width: width, height: 0)
+            ).width,
             ScreenCardChips.minChipWidth
         )
         let step =

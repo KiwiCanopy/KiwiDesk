@@ -10,7 +10,10 @@ enum ScreenCardChips {
     /// silently does not fit costs its affordance.
     static let minChipWidth: CGFloat = 52
     static var spacing: CGFloat { ChipMetrics.spacing }
-    static let cardPadding: CGFloat = 6
+    /// The card's inset on every side. 8, not 6: at 6 a full chip
+    /// row read as pressed against the card's right edge, though
+    /// both ends sat the same distance in (owner eyeball, #2065).
+    static let cardPadding: CGFloat = 8
     static let headerHeight: CGFloat = 16
     static let trayHeaderHeight: CGFloat = 14
     /// Child spacing for chip stacks pinned in `ScreensGateWiringTests`.
