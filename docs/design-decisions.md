@@ -12746,6 +12746,45 @@ by a rule that no longer holds. `kiwishelf.set_edge` retires naming `space_bar.s
 the per-layout App Bar edge verbs name `app_bar.set_edge`; and
 the bars' own `set_edge` verbs are live.
 
+:::unreleased
+*Amended: a bar's edge may differ per screen, and nothing else
+does.* ([#1948](https://github.com/KiwiCanopy/KiwiDesk/issues/1948),
+owner rulings 2026-10-04 and 2026-10-09.) A landscape screen
+between two portrait ones wants its bars on its long sides while
+its neighbours keep theirs on top, and only the edge causes that
+problem: thickness, margins, alignment and glyph size do not, so
+they stay one value. A screen's edge is a sparse override of its
+bar's — `space_bar.edge_override` and `app_bar.edge_override`,
+keyed by the fingerprint a Monitor pin uses — so a new or
+unknown screen follows the bar with no setup, and a profile
+never has to name every screen. It is stored beside `edge` under
+the `X_override` name `gap.override` already uses, rather than a
+coined noun.
+
+Giving a screen its bar's own edge stores nothing: that is
+"follow the bar", so there is no third state for a later bar
+edge to disagree with, and no reset action is needed. A
+screen-less `set_edge` sets the bar on every screen and clears
+the screens' own edges, as a pick of a bar's edge — or of
+Position — in Settings writes every level below it. The entries
+collapse into the bar's edge once every screen ends up equal,
+judged over one set: the active profile's monitor-set screens,
+the connected screens and every screen holding an entry. When
+every screen of that set draws one edge, that edge becomes the
+bar's and the entries go, which moves no screen; a screen that
+draws another edge keeps them, a known screen following the bar
+included while the rest agree on a different edge. The union
+keeps a known screen that is away in the set, so a monitor-set
+screen not connected while a config runs counts as a connected
+screen does.
+
+A look sets the bars' edges and leaves each screen's own
+untouched, even one it now equals, which stays a pin: the
+map names this Mac's screens, which a look shared to another Mac
+cannot know, and a screen's own edge is the most specific choice
+the user made, so it stays the strongest.
+:::
+
 **The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
 edges (`top` / `bottom` / `left` / `right`, default top) and the

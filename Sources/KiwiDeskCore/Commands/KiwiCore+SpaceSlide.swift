@@ -59,9 +59,7 @@ extension KiwiCore {
             SpaceSlideOverlay.Press(
                 display: intent.display,
                 screen: screen.frame,
-                axis: SpaceSlidePlan.axis(
-                    spaceBarEdge: tiler.settings.spaceBarStyle.edge
-                ),
+                axis: spaceSlideAxis(on: intent.display),
                 direction: SpaceSlidePlan.direction(
                     from: intent.leaving,
                     to: target,

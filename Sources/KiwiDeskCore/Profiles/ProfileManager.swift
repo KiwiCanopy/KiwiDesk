@@ -335,6 +335,8 @@ public final class ProfileManager {
             to: url(for: name),
             options: .atomic
         )
+        // A claim moves the live profile's sets with no apply.
+        active = active?.refiled(profile)
         if profile.name == currentName {
             savedModesRecord = (profile.name, profile.spaceModes)
         }

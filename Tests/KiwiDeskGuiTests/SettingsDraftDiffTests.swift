@@ -28,6 +28,8 @@ struct SettingsDraftDiffTests {
         config.settings.monocle.override["1"] =
             MonocleOverride()
         config.settings.track.override["1"] = TrackOverride()
+        config.settings.spaceBarStyle.edgeOverride["S:1x1"] = .left
+        config.settings.appBarStyle.edgeOverride["S:1x1"] = .left
         config.spaces = ["work"]
         config.spaceModes = ["work": .grid]
         config.appRules = ["Safari": "web"]

@@ -83,72 +83,6 @@ extension TilingSettings {
         return params
     }
 
-    /// Whether the KiwiShelf carries any bar in some layout — the
-    /// Space Bar or any layout's App Bar is on. The Settings gates
-    /// ask it; the reservation asks `shelfEdges(in:)`.
-    public var shelfShows: Bool {
-        spaceBarStyle.enabled || anyAppBarCanShow
-    }
-
-    /// The edges a space laid out in `mode` reserves — of the
-    /// edges `barEdges` lists for the Space Bar, which draws in
-    /// every layout, and that layout's own App Bar where it is
-    /// on (#1517, #1731), the ones that reserve (#1524). A layout
-    /// that draws no bar keeps the whole screen; the price is that
-    /// a switch into a layout whose App Bar draws on an edge
-    /// nothing else holds moves windows by the strip.
-    public func shelfEdges(in mode: LayoutMode) -> [AppBarEdge] {
-        barEdges(
-            space: spaceBarStyle.enabled,
-            app: appBarHost(for: mode)?.appBar.enabled == true
-        ).filter(\.reserves).map(\.edge)
-    }
-
-    /// The edges the shown bars sit on — the ONE list the
-    /// reservation and the live plan both take: the Space Bar's
-    /// first, then the App Bar's unless the two share it, so two
-    /// bars are never stacked on one edge
-    /// (`ShelfSplitGeometryTests` ▸ `edgesPerMode`) and
-    /// `ShelfGeometry.strips` measures the Space Bar's whole edge.
-    /// A shared edge reserves while either bar on it does — the
-    /// fold is here, at the dedup, and nowhere beside it
-    /// (`BarReserveTests`, #1524).
-    public func barEdges(space: Bool, app: Bool) -> [ShelfEdge] {
-        var edges: [ShelfEdge] = []
-        if space {
-            edges.append(
-                ShelfEdge(
-                    spaceBarStyle.edge,
-                    reserves: spaceBarStyle.reserve
-                )
-            )
-        }
-        guard app else { return edges }
-        if let shared = edges.firstIndex(where: {
-            $0.edge == appBarStyle.edge
-        }) {
-            edges[shared].reserves =
-                edges[shared].reserves || appBarStyle.reserve
-        } else {
-            edges.append(
-                ShelfEdge(
-                    appBarStyle.edge,
-                    reserves: appBarStyle.reserve
-                )
-            )
-        }
-        return edges
-    }
-
-    /// The edge both bars sit on while they share one — one fused
-    /// shelf — or nil while they are split, a bar per edge (#1731).
-    /// The one comparison: Settings' Position master shows it and
-    /// asks it for its `?`.
-    public var sharedBarEdge: AppBarEdge? {
-        spaceBarStyle.edge == appBarStyle.edge
-            ? spaceBarStyle.edge : nil
-    }
-
     /// True if any layout's App Bar is switched on.
     public var anyAppBarCanShow: Bool {
         appBarHosts.contains { $0.enabled }
@@ -208,33 +142,6 @@ extension TilingSettings {
         LayoutMode.allCases.compactMap {
             appBarHost(for: $0)?.appBar
         }
-    }
-
-    /// Insets visible bounds by the reservation of every edge a
-    /// bar draws on in `mode` (#293, #1517, #1731).
-    /// Deliberately NOT public: it takes a raw frame the caller
-    /// obtained some other way — the unsafe half. Callers with a
-    /// screen want `TilingEngine.layoutBounds(on:)` (#537), and
-    /// the routing guards scan only this module, so a cross-module
-    /// caller would be invisible to them.
-    func layoutBounds(
-        from visible: CGRect,
-        mode: LayoutMode
-    ) -> CGRect {
-        shelfReservation(in: mode).remaining(in: visible)
-    }
-
-    /// The whole input `layoutBounds(from:mode:)` reads for
-    /// `mode` — what a bar write must change to owe a pass
-    /// (#1524, `BarReserveCoreTests` ▸
-    /// `unchangedReservationSkipsTheRetile`).
-    public func shelfReservation(
-        in mode: LayoutMode
-    ) -> ShelfReservation {
-        ShelfReservation(
-            edges: shelfEdges(in: mode),
-            depth: kiwishelf.reservation
-        )
     }
 
     /// The most scrolling slots that fit `bounds` — the layout

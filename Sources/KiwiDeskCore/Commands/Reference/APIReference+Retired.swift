@@ -32,7 +32,7 @@ extension APIReference {
             let field = key.stringValue
             for layout in ["monocle", "scroll"] {
                 map["\(layout).set_app_bar_\(field)"] =
-                    "app_bar.set_\(field)"
+                    AppBarStyle.layoutFixedKeys[key]
             }
         }
         // An App Bar item is as wide as its title allows, so the

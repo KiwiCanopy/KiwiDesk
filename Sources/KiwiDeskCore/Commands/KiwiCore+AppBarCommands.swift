@@ -16,10 +16,23 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("app_bar.set_".count)
         )
-        switch AppBarCommandSetting.parse(field: field, args: args)
+        let given: [JSONValue]
+        switch screenResolvedEdgeArgs(field: field, args) {
+        case .success(let resolved): given = resolved
+        case .failure(let error): return .fail(error.message)
+        }
+        switch AppBarCommandSetting.parse(field: field, args: given)
         {
         case .success(let setting):
-            setting.apply(to: &tiler.settings.appBarStyle)
+            if case .screenEdge(let edge, let screen) = setting {
+                tiler.settings.appBarStyle.setEdge(
+                    edge,
+                    on: screen,
+                    among: liveScreenEdgeScope
+                )
+            } else {
+                setting.apply(to: &tiler.settings.appBarStyle)
+            }
             return .ok()
         case .failure(let error):
             return .fail(error.message)
@@ -38,12 +51,25 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("space_bar.set_".count)
         )
+        let given: [JSONValue]
+        switch screenResolvedEdgeArgs(field: field, args) {
+        case .success(let resolved): given = resolved
+        case .failure(let error): return .fail(error.message)
+        }
         switch SpaceBarCommandSetting.parse(
             field: field,
-            args: args
+            args: given
         ) {
         case .success(let setting):
-            setting.apply(to: &tiler.settings.spaceBarStyle)
+            if case .screenEdge(let edge, let screen) = setting {
+                tiler.settings.spaceBarStyle.setEdge(
+                    edge,
+                    on: screen,
+                    among: liveScreenEdgeScope
+                )
+            } else {
+                setting.apply(to: &tiler.settings.spaceBarStyle)
+            }
             return .ok()
         case .failure(let error):
             return .fail(error.message)
@@ -88,12 +114,10 @@ extension KiwiCore {
             bar.enabled = enabled
             return .ok()
         }
-        if AppBarStyle.layoutFixedKeys.contains(where: {
-            $0.stringValue == field
-        }) {
-            return .fail(
-                "the App Bar's \(field) is global: app_bar.set_\(field)"
-            )
+        if let global = AppBarStyle.layoutFixedKeys.first(where: {
+            $0.key.stringValue == field
+        })?.value {
+            return .fail("the App Bar's \(field) is global: \(global)")
         }
         switch AppBarCommandSetting.parse(field: field, args: args)
         {

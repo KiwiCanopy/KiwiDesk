@@ -32,6 +32,8 @@ struct SettingKeyModelParityTests {
         settings.grid.override["1"] = GridOverride()
         settings.monocle.override["1"] = MonocleOverride()
         settings.track.override["1"] = TrackOverride()
+        settings.spaceBarStyle.edgeOverride["S:1x1"] = .left
+        settings.appBarStyle.edgeOverride["S:1x1"] = .left
         return settings
     }
 
@@ -100,7 +102,7 @@ struct SettingKeyModelParityTests {
 
     /// The census's `settings.*` rows, normalized to the walk's
     /// convention: synthetic `(auto)`/`(unit)`/`(value)`/
-    /// `(master)` suffixes stripped, `[space]` → `[]`.
+    /// `(master)` suffixes stripped, `[space]`/`[screen]` → `[]`.
     private static func censusBases() -> Set<String> {
         var bases: Set<String> = []
         for key in SettingKey.allCases {
@@ -112,9 +114,10 @@ struct SettingKeyModelParityTests {
             ] where id.hasSuffix(suffix) {
                 id.removeLast(suffix.count)
             }
-            bases.insert(
-                id.replacingOccurrences(of: "[space]", with: "[]")
-            )
+            for instance in ["[space]", "[screen]"] {
+                id = id.replacingOccurrences(of: instance, with: "[]")
+            }
+            bases.insert(id)
         }
         return bases
     }

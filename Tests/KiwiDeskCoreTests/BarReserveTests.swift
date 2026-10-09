@@ -7,7 +7,7 @@ import Testing
 /// Shown apart from reserved (#1524): `barEdges` lists every edge
 /// a shown bar sits on, each carrying whether the layout gives it
 /// up — OR-folded where two bars share an edge — and
-/// `shelfEdges(in:)` keeps the reserving ones alone.
+/// `shelfEdges(in:on:)` keeps the reserving ones alone.
 @Suite("Bar reserve (#1524)")
 struct BarReserveTests {
     private let visible = CGRect(x: 0, y: 25, width: 1920, height: 1055)
@@ -34,26 +34,26 @@ struct BarReserveTests {
     @Test("A shared edge reserves while either bar on it does")
     func fusedEdgeOrs() {
         let both = settings(space: .top, app: .top)
-        #expect(both.shelfEdges(in: .monocle) == [.top])
+        #expect(both.shelfEdges(in: .monocle, on: nil) == [.top])
         let spaceOff = settings(
             space: .top,
             app: .top,
             spaceReserves: false
         )
-        #expect(spaceOff.shelfEdges(in: .monocle) == [.top])
+        #expect(spaceOff.shelfEdges(in: .monocle, on: nil) == [.top])
         // Where no App Bar draws, the Space Bar's own flag rules.
-        #expect(spaceOff.shelfEdges(in: .bsp).isEmpty)
+        #expect(spaceOff.shelfEdges(in: .bsp, on: nil).isEmpty)
         let appOff = settings(space: .top, app: .top, appReserves: false)
-        #expect(appOff.shelfEdges(in: .monocle) == [.top])
+        #expect(appOff.shelfEdges(in: .monocle, on: nil) == [.top])
         let neither = settings(
             space: .top,
             app: .top,
             spaceReserves: false,
             appReserves: false
         )
-        #expect(neither.shelfEdges(in: .monocle).isEmpty)
+        #expect(neither.shelfEdges(in: .monocle, on: nil).isEmpty)
         #expect(
-            neither.layoutBounds(from: visible, mode: .monocle)
+            neither.layoutBounds(from: visible, mode: .monocle, on: nil)
                 == visible
         )
     }
@@ -67,9 +67,9 @@ struct BarReserveTests {
             app: .bottom,
             spaceReserves: false
         )
-        #expect(split.shelfEdges(in: .bsp).isEmpty)
-        #expect(split.shelfEdges(in: .monocle) == [.bottom])
-        let bounds = split.layoutBounds(from: visible, mode: .monocle)
+        #expect(split.shelfEdges(in: .bsp, on: nil).isEmpty)
+        #expect(split.shelfEdges(in: .monocle, on: nil) == [.bottom])
+        let bounds = split.layoutBounds(from: visible, mode: .monocle, on: nil)
         #expect(bounds.minY == visible.minY)
         #expect(bounds.maxY == visible.maxY - 32)
     }

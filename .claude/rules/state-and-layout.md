@@ -124,7 +124,8 @@ editing here:
   (#242) owns its relationship to a bar. Which files qualify
   lives in that map, not here.
 - **A per-space override never carries `appBar`.** The shelf's
-  reservation is answered per layout MODE (`shelfEdges(in:)`), and
+  reservation is answered per layout MODE and per screen
+  (`shelfEdges(in:on:)`, #1948), and
   the App Bar a Space draws is its mode's; a per-space `appBar`
   would draw a bar where the reservation left the windows, or
   reserve a strip nothing draws on. `MonocleOverrideTests` and
@@ -2016,8 +2017,9 @@ editing here:
   dispatch — save that a `space_bar.*` or `app_bar.*` write may
   skip the pass, running the one `repaintBarsAndFloatNet` tail
   (the bars, then every strip reader) instead, only while it leaves every layout's
-  `TilingSettings.shelfReservation(in:)` — the whole input
-  `layoutBounds(from:mode:)` reads — unchanged (#1524,
+  `TilingSettings.shelfReservation(in:on:)` on every connected
+  screen — the whole input `layoutBounds(from:mode:on:)`
+  reads — unchanged (#1524, #1948,
   `BarReserveCoreTests` ▸ `unchangedReservationSkipsTheRetile`).
   Event-driven retiles stay on the `.event` default so
   echo lag can't wobble windows. Profile applies classify
