@@ -5,7 +5,9 @@ import Testing
 /// `KeybindingCatalog.localizedName(of:config:)` (#2111, #96): a
 /// hand-written "label, else Lua" shows the stored English
 /// identifier in every locale. The scan covers `Sources/KiwiDesk`;
-/// Core's conflict naming is #2116's.
+/// Core's conflict naming is #2116's. Accepted limit: a file that
+/// reaches a binding only through an inferred type or a renamed
+/// accessor names no scope word and is review's to catch.
 @Suite("Binding name door (#2111)")
 struct BindingNameDoorTests {
     private let home = "KeybindingCatalog+DisplayName.swift"
@@ -60,7 +62,8 @@ struct BindingNameDoorTests {
     /// type, the reach templates, or a binding. Lookaheads, not
     /// `\b`: Swift's Unicode word boundary does not break inside
     /// `label.count`.
-    private let scope = /KeyBinding|keyTemplates|binding|\.kept(?!\w)/
+    private let scope =
+        /KeyBinding|keyTemplates|binding|\.kept(?!\w)|\.dropped(?!\w)/
 
     /// A `.label` member read — `x.label`, `$0.label`, `x?.label`,
     /// `t[k]?.label` — but not an assignment to one.
@@ -143,6 +146,7 @@ struct BindingNameDoorTests {
         #expect(self.reads(in: "view.labelsHidden()") == 0)
         // Scope admits a file that only reaches templates.
         #expect("reach.keyTemplates[rival]".firstMatch(of: scope) != nil)
+        #expect("entry.dropped.combo".firstMatch(of: scope) != nil)
     }
 
     @Test("every binding label read is routed or classified")
