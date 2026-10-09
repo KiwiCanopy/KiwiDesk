@@ -116,12 +116,12 @@ struct ScreensCensusRenderTests {
                 == Set(ScreensRowOrder.byContainer.keys)
         )
         let root = SourceScan.repoRoot(from: #filePath)
-        var files = try SourceScan.swiftSources(
+        let components = try SourceScan.swiftSources(
             under: root.appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/Screens"
             )
         )
-        files += try SourceScan.swiftSources(
+        let sections = try SourceScan.swiftSources(
             under: root.appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Sections"
             )
@@ -131,14 +131,12 @@ struct ScreensCensusRenderTests {
         // Assert the scan found its input before asserting about
         // it: an enumerator over a renamed directory yields [] and
         // every check below would pass for having looked at
-        // nothing.
-        //
-        // Tight, not merely non-zero: at a floor of 10 the whole
-        // `Sections/` half could stop being scanned and the
-        // Components half alone would still clear it
-        // (guard-prover, 2026-08-04).
-        #expect(files.count >= 13)
-        for file in files {
+        // nothing. One floor PER HALF: a shared floor let either
+        // half go unscanned while the other cleared it alone
+        // (guard-prover, 2026-08-04 and #865).
+        #expect(components.count >= 13)
+        #expect(sections.count >= 2)
+        for file in components + sections {
             let source = try SourceScan.blankedSource(at: file)
             let squashed = source.split(
                 whereSeparator: \.isWhitespace
