@@ -54,6 +54,10 @@ struct OwnWindowTilingSeamTests {
         // cannot overwrite the press the gesture classifiers
         // read. A read of the mark, never a stamp.
         "Sources/KiwiDeskCore/Events/MouseTracker.swift": 1,
+        // The fourth read side (#2059): the marked window's reopen
+        // identity is the mark, not its area-named title. A read
+        // of the mark's value as a key, never a stamp.
+        "Sources/KiwiDeskCore/State/StateCoordinator.swift": 1,
     ]
 
     /// BOTH source trees: Core builds its own `NSWindow`s (the
