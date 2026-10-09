@@ -72,7 +72,7 @@ struct PendingFilingCarryTests {
         let away = WindowID(2009)
         state.rememberedSpaces[away] = .departed(SpaceID(2))
         state.unjudgedFilings.insert(late)
-        state.restoredFrames[late] = owed
+        state.restoredFrames[late] = .init(frame: owed)
         let snapshot = state.snapshot()
         #expect(try record(2, in: snapshot).pending == [away.raw])
         #expect(!snapshot.windows.contains { $0.windowID == late })
@@ -84,7 +84,7 @@ struct PendingFilingCarryTests {
             let core = makeTestCore()
             core.state.workspaces.ensureSpace(SpaceID(2))
             core.state.remember(late, in: SpaceID(2))
-            core.state.restoredFrames[late] = owed
+            core.state.restoredFrames[late] = .init(frame: owed)
             let snapshot = core.sessionSnapshot(inPlace: inPlace)
             #expect(try record(2, in: snapshot).pending == [late.raw])
             #expect(

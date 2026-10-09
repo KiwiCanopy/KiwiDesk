@@ -40,7 +40,6 @@ struct LoginSessionGateTests {
 
     private func desk(inPlace: Bool = false) -> StateSnapshot {
         let session = StateSnapshot.WindowSession(
-            floating: true,
             sticky: .none,
             stickyReach: nil
         )

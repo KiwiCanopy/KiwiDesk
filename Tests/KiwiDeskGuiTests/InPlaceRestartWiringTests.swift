@@ -52,7 +52,9 @@ struct InPlaceRestartWiringTests {
             nothing, parked windows included (#930 ruling 2).
             """
         )
-        #expect(stop.contains("shutdownCleanly(inPlace: inPlace)"))
+        #expect(
+            stop.contains("shutdownCleanly(inPlace: inPlace, captured:")
+        )
     }
 
     /// The update half (#930 ruling 1): Sparkle's relaunch

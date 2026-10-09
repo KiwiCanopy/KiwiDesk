@@ -13,15 +13,15 @@ import CoreGraphics
 /// Space). One-shot teardown placement: no live management
 /// after, and no cross-monitor pull.
 public enum WindowGather {
-    /// Returns a gather target for every tracked window, tiled or
-    /// floating (#1864).
+    /// Returns a gather target for every window
+    /// `StateCoordinator.gatherMembers` names, floats included
+    /// (#1864).
     ///
     /// `primaryHeight` is `NSScreen.screens.first?.frame.height`
     /// (Cocoa coordinates), used to flip `Display.visibleFrame`
     /// into AX (top-left) coordinates. Windows whose space has
     /// no display assignment fall back to the display with the
-    /// lowest raw ID (deterministic on multi-monitor). Fullscreen
-    /// windows and windows with a zero-size frame are excluded.
+    /// lowest raw ID (deterministic on multi-monitor).
     ///
     /// Each display collects its own windows (space-iteration
     /// order) and sizes its own grid — see `QuitGridLayout`.
@@ -93,11 +93,8 @@ public enum WindowGather {
                     primaryHeight: primaryHeight
                 )
             }
-            for windowID in space.windows
-            where gathers(state.windows[windowID]) {
-                gathered[display.id, default: []]
-                    .append(windowID)
-            }
+            gathered[display.id, default: []] +=
+                state.gatherMembers(of: space)
         }
         return order.compactMap { id in
             guard
@@ -116,15 +113,6 @@ public enum WindowGather {
                 windows: windows
             )
         }
-    }
-
-    /// The gather's domain: every member, floats of every Space
-    /// included (#1864) — a stop carries their state back — but no
-    /// fullscreen window, which lives on its own macOS Space where
-    /// the grid can neither reach nor place it (#670).
-    static func gathers(_ window: ManagedWindow?) -> Bool {
-        guard let window else { return false }
-        return !window.isFullscreen && window.frame.size != .zero
     }
 
     public static func targets(

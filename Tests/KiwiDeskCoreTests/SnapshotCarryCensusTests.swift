@@ -126,8 +126,10 @@ struct SnapshotCarryCensusTests {
     private func processB(from a: KiwiCore) throws -> KiwiCore {
         let crossed = try JSONDecoder().decode(
             StateSnapshot.self,
+            // The in-place stop's whole capture: the hand float
+            // rides `stopCarry`, every stop's (#1864).
             from: JSONEncoder().encode(
-                a.sessionSnapshot(inPlace: true)
+                try #require(a.crash.stopCapture(inPlace: true))
             )
         )
         let core = makeTestCore()

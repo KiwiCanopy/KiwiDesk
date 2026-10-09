@@ -65,7 +65,6 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
                     id: WindowID(10),
                     frame: Self.frame,
                     session: .init(
-                        floating: nil,
                         sticky: .none,
                         stickyReach: nil
                     )
@@ -90,13 +89,39 @@ struct CrossSessionRestoreTests: CrossSessionFixture {
         #expect(!core.state.crossSession.isOpen)
     }
 
-    /// A plain Quit lets go (#1385 ruling): its file, unmarked,
-    /// never crosses a boot.
+    /// A plain Quit's file crosses the next boot only when that
+    /// boot began inside `quitCrossingBound` of it (#1864 ruling);
+    /// older, it lets go (#1385 ruling). An unmarked autosave never
+    /// crosses.
     @Test(
-        "A plain Quit's file starts the next boot fresh",
+        "A plain Quit's file crosses a boot only inside the bound",
+        .enabled(if: NSScreen.main != nil),
+        arguments: [false, true]
+    )
+    func plainQuitCrossesInsideTheBound(late: Bool) throws {
+        let core = try #require(boot([window(10, "com.a", "A")]))
+        let bound = CrashRecovery.quitCrossingBound
+        // The boot is one second after `before`.
+        let at = Self.before.addingTimeInterval(late ? -bound : 0)
+        let quit = previous(
+            [(F.hidden, "com.a", "A")],
+            at: at,
+            frozen: false
+        )
+        // The autosave makes the directory; the stop writes the
+        // session file a Quit leaves and deletes the autosave.
+        leave(quit, in: core)
+        core.crash.shutdownCleanly()
+        arrange(core)
+        #expect(space(core, 10) == (late ? F.shown : F.hidden))
+        #expect(core.state.crossSession.isOpen == false)
+    }
+
+    @Test(
+        "An unmarked autosave starts the next boot fresh",
         .enabled(if: NSScreen.main != nil)
     )
-    func plainQuitStartsFresh() throws {
+    func unmarkedAutosaveStartsFresh() throws {
         let core = try #require(boot([window(10, "com.a", "A")]))
         leave(previous([(F.hidden, "com.a", "A")], frozen: false), in: core)
         arrange(core)

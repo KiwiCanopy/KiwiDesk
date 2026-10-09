@@ -5,7 +5,7 @@ import Foundation
 public struct StateSnapshot: Codable, Sendable, Equatable {
     public struct WindowRecord: Codable, Sendable, Equatable {
         public let id: UInt32
-        public let frame: CGRect
+        public var frame: CGRect
         /// In-place restarts only (#930, `StateSnapshot+InPlace`).
         public var session: WindowSession?
         /// The bundle id and title a snapshot from another boot or
@@ -50,7 +50,29 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
             )
             app = try? c.decodeIfPresent(String.self, forKey: .app)
             title = try? c.decodeIfPresent(String.self, forKey: .title)
-            floating = try? c.decodeIfPresent(Bool.self, forKey: .floating)
+            floating =
+                (try? c.decodeIfPresent(Bool.self, forKey: .floating))
+                ?? Self.legacyFloat(in: c)
+        }
+
+        private enum LegacySessionKeys: String, CodingKey {
+            case floating
+        }
+
+        /// A pre-#1864 in-place stop wrote the hand float into the
+        /// session — the update relaunch onto this build reads it.
+        private static func legacyFloat(
+            in c: KeyedDecodingContainer<CodingKeys>
+        ) -> Bool? {
+            guard
+                let session = try? c.nestedContainer(
+                    keyedBy: LegacySessionKeys.self,
+                    forKey: .session
+                ),
+                (try? session.decodeIfPresent(Bool.self, forKey: .floating))
+                    == true
+            else { return nil }
+            return true
         }
 
         public var windowID: WindowID { WindowID(id) }
@@ -274,7 +296,6 @@ extension StateCoordinator {
             refilePending(record.pending.map(WindowID.init), in: space)
             adoptSession(record, in: space)
         }
-        restoredFloats = []
         for record in snapshot.windows {
             adoptSession(of: record)
             adoptStopFloat(of: record)

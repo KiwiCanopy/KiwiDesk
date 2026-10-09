@@ -168,11 +168,14 @@ struct QuitFloatReturnTests {
         #expect(shown[Self.hiddenFloat] == capture)
     }
 
+    /// Its debt rides every capture as its frame does (#2008), so
+    /// a wake replay or a second stop before it arrives keeps it.
     @Test(
         "a hand float that arrives after the boot tail floats",
-        .enabled(if: NSScreen.main != nil)
+        .enabled(if: NSScreen.main != nil),
+        arguments: [false, true]
     )
-    func lateArrivalFloats() throws {
+    func lateArrivalFloats(waking: Bool) throws {
         let a = try processA()
         let before = F.settle(a)
         let left = gathered(a)
@@ -183,6 +186,12 @@ struct QuitFloatReturnTests {
             F.processB(early, left: left, session: session)
         )
         b.onLog = { _ in }
+        if waking {
+            b.restoreAndSettleAfterWake(b.sessionSnapshot())
+            let again = try #require(b.crash.stopCapture(inPlace: false))
+            let owed = again.windows.first { $0.windowID == late }
+            #expect(owed?.floating == true)
+        }
         var arrival = try #require(Self.scanned.first { $0.id == late })
         arrival.frame = left[late]!
         let issued = F.record(b) {
@@ -192,6 +201,36 @@ struct QuitFloatReturnTests {
         #expect(b.state.userFloated.contains(late))
         #expect(b.state.workspaces.space(of: late) == F.shown)
         #expect(after[late] == before[late])
+    }
+
+    /// The race the seed beside the set closes: the activation
+    /// parks a replayed float before its set's echo lands, while
+    /// state still reads the quit grid's frame.
+    @Test(
+        "a float parked before its set lands keeps its record",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func parkBeforeTheEchoKeepsTheRecord() throws {
+        let a = try processA()
+        let before = F.settle(a)
+        let left = gathered(a)
+        let session = try quit(a)
+        let b = try #require(F.makeCore())
+        b.onLog = { _ in }
+        b.defersEventRetiles = true
+        for window in Self.scanned {
+            var found = window
+            found.frame = left[window.id]!
+            b.handle(.windowCreated(F.managed(found)))
+        }
+        b.defersEventRetiles = false
+        b.restore(session)
+        let float = Self.shownFloat
+        // The set went out; its echo has not folded in.
+        #expect(b.state.windows[float]?.frame == left[float])
+        b.state.workspaces.activate(F.hidden)
+        b.retile()
+        #expect(b.tiler.stashOriginal(float) == before[float])
     }
 
     @Test(

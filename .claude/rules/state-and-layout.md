@@ -1811,11 +1811,7 @@ editing here:
   visible after all; it is written by the in-place stop's
   capture ALONE, so a quit, a crash and a wake still start sizing
   fresh, and a boot more than `CrashRecovery.inPlaceSessionBound`
-  after the capture drops it. What the quit gather overwrites
-  rides EVERY stop's capture through `CrashRecovery.stopCarry`
-  and never an autosave — the hand float, since the gather places
-  every float (#1864, `QuitFloatReturnTests` ▸
-  `onlyAStopCarries`). A store that changes what a layout
+  after the capture drops it. A store that changes what a layout
   draws rides it, or is named with its reason in a register:
   `SnapshotCarryCensusTests` round-trips every field of `Space`
   and `ManagedWindow` — `SessionRatios` and `ScrollRest` leaf by
@@ -1824,6 +1820,17 @@ editing here:
   `floatFrames` (#1675) and the size-bound learner's ledgers
   named as left behind. A Space's session is adopted AFTER its
   membership: re-filing a window drops its weight.
+- **A change that widens the quit gather carries what it
+  overwrites through `CrashRecovery.stopCarry` (#1864).** Session
+  state the next launch owes back because the gather moved the
+  window rides EVERY stop's capture — a quit's, an in-place
+  restart's and the logout freeze's kept file — and never a plain
+  autosave, so a crash, which moved nothing, still starts it
+  fresh; the stop captures BEFORE it gathers
+  (`StopCaptureOrderTests`). The hand float is the one carried,
+  since the gather places every float (`QuitFloatReturnTests` ▸
+  `onlyAStopCarries`), and `SnapshotStoreCensusTests` names such
+  a store's `.stop` tier.
 - **The in-place payload is a stored cross-version shape
   (#930).** Build N writes the session file and build N+1 reads
   it, so `SpaceSession`, `WindowSession`, `SessionRatios`'
@@ -1833,7 +1840,8 @@ editing here:
   `HeldOrigin.Arrangement` keys and the snapshot's own
   `arrangement`, which every snapshot carries (#1646,
   profiles.md), each window record's `app` and `title` — the
-  stable key a cross-session match reads (#1385) — and the
+  stable key a cross-session match reads (#1385) — and its
+  `floating`, the stop-carried hand float (#1864) — and the
   snapshot's `frozenForLogout` mark, and its
   `arrangementRecords` — #1230's record
   per saved profile and per composed Standard, keyed by the
@@ -1894,8 +1902,10 @@ editing here:
   any new door is written inside that file, beside the two.
 - **A file the id gates refuse never has its ids replayed
   (#1385).** It reaches boot only as `takeCrossSessionCandidate`,
-  and only when a logout's freeze wrote it — a plain Quit's file
-  never crosses a boot — consumed with the file, so once; and it
+  and only when a logout's freeze wrote it or a plain Quit's
+  boot or login began inside `CrashRecovery.quitCrossingBound`
+  (#1864, `QuitCrossingTests`) — consumed with the file, so
+  once; and it
   is applied only through `CrossSessionMatch` and
   `StateSnapshot.rekeyed`, pairing by bundle id, then title once
   the title pass has run, then rank, its late arrivals paid
@@ -1917,7 +1927,7 @@ editing here:
   `arrangementChangeClosesTheMatch`). An
   in-place file that passes the gates is replayed by id and the
   match never arms beside it (`CrossSessionRestoreTests` ▸
-  `sameSessionIsNeverMatched`, `plainQuitStartsFresh`,
+  `sameSessionIsNeverMatched`, `plainQuitCrossesInsideTheBound`,
   `secondLaunchMatchesNothing`, `oldIDNamesNothing`,
   `titlePassRespectsTheUser`). A new reader of a refused file
   owes the same, and a new field of the snapshot's records is

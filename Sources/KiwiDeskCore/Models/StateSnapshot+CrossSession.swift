@@ -14,7 +14,8 @@ extension StateSnapshot {
                     id: $0,
                     frame: record.frame,
                     app: record.app,
-                    title: record.title
+                    title: record.title,
+                    floating: record.floating
                 )
             }
         }

@@ -132,6 +132,30 @@ struct GatherTargetsTests {
         }
     }
 
+    /// A transient overlay — a popup, a raised-layer panel — is no
+    /// window the grid arranges (#1864 ruling).
+    @Test("transient overlays are excluded")
+    func skipsTransientOverlays() {
+        var state = makeState()
+        addWindow(&state, id: 98)
+        state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(97),
+                    pid: 99,
+                    appName: "TestApp",
+                    title: "",
+                    frame: CGRect(x: 0, y: 0, width: 300, height: 200),
+                    isFloating: true,
+                    isTransientOverlay: true
+                )
+            )
+        )
+        let frames = targets(state)
+        #expect(frames[WindowID(98)] != nil)
+        #expect(frames[WindowID(97)] == nil)
+    }
+
     @Test("windows with zero-size frame are excluded")
     func skipsZeroFrame() {
         var state = makeState()

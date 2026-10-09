@@ -72,8 +72,12 @@ extension KiwiCore {
         else { return }
         state.crossSession.commit([pair])
         state.remember(window.id, in: pair.record.space)
-        if !tiler.looksStashed(pair.record.frame) {
-            state.restoredFrames[window.id] = pair.record.frame
+        // A corner rides only for the float it carries (#1864).
+        if !tiler.looksStashed(pair.record.frame) || pair.record.floating {
+            state.restoredFrames[window.id] = .init(
+                frame: pair.record.frame,
+                floating: pair.record.floating
+            )
         }
         logCrossSession([pair], phase: "arrival")
     }

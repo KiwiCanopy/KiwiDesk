@@ -60,11 +60,13 @@ private func trackedFixture() -> StateCoordinator {
     state.setFloating(old, true)
     state.crossSession.placed.insert(old)
     state.remember(old, in: SpaceID(1))
-    state.restoredFrames[old] = CGRect(
-        x: 1,
-        y: 2,
-        width: 3,
-        height: 4
+    state.restoredFrames[old] = .init(
+        frame: CGRect(
+            x: 1,
+            y: 2,
+            width: 3,
+            height: 4
+        )
     )
     state.stickyReachOverrides[old] = true
     state.floatFrames[old] = .init(

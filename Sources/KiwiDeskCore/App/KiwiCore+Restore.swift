@@ -62,13 +62,17 @@ extension KiwiCore {
                 // Not tracked yet (a slow app's window, #21):
                 // `adopt` filed its Space, and its frame is owed
                 // at its arrival (#1362) — the space it lands in
-                // may assign none, on another display.
+                // may assign none, on another display — beside a
+                // hand float a stop carried (#1864).
                 missing += 1
-                if !corner,
+                let floating = record.floating == true
+                if !corner || floating,
                     state.rememberedSpaces[record.windowID] != nil
                 {
-                    state.restoredFrames[record.windowID] =
-                        record.frame
+                    state.restoredFrames[record.windowID] = .init(
+                        frame: record.frame,
+                        floating: floating
+                    )
                 }
                 continue
             }
@@ -118,13 +122,13 @@ extension KiwiCore {
     }
 
     /// Whether the pass after the replay parks `id`: filed in a
-    /// Space no display shows, and not exempt as a sticky window.
+    /// Space no display shows, under the stash's own verdict.
     private func parksNow(_ id: WindowID) -> Bool {
         guard let space = state.workspaces.space(of: id),
             let window = state.windows[id]
         else { return false }
         return !state.workspaces.visibleSpaces.contains(space)
-            && !state.stickyExemptFromStash(window, onSpace: space)
+            && state.parksOnInactive(window, in: space)
     }
 
     /// Pays a restored frame the arrival fold handed back
@@ -137,7 +141,10 @@ extension KiwiCore {
         arrived window: WindowID,
         effects: AppliedEffects
     ) {
-        guard let frame = effects.restoredFrame else { return }
+        // A corner rides the debt only for its float (#1352).
+        guard let frame = effects.restoredFrame,
+            !tiler.looksStashed(frame)
+        else { return }
         tiler.seedStash(window, frame: frame)
         onLog(
             "restore: w\(window.raw) arrived late — its snapshot "

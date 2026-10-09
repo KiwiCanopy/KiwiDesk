@@ -221,7 +221,6 @@ extension StateCoordinator {
         closedDepartures.remove(id)
         unjudgedFilings.remove(id)
         restoredFrames[id] = nil
-        restoredFloats.remove(id)
         floatFrames[id] = nil
         retireDepartureRecord(of: id)
     }
@@ -232,7 +231,6 @@ extension StateCoordinator {
         guard case .restored? = rememberedSpaces[id] else { return }
         rememberedSpaces[id] = nil
         restoredFrames[id] = nil
-        restoredFloats.remove(id)
         unjudgedFilings.remove(id)
     }
 
@@ -243,7 +241,6 @@ extension StateCoordinator {
         closedDepartures = []
         unjudgedFilings = []
         restoredFrames = [:]
-        restoredFloats = []
         departedSlots = [:]
         awayWindows = [:]
     }
