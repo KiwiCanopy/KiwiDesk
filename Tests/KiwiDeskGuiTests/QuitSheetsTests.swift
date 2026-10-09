@@ -43,7 +43,9 @@ private final class FakeHost: NSWindow {
         guard let child = sheetWindow as? FakeHost else { return }
         ended.append((child, returnCode))
         journal(child.name)
-        if !stuck { hosted = nil }
+        // A stuck sheet lets go after a few tries, so a clear
+        // that loops on it reds the count instead of hanging.
+        if !stuck || ended.count >= 8 { hosted = nil }
     }
 }
 

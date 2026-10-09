@@ -97,7 +97,11 @@ struct QuitSheetsWiringTests {
             from: "static func install()",
             to: "return source"
         )
-        #expect(install.occurrences(of: "queue: .main") == 0)
+        #expect(
+            install.occurrences(
+                of: "queue: .global(qos: .userInitiated)"
+            ) == 1
+        )
         #expect(install.occurrences(of: "handler: deliver") == 1)
         let deliver = try body(
             of: quit,
