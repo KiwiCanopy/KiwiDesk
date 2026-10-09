@@ -128,7 +128,11 @@ extension KiwiCore {
     /// drives the boot tail; `finishBoot` is not test-drivable.
     func arrangeBootDesk(session: StateSnapshot?) {
         crash.restoreKeys.boot(self)
-        guard let session else {
+        // A file the id gates refused is matched by its stable
+        // keys instead — never over this session's own (#1385).
+        let refused = crash.takeCrossSessionCandidate()
+        guard let session = session ?? refused.flatMap(armCrossSessionMatch)
+        else {
             retile()
             return
         }

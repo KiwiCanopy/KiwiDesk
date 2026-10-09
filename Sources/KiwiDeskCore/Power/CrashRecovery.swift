@@ -49,6 +49,12 @@ public final class CrashRecovery {
 
     /// When the logout froze the snapshot writes, or nil (#1385).
     private(set) var frozenAt: Date?
+    /// The recent autosaves and departures the freeze rolls back
+    /// over (#1385, `LogoutRollback`), on `now`.
+    private(set) var rollback = LogoutRollback()
+    /// The newest file the id gates refused at boot (#1385): its
+    /// ids are never replayed, only its stable keys matched.
+    private(set) var crossSessionCandidate: StateSnapshot?
     /// The power-off observer and the center it was added on.
     private(set) var powerOff:
         (token: NSObjectProtocol, center: NotificationCenter)?
@@ -131,6 +137,7 @@ public final class CrashRecovery {
     /// stop wrote, or the autosave an unclean one left — the newer
     /// when both survive. Both files are consumed.
     public func takeBootSnapshot() -> StateSnapshot? {
+        crossSessionCandidate = nil
         var session = consumeSession()
         if let taken = session, taken.carriesSessions,
             now().timeIntervalSince(taken.capturedAt)
@@ -152,8 +159,15 @@ public final class CrashRecovery {
         return crashed
     }
 
+    /// Hands over the file the id gates refused at boot, once.
+    func takeCrossSessionCandidate() -> StateSnapshot? {
+        defer { crossSessionCandidate = nil }
+        return crossSessionCandidate
+    }
+
     /// Discards saved snapshot files (#634).
     public func discardSavedSnapshots() {
+        crossSessionCandidate = nil
         try? FileManager.default.removeItem(at: fileURL)
         try? FileManager.default.removeItem(at: sessionURL)
     }
@@ -162,8 +176,34 @@ public final class CrashRecovery {
     /// performs during a logout must not overwrite the last
     /// arrangement. Lifts past `logoutFreezeBound`.
     public func freezeForLogout() {
-        frozenAt = now()
+        let at = now()
+        frozenAt = at
         onLog("autosave frozen: logout or power-off began")
+        // macOS quit the apps before this notice (#1385): put back
+        // the autosave written before their closes, else re-write
+        // the last one — marked, the one file a reboot may match.
+        let rolled = rollback.preBurst(at: at)
+        guard let kept = rolled ?? rollback.autosaves.last else {
+            onLog("autosave frozen with none written; nothing marked")
+            return
+        }
+        var marked = kept.snapshot
+        marked.frozenForLogout = true
+        guard write(marked, to: fileURL) else { return }
+        let age = Int(at.timeIntervalSince(kept.at))
+        let count = kept.snapshot.windows.count
+        onLog(
+            rolled == nil
+                ? "autosave marked at the freeze: \(count) windows"
+                : "autosave rolled back \(age)s, before the logout's "
+                    + "closes: \(count) windows"
+        )
+    }
+
+    /// One window left (#1385): `closed` is the gone handler's
+    /// `closed` arm, never re-derived here.
+    func noteDeparture(closed: Bool) {
+        rollback.noteDeparture(closed: closed, at: now())
     }
 
     /// Writes one snapshot now (also called by the timer), unless
@@ -176,6 +216,7 @@ public final class CrashRecovery {
             withIntermediateDirectories: true
         )
         guard write(snapshot, to: fileURL) else { return }
+        rollback.noteAutosave(snapshot, at: now())
         onAutosaved()
     }
 
@@ -237,6 +278,7 @@ public final class CrashRecovery {
         else { return nil }
         guard snapshot.capturedAt >= bootTime() else {
             onLog("\(kind) snapshot predates this boot; discarded")
+            keepForCrossSession(snapshot)
             return nil
         }
         guard isThisLogin(snapshot) else {
@@ -244,9 +286,23 @@ public final class CrashRecovery {
                 "\(kind) snapshot is from another login session; "
                     + "discarded"
             )
+            keepForCrossSession(snapshot)
             return nil
         }
         return snapshot
+    }
+
+    /// The newer of the refused files is the cross-session one,
+    /// and only a file a logout's freeze wrote: a plain Quit's
+    /// never crosses a boot (#1385 ruling, 2026-10-09).
+    private func keepForCrossSession(_ snapshot: StateSnapshot) {
+        guard snapshot.frozenForLogout else { return }
+        guard
+            crossSessionCandidate.map({
+                snapshot.capturedAt > $0.capturedAt
+            }) ?? true
+        else { return }
+        crossSessionCandidate = snapshot
     }
 
     /// A stamp matches only a readable, equal live id. An
