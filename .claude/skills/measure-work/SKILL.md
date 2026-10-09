@@ -127,9 +127,11 @@ The fixture pins only the animation settings every measured
 release shares; a setting one release changes or lacks is stated
 per bundle in `extra.lua`, which `up` appends to the config — a
 *slide off* bundle appends `animations.set_on_space_change(false)`.
-Where the new release's default differs from the older one's,
-measure it both ways: with its default, and with `extra.lua`
-matching the older release, the like-for-like row.
+Compare like with like: every release with all animations off,
+and every release with its Space-switch animation on at one
+shared pace, each set through `extra.lua`. Pass `--gap` past the
+longest animation measured, or a press cuts it short and the run
+reads cheaper than the motion is.
 
 The owner switches to an EMPTY macOS Desktop first, by hand or by
 swipe — a `focus_desktop` switch leaves macOS's current Desktop
