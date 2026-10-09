@@ -37,7 +37,7 @@ extension StateCoordinator {
         of window: ManagedWindow
     ) {
         guard userFloated.remove(window.id) != nil,
-            !window.title.isEmpty
+            WindowIdentity.exists(for: window)
         else { return }
         rememberedFloating.insert(WindowIdentity(of: window))
     }
@@ -49,7 +49,7 @@ extension StateCoordinator {
         of window: ManagedWindow
     ) {
         guard !userFloated.contains(window.id),
-            !window.title.isEmpty,
+            WindowIdentity.exists(for: window),
             rememberedFloating.remove(WindowIdentity(of: window))
                 != nil,
             windows[window.id]?.isFloating == false
@@ -62,7 +62,7 @@ extension StateCoordinator {
     mutating func rememberStickyIntent(
         of window: ManagedWindow
     ) {
-        guard !window.title.isEmpty else { return }
+        guard WindowIdentity.exists(for: window) else { return }
         let identity = WindowIdentity(of: window)
         if window.stickyScope == .none {
             rememberedSticky[identity] = nil
@@ -75,7 +75,7 @@ extension StateCoordinator {
     mutating func restoreStickyIntent(
         of window: ManagedWindow
     ) {
-        guard !window.title.isEmpty,
+        guard WindowIdentity.exists(for: window),
             let scope = rememberedSticky.removeValue(
                 forKey: WindowIdentity(of: window)
             )

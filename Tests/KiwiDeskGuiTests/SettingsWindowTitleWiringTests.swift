@@ -76,4 +76,24 @@ struct SettingsWindowTitleWiringTests {
             ) == ["SettingsWindowController.swift": 1]
         )
     }
+
+    /// The track door reads the mark onto the window, so the reopen
+    /// identity `OwnWindowIdentityTests` proves is the one the app
+    /// tracks with (#2059).
+    @Test("Tracking stamps the own-window mark on the snapshot")
+    func trackingStampsTheMark() throws {
+        let tracking = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDeskCore/Events/EventLoop+Tracking.swift"
+                )
+        )
+        let squashed =
+            tracking.split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            squashed.contains(
+                "window.carriesOwnMark=tilesAsOwnWindow(pid:pid,id:window.id)"
+            )
+        )
+    }
 }
