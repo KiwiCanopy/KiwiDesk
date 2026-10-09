@@ -21,7 +21,6 @@ extension SettingsModel {
         guard enabled != autoStart.level.opensAtLogin else {
             return
         }
-        guard autoStart.registerable || !enabled else { return }
         autoStartBusy = true
         Task {
             let result = await writeLoginItem(enabled)

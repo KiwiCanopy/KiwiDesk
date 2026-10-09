@@ -15,10 +15,16 @@ public enum LoginItemManager {
         // cannot be a stable login item is `.unavailable` whatever
         // `SMAppService` reports — even if a prior install left a
         // stale registration.
-        if let reason = unavailableReason(for: Bundle.main.bundleURL) {
+        if let reason = unavailableCopy {
             return .unavailable(reason)
         }
         return state(from: SMAppService.mainApp.status)
+    }
+
+    /// Why the running copy cannot be a login item, nil if it can.
+    /// A path check only, so the main actor may ask (#2094).
+    public static var unavailableCopy: LoginItemUnavailable? {
+        unavailableReason(for: Bundle.main.bundleURL)
     }
 
     /// Why bundle at `url` cannot register (nil if registerable).
@@ -33,8 +39,8 @@ public enum LoginItemManager {
     }
 
     /// Registers or unregisters the app as a login item and returns
-    /// the live state. A copy that cannot be a stable login item is
-    /// refused here, for every caller (#2094).
+    /// the live state. A copy `unavailableReason` refuses is never
+    /// written, on OR off, whoever calls (#2094).
     @discardableResult
     public static func setEnabled(_ enabled: Bool) -> LoginItemState {
         guardedWrite(
@@ -44,12 +50,14 @@ public enum LoginItemManager {
         )
     }
 
-    /// `setEnabled` over an injected bundle URL and OS write, so a
-    /// test never reaches `SMAppService` (#2094, #2092).
+    /// `setEnabled` over an injected bundle URL, OS write and
+    /// re-read, so a test never reaches `SMAppService` (#2092).
+    /// Refuses both directions for an unstable copy (#2094).
     static func guardedWrite(
         _ enabled: Bool,
         at url: URL,
-        write: (Bool) throws -> Void
+        write: (Bool) throws -> Void,
+        read: () -> LoginItemState = { current }
     ) -> LoginItemState {
         if let reason = unavailableReason(for: url) {
             note("login-item write refused: \(reason)")
@@ -61,7 +69,7 @@ public enum LoginItemManager {
             let verb = enabled ? "register" : "unregister"
             note("login-item \(verb) failed: \(error)")
         }
-        return current
+        return read()
     }
 
     /// The one live OS write behind `setEnabled`.

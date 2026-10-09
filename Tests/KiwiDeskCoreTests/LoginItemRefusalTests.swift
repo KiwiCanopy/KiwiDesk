@@ -4,8 +4,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A copy `unavailableReason` refuses is never written as a login
-/// item, on or off (#2094). The bundle URL and the OS write are
-/// injected, so no case here reaches `SMAppService` (#2092).
+/// item, on or off (#2094). The bundle URL, the OS write and the
+/// re-read are injected, so no case reaches `SMAppService` (#2092).
 @Suite("Login-item write refuses an unstable copy (#2094)")
 struct LoginItemRefusalTests {
     private static let translocated = URL(
@@ -34,7 +34,8 @@ struct LoginItemRefusalTests {
             let state = LoginItemManager.guardedWrite(
                 enabled,
                 at: url,
-                write: { writes.append($0) }
+                write: { writes.append($0) },
+                read: { .enabled }
             )
             #expect(writes.isEmpty, "\(url.path) was written")
             #expect(state == .unavailable(reason))
@@ -47,11 +48,13 @@ struct LoginItemRefusalTests {
     )
     func registerableCopyWrites(enabled: Bool) {
         var writes: [Bool] = []
-        _ = LoginItemManager.guardedWrite(
+        let state = LoginItemManager.guardedWrite(
             enabled,
             at: Self.installed,
-            write: { writes.append($0) }
+            write: { writes.append($0) },
+            read: { .requiresApproval }
         )
         #expect(writes == [enabled])
+        #expect(state == .requiresApproval)
     }
 }
