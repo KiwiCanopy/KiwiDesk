@@ -4,9 +4,10 @@ import Foundation
 /// the process swap (#930 ruling 5): written by the in-place
 /// stop's capture alone, so after a quit, a crash or a wake the
 /// fields are nil and a relaunch starts them fresh, which users
-/// rely on. Which stored properties ride here, which ride every
-/// snapshot, and which stay behind is `SnapshotCarryCensusTests`'
-/// register.
+/// rely on. The hand float is not here: every stop carries it
+/// (#1864). Which stored properties ride here, which ride every
+/// snapshot or every stop, and which stay behind is
+/// `SnapshotCarryCensusTests`' register.
 extension StateSnapshot {
     /// One Space's session sizing and its Monocle hold.
     public struct SpaceSession: Codable, Sendable, Equatable {
@@ -36,26 +37,20 @@ extension StateSnapshot {
         }
     }
 
-    /// One window's runtime flags: the user float (`true`, else
-    /// nil — detection re-derives it, #1810), the sticky scope and
-    /// the sticky-reach override.
+    /// One window's runtime flags: the sticky scope and the
+    /// sticky-reach override. The hand float rides the record
+    /// itself, on every stop (#1864, `StateSnapshot+StopFloats`).
     public struct WindowSession: Codable, Sendable, Equatable {
-        public var floating: Bool?
         public var sticky: StickyScope
         public var stickyReach: Bool?
 
-        public init(
-            floating: Bool?,
-            sticky: StickyScope,
-            stickyReach: Bool?
-        ) {
-            self.floating = floating
+        public init(sticky: StickyScope, stickyReach: Bool?) {
             self.sticky = sticky
             self.stickyReach = stickyReach
         }
 
         private enum CodingKeys: String, CodingKey {
-            case floating, sticky
+            case sticky
             case stickyReach = "sticky_reach"
         }
     }
@@ -103,8 +98,6 @@ extension StateCoordinator {
             var record = record
             if let window = windows[record.windowID] {
                 record.session = StateSnapshot.WindowSession(
-                    floating: userFloated.contains(window.id)
-                        ? true : nil,
                     sticky: window.stickyScope,
                     stickyReach: stickyReachOverrides[window.id]
                 )
@@ -140,13 +133,6 @@ extension StateCoordinator {
             windows[record.windowID] != nil
         else { return }
         let id = record.windowID
-        // A pre-#1810 `false` was a manual tile, which is gone;
-        // a window detection floats takes no record.
-        if session.floating == true,
-            windows[id]?.isFloating == false
-        {
-            setFloating(id, true)
-        }
         setSticky(id, session.sticky)
         stickyReachOverrides[id] = session.stickyReach
     }

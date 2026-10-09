@@ -72,8 +72,12 @@ extension KiwiCore {
         else { return }
         state.crossSession.commit([pair])
         state.remember(window.id, in: pair.record.space)
-        if !tiler.looksStashed(pair.record.frame) {
-            state.restoredFrames[window.id] = pair.record.frame
+        // A corner rides only for the float it carries (#1864).
+        if !tiler.looksStashed(pair.record.frame) || pair.record.floating {
+            state.restoredFrames[window.id] = .init(
+                frame: pair.record.frame,
+                floating: pair.record.floating
+            )
         }
         logCrossSession([pair], phase: "arrival")
     }
@@ -81,7 +85,8 @@ extension KiwiCore {
     /// The title pass, `titleSettle` after arming: tracked windows
     /// still unpaired are re-filed quietly through the one
     /// membership door — no focus, no event, one retile. The
-    /// focused window is paired but left where it is; a sticky one
+    /// focused window is paired but left where it is, a carried
+    /// hand float floating there (#1864); a sticky one
     /// and one a user verb filed (`placed`) are never paired.
     func crossSessionSettlePass() {
         guard crossSessionStillApplies() else { return }
@@ -91,11 +96,14 @@ extension KiwiCore {
         logCrossSession(pairs, phase: "settle")
         var moved = false
         for pair in pairs {
-            let from = state.workspaces.space(of: pair.window)
             // The window the user is in stays where it is.
+            let focused = pair.window == state.workspaces.lastFocused
+            if restoreCarriedFloat(pair, placing: !focused) {
+                moved = true
+            }
+            let from = state.workspaces.space(of: pair.window)
             guard state.workspaces[pair.record.space] != nil,
-                from != pair.record.space,
-                pair.window != state.workspaces.lastFocused
+                from != pair.record.space, !focused
             else { continue }
             fileMembership(
                 pair.window,
@@ -106,6 +114,24 @@ extension KiwiCore {
             moved = true
         }
         if moved { retile() }
+    }
+
+    /// A title-pass pair's carried hand float (#1864), whether or
+    /// not the pass re-files it: floated, and with `placing` its
+    /// record's frame seeded for the stash to deliver — never a
+    /// corner — as the boot replay and an arrival pay theirs. The
+    /// window the user is in floats where it is. True when it
+    /// floated.
+    private func restoreCarriedFloat(
+        _ pair: CrossSessionPair,
+        placing: Bool
+    ) -> Bool {
+        guard pair.record.floating, state.floatByHand(pair.window)
+        else { return false }
+        if placing, !tiler.looksStashed(pair.record.frame) {
+            tiler.seedStash(pair.window, frame: pair.record.frame)
+        }
+        return true
     }
 
     /// Whether the match is open under the arrangement it armed

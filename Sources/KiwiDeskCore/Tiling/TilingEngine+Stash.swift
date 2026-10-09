@@ -151,18 +151,8 @@ extension TilingEngine {
             for id in space.windows {
                 guard let window = state.windows[id],
                     id != dragExemptWindow,
-                    // A native-fullscreen window lives on its
-                    // own macOS Space (#670): there is nothing
-                    // on this desktop to park, and the frame-set
-                    // would poke the fullscreen app for nothing.
-                    !window.isFullscreen,
-                    // Sticky exemption is scope-aware (#445): a
-                    // global sticky never parks; a display sticky
-                    // parks only off its own monitor.
-                    !state.stickyExemptFromStash(
-                        window,
-                        onSpace: space.id
-                    )
+                    // Fullscreen (#670) and sticky (#445) stay.
+                    state.parksOnInactive(window, in: space.id)
                 else { continue }
                 let screen =
                     ScreenList.all.first {

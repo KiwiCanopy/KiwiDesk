@@ -141,11 +141,13 @@ struct ClosedReturnPlacementTests {
         let elsewhere = SpaceID("2")
         core.state.workspaces.ensureSpace(elsewhere)
         core.state.remember(target, in: elsewhere)
-        core.state.restoredFrames[target] = CGRect(
-            x: 9,
-            y: 9,
-            width: 90,
-            height: 90
+        core.state.restoredFrames[target] = .init(
+            frame: CGRect(
+                x: 9,
+                y: 9,
+                width: 90,
+                height: 90
+            )
         )
         var log: [String] = []
         core.onLog = { log.append($0) }
@@ -163,11 +165,13 @@ struct ClosedReturnPlacementTests {
         control.lastDesktopSwitch = Date()
         control.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
         control.lastDesktopSwitch = .distantPast
-        control.state.restoredFrames[WindowID(1)] = CGRect(
-            x: 9,
-            y: 9,
-            width: 90,
-            height: 90
+        control.state.restoredFrames[WindowID(1)] = .init(
+            frame: CGRect(
+                x: 9,
+                y: 9,
+                width: 90,
+                height: 90
+            )
         )
         var controlLog: [String] = []
         control.onLog = { controlLog.append($0) }

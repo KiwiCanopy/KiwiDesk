@@ -15571,14 +15571,55 @@ snapshot also carries the session's resized splits, weights and
 Scrolling rest, the Monocle hold, and the float and sticky flags
 set by hand, since without them the new process lays the desk
 out differently and the restart is visible after all. After a
-quit and relaunch they start fresh, as they always have: a
-relaunch that resets sizing is a behaviour users rely on, and the
-two exits should not start to mean the same thing. For the same
-reason a snapshot a failed relaunch leaves behind gives up its
-session memory two minutes after the stop: the next launch, much
-later, is a launch after a quit, and restores the arrangement
-alone. The payload is one build writing for the next, so a
-payload the reading build cannot decode costs only itself.
+quit and relaunch the sizing and the sticky flag start fresh, as
+they always have: a relaunch that resets sizing is a behaviour
+users rely on, and the two exits should not start to mean the
+same thing. For the same reason a snapshot a failed relaunch
+leaves behind gives up its session memory two minutes after the
+stop: the next launch, much later, is a launch after a quit, and
+restores the arrangement without the sizing. The payload is one
+build writing for the next, so a payload the reading build cannot
+decode costs only itself.
+
+:::unreleased
+### A quit arranges floats too
+
+**[Principle]**
+
+**The quit gather places every window it can reach.** A float
+left where KiwiDesk last put it is as stranded as a tile — a
+parked one sits in a screen corner — so the gather takes every
+Space's floats, shown or not, beside its tiles. A native-fullscreen
+window, which lives on its own macOS Space, and a transient
+overlay such as a popup stay out
+([#1864](https://github.com/KiwiCanopy/KiwiDesk/issues/1864)).
+
+**On the condition that the next launch gives them back.** No
+layout recomputes a float's frame, so the gather overwrites the
+only one it has, and is admitted only because a stop carries
+each float's state: its Space and frame, which every snapshot
+carries — a parked float's capture in place of its corner — and
+the float flag set by hand, which a quit would otherwise start
+fresh. The flag rides every stop's capture, a quit's, an in-place
+restart's and the file a logout's freeze keeps, never a plain
+autosave: a crash moved nothing, so it still starts the flag
+fresh, as
+[the in-place trade-off](#an-in-place-restart-gathers-nothing)
+rules for sizing. A window that reopens after the replay takes
+its flag at arrival, beside its frame.
+
+**A restart soon after a Quit counts as that Quit's relaunch.**
+Quitting and then restarting the Mac is one gesture — closing
+up — and the Quit has just gathered every float, so the first
+launch after a boot or a login that began within ten minutes of
+the Quit matches its file by app and title, once, as it matches a
+logout's
+([A restart of the Mac restores by app and title](#a-restart-of-the-mac-restores-by-app-and-title)).
+Past ten minutes the Quit lets the arrangement go, as before:
+someone who quit, worked without KiwiDesk and restarted later has
+not asked for it back. Within one boot the login's start cannot be
+read, so the launch stands in for it, which can only refuse more.
+:::
 
 :::unreleased
 ### A restart of the Mac restores by app and title
@@ -15603,14 +15644,16 @@ the match stays open for two. Windows sharing one title cannot be
 told apart by any key KiwiDesk holds, so they go back to their
 app's Spaces in no particular order.
 
-**Earned by the shutdown, not by the passage of time.** Only a
-snapshot the logout freeze wrote crosses a boot, and only once,
-by the first launch after it. A plain Quit lets the arrangement
-go: someone who quits KiwiDesk, works without it and restarts has
-not asked for an old arrangement back, however recent. So there
-is no age limit and no setting — the freeze is the user's
-restart reaching a running KiwiDesk, which is the one case where
-putting the desk back is what was asked for.
+**Earned by the shutdown.** A snapshot the logout freeze wrote
+crosses a boot, and only once, by the first launch after it — the
+freeze is the user's restart reaching a running KiwiDesk, which
+is the case where putting the desk back is what was asked for. A
+plain Quit crosses only when the next boot or login began within
+ten minutes of it, the one bound
+([#1864](https://github.com/KiwiCanopy/KiwiDesk/issues/1864),
+[A quit arranges floats too](#a-quit-arranges-floats-too)):
+someone who quits KiwiDesk, works without it and restarts later
+has not asked for an old arrangement back. There is no setting.
 
 **The freeze became a rollback.** macOS quits the other apps
 about 14 s before KiwiDesk hears the power-off notification
