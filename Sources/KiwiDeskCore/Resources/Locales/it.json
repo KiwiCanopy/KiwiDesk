@@ -1234,7 +1234,7 @@
   "profiles.rename.help": "Rinomina profilo",
   "profiles.rename_failed": "Ridenominazione non riuscita: %1$@",
   "profiles.save_blocked_idle": "KiwiDesk non ha ancora avviato l'affiancamento, quindi non viene rilevato alcuno schermo. Avvia prima l'affiancamento: un profilo salvato adesso non registrerebbe alcuno schermo e non verrebbe mai applicato.",
-  "profiles.save_blocked_paused": "La gestione delle finestre è in pausa perché l'accesso all'Accessibilità è disattivato, quindi non viene rilevato alcuno schermo. Concedi prima l'accesso: un profilo salvato adesso non registrerebbe alcuno schermo e non verrebbe mai risolto.",
+  "profiles.save_blocked_paused": "La gestione delle finestre è in pausa perché l'accesso all'Accessibilità è disattivato, quindi non viene rilevato alcuno schermo. Concedi prima l'accesso: un profilo salvato adesso non registrerebbe alcuno schermo e non verrebbe mai applicato.",
   "profiles.save_failed": "Salvataggio non riuscito: %1$@",
   "profiles.saved.caption": "Un profilo si carica sulle configurazioni di schermi che gli appartengono, a meno che una Scrivania non sia associata a un altro.",
   "profiles.saved.empty": "Nessun profilo ancora salvato — si utilizzerà un layout integrato finché non ne salverai uno.",

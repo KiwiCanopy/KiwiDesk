@@ -89,7 +89,7 @@ word, never its *display* or *monitor* word. The
 `destination.monitors` destination is titled **Screens** and takes
 that same SCREEN word, as do its rows (**Screen pin**, **Screen
 fingerprints**) — so the qualifier and the destination name one
-concept, which is what Family C rule 1 asks; a *display* or
+concept, Family C's one concept, one word; a *display* or
 *monitor* word beside them would read as a second one.
 
 **`zh-Hans` is the measured exception.** It splits the English
@@ -97,11 +97,13 @@ concept, which is what Family C rule 1 asks; a *display* or
 for a countable one (`presets.screen_name.main` 主显示器,
 `profiles.screens.many` %1$d 台显示器) — so 显示器 IS its screen
 word here, and rule 2 is satisfied by the split. Countable
-screens take 显示器 wherever they are listed or counted — the
-destination, `diff.drift.screens`, `menu.layout.all_screens`
-所有显示器 and "main screen" 主显示器 — so the destination title
-and those rows share one word because they share one concept,
-not by collision.
+screens take 显示器 where a screen is counted with a measure word
+or named as an item — the destination and its rows,
+`diff.drift.screens`, `menu.layout.all_screens` 所有显示器 and
+every "all screens", every count (%1$d 台显示器) and "main
+screen" 主显示器 — so the destination title and those rows share
+one word because they share one concept, not by collision; a
+single screen pointed at (这些屏幕, 指针所在的屏幕) keeps 屏幕.
 
 ### What it requires
 
@@ -416,7 +418,7 @@ to stop, so the escape is ranked too. Take the first that fits.
 case — it makes the collision *visible*, not resolved. Steps 1–4
 are review's, like the rest of this family.
 
-**One concept is swept in English and open per catalog**: the
+**One concept is swept in English and in every catalog**: the
 physical screen, where English carried three words. The winner is
 `screen`, `display` is reserved for quoting Apple's own controls,
 the English-side obligation is
@@ -427,7 +429,8 @@ each catalog second, by its own rule-2 run — which the English
 ruling does **not** decide: each locale took its own majority
 SCREEN word, and a quoted Apple control keeps Apple's word. A
 string joining the family takes the word its catalog already
-uses, found by grepping that catalog.
+uses, found by grepping that catalog — in `zh-Hans`, by the
+countability split above.
 
 ### Why there is no per-locale word list here
 

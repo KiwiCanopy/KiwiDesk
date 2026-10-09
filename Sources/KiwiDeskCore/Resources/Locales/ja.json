@@ -1157,7 +1157,7 @@
   "presets.design_studio.summary": "中央にフロントエンドのIDEとプレビュー、左にデザイン用キャンバス、右にインスペクタ。",
   "presets.developer.name": "開発者",
   "presets.developer.summary": "IDE、リファレンス用のドキュメント、実行中のアプリを全画面表示するスペース。",
-  "presets.dual_developer.name": "デュアルディスプレイ開発者",
+  "presets.dual_developer.name": "2画面開発者",
   "presets.dual_developer.summary": "メイン画面にコードとドキュメント、2台目の画面にメール、チャット、メディア。",
   "presets.editing_stored": "プリセットを適用すると実行中のレイアウトが切り替わります。保存済みプロファイルの編集ではこれは起こりません。適用するには「実行中」に切り替えてください。",
   "presets.focus_stack.name": "フォーカススタック",

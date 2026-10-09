@@ -1234,7 +1234,7 @@
   "profiles.rename.help": "Renomear perfil",
   "profiles.rename_failed": "Falha ao renomear: %1$@",
   "profiles.save_blocked_idle": "O KiwiDesk ainda não iniciou o lado a lado, então nenhuma tela é detectada. Inicie o lado a lado primeiro — um perfil salvo agora não registraria tela alguma e nunca seria aplicado.",
-  "profiles.save_blocked_paused": "O gerenciamento de janelas está pausado porque o acesso à Acessibilidade está desativado, então nenhuma tela é detectada. Conceda o acesso primeiro — um perfil salvo agora não registraria tela alguma e nunca seria resolvido.",
+  "profiles.save_blocked_paused": "O gerenciamento de janelas está pausado porque o acesso à Acessibilidade está desativado, então nenhuma tela é detectada. Conceda o acesso primeiro — um perfil salvo agora não registraria tela alguma e nunca seria aplicado.",
   "profiles.save_failed": "Falha ao salvar: %1$@",
   "profiles.saved.caption": "Um perfil é carregado nas configurações de telas que pertencem a ele, a menos que uma Mesa esteja vinculada a outro.",
   "profiles.saved.empty": "Nenhum perfil salvo ainda — um layout integrado é usado até que você salve um.",
