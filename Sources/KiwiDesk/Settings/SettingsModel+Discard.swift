@@ -2,8 +2,9 @@ import Foundation
 import KiwiDeskCore
 
 /// Destructive action staged behind the one dashboard dialog
-/// (#515): a discard of staged edits, or a profile delete that
-/// asks even when clean (#1619).
+/// (#515): a discard of staged edits, a profile delete that asks
+/// even when clean (#1619), or a close or quit over unsaved edits
+/// (#2049).
 struct PendingDiscard: Identifiable {
     /// What the dialog confirms. The kind decides the title, the
     /// Cancel wording and which button Return picks, so no
@@ -11,12 +12,16 @@ struct PendingDiscard: Identifiable {
     enum Kind: Equatable {
         case discard
         case deleteProfile(name: String)
+        /// Save / Discard / Cancel before a close or quit (#2049).
+        case leave(DraftLeave.Intent)
     }
 
     let id = UUID()
     var kind = Kind.discard
     let message: String
     let confirmLabel: String
+    /// A leave's Save verb; nil where saving is blocked.
+    var saveLabel: String?
     let perform: @MainActor () -> Void
 
     @MainActor var title: String {
@@ -29,6 +34,16 @@ struct PendingDiscard: Identifiable {
                 "Delete “%1$@”?",
                 name
             )
+        case .leave(.close):
+            return L(
+                "discard.leave.close.title",
+                "Save your changes before closing Settings?"
+            )
+        case .leave(.quit):
+            return L(
+                "discard.leave.quit.title",
+                "Save your changes before quitting KiwiDesk?"
+            )
         }
     }
 
@@ -36,15 +51,24 @@ struct PendingDiscard: Identifiable {
     /// which a clean delete has nothing to keep.
     @MainActor var cancelLabel: String {
         switch kind {
-        case .discard: return L("discard.cancel", "Cancel")
+        case .discard, .leave: return L("discard.cancel", "Cancel")
         case .deleteProfile:
             return L("profiles.delete.confirm.cancel", "Cancel")
         }
     }
 
     /// Return picks Cancel on a delete with no undo, so a reflex
-    /// keypress deletes nothing (#1619).
-    var cancelIsDefault: Bool { kind != .discard }
+    /// keypress deletes nothing (#1619). A leave picks Save, or
+    /// Cancel where Save is blocked (`DiscardConfirmation`).
+    var cancelIsDefault: Bool {
+        if case .deleteProfile = kind { return true }
+        return false
+    }
+
+    var isLeave: Bool {
+        if case .leave = kind { return true }
+        return false
+    }
 }
 
 /// Discard confirmation gating logic on `SettingsModel`
@@ -133,17 +157,14 @@ extension SettingsModel {
         pending.perform()
     }
 
-    /// Whether the open question guards unsaved work, so a quit
-    /// keeps asking rather than closing it (#2049): the discard
-    /// gate. A delete's confirm closes as Cancel like any other.
-    var quitKeepsAsking: Bool { pendingDiscard?.kind == .discard }
-
     /// Cancels a parked action — Cancel, and the disarm net on
     /// window close: the window is retained
     /// (`isReleasedWhenClosed = false`), so a parked closure could
     /// otherwise survive to the next `show()` and present a dialog
     /// about edits that no longer exist (`windowWillClose`).
     func cancelPendingDiscard() {
+        let leaving = pendingDiscard?.isLeave == true
         pendingDiscard = nil
+        if leaving { finishLeave(proceeding: false) }
     }
 }

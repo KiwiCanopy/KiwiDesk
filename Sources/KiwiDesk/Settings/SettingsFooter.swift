@@ -62,6 +62,13 @@ struct SettingsFooter: View {
                 execute: work
             )
         }
+        // A close or quit's Save that needs a name (#2049).
+        .onChange(of: model.leaveNamingRequested) { _, asked in
+            guard asked else { return }
+            model.leaveNamingRequested = false
+            prefillNewProfileName()
+            namingNewProfile = true
+        }
         .alert(
             L(
                 "footer.save_as_new.title",
@@ -78,10 +85,12 @@ struct SettingsFooter: View {
             Button(L("footer.save", "Save")) {
                 model.saveAsNewProfile(named: newProfileName)
                 newProfileName = ""
+                model.namingEnded()
             }
             .disabled(newProfileName.trimmed.isEmpty)
             Button(L("footer.cancel", "Cancel"), role: .cancel) {
                 newProfileName = ""
+                model.namingEnded()
             }
         } message: {
             Text(saveAsNewMessage)

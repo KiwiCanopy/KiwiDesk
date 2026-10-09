@@ -85,10 +85,36 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// write over a tour paint (#1720); a stored profile's cannot.
     var hasUnsavedDraft: Bool { model.isDirty && model.target == .live }
 
-    /// Whether `window` is this one showing the discard question,
-    /// the one sheet a quit keeps asking (#2049, `QuitSheets`).
-    func guardsUnsavedWork(on window: NSWindow) -> Bool {
-        window === self.window && model.quitKeepsAsking
+    /// Settings is open with unsaved edits, so a quit asks first
+    /// (#2049). Closed, nothing asks: no draft outlives the window.
+    var quitAsksAboutDraft: Bool {
+        guard let window,
+            window.isVisible || window.isMiniaturized
+        else { return false }
+        return model.isDirty
+    }
+
+    /// Brings Settings forward and asks Save / Discard / Cancel;
+    /// `reply` is told whether the quit goes ahead.
+    func askBeforeQuit(reply: @escaping @MainActor (Bool) -> Void) {
+        show()
+        model.leavingDraft(
+            .quit,
+            proceed: { reply(true) },
+            cancel: { reply(false) }
+        )
+    }
+
+    /// Every close path — the close button, ⌘W, File ▸ Close —
+    /// asks first while the draft holds unsaved edits (#2049).
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        guard model.isDirty else { return true }
+        model.leavingDraft(
+            .close,
+            proceed: { [weak sender] in sender?.close() },
+            cancel: {}
+        )
+        return false
     }
 
     /// Re-reads saved profiles list without discarding staged edits (#246).
@@ -204,10 +230,13 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         NSApp.forceFront(window)
     }
 
-    /// Disarms recorder and cleans up state on window close (#213, #515).
+    /// Disarms recorder and cleans up state on window close (#213,
+    /// #515); a close that did not ask drops the draft, which never
+    /// outlives the window (#2049).
     func windowWillClose(_ notification: Notification) {
         model.setRecorderArmed(false)
         model.cancelPendingDiscard()
+        if model.isDirty { model.revert() }
         ColorPanelController.shared.dismiss()
         model.settingsClosed()
     }

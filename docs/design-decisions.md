@@ -6915,36 +6915,49 @@ Config Issues) stay un-miniaturizable so they are completed or
 dismissed rather than parked indefinitely.
 
 :::unreleased
-### A quit closes a confirmation; only unsaved work keeps asking (#2049)
+### Unsaved edits ask at the window; a quit closes every dialog (#2049)
 
 **[Principle]**
 
-**A quit, restart or logout that meets an open sheet closes it as
-Cancel, unless the sheet guards unsaved Settings work — the
-discard question — which keeps asking.** KiwiDesk runs in the
-background, so a dialog left open in a Settings window nobody is
-looking at must never hold up a restart: the user would meet
-"KiwiDesk interrupted restart" over a question they had forgotten.
-A dialog whose Cancel loses nothing — delete, reset, restore,
-the About or preset sheet, an open or save panel — is answered
-for them. The discard question is different in kind: its subject
-is the unsaved draft itself, so answering it for the user is
-deciding about their work, which the owner's ruling reserves for
-them. A kept question closes nothing else either, since the quit
-it stops does not happen.
+**The Settings draft lives exactly as long as its window.**
+Closing the window with unsaved edits — the close button, ⌘W,
+File ▸ Close — asks Save / Discard / Cancel, and a quit while
+Settings is open with unsaved edits asks the same with Settings
+brought to the front: the user's Quit, Install and Relaunch, a
+quit another app sends, a logout or restart. With Settings
+closed there is no draft, so no quit ever asks. This amends
+#455's "the draft survives a close": a draft that outlived its
+window could only be met again as a question from an app showing
+nothing, or be dropped silently by the next quit, which is what
+every quit did before. A document app asks at its window and at
+a quit while the window is open; Settings now does the same,
+and a visible window is never a hidden prompt.
 
-**A new dialog is a confirmation unless it opts in.** The guard
-is one predicate, `SettingsModel.quitKeepsAsking`, read through
-`QuitSheetKeeper`; a dialog that holds unsaved work joins it, and
-any other is closed without a change here. AppKit closes only an
-`NSAlert` sheet on its own and refuses termination for any other
-sheet, which is why `KiwiApplication` clears them in front of
-`terminate(_:)`. A logout's quit event is refused before that
-method runs, so the power-off notification clears them too; that
-covers the logout only while macOS posts the notification ahead of
-the quit event, which is the ordering this relies on. An
-app-modal alert or panel is not a sheet: AppKit quits through it,
-once SIGTERM is delivered in the run loop's common modes.
+**Every other Settings dialog closes as Cancel on any quit.**
+KiwiDesk runs in the background, so a dialog forgotten in an
+open window must not hold up a restart ("KiwiDesk interrupted
+restart"). A dialog's Cancel loses nothing, and the unsaved
+edits it sat over are asked about by the question above. AppKit
+closes only an `NSAlert` sheet on its own and refuses termination
+for any other sheet, and refuses a logout's quit event before
+`terminate(_:)` runs, which is why `KiwiApplication` closes them
+ahead of `terminate(_:)` and the power-off notification closes
+them ahead of the quit event — the logout half relies on macOS
+posting that notification first.
+
+**A SIGTERM discards.** A kill, launchd or `kiwidesk service
+restart` cannot wait for an answer, so it quits without asking
+and the draft goes.
+
+**The question's verbs.** Save is the default, on Return;
+Discard is destructive, on ⌘D; Cancel is on Escape and keeps the
+window open or cancels the quit. Save is the footer's own Save:
+where it needs a name the naming prompt opens and the close or
+quit continues only once that save lands, and a save that fails
+keeps the draft and cancels. Where saving is blocked (#335) the
+question offers Discard and Cancel, Cancel the default, with the
+existing reason. It is a kind of the one discard gate
+(`PendingDiscard`), so it shares that gate's single pending slot.
 :::
 
 ### The tour is chrome, and chrome is not tiled
@@ -8872,8 +8885,10 @@ confirmation, and that is the macOS norm. **Adopt** keeps its
 own dialog instead of stacking the shared one, so one gesture
 prompts once; that dialog names the dropped buffer itself when
 dirty. Reopening the window (`SettingsWindowController.show`)
-guards with `if !model.isDirty` rather than prompting, because
-reopening is not a user action against their edits (#455). The
+keeps an open window's draft rather than prompting, because a
+raise is not a user action against their edits (#455); a closed
+window has no draft to keep, since a close with unsaved edits
+asks first (#2049). The
 menu-bar Load Profile and the Config Issues delete go straight
 to the core and never `reload()` the model, so they drop
 nothing.
@@ -8890,15 +8905,18 @@ profile (the healthy and the broken), and one pending slot is
 what makes "never two dialogs" hold. A Desktop binding's × stays
 unconfirmed: it is one pick to set again.
 
-*The dialog offers two verbs, not three.* macOS document apps
-offer Save / Discard / Cancel with Save as default. An
-unconditional Save is not offerable here: with no profile yet
-the primary action is "Save as New Profile…", which needs a
-naming sheet, and `profileSaveBlockedReason` can block saving
-outright while Accessibility is off. Discard / Cancel is the
-honest reduction. Adding the third verb later means changing
-`PendingDiscard` and every call site — decide before doing it,
-not by accretion.
+*The dialog offers two verbs, not three — before an action.*
+macOS document apps offer Save / Discard / Cancel with Save as
+default. Before a Load, a preset or a rename an unconditional
+Save is not offerable: with no profile yet the primary action is
+"Save as New Profile…", which needs a naming sheet, and
+`profileSaveBlockedReason` can block saving outright while
+Accessibility is off. Discard / Cancel is the honest reduction
+there. The third verb exists for a close or a quit alone (#2049,
+*Unsaved edits ask at the window*), where leaving with the work
+unsaved is the whole question; it is a kind of `PendingDiscard`
+that runs the naming prompt or offers two verbs where saving is
+blocked, and no action's gate takes it.
 
 **A paused engine blocks profile saves, never global ones.** The
 #335 gate exists for one reason: with Accessibility off no
@@ -9467,9 +9485,8 @@ Settings ▸ Keyboard Shortcuts applies *and* saves in one act —
 and one save pill cannot say both "not in effect yet" and "in
 effect but not kept". Reverting the live copy when the window
 closes was weighed and refused: closing Settings would silently
-undo a chord the user just pressed, while the draft survives
-the close, and a chord left in an open window still dies at the
-restart. What stays live is the suspend while a recorder is
+undo a chord the user just pressed, and a chord left unsaved
+in an open window still dies at the restart. What stays live is the suspend while a recorder is
 armed (#213): it exists so a chord already bound to KiwiDesk is
 captured rather than fired, and disarming resumes the saved
 table. What a recording can still tell before Save — a

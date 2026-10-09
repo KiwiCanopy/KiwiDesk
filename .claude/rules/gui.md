@@ -314,17 +314,21 @@ panel's verdict. Adding `.closable` instead is the wrong door: it
 routes through AppKit's `close()` and past the #952 activation
 hand-back.
 
-## A quit closes a dialog unless it guards unsaved work (#2049)
+## Unsaved edits ask at the window; a quit closes every dialog (#2049)
 
-**A new sheet or alert is a confirmation, and a quit, restart or
-logout closes it as Cancel; one whose subject is unsaved Settings
-work joins `SettingsModel.quitKeepsAsking` instead**, which stops
-the quit and brings Settings forward. Every quit path reaches
-`QuitSheets.clearOwnWindows()` — `KiwiApplication.terminate(_:)`
-and the power-off observer — so a new path calls that door rather
-than `NSApp.terminate` around it. `QuitSheetsTests` holds the
+**A quit, restart or logout closes every sheet as Cancel, through
+the one `QuitSheets.clearOwnWindows()`** — `KiwiApplication`'s
+`terminate(_:)` and the power-off observer call it, and a new
+quit path calls that door rather than `NSApp.terminate` around
+it. **Unsaved Settings edits are asked about only through
+`SettingsModel.leavingDraft`**, from the window's
+`windowShouldClose` and from `applicationShouldTerminate` while
+Settings is open, and never by a dialog of their own; a close
+that did not ask drops the draft, which never outlives the
+window, and a SIGTERM quits through `terminateDiscardingDraft`
+without asking. `QuitSheetsTests` and `DraftLeaveTests` hold the
 verdicts and `QuitSheetsWiringTests` the paths; the argument is
-*A quit closes a confirmation; only unsaved work keeps asking* in
+*Unsaved edits ask at the window; a quit closes every dialog* in
 `docs/design-decisions.md`.
 
 ## The Settings raise tells Core first (#1281)

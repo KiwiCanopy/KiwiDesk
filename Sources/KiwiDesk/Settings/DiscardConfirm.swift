@@ -19,25 +19,34 @@ struct DiscardConfirmation: ViewModifier {
                     // Dismissal only. Confirm clears the state
                     // itself, before running, so this never has
                     // to win a race against a view swap.
-                    if !shown { model.cancelPendingDiscard() }
+                    if !shown { model.discardDialogDismissed() }
                 }
             ),
             titleVisibility: .visible,
             presenting: model.pendingDiscard
         ) { pending in
-            // Hand over the presented value, never a re-read:
-            // the dismissal setter above clears the same state,
-            // and SwiftUI does not contract which runs first.
-            Button(pending.confirmLabel, role: .destructive) {
-                model.confirmPendingDiscard(pending)
+            if pending.isLeave {
+                leaveActions(pending)
+            } else {
+                gateActions(pending)
             }
-            Button(pending.cancelLabel, role: .cancel) {}
-                .keyboardShortcut(
-                    pending.cancelIsDefault ? .defaultAction : nil
-                )
         } message: { pending in
             Text(pending.message)
         }
+    }
+
+    @ViewBuilder
+    private func gateActions(_ pending: PendingDiscard) -> some View {
+        // Hand over the presented value, never a re-read:
+        // the dismissal setter above clears the same state,
+        // and SwiftUI does not contract which runs first.
+        Button(pending.confirmLabel, role: .destructive) {
+            model.confirmPendingDiscard(pending)
+        }
+        Button(pending.cancelLabel, role: .cancel) {}
+            .keyboardShortcut(
+                pending.cancelIsDefault ? .defaultAction : nil
+            )
     }
 }
 
