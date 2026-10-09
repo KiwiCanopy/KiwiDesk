@@ -71,6 +71,7 @@ struct AdvancedLuaGroup: View {
                             $0.id == id
                         },
                         bindings: $bindings,
+                        config: model.config,
                         // Id-based: Steal mutates the array
                         // (removing a navigation holder
                         // shifts indices) before committing —

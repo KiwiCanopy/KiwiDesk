@@ -25,6 +25,7 @@ struct RecorderPreflightTests {
             combo: "option+j",
             excluding: { $0.id == own.id },
             bindings: bindings,
+            config: GuiConfig(),
             commit: { _ in }
         )
 

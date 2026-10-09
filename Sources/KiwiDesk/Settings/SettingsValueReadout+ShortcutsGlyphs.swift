@@ -4,9 +4,10 @@ import KiwiDeskCore
 /// Shortcut action label resolution and glyph rendering for settings readout
 /// (#23).
 extension SettingsValueReadout {
-    /// Builds localized action labels from the union of BOTH
-    /// sides' space lists and resize steps, so a row keeps its
-    /// name even when the draft also renamed the thing it targets.
+    /// Localized action labels keyed by Lua, from the one roster
+    /// (`KeybindingCatalog.namedCommands`) over the union of BOTH
+    /// sides' spaces, layers, resize steps and bindings, so a row
+    /// keeps its name even when the draft renamed what it targets.
     static func shortcutsActionLabels(
         old: GuiConfig,
         new: GuiConfig
@@ -21,29 +22,16 @@ extension SettingsValueReadout {
         where !layerNames.contains(layer.name) {
             layerNames.append(layer.name)
         }
-        var commands =
-            KeybindingCatalog.focusDirections
-            + KeybindingCatalog.goToSpace(spaces)
-            + KeybindingCatalog.swapDirections
-            + KeybindingCatalog.trackRows
-            + KeybindingCatalog.moveToSpace(spaces)
-            + desktopCommands(old: old, new: new)
-            + [
-                KeybindingCatalog.showShortcuts,
-                KeybindingCatalog.openSettings,
-            ]
-            + layerNames.map(
-                KeybindingCatalog.switchLayerCommand
-            )
         let steps = Set([
             Int(old.settings.resizeStep),
             Int(new.settings.resizeStep),
         ])
-        for step in steps.sorted() {
-            commands += KeybindingCatalog.resizeAndFloat(
-                step: step
-            )
-        }
+        let commands = KeybindingCatalog.namedCommands(
+            spaces: spaces,
+            layerNames: layerNames,
+            steps: steps.sorted(),
+            bindings: (old.layers + new.layers).flatMap(\.bindings)
+        )
         var labels: [String: String] = [:]
         for command in commands
         where labels[command.lua] == nil {
@@ -52,28 +40,11 @@ extension SettingsValueReadout {
         return labels
     }
 
-    /// Desktop rows read from the BINDINGS, never a live Desktop
-    /// list: a config records no Desktops, and the diff must name
-    /// a row whatever is plugged in while it is read.
-    private static func desktopCommands(
-        old: GuiConfig,
-        new: GuiConfig
-    ) -> [NavCommand] {
-        let bindings = (old.layers + new.layers).flatMap(
-            \.bindings
-        )
-        let desktops = KeybindingCatalog.desktopOffer(
-            live: [],
-            bindings: bindings
-        )
-        return KeybindingCatalog.goToDesktop(desktops.desktops)
-            + KeybindingCatalog.moveToDesktop(desktops.desktops)
-    }
-
     /// Resolves display label for keybinding.
     static func shortcutsBindingLabel(
         _ binding: KeyBinding,
-        labels: [String: String]
+        labels: [String: String],
+        config: GuiConfig
     ) -> String {
         if let label = labels[binding.lua] { return label }
         if binding.kind == .application,
@@ -85,8 +56,10 @@ extension SettingsValueReadout {
                 forBundleID: bundleID
             )
         }
-        if !binding.label.isEmpty { return binding.label }
-        return binding.lua
+        return KeybindingCatalog.localizedName(
+            of: binding,
+            config: config
+        )
     }
 
     /// Formats shortcut combo string into native glyphs (#23).
