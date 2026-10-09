@@ -109,15 +109,11 @@ class — see
 | Two connected displays of the **same model at the same resolution** are one identity to KiwiDesk: a space pinned to one may open on the other, both draw the same chips in Settings ▸ Monitors, and only one of them can carry the "main" badge. | A display is recognised by `name:WxH` because the identity has to be stable across sessions and macOS's `CGDirectDisplayID` is reassigned across reconnects and reboots, EDID serial numbers are unreliable in exactly the population that needs them (zeros for virtual, AirPlay and projector displays, missing on real panels), and every stored pin is keyed by that string, so changing the identity is a config-shape change. | `Display.fingerprint` (`Sources/KiwiDeskCore/Models/DisplayModel.swift`) is `name:WxH`; the Monitors picture, the pin map and the main badge all key off it, and `MonitorsFamilyRows.hasAmbiguousDisplays` is what detects the collision. | The picture **says so** rather than letting it read as a bug — a note appears under the arrangement whenever two connected displays share a fingerprint. Real fix planned in [#734](https://github.com/KiwiCanopy/KiwiDesk/issues/734): a display identity that survives reconnects without colliding. Changing it re-keys every stored pin, so the change owes a one-shot `ConfigMigration` step (AGENTS.md §5), and the changelog says so. The open question is which field is both stable and distinct, which needs a device test with two identical panels. |
 | The Monocle focus flip turns a **plate carrying the two apps' icons**, never the windows' own pixels — and cycling between two windows of the **same app** turns one icon into the same icon; the direction of the turn is the only tell. | A live-image flip needs the window's pixels, which reach no process without the Screen Recording permission, and the owner ruled no new permission prompt ([#1391](https://github.com/KiwiCanopy/KiwiDesk/issues/1391); the ruling is in [design decisions](design-decisions.md)); the plate shows icons alone because the turn is below reading time. | `MonocleFlipPlate` draws a `CALayer` wash with the app icon over the compositor's own behind-window blur (`NSVisualEffectView`); `SLSSetWindowTransform`/`SLSSetWindowAlpha` on another app's window perform and apply nothing from an ordinary connection. | None planned — closed, not deferred. `animations.set_on_monocle_focus(false)` turns the flip off. |
 
-:::unreleased
 A snapshot written in **another login session** is discarded at launch too, so after a logout and login without a restart KiwiDesk starts as it does after a restart of the Mac, rather than replaying window ids the new session may reuse ([#1385](https://github.com/KiwiCanopy/KiwiDesk/issues/1385)). That covers the Spaces as well as the windows: the active Space, a Space's layout changed from a shortcut or the CLI without saving, and held and temporary Spaces all come back as after a restart, while your saved profiles and settings are untouched.
 
 The first launch after updating onto this version **other than through KiwiDesk's own updater** — replacing the app by hand, for one — starts fresh once in the same way: the older version's quit wrote an arrangement without the login-session mark, which is discarded by design. An update installed by KiwiDesk's own updater keeps the arrangement.
-:::
 
-:::unreleased
 The focused-window shortcut row above has one exception: `focus` itself runs through the activation race when it is KiwiDesk's own raise toward the focused window — a raise pending a scrolling pan or issued a moment ago, while the managed app it left is still in front ([#1812](https://github.com/KiwiCanopy/KiwiDesk/issues/1812)). Every other focused verb still waits for the foreground.
-:::
 
 
 The sticky-window row above covers the *gesture* switch too: a
@@ -158,9 +154,7 @@ An in-place restart brings back every size you set, but not what KiwiDesk **lear
 
 A profile that is not loaded keeps the Spaces it remembers for its windows across a KiwiDesk quit, restart or crash, and loses them with a restart of the Mac ([#1802](https://github.com/KiwiCanopy/KiwiDesk/issues/1802)). **General ▸ Advanced ▸ Discard Saved Window Arrangement** clears what every profile remembers.
 
-:::unreleased
 A logout and login loses them too, as a restart of the Mac does ([#1385](https://github.com/KiwiCanopy/KiwiDesk/issues/1385)).
-:::
 
 The **Play a sound when an action is blocked** setting and the **windows per pile on quit** are app-wide, kept in `gui.json` and in no profile ([#1741](https://github.com/KiwiCanopy/KiwiDesk/issues/1741); the ruling is in [design decisions](design-decisions.md#spaces-profiles--config-ownership)). On the upgrade itself, and when restoring a backup written before that change, the first saved profile loaded lends its values and every other profile's are dropped. Set both on **General** if that profile was not the one whose values you wanted.
 
@@ -172,7 +166,6 @@ A window with **no title-bar buttons and no accessibility content** that is the 
 
 A window that fills its whole screen — a slide show, a borderless-fullscreen game — is left where its app put it and hides both bars while it is in front ([#1787](https://github.com/KiwiCanopy/KiwiDesk/issues/1787)). KiwiDesk tells such a window from its frame alone, so with the menu bar set to auto-hide and no Dock on that screen, a window you maximise with **Fill** reads as one too: it is not moved clear of the bars, the bars hide while it is in front, it wears no focus ring or floating mark, and a cmd-tab onto it is never bounced the way the [#1161](https://github.com/KiwiCanopy/KiwiDesk/issues/1161) row describes ([#1788](https://github.com/KiwiCanopy/KiwiDesk/issues/1788)). The bars come back at the next focus change, so a window of an app KiwiDesk ignores stepping in front of a show leaves them hidden until then, and a screen-filling window KiwiDesk does not manage keeps them drawn over it.
 
-:::unreleased
 With Space switch animation on, a window of an app that is slow
 to move — System Settings is the usual one — can land a moment
 after the plates have faded, and under a heavily loaded GPU a
@@ -181,9 +174,7 @@ window can stay visible for an instant after the slide
 KiwiDesk sends each window its move at the press and holds the
 arriving ones until the plates land, but when the app performs
 the move is the app's.
-:::
 
-:::unreleased
 The focus ring disappears with the desktop when Mission Control
 opens and comes back when it closes, in either draw order and
 with or without glow
@@ -191,4 +182,3 @@ with or without glow
 swipe let go before Mission Control opens leaves the ring drawn
 until the swipe ends
 ([#1921](https://github.com/KiwiCanopy/KiwiDesk/issues/1921)).
-:::
