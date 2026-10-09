@@ -2106,7 +2106,6 @@ accepted cost: inside that second, a re-raise of the fronted
 window while the user moves between KiwiDesk's own windows is
 honored rather than reverted.
 
-:::unreleased
 ### Windows KiwiDesk moves on its own wait for your hand to rest (#804)
 
 **[Rationale]**
@@ -2144,7 +2143,6 @@ windows arriving during one hold, only the newer keeps its
 start-at-target entrance. The cost: after you stop the
 mouse, an ambient reflow lands up to ~300 ms later than it did,
 and while you hold a button it does not land at all.
-:::
 
 ### A placement bounce is the app's answer, not the user's (#1161)
 
@@ -2724,7 +2722,6 @@ pins the wake leg's payment, the crash leg's stand-down, the
 gone-window seed and the heal; `WakeFocusSeamTests` pins the
 wiring no unit fixture can see.
 
-:::unreleased
 ### Focus may run through KiwiDesk's own raise; nothing else may
 
 **[Rationale]**
@@ -2768,7 +2765,6 @@ tenth of a second long; none is built, and the issue records the
 shape one would take (owner, 2026-10-07).
 `FocusRaiseFlightGuardTests` holds the bypass, each refusal it
 keeps, and every other verb.
-:::
 
 ### Layout and resize behavior
 
@@ -3159,7 +3155,6 @@ the animations master like it. The #881 sentence above,
 is still the swap, and the card is what the eye follows across
 it.
 
-:::unreleased
 **A Space switch plays a drawn plate slide; the windows move
 once, underneath (#1956).** With `animations.on_space_change`
 on, an explicit switch — a follow and a launch follow included,
@@ -3293,7 +3288,6 @@ sent, or at a 300 ms cap, and never before the plates lift
 (#1959). Inside a Space the ring still leads a focus move, since
 there the moving ring is the cue; after a switch a leading ring
 would sit on an empty spot.
-:::
 
 **A resize span is the layout region, not the display
 (#537).** Anything that divides a delta by a span — or
@@ -4685,7 +4679,6 @@ this issue's strand by another door. This answers ARRIVALS; a
 hand DROP on another display re-files every float, flag or
 floating-mode, at the drop (#1686, below beside #492).
 
-:::unreleased
 **A float dropped past the bottom is shrunk to fit, never moved
 back** ([#1427](https://github.com/KiwiCanopy/KiwiDesk/issues/1427),
 owner ruling 2026-10-06). [Principle] A window pushed down until its
@@ -4711,7 +4704,6 @@ exception to it. Three limits keep it narrow:
   its title bar is out of reach. A bottom "peek" with the title
   bar showing is therefore reachable only at the window's
   minimum height.
-:::
 
 **Floating a tiled window centres it at a derived size
 (#1674).** [Principle] The frame a window
@@ -8669,7 +8661,6 @@ one action in one layer, its value the combo:
   from the page's own structure, and both the rule write and the
   globals write read that one base.
 
-:::unreleased
 **A layer takes the checklist too, and its tick is membership**
 (#2022, owner ruling 2026-10-07). A layer is a set of rows, so
 asking which profiles a layer belongs to row by row hid the one
@@ -8720,7 +8711,6 @@ channel only a pointer finds:
   only that profile has stays editable.
 - **A shortcut row's checklist greys a profile without the
   row's layer**: ticking it there would build a layer of one row.
-:::
 
 *The saves write different layers, by design.* The loaded
 profile's Save and a stored profile's Save touch **disjoint**
@@ -10324,7 +10314,6 @@ only a second one inside that bound goes through, and the
 pointer leaving the edge, or a click, is what ends it.
 (`MenuBarRevealReturnTests`, `MenuBarRevealSeamTests`)
 
-:::unreleased
 **Open or Focus is `focus_or_spawn`, not `pull_or_spawn`
 ([#1511](https://github.com/KiwiCanopy/KiwiDesk/issues/1511)).**
 The verb has never pulled a window: from its first version it
@@ -10335,7 +10324,6 @@ to the current Space, and it would have meant the opposite of
 itself beside a verb that does gather windows. "Focus" is the
 vocabulary's word for going to something (`focus`,
 `focus_space`), and "spawn" keeps the pair with `spawn_new`.
-:::
 
 **Open-or-Focus cycles in canonical order, never
 most-recently-used.** A repeat press of the shortcut walks the
@@ -10547,12 +10535,10 @@ card that opens on a first visit needs a stored "seen" flag and
 then changes shape on the second; search opens it on a hit, and its
 summary does the telling while it is shut.
 
-:::unreleased
 Since the layer's name moved onto the pinned jump bar (#1520), the
 separation is carried by the rule after the Mouse & trackpad chip
 and by the Layers card, which leads everything layer-scoped: the
 card above it belongs to no layer.
-:::
 
 **Its entries are grouped by where the hand is** — on your
 windows, on the KiwiShelf, anywhere holding a modifier — never by
@@ -10767,7 +10753,6 @@ where a busy switch would squash deliberate notches into a
 burst. The number is provisional until a device logs notch
 intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
 
-:::unreleased
 **The page is mapped by pinned jump chips, never split into tabs**
 (#1520, owner ruling 2026-10-01). A group well below the fold of
 a long list is undiscoverable without a map — the per-app
@@ -10864,7 +10849,6 @@ refused as well: it names one input of several. The caption
 does not replace the edge — it labels the row once, where the
 edge tells each chip from a passive capsule on every look, and
 without the edge a dark jump chip is `chipSurface()` again.
-:::
 
 ### Overrides & appearance
 
@@ -12239,7 +12223,6 @@ rather than scanning payloads, and future migration removals establish
 a supported format floor rather than guessing whether older configs
 still exist.
 
-:::unreleased
 **A verb the GUI writes into a stored binding is a stored value
 ([#1511](https://github.com/KiwiCanopy/KiwiDesk/issues/1511)).**
 The charter keeps the user's Lua out of every crossing: a renamed
@@ -12255,7 +12238,6 @@ a missing `kind` decodes as custom — while every other spelling
 still fails loudly. Without it a rename breaks every shortcut ever
 made in Settings on the update, which is the
 stranger-hand-edits-JSON outcome above.
-:::
 
 The bar exists to tell one window from another, and the app name
 is the one label that provably cannot. Five Finder windows read
@@ -13368,7 +13350,6 @@ stored bar's number onto the shelf rather than letting the
 default in, so the argument that no migration is owed carries
 over unchanged.
 
-:::unreleased
 One exception narrows "every screen": Glass, and so the first-run
 profile, thins the shelf to 32 pt when the MAIN screen's full
 frame is shorter than 1000 pt (#1952, owner ruling 2026-10-04). It is a height
@@ -13382,7 +13363,6 @@ takes it, so no stored file moves and plugging in a screen moves
 no bar. A separate "Compact" look was refused for the reason in
 *A bundled look is total*: a first run shows Glass, and Glass is
 also the shape reset (`StarterCompactShelfTests`).
-:::
 
 **"Which palette am I on" is computed, never remembered.**
 (#757.) The shelf marks the card whose colors the config it is
@@ -13746,11 +13726,9 @@ the shelf's, which both bars read, the panel's, and (below) the
 drag visuals' and the sticky mark's — stored side by side in the
 profile.
 
-:::unreleased
 The Space switch plates' leaf joins them (#1956). The slow-boot
 notice (#1715) reads the panel's leaf rather than storing one of
 its own.
-:::
 
 **Profile-scoped, and the alternative was not merely riskier but
 unbuildable.** Moving the value app-wide into `gui.json` needed a
@@ -15390,7 +15368,6 @@ queue** during boot (a retile queued at second 2 firing at second
 9 is a worse surprise than the one being removed, and a new state
 machine paid on every boot to save seconds on heavy ones).
 
-:::unreleased
 **A slow boot earns a quiet notice; the HUD stays rejected for
 every other boot** ([#1715](https://github.com/KiwiCanopy/KiwiDesk/issues/1715),
 owner rulings 2026-09-27 and 2026-10-06). On a login boot, the
@@ -15416,7 +15393,6 @@ of M" would have read as a window count. It stands down where the
 shelf does (full screen, a presentation), while the tour owns the
 screen, and after an update relaunch, where "What's new" already
 narrates the boot. The full-screen overlay stays rejected.
-:::
 
 **One slow app is deferred, never abandoned.** Chunking cannot
 divide a single app's AX work: on the measured session one app's

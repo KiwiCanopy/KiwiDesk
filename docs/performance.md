@@ -37,7 +37,6 @@ The procedure and the desk script live in the repository's
 | Parks | Windows moved to the hiding corner per switch |
 | Retile mean / max | Main-thread time of one layout pass, ms |
 
-:::unreleased
 ## 2.2.0 against 2.1.1
 
 Measured 2026-10-09 on macOS 27.0.1, 1.5 s between switches so
@@ -90,4 +89,3 @@ layout pass is four to six times shorter with animations off.
 With the switch animation on, 2.2.0's slide costs a few ms over
 having it off; 2.1.1's slide added most of its own AX calls and,
 under a saturated GPU, its longest passes.
-:::

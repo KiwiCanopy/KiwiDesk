@@ -528,7 +528,6 @@ the answer. A non-interactive value state in a control row (the
 slot size's "Default — orientation standard") renders in the
 same capsule language rather than as bare gray prose.
 
-:::unreleased
 **Jump chips are the capsule language as buttons** (#1520). A long
 page whose groups the reader needs a map of — Shortcuts & Gestures
 is the one — pins a row of chips over its scroll, one per group,
@@ -560,7 +559,6 @@ chrome, the first thing a narrowing window drops — a name
 inside the readout is shortened before the sentence ever is,
 and the bare chips remain. Chips jump within one page; tabs,
 which show one view at a time, stay the update window's control.
-:::
 
 **An "Automatic" color well shows adaptivity as a shape, not
 an absence** (#429). Almost every color setting stores a
@@ -1029,12 +1027,10 @@ The shelf's own glide is the one chrome motion with rows on that
 card — **Animate KiwiShelf** and its duration — and Reduce Motion
 still wins over them (#1838).
 
-:::unreleased
 The Space-switch plate slide is the second: drawn chrome that
 moves no window, with **Animate Space switches** and **Space
 switch duration** on that card, and Reduce Motion winning over
 both (#1956, #1931).
-:::
 
 Nothing is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays
@@ -1134,7 +1130,6 @@ keyboard-focus state, and a recognizable rest treatment or list
 context — `.help()` and hover alone do not make a control
 discoverable.
 
-:::unreleased
 Every chip fill in that ladder is a theme token, never a bare
 opacity. A chip rests at `chipRest`, lifts to `chipHover` and,
 where its style can see the press, deepens to `chipPressed`; a
@@ -1149,7 +1144,6 @@ hairline capsule is the passive chip's vocabulary, so a button
 chip is told apart by its edge before it is ever pointed at. A
 glyph-only chip and a segmented track take no edge — no passive
 control shares their shape.
-:::
 
 **Inapplicable controls are greyed, not hidden.** When a
 setting makes another control inert — Auto-size grid overrides
