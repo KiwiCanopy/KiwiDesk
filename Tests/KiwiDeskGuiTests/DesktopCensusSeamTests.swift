@@ -56,14 +56,17 @@ struct DesktopCensusSeamTests {
         )
         let files = Set(readers.map(\.file.lastPathComponent))
         #expect(
-            readers.count == 3
+            readers.count == 4
                 && files == [
                     "KiwiCore+AwayWindows.swift",
                     "KiwiCore+LaunchReach.swift",
+                    // The `self_test` probe (#1889): a nil reads
+                    // as `failed`, never as a census.
+                    "KiwiCore+SelfTest.swift",
                 ],
             .init(
-                rawValue: "expected the refresh, the boot seed "
-                    + "and the reach, found "
+                rawValue: "expected the refresh, the boot seed, "
+                    + "the reach and the self-test, found "
                     + readers.map(\.site).joined(separator: ", ")
             )
         )
@@ -90,16 +93,20 @@ struct DesktopCensusSeamTests {
         )
         let files = Set(readers.map(\.file.lastPathComponent))
         #expect(
-            readers.count == 3
+            readers.count == 4
                 && files == [
                     "KiwiCore+GoneReason.swift",
                     "KiwiCore+DesktopFocusMemory.swift",
                     // Boot's judge of a restored hold (#1646).
                     "KiwiCore+HeldSpaceBoot.swift",
+                    // The `self_test` probe of our own window
+                    // (#1889).
+                    "KiwiCore+SelfTest.swift",
                 ],
             .init(
                 rawValue: "expected the classifier, the focus "
-                    + "memory and the held judge, found "
+                    + "memory, the held judge and the self-test, "
+                    + "found "
                     + readers.map(\.site).joined(separator: ", ")
             )
         )

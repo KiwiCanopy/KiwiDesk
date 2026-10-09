@@ -9,7 +9,7 @@ extension WMBridge {
         to space: SpaceID
     ) -> Bool {
         let op = make(
-            "MoveWindowsToManagedSpaceOperation",
+            .moveWindowsToManagedSpace,
             initializer: "initWithWindows:spaceID:"
         ) { instance, selector in
             sender(as: InitObjectIDFn.self)?(
@@ -29,7 +29,7 @@ extension WMBridge {
         to spaces: [SpaceID]
     ) -> Bool {
         membership(
-            "AddWindowsToSpacesOperation",
+            .addWindowsToSpaces,
             windows,
             spaces
         )
@@ -41,7 +41,7 @@ extension WMBridge {
         from spaces: [SpaceID]
     ) -> Bool {
         membership(
-            "RemoveWindowsFromSpacesOperation",
+            .removeWindowsFromSpaces,
             windows,
             spaces
         )
@@ -53,7 +53,7 @@ extension WMBridge {
     /// Queries primary space membership for windows (#889 item 5).
     public static func spaces(for windows: [WindowID]) -> [SpaceID]? {
         let op = make(
-            "CopySpacesForWindowsOperation",
+            .copySpacesForWindows,
             initializer: "initWithOptions:windows:"
         ) { instance, selector in
             sender(as: InitOptionsObjectFn.self)?(
@@ -68,7 +68,7 @@ extension WMBridge {
     }
 
     private static func membership(
-        _ operation: String,
+        _ operation: Operation,
         _ windows: [WindowID],
         _ spaces: [SpaceID]
     ) -> Bool {

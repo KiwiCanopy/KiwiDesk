@@ -220,6 +220,42 @@ live while reproducing:
 same log — one before and one after a repro brackets it; it
 exports nothing.
 
+## Checking the Private Fast Paths
+
+:::unreleased
+KiwiDesk reaches some of macOS through private WindowServer
+calls, each with a public fallback or, where macOS offers none, a
+refusal. A new macOS can drop any of them without a crash, so
+`self_test` asks the running app which ones still answer:
+
+```sh
+kiwidesk self_test          # a table on a terminal
+kiwidesk self_test --json   # JSON, as a pipe also gets
+```
+
+Each path gets one verdict:
+
+- `works` — it answered, and a second reading agreed.
+- `answered` — it answered, and nothing else can read the same
+  thing to check it: it is alive, no more.
+- `resolved` — it is there, but the check never calls it: it
+  writes, or calling it would take something KiwiDesk needs.
+- `absent` — macOS no longer has it; the fallback runs.
+- `failed` — it is there but answered nothing, or disagreed.
+- `inconclusive` — it is there, with nothing to check it against
+  (KiwiDesk showing no window, say).
+
+The check only reads: it moves no window, switches no Desktop and
+changes no setting. The JSON carries `macos`, a `counts` object by
+verdict, and a `probes` array of `name`, `kind` (`symbol` or
+`bridge_class`), `home`, `verdict` and `detail`. CLI only — Lua
+cannot call it.
+
+The exit code is 2 when any path `failed`, and 0 otherwise —
+`absent`, `resolved` and `inconclusive` are findings, not
+failures. 1 still means the command itself did not get through.
+:::
+
 ## Commands
 
 | Category | Command | Arguments |

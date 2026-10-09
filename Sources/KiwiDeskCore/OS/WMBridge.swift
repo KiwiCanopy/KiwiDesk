@@ -59,14 +59,14 @@ public enum WMBridge {
     }
 
     /// Resolves class for operation short name, or nil if unavailable.
-    static func resolve(_ operation: String) -> AnyClass? {
+    static func resolve(_ operation: Operation) -> AnyClass? {
         #if DEBUG
             if let override = classResolverOverride {
-                return override(operation)
+                return override(operation.rawValue)
             }
         #endif
         guard SkyLight.isLoaded else { return nil }
-        return NSClassFromString(classPrefix + operation)
+        return NSClassFromString(classPrefix + operation.rawValue)
     }
 
     /// `objc_msgSend`, typed per call: the initialisers take C
@@ -113,7 +113,7 @@ public enum WMBridge {
 
     /// Allocates and initializes operation object.
     static func make(
-        _ operation: String,
+        _ operation: Operation,
         initializer: String,
         _ build: (AnyObject, Selector) -> Unmanaged<AnyObject>?
     ) -> AnyObject? {

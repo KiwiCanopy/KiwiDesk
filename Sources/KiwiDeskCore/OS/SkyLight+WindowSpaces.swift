@@ -10,11 +10,13 @@ extension SkyLight {
             ConnectionID, UInt32, CFArray
         ) -> Unmanaged<CFArray>?
 
-    static let copySpacesForWindows: CopySpacesForWindowsFn? =
-        symbol(
-            "SLSCopySpacesForWindows",
-            as: CopySpacesForWindowsFn.self
-        )
+    static let copySpacesForWindowsSymbol = symbol(
+        "SLSCopySpacesForWindows",
+        as: CopySpacesForWindowsFn.self
+    )
+    static var copySpacesForWindows: CopySpacesForWindowsFn? {
+        copySpacesForWindowsSymbol.function
+    }
 
     /// `SLSCopySpacesForWindows` selector for all space types.
     private static let allSpacesSelector: UInt32 = 0x7

@@ -13,11 +13,13 @@ extension SkyLight {
             ConnectionID, ConnectionID, CFString, CFTypeRef
         ) -> Int32
 
-    static let setConnectionProperty: SetConnectionPropertyFn? =
-        symbol(
-            "SLSSetConnectionProperty",
-            as: SetConnectionPropertyFn.self
-        )
+    static let setConnectionPropertySymbol = symbol(
+        "SLSSetConnectionProperty",
+        as: SetConnectionPropertyFn.self
+    )
+    static var setConnectionProperty: SetConnectionPropertyFn? {
+        setConnectionPropertySymbol.function
+    }
 
     /// Whether the window server accepted the property; false where
     /// either symbol is absent.

@@ -14,10 +14,13 @@ extension SkyLight {
             UnsafeMutablePointer<CGRect>
         ) -> CGError
 
-    static let getWindowBounds: GetWindowBoundsFn? = symbol(
+    static let getWindowBoundsSymbol = symbol(
         "SLSGetWindowBounds",
         as: GetWindowBoundsFn.self
     )
+    static var getWindowBounds: GetWindowBoundsFn? {
+        getWindowBoundsSymbol.function
+    }
 
     /// Authoritative WindowServer bounds (AX coordinates) for `wid`, or nil.
     static func windowBounds(_ wid: CGWindowID) -> CGRect? {

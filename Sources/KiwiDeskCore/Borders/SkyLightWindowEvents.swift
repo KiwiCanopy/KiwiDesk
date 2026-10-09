@@ -56,11 +56,13 @@ final class SkyLightWindowEvents {
     static let shared: SkyLightWindowEvents? = SkyLightWindowEvents()
     private static weak var active: SkyLightWindowEvents?
 
-    private static let requestNotifications: RequestNotificationsFn? =
-        SkyLight.symbol(
-            "SLSRequestNotificationsForWindows",
-            as: RequestNotificationsFn.self
-        )
+    private static let requestNotificationsSymbol = SkyLight.symbol(
+        "SLSRequestNotificationsForWindows",
+        as: RequestNotificationsFn.self
+    )
+    private static var requestNotifications: RequestNotificationsFn? {
+        requestNotificationsSymbol.function
+    }
 
     private weak var manager: BorderManager?
     private let connection: SkyLight.ConnectionID
@@ -122,6 +124,17 @@ final class SkyLightWindowEvents {
         }
         if success { lastRequested = windows }
         return success
+    }
+
+    /// The subscription `self_test` looks up and never calls
+    /// (#1889): a request would change which windows we hear.
+    static func selfTestProbes() -> [PrivatePathProbe] {
+        [
+            .write(
+                requestNotificationsSymbol.resolution,
+                home: "SkyLightWindowEvents"
+            )
+        ]
     }
 
     fileprivate static func deliver(
