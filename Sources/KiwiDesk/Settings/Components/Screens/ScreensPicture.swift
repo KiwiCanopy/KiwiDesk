@@ -14,12 +14,15 @@ struct ScreensPicture: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let layout = arrangement(
-                for: CGSize(
-                    width: proxy.size.width - Self.inset * 2,
-                    height: Self.canvasHeight - Self.inset * 2
-                        - Self.standBand
-                )
+            let canvas = CGSize(
+                width: proxy.size.width - Self.inset * 2,
+                height: Self.canvasHeight - Self.inset * 2
+                    - Self.standBand
+            )
+            let layout = arrangement(for: canvas)
+            let origin = ScreenArrangement.origin(
+                of: layout.contentSize,
+                in: canvas
             )
             ScrollView([.horizontal, .vertical]) {
                 picture(layout)
@@ -28,6 +31,8 @@ struct ScreensPicture: View {
                         height: layout.contentSize.height
                             + Self.standBand
                     )
+                    .padding(.leading, origin.x)
+                    .padding(.top, origin.y)
                     .padding(Self.inset)
             }
             .frame(
