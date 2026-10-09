@@ -3,13 +3,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// **A Space switch plays the plate slide by default, and a stored
-/// file keeps what it says** (#1931). The flip owes no #1369
-/// crossing only because the encoder writes the `animations` group
-/// whole, so every file KiwiDesk wrote carries its own
-/// `on_space_change` (design-decisions ▸ #1359's thickness ruling).
-/// The encoder clause is that premise: a sparse encoder would make
-/// absence a stored value, and the flip would then owe a step.
+/// **A Space switch plays the plate slide by default, and a file
+/// written at the current format keeps what it says** (#1931). A
+/// file from before is turned on once (`SpaceChangeOnMigrationTests`);
+/// the encoder clause is that step's premise — it edits a written
+/// leaf, while a sparse encoder would make absence the stored
+/// value and owe a #1369 fill instead.
 @Suite("Space switch animation default (#1931)")
 struct SpaceChangeDefaultTests {
     @Test("a new setup and an absent leaf animate the switch")

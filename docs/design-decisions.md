@@ -3255,14 +3255,28 @@ most, and the slide is what tells them which way they went, so a
 new install plays it. The cost is the GPU: switching
 back-to-back, Liquid Glass plates hold it at 55–65 % against
 33 % for the instant switch, which is why glass off, Reduce
-Motion and the toggle itself stay one step away. No migration is
-owed, on #1359's thickness argument: `on_space_change` predates
-the first tag and the settings encoder writes `animations` whole,
-so every saved profile keeps the value it stored and only a fresh
-seed takes the new one (`SpaceChangeDefaultTests`). What has no
-file takes the new default on upgrade, and that is accepted: a
-composed Standard, and an `init.lua` config that never calls the
-setter, start playing the slide. The animations master still
+Motion and the toggle itself stay one step away. A saved
+profile's `false` is turned on once at the crossing
+(`SpaceChangeOnMigrationTests`), which #1359's thickness argument
+would let stand. The ground is not a changed meaning — a stored
+`false` drew the instant switch before and still does — but that
+the value cannot be told from a choice: the encoder writes
+`animations` whole, so nearly every file stored the old default,
+and keeping it would hide the slide from almost every upgrade
+while a new install plays it. That re-default is bounded by a
+stored signal of a real choice, and only that signal saves a
+`false`: 2.1.1's master wrote every slide and window leaf off at
+once, so a group with all of them off keeps its `false`. A
+`false` chosen after the crossing stays, the step reading the
+file's format; one written by a pre-release build that already
+defaulted on sits below the floor and is turned on once too,
+which the floor cannot tell apart and is accepted. The cost is a user who turned the old window slide
+off on purpose meeting a slide once, one toggle from off again,
+and an `init.lua` that sets the leaf `false` while a saved
+profile is live: the profile's settings apply over the script,
+so its turned-on value wins there. What has no file takes the new
+default on upgrade: a composed Standard, and an `init.lua` config
+that never calls the setter. The animations master still
 restores the defaults rather than turning every motion on, so it
 brings the slide back with the rest.
 
