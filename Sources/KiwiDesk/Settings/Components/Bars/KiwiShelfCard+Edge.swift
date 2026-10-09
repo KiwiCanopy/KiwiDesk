@@ -57,7 +57,7 @@ extension KiwiShelfCard {
     var spaceBarEdgeRow: some View {
         SegmentedPicker(
             L("kiwishelf.edge.space_bar", "Space Bar"),
-            selection: $model.config.settings.spaceBarStyle.edge,
+            selection: model.barEdge(\.spaceBarStyle),
             options: edgeOptions
         )
         .searchAnchored(
@@ -69,7 +69,7 @@ extension KiwiShelfCard {
     var appBarEdgeRow: some View {
         SegmentedPicker(
             L("kiwishelf.edge.app_bar", "App Bar"),
-            selection: $model.config.settings.appBarStyle.edge,
+            selection: model.barEdge(\.appBarStyle),
             options: edgeOptions
         )
         .searchAnchored(

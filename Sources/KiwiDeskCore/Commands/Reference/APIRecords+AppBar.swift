@@ -6,9 +6,10 @@ import Foundation
 extension APIReference {
     static let appBarRecords: [String: APIRecord] = [
         "set_edge": APIRecord(
-            "Sets the App Bar's screen edge; on the Space Bar's "
-                + "edge the two share one KiwiShelf.",
-            .choice("edge", AppBarEdge.self)
+            "Sets the App Bar's edge on all screens, or on one "
+                + "named by number, fingerprint or name.",
+            .choice("edge", AppBarEdge.self),
+            .text("screen", optional: true)
         ),
         "set_reserve": APIRecord(
             "Reserves the App Bar's strip; false draws it over "

@@ -22,7 +22,8 @@ extension KiwiCore {
         return settings.scrollingColumnCap(
             bounds: settings.layoutBounds(
                 from: tiler.visibleBounds(screen),
-                mode: .scrolling
+                mode: .scrolling,
+                on: tiler.fingerprint(of: screen, in: settings)
             ),
             space: space
         )

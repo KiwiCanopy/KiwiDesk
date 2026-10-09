@@ -98,7 +98,7 @@ struct SettingsDraftDiff {
                 id.removeLast(suffix.count)
             }
             var base = id
-            for instance in ["[space]", "[app]", "[n]"] {
+            for instance in ["[space]", "[app]", "[n]", "[screen]"] {
                 base = base.replacingOccurrences(
                     of: instance,
                     with: "[]"

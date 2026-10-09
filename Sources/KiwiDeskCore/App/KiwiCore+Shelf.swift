@@ -49,11 +49,14 @@ extension KiwiCore {
             retireDepartedBars(live: Set(fallback.map(\.display)))
             return
         }
-        let look = settings.spaceBarLook
         var appBarsShown: [AppBarManager.Bar] = []
         var spaceBarsShown: [SpaceBarManager.Bar] = []
         var strips: [ShelfStrip] = []
         for display in displays {
+            // Each bar's edge as THIS screen has it (#1948), so
+            // the plan and every style a bar draws carry it.
+            let shown = settings.onScreen(display.fingerprint)
+            let look = shown.spaceBarLook
             // A fullscreen space hosts the panels by construction
             // (`.canJoinAllSpaces` + `.fullScreenAuxiliary`), so
             // the stand-down (#670, and a presentation in front,
@@ -63,7 +66,7 @@ extension KiwiCore {
             let down = shelfStandsDown(on: display.id)
             let app =
                 down
-                ? nil : appBarContent(on: display.id, settings: settings)
+                ? nil : appBarContent(on: display.id, settings: shown)
             let items =
                 down
                 ? nil : spaceBarContent(on: display.id, style: look)
@@ -77,7 +80,7 @@ extension KiwiCore {
             // (`VisibleBoundsRoutingTests.allowed`, #537).
             let plans = shelfPlans(
                 visible: GeometryUtils.axVisibleFrame(of: screen),
-                settings: settings,
+                settings: shown,
                 spaceItems: items,
                 app: app
             )

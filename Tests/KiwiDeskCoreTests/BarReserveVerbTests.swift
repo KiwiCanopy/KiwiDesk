@@ -97,6 +97,9 @@ struct BarReserveVerbTests {
                 return .string(
                     (variant == 0 ? values.first : values.last) ?? ""
                 )
+            // The bars' one text argument is `set_edge`'s screen,
+            // named here by a fingerprint (#1948).
+            case .text: return .string("Probe:1x1")
             default: return .string("probe")
             }
         }
