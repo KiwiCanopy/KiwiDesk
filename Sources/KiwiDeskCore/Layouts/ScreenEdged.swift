@@ -62,7 +62,9 @@ extension ScreenEdged {
         among scope: ScreenEdgeScope
     ) {
         edgeOverride[screen] = edge == self.edge ? nil : edge
+        // The written screen is judged too, entry or none.
         let judged = scope.screens.union(edgeOverride.keys)
+            .union([screen])
         let drawn = Set(judged.map { self.edge(on: $0) })
         guard !edgeOverride.isEmpty, drawn.count == 1,
             let shared = drawn.first

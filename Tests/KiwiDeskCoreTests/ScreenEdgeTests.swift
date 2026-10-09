@@ -229,6 +229,24 @@ struct ScreenEdgeTests {
         }
     }
 
+    /// A write that clears its own entry outside the scope still
+    /// judges that screen: it draws the bar's edge, so another
+    /// screen's edge never collapses onto it.
+    @Test("The written screen is judged though the scope lacks it")
+    func writtenScreenIsJudged() {
+        var style = SpaceBarStyle()
+        style.setEdge(.bottom)
+        style.edgeOverride = [Self.studio: .top, Self.away: .top]
+        style.setEdge(
+            .bottom,
+            on: Self.away,
+            among: ScreenEdgeScope(screens: [Self.studio])
+        )
+        #expect(style.edge == .bottom)
+        #expect(style.edgeOverride == [Self.studio: .top])
+        #expect(style.edge(on: Self.away) == .bottom)
+    }
+
     /// The Position master selects an edge only while the bars
     /// share it on every screen.
     @Test("A screen of its own leaves the Position master unset")

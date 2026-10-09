@@ -161,11 +161,12 @@ twice, was a question the user answered twice. The argument is
   entries exactly as they are — so a verb or Settings write of a
   screen's edge equal to its bar's stores nothing for that
   screen, an entry a look leaves equal stays a pin, every
-  judgement reads the edges screens draw (`edge(on:)`), and no
+  judgement reads the edges screens draw (`edge(on:)`)
+  (`ScreenEdgeTests` ▸ `judgementsReadDrawnEdges`), and no
   caller collapses by hand (`BarEdgeWriteCensusTests` ▸
   `rawWritesAreCensused`); `ScreenEdgeScope` is built only by
-  `screenEdgeScope(monitorSets:)`
-  (▸ `scopeHasOneHome`). The empty map stays out of the JSON
+  `screenEdgeScope(monitorSets:)` (`BarEdgeWriteCensusTests` ▸
+  `scopeHasOneHome`). The empty map stays out of the JSON
   through a `KeyedEncodingContainer` overload whose scope is the
   TYPE `[String: AppBarEdge]`, module-wide: a store of that type
   that must encode an empty map takes a type of its own.
