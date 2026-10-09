@@ -6,9 +6,10 @@ import CoreGraphics
 /// otherwise stops one from sliding under a strip. The original
 /// motivator was a TOP bar covering the title bar and leaving
 /// the float ungrabbable (#242); since QA 2026-07-19 all four
-/// edges nudge — a bar reserves its edge for every window kind,
-/// the way the Dock reserves `visibleFrame`, and a top-only
-/// nudge read as an inconsistency, not a scoped decision.
+/// edges nudge — a reserving bar (#1524) reserves its edge for
+/// every window kind, the way the Dock reserves `visibleFrame`,
+/// and a top-only nudge read as an inconsistency, not a scoped
+/// decision.
 ///
 /// Strips are read from the bars the managers actually painted
 /// (`shownStrips`) on the edges the layout reserves

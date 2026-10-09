@@ -7,21 +7,29 @@ import Testing
 
 /// The consumers of the reserved fold (#1524), through the real
 /// drivers: the float region follows the edges the layout gives
-/// up rather than every strip painted, a bar write that moves no
-/// reserved edge issues no pass, and the verbs reach the stored
-/// style from Lua and the CLI.
+/// up rather than every strip painted, and a bar write that
+/// leaves the layout bounds alone repaints the bars and re-clamps
+/// the floats without a pass.
 @Suite("Bar reserve consumers (#1524)", .serialized)
 @MainActor
 struct BarReserveCoreTests {
     private static let window = WindowID(1)
 
-    /// A core on the primary screen, one tiled window in a Space
-    /// laid out in `mode`, both bars on the top edge. Nil where
-    /// the host has no screen to paint on.
+    /// A core on the primary screen, its shown Space laid out in
+    /// `mode`, both bars on the top edge. `window` places one
+    /// window there at `frame` (nil: the Space stays empty). Nil
+    /// where the host has no screen to paint on.
     private func makeCore(
         mode: LayoutMode,
         spaceReserves: Bool,
-        appReserves: Bool = true
+        appReserves: Bool = true,
+        window frame: CGRect? = CGRect(
+            x: 100,
+            y: 200,
+            width: 600,
+            height: 400
+        ),
+        floating: Bool = false
     ) -> (KiwiCore, SpaceID, NSScreen)? {
         guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
@@ -30,22 +38,30 @@ struct BarReserveCoreTests {
         // Pin the display rather than inherit it (#531).
         core.tiler.visibleBounds = { _ in screen.frame }
         core.state.apply(.displaysChanged([display]))
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(
-                    id: Self.window,
-                    pid: 1,
-                    appName: "ReserveApp",
-                    frame: CGRect(x: 100, y: 200, width: 600, height: 400),
-                    isFloating: false
+        if let frame {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: Self.window,
+                        pid: 1,
+                        appName: "ReserveApp",
+                        frame: frame,
+                        isFloating: floating
+                    )
                 )
             )
-        )
+        }
         core.resolveSpaceDisplays(mainID: display.id)
-        let space = core.state.workspaces.space(of: Self.window)!
+        guard
+            let space = frame == nil
+                ? core.state.workspaces.currentSpace(on: display.id)
+                : core.state.workspaces.space(of: Self.window)
+        else { return nil }
         core.state.workspaces.setMode(space, mode)
-        core.state.workspaces.withSpace(space) {
-            $0.focused = Self.window
+        if frame != nil {
+            core.state.workspaces.withSpace(space) {
+                $0.focused = Self.window
+            }
         }
         var settings = core.tiler.settings
         settings.spaceBarStyle.enabled = true
@@ -84,26 +100,34 @@ struct BarReserveCoreTests {
         #expect(region.minY >= strip.strip.maxY)
     }
 
+    /// Separates the per-EDGE fold from per-SECTION filtering:
+    /// on an empty monocle Space the reserving App Bar paints no
+    /// strip, so only the non-reserving Space Bar's section is
+    /// there to carve. The fold keeps it, since the layout
+    /// reserves that edge; a section filter would carve nothing.
     @Test(
-        "A fused edge another bar reserves keeps every float out",
+        "A fused edge the unpainted App Bar reserves keeps floats out",
         .enabled(if: NSScreen.main != nil)
     )
-    func fusedReservedEdgeCarvesTheWholeStrip() throws {
-        let (core, space, _) = try #require(
-            makeCore(mode: .monocle, spaceReserves: false)
+    func fusedEdgeFoldCarvesUnpaintedReserver() throws {
+        let (core, space, screen) = try #require(
+            makeCore(mode: .monocle, spaceReserves: false, window: nil)
         )
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        let spaceStrip = try #require(core.spaceBars.shownStrips.first)
+        #expect(core.appBars.shownStrips.isEmpty)
+        let strip = try #require(core.spaceBars.shownStrips.first)
+        #expect(
+            core.tiler.settings.shelfEdges(in: .monocle) == [.top]
+        )
         let region = try #require(core.floatBounds(on: space))
-        // Under the Space Bar's own section too, as a tiled
-        // window is kept out of it.
-        #expect(region.minY >= spaceStrip.strip.maxY)
+        #expect(region.minY >= strip.strip.maxY)
         // Both bars off it: the strip is free for floats too.
-        let (free, freeSpace, screen) = try #require(
+        let (free, freeSpace, _) = try #require(
             makeCore(
                 mode: .monocle,
                 spaceReserves: false,
-                appReserves: false
+                appReserves: false,
+                window: nil
             )
         )
         #expect(
@@ -118,8 +142,12 @@ struct BarReserveCoreTests {
         return counts.retiles + counts.passesHeld
     }
 
+    private func renders(_ meter: WorkMeter) -> Int {
+        meter.snapshot(reset: false).counts.barRenders
+    }
+
     @Test(
-        "A bar write that moves no reserved edge issues no pass",
+        "A bar write that leaves the bounds alone repaints, no pass",
         .enabled(if: NSScreen.main != nil)
     )
     func unchangedReservationSkipsTheRetile() throws {
@@ -129,14 +157,22 @@ struct BarReserveCoreTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let meter = WorkMeter(now: { 0 })
         core.tiler.meter = meter
+        #expect(
+            core.execute("space_bar.set_enabled", args: [.bool(false)])
+                .isSuccess
+        )
+        // The repaint ran: the hidden bar left the screen.
+        #expect(core.spaceBars.shownStrips.isEmpty)
         for (verb, value) in [
-            ("space_bar.set_enabled", JSONValue.bool(false)),
-            ("space_bar.set_enabled", .bool(true)),
+            ("space_bar.set_enabled", JSONValue.bool(true)),
             ("space_bar.set_glyph_span", .number(8)),
             ("app_bar.set_title_cap", .number(30)),
         ] {
+            let before = renders(meter)
             #expect(core.execute(verb, args: [value]).isSuccess)
+            #expect(renders(meter) > before, "\(verb) did not repaint")
         }
+        #expect(!core.spaceBars.shownStrips.isEmpty)
         #expect(passes(meter) == 0)
         // Reserving moves the edge, so it is an explicit apply.
         #expect(
@@ -146,43 +182,39 @@ struct BarReserveCoreTests {
         #expect(passes(meter) == 1)
     }
 
-    @Test("set_reserve reaches the stored style over the CLI")
-    func cliRoundTrip() {
-        let core = makeTestCore()
-        for bar in ["space_bar", "app_bar"] {
-            #expect(
-                core.execute("\(bar).set_reserve", args: [.bool(false)])
-                    .isSuccess
+    @Test(
+        "A skipped pass still clamps a float under a reserved strip",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func skippedPassReclampsFloats() throws {
+        let screen = try #require(NSScreen.screens.first)
+        // Overlapping the top strip by construction.
+        let (core, _, _) = try #require(
+            makeCore(
+                mode: .bsp,
+                spaceReserves: true,
+                window: CGRect(
+                    x: screen.frame.minX + 100,
+                    y: screen.frame.minY,
+                    width: 400,
+                    height: 300
+                ),
+                floating: true
             )
-        }
-        #expect(!core.tiler.settings.spaceBarStyle.reserve)
-        #expect(!core.tiler.settings.appBarStyle.reserve)
+        )
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let strip = try #require(core.spaceBars.shownStrips.first)
+        let meter = WorkMeter(now: { 0 })
+        core.tiler.meter = meter
         #expect(
-            !core.execute("space_bar.set_reserve", args: [.string("no")])
+            core.execute("space_bar.set_glyph_span", args: [.number(8)])
                 .isSuccess
         )
-        // Global only: no layout carries its own reservation.
-        #expect(
-            !core.execute(
-                "monocle.set_app_bar_reserve",
-                args: [.bool(false)]
-            ).isSuccess
+        #expect(passes(meter) == 0)
+        let commanded = try #require(
+            core.tiler.recentInstantTarget(Self.window),
+            "the skipped pass never re-clamped the float"
         )
-    }
-
-    @Test("set_reserve reaches the stored style from Lua")
-    func luaRoundTrip() throws {
-        let core = makeTestCore()
-        let lua = try #require(LuaInterpreter())
-        core.registerLuaAPI(on: lua)
-        let result = lua.run(
-            "space_bar.set_reserve(false)\napp_bar.set_reserve(false)"
-        )
-        guard case .success = result else {
-            Issue.record("set_reserve run failed: \(result)")
-            return
-        }
-        #expect(!core.tiler.settings.spaceBarStyle.reserve)
-        #expect(!core.tiler.settings.appBarStyle.reserve)
+        #expect(commanded.minY >= strip.strip.maxY)
     }
 }

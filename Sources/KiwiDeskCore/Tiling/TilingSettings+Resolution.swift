@@ -221,10 +221,19 @@ extension TilingSettings {
         from visible: CGRect,
         mode: LayoutMode
     ) -> CGRect {
-        ShelfGeometry.remainingFrame(
-            in: visible,
+        shelfReservation(in: mode).remaining(in: visible)
+    }
+
+    /// The whole input `layoutBounds(from:mode:)` reads for
+    /// `mode` — what a bar write must change to owe a pass
+    /// (#1524, `BarReserveCoreTests` ▸
+    /// `unchangedReservationSkipsTheRetile`).
+    public func shelfReservation(
+        in mode: LayoutMode
+    ) -> ShelfReservation {
+        ShelfReservation(
             edges: shelfEdges(in: mode),
-            shelf: kiwishelf
+            depth: kiwishelf.reservation
         )
     }
 

@@ -170,10 +170,13 @@ extension KiwiCore {
     /// layout RESERVES — both bars, in one list. The edge is
     /// judged by the one fold `shelfEdges(in:)`, never per
     /// section: on a fused edge either bar's reserve holds the
-    /// whole strip, so a float is kept out where a tiled window
-    /// is (#1524, `BarReserveFloatTests`). One accessor so a
-    /// third bar source reaches every site that asks "what
-    /// chrome covers this space" (architect review, 2026-08-29).
+    /// whole strip — the non-reserving bar's painted section
+    /// included, where the reserving one paints nothing — so a
+    /// float is kept out where a tiled window is (#1524,
+    /// `BarReserveCoreTests` ▸ `fusedEdgeFoldCarvesUnpaintedReserver`).
+    /// One accessor so a third bar source reaches every site that
+    /// asks "what chrome covers this space" (architect review,
+    /// 2026-08-29).
     func reservedStrips(
         forSpace space: SpaceID
     ) -> [(strip: CGRect, edge: AppBarEdge)] {

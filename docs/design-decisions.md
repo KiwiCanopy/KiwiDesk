@@ -4453,13 +4453,17 @@ paint at `BarPanel.level`, so a window flush against a strip has
 its outer sliver hidden; flush against a screen edge it is
 clipped instead. Insetting at bars only (device QA) is two rules
 where the principle gives one:
-**float geometry follows RESERVED chrome** — a painted strip on
-an edge the layout gives up, since a bar set to draw over the
-windows keeps no float out either (#1524) — and a ring reserves
+**float geometry follows PAINTED chrome**, and a ring is painted
 wherever it is drawn. The number is not invented for this — it is
 `BorderGeometry.outwardReach`, the renderer's own function, and
 `BorderStyle.fittingGaps` already answers the same question for
 the layout with the same value on all four edges.
+
+:::unreleased
+Painted chrome counts only on an edge the layout reserves: a bar
+set not to reserve its strip keeps no float out, as it keeps no
+tiled window out ([*Reserved where a bar draws*](#app-bar), #1524).
+:::
 
 A tempting alternative was rejected on that same principle: to
 follow `gap.outer` instead, so `border.fit_gaps` would cover
@@ -4646,8 +4650,8 @@ beside a grid of the rest read as a mess, and the gathered
 windows lie exactly behind one another. The whole-space
 grid is what keeps a pile of columns findable rather than stacked
 at one edge, and it is laid inside the grow bound
-— the painted strips carved off and the focus ring's reach
-reserved on every edge — so no gathered frame lands under a bar
+— the painted strips carved off (on a reserved edge, #1524) and
+the focus ring's reach reserved on every edge — so no gathered frame lands under a bar
 and the clamp has nothing left to push; the judgment itself
 takes the correctness bound, or a float flush with a bare screen
 edge would count as outside.
@@ -4733,7 +4737,8 @@ exception to it. Three limits keep it narrow:
   minimum, or a corroborated app minimum). Past that, at the
   screen edge the rest stays clipped rather than the window
   moving; under a bar on that edge the bar still lifts it
-  clear, since a bar reserves its edge for every window (#242).
+  clear, since a bar reserves its edge for every window (#242)
+  — unless it is set not to reserve it (#1524).
 - A window whose top is already past the border is left alone:
   its title bar is out of reach. A bottom "peek" with the title
   bar showing is therefore reachable only at the window's
@@ -12407,6 +12412,25 @@ accepted: the move is the bar the user turned on for that
 layout appearing, while reserving everywhere left an empty
 strip — permanently, in every layout that draws nothing there —
 to spare it.
+
+:::unreleased
+*Shown is not reserved* ([#1524](https://github.com/KiwiCanopy/KiwiDesk/issues/1524)).
+Each bar carries a `reserve` flag, `space_bar.set_reserve` and
+`app_bar.set_reserve`: off, the bar still draws but the layout
+keeps its strip, so showing or hiding it moves no window — the
+primitive auto-hide (#761) reveals on. On an edge the two bars
+share, which is one strip, the edge stays reserved while EITHER
+bar reserves it; there is no shelf-wide master flag, since the
+two bars may sit on different edges and want different answers.
+The flag is Lua/CLI only and never a Settings row: with it off
+the bar's panel still spans the strip and takes the mouse there,
+a dead zone a row would have to explain in a sentence and the
+reference can. That cost is accepted; sizing the panel to the
+drawn plate, so clicks beside a short bar fall through, is a
+later improvement rather than a condition of the verb. It is
+global, never a layout's: like the edge, a reservation per
+layout would move windows on a layout switch.
+:::
 
 A split App Bar pays the same price with the Space Bar on — the
 reflow paragraph of *Amended* below.

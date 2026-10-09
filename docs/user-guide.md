@@ -512,12 +512,17 @@ Scrolling** switches are its visibility.
 
 Drag an item to reorder the windows; a grouped item expands into
 its members on click. Styling it differently per layout is
-Lua-only: every `app_bar.*` field has a `monocle.set_app_bar_*` /
+Lua-only: an `app_bar.*` field has a `monocle.set_app_bar_*` /
 `scroll.set_app_bar_*` twin ([Per-layout App Bar
-overrides](lua-reference.md#per-layout-app-bar-overrides)).
+overrides](lua-reference.md#per-layout-app-bar-overrides)),
+except the App Bar's edge, which every layout shares.
 
-The one exception is the App Bar's edge, which every layout
-shares. The starter setup puts the App Bar on the bottom edge and
+:::unreleased
+Whether the App Bar reserves its strip is global too
+([`app_bar.set_reserve`](lua-reference.md#app_barset_reserve)).
+:::
+
+The starter setup puts the App Bar on the bottom edge and
 the Space Bar on top; set both to one edge to share one shelf.
 
 Floating windows come last, past a thin line and the floating

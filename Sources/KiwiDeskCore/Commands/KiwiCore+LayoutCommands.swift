@@ -24,7 +24,10 @@ extension KiwiCore {
         if let retired = APIReference.retirement(of: command) {
             return .fail(retired)
         }
-        let reservation = shelfReservation
+        let reservation = shelfReservations
+        // Raised by the bars' own arms: their write may leave the
+        // layout bounds alone (#1524).
+        var barWrite = false
         let response: CommandResponse
         if command.hasPrefix("animations.") {
             response = animationsCommand(command, args)
@@ -41,8 +44,10 @@ extension KiwiCore {
         } else if command.hasPrefix("track.") {
             response = trackCommand(command, args)
         } else if command.hasPrefix("app_bar.") {
+            barWrite = true
             response = barCommand(command, args)
         } else if command.hasPrefix("space_bar.") {
+            barWrite = true
             response = spaceBarCommand(command, args)
         } else if command.hasPrefix("kiwishelf.") {
             response = kiwishelfCommand(command, args)
@@ -59,13 +64,17 @@ extension KiwiCore {
         } else {
             response = settingsCommand(command, args)
         }
-        if response.isSuccess, Self.isBarCommand(command),
-            shelfReservation == reservation
+        if response.isSuccess, barWrite,
+            shelfReservations == reservation
         {
-            // A bar write that moved no reserved edge moves no
-            // window: repaint the bars alone (#1524,
-            // `BarReserveRetileTests`).
+            // A bar write that left the layout bounds alone moves
+            // no tiled window: repaint the bars, and re-clamp the
+            // floats, whose strips can still move at a corner
+            // (#1524, `BarReserveCoreTests` ▸
+            // `unchangedReservationSkipsTheRetile` and
+            // ▸ `skippedPassReclampsFloats`).
             updateBars()
+            clampFloatsClearOfBars()
         } else if response.isSuccess {
             // Forced: these are explicit config applies from
             // Lua/CLI (AGENTS.md §5) — un-forced, the engine's
@@ -84,18 +93,10 @@ extension KiwiCore {
         return response
     }
 
-    /// Every layout's reserved shelf edges, read through the one
-    /// `shelfEdges(in:)` — what a bar write must move to owe a
-    /// retile (#1524).
-    var shelfReservation: [[AppBarEdge]] {
-        LayoutMode.allCases.map(tiler.settings.shelfEdges(in:))
-    }
-
-    /// The bars' own global setters — the ones whose write may
-    /// leave the reservation alone.
-    static func isBarCommand(_ command: String) -> Bool {
-        command.hasPrefix("space_bar.")
-            || command.hasPrefix("app_bar.")
+    /// Every layout's layout-bounds input, read through the one
+    /// `shelfReservation(in:)` `layoutBounds` reads (#1524).
+    var shelfReservations: [ShelfReservation] {
+        LayoutMode.allCases.map(tiler.settings.shelfReservation(in:))
     }
 
     /// Raised by a layout setter that only re-divides room among

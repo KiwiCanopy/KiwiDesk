@@ -23,10 +23,12 @@ extension APIReference {
             map["monocle.set_app_bar_\(field)"] = target
             map["scroll.set_app_bar_\(field)"] = target
         }
-        // The edge is each bar's again (#1731), and no layout
-        // overrides a layout-fixed App Bar field.
+        // The edge is each bar's again (#1731). Only the edge
+        // shipped as a per-layout verb, so only it retires; a
+        // later global-only field (#1524's `reserve`) answers
+        // with `applyBarOverride`'s refusal instead.
         map["kiwishelf.set_edge"] = "space_bar.set_edge"
-        for key in AppBarStyle.layoutFixedKeys {
+        for key in [AppBarStyle.CodingKeys.edge] {
             let field = key.stringValue
             for layout in ["monocle", "scroll"] {
                 map["\(layout).set_app_bar_\(field)"] =

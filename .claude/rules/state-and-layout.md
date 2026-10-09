@@ -1951,7 +1951,13 @@ editing here:
   nothing). Every retile triggered by an explicit `set_*` from
   Lua/CLI applies — `applyProfileScopedState`, `set_gap_*`,
   `set_min_window_size`, `set_mode`, the whole `layoutCommand`
-  dispatch. Event-driven retiles stay on the `.event` default so
+  dispatch — save that a `space_bar.*` or `app_bar.*` write may
+  skip the pass, repainting the bars and re-clamping the floats
+  instead, only while it leaves every layout's
+  `TilingSettings.shelfReservation(in:)` — the whole input
+  `layoutBounds(from:mode:)` reads — unchanged (#1524,
+  `BarReserveCoreTests` ▸ `unchangedReservationSkipsTheRetile`).
+  Event-driven retiles stay on the `.event` default so
   echo lag can't wobble windows. Profile applies classify
   themselves: see [profiles.md](profiles.md). **A Space or
   Desktop activation takes `retile(pass: .reissue)`, never
