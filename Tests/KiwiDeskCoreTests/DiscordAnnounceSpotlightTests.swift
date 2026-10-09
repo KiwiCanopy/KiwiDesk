@@ -13,6 +13,7 @@ import Testing
 struct DiscordAnnounceSpotlightTests {
     private static let url = "https://example.invalid/release"
     private static let notes = "[release notes](\(url))"
+    private static let updateTail = "in the footer of Settings Home."
 
     private static let rowFast =
         "- **Fast switches** — Switching keeps up. "
@@ -91,6 +92,7 @@ struct DiscordAnnounceSpotlightTests {
         )
         #expect(!text.contains("**New"))
         #expect(!text.contains("- **A fix.**"))
+        #expect(text.hasSuffix(Self.updateTail))
         #expect(
             text.contains(
                 "This release brings 1 addition and 2 fixes — all of "
@@ -103,6 +105,11 @@ struct DiscordAnnounceSpotlightTests {
         "the count reads as a sentence",
         arguments: [
             ("### Fixed\n\n- **A fix.**", "1 fix — see the"),
+            (
+                "### New\n\n- **A.**\n\n### Improved\n\n- **B.**\n\n"
+                    + "### Fixed\n\n- **C.**",
+                "1 addition, 1 improvement and 1 fix — all of them in the"
+            ),
             (
                 "### Improved\n\n- **One.**\n- **Two.**\n\n"
                     + "### Lua & CLI\n\n- **Three.**",
