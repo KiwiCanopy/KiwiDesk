@@ -29,9 +29,8 @@ file an issue, or open a branch.
   `scripts/release.sh` (which branches it cuts from) and
   `.claude/rules/packaging-and-release.md`. A policy the
   tooling cannot cut is a finding, not a plan.
-- Model column: Fable for timing, protocol and private-surface
-  lanes; Opus for the rest — unless the plan file records a
-  later owner ruling on model picks.
+- Lanes carry no model pick: every lane runs on the session's
+  own model (owner ruling 2026-10-09).
 
 ## The procedure
 
@@ -48,7 +47,7 @@ file an issue, or open a branch.
    issue whose body rules its own milestone differently from
    the one it carries is an owner question. A feature the
    caller describes but has not filed gets a decomposition
-   table (step, what, touches, kind, model) instead of a row.
+   table (step, what, touches, kind) instead of a row.
 2. **Map each issue to what it touches** — the `Sources/`
    directories, the §5 rule file, stored formats (anything that
    owes a `ConfigMigration` crossing or a format bump), Lua/CLI
@@ -109,7 +108,7 @@ file an issue, or open a branch.
 The draft plan file, in the shape the existing `plan/roadmap-*`
 files use: a header saying it is a PROPOSAL, **START HERE**, the
 theme, one table per group (`# | P/E | What | Note`), then
-**Lanes** (branch, issues, order, parallel-with, model — a
+**Lanes** (branch, issues, order, parallel-with — a
 spike that never merges is a lane with a `spike/` branch and says
 so), **Owner sittings** (device checks and owner-hands work,
 batched per session), **Moves
