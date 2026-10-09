@@ -22,6 +22,7 @@ different behavior.
 | `docs/design-decisions.md` | Durable product/UX decisions (see charter below) |
 | `docs/ui-patterns.md` | Shared Settings control conventions |
 | `docs/accepted-limitations.md` | Behavior classified accepted-by-architecture |
+| `docs/performance.md` | What a Space switch costs, release against release, measured on the fixed desk (#1910) — a row is appended by the `measure-work` skill's release step, never edited after |
 | `docs/translating.md` | Translation workflow |
 | `Sources/KiwiDeskCore/Resources/Locales/TRANSLATION_BRIEF.md` | The mechanical contract handed to a translator, and only that — it sits beside the catalogs because that is what gets handed over. Guidance routes to `docs/translating.md`; it went unowned long enough to ship a per-locale key count that was wrong by dozens, so it states no number `en.json` already answers |
 | `docs/localization-naming.md` | The feature-name / mode-name guard pair |

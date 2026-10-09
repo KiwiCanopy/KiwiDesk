@@ -109,6 +109,36 @@ load, and report the deltas. Three readings to keep straight:
 `ax_off_main_us_mean` is the per-call cost the load inflates;
 `ax_main_*` is what blocks the main actor.
 
+## 6. A release comparison: the fixed desk (#1910)
+
+A per-change pair runs on whatever the desk holds that day, so its
+absolute numbers do not carry across days. A release row in
+`docs/performance.md` is measured on the fixed desk instead, every
+bundle in one sitting:
+
+```bash
+F=.claude/skills/measure-work/scripts/fixture-desk.sh
+$F up <scratch>/<label>/KiwiDesk.app <scratch>/fx-<label>
+# measure pairs 2↔3, 3↔4 and 5↔6, idle / --load / --gpu-load
+$F down <scratch>/fx-<label>
+```
+
+The owner switches to an EMPTY macOS Desktop first, by hand or by
+swipe — a `focus_desktop` switch leaves macOS's current Desktop
+behind, and the fixture's windows open there instead. `up` replaces
+`swap-instance.sh`: it stops the running app before pointing
+`~/.config/KiwiDesk` at a Lua-only config, which every release reads
+and none migrates, so an older bundle boots the same desk. Run `down`
+before the next bundle's `up`; every bundle starts on a fresh copy.
+
+Take two runs per condition; where the maxima of two runs disagree
+by more than a quarter, add runs and balance their ORDER across the
+bundles, since a long GPU sitting heats the machine and the later
+bundle pays for it. Then append one row per pair and condition to
+the table in `docs/performance.md`, the desk and the commits named
+above it, and keep the earlier rows: the table is the record
+across releases.
+
 ## What this is not
 
 Not a test: the numbers are one desk's, and tests.md bans timing
