@@ -4,15 +4,15 @@ import Testing
 @testable import KiwiDeskCore
 
 /// **A stored `on_space_change: false` from before 2.2.0 is turned
-/// on once** (#1931): the leaf used to slide the windows themselves
-/// and now plays the plate slide, so the stored value answered
-/// another question (profiles.md ▸ a value whose meaning changes).
-/// A group whose other master leaves are all off is the master
-/// switched off and keeps its `false`. Fixtures are the ENCODER's
-/// values, never hand-written JSON, laid out COMPACT — a shape the
-/// fallback's pretty, sorted re-encode never writes — so the
-/// in-place clauses, which read the TEXT, can tell an edit from a
-/// re-encode.
+/// on once** (#1931): the encoder writes `animations` whole, so the
+/// stored old default cannot be told from a choice (profiles.md ▸
+/// re-defaulting a whole-written leaf is a bounded ruling). A group
+/// whose other master leaves are all off is the master switched off
+/// — the bound's stored signal — and keeps its `false`. Fixtures
+/// are the ENCODER's values, never hand-written JSON, laid out
+/// COMPACT — a shape the fallback's pretty, sorted re-encode never
+/// writes — so the in-place clauses, which read the TEXT, can tell
+/// an edit from a re-encode.
 @Suite("Space switch slide turned on (#1931)")
 struct SpaceChangeOnMigrationTests {
     private static let leaf = "on_space_change"

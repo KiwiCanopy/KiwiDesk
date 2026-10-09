@@ -3266,9 +3266,9 @@ stored signal of a real choice, and only that signal saves a
 `false`: 2.1.1's master wrote every slide and window leaf off at
 once, so a group with all of them off keeps its `false`. A
 `false` chosen after the crossing stays, the step reading the
-file's format — and so does one written by a pre-release build
-that already defaulted on, which the floor cannot tell apart and
-is accepted. The cost is a user who turned the old window slide
+file's format; one written by a pre-release build that already
+defaulted on sits below the floor and is turned on once too,
+which the floor cannot tell apart and is accepted. The cost is a user who turned the old window slide
 off on purpose meeting a slide once, one toggle from off again,
 and an `init.lua` that sets the leaf `false` while a saved
 profile is live: the profile's settings apply over the script,

@@ -4,8 +4,8 @@ import Foundation
 public struct AnimationSettings: Sendable, Equatable, Codable {
     /// Play the plate slide on a Space switch (#1956); off, the
     /// switch is instant. On by default since #1931, and a file
-    /// from before turned on once, since the leaf used to slide
-    /// the windows themselves (`SpaceChangeOnMigrationTests`).
+    /// from before turned on once, its whole-written `false` being
+    /// no evidence of a choice (`SpaceChangeOnMigrationTests`).
     public var onSpaceChange = true
 
     /// The plate slide's pace in milliseconds (#1931): the strip's
