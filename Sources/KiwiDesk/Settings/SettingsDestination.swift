@@ -42,7 +42,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         switch self {
         case .spaces: return L("destination.spaces", "Spaces")
         case .layoutDefaults: return L("destination.layout", "Layout Defaults")
-        case .monitors: return L("destination.monitors", "Monitors")
+        case .monitors: return L("destination.monitors", "Screens")
         case .looks:
             return L(
                 "destination.looks",

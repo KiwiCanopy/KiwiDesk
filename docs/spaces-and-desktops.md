@@ -38,11 +38,11 @@ Space.
 The Space list is part of the **profile**, with its layout
 modes, gaps, borders and rules. Whenever a different profile
 becomes live — loaded by you, or arriving on its own from a
-Desktop binding or a monitor change — its Space list becomes the
+Desktop binding or a screen change — its Space list becomes the
 authority. A Space's name is what makes it that Space: when both
 profiles have a `1`, it stays on screen and takes the new
 profile's settings. Re-applying the profile that is already
-live changes nothing, so a monitor reconnect is harmless.
+live changes nothing, so a screen reconnect is harmless.
 
 **Switching holds the Spaces it does not name.** When a
 different profile or a built-in Standard becomes live, each Space
@@ -116,9 +116,9 @@ by then. A restart of the Mac ends them, since macOS reopens every
 window as a new one. A window of a hidden app goes home with its
 held Space too, and comes back there when you show the app.
 
-Every Space sits on a screen. In Settings the **Monitors**
+Every Space sits on a screen. In Settings the **Screens**
 section is a picture of your desk: drag a Space chip onto the
-display it belongs to, or leave it outlined and KiwiDesk places
+screen it belongs to, or leave it outlined and KiwiDesk places
 it for you. From Lua the same pin is
 `pin_space_to_display("mail", 2)`.
 

@@ -61,7 +61,7 @@ any of them to keep sketchybar in sync:
 | `space_change` | `space_id`, `mode` | A KiwiDesk space switches |
 | `layout_change` | `space_id`, `mode` | Layout mode changes on a space |
 | `focus_change` | `window_id`, `app`, `bundle_id` | Focused window changes |
-| `monitor_change` | `monitor_count` | Monitors connect or disconnect |
+| `monitor_change` | `monitor_count` | Screens connect or disconnect |
 | `desktop_change` | `desktop`, `monitor` | A macOS Desktop switches on some screen (`monitor` 1 is the main screen) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window appears (`new`/`returned`/`restored`) |
 | `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id`, `desktop` | A managed window disappears (`closed`/`minimized`/`hidden`/`vanished`); `desktop` names the Desktop holding a `vanished` window, else `nil` |

@@ -77,11 +77,11 @@ synonym:
   the profile (#1790). *Temporary* is the word in copy and code
   (`space_bar.item.ax.temporary`, `temporarySpaces`); its
   opposite is a Space **in the profile**, never *permanent*,
-  *saved* or *pinned*, which would collide with a Monitor pin.
+  *saved* or *pinned*, which would collide with a Screen pin.
   A *temporary layout* (#1179) is a different thing — a mode not
   kept in the profile — so a sentence naming either says which.
 - **pin** — two relations, and only ONE of them still spends the
-  word (#1022). A **Monitor pin** binds a Space to a screen and
+  word (#1022). A **Screen pin** binds a Space to a screen and
   takes the word in its labels (`diff.label.space_pin`,
   `spaces.pin_badge.help`, `monitors.orphan_pins.title`). The
   app→Space relation is real but is named by its EFFECT instead —
@@ -92,12 +92,12 @@ synonym:
   argument is `docs/design-decisions.md` ▸ App rules.
 
   **A LABEL naming either relation carries its object**, because
-  a label is read with nothing around it: "Monitor pin", never a
+  a label is read with nothing around it: "Screen pin", never a
   bare "Pin". A SENTENCE may lean on its subject instead, which
   is why `home.card.app_rules.subtitle`'s "%1$d apps pinned or
   floating" (the app→Space sense) and
   `home.card.monitors.subtitle`'s "%2$d Spaces pinned" (the
-  Monitor sense) are both correct as they stand — the thing being
+  Screen sense) are both correct as they stand — the thing being
   pinned is already named in each.
 
   Two obligations, and no claim about what the corpus currently
@@ -108,7 +108,7 @@ synonym:
   (`spaces.pin_offline_badge`, "Pin offline", whose `de` is
   already the qualified "Monitor-Pin offline") plus the two
   `monitor_chip.hint.*` drag hints, which lean on a chip whose
-  third sibling names the monitor. Retired as
+  third sibling names the screen. Retired as
   names for either: *attach*, *assign*, *lock*. What a locale
   spells them is its own to settle under
   `docs/localization-naming.md` ▸ Family C — **one word per
@@ -278,18 +278,20 @@ synonym:
   the same reason. A sentence naming both writes both words.
   Retired as names for a screen: *monitor*, *display*. The
   **wire is exempt**, as it is above: a Lua verb, an event name
-  or a profile key spelling either word keeps it until someone
-  rules the wire, and this bullet governs copy alone — naming
-  those here would be one list rotting in two files, the same
-  reason the bullet above names none. A **proper name** is not
-  the common noun and is not bound here — the `Coder & Monitor`
-  preset keeps its name.
+  or a profile key spelling either word keeps it — the owner
+  ruled the wire stays (#865, 2026-10-09) — and this bullet
+  governs copy alone; naming those here would be one list
+  rotting in two files, the same reason the bullet above names
+  none. A **proper name** is not the common noun and is not
+  bound here — the `Coder & Monitor` preset keeps its name.
 
   Two obligations, and no claim about what the corpus currently
-  says: **author every new string to this**, and **do not sweep
-  the existing ones as a rider on some other branch** — the
-  sweep reaches the census, a component directory, the site
-  corpus and `docs/`, and it is #865, ruled off 1.0. A locale
+  says: **author every new string to this**, and give a retired
+  noun a user still types to `SettingsSearchSynonyms` rather
+  than back to a label (`SettingsSearchTests` ▸
+  `retiredScreenNounsFindTheirPage`). #865 is the sweep; the
+  keys it deliberately left alone are listed in the design
+  entry below, as Family C requires. A locale
   applies the ladder to its OWN file: this settles the English,
   never which of a catalog's two candidates wins there
   (`docs/localization-naming.md` ▸ Family C, whose rule 2 is

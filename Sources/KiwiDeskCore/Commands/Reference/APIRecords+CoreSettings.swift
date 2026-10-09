@@ -120,11 +120,11 @@ extension APIReference {
         ),
         "save_profile": APIRecord(
             "Saves the current configuration to a profile, which "
-                + "claims the connected monitor set.",
+                + "claims the connected screen set.",
             .text("name")
         ),
         "load_profile": APIRecord(
-            "Loads a profile, claiming the connected monitor set "
+            "Loads a profile, claiming the connected screen set "
                 + "where its screen count fits.",
             .text("name")
         ),
@@ -134,7 +134,7 @@ extension APIReference {
         ),
         "set_default_profile": APIRecord(
             "Sets the fallback profile for its screen count; "
-                + "refuses one that holds no monitor set.",
+                + "refuses one that holds no screen set.",
             .text("name")
         ),
         "list_profiles": APIRecord(

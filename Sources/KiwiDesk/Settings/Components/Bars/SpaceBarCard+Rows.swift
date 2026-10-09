@@ -20,7 +20,7 @@ extension SpaceBarCard {
                     help: L(
                         "space_bar.show_front_app.help",
                         "Adds a trailing segment with the focused "
-                            + "window of the Space each display "
+                            + "window of the Space each screen "
                             + "currently shows. Icon-only on "
                             + "vertical bars."
                     )

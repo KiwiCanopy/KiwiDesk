@@ -264,7 +264,7 @@ restated `20...80` satisfies on the day it is written.
   skipping the drawing rather than leaving it to the frame's
   clip, which does not crop where a reader assumes
   (`SchematicCanvas.screen` states the mechanism). Scrolling's
-  off-monitor ghosts are the worked case, drawn at `.panel` and
+  off-screen ghosts are the worked case, drawn at `.panel` and
   left undrawn at `.tile`; the argument for the trade lives on
   `SchematicScale`, whose doc comment says what a thumbnail is
   *for*, and `LayoutSchematicScaleTests` holds both halves.

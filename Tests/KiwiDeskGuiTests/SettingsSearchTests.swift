@@ -121,6 +121,26 @@ struct SettingsSearchTests {
         #expect(hit)
     }
 
+    /// #865 renamed the page "Screens"; a user still arriving with
+    /// the retired nouns lands on it, and on the fingerprints row
+    /// the label no longer spells.
+    @Test("the retired screen nouns still find the Screens page")
+    func retiredScreenNounsFindTheirPage() {
+        pinEnglish()
+        defer { reset() }
+        for query in ["monitor", "Displays"] {
+            #expect(
+                settings(query).contains(.destination(.monitors)),
+                Comment(rawValue: query)
+            )
+        }
+        let hit = settings("monitor fingerprint").contains {
+            guard case .setting(let row) = $0 else { return false }
+            return row.key == .monitors(.fingerprints)
+        }
+        #expect(hit)
+    }
+
     @Test("editing a stored profile hides General rows (#18)")
     func reachabilityFilter() {
         pinEnglish()

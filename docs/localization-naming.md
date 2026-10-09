@@ -412,14 +412,16 @@ to stop, so the escape is ranked too. Take the first that fits.
 case — it makes the collision *visible*, not resolved. Steps 1–4
 are review's, like the rest of this family.
 
-**One concept is ruled and deliberately unswept**: the physical
-screen, where English carries three words. The winner is
+**One concept is swept in English and open per catalog**: the
+physical screen, where English carried three words. The winner is
 `screen`, `display` is reserved for quoting Apple's own controls,
 the English-side obligation is
 `.claude/rules/config-vocabulary.md` ▸ noun glossary, and the
-argument is `docs/design-decisions.md` ▸ Vocabulary: a screen is
-a screen. The sweep — including each catalog's own rule-2 run,
-which the English ruling does **not** decide — is #865.
+argument and the keep-list are `docs/design-decisions.md` ▸
+Vocabulary: a screen is a screen. #865 swept the English and left
+every translation as it was, since the meaning did not move. Each
+catalog's own rule-2 run — which the English ruling does **not**
+decide — is still owed, catalog by catalog.
 
 ### Why there is no per-locale word list here
 

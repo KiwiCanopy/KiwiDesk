@@ -153,7 +153,7 @@ struct DisplayCard: View {
         .accessibilityLabel(
             L(
                 "monitor_card.more_spaces.axlabel",
-                "%1$d more Spaces on this display",
+                "%1$d more Spaces on this screen",
                 count
             )
         )
@@ -214,11 +214,11 @@ struct DisplayCard: View {
         isSelected
             ? L(
                 "monitors.deselect",
-                "Hide the Spaces on this display"
+                "Hide the Spaces on this screen"
             )
             : L(
                 "monitors.select",
-                "Show the Spaces on this display"
+                "Show the Spaces on this screen"
             )
     }
 

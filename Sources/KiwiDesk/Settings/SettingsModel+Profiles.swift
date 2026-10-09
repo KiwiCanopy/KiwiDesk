@@ -14,9 +14,9 @@ extension SettingsModel {
             return L(
                 "profiles.save_blocked_paused",
                 "Window management is paused because Accessibility "
-                    + "access is off, so no displays are detected. "
+                    + "access is off, so no screens are detected. "
                     + "Grant access first — a profile saved now would "
-                    + "capture no monitors and never resolve."
+                    + "capture no screens and never resolve."
             )
         case .notStarted:
             // The core has not run, so no screen is known (#2050).

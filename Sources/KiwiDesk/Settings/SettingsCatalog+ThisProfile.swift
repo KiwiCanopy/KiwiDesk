@@ -33,11 +33,11 @@ struct MonitorsControls: Sendable {
     )
     let orphanPins = SettingsControl(
         "monitors.orphan_pins.title",
-        "Pinned to disconnected monitors"
+        "Pinned to disconnected screens"
     )
     let monitorFingerprints = SettingsDrawer(
         "monitors.advanced.title",
-        "Monitor fingerprints"
+        "Screen fingerprints"
     )
 }
 

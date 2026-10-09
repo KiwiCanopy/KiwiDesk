@@ -7,7 +7,7 @@ import Testing
 /// What a schematic's frame is allowed to be (#753).
 ///
 /// Three halves of one decision, and they fail apart. The first is
-/// arithmetic: Scrolling reserves canvas for its off-monitor
+/// arithmetic: Scrolling reserves canvas for its off-screen
 /// ghosts, and reserving it at `.tile` drew the monitor at half
 /// the size of every sibling's outline — the thumbnail that read
 /// as broken in the layout chooser. The second is vocabulary: the
@@ -100,7 +100,7 @@ struct LayoutSchematicScaleTests {
                 // Without it the clip leaves a few points of a
                 // tile inside `LayoutSchematic.inset`'s band —
                 // most visibly a grey ghost at a thumbnail's edge,
-                // where every off-monitor slot is one of these.
+                // where every off-screen slot is one of these.
                 "if!onCanvas(i,m,along:along){EmptyView()}",
                 // The ghost itself, which only the panel's margin
                 // has room for and which the skip above is what

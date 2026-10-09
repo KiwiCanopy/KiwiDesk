@@ -178,13 +178,13 @@ struct SpaceAssignmentChip: View {
         case .pinned:
             return L(
                 "monitor_chip.hint.pinned",
-                "Pinned to this monitor — drag to move, or "
+                "Pinned to this screen — drag to move, or "
                     + "clear it for automatic"
             )
         case .main:
             return L(
                 "monitor_chip.hint.main",
-                "Follows the main display — drag to pin, or "
+                "Follows the main screen — drag to pin, or "
                     + "clear it for automatic"
             )
         case .auto:
@@ -203,7 +203,7 @@ struct SpaceAssignmentChip: View {
         Button(
             L(
                 "monitor_card.follows_main",
-                "Follows main display"
+                "Follows main screen"
             )
         ) {
             model.config.mainSpaces.insert(space)

@@ -97,7 +97,7 @@ saved profile.
   sketchybar bridge) live.
 
 Once `gui.json` exists, the visual editor owns tiling, and
-hand-written `set_gap_global` calls stop applying on monitor
+hand-written `set_gap_global` calls stop applying on screen
 changes; persist custom tiling as a profile.
 
 **First launch with an existing `init.lua`:** the default
@@ -124,7 +124,7 @@ Lua-only (`enable_wake_restore`, `set_wake_restore_delay` in the
 KiwiDesk restores the arrangement captured when the Mac went to
 rest (on by default, after a 1500 ms delay) and puts focus back
 on the window you were in. A wake restore is skipped when the
-display set changed during sleep; the monitor-change profile
+screen set changed during sleep; the screen-change profile
 switch takes over. If a restore leaves things wrong, **General ▸
 Advanced ▸ Discard Saved Window Arrangement** clears it.
 
@@ -168,7 +168,7 @@ hand-written setup, the first time you Save in Settings.
 > **Keeping multiple Macs in sync.** Symlink `~/.config/KiwiDesk`
 > into an iCloud Drive or Dropbox folder. Machine-specific state
 > does not travel: grant Accessibility on each Mac, and expect
-> display layout and macOS Desktops to resolve against what is
+> screen layout and macOS Desktops to resolve against what is
 > connected there.
 
 When an update moves `gui.json`, a profile, your palettes or your
@@ -273,7 +273,7 @@ keybindings runs on every reload.
   Desktop → profile bindings.
 - **Each profile's JSON**, applied only while that profile is
   active: which spaces exist and their order, layout mode, gaps
-  and per-layout / per-space tuning, space-to-monitor pins, the
+  and per-layout / per-space tuning, space-to-screen pins, the
   Main role and the fallback space.
 
 The alert sound when an action is blocked and the windows per
@@ -362,29 +362,29 @@ keeps its own, and a **Saved for _N_ other layouts** card at the
 foot lists them. **Reset All Layout Overrides** there clears
 every layout's, after a confirmation.
 
-## Monitors
+## Screens
 
-Drag a space chip onto a display to pin it there; drag it onto
-the dashed **Follows main display** tray to give it the **Main
-role**, which moves with whichever display is main when you dock
+Drag a space chip onto a screen to pin it there; drag it onto
+the dashed **Follows main screen** tray to give it the **Main
+role**, which moves with whichever screen is main when you dock
 and undock. Outlined chips are placed automatically; a filled
 chip is yours. Every chip is also a menu, which is the keyboard
 route ([Using Settings from the
 Keyboard](#using-settings-from-the-keyboard)).
 
-KiwiDesk recognises a display by name and resolution, so two of
+KiwiDesk recognises a screen by name and resolution, so two of
 the same model at the same resolution are one identity and a
 space pinned to one may open on either. A space pinned to an
-absent monitor gets its own card below the picture with **Back
+absent screen gets its own card below the picture with **Back
 to automatic placement**.
 
-The **focused monitor** is the one you last clicked — a window or
+The **focused screen** is the one you last clicked — a window or
 the bare wallpaper. A new window, and a global sticky window,
-appear on that monitor's space. Clicking the menu bar or the Dock
+appear on that screen's space. Clicking the menu bar or the Dock
 does not move focus.
 
 Opening an app whose [app rule](#app-rules) names a space on
-another monitor moves the focus there with its window.
+another screen moves the focus there with its window.
 
 ## Gaps & Borders
 
@@ -441,16 +441,16 @@ floating window that way.
 ### Drag Visuals
 
 Releasing a dragged window over another's slot on the same
-display swaps the two. Dragging onto another display moves it
-there, live: once the cursor settles on the other display, its
+screen swaps the two. Dragging onto another screen moves it
+there, live: once the cursor settles on the other screen, its
 windows slide apart to open a slot, and pulling the cursor back
 moves the window home. Releasing outside every slot on your own
-display snaps the window back. Floating windows show no overlay
+screen snaps the window back. Floating windows show no overlay
 and cannot be dropped onto a tiled slot; use *make tiled* first
 ([Accepted limitations](accepted-limitations.md)).
 
-A floating window dropped on another display moves into the Space
-that display shows, and stays where you let go of it, clear of
+A floating window dropped on another screen moves into the Space
+that screen shows, and stays where you let go of it, clear of
 the bars. A sticky window keeps its own Space.
 
 ### Sticky Windows
@@ -459,15 +459,15 @@ A **sticky** window stays visible on every space. Two scopes,
 both shortcuts under Size & float (stickiness is per window;
 there is no app-rule list):
 
-- **Toggle sticky everywhere** — every space of every monitor
+- **Toggle sticky everywhere** — every space of every screen
   (∞ mark).
 - **Toggle sticky on this screen** — every space of the one
-  monitor it lives on (📌 mark). Moving it to a space on another
-  monitor re-homes it there.
+  screen it lives on (📌 mark). Moving it to a space on another
+  screen re-homes it there.
 
 Moving a ∞ window anywhere, or a 📌 window to another space on
-the same monitor, is refused with a brief pill. On a single
-monitor the two are identical. The flag survives closing and
+the same screen, is refused with a brief pill. On a single
+screen the two are identical. The flag survives closing and
 reopening the window and is independent of floating: a floating
 sticky window keeps its frame everywhere; a tiled one tiles into
 every space's layout near where it sits on its home space, keeps
@@ -541,7 +541,7 @@ as you set it.
 
 ### Space Bar
 
-One bar per display, listing that display's Spaces in profile
+One bar per screen, listing that screen's Spaces in profile
 order. Click a Space to switch to it.
 
 Click an app glyph to switch to its Space and focus that window.
@@ -595,8 +595,8 @@ a 📌 window under the current Space of its own screen.
 
 | Mark | Where it sits | Means |
 | --- | --- | --- |
-| ∞ mark | On the window, top-right corner | **Global sticky** — every Space of every monitor |
-| 📌 mark | On the window, top-right corner | **Display sticky** — every Space of the one monitor it lives on |
+| ∞ mark | On the window, top-right corner | **Global sticky** — every Space of every screen |
+| 📌 mark | On the window, top-right corner | **Screen sticky** — every Space of the one screen it lives on |
 | Floating mark | On the window, top-right corner — left of a sticky mark | A **floating** window |
 | Badge, glyph's **top-left** | Space Bar | That window (or one in the group) is **sticky** |
 | Badge, glyph's **bottom-left** | Space Bar | That window is **floating** |
@@ -638,10 +638,10 @@ The rungs, in order:
    ([macOS Desktops](#macos-desktops-mission-control)), when
    a bound profile is saved for this many screens. With none
    the binding stands aside and the rungs below decide.
-2. An **exact monitor match** — these exact displays. It stops
+2. An **exact screen match** — these exact screens. It stops
    matching the moment you swap one out, unless you saved a set
    for the new hardware too.
-3. The **default for this screen count**, whatever monitors are
+3. The **default for this screen count**, whatever screens are
    plugged in. The first profile saved for a count becomes its
    default; **make default** moves it.
 4. A **built-in Standard** for that screen count, or a line
@@ -649,7 +649,7 @@ The rungs, in order:
 
 A new hardware combination therefore uses the Standard and marks
 the profile dirty until you Save on it; a profile saved for two
-*different* monitors sorts after your exact matches but before
+*different* screens sorts after your exact matches but before
 one-screen profiles.
 
 ### The Profile Banner
@@ -682,7 +682,7 @@ keeps that look as its own.
 ### Saving
 
 **Save** writes to the current target and adds or refreshes the
-connected monitor set; it is greyed when the connected screen
+connected screen set; it is greyed when the connected screen
 count differs from the profile's. A screen setup the profile has
 no set for is itself an unsaved change, listed as a **Screens**
 row. On a temporary layout or a built-in Standard the slot reads
@@ -694,14 +694,14 @@ screens connect, it loads. Saving adds the connected screen setup
 only when no other profile has it.
 
 While management is **paused** (Accessibility off), KiwiDesk
-detects no displays, so any save that captures the live monitor
+detects no screens, so any save that captures the live screen
 set is unavailable. Shortcuts, app rules, float and ignore rules,
-the space list and Desktop bindings carry no monitor set, so
+the space list and Desktop bindings carry no screen set, so
 **Save** still writes `gui.json` for them and keeps counting the
 layout edits until you grant access.
 
 The same holds before you press **Start Tiling** for the first
-time: until then KiwiDesk detects no displays either.
+time: until then KiwiDesk detects no screens either.
 
 Neither live save carries a keybinding override: to give a
 profile its own shortcuts, pick it in the banner while it isn't
@@ -832,7 +832,7 @@ grid (one column of three) · floating, a laptop monocle · grid
 (two across) · floating.
 
 While you are still on the starter setup, connecting or removing
-a monitor re-derives it and the `⌃⌥N` space shortcuts extend to
+a screen re-derives it and the `⌃⌥N` space shortcuts extend to
 new spaces (up to ten).
 
 It is saved as an ordinary profile named after your main screen
@@ -1123,6 +1123,6 @@ Ensure the space's layout is not Floating and the app is not in
 float_rules. On a hand-written config, make sure `init.lua`
 exists and the app is managing tiling (check the banner).
 
-**Profile not loading after monitor change?**  
+**Profile not loading after a screen change?**  
 See [Which Profile Loads](#which-profile-loads): a new hardware
 combination uses the built-in Standard until you Save on it.

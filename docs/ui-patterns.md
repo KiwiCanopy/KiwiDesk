@@ -259,8 +259,8 @@ Three boundaries, because System Settings itself draws them:
 **"Advanced" prefixes a disclosure's noun only when a basic tier
 of that same noun is visible above it; otherwise the drawer is
 named for what it holds** (R3, #406). So **"Lua bindings"** and
-**"Monitor fingerprints"**: the catalog above Shortcuts' drawer
-is a different noun (*actions*), and Monitors has no lesser
+**"Screen fingerprints"**: the catalog above Shortcuts' drawer
+is a different noun (*actions*), and Screens has no lesser
 fingerprint anywhere.
 
 **The qualifier must also be unclaimed by the surface AROUND
@@ -360,7 +360,7 @@ catalog's own controls — drawer titles, mode tabs — plus a
 sparse English synonym table (`SettingsSearchSynonyms`,
 match-only, never displayed). A title that drops a word no
 other indexed string carries makes its own drawer unfindable by
-that word. "Monitor fingerprints" is the one indexed string
+that word. "Screen fingerprints" is the one indexed string
 carrying "fingerprint", which is part of why that title wins.
 "Lua" is also carried by the init.lua rows in General and
 Shortcuts, but results are per row, so the raw-Lua drawer still
@@ -376,7 +376,7 @@ take `scripts/drop-key` and re-queue for translation — see
 `docs/translating.md`.
 
 **A section title labels its rows visually; it does not label
-them to VoiceOver.** A diagnostic readout row (Monitors'
+them to VoiceOver.** A diagnostic readout row (Screens'
 fingerprint hashes) needs no visible per-row label when the
 drawer above it is named for exactly that value. But the title
 is spoken once while rows are stepped one at a time, so give
@@ -387,12 +387,12 @@ yields the value alone.
 
 Two things decide how far the combined element reaches:
 
-- **Does the title name the value at all?** Monitors' drawer is
-  titled "Monitor fingerprints", so its rows speak the display
+- **Does the title name the value at all?** Screens' drawer is
+  titled "Screen fingerprints", so its rows speak the screen
   and the hash. The orphan-pin rows sit under "Pinned to
-  disconnected monitors", which never says *fingerprint*, so
+  disconnected screens", which never says *fingerprint*, so
   their label carries both halves — the row's own sentence plus
-  the monitor it is waiting for.
+  the screen it is waiting for.
 - **Does the row hold a control?** Combine the **readout only**,
   never the whole row: `children: .combine` folds interactive
   children in too, so wrapping a row that ends in a clear or
@@ -520,8 +520,8 @@ settings' vocabulary for "interactive, movable"; on a passive
 `BadgeChip` it would promise interaction the chip does not
 have. Depth comes from the hairline stroke both chip types
 share, matching the flat capsule language of native tags. One
-mark sits outside both vocabularies: the Monitors picture's
-main-display card wears a soft accent bloom — decoration
+mark sits outside both vocabularies: the Screens picture's
+main-screen card wears a soft accent bloom — decoration
 stating a fact, promising neither interaction nor an armed
 input, and always beside the textual "main" badge that carries
 the answer. A non-interactive value state in a control row (the
@@ -811,13 +811,13 @@ are capped for legibility with a "+N" chip.
 
 **"+N" means the same thing wherever it appears: there are N
 more, and here is how to see them.** The schematics' legibility
-cap above and a Monitors card too small to draw all its chips
+cap above and a screen card too small to draw all its chips
 set the grammar; the Home cards' overflow chips and space fan
 reuse it, and a new surface must not invent a different one. It
 counts the items NOT shown (never the total), it takes a slot
 of its own so it never claims to hide exactly one, and it is an
 affordance rather than a label wherever the hidden items have
-their own controls: on the Monitors card it opens a popover
+their own controls: on a screen card it opens a popover
 holding every chip, each working as it does on the card,
 because a chip that is merely counted has lost its clear button
 and its menu.
@@ -836,7 +836,7 @@ The middle clause is arithmetic, so it is code:
 `OverflowSplit.shown(of:fitting:withMarker:)` is the one
 statement of it, and a surface that caps a run routes through
 it instead of restating the sum. Each caller still measures its
-own capacity — a Monitors card from its geometry, a Profiles
+own capacity — a screen card from its geometry, a Profiles
 row from a fixed slot count. Surfaces predating it still
 compute `total - cap` and so can render "+1"; adopting one is
 its own change, since routing it shows one item fewer.
@@ -848,7 +848,7 @@ sequence retired — and each carries whatever is conditional
 about its layout with one of a small shared vocabulary: a
 **spawn ghost** (dashed accent tile + "+", "the next window
 lands here": BSP's incoming window, Track's own-vs-focused
-track), an **off-monitor ghost** (solid gray, straddling a
+track), an **off-screen ghost** (solid gray, straddling a
 drawn screen edge, "a real window scrolled off-screen":
 Scrolling's side panel), and the **empty-cell gap** (dashed
 gray, "unused grid space": rigid Grid). Stack's overflow is a
@@ -938,7 +938,7 @@ value the space actually gets, never the global.
 **"Automatic" is the word for a value; "Auto" is the adjective
 in a toggle label (R6/#406).** A value the user *reads* or
 *picks* takes macOS's own full word — the empty-hex colour
-sentinel, a monitor chip's placement, and
+sentinel, a screen chip's placement, and
 `PtSlider`'s readout, which prints **Automatic** in place of
 `0 pt` while the Auto sentinel is set. A toggle that turns
 automation on takes "Auto" as an adjective, since its noun is
@@ -992,7 +992,7 @@ flag to diverge from its own label by design.
 ## Interaction states
 
 **A row's menu is one menu, on every route.** Wherever a row
-offers a contextual menu (palette tiles, space rows, monitor
+offers a contextual menu (palette tiles, space rows, screen
 assignment chips, adaptive color wells), the same items are its
 right-click menu, its VoiceOver actions, and its keyboard route
 — a chord on the focused row, stated in the user guide's
@@ -1051,7 +1051,7 @@ obligations follow: the edge is **one weight for every kind**
 is a half-pixel at 1x and can vanish on an external screen),
 and **nothing that is not a drag source wears that costume**,
 since a rest cue only reads as one if its neighbours lack it —
-the Monitors `+n` marker, which opens a popover, takes the
+the Screens `+n` marker, which opens a popover, takes the
 shared chip rather than the pinned chip's fill (#1240).
 
 **Picking from a picker IS the add.** Where a control's whole
@@ -1138,7 +1138,7 @@ step; a segmented control's track is `trackFill`, fill and rim.
 All are stronger in dark, where a 6 % lift on the near-black
 page does not read as a shape (#1520, #2047). A text chip that
 is a button also takes `chipEdge`, constant across states — the
-jump chips, a monitor card's `+n`, the collapsed screen-setups
+jump chips, a screen card's `+n`, the collapsed screen-setups
 chip, a colour well's swatch, a layer or preset choice chip: the
 hairline capsule is the passive chip's vocabulary, so a button
 chip is told apart by its edge before it is ever pointed at. A
@@ -1251,7 +1251,7 @@ remains and the strength is measured —
 `ModeGatedFrameSeparationTests` derives the CVD floors against
 both neighbours on the same edge (the hairline, and hover's
 full accent) from the shipped tokens. The weight stays below
-the doubling the Monitors (1.5→3 pt) and palette (1→2 pt) pairs
+the doubling the Screens (1.5→3 pt) and palette (1→2 pt) pairs
 spend on *selected/applied*, because a mode-gated card is
 present, not picked; hover keeps the full-strength accent as
 its own register. The argument is `docs/design-decisions.md` ▸
@@ -1263,7 +1263,7 @@ the implicit promotion (search or a cross-reference landing in a
 Power-User-only area) already owns its arrival wash. **The flag
 is the site's own offer predicate evaluated at `.simple`** —
 never a hand-negated copy — so the weight states the same fact
-as presence: Monitors is unmarked on a multi-display machine,
+as presence: Screens is unmarked on a multi-screen machine,
 the Layers card is unmarked the moment a layer exists, and when
 config presence changes the flag at rest the weight steps with
 no wash. **The way back to Simple is a plain fade.** Reduce

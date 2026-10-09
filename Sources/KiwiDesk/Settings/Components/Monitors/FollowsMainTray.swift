@@ -54,7 +54,7 @@ struct FollowsMainTray: View {
             Text(
                 L(
                     "monitor_card.follows_main",
-                    "Follows main display"
+                    "Follows main screen"
                 )
             )
             .font(.caption2)
@@ -131,7 +131,7 @@ struct FollowsMainTray: View {
         .accessibilityLabel(
             L(
                 "monitor_card.more_spaces.axlabel",
-                "%1$d more Spaces on this display",
+                "%1$d more Spaces on this screen",
                 count
             )
         )

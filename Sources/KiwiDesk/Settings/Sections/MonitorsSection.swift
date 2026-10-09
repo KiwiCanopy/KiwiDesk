@@ -32,7 +32,7 @@ struct MonitorsSection: View {
     private var areaCaption: String {
         L(
             "monitors.area.caption",
-            "Drag a Space onto the display it belongs to."
+            "Drag a Space onto the screen it belongs to."
         )
     }
 
@@ -65,7 +65,7 @@ struct MonitorsSection: View {
             Text(
                 L(
                     "monitors.none_detected",
-                    "No monitors detected, so there's nothing to "
+                    "No screens detected, so there's nothing to "
                         + "place Spaces on. Windows still tile, "
                         + "all in a single Space."
                 )
@@ -103,7 +103,7 @@ struct MonitorsSection: View {
     private var clampedNote: String {
         L(
             "monitors.picture.clamped",
-            "Sizes are approximate — these displays are too "
+            "Sizes are approximate — these screens are too "
                 + "different to draw to scale."
         )
     }
@@ -117,7 +117,7 @@ struct MonitorsSection: View {
     private var ambiguousNote: String {
         L(
             "monitors.picture.ambiguous",
-            "Some of these displays look identical to KiwiDesk, "
+            "Some of these screens look identical to KiwiDesk, "
                 + "so a Space pinned to one may open on another."
         )
     }
@@ -154,7 +154,7 @@ struct MonitorsSection: View {
             Label(
                 L(
                     "monitors.not_connected",
-                    "Monitors not connected"
+                    "Screens not connected"
                 ),
                 systemImage:
                     "display.trianglebadge.exclamationmark"

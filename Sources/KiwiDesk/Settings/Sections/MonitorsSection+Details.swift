@@ -44,7 +44,7 @@ extension MonitorsSection {
             .accessibilityLabel(
                 L(
                     "monitors.orphan_pin.row_axlabel",
-                    "%1$@, waiting for monitor %2$@",
+                    "%1$@, waiting for screen %2$@",
                     orphanSentence(orphan.space),
                     orphan.fingerprint
                 )
@@ -66,7 +66,7 @@ extension MonitorsSection {
     private func orphanSentence(_ space: SpaceID) -> String {
         L(
             "monitors.orphan_pin.sentence",
-            "Space %1$@ is pinned to a monitor that isn't "
+            "Space %1$@ is pinned to a screen that isn't "
                 + "attached, so it opens elsewhere for now.",
             space.raw
         )
@@ -94,7 +94,7 @@ extension MonitorsSection {
                     L(
                         "monitors.advanced.caption",
                         "Profiles reattach automatically when "
-                            + "a known monitor setup is "
+                            + "a known screen setup is "
                             + "reconnected."
                     )
                 )

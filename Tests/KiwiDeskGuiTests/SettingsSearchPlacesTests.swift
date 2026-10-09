@@ -149,7 +149,7 @@ struct SettingsSearchPlacesTests {
         // A second flip supersedes the first.
         model.noteSearchModeSwitch(.monitors)
         #expect(
-            model.searchModeNotice?.contains("Monitors") == true
+            model.searchModeNotice?.contains("Screens") == true
         )
         model.searchNoticeTask?.cancel()
     }

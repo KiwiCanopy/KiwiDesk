@@ -46,8 +46,8 @@ struct ProfilesSection: View {
     private var areaCaption: String {
         L(
             "profiles.area.caption",
-            "A profile is your whole setup, remembered per "
-                + "display arrangement."
+            "A profile is your whole arrangement, remembered "
+                + "per screen setup."
         )
     }
 

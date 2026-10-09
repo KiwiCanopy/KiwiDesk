@@ -28,6 +28,18 @@ enum SettingsSearchSynonyms {
         return []
     }
 
+    /// Alternate vocabulary for a destination's TITLE, which a
+    /// query otherwise reaches by its label alone. The Screens
+    /// page answers to the two nouns `screen` retired (#865).
+    static func destinationTerms(
+        for destination: SettingsDestination
+    ) -> [String] {
+        switch destination {
+        case .monitors: return ["monitors", "displays"]
+        default: return []
+        }
+    }
+
     /// Alternate vocabulary terms for census setting keys.
     static func terms(for key: SettingKey) -> [String] {
         switch key {
@@ -56,6 +68,9 @@ enum SettingsSearchSynonyms {
                 "natural", "natural scrolling", "reverse", "invert",
                 "direction",
             ]
+        // "Monitor fingerprints" until #865 retired the noun.
+        case .monitors(.fingerprints):
+            return ["monitor fingerprints", "display fingerprints"]
         case .gaps(.outer): return ["margin", "padding"]
         case .gaps(.inner): return ["padding", "spacing"]
         case .borders(.borderEnabled):

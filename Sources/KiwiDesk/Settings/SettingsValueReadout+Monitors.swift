@@ -37,7 +37,7 @@ extension SettingsValueReadout {
         old: [SpaceID: String],
         new: [SpaceID: String]
     ) -> [SettingsDiffRow] {
-        let base = L("diff.label.space_pin", "Monitor pin")
+        let base = L("diff.label.space_pin", "Screen pin")
         let touched = Set(old.keys).union(new.keys)
             .filter { old[$0] != new[$0] }
             .sorted { $0.raw < $1.raw }

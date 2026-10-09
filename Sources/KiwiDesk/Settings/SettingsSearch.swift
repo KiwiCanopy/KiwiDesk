@@ -136,7 +136,14 @@ enum SettingsSearch {
         let rows = SettingsSearchIndex.rows()
         return reachable.flatMap { destination in
             var out: [SettingsSearchResult] = []
-            if destination.title.searchMatches(query) {
+            let retired = SettingsSearchSynonyms.destinationTerms(
+                for: destination
+            )
+            if destination.title.searchMatches(query)
+                || retired.contains(where: {
+                    $0.searchMatches(query)
+                })
+            {
                 out.append(.destination(destination))
             }
             out += rows.filter {
