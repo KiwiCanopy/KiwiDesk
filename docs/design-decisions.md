@@ -6944,9 +6944,17 @@ deaf for as long as the question waits — unbounded on a logout.
 The price is that a restart or logout the question stops has to
 be started again after the answer. A second quit while the
 question is up brings it forward rather than slipping past it.
-An update's in-place relaunch intent is withdrawn while the
-question waits and announced again on the answer, so a Cancel
-leaves none armed and a late answer still relaunches in place.
+An in-place restart intent is withdrawn while the question waits
+and re-armed with the same source on the answer, so a Cancel
+leaves none armed and a late answer still restarts in place. A
+Cancel followed by a second Install and Relaunch and then an
+answer does not restart in place: Sparkle tells the app it is
+about to relaunch once per install, so the second quit arrives
+unannounced, gathers the windows, and Sparkle still relaunches.
+A quit event from another app or a logout that arrives while the
+question's naming prompt is open finds an alert AppKit closes on
+its own: the quit is aborted, the draft is kept, and Settings is
+in front with no question showing.
 
 **Every other Settings dialog closes as Cancel on any quit.**
 KiwiDesk runs in the background, so a dialog forgotten in an

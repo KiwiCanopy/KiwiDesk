@@ -225,6 +225,31 @@ struct DraftLeaveTests {
         model.confirmPendingDiscard(try #require(model.pendingDiscard))
         #expect(quits == 1)
         #expect(model.quitAnswered)
+        #expect(core.inPlaceRestart.source == .update)
+        #expect(core.takeInPlaceRestart())
+    }
+
+    @Test("a quit question never arms an intent nobody announced")
+    func noIntentStaysNone() throws {
+        let model = try makeDirtyModel()
+        let core = model.core
+        var quits = 0
+        model.askBeforeQuit { quits += 1 }
+        model.confirmPendingDiscard(try #require(model.pendingDiscard))
+        #expect(quits == 1)
+        #expect(!core.takeInPlaceRestart())
+    }
+
+    @Test("a withdrawn service restart comes back as a service one")
+    func serviceSourceRoundTrips() throws {
+        let model = try makeDirtyModel()
+        let core = model.core
+        core.inPlaceRestart.announcedAt = core.inPlaceRestart.now()
+        core.inPlaceRestart.source = .service
+        model.askBeforeQuit {}
+        #expect(core.inPlaceRestart.source == nil)
+        model.confirmPendingDiscard(try #require(model.pendingDiscard))
+        #expect(core.inPlaceRestart.source == .service)
         #expect(core.takeInPlaceRestart())
     }
 

@@ -52,17 +52,19 @@ extension SettingsModel {
 
     /// A quit while Settings is open with unsaved edits (#2049):
     /// asks, or leaves the question already up as it is. An
-    /// update's in-place relaunch intent is withdrawn while the
-    /// question waits and announced again on the answer, so a
-    /// Cancel leaves none armed and a late answer still relaunches
-    /// in place. `terminate` runs once Save landed or Discard ran.
+    /// in-place restart intent is withdrawn while the question
+    /// waits and re-armed, same source, on the answer, so a Cancel
+    /// leaves none armed and a late answer still restarts in place.
+    /// `terminate` runs once Save landed or Discard ran.
     func askBeforeQuit(terminate: @escaping @MainActor () -> Void) {
         guard draftLeave == nil else { return }
-        let relaunch = core.withdrawUpdateRelaunch()
+        let restart = core.withdrawInPlaceRestart()
         leavingDraft(
             .quit,
             proceed: { [weak self] in
-                if relaunch { self?.core.announceUpdateRelaunch() }
+                if let restart {
+                    self?.core.rearmInPlaceRestart(restart)
+                }
                 self?.quitAnswered = true
                 terminate()
             },
