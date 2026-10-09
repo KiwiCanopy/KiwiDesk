@@ -72,6 +72,10 @@ final class DeferredTasks {
         /// The profile choice a screen-count change waits on
         /// until the reports stop (#1612).
         case monitorSettle
+        /// The cross-session match's title pass and its close
+        /// (#1385, `KiwiCore+CrossSession`).
+        case crossSessionSettle
+        case crossSessionClose
 
         /// Whether a body in this slot runs as its scheduler's
         /// motion, late (#804 ▸ Ruling 2), or always as ambient
@@ -89,7 +93,7 @@ final class DeferredTasks {
                 .adoptionHealWake,
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
-                .monitorSettle:
+                .monitorSettle, .crossSessionSettle, .crossSessionClose:
                 return false
             }
         }

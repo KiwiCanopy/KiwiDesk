@@ -52,6 +52,11 @@ public final class CrashRecovery {
     /// The recent autosaves and departures the freeze rolls back
     /// over (#1385, `LogoutRollback`), on `now`.
     private(set) var rollback = LogoutRollback()
+    /// The newest file the id gates refused at boot (#1385): its
+    /// ids are never replayed, only its stable keys matched.
+    private(set) var crossSessionCandidate: StateSnapshot?
+    /// That match while it is open (`KiwiCore+CrossSession`).
+    var crossSession = CrossSessionMatch()
     /// The power-off observer and the center it was added on.
     private(set) var powerOff:
         (token: NSObjectProtocol, center: NotificationCenter)?
@@ -134,6 +139,7 @@ public final class CrashRecovery {
     /// stop wrote, or the autosave an unclean one left — the newer
     /// when both survive. Both files are consumed.
     public func takeBootSnapshot() -> StateSnapshot? {
+        crossSessionCandidate = nil
         var session = consumeSession()
         if let taken = session, taken.carriesSessions,
             now().timeIntervalSince(taken.capturedAt)
@@ -155,8 +161,16 @@ public final class CrashRecovery {
         return crashed
     }
 
+    /// Hands over the file the id gates refused at boot, once.
+    func takeCrossSessionCandidate() -> StateSnapshot? {
+        defer { crossSessionCandidate = nil }
+        return crossSessionCandidate
+    }
+
     /// Discards saved snapshot files (#634).
     public func discardSavedSnapshots() {
+        crossSessionCandidate = nil
+        _ = crossSession.close()
         try? FileManager.default.removeItem(at: fileURL)
         try? FileManager.default.removeItem(at: sessionURL)
     }
@@ -258,6 +272,7 @@ public final class CrashRecovery {
         else { return nil }
         guard snapshot.capturedAt >= bootTime() else {
             onLog("\(kind) snapshot predates this boot; discarded")
+            keepForCrossSession(snapshot)
             return nil
         }
         guard isThisLogin(snapshot) else {
@@ -265,9 +280,20 @@ public final class CrashRecovery {
                 "\(kind) snapshot is from another login session; "
                     + "discarded"
             )
+            keepForCrossSession(snapshot)
             return nil
         }
         return snapshot
+    }
+
+    /// The newer of the refused files is the cross-session one.
+    private func keepForCrossSession(_ snapshot: StateSnapshot) {
+        guard
+            crossSessionCandidate.map({
+                snapshot.capturedAt > $0.capturedAt
+            }) ?? true
+        else { return }
+        crossSessionCandidate = snapshot
     }
 
     /// A stamp matches only a readable, equal live id. An

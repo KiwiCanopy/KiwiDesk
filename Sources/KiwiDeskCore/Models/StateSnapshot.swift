@@ -8,19 +8,28 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         public let frame: CGRect
         /// In-place restarts only (#930, `StateSnapshot+InPlace`).
         public var session: WindowSession?
+        /// The bundle id and title a snapshot from another boot or
+        /// login is matched on, its ids naming nothing there
+        /// (#1385, `CrossSessionMatch`).
+        public var app: String?
+        public var title: String?
 
         public init(
             id: WindowID,
             frame: CGRect,
-            session: WindowSession? = nil
+            session: WindowSession? = nil,
+            app: String? = nil,
+            title: String? = nil
         ) {
             self.id = id.raw
             self.frame = frame
             self.session = session
+            self.app = app
+            self.title = title
         }
 
         private enum CodingKeys: String, CodingKey {
-            case id, frame, session
+            case id, frame, session, app, title
         }
 
         /// The in-place payload decodes on its own: one this build
@@ -34,6 +43,8 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
                 WindowSession.self,
                 forKey: .session
             )
+            app = try? c.decodeIfPresent(String.self, forKey: .app)
+            title = try? c.decodeIfPresent(String.self, forKey: .title)
         }
 
         public var windowID: WindowID { WindowID(id) }
@@ -267,7 +278,9 @@ extension StateCoordinator {
             windows: windows.all.map {
                 StateSnapshot.WindowRecord(
                     id: $0.id,
-                    frame: $0.frame
+                    frame: $0.frame,
+                    app: $0.appBundleID,
+                    title: $0.title
                 )
             } + owedFrameRecords(),
             spaces: workspaces.allSpaces.map { spaceRecord(of: $0) },

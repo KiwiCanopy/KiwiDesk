@@ -46,9 +46,9 @@ extension KiwiCore {
                 TilingEngine.screen(
                     containing: window.frame
                 )?.kiwiDisplayID
-            // The Desktop return's owed focus, mirrored in the
-            // same way (#1207).
+            // The Desktop return's owed focus, mirrored (#1207).
             state.returningFocus = desktopMemory.returnFocus.owed()
+            claimCrossSessionArrival(window)  // #1385
         }
         // Read BEFORE the fold below overwrites/removes them —
         // both helpers argue their consumer.
