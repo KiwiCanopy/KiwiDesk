@@ -100,11 +100,13 @@ extension KiwiCore {
     /// callers keep their own focus policy and retile. A
     /// same-space re-file is geometry-neutral and emits nothing:
     /// the window may sit on another display than its membership
-    /// by USER choice, and placement always wins.
+    /// by USER choice, and placement always wins. `restoring` is
+    /// the cross-session pass's (#1385): no focus, no event.
     func fileMembership(
         _ window: WindowID,
         into target: SpaceID,
-        from: SpaceID?
+        from: SpaceID?,
+        restoring: Bool = false
     ) {
         // Read before the filing: only a window that was no
         // effective float where it left ENTERS floating (#1708).
@@ -115,6 +117,10 @@ extension KiwiCore {
         let takesFocus =
             state.workspaces.lastFocused == window
             || target == state.workspaces.activeSpace
+        // A user's filing is never undone by a restore pass (#1385).
+        if !restoring, state.crossSession.isOpen {
+            state.crossSession.placed.insert(window)
+        }
         addFocusedToSpace(window, to: target)
         // A target named by an undeclared id takes its screen now:
         // the re-anchor and a follow's slide read it (#1994).
@@ -124,6 +130,9 @@ extension KiwiCore {
         {
             reanchorFloat(window, to: target)
         }
+        // A restore's filing touches no focus and tells no one,
+        // like the boot replay it completes (#1385).
+        guard !restoring else { return }
         if takesFocus {
             state.workspaces.focus(window, in: target)
         } else {

@@ -132,7 +132,7 @@ struct SnapshotStoreCensusTests {
             (.behind, "an animation in flight"),
         "tiler.animation.ticks.heldSize":
             (.behind, "an animation in flight (#45)"),
-        "crash.crossSession.placed":
+        "state.crossSession.placed":
             (
                 .behind,
                 "a cross-session match in flight (#1385); an in-place "
@@ -188,7 +188,7 @@ struct SnapshotStoreCensusTests {
         core.state.focusRecency[WindowID(1)] = .init(pid: 7, tick: 1)
         core.tiler.monocleShownMembers[shown] = WindowID(1)
         core.ownFronts[WindowID(1)] = core.wallClock()
-        core.crash.crossSession.placed.insert(WindowID(1))
+        core.state.crossSession.placed.insert(WindowID(1))
         core.state.profilePartitioning.record(
             [Space(id: hidden, windows: [WindowID(4)])],
             as: .profile("Other")
@@ -233,7 +233,7 @@ struct SnapshotStoreCensusTests {
             "state.heldSpaces", "state.temporaryArmed", "ownFronts",
             "tiler.stashDepartures.owed",
             "state.profilePartitioning.byArrangement[][]",
-            "crash.crossSession.placed",
+            "state.crossSession.placed",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")
         }

@@ -53,6 +53,13 @@ public struct StateCoordinator: Sendable {
     /// #152 exposure; a new `restore` refiles the whole map.
     var restoredFrames: [WindowID: CGRect] = [:]
 
+    /// The cross-session match while it is open (#1385,
+    /// `KiwiCore+CrossSession`): a snapshot from another boot or
+    /// login paired with reopened windows by app and title. Not
+    /// carried by any snapshot; its `pending` records sit in an
+    /// array of structs the store census cannot walk.
+    var crossSession = CrossSessionMatch()
+
     /// The slot a departed window held (#1207): a return re-inserts
     /// by this rank, so a Desktop's row comes back in the order it
     /// left rather than in re-track order. Kept after the return so
@@ -190,6 +197,9 @@ public struct StateCoordinator: Sendable {
         }
         if let frame = restoredFrames.removeValue(forKey: old) {
             restoredFrames[new] = frame
+        }
+        if crossSession.placed.remove(old) != nil {
+            crossSession.placed.insert(new)
         }
         if let slot = departedSlots.removeValue(forKey: old) {
             departedSlots[new] = slot

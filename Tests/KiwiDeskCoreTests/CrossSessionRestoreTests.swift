@@ -7,130 +7,58 @@ import Testing
 
 private typealias F = BootRestoreFixture
 
-/// The cross-session restore (#1385 ruling 2026-10-09), driven
-/// through the boot tail as `finishBoot` runs it: a file the id
-/// gates refuse is matched to the reopened windows by app, then
-/// title, then rank — at boot, at each arrival and once titles
-/// settle — and an in-place restart's own file is never matched.
-/// The core's wall clock is the match's; boot time is pinned.
+/// The cross-session restore (#1385 rulings 2026-10-09), driven
+/// through the boot tail as `finishBoot` runs it: only a file a
+/// logout's freeze wrote, refused by the id gates, is matched to
+/// the reopened windows — by app, then title, then rank, at boot,
+/// at each arrival and at the title pass — once. An in-place
+/// restart's own file and a plain Quit's are never matched.
 @Suite("Cross-session restore (#1385)", .serialized)
 @MainActor
-struct CrossSessionRestoreTests {
-    /// When the snapshot was written; the boot is one second on.
-    private static let before = Date(timeIntervalSince1970: 9000)
-    private static let frame = CGRect(x: 80, y: 90, width: 600, height: 400)
-
-    private final class Clock {
-        var now = Date(timeIntervalSince1970: 50_000)
-        func advance(_ seconds: TimeInterval) {
-            now = now.addingTimeInterval(seconds)
-        }
-    }
-
-    private func window(
-        _ id: UInt32,
-        _ app: String,
-        _ title: String
-    ) -> ManagedWindow {
-        ManagedWindow(
-            id: WindowID(id),
-            pid: pid_t(100 + id),
-            appName: app,
-            appBundleID: app,
-            title: title,
-            frame: Self.frame
-        )
-    }
-
-    /// The previous boot's desk: `rows` per Space, old ids 500+.
-    private func previous(
-        _ rows: [(space: SpaceID, app: String, title: String)],
-        at: Date = before
-    ) -> StateSnapshot {
-        var records: [StateSnapshot.WindowRecord] = []
-        var spaces: [SpaceID: [WindowID]] = [:]
-        for (index, row) in rows.enumerated() {
-            let id = WindowID(UInt32(500 + index))
-            records.append(
-                .init(
-                    id: id,
-                    frame: Self.frame,
-                    app: row.app,
-                    title: row.title
-                )
-            )
-            spaces[row.space, default: []].append(id)
-        }
-        return StateSnapshot(
-            windows: records,
-            spaces: [F.shown, F.hidden].map {
-                .init(space: Space(id: $0, windows: spaces[$0] ?? []))
-            },
-            activeSpace: F.shown.raw,
-            capturedAt: at
-        )
-    }
-
-    /// A core whose boot came after `before`, with `scanned`
-    /// tracked in the shown Space, and the clock wired.
-    private func boot(
-        _ scanned: [ManagedWindow],
-        clock: Clock
-    ) -> KiwiCore? {
-        guard let core = F.makeCore() else { return nil }
-        core.wallClock = { clock.now }
-        core.crash.bootTime = { Self.before.addingTimeInterval(1) }
-        core.defersEventRetiles = true
-        for window in scanned {
-            core.handle(.windowCreated(window))
-        }
-        core.defersEventRetiles = false
-        return core
-    }
-
-    /// Writes `snapshot` as the autosave the boot finds.
-    private func leave(_ snapshot: StateSnapshot, in core: KiwiCore) {
-        core.crash.captureState = { snapshot }
-        core.crash.autosave()
-    }
-
-    private func space(_ core: KiwiCore, _ id: UInt32) -> SpaceID? {
-        core.state.workspaces.space(of: WindowID(id))
-    }
-
+struct CrossSessionRestoreTests: CrossSessionFixture {
     @Test(
-        "A reboot's arrangement places the reopened windows by app",
+        "A freeze's file places the reopened windows by app",
         .enabled(if: NSScreen.main != nil)
     )
     func bootPlacesByApp() throws {
-        let clock = Clock()
         let core = try #require(
-            boot(
-                [window(10, "com.a", "A"), window(11, "com.b", "")],
-                clock: clock
-            )
+            boot([window(10, "com.a", "A"), window(11, "com.b", "")])
         )
         leave(
             previous([(F.hidden, "com.a", "A"), (F.shown, "com.b", "B")]),
             in: core
         )
-        core.arrangeBootDesk(session: core.crash.takeBootSnapshot())
+        arrange(core)
         #expect(space(core, 10) == F.hidden)
         #expect(space(core, 11) == F.shown)
-        #expect(core.crash.crossSession.pending.isEmpty)
+        #expect(!core.state.crossSession.isOpen)
+    }
+
+    /// The old id 10 was another app's window: the live window 10
+    /// is never filed by that record.
+    @Test(
+        "An old id equal to a live one never files it",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func oldIDNamesNothing() throws {
+        let core = try #require(
+            boot([window(10, "com.b", "B"), window(11, "com.a", "A")])
+        )
+        leave(previous([(F.hidden, "com.a", "A")], first: 10), in: core)
+        arrange(core)
+        #expect(space(core, 10) == F.shown)
+        #expect(space(core, 11) == F.hidden)
     }
 
     /// The in-place path: this session's own file is replayed by
-    /// id while a refused one is on disk beside it, never matched.
+    /// id while a freeze's file sits beside it, and the match is
+    /// never armed — its unpairable record would hold it open.
     @Test(
         "A same-session file is replayed by id, never matched",
         .enabled(if: NSScreen.main != nil)
     )
     func sameSessionIsNeverMatched() throws {
-        let clock = Clock()
-        let core = try #require(
-            boot([window(10, "com.a", "A")], clock: clock)
-        )
+        let core = try #require(boot([window(10, "com.a", "A")]))
         let own = StateSnapshot(
             windows: [
                 .init(
@@ -149,81 +77,159 @@ struct CrossSessionRestoreTests {
             ],
             activeSpace: F.shown.raw
         )
-        let refused = previous([(F.hidden, "com.a", "A")])
+        let refused = previous([
+            (F.hidden, "com.a", "A"), (F.hidden, "com.z", "Z"),
+        ])
         // The autosave makes the directory the stop writes into.
         leave(refused, in: core)
         core.crash.captureInPlaceState = { own }
         core.crash.shutdownCleanly(inPlace: true)
         leave(refused, in: core)
-        core.arrangeBootDesk(session: core.crash.takeBootSnapshot())
+        arrange(core)
         #expect(space(core, 10) == F.shown)
-        #expect(core.crash.crossSession.pending.isEmpty)
+        #expect(!core.state.crossSession.isOpen)
     }
 
-    /// Two records of one app pair by title, and only once titles
-    /// settle; the pass moves the window that was scanned elsewhere.
+    /// A plain Quit lets go (#1385 ruling): its file, unmarked,
+    /// never crosses a boot.
     @Test(
-        "The settle pass pairs by title, never before the settle",
+        "A plain Quit's file starts the next boot fresh",
         .enabled(if: NSScreen.main != nil)
     )
-    func settlePassPairsByTitle() throws {
-        let clock = Clock()
+    func plainQuitStartsFresh() throws {
+        let core = try #require(boot([window(10, "com.a", "A")]))
+        leave(previous([(F.hidden, "com.a", "A")], frozen: false), in: core)
+        arrange(core)
+        #expect(space(core, 10) == F.shown)
+        #expect(!core.state.crossSession.isOpen)
+    }
+
+    /// Used once: the first launch consumes the freeze's file, and
+    /// a second launch in the same boot finds only its own.
+    @Test(
+        "A second launch in the same boot matches nothing",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func secondLaunchMatchesNothing() throws {
+        let core = try #require(boot([window(10, "com.a", "A")]))
+        leave(previous([(F.hidden, "com.a", "A")]), in: core)
+        arrange(core)
+        #expect(space(core, 10) == F.hidden)
+        core.crash.captureState = { core.sessionSnapshot() }
+        core.crash.autosave()
+        let second = core.crash.takeBootSnapshot()
+        #expect(second?.frozenForLogout == false)
+        #expect(core.crash.takeCrossSessionCandidate() == nil)
+    }
+
+    /// The scheduled passes, through the deferred seam: the title
+    /// pass pairs by title and re-files quietly, the close ends the
+    /// match. Neither reads the wall clock, which a step moves.
+    @Test(
+        "The scheduled title pass and close run on their own clock",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func scheduledPassesRun() async throws {
         let core = try #require(
-            boot(
-                [
-                    window(20, "com.ide", "Preview"),
-                    window(21, "com.ide", "IDE"),
-                ],
-                clock: clock
-            )
+            boot([
+                window(20, "com.ide", "Preview"),
+                window(21, "com.ide", "IDE"),
+            ])
         )
+        var moves = 0
+        _ = core.bus.addSink { event, _ in
+            if event == .windowMovedToSpace { moves += 1 }
+        }
         leave(
             previous([
-                (F.shown, "com.ide", "IDE"), (F.hidden, "com.ide", "Preview"),
+                (F.shown, "com.ide", "IDE"),
+                (F.hidden, "com.ide", "Preview"),
+                (F.hidden, "com.z", "Z"),
             ]),
             in: core
         )
-        core.arrangeBootDesk(session: core.crash.takeBootSnapshot())
+        core.deferred.sleep = { _ in }
+        arrange(core)
         #expect(space(core, 20) == F.shown)
-        clock.advance(CrossSessionMatch.titleSettle - 1)
-        core.crossSessionSettlePass()
-        #expect(space(core, 20) == F.shown)
-        clock.advance(1)
-        core.crossSessionSettlePass()
+        core.wallClock = { .distantPast }
+        await core.deferred.task(for: .crossSessionSettle)?.value
         #expect(space(core, 20) == F.hidden)
         #expect(space(core, 21) == F.shown)
+        #expect(moves == 0)
+        await core.deferred.task(for: .crossSessionClose)?.value
+        #expect(!core.state.crossSession.isOpen)
     }
 
+    /// The title pass never undoes a user's filing, and leaves the
+    /// window the user is in.
     @Test(
-        "A late arrival inside the bound is placed; past it, not",
-        .enabled(if: NSScreen.main != nil),
-        arguments: [
-            (CrossSessionMatch.bound, true),
-            (CrossSessionMatch.bound + 1, false),
-        ]
+        "The title pass leaves a user-filed and the focused window",
+        .enabled(if: NSScreen.main != nil)
     )
-    func lateArrivalWithinTheBound(
-        after: TimeInterval,
-        placed: Bool
-    ) throws {
-        let clock = Clock()
-        let core = try #require(boot([], clock: clock))
-        leave(previous([(F.hidden, "app.zen", "Zen Browser")]), in: core)
-        core.arrangeBootDesk(session: core.crash.takeBootSnapshot())
-        clock.advance(after)
-        core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
-        #expect(space(core, 30) == (placed ? F.hidden : F.shown))
+    func titlePassRespectsTheUser() throws {
+        let core = try #require(
+            boot([
+                window(20, "com.ide", "Preview"),
+                window(21, "com.ide", "IDE"),
+                window(22, "com.ide", "Notes"),
+            ])
+        )
+        leave(
+            previous([
+                (F.shown, "com.ide", "IDE"),
+                (F.hidden, "com.ide", "Preview"),
+                (F.hidden, "com.ide", "Notes"),
+            ]),
+            in: core
+        )
+        arrange(core)
+        core.moveWindow(WindowID(21), to: F.hidden, follow: false)
+        core.state.workspaces.focus(WindowID(22), in: F.shown)
+        core.crossSessionSettlePass()
+        #expect(space(core, 20) == F.hidden)
+        #expect(space(core, 21) == F.hidden)
+        #expect(space(core, 22) == F.shown)
     }
 
-    /// Both id gates hand their refusal over — the boot's and the
-    /// login session's — and an admitted file is never handed.
     @Test(
-        "Only a file the id gates refused is matched",
+        "A late arrival is placed with its frame until the close",
+        .enabled(if: NSScreen.main != nil),
+        arguments: [false, true]
+    )
+    func lateArrivalUntilTheClose(closed: Bool) throws {
+        let core = try #require(boot([]))
+        leave(previous([(F.hidden, "app.zen", "Zen Browser")]), in: core)
+        arrange(core)
+        if closed { core.closeCrossSessionMatch() }
+        core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
+        #expect(space(core, 30) == (closed ? F.shown : F.hidden))
+        if !closed {
+            let seeded = core.tiler.stashOriginal(WindowID(30))
+            #expect(seeded == Self.recorded)
+        }
+    }
+
+    @Test(
+        "A stop closes the match",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func stopClosesTheMatch() throws {
+        let core = try #require(boot([]))
+        leave(previous([(F.hidden, "app.zen", "Zen Browser")]), in: core)
+        arrange(core)
+        #expect(core.state.crossSession.isOpen)
+        core.stop()
+        #expect(!core.state.crossSession.isOpen)
+    }
+
+    /// Both id gates hand a freeze's refusal over — the boot's and
+    /// the login session's — and an admitted file never is.
+    @Test(
+        "Only a freeze's file the id gates refused is matched",
         .enabled(if: NSScreen.main != nil)
     )
     func onlyRefusedFilesAreCandidates() throws {
-        let clock = Clock()
-        let core = try #require(boot([], clock: clock))
+        let core = try #require(boot([]))
         let crash = core.crash
         leave(previous([(F.hidden, "com.a", "A")]), in: core)
         _ = crash.takeBootSnapshot()
@@ -237,5 +243,29 @@ struct CrossSessionRestoreTests {
         let admitted = crash.takeBootSnapshot()
         #expect(admitted != nil)
         #expect(crash.takeCrossSessionCandidate() == nil)
+    }
+
+    /// The live capture writes the keys the match reads.
+    @Test(
+        "Every capture records each window's app and title",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func captureRecordsTheKeys() throws {
+        let core = try #require(
+            boot([window(10, "com.a", "Alpha"), window(11, "com.b", "Beta")])
+        )
+        core.state.workspaces.add(WindowID(11), to: F.hidden)
+        _ = F.settle(core)
+        for snapshot in [
+            core.state.snapshot(), core.sessionSnapshot(),
+            core.sessionSnapshot(inPlace: true),
+        ] {
+            let keys = Dictionary(
+                uniqueKeysWithValues: snapshot.windows.map {
+                    ($0.id, "\($0.app ?? "-")|\($0.title ?? "-")")
+                }
+            )
+            #expect(keys == [10: "com.a|Alpha", 11: "com.b|Beta"])
+        }
     }
 }

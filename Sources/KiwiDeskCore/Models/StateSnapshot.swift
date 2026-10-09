@@ -166,6 +166,9 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     /// The login session the file was written in, stamped by
     /// `CrashRecovery`'s write (#1385); nil in an older build's.
     public var loginSession: Int32?
+    /// Written by a logout's freeze (#1385): the one file a later
+    /// boot may match by stable key, once.
+    public var frozenForLogout = false
 
     public init(
         windows: [WindowRecord],
@@ -183,7 +186,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case windows, spaces, activeSpace, capturedAt, arrangement
-        case arrangementRecords, loginSession
+        case arrangementRecords, loginSession, frozenForLogout
     }
 
     public init(from decoder: Decoder) throws {
@@ -210,6 +213,9 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
             Int32.self,
             forKey: .loginSession
         )
+        frozenForLogout =
+            (try? c.decodeIfPresent(Bool.self, forKey: .frozenForLogout))
+            ?? false
     }
 }
 

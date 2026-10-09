@@ -229,6 +229,7 @@ extension StateCoordinator {
     /// Clears all remembered space associations (`CGWindowID`, #634).
     public mutating func forgetRememberedSpaces() {
         rememberedSpaces = [:]
+        _ = crossSession.close()
         closedDepartures = []
         unjudgedFilings = []
         restoredFrames = [:]

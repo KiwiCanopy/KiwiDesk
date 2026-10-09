@@ -13,7 +13,7 @@ struct LogoutRollback {
     /// autosave interval before it, and slack for a late timer.
     static let historyBound: TimeInterval = 120
 
-    struct Autosave {
+    struct Autosave: Equatable {
         let at: Date
         let snapshot: StateSnapshot
     }

@@ -3,9 +3,10 @@ import Foundation
 
 /// Matches a snapshot from another boot or login to the windows
 /// macOS reopens, whose ids are new (#1385 ruling 2026-10-09): by
-/// app first, by title once titles settle, then by rank. Open for
-/// late arrivals until `bound`; pure, the caller's clock.
-struct CrossSessionMatch: Sendable {
+/// app first, by title once titles settle, then by rank. Pure and
+/// clockless: the caller's scheduled passes `settle()` and
+/// `close()` it, so a wall-clock step cannot move either (#1385).
+struct CrossSessionMatch: Sendable, Equatable {
     /// Boot-time titles are generic or empty; measured renames
     /// landed inside 30 s of boot.
     static let titleSettle: TimeInterval = 30
@@ -30,11 +31,13 @@ struct CrossSessionMatch: Sendable {
         let title: String
     }
 
-    private(set) var armedAt: Date = .distantPast
+    /// Set by the title pass; titles pair only after it.
+    private(set) var settled = false
     /// Waiting records, in the snapshot's Space-then-row order —
     /// each app's in its rank order.
     private(set) var pending: [Record] = []
-    /// Live windows already placed, never taken twice.
+    /// Live windows placed, or filed by a user verb since the
+    /// match armed — never taken, so no pass undoes a user move.
     var placed: Set<WindowID> = []
 
     init() {}
@@ -43,10 +46,8 @@ struct CrossSessionMatch: Sendable {
     /// a Space `exists` admits; empty when none do.
     init(
         _ snapshot: StateSnapshot,
-        at now: Date,
         exists: (SpaceID) -> Bool
     ) {
-        armedAt = now
         let byID = Dictionary(
             snapshot.windows.map { ($0.id, $0) },
             uniquingKeysWith: { first, _ in first }
@@ -68,14 +69,11 @@ struct CrossSessionMatch: Sendable {
         }
     }
 
-    func isOpen(at now: Date) -> Bool {
-        !pending.isEmpty
-            && now.timeIntervalSince(armedAt) <= Self.bound
-    }
+    /// Open while a record waits; `close()` ends it.
+    var isOpen: Bool { !pending.isEmpty }
 
-    func titlesSettled(at now: Date) -> Bool {
-        now.timeIntervalSince(armedAt) >= Self.titleSettle
-    }
+    /// Titles have settled; the title pass calls it.
+    mutating func settle() { settled = true }
 
     /// The pairs `live` earns now. Before the settle only an app
     /// with one record and one live window pairs; after it, an
@@ -83,11 +81,9 @@ struct CrossSessionMatch: Sendable {
     /// pair by rank — live windows in id order, so identical
     /// titles land in their app's Spaces, order unknown.
     func pairs(
-        _ live: [Candidate],
-        at now: Date
+        _ live: [Candidate]
     ) -> [(window: WindowID, record: Record)] {
-        guard isOpen(at: now) else { return [] }
-        let settled = titlesSettled(at: now)
+        guard isOpen else { return [] }
         let byApp = Dictionary(grouping: live) { $0.app }
         var out: [(window: WindowID, record: Record)] = []
         for app in byApp.keys.sorted() {
@@ -131,8 +127,7 @@ struct CrossSessionMatch: Sendable {
     /// Ends the match; returns how many records never paired.
     mutating func close() -> Int {
         let missed = pending.count
-        pending = []
-        placed = []
+        self = CrossSessionMatch()
         return missed
     }
 }

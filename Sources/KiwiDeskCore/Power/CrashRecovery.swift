@@ -55,8 +55,6 @@ public final class CrashRecovery {
     /// The newest file the id gates refused at boot (#1385): its
     /// ids are never replayed, only its stable keys matched.
     private(set) var crossSessionCandidate: StateSnapshot?
-    /// That match while it is open (`KiwiCore+CrossSession`).
-    var crossSession = CrossSessionMatch()
     /// The power-off observer and the center it was added on.
     private(set) var powerOff:
         (token: NSObjectProtocol, center: NotificationCenter)?
@@ -170,7 +168,6 @@ public final class CrashRecovery {
     /// Discards saved snapshot files (#634).
     public func discardSavedSnapshots() {
         crossSessionCandidate = nil
-        _ = crossSession.close()
         try? FileManager.default.removeItem(at: fileURL)
         try? FileManager.default.removeItem(at: sessionURL)
     }
@@ -183,14 +180,23 @@ public final class CrashRecovery {
         frozenAt = at
         onLog("autosave frozen: logout or power-off began")
         // macOS quit the apps before this notice (#1385): put back
-        // the autosave written before their closes.
-        guard let kept = rollback.preBurst(at: at),
-            write(kept.snapshot, to: fileURL)
-        else { return }
+        // the autosave written before their closes, else re-write
+        // the last one — marked, the one file a reboot may match.
+        let rolled = rollback.preBurst(at: at)
+        guard let kept = rolled ?? rollback.autosaves.last else {
+            onLog("autosave frozen with none written; nothing marked")
+            return
+        }
+        var marked = kept.snapshot
+        marked.frozenForLogout = true
+        guard write(marked, to: fileURL) else { return }
         let age = Int(at.timeIntervalSince(kept.at))
+        let count = kept.snapshot.windows.count
         onLog(
-            "autosave rolled back \(age)s, before the logout's "
-                + "closes: \(kept.snapshot.windows.count) windows"
+            rolled == nil
+                ? "autosave marked at the freeze: \(count) windows"
+                : "autosave rolled back \(age)s, before the logout's "
+                    + "closes: \(count) windows"
         )
     }
 
@@ -286,8 +292,11 @@ public final class CrashRecovery {
         return snapshot
     }
 
-    /// The newer of the refused files is the cross-session one.
+    /// The newer of the refused files is the cross-session one,
+    /// and only a file a logout's freeze wrote: a plain Quit's
+    /// never crosses a boot (#1385 ruling, 2026-10-09).
     private func keepForCrossSession(_ snapshot: StateSnapshot) {
+        guard snapshot.frozenForLogout else { return }
         guard
             crossSessionCandidate.map({
                 snapshot.capturedAt > $0.capturedAt

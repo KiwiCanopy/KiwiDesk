@@ -181,12 +181,72 @@ struct LogoutRollbackTests {
             wasMinimized: false,
             effects: AppliedEffects()
         )
-        let noted = core.crash.rollback.departures.last?.closed
-        #expect(noted == (reason == .closed))
+        // Hosted nowhere and no Desktop switch: a close.
+        #expect(reason == .closed)
+        #expect(core.crash.rollback.departures.last?.closed == true)
         core.handle(.windowCreated(window))
         let before = core.crash.rollback.departures.count
         core.handle(.windowHidden(id))
         #expect(core.crash.rollback.departures.count == before + 1)
         #expect(core.crash.rollback.departures.last?.closed == false)
+    }
+
+    /// A logout quits whole apps: their windows leave through the
+    /// exit, with no destroy, and still count as the burst.
+    @Test("An app exit inside the window rolls back")
+    func appExitsRollBack() throws {
+        let clock = Clock(start)
+        let core = makeTestCore()
+        core.crash.now = { clock.now }
+        for id in [UInt32(51), 52] {
+            core.handle(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(id),
+                        pid: 7,
+                        appName: "App",
+                        frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+                    )
+                )
+            )
+        }
+        core.crash.captureState = { self.desk(Array(1...10)) }
+        core.crash.autosave()
+        clock.advance(20)
+        core.handle(.appTerminated(pid: 7))
+        #expect(core.crash.rollback.departures.map(\.closed) == [true, true])
+        clock.advance(6)
+        core.crash.captureState = { self.desk([1, 2]) }
+        core.crash.autosave()
+        clock.advance(2)
+        core.crash.freezeForLogout()
+        core.crash.bootTime = { .distantPast }
+        let read = core.crash.takeBootSnapshot()
+        #expect(read?.windows.map(\.id) == Array(1...10))
+        #expect(read?.frozenForLogout == true)
+    }
+
+    /// The freeze marks the file it keeps, rolled back or not; an
+    /// autosave and a Quit's stop mark nothing (#1385 ruling).
+    @Test("Only the freeze marks a file for a later boot")
+    func onlyTheFreezeMarks() throws {
+        let clock = Clock(start)
+        let (recovery, dir) = try makeRecovery(clock)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let reader = CrashRecovery(directory: dir)
+        reader.onLog = { _ in }
+        reader.loginSession = { 1 }
+        reader.bootTime = { .distantPast }
+        recovery.captureState = { self.desk([1, 2]) }
+        recovery.autosave()
+        #expect(reader.takeBootSnapshot()?.frozenForLogout == false)
+        recovery.autosave()
+        recovery.shutdownCleanly()
+        #expect(reader.takeBootSnapshot()?.frozenForLogout == false)
+        recovery.autosave()
+        recovery.freezeForLogout()
+        let frozen = reader.takeBootSnapshot()
+        #expect(frozen?.frozenForLogout == true)
+        #expect(frozen?.windows.map(\.id) == [1, 2])
     }
 }

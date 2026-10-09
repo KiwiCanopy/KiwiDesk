@@ -104,6 +104,12 @@ final class DeferredTasks {
     var captureCause: @MainActor () -> MotionCause = { .ambient }
     var runUnder: @MainActor (MotionCause, () -> Void) -> Void = { $1() }
 
+    /// The wait before a body runs, on the monotonic clock; a test
+    /// steps it to fire a long slot at once (#1385).
+    var sleep: @Sendable (Duration) async -> Void = {
+        try? await Task.sleep(for: $0)
+    }
+
     private var tasks: [Key: Task<Void, Never>] = [:]
     private var burstStarts: [Key: ContinuousClock.Instant] = [:]
 
@@ -143,8 +149,9 @@ final class DeferredTasks {
             sleepDuration = delay
         }
 
+        let sleep = sleep
         tasks[key] = Task { @MainActor in
-            try? await Task.sleep(for: sleepDuration)
+            await sleep(sleepDuration)
             guard !Task.isCancelled else { return }
             burstStarts[key] = nil
             run(cause, body)
