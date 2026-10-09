@@ -109,6 +109,52 @@ load, and report the deltas. Three readings to keep straight:
 `ax_off_main_us_mean` is the per-call cost the load inflates;
 `ax_main_*` is what blocks the main actor.
 
+## 6. A release comparison: the fixed desk (#1910)
+
+A per-change pair runs on whatever the desk holds that day, so its
+absolute numbers do not carry across days. A release row in
+`docs/performance.md` is measured on the fixed desk instead, every
+bundle in one sitting:
+
+```bash
+F=.claude/skills/measure-work/scripts/fixture-desk.sh
+$F up <scratch>/<label>/KiwiDesk.app <scratch>/fx-<label> [extra.lua]
+# measure pairs 2↔3, 3↔4 and 5↔6, idle / --load / --gpu-load
+$F down <scratch>/fx-<label>
+```
+
+The fixture pins only the animation settings every measured
+release shares; a setting one release changes or lacks is stated
+per bundle in `extra.lua`, which `up` appends to the config — a
+*slide off* bundle appends `animations.set_on_space_change(false)`.
+Compare like with like: every release with all animations off,
+and every release with its Space-switch animation on at one
+shared pace, each set through `extra.lua`. Pass `--gap` past the
+longest animation measured, or a press cuts it short and the run
+reads cheaper than the motion is.
+
+The owner switches to an EMPTY macOS Desktop first, by hand or by
+swipe — a `focus_desktop` switch leaves macOS's current Desktop
+behind, and the fixture's windows open there instead. `up` replaces
+`swap-instance.sh`: it stops the running app before pointing
+`~/.config/KiwiDesk` at a Lua-only config, which every release reads
+and none migrates, so an older bundle boots the same desk. Run `down`
+before the next bundle's `up`; every bundle starts on a fresh copy.
+
+Runs per condition follow §3; when more are added, balance their
+ORDER across the bundles, since a long GPU sitting heats the
+machine and the later bundle pays for it. Report counters only:
+a `frame clock stalled` count is no comparison across releases,
+since it fires only while the window-animation clock runs and a
+release whose switch pass is instant never starts it.
+
+Then add the release's own section to `docs/performance.md` —
+one table per pair, a row per bundle and load, the date, macOS
+version and commits named above it — measuring the previous
+release again in the same sitting, since times compare only
+within a table. `docs.md`'s row for that page says what may never
+change in an earlier section.
+
 ## What this is not
 
 Not a test: the numbers are one desk's, and tests.md bans timing

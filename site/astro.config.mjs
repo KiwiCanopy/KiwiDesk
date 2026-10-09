@@ -134,6 +134,7 @@ export default defineConfig({
               label: "Accepted Limitations",
               slug: "docs/accepted-limitations",
             },
+            { label: "Performance", slug: "docs/performance" },
           ],
         },
         {
