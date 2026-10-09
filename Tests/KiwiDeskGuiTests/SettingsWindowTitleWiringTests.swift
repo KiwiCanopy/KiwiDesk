@@ -35,6 +35,9 @@ struct SettingsWindowTitleWiringTests {
         }
     }
 
+    /// Sees only the `onWindowTitle?(` spelling: a `.map`, an
+    /// `if let` or an alias passes it. `SettingsWindowTitleTests`
+    /// covers those by behaviour; this clause holds the shape.
     @Test("Only the destination, the language and the wiring retitle")
     func titleFiresOnlyFromAreaAndLanguage() throws {
         let sites = Self.count("onWindowTitle?(", in: try Self.sources())
