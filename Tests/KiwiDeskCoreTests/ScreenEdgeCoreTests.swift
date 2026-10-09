@@ -121,6 +121,30 @@ struct ScreenEdgeCoreTests {
         )
     }
 
+    /// The float region carves the strips on the edges THIS
+    /// screen reserves, so a Space Bar moved to the left on this
+    /// screen alone keeps floats out of the left strip.
+    @Test(
+        "The float region follows the edge this screen has",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func floatRegionPerScreen() throws {
+        let (core, display, _) = try #require(makeCore(mode: .floating))
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        core.tiler.settings.spaceBarStyle.setEdge(
+            .left,
+            on: display.fingerprint
+        )
+        core.updateBars()
+        let space = try #require(
+            core.state.workspaces.space(of: Self.window)
+        )
+        let strip = try #require(core.spaceBars.shownStrips.first)
+        #expect(strip.edge == .left)
+        let region = try #require(core.floatBounds(on: space))
+        #expect(region.minX >= strip.strip.maxX)
+    }
+
     private func passes(_ meter: WorkMeter) -> Int {
         let counts = meter.snapshot(reset: false).counts
         return counts.retiles + counts.passesHeld
