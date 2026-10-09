@@ -229,6 +229,19 @@ struct ScreenEdgeTests {
         }
     }
 
+    /// A write of the bar's own edge stores nothing for that
+    /// screen, so a later bar edge moves it.
+    @Test("A screen given the bar's edge follows the bar")
+    func barEdgeWriteStoresNothing() {
+        let both = ScreenEdgeScope(screens: [Self.studio, Self.laptop])
+        var style = SpaceBarStyle()
+        style.edgeOverride = [Self.studio: .left]
+        style.setEdge(.top, on: Self.laptop, among: both)
+        #expect(style.edgeOverride == [Self.studio: .left])
+        style.setEdgeKeepingScreens(.bottom)
+        #expect(style.edge(on: Self.laptop) == .bottom)
+    }
+
     /// A write that clears its own entry outside the scope still
     /// judges that screen: it draws the bar's edge, so another
     /// screen's edge never collapses onto it.

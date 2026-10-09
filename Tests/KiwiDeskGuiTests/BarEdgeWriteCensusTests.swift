@@ -9,7 +9,10 @@ import Testing
 /// pick of the bar's edge must clear. Reads: `barEdges(space:app:)`
 /// and the GUI's readers of a bar's own edge answer for no screen.
 /// Both trees are scanned; a hit outside its map reds until it
-/// routes through a door or names its reason here.
+/// routes through a door or names its reason here. Blind spots,
+/// review's: a bare `edge =` is scanned only in the two styles'
+/// own files, and a write through a generic `[keyPath:]` whose
+/// key path is built elsewhere is not seen.
 @Suite("Bar edge write census (#1948)")
 struct BarEdgeWriteCensusTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
