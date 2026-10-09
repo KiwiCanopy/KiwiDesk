@@ -12746,6 +12746,52 @@ by a rule that no longer holds. `kiwishelf.set_edge` retires naming `space_bar.s
 the per-layout App Bar edge verbs name `app_bar.set_edge`; and
 the bars' own `set_edge` verbs are live.
 
+:::unreleased
+*Amended: a bar's edge may differ per screen, and nothing else
+does.* ([#1948](https://github.com/KiwiCanopy/KiwiDesk/issues/1948),
+owner rulings 2026-10-04 and 2026-10-09.) A landscape screen
+between two portrait ones wants its bars on its long sides while
+its neighbours keep theirs on top, and only the edge causes that
+problem: thickness, margins, alignment and glyph size read the
+same on any screen, so they stay one value. A screen's edge is a
+sparse override of its bar's — `space_bar.edge_override` and
+`app_bar.edge_override`, keyed by the fingerprint a Monitor pin
+uses — so a new or unknown screen follows the bar with no setup,
+and a profile never has to name every screen. It is stored beside
+`edge` under the `X_override` name `gap.override` already uses,
+rather than a coined noun.
+
+The per-screen edge resolves *before* the one fold that lists the
+edges a screen's bars sit on, so the strips drawn and the strips
+reserved stay one derivation per screen; a second "which edge on
+this screen" read beside the fold could let the two disagree,
+which is the reflow-or-overlap defect the fold exists to prevent.
+The skipped-pass comparison is keyed by screen for the same
+reason: a write that moves one screen's strip must lay that
+screen out again.
+
+Giving a screen its bar's own edge stores nothing: that is
+"follow the bar", so there is no third state for a later bar
+edge to disagree with, and no reset action is needed. A
+screen-less `set_edge` sets the bar on every screen and clears
+the screens' own edges, as a pick of the bar's edge in Settings
+writes every level below it. Once two or more connected screens
+each have the same edge of their own, the entries collapse into
+the bar's edge — every screen then ends up equal, so the
+override says nothing. One screen alone never collapses: its
+edge says nothing about the screens a later setup adds, which
+would silently inherit it as the bar's.
+
+A look sets the bars' edges and leaves each screen's alone: the
+map names this Mac's screens, which a look shared to another Mac
+cannot know, and a screen's own edge is the most specific choice
+the user made, so it stays the strongest. The map has no verb of
+its own — `set_edge`'s screen argument writes it — so the App
+Bar's layout-fixed keys each carry the verb that writes them, and
+a layout's refusal names that verb rather than a
+`set_edge_override` that does not exist.
+:::
+
 **The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
 edges (`top` / `bottom` / `left` / `right`, default top) and the

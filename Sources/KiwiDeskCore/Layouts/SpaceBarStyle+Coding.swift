@@ -9,6 +9,7 @@ extension SpaceBarStyle {
         case enabled
         case reserve
         case edge
+        case edgeOverride = "edge_override"
         case glyphSpan = "glyph_span"
         case groupAdjacentWindows = "group_adjacent_windows"
         case glyphGap = "glyph_gap"
@@ -46,6 +47,11 @@ extension SpaceBarStyle {
                 AppBarEdge.self,
                 forKey: .edge
             ) ?? defaults.edge
+        edgeOverride =
+            try container.decodeIfPresent(
+                [String: AppBarEdge].self,
+                forKey: .edgeOverride
+            ) ?? defaults.edgeOverride
         glyphSpan =
             try container.decodeIfPresent(
                 Int.self,

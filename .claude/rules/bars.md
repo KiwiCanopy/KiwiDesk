@@ -106,8 +106,8 @@ twice, was a question the user answered twice. The argument is
   registered, ▸ `retiredCallIsAnIssue` that `init.lua` reports
   one as its own Config Issue.
 - **Reserve each edge a bar draws on through the one
-  `TilingSettings.layoutBounds(from:mode:)`, listed by the one
-  `shelfEdges(in:)`, unless every bar drawing on that edge has
+  `TilingSettings.layoutBounds(from:mode:on:)`, listed by the one
+  `shelfEdges(in:on:)`, unless every bar drawing on that edge has
   `reserve` off (#1524)** — `barEdges(space:app:)`'s reserving
   subset, while the live plan (`KiwiCore.shelfPlans`) takes
   `barEdges` whole, so the strips drawn and the edges reserved
@@ -134,18 +134,24 @@ twice, was a question the user answered twice. The argument is
   edge two bars share is one strip, so it reserves while EITHER
   bar does, and a second "reserved edges" list beside it would
   repeat the fusion. Shown and reserved are apart (#1524): the
-  live plan reads every edge `barEdges` lists, `shelfEdges(in:)`
+  live plan reads every edge `barEdges` lists, `shelfEdges(in:on:)`
   keeps the reserving ones, the float region carves only the
   painted strips on those edges (`KiwiCore.reservedStrips`),
-  and a bar write that leaves `shelfReservation(in:)` alone
+  and a bar write that leaves `shelfReservation(in:on:)` alone
   repaints the bars and re-clamps the floats without a pass. `reserve` is a bar's own, global like
-  its edge (`AppBarStyle.layoutFixedKeys`). A per-screen edge
-  (#1948) resolves before this fold, never beside it. **A new
-  input to `layoutBounds` enters through `shelfReservation(in:)`,
-  and the skip comparison covers every axis that input is keyed
-  by** — a per-screen edge widens the per-mode comparison in
-  `layoutCommand` with the screen axis, or a bar write skips a
-  pass the bounds owed.
+  its edge (`AppBarStyle.layoutFixedKeys`). **A per-screen edge
+  (#1948) resolves before this fold, through the one
+  `TilingSettings.onScreen(_:)`, never beside it** — the
+  reservation (`shelfEdges(in:on:)`), each display's live plan
+  in `updateBars()` and every style a bar draws read the edges it
+  resolved, so the views read `style.edge` and never a screen
+  (`ScreenEdgeTests`, `ScreenEdgeCoreTests` ▸
+  `livePlanPerDisplay`). **A new input to `layoutBounds` enters
+  through `shelfReservation(in:on:)`, and the skip comparison
+  covers every axis that input is keyed by** —
+  `KiwiCore.shelfReservations` compares every mode on every
+  connected screen, or a bar write skips a pass the bounds owed
+  (`ScreenEdgeCoreTests` ▸ `screenWriteOwesThePass`).
   `BarReserveTests` holds the fold, `BarReserveCoreTests` the
   float region and the skipped pass, `BarReserveVerbTests` the
   global-only refusal.
@@ -163,6 +169,12 @@ twice, was a question the user answered twice. The argument is
   layouts' refusal from the same register — since an edge per
   layout carries the bar across the screen on a layout switch
   (`BarEdgeCommandTests` ▸ `noLayoutEdge`, through `execute`).
+  **Each layout-fixed key carries the global verb that writes
+  it**, and the refusal and the retired per-layout verbs name
+  that one value rather than spelling `app_bar.set_<key>` — a
+  key with no verb of its own, such as the per-screen
+  `edge_override` that `set_edge` writes (#1948), would name a
+  dead verb (`ScreenEdgeVerbTests` ▸ `layoutRefusalNamesTheVerb`).
 - **Place every bar along the edge through the one
   `ShelfArrangement`** — the live drivers through
   `KiwiCore.shelfPlans`, and the Settings preview and the

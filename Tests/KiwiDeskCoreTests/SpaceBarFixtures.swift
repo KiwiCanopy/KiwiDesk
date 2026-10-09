@@ -15,6 +15,7 @@ enum SpaceBarFixtures {
         style.enabled = false
         style.reserve = false
         style.edge = .left
+        style.setEdge(.right, on: "Screen:1x1")
         style.glyphSpan = 8
         style.glyphGap = 3
         style.inactiveContent = .count

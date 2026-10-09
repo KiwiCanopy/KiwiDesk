@@ -33,6 +33,20 @@ extension SettingsValueReadout {
                 new.settings.appBarStyle.edge,
                 AppBarOptions.edge
             )
+        case .spaceBarScreenEdge:
+            return screenEdgeRows(
+                census,
+                bar: .spaceBarEdge,
+                old.settings.spaceBarStyle.edgeOverride,
+                new.settings.spaceBarStyle.edgeOverride
+            )
+        case .appBarScreenEdge:
+            return screenEdgeRows(
+                census,
+                bar: .appBarEdge,
+                old.settings.appBarStyle.edgeOverride,
+                new.settings.appBarStyle.edgeOverride
+            )
         case .alignment:
             return spaceBarChoiceRow(
                 census,
@@ -170,5 +184,36 @@ extension SettingsValueReadout {
             return L("diff.value.mixed", "mixed")
         }
         return AppBarOptions.edge.first { $0.0 == edge }?.1 ?? ""
+    }
+
+    /// One row per screen whose own edge changed (#1948), under
+    /// its bar's edge label; a screen without one reads unset.
+    private static func screenEdgeRows(
+        _ census: SettingKey,
+        bar: KiwiShelfKey,
+        _ old: [String: AppBarEdge],
+        _ new: [String: AppBarEdge]
+    ) -> [SettingsDiffRow] {
+        let base = label(for: .kiwishelf(bar))
+        let name: (AppBarEdge?) -> String = { edge in
+            edge.flatMap { edge in
+                AppBarOptions.edge.first { $0.0 == edge }?.1
+            } ?? unset
+        }
+        return Set(old.keys).union(new.keys)
+            .filter { old[$0] != new[$0] }
+            .sorted()
+            .map { screen in
+                .change(
+                    census,
+                    instance: screen,
+                    label: instanceLabel(
+                        base,
+                        Display.fingerprintParts(screen).name
+                    ),
+                    old: name(old[screen]),
+                    new: name(new[screen])
+                )
+            }
     }
 }

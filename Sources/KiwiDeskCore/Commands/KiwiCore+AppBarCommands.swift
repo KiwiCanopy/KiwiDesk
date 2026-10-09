@@ -16,10 +16,19 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("app_bar.set_".count)
         )
+        guard
+            let args = field == "edge"
+                ? screenResolvedEdgeArgs(args) : args
+        else { return .fail(Self.unknownScreen) }
         switch AppBarCommandSetting.parse(field: field, args: args)
         {
         case .success(let setting):
             setting.apply(to: &tiler.settings.appBarStyle)
+            if case .screenEdge = setting {
+                tiler.settings.appBarStyle.collapseScreenEdges(
+                    among: connectedScreens
+                )
+            }
             return .ok()
         case .failure(let error):
             return .fail(error.message)
@@ -38,12 +47,21 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("space_bar.set_".count)
         )
+        guard
+            let args = field == "edge"
+                ? screenResolvedEdgeArgs(args) : args
+        else { return .fail(Self.unknownScreen) }
         switch SpaceBarCommandSetting.parse(
             field: field,
             args: args
         ) {
         case .success(let setting):
             setting.apply(to: &tiler.settings.spaceBarStyle)
+            if case .screenEdge = setting {
+                tiler.settings.spaceBarStyle.collapseScreenEdges(
+                    among: connectedScreens
+                )
+            }
             return .ok()
         case .failure(let error):
             return .fail(error.message)
@@ -88,12 +106,10 @@ extension KiwiCore {
             bar.enabled = enabled
             return .ok()
         }
-        if AppBarStyle.layoutFixedKeys.contains(where: {
-            $0.stringValue == field
-        }) {
-            return .fail(
-                "the App Bar's \(field) is global: app_bar.set_\(field)"
-            )
+        if let global = AppBarStyle.layoutFixedKeys.first(where: {
+            $0.key.stringValue == field
+        })?.value {
+            return .fail("the App Bar's \(field) is global: \(global)")
         }
         switch AppBarCommandSetting.parse(field: field, args: args)
         {

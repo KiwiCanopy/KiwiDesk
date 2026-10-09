@@ -9,6 +9,10 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case edge = "settings.spaceBarStyle.edge (master)"
     case spaceBarEdge = "settings.spaceBarStyle.edge"
     case appBarEdge = "settings.appBarStyle.edge"
+    /// Each bar's per-screen edges (#1948), Lua-only until the
+    /// Per screen rows land.
+    case spaceBarScreenEdge = "settings.spaceBarStyle.edgeOverride[screen]"
+    case appBarScreenEdge = "settings.appBarStyle.edgeOverride[screen]"
     case thickness = "settings.kiwishelf.thickness"
     case alignment = "settings.kiwishelf.alignment"
     case order = "settings.kiwishelf.order"
@@ -114,6 +118,8 @@ extension KiwiShelfKey {
             )
         case .liquidGlass:
             // Written by the one Liquid Glass row (#1307).
+            return .luaOnly
+        case .spaceBarScreenEdge, .appBarScreenEdge:
             return .luaOnly
         case .dimFactor:
             return .luaOnly
@@ -242,7 +248,8 @@ extension KiwiShelfKey {
                 "kiwishelf.inner_margin",
                 help: "kiwishelf.inner_margin.help"
             )
-        case .liquidGlass, .dimFactor:
+        case .liquidGlass, .dimFactor, .spaceBarScreenEdge,
+            .appBarScreenEdge:
             return .none
         case .iconSource:
             return .text(

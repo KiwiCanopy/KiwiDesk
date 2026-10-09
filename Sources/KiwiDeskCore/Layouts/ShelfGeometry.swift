@@ -5,7 +5,8 @@ import CoreGraphics
 /// the bars share an edge, two while they are split — each taken
 /// in every layout where a bar draws on it.
 public enum ShelfGeometry {
-    // Layout span flows must route via TilingSettings.layoutBounds(from:)
+    // Layout span flows must route via
+    // TilingSettings.layoutBounds(from:mode:on:)
     // (#537, LayoutBoundsRoutingTests).
 
     /// The strip on `edge` of visible bounds — the outer margin in

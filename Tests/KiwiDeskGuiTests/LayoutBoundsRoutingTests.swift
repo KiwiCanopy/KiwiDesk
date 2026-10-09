@@ -111,7 +111,7 @@ struct LayoutBoundsRoutingTests {
         // Settings DRAFT, whose Space Bar may differ from the
         // live one `layoutBounds(on:)` reserves — so it takes the
         // raw size and reserves the draft's own strip through
-        // `TilingSettings.layoutBounds(from:)`, the same seam one
+        // `TilingSettings.layoutBounds(from:mode:on:)`, the same seam one
         // level down (`ScrollingColumnCapDoorTests`).
         "App/KiwiCore+ScrollingColumnCap.swift": 1,
     ]

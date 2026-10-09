@@ -60,7 +60,8 @@ extension KiwiCore {
                 display: intent.display,
                 screen: screen.frame,
                 axis: SpaceSlidePlan.axis(
-                    spaceBarEdge: tiler.settings.spaceBarStyle.edge
+                    spaceBarEdge: settings(on: intent.display)
+                        .spaceBarStyle.edge
                 ),
                 direction: SpaceSlidePlan.direction(
                     from: intent.leaving,

@@ -84,14 +84,20 @@ extension ShelfLook {
                 SpaceBarCommandSetting
                 .parse(field: parts[1], args: args)
             {
+                // A look sets the bar's edge and leaves each
+                // screen's own alone, the strongest (#1948).
+                let screens = settings.spaceBarStyle.edgeOverride
                 setting.apply(to: &settings.spaceBarStyle)
+                settings.spaceBarStyle.edgeOverride = screens
             }
         case "app_bar":
             if case .success(let setting) =
                 AppBarCommandSetting
                 .parse(field: parts[1], args: args)
             {
+                let screens = settings.appBarStyle.edgeOverride
                 setting.apply(to: &settings.appBarStyle)
+                settings.appBarStyle.edgeOverride = screens
                 // A per-layout indicator would hide the look's.
                 if case .activeIndicator = setting {
                     settings.monocle.appBar.activeIndicator = nil

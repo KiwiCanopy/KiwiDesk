@@ -1927,6 +1927,13 @@ meet at a corner, the Space Bar runs the whole edge and the App
 Bar stops at it.
 
 :::unreleased
+A bar's edge may also differ per screen — `set_edge`'s optional
+screen argument — and each screen reserves the edges its own
+bars sit on, so the bars may share one shelf on one screen and
+sit apart on another.
+:::
+
+:::unreleased
 An edge whose every bar has `reserve` off is not reserved
 ([`space_bar.set_reserve`](#space_barset_reserve)): its bar
 draws over the windows.
@@ -2517,6 +2524,15 @@ app_bar.set_edge("bottom")
 ```
 
 :::unreleased
+A second argument sets the edge on one screen only, as
+[`space_bar.set_edge`](#space_barset_edge) describes.
+
+```lua
+app_bar.set_edge("right", "LG HDR 4K:3840x2160")
+```
+:::
+
+:::unreleased
 ### app_bar.set_reserve
 
 **Expects:** boolean (default `true`).
@@ -2713,6 +2729,28 @@ edge is absolute — it does not follow a layout's orientation.
 ```lua
 space_bar.set_edge("left")
 ```
+
+:::unreleased
+**Per screen:** an optional second argument names one screen,
+in the forms [`move_space_to_display`](#move_space_to_display)
+takes — a number, or a connected screen's fingerprint or name —
+and gives the bar that edge on that screen alone. A fingerprint
+of a screen that is not connected is kept for when it is. A
+screen with no edge of its own uses the bar's, so a new screen
+needs no setup. Naming the bar's own edge returns a screen to it,
+and once two or more connected screens all have the same edge of
+their own, that edge becomes the bar's. A call without a screen
+sets the bar on every screen, clearing their own edges. A look
+applied in Settings sets the bars' edges and leaves each
+screen's own in place. The edges are stored per profile, under
+`space_bar.edge_override` and `app_bar.edge_override`, keyed by
+fingerprint.
+
+```lua
+space_bar.set_edge("top")
+space_bar.set_edge("left", "LG HDR 4K:3840x2160")
+```
+:::
 
 ### space_bar.set_glyph_span
 

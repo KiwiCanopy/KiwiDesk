@@ -19,6 +19,9 @@ struct AppBarSettingError: Error, Equatable,
 /// Parsed App Bar command setting representation.
 enum AppBarCommandSetting {
     case edge(AppBarEdge)
+    /// `set_edge(edge, screen)` — one screen's edge (#1948), the
+    /// screen already resolved to its fingerprint.
+    case screenEdge(AppBarEdge, screen: String)
     case activeIndicator(AppBarStyle.ActiveIndicator)
     case titleCap(Int)
     case groupAdjacentWindows(Bool)
@@ -42,8 +45,11 @@ enum AppBarCommandSetting {
     ) -> Result<AppBarCommandSetting, AppBarSettingError>? {
         switch field {
         case "edge":
-            return BarSettingChoice.value(args, AppBarEdge.self)
-                .map(Self.edge)
+            return BarSettingChoice.edge(args).map { parsed in
+                parsed.screen.map {
+                    .screenEdge(parsed.edge, screen: $0)
+                } ?? .edge(parsed.edge)
+            }
         case "active_indicator":
             return BarSettingChoice.value(
                 args,
@@ -88,7 +94,9 @@ enum AppBarCommandSetting {
     /// Applies concrete setting to AppBarStyle.
     func apply(to style: inout AppBarStyle) {
         switch self {
-        case .edge(let value): style.edge = value
+        case .edge(let value): style.setEdge(value)
+        case .screenEdge(let value, let screen):
+            style.setEdge(value, on: screen)
         case .activeIndicator(let value):
             style.activeIndicator = value
         case .titleCap(let value): style.titleCap = value
@@ -102,7 +110,7 @@ enum AppBarCommandSetting {
     /// field in `AppBarStyle.layoutFixedKeys` has none to write.
     func apply(to bar: inout LayoutAppBar) {
         switch self {
-        case .edge, .reserve: break
+        case .edge, .screenEdge, .reserve: break
         case .activeIndicator(let value):
             bar.activeIndicator = value
         case .titleCap(let value): bar.titleCap = value

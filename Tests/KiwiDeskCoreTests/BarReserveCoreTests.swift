@@ -117,7 +117,7 @@ struct BarReserveCoreTests {
         #expect(core.appBars.shownStrips.isEmpty)
         let strip = try #require(core.spaceBars.shownStrips.first)
         #expect(
-            core.tiler.settings.shelfEdges(in: .monocle) == [.top]
+            core.tiler.settings.shelfEdges(in: .monocle, on: nil) == [.top]
         )
         let region = try #require(core.floatBounds(on: space))
         #expect(region.minY >= strip.strip.maxY)

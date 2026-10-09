@@ -17,7 +17,9 @@ struct AppBarParityTests {
     /// `AppBarStyle.layoutFixedKeys` as property names — the
     /// fields no layout overrides (#1731).
     static var layoutFixed: Set<String> {
-        let keys = Set(AppBarStyle.layoutFixedKeys.map(\.stringValue))
+        let keys = Set(
+            AppBarStyle.layoutFixedKeys.keys.map(\.stringValue)
+        )
         return fieldNames(AppBarStyle()).filter {
             keys.contains(snakeCased($0))
         }
@@ -98,7 +100,8 @@ struct AppBarCommandParityTests {
     /// `applyParity` goes red if this list, either apply switch,
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
-        .edge(.left), .activeIndicator(.outline), .titleCap(40),
+        .edge(.left), .screenEdge(.left, screen: "Screen:1x1"),
+        .activeIndicator(.outline), .titleCap(40),
         .groupAdjacentWindows(false), .reserve(false),
     ]
 
@@ -139,7 +142,7 @@ struct AppBarCommandParityTests {
     func parseCoverage() {
         for key in AppBarStyle.CodingKeys.allCases {
             let parsed = AppBarCommandSetting.parse(
-                field: key.stringValue,
+                field: setterField(of: key.stringValue),
                 args: sampleArgs(for: key)
             )
             #expect(
@@ -156,6 +159,7 @@ struct AppBarCommandParityTests {
         case .groupAdjacentWindows, .reserve:
             return [.bool(true)]
         case .edge: return [.string("left")]
+        case .edgeOverride: return [.string("left"), .string("S:1x1")]
         case .activeIndicator: return [.string("outline")]
         case .titleCap: return [.number(40)]
         }
@@ -171,7 +175,7 @@ struct AppBarCommandParityTests {
     func appBarNamespaceParity() {
         let expected = Set(
             AppBarStyle.CodingKeys.allCases.map {
-                "set_\($0.stringValue)"
+                "set_\(setterField(of: $0.stringValue))"
             }
         )
         #expect(

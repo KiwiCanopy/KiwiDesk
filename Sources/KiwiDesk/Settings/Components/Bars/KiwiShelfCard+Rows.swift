@@ -115,7 +115,8 @@ extension KiwiShelfCard {
             )
         case .iconSource:
             iconSourceRow
-        case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .fillColor,
+        case .fontSize, .glyphSize, .liquidGlass, .dimFactor,
+            .spaceBarScreenEdge, .appBarScreenEdge, .fillColor,
             .borderColor, .itemColor, .activeItemColor, .highlightColor,
             .hoverFillColor, .hoverItemColor, .groupBadgeColor,
             .groupBadgeTextColor:

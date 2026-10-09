@@ -45,6 +45,18 @@ vocabulary spans Lua and profile JSON:
   `layout.stack.master_ratio`. Multi-part element names nest
   further when the element is a configurable unit:
   `drag.set_ghost_fill_color` → `drag.ghost.fill_color`.
+  **A `set_X` verb whose optional scope argument (a screen, a
+  Space) writes a sparse map stores that map at `X_override`
+  beside `X`, keyed by the scope's identifier** — a Space by its
+  id, a screen by its `Display.fingerprint`:
+  `space_bar.set_edge(edge, screen)` → `space_bar.edge_override`
+  beside `space_bar.edge` (#1948), the shape `gap.override`
+  already has beside `gap.global`. For the two bars the parity
+  suites derive the writing verb from that suffix
+  (`setterField(of:)` in `AppBarCommandParityTests` and
+  `SpaceBarCommandParityTests`), so a scoped map named another
+  way reds there as a missing verb; elsewhere the name is
+  review's.
 - Groups are **singular** (`gap`, `layout`, `drag`); never invent
   synonyms or plurals.
 - When adding a setting, pick the Lua name first and derive the

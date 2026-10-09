@@ -197,6 +197,25 @@ public final class TilingEngine {
         ScreenList.all.map(KiwiCore.axFrame(of:))
     }
 
+    /// A screen's `Display.fingerprint`, the key of a bar's
+    /// per-screen edge (#1948). Read only while a bar has one
+    /// (`fingerprint(of:)`), so a fixture without one never
+    /// reaches the host's screens; a fixture with one pins it.
+    var screenFingerprint: @MainActor (NSScreen) -> String = {
+        Display.fingerprint(name: $0.localizedName, frame: $0.frame)
+    }
+
+    /// The fingerprint `screen`'s bar edges resolve under in
+    /// `settings` (the live ones unless a draft is handed in) —
+    /// nil while no bar has a screen of its own, skipping the read.
+    func fingerprint(
+        of screen: NSScreen,
+        in settings: TilingSettings? = nil
+    ) -> String? {
+        (settings ?? self.settings).hasScreenEdges
+            ? screenFingerprint(screen) : nil
+    }
+
     public init() {
         applier.elementProvider = { [weak self] id in
             self?.elementProvider(id)

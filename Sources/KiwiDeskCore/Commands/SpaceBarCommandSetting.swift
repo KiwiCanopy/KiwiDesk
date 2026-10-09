@@ -8,6 +8,8 @@ enum SpaceBarCommandSetting {
     case enabled(Bool)
     case reserve(Bool)
     case edge(AppBarEdge)
+    /// One screen's edge (#1948), as `AppBarCommandSetting`'s.
+    case screenEdge(AppBarEdge, screen: String)
     case glyphSpan(Int)
     case glyphGap(CGFloat)
     case groupAdjacentWindows(Bool)
@@ -67,8 +69,11 @@ enum SpaceBarCommandSetting {
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError>? {
         switch field {
         case "edge":
-            return BarSettingChoice.value(args, AppBarEdge.self)
-                .map(Self.edge)
+            return BarSettingChoice.edge(args).map { parsed in
+                parsed.screen.map {
+                    .screenEdge(parsed.edge, screen: $0)
+                } ?? .edge(parsed.edge)
+            }
         case "active_indicator":
             return BarSettingChoice.value(
                 args,
@@ -212,7 +217,9 @@ enum SpaceBarCommandSetting {
         switch self {
         case .enabled(let value): style.enabled = value
         case .reserve(let value): style.reserve = value
-        case .edge(let value): style.edge = value
+        case .edge(let value): style.setEdge(value)
+        case .screenEdge(let value, let screen):
+            style.setEdge(value, on: screen)
         case .glyphSpan(let value): style.glyphSpan = value
         case .glyphGap(let value):
             style.glyphGap = SpaceBarStyle.clampGlyphGap(value)

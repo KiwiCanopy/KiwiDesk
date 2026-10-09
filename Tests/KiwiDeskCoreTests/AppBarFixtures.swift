@@ -19,6 +19,7 @@ enum AppBarFixtures {
         style.titleCap = 40
         style.groupAdjacentWindows = false
         style.edge = .left
+        style.setEdge(.right, on: "Screen:1x1")
         style.reserve = false
         return style
     }
