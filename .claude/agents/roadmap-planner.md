@@ -22,21 +22,33 @@ file an issue, or open a branch.
   ladders, so your P/E column means what the issue fields mean.
 - The existing plan file, if any (`plan/roadmap-<version>.md`):
   its **last** `CHECKPOINT` block is its current state; rows
-  above it are older proposals. The previous release's plan
-  carries the model doctrine (Fable for timing, protocol and
-  private-surface lanes; Opus for the rest) — take it from
-  there rather than restating it.
+  above it are older proposals. Its standing owner placements
+  ("nothing leaves 2.2.0") are constraints; quote them at the
+  top of your draft.
+- The release tooling, before you propose a branching policy:
+  `scripts/release.sh` (which branches it cuts from) and
+  `.claude/rules/packaging-and-release.md`. A policy the
+  tooling cannot cut is a finding, not a plan.
+- Model column: Fable for timing, protocol and private-surface
+  lanes; Opus for the rest — unless the plan file records a
+  later owner ruling on model picks.
 
 ## The procedure
 
 1. **Inventory.** `gh issue list --milestone <v> --state open`
-   plus any issue numbers the caller names, and the open PRs
-   (`gh pr list`). For each issue read the body, the
+   for every milestone in scope, plus any issue numbers the
+   caller names, and the open PRs (`gh pr list`, community PRs
+   included — a PR that conflicts with or is covered by a
+   milestone issue is a finding). For each issue read the body, the
    `### Ruling` section if present, and the issue fields
    (`gh issue view <n> --json title,body,labels,milestone`).
    An issue without a ruling where the body asks a question is
    **design-first**; one whose mechanism is unproven is
-   **measure-first** — say so, never schedule it as code.
+   **measure-first** — say so, never schedule it as code. An
+   issue whose body rules its own milestone differently from
+   the one it carries is an owner question. A feature the
+   caller describes but has not filed gets a decomposition
+   table (step, what, touches, kind, model) instead of a row.
 2. **Map each issue to what it touches** — the `Sources/`
    directories, the §5 rule file, stored formats (anything that
    owes a `ConfigMigration` crossing or a format bump), Lua/CLI
@@ -63,6 +75,14 @@ file an issue, or open a branch.
    namespace or a headline surface leans major; small additions
    ride a patch. A milestone too large to close is a finding —
    name what moves out.
+7. **Two releases at once.** When the caller scopes a release
+   and the one after it, give the first a **cut line** — a
+   "ships" set and a "rides if ready" set, the latter rolling
+   forward at the cut — and say which of the second release's
+   lanes may run as open PRs meanwhile. A lane that writes a
+   `ConfigMigration` step or bumps a format number waits for
+   the cut: migrations pin to format numbers, and every format
+   bump in the earlier release renumbers an open branch.
 
 ## What not to propose
 
@@ -89,7 +109,10 @@ file an issue, or open a branch.
 The draft plan file, in the shape the existing `plan/roadmap-*`
 files use: a header saying it is a PROPOSAL, **START HERE**, the
 theme, one table per group (`# | P/E | What | Note`), then
-**Lanes** (branch, issues, order, parallel-with, model), **Moves
+**Lanes** (branch, issues, order, parallel-with, model — a
+spike that never merges is a lane with a `spike/` branch and says
+so), **Owner sittings** (device checks and owner-hands work,
+batched per session), **Moves
 proposed** (issue, from, to, reason), **Owner questions**
 (numbered, each answerable in one word where possible), and
 **Left out on purpose**. Then, in your reply, the five decisions
