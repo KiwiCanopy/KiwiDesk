@@ -70,24 +70,30 @@ UPDATE_LINE = (
     "to get it now, click the circular arrow (Check for updates) "
     "in the footer of Settings Home."
 )
-# A typed section's change, counted in words (#1627's follow-up).
+# A typed section's change, counted in words (#2112): one entry per
+# `changelog-sync` SECTION_TYPES type, held to that table by
+# `DiscordAnnounceSpotlightTests`; a type missing here still counts.
 NOUNS = {
     "new": ("addition", "additions"),
     "improved": ("improvement", "improvements"),
     "fixed": ("fix", "fixes"),
     "scripting": ("Lua & CLI change", "Lua & CLI changes"),
 }
+FALLBACK_NOUNS = ("change", "changes")
+# Room the head keeps when a Spotlight is long enough to crowd it.
+HEAD_FLOOR = 600
 
 
-def counted(sections: list[dict]) -> list[str]:
-    """`3 fixes`, one per typed section that has entries, in the
-    block's order."""
+def counted(sections: list[dict]) -> list[tuple[int, str]]:
+    """`(3, "3 fixes")`, one per typed section that has entries, in
+    the block's order."""
     out = []
     for section in sections:
-        nouns = NOUNS.get(section.get("type") or "")
+        if not section.get("type") or not section["items"]:
+            continue
+        nouns = NOUNS.get(section["type"], FALLBACK_NOUNS)
         count = len(section["items"])
-        if nouns and count:
-            out.append(f"{count} {nouns[0] if count == 1 else nouns[1]}")
+        out.append((count, f"{count} {nouns[0 if count == 1 else 1]}"))
     return out
 
 
@@ -104,9 +110,10 @@ def counts_line(entry: dict) -> str:
     counts = counted(entry.get("sections") or [])
     if not counts:
         return f"Everything that changed is in the {notes}."
-    total = sum(int(c.split(" ", 1)[0]) for c in counts)
+    total = sum(count for count, _ in counts)
     where = f"all of them in the {notes}" if total > 1 else f"see the {notes}"
-    return f"This release brings {joined(counts)} — {where}."
+    phrases = [phrase for _, phrase in counts]
+    return f"This release brings {joined(phrases)} — {where}."
 
 
 def spotlight_block(rows: list[dict]) -> str:
@@ -164,10 +171,17 @@ def description(entry: dict) -> str:
         head.append(entry["summary"])
     if entry.get("heads"):
         head.append(f"**Before you update:** {entry['heads']}")
+    closing = max(len(close), len(cut_close))
     body = spotlight_block(rows) if rows else ""
-    reserve = max(len(close), len(cut_close)) + len(body) + 4
-    room = DESCRIPTION_BUDGET - reserve
+    keep = min(len("\n\n".join(head)), HEAD_FLOOR)
+    body_room = DESCRIPTION_BUDGET - closing - keep - 4
+    if len(body) > body_room:
+        body = clip(body, body_room)
+    room = DESCRIPTION_BUDGET - closing - len(body) - 4
     while len("\n\n".join(head)) > room and head:
+        if room < 3 * len(head):
+            head = []
+            break
         over = len("\n\n".join(head)) - room
         longest = max(range(len(head)), key=lambda i: len(head[i]))
         head[longest] = clip(head[longest], len(head[longest]) - over)

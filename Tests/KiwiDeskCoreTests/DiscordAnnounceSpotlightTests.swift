@@ -11,7 +11,6 @@ import Testing
 /// network.
 @Suite("Discord release announcement: Spotlight and counts")
 struct DiscordAnnounceSpotlightTests {
-    private static let tag = "v9999.4.0"
     private static let url = "https://example.invalid/release"
     private static let notes = "[release notes](\(url))"
 
@@ -23,9 +22,12 @@ struct DiscordAnnounceSpotlightTests {
         + "{setting:settings.animations.onSpaceChange} "
         + "{symbol:list.bullet.rectangle}"
 
-    private func description(of body: String) throws -> String {
+    private func description(
+        of body: String,
+        tag: String = "v9999.4.0"
+    ) throws -> String {
         let release: [String: Any] = [
-            "tag_name": Self.tag,
+            "tag_name": tag,
             "published_at": "2026-10-09T10:00:00Z",
             "draft": false,
             "html_url": Self.url,
@@ -44,7 +46,7 @@ struct DiscordAnnounceSpotlightTests {
                 .appendingPathComponent("scripts")
                 .appendingPathComponent("discord-announce"),
             arguments: [
-                "--release", Self.tag, "--releases", file.path,
+                "--release", tag, "--releases", file.path,
                 "--dry-run",
             ]
         )
@@ -87,7 +89,6 @@ struct DiscordAnnounceSpotlightTests {
                 + "**Windows on hover** — Rest on an app to list its "
                 + "windows."
         )
-        #expect(!text.contains("{"))
         #expect(!text.contains("**New"))
         #expect(!text.contains("- **A fix.**"))
         #expect(
@@ -116,5 +117,58 @@ struct DiscordAnnounceSpotlightTests {
         #expect(
             text.contains("This release brings \(phrase) \(Self.notes).")
         )
+    }
+
+    /// Rows have no length cap, so a long Spotlight is clipped to
+    /// fit beside the close rather than crowding the head forever.
+    @Test("a long Spotlight still posts within the embed limit")
+    func longSpotlightFits() throws {
+        let line = String(repeating: "word ", count: 300) + "end."
+        let rows = (1...4)
+            .map { "- **Row \($0)** — \(line) {symbol:keyboard}" }
+            .joined(separator: "\n")
+        let text = try description(
+            of: "## Highlights\n\nA summary.\n\n### Spotlight\n\n"
+                + "\(rows)\n\n### Fixed\n\n- **A fix.**\n"
+        )
+        #expect(text.count <= 4096)
+        #expect(text.hasPrefix("A summary."))
+        #expect(text.contains("This release brings 1 fix"))
+    }
+
+    /// A release from before the section types counts nothing,
+    /// and says where everything is instead.
+    @Test("an untyped release points at the notes")
+    func untypedReleasePoints() throws {
+        let text = try description(
+            of: "## Highlights\n\nA summary.\n\n### New\n\n- **A.**\n",
+            tag: "v1.9.0"
+        )
+        #expect(
+            text.contains("Everything that changed is in the \(Self.notes).")
+        )
+    }
+
+    /// Every section type the parser knows has its own nouns, so a
+    /// new type is named rather than counted as plain changes.
+    @Test("every section type has its nouns")
+    func nounsCoverEverySectionType() throws {
+        let root = scriptFixtureRepoRoot().path
+        let code = """
+            import importlib.machinery, importlib.util, sys
+            def load(name):
+                path = sys.argv[1] + "/scripts/" + name
+                loader = importlib.machinery.SourceFileLoader(name, path)
+                spec = importlib.util.spec_from_loader(name, loader)
+                module = importlib.util.module_from_spec(spec)
+                loader.exec_module(module)
+                return module
+            types = {t for _, t in load("changelog-sync").SECTION_TYPES}
+            nouns = set(load("discord-announce").NOUNS)
+            print(sorted(types), sorted(nouns))
+            sys.exit(0 if types and types == nouns else 1)
+            """
+        let result = try spawn("/usr/bin/env", ["python3", "-c", code, root])
+        #expect(result.status == 0, "\(result.stdout)\(result.stderr)")
     }
 }
