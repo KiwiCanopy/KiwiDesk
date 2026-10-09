@@ -54,6 +54,8 @@ extension AppDelegate {
         onboardingModel.onSetLoginItem = { enabled in
             LoginItemManager.setEnabled(enabled)
         }
+        onboardingModel.loginItemUnavailable =
+            LoginItemManager.unavailableCopy
         onboardingModel.starterSpaces = { [weak self] in
             self?.starterSpaceCards() ?? []
         }
