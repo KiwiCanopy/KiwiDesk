@@ -6,10 +6,13 @@ import Foundation
 /// by `Display.fingerprint` as a Monitor pin is; a screen with no
 /// entry uses the bar's `edge`.
 ///
-/// Write a bar's edge only through the `setEdge` doors below. The
-/// verb's and Settings' writes keep no entry equal to the bar's
-/// edge and collapse the entries wherever every screen agrees; a
-/// look's leaves the entries exactly as they are.
+/// Write a bar's edge only through the `setEdge` doors below. A
+/// verb's or Settings' write of a screen's edge equal to the
+/// bar's stores nothing for THAT screen, and collapses the entries
+/// wherever every screen draws one edge; a look's leaves the
+/// entries exactly as they are, so an entry it leaves equal to the
+/// bar's edge stays a pin. Every judgement reads EFFECTIVE edges
+/// (`edge(on:)`).
 /// `BarEdgeWriteCensusTests` holds the raw writes to their named
 /// exemptions.
 public protocol ScreenEdged {
@@ -31,10 +34,13 @@ extension ScreenEdged {
         screen.flatMap { edgeOverride[$0] } ?? edge
     }
 
-    /// Whether some screen has an edge of its own — what makes the
-    /// Settings Position master show no selection
-    /// (`TilingSettings.uniformBarEdge`).
-    public var screensDiffer: Bool { !edgeOverride.isEmpty }
+    /// Whether some screen draws an edge other than the bar's —
+    /// what makes the Settings Position master show no selection
+    /// (`TilingSettings.uniformBarEdge`). A pin equal to the bar's
+    /// edge draws the same edge, so it differs in nothing.
+    public var screensDiffer: Bool {
+        edgeOverride.contains { $0.value != edge }
+    }
 
     /// The bar on every screen: a screen-less `set_edge`, or a
     /// Settings pick of the bar's edge, which writes every level
@@ -45,10 +51,11 @@ extension ScreenEdged {
     }
 
     /// One screen's edge (#1948). The bar's own edge stores
-    /// nothing; once every screen of `scope` and of the entries
-    /// has an edge of its own and all agree, the entries collapse
-    /// into the bar's edge — a screen that follows the bar blocks
-    /// it, since collapsing would move that screen.
+    /// nothing for that screen. Once every screen of `scope` and
+    /// of the entries DRAWS one edge (`edge(on:)`), the entries
+    /// collapse into the bar's edge, which moves no screen; a
+    /// screen drawing another edge — its own, or the bar's while
+    /// the rest agree on a different one — keeps them apart.
     public mutating func setEdge(
         _ edge: AppBarEdge,
         on screen: String,
@@ -56,9 +63,9 @@ extension ScreenEdged {
     ) {
         edgeOverride[screen] = edge == self.edge ? nil : edge
         let judged = scope.screens.union(edgeOverride.keys)
-        let edges = Set(edgeOverride.values)
-        guard edges.count == 1, let shared = edges.first,
-            judged.allSatisfy({ edgeOverride[$0] != nil })
+        let drawn = Set(judged.map { self.edge(on: $0) })
+        guard !edgeOverride.isEmpty, drawn.count == 1,
+            let shared = drawn.first
         else { return }
         setEdge(shared)
     }
@@ -66,7 +73,7 @@ extension ScreenEdged {
     /// A look's write: the bar's edge, the entries left exactly as
     /// they are — a screen's own edge is the strongest, and the
     /// tour's Revert (`KiwiCore.unpainted`) restores the edge
-    /// alone.
+    /// alone, never reaching the entries.
     public mutating func setEdgeKeepingScreens(_ edge: AppBarEdge) {
         self.edge = edge
     }

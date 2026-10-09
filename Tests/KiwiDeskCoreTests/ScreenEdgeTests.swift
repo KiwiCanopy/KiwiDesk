@@ -203,6 +203,32 @@ struct ScreenEdgeTests {
         #expect(studio.onScreen(Self.laptop) == studio)
     }
 
+    /// A pin a look left equal to the bar's edge draws that edge:
+    /// the Position master selects it, and a later write that
+    /// makes every screen draw it collapses, moving no screen.
+    @Test("Judgements read the edge each screen draws")
+    func judgementsReadDrawnEdges() {
+        let both = ScreenEdgeScope(screens: [Self.studio, Self.laptop])
+        var settings = TilingSettings()
+        settings.barEdge = .bottom
+        settings.spaceBarStyle.setEdge(.top, on: Self.studio, among: both)
+        settings.appBarStyle.setEdge(.top, on: Self.studio, among: both)
+        #expect(settings.uniformBarEdge == nil)
+        // A look sets top and keeps the studio's pin.
+        settings.spaceBarStyle.setEdgeKeepingScreens(.top)
+        settings.appBarStyle.setEdgeKeepingScreens(.top)
+        #expect(settings.spaceBarStyle.edgeOverride == [Self.studio: .top])
+        #expect(settings.uniformBarEdge == .top)
+        // The laptop's write of the bar's edge stores nothing, and
+        // every screen drawing top collapses the pin.
+        settings.spaceBarStyle.setEdge(.top, on: Self.laptop, among: both)
+        #expect(settings.spaceBarStyle.edge == .top)
+        #expect(settings.spaceBarStyle.edgeOverride.isEmpty)
+        for screen in [Self.studio, Self.laptop] {
+            #expect(settings.spaceBarStyle.edge(on: screen) == .top)
+        }
+    }
+
     /// The Position master selects an edge only while the bars
     /// share it on every screen.
     @Test("A screen of its own leaves the Position master unset")

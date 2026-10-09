@@ -98,7 +98,7 @@ extension TilingSettings {
 
     /// The edge both bars sit on on EVERY screen — what Settings'
     /// Position master selects — or nil while the bars differ or
-    /// a screen has an edge of its own (`ScreenEdged.screensDiffer`,
+    /// a screen draws an edge of its own (`ScreenEdged.screensDiffer`,
     /// #1948): a level whose lower levels disagree shows none.
     public var uniformBarEdge: AppBarEdge? {
         guard !spaceBarStyle.screensDiffer,

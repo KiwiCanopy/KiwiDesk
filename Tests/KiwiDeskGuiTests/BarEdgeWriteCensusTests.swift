@@ -20,10 +20,6 @@ struct BarEdgeWriteCensusTests {
         "ShelfEdge.swift": (1, "`ShelfEdge`'s own field, no bar's"),
         "AppBarStyle+Coding.swift": (3, "its coding key and decoder"),
         "SpaceBarStyle+Coding.swift": (3, "its coding key and decoder"),
-        "KiwiCore+ShelfPaint.swift": (
-            2,
-            "a Revert puts back the entries a look left alone"
-        ),
     ]
 
     private static func regexes(_ patterns: [String]) -> [NSRegularExpression]
@@ -143,6 +139,19 @@ struct BarEdgeWriteCensusTests {
         #"sharedBarEdge"#,
         #"\b(spaceBarStyle|appBarStyle|style)\.edge\b"#,
     ])
+
+    /// `ScreenEdgeScope`'s memberwise init is module-wide, so its
+    /// one home — `KiwiCore.screenEdgeScope(monitorSets:)`, which
+    /// adds the connected screens — is held here.
+    @Test("a ScreenEdgeScope is built only by screenEdgeScope")
+    func scopeHasOneHome() throws {
+        let found = try census(
+            in: ["Sources/KiwiDeskCore", "Sources/KiwiDesk"]
+        ) { _, text in
+            text.components(separatedBy: "ScreenEdgeScope(").count - 1
+        }
+        #expect(found == ["KiwiCore+ScreenEdges.swift": 1])
+    }
 
     @Test("every barEdges caller is resolved for a screen or named")
     func foldCallersAreCensused() throws {

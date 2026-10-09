@@ -12769,17 +12769,17 @@ the screens' own edges, as a pick of a bar's edge — or of
 Position — in Settings writes every level below it. The entries
 collapse into the bar's edge once every screen ends up equal,
 judged over one set: the active profile's monitor-set screens,
-the connected screens and every screen holding an entry. Only
-when each screen of that set has an edge of its own and all
-agree do the entries become the bar's edge; a known screen that
-follows the bar blocks it, since collapsing would move that
-screen. The union keeps a known screen that is away in the set,
-so a monitor-set screen not connected while a config runs still
-blocks the collapse, as a connected screen without an entry
-does.
+the connected screens and every screen holding an entry. When
+every screen of that set draws one edge, that edge becomes the
+bar's and the entries go, which moves no screen; a screen that
+draws another edge keeps them, a known screen following the bar
+included while the rest agree on a different edge. The union
+keeps a known screen that is away in the set, so a monitor-set
+screen not connected while a config runs counts as a connected
+screen does.
 
 A look sets the bars' edges and leaves each screen's own
-untouched: the
+untouched, even one it now equals, which stays a pin: the
 map names this Mac's screens, which a look shared to another Mac
 cannot know, and a screen's own edge is the most specific choice
 the user made, so it stays the strongest.

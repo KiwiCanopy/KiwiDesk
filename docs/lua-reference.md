@@ -2748,12 +2748,12 @@ screen alone. A screen with no edge of its own uses the bar's,
 so a new screen needs no setup. Naming the bar's own edge
 returns a screen to it. The screens judged together are the
 active profile's screens, the connected ones and every screen
-with an edge of its own: once each of them has an edge of its
-own and all are the same, that edge becomes the bar's and the
-screens' own edges go — a screen among them that follows the
-bar keeps them apart. A call without a screen sets the bar on
-every screen, clearing their own edges. A look sets the bars'
-edges and leaves each screen's own untouched. The edges are stored per profile, under
+with an edge of its own: once all of them sit on one edge, that
+edge becomes the bar's and the screens' own edges go, which
+moves no screen; a screen on another edge keeps them apart. A
+call without a screen sets the bar on every screen, clearing
+their own edges. A look sets the bars' edges and leaves each
+screen's own untouched. The edges are stored per profile, under
 `space_bar.edge_override` and `app_bar.edge_override`, keyed by
 fingerprint.
 

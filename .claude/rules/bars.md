@@ -138,7 +138,8 @@ twice, was a question the user answered twice. The argument is
   keeps the reserving ones, the float region carves only the
   painted strips on those edges (`KiwiCore.reservedStrips`),
   and a bar write that leaves `shelfReservation(in:on:)` alone
-  repaints the bars and re-clamps the floats without a pass. `reserve` is a bar's own, global like
+  repaints the bars and re-clamps the floats without a pass.
+  `reserve` is a bar's own, global like
   its edge (`AppBarStyle.layoutFixedKeys`). **A per-screen edge
   (#1948) resolves before this fold, through the one
   `TilingSettings.onScreen(_:)`, never beside it** — a second
@@ -157,9 +158,14 @@ twice, was a question the user answered twice. The argument is
   judged over the one `KiwiCore.screenEdgeScope(monitorSets:)`
   handed the written profile's monitor sets, and
   `setEdgeKeepingScreens(_:)` for a look, which leaves the
-  entries exactly as they are — so a verb or Settings write keeps
-  no entry equal to its bar's edge and no caller collapses by
-  hand (`BarEdgeWriteCensusTests` ▸ `rawWritesAreCensused`). The empty map stays out of the JSON
+  entries exactly as they are — so a verb or Settings write of a
+  screen's edge equal to its bar's stores nothing for that
+  screen, an entry a look leaves equal stays a pin, every
+  judgement reads the edges screens draw (`edge(on:)`), and no
+  caller collapses by hand (`BarEdgeWriteCensusTests` ▸
+  `rawWritesAreCensused`); `ScreenEdgeScope` is built only by
+  `screenEdgeScope(monitorSets:)`
+  (▸ `scopeHasOneHome`). The empty map stays out of the JSON
   through a `KeyedEncodingContainer` overload whose scope is the
   TYPE `[String: AppBarEdge]`, module-wide: a store of that type
   that must encode an empty map takes a type of its own.
