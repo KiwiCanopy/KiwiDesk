@@ -60,9 +60,9 @@ reaches people who did not ask to read anything.
    `python3 scripts/changelog-sync --body <file>`. It refuses
    rather than half-rendering, so a green run is the floor, not
    the goal.
-5. **Pick the Highlights tab's shape: a spotlight by default,
-   prose only for a patch or a fixes-only release** (owner,
-   2026-10-09). Say which you picked; the owner may still
+5. **Pick the Highlights tab's shape: a spotlight whenever the
+   release adds something — a patch included — and prose only
+   for a fixes-only release** (owner, 2026-10-09). Say which you picked; the owner may still
    overrule it for a release. A spotlight is one
    intro sentence and up to `SPOTLIGHT_MAX_ROWS` `### Spotlight`
    rows, drawn from the New and Improved bullets a user would
