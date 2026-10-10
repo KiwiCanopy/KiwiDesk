@@ -57,7 +57,7 @@ final class OtherWindowManagerPanel: NSPanel {
 /// KiwiDesk (#1882). Non-modal: a modal run loop would hold the
 /// AX notifications, and the ruling is that tiling never stops. It
 /// comes forward like any alert, by the owner's ruling of an alert
-/// window, and closes itself once that manager quits by any route.
+/// window, and closes when Core reports that manager gone.
 @MainActor
 final class OtherWindowManagerAlert: NSObject {
     /// Keeps each shown alert alive until it is answered.
@@ -66,36 +66,50 @@ final class OtherWindowManagerAlert: NSObject {
     private let alert = NSAlert()
     private let manager: OtherWindowManager
     private let defaults: UserDefaults
+    private let quit: () -> Void
     private var panel: OtherWindowManagerPanel?
-    private var quitObserver: NSObjectProtocol?
 
-    /// Whether a detection is shown: once per manager while open,
-    /// never for one the user silenced.
+    /// Whether a detection is shown: never for a manager the user
+    /// silenced. Core announces a running manager once.
     static func shouldPresent(
         _ manager: OtherWindowManager,
         defaults: UserDefaults
     ) -> Bool {
         !OtherWindowManagerSilence.isSilenced(manager, in: defaults)
-            && !open.contains { $0.manager == manager }
     }
 
-    /// Shows the alert unless `shouldPresent` refuses it.
+    /// Shows the alert unless `shouldPresent` refuses it; `quit`
+    /// asks Core to quit the manager.
     static func present(
         for manager: OtherWindowManager,
-        defaults: UserDefaults = .standard
+        defaults: UserDefaults = .standard,
+        quit: @escaping () -> Void
     ) {
         guard shouldPresent(manager, defaults: defaults) else { return }
         let shown = OtherWindowManagerAlert(
             manager: manager,
-            defaults: defaults
+            defaults: defaults,
+            quit: quit
         )
         open.append(shown)
         shown.show()
     }
 
-    private init(manager: OtherWindowManager, defaults: UserDefaults) {
+    /// Closes the alert for a manager Core reports gone.
+    static func close(for manager: OtherWindowManager) {
+        for shown in open where shown.manager == manager {
+            shown.dismiss()
+        }
+    }
+
+    private init(
+        manager: OtherWindowManager,
+        defaults: UserDefaults,
+        quit: @escaping () -> Void
+    ) {
         self.manager = manager
         self.defaults = defaults
+        self.quit = quit
     }
 
     private func show() {
@@ -108,14 +122,19 @@ final class OtherWindowManagerAlert: NSObject {
         alert.informativeText = L(
             "other_wm.alert.body",
             "When two window managers arrange the same windows, the "
-                + "windows jump between both layouts. KiwiDesk keeps "
-                + "managing your windows either way."
+                + "windows jump between both layouts. Quit the one you "
+                + "don't want to use."
         )
         let quit = alert.addButton(
             withTitle: L("other_wm.alert.quit", "Quit %1$@", manager.name)
         )
         quit.target = self
         quit.action = #selector(quitManager)
+        let quitKiwiDesk = alert.addButton(
+            withTitle: L("menu.quit", "Quit KiwiDesk")
+        )
+        quitKiwiDesk.target = self
+        quitKiwiDesk.action = #selector(quitKiwiDeskInstead)
         let silence = alert.addButton(
             withTitle: L(
                 "other_wm.alert.silence",
@@ -128,7 +147,6 @@ final class OtherWindowManagerAlert: NSObject {
         let panel = Self.host(alert.window)
         panel.onDismiss = { [weak self] in self?.dismiss() }
         self.panel = panel
-        watchForQuit()
         NSApp.forceFront(panel)
     }
 
@@ -145,6 +163,9 @@ final class OtherWindowManagerAlert: NSObject {
         panel.titleVisibility = .hidden
         panel.isMovableByWindowBackground = true
         panel.isReleasedWhenClosed = false
+        // An accessory app's panel otherwise hides on the first
+        // click elsewhere, unanswered.
+        panel.hidesOnDeactivate = false
         for button in [
             NSWindow.ButtonType.closeButton,
             .miniaturizeButton,
@@ -157,60 +178,20 @@ final class OtherWindowManagerAlert: NSObject {
         return panel
     }
 
-    /// Asks every running instance to quit; the alert stays until
-    /// the app has actually exited, so a refusal leaves it up.
+    /// The alert stays until Core reports the manager gone, so a
+    /// refusal to quit leaves it up.
     @objc private func quitManager() {
-        for app in runningInstances() {
-            app.terminate()
-        }
+        quit()
     }
 
-    private func runningInstances() -> [NSRunningApplication] {
-        NSRunningApplication.runningApplications(
-            withBundleIdentifier: manager.bundleID
-        )
-    }
-
-    private func watchForQuit() {
-        quitObserver = NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.didTerminateApplicationNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] note in
-            let bundleID =
-                (note.userInfo?[NSWorkspace.applicationUserInfoKey]
-                as? NSRunningApplication)?.bundleIdentifier
-            MainActor.assumeIsolated {
-                self?.managerQuit(bundleID: bundleID)
-            }
-        }
-    }
-
-    private func managerQuit(bundleID: String?) {
-        let left = runningInstances().filter { !$0.isTerminated }.count
-        guard Self.quitEnds(manager, quit: bundleID, stillRunning: left)
-        else { return }
+    /// Keeps the other manager and leaves through the app's own
+    /// quit path.
+    @objc private func quitKiwiDeskInstead() {
         dismiss()
-    }
-
-    /// Whether an app's exit ends the alert: it is that manager and
-    /// no instance of it still runs.
-    static func quitEnds(
-        _ manager: OtherWindowManager,
-        quit bundleID: String?,
-        stillRunning: Int
-    ) -> Bool {
-        bundleID?.lowercased() == manager.bundleID.lowercased()
-            && stillRunning == 0
+        NSApp.terminate(nil)
     }
 
     @objc private func dismiss() {
-        if let quitObserver {
-            NSWorkspace.shared.notificationCenter.removeObserver(
-                quitObserver
-            )
-        }
-        quitObserver = nil
         panel?.orderOut(nil)
         Self.open.removeAll { $0 === self }
     }

@@ -44,7 +44,10 @@ struct OtherWindowManagerAlertTests {
             in: "KiwiCore+Boot.swift",
             under: "App"
         )
-        #expect(body.contains("otherWindowManagers.scanRunning("))
+        let scan =
+            "otherWindowManagers.scanRunning(eventLoop.liveApps("
+            + "owners: []).map { ($0.pid, $0.ref.bundleID) })"
+        #expect(Self.squashed(body).contains(Self.squashed(scan)))
     }
 
     @Test("the launch arm carries the bundle id")
@@ -64,22 +67,33 @@ struct OtherWindowManagerAlertTests {
                 "Sources/KiwiDesk/AppDelegate.swift"
             )
         )
-        let wiring = """
-            core.otherWindowManagers.onDetected = { manager in
-                OtherWindowManagerAlert.present(for: manager)
+        let detected = """
+            core.otherWindowManagers.onDetected = { [weak self] manager in
+                OtherWindowManagerAlert.present(for: manager) {
+                    self?.core.otherWindowManagers.quit(manager)
+                }
             }
             """
-        #expect(Self.squashed(source).contains(Self.squashed(wiring)))
+        let gone = """
+            core.otherWindowManagers.onGone = { manager in
+                OtherWindowManagerAlert.close(for: manager)
+            }
+            """
+        for wiring in [detected, gone] {
+            #expect(Self.squashed(source).contains(Self.squashed(wiring)))
+        }
     }
 
-    /// The hosted panel answers ⌘W and Esc as OK; an `NSAlert`
-    /// window, not `.closable`, would beep at ⌘W (#1533).
+    /// The hosted panel answers ⌘W and Esc by closing for this
+    /// launch; an `NSAlert` window, not `.closable`, would beep at
+    /// ⌘W (#1533). It stays up while KiwiDesk is inactive.
     @Test("the alert panel validates and answers Close")
     func panelHonoursClose() {
         let alert = NSAlert()
         alert.layout()
         let panel = OtherWindowManagerAlert.host(alert.window)
         #expect(!panel.styleMask.contains(.closable))
+        #expect(!panel.hidesOnDeactivate)
         var dismissed = 0
         panel.onDismiss = { dismissed += 1 }
         let close = NSMenuItem(
@@ -114,14 +128,15 @@ struct OtherWindowManagerAlertTests {
         )
     }
 
-    @Test("only that manager's last exit ends the alert")
-    func quitEndsOnTheLastExit() {
-        let ends = OtherWindowManagerAlert.quitEnds
-        #expect(ends(aerospace, "bobko.aerospace", 0))
-        #expect(ends(aerospace, "BOBKO.AeroSpace", 0))
-        #expect(!ends(aerospace, "bobko.aerospace", 1))
-        #expect(!ends(aerospace, "com.amethyst.Amethyst", 0))
-        #expect(!ends(aerospace, nil, 0))
+    @Test("present asks shouldPresent first")
+    func presentIsGated() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/OtherWindowManagerAlert.swift"
+            )
+        )
+        let gate = "guard shouldPresent(manager, defaults: defaults) else"
+        #expect(Self.squashed(source).contains(Self.squashed(gate)))
     }
 
     private static func squashed(_ text: String) -> String {

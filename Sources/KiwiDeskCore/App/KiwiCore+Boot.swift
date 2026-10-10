@@ -185,7 +185,7 @@ extension KiwiCore {
         retireGoneRestoredFilings()
         drainDeferredBootApps()
         otherWindowManagers.scanRunning(  // #1882
-            eventLoop.liveApps(owners: []).compactMap(\.ref.bundleID)
+            eventLoop.liveApps(owners: []).map { ($0.pid, $0.ref.bundleID) }
         )
         closeBootInterval()
         logBootSummary()

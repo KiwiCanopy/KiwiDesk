@@ -242,8 +242,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.dashboardIfCreated?.showLiveOnlySpaces(spaces)
         }
         // Another window manager runs beside KiwiDesk (#1882).
-        core.otherWindowManagers.onDetected = { manager in
-            OtherWindowManagerAlert.present(for: manager)
+        core.otherWindowManagers.onDetected = { [weak self] manager in
+            OtherWindowManagerAlert.present(for: manager) {
+                self?.core.otherWindowManagers.quit(manager)
+            }
+        }
+        core.otherWindowManagers.onGone = { manager in
+            OtherWindowManagerAlert.close(for: manager)
         }
 
         sigtermSource = QuitSignal.install()

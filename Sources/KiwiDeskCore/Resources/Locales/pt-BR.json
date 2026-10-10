@@ -1122,7 +1122,7 @@
   "onboarding.starter_spaces.title.ultrawide": "Seus espaços estão prontos para sua tela ultrawide",
   "onboarding.starter_spaces.title.widescreen": "Seus espaços estão prontos para sua tela",
   "onboarding.window.title": "Configuração do KiwiDesk",
-  "other_wm.alert.body": "Quando dois gerenciadores de janelas organizam as mesmas janelas, as janelas pulam entre os dois layouts. O KiwiDesk continua gerenciando suas janelas de qualquer forma.",
+  "other_wm.alert.body": "Quando dois gerenciadores de janelas organizam as mesmas janelas, as janelas pulam entre os dois layouts. Encerre o que você não quer usar.",
   "other_wm.alert.quit": "Encerrar %1$@",
   "other_wm.alert.silence": "Sei o que estou fazendo",
   "other_wm.alert.title": "%1$@ também está gerenciando janelas",
