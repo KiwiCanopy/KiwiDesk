@@ -13,10 +13,13 @@ struct ProfilesControls: Sendable {
         "profiles.which_loads.title",
         "Which profile loads"
     )
-    /// Desktop-specific profile bindings drawer (#678 turn 13a).
+    /// Desktop-specific profile bindings drawer (#678 turn 13a),
+    /// declared with its one static child so a hit on the switch
+    /// cue's row opens it (#2142, #1250).
     let desktops = SettingsDrawer(
         "desktops.title",
-        "Profiles per macOS Desktop"
+        "Profiles per macOS Desktop",
+        children: DesktopsControls()
     )
     let presetsCard = SettingsControl(
         "presets.title",
@@ -26,6 +29,15 @@ struct ProfilesControls: Sendable {
     let presetsOther = SettingsDrawer(
         "presets.other_setups",
         "For other setups"
+    )
+}
+
+/// Profiles ▸ Desktops rows a search can name — the binding rows'
+/// labels are per-Desktop, so only the switch cue is here (#2142).
+struct DesktopsControls: Sendable {
+    let switchCue = SettingsControl(
+        "desktops.cue",
+        "Show the Desktop's number after a switch"
     )
 }
 

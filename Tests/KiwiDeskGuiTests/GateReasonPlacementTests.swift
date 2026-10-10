@@ -66,6 +66,9 @@ struct GateReasonPlacementTests {
                 // General, so each draws its sentence.
                 .general(.refusalSound),
                 .general(.quitGridTargetDepth),
+                // #2142: the app-wide Desktop switch cue greys the
+                // same way, a cause shown nowhere on Profiles.
+                .profiles(.desktopCue),
                 // Back in the set with #1392: the stored-profile
                 // arm (cause on the surface) retired, and the
                 // one that greys now — a stored Save with no

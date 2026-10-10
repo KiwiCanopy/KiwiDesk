@@ -52,6 +52,7 @@ struct DesktopsGroup: View {
             isExpanded: $expanded
         ) {
             VStack(alignment: .leading, spacing: 8) {
+                switchCueRow
                 Text(intro)
                     .font(.caption)
                     .foregroundStyle(.secondary)

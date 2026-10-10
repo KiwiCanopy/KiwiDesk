@@ -155,6 +155,7 @@ extension KiwiCore {
         }
         lastDesktop = key
         desktopMemory.lastDesktopSpace = snapshot.mainCurrentSpace
+        let profileBefore = profiles.currentName
         if secondarySwitch {
             // A secondary display's Desktop switched: the
             // binding authority is unmoved, so the PROFILE stands
@@ -234,6 +235,11 @@ extension KiwiCore {
         // stamps the window in flight before the file closes it.
         fileDisplaySpaces(in: snapshot)
         emitDesktopChange(snapshot, changed: changed)
+        let loaded = profiles.currentName
+        payDesktopCue(
+            in: snapshot,
+            loadedProfile: loaded != profileBefore ? loaded : nil
+        )
         settleAfterDesktopSwitch(snapshot.mainCurrentSpace)
     }
 

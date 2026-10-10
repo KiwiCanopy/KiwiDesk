@@ -185,6 +185,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case spaceHistory = "space_history"
         case refusal
         case quit
+        case desktop
         case look
     }
 
@@ -268,6 +269,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             quit: try container.decodeIfPresent(
                 AppWideSettings.Quit.self,
                 forKey: .quit
+            ),
+            desktop: try container.decodeIfPresent(
+                AppWideSettings.Desktop.self,
+                forKey: .desktop
             )
         )
         // Additive since #1752: absence is "no shared look adopted
@@ -324,6 +329,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         if let appWide {
             try container.encode(appWide.refusal, forKey: .refusal)
             try container.encode(appWide.quit, forKey: .quit)
+            try container.encode(appWide.desktop, forKey: .desktop)
         }
         try container.encodeIfPresent(look, forKey: .look)
     }

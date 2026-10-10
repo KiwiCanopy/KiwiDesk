@@ -99,7 +99,8 @@ struct SettingsCatalogSiteTests {
         // 122 since #1520: Shortcuts' General drawer left; its
         // two rows stay as Open applications' controls.
         // 124 since #1948: the two Per screen drawers.
-        #expect(names.count == 124)
+        // 125 since #2142: the Desktop switch cue row.
+        #expect(names.count == 125)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
