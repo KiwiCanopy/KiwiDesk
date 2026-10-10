@@ -24,7 +24,8 @@ struct SpaceBarGlideWiringTests {
         from: Int,
         to: Int,
         boxedGlass: Bool = false,
-        dropEmpty: Bool = false
+        dropEmpty: Bool = false,
+        applies: Bool = false
     ) throws -> (
         writes: [(view: NSView, travels: Bool)],
         overlay: SpaceBarOverlay
@@ -38,10 +39,32 @@ struct SpaceBarGlideWiringTests {
             manager.overlayForTesting(barTitleDisplay)
         )
         var writes: [(view: NSView, travels: Bool)] = []
+        var ticks: [() -> Void] = []
         // The run view carries the scroll, not the glide's items.
-        overlay.moveFrame = { [unowned overlay] view, _, travels in
+        overlay.moveFrame = { [unowned overlay] view, frame, travels in
             guard view !== overlay.itemRun else { return }
             writes.append((view, travels))
+            guard applies else { return }
+            // AppKit steps a travelling frame on later display ticks,
+            // autoresizing the subviews at every step; a landing
+            // sets it at once.
+            guard travels else {
+                view.frame = frame
+                return
+            }
+            let from = view.frame
+            for step in 1...4 {
+                let t = CGFloat(step) / 4
+                ticks.append {
+                    view.frame = CGRect(
+                        x: from.minX + (frame.minX - from.minX) * t,
+                        y: from.minY + (frame.minY - from.minY) * t,
+                        width: from.width + (frame.width - from.width) * t,
+                        height: from.height
+                            + (frame.height - from.height) * t
+                    )
+                }
+            }
         }
         // A steady pass repeats its input, which draws nothing
         // since #1901; force the draw it is here to classify.
@@ -63,6 +86,7 @@ struct SpaceBarGlideWiringTests {
             )
         }
         manager.sync([second])
+        for tick in ticks { tick() }
         return (writes, overlay)
     }
 
@@ -82,6 +106,8 @@ struct SpaceBarGlideWiringTests {
         let steady = try secondPass(.count, from: 1, to: 1).writes
         #expect(!steady.isEmpty)
         #expect(!steady.contains { $0.travels })
+        // A steady pass writes the three hosts and nothing else.
+        #expect(steady.count == 3)
     }
 
     /// A switch that also changes which items draw — a
@@ -109,9 +135,41 @@ struct SpaceBarGlideWiringTests {
         #expect(overlay.shownIdentities.isEmpty)
     }
 
-    /// Hosted items ride their glass: the render moves none of
-    /// them, and each glass and its backdrop are written to
-    /// travel on a switch and to land on a steady pass.
+    /// Applying every write the way AppKit steps a travelling
+    /// frame, the pair still fills its host after a switch that
+    /// re-sizes the boxes (#2095): a pair written to the final
+    /// size before the host moved was autoresized past it.
+    @Test("Box glass fills its host after a re-sizing switch")
+    func boxGlassFillsItsHost() throws {
+        try #require(Self.platformGlass)
+        let overlay = try secondPass(
+            .count,
+            from: 1,
+            to: 2,
+            boxedGlass: true,
+            applies: true
+        ).overlay
+        #expect(overlay.boxGlasses.count == 3)
+        for (glass, tint) in zip(overlay.boxGlasses, overlay.boxTints) {
+            let host = try #require(glass.superview)
+            // Within a point: autoresizing rounds each step to the
+            // pixel grid; the defect overshot by the size change.
+            for pair in [glass.frame, tint.frame] {
+                #expect(abs(pair.width - host.bounds.width) < 1)
+                #expect(abs(pair.minX - host.bounds.minX) < 1)
+            }
+        }
+        let widths = overlay.boxGlasses.compactMap {
+            $0.superview?.frame.width
+        }
+        #expect(Set(widths).count > 1)
+    }
+
+    /// Hosted items ride their glass, and each glass and its
+    /// backdrop ride the box's host (#2095): on a switch the host
+    /// travels and neither of them is written to animate its own
+    /// frame — the pair animating apart trailed a crescent ahead
+    /// of every box — and on a steady pass nothing travels.
     @Test("Box glass travels with its item")
     func boxGlassTravels() throws {
         try #require(Self.platformGlass)
@@ -123,20 +181,25 @@ struct SpaceBarGlideWiringTests {
         )
         #expect(overlay.boxGlasses.count == 3)
         #expect(!writes.contains { $0.view is SpaceBarItemView })
-        let glass = writes.filter { write in
-            overlay.boxGlasses.contains { $0 === write.view }
+        let hosts = overlay.boxGlasses.compactMap(\.superview)
+        #expect(hosts.count == 3)
+        #expect(hosts.allSatisfy { $0 is GlassBoxHost })
+        let hostWrites = writes.filter { write in
+            hosts.contains { $0 === write.view }
         }
-        let backdrops = writes.filter { $0.view is GlassBackdrop }
-        #expect(glass.count == 3)
-        #expect(backdrops.count == 3)
-        #expect((glass + backdrops).allSatisfy { $0.travels })
+        #expect(hostWrites.count == 3)
+        #expect(hostWrites.allSatisfy { $0.travels })
+        let pair = writes.filter { write in
+            write.view is GlassBackdrop
+                || overlay.boxGlasses.contains { $0 === write.view }
+        }
+        #expect(!pair.contains { $0.travels })
         let steady = try secondPass(
             .count,
             from: 2,
             to: 2,
             boxedGlass: true
         ).writes
-        #expect(steady.count == 6)
         #expect(!steady.contains { $0.travels })
     }
 }

@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A boxed glass App Bar keeps each glass and its tint in the
-/// `BoxHost` it was minted in (#1842), whatever moves the box: a
+/// `GlassBoxHost` it was minted in (#1842), whatever moves the box: a
 /// drag fronts the host, a dissolve stands an arrival's host
 /// transparent, and a run turning bare fades a leaving view on its
 /// own rather than in a box the render is about to drop.
@@ -46,7 +46,7 @@ struct AppBarBoxHostTests {
         let overlay = boxedOverlay([1, 2, 3])
         let view = try #require(overlay.itemViews.first)
         let glass = overlay.draggableView(for: view)
-        let host = try #require(AppBarOverlay.boxHost(of: glass))
+        let host = try #require(GlassBox.host(of: glass))
 
         overlay.dragMoved(view, to: .zero)
 
@@ -70,7 +70,7 @@ struct AppBarBoxHostTests {
         overlay.standArrivals(sync.arrivals)
 
         let glass = try #require(overlay.boxGlasses.first)
-        let host = try #require(AppBarOverlay.boxHost(of: glass))
+        let host = try #require(GlassBox.host(of: glass))
         #expect(host.alphaValue == 0)
     }
 

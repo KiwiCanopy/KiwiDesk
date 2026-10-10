@@ -1111,6 +1111,16 @@ Obligations:
   clear glass, nothing pinned — which the drag marker's fill-off
   and the sticky mark's Automatic both hand it
   (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`).
+- **A glass and its backdrop never animate their own frames; a
+  pair that travels fills one host that carries the motion**
+  (#2095). The glass renders a frame behind its gradient, so a
+  pair gliding by its own frames trails a crescent ahead of the
+  box. A box is minted and dropped through the one `GlassBox`,
+  its pair written to the host's CURRENT bounds before the host
+  moves — AppKit steps a travelling frame and autoresizes the pair
+  at every step (`SpaceBarGlideWiringTests` ▸ `boxGlassTravels`,
+  `boxGlassFillsItsHost`). The App Bar's boxes and the KiwiShelf
+  plate still glide by their own frames, the residue #2150 owns.
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** Both drag markers' glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays
