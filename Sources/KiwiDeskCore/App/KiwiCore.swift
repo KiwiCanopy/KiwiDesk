@@ -313,14 +313,14 @@ public final class KiwiCore {
     /// `recordingTypoIssues`; nil gates runtime hits (a typo
     /// inside a keybinding closure) to log-only.
     var typoIssues: [ConfigIssue]?
-    /// Fired whenever `configIssues` changes (including back
-    /// to empty, so the badge clears itself).
+    /// Fired whenever `configIssues` changes, back to empty too.
     public var onConfigIssuesChange:
         @MainActor ([ConfigIssue])
             -> Void = { _ in }
     /// Fired on every live-profile write from outside Settings.
     public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
     public var onShortcutsDropped: ShortcutsDropped = { _ in }
+    public var onShortcutsAdded: ShortcutsAdded = { _ in }
 
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18), argued
     /// as a bundle in `KiwiCore+LuaAPI`, the `openOrFocus` shape.

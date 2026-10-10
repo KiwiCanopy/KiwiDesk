@@ -236,6 +236,12 @@ extension KiwiCore {
         fileDisplaySpaces(in: snapshot)
         emitDesktopChange(snapshot, changed: changed)
         payDesktopCue(in: snapshot, loadedProfile: loaded)
+        // Off the switch's own turn: a top-up writes the sidecar
+        // and re-registers every key.
+        let desktops = snapshot.userDesktops
+        DispatchQueue.main.async { [weak self] in
+            self?.topUpDesktopShortcuts(desktops: desktops)
+        }
         settleAfterDesktopSwitch(snapshot.mainCurrentSpace)
     }
 
