@@ -24,6 +24,14 @@ extension KiwiCore {
             return navigate(args, swapping: true)
         case "focus_space":
             return focusSpace(args)
+        case "focus_space_back":
+            return focusSpaceInHistory(by: -1)
+        case "focus_space_forward":
+            return focusSpaceInHistory(by: 1)
+        case "focus_space_previous":
+            return focusSpaceInOrder(by: -1)
+        case "focus_space_next":
+            return focusSpaceInOrder(by: 1)
         case "move_to_space":
             return moveToSpace(command, args, follow: false)
         case "move_to_space_and_follow":
@@ -94,6 +102,8 @@ extension KiwiCore {
             return setResizeStep(args)
         case "set_refusal_sound":
             return setRefusalSound(args)
+        case "set_space_history":
+            return setSpaceHistory(args)
         case "set_shortcut_panel_liquid_glass":
             return setShortcutPanelLiquidGlass(args)
         case "set_space_switch_liquid_glass":

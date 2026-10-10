@@ -119,8 +119,10 @@ at once helps the decision. It is a **menu** (`DropdownRow`)
 when any of: five or more choices; dynamic or user-generated
 choices; long, explanatory, or localization-risk labels; or
 a constrained repeated surface where showing every choice
-would crowd or truncate. A binary is a **toggle**, never two
-segments. Fixed editor-navigation tabs (the icon picker's
+would crowd or truncate. A binary — on/off, where off means the
+thing is absent — is a **toggle**, never two segments; two named
+peer behaviours, neither an "off", are a pick-one under this rule
+(App glyph style; Space history, #1655). Fixed editor-navigation tabs (the icon picker's
 Emoji / Symbol / Glyph strip) may exceed four — they switch the
 visible editor rather than edit a value, and a future
 navigation strip past four segments still qualifies. Layout

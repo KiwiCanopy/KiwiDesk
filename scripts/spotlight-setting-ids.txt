@@ -64,6 +64,7 @@ config.scrollGesture.naturalTrackpad
 config.scrollGesture.pan
 config.scrollGesture.spaceStep
 config.scrollGesture.stepDistance
+config.spaceHistory
 keybinding.grow_height
 keybinding.grow_width
 keybinding.open_settings

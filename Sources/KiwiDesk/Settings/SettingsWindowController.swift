@@ -185,6 +185,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.adoptLiveWrite(edit, persisted: persisted)
     }
 
+    /// A gone Space's shortcuts left every shortcut file (#1827).
+    func adoptShortcutDrop(_ spaces: Set<SpaceID>) {
+        model.adoptShortcutDrop(spaces)
+    }
+
     /// Shows dashboard navigated to destination (#326).
     func show(navigatingTo destination: SettingsDestination) {
         model.land(on: SettingsAnchor(destination: destination))

@@ -850,8 +850,10 @@ and the same setup is always available as a preset of that name.
 | --- | --- |
 | Focus window left / down / up / right | `⌃⌥←` `⌃⌥↓` `⌃⌥↑` `⌃⌥→` |
 | Go to space | `⌃⌥1` … `⌃⌥9`, then `⌃⌥0` for the tenth |
+| Go to previous / next space | `⌃⌥⌘←` / `⌃⌥⌘→` |
+| Go back / forward in space history | `⌥⌘Tab` / `⌥⌘⇧Tab` |
 | Move to space | `⌃⌥⇧1` … `⌃⌥⇧9`, `⌃⌥⇧0` |
-| Swap with window left / down / up / right | `⌃⌥⌘←` `⌃⌥⌘↓` `⌃⌥⌘↑` `⌃⌥⌘→` |
+| Swap with window left / down / up / right | `⌃⌥⇧←` `⌃⌥⇧↓` `⌃⌥⇧↑` `⌃⌥⇧→` |
 | Move to space and follow | `⌃⌥⌘1` … `⌃⌥⌘9`, `⌃⌥⌘0` |
 | Grow / Shrink width | `⌥⌘2` / `⌥⌘1` |
 | Grow / Shrink height | `⌥⌘5` / `⌥⌘4` |
@@ -862,9 +864,17 @@ and the same setup is always available as a preset of that name.
 
 **Open Settings** ships on `⌃⌥,` as well.
 
-`⌃⌥` moves your focus, `⇧` sends the window to a space, `⌘`
-swaps it or sends it and follows; resizing has its own layer,
-`⌥⌘`. Each space digit is bound *by name* and follows a rename;
+:::unreleased
+`⌃⌥` moves your focus, `⇧` acts on the window — swaps it or
+sends it to a space — and `⌘` steps through the spaces or sends
+the window and follows. Resizing has its own layer, `⌥⌘`, which
+also carries the space history on `Tab`, `⇧` stepping it the
+other way as it does everywhere on macOS. A space past the tenth,
+or one with a name, has no digit: the space steps and the history
+reach it, and Shortcuts & Gestures can give it a key of its own.
+:::
+
+Each space digit is bound *by name* and follows a rename;
 spaces past the tenth ship without a digit. The set is seeded
 only while no shortcut is bound anywhere, and an install that
 already has shortcuts picks up a later default through **Restore

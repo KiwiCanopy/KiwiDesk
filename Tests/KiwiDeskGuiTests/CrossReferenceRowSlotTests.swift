@@ -124,9 +124,16 @@ struct CrossReferenceRowSlotTests {
         "GapsEditor.swift:Self.lookReference",  // LookReferenceTests
         "SharedLookPointer.swift:follows?Self.sharedProse:Self.ownProse",
         "SpacesSection+LiveOnly.swift:Self.noProfileProse",
+        "SpacesSection.swift:Self.shortcutsProse",
     ]
 
     // MARK: - The values
+
+    /// The Spaces card's pointer to every Space's shortcuts
+    /// (#1827).
+    @Test func theSpacesShortcutsProsePlacesItsLink() {
+        #expect(SpacesSection.shortcutsProse.contains(Self.slot))
+    }
 
     @Test func theMotionCardProsePlacesItsLink() {
         #expect(MotionCard.scrollingXrefProse.contains(Self.slot))

@@ -15,6 +15,10 @@ public enum APIReference {
             // event namespace, which uses bare `space` for a
             // Space and `desktop` for macOS desktops.
             ("focus_space", "focus_space"),
+            ("focus_space_back", "focus_space_back"),
+            ("focus_space_forward", "focus_space_forward"),
+            ("focus_space_previous", "focus_space_previous"),
+            ("focus_space_next", "focus_space_next"),
             ("move_to_space", "move_to_space"),
             ("move_to_space_and_follow", "move_to_space_and_follow"),
             // The Desktop twins (#884): `desktop` is macOS's,
@@ -60,6 +64,7 @@ public enum APIReference {
                 "set_refusal_sound",
                 "set_refusal_sound"
             ),
+            ("set_space_history", "set_space_history"),
             (
                 "set_shortcut_panel_liquid_glass",
                 "set_shortcut_panel_liquid_glass"

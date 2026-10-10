@@ -4,6 +4,7 @@ import Foundation
 /// EventBus for Lua callbacks and the CLI event stream.
 extension KiwiCore {
     func emitSpaceChange() {
+        noteSpaceVisits()  // #1655
         guard let id = state.workspaces.activeSpace,
             let space = state.workspaces[id]
         else { return }

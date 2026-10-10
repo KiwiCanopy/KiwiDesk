@@ -76,6 +76,9 @@ extension InterpolatedLabelTests {
         // the drafting round did exactly that (localization
         // audit, 2026-08-16).
         "spaces.preview.caption_default": 1,
+        // The temporary-Space note under the per-Space shortcut
+        // rows names the Spaces pane (#1827).
+        "shortcuts.temporary_space.note": 1,
         "scroll_grid.auto_size.xref": 1,
         "track.auto_tracks.xref": 1,
         // The `.gates` twins of the two above. They quoted the

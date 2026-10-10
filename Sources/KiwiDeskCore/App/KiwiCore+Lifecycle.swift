@@ -209,6 +209,7 @@ extension KiwiCore {
         stickyMarks.clear()
         retireReduceTransparency()
         retireFontSet()
+        payOwedShortcutDrops()  // nothing carries the debt (#1827)
         // Captured BEFORE the gather moves anything: each float's
         // record is the frame the next launch gives back (#1864,
         // `StopCaptureOrderTests`).
