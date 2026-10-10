@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 
@@ -19,16 +20,12 @@ struct OtherWindowManagerAlertTests {
         name: "Amethyst"
     )
 
-    private func scratchDefaults() -> UserDefaults {
+    @Test("silencing holds for that manager alone")
+    func silenceIsPerManager() {
         let name = "kiwi-test-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: name)!
         defaults.removePersistentDomain(forName: name)
-        return defaults
-    }
-
-    @Test("silencing holds for that manager alone")
-    func silenceIsPerManager() {
-        let defaults = scratchDefaults()
+        defer { defaults.removePersistentDomain(forName: name) }
         #expect(!OtherWindowManagerSilence.isSilenced(aerospace, in: defaults))
         OtherWindowManagerSilence.silence(aerospace, in: defaults)
         OtherWindowManagerSilence.silence(aerospace, in: defaults)
@@ -47,7 +44,7 @@ struct OtherWindowManagerAlertTests {
             in: "KiwiCore+Boot.swift",
             under: "App"
         )
-        #expect(body.contains("otherWindowManagers.scanRunning()"))
+        #expect(body.contains("otherWindowManagers.scanRunning("))
     }
 
     @Test("the launch arm carries the bundle id")
@@ -67,7 +64,67 @@ struct OtherWindowManagerAlertTests {
                 "Sources/KiwiDesk/AppDelegate.swift"
             )
         )
-        #expect(source.contains("core.otherWindowManagers.onDetected"))
-        #expect(source.contains("OtherWindowManagerAlert.present(for:"))
+        let wiring = """
+            core.otherWindowManagers.onDetected = { manager in
+                OtherWindowManagerAlert.present(for: manager)
+            }
+            """
+        #expect(Self.squashed(source).contains(Self.squashed(wiring)))
+    }
+
+    /// The hosted panel answers ⌘W and Esc as OK; an `NSAlert`
+    /// window, not `.closable`, would beep at ⌘W (#1533).
+    @Test("the alert panel validates and answers Close")
+    func panelHonoursClose() {
+        let alert = NSAlert()
+        alert.layout()
+        let panel = OtherWindowManagerAlert.host(alert.window)
+        #expect(!panel.styleMask.contains(.closable))
+        var dismissed = 0
+        panel.onDismiss = { dismissed += 1 }
+        let close = NSMenuItem(
+            title: "Close",
+            action: #selector(NSWindow.performClose(_:)),
+            keyEquivalent: "w"
+        )
+        #expect(panel.validateUserInterfaceItem(close))
+        panel.performClose(nil)
+        panel.cancelOperation(nil)
+        #expect(dismissed == 2)
+    }
+
+    @Test("a silenced manager is never presented")
+    func silencedIsNotPresented() {
+        let name = "kiwi-test-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: name)!
+        defaults.removePersistentDomain(forName: name)
+        defer { defaults.removePersistentDomain(forName: name) }
+        #expect(
+            OtherWindowManagerAlert.shouldPresent(
+                aerospace,
+                defaults: defaults
+            )
+        )
+        OtherWindowManagerSilence.silence(aerospace, in: defaults)
+        #expect(
+            !OtherWindowManagerAlert.shouldPresent(
+                aerospace,
+                defaults: defaults
+            )
+        )
+    }
+
+    @Test("only that manager's last exit ends the alert")
+    func quitEndsOnTheLastExit() {
+        let ends = OtherWindowManagerAlert.quitEnds
+        #expect(ends(aerospace, "bobko.aerospace", 0))
+        #expect(ends(aerospace, "BOBKO.AeroSpace", 0))
+        #expect(!ends(aerospace, "bobko.aerospace", 1))
+        #expect(!ends(aerospace, "com.amethyst.Amethyst", 0))
+        #expect(!ends(aerospace, nil, 0))
+    }
+
+    private static func squashed(_ text: String) -> String {
+        text.filter { !$0.isWhitespace }
     }
 }

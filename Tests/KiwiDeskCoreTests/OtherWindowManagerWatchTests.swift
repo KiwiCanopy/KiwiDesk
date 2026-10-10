@@ -40,10 +40,9 @@ struct OtherWindowManagerWatchTests {
     func scanStatesRunning() {
         let watch = OtherWindowManagerWatch()
         let seen = recording(watch)
-        watch.runningBundleIDs = {
-            ["com.apple.finder", Self.aerospace, "com.amethyst.Amethyst"]
-        }
-        watch.scanRunning()
+        watch.scanRunning(
+            ["com.apple.finder", Self.aerospace, "com.amethyst.amethyst"]
+        )
         watch.noteLaunch(bundleID: Self.aerospace)
         #expect(seen() == [Self.aerospace, "com.amethyst.Amethyst"])
     }

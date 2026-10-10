@@ -1,4 +1,4 @@
-import AppKit
+import Foundation
 
 /// A window manager other than KiwiDesk, known by its bundle id
 /// (#1882). The name is the product's own, so it is not localized.
@@ -15,7 +15,9 @@ public struct OtherWindowManager: Sendable, Hashable {
 /// Notices another window manager running beside KiwiDesk (#1882):
 /// two managers arranging the same windows read as a KiwiDesk bug.
 /// Core states which one runs; the GUI words the warning and owns
-/// its silencing. Warns only — nothing here stops tiling.
+/// its silencing. Warns only — nothing here stops tiling. The
+/// once-per-session memory is in-process on purpose: a relaunch
+/// warns again until the user silences that manager.
 @MainActor
 public final class OtherWindowManagerWatch {
     /// The one list of managers KiwiDesk knows. Extend it here.
@@ -34,28 +36,23 @@ public final class OtherWindowManagerWatch {
         _ in
     }
 
-    /// The running apps' bundle ids; a test injects its own.
-    var runningBundleIDs: @MainActor () -> [String] = {
-        NSWorkspace.shared.runningApplications.compactMap(
-            \.bundleIdentifier
-        )
-    }
-
     private var announced: Set<String> = []
 
     public init() {}
 
     /// Boot's pass over the apps already running.
-    func scanRunning() {
-        for bundleID in runningBundleIDs() {
+    func scanRunning(_ bundleIDs: [String]) {
+        for bundleID in bundleIDs {
             noteLaunch(bundleID: bundleID)
         }
     }
 
     func noteLaunch(bundleID: String?) {
-        guard let bundleID,
+        // LaunchServices compares bundle ids case-insensitively,
+        // and `AppRef` hands them lower-cased.
+        guard let bundleID = bundleID?.lowercased(),
             let manager = Self.known.first(where: {
-                $0.bundleID == bundleID
+                $0.bundleID.lowercased() == bundleID
             }),
             announced.insert(bundleID).inserted
         else { return }
