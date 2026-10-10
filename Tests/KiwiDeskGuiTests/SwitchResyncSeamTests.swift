@@ -13,44 +13,45 @@ import Testing
 struct SwitchResyncSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
-    /// needle → (tree, the file that carries it once).
-    private static let wirings: [(String, String, String)] = [
+    /// needle → (tree, the file that carries it, how often).
+    private static let wirings: [(String, String, String, Int)] = [
         // The switch handler runs its re-sync through the seam.
         (
             "foldsSwitchResync { reconcileAll() }",
-            "Sources/KiwiDeskCore", "EventLoop+Apps.swift"
+            "Sources/KiwiDeskCore", "EventLoop+Apps.swift", 1
         ),
         // Bootstrap wires the seam to the fold.
         (
             "self.foldingSwitchResync(body)",
-            "Sources/KiwiDeskCore", "KiwiCore+Bootstrap.swift"
+            "Sources/KiwiDeskCore", "KiwiCore+Bootstrap.swift", 1
         ),
         // The event retile asks the fold before it retiles.
         (
             "!foldIntoSwitchResync()",
-            "Sources/KiwiDeskCore", "KiwiCore+Events.swift"
+            "Sources/KiwiDeskCore", "KiwiCore+Events.swift", 1
         ),
-        // The close-return arm waits for the fold's one pass.
+        // The close-return raise and its track arm wait for the
+        // fold's one pass.
         (
-            "switchResync?.armsTrackRestore = true",
-            "Sources/KiwiDeskCore", "KiwiCore+CloseReturn.swift"
+            "afterSwitchResync { [self] in",
+            "Sources/KiwiDeskCore", "KiwiCore+CloseReturn.swift", 2
         ),
     ]
 
     @Test("each wiring exists exactly once, in its own file")
     func wiringsAreSingular() throws {
-        for (needle, tree, file) in Self.wirings {
+        for (needle, tree, file, count) in Self.wirings {
             let sites = try SourceScan.identifierSites(
                 of: needle,
                 under: Self.root.appendingPathComponent(tree)
             )
             #expect(
-                sites.count == 1
+                sites.count == count
                     && sites.allSatisfy {
                         $0.file.lastPathComponent == file
                     },
                 """
-                expected one `\(needle)` in \(file), found: \
+                expected \(count) `\(needle)` in \(file), found: \
                 \(sites.map(\.site).joined(separator: ", "))
                 """
             )
@@ -65,12 +66,14 @@ struct SwitchResyncSeamTests {
             "Sources/KiwiDesk/Settings/SettingsWindowController.swift"
         )
         let source = try String(contentsOf: file, encoding: .utf8)
-        let hop = try #require(
-            source.range(of: "DispatchQueue.main.async {")
+        let start = try #require(
+            source.range(of: "func observeWorkspaceTopology()")
         )
-        let call = try #require(
-            source.range(of: "self?.refreshProfiles()")
-        )
+        let rest = source[start.upperBound...]
+        let end = rest.range(of: "\n    }\n")?.lowerBound ?? rest.endIndex
+        let body = String(rest[..<end])
+        let hop = try #require(body.range(of: "DispatchQueue.main.async {"))
+        let call = try #require(body.range(of: "self?.refreshProfiles()"))
         #expect(hop.upperBound < call.lowerBound)
         #expect(
             source.components(separatedBy: "self?.refreshProfiles()")

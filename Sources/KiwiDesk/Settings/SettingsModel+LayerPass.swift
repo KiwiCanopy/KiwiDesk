@@ -173,7 +173,9 @@ struct LayeredReachCache {
 }
 
 /// The last draft encode and what it read; dropped with
-/// `layeredCache`, whose stored inputs it sits on.
+/// `layeredCache`, whose stored inputs it sits on. `Key` lists
+/// every input `encodeReach` reads: a read it omits is served
+/// stale (`EncodedReachCacheTests`).
 struct EncodedReachCache {
     struct Key: Equatable {
         let edits: RuleReachEdits

@@ -82,6 +82,35 @@ struct SwitchResyncFoldTests {
         #expect(meter.snapshot(reset: false).counts.retiles == 1)
     }
 
+    /// The close-return raise and the z-order arms ride the
+    /// after-pass list, so they act on the row the pass placed
+    /// (#153) — and still run when the fold owed no pass.
+    @Test("After-pass work runs after the one pass")
+    func afterPassWorkFollowsThePass() {
+        let (core, meter) = makeCore()
+        var passesSeen: [Int] = []
+        core.foldingSwitchResync {
+            core.afterSwitchResync {
+                passesSeen.append(meter.snapshot(reset: false).counts.retiles)
+            }
+            departAll(core)
+        }
+        core.foldingSwitchResync {
+            core.afterSwitchResync {
+                passesSeen.append(meter.snapshot(reset: false).counts.retiles)
+            }
+        }
+        #expect(passesSeen == [1, 1])
+    }
+
+    @Test("Outside a fold after-pass work runs at once")
+    func afterPassRunsNowUnfolded() {
+        let (core, _) = makeCore()
+        var ran = false
+        core.afterSwitchResync { ran = true }
+        #expect(ran)
+    }
+
     /// The event loop's seam is the one the switch handler takes;
     /// bootstrap wires it to the fold, and unwired it folds
     /// nothing.

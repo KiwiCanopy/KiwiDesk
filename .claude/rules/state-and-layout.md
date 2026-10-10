@@ -766,7 +766,12 @@ editing here:
   when the retile belongs to the command dispatcher rather than
   the call site. Arming *before* the retile lets the settle
   callback consume the restore off the pre-mutation frames
-  (#153). Nothing scans for a mutation that forgot to arm, so
+  (#153). A Desktop switch's re-sync folds `handle`'s event
+  retiles into one pass (`foldingSwitchResync`), so work in the
+  handler's tail that must follow its retile — an arm, the
+  close-return raise — goes through `afterSwitchResync`, never
+  beside it (`SwitchResyncFoldTests`, `SwitchResyncSeamTests`).
+  Nothing scans for a mutation that forgot to arm, so
   each new one owes its own arm deliberately — three have now
   shipped without one (#150, #153, #674).
   Arm **narrowly**: a restore drains a verified raise sequence on

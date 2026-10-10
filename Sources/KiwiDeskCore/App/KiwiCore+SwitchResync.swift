@@ -1,35 +1,36 @@
 import Foundation
 
 /// What a Desktop switch's re-sync owes once it ends: one pass
-/// for every event retile it folded, and the track restore the
-/// close-return tail would have armed after each.
+/// for the event retiles it folded, then the work that must follow
+/// that pass, in the order it was owed.
 struct SwitchResyncBatch {
     var owesRetile = false
-    var armsTrackRestore = false
+    var afterPass: [@MainActor () -> Void] = []
 }
 
-/// The Desktop switch's bulk re-sync as ONE pass. Leaving a
-/// Desktop folds each of its windows as a departure and each was a
-/// full retile, bars and rings included — 17 passes for one
-/// switch on the device, all inside the switch's main turn, so the
-/// ring stood on the departed window until they ended.
+/// The Desktop switch's bulk re-sync as ONE pass: the generic
+/// structural retile in `handle(_:)` is owed rather than run for
+/// each window the re-sync adds or removes. A retile an arm runs
+/// itself (a float flip, a follow) is not folded.
 extension KiwiCore {
-    /// Runs `body` with every structural event retile folded into
-    /// one pass at its end. The restore a fold would arm is armed
-    /// after that pass, never before it (#153).
+    /// Runs `body`, then one switch pass if any event retile was
+    /// owed, then the owed after-pass work — the close-return
+    /// raise and the z-order arms, which go after the pass that
+    /// places the row (#153). The pass is the switch's own, so
+    /// the motion gate never holds it (#804) and it snaps like
+    /// `handleDesktopChange`'s.
     func foldingSwitchResync(_ body: () -> Void) {
         guard switchResync == nil else { return body() }
         switchResync = SwitchResyncBatch()
         body()
-        let batch = switchResync
+        let batch = switchResync ?? SwitchResyncBatch()
         switchResync = nil
-        guard let batch, batch.owesRetile else { return }
-        // A switch reveals windows; nothing to fly (see
-        // `handleDesktopChange`).
-        retile(animated: false, pass: .event)
-        if batch.armsTrackRestore {
-            scheduleTrackZOrderRestoreIfOverflowing()
+        if batch.owesRetile {
+            tiler.motionGate.exemptingSwitch {
+                retile(animated: false, pass: .event)
+            }
         }
+        for work in batch.afterPass { work() }
     }
 
     /// Folds an event retile into the running re-sync, if one
@@ -38,5 +39,14 @@ extension KiwiCore {
         guard switchResync != nil else { return false }
         switchResync?.owesRetile = true
         return true
+    }
+
+    /// Runs `work` now, or after the running re-sync's pass.
+    func afterSwitchResync(_ work: @escaping @MainActor () -> Void) {
+        if switchResync != nil {
+            switchResync?.afterPass.append(work)
+        } else {
+            work()
+        }
     }
 }
