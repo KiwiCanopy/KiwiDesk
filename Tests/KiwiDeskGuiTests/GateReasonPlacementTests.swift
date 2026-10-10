@@ -77,6 +77,10 @@ struct GateReasonPlacementTests {
                 // border switch on the Focus Border card.
                 .borders(.borderFitGaps),
                 .borders(.borderFitGapsExtraSpacing),
+                // #1775: a Space's own gaps grey while it floats;
+                // its layout is picked in the Space list, not in
+                // the overrides box, so the row draws its reason.
+                .gaps(.perSpaceOverride),
             ]
         )
     }
