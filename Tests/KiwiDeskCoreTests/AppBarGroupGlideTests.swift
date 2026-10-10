@@ -204,7 +204,7 @@ struct AppBarGroupGlideTests {
         // (#1842); the folded member's own view left with its
         // glide's timer, not here.
         let hosts = overlay.itemRun.subviews.filter {
-            $0 is AppBarOverlay.BoxHost
+            $0 is GlassBoxHost
         }
         #expect(hosts.count == expanded.count)
         #expect(

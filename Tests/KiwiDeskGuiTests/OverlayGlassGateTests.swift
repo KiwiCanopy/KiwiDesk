@@ -80,7 +80,8 @@ struct OverlayGlassGateTests {
     /// its render — the one copy. Derived from `GlassPlate.make(`
     /// callers, so a new glass host reds until it names its gate.
     private static let minters: [String: String] = [
-        "Bar/AppBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
+        // Both bars' boxes (#2095); each bar's render gates them.
+        "Bar/GlassBox.swift": "ReduceTransparencySeamTests",
         "Bar/SpaceBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
         "Bar/ShelfOverlay+Views.swift": "ShelfPlateGlassGateTests",
         "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",

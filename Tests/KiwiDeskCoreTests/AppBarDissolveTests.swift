@@ -122,7 +122,7 @@ struct AppBarDissolveTests {
 
     /// On a boxed glass run the BOXES dissolve with their content
     /// (#1842): a glass's own alpha shows the tint behind it bare, so
-    /// each box fades as one unit through the `BoxHost` it was minted
+    /// each box fades as one unit through the `GlassBoxHost` it was minted
     /// in — a leaving one where it stands, still hosting its view,
     /// an arriving one in from transparent.
     @Test("A boxed glass dissolve fades each box as one unit")
@@ -146,7 +146,7 @@ struct AppBarDissolveTests {
         )
         let oldGlasses = overlay.boxGlasses
         let oldHosts = try oldGlasses.map {
-            try #require(AppBarOverlay.boxHost(of: $0))
+            try #require(GlassBox.host(of: $0))
         }
         let oldViews = overlay.itemViews
         // Reduce Motion on, synchronously and restored before any
@@ -180,7 +180,7 @@ struct AppBarDissolveTests {
         #expect(arriving.frame.width > 0)
         #expect(GlassPlate.holds(arriving, overlay.itemViews[0]))
         let arrivingHost = try #require(
-            AppBarOverlay.boxHost(of: arriving)
+            GlassBox.host(of: arriving)
         )
         #expect(arrivingHost.alphaValue == 1)
         for _ in 0..<150

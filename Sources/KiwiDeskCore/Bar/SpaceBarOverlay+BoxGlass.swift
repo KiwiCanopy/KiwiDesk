@@ -30,12 +30,13 @@ extension SpaceBarOverlay {
                 size: frames[i].size
             )
             let glass = boxGlasses[i]
-            let bounds = CGRect(origin: .zero, size: frames[i].size)
-            glass.superview?.isHidden = itemViews[i].isHidden
+            guard let host = GlassBox.host(of: glass) else { continue }
+            host.isHidden = itemViews[i].isHidden
             GlassPlate.setContent(glass, itemViews[i])
-            if let host = glass.superview {
-                moveFrame(host, frames[i], animated)
-            }
+            // The pair takes the host's CURRENT bounds before it
+            // moves: AppKit steps a travelling frame, and each step
+            // autoresizes them by the rest of the size change.
+            let bounds = host.bounds
             GlassPlate.update(
                 glass,
                 frame: bounds,
@@ -56,28 +57,22 @@ extension SpaceBarOverlay {
                     animated: false,
                     move: fill
                 )
-                tint.autoresizingMask = [.width, .height]
             }
+            // A fresh host lands; only a drawn box travels.
+            moveFrame(host, frames[i], animated && host.frame != .zero)
         }
     }
 
     private func syncBoxGlassCount(_ n: Int) {
         while boxGlasses.count > n {
             // Its item left in this render's `syncItemViewCount`.
-            let glass = boxGlasses.removeLast()
-            GlassPlate.release(glass)
-            glass.superview?.removeFromSuperview()
-            glass.removeFromSuperview()
-            boxTints.removeLast().removeFromSuperview()
+            GlassBox.drop(boxGlasses.removeLast(), boxTints.removeLast())
         }
         while boxGlasses.count < n {
-            guard let glass = GlassPlate.make() else { break }
-            let host = AppBarOverlay.BoxHost(frame: .zero)
-            itemRun.addSubview(host)
-            glass.autoresizingMask = [.width, .height]
-            host.addSubview(glass)
-            boxGlasses.append(glass)
-            boxTints.append(GlassBackdrop())
+            guard let pair = GlassBox.make(in: itemRun, spansParent: false)
+            else { break }
+            boxGlasses.append(pair.glass)
+            boxTints.append(pair.tint)
         }
     }
 
@@ -128,16 +123,14 @@ extension SpaceBarOverlay {
         frontGlass?.isHidden = true
         frontTint?.isHidden = true
         guard !boxGlasses.isEmpty else { return }
-        for glass in boxGlasses {
+        for (glass, tint) in zip(boxGlasses, boxTints) {
             for item in itemViews where GlassPlate.holds(glass, item) {
                 GlassPlate.release(glass)
                 itemRun.addSubview(item)
             }
-            glass.superview?.removeFromSuperview()
-            glass.removeFromSuperview()
+            GlassBox.drop(glass, tint)
         }
         boxGlasses.removeAll()
-        for tint in boxTints { tint.removeFromSuperview() }
         boxTints.removeAll()
     }
 }
