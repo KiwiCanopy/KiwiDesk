@@ -108,7 +108,8 @@ extension EventLoop {
         onEvent(
             .appLaunched(
                 pid: app.processIdentifier,
-                name: app.localizedName ?? "?"
+                name: app.localizedName ?? "?",
+                bundleID: app.bundleIdentifier
             )
         )
     }

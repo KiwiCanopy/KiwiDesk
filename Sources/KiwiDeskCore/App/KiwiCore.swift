@@ -16,6 +16,7 @@ public final class KiwiCore {
     public let dragOverlay = DragOverlay()
     public let appBars = AppBarManager()
     public let spaceBars = SpaceBarManager()
+    public let otherWindowManagers = OtherWindowManagerWatch()  // #1882
     let shelves = ShelfManager()
     /// Space Bar drag-drop gesture state (#372).
     let spaceBarDrop = SpaceBarDropCoordinator()
@@ -23,8 +24,7 @@ public final class KiwiCore {
     let dragCrossing = DragCrossingCoordinator()
     /// Glyph-vs-image icon decisions: bars, shortcuts panel (#294).
     public let appFont = AppFontResolver()
-    /// Focus-window border overlays (#278) and their sibling, the
-    /// on-window sticky marks (#414), both driven from `retile()`.
+    /// Focus rings (#278) and sticky marks (#414), driven by `retile()`.
     public let borders = BorderManager()
     public let stickyMarks = StickyMarkManager()
     /// Drawn transitions: Monocle flip (#1391), plate slide (#1956).

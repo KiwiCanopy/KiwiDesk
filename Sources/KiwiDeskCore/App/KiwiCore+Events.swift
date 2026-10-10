@@ -56,7 +56,11 @@ extension KiwiCore {
         let goneWindowPID = goneWindowPID(of: event)
         let priorDisplayCount = state.workspaces.allDisplays.count
         let priorScreens = spaceScreens(for: event)
+        if case .appLaunched(let pid, _, let bundleID) = event {
+            otherWindowManagers.noteLaunch(pid: pid, bundleID: bundleID)
+        }
         if case .appTerminated(let pid) = event {
+            otherWindowManagers.noteExit(pid: pid)
             prepareAppExit(pid)
         }
         let detectedFlip = detectedFlip(event)
