@@ -34,6 +34,7 @@ extension KiwiCore {
                 + "\(Int(CrossSessionMatch.bound))s for the rest"
         )
         logCrossSession(pairs, phase: "boot")
+        if match.isOpen { publishRestoreProgress() }
         deferred.schedule(
             .crossSessionSettle,
             after: .seconds(CrossSessionMatch.titleSettle)
@@ -80,6 +81,7 @@ extension KiwiCore {
             )
         }
         logCrossSession([pair], phase: "arrival")
+        publishRestoreProgress()
     }
 
     /// The title pass, `titleSettle` after arming: tracked windows
@@ -94,6 +96,7 @@ extension KiwiCore {
         let pairs = state.crossSession.pairs(crossSessionCandidates())
         state.crossSession.commit(pairs)
         logCrossSession(pairs, phase: "settle")
+        publishRestoreProgress(ending: true)
         var moved = false
         for pair in pairs {
             // The window the user is in stays where it is.
@@ -143,7 +146,7 @@ extension KiwiCore {
         guard state.crossSession.arrangement != liveArrangement else {
             return true
         }
-        let missed = state.crossSession.close()
+        let missed = closeCrossSession()
         onLog(
             "cross-session: the arrangement changed; closed with "
                 + "\(missed) window(s) unpaired"
@@ -151,9 +154,35 @@ extension KiwiCore {
         return false
     }
 
+    /// The restore's progress (#2133): placing while records wait
+    /// before the title settle, done at the settle or once none
+    /// waits; never again once done, so a late arrival cannot
+    /// reopen an ended line. It counts paired records, so a window
+    /// the user files by hand meanwhile stays out of the count.
+    private func publishRestoreProgress(ending: Bool = false) {
+        let match = state.crossSession
+        let placed = match.total - match.pending.count
+        if case .done = boot.restore { return }
+        boot.publishRestore(
+            ending || !match.isOpen
+                ? .done(placed: placed, total: match.total)
+                : .placing(placed: placed, total: match.total)
+        )
+    }
+
+    /// The one way KiwiCore closes the match: a restore still
+    /// placing windows ends with it, unannounced (#2133). A stop and
+    /// the #634 reset take it too; returns the unpaired count.
+    @discardableResult
+    func closeCrossSession() -> Int {
+        let missed = state.crossSession.close()
+        if case .placing = boot.restore { boot.publishRestore(.none) }
+        return missed
+    }
+
     /// Ends the match at its bound.
     func closeCrossSessionMatch() {
-        let missed = state.crossSession.close()
+        let missed = closeCrossSession()
         guard missed > 0 else { return }
         onLog("cross-session: closed; \(missed) window(s) never paired")
     }

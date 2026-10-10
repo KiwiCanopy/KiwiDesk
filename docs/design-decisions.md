@@ -9522,9 +9522,11 @@ macOS has off keeps the quiet ⚠ and says it is off; a chord every
 app's menus carry (⌘W, ⌘Q, ⌘H, ⌘M) is the reverse — KiwiDesk wins
 it, measured on ⌘W and ⌘P, so the row says every app loses that
 item; and the two system-level chords outside the table (⌘Tab,
-⌥⌘Esc) keep the collision wording, their precedence being
-unmeasured. The treatment is deliberately smaller than a tinted
-row: outline plus caption already carry the fact in two channels,
+⌥⌘Esc) are dead rows too — macOS opened the app switcher and Force
+Quit while a bound control chord proved the probe heard presses
+(#1275, 2026-10-10) — with no setting to switch them off. The
+treatment is deliberately smaller than a tinted row: outline plus
+caption already carry the fact in two channels,
 a red ground would be a new register needing its own inks, and a
 filled badge has no ink that clears 4.5:1 in both modes
 (ui-designer, 2026-09-03). Conflict surfaces (the banner and the
@@ -15806,6 +15808,28 @@ of M" would have read as a window count. It stands down where the
 shelf does (full screen, a presentation), while the tour owns the
 screen, and after an update relaunch, where "What's new" already
 narrates the boot. The full-screen overlay stays rejected.
+
+**A restart restore keeps the same capsule up, with a count**
+([#2133](https://github.com/KiwiCanopy/KiwiDesk/issues/2133),
+owner ruling 2026-10-10). After a Mac restart, the cross-session
+match places only part of the desk at boot; the rest lands as
+windows reopen and once titles settle, ~30 s later. So at ready
+the capsule changes its line to "Putting your windows back: N of
+M" instead of leaving, and ends with "Your windows are back: N of
+M" at the title settle or once every window is back. Still past
+the 3 s threshold only, so a fast restore never flashes it, and
+still without focus, mouse or dismissal. It does not wait out
+the match's 120 s bound: a window that never reopens would hold
+it up for two minutes, while a late one is still placed after it
+ends. A Load, a Desktop-bound switch or a monitor change drops it
+without an end line at the restore's next pass, since the user
+caused that change; a stop or the arrangement reset drops it at
+once. An
+expandable list of the awaited windows was weighed and rejected:
+a click target brings back the dismissal policy this capsule
+exists without, it would show window titles at login, and every
+row's wait is the one bound. Core reports `RestorePhase`;
+`BootCountText` stays the one narrator.
 
 **One slow app is deferred, never abandoned.** Chunking cannot
 divide a single app's AX work: on the measured session one app's
