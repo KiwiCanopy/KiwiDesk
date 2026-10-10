@@ -28,7 +28,7 @@ enum ConflictSeverity: Equatable {
     case shadowsApps(SystemShortcut)
     /// Another row of the same layer holds the chord: one of the
     /// two fires, the other is silent.
-    case duplicate(String)
+    case duplicate(KeyBinding)
     /// The chord string does not parse.
     case unrecognized
 
