@@ -68,6 +68,18 @@ final class DesktopMemory {
     /// Mission Control number for them.
     var unstampable: Set<SkyLight.SpaceID> = []
 
+    /// The highest Desktop number the shortcut top-up has offered
+    /// on this Mac (`KiwiCore+DesktopShortcuts`) — live in the
+    /// app's defaults, since the Desktops are the Mac's, and
+    /// pinned by both `makeTestCore` twins.
+    var readShortcutMark: @MainActor () -> Int = {
+        UserDefaults.standard.integer(forKey: DesktopMemory.shortcutMarkKey)
+    }
+    var writeShortcutMark: @MainActor (Int) -> Void = {
+        UserDefaults.standard.set($0, forKey: DesktopMemory.shortcutMarkKey)
+    }
+    nonisolated static let shortcutMarkKey = "desktopShortcutMark"
+
     /// Last observed native Space ID per display (`KiwiCore+BootSeams`,
     /// docs/cli.md).
     var lastDisplaySpaces: [String: SkyLight.SpaceID] = [:]

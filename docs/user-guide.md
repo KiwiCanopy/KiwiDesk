@@ -872,6 +872,10 @@ also carries the space history on `Tab`, `⇧` stepping it the
 other way as it does everywhere on macOS. A space past the tenth,
 or one with a name, has no digit: the space steps and the history
 reach it, and Shortcuts & Gestures can give it a key of its own.
+
+`⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each
+Desktop gets its key the first time KiwiDesk sees it, so a key you
+delete stays deleted.
 :::
 
 Each space digit is bound *by name* and follows a rename;

@@ -236,6 +236,7 @@ extension KiwiCore {
         fileDisplaySpaces(in: snapshot)
         emitDesktopChange(snapshot, changed: changed)
         payDesktopCue(in: snapshot, loadedProfile: loaded)
+        topUpDesktopShortcuts(desktops: snapshot.userDesktops)
         settleAfterDesktopSwitch(snapshot.mainCurrentSpace)
     }
 

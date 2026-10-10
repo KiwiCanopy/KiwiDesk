@@ -202,6 +202,10 @@ func makeTestCore(
     // stamping suite takes the live writer back explicitly, with
     // the bridge itself faked.
     core.desktopMemory.writeStamp = { _, _ in false }
+    // The Desktop shortcut mark lives in the app's defaults; a
+    // fixture offers nothing unless it states a mark.
+    core.desktopMemory.readShortcutMark = { .max }
+    core.desktopMemory.writeShortcutMark = { _ in }
     // Same class, eighth time (#1103/#1199): the mouse-button
     // read defaults LIVE, and three gesture decisions consult
     // it — the warp gate, `isResizeGesture` and the drag

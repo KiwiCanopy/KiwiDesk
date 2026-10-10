@@ -114,19 +114,6 @@ extension KiwiCore {
             spaces: spaces
         )
         guard !added.isEmpty else { return }
-        config.layers[index].bindings.append(
-            contentsOf: added
-        )
-        try? guiConfigStore.save(config)
-        // Re-register the base bindings from the just-written
-        // sidecar without a full reload, resolving through any
-        // active profile override just as `applyStructuredConfig`
-        // does (a transient Standard baseline has none).
-        guard let lua = keys.lua else { return }
-        applyStructuredKeybindings(
-            layers: config.layers,
-            profile: activeProfileOverrides()?.layers,
-            lua: lua
-        )
+        appendBaseShortcuts(added, to: &config, layer: index)
     }
 }

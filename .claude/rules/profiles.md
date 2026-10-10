@@ -79,7 +79,12 @@ because two real clients now remove drift — see
   row rather than restated (`DefaultKeybindingLadderTests` ▸
   `arrowsRideTheirOwnTiers`, `shiftReversesItsTwin`). The
   ergonomics rulings and the collision measure behind them are
-  `docs/design-decisions.md`'s. Which letter each sticky scope
+  `docs/design-decisions.md`'s. The one other sense is the
+  Desktop tier: `⌃⌥⇧⌘` + digit goes to that macOS Desktop, topped
+  up per Desktop past a per-Mac mark through the one
+  `topUpDesktopShortcuts` (owner ruling 2026-10-10,
+  `DesktopShortcutTopUpTests`); a further `⇧`-lifted tier is a
+  ruling of its own. Which letter each sticky scope
   takes, why the screen-scoped one is named for a mark rather
   than a label, and why `D` was refused, are argued in
   `docs/design-decisions.md` ▸ "Size is not a positional verb" —

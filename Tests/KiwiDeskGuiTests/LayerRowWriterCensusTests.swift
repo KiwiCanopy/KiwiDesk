@@ -37,11 +37,13 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDesk/Settings/SettingsModel+LayerAdd.swift":
             (1, "import: merges, then takes the dedupe (driven)"),
-        "KiwiDeskCore/Profiles/KiwiCore+StarterRescale.swift":
+        "KiwiDeskCore/Profiles/KiwiCore+DesktopShortcuts.swift":
             (
                 1,
-                "top-up: adds only actions no profile binds"
-                    + " (DigitTopUpOverrideTests)"
+                "the digit and Desktop top-ups' one append: adds"
+                    + " only actions no profile binds"
+                    + " (DigitTopUpOverrideTests,"
+                    + " DesktopShortcutTopUpTests)"
             ),
         "KiwiDesk/Settings/SettingsModel+Reset.swift":
             (

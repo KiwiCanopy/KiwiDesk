@@ -9304,7 +9304,8 @@ without a gate is meaningless.
 **And the same tier answers the question one step earlier: a row
 for a concept the app has not introduced is an OFFER, not a
 setting** (#1125). The Desktop shortcut families are the worked
-case. Nothing seeds them, a **Desktop** is macOS's arrangement
+case — save Go to Desktop, which *The Desktop tier is seeded*
+now binds. Nothing seeds the others, a **Desktop** is macOS's arrangement
 rather than KiwiDesk's, and they scale per Desktop — so a
 four-Desktop Mac draws twelve rows about a thing a first-run user
 has never met, in the area whose own ordering already says
@@ -9799,6 +9800,33 @@ key: `⌥⌘` still carries no pressed verb on any other key, and
 under cover of the first. Before seeding, the owner pressed
 `⌥⌘Tab` (2026-10-09): macOS's app switcher does not take it, and
 `SystemShortcuts.map` reserves `⌘Tab` alone.
+:::
+
+:::unreleased
+**The Desktop tier is seeded: `⌃⌥⇧⌘` + digit goes to that macOS
+Desktop (owner ruling 2026-10-10).** Going to a Desktop is the one
+Desktop verb a user presses as often as they swipe, so it ships
+bound; moving a window to a Desktop, with or without following it,
+stays an offer behind its drawer, which keeps #1125's reasoning for
+the verbs a newcomer has no picture of. `⇧` here does not act on
+the window: on top of `⌃⌥⌘` it lifts the whole ladder one tier, from
+KiwiDesk's Spaces to macOS's Desktops, which is the second sense of
+`⇧` the rule above otherwise refuses — accepted because the four
+modifiers read as one chord (the Hyper key many users map Caps Lock
+to), and the ladder has no other free tier for a digit. A chord
+any app's menus carry is unlikely on four modifiers; if a later
+change makes Input Monitoring a requirement, a dedicated Hyper key
+is the place to revisit this.
+
+The rows are topped up rather than seeded once, because Desktops
+come and go: at boot, and at a switch that shows a Desktop numbered
+past a per-Mac mark, each such Desktop up to the tenth gets its row
+when no row goes there and the chord is free. The mark is what
+keeps a deleted row deleted — a Desktop at or below it was offered
+before — and it lives in the app's defaults, not in `gui.json`,
+because the Desktops belong to the Mac rather than to the setup a
+backup carries. A Lua-owned setup leaves the mark alone, so moving
+to Settings later still offers every Desktop.
 :::
 
 **Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
