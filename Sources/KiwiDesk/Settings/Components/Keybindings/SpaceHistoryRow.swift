@@ -1,37 +1,37 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Focus ▸ Space history (#1655): a compact menu naming the current
-/// behaviour — two peers, neither an "off" — in the shortcut rows'
-/// shape: the menu in their recorder column, its "Applies to"
-/// control in their reach column. Greyed with its reason on a
-/// stored profile saved for one screen, where both choices walk
-/// the same history.
+/// Focus ▸ Space history (#1655): a group headed like the per-Space
+/// families, whose first row names the current behaviour in a
+/// menu — two peers, neither an "off" — and whose "Applies to"
+/// control sits in the shortcut rows' reach column; the two
+/// history shortcuts follow it. Greyed with its reason on a stored
+/// profile saved for one screen, where both choices walk the same
+/// history.
 struct SpaceHistoryRow: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
+            Text(SpaceHistoryWords.title)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
+                .accessibilityAddTraits(.isHeader)
             HStack(alignment: .firstTextBaseline) {
                 // The icon slot every shortcut row reserves (#264).
                 Color.clear.frame(width: Self.iconSlot, height: 1)
-                // The picker names itself; this is its drawn twin.
-                Text(SpaceHistoryWords.title)
+                // The menu names itself; this is its drawn twin.
+                Text(SpaceHistoryWords.kept)
                     .accessibilityHidden(true)
+                menu
                 HelpButton(
                     explanation: SpaceHistoryWords.help,
                     subject: SpaceHistoryWords.title
                 )
                 Spacer()
                 reach
-                ZStack(alignment: .trailing) {
-                    KeyRecorderField.footprint
-                    menu
-                        .padding(
-                            .trailing,
-                            KeyRecorderField.iconSlotWidth + 6
-                        )
-                }
+                KeyRecorderField.footprint
             }
             if oneScreen {
                 Text(reason)
@@ -109,6 +109,11 @@ extension SettingsModel {
 enum SpaceHistoryWords {
     static var title: String {
         L("shortcuts.space_history", "Space history")
+    }
+
+    /// The setting row's label, under the group's heading.
+    static var kept: String {
+        L("shortcuts.space_history.kept", "History kept")
     }
 
     static var help: String {

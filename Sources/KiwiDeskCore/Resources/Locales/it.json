@@ -1497,6 +1497,7 @@
   "shortcuts.space_history": "Cronologia degli spazi",
   "shortcuts.space_history.all_screens": "Tutti gli schermi",
   "shortcuts.space_history.choice_help": "%1$@: ogni schermo ricorda i propri spazi, e tornare indietro o andare avanti cambia lo spazio dello schermo su cui stai lavorando. %2$@: un'unica cronologia per tutti gli schermi, quindi tornare indietro può portarti su un altro schermo. Con un solo schermo, le due opzioni funzionano allo stesso modo.",
+  "shortcuts.space_history.kept": "Cronologia salvata",
   "shortcuts.space_history.one_screen": "Questo profilo usa un solo schermo, dove le due opzioni funzionano allo stesso modo.",
   "shortcuts.space_history.per_screen": "Per schermo",
   "shortcuts.temporary_space.note": "Le scorciatoie di uno spazio temporaneo spariscono insieme allo spazio. Aggiungilo al profilo in %1$@ per non perderle.",

@@ -1497,6 +1497,7 @@
   "shortcuts.space_history": "Historique des espaces",
   "shortcuts.space_history.all_screens": "Tous les écrans",
   "shortcuts.space_history.choice_help": "%1$@ : chaque écran mémorise ses propres espaces, et reculer ou avancer change l'espace de l'écran sur lequel vous travaillez. %2$@ : un seul historique pour tous les écrans, donc reculer peut vous amener sur un autre écran. Avec un seul écran, les deux fonctionnent de la même façon.",
+  "shortcuts.space_history.kept": "Historique conservé",
   "shortcuts.space_history.one_screen": "Ce profil utilise un seul écran, où les deux fonctionnent de la même façon.",
   "shortcuts.space_history.per_screen": "Par écran",
   "shortcuts.temporary_space.note": "Les raccourcis d'un espace temporaire disparaissent avec lui. Ajoutez-le au profil dans %1$@ pour les conserver.",

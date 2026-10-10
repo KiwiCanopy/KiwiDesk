@@ -1497,6 +1497,7 @@
   "shortcuts.space_history": "Space-Verlauf",
   "shortcuts.space_history.all_screens": "Alle Bildschirme",
   "shortcuts.space_history.choice_help": "%1$@: Jeder Bildschirm merkt sich seine eigenen Spaces, und das Zurück- oder Vorwärtsgehen wechselt den Space auf dem Bildschirm, an dem du arbeitest. %2$@: ein Verlauf über alle Bildschirme hinweg, daher kann dich das Zurückgehen auf einen anderen Bildschirm bringen. Mit einem Bildschirm verhalten sich beide gleich.",
+  "shortcuts.space_history.kept": "Verlauf gespeichert",
   "shortcuts.space_history.one_screen": "Dieses Profil läuft auf einem Bildschirm, wo sich beide gleich verhalten.",
   "shortcuts.space_history.per_screen": "Pro Bildschirm",
   "shortcuts.temporary_space.note": "Die Tastenkürzel eines temporären Space verschwinden mit dem Space. Füge ihn unter „%1$@“ zum Profil hinzu, um sie zu behalten.",

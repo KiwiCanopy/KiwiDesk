@@ -1497,6 +1497,7 @@
   "shortcuts.space_history": "空間歷史記錄",
   "shortcuts.space_history.all_screens": "所有螢幕",
   "shortcuts.space_history.choice_help": "%1$@：每個螢幕記住自己的空間，返回或前進會切換你正在使用的螢幕上的空間。%2$@：所有螢幕共用一個歷史記錄，因此返回可能會把你帶到另一個螢幕。只有一個螢幕時，兩者效果相同。",
+  "shortcuts.space_history.kept": "歷史記錄範圍",
   "shortcuts.space_history.one_screen": "此描述檔只在一個螢幕上執行，兩者效果相同。",
   "shortcuts.space_history.per_screen": "依螢幕",
   "shortcuts.temporary_space.note": "暫時空間的快速鍵會隨空間一起移除。若要留住這些快速鍵，請在「%1$@」中將該空間加入描述檔。",

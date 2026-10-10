@@ -1497,6 +1497,7 @@
   "shortcuts.space_history": "スペースの履歴",
   "shortcuts.space_history.all_screens": "すべての画面",
   "shortcuts.space_history.choice_help": "%1$@：画面ごとに独自のスペースを記憶し、戻る／進むは作業中の画面のスペースを切り替えます。%2$@：すべての画面で1つの履歴を共有するため、戻ると別の画面に移動することがあります。画面が1つの場合、どちらも同じように動作します。",
+  "shortcuts.space_history.kept": "履歴の保持",
   "shortcuts.space_history.one_screen": "このプロファイルは1つの画面で使われるため、どちらも同じように動作します。",
   "shortcuts.space_history.per_screen": "画面ごと",
   "shortcuts.temporary_space.note": "一時的なスペースのショートカットは、そのスペースがなくなると削除されます。残すには「%1$@」でプロファイルに追加してください。",

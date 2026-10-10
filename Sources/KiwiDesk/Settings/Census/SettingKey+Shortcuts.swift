@@ -185,7 +185,7 @@ extension ShortcutsKey {
             return .text("shortcuts.gestures.scroll.space_step")
         case .spaceHistory:
             return .text(
-                "shortcuts.space_history",
+                "shortcuts.space_history.kept",
                 help: "shortcuts.space_history.choice_help"
             )
         }

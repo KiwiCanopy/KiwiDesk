@@ -1497,6 +1497,7 @@
   "shortcuts.space_history": "Historial de espacios",
   "shortcuts.space_history.all_screens": "Todas las pantallas",
   "shortcuts.space_history.choice_help": "%1$@: cada pantalla recuerda sus propios espacios, y retroceder o avanzar cambia el espacio de la pantalla en la que trabajas. %2$@: un único historial para todas las pantallas, así que retroceder puede llevarte a otra pantalla. Con una sola pantalla, ambas opciones funcionan igual.",
+  "shortcuts.space_history.kept": "Historial guardado",
   "shortcuts.space_history.one_screen": "Este perfil usa una sola pantalla, donde ambas opciones funcionan igual.",
   "shortcuts.space_history.per_screen": "Por pantalla",
   "shortcuts.temporary_space.note": "Los atajos de un espacio temporal desaparecen con el espacio. Añádelo al perfil en %1$@ para no perderlos.",

@@ -1501,6 +1501,7 @@
   "shortcuts.space_history": "Space history",
   "shortcuts.space_history.all_screens": "All screens",
   "shortcuts.space_history.choice_help": "%1$@: each screen remembers its own Spaces, and going back or forward changes the Space on the screen you are working on. %2$@: one history across every screen, so going back may take you to another screen. With one screen, both work the same.",
+  "shortcuts.space_history.kept": "History kept",
   "shortcuts.space_history.one_screen": "This profile runs on one screen, where both work the same.",
   "shortcuts.space_history.per_screen": "Per screen",
   "shortcuts.temporary_space.note": "A temporary Space's shortcuts go when the Space does. Add it to the profile in %1$@ to keep them.",
