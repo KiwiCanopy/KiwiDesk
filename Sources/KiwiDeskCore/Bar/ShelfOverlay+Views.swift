@@ -12,18 +12,16 @@ extension ShelfOverlay {
         return plate
     }
 
-    /// Nil below macOS 26, where there is no glass to draw.
+    /// The glass plate, minted once with its tint in a host of
+    /// their own beneath the rim, which the plate glide moves
+    /// (#2095). Nil below macOS 26, where there is no glass to draw.
     func glassPlateView() -> NSView? {
         if let glassPlate { return glassPlate }
-        glassPlate = GlassPlate.make()
-        return glassPlate
-    }
-
-    func tintView() -> GlassBackdrop {
-        if let glassTint { return glassTint }
-        let tint = GlassBackdrop()
-        glassTint = tint
-        return tint
+        guard let box = GlassBox.make(in: content, below: plateBorder)
+        else { return nil }
+        glassPlate = box.glass
+        glassTint = box.tint
+        return box.glass
     }
 
     func makePanel() -> NSPanel {

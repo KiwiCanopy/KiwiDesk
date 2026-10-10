@@ -25,27 +25,16 @@ extension ShelfOverlay {
             cornerRadius: radius,
             sheen: sheen
         )
-        if shelf.glassEnabled, let glass = glassPlateView() {
+        if shelf.glassEnabled, let glass = glassPlateView(),
+            let tint = glassTint
+        {
             solidPlateView().isHidden = true
-            if glass.superview !== content {
-                content.addSubview(
-                    glass,
-                    positioned: .below,
-                    relativeTo: plateBorder
-                )
-            }
             glass.isHidden = false
             GlassPlate.setContent(glass, glassFiller)
-            GlassPlate.update(
+            GlassBox.place(
                 glass,
-                frame: frame,
-                cornerRadius: radius,
-                animated: animated
-            )
-            GlassTint.apply(
-                tintView(),
-                below: glass,
-                frame: frame,
+                tint: tint,
+                at: frame,
                 cornerRadius: radius,
                 hex: shelf.fillColor,
                 edge: edge,

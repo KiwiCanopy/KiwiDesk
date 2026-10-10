@@ -49,13 +49,14 @@ enum GlassPlate {
         _ view: NSView,
         frame: CGRect,
         cornerRadius: CGFloat,
-        animated: Bool = false,
         move: BarFrameMove = BarMotion.setFrame(_:to:animated:)
     ) {
         guard #available(macOS 26, *),
             let glass = view as? NSGlassEffectView
         else { return }
-        move(glass, frame, animated)
+        // Never travels: a gliding glass rides its `GlassBox` host
+        // (#2095).
+        move(glass, frame, false)
         glass.cornerRadius = cornerRadius
     }
 

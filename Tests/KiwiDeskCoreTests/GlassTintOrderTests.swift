@@ -31,16 +31,17 @@ struct GlassTintOrderTests {
         return false
     }
 
-    /// The tint's and the plate's indices in the shelf content.
+    /// The tint's and the plate's indices in the box host they
+    /// share (#2095).
     private static func order(
         _ overlay: ShelfOverlay
     ) throws -> (tint: Int, plate: Int) {
         let tint = try #require(overlay.glassTint)
         let plate = try #require(overlay.glassPlate)
-        let content = overlay.content
+        let host = try #require(GlassBox.host(of: plate))
         return (
-            try #require(content.subviews.firstIndex(of: tint)),
-            try #require(content.subviews.firstIndex(of: plate))
+            try #require(host.subviews.firstIndex(of: tint)),
+            try #require(host.subviews.firstIndex(of: plate))
         )
     }
 
@@ -83,10 +84,12 @@ struct GlassTintOrderTests {
         let first = try Self.order(overlay)
         #expect(first.tint == first.plate - 1, "\(first)")
         // The plate sits beneath the strip that holds the sections.
-        let strip = try #require(
-            overlay.content.subviews.firstIndex(of: overlay.stripView)
+        let content = overlay.content.subviews
+        let host = try #require(
+            overlay.glassPlate.flatMap { GlassBox.host(of: $0) }
         )
-        #expect(first.plate < strip)
+        let strip = try #require(content.firstIndex(of: overlay.stripView))
+        #expect(try #require(content.firstIndex(of: host)) < strip)
         shelves.sync([Self.shelf(section, glass: false)])
         shelves.sync([Self.shelf(section, glass: true)])
         spaces.sync([

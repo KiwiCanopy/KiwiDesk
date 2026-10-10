@@ -147,7 +147,6 @@ enum GlassTint {
         cornerRadius: CGFloat,
         hex: String,
         edge: AppBarEdge,
-        animated: Bool = false,
         move: BarFrameMove = BarMotion.setFrame(_:to:animated:)
     ) {
         paint(
@@ -157,7 +156,6 @@ enum GlassTint {
             cornerRadius: cornerRadius,
             hex: hex,
             fadeFrom: edge,
-            animated: animated,
             move: move
         )
     }
@@ -182,7 +180,6 @@ enum GlassTint {
             cornerRadius: cornerRadius,
             hex: hex,
             fadeFrom: nil,
-            animated: false,
             move: BarMotion.setFrame(_:to:animated:)
         )
     }
@@ -197,7 +194,6 @@ enum GlassTint {
         cornerRadius: CGFloat,
         hex: String,
         fadeFrom edge: AppBarEdge?,
-        animated: Bool,
         move: BarFrameMove
     ) {
         glass.appearance = pinnedAppearance(hex)
@@ -219,7 +215,9 @@ enum GlassTint {
             )
         }
         backdrop.isHidden = false
-        move(backdrop, frame, animated)
+        // Never travels: a gliding backdrop rides its `GlassBox`
+        // host with its glass (#2095).
+        move(backdrop, frame, false)
         let direction = fade(from: edge ?? .top)
         gradient.startPoint = direction.start
         gradient.endPoint = direction.end

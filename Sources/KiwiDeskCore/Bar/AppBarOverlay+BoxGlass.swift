@@ -25,28 +25,19 @@ extension AppBarOverlay {
             // A member still sliding out of its group travels bare
             // and takes its glass when it lands (#1831).
             let gliding = glidingIn.contains(itemViews[i].windowID)
-            glass.isHidden = itemViews[i].isHidden || gliding
+            let bare = itemViews[i].isHidden || gliding
+            glass.isHidden = bare
             if !gliding { GlassPlate.setContent(glass, itemViews[i]) }
-            GlassPlate.update(
+            GlassBox.place(
                 glass,
-                frame: frames[i],
+                tint: boxTints[i],
+                at: frames[i],
                 cornerRadius: radius,
-                animated: animated
+                hex: bare ? nil : style.fillColor,
+                edge: style.edge,
+                animated: animated,
+                move: moveFrame
             )
-            let tint = boxTints[i]
-            if itemViews[i].isHidden || gliding {
-                tint.isHidden = true
-            } else {
-                GlassTint.apply(
-                    tint,
-                    below: glass,
-                    frame: frames[i],
-                    cornerRadius: radius,
-                    hex: style.fillColor,
-                    edge: style.edge,
-                    animated: animated
-                )
-            }
         }
     }
 
@@ -63,10 +54,11 @@ extension AppBarOverlay {
         }
     }
 
-    /// A fresh glass and tint in the run, in a run-wide host of
-    /// their own (#1842) — the pool's one mint.
+    /// A fresh glass and tint in the run, in a box host of their
+    /// own that fades (#1842) and travels (#2095) — the pool's one
+    /// mint.
     private func makeBoxGlass() -> (glass: NSView, tint: GlassBackdrop)? {
-        GlassBox.make(in: itemRun, spansParent: true)
+        GlassBox.make(in: itemRun)
     }
 
     /// Re-orders the glass pool to follow `ids`, by the window each
@@ -108,13 +100,15 @@ extension AppBarOverlay {
         return hosts
     }
 
-    /// Returns the target view for drag operations (`AppBarItemView`).
+    /// The view a drag moves for `item`: its box's host where a
+    /// glass hosts it, so the glass and tint move as one (#2095).
     func draggableView(for item: AppBarItemView) -> NSView {
         guard let i = itemViews.firstIndex(of: item),
             i < boxGlasses.count,
-            GlassPlate.holds(boxGlasses[i], item)
+            GlassPlate.holds(boxGlasses[i], item),
+            let host = GlassBox.host(of: boxGlasses[i])
         else { return item }
-        return boxGlasses[i]
+        return host
     }
 
     /// Detaches items from glass wrappers and tears down box glass views.

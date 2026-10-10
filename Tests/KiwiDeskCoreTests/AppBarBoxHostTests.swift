@@ -45,13 +45,60 @@ struct AppBarBoxHostTests {
         LiquidGlassGate.override = { false }
         let overlay = boxedOverlay([1, 2, 3])
         let view = try #require(overlay.itemViews.first)
-        let glass = overlay.draggableView(for: view)
+        let glass = try #require(overlay.boxGlasses.first)
         let host = try #require(GlassBox.host(of: glass))
+        // The drag moves the host, so the glass and tint move as
+        // one (#2095).
+        #expect(overlay.draggableView(for: view) === host)
 
         overlay.dragMoved(view, to: .zero)
 
         #expect(glass.superview === host)
         #expect(overlay.itemRun.subviews.last === host)
+    }
+
+    /// A box gliding to a new slot moves its host and never its
+    /// glass or tint, which fill the host: the pair animating its
+    /// own frames trailed a crescent on the device (#2150).
+    @Test("A gliding box moves its host, never its glass or tint")
+    func glideMovesTheHost() throws {
+        guard #available(macOS 26, *) else { return }
+        let gate = LiquidGlassGate.override
+        defer { LiquidGlassGate.override = gate }
+        LiquidGlassGate.override = { false }
+        let overlay = boxedOverlay([1, 2, 3])
+        var writes: [(view: NSView, travels: Bool)] = []
+        overlay.moveFrame = { view, frame, travels in
+            writes.append((view, travels))
+            view.frame = frame
+        }
+        var style = AppBarLook()
+        style.liquidGlass = true
+        style.backgroundStyle = .boxed
+        overlay.show(
+            items: [1, 3].map(item),
+            activeIndex: nil,
+            strip: CGRect(x: 0, y: 0, width: 900, height: 30),
+            style: style,
+            space: SpaceID("1")
+        )
+
+        let hosts = overlay.boxGlasses.compactMap { GlassBox.host(of: $0) }
+        #expect(hosts.count == 2)
+        let hostWrites = writes.filter { write in
+            hosts.contains { $0 === write.view }
+        }
+        #expect(hostWrites.contains { $0.travels })
+        let pair = writes.filter { write in
+            write.view is GlassBackdrop
+                || overlay.boxGlasses.contains { $0 === write.view }
+        }
+        #expect(!pair.contains { $0.travels })
+        for (glass, tint) in zip(overlay.boxGlasses, overlay.boxTints) {
+            let host = try #require(GlassBox.host(of: glass))
+            #expect(tint.superview === host)
+            #expect(glass.frame == host.bounds)
+        }
     }
 
     @Test("A dissolve stands an arriving box's host transparent")

@@ -60,7 +60,9 @@ extension AppBarOverlay {
             next.append(view)
             if let source = old.first(where: { $0.members.contains(item.id) }
             ) {
-                let from = hosts[source.windowID]?.glass.frame ?? source.frame
+                let from =
+                    hosts[source.windowID].map { GlassBox.frame(of: $0.glass) }
+                    ?? source.frame
                 if from != .zero {
                     arrivals.append(
                         Arrival(view: view, id: item.id, from: from)
@@ -115,7 +117,7 @@ extension AppBarOverlay {
         from glass: NSView,
         tint: GlassBackdrop
     ) {
-        let frame = glass.frame
+        let frame = GlassBox.frame(of: glass)
         GlassPlate.release(glass)
         itemRun.addSubview(view)
         view.frame = frame
