@@ -263,6 +263,8 @@ failures. 1 still means the command itself did not get through.
 `focus_space_forward` and `set_space_history` step through the
 Spaces by their order and by the ones you visited
 ([`focus_space_back`](lua-reference.md#focus_space_back--focus_space_forward)).
+`set_desktop_cue` turns off the plate a Desktop switch shows
+([`set_desktop_cue`](lua-reference.md#set_desktop_cue)).
 :::
 
 | Category | Command | Arguments |
@@ -303,6 +305,7 @@ Spaces by their order and by the ones you visited
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
+| | `set_desktop_cue` | true\|false (default `true`) — the plate naming the Desktop a `focus_desktop` lands on |
 | | `set_space_history` | `per_screen` (default) \| `all_screens` — whose visits Space back and forward walk |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_float_placement` | `center` (default) \| `keep` — where a window lands when it toggles to floating or moves into a floating Space |

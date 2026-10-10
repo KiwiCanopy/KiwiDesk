@@ -63,7 +63,7 @@ extension KiwiCore {
     /// The `NSScreen` backing a tracked display, matched by its
     /// `CGDirectDisplayID`. Nil when the display is not currently
     /// connected to a screen.
-    func screen(for display: DisplayID) -> NSScreen? {
+    public func screen(for display: DisplayID) -> NSScreen? {
         TilingEngine.screen(for: display)
     }
 

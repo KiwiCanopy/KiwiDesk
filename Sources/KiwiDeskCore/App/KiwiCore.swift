@@ -231,6 +231,7 @@ public final class KiwiCore {
     /// restored on returning to one. Keyed, not numbered (#1147).
     var lastDesktop: DesktopKey?
     let desktopMemory = DesktopMemory()
+    let desktopCue = DesktopCueLedger()
     /// The last native Desktop switch; focus during it changes no space.
     var lastDesktopSwitch: Date = .distantPast
 
@@ -321,9 +322,8 @@ public final class KiwiCore {
     public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
     public var onShortcutsDropped: ShortcutsDropped = { _ in }
 
-    /// The UI-bridge verbs' GUI hooks (#330, #678 item 18) —
-    /// declared and argued as a bundle in `KiwiCore+LuaAPI`,
-    /// the `openOrFocus` seam shape.
+    /// The UI-bridge verbs' GUI hooks (#330, #678 item 18), argued
+    /// as a bundle in `KiwiCore+LuaAPI`, the `openOrFocus` shape.
     public var uiBridge = UIBridgeHooks()
 
     /// `~/.config/KiwiDesk/` (created on demand).

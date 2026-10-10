@@ -218,7 +218,8 @@ struct SettingsCatalogArgumentTests {
         // 98 since #1520: Shortcuts ▸ General's drawer mount
         // left; its two rows anchor under Open applications.
         // 100 since #1948: the two Per screen drawers'.
-        #expect(direct.values.reduce(0, +) == 100)
+        // 101 since #2142: the Desktop switch cue row's.
+        #expect(direct.values.reduce(0, +) == 101)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

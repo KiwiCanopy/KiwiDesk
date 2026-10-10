@@ -842,6 +842,36 @@ KiwiDesk.set_space_history("all_screens")
 ```
 :::
 
+:::unreleased
+### set_desktop_cue
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether a Desktop switch KiwiDesk performs — such as
+[`focus_desktop`](#focus_desktop) or
+[`move_to_desktop_and_follow`](#move_to_desktop_and_follow) —
+shows a plate in the middle of the screen that switched: the
+Desktop's Mission Control number, a dot for each Desktop on that
+screen with the current one filled, and the profile a
+[Desktop binding](#bind_profile_to_desktop) loaded, if one did
+(#2142). It takes no focus or click, fades after about a
+second, and stays away from a screen showing a full-screen app
+or a presentation. A swipe or Mission Control switch shows nothing; macOS
+animates those itself.
+
+The GUI twin is **Profiles ▸ Profiles per macOS Desktop ▸ Show
+the Desktop's number after a switch**. Like
+[`set_refusal_sound`](#set_refusal_sound), the setting is
+app-wide, stored in `gui.json` as `desktop.cue`; the verb
+changes the running value only.
+
+**Example:**
+
+```lua
+KiwiDesk.set_desktop_cue(false)
+```
+:::
+
 ### set_shortcut_panel_liquid_glass
 
 **Expects:** `true` or `false` (default `true`).

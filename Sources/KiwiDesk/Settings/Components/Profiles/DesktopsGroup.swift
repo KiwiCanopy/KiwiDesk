@@ -33,7 +33,7 @@ struct DesktopsGroup: View {
     /// focus to (#1609).
     @FocusState var focusedSlot: BindingFocus?
 
-    private var gates: ProfilesGates {
+    var gates: ProfilesGates {
         ProfilesGates(
             editingStoredProfile: model.editingStoredProfile,
             connectedScreens: model.displays.count,
@@ -52,6 +52,7 @@ struct DesktopsGroup: View {
             isExpanded: $expanded
         ) {
             VStack(alignment: .leading, spacing: 8) {
+                switchCueRow
                 Text(intro)
                     .font(.caption)
                     .foregroundStyle(.secondary)

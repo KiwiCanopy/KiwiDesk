@@ -6043,6 +6043,48 @@ Space it was taken in, so a window filed into a different Space
 returns by the arrival's ordinary placement rather than at its
 old index (#1207).
 
+### KiwiDesk's own Desktop switch names where it landed (#2142)
+
+**[Principle]**
+
+A Desktop switch KiwiDesk performs shows a plate on the screen
+that switched: the Desktop's Mission Control number, a dot per
+Desktop on that screen, and the profile a binding loaded where one
+did. A swipe or Mission Control switch shows nothing.
+
+The instant switch (#1023) removed macOS's slide, and the slide
+was the only thing that said which Desktop came up; on a desk with
+several Desktops of similar windows the screen just changes. The
+plate replaces exactly that cue, so it answers only where the cue
+went missing — a gesture or Mission Control still animates, and a
+plate over that would say the same thing twice.
+
+**The number is Mission Control's global one**, the label Mission
+Control draws and the number `focus_desktop` and the Shortcuts
+rows take; a per-screen position would give one Desktop two
+numbers in one app. The dots carry the position on that screen,
+and shape alone marks the current one, so colour carries nothing.
+
+**The profile line shows only when the switch changed the live
+profile.** A Desktop with no binding loads nothing, and naming the
+profile that merely stayed would be noise on every press.
+
+**Plain system glass, not the profile's look**, so it reads on any
+wallpaper and any look with no contrast check per look; Reduce
+transparency draws it opaque, Reduce Motion drops the fade.
+
+**On by default, app-wide.** This is the "uninvited surface"
+objection the boot notice answers by staying away (#1715), and
+here it lands the other way: the user's own key press asked for
+the switch, and the plate stands in for a cue the app took away.
+Nobody varies it per profile, so it is app-wide (#1741).
+
+**What was not shipped:** a number alone (no sense of where among
+how many), dots alone (counted, not read, past about five), a pill
+by KiwiShelf (hidden whenever the shelf is), a mini-map of the
+screens, and the KiwiDesk Space — a Space switch keeps its own
+motion cue (#1956).
+
 ### A Desktop switch that changes nothing still reports itself (#1336)
 
 **[Principle]**
