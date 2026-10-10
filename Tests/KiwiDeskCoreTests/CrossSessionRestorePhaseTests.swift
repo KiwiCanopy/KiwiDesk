@@ -126,4 +126,19 @@ struct CrossSessionRestorePhaseTests: CrossSessionFixture {
         core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
         #expect(seen() == [.placing(placed: 0, total: 1), .none])
     }
+
+    @Test(
+        "A reset or a stop mid-restore drops it to none",
+        .enabled(if: NSScreen.main != nil),
+        arguments: [false, true]
+    )
+    func resetOrStopDropsIt(stop: Bool) throws {
+        let core = try #require(boot([]))
+        let seen = recording(core)
+        leave(previous([(F.hidden, "app.zen", "Zen Browser")]), in: core)
+        arrange(core)
+        if stop { core.stop() } else { core.discardSavedArrangement() }
+        #expect(seen() == [.placing(placed: 0, total: 1), .none])
+        #expect(core.restorePhase == .none)
+    }
 }

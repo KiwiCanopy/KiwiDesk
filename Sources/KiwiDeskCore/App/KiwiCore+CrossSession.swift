@@ -146,8 +146,7 @@ extension KiwiCore {
         guard state.crossSession.arrangement != liveArrangement else {
             return true
         }
-        let missed = state.crossSession.close()
-        if case .placing = boot.restore { boot.publishRestore(.none) }
+        let missed = closeCrossSession()
         onLog(
             "cross-session: the arrangement changed; closed with "
                 + "\(missed) window(s) unpaired"
@@ -157,17 +156,13 @@ extension KiwiCore {
 
     /// The restore's progress (#2133): placing while records wait
     /// before the title settle, done at the settle or once none
-    /// waits. Published only from the boot pass or while placing,
-    /// so a late arrival never reopens an ended line.
+    /// waits; never again once done, so a late arrival cannot
+    /// reopen an ended line. It counts paired records, so a window
+    /// the user files by hand meanwhile stays out of the count.
     private func publishRestoreProgress(ending: Bool = false) {
         let match = state.crossSession
         let placed = match.total - match.pending.count
-        switch boot.restore {
-        case .none where boot.reachedReady, .done:
-            return
-        default:
-            break
-        }
+        if case .done = boot.restore { return }
         boot.publishRestore(
             ending || !match.isOpen
                 ? .done(placed: placed, total: match.total)
@@ -175,9 +170,19 @@ extension KiwiCore {
         )
     }
 
+    /// The one way KiwiCore closes the match: a restore still
+    /// placing windows ends with it, unannounced (#2133). A stop and
+    /// the #634 reset take it too; returns the unpaired count.
+    @discardableResult
+    func closeCrossSession() -> Int {
+        let missed = state.crossSession.close()
+        if case .placing = boot.restore { boot.publishRestore(.none) }
+        return missed
+    }
+
     /// Ends the match at its bound.
     func closeCrossSessionMatch() {
-        let missed = state.crossSession.close()
+        let missed = closeCrossSession()
         guard missed > 0 else { return }
         onLog("cross-session: closed; \(missed) window(s) never paired")
     }

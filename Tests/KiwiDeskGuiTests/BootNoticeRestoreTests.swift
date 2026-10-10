@@ -21,7 +21,7 @@ struct BootNoticeRestoreTests {
         var timeline = T()
         _ = timeline.phase(scanning, at: 10, standsDown: false)
         timeline.shown(at: 12)
-        _ = timeline.restore(placing, at: 13)
+        _ = timeline.restore(placing, at: 13, standsDown: false)
         return timeline
     }
 
@@ -36,12 +36,15 @@ struct BootNoticeRestoreTests {
     func fastBootWaitsForTheThreshold() {
         var timeline = T()
         _ = timeline.phase(scanning, at: 10, standsDown: false)
-        #expect(timeline.restore(placing, at: 11) == .showAt(10 + T.threshold))
+        #expect(
+            timeline.restore(placing, at: 11, standsDown: false)
+                == .showAt(10 + T.threshold)
+        )
         _ = timeline.phase(.ready, at: 11.5, standsDown: false)
         #expect(timeline.showsAt(10 + T.threshold, standsDown: false))
         #expect(!timeline.showsAt(10 + T.threshold - 0.1, standsDown: false))
         var ended = timeline
-        #expect(ended.restore(done, at: 12) == .cancel)
+        #expect(ended.restore(done, at: 12, standsDown: false) == .cancel)
         #expect(!ended.showsAt(10 + T.threshold, standsDown: false))
     }
 
@@ -49,17 +52,20 @@ struct BootNoticeRestoreTests {
     func endIsHeld() {
         var timeline = restoringShown()
         _ = timeline.phase(.ready, at: 14, standsDown: false)
-        #expect(timeline.restore(done, at: 40) == .hideAt(40 + T.minimumShown))
+        #expect(
+            timeline.restore(done, at: 40, standsDown: false)
+                == .hideAt(40 + T.minimumShown)
+        )
         #expect(!timeline.restoring)
     }
 
     @Test("a dropped restore hides at once, and only a running one")
     func droppedHidesNow() {
         var timeline = restoringShown()
-        #expect(timeline.restore(.none, at: 20) == .hideNow)
+        #expect(timeline.restore(.none, at: 20, standsDown: false) == .hideNow)
         var idle = T()
-        #expect(idle.restore(.none, at: 20) == .none)
-        #expect(idle.restore(done, at: 20) == .none)
+        #expect(idle.restore(.none, at: 20, standsDown: false) == .none)
+        #expect(idle.restore(done, at: 20, standsDown: false) == .none)
     }
 
     @Test("the restore lines put the count last")
@@ -92,5 +98,25 @@ struct BootNoticeRestoreTests {
             delegate.filter { !$0.isWhitespace }
                 .contains(wiring.filter { !$0.isWhitespace })
         )
+    }
+
+    @Test("a stand-down while restoring hides it for the boot")
+    func standDownWhileRestoring() {
+        var timeline = restoringShown()
+        _ = timeline.phase(.ready, at: 14, standsDown: false)
+        #expect(
+            timeline.restore(placing, at: 15, standsDown: true) == .hideNow
+        )
+        #expect(!timeline.showsAt(20, standsDown: false))
+        #expect(timeline.restore(done, at: 20, standsDown: false) == .cancel)
+    }
+
+    @Test("a restore done before ready leaves boot's own show standing")
+    func doneBeforeReadyKeepsTheBootShow() {
+        var timeline = T()
+        _ = timeline.phase(scanning, at: 10, standsDown: false)
+        _ = timeline.restore(placing, at: 10.5, standsDown: false)
+        #expect(timeline.restore(done, at: 11, standsDown: false) == .none)
+        #expect(timeline.showsAt(10 + T.threshold, standsDown: false))
     }
 }

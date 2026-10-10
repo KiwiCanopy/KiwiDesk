@@ -15754,7 +15754,9 @@ still without focus, mouse or dismissal. It does not wait out
 the match's 120 s bound: a window that never reopens would hold
 it up for two minutes, while a late one is still placed after it
 ends. A Load, a Desktop-bound switch or a monitor change drops it
-without an end line, since the user caused that change. An
+without an end line at the restore's next pass, since the user
+caused that change; a stop or the arrangement reset drops it at
+once. An
 expandable list of the awaited windows was weighed and rejected:
 a click target brings back the dismissal policy this capsule
 exists without, it would show window titles at login, and every

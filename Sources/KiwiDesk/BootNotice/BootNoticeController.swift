@@ -39,6 +39,11 @@ final class BootNoticeController {
     }
 
     func phase(_ phase: BootPhase) {
+        if case .idle = phase {
+            // A stop ends the boot, its restore with it.
+            restoreLine = nil
+            restoreTotal = 0
+        }
         if case .scanning(_, let count) = phase { total = count }
         if let line = BootCountText.line(for: phase) {
             model.line = line
@@ -63,7 +68,9 @@ final class BootNoticeController {
             model.line = restoreLine
             if wasShown { widen() }
         }
-        apply(timeline.restore(phase, at: now()))
+        apply(
+            timeline.restore(phase, at: now(), standsDown: standsDown())
+        )
         if case .done = phase, wasShown {
             announce(model.line, priority: .medium)
         }

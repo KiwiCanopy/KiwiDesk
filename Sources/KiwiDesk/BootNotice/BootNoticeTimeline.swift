@@ -73,8 +73,14 @@ struct BootNoticeTimeline: Equatable {
     /// done holds the end line `minimumShown`; none hides at once.
     mutating func restore(
         _ phase: RestorePhase,
-        at now: TimeInterval
+        at now: TimeInterval,
+        standsDown: Bool
     ) -> Effect {
+        if standsDown, case .placing = phase {
+            restoring = true
+            stoodDown = true
+            return shownAt != nil ? .hideNow : .cancel
+        }
         switch phase {
         case .placing:
             let wasRestoring = restoring
@@ -86,6 +92,8 @@ struct BootNoticeTimeline: Equatable {
         case .done:
             guard restoring else { return .none }
             restoring = false
+            // Boot's own show still stands until ready.
+            guard ready else { return .none }
             guard let shownAt, !stoodDown else { return .cancel }
             return .hideAt(
                 max(now + Self.minimumShown, shownAt + Self.minimumShown)
