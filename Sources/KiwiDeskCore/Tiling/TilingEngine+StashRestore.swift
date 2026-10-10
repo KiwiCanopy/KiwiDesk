@@ -17,8 +17,9 @@ extension TilingEngine {
     ///
     /// A capture is consumed only once the window's STATE frame
     /// reads back at the original — i.e. the restore's AX echo
-    /// landed. Consuming eagerly opened an echo-lag hole: on a
-    /// rapid space bounce (A→B→A→B on a held hotkey) the next
+    /// landed — once SENT, at its origin alone (`delivered`).
+    /// Consuming eagerly opened an echo-lag hole: on a rapid
+    /// space bounce (A→B→A→B on a held hotkey) the next
     /// stash saw a nil entry while the state frame still read
     /// the corner, captured the corner as the new "original",
     /// and the window was restored to the corner forever. Until
@@ -50,6 +51,9 @@ extension TilingEngine {
             state.windows[$0.key] != nil
                 || state.awayWindows[$0.key] != nil
         }
+        stashSent = stashSent.filter {
+            stashedFrames[$0.key] == $0.value
+        }
         // Restore floats for every space currently shown on some
         // display, not just the focused one (#multi-monitor): a
         // secondary display's space activating must un-park its
@@ -66,9 +70,12 @@ extension TilingEngine {
             }
             guard id != dragExemptWindow else { continue }
             if let current = state.windows[id]?.frame,
-                Self.delivered(current, to: original)
+                Self.close(current, to: original)
+                    || (stashSent[id] == original
+                        && Self.delivered(current, to: original))
             {
                 stashedFrames[id] = nil
+                stashSent[id] = nil
                 continue
             }
             // An original whose display is gone can never be
@@ -91,15 +98,14 @@ extension TilingEngine {
                 continue
             }
             animation.cancel(window: id)
+            stashSent[id] = original
             setFrame(id, original)
         }
     }
 
-    /// Whether a capture has been delivered: the window stands at
-    /// its ORIGIN. The size is the app's to refuse — a capture
-    /// held for a size the app's minimum overrules re-sent it on
-    /// every retile and was recorded as the window's frame
-    /// (#2129) — while a set that never landed leaves the origin
+    /// Whether a SENT capture has been delivered: the window
+    /// stands at its origin. The size is the app's to refuse
+    /// (#2129); a set that never landed leaves the origin
     /// elsewhere and is sent again.
     static func delivered(_ current: CGRect, to original: CGRect) -> Bool {
         abs(current.minX - original.minX) <= retileTolerance
@@ -136,6 +142,7 @@ extension TilingEngine {
     /// Migrates a stashed frame capture when a native-tab rekeys
     /// a window id (#308/#412).
     public func rekeyStash(oldID: WindowID, newID: WindowID) {
+        stashSent[newID] = stashSent.removeValue(forKey: oldID)
         guard let capture = stashedFrames.removeValue(forKey: oldID)
         else { return }
         stashedFrames[newID] = capture
@@ -193,5 +200,6 @@ extension TilingEngine {
     /// longer represents where the window belongs.
     func forgetStash(_ id: WindowID) {
         stashedFrames[id] = nil
+        stashSent[id] = nil
     }
 }

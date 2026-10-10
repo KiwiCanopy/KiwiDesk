@@ -23,6 +23,8 @@ struct StashRefusedSizeTests {
         let screen = self.screen
         core.tiler.visibleBounds = { _ in screen }
         core.tiler.allScreenBounds = { [screen] }
+        // Pinned (#660): the move's placement is the centred one.
+        core.tiler.settings.floatPlacement = .center
         core.execute(
             "set_mode",
             args: [.string("1"), .string("scrolling")]
@@ -77,11 +79,28 @@ struct StashRefusedSizeTests {
     @Test("a set that never landed is sent again")
     func lostSetRetries() throws {
         let (core, asked) = try followed()
-        let elsewhere = asked.offsetBy(dx: 300, dy: 0)
+        let elsewhere = asked.offsetBy(dx: 0, dy: 40)
         core.handle(.windowMoved(window, elsewhere))
         // An echo inside the grace is ours: the capture stands.
         core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(window) == asked)
         #expect(core.tiler.recentInstantTarget(window) == asked)
+    }
+
+    /// A capture never sent is not delivered by an origin match:
+    /// a seed at the window's own origin with another size is
+    /// sent, the size included.
+    @Test("an unsent capture at the window's origin is sent")
+    func unsentCaptureIsSent() throws {
+        let (core, asked) = try followed()
+        core.handle(.windowResized(window, asked))
+        core.retile(pass: .apply)
+        #expect(core.tiler.stashOriginal(window) == nil)
+        var smaller = asked
+        smaller.size.height -= 100
+        core.tiler.seedStash(window, frame: smaller)
+        core.retile(pass: .apply)
+        #expect(core.tiler.recentInstantTarget(window) == smaller)
+        #expect(core.tiler.stashOriginal(window) == smaller)
     }
 }

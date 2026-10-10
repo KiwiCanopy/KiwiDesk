@@ -10,8 +10,9 @@ private typealias F = BootRestoreFixture
 /// A window paired at boot into a floating Space, standing at the
 /// column the boot's first pass gave it (#2130). Its record is
 /// delivered; a CORNER record — taken while it was parked —
-/// carries no original, so it takes the float placement instead
-/// of staying at the column, off screen.
+/// carries no original, so it takes the one no-original door
+/// (`seedWithoutOriginal`) instead of staying at the column, off
+/// screen.
 @Suite("Cross-session floats with a corner record (#2130)", .serialized)
 @MainActor
 struct CrossSessionCornerRecordTests: CrossSessionFixture {
@@ -19,23 +20,29 @@ struct CrossSessionCornerRecordTests: CrossSessionFixture {
         try #require(core.tiler.allScreenBounds().first)
     }
 
-    /// The boot desk: w10 scanned into the shown Space, laid at a
-    /// column left of the screen.
-    private func core() throws -> (KiwiCore, CGRect) {
+    /// The boot desk: w10 scanned into the shown Space at `at`,
+    /// a column left of the screen unless given.
+    private func core(at: CGRect? = nil) throws -> (KiwiCore, CGRect) {
         let core = try #require(boot([window(10, "com.a", "A")]))
         let bounds = try screen(core)
-        let column = CGRect(
-            x: bounds.minX - 500,
-            y: bounds.minY + 20,
-            width: 600,
-            height: 400
-        )
-        core.state.apply(.windowMoved(WindowID(10), column))
-        return (core, column)
+        let frame =
+            at
+            ?? CGRect(
+                x: bounds.minX - 500,
+                y: bounds.minY + 20,
+                width: 600,
+                height: 400
+            )
+        core.state.apply(.windowMoved(WindowID(10), frame))
+        return (core, frame)
     }
 
-    /// The freeze's desk: the record's Space floating and shown.
-    private func desk(record: CGRect? = nil) -> StateSnapshot {
+    /// The freeze's desk: the record's Space shown, floating
+    /// unless `tiled`.
+    private func desk(
+        record: CGRect? = nil,
+        tiled: Bool = false
+    ) -> StateSnapshot {
         var desk = previous([(F.hidden, "com.a", "A")])
         if let record { desk.windows[0].frame = record }
         desk.spaces = [F.shown, F.hidden].map { id in
@@ -43,11 +50,21 @@ struct CrossSessionCornerRecordTests: CrossSessionFixture {
                 id: id,
                 windows: id == F.hidden ? [WindowID(500)] : []
             )
-            if id == F.hidden { space.mode = .floating }
+            if id == F.hidden, !tiled { space.mode = .floating }
             return .init(space: space)
         }
         desk.activeSpace = F.hidden.raw
         return desk
+    }
+
+    private func corner(_ core: KiwiCore) throws -> CGRect {
+        let frame = TilingEngine.stashFrame(
+            Self.recorded,
+            in: try screen(core),
+            corner: .bottomRight
+        )
+        #expect(core.tiler.looksStashed(frame))
+        return frame
     }
 
     @Test(
@@ -65,24 +82,37 @@ struct CrossSessionCornerRecordTests: CrossSessionFixture {
     }
 
     @Test(
-        "a corner record takes the float placement",
+        "a corner record is centred at the window's size",
         .enabled(if: NSScreen.main != nil)
     )
-    func cornerRecordIsPlaced() throws {
+    func cornerRecordIsCentred() throws {
         let (core, column) = try core()
-        let bounds = try screen(core)
-        let corner = TilingEngine.stashFrame(
-            Self.recorded,
-            in: bounds,
-            corner: .bottomRight
-        )
-        #expect(core.tiler.looksStashed(corner))
-        leave(desk(record: corner), in: core)
+        leave(desk(record: try corner(core)), in: core)
         arrange(core)
+        // Centred at the window's own size; the region's height
+        // is read before the shelf settles, so the x axis decides.
+        let region = try #require(core.floatBounds(on: F.hidden))
         let landed = try #require(
             core.tiler.commandedFrame(of: WindowID(10))
         )
-        #expect(landed != column)
-        #expect(bounds.contains(landed))
+        #expect(landed.size == column.size)
+        #expect(abs(landed.midX - region.midX) < 1)
+        #expect(try screen(core).contains(landed))
+    }
+
+    /// The control: a tiled Space's layout places the window, so a
+    /// corner record there is never seeded.
+    @Test(
+        "a tiled window with a corner record is the layout's",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func tiledWindowIsNotSeeded() throws {
+        let (core, _) = try core()
+        leave(desk(record: try corner(core), tiled: true), in: core)
+        arrange(core)
+        #expect(
+            core.tiler.commandedFrame(of: WindowID(10))
+                == core.tiler.calculatedFrames(state: core.state)[WindowID(10)]
+        )
     }
 }
