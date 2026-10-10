@@ -397,13 +397,14 @@ twice, was a question the user answered twice. The argument is
   leave lands leaves `leavingViews` and stays on the strip
   (`ShelfFadeTests` ▸ `reWantedSectionStays`).
   On a boxed glass run each box dissolves as ONE unit with its
-  tint, the fade on the `BoxHost` the pair is minted in and never
+  tint, the fade on the `GlassBoxHost` the pair is minted in and never
   on the glass — a glass's own alpha shows the tint behind it
   bare (device, 2026-10-01 and 2026-10-08) — and no box resizes,
   since its content re-lays every frame (#1842,
-  `AppBarDissolveTests`). A box glass never leaves the `BoxHost`
-  it was minted in: a z-order move fronts the host, and a box
-  leaves only through `dropBox`, since the host is found through
+  `AppBarDissolveTests`). A box glass never leaves the
+  `GlassBoxHost` it was minted in: a drag moves and fronts the
+  host, and a box leaves only through `GlassBox.drop`, since the
+  host is found through
   the glass and a glass moved out leaks it and fades bare
   (`AppBarBoxHostTests`). A bar
   manager hides its display's overlay and never drops it — a bar
@@ -1115,12 +1116,17 @@ Obligations:
   pair that travels fills one host that carries the motion**
   (#2095). The glass renders a frame behind its gradient, so a
   pair gliding by its own frames trails a crescent ahead of the
-  box. A box is minted and dropped through the one `GlassBox`,
-  its pair written to the host's CURRENT bounds before the host
-  moves — AppKit steps a travelling frame and autoresizes the pair
-  at every step (`SpaceBarGlideWiringTests` ▸ `boxGlassTravels`,
-  `boxGlassFillsItsHost`). The App Bar's boxes and the KiwiShelf
-  plate still glide by their own frames, the residue #2150 owns.
+  box. A glass pair that travels is minted, laid out and taken
+  out through the one `GlassBox` — laid out through its one
+  `place`, which writes the pair to the host's CURRENT bounds
+  before the host moves, since AppKit steps a travelling frame and
+  autoresizes the pair at every step — and a drag moves the host
+  too (`SpaceBarGlideWiringTests` ▸ `boxGlassTravels`,
+  `boxGlassFillsItsHost`, `AppBarBoxHostTests` ▸
+  `glideMovesTheHost`, `ShelfPlateGlassHostTests`). The pair's own
+  frame writers, `GlassPlate.update` and `GlassTint.apply`, take
+  no motion input and start no motion (`GlassPairMotionSeamTests`),
+  so a call site cannot make either travel.
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** Both drag markers' glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays

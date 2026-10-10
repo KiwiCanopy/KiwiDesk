@@ -40,9 +40,8 @@ public final class KiwiCore {
     public internal(set) var lua: LuaInterpreter?
     public let exec = ExecLauncher()
 
-    /// Effective structured keybinding sources currently
-    /// installed in `keys`, read by the shortcuts reference
-    /// panel (`liveKeybindingSnapshot`).
+    /// Structured keybinding sources installed in `keys`, read by
+    /// the shortcuts reference panel (`liveKeybindingSnapshot`).
     var appliedStructuredLayers: [KeyLayer]?
 
     /// The global window-rule bases (`GlobalRuleBase`).
@@ -61,11 +60,12 @@ public final class KiwiCore {
     /// argued at its one reader, `mayReconcileWindowRulesNow`.
     var defersWindowRuleReconcileToSweep = false
 
-    /// Boot and the startup sweep surface N windows in one burst,
-    /// each `.windowCreated` a full pass (#672). While raised,
-    /// `handle` skips its structural retile; the raiser runs one
-    /// `retile()` after lowering it.
+    /// Boot and the startup sweep surface N windows in one burst
+    /// (#672): while raised, `handle` skips its structural retile
+    /// and the raiser runs one after lowering it.
     var defersEventRetiles = false
+    /// A Desktop switch's re-sync, folded alike (`+SwitchResync`).
+    var switchResync: SwitchResyncBatch?
 
     /// A z-order restore is waiting for the current animations
     /// to settle (`runPendingZOrderRestore`).

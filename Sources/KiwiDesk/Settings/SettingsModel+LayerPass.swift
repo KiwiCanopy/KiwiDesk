@@ -19,6 +19,12 @@ extension SettingsModel {
         return value
     }
 
+    /// Drops both reach memos when a stored input moves.
+    func dropReachCaches() {
+        layeredCache = nil
+        encodedCache = nil
+    }
+
     /// The pass over `edits`, uncached — for a reading taken
     /// without one of the draft's picks.
     func layeredReach(_ edits: RuleReachEdits) -> RuleReachSnapshot? {
@@ -160,6 +166,26 @@ struct LayeredReachCache {
         let edits: RuleReachEdits
         let page: [KeyLayer]
         let profile: String?
+    }
+
+    let key: Key
+    let value: RuleReachSnapshot?
+}
+
+/// The last draft encode and what it read; dropped with
+/// `layeredCache`, whose stored inputs it sits on. `Key` lists
+/// every input `encodeReach` reads: a read it omits is served
+/// stale (`EncodedReachCacheTests`).
+struct EncodedReachCache {
+    struct Key: Equatable {
+        let edits: RuleReachEdits
+        let appRules: [String: SpaceID]
+        let floatRules: [String]
+        let layers: [KeyLayer]
+        let scrollGesture: ScrollGestureBase
+        let spaceHistory: SpaceHistoryKind
+        let profile: String?
+        let isLoaded: Bool
     }
 
     let key: Key

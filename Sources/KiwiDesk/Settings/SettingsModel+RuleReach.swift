@@ -29,7 +29,27 @@ extension SettingsModel {
 
     /// The stored tables with the draft applied — its layer edits
     /// first (`layeredReach`, #2022); nil without a checklist.
+    /// Memoized: every shortcut row reads it several times per
+    /// render, and a Desktop switch re-renders them all.
     var encodedReach: RuleReachSnapshot? {
+        let key = EncodedReachCache.Key(
+            edits: reachEdits,
+            appRules: config.appRules,
+            floatRules: config.floatRules,
+            layers: config.layers,
+            scrollGesture: config.scrollGesture,
+            spaceHistory: config.spaceHistory,
+            profile: reachProfile,
+            isLoaded: reachIsLoaded
+        )
+        if let cache = encodedCache, cache.key == key { return cache.value }
+        let value = encodeReach()
+        encodedCache = EncodedReachCache(key: key, value: value)
+        return value
+    }
+
+    /// The encode `encodedReach` memoizes, uncached.
+    func encodeReach() -> RuleReachSnapshot? {
         guard var snapshot = layeredReach, let editing = reachProfile
         else { return nil }
         var pageTemplates: [String: KeyBinding] = [:]

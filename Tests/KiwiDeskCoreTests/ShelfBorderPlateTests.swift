@@ -65,10 +65,12 @@ struct ShelfBorderPlateTests {
         let overlay = try plateOverlay(shelf)
         let glass = try #require(overlay.glassPlate)
         #expect(!glass.isHidden)
-        Border.expectStroke(overlay.plateBorder, frame: glass.frame)
+        // The glass rides its box host, which carries the frame.
+        let host = try #require(GlassBox.host(of: glass))
+        Border.expectStroke(overlay.plateBorder, frame: host.frame)
         let order = overlay.content.subviews
         let rim = try #require(order.firstIndex(of: overlay.plateBorder))
-        #expect(try #require(order.firstIndex(of: glass)) < rim)
+        #expect(try #require(order.firstIndex(of: host)) < rim)
     }
 
     /// Reduce transparency stands the glass down, never the rim:

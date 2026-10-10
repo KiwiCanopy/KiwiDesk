@@ -189,11 +189,9 @@ struct SpaceBarGlideWiringTests {
         }
         #expect(hostWrites.count == 3)
         #expect(hostWrites.allSatisfy { $0.travels })
-        let pair = writes.filter { write in
-            write.view is GlassBackdrop
-                || overlay.boxGlasses.contains { $0 === write.view }
-        }
-        #expect(!pair.contains { $0.travels })
+        // The pair's own writes never travel: `GlassPlate.update`
+        // and `GlassTint.apply` take no motion input
+        // (`GlassPairMotionSeamTests`, #2150).
         let steady = try secondPass(
             .count,
             from: 2,
