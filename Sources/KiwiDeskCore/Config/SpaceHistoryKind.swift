@@ -18,4 +18,13 @@ public enum SpaceHistoryKind: String, CaseIterable, Codable, Sendable {
     public static func choiceMatters(screens: Int) -> Bool {
         screens != 1
     }
+
+    /// A profile's sparse override for `value` over `base`: nil
+    /// where it follows the base.
+    public static func sparse(
+        _ value: SpaceHistoryKind,
+        over base: SpaceHistoryKind
+    ) -> SpaceHistoryKind? {
+        value == base ? nil : value
+    }
 }

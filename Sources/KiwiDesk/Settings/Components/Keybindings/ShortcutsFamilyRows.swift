@@ -106,7 +106,9 @@ struct ShortcutsFamilyRows {
     private func perSpace(
         _ make: ([SpaceID], [SpaceID: String]) -> [NavCommand]
     ) -> [NavCommand] {
-        let extra = liveOnly.filter { !spaces.contains($0.id) }
+        let extra = liveOnly.shortcutOrder.filter {
+            !spaces.contains($0.id)
+        }
         var icons = icons
         for space in extra {
             if let icon = space.icon { icons[space.id] = icon }
@@ -120,9 +122,7 @@ struct ShortcutsFamilyRows {
 
     /// Every Space a per-Space binding can reach now: the
     /// profile's and the live-only ones (#1827).
-    var liveSpaces: [SpaceID] {
-        spaces + liveOnly.map(\.id).filter { !spaces.contains($0) }
-    }
+    var liveSpaces: [SpaceID] { liveOnly.shortcutSpaces(after: spaces) }
 
     private func resizeRow(
         _ row: KeybindingCatalog.ResizeRow

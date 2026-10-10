@@ -28,10 +28,13 @@ extension KeyLayerOverride {
     /// This override without a row naming one of `spaces`, and
     /// without a tombstone for a base row `baseRemoved` took — a
     /// mark with no row under it would remove the next row bound
-    /// to that combo. Nil where nothing is left to override.
+    /// to that combo. An override of a `baseLayers` layer the drop
+    /// emptied goes; a profile's own layer, or one diverging by its
+    /// icon, stays. Nil where nothing is left to override.
     public func removingRows(
         naming spaces: Set<SpaceID>,
-        baseRemoved: [String: [String]]
+        baseRemoved: [String: [String]],
+        baseLayers: Set<String>
     ) -> KeyLayerOverride? {
         var marks: [String: [String]] = [:]
         for (name, combos) in removed {
@@ -41,10 +44,12 @@ extension KeyLayerOverride {
             }
             if !kept.isEmpty { marks[name] = kept }
         }
-        // A layer the drop emptied overrides nothing; one that
-        // carried no rows to begin with diverges by its icon.
         let kept = zip(layers, layers.removingRows(naming: spaces).layers)
-            .filter { $0.bindings.isEmpty || !$1.bindings.isEmpty }
+            .filter { before, after in
+                before.bindings.isEmpty || !after.bindings.isEmpty
+                    || after.icon != nil
+                    || !baseLayers.contains(after.name)
+            }
             .map(\.1)
         let trimmed = KeyLayerOverride(
             layers: kept,

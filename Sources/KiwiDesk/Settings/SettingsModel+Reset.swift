@@ -52,9 +52,7 @@ extension SettingsModel {
     /// after the profile's (#1827): temporary, then held. The
     /// live page only — a stored profile is another arrangement.
     var liveOnlyShortcutSpaces: [LiveOnlySpace] {
-        guard !editingStoredProfile else { return [] }
-        return liveOnlySpaces.filter(\.isTemporary)
-            + liveOnlySpaces.filter { !$0.isTemporary }
+        editingStoredProfile ? [] : liveOnlySpaces.shortcutOrder
     }
 
     /// Inactive Space shortcut Lua in default layer (#820, #92).
@@ -64,11 +62,13 @@ extension SettingsModel {
                 $0.name == KeyLayer.defaultName
             })
         else { return [] }
-        let live = liveOnlyShortcutSpaces.map(\.id)
+        let reachable = liveOnlyShortcutSpaces.shortcutSpaces(
+            after: config.spaces
+        )
         return Set(
             OrphanedShortcuts.commands(
                 bindings: layer.bindings,
-                spaces: config.spaces + live,
+                spaces: reachable,
                 layers: config.layers.map(\.name)
             )
             .map(\.lua)

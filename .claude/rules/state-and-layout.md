@@ -25,6 +25,11 @@ editing here:
 
 - Windows live in a **flat `[WindowID]` array per space**. Do not
   introduce tree or container structures into state or layout code.
+- **A per-Space session store follows a Space's renumber and its
+  end (#1655).** One keyed by `SpaceID` rekeys where a held Space
+  is renumbered (`moveMembers`) and forgets in the one Space drop,
+  `forwardWindows(of:to:)`; the Space history's trails are the
+  instance (`SpaceDropHookNeedleTests`).
 - **A Space seeded before any config declares one is
   PROVISIONAL (#1526).** Whoever plants one arms
   `StateCoordinator.placeholderSpace`, and the next config load

@@ -88,8 +88,8 @@ struct SpaceShortcutDropTests {
     func temporaryDropTakesItsChords() throws {
         let core = try desk.docked()
         try seedShortcuts(core)
-        var edits: [LiveProfileEdit] = []
-        core.onLiveProfileWritten = { edit, _ in edits.append(edit) }
+        var told: [Set<SpaceID>] = []
+        core.onShortcutsDropped = { told.append($0) }
         dropScratch(core)
         #expect(core.state.workspaces[scratch] == nil)
         #expect(
@@ -98,13 +98,7 @@ struct SpaceShortcutDropTests {
         // Its own row and the tombstone over the gone base row go,
         // so the profile has nothing left to override.
         #expect(try core.profiles.read(name: "solo").layers == nil)
-        let reached = edits.contains {
-            if case .dropSpaceShortcuts(let spaces) = $0 {
-                return spaces == [scratch]
-            }
-            return false
-        }
-        #expect(reached, "an open draft is never told")
+        #expect(told == [[scratch]], "an open draft is never told")
     }
 
     @Test("a Space another arrangement declares keeps its chords")

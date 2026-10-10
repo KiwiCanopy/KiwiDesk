@@ -36,7 +36,8 @@ extension RuleReachTable where Value == SpaceHistoryKind {
     public func spaceHistoryOverride(
         for profile: String
     ) -> SpaceHistoryKind? {
-        let own = resolved(Self.spaceHistoryKey, for: profile)
-        return own == spaceHistoryBase ? nil : own
+        resolved(Self.spaceHistoryKey, for: profile).flatMap {
+            .sparse($0, over: spaceHistoryBase)
+        }
     }
 }

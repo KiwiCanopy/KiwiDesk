@@ -40,10 +40,9 @@ extension ShortcutsPanelController {
             // Every live Space, so a temporary or held Space's
             // working chord files beside the others, not under
             // Inactive (#1827).
-            spaces: config.spaces
-                + core.liveOnlySpaces.map(\.id).filter {
-                    !config.spaces.contains($0)
-                },
+            spaces: core.liveOnlySpaces.shortcutSpaces(
+                after: config.spaces
+            ),
             spaceIcons: config.settings.spaceIcons,
             desktops: core.bindableDesktops(
                 in: NativeSpaces.desktopSnapshot()

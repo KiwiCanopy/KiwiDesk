@@ -44,6 +44,7 @@ extension KiwiCore {
         // window remembered there. An EMPTY Space the prune is
         // about to drop frees its number (#1790).
         let taken = declared.union(state.heldSpaces.keys)
+            .union(state.owedShortcutDrops)
             .union(
                 state.workspaces.allSpaces.map(\.id)
                     .filter { !spaceHoldsNothing($0) }
@@ -134,6 +135,7 @@ extension KiwiCore {
         }
         var taken = declared.union(state.heldSpaces.keys).union(live)
             .union(state.rememberedSpaces.values.map(\.space))
+            .union(state.owedShortcutDrops)
         let names = held.map { id -> SpaceID in
             guard declared.contains(id) else { return id }
             let fresh = SpaceID.nextNumber(past: taken)
@@ -206,6 +208,7 @@ extension KiwiCore {
                 for window in remembered {
                     state.refileAway(of: window, to: origin.name)
                 }
+                oweShortcutDrop(id)  // its hold ended (#1827)
                 forwardWindows(of: id, to: origin.name)
                 tiler.settings.removeSpace(id)
             }
@@ -282,6 +285,7 @@ extension KiwiCore {
             else { continue }
             tiler.settings.removeSpace(id)
             spacePins[id] = nil
+            oweShortcutDrop(id)  // its hold ended (#1827)
             forwardWindows(of: id, to: other)
             retired = true
         }

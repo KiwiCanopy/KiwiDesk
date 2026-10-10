@@ -32,15 +32,7 @@ struct SpaceHistoryRow: View {
         }
     }
 
-    /// The edited stored profile runs on one screen. The live page
-    /// edits what every profile shares, so it never greys.
-    private var oneScreen: Bool {
-        guard let name = model.editingProfile,
-            let count = model.profileSummaries
-                .first(where: { $0.name == name })?.count
-        else { return false }
-        return !SpaceHistoryKind.choiceMatters(screens: count)
-    }
+    private var oneScreen: Bool { model.spaceHistoryRunsOnOneScreen }
 
     private var reason: String {
         L(
@@ -64,6 +56,20 @@ struct SpaceHistoryRow: View {
     }
 }
 
+extension SettingsModel {
+    /// The Space history row greys (#1655): the edited stored
+    /// profile runs on one screen. The live page edits what every
+    /// profile shares, so it never greys.
+    var spaceHistoryRunsOnOneScreen: Bool {
+        guard let name = editingProfile,
+            let count =
+                profileSummaries
+                .first(where: { $0.name == name })?.count
+        else { return false }
+        return !SpaceHistoryKind.choiceMatters(screens: count)
+    }
+}
+
 /// What the Space history row is called and how its value reads —
 /// one home for the row, the diff pill and the checklist.
 @MainActor
@@ -75,11 +81,13 @@ enum SpaceHistoryWords {
     static var help: String {
         L(
             "shortcuts.space_history.help",
-            "Per screen: each screen remembers its own Spaces, and "
-                + "going back or forward changes the Space on the "
-                + "screen you are working on. All screens: one history "
-                + "across every screen, so going back may take you to "
-                + "another screen. With one screen, both work the same."
+            "%1$@: each screen remembers its own Spaces, and going "
+                + "back or forward changes the Space on the screen you "
+                + "are working on. %2$@: one history across every "
+                + "screen, so going back may take you to another "
+                + "screen. With one screen, both work the same.",
+            value(.perScreen),
+            value(.allScreens)
         )
     }
 

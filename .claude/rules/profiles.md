@@ -1255,16 +1255,22 @@ in the profile*. The obligations:
   temporary instead of deleting it. The door announces only after
   live has settled (`TemporarySpaceScopeTests`).
 - **Its shortcuts go with it, and a held Space's with its hold
-  (#1827).** `retireLiveOnlyShortcuts`, after the retires at the
-  head of `retile()`, is the one remover: a Space temporary or held
-  at the last retile and gone now takes every binding naming it
-  out of the base layers and every profile override, unless an
-  arrangement still declares it — that binding is #92's to keep.
-  It writes through `dropShortcuts(naming:)`, which re-registers
-  the keys and hands an open draft the same `LiveProfileEdit`. A
-  second remover beside it is the bug, and a path that drops a
-  Space without a retile is review's to catch
-  (`SpaceShortcutDropTests`, `LayerRowWriterCensusTests`).
+  (#1827).** Owe the drop where the Space ENDS, never by diffing
+  Space ids between passes — a hold outlives its workspace, and a
+  freed number is minted again: the one Space drop,
+  `forwardWindows(of:to:)`, owes a temporary or held Space's
+  through `oweShortcutDropIfLiveOnly`, and a held go-home arm that
+  clears the hold first owes it by hand (`SpaceDropHookNeedleTests`
+  pins both). `payOwedShortcutDrops`, after the retires at the
+  head of `retile()`, takes every binding naming an owed Space out
+  of the base layers and every profile override, unless an
+  arrangement declares it — that binding is #92's to keep — and an
+  owed number stays taken until then (`mintedSpaceNumber`, the
+  hold's renumbers). It writes through `dropShortcuts(naming:)`,
+  which re-registers the keys and tells an open draft of ANY target
+  through `onShortcutsDropped`, never the live-profile door
+  (`SpaceShortcutDropTests`, `SpaceShortcutDropOwedTests`,
+  `LiveOnlyShortcutRowsTests`, `LayerRowWriterCensusTests`).
 
 ## Resolve before layout, and merge per-field first
 

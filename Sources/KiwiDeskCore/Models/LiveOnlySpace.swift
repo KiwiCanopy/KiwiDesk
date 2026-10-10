@@ -22,3 +22,20 @@ public struct LiveOnlySpace: Equatable, Sendable, Identifiable {
 
     public var isTemporary: Bool { kind == .temporary }
 }
+
+extension Array where Element == LiveOnlySpace {
+    /// The order the per-Space shortcut rows draw them in (#1827):
+    /// temporary, then held.
+    public var shortcutOrder: [LiveOnlySpace] {
+        filter(\.isTemporary) + filter { !$0.isTemporary }
+    }
+
+    /// Every Space a per-Space shortcut reaches now (#1827): the
+    /// profile's `declared`, then these in shortcut order — the one
+    /// reading the shortcut rows, Inactive shortcuts and the ⌃⌥K
+    /// panel judge against.
+    public func shortcutSpaces(after declared: [SpaceID]) -> [SpaceID] {
+        declared
+            + shortcutOrder.map(\.id).filter { !declared.contains($0) }
+    }
+}

@@ -17,8 +17,9 @@ extension KiwiCore {
     /// (its Canvas is read-only in that case, so `spacePins` is
     /// empty here anyway).
     ///
-    /// `writingRules: false` leaves the app rule, float rule and
-    /// scroll-gesture overrides as stored, for a caller whose
+    /// `writingRules: false` leaves the app rule, float rule,
+    /// scroll-gesture and Space history overrides as stored
+    /// (`RuleReachFamilyParityTests`), for a caller whose
     /// `saveRuleReach` writes them — one encoder per field
     /// (#1393). The shortcut
     /// override is always this diff, against the base as stored
@@ -171,9 +172,10 @@ extension KiwiCore {
                 base: base.scrollGesture,
                 edited: config.scrollGesture
             )
-            profile.spaceHistory =
-                config.spaceHistory == base.spaceHistory
-                ? nil : config.spaceHistory
+            profile.spaceHistory = .sparse(
+                config.spaceHistory,
+                over: base.spaceHistory
+            )
             // `ignoreRules` is deliberately untouched: the GUI has
             // no ignore editor, so even an inert hidden tombstone must
             // survive overwrite/copy until an external edit removes it.

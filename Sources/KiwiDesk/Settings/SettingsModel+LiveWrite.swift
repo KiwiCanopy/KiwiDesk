@@ -24,11 +24,28 @@ extension SettingsModel {
         suppressDirty = true
         config.apply(edit)
         cleanConfig.apply(edit)
-        // The write reached the base and other profiles, which the
-        // checklist's stored table reads (#1827).
-        if case .dropSpaceShortcuts = edit {
-            ruleReachStored = core.ruleReachSnapshot()
+        suppressDirty = false
+        recomputeDirty()
+    }
+
+    /// A gone Space's shortcuts left the base and every profile
+    /// (#1827), so a draft of ANY target takes it: a clean one
+    /// re-reads, a dirty one drops the rows on both sides of its
+    /// diff and re-reads the stored tables its Save diffs against,
+    /// or that Save would write the rows back.
+    func adoptShortcutDrop(_ spaces: Set<SpaceID>) {
+        guard isDirty else {
+            reload()
+            return
         }
+        suppressDirty = true
+        config.layers = config.layers.removingRows(naming: spaces).layers
+        cleanConfig.layers =
+            cleanConfig.layers.removingRows(naming: spaces).layers
+        if profileEditingBaseLayers != nil {
+            profileEditingBaseLayers = core.baseKeyLayers()
+        }
+        ruleReachStored = core.ruleReachSnapshot()
         suppressDirty = false
         recomputeDirty()
     }
