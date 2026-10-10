@@ -160,7 +160,17 @@ struct GapsAndBordersGateWiringTests {
                     + "sentence to the label's `?`"
             )
         )
-        let editor = squashed(try read("GapsEditor.swift"))
+        let editor =
+            squashed(try read("GapsEditor.swift"))
+            + squashed(
+                try String(
+                    contentsOf: dir.deletingLastPathComponent()
+                        .appendingPathComponent(
+                            "SpaceOverrides/OverrideGapsRow.swift"
+                        ),
+                    encoding: .utf8
+                )
+            )
         #expect(
             !source.contains(".disabled(") && !editor.contains(".disabled("),
             Comment(

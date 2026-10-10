@@ -115,5 +115,10 @@ struct OverrideGapsRowTests {
         #expect(
             box.contains("gates.inertReason(for:.gaps(.perSpaceOverride))")
         )
+        // The answer is drawn: the row greyed, its reason beside it.
+        #expect(
+            box.contains("row.modifier(GreyOut(active:true,help:sentence))")
+        )
+        #expect(box.contains("Text(sentence)"))
     }
 }
