@@ -8,7 +8,7 @@ struct SpacesGates {
     let mode: LayoutMode
 
     /// Why a row is inert.
-    enum InertReason: Hashable {
+    enum InertReason: Hashable, CaseIterable {
         case noOverrides
         case oneMaster
         case rigidGrid

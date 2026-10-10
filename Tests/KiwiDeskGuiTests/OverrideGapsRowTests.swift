@@ -1,5 +1,6 @@
 import Foundation
 import KiwiDeskCore
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk
@@ -50,6 +51,16 @@ struct OverrideGapsRowTests {
         #expect(
             OverrideGapsRow.summary(gaps) == "outer mixed, inner 8 pt"
         )
+    }
+
+    @Test("checking the row copies the global gaps exactly")
+    func checkingPrefillsFromGlobal() {
+        var stored: Gaps? = nil
+        let binding = Binding(get: { stored }, set: { stored = $0 })
+        overrideToggle(binding, global: mixedGaps()).wrappedValue = true
+        #expect(stored == mixedGaps())
+        overrideToggle(binding, global: mixedGaps()).wrappedValue = false
+        #expect(stored == nil)
     }
 
     @Test("a floating Space greys the row, a tiling one does not")

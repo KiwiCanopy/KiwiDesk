@@ -160,11 +160,12 @@ struct GapsAndBordersGateWiringTests {
                     + "sentence to the label's `?`"
             )
         )
+        let editor = squashed(try read("GapsEditor.swift"))
         #expect(
-            !source.contains(".disabled("),
+            !source.contains(".disabled(") && !editor.contains(".disabled("),
             Comment(
                 rawValue:
-                    "GapsMasterRow greys a master again — dimmed means "
+                    "a gap master is greyed again — dimmed means "
                     + "no input on every channel (#1383)"
             )
         )
