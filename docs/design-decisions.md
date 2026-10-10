@@ -11400,8 +11400,9 @@ override tier when three things hold: it belongs to the space's
 calculation (so the resolved value can feed layout math over
 the flat array), and it has an **unambiguous layout default
 to inherit** (the checkbox has a meaningful "off"). That
-admits exactly the six per-layout override models — BSP,
-Stack, Scrolling, Grid, Monocle, Track — and nothing else.
+admits the six per-layout override models — BSP, Stack,
+Scrolling, Grid, Monocle, Track — and one further class ruled
+below on its own test, a Space's own gaps.
 Explicitly **excluded**: animations, mouse/drag behavior,
 borders, quit behavior, keybindings and window rules, profile
 routing (`profile_bindings`), and GUI language — none are
@@ -11413,10 +11414,33 @@ for exactly that reason. Two boundary notes: **Monocle** has a
 single eligible override, focus **orientation** (which
 directional keys cycle the window order and which axis the App
 Bar follows); **Wrap focus** is a layout-wide Monocle/Scrolling
-behavior, deliberately *not* per-space. The override cell's
-count and the *saved for other layouts* breakdown read one
-reflective `fieldCount` over these six models, so a new override
-field is counted without a hand-kept tally. (#290)
+behavior, deliberately *not* per-space. The editor's
+*saved for other layouts* breakdown reads one reflective
+`fieldCount` over these six models, so a new override field is
+counted without a hand-kept tally; the cell's total adds the
+gaps class (`spaceOverrideCount(for:)`). (#290)
+
+**A Space's own gaps are the one override outside a layout.**
+Its first test is its own rather than #290's: gaps are
+geometry of the whole Space, owned by no layout and applied by
+every one. The other two hold as written — they resolve before
+any layout runs (`gaps(for:)` feeds every layout's math), and
+the global gaps on Gaps & Borders are an unambiguous "off". So the gaps row sits first in the overrides
+box, apart from the layout rows, and survives a layout switch;
+it counts as one in the cell's total, so a Space whose only
+override is its gaps still shows it — on a Floating Space as
+**N saved** — while the panel caption and the header's "N of M
+set" stay layout-only, a gaps-only Space truly following Layout
+Defaults, where the row stays visible, greyed with its
+reason, because floating places no windows. The row edits the
+uniform Outer and Inner masters only; per-edge values stay in
+Lua (`set_gap_override` with a table) and read "mixed", the
+first drag converging them, as on Gaps & Borders. "Reset All
+Layout Overrides" leaves the gaps alone: they are not a layout
+override, and the row's own checkbox is their reset. This is a
+second admitted class, not the start of a generic per-Space
+settings override — each further class owes the same three
+tests and its own entry. (#1775, owner ruling 2026-10-09)
 
 **A Floating space still shows its parked overrides as a muted
 "N saved", never hidden.** A space's override cell reports the

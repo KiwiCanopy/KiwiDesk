@@ -19,7 +19,7 @@ enum SpaceOverrideOffer {
     ) -> Bool {
         if mode == .powerUser { return true }
         return spaces.contains {
-            settings.overrideFieldCount(for: $0) > 0
+            settings.spaceOverrideCount(for: $0) > 0
         }
     }
 }
