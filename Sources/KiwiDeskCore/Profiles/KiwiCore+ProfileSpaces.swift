@@ -25,12 +25,18 @@ extension KiwiCore {
         )
     }
 
+    /// Each live Space's members as the record keeps them: the
+    /// row, the up away windows by rank, then every window filed
+    /// there that has not arrived — the snapshot's own
+    /// `pendingFilings(in:)` set, so a restored filing or a parked
+    /// away window comes back to its Space after a switch away and
+    /// back (#2015).
     private var livePartitioning: [Space] {
-        capturedSpaces.map {
-            Space(
-                id: $0.id,
-                windows: withAwayMembers($0.windows, of: $0.id)
-            )
+        capturedSpaces.map { space in
+            let members = withAwayMembers(space.windows, of: space.id)
+            let pending = state.pendingFilings(in: space.id)
+                .filter { !members.contains($0) }
+            return Space(id: space.id, windows: members + pending)
         }
     }
 

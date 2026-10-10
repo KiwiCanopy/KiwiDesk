@@ -543,7 +543,11 @@ editing here:
   takes `withAwayMembers(_:of:)` — the fold's own rank insert —
   never a hand merge, and a profile's PARTITIONING record is such
   a reader, since a record that omits what is away forgets it on
-  every switch (#1248); a reader keyed by app takes
+  every switch (#1248) — and it also takes every window filed
+  there that has not arrived, the snapshot's one
+  `pendingFilings(in:)` set, a restored filing and a parked away
+  window included (#2015, `PartitioningPendingFilingTests`); a
+  reader keyed by app takes
   `awayWindows(bundleID:)`. An entry with NO Space (a boot-found
   window nothing has filed) is UNFILED: every reader carries the
   skip branch — `awayMembers(of:)` omits it, `get_state` lists it
