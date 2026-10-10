@@ -73,14 +73,52 @@ struct SpaceShortcutDropOwedTests {
         config.layers = [
             KeyLayer(
                 name: KeyLayer.defaultName,
-                bindings: [row("control+option+1", 1)]
+                bindings: [row("control+option+9", 9)]
             )
         ]
         try core.guiConfigStore.save(config)
-        core.state.owedShortcutDrops = [SpaceID(1)]
+        // Space 9 is live and no arrangement declares it.
+        core.execute("move_to_space", args: [.string("9"), .number(13)])
+        #expect(core.state.workspaces[SpaceID(9)] != nil)
+        core.state.owedShortcutDrops = [SpaceID(9)]
         core.retile()
         #expect(core.state.owedShortcutDrops.isEmpty)
-        #expect(baseCombos(core) == ["control+option+1"])
+        #expect(baseCombos(core) == ["control+option+9"])
+    }
+
+    @Test("an emptied hold with no workspace owes its chords")
+    func emptiedHoldOwes() throws {
+        let core = try desk.docked()
+        var config = GuiConfig()
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [row("control+option+5", 5)]
+            )
+        ]
+        try core.guiConfigStore.save(config)
+        let away = WindowID(22)
+        core.state.awayWindows[away] = AwayWindow(
+            id: away,
+            pid: 3,
+            appName: "Away",
+            appBundleID: "app.away",
+            nativeSpace: 4
+        )
+        core.state.rememberedSpaces[away] = .departed(SpaceID(3))
+        core.handle(.displaysChanged([desk.builtIn]))
+        let held = SpaceID(5)
+        core.state.workspaces.removeSpace(held)
+        core.retile()
+        #expect(core.state.heldSpaces[held] != nil)
+        // Its last remembered window goes: the hold ends with no
+        // Space to forward, so only the door owes the drop.
+        core.state.awayWindows[away] = nil
+        core.state.rememberedSpaces[away] = nil
+        core.retile()
+        #expect(core.state.heldSpaces[held] == nil)
+        core.retile()
+        #expect(!baseCombos(core).contains("control+option+5"))
     }
 
     @Test("a number whose drop is owed is never minted")

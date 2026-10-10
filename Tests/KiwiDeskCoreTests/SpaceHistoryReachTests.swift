@@ -74,6 +74,8 @@ struct SpaceHistoryReachTests {
     @Test("Back skips a Space that left state")
     func goneSpaceIsSkipped() {
         let core = makeCore(shown: "1")
+        // All screens: the per-screen term would skip it anyway.
+        core.execute("set_space_history", args: [.string("all_screens")])
         core.execute("focus_space", args: [.string("2")])
         core.execute("focus_space", args: [.string("3")])
         core.state.workspaces.removeSpace(SpaceID("2"))
