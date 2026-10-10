@@ -30,7 +30,8 @@ enum OtherWindowManagerSilence {
 
 /// The panel the alert's content is hosted in. An `NSAlert` window
 /// is not `.closable`, so ⌘W would beep at it once it is key; this
-/// one answers Close and Esc as Not Now (#1533's shape).
+/// one answers Close and Esc by closing for this launch (#1533's
+/// shape).
 final class OtherWindowManagerPanel: NSPanel {
     var onDismiss: () -> Void = {}
 
@@ -115,12 +116,6 @@ final class OtherWindowManagerAlert: NSObject {
         )
         quit.target = self
         quit.action = #selector(quitManager)
-        let notNow = alert.addButton(
-            withTitle: L("other_wm.alert.not_now", "Not Now")
-        )
-        notNow.keyEquivalent = "\u{1b}"
-        notNow.target = self
-        notNow.action = #selector(dismiss)
         let silence = alert.addButton(
             withTitle: L(
                 "other_wm.alert.silence",

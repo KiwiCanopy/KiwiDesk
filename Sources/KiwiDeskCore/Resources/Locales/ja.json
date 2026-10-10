@@ -1123,7 +1123,6 @@
   "onboarding.starter_spaces.title.widescreen": "お使いの画面に合わせたスペースの準備ができました",
   "onboarding.window.title": "KiwiDeskの設定",
   "other_wm.alert.body": "2つのウインドウマネージャが同じウインドウを配置すると、ウインドウが両方のレイアウトの間で跳ね回ります。KiwiDeskはどちらの場合もウインドウの管理を続けます。",
-  "other_wm.alert.not_now": "今はしない",
   "other_wm.alert.quit": "%1$@を終了",
   "other_wm.alert.silence": "わかっています",
   "other_wm.alert.title": "%1$@もウインドウを管理しています",

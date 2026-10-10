@@ -1123,7 +1123,6 @@
   "onboarding.starter_spaces.title.widescreen": "화면에 맞춘 공간이 준비되었습니다",
   "onboarding.window.title": "KiwiDesk 설정",
   "other_wm.alert.body": "윈도우 관리자 두 개가 같은 윈도우를 배치하면 윈도우가 두 레이아웃 사이를 오갑니다. KiwiDesk는 어느 경우든 계속 윈도우를 관리합니다.",
-  "other_wm.alert.not_now": "나중에",
   "other_wm.alert.quit": "%1$@ 종료",
   "other_wm.alert.silence": "알고 있습니다",
   "other_wm.alert.title": "%1$@도 윈도우를 관리하고 있습니다",
