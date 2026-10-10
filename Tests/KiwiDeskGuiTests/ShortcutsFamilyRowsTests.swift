@@ -50,7 +50,8 @@ struct ShortcutsFamilyRowsTests {
         //    Mouse & trackpad drawer's two mouse settings (#1726),
         //    whose census cases live in the Behaviour sub-enum,
         //    and its scroll gestures (#1656, #1519) — controls the
-        //    drawer's entries draw.
+        //    drawer's entries draw — and Focus's Space history
+        //    setting (#1655), drawn by `SpaceHistoryRow`.
         let handDrawn: Set<SettingKey> = [
             .shortcuts(.layers),
             .shortcuts(.layersIcon),
@@ -67,6 +68,7 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.scrollSpaceStep),
             .shortcuts(.scrollNaturalTrackpad),
             .shortcuts(.scrollNaturalMouse),
+            .shortcuts(.spaceHistory),
         ]
         let expander = fixture()
         let placed = SettingKey.allCases.filter {

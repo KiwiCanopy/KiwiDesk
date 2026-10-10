@@ -62,6 +62,19 @@ extension SettingsModel {
         )
     }
 
+    /// The Space history row's checklist (#1655).
+    func historyReach() -> RuleReachReading? {
+        guard let reach = encodedReach else { return nil }
+        let key = RuleReachTable<SpaceHistoryKind>.spaceHistoryKey
+        return reading(
+            reach.spaceHistory,
+            key,
+            reach.unreadable,
+            picked: reachEdits.reach[.history]?[key],
+            SpaceHistoryWords.value
+        )
+    }
+
     /// Who binds this row's combo to another action, per profile,
     /// read off the encoded table — the action ticking would take
     /// the key from.
@@ -171,6 +184,7 @@ extension SettingsModel {
         case .float: floatReach(app) { $0.joined(separator: ", ") }
         case .key: keyReach(app)
         case .scroll: scrollReach(app)
+        case .history: historyReach()
         }
     }
 
@@ -271,6 +285,13 @@ extension SettingsModel {
             return RuleReachDraft.defaultReach(
                 of: key,
                 in: stored.scrollGestures,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .history:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.spaceHistory,
                 editing: editing,
                 isLoaded: reachIsLoaded
             )

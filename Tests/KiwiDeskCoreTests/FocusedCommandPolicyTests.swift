@@ -18,6 +18,12 @@ struct FocusedCommandPolicyTests {
     private let allowedNonSetters: Set<String> = [
         "focus_space",
         "focus_desktop",
+        // Switch a Space on the focused window's screen (#1655),
+        // moving no window — focus_space's class.
+        "focus_space_previous",
+        "focus_space_next",
+        "focus_space_back",
+        "focus_space_forward",
         // Act on a named space + display, not the focused window,
         // so they skip the foreground preflight (like focus_space).
         "move_space_to_display",

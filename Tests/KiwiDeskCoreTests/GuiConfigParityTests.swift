@@ -43,7 +43,7 @@ struct GuiConfigParityTests {
                 "appRules", "spacePins", "mainSpaces",
                 "fallbackSpace", "floatRules", "ignoreRules",
                 "profileBindings", "desktopSpaces", "layers",
-                "scrollGesture", "appWide", "look",
+                "scrollGesture", "appWide", "look", "spaceHistory",
             ]
         )
     }
@@ -82,6 +82,7 @@ struct GuiConfigParityTests {
             longSwipes: true,
             stepDistance: 120
         )
+        config.spaceHistory = .allScreens
         config.layers = [
             KeyLayer(
                 name: "default",
@@ -110,6 +111,7 @@ struct GuiConfigParityTests {
         #expect(back.appWide == config.appWide)
         #expect(back.look == config.look)
         #expect(back.scrollGesture == config.scrollGesture)
+        #expect(back.spaceHistory == config.spaceHistory)
         // Profile-scoped fields deliberately do NOT ride the
         // sidecar (#36) — they come back default.
         #expect(back.settings == TilingSettings())

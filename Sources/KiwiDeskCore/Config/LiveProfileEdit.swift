@@ -1,8 +1,9 @@
 import Foundation
 
 /// What a write of the live profile from outside Settings changes
-/// (#1518, #1790): the one value the door carries to the file and
-/// to an open draft alike, so the two cannot apply different edits.
+/// (#1518, #1790): the one value the door carries to the
+/// file and to an open draft alike, so the two cannot apply
+/// different edits.
 public enum LiveProfileEdit {
     /// A leaf of the settings — the tour's look, a bar row.
     case settings(SettingsEdit)

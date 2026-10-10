@@ -15,6 +15,16 @@ extension SpacesSection {
         )
     }
 
+    /// The one pointer to every Space's shortcuts (#1827).
+    static var shortcutsProse: String {
+        L(
+            "spaces.shortcuts_xref",
+            "Shortcuts for every Space, named or numbered, are on "
+                + "%1$@.",
+            CrossReferenceRow.linkSlot
+        )
+    }
+
     var emptyCaption: String {
         L(
             "spaces.empty",

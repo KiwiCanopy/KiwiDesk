@@ -106,6 +106,8 @@ struct AnnouncedValuePinTests {
         // no number of points can answer.
         "SettingsDisclosureStyle.swift": 1,
         "SettingsHeaderBar.swift": 1,
+        // #1655: the Space history group's heading.
+        "SpaceHistoryRow.swift": 1,
         "HomeScreen.swift": 1,
         // The ⌃⌥K panel's band and subgroup headers, in the census
         // from the moment `Sources/KiwiDesk/Shortcuts` joined

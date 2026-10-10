@@ -213,6 +213,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 persisted: persisted
             )
         }
+        core.onShortcutsDropped = { [weak self] spaces in
+            self?.dashboardIfCreated?.adoptShortcutDrop(spaces)
+        }
         wireBarMenus()
         wireWhatsNewTrail()
         core.onConfigIssuesChange = { [weak self] issues in

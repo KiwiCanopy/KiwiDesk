@@ -13,7 +13,7 @@ extension SettingsValueReadout {
             return shortcutsLayerRows(census, old: old, new: new)
         case .layersIcon:
             return shortcutsIconRows(census, old: old, new: new)
-        case .focusDir, .goToSpace, .swapDir,
+        case .focusDir, .spaceStep, .spaceHistoryStep, .goToSpace, .swapDir,
             .moveWindowToTrack, .swapWithTrack, .moveToSpace,
             .moveToSpaceFollow, .focusDesktop, .moveToDesktop,
             .moveToDesktopFollow, .growWidth, .shrinkWidth,
@@ -29,6 +29,15 @@ extension SettingsValueReadout {
         case .scrollPan, .scrollLongSwipes, .scrollStepDistance,
             .scrollNaturalTrackpad, .scrollNaturalMouse, .scrollSpaceStep:
             return scrollGestureRows(key, old: old, new: new)
+        case .spaceHistory:
+            return [
+                .change(
+                    census,
+                    label: SpaceHistoryWords.title,
+                    old: SpaceHistoryWords.value(old.spaceHistory),
+                    new: SpaceHistoryWords.value(new.spaceHistory)
+                )
+            ]
         }
     }
 

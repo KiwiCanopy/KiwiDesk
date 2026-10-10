@@ -101,6 +101,10 @@ struct SnapshotStoreCensusTests {
             (.always, "held Spaces, re-created at boot (#1646)"),
         "state.temporaryArmed":
             (.always, "temporary Spaces, re-created at boot (#1790)"),
+        "state.owedShortcutDrops":
+            (.behind, "paid at the retile after the drop (#1827)"),
+        "spaceHistory.trails.trails[].visits":
+            (.behind, "the Space history starts fresh, by ruling (#1655)"),
         "state.profilePartitioning.byArrangement[]":
             (
                 .always,
@@ -276,8 +280,12 @@ struct SnapshotStoreCensusTests {
                         .hasSuffix("[]")
                 {
                     // Past a dictionary value: the element type is
-                    // `Space`, whose fields the Space census holds.
-                    value = Space(id: SpaceID("1"))
+                    // `Space`, whose fields the Space census holds —
+                    // save the Space history's trails (#1655).
+                    value =
+                        path.hasPrefix("spaceHistory.")
+                        ? SpaceHistory.Trail() as Any
+                        : Space(id: SpaceID("1"))
                 }
                 guard
                     let child = Mirror(reflecting: value).children

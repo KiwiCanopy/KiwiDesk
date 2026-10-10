@@ -258,11 +258,20 @@ failures. 1 still means the command itself did not get through.
 
 ## Commands
 
+:::unreleased
+`focus_space_previous`, `focus_space_next`, `focus_space_back`,
+`focus_space_forward` and `set_space_history` step through the
+Spaces by their order and by the ones you visited
+([`focus_space_back`](lua-reference.md#focus_space_back--focus_space_forward)).
+:::
+
 | Category | Command | Arguments |
 |---|---|---|
 | Navigation | `focus` | `left\|right\|up\|down` |
 | | `swap` | `left\|right\|up\|down` |
 | | `focus_space` | space id |
+| | `focus_space_previous` / `focus_space_next` | — (the focused screen's order; stops at the ends) |
+| | `focus_space_back` / `focus_space_forward` | — (the Spaces you visited; see `set_space_history`) |
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
 | | `focus_desktop` | Desktop number (Mission Control's) |
@@ -294,6 +303,7 @@ failures. 1 still means the command itself did not get through.
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
+| | `set_space_history` | `per_screen` (default) \| `all_screens` — whose visits Space back and forward walk |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_float_placement` | `center` (default) \| `keep` — where a window lands when it toggles to floating or moves into a floating Space |
 | | `sticky.set_desktop_reach` | true\|false (default `true`) — sticky windows follow you across macOS Desktops (needs the window-management bridge) |

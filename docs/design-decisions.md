@@ -9740,6 +9740,23 @@ Stated that way the rule **predicts**, which is what makes it a
 rule rather than a label: a future glide-able verb goes to `⌥⌘`,
 anything you tap stays on `⌃⌥`.
 
+:::unreleased
+**One pressed exception rides `⌥⌘`: the Space history on `Tab`
+(#1655, owner ruling 2026-10-09).** Back and Forward through the
+Spaces you visited are pressed, so the rule above sends them to
+`⌃⌥`. They take `⌥⌘Tab` and `⌥⌘⇧Tab` instead, for the hand: `⌘`
+and `⌥` sit on the right of every Mac keyboard, while a MacBook
+has no right `⌃`, so a key pressed in passing — the way `⌘Tab`
+is — reads as one thumb roll on `⌥⌘` and a two-hand reach on
+`⌃⌥`. `⌃⌥Tab` was the other candidate and lost on exactly that.
+The prediction survives because the exception is pinned to one
+key: `⌥⌘` still carries no pressed verb on any other key, and
+`SizeLayerSeedTests` holds the pair to `Tab`, so it cannot spread
+under cover of the first. Before seeding, the owner pressed
+`⌥⌘Tab` (2026-10-09): macOS's app switcher does not take it, and
+`SystemShortcuts.map` reserves `⌘Tab` alone.
+:::
+
 **Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
 2026-09-13). A menu-bar app with no Dock tile is almost never
 the active app, so `⌘,` reaches a new user only once they have
@@ -9799,6 +9816,90 @@ invents a collision with the system's own window tiling.** The
 known-truth check that settles it: Window ▸ Move & Resize ▸ Left
 reads `mods=28`, which is `fn` + control + "no command" and
 matches Apple's own documented `fn⌃←`.
+
+:::unreleased
+**Swap returns to `⌃⌥⇧`, and `⌃⌥⌘`+arrows steps the Spaces
+(#1655, owner ruling 2026-10-09, amending #1176 above).** The
+previous and next Space need a chord, and the obvious base is the
+one the ⌃⌥⌘ + scroll step already taught (#1519): a gesture and a
+key that do the same thing should share their modifiers. That
+base held swap, so swap moves — to `⌃⌥⇧`+arrows, where `⇧` means
+what it means on a digit, "act on the window": `⇧` sends the
+window to a Space or swaps it with a neighbour, `⌘` steps through
+the Spaces or sends the window and follows. The grammar #1176
+gave up for ergonomics comes back, and the cost #1176 named
+returns with it: `⌃⌥⇧`+arrows is the three-modifier claw for the
+less frequent of the two verbs, which the Space step — pressed far
+more often than a swap — now does not pay. `⌃⌥⌘↑`/`↓` are left
+unbound rather than given a verb nobody asked for.
+
+**`⌥⌘`+arrows was refused for the Space step.** It is the lighter
+chord and it is next/previous tab in Chrome, Edge, Arc, Firefox
+and VS Code (#1075's boundary above): a global hotkey pre-empts
+the frontmost app, so the step would take tab switching away
+everywhere, a loss with no menu path that presents as "the browser
+is broken".
+
+**The collision measure, and what it leaves owed.**
+`SystemShortcuts.map` reserves none of the four new chords — the
+⌃⌥⌘ arrows, `⌥⌘Tab`, `⌥⌘⇧Tab` — nor the `⌃⌥⇧` arrows swap moves
+to (`SizeLayerSeedTests` holds every seeded row against it). The
+app-menu enumeration of 2026-09-04 above found neither arrow row
+in any app's shipped defaults, read with the `fn` bit decoded.
+The menus have not been read for the `Tab` pair; that sweep is
+owed on the owner's desk before the release, and the register
+check is necessary and not sufficient (#1098).
+
+**Nobody is moved.** As with every later default, an existing
+install keeps its keymap: its swap stays on `⌃⌥⌘`+arrows and the
+four new rows stay unbound until a Record or Shortcuts & Gestures
+▸ Restore Defaults… lands them.
+
+**Space history walks the visits, never the order (#1655, owner
+rulings 2026-10-09).** Back and Forward answer "where was I", which
+the order steps cannot: the Space you came from is rarely the one
+beside you. They behave as a browser's buttons, because that is
+the model everyone already has. **Every arrival is a visit** — a
+key, a Space Bar click, a move-and-follow, a Desktop switch that
+brings a bound profile's Space — since a history that skips some
+arrivals sends Back somewhere other than where you were, and "it
+depends how I got here" is the one answer the verb cannot give.
+Back and Forward move a cursor and never push; any other arrival
+pushes and clears the forward half. They never create a Space: a
+visit to a Space that has since gone is skipped, and a held Space
+renumbered on a screen change keeps its visits.
+
+**Per screen by default, all screens on request.** With a Space
+per screen, "the Space I was on" usually means on this screen — a
+Back that jumps the focus to the other monitor is a surprise —
+so each screen keeps its own history and Back acts on the screen
+of the focused window. Someone who works across screens as one
+desk asks for the other reading, so it is a setting, `per_screen`
+or `all_screens`. A third choice, a back-and-forth toggle between
+the last two Spaces, was drafted and dropped: Back then Forward
+already bounces between them, and the first Back is the same in
+every kind, so it bought nothing a user could feel. Both
+histories are recorded all the time, so changing the setting
+loses nothing.
+
+**Stored like the shortcuts.** The setting is a global base in
+`gui.json` that every profile uses, and a profile may keep its own
+as a sparse override — the scroll gestures' shape (#1656), and for
+the same reason: it changes what the keys on the same page do, and
+a profile is where a user who docks and undocks keeps what
+differs. An app-wide value with no override was the first draft
+and lost on that ground. Edited for a profile saved for one
+screen, the row greys and says why — both choices walk the one
+history there — while the shared value never greys, since it
+serves every profile.
+
+**It starts fresh at every start.** An in-place restart, an update
+or a crash carries no history. A Back that lands on a Space from
+before the restart, chosen by visits nobody remembers, is a
+surprise rather than a convenience, and carrying it would make the
+history one more store the snapshot must keep coherent with
+renumbered and dropped Spaces for no visible gain.
+:::
 
 **`⇧` has one meaning, and a toggle does not qualify (#1094).**
 `⌃⌥⇧S` spent `⇧` on "a broader scope" while the ladder three rows
@@ -10126,6 +10227,44 @@ a binding orphaned under a 4-space profile is valid again under
 the 8-space one — silently deleting it would lose config across a
 routine monitor swap. The rows stay live at runtime by design.
 (#92)
+
+:::unreleased
+**A Space that was only ever live takes its shortcuts with it
+(#1827, owner ruling 2026-10-09, amending #92 and #1507).** #92's
+argument is that another arrangement can use the binding again:
+a chord orphaned under a 4-space profile is valid again under the
+8-space one. A temporary Space and a held one have no such
+arrangement. A temporary Space's number was taken for a task and
+is minted again for the next one; a held Space's number was minted
+for the hold, past every live number, and is minted again by the
+next hold. A chord that outlived either would aim at whatever
+unrelated Space takes the number next — a press that "works" and
+lands somewhere the user never meant, which is worse than a press
+that does nothing. So when a temporary Space drops, or a held
+Space's hold ends without it going home, every binding naming it
+leaves the base layers and every profile's override, through one
+path at the retile every membership change takes; an open
+Settings draft takes the same edit. A Space some arrangement still
+declares keeps its chord — that binding is #92's, and Inactive
+shortcuts keeps surfacing it — and so does one that went home or
+was added to the profile, which is live and declared. A Lua-owned
+config's shortcuts are `init.lua`'s, which nothing rewrites.
+
+**No new chords for named Spaces or Spaces past ten.** Once the
+order steps and the history reach every Space, a chord per Space
+past the tenth digit is a want, not a gap: the per-Space rows on
+Shortcuts & Gestures already offer one, unbound, for every live
+Space, and Settings ▸ Spaces points there rather than growing a
+recorder of its own.
+
+**The per-Space rows draw every live Space (#1827).** A temporary
+or held Space's chords work, so its rows sit in the per-Space
+families after the profile's own, wearing the Space's chip, and
+Inactive shortcuts judges against every LIVE Space rather than the
+profile's list. Listing a working chord under Inactive, captioned
+"pressing one recreates its Space", told the user the opposite of
+what a press does; Inactive keeps only #92's true orphans.
+:::
 
 **The shortcuts panel scrolls, and says so — in words, in the
 footer.** The panel is a glance surface but not a small one: the
@@ -14828,7 +14967,7 @@ learn it. The namesake adopting the windows is refused because it
 merges two arrangements into one Space, the merge #1230 ruled out;
 the resident keeping the name with the held Space reachable by a
 bar click alone is refused because it leaves a Space with no
-shortcut, and no next/previous-Space verb exists to reach it by.
+shortcut of its own.
 
 **The held Spaces keep their order**
 ([#1664](https://github.com/KiwiCanopy/KiwiDesk/issues/1664)).

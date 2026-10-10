@@ -49,6 +49,7 @@ extension KiwiCore {
             // defaults, the profile's override dropped with the
             // rest of its state on this branch.
             applyScrollGestures(profile: nil)
+            applySpaceHistory(profile: nil)
             return
         }
         lua = fresh
@@ -216,6 +217,8 @@ extension KiwiCore {
         // `init.lua`'s scroll_gesture verbs declare the base anew;
         // the load's tail configures the tap once.
         resetScrollGestureInputs()
+        spaceHistory.base = .defaultKind
+        spaceHistory.profileOverride = nil
         tiler.settings.gapsOverride = [:]
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]

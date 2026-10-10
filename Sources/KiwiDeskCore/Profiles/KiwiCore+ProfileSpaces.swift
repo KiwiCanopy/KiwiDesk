@@ -143,6 +143,7 @@ extension KiwiCore {
     /// take it (`SpaceForwardingSeamTests`), since a hand copy of
     /// the step list is how the record went missing from one.
     func forwardWindows(of space: SpaceID, to fallback: SpaceID) {
+        oweShortcutDropIfLiveOnly(space)  // #1827
         for window in state.workspaces[space]?.windows ?? [] {
             state.workspaces.add(window, to: fallback)
             // A later `resolveSpaceDisplays` moving the fallback
@@ -153,6 +154,7 @@ extension KiwiCore {
         }
         state.workspaces.removeSpace(space)
         state.temporaryArmed.remove(space)
+        spaceHistory.trails.forget(space)  // #1655
     }
 
     /// Puts the incoming profile's own windows back in its own

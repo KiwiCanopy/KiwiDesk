@@ -44,6 +44,7 @@ extension KiwiCore {
         // window remembered there. An EMPTY Space the prune is
         // about to drop frees its number (#1790).
         let taken = declared.union(state.heldSpaces.keys)
+            .union(state.owedShortcutDrops)
             .union(
                 state.workspaces.allSpaces.map(\.id)
                     .filter { !spaceHoldsNothing($0) }
@@ -134,6 +135,7 @@ extension KiwiCore {
         }
         var taken = declared.union(state.heldSpaces.keys).union(live)
             .union(state.rememberedSpaces.values.map(\.space))
+            .union(state.owedShortcutDrops)
         let names = held.map { id -> SpaceID in
             guard declared.contains(id) else { return id }
             let fresh = SpaceID.nextNumber(past: taken)
@@ -206,6 +208,7 @@ extension KiwiCore {
                 for window in remembered {
                     state.refileAway(of: window, to: origin.name)
                 }
+                oweShortcutDrop(id)  // its hold ended (#1827)
                 forwardWindows(of: id, to: origin.name)
                 tiler.settings.removeSpace(id)
             }
@@ -259,8 +262,10 @@ extension KiwiCore {
         placeHeldBatchLast(created)
     }
 
-    /// Ends one Space's hold — `delete_space` removed it.
+    /// Ends a hold whose number goes with it (`delete_space`, the
+    /// emptied retire), owing its shortcuts (#1827).
     func endHold(of id: SpaceID) {
+        oweShortcutDrop(id)
         state.heldSpaces[id] = nil
     }
 
@@ -274,7 +279,7 @@ extension KiwiCore {
         for id in state.heldSpaces.keys {
             let space = state.workspaces[id]
             guard spaceHoldsNothing(id) else { continue }
-            state.heldSpaces[id] = nil
+            endHold(of: id)
             guard space != nil,
                 let other = state.workspaces.allSpaces.first(where: {
                     $0.id != id
@@ -311,6 +316,7 @@ extension KiwiCore {
         // Every remembered window, up or not — a hidden app's
         // included — or it returns to the old number (#1669).
         state.renameRememberedSpace(source, to: target)
+        spaceHistory.trails.rekey(source, to: target)  // #1655
     }
 
     /// `WorkspaceManager.add` nils the focus trackers of a window

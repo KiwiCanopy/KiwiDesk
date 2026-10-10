@@ -203,10 +203,7 @@ public final class KiwiCore {
     /// staleness-checked (the `runPendingFocusRaise` pattern).
     var pendingMouseWarp: WindowID?
 
-    /// The machine tail of the warp (#186): reads the live
-    /// cursor, moves the pointer. nil until `start()` wires it,
-    /// so unit tests never move the developer's pointer (the
-    /// `frontmostPIDProvider` pattern).
+    /// The warp's machine tail (#186); nil until `start()` wires it.
     var pointerWarp: (@MainActor (CGRect) -> Void)?
 
     /// The deferred one-shot settle tasks (focus follow, startup
@@ -278,6 +275,8 @@ public final class KiwiCore {
     var healedSpaces: [String: SpaceID] = [:]
     /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
     var appWideLedger = AppWideLedger()
+    /// Space history and its setting (#1655, `KiwiCore+SpaceHistory`).
+    var spaceHistory = SpaceHistoryState()
     /// The shared look's state (#1752, `KiwiCore+SharedLook`).
     var sharedLookLedger = SharedLookLedger()
     /// The live arrangement's explicit rehome target (#68) —
@@ -320,6 +319,7 @@ public final class KiwiCore {
             -> Void = { _ in }
     /// Fired on every live-profile write from outside Settings.
     public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
+    public var onShortcutsDropped: ShortcutsDropped = { _ in }
 
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18) —
     /// declared and argued as a bundle in `KiwiCore+LuaAPI`,
