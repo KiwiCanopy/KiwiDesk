@@ -25,16 +25,15 @@ extension AppBarOverlay {
             // A member still sliding out of its group travels bare
             // and takes its glass when it lands (#1831).
             let gliding = glidingIn.contains(itemViews[i].windowID)
-            let bare = itemViews[i].isHidden || gliding
-            glass.isHidden = bare
             if !gliding { GlassPlate.setContent(glass, itemViews[i]) }
             GlassBox.place(
                 glass,
                 tint: boxTints[i],
                 at: frames[i],
                 cornerRadius: radius,
-                hex: bare ? nil : style.fillColor,
+                hex: style.fillColor,
                 edge: style.edge,
+                visible: !itemViews[i].isHidden && !gliding,
                 animated: animated,
                 move: moveFrame
             )

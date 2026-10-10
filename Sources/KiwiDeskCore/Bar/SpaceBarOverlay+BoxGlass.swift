@@ -24,15 +24,15 @@ extension SpaceBarOverlay {
                 size: frames[i].size
             )
             let glass = boxGlasses[i]
-            GlassBox.host(of: glass)?.isHidden = itemViews[i].isHidden
             GlassPlate.setContent(glass, itemViews[i])
             GlassBox.place(
                 glass,
                 tint: boxTints[i],
                 at: frames[i],
                 cornerRadius: radius,
-                hex: itemViews[i].isHidden ? nil : style.fillColor,
+                hex: style.fillColor,
                 edge: style.edge,
+                visible: !itemViews[i].isHidden,
                 animated: animated,
                 move: moveFrame
             )

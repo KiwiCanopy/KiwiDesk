@@ -57,9 +57,10 @@ struct AppBarBoxHostTests {
         #expect(overlay.itemRun.subviews.last === host)
     }
 
-    /// A box gliding to a new slot moves its host and never its
-    /// glass or tint, which fill the host: the pair animating its
-    /// own frames trailed a crescent on the device (#2150).
+    /// A box gliding to a new slot moves its host, which the glass
+    /// and tint fill: the pair animating its own frames trailed a
+    /// crescent on the device (#2150). That the pair's own writes
+    /// never travel is `GlassPairMotionSeamTests`'.
     @Test("A gliding box moves its host, never its glass or tint")
     func glideMovesTheHost() throws {
         guard #available(macOS 26, *) else { return }
@@ -89,11 +90,6 @@ struct AppBarBoxHostTests {
             hosts.contains { $0 === write.view }
         }
         #expect(hostWrites.contains { $0.travels })
-        let pair = writes.filter { write in
-            write.view is GlassBackdrop
-                || overlay.boxGlasses.contains { $0 === write.view }
-        }
-        #expect(!pair.contains { $0.travels })
         for (glass, tint) in zip(overlay.boxGlasses, overlay.boxTints) {
             let host = try #require(GlassBox.host(of: glass))
             #expect(tint.superview === host)

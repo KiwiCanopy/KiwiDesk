@@ -1116,16 +1116,17 @@ Obligations:
   pair that travels fills one host that carries the motion**
   (#2095). The glass renders a frame behind its gradient, so a
   pair gliding by its own frames trails a crescent ahead of the
-  box. Both bars' boxes and the KiwiShelf plate are minted and
-  dropped through the one `GlassBox` and laid out through its one
+  box. A glass pair that travels is minted, laid out and taken
+  out through the one `GlassBox` — laid out through its one
   `place`, which writes the pair to the host's CURRENT bounds
-  before the host moves — AppKit steps a travelling frame and
-  autoresizes the pair at every step (#2150). `GlassPlate.update` and
-  `GlassTint.apply` take no `animated:` argument, so a pair has
-  no way to travel by itself; a drag moves the host too
-  (`SpaceBarGlideWiringTests` ▸ `boxGlassTravels`,
+  before the host moves, since AppKit steps a travelling frame and
+  autoresizes the pair at every step — and a drag moves the host
+  too (`SpaceBarGlideWiringTests` ▸ `boxGlassTravels`,
   `boxGlassFillsItsHost`, `AppBarBoxHostTests` ▸
-  `glideMovesTheHost`, `ShelfPlateGlassHostTests`).
+  `glideMovesTheHost`, `ShelfPlateGlassHostTests`). The pair's own
+  frame writers, `GlassPlate.update` and `GlassTint.apply`, take
+  no motion input and start no motion (`GlassPairMotionSeamTests`),
+  so a call site cannot make either travel.
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** Both drag markers' glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays

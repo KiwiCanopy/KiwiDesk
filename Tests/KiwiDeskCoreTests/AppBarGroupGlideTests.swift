@@ -157,7 +157,7 @@ struct AppBarGroupGlideTests {
         let arrival = overlay.itemViews[1]
         #expect(overlay.glidingIn.contains(WindowID(2)))
         #expect(arrival.superview === overlay.itemRun)
-        #expect(overlay.boxGlasses[1].isHidden)
+        #expect(GlassBox.host(of: overlay.boxGlasses[1])?.isHidden == true)
     }
 
     /// A released member's glass is paired by window, so no render

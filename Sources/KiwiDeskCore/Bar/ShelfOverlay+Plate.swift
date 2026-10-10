@@ -29,7 +29,6 @@ extension ShelfOverlay {
             let tint = glassTint
         {
             solidPlateView().isHidden = true
-            glass.isHidden = false
             GlassPlate.setContent(glass, glassFiller)
             GlassBox.place(
                 glass,
@@ -38,12 +37,13 @@ extension ShelfOverlay {
                 cornerRadius: radius,
                 hex: shelf.fillColor,
                 edge: edge,
-                animated: animated
+                visible: true,
+                animated: animated,
+                move: moveFrame
             )
             return
         }
-        glassPlate?.isHidden = true
-        glassTint?.isHidden = true
+        hideGlassPlate()
         let plate = solidPlateView()
         if plate.superview !== content {
             content.addSubview(
@@ -186,8 +186,12 @@ extension ShelfOverlay {
 
     private func hidePlates() {
         solidPlate?.isHidden = true
-        glassPlate?.isHidden = true
-        glassTint?.isHidden = true
+        hideGlassPlate()
         plateBorder.isHidden = true
+    }
+
+    /// Hides the glass plate's box, which keeps its place.
+    private func hideGlassPlate() {
+        if let glassPlate { GlassBox.host(of: glassPlate)?.isHidden = true }
     }
 }

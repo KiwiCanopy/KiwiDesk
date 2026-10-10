@@ -6,7 +6,9 @@ import AppKit
 /// what moves: a glass and its backdrop animating their own frames
 /// drift a frame apart and trail (#2095). It lets presses through
 /// its empty area.
-final class GlassBoxHost: AppBarOverlay.FlippedView {
+final class GlassBoxHost: NSView {
+    override var isFlipped: Bool { true }
+
     override func hitTest(_ point: NSPoint) -> NSView? {
         let hit = super.hitTest(point)
         return hit === self ? nil : hit
@@ -51,43 +53,32 @@ enum GlassBox {
     /// Lays a box out at `frame`: the pair takes the host's CURRENT
     /// bounds, then the host — the one view that travels (#2095) —
     /// moves; AppKit steps a travelling frame and autoresizes the
-    /// pair at each step, and an equal write is skipped so it never
-    /// cancels that follow. `hex` nil hides the tint. A fresh host
-    /// lands rather than gliding from nowhere.
+    /// pair at each step. A fresh host lands rather than gliding
+    /// from nowhere. `visible` false hides the whole box, which
+    /// still takes its slot; `hex` is the Fill its tint paints.
     static func place(
         _ glass: NSView,
         tint: GlassBackdrop,
         at frame: CGRect,
         cornerRadius: CGFloat,
-        hex: String?,
+        hex: String,
         edge: AppBarEdge,
+        visible: Bool,
         animated: Bool,
-        move: @escaping BarFrameMove = BarMotion.setFrame(_:to:animated:)
+        move: BarFrameMove = BarMotion.setFrame(_:to:animated:)
     ) {
         guard let host = host(of: glass) else { return }
-        let fill: BarFrameMove = { view, target, _ in
-            if view.frame != target { move(view, target, false) }
-        }
+        host.isHidden = !visible
         let bounds = host.bounds
-        GlassPlate.update(
-            glass,
+        GlassPlate.update(glass, frame: bounds, cornerRadius: cornerRadius)
+        GlassTint.apply(
+            tint,
+            below: glass,
             frame: bounds,
             cornerRadius: cornerRadius,
-            move: fill
+            hex: hex,
+            edge: edge
         )
-        if let hex {
-            GlassTint.apply(
-                tint,
-                below: glass,
-                frame: bounds,
-                cornerRadius: cornerRadius,
-                hex: hex,
-                edge: edge,
-                move: fill
-            )
-        } else {
-            tint.isHidden = true
-        }
         move(host, frame, animated && host.frame != .zero)
     }
 

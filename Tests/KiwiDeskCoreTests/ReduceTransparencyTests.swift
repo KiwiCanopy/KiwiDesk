@@ -160,7 +160,8 @@ struct ReduceTransparencyTests {
                     shelves.overlayForTesting(barTitleDisplay)
                 )
                 #expect(
-                    (overlay.glassPlate?.isHidden ?? true) == reduced,
+                    (overlay.glassPlate.flatMap { GlassBox.host(of: $0) }?
+                        .isHidden ?? true) == reduced,
                     Comment(rawValue: "reduced: \(reduced)")
                 )
                 #expect(

@@ -48,6 +48,55 @@ struct ShelfPlateGlassHostTests {
         #expect(overlay.plateBorder.frame == host.frame)
     }
 
+    /// The plate's own call travels its host on a glide, so the
+    /// shelf's plate glide reaches the box rather than landing.
+    @Test("A plate glide moves the plate's host")
+    func plateGlideMovesTheHost() throws {
+        guard #available(macOS 26, *) else { return }
+        let spaces = SpaceBarManager()
+        spaces.sync([paintedSpaceBar(front: nil, spaces: 3, glass: true)])
+        let section = try #require(
+            spaces.shownOverlay(on: barTitleDisplay)
+        )
+        var look = KiwiShelf()
+        look.liquidGlass = true
+        let shelves = ShelfManager()
+        shelves.sync([
+            ShelfManager.Shelf(
+                display: barTitleDisplay,
+                edge: .top,
+                strip: barTitleStrip,
+                shelf: look,
+                sheen: 0,
+                space: section,
+                app: nil
+            )
+        ])
+        let overlay = try #require(
+            shelves.overlayForTesting(barTitleDisplay)
+        )
+        let host = try #require(
+            overlay.glassPlate.flatMap { GlassBox.host(of: $0) }
+        )
+        var writes: [(view: NSView, travels: Bool)] = []
+        overlay.moveFrame = { view, frame, travels in
+            writes.append((view, travels))
+            view.frame = frame
+        }
+        var moved = host.frame
+        moved.size.width -= 40
+        overlay.layoutPlate(
+            moved,
+            edge: .top,
+            shelf: look,
+            sheen: 0,
+            radius: 8,
+            animated: true
+        )
+        #expect(writes.contains { $0.view === host && $0.travels })
+        #expect(!host.isHidden)
+    }
+
     /// The door every gliding glass takes: only the host travels,
     /// and the pair is written to the host's bounds before it
     /// moves, so autoresizing carries it the rest of the way.
@@ -72,6 +121,7 @@ struct ShelfPlateGlassHostTests {
                 cornerRadius: 8,
                 hex: "#202020B3",
                 edge: .top,
+                visible: true,
                 animated: true,
                 move: move
             )
@@ -82,7 +132,7 @@ struct ShelfPlateGlassHostTests {
         writes.removeAll()
         place(CGRect(x: 120, y: 0, width: 60, height: 30))
         #expect(writes.contains { $0.view === host && $0.travels })
-        #expect(!writes.contains { $0.view !== host && $0.travels })
+        #expect(!writes.contains { $0.view !== host })
         #expect(box.tint.superview === host)
         #expect(box.glass.frame == host.bounds)
         #expect(box.tint.frame == host.bounds)
