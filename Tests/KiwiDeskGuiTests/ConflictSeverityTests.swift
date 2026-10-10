@@ -126,9 +126,9 @@ struct ConflictSeverityTests {
         )
     }
 
-    /// The two chord facts encode one partition, and `of` reads
-    /// the symbolic id FIRST: an accelerator that gained an id
-    /// would read `.dead` and `.shadowsApps` would go unreachable
+    /// The two chord facts encode one partition, and `of` asks
+    /// the accelerator class first: an accelerator that gained a
+    /// live symbolic id would read `.shadowsApps`, as if it worked,
     /// with every suite still green. Derived over `allCases`, so
     /// a new case joins it for free.
     @Test("the accelerator and symbolic classes do not overlap")

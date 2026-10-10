@@ -50,8 +50,8 @@ extension SystemShortcut {
     /// first (#1275). A `switch` for the parity idiom's reason;
     /// that it never overlaps `symbolicHotkey` is held by
     /// `ConflictSeverityTests` ▸ `classesArePartitioned`, since
-    /// `of` reads the id FIRST and an overlap would make
-    /// `.shadowsApps` unreachable with every suite green.
+    /// `of` asks this first and an overlap would make a live
+    /// symbolic hotkey read `.shadowsApps`, as if it worked.
     var isUniversalAccelerator: Bool {
         switch self {
         case .closeWindow, .quitApp, .hideApp, .minimize:
