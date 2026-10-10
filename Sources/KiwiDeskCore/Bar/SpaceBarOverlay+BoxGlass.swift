@@ -17,6 +17,12 @@ extension SpaceBarOverlay {
     ) {
         let n = min(frames.count, itemViews.count)
         syncBoxGlassCount(n)
+        // Only the box's host travels (#2095): a glass and its
+        // backdrop animating their own frames drift a frame apart,
+        // so both fill it by autoresizing; an equal write is skipped.
+        let fill: BarFrameMove = { [moveFrame] view, frame, animated in
+            if view.frame != frame { moveFrame(view, frame, animated) }
+        }
         for i in 0..<n {
             let radius = SpaceBarItemView.boxRadius(
                 look: style,
@@ -24,14 +30,18 @@ extension SpaceBarOverlay {
                 size: frames[i].size
             )
             let glass = boxGlasses[i]
-            glass.isHidden = itemViews[i].isHidden
+            guard let host = GlassBox.host(of: glass) else { continue }
+            host.isHidden = itemViews[i].isHidden
             GlassPlate.setContent(glass, itemViews[i])
+            // The pair takes the host's CURRENT bounds before it
+            // moves: AppKit steps a travelling frame, and each step
+            // autoresizes them by the rest of the size change.
+            let bounds = host.bounds
             GlassPlate.update(
                 glass,
-                frame: frames[i],
+                frame: bounds,
                 cornerRadius: radius,
-                animated: animated,
-                move: moveFrame
+                move: fill
             )
             let tint = boxTints[i]
             if itemViews[i].isHidden {
@@ -40,30 +50,29 @@ extension SpaceBarOverlay {
                 GlassTint.apply(
                     tint,
                     below: glass,
-                    frame: frames[i],
+                    frame: bounds,
                     cornerRadius: radius,
                     hex: style.fillColor,
                     edge: style.edge,
-                    animated: animated,
-                    move: moveFrame
+                    animated: false,
+                    move: fill
                 )
             }
+            // A fresh host lands; only a drawn box travels.
+            moveFrame(host, frames[i], animated && host.frame != .zero)
         }
     }
 
     private func syncBoxGlassCount(_ n: Int) {
         while boxGlasses.count > n {
             // Its item left in this render's `syncItemViewCount`.
-            let glass = boxGlasses.removeLast()
-            GlassPlate.release(glass)
-            glass.removeFromSuperview()
-            boxTints.removeLast().removeFromSuperview()
+            GlassBox.drop(boxGlasses.removeLast(), boxTints.removeLast())
         }
         while boxGlasses.count < n {
-            guard let glass = GlassPlate.make() else { break }
-            itemRun.addSubview(glass)
-            boxGlasses.append(glass)
-            boxTints.append(GlassBackdrop())
+            guard let pair = GlassBox.make(in: itemRun, spansParent: false)
+            else { break }
+            boxGlasses.append(pair.glass)
+            boxTints.append(pair.tint)
         }
     }
 
@@ -114,15 +123,14 @@ extension SpaceBarOverlay {
         frontGlass?.isHidden = true
         frontTint?.isHidden = true
         guard !boxGlasses.isEmpty else { return }
-        for glass in boxGlasses {
+        for (glass, tint) in zip(boxGlasses, boxTints) {
             for item in itemViews where GlassPlate.holds(glass, item) {
                 GlassPlate.release(glass)
                 itemRun.addSubview(item)
             }
-            glass.removeFromSuperview()
+            GlassBox.drop(glass, tint)
         }
         boxGlasses.removeAll()
-        for tint in boxTints { tint.removeFromSuperview() }
         boxTints.removeAll()
     }
 }

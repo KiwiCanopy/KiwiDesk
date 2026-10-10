@@ -11,7 +11,7 @@ import AppKit
 /// A Space switch DISSOLVES instead (#1838): the old row fades out
 /// where it stands, cropped by the section as it resizes, while the
 /// new row's fades in at its slots — a box with its glass and tint
-/// as one unit, through its `BoxHost` (#1842).
+/// as one unit, through its `GlassBoxHost` (#1842).
 extension AppBarOverlay {
     /// A view leaving the run: into the item that absorbed it, or
     /// — `into` nil — fading out where it stands on a dissolve, in
@@ -119,7 +119,7 @@ extension AppBarOverlay {
         GlassPlate.release(glass)
         itemRun.addSubview(view)
         view.frame = frame
-        Self.dropBox(glass, tint)
+        GlassBox.drop(glass, tint)
     }
 
     /// Plays the glide inside the render's layout group: arrivals
@@ -141,14 +141,14 @@ extension AppBarOverlay {
         let boxes = boxGlassHosts()
         for arrival in arrivals where arrival.from == .zero {
             guard let glass = boxes[arrival.id]?.glass,
-                let host = Self.boxHost(of: glass)
+                let host = GlassBox.host(of: glass)
             else { continue }
             BarMotion.setAlpha(host, to: 1, animated: true)
         }
         BarMotion.runDissolveOut {
             for departure in departures where departure.into == nil {
                 let fading = departure.box.flatMap {
-                    Self.boxHost(of: $0.glass)
+                    GlassBox.host(of: $0.glass)
                 }
                 BarMotion.setAlpha(
                     fading ?? departure.view,
@@ -193,7 +193,7 @@ extension AppBarOverlay {
         generation: Int
     ) {
         for departure in departures {
-            if let box = departure.box { Self.dropBox(box.glass, box.tint) }
+            if let box = departure.box { GlassBox.drop(box.glass, box.tint) }
             departure.view.removeFromSuperview()
         }
         glidingIn.subtract(landed)
@@ -216,7 +216,7 @@ extension AppBarOverlay {
             if arrival.from != .zero { arrival.view.frame = arrival.from }
             arrival.view.alphaValue = 0
             if arrival.from == .zero, let glass = boxes[arrival.id]?.glass {
-                Self.boxHost(of: glass)?.alphaValue = 0
+                GlassBox.host(of: glass)?.alphaValue = 0
             }
         }
     }
@@ -228,7 +228,7 @@ extension AppBarOverlay {
         glass: NSView?,
         tint: GlassBackdrop?
     ) {
-        if let glass { dropBox(glass, tint) }
+        if let glass { GlassBox.drop(glass, tint) }
         view.removeFromSuperview()
     }
 }

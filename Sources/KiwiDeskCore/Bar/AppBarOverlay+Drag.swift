@@ -19,7 +19,7 @@ extension AppBarOverlay {
         let mover = draggableView(for: view)
         let point = itemRun.convert(windowPoint, from: nil)
         // A boxed glass fronts its host, never leaving it (#1842).
-        let front = Self.boxHost(of: mover) ?? mover
+        let front = GlassBox.host(of: mover) ?? mover
         if itemRun.subviews.last !== front {
             itemRun.addSubview(front)
         }
