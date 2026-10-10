@@ -27,12 +27,16 @@ struct ScreenEdgesWiringTests {
     func drawersHideOnOneScreen() throws {
         let card = try squashed(Self.bars + "Bars/KiwiShelfCard+Edge.swift")
         #expect(count("ScreenEdgesDrawer(", in: card) == 2)
-        #expect(
-            count(
-                "ifmodel.offersScreenEdges(",
-                in: card
-            ) == 2
-        )
+        // Each mount is gated on, and edits, its own bar.
+        for bar in ["spaceBarStyle", "appBarStyle"] {
+            #expect(
+                count(
+                    "ifmodel.offersScreenEdges(\\.\(bar)){"
+                        + "ScreenEdgesDrawer(model:model,bar:\\.\(bar),",
+                    in: card
+                ) == 1
+            )
+        }
     }
 
     @Test("each bar row explains an empty selection")
@@ -40,14 +44,16 @@ struct ScreenEdgesWiringTests {
         let card = try squashed(Self.bars + "Bars/KiwiShelfCard+Edge.swift")
         #expect(count("help:screensDifferHelp(", in: card) == 2)
         // Each row names its own bar's drawer.
-        #expect(
-            count("screensDifferHelp(\\.spaceBarStyle,appBar:false)", in: card)
-                == 1
-        )
-        #expect(
-            count("screensDifferHelp(\\.appBarStyle,appBar:true)", in: card)
-                == 1
-        )
+        for (bar, app) in [("spaceBarStyle", false), ("appBarStyle", true)] {
+            #expect(
+                count(
+                    "selection:model.barEdge(\\.\(bar)),"
+                        + "options:edgeOptions,"
+                        + "help:screensDifferHelp(\\.\(bar),appBar:\(app))",
+                    in: card
+                ) == 1
+            )
+        }
     }
 
     @Test("a drawer held open greys its chevron")
@@ -56,6 +62,14 @@ struct ScreenEdgesWiringTests {
         #expect(count("locked:edgesSplit", in: card) == 1)
         let drawer = try squashed(Self.bars + "Bars/ScreenEdgesDrawer.swift")
         #expect(count("locked:locked", in: drawer) == 1)
+        // Held open exactly while its bar's screens differ.
+        #expect(
+            count(
+                "privatevarlocked:Bool{"
+                    + "model.config.settings[keyPath:bar].screensDiffer}",
+                in: drawer
+            ) == 1
+        )
         #expect(count("ifexpanded||locked{", in: drawer) == 1)
         let wrapper = try squashed(
             Self.bars + "Common/SettingsDisclosure.swift"

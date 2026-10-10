@@ -121,6 +121,11 @@ struct BarEdgeWriteCensusTests {
             "the Home card names the main screen's edges, read "
                 + "from `homeSettings` (#1948)"
         ),
+        "SettingsModel+ScreenEdges.swift": (
+            1,
+            "a screen row's picker shows the edge that screen gets, "
+                + "`edge(on:)` (#1948)"
+        ),
         "SettingsModel+BarEdges.swift": (
             1,
             "a bar row's binding shows its own edge while its "
@@ -146,6 +151,8 @@ struct BarEdgeWriteCensusTests {
     private static let guiReader = regexes([
         #"sharedBarEdge"#,
         #"\b(spaceBarStyle|appBarStyle|style)\.edge\b"#,
+        // A generic read of either bar (#1948).
+        #"\[keyPath:\s*\w+\]\.edge\b"#,
     ])
 
     /// `ScreenEdgeScope`'s memberwise init is module-wide, so its

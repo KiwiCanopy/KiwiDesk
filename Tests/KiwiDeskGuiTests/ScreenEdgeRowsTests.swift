@@ -23,10 +23,12 @@ struct ScreenEdgeRowsTests {
         name: "DELL U2720Q",
         frame: CGRect(x: 1728, y: 0, width: 2560, height: 1440)
     )
-    private let absent = "LG HDR 4K:3840x2160"
+    /// Sorts before every connected name, so only the
+    /// connected-first partition puts it last.
+    private let absent = "Acer X32:3840x2160"
 
     /// A draft whose profile holds the main screen, two DELLs and
-    /// an LG that is not connected; the main screen and one DELL
+    /// an Acer that is not connected; the main screen and one DELL
     /// are.
     private func model() -> SettingsModel {
         let model = makeTestModel()
