@@ -34,9 +34,11 @@ extension TilingSettings {
         layoutOverride(mode, for: space)?.fieldCount ?? 0
     }
 
-    /// Total count of set override fields across all layouts for space (#290).
+    /// Total count of a space's overrides: the set fields across
+    /// all layouts (#290) plus its own gaps, which count as one
+    /// (#1775) and survive a layout switch.
     public func overrideFieldCount(for space: SpaceID) -> Int {
-        Self.overridableLayouts.reduce(0) {
+        Self.overridableLayouts.reduce(gapsOverride[space] == nil ? 0 : 1) {
             $0 + overrideFieldCount($1, for: space)
         }
     }

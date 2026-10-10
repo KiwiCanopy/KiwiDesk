@@ -11,9 +11,9 @@ struct SpaceOverrideRows: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                if mode != .floating {
-                    captionRow
-                }
+                captionRow
+                gapsRow
+                Divider()
                 modeRows
             }
             .environment(\.overrideLayoutName, mode.displayName)
@@ -59,13 +59,42 @@ struct SpaceOverrideRows: View {
         .padding(.horizontal, SettingsMetrics.overrideRowInset)
     }
 
-    /// Dynamic caption naming the active layout whose defaults an unchecked
-    /// row inherits (#290).
+    /// Each unchecked row names what it follows: the gaps row the
+    /// global gaps, a layout row its layout's defaults (#290, #1775).
     private var caption: String {
         L(
-            "space_override.caption",
-            "Unchecked settings inherit %1$@ defaults.",
-            mode.displayName
+            "space_override.caption_any",
+            "Unchecked settings follow their defaults."
+        )
+    }
+
+    /// The Space's own gaps (#1775), above the layout rows since
+    /// they survive a layout switch. Floating places no windows, so
+    /// there the row is kept visible and greyed with its reason.
+    @ViewBuilder
+    private var gapsRow: some View {
+        let row = OverrideGapsRow(
+            value: $model.config.settings.gapsOverride[space],
+            global: g.gapsGlobal
+        )
+        if mode == .floating {
+            VStack(alignment: .leading, spacing: 4) {
+                row.modifier(GreyOut(active: true, help: Self.floatingGaps))
+                Text(Self.floatingGaps)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, SettingsMetrics.overrideRowInset)
+            }
+        } else {
+            row
+        }
+    }
+
+    static var floatingGaps: String {
+        L(
+            "space_override.gaps.floating",
+            "Floating places no windows, so these gaps apply when "
+                + "this Space tiles."
         )
     }
 
@@ -99,8 +128,8 @@ struct SpaceOverrideRows: View {
         case .floating:
             placeholder(
                 L(
-                    "space_override.floating.none",
-                    "Floating has no per-Space overrides."
+                    "space_override.floating.no_layout",
+                    "Floating has no layout overrides."
                 )
             )
         }

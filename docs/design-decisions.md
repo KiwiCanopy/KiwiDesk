@@ -11416,6 +11416,26 @@ count and the *saved for other layouts* breakdown read one
 reflective `fieldCount` over these six models, so a new override
 field is counted without a hand-kept tally. (#290)
 
+**A Space's own gaps are the one override outside a layout.**
+They pass the same three tests from another side: gaps are
+geometry of the Space rather than of its layout, they resolve
+before any layout runs (`gaps(for:)` feeds every
+layout's math), and the global gaps on Gaps & Borders are an
+unambiguous "off". So the gaps row sits first in the overrides
+box, apart from the layout rows, and survives a layout switch;
+it counts as one in the cell's total, so a Space whose only
+override is its gaps still shows it — on a Floating Space as
+**N saved**, where the row stays visible, greyed with its
+reason, because floating places no windows. The row edits the
+uniform Outer and Inner masters only; per-edge values stay in
+Lua (`set_gap_override` with a table) and read "mixed", the
+first drag converging them, as on Gaps & Borders. "Reset All
+Layout Overrides" leaves the gaps alone: they are not a layout
+override, and the row's own checkbox is their reset. This is a
+second admitted class, not the start of a generic per-Space
+settings override — each further class owes the same three
+tests and its own entry. (#1775, owner ruling 2026-10-09)
+
 **A Floating space still shows its parked overrides as a muted
 "N saved", never hidden.** A space's override cell reports the
 total overrides it carries across every layout. A Floating space

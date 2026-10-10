@@ -126,8 +126,8 @@ struct SpacesPanelPreview: View {
         } else {
             Text(
                 L(
-                    "space_override.floating.none",
-                    "Floating has no per-Space overrides."
+                    "space_override.floating.no_layout",
+                    "Floating has no layout overrides."
                 )
             )
             .font(.callout)
