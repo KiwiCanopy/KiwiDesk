@@ -53,6 +53,7 @@ struct StickyOverlaySpanTests {
             )
         )
         #expect(core.contains("spansDesktops: carried.contains(spec.window)"))
+        #expect(core.contains("desktop: shownDesktop(at: frame)"))
         let sync = SourceScan.stripComments(
             try String(
                 contentsOf: Self.root.appendingPathComponent(

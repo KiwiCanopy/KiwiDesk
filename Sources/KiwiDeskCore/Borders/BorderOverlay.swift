@@ -146,7 +146,7 @@ final class BorderOverlay {
     ) {
         // A panel on one Desktop orders onto the Desktop it is on;
         // ordering it out first lands it on the one shown (#2149).
-        if hasOrdered, rehomeOwed { backend.hide() }
+        if hasOrdered, rehomeOwed, !isHidden { backend.hide() }
         rehomeOwed = false
         if !spansDesktops, let desktop = shownDesktop {
             orderedOn = desktop
@@ -170,9 +170,11 @@ final class BorderOverlay {
 
     /// `sync`'s placement facts for the next order (#2149): the
     /// ring joins every Desktop while its window is carried, and
-    /// `desktop` is the native Space its screen shows — a ring that
-    /// stops spanning, or is next ordered on another Desktop, is
-    /// re-homed there.
+    /// `desktop` is the native Space its screen shows. A ring that
+    /// stops spanning, or RETURNS from dormant on another Desktop —
+    /// its window moved there without it — owes an order that
+    /// re-homes it. A live ring is never moved by the Desktop: its
+    /// window may still be leaving with the old one.
     func place(spansDesktops on: Bool, desktop: UInt64?) {
         shownDesktop = desktop
         if on != spansDesktops {
@@ -182,7 +184,7 @@ final class BorderOverlay {
             if !on { rehomeOwed = true }
         }
         // A spanning ring records no `orderedOn`, so never moves.
-        if let desktop, let orderedOn, desktop != orderedOn {
+        if isDormant, let desktop, let orderedOn, desktop != orderedOn {
             rehomeOwed = true
         }
     }

@@ -287,13 +287,15 @@ obligations:
 
 - **Re-home a ring through `BorderOverlay`, and only where it must
   move Desktops** — it stopped spanning, since dropping the flag
-  leaves a shown panel on every Desktop (device, 2026-10-10), or
-  `sync` orders it on a screen showing another Desktop than the
+  leaves a shown panel on every Desktop (device, 2026-10-10), or it
+  returns from dormant on a screen showing another Desktop than the
   one it was last ordered on, read from `DesktopMemory.shownSpaces`,
-  which the switch handler files at its HEAD. The re-home is an
-  order-out ahead of the order the ring was owed anyway; a reorder
-  event or a settle pass never re-homes, and no WindowServer read
-  decides it (`BorderDesktopSpanTests`).
+  which the switch handler files at its HEAD. Never move a LIVE
+  ring by the Desktop: its window may still be leaving with the old
+  one, a slow app's vanish trailing the switch. The re-home owes an
+  order-out and an order of its own; a reorder event or a settle
+  pass never re-homes, and no WindowServer read decides it
+  (`BorderDesktopSpanTests`).
 - **A new overlay panel that follows a window states which kind it
   is** — on the window's Desktop, or on every Desktop because a
   carry moves its window — and `StickyOverlaySpanTests` gains its
