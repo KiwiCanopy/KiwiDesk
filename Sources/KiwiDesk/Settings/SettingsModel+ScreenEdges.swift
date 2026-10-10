@@ -16,33 +16,41 @@ struct ScreenEdgeRow: Identifiable, Equatable {
 /// screens get a row, and the binding a screen's picker writes.
 extension SettingsModel {
     /// The draft as the main screen shows it (#1948): each bar on
-    /// that screen's edge. The Home cards picture and name it. The
-    /// main screen is the one at the AppKit origin.
+    /// that screen's edge (`mainDisplay`). The Home cards picture
+    /// and name it.
     var homeSettings: TilingSettings {
-        config.settings.onScreen(
-            displays.first { $0.frame.origin == .zero }?.fingerprint
-        )
+        config.settings.onScreen(mainDisplay?.fingerprint)
     }
 
-    /// The draft profile's screen combinations: the page's saved
-    /// sets, else the connected screens as one.
+    /// The draft profile's screen combinations: the edit target's
+    /// saved sets — the stored profile, else the loaded one — else
+    /// the connected screens as one.
     var draftMonitorSets: [MonitorSet] {
-        let page = profileSummaries.first { $0.name == reachPage }
+        let name = editingProfile ?? core.profiles.currentName
+        let page = profileSummaries.first { $0.name == name }
         if let sets = page?.sets, !sets.isEmpty {
             return sets.map { MonitorSet(monitors: $0) }
         }
         return [MonitorSet(monitors: displays.map(\.fingerprint))]
     }
 
-    /// Whether the Per screen rows show: hidden, never greyed,
-    /// while the profile holds one screen (#1948 ruling).
-    var offersScreenEdges: Bool {
-        draftMonitorSets.contains { $0.monitors.count > 1 }
+    /// Whether a bar's Per screen rows show: hidden, never
+    /// greyed, while the profile holds one screen (#1948 ruling) —
+    /// unless that bar's screens already differ, which the rows
+    /// must then show.
+    func offersScreenEdges<Bar: ScreenEdged>(
+        _ bar: KeyPath<TilingSettings, Bar>
+    ) -> Bool {
+        draftMonitorSets.contains { Set($0.monitors).count > 1 }
+            || config.settings[keyPath: bar].screensDiffer
     }
 
-    /// The profile's screens, one row per fingerprint: connected
-    /// ones first, then the rest, each A–Z by name.
-    var screenEdgeRows: [ScreenEdgeRow] {
+    /// A bar's screen rows, one per fingerprint: the profile's
+    /// screens and any screen holding an edge of its own,
+    /// connected ones first, then the rest, each A–Z by name.
+    func screenEdgeRows<Bar: ScreenEdged>(
+        _ bar: KeyPath<TilingSettings, Bar>
+    ) -> [ScreenEdgeRow] {
         let connected = Set(displays.map(\.fingerprint))
         var counts: [String: Int] = [:]
         for set in draftMonitorSets {
@@ -50,6 +58,9 @@ extension SettingsModel {
                 let n = set.monitors.filter { $0 == screen }.count
                 counts[screen] = max(counts[screen] ?? 0, n)
             }
+        }
+        for screen in config.settings[keyPath: bar].edgeOverride.keys {
+            counts[screen] = max(counts[screen] ?? 0, 1)
         }
         return counts.map { screen, count in
             ScreenEdgeRow(

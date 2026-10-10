@@ -29,9 +29,24 @@ struct ScreenEdgesWiringTests {
         #expect(count("ScreenEdgesDrawer(", in: card) == 2)
         #expect(
             count(
-                "ifmodel.offersScreenEdges{ScreenEdgesDrawer(",
+                "ifmodel.offersScreenEdges(",
                 in: card
             ) == 2
+        )
+    }
+
+    @Test("each bar row explains an empty selection")
+    func barRowsCarryTheirHelp() throws {
+        let card = try squashed(Self.bars + "Bars/KiwiShelfCard+Edge.swift")
+        #expect(count("help:screensDifferHelp(", in: card) == 2)
+        // Each row names its own bar's drawer.
+        #expect(
+            count("screensDifferHelp(\\.spaceBarStyle,appBar:false)", in: card)
+                == 1
+        )
+        #expect(
+            count("screensDifferHelp(\\.appBarStyle,appBar:true)", in: card)
+                == 1
         )
     }
 
@@ -41,12 +56,26 @@ struct ScreenEdgesWiringTests {
         #expect(count("locked:edgesSplit", in: card) == 1)
         let drawer = try squashed(Self.bars + "Bars/ScreenEdgesDrawer.swift")
         #expect(count("locked:locked", in: drawer) == 1)
+        #expect(count("ifexpanded||locked{", in: drawer) == 1)
+        let wrapper = try squashed(
+            Self.bars + "Common/SettingsDisclosure.swift"
+        )
+        // The hop from the drawer into its style.
         #expect(
-            count("get:{expanded||locked}", in: drawer) == 1
+            count(
+                "SettingsDisclosureStyle(summary:summary,locked:locked,",
+                in: wrapper
+            ) == 1
         )
         let style = try squashed(
             Self.bars + "Common/SettingsDisclosureStyle.swift"
         )
+        // Held open, deaf to a press: the button is the one home.
+        #expect(
+            count("ifconfiguration.isExpanded||locked{", in: style) == 1
+        )
+        #expect(count("guard!lockedelse{return}", in: style) == 1)
+        #expect(count(".allowsHitTesting(!locked)", in: style) == 1)
         #expect(
             count(
                 ".foregroundStyle(locked?SettingsTheme.ink3"

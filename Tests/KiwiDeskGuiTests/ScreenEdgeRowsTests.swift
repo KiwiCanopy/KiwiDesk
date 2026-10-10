@@ -34,8 +34,10 @@ struct ScreenEdgeRowsTests {
         for display in core.state.workspaces.allDisplays {
             core.state.workspaces.removeDisplay(display.id)
         }
-        core.state.workspaces.upsertDisplay(main)
+        // The DELL first, so a reader taking the first display
+        // rather than the main one is told apart.
         core.state.workspaces.upsertDisplay(dell)
+        core.state.workspaces.upsertDisplay(main)
         model.profileSummaries = [
             ProfileSummary(
                 name: "Desk",
@@ -53,7 +55,7 @@ struct ScreenEdgeRowsTests {
                 shortcutOverrideCount: 0
             )
         ]
-        model.reachPage = "Desk"
+        model.target = .storedProfile("Desk")
         model.config.settings.spaceBarStyle.enabled = true
         model.config.settings.spaceBarStyle.setEdge(.top)
         model.config.settings.appBarStyle.setEdge(.top)
@@ -62,7 +64,7 @@ struct ScreenEdgeRowsTests {
 
     @Test("connected screens first, then the rest, each A–Z")
     func rowsAreOrdered() {
-        let rows = model().screenEdgeRows
+        let rows = model().screenEdgeRows(\.spaceBarStyle)
         #expect(
             rows.map(\.id) == [main.fingerprint, dell.fingerprint, absent]
         )
@@ -74,7 +76,7 @@ struct ScreenEdgeRowsTests {
     @Test("the rows hide while the profile holds one screen")
     func oneScreenHides() {
         let model = model()
-        #expect(model.offersScreenEdges)
+        #expect(model.offersScreenEdges(\.spaceBarStyle))
         model.profileSummaries = [
             ProfileSummary(
                 name: "Desk",
@@ -87,7 +89,55 @@ struct ScreenEdgeRowsTests {
                 shortcutOverrideCount: 0
             )
         ]
-        #expect(!model.offersScreenEdges)
+        #expect(!model.offersScreenEdges(\.spaceBarStyle))
+    }
+
+    /// An edge Lua stored for a screen outside the profile still
+    /// draws a differing edge, so its row shows — on a one-screen
+    /// profile too — and the other bar's drawer stays hidden.
+    @Test("a screen with its own edge gets a row, even on one screen")
+    func outsideScreenHasARow() {
+        let model = model()
+        model.profileSummaries = [
+            ProfileSummary(
+                name: "Desk",
+                count: 1,
+                sets: [[main.fingerprint]],
+                isDefault: false,
+                matchesLive: false,
+                matchesConnectedCount: true,
+                spaceCount: 0,
+                shortcutOverrideCount: 0
+            )
+        ]
+        let lua = "Projector:1920x1080"
+        model.config.settings.spaceBarStyle.edgeOverride = [lua: .left]
+        #expect(model.offersScreenEdges(\.spaceBarStyle))
+        #expect(!model.offersScreenEdges(\.appBarStyle))
+        #expect(
+            model.screenEdgeRows(\.spaceBarStyle).map(\.id)
+                == [main.fingerprint, lua]
+        )
+    }
+
+    /// Two identical models are one row, which would only repeat
+    /// the bar row: no drawer for them.
+    @Test("identical models alone offer no drawer")
+    func twinsAloneOfferNothing() {
+        let model = model()
+        model.profileSummaries = [
+            ProfileSummary(
+                name: "Desk",
+                count: 2,
+                sets: [[dell.fingerprint, dell.fingerprint]],
+                isDefault: false,
+                matchesLive: false,
+                matchesConnectedCount: true,
+                spaceCount: 0,
+                shortcutOverrideCount: 0
+            )
+        ]
+        #expect(!model.offersScreenEdges(\.spaceBarStyle))
     }
 
     @Test("a screen's pick stores its edge; the bar's edge clears it")

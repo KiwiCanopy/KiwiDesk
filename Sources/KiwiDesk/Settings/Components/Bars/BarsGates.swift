@@ -98,14 +98,17 @@ enum BarsGateHelp {
         )
     }
 
-    /// A bar row's `?` while its screens differ (#1948).
-    static var screensDiffer: String {
+    /// A bar row's `?` while its screens differ (#1948), naming
+    /// that bar's own Per screen drawer.
+    static func screensDiffer(appBar: Bool) -> String {
         L(
             "kiwishelf.edge.screens_differ.help",
             "Your screens put this bar on different edges — "
                 + "see \u{201C}%1$@\u{201D} below. Picking an edge "
                 + "here puts it there on every screen.",
-            L("kiwishelf.edge.per_screen.space_bar", "Per screen")
+            appBar
+                ? L("kiwishelf.edge.per_screen.app_bar", "Per screen")
+                : L("kiwishelf.edge.per_screen.space_bar", "Per screen")
         )
     }
 

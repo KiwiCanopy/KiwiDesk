@@ -36,7 +36,8 @@ extension TilingSettings {
     /// These settings as each screen they can draw on shows them
     /// (#1948): the bars' own edges, then every screen with an edge
     /// of its own. A reader asking whether a setting acts on SOME
-    /// screen asks each.
+    /// screen asks each; the set errs toward "acts", never toward
+    /// a wrong grey.
     public var screenVariants: [TilingSettings] {
         let screens = Set(spaceBarStyle.edgeOverride.keys)
             .union(appBarStyle.edgeOverride.keys)
