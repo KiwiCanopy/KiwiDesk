@@ -5,6 +5,9 @@ import Foundation
 /// live profile, so an open draft of ANY target takes it
 /// (`KiwiCore.onShortcutsDropped`).
 public typealias ShortcutsDropped = @MainActor (Set<SpaceID>) -> Void
+/// Fired when a top-up appended rows to the base layer
+/// (`KiwiCore.appendBaseShortcuts`), so an open draft takes them.
+public typealias ShortcutsAdded = @MainActor ([KeyBinding]) -> Void
 
 /// A temporary Space's shortcuts go when it drops, and a held
 /// Space's when its hold ends (#1827, amending #92 and #1507's "the

@@ -222,6 +222,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.onShortcutsDropped = { [weak self] spaces in
             self?.dashboardIfCreated?.adoptShortcutDrop(spaces)
         }
+        core.onShortcutsAdded = { [weak self] rows in
+            self?.dashboardIfCreated?.adoptShortcutAdd(rows)
+        }
         wireBarMenus()
         wireWhatsNewTrail()
         core.onConfigIssuesChange = { [weak self] issues in

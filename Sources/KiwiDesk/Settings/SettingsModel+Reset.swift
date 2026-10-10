@@ -41,11 +41,13 @@ extension SettingsModel {
         droppedChords = []
     }
 
+    /// The seed for this config, the Desktop tier included for
+    /// the Desktops this Mac has now.
     private var shippedDefaults: [KeyBinding] {
         DefaultKeybindings.bindings(
             spaces: config.spaces,
             resizeStep: Int(config.settings.resizeStep)
-        )
+        ) + bindableDesktops.compactMap(DefaultKeybindings.desktopRow)
     }
 
     /// The live Spaces the page's per-Space shortcut rows add
@@ -98,8 +100,9 @@ extension SettingsModel {
     }
 
     /// Does `row` outlive a reset? Only rows the SEED authors are
-    /// replaced (owner ruling) — a launcher or Desktop row the
-    /// user invented is not a "customised default". Two ways a row
+    /// replaced (owner ruling) — a launcher, or a Desktop row other
+    /// than Go to Desktop, the user invented is not a "customised
+    /// default". Two ways a row
     /// is the seed's, and both must go: its Lua is a shipped verb
     /// (leaving it doubles the verb), or its COMBO is a shipped
     /// chord (the seed reclaims that key — leaving the row puts

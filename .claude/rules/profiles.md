@@ -84,6 +84,16 @@ because two real clients now remove drift — see
   than a label, and why `D` was refused, are argued in
   `docs/design-decisions.md` ▸ "Size is not a positional verb" —
   do not restate them here or in the seed's docstring.
+- **The Desktop tier, `⌃⌥⇧⌘` + digit → Go to Desktop, is the one
+  other sense of `⇧`, and it lifts the ladder to macOS's Desktops
+  (owner ruling 2026-10-10).** A Desktop row the seed adds goes
+  through `topUpDesktopShortcuts`, which advances the per-Mac mark
+  only once its rows landed — a writer that adds them beside it
+  re-offers a row the user deleted — and a writer that discards
+  `gui.json` clears that mark (`DesktopShortcutTopUpTests`,
+  `DesktopShortcutSeamTests`). Moving a window to a Desktop stays
+  an offer (#1125), and a further `⇧`-lifted tier is a ruling of
+  its own.
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took

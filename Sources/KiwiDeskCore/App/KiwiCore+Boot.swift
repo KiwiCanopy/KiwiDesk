@@ -186,6 +186,9 @@ extension KiwiCore {
         // After the seed, so an away window keeps its hold (#1646).
         retireGoneRestoredFilings()
         drainDeferredBootApps()
+        topUpDesktopShortcuts(
+            desktops: NativeSpaces.desktopSnapshot().userDesktops
+        )
         otherWindowManagers.scanRunning(  // #1882
             eventLoop.liveApps(owners: []).map { ($0.pid, $0.ref.bundleID) }
         )

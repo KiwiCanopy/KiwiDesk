@@ -9,11 +9,12 @@ import Testing
 /// arrows.
 @Suite("The ⌥⌘ size layer (#1075)", .serialized)
 struct SizeLayerSeedTests {
+    /// The whole seed, the Desktop tier's ten rows included.
     private func seeded(step: Int = 50) -> [KeyBinding] {
         DefaultKeybindings.bindings(
             spaces: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
             resizeStep: step
-        )
+        ) + (1...10).compactMap(DefaultKeybindings.desktopRow)
     }
 
     private var sizeBase: HotkeyModifiers { [.option, .command] }

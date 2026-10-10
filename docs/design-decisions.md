@@ -9810,6 +9810,43 @@ under cover of the first. Before seeding, the owner pressed
 `SystemShortcuts.map` reserves `⌘Tab` alone.
 :::
 
+:::unreleased
+**The Desktop tier is seeded: `⌃⌥⇧⌘` + digit goes to that macOS
+Desktop (owner ruling 2026-10-10).** Going to a Desktop is the one
+Desktop verb a user presses as often as they swipe, so it is the
+exception to the offer rule above: it ships bound, its drawer
+opening with it, while moving a window to a Desktop, with or
+without following it, stays an offer behind its drawer for the
+reason that rule gives. `⇧` here does not act on
+the window: on top of `⌃⌥⌘` it lifts the whole ladder one tier, from
+KiwiDesk's Spaces to macOS's Desktops, which is the second sense of
+`⇧` the rule above otherwise refuses — accepted because the four
+modifiers read as one chord (the Hyper key many users map Caps Lock
+to), and the ladder has no other free tier for a digit. Measured
+before seeding (2026-10-10, macOS 27.0.1): no entry in
+`com.apple.symbolichotkeys` uses the four modifiers, and over the
+AX menu bars of fifteen running apps (858 shortcut items) one
+claimed a `⌃⌥⇧⌘` digit — Antigravity IDE's Split Terminal on 7,
+which KiwiDesk's hotkey takes from it as every seeded chord takes
+an app menu's. If a later change makes Input Monitoring a
+requirement, a dedicated Hyper key is the place to revisit this.
+
+The rows are topped up rather than seeded once, because Desktops
+come and go: at boot, and at a switch that shows a Desktop numbered
+past a per-Mac mark, each such Desktop up to the tenth gets its row
+when no row goes there and the chord is free. The mark is what
+keeps a deleted row deleted — a Desktop at or below it was offered
+before — and it lives in the app's defaults, not in `gui.json`,
+because the Desktops belong to the Mac rather than to the setup a
+backup carries. The mark vouches for rows in one `gui.json`, so
+discarding that file — Reset All Settings, a restore — clears it,
+and a restored backup's deleted row can come back once; that is
+the trade for keeping a per-Mac count out of a file that travels.
+A Lua-owned setup leaves the mark alone, so moving to Settings
+later still offers every Desktop. Restore Defaults restores the
+tier for the Desktops the Mac has.
+:::
+
 **Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
 2026-09-13). A menu-bar app with no Dock tile is almost never
 the active app, so `⌘,` reaches a new user only once they have
