@@ -217,6 +217,31 @@ struct DesktopSwitchCueTests {
         #expect(core.cueDisplay("Main", in: split) == nil)
     }
 
+    /// The payer takes the shared-mode screen too: a switch in
+    /// shared mode lands its plate on the main screen.
+    @Test("a shared-mode switch draws on the main screen")
+    func sharedModeSwitchPays() {
+        let core = makeCore()
+        defer { teardown() }
+        func shared(current: UInt64) -> [NativeSpace] {
+            [10, 11].map {
+                NativeSpace(
+                    id: $0,
+                    displayUUID: "Main",
+                    isCurrent: $0 == current
+                )
+            }
+        }
+        NativeSpaces.spacesOverride = shared(current: 10)
+        var shown: [DesktopSwitchCue] = []
+        core.desktopCue.onCue = { shown.append($0) }
+        #expect(core.execute("focus_desktop", args: [.number(2)]).isSuccess)
+        NativeSpaces.spacesOverride = shared(current: 11)
+        NativeSpaces.activeSpaceIDOverride = 11
+        core.handleDesktopChange()
+        #expect(shown.map(\.display) == [DisplayID(1)])
+    }
+
     // MARK: - Stored shape
 
     @Test("gui.json carries desktop.cue, and its absence reads on")
