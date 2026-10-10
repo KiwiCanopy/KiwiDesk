@@ -14,7 +14,7 @@ import Testing
 /// wiring half — the behaviour half is `SpacesGateTests`.
 ///
 /// SCOPE: this scans by explicit path under `Settings/`, since the
-/// gated rows `SpacesGates` answers now render in TWO places — five
+/// gated rows `SpacesGates` answers now render in TWO places — six
 /// in the `.perSpaceOverrides` rows (`Components/SpaceOverrides/`)
 /// and the active-layout reset in the pushed editor's header
 /// (`Sections/SpacesSection+Overrides.swift`, #678 8b, which moved
@@ -79,6 +79,10 @@ struct SpacesGateWiringTests {
                 "gates.inertReason("
                     + "for:.layout(.trackOverrideLimit))",
             ],
+            // A Space's own gaps (#1775), inert while it floats.
+            overrides + "SpaceOverrideRows.swift": [
+                "gates.inertReason(for:.gaps(.perSpaceOverride))"
+            ],
         ]
         for (name, needles) in consults {
             let source = try squashed(name)
@@ -119,6 +123,7 @@ struct SpacesGateWiringTests {
             "scroll_grid.fill_empty_cells.rigid_only",
             "scroll_grid.auto_size.gates",
             "track.auto_tracks.gates",
+            "space_override.gaps.floating",
         ] {
             #expect(
                 help.contains(key),

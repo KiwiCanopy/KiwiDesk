@@ -116,16 +116,23 @@ struct GapsBordersGates {
     /// The outer master acknowledges while its four edges
     /// disagree — it shows the top edge and writes all four.
     private var outerGapsDiffer: Bool {
-        let o = settings.gapsGlobal.outer
-        return
-            !(o.top == o.bottom
-            && o.top == o.left
-            && o.top == o.right)
+        Self.outerDiffers(settings.gapsGlobal)
+    }
+
+    /// Whether a value's four outer edges differ — the one copy
+    /// both outer masters read (#1383, #1775).
+    static func outerDiffers(_ gaps: Gaps) -> Bool {
+        let o = gaps.outer
+        return !(o.top == o.bottom && o.top == o.left && o.top == o.right)
     }
 
     /// The inner master acknowledges while its two axes disagree.
     private var innerGapsDiffer: Bool {
-        let i = settings.gapsGlobal.inner
-        return i.horizontal != i.vertical
+        Self.innerDiffers(settings.gapsGlobal)
+    }
+
+    /// Whether a value's two inner axes differ (#1383, #1775).
+    static func innerDiffers(_ gaps: Gaps) -> Bool {
+        gaps.inner.horizontal != gaps.inner.vertical
     }
 }

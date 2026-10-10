@@ -51,7 +51,7 @@ extension SpacesSection {
     private func offeredCustomizeButton(
         _ space: SpaceID
     ) -> some View {
-        let count = model.config.settings.overrideFieldCount(
+        let count = model.config.settings.spaceOverrideCount(
             for: space
         )
         let isFloating =
@@ -85,8 +85,8 @@ extension SpacesSection {
         .help(overrideCellHelp(state))
         .accessibilityLabel(
             L(
-                "spaces.overrides.a11y",
-                "Layout overrides for %1$@, %2$d saved",
+                "spaces.overrides.a11y_any",
+                "Overrides for %1$@, %2$d saved",
                 space.raw,
                 count
             )
@@ -119,14 +119,14 @@ extension SpacesSection {
             )
         case .saved:
             return L(
-                "spaces.overrides.saved.help",
-                "Saved for other layouts — switch this Space "
-                    + "to a tiling layout to use them."
+                "spaces.overrides.saved_any.help",
+                "Kept while this Space floats — they apply when it "
+                    + "tiles again."
             )
         case .customize, .custom:
             return L(
-                "spaces.customize.help",
-                "Layout overrides for this Space"
+                "spaces.customize_any.help",
+                "Overrides for this Space"
             )
         }
     }
