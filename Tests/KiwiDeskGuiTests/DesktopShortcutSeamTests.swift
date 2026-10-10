@@ -14,8 +14,16 @@ struct DesktopShortcutSeamTests {
     /// needle → (tree, the file that carries it once).
     private static let wirings: [(String, String, String)] = [
         (
-            "topUpDesktopShortcuts(desktops: snapshot.userDesktops)",
+            "self?.topUpDesktopShortcuts(desktops: desktops)",
             "Sources/KiwiDeskCore", "KiwiCore+Desktops.swift"
+        ),
+        (
+            "self?.dashboardIfCreated?.adoptShortcutAdd(rows)",
+            "Sources/KiwiDesk", "AppDelegate.swift"
+        ),
+        (
+            "onShortcutsAdded(rows)",
+            "Sources/KiwiDeskCore", "KiwiCore+ShortcutTopUp.swift"
         ),
         (
             "topUpDesktopShortcuts(",

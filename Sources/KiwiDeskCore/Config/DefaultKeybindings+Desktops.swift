@@ -19,6 +19,15 @@ extension DefaultKeybindings {
         )
     }
 
+    /// Whether `row` goes to a Desktop — the seed's own spelling,
+    /// derived from `desktopRow` rather than restated.
+    public static func isDesktopRow(_ row: KeyBinding) -> Bool {
+        guard let sample = desktopRow(1)?.lua,
+            let open = sample.firstIndex(of: "(")
+        else { return false }
+        return row.lua.hasPrefix(sample[...open])
+    }
+
     /// Rows for the Desktops in `desktops` numbered above `mark`
     /// that no row in `existing` already goes to and whose chord
     /// is free. Additive, like `digitTopUp`: a Desktop at or

@@ -79,6 +79,10 @@ final class DesktopMemory {
         UserDefaults.standard.set($0, forKey: DesktopMemory.shortcutMarkKey)
     }
     nonisolated static let shortcutMarkKey = "desktopShortcutMark"
+    /// The highest Desktop a declining setup (Lua-owned, no
+    /// sidecar) was asked about this session, so a switch does not
+    /// ask again.
+    var shortcutTopUpDeclined = 0
 
     /// Last observed native Space ID per display (`KiwiCore+BootSeams`,
     /// docs/cli.md).

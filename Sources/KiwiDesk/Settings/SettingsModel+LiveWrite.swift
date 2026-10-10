@@ -49,4 +49,39 @@ extension SettingsModel {
         suppressDirty = false
         recomputeDirty()
     }
+
+    /// A top-up appended rows to the base layer, which every
+    /// profile inherits, so a draft of ANY target takes them: a
+    /// clean one re-reads, a dirty one adds the rows on both sides
+    /// of its diff, or its Save would drop them.
+    func adoptShortcutAdd(_ rows: [KeyBinding]) {
+        guard isDirty else {
+            reload()
+            return
+        }
+        suppressDirty = true
+        Self.appendToDefault(rows, in: &config.layers)
+        Self.appendToDefault(rows, in: &cleanConfig.layers)
+        if profileEditingBaseLayers != nil {
+            profileEditingBaseLayers = core.baseKeyLayers()
+        }
+        ruleReachStored = core.ruleReachSnapshot()
+        suppressDirty = false
+        recomputeDirty()
+    }
+
+    /// Appends `rows` to the default layer, skipping a row whose
+    /// action that layer already runs.
+    private static func appendToDefault(
+        _ rows: [KeyBinding],
+        in layers: inout [KeyLayer]
+    ) {
+        guard let index = layers.firstIndex(where: { $0.isDefault }) else {
+            return
+        }
+        let bound = Set(layers[index].bindings.map(\.lua))
+        layers[index].bindings.append(
+            contentsOf: rows.filter { !bound.contains($0.lua) }
+        )
+    }
 }

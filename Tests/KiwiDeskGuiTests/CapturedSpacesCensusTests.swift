@@ -17,7 +17,7 @@ struct CapturedSpacesCensusTests {
     private static let fullListReaders: [String: (Int, String)] = [
         "KiwiDeskCore/Profiles/KiwiCore+DesktopSpaces.swift":
             (1, "a Desktop return picks a Space; writes nothing"),
-        "KiwiDeskCore/Profiles/KiwiCore+StarterRescale.swift":
+        "KiwiDeskCore/Profiles/KiwiCore+ShortcutTopUp.swift":
             (1, "the ⌃⌥N top-up reaches a held Space by ruling"),
         "KiwiDeskCore/Profiles/KiwiCore+EmptyDisplayHeal.swift":
             (1, "the orphan's drop target; its number is minted"),

@@ -190,6 +190,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.adoptShortcutDrop(spaces)
     }
 
+    /// Routes a top-up's appended base rows to the draft.
+    func adoptShortcutAdd(_ rows: [KeyBinding]) {
+        model.adoptShortcutAdd(rows)
+    }
+
     /// Shows dashboard navigated to destination (#326).
     func show(navigatingTo destination: SettingsDestination) {
         model.land(on: SettingsAnchor(destination: destination))

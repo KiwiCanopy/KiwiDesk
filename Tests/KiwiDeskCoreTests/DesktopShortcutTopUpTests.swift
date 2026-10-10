@@ -99,4 +99,42 @@ struct DesktopShortcutTopUpTests {
         core.topUpDesktopShortcuts(desktops: [1, 2])
         #expect(mark.value == 0)
     }
+
+    @Test("Discarding gui.json offers every Desktop again")
+    func discardClearsTheMark() throws {
+        let mark = Mark()
+        let core = try makeCore(mark: mark)
+        core.topUpDesktopShortcuts(desktops: [1, 2])
+        #expect(mark.value == 2)
+        _ = core.discardArtifacts(
+            [.guiConfig],
+            reason: "test",
+            trash: { try FileManager.default.removeItem(at: $0) }
+        )
+        #expect(mark.value == 0)
+        try core.guiConfigStore.save(GuiConfig())
+        core.topUpDesktopShortcuts(desktops: [1, 2])
+        #expect(desktopRows(core) == [lua(1), lua(2)])
+    }
+
+    @Test("A declining setup is asked once a session")
+    func declineIsLatched() throws {
+        let mark = Mark()
+        var reads = 0
+        let core = makeTestCore(
+            configDirectory: FileManager.default.temporaryDirectory
+                .appendingPathComponent(
+                    "kiwi-desktop-topup-latch-\(UUID().uuidString)"
+                )
+        )
+        core.desktopMemory.readShortcutMark = {
+            reads += 1
+            return mark.value
+        }
+        core.desktopMemory.writeShortcutMark = { mark.value = $0 }
+        core.topUpDesktopShortcuts(desktops: [1, 2])
+        core.topUpDesktopShortcuts(desktops: [1, 2])
+        #expect(reads == 1)
+        #expect(mark.value == 0)
+    }
 }
