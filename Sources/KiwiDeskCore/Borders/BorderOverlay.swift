@@ -144,18 +144,13 @@ final class BorderOverlay {
         relativeTo windowNumber: CGWindowID,
         revealing: Bool = true
     ) {
-        let desktop = shownDesktop
         // A panel on one Desktop orders onto the Desktop it is on;
-        // ordering it out first lands it on the one shown. Owed
-        // when it stops spanning, or when `sync` orders it on a
-        // screen now showing another Desktop: its window moved
-        // there without it.
-        // A spanning ring records no `orderedOn`, so never moves.
-        let moved =
-            desktop != nil && orderedOn != nil && desktop != orderedOn
-        if hasOrdered, rehomeOwed || moved { backend.hide() }
+        // ordering it out first lands it on the one shown (#2149).
+        if hasOrdered, rehomeOwed { backend.hide() }
         rehomeOwed = false
-        if !spansDesktops, let desktop { orderedOn = desktop }
+        if !spansDesktops, let desktop = shownDesktop {
+            orderedOn = desktop
+        }
         targetWindow = windowNumber
         isHidden = false
         if !revealing {
@@ -180,11 +175,16 @@ final class BorderOverlay {
     /// re-homed there.
     func place(spansDesktops on: Bool, desktop: UInt64?) {
         shownDesktop = desktop
-        guard on != spansDesktops else { return }
-        spansDesktops = on
-        backend.setSpansDesktops(on)
-        orderedOn = nil
-        if !on { rehomeOwed = true }
+        if on != spansDesktops {
+            spansDesktops = on
+            backend.setSpansDesktops(on)
+            orderedOn = nil
+            if !on { rehomeOwed = true }
+        }
+        // A spanning ring records no `orderedOn`, so never moves.
+        if let desktop, let orderedOn, desktop != orderedOn {
+            rehomeOwed = true
+        }
     }
 
     /// Ends a hold without showing the ring: the next order shows
