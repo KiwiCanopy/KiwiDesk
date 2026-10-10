@@ -9,7 +9,7 @@ enum HomeCardPlate {
         for destination: SettingsDestination,
         model: SettingsModel
     ) -> AnyView? {
-        let settings = model.config.settings
+        let settings = model.homeSettings
         switch destination {
         case .spaces:
             return tile(padding: 7, settings: settings) {

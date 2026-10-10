@@ -118,24 +118,29 @@ struct BarEdgeWriteCensusTests {
         "HomeCardPlate+Bars.swift": (2, pictureDeferral),
         "HomeCardContent.swift": (
             5,
-            "the Home card's caption names the bars' own edges "
-                + "until the Per screen rows land (#1948 PR 2)"
+            "the Home card names the main screen's edges, read "
+                + "from `homeSettings` (#1948)"
+        ),
+        "SettingsModel+BarEdges.swift": (
+            1,
+            "a bar row's binding shows its own edge while its "
+                + "screens agree (#1948)"
         ),
         "BarsGates.swift": (
             1,
-            "order and minimum grey on the bars' own split; "
-                + "per screen they are PR 2's (#1948)"
+            "order and minimum grey only where no screen fuses "
+                + "the bars, over `screenVariants` (#1948)"
         ),
         "AdvancedColorsGates.swift": (
             1,
-            "the front-app colour's gate reads the Space Bar's "
-                + "own edge; per screen it is PR 2's (#1948)"
+            "the front-app colour greys only where no screen "
+                + "draws the name, over `screenVariants` (#1948)"
         ),
     ]
 
     private static let pictureDeferral =
-        "the Home card pictures the bars' own edges until the "
-        + "Per screen rows land (#1948 PR 2)"
+        "the Home card pictures the main screen's edges, read "
+        + "from `homeSettings` (#1948)"
     private static let keySpelling = "a census key's spelling"
 
     private static let guiReader = regexes([

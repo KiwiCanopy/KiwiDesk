@@ -24,6 +24,8 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     @State private var internalExpansion = false
     /// Summary phrase displayed while collapsed (#1028).
     private let summary: String?
+    /// Held open by what it shows (#1948): the chevron greys.
+    private let locked: Bool
     @ViewBuilder private let content: () -> Content
     @ViewBuilder private let accessory: () -> Accessory
     @Environment(\.settingsRevealTarget)
@@ -36,9 +38,11 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         scrollHoisted: Bool = false,
         modeGated: Bool = false,
         summary: String? = nil,
+        locked: Bool = false,
         @ViewBuilder content: @escaping () -> Content,
         @ViewBuilder accessory: @escaping () -> Accessory
     ) {
+        self.locked = locked
         self.control = drawer.control
         self.childIDs = drawer.childIDs
         self.chrome = chrome
@@ -57,6 +61,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         scrollHoisted: Bool = false,
         modeGated: Bool = false,
         summary: String? = nil,
+        locked: Bool = false,
         @ViewBuilder content: @escaping () -> Content
     ) where Accessory == EmptyView {
         self.init(
@@ -66,6 +71,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             scrollHoisted: scrollHoisted,
             modeGated: modeGated,
             summary: summary,
+            locked: locked,
             content: content,
             accessory: { EmptyView() }
         )
@@ -154,6 +160,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         .disclosureGroupStyle(
             SettingsDisclosureStyle(
                 summary: summary,
+                locked: locked,
                 accessory: accessory
             )
         )

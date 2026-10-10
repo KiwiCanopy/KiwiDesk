@@ -24,14 +24,19 @@ extension SettingsModel {
         )
     }
 
-    /// One bar's edge row: a pick sets that bar on every screen,
-    /// clearing each screen's own edge (#1948).
+    /// One bar's edge row — OPTIONAL, nil while its screens draw
+    /// different edges (#1948); a pick sets that bar on every
+    /// screen, clearing each screen's own edge.
     func barEdge<Bar: ScreenEdged>(
         _ bar: WritableKeyPath<TilingSettings, Bar>
-    ) -> Binding<AppBarEdge> {
+    ) -> Binding<AppBarEdge?> {
         Binding(
-            get: { self.config.settings[keyPath: bar].edge },
+            get: {
+                let style = self.config.settings[keyPath: bar]
+                return style.screensDiffer ? nil : style.edge
+            },
             set: { edge in
+                guard let edge else { return }
                 var next = self.config.settings
                 next[keyPath: bar].setEdge(edge)
                 guard next != self.config.settings else { return }

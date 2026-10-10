@@ -58,7 +58,11 @@ struct BarsGates {
         guard settings.shelfShows else { return nil }
         if !settings.spaceBarStyle.enabled { return .spaceBarOff }
         guard anyBarShown else { return .noBarShown }
-        return settings.sharedBarEdge == nil ? .barsSplit : nil
+        // Split only where no screen fuses them (#1948).
+        let fused = settings.screenVariants.contains {
+            $0.sharedBarEdge != nil
+        }
+        return fused ? nil : .barsSplit
     }
 
     /// True while any bar can show — Core's one predicate — so
@@ -88,8 +92,20 @@ enum BarsGateHelp {
     static var edgesDiffer: String {
         L(
             "kiwishelf.edge.differ.help",
-            "The bars sit on different edges right now; choosing "
-                + "here puts both on one."
+            "The bars, or one bar's screens, sit on different "
+                + "edges right now; choosing here puts both bars on "
+                + "one edge on every screen."
+        )
+    }
+
+    /// A bar row's `?` while its screens differ (#1948).
+    static var screensDiffer: String {
+        L(
+            "kiwishelf.edge.screens_differ.help",
+            "Your screens put this bar on different edges — "
+                + "see \u{201C}%1$@\u{201D} below. Picking an edge "
+                + "here puts it there on every screen.",
+            L("kiwishelf.edge.per_screen.space_bar", "Per screen")
         )
     }
 

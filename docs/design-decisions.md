@@ -12870,6 +12870,25 @@ untouched, even one it now equals, which stays a pin: the
 map names this Mac's screens, which a look shared to another Mac
 cannot know, and a screen's own edge is the most specific choice
 the user made, so it stays the strongest.
+
+In Settings each bar row under Each bar gets a Per screen drawer,
+one picker per screen of the profile's own monitor set, and those
+rows are HIDDEN while the profile holds one screen. That is a
+deliberate exception to "grey, don't hide": greying says "switch
+that on and I act", and no setting turns one screen into two —
+a dimmed drawer would promise a choice the profile cannot have.
+A screen with no row of its own (one plugged in after the save)
+follows its bar, so hiding loses nothing. The rows list the
+profile's screens, not the connected ones, since a profile names
+its own screens and an absent one is still part of it; connected
+screens come first and an absent one carries "not present".
+Identical models share a fingerprint, and so share one row. A
+bar row whose screens differ selects nothing and says so through
+its `?`, as Position does when the bars differ, and a drawer held
+open by what it shows greys its chevron. Readers that ask
+whether a setting has any effect — order and minimum, the
+front-app colour — ask every screen and grey only where none is
+affected; the Home card pictures the main screen.
 :::
 
 **The shelf's edge is absolute.** (#293, supersedes the #228

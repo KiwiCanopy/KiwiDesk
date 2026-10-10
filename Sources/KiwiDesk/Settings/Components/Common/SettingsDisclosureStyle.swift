@@ -15,13 +15,17 @@ struct SettingsDisclosureStyle<Accessory: View>:
 {
     /// What the drawer hides, shown trailing while shut.
     private let summary: String?
+    /// Held open by what it shows: the chevron greys (#1948).
+    private let locked: Bool
     @ViewBuilder private let accessory: () -> Accessory
 
     init(
         summary: String? = nil,
+        locked: Bool = false,
         @ViewBuilder accessory: @escaping () -> Accessory
     ) {
         self.summary = summary
+        self.locked = locked
         self.accessory = accessory
     }
 
@@ -39,7 +43,8 @@ struct SettingsDisclosureStyle<Accessory: View>:
     ) -> some View {
         HStack(spacing: 6) {
             SettingsDisclosureButton(
-                isExpanded: configuration.$isExpanded
+                isExpanded: configuration.$isExpanded,
+                locked: locked
             ) {
                 configuration.label
                     .font(SettingsDrawerHeader.tier)
@@ -77,6 +82,9 @@ extension SettingsDisclosureStyle where Accessory == EmptyView {
 /// the Reduce Motion gate, in one place so none of them forks.
 struct SettingsDisclosureButton<Label: View>: View {
     @Binding var isExpanded: Bool
+    /// Held open by what it shows (#1948): the chevron greys, the
+    /// way a dimmed control says it takes no input.
+    var locked = false
     /// A drawer's header is a heading; a row inside a titled
     /// card (`SettingsCollapsibleSection`) is not.
     var isHeading = true
@@ -114,7 +122,7 @@ struct SettingsDisclosureButton<Label: View>: View {
     private var chevron: some View {
         Image(systemName: "chevron.right")
             .fontWeight(.bold)
-            .foregroundStyle(SettingsTheme.ink2)
+            .foregroundStyle(locked ? SettingsTheme.ink3 : SettingsTheme.ink2)
             .rotationEffect(.degrees(isExpanded ? 90 : 0))
             .accessibilityHidden(true)
     }

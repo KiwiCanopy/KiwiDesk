@@ -89,6 +89,7 @@ settings.animations.shelfDurationMS
 settings.animations.spaceChangeDurationMS
 settings.appBarStyle.activeIndicator
 settings.appBarStyle.edge
+settings.appBarStyle.edgeOverride[screen]
 settings.appBarStyle.groupAdjacentWindows
 settings.appBarStyle.titleCap
 settings.borderStyle.cornerStyle
@@ -180,6 +181,7 @@ settings.scrolling.wrapFocus
 settings.spaceBarStyle.activeIndicator
 settings.spaceBarStyle.edge
 settings.spaceBarStyle.edge (master)
+settings.spaceBarStyle.edgeOverride[screen]
 settings.spaceBarStyle.enabled
 settings.spaceBarStyle.focusedHighlightColor
 settings.spaceBarStyle.focusedItemColor

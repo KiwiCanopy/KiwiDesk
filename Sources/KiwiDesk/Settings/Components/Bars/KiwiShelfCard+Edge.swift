@@ -39,14 +39,46 @@ extension KiwiShelfCard {
         SettingsDisclosure(
             SettingsCatalog.bars.kiwishelfEdges,
             isExpanded: edgesDisclosure,
-            scrollHoisted: true
+            scrollHoisted: true,
+            locked: edgesSplit
         ) {
             // Spelled out in `BarsRowOrder.kiwishelfEdges`' order:
             // `row(for:)` renders this very row, and an opaque
             // type cannot contain itself.
             VStack(alignment: .leading, spacing: 10) {
                 spaceBarEdgeRow
+                // Hidden, never greyed, on one screen (#1948).
+                if model.offersScreenEdges {
+                    ScreenEdgesDrawer(
+                        model: model,
+                        bar: \.spaceBarStyle,
+                        title: L(
+                            "kiwishelf.edge.per_screen.space_bar",
+                            "Per screen"
+                        ),
+                        options: edgeOptions
+                    )
+                    .searchAnchored(
+                        SettingsCatalog.bars.kiwishelfEdges.children
+                            .kiwishelfSpaceBarScreenEdges
+                    )
+                }
                 appBarEdgeRow
+                if model.offersScreenEdges {
+                    ScreenEdgesDrawer(
+                        model: model,
+                        bar: \.appBarStyle,
+                        title: L(
+                            "kiwishelf.edge.per_screen.app_bar",
+                            "Per screen"
+                        ),
+                        options: edgeOptions
+                    )
+                    .searchAnchored(
+                        SettingsCatalog.bars.kiwishelfEdges.children
+                            .kiwishelfAppBarScreenEdges
+                    )
+                }
             }
             .padding(.top, 8)
         }
@@ -58,7 +90,8 @@ extension KiwiShelfCard {
         SegmentedPicker(
             L("kiwishelf.edge.space_bar", "Space Bar"),
             selection: model.barEdge(\.spaceBarStyle),
-            options: edgeOptions
+            options: edgeOptions,
+            help: screensDifferHelp(\.spaceBarStyle)
         )
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfEdges.children
@@ -70,12 +103,22 @@ extension KiwiShelfCard {
         SegmentedPicker(
             L("kiwishelf.edge.app_bar", "App Bar"),
             selection: model.barEdge(\.appBarStyle),
-            options: edgeOptions
+            options: edgeOptions,
+            help: screensDifferHelp(\.appBarStyle)
         )
         .searchAnchored(
             SettingsCatalog.bars.kiwishelfEdges.children
                 .kiwishelfAppBarEdge
         )
+    }
+
+    /// The `?` a bar row shows while its screens differ (#1948).
+    private func screensDifferHelp<Bar: ScreenEdged>(
+        _ bar: KeyPath<TilingSettings, Bar>
+    ) -> String? {
+        guard model.config.settings[keyPath: bar].screensDiffer
+        else { return nil }
+        return BarsGateHelp.screensDiffer
     }
 
     private var edgeOptions: [(String, AppBarEdge)] {
