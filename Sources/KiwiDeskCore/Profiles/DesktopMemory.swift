@@ -102,8 +102,14 @@ final class DesktopMemory {
     var readWindowSpace: @MainActor (WindowID) -> WindowSpaceReading =
         NativeSpaces.windowSpaceReading(of:)
 
+    /// The native Space each screen shows, filed at the HEAD of
+    /// every Desktop switch so the switch's own rings read it
+    /// (#2149); `lastDisplaySpaces` is filed at the tail (#1215).
+    var shownSpaces: [String: SkyLight.SpaceID] = [:]
+
     /// Seeds display space readings from desktop snapshot at boot.
     func seed(_ snapshot: DesktopSnapshot) {
         lastDisplaySpaces = snapshot.currentSpaces
+        shownSpaces = snapshot.currentSpaces
     }
 }
