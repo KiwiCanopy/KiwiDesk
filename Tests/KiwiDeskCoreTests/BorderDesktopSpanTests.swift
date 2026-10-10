@@ -89,6 +89,21 @@ struct BorderDesktopSpanTests {
         #expect(backend.calls == ["order", "hide", "order", "order"])
     }
 
+    /// A ring that stays wanted across a Desktop change — its
+    /// window still focused in a Space both Desktops show — is
+    /// never retired, so the change alone must owe the order.
+    @Test("A live ring placed on another Desktop owes a re-home")
+    func liveRingOwesTheRehome() {
+        let (overlay, backend) = ring()
+        syncOrder(overlay, on: 1)
+        #expect(!overlay.needsOrder)
+        overlay.place(spansDesktops: false, desktop: 2)
+        #expect(overlay.needsOrder)
+        overlay.order(relativeTo: 7)
+        #expect(!overlay.needsOrder)
+        #expect(backend.calls == ["order", "hide", "order"])
+    }
+
     @Test("An unknown Desktop never re-homes")
     func unknownDesktopStays() {
         let (overlay, backend) = ring()
