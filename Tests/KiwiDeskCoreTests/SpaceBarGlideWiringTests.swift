@@ -109,9 +109,11 @@ struct SpaceBarGlideWiringTests {
         #expect(overlay.shownIdentities.isEmpty)
     }
 
-    /// Hosted items ride their glass: the render moves none of
-    /// them, and each glass and its backdrop are written to
-    /// travel on a switch and to land on a steady pass.
+    /// Hosted items ride their glass, and each glass and its
+    /// backdrop ride the box's host (#2095): on a switch the host
+    /// travels and neither of them is written to animate its own
+    /// frame — the pair animating apart trailed a crescent ahead
+    /// of every box — and on a steady pass nothing travels.
     @Test("Box glass travels with its item")
     func boxGlassTravels() throws {
         try #require(Self.platformGlass)
@@ -123,20 +125,25 @@ struct SpaceBarGlideWiringTests {
         )
         #expect(overlay.boxGlasses.count == 3)
         #expect(!writes.contains { $0.view is SpaceBarItemView })
-        let glass = writes.filter { write in
-            overlay.boxGlasses.contains { $0 === write.view }
+        let hosts = overlay.boxGlasses.compactMap(\.superview)
+        #expect(hosts.count == 3)
+        #expect(hosts.allSatisfy { $0 is AppBarOverlay.BoxHost })
+        let hostWrites = writes.filter { write in
+            hosts.contains { $0 === write.view }
         }
-        let backdrops = writes.filter { $0.view is GlassBackdrop }
-        #expect(glass.count == 3)
-        #expect(backdrops.count == 3)
-        #expect((glass + backdrops).allSatisfy { $0.travels })
+        #expect(hostWrites.count == 3)
+        #expect(hostWrites.allSatisfy { $0.travels })
+        let pair = writes.filter { write in
+            write.view is GlassBackdrop
+                || overlay.boxGlasses.contains { $0 === write.view }
+        }
+        #expect(!pair.contains { $0.travels })
         let steady = try secondPass(
             .count,
             from: 2,
             to: 2,
             boxedGlass: true
         ).writes
-        #expect(steady.count == 6)
         #expect(!steady.contains { $0.travels })
     }
 }
