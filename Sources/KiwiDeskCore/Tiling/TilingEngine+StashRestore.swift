@@ -66,7 +66,7 @@ extension TilingEngine {
             }
             guard id != dragExemptWindow else { continue }
             if let current = state.windows[id]?.frame,
-                Self.close(current, to: original)
+                Self.delivered(current, to: original)
             {
                 stashedFrames[id] = nil
                 continue
@@ -93,6 +93,17 @@ extension TilingEngine {
             animation.cancel(window: id)
             setFrame(id, original)
         }
+    }
+
+    /// Whether a capture has been delivered: the window stands at
+    /// its ORIGIN. The size is the app's to refuse — a capture
+    /// held for a size the app's minimum overrules re-sent it on
+    /// every retile and was recorded as the window's frame
+    /// (#2129) — while a set that never landed leaves the origin
+    /// elsewhere and is sent again.
+    static func delivered(_ current: CGRect, to original: CGRect) -> Bool {
+        abs(current.minX - original.minX) <= retileTolerance
+            && abs(current.minY - original.minY) <= retileTolerance
     }
 
     /// A float's captured original frame, if one is pending —

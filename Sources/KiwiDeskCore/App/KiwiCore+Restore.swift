@@ -83,6 +83,15 @@ extension KiwiCore {
             // retile's centred seed. A float the quit gathered off
             // a hidden Space takes it too (#1864).
             let float = restoresAsFloat(record.windowID)
+            // A corner record carries no original, and the frame the
+            // window stands at is the boot pass's or its app's, never
+            // where it floated: placed as a float entering its Space
+            // (#2130).
+            if float, corner, !tiler.looksStashed(current),
+                placeEnteringFloat(record.windowID, wasFloat: false)
+            {
+                continue
+            }
             let parks = float && (corner || parksNow(record.windowID))
             if tiler.looksStashed(current) || parks {
                 if !corner {
