@@ -592,7 +592,6 @@
   "keybinding.conflict.system_shadows_apps": "Das Tastenkürzel für „%1$@“ nimmt jeder App „%2$@“ weg.",
   "keybinding.conflict.tooltip.other_binding": "In dieser Ebene auch mit %1$@ belegt — nur eines von beiden reagiert.",
   "keybinding.conflict.tooltip.shadows_apps": "Nimmt jeder App %1$@ weg, solange das Tastenkürzel hier belegt ist.",
-  "keybinding.conflict.tooltip.system": "Konflikt mit macOS: %1$@",
   "keybinding.conflict.tooltip.system_dead": "Funktioniert nicht: macOS reagiert zuerst auf dieses Tastenkürzel, für %1$@.",
   "keybinding.conflict.tooltip.system_off": "macOS reserviert dieses Tastenkürzel für %1$@ — diese Funktion ist gerade ausgeschaltet.",
   "keybinding.conflict.tooltip.unrecognized": "Kein erkanntes Tastenkürzel.",
