@@ -150,9 +150,9 @@ final class BorderOverlay {
         // when it stops spanning, or when `sync` orders it on a
         // screen now showing another Desktop: its window moved
         // there without it.
+        // A spanning ring records no `orderedOn`, so never moves.
         let moved =
-            !spansDesktops && desktop != nil && orderedOn != nil
-            && desktop != orderedOn
+            desktop != nil && orderedOn != nil && desktop != orderedOn
         if hasOrdered, rehomeOwed || moved { backend.hide() }
         rehomeOwed = false
         if !spansDesktops, let desktop { orderedOn = desktop }
