@@ -244,7 +244,7 @@ extension EventLoop {
         // (departed/arrived windows tile to identical frames, #308).
         lastDesktopChange = Date()
         onEvent(.desktopChanged)
-        reconcileAll()
+        foldsSwitchResync { reconcileAll() }
     }
 
     // MARK: - Displays

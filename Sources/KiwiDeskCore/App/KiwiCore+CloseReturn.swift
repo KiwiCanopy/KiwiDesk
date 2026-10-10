@@ -57,19 +57,21 @@ extension KiwiCore {
             state.windows[next]?.isFullscreen != true
         {
             onLog("close-return: raising w\(next.raw)")
-            // The owed return's switch, on the raise's branch
-            // alone, takes the one follow-shaped switch: its retile
-            // places the Space and lifts its floats (#11, #412,
-            // #2002).
-            if let owedSpace {
-                followSwitch(to: owedSpace, focusing: next)
-            } else {
-                focusWindow(next, warp: true)
+            let removedSlot = effects.removedWindow?.tiledSlot
+            // Inside a switch's re-sync the raise and its restack
+            // wait for the one pass that places the row.
+            afterSwitchResync { [self] in
+                // The owed return's switch, on the raise's branch
+                // alone, takes the one follow-shaped switch: its
+                // retile places the Space and lifts its floats
+                // (#11, #412, #2002).
+                if let owedSpace {
+                    followSwitch(to: owedSpace, focusing: next)
+                } else {
+                    focusWindow(next, warp: true)
+                }
+                armCloseReturnRestack(to: next, fromRemovedSlot: removedSlot)
             }
-            armCloseReturnRestack(
-                to: next,
-                fromRemovedSlot: effects.removedWindow?.tiledSlot
-            )
         }
         // A structural change in a track space (spawn, close) can
         // push a window into an overflow cascade; fix the pile's
@@ -82,7 +84,9 @@ extension KiwiCore {
         // focus re-raise of the very anchor the stand-down
         // refused — the next mutation's arm heals the pile.
         if willRetile, !closeReturnRaiseStandsDown {
-            scheduleTrackZOrderRestoreIfOverflowing()
+            afterSwitchResync { [self] in
+                scheduleTrackZOrderRestoreIfOverflowing()
+            }
         }
         // #951/#952 diagnosis: narrate the decision above. AFTER
         // the arms on purpose — the needle windows in
