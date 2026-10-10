@@ -161,7 +161,7 @@ struct ConflictSeverityTests {
             try #require(conflict("alt+h", in: [twin])),
             disabled: []
         )
-        #expect(duplicate == .duplicate("Focus window right"))
+        #expect(duplicate == .duplicate(twin))
         #expect(!duplicate.isDead)
         let unrecognized = ConflictSeverity.of(
             try #require(conflict("not+a+key")),
@@ -193,7 +193,7 @@ struct ConflictSeverityTests {
                 for: left,
                 in: [left, right],
                 disabled: []
-            ) == .duplicate("Focus window right")
+            ) == .duplicate(right)
         )
         #expect(
             ConflictText.severity(

@@ -85,8 +85,8 @@ enum ConflictText {
                 "keybinding.conflict.tooltip.other_binding",
                 "Also bound in this layer to %1$@ — only one "
                     + "of the two will fire.",
-                KeybindingCatalog.localizedLabel(
-                    for: who,
+                KeybindingCatalog.localizedName(
+                    of: who,
                     config: config
                 )
             )
