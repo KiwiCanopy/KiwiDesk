@@ -105,7 +105,7 @@ struct DesktopCueView: View {
             }
             .padding(.horizontal, 16)
             .frame(
-                minWidth: DesktopCueModel.side,
+                minWidth: height(cue),
                 minHeight: height(cue),
                 maxHeight: height(cue)
             )
@@ -123,6 +123,8 @@ struct DesktopCueView: View {
         }
     }
 
+    /// The plate's side: square either way, a long profile name
+    /// widening it past the side.
     private func height(_ cue: DesktopSwitchCue) -> CGFloat {
         cue.loadedProfile == nil
             ? DesktopCueModel.side : DesktopCueModel.tallSide
