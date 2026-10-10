@@ -12,6 +12,10 @@ struct ShortcutsFamilyRows {
     let spaces: [SpaceID]
     /// Space recognition icons.
     let icons: [SpaceID: String]
+    /// The live Spaces the profile does not hold (#1827), drawn
+    /// after `spaces` in the per-Space families: temporary, then
+    /// held.
+    var liveOnly: [LiveOnlySpace] = []
     /// Desktop availability offer (`KiwiCore.bindableDesktops(in:)`,
     /// `KeybindingCatalog.desktopOffer`).
     let desktops: KeybindingCatalog.DesktopOffer
@@ -39,9 +43,7 @@ struct ShortcutsFamilyRows {
         case .spaceHistoryStep:
             return KeybindingCatalog.spaceHistoryRows
         case .goToSpace:
-            return spaces.isEmpty
-                ? []
-                : KeybindingCatalog.goToSpace(spaces, icons: icons)
+            return perSpace(KeybindingCatalog.goToSpace)
         case .swapDir:
             return KeybindingCatalog.swapDirections
         case .moveWindowToTrack:
@@ -49,15 +51,9 @@ struct ShortcutsFamilyRows {
         case .swapWithTrack:
             return KeybindingCatalog.trackSwapRows
         case .moveToSpace:
-            return KeybindingCatalog.moveToSpaceRows(
-                spaces,
-                icons: icons
-            )
+            return perSpace(KeybindingCatalog.moveToSpaceRows)
         case .moveToSpaceFollow:
-            return KeybindingCatalog.moveToSpaceFollowRows(
-                spaces,
-                icons: icons
-            )
+            return perSpace(KeybindingCatalog.moveToSpaceFollowRows)
         case .focusDesktop:
             return KeybindingCatalog.goToDesktop(
                 desktops.desktops,
@@ -100,9 +96,32 @@ struct ShortcutsFamilyRows {
             .advanced,
             .`import`, .restoreDefaults, .scrollPan, .scrollLongSwipes,
             .scrollStepDistance, .scrollNaturalTrackpad,
-            .scrollNaturalMouse, .scrollSpaceStep:
+            .scrollNaturalMouse, .scrollSpaceStep, .spaceHistory:
             return nil
         }
+    }
+
+    /// A per-Space family over the profile's Spaces, then the
+    /// live-only ones wearing their chip.
+    private func perSpace(
+        _ make: ([SpaceID], [SpaceID: String]) -> [NavCommand]
+    ) -> [NavCommand] {
+        let extra = liveOnly.filter { !spaces.contains($0.id) }
+        var icons = icons
+        for space in extra {
+            if let icon = space.icon { icons[space.id] = icon }
+        }
+        var rows = make(spaces + extra.map(\.id), icons)
+        for (offset, space) in extra.enumerated() {
+            rows[spaces.count + offset].liveOnly = space.kind
+        }
+        return rows
+    }
+
+    /// Every Space a per-Space binding can reach now: the
+    /// profile's and the live-only ones (#1827).
+    var liveSpaces: [SpaceID] {
+        spaces + liveOnly.map(\.id).filter { !spaces.contains($0) }
     }
 
     private func resizeRow(

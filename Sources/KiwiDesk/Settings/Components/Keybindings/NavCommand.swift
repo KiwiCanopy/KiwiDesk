@@ -14,6 +14,9 @@ struct NavCommand: Identifiable, Hashable {
     /// Explanation of why command action cannot run in current environment
     /// (`keybindingRowStyle`).
     var unavailable: (@MainActor () -> String)? = nil
+    /// A live Space the profile does not hold, whose chip the row
+    /// wears (#1827).
+    var liveOnly: LiveOnlySpace.Kind? = nil
     var id: String { lua }
 
     @MainActor var resolvedLabel: String {

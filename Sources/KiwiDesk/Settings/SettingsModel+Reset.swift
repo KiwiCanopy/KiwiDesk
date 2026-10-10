@@ -48,6 +48,15 @@ extension SettingsModel {
         )
     }
 
+    /// The live Spaces the page's per-Space shortcut rows add
+    /// after the profile's (#1827): temporary, then held. The
+    /// live page only — a stored profile is another arrangement.
+    var liveOnlyShortcutSpaces: [LiveOnlySpace] {
+        guard !editingStoredProfile else { return [] }
+        return liveOnlySpaces.filter(\.isTemporary)
+            + liveOnlySpaces.filter { !$0.isTemporary }
+    }
+
     /// Inactive Space shortcut Lua in default layer (#820, #92).
     private var orphanLuaInDefaultLayer: Set<String> {
         guard
@@ -55,10 +64,11 @@ extension SettingsModel {
                 $0.name == KeyLayer.defaultName
             })
         else { return [] }
+        let live = liveOnlyShortcutSpaces.map(\.id)
         return Set(
             OrphanedShortcuts.commands(
                 bindings: layer.bindings,
-                spaces: config.spaces,
+                spaces: config.spaces + live,
                 layers: config.layers.map(\.name)
             )
             .map(\.lua)

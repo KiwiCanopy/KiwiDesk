@@ -61,8 +61,9 @@ struct FirstRunSeedTests {
         // Every seeded per-space row targets a space that is
         // in the seeded list — no dead rows (#91).
         let spaces = Set((config?.spaces ?? []).map(\.raw))
+        // The step verbs (#1655) name no Space, so no dead row.
         for row in base?.bindings ?? []
-        where row.lua.contains("_space") {
+        where row.lua.contains("_space") && !row.lua.hasSuffix("()") {
             let quoted = spaces.contains {
                 row.lua.contains(SpaceLuaArg.quote($0))
             }

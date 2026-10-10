@@ -133,9 +133,11 @@ struct DefaultKeybindingsTests {
             spaces: [],
             resizeStep: 50
         )
+        // The step verbs name no Space (#1655); only a row
+        // carrying a Space argument is per-space.
         #expect(
             !rows.contains {
-                $0.lua.contains("_space")
+                $0.lua.contains("_space") && !$0.lua.hasSuffix("()")
             }
         )
         // The directional / resize / float set still seeds.

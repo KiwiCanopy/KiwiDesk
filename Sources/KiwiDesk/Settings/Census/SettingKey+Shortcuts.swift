@@ -10,6 +10,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case spaceStep = "keybinding.space_{previous,next}"
     /// Back / forward through the Space history (#1655).
     case spaceHistoryStep = "keybinding.space_{back,forward}"
+    /// Which history those two walk (#1655).
+    case spaceHistory = "config.spaceHistory"
     case goToSpace = "keybinding.go_to_space (x N spaces)"
     case focusDesktop = "keybinding.focus_desktop (x N desktops)"
     case swapDir = "keybinding.swap_dir (x4)"
@@ -56,7 +58,8 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.layersExist)
             )
-        case .focusDir, .spaceStep, .spaceHistoryStep, .goToSpace:
+        case .focusDir, .spaceStep, .spaceHistoryStep, .spaceHistory,
+            .goToSpace:
             return .row(.shortcuts, .focus, .atRest)
         case .swapDir, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
@@ -180,6 +183,11 @@ extension ShortcutsKey {
             return .text("shortcuts.gestures.scroll.mouse")
         case .scrollSpaceStep:
             return .text("shortcuts.gestures.scroll.space_step")
+        case .spaceHistory:
+            return .text(
+                "shortcuts.space_history",
+                help: "shortcuts.space_history.help"
+            )
         }
     }
 }

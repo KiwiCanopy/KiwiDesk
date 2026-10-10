@@ -36,12 +36,18 @@ extension KeyLayerOverride {
         var marks: [String: [String]] = [:]
         for (name, combos) in removed {
             let gone = baseRemoved[name] ?? []
-            marks[name] = combos.filter { mark in
+            let kept = combos.filter { mark in
                 !gone.contains { Self.sameChord($0, mark) }
             }
+            if !kept.isEmpty { marks[name] = kept }
         }
+        // A layer the drop emptied overrides nothing; one that
+        // carried no rows to begin with diverges by its icon.
+        let kept = zip(layers, layers.removingRows(naming: spaces).layers)
+            .filter { $0.bindings.isEmpty || !$1.bindings.isEmpty }
+            .map(\.1)
         let trimmed = KeyLayerOverride(
-            layers: layers.removingRows(naming: spaces).layers,
+            layers: kept,
             removed: marks,
             leftOut: leftOut
         )

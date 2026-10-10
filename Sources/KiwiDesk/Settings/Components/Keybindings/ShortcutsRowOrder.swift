@@ -26,11 +26,13 @@ enum ShortcutsRowOrder {
         .behaviour(.mouseFollowsFocus),
     ]
 
-    /// Focus group order: directions, the Space steps (#1655),
-    /// then live spaces.
+    /// Focus group order: directions, the Space steps, the
+    /// history setting above its two rows (#1655), then live
+    /// spaces.
     static let focusAtRest: [SettingKey] = [
         .shortcuts(.focusDir),
         .shortcuts(.spaceStep),
+        .shortcuts(.spaceHistory),
         .shortcuts(.spaceHistoryStep),
         .shortcuts(.goToSpace),
     ]

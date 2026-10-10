@@ -119,6 +119,11 @@ struct SpacesSection: View {
                 model.config.spaces.append($0)
             }
             liveOnlyRows
+            CrossReferenceRow(
+                prose: Self.shortcutsProse,
+                linkTitle: SettingsDestination.shortcuts.title,
+                destination: .shortcuts
+            )
         }
     }
 

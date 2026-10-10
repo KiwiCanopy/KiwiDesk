@@ -9884,7 +9884,10 @@ as a sparse override — the scroll gestures' shape (#1656), and for
 the same reason: it changes what the keys on the same page do, and
 a profile is where a user who docks and undocks keeps what
 differs. An app-wide value with no override was the first draft
-and lost on that ground.
+and lost on that ground. Edited for a profile saved for one
+screen, the row greys and says why — both choices walk the one
+history there — while the shared value never greys, since it
+serves every profile.
 
 **It starts fresh at every start.** An in-place restart, an update
 or a crash carries no history. A Back that lands on a Space from
@@ -10249,6 +10252,14 @@ past the tenth digit is a want, not a gap: the per-Space rows on
 Shortcuts & Gestures already offer one, unbound, for every live
 Space, and Settings ▸ Spaces points there rather than growing a
 recorder of its own.
+
+**The per-Space rows draw every live Space (#1827).** A temporary
+or held Space's chords work, so its rows sit in the per-Space
+families after the profile's own, wearing the Space's chip, and
+Inactive shortcuts judges against every LIVE Space rather than the
+profile's list. Listing a working chord under Inactive, captioned
+"pressing one recreates its Space", told the user the opposite of
+what a press does; Inactive keeps only #92's true orphans.
 :::
 
 **The shortcuts panel scrolls, and says so — in words, in the

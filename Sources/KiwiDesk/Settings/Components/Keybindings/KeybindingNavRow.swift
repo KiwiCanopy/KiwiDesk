@@ -32,6 +32,9 @@ struct NavRow: View {
                     }
                 }
             Text(command.resolvedLabel)
+            if let kind = command.liveOnly {
+                LiveOnlySpaceChip(kind: kind)
+            }
             if let help = command.help {
                 HelpButton(
                     explanation: help(),

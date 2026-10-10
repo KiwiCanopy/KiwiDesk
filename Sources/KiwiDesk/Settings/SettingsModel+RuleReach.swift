@@ -82,6 +82,17 @@ extension SettingsModel {
             reach: reachEdits.reach[.scroll] ?? [:],
             removal: [:]
         )
+        snapshot.spaceHistory = RuleReachDraft.encode(
+            snapshot.spaceHistory,
+            current: [
+                RuleReachTable<SpaceHistoryKind>.spaceHistoryKey:
+                    config.spaceHistory
+            ],
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.history] ?? [:],
+            removal: [:]
+        )
         // The loaded page's gui.json layers, derived ONCE so the rule
         // write and the globals write read the same base.
         if reachIsLoaded {
@@ -112,6 +123,11 @@ extension SettingsModel {
         config.scrollGesture = stored.storedScrollBase.writing(
             stored.scrollGestures.resolved(for: loaded)
         )
+        config.spaceHistory =
+            stored.spaceHistory.resolved(
+                RuleReachTable<SpaceHistoryKind>.spaceHistoryKey,
+                for: loaded
+            ) ?? stored.spaceHistory.spaceHistoryBase
     }
 
     /// The draft as gui.json must hold it: on the live target the
@@ -133,6 +149,7 @@ extension SettingsModel {
         sidecar.scrollGesture = reach.scrollGestures.scrollGestureBase(
             original: reach.storedScrollBase
         )
+        sidecar.spaceHistory = reach.spaceHistory.spaceHistoryBase
         return sidecar
     }
 
@@ -172,6 +189,7 @@ extension SettingsModel {
         cleanConfig.appRules = config.appRules
         cleanConfig.floatRules = config.floatRules
         cleanConfig.scrollGesture = config.scrollGesture
+        cleanConfig.spaceHistory = config.spaceHistory
         // Not the layers: a stored page's own shortcut diff is the
         // tiling write's, which is what failed.
         ruleReachStored = core.ruleReachSnapshot()
@@ -187,6 +205,7 @@ extension SettingsModel {
         config.floatRules = cleanConfig.floatRules
         config.layers = cleanConfig.layers
         config.scrollGesture = cleanConfig.scrollGesture
+        config.spaceHistory = cleanConfig.spaceHistory
         reachEdits = RuleReachEdits()
     }
 

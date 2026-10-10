@@ -23,6 +23,12 @@ struct LayerRowWriterCensusTests {
     private static let writers: [String: (Int, String)] = [
         "KiwiDeskCore/Config/NavigationChords.swift":
             (1, "the dedupe itself"),
+        "KiwiDeskCore/Config/SpaceShortcutRemoval.swift":
+            (
+                1,
+                "drop: removes the rows naming a gone Space, adds"
+                    + " none (#1827)"
+            ),
         "KiwiDeskCore/Config/GuiConfig.swift":
             (
                 1,

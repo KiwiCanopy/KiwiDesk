@@ -56,8 +56,13 @@ struct SpaceHistorySettingTests {
         var work = try core.profiles.read(name: "Work")
         work.spaceHistory = .allScreens
         try core.profiles.write(work)
-        let work = try core.profiles.read(name: "Work")
-        #expect(work.spaceHistory == .allScreens)
+        let written = try String(
+            contentsOf: core.profiles.fileURL(name: "Work"),
+            encoding: .utf8
+        )
+        #expect(written.contains(#""space_history""#))
+        let reread = try core.profiles.read(name: "Work")
+        #expect(reread.spaceHistory == .allScreens)
     }
 
     @Test("the table writes a listed value to the profile alone")

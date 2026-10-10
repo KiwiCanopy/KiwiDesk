@@ -114,7 +114,7 @@ struct DefaultKeybindingLadderTests {
             ["left", "right", "up", "down"]
                 + (0...9).map(String.init)
         ).reduce(into: []) { set, name in
-            KeyCombo.keyCodes[name].map { set.insert($0) }
+            if let code = KeyCombo.keyCodes[name] { set.insert(code) }
         }
         #expect(positional.count == 14, "key names moved")
         var reversed = 0

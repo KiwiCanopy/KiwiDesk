@@ -16,7 +16,7 @@ public struct SpaceHistory: Sendable, Equatable {
 
     /// One trail and where along it the user stands.
     struct Trail: Sendable, Equatable {
-        var entries: [SpaceID] = []
+        var visits: [SpaceID] = []
         var cursor = 0
     }
 
@@ -32,21 +32,21 @@ public struct SpaceHistory: Sendable, Equatable {
     /// re-report of the same state.
     public mutating func visit(_ space: SpaceID, under key: Key) {
         var trail = trails[key] ?? Trail()
-        if trail.entries.indices.contains(trail.cursor),
-            trail.entries[trail.cursor] == space
+        if trail.visits.indices.contains(trail.cursor),
+            trail.visits[trail.cursor] == space
         {
             return
         }
-        if !trail.entries.isEmpty {
-            trail.entries.removeSubrange((trail.cursor + 1)...)
+        if !trail.visits.isEmpty {
+            trail.visits.removeSubrange((trail.cursor + 1)...)
         }
-        trail.entries.append(space)
-        if trail.entries.count > Self.capacity {
-            trail.entries.removeFirst(
-                trail.entries.count - Self.capacity
+        trail.visits.append(space)
+        if trail.visits.count > Self.capacity {
+            trail.visits.removeFirst(
+                trail.visits.count - Self.capacity
             )
         }
-        trail.cursor = trail.entries.count - 1
+        trail.cursor = trail.visits.count - 1
         trails[key] = trail
     }
 
@@ -61,8 +61,8 @@ public struct SpaceHistory: Sendable, Equatable {
     ) -> (index: Int, space: SpaceID)? {
         guard let trail = trails[key], direction != 0 else { return nil }
         var index = trail.cursor + direction.signum()
-        while trail.entries.indices.contains(index) {
-            let space = trail.entries[index]
+        while trail.visits.indices.contains(index) {
+            let space = trail.visits[index]
             if space != shown, reachable(space) {
                 return (index, space)
             }
@@ -74,7 +74,7 @@ public struct SpaceHistory: Sendable, Equatable {
     /// Stands the cursor on `index`, which `step` returned.
     public mutating func move(under key: Key, to index: Int) {
         guard var trail = trails[key],
-            trail.entries.indices.contains(index)
+            trail.visits.indices.contains(index)
         else { return }
         trail.cursor = index
         trails[key] = trail
@@ -84,7 +84,7 @@ public struct SpaceHistory: Sendable, Equatable {
     public mutating func rekey(_ old: SpaceID, to new: SpaceID) {
         trails = trails.mapValues { trail in
             var trail = trail
-            trail.entries = trail.entries.map { $0 == old ? new : $0 }
+            trail.visits = trail.visits.map { $0 == old ? new : $0 }
             return trail
         }
     }
@@ -94,21 +94,21 @@ public struct SpaceHistory: Sendable, Equatable {
     public mutating func forget(_ space: SpaceID) {
         for (key, trail) in trails {
             var kept = Trail()
-            for (index, entry) in trail.entries.enumerated()
+            for (index, entry) in trail.visits.enumerated()
             where entry != space {
                 // Collapse a repeat the removal made adjacent.
-                if kept.entries.last == entry {
+                if kept.visits.last == entry {
                     if index <= trail.cursor {
-                        kept.cursor = kept.entries.count - 1
+                        kept.cursor = kept.visits.count - 1
                     }
                     continue
                 }
-                kept.entries.append(entry)
+                kept.visits.append(entry)
                 if index <= trail.cursor {
-                    kept.cursor = kept.entries.count - 1
+                    kept.cursor = kept.visits.count - 1
                 }
             }
-            trails[key] = kept.entries.isEmpty ? nil : kept
+            trails[key] = kept.visits.isEmpty ? nil : kept
         }
     }
 
@@ -123,6 +123,6 @@ public struct SpaceHistory: Sendable, Equatable {
     /// A trail's entries and cursor, for tests and diagnostics.
     public func entries(under key: Key) -> (list: [SpaceID], cursor: Int) {
         let trail = trails[key] ?? Trail()
-        return (trail.entries, trail.cursor)
+        return (trail.visits, trail.cursor)
     }
 }

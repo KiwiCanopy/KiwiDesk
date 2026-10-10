@@ -29,6 +29,15 @@ extension SettingsValueReadout {
         case .scrollPan, .scrollLongSwipes, .scrollStepDistance,
             .scrollNaturalTrackpad, .scrollNaturalMouse, .scrollSpaceStep:
             return scrollGestureRows(key, old: old, new: new)
+        case .spaceHistory:
+            return [
+                .change(
+                    census,
+                    label: SpaceHistoryWords.title,
+                    old: SpaceHistoryWords.value(old.spaceHistory),
+                    new: SpaceHistoryWords.value(new.spaceHistory)
+                )
+            ]
         }
     }
 
