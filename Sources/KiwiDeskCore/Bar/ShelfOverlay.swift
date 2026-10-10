@@ -67,6 +67,9 @@ final class ShelfOverlay {
     var solidPlate: NSView?
     var glassPlate: NSView?
     var glassTint: GlassBackdrop?
+    /// The glass plate's box move; a test swaps it to see whether
+    /// a pass asked it to travel.
+    var moveFrame: BarFrameMove = BarMotion.setFrame(_:to:animated:)
     /// The plate's border (#1679), above whichever plate draws
     /// and below the strip; hidden with the plates.
     let plateBorder = ShelfBorder.make()
