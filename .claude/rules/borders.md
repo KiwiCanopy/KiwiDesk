@@ -272,16 +272,32 @@ these:
   read below says of every cue. Both `makeTestCore` twins pin the
   hold's clock, timer and that read.
 
-## The overlay panels join every Space
+## A ring stays on its window's Desktop; the mark spans them
 
-Both overlay panels carry `.canJoinAllSpaces` in their
-collection behavior — the bars' recipe, and the reason the
-Space Bar spans Desktops. A sticky window the Desktop reach
-carries (#1145) changes macOS Desktop under its overlays, and a
-single-Desktop panel strands the mark and the ring on the
-origin (device-observed 2026-09-01). Keep the flag on any new
-overlay panel that follows a window; `StickyOverlaySpanTests`
-pins the two that exist.
+**A ring panel joins every Desktop only while its window is
+carried, decided per ring from `stickyReachCarried()` and handed to
+`sync` on its `Spec`** (#2149, `BorderDesktopSpanTests`,
+`StickyOverlaySpanTests`). A spanning ring stood on screen through
+every Desktop switch's slide until the switch handler hid it; a
+single-Desktop ring slides away with its window. A carried window
+changes Desktop under its overlays (#1145), so its ring spans, as
+the sticky mark always does — a single-Desktop panel strands
+either on the origin (device-observed 2026-09-01). Two
+obligations:
+
+- **Re-home a ring through `BorderOverlay`, and only where it must
+  move Desktops** — it stopped spanning, since dropping the flag
+  leaves a shown panel on every Desktop (device, 2026-10-10), or
+  `sync` orders it on a screen showing another Desktop than the
+  one it was last ordered on, read from `DesktopMemory.shownSpaces`,
+  which the switch handler files at its HEAD. The re-home is an
+  order-out ahead of the order the ring was owed anyway; a reorder
+  event or a settle pass never re-homes, and no WindowServer read
+  decides it (`BorderDesktopSpanTests`).
+- **A new overlay panel that follows a window states which kind it
+  is** — on the window's Desktop, or on every Desktop because a
+  carry moves its window — and `StickyOverlaySpanTests` gains its
+  clause.
 
 ## The ring draws on the `.transient` panel, never a raw window
 
