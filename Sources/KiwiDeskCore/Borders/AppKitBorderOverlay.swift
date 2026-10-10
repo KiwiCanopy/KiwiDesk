@@ -252,6 +252,16 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         isOrderedIn = true
     }
 
+    /// Joins every Desktop while the ring's window is carried
+    /// (#2149); `BorderOverlay` re-homes a ring that stops.
+    func setSpansDesktops(_ on: Bool) {
+        if on {
+            panel?.collectionBehavior.insert(.canJoinAllSpaces)
+        } else {
+            panel?.collectionBehavior.remove(.canJoinAllSpaces)
+        }
+    }
+
     func hide() {
         panel?.orderOut(nil)
         isOrderedIn = false
@@ -312,12 +322,11 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         panel.level = .normal
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
-        // `.canJoinAllSpaces`: the ring follows a carried sticky
-        // window across Desktops (#1145), the bars' recipe;
-        // `.transient` hides it in Mission Control, which on
-        // macOS 27 a raw SkyLight window never does (#1917).
+        // No `.canJoinAllSpaces`: the ring stays on its window's
+        // Desktop unless `setSpansDesktops` says it is carried
+        // (#2149, #1145); `.transient` hides it in Mission
+        // Control, which a raw SkyLight window never does (#1917).
         panel.collectionBehavior = [
-            .canJoinAllSpaces,
             .transient,
             .fullScreenAuxiliary,
             .ignoresCycle,

@@ -5619,6 +5619,15 @@ rulings:
   promise to the user — switch, and the window is already there;
   the one visible difference is Mission Control, which shows a
   sticky window on one Desktop at a time.
+:::unreleased
+- **Only a carried window's overlays ride the switch.** A ring
+  belongs to its window's Desktop and slides away with it; a
+  carried window's ring, and every sticky mark, join every Desktop
+  so the carry finds them, and so stand on screen through the
+  slide until the switch handler places them (#2149). Accepted:
+  the carry moves the window under them, and a panel that left
+  with the origin Desktop would strand there.
+:::
 - **Both scopes carry within the screen they are shown on.** ∞
   and 📌 differ in which KiwiDesk Spaces a window follows; across
   Desktops they behave alike — each follows the Desktop switches

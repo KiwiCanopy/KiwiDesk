@@ -14,6 +14,12 @@ public final class BorderManager {
         public let glowBlur: CGFloat
         /// The stroke's sheen strength (#1644), 0 for none.
         public let sheen: CGFloat
+        /// Whether the ring joins every Desktop: its window is
+        /// carried (#2149, #1145).
+        public let spansDesktops: Bool
+        /// The native Space its screen shows, nil where unknown —
+        /// a ring revived on another is re-homed (#2149).
+        public let desktop: UInt64?
 
         public init(
             window: WindowID,
@@ -22,7 +28,9 @@ public final class BorderManager {
             width: CGFloat,
             cornerStyle: BorderStyle.CornerStyle,
             glowBlur: CGFloat = 0,
-            sheen: CGFloat = 0
+            sheen: CGFloat = 0,
+            spansDesktops: Bool = false,
+            desktop: UInt64? = nil
         ) {
             self.window = window
             self.frame = frame
@@ -31,6 +39,8 @@ public final class BorderManager {
             self.cornerStyle = cornerStyle
             self.glowBlur = glowBlur
             self.sheen = sheen
+            self.spansDesktops = spansDesktops
+            self.desktop = desktop
         }
     }
 
