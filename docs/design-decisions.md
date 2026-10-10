@@ -6924,7 +6924,7 @@ Closing the window with unsaved edits — the close button, ⌘W,
 File ▸ Close — asks Save / Discard / Cancel, and a quit while
 Settings is open with unsaved edits asks the same with Settings
 brought to the front: the user's Quit, Install and Relaunch, a
-quit another app sends, a logout or restart. With Settings
+quit another app sends. With Settings
 closed there is no draft, so no quit ever asks. This amends
 #455's "the draft survives a close": a draft that outlived its
 window could only be met again as a question from an app showing
@@ -6940,9 +6940,13 @@ through once. It never holds the quit with `.terminateLater`:
 that runs the run loop in the modal-panel mode, where other apps'
 accessibility notifications are not delivered (they are observed
 in the default mode alone, accessibility.md), so tiling would go
-deaf for as long as the question waits — unbounded on a logout.
-The price is that a restart or logout the question stops has to
-be started again after the answer. A second quit while the
+deaf for as long as the question waits. A logout, restart or
+shut down is never asked about: macOS asks a menu-bar app to
+quit only past its point of no return and logs out whatever it
+answers (measured on macOS 27.0, 2026-10-10, #2135), so the
+power-off notice and the quit event's own reason discard the
+edits as a SIGTERM does; saving them unasked was ruled out, as a
+write of changes never confirmed. A second quit while the
 question is up brings it forward rather than slipping past it.
 An in-place restart intent is withdrawn while the question waits
 and re-armed with the same source on the answer, so a Cancel
