@@ -4,13 +4,21 @@ import Testing
 /// A `KeyBinding` is named for display through ONE door,
 /// `KeybindingCatalog.localizedName(of:config:)` (#2111, #96): a
 /// hand-written "label, else Lua" shows the stored English
-/// identifier in every locale. The scan covers `Sources/KiwiDesk`;
-/// Core's conflict naming is #2116's. Accepted limit: a file that
+/// identifier in every locale. The scan covers both trees, since
+/// Core hands the GUI the binding rather than a name (#2116).
+/// Accepted limit: a file that
 /// reaches a binding only through an inferred type or a renamed
 /// accessor names no scope word and is review's to catch.
 @Suite("Binding name door (#2111)")
 struct BindingNameDoorTests {
     private let home = "KeybindingCatalog+DisplayName.swift"
+
+    /// Both trees: Core hands the GUI bindings to name, never a
+    /// name it chose (#2116).
+    private static let roots = ["Sources/KiwiDesk", "Sources/KiwiDeskCore"]
+        .map {
+            SourceScan.repoRoot(from: #filePath).appendingPathComponent($0)
+        }
 
     /// Every `.label` READ in a binding-handling file outside the
     /// home, by file, exact count and reason. Keyed on the subject
@@ -56,6 +64,16 @@ struct BindingNameDoorTests {
             1,
             "a built ShortcutRow's display label"
         ),
+        // Core (#2116): it stores and compares the label and never
+        // names a binding for display.
+        "KeyLayer.swift": (
+            4,
+            "the type's own coding keys and equality"
+        ),
+        "KeybindingMerge.swift": (
+            1,
+            "a merge copying a row's label into the stored binding"
+        ),
     ]
 
     /// A file is in scope when it can hold a binding: it names the
@@ -70,9 +88,9 @@ struct BindingNameDoorTests {
     private let labelRead = /\.label(?!\w)(?!\s*=[^=])/
 
     private func sources() throws -> [(name: String, text: String)] {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk")
-        let files = try SourceScan.swiftSources(under: root)
+        let files = try Self.roots.flatMap {
+            try SourceScan.swiftSources(under: $0)
+        }
         // A scan that read nothing would pass having looked at
         // nothing (#635).
         #expect(files.count > 50)
@@ -89,10 +107,11 @@ struct BindingNameDoorTests {
     /// Label reads per in-scope file, literals and comments blanked
     /// so a localization key spelling `.label` is no read.
     private func labelReads() throws -> [String: Int] {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk")
         var result: [String: Int] = [:]
-        for file in try SourceScan.swiftSources(under: root) {
+        let files = try Self.roots.flatMap {
+            try SourceScan.swiftSources(under: $0)
+        }
+        for file in files {
             let text = try SourceScan.blankedSource(at: file)
             guard text.firstMatch(of: scope) != nil else { continue }
             let reads = reads(in: text)

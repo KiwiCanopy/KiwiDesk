@@ -24,15 +24,25 @@ extension KeybindingCatalog {
     /// A binding's name wherever the GUI names one: its localized
     /// label, else the catalog command its Lua runs, else the Lua
     /// itself — the one door (#96, #2111,
-    /// `BindingNameDoorTests`).
+    /// `BindingNameDoorTests`). `foreign` names a binding of
+    /// ANOTHER profile, whose roster this page's `config` lacks:
+    /// the Space the binding itself targets joins the roster, so a
+    /// Space only that profile declares is still named (#2116).
     @MainActor static func localizedName(
         of binding: KeyBinding,
-        config: GuiConfig
+        config: GuiConfig,
+        foreign: Bool = false
     ) -> String {
         guard binding.label.isEmpty else {
             return localizedLabel(for: binding.label, config: config)
         }
-        return namedCommands(config).first(where: {
+        var roster = config
+        if foreign, let space = SpaceLuaArg.targetSpace(of: binding.lua),
+            !roster.spaces.contains(space)
+        {
+            roster.spaces.append(space)
+        }
+        return namedCommands(roster).first(where: {
             $0.lua == binding.lua
         })?.resolvedLabel ?? binding.lua
     }
