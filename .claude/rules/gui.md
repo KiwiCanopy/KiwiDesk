@@ -327,7 +327,11 @@ window's `windowShouldClose` and from `applicationShouldTerminate`
 while Settings is open — which CANCELS the quit and lets the
 answer quit again, never `.terminateLater`, whose modal-panel run
 loop mode deafens the AX observers (accessibility.md) — and never
-by a dialog of its own. **Any sheet a leave waits on settles the
+by a dialog of its own; **a logout, restart or shut down is
+never asked about** — macOS asks a menu-bar app only past its
+point of no return — so the power-off notice and
+`QuitReason.isPowerOff` drop the draft first (#2135,
+`PowerOffQuitTests`). **Any sheet a leave waits on settles the
 leave on its own dismissal**, not only from its buttons: a quit
 ending the sheet or a rebuild tearing its host down would
 otherwise orphan the leave, which then holds every later quit. Its
