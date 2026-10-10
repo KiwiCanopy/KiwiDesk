@@ -12,11 +12,12 @@ import SwiftUI
 /// binding hears the press, so that row never fires; a layer is
 /// one `[KeyCombo: ref]` table, so of two rows on one chord
 /// exactly one fires; a chord every app's menus carry (⌘W) is
-/// WON by KiwiDesk, so the app loses it. ⌘Tab and ⌥⌘Esc have no
-/// measured precedence yet, so they stay a collision.
+/// WON by KiwiDesk, so the app loses it. ⌘Tab and ⌥⌘Esc, outside
+/// the symbolic table, are macOS's too (#1275, 2026-10-10): dead,
+/// and no setting switches them off.
 enum ConflictSeverity: Equatable {
-    /// A symbolic hotkey macOS has switched on: the press goes
-    /// to macOS and the row never fires.
+    /// A chord macOS answers first — a symbolic hotkey it has
+    /// switched on, or ⌘Tab / ⌥⌘Esc: the row never fires.
     case dead(SystemShortcut)
     /// macOS holds the chord but has it switched off (the Zoom
     /// and Invert Colors families): the row works until the
@@ -25,9 +26,6 @@ enum ConflictSeverity: Equatable {
     /// A chord every app's menus carry: the row works and every
     /// app loses that item's shortcut while it is bound.
     case shadowsApps(SystemShortcut)
-    /// A system-level chord outside the symbolic table (⌘Tab,
-    /// ⌥⌘Esc) — who wins the press is unmeasured (#1126).
-    case reserved(SystemShortcut)
     /// Another row of the same layer holds the chord: one of the
     /// two fires, the other is silent.
     case duplicate(String)
@@ -44,9 +42,8 @@ enum ConflictSeverity: Equatable {
         switch conflict.target {
         case .systemShortcut(let shortcut):
             if disabled.contains(shortcut) { return .dormant(shortcut) }
-            if shortcut.symbolicHotkey != nil { return .dead(shortcut) }
             return shortcut.isUniversalAccelerator
-                ? .shadowsApps(shortcut) : .reserved(shortcut)
+                ? .shadowsApps(shortcut) : .dead(shortcut)
         case .otherBinding(let who):
             return .duplicate(who)
         case .unrecognized:

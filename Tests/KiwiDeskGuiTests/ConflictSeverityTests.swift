@@ -57,14 +57,19 @@ struct ConflictSeverityTests {
         #expect(!severity.isDead)
     }
 
-    /// ⌘Tab is system-level and outside the symbolic table, with
-    /// no measured precedence: a collision, never a death.
-    @Test("a system-level chord outside the table is reserved")
-    func systemLevelChordIsReserved() throws {
-        let appSwitcher = try #require(conflict("command+tab"))
-        let severity = ConflictSeverity.of(appSwitcher, disabled: [])
-        #expect(severity == .reserved(.appSwitcher))
-        #expect(!severity.isDead)
+    /// ⌘Tab and ⌥⌘Esc are system-level and outside the symbolic
+    /// table; the press test found macOS answers both (#1275).
+    @Test("a system-level chord outside the table is dead")
+    func systemLevelChordIsDead() throws {
+        for (chord, shortcut) in [
+            ("command+tab", SystemShortcut.appSwitcher),
+            ("command+option+escape", .forceQuit),
+        ] {
+            let found = try #require(conflict(chord))
+            let severity = ConflictSeverity.of(found, disabled: [])
+            #expect(severity == .dead(shortcut))
+            #expect(severity.isDead)
+        }
     }
 
     /// The population the static set was wrong for, both ways
