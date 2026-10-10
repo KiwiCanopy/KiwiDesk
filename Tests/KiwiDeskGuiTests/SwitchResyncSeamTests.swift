@@ -58,23 +58,52 @@ struct SwitchResyncSeamTests {
         }
     }
 
+    /// Comment-free source with every whitespace dropped, so a
+    /// needle pins what a closure CONTAINS, not only that one
+    /// exists beside the call.
+    private static func squeezed(_ path: String) throws -> String {
+        let url = root.appendingPathComponent(path)
+        return SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        .filter { !$0.isWhitespace }
+    }
+
+    @Test("the close-return raise and track arm sit inside the wait")
+    func closeReturnWorkIsInsideTheWait() throws {
+        let source = try Self.squeezed(
+            "Sources/KiwiDeskCore/App/KiwiCore+CloseReturn.swift"
+        )
+        #expect(
+            source.contains(
+                "afterSwitchResync{[self]iniflet"
+                    + "owedSpace{followSwitch(to:owedSpace,focusing:next)}"
+                    + "else{focusWindow(next,warp:true)}"
+                    + "armCloseReturnRestack(to:next,"
+                    + "fromRemovedSlot:removedSlot)}"
+            )
+        )
+        #expect(
+            source.contains(
+                "afterSwitchResync{[self]in"
+                    + "scheduleTrackZOrderRestoreIfOverflowing()}"
+            )
+        )
+    }
+
     /// The topology refresh is hopped to the next main turn, so
     /// the re-render it starts never joins the switch's turn.
     @Test("Settings refreshes after the switch's turn")
     func settingsRefreshIsDeferred() throws {
-        let file = Self.root.appendingPathComponent(
+        let source = try Self.squeezed(
             "Sources/KiwiDesk/Settings/SettingsWindowController.swift"
         )
-        let source = try String(contentsOf: file, encoding: .utf8)
-        let start = try #require(
-            source.range(of: "func observeWorkspaceTopology()")
+        #expect(
+            source.contains(
+                "DispatchQueue.main.async{MainActor.assumeIsolated"
+                    + "{self?.refreshProfiles()}}"
+            )
         )
-        let rest = source[start.upperBound...]
-        let end = rest.range(of: "\n    }\n")?.lowerBound ?? rest.endIndex
-        let body = String(rest[..<end])
-        let hop = try #require(body.range(of: "DispatchQueue.main.async {"))
-        let call = try #require(body.range(of: "self?.refreshProfiles()"))
-        #expect(hop.upperBound < call.lowerBound)
         #expect(
             source.components(separatedBy: "self?.refreshProfiles()")
                 .count == 2
