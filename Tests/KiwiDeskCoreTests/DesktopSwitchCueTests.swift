@@ -26,7 +26,7 @@ struct DesktopSwitchCueTests {
     func globalNumberLocalDots() {
         defer { resetAuthorityOverrides() }
         let snapshot = authoritySnapshot(mainCurrent: 10, secondaryCurrent: 21)
-        let cue = DesktopCueLedger.cue(
+        let verdict = DesktopCueLedger.verdict(
             for: owed(21, on: "UUID-B"),
             in: snapshot,
             display: DisplayID(2),
@@ -34,49 +34,53 @@ struct DesktopSwitchCueTests {
             now: at.addingTimeInterval(0.2)
         )
         #expect(
-            cue
-                == DesktopSwitchCue(
-                    display: DisplayID(2),
-                    number: 4,
-                    position: 2,
-                    count: 2,
-                    loadedProfile: "Work"
+            verdict
+                == .settled(
+                    DesktopSwitchCue(
+                        display: DisplayID(2),
+                        number: 4,
+                        position: 2,
+                        count: 2,
+                        loadedProfile: "Work"
+                    )
                 )
         )
     }
 
-    @Test("nothing is earned before the target shows, or past the bound")
-    func earnedOnlyWhenShownInTime() {
+    /// The three other arms: waiting before the target shows,
+    /// settled with nothing past the bound or on an unnamed screen.
+    @Test("a debt waits for its landing and settles empty otherwise")
+    func verdictArms() {
         defer { resetAuthorityOverrides() }
         let notYet = authoritySnapshot(mainCurrent: 10)
         #expect(
-            DesktopCueLedger.cue(
+            DesktopCueLedger.verdict(
                 for: owed(11, on: "UUID-A"),
                 in: notYet,
                 display: DisplayID(1),
                 loadedProfile: nil,
                 now: at
-            ) == nil
+            ) == .waiting
         )
         let shown = authoritySnapshot(mainCurrent: 11)
         let late = at.addingTimeInterval(DesktopCueLedger.bound + 0.1)
         #expect(
-            DesktopCueLedger.cue(
+            DesktopCueLedger.verdict(
                 for: owed(11, on: "UUID-A"),
-                in: shown,
+                in: notYet,
                 display: DisplayID(1),
                 loadedProfile: nil,
                 now: late
-            ) == nil
+            ) == .settled(nil)
         )
         #expect(
-            DesktopCueLedger.cue(
+            DesktopCueLedger.verdict(
                 for: owed(11, on: "UUID-A"),
                 in: shown,
                 display: nil,
                 loadedProfile: nil,
                 now: at
-            ) == nil
+            ) == .settled(nil)
         )
     }
 
@@ -173,6 +177,44 @@ struct DesktopSwitchCueTests {
             !core.execute("set_desktop_cue", args: [.string("no")])
                 .isSuccess
         )
+    }
+
+    @Test("a switch confirmed past the bound shows nothing")
+    func lateLandingShowsNothing() {
+        let core = makeCore()
+        defer { teardown() }
+        var shown = 0
+        core.desktopCue.onCue = { _ in shown += 1 }
+        core.execute("focus_desktop", args: [.number(2)])
+        core.wallClock = {
+            self.at.addingTimeInterval(DesktopCueLedger.bound + 0.1)
+        }
+        land(core, mainOn: 11)
+        #expect(shown == 0)
+        #expect(core.desktopCue.owed == nil)
+    }
+
+    /// Shared mode: every Desktop sits on one managed-display
+    /// identifier no screen answers to, so the cue takes the main
+    /// screen.
+    @Test("a shared Desktop draws on the main screen")
+    func sharedModeDrawsOnMain() {
+        let core = makeCore()
+        defer { teardown() }
+        let shared = [10, 11].map { id in
+            NativeSpace(
+                id: UInt64(id),
+                displayUUID: "Main",
+                isCurrent: id == 11
+            )
+        }
+        NativeSpaces.spacesOverride = shared
+        let snapshot = NativeSpaces.desktopSnapshot()
+        #expect(core.cueDisplay("Main", in: snapshot) == DisplayID(1))
+        // The control: with each screen's own Desktops, an
+        // identifier no screen answers to names none.
+        let split = authoritySnapshot(mainCurrent: 11)
+        #expect(core.cueDisplay("Main", in: split) == nil)
     }
 
     // MARK: - Stored shape

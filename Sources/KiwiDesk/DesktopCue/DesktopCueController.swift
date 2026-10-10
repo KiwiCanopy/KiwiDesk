@@ -14,9 +14,6 @@ final class DesktopCueController {
     private var hideWork: DispatchWorkItem?
     private var orderOutWork: DispatchWorkItem?
 
-    var screenStandsDown: (NSScreen) -> Bool = { _ in false }
-    var liquidGlass: () -> Bool = { true }
-
     /// AppKit keeps a visible panel alive past its owner (#1868).
     isolated deinit {
         hideWork?.cancel()
@@ -24,13 +21,11 @@ final class DesktopCueController {
         panel?.orderOut(nil)
     }
 
-    func show(_ cue: DesktopSwitchCue) {
-        guard let screen = Self.screen(of: cue.display),
-            !screenStandsDown(screen)
-        else { return }
+    /// `screen` is the one `cue.display` names, resolved by Core;
+    /// whether to show at all is Core's too (`payDesktopCue`).
+    func show(_ cue: DesktopSwitchCue, on screen: NSScreen) {
         orderOutWork?.cancel()
         model.cue = cue
-        model.liquidGlass = liquidGlass()
         let panel = self.panel ?? makePanel()
         self.panel = panel
         let room = DesktopCueModel.room
@@ -66,14 +61,6 @@ final class DesktopCueController {
         schedule(&orderOutWork, after: fade) { [weak self] in
             guard let self, !self.model.visible else { return }
             self.panel?.orderOut(nil)
-        }
-    }
-
-    private static func screen(of display: DisplayID) -> NSScreen? {
-        let key = NSDeviceDescriptionKey("NSScreenNumber")
-        return NSScreen.screens.first {
-            ($0.deviceDescription[key] as? NSNumber)?.uint32Value
-                == display.raw
         }
     }
 

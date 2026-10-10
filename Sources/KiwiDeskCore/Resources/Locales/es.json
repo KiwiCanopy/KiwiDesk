@@ -276,7 +276,7 @@
   "desktops.absent.help": "Este Escritorio no está ahora mismo en Mission Control — su pantalla no está conectada, o se eliminó. El perfil sigue asociado aquí y vuelve a cargarse si ese Escritorio regresa.",
   "desktops.conflict": "Carga %1$@ en lugar de %2$@, al que pertenecen estas pantallas.",
   "desktops.cue": "Mostrar el número del Escritorio tras un cambio",
-  "desktops.cue.help": "KiwiDesk cambia de Escritorio sin animación, así que muestra un momento en esa pantalla el número del Escritorio al que ha cambiado, con un punto por cada Escritorio de esa pantalla y el perfil que cargó, si cargó alguno.",
+  "desktops.cue.help": "KiwiDesk cambia de Escritorio sin la animación de macOS, así que muestra por un momento, en la pantalla donde cambió, el número del Escritorio, con un punto por cada Escritorio de esa pantalla y el perfil que cargó, si cargó alguno.",
   "desktops.current": "actual",
   "desktops.desktop": "Escritorio %1$d",
   "desktops.empty": "No se ha detectado ningún Escritorio nativo de macOS. Añade Escritorios en Mission Control para asociar perfiles.",

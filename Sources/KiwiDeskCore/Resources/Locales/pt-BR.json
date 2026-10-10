@@ -276,7 +276,7 @@
   "desktops.absent.help": "Esta Mesa não está no Mission Control no momento — a tela dela não está conectada, ou ela foi removida. O perfil continua vinculado aqui e é carregado de novo se essa Mesa retornar.",
   "desktops.conflict": "Carrega %1$@ no lugar de %2$@, ao qual pertencem estas telas.",
   "desktops.cue": "Mostrar o número da Mesa após uma troca",
-  "desktops.cue.help": "O KiwiDesk troca de Mesa sem animação, então mostra por um instante nessa tela o número da Mesa para a qual trocou, com um ponto para cada Mesa dessa tela e o perfil que carregou, se carregou algum.",
+  "desktops.cue.help": "O KiwiDesk troca de Mesa sem a animação do macOS, então mostra por um instante, na tela em que trocou, o número da Mesa, com um ponto para cada Mesa dessa tela e o perfil que carregou, se carregou algum.",
   "desktops.current": "atual",
   "desktops.desktop": "Mesa %1$d",
   "desktops.empty": "Nenhuma Mesa nativa do macOS detectada. Adicione Mesas no Mission Control para vincular perfis.",

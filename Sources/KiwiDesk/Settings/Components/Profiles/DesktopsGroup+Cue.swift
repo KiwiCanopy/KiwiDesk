@@ -7,7 +7,7 @@ import SwiftUI
 /// binding rows'.
 extension DesktopsGroup {
     @ViewBuilder var switchCueRow: some View {
-        let reason = cueGates.inertReason(for: .profiles(.desktopCue))
+        let reason = gates.inertReason(for: .profiles(.desktopCue))
         ToggleRow(
             label: SettingsCatalog.profiles.desktops.children
                 .switchCue.text,
@@ -17,11 +17,11 @@ extension DesktopsGroup {
             ),
             help: L(
                 "desktops.cue.help",
-                "KiwiDesk switches Desktops without the slide, so "
-                    + "it shows the number of the Desktop it "
-                    + "switched to on that screen for a moment, "
-                    + "with a dot for each Desktop there and the "
-                    + "profile it loaded, if any."
+                "KiwiDesk switches Desktops without macOS's slide "
+                    + "animation, so for a moment it shows the "
+                    + "Desktop's number on the screen that switched, "
+                    + "with a dot for each Desktop on that screen and "
+                    + "the profile it loaded, if any."
             ),
             disabled: reason != nil
         )
@@ -33,14 +33,5 @@ extension DesktopsGroup {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.leading, ToggleRow.captionIndent)
         }
-    }
-
-    private var cueGates: ProfilesGates {
-        ProfilesGates(
-            editingStoredProfile: model.editingStoredProfile,
-            connectedScreens: model.displays.count,
-            guiManaged: model.guiManaged,
-            sidecarExists: model.sidecarExists
-        )
     }
 }

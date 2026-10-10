@@ -3,18 +3,14 @@ import KiwiDeskCore
 
 extension AppDelegate {
     /// The Desktop switch cue (#2142): fed by Core's one payer,
-    /// standing down where the shelf would, and following the
-    /// Liquid Glass switch through the ⌃⌥K panel's leaf, as the
-    /// slow-boot notice does.
+    /// which has already decided it shows; the GUI draws it on the
+    /// screen Core names.
     func wireDesktopCue() {
-        core.desktopCue.onCue = { [weak self] cue in
-            self?.desktopCuePlate.show(cue)
-        }
-        desktopCuePlate.screenStandsDown = { [weak self] screen in
-            self?.core.shelfStandsDown(on: screen) ?? false
-        }
-        desktopCuePlate.liquidGlass = { [weak self] in
-            self?.core.tiler.settings.shortcutPanelLiquidGlass ?? true
+        core.onDesktopCue = { [weak self] cue in
+            guard let self,
+                let screen = self.core.screen(for: cue.display)
+            else { return }
+            self.desktopCuePlate.show(cue, on: screen)
         }
     }
 }

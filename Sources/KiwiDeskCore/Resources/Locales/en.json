@@ -276,7 +276,7 @@
   "desktops.absent.help": "This Desktop isn't in Mission Control right now — its screen is unplugged, or it was removed. The profile stays here and loads again if that Desktop comes back.",
   "desktops.conflict": "Loads %1$@ over %2$@, which holds these screens.",
   "desktops.cue": "Show the Desktop's number after a switch",
-  "desktops.cue.help": "KiwiDesk switches Desktops without the slide, so it shows the number of the Desktop it switched to on that screen for a moment, with a dot for each Desktop there and the profile it loaded, if any.",
+  "desktops.cue.help": "KiwiDesk switches Desktops without macOS's slide animation, so for a moment it shows the Desktop's number on the screen that switched, with a dot for each Desktop on that screen and the profile it loaded, if any.",
   "desktops.current": "current",
   "desktops.desktop": "Desktop %1$d",
   "desktops.empty": "No native macOS Desktops detected. Add Desktops in Mission Control to bind profiles.",

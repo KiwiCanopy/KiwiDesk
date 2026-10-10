@@ -8,7 +8,6 @@ import SwiftUI
 final class DesktopCueModel: ObservableObject {
     @Published var cue: DesktopSwitchCue?
     @Published var visible = false
-    var liquidGlass = true
 
     static let hold: TimeInterval = 0.6
     static let fade: TimeInterval = 0.25
@@ -74,7 +73,8 @@ struct DesktopCueView: View {
             )
             .opacity(model.visible ? 1 : 0)
             .animation(
-                reduceMotion
+                // Appears at once; only the leave fades (#2142).
+                reduceMotion || model.visible
                     ? nil : .easeOut(duration: DesktopCueModel.fade),
                 value: model.visible
             )
@@ -114,9 +114,9 @@ struct DesktopCueView: View {
                     cornerRadius: DesktopCueModel.corner,
                     style: .continuous
                 ),
-                // `.regular` carries the digit, as the ⌃⌥K panel's
-                // text does.
-                enabled: model.liquidGlass,
+                // Plain system glass by ruling (#2142), never a
+                // look's or a switch's; `.regular` carries the digit.
+                enabled: true,
                 variant: .regular,
                 fallback: AnyShapeStyle(.regularMaterial)
             )

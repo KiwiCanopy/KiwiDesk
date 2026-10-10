@@ -276,7 +276,7 @@
   "desktops.absent.help": "Dieser Schreibtisch ist gerade nicht in Mission Control — sein Bildschirm ist nicht angeschlossen, oder er wurde entfernt. Das Profil bleibt hier verknüpft und wird wieder geladen, wenn dieser Schreibtisch zurückkommt.",
   "desktops.conflict": "Lädt %1$@ statt %2$@, zu dem diese Bildschirme gehören.",
   "desktops.cue": "Nach einem Wechsel die Nummer des Schreibtischs zeigen",
-  "desktops.cue.help": "KiwiDesk wechselt Schreibtische ohne Animation und zeigt deshalb auf diesem Bildschirm kurz die Nummer des Schreibtischs, zu dem gewechselt wurde, mit einem Punkt für jeden Schreibtisch dort und dem geladenen Profil, falls eines geladen wurde.",
+  "desktops.cue.help": "KiwiDesk wechselt Schreibtische ohne die Animation von macOS und zeigt deshalb auf dem Bildschirm, auf dem gewechselt wurde, kurz die Nummer des Schreibtischs, mit einem Punkt für jeden Schreibtisch dieses Bildschirms und dem geladenen Profil, falls eines geladen wurde.",
   "desktops.current": "aktuell",
   "desktops.desktop": "Schreibtisch %1$d",
   "desktops.empty": "Keine nativen macOS-Schreibtische erkannt. Füge in Mission Control Schreibtische hinzu, um Profile zu verknüpfen.",

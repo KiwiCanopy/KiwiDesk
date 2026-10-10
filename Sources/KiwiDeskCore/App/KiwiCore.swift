@@ -231,7 +231,7 @@ public final class KiwiCore {
     /// restored on returning to one. Keyed, not numbered (#1147).
     var lastDesktop: DesktopKey?
     let desktopMemory = DesktopMemory()
-    public let desktopCue = DesktopCueLedger()
+    let desktopCue = DesktopCueLedger()
     /// The last native Desktop switch; focus during it changes no space.
     var lastDesktopSwitch: Date = .distantPast
 
