@@ -1,35 +1,50 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Focus ▸ Space history (#1655): which history the two rows below
-/// it walk, stored like the shortcuts — the shared value or the
-/// edited profile's own, through the row's "Applies to" checklist.
-/// Greyed on a stored profile saved for one screen, where both
-/// choices walk the same history.
+/// Focus ▸ Space history (#1655): one checkbox — a binary is a
+/// toggle (`docs/ui-patterns.md`) — shaped like the shortcut rows
+/// below it, its "Applies to" control in their reach column. Off
+/// keeps a history per screen, the default. Greyed with its reason
+/// on a stored profile saved for one screen, where both choices
+/// walk the same history.
 struct SpaceHistoryRow: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                SegmentedPicker(
-                    SpaceHistoryWords.title,
-                    selection: $model.config.spaceHistory,
-                    options: SpaceHistoryKind.allCases.map {
-                        (SpaceHistoryWords.value($0), $0)
-                    },
-                    help: SpaceHistoryWords.help
+            HStack(alignment: .firstTextBaseline) {
+                // The icon slot every shortcut row reserves (#264).
+                Color.clear.frame(width: Self.iconSlot, height: 1)
+                Toggle(SpaceHistoryWords.shared, isOn: shared)
+                    .toggleStyle(.checkbox)
+                    .modifier(GreyOut(active: oneScreen, help: reason))
+                HelpButton(
+                    explanation: SpaceHistoryWords.help,
+                    subject: SpaceHistoryWords.shared
                 )
-                .modifier(GreyOut(active: oneScreen, help: reason))
-                Spacer(minLength: 8)
+                Spacer()
                 reach
+                KeyRecorderField.footprint
             }
             if oneScreen {
                 Text(reason)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .padding(.leading, Self.iconSlot + 8)
             }
         }
+    }
+
+    private static let iconSlot: CGFloat = 18
+
+    /// On is one history across every screen.
+    private var shared: Binding<Bool> {
+        Binding(
+            get: { model.config.spaceHistory == .allScreens },
+            set: {
+                model.config.spaceHistory = $0 ? .allScreens : .perScreen
+            }
+        )
     }
 
     private var oneScreen: Bool { model.spaceHistoryRunsOnOneScreen }
@@ -78,16 +93,23 @@ enum SpaceHistoryWords {
         L("shortcuts.space_history", "Space history")
     }
 
+    /// The checkbox's label: what turning it on does.
+    static var shared: String {
+        L(
+            "shortcuts.space_history.shared",
+            "One Space history across all screens"
+        )
+    }
+
     static var help: String {
         L(
-            "shortcuts.space_history.help",
-            "%1$@: each screen remembers its own Spaces, and going "
-                + "back or forward changes the Space on the screen you "
-                + "are working on. %2$@: one history across every "
-                + "screen, so going back may take you to another "
-                + "screen. With one screen, both work the same.",
-            value(.perScreen),
-            value(.allScreens)
+            "shortcuts.space_history.shared_help",
+            "Each screen remembers the Spaces you visited on it, so "
+                + "going back or forward changes the Space on the "
+                + "screen you are working on. Turn this on to keep one "
+                + "history across every screen instead, so going back "
+                + "may take you to another screen. With one screen, "
+                + "both work the same."
         )
     }
 
