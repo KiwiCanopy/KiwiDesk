@@ -46,12 +46,12 @@ extension SystemShortcut {
     /// Minimize). KiwiDesk WINS it — measured on ⌘W and ⌘P
     /// (#1126, #1075) — so the cost is every app's, not the
     /// row's. False for a symbolic hotkey and for the two
-    /// system-level chords (⌘Tab, ⌥⌘Esc) whose press precedence
-    /// is unmeasured. A `switch` for the parity idiom's reason;
+    /// system-level chords (⌘Tab, ⌥⌘Esc), which macOS answers
+    /// first (#1275). A `switch` for the parity idiom's reason;
     /// that it never overlaps `symbolicHotkey` is held by
     /// `ConflictSeverityTests` ▸ `classesArePartitioned`, since
-    /// `of` reads the id FIRST and an overlap would make
-    /// `.shadowsApps` unreachable with every suite green.
+    /// `of` asks this first and an overlap would make a live
+    /// symbolic hotkey read `.shadowsApps`, as if it worked.
     var isUniversalAccelerator: Bool {
         switch self {
         case .closeWindow, .quitApp, .hideApp, .minimize:
@@ -69,8 +69,8 @@ extension SystemShortcut {
 
     /// Apple's `AppleSymbolicHotKeys` id and the state macOS
     /// ships when the plist has no entry for it; nil = not a
-    /// symbolic hotkey at all — an app accelerator or a system
-    /// chord whose press precedence is UNMEASURED (#1126). Ids
+    /// symbolic hotkey at all — an app accelerator, or a system
+    /// chord macOS answers first and never lets go (#1275). Ids
     /// verified against each entry's key parameters (keycode +
     /// modifier mask), 2026-09-01, macOS 26.6.2 — an id names
     /// the FEATURE, so a user who rebinds a system chord drifts

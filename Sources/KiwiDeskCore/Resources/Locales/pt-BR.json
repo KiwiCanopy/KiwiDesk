@@ -594,7 +594,6 @@
   "keybinding.conflict.system_shadows_apps": "O atalho para “%1$@” tira “%2$@” de todos os apps.",
   "keybinding.conflict.tooltip.other_binding": "Também atribuído nesta camada a %1$@ — só um dos dois vai funcionar.",
   "keybinding.conflict.tooltip.shadows_apps": "Tira %1$@ de todos os apps enquanto estiver atribuído aqui.",
-  "keybinding.conflict.tooltip.system": "Em conflito com o macOS: %1$@",
   "keybinding.conflict.tooltip.system_dead": "Não vai funcionar: o macOS responde primeiro a este atalho, para %1$@.",
   "keybinding.conflict.tooltip.system_off": "O macOS reserva este atalho para %1$@, um recurso que está desativado no momento.",
   "keybinding.conflict.tooltip.unrecognized": "Não é um atalho reconhecido.",

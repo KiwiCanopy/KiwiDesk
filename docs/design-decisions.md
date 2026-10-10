@@ -9480,9 +9480,11 @@ macOS has off keeps the quiet ⚠ and says it is off; a chord every
 app's menus carry (⌘W, ⌘Q, ⌘H, ⌘M) is the reverse — KiwiDesk wins
 it, measured on ⌘W and ⌘P, so the row says every app loses that
 item; and the two system-level chords outside the table (⌘Tab,
-⌥⌘Esc) keep the collision wording, their precedence being
-unmeasured. The treatment is deliberately smaller than a tinted
-row: outline plus caption already carry the fact in two channels,
+⌥⌘Esc) are dead rows too — macOS opened the app switcher and Force
+Quit while a bound control chord proved the probe heard presses
+(#1275, 2026-10-10) — with no setting to switch them off. The
+treatment is deliberately smaller than a tinted row: outline plus
+caption already carry the fact in two channels,
 a red ground would be a new register needing its own inks, and a
 filled badge has no ink that clears 4.5:1 in both modes
 (ui-designer, 2026-09-03). Conflict surfaces (the banner and the

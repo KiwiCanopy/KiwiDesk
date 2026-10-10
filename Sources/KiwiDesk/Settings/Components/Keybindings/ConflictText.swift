@@ -104,12 +104,6 @@ enum ConflictText {
                     + "bound here.",
                 shortcut.localizedName
             )
-        case .reserved(let shortcut):
-            return L(
-                "keybinding.conflict.tooltip.system",
-                "Conflicts with macOS: %1$@",
-                shortcut.localizedName
-            )
         case .dormant(let shortcut):
             return L(
                 "keybinding.conflict.tooltip.system_off",

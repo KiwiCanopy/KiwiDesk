@@ -594,7 +594,6 @@
   "keybinding.conflict.system_shadows_apps": "La scorciatoia per «%1$@» toglie «%2$@» a ogni app.",
   "keybinding.conflict.tooltip.other_binding": "Assegnata in questo livello anche a %1$@ — si attiverà solo una delle due.",
   "keybinding.conflict.tooltip.shadows_apps": "Toglie %1$@ a ogni app finché è assegnata qui.",
-  "keybinding.conflict.tooltip.system": "In conflitto con macOS: %1$@",
   "keybinding.conflict.tooltip.system_dead": "Non funzionerà: macOS risponde per primo a questa scorciatoia, per %1$@.",
   "keybinding.conflict.tooltip.system_off": "macOS riserva questa scorciatoia a %1$@, una funzione al momento disattivata.",
   "keybinding.conflict.tooltip.unrecognized": "Non è una scorciatoia riconosciuta.",

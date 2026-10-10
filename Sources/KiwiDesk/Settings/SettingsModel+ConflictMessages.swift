@@ -120,9 +120,8 @@ extension SettingsModel {
                 localized(who)
             )
         case .systemShortcut(let shortcut):
-            // A live symbolic hotkey is DEAD, measured (#1126);
-            // a register chord outside that table keeps the
-            // collision wording until its precedence is.
+            // A chord macOS answers first is DEAD, measured
+            // (#1126, #1275).
             switch ConflictSeverity.of(
                 conflict,
                 disabled: disabled
@@ -143,7 +142,7 @@ extension SettingsModel {
                     localized(conflict.name),
                     shortcut.localizedName
                 )
-            case .dormant, .reserved, .duplicate, .unrecognized:
+            case .dormant, .duplicate, .unrecognized:
                 break
             }
             return L(
@@ -196,7 +195,7 @@ extension SettingsModel {
                     localized(conflict.name),
                     shortcut.localizedName
                 )
-            case .dormant, .reserved, .duplicate, .unrecognized:
+            case .dormant, .duplicate, .unrecognized:
                 break
             }
             return L(

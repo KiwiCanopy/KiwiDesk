@@ -594,7 +594,6 @@
   "keybinding.conflict.system_shadows_apps": "Le raccourci pour « %1$@ » retire « %2$@ » à chaque app.",
   "keybinding.conflict.tooltip.other_binding": "Également assigné dans ce calque à %1$@ — un seul des deux se déclenchera.",
   "keybinding.conflict.tooltip.shadows_apps": "Retire %1$@ à chaque app tant qu'il est assigné ici.",
-  "keybinding.conflict.tooltip.system": "En conflit avec macOS : %1$@",
   "keybinding.conflict.tooltip.system_dead": "Ne fonctionnera pas : macOS répond en premier à ce raccourci, pour %1$@.",
   "keybinding.conflict.tooltip.system_off": "macOS réserve ce raccourci à %1$@, une fonction actuellement désactivée.",
   "keybinding.conflict.tooltip.unrecognized": "Ce n'est pas un raccourci reconnu.",
