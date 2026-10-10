@@ -37,11 +37,12 @@ struct CrossSessionCornerRecordTests: CrossSessionFixture {
         return (core, frame)
     }
 
-    /// The freeze's desk: the record's Space shown, floating
-    /// unless `tiled`.
+    /// The freeze's desk: the record's Space floating unless
+    /// `tiled`, and shown unless `hidden`.
     private func desk(
         record: CGRect? = nil,
-        tiled: Bool = false
+        tiled: Bool = false,
+        hidden: Bool = false
     ) -> StateSnapshot {
         var desk = previous([(F.hidden, "com.a", "A")])
         if let record { desk.windows[0].frame = record }
@@ -53,7 +54,7 @@ struct CrossSessionCornerRecordTests: CrossSessionFixture {
             if id == F.hidden, !tiled { space.mode = .floating }
             return .init(space: space)
         }
-        desk.activeSpace = F.hidden.raw
+        desk.activeSpace = (hidden ? F.shown : F.hidden).raw
         return desk
     }
 
@@ -101,18 +102,20 @@ struct CrossSessionCornerRecordTests: CrossSessionFixture {
     }
 
     /// The control: a tiled Space's layout places the window, so a
-    /// corner record there is never seeded.
+    /// corner record there is never seeded — on a Space no screen
+    /// shows, where a seed would linger as the window's frame.
     @Test(
-        "a tiled window with a corner record is the layout's",
+        "a tiled window with a corner record is never seeded",
         .enabled(if: NSScreen.main != nil)
     )
     func tiledWindowIsNotSeeded() throws {
         let (core, _) = try core()
-        leave(desk(record: try corner(core), tiled: true), in: core)
-        arrange(core)
-        #expect(
-            core.tiler.commandedFrame(of: WindowID(10))
-                == core.tiler.calculatedFrames(state: core.state)[WindowID(10)]
+        leave(
+            desk(record: try corner(core), tiled: true, hidden: true),
+            in: core
         )
+        arrange(core)
+        #expect(space(core, 10) == F.hidden)
+        #expect(core.tiler.stashOriginal(WindowID(10)) == nil)
     }
 }

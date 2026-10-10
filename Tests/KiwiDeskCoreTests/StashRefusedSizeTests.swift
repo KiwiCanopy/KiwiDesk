@@ -76,10 +76,13 @@ struct StashRefusedSizeTests {
 
     /// The control: an answer away from the asked origin is a set
     /// that did not land, and the capture keeps re-sending it.
-    @Test("a set that never landed is sent again")
-    func lostSetRetries() throws {
+    @Test(
+        "a set that never landed is sent again",
+        arguments: [CGVector(dx: 0, dy: 40), CGVector(dx: 40, dy: 0)]
+    )
+    func lostSetRetries(_ offset: CGVector) throws {
         let (core, asked) = try followed()
-        let elsewhere = asked.offsetBy(dx: 0, dy: 40)
+        let elsewhere = asked.offsetBy(dx: offset.dx, dy: offset.dy)
         core.handle(.windowMoved(window, elsewhere))
         // An echo inside the grace is ours: the capture stands.
         core.retile(pass: .apply)
