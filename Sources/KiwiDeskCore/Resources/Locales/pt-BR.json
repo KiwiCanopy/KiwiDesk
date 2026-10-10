@@ -162,6 +162,8 @@
   "behavior.mouse.resize_action.help": "**%1$@** — Arrastar a borda de uma janela a redimensiona e rearranja as vizinhas no layout.\n**%2$@** — A janela se redimensiona livremente enquanto você arrasta e retorna ao tamanho lado a lado ao soltar.",
   "behavior.mouse.resize_layout": "Redimensionar as janelas adjacentes",
   "behavior.mouse.resize_snap_back": "Voltar ao slot",
+  "boot_notice.restore.done": "Suas janelas voltaram: %1$d de %2$d",
+  "boot_notice.restore.placing": "Recolocando suas janelas: %1$d de %2$d",
   "border.caption": "Desenha um contorno ao redor da janela com foco para que ela se destaque em um layout com espaçamento.",
   "border.color.focused": "Janela com foco",
   "border.color.unfocused": "Janelas fora de foco",

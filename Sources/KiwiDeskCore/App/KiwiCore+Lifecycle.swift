@@ -235,7 +235,7 @@ extension KiwiCore {
         deferred.cancelAll()
         // Its close task just went; an open match would claim the
         // next start's arrivals (#1385).
-        _ = state.crossSession.close()
+        closeCrossSession()
         mouse.stop()
         eventLoop.stop()
         sleepWake.stop()

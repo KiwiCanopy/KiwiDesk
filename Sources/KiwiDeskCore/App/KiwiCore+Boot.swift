@@ -69,6 +69,8 @@ extension KiwiCore {
     public func start() {
         let signposter = BootSignpost.signposter
         boot.reachedReady = false
+        // A restore belongs to the boot that armed it (#2133).
+        boot.publishRestore(.none)
         boot.interval = signposter.beginInterval("boot")
         boot.began = ContinuousClock.now
         armMachineSeams()

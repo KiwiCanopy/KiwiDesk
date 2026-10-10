@@ -162,6 +162,8 @@
   "behavior.mouse.resize_action.help": "**%1$@** — 拖移窗口边缘会调整其大小，并重排布局中的相邻窗口。\n**%2$@** — 拖移过程中窗口可自由调整大小，松开后会回到平铺时的尺寸。",
   "behavior.mouse.resize_layout": "调整相邻窗口",
   "behavior.mouse.resize_snap_back": "回到原位",
+  "boot_notice.restore.done": "你的窗口已回到原处：%1$d / %2$d",
+  "boot_notice.restore.placing": "正在把你的窗口放回原处：%1$d / %2$d",
   "border.caption": "为聚焦窗口描边，让它在有间距的布局中更醒目。",
   "border.color.focused": "聚焦窗口",
   "border.color.unfocused": "非焦点窗口",

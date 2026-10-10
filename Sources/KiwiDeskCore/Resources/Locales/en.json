@@ -162,6 +162,8 @@
   "behavior.mouse.resize_action.help": "**%1$@** — Dragging a window's edge resizes it and reflows its neighbours in the layout.\n**%2$@** — The window resizes freely while you drag, then snaps back to its tiled size when you release.",
   "behavior.mouse.resize_layout": "Resize adjacent windows",
   "behavior.mouse.resize_snap_back": "Snap back to slot",
+  "boot_notice.restore.done": "Your windows are back: %1$d of %2$d",
+  "boot_notice.restore.placing": "Putting your windows back: %1$d of %2$d",
   "border.caption": "Outlines the focused window so it stands out in a gapped layout.",
   "border.color.focused": "Focused window",
   "border.color.unfocused": "Unfocused windows",

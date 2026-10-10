@@ -162,6 +162,8 @@
   "behavior.mouse.resize_action.help": "**%1$@** — 拖移視窗邊緣會調整它的尺寸，並讓佈局中的鄰居重新排列。\n**%2$@** — 拖移期間視窗可自由縮放，放開後便彈回並排時的尺寸。",
   "behavior.mouse.resize_layout": "調整相鄰視窗",
   "behavior.mouse.resize_snap_back": "回彈至原位",
+  "boot_notice.restore.done": "你的視窗已回到原處：%1$d / %2$d",
+  "boot_notice.restore.placing": "正在把你的視窗放回原處：%1$d / %2$d",
   "border.caption": "為焦點視窗描邊，讓它在有間距的佈局中更醒目。",
   "border.color.focused": "焦點視窗",
   "border.color.unfocused": "非焦點視窗",

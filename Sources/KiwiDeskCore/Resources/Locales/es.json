@@ -162,6 +162,8 @@
   "behavior.mouse.resize_action.help": "**%1$@** — Arrastrar el borde de una ventana la redimensiona y reajusta sus vecinas en el diseño.\n**%2$@** — La ventana se redimensiona libremente mientras arrastras y vuelve a su tamaño en mosaico al soltar.",
   "behavior.mouse.resize_layout": "Redimensionar las ventanas contiguas",
   "behavior.mouse.resize_snap_back": "Volver al hueco",
+  "boot_notice.restore.done": "Tus ventanas han vuelto: %1$d de %2$d",
+  "boot_notice.restore.placing": "Volviendo a colocar tus ventanas: %1$d de %2$d",
   "border.caption": "Dibuja un contorno alrededor de la ventana enfocada para que destaque en un diseño con espaciado.",
   "border.color.focused": "Ventana enfocada",
   "border.color.unfocused": "Ventanas sin foco",
