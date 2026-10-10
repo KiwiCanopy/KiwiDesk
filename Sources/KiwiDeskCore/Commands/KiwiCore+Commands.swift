@@ -102,6 +102,8 @@ extension KiwiCore {
             return setResizeStep(args)
         case "set_refusal_sound":
             return setRefusalSound(args)
+        case "set_desktop_cue":
+            return setDesktopCue(args)
         case "set_space_history":
             return setSpaceHistory(args)
         case "set_shortcut_panel_liquid_glass":

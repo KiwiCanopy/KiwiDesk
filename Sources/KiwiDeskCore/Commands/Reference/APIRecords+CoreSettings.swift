@@ -51,6 +51,11 @@ extension APIReference {
                 + "keyboard action draws its refusal pill.",
             .boolean("enabled")
         ),
+        "set_desktop_cue": APIRecord(
+            "Shows the Desktop's number on the screen that switched "
+                + "after KiwiDesk's own Desktop switch.",
+            .boolean("enabled")
+        ),
         "set_space_history": APIRecord(
             "Sets whether Space history is kept per screen or "
                 + "across every screen.",

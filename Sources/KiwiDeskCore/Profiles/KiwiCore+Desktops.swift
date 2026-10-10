@@ -155,6 +155,7 @@ extension KiwiCore {
         }
         lastDesktop = key
         desktopMemory.lastDesktopSpace = snapshot.mainCurrentSpace
+        var loaded: String?
         if secondarySwitch {
             // A secondary display's Desktop switched: the
             // binding authority is unmoved, so the PROFILE stands
@@ -180,7 +181,7 @@ extension KiwiCore {
                 emitSpaceChange()
             }
         } else {
-            applyDesktopBinding(in: snapshot)
+            loaded = applyDesktopBinding(in: snapshot)
             if let key,
                 let target = virtualSpaceTarget(
                     for: key,
@@ -234,6 +235,7 @@ extension KiwiCore {
         // stamps the window in flight before the file closes it.
         fileDisplaySpaces(in: snapshot)
         emitDesktopChange(snapshot, changed: changed)
+        payDesktopCue(in: snapshot, loadedProfile: loaded)
         settleAfterDesktopSwitch(snapshot.mainCurrentSpace)
     }
 
@@ -306,31 +308,35 @@ extension KiwiCore {
     /// (review round 2, 2026-08-18); `desktop: nil` from such a
     /// caller means "no authoritative Desktop", which no-ops, so
     /// the live read belongs to the no-argument convenience
-    /// alone.
-    func applyDesktopBinding(in snapshot: DesktopSnapshot) {
+    /// alone. Returns the profile it loaded — the Desktop cue's
+    /// caption (#2142) — and nil where it loaded none.
+    @discardableResult
+    func applyDesktopBinding(in snapshot: DesktopSnapshot) -> String? {
         guard let binding = mainDesktopBinding(in: snapshot)
-        else { return }
+        else { return nil }
         // The gate's pick is the profile ALREADY live: stand down
         // without reading its file on a swipe (#1245).
-        if bindingPicksLiveProfile(binding) { return }
+        if bindingPicksLiveProfile(binding) { return nil }
         // The LOG names the number, which is the only name for a
         // Desktop the user has; the lookup above never does.
         switch boundProfile(of: binding) {
         case .success(let pick):
             let profile = pick.profile
             guard profile.name != profiles.currentName else {
-                return
+                return nil
             }
             apply(profile: profile, cause: .event)
             onLog(
                 "Desktop \(binding.desktop): loaded profile "
                     + "'\(profile.name)'"
             )
+            return profile.name
         case .failure(let refusal):
             onLog(
                 "Desktop \(binding.desktop): "
                     + refusal.narrative(binding: binding)
             )
+            return nil
         }
     }
 }

@@ -51,6 +51,7 @@ AutoStartManager (no stored pref)
 UserDefaults.SUAutomaticallyUpdate (Sparkle)
 UserDefaults.appearance
 UserDefaults.language
+appWide.desktopCue
 appWide.quitGridTargetDepth
 appWide.refusalSound
 config.appRules[app]

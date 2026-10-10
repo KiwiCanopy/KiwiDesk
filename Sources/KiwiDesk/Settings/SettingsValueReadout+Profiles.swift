@@ -19,8 +19,9 @@ extension SettingsValueReadout {
         case .profilesLoad, .profilesDelete, .profilesRename,
             .profilesAddScreenSetup,
             .isDefault, .isStarterSetup, .presetsApply,
-            .presetsLayouts:
-            // no model path — never booked by the diff
+            .presetsLayouts, .desktopCue:
+            // no model path — never booked by the diff (the cue writes
+            // at once, #1741)
             return []
         }
     }

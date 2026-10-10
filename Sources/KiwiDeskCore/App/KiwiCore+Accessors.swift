@@ -18,6 +18,15 @@ extension KiwiCore {
         set { boot.onPhaseChange = newValue }
     }
 
+    /// A restart restore's progress (#2133), the slow-boot
+    /// notice's second line; pushed from the cross-session match.
+    public var restorePhase: RestorePhase { boot.restore }
+
+    public var onRestorePhaseChange: @MainActor (RestorePhase) -> Void {
+        get { boot.onRestoreChange }
+        set { boot.onRestoreChange = newValue }
+    }
+
     /// The menu bar item's layer and Space mark (#1413), pushed
     /// off the Space Bar's refresh; stored on the manager since
     /// `KiwiCore.swift` sits at the ceiling, forwarded so every

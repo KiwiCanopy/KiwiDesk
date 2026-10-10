@@ -177,4 +177,48 @@ extension FullscreenStandDownTests {
 
         #expect(core.spaceBars.shownStrips.isEmpty)
     }
+
+    /// The Desktop cue (#2142) stands down where the shelf does:
+    /// a show in FRONT keeps the plate off its screen, and the
+    /// debt still settles.
+    @Test("A presentation in front keeps the Desktop cue away")
+    func presentationKeepsTheDesktopCueAway() throws {
+        let screen = try #require(screenFrame)
+        defer {
+            NativeSpaces.currentSpaceIsUserOverride = nil
+            resetAuthorityOverrides()
+        }
+        let core = try #require(makeShelfCore(frame: screen))
+        NativeSpaces.displayUUIDOverride = { _ in "UUID-A" }
+        NativeSpaces.mainDisplayUUIDOverride = "UUID-A"
+        NativeSpaces.spacesOverride = [10, 11].map {
+            NativeSpace(id: $0, displayUUID: "UUID-A", isCurrent: $0 == 11)
+        }
+        var shown = 0
+        core.desktopCue.onCue = { _ in shown += 1 }
+        func owe() {
+            core.desktopCue.owed = .init(
+                displayUUID: "UUID-A",
+                space: 11,
+                at: core.wallClock()
+            )
+        }
+        let editor = CGRect(x: 100, y: 100, width: 800, height: 600)
+        // Control: the editor in front, so the plate shows.
+        core.shelves.frontWindowFrames = { [editor, screen] }
+        owe()
+        core.payDesktopCue(
+            in: NativeSpaces.desktopSnapshot(),
+            loadedProfile: nil
+        )
+        #expect(shown == 1)
+        core.shelves.frontWindowFrames = { [screen, editor] }
+        owe()
+        core.payDesktopCue(
+            in: NativeSpaces.desktopSnapshot(),
+            loadedProfile: nil
+        )
+        #expect(shown == 1)
+        #expect(core.desktopCue.owed == nil)
+    }
 }
