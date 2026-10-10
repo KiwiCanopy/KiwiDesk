@@ -80,13 +80,14 @@ struct GapsAndBordersGateWiringTests {
                     )
                 )
             }
-            // `.sentence(for:)` for a gate, or the named
-            // acknowledgement a live master carries (#1383) —
+            // `.sentence(for:)` for a gate, or, for the masters,
+            // the shared row that carries the named
+            // acknowledgement (#1383, `gapMastersAcknowledge…`) —
             // keyed per file so a gated editor cannot satisfy
             // this with any other static.
             let caption =
                 name == "GapsEditor.swift"
-                ? "GapsBordersGateHelp.edgesDiffer"
+                ? "GapsMasterRow("
                 : "GapsBordersGateHelp.sentence"
             #expect(
                 source.contains(caption),
@@ -143,14 +144,19 @@ struct GapsAndBordersGateWiringTests {
     /// a wrong grey, and only the source shows it.
     @Test("the gap masters stay live and acknowledge at the label")
     func gapMastersAcknowledgeAtTheLabel() throws {
-        let source = squashed(try read("GapsEditor.swift"))
+        let source = squashed(try read("GapsMasterRow.swift"))
+        #expect(
+            squashed(try read("GapsEditor.swift")).contains(
+                "GapsMasterRow("
+            )
+        )
         #expect(
             source.contains(
                 "help:mixed?GapsBordersGateHelp.edgesDiffer:nil"
             ),
             Comment(
                 rawValue:
-                    "GapsEditor no longer hands the mixed-edges "
+                    "GapsMasterRow no longer hands the mixed-edges "
                     + "sentence to the label's `?`"
             )
         )
@@ -158,7 +164,7 @@ struct GapsAndBordersGateWiringTests {
             !source.contains(".disabled("),
             Comment(
                 rawValue:
-                    "GapsEditor greys a master again — dimmed means "
+                    "GapsMasterRow greys a master again — dimmed means "
                     + "no input on every channel (#1383)"
             )
         )

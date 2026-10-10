@@ -1,16 +1,17 @@
 import Foundation
 import KiwiDeskCore
-import SwiftUI
 import Testing
 
 @testable import KiwiDesk
 
-/// A Space's own gaps row (#1775): its readings, its prefill and
-/// its place in the overrides box.
+/// A Space's own gaps row (#1775): its readings, its wiring and its
+/// place in the overrides box.
 @MainActor
 @Suite("Per-Space gaps override row (#1775)")
 struct OverrideGapsRowTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
+    private static let dir =
+        "Sources/KiwiDesk/Settings/Components/SpaceOverrides/"
 
     private func mixedGaps() -> Gaps {
         var gaps = Gaps.uniform(10)
@@ -19,16 +20,26 @@ struct OverrideGapsRowTests {
         return gaps
     }
 
+    private static func squashed(_ text: String) -> String {
+        text.filter { !$0.isWhitespace }
+    }
+
+    private static func source(_ file: String) throws -> String {
+        squashed(
+            try SourceScan.strippedSource(
+                at: root.appendingPathComponent(dir + file)
+            )
+        )
+    }
+
     @Test("a master reads mixed only while its edges differ")
     func readingsTrackTheEdges() {
         LocalizationManager.shared.select("en")
-        let even = OverrideGapsRow.outerReading(.uniform(10))
-        #expect(even == .init(value: 10, mixed: false))
-        #expect(even.text == "10 pt")
-        let gaps = mixedGaps()
-        #expect(OverrideGapsRow.outerReading(gaps).mixed)
-        #expect(OverrideGapsRow.innerReading(gaps).mixed)
-        #expect(!OverrideGapsRow.innerReading(.uniform(3)).mixed)
+        #expect(!GapsBordersGates.outerDiffers(.uniform(10)))
+        #expect(!GapsBordersGates.innerDiffers(.uniform(3)))
+        #expect(GapsBordersGates.outerDiffers(mixedGaps()))
+        #expect(GapsBordersGates.innerDiffers(mixedGaps()))
+        #expect(GapsMasterRow.readout(10, mixed: false) == "10 pt")
     }
 
     @Test("the inheriting row names both masters")
@@ -41,49 +52,57 @@ struct OverrideGapsRowTests {
         )
     }
 
-    @Test("checking the row copies the global gaps exactly")
-    func checkingPrefillsFromGlobal() {
-        var stored: Gaps? = nil
-        let binding = Binding(get: { stored }, set: { stored = $0 })
-        let global = mixedGaps()
-        overrideToggle(binding, global: global).wrappedValue = true
-        #expect(stored == global)
-        overrideToggle(binding, global: global).wrappedValue = false
-        #expect(stored == nil)
+    @Test("a floating Space greys the row, a tiling one does not")
+    func floatingIsInert() {
+        let space = SpaceID("2")
+        let key = SettingKey.gaps(.perSpaceOverride)
+        let floating = SpacesGates(
+            settings: TilingSettings(),
+            space: space,
+            mode: .floating
+        )
+        #expect(floating.inertReason(for: key) == .floatingPlacesNone)
+        for mode in LayoutMode.allCases where mode != .floating {
+            let gates = SpacesGates(
+                settings: TilingSettings(),
+                space: space,
+                mode: mode
+            )
+            #expect(gates.inertReason(for: key) == nil)
+        }
     }
 
-    /// The row sits above the layout rows on every mode, and the
-    /// Floating arm greys it rather than dropping it.
-    @Test("the box draws the gaps row first, greyed on Floating")
+    /// One master row and one comparison for every `Gaps` editor
+    /// (gui.md ▸ the gap masters, #1383).
+    @Test("the gaps row shares the Gaps & Borders masters")
+    func gapsRowSharesTheMasters() throws {
+        let row = try Self.source("OverrideGapsRow.swift")
+        #expect(row.components(separatedBy: "GapsMasterRow(").count == 3)
+        #expect(row.contains("GapsBordersGates.outerDiffers(current)"))
+        #expect(row.contains("GapsBordersGates.innerDiffers(current)"))
+        #expect(!row.contains("SettingsSlider("))
+        #expect(row.contains("overrideToggle($value,global:global)"))
+        #expect(row.contains("inheritsFrom:.gapsAndBorders"))
+    }
+
+    /// The row sits above the layout rows on every mode, writes
+    /// the Space's own gaps over the global ones, and greys
+    /// through the area's resolver.
+    @Test("the box draws the gaps row first through its gate")
     func boxDrawsTheRow() throws {
-        let source = try SourceScan.strippedSource(
-            at: Self.root.appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/SpaceOverrides/"
-                    + "SpaceOverrideRows.swift"
-            )
-        )
-        let order = "captionRow gapsRow Divider() modeRows"
+        let box = try Self.source("SpaceOverrideRows.swift")
+        #expect(box.contains("captionRowgapsRowDivider()modeRows"))
         #expect(
-            Self.squashed(source).contains(Self.squashed(order))
-        )
-        #expect(
-            Self.squashed(source).contains(
+            box.contains(
                 Self.squashed(
-                    "value: $model.config.settings.gapsOverride[space]"
+                    "OverrideGapsRow(value: "
+                        + "$model.config.settings.gapsOverride[space], "
+                        + "global: g.gapsGlobal)"
                 )
             )
         )
         #expect(
-            Self.squashed(source).contains(
-                Self.squashed(
-                    "row.modifier(GreyOut(active: true, "
-                        + "help: Self.floatingGaps))"
-                )
-            )
+            box.contains("gates.inertReason(for:.gaps(.perSpaceOverride))")
         )
-    }
-
-    private static func squashed(_ text: String) -> String {
-        text.filter { !$0.isWhitespace }
     }
 }

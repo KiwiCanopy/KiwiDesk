@@ -722,6 +722,14 @@ those two homes; a third one is ruled here before it ships, or
 the two registers stop being the whole census of who
 acknowledges.
 
+A Space's own gap masters (#1775) are not a third home: they
+are the gap masters again, drawn by the one `GapsMasterRow` and
+reading `GapsBordersGates.outerDiffers` / `innerDiffers` over the
+Space's own value instead of the global one. A further editor of
+a `Gaps` value takes the same row and the same two comparisons,
+never a copy of either (`OverrideGapsRowTests` ▸
+`gapsRowSharesTheMasters`).
+
 **Consulting a resolver is not drawing what it answered, and a
 SURFACING gate leaves nothing behind to prove the difference.**
 A greying gate ends in a dimmed control a test can find; a

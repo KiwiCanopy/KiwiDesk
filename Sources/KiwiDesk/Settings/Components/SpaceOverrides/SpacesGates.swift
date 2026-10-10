@@ -14,6 +14,7 @@ struct SpacesGates {
         case rigidGrid
         case autoSizedGrid
         case autoTracks
+        case floatingPlacesNone
     }
 
     /// Evaluates inert reason for given setting key on this space.
@@ -36,6 +37,8 @@ struct SpacesGates {
         case .layout(.trackOverrideLimit):
             return settings.resolvedTrack(for: space).autoTracks
                 ? .autoTracks : nil
+        case .gaps(.perSpaceOverride):
+            return mode == .floating ? .floatingPlacesNone : nil
         default:
             assertionFailure(
                 "unhandled Spaces & Layouts gate: \(key.id)"
@@ -51,6 +54,7 @@ struct SpacesGates {
         .layout(.gridOverrideColumns),
         .layout(.gridOverrideRows),
         .layout(.trackOverrideLimit),
+        .gaps(.perSpaceOverride),
     ]
 
     static let resolvedElsewhere: Set<SettingKey> = []
@@ -98,6 +102,12 @@ enum SpacesGateHelp {
                 "%1$@ is on, so the screen decides how many "
                     + "tracks open.",
                 L("track.auto_tracks", "Auto track limit")
+            )
+        case .floatingPlacesNone:
+            return L(
+                "space_override.gaps.floating",
+                "Floating places no windows, so these gaps apply when "
+                    + "this Space tiles."
             )
         }
     }

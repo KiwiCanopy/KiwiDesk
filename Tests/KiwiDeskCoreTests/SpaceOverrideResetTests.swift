@@ -32,13 +32,13 @@ struct SpaceOverrideResetTests {
     @Test("Field count sums every layout and the gaps for the space")
     func totalCount() {
         var s = populated()
-        #expect(s.overrideFieldCount(for: space) == 4)
+        #expect(s.spaceOverrideCount(for: space) == 4)
         #expect(s.overrideFieldCount(.bsp, for: space) == 1)
         #expect(s.overrideFieldCount(.grid, for: space) == 0)
-        #expect(s.overrideFieldCount(for: SpaceID("nope")) == 0)
+        #expect(s.spaceOverrideCount(for: SpaceID("nope")) == 0)
         // The gaps count once, whatever the layout (#1775).
         s.gapsOverride[space] = nil
-        #expect(s.overrideFieldCount(for: space) == 3)
+        #expect(s.spaceOverrideCount(for: space) == 3)
     }
 
     @Test("Dormant list excludes the active layout")
@@ -67,14 +67,14 @@ struct SpaceOverrideResetTests {
         // The other layers survive.
         #expect(s.stack.override[space] != nil)
         #expect(s.scrolling.override[space] != nil)
-        #expect(s.overrideFieldCount(for: space) == 3)
+        #expect(s.spaceOverrideCount(for: space) == 3)
     }
 
     @Test("Reset all clears every layer but keeps gap override")
     func resetAll() {
         var s = populated()
         s.resetAllLayoutOverrides(for: space)
-        #expect(s.overrideFieldCount(for: space) == 1)
+        #expect(s.spaceOverrideCount(for: space) == 1)
         #expect(s.bsp.override[space] == nil)
         #expect(s.stack.override[space] == nil)
         #expect(s.scrolling.override[space] == nil)

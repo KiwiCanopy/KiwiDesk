@@ -69,18 +69,20 @@ struct SpaceOverrideRows: View {
     }
 
     /// The Space's own gaps (#1775), above the layout rows since
-    /// they survive a layout switch. Floating places no windows, so
-    /// there the row is kept visible and greyed with its reason.
+    /// they survive a layout switch; inert, greyed with its reason
+    /// beside it, while the Space floats.
     @ViewBuilder
     private var gapsRow: some View {
+        let reason = gates.inertReason(for: .gaps(.perSpaceOverride))
         let row = OverrideGapsRow(
             value: $model.config.settings.gapsOverride[space],
             global: g.gapsGlobal
         )
-        if mode == .floating {
+        if let reason {
+            let sentence = SpacesGateHelp.sentence(for: reason)
             VStack(alignment: .leading, spacing: 4) {
-                row.modifier(GreyOut(active: true, help: Self.floatingGaps))
-                Text(Self.floatingGaps)
+                row.modifier(GreyOut(active: true, help: sentence))
+                Text(sentence)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, SettingsMetrics.overrideRowInset)
@@ -88,14 +90,6 @@ struct SpaceOverrideRows: View {
         } else {
             row
         }
-    }
-
-    static var floatingGaps: String {
-        L(
-            "space_override.gaps.floating",
-            "Floating places no windows, so these gaps apply when "
-                + "this Space tiles."
-        )
     }
 
     var mode: LayoutMode {

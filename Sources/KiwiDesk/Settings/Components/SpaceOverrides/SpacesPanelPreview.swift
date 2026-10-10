@@ -161,7 +161,9 @@ struct SpacesPanelPreview: View {
         .foregroundStyle(SettingsTheme.ink3)
     }
 
-    /// Count of active layout overrides on space (`SpacesPanelPreviewTests`).
+    /// Count of active layout overrides on space, the header's N
+    /// (`SpacesPanelPreviewTests`). A Space's own gaps are not
+    /// among them: they are not Layout Defaults (#1775).
     func overrideCount(for space: SpaceID) -> Int {
         let mode = mode(of: space)
         guard mode != .floating else { return 0 }
