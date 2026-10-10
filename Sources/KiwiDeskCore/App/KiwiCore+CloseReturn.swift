@@ -82,7 +82,13 @@ extension KiwiCore {
         // focus re-raise of the very anchor the stand-down
         // refused — the next mutation's arm heals the pile.
         if willRetile, !closeReturnRaiseStandsDown {
-            scheduleTrackZOrderRestoreIfOverflowing()
+            // Folded into a switch's re-sync, the arm waits for
+            // the one pass that ends it.
+            if switchResync != nil {
+                switchResync?.armsTrackRestore = true
+            } else {
+                scheduleTrackZOrderRestoreIfOverflowing()
+            }
         }
         // #951/#952 diagnosis: narrate the decision above. AFTER
         // the arms on purpose — the needle windows in

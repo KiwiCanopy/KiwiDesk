@@ -24,11 +24,16 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     }
 
     /// Listens for display and space changes to refresh profile topology
-    /// snapshots (#678).
+    /// snapshots (#678). The refresh runs on the NEXT main turn: the
+    /// page re-render it starts would otherwise hold the Desktop
+    /// switch's own turn — ring and bars included — for its length,
+    /// and it reads the profile a bound Desktop has loaded by then.
     private func observeWorkspaceTopology() {
         let refresh: @Sendable (Notification) -> Void = {
             [weak self] _ in
-            MainActor.assumeIsolated { self?.refreshProfiles() }
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated { self?.refreshProfiles() }
+            }
         }
         _ = NotificationCenter.default.addObserver(
             forName: NSApplication

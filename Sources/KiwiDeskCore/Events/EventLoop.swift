@@ -11,6 +11,8 @@ import ApplicationServices
 @MainActor
 public final class EventLoop {
     public var onEvent: @MainActor (KiwiEvent) -> Void = { _ in }
+    /// Folds a Desktop switch's re-sync (`foldingSwitchResync`).
+    var foldsSwitchResync: @MainActor (() -> Void) -> Void = { $0() }
 
     /// Fired when an app reports an ignored panel (Ghostty's quick
     /// terminal, VoiceOver's control process) as its focused
@@ -40,11 +42,10 @@ public final class EventLoop {
     var onRemovalDistrust: @MainActor () -> Void = {}
     var onRemovalEpisodesEnded: @MainActor (Set<WindowID>) -> Void = { _ in }
 
-    /// User float rules from the Lua config (`float_rules`).
-    /// Assigning does NOT resync `detectedFloating`: rules
-    /// change hands inside loadConfig's reset→reassign
-    /// transaction, so any new assignment site outside it must
-    /// follow with `reconcileAll()` or a scoped recheck (#164).
+    /// Lua `float_rules`. Assigning does NOT resync `detectedFloating`: rules
+    /// change hands inside loadConfig's reset→reassign transaction, so a new
+    /// assignment site outside it follows with `reconcileAll()` or a scoped
+    /// recheck (#164).
     public var floatRules = FloatRules()
 
     /// Global apps KiwiDesk never manages (`ignore_rules`).
