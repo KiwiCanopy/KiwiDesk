@@ -119,4 +119,29 @@ struct BootNoticeRestoreTests {
         #expect(timeline.restore(done, at: 11, standsDown: false) == .none)
         #expect(timeline.showsAt(10 + T.threshold, standsDown: false))
     }
+
+    @Test("a stand-down met at the end hides without the hold")
+    func standDownAtTheEnd() {
+        var timeline = restoringShown()
+        _ = timeline.phase(.ready, at: 14, standsDown: false)
+        #expect(timeline.restore(done, at: 30, standsDown: true) == .hideNow)
+        #expect(!timeline.restoring)
+    }
+
+    /// A stop ends the boot and its restore: the controller drops
+    /// the restore's line with it, or the next boot's count would
+    /// read a stale "Putting your windows back".
+    @Test("idle clears the controller's restore line")
+    func idleClearsTheLine() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/BootNotice/BootNoticeController.swift"
+            )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            source.contains(
+                "ifcase.idle=phase{restoreLine=nilrestoreTotal=0}"
+            )
+        )
+    }
 }

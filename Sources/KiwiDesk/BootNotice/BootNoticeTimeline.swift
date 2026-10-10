@@ -76,8 +76,8 @@ struct BootNoticeTimeline: Equatable {
         at now: TimeInterval,
         standsDown: Bool
     ) -> Effect {
-        if standsDown, case .placing = phase {
-            restoring = true
+        if standsDown, phase != .none {
+            restoring = !isDone(phase)
             stoodDown = true
             return shownAt != nil ? .hideNow : .cancel
         }
@@ -116,5 +116,10 @@ struct BootNoticeTimeline: Equatable {
 
     mutating func shown(at now: TimeInterval) {
         shownAt = now
+    }
+
+    private func isDone(_ phase: RestorePhase) -> Bool {
+        if case .done = phase { return true }
+        return false
     }
 }

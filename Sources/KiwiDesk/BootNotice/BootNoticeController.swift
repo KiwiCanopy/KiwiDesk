@@ -71,7 +71,7 @@ final class BootNoticeController {
         apply(
             timeline.restore(phase, at: now(), standsDown: standsDown())
         )
-        if case .done = phase, wasShown {
+        if case .done = phase, wasShown, model.visible {
             announce(model.line, priority: .medium)
         }
         if case .none = phase { restoreLine = nil }

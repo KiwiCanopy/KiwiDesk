@@ -141,4 +141,24 @@ struct CrossSessionRestorePhaseTests: CrossSessionFixture {
         #expect(seen() == [.placing(placed: 0, total: 1), .none])
         #expect(core.restorePhase == .none)
     }
+
+    /// A restore belongs to the boot that armed it: one that ended
+    /// done never silences the next boot's.
+    @Test(
+        "A finished restore does not silence the next boot's",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func nextBootRestoresAgain() throws {
+        let core = try #require(boot([]))
+        leave(previous([(F.hidden, "app.zen", "Zen Browser")]), in: core)
+        arrange(core)
+        core.crossSessionSettlePass()
+        #expect(core.restorePhase == .done(placed: 0, total: 1))
+        core.stop()
+        core.start()
+        let seen = recording(core)
+        leave(previous([(F.hidden, "app.zen", "Zen Browser")]), in: core)
+        arrange(core)
+        #expect(seen().last == .placing(placed: 0, total: 1))
+    }
 }
