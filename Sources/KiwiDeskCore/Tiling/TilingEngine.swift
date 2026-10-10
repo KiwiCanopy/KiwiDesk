@@ -112,6 +112,9 @@ public final class TilingEngine {
     /// Tiled windows need no entry: their frames are recomputed
     /// by the layout on every retile.
     var stashedFrames: [WindowID: CGRect] = [:]
+    /// The capture `restoreStashed` last SENT per window: only a
+    /// sent capture may be delivered at its origin alone (#2129).
+    var stashSent: [WindowID: CGRect] = [:]
 
     /// Which Spaces' parks a re-issuing pass forces (#1508).
     var stashDepartures = StashDepartures()

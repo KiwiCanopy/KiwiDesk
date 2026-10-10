@@ -26,20 +26,28 @@ extension KiwiCore {
                         mode: workspace.mode
                     ),
                     tiler.stashOriginal(id) == nil,
-                    tiler.looksStashed(window.frame),
-                    let region = floatBounds(on: space)
+                    tiler.looksStashed(window.frame)
                 else { continue }
-                let centred = FloatRecovery.centred(
-                    window.frame.size,
-                    in: region
-                )
-                tiler.seedStash(id, frame: centred)
-                onLog(
-                    "float \(id) stranded at the stash corner "
-                        + "on space \(space); re-centring"
-                )
+                seedWithoutOriginal(id, in: space)
             }
         }
+    }
+
+    /// The one door for a float with no original — stranded at a
+    /// corner, or replayed from a corner record (#2130): centred
+    /// at its size in the float region, as a pending capture the
+    /// restore delivers. False where the Space has no region.
+    @discardableResult
+    func seedWithoutOriginal(_ id: WindowID, in space: SpaceID) -> Bool {
+        guard let window = state.windows[id],
+            let region = floatBounds(on: space)
+        else { return false }
+        tiler.seedStash(
+            id,
+            frame: FloatRecovery.centred(window.frame.size, in: region)
+        )
+        onLog("float \(id) has no original on space \(space); re-centring")
+        return true
     }
 
     /// The session snapshot the crash and sleep legs write —

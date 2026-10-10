@@ -1721,7 +1721,17 @@ editing here:
   writes a parked float's corner into the session file. Held by
   `StashCornerLiftTests`, `FloatStrandRecoveryTests` (the
   decision) and `FloatStrandSeamTests` (every consumer above,
-  the `captureState` wirings included).
+  the `captureState` wirings included). A float with NO
+  original — stranded at a corner, or a tracked window replayed
+  from a corner record wherever the boot pass or its app left
+  it — takes the one `seedWithoutOriginal` door, never a
+  placement of its own (#2130, `CrossSessionCornerRecordTests`).
+- **A capture the restore has SENT is consumed at its origin;
+  the size is never a delivery condition (#2129).** The app may
+  refuse the size, and a capture held for it re-sends on every
+  retile. A capture not yet sent is delivered only by the whole
+  frame, through the one `stashSent` record
+  (`StashRefusedSizeTests`).
 - **A space entering floating mode gathers by REACHABILITY
   (#1177), and an entry is a change in what was DRAWN.** A
   floating layout assigns nothing, so the switch inherits the
