@@ -184,6 +184,7 @@ extension KiwiCore {
         // After the seed, so an away window keeps its hold (#1646).
         retireGoneRestoredFilings()
         drainDeferredBootApps()
+        otherWindowManagers.scanRunning()  // #1882
         closeBootInterval()
         logBootSummary()
         boot.reachedReady = true

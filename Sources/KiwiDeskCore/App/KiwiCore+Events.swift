@@ -56,6 +56,9 @@ extension KiwiCore {
         let goneWindowPID = goneWindowPID(of: event)
         let priorDisplayCount = state.workspaces.allDisplays.count
         let priorScreens = spaceScreens(for: event)
+        if case .appLaunched(_, _, let bundleID) = event {
+            otherWindowManagers.noteLaunch(bundleID: bundleID)
+        }
         if case .appTerminated(let pid) = event {
             prepareAppExit(pid)
         }

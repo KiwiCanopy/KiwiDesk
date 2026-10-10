@@ -75,6 +75,9 @@ func makeTestCore(
     core.spaceSlide.reduceMotion = { true }
     core.spaceSlide.present = { _ in }
     core.spaceSlide.stackOrder = { [:] }
+    // The running-app read (#1882), or a host running another
+    // window manager would fire the boot scan's detection.
+    core.otherWindowManagers.runningBundleIDs = { [] }
     // The focused ring's arrival hold (#1959) reads the render
     // clock, the host's Reduce Motion and a live timer: frozen and
     // inert here, so ring visibility after a switch never depends
