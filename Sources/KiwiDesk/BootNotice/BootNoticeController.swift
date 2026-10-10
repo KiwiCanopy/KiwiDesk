@@ -4,7 +4,9 @@ import SwiftUI
 
 /// The slow-boot notice (#1715): a non-activating capsule near
 /// KiwiDesk's menu-bar item, narrating the boot count past
-/// `BootNoticeTimeline.threshold` and leaving by itself at ready.
+/// `BootNoticeTimeline.threshold` and leaving by itself at ready —
+/// or, after a restart, once its restore has put the windows back
+/// (#2133).
 /// It never takes focus or the mouse; design-decisions ▸ Boot
 /// carries the ruling.
 @MainActor
@@ -15,6 +17,10 @@ final class BootNoticeController {
     private var showWork: DispatchWorkItem?
     private var hideWork: DispatchWorkItem?
     private var total = 0
+    /// The restore's line while one runs; it outranks the boot
+    /// count's (#2133).
+    private var restoreLine: String?
+    private var restoreTotal = 0
 
     /// Another surface narrates this boot — "What's new" after an
     /// update relaunch (#1667). Set before boot.
@@ -43,11 +49,29 @@ final class BootNoticeController {
                     for: .scanning(scanned: total, total: total)
                 ) ?? model.line
         }
-        switch timeline.phase(
-            phase,
-            at: now(),
-            standsDown: standsDown()
-        ) {
+        if let restoreLine { model.line = restoreLine }
+        apply(timeline.phase(phase, at: now(), standsDown: standsDown()))
+    }
+
+    /// The restart restore's progress (#2133): the same capsule
+    /// changes its line, and its end is announced once.
+    func restore(_ phase: RestorePhase) {
+        let wasShown = model.visible
+        if case .placing(_, let total) = phase { restoreTotal = total }
+        restoreLine = BootCountText.line(for: phase)
+        if let restoreLine {
+            model.line = restoreLine
+            if wasShown { widen() }
+        }
+        apply(timeline.restore(phase, at: now()))
+        if case .done = phase, wasShown {
+            announce(model.line, priority: .medium)
+        }
+        if case .none = phase { restoreLine = nil }
+    }
+
+    private func apply(_ effect: BootNoticeTimeline.Effect) {
+        switch effect {
         case .none:
             if model.visible { place() }
         case .showAt(let due):
@@ -86,14 +110,29 @@ final class BootNoticeController {
         place()
         panel.orderFrontRegardless()
         model.visible = true
+        announce(model.line, priority: .high)
+    }
+
+    private func announce(
+        _ line: String,
+        priority: NSAccessibilityPriorityLevel
+    ) {
         NSAccessibility.post(
             element: NSApp as Any,
             notification: .announcementRequested,
             userInfo: [
-                .announcement: model.line,
-                .priority: NSAccessibilityPriorityLevel.high.rawValue,
+                .announcement: line,
+                .priority: priority.rawValue,
             ]
         )
+    }
+
+    /// A restore total larger than the width was measured for.
+    private func widen() {
+        let width = fixedWidth()
+        guard width > model.width else { return }
+        model.width = width
+        place()
     }
 
     private func hide() {
@@ -109,21 +148,30 @@ final class BootNoticeController {
         }
     }
 
-    /// Measured with the total in both slots, so the digits never
-    /// jitter, and capped; the line truncates past the cap.
+    /// The widest of the boot and restore lines, each measured with
+    /// its total in both slots, so neither the digits nor the swap
+    /// between them jitters; capped, the line truncating past it.
     private func fixedWidth() -> CGFloat {
-        let widest =
+        let count = max(total, restoreTotal)
+        let lines = [
             BootCountText.line(
                 for: .scanning(scanned: total, total: total)
-            ) ?? model.line
+            ),
+            BootCountText.line(
+                for: .placing(placed: count, total: count)
+            ),
+            BootCountText.line(for: .done(placed: count, total: count)),
+            model.line,
+        ].compactMap { $0 }
         let font = NSFont.monospacedDigitSystemFont(
             ofSize: BootNoticeModel.textSize,
             weight: .medium
         )
-        let text = (widest as NSString).size(
-            withAttributes: [.font: font]
-        ).width
-        return min(ceil(text) + BootNoticeModel.chrome, 360)
+        let widest =
+            lines.map {
+                ($0 as NSString).size(withAttributes: [.font: font]).width
+            }.max() ?? 0
+        return min(ceil(widest) + BootNoticeModel.chrome, 360)
     }
 
     private func place() {

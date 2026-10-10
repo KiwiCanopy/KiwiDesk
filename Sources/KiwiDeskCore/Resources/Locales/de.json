@@ -162,6 +162,8 @@
   "behavior.mouse.resize_action.help": "**%1$@** — Das Ziehen einer Fensterkante ändert deren Größe und passt die Nachbarn im Layout an.\n**%2$@** — Das Fenster lässt sich beim Ziehen frei skalieren und rastet beim Loslassen wieder in seine Tiling-Größe ein.",
   "behavior.mouse.resize_layout": "Benachbarte Fenster anpassen",
   "behavior.mouse.resize_snap_back": "Wieder einrasten",
+  "boot_notice.restore.done": "Deine Fenster sind zurück: %1$d von %2$d",
+  "boot_notice.restore.placing": "Deine Fenster werden zurückgestellt: %1$d von %2$d",
   "border.caption": "Umrandet das fokussierte Fenster, damit es in einem Layout mit Abständen hervorsticht.",
   "border.color.focused": "Fokussiertes Fenster",
   "border.color.unfocused": "Nicht fokussierte Fenster",

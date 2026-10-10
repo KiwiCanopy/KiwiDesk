@@ -162,6 +162,8 @@
   "behavior.mouse.resize_action.help": "**%1$@** — 윈도우의 가장자리를 드래그하면 해당 윈도우의 크기가 조절되고 레이아웃 안의 이웃 윈도우도 다시 배치됩니다.\n**%2$@** — 드래그하는 동안에는 자유롭게 크기가 바뀌고, 놓으면 타일 크기로 돌아갑니다.",
   "behavior.mouse.resize_layout": "인접한 윈도우 크기 조절",
   "behavior.mouse.resize_snap_back": "원래 자리로 되돌리기",
+  "boot_notice.restore.done": "윈도우가 돌아왔습니다: %2$d개 중 %1$d개",
+  "boot_notice.restore.placing": "윈도우를 원래대로 되돌리는 중: %2$d개 중 %1$d개",
   "border.caption": "포커스된 윈도우를 테두리로 감싸 간격이 있는 레이아웃에서 눈에 띄게 합니다.",
   "border.color.focused": "포커스된 윈도우",
   "border.color.unfocused": "포커스되지 않은 윈도우",

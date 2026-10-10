@@ -44,6 +44,8 @@ struct CrossSessionMatch: Sendable, Equatable {
     /// Live windows placed, or filed by a user verb since the
     /// match armed — never taken, so no pass undoes a user move.
     var placed: Set<WindowID> = []
+    /// The records the match owed when it armed (#2133).
+    private(set) var total = 0
 
     init() {}
 
@@ -75,6 +77,7 @@ struct CrossSessionMatch: Sendable, Equatable {
                 )
             }
         }
+        total = pending.count
     }
 
     /// Open while a record waits; `close()` ends it.

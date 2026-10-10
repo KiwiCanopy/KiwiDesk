@@ -162,6 +162,8 @@
   "behavior.mouse.resize_action.help": "**%1$@** — Trascinare il bordo di una finestra la ridimensiona e ridispone quelle vicine nel layout.\n**%2$@** — La finestra si ridimensiona liberamente mentre trascini, poi torna alla dimensione affiancata quando rilasci.",
   "behavior.mouse.resize_layout": "Ridimensiona le finestre adiacenti",
   "behavior.mouse.resize_snap_back": "Torna allo slot",
+  "boot_notice.restore.done": "Le tue finestre sono tornate: %1$d di %2$d",
+  "boot_notice.restore.placing": "Riposizionamento delle tue finestre: %1$d di %2$d",
   "border.caption": "Disegna un contorno attorno alla finestra con focus, così da farla risaltare in un layout con spaziatura.",
   "border.color.focused": "Finestra con focus",
   "border.color.unfocused": "Finestre senza focus",

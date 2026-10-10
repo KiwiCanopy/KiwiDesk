@@ -15741,6 +15741,26 @@ shelf does (full screen, a presentation), while the tour owns the
 screen, and after an update relaunch, where "What's new" already
 narrates the boot. The full-screen overlay stays rejected.
 
+**A restart restore keeps the same capsule up, with a count**
+([#2133](https://github.com/KiwiCanopy/KiwiDesk/issues/2133),
+owner ruling 2026-10-10). After a Mac restart, the cross-session
+match places only part of the desk at boot; the rest lands as
+windows reopen and once titles settle, ~30 s later. So at ready
+the capsule changes its line to "Putting your windows back: N of
+M" instead of leaving, and ends with "Your windows are back: N of
+M" at the title settle or once every window is back. Still past
+the 3 s threshold only, so a fast restore never flashes it, and
+still without focus, mouse or dismissal. It does not wait out
+the match's 120 s bound: a window that never reopens would hold
+it up for two minutes, while a late one is still placed after it
+ends. A Load, a Desktop-bound switch or a monitor change drops it
+without an end line, since the user caused that change. An
+expandable list of the awaited windows was weighed and rejected:
+a click target brings back the dismissal policy this capsule
+exists without, it would show window titles at login, and every
+row's wait is the one bound. Core reports `RestorePhase`;
+`BootCountText` stays the one narrator.
+
 **One slow app is deferred, never abandoned.** Chunking cannot
 divide a single app's AX work: on the measured session one app's
 reconcile took 5011 ms of the startup sweep's 5285 ms total — so a

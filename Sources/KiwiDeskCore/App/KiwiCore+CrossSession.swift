@@ -34,6 +34,7 @@ extension KiwiCore {
                 + "\(Int(CrossSessionMatch.bound))s for the rest"
         )
         logCrossSession(pairs, phase: "boot")
+        if match.isOpen { publishRestoreProgress() }
         deferred.schedule(
             .crossSessionSettle,
             after: .seconds(CrossSessionMatch.titleSettle)
@@ -80,6 +81,7 @@ extension KiwiCore {
             )
         }
         logCrossSession([pair], phase: "arrival")
+        publishRestoreProgress()
     }
 
     /// The title pass, `titleSettle` after arming: tracked windows
@@ -94,6 +96,7 @@ extension KiwiCore {
         let pairs = state.crossSession.pairs(crossSessionCandidates())
         state.crossSession.commit(pairs)
         logCrossSession(pairs, phase: "settle")
+        publishRestoreProgress(ending: true)
         var moved = false
         for pair in pairs {
             // The window the user is in stays where it is.
@@ -144,11 +147,32 @@ extension KiwiCore {
             return true
         }
         let missed = state.crossSession.close()
+        if case .placing = boot.restore { boot.publishRestore(.none) }
         onLog(
             "cross-session: the arrangement changed; closed with "
                 + "\(missed) window(s) unpaired"
         )
         return false
+    }
+
+    /// The restore's progress (#2133): placing while records wait
+    /// before the title settle, done at the settle or once none
+    /// waits. Published only from the boot pass or while placing,
+    /// so a late arrival never reopens an ended line.
+    private func publishRestoreProgress(ending: Bool = false) {
+        let match = state.crossSession
+        let placed = match.total - match.pending.count
+        switch boot.restore {
+        case .none where boot.reachedReady, .done:
+            return
+        default:
+            break
+        }
+        boot.publishRestore(
+            ending || !match.isOpen
+                ? .done(placed: placed, total: match.total)
+                : .placing(placed: placed, total: match.total)
+        )
     }
 
     /// Ends the match at its bound.

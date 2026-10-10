@@ -162,6 +162,8 @@
   "behavior.mouse.resize_action.help": "**%1$@** — ウインドウの端をドラッグするとそのウインドウがサイズ変更され、レイアウト内の隣のウインドウも再配置されます。\n**%2$@** — ドラッグ中は自由にサイズ変更でき、放すとタイル表示のサイズに戻ります。",
   "behavior.mouse.resize_layout": "隣接するウインドウをサイズ変更",
   "behavior.mouse.resize_snap_back": "元の位置に戻す",
+  "boot_notice.restore.done": "ウインドウが元に戻りました: %2$d個中%1$d個",
+  "boot_notice.restore.placing": "ウインドウを元に戻しています: %2$d個中%1$d個",
   "border.caption": "フォーカス中のウインドウを枠で囲み、ギャップのあるレイアウトで目立つようにします。",
   "border.color.focused": "フォーカス中のウインドウ",
   "border.color.unfocused": "フォーカスされていないウインドウ",
