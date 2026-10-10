@@ -12881,7 +12881,7 @@ A screen with no row of its own (one plugged in after the save)
 follows its bar, so hiding loses nothing. The rows list the
 profile's screens, not the connected ones, since a profile names
 its own screens and an absent one is still part of it; connected
-screens come first and an absent one carries "not present".
+screens come first and an absent one carries "not connected".
 Identical models share a fingerprint, and so share one row. A
 bar row whose screens differ selects nothing and says so through
 its `?`, as Position does when the bars differ, and a drawer held
