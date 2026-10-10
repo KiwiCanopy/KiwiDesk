@@ -29,22 +29,60 @@ struct SpaceDropHookNeedleTests {
         #expect(body.contains("spaceHistory.trails.rekey("))
     }
 
-    @Test("both held arms that end a hold first owe its shortcuts")
+    @Test("every end of a hold owes its shortcuts first")
     func heldEndsOwe() throws {
-        for function in ["refileHeldSpaces", "retireEmptiedHeldSpaces"] {
+        let door = try SourceScan.functionBody(
+            of: "endHold",
+            in: "KiwiCore+HeldSpaces.swift",
+            under: "Profiles"
+        )
+        #expect(door.contains("oweShortcutDrop(id)"))
+        // The go-home arm clears every hold up front, so it owes
+        // by hand; the emptied retire takes the door.
+        let arms = [
+            "refileHeldSpaces": "oweShortcutDrop(id)",
+            "retireEmptiedHeldSpaces": "endHold(of: id)",
+        ]
+        for (function, owe) in arms {
             let body = try SourceScan.functionBody(
                 of: function,
                 in: "KiwiCore+HeldSpaces.swift",
                 under: "Profiles"
             )
-            let owe = try #require(
-                body.range(of: "oweShortcutDrop(id)"),
+            let owed = try #require(
+                body.range(of: owe),
                 "\(function) never owes"
             )
             let forward = try #require(
                 body.range(of: "forwardWindows(of: id")
             )
-            #expect(owe.lowerBound < forward.lowerBound)
+            #expect(owed.lowerBound < forward.lowerBound)
         }
+    }
+
+    @Test("stop pays the debt before its capture")
+    func stopPays() throws {
+        let body = try SourceScan.functionBody(
+            of: "stop",
+            in: "KiwiCore+Lifecycle.swift",
+            under: "App"
+        )
+        let pay = try #require(body.range(of: "payOwedShortcutDrops()"))
+        let capture = try #require(body.range(of: "stopCapture("))
+        #expect(pay.lowerBound < capture.lowerBound)
+    }
+
+    @Test("the app hands a drop to an open draft")
+    func appWiresTheDrop() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/AppDelegate.swift")
+        let source = try SourceScan.strippedSource(at: url)
+            .split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            source.contains(
+                "core.onShortcutsDropped={[weakself]spacesin"
+                    + "self?.dashboardIfCreated?.adoptShortcutDrop(spaces)"
+            )
+        )
     }
 }

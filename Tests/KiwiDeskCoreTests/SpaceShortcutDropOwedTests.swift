@@ -26,6 +26,63 @@ struct SpaceShortcutDropOwedTests {
             ?? []
     }
 
+    /// Space 9 made by a move, then emptied and left: it drops.
+    private func dropScratch(_ core: KiwiCore) {
+        let scratch = SpaceID(9)
+        core.execute(
+            "move_to_space",
+            args: [.string(scratch.raw), .number(13)]
+        )
+        core.execute(
+            "pin_space_to_display",
+            args: [.string(scratch.raw), .string(desk.builtIn.fingerprint)]
+        )
+        core.retile()
+        core.state.workspaces.activate(SpaceID(1))
+        core.state.workspaces.add(WindowID(13), to: SpaceID(1))
+        core.retile()
+    }
+
+    @Test("a chord only another profile holds is still owed")
+    func otherProfileChordIsOwed() throws {
+        let core = try desk.docked()
+        try core.guiConfigStore.save(GuiConfig())
+        var studio = desk.profile(
+            "studio",
+            screens: [desk.builtIn.fingerprint],
+            spaces: [SpaceID(1)]
+        )
+        studio.layers = KeyLayerOverride(
+            layers: [
+                KeyLayer(name: "Studio", bindings: [row("f13", 9)])
+            ]
+        )
+        try core.profiles.write(studio)
+        dropScratch(core)
+        #expect(core.state.workspaces[SpaceID(9)] == nil)
+        let kept =
+            try core.profiles.read(name: "studio").layers?
+            .layers.flatMap(\.bindings) ?? []
+        #expect(kept.isEmpty)
+    }
+
+    @Test("a number live again keeps its chords")
+    func liveAgainKeeps() throws {
+        let core = try desk.docked()
+        var config = GuiConfig()
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [row("control+option+1", 1)]
+            )
+        ]
+        try core.guiConfigStore.save(config)
+        core.state.owedShortcutDrops = [SpaceID(1)]
+        core.retile()
+        #expect(core.state.owedShortcutDrops.isEmpty)
+        #expect(baseCombos(core) == ["control+option+1"])
+    }
+
     @Test("a number whose drop is owed is never minted")
     func owedNumberIsTaken() {
         let core = makeTestCore()

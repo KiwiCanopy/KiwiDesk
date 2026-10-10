@@ -96,7 +96,12 @@ struct LiveOnlyShortcutRowsTests {
         model.config.settings.resizeStep += 5
         model.recomputeDirty()
         #expect(model.isDirty)
+        model.profileEditingBaseLayers = []
         model.adoptShortcutDrop([SpaceID("9")])
+        // The base its Save diffs the override against is re-read.
+        #expect(
+            model.profileEditingBaseLayers == model.core.baseKeyLayers()
+        )
         #expect(model.config.layers.allSatisfy { $0.bindings.isEmpty })
         #expect(
             model.cleanConfig.layers.allSatisfy { $0.bindings.isEmpty }

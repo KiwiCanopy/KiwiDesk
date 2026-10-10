@@ -262,8 +262,10 @@ extension KiwiCore {
         placeHeldBatchLast(created)
     }
 
-    /// Ends one Space's hold — `delete_space` removed it.
+    /// Ends a hold whose number goes with it (`delete_space`, the
+    /// emptied retire), owing its shortcuts (#1827).
     func endHold(of id: SpaceID) {
+        oweShortcutDrop(id)
         state.heldSpaces[id] = nil
     }
 
@@ -277,7 +279,7 @@ extension KiwiCore {
         for id in state.heldSpaces.keys {
             let space = state.workspaces[id]
             guard spaceHoldsNothing(id) else { continue }
-            state.heldSpaces[id] = nil
+            endHold(of: id)
             guard space != nil,
                 let other = state.workspaces.allSpaces.first(where: {
                     $0.id != id
@@ -285,7 +287,6 @@ extension KiwiCore {
             else { continue }
             tiler.settings.removeSpace(id)
             spacePins[id] = nil
-            oweShortcutDrop(id)  // its hold ended (#1827)
             forwardWindows(of: id, to: other)
             retired = true
         }
