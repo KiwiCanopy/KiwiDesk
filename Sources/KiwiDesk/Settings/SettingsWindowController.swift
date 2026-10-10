@@ -5,14 +5,20 @@ import SwiftUI
 /// Owns the dashboard window and its view model.
 @MainActor
 final class SettingsWindowController: NSObject, NSWindowDelegate {
-    private let model: SettingsModel
+    /// Internal so a test can drive the controller's verdicts
+    /// without opening its window.
+    let model: SettingsModel
     private var window: NSWindow?
 
     /// Initial open and minimum restore width
     /// (`SettingsWidthClass.panelBreakpoint`).
     static let firstRunWidth = SettingsWidthClass.panelBreakpoint
-    init(core: KiwiCore) {
-        self.model = SettingsModel(core: core)
+    convenience init(core: KiwiCore) {
+        self.init(model: SettingsModel(core: core))
+    }
+
+    init(model: SettingsModel) {
+        self.model = model
         super.init()
         observeWorkspaceTopology()
     }
@@ -85,6 +91,62 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// write over a tour paint (#1720); a stored profile's cannot.
     var hasUnsavedDraft: Bool { model.isDirty && model.target == .live }
 
+    /// The one reading of "Settings is open": shown, or
+    /// minimized to the Dock (#1970, #2049).
+    private var isShown: Bool {
+        window.map { $0.isVisible || $0.isMiniaturized } ?? false
+    }
+
+    /// Settings is open with unsaved edits, so a quit asks first
+    /// (#2049). Closed, nothing asks: no draft outlives the window.
+    var quitAsksAboutDraft: Bool {
+        Self.quitAsks(shown: isShown, dirty: model.isDirty)
+    }
+
+    /// The quit question's one verdict: open AND unsaved.
+    static func quitAsks(shown: Bool, dirty: Bool) -> Bool {
+        shown && dirty
+    }
+
+    /// Brings Settings forward and asks Save / Discard / Cancel,
+    /// or leaves a question already up as it is; `terminate`
+    /// runs on Save landed or Discard.
+    func askBeforeQuit(terminate: @escaping @MainActor () -> Void) {
+        show()
+        model.askBeforeQuit(terminate: terminate)
+    }
+
+    /// A quit answered by the question passes once (#2049).
+    func takeQuitAnswer() -> Bool {
+        defer { model.quitAnswered = false }
+        return model.quitAnswered
+    }
+
+    /// Brings Settings forward while a close or quit waits on the
+    /// unsaved-edits question; false when none waits.
+    func frontPendingQuestion() -> Bool {
+        guard model.draftLeave != nil else { return false }
+        show()
+        return true
+    }
+
+    /// A SIGTERM's quit: the draft goes unasked (#2049).
+    func dropDraftForQuit() {
+        model.dropDraftForQuit()
+    }
+
+    /// Every close path — the close button, ⌘W, File ▸ Close —
+    /// asks first while the draft holds unsaved edits (#2049).
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        guard model.isDirty else { return true }
+        model.leavingDraft(
+            .close,
+            proceed: { [weak sender] in sender?.close() },
+            cancel: {}
+        )
+        return false
+    }
+
     /// Re-reads saved profiles list without discarding staged edits (#246).
     func refreshProfiles() {
         model.refreshProfiles()
@@ -132,11 +194,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// Shows the dashboard window: a fresh open on Home, an open
     /// one where it is (`SettingsModel.prepareToShow`, #1970).
     func show() {
-        model.prepareToShow(
-            windowShown: window.map {
-                $0.isVisible || $0.isMiniaturized
-            } ?? false
-        )
+        model.prepareToShow(windowShown: isShown)
         if let window {
             // Core first (#1281): a bare order-front of a window
             // the row just panned out reports a clickless focus,
@@ -198,10 +256,14 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         NSApp.forceFront(window)
     }
 
-    /// Disarms recorder and cleans up state on window close (#213, #515).
+    /// Disarms recorder and cleans up state on window close (#213,
+    /// #515). Owns "no draft outlives the window" (#2049): a close
+    /// that did not ask drops it here; `prepareToShow`'s reload on
+    /// a fresh open is the backstop.
     func windowWillClose(_ notification: Notification) {
         model.setRecorderArmed(false)
         model.cancelPendingDiscard()
+        if model.isDirty { model.revert() }
         ColorPanelController.shared.dismiss()
         model.settingsClosed()
     }

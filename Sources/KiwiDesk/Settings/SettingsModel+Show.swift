@@ -2,12 +2,14 @@ import Foundation
 
 extension SettingsModel {
     /// What opening Settings does to the model before the window
-    /// comes forward (#455, #1970): a clean draft reloads, and a
-    /// fresh open starts on Home — while a window already shown
-    /// keeps the page the user is on. A navigating open sets its
-    /// reveal first, which still lands either way.
+    /// comes forward (#1970): a fresh open reloads and starts on
+    /// Home — the backstop to `windowWillClose`, which owns "no
+    /// draft outlives the window" (#2049, amending #455) — while a
+    /// window already shown keeps its draft and the page the user
+    /// is on. A navigating open sets its reveal first,
+    /// which still lands either way.
     func prepareToShow(windowShown: Bool) {
-        if !isDirty {
+        if !windowShown || !isDirty {
             reload()
         }
         guard !windowShown else { return }

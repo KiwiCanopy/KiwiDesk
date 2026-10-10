@@ -166,7 +166,7 @@ struct ProfileDeleteConfirmTests {
         let cancel = try #require(
             source.range(of: "Button(pending.cancelLabel,role:.cancel)")
         )
-        let end = try #require(source.range(of: "}message:"))
+        let end = try #require(source.range(of: "extensionView{"))
         #expect(destructive.upperBound < cancel.lowerBound)
         let deleteChain = source[destructive.upperBound..<cancel.lowerBound]
         let cancelChain = source[cancel.upperBound..<end.lowerBound]

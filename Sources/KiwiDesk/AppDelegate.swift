@@ -53,6 +53,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
     private var sigtermSource: DispatchSourceSignal?
+    /// `wirePowerOffSheets`' observer (#2049).
+    var powerOffObserver: NSObjectProtocol?
     /// Rebuilds the fixed-string main menu when the GUI language
     /// changes, so it honors the live-switch contract (#9) the
     /// rest of the app upholds.
@@ -237,15 +239,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.dashboardIfCreated?.showLiveOnlySpaces(spaces)
         }
 
-        // Redirect SIGTERM from launchctl into AppKit termination flow.
-        signal(SIGTERM, SIG_IGN)
-        let src = DispatchSource.makeSignalSource(
-            signal: SIGTERM,
-            queue: .main
-        )
-        src.setEventHandler { NSApp.terminate(nil) }
-        src.resume()
-        sigtermSource = src
+        sigtermSource = QuitSignal.install()
+        wirePowerOffSheets()
 
         permissions.onChange = { [weak self] trusted in
             self?.permissionChanged(trusted)

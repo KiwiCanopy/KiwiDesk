@@ -27,6 +27,16 @@ extension SettingsButtonStyleConventionTests {
                 "Returned to a confirmationDialog / contextMenu, "
                     + "plus one icon affordance"
             ),
+            // The one discard gate's verbs, returned to its
+            // confirmationDialog per kind (#515, #2049).
+            "DiscardConfirm.swift": (
+                2, "gateActions",
+                "Returned to the discard gate's confirmationDialog"
+            ),
+            "DiscardConfirm+Leave.swift": (
+                3, "leaveActions",
+                "Returned to the discard gate's confirmationDialog"
+            ),
             "SpaceAssignmentChip.swift": (
                 3, "rowActions",
                 "Returned to the row-menu builder the rowActions "

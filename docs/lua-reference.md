@@ -5868,6 +5868,19 @@ begins within 10 minutes; later than that, the next launch starts
 fresh: quitting lets the arrangement go.
 :::
 
+:::unreleased
+A quit, restart or logout closes a dialog left open in KiwiDesk
+as if you had pressed Cancel. If Settings is open with unsaved
+edits, the quit stops and asks whether to save them, with
+Settings in front: Save (Return) or Discard (⌘D) then quits, and
+Cancel (Escape) keeps KiwiDesk running. A restart or logout
+stopped this way must be started again once you have answered.
+Closing the Settings window asks the same, and
+Settings never keeps unsaved edits once its window is closed. A
+SIGTERM — `kill`, launchd, `kiwidesk service restart` — cannot
+wait for an answer and discards them.
+:::
+
 On quit, KiwiDesk moves each managed tiled window
 back onto the screen its space is assigned to and arranges them
 per `quit.layout` (see `quit.set_layout` below). KiwiDesk keeps

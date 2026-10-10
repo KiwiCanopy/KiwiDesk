@@ -1314,6 +1314,14 @@ that takes the plain gate. *Why* is
 [Design decisions](design-decisions.md) ▸ every edit-dropping
 action routes through one discard gate.
 
+:::unreleased
+**Leaving the window takes the gate's third verb.** A close or a
+quit over unsaved edits goes through `SettingsModel.leavingDraft`,
+the one place Save / Discard / Cancel is offered; an action never
+takes it. `DraftLeaveTests` holds its verdicts and
+`QuitSheetsWiringTests` the close and quit paths that reach it.
+:::
+
 Greying applied across a whole editor (#520, #527):
 
 - **Read the claim aloud before writing the gate.** Greying
