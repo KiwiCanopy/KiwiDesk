@@ -1,4 +1,5 @@
 import CoreFoundation
+import Foundation
 import KiwiDeskCore
 
 /// Localized display name resolution for stored keybinding labels (#96).
@@ -57,14 +58,16 @@ extension KeybindingCatalog {
             spaces.append(space)
         }
         var layers = config.layers.map(\.name)
-        if let layer = lua.firstMatch(of: /switch_layer\("([^"]*)"\)/) {
-            layers.append(String(layer.1))
+        if let layer = argument(of: "switch_layer", in: lua) {
+            layers.append(layer.trimmingCharacters(in: ["\""]))
         }
         var steps = [Int(config.settings.resizeStep)]
-        if let step = lua.firstMatch(of: /resize\("[xy]", -?(\d+)\)/),
-            let value = Int(step.1)
+        if let args = argument(of: "resize", in: lua),
+            let step = args.split(separator: ",").last.flatMap({
+                Int($0.trimmingCharacters(in: [" ", "-"]))
+            })
         {
-            steps.append(value)
+            steps.append(step)
         }
         return namedCommands(
             spaces: spaces,
@@ -107,5 +110,13 @@ extension KeybindingCatalog {
         commands += goToDesktop(desktops.desktops)
         commands += moveToDesktop(desktops.desktops)
         return commands
+    }
+
+    /// The raw argument list of `call(...)` in `lua`, or nil.
+    private static func argument(of call: String, in lua: String) -> String? {
+        guard let open = lua.range(of: call + "("),
+            let close = lua[open.upperBound...].lastIndex(of: ")")
+        else { return nil }
+        return String(lua[open.upperBound..<close])
     }
 }

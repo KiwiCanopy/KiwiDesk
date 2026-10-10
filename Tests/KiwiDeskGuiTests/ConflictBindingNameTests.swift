@@ -1,3 +1,4 @@
+import CoreFoundation
 import KiwiDeskCore
 import Testing
 
@@ -63,6 +64,7 @@ struct ConflictBindingNameTests {
             label: "Go to Space 7"
         )
         LocalizationManager.shared.select("de")
+        defer { LocalizationManager.shared.select("en") }
         let named = KeybindingCatalog.localizedName(of: bare, config: config)
         #expect(named != bare.lua)
         #expect(
@@ -70,7 +72,27 @@ struct ConflictBindingNameTests {
                 == named
         )
         #expect(named != "Go to Space 7")
+    }
+
+    /// Every axis the door widens by: a layer, a resize step and
+    /// a Desktop this page's roster lacks are still named.
+    @Test("a foreign layer, step and Desktop are named")
+    func foreignArgumentsAreNamed() {
         LocalizationManager.shared.select("en")
+        var config = config(spaces: ["1"])
+        config.settings.resizeStep = 50
+        for lua in [
+            "KiwiDesk.switch_layer(\"Foreign\")",
+            "KiwiDesk.resize(\"x\", 77)",
+            "KiwiDesk.focus_desktop(9)",
+        ] {
+            let binding = KeyBinding(combo: "alt+9", lua: lua)
+            #expect(
+                KeybindingCatalog.localizedName(of: binding, config: config)
+                    != lua,
+                "\(lua)"
+            )
+        }
     }
 
     /// The banner names a label-less side the same way as the
