@@ -88,12 +88,13 @@ struct BindingNameDoorTests {
     private let labelRead = /\.label(?!\w)(?!\s*=[^=])/
 
     private func sources() throws -> [(name: String, text: String)] {
-        let files = try Self.roots.flatMap {
-            try SourceScan.swiftSources(under: $0)
+        let files = try Self.roots.flatMap { root in
+            let tree = try SourceScan.swiftSources(under: root)
+            // Per root: either tree alone clears a joint floor, so
+            // the other could read nothing unnoticed (#635).
+            #expect(tree.count > 50, "\(root.lastPathComponent)")
+            return tree
         }
-        // A scan that read nothing would pass having looked at
-        // nothing (#635).
-        #expect(files.count > 50)
         return try files.map {
             (
                 $0.lastPathComponent,
@@ -115,7 +116,11 @@ struct BindingNameDoorTests {
             let text = try SourceScan.blankedSource(at: file)
             guard text.firstMatch(of: scope) != nil else { continue }
             let reads = reads(in: text)
-            if reads > 0 { result[file.lastPathComponent] = reads }
+            // Keyed by basename across two trees: a same-named
+            // file adds rather than hides the other's reads.
+            if reads > 0 {
+                result[file.lastPathComponent, default: 0] += reads
+            }
         }
         return result
     }

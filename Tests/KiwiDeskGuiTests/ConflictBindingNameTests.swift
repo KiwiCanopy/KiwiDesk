@@ -45,24 +45,62 @@ struct ConflictBindingNameTests {
         #expect(sentence?.contains("alt+3") == false)
     }
 
-    @Test("another profile's Space is named though this page lacks it")
+    /// The door widens its roster by what the binding itself
+    /// names, labelled or not, so another profile's seeded row and
+    /// its Lua twin both read their command's name (#2116).
+    @Test("another profile's Space is named, labelled or not")
     func foreignSpaceIsNamed() {
         LocalizationManager.shared.select("en")
         let config = config(spaces: ["1"])
-        let rival = KeyBinding(
+        let bare = KeyBinding(
             combo: "alt+7",
             lua: "KiwiDesk.focus_space(\"7\")"
         )
+        let labelled = KeyBinding(
+            combo: "alt+7",
+            lua: "KiwiDesk.focus_space(\"7\")",
+            kind: .navigation,
+            label: "Go to Space 7"
+        )
+        LocalizationManager.shared.select("de")
+        let named = KeybindingCatalog.localizedName(of: bare, config: config)
+        #expect(named != bare.lua)
         #expect(
-            KeybindingCatalog.localizedName(of: rival, config: config)
-                == rival.lua
+            KeybindingCatalog.localizedName(of: labelled, config: config)
+                == named
         )
-        let foreign = KeybindingCatalog.localizedName(
-            of: rival,
-            config: config,
-            foreign: true
-        )
-        #expect(foreign != rival.lua)
-        #expect(foreign.contains("7"))
+        #expect(named != "Go to Space 7")
+        LocalizationManager.shared.select("en")
+    }
+
+    /// The banner names a label-less side the same way as the
+    /// tooltip.
+    @Test("the banner names a label-less side by its command")
+    func bannerNamesLabelLessSide() {
+        LocalizationManager.shared.select("en")
+        let model = makeTestModel()
+        model.config.spaces = [SpaceID("3")]
+        model.config.layers = [
+            KeyLayer(
+                name: "default",
+                bindings: [
+                    KeyBinding(
+                        combo: "alt+3",
+                        lua: "KiwiDesk.focus(\"left\")",
+                        kind: .navigation,
+                        label: "Focus window left"
+                    ),
+                    KeyBinding(
+                        combo: "alt+3",
+                        lua: "KiwiDesk.focus_space(\"3\")"
+                    ),
+                ]
+            )
+        ]
+        model.warnIfAnyConflict()
+        let banner = model.keybindingWarning ?? ""
+        #expect(!banner.isEmpty)
+        #expect(!banner.contains("alt+3"))
+        #expect(!banner.contains("focus_space"))
     }
 }

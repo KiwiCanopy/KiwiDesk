@@ -544,5 +544,6 @@ A `KeyBinding` is named for display only through
 stored `label`, which is an English identifier no locale shows on
 the row, and never a hand-written "label, else Lua" beside the
 door (#2111, `BindingNameDoorTests`, which scans both trees). Core
-hands the GUI the binding to name — a `Conflict` carries both
-sides as bindings (#2116) — and never a name it chose.
+hands the GUI the binding to name, and never a name it chose: a
+`Conflict` carries both sides as bindings (#2116,
+`KeybindingConflictsTests` ▸ `conflictsCarriesTheUnnamedRow`).

@@ -90,15 +90,9 @@ extension SettingsModel {
         for profile in table.profiles where profile != editing {
             guard let rival = table.rival(of: key, for: profile, combo: combo)
             else { continue }
-            // Another profile's binding: its own Space joins this
-            // page's roster (#2116).
             result[profile] =
                 reach.keyTemplates[rival].map {
-                    KeybindingCatalog.localizedName(
-                        of: $0,
-                        config: config,
-                        foreign: true
-                    )
+                    KeybindingCatalog.localizedName(of: $0, config: config)
                 } ?? RuleReachTable<String>.keyParts(rival).lua
         }
         return result

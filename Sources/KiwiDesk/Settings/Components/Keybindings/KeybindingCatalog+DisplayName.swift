@@ -24,27 +24,54 @@ extension KeybindingCatalog {
     /// A binding's name wherever the GUI names one: its localized
     /// label, else the catalog command its Lua runs, else the Lua
     /// itself — the one door (#96, #2111,
-    /// `BindingNameDoorTests`). `foreign` names a binding of
-    /// ANOTHER profile, whose roster this page's `config` lacks:
-    /// the Space the binding itself targets joins the roster, so a
-    /// Space only that profile declares is still named (#2116).
+    /// `BindingNameDoorTests`). The roster it names against is the
+    /// page's, widened by what the binding itself names — its
+    /// Space, layer, resize step and Desktop — so another
+    /// profile's binding, or one whose Space this page dropped,
+    /// is named rather than read back in English (#2116).
     @MainActor static func localizedName(
         of binding: KeyBinding,
-        config: GuiConfig,
-        foreign: Bool = false
+        config: GuiConfig
     ) -> String {
+        let commands = namedCommands(config, widenedBy: binding)
         guard binding.label.isEmpty else {
-            return localizedLabel(for: binding.label, config: config)
+            return commands.first(where: { $0.label == binding.label })?
+                .resolvedLabel ?? binding.label
         }
-        var roster = config
-        if foreign, let space = SpaceLuaArg.targetSpace(of: binding.lua),
-            !roster.spaces.contains(space)
-        {
-            roster.spaces.append(space)
-        }
-        return namedCommands(roster).first(where: {
+        return commands.first(where: {
             $0.lua == binding.lua
         })?.resolvedLabel ?? binding.lua
+    }
+
+    /// The page's roster plus the arguments `binding`'s own Lua
+    /// names.
+    @MainActor private static func namedCommands(
+        _ config: GuiConfig,
+        widenedBy binding: KeyBinding
+    ) -> [NavCommand] {
+        let lua = binding.lua
+        var spaces = config.spaces
+        if let space = SpaceLuaArg.targetSpace(of: lua),
+            !spaces.contains(space)
+        {
+            spaces.append(space)
+        }
+        var layers = config.layers.map(\.name)
+        if let layer = lua.firstMatch(of: /switch_layer\("([^"]*)"\)/) {
+            layers.append(String(layer.1))
+        }
+        var steps = [Int(config.settings.resizeStep)]
+        if let step = lua.firstMatch(of: /resize\("[xy]", -?(\d+)\)/),
+            let value = Int(step.1)
+        {
+            steps.append(value)
+        }
+        return namedCommands(
+            spaces: spaces,
+            layerNames: layers,
+            steps: steps,
+            bindings: config.layers.flatMap(\.bindings) + [binding]
+        )
     }
 
     /// Every command a stored binding may be named after.
