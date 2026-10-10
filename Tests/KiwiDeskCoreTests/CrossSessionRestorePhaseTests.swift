@@ -88,15 +88,18 @@ struct CrossSessionRestorePhaseTests: CrossSessionFixture {
         )
         arrange(core)
         core.crossSessionSettlePass()
-        // Still matched after the settle, but the line has ended.
+        // Still matched after the settle, but the line has ended,
+        // and the bound's close leaves it ended.
         core.handle(.windowCreated(window(30, "app.zen", "Zen Browser")))
         #expect(space(core, 30) == F.hidden)
+        core.closeCrossSessionMatch()
         #expect(
             seen() == [
                 .placing(placed: 0, total: 2),
                 .done(placed: 0, total: 2),
             ]
         )
+        #expect(core.restorePhase == .done(placed: 0, total: 2))
     }
 
     @Test(
