@@ -98,7 +98,8 @@ struct SettingsCatalogSiteTests {
         // 123 since #1931: the Space switch duration row.
         // 122 since #1520: Shortcuts' General drawer left; its
         // two rows stay as Open applications' controls.
-        #expect(names.count == 122)
+        // 124 since #1948: the two Per screen drawers.
+        #expect(names.count == 124)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

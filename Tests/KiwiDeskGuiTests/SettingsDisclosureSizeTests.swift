@@ -260,7 +260,7 @@ struct SettingsDisclosureSizeTests {
         )
         #expect(
             labelRun.contains(
-                "if!configuration.isExpanded{summaryText}"
+                "if!configuration.isExpanded,!locked{summaryText}"
             ),
             Comment(
                 rawValue:

@@ -9,7 +9,7 @@ enum HomeCardContent {
         for destination: SettingsDestination,
         model: SettingsModel
     ) -> String {
-        let settings = model.config.settings
+        let settings = model.homeSettings
         switch destination {
         case .spaces:
             return L(
