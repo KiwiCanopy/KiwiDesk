@@ -4,8 +4,11 @@ import Foundation
 /// title fragments.
 public struct FloatRules: Sendable, Equatable {
     private let rules: [(app: String, title: String?)]
+    /// Where detection may float a window on a guess (#2173).
+    public let guess: FloatGuess
 
-    public init(_ rules: [String] = []) {
+    public init(_ rules: [String] = [], guess: FloatGuess = FloatGuess()) {
+        self.guess = guess
         self.rules = rules.map { rule in
             let parts = rule.split(
                 separator: ":",
@@ -61,6 +64,7 @@ public struct FloatRules: Sendable, Equatable {
     public static func == (a: FloatRules, b: FloatRules) -> Bool {
         a.rules.map(\.app) == b.rules.map(\.app)
             && a.rules.map(\.title) == b.rules.map(\.title)
+            && a.guess == b.guess
     }
 }
 
@@ -87,4 +91,34 @@ public struct IgnoreRules: Sendable, Equatable {
         guard let bundleID else { return false }
         return bundleIDs.contains(bundleID.lowercased())
     }
+}
+
+/// Which apps detection may float on a GUESS — a fixed size, no
+/// Dock icon — rather than a structure no setting removes (#2173):
+/// none while `float_automatically` is off, else every app without
+/// a Tile rule (`tile_rules`).
+public struct FloatGuess: Sendable, Equatable {
+    public var enabled: Bool
+    private let tiled: Set<String>
+
+    public init(enabled: Bool = true, tileRules: [String] = []) {
+        self.enabled = enabled
+        tiled = Set(tileRules.map(Self.normalizedRule))
+    }
+
+    /// Canonical identity shared by matching and profile diffs: a
+    /// bundle id, case-insensitive.
+    public static func normalizedRule(_ rule: String) -> String {
+        rule.lowercased()
+    }
+
+    /// Whether a guess may float `bundleID`'s windows.
+    public func applies(to bundleID: String?) -> Bool {
+        guard enabled else { return false }
+        guard let bundleID else { return true }
+        return !tiled.contains(Self.normalizedRule(bundleID))
+    }
+
+    /// The Tile rules, normalized for matching and config seeding.
+    public var tileRules: [String] { tiled.sorted() }
 }

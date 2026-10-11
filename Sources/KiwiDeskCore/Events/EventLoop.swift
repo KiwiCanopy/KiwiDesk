@@ -42,9 +42,9 @@ public final class EventLoop {
     var onRemovalDistrust: @MainActor () -> Void = {}
     var onRemovalEpisodesEnded: @MainActor (Set<WindowID>) -> Void = { _ in }
 
-    /// Lua `float_rules`. Assigning does NOT resync `detectedFloating`: rules
-    /// change hands inside loadConfig's reset→reassign transaction, so a new
-    /// assignment site outside it follows with `reconcileAll()` or a scoped
+    /// The resolved float rules and guess, written only through
+    /// `KiwiCore.installFloatRules` (`AutoFloatSeamTests`); the
+    /// re-check is the writer's — `reconcileAll()` or a scoped
     /// recheck (#164).
     public var floatRules = FloatRules()
 

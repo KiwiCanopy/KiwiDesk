@@ -189,6 +189,8 @@ extension KiwiCore {
         config.layers = recoverKeybindings()
         config.floatRules = globalRuleBase.floatRules
         config.ignoreRules = globalRuleBase.ignoreRules
+        config.tileRules = globalRuleBase.tileRules
+        config.floatAutomatically = globalRuleBase.floatAutomatically
         // The base `init.lua`'s verbs declared (#1656).
         config.scrollGesture = mouse.scroll.base
         config.spaceHistory = spaceHistory.base

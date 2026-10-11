@@ -3945,6 +3945,45 @@ float_rules = {
 }
 ```
 
+:::unreleased
+### tile_rules
+
+**Expects:** a Lua table of app bundle identifiers.
+
+**Does:** an app named here tiles the windows KiwiDesk would
+otherwise float on a guess: windows that can't be resized, and
+every window of an app with no Dock icon. Dialogs, sheets, panels
+and raised-layer windows still float, and a `float_rules` entry
+for the same app still floats the windows it matches. Matching is
+case-insensitive. Like `float_rules`, this table is the global
+base, a profile adds or removes entries with its sparse
+`tile_rules` object, and the table counts as a setting that makes
+`init.lua` the config owner.
+
+**Example:**
+
+```lua
+tile_rules = { "com.valvesoftware.steam" }
+```
+
+### set_float_automatically
+
+**Expects:** `enabled` (boolean). Default `true`.
+
+**Does:** turns off the guesses `tile_rules` escapes for every
+app at once: with `false`, a window floats only through
+`float_rules`, a dialog, sheet, panel or raised layer, or your own
+`make_floating`. It writes the global base, so a profile's own
+`float_automatically` value still applies while that profile is
+loaded, and lasts until the next config load.
+
+**Example:**
+
+```lua
+KiwiDesk.set_float_automatically(false)
+```
+:::
+
 ### ignore_rules
 
 **Expects:** a Lua table of app bundle identifiers.
@@ -4108,6 +4147,12 @@ does nothing, a pill on the window names the reason, and over the
 CLI it fails. Remove the `float_rules` entry to tile such a
 window. A window that floats only because its Space is in
 floating layout still floats there.
+
+:::unreleased
+A window floated only because it can't be resized or its app has
+no Dock icon tiles once its app is in [`tile_rules`](#tile_rules)
+or [`set_float_automatically`](#set_float_automatically) is off.
+:::
 
 Dragging a window out of a floating-layout Space onto a tiled
 Space on another screen floats it the way `make_floating` does,

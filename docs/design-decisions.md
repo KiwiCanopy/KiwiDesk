@@ -4958,8 +4958,8 @@ tile override back:
 - A Tile pressed during a momentary misread mid-launch stuck
   after detection healed.
 - Its one real beneficiary, an app that hides its Dock icon, is
-  better served by an app-level rule, which waits until someone
-  asks for it.
+  better served by an app-level rule: the Tile rule
+  ([#2173](https://github.com/KiwiCanopy/KiwiDesk/issues/2173)).
 
 *Tile on a window the verdict floats refuses.* Overriding the
 verdict there is the third state again, so the verb does nothing
@@ -4971,7 +4971,12 @@ seam), and CLI/IPC fail in English. The bar menu's
 Tile Window row greys with the same sentence rather than hiding
 (grey, don't hide), and the row and the cue read the one reason
 value so they cannot disagree. A rule's reason names App Rules,
-because that is where the user can change the answer.
+because that is where the user can change the answer — and so
+does a guess's, which says "floats automatically" where a dialog
+says "always": the word tells which floats have an escape
+(#2173). The label names the first obstacle met, so a fixed-size
+window a Float rule also matches names its size first and, once a
+Tile rule tiles the guess, the rule: two steps, each one true.
 
 *Float records nothing where the verdict already floats.* Such a
 record changes nothing now, and later keeps the window floating
@@ -15575,8 +15580,17 @@ does *differently* from an unruled one, so a row that states
 nothing must not be expressible. Each rule says something on
 its own — a Space ("Finder opens in *work*"), floating
 ("Spotify stays out of tiling") — and either alone is a whole
-rule. Tiling is not: it is what every app without a rule
-already does, which the card's own empty note says.
+rule. Tiling was not while every app without a rule tiled.
+Detection now also floats some windows on a guess — a fixed size
+([#2070](https://github.com/KiwiCanopy/KiwiDesk/issues/2070)), no
+Dock icon — so an unruled app may float, and *tile what a guess
+floats* says something too
+([#2173](https://github.com/KiwiCanopy/KiwiDesk/issues/2173)). A
+Tile rule reaches the guesses alone: a dialog, sheet or panel and
+a Float rule for the same app still float, so a Tile rule never
+fights structure or a rule the user wrote. It is the app-level
+rule #1810 left for when someone asked, and the "Float windows
+automatically" switch is its every-app form.
 
 **One list per rule, because the rules have different scopes.**
 A Space is title-blind — every new window of the app opens in

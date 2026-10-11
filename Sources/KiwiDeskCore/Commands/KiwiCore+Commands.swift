@@ -108,6 +108,8 @@ extension KiwiCore {
             return setDesktopCue(args)
         case "set_space_history":
             return setSpaceHistory(args)
+        case "set_float_automatically":
+            return setFloatAutomatically(args)
         case "set_shortcut_panel_liquid_glass":
             return setShortcutPanelLiquidGlass(args)
         case "set_space_switch_liquid_glass":

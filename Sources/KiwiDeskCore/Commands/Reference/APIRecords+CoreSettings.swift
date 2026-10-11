@@ -61,6 +61,11 @@ extension APIReference {
                 + "across every screen.",
             .choice("kind", SpaceHistoryKind.self)
         ),
+        "set_float_automatically": APIRecord(
+            "Sets whether windows that can't be resized and apps "
+                + "with no Dock icon float without a rule.",
+            .boolean("enabled")
+        ),
         "set_shortcut_panel_liquid_glass": APIRecord(
             "Lays a macOS 26 Liquid Glass material over the "
                 + "shortcuts panel and the slow-boot notice.",

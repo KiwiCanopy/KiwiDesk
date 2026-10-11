@@ -96,7 +96,7 @@ struct CoreLocalizationBoundaryTests {
         "Commands/ResizeRefusal+Rendering.swift": 12,
         // The Tile refusal's three reasons (#1810), drawn on the
         // same pill and on the bar menu's greyed row, both Core's.
-        "Commands/AutoFloatReason+Rendering.swift": 4,
+        "Commands/AutoFloatReason+Rendering.swift": 5,
         // The two marks' VoiceOver names (#1799).
         "Borders/StickyMarkOverlay.swift": 2,
         // The Space Bar's item labels and a11y strings, and the

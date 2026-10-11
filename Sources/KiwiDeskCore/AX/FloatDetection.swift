@@ -190,19 +190,25 @@ public enum FloatDetection {
             structural: structural,
             // Asked only where structure tiles: a standard window
             // on the normal layer, the one shape a disabled zoom
-            // button marks as fixed-size.
-            fixedSize: { facts.zoomable() == false },
+            // button marks as fixed-size — and only where a guess
+            // may float the app (#2173).
+            fixedSize: {
+                rules.guess.applies(to: bundleID)
+                    && facts.zoomable() == false
+            },
             ruleMatches: {
                 rules.matches(bundleID: bundleID, title: facts.title())
             }
         )
     }
 
-    /// The reason's order, pure: what no setting removes first —
-    /// structure, then a fixed size (#2070) — and the rule last,
-    /// since deleting a rule must tile what it named. Each is
-    /// asked only where the one before tiles: the later ones cost
-    /// a read.
+    /// The reason's order, pure: structure, then a fixed size
+    /// (#2070) — a guess `fixedSize` answers only where it applies
+    /// (#2173) — and the rule last. The LABEL names the first
+    /// obstacle met, so a fixed-size window a rule also matches
+    /// reads `.fixedSize` and, once tiled by a Tile rule, `.rule`.
+    /// Each is asked only where the one before tiles: the later
+    /// ones cost a read.
     public static func autoFloatReason(
         structural: Bool,
         fixedSize: () -> Bool,

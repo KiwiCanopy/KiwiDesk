@@ -4,7 +4,9 @@ import Foundation
 /// draws on the window and the subtitle of the bar menu's greyed
 /// row take this one sentence, so they cannot disagree.
 extension AutoFloatReason {
-    /// A rule's sentence names App Rules, where it is changed.
+    /// A rule's sentence names App Rules, where it is changed, and
+    /// so does a guess's (#2173): "always" is kept for the floats
+    /// no setting removes.
     @MainActor
     var sentence: String {
         switch self {
@@ -15,14 +17,23 @@ extension AutoFloatReason {
         case .accessoryApp:
             L(
                 "float.refusal.accessory_app",
-                "Apps without a Dock icon always float"
+                "Apps without a Dock icon float automatically. "
+                    + "Change it in %1$@.",
+                Self.appRules
             )
         case .fixedSize:
             L(
                 "float.refusal.fixed_size",
-                "Windows that can't be resized always float"
+                "Windows that can't be resized float automatically. "
+                    + "Change it in %1$@.",
+                Self.appRules
             )
         }
+    }
+
+    @MainActor
+    private static var appRules: String {
+        L("destination.app_rules", "App Rules")
     }
 
     /// The pill's glyph: no tile here, the resize family's
@@ -34,8 +45,10 @@ extension AutoFloatReason {
         switch self {
         case .rule: "a float rule floats this window"
         case .panel: "dialogs and panels always float"
-        case .accessoryApp: "apps without a Dock icon always float"
-        case .fixedSize: "windows that can't be resized always float"
+        case .accessoryApp:
+            "apps without a Dock icon float automatically"
+        case .fixedSize:
+            "windows that can't be resized float automatically"
         }
     }
 }

@@ -8,4 +8,20 @@ struct GlobalRuleBase {
     var appRules: [String: SpaceID] = [:]
     var floatRules: [String] = []
     var ignoreRules: [String] = []
+    var tileRules: [String] = []
+    /// `float_automatically`'s base (#2173).
+    var floatAutomatically = true
+    /// The live profile's `float_automatically` override as last
+    /// resolved, so the verb re-resolves without a file read
+    /// (profiles.md, #1245). Not a base: a profile apply writes it.
+    var liveFloatAutomatically: Bool?
+
+    /// The guess `float_automatically` and the resolved Tile rules
+    /// make — built here alone.
+    func guess(tileRules: [String]) -> FloatGuess {
+        FloatGuess(
+            enabled: liveFloatAutomatically ?? floatAutomatically,
+            tileRules: tileRules
+        )
+    }
 }

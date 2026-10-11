@@ -75,23 +75,14 @@ public struct Profile: Codable, Sendable, Equatable {
     public var scrollGesture: ScrollGestureOverride?
     /// Sparse Space history override (#1655); nil follows the base.
     public var spaceHistory: SpaceHistoryKind?
+    /// Sparse override of `float_automatically` (#2173); nil
+    /// follows the base.
+    public var floatAutomatically: Bool?
+    /// Sparse additions/removals over global `tile_rules` (#2173).
+    public var tileRules: RuleListOverride?
     /// Which look this profile wears (#1752): nil is the shared
     /// look in `gui.json`, `.own` the copy in `settings`.
     public var look: LookReference?
-
-    /// Number of monitors covered by profile sets.
-    public var monitorCount: Int {
-        monitorSets.first?.monitors.count
-            ?? dormantMonitorCount ?? 0
-    }
-
-    /// Holds no monitor combination: never auto-matched, loadable
-    /// by hand, re-claiming a set on its next save or load (#1530).
-    public var isDormant: Bool { monitorSets.isEmpty }
-
-    /// Is its screen count's default AND can load as one: a
-    /// dormant profile is never a count's fallback (#1530).
-    public var isUsableDefault: Bool { isDefault && !isDormant }
 
     enum CodingKeys: String, CodingKey {
         case format
@@ -112,6 +103,8 @@ public struct Profile: Codable, Sendable, Equatable {
         case ignoreRules = "ignore_rules"
         case scrollGesture = "scroll_gesture"
         case spaceHistory = "space_history"
+        case floatAutomatically = "float_automatically"
+        case tileRules = "tile_rules"
         case look
     }
 
@@ -134,6 +127,8 @@ public struct Profile: Codable, Sendable, Equatable {
         ignoreRules: RuleListOverride? = nil,
         scrollGesture: ScrollGestureOverride? = nil,
         spaceHistory: SpaceHistoryKind? = nil,
+        floatAutomatically: Bool? = nil,
+        tileRules: RuleListOverride? = nil,
         look: LookReference? = nil
     ) {
         self.format = format
@@ -155,6 +150,8 @@ public struct Profile: Codable, Sendable, Equatable {
         self.ignoreRules = ignoreRules
         self.scrollGesture = scrollGesture
         self.spaceHistory = spaceHistory
+        self.floatAutomatically = floatAutomatically
+        self.tileRules = tileRules
         self.look = look
     }
 
@@ -270,6 +267,14 @@ public struct Profile: Codable, Sendable, Equatable {
             SpaceHistoryKind.self,
             forKey: .spaceHistory
         )
+        floatAutomatically = try container.decodeIfPresent(
+            Bool.self,
+            forKey: .floatAutomatically
+        )
+        tileRules = try container.decodeIfPresent(
+            RuleListOverride.self,
+            forKey: .tileRules
+        )
         look = try container.decodeIfPresent(
             LookReference.self,
             forKey: .look
@@ -287,15 +292,6 @@ public struct Profile: Codable, Sendable, Equatable {
         return sets.filter {
             $0.monitors.count == canonical
         }
-    }
-
-    /// The stored set covering `fingerprints` (compared as
-    /// sorted arrays, not sets), if any.
-    public func set(
-        matching fingerprints: [String]
-    ) -> MonitorSet? {
-        let wanted = fingerprints.sorted()
-        return monitorSets.first { $0.monitors == wanted }
     }
 
     /// Adds or replaces the set covering the same monitors.
