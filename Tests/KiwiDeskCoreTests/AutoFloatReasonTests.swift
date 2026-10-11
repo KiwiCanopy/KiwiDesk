@@ -15,38 +15,45 @@ struct AutoFloatReasonTests {
     func structureFirst() {
         var asked = false
         #expect(
-            FloatDetection.autoFloatReason(structural: true) {
+            FloatDetection.autoFloatReason(
+                structural: true,
+                fixedSize: { false }
+            ) {
                 asked = true
                 return true
             } == .panel
         )
         #expect(!asked)
         #expect(
-            FloatDetection.autoFloatReason(structural: false) { true }
-                == .rule
+            FloatDetection.autoFloatReason(
+                structural: false,
+                fixedSize: { false }
+            ) { true } == .rule
         )
         #expect(
-            FloatDetection.autoFloatReason(structural: false) { false }
-                == nil
+            FloatDetection.autoFloatReason(
+                structural: false,
+                fixedSize: { false }
+            ) { false } == nil
         )
     }
 
-    /// A fixed size is asked last, only where nothing else floats
-    /// the window, and only of a standard normal-layer window
-    /// (#2070): a sheet or panel reads its own reason, a zoom
-    /// button that did not answer tiles.
-    @Test("a fixed-size standard window floats, asked last")
-    func fixedSizeLast() {
+    /// A fixed size is what no setting removes, like structure: a
+    /// rule matching the same window must not send you to App
+    /// Rules, whose deletion would not tile it (#2070). It is asked
+    /// only of a standard normal-layer window, and a zoom button
+    /// that did not answer tiles.
+    @Test("a fixed-size standard window floats ahead of a rule")
+    func fixedSizeBeforeRule() {
         var asked = false
         #expect(
             FloatDetection.autoFloatReason(
                 structural: false,
-                ruleMatches: { true },
-                fixedSize: {
-                    asked = true
-                    return true
-                }
-            ) == .rule
+                fixedSize: { true }
+            ) {
+                asked = true
+                return true
+            } == .fixedSize
         )
         #expect(!asked)
         func facts(

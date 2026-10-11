@@ -70,7 +70,7 @@ struct TileReturnsToRulesTests {
     @Test(
         "a Tile refuses where detection floats the window",
         arguments: [
-            AutoFloatReason.rule, .panel, .accessoryApp,
+            AutoFloatReason.rule, .panel, .accessoryApp, .fixedSize,
         ]
     )
     func tileRefuses(_ reason: AutoFloatReason) {

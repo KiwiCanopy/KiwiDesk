@@ -38,7 +38,7 @@ extension FloatDetection {
         layer: Int,
         isAccessory: Bool,
         rules: IgnoreRules,
-        titlebarButton: Bool = false
+        titlebarButton: Bool
     ) -> Bool {
         rules.matches(bundleID: bundleID)
             || isBuiltInIgnoredApp(bundleID: bundleID)
@@ -48,6 +48,17 @@ extension FloatDetection {
                         layerScopedIgnoredApps
                             .contains($0.lowercased())
                     } == true)
+    }
+
+    /// Whether the ignore gate asks the window's title-bar button:
+    /// the #2072 escape decides only for an accessory app's raised
+    /// window. The one copy of the condition — the off-main list
+    /// read and the main-actor gate both ask it.
+    public static func needsTitlebarButton(
+        layer: Int,
+        isAccessory: Bool
+    ) -> Bool {
+        isAccessory && layer != 0
     }
 
     /// Whether ignore classification depends on CGWindow layer lookup.
@@ -66,7 +77,8 @@ extension FloatDetection {
     public static func isBuiltInIgnoredPanel(
         bundleID: String?,
         id: WindowID,
-        isAccessory: Bool
+        isAccessory: Bool,
+        titlebarButton: Bool
     ) -> Bool {
         guard
             requiresWindowLayers(
@@ -80,7 +92,8 @@ extension FloatDetection {
             bundleID: bundleID,
             layer: windowLayer(of: id) ?? 0,
             isAccessory: isAccessory,
-            rules: IgnoreRules()
+            rules: IgnoreRules(),
+            titlebarButton: titlebarButton
         )
     }
 
@@ -126,7 +139,7 @@ extension FloatDetection {
         pid: pid_t,
         bundleID: String?,
         isAccessory: Bool,
-        tracked: Set<WindowID> = []
+        tracked: Set<WindowID>
     ) -> Bool {
         guard
             requiresWindowLayers(
@@ -154,7 +167,8 @@ extension FloatDetection {
                     bundleID: bundleID,
                     layer: layer,
                     isAccessory: isAccessory,
-                    rules: IgnoreRules()
+                    rules: IgnoreRules(),
+                    titlebarButton: false
                 )
         }
     }

@@ -81,7 +81,7 @@ extension KiwiCore {
                     pid: pid,
                     activationPolicy: app.activationPolicy
                 ),
-                tracked: Set(eventLoop.elements[pid]?.keys ?? [:].keys)
+                tracked: eventLoop.admittedWindows(of: pid)
             )
         else { return nil }
         return eventLoop.focusedWindowID(pid: pid)

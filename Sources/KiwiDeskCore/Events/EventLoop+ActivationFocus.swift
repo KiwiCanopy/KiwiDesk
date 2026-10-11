@@ -126,6 +126,7 @@ extension EventLoop {
                 pid: pid,
                 activationPolicy: app.activationPolicy
             ),
+            element: nil,
             channel: "activation"
         )
     }

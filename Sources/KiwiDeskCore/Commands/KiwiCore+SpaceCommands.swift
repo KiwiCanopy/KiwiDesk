@@ -49,9 +49,8 @@ extension KiwiCore {
                     bundleID: window.appBundleID,
                     isAccessory: self.eventLoop
                         .classifiesAsOverlay(pid: window.pid),
-                    tracked: Set(
-                        self.eventLoop.elements[window.pid]?.keys
-                            ?? [:].keys
+                    tracked: self.eventLoop.admittedWindows(
+                        of: window.pid
                     )
                 ),
                 self.eventLoop.focusedWindowID(pid: window.pid) == id,

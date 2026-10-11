@@ -291,10 +291,11 @@ extension EventLoop {
         }
         let resolved = layer ?? FloatDetection.windowLayer(of: id) ?? 0
         let button =
-            isAccessory && resolved != 0
-            ? titlebarButton
-                ?? (AXHelper.windowTraits(element, id: id)?
-                    .hasTitlebarButton == true)
+            FloatDetection.needsTitlebarButton(
+                layer: resolved,
+                isAccessory: isAccessory
+            )
+            ? titlebarButton ?? Self.readsTitlebarButton(element, id: id)
             : false
         return FloatDetection.shouldIgnore(
             bundleID: app.bundleID,
@@ -303,5 +304,22 @@ extension EventLoop {
             rules: ignoreRules,
             titlebarButton: button
         )
+    }
+
+    /// The title-bar button where no list read carried it: `track`,
+    /// a sync reconcile, an untracked focus report. An unanswered
+    /// read is no button, so the window stays ignored.
+    static func readsTitlebarButton(
+        _ element: AXUIElement,
+        id: WindowID
+    ) -> Bool {
+        AXHelper.windowTraits(element, id: id)?.hasTitlebarButton == true
+    }
+
+    /// The ids the ignore gate admitted for `pid` — what the
+    /// visible-panel distrust leaves out, since it cannot see the
+    /// #2072 escape.
+    func admittedWindows(of pid: pid_t) -> Set<WindowID> {
+        Set(elements[pid]?.keys ?? [:].keys)
     }
 }

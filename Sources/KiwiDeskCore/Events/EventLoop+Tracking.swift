@@ -219,6 +219,10 @@ extension EventLoop {
 
     private func applyFloatVerdict(_ verdict: FloatVerdict, id: WindowID) {
         let before = detectedFloating[id]
+        // A fixed size is judged at adoption (#2070): a sheet can
+        // grey the zoom button for a moment, and a recheck never
+        // floats a tiled window on that reading alone.
+        if verdict == .floats(.fixedSize), before != verdict { return }
         detectedFloating[id] = verdict
         // A changed REASON alone is stored silently: the flag
         // follows only whether the window floats.

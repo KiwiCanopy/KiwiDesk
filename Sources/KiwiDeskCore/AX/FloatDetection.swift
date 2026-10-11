@@ -188,11 +188,11 @@ public enum FloatDetection {
         )
         return autoFloatReason(
             structural: structural,
-            ruleMatches: {
-                rules.matches(bundleID: bundleID, title: facts.title())
-            },
             fixedSize: {
                 isStandardNormalWindow(facts) && facts.zoomable() == false
+            },
+            ruleMatches: {
+                rules.matches(bundleID: bundleID, title: facts.title())
             }
         )
     }
@@ -205,17 +205,19 @@ public enum FloatDetection {
             && (facts.layer ?? 0) == 0
     }
 
-    /// The reason's order, pure: structure first, then the rule,
-    /// then a fixed size (#2070) — each asked only where the one
-    /// before tiles, since the later ones cost a read.
+    /// The reason's order, pure: what no setting removes first —
+    /// structure, then a fixed size (#2070) — and the rule last,
+    /// since deleting a rule must tile what it named. Each is
+    /// asked only where the one before tiles: the later ones cost
+    /// a read.
     public static func autoFloatReason(
         structural: Bool,
-        ruleMatches: () -> Bool,
-        fixedSize: () -> Bool = { false }
+        fixedSize: () -> Bool,
+        ruleMatches: () -> Bool
     ) -> AutoFloatReason? {
         if structural { return .panel }
-        if ruleMatches() { return .rule }
-        return fixedSize() ? .fixedSize : nil
+        if fixedSize() { return .fixedSize }
+        return ruleMatches() ? .rule : nil
     }
 }
 
