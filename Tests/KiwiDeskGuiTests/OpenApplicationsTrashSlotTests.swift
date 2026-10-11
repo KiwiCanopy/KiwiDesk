@@ -1,30 +1,67 @@
+import AppKit
 import Foundation
+import SwiftUI
 import Testing
 
-/// The Open applications card's KiwiDesk rows hold the trash's
-/// width, so their "Applies to" picker and key field line up with
-/// the app rows above them, which end in a trash (owner
-/// screenshot, 2026-10-11).
-@Suite("Open applications trash slot")
+@testable import KiwiDesk
+
+/// A rule row's trash keeps ONE width whichever form it draws, and
+/// a trash-less row beside trash rows holds that width, so a
+/// card's trailing reach and key columns line up — the Open
+/// applications card's KiwiDesk rows sat one trash-width off.
+///
+/// Main-actor spend: three `NSHostingView` fitting sizes, once.
+@Suite("Rule trash column width")
+@MainActor
 struct OpenApplicationsTrashSlotTests {
+    private func width(_ view: some View) -> CGFloat {
+        NSHostingView(rootView: view).fittingSize.width
+    }
+
+    private var shared: RuleReachReading {
+        RuleReachReading(
+            editing: "A",
+            loaded: "A",
+            profiles: ["A", "B"],
+            unreadable: [],
+            shared: true,
+            hasShared: true,
+            users: ["A", "B"],
+            own: [:],
+            ownIsShared: [],
+            leftOut: []
+        )
+    }
+
+    @Test("both trash forms and the empty slot are one width")
+    func oneWidth() {
+        let plain = width(AppRuleDeleteButton(help: "x") { _ in })
+        let menu = width(
+            AppRuleDeleteButton(help: "x", sharedFrom: shared) { _ in }
+        )
+        let slot = width(AppRuleDeleteButton.slot)
+        #expect(plain > 0)
+        #expect(plain == menu)
+        #expect(slot == menu)
+    }
+
     private func source(_ name: String) throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/Keybindings"
             )
             .appendingPathComponent(name)
-        return SourceScan.stripComments(
+        let text = SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)
         )
+        return text.split(whereSeparator: \.isWhitespace).joined()
     }
 
-    private func squashed(_ text: String) -> String {
-        text.split(whereSeparator: \.isWhitespace).joined()
-    }
-
-    @Test("the card asks its KiwiDesk rows to hold the slot")
-    func cardAsksForTheSlot() throws {
-        let group = squashed(try source("KeybindingAppGroup.swift"))
+    /// The card asks, and the row ends in the slot right after its
+    /// key field, where an app row's trash stands.
+    @Test("the KiwiDesk rows hold the slot in the apps card")
+    func kiwiDeskRowsHoldTheSlot() throws {
+        let group = try source("KeybindingAppGroup.swift")
         #expect(
             group.contains(
                 "KiwiDeskKeyRows(model:model,bindings:$bindings,"
@@ -32,58 +69,17 @@ struct OpenApplicationsTrashSlotTests {
                     + ".environment(\\.keybindingReservesTrashSlot,true)"
             )
         )
-    }
-
-    /// The slot ends the row, after the key field, where the app
-    /// row's trash stands.
-    @Test("a row asked for the slot ends in it")
-    func rowEndsInTheSlot() throws {
-        let row = squashed(try source("KeybindingNavRow.swift"))
-        let field = try #require(row.range(of: "KeyRecorderField("))
-        let rest = row[field.upperBound...]
-        let slot = try #require(
-            rest.range(
-                of: "onClear:clear)ifreservesTrashSlot{"
-                    + "KeyReachTrashSlot()}}"
+        let row = try source("KeybindingNavRow.swift")
+        #expect(
+            row.contains(
+                "onClear:clear)ifreservesTrashSlot{"
+                    + "AppRuleDeleteButton.slot}}"
             )
         )
-        #expect(slot.lowerBound > field.upperBound)
         #expect(
             row.contains(
                 "@Environment(\\.keybindingReservesTrashSlot)"
                     + "privatevarreservesTrashSlot"
-            )
-        )
-    }
-
-    /// The slot is the trash's wider, shared-rule menu form,
-    /// hidden — measured 25 pt against the plain button's 19 —
-    /// and the trash itself stands in it, so either form a row
-    /// draws keeps one column width.
-    @Test("the slot is the menu trash, and the trash stands in it")
-    func slotIsTheMenuTrash() throws {
-        let column = squashed(try source("KeyReachColumn.swift"))
-        let start = try #require(
-            column.range(of: "structKeyReachTrashSlot:View{")
-        )
-        let end = try #require(
-            column.range(
-                of: "structKeyReachTrash:View{",
-                range: start.upperBound..<column.endIndex
-            )
-        )
-        let slot = column[start.upperBound..<end.lowerBound]
-        #expect(
-            slot.contains(
-                "AppRuleDeleteButton(help:\"\",sharedFrom:Self.menuForm)"
-                    + "{_in}.hidden().accessibilityHidden(true)"
-            )
-        )
-        let trash = column[end.upperBound...]
-        #expect(
-            trash.contains(
-                "varbody:someView{ZStack{KeyReachTrashSlot()"
-                    + "AppRuleDeleteButton("
             )
         )
     }

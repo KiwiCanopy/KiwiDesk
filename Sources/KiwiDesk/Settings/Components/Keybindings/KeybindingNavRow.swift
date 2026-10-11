@@ -60,7 +60,7 @@ struct NavRow: View {
                 onClear: clear
             )
             if reservesTrashSlot {
-                KeyReachTrashSlot()
+                AppRuleDeleteButton.slot
             }
         }
         .keybindingRowStyle(unavailable: command.unavailable?())

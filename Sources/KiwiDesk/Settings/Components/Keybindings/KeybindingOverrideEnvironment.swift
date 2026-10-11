@@ -18,9 +18,9 @@ private struct DisabledSystemShortcutsKey: EnvironmentKey {
     static let defaultValue: Set<SystemShortcut> = []
 }
 
-/// Set on rows sharing a card with trash-ended rows (#334), so a
-/// row with nothing to remove holds the trash's width and its
-/// reach and key columns line up with theirs.
+/// Set on a card whose rows end in a trash: a trash-less row in
+/// it reads this key and holds `AppRuleDeleteButton.slot`, so its
+/// reach and key columns line up with the trash rows'.
 private struct KeybindingReservesTrashSlotKey: EnvironmentKey {
     static let defaultValue = false
 }
