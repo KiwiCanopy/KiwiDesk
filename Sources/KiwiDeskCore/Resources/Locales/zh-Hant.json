@@ -1745,5 +1745,6 @@
   "whatsnew.trail.from": "來自「新功能」",
   "whatsnew.trail.next": "下一項：%1$@",
   "window_action.refusal.no_close_button": "「%1$@」沒有關閉按鈕",
-  "window_action.refusal.no_new_window": "%1$@ 沒有「新增視窗」指令"
+  "window_action.refusal.no_new_window": "%1$@ 沒有「新增視窗」指令",
+  "window_action.refusal.nothing_to_gather": "沒有可收集的 %1$@ 視窗"
 }

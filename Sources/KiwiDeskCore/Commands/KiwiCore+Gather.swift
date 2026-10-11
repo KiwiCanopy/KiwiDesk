@@ -2,11 +2,12 @@ import Foundation
 
 /// `gather` (#1510): every window of an app into the Space the
 /// user is on. A tracked window is filed through the one
-/// `fileMembership`; a window up on another macOS Desktop (#1146)
-/// has its remembered Space pointed at the target and is MOVED
-/// onto the Desktop that Space shows — a hop, never a switch — so
-/// its arrival files it there. Nothing launches: an app with no
-/// window to gather refuses.
+/// `fileMembership`; a window up on another macOS Desktop of the
+/// same screen (#1146) is MOVED onto the Desktop that screen shows
+/// — a hop, never a switch — and, once the bridge accepted, has
+/// its remembered Space pointed at the target, so its arrival
+/// files it there. Nothing launches: an app with no window to
+/// gather is cued and refused.
 extension KiwiCore {
     func gather(_ args: [JSONValue]) -> CommandResponse {
         guard let bundleID = args.first?.stringValue?.lowercased()
@@ -16,7 +17,8 @@ extension KiwiCore {
         }
         let local = gatherableWindows(bundleID: bundleID, into: target)
         let hopped = hopAwayWindows(bundleID: bundleID, into: target)
-        guard !local.isEmpty || hopped else {
+        guard !local.isEmpty || !hopped.isEmpty else {
+            cueNothingToGather(bundleID: bundleID)
             return .fail("no \(bundleID) window outside this Space")
         }
         for id in local {
@@ -27,11 +29,18 @@ extension KiwiCore {
             )
         }
         onLog(
-            "gather: \(bundleID) — \(local.count) window(s) filed "
-                + "into space \(target.raw)"
-                + (hopped ? ", away ones moved here" : "")
+            "gather: \(bundleID) — \(local.count) window(s) filed into "
+                + "space \(target.raw), \(hopped.count) move(s) "
+                + "dispatched from other Desktops"
         )
-        if !local.isEmpty { retile(animated: true) }
+        // The first gathered window is the focus, raised and keyed
+        // the way a window moved INTO the active Space is — the
+        // state trackers alone would leave the ring on a window
+        // macOS never focused (#292's anchor).
+        if let first = local.first {
+            focusWindow(first, refocusRetile: false, warp: true)
+            retile(animated: true)
+        }
         return .ok()
     }
 
@@ -60,32 +69,66 @@ extension KiwiCore {
             }
     }
 
-    /// Moves the app's windows that are up on an away Desktop onto
-    /// the Desktop `target`'s screen shows, their remembered Space
-    /// re-pointed first so each arrival files into `target`. False
-    /// without the bridge, a census, or a window to move.
+    /// Moves the app's windows up on another Desktop of `target`'s
+    /// screen onto the Desktop that screen shows, and only once the
+    /// bridge accepted points each one's remembered Space at
+    /// `target`. Another screen's Desktop is left alone: the
+    /// arrival's screen-home net (#1010) would file it there. An
+    /// UNFILED entry — no remembered Space, a boot-seeded window —
+    /// is skipped too, since its arrival would take its app rule.
+    /// Performed is not applied (os-private-apis.md): the arrival,
+    /// or the reap's reconcile, is the verification. Returns the
+    /// windows whose move was dispatched.
     private func hopAwayWindows(
         bundleID: String,
         into target: SpaceID
-    ) -> Bool {
+    ) -> [WindowID] {
         guard canDriveDesktops,
             let reach = awayReach(bundleID: bundleID),
-            !reach.windows.isEmpty,
             let uuid = state.workspaces.display(of: target)
                 .flatMap(NativeSpaces.displayUUID(for:))
                 ?? reach.snapshot.mainUUID,
             let shown = reach.snapshot.currentSpaces[uuid]
-        else { return false }
-        let windows = reach.windows.map(\.window)
+        else { return [] }
+        let windows = reach.windows.map(\.window).filter { window in
+            state.rememberedSpaces[window.id] != nil
+                && reach.snapshot.spaces.first {
+                    $0.id == window.nativeSpace
+                }?.displayUUID == uuid
+        }
+        guard !windows.isEmpty,
+            WMBridge.moveWindows(windows.map(\.id), to: shown)
+        else { return [] }
         for window in windows {
             state.refileAway(of: window.id, to: target)
         }
-        guard WMBridge.moveWindows(windows.map(\.id), to: shown) else {
-            return false
+        let pids = Set(windows.map(\.pid))
+        deferred.schedule(.gatherReap, after: .milliseconds(700)) {
+            [weak self] in
+            guard let self, self.eventLoop.isRunning else { return }
+            // Off the main actor (#1930): the arrival's own
+            // retile places what each read adopts.
+            for pid in pids.sorted() {
+                self.eventLoop.reconcileOffMain(
+                    pid: pid,
+                    app: AppRef(pid: pid)
+                ) { [weak self] in self?.retile(animated: true) }
+            }
         }
-        for pid in Set(windows.map(\.pid)) {
-            scheduleReachReap(pid: pid)
+        return windows.map(\.id)
+    }
+
+    /// The refusal a key press would otherwise meet in silence:
+    /// drawn on the focused window, naming the app.
+    private func cueNothingToGather(bundleID: String) {
+        let app =
+            state.windows.all.first {
+                $0.appBundleID?.lowercased() == bundleID
+            }?.appName ?? bundleID
+        guard let focused = state.workspaces.lastFocused else {
+            onLog("gather: nothing of \(bundleID) to gather")
+            return
         }
-        return true
+        cueWindowAction(.nothingToGather(app: app), on: focused)
     }
 }

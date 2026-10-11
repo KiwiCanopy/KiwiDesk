@@ -1745,5 +1745,6 @@
   "whatsnew.trail.from": "Dalle Novità",
   "whatsnew.trail.next": "Avanti: %1$@",
   "window_action.refusal.no_close_button": "«%1$@» non ha il pulsante di chiusura",
-  "window_action.refusal.no_new_window": "%1$@ non ha il comando «Nuova finestra»"
+  "window_action.refusal.no_new_window": "%1$@ non ha il comando «Nuova finestra»",
+  "window_action.refusal.nothing_to_gather": "Nessuna finestra di %1$@ da raccogliere"
 }

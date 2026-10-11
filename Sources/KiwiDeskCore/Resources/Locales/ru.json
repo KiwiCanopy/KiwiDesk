@@ -1745,5 +1745,6 @@
   "whatsnew.trail.from": "Из «Что нового»",
   "whatsnew.trail.next": "Далее: %1$@",
   "window_action.refusal.no_close_button": "У окна «%1$@» нет кнопки закрытия",
-  "window_action.refusal.no_new_window": "%1$@: нет команды «Новое окно»"
+  "window_action.refusal.no_new_window": "%1$@: нет команды «Новое окно»",
+  "window_action.refusal.nothing_to_gather": "Нет окон %1$@, которые можно собрать"
 }

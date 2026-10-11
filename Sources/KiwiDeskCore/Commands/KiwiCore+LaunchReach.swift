@@ -72,7 +72,7 @@ extension KiwiCore {
 
     /// The follow's own 700 ms reap (`departEagerly`), for the
     /// window that composites after the settle's arrival sweep.
-    func scheduleReachReap(pid: pid_t) {
+    private func scheduleReachReap(pid: pid_t) {
         deferred.schedule(
             .awayReachReap,
             after: .milliseconds(700)

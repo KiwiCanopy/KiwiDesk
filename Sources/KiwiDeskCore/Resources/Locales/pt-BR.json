@@ -1745,5 +1745,6 @@
   "whatsnew.trail.from": "Das Novidades",
   "whatsnew.trail.next": "Próximo: %1$@",
   "window_action.refusal.no_close_button": "“%1$@” não tem botão de fechar",
-  "window_action.refusal.no_new_window": "%1$@ não tem o comando “Nova Janela”"
+  "window_action.refusal.no_new_window": "%1$@ não tem o comando “Nova Janela”",
+  "window_action.refusal.nothing_to_gather": "Nenhuma janela de %1$@ para reunir"
 }

@@ -1745,5 +1745,6 @@
   "whatsnew.trail.from": "Aus „Neu in KiwiDesk“",
   "whatsnew.trail.next": "Weiter: %1$@",
   "window_action.refusal.no_close_button": "„%1$@“ hat keine Schließen-Taste",
-  "window_action.refusal.no_new_window": "%1$@ hat keinen Befehl „Neues Fenster“"
+  "window_action.refusal.no_new_window": "%1$@ hat keinen Befehl „Neues Fenster“",
+  "window_action.refusal.nothing_to_gather": "Kein Fenster von %1$@ zum Sammeln"
 }

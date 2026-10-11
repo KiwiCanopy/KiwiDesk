@@ -9,6 +9,8 @@ enum WindowActionRefusal: Equatable {
     case noNewWindow(app: String)
     /// The window has no enabled close button.
     case noCloseButton(window: String)
+    /// `gather` found no window of the app to bring (#1510).
+    case nothingToGather(app: String)
 
     /// The pill's glyph: there is no such action here.
     var pillSymbol: String { "nosign" }
@@ -30,6 +32,12 @@ enum WindowActionRefusal: Equatable {
                 "“%1$@” has no close button",
                 window
             )
+        case .nothingToGather(let app):
+            L(
+                "window_action.refusal.nothing_to_gather",
+                "No %1$@ window to gather",
+                app
+            )
         }
     }
 
@@ -38,6 +46,7 @@ enum WindowActionRefusal: Equatable {
         switch self {
         case .noNewWindow: "no enabled New Window item"
         case .noCloseButton: "no enabled close button"
+        case .nothingToGather: "no window to gather"
         }
     }
 }
