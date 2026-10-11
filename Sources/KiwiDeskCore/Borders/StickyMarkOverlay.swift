@@ -15,6 +15,15 @@ final class StickyMarkOverlay {
     private static let expandDuration: TimeInterval = 0.22
     private static let holdDuration: TimeInterval = 1.6
     private static let collapseDuration: TimeInterval = 0.16
+    /// The pill's entrance pop. Its PEAK sizes the panel's room
+    /// around the plate (`PopRoom`), so the pop is never clipped
+    /// at the panel's edge — mid-expand included, since the room
+    /// and the plate animate together (#2033's class).
+    nonisolated static let popKeyframes: [(scale: CGFloat, time: Double)] =
+        [(1.0, 0), (1.045, 0.45), (1.0, 1.0)]
+    nonisolated static var popPeak: CGFloat {
+        popKeyframes.map(\.scale).max() ?? 1
+    }
 
     private var panel: NSPanel?
 
@@ -57,10 +66,10 @@ final class StickyMarkOverlay {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         fitGlyphs(to: frame)
-        panel.setFrame(
-            markRect(for: frame, width: currentWidth),
-            display: false
-        )
+        let mark = markRect(for: frame, width: currentWidth)
+        let room = Self.panelFrame(for: mark)
+        panel.setFrame(room, display: false)
+        plate.frame = PopRoom.plateFrame(plate: mark, in: room)
         if !panel.isVisible {
             panel.orderFrontRegardless()
             // In front of every app, not against its window yet.
@@ -203,10 +212,13 @@ final class StickyMarkOverlay {
         currentWidth = width
         pillShown = nameShown
         let rect = markRect(for: frame, width: width)
+        let room = Self.panelFrame(for: rect)
+        let plateRect = PopRoom.plateFrame(plate: rect, in: room)
         guard let panel else { return }
 
         if reduceMotion {
-            panel.setFrame(rect, display: true)
+            panel.setFrame(room, display: true)
+            plate.frame = plateRect
             plate.setNameShown(nameShown, animated: false, duration: 0)
             return
         }
@@ -218,7 +230,8 @@ final class StickyMarkOverlay {
             ctx.timingFunction = CAMediaTimingFunction(
                 name: nameShown ? .easeOut : .easeIn
             )
-            panel.animator().setFrame(rect, display: true)
+            panel.animator().setFrame(room, display: true)
+            plate.animator().frame = plateRect
             plate.setNameShown(
                 nameShown,
                 animated: true,
@@ -231,9 +244,19 @@ final class StickyMarkOverlay {
     /// Entrance pop animation (#421, #436; ui-designer 2026-07-22).
     private func popEntrance() {
         guard let layer = plate.layer else { return }
-        let pop = CAKeyframeAnimation(keyPath: "transform.scale")
-        pop.values = [1.0, 1.045, 1.0]
-        pop.keyTimes = [0, 0.45, 1.0]
+        let pop = CAKeyframeAnimation(keyPath: "transform")
+        // About the plate's centre: a view's layer keeps AppKit's
+        // corner anchor, which grew the pop up and to the right.
+        pop.values = Self.popKeyframes.map {
+            NSValue(
+                caTransform3D: PopRoom.transform(
+                    scale: $0.scale,
+                    size: plate.bounds.size,
+                    anchor: layer.anchorPoint
+                )
+            )
+        }
+        pop.keyTimes = Self.popKeyframes.map { NSNumber(value: $0.time) }
         pop.duration = 0.13
         pop.timingFunctions = [
             CAMediaTimingFunction(name: .easeOut),
@@ -245,6 +268,12 @@ final class StickyMarkOverlay {
     private var reduceMotion: Bool {
         NSWorkspace.shared
             .accessibilityDisplayShouldReduceMotion
+    }
+
+    /// The panel around a mark resting at `mark`, room for the
+    /// pop's peak on every side.
+    nonisolated static func panelFrame(for mark: CGRect) -> CGRect {
+        PopRoom.panelFrame(for: mark, peak: popPeak)
     }
 
     private func markRect(
@@ -294,7 +323,11 @@ final class StickyMarkOverlay {
             .ignoresCycle,
         ]
         applyGlyphs()
-        panel.contentView = plate
+        // The plate rides a clear room, never the content view
+        // itself: a plate the panel's size clips its own pop.
+        let room = NSView()
+        room.addSubview(plate)
+        panel.contentView = room
         return panel
     }
 }
