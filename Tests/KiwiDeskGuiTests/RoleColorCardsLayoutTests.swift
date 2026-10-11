@@ -23,7 +23,7 @@ struct RoleColorCardsLayoutTests {
             )
         )
         #expect(source.contains(":AnyLayout(HStackLayout("))
-        // No second spelling of the band beside it.
-        #expect(!source.contains("HStack("))
+        // One reading of the band, so the two arms cannot drift.
+        #expect(source.components(separatedBy: "stacksRows").count == 2)
     }
 }

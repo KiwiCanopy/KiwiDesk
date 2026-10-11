@@ -43,6 +43,10 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case lookRename = "(action) look.rename"
     case lookExport = "(action) look.export"
     case lookDelete = "(action) look.delete"
+    /// Each role group's colour, written onto its ticked rows
+    /// (#1857); it stores nothing of its own.
+    case accentPaint = "(action) colors.accent.paint"
+    case secondAccentPaint = "(action) colors.second_accent.paint"
 }
 
 extension ColoursKey {
@@ -139,6 +143,10 @@ extension ColoursKey {
             return .row(.coloursAndMotion, .looks, .showMore)
         case .lookAppliesTo:
             return .row(.coloursAndMotion, .sharedLook, .atRest)
+        case .accentPaint:
+            return .row(.advancedColours, .accent, .atRest)
+        case .secondAccentPaint:
+            return .row(.advancedColours, .secondAccent, .atRest)
         case .paletteNeonGlowHint:
             return .row(
                 .coloursAndMotion,
@@ -243,6 +251,11 @@ extension ColoursKey {
             return .text("looks.export")
         case .lookDelete:
             return .text("looks.delete")
+        case .accentPaint, .secondAccentPaint:
+            return .text(
+                "colors.ticked_rows",
+                help: "colors.ticked_rows.help"
+            )
         }
     }
 }

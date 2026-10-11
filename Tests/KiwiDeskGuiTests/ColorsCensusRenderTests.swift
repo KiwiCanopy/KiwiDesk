@@ -181,15 +181,17 @@ struct ColorsCensusRenderTests {
     /// behind a drawer.
     @Test("each Advanced Colours group's rows are the census's")
     func advancedColoursGroups() {
+        // Each role group draws its colour above its rows.
         pin(
-            ColorsRowOrder.accentAtRest,
+            [ColorRole.accent.paint] + ColorsRowOrder.accentAtRest,
             .advancedColours,
             .accent,
             .atRest,
             "accent"
         )
         pin(
-            ColorsRowOrder.secondAccentAtRest,
+            [ColorRole.secondAccent.paint]
+                + ColorsRowOrder.secondAccentAtRest,
             .advancedColours,
             .secondAccent,
             .atRest,

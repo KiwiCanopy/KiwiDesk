@@ -48,6 +48,19 @@ enum ColorRole: CaseIterable {
         }
     }
 
+    /// The group colour's own census row (#1857).
+    var paint: SettingKey {
+        switch self {
+        case .accent: return .colours(.accentPaint)
+        case .secondAccent: return .colours(.secondAccentPaint)
+        }
+    }
+
+    /// Every group colour's row: actions, not colours of their own.
+    static var paintKeys: Set<SettingKey> {
+        Set(allCases.map(\.paint))
+    }
+
     /// Rows whose empty value follows another colour, so a group
     /// colour never writes them (`ColorPaletteKeys.followers`).
     var followers: Set<SettingKey> {

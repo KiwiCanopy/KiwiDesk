@@ -158,6 +158,13 @@ struct GreyOutParityTests {
             "active: verdict != nil",
             1
         ),
+        // The role groups draw their rows themselves, each beside
+        // its tick, on the same verdict (#1857).
+        (
+            "RoleColorCards.swift",
+            "active: verdict != nil",
+            1
+        ),
         // Not a GreyOut site — a plain `.disabled` with its own
         // reason-bearing help — but the same convention, and
         // the same failure if it is dropped: Apply would switch

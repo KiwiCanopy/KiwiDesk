@@ -2,6 +2,8 @@
 (action) app_rules.add_space
 (action) border.fit_gaps
 (action) border.fit_gaps.extra_spacing
+(action) colors.accent.paint
+(action) colors.second_accent.paint
 (action) general.advanced.backup.export
 (action) general.advanced.backup.restore
 (action) general.advanced.discard_arrangement

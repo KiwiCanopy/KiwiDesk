@@ -12086,6 +12086,31 @@ still renders in one place, which is why the ring's row there is
 Grouping by role elsewhere — the shelf's item and fill, the
 window marks — would invent a role no palette rule defines.
 
+**A role group's colour writes its rows; it is never a colour of
+its own** (#1857). Retinting a look used to mean editing each of
+the accent's wells in turn, so each role group carries one well,
+"Ticked rows", whose pick lands on every ticked row of the group
+— at that row's own alpha, since a hover fill and a ghost fill are
+the accent at their own strength, and a pick never makes a stroke
+translucent. It stores nothing: the writes land on the existing
+leaves in the draft, so Revert is the undo and nothing migrates.
+The ticks are scratch, re-seeded each time the page opens from
+the palette itself — a row starts ticked when it already draws
+its group's first colour, ignoring alpha — because ticking by
+meaning would undo the palettes' own splits: the shipped default
+darkens its ring for stroke contrast and draws an emerald ghost
+for the drag pair, and a seed by meaning would paint the bar's
+green onto both the moment the page opened. A dimmed row is left
+alone, and a row whose empty value follows another colour takes
+no tick at all, or a pick would pin a hex over that pairing.
+
+There is deliberately **no colour-vision warning** on the pick
+(owner, 2026-10-11). The separation floor holds the BUNDLED
+palettes to what every reader can tell apart; a user picking their
+own colours is choosing for their own eyes, and a reader who
+cannot tell the pair apart sees that on the bar without being
+told. The guards keep the bundled half.
+
 The cost is real and is paid deliberately: every gate on the
 Advanced Colours page now names a switch on another page, so
 "why is this greyed" has to say *where to go*, on a live `?`

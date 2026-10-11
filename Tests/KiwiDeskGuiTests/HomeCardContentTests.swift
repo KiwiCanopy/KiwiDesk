@@ -225,7 +225,9 @@ struct HomeCardContentTests {
                 && [.atRest, .showMore].contains(
                     $0.placement.tier
                 )
+                && !ColorRole.paintKeys.contains($0)
         }.count
+        #expect(expected == 19)
         let line = HomeCardContent.subtitle(
             for: .advancedColors,
             model: model()

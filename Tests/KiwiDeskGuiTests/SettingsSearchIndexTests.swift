@@ -222,8 +222,8 @@ struct SettingsSearchIndexTests {
                 // the "use its colors" row it replaced was not. 15:
                 // the Shared look card's "Applies to" (#1752).
                 .looks: 15,
-                // 17 #1517 (one shelf set), 18 #1679, 19 #1856.
-                .advancedColors: 19,
+                // 17 #1517, 18 #1679, 19 #1856, 21 #1857 (wells).
+                .advancedColors: 21,
                 // 6: `(action) presets.layouts` joined anchor-less
                 // in #859 — the preset card's preview opener. This
                 // count RISING is the unusual direction the

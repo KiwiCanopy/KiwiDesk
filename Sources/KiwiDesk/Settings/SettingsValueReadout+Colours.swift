@@ -134,9 +134,10 @@ extension SettingsValueReadout {
             .paletteNeonGlowHint, .lookApply, .lookKeepPreviousColors,
             .lookAppliesTo,
             .lookSave, .lookImport, .lookRename, .lookExport,
-            .lookDelete:
+            .lookDelete, .accentPaint, .secondAccentPaint:
             // Actions and a link: no stored model path, so no
-            // value pair to narrate.
+            // value pair to narrate — a group colour's writes are
+            // booked to the rows it painted (#1857).
             return []
         }
     }

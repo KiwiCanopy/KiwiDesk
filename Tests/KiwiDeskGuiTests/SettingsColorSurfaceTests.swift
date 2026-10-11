@@ -43,6 +43,9 @@ struct SettingsColorSurfaceTests {
             "the border, mark and drag swatches",
         "ColorField.swift":
             "declares HexColorField; not a render site",
+        "RolePaintRow.swift":
+            "a role group's colour: writes its ticked rows, binds "
+            + "no setting of its own (#1857)",
     ]
 
     @Test("every colour well lives in Advanced Colours")
@@ -79,6 +82,37 @@ struct SettingsColorSurfaceTests {
         // correct: the four drag tints share one builder, since
         // both columns edit the same `DragVisual` shape.
         #expect(found >= 14)
+    }
+
+    /// The role groups' well is the one allowed well that is NOT
+    /// a row (#1857): it may edit no stored value directly, or the
+    /// colour it shows would be a second home for that setting.
+    /// So its file holds no model binding, and its well's hex is
+    /// handed in — the card's computed binding over the rows it
+    /// writes (`RolePaint.painted`).
+    @Test("the role groups' well binds no setting")
+    func roleWellBindsNoSetting() throws {
+        let url = settingsDir.appendingPathComponent(
+            "Components/Colors/RolePaintRow.swift"
+        )
+        let source = try SourceScan.strippedSource(at: url)
+            .filter { !$0.isWhitespace }
+        #expect(!source.contains("$model"))
+        #expect(!source.contains("SettingsModel"))
+        #expect(source.contains("hex:hex"))
+        // The one writer: the card hands the well a binding whose
+        // set goes through the paint and nowhere else.
+        let card = try SourceScan.strippedSource(
+            at: settingsDir.appendingPathComponent(
+                "Components/Colors/RoleColorCards.swift"
+            )
+        )
+        .filter { !$0.isWhitespace }
+        #expect(
+            card.contains(
+                "set:{model.config.settings=paint.painted($0)}"
+            )
+        )
     }
 
     /// An allow-list entry for a file that no longer exists is a
@@ -122,8 +156,11 @@ struct SettingsColorSurfaceTests {
     /// restated constant.
     @Test("every palette colour has a census row in the area")
     func everyPaletteColorIsPlaced() {
+        // The role groups' colours are actions writing these
+        // rows, not colours of their own (#1857).
         let placed = SettingKey.allCases.filter {
             $0.placement.area == .advancedColours
+                && !ColorRole.paintKeys.contains($0)
         }
         // 17 rows since #1517: the shelf's eight colours replaced
         // the two bars' seventeen; 18 since #1679, the border; 19

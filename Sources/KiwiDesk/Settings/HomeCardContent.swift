@@ -207,6 +207,7 @@ enum HomeCardContent {
                 && [.atRest, .showMore].contains(
                     $0.placement.tier
                 )
+                && !ColorRole.paintKeys.contains($0)
         }.count
     }
 
