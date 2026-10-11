@@ -29,7 +29,8 @@ struct LayoutCycleSeedTests {
     @Test("Previous layout ships unbound")
     func previousLayoutIsUnbound() {
         #expect(
-            !seeded.contains { $0.lua.contains("cycle_mode(\"") }
+            seeded.filter { $0.lua.contains("cycle_mode") }
+                == [DefaultKeybindings.nextLayoutRow()]
         )
     }
 

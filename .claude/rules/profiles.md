@@ -51,10 +51,11 @@ because two real clients now remove drift — see
   user holds, so it is the only held thing on `⌥⌘`, and no other
   pressed verb joins the history pair there — a second key is a
   ruling of its own, argued in `docs/design-decisions.md` ▸ "One
-  pressed exception rides `⌥⌘`". The toggles (`⌃⌥F`, `⌃⌥S`,
-  `⌃⌥P`) and app chrome (`⌃⌥K`, `⌃⌥,`) are pressed, so they stay
-  on the base tier as mnemonic keys (`SizeLayerSeedTests` ▸
-  `sizeLayerCarriesOnlySize`, `DefaultKeybindingsTests`).
+  pressed exception rides `⌥⌘`". Every other pressed verb off
+  the ladder — the toggles, Next layout, app chrome — stays on
+  the base tier as a mnemonic letter (`SizeLayerSeedTests` ▸
+  `sizeLayerCarriesOnlySize`, `DefaultKeybindingsTests`,
+  `LayoutCycleSeedTests`).
 - **App chrome is seeded from the ONE `appChromeRows`, and
   every site that authors a layer takes it (#602/#1381).** The
   base seed and a GUI-created layer are two authoring sites, and

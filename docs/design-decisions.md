@@ -9794,6 +9794,22 @@ rule rather than a label: a future glide-able verb goes to `⌥⌘`,
 anything you tap stays on `⌃⌥`.
 
 :::unreleased
+**Next layout is `⌃⌥C` (#453), the first prediction the rule
+paid.** Stepping a Space to its next layout is a verb you tap, so
+it takes a mnemonic letter on `⌃⌥` — C for cycle — beside the
+toggles. It goes in the base seed, not `appChromeRows`: it acts on
+a Space, and a GUI-created layer re-seeds only chrome. Previous
+layout ships unbound, since its natural key would be `⌃⌥⇧C` and
+`⇧` never qualifies a letter (#1094). The collision measure (2026-10-11,
+recorded on #453): `SystemShortcuts.map`,
+`com.apple.symbolichotkeys`, sixteen apps' menus read through AX
+with the fn bit decoded, and the Xcode, VS Code and JetBrains
+default tables found nothing on `⌃⌥C`. VoiceOver's VO-C and
+Emacs's C-M-c under Option-as-Meta are the class the whole `⌃⌥`
+tier already accepts.
+:::
+
+:::unreleased
 **One pressed exception rides `⌥⌘`: the Space history on `Tab`
 (#1655, owner ruling 2026-10-09).** Back and Forward through the
 Spaces you visited are pressed, so the rule above sends them to

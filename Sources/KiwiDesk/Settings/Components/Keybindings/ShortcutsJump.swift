@@ -34,7 +34,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .gestures: return .gestures
         case .focus: return .focus
         case .moveWindows: return .moveWindows
-        case .layout: return .layoutKeys
+        case .layout: return .layout
         case .sizeFloat: return .sizeAndFloat
         case .openApplications: return .openApplications
         }

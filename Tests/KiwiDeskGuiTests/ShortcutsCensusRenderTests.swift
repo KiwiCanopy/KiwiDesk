@@ -104,7 +104,7 @@ struct ShortcutsCensusRenderTests {
     func layoutTier() {
         pin(
             ShortcutsRowOrder.layoutAtRest,
-            .layoutKeys,
+            .layout,
             .atRest,
             "layout at rest"
         )
@@ -285,7 +285,7 @@ struct ShortcutsCensusRenderTests {
     func shortcutsContainers() {
         #expect(
             Self.containers(of: .shortcuts) == [
-                .focus, .moveWindows, .layoutKeys, .sizeAndFloat,
+                .focus, .moveWindows, .layout, .sizeAndFloat,
                 .openApplications, .layers,
                 .luaBindings, .defaultShortcuts, .gestures,
             ]

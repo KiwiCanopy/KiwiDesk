@@ -93,7 +93,7 @@ extension ShortcutsKey {
                 gate: .runtime(.desktopBindingsExist)
             )
         case .layoutCycle:
-            return .row(.shortcuts, .layoutKeys, .atRest)
+            return .row(.shortcuts, .layout, .atRest)
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .toggleFloating, .toggleSticky, .toggleDisplaySticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
