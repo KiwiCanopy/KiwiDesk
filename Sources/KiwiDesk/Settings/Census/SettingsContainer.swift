@@ -12,6 +12,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     case essentialSettings
     case focus
     case floatRules
+    /// App Rules ▸ Automatic floating (#2173).
+    case automaticFloating
     case focusBorder
     case gaps
     case general
@@ -81,7 +83,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .optionalSettings, .palettes, .perSpaceOverrides,
             .pinnedToDisconnectedScreens, .presets,
             .profilesPerMacOSSpace, .floatRules, .secondAccent,
-            .spaceRules,
+            .spaceRules, .automaticFloating,
             .savedProfiles, .scrolling, .sharedLook, .sizeAndFloat,
             .spaceList, .spacePlacement, .stack,
             .stickyWindows, .track, .windowMarks:

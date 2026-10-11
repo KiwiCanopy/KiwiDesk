@@ -220,7 +220,7 @@ extension KiwiCore {
         globalRuleBase.floatRules = []
         globalRuleBase.ignoreRules = []
         globalRuleBase.tileRules = []
-        globalRuleBase.floatAutomatically = true
+        globalRuleBase.floatAutomatically = FloatGuess.enabledByDefault
         // `init.lua`'s scroll_gesture verbs declare the base anew;
         // the load's tail configures the tap once.
         resetScrollGestureInputs()

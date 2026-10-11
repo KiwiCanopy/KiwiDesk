@@ -1,5 +1,6 @@
 (action) app_rules.add_float
 (action) app_rules.add_space
+(action) app_rules.add_tile
 (action) border.fit_gaps
 (action) border.fit_gaps.extra_spacing
 (action) colors.accent.paint
@@ -57,6 +58,7 @@ appWide.desktopCue
 appWide.quitGridTargetDepth
 appWide.refusalSound
 config.appRules[app]
+config.floatAutomatically
 config.floatRules
 config.layers[].icon
 config.layers[].reach
@@ -68,6 +70,7 @@ config.scrollGesture.pan
 config.scrollGesture.spaceStep
 config.scrollGesture.stepDistance
 config.spaceHistory
+config.tileRules
 keybinding.grow_height
 keybinding.grow_width
 keybinding.open_settings

@@ -15,6 +15,9 @@ struct AppRulesGates {
         /// No float rule matches by title
         /// (`.titlePatternsExist`).
         case noTitlePatterns
+        /// "Float windows automatically" is off, so nothing floats
+        /// on a guess for a Tile rule to change (#2173).
+        case automaticOff
     }
 
     /// Evaluates the inert reason for a gated App Rules key.
@@ -26,6 +29,8 @@ struct AppRulesGates {
         case .appRules(.floatRulesPattern):
             return config.floatRules.contains(where: FloatFacet.isTitled)
                 ? nil : .noTitlePatterns
+        case .appRules(.tileRules), .appRules(.appRulesAddTile):
+            return config.floatAutomatically ? nil : .automaticOff
         default:
             assertionFailure(
                 "AppRulesGates does not own \(key.id)"
@@ -46,11 +51,19 @@ struct AppRulesGates {
             != .noTitlePatterns
     }
 
+    /// Whether detection floats windows on a guess, which the Tile
+    /// list needs to change anything.
+    var automaticFloats: Bool {
+        inertReason(for: .appRules(.tileRules)) != .automaticOff
+    }
+
     /// Gated keys this resolver answers
     /// (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
         .appRules(.appRules),
         .appRules(.floatRulesPattern),
+        .appRules(.tileRules),
+        .appRules(.appRulesAddTile),
     ]
 
     /// Gated keys answered outside this resolver — none; named so

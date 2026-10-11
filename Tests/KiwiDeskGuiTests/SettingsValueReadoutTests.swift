@@ -49,6 +49,7 @@ struct SettingsValueReadoutTests {
         "config.spaces",
         "config.floatRules",
         "config.ignoreRules",
+        "config.tileRules",
         "config.mainSpaces",
         "config.layers",
     ]

@@ -37,6 +37,8 @@ extension KiwiCore {
             existing.floatRules = stored.floatRules
             existing.scrollGesture = stored.scrollGesture
             existing.spaceHistory = stored.spaceHistory
+            existing.tileRules = stored.tileRules
+            existing.floatAutomatically = stored.floatAutomatically
         }
         try profiles.write(existing)
         refreshConfigIssues()
@@ -176,11 +178,17 @@ extension KiwiCore {
                 config.spaceHistory,
                 over: base.spaceHistory
             )
+            profile.tileRules = RuleListOverride.diff(
+                base: sidecar?.tileRules ?? globalRuleBase.tileRules,
+                edited: config.tileRules,
+                normalizing: FloatGuess.normalizedRule
+            )
+            profile.floatAutomatically =
+                config.floatAutomatically == base.floatAutomatically
+                ? nil : config.floatAutomatically
             // `ignoreRules` is deliberately untouched: the GUI has
             // no ignore editor, so even an inert hidden tombstone must
             // survive overwrite/copy until an external edit removes it.
-            // So are `tileRules` and `floatAutomatically` until the
-            // App Rules card edits them (#2173).
         }
         let live = liveFingerprints
         if profile.set(matching: live) != nil {

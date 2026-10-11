@@ -107,12 +107,21 @@ extension SettingsModel {
         if reach.appRules.profiles.count >= 2 { return true }
         let spaces = reach.appRules.resolved(for: editing).keys
         let floats = reach.floatRules.resolved(for: editing).keys
+        let tiles = reach.tileRules.resolved(for: editing).keys
+        let automatic = RuleReachTable<Bool>.floatAutomaticallyKey
         return spaces.contains {
             !reach.appRules.reach(of: $0, editing: editing).isShared
         }
             || floats.contains {
                 !reach.floatRules.reach(of: $0, editing: editing).isShared
             }
+            || tiles.contains {
+                !reach.tileRules.reach(of: $0, editing: editing).isShared
+            }
+            || !reach.floatAutomatically.reach(
+                of: automatic,
+                editing: editing
+            ).isShared
     }
 
     /// Ticks or unticks "All profiles" on a row.
@@ -183,10 +192,12 @@ extension SettingsModel {
         case .key: keyReach(app)
         case .scroll: scrollReach(app)
         case .history: historyReach()
+        case .tile: tileReach(app)
+        case .autoFloat: autoFloatReach()
         }
     }
 
-    private func reading<V>(
+    func reading<V>(
         _ table: RuleReachTable<V>,
         _ app: String,
         _ unreadable: [String],
@@ -290,6 +301,20 @@ extension SettingsModel {
             return RuleReachDraft.defaultReach(
                 of: key,
                 in: stored.spaceHistory,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .tile:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.tileRules,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .autoFloat:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.floatAutomatically,
                 editing: editing,
                 isLoaded: reachIsLoaded
             )
