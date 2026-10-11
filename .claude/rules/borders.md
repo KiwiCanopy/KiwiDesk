@@ -399,6 +399,26 @@ the three already in it, which an entry exempts wholesale. So
 the obligation above is the net for the inside of those files,
 and the map is the net for the next one.
 
+## A cue that pops past its resting size takes room for it
+
+**A cue that scales its plate past the resting size hosts the
+plate in a room `PopRoom.panelFrame` grows by the peak of the
+scales it plays, and pops about the plate's centre through
+`PopRoom.transform`** (#2033, the sticky mark's pill after it).
+A panel sized exactly to its plate clips the pop at its edge, and
+a view's layer keeps AppKit's corner anchor, so an unshifted scale
+grows the plate up and to the right. A cue whose plate also
+RESIZES while it pops sets the room for the whole resize at once
+and animates only the plate inside it: the pop's matrices are
+built for one size, and a room animating beside the plate gives
+its margin at neither end. `SizeLimitPillPopTests` and
+`StickyMarkPopTests` (which reads the transforms the expand
+actually added) hold the two cues; a third owes the same clause,
+and review is what notices one — no scan finds a new pop. The
+principle is the moving ring's room (#1937, above) one level
+down: a surface that changes size while it moves takes its room
+once and moves inside it.
+
 ## The sheen is one ramp, painted by the surface that owns the stroke
 
 `border.sheen` (#1644) reaches the focused ring, the shelf's
