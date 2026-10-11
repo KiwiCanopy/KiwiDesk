@@ -93,10 +93,10 @@ public final class EventLoop {
     /// reason (#1810), so reconcile can re-check and emit only
     /// actual changes.
     var detectedFloating: [WindowID: FloatVerdict] = [:]
-    /// Last native-fullscreen verdict per tracked window, so the
-    /// reconcile recheck emits `.windowFullscreenChanged` only on
-    /// an actual transition (mirrors `detectedFloating`).
+    /// Last native-fullscreen verdict and AX subrole per tracked
+    /// window, so a recheck emits only on a change (#1788).
     var detectedFullscreen: [WindowID: Bool] = [:]
+    var detectedSubroles: [WindowID: String] = [:]
     /// Tracked windows whose CGWindow layer read as ignored
     /// once; untracked only if the reading persists (layers
     /// flicker during fullscreen transitions).

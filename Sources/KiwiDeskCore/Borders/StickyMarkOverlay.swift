@@ -15,7 +15,6 @@ final class StickyMarkOverlay {
     private static let expandDuration: TimeInterval = 0.22
     private static let holdDuration: TimeInterval = 1.6
     private static let collapseDuration: TimeInterval = 0.16
-
     private var panel: NSPanel?
 
     /// AppKit keeps a visible panel alive after its owner is gone,
@@ -57,10 +56,7 @@ final class StickyMarkOverlay {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         fitGlyphs(to: frame)
-        panel.setFrame(
-            markRect(for: frame, width: currentWidth),
-            display: false
-        )
+        place(markRect(for: frame, width: currentWidth), in: panel)
         if !panel.isVisible {
             panel.orderFrontRegardless()
             // In front of every app, not against its window yet.
@@ -206,10 +202,21 @@ final class StickyMarkOverlay {
         guard let panel else { return }
 
         if reduceMotion {
-            panel.setFrame(rect, display: true)
+            place(rect, in: panel)
             plate.setNameShown(nameShown, animated: false, duration: 0)
             return
         }
+        // The room spans where the plate rests now AND where it
+        // lands, set at once: only the plate animates inside it,
+        // so the pop has room at every point of the resize.
+        let shown = plate.frame.offsetBy(
+            dx: panel.frame.minX,
+            dy: panel.frame.minY
+        )
+        let room = Self.panelFrame(for: shown.union(rect))
+        panel.setFrame(room, display: true)
+        plate.frame = PopRoom.plateFrame(plate: shown, in: room)
+        let plateRect = PopRoom.plateFrame(plate: rect, in: room)
         NSAnimationContext.runAnimationGroup { ctx in
             let duration =
                 nameShown
@@ -218,7 +225,7 @@ final class StickyMarkOverlay {
             ctx.timingFunction = CAMediaTimingFunction(
                 name: nameShown ? .easeOut : .easeIn
             )
-            panel.animator().setFrame(rect, display: true)
+            plate.animator().frame = plateRect
             plate.setNameShown(
                 nameShown,
                 animated: true,
@@ -231,9 +238,19 @@ final class StickyMarkOverlay {
     /// Entrance pop animation (#421, #436; ui-designer 2026-07-22).
     private func popEntrance() {
         guard let layer = plate.layer else { return }
-        let pop = CAKeyframeAnimation(keyPath: "transform.scale")
-        pop.values = [1.0, 1.045, 1.0]
-        pop.keyTimes = [0, 0.45, 1.0]
+        let pop = CAKeyframeAnimation(keyPath: "transform")
+        // About the plate's centre: a view's layer keeps AppKit's
+        // corner anchor, which grew the pop up and to the right.
+        pop.values = Self.popKeyframes.map {
+            NSValue(
+                caTransform3D: PopRoom.transform(
+                    scale: $0.scale,
+                    size: plate.bounds.size,
+                    anchor: layer.anchorPoint
+                )
+            )
+        }
+        pop.keyTimes = Self.popKeyframes.map { NSNumber(value: $0.time) }
         pop.duration = 0.13
         pop.timingFunctions = [
             CAMediaTimingFunction(name: .easeOut),
@@ -242,10 +259,34 @@ final class StickyMarkOverlay {
         layer.add(pop, forKey: "entrancePop")
     }
 
-    private var reduceMotion: Bool {
-        NSWorkspace.shared
-            .accessibilityDisplayShouldReduceMotion
+    private var reduceMotion: Bool { readReduceMotion() }
+
+    /// Reduce Motion, read live; a test pins it.
+    var readReduceMotion: () -> Bool = {
+        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
     }
+
+    /// Rests the plate at `mark` (screen coordinates) in a room
+    /// fitted to it.
+    private func place(_ mark: CGRect, in panel: NSPanel) {
+        let room = Self.panelFrame(for: mark)
+        panel.setFrame(room, display: false)
+        plate.frame = PopRoom.plateFrame(plate: mark, in: room)
+    }
+
+    #if DEBUG
+        /// Test-only: the pill's resize, as `flash` reaches it.
+        func setPillForTest(width: CGFloat, nameShown: Bool) {
+            guard let frame = lastFrame else { return }
+            setPill(width: width, nameShown: nameShown, on: frame)
+        }
+
+        /// Test-only: the panel's frame.
+        var panelFrameForTest: CGRect? { panel?.frame }
+
+        /// Test-only: the panel's content view.
+        var panelContentForTest: NSView? { panel?.contentView }
+    #endif
 
     private func markRect(
         for frame: CGRect,
@@ -294,7 +335,11 @@ final class StickyMarkOverlay {
             .ignoresCycle,
         ]
         applyGlyphs()
-        panel.contentView = plate
+        // The plate rides a clear room, never the content view
+        // itself: a plate the panel's size clips its own pop.
+        let room = NSView()
+        room.addSubview(plate)
+        panel.contentView = room
         return panel
     }
 }
