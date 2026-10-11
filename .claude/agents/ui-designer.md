@@ -23,9 +23,8 @@ concrete alternative; the caller writes the SwiftUI.
   section covering the surface you are touching before proposing
   anything that would overturn one. The colour-vision clauses under
   *Overrides & appearance* are build gates, not preferences; the
-  maths behind them lives in Core's
-  `Sources/KiwiDeskCore/Appearance/ColorVision.swift`, which is
-  where the guards that enforce them read their numbers from.
+  maths behind them is Core's `ColorVision`, which is where the
+  guards that enforce them read their numbers from.
 
 ## How to judge
 

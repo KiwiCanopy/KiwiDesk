@@ -4,20 +4,11 @@ import Foundation
 /// and the separation measures the colour-vision guards assert on
 /// (#511). The numbers are the argument the palette rulings rest
 /// on (`docs/design-decisions.md`), so this is the one place that
-/// computes them — a guard or a Settings warning measuring a pair
-/// reads it here, never a copy, since a drifted copy moves the
-/// number a guard asserts on without failing anything. Pure and
-/// actor-free.
-///
-/// The suites that share it: `SpaceBarAccentSeparationTests` (the
-/// Space Bar's active/focused pair), `DragPairSeparationTests`
-/// (the drag overlay's origin/target pair),
-/// `PaletteHighlightRoleTests` (an accent against its own
-/// composited plate), `ModeGatedFrameSeparationTests` (the
-/// Settings mode-gated frame against its two border neighbours),
-/// `AccentStateSeparationTests` (the accent seal's disabled fill
-/// against the two live ones) and `BorderRingSeparationTests`
-/// (the focused ring against the composited unfocused one).
+/// computes them: a guard, a derived ink or a Settings warning
+/// measuring a colour reads it here, never a copy, since a drifted
+/// copy moves the number a guard asserts on without failing
+/// anything. Pure and actor-free; the steps inside the measures
+/// and the guards' hue sweep stay internal.
 public enum ColorVision {
     /// The separation floor every CVD guard measures
     /// against — a suite asserting on this quantity reads it
@@ -58,13 +49,13 @@ public enum ColorVision {
     public static let separationFloor: Double = 60
 
     /// sRGB → linear, the same transfer function WCAG uses.
-    public static func linear(_ value: Double) -> Double {
+    static func linear(_ value: Double) -> Double {
         value <= 0.03928
             ? value / 12.92
             : pow((value + 0.055) / 1.055, 2.4)
     }
 
-    public static func components(_ hex: String) -> (
+    static func components(_ hex: String) -> (
         r: Double, g: Double, b: Double
     )? {
         guard let rgb = DragVisual.parseHex(hex) else { return nil }
@@ -97,7 +88,7 @@ public enum ColorVision {
     /// it is the axis a green primary and a warm focused accent
     /// collapse onto, so it is the one the rules are written
     /// against. Deutan tracks it closely; tritan is unaffected.
-    public static func protanope(_ hex: String) -> (
+    static func protanope(_ hex: String) -> (
         r: Double, g: Double, b: Double
     )? {
         guard let c = components(hex) else { return nil }
@@ -136,7 +127,7 @@ public enum ColorVision {
     }
 
     /// HSL → hex, for sweeping a hue family in a guard.
-    public static func hex(
+    static func hex(
         hue: Double,
         saturation: Double,
         lightness: Double

@@ -44,8 +44,8 @@ bite large test PRs:
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Ten ratified exceptions, none with setup/teardown coupling
-  or assertions of their own — save the one non-vacuity check
+  The ratified exceptions are the bullets below, none with
+  setup/teardown coupling or assertions of their own — save the one non-vacuity check
   the build-script reader keeps, named below — and all but the
   fake WindowServer *stateless primitives*:
   - *structural-parity primitives* (reflection helpers backing
@@ -236,12 +236,11 @@ bite large test PRs:
     between tests — so it clears the bar the fake WindowServer
     entry above says the statelessness rule was protecting.
 
-  (Colour-vision maths is not a test helper: it is Core's
-  `ColorVision` (#1857), because the Settings page warns on the
-  same pair separations the CVD guards assert on. A guard
-  measuring a colour pair reads it there and never re-derives
-  the transform or restates `separationFloor`; which suites
-  share it is that type's own doc comment.)
+  (Colour-vision maths is not a test helper: it lives in Core
+  as `ColorVision`, so the app and the guards measure from one
+  copy (#1857). A guard measuring a colour pair reads it there
+  and never re-derives the transform or restates
+  `separationFloor`.)
 
   (The status-item seam deliberately does NOT add a shared
   factory here: its fake is a per-file `StatusItemHandle`

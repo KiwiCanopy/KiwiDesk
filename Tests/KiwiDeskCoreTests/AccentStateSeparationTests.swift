@@ -12,10 +12,9 @@ import Testing
 /// that is green, which is the one hue protanopia takes. So the
 /// pairs owe the same floor the bars' and the drag overlay's do.
 ///
-/// Lives in this target because `ColorVision` does; both hexes
-/// are PARSED from `SettingsTheme.swift`, so a retune moves the
-/// measurement with it instead of leaving a stale copy behind (a
-/// number-pin derives, never restates).
+/// Both hexes are PARSED from `SettingsTheme.swift`, so a
+/// retune moves the measurement with it instead of leaving a
+/// stale copy behind (a number-pin derives, never restates).
 @Suite("Accent state separation")
 struct AccentStateSeparationTests {
     private func themeSource() throws -> String {
