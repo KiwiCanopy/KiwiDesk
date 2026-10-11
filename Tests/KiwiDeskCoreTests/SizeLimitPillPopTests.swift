@@ -36,7 +36,7 @@ struct SizeLimitPillPopTests {
             let pill = CGRect(x: 300, y: 40, width: width, height: 26)
             let panel = PopRoom.panelFrame(
                 for: pill,
-                peak: SizeLimitOverlay.popPeak
+                scales: SizeLimitOverlay.popKeyframes.map(\.scale)
             )
             // The plate, in the panel's own coordinates, where
             // `flash` puts it.
@@ -100,7 +100,7 @@ struct SizeLimitPillPopTests {
         let pill = CGRect(x: 300, y: 40, width: 200, height: 26)
         let panel = PopRoom.panelFrame(
             for: pill,
-            peak: SizeLimitOverlay.popPeak
+            scales: SizeLimitOverlay.popKeyframes.map(\.scale)
         )
         let plate = PopRoom.plateFrame(plate: pill, in: panel)
         #expect(plate.offsetBy(dx: panel.minX, dy: panel.minY) == pill)

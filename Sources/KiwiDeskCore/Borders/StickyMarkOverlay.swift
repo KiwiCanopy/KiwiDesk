@@ -15,16 +15,6 @@ final class StickyMarkOverlay {
     private static let expandDuration: TimeInterval = 0.22
     private static let holdDuration: TimeInterval = 1.6
     private static let collapseDuration: TimeInterval = 0.16
-    /// The pill's entrance pop. Its PEAK sizes the panel's room
-    /// around the plate (`PopRoom`), so the pop is never clipped
-    /// at the panel's edge — mid-expand included, since the room
-    /// and the plate animate together (#2033's class).
-    nonisolated static let popKeyframes: [(scale: CGFloat, time: Double)] =
-        [(1.0, 0), (1.045, 0.45), (1.0, 1.0)]
-    nonisolated static var popPeak: CGFloat {
-        popKeyframes.map(\.scale).max() ?? 1
-    }
-
     private var panel: NSPanel?
 
     /// AppKit keeps a visible panel alive after its owner is gone,
@@ -66,10 +56,7 @@ final class StickyMarkOverlay {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         fitGlyphs(to: frame)
-        let mark = markRect(for: frame, width: currentWidth)
-        let room = Self.panelFrame(for: mark)
-        panel.setFrame(room, display: false)
-        plate.frame = PopRoom.plateFrame(plate: mark, in: room)
+        place(markRect(for: frame, width: currentWidth), in: panel)
         if !panel.isVisible {
             panel.orderFrontRegardless()
             // In front of every app, not against its window yet.
@@ -212,16 +199,24 @@ final class StickyMarkOverlay {
         currentWidth = width
         pillShown = nameShown
         let rect = markRect(for: frame, width: width)
-        let room = Self.panelFrame(for: rect)
-        let plateRect = PopRoom.plateFrame(plate: rect, in: room)
         guard let panel else { return }
 
         if reduceMotion {
-            panel.setFrame(room, display: true)
-            plate.frame = plateRect
+            place(rect, in: panel)
             plate.setNameShown(nameShown, animated: false, duration: 0)
             return
         }
+        // The room spans where the plate rests now AND where it
+        // lands, set at once: only the plate animates inside it,
+        // so the pop has room at every point of the resize.
+        let shown = plate.frame.offsetBy(
+            dx: panel.frame.minX,
+            dy: panel.frame.minY
+        )
+        let room = Self.panelFrame(for: shown.union(rect))
+        panel.setFrame(room, display: true)
+        plate.frame = PopRoom.plateFrame(plate: shown, in: room)
+        let plateRect = PopRoom.plateFrame(plate: rect, in: room)
         NSAnimationContext.runAnimationGroup { ctx in
             let duration =
                 nameShown
@@ -230,7 +225,6 @@ final class StickyMarkOverlay {
             ctx.timingFunction = CAMediaTimingFunction(
                 name: nameShown ? .easeOut : .easeIn
             )
-            panel.animator().setFrame(room, display: true)
             plate.animator().frame = plateRect
             plate.setNameShown(
                 nameShown,
@@ -270,11 +264,24 @@ final class StickyMarkOverlay {
             .accessibilityDisplayShouldReduceMotion
     }
 
-    /// The panel around a mark resting at `mark`, room for the
-    /// pop's peak on every side.
-    nonisolated static func panelFrame(for mark: CGRect) -> CGRect {
-        PopRoom.panelFrame(for: mark, peak: popPeak)
+    /// Rests the plate at `mark` (screen coordinates) in a room
+    /// fitted to it.
+    private func place(_ mark: CGRect, in panel: NSPanel) {
+        let room = Self.panelFrame(for: mark)
+        panel.setFrame(room, display: false)
+        plate.frame = PopRoom.plateFrame(plate: mark, in: room)
     }
+
+    #if DEBUG
+        /// Test-only: the pill's resize, as `flash` reaches it.
+        func setPillForTest(width: CGFloat, nameShown: Bool) {
+            guard let frame = lastFrame else { return }
+            setPill(width: width, nameShown: nameShown, on: frame)
+        }
+
+        /// Test-only: the panel's frame.
+        var panelFrameForTest: CGRect? { panel?.frame }
+    #endif
 
     private func markRect(
         for frame: CGRect,

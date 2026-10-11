@@ -56,11 +56,6 @@ final class SizeLimitOverlay {
         return width > 40 ? width : nil
     }
 
-    /// The pop's peak, which sizes the panel's room (#2033).
-    nonisolated static var popPeak: CGFloat {
-        popKeyframes.map(\.scale).max() ?? 1
-    }
-
     /// Flashes size-limit pill on window frame in AX coordinates
     /// (#933). Returns whether one actually appeared — the
     /// caller's refusal sound follows this, never the fact that
@@ -105,7 +100,7 @@ final class SizeLimitOverlay {
         )
         let panelRect = PopRoom.panelFrame(
             for: screenRect,
-            peak: Self.popPeak
+            scales: Self.popKeyframes.map(\.scale)
         )
 
         // The plate first: the shadow follows what the panel draws.

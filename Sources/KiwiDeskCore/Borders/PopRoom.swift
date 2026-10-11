@@ -7,10 +7,14 @@ import QuartzCore
 /// sticky mark's pill both take it.
 enum PopRoom {
     /// The panel frame hosting a plate resting at `plate` that
-    /// pops to `peak`: grown on each side by what the peak adds,
-    /// plus a point, so the scaled plate never meets the edge.
-    static func panelFrame(for plate: CGRect, peak: CGFloat) -> CGRect {
-        let grow = max(peak, 1) - 1
+    /// pops through `scales`: grown on each side by what the
+    /// peak adds, plus a point, so the scaled plate never meets
+    /// the edge. The peak is read off the scales the cue plays.
+    static func panelFrame(
+        for plate: CGRect,
+        scales: [CGFloat]
+    ) -> CGRect {
+        let grow = max(scales.max() ?? 1, 1) - 1
         return plate.insetBy(
             dx: -ceil(plate.width * grow / 2) - 1,
             dy: -ceil(plate.height * grow / 2) - 1
