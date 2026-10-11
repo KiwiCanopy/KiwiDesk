@@ -5882,10 +5882,10 @@ animations.set_space_change("slide")
 ([animations.set_space_change](#animationsset_space_change)):
 how long the plates take to slide to the new Space, their fades
 scaling with it. It has no effect unless the style is `"slide"`,
-nor while Reduce Motion is on.
-::: Window motion keeps its own pace
+nor while Reduce Motion is on. Window motion keeps its own pace
 ([animations.set_duration](#animationsset_duration)). Read at
 the next switch.
+:::
 
 **Example:**
 

@@ -88,7 +88,7 @@ struct SpaceChangeOnMigrationTests {
     )
     func offTurnsOn(_ master: [Bool], _ expected: Bool) throws {
         let data = try Self.profile(Self.settings(master: master))
-        let step = try ConfigMigration.migratingSpaceChangeOn(data)
+        let step = ConfigMigration.migratingSpaceChangeOn(data)
         #expect(try Self.slide(of: step ?? data) == expected)
         // Through `migrated`, #2143's crossing then names the style.
         let out = try #require(ConfigMigration.migrated(data))
