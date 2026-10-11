@@ -14,9 +14,6 @@ import Testing
 @Suite("Sticky mark pop")
 @MainActor
 struct StickyMarkPopTests {
-    /// The pop plays only with Reduce Motion off.
-    nonisolated private static let motionOn = !NSWorkspace.shared
-        .accessibilityDisplayShouldReduceMotion
     private static let height = StickyMarkOverlay.size
 
     /// Where `point` (layer-local) lands under `t`, applied about
@@ -85,20 +82,39 @@ struct StickyMarkPopTests {
         }
     }
 
+    /// An overlay showing its collapsed mark, Reduce Motion off.
+    private func overlay() -> StickyMarkOverlay {
+        let overlay = StickyMarkOverlay(window: 1)
+        overlay.readReduceMotion = { false }
+        overlay.update(
+            frame: CGRect(x: 200, y: 200, width: 900, height: 600)
+        )
+        return overlay
+    }
+
+    /// The plate's rect, re-expressed in the panel the overlay set
+    /// after `before` was read.
+    private func moved(
+        _ plate: CGRect,
+        from before: CGRect,
+        to after: CGRect
+    ) -> CGRect {
+        plate.offsetBy(
+            dx: before.minX - after.minX,
+            dy: before.minY - after.minY
+        )
+    }
+
     /// The pop the expand adds, read off the plate's layer: its
     /// transforms against the plate as it resizes inside the panel
-    /// the overlay set, from the collapsed mark to the pill.
-    @Test(
-        "the expand's pop stays inside the panel",
-        .enabled(if: motionOn)
-    )
+    /// the overlay set, from where it rested to the pill.
+    @Test("the expand's pop stays inside the panel")
     func expandPopStaysInside() throws {
-        let frame = CGRect(x: 200, y: 200, width: 900, height: 600)
         for width in [120.0, 240.0, StickyMarkPlate.maxWidth] as [CGFloat] {
-            let overlay = StickyMarkOverlay(window: 1)
-            overlay.update(frame: frame)
+            let overlay = overlay()
             defer { overlay.hide() }
-            let collapsed = overlay.plate.frame.size
+            let before = try #require(overlay.panelFrameForTest)
+            let rest = overlay.plate.frame
             overlay.setPillForTest(width: width, nameShown: true)
             let panel = try #require(overlay.panelFrameForTest)
             let layer = try #require(overlay.plate.layer)
@@ -106,22 +122,32 @@ struct StickyMarkPopTests {
                 layer.animation(forKey: "entrancePop")
                     as? CAKeyframeAnimation
             )
-            let to = overlay.plate.frame
-            // The pill grows left from the mark's right edge.
-            let from = CGRect(
-                x: to.maxX - collapsed.width,
-                y: to.minY,
-                width: collapsed.width,
-                height: collapsed.height
-            )
             expectInside(
                 pop,
                 anchor: layer.anchorPoint,
-                from: from,
-                to: to,
+                from: moved(rest, from: before, to: panel),
+                to: overlay.plate.frame,
                 panel: panel.size
             )
         }
+    }
+
+    /// The collapse shrinks the pill back to the mark: the panel
+    /// it sets holds the plate where it starts and where it lands,
+    /// or the shrinking plate is clipped at the panel's edge.
+    @Test("the collapse keeps the shrinking plate inside the panel")
+    func collapseStaysInside() throws {
+        let overlay = overlay()
+        defer { overlay.hide() }
+        let mark = overlay.plate.frame.width
+        overlay.setPillForTest(width: 240, nameShown: true)
+        let before = try #require(overlay.panelFrameForTest)
+        let pill = overlay.plate.frame
+        overlay.setPillForTest(width: mark, nameShown: false)
+        let panel = try #require(overlay.panelFrameForTest)
+        let bounds = CGRect(origin: .zero, size: panel.size)
+        #expect(bounds.contains(moved(pill, from: before, to: panel)))
+        #expect(bounds.contains(overlay.plate.frame))
     }
 
     /// Room is what the peak needs, never a scale clamped to 1.

@@ -259,9 +259,11 @@ final class StickyMarkOverlay {
         layer.add(pop, forKey: "entrancePop")
     }
 
-    private var reduceMotion: Bool {
-        NSWorkspace.shared
-            .accessibilityDisplayShouldReduceMotion
+    private var reduceMotion: Bool { readReduceMotion() }
+
+    /// Reduce Motion, read live; a test pins it.
+    var readReduceMotion: () -> Bool = {
+        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
     }
 
     /// Rests the plate at `mark` (screen coordinates) in a room

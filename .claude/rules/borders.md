@@ -413,7 +413,11 @@ and animates only the plate inside it: the pop's matrices are
 built for one size, and a room animating beside the plate gives
 its margin at neither end. `SizeLimitPillPopTests` and
 `StickyMarkPopTests` (which reads the transforms the expand
-actually added) hold the two cues; a third owes the same clause.
+actually added) hold the two cues; a third owes the same clause,
+and review is what notices one — no scan finds a new pop. The
+principle is the moving ring's room (#1937, above) one level
+down: a surface that changes size while it moves takes its room
+once and moves inside it.
 
 ## The sheen is one ramp, painted by the surface that owns the stroke
 
