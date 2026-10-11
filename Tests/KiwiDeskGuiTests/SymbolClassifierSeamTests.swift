@@ -48,7 +48,7 @@ struct SymbolClassifierSeamTests {
             "builds the floating glyph from a fixed name",
         "Tests/KiwiDeskCoreTests/FloatingMarkOverlayTests.swift":
             "builds the floating glyph from a fixed name",
-        "Sources/KiwiDeskCore/Borders/SizeLimitOverlay.swift":
+        "Sources/KiwiDeskCore/Borders/SizeLimitPillPlate.swift":
             "builds the refusal pill's image from `pillSymbol`",
         "Tests/KiwiDeskCoreTests/ResizeRefusalSymbolTests.swift":
             "asserts every pill symbol RESOLVES; classifies nothing",
