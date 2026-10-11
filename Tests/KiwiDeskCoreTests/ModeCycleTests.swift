@@ -88,6 +88,8 @@ struct ModeCycleTests {
         }
         #expect(core.modeCycle == [.stack, .grid])
         #expect(!core.execute("cycle_mode", args: [.string("up")]).isSuccess)
+        let number = core.execute("cycle_mode", args: [.number(1)])
+        #expect(!number.isSuccess, "a non-string direction is refused")
     }
 
     @Test("an unreadable mode_cycle fails the file, as a strict decoder")
