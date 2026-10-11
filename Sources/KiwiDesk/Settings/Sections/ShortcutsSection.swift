@@ -143,6 +143,11 @@ struct ShortcutsSection: View {
             bindings: bindingsBinding,
             expander: expander
         )
+        LayoutGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
         SizeFloatGroup(
             model: model,
             bindings: bindingsBinding,

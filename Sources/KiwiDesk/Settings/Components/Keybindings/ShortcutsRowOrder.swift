@@ -93,6 +93,11 @@ enum ShortcutsRowOrder {
         }
     }
 
+    /// Layout group order (#453): next, then previous.
+    static let layoutAtRest: [SettingKey] = [
+        .shortcuts(.layoutCycle)
+    ]
+
     /// Size & float order: resize pairs followed by state toggles.
     static let sizeAndFloatAtRest: [SettingKey] = [
         .shortcuts(.growWidth),

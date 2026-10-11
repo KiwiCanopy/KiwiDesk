@@ -24,6 +24,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case moveToDesktop = "keybinding.move_to_desktop (x N desktops)"
     case moveToDesktopFollow =
         "keybinding.move_to_desktop_follow (x N)"
+    /// Next / previous layout of the focused Space (#453).
+    case layoutCycle = "keybinding.{next,previous}_layout"
     case growWidth = "keybinding.grow_width"
     case shrinkWidth = "keybinding.shrink_width"
     case growHeight = "keybinding.grow_height"
@@ -90,6 +92,8 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.desktopBindingsExist)
             )
+        case .layoutCycle:
+            return .row(.shortcuts, .layoutKeys, .atRest)
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .toggleFloating, .toggleSticky, .toggleDisplaySticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
@@ -134,7 +138,8 @@ extension ShortcutsKey {
             .spaceStep, .spaceHistoryStep, .goToSpace, .swapDir,
             .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
-            .moveToDesktop, .moveToDesktopFollow, .switchToLayer:
+            .moveToDesktop, .moveToDesktopFollow, .switchToLayer,
+            .layoutCycle:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")

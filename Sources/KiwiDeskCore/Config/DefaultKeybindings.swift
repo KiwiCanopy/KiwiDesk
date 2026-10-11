@@ -79,8 +79,20 @@ public enum DefaultKeybindings {
                 label: "Toggle display sticky"
             )
         )
+        rows.append(nextLayoutRow())
         rows.append(contentsOf: appChromeRows())
         return rows
+    }
+
+    /// Next layout on `⌃⌥C` (#453); Previous layout ships
+    /// unbound, `⇧` never qualifying a letter (#1094).
+    public static func nextLayoutRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+c",
+            lua: "KiwiDesk.cycle_mode()",
+            kind: .navigation,
+            label: "Next layout"
+        )
     }
 
     /// The app-chrome rows on the `⌃⌥` base — ⌃⌥K opens the
