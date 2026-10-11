@@ -46,6 +46,8 @@ public enum APIReference {
             ("focus_or_spawn", "focus_or_spawn"),
             ("spawn_new", "spawn_new"),
             ("set_mode", "set_mode"),
+            ("cycle_mode", "cycle_mode"),
+            ("set_mode_cycle", "set_mode_cycle"),
             ("set_gap_global", "set_gap_global"),
             ("set_gap_override", "set_gap_override"),
             ("set_min_window_size", "set_min_window_size"),
