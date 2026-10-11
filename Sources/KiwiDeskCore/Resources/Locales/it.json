@@ -630,6 +630,7 @@
   "keybinding.next_layout": "Layout successivo",
   "keybinding.open_settings": "Apri Impostazioni",
   "keybinding.previous_layout": "Layout precedente",
+  "keybinding.show_layout_picker": "Mostra il selettore di layout",
   "keybinding.show_shortcuts": "Mostra il pannello delle scorciatoie",
   "keybinding.shrink_height": "Riduci l'altezza",
   "keybinding.shrink_width": "Riduci la larghezza",

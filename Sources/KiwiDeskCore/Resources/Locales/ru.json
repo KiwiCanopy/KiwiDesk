@@ -630,6 +630,7 @@
   "keybinding.next_layout": "Следующая раскладка",
   "keybinding.open_settings": "Открыть настройки",
   "keybinding.previous_layout": "Предыдущая раскладка",
+  "keybinding.show_layout_picker": "Показать выбор раскладки",
   "keybinding.show_shortcuts": "Показать панель сочетаний клавиш",
   "keybinding.shrink_height": "Уменьшить высоту",
   "keybinding.shrink_width": "Уменьшить ширину",

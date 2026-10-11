@@ -630,6 +630,7 @@
   "keybinding.next_layout": "다음 레이아웃",
   "keybinding.open_settings": "설정 열기",
   "keybinding.previous_layout": "이전 레이아웃",
+  "keybinding.show_layout_picker": "레이아웃 선택 보기",
   "keybinding.show_shortcuts": "단축키 패널 보기",
   "keybinding.shrink_height": "높이 줄이기",
   "keybinding.shrink_width": "너비 줄이기",
