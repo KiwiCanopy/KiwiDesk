@@ -9833,6 +9833,26 @@ rule rather than a label: a future glide-able verb goes to `⌥⌘`,
 anything you tap stays on `⌃⌥`.
 
 :::unreleased
+**Next layout is `⌃⌥C` (#453), the first prediction the rule
+paid.** Stepping a Space to its next layout is a verb you tap, so
+it takes a mnemonic letter on `⌃⌥` — C for cycle — beside the
+toggles. It goes in the base seed, not `appChromeRows`: it acts on
+a Space, and a GUI-created layer re-seeds only chrome. Previous
+layout takes `⌃⌥⇧C` (owner, 2026-10-11): #1094 keeps `⇧` off a
+lettered toggle because there it read as "act on the window",
+but a letter whose unshifted row STEPS has a twin to reverse, the
+second sense #1655 gave `⇧` on `Tab`. A toggle still never takes
+it. The collision measure (2026-10-11, recorded on #453):
+`SystemShortcuts.map`,
+`com.apple.symbolichotkeys`, sixteen apps' menus read through AX
+with the fn bit decoded, and the Xcode, VS Code and JetBrains
+default tables found nothing on `⌃⌥C` or `⌃⌥⇧C` (JetBrains'
+Ctrl+Alt+Shift+C becomes ⌥⇧⌘C on a Mac). VoiceOver's VO-C and
+Emacs's C-M-c under Option-as-Meta are the class the whole `⌃⌥`
+tier already accepts.
+:::
+
+:::unreleased
 **One pressed exception rides `⌥⌘`: the Space history on `Tab`
 (#1655, owner ruling 2026-10-09).** Back and Forward through the
 Spaces you visited are pressed, so the rule above sends them to
@@ -10051,6 +10071,13 @@ claim nothing enforces (#614), since `goToDesktop` and
 `moveToDesktop` ship as offerable unbound rows a user may bind to
 any letter they like. So `⇧` means exactly one thing everywhere,
 and so does `⌘`.
+
+:::unreleased
+Amended since: off a positional key `⇧` reverses its unshifted
+twin — `Tab` (#1655), and a letter whose unshifted row steps,
+the layout cycle's `⌃⌥⇧C` (#453) — and `⌃⌥⇧⌘` + digit lifts the
+ladder to Go to Desktop. A toggle still never carries it.
+:::
 
 The ergonomics agree. Resize is the one verb a user HOLDS (#1056),
 and tier 3 is the heaviest chord in the scheme — three modifiers

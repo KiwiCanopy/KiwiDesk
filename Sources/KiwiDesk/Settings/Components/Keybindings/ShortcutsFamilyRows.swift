@@ -69,6 +69,8 @@ struct ShortcutsFamilyRows {
                 desktops.desktops,
                 absent: desktops.absent
             )
+        case .layoutCycle:
+            return KeybindingCatalog.layoutCycleRows
         case .growWidth:
             return [resizeRow(.growWidth)]
         case .shrinkWidth:

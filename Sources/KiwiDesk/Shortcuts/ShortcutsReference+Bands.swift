@@ -57,6 +57,10 @@ extension ShortcutsReferenceBuilder {
                 rows: rows(move)
             ),
             ShortcutSubgroup(
+                title: L("shortcuts.section.layout", "Layout"),
+                rows: rows(KeybindingCatalog.layoutCycleRows)
+            ),
+            ShortcutSubgroup(
                 title: L(
                     "shortcuts.section.size_float",
                     "Size & float"

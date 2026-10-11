@@ -187,6 +187,28 @@ struct MoveWindowsGroup: View {
     }
 }
 
+/// Layout shortcut section (#453): the focused Space's next and
+/// previous layout.
+struct LayoutGroup: View {
+    @ObservedObject var model: SettingsModel
+    @Binding var bindings: [KeyBinding]
+    let expander: ShortcutsFamilyRows
+
+    var body: some View {
+        SettingsSection(SettingsCatalog.shortcuts.layoutKeys) {
+            ForEach(ShortcutsRowOrder.layoutAtRest, id: \.id) {
+                key in
+                KeybindingFamilyRows(
+                    model: model,
+                    bindings: $bindings,
+                    key: key,
+                    expander: expander
+                )
+            }
+        }
+    }
+}
+
 /// Size & float shortcut section (#68, #56, #184).
 struct SizeFloatGroup: View {
     @ObservedObject var model: SettingsModel

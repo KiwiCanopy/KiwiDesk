@@ -36,6 +36,10 @@ struct ShortcutsJumpPairingTests {
                 ShortcutsRowOrder.moveWindowsAtRest
             ),
             (
+                "ShortcutsRowOrder.layoutAtRest",
+                ShortcutsRowOrder.layoutAtRest
+            ),
+            (
                 "ShortcutsRowOrder.sizeAndFloatAtRest",
                 ShortcutsRowOrder.sizeAndFloatAtRest
             ),
