@@ -40,7 +40,7 @@ struct BarsPreviewCornerTests {
         #expect(
             HomeCardBarsTile(settings: settings).rowsRunFullWidth
                 == settings.barEdges(space: true, app: true)
-                .first?.isHorizontal
+                .first?.edge.isHorizontal
         )
     }
 

@@ -230,10 +230,7 @@ struct SpacesGateTests {
     @MainActor
     @Test("each inert reason renders its own sentence")
     func eachReasonHasItsOwnSentence() {
-        let all: [SpacesGates.InertReason] = [
-            .noOverrides, .oneMaster, .rigidGrid, .autoSizedGrid,
-            .autoTracks,
-        ]
+        let all = SpacesGates.InertReason.allCases
         let sentences = all.map(SpacesGateHelp.sentence)
         for sentence in sentences {
             #expect(!sentence.isEmpty)

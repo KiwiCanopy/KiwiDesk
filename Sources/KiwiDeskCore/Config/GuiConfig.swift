@@ -63,6 +63,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// The scroll gestures' global base (#1656); a profile
     /// diverges through `Profile.scrollGesture`.
     public var scrollGesture: ScrollGestureBase = .defaults
+    /// The Space history's global base (#1655); a profile diverges
+    /// through `Profile.spaceHistory`.
+    public var spaceHistory = SpaceHistoryKind.defaultKind
     /// The settings no profile carries (#1741); nil until this
     /// file has adopted them. Stamped at the write
     /// (`GuiConfigStore.liveAppWide`) rather than drafted: General
@@ -179,8 +182,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case desktopSpaces = "desktop_spaces"
         case layers
         case scrollGesture = "scroll_gesture"
+        case spaceHistory = "space_history"
         case refusal
         case quit
+        case desktop
         case look
     }
 
@@ -248,6 +253,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 ScrollGestureBase.self,
                 forKey: .scrollGesture
             ) ?? .defaults
+        // Additive since #1655: absence is the default.
+        spaceHistory =
+            try container.decodeIfPresent(
+                SpaceHistoryKind.self,
+                forKey: .spaceHistory
+            ) ?? .defaultKind
         // Additive since #1741, like `desktopSpaces`: absence is
         // "not adopted yet", which the adoption reads.
         appWide = AppWideSettings(
@@ -258,6 +269,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             quit: try container.decodeIfPresent(
                 AppWideSettings.Quit.self,
                 forKey: .quit
+            ),
+            desktop: try container.decodeIfPresent(
+                AppWideSettings.Desktop.self,
+                forKey: .desktop
             )
         )
         // Additive since #1752: absence is "no shared look adopted
@@ -310,9 +325,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         )
         try container.encode(layers, forKey: .layers)
         try container.encode(scrollGesture, forKey: .scrollGesture)
+        try container.encode(spaceHistory, forKey: .spaceHistory)
         if let appWide {
             try container.encode(appWide.refusal, forKey: .refusal)
             try container.encode(appWide.quit, forKey: .quit)
+            try container.encode(appWide.desktop, forKey: .desktop)
         }
         try container.encodeIfPresent(look, forKey: .look)
     }

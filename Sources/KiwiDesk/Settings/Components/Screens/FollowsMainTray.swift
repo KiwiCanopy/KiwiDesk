@@ -1,0 +1,160 @@
+import KiwiDeskCore
+import SwiftUI
+
+/// Drop target tray for Spaces assigned to dynamic main screen
+/// (`ScreenTray`, #36, #678).
+struct FollowsMainTray: View {
+    @ObservedObject var model: SettingsModel
+    let rows: ScreensFamilyRows
+    let size: CGSize
+    @State private var targeted = false
+    @State private var showingOverflow = false
+
+    var body: some View {
+        VStack(
+            alignment: .leading,
+            spacing: ScreenCardChips.stackSpacing
+        ) {
+            header
+            chips
+        }
+        .padding(ScreenCardChips.cardPadding)
+        .frame(
+            maxWidth: .infinity,
+            maxHeight: .infinity,
+            alignment: .topLeading
+        )
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(.tint.opacity(targeted ? 0.2 : 0))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(
+                    .tint.opacity(targeted ? 1 : 0.55),
+                    style: StrokeStyle(
+                        lineWidth: targeted ? 2 : 1,
+                        dash: [4]
+                    )
+                )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .dropDestination(for: DraggableSpace.self) { items, _ in
+            assign(items)
+        } isTargeted: { hovering in
+            targeted = hovering
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "arrow.right")
+                .font(.system(size: 9))
+                .foregroundStyle(.secondary)
+            Text(
+                L(
+                    "monitor_card.follows_main",
+                    "Follows main screen"
+                )
+            )
+            .font(.caption2)
+            .bold()
+            .lineLimit(1)
+            .truncationMode(.tail)
+            Spacer(minLength: 0)
+        }
+        .frame(height: ScreenCardChips.trayHeaderHeight)
+    }
+
+    @ViewBuilder private var chips: some View {
+        let spaces = rows.trayChips
+        if spaces.isEmpty {
+            Text(L("monitor_card.drop_here", "Drop a Space here"))
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+        } else {
+            let split = ScreenCardChips.split(
+                spaces,
+                in: size,
+                header: ScreenCardChips.trayHeaderHeight
+            )
+            HStack(
+                alignment: .top,
+                spacing: ScreenCardChips.spacing
+            ) {
+                WrapChips(split.shown) { space in
+                    chip(space)
+                }
+                if split.overflow > 0 {
+                    overflowChip(spaces, split.overflow)
+                }
+            }
+        }
+    }
+
+    private func chip(_ space: SpaceID) -> some View {
+        SpaceAssignmentChip(
+            model: model,
+            space: space,
+            kind: .main,
+            displays: rows.orderedDisplays
+        )
+    }
+
+    /// Overflow chip showing popover with remaining spaces
+    /// (`ScreenCardChips`).
+    private func overflowChip(
+        _ all: [SpaceID],
+        _ count: Int
+    ) -> some View {
+        Button {
+            showingOverflow = true
+        } label: {
+            Text(L("monitor_card.more_spaces", "+%1$d", count))
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundStyle(SettingsTheme.ink)
+                .lineLimit(1)
+                .frame(width: ScreenCardChips.markerWidth)
+                .padding(.vertical, 3)
+                // The SHARED adaptive chip, not the pinned
+                // chip's fill: this opens a popover, and wearing
+                // a drag source's costume is what diluted the
+                // chips' own rest cue (#1240). `padding: 0`
+                // keeps it inside the reserved marker column.
+                .hoverHighlight(
+                    cornerRadius: ScreenCardChips.chipHeight / 2,
+                    padding: 0
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(
+            L(
+                "monitor_card.more_spaces.axlabel",
+                "%1$d more Spaces on this screen",
+                count
+            )
+        )
+        .popover(isPresented: $showingOverflow) {
+            WrapChips(all) { space in
+                chip(space)
+            }
+            .frame(width: 240)
+            .padding(12)
+        }
+    }
+
+    private func assign(_ items: [DraggableSpace]) -> Bool {
+        var assigned = false
+        for item in items {
+            let space = SpaceID(item.raw)
+            guard model.config.spaces.contains(space) else {
+                continue
+            }
+            model.config.mainSpaces.insert(space)
+            model.config.spacePins[space] = nil
+            assigned = true
+        }
+        return assigned
+    }
+}

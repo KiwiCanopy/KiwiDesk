@@ -15,6 +15,10 @@ public enum APIReference {
             // event namespace, which uses bare `space` for a
             // Space and `desktop` for macOS desktops.
             ("focus_space", "focus_space"),
+            ("focus_space_back", "focus_space_back"),
+            ("focus_space_forward", "focus_space_forward"),
+            ("focus_space_previous", "focus_space_previous"),
+            ("focus_space_next", "focus_space_next"),
             ("move_to_space", "move_to_space"),
             ("move_to_space_and_follow", "move_to_space_and_follow"),
             // The Desktop twins (#884): `desktop` is macOS's,
@@ -60,6 +64,8 @@ public enum APIReference {
                 "set_refusal_sound",
                 "set_refusal_sound"
             ),
+            ("set_desktop_cue", "set_desktop_cue"),
+            ("set_space_history", "set_space_history"),
             (
                 "set_shortcut_panel_liquid_glass",
                 "set_shortcut_panel_liquid_glass"
@@ -149,7 +155,8 @@ public enum APIReference {
             "set_app_bar_group_adjacent_windows",
         ],
         "space_bar": [
-            "set_enabled", "set_edge", "set_glyph_span", "set_glyph_gap",
+            "set_enabled", "set_reserve", "set_edge",
+            "set_glyph_span", "set_glyph_gap",
             "set_group_adjacent_windows", "set_inactive_content",
             "set_item_label",
             "set_active_indicator",
@@ -159,7 +166,8 @@ public enum APIReference {
             "set_focused_item_color", "set_focused_highlight_color",
         ],
         "app_bar": [
-            "set_edge", "set_active_indicator", "set_title_cap",
+            "set_edge", "set_reserve", "set_active_indicator",
+            "set_title_cap",
             "set_group_adjacent_windows",
         ],
         "kiwishelf": [

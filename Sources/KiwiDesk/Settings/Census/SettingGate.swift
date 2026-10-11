@@ -24,10 +24,10 @@ enum SettingRuntimeGate: Hashable {
     /// macOS Reduce transparency greys the Liquid Glass card
     /// (#1418) — the stored value is untouched (#1374).
     case reduceTransparency
-    /// Space pinned to a disconnected monitor.
+    /// Space pinned to a disconnected screen.
     case orphanPinsExist
-    /// Stored profile edited while monitors are disconnected.
-    case monitorsDisconnected
+    /// Stored profile edited while screens are disconnected.
+    case screensDisconnected
     /// Palettes that carry neon Glow pairing (#578).
     case paletteGlowPairing
     /// A look click replaced colours no saved palette brings back,

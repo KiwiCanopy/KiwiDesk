@@ -47,6 +47,19 @@ final class OnboardingModel {
     var bootPhase: BootPhase = .ready
     /// Closing card "open at login" checkbox state (#342).
     var openAtLogin = true
+    /// Why this copy cannot be a login item, nil if it can; set by
+    /// the wiring. A refused copy never starts ticked (#2094).
+    var loginItemUnavailable: LoginItemUnavailable? {
+        didSet { if loginItemUnavailable != nil { openAtLogin = false } }
+    }
+
+    /// The greyed checkbox's caption: Settings' sentence for the
+    /// same refusal (#2094), nil while the copy can register.
+    var loginItemReason: String? {
+        loginItemUnavailable.map {
+            GeneralGateHelp.sentence(for: .cannotRegister($0))
+        }
+    }
 
     /// Ordered steps for the current tour presentation (#828).
     private(set) var plannedSteps: [Step] = []

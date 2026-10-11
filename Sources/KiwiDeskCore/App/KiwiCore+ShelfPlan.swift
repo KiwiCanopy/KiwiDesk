@@ -37,7 +37,7 @@ extension KiwiCore {
         let edges = settings.barEdges(
             space: spaceItems != nil,
             app: app != nil
-        )
+        ).map(\.edge)
         let strips = ShelfGeometry.strips(
             in: visible,
             edges: edges,

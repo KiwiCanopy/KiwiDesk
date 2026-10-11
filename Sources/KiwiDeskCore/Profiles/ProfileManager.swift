@@ -21,7 +21,7 @@ public enum ProfileError: Error, CustomStringConvertible {
             return "a profile named '\(name)' already exists"
         case .dormantDefault(let name):
             return
-                "'\(name)' holds no monitor set, so it cannot be "
+                "'\(name)' holds no screen setup, so it cannot be "
                 + "a screen count's default; load it first"
         }
     }
@@ -335,6 +335,8 @@ public final class ProfileManager {
             to: url(for: name),
             options: .atomic
         )
+        // A claim moves the live profile's sets with no apply.
+        active = active?.refiled(profile)
         if profile.name == currentName {
             savedModesRecord = (profile.name, profile.spaceModes)
         }

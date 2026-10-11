@@ -73,10 +73,11 @@ enum RecorderPreflight {
     /// never mutate the bindings (#181 review H2 — a preview
     /// keystroke deleted a row). `commit` must look its row up at
     /// write time, because Steal mutates the array first.
-    static func rejection(
+    @MainActor static func rejection(
         combo: String,
         excluding isOwn: @escaping (KeyBinding) -> Bool,
         bindings: Binding<[KeyBinding]>,
+        config: GuiConfig,
         commit: @escaping (String) -> Void
     ) -> RecorderRejection? {
         guard
@@ -86,8 +87,10 @@ enum RecorderPreflight {
                     && !isOwn($0)
             })
         else { return nil }
-        let label =
-            holder.label.isEmpty ? holder.lua : holder.label
+        let label = KeybindingCatalog.localizedName(
+            of: holder,
+            config: config
+        )
         return RecorderRejection(
             combo: combo,
             holder: label,

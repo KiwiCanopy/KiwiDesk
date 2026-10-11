@@ -22,6 +22,9 @@ struct OverrideChrome<Content: View>: View {
     /// decides whether to override (#94).
     var help: String? = nil
     var subject: String? = nil
+    /// The page an inheriting row follows instead of the layout's
+    /// defaults — the gaps row's Gaps & Borders (#1775).
+    var inheritsFrom: SettingsDestination? = nil
     @ViewBuilder let content: Content
     @Environment(\.isInsideGreyOut) private var alreadyDimmed
     @Environment(\.overrideLayoutName) private var layoutName
@@ -124,22 +127,34 @@ struct OverrideChrome<Content: View>: View {
                 helpButton
             }
         } control: {
-            Text(
-                L(
-                    "space_override.inherits",
-                    "follows %1$@ defaults · %2$@",
-                    layoutName,
-                    inherited.value
-                )
-            )
-            .lineLimit(1)
-            .truncationMode(.tail)
+            Text(inheritedText(inherited.value))
+                .lineLimit(1)
+                .truncationMode(.tail)
         }
         .environment(
             \.settingsLabelColumn,
             SettingsMetrics.overrideLabelColumn
         )
         .foregroundStyle(.secondary)
+    }
+}
+
+extension OverrideChrome {
+    fileprivate func inheritedText(_ value: String) -> String {
+        if let inheritsFrom {
+            return L(
+                "space_override.inherits_page",
+                "follows %1$@ · %2$@",
+                inheritsFrom.title,
+                value
+            )
+        }
+        return L(
+            "space_override.inherits",
+            "follows %1$@ defaults · %2$@",
+            layoutName,
+            value
+        )
     }
 }
 

@@ -61,11 +61,9 @@ extension SettingsModel {
     }
 
     /// Localized keybinding name lookup (`KeybindingCatalog`, #96).
-    private func localized(_ name: String) -> String {
-        KeybindingCatalog.localizedLabel(
-            for: name,
-            config: config
-        )
+    /// A side of a conflict, named as its row names it (#2116).
+    private func name(_ binding: KeyBinding) -> String {
+        KeybindingCatalog.localizedName(of: binding, config: config)
     }
 
     /// Formats single conflict sentence or bulleted list.
@@ -108,7 +106,7 @@ extension SettingsModel {
                 "keybinding.conflict.unrecognized",
                 "Shortcut for \"%1$@\" isn't a recognized "
                     + "shortcut.",
-                localized(conflict.name)
+                name(conflict.binding)
             )
         case .otherBinding(let who):
             return L(
@@ -116,13 +114,12 @@ extension SettingsModel {
                 "Shortcut for \"%1$@\" is also bound to "
                     + "\"%2$@\" — only one of the two will "
                     + "fire.",
-                localized(conflict.name),
-                localized(who)
+                name(conflict.binding),
+                name(who)
             )
         case .systemShortcut(let shortcut):
-            // A live symbolic hotkey is DEAD, measured (#1126);
-            // a register chord outside that table keeps the
-            // collision wording until its precedence is.
+            // A chord macOS answers first is DEAD, measured
+            // (#1126, #1275).
             switch ConflictSeverity.of(
                 conflict,
                 disabled: disabled
@@ -132,7 +129,7 @@ extension SettingsModel {
                     "keybinding.conflict.system_dead",
                     "Shortcut for \"%1$@\" won't work: macOS "
                         + "answers it first, for \"%2$@\".",
-                    localized(conflict.name),
+                    name(conflict.binding),
                     shortcut.localizedName
                 )
             case .shadowsApps:
@@ -140,17 +137,17 @@ extension SettingsModel {
                     "keybinding.conflict.system_shadows_apps",
                     "Shortcut for \"%1$@\" takes \"%2$@\" away "
                         + "from every app.",
-                    localized(conflict.name),
+                    name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .reserved, .duplicate, .unrecognized:
+            case .dormant, .duplicate, .unrecognized:
                 break
             }
             return L(
                 "keybinding.conflict.system",
                 "Shortcut for \"%1$@\" is conflicting with "
                     + "the macOS shortcut \"%2$@\".",
-                localized(conflict.name),
+                name(conflict.binding),
                 shortcut.localizedName
             )
         }
@@ -166,15 +163,15 @@ extension SettingsModel {
             return L(
                 "keybinding.conflict.bullet.unrecognized",
                 "\"%1$@\" isn't a recognized shortcut",
-                localized(conflict.name)
+                name(conflict.binding)
             )
         case .otherBinding(let who):
             return L(
                 "keybinding.conflict.bullet.with",
                 "\"%1$@\" and \"%2$@\" share a shortcut — "
                     + "only one will fire",
-                localized(conflict.name),
-                localized(who)
+                name(conflict.binding),
+                name(who)
             )
         case .systemShortcut(let shortcut):
             switch ConflictSeverity.of(
@@ -186,23 +183,23 @@ extension SettingsModel {
                     "keybinding.conflict.bullet.system_dead",
                     "\"%1$@\" won't work — macOS answers "
                         + "\"%2$@\" first",
-                    localized(conflict.name),
+                    name(conflict.binding),
                     shortcut.localizedName
                 )
             case .shadowsApps:
                 return L(
                     "keybinding.conflict.bullet.system_shadows_apps",
                     "\"%1$@\" takes \"%2$@\" away from every app",
-                    localized(conflict.name),
+                    name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .reserved, .duplicate, .unrecognized:
+            case .dormant, .duplicate, .unrecognized:
                 break
             }
             return L(
                 "keybinding.conflict.bullet.system",
                 "\"%1$@\" with the macOS shortcut \"%2$@\"",
-                localized(conflict.name),
+                name(conflict.binding),
                 shortcut.localizedName
             )
         }

@@ -85,6 +85,10 @@ struct WMBridgeSeamTests {
             // #1147: the one stamp WRITE. Reads never come here
             // — they ride the plist the snapshot already parses.
             "KiwiDeskCore/Profiles/KiwiCore+DesktopIdentity.swift": 1,
+            // #1889: the self-test's catalog, gathering the
+            // wrapper's own probe rows — reads re-queried, writes
+            // looked up and never dispatched.
+            "KiwiDeskCore/OS/PrivatePathSelfTest.swift": 1,
         ],
     ]
 

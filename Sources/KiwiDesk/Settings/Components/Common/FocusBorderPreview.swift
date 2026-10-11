@@ -28,7 +28,7 @@ struct FocusBorderPreview: View {
                 "border.preview.ax_sticky",
                 "Border preview: a focused window with its ring "
                     + "and the everywhere-sticky mark, beside an "
-                    + "unfocused one with the one-display mark."
+                    + "unfocused one with the one-screen mark."
             )
     }
 

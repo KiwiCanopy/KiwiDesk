@@ -25,6 +25,8 @@ extension SettingsValueReadout {
                 o.groupAdjacentWindows,
                 n.groupAdjacentWindows
             )
+        case .appBarReserve:
+            return appBarOnOffRow(census, o.reserve, n.reserve)
         case .appBarTitleCap:
             return appBarRow(
                 census,

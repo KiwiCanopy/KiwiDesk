@@ -49,6 +49,7 @@ extension ApplicationsGroup {
                             $0.id == id
                         },
                         bindings: $bindings,
+                        config: model.config,
                         commit: {
                             record(
                                 $0,

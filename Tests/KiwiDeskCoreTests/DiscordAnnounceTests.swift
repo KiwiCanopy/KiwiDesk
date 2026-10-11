@@ -2,8 +2,10 @@ import Foundation
 import Testing
 
 /// `scripts/discord-announce` posts a published release's curated
-/// block to Discord (#1627): the summary, Before you update, and
-/// each section with its count — never the generated list — cut
+/// block to Discord (#1627): the summary, Before you update, the
+/// Spotlight rows where there are any and each section with its
+/// count where there are not — never the generated list — closed
+/// by a counted sentence linking the notes and how to update, cut
 /// at a section boundary to fit an embed, and never failing the
 /// release sync when the webhook is absent.
 ///
@@ -13,6 +15,11 @@ import Testing
 struct DiscordAnnounceTests {
     private static let tag = "v9999.3.0"
     private static let url = "https://example.invalid/release"
+    private static let notes = "[release notes](\(url))"
+    private static let update =
+        "KiwiDesk flags the update in its menu bar once it finds it; "
+        + "to get it now, click the circular arrow (Check for updates) "
+        + "in the footer of Settings Home."
 
     private func script() -> URL {
         scriptFixtureRepoRoot()
@@ -90,6 +97,12 @@ struct DiscordAnnounceTests {
         #expect(text.contains("**New · 2**\n- **One shelf** for both bars."))
         #expect(text.contains("**Fixed · 1**"))
         #expect(!text.contains("fix(bars)"))
+        #expect(
+            text.hasSuffix(
+                "This release brings 2 additions and 1 fix — all of "
+                    + "them in the \(Self.notes).\n\(Self.update)"
+            )
+        )
     }
 
     /// A release post must never ping the channel, whatever the
@@ -140,7 +153,7 @@ struct DiscordAnnounceTests {
         // so a reader knows what is behind the link.
         let last = try #require(text.components(separatedBy: "\n\n").last)
         #expect(last.hasPrefix("**Also in this release:** "))
-        #expect(last.hasSuffix("— full notes: \(Self.url)"))
+        #expect(last.hasSuffix("— full notes: \(Self.url)\n\(Self.update)"))
         #expect(last.contains("Fixed 12"))
         for shownSection in ["New", "Improved"]
         where text.contains("**\(shownSection) · 12**") {
@@ -169,7 +182,8 @@ struct DiscordAnnounceTests {
         #expect(result.status == 0, "\(result.stderr)")
         let text = try #require(try embed(result)["description"] as? String)
         #expect(text.count <= 4096)
-        #expect(text.hasSuffix("Full notes: \(Self.url)"))
+        #expect(text.hasSuffix(Self.update))
+        #expect(text.contains(Self.notes))
         // Cut at a sentence end, never mid-sentence.
         let summary = try #require(
             text.components(separatedBy: "\n\n").first
@@ -177,10 +191,10 @@ struct DiscordAnnounceTests {
         #expect(summary.hasSuffix("end."))
     }
 
-    /// The issue's "a link to the release and the download": the
-    /// release's own image, as the site promotes it.
-    @Test("the post links the download when there is one")
-    func downloadLinked() throws {
+    /// The channel knows the site and installed copies update
+    /// themselves, so the post links the notes, never an image.
+    @Test("the post carries no download link")
+    func noDownloadLink() throws {
         let image = "https://example.invalid/KiwiDesk-9999.3.0.dmg"
         let result = try run(
             body: Self.body,
@@ -192,7 +206,8 @@ struct DiscordAnnounceTests {
             ]
         )
         let text = try #require(try embed(result)["description"] as? String)
-        #expect(text.contains("Download: \(image)"))
+        #expect(!text.contains(image))
+        #expect(!text.contains("Download"))
     }
 
     /// The webhook URL is the secret: a malformed one fails the

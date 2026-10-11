@@ -10,6 +10,7 @@ enum ProfilesKey: String, CaseIterable, Hashable {
     case isStarterSetup = "profile.isStarterSetup"
     case presetsApply = "(action) presets.apply"
     case presetsLayouts = "(action) presets.layouts"
+    case desktopCue = "appWide.desktopCue"
 }
 
 extension ProfilesKey {
@@ -28,6 +29,15 @@ extension ProfilesKey {
         case .profilesLoad, .profilesDelete, .profilesRename, .isDefault,
             .profilesAddScreenSetup:
             return .row(.profiles, .savedProfiles, .atRest)
+        case .desktopCue:
+            // App-wide (#1741), written at once; greys where
+            // init.lua owns the config (#2142).
+            return .row(
+                .profiles,
+                .profilesPerMacOSSpace,
+                .showMore,
+                gate: .runtime(.luaOwnsConfig)
+            )
         case .isStarterSetup:
             return .luaOnly
         case .presetsApply:
@@ -63,6 +73,8 @@ extension ProfilesKey {
             return .text("profiles.make_default.one")
         case .profilesAddScreenSetup:
             return .text("profiles.sets.move.help")
+        case .desktopCue:
+            return .text("desktops.cue", help: "desktops.cue.help")
         case .isStarterSetup:
             return .none
         case .presetsApply:

@@ -157,7 +157,7 @@ struct AppBarGroupGlideTests {
         let arrival = overlay.itemViews[1]
         #expect(overlay.glidingIn.contains(WindowID(2)))
         #expect(arrival.superview === overlay.itemRun)
-        #expect(overlay.boxGlasses[1].isHidden)
+        #expect(GlassBox.host(of: overlay.boxGlasses[1])?.isHidden == true)
     }
 
     /// A released member's glass is paired by window, so no render
@@ -204,7 +204,7 @@ struct AppBarGroupGlideTests {
         // (#1842); the folded member's own view left with its
         // glide's timer, not here.
         let hosts = overlay.itemRun.subviews.filter {
-            $0 is AppBarOverlay.BoxHost
+            $0 is GlassBoxHost
         }
         #expect(hosts.count == expanded.count)
         #expect(

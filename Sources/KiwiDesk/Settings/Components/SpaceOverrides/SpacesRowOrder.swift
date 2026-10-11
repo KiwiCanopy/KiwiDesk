@@ -15,6 +15,7 @@ enum SpacesRowOrder {
     /// Per-space override rows grouped by layout mode
     /// (`SpaceOverrideRows`, `SpacesSection+Overrides`).
     static let perSpaceOverrides: [SettingKey] = [
+        .gaps(.perSpaceOverride),
         .layout(.bspOverrideStrategy),
         .layout(.bspOverrideSplitRatioH),
         .layout(.bspOverrideSplitRatioV),

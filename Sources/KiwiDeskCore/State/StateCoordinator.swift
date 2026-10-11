@@ -46,12 +46,20 @@ public struct StateCoordinator: Sendable {
     /// A set, not a clock: its lifetime is `rememberedSpaces`'s.
     var closedDepartures: Set<WindowID> = []
 
-    /// The snapshot frame of a restored window not yet tracked
-    /// (#1362), beside its `.restored` Space above — the arrival
-    /// fold consumes it once, since a later return is not the
-    /// restore's to place. Shares that memory's lifetime and its
+    /// What a restored window not yet tracked is owed at its
+    /// arrival (#1362) — its snapshot frame and a carried hand
+    /// float (#1864) — beside its `.restored` Space above; the
+    /// arrival fold consumes it once, since a later return is not
+    /// the restore's to place. Shares that memory's lifetime and its
     /// #152 exposure; a new `restore` refiles the whole map.
-    var restoredFrames: [WindowID: CGRect] = [:]
+    var restoredFrames: [WindowID: RestoredArrival] = [:]
+
+    /// The cross-session match while it is open (#1385,
+    /// `KiwiCore+CrossSession`): a snapshot from another boot or
+    /// login paired with reopened windows by app and title. Not
+    /// carried by any snapshot; its `pending` records sit in an
+    /// array of structs the store census cannot walk.
+    var crossSession = CrossSessionMatch()
 
     /// The slot a departed window held (#1207): a return re-inserts
     /// by this rank, so a Desktop's row comes back in the order it
@@ -91,6 +99,10 @@ public struct StateCoordinator: Sendable {
     /// emptying one deletes it. Whether a Space IS temporary is
     /// derived (`KiwiCore.isTemporary`); only this is stored.
     var temporaryArmed: Set<SpaceID> = []
+    /// Temporary or held Spaces that ended and whose shortcuts are
+    /// still to go (#1827, `KiwiCore+SpaceShortcutDrop`); a number
+    /// here is taken until they have.
+    var owedShortcutDrops: Set<SpaceID> = []
     /// Restored filings boot could not judge (#1646): the
     /// WindowServer did not answer whether they still exist, so
     /// the snapshot does not carry them again and a closed window
@@ -143,17 +155,6 @@ public struct StateCoordinator: Sendable {
     /// Sticky intent remembered across window close/reopen (#414, #445).
     var rememberedSticky: [WindowIdentity: StickyScope] = [:]
 
-    /// Stable close/reopen identity of a window (#160).
-    struct WindowIdentity: Hashable, Sendable {
-        let app: String
-        let title: String
-
-        init(of window: ManagedWindow) {
-            app = window.appName
-            title = window.title
-        }
-    }
-
     /// The id a first launch seeds before any config declares one.
     public static let placeholderID = SpaceID(1)
 
@@ -188,8 +189,11 @@ public struct StateCoordinator: Sendable {
         if unjudgedFilings.remove(old) != nil {
             unjudgedFilings.insert(new)
         }
-        if let frame = restoredFrames.removeValue(forKey: old) {
-            restoredFrames[new] = frame
+        if let owed = restoredFrames.removeValue(forKey: old) {
+            restoredFrames[new] = owed
+        }
+        if crossSession.placed.remove(old) != nil {
+            crossSession.placed.insert(new)
         }
         if let slot = departedSlots.removeValue(forKey: old) {
             departedSlots[new] = slot

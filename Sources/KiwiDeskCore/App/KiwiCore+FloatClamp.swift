@@ -1,21 +1,23 @@
 import CoreGraphics
 
-/// Keeps floating windows clear of every painted bar. Floats
+/// Keeps floating windows clear of every reserved bar. Floats
 /// are excluded from all layout geometry
 /// (`TilingEngine.layoutInput` filters them out), so nothing
 /// otherwise stops one from sliding under a strip. The original
 /// motivator was a TOP bar covering the title bar and leaving
 /// the float ungrabbable (#242); since QA 2026-07-19 all four
-/// edges nudge — a bar reserves its edge for every window kind,
-/// the way the Dock reserves `visibleFrame`, and a top-only
-/// nudge read as an inconsistency, not a scoped decision.
+/// edges nudge — a reserving bar (#1524) reserves its edge for
+/// every window kind, the way the Dock reserves `visibleFrame`,
+/// and a top-only nudge read as an inconsistency, not a scoped
+/// decision.
 ///
 /// Strips are read from the bars the managers actually painted
-/// (`shownStrips`), never re-derived here: a second derivation
-/// drifts from what is on screen — outer gaps, the empty-bar
-/// suppression, per-display screen pick — and each drift is a
-/// way the float ends up wrongly placed or moved for no visible
-/// bar.
+/// (`shownStrips`) on the edges the layout reserves
+/// (`reservedStrips`, #1524), never re-derived here: a second
+/// derivation drifts from what is on screen — outer gaps, the
+/// empty-bar suppression, per-display screen pick — and each
+/// drift is a way the float ends up wrongly placed or moved for
+/// no visible bar.
 extension KiwiCore {
     /// `frame` nudged clear of every bar painted for the
     /// window's own space — or for `space`, the one a traveler
@@ -35,7 +37,7 @@ extension KiwiCore {
         // Order is immaterial: each clamp is a monotonic push
         // off its edge, so on a shared edge the deeper strip's
         // push subsumes the shallower one's either way.
-        for (strip, edge) in paintedStrips(forSpace: space) {
+        for (strip, edge) in reservedStrips(forSpace: space) {
             result = AppBarGeometry.clampClear(
                 result,
                 of: strip,

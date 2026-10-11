@@ -95,6 +95,12 @@ extension KiwiCore {
     ) -> Bool {
         let files = FileManager.default
         var cleared = true
+        // The Desktop shortcut mark vouches for rows in this file,
+        // so a discarded sidecar offers every Desktop again.
+        if artifacts.contains(.guiConfig) {
+            desktopMemory.writeShortcutMark(0)
+            desktopMemory.shortcutTopUpDeclined = 0
+        }
         for url in artifacts.map(url(of:))
         where files.fileExists(atPath: url.path) {
             do {

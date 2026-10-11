@@ -9,7 +9,7 @@ enum HomeCardContent {
         for destination: SettingsDestination,
         model: SettingsModel
     ) -> String {
-        let settings = model.config.settings
+        let settings = model.homeSettings
         switch destination {
         case .spaces:
             return L(
@@ -82,7 +82,7 @@ enum HomeCardContent {
                 LayoutMode.allCases.count,
                 Int(settings.minWindowSize)
             )
-        case .monitors:
+        case .screens:
             return L(
                 "home.card.monitors.subtitle",
                 "%1$d connected · %2$d Spaces pinned",

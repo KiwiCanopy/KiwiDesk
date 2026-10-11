@@ -10,7 +10,7 @@ extension SpacesSection {
             connectedFingerprints: Set(
                 model.displays.map(\.fingerprint)
             ),
-            name: model.monitorName
+            name: model.screenName
         ) {
         case .none:
             EmptyView()
@@ -30,8 +30,8 @@ extension SpacesSection {
             .help(
                 L(
                     "spaces.pin_offline_badge.help",
-                    "Pinned to a display that isn't attached, so "
-                        + "this Space opens on the main display "
+                    "Pinned to a screen that isn't attached, so "
+                        + "this Space opens on the main screen "
                         + "for now."
                 )
             )

@@ -108,12 +108,52 @@ struct GatherTargetsTests {
         #expect(frame.height == 1055)
     }
 
-    @Test("floating windows are excluded")
-    func skipsFloating() {
+    /// Every Space's floats join the grid (#1864): a stop carries
+    /// their flag and frame back to the next launch.
+    @Test("floating windows of every space are gathered")
+    func gathersFloating() throws {
         var state = makeState()
+        state.workspaces.assign(SpaceID(2), to: DisplayID(1))
+        addWindow(&state, id: 98)
         addWindow(&state, id: 99, isFloating: true)
+        addWindow(&state, id: 100, isFloating: true)
+        state.workspaces.add(WindowID(100), to: SpaceID(2))
+        let groups = WindowGather.collect(
+            state: state,
+            primaryHeight: primaryH
+        )
+        let group = try #require(groups.first)
+        #expect(groups.count == 1)
+        #expect(group.windows == [WindowID(98), WindowID(99), WindowID(100)])
         let frames = targets(state)
-        #expect(frames[WindowID(99)] == nil)
+        for id in group.windows {
+            let frame = try #require(frames[id])
+            #expect(axVisible.contains(frame))
+        }
+    }
+
+    /// A transient overlay — a popup, a raised-layer panel — is no
+    /// window the grid arranges (#1864 ruling).
+    @Test("transient overlays are excluded")
+    func skipsTransientOverlays() {
+        var state = makeState()
+        addWindow(&state, id: 98)
+        state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(97),
+                    pid: 99,
+                    appName: "TestApp",
+                    title: "",
+                    frame: CGRect(x: 0, y: 0, width: 300, height: 200),
+                    isFloating: true,
+                    isTransientOverlay: true
+                )
+            )
+        )
+        let frames = targets(state)
+        #expect(frames[WindowID(98)] != nil)
+        #expect(frames[WindowID(97)] == nil)
     }
 
     @Test("windows with zero-size frame are excluded")

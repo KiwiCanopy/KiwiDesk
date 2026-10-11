@@ -60,11 +60,14 @@ struct RestoreDefaultShortcutsTests {
             spaces: [SpaceID("1"), SpaceID("2"), SpaceID("3")]
         )
         model.config.settings.resizeStep = 80
+        // The Desktop tier is restored for the Mac's Desktops.
+        model.bindableDesktops = [1, 2]
         model.resetShortcutsToDefaults()
-        let expected = DefaultKeybindings.bindings(
-            spaces: model.config.spaces,
-            resizeStep: 80
-        )
+        let expected =
+            DefaultKeybindings.bindings(
+                spaces: model.config.spaces,
+                resizeStep: 80
+            ) + [1, 2].compactMap(DefaultKeybindings.desktopRow)
         let got = model.config.layers[0].bindings
         #expect(got.map(\.combo) == expected.map(\.combo))
         #expect(got.map(\.lua) == expected.map(\.lua))

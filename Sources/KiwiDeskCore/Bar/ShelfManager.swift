@@ -32,19 +32,6 @@ final class ShelfManager {
         _ in
     }
 
-    /// The WindowServer's normal-layer windows, front to back —
-    /// which window a screen SHOWS in front, read by the
-    /// presentation stand-down (#1787). Pinned to `[]` by both
-    /// `makeTestCore` twins.
-    var frontWindowFrames: @MainActor () -> [CGRect] = {
-        let own = getpid()
-        // KiwiDesk's chrome is never a presentation, and a moving
-        // ring's panel spans its screen (#1937).
-        return FloatDetection.frontToBackNormalFrames { pid, number in
-            pid == own && EventLoop.isOwnChrome(number: number)
-        }
-    }
-
     /// Which shelf an overlay draws: a display's, on one edge.
     struct Key: Hashable {
         let display: DisplayID

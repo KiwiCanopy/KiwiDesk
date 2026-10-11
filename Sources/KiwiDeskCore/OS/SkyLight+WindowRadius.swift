@@ -16,28 +16,41 @@ extension SkyLight {
     typealias IteratorGetCornerRadiiFn =
         @convention(c) (CFTypeRef) -> Unmanaged<CFArray>?
 
-    static let windowQueryWindows: WindowQueryWindowsFn? = symbol(
+    static let windowQueryWindowsSymbol = symbol(
         "SLSWindowQueryWindows",
         as: WindowQueryWindowsFn.self
     )
-    static let queryResultCopyWindows: QueryResultCopyWindowsFn? =
-        symbol(
-            "SLSWindowQueryResultCopyWindows",
-            as: QueryResultCopyWindowsFn.self
-        )
-    static let iteratorGetCount: IteratorGetCountFn? = symbol(
+    static var windowQueryWindows: WindowQueryWindowsFn? {
+        windowQueryWindowsSymbol.function
+    }
+    static let queryResultCopyWindowsSymbol = symbol(
+        "SLSWindowQueryResultCopyWindows",
+        as: QueryResultCopyWindowsFn.self
+    )
+    static var queryResultCopyWindows: QueryResultCopyWindowsFn? {
+        queryResultCopyWindowsSymbol.function
+    }
+    static let iteratorGetCountSymbol = symbol(
         "SLSWindowIteratorGetCount",
         as: IteratorGetCountFn.self
     )
-    static let iteratorAdvance: IteratorAdvanceFn? = symbol(
+    static var iteratorGetCount: IteratorGetCountFn? {
+        iteratorGetCountSymbol.function
+    }
+    static let iteratorAdvanceSymbol = symbol(
         "SLSWindowIteratorAdvance",
         as: IteratorAdvanceFn.self
     )
-    static let iteratorGetCornerRadii: IteratorGetCornerRadiiFn? =
-        symbol(
-            "SLSWindowIteratorGetCornerRadii",
-            as: IteratorGetCornerRadiiFn.self
-        )
+    static var iteratorAdvance: IteratorAdvanceFn? {
+        iteratorAdvanceSymbol.function
+    }
+    static let iteratorGetCornerRadiiSymbol = symbol(
+        "SLSWindowIteratorGetCornerRadii",
+        as: IteratorGetCornerRadiiFn.self
+    )
+    static var iteratorGetCornerRadii: IteratorGetCornerRadiiFn? {
+        iteratorGetCornerRadiiSymbol.function
+    }
 
     /// Queries window corner radius via SkyLight (#357), or nil
     /// if unavailable — the caller substitutes

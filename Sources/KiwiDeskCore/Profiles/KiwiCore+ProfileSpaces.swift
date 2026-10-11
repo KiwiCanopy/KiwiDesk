@@ -25,12 +25,18 @@ extension KiwiCore {
         )
     }
 
+    /// Each live Space's members as the record keeps them: the
+    /// row, the up away windows by rank, then every window filed
+    /// there that has not arrived — the snapshot's own
+    /// `pendingFilings(in:)` set, so a restored filing or a parked
+    /// away window comes back to its Space after a switch away and
+    /// back (#2015).
     private var livePartitioning: [Space] {
-        capturedSpaces.map {
-            Space(
-                id: $0.id,
-                windows: withAwayMembers($0.windows, of: $0.id)
-            )
+        capturedSpaces.map { space in
+            let members = withAwayMembers(space.windows, of: space.id)
+            let pending = state.pendingFilings(in: space.id)
+                .filter { !members.contains($0) }
+            return Space(id: space.id, windows: members + pending)
         }
     }
 
@@ -137,6 +143,7 @@ extension KiwiCore {
     /// take it (`SpaceForwardingSeamTests`), since a hand copy of
     /// the step list is how the record went missing from one.
     func forwardWindows(of space: SpaceID, to fallback: SpaceID) {
+        oweShortcutDropIfLiveOnly(space)  // #1827
         for window in state.workspaces[space]?.windows ?? [] {
             state.workspaces.add(window, to: fallback)
             // A later `resolveSpaceDisplays` moving the fallback
@@ -147,6 +154,7 @@ extension KiwiCore {
         }
         state.workspaces.removeSpace(space)
         state.temporaryArmed.remove(space)
+        spaceHistory.trails.forget(space)  // #1655
     }
 
     /// Puts the incoming profile's own windows back in its own

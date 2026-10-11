@@ -73,6 +73,8 @@ enum ProfilesRowInstance: Hashable {
     /// By the stable English `StandardLayout.name` — identity must
     /// not move with the GUI language.
     case preset(String)
+    /// The one switch-cue toggle (#2142): a single static row.
+    case switchCue
 }
 
 /// Expands Profiles census keys into rendered instances (#678,
@@ -328,6 +330,8 @@ struct ProfilesFamilyRows {
             return presets.map {
                 ProfilesRowInstance.preset($0.name)
             }
+        case .desktopCue:
+            return [.switchCue]
         case .isStarterSetup:
             return nil
         }

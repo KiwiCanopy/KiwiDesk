@@ -220,13 +220,60 @@ live while reproducing:
 same log — one before and one after a repro brackets it; it
 exports nothing.
 
+## Checking the Private Fast Paths
+
+:::unreleased
+KiwiDesk reaches some of macOS through private WindowServer
+calls, each with a public fallback or, where macOS offers none, a
+refusal. A new macOS can drop any of them without a crash, so
+`self_test` asks the running app which ones still answer:
+
+```sh
+kiwidesk self_test          # a table on a terminal
+kiwidesk self_test --json   # JSON, as a pipe also gets
+```
+
+Each path gets one verdict:
+
+- `works` — it answered, and a second reading agreed.
+- `answered` — it answered, and nothing else can read the same
+  thing to check it: it is alive, no more.
+- `resolved` — it is there, but the check never calls it: it
+  writes, or calling it would take something KiwiDesk needs.
+- `absent` — macOS no longer has it; the fallback runs.
+- `failed` — it is there but answered nothing, or disagreed.
+- `inconclusive` — it is there, with nothing to check it against
+  (KiwiDesk showing no window, say).
+
+The check only reads: it moves no window, switches no Desktop and
+changes no setting. The JSON carries `macos`, a `counts` object by
+verdict, and a `probes` array of `name`, `kind` (`symbol` or
+`bridge_class`), `home`, `verdict` and `detail`. CLI only — Lua
+cannot call it.
+
+The exit code is 2 when any path `failed`, and 0 otherwise —
+`absent`, `resolved` and `inconclusive` are findings, not
+failures. 1 still means the command itself did not get through.
+:::
+
 ## Commands
+
+:::unreleased
+`focus_space_previous`, `focus_space_next`, `focus_space_back`,
+`focus_space_forward` and `set_space_history` step through the
+Spaces by their order and by the ones you visited
+([`focus_space_back`](lua-reference.md#focus_space_back--focus_space_forward)).
+`set_desktop_cue` turns off the plate a Desktop switch shows
+([`set_desktop_cue`](lua-reference.md#set_desktop_cue)).
+:::
 
 | Category | Command | Arguments |
 |---|---|---|
 | Navigation | `focus` | `left\|right\|up\|down` |
 | | `swap` | `left\|right\|up\|down` |
 | | `focus_space` | space id |
+| | `focus_space_previous` / `focus_space_next` | — (the focused screen's order; stops at the ends) |
+| | `focus_space_back` / `focus_space_forward` | — (the Spaces you visited; see `set_space_history`) |
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
 | | `focus_desktop` | Desktop number (Mission Control's) |
@@ -239,8 +286,8 @@ exports nothing.
 | Window | `make_floating` | — |
 | | `make_tiled` | — |
 | | `toggle_floating` | — |
-| | `make_sticky` | — (sticky on every monitor) |
-| | `make_display_sticky` | — (sticky on this monitor only) |
+| | `make_sticky` | — (sticky on every screen) |
+| | `make_display_sticky` | — (sticky on this screen only) |
 | | `make_unsticky` | — |
 | | `toggle_sticky` | — |
 | | `toggle_display_sticky` | — |
@@ -258,6 +305,8 @@ exports nothing.
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
+| | `set_desktop_cue` | true\|false (default `true`) — the plate naming the Desktop a `focus_desktop` lands on |
+| | `set_space_history` | `per_screen` (default) \| `all_screens` — whose visits Space back and forward walk |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_float_placement` | `center` (default) \| `keep` — where a window lands when it toggles to floating or moves into a floating Space |
 | | `sticky.set_desktop_reach` | true\|false (default `true`) — sticky windows follow you across macOS Desktops (needs the window-management bridge) |
@@ -268,8 +317,8 @@ exports nothing.
 | | `get_state` | — (returns `{active_space, spaces, windows, away_windows, monitor_count, desktop, exec_running}`; `desktop` is the main screen's current Desktop; `away_windows` lists the windows on Desktops no screen shows, each with `id`, `app`, `bundle_id`, `space_id` and `desktop`, and each space object carries its own `away_windows` ids) |
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |
-| Profiles | `save_profile` | name (updates in place when it exists; see [Profile Monitor Sets](lua-reference.md#profile-monitor-sets)) |
-| | `load_profile` | name (see [Profile Monitor Sets](lua-reference.md#profile-monitor-sets)) |
+| Profiles | `save_profile` | name (updates in place when it exists; see [Profile Screen Setups](lua-reference.md#profile-screen-setups)) |
+| | `load_profile` | name (see [Profile Screen Setups](lua-reference.md#profile-screen-setups)) |
 | | `delete_profile` | name |
 | | `set_default_profile` | name (its screen count's fallback) |
 | | `list_profiles` | — |
@@ -612,7 +661,7 @@ window, `vanished` then `closed`, and refreshing on
 
 `window_moved_to_space` fires when a window is explicitly
 moved to another space (`move_to_space`,
-with or without follow, or a drag onto another display — the
+with or without follow, or a drag onto another screen — the
 live crossing emits as the membership moves, so a drag pulled
 back before release emits once per crossing). A
 `move_to_desktop` onto a Desktop that lives on **another
@@ -641,7 +690,7 @@ screen — a swipe, Mission Control, or a `focus_desktop` /
 Desktop number now current on the screen that switched, that
 screen's positional number (`monitor`: 1 is the main screen,
 secondaries follow left to right — the same 1-based positional
-numbering a display argument takes), and the active profile:
+numbering a screen argument takes), and the active profile:
 
 ```json
 {"event": "desktop_change",

@@ -20,9 +20,9 @@ extension StateCoordinator {
         }
         effects.hadRememberedSpace =
             rememberedSpaces[window.id] != nil
-        // Once: the restore's frame is the FIRST arrival's (#1362).
-        effects.restoredFrame =
-            restoredFrames.removeValue(forKey: window.id)
+        // Once: the restore's debt is the FIRST arrival's (#1362).
+        let restored = restoredFrames.removeValue(forKey: window.id)
+        effects.restoredFrame = restored?.frame
         // Back on a shown Desktop: the away ledger's entry ends
         // (#1146).
         awayWindows[window.id] = nil
@@ -32,6 +32,7 @@ extension StateCoordinator {
         // window outside that branch.
         defer { departedSlots[window.id]?.handedTo = nil }
         windows.upsert(window)
+        if restored?.floating == true { floatByHand(window.id) }
         restoreFloatOverride(of: window)
         restoreStickyIntent(of: window)
         // Screen wins on multi-monitor Desktop moves (#1010).

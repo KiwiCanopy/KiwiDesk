@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDesk
 
 /// The mode-gated chrome pairing (#760), in the idiom of
-/// `MonitorsChromeWiringTests` / `PaletteShelfChromeTests`: the
+/// `ScreensChromeWiringTests` / `PaletteShelfChromeTests`: the
 /// container shapes draw BOTH stroke weights
 /// (`SettingsTheme.containerStroke` and
 /// `SettingsTheme.containerStrokeModeGated`) through one
@@ -104,7 +104,7 @@ struct ModeGatedChromeTests {
     /// hand-negated twin beside the stroke is the drift the
     /// one-predicate rule exists to prevent — it is how the
     /// weight would silently disagree with presence on the
-    /// Monitors computed promotion.
+    /// Screens computed promotion.
     @Test("the Home card's flag is the offer predicate")
     func homeCardFlagIsTheOfferPredicate() throws {
         #expect(

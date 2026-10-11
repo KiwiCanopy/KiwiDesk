@@ -31,6 +31,9 @@ struct SnapshotStoreCensusTests {
         case always
         /// Only the in-place snapshot carries it.
         case inPlace
+        /// Every stop's snapshot carries it — a quit's and an
+        /// in-place one — never an autosave (#1864).
+        case stop
         /// Nothing carries it.
         case behind
     }
@@ -50,7 +53,7 @@ struct SnapshotStoreCensusTests {
         "state.workspaces.spaces[].handedBreaks":
             (.behind, "a break's provenance; draws nothing (#1387)"),
         "state.userFloated":
-            (.inPlace, "a float set by hand, which the scan cannot see"),
+            (.stop, "a float set by hand, which the scan cannot see"),
         "state.stickyReachOverrides":
             (.inPlace, "a reach pin set by hand"),
         "state.rememberedSpaces":
@@ -59,6 +62,8 @@ struct SnapshotStoreCensusTests {
             (.inPlace, "the member Monocle shows under a float focus"),
         "tiler.stashedFrames":
             (.always, "a parked float's capture rides its record frame"),
+        "tiler.stashSent":
+            (.behind, "which capture the restore sent (#2129)"),
         "tiler.stashDepartures.shown":
             (.behind, "which Spaces the last park saw shown (#1508)"),
         "tiler.stashDepartures.owed":
@@ -96,6 +101,10 @@ struct SnapshotStoreCensusTests {
             (.always, "held Spaces, re-created at boot (#1646)"),
         "state.temporaryArmed":
             (.always, "temporary Spaces, re-created at boot (#1790)"),
+        "state.owedShortcutDrops":
+            (.behind, "paid at the retile after the drop (#1827)"),
+        "spaceHistory.trails.trails[].visits":
+            (.behind, "the Space history starts fresh, by ruling (#1655)"),
         "state.profilePartitioning.byArrangement[]":
             (
                 .always,
@@ -107,7 +116,11 @@ struct SnapshotStoreCensusTests {
                 "a Space's windows in that record, adopted at boot (#1802)"
             ),
         "state.restoredFrames":
-            (.always, "rides a window record beside its filing (#2008)"),
+            (
+                .always,
+                "rides a window record beside its filing (#2008), "
+                    + "with the hand float it is owed (#1864)"
+            ),
         "state.departedSlots":
             (.behind, "a Desktop departure's slot (#1207)"),
         "state.unjudgedFilings":
@@ -132,6 +145,12 @@ struct SnapshotStoreCensusTests {
             (.behind, "an animation in flight"),
         "tiler.animation.ticks.heldSize":
             (.behind, "an animation in flight (#45)"),
+        "state.crossSession.placed":
+            (
+                .behind,
+                "a cross-session match in flight (#1385); an in-place "
+                    + "restart carries ids instead"
+            ),
         "borders.cornerRadii": (.behind, "render state, redrawn"),
         "borders.overlays": (.behind, "render state, redrawn"),
         "borders.specs": (.behind, "render state, redrawn"),
@@ -176,12 +195,16 @@ struct SnapshotStoreCensusTests {
         core.state.stickyReachOverrides[WindowID(2)] = true
         core.state.floatFrames[WindowID(1)] = .init(pid: 7, frame: .zero)
         core.state.remember(WindowID(9), in: shown)
-        core.state.restoredFrames[WindowID(9)] = .zero
+        core.state.restoredFrames[WindowID(9)] = .init(
+            frame: .zero,
+            floating: true
+        )
         core.state.departedSlots[WindowID(9)] = .init(rank: 0)
         core.state.closedDepartures.insert(WindowID(9))
         core.state.focusRecency[WindowID(1)] = .init(pid: 7, tick: 1)
         core.tiler.monocleShownMembers[shown] = WindowID(1)
         core.ownFronts[WindowID(1)] = core.wallClock()
+        core.state.crossSession.placed.insert(WindowID(1))
         core.state.profilePartitioning.record(
             [Space(id: hidden, windows: [WindowID(4)])],
             as: .profile("Other")
@@ -226,6 +249,7 @@ struct SnapshotStoreCensusTests {
             "state.heldSpaces", "state.temporaryArmed", "ownFronts",
             "tiler.stashDepartures.owed",
             "state.profilePartitioning.byArrangement[][]",
+            "state.crossSession.placed",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")
         }
@@ -256,8 +280,12 @@ struct SnapshotStoreCensusTests {
                         .hasSuffix("[]")
                 {
                     // Past a dictionary value: the element type is
-                    // `Space`, whose fields the Space census holds.
-                    value = Space(id: SpaceID("1"))
+                    // `Space`, whose fields the Space census holds —
+                    // save the Space history's trails (#1655).
+                    value =
+                        path.hasPrefix("spaceHistory.")
+                        ? SpaceHistory.Trail() as Any
+                        : Space(id: SpaceID("1"))
                 }
                 guard
                     let child = Mirror(reflecting: value).children

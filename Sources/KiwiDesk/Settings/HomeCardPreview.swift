@@ -20,7 +20,7 @@ enum HomeCardPreview {
             return AnyView(checklistTicks(model))
         // General's version moved to Home's footer (#1536); its
         // subtitle already says the language and start at login.
-        case .spaces, .bars, .layoutDefaults, .monitors,
+        case .spaces, .bars, .layoutDefaults, .screens,
             .gapsAndBorders, .looks, .advancedColors, .general:
             return nil
         }

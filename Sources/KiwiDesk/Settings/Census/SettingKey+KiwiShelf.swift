@@ -9,6 +9,10 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case edge = "settings.spaceBarStyle.edge (master)"
     case spaceBarEdge = "settings.spaceBarStyle.edge"
     case appBarEdge = "settings.appBarStyle.edge"
+    /// Each bar's per-screen edges (#1948): a row per screen in
+    /// that bar's Per screen drawer.
+    case spaceBarScreenEdge = "settings.spaceBarStyle.edgeOverride[screen]"
+    case appBarScreenEdge = "settings.appBarStyle.edgeOverride[screen]"
     case thickness = "settings.kiwishelf.thickness"
     case alignment = "settings.kiwishelf.alignment"
     case order = "settings.kiwishelf.order"
@@ -60,7 +64,8 @@ extension KiwiShelfKey {
             return .row(.bars, .kiwishelf, .atRest)
         case .thickness, .alignment, .order, .minimum:
             return .row(.bars, .kiwishelf, .atRest, gate: Self.showGate)
-        case .spaceBarEdge, .appBarEdge:
+        case .spaceBarEdge, .appBarEdge, .spaceBarScreenEdge,
+            .appBarScreenEdge:
             return .row(
                 .bars,
                 .kiwishelf,
@@ -156,6 +161,10 @@ extension KiwiShelfKey {
             return .text("kiwishelf.edge.space_bar")
         case .appBarEdge:
             return .text("kiwishelf.edge.app_bar")
+        case .spaceBarScreenEdge:
+            return .text("kiwishelf.edge.per_screen.space_bar")
+        case .appBarScreenEdge:
+            return .text("kiwishelf.edge.per_screen.app_bar")
         case .thickness:
             return .text(
                 "kiwishelf.thickness",

@@ -26,7 +26,7 @@ Query state on demand:
 # List all spaces and their layout modes:
 "$KIWIDESK" get_state | jq '.spaces[] | {id, mode}'
 
-# List monitors:
+# List screens:
 "$KIWIDESK" list_monitors | jq
 ```
 
@@ -125,7 +125,7 @@ KiwiDesk.define_layer("desk2", layer({
 }))
 
 -- Switch layer when the macOS Desktop changes. Only the main
--- display's Desktop counts ("Displays have separate Spaces"
+-- screen's Desktop counts ("Displays have separate Spaces"
 -- makes secondary screens report their own switches too):
 KiwiDesk.on("desktop_change", function(n, monitor)
     if monitor ~= 1 then return end

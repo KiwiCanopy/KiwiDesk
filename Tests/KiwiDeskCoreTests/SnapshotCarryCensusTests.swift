@@ -39,6 +39,7 @@ struct SnapshotCarryCensusTests {
         "isTransientOverlay": "the scan classifies it",
         "isRaisedLayer": "the scan reads the window layer",
         "isFullscreen": "the scan reads the AX attribute",
+        "carriesOwnMark": "the scan reads the window mark",
         "frame":
             "carried as the record's frame, replayed through "
             + "the frame pipeline rather than as a field",
@@ -126,8 +127,10 @@ struct SnapshotCarryCensusTests {
     private func processB(from a: KiwiCore) throws -> KiwiCore {
         let crossed = try JSONDecoder().decode(
             StateSnapshot.self,
+            // The in-place stop's whole capture: the hand float
+            // rides `stopCarry`, every stop's (#1864).
             from: JSONEncoder().encode(
-                a.sessionSnapshot(inPlace: true)
+                try #require(a.crash.stopCapture(inPlace: true))
             )
         )
         let core = makeTestCore()

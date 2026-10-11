@@ -62,6 +62,22 @@ struct SettingsFooter: View {
                 execute: work
             )
         }
+        // The primary Save that needs a name (#2049).
+        .onChange(of: model.newProfileNamingRequested) { _, asked in
+            guard asked else { return }
+            model.newProfileNamingRequested = false
+            prefillNewProfileName()
+            namingNewProfile = true
+        }
+        // A leave waiting on the prompt settles on its dismissal,
+        // however it went — a button, a quit ending the sheet, or
+        // this footer torn down by a width-class flip.
+        .onChange(of: namingNewProfile) { was, now in
+            if was && !now { model.namingEnded() }
+        }
+        .onDisappear {
+            if namingNewProfile { model.namingEnded() }
+        }
         .alert(
             L(
                 "footer.save_as_new.title",

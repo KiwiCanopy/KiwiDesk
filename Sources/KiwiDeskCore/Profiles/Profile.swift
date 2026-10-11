@@ -73,6 +73,8 @@ public struct Profile: Codable, Sendable, Equatable {
     public var ignoreRules: RuleListOverride?
     /// Sparse scroll-gesture overrides (#1656).
     public var scrollGesture: ScrollGestureOverride?
+    /// Sparse Space history override (#1655); nil follows the base.
+    public var spaceHistory: SpaceHistoryKind?
     /// Which look this profile wears (#1752): nil is the shared
     /// look in `gui.json`, `.own` the copy in `settings`.
     public var look: LookReference?
@@ -109,6 +111,7 @@ public struct Profile: Codable, Sendable, Equatable {
         case floatRules = "float_rules"
         case ignoreRules = "ignore_rules"
         case scrollGesture = "scroll_gesture"
+        case spaceHistory = "space_history"
         case look
     }
 
@@ -130,6 +133,7 @@ public struct Profile: Codable, Sendable, Equatable {
         floatRules: RuleListOverride? = nil,
         ignoreRules: RuleListOverride? = nil,
         scrollGesture: ScrollGestureOverride? = nil,
+        spaceHistory: SpaceHistoryKind? = nil,
         look: LookReference? = nil
     ) {
         self.format = format
@@ -150,6 +154,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.floatRules = floatRules
         self.ignoreRules = ignoreRules
         self.scrollGesture = scrollGesture
+        self.spaceHistory = spaceHistory
         self.look = look
     }
 
@@ -260,6 +265,10 @@ public struct Profile: Codable, Sendable, Equatable {
         scrollGesture = try container.decodeIfPresent(
             ScrollGestureOverride.self,
             forKey: .scrollGesture
+        )
+        spaceHistory = try container.decodeIfPresent(
+            SpaceHistoryKind.self,
+            forKey: .spaceHistory
         )
         look = try container.decodeIfPresent(
             LookReference.self,

@@ -24,24 +24,33 @@ struct ActiveProfile {
     /// Whether it is the starter setup — what the onboarding and
     /// Settings title ask without re-reading the file (#1662).
     let isStarterSetup: Bool
+    /// Its monitor sets — what a bar's per-screen edge write
+    /// judges beside the connected screens (#1948,
+    /// `KiwiCore.screenEdgeScope(monitorSets:)`). Unlike the
+    /// Spaces it follows every write of the file, since a claim
+    /// moves a set without an apply (`refiled(_:)`).
+    let monitorSets: [MonitorSet]
 
     init(_ profile: Profile) {
         name = profile.name
         declaredSpaces = profile.declaredSpaces
         monitorCount = profile.monitorCount
         isStarterSetup = profile.isStarterSetup
+        monitorSets = profile.monitorSets
     }
 
     private init(
         name: String,
         declaredSpaces: Set<SpaceID>,
         monitorCount: Int,
-        isStarterSetup: Bool
+        isStarterSetup: Bool,
+        monitorSets: [MonitorSet]
     ) {
         self.name = name
         self.declaredSpaces = declaredSpaces
         self.monitorCount = monitorCount
         self.isStarterSetup = isStarterSetup
+        self.monitorSets = monitorSets
     }
 
     /// A rename moves the name; the Spaces are unchanged by it.
@@ -50,7 +59,21 @@ struct ActiveProfile {
             name: new,
             declaredSpaces: declaredSpaces,
             monitorCount: monitorCount,
-            isStarterSetup: isStarterSetup
+            isStarterSetup: isStarterSetup,
+            monitorSets: monitorSets
+        )
+    }
+
+    /// The live profile after a write of its file: the monitor
+    /// sets follow it; the name and Spaces stay the apply's.
+    func refiled(_ profile: Profile) -> ActiveProfile {
+        guard profile.name == name else { return self }
+        return ActiveProfile(
+            name: name,
+            declaredSpaces: declaredSpaces,
+            monitorCount: monitorCount,
+            isStarterSetup: isStarterSetup,
+            monitorSets: profile.monitorSets
         )
     }
 }

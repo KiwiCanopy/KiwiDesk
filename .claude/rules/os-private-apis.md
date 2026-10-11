@@ -97,7 +97,8 @@ Every one of the following binds whoever touches them:
   So a caller asserts no second membership and keeps no ledger
   of one; the wrapper's `addWindows`, `removeWindows` and
   `spaces(for:)` stay as the re-probe surface with no
-  production caller, and a new call site reds in
+  production caller but the `self_test` read of `spaces(for:)`
+  (#1889), and a new call site reds in
   `WMBridgeSeamTests`' per-file spelling map. **The MOVE
   (`MoveWindowsToManagedSpace`) is the one membership write
   applied cross-app** — `move_to_desktop` ships on it, and
@@ -271,5 +272,27 @@ Every one of the following binds whoever touches them:
   is still not usable: it is `SpaceCopyName` — the Desktop's
   name — so naming a Desktop would move it, and it is EMPTY on
   the primordial Desktop. Never write it.
+- **Every private path is a `self_test` row (#1889).** A new
+  `dlsym` symbol is a `PrivateSymbol`, its name spelled once at
+  the lookup, and owes a row in the `selfTestProbes` of the home
+  that resolves it, named and judged by that `PrivateSymbol` —
+  never looked up again, and the function pointer stays as
+  private as it was (`PrivatePathCensusTests` ▸
+  `catalogMatchesTheSource`, `nameIsSpelledOnce`). A new bridge
+  operation is a `WMBridge.Operation` case, which `make` takes
+  and the probes enumerate.
+  - A READ is called and judged against a second reader where
+    one exists (`works`), since performed is not applied; where
+    none does it reports `answered`, liveness only, and its row
+    says so in a comment.
+  - A WRITE — or a read whose call would take something
+    KiwiDesk needs — is looked up and never called, so the
+    default run touches no window, Desktop or setting. Which
+    paths the run calls is a pinned roster, so a reclassified
+    write reds: the C ones in `PrivatePathCensusTests` ▸
+    `cReadRosterIsPinned`, the bridge's in
+    `PrivatePathSelfTestTests` ▸ `readRosterIsPinned`, and a
+    bridge write dispatched from inside a read's verification in
+    `PrivatePathSelfTestTests` ▸ `writesAreNeverDispatched`.
 - No Accessibility trust is needed for any bridge operation
   (#889 item 2); do not add a permission prompt for one.

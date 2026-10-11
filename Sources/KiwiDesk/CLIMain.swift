@@ -74,9 +74,21 @@ private func runSocketCommand(
     _ arguments: [String]
 ) -> Int32 {
     let command = arguments[1]
-    let args = arguments.dropFirst(2).map {
-        JSONValue.string($0)
+    var rest = Array(arguments.dropFirst(2))
+    var selfTestText = false
+    if command == PrivatePathSelfTest.command {
+        // Text on a terminal, JSON piped or with --json (#1889),
+        // as `list_commands` answers.
+        guard let json = CLISelfTest.parseOptions(rest) else {
+            FileHandle.standardError.write(
+                Data("error: \(command) takes only --json\n".utf8)
+            )
+            return 1
+        }
+        selfTestText = !json && CLIOutput.stdoutIsTerminal
+        rest = []
     }
+    let args = rest.map { JSONValue.string($0) }
     let request = CommandRequest(
         command: command,
         args: args.isEmpty ? nil : args
@@ -110,7 +122,11 @@ private func runSocketCommand(
             return 0
         }
         let response = try client.roundTrip(request)
-        if let data = response.data,
+        if selfTestText, let data = response.data,
+            let text = CLISelfTest.render(data)
+        {
+            print(text)
+        } else if let data = response.data,
             let text = CLIOutput.render(
                 data,
                 pretty: CLIOutput.stdoutIsTerminal
@@ -128,7 +144,9 @@ private func runSocketCommand(
                 Data("error: \(error)\n".utf8)
             )
         }
-        return response.isSuccess ? 0 : 1
+        guard response.isSuccess else { return 1 }
+        return command == PrivatePathSelfTest.command
+            ? CLISelfTest.exitCode(response.data) : 0
     } catch {
         FileHandle.standardError.write(
             Data("KiwiDesk: \(error)\n".utf8)

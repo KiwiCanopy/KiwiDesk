@@ -178,6 +178,23 @@ struct ProfilesGateTests {
         }
     }
 
+    /// The Desktop cue's switch is app-wide (#2142, #1741): it greys
+    /// only where init.lua owns the config, whatever the target.
+    @Test("the Desktop cue greys only under a Lua-owned config")
+    func desktopCueGreysUnderLua() {
+        for editing in [false, true] {
+            #expect(
+                gates(editing: editing, guiManaged: true)
+                    .inertReason(for: .profiles(.desktopCue)) == nil
+            )
+            #expect(
+                gates(editing: editing, guiManaged: false)
+                    .inertReason(for: .profiles(.desktopCue))
+                    == .appWideLuaOwned
+            )
+        }
+    }
+
     // MARK: - Preset apply
 
     @Test("a preset for the connected count applies")

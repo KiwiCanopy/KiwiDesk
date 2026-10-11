@@ -63,7 +63,8 @@ struct SettingsDisclosureAccessoryTests {
         // trailing closure the style hands it.
         let label = try braced(
             after: "SettingsDisclosureButton("
-                + "isExpanded:configuration.$isExpanded)",
+                + "isExpanded:configuration.$isExpanded,"
+                + "locked:locked)",
             in: style
         )
         // Non-vacuity: this really is the label's run.

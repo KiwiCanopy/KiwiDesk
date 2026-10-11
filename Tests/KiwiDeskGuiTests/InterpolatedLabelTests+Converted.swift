@@ -76,6 +76,9 @@ extension InterpolatedLabelTests {
         // the drafting round did exactly that (localization
         // audit, 2026-08-16).
         "spaces.preview.caption_default": 1,
+        // The temporary-Space note under the per-Space shortcut
+        // rows names the Spaces pane (#1827).
+        "shortcuts.temporary_space.note": 1,
         "scroll_grid.auto_size.xref": 1,
         "track.auto_tracks.xref": 1,
         // The `.gates` twins of the two above. They quoted the
@@ -104,6 +107,7 @@ extension InterpolatedLabelTests {
         "shortcuts.import.help": 1,
         "kiwishelf.background_fit.boxed_only": 1,
         "kiwishelf.empty.help": 1,
+        "kiwishelf.edge.screens_differ.help": 2,
         "space_bar.color.focused_item.help": 2,
         "spaces.delete_confirm.message": 2,
         // The entries below were ALWAYS interpolating and were

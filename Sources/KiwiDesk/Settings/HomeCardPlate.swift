@@ -9,7 +9,7 @@ enum HomeCardPlate {
         for destination: SettingsDestination,
         model: SettingsModel
     ) -> AnyView? {
-        let settings = model.config.settings
+        let settings = model.homeSettings
         switch destination {
         case .spaces:
             return tile(padding: 7, settings: settings) {
@@ -43,9 +43,9 @@ enum HomeCardPlate {
                     )
                 )
             }
-        case .monitors:
+        case .screens:
             return tile(padding: 8, settings: settings) {
-                HomeCardMonitorsTile(model: model)
+                HomeCardScreensTile(model: model)
             }
         case .advancedColors:
             return tile(padding: 11, settings: settings) {

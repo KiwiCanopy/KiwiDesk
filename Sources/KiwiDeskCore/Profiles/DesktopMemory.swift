@@ -38,6 +38,16 @@ final class DesktopMemory {
     /// a fold or the switch handler.
     var honoredFocus: [SpaceID: [SkyLight.SpaceID: WindowID]] = [:]
 
+    /// The last honored focus per native Desktop, any Space (#1564)
+    /// — filed beside `honoredFocus`, read at the departure.
+    var lastHonoredOn: [SkyLight.SpaceID: WindowID] = [:]
+    /// The carried sticky window each Desktop was LEFT with
+    /// (#1564), filed at the departure and taken at the return.
+    var stickyLeft: [SkyLight.SpaceID: WindowID] = [:]
+    /// The focus a return owes that window, and when it was owed,
+    /// paid at the settle.
+    var stickyReturn: (window: WindowID, at: ContinuousClock.Instant)?
+
     /// The focus a Desktop return owes its remembered window,
     /// paid at that window's ARRIVAL (#1207) — the #1007 shape,
     /// a second instance: per-window record, bound, rekey.
@@ -68,6 +78,22 @@ final class DesktopMemory {
     /// Mission Control number for them.
     var unstampable: Set<SkyLight.SpaceID> = []
 
+    /// The highest Desktop number the shortcut top-up has offered
+    /// on this Mac (`KiwiCore+DesktopShortcuts`) — live in the
+    /// app's defaults, since the Desktops are the Mac's, and
+    /// pinned by both `makeTestCore` twins.
+    var readShortcutMark: @MainActor () -> Int = {
+        UserDefaults.standard.integer(forKey: DesktopMemory.shortcutMarkKey)
+    }
+    var writeShortcutMark: @MainActor (Int) -> Void = {
+        UserDefaults.standard.set($0, forKey: DesktopMemory.shortcutMarkKey)
+    }
+    nonisolated static let shortcutMarkKey = "desktopShortcutMark"
+    /// The highest Desktop a declining setup (Lua-owned, no
+    /// sidecar) was asked about this session, so a switch does not
+    /// ask again.
+    var shortcutTopUpDeclined = 0
+
     /// Last observed native Space ID per display (`KiwiCore+BootSeams`,
     /// docs/cli.md).
     var lastDisplaySpaces: [String: SkyLight.SpaceID] = [:]
@@ -86,8 +112,14 @@ final class DesktopMemory {
     var readWindowSpace: @MainActor (WindowID) -> WindowSpaceReading =
         NativeSpaces.windowSpaceReading(of:)
 
+    /// The native Space each screen shows, filed at the HEAD of
+    /// every Desktop switch so the switch's own rings read it
+    /// (#2149); `lastDisplaySpaces` is filed at the tail (#1215).
+    var shownSpaces: [String: SkyLight.SpaceID] = [:]
+
     /// Seeds display space readings from desktop snapshot at boot.
     func seed(_ snapshot: DesktopSnapshot) {
         lastDisplaySpaces = snapshot.currentSpaces
+        shownSpaces = snapshot.currentSpaces
     }
 }

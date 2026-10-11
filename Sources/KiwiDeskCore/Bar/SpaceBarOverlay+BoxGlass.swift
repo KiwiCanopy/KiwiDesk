@@ -24,46 +24,31 @@ extension SpaceBarOverlay {
                 size: frames[i].size
             )
             let glass = boxGlasses[i]
-            glass.isHidden = itemViews[i].isHidden
             GlassPlate.setContent(glass, itemViews[i])
-            GlassPlate.update(
+            GlassBox.place(
                 glass,
-                frame: frames[i],
+                tint: boxTints[i],
+                at: frames[i],
                 cornerRadius: radius,
+                hex: style.fillColor,
+                edge: style.edge,
+                visible: !itemViews[i].isHidden,
                 animated: animated,
                 move: moveFrame
             )
-            let tint = boxTints[i]
-            if itemViews[i].isHidden {
-                tint.isHidden = true
-            } else {
-                GlassTint.apply(
-                    tint,
-                    below: glass,
-                    frame: frames[i],
-                    cornerRadius: radius,
-                    hex: style.fillColor,
-                    edge: style.edge,
-                    animated: animated,
-                    move: moveFrame
-                )
-            }
         }
     }
 
     private func syncBoxGlassCount(_ n: Int) {
         while boxGlasses.count > n {
             // Its item left in this render's `syncItemViewCount`.
-            let glass = boxGlasses.removeLast()
-            GlassPlate.release(glass)
-            glass.removeFromSuperview()
-            boxTints.removeLast().removeFromSuperview()
+            GlassBox.drop(boxGlasses.removeLast(), boxTints.removeLast())
         }
         while boxGlasses.count < n {
-            guard let glass = GlassPlate.make() else { break }
-            itemRun.addSubview(glass)
-            boxGlasses.append(glass)
-            boxTints.append(GlassBackdrop())
+            guard let pair = GlassBox.make(in: itemRun)
+            else { break }
+            boxGlasses.append(pair.glass)
+            boxTints.append(pair.tint)
         }
     }
 
@@ -114,15 +99,14 @@ extension SpaceBarOverlay {
         frontGlass?.isHidden = true
         frontTint?.isHidden = true
         guard !boxGlasses.isEmpty else { return }
-        for glass in boxGlasses {
+        for (glass, tint) in zip(boxGlasses, boxTints) {
             for item in itemViews where GlassPlate.holds(glass, item) {
                 GlassPlate.release(glass)
                 itemRun.addSubview(item)
             }
-            glass.removeFromSuperview()
+            GlassBox.drop(glass, tint)
         }
         boxGlasses.removeAll()
-        for tint in boxTints { tint.removeFromSuperview() }
         boxTints.removeAll()
     }
 }

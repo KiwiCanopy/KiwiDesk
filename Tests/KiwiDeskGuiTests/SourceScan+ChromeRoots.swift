@@ -46,6 +46,7 @@ enum ChromeScanRoots {
         "Sources/KiwiDesk/Shortcuts",
         "Sources/KiwiDesk/Updates",
         "Sources/KiwiDesk/BootNotice",
+        "Sources/KiwiDesk/DesktopCue",
     ]
 
     static func urls(from filePath: String) -> [URL] {

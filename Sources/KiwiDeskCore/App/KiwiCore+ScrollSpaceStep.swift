@@ -53,30 +53,30 @@ extension KiwiCore {
         guard steps != 0, let display = session.display else { return }
         // Content follows the fingers: moving it back brings the
         // NEXT Space in, so a step runs against the delta's sign.
-        stepSpace(on: display, by: steps > 0 ? -1 : 1)
+        stepSpace(on: display, by: steps > 0 ? -1 : 1, warp: false)
     }
 
     /// The neighbour of the Space `display` shows, in that
     /// screen's order — the Space Bar's, empty Spaces included
     /// where `hide_empty` leaves them off the bar, which is a
     /// display setting and never changes reach (#1519 ruling).
-    private func stepSpace(on display: DisplayID, by step: Int) {
+    /// The one step the gesture and `focus_space_previous` /
+    /// `_next` (#1655) share; false at an end, which bumps.
+    @discardableResult
+    func stepSpace(
+        on display: DisplayID,
+        by step: Int,
+        warp: Bool
+    ) -> Bool {
         let order = state.workspaces.spaces(on: display)
         guard let shown = state.workspaces.activeSpace(on: display),
             let index = order.firstIndex(of: shown)
-        else { return }
+        else { return false }
         guard order.indices.contains(index + step) else {
-            // An empty Space has no ring to bump, and says nothing.
-            if let space = state.workspaces[shown],
-                let focused = state.focusAnchor(of: space)
-            {
-                flashDeadEnd(
-                    focused,
-                    direction: Self.direction(step, horizontal: true)
-                )
-            }
-            return
+            bumpAtSpaceEnd(step, on: display)
+            return false
         }
-        switchSpace(to: order[index + step], warp: false)
+        switchSpace(to: order[index + step], warp: warp)
+        return true
     }
 }

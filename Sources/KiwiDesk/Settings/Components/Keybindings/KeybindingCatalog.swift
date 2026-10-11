@@ -148,7 +148,8 @@ enum KeybindingCatalog {
         [
             NavGroup(
                 title: "Focus",
-                commands: focusDirections + goToSpace(spaces)
+                commands: focusDirections + spaceStepRows
+                    + spaceHistoryRows + goToSpace(spaces)
             ),
             NavGroup(
                 title: "Window Management",

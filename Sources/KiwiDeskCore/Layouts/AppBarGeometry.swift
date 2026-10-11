@@ -150,7 +150,7 @@ public enum AppBarGeometry {
 
 /// Protocol for layouts supporting an indicator bar. The bar
 /// sits on the KiwiShelf, which reserves its room in every
-/// layout (`TilingSettings.layoutBounds(from:)`, #1517), so a
+/// layout (`TilingSettings.layoutBounds(from:mode:on:)`, #1517), so a
 /// hosting layout places its windows exactly as any other does.
 public protocol AppBarHosting {
     var appBar: LayoutAppBar { get }

@@ -13,6 +13,8 @@ extension KiwiCore {
     public func discardSavedArrangement() {
         crash.discardSavedSnapshots()
         sleepWake.dropHeldSnapshot()
+        // The match first, through its door, so a restore line ends.
+        closeCrossSession()
         state.forgetRememberedSpaces()
         forgetDesktopFocus()
         // #1230: both of this lane's records are saved

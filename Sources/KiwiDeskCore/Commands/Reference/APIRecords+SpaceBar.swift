@@ -12,10 +12,16 @@ extension APIReference {
             "Shows or hides the Space Bar.",
             .boolean("enabled")
         ),
+        "set_reserve": APIRecord(
+            "Reserves the Space Bar's strip; false draws it over "
+                + "the windows, the strip unclickable.",
+            .boolean("reserve")
+        ),
         "set_edge": APIRecord(
-            "Sets the Space Bar's screen edge; on the App Bar's "
-                + "edge the two share one KiwiShelf.",
-            .choice("edge", AppBarEdge.self)
+            "Sets the Space Bar's edge on all screens, or on one "
+                + "named by number, fingerprint or name.",
+            .choice("edge", AppBarEdge.self),
+            .text("screen", optional: true)
         ),
         "set_glyph_span": APIRecord(
             "Sets how many glyphs a Space item shows "

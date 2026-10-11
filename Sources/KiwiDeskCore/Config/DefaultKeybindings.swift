@@ -1,6 +1,7 @@
 import Foundation
 
-/// First-run starter keyboard shortcuts (#91, #270, #1075, #1056).
+/// First-run starter keyboard shortcuts (#91, #270, #1075, #1056,
+/// #1655).
 /// Parity guarded by `DefaultSeedCatalogParityTests`.
 public enum DefaultKeybindings {
     private static let directions = [
@@ -30,15 +31,11 @@ public enum DefaultKeybindings {
         for (digit, space) in numbered(spaces) {
             rows.append(focusSpaceRow(digit: digit, space: space))
         }
-        // Tier 2 — ⌃⌥⇧: move to space
-        for (digit, space) in numbered(spaces) {
-            rows.append(moveSpaceRow(digit: digit, space: space))
-        }
-        // Tier 3 — ⌃⌥⌘: swap window / move to space and follow
+        // Tier 2 — ⌃⌥⇧: act on the window — swap it, send it
         for (dir, phrase) in directions {
             rows.append(
                 KeyBinding(
-                    combo: "control+option+command+\(dir)",
+                    combo: "control+option+shift+\(dir)",
                     lua: "KiwiDesk.swap(\"\(dir)\")",
                     kind: .navigation,
                     label: "Swap with window \(phrase)"
@@ -46,8 +43,15 @@ public enum DefaultKeybindings {
             )
         }
         for (digit, space) in numbered(spaces) {
+            rows.append(moveSpaceRow(digit: digit, space: space))
+        }
+        // Tier 3 — ⌃⌥⌘: step the Spaces / move to space and follow
+        rows.append(contentsOf: spaceStepRows())
+        for (digit, space) in numbered(spaces) {
             rows.append(followSpaceRow(digit: digit, space: space))
         }
+        // History — ⌥⌘Tab, ⇧ reversing it as everywhere on macOS
+        rows.append(contentsOf: spaceHistoryRows())
         // Size — ⌥⌘ (#1075)
         rows.append(contentsOf: resizeRows(step: resizeStep))
         // Toggles — ⌃⌥ (#1094)
@@ -103,6 +107,43 @@ public enum DefaultKeybindings {
             kind: .navigation,
             label: "Open Settings"
         )
+    }
+
+    /// The previous and next Space in the screen's order (#1655),
+    /// on the ⌃⌥⌘ + scroll step's base.
+    public static func spaceStepRows() -> [KeyBinding] {
+        [
+            KeyBinding(
+                combo: "control+option+command+left",
+                lua: "KiwiDesk.focus_space_previous()",
+                kind: .navigation,
+                label: "Go to previous Space"
+            ),
+            KeyBinding(
+                combo: "control+option+command+right",
+                lua: "KiwiDesk.focus_space_next()",
+                kind: .navigation,
+                label: "Go to next Space"
+            ),
+        ]
+    }
+
+    /// Back and forward through the Space history (#1655).
+    public static func spaceHistoryRows() -> [KeyBinding] {
+        [
+            KeyBinding(
+                combo: "option+command+tab",
+                lua: "KiwiDesk.focus_space_back()",
+                kind: .navigation,
+                label: "Go back in Space history"
+            ),
+            KeyBinding(
+                combo: "shift+option+command+tab",
+                lua: "KiwiDesk.focus_space_forward()",
+                kind: .navigation,
+                label: "Go forward in Space history"
+            ),
+        ]
     }
 
     private static func focusSpaceRow(

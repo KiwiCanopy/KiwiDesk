@@ -78,10 +78,13 @@ struct OverlayGlassGateTests {
 
     /// Every Core file that mints glass, and the suite that gates
     /// its render — the one copy. Derived from `GlassPlate.make(`
-    /// callers, so a new glass host reds until it names its gate.
+    /// and `GlassBox.make(` callers, so a new glass host reds until
+    /// it names its gate.
     private static let minters: [String: String] = [
-        "Bar/AppBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
+        // The box mint behind the three callers below (#2150).
+        "Bar/GlassBox.swift": "ReduceTransparencySeamTests",
         "Bar/SpaceBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
+        "Bar/AppBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
         "Bar/ShelfOverlay+Views.swift": "ShelfPlateGlassGateTests",
         "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",
         "Borders/StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
@@ -95,8 +98,9 @@ struct OverlayGlassGateTests {
         for file in try SourceScan.swiftSources(under: Self.core) {
             let text = Array(try SourceScan.strippedSource(at: file))
             guard
-                !SourceScan.callSites(in: text, for: "GlassPlate.make")
-                    .isEmpty
+                ["GlassPlate.make", "GlassBox.make"].contains(where: {
+                    !SourceScan.callSites(in: text, for: $0).isEmpty
+                })
             else { continue }
             let path = file.standardizedFileURL.path
             let root = Self.core.standardizedFileURL.path + "/"

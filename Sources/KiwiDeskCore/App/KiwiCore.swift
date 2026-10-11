@@ -16,6 +16,7 @@ public final class KiwiCore {
     public let dragOverlay = DragOverlay()
     public let appBars = AppBarManager()
     public let spaceBars = SpaceBarManager()
+    public let otherWindowManagers = OtherWindowManagerWatch()  // #1882
     let shelves = ShelfManager()
     /// Space Bar drag-drop gesture state (#372).
     let spaceBarDrop = SpaceBarDropCoordinator()
@@ -23,8 +24,7 @@ public final class KiwiCore {
     let dragCrossing = DragCrossingCoordinator()
     /// Glyph-vs-image icon decisions: bars, shortcuts panel (#294).
     public let appFont = AppFontResolver()
-    /// Focus-window border overlays (#278) and their sibling, the
-    /// on-window sticky marks (#414), both driven from `retile()`.
+    /// Focus rings (#278) and sticky marks (#414), driven by `retile()`.
     public let borders = BorderManager()
     public let stickyMarks = StickyMarkManager()
     /// Drawn transitions: Monocle flip (#1391), plate slide (#1956).
@@ -40,9 +40,8 @@ public final class KiwiCore {
     public internal(set) var lua: LuaInterpreter?
     public let exec = ExecLauncher()
 
-    /// Effective structured keybinding sources currently
-    /// installed in `keys`, read by the shortcuts reference
-    /// panel (`liveKeybindingSnapshot`).
+    /// Structured keybinding sources installed in `keys`, read by
+    /// the shortcuts reference panel (`liveKeybindingSnapshot`).
     var appliedStructuredLayers: [KeyLayer]?
 
     /// The global window-rule bases (`GlobalRuleBase`).
@@ -61,11 +60,12 @@ public final class KiwiCore {
     /// argued at its one reader, `mayReconcileWindowRulesNow`.
     var defersWindowRuleReconcileToSweep = false
 
-    /// Boot and the startup sweep surface N windows in one burst,
-    /// each `.windowCreated` a full pass (#672). While raised,
-    /// `handle` skips its structural retile; the raiser runs one
-    /// `retile()` after lowering it.
+    /// Boot and the startup sweep surface N windows in one burst
+    /// (#672): while raised, `handle` skips its structural retile
+    /// and the raiser runs one after lowering it.
     var defersEventRetiles = false
+    /// A Desktop switch's re-sync, folded alike (`+SwitchResync`).
+    var switchResync: SwitchResyncBatch?
 
     /// A z-order restore is waiting for the current animations
     /// to settle (`runPendingZOrderRestore`).
@@ -203,10 +203,7 @@ public final class KiwiCore {
     /// staleness-checked (the `runPendingFocusRaise` pattern).
     var pendingMouseWarp: WindowID?
 
-    /// The machine tail of the warp (#186): reads the live
-    /// cursor, moves the pointer. nil until `start()` wires it,
-    /// so unit tests never move the developer's pointer (the
-    /// `frontmostPIDProvider` pattern).
+    /// The warp's machine tail (#186); nil until `start()` wires it.
     var pointerWarp: (@MainActor (CGRect) -> Void)?
 
     /// The deferred one-shot settle tasks (focus follow, startup
@@ -214,10 +211,8 @@ public final class KiwiCore {
     /// without a hand-kept list (#49); bodies at the `schedule*`
     /// call sites.
     let deferred = DeferredTasks()
-
     /// The in-flight boot's phase, spans and timestamps (#801).
     let boot = BootRun()
-
     /// The tunable waits; tests assign milliseconds.
     var timings = CoreTimings()
 
@@ -234,14 +229,17 @@ public final class KiwiCore {
     /// restored on returning to one. Keyed, not numbered (#1147).
     var lastDesktop: DesktopKey?
     let desktopMemory = DesktopMemory()
+    let desktopCue = DesktopCueLedger()
     /// The last native Desktop switch; focus during it changes no space.
     var lastDesktopSwitch: Date = .distantPast
 
-    /// The Desktop raise gate's two reads (#1345/#1410) — the on-screen
-    /// flag and the shown host — both pinned to nil by `makeTestCore`.
+    /// The WindowServer window reads, all pinned by `makeTestCore`: the
+    /// Desktop raise gate's on-screen flag and shown host (#1345/#1410),
+    /// and the front-to-back frames, one door by census (#1788).
     var windowIsOnScreen: (WindowID) -> Bool? = FloatDetection.isOnScreen
     var windowIsOnShownDesktop: (WindowID) -> Bool? =
         NativeSpaces.isOnShownDesktop
+    var frontWindowFrames: @MainActor () -> [CGRect] = liveFrontFrames
     /// A move verb's departures, claimed at the vanish (#1345).
     var desktopMoveDepartures: [WindowID: Date] = [:]
     /// A `.returned` window's arrival time (#1345).
@@ -278,6 +276,8 @@ public final class KiwiCore {
     var healedSpaces: [String: SpaceID] = [:]
     /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
     var appWideLedger = AppWideLedger()
+    /// Space history and its setting (#1655, `KiwiCore+SpaceHistory`).
+    var spaceHistory = SpaceHistoryState()
     /// The shared look's state (#1752, `KiwiCore+SharedLook`).
     var sharedLookLedger = SharedLookLedger()
     /// The live arrangement's explicit rehome target (#68) —
@@ -313,17 +313,17 @@ public final class KiwiCore {
     /// `recordingTypoIssues`; nil gates runtime hits (a typo
     /// inside a keybinding closure) to log-only.
     var typoIssues: [ConfigIssue]?
-    /// Fired whenever `configIssues` changes (including back
-    /// to empty, so the badge clears itself).
+    /// Fired whenever `configIssues` changes, back to empty too.
     public var onConfigIssuesChange:
         @MainActor ([ConfigIssue])
             -> Void = { _ in }
     /// Fired on every live-profile write from outside Settings.
     public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
+    public var onShortcutsDropped: ShortcutsDropped = { _ in }
+    public var onShortcutsAdded: ShortcutsAdded = { _ in }
 
-    /// The UI-bridge verbs' GUI hooks (#330, #678 item 18) —
-    /// declared and argued as a bundle in `KiwiCore+LuaAPI`,
-    /// the `openOrFocus` seam shape.
+    /// The UI-bridge verbs' GUI hooks (#330, #678 item 18), argued
+    /// as a bundle in `KiwiCore+LuaAPI`, the `openOrFocus` shape.
     public var uiBridge = UIBridgeHooks()
 
     /// `~/.config/KiwiDesk/` (created on demand).

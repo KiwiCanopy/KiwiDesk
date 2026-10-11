@@ -119,34 +119,44 @@ struct TileReturnsToRulesTests {
         #expect(floats(core) == false)
     }
 
-    /// An in-place restart obeys it too: a carried user float is
-    /// adopted only where the window arrived tiled, and an old
+    /// A stop's carried float obeys it too (#1864): adopted only
+    /// where the window arrived tiled; a pre-#1864 session's old
     /// `false` — a manual tile — adopts nothing.
-    @Test("an in-place restore adopts a user float only where it tiles")
-    func inPlaceRestoreObeysDetection() {
-        let session = StateSnapshot.WindowSession(
-            floating: true,
-            sticky: .none,
-            stickyReach: nil
-        )
+    @Test("a restored stop float is adopted only where it tiles")
+    func stopRestoreObeysDetection() throws {
         let record = StateSnapshot.WindowRecord(
             id: id,
             frame: .zero,
-            session: session
+            floating: true
         )
         let floated = makeCore()
         track(floated, .floats(.panel))
-        floated.state.adoptSession(of: record)
+        floated.state.adoptStopFloat(of: record)
         #expect(floated.state.userFloated.isEmpty)
         let tiled = makeCore()
         track(tiled)
-        tiled.state.adoptSession(of: record)
+        tiled.state.adoptStopFloat(of: record)
         #expect(tiled.state.userFloated == [id])
-        var old = record
-        old.session?.floating = false
+        // The encoder's own record, its session given the old key.
+        var plain = record
+        plain.floating = nil
+        plain.session = .init(sticky: .none, stickyReach: nil)
+        var json = try #require(
+            JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(plain)
+            ) as? [String: Any]
+        )
+        var session = try #require(json["session"] as? [String: Any])
+        session["floating"] = false
+        json["session"] = session
+        let old = try JSONDecoder().decode(
+            StateSnapshot.WindowRecord.self,
+            from: JSONSerialization.data(withJSONObject: json)
+        )
+        #expect(old.floating == nil)
         let legacy = makeCore()
         track(legacy)
-        legacy.state.adoptSession(of: old)
+        legacy.state.adoptStopFloat(of: old)
         #expect(legacy.state.userFloated.isEmpty)
         #expect(floats(legacy) == false)
     }

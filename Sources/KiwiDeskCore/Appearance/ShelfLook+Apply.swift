@@ -84,14 +84,24 @@ extension ShelfLook {
                 SpaceBarCommandSetting
                 .parse(field: parts[1], args: args)
             {
-                setting.apply(to: &settings.spaceBarStyle)
+                // A look sets the bar's edge and keeps each
+                // screen's own, the strongest (#1948).
+                if case .edge(let edge) = setting {
+                    settings.spaceBarStyle.setEdgeKeepingScreens(edge)
+                } else {
+                    setting.apply(to: &settings.spaceBarStyle)
+                }
             }
         case "app_bar":
             if case .success(let setting) =
                 AppBarCommandSetting
                 .parse(field: parts[1], args: args)
             {
-                setting.apply(to: &settings.appBarStyle)
+                if case .edge(let edge) = setting {
+                    settings.appBarStyle.setEdgeKeepingScreens(edge)
+                } else {
+                    setting.apply(to: &settings.appBarStyle)
+                }
                 // A per-layout indicator would hide the look's.
                 if case .activeIndicator = setting {
                     settings.monocle.appBar.activeIndicator = nil

@@ -62,6 +62,19 @@ extension SettingsModel {
         )
     }
 
+    /// The Space history row's checklist (#1655).
+    func historyReach() -> RuleReachReading? {
+        guard let reach = encodedReach else { return nil }
+        let key = RuleReachTable<SpaceHistoryKind>.spaceHistoryKey
+        return reading(
+            reach.spaceHistory,
+            key,
+            reach.unreadable,
+            picked: reachEdits.reach[.history]?[key],
+            SpaceHistoryWords.value
+        )
+    }
+
     /// Who binds this row's combo to another action, per profile,
     /// read off the encoded table — the action ticking would take
     /// the key from.
@@ -77,10 +90,10 @@ extension SettingsModel {
         for profile in table.profiles where profile != editing {
             guard let rival = table.rival(of: key, for: profile, combo: combo)
             else { continue }
-            let label = reach.keyTemplates[rival]?.label ?? ""
             result[profile] =
-                label.isEmpty
-                ? RuleReachTable<String>.keyParts(rival).lua : label
+                reach.keyTemplates[rival].map {
+                    KeybindingCatalog.localizedName(of: $0, config: config)
+                } ?? RuleReachTable<String>.keyParts(rival).lua
         }
         return result
     }
@@ -169,6 +182,7 @@ extension SettingsModel {
         case .float: floatReach(app) { $0.joined(separator: ", ") }
         case .key: keyReach(app)
         case .scroll: scrollReach(app)
+        case .history: historyReach()
         }
     }
 
@@ -269,6 +283,13 @@ extension SettingsModel {
             return RuleReachDraft.defaultReach(
                 of: key,
                 in: stored.scrollGestures,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .history:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.spaceHistory,
                 editing: editing,
                 isLoaded: reachIsLoaded
             )

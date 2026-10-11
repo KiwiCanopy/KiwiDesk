@@ -82,7 +82,7 @@ extension SettingRuntimeGate {
             .spaceHasNoOverrides, .reduceMotion, .reduceTransparency,
             .noBindingStore:
             return true
-        case .orphanPinsExist, .monitorsDisconnected,
+        case .orphanPinsExist, .screensDisconnected,
             .paletteGlowPairing, .lookReplacedUnsavedColors,
             .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
@@ -106,7 +106,7 @@ extension SettingRuntimeGate {
             return false
         case .editingStoredProfile, .screenCountMismatch:
             return true
-        case .orphanPinsExist, .monitorsDisconnected,
+        case .orphanPinsExist, .screensDisconnected,
             .paletteGlowPairing, .lookReplacedUnsavedColors,
             .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,

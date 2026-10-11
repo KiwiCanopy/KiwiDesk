@@ -1,0 +1,42 @@
+import AppKit
+
+/// Answers whether a close or quit is already waiting on the
+/// unsaved-edits question, bringing it forward if so (#2049).
+@MainActor
+protocol QuitQuestionHost: AnyObject {
+    func frontPendingQuestion() -> Bool
+}
+
+/// Closes own windows' sheets ahead of a quit, restart or logout,
+/// each as Cancel (#2049). AppKit ends an `NSAlert` sheet itself
+/// but aborts the termination for any other sheet — a SwiftUI
+/// `.confirmationDialog` or `.sheet` — so the quit never arrives.
+@MainActor
+enum QuitSheets {
+    /// The one door every quit path takes. False while the
+    /// unsaved-edits question is up: it comes forward, nothing
+    /// closes, and the quit stops rather than slipping past it.
+    static func clearOwnWindows() -> Bool {
+        let host = NSApp.delegate as? QuitQuestionHost
+        if host?.frontPendingQuestion() == true { return false }
+        clear(NSApp.windows)
+        return true
+    }
+
+    /// Ends every sheet of `windows` as Cancel, innermost first.
+    static func clear(_ windows: [NSWindow]) {
+        for window in windows
+        where window.sheetParent == nil && window.attachedSheet != nil {
+            endSheets(of: window)
+        }
+    }
+
+    /// A sheet that will not leave stops the loop.
+    private static func endSheets(of window: NSWindow) {
+        while let sheet = window.attachedSheet {
+            endSheets(of: sheet)
+            window.endSheet(sheet, returnCode: .cancel)
+            if window.attachedSheet === sheet { return }
+        }
+    }
+}

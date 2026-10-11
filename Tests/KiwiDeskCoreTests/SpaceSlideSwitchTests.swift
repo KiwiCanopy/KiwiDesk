@@ -24,7 +24,7 @@ struct SpaceSlideSwitchTests {
     private let w3 = WindowID(3)
 
     /// Windows 1 and 2 in Space 1, shown; window 3 in Space 2.
-    private func makeCore(slide: Bool) throws -> (KiwiCore, WorkMeter) {
+    func makeCore(slide: Bool) throws -> (KiwiCore, WorkMeter) {
         let display = try #require(NSScreen.main?.kiwiDisplayID)
         let core = makeTestCore()
         core.tiler.visibleBounds = { _ in

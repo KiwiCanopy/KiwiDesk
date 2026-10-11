@@ -25,6 +25,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     let bootNarration = BootNarration()
     /// The slow-boot notice (#1715).
     let bootNotice = BootNoticeController()
+    let desktopCuePlate = DesktopCueController()
     /// Cached dashboard controller to avoid constructing on refresh.
     private(set) var dashboardIfCreated: SettingsWindowController?
     var dashboard: SettingsWindowController {
@@ -53,6 +54,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
     private var sigtermSource: DispatchSourceSignal?
+    /// `wirePowerOffSheets`' observer (#2049).
+    var powerOffObserver: NSObjectProtocol?
     /// Rebuilds the fixed-string main menu when the GUI language
     /// changes, so it honors the live-switch contract (#9) the
     /// rest of the app upholds.
@@ -169,6 +172,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.bootNarration.phase = phase
             self?.bootNotice.phase(phase)
         }
+        // A restart restore's progress (#2133).
+        core.onRestorePhaseChange = { [weak self] phase in
+            self?.bootNotice.restore(phase)
+        }
         // Sparkle's relaunch is an in-place restart (#930).
         updater.onWillRelaunch = { [weak self] in
             self?.core.announceUpdateRelaunch()
@@ -184,6 +191,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         self.statusItem = statusItem
         wireBootNotice()
+        wireDesktopCue()
 
         // The error surface (#68 §3.7): the badge and the
         // standalone panel track the last config load.
@@ -211,6 +219,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 persisted: persisted
             )
         }
+        core.onShortcutsDropped = { [weak self] spaces in
+            self?.dashboardIfCreated?.adoptShortcutDrop(spaces)
+        }
+        core.onShortcutsAdded = { [weak self] rows in
+            self?.dashboardIfCreated?.adoptShortcutAdd(rows)
+        }
         wireBarMenus()
         wireWhatsNewTrail()
         core.onConfigIssuesChange = { [weak self] issues in
@@ -236,16 +250,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.onLiveOnlySpacesChange = { [weak self] spaces in
             self?.dashboardIfCreated?.showLiveOnlySpaces(spaces)
         }
+        // Another window manager runs beside KiwiDesk (#1882).
+        core.otherWindowManagers.onDetected = { [weak self] manager in
+            OtherWindowManagerAlert.present(for: manager) {
+                self?.core.otherWindowManagers.quit(manager)
+            }
+        }
+        core.otherWindowManagers.onGone = { manager in
+            OtherWindowManagerAlert.close(for: manager)
+        }
 
-        // Redirect SIGTERM from launchctl into AppKit termination flow.
-        signal(SIGTERM, SIG_IGN)
-        let src = DispatchSource.makeSignalSource(
-            signal: SIGTERM,
-            queue: .main
-        )
-        src.setEventHandler { NSApp.terminate(nil) }
-        src.resume()
-        sigtermSource = src
+        sigtermSource = QuitSignal.install()
+        wirePowerOffSheets()
 
         permissions.onChange = { [weak self] trusted in
             self?.permissionChanged(trusted)

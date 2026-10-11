@@ -7,7 +7,7 @@ import Testing
 /// What a schematic's frame is allowed to be (#753).
 ///
 /// Three halves of one decision, and they fail apart. The first is
-/// arithmetic: Scrolling reserves canvas for its off-monitor
+/// arithmetic: Scrolling reserves canvas for its off-screen
 /// ghosts, and reserving it at `.tile` drew the monitor at half
 /// the size of every sibling's outline — the thumbnail that read
 /// as broken in the layout chooser. The second is vocabulary: the
@@ -84,7 +84,7 @@ struct LayoutSchematicScaleTests {
     /// Both are `if`s inside a `body`, and a surfacing branch
     /// leaves nothing behind for a property test to find: deleting
     /// either one keeps every assertion above green
-    /// (`MonitorsGateWiringTests`' `surfacingBranchesAreDrawn` is
+    /// (`ScreensGateWiringTests`' `surfacingBranchesAreDrawn` is
     /// the worked example this copies). Keyed on the branch WITH
     /// its body, over comment-stripped, whitespace-free source, so
     /// a comment quoting the call cannot stand in for it and the
@@ -100,7 +100,7 @@ struct LayoutSchematicScaleTests {
                 // Without it the clip leaves a few points of a
                 // tile inside `LayoutSchematic.inset`'s band —
                 // most visibly a grey ghost at a thumbnail's edge,
-                // where every off-monitor slot is one of these.
+                // where every off-screen slot is one of these.
                 "if!onCanvas(i,m,along:along){EmptyView()}",
                 // The ghost itself, which only the panel's margin
                 // has room for and which the skip above is what

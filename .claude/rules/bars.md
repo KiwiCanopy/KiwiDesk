@@ -106,10 +106,12 @@ twice, was a question the user answered twice. The argument is
   registered, ▸ `retiredCallIsAnIssue` that `init.lua` reports
   one as its own Config Issue.
 - **Reserve each edge a bar draws on through the one
-  `TilingSettings.layoutBounds(from:mode:)`, listed by the one
-  `shelfEdges(in:)`** — itself the one `barEdges(space:app:)`,
-  which the live plan (`KiwiCore.shelfPlans`) takes too, so the
-  strips drawn and the edges reserved are one list — the Space
+  `TilingSettings.layoutBounds(from:mode:on:)`, listed by the one
+  `shelfEdges(in:on:)`, unless every bar drawing on that edge has
+  `reserve` off (#1524)** — `barEdges(space:app:)`'s reserving
+  subset, while the live plan (`KiwiCore.shelfPlans`) takes
+  `barEdges` whole, so the strips drawn and the edges reserved
+  come from one derivation — the Space
   Bar's edge in every layout
   while it is on, the App Bar's only in the layouts whose own
   App Bar is on and only where the Space Bar does not already
@@ -127,6 +129,56 @@ twice, was a question the user answered twice. The argument is
   MODE, so a per-space `appBar` would draw a bar where nothing is
   reserved — [state-and-layout.md](state-and-layout.md) owns that
   half, since the override types are its files.
+- **Fold a bar's `reserve` into the edge it sits on inside the
+  one `barEdges(space:app:)`, OR-combined at its dedup** — an
+  edge two bars share is one strip, so it reserves while EITHER
+  bar does, and a second "reserved edges" list beside it would
+  repeat the fusion. Shown and reserved are apart (#1524): the
+  live plan reads every edge `barEdges` lists, `shelfEdges(in:on:)`
+  keeps the reserving ones, the float region carves only the
+  painted strips on those edges (`KiwiCore.reservedStrips`),
+  and a bar write that leaves `shelfReservation(in:on:)` alone
+  repaints the bars and re-clamps the floats without a pass.
+  `reserve` is a bar's own, global like
+  its edge (`AppBarStyle.layoutFixedKeys`). **A per-screen edge
+  (#1948) resolves before this fold, through the one
+  `TilingSettings.onScreen(_:)`, never beside it** — a second
+  read beside it lets one screen's drawn and reserved strips
+  disagree. The reservation (`shelfEdges(in:on:)`), each
+  display's live plan in `updateBars()` and every style a bar
+  draws read the edges it resolved, so the views read
+  `style.edge` and never a screen (`ScreenEdgeTests`,
+  `ScreenEdgeCoreTests` ▸ `livePlanPerDisplay`), and a caller of
+  `barEdges(space:app:)` hands it settings `onScreen` resolved or
+  names why not (`BarEdgeWriteCensusTests` ▸
+  `foldCallersAreCensused`), a Settings reader of a bar's own
+  edge naming its reason too (▸ `guiReadersAreCensused`).
+  **Write a bar's edge through the `ScreenEdged` doors** —
+  `setEdge(_:)` for every screen, `setEdge(_:on:among:)` for one,
+  judged over the one `KiwiCore.screenEdgeScope(monitorSets:)`
+  handed the written profile's monitor sets, and
+  `setEdgeKeepingScreens(_:)` for a look, which leaves the
+  entries exactly as they are — so a verb or Settings write of a
+  screen's edge equal to its bar's stores nothing for that
+  screen, an entry a look leaves equal stays a pin, every
+  judgement reads the edges screens draw (`edge(on:)`)
+  (`ScreenEdgeTests` ▸ `judgementsReadDrawnEdges`), and no
+  caller collapses by hand (`BarEdgeWriteCensusTests` ▸
+  `rawWritesAreCensused`); `ScreenEdgeScope` is built only by
+  `screenEdgeScope(monitorSets:)` (`BarEdgeWriteCensusTests` ▸
+  `scopeHasOneHome`). The empty map stays out of the JSON
+  through a `KeyedEncodingContainer` overload whose scope is the
+  TYPE `[String: AppBarEdge]`, module-wide: a store of that type
+  that must encode an empty map takes a type of its own.
+  **A new input to `layoutBounds` enters
+  through `shelfReservation(in:on:)`, and the skip comparison
+  covers every axis that input is keyed by** —
+  `KiwiCore.shelfReservations` compares every mode on every
+  connected screen, or a bar write skips a pass the bounds owed
+  (`ScreenEdgeCoreTests` ▸ `screenWriteOwesThePass`).
+  `BarReserveTests` holds the fold, `BarReserveCoreTests` the
+  float region and the skipped pass, `BarReserveVerbTests` the
+  global-only refusal.
 - **Measure the strips of several edges through the one
   `ShelfGeometry.strips`, the Space Bar's edge first** — at a
   corner the earlier strip runs the whole edge and the later one
@@ -141,6 +193,12 @@ twice, was a question the user answered twice. The argument is
   layouts' refusal from the same register — since an edge per
   layout carries the bar across the screen on a layout switch
   (`BarEdgeCommandTests` ▸ `noLayoutEdge`, through `execute`).
+  **Each layout-fixed key carries the global verb that writes
+  it**, and the refusal and the retired per-layout verbs name
+  that one value rather than spelling `app_bar.set_<key>` — a
+  key with no verb of its own, such as the per-screen
+  `edge_override` that `set_edge` writes (#1948), would name a
+  dead verb (`ScreenEdgeVerbTests` ▸ `layoutRefusalNamesTheVerb`).
 - **Place every bar along the edge through the one
   `ShelfArrangement`** — the live drivers through
   `KiwiCore.shelfPlans`, and the Settings preview and the
@@ -339,13 +397,14 @@ twice, was a question the user answered twice. The argument is
   leave lands leaves `leavingViews` and stays on the strip
   (`ShelfFadeTests` ▸ `reWantedSectionStays`).
   On a boxed glass run each box dissolves as ONE unit with its
-  tint, the fade on the `BoxHost` the pair is minted in and never
+  tint, the fade on the `GlassBoxHost` the pair is minted in and never
   on the glass — a glass's own alpha shows the tint behind it
   bare (device, 2026-10-01 and 2026-10-08) — and no box resizes,
   since its content re-lays every frame (#1842,
-  `AppBarDissolveTests`). A box glass never leaves the `BoxHost`
-  it was minted in: a z-order move fronts the host, and a box
-  leaves only through `dropBox`, since the host is found through
+  `AppBarDissolveTests`). A box glass never leaves the
+  `GlassBoxHost` it was minted in: a drag moves and fronts the
+  host, and a box leaves only through `GlassBox.drop`, since the
+  host is found through
   the glass and a glass moved out leaks it and fades bare
   (`AppBarBoxHostTests`). A bar
   manager hides its display's overlay and never drops it — a bar
@@ -1053,6 +1112,21 @@ Obligations:
   clear glass, nothing pinned — which the drag marker's fill-off
   and the sticky mark's Automatic both hand it
   (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`).
+- **A glass and its backdrop never animate their own frames; a
+  pair that travels fills one host that carries the motion**
+  (#2095). The glass renders a frame behind its gradient, so a
+  pair gliding by its own frames trails a crescent ahead of the
+  box. A glass pair that travels is minted, laid out and taken
+  out through the one `GlassBox` — laid out through its one
+  `place`, which writes the pair to the host's CURRENT bounds
+  before the host moves, since AppKit steps a travelling frame and
+  autoresizes the pair at every step — and a drag moves the host
+  too (`SpaceBarGlideWiringTests` ▸ `boxGlassTravels`,
+  `boxGlassFillsItsHost`, `AppBarBoxHostTests` ▸
+  `glideMovesTheHost`, `ShelfPlateGlassHostTests`). The pair's own
+  frame writers, `GlassPlate.update` and `GlassTint.apply`, take
+  no motion input and start no motion (`GlassPairMotionSeamTests`),
+  so a call site cannot make either travel.
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** Both drag markers' glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays

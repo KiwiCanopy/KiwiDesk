@@ -1,4 +1,5 @@
 import CoreFoundation
+import Foundation
 import KiwiDeskCore
 
 /// Localized display name resolution for stored keybinding labels (#96).
@@ -13,26 +14,109 @@ extension KeybindingCatalog {
         config: GuiConfig
     ) -> String {
         guard !label.isEmpty else { return label }
-        var commands = navigationGroups(spaces: config.spaces)
-            .flatMap(\.commands)
-        commands += config.layers.map {
-            switchLayerCommand($0.name)
-        }
-        commands += resizeAndFloat(
-            step: Int(config.settings.resizeStep)
-        )
-        commands += stepFreeCommands
-        let desktops = desktopOffer(
-            live: [],
-            bindings: config.layers.flatMap(\.bindings)
-        )
-        commands += goToDesktop(desktops.desktops)
-        commands += moveToDesktop(desktops.desktops)
         guard
-            let match = commands.first(where: {
+            let match = namedCommands(config).first(where: {
                 $0.label == label
             })
         else { return label }
         return match.resolvedLabel
+    }
+
+    /// A binding's name wherever the GUI names one: its localized
+    /// label, else the catalog command its Lua runs, else the Lua
+    /// itself — the one door (#96, #2111,
+    /// `BindingNameDoorTests`). The roster it names against is the
+    /// page's, widened by what the binding itself names — its
+    /// Space, layer, resize step and Desktop — so another
+    /// profile's binding, or one whose Space this page dropped,
+    /// is named rather than read back in English (#2116).
+    @MainActor static func localizedName(
+        of binding: KeyBinding,
+        config: GuiConfig
+    ) -> String {
+        let commands = namedCommands(config, widenedBy: binding)
+        guard binding.label.isEmpty else {
+            return commands.first(where: { $0.label == binding.label })?
+                .resolvedLabel ?? binding.label
+        }
+        return commands.first(where: {
+            $0.lua == binding.lua
+        })?.resolvedLabel ?? binding.lua
+    }
+
+    /// The page's roster plus the arguments `binding`'s own Lua
+    /// names.
+    @MainActor private static func namedCommands(
+        _ config: GuiConfig,
+        widenedBy binding: KeyBinding
+    ) -> [NavCommand] {
+        let lua = binding.lua
+        var spaces = config.spaces
+        if let space = SpaceLuaArg.targetSpace(of: lua),
+            !spaces.contains(space)
+        {
+            spaces.append(space)
+        }
+        var layers = config.layers.map(\.name)
+        if let layer = argument(of: "switch_layer", in: lua) {
+            layers.append(layer.trimmingCharacters(in: ["\""]))
+        }
+        var steps = [Int(config.settings.resizeStep)]
+        if let args = argument(of: "resize", in: lua),
+            let step = args.split(separator: ",").last.flatMap({
+                Int($0.trimmingCharacters(in: [" ", "-"]))
+            })
+        {
+            steps.append(step)
+        }
+        return namedCommands(
+            spaces: spaces,
+            layerNames: layers,
+            steps: steps,
+            bindings: config.layers.flatMap(\.bindings) + [binding]
+        )
+    }
+
+    /// Every command a stored binding may be named after.
+    @MainActor private static func namedCommands(
+        _ config: GuiConfig
+    ) -> [NavCommand] {
+        namedCommands(
+            spaces: config.spaces,
+            layerNames: config.layers.map(\.name),
+            steps: [Int(config.settings.resizeStep)],
+            bindings: config.layers.flatMap(\.bindings)
+        )
+    }
+
+    /// THE roster of nameable commands (#2111): the door and the
+    /// settings diff both read it, so a command added here is named
+    /// everywhere. Desktop rows read the BINDINGS, never a live
+    /// list, so an unplugged screen's row keeps its name.
+    @MainActor static func namedCommands(
+        spaces: [SpaceID],
+        layerNames: [String],
+        steps: [Int],
+        bindings: [KeyBinding]
+    ) -> [NavCommand] {
+        var commands = navigationGroups(spaces: spaces)
+            .flatMap(\.commands)
+        commands += layerNames.map(switchLayerCommand)
+        for step in steps {
+            commands += resizeAndFloat(step: step)
+        }
+        commands += stepFreeCommands
+        let desktops = desktopOffer(live: [], bindings: bindings)
+        commands += goToDesktop(desktops.desktops)
+        commands += moveToDesktop(desktops.desktops)
+        return commands
+    }
+
+    /// The raw argument list of `call(...)` in `lua`, or nil.
+    private static func argument(of call: String, in lua: String) -> String? {
+        guard let open = lua.range(of: call + "("),
+            let close = lua[open.upperBound...].lastIndex(of: ")")
+        else { return nil }
+        return String(lua[open.upperBound..<close])
     }
 }

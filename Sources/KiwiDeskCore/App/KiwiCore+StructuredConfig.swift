@@ -38,6 +38,10 @@ extension KiwiCore {
             base: config.scrollGesture,
             profile: profile?.scrollGesture
         )
+        applySpaceHistory(
+            base: config.spaceHistory,
+            profile: profile?.spaceHistory
+        )
         // Mint refs from the SAME interpreter that releases
         // them (`keys.lua`, see `KeybindingManager.reset`),
         // so mint and release cannot diverge.
@@ -65,7 +69,8 @@ extension KiwiCore {
         profileAppRules: AppRuleOverride?,
         profileFloatRules: RuleListOverride?,
         profileIgnoreRules: RuleListOverride?,
-        profileScrollGesture: ScrollGestureOverride?
+        profileScrollGesture: ScrollGestureOverride?,
+        profileSpaceHistory: SpaceHistoryKind?
     ) {
         var structured: GuiConfig?
         if isGuiManaged {
@@ -85,6 +90,10 @@ extension KiwiCore {
         applyScrollGestures(
             base: structured?.scrollGesture,
             profile: profileScrollGesture
+        )
+        applySpaceHistory(
+            base: structured?.spaceHistory,
+            profile: profileSpaceHistory
         )
         guard isGuiManaged else { return }
         guard let lua = keys.lua else { return }
@@ -173,6 +182,10 @@ extension KiwiCore {
         applyScrollGestures(
             base: config.scrollGesture,
             profile: profile?.scrollGesture
+        )
+        applySpaceHistory(
+            base: config.spaceHistory,
+            profile: profile?.spaceHistory
         )
         guard changed, let lua = keys.lua else { return }
         applyStructuredKeybindings(

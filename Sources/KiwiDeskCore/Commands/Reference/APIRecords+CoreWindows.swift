@@ -21,6 +21,22 @@ extension APIReference {
                 + "windows.",
             .space("space")
         ),
+        "focus_space_back": APIRecord(
+            "Goes back to the Space shown before, along the "
+                + "history space_history names."
+        ),
+        "focus_space_forward": APIRecord(
+            "Goes forward again along the Space history, after "
+                + "focus_space_back."
+        ),
+        "focus_space_previous": APIRecord(
+            "Switches to the previous Space in the focused "
+                + "screen's order, stopping at the first."
+        ),
+        "focus_space_next": APIRecord(
+            "Switches to the next Space in the focused screen's "
+                + "order, stopping at the last."
+        ),
         "move_to_space": APIRecord(
             "Moves the focused window, or the one a window id "
                 + "names, to a Space without following it.",
@@ -116,7 +132,7 @@ extension APIReference {
                 + "off."
         ),
         "toggle_display_sticky": APIRecord(
-            "Flips the focused window between display-sticky and "
+            "Flips the focused window between screen-sticky and "
                 + "off."
         ),
         "override_sticky_reach": APIRecord(

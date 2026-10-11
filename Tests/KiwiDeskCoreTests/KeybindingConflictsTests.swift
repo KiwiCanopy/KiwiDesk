@@ -82,7 +82,7 @@ struct KeybindingConflictsTests {
         ]
         let list = KeybindingConflicts.conflicts(in: layers)
         #expect(list.count == 1)
-        #expect(list[0].name == "Close")
+        #expect(list[0].binding.label == "Close")
         // The case, never its English name (#96): Core cannot
         // reach `L()`, so the GUI resolves the display string.
         #expect(list[0].target == .systemShortcut(.closeWindow))
@@ -109,14 +109,18 @@ struct KeybindingConflictsTests {
         ]
         let list = KeybindingConflicts.conflicts(in: layers)
         #expect(list.count == 2)
-        #expect(list[0].name == "First")
-        #expect(list[0].target == .otherBinding("Second"))
-        #expect(list[1].name == "Second")
-        #expect(list[1].target == .otherBinding("First"))
+        // Each side carries the BINDING; the GUI names it (#2116).
+        #expect(list[0].binding == layers[0].bindings[0])
+        #expect(list[0].target == .otherBinding(layers[0].bindings[1]))
+        #expect(list[1].binding == layers[0].bindings[1])
+        #expect(list[1].target == .otherBinding(layers[0].bindings[0]))
     }
 
-    @Test("conflicts(in:) falls back to the combo for an unnamed row")
-    func conflictsFallsBackToCombo() {
+    /// Core picks no name for a label-less row: it hands the GUI
+    /// the binding, which names it by its catalog name or its Lua
+    /// (#2116), never by its combo.
+    @Test("conflicts(in:) carries an unnamed row whole")
+    func conflictsCarriesTheUnnamedRow() {
         let layers = [
             KeyLayer(
                 name: "default",
@@ -127,7 +131,7 @@ struct KeybindingConflictsTests {
         ]
         let list = KeybindingConflicts.conflicts(in: layers)
         #expect(list.count == 1)
-        #expect(list[0].name == "cmd+w")
+        #expect(list[0].binding == layers[0].bindings[0])
     }
 
     @Test("conflicts(in:) flags an unparseable combo")
@@ -146,7 +150,7 @@ struct KeybindingConflictsTests {
         ]
         let list = KeybindingConflicts.conflicts(in: layers)
         #expect(list.count == 1)
-        #expect(list[0].name == "Bad")
+        #expect(list[0].binding.label == "Bad")
         #expect(list[0].target == .unrecognized)
     }
 }

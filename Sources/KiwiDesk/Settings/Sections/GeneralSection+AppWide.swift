@@ -48,7 +48,7 @@ extension GeneralSection {
             L(
                 "general.quit_pile_depth.caption",
                 "Before KiwiDesk stops, it arranges managed "
-                    + "windows on each display so their title "
+                    + "windows on each screen so their title "
                     + "bars remain reachable."
             )
         )
@@ -81,7 +81,7 @@ extension GeneralSection {
     private var pileHelp: String {
         L(
             "general.quit_pile_depth.help",
-            "Windows tile the display until they "
+            "Windows tile the screen until they "
                 + "outnumber the grid's cells, then pile "
                 + "up in them; the grid grows, up to 4×4, "
                 + "when a pile would pass this number."

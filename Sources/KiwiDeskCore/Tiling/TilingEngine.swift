@@ -112,6 +112,9 @@ public final class TilingEngine {
     /// Tiled windows need no entry: their frames are recomputed
     /// by the layout on every retile.
     var stashedFrames: [WindowID: CGRect] = [:]
+    /// The capture `restoreStashed` last SENT per window: only a
+    /// sent capture may be delivered at its origin alone (#2129).
+    var stashSent: [WindowID: CGRect] = [:]
 
     /// Which Spaces' parks a re-issuing pass forces (#1508).
     var stashDepartures = StashDepartures()
@@ -195,6 +198,27 @@ public final class TilingEngine {
     /// (#1787); `allScreenBounds`' sibling, pinned the same way.
     var allScreenFrames: @MainActor () -> [CGRect] = {
         ScreenList.all.map(KiwiCore.axFrame(of:))
+    }
+
+    /// A screen's `Display.fingerprint`, the key of a bar's
+    /// per-screen edge (#1948) — the published display's, which
+    /// `bootstrapCoreServices` wires to `KiwiCore.screenFingerprint
+    /// (of:)` so the engine and the bars read one identity; nil
+    /// for a screen no display answers, which takes the bars' own
+    /// edges.
+    var screenFingerprint: @MainActor (NSScreen) -> String? = { _ in
+        nil
+    }
+
+    /// The fingerprint `screen`'s bar edges resolve under in
+    /// `settings` (the live ones unless a draft is handed in) —
+    /// nil while no bar has a screen of its own, skipping the read.
+    func fingerprint(
+        of screen: NSScreen,
+        in settings: TilingSettings? = nil
+    ) -> String? {
+        (settings ?? self.settings).hasScreenEdges
+            ? screenFingerprint(screen) : nil
     }
 
     public init() {

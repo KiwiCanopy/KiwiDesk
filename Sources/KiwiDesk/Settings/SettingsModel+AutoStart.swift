@@ -21,13 +21,14 @@ extension SettingsModel {
         guard enabled != autoStart.level.opensAtLogin else {
             return
         }
-        guard autoStart.registerable || !enabled else { return }
         autoStartBusy = true
         Task {
             let result = await writeLoginItem(enabled)
             autoStart = result
             autoStartLoaded = true
             autoStartBusy = false
+            // Core refused an unstable copy: nothing was applied.
+            guard result.registerable else { return }  // #2094
             flashAutoStart(
                 result.level,
                 reduceMotion: reduceMotion

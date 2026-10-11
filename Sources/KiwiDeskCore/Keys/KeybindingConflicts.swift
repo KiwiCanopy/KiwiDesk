@@ -34,28 +34,23 @@ public enum KeybindingConflicts {
         in bindings: [KeyBinding]
     ) -> Conflict? {
         guard !binding.combo.isEmpty else { return nil }
-        let name =
-            binding.label.isEmpty ? binding.combo : binding.label
         guard let combo = KeyCombo.parse(binding.combo) else {
-            return Conflict(name: name, target: .unrecognized)
+            return Conflict(binding: binding, target: .unrecognized)
         }
         for other in bindings
         where other.id != binding.id && !other.combo.isEmpty {
             guard let otherCombo = KeyCombo.parse(other.combo)
             else { continue }
             if otherCombo == combo {
-                let who =
-                    other.label.isEmpty
-                    ? other.combo : other.label
                 return Conflict(
-                    name: name,
-                    target: .otherBinding(who)
+                    binding: binding,
+                    target: .otherBinding(other)
                 )
             }
         }
         if let system = SystemShortcuts.map[combo] {
             return Conflict(
-                name: name,
+                binding: binding,
                 target: .systemShortcut(system)
             )
         }
@@ -81,14 +76,16 @@ public enum KeybindingConflicts {
 }
 
 /// Structured representation of a keybinding conflict (`SystemShortcut`, #96).
+/// It carries the BINDINGS, never a name: the GUI names each side
+/// the way its row does (`KeybindingCatalog.localizedName`, #2116).
 public struct Conflict: Equatable, Sendable {
     /// Conflict category and target details.
     public enum Target: Equatable, Sendable {
         case systemShortcut(SystemShortcut)
-        case otherBinding(String)
+        case otherBinding(KeyBinding)
         case unrecognized
     }
 
-    public let name: String
+    public let binding: KeyBinding
     public let target: Target
 }

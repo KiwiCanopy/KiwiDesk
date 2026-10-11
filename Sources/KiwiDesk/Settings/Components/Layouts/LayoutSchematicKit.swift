@@ -212,7 +212,7 @@ struct SchematicPileTile: View {
     }
 }
 
-/// Off-monitor ghost window representation for scrolling layouts.
+/// Off-screen ghost window representation for scrolling layouts.
 struct SchematicGhostOverflow: View {
     @Environment(\.schematicPalette) private var palette
 

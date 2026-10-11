@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 // Sticky windows belong to one home space; presence on other spaces is derived
@@ -13,6 +14,18 @@ extension StateCoordinator {
         space.windows.filter { id in
             guard let window = windows[id] else { return false }
             return !window.isFloating && !window.isFullscreen
+        }
+    }
+
+    /// The quit gather's members, floats included (#1864): every
+    /// one the grid can place — not a fullscreen window, on its own
+    /// macOS Space (#670), nor a transient overlay or a sizeless
+    /// window.
+    public func gatherMembers(of space: Space) -> [WindowID] {
+        space.windows.filter { id in
+            guard let window = windows[id] else { return false }
+            return !window.isFullscreen && !window.isTransientOverlay
+                && window.frame.size != .zero
         }
     }
 
@@ -74,6 +87,20 @@ extension StateCoordinator {
     func homeDisplay(of window: WindowID) -> DisplayID? {
         workspaces.space(of: window)
             .flatMap { workspaces.display(of: $0) }
+    }
+
+    /// Whether the stash parks `window` while `space` is not shown —
+    /// the one per-window park verdict: a fullscreen window is on its
+    /// own Desktop (#670) and a sticky one may be exempt (#445).
+    /// It answers as if `space` were hidden: whether it is shown is
+    /// each asker's own input to pair with it, as the pointer's drag
+    /// exemption is the engine's.
+    func parksOnInactive(
+        _ window: ManagedWindow,
+        in space: SpaceID
+    ) -> Bool {
+        !window.isFullscreen
+            && !stickyExemptFromStash(window, onSpace: space)
     }
 
     /// Whether sticky window is exempt from inactive stash on `space`

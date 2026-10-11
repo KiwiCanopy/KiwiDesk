@@ -45,6 +45,9 @@ private func dictionaryDescriptions(
 ) -> [String] {
     var found: [String] = []
     for child in Mirror(reflecting: value).children {
+        // A bar's per-screen edges are keyed by a screen's
+        // fingerprint, never a Space (#1948).
+        if child.label == "edgeOverride" { continue }
         let mirror = Mirror(reflecting: child.value)
         if mirror.displayStyle == .dictionary {
             found.append(String(describing: child.value))

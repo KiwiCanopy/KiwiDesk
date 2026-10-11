@@ -97,8 +97,8 @@ struct ShortcutsApplyOnSaveTests {
                 "config load, profile re-apply and rule refresh,"
                     + " each from the saved gui.json"
             ),
-        "KiwiDeskCore/Profiles/KiwiCore+StarterRescale.swift":
-            (1, "the digit top-up, from the sidecar it just saved"),
+        "KiwiDeskCore/Profiles/KiwiCore+ShortcutTopUp.swift":
+            (1, "the top-ups' append, from the sidecar it just saved"),
         "KiwiDeskCore/App/KiwiCore+Config.swift":
             (1, "config load clears the table before the file runs"),
         "KiwiDeskCore/Lua/KiwiCore+LuaAPI.swift":

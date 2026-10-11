@@ -27,7 +27,7 @@ graph LR
     KEY[Keys / IPC / Lua] --> CMD[Commands: set_* verbs]
     CMD --> ST
     CFG[Config / Profiles] --> RES[resolve] --> TI
-    AN[Animation: per-monitor DisplayLink] --> PL
+    AN[Animation: per-screen DisplayLink] --> PL
 ```
 
 ---
@@ -40,7 +40,7 @@ flowchart TD
     RC -->|normal delta| ST
     RC -->|tab pair at same frame| TR["TabReconciler coalesce<br/>→ .windowRekeyed"]
     TR --> ST["State: flat WindowID per space<br/>id swapped in place, no tree"]
-    ST --> TI["Tiling: one space per display,<br/>park off-display spaces"]
+    ST --> TI["Tiling: one space per screen,<br/>park off-screen spaces"]
     TI --> LA["Layouts: pure fn<br/>frames from array + resolved settings"]
     LA --> PL["OS: place windows<br/>SkyLight dlsym → AX fallback"]
     PL -.->|un-forced: ±2 pt tolerance absorbs AX echo| OS
@@ -66,13 +66,13 @@ flowchart TD
    window's `CGWindowID` is **not** stable.
 3. **`State`** — the reconciled result mutates the flat
    `[WindowID]`-per-space array.
-4. **`Tiling`** — lays out **one space per connected display**
-   (each display's `activeSpace(on:)`) onto that display's own
-   bounds, and parks every space visible on no display in a screen
+4. **`Tiling`** — lays out **one space per connected screen**
+   (each screen's `activeSpace(on:)`) onto that screen's own
+   bounds, and parks every space visible on no screen in a screen
    corner (`stashInactive`, keyed off `visibleSpaces`). The focused
-   display's space is the global `activeSpace`; the other
-   displays' shown spaces are tracked alongside it, so focusing
-   one monitor never hides another's. A single monitor has exactly
+   screen's space is the global `activeSpace`; the other
+   screens' shown spaces are tracked alongside it, so focusing
+   one screen never hides another's. A single screen has exactly
    one active space.
 5. **`Layouts`** — a **pure function** computes frames from the
    array and the resolved settings: no AX, no I/O (§5). Each
@@ -175,6 +175,13 @@ default `.event` pass (`RetilePass`). A reissue forces the park
 of only the Spaces that just left view; a window parked longer
 keeps its place (`StashDepartures`).
 
+:::unreleased
+A `space_bar.*` or `app_bar.*` write that leaves every layout's
+`shelfReservation(in:on:)` — the input `layoutBounds` reads —
+unchanged on every screen runs no pass at all: it repaints the bars and
+re-clamps the floats (#1524).
+:::
+
 An explicit Space switch with switch animation on wraps that
 reissue in the plate slide (`Commands/KiwiCore+SpaceSlide`):
 before the pass, the overlay in `Animation/` covers the windows
@@ -230,17 +237,17 @@ profile with its own look keeps its settings as stored.
 Hand-mirrored field lists here are guarded by parity tests — see
 `.claude/rules/parity-tests.md`.
 
-## 4. Animation (per-monitor)
+## 4. Animation (per-screen)
 
-Animated placement is driven by **one `DisplayLink` per monitor**,
+Animated placement is driven by **one `DisplayLink` per screen**,
 never a single global timer (§5). `Animation` interpolates and
 hands each frame to the `OS` placement path of pipeline 1's final
 step; position-only frames are applied per app.
 
 ```mermaid
 flowchart LR
-    P["placement (animated, not snapped)"] --> DL1["DisplayLink · monitor 1"]
-    P --> DL2["DisplayLink · monitor 2"]
+    P["placement (animated, not snapped)"] --> DL1["DisplayLink · screen 1"]
+    P --> DL2["DisplayLink · screen 2"]
     DL1 --> AN["Animation: interpolate frames"]
     DL2 --> AN
     AN --> OSP["OS placement path<br/>position-only frames, per app"]
@@ -293,6 +300,16 @@ flowchart TD
 
 The startup sweep one second later takes the same chunked,
 budgeted path and re-tracks what cold AX trees under-reported.
+
+:::unreleased
+After a restart of the Mac the tail has no session to replay by
+id. A snapshot the logout freeze wrote — or a plain Quit's,
+when the boot or login began within ten minutes of it (#1864) —
+is matched instead (`CrossSessionMatch`, #1385): the windows the scan paired by app
+are re-keyed into the same replay, a window that arrives later is
+filed before its create fold as a slow app's window is, and a
+pass about 30 s after launch pairs the rest by title.
+:::
 
 ---
 

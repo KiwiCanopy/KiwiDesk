@@ -23,6 +23,12 @@ struct LayerRowWriterCensusTests {
     private static let writers: [String: (Int, String)] = [
         "KiwiDeskCore/Config/NavigationChords.swift":
             (1, "the dedupe itself"),
+        "KiwiDeskCore/Config/SpaceShortcutRemoval.swift":
+            (
+                1,
+                "drop: removes the rows naming a gone Space, adds"
+                    + " none (#1827)"
+            ),
         "KiwiDeskCore/Config/GuiConfig.swift":
             (
                 1,
@@ -31,11 +37,19 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDesk/Settings/SettingsModel+LayerAdd.swift":
             (1, "import: merges, then takes the dedupe (driven)"),
-        "KiwiDeskCore/Profiles/KiwiCore+StarterRescale.swift":
+        "KiwiDeskCore/Profiles/KiwiCore+ShortcutTopUp.swift":
             (
                 1,
-                "top-up: adds only actions no profile binds"
-                    + " (DigitTopUpOverrideTests)"
+                "the digit and Desktop top-ups' one append: adds"
+                    + " only actions no profile binds"
+                    + " (DigitTopUpOverrideTests,"
+                    + " DesktopShortcutTopUpTests)"
+            ),
+        "KiwiDesk/Settings/SettingsModel+LiveWrite.swift":
+            (
+                1,
+                "draft adopts a top-up's rows: refuses an action the"
+                    + " layer already runs (DesktopShortcutDraftTests)"
             ),
         "KiwiDesk/Settings/SettingsModel+Reset.swift":
             (

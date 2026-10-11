@@ -287,7 +287,7 @@ bite large test PRs:
   `LocalizationManager.shared.select("en")` as the first line of
   each test **body**, never `init`: suites interleave on the main
   actor at the init→body hop and another suite's `select()` lands
-  in that window. `MonitorReadoutTests` owns that argument and is
+  in that window. `ScreenReadoutTests` owns that argument and is
   the worked example.
 
   **It is not only English literals.** An assertion on argument

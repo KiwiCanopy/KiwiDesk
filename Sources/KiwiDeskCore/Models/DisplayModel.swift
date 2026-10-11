@@ -40,9 +40,15 @@ public struct Display: Sendable, Equatable {
 
     /// Stable identity string based on name and resolution.
     public var fingerprint: String {
-        let w = Int(frame.width)
-        let h = Int(frame.height)
-        return "\(name):\(w)x\(h)"
+        Self.fingerprint(name: name, frame: frame)
+    }
+
+    /// The fingerprint of a screen named `name` with `frame`.
+    public static func fingerprint(
+        name: String,
+        frame: CGRect
+    ) -> String {
+        "\(name):\(Int(frame.width))x\(Int(frame.height))"
     }
 
     /// `fingerprint`'s two parts — the screen name and its

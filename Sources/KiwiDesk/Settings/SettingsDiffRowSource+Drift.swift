@@ -36,7 +36,7 @@ extension SettingsDiffRowSource {
         case .screensUnsaved(let name):
             return [
                 SettingsDiffRow.note(
-                    .monitors(.fingerprints),
+                    .screens(.fingerprints),
                     instance: driftInstance,
                     label: L("diff.drift.screens", "Screens"),
                     // A screen-count mismatch is the one drift

@@ -12,8 +12,8 @@ struct SpaceOverrideResetTests {
     private let space = SpaceID("2")
 
     /// A settings value with an override under three layouts for
-    /// `space`, one field each — plus a gap override, which is a
-    /// per-space setting but NOT a layout override.
+    /// `space`, one field each — plus a gap override, which the
+    /// total counts (#1775) and a layout reset leaves alone.
     private func populated() -> TilingSettings {
         var s = TilingSettings()
         var bsp = BspOverride()
@@ -29,14 +29,16 @@ struct SpaceOverrideResetTests {
         return s
     }
 
-    @Test("Field count sums every layout for the space")
+    @Test("Field count sums every layout and the gaps for the space")
     func totalCount() {
-        let s = populated()
-        #expect(s.overrideFieldCount(for: space) == 3)
+        var s = populated()
+        #expect(s.spaceOverrideCount(for: space) == 4)
         #expect(s.overrideFieldCount(.bsp, for: space) == 1)
         #expect(s.overrideFieldCount(.grid, for: space) == 0)
-        // A gap override is not a layout override — never counted.
-        #expect(s.overrideFieldCount(for: SpaceID("nope")) == 0)
+        #expect(s.spaceOverrideCount(for: SpaceID("nope")) == 0)
+        // The gaps count once, whatever the layout (#1775).
+        s.gapsOverride[space] = nil
+        #expect(s.spaceOverrideCount(for: space) == 3)
     }
 
     @Test("Dormant list excludes the active layout")
@@ -65,14 +67,14 @@ struct SpaceOverrideResetTests {
         // The other layers survive.
         #expect(s.stack.override[space] != nil)
         #expect(s.scrolling.override[space] != nil)
-        #expect(s.overrideFieldCount(for: space) == 2)
+        #expect(s.spaceOverrideCount(for: space) == 3)
     }
 
     @Test("Reset all clears every layer but keeps gap override")
     func resetAll() {
         var s = populated()
         s.resetAllLayoutOverrides(for: space)
-        #expect(s.overrideFieldCount(for: space) == 0)
+        #expect(s.spaceOverrideCount(for: space) == 1)
         #expect(s.bsp.override[space] == nil)
         #expect(s.stack.override[space] == nil)
         #expect(s.scrolling.override[space] == nil)

@@ -19,3 +19,15 @@ public enum BootPhase: Equatable, Sendable {
         return false
     }
 }
+
+/// How far a restart's cross-session restore has placed the
+/// previous arrangement (#2133). `total` is what the match owed at
+/// boot; `placed` counts its pairs at boot, at arrivals and at the
+/// title settle. It ends at the settle, or once every window is
+/// placed, although the match stays open to its bound for late
+/// arrivals; a change of arrangement drops it to `none`.
+public enum RestorePhase: Equatable, Sendable {
+    case none
+    case placing(placed: Int, total: Int)
+    case done(placed: Int, total: Int)
+}

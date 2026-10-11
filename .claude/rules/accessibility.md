@@ -210,7 +210,13 @@ editing AX code:
   of `arrangeBootDesk` issues a pass, and a new boot-time restore
   source joins `CrashRecovery.takeBootSnapshot` rather than
   replaying after it, as the crash autosave once did from
-  `crash.start()`. `BootArrangeWiringTests` needles the tail;
+  `crash.start()`. The one ruled second door is the cross-session
+  candidate (#1385): `arrangeBootDesk` takes
+  `takeCrossSessionCandidate` — produced by that same
+  `takeBootSnapshot` — only where the session is nil, and its
+  late phases, the arrival claim and the title pass, run after
+  boot by design, since macOS reopens windows for a minute
+  (`CrossSessionRestoreTests`). `BootArrangeWiringTests` needles the tail;
   `BootArrangesAfterRestoreTests` and
   `InPlaceRestartNoMotionTests` drive `arrangeBootDesk` over a
   scanned desk and read every frame it issues through

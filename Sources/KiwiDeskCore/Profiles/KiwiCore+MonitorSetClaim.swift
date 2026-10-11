@@ -217,8 +217,8 @@ extension KiwiCore {
             .object([
                 "taken_from": .array(released.map { .string($0) }),
                 "reason": .string(
-                    "The connected monitor set now belongs to "
-                        + "'\(claimant)'; a monitor set belongs to "
+                    "The connected screen setup now belongs to "
+                        + "'\(claimant)'; a screen setup belongs to "
                         + "one profile."
                 ),
             ])

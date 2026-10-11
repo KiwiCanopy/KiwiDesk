@@ -22,6 +22,8 @@ extension ShortcutsReferenceBuilder {
     ) -> [ShortcutSubgroup] {
         let focus =
             KeybindingCatalog.focusDirections
+            + KeybindingCatalog.spaceStepRows
+            + KeybindingCatalog.spaceHistoryRows
             + KeybindingCatalog.goToSpace(spaces, icons: spaceIcons)
             + KeybindingCatalog.goToDesktop(
                 desktops.desktops,

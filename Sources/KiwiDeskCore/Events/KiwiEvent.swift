@@ -3,7 +3,7 @@ import Foundation
 
 /// System events observed and emitted by the `EventLoop`.
 public enum KiwiEvent: Sendable {
-    case appLaunched(pid: pid_t, name: String)
+    case appLaunched(pid: pid_t, name: String, bundleID: String?)
     case appTerminated(pid: pid_t)
     case windowCreated(ManagedWindow)
     /// Window left layout (distinguishes user minimize from window close).

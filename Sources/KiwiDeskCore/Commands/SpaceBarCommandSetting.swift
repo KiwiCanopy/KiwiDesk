@@ -6,7 +6,14 @@ import Foundation
 /// one vocabulary and their messages must not drift.
 enum SpaceBarCommandSetting {
     case enabled(Bool)
+    case reserve(Bool)
     case edge(AppBarEdge)
+    /// `set_edge(edge, screen)` — one screen's edge (#1948), the
+    /// screen resolved to its fingerprint. It needs the screens a
+    /// write judges, so `apply(to:)` writes nothing for it and
+    /// `KiwiCore` applies it through `ScreenEdged.setEdge(_:on:
+    /// among:)` with `screenEdgeScope(monitorSets:)`.
+    case screenEdge(AppBarEdge, screen: String)
     case glyphSpan(Int)
     case glyphGap(CGFloat)
     case groupAdjacentWindows(Bool)
@@ -66,8 +73,11 @@ enum SpaceBarCommandSetting {
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError>? {
         switch field {
         case "edge":
-            return BarSettingChoice.value(args, AppBarEdge.self)
-                .map(Self.edge)
+            return BarSettingChoice.edge(args).map { parsed in
+                parsed.screen.map {
+                    .screenEdge(parsed.edge, screen: $0)
+                } ?? .edge(parsed.edge)
+            }
         case "active_indicator":
             return BarSettingChoice.value(
                 args,
@@ -91,6 +101,7 @@ enum SpaceBarCommandSetting {
     private static var boolFields: [String: (Bool) -> SpaceBarCommandSetting] {
         [
             "enabled": Self.enabled,
+            "reserve": Self.reserve,
             "show_front_app": Self.showFrontApp,
             "hide_empty": Self.hideEmpty,
             "sticky_badge": Self.stickyBadge,
@@ -209,7 +220,9 @@ enum SpaceBarCommandSetting {
     func apply(to style: inout SpaceBarStyle) {
         switch self {
         case .enabled(let value): style.enabled = value
-        case .edge(let value): style.edge = value
+        case .reserve(let value): style.reserve = value
+        case .edge(let value): style.setEdge(value)
+        case .screenEdge: break
         case .glyphSpan(let value): style.glyphSpan = value
         case .glyphGap(let value):
             style.glyphGap = SpaceBarStyle.clampGlyphGap(value)

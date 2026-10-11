@@ -186,6 +186,42 @@ struct TemporarySpaceTests {
         #expect(core.state.workspaces[SpaceID(7)] != nil)
     }
 
+    /// A visit arms it too (#1994): `focus_space` to a new id
+    /// makes an empty Space, and leaving it still empty deletes
+    /// it, while a New Space nobody has visited stays.
+    @Test("an empty one goes once visited and left")
+    func visitedEmptyGoes() throws {
+        let core = try docked()
+        core.execute("create_space", args: [.string("7")])
+        // Past the two-screen plan's 5–8, so on Space 1's screen:
+        // switching that screen back is what stops showing it.
+        let fresh = SpaceID(12)
+        core.execute("focus_space", args: [.string(fresh.raw)])
+        #expect(core.isTemporary(fresh))
+        #expect(core.state.workspaces.activeSpace == fresh)
+        core.execute("focus_space", args: [.string("1")])
+        #expect(core.state.workspaces[fresh] == nil)
+        #expect(core.state.workspaces[SpaceID(7)] != nil)
+    }
+
+    /// Made on the fly, they carry no chosen order: they sort by
+    /// number among their own slots, declared Spaces untouched.
+    @Test("they line up by number")
+    func sortByNumber() throws {
+        let core = try docked()
+        let declared = core.state.workspaces.allSpaces.map(\.id)
+        for (id, window) in [("8", 13), ("6", 12), ("7", 11)] {
+            core.execute(
+                "move_to_space",
+                args: [.string(id), .number(Double(window))]
+            )
+        }
+        let order = core.state.workspaces.allSpaces.map(\.id)
+        #expect(Array(order.prefix(declared.count)) == declared)
+        let temporaries = order.filter(core.isTemporary)
+        #expect(temporaries == [SpaceID(6), SpaceID(7), SpaceID(8)])
+    }
+
     @Test("a hidden app's window keeps it")
     func hiddenWindowKeepsIt() throws {
         for hidden in [true, false] {

@@ -32,4 +32,16 @@ extension KiwiCore {
             return nil
         }
     }
+
+    /// An exiting app, read before the fold drops its windows:
+    /// its away entries are gone for good (#1146), and each window
+    /// it took is a close on the logout rollback's ledger (#1385)
+    /// — an exit is no hide and no Desktop departure.
+    func prepareAppExit(_ pid: pid_t) {
+        retireAwayDebts(ofExitedApp: pid)
+        BarIconCache.forget(pid: pid)
+        for _ in state.windows.windows(pid: pid) {
+            crash.noteDeparture(closed: true)
+        }
+    }
 }

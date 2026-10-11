@@ -154,7 +154,7 @@ struct SpaceOverrideUnlockTests {
         )
         // The values themselves are untouched by the mode: the
         // offer is chrome, the override is state.
-        #expect(settings.overrideFieldCount(for: spaces[0]) == 1)
+        #expect(settings.spaceOverrideCount(for: spaces[0]) == 1)
     }
 
 }

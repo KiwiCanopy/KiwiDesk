@@ -40,7 +40,41 @@ struct KeybindingFamilyRows: View {
                     command: command
                 )
             }
+            liveOnlyNotes(commands)
         }
+    }
+
+    /// Under a family carrying live-only Spaces (#1827): their
+    /// shortcuts do not outlive them.
+    @ViewBuilder private func liveOnlyNotes(
+        _ commands: [NavCommand]
+    ) -> some View {
+        let kinds = commands.compactMap(\.liveOnly)
+        if kinds.contains(.temporary) {
+            note(
+                L(
+                    "shortcuts.temporary_space.note",
+                    "A temporary Space's shortcuts go when the Space "
+                        + "does. Add it to the profile in %1$@ to keep "
+                        + "them.",
+                    SettingsDestination.spaces.title
+                )
+            )
+        }
+        if kinds.contains(where: { $0 != .temporary }) {
+            note(
+                L(
+                    "shortcuts.held_space.note",
+                    "A held Space's shortcuts go when its hold ends."
+                )
+            )
+        }
+    }
+
+    private func note(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.secondary)
     }
 
     private var renderedRows: [NavCommand] {
@@ -90,12 +124,16 @@ struct FocusGroup: View {
         SettingsSection(SettingsCatalog.shortcuts.focusKeys) {
             ForEach(ShortcutsRowOrder.focusAtRest, id: \.id) {
                 key in
-                KeybindingFamilyRows(
-                    model: model,
-                    bindings: $bindings,
-                    key: key,
-                    expander: expander
-                )
+                if key == .shortcuts(.spaceHistory) {
+                    SpaceHistoryRow(model: model)
+                } else {
+                    KeybindingFamilyRows(
+                        model: model,
+                        bindings: $bindings,
+                        key: key,
+                        expander: expander
+                    )
+                }
             }
             DesktopShortcutsOffer(
                 model: model,

@@ -8,12 +8,18 @@ extension SkyLight {
     typealias TransactionCommitFn =
         @convention(c) (CFTypeRef, Int32) -> CGError
 
-    static let transactionCreate: TransactionCreateFn? = symbol(
+    static let transactionCreateSymbol = symbol(
         "SLSTransactionCreate",
         as: TransactionCreateFn.self
     )
-    static let transactionCommit: TransactionCommitFn? = symbol(
+    static var transactionCreate: TransactionCreateFn? {
+        transactionCreateSymbol.function
+    }
+    static let transactionCommitSymbol = symbol(
         "SLSTransactionCommit",
         as: TransactionCommitFn.self
     )
+    static var transactionCommit: TransactionCommitFn? {
+        transactionCommitSymbol.function
+    }
 }

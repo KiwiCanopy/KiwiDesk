@@ -17,7 +17,7 @@ struct KeyReachColumn: View {
                 model: model,
                 family: .key,
                 app: key,
-                subject: binding.label.isEmpty ? binding.lua : binding.label,
+                subject: subject,
                 reading: reading,
                 value: binding.combo.isEmpty
                     ? L("app_rules.dash", "—")
@@ -28,6 +28,14 @@ struct KeyReachColumn: View {
 
     var key: String {
         RuleReachTable<String>.keyID(layer: layer, lua: binding.lua)
+    }
+
+    /// The checklist's name for the row, in the reader's language.
+    var subject: String {
+        KeybindingCatalog.localizedName(
+            of: binding,
+            config: model.config
+        )
     }
 }
 

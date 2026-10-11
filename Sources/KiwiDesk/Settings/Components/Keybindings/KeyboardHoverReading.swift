@@ -107,8 +107,8 @@ extension KeyboardHoverReading {
         .map { entry in
             Claim(
                 chord: entry.layer.label,
-                action: KeybindingCatalog.localizedLabel(
-                    for: entry.binding.label,
+                action: KeybindingCatalog.localizedName(
+                    of: entry.binding,
                     config: config
                 ),
                 conflict: ringed

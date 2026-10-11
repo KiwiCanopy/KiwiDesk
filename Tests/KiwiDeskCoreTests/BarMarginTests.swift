@@ -89,7 +89,7 @@ struct BarMarginTests {
         let settings = settings(shelf(), edge: .bottom)
         let outer = Gaps.Outer(top: 10, bottom: 10, left: 10, right: 10)
         let area = LayoutContext.usable(
-            settings.layoutBounds(from: visible, mode: .scrolling),
+            settings.layoutBounds(from: visible, mode: .scrolling, on: nil),
             outer: outer
         )
         #expect(area.maxY == visible.maxY - 32 - 10)
@@ -108,7 +108,8 @@ struct BarMarginTests {
         let area = LayoutContext.usable(
             settings(shelf, edge: .bottom).layoutBounds(
                 from: visible,
-                mode: .scrolling
+                mode: .scrolling,
+                on: nil
             ),
             outer: Gaps.uniform(10).outer
         )
@@ -122,10 +123,11 @@ struct BarMarginTests {
         let shelf = shelf(outer: 2, inner: 3)
         let one = settings(shelf, edge: .top).layoutBounds(
             from: visible,
-            mode: .scrolling
+            mode: .scrolling,
+            on: nil
         )
         let both = settings(shelf, edge: .top, spaceBar: true)
-            .layoutBounds(from: visible, mode: .scrolling)
+            .layoutBounds(from: visible, mode: .scrolling, on: nil)
         #expect(both == one)
         #expect(both.minY == visible.minY + 2 + 32 + 3)
     }

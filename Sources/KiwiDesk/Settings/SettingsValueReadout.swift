@@ -43,8 +43,8 @@ enum SettingsValueReadout {
             // Read from macOS or the user's own tick — never a
             // draft leaf, so nothing to narrate.
             return []
-        case .monitors(let k):
-            return monitorsRows(k, old: old, new: new)
+        case .screens(let k):
+            return screensRows(k, old: old, new: new)
         case .profiles(let k):
             return profilesRows(k, old: old, new: new)
         case .shortcuts(let k):

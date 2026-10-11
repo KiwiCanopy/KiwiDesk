@@ -19,9 +19,8 @@ import Foundation
 ///
 /// Reading a restart: compare the `phase=boot` batch against the
 /// last `phase=autosave` batch logged BEFORE the logout began.
-/// Until step 1's logout freeze lands (a separate branch), later
-/// autosave batches can show the desk shrinking as macOS closes
-/// the apps.
+/// Later batches show the desk shrinking as macOS quits the apps;
+/// the freeze's rollback puts that earlier batch back on disk.
 ///
 /// Removal: this file, `CrashRecovery.restoreKeys` and
 /// `onAutosaved`, their wiring, the call in `arrangeBootDesk`,

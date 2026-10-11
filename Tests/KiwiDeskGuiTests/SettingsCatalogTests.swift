@@ -124,7 +124,9 @@ struct SettingsCatalogTests {
         // 129 since #1931: the Space switch duration row.
         // 128 since #1520: Shortcuts' General drawer left; its
         // two rows stay as Open applications' controls.
-        #expect(allEntries.count == 128)
+        // 130 since #1948: Each bar's two Per screen drawers.
+        // 131 since #2142: the Desktop switch cue row.
+        #expect(allEntries.count == 131)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

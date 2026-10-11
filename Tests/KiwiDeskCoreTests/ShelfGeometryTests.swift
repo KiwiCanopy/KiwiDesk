@@ -81,7 +81,7 @@ struct ShelfGeometryTests {
             shelf: settings.kiwishelf
         )
         func bounds(_ s: TilingSettings, _ mode: LayoutMode) -> CGRect {
-            s.layoutBounds(from: visible, mode: mode)
+            s.layoutBounds(from: visible, mode: mode, on: nil)
         }
         for mode in LayoutMode.allCases {
             #expect(bounds(settings, mode) == visible, "\(mode)")

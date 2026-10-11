@@ -74,6 +74,10 @@ extension BorderManager {
             // Without the WindowServer stream no reorder event
             // tells a shown ring its target moved, so every sync
             // re-stacks.
+            overlay.place(
+                spansDesktops: spec.spansDesktops,
+                desktop: spec.desktop
+            )
             let held = ordersDormant(spec.window, overlay: overlay)
             if Self.ordersOverlay(
                 reassert: reassertOrder,

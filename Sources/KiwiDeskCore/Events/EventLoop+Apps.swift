@@ -108,7 +108,8 @@ extension EventLoop {
         onEvent(
             .appLaunched(
                 pid: app.processIdentifier,
-                name: app.localizedName ?? "?"
+                name: app.localizedName ?? "?",
+                bundleID: app.bundleIdentifier
             )
         )
     }
@@ -243,7 +244,7 @@ extension EventLoop {
         // (departed/arrived windows tile to identical frames, #308).
         lastDesktopChange = Date()
         onEvent(.desktopChanged)
-        reconcileAll()
+        foldsSwitchResync { reconcileAll() }
     }
 
     // MARK: - Displays

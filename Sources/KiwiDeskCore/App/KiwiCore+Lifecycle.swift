@@ -209,6 +209,12 @@ extension KiwiCore {
         stickyMarks.clear()
         retireReduceTransparency()
         retireFontSet()
+        payOwedShortcutDrops()  // nothing carries the debt (#1827)
+        // Captured BEFORE the gather moves anything: each float's
+        // record is the frame the next launch gives back (#1864,
+        // `StopCaptureOrderTests`).
+        let captured =
+            boot.reachedReady ? crash.stopCapture(inPlace: inPlace) : nil
         // Gather windows onto their owning monitors before
         // any subsystem teardown; AX must still be live here.
         if inPlace {
@@ -227,6 +233,9 @@ extension KiwiCore {
         exec.cancelWatchdogs()
         SkyLightWindowLifecycle.stop()
         deferred.cancelAll()
+        // Its close task just went; an open match would claim the
+        // next start's arrivals (#1385).
+        closeCrossSession()
         mouse.stop()
         eventLoop.stop()
         sleepWake.stop()
@@ -252,7 +261,7 @@ extension KiwiCore {
         } else {
             // In place, the session memory a relaunch otherwise
             // starts fresh rides along (#930 ruling 5).
-            crash.shutdownCleanly(inPlace: inPlace)
+            crash.shutdownCleanly(inPlace: inPlace, captured: captured)
         }
         // #1230: which Space each Desktop was showing is the one
         // record here that has to outlive the process, and the

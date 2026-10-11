@@ -31,10 +31,10 @@ extension SettingsTheme {
     /// Chip corner radius.
     static let chipRadius: CGFloat = 9
 
-    /// Monitors picture card stroke weights at rest and selected
-    /// (`MonitorsChromeWiringTests`, #758).
-    static let monitorCardStroke: CGFloat = 1.5
-    static let monitorCardStrokeSelected: CGFloat = 3
+    /// Screens picture card stroke weights at rest and selected
+    /// (`ScreensChromeWiringTests`, #758).
+    static let screenCardStroke: CGFloat = 1.5
+    static let screenCardStrokeSelected: CGFloat = 3
 
     /// Palette tile stroke weights at rest and applied
     /// (`PaletteShelfChromeTests`, #757).
@@ -62,12 +62,12 @@ extension SettingsTheme {
     /// (`SettingsThemeContrastTests`, #1542).
     static let highlightWashOpacity: CGFloat = 0.06
 
-    /// Display card stand scale and clamp metrics
-    /// (`MonitorsChromeWiringTests`, #758).
-    static let monitorStandScale: CGFloat = 0.52
-    static let monitorStandMin: CGFloat = 44
-    static let monitorStandMax: CGFloat = 320
-    static let monitorNeckScale: CGFloat = 0.26
-    static let monitorNeckMin: CGFloat = 14
-    static let monitorNeckMax: CGFloat = 44
+    /// Screen card stand scale and clamp metrics
+    /// (`ScreensChromeWiringTests`, #758).
+    static let screenStandScale: CGFloat = 0.52
+    static let screenStandMin: CGFloat = 44
+    static let screenStandMax: CGFloat = 320
+    static let screenNeckScale: CGFloat = 0.26
+    static let screenNeckMin: CGFloat = 14
+    static let screenNeckMax: CGFloat = 44
 }

@@ -7,7 +7,7 @@ extension WMBridge {
     /// (`NativeSpaces.allSpaces()`).
     static func managedDisplaySpaces() -> [[String: Any]]? {
         let op = make(
-            "CopyManagedDisplaySpacesOperation",
+            .copyManagedDisplaySpaces,
             initializer: "init"
         ) { instance, selector in
             sender(as: InitFn.self)?(instance, selector)
@@ -18,7 +18,7 @@ extension WMBridge {
     /// Fetches assigned name for Space ID.
     public static func name(of space: SpaceID) -> String? {
         let op = make(
-            "SpaceCopyNameOperation",
+            .spaceCopyName,
             initializer: "initWithSpaceID:"
         ) { instance, selector in
             sender(as: InitIDFn.self)?(instance, selector, space)
@@ -39,7 +39,7 @@ extension WMBridge {
     /// Reads full property list dictionary for Space ID.
     public static func values(of space: SpaceID) -> [String: Any]? {
         let op = make(
-            "SpaceCopyValuesOperation",
+            .spaceCopyValues,
             initializer: "initWithSpaceID:"
         ) { instance, selector in
             sender(as: InitIDFn.self)?(instance, selector, space)
@@ -58,7 +58,7 @@ extension WMBridge {
         displayIdentifier: String
     ) -> Bool {
         let op = make(
-            "ManagedDisplaySetCurrentSpaceOperation",
+            .managedDisplaySetCurrentSpace,
             initializer: "initWithDisplayIdentifier:spaceID:"
         ) { instance, selector in
             sender(as: InitObjectIDFn.self)?(
@@ -78,7 +78,7 @@ extension WMBridge {
     /// a write nothing needs.
     public static func hideSpaces(_ spaces: [SpaceID]) -> Bool {
         let op = make(
-            "HideSpacesOperation",
+            .hideSpaces,
             initializer: "initWithSpaces:"
         ) { instance, selector in
             sender(as: InitObjectFn.self)?(
@@ -95,7 +95,7 @@ extension WMBridge {
         values: [String: Any] = [:]
     ) -> SpaceID? {
         let op = make(
-            "SpaceCreateOperation",
+            .spaceCreate,
             initializer: "initWithOptions:values:"
         ) { instance, selector in
             sender(as: InitOptionsObjectFn.self)?(
@@ -111,7 +111,7 @@ extension WMBridge {
     /// Destroys desktop space, migrating windows (#889 item 1).
     public static func destroySpace(_ space: SpaceID) -> Bool {
         let op = make(
-            "SpaceDestroyOperation",
+            .spaceDestroy,
             initializer: "initWithSpaceID:"
         ) { instance, selector in
             sender(as: InitIDFn.self)?(instance, selector, space)
@@ -125,7 +125,7 @@ extension WMBridge {
         of space: SpaceID
     ) -> Bool {
         let op = make(
-            "SpaceSetNameOperation",
+            .spaceSetName,
             initializer: "initWithSpaceID:name:"
         ) { instance, selector in
             sender(as: InitIDObjectFn.self)?(
@@ -144,7 +144,7 @@ extension WMBridge {
         of space: SpaceID
     ) -> Bool {
         let op = make(
-            "SpaceSetValuesOperation",
+            .spaceSetValues,
             initializer: "initWithSpaceID:values:"
         ) { instance, selector in
             sender(as: InitIDObjectFn.self)?(

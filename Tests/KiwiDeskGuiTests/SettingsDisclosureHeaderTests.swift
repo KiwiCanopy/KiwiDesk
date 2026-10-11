@@ -221,7 +221,7 @@ struct SettingsDisclosureHeaderTests {
         )
         #expect(
             style.contains(
-                ".rotationEffect(.degrees(isExpanded?90:0))"
+                ".rotationEffect(.degrees(isExpanded||locked?90:0))"
             )
         )
     }

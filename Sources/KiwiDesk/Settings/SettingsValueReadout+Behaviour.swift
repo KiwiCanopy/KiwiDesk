@@ -62,7 +62,7 @@ extension SettingsValueReadout {
                     census,
                     label: L(
                         "diff.label.float_scale_on_display_change",
-                        "Scale floats across displays"
+                        "Scale floats across screens"
                     ),
                     old: before.floatScaleOnDisplayChange,
                     new: after.floatScaleOnDisplayChange

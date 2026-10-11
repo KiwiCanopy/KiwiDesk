@@ -51,6 +51,7 @@ AutoStartManager (no stored pref)
 UserDefaults.SUAutomaticallyUpdate (Sparkle)
 UserDefaults.appearance
 UserDefaults.language
+appWide.desktopCue
 appWide.quitGridTargetDepth
 appWide.refusalSound
 config.appRules[app]
@@ -64,6 +65,7 @@ config.scrollGesture.naturalTrackpad
 config.scrollGesture.pan
 config.scrollGesture.spaceStep
 config.scrollGesture.stepDistance
+config.spaceHistory
 keybinding.grow_height
 keybinding.grow_width
 keybinding.open_settings
@@ -89,6 +91,7 @@ settings.animations.shelfDurationMS
 settings.animations.spaceChangeDurationMS
 settings.appBarStyle.activeIndicator
 settings.appBarStyle.edge
+settings.appBarStyle.edgeOverride[screen]
 settings.appBarStyle.groupAdjacentWindows
 settings.appBarStyle.titleCap
 settings.borderStyle.cornerStyle
@@ -180,6 +183,7 @@ settings.scrolling.wrapFocus
 settings.spaceBarStyle.activeIndicator
 settings.spaceBarStyle.edge
 settings.spaceBarStyle.edge (master)
+settings.spaceBarStyle.edgeOverride[screen]
 settings.spaceBarStyle.enabled
 settings.spaceBarStyle.focusedHighlightColor
 settings.spaceBarStyle.focusedItemColor

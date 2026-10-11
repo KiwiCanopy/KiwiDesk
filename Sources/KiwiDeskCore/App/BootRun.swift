@@ -24,4 +24,16 @@ final class BootRun {
         phase = next
         onPhaseChange(next)
     }
+
+    /// Handler fired on restore progress (#2133, `AppDelegate`).
+    var onRestoreChange: @MainActor (RestorePhase) -> Void = { _ in }
+
+    private(set) var restore: RestorePhase = .none
+
+    /// Publishes the restore's progress if changed.
+    func publishRestore(_ next: RestorePhase) {
+        guard next != restore else { return }
+        restore = next
+        onRestoreChange(next)
+    }
 }

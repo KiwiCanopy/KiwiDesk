@@ -20,7 +20,9 @@ enum BarsRowOrder {
     /// (#1731).
     static let kiwishelfEdges: [SettingKey] = [
         .kiwishelf(.spaceBarEdge),
+        .kiwishelf(.spaceBarScreenEdge),
         .kiwishelf(.appBarEdge),
+        .kiwishelf(.appBarScreenEdge),
     ]
 
     /// KiwiShelf card, behind the Style disclosure.

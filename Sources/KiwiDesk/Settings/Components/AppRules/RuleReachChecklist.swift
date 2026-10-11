@@ -37,6 +37,7 @@ struct RuleReachChecklist: View {
             model.floatReach(app, describe: SettingsModel.floatWords)
         case .key: model.keyReach(app)
         case .scroll: model.scrollReach(app)
+        case .history: model.historyReach()
         }
     }
 

@@ -29,22 +29,23 @@ struct ShelfSplitGeometryTests {
     @Test("A layout reserves the edges its bars draw on")
     func edgesPerMode() {
         let split = settings(space: .top, app: .bottom)
-        #expect(split.shelfEdges(in: .bsp) == [.top])
-        #expect(split.shelfEdges(in: .monocle) == [.top, .bottom])
-        #expect(split.shelfEdges(in: .scrolling) == [.top, .bottom])
+        #expect(split.shelfEdges(in: .bsp, on: nil) == [.top])
+        #expect(split.shelfEdges(in: .monocle, on: nil) == [.top, .bottom])
+        #expect(split.shelfEdges(in: .scrolling, on: nil) == [.top, .bottom])
         let fused = settings(space: .left, app: .left)
-        #expect(fused.shelfEdges(in: .monocle) == [.left])
-        #expect(fused.shelfEdges(in: .bsp) == [.left])
+        #expect(fused.shelfEdges(in: .monocle, on: nil) == [.left])
+        #expect(fused.shelfEdges(in: .bsp, on: nil) == [.left])
         let appOnly = settings(space: .top, app: .right, spaceBar: false)
-        #expect(appOnly.shelfEdges(in: .monocle) == [.right])
-        #expect(appOnly.shelfEdges(in: .bsp).isEmpty)
+        #expect(appOnly.shelfEdges(in: .monocle, on: nil) == [.right])
+        #expect(appOnly.shelfEdges(in: .bsp, on: nil).isEmpty)
     }
 
     @Test("A split App Bar's strip leaves the layout in its layouts only")
     func splitReservationReflows() {
         let split = settings(space: .top, app: .bottom)
-        let bsp = split.layoutBounds(from: visible, mode: .bsp)
-        let monocle = split.layoutBounds(from: visible, mode: .monocle)
+        let bsp = split.layoutBounds(from: visible, mode: .bsp, on: nil)
+        let monocle =
+            split.layoutBounds(from: visible, mode: .monocle, on: nil)
         #expect(bsp.minY == visible.minY + 32)
         #expect(bsp.maxY == visible.maxY)
         #expect(monocle.minY == visible.minY + 32)
@@ -143,7 +144,8 @@ struct ShelfSplitPlanTests {
             app: app(settings)
         )
         #expect(plans.count == 2)
-        let bounds = settings.layoutBounds(from: visible, mode: .monocle)
+        let bounds =
+            settings.layoutBounds(from: visible, mode: .monocle, on: nil)
         for plan in plans {
             #expect(!plan.strip.intersects(bounds), "\(plan.edge)")
         }

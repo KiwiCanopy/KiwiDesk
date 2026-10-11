@@ -16,6 +16,7 @@ extension MouseResizeMode: APIChoiceType {}
 extension FloatPlacement: APIChoiceType {}
 extension SizePolicy: APIChoiceType {}
 extension QuitLayoutStyle: APIChoiceType {}
+extension SpaceHistoryKind: APIChoiceType {}
 
 extension BspParams.Strategy: APIChoiceType {}
 extension ScrollingParams.Anchor: APIChoiceType {}

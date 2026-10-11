@@ -1,7 +1,8 @@
 import Foundation
 
-/// Per-space layout override inspection and reset operations
-/// (#290). The `LayoutMode` switches are exhaustive, so a new
+/// Per-space override inspection and reset operations: the layout
+/// overrides (#290) and, in the space's total, its own gaps
+/// (#1775). The `LayoutMode` switches are exhaustive, so a new
 /// layout is a compile error until handled — forget-proof
 /// without a hand-mirrored parity test.
 extension TilingSettings {
@@ -34,9 +35,11 @@ extension TilingSettings {
         layoutOverride(mode, for: space)?.fieldCount ?? 0
     }
 
-    /// Total count of set override fields across all layouts for space (#290).
-    public func overrideFieldCount(for space: SpaceID) -> Int {
-        Self.overridableLayouts.reduce(0) {
+    /// Total count of a space's overrides: the set fields across
+    /// all layouts (#290) plus its own gaps, which count as one
+    /// (#1775) and survive a layout switch.
+    public func spaceOverrideCount(for space: SpaceID) -> Int {
+        Self.overridableLayouts.reduce(gapsOverride[space] == nil ? 0 : 1) {
             $0 + overrideFieldCount($1, for: space)
         }
     }

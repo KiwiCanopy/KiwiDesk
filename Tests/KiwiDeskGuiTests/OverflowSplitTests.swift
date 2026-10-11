@@ -6,7 +6,7 @@ import Testing
 /// (`OverflowSplit`) instead of once per surface.
 ///
 /// Asserted at capacities NEITHER caller ships — the Profiles row
-/// pips pass a fixed 4/3 and a Monitors card passes whatever its
+/// pips pass a fixed 4/3 and a Screens card passes whatever its
 /// geometry measured — because a rule extracted to be shared has
 /// to be right at the inputs its next caller will bring, not only
 /// at the two that exist. The callers keep their own suites for
@@ -52,7 +52,7 @@ struct OverflowSplitTests {
     /// draws `capacity` and hides… two, because the marker took
     /// one — and the `- 1` correction inside is never reached.
     /// It is reached only when the marker costs nothing
-    /// (`markerCapacity == capacity`), which a Monitors card
+    /// (`markerCapacity == capacity`), which a Screens card
     /// measures whenever the `+n` happens to fit the same row.
     /// So the correction is live code with one real caller, and
     /// the sweep has to include that shape or it guards the
@@ -97,7 +97,7 @@ struct OverflowSplitTests {
     }
 
     /// The same capacity where the marker costs NO slot — a
-    /// Monitors card whose `+n` fits the row it measured. This
+    /// Screens card whose `+n` fits the row it measured. This
     /// is the only shape that reaches the `- 1` correction: at
     /// 7 items the run would draw 6 and hide exactly one, so it
     /// gives up one more.

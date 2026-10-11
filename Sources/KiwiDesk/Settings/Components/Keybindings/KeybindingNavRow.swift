@@ -32,6 +32,9 @@ struct NavRow: View {
                     }
                 }
             Text(command.resolvedLabel)
+            if let kind = command.liveOnly {
+                LiveOnlySpaceChip(kind: kind)
+            }
             if let help = command.help {
                 HelpButton(
                     explanation: help(),
@@ -98,6 +101,7 @@ struct NavRow: View {
                 $0.kind == .navigation && $0.lua == lua
             },
             bindings: $bindings,
+            config: model.config,
             commit: { record($0) }
         )
     }

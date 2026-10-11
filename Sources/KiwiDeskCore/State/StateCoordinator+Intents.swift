@@ -3,6 +3,28 @@ import Foundation
 /// User float and sticky intent state management
 /// (`WindowIdentity`, #160, #414, #1810).
 extension StateCoordinator {
+    /// Stable close/reopen identity of a window (#160): app and
+    /// title, except that KiwiDesk's marked own window is keyed on
+    /// the mark, since its title names the area it shows (#2059).
+    struct WindowIdentity: Hashable, Sendable {
+        let app: String
+        let title: String
+
+        init(of window: ManagedWindow) {
+            app = window.appName
+            title =
+                window.carriesOwnMark
+                ? OwnWindowTiling.identifier : window.title
+        }
+
+        /// Whether `window` has an identity at all: an empty title
+        /// carries none, since every pre-title window of the app
+        /// would match it, unless the mark stands in for it.
+        static func exists(for window: ManagedWindow) -> Bool {
+            window.carriesOwnMark || !window.title.isEmpty
+        }
+    }
+
     /// Floats a window as the user's choice, or clears that choice
     /// and tiles it (#1810). A Tile also forgets the window's
     /// reopen memory, so nothing brings the float back.
@@ -37,7 +59,7 @@ extension StateCoordinator {
         of window: ManagedWindow
     ) {
         guard userFloated.remove(window.id) != nil,
-            !window.title.isEmpty
+            WindowIdentity.exists(for: window)
         else { return }
         rememberedFloating.insert(WindowIdentity(of: window))
     }
@@ -49,7 +71,7 @@ extension StateCoordinator {
         of window: ManagedWindow
     ) {
         guard !userFloated.contains(window.id),
-            !window.title.isEmpty,
+            WindowIdentity.exists(for: window),
             rememberedFloating.remove(WindowIdentity(of: window))
                 != nil,
             windows[window.id]?.isFloating == false
@@ -62,7 +84,7 @@ extension StateCoordinator {
     mutating func rememberStickyIntent(
         of window: ManagedWindow
     ) {
-        guard !window.title.isEmpty else { return }
+        guard WindowIdentity.exists(for: window) else { return }
         let identity = WindowIdentity(of: window)
         if window.stickyScope == .none {
             rememberedSticky[identity] = nil
@@ -75,7 +97,7 @@ extension StateCoordinator {
     mutating func restoreStickyIntent(
         of window: ManagedWindow
     ) {
-        guard !window.title.isEmpty,
+        guard WindowIdentity.exists(for: window),
             let scope = rememberedSticky.removeValue(
                 forKey: WindowIdentity(of: window)
             )

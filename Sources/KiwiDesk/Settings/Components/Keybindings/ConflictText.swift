@@ -85,8 +85,8 @@ enum ConflictText {
                 "keybinding.conflict.tooltip.other_binding",
                 "Also bound in this layer to %1$@ — only one "
                     + "of the two will fire.",
-                KeybindingCatalog.localizedLabel(
-                    for: who,
+                KeybindingCatalog.localizedName(
+                    of: who,
                     config: config
                 )
             )
@@ -102,12 +102,6 @@ enum ConflictText {
                 "keybinding.conflict.tooltip.shadows_apps",
                 "Takes %1$@ away from every app while it is "
                     + "bound here.",
-                shortcut.localizedName
-            )
-        case .reserved(let shortcut):
-            return L(
-                "keybinding.conflict.tooltip.system",
-                "Conflicts with macOS: %1$@",
                 shortcut.localizedName
             )
         case .dormant(let shortcut):

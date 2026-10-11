@@ -59,61 +59,19 @@ extension SettingsFooter {
         L("footer.save_a_copy_as", "Save as new profile…")
     }
 
-    /// Primary Save action button slot.
+    /// Primary Save action button slot: the model's one Save
+    /// (`performPrimarySave`), which the close / quit question
+    /// takes too (#2049).
     ///
     /// Sealed rather than `.borderedProminent`: the pill is a
     /// fixed-dark ground and AppKit picks against the window
     /// (#1198, gui.md).
-    @ViewBuilder var primarySlot: some View {
-        let save = L("footer.save", "Save")
-        switch model.primarySaveAction {
-        case .saveLua:
-            Button(save) { model.saveLuaSource() }
-                .keyboardShortcut("s")
-                .kiwiProminentButton()
-                .disabled(!model.isDirty)
-        case .updateStoredProfile:
-            Button(save) { model.saveEditedProfile() }
-                .keyboardShortcut("s")
-                .kiwiProminentButton()
-                .disabled(!model.isDirty)
-        case .updateActiveProfile:
-            // Update blocked while permission is paused (#335).
-            Button(save) { model.updateActiveProfile() }
-                .keyboardShortcut("s")
-                .kiwiProminentButton()
-                .disabled(
-                    model.profileSaveBlockedReason != nil
-                        || !model.updateEnabled
-                        || !(model.isDirty
-                            || model.profileDirty)
-                )
-                .help(
-                    model.profileSaveBlockedReason
-                        ?? model.updateHint ?? ""
-                )
-        case .saveGlobalsOnly:
-            // Saves globals only when permission paused (#516).
-            Button(save) { model.saveGlobalsWhilePaused() }
-                .keyboardShortcut("s")
-                .kiwiProminentButton()
-                .disabled(!model.isDirty)
-        case .saveAsNewProfile:
-            // Blocked while permission paused (#335).
-            Button(
-                L(
-                    "footer.save_as_new_profile",
-                    "Save as New Profile…"
-                )
-            ) {
-                prefillNewProfileName()
-                namingNewProfile = true
-            }
+    var primarySlot: some View {
+        Button(model.primarySaveLabel) { model.performPrimarySave() }
             .keyboardShortcut("s")
             .kiwiProminentButton()
-            .disabled(model.profileSaveBlockedReason != nil)
-            .help(model.profileSaveBlockedReason ?? "")
-        }
+            .disabled(!model.primarySaveEnabled)
+            .help(model.primarySaveBlockedReason ?? "")
     }
 
     /// Pre-fills unique name in new profile sheet using `isProfileNameFree`.

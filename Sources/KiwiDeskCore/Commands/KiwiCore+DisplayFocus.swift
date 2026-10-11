@@ -40,10 +40,7 @@ extension KiwiCore {
             }),
             let display = screen.kiwiDisplayID
         else { return }
-        let focusedDisplay = state.workspaces.activeSpace.flatMap {
-            state.workspaces.display(of: $0)
-        }
-        guard display != focusedDisplay else { return }
+        guard display != focusedScreen else { return }
         // Move focus to that display's shown space. Nothing to do
         // if the display has no assigned space, or its space is
         // already the active one (single-display collapse).

@@ -128,6 +128,7 @@ extension EventLoop {
         // around a display-filling window shows only at the
         // corners); snapshot it here, refresh on reconcile.
         window.isFullscreen = readFullscreen(element)
+        window.carriesOwnMark = tilesAsOwnWindow(pid: pid, id: window.id)
         detectedFloating[window.id] = verdict
         detectedFullscreen[window.id] = window.isFullscreen
         elements[pid, default: [:]][window.id] = element

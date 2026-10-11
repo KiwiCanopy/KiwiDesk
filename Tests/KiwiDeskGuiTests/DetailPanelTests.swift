@@ -61,7 +61,7 @@ struct DetailPanelTests {
         //
         // The good idea the panel route was reaching for — a
         // per-preset inspector — belongs in the CONTENT column
-        // under the preset grid, where Monitors already puts
+        // under the preset grid, where Screens already puts
         // per-selection depth and where no width gate can take
         // it away.
         #expect(

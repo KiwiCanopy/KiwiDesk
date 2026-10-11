@@ -19,11 +19,14 @@ extension SkyLight {
             UnsafeMutablePointer<UInt64>
         ) -> Unmanaged<CFArray>?
 
-    static let copyWindowsWithOptionsAndTags:
-        CopyWindowsWithOptionsAndTagsFn? = symbol(
-            "SLSCopyWindowsWithOptionsAndTags",
-            as: CopyWindowsWithOptionsAndTagsFn.self
-        )
+    static let copyWindowsWithOptionsAndTagsSymbol = symbol(
+        "SLSCopyWindowsWithOptionsAndTags",
+        as: CopyWindowsWithOptionsAndTagsFn.self
+    )
+    static var copyWindowsWithOptionsAndTags: CopyWindowsWithOptionsAndTagsFn?
+    {
+        copyWindowsWithOptionsAndTagsSymbol.function
+    }
 
     /// Windows UP on the Space — not minimized, not hidden.
     private static let upWindowsOptions: UInt32 = 0x2

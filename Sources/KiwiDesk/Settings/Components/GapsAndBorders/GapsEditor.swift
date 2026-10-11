@@ -100,53 +100,17 @@ struct GapsEditor: View {
         }
     }
 
-    private func masterReadout(
-        _ unified: Binding<CGFloat>,
-        _ mixed: Bool
-    ) -> String {
-        mixed
-            ? L("gaps.mixed", "mixed")
-            : "\(Int(unified.wrappedValue)) pt"
-    }
-
     private func masterRow(
         label: String,
         unified: Binding<CGFloat>,
         mixed: Bool
     ) -> some View {
-        // Live while mixed (#1383): the `?` on the label says what
-        // a drag will do, and the first one converges every edge.
-        SettingsRowShape {
-            SettingsRowLabel(
-                label: label,
-                help: mixed ? GapsBordersGateHelp.edgesDiffer : nil
-            )
-        } control: {
-            HStack {
-                SettingsSlider(
-                    value: Binding(
-                        get: { Double(unified.wrappedValue) },
-                        set: {
-                            unified.wrappedValue = CGFloat($0)
-                        }
-                    ),
-                    range: 0...100,
-                    step: 1,
-                    label: label,
-                    spokenValue: masterReadout(unified, mixed)
-                )
-                Text(masterReadout(unified, mixed))
-                    .settingsReadout()
-                    .frame(
-                        width: SettingsMetrics.readoutColumn,
-                        alignment: .trailing
-                    )
-                    .foregroundStyle(.secondary)
-                    .font(.body.monospacedDigit())
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-            }
-        }
+        GapsMasterRow(
+            label: label,
+            value: unified.wrappedValue,
+            mixed: mixed,
+            set: { unified.wrappedValue = $0 }
+        )
     }
 
     private var outer: Gaps.Outer {

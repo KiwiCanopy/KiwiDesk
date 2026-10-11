@@ -15,9 +15,6 @@ struct SettingsCatalogDrawerTests {
     /// both directions: a drawer landing childless joins with its
     /// reason, and one that gains children leaves.
     private let childless: Set<String> = [
-        // Per-Desktop binding rows carry dynamic labels no static
-        // index can name (#678 turn 13a).
-        "desktops.title",
         // Hardware presets for unconnected setups: the rows are
         // the presets themselves, a browse rather than a search.
         "presets.other_setups",

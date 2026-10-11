@@ -7,11 +7,15 @@ The post is the release's curated `## Highlights`, read by
 "What's Changed" list, which is reviewer language
 (`docs/design-decisions.md` ▸ *Release notes are written for the
 person installing*). One Discord embed: the version as its title
-linking the release, the summary, the Before you update
-paragraph, then each section with its count and bullets. A body
+linking the release, the summary and the Before you update
+paragraph, then the Spotlight rows where the block has them and
+each section with its count and bullets where it does not, then a
+sentence counting what changed with a link to the notes, and how
+to get the update. No download link: the channel's readers know
+the site, and installed copies update themselves. A section list
 past Discord's embed limit is cut at a section boundary and closes
-on a line naming what was cut, with its counts, and pointing at the
-full notes, never mid-sentence.
+on a line naming what was cut, with its counts, never
+mid-sentence.
 
     scripts/discord-announce --release <tag> [--releases FILE]
         [--dry-run]
@@ -59,6 +63,65 @@ DESCRIPTION_BUDGET = 3900
 USERNAME = "KiwiDesk Releases"
 
 
+# Where a found update shows, and the one manual check: the
+# icon's tooltip is `updates.check` (#1536).
+UPDATE_LINE = (
+    "KiwiDesk flags the update in its menu bar once it finds it; "
+    "to get it now, click the circular arrow (Check for updates) "
+    "in the footer of Settings Home."
+)
+# A typed section's change, counted in words (#2112): one entry per
+# `changelog-sync` SECTION_TYPES type, held to that table by
+# `DiscordAnnounceSpotlightTests`; a type missing here still counts.
+NOUNS = {
+    "new": ("addition", "additions"),
+    "improved": ("improvement", "improvements"),
+    "fixed": ("fix", "fixes"),
+    "scripting": ("Lua & CLI change", "Lua & CLI changes"),
+}
+FALLBACK_NOUNS = ("change", "changes")
+# Room the head keeps when a Spotlight is long enough to crowd it.
+HEAD_FLOOR = 600
+
+
+def counted(sections: list[dict]) -> list[tuple[int, str]]:
+    """`(3, "3 fixes")`, one per typed section that has entries, in
+    the block's order."""
+    out = []
+    for section in sections:
+        if not section.get("type") or not section["items"]:
+            continue
+        nouns = NOUNS.get(section["type"], FALLBACK_NOUNS)
+        count = len(section["items"])
+        out.append((count, f"{count} {nouns[0 if count == 1 else 1]}"))
+    return out
+
+
+def joined(items: list[str]) -> str:
+    """`a`, `a and b`, `a, b and c`."""
+    if len(items) < 2:
+        return "".join(items)
+    return ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def counts_line(entry: dict) -> str:
+    """What changed, in one sentence, linking the full notes."""
+    notes = f"[release notes]({entry['url']})"
+    counts = counted(entry.get("sections") or [])
+    if not counts:
+        return f"Everything that changed is in the {notes}."
+    total = sum(count for count, _ in counts)
+    where = f"all of them in the {notes}" if total > 1 else f"see the {notes}"
+    phrases = [phrase for _, phrase in counts]
+    return f"This release brings {joined(phrases)} — {where}."
+
+
+def spotlight_block(rows: list[dict]) -> str:
+    """The Spotlight rows as `**Title** — line`; the `{setting:}`
+    and `{symbol:}` tokens are the app's and never shown."""
+    return "\n".join(f"**{row['title']}** — {row['line']}" for row in rows)
+
+
 def section_block(section: dict) -> str:
     """One section as Discord markdown: its title and, on a typed
     release, its count, then its bullets."""
@@ -83,53 +146,58 @@ def clip(text: str, budget: int) -> str:
 
 
 def pointer(entry: dict, rest: list[dict]) -> str:
-    """The closing line: plain where nothing was cut, else naming
-    each cut section and its count so a reader knows what is
-    behind the link."""
-    url = entry["url"]
-    if not rest:
-        return f"Full notes: {url}"
+    """The line closing a cut section list, naming each cut
+    section and its count so a reader knows what is behind the
+    link."""
     names = " · ".join(
         f"{s['title']} {len(s['items'])}" if s.get("type") else s["title"]
         for s in rest
     )
-    return f"**Also in this release:** {names} — full notes: {url}"
+    return f"**Also in this release:** {names} — full notes: {entry['url']}"
 
 
 def description(entry: dict) -> str:
-    """The embed body, cut at a section boundary to fit. The head
-    — summary, Before you update, the download — is clipped first
-    if it alone would not leave room for the longest pointer."""
+    """The embed body. A block with Spotlight rows posts the rows,
+    never its sections; one without posts its sections, cut at a
+    section boundary to fit. The head — summary, Before you
+    update — is clipped first if it alone would not leave room for
+    the close."""
     sections = entry.get("sections") or []
-    more = pointer(entry, sections)
+    rows = entry.get("spotlight") or []
+    close = f"{counts_line(entry)}\n{UPDATE_LINE}"
+    cut_close = f"{pointer(entry, sections)}\n{UPDATE_LINE}"
     head: list[str] = []
     if entry.get("summary"):
         head.append(entry["summary"])
     if entry.get("heads"):
         head.append(f"**Before you update:** {entry['heads']}")
-    if entry.get("download"):
-        head.append(f"Download: {entry['download']}")
-    room = DESCRIPTION_BUDGET - len(more) - 2
-    clipped = False
+    closing = max(len(close), len(cut_close))
+    body = spotlight_block(rows) if rows else ""
+    keep = min(len("\n\n".join(head)), HEAD_FLOOR)
+    body_room = DESCRIPTION_BUDGET - closing - keep - 4
+    if len(body) > body_room:
+        body = clip(body, body_room)
+    room = DESCRIPTION_BUDGET - closing - len(body) - 4
     while len("\n\n".join(head)) > room and head:
-        clipped = True
+        if room < 3 * len(head):
+            head = []
+            break
         over = len("\n\n".join(head)) - room
         longest = max(range(len(head)), key=lambda i: len(head[i]))
         head[longest] = clip(head[longest], len(head[longest]) - over)
     parts = list(head)
+    if rows:
+        return "\n\n".join(parts + [body, close])
     for index, section in enumerate(sections):
         block = section_block(section)
         rest = sections[index + 1 :]
-        tail = pointer(entry, rest) if rest else ""
-        candidate = "\n\n".join(parts + [block])
-        if len(candidate) + (len(tail) + 2 if tail else 0) > DESCRIPTION_BUDGET:
-            parts.append(pointer(entry, sections[index:]))
-            return "\n\n".join(parts)
+        tail = f"{pointer(entry, rest)}\n{UPDATE_LINE}" if rest else close
+        candidate = "\n\n".join(parts + [block, tail])
+        if len(candidate) > DESCRIPTION_BUDGET:
+            cut = f"{pointer(entry, sections[index:])}\n{UPDATE_LINE}"
+            return "\n\n".join(parts + [cut])
         parts.append(block)
-    # A clipped head says so, as a cut section list does.
-    if clipped:
-        parts.append(pointer(entry, []))
-    return "\n\n".join(parts)
+    return "\n\n".join(parts + [close])
 
 
 def payload(entry: dict) -> dict:

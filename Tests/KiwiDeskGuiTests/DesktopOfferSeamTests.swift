@@ -44,10 +44,12 @@ struct DesktopOfferSeamTests {
 
     /// Every file that spells the union today, and how often.
     /// The first entry is the declaration itself; the rest are
-    /// the four surfaces, by role — the editor's rows, the ⌃⌥K
-    /// panel's bands, the unsaved-changes readout, and the
-    /// conflict banner's label roster. The last of those is the
-    /// one this guard was written after: it shipped without the
+    /// the surfaces, by role — the editor's rows, the ⌃⌥K
+    /// panel's bands, and the one naming roster
+    /// (`KeybindingCatalog.namedCommands`, #2111), which the
+    /// conflict banner and the unsaved-changes readout both read.
+    /// The banner is the one this guard was written after: it
+    /// shipped without the
     /// union and narrated raw English inside a localized
     /// sentence, which is #96's defect.
     private let allowed: [String: Int] = [
@@ -56,8 +58,6 @@ struct DesktopOfferSeamTests {
         "KiwiDesk/Settings/Components/Keybindings/"
             + "KeybindingCatalog+DisplayName.swift": 1,
         "KiwiDesk/Settings/Sections/ShortcutsSection.swift": 1,
-        "KiwiDesk/Settings/"
-            + "SettingsValueReadout+ShortcutsGlyphs.swift": 1,
         "KiwiDesk/Shortcuts/ShortcutsReference.swift": 1,
     ]
 

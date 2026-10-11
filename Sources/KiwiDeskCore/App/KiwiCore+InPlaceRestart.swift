@@ -23,6 +23,9 @@ struct InPlaceRestartState {
     static let bound: TimeInterval = 30
 
     var announcedAt: TimeInterval?
+    /// Who announced it, so a withdrawn intent comes back as the
+    /// same source (#2049).
+    var source: InPlaceRestartSource?
     /// The clock the bound is measured on (tests.md, #1456).
     var now: () -> TimeInterval = {
         ProcessInfo.processInfo.systemUptime
@@ -42,6 +45,25 @@ extension KiwiCore {
     /// never reaches here and still gathers.
     public func announceUpdateRelaunch() {
         arm(.update)
+    }
+
+    /// Withdraws an announced intent while the quit it named waits
+    /// on the user (#2049); answers its source, nil when none was
+    /// armed, so the answer re-arms that same source.
+    public func withdrawInPlaceRestart() -> InPlaceRestartSource? {
+        guard inPlaceRestart.announcedAt != nil,
+            let source = inPlaceRestart.source
+        else { return nil }
+        inPlaceRestart.announcedAt = nil
+        inPlaceRestart.source = nil
+        onLog("in-place restart withdrawn: the quit is asking first")
+        return source
+    }
+
+    /// Re-arms an intent `withdrawInPlaceRestart` returned, on the
+    /// answer to the quit's question (#2049).
+    public func rearmInPlaceRestart(_ source: InPlaceRestartSource) {
+        arm(source)
     }
 
     /// `prepare_restart`: the CLI is about to replace a loaded
@@ -67,7 +89,10 @@ extension KiwiCore {
     /// Consumes the intent: true only for one announced within
     /// the bound. `stop()`'s one question.
     func takeInPlaceRestart() -> Bool {
-        defer { inPlaceRestart.announcedAt = nil }
+        defer {
+            inPlaceRestart.announcedAt = nil
+            inPlaceRestart.source = nil
+        }
         guard let at = inPlaceRestart.announcedAt else {
             return false
         }
@@ -84,11 +109,13 @@ extension KiwiCore {
 
     private func arm(_ source: InPlaceRestartSource) {
         inPlaceRestart.announcedAt = inPlaceRestart.now()
+        inPlaceRestart.source = source
         onLog("in-place restart announced (\(source.rawValue))")
     }
 
     private func disarm(_ reason: String) {
         inPlaceRestart.announcedAt = nil
+        inPlaceRestart.source = nil
         onLog("in-place restart refused: \(reason); will gather")
     }
 }

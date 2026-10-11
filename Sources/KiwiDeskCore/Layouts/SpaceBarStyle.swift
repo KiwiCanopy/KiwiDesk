@@ -10,10 +10,16 @@ public struct SpaceBarStyle: Sendable, Equatable {
 
     /// On by default (QA 2026-07-19) to surface Spaces discoverability.
     public var enabled = true
+    /// Whether the layout gives up the bar's strip (#1524); off
+    /// draws the shown bar over the windows.
+    public var reserve = true
     /// The screen edge the bar sits on (top). The App Bar on the
     /// same edge shares one shelf with it; on another, each bar
     /// is its own (#1731).
     public var edge: AppBarEdge = .top
+    /// A screen's own edge, keyed by its fingerprint (#1948); a
+    /// screen with none uses `edge`.
+    public var edgeOverride: [String: AppBarEdge] = [:]
     /// Max glyphs per Space item before "+n" badge (#376).
     /// Default 5.
     public var glyphSpan = 5
@@ -92,4 +98,4 @@ public struct SpaceBarStyle: Sendable, Equatable {
 /// placement from `TilingSettings+Coding` is deliberate — do not
 /// harmonize; `SpaceBarParityTests` and `SettingsCodingTests`
 /// backstop the residual hazard.
-extension SpaceBarStyle: Codable {}
+extension SpaceBarStyle: Codable, ScreenEdged {}

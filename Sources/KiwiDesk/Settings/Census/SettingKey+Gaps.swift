@@ -23,7 +23,14 @@ extension GapsKey {
             // says "mixed" and the `?` acknowledges, never a grey.
             return .row(.gapsAndBorders, .gaps, .atRest)
         case .perSpaceOverride:
-            return .luaOnly
+            // A Space's own gaps (#1775), first in its overrides,
+            // inert while the Space floats.
+            return .row(
+                .spacesAndLayouts,
+                .perSpaceOverrides,
+                .atRest,
+                gate: .setting(.spaces(.spaceModes))
+            )
         }
     }
 }
@@ -48,7 +55,7 @@ extension GapsKey {
         case .inner:
             return .text("gaps.inner")
         case .perSpaceOverride:
-            return .none
+            return .text("gaps.title")
         }
     }
 }

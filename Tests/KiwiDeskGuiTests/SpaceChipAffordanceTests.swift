@@ -6,7 +6,7 @@ import Testing
 /// What makes a Space chip read as something you can pick up
 /// (#1240), as three shapes rather than three numbers.
 ///
-/// The Monitors picture says *Drag a Space onto the display it
+/// The Screens picture says *Drag a Space onto the display it
 /// belongs to* in words, and the chips said nothing back. Paint
 /// alone cannot say "draggable", so what the change buys is
 /// narrower and has to be guarded as such: the drag SOURCES are
@@ -17,12 +17,12 @@ import Testing
 /// them green, undoing a decision reds them.
 @Suite("Space chip drag affordance")
 struct SpaceChipAffordanceTests {
-    private static let monitors =
-        "Sources/KiwiDesk/Settings/Components/Monitors"
+    private static let screens =
+        "Sources/KiwiDesk/Settings/Components/Screens"
 
     private func squashed(_ file: String) throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(Self.monitors)
+            .appendingPathComponent(Self.screens)
             .appendingPathComponent(file)
         let source = SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)
@@ -153,19 +153,19 @@ struct SpaceChipAffordanceTests {
     /// adaptive chip instead — the seam, never which alpha.
     @Test("the +n marker draws no tint of its own")
     func overflowMarkerIsNotAChip() throws {
-        for file in ["DisplayCard.swift", "FollowsMainTray.swift"] {
+        for file in ["ScreenCard.swift", "FollowsMainTray.swift"] {
             let body = try declarationBody(
                 "privatefuncoverflowChip",
                 in: try squashed(file)
             )
             // CONTIGUOUS, and `padding:0` is the load-bearing
             // half: the default 4 widens the marker past the
-            // column `MonitorCardChips.markerWidth` reserves,
+            // column `ScreenCardChips.markerWidth` reserves,
             // and that suite's needle stays green through it
             // because it reads the inner frame.
             #expect(
                 body.contains(
-                    ".hoverHighlight(cornerRadius:MonitorCardChips"
+                    ".hoverHighlight(cornerRadius:ScreenCardChips"
                         + ".chipHeight/2,padding:0)"
                 ),
                 Comment(
@@ -206,7 +206,7 @@ struct SpaceChipAffordanceTests {
     /// this green.
     @Test("the drop wash is drawn behind the chips")
     func dropWashSitsUnderTheContent() throws {
-        let source = try squashed("DisplayCard.swift")
+        let source = try squashed("ScreenCard.swift")
         #expect(
             source.contains(".background(dropWash)"),
             Comment(

@@ -59,16 +59,27 @@ struct BoxGlassRadiusNeedleTests {
         #expect(!box.contains("resolvedCornerRadius("))
     }
 
+    /// The pair is placed through the one `GlassBox.place`
+    /// (#2150), which hands its one radius to both the glass and
+    /// the tint.
     @Test("the glass and the tint are both handed that radius")
     func bothTakeIt() throws {
-        let body = try body()
+        let place = try #require(
+            SourceScan.callArguments(of: "GlassBox.place(", in: try body())
+        )
+        #expect(place.contains("cornerRadius: radius"))
+        let door = try SourceScan.functionBody(
+            of: "place",
+            in: "GlassBox.swift",
+            under: "Bar"
+        )
         let glass = try #require(
-            SourceScan.callArguments(of: "GlassPlate.update(", in: body)
+            SourceScan.callArguments(of: "GlassPlate.update(", in: door)
         )
         let tint = try #require(
-            SourceScan.callArguments(of: "GlassTint.apply(", in: body)
+            SourceScan.callArguments(of: "GlassTint.apply(", in: door)
         )
-        #expect(glass.contains("cornerRadius: radius"))
-        #expect(tint.contains("cornerRadius: radius"))
+        #expect(glass.contains("cornerRadius: cornerRadius"))
+        #expect(tint.contains("cornerRadius: cornerRadius"))
     }
 }

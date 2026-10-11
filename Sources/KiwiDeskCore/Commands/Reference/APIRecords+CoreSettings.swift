@@ -51,6 +51,16 @@ extension APIReference {
                 + "keyboard action draws its refusal pill.",
             .boolean("enabled")
         ),
+        "set_desktop_cue": APIRecord(
+            "Shows the Desktop's number on the screen that switched "
+                + "after KiwiDesk's own Desktop switch.",
+            .boolean("enabled")
+        ),
+        "set_space_history": APIRecord(
+            "Sets whether Space history is kept per screen or "
+                + "across every screen.",
+            .choice("kind", SpaceHistoryKind.self)
+        ),
         "set_shortcut_panel_liquid_glass": APIRecord(
             "Lays a macOS 26 Liquid Glass material over the "
                 + "shortcuts panel and the slow-boot notice.",
@@ -105,6 +115,10 @@ extension APIReference {
                 + "reset, and resets them when passed true.",
             .boolean("reset", optional: true)
         ),
+        "self_test": APIRecord(
+            "Reports which private fast paths this macOS still "
+                + "answers, one verdict each, changing nothing."
+        ),
         "help": APIRecord(
             "Describes one command, or lists the whole API "
                 + "surface.",
@@ -120,11 +134,11 @@ extension APIReference {
         ),
         "save_profile": APIRecord(
             "Saves the current configuration to a profile, which "
-                + "claims the connected monitor set.",
+                + "claims the connected screen setup.",
             .text("name")
         ),
         "load_profile": APIRecord(
-            "Loads a profile, claiming the connected monitor set "
+            "Loads a profile, claiming the connected screen setup "
                 + "where its screen count fits.",
             .text("name")
         ),
@@ -134,7 +148,7 @@ extension APIReference {
         ),
         "set_default_profile": APIRecord(
             "Sets the fallback profile for its screen count; "
-                + "refuses one that holds no monitor set.",
+                + "refuses one that holds no screen setup.",
             .text("name")
         ),
         "list_profiles": APIRecord(

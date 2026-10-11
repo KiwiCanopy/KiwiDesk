@@ -30,7 +30,7 @@ struct MonocleGeometryTests {
     let layout = MonocleLayout()
 
     /// The shelf reserves its strip before the layout runs
-    /// (`TilingSettings.layoutBounds(from:)`, #1517), so the
+    /// (`TilingSettings.layoutBounds(from:mode:on:)`, #1517), so the
     /// App Bar's switch no longer moves a window: the frames are
     /// the usable area either way.
     @Test(

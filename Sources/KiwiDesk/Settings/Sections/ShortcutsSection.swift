@@ -160,7 +160,7 @@ struct ShortcutsSection: View {
         OrphanedShortcutsGroup(
             model: model,
             bindings: bindingsBinding,
-            spaces: model.config.spaces,
+            spaces: expander.liveSpaces,
             layers: model.config.layers.map(\.name)
         )
         advancedDrawer
@@ -229,6 +229,7 @@ struct ShortcutsSection: View {
         return ShortcutsFamilyRows(
             spaces: model.config.spaces,
             icons: model.config.settings.spaceIcons,
+            liveOnly: model.liveOnlyShortcutSpaces,
             desktops: KeybindingCatalog.desktopOffer(
                 live: model.bindableDesktops,
                 bindings: model.config.layers.flatMap(\.bindings)

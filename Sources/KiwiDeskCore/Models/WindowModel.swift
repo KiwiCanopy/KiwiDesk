@@ -60,6 +60,10 @@ public struct ManagedWindow: Sendable, Equatable {
     public var isRaisedLayer: Bool
     /// Native fullscreen state (`kAXFullScreenAttribute`).
     public var isFullscreen: Bool
+    /// Carries KiwiDesk's own tiling mark (`OwnWindowTiling`), so
+    /// its reopen identity is the mark, never its area-named title
+    /// (#2059).
+    public var carriesOwnMark: Bool
 
     public init(
         id: WindowID,
@@ -72,7 +76,8 @@ public struct ManagedWindow: Sendable, Equatable {
         stickyScope: StickyScope = .none,
         isTransientOverlay: Bool = false,
         isRaisedLayer: Bool = false,
-        isFullscreen: Bool = false
+        isFullscreen: Bool = false,
+        carriesOwnMark: Bool = false
     ) {
         self.id = id
         self.pid = pid
@@ -85,6 +90,7 @@ public struct ManagedWindow: Sendable, Equatable {
         self.isTransientOverlay = isTransientOverlay
         self.isRaisedLayer = isRaisedLayer
         self.isFullscreen = isFullscreen
+        self.carriesOwnMark = carriesOwnMark
     }
 
     /// Reconstructs the snapshot with a new `WindowID` for native
@@ -103,7 +109,8 @@ public struct ManagedWindow: Sendable, Equatable {
             stickyScope: stickyScope,
             isTransientOverlay: isTransientOverlay,
             isRaisedLayer: isRaisedLayer,
-            isFullscreen: isFullscreen
+            isFullscreen: isFullscreen,
+            carriesOwnMark: carriesOwnMark
         )
     }
 }

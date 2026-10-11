@@ -159,18 +159,35 @@ extension KiwiCore {
         // actual on-screen size, which an app may have clamped
         // larger than the slot), not the slot it was assigned.
         // Falls back to the slot only until the first AX echo.
+        let carried = stickyReachCarried()
         return chosen.map { spec in
-            BorderManager.Spec(
+            let frame = state.windows[spec.window]?.frame ?? spec.frame
+            return BorderManager.Spec(
                 window: spec.window,
-                frame: state.windows[spec.window]?.frame
-                    ?? spec.frame,
+                frame: frame,
                 colorHex: spec.colorHex,
                 width: spec.width,
                 cornerStyle: spec.cornerStyle,
                 glowBlur: spec.glowBlur,
-                sheen: spec.sheen
+                sheen: spec.sheen,
+                spansDesktops: carried.contains(spec.window),
+                desktop: shownDesktop(at: frame)
             )
         }
+    }
+
+    /// The native Space the screen holding `frame` shows, as the
+    /// last Desktop switch read it (#2149) — no WindowServer read.
+    func shownDesktop(at frame: CGRect) -> SkyLight.SpaceID? {
+        guard
+            let display = TilingEngine.screen(containing: frame)?
+                .kiwiDisplayID,
+            let uuid = NativeSpaces.displayUUID(for: display)
+        else { return nil }
+        let shown = desktopMemory.shownSpaces
+        // Shared Spaces key the one managed display by a synthetic
+        // id that names no screen (`cueDisplay` reads it alike).
+        return shown[uuid] ?? (shown.count == 1 ? shown.first?.value : nil)
     }
 
     /// The rings to show for one space. Focused window always

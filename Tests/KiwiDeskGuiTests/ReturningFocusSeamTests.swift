@@ -63,6 +63,15 @@ struct ReturningFocusSeamTests {
         ("followFocus.owed(", memoryFile),
         ("state.returningFocus =", "KiwiCore+Events.swift"),
         ("payReturningFocus(arrived:", "KiwiCore+Events.swift"),
+        // The carried sticky debt (#1564): filed at the handler's
+        // DEPARTURE from report-time memory, owed after the
+        // follow's precedence, paid by the settle alone.
+        (
+            "rememberDeparture(of: active, leaving: leaving)",
+            "KiwiCore+Desktops.swift"
+        ),
+        ("oweStickyReturn(native: native)", memoryFile),
+        ("payStickyReturn(stickyOwed)", "KiwiCore+DesktopSettle.swift"),
     ]
 
     @Test("each wiring exists exactly once, in its own file")

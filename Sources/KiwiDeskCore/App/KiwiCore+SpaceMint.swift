@@ -13,6 +13,8 @@ extension KiwiCore {
         taken.formUnion(profiles.active?.declaredSpaces ?? [])
         taken.formUnion(profiles.standard?.spaces ?? [])
         taken.formUnion(initDeclaredSpaces)
+        // A number whose old shortcuts are still to go (#1827).
+        taken.formUnion(state.owedShortcutDrops)
         return SpaceID.smallestFreeNumber(among: taken)
     }
 }

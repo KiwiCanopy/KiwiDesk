@@ -65,7 +65,10 @@ final class SettingsModel: ObservableObject {
     /// through this property, and the read is only valid while
     /// the event that caused it is still being dispatched.
     @Published var destination: SettingsDestination? {
-        didSet { nav.navigationMovesFocus = SettingsInputSource.movesFocus }
+        didSet {
+            nav.navigationMovesFocus = SettingsInputSource.movesFocus
+            onWindowTitle?(SettingsWindowTitle.of(destination))
+        }
     }
     /// Simple or Power User mode; stored in `SettingsModePreference` (#678).
     @Published var settingsMode: SettingsMode = .simple
@@ -81,6 +84,13 @@ final class SettingsModel: ObservableObject {
     @Published var liveOnlySpaces: [LiveOnlySpace] = []
     /// Destructive action behind unsaved-changes dialog (#515).
     @Published var pendingDiscard: PendingDiscard?
+    /// The close or quit the unsaved-edits question holds (#2049).
+    var draftLeave: DraftLeave?
+    /// Asks the footer for its naming prompt (`performPrimarySave`).
+    @Published var newProfileNamingRequested = false
+    /// A quit answered Save or Discard: the next quit goes ahead
+    /// without asking again (#2049).
+    var quitAnswered = false
     /// Clean baseline state compared against `isDirty`; set by `apply(_:)`.
     var cleanConfig = GuiConfig()
     var cleanLuaSource = ""
@@ -104,7 +114,7 @@ final class SettingsModel: ObservableObject {
     @Published var profileDirty = false
     /// Dashboard edit target: live config or stored profile (#18, #64).
     @Published var target: EditTarget = .live
-    /// Whether monitor placement canvas is editable for current target (#18).
+    /// Whether screen placement canvas is editable for current target (#18).
     @Published var placementEditable = true
     @Published var profiles: [String] = []
     /// `KiwiCore.isGuiManaged` and the sidecar's presence, read
@@ -112,7 +122,7 @@ final class SettingsModel: ObservableObject {
     /// per render (#1392).
     @Published var guiManaged = true
     @Published var sidecarExists = true
-    /// Rich rows for saved profiles: monitor sets, screen count, matches
+    /// Rich rows for saved profiles: screen setups, screen count, matches
     /// (#36).
     @Published var profileSummaries: [ProfileSummary] = []
     /// Un-decodable profiles shown greyed with reveal and delete
@@ -141,7 +151,7 @@ final class SettingsModel: ObservableObject {
         verdict: .none,
         screens: 0
     )
-    /// Dismissible warning from profile actions (e.g. monitor overlap).
+    /// Dismissible warning from profile actions (e.g. screen overlap).
     @Published var profileWarning: String?
 
     /// Main screen user Desktops by Mission Control number (#888).
@@ -248,6 +258,12 @@ final class SettingsModel: ObservableObject {
     var onRevealProfile: (String) -> Void = { _ in }
     /// Routes banner button to voluntary welcome tour replay.
     var onShowTour: () -> Void = {}
+    /// Receives the window title on every area navigation and
+    /// language change (#2059), and once when set; wired by
+    /// `SettingsWindowTitle.follow`.
+    var onWindowTitle: ((String) -> Void)? {
+        didSet { onWindowTitle?(SettingsWindowTitle.of(destination)) }
+    }
     /// The update channel the Home footer and About read (#1536);
     /// inert until `AppDelegate` hands over the status item's.
     var updater: any AppUpdating = NoUpdater()
@@ -266,17 +282,19 @@ final class SettingsModel: ObservableObject {
     /// profile, as stored (#1393); nil where no checklist is
     /// offered. Re-read by `reload()` alone.
     var ruleReachStored: RuleReachSnapshot? {
-        didSet { layeredCache = nil }
+        didSet { dropReachCaches() }
     }
     /// The last layer pass and what it read (#2022).
     var layeredCache: LayeredReachCache?
+    /// The last draft encode over it (`encodedReach`).
+    var encodedCache: EncodedReachCache?
     /// The profile whose page the draft is — pinned by `reload()`,
     /// because the loaded name can move under an open draft (a
     /// Save as New makes its profile current mid-save; a Desktop
     /// switch loads another), and encoding the page against the
     /// new name would bake its own rules into the shared base.
     var reachPage: String? {
-        didSet { layeredCache = nil }
+        didSet { dropReachCaches() }
     }
     /// The draft's checklist choices over `ruleReachStored`.
     @Published var reachEdits = RuleReachEdits() {

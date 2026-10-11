@@ -5,22 +5,36 @@ import Foundation
 public struct StateSnapshot: Codable, Sendable, Equatable {
     public struct WindowRecord: Codable, Sendable, Equatable {
         public let id: UInt32
-        public let frame: CGRect
+        public var frame: CGRect
         /// In-place restarts only (#930, `StateSnapshot+InPlace`).
         public var session: WindowSession?
+        /// The bundle id and title a snapshot from another boot or
+        /// login is matched on, its ids naming nothing there
+        /// (#1385, `CrossSessionMatch`).
+        public var app: String?
+        public var title: String?
+        /// A hand float, `true` else nil, in a STOP's capture alone
+        /// (#1864, `StateSnapshot+StopFloats`).
+        public var floating: Bool?
 
         public init(
             id: WindowID,
             frame: CGRect,
-            session: WindowSession? = nil
+            session: WindowSession? = nil,
+            app: String? = nil,
+            title: String? = nil,
+            floating: Bool? = nil
         ) {
             self.id = id.raw
             self.frame = frame
             self.session = session
+            self.app = app
+            self.title = title
+            self.floating = floating
         }
 
         private enum CodingKeys: String, CodingKey {
-            case id, frame, session
+            case id, frame, session, app, title, floating
         }
 
         /// The in-place payload decodes on its own: one this build
@@ -34,6 +48,31 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
                 WindowSession.self,
                 forKey: .session
             )
+            app = try? c.decodeIfPresent(String.self, forKey: .app)
+            title = try? c.decodeIfPresent(String.self, forKey: .title)
+            floating =
+                (try? c.decodeIfPresent(Bool.self, forKey: .floating))
+                ?? Self.legacyFloat(in: c)
+        }
+
+        private enum LegacySessionKeys: String, CodingKey {
+            case floating
+        }
+
+        /// A pre-#1864 in-place stop wrote the hand float into the
+        /// session — the update relaunch onto this build reads it.
+        private static func legacyFloat(
+            in c: KeyedDecodingContainer<CodingKeys>
+        ) -> Bool? {
+            guard
+                let session = try? c.nestedContainer(
+                    keyedBy: LegacySessionKeys.self,
+                    forKey: .session
+                ),
+                (try? session.decodeIfPresent(Bool.self, forKey: .floating))
+                    == true
+            else { return nil }
+            return true
         }
 
         public var windowID: WindowID { WindowID(id) }
@@ -155,6 +194,9 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     /// The login session the file was written in, stamped by
     /// `CrashRecovery`'s write (#1385); nil in an older build's.
     public var loginSession: Int32?
+    /// Written by a logout's freeze (#1385): the one file a later
+    /// boot may match by stable key, once.
+    public var frozenForLogout = false
 
     public init(
         windows: [WindowRecord],
@@ -172,7 +214,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case windows, spaces, activeSpace, capturedAt, arrangement
-        case arrangementRecords, loginSession
+        case arrangementRecords, loginSession, frozenForLogout
     }
 
     public init(from decoder: Decoder) throws {
@@ -199,6 +241,9 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
             Int32.self,
             forKey: .loginSession
         )
+        frozenForLogout =
+            (try? c.decodeIfPresent(Bool.self, forKey: .frozenForLogout))
+            ?? false
     }
 }
 
@@ -253,6 +298,7 @@ extension StateCoordinator {
         }
         for record in snapshot.windows {
             adoptSession(of: record)
+            adoptStopFloat(of: record)
         }
         if let active = snapshot.activeSpace,
             workspaces[SpaceID(active)] != nil
@@ -267,7 +313,9 @@ extension StateCoordinator {
             windows: windows.all.map {
                 StateSnapshot.WindowRecord(
                     id: $0.id,
-                    frame: $0.frame
+                    frame: $0.frame,
+                    app: $0.appBundleID,
+                    title: $0.title
                 )
             } + owedFrameRecords(),
             spaces: workspaces.allSpaces.map { spaceRecord(of: $0) },

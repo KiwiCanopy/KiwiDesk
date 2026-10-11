@@ -58,6 +58,10 @@ struct SettingsSearchDrawerAnchorTests {
                 ]
             ),
             (
+                .profiles, "Profiles", .profilesPerMacOSSpace,
+                [SettingsCatalog.profiles.desktops]
+            ),
+            (
                 .looks, "Looks & Animations", .motion,
                 [SettingsCatalog.colors.motionMore]
             ),

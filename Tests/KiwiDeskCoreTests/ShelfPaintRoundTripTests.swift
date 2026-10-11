@@ -27,6 +27,14 @@ struct ShelfPaintRoundTripTests {
             settings[keyPath: host].titleCap = 17
             settings[keyPath: host].groupAdjacentWindows = false
         }
+        // A screen's own edge on every edge a look can pick, so
+        // some look's bar edge equals an entry (#1948).
+        var screens: [String: AppBarEdge] = [:]
+        for (index, edge) in AppBarEdge.allCases.enumerated() {
+            screens["Screen\(index):100x100"] = edge
+        }
+        settings.spaceBarStyle.edgeOverride = screens
+        settings.appBarStyle.edgeOverride = screens
         return settings
     }
 
@@ -42,6 +50,13 @@ struct ShelfPaintRoundTripTests {
                     before,
                     look: look,
                     palette: palette
+                )
+                // A look leaves every screen's own edge alone.
+                #expect(
+                    painted.spaceBarStyle.edgeOverride
+                        == before.spaceBarStyle.edgeOverride
+                        && painted.appBarStyle.edgeOverride
+                            == before.appBarStyle.edgeOverride
                 )
                 let reverted = KiwiCore.unpainted(painted, to: before)
                 #expect(

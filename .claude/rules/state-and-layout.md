@@ -25,6 +25,11 @@ editing here:
 
 - Windows live in a **flat `[WindowID]` array per space**. Do not
   introduce tree or container structures into state or layout code.
+- **A per-Space session store follows a Space's renumber and its
+  end (#1655).** One keyed by `SpaceID` rekeys where a held Space
+  is renumbered (`moveMembers`) and forgets in the one Space drop,
+  `forwardWindows(of:to:)`; the Space history's trails are the
+  instance (`SpaceDropHookNeedleTests`).
 - **A Space seeded before any config declares one is
   PROVISIONAL (#1526).** Whoever plants one arms
   `StateCoordinator.placeholderSpace`, and the next config load
@@ -124,7 +129,8 @@ editing here:
   (#242) owns its relationship to a bar. Which files qualify
   lives in that map, not here.
 - **A per-space override never carries `appBar`.** The shelf's
-  reservation is answered per layout MODE (`shelfEdges(in:)`), and
+  reservation is answered per layout MODE and per screen
+  (`shelfEdges(in:on:)`, #1948), and
   the App Bar a Space draws is its mode's; a per-space `appBar`
   would draw a bar where the reservation left the windows, or
   reserve a strip nothing draws on. `MonocleOverrideTests` and
@@ -377,7 +383,20 @@ editing here:
   and the owed window's later arrival must not pay over it (CI,
   2026-09-02: `OpenOrFocusRingTests` ▸ the re-track after the
   focus report). The payment claims BEFORE it raises, so its own
-  echo finds nothing to retire. The `.windowCreated` fold takes the debt mirrored in as
+  echo finds nothing to retire. The one PRESENT window a return
+  does owe is a carried sticky window its Desktop was LEFT with
+  (#1564): filed at the DEPARTURE by `rememberDeparture` from
+  `lastHonoredOn` — macOS's restore report beats the handler and
+  overwrites the memory, so the departure's filing is what
+  survives; the handler only COPIES that report-time memory and
+  never reads a live focus — owed by `oweStickyReturn` behind the
+  follow's precedence, taken at the head of every settle and paid
+  there by `payStickyReturn` once the carry landed, standing down
+  on a press or a commanded focus since the return — never on a
+  focus REPORT, unlike the #1207 debt, since macOS's own restore
+  may land after the handler and is the report this debt
+  overrides; a ⌘-Tab inside the settle's 600 ms is the residue
+  (`StickyReturnFocusTests`, `ReturningFocusSeamTests`). The `.windowCreated` fold takes the debt mirrored in as
   `returningFocus` (the `arrivalDisplay` pattern) and rules two
   clauses: the owed RETURNING window takes the focus even beside
   a non-nil one — and into the ACTIVE space only
@@ -537,7 +556,11 @@ editing here:
   takes `withAwayMembers(_:of:)` — the fold's own rank insert —
   never a hand merge, and a profile's PARTITIONING record is such
   a reader, since a record that omits what is away forgets it on
-  every switch (#1248); a reader keyed by app takes
+  every switch (#1248) — and it also takes every window filed
+  there that has not arrived, the snapshot's one
+  `pendingFilings(in:)` set, a restored filing and a parked away
+  window included (#2015, `PartitioningPendingFilingTests`); a
+  reader keyed by app takes
   `awayWindows(bundleID:)`. An entry with NO Space (a boot-found
   window nothing has filed) is UNFILED: every reader carries the
   skip branch — `awayMembers(of:)` omits it, `get_state` lists it
@@ -756,7 +779,12 @@ editing here:
   when the retile belongs to the command dispatcher rather than
   the call site. Arming *before* the retile lets the settle
   callback consume the restore off the pre-mutation frames
-  (#153). Nothing scans for a mutation that forgot to arm, so
+  (#153). A Desktop switch's re-sync folds `handle`'s event
+  retiles into one pass (`foldingSwitchResync`), so work in the
+  handler's tail that must follow its retile — an arm, the
+  close-return raise — goes through `afterSwitchResync`, never
+  beside it (`SwitchResyncFoldTests`, `SwitchResyncSeamTests`).
+  Nothing scans for a mutation that forgot to arm, so
   each new one owes its own arm deliberately — three have now
   shipped without one (#150, #153, #674).
   Arm **narrowly**: a restore drains a verified raise sequence on
@@ -1618,7 +1646,13 @@ editing here:
   draws refreshes on the cover CROSSING too, since a move or
   resize may retile nothing (`PresentingReaderTests` ▸
   `crossingRefreshesRingAndMark`); the readers ruled so far are
-  the door's docstring.
+  the door's docstring. Which window a screen shows in FRONT is
+  read through `showsPresentation` / `shelfStandsDown`, never the
+  raw `KiwiCore.frontWindowFrames` seam, its live default or the
+  CGWindowList read beneath it, and a new z-order need widens
+  that one seam rather than adding a second front-to-back read
+  (`ScreenCoveringCallerCensusTests` ▸
+  `frontWindowSeamHasOneReader`).
 - **A window is tiled or floating, and detection's verdict is
   read through ONE door (#1810).** The float verbs and the bar
   menu's Float/Tile row ask `KiwiCore.tileRefusal(of:)`, never
@@ -1720,7 +1754,17 @@ editing here:
   writes a parked float's corner into the session file. Held by
   `StashCornerLiftTests`, `FloatStrandRecoveryTests` (the
   decision) and `FloatStrandSeamTests` (every consumer above,
-  the `captureState` wirings included).
+  the `captureState` wirings included). A float with NO
+  original — stranded at a corner, or a tracked window replayed
+  from a corner record wherever the boot pass or its app left
+  it — takes the one `seedWithoutOriginal` door, never a
+  placement of its own (#2130, `CrossSessionCornerRecordTests`).
+- **A capture the restore has SENT is consumed at its origin;
+  the size is never a delivery condition (#2129).** The app may
+  refuse the size, and a capture held for it re-sends on every
+  retile. A capture not yet sent is delivered only by the whole
+  frame, through the one `stashSent` record
+  (`StashRefusedSizeTests`).
 - **A space entering floating mode gathers by REACHABILITY
   (#1177), and an entry is a change in what was DRAWN.** A
   floating layout assigns nothing, so the switch inherits the
@@ -1820,6 +1864,20 @@ editing here:
   `floatFrames` (#1675) and the size-bound learner's ledgers
   named as left behind. A Space's session is adopted AFTER its
   membership: re-filing a window drops its weight.
+- **A change that widens the quit gather carries what it
+  overwrites through `CrashRecovery.stopCarry` (#1864).** Session
+  state the next launch owes back because the gather moved the
+  window rides EVERY stop's capture — a quit's, an in-place
+  restart's and the logout freeze's kept file — and never a plain
+  autosave, so a crash, which moved nothing, still starts it
+  fresh — save a debt owed to a window not yet arrived, which
+  rides every capture, its float with it (#2008,
+  `QuitFloatReturnTests` ▸ `owedFloatRidesACrash`); the stop
+  captures BEFORE it gathers
+  (`StopCaptureOrderTests`). The hand float is the one carried,
+  since the gather places every float (`QuitFloatReturnTests` ▸
+  `onlyAStopCarries`), and `SnapshotStoreCensusTests` names such
+  a store's `.stop` tier.
 - **The in-place payload is a stored cross-version shape
   (#930).** Build N writes the session file and build N+1 reads
   it, so `SpaceSession`, `WindowSession`, `SessionRatios`'
@@ -1828,7 +1886,11 @@ editing here:
   record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
   `HeldOrigin.Arrangement` keys and the snapshot's own
   `arrangement`, which every snapshot carries (#1646,
-  profiles.md), and its `arrangementRecords` — #1230's record
+  profiles.md), each window record's `app` and `title` — the
+  stable key a cross-session match reads (#1385) — and its
+  `floating`, the stop-carried hand float (#1864) — and the
+  snapshot's `frozenForLogout` mark, and its
+  `arrangementRecords` — #1230's record
   per saved profile and per composed Standard, keyed by the
   arrangement and Space name (#1802, #1829,
   `ProfilePartitioningRestartTests` ▸
@@ -1862,7 +1924,16 @@ editing here:
   emptied desk over the last real arrangement; only an announced
   in-place restart outranks it (`LogoutAutosaveFreezeTests` ▸
   `frozenStopKeepsTheAutosave`, `InPlaceRestartTests` ▸
-  `inPlaceOutranksLogoutFreeze`).
+  `inPlaceOutranksLogoutFreeze`). The freeze's own write is the
+  second sanctioned exception: macOS quits the apps about 14 s
+  before the notice (2026-10-09), so the freeze writes back the
+  autosave from before the burst of closes — or the last one
+  when there was none — marked `frozenForLogout`
+  (`LogoutRollbackTests` ▸ `closesRollBack`, `appExitsRollBack`,
+  `onlyTheFreezeMarks`). The burst is read off the departures the
+  gone handler classified and the app exits, so a new path that
+  removes windows from state reports each departure to
+  `CrashRecovery.noteDeparture` with whether it was a close.
 - **A snapshot is read only in the login session that wrote it
   (#1385).** A logout without a reboot passes the boot gate
   (#633) and reuses window ids, so a write stamps the session
@@ -1876,6 +1947,38 @@ editing here:
   third door, and the structure is what keeps one rare —
   `fileURL` and `sessionURL` are private to `CrashRecovery`, so
   any new door is written inside that file, beside the two.
+- **A file the id gates refuse never has its ids replayed
+  (#1385).** It reaches boot only as `takeCrossSessionCandidate`,
+  and only when a logout's freeze wrote it or a plain Quit's
+  boot or login began inside `CrashRecovery.quitCrossingBound`
+  (#1864, `QuitCrossingTests`) — consumed with the file, so
+  once; and it
+  is applied only through `CrossSessionMatch` and
+  `StateSnapshot.rekeyed`, pairing by bundle id, then title once
+  the title pass has run, then rank, its late arrivals paid
+  through `remember` and `restoredFrames` like #1362's, its title
+  pass re-filing through `fileMembership(restoring:)`, its one
+  caller. A user filing while the match is open stamps it
+  through the one seam, `addFocusedToSpace` — a drop's
+  positional filing takes its `after:` form — so no late phase
+  undoes it; a new `workspaces.add(` call site is classified in
+  `CrossSessionSeamTests`. The match is pinned to the
+  arrangement live at arming, never the snapshot's: a login
+  under another arrangement than the logout's — docked, then
+  undocked — would otherwise starve both late phases
+  (`CrossSessionArrangementTests` ▸ `foreignBootFilesByName`). A
+  late phase files exactly as the ordinary restore does:
+  membership by name into a Space that exists, never a mode,
+  never a new Space; any later arrangement change closes it
+  (`CrossSessionRestoreTests` ▸
+  `arrangementChangeClosesTheMatch`). An
+  in-place file that passes the gates is replayed by id and the
+  match never arms beside it (`CrossSessionRestoreTests` ▸
+  `sameSessionIsNeverMatched`, `plainQuitCrossesInsideTheBound`,
+  `secondLaunchMatchesNothing`, `oldIDNamesNothing`,
+  `titlePassRespectsTheUser`). A new reader of a refused file
+  owes the same, and a new field of the snapshot's records is
+  classified for `rekeyed` (`CrossSessionRekeyParityTests`).
 - **A restore pays an untracked window's frame at its arrival
   (#1362).** The replay sets frames on TRACKED windows only; a
   slow app's window adopted later kept the boot scan's tile on
@@ -1890,7 +1993,10 @@ editing here:
   delivers it on a shown Space and the park keeps it for the
   activation; a layout frame outranks it on a tiled Space. It
   is id-keyed like `rememberedSpaces` and shares its lifetime
-  and its rekey (`WindowRekeyParityTests` counts it). The
+  and its rekey (`WindowRekeyParityTests` counts it). Its second
+  writer is `claimCrossSessionArrival`, which files a paired
+  arrival's Space and frame the same way before the fold
+  (`CrossSessionRestoreTests` ▸ `lateArrivalUntilTheClose`). The
   screen-home stand-down stays on the FLAG by ruling: a
   floating-mode member returning on another display follows
   the screen — the flag travels with the window and survives a
@@ -1951,7 +2057,14 @@ editing here:
   nothing). Every retile triggered by an explicit `set_*` from
   Lua/CLI applies — `applyProfileScopedState`, `set_gap_*`,
   `set_min_window_size`, `set_mode`, the whole `layoutCommand`
-  dispatch. Event-driven retiles stay on the `.event` default so
+  dispatch — save that a `space_bar.*` or `app_bar.*` write may
+  skip the pass, running the one `repaintBarsAndFloatNet` tail
+  (the bars, then every strip reader) instead, only while it leaves every layout's
+  `TilingSettings.shelfReservation(in:on:)` on every connected
+  screen — the whole input `layoutBounds(from:mode:on:)`
+  reads — unchanged (#1524, #1948,
+  `BarReserveCoreTests` ▸ `unchangedReservationSkipsTheRetile`).
+  Event-driven retiles stay on the `.event` default so
   echo lag can't wobble windows. Profile applies classify
   themselves: see [profiles.md](profiles.md). **A Space or
   Desktop activation takes `retile(pass: .reissue)`, never

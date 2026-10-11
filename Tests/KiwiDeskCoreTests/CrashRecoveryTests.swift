@@ -66,7 +66,6 @@ struct CrashRecoveryTests {
         let captured = Date(timeIntervalSince1970: 5000)
         var record = snapshot(at: captured)
         record.windows[0].session = StateSnapshot.WindowSession(
-            floating: true,
             sticky: .global,
             stickyReach: nil
         )

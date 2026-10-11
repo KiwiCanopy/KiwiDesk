@@ -2,6 +2,7 @@
 
 enum SpaceBarKey: String, CaseIterable, Hashable {
     case spaceBarEnabled = "settings.spaceBarStyle.enabled"
+    case spaceBarReserve = "settings.spaceBarStyle.reserve"
     case spaceBarActiveIndicator = "settings.spaceBarStyle.activeIndicator"
     case spaceBarHideEmpty = "settings.spaceBarStyle.hideEmpty"
     case spaceBarGroupAdjacent =
@@ -44,6 +45,10 @@ extension SpaceBarKey {
                 gate: .setting(.spaceBar(.spaceBarShowFrontApp))
             )
         case .spaceBarActiveDimFactor, .spaceBarStickyBadge:
+            return .luaOnly
+        case .spaceBarReserve:
+            // Lua/CLI only by ruling (#1524): its dead zone
+            // is a cost a row would have to explain.
             return .luaOnly
         case .spaceBarFocusedItemColor:
             // Inert when front-app is off or icon source does not tint.
@@ -125,7 +130,8 @@ extension SpaceBarKey {
                 "space_bar.front_app_title_cap",
                 help: "space_bar.front_app_title_cap.help"
             )
-        case .spaceBarActiveDimFactor, .spaceBarStickyBadge:
+        case .spaceBarActiveDimFactor, .spaceBarStickyBadge,
+            .spaceBarReserve:
             return .none
         case .spaceBarFocusedItemColor:
             return .text(
