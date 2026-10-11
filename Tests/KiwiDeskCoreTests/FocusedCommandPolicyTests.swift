@@ -32,6 +32,8 @@ struct FocusedCommandPolicyTests {
         "delete_space",
         "focus_or_spawn",
         "spawn_new",
+        // Names an app, never the focused window (#1510).
+        "gather",
         "get_state",
         "get_layout_info",
         "list_monitors",

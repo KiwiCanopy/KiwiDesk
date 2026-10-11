@@ -89,6 +89,14 @@ struct AXDump {
         return WindowTraits.titlebarButton(from: buttons)
     }
 
+    /// The zoom button's recorded `AXEnabled` (#2070); nil where
+    /// the dump records no zoom button.
+    var zoomable: Bool? {
+        guard let zoom = values["AXZoomButton"] as? [String: Any]
+        else { return nil }
+        return (zoom["AXEnabled"] as? Int).map { $0 != 0 }
+    }
+
     /// AeroSpace skips `AXChildren`, so this is nil throughout
     /// the pinned corpus.
     var childCount: Int? { (values["AXChildren"] as? [Any])?.count }
@@ -137,11 +145,15 @@ extension AXDump {
             let bundleID
         else { return nil }
         let title = title
+        let zoomable = zoomable
         return EventLoop.composeVerdict(
             .facts(
-                WindowFacts(role: role, subrole: subrole, layer: layer) {
-                    title
-                }
+                WindowFacts(
+                    role: role,
+                    subrole: subrole,
+                    layer: layer,
+                    zoomable: { zoomable }
+                ) { title }
             ),
             pid: Self.foreignPID,
             activationPolicy: policy,
@@ -158,7 +170,8 @@ extension AXDump {
             bundleID: bundleID,
             layer: layer,
             isAccessory: isAccessory,
-            rules: IgnoreRules()
+            rules: IgnoreRules(),
+            titlebarButton: hasTitlebarButton == true
         )
         return ignored ? .ignored : .kept
     }

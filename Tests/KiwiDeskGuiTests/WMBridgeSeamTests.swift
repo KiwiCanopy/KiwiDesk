@@ -75,6 +75,9 @@ struct WMBridgeSeamTests {
             "KiwiDeskCore/Commands/KiwiCore+DesktopSwitch.swift": 2,
             // #1145 sticky reach: the one carry MOVE.
             "KiwiDeskCore/App/KiwiCore+StickyReach.swift": 1,
+            // #1510 gather: the MOVE that hops an app's away
+            // windows onto the shown Desktop.
+            "KiwiDeskCore/Commands/KiwiCore+Gather.swift": 1,
             // #1147: the store PREFIX, not an operation. The
             // identity's read door is the plain WindowServer
             // plist, so the full key is joined here once from

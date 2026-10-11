@@ -83,6 +83,12 @@ struct WindowFactsSeamTests {
         #expect(door.contains("AXHelper.subrole(of: element)"))
         #expect(door.contains("{ AXHelper.title(of: element) }"))
         #expect(door.occurrences(of: "AXHelper.title(") == 1)
+        // The zoom button (#2070) is read live through the door
+        // too, deferred like the title: a door handing every
+        // producer `{ nil }` would tile every fixed-size window.
+        #expect(door.contains("kAXZoomButtonAttribute"))
+        #expect(door.contains("kAXEnabledAttribute"))
+        #expect(door.contains("zoomable: {"))
     }
 
     /// Every `FloatDetection*` file, qualified or not (an

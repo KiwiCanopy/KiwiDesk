@@ -159,6 +159,11 @@ extension APIReference {
                 + "identifier.",
             .text("bundle_id")
         ),
+        "gather": APIRecord(
+            "Moves every window of an app into the Space you are "
+                + "on, from other Desktops too.",
+            .text("bundle_id")
+        ),
         "set_mode": APIRecord(
             "Sets a Space's layout mode; omit the Space to set "
                 + "the active one.",

@@ -66,6 +66,11 @@ final class DeferredTasks {
         /// a follow and a reach are one keystroke apart, and
         /// cancel-and-replace would drop whichever fired first.
         case awayReachReap
+        /// Adopts the windows a `gather` moved here from other
+        /// Desktops (#1510); its own slot, so a reach never drops
+        /// it, and a second gather adds its apps to the pending
+        /// reap (`DesktopMemory.gatherReapPIDs`).
+        case gatherReap
         /// Re-publishes the displays after the menu-bar
         /// auto-hide pref flips (#1386).
         case menuBarRemeasure
@@ -86,7 +91,7 @@ final class DeferredTasks {
             case .focusFollow, .spaceSettle, .moveSettle,
                 .desktopSettle, .desktopMoveReap, .desktopFollowReap,
                 .desktopSwitchVerify, .borderDropSettle, .floatRaise,
-                .awayReachReap:
+                .awayReachReap, .gatherReap:
                 return true
             case .startupSweep, .bootScan, .deferredBootApps,
                 .borderResync, .adoptionHeal, .adoptionHealRead,

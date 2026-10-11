@@ -127,7 +127,8 @@ struct FloatRuleTests {
                 bundleID: "com.mitchellh.ghostty",
                 layer: 3,
                 isAccessory: false,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
         // Ghostty's normal windows tile as usual.
@@ -136,7 +137,8 @@ struct FloatRuleTests {
                 bundleID: "com.mitchellh.ghostty",
                 layer: 0,
                 isAccessory: false,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
         // Other regular apps' panels merely float; the ignore
@@ -147,7 +149,8 @@ struct FloatRuleTests {
                 bundleID: "com.apple.finder",
                 layer: 3,
                 isAccessory: false,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
     }
@@ -160,7 +163,8 @@ struct FloatRuleTests {
                 bundleID: "io.tailscale.ipn.macos",
                 layer: 0,
                 isAccessory: false,
-                rules: rules
+                rules: rules,
+                titlebarButton: false
             )
         )
         #expect(
@@ -168,7 +172,8 @@ struct FloatRuleTests {
                 bundleID: "io.tailscale.ipn.macos",
                 layer: 9,
                 isAccessory: true,
-                rules: rules
+                rules: rules,
+                titlebarButton: false
             )
         )
         #expect(
@@ -176,7 +181,8 @@ struct FloatRuleTests {
                 bundleID: "com.apple.finder",
                 layer: 0,
                 isAccessory: false,
-                rules: rules
+                rules: rules,
+                titlebarButton: false
             )
         )
     }
@@ -198,7 +204,8 @@ struct FloatRuleTests {
                     bundleID: bundleID,
                     layer: 0,
                     isAccessory: false,
-                    rules: IgnoreRules()
+                    rules: IgnoreRules(),
+                    titlebarButton: false
                 )
             )
         }
