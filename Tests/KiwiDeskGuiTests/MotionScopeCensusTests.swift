@@ -98,7 +98,7 @@ struct MotionScopeCensusTests {
     func scopeHasOneHome() throws {
         let found = try Self.counts(of: "applier.motion")
         #expect(
-            found == ["KiwiDeskCore/App/KiwiCore+MotionCause.swift": 4]
+            found == ["KiwiDeskCore/App/KiwiCore+MotionCause.swift": 5]
         )
         // The gate's reading is wired once, to the one fold.
         let wired = try Self.counts(of: "applier.cause =")
