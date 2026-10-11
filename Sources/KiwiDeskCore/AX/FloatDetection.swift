@@ -188,21 +188,14 @@ public enum FloatDetection {
         )
         return autoFloatReason(
             structural: structural,
-            fixedSize: {
-                isStandardNormalWindow(facts) && facts.zoomable() == false
-            },
+            // Asked only where structure tiles: a standard window
+            // on the normal layer, the one shape a disabled zoom
+            // button marks as fixed-size.
+            fixedSize: { facts.zoomable() == false },
             ruleMatches: {
                 rules.matches(bundleID: bundleID, title: facts.title())
             }
         )
-    }
-
-    /// A standard window on the normal layer — the one shape a
-    /// disabled zoom button marks as fixed-size (#2070).
-    static func isStandardNormalWindow(_ facts: WindowFacts) -> Bool {
-        facts.role == kAXWindowRole
-            && facts.subrole == kAXStandardWindowSubrole
-            && (facts.layer ?? 0) == 0
     }
 
     /// The reason's order, pure: what no setting removes first —
