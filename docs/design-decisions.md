@@ -6094,6 +6094,45 @@ by KiwiShelf (hidden whenever the shelf is), a mini-map of the
 screens, and the KiwiDesk Space — a Space switch keeps its own
 motion cue (#1956).
 
+### Cycling layouts shows the cycle, on its own switch (#2144)
+
+**[Principle]**
+
+`cycle_mode` shows #2142's plate with the user's cycle list as a
+ring — first entry at 12 o'clock, clockwise in Next order — the
+current layout large in the centre, its slot empty. Only the
+verb shows it; `set_mode` and the Layout menu do not.
+
+With three windows, bsp and grid or stack and track can look
+alike, so the rearranged windows say that something changed and
+not what. The ring IS the list the key walks, so the plate also
+teaches the order, and a second press visibly steps around it.
+
+**The step is one shared element per symbol**: the incoming
+layout flies from its slot to the centre and grows while the
+outgoing one flies back to its own slot, in one critically damped
+spring. It shows which layout came in and where the old one went;
+a symbol morph in place says only the first. The first
+appearance stays instant, as #2142's, and Reduce Motion jumps.
+
+**No strip of options and no circling windows.** The plate takes
+no mouse, so a row of layouts reads as a menu it cannot honour;
+and the frame animation already moves each window from its old
+frame to its new one, which is the honest motion — a circular
+path lengthens the change and brings back the AX-write stalls
+#1956 fought.
+
+**Its own switch, not a shared "switch cue".** The Desktop cue
+stands in for motion the instant switch removed; this one
+confirms the user's own press. A user may want one and not the
+other, and merging them would have owed a `ConfigMigration` of
+`desktop.cue` only to merge two choices. On by default and
+app-wide, for #2142's reasons. It is stored as `mode.cue` beside
+the other app-wide groups (`desktop.cue`, `refusal.sound`), while
+`mode_cycle` stays a flat key: the list is the global base a
+profile overrides, the switch is app-wide, and the two shapes
+follow those two families rather than the shared word.
+
 ### A Desktop switch that changes nothing still reports itself (#1336)
 
 **[Principle]**
@@ -9811,6 +9850,13 @@ default tables found nothing on `⌃⌥C` or `⌃⌥⇧C` (JetBrains'
 Ctrl+Alt+Shift+C becomes ⌥⇧⌘C on a Mac). VoiceOver's VO-C and
 Emacs's C-M-c under Option-as-Meta are the class the whole `⌃⌥`
 tier already accepts.
+
+The layout picker takes `⌃⌥L` (#762), L for layout, beside the
+cycle's `C`: each letter names what its key does, so the two
+carrying different letters is intended. It is a layout verb too,
+so it joins the base seed and not `appChromeRows`. The same sweep
+found `⌃⌥L` free; the nearest chords taken are Terminal's `⌃⌥⌘L`
+and the `⌥⌘L` Downloads item Finder, Safari and Chrome keep.
 :::
 
 :::unreleased

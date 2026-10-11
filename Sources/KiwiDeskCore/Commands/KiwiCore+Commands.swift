@@ -88,6 +88,8 @@ extension KiwiCore {
             return launch(args, newInstance: true)
         case "set_mode":
             return setMode(args)
+        case "show_layout_picker":
+            return showLayoutPicker()
         case "cycle_mode":
             return cycleMode(args)
         case "set_mode_cycle":
@@ -108,6 +110,8 @@ extension KiwiCore {
             return setRefusalSound(args)
         case "set_desktop_cue":
             return setDesktopCue(args)
+        case "set_mode_cue":
+            return setModeCue(args)
         case "set_space_history":
             return setSpaceHistory(args)
         case "set_shortcut_panel_liquid_glass":

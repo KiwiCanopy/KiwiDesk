@@ -56,6 +56,11 @@ extension APIReference {
                 + "after KiwiDesk's own Desktop switch.",
             .boolean("enabled")
         ),
+        "set_mode_cue": APIRecord(
+            "Shows the cycle list and the new layout on the "
+                + "Space's screen after cycle_mode.",
+            .boolean("enabled")
+        ),
         "set_space_history": APIRecord(
             "Sets whether Space history is kept per screen or "
                 + "across every screen.",

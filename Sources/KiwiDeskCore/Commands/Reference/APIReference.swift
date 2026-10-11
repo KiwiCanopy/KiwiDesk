@@ -46,6 +46,7 @@ public enum APIReference {
             ("focus_or_spawn", "focus_or_spawn"),
             ("spawn_new", "spawn_new"),
             ("set_mode", "set_mode"),
+            ("show_layout_picker", "show_layout_picker"),
             ("cycle_mode", "cycle_mode"),
             ("set_mode_cycle", "set_mode_cycle"),
             ("set_gap_global", "set_gap_global"),
@@ -67,6 +68,7 @@ public enum APIReference {
                 "set_refusal_sound"
             ),
             ("set_desktop_cue", "set_desktop_cue"),
+            ("set_mode_cue", "set_mode_cue"),
             ("set_space_history", "set_space_history"),
             (
                 "set_shortcut_panel_liquid_glass",

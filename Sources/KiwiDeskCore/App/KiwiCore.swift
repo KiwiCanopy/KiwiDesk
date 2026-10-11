@@ -224,12 +224,12 @@ public final class KiwiCore {
     let pendingSpace = PendingSpaceAssignment()
     let launchFollow = LaunchFollowIntent()
 
-    /// The MAIN display's current native Desktop (#888) — the
-    /// binding authority, and the per-Desktop Space memory
-    /// restored on returning to one. Keyed, not numbered (#1147).
+    /// The MAIN display's current native Desktop (#888): the binding
+    /// authority and the Space memory's key (#1147), never a number.
     var lastDesktop: DesktopKey?
     let desktopMemory = DesktopMemory()
     let desktopCue = DesktopCueLedger()
+    let modeCue = ModeCueHook()
     /// The last native Desktop switch; focus during it changes no space.
     var lastDesktopSwitch: Date = .distantPast
 

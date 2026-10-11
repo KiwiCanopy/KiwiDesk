@@ -25,7 +25,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     let bootNarration = BootNarration()
     /// The slow-boot notice (#1715).
     let bootNotice = BootNoticeController()
-    let desktopCuePlate = DesktopCueController()
+    /// The switch cues' one plate (#2142, #2144).
+    let cuePlate = CuePlateController()
     /// Cached dashboard controller to avoid constructing on refresh.
     private(set) var dashboardIfCreated: SettingsWindowController?
     var dashboard: SettingsWindowController {
@@ -191,7 +192,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         self.statusItem = statusItem
         wireBootNotice()
-        wireDesktopCue()
+        wireCuePlate()
 
         // The error surface (#68 §3.7): the badge and the
         // standalone panel track the last config load.

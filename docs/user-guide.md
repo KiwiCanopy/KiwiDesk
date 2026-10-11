@@ -875,7 +875,10 @@ reach it, and Shortcuts & Gestures can give it a key of its own.
 
 `⌃⌥C` moves the focused space to its next layout
 ([`cycle_mode`](lua-reference.md#cycle_mode)) and `⌃⌥⇧C` to the
-previous one, `⇧` stepping back as it does on `Tab`.
+previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥L` opens
+a menu of every layout at the pointer
+([`show_layout_picker`](lua-reference.md#show_layout_picker)) for
+the space on that screen.
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each
 Desktop gets its key the first time KiwiDesk sees it, so a key you
