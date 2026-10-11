@@ -176,74 +176,27 @@ struct ColorsCensusRenderTests {
 
     // MARK: - Advanced Colours
 
-    @Test("the Borders group's rows are the census's")
-    func bordersGroup() {
+    /// Every Advanced Colours group draws its rows at rest:
+    /// the page is a browse, and since #1857 nothing on it hides
+    /// behind a drawer.
+    @Test("each Advanced Colours group's rows are the census's")
+    func advancedColoursGroups() {
+        // Each role group draws its colour above its rows.
         pin(
-            ColorsRowOrder.bordersAtRest,
+            [ColorRole.accent.paint] + ColorsRowOrder.accentAtRest,
             .advancedColours,
-            .borders,
+            .accent,
             .atRest,
-            "border colors"
+            "accent"
         )
-        // No drawer: the group is small enough that hiding part
-        // of it would move a decision rather than remove one.
-        #expect(
-            censusRows(.advancedColours, .borders, .showMore)
-                .isEmpty
-        )
-    }
-
-    /// One list per column, and the union is what the census
-    /// must hold: the columns are what the renderer reads, so a
-    /// combined list nothing renders would let a fifth drag tint
-    /// ship invisible while this stayed green.
-    ///
-    /// Set equality over the union cannot see WHICH column a
-    /// tint sits in — swapping one across renders the Ghost's
-    /// Fill under the "Drop zone" heading, beside that column's
-    /// preview and its `?`. `dragColumnsHoldTheirOwnVisual`
-    /// below is the half that pins it.
-    @Test("the Drag group's rows are the census's")
-    func dragGroup() {
         pin(
-            ColorsRowOrder.dragGhostColumn
-                + ColorsRowOrder.dragDropZoneColumn,
+            [ColorRole.secondAccent.paint]
+                + ColorsRowOrder.secondAccentAtRest,
             .advancedColours,
-            .dragAndDrop,
+            .secondAccent,
             .atRest,
-            "drag colors"
+            "second accent"
         )
-        #expect(
-            censusRows(.advancedColours, .dragAndDrop, .showMore)
-                .isEmpty
-        )
-    }
-
-    /// Each column holds its own visual's tints and no others,
-    /// derived from the census row key rather than re-listed:
-    /// the two columns render side by side, each with its own
-    /// preview and its own gate, so a tint in the wrong one is
-    /// labelled by the wrong visual and explained by the wrong
-    /// switch.
-    @Test("each drag column holds only its own visual's tints")
-    func dragColumnsHoldTheirOwnVisual() {
-        func isGhost(_ key: SettingKey) -> Bool {
-            key.id.contains("dragGhost")
-        }
-        #expect(ColorsRowOrder.dragGhostColumn.allSatisfy(isGhost))
-        #expect(
-            ColorsRowOrder.dragDropZoneColumn.allSatisfy {
-                !isGhost($0) && $0.id.contains("dragDropZone")
-            }
-        )
-        // Vacuity: a renamed key shape would make both
-        // `allSatisfy`s pass over nothing to check.
-        #expect(!ColorsRowOrder.dragGhostColumn.isEmpty)
-        #expect(!ColorsRowOrder.dragDropZoneColumn.isEmpty)
-    }
-
-    @Test("the KiwiShelf group's two tiers are the census's")
-    func kiwishelfGroup() {
         pin(
             ColorsRowOrder.kiwishelfAtRest,
             .advancedColours,
@@ -252,21 +205,60 @@ struct ColorsCensusRenderTests {
             "shelf inks"
         )
         pin(
-            ColorsRowOrder.kiwishelfMore,
+            ColorsRowOrder.windowMarksAtRest,
             .advancedColours,
-            .kiwishelf,
-            .showMore,
-            "shelf drawer"
+            .windowMarks,
+            .atRest,
+            "window marks"
+        )
+        #expect(
+            SettingKey.allCases.filter {
+                $0.placement.area == .advancedColours
+                    && $0.placement.tier != .atRest
+            }
+            .isEmpty
         )
     }
 
-    /// Three groups, matching the three things on screen. A
-    /// fourth container placed in this area would render nowhere.
-    @Test("Advanced Colours holds exactly the three groups")
+    /// The two role groups are the two colour-vision pairs, one
+    /// half of each in each group (#1857): side by side, the
+    /// colours that must stay apart are read together. A pair
+    /// split onto one side, or moved off the page's top, reds.
+    @Test("each role group holds one half of both pairs")
+    func roleGroupsSplitThePairs() {
+        let accent = ColorsRowOrder.accentAtRest
+        let second = ColorsRowOrder.secondAccentAtRest
+        #expect(accent.contains(.kiwishelf(.activeItemColor)))
+        #expect(second.contains(.spaceBar(.spaceBarFocusedItemColor)))
+        #expect(accent.contains(.borders(.dragGhostBorderColor)))
+        #expect(second.contains(.borders(.dragDropZoneBorderColor)))
+        // Each group leads with the colour its pair is anchored on.
+        #expect(accent.first == ColorRole.accent.anchor)
+        #expect(second.first == ColorRole.secondAccent.anchor)
+        // Every tint of a drag visual sits with its visual: the
+        // ghost's in Accent, the drop zone's in Second accent,
+        // derived from the key rather than re-listed.
+        let drag = SettingKey.allCases.filter {
+            $0.placement.area == .advancedColours
+                && $0.id.contains("drag")
+        }
+        #expect(drag.count == 4)
+        for key in drag {
+            let ghost = key.id.contains("dragGhost")
+            #expect(
+                (ghost ? accent : second).contains(key),
+                "\(key.id) left its visual's group"
+            )
+        }
+    }
+
+    /// Four groups, matching the four cards on screen. A fifth
+    /// container placed in this area would render nowhere.
+    @Test("Advanced Colours holds exactly the four groups")
     func advancedColoursContainers() {
         #expect(
             containers(of: .advancedColours)
-                == [.borders, .dragAndDrop, .kiwishelf]
+                == [.accent, .secondAccent, .kiwishelf, .windowMarks]
         )
     }
 

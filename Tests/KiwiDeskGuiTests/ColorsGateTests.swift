@@ -14,52 +14,25 @@ import Testing
 /// behaviour, not decoration.
 @Suite("Advanced Colours greying")
 struct ColorsGateTests {
-    /// The exemption escapes the CONTAINER gate and nothing
-    /// else. Asserted over the resolver rather than left to the
-    /// view body, because no rendered behaviour distinguishes
-    /// the two forms today — nothing in this area is exempt, so
-    /// dropping the `||` produced a byte-identical full-suite
-    /// result. It is reachable the moment someone adds the first
-    /// exemption, and what they would get is a swatch that is
-    /// editable, tints nothing, and explains nothing.
+    /// The exemption escapes the shelf's block gate and nothing
+    /// else, asserted over the verdict because nothing in this
+    /// area is exempt yet — so the first exemption gets a swatch
+    /// that keeps its own reason rather than one that tints
+    /// nothing and explains nothing.
     @Test("an exemption escapes the container gate only")
     func exemptionEscapesOnlyTheContainerGate() {
-        // `gate` is pure and reads only the flag, so the exempt
-        // half is exercised with a key that actually carries it.
-        // None is in this area yet — which is the point: the
-        // resolver has to be right BEFORE the first one lands.
         let exempt = SettingKey.borders(.borderEnabled)
         let plain = SettingKey.kiwishelf(.itemColor)
         #expect(exempt.placement.exemptFromContainerGate)
         #expect(!plain.placement.exemptFromContainerGate)
-
-        // Container gate closed. The plain row greys wholesale
-        // and its own predicate stands down, so the hover names
-        // the outer reason.
-        let closed = AdvancedColorRows.gate(
-            allows: false,
-            key: plain
+        #expect(AdvancedColorsGates.takesShelfGate(plain))
+        #expect(!AdvancedColorsGates.takesShelfGate(exempt))
+        // Window rows never take the shelf's gate.
+        #expect(
+            !AdvancedColorsGates.takesShelfGate(
+                .borders(.borderFocusedColor)
+            )
         )
-        #expect(closed.containerGrey)
-        #expect(!closed.rowPredicateLive)
-
-        // Same closed gate, exempt row: the container grey lifts
-        // — and its OWN predicate must stay live rather than lift
-        // with it. Dropping the `||` flips this one line to
-        // false and ships an editable swatch that tints nothing.
-        let escaped = AdvancedColorRows.gate(
-            allows: false,
-            key: exempt
-        )
-        #expect(!escaped.containerGrey)
-        #expect(escaped.rowPredicateLive)
-
-        // Gate open: neither row is touched by either half.
-        for key in [plain, exempt] {
-            let open = AdvancedColorRows.gate(allows: true, key: key)
-            #expect(!open.containerGrey)
-            #expect(open.rowPredicateLive)
-        }
     }
 
     /// Advanced Colours exempts no row from a container gate
@@ -111,90 +84,163 @@ struct ColorsGateTests {
     /// ring is off would send the user to fix the wrong switch.
     @MainActor
     @Test("an off-page gate names the outermost reason")
-    func headerHelpPicksTheOuterReason() {
+    func rowHelpPicksTheOuterReason() {
+        let unfocused = SettingKey.borders(.borderUnfocusedColor)
+        let focusedItem = SettingKey.spaceBar(.spaceBarFocusedItemColor)
         var settings = TilingSettings()
         settings.borderStyle.enabled = false
         settings.borderStyle.unfocusedEnabled = false
+        var gates = AdvancedColorsGates(settings: settings)
         #expect(
-            AdvancedColorsGates(settings: settings)
-                .bordersHeaderHelp == AdvancedColorsHelp.borderOff
+            gates.verdict(for: unfocused)
+                == ColorRowVerdict(
+                    help: AdvancedColorsHelp.borderOff,
+                    link: .page(.gapsAndBorders)
+                )
         )
-        #expect(
-            !AdvancedColorsGates(settings: settings)
-                .unfocusedNeedsReference
-        )
-        // Ring on, unfocused off: ONE greyed row in a live card,
-        // which takes the link beneath the grid rather than the
-        // header `?` (#1310).
+        // Ring on, unfocused off: the row's own sentence (#1310).
         settings.borderStyle.enabled = true
+        gates = AdvancedColorsGates(settings: settings)
         #expect(
-            AdvancedColorsGates(settings: settings)
-                .bordersHeaderHelp == nil
-        )
-        #expect(
-            AdvancedColorsGates(settings: settings)
-                .unfocusedNeedsReference
+            gates.verdict(for: unfocused)?.link
+                == .ownSentence(.gapsAndBorders)
         )
         settings.borderStyle.unfocusedEnabled = true
         #expect(
             AdvancedColorsGates(settings: settings)
-                .bordersHeaderHelp == nil
-        )
-        #expect(
-            !AdvancedColorsGates(settings: settings)
-                .unfocusedNeedsReference
+                .verdict(for: unfocused) == nil
         )
 
-        // The focused-item row's link (#1310) draws only while
-        // the bar is on — off, the header's outer reason covers
-        // the row — and stands down once the picker is Glyphs.
+        // The focused-item row: every bar off names the shelf;
+        // the Space Bar off with an App Bar on names the Space
+        // Bar's switch, never the glyph style; the bar on with
+        // App icons takes the row's own sentence; Symbols draws.
         settings.spaceBarStyle.enabled = false
+        settings.monocle.appBar.enabled = false
+        settings.scrolling.appBar.enabled = false
         settings.kiwishelf.iconSource = .appImage
         settings.spaceBarStyle.showFrontApp = false
         #expect(
-            !AdvancedColorsGates(settings: settings)
-                .focusedItemNeedsReference
+            AdvancedColorsGates(settings: settings)
+                .verdict(for: focusedItem)?.help
+                == AdvancedColorsHelp.kiwishelfOff
+        )
+        settings.monocle.appBar.enabled = true
+        #expect(
+            AdvancedColorsGates(settings: settings)
+                .verdict(for: focusedItem)
+                == ColorRowVerdict(
+                    help: BarsGateHelp.sentence(for: .spaceBarOff),
+                    link: .page(.bars)
+                )
         )
         settings.spaceBarStyle.enabled = true
         #expect(
             AdvancedColorsGates(settings: settings)
-                .focusedItemNeedsReference
+                .verdict(for: focusedItem)
+                == ColorRowVerdict(
+                    help: AdvancedColorsHelp.focusedItemHelp,
+                    link: .ownSentence(.bars)
+                )
         )
         settings.kiwishelf.iconSource = .appFont
         #expect(
-            !AdvancedColorsGates(settings: settings)
-                .focusedItemNeedsReference
+            AdvancedColorsGates(settings: settings)
+                .verdict(for: focusedItem) == nil
         )
 
+        // A drag tint names its visual's switch first, its own
+        // part's second.
         settings.dragGhost.enabled = false
         settings.dragGhost.border = false
-        var gates = AdvancedColorsGates(settings: settings)
+        gates = AdvancedColorsGates(settings: settings)
         #expect(
-            gates.dragHeaderHelp(ghost: true)
+            gates.verdict(for: .borders(.dragGhostBorderColor))?.help
                 == AdvancedColorsHelp.dragOff
         )
-        #expect(gates.dragHeaderHelp(ghost: false) == nil)
-
-        // Border and Fill are siblings, not a second level: with
-        // both off the column's one live `?` must carry BOTH
-        // reasons, or the Fill row sits dimmed and unexplained.
-        settings.dragGhost.enabled = true
-        settings.dragGhost.fill = false
-        gates = AdvancedColorsGates(settings: settings)
-        // Exact, not two `contains` checks: those pin presence
-        // only, and pass on the two sentences reversed or run
-        // together with no separator — visibly broken help.
         #expect(
-            gates.dragHeaderHelp(ghost: true)
-                == AdvancedColorsHelp.dragBorderOff + "\n"
-                + AdvancedColorsHelp.dragFillOff
+            gates.verdict(for: .borders(.dragDropZoneBorderColor))
+                == nil
+        )
+        settings.dragGhost.enabled = true
+        gates = AdvancedColorsGates(settings: settings)
+        #expect(
+            gates.verdict(for: .borders(.dragGhostBorderColor))?.help
+                == AdvancedColorsHelp.dragBorderOff
+        )
+        #expect(
+            gates.verdict(for: .borders(.dragGhostFillColor)) == nil
+        )
+    }
+
+    /// A role group draws ONE link per page whose switch dims a
+    /// row of it, in its rows' order, and none while every row
+    /// draws (#1857, #1310) — a link per row would stack the
+    /// same sentence under the card.
+    @MainActor
+    @Test("a role group links each page that dims one of its rows")
+    func roleGroupLinksEachDimmingPage() {
+        var settings = TilingSettings()
+        settings.spaceBarStyle.enabled = true
+        settings.spaceBarStyle.showFrontApp = true
+        var gates = AdvancedColorsGates(settings: settings)
+        #expect(
+            gates.dimmedDestinations(
+                of: ColorsRowOrder.accentAtRest
+            ).isEmpty
+        )
+        #expect(
+            gates.dimmedDestinations(
+                of: ColorsRowOrder.secondAccentAtRest
+            ).isEmpty
         )
 
-        settings.dragGhost.border = true
+        // Every bar off, the ring off and the ghost's border off:
+        // both pages, once each, the shelf rows' first.
+        settings.spaceBarStyle.enabled = false
+        settings.monocle.appBar.enabled = false
+        settings.scrolling.appBar.enabled = false
+        settings.borderStyle.enabled = false
+        settings.dragGhost.border = false
+        gates = AdvancedColorsGates(settings: settings)
+        #expect(!gates.shelfDraws)
+        #expect(
+            gates.dimmedDestinations(
+                of: ColorsRowOrder.accentAtRest
+            ) == [.bars, .gapsAndBorders]
+        )
+
+        // The drop zone off dims only the Second accent's drag
+        // rows; with the bars back, Gaps & Borders alone.
+        settings.spaceBarStyle.enabled = true
+        settings.dragDropZone.enabled = false
         gates = AdvancedColorsGates(settings: settings)
         #expect(
-            gates.dragHeaderHelp(ghost: true)
-                == AdvancedColorsHelp.dragFillOff
+            gates.dimmedDestinations(
+                of: ColorsRowOrder.secondAccentAtRest
+            ) == [.gapsAndBorders]
+        )
+
+        // A page a row's own sentence already links takes no
+        // second, vaguer link: App icons dim Focused window (its
+        // own sentence, to Bars) and the front-app segment off
+        // dims its indicator (a page link to Bars too).
+        settings = TilingSettings()
+        settings.spaceBarStyle.enabled = true
+        settings.kiwishelf.iconSource = .appImage
+        settings.spaceBarStyle.showFrontApp = false
+        gates = AdvancedColorsGates(settings: settings)
+        #expect(
+            gates.needsOwnSentence(.spaceBar(.spaceBarFocusedItemColor))
+        )
+        #expect(
+            gates.verdict(for: .spaceBar(.spaceBarFocusedHighlightColor))?
+                .link == .page(.bars)
+        )
+        #expect(
+            !gates.dimmedDestinations(
+                of: ColorsRowOrder.secondAccentAtRest
+            ).contains(.bars)
         )
     }
 }

@@ -5,15 +5,9 @@ import SwiftUI
 struct AdvancedColorRow: View {
     @ObservedObject var model: SettingsModel
     let key: SettingKey
-    /// Whether this row's own gate predicate is active
-    /// (`AdvancedColorRows.gate`).
-    var ownPredicateLive = true
 
     var settings: Binding<TilingSettings> {
         $model.config.settings
-    }
-    var gates: AdvancedColorsGates {
-        AdvancedColorsGates(settings: model.config.settings)
     }
 
     @ViewBuilder var body: some View {
@@ -30,12 +24,5 @@ struct AdvancedColorRow: View {
             )
             EmptyView()
         }
-    }
-
-    func gated(
-        _ inert: Bool,
-        _ help: String
-    ) -> GreyOut {
-        GreyOut(active: ownPredicateLive && inert, help: help)
     }
 }

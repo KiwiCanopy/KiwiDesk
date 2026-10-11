@@ -258,12 +258,16 @@ struct DetailPanelTests {
             // them would assert against a type that no longer
             // exists — permanently true, and read as coverage.
             (
-                "Components/Colors/StructureColorCards.swift",
+                "Components/Colors/RoleColorCards.swift",
                 "FocusBorderPreview("
             ),
             (
-                "Components/Colors/StructureColorCards.swift",
+                "Components/Colors/RoleColorCards.swift",
                 "DragVisualPreview("
+            ),
+            (
+                "Components/Colors/WindowMarksColorCard.swift",
+                "FocusBorderPreview("
             ),
             // #794: the per-space editor gave up its own copy,
             // which is what let the panel take it. The needle

@@ -31,9 +31,6 @@ enum SettingsMetrics {
     /// Destination icon square tile (#678).
     static let sidebarTile: CGFloat = 22
 
-    /// Label column for half-width drag columns (#231, #754).
-    static let dragColumnLabelColumn: CGFloat = 80
-
     /// Trailing readout of a slider row (#406). Sized for proportional
     /// digits with `monospacedDigit()`.
     static let readoutColumn: CGFloat = 72

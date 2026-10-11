@@ -1,6 +1,9 @@
 /// Titled card or group within an area. Spans multiple areas where relevant.
 enum SettingsContainer: CaseIterable, Hashable {
     case advanced
+    /// Advanced Colours' first role group (#1857): the hue the
+    /// active Space, the focus border and the drag ghost share.
+    case accent
     case appBar
     case borders
     case bsp
@@ -23,6 +26,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     case looks
     case luaBindings
     case screenFingerprints
+    /// Advanced Colours' second role group (#1857).
+    case secondAccent
     case monocle
     case motion
     case gestures
@@ -46,6 +51,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     case stack
     case stickyWindows
     case track
+    /// Advanced Colours' window-mark colours (#1857).
+    case windowMarks
 
     /// Container-level gate that greys member rows as a unit.
     var gate: SettingGate? {
@@ -66,7 +73,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             return .setting(.borders(.borderEnabled))
         case .motion:
             return .runtime(.reduceMotion)
-        case .advanced, .borders, .bsp,
+        case .accent, .advanced, .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .grid,
             .habits, .kiwishelf, .appliesImmediately, .layers,
@@ -75,11 +82,11 @@ enum SettingsContainer: CaseIterable, Hashable {
             .moveWindows, .openApplications,
             .optionalSettings, .palettes, .perSpaceOverrides,
             .pinnedToDisconnectedScreens, .presets,
-            .profilesPerMacOSSpace, .floatRules,
+            .profilesPerMacOSSpace, .floatRules, .secondAccent,
             .spaceRules, .automaticFloating,
             .savedProfiles, .scrolling, .sharedLook, .sizeAndFloat,
             .spaceList, .spacePlacement, .stack,
-            .stickyWindows, .track:
+            .stickyWindows, .track, .windowMarks:
             return nil
         }
     }

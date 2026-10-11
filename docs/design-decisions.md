@@ -12054,11 +12054,10 @@ are co-active concerns tuned together in one session, not a
 mutually-exclusive set, so a strip would misapply the #205 "tabs
 fit a fixed exclusive set" principle. The bar colors live on
 Advanced Colors (#678 Phase 3, "Colour is its own destination"
-below), their "Advanced colors" disclosure being "More colors"
-there; the at-rest/behind-a-drawer SPLIT holds: Fill and Highlight
-are the two a drawing of the bar most visibly reflects, and the
-two at rest (the per-group preview strip that once made that point
-went with #793's composite scene; the split never rested on it).
+below). Since #1857 none of them sits behind a drawer: the
+accent ones open the page in its role groups and the rest are all
+at rest under KiwiShelf colors, because a browse should not hide
+half its subject.
 
 **[Principle] Colour is its own destination, and a colour renders
 in exactly one of them.** (#678 Phase 3, 2026-08-02.) Filing a
@@ -12081,6 +12080,52 @@ who does want the individual tints meets them grouped by
 *where you see it*, because you arrive at that page having
 noticed something on screen is wrong, not looking for
 "highlight colour" in the abstract.
+
+**Amended by #1857 (2026-10-11): the accent groups by role.**
+That premise fails for one colour. "My green" is one thing a user
+notices, drawn on four surfaces — the active Space, the bar's
+highlight, the focus border and the drag ghost — and the palette
+rules already treat it as one role, held apart from a second
+accent by the two colour-vision pair floors (active item against
+the Space Bar's focused window, the ghost against the drop zone).
+So Advanced Colours opens with two role groups side by side,
+**Accent** and **Second accent**, which are exactly one half of
+each pair, and groups by surface everywhere else, where the
+premise holds. A role group is not a second home: every colour
+still renders in one place, which is why the ring's row there is
+"Focus border" and "Focused window" names only the Space Bar ink.
+Grouping by role elsewhere — the shelf's item and fill, the
+window marks — would invent a role no palette rule defines.
+
+**A role group's colour writes its rows; it is never a colour of
+its own** (#1857). Retinting a look used to mean editing each of
+the accent's wells in turn, so each role group carries one well,
+"Ticked rows", whose pick lands on every ticked row of the group
+— at that row's own alpha, since a hover fill and a ghost fill are
+the accent at their own strength, and a pick never makes a stroke
+translucent. It stores nothing: the writes land on the existing
+leaves in the draft, so Revert is the undo and nothing migrates.
+The ticks are scratch, re-seeded each time the page opens from
+the palette itself — a row starts ticked when it already draws
+its group's first colour, ignoring alpha — because ticking by
+meaning would undo the palettes' own splits: the shipped default
+darkens its ring for stroke contrast and draws an emerald ghost
+for the drag pair, and a seed by meaning would paint the bar's
+green onto both the moment the page opened. A dimmed row is left
+alone, and a row whose empty value follows another colour takes
+no tick at all, or a pick would pin a hex over that pairing.
+While the ticked rows differ, the well shows the first and says
+"mixed", the group's title carrying the `?` (#1383's master
+shape); and a field's commit that names the colour already stored
+writes nothing, so focus passing through the well never repaints
+the group.
+
+There is deliberately **no colour-vision warning** on the pick
+(owner, 2026-10-11). The separation floor holds the BUNDLED
+palettes to what every reader can tell apart; a user picking their
+own colours is choosing for their own eyes, and a reader who
+cannot tell the pair apart sees that on the bar without being
+told. The guards keep the bundled half.
 
 The cost is real and is paid deliberately: every gate on the
 Advanced Colours page now names a switch on another page, so
