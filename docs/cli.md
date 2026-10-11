@@ -403,6 +403,13 @@ its value applies over `init.lua`'s.
 `focus_or_spawn` was `pull_or_spawn`; the old name is refused,
 naming the new one.
 
+:::unreleased
+`cycle_mode` (System) takes `prev` or `next` (default) and
+moves the focused Space to the next layout in its cycle list;
+`set_mode_cycle` sets that list. See
+[cycle_mode](lua-reference.md#cycle_mode).
+:::
+
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last
 argument, a window `id` from `get_state`: they then act on that

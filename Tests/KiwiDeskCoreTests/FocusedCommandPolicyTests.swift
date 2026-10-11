@@ -35,6 +35,9 @@ struct FocusedCommandPolicyTests {
         // A menu for the Space under the pointer; a pick goes
         // through set_mode by name (#762).
         "show_layout_picker",
+        // Re-lays the focused Space out, like set_mode without a
+        // Space, moving no window between Spaces (#453).
+        "cycle_mode",
         "get_state",
         "get_layout_info",
         "list_monitors",

@@ -192,6 +192,7 @@ extension KiwiCore {
         // The base `init.lua`'s verbs declared (#1656).
         config.scrollGesture = mouse.scroll.base
         config.spaceHistory = spaceHistory.base
+        config.modeCycle = modeCycle
         var modes: [SpaceID: LayoutMode] = [:]
         var defined: [SpaceID] = []
         for space in capturedSpaces {

@@ -90,6 +90,10 @@ extension KiwiCore {
             return setMode(args)
         case "show_layout_picker":
             return showLayoutPicker()
+        case "cycle_mode":
+            return cycleMode(args)
+        case "set_mode_cycle":
+            return setModeCycle(args)
         case "set_gap_global", "set_gap_override":
             return setGaps(command, args)
         case "set_min_window_size":
@@ -230,7 +234,7 @@ extension KiwiCore {
 
     // MARK: - Modes and gaps
 
-    private func setMode(
+    func setMode(
         _ args: [JSONValue]
     ) -> CommandResponse {
         let spaceID: SpaceID?

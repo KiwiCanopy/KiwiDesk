@@ -572,6 +572,43 @@ KiwiDesk.set_mode("music", "floating")
 ```
 
 :::unreleased
+### cycle_mode
+
+**Expects:** optionally a direction: `"prev"` or `"next"` (the
+default) — exactly these, no `previous` alias, as `move_to_track`.
+
+**Does:** moves the focused Space to the next layout in your
+layout cycle list (see [`set_mode_cycle`](#set_mode_cycle)), or
+to the previous one, the same way `set_mode` would. The list
+wraps: after the last layout comes the first. A Space whose
+layout is not in the list goes to the first layout on Next and
+to the last on Previous. It never creates a Space.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+c", function()
+    KiwiDesk.cycle_mode()
+end)
+```
+
+### set_mode_cycle
+
+**Expects:** a table of layout modes, in order — at least two,
+each at most once.
+
+**Does:** sets the layouts `cycle_mode` walks. The default is
+`{ "bsp", "scrolling", "floating" }`. Settings and `gui.json`
+keep it as `mode_cycle`.
+
+**Example:**
+
+```lua
+KiwiDesk.set_mode_cycle({ "bsp", "stack", "monocle" })
+```
+:::
+
+:::unreleased
 ### show_layout_picker
 
 **Expects:** nothing.

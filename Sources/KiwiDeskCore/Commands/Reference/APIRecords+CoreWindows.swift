@@ -162,6 +162,20 @@ extension APIReference {
         "show_layout_picker": APIRecord(
             "Opens a layout menu at the pointer for the Space under it."
         ),
+        "cycle_mode": APIRecord(
+            "Moves the focused Space to the next layout in the cycle "
+                + "list, or the previous one.",
+            .choice(
+                "direction",
+                ModeCycleDirection.self,
+                optional: true
+            )
+        ),
+        "set_mode_cycle": APIRecord(
+            "Sets the cycle_mode layouts in order, each once: a "
+                + "table, or one per argument.",
+            .choice("layouts", LayoutMode.self)
+        ),
         "set_mode": APIRecord(
             "Sets a Space's layout mode; omit the Space to set "
                 + "the active one.",
