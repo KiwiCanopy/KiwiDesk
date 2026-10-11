@@ -201,6 +201,17 @@ struct StickyReturnFocusTests {
         #expect(core.state.workspaces.lastFocused == other)
     }
 
+    /// A stale settle — the main screen moved on since — ends it
+    /// too, before its staleness guard returns.
+    @Test("a stale settle ends the debt")
+    func staleSettleEndsTheDebt() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        roundTrip(core, box, leavingWith: sticky)
+        core.desktopSettle(ifStill: 11)
+        #expect(core.desktopMemory.stickyReturn == nil)
+    }
+
     /// A follow (#1007) names its window: it outranks the memory.
     @Test("a standing follow outranks the sticky debt")
     func followOutranks() {
