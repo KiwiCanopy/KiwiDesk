@@ -159,6 +159,9 @@ extension APIReference {
                 + "identifier.",
             .text("bundle_id")
         ),
+        "show_layout_picker": APIRecord(
+            "Opens a layout menu at the pointer for the Space under it."
+        ),
         "set_mode": APIRecord(
             "Sets a Space's layout mode; omit the Space to set "
                 + "the active one.",

@@ -32,6 +32,9 @@ struct FocusedCommandPolicyTests {
         "delete_space",
         "focus_or_spawn",
         "spawn_new",
+        // A menu for the Space under the pointer; a pick goes
+        // through set_mode by name (#762).
+        "show_layout_picker",
         "get_state",
         "get_layout_info",
         "list_monitors",

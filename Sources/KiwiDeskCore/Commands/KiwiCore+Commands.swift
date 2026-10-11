@@ -88,6 +88,8 @@ extension KiwiCore {
             return launch(args, newInstance: true)
         case "set_mode":
             return setMode(args)
+        case "show_layout_picker":
+            return showLayoutPicker()
         case "set_gap_global", "set_gap_override":
             return setGaps(command, args)
         case "set_min_window_size":

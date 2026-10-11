@@ -34,6 +34,13 @@ final class BarContextMenus {
     var terminateApp: @MainActor (pid_t) -> Void = {
         NSRunningApplication(processIdentifier: $0)?.terminate()
     }
+    /// The pointer, in Cocoa screen coordinates, and the pop-up a
+    /// menu at it — the layout picker's (#762). Pinned in both
+    /// `makeTestCore` twins: a real pop-up tracks modally.
+    var pointer: @MainActor () -> NSPoint = { NSEvent.mouseLocation }
+    var popUp: @MainActor (NSMenu, NSPoint) -> Void = { menu, point in
+        menu.popUp(positioning: nil, at: point, in: nil)
+    }
 
     func menu(for hit: BarHit) -> NSMenu? {
         let rows = rows(hit)

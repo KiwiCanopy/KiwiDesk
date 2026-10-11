@@ -56,6 +56,8 @@ struct MouseButtonSeamGuardTests {
     /// a one-shot position no suite measures — and the hover
     /// peek's hull hold, pinned by both `makeTestCore` twins (#1946).
     private static let pointerHomes = [
+        // The layout picker's pointer (#762).
+        "BarContextMenus.swift",
         "BarPeek.swift",
         "KiwiCore+Drag.swift",
         "MouseTracker.swift",

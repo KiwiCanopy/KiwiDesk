@@ -571,6 +571,26 @@ KiwiDesk.set_mode(1, "stack")
 KiwiDesk.set_mode("music", "floating")
 ```
 
+:::unreleased
+### show_layout_picker
+
+**Expects:** nothing.
+
+**Does:** opens a menu at the pointer listing the layouts, the
+current one checked, for the Space shown on the screen under the
+pointer — its name heads the menu. Pick a layout with the mouse,
+the arrow keys and Return, or by typing its first letters; Escape
+closes it. A pick works like `set_mode` for that Space.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+l", function()
+    KiwiDesk.show_layout_picker()
+end)
+```
+:::
+
 ### set_gap_global
 
 **Expects:**
