@@ -397,6 +397,7 @@
   "drag.ghost.caption": "Marca la posición desde la que se arrastra tu ventana.",
   "drag.title": "Arrastre con ratón",
   "float.refusal.accessory_app": "Las apps sin icono en el Dock siempre flotan",
+  "float.refusal.fixed_size": "Las ventanas que no se pueden redimensionar siempre flotan",
   "float.refusal.panel": "Los diálogos y paneles siempre flotan",
   "float.refusal.rule": "Una regla de apps hace flotar esta ventana",
   "floating.color": "Floating",

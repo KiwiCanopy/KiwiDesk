@@ -15,19 +15,72 @@ struct AutoFloatReasonTests {
     func structureFirst() {
         var asked = false
         #expect(
-            FloatDetection.autoFloatReason(structural: true) {
+            FloatDetection.autoFloatReason(
+                structural: true,
+                fixedSize: { false }
+            ) {
                 asked = true
                 return true
             } == .panel
         )
         #expect(!asked)
         #expect(
-            FloatDetection.autoFloatReason(structural: false) { true }
-                == .rule
+            FloatDetection.autoFloatReason(
+                structural: false,
+                fixedSize: { false }
+            ) { true } == .rule
         )
         #expect(
-            FloatDetection.autoFloatReason(structural: false) { false }
-                == nil
+            FloatDetection.autoFloatReason(
+                structural: false,
+                fixedSize: { false }
+            ) { false } == nil
+        )
+    }
+
+    /// A fixed size is what no setting removes, like structure: a
+    /// rule matching the same window must not send you to App
+    /// Rules, whose deletion would not tile it (#2070). It is asked
+    /// only of a standard normal-layer window, and a zoom button
+    /// that did not answer tiles.
+    @Test("a fixed-size standard window floats ahead of a rule")
+    func fixedSizeBeforeRule() {
+        var asked = false
+        #expect(
+            FloatDetection.autoFloatReason(
+                structural: false,
+                fixedSize: { true }
+            ) {
+                asked = true
+                return true
+            } == .fixedSize
+        )
+        #expect(!asked)
+        func facts(
+            _ subrole: String,
+            layer: Int = 0,
+            zoomable: Bool?
+        ) -> WindowFacts {
+            WindowFacts(
+                role: kAXWindowRole,
+                subrole: subrole,
+                layer: layer,
+                zoomable: { zoomable }
+            ) { "Settings" }
+        }
+        let standard = kAXStandardWindowSubrole
+        let reason = { (facts: WindowFacts) in
+            FloatDetection.autoFloatReason(
+                facts,
+                bundleID: "com.apple.mail",
+                rules: FloatRules()
+            )
+        }
+        #expect(reason(facts(standard, zoomable: false)) == .fixedSize)
+        #expect(reason(facts(standard, zoomable: true)) == nil)
+        #expect(reason(facts(standard, zoomable: nil)) == nil)
+        #expect(
+            reason(facts(kAXDialogSubrole, zoomable: false)) == .panel
         )
     }
 

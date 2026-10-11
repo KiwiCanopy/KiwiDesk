@@ -29,21 +29,36 @@ extension FloatDetection {
     }
 
     /// Whether window should be ignored from tracking, state, and borders
-    /// (#21, #448).
+    /// (#21, #448). An accessory app's raised-layer window with a
+    /// title-bar button is a normal window of that app, not a
+    /// launcher or HUD, and escapes (#2072); `titlebarButton` is
+    /// read only where that branch decides.
     public static func shouldIgnore(
         bundleID: String?,
         layer: Int,
         isAccessory: Bool,
-        rules: IgnoreRules
+        rules: IgnoreRules,
+        titlebarButton: Bool
     ) -> Bool {
         rules.matches(bundleID: bundleID)
             || isBuiltInIgnoredApp(bundleID: bundleID)
             || layer != 0
-                && (isAccessory
+                && (isAccessory && !titlebarButton
                     || bundleID.map {
                         layerScopedIgnoredApps
                             .contains($0.lowercased())
                     } == true)
+    }
+
+    /// Whether the ignore gate asks the window's title-bar button:
+    /// the #2072 escape decides only for an accessory app's raised
+    /// window. The one copy of the condition — the off-main list
+    /// read and the main-actor gate both ask it.
+    public static func needsTitlebarButton(
+        layer: Int,
+        isAccessory: Bool
+    ) -> Bool {
+        isAccessory && layer != 0
     }
 
     /// Whether ignore classification depends on CGWindow layer lookup.
@@ -62,7 +77,8 @@ extension FloatDetection {
     public static func isBuiltInIgnoredPanel(
         bundleID: String?,
         id: WindowID,
-        isAccessory: Bool
+        isAccessory: Bool,
+        titlebarButton: Bool
     ) -> Bool {
         guard
             requiresWindowLayers(
@@ -76,7 +92,8 @@ extension FloatDetection {
             bundleID: bundleID,
             layer: windowLayer(of: id) ?? 0,
             isAccessory: isAccessory,
-            rules: IgnoreRules()
+            rules: IgnoreRules(),
+            titlebarButton: titlebarButton
         )
     }
 
@@ -114,11 +131,15 @@ extension FloatDetection {
             && layer < Int(CGWindowLevelForKey(.mainMenuWindow))
     }
 
-    /// Whether process currently displays a visible ignored panel (#21, #448).
+    /// Whether process currently displays a visible ignored panel
+    /// (#21, #448). A `tracked` window is none: the gate admitted
+    /// it, a buttoned one through the #2072 escape this reading
+    /// cannot see.
     public static func hasVisibleIgnoredPanel(
         pid: pid_t,
         bundleID: String?,
-        isAccessory: Bool
+        isAccessory: Bool,
+        tracked: Set<WindowID>
     ) -> Bool {
         guard
             requiresWindowLayers(
@@ -136,14 +157,18 @@ extension FloatDetection {
         return list.contains { info in
             let layer =
                 info[kCGWindowLayer as String] as? Int ?? 0
+            let number = (info[kCGWindowNumber as String] as? Int)
+                .flatMap { UInt32(exactly: $0) }.map(WindowID.init)
             return info[kCGWindowOwnerPID as String] as? pid_t
                 == pid
+                && number.map { !tracked.contains($0) } ?? true
                 && isPanelBandLayer(layer)
                 && shouldIgnore(
                     bundleID: bundleID,
                     layer: layer,
                     isAccessory: isAccessory,
-                    rules: IgnoreRules()
+                    rules: IgnoreRules(),
+                    titlebarButton: false
                 )
         }
     }

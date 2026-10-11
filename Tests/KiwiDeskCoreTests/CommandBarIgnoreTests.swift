@@ -20,7 +20,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.raycast.macos",
                 layer: 8,
                 isAccessory: true,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
         // Any accessory app, not just known bundle ids.
@@ -29,7 +30,34 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.example.somelauncher",
                 layer: 3,
                 isAccessory: true,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
+            )
+        )
+    }
+
+    /// A buttoned window of a Dock-less app is one of its normal
+    /// windows, not a launcher (#2072) — the escape is the
+    /// accessory branch's alone; a layer-scoped bundle's raised
+    /// window stays ignored with buttons.
+    @Test("a buttoned accessory window escapes the ignore")
+    func buttonedAccessoryWindowEscapes() {
+        #expect(
+            !FloatDetection.shouldIgnore(
+                bundleID: "com.apple.captivenetworkassistant",
+                layer: 8,
+                isAccessory: true,
+                rules: noRules,
+                titlebarButton: true
+            )
+        )
+        #expect(
+            FloatDetection.shouldIgnore(
+                bundleID: "com.raycast.macos",
+                layer: 8,
+                isAccessory: false,
+                rules: noRules,
+                titlebarButton: true
             )
         )
     }
@@ -41,7 +69,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.raycast.macos",
                 layer: 0,
                 isAccessory: true,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
         #expect(
@@ -49,7 +78,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.example.menubarapp",
                 layer: 0,
                 isAccessory: true,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
     }
@@ -64,7 +94,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.raycast.macos",
                 layer: 8,
                 isAccessory: false,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
         #expect(
@@ -72,7 +103,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.raycast.macos",
                 layer: 0,
                 isAccessory: false,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
         // Raycast 2 (the "Raycast X" beta) has its own id.
@@ -81,7 +113,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.raycast-x.macos",
                 layer: 8,
                 isAccessory: false,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
     }
@@ -93,7 +126,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.apple.finder",
                 layer: 8,
                 isAccessory: false,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
     }

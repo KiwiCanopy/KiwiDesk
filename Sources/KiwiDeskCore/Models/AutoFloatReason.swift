@@ -11,6 +11,9 @@ public enum AutoFloatReason: Sendable, Equatable {
     case panel
     /// The app runs with no Dock icon (accessory policy).
     case accessoryApp
+    /// A standard window that cannot be resized — its zoom button
+    /// is disabled: Settings and About windows (#2070).
+    case fixedSize
 }
 
 /// Float detection's last verdict for one tracked window (#1810).

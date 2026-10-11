@@ -82,7 +82,7 @@ A [`kiwishelf.*`](#kiwishelf) setter counts as a setting too.
 -- Any one of these makes init.lua the config owner:
 KiwiDesk.set_mode(1, "stack")
 bsp.set_ratio_h(0.6)
-float_rules = { "com.apple.calculator" }
+float_rules = { "com.apple.systempreferences" }
 ```
 
 To keep the GUI in charge, put settings like these in the
@@ -3895,6 +3895,14 @@ remain accessory processes are tracked but forced floating. If an app
 promotes itself to a regular process, its standard windows follow the
 normal float-or-tile rules.
 
+:::unreleased
+A standard window that cannot be resized — its green zoom button is
+disabled, as on most Settings and About windows — floats
+automatically too, and a window of an app with no Dock icon that
+carries its own title-bar buttons on a raised layer (a system
+"Join Network" sheet, for one) is floated rather than ignored.
+:::
+
 This table is the global base. A profile may add rules or remove
 inherited ones with its sparse `float_rules` object (`true` adds,
 `null` removes). The same profile diff resolves whether the base is
@@ -3932,7 +3940,7 @@ no bar and no window list KiwiDesk publishes.
 
 ```lua
 float_rules = {
-    "com.apple.calculator",
+    "com.apple.systempreferences",
     "com.apple.finder:Get Info",
 }
 ```

@@ -397,6 +397,7 @@
   "drag.ghost.caption": "Indica la posizione da cui la finestra viene trascinata.",
   "drag.title": "Trascinamento mouse",
   "float.refusal.accessory_app": "Le app senza icona nel Dock fluttuano sempre",
+  "float.refusal.fixed_size": "Le finestre non ridimensionabili fluttuano sempre",
   "float.refusal.panel": "Le finestre di dialogo e i pannelli fluttuano sempre",
   "float.refusal.rule": "Una regola app fa fluttuare questa finestra",
   "floating.color": "Floating",

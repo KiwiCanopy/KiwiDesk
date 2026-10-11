@@ -17,6 +17,11 @@ extension AutoFloatReason {
                 "float.refusal.accessory_app",
                 "Apps without a Dock icon always float"
             )
+        case .fixedSize:
+            L(
+                "float.refusal.fixed_size",
+                "Windows that can't be resized always float"
+            )
         }
     }
 
@@ -30,6 +35,7 @@ extension AutoFloatReason {
         case .rule: "a float rule floats this window"
         case .panel: "dialogs and panels always float"
         case .accessoryApp: "apps without a Dock icon always float"
+        case .fixedSize: "windows that can't be resized always float"
         }
     }
 }

@@ -8,13 +8,20 @@ extension AXDumpExpected {
         .row("qutebrowser_context_menu", .floats(.panel), .kept, nil),
         .row("qutebrowser_hide_decoration", .floats(.panel), .kept, nil),
         .row("raycast", .floats(.accessoryApp), .ignored, nil),
-        .row("raycast_settings", .tiles, .kept, .furnished),
+        .row(
+            "raycast_settings",
+            .floats(.fixedSize),
+            .kept,
+            .furnished,
+            .ruled(issue: 2070)
+        ),
         .row("safari", .tiles, .kept, .furnished),
         .row(
             "safari_pinterest_sign_in_with_google",
-            .tiles,
+            .floats(.fixedSize),
             .kept,
-            .furnished
+            .furnished,
+            .ruled(issue: 2070)
         ),
         .row(
             "scenario_firefox_google_meet_share_window/01_firefox",

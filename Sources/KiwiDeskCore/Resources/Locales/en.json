@@ -397,6 +397,7 @@
   "drag.ghost.caption": "Marks the position your window is dragged from.",
   "drag.title": "Drag & drop",
   "float.refusal.accessory_app": "Apps without a Dock icon always float",
+  "float.refusal.fixed_size": "Windows that can't be resized always float",
   "float.refusal.panel": "Dialogs and panels always float",
   "float.refusal.rule": "An App Rule floats this window",
   "floating.color": "Floating",

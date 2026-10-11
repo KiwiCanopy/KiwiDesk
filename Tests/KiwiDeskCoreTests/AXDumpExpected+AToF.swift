@@ -14,7 +14,13 @@ extension AXDumpExpected {
         .row("about_this_mac", .floats(.accessoryApp), .kept, .furnished),
         .row("alacritty_decorations_buttonless", .tiles, .kept, .furnished),
         .row("apple_calendar", .tiles, .kept, .furnished),
-        .row("apple_calendar_settings", .tiles, .kept, .furnished),
+        .row(
+            "apple_calendar_settings",
+            .floats(.fixedSize),
+            .kept,
+            .furnished,
+            .ruled(issue: 2070)
+        ),
         .row(
             "apple_followup_sign_in_to_a_new_device_confirmation",
             .floats(.accessoryApp),
@@ -23,11 +29,23 @@ extension AXDumpExpected {
         ),
         .row("apple_mail", .tiles, .kept, .furnished),
         .row("apple_mail_new_email", .tiles, .kept, .furnished),
-        .row("apple_mail_settings", .tiles, .kept, .furnished),
+        .row(
+            "apple_mail_settings",
+            .floats(.fixedSize),
+            .kept,
+            .furnished,
+            .ruled(issue: 2070)
+        ),
         .row("archiveutility", .tiles, .kept, .furnished),
         .row("brave", .tiles, .kept, .furnished),
         .row("brave_pip", .floats(.panel), .kept, .furnished),
-        .row("calculator", .tiles, .kept, .furnished),
+        .row(
+            "calculator",
+            .floats(.fixedSize),
+            .kept,
+            .furnished,
+            .ruled(issue: 2070)
+        ),
         .row("choose_1_5_0", .floats(.accessoryApp), .kept, nil),
         .row("chrome", .tiles, .kept, .furnished),
         .row("chrome_choose_what_to_share_popup", .floats(.panel), .kept, nil),
