@@ -10033,6 +10033,13 @@ claim nothing enforces (#614), since `goToDesktop` and
 any letter they like. So `⇧` means exactly one thing everywhere,
 and so does `⌘`.
 
+:::unreleased
+Amended since: off a positional key `⇧` reverses its unshifted
+twin — `Tab` (#1655), and a letter whose unshifted row steps,
+the layout cycle's `⌃⌥⇧C` (#453) — and `⌃⌥⇧⌘` + digit lifts the
+ladder to Go to Desktop. A toggle still never carries it.
+:::
+
 The ergonomics agree. Resize is the one verb a user HOLDS (#1056),
 and tier 3 is the heaviest chord in the scheme — three modifiers
 with `⌃` and `⌘` at opposite ends of the left cluster. `⌥⌘` is a
