@@ -80,6 +80,9 @@ extension KiwiCore {
                 "desktop return: focus owed to w\(owed.raw), "
                     + "settle refocus stands down"
             )
+        } else if payStickyReturn() {
+            // #1564: the carried sticky window the user left with
+            // took the focus back; the refocus below is moot.
         } else if let focused = activeSpace?.focused,
             departedWithThisSwitch(focused)
         {

@@ -383,7 +383,14 @@ editing here:
   and the owed window's later arrival must not pay over it (CI,
   2026-09-02: `OpenOrFocusRingTests` ▸ the re-track after the
   focus report). The payment claims BEFORE it raises, so its own
-  echo finds nothing to retire. The `.windowCreated` fold takes the debt mirrored in as
+  echo finds nothing to retire. The one PRESENT window a return
+  does owe is a carried sticky window its Desktop was LEFT with
+  (#1564): filed at the DEPARTURE by `rememberDeparture` from
+  `lastHonoredOn` — macOS's restore report beats the handler and
+  overwrites the memory, so the departure's filing is what
+  survives — owed by `oweStickyReturn` and paid at the settle by
+  `payStickyReturn` once the carry landed, standing down on a
+  left click since the switch (`StickyReturnFocusTests`). The `.windowCreated` fold takes the debt mirrored in as
   `returningFocus` (the `arrivalDisplay` pattern) and rules two
   clauses: the owed RETURNING window takes the focus even beside
   a non-nil one — and into the ACTIVE space only

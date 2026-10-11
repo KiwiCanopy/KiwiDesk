@@ -29,6 +29,7 @@ extension KiwiCore {
         }
         guard let native = hostedNativeSpace(of: id) else { return }
         desktopMemory.honoredFocus[space, default: [:]][native] = id
+        desktopMemory.lastHonoredOn[native] = id
     }
 
     /// The memory's key: the native Space the compositor hosts
@@ -57,6 +58,7 @@ extension KiwiCore {
         native: SkyLight.SpaceID?
     ) {
         desktopMemory.returnFocus.forget()
+        oweStickyReturn(native: native)
         guard let native,
             let remembered = desktopMemory.honoredFocus[target]?[
                 native
@@ -126,6 +128,9 @@ extension KiwiCore {
     func forgetDesktopFocus() {
         desktopMemory.honoredFocus = [:]
         desktopMemory.returnFocus.forget()
+        desktopMemory.lastHonoredOn = [:]
+        desktopMemory.stickyLeft = [:]
+        desktopMemory.stickyReturn = nil
         desktopMemory.switchDepartures = [:]
     }
 
@@ -133,6 +138,15 @@ extension KiwiCore {
     /// or the next return owes a debt to a window that is gone.
     func retireDesktopFocus(of id: WindowID) {
         desktopMemory.switchDepartures[id] = nil
+        desktopMemory.lastHonoredOn = desktopMemory.lastHonoredOn.filter {
+            $0.value != id
+        }
+        desktopMemory.stickyLeft = desktopMemory.stickyLeft.filter {
+            $0.value != id
+        }
+        if desktopMemory.stickyReturn == id {
+            desktopMemory.stickyReturn = nil
+        }
         for (space, entries) in desktopMemory.honoredFocus {
             for (native, owed) in entries where owed == id {
                 desktopMemory.honoredFocus[space]?[native] = nil
@@ -148,6 +162,13 @@ extension KiwiCore {
             .removeValue(forKey: old)
         {
             desktopMemory.switchDepartures[new] = filed
+        }
+        desktopMemory.lastHonoredOn = desktopMemory.lastHonoredOn
+            .mapValues { $0 == old ? new : $0 }
+        desktopMemory.stickyLeft = desktopMemory.stickyLeft
+            .mapValues { $0 == old ? new : $0 }
+        if desktopMemory.stickyReturn == old {
+            desktopMemory.stickyReturn = new
         }
         for (space, entries) in desktopMemory.honoredFocus {
             for (native, id) in entries where id == old {
