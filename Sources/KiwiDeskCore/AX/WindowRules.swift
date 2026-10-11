@@ -103,14 +103,20 @@ public struct FloatGuess: Sendable, Equatable {
 
     public init(enabled: Bool = true, tileRules: [String] = []) {
         self.enabled = enabled
-        tiled = Set(tileRules.map { $0.lowercased() })
+        tiled = Set(tileRules.map(Self.normalizedRule))
+    }
+
+    /// Canonical identity shared by matching and profile diffs: a
+    /// bundle id, case-insensitive.
+    public static func normalizedRule(_ rule: String) -> String {
+        rule.lowercased()
     }
 
     /// Whether a guess may float `bundleID`'s windows.
     public func applies(to bundleID: String?) -> Bool {
         guard enabled else { return false }
         guard let bundleID else { return true }
-        return !tiled.contains(bundleID.lowercased())
+        return !tiled.contains(Self.normalizedRule(bundleID))
     }
 
     /// The Tile rules, normalized for matching and config seeding.

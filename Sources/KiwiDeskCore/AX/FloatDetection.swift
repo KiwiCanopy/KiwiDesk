@@ -202,11 +202,13 @@ public enum FloatDetection {
         )
     }
 
-    /// The reason's order, pure: what no setting removes first —
-    /// structure, then a fixed size (#2070) — and the rule last,
-    /// since deleting a rule must tile what it named. Each is
-    /// asked only where the one before tiles: the later ones cost
-    /// a read.
+    /// The reason's order, pure: structure, then a fixed size
+    /// (#2070) — a guess `fixedSize` answers only where it applies
+    /// (#2173) — and the rule last. The LABEL names the first
+    /// obstacle met, so a fixed-size window a rule also matches
+    /// reads `.fixedSize` and, once tiled by a Tile rule, `.rule`.
+    /// Each is asked only where the one before tiles: the later
+    /// ones cost a read.
     public static func autoFloatReason(
         structural: Bool,
         fixedSize: () -> Bool,

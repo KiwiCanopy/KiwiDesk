@@ -4974,7 +4974,9 @@ value so they cannot disagree. A rule's reason names App Rules,
 because that is where the user can change the answer — and so
 does a guess's, which says "floats automatically" where a dialog
 says "always": the word tells which floats have an escape
-(#2173).
+(#2173). The label names the first obstacle met, so a fixed-size
+window a Float rule also matches names its size first and, once a
+Tile rule tiles the guess, the rule: two steps, each one true.
 
 *Float records nothing where the verdict already floats.* Such a
 record changes nothing now, and later keeps the window floating

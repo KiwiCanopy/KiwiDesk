@@ -70,6 +70,8 @@ struct TileRefusalSeamTests {
                 "Events/EventLoop+Notifications.swift",
                 "Events/EventLoop+Tabs.swift",
                 "Events/EventLoop+Queries.swift",
+                // A changed guess forgets verdicts (#2173).
+                "Events/EventLoop+FloatVerdict.swift",
             ]
         )
     }

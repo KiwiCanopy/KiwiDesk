@@ -209,7 +209,8 @@ extension KiwiCore {
     /// params) are always overwritten, so they need no reset.
     private func resetDeclarativeState() {
         state.appRules = [:]
-        eventLoop.floatRules = FloatRules([])
+        globalRuleBase.liveFloatAutomatically = nil
+        installFloatRules(FloatRules([], guess: FloatGuess()))
         eventLoop.ignoreRules = IgnoreRules([])
         globalRuleBase.appRules = [:]
         globalRuleBase.floatRules = []
@@ -247,8 +248,11 @@ extension KiwiCore {
     /// Applies declarative globals after the config ran.
     private func applyConfigGlobals(from lua: LuaInterpreter) {
         if case .array(let rules) = lua.global("float_rules") {
-            eventLoop.floatRules = FloatRules(
-                rules.compactMap(\.stringValue)
+            installFloatRules(
+                FloatRules(
+                    rules.compactMap(\.stringValue),
+                    guess: eventLoop.floatRules.guess
+                )
             )
         }
         let tileRules: [String]
@@ -282,11 +286,12 @@ extension KiwiCore {
             // `set_float_automatically` wrote the base as it ran.
             floatAutomatically: globalRuleBase.floatAutomatically
         )
-        eventLoop.floatRules = FloatRules(
-            eventLoop.floatRules.rawRules,
-            guess: FloatGuess(
-                enabled: globalRuleBase.floatAutomatically,
-                tileRules: globalRuleBase.tileRules
+        installFloatRules(
+            FloatRules(
+                eventLoop.floatRules.rawRules,
+                guess: globalRuleBase.guess(
+                    tileRules: globalRuleBase.tileRules
+                )
             )
         )
     }

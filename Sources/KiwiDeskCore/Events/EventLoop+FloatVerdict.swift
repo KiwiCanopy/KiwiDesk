@@ -32,6 +32,18 @@ extension EventLoop {
         )
     }
 
+    /// Forgets the verdict of every tracked window of an app whose
+    /// guess changed from `old`, so its next recheck judges a fixed
+    /// size as at adoption (#2173).
+    func rejudgeGuesses(from old: FloatGuess) {
+        for (pid, windows) in elements {
+            let app = appRef(of: pid).bundleID
+            guard old.applies(to: app) != floatRules.guess.applies(to: app)
+            else { continue }
+            for id in windows.keys { detectedFloating[id] = nil }
+        }
+    }
+
     /// `autoFloatVerdict` over the app's policy and the own-window
     /// mark as read, pure where the source is: a forced float asks
     /// detection nothing (#1883 replays dumps through it).

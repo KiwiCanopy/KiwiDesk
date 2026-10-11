@@ -42,7 +42,9 @@ extension KiwiCore {
         globalRuleBase.appRules = AppRuleOverride.normalized(appRules)
         globalRuleBase.floatRules = FloatRules(floatRules).rawRules
         globalRuleBase.ignoreRules = IgnoreRules(ignoreRules).rawRules
-        globalRuleBase.tileRules = IgnoreRules(tileRules).rawRules
+        globalRuleBase.tileRules =
+            FloatGuess(tileRules: tileRules)
+            .tileRules
         globalRuleBase.floatAutomatically = floatAutomatically
     }
 
@@ -75,6 +77,9 @@ extension KiwiCore {
         )
     }
 
+    /// The one resolve of the window-rule families — a config load,
+    /// a profile apply and a rule write; a verb writing one base
+    /// re-resolves only its own family (`setFloatAutomatically`).
     func setResolvedWindowRules(_ profile: WindowRuleOverrides) {
         setResolvedAppRules(
             base: globalRuleBase.appRules,
@@ -93,14 +98,13 @@ extension KiwiCore {
         let resolvedTile =
             profile.tileRules?.resolved(
                 onto: globalRuleBase.tileRules,
-                normalizing: IgnoreRules.normalizedRule
+                normalizing: FloatGuess.normalizedRule
             ) ?? globalRuleBase.tileRules
-        eventLoop.floatRules = FloatRules(
-            resolvedFloat,
-            guess: FloatGuess(
-                enabled: profile.floatAutomatically
-                    ?? globalRuleBase.floatAutomatically,
-                tileRules: resolvedTile
+        globalRuleBase.liveFloatAutomatically = profile.floatAutomatically
+        installFloatRules(
+            FloatRules(
+                resolvedFloat,
+                guess: globalRuleBase.guess(tileRules: resolvedTile)
             )
         )
         eventLoop.ignoreRules = IgnoreRules(resolvedIgnore)

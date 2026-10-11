@@ -98,6 +98,12 @@ public struct WindowManager: Sendable {
         windows[id]?.subrole = subrole
     }
 
+    /// Sets whether the window is a transient overlay (#300), as a
+    /// changed guess re-derives it (#2173).
+    public mutating func setTransientOverlay(_ id: WindowID, _ on: Bool) {
+        windows[id]?.isTransientOverlay = on
+    }
+
     public mutating func setFloating(
         _ id: WindowID,
         _ floating: Bool
