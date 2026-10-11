@@ -152,7 +152,7 @@ extension KiwiCore {
         if let leaving = lastDesktop, leaving != key,
             let active = state.workspaces.activeSpace
         {
-            rememberVirtualSpace(active, leaving: leaving)
+            rememberDeparture(of: active, leaving: leaving)
         }
         lastDesktop = key
         desktopMemory.lastDesktopSpace = snapshot.mainCurrentSpace

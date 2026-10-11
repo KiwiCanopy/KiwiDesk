@@ -29,6 +29,7 @@ extension KiwiCore {
         }
         guard let native = hostedNativeSpace(of: id) else { return }
         desktopMemory.honoredFocus[space, default: [:]][native] = id
+        desktopMemory.lastHonoredOn[native] = id
     }
 
     /// The memory's key: the native Space the compositor hosts
@@ -45,10 +46,12 @@ extension KiwiCore {
     /// Owes the arriving `target` the focus last honored on
     /// `native`, the Desktop being shown. The last return's debt
     /// is retired first — a debt lives from one return to the
-    /// next. A standing follow (#1007) outranks the memory. Only a
-    /// window GONE from state is owed: a carried sticky (#1145) or
-    /// a window macOS restored and KiwiDesk already honored is
-    /// present and needs nothing. Reached for EVERY user-Desktop
+    /// next. A standing follow (#1007) outranks the memory and the
+    /// sticky debt alike. Only a window GONE from state is owed
+    /// here: a window macOS restored and KiwiDesk already honored
+    /// is present and needs nothing, and a carried sticky (#1145)
+    /// takes the settle's debt instead (`oweStickyReturn`, #1564).
+    /// Reached for EVERY user-Desktop
     /// arrival only because `virtualSpaceTarget` falls back to the
     /// first space (`DesktopFocusMemoryTests` ▸ the unremembered
     /// pass-through).
@@ -57,19 +60,21 @@ extension KiwiCore {
         native: SkyLight.SpaceID?
     ) {
         desktopMemory.returnFocus.forget()
-        guard let native,
-            let remembered = desktopMemory.honoredFocus[target]?[
-                native
-            ],
-            state.windows[remembered] == nil
-        else { return }
+        desktopMemory.stickyReturn = nil
+        guard let native else { return }
+        let remembered = desktopMemory.honoredFocus[target]?[native]
+            .flatMap { state.windows[$0] == nil ? $0 : nil }
         if let followed = followFocus.owed() {
-            onLog(
-                "desktop return: w\(remembered.raw) not owed — "
-                    + "a follow owes w\(followed.raw)"
-            )
+            if let remembered {
+                onLog(
+                    "desktop return: w\(remembered.raw) not owed — "
+                        + "a follow owes w\(followed.raw)"
+                )
+            }
             return
         }
+        oweStickyReturn(native: native)
+        guard let remembered else { return }
         desktopMemory.returnFocus.record(remembered)
         onLog(
             "desktop return: owing focus to w\(remembered.raw) "
@@ -126,6 +131,9 @@ extension KiwiCore {
     func forgetDesktopFocus() {
         desktopMemory.honoredFocus = [:]
         desktopMemory.returnFocus.forget()
+        desktopMemory.lastHonoredOn = [:]
+        desktopMemory.stickyLeft = [:]
+        desktopMemory.stickyReturn = nil
         desktopMemory.switchDepartures = [:]
     }
 
@@ -133,6 +141,15 @@ extension KiwiCore {
     /// or the next return owes a debt to a window that is gone.
     func retireDesktopFocus(of id: WindowID) {
         desktopMemory.switchDepartures[id] = nil
+        desktopMemory.lastHonoredOn = desktopMemory.lastHonoredOn.filter {
+            $0.value != id
+        }
+        desktopMemory.stickyLeft = desktopMemory.stickyLeft.filter {
+            $0.value != id
+        }
+        if desktopMemory.stickyReturn?.window == id {
+            desktopMemory.stickyReturn = nil
+        }
         for (space, entries) in desktopMemory.honoredFocus {
             for (native, owed) in entries where owed == id {
                 desktopMemory.honoredFocus[space]?[native] = nil
@@ -148,6 +165,13 @@ extension KiwiCore {
             .removeValue(forKey: old)
         {
             desktopMemory.switchDepartures[new] = filed
+        }
+        desktopMemory.lastHonoredOn = desktopMemory.lastHonoredOn
+            .mapValues { $0 == old ? new : $0 }
+        desktopMemory.stickyLeft = desktopMemory.stickyLeft
+            .mapValues { $0 == old ? new : $0 }
+        if let owed = desktopMemory.stickyReturn, owed.window == old {
+            desktopMemory.stickyReturn = (new, owed.at)
         }
         for (space, entries) in desktopMemory.honoredFocus {
             for (native, id) in entries where id == old {

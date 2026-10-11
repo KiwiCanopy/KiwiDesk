@@ -38,6 +38,16 @@ final class DesktopMemory {
     /// a fold or the switch handler.
     var honoredFocus: [SpaceID: [SkyLight.SpaceID: WindowID]] = [:]
 
+    /// The last honored focus per native Desktop, any Space (#1564)
+    /// — filed beside `honoredFocus`, read at the departure.
+    var lastHonoredOn: [SkyLight.SpaceID: WindowID] = [:]
+    /// The carried sticky window each Desktop was LEFT with
+    /// (#1564), filed at the departure and taken at the return.
+    var stickyLeft: [SkyLight.SpaceID: WindowID] = [:]
+    /// The focus a return owes that window, and when it was owed,
+    /// paid at the settle.
+    var stickyReturn: (window: WindowID, at: ContinuousClock.Instant)?
+
     /// The focus a Desktop return owes its remembered window,
     /// paid at that window's ARRIVAL (#1207) — the #1007 shape,
     /// a second instance: per-window record, bound, rekey.
