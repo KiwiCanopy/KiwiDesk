@@ -2159,6 +2159,17 @@ command's own but lands later, when the next click may already be
 aimed, so it waits like ambient motion. Keyboard activity never
 counts: moving a window steals no keystroke.
 
+:::unreleased
+Your own act in an app is not ambient either (#2187). Closing,
+hiding or minimizing the focused window, or a new window from the
+app in front, just after a key-down or click lays out at once —
+but never a window that left with its Desktop: ⌘W and ⌘N are as
+deliberate as a hotkey, and holding their reflow left a stack
+stale for seconds while the mouse moved. The press only admits
+such a pass; it never holds one. A window a background app opens,
+or a close nothing pressed for, still waits.
+:::
+
 What waits is the layout pass, never its frames. A held pass is
 owed and run again once the hand rests, against the windows as
 they are by then, so nothing stale lands: a later pass, a closed

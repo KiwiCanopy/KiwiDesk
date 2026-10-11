@@ -269,7 +269,14 @@ extension KiwiCore {
         if willRetile, followed != true {
             // A Desktop switch's re-sync takes one pass at its end.
             if !foldIntoSwitchResync() {
-                retile(newlyCreatedWindow: newlyCreatedWindow)
+                // The user's own close or open runs now (#2187).
+                withAppActMotion(
+                    event,
+                    effects: effects,
+                    reason: goneReason
+                ) {
+                    retile(newlyCreatedWindow: newlyCreatedWindow)
+                }
             }
         } else if crossedScreenCover(event, before: preEventFrame) {
             // Every reader of the verdict, since no retile runs

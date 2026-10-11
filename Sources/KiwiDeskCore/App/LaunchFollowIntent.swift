@@ -32,7 +32,7 @@ final class LaunchFollowIntent {
     /// Longest gap between a click or key-down and the activation
     /// it caused: a Dock click measured 0.29 s and a Spotlight
     /// Return 0.35 s, a login restore's activation 15 s after the
-    /// password (#1599).
+    /// password (#1599). It bounds #2187's app-act motion too.
     static let pressGrace: TimeInterval = 1
 
     /// Longest gap between a process starting and its activation
@@ -50,7 +50,15 @@ final class LaunchFollowIntent {
     /// Seconds since the last left click or key-down. nil until
     /// `start()` wires it, so a unit test mints no follow unless
     /// it injects one (`LaunchFollowSeamTests` pins the arming).
+    /// Read through `recentPress()`, by #2187's motion as well.
     var pressAge: (@MainActor () -> TimeInterval?)?
+
+    /// The last press's age while inside `pressGrace`, else nil.
+    func recentPress() -> TimeInterval? {
+        guard let press = pressAge?(), press <= Self.pressGrace
+        else { return nil }
+        return press
+    }
 
     private var pending: (bundleID: String, at: Date)?
 
