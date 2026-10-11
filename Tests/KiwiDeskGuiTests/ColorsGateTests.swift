@@ -220,5 +220,27 @@ struct ColorsGateTests {
                 of: ColorsRowOrder.secondAccentAtRest
             ) == [.gapsAndBorders]
         )
+
+        // A page a row's own sentence already links takes no
+        // second, vaguer link: App icons dim Focused window (its
+        // own sentence, to Bars) and the front-app segment off
+        // dims its indicator (a page link to Bars too).
+        settings = TilingSettings()
+        settings.spaceBarStyle.enabled = true
+        settings.kiwishelf.iconSource = .appImage
+        settings.spaceBarStyle.showFrontApp = false
+        gates = AdvancedColorsGates(settings: settings)
+        #expect(
+            gates.needsOwnSentence(.spaceBar(.spaceBarFocusedItemColor))
+        )
+        #expect(
+            gates.verdict(for: .spaceBar(.spaceBarFocusedHighlightColor))?
+                .link == .page(.bars)
+        )
+        #expect(
+            !gates.dimmedDestinations(
+                of: ColorsRowOrder.secondAccentAtRest
+            ).contains(.bars)
+        )
     }
 }

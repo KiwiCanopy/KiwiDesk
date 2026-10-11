@@ -23,6 +23,8 @@ struct RoleColorCardsLayoutTests {
             )
         )
         #expect(source.contains(":AnyLayout(HStackLayout("))
+        // The swapped layout is the one that draws the cards.
+        #expect(source.contains("layout{ForEach(ColorRole.allCases"))
         // One reading of the band, so the two arms cannot drift.
         #expect(source.components(separatedBy: "stacksRows").count == 2)
     }

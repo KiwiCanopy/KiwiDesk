@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 
 @testable import KiwiDesk
@@ -46,6 +47,22 @@ struct ColorSwatchCommitTests {
                 automatic: false
             ) == nil
         )
+    }
+
+    /// The field writes only what `committed` answers: a call site
+    /// that fell back to the stored hex would write it on every
+    /// blur and repaint a role group's rows.
+    @Test("the field writes only a committed value")
+    func callSiteWritesOnlyAnAnswer() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Common/"
+                    + "ColorField.swift"
+            )
+        let source = try SourceScan.strippedSource(at: url)
+            .filter { !$0.isWhitespace }
+        #expect(source.contains("ifletvalue=Self.committed("))
+        #expect(source.components(separatedBy: "Self.committed(").count == 2)
     }
 
     @Test("clearing an Automatic field writes Automatic once")
