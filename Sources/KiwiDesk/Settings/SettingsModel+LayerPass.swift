@@ -184,6 +184,7 @@ struct EncodedReachCache {
         let layers: [KeyLayer]
         let scrollGesture: ScrollGestureBase
         let spaceHistory: SpaceHistoryKind
+        let modeCycle: [LayoutMode]
         let profile: String?
         let isLoaded: Bool
     }

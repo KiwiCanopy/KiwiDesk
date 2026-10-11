@@ -92,10 +92,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// stamped the same way.
     public static let undraftedFields: Set<String> = [
         "format", "desktopSpaces", "appWide", "look",
-        // #453: no Settings group yet (it lands after its preview);
-        // `SettingKeyModelParityTests` reds once a census row names
-        // it while it is still listed here.
-        "modeCycle",
     ]
 
     public init() {}

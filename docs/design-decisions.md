@@ -3806,6 +3806,17 @@ crossing out of the profiles, and why General's card needs the
 immediate write are argued once, in [Spaces, profiles & config
 ownership](#spaces-profiles--config-ownership) (#1741).
 
+General is the home of an app-wide value with no feature of its
+own — this sound, the quit layout — and not of every app-wide
+value (owner ruling 2026-10-11). A switch that belongs to a
+feature sits beside that feature, where someone setting the
+feature up looks for it: the Desktop switch cue in Profiles ▸
+Desktops (#2142), the layout plate's in Shortcuts & Gestures ▸
+Layout under the cycle list (#2144). Such a switch is still
+written the moment it changes, on a page whose other rows wait
+for Save, so it says in its `?` that it applies at once and to
+every profile.
+
 **An arrow means a resize stopped; a non-arrow means there is
 no resize here (#1260).** [Principle] The pill carries two kinds
 of message, and they ask for different things of the reader:
@@ -6098,6 +6109,45 @@ how many), dots alone (counted, not read, past about five), a pill
 by KiwiShelf (hidden whenever the shelf is), a mini-map of the
 screens, and the KiwiDesk Space — a Space switch names its own
 Space with the same plate (#2143).
+
+### Cycling layouts shows the cycle, on its own switch (#2144)
+
+**[Principle]**
+
+`cycle_mode` shows #2142's plate with the user's cycle list as a
+ring — first entry at 12 o'clock, clockwise in Next order — the
+current layout large in the centre, its slot empty. Only the
+verb shows it; `set_mode` and the Layout menu do not.
+
+With three windows, bsp and grid or stack and track can look
+alike, so the rearranged windows say that something changed and
+not what. The ring IS the list the key walks, so the plate also
+teaches the order, and a second press visibly steps around it.
+
+**The step is one shared element per symbol**: the incoming
+layout flies from its slot to the centre and grows while the
+outgoing one flies back to its own slot, in one critically damped
+spring. It shows which layout came in and where the old one went;
+a symbol morph in place says only the first. The first
+appearance stays instant, as #2142's, and Reduce Motion jumps.
+
+**No strip of options and no circling windows.** The plate takes
+no mouse, so a row of layouts reads as a menu it cannot honour;
+and the frame animation already moves each window from its old
+frame to its new one, which is the honest motion — a circular
+path lengthens the change and brings back the AX-write stalls
+#1956 fought.
+
+**Its own switch, not a shared "switch cue".** The Desktop cue
+stands in for motion the instant switch removed; this one
+confirms the user's own press. A user may want one and not the
+other, and merging them would have owed a `ConfigMigration` of
+`desktop.cue` only to merge two choices. On by default and
+app-wide, for #2142's reasons. It is stored as `mode.cue` beside
+the other app-wide groups (`desktop.cue`, `refusal.sound`), while
+`mode_cycle` stays a flat key: the list is the global base a
+profile overrides, the switch is app-wide, and the two shapes
+follow those two families rather than the shared word.
 
 ### Cycling layouts shows the cycle, on its own switch (#2144)
 

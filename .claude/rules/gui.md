@@ -694,10 +694,11 @@ trap General shipped, where the resolver was built only in tests
 (`BarsGateWiringTests`, `GapsAndBordersGateWiringTests`,
 `ShortcutsGateTests.layersCardConsultsTheResolver`), gate-granular
 so a file resolving two gates reds if EITHER goes hand-rolled.
-`ShortcutsGates.resolvedElsewhere` holds its one gate
-(`.luaImportAvailable`) because that is a live-editor-state
-predicate the saved config cannot answer — not because of any
-shape split, which no longer exists.
+A gate joins `ShortcutsGates.resolvedElsewhere` only when it is
+a live-editor-state predicate no resolver input can answer, never
+because of a shape split, which no longer exists — a fact the
+resolver can be HANDED, as the layout plate's switch is handed
+`guiManaged` (#2144), is resolved there.
 
 **A master whose followers disagree acknowledges; it never takes
 a census gate** (#1383). Dimmed means "takes no input" on every

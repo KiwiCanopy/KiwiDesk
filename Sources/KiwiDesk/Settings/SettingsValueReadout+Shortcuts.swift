@@ -23,6 +23,9 @@ extension SettingsValueReadout {
             .openSettings, .switchToLayer, .openApplications,
             .advanced, .`import`, .restoreDefaults:
             return []
+        // App-wide, written at once, never in the draft (#1741).
+        case .modeCue:
+            return []
         // A layer's profiles are no config field: the checklist's own
         // rows carry them (`layerDiffRows`, #2022).
         case .layersReach:
@@ -37,6 +40,15 @@ extension SettingsValueReadout {
                     label: SpaceHistoryWords.title,
                     old: SpaceHistoryWords.value(old.spaceHistory),
                     new: SpaceHistoryWords.value(new.spaceHistory)
+                )
+            ]
+        case .modeCycle:
+            return [
+                .change(
+                    census,
+                    label: LayoutCycleWords.title,
+                    old: LayoutCycleWords.readout(old.modeCycle),
+                    new: LayoutCycleWords.readout(new.modeCycle)
                 )
             ]
         }

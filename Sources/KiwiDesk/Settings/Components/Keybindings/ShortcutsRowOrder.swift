@@ -4,9 +4,11 @@ enum ShortcutsRowOrder {
     /// Containers holding a non-empty order list that a bespoke
     /// view draws rather than a standard list loop — Open
     /// applications for its app list, though its KiwiDesk rows
-    /// are walked (#1520).
+    /// are walked (#1520), and Layout for its cycle list and
+    /// switch above the walked shortcuts (#453).
     static let bespokeContainers: Set<SettingsContainer> = [
         .openApplications,
+        .layout,
         .layers,
         .luaBindings,
         .defaultShortcuts,
@@ -92,6 +94,14 @@ enum ShortcutsRowOrder {
             $0.dropFirst().contains(key)
         }
     }
+
+    /// The Layout group's setting rows, above its shortcuts:
+    /// the cycle list and the plate's switch (#453, #2144),
+    /// drawn by `LayoutCycleRow` and `LayoutCueRow`.
+    static let layoutList: [SettingKey] = [
+        .shortcuts(.modeCycle),
+        .shortcuts(.modeCue),
+    ]
 
     /// Layout group order (#453, #762): this list orders the
     /// families; `KeybindingCatalog.layoutCycleRows` orders the

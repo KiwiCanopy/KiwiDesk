@@ -106,6 +106,16 @@ enum SettingsTheme {
         darkAlpha: 0.22
     )
 
+    /// The selected row of an editable list — a durable marking,
+    /// kept off the chip press it matches today so a hover or
+    /// press added later does not overwrite it (#1173, #453).
+    static let rowSelected = token(
+        light: 0x12_25_1A,
+        dark: 0xE6_EC_E6,
+        lightAlpha: 0.16,
+        darkAlpha: 0.22
+    )
+
     /// A text button chip's edge, constant in every state — what
     /// tells it from a passive hairline capsule (#1520 amendments
     /// 5, 6).
