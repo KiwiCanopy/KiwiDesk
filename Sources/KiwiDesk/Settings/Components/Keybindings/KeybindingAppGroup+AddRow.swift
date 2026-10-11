@@ -59,7 +59,7 @@ extension ApplicationsGroup {
     /// Why a pick at `row` created nothing, or nil.
     ///
     /// DERIVED, never a stored message: it re-asks the live
-    /// question, so freeing a behavior by deleting one of that
+    /// question, so freeing a action by deleting one of that
     /// app's rows clears the sentence without anything having to
     /// notice. `refusal` only says which app to ask about and
     /// where the pick was made.
@@ -76,13 +76,13 @@ extension ApplicationsGroup {
     func allBoundNotice(
         about app: KeybindingCatalog.InstalledApp
     ) -> String? {
-        guard firstAvailableBehavior(for: app.bundleID) == nil
+        guard firstAvailableAction(for: app.bundleID) == nil
         else { return nil }
         return L(
             "shortcuts.apps.all_bound",
-            "\u{201C}%1$@\u{201D} already has a key for each way "
-                + "to open it. Change one of its shortcuts above "
-                + "to give it another.",
+            "\u{201C}%1$@\u{201D} already has a key for each "
+                + "action. Change one of its shortcuts above to give "
+                + "it another.",
             app.name
         )
     }
@@ -95,11 +95,11 @@ extension ApplicationsGroup {
     /// one. The greyed Add button used to be the only thing
     /// standing there, and a dim is not a sentence (#1235).
     func add(_ app: KeybindingCatalog.InstalledApp) {
-        // Seed the first behavior not already bound for this app,
-        // so re-adding it lands on a distinct behavior instead of
+        // Seed the first action not already bound for this app,
+        // so re-adding it lands on a distinct action instead of
         // a duplicate default.
         guard
-            let behavior = firstAvailableBehavior(for: app.bundleID)
+            let action = firstAvailableAction(for: app.bundleID)
         else {
             refuse(app, at: nil)
             return
@@ -108,7 +108,7 @@ extension ApplicationsGroup {
         binding.label = app.name
         binding.lua = KeybindingCatalog.appCommand(
             app.bundleID,
-            behavior: behavior
+            action: action
         )
         bindings.append(binding)
         clearRefusal()
@@ -144,13 +144,13 @@ extension ApplicationsGroup {
         refusal = nil
     }
 
-    /// Bundle IDs that already carry every launch behavior (#334).
+    /// Bundle IDs that already carry every action (#334).
     /// A per-row re-pick excludes its own row, so an app fully
     /// bound only BECAUSE of that row stays pickable.
     func fullyBoundBundleIDs(
         excluding id: UUID? = nil
     ) -> Set<String> {
-        var seen: [String: Set<AppLaunchBehavior>] = [:]
+        var seen: [String: Set<AppShortcutAction>] = [:]
         for binding in bindings
         where binding.kind == .application && binding.id != id {
             guard
@@ -158,13 +158,13 @@ extension ApplicationsGroup {
                     from: binding.lua
                 )
             else { continue }
-            let behavior =
-                KeybindingCatalog.appLaunchBehavior(
+            let action =
+                KeybindingCatalog.appShortcutAction(
                     from: binding.lua
                 ) ?? .openOrFocus
-            seen[bundleID, default: []].insert(behavior)
+            seen[bundleID, default: []].insert(action)
         }
-        let all = Set(AppLaunchBehavior.allCases)
+        let all = Set(AppShortcutAction.allCases)
         return Set(
             seen.filter { $0.value == all }.map(\.key)
         )

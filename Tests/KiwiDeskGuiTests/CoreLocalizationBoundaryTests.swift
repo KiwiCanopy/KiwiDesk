@@ -131,7 +131,7 @@ struct CoreLocalizationBoundaryTests {
         "App/KiwiCore+SpaceChipLifecycle.swift": 9,
         // The window actions' refusal pills (#1518), which Core
         // draws on the window, as the resize pills are.
-        "Commands/WindowActionRefusal.swift": 2,
+        "Commands/WindowActionRefusal.swift": 3,
         "Bar/BarMenu.swift": 3,
         "Bar/LayoutModeRows.swift": 8,
     ]

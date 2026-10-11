@@ -4551,10 +4551,37 @@ KiwiDesk.bind("ctrl+alt+return", function()
 end)
 ```
 
-Both launch verbs are also reachable from the Settings app: an
-Open applications shortcut carries a per-row **Launch behavior**
-menu — *Open or Focus* (`focus_or_spawn`, the default) or *Open
-New* (`spawn_new`).
+Both launch verbs are also reachable from the Settings app, from
+the per-row menu of an Open applications shortcut: *Open or Focus*
+(`focus_or_spawn`, the default) or *Open New* (`spawn_new`).
+
+:::unreleased
+### gather
+
+**Expects:** an app bundle identifier (e.g. `com.apple.Notes`).
+See [Finding a bundle identifier](#finding-a-bundle-identifier).
+
+**Does:** moves every window of the app into the Space you are
+on, in the order the Space Bar lists them, after the windows
+already there. Floating windows stay floating and sticky windows
+stay sticky; a window in native full screen keeps its own Space.
+Windows up on another macOS Desktop are moved onto the Desktop
+you are looking at, without switching to theirs — that needs the
+Desktop bridge; without it they stay where they are. It never
+launches the app: with no window to move, it does nothing and
+reports an error.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+shift+return", function()
+    KiwiDesk.gather("com.apple.Notes")
+end)
+```
+
+It is the third choice, *Gather Windows*, in the **Action** menu
+of an Open applications shortcut in Settings.
+:::
 
 ## User Interface
 
@@ -6128,9 +6155,9 @@ through `6×T` windows, 4×2 through `8×T`, 4×3 through `12×T`,
 quit.set_grid_target_depth(10)  -- denser piles, later growth
 ```
 
-When AX permission is revoked mid-session, KiwiDesk pauses window
-management but cannot gather windows — `setFrame` calls return
-`kAXErrorAPIDisabled` and are silent no-ops. Windows stay wherever
+When AX permission is revoked mid-session, KiwiDesk pauses
+window management but cannot spread windows into the grid —
+`setFrame` calls return `kAXErrorAPIDisabled` and are silent no-ops. Windows stay wherever
 the WM left them; re-enabling Accessibility in System Settings
 resumes management.
 

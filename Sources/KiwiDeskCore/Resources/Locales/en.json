@@ -1377,12 +1377,14 @@
   "shortcuts.add_layer.stored_page": "Shared layers are joined on the loaded profile's page.",
   "shortcuts.advanced.caption": "Bind any Lua to a hotkey. This is the power-user escape hatch — the groups above cover the built-in actions.",
   "shortcuts.advanced.title": "Lua bindings",
-  "shortcuts.app_behavior": "Launch behavior",
-  "shortcuts.app_behavior.help": "**%1$@** takes you to the app's existing window, wherever it is, or launches the app if it isn't running. Pressing again while that window is focused cycles through the app's other windows. If the app has nothing on screen, pressing the shortcut restores its most recently minimized window; otherwise minimized windows stay in the Dock.\n\n**%2$@** always launches a fresh instance, even when the app is already open.",
+  "shortcuts.app_behavior": "Action",
+  "shortcuts.app_behavior.gather": "Gather Windows",
+  "shortcuts.app_behavior.gather.badge": "Gathers its windows here",
+  "shortcuts.app_behavior.help": "**%1$@** takes you to the app's existing window, wherever it is, or launches the app if it isn't running. Pressing again while that window is focused cycles through the app's other windows. If the app has nothing on screen, pressing the shortcut restores its most recently minimized window; otherwise minimized windows stay in the Dock.\n\n**%2$@** always launches a fresh instance, even when the app is already open.\n\n**%3$@** brings every window of the app into the Space you are on, from other Desktops too. It never launches the app.",
   "shortcuts.app_behavior.open_new": "Open New",
   "shortcuts.app_behavior.open_new.badge": "Opens a new instance",
   "shortcuts.app_behavior.open_or_focus": "Open or Focus",
-  "shortcuts.apps.all_bound": "“%1$@” already has a key for each way to open it. Change one of its shortcuts above to give it another.",
+  "shortcuts.apps.all_bound": "“%1$@” already has a key for each action. Change one of its shortcuts above to give it another.",
   "shortcuts.apps.empty": "No app has a key of its own yet. Add one and its key takes you to that app's window, wherever it is, or launches the app if it isn't running.",
   "shortcuts.choose_app": "Choose app…",
   "shortcuts.clear_shared.title": "Other profiles use this shortcut too.",
@@ -1744,5 +1746,6 @@
   "whatsnew.trail.from": "From What's new",
   "whatsnew.trail.next": "Next: %1$@",
   "window_action.refusal.no_close_button": "“%1$@” has no close button",
-  "window_action.refusal.no_new_window": "%1$@ has no New Window command"
+  "window_action.refusal.no_new_window": "%1$@ has no New Window command",
+  "window_action.refusal.nothing_to_gather": "No %1$@ window to gather"
 }

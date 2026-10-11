@@ -1377,12 +1377,14 @@
   "shortcuts.add_layer.stored_page": "Para unirte a una capa compartida, usa la página del perfil cargado.",
   "shortcuts.advanced.caption": "Asigna cualquier código Lua a un atajo de teclado. Es la opción de escape para usuarios avanzados — los grupos superiores cubren las acciones integradas.",
   "shortcuts.advanced.title": "Atajos Lua",
-  "shortcuts.app_behavior": "Comportamiento al abrir",
-  "shortcuts.app_behavior.help": "**%1$@** te lleva a la ventana existente de la app, esté donde esté, o la inicia si no está en ejecución. Al pulsar de nuevo con esa ventana enfocada, pasa una a una por las demás ventanas de la app. Si la app no tiene nada en pantalla, el atajo restaura la última ventana que se minimizó; si no, las ventanas minimizadas se quedan en el Dock.\n\n**%2$@** siempre inicia una instancia nueva, aunque la app ya esté abierta.",
+  "shortcuts.app_behavior": "Acción",
+  "shortcuts.app_behavior.gather": "Reunir ventanas",
+  "shortcuts.app_behavior.gather.badge": "Trae sus ventanas aquí",
+  "shortcuts.app_behavior.help": "**%1$@** te lleva a la ventana existente de la app, esté donde esté, o la inicia si no está en ejecución. Al pulsar de nuevo con esa ventana enfocada, pasa una a una por las demás ventanas de la app. Si la app no tiene nada en pantalla, el atajo restaura la última ventana que se minimizó; si no, las ventanas minimizadas se quedan en el Dock.\n\n**%2$@** siempre inicia una instancia nueva, aunque la app ya esté abierta.\n\n**%3$@** trae todas las ventanas de la app al espacio en el que estás, también desde otros Escritorios. Nunca inicia la app.",
   "shortcuts.app_behavior.open_new": "Abrir nueva",
   "shortcuts.app_behavior.open_new.badge": "Abre una instancia nueva",
   "shortcuts.app_behavior.open_or_focus": "Abrir o Enfocar",
-  "shortcuts.apps.all_bound": "«%1$@» ya tiene una tecla para cada forma de abrirla. Cambia uno de sus atajos de arriba para darle otro.",
+  "shortcuts.apps.all_bound": "«%1$@» ya tiene una tecla para cada acción. Cambia uno de sus atajos de arriba para darle otro.",
   "shortcuts.apps.empty": "Todavía ninguna app tiene una tecla propia. Añade una y su tecla te llevará a la ventana de esa app, esté donde esté, o iniciará la app si no está en ejecución.",
   "shortcuts.choose_app": "Elegir aplicación…",
   "shortcuts.clear_shared.title": "Otros perfiles también usan este atajo.",
@@ -1744,5 +1746,6 @@
   "whatsnew.trail.from": "Desde Novedades",
   "whatsnew.trail.next": "Siguiente: %1$@",
   "window_action.refusal.no_close_button": "«%1$@» no tiene botón de cerrar",
-  "window_action.refusal.no_new_window": "%1$@ no tiene el comando «Nueva ventana»"
+  "window_action.refusal.no_new_window": "%1$@ no tiene el comando «Nueva ventana»",
+  "window_action.refusal.nothing_to_gather": "No hay ventanas de %1$@ que reunir"
 }
