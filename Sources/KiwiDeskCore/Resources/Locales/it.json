@@ -397,6 +397,7 @@
   "drag.ghost.caption": "Indica la posizione da cui la finestra viene trascinata.",
   "drag.title": "Trascinamento mouse",
   "float.refusal.accessory_app": "Le app senza icona nel Dock fluttuano sempre",
+  "float.refusal.fixed_size": "Le finestre non ridimensionabili fluttuano sempre",
   "float.refusal.panel": "Le finestre di dialogo e i pannelli fluttuano sempre",
   "float.refusal.rule": "Una regola app fa fluttuare questa finestra",
   "floating.color": "Floating",
@@ -1376,12 +1377,14 @@
   "shortcuts.add_layer.stored_page": "Per unirti a un livello condiviso, usa la pagina del profilo caricato.",
   "shortcuts.advanced.caption": "Associa qualsiasi codice Lua a un tasto di scelta rapida. È la via di fuga per gli utenti esperti: i gruppi qui sopra coprono le azioni integrate.",
   "shortcuts.advanced.title": "Scorciatoie Lua",
-  "shortcuts.app_behavior": "Comportamento all'avvio",
-  "shortcuts.app_behavior.help": "**%1$@** ti porta alla finestra esistente dell'app, ovunque si trovi, o avvia l'app se non è in esecuzione. Premendo di nuovo mentre quella finestra ha il focus si passa in ordine alle altre finestre dell'app. Se l'app non ha nulla sullo schermo, premendo la scorciatoia si ripristina l'ultima finestra ridotta a icona; altrimenti le finestre ridotte restano nel Dock.\n\n**%2$@** avvia sempre una nuova istanza, anche se l'app è già aperta.",
+  "shortcuts.app_behavior": "Azione",
+  "shortcuts.app_behavior.gather": "Raccogli finestre",
+  "shortcuts.app_behavior.gather.badge": "Porta qui le sue finestre",
+  "shortcuts.app_behavior.help": "**%1$@** ti porta alla finestra esistente dell'app, ovunque si trovi, o avvia l'app se non è in esecuzione. Premendo di nuovo mentre quella finestra ha il focus si passa in ordine alle altre finestre dell'app. Se l'app non ha nulla sullo schermo, premendo la scorciatoia si ripristina l'ultima finestra ridotta a icona; altrimenti le finestre ridotte restano nel Dock.\n\n**%2$@** avvia sempre una nuova istanza, anche se l'app è già aperta.\n\n**%3$@** porta tutte le finestre dell'app nello spazio in cui ti trovi, anche da altre Scrivanie. Non avvia mai l'app.",
   "shortcuts.app_behavior.open_new": "Apri nuova",
   "shortcuts.app_behavior.open_new.badge": "Apre una nuova istanza",
   "shortcuts.app_behavior.open_or_focus": "Apri o porta in primo piano",
-  "shortcuts.apps.all_bound": "«%1$@» ha già un tasto per ogni modo di aprirla. Cambia una delle sue scorciatoie qui sopra per dargliene un'altra.",
+  "shortcuts.apps.all_bound": "«%1$@» ha già un tasto per ogni azione. Cambia una delle sue scorciatoie qui sopra per dargliene un'altra.",
   "shortcuts.apps.empty": "Nessuna app ha ancora un tasto tutto suo. Aggiungine una: il suo tasto ti porterà alla finestra di quell'app, ovunque si trovi, oppure avvierà l'app se non è in esecuzione.",
   "shortcuts.choose_app": "Scegli app…",
   "shortcuts.clear_shared.title": "Anche altri profili usano questa scorciatoia.",
@@ -1743,5 +1746,6 @@
   "whatsnew.trail.from": "Dalle Novità",
   "whatsnew.trail.next": "Avanti: %1$@",
   "window_action.refusal.no_close_button": "«%1$@» non ha il pulsante di chiusura",
-  "window_action.refusal.no_new_window": "%1$@ non ha il comando «Nuova finestra»"
+  "window_action.refusal.no_new_window": "%1$@ non ha il comando «Nuova finestra»",
+  "window_action.refusal.nothing_to_gather": "Nessuna finestra di %1$@ da raccogliere"
 }

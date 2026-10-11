@@ -4,7 +4,13 @@ extension AXDumpExpected {
     /// Dumps g–n.
     static let rowsGToN: [Row] = [
         .row("ghostty", .tiles, .kept, .furnished),
-        .row("ghostty_about", .tiles, .kept, .furnished),
+        .row(
+            "ghostty_about",
+            .floats(.fixedSize),
+            .kept,
+            .furnished,
+            .ruled(issue: 2070)
+        ),
         .row("ghostty_check_for_updates_1_dialog", .tiles, .kept, nil),
         .row(
             "ghostty_check_for_updates_2_alert",
@@ -34,8 +40,9 @@ extension AXDumpExpected {
         .row(
             "macos_join_network",
             .floats(.accessoryApp),
-            .ignored,
-            .furnished
+            .kept,
+            .furnished,
+            .ruled(issue: 2072)
         ),
         .row(
             "macos_share_window_purple_pill_sublime",

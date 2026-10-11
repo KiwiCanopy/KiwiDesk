@@ -199,7 +199,7 @@ extension InterpolatedLabelTests {
         "lua_editor.adopt.title": 1,
         "lua_editor.adopt.message_dirty": 1,
         "layout_params.master_orientation.one_master": 1,
-        "shortcuts.app_behavior.help": 2,
+        "shortcuts.app_behavior.help": 3,
         // 2. The `**`-marker glossaries. #830 asked that two be
         //    CHECKED rather than swept; the check converted them
         //    and found more of the same family. A bold marker

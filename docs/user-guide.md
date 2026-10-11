@@ -186,7 +186,7 @@ its `.gitignore`.
 {
   "spaces": [ "1", "2", "mail" ],
   "app_rules": { "com.spotify.client": "music" },
-  "float_rules": [ "com.apple.calculator" ],
+  "float_rules": [ "com.apple.systempreferences" ],
   "ignore_rules": [ "eu.exelban.Stats" ],
   "profile_bindings": {
     "9C1F2A44-3B0E-4E7D-9A21-6D5C8B7E0143": {
@@ -769,7 +769,7 @@ entries add rules and `null` entries remove inherited ones:
 {
   "app_rules": { "com.apple.mail": null },
   "float_rules": {
-    "com.apple.calculator": null,
+    "com.apple.systempreferences": null,
     "com.apple.finder:Get Info": true
   },
   "ignore_rules": {

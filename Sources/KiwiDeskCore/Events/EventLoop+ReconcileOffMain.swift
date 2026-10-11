@@ -209,6 +209,7 @@ extension EventLoop {
         let tracked = Set(elements[pid]?.keys ?? [:].keys)
         let writesAtRead = offMain.writes
         let reader = listedWindowReader(
+            pid: pid,
             bundleID: app.bundleID,
             tracked: tracked
         )
@@ -313,6 +314,7 @@ extension EventLoop {
 extension EventLoop {
     /// The reader for `pid`'s next off-main list read.
     func listedWindowReader(
+        pid: pid_t,
         bundleID: String?,
         tracked: Set<WindowID>
     ) -> ListedWindowReader {
@@ -322,7 +324,8 @@ extension EventLoop {
             traits: shadows.traits,
             bundleID: bundleID,
             rules: floatRules,
-            tracked: tracked
+            tracked: tracked,
+            isAccessory: classifiesAsOverlay(pid: pid)
         )
     }
 }

@@ -48,7 +48,10 @@ extension KiwiCore {
                     pid: window.pid,
                     bundleID: window.appBundleID,
                     isAccessory: self.eventLoop
-                        .classifiesAsOverlay(pid: window.pid)
+                        .classifiesAsOverlay(pid: window.pid),
+                    tracked: self.eventLoop.admittedWindows(
+                        of: window.pid
+                    )
                 ),
                 self.eventLoop.focusedWindowID(pid: window.pid) == id,
                 let space = self.state.workspaces.space(

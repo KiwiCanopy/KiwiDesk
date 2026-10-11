@@ -86,6 +86,8 @@ extension KiwiCore {
             return launch(args, newInstance: false)
         case "spawn_new":
             return launch(args, newInstance: true)
+        case "gather":
+            return gather(args)
         case "set_mode":
             return setMode(args)
         case "set_gap_global", "set_gap_override":

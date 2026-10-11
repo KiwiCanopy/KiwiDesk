@@ -156,7 +156,9 @@ struct ResizeRefusalSymbolTests {
     /// here, so never an arrow, and a glyph the target resolves.
     @Test("a Tile refusal draws a resolvable non-arrow")
     func tileRefusalSymbol() {
-        for reason: AutoFloatReason in [.rule, .panel, .accessoryApp] {
+        for reason: AutoFloatReason in [
+            .rule, .panel, .accessoryApp, .fixedSize,
+        ] {
             #expect(!reason.pillSymbol.contains("arrow"))
             #expect(
                 NSImage(
