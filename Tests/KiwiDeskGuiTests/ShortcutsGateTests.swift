@@ -143,12 +143,17 @@ struct ShortcutsGateTests {
         #expect(ShortcutsGates(config: track).trackInUse)
         #expect(!ShortcutsGates(config: track).layersExist)
         #expect(!ShortcutsGates(config: track).desktopBindingsExist)
-        // All cases are spoken for above; a FOURTH reds here —
-        // check what each named reading should answer for it
-        // before extending, since none is written against nil.
+        // All cases are spoken for above, the plate switch's
+        // greying reason (#2144) answering none of the three
+        // readings; a FIFTH reds here — check what each named
+        // reading should answer for it before extending, since
+        // none is written against nil.
         #expect(
             Set(ShortcutsGates.InertReason.allCases)
-                == [.onlyDefaultLayer, .noDesktopBinding, .trackUnused]
+                == [
+                    .onlyDefaultLayer, .noDesktopBinding, .trackUnused,
+                    .appWideLuaOwned,
+                ]
         )
     }
 
@@ -175,6 +180,42 @@ struct ShortcutsGateTests {
             ShortcutsGates.resolved
                 .isDisjoint(with: ShortcutsGates.resolvedElsewhere)
         )
+    }
+
+    /// The layout plate's switch greys only where init.lua owns
+    /// the config (#2144), the one greying gate in this area, and
+    /// its row asks this resolver rather than `guiManaged` itself.
+    @Test("the plate switch greys under a Lua-owned config")
+    func plateSwitchGreysUnderLua() throws {
+        let config = GuiConfig()
+        let key = SettingKey.shortcuts(.modeCue)
+        #expect(
+            ShortcutsGates(config: config, guiManaged: true)
+                .inertReason(for: key) == nil
+        )
+        #expect(
+            ShortcutsGates(config: config, guiManaged: false)
+                .inertReason(for: key) == .appWideLuaOwned
+        )
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                    + "LayoutCycleRow.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+        #expect(
+            source.contains(
+                "ShortcutsGates(config:model.config,"
+                    + "guiManaged:model.guiManaged)"
+                    + ".inertReason(for:.shortcuts(.modeCue))"
+            ),
+            "LayoutCueRow no longer asks ShortcutsGates"
+        )
+        #expect(source.contains("disabled:luaOwned"))
     }
 
     /// `LayersCard` must ASK the resolver, not re-derive the

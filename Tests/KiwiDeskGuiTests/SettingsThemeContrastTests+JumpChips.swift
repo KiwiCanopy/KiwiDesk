@@ -55,6 +55,14 @@ extension SettingsThemeContrastTests {
             layers: [SettingsTheme.chipPressed],
             washedWith: markedWash
         ),
+        // The layout cycle list's selected row, in its sunken well
+        // (#453) — kept beside the chips for the shared ink.
+        Pairing(
+            "ink on a selected list row",
+            SettingsTheme.ink,
+            on: SettingsTheme.sunken,
+            layers: [SettingsTheme.rowSelected]
+        ),
     ]
 
     /// The chip's edge is what tells a button chip from a passive

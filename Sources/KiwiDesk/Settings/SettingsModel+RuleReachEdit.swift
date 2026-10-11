@@ -75,6 +75,19 @@ extension SettingsModel {
         )
     }
 
+    /// The layout cycle row's checklist (#453).
+    func cycleReach() -> RuleReachReading? {
+        guard let reach = encodedReach else { return nil }
+        let key = RuleReachTable<[LayoutMode]>.modeCycleKey
+        return reading(
+            reach.modeCycle,
+            key,
+            reach.unreadable,
+            picked: reachEdits.reach[.cycle]?[key],
+            LayoutCycleWords.readout
+        )
+    }
+
     /// Who binds this row's combo to another action, per profile,
     /// read off the encoded table — the action ticking would take
     /// the key from.
@@ -183,6 +196,7 @@ extension SettingsModel {
         case .key: keyReach(app)
         case .scroll: scrollReach(app)
         case .history: historyReach()
+        case .cycle: cycleReach()
         }
     }
 
@@ -290,6 +304,13 @@ extension SettingsModel {
             return RuleReachDraft.defaultReach(
                 of: key,
                 in: stored.spaceHistory,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .cycle:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.modeCycle,
                 editing: editing,
                 isLoaded: reachIsLoaded
             )

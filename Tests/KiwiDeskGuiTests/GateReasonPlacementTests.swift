@@ -69,6 +69,9 @@ struct GateReasonPlacementTests {
                 // #2142: the app-wide Desktop switch cue greys the
                 // same way, a cause shown nowhere on Profiles.
                 .profiles(.desktopCue),
+                // #2144: the layout plate's switch, the same
+                // shape on Shortcuts ▸ Layout.
+                .shortcuts(.modeCue),
                 // Back in the set with #1392: the stored-profile
                 // arm (cause on the surface) retired, and the
                 // one that greys now — a stored Save with no

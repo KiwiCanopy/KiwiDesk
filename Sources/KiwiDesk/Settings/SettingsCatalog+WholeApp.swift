@@ -82,6 +82,17 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.layout",
         "Layout"
     )
+    /// Layout ▸ the cycle list and the plate's switch (#453,
+    /// #2144), keyed on their census label keys so a hit lands on
+    /// the row.
+    let modeCycle = SettingsControl(
+        "shortcuts.mode_cycle",
+        "Layouts to cycle"
+    )
+    let modeCue = SettingsControl(
+        "shortcuts.mode_cue",
+        "Show the layout after cycling"
+    )
     let sizeFloat = SettingsControl(
         "shortcuts.section.size_float",
         "Size & float"

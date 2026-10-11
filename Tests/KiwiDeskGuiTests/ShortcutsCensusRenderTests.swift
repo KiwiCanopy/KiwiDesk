@@ -102,12 +102,10 @@ struct ShortcutsCensusRenderTests {
 
     @Test("Layout's one tier is the census's (#453)")
     func layoutTier() {
-        pin(
-            ShortcutsRowOrder.layoutAtRest,
-            .layout,
-            .atRest,
-            "layout at rest"
-        )
+        let list = ShortcutsRowOrder.layoutList
+        let keys = ShortcutsRowOrder.layoutAtRest
+        pin(list + keys, .layout, .atRest, "layout at rest")
+        #expect(!list.isEmpty && !keys.isEmpty)
     }
 
     @Test("Size & float's two tiers are the census's")

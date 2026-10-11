@@ -39,6 +39,7 @@ extension SettingsModel {
             layers: config.layers,
             scrollGesture: config.scrollGesture,
             spaceHistory: config.spaceHistory,
+            modeCycle: config.modeCycle,
             profile: reachProfile,
             isLoaded: reachIsLoaded
         )
@@ -113,6 +114,17 @@ extension SettingsModel {
             reach: reachEdits.reach[.history] ?? [:],
             removal: [:]
         )
+        snapshot.modeCycle = RuleReachDraft.encode(
+            snapshot.modeCycle,
+            current: [
+                RuleReachTable<[LayoutMode]>.modeCycleKey:
+                    config.modeCycle
+            ],
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.cycle] ?? [:],
+            removal: [:]
+        )
         // The loaded page's gui.json layers, derived ONCE so the rule
         // write and the globals write read the same base.
         if reachIsLoaded {
@@ -148,6 +160,11 @@ extension SettingsModel {
                 RuleReachTable<SpaceHistoryKind>.spaceHistoryKey,
                 for: loaded
             ) ?? stored.spaceHistory.spaceHistoryBase
+        config.modeCycle =
+            stored.modeCycle.resolved(
+                RuleReachTable<[LayoutMode]>.modeCycleKey,
+                for: loaded
+            ) ?? stored.modeCycle.modeCycleBase
     }
 
     /// The draft as gui.json must hold it: on the live target the
@@ -170,6 +187,7 @@ extension SettingsModel {
             original: reach.storedScrollBase
         )
         sidecar.spaceHistory = reach.spaceHistory.spaceHistoryBase
+        sidecar.modeCycle = reach.modeCycle.modeCycleBase
         return sidecar
     }
 
@@ -210,6 +228,7 @@ extension SettingsModel {
         cleanConfig.floatRules = config.floatRules
         cleanConfig.scrollGesture = config.scrollGesture
         cleanConfig.spaceHistory = config.spaceHistory
+        cleanConfig.modeCycle = config.modeCycle
         // Not the layers: a stored page's own shortcut diff is the
         // tiling write's, which is what failed.
         ruleReachStored = core.ruleReachSnapshot()
@@ -226,6 +245,7 @@ extension SettingsModel {
         config.layers = cleanConfig.layers
         config.scrollGesture = cleanConfig.scrollGesture
         config.spaceHistory = cleanConfig.spaceHistory
+        config.modeCycle = cleanConfig.modeCycle
         reachEdits = RuleReachEdits()
     }
 

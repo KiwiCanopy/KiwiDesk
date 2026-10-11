@@ -100,7 +100,8 @@ struct ShortcutsFamilyRows {
             .advanced,
             .`import`, .restoreDefaults, .scrollPan, .scrollLongSwipes,
             .scrollStepDistance, .scrollNaturalTrackpad,
-            .scrollNaturalMouse, .scrollSpaceStep, .spaceHistory:
+            .scrollNaturalMouse, .scrollSpaceStep, .spaceHistory,
+            .modeCycle, .modeCue:
             return nil
         }
     }

@@ -196,6 +196,9 @@ struct LayoutGroup: View {
 
     var body: some View {
         SettingsSection(SettingsCatalog.shortcuts.layoutKeys) {
+            // `ShortcutsRowOrder.layoutList`, drawn by its own views.
+            LayoutCycleRow(model: model)
+            LayoutCueRow(model: model)
             ForEach(ShortcutsRowOrder.layoutAtRest, id: \.id) {
                 key in
                 KeybindingFamilyRows(
