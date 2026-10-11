@@ -44,6 +44,7 @@ struct GuiConfigParityTests {
                 "fallbackSpace", "floatRules", "ignoreRules",
                 "profileBindings", "desktopSpaces", "layers",
                 "scrollGesture", "appWide", "look", "spaceHistory",
+                "modeCycle",
             ]
         )
     }
@@ -83,6 +84,7 @@ struct GuiConfigParityTests {
             stepDistance: 120
         )
         config.spaceHistory = .allScreens
+        config.modeCycle = [.grid, .monocle]
         config.layers = [
             KeyLayer(
                 name: "default",
@@ -112,6 +114,7 @@ struct GuiConfigParityTests {
         #expect(back.look == config.look)
         #expect(back.scrollGesture == config.scrollGesture)
         #expect(back.spaceHistory == config.spaceHistory)
+        #expect(back.modeCycle == config.modeCycle)
         // Profile-scoped fields deliberately do NOT ride the
         // sidecar (#36) — they come back default.
         #expect(back.settings == TilingSettings())

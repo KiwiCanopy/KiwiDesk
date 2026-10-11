@@ -66,6 +66,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// The Space history's global base (#1655); a profile diverges
     /// through `Profile.spaceHistory`.
     public var spaceHistory = SpaceHistoryKind.defaultKind
+    /// The layouts the cycle walks (#453).
+    public var modeCycle = ModeCycle.defaultList
     /// The settings no profile carries (#1741); nil until this
     /// file has adopted them. Stamped at the write
     /// (`GuiConfigStore.liveAppWide`) rather than drafted: General
@@ -90,6 +92,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// stamped the same way.
     public static let undraftedFields: Set<String> = [
         "format", "desktopSpaces", "appWide", "look",
+        // #453: its Settings group lands after its preview.
+        "modeCycle",
     ]
 
     public init() {}
@@ -183,6 +187,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case layers
         case scrollGesture = "scroll_gesture"
         case spaceHistory = "space_history"
+        case modeCycle = "mode_cycle"
         case refusal
         case quit
         case desktop
@@ -259,6 +264,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 SpaceHistoryKind.self,
                 forKey: .spaceHistory
             ) ?? .defaultKind
+        // Additive since #453: absence is the default list.
+        modeCycle = try ModeCycle.decoded(container, forKey: .modeCycle)
         // Additive since #1741, like `desktopSpaces`: absence is
         // "not adopted yet", which the adoption reads.
         appWide = AppWideSettings(
@@ -326,6 +333,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(layers, forKey: .layers)
         try container.encode(scrollGesture, forKey: .scrollGesture)
         try container.encode(spaceHistory, forKey: .spaceHistory)
+        try container.encode(modeCycle, forKey: .modeCycle)
         if let appWide {
             try container.encode(appWide.refusal, forKey: .refusal)
             try container.encode(appWide.quit, forKey: .quit)

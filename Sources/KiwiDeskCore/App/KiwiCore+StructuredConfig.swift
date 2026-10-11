@@ -42,6 +42,7 @@ extension KiwiCore {
             base: config.spaceHistory,
             profile: profile?.spaceHistory
         )
+        modeCycle = config.modeCycle
         // Mint refs from the SAME interpreter that releases
         // them (`keys.lua`, see `KeybindingManager.reset`),
         // so mint and release cannot diverge.
@@ -95,6 +96,7 @@ extension KiwiCore {
             base: structured?.spaceHistory,
             profile: profileSpaceHistory
         )
+        if let structured { modeCycle = structured.modeCycle }
         guard isGuiManaged else { return }
         guard let lua = keys.lua else { return }
         guard let config = structured else { return }
@@ -187,6 +189,7 @@ extension KiwiCore {
             base: config.spaceHistory,
             profile: profile?.spaceHistory
         )
+        modeCycle = config.modeCycle
         guard changed, let lua = keys.lua else { return }
         applyStructuredKeybindings(
             layers: config.layers,

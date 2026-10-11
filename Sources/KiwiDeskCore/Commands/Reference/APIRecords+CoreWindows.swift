@@ -159,6 +159,20 @@ extension APIReference {
                 + "identifier.",
             .text("bundle_id")
         ),
+        "cycle_mode": APIRecord(
+            "Moves the focused Space to the next layout in the cycle "
+                + "list, or the previous one.",
+            .choice(
+                "direction",
+                ModeCycleDirection.self,
+                optional: true
+            )
+        ),
+        "set_mode_cycle": APIRecord(
+            "Sets the layouts cycle_mode walks, in order: two or "
+                + "more, each once.",
+            .text("layouts")
+        ),
         "set_mode": APIRecord(
             "Sets a Space's layout mode; omit the Space to set "
                 + "the active one.",

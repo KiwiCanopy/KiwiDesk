@@ -32,6 +32,9 @@ struct FocusedCommandPolicyTests {
         "delete_space",
         "focus_or_spawn",
         "spawn_new",
+        // Re-lays the focused Space out, like set_mode without a
+        // Space, moving no window between Spaces (#453).
+        "cycle_mode",
         "get_state",
         "get_layout_info",
         "list_monitors",

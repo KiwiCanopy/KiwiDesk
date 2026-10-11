@@ -280,11 +280,11 @@ public final class KiwiCore {
     var spaceHistory = SpaceHistoryState()
     /// The shared look's state (#1752, `KiwiCore+SharedLook`).
     var sharedLookLedger = SharedLookLedger()
-    /// The live arrangement's explicit rehome target (#68) —
-    /// adopted from the active profile, edited by the GUI, and
-    /// captured back on save. nil falls back to the space
-    /// order's first survivor on a profile-switch reconcile.
+    /// The rehome target (#68), adopted from the active profile;
+    /// nil falls back to the space order's first survivor.
     var fallbackSpace: SpaceID?
+    /// The layouts `cycle_mode` walks (#453, `KiwiCore+ModeCycle`).
+    var modeCycle = ModeCycle.defaultList
     /// The announced in-place restart (#930, `KiwiCore+InPlaceRestart`).
     var inPlaceRestart = InPlaceRestartState()
     /// Profile bound per macOS Desktop, keyed by the Desktop
