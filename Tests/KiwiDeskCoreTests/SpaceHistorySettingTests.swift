@@ -122,25 +122,9 @@ struct SpaceHistorySettingTests {
         let core = try makeCore()
         var work = try core.profiles.read(name: "Work")
         work.spaceHistory = .allScreens
-        core.reapplyStructuredOverrides(
-            profileModes: nil,
-            profileAppRules: nil,
-            profileFloatRules: nil,
-            profileIgnoreRules: nil,
-            profileScrollGesture: nil,
-            profileSpaceHistory: work.spaceHistory,
-            profileModeCycle: nil
-        )
+        core.reapplyStructuredOverrides(work)
         #expect(core.spaceHistory.kind == .allScreens)
-        core.reapplyStructuredOverrides(
-            profileModes: nil,
-            profileAppRules: nil,
-            profileFloatRules: nil,
-            profileIgnoreRules: nil,
-            profileScrollGesture: nil,
-            profileSpaceHistory: nil,
-            profileModeCycle: nil
-        )
+        core.reapplyStructuredOverrides(nil)
         #expect(core.spaceHistory.kind == .perScreen)
     }
 

@@ -31,13 +31,13 @@ struct ModeCycleSettingTests {
 
     private func reapply(_ core: KiwiCore, cycle: [LayoutMode]?) {
         core.reapplyStructuredOverrides(
-            profileModes: nil,
-            profileAppRules: nil,
-            profileFloatRules: nil,
-            profileIgnoreRules: nil,
-            profileScrollGesture: nil,
-            profileSpaceHistory: nil,
-            profileModeCycle: cycle
+            Profile(
+                name: "P",
+                monitorSets: [MonitorSet(monitors: ["P:1x1"])],
+                spaceModes: [:],
+                settings: TilingSettings(),
+                modeCycle: cycle
+            )
         )
     }
 

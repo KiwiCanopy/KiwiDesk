@@ -117,15 +117,15 @@ struct BootWindowRuleReconcileTests {
     ) {
         #expect(!core.isGuiManaged)
         core.reapplyStructuredOverrides(
-            profileModes: nil,
-            profileAppRules: nil,
-            profileFloatRules: float.map {
-                RuleListOverride(rules: [$0: true])
-            },
-            profileIgnoreRules: nil,
-            profileScrollGesture: nil,
-            profileSpaceHistory: nil,
-            profileModeCycle: nil
+            Profile(
+                name: "P",
+                monitorSets: [MonitorSet(monitors: ["P:1x1"])],
+                spaceModes: [:],
+                settings: TilingSettings(),
+                floatRules: float.map {
+                    RuleListOverride(rules: [$0: true])
+                }
+            )
         )
     }
 
