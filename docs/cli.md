@@ -404,7 +404,7 @@ its value applies over `init.lua`'s.
 naming the new one.
 
 :::unreleased
-`cycle_mode` (System) takes `next` (default) or `previous` and
+`cycle_mode` (System) takes `prev` or `next` (default) and
 moves the focused Space to the next layout in its cycle list;
 `set_mode_cycle` sets that list. See
 [cycle_mode](lua-reference.md#cycle_mode).

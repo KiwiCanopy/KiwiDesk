@@ -574,8 +574,8 @@ KiwiDesk.set_mode("music", "floating")
 :::unreleased
 ### cycle_mode
 
-**Expects:** optionally a direction: `"next"` (the default) or
-`"previous"`.
+**Expects:** optionally a direction: `"prev"` or `"next"` (the
+default) — exactly these, no `previous` alias, as `move_to_track`.
 
 **Does:** moves the focused Space to the next layout in your
 layout cycle list (see [`set_mode_cycle`](#set_mode_cycle)), or

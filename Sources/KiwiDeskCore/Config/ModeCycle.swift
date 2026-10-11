@@ -76,8 +76,10 @@ public enum ModeCycle {
     }
 }
 
-/// Which way `cycle_mode` steps (#453).
+/// Which way `cycle_mode` steps (#453) — spelled as every other
+/// direction argument is (`move_to_track`): one spelling, no
+/// `previous` alias.
 public enum ModeCycleDirection: String, CaseIterable, Sendable {
+    case prev
     case next
-    case previous
 }
