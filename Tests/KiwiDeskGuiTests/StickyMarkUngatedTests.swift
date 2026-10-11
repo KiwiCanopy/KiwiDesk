@@ -88,9 +88,9 @@ struct StickyMarkUngatedTests {
         for key in [BordersKey.stickyColor, .floatingColor] {
             let placement = SettingKey.borders(key).placement
             #expect(placement.gate == nil, "\(key)")
-            #expect(placement.container == .borders, "\(key)")
+            #expect(placement.container == .windowMarks, "\(key)")
         }
-        #expect(SettingsContainer.borders.gate == nil)
+        #expect(SettingsContainer.windowMarks.gate == nil)
     }
 
     /// The editor greys nothing, reads nothing off the bar, and

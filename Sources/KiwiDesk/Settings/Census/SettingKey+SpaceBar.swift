@@ -54,8 +54,8 @@ extension SpaceBarKey {
             // Inert when front-app is off or icon source does not tint.
             return .row(
                 .advancedColours,
-                .kiwishelf,
-                .showMore,
+                .secondAccent,
+                .atRest,
                 gate: .anyOf([
                     .spaceBar(.spaceBarEnabled),
                     .kiwishelf(.iconSource),
@@ -67,8 +67,8 @@ extension SpaceBarKey {
             // Inert while no front-app segment draws (#1856).
             return .row(
                 .advancedColours,
-                .kiwishelf,
-                .showMore,
+                .secondAccent,
+                .atRest,
                 gate: .anyOf([
                     .spaceBar(.spaceBarEnabled),
                     .spaceBar(.spaceBarShowFrontApp),

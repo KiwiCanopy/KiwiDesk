@@ -113,8 +113,10 @@ struct CrossReferenceRowSlotTests {
         "SpacesUsingLayout.swift:Self.overrideProse(overriding)",
         "LayoutCard.swift:appBarProse",
         "SpaceOverrideRows+ModeRows.swift:prose",
-        "BarColorCards.swift:AdvancedColorsHelp.focusedItemReference",
-        "StructureColorCards.swift:AdvancedColorsHelp.unfocusedReference",
+        "RoleColorCards.swift:AdvancedColorsHelp.focusedItemReference",
+        "RoleColorCards.swift:AdvancedColorsHelp.dimmedReference",
+        "WindowMarksColorCard.swift:AdvancedColorsHelp.unfocusedReference",
+        "WindowMarksColorCard.swift:AdvancedColorsHelp.dimmedReference",
         // Siblings assert these; ShelfBorderColorGateTests the border.
         "GesturesShelfEntries.swift:prose",  // GesturesDrawerTests
         "MacHabitRow.swift:prose",  // MacChecklistCrossReferenceTests
@@ -139,19 +141,27 @@ struct CrossReferenceRowSlotTests {
         #expect(MotionCard.scrollingXrefProse.contains(Self.slot))
     }
 
-    /// The focused-item row's link under the Space Bar colours
-    /// grid (#1310) — one branch, one value.
+    /// The focused-item row's link under the Second accent
+    /// group (#1310) — one branch, one value.
     @Test func theFocusedItemProsePlacesItsLink() {
         #expect(
             AdvancedColorsHelp.focusedItemReference.contains(Self.slot)
         )
     }
 
-    /// The unfocused row's link under the Border colours grid
+    /// The unfocused row's link under the Window marks grid
     /// (#1310) — one branch, one value.
     @Test func theUnfocusedProsePlacesItsLink() {
         #expect(
             AdvancedColorsHelp.unfocusedReference.contains(Self.slot)
+        )
+    }
+
+    /// The Advanced Colours groups' link for their dimmed rows
+    /// (#1857), one value at both mounts.
+    @Test func theDimmedProsePlacesItsLink() {
+        #expect(
+            AdvancedColorsHelp.dimmedReference.contains(Self.slot)
         )
     }
 

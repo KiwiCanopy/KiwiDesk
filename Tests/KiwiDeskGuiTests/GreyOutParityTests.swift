@@ -149,28 +149,20 @@ struct GreyOutParityTests {
         // Advanced Colours (#678 Phase 3), which replaced the
         // interim colour cards.
         //
-        // The first pins the WIRING: each row must actually
-        // apply the resolved container gate. The gate's own
-        // logic — that an exemption escapes the container grey
-        // and nothing else — used to live inline here as a
-        // shape pin whose green was not coverage; it is now a
-        // pure function with a behavioural test
-        // (`ColorsGateTests`,
-        // `exemptionEscapesOnlyTheContainerGate`), so this
-        // needle no longer has to stand in for it.
-        //
-        // The second IS behavioural: without it a row gate
-        // fires alongside its container gate and the hover
-        // names a row-specific reason that fixing would not
-        // un-grey anything.
+        // This pins the WIRING: each row must actually grey on
+        // its one verdict (#1857). What the verdict says — the
+        // outer reason outranking the row's own, and every grey
+        // answered by a link — is `ColorsGateTests`'.
         (
             "BarColorCards.swift",
-            "GreyOut(active: gate.containerGrey",
+            "active: verdict != nil",
             1
         ),
+        // The role groups draw their rows themselves, each beside
+        // its tick, on the same verdict (#1857).
         (
-            "AdvancedColorRow.swift",
-            "GreyOut(active: ownPredicateLive && inert",
+            "RoleColorCards.swift",
+            "active: verdict != nil",
             1
         ),
         // Not a GreyOut site — a plain `.disabled` with its own

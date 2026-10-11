@@ -50,8 +50,16 @@ struct BarsGateWiringTests {
             "Components/Bars/SpaceBarCard.swift": [
                 "gates.containerReason(for:.spaceBar)"
             ],
+            // The colour cards read the shelf's block gate through
+            // the one `shelfDraws` (#1857), which asks the resolver.
+            "Components/Colors/AdvancedColorsGates.swift": [
+                "bars.containerReason(for:.kiwishelf)"
+            ],
             "Components/Colors/BarColorCards.swift": [
-                "gates.bars.containerReason(for:.kiwishelf)"
+                "gates.shelfDraws"
+            ],
+            "Components/Colors/AdvancedColorsGates+Verdict.swift": [
+                "if!shelfDraws,Self.takesShelfGate(key)"
             ],
         ]
         for (path, needles) in consults {
@@ -103,6 +111,7 @@ struct BarsGateWiringTests {
             "Components/Bars/KiwiShelfCard+Rows.swift",
             "Components/Colors/AdvancedColorRow+Bars.swift",
             "Components/Colors/BarColorCards.swift",
+            "Components/Colors/RoleColorCards.swift",
         ]
         for key in [
             "app_bar.no_layout.shelf_help",

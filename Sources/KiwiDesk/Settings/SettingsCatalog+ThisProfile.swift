@@ -123,24 +123,22 @@ struct MotionMoreControls: Sendable {
     )
 }
 
-/// Advanced Colors catalog controls (#678 Phase 3, #277, #793).
+/// Advanced Colors catalog controls (#678 Phase 3, #277, #793,
+/// #1857).
 struct AdvancedColorsControls: Sendable {
-    let bordersGroup = SettingsControl(
-        "colors.borders.title",
-        "Border colors"
-    )
-    let dragGroup = SettingsControl(
-        "colors.drag.title",
-        "Drag colors"
+    /// The two role groups (#1857).
+    let accentGroup = SettingsControl("colors.accent.title", "Accent")
+    let secondAccentGroup = SettingsControl(
+        "colors.second_accent.title",
+        "Second accent"
     )
     let kiwishelfGroup = SettingsControl(
         "kiwishelf.colors.title",
         "KiwiShelf colors"
     )
-    let kiwishelfMore = SettingsDrawer(
-        "colors.more",
-        "More colors",
-        instance: "kiwishelf"
+    let windowMarksGroup = SettingsControl(
+        "colors.window_marks.title",
+        "Window marks"
     )
     /// Detail panel full-palette preview (#793).
     let everyColorScene = SettingsControl(

@@ -730,6 +730,14 @@ a `Gaps` value takes the same row and the same two comparisons,
 never a copy of either (`OverrideGapsRowTests` ▸
 `gapsRowSharesTheMasters`).
 
+A role group's colour on Advanced Colours (#1857) is the third
+home, ruled: its followers are the group's ticks — scratch state
+no stored-setting register can read — so it answers its title's
+`?` and its "mixed" readout from `RolePaint.mixed` alone, both
+needled by `RolePaintTests` ▸ `mixedIsWired`, and joins neither
+register. A further master whose followers are scratch takes the
+same shape, its own pure value with both channels needled.
+
 **Consulting a resolver is not drawing what it answered, and a
 SURFACING gate leaves nothing behind to prove the difference.**
 A greying gate ends in a dimmed control a test can find; a

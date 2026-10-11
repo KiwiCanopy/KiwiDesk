@@ -399,7 +399,8 @@ reference](lua-reference.md) the verbs.
 
 ### Focus Border
 
-The ring's colours are in **Advanced Colors ▸ Border colors**,
+The ring's colours are in **Advanced Colors**: the focused one
+under **Accent**, the unfocused one under **Window marks**, each
 dimmed while the matching switch here is off.
 
 **What gets no border.** Launcher and panel overlays (Spotlight,
