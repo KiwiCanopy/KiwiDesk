@@ -272,9 +272,9 @@ extension KiwiCore {
             // (#1787, #1788) — and the subrole re-read, since a
             // window may drop its title bar as it covers.
             if case .windowResized(let id, _) = event {
-                eventLoop.recheckSubrole(of: id)
+                eventLoop.reconcileForCoverCrossing(of: id)
             } else if case .windowMoved(let id, _) = event {
-                eventLoop.recheckSubrole(of: id)
+                eventLoop.reconcileForCoverCrossing(of: id)
             }
             updateBars()
             updateBorders()

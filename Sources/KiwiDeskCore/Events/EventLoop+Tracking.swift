@@ -209,10 +209,14 @@ extension EventLoop {
         app: AppRef
     ) {
         recheckFullscreen(element, id: id)
-        applySubrole(AXHelper.subrole(of: element), id: id)
+        let facts = WindowFacts.read(
+            element,
+            layer: FloatDetection.windowLayer(of: id)
+        )
+        applySubrole(facts.subrole, id: id)
         offMain.noteFreshWrite(id, [.detection])
         let verdict = autoFloatVerdict(
-            .element(element, layer: FloatDetection.windowLayer(of: id)),
+            .facts(facts),
             id: id,
             pid: pid,
             bundleID: app.bundleID
@@ -260,20 +264,22 @@ extension EventLoop {
     }
 
     /// Emits a changed subrole (#1788): a window may drop its
-    /// title bar in place as it starts presenting.
-    private func applySubrole(_ subrole: String, id: WindowID) {
-        guard detectedSubroles[id] != subrole else { return }
+    /// title bar in place as it starts presenting. An empty read
+    /// is a failed one, never evidence (#1285): it files nothing.
+    func applySubrole(_ subrole: String, id: WindowID) {
+        guard !subrole.isEmpty, detectedSubroles[id] != subrole
+        else { return }
         detectedSubroles[id] = subrole
         onEvent(.windowSubroleChanged(id, subrole: subrole))
     }
 
-    /// Re-reads `id`'s app off the main actor, whose recheck
-    /// re-reads the subrole: a window crossing into covering its
-    /// screen may have dropped its title bar (#1788).
-    func recheckSubrole(of id: WindowID) {
-        guard
-            let pid = elements.first(where: { $0.value[id] != nil })?.key
-        else { return }
+    /// Reconciles `id`'s app off the main actor for its subrole:
+    /// a window crossing into covering its screen may have dropped
+    /// its title bar (#1788). The whole-app read is the one that
+    /// already carries the subrole off main, and a crossing is a
+    /// boundary event, not a per-frame one.
+    func reconcileForCoverCrossing(of id: WindowID) {
+        guard let pid = trackingPID(of: id) else { return }
         reconcileOffMain(pid: pid, app: appRef(of: pid))
     }
 

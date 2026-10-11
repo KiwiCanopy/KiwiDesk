@@ -27,7 +27,7 @@ struct ReconcileSnapshotTests {
     }
 
     @MainActor
-    private final class Box {
+    final class Box {
         var applying = false
         var reading = false
         /// LaunchServices seams asked outside the off-main read.
@@ -49,10 +49,10 @@ struct ReconcileSnapshotTests {
         }
     }
 
-    private let pid: pid_t = 727_727
-    private let first = WindowID(41)
+    let pid: pid_t = 727_727
+    let first = WindowID(41)
     private let second = WindowID(42)
-    private var ref: AppRef {
+    var ref: AppRef {
         AppRef(bundleID: "test.kiwi.snapshot", name: "Snapshot")
     }
     private var elementOne: AXUIElement {
@@ -64,7 +64,7 @@ struct ReconcileSnapshotTests {
 
     /// A loop tracking two windows of `pid`, both listed, every
     /// read pumped synchronously and the delivery marked.
-    private func makeLoop(
+    func makeLoop(
         policy: NSApplication.ActivationPolicy = .regular
     ) -> (loop: EventLoop, box: Box) {
         let loop = EventLoop()
@@ -193,27 +193,6 @@ struct ReconcileSnapshotTests {
         #expect(box.events.contains("fullscreen w41 true"))
         #expect(box.events.contains("fullscreen w42 true"))
         #expect(loop.detectedFullscreen[first] == true)
-    }
-
-    /// A window adopted titled can drop its title bar in place
-    /// as it starts presenting (#1788 item 5): both reconcile
-    /// paths re-file the subrole, change-only. The fabricated
-    /// elements answer no subrole, which differs from the seed.
-    @Test("a subrole change lands on both reconcile paths")
-    func subroleChangeLands() {
-        for offMain in [true, false] {
-            let (loop, box) = makeLoop()
-            loop.detectedSubroles[first] = "AXStandardWindow"
-            loop.detectedSubroles[second] = ""
-            if offMain {
-                loop.reconcileOffMain(pid: pid, app: ref)
-            } else {
-                loop.reconcile(pid: pid, app: ref)
-            }
-            #expect(box.events.contains("subrole w41 "), "\(offMain)")
-            #expect(!box.events.contains("subrole w42 "), "\(offMain)")
-            #expect(loop.detectedSubroles[first] == "")
-        }
     }
 
     @Test("the float verdict read off main matches the main-actor one")
