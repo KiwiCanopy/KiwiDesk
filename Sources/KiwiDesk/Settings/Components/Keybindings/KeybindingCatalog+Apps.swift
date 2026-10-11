@@ -7,11 +7,14 @@ import KiwiDeskCore
 enum AppLaunchBehavior: String, CaseIterable {
     case openOrFocus
     case openNew
+    /// Brings the app's windows to the user (#1510).
+    case gather
 
     var verb: String {
         switch self {
         case .openOrFocus: return "focus_or_spawn"
         case .openNew: return "spawn_new"
+        case .gather: return "gather"
         }
     }
 }

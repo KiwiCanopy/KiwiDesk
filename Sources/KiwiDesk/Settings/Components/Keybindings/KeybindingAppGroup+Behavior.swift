@@ -60,6 +60,8 @@ extension ApplicationsGroup {
             )
         case .openNew:
             return L("shortcuts.app_behavior.open_new", "Open New")
+        case .gather:
+            return L("shortcuts.app_behavior.gather", "Gather Windows")
         }
     }
 
@@ -77,12 +79,16 @@ extension ApplicationsGroup {
                 + "minimized windows stay in the Dock."
                 + "\n\n**%2$@** always launches a "
                 + "fresh instance, even when the app is already "
-                + "open.",
+                + "open."
+                + "\n\n**%3$@** brings every window of the app "
+                + "into the Space you are on, from other Desktops "
+                + "too. It never launches the app.",
             L(
                 "shortcuts.app_behavior.open_or_focus",
                 "Open or Focus"
             ),
-            L("shortcuts.app_behavior.open_new", "Open New")
+            L("shortcuts.app_behavior.open_new", "Open New"),
+            L("shortcuts.app_behavior.gather", "Gather Windows")
         )
     }
 

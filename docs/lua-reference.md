@@ -4548,6 +4548,34 @@ Open applications shortcut carries a per-row **Launch behavior**
 menu — *Open or Focus* (`focus_or_spawn`, the default) or *Open
 New* (`spawn_new`).
 
+:::unreleased
+### gather
+
+**Expects:** an app bundle identifier (e.g. `com.apple.Notes`).
+See [Finding a bundle identifier](#finding-a-bundle-identifier).
+
+**Does:** moves every window of the app into the Space you are
+on, in the order the Space Bar lists them, after the windows
+already there. Floating windows stay floating and sticky windows
+stay sticky; a window in native full screen keeps its own Space.
+Windows up on another macOS Desktop are moved onto the Desktop
+you are looking at, without switching to theirs — that needs the
+Desktop bridge; without it they stay where they are. It never
+launches the app: with no window to move, it does nothing and
+reports an error.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+shift+return", function()
+    KiwiDesk.gather("com.apple.Notes")
+end)
+```
+
+It is the third **Launch behavior** of an Open applications
+shortcut in Settings: *Gather Windows*.
+:::
+
 ## User Interface
 
 ### show_shortcuts

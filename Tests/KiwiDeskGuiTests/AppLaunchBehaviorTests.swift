@@ -45,6 +45,18 @@ struct AppLaunchBehaviorTests {
         )
     }
 
+    @Test("gather round-trips through gather (#1510)")
+    func gatherRoundTrip() {
+        let lua = KeybindingCatalog.appCommand(
+            "com.apple.notes",
+            behavior: .gather
+        )
+        #expect(lua == "KiwiDesk.gather(\"com.apple.notes\")")
+        #expect(
+            KeybindingCatalog.appLaunchBehavior(from: lua) == .gather
+        )
+    }
+
     @Test("behavior defaults to open-or-focus")
     func defaultBehavior() {
         // The parameterless call keeps the pre-#334 meaning, so
@@ -104,11 +116,12 @@ struct AppLaunchBehaviorTests {
         )
     }
 
-    @Test("both behaviors bound ⇒ no available behavior")
+    @Test("every behavior bound ⇒ no available behavior")
     func fullyBound() {
         let bindings = [
             appBinding("com.a", .openOrFocus),
             appBinding("com.a", .openNew),
+            appBinding("com.a", .gather),
         ]
         #expect(
             KeybindingCatalog.firstAvailableBehavior(

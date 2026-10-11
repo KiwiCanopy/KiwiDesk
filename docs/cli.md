@@ -403,6 +403,14 @@ its value applies over `init.lua`'s.
 `focus_or_spawn` was `pull_or_spawn`; the old name is refused,
 naming the new one.
 
+:::unreleased
+`gather` (Launch) takes an app bundle id and moves every window of
+that app into the Space you are on, from other macOS Desktops too
+where the Desktop bridge is present; it never launches the app, and
+an app with nothing to move answers with an error. See
+[gather](lua-reference.md#gather).
+:::
+
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last
 argument, a window `id` from `get_state`: they then act on that

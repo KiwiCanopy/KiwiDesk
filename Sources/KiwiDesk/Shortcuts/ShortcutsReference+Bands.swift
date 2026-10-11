@@ -123,23 +123,17 @@ extension ShortcutsReferenceBuilder {
                             forBundleID: $0
                         )
                     } ?? binding.label
-                let openNew =
-                    KeybindingCatalog.appLaunchBehavior(
-                        from: binding.lua
-                    ) == .openNew
+                let behavior = KeybindingCatalog.appLaunchBehavior(
+                    from: binding.lua
+                )
+                let badge = Self.behaviorBadge(behavior)
                 return ShortcutRow(
                     id: binding.id.uuidString,
                     label: name,
                     combo: glyphs(binding.combo),
                     bundleID: bundleID,
-                    accessoryIcon: openNew
-                        ? "macwindow.badge.plus" : nil,
-                    accessoryHelp: openNew
-                        ? L(
-                            "shortcuts.app_behavior.open_new.badge",
-                            "Opens a new instance"
-                        )
-                        : ""
+                    accessoryIcon: badge?.icon,
+                    accessoryHelp: badge?.help ?? ""
                 )
             }
             .sorted { lhs, rhs in
@@ -148,6 +142,33 @@ extension ShortcutsReferenceBuilder {
                 if order == .orderedSame { return lhs.id < rhs.id }
                 return order == .orderedAscending
             }
+    }
+
+    /// The row badge for a behavior other than Open or Focus: its
+    /// symbol and the help naming what the key does.
+    static func behaviorBadge(
+        _ behavior: AppLaunchBehavior?
+    ) -> (icon: String, help: String)? {
+        switch behavior {
+        case .openNew:
+            return (
+                "macwindow.badge.plus",
+                L(
+                    "shortcuts.app_behavior.open_new.badge",
+                    "Opens a new instance"
+                )
+            )
+        case .gather:
+            return (
+                "rectangle.stack",
+                L(
+                    "shortcuts.app_behavior.gather.badge",
+                    "Gathers its windows here"
+                )
+            )
+        case .openOrFocus, nil:
+            return nil
+        }
     }
 
     /// Builds custom shortcut rows for remaining unconsumed bindings.
