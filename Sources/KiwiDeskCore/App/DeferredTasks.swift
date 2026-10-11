@@ -67,8 +67,9 @@ final class DeferredTasks {
         /// cancel-and-replace would drop whichever fired first.
         case awayReachReap
         /// Adopts the windows a `gather` moved here from other
-        /// Desktops (#1510); its own slot, so neither a reach nor
-        /// a second gather drops the other's reap.
+        /// Desktops (#1510); its own slot, so a reach never drops
+        /// it, and a second gather adds its apps to the pending
+        /// reap (`DesktopMemory.gatherReapPIDs`).
         case gatherReap
         /// Re-publishes the displays after the menu-bar
         /// auto-hide pref flips (#1386).

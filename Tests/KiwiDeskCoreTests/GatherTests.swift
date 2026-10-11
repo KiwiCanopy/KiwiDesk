@@ -207,6 +207,7 @@ struct GatherTests {
         park(core)
         let response = core.execute("gather", args: [.string(bundle)])
         #expect(!response.isSuccess)
+        #expect(response.error?.contains("could not move") == true)
         #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("2"))
     }
 
