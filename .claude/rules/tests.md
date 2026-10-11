@@ -45,8 +45,9 @@ bite large test PRs:
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
   The ratified exceptions are the bullets below, none with
-  setup/teardown coupling or assertions of their own — save the one non-vacuity check
-  the build-script reader keeps, named below — and all but the
+  setup/teardown coupling or assertions of their own — save the
+  one non-vacuity check the build-script reader keeps, named
+  below — and all but the
   fake WindowServer *stateless primitives*:
   - *structural-parity primitives* (reflection helpers backing
     the field-list guards) in `ReflectionParity.swift` — a
