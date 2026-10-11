@@ -23,9 +23,9 @@ extension KiwiCore {
         return SpaceSlideIntent(display: display, leaving: leaving)
     }
 
-    /// Off, or Reduce Motion: the instant switch.
+    /// Anything but Slide, or Reduce Motion: no slide (#2143).
     var spaceSlideStandsDown: Bool {
-        !tiler.settings.animations.onSpaceChange
+        tiler.settings.animations.spaceChange != .slide
             || spaceSlide.reduceMotion()
     }
 

@@ -25,17 +25,19 @@ public struct ModeCycleCue: Equatable, Sendable {
     }
 }
 
-/// Holds the GUI's hook, fed by `payModeCue` alone.
+/// The GUI's hooks for the plate cues Core pays at once — the
+/// layout cue (`payModeCue`) and the Space cue (`paySpaceCue`).
 @MainActor
-final class ModeCueHook {
-    var onCue: @MainActor (ModeCycleCue) -> Void = { _ in }
+final class CueHooks {
+    var onModeCue: @MainActor (ModeCycleCue) -> Void = { _ in }
+    var onSpaceCue: @MainActor (SpaceSwitchCue) -> Void = { _ in }
 }
 
 extension KiwiCore {
     /// The GUI's hook: handed every cue `cycle_mode` pays.
     public var onModeCue: @MainActor (ModeCycleCue) -> Void {
-        get { modeCue.onCue }
-        set { modeCue.onCue = newValue }
+        get { cueHooks.onModeCue }
+        set { cueHooks.onModeCue = newValue }
     }
 
     /// Called once `cycle_mode`'s own write landed, and only then:
@@ -48,7 +50,7 @@ extension KiwiCore {
             let display = state.workspaces.display(of: space),
             !shelfStandsDown(on: display)
         else { return }
-        modeCue.onCue(
+        cueHooks.onModeCue(
             ModeCycleCue(
                 display: display,
                 cycle: modeCycle.list,

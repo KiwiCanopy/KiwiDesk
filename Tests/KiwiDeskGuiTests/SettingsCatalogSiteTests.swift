@@ -101,7 +101,9 @@ struct SettingsCatalogSiteTests {
         // 124 since #1948: the two Per screen drawers.
         // 125 since #2142: the Desktop switch cue row.
         // 126 since #453: Shortcuts' Layout group.
-        #expect(names.count == 126)
+        // 124: #2143's picker and the slide's duration left the
+        // Animations drawer.
+        #expect(names.count == 124)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

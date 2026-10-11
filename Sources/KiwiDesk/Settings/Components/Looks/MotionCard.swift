@@ -12,7 +12,7 @@ import SwiftUI
 struct MotionCard: View {
     @ObservedObject var model: SettingsModel
     /// macOS Reduce Motion forces animations off system-wide (#171).
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
     @State private var moreExpanded = false
 
     var body: some View {
@@ -23,15 +23,16 @@ struct MotionCard: View {
             help: reduceMotion ? reduceMotionHelp : nil
         ) {
             VStack(alignment: .leading, spacing: 8) {
-                VStack(alignment: .leading, spacing: 8) {
-                    rows(ColorsRowOrder.motionAtRest)
-                    disclosure
-                }
                 // Reduce Motion greys the CONTENT, never the
                 // header, so the `?` stays a live #527 anchor —
                 // the `.motion` container's `.runtime` census
-                // gate (#171).
-                .modifier(GreyOut(active: reduceMotion))
+                // gate (#171) — per row, less the census's
+                // exemption (#2143); parallel `GreyOut`s, never
+                // nested (gui.md).
+                ForEach(ColorsRowOrder.motionAtRest, id: \.id) { key in
+                    row(for: key).modifier(GreyOut(active: greyed(key)))
+                }
+                disclosure.modifier(GreyOut(active: reduceMotion))
                 // Signpost stays outside the Reduce Motion gate
                 // (#171; `LinkedCaption`).
                 CrossReferenceRow(
@@ -44,6 +45,12 @@ struct MotionCard: View {
                 )
             }
         }
+    }
+
+    /// Whether Reduce Motion greys `key`: the card's gate, less
+    /// the census's exemption.
+    private func greyed(_ key: SettingKey) -> Bool {
+        reduceMotion && !key.placement.exemptFromContainerGate
     }
 
     private var disclosure: some View {
@@ -98,7 +105,6 @@ struct MotionCard: View {
             set: { on in
                 let defaults = AnimationSettings()
                 var a = model.config.settings.animations
-                a.onSpaceChange = on ? defaults.onSpaceChange : false
                 a.onWindowResize = on ? defaults.onWindowResize : false
                 a.onWindowSwap = on ? defaults.onWindowSwap : false
                 a.onRelayout = on ? defaults.onRelayout : false

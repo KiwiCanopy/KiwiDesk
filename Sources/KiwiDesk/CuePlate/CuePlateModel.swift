@@ -10,6 +10,7 @@ final class CuePlateModel: ObservableObject {
     enum Content: Equatable {
         case desktop(DesktopSwitchCue)
         case mode(ModeCycleCue)
+        case space(SpaceSwitchCue)
     }
 
     @Published private(set) var content: Content?
@@ -68,6 +69,13 @@ final class CuePlateModel: ObservableObject {
     static func spoken(_ content: Content) -> String {
         switch content {
         case .desktop(let cue): return spoken(cue)
+        case .space(let cue):
+            return L(
+                "space_cue.ax",
+                "Space %1$@, %2$@",
+                cue.space.raw,
+                cue.mode.displayName
+            )
         case .mode(let cue):
             return L("mode_cue.ax", "Layout: %1$@", cue.current.displayName)
         }
@@ -128,6 +136,7 @@ struct CuePlateView: View {
         switch model.content {
         case .desktop(let cue)?: DesktopCueView(cue: cue)
         case .mode(let cue)?: ModeCueView(cue: cue)
+        case .space(let cue)?: SpaceCueView(cue: cue)
         case nil: EmptyView()
         }
     }

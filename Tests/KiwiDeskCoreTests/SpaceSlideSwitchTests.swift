@@ -31,7 +31,7 @@ struct SpaceSlideSwitchTests {
             CGRect(x: 0, y: 25, width: 1200, height: 775)
         }
         core.tiler.animation.isEnabled = false
-        core.tiler.settings.animations.onSpaceChange = true
+        core.tiler.settings.animations.spaceChange = .slide
         core.spaceSlide.reduceMotion = { !slide }
         for (id, space) in [(w1, 1), (w2, 1), (w3, 2)] {
             core.state.apply(
@@ -109,7 +109,7 @@ struct SpaceSlideSwitchTests {
         // Hold reads are pinned to before the switch: a deadline read
         // against a later wall clock ages out on a starved runner.
         let t0 = DispatchTime.now()
-        core.tiler.settings.animations.onSpaceChange = false
+        core.tiler.settings.animations.spaceChange = .instant
         core.execute("focus_space", args: [.string("2")])
         #expect(!core.spaceSlide.isPlaying)
         #expect(!core.tiler.applier.held.isHeld(w3, now: t0))

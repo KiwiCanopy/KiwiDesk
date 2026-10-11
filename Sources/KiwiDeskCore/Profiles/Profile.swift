@@ -26,12 +26,13 @@ public struct Profile: Codable, Sendable, Equatable {
     /// `focus_or_spawn` (#1511), 18 since a layer override may leave
     /// a shared layer out whole (#2022) — no step, as for 7 — 19
     /// since a stored `on_space_change: false` is turned on once
-    /// (#1931). The
+    /// (#1931), 20 since `on_space_change` crossed onto
+    /// `space_change` (#2143). The
     /// bump is what RUNS a step: `needsMigration` short-circuits on
     /// it, so a step that must reach this shape owes one whatever it
     /// rewrites — a retired key decodes to the default and an absent
     /// leaf to the NEW default, silently, without it.
-    public static let currentFormat = 19
+    public static let currentFormat = 20
 
     public var format: Int
     public var name: String

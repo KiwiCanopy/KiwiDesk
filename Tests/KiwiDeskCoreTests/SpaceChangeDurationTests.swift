@@ -227,7 +227,7 @@ struct SpaceChangeDurationTests {
         let display = try #require(NSScreen.main?.kiwiDisplayID)
         let core = makeTestCore()
         core.tiler.animation.isEnabled = false
-        core.tiler.settings.animations.onSpaceChange = true
+        core.tiler.settings.animations.spaceChange = .slide
         core.tiler.settings.animations.spaceChangeDurationMS = 900
         core.spaceSlide.reduceMotion = { false }
         for (id, space): (UInt32, Int) in [(1, 1), (2, 2)] {

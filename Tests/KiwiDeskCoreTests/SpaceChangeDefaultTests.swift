@@ -3,49 +3,52 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// **A Space switch plays the plate slide by default, and a file
-/// written at the current format keeps what it says** (#1931). A
-/// file from before is turned on once (`SpaceChangeOnMigrationTests`);
-/// the encoder clause is that step's premise — it edits a written
-/// leaf, while a sparse encoder would make absence the stored
-/// value and owe a #1369 fill instead.
-@Suite("Space switch animation default (#1931)")
+/// **A Space switch names the Space by default, and a file written
+/// at the current format keeps the style it says** (#2143). A file
+/// from before crosses once (`SpaceChangeStyleMigrationTests`); the
+/// encoder clause is that step's premise — `animations` is written
+/// whole, so the style is always a stored value.
+@Suite("Space switch style default (#2143)")
 struct SpaceChangeDefaultTests {
-    @Test("a new setup and an absent leaf animate the switch")
-    func newDefaultIsOn() throws {
-        #expect(TilingSettings().animations.onSpaceChange)
+    @Test("a new setup and an absent leaf show the Space")
+    func newDefaultIsTheCue() throws {
+        #expect(TilingSettings().animations.spaceChange == .cue)
         let empty = try JSONDecoder().decode(
             AnimationSettings.self,
             from: Data("{}".utf8)
         )
-        #expect(empty.onSpaceChange)
+        #expect(empty.spaceChange == .cue)
     }
 
-    @Test("the encoder writes the leaf at either value")
-    func encoderWritesTheLeaf() throws {
-        for value in [false, true] {
+    @Test("every style is written and read back")
+    func everyStyleRoundTrips() throws {
+        for style in SpaceChangeStyle.allCases {
             var settings = TilingSettings()
-            settings.animations.onSpaceChange = value
+            settings.animations.spaceChange = style
+            let data = try JSONEncoder().encode(settings)
             let root = try #require(
-                JSONSerialization.jsonObject(
-                    with: JSONEncoder().encode(settings)
-                ) as? [String: Any]
+                JSONSerialization.jsonObject(with: data) as? [String: Any]
             )
             let animations = try #require(
                 root["animations"] as? [String: Any]
             )
-            #expect(animations["on_space_change"] as? Bool == value)
+            #expect(animations["space_change"] as? String == style.rawValue)
+            let decoded = try JSONDecoder().decode(
+                TilingSettings.self,
+                from: data
+            )
+            #expect(decoded.animations.spaceChange == style)
         }
     }
 
-    @Test("a stored off survives the round trip")
-    func storedOffStaysOff() throws {
-        var settings = TilingSettings()
-        settings.animations.onSpaceChange = false
-        let decoded = try JSONDecoder().decode(
-            TilingSettings.self,
-            from: JSONEncoder().encode(settings)
-        )
-        #expect(!decoded.animations.onSpaceChange)
+    /// Strict: a word the picker does not offer fails the file.
+    @Test("an unknown style fails the decode")
+    func unknownStyleFails() {
+        #expect(throws: (any Error).self) {
+            try JSONDecoder().decode(
+                AnimationSettings.self,
+                from: Data(#"{"space_change":"fade"}"#.utf8)
+            )
+        }
     }
 }

@@ -215,13 +215,11 @@ struct SettingsSearchIndexTests {
                 // rows gained anchors; the palette shelf's three
                 // context-menu actions have no rendered row to
                 // anchor and stay anchor-less by ruling.
-                // 8: #1644's Sheen row, on every macOS; 13 since
-                // #1684: the look shelf's five labelled actions,
-                // anchor-less like the palette shelf's. 14 since
-                // #1752: "Keep previous colors" is labelled, where
-                // the "use its colors" row it replaced was not. 15:
-                // the Shared look card's "Applies to" (#1752).
-                .looks: 15,
+                // 8: #1644's Sheen row; 13 since #1684: the look
+                // shelf's five labelled actions; 14 and 15 since
+                // #1752: "Keep previous colors" and "Applies to";
+                // 17: #2143's picker and duration, at rest.
+                .looks: 17,
                 // 17 #1517 (one shelf set), 18 #1679, 19 #1856.
                 .advancedColors: 19,
                 // 6: `(action) presets.layouts` joined anchor-less

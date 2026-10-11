@@ -1,12 +1,22 @@
 import Foundation
 
+/// How a Space switch shows itself (#2143), `animations.space_change`.
+public enum SpaceChangeStyle: String, Codable, CaseIterable, Sendable {
+    /// The screen changes at once.
+    case instant
+    /// At once, and #2142's plate names the Space for a moment.
+    case cue
+    /// The #1956 plate slide; Reduce Motion shows the plate instead.
+    case slide
+}
+
 /// Per-trigger animation configuration and duration settings (#11, #50).
 public struct AnimationSettings: Sendable, Equatable, Codable {
-    /// Play the plate slide on a Space switch (#1956); off, the
-    /// switch is instant. On by default since #1931, and a file
-    /// from before turned on once, its whole-written `false` being
-    /// no evidence of a choice (`SpaceChangeOnMigrationTests`).
-    public var onSpaceChange = true
+    /// How a Space switch shows itself (#2143): at once, at once
+    /// with the plate naming the Space, or the #1956 plate slide.
+    /// The plate by default; a stored `on_space_change` crosses
+    /// once (`SpaceChangeStyleMigrationTests`).
+    public var spaceChange: SpaceChangeStyle = .cue
 
     /// The plate slide's pace in milliseconds (#1931): the strip's
     /// spring response, its fades scaling with it. The default is
@@ -115,7 +125,7 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case onSpaceChange = "on_space_change"
+        case spaceChange = "space_change"
         case spaceChangeDurationMS = "space_change_duration"
         case onScrolling = "on_scrolling"
         case onWindowResize = "on_window_resize"
@@ -135,11 +145,11 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         let container = try decoder.container(
             keyedBy: CodingKeys.self
         )
-        onSpaceChange =
+        spaceChange =
             try container.decodeIfPresent(
-                Bool.self,
-                forKey: .onSpaceChange
-            ) ?? true
+                SpaceChangeStyle.self,
+                forKey: .spaceChange
+            ) ?? .cue
         spaceChangeDurationMS = Self.clampSpaceChangeMS(
             try container.decodeIfPresent(
                 Int.self,

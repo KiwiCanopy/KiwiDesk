@@ -18,10 +18,10 @@ extension APIReference {
                 + "milliseconds.",
             .integer("milliseconds")
         ),
-        "set_on_space_change": APIRecord(
-            "Enables or disables the plate slide when switching "
-                + "Spaces.",
-            .boolean("enabled")
+        "set_space_change": APIRecord(
+            "Sets how a Space switch shows itself: at once, at "
+                + "once naming the Space, or the plate slide.",
+            .choice("style", SpaceChangeStyle.self)
         ),
 
         "set_on_scrolling": APIRecord(

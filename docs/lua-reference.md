@@ -978,7 +978,7 @@ KiwiDesk.set_shortcut_panel_liquid_glass(true)
 **Expects:** `true` or `false` (default `true`).
 
 **Does:** draws the plates a Space switch slides
-([animations.set_on_space_change](#animationsset_on_space_change))
+([animations.set_space_change](#animationsset_space_change))
 in macOS&nbsp;26 Liquid Glass, the shortcuts panel's `.regular`
 glass. Off, or below macOS&nbsp;26, they draw a blurred material,
 as the panel does. Read at the next switch.
@@ -1011,9 +1011,9 @@ corner of their screen — [Parking is not a Desktop
 move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
 owns the model.
 
-By default the switch plays the plate slide
-([animations.set_on_space_change](#animationsset_on_space_change));
-off, it is instant.
+How the switch shows itself — at once, at once with a plate naming
+the Space, or the plate slide — is
+[animations.set_space_change](#animationsset_space_change).
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
 Floating windows, picture-in-picture included, are never parked
@@ -5800,27 +5800,39 @@ animations.set_size_rate(30)   -- throttle a heavy app
 animations.set_size_rate(0)    -- back to per-tick default
 ```
 
-### animations.set_on_space_change
+:::unreleased
+### animations.set_space_change
 
-**Expects:** `true` or `false`.
+**Expects:** `"instant"`, `"cue"` or `"slide"` (default `"cue"`).
 
-Defaults to `true`. A profile saved by an earlier release with it
-off is turned on once, unless its other animations are all off;
-while a saved profile is live, its value applies over this call.
+**Does:** sets how an explicit Space switch — `focus_space`, a
+Space Bar click, the scroll Space step, a move-and-follow or a
+launch follow — shows itself:
 
-**Does:** enables or disables the animation of an explicit
-Space switch — `focus_space`, a Space Bar click, the scroll
-Space step, a move-and-follow or a launch follow.
+- `"instant"`: the screen changes at once.
+- `"cue"`: the screen changes at once, and a glass plate in the
+  middle of the screen that switched names the Space you arrived
+  on and shows its layout's symbol, for about a second. A screen
+  that draws a Space Bar skips it, since the bar already names the
+  Space, and so does one showing a full-screen app or a
+  presentation.
+- `"slide"`: the plate slide. A plate with its app's icon fades in
+  over each window on the screen, the plates slide as one strip
+  one screen toward the new Space — across for a Space Bar on the
+  top or bottom edge, up or down for one on a side — and fade out
+  over the windows that arrive. The windows themselves move once
+  each, under the plates. The plates wear Liquid Glass
+  ([set_space_switch_liquid_glass](#set_space_switch_liquid_glass)).
+  With Reduce Motion on it shows the `"cue"` plate instead, the
+  stored value staying `"slide"`.
 
-On, a switch plays the plate slide: a plate with its app's icon
-fades in over each window on the screen, the plates slide as one
-strip one screen toward the new Space — across for a Space Bar
-on the top or bottom edge, up or down for one on a side — and
-fade out over the windows that arrive. The windows themselves
-move once each, under the plates. The plates wear Liquid Glass
-([set_space_switch_liquid_glass](#set_space_switch_liquid_glass));
-Reduce Motion keeps the switch instant
-([Accepted limitations](accepted-limitations.md)).
+The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Space
+switches**, which Reduce Motion does not grey and the **Animate
+windows** switch does not turn off. It replaces
+`animations.set_on_space_change`, which is refused, naming this
+verb; a profile that stored the old switch on shows the plate, and
+one that stored it off is instant. While a saved profile is live,
+its value applies over this call.
 
 macOS Desktop switches are never animated in either direction —
 macOS stops reporting an inactive Desktop's windows to
@@ -5830,8 +5842,9 @@ Accessibility (see
 **Example:**
 
 ```lua
-animations.set_on_space_change(false)
+animations.set_space_change("slide")
 ```
+:::
 
 ### animations.set_space_change_duration
 
@@ -5839,10 +5852,10 @@ animations.set_on_space_change(false)
 `300`).
 
 **Does:** sets the pace of the plate slide a Space switch plays
-([animations.set_on_space_change](#animationsset_on_space_change)):
+([animations.set_space_change](#animationsset_space_change)):
 how long the plates take to slide to the new Space, their fades
-scaling with it. It has no effect while `set_on_space_change` is
-off or Reduce Motion is on. Window motion keeps its own pace
+scaling with it. It has no effect unless the style is `"slide"`,
+nor while Reduce Motion is on. Window motion keeps its own pace
 ([animations.set_duration](#animationsset_duration)). Read at
 the next switch.
 

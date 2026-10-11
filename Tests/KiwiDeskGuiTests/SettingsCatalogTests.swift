@@ -127,7 +127,9 @@ struct SettingsCatalogTests {
         // 130 since #1948: Each bar's two Per screen drawers.
         // 131 since #2142: the Desktop switch cue row.
         // 132 since #453: Shortcuts' Layout group.
-        #expect(allEntries.count == 132)
+        // 130: #2143's picker and the slide's duration left the
+        // Animations drawer.
+        #expect(allEntries.count == 130)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

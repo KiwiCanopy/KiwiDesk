@@ -127,7 +127,7 @@ struct MoveToSpaceTests {
         let core = makeCore()
         // Every frame either pass issues, instant or animated,
         // reaches the applier's sink (#930).
-        core.tiler.settings.animations.onSpaceChange = true
+        core.tiler.settings.animations.spaceChange = .slide
         core.tiler.animation.isEnabled = false
         var applies: [WindowID: Int] = [:]
         core.tiler.applier.issued = { id, _ in

@@ -20,23 +20,29 @@ struct SpaceChangeOnMigrationTests {
         "on_window_resize", "on_window_swap", "on_relayout",
     ]
 
-    /// This build's settings as the encoder writes them, the slide
-    /// off and the master's other leaves set as given.
+    /// This build's settings as the encoder writes them, the
+    /// master's other leaves set as given, with the 2.x slide leaf
+    /// in place of #2143's `space_change` — the shape this step
+    /// met, which no encoder writes now.
     private static func settings(
         slide: Bool = false,
         master: [Bool] = [true, true, true]
     ) throws -> [String: Any] {
         var settings = TilingSettings()
-        settings.animations.onSpaceChange = slide
         settings.animations.onWindowResize = master[0]
         settings.animations.onWindowSwap = master[1]
         settings.animations.onRelayout = master[2]
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try #require(
+        var root = try #require(
             JSONSerialization.jsonObject(with: encoder.encode(settings))
                 as? [String: Any]
         )
+        var group = try #require(root["animations"] as? [String: Any])
+        group[ConfigMigration.spaceChangeStyleKey] = nil
+        group[leaf] = slide
+        root["animations"] = group
+        return root
     }
 
     /// A profile root at `format`, the one before this step's by
@@ -82,8 +88,10 @@ struct SpaceChangeOnMigrationTests {
     )
     func offTurnsOn(_ master: [Bool], _ expected: Bool) throws {
         let data = try Self.profile(Self.settings(master: master))
+        let step = try ConfigMigration.migratingSpaceChangeOn(data)
+        #expect(try Self.slide(of: step ?? data) == expected)
+        // Through `migrated`, #2143's crossing then names the style.
         let out = try #require(ConfigMigration.migrated(data))
-        #expect(try Self.slide(of: out) == expected)
         let root = try #require(
             JSONSerialization.jsonObject(with: out) as? [String: Any]
         )
@@ -93,7 +101,10 @@ struct SpaceChangeOnMigrationTests {
                 withJSONObject: try #require(root["settings"])
             )
         )
-        #expect(decoded.animations.onSpaceChange == expected)
+        #expect(
+            decoded.animations.spaceChange
+                == (expected ? .cue : .instant)
+        )
     }
 
     @Test("a stored on is left as it is")
@@ -156,9 +167,12 @@ struct SpaceChangeOnMigrationTests {
             JSONSerialization.jsonObject(with: out) as? [String: Any]
         )
         let profiles = try #require(root["profiles"] as? [[String: Any]])
-        #expect(
-            profiles.map { Self.slide($0["settings"]) } == [true, false]
-        )
+        let styles = profiles.map {
+            (($0["settings"] as? [String: Any])?["animations"]
+                as? [String: Any])?[ConfigMigration.spaceChangeStyleKey]
+                as? String
+        }
+        #expect(styles == ["cue", "instant"])
     }
 
     /// Not idempotent by construction — a `true` turned on is the

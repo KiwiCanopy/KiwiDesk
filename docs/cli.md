@@ -332,7 +332,7 @@ Spaces by their order and by the ones you visited
 | | `debug_log` | [message] |
 | Animation | `animations.set_duration` | ms (50–1000); persisted per-profile |
 | | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration, persisted per-profile |
-| | `animations.set_on_space_change` | true\|false; the plate slide on a Space switch, persisted per-profile |
+| | `animations.set_space_change` | `instant\|cue\|slide` (default `cue`); how a Space switch shows itself, persisted per-profile |
 | | `animations.set_space_change_duration` | ms (150–1000, default 300); the plate slide's pace, persisted per-profile |
 | | `animations.set_on_scrolling` | true\|false (default true) |
 | | `animations.set_on_window_resize` | true\|false (default true) |
@@ -397,11 +397,14 @@ Spaces by their order and by the ones you visited
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
-`animations.set_on_space_change` defaults to `true`, and
-`animations.set_space_change_duration` is new. A profile saved by
-an earlier release with the slide off is turned on once, unless
-its other animations are all off; while a saved profile is live,
-its value applies over `init.lua`'s.
+`animations.set_space_change_duration` is new; while a saved
+profile is live, its value applies over `init.lua`'s.
+
+:::unreleased
+`animations.set_space_change` replaces
+`animations.set_on_space_change`, which is refused, naming it
+([animations.set_space_change](lua-reference.md#animationsset_space_change)).
+:::
 
 `focus_or_spawn` was `pull_or_spawn`; the old name is refused,
 naming the new one.
