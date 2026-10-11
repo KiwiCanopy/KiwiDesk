@@ -1,31 +1,24 @@
 import Foundation
 
-@testable import KiwiDeskCore
-
-/// Colour-vision maths shared by the CVD separation guards.
+/// Colour-vision maths: the protanopia transform, WCAG contrast,
+/// and the separation measures the colour-vision guards assert on
+/// (#511). The numbers are the argument the palette rulings rest
+/// on (`docs/design-decisions.md`), so this is the one place that
+/// computes them — a guard or a Settings warning measuring a pair
+/// reads it here, never a copy, since a drifted copy moves the
+/// number a guard asserts on without failing anything. Pure and
+/// actor-free.
 ///
-/// A **stateless primitive**: no assertions, no setup/teardown, no
-/// suite of its own. It is the fourth ratified exception to the
-/// per-file-private-helper convention (AGENTS.md §5), extracted at
-/// the *second* copy on drift risk alone — the same argument that
-/// pulled `SourceScan.swift` out. Several suites now measure the
-/// same quantity — `SpaceBarAccentSeparationTests` for the Space
-/// Bar's active/focused pair, `DragPairSeparationTests` for the
-/// drag overlay's origin/target pair,
-/// `PaletteHighlightRoleTests` for an accent against its own
-/// composited plate, `ModeGatedFrameSeparationTests` for the
-/// Settings mode-gated frame against its two border
-/// neighbours, `AccentStateSeparationTests` for the accent
-/// seal's disabled fill against the two live ones,
-/// `BorderRingSeparationTests` for the focused ring against
-/// the composited unfocused one — and a hand-copied transform
-/// that
-/// drifted in one of them would silently move the number a guard
-/// is asserting on — a guard passing for the wrong reason, which
-/// is precisely what these guards exist to prevent. The numbers
-/// are the argument here (see `docs/design-decisions.md`), so
-/// there must be exactly one place that computes them.
-enum ColorVision {
+/// The suites that share it: `SpaceBarAccentSeparationTests` (the
+/// Space Bar's active/focused pair), `DragPairSeparationTests`
+/// (the drag overlay's origin/target pair),
+/// `PaletteHighlightRoleTests` (an accent against its own
+/// composited plate), `ModeGatedFrameSeparationTests` (the
+/// Settings mode-gated frame against its two border neighbours),
+/// `AccentStateSeparationTests` (the accent seal's disabled fill
+/// against the two live ones) and `BorderRingSeparationTests`
+/// (the focused ring against the composited unfocused one).
+public enum ColorVision {
     /// The separation floor every CVD guard measures
     /// against — a suite asserting on this quantity reads it
     /// here rather than restating the number.
@@ -62,16 +55,16 @@ enum ColorVision {
     /// re-measure, and move the floor only if the new
     /// *measurement* justifies it. Lowering it to fit a pick
     /// discards the argument the number encodes.
-    static let separationFloor: Double = 60
+    public static let separationFloor: Double = 60
 
     /// sRGB → linear, the same transfer function WCAG uses.
-    static func linear(_ value: Double) -> Double {
+    public static func linear(_ value: Double) -> Double {
         value <= 0.03928
             ? value / 12.92
             : pow((value + 0.055) / 1.055, 2.4)
     }
 
-    static func components(_ hex: String) -> (
+    public static func components(_ hex: String) -> (
         r: Double, g: Double, b: Double
     )? {
         guard let rgb = DragVisual.parseHex(hex) else { return nil }
@@ -80,14 +73,17 @@ enum ColorVision {
     }
 
     /// Relative luminance, WCAG's definition.
-    static func luminance(_ hex: String) -> Double? {
+    public static func luminance(_ hex: String) -> Double? {
         guard let c = components(hex) else { return nil }
         return 0.2126 * linear(c.r) + 0.7152 * linear(c.g)
             + 0.0722 * linear(c.b)
     }
 
     /// WCAG contrast ratio, 1...21.
-    static func contrast(_ a: String, _ b: String) -> Double? {
+    public static func contrast(
+        _ a: String,
+        _ b: String
+    ) -> Double? {
         guard let x = luminance(a), let y = luminance(b) else {
             return nil
         }
@@ -101,7 +97,7 @@ enum ColorVision {
     /// it is the axis a green primary and a warm focused accent
     /// collapse onto, so it is the one the rules are written
     /// against. Deutan tracks it closely; tritan is unaffected.
-    static func protanope(_ hex: String) -> (
+    public static func protanope(_ hex: String) -> (
         r: Double, g: Double, b: Double
     )? {
         guard let c = components(hex) else { return nil }
@@ -140,7 +136,7 @@ enum ColorVision {
     }
 
     /// HSL → hex, for sweeping a hue family in a guard.
-    static func hex(
+    public static func hex(
         hue: Double,
         saturation: Double,
         lightness: Double
@@ -177,7 +173,7 @@ enum ColorVision {
     /// palettes on the wrong colour. Nil for either operand
     /// unparseable, and an alpha on `bottom` is ignored — a
     /// wallpaper is opaque.
-    static func composite(
+    public static func composite(
         _ top: String,
         over bottom: String
     ) -> String? {
@@ -195,7 +191,10 @@ enum ColorVision {
     }
 
     /// Euclidean distance in simulated sRGB, 0...441 (√3·255).
-    static func separation(_ a: String, _ b: String) -> Double? {
+    public static func separation(
+        _ a: String,
+        _ b: String
+    ) -> Double? {
         guard let x = protanope(a), let y = protanope(b) else {
             return nil
         }
