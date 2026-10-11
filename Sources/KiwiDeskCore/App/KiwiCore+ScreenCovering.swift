@@ -89,11 +89,22 @@ extension KiwiCore {
             state.windows.all.contains(where: {
                 Self.covers($0.frame, bounds)
             }),
-            let front = shelves.frontWindowFrames().first(where: {
+            let front = frontWindowFrames().first(where: {
                 bounds.contains(CGPoint(x: $0.midX, y: $0.midY))
             })
         else { return false }
         return Self.covers(front, bounds)
+    }
+
+    /// The WindowServer's normal-layer windows, front to back —
+    /// which window a screen SHOWS in front. KiwiDesk's chrome is
+    /// never a presentation, and a moving ring's panel spans its
+    /// screen (#1937). The live default of `frontWindowFrames`.
+    static func liveFrontFrames() -> [CGRect] {
+        let own = getpid()
+        return FloatDetection.frontToBackNormalFrames { pid, number in
+            pid == own && EventLoop.isOwnChrome(number: number)
+        }
     }
 
     /// Whether a move or resize took a window into or out of

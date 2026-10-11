@@ -1633,7 +1633,13 @@ editing here:
   draws refreshes on the cover CROSSING too, since a move or
   resize may retile nothing (`PresentingReaderTests` ▸
   `crossingRefreshesRingAndMark`); the readers ruled so far are
-  the door's docstring.
+  the door's docstring. Which window a screen shows in FRONT is
+  read through `showsPresentation` / `shelfStandsDown`, never the
+  raw `KiwiCore.frontWindowFrames` seam, its live default or the
+  CGWindowList read beneath it, and a new z-order need widens
+  that one seam rather than adding a second front-to-back read
+  (`ScreenCoveringCallerCensusTests` ▸
+  `frontWindowSeamHasOneReader`).
 - **A window is tiled or floating, and detection's verdict is
   read through ONE door (#1810).** The float verbs and the bar
   menu's Float/Tile row ask `KiwiCore.tileRefusal(of:)`, never

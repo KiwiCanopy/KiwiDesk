@@ -49,7 +49,7 @@ struct ScreenCoveringPinTests {
     @Test("makeTestCore hands the verdict no host screen or window")
     func factoryPinsBothReads() {
         let core = makeTestCore()
-        #expect(core.shelves.frontWindowFrames().isEmpty)
+        #expect(core.frontWindowFrames().isEmpty)
         #expect(core.tiler.allScreenFrames().isEmpty)
     }
 }
