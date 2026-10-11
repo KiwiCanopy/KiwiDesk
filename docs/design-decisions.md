@@ -6127,7 +6127,11 @@ stands in for motion the instant switch removed; this one
 confirms the user's own press. A user may want one and not the
 other, and merging them would have owed a `ConfigMigration` of
 `desktop.cue` only to merge two choices. On by default and
-app-wide, for #2142's reasons.
+app-wide, for #2142's reasons. It is stored as `mode.cue` beside
+the other app-wide groups (`desktop.cue`, `refusal.sound`), while
+`mode_cycle` stays a flat key: the list is the global base a
+profile overrides, the switch is app-wide, and the two shapes
+follow those two families rather than the shared word.
 
 ### A Desktop switch that changes nothing still reports itself (#1336)
 

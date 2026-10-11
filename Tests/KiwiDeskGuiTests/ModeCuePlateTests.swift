@@ -36,6 +36,33 @@ struct ModeCuePlateTests {
         #expect(CuePlateModel.spoken(.mode(cue)) == "Layout: Scrolling")
     }
 
+    /// Only a layout cue replacing one still up moves; a first
+    /// appearance, a cue after the fade and a Desktop cue swap
+    /// all appear at once (#2142).
+    @Test("only a layout cue over a shown one is the step")
+    func stepDecision() {
+        func mode(_ m: LayoutMode) -> CuePlateModel.Content {
+            .mode(
+                ModeCycleCue(display: DisplayID(1), cycle: three, current: m)
+            )
+        }
+        let desktop = CuePlateModel.Content.desktop(
+            DesktopSwitchCue(
+                display: DisplayID(1),
+                number: 2,
+                position: 2,
+                count: 3,
+                loadedProfile: nil
+            )
+        )
+        let steps = CuePlateModel.steps
+        #expect(steps(mode(.bsp), true, mode(.scrolling)))
+        #expect(!steps(nil, false, mode(.bsp)))
+        #expect(!steps(mode(.bsp), false, mode(.scrolling)))
+        #expect(!steps(desktop, true, mode(.bsp)))
+        #expect(!steps(mode(.bsp), true, desktop))
+    }
+
     @Test("a cue replaces the last one and shows the plate")
     func presentReplaces() {
         let model = CuePlateModel()

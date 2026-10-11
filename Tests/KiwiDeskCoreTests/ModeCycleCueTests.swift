@@ -3,10 +3,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The layout-cycle plate's Core half (#2144): `cycle_mode` alone
-/// pays a cue — naming the Space's screen, the cycle list and the
-/// layout it landed on — and only once its write landed; the
-/// app-wide `mode.cue` switch turns it off.
+/// The layout-cycle plate's Core half (#2144) that reads no
+/// stand-down: `set_mode` and a refused press pay nothing, and
+/// the switch's stored shape. The press itself reads the
+/// process-global `isUser` override, so its cases live in
+/// `FullscreenStandDownTests+ModeCue`.
 @Suite("Layout-cycle cue (#2144)")
 @MainActor
 struct ModeCycleCueTests {
@@ -23,47 +24,26 @@ struct ModeCycleCueTests {
 
     final class Box { var cues: [ModeCycleCue] = [] }
 
-    @Test("a press names the screen, the list and the new layout")
-    func pressPaysTheCue() {
-        let (core, box) = makeCore()
-        #expect(core.execute("cycle_mode", args: []).isSuccess)
-        #expect(
-            box.cues == [
-                ModeCycleCue(
-                    display: DisplayID(1),
-                    cycle: [.bsp, .scrolling, .floating],
-                    current: .scrolling
-                )
-            ]
-        )
-    }
-
     /// The press asked for it; a Layout-menu pick or a Lua
     /// `set_mode` changes the layout without one.
     @Test("set_mode shows nothing")
     func setModeShowsNothing() {
         let (core, box) = makeCore()
-        _ = core.execute("set_mode", args: [.string("grid")])
+        #expect(
+            core.execute("set_mode", args: [.string("grid")]).isSuccess
+        )
         #expect(box.cues.isEmpty)
     }
 
     @Test("a refused press shows nothing")
     func refusalShowsNothing() {
         let (core, box) = makeCore()
-        _ = core.execute("cycle_mode", args: [.string("sideways")])
+        let refused = core.execute(
+            "cycle_mode",
+            args: [.string("sideways")]
+        )
+        #expect(!refused.isSuccess)
         #expect(box.cues.isEmpty)
-    }
-
-    @Test("set_mode_cue(false) turns it off for the session")
-    func verbTurnsItOff() {
-        let (core, box) = makeCore()
-        #expect(core.appWide.modeCue)
-        let off = core.execute("set_mode_cue", args: [.bool(false)])
-        #expect(off.isSuccess)
-        #expect(core.appWide.modeCue == false)
-        _ = core.execute("cycle_mode", args: [])
-        #expect(box.cues.isEmpty)
-        #expect(!core.execute("set_mode_cue", args: []).isSuccess)
     }
 
     @Test("gui.json carries mode.cue, and its absence reads on")

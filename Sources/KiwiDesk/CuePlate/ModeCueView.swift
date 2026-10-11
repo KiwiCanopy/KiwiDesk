@@ -11,12 +11,14 @@ import SwiftUI
 struct ModeCueView: View {
     let cue: ModeCycleCue
 
-    static let side: CGFloat = 152
-    static let centre = CGPoint(x: 76, y: 64)
+    /// The panel's room height, so the plate fills it.
+    static let side = CuePlateModel.tallSide
+    /// Raised off the middle to leave the caption its line.
+    static let centre = CGPoint(x: side / 2, y: side / 2 - 12)
     static let radius: CGFloat = 44
     static let symbolSize: CGFloat = 40
     static let slotSize: CGFloat = 13
-    static let captionY: CGFloat = 132
+    static let captionY = side - 20
 
     var body: some View {
         ZStack {

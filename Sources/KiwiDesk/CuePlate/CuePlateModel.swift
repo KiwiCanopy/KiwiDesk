@@ -33,13 +33,7 @@ final class CuePlateModel: ObservableObject {
     /// up is the step, which moves; every first appearance is
     /// instant (#2142), and Reduce Motion jumps.
     func present(_ content: Content, reduceMotion: Bool) {
-        let steps: Bool
-        if visible, case .mode? = self.content, case .mode = content {
-            steps = true
-        } else {
-            steps = false
-        }
-        if steps {
+        if Self.steps(from: self.content, visible: visible, to: content) {
             withAnimation(reduceMotion ? nil : Self.step) {
                 self.content = content
             }
@@ -47,6 +41,19 @@ final class CuePlateModel: ObservableObject {
             self.content = content
         }
         visible = true
+    }
+
+    /// Whether showing `next` over `shown` is the step: a layout
+    /// cue replacing one still up. Anything else appears at once.
+    static func steps(
+        from shown: Content?,
+        visible: Bool,
+        to next: Content
+    ) -> Bool {
+        guard visible, case .mode? = shown, case .mode = next else {
+            return false
+        }
+        return true
     }
 
     /// The caption's own width, capped: a bare `maxWidth` frame
