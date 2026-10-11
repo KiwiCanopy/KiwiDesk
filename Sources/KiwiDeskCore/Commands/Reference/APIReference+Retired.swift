@@ -50,6 +50,9 @@ extension APIReference {
         // A window is tiled or floating, and Tile hands it back
         // to detection (#1810).
         map["make_auto"] = "make_tiled"
+        // A Space switch shows itself one of three ways (#2143).
+        map["animations.set_on_space_change"] =
+            "animations.set_space_change"
         map["kiwishelf.set_item_padding"] = "kiwishelf.set_glyph_size"
         // The centred strip draws one more glyph at a row's end,
         // so the count is a span, not a cap (#1528).

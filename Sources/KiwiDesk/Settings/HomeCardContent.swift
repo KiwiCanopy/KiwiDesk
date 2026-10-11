@@ -72,8 +72,8 @@ enum HomeCardContent {
                 )
             }
             return L(
-                "home.card.colors.subtitle_off",
-                "Animations off"
+                "home.card.colors.subtitle_window_off",
+                "Window animations off"
             )
         case .layoutDefaults:
             return L(
@@ -226,9 +226,9 @@ enum HomeCardContent {
 }
 
 extension AnimationSettings {
-    /// True when any event animation is enabled.
+    /// True when any window animation is enabled. The Space
+    /// switch picker is its own row, outside the master (#2143).
     var anyEnabled: Bool {
-        onSpaceChange || onWindowResize || onWindowSwap
-            || onRelayout
+        onWindowResize || onWindowSwap || onRelayout
     }
 }

@@ -4,9 +4,11 @@ import Foundation
 ///
 /// State (active space, focus, bars, events) commits up front; the
 /// frames then land in one instant pass. An explicit switch with
-/// `animations.on_space_change` on plays the plate slide around
+/// `animations.space_change` on Slide plays the plate slide around
 /// that pass (`prepareSpaceSlide`, `runSpaceSlide`, #1956): the
-/// motion is drawn, and the windows still move once each.
+/// motion is drawn, and the windows still move once each. On Show
+/// the Space — or Slide under Reduce Motion — it pays the plate
+/// naming the Space instead (`paySpaceCue`, #2143).
 ///
 /// Native macOS Space switches are untouched: AX cannot address
 /// an inactive desktop's windows, so that path stays instant in
@@ -66,6 +68,10 @@ extension KiwiCore {
         } else {
             pass()
         }
-        if let run { runSpaceSlide(run) }
+        if let run {
+            runSpaceSlide(run)
+        } else if let slide {
+            paySpaceCue(on: slide.display)
+        }
     }
 }

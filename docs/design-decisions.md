@@ -3188,8 +3188,8 @@ is still the swap, and the card is what the eye follows across
 it.
 
 **A Space switch plays a drawn plate slide; the windows move
-once, underneath (#1956).** With `animations.on_space_change`
-on, an explicit switch — a follow and a launch follow included,
+once, underneath (#1956).** With `animations.space_change` on
+Slide, an explicit switch — a follow and a launch follow included,
 since each changes which Space you are looking at — fades a plate in over each window the
 screen shows, parks those windows AT the press, moves the plates
 as one rigid strip one screen page in the Space Bar's reading
@@ -3254,10 +3254,8 @@ look. Mid-slide that blur reads close to glass — what sets Liquid
 Glass apart barely shows in a fade and a half-second move — and
 a solid
 material that would set glass-off apart was tried on the device
-and refused for not matching the panel. Reduce Motion takes the
-instant switch. There is no style picker: one transition is
-less surface to maintain, and a stored `true` reads as the plate
-slide, so no migration is owed.
+and refused for not matching the panel. Reduce Motion shows the
+Space plate instead (#2143, below).
 
 *Its own pace (#1931).* `animations.space_change_duration` is the
 strip's spring response, and both fades scale with it from the
@@ -3277,35 +3275,42 @@ scale: they measure how long an app takes, which no pace
 changes. `animations.duration` keeps pacing windows only, since
 the slide moves none.
 
-*On by default (#1931).* The switch is the motion a user meets
-most, and the slide is what tells them which way they went, so a
-new install plays it. The cost is the GPU: switching
-back-to-back, Liquid Glass plates hold it at 55–65 % against
-33 % for the instant switch, which is why glass off, Reduce
-Motion and the toggle itself stay one step away. A saved
-profile's `false` is turned on once at the crossing
-(`SpaceChangeOnMigrationTests`), which #1359's thickness argument
-would let stand. The ground is not a changed meaning — a stored
-`false` drew the instant switch before and still does — but that
-the value cannot be told from a choice: the encoder writes
-`animations` whole, so nearly every file stored the old default,
-and keeping it would hide the slide from almost every upgrade
-while a new install plays it. That re-default is bounded by a
-stored signal of a real choice, and only that signal saves a
-`false`: 2.1.1's master wrote every slide and window leaf off at
-once, so a group with all of them off keeps its `false`. A
-`false` chosen after the crossing stays, the step reading the
-file's format; one written by a pre-release build that already
-defaulted on sits below the floor and is turned on once too,
-which the floor cannot tell apart and is accepted. The cost is a user who turned the old window slide
-off on purpose meeting a slide once, one toggle from off again,
-and an `init.lua` that sets the leaf `false` while a saved
-profile is live: the profile's settings apply over the script,
-so its turned-on value wins there. What has no file takes the new
-default on upgrade: a composed Standard, and an `init.lua` config
-that never calls the setter. The animations master still
-restores the defaults rather than turning every motion on, so it
-brings the slide back with the rest.
+*Three ways, and the plate by default (#2143).* One picker,
+"Space switches", offers Instant, Instant + name and Slide.
+Instant + name is #2142's glass plate naming the Space you arrived on
+and its layout's symbol — dots mean a Desktop, a symbol a Space —
+on the screen that switched, after an instant switch. It is the
+default because it answers the question the slide answered —
+where am I now — at the instant switch's cost: the slide holds
+the GPU at 55–65 % switching back-to-back where the instant
+switch holds 33 %, and it carries the most fragile machinery in
+the switch path, the write hold and the plate builder. What the
+plate does not show is the direction of the switch and a
+follow's window travelling with you, which is why the slide
+stays an option rather than being retired: nothing is stripped,
+and a user who wants the motion is one picker step away. The
+plate stands down on a screen that draws a Space Bar, which
+already names the Space, so it never says a thing twice. The
+picker is its own row above the window animations' master and
+outside Reduce Motion's grey: under Reduce Motion, Slide shows
+the plate without its fade, and Instant + name is how a switch
+reads with less motion, so greying it would hide the one answer
+that setting leaves.
+
+The crossing maps a stored `on_space_change: true` to the plate
+and `false` to Instant (`SpaceChangeStyleMigrationTests`). The
+`true` is #1931's reasoning again — the encoder writes
+`animations` whole, so a `true` is nearly always the default
+rather than a choice of the slide — and a `false` keeps the
+instant switch it drew. The cost is a user who chose the slide on
+purpose meeting the plate once, one picker step from the slide
+again.
+
+The style stays per profile, the scope `on_space_change` had,
+where the Desktop and layout cues are app-wide (#1741): a profile
+may want the slide on one desk and not another, and moving it
+app-wide would be an adoption crossing of its own, not a rider on
+this one.
 
 *One panel per screen, ordered in once.* Moving or re-ordering
 a panel per switch queues behind the compositor exactly when
@@ -6102,8 +6107,47 @@ Nobody varies it per profile, so it is app-wide (#1741).
 **What was not shipped:** a number alone (no sense of where among
 how many), dots alone (counted, not read, past about five), a pill
 by KiwiShelf (hidden whenever the shelf is), a mini-map of the
-screens, and the KiwiDesk Space — a Space switch keeps its own
-motion cue (#1956).
+screens, and the KiwiDesk Space — a Space switch names its own
+Space with the same plate (#2143).
+
+### Cycling layouts shows the cycle, on its own switch (#2144)
+
+**[Principle]**
+
+`cycle_mode` shows #2142's plate with the user's cycle list as a
+ring — first entry at 12 o'clock, clockwise in Next order — the
+current layout large in the centre, its slot empty. Only the
+verb shows it; `set_mode` and the Layout menu do not.
+
+With three windows, bsp and grid or stack and track can look
+alike, so the rearranged windows say that something changed and
+not what. The ring IS the list the key walks, so the plate also
+teaches the order, and a second press visibly steps around it.
+
+**The step is one shared element per symbol**: the incoming
+layout flies from its slot to the centre and grows while the
+outgoing one flies back to its own slot, in one critically damped
+spring. It shows which layout came in and where the old one went;
+a symbol morph in place says only the first. The first
+appearance stays instant, as #2142's, and Reduce Motion jumps.
+
+**No strip of options and no circling windows.** The plate takes
+no mouse, so a row of layouts reads as a menu it cannot honour;
+and the frame animation already moves each window from its old
+frame to its new one, which is the honest motion — a circular
+path lengthens the change and brings back the AX-write stalls
+#1956 fought.
+
+**Its own switch, not a shared "switch cue".** The Desktop cue
+stands in for motion the instant switch removed; this one
+confirms the user's own press. A user may want one and not the
+other, and merging them would have owed a `ConfigMigration` of
+`desktop.cue` only to merge two choices. On by default and
+app-wide, for #2142's reasons. It is stored as `mode.cue` beside
+the other app-wide groups (`desktop.cue`, `refusal.sound`), while
+`mode_cycle` stays a flat key: the list is the global base a
+profile overrides, the switch is app-wide, and the two shapes
+follow those two families rather than the shared word.
 
 ### Cycling layouts shows the cycle, on its own switch (#2144)
 
@@ -13765,7 +13809,7 @@ load-bearing details:
   `focusSpace`: that command warps the cursor to hand off AX
   focus, which would rip the pointer out of the OS drag loop. No
   focus hand-off, no warp, and the spring retile is
-  `animated: false` regardless of `animations.on_space_change`
+  `animated: false` regardless of `animations.space_change`
   (a crisp switch must not add motion competing with the live
   foreign-app drag).
 - Space membership flips **eagerly at spring** (QA revision):

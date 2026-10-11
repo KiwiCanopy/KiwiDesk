@@ -18,6 +18,7 @@ extension SizePolicy: APIChoiceType {}
 extension QuitLayoutStyle: APIChoiceType {}
 extension SpaceHistoryKind: APIChoiceType {}
 extension ModeCycleDirection: APIChoiceType {}
+extension SpaceChangeStyle: APIChoiceType {}
 
 extension BspParams.Strategy: APIChoiceType {}
 extension ScrollingParams.Anchor: APIChoiceType {}

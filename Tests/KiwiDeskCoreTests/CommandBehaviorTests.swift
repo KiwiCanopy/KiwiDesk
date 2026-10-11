@@ -35,20 +35,29 @@ struct CommandBehaviorTests {
             args: [.number(300)]
         )
         #expect(core.tiler.animation.durationMS == 300)
-        // Defaults: space change on (#1931), scrolling on (#11).
-        #expect(core.tiler.settings.animations.onSpaceChange)
+        // Defaults: the Space cue (#2143), scrolling on (#11).
+        #expect(core.tiler.settings.animations.spaceChange == .cue)
         #expect(core.tiler.settings.animations.onScrolling)
-        // Each toggle round-trips in *both* directions.
-        core.execute(
-            "animations.set_on_space_change",
-            args: [.bool(false)]
+        // The style takes each case, and refuses another word.
+        for style in SpaceChangeStyle.allCases {
+            core.execute(
+                "animations.set_space_change",
+                args: [.string(style.rawValue)]
+            )
+            #expect(core.tiler.settings.animations.spaceChange == style)
+        }
+        #expect(
+            !core.execute(
+                "animations.set_space_change",
+                args: [.string("fade")]
+            ).isSuccess
         )
-        #expect(!core.tiler.settings.animations.onSpaceChange)
-        core.execute(
+        // The 2.x toggle is retired, naming its replacement.
+        let retired = core.execute(
             "animations.set_on_space_change",
             args: [.bool(true)]
         )
-        #expect(core.tiler.settings.animations.onSpaceChange)
+        #expect(retired.error?.contains("set_space_change") == true)
         core.execute(
             "animations.set_on_scrolling",
             args: [.bool(false)]

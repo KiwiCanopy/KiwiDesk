@@ -167,10 +167,13 @@ extension KiwiCore {
             }
             tiler.animation.sizeRateHz = hz > 0 ? hz : nil
             return .ok()
-        case "animations.set_on_space_change":
-            return setBool(args) {
-                tiler.settings.animations.onSpaceChange = $0
-            }
+        case "animations.set_space_change":
+            // Read at each switch; no retile (#2143).
+            guard let raw = args.first?.stringValue,
+                let style = SpaceChangeStyle(rawValue: raw)
+            else { return .expected(SpaceChangeStyle.self) }
+            tiler.settings.animations.spaceChange = style
+            return .ok()
         case "animations.set_on_scrolling":
             return setBool(args) {
                 tiler.settings.animations.onScrolling = $0

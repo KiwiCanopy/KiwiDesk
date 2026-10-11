@@ -749,7 +749,12 @@ editing here:
   for navigation that passes a `SpaceSlideIntent`
   (`SpaceSlideSwitchTests` ▸ `onlyNavigationPlays` holds the
   display follow; boot, wake and a restore pass none through
-  `spaceSwitchRetile`'s nil default, which review holds). A live
+  `spaceSwitchRetile`'s nil default, which review holds). The
+  Space cue (#2143) rides the same intent: `spaceSwitchRetile`
+  is its one payer, where no slide ran, and the slide and the cue
+  ask the one `drawnSpaceChange` — a stand-down added to either
+  beside it leaves a switch with neither
+  (`SpaceCueSeamTests`). A live
   read the slide adds is pinned inert in both `makeTestCore`
   twins (`SpaceSlideSeamTests` ▸ `bothTwinsPinTheReads`). The
   product ruling is `docs/design-decisions.md` ▸ *A Space switch

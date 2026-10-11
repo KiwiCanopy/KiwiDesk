@@ -23,11 +23,16 @@ extension KiwiCore {
         return SpaceSlideIntent(display: display, leaving: leaving)
     }
 
-    /// Off, or Reduce Motion: the instant switch.
-    var spaceSlideStandsDown: Bool {
-        !tiler.settings.animations.onSpaceChange
-            || spaceSlide.reduceMotion()
+    /// How this switch shows itself (#2143): the stored style,
+    /// save that Slide under Reduce Motion names the Space instead.
+    /// The one reading the slide and the Space cue both take.
+    var drawnSpaceChange: SpaceChangeStyle {
+        let style = tiler.settings.animations.spaceChange
+        return style == .slide && spaceSlide.reduceMotion() ? .cue : style
     }
+
+    /// Anything but a drawn Slide: no slide.
+    var spaceSlideStandsDown: Bool { drawnSpaceChange != .slide }
 
     /// Starts the slide ahead of the switch's one retile: covers
     /// what the screen shows, decides the strip's motion and holds

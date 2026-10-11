@@ -10,6 +10,7 @@ final class CuePlateModel: ObservableObject {
     enum Content: Equatable {
         case desktop(DesktopSwitchCue)
         case mode(ModeCycleCue)
+        case space(SpaceSwitchCue)
     }
 
     @Published private(set) var content: Content?
@@ -25,6 +26,13 @@ final class CuePlateModel: ObservableObject {
     /// centred, so a cue never resizes the panel.
     static let room = CGSize(width: captionWidth + 32, height: tallSide)
     static let captionFont = NSFont.systemFont(ofSize: 13, weight: .medium)
+    /// The large number both plates draw — a Desktop's, and a
+    /// Space's short identifier (#2142, #2143).
+    static let digitFont = Font.system(
+        size: 64,
+        weight: .semibold,
+        design: .rounded
+    )
     /// The layout step (#2144): one critically damped spring, no
     /// overshoot.
     static let step = Animation.spring(duration: 0.3, bounce: 0)
@@ -58,9 +66,12 @@ final class CuePlateModel: ObservableObject {
 
     /// The caption's own width, capped: a bare `maxWidth` frame
     /// would stretch the plate to the cap for any name.
-    static func captionFit(_ text: String) -> CGFloat {
+    static func captionFit(
+        _ text: String,
+        font: NSFont = captionFont
+    ) -> CGFloat {
         let width = (text as NSString)
-            .size(withAttributes: [.font: captionFont]).width
+            .size(withAttributes: [.font: font]).width
         return min(ceil(width) + 1, captionWidth)
     }
 
@@ -68,6 +79,13 @@ final class CuePlateModel: ObservableObject {
     static func spoken(_ content: Content) -> String {
         switch content {
         case .desktop(let cue): return spoken(cue)
+        case .space(let cue):
+            return L(
+                "space_cue.ax",
+                "Space %1$@, %2$@",
+                cue.space.raw,
+                cue.mode.displayName
+            )
         case .mode(let cue):
             return L("mode_cue.ax", "Layout: %1$@", cue.current.displayName)
         }
@@ -128,6 +146,7 @@ struct CuePlateView: View {
         switch model.content {
         case .desktop(let cue)?: DesktopCueView(cue: cue)
         case .mode(let cue)?: ModeCueView(cue: cue)
+        case .space(let cue)?: SpaceCueView(cue: cue)
         case nil: EmptyView()
         }
     }

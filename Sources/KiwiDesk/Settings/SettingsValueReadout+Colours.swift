@@ -61,11 +61,11 @@ extension SettingsValueReadout {
                 o.anyEnabled,
                 n.anyEnabled
             )
-        case .animationsOnSpaceChange:
-            return coloursOnOffRow(
+        case .animationsSpaceChange:
+            return coloursRow(
                 census,
-                o.onSpaceChange,
-                n.onSpaceChange
+                MotionCard.spaceChangeTitle(o.spaceChange),
+                MotionCard.spaceChangeTitle(n.spaceChange)
             )
         case .animationsOnWindowResize:
             return coloursOnOffRow(

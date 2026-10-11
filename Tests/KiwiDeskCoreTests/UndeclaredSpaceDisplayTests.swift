@@ -114,7 +114,7 @@ struct UndeclaredSpaceDisplayTests {
             CGRect(x: 0, y: 25, width: 1200, height: 775)
         }
         core.tiler.animation.isEnabled = false
-        core.tiler.settings.animations.onSpaceChange = true
+        core.tiler.settings.animations.spaceChange = .slide
         core.spaceSlide.reduceMotion = { false }
         core.tiler.applier.writer = FrameWriter(
             setFrame: { _, _ in },

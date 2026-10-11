@@ -85,11 +85,11 @@ settings.animations.onMonocleFocus
 settings.animations.onRelayout
 settings.animations.onScrolling
 settings.animations.onShelf
-settings.animations.onSpaceChange
 settings.animations.onWindowResize
 settings.animations.onWindowSwap
 settings.animations.scrollDurationMS
 settings.animations.shelfDurationMS
+settings.animations.spaceChange
 settings.animations.spaceChangeDurationMS
 settings.appBarStyle.activeIndicator
 settings.appBarStyle.edge

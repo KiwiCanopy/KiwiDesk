@@ -220,8 +220,9 @@ struct SettingsCatalogArgumentTests {
         // 100 since #1948: the two Per screen drawers'.
         // 101 since #2142: the Desktop switch cue row's.
         // 102 since #453: Shortcuts' Layout group's.
-        // 104 with #2144: the cycle and plate rows (#453).
-        #expect(direct.values.reduce(0, +) == 104)
+        // 104 with #2144: the cycle and plate rows (#453); 102 once
+        // #2143's picker and the slide's duration left the drawer.
+        #expect(direct.values.reduce(0, +) == 102)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

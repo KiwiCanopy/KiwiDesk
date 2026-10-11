@@ -45,6 +45,7 @@ public enum ConfigMigration {
         migratingAbsentSpaceSwitchGlass,
         migratingRetiredPullOrSpawn,
         migratingSpaceChangeOn,
+        migratingSpaceChangeStyle,
     ]
 
     /// The file shapes a config root can take.

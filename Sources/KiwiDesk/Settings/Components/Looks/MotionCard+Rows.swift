@@ -21,27 +21,8 @@ extension MotionCard {
                         + "Reduce Motion on also keeps them off."
                 )
             )
-        case .animationsOnSpaceChange:
-            Toggle(
-                L(
-                    "behavior.animations.space_change",
-                    "Animate Space switches"
-                ),
-                isOn: animations.onSpaceChange
-            )
-            .searchAnchored(
-                SettingsCatalog.colors.motionMore.children.animateSpaceSwitches
-            )
-            // The plate slide (#1956).
-            Text(
-                L(
-                    "behavior.animations.space_change.caption",
-                    "Plates cover your windows and slide to the "
-                        + "Space you're switching to."
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+        case .animationsSpaceChange:
+            spaceChangeRow
         case .animationsSpaceChangeDurationMS:
             StepperRow(
                 label: L(
@@ -59,15 +40,8 @@ extension MotionCard {
                         + "slower."
                 )
             )
-            .modifier(
-                GreyOut(active: !animations.onSpaceChange.wrappedValue)
-            )
-            .searchAnchored(
-                SettingsCatalog.colors.motionMore.children
-                    .spaceSwitchDuration
-            )
-            // The window toggles and their duration form one group
-            // apart from the slide, which it does not pace (#1932).
+            // The Space switch rows stand apart from the window
+            // master, which does not reach them (#1932, #2143).
             Divider()
         case .animationsOnWindowResize:
             Toggle(

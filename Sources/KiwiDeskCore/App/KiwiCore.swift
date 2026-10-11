@@ -229,7 +229,7 @@ public final class KiwiCore {
     var lastDesktop: DesktopKey?
     let desktopMemory = DesktopMemory()
     let desktopCue = DesktopCueLedger()
-    let modeCue = ModeCueHook()
+    let cueHooks = CueHooks()
     /// The last native Desktop switch; focus during it changes no space.
     var lastDesktopSwitch: Date = .distantPast
 

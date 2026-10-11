@@ -10,7 +10,7 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case spaceSwitchLiquidGlass = "settings.spaceSwitchLiquidGlass"
     case borderSheen = "settings.borderStyle.sheen"
     case animationsMaster = "settings.animations (master)"
-    case animationsOnSpaceChange = "settings.animations.onSpaceChange"
+    case animationsSpaceChange = "settings.animations.spaceChange"
     case animationsSpaceChangeDurationMS =
         "settings.animations.spaceChangeDurationMS"
     case animationsOnWindowResize = "settings.animations.onWindowResize"
@@ -70,9 +70,19 @@ extension ColoursKey {
                 .atRest,
                 exemptFromContainerGate: true
             )
+        case .animationsSpaceChange:
+            // Its own row above the master, outside Reduce Motion's
+            // grey: Instant + name is how a switch reads with less
+            // motion (#2143, owner 2026-10-11).
+            return .row(
+                .coloursAndMotion,
+                .motion,
+                .atRest,
+                exemptFromContainerGate: true
+            )
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
-        case .animationsOnSpaceChange, .animationsOnWindowResize,
+        case .animationsOnWindowResize,
             .animationsOnWindowSwap, .animationsOnRelayout,
             .animationsDurationMS:
             return .row(
@@ -82,13 +92,14 @@ extension ColoursKey {
                 gate: .setting(.colours(.animationsMaster))
             )
         case .animationsSpaceChangeDurationMS:
-            // Paces the slide alone, so greys with its toggle,
-            // which the master turns off (#1931).
+            // Paces the slide alone, so sits under the picker and
+            // greys unless it is on Slide (#1931, #2143), and with
+            // the card under Reduce Motion.
             return .row(
                 .coloursAndMotion,
                 .motion,
-                .showMore,
-                gate: .setting(.colours(.animationsOnSpaceChange))
+                .atRest,
+                gate: .setting(.colours(.animationsSpaceChange))
             )
         case .animationsOnShelf:
             // Not under the master: the shelf glides whatever the
@@ -168,11 +179,8 @@ extension ColoursKey {
                 "behavior.animations.master",
                 help: "behavior.animations.master.help"
             )
-        case .animationsOnSpaceChange:
-            return .text(
-                "behavior.animations.space_change",
-                caption: "behavior.animations.space_change.caption"
-            )
+        case .animationsSpaceChange:
+            return .text("behavior.animations.space_change_style")
         case .animationsSpaceChangeDurationMS:
             return .text(
                 "behavior.animations.space_change_duration",

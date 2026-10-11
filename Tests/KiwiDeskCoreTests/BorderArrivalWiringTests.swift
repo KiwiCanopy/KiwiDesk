@@ -24,7 +24,8 @@ struct BorderArrivalWiringTests {
         core.tiler.visibleBounds = { _ in pinned }
         core.tiler.allScreenBounds = { [pinned] }
         core.tiler.animation.isEnabled = false
-        core.tiler.settings.animations.onSpaceChange = slide
+        core.tiler.settings.animations.spaceChange =
+            slide ? .slide : .instant
         core.spaceSlide.reduceMotion = { !slide }
         for (id, space) in [(WindowID(1), 1), (WindowID(2), 2)] {
             core.state.apply(
