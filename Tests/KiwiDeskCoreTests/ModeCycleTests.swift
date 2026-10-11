@@ -25,12 +25,12 @@ struct ModeCycleTests {
     @Test("Next walks the list and wraps; Previous walks back")
     func walksAndWraps() {
         let core = makeCore()
-        #expect(core.modeCycle == [.bsp, .scrolling, .floating])
+        #expect(core.modeCycle.list == [.bsp, .scrolling, .floating])
         for expected: LayoutMode in [.scrolling, .floating, .bsp] {
             #expect(core.execute("cycle_mode", args: []).isSuccess)
             #expect(mode(core) == expected)
         }
-        let back = core.execute("cycle_mode", args: [.string("previous")])
+        let back = core.execute("cycle_mode", args: [.string("prev")])
         #expect(back.isSuccess)
         #expect(mode(core) == .floating)
     }
@@ -55,7 +55,7 @@ struct ModeCycleTests {
         _ = core.execute("cycle_mode", args: [.string("next")])
         #expect(mode(core) == .bsp)
         core.state.workspaces.setMode("1", .grid)
-        _ = core.execute("cycle_mode", args: [.string("previous")])
+        _ = core.execute("cycle_mode", args: [.string("prev")])
         #expect(mode(core) == .floating)
     }
 
@@ -67,14 +67,14 @@ struct ModeCycleTests {
             args: [.array([.string("monocle"), .string("grid")])]
         )
         #expect(two.isSuccess)
-        #expect(core.modeCycle == [.monocle, .grid])
+        #expect(core.modeCycle.list == [.monocle, .grid])
         // The CLI's shape: one argument per layout.
         let cli = core.execute(
             "set_mode_cycle",
             args: [.string("stack"), .string("grid")]
         )
         #expect(cli.isSuccess)
-        #expect(core.modeCycle == [.stack, .grid])
+        #expect(core.modeCycle.list == [.stack, .grid])
         for bad: [JSONValue] in [
             [.string("grid")],
             [.string("grid"), .string("grid")],
@@ -86,8 +86,13 @@ struct ModeCycleTests {
             )
             #expect(!response.isSuccess)
         }
-        #expect(core.modeCycle == [.stack, .grid])
+        #expect(core.modeCycle.list == [.stack, .grid])
         #expect(!core.execute("cycle_mode", args: [.string("up")]).isSuccess)
+        // Listed in `move_to_track`'s order, read off `allCases`.
+        #expect(ModeCycleDirection.allCases == [.prev, .next])
+        // One spelling, as `move_to_track`'s: no `previous` alias.
+        let alias = core.execute("cycle_mode", args: [.string("previous")])
+        #expect(!alias.isSuccess)
         let number = core.execute("cycle_mode", args: [.number(1)])
         #expect(!number.isSuccess, "a non-string direction is refused")
     }

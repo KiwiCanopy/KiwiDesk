@@ -124,7 +124,8 @@ struct BootWindowRuleReconcileTests {
             },
             profileIgnoreRules: nil,
             profileScrollGesture: nil,
-            profileSpaceHistory: nil
+            profileSpaceHistory: nil,
+            profileModeCycle: nil
         )
     }
 

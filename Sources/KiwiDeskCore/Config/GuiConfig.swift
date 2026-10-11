@@ -66,7 +66,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// The Space history's global base (#1655); a profile diverges
     /// through `Profile.spaceHistory`.
     public var spaceHistory = SpaceHistoryKind.defaultKind
-    /// The layouts the cycle walks (#453).
+    /// The layouts the cycle walks (#453); a profile diverges
+    /// through `Profile.modeCycle`.
     public var modeCycle = ModeCycle.defaultList
     /// The settings no profile carries (#1741); nil until this
     /// file has adopted them. Stamped at the write
