@@ -108,7 +108,7 @@
   "app_rules.space_list.title": "공간에서 앱 열기",
   "app_rules.tile": "대신 타일 배치",
   "app_rules.tile.help": "타일 규칙은 원래라면 자동으로 플로팅될 앱의 윈도우를 타일 배치합니다. 대화상자, 시트, 패널은 계속 플로팅되며, 같은 앱의 플로팅 규칙은 해당하는 윈도우를 계속 플로팅합니다.",
-  "app_rules.tile.inert": "플로팅 규칙이 모든 윈도우를 플로팅합니다.",
+  "app_rules.tile.inert": "⚠ 플로팅 규칙이 이미 모든 윈도우를 플로팅하므로 이 타일 규칙은 효과가 없습니다.",
   "app_rules.tile.remove.help": "이 타일 규칙 제거",
   "app_rules.tile.tiles": "타일 배치",
   "app_rules.title_contains": "제목에 다음을 포함…",

@@ -108,7 +108,7 @@
   "app_rules.space_list.title": "スペースで開く",
   "app_rules.tile": "代わりにタイル表示",
   "app_rules.tile.help": "タイルルールは、本来なら自動的にフローティングになるAppのウインドウをタイル表示にします。ダイアログ、シート、パネルは引き続きフローティングになり、同じAppのフローティングルールは、対象のウインドウを引き続きフローティングにします。",
-  "app_rules.tile.inert": "フローティングルールがすべてのウインドウをフローティングにしています。",
+  "app_rules.tile.inert": "⚠ フローティングルールがすでにすべてのウインドウをフローティングにしているため、このタイルルールは効果がありません。",
   "app_rules.tile.remove.help": "このタイルルールを削除",
   "app_rules.tile.tiles": "タイル表示",
   "app_rules.title_contains": "タイトルに次を含む…",

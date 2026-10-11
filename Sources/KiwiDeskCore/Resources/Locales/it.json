@@ -108,7 +108,7 @@
   "app_rules.space_list.title": "Apri in uno spazio",
   "app_rules.tile": "Affianca invece",
   "app_rules.tile.help": "Una regola di affiancamento affianca le finestre di un'app che altrimenti fluttuerebbero automaticamente. Finestre di dialogo, fogli e pannelli fluttuano comunque, e una regola di fluttuazione per la stessa app continua a far fluttuare le finestre che riguarda.",
-  "app_rules.tile.inert": "La sua regola di fluttuazione fa fluttuare ogni finestra.",
+  "app_rules.tile.inert": "⚠ La sua regola di fluttuazione fa già fluttuare ogni finestra, quindi questa regola di affiancamento non ha effetto.",
   "app_rules.tile.remove.help": "Rimuovi questa regola di affiancamento",
   "app_rules.tile.tiles": "Si affianca",
   "app_rules.title_contains": "Il titolo contiene…",

@@ -108,7 +108,7 @@
   "app_rules.space_list.title": "Open in a Space",
   "app_rules.tile": "Tile instead",
   "app_rules.tile.help": "A Tile rule tiles an app’s windows that would otherwise float automatically. Dialogs, sheets and panels still float, and a Float rule for the same app still floats the windows it matches.",
-  "app_rules.tile.inert": "Its Float rule floats every window.",
+  "app_rules.tile.inert": "⚠ Its Float rule already floats every window, so this Tile rule has no effect.",
   "app_rules.tile.remove.help": "Remove this Tile rule",
   "app_rules.tile.tiles": "Tiles",
   "app_rules.title_contains": "Title contains…",

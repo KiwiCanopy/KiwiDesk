@@ -108,7 +108,7 @@
   "app_rules.space_list.title": "In einem Space öffnen",
   "app_rules.tile": "Stattdessen kacheln",
   "app_rules.tile.help": "Eine Kachel-Regel kachelt die Fenster einer App, die sonst automatisch schweben würden. Dialoge, Sheets und Panels schweben weiterhin, und eine Schwebe-Regel für dieselbe App lässt die Fenster, auf die sie zutrifft, weiterhin schweben.",
-  "app_rules.tile.inert": "Eine Schwebe-Regel für diese App lässt jedes Fenster schweben.",
+  "app_rules.tile.inert": "⚠ Eine Schwebe-Regel für diese App lässt schon jedes Fenster schweben, daher hat diese Kachel-Regel keine Wirkung.",
   "app_rules.tile.remove.help": "Diese Kachel-Regel entfernen",
   "app_rules.tile.tiles": "Wird gekachelt",
   "app_rules.title_contains": "Titel enthält…",

@@ -108,7 +108,7 @@
   "app_rules.space_list.title": "Ouvrir dans un espace",
   "app_rules.tile": "Tuiler à la place",
   "app_rules.tile.help": "Une règle de tuilage tuile les fenêtres d’une app qui flotteraient sinon automatiquement. Les zones de dialogue, les feuilles et les panneaux flottent toujours, et une règle de flottement pour la même app fait toujours flotter les fenêtres qu’elle vise.",
-  "app_rules.tile.inert": "Sa règle de flottement fait flotter toutes les fenêtres.",
+  "app_rules.tile.inert": "⚠ Sa règle de flottement fait déjà flotter toutes les fenêtres : cette règle de tuilage n’a donc aucun effet.",
   "app_rules.tile.remove.help": "Supprimer cette règle de tuilage",
   "app_rules.tile.tiles": "Se tuile",
   "app_rules.title_contains": "Le titre contient…",

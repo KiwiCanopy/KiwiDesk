@@ -108,7 +108,7 @@
   "app_rules.space_list.title": "在空间中打开 App",
   "app_rules.tile": "改为平铺",
   "app_rules.tile.help": "平铺规则会平铺 App 中本来会自动浮动的窗口。对话框、表单和面板仍会浮动，同一 App 的浮动规则也仍会让它匹配的窗口浮动。",
-  "app_rules.tile.inert": "它的浮动规则会让所有窗口浮动。",
+  "app_rules.tile.inert": "⚠ 它的浮动规则已让所有窗口浮动，因此此平铺规则不会生效。",
   "app_rules.tile.remove.help": "移除此平铺规则",
   "app_rules.tile.tiles": "平铺",
   "app_rules.title_contains": "标题包含…",

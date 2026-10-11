@@ -108,7 +108,7 @@
   "app_rules.space_list.title": "Abrir em um espaço",
   "app_rules.tile": "Lado a lado em vez disso",
   "app_rules.tile.help": "Uma regra de lado a lado coloca lado a lado as janelas de um app que, de outra forma, flutuariam automaticamente. Caixas de diálogo, painéis e folhas continuam flutuando, e uma regra de flutuar do mesmo app continua fazendo flutuar as janelas que abrange.",
-  "app_rules.tile.inert": "A regra de flutuar dele faz todas as janelas flutuarem.",
+  "app_rules.tile.inert": "⚠ A regra de flutuar dele já faz todas as janelas flutuarem, então esta regra de lado a lado não tem efeito.",
   "app_rules.tile.remove.help": "Remover esta regra de lado a lado",
   "app_rules.tile.tiles": "Lado a lado",
   "app_rules.title_contains": "O título contém…",

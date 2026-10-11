@@ -108,7 +108,7 @@
   "app_rules.space_list.title": "在空間中開啟 App",
   "app_rules.tile": "改為並排",
   "app_rules.tile.help": "並排規則會並排 App 中原本會自動浮動的視窗。對話框、表單和面板仍會浮動，同一個 App 的浮動規則也仍會讓它符合的視窗浮動。",
-  "app_rules.tile.inert": "它的浮動規則會讓所有視窗浮動。",
+  "app_rules.tile.inert": "⚠ 它的浮動規則已讓所有視窗浮動，因此這個並排規則不會生效。",
   "app_rules.tile.remove.help": "移除這個並排規則",
   "app_rules.tile.tiles": "並排",
   "app_rules.title_contains": "標題包含…",

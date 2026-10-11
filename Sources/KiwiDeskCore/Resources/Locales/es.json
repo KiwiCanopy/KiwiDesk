@@ -108,7 +108,7 @@
   "app_rules.space_list.title": "Abrir en un espacio",
   "app_rules.tile": "En mosaico en su lugar",
   "app_rules.tile.help": "Una regla de mosaico coloca en mosaico las ventanas de una app que, si no, flotarían automáticamente. Los diálogos, las hojas y los paneles siguen flotando, y una regla de flotar de la misma app sigue haciendo flotar las ventanas que abarca.",
-  "app_rules.tile.inert": "Su regla de flotar hace flotar todas las ventanas.",
+  "app_rules.tile.inert": "⚠ Su regla de flotar ya hace flotar todas las ventanas, así que esta regla de mosaico no tiene efecto.",
   "app_rules.tile.remove.help": "Eliminar esta regla de mosaico",
   "app_rules.tile.tiles": "En mosaico",
   "app_rules.title_contains": "El título contiene…",

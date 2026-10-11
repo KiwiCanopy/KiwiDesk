@@ -162,7 +162,7 @@ struct AppRuleTileRow: View {
             if floatsEveryWindow {
                 Text(AutoFloatWords.inert)
                     .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink3)
+                    .foregroundStyle(SettingsTheme.warningInk)
                     .padding(.leading, SettingsMetrics.appRuleIdentityInset)
             }
         }
@@ -245,6 +245,10 @@ enum AutoFloatWords {
     }
 
     static var inert: String {
-        L("app_rules.tile.inert", "Its Float rule floats every window.")
+        L(
+            "app_rules.tile.inert",
+            "⚠ Its Float rule already floats every window, so this "
+                + "Tile rule has no effect."
+        )
     }
 }
