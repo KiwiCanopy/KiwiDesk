@@ -125,13 +125,13 @@ extension ApplicationsGroup {
         // picker excludes fully-bound apps, but its "Other…"
         // panel does not, so it could reach one and do nothing
         // at all (#1235). One refusal channel, two pick routes.
-        guard taken.count < AppLaunchBehavior.allCases.count else {
+        guard taken.count < AppShortcutAction.allCases.count else {
             refuse(app, at: id)
             return
         }
         clearRefusal()
         let current =
-            KeybindingCatalog.appLaunchBehavior(
+            KeybindingCatalog.appShortcutAction(
                 from: binding.wrappedValue.lua
             ) ?? .openOrFocus
         let behavior = KeybindingCatalog.behaviorForAssignment(

@@ -195,7 +195,7 @@ struct AppShortcutAddOnSelectTests {
             (
                 "KeybindingAppGroup+Row.swift",
                 "privatefuncassign(",
-                "AppLaunchBehavior.allCases.count"
+                "AppShortcutAction.allCases.count"
             ),
         ] {
             let body = try declarationBody(

@@ -5,10 +5,10 @@ import Testing
 @testable import KiwiDesk
 
 /// The app-launch behavior encoding (#334): `appCommand` and its
-/// two inverses (`appBundleID` / `appLaunchBehavior`) round-trip
+/// two inverses (`appBundleID` / `appShortcutAction`) round-trip
 /// both verbs, and non-app Lua stays unmatched.
 @Suite("App launch behavior")
-struct AppLaunchBehaviorTests {
+struct AppShortcutActionTests {
     @Test("open-or-focus round-trips through focus_or_spawn")
     func openOrFocusRoundTrip() {
         let lua = KeybindingCatalog.appCommand(
@@ -21,7 +21,7 @@ struct AppLaunchBehaviorTests {
                 == "com.apple.safari"
         )
         #expect(
-            KeybindingCatalog.appLaunchBehavior(from: lua)
+            KeybindingCatalog.appShortcutAction(from: lua)
                 == .openOrFocus
         )
     }
@@ -40,7 +40,7 @@ struct AppLaunchBehaviorTests {
                 == "com.apple.terminal"
         )
         #expect(
-            KeybindingCatalog.appLaunchBehavior(from: lua)
+            KeybindingCatalog.appShortcutAction(from: lua)
                 == .openNew
         )
     }
@@ -53,7 +53,7 @@ struct AppLaunchBehaviorTests {
         )
         #expect(lua == "KiwiDesk.gather(\"com.apple.notes\")")
         #expect(
-            KeybindingCatalog.appLaunchBehavior(from: lua) == .gather
+            KeybindingCatalog.appShortcutAction(from: lua) == .gather
         )
     }
 
@@ -76,7 +76,7 @@ struct AppLaunchBehaviorTests {
         // round-trip tests above check the GUI against itself and
         // would stay green through such a drift.
         let known = Set(APIReference.commands.map(\.lua))
-        for behavior in AppLaunchBehavior.allCases {
+        for behavior in AppShortcutAction.allCases {
             #expect(known.contains(behavior.verb))
         }
     }
@@ -85,7 +85,7 @@ struct AppLaunchBehaviorTests {
 
     private func appBinding(
         _ bundleID: String,
-        _ behavior: AppLaunchBehavior
+        _ behavior: AppShortcutAction
     ) -> KeyBinding {
         KeyBinding(
             lua: KeybindingCatalog.appCommand(
@@ -200,7 +200,7 @@ struct AppLaunchBehaviorTests {
         ] {
             #expect(KeybindingCatalog.appBundleID(from: lua) == nil)
             #expect(
-                KeybindingCatalog.appLaunchBehavior(from: lua)
+                KeybindingCatalog.appShortcutAction(from: lua)
                     == nil
             )
         }

@@ -123,7 +123,7 @@ extension ShortcutsReferenceBuilder {
                             forBundleID: $0
                         )
                     } ?? binding.label
-                let behavior = KeybindingCatalog.appLaunchBehavior(
+                let behavior = KeybindingCatalog.appShortcutAction(
                     from: binding.lua
                 )
                 let badge = Self.behaviorBadge(behavior)
@@ -147,7 +147,7 @@ extension ShortcutsReferenceBuilder {
     /// The row badge for a behavior other than Open or Focus: its
     /// symbol and the help naming what the key does.
     static func behaviorBadge(
-        _ behavior: AppLaunchBehavior?
+        _ behavior: AppShortcutAction?
     ) -> (icon: String, help: String)? {
         switch behavior {
         case .openNew:
@@ -160,7 +160,7 @@ extension ShortcutsReferenceBuilder {
             )
         case .gather:
             return (
-                "rectangle.stack",
+                "macwindow.on.rectangle",
                 L(
                     "shortcuts.app_behavior.gather.badge",
                     "Gathers its windows here"

@@ -80,9 +80,9 @@ extension ApplicationsGroup {
         else { return nil }
         return L(
             "shortcuts.apps.all_bound",
-            "\u{201C}%1$@\u{201D} already has a key for each way "
-                + "to open it. Change one of its shortcuts above "
-                + "to give it another.",
+            "\u{201C}%1$@\u{201D} already has a key for each "
+                + "action. Change one of its shortcuts above to give "
+                + "it another.",
             app.name
         )
     }
@@ -150,7 +150,7 @@ extension ApplicationsGroup {
     func fullyBoundBundleIDs(
         excluding id: UUID? = nil
     ) -> Set<String> {
-        var seen: [String: Set<AppLaunchBehavior>] = [:]
+        var seen: [String: Set<AppShortcutAction>] = [:]
         for binding in bindings
         where binding.kind == .application && binding.id != id {
             guard
@@ -159,12 +159,12 @@ extension ApplicationsGroup {
                 )
             else { continue }
             let behavior =
-                KeybindingCatalog.appLaunchBehavior(
+                KeybindingCatalog.appShortcutAction(
                     from: binding.lua
                 ) ?? .openOrFocus
             seen[bundleID, default: []].insert(behavior)
         }
-        let all = Set(AppLaunchBehavior.allCases)
+        let all = Set(AppShortcutAction.allCases)
         return Set(
             seen.filter { $0.value == all }.map(\.key)
         )

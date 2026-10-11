@@ -1,10 +1,11 @@
 import AppKit
 import KiwiDeskCore
 
-/// Launch behavior for Open-Applications shortcut bindings (#334),
-/// derived from the binding's `lua` verb, never a persisted field
-/// — so there is no `KeyBinding` shape to migrate or parity-test.
-enum AppLaunchBehavior: String, CaseIterable {
+/// What an Open applications shortcut does with its app (#334,
+/// #1510), derived from the binding's `lua` verb, never a
+/// persisted field — so there is no `KeyBinding` shape to migrate
+/// or parity-test.
+enum AppShortcutAction: String, CaseIterable {
     case openOrFocus
     case openNew
     /// Brings the app's windows to the user (#1510).
@@ -26,7 +27,7 @@ extension KeybindingCatalog {
     /// behavior.
     static func appCommand(
         _ bundleID: String,
-        behavior: AppLaunchBehavior = .openOrFocus
+        behavior: AppShortcutAction = .openOrFocus
     ) -> String {
         "KiwiDesk.\(behavior.verb)(\"\(bundleID)\")"
     }
@@ -37,9 +38,9 @@ extension KeybindingCatalog {
     }
 
     /// Extracts launch behavior from app-launch Lua command string.
-    static func appLaunchBehavior(
+    static func appShortcutAction(
         from lua: String
-    ) -> AppLaunchBehavior? {
+    ) -> AppShortcutAction? {
         parseAppCommand(lua)?.behavior
     }
 
@@ -49,13 +50,13 @@ extension KeybindingCatalog {
         for bundleID: String,
         in bindings: [KeyBinding],
         excluding id: UUID? = nil
-    ) -> Set<AppLaunchBehavior> {
+    ) -> Set<AppShortcutAction> {
         Set(
             bindings.filter {
                 $0.kind == .application && $0.id != id
                     && appBundleID(from: $0.lua) == bundleID
             }
-            .map { appLaunchBehavior(from: $0.lua) ?? .openOrFocus }
+            .map { appShortcutAction(from: $0.lua) ?? .openOrFocus }
         )
     }
 
@@ -63,9 +64,9 @@ extension KeybindingCatalog {
     static func firstAvailableBehavior(
         for bundleID: String,
         in bindings: [KeyBinding]
-    ) -> AppLaunchBehavior? {
+    ) -> AppShortcutAction? {
         let taken = takenBehaviors(for: bundleID, in: bindings)
-        return AppLaunchBehavior.allCases.first {
+        return AppShortcutAction.allCases.first {
             !taken.contains($0)
         }
     }
@@ -74,17 +75,17 @@ extension KeybindingCatalog {
     /// row (#334).
     static func behaviorForAssignment(
         to bundleID: String,
-        preferred: AppLaunchBehavior,
+        preferred: AppShortcutAction,
         in bindings: [KeyBinding],
         excluding id: UUID
-    ) -> AppLaunchBehavior {
+    ) -> AppShortcutAction {
         let taken = takenBehaviors(
             for: bundleID,
             in: bindings,
             excluding: id
         )
         if !taken.contains(preferred) { return preferred }
-        return AppLaunchBehavior.allCases.first {
+        return AppShortcutAction.allCases.first {
             !taken.contains($0)
         } ?? preferred
     }
@@ -93,9 +94,9 @@ extension KeybindingCatalog {
     /// quote means escaped content the app menu never authors.
     private static func parseAppCommand(
         _ lua: String
-    ) -> (bundleID: String, behavior: AppLaunchBehavior)? {
+    ) -> (bundleID: String, behavior: AppShortcutAction)? {
         let suffix = "\")"
-        for behavior in AppLaunchBehavior.allCases {
+        for behavior in AppShortcutAction.allCases {
             let prefix = "KiwiDesk.\(behavior.verb)(\""
             guard lua.hasPrefix(prefix), lua.hasSuffix(suffix),
                 lua.count > prefix.count + suffix.count

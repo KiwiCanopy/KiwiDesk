@@ -4543,10 +4543,9 @@ KiwiDesk.bind("ctrl+alt+return", function()
 end)
 ```
 
-Both launch verbs are also reachable from the Settings app: an
-Open applications shortcut carries a per-row **Launch behavior**
-menu — *Open or Focus* (`focus_or_spawn`, the default) or *Open
-New* (`spawn_new`).
+Both launch verbs are also reachable from the Settings app, from
+the per-row menu of an Open applications shortcut: *Open or Focus*
+(`focus_or_spawn`, the default) or *Open New* (`spawn_new`).
 
 :::unreleased
 ### gather
@@ -4572,8 +4571,8 @@ KiwiDesk.bind("ctrl+shift+return", function()
 end)
 ```
 
-It is the third **Launch behavior** of an Open applications
-shortcut in Settings: *Gather Windows*.
+It is the third choice in an Open applications shortcut's menu
+in Settings, *Gather Windows*; that menu is now called **Action**.
 :::
 
 ## User Interface
@@ -6149,8 +6148,8 @@ quit.set_grid_target_depth(10)  -- denser piles, later growth
 ```
 
 When AX permission is revoked mid-session, KiwiDesk pauses window
-management but cannot gather windows — `setFrame` calls return
-`kAXErrorAPIDisabled` and are silent no-ops. Windows stay wherever
+management but cannot spread windows into the grid — `setFrame`
+calls return `kAXErrorAPIDisabled` and are silent no-ops. Windows stay wherever
 the WM left them; re-enabling Accessibility in System Settings
 resumes management.
 
