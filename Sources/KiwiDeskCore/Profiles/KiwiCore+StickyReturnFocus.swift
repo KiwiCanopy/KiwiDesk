@@ -30,7 +30,7 @@ extension KiwiCore {
         guard let id = desktopMemory.stickyLeft.removeValue(forKey: native),
             state.windows[id] != nil
         else { return }
-        desktopMemory.stickyReturn = id
+        desktopMemory.stickyReturn = (id, .now)
         onLog(
             "desktop return: w\(id.raw) left with the focus — owed "
                 + "at the settle (#1564)"
@@ -39,22 +39,31 @@ extension KiwiCore {
 
     /// Takes the debt at the head of the settle, so a settle that
     /// stands down, or pays the #1207 debt instead, still ends it.
-    func takeStickyReturn() -> WindowID? {
+    func takeStickyReturn() -> (window: WindowID, at: ContinuousClock.Instant)?
+    {
         defer { desktopMemory.stickyReturn = nil }
         return desktopMemory.stickyReturn
     }
 
     /// Pays `owed` once the carry has landed: still carried, on
-    /// the active Space, raisable without a Desktop switch, and no
-    /// click since the switch. A focus honored meanwhile already
-    /// retired it (`rememberHonoredFocus`). True when it took the
-    /// focus, which stands the settle's own refocus down.
-    func payStickyReturn(_ owed: WindowID?) -> Bool {
-        guard let id = owed else { return false }
-        if leftPress(since: lastDesktopSwitch) {
+    /// the active Space and raisable without a Desktop switch.
+    /// Only what the user did stands it down — a press, or a focus
+    /// KiwiDesk commanded, since the debt was owed: a focus REPORT
+    /// in between may be macOS's own restore landing late, the one
+    /// this debt exists to override. A ⌘-Tab in those 600 ms is
+    /// the residue. True when it took the focus, which stands the
+    /// settle's own refocus down.
+    func payStickyReturn(
+        _ owed: (window: WindowID, at: ContinuousClock.Instant)?
+    ) -> Bool {
+        guard let owed else { return false }
+        let id = owed.window
+        if leftPress(since: lastDesktopSwitch)
+            || eventLoop.focusCommanded(since: owed.at)
+        {
             onLog(
-                "desktop return: w\(id.raw) not raised — a click "
-                    + "since the switch chose (#1564)"
+                "desktop return: w\(id.raw) not raised — a press or "
+                    + "a commanded focus since the return (#1564)"
             )
             return false
         }

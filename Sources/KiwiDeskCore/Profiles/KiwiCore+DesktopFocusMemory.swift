@@ -27,17 +27,6 @@ extension KiwiCore {
                     + "focus honored on w\(id.raw)"
             )
         }
-        // The sticky debt yields the same way (#1564): a keyboard
-        // focus, ⌘-Tab or a verb chose before the settle paid.
-        if let owed = desktopMemory.stickyReturn, owed != id,
-            space == state.workspaces.activeSpace
-        {
-            desktopMemory.stickyReturn = nil
-            onLog(
-                "desktop return: w\(owed.raw) not raised — focus "
-                    + "honored on w\(id.raw) (#1564)"
-            )
-        }
         guard let native = hostedNativeSpace(of: id) else { return }
         desktopMemory.honoredFocus[space, default: [:]][native] = id
         desktopMemory.lastHonoredOn[native] = id
@@ -158,7 +147,7 @@ extension KiwiCore {
         desktopMemory.stickyLeft = desktopMemory.stickyLeft.filter {
             $0.value != id
         }
-        if desktopMemory.stickyReturn == id {
+        if desktopMemory.stickyReturn?.window == id {
             desktopMemory.stickyReturn = nil
         }
         for (space, entries) in desktopMemory.honoredFocus {
@@ -181,8 +170,8 @@ extension KiwiCore {
             .mapValues { $0 == old ? new : $0 }
         desktopMemory.stickyLeft = desktopMemory.stickyLeft
             .mapValues { $0 == old ? new : $0 }
-        if desktopMemory.stickyReturn == old {
-            desktopMemory.stickyReturn = new
+        if let owed = desktopMemory.stickyReturn, owed.window == old {
+            desktopMemory.stickyReturn = (new, owed.at)
         }
         for (space, entries) in desktopMemory.honoredFocus {
             for (native, id) in entries where id == old {

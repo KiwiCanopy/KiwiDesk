@@ -44,8 +44,9 @@ final class DesktopMemory {
     /// The carried sticky window each Desktop was LEFT with
     /// (#1564), filed at the departure and taken at the return.
     var stickyLeft: [SkyLight.SpaceID: WindowID] = [:]
-    /// The focus a return owes that window, paid at the settle.
-    var stickyReturn: WindowID?
+    /// The focus a return owes that window, and when it was owed,
+    /// paid at the settle.
+    var stickyReturn: (window: WindowID, at: ContinuousClock.Instant)?
 
     /// The focus a Desktop return owes its remembered window,
     /// paid at that window's ARRIVAL (#1207) — the #1007 shape,

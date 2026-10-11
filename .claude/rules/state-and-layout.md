@@ -390,10 +390,12 @@ editing here:
   overwrites the memory, so the departure's filing is what
   survives; the handler only COPIES that report-time memory and
   never reads a live focus — owed by `oweStickyReturn` behind the
-  follow's precedence, retired like the #1207 debt by a focus
-  honored in the active space meanwhile, taken at the head of
-  every settle and paid there by `payStickyReturn` once the carry
-  landed, standing down on a left click since the switch
+  follow's precedence, taken at the head of every settle and paid
+  there by `payStickyReturn` once the carry landed, standing down
+  on a press or a commanded focus since the return — never on a
+  focus REPORT, unlike the #1207 debt, since macOS's own restore
+  may land after the handler and is the report this debt
+  overrides; a ⌘-Tab inside the settle's 600 ms is the residue
   (`StickyReturnFocusTests`, `ReturningFocusSeamTests`). The `.windowCreated` fold takes the debt mirrored in as
   `returningFocus` (the `arrivalDisplay` pattern) and rules two
   clauses: the owed RETURNING window takes the focus even beside

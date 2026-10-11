@@ -145,7 +145,7 @@ struct StickyReturnFocusTests {
         let (core, box) = makeCore()
         defer { teardown() }
         roundTrip(core, box, leavingWith: sticky)
-        #expect(core.desktopMemory.stickyReturn == sticky)
+        #expect(core.desktopMemory.stickyReturn?.window == sticky)
         #expect(core.state.workspaces.lastFocused == other)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(core.state.workspaces.lastFocused == sticky)
@@ -162,17 +162,43 @@ struct StickyReturnFocusTests {
         #expect(core.state.workspaces.lastFocused == other)
     }
 
-    /// A focus chosen by keyboard before the settle retires the
-    /// debt, as it retires the #1207 one.
-    @Test("a focus honored before the settle keeps its choice")
-    func honoredFocusRetires() {
+    /// macOS's restore report may land after the handler: it is
+    /// the focus this debt overrides, so it never retires it.
+    @Test("a late restore report still pays")
+    func lateRestoreStillPays() {
         let (core, box) = makeCore()
         defer { teardown() }
         roundTrip(core, box, leavingWith: sticky)
         core.handle(.windowFocused(third))
-        #expect(core.desktopMemory.stickyReturn == nil)
+        #expect(core.desktopMemory.stickyReturn?.window == sticky)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
-        #expect(core.state.workspaces.lastFocused == third)
+        #expect(core.state.workspaces.lastFocused == sticky)
+    }
+
+    /// A focus KiwiDesk commanded after the return — a `focus`
+    /// verb, Open or Focus — is the user's choice.
+    @Test("a commanded focus since the return keeps its choice")
+    func commandedFocusStandsDown() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        roundTrip(core, box, leavingWith: sticky)
+        core.eventLoop.lastCommandedFocus = .now
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
+        #expect(core.state.workspaces.lastFocused == other)
+        #expect(box.lines.contains { $0.contains("commanded focus") })
+    }
+
+    /// A settle that stands down still ends the debt, or a later
+    /// secondary-screen settle would pay it stale.
+    @Test("a settle that stands down ends the debt")
+    func standDownEndsTheDebt() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        roundTrip(core, box, leavingWith: sticky)
+        NativeSpaces.activeSpaceIsUserOverride = false
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
+        #expect(core.desktopMemory.stickyReturn == nil)
+        #expect(core.state.workspaces.lastFocused == other)
     }
 
     /// A follow (#1007) names its window: it outranks the memory.
@@ -193,7 +219,7 @@ struct StickyReturnFocusTests {
         core.lastLeftClick = (Date(), .zero, other)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(core.state.workspaces.lastFocused == other)
-        #expect(box.lines.contains { $0.contains("a click since") })
+        #expect(box.lines.contains { $0.contains("a press or") })
     }
 
     /// Reach off: the window was not carried, so nothing follows
