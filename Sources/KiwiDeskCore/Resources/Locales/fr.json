@@ -397,6 +397,7 @@
   "drag.ghost.caption": "Indique la position depuis laquelle votre fenêtre est déplacée.",
   "drag.title": "Glisser à la souris",
   "float.refusal.accessory_app": "Les apps sans icône dans le Dock flottent toujours",
+  "float.refusal.fixed_size": "Les fenêtres non redimensionnables flottent toujours",
   "float.refusal.panel": "Les zones de dialogue et les panneaux flottent toujours",
   "float.refusal.rule": "Une règle d’apps fait flotter cette fenêtre",
   "floating.color": "Floating",

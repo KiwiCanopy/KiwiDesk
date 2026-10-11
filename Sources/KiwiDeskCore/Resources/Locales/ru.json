@@ -397,6 +397,7 @@
   "drag.ghost.caption": "Отмечает место, откуда перетаскивается окно.",
   "drag.title": "Перетаскивание",
   "float.refusal.accessory_app": "Приложения без значка в Dock всегда плавающие",
+  "float.refusal.fixed_size": "Окна, размер которых нельзя изменить, всегда плавающие",
   "float.refusal.panel": "Диалоговые окна и панели всегда плавающие",
   "float.refusal.rule": "Правило приложений делает это окно плавающим",
   "floating.color": "Floating",

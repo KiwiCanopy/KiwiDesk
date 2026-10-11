@@ -256,14 +256,17 @@ extension EventLoop {
     }
 
     /// `id` is the window's, where the caller already read it
-    /// (#1933); nil asks the element.
+    /// (#1933); nil asks the element. `titlebarButton` likewise:
+    /// the off-main list read carries it for a raised-layer
+    /// window, and nil reads it here where the #2072 escape needs it.
     func shouldIgnore(
         _ element: AXUIElement,
         id known: WindowID? = nil,
         pid: pid_t,
         app: AppRef,
         layer: Int? = nil,
-        isAccessory: Bool
+        isAccessory: Bool,
+        titlebarButton: Bool? = nil
     ) -> Bool {
         if Self.isOwnProcess(pid) {
             guard
@@ -286,11 +289,19 @@ extension EventLoop {
         guard let id = known ?? AXHelper.windowID(of: element) else {
             return false
         }
+        let resolved = layer ?? FloatDetection.windowLayer(of: id) ?? 0
+        let button =
+            isAccessory && resolved != 0
+            ? titlebarButton
+                ?? (AXHelper.windowTraits(element, id: id)?
+                    .hasTitlebarButton == true)
+            : false
         return FloatDetection.shouldIgnore(
             bundleID: app.bundleID,
-            layer: layer ?? FloatDetection.windowLayer(of: id) ?? 0,
+            layer: resolved,
             isAccessory: isAccessory,
-            rules: ignoreRules
+            rules: ignoreRules,
+            titlebarButton: button
         )
     }
 }

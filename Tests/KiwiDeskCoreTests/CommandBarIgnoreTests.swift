@@ -34,6 +34,32 @@ struct CommandBarIgnoreTests {
         )
     }
 
+    /// A buttoned window of a Dock-less app is one of its normal
+    /// windows, not a launcher (#2072) — the escape is the
+    /// accessory branch's alone; a layer-scoped bundle's raised
+    /// window stays ignored with buttons.
+    @Test("a buttoned accessory window escapes the ignore")
+    func buttonedAccessoryWindowEscapes() {
+        #expect(
+            !FloatDetection.shouldIgnore(
+                bundleID: "com.apple.captivenetworkassistant",
+                layer: 8,
+                isAccessory: true,
+                rules: noRules,
+                titlebarButton: true
+            )
+        )
+        #expect(
+            FloatDetection.shouldIgnore(
+                bundleID: "com.raycast.macos",
+                layer: 8,
+                isAccessory: false,
+                rules: noRules,
+                titlebarButton: true
+            )
+        )
+    }
+
     @Test("Accessory layer-0 windows stay managed floats")
     func accessoryNormalWindowTracked() {
         #expect(

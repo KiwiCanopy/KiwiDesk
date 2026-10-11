@@ -397,6 +397,7 @@
   "drag.ghost.caption": "Marca a posição de onde sua janela é arrastada.",
   "drag.title": "Arrasto de mouse",
   "float.refusal.accessory_app": "Apps sem ícone no Dock sempre flutuam",
+  "float.refusal.fixed_size": "Janelas que não podem ser redimensionadas sempre flutuam",
   "float.refusal.panel": "Caixas de diálogo e painéis sempre flutuam",
   "float.refusal.rule": "Uma regra de apps faz esta janela flutuar",
   "floating.color": "Floating",

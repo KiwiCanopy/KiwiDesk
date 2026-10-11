@@ -186,20 +186,36 @@ public enum FloatDetection {
             subrole: facts.subrole,
             layer: facts.layer ?? 0
         )
-        return autoFloatReason(structural: structural) {
-            rules.matches(bundleID: bundleID, title: facts.title())
-        }
+        return autoFloatReason(
+            structural: structural,
+            ruleMatches: {
+                rules.matches(bundleID: bundleID, title: facts.title())
+            },
+            fixedSize: {
+                isStandardNormalWindow(facts) && facts.zoomable() == false
+            }
+        )
     }
 
-    /// The reason's order, pure: structure first, then the rule —
-    /// asked only where structure tiles, since it costs a title
-    /// read.
+    /// A standard window on the normal layer — the one shape a
+    /// disabled zoom button marks as fixed-size (#2070).
+    static func isStandardNormalWindow(_ facts: WindowFacts) -> Bool {
+        facts.role == kAXWindowRole
+            && facts.subrole == kAXStandardWindowSubrole
+            && (facts.layer ?? 0) == 0
+    }
+
+    /// The reason's order, pure: structure first, then the rule,
+    /// then a fixed size (#2070) — each asked only where the one
+    /// before tiles, since the later ones cost a read.
     public static func autoFloatReason(
         structural: Bool,
-        ruleMatches: () -> Bool
+        ruleMatches: () -> Bool,
+        fixedSize: () -> Bool = { false }
     ) -> AutoFloatReason? {
         if structural { return .panel }
-        return ruleMatches() ? .rule : nil
+        if ruleMatches() { return .rule }
+        return fixedSize() ? .fixedSize : nil
     }
 }
 

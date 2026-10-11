@@ -80,7 +80,8 @@ extension KiwiCore {
                 isAccessory: EventLoop.classifiesAsOverlay(
                     pid: pid,
                     activationPolicy: app.activationPolicy
-                )
+                ),
+                tracked: Set(eventLoop.elements[pid]?.keys ?? [:].keys)
             )
         else { return nil }
         return eventLoop.focusedWindowID(pid: pid)

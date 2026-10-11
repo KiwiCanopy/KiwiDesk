@@ -31,6 +31,52 @@ struct AutoFloatReasonTests {
         )
     }
 
+    /// A fixed size is asked last, only where nothing else floats
+    /// the window, and only of a standard normal-layer window
+    /// (#2070): a sheet or panel reads its own reason, a zoom
+    /// button that did not answer tiles.
+    @Test("a fixed-size standard window floats, asked last")
+    func fixedSizeLast() {
+        var asked = false
+        #expect(
+            FloatDetection.autoFloatReason(
+                structural: false,
+                ruleMatches: { true },
+                fixedSize: {
+                    asked = true
+                    return true
+                }
+            ) == .rule
+        )
+        #expect(!asked)
+        func facts(
+            _ subrole: String,
+            layer: Int = 0,
+            zoomable: Bool?
+        ) -> WindowFacts {
+            WindowFacts(
+                role: kAXWindowRole,
+                subrole: subrole,
+                layer: layer,
+                zoomable: { zoomable }
+            ) { "Settings" }
+        }
+        let standard = kAXStandardWindowSubrole
+        let reason = { (facts: WindowFacts) in
+            FloatDetection.autoFloatReason(
+                facts,
+                bundleID: "com.apple.mail",
+                rules: FloatRules()
+            )
+        }
+        #expect(reason(facts(standard, zoomable: false)) == .fixedSize)
+        #expect(reason(facts(standard, zoomable: true)) == nil)
+        #expect(reason(facts(standard, zoomable: nil)) == nil)
+        #expect(
+            reason(facts(kAXDialogSubrole, zoomable: false)) == .panel
+        )
+    }
+
     @Test("a third-party app with no Dock icon is the accessory reason")
     func accessoryApp() {
         #expect(

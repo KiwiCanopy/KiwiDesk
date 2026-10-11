@@ -11,6 +11,9 @@ struct ListedWindow {
     let minimized: Bool
     let role: String
     let subrole: String
+    /// A raised-layer window's title-bar button (#2072); nil for a
+    /// layer-0 window, where no gate asks, or an unread one.
+    var raisedTitlebarButton: Bool? = nil
     /// Read only for a window tracked when the read began; the
     /// reconcile reads any other the way it always has.
     let tracked: TrackedReading?
@@ -93,11 +96,14 @@ struct ListedWindowReader: @unchecked Sendable {
                 traits: many ? traits(element, id) : nil
             )
         }
+        let raised = id.flatMap { layers[$0] }.map { $0 != 0 } == true
         return ListedWindow(
             id: id,
             minimized: minimized,
             role: facts.role,
             subrole: facts.subrole,
+            raisedTitlebarButton: raised
+                ? traits(element, id)?.hasTitlebarButton : nil,
             tracked: reading
         )
     }
