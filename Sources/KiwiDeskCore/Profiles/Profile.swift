@@ -75,6 +75,8 @@ public struct Profile: Codable, Sendable, Equatable {
     public var scrollGesture: ScrollGestureOverride?
     /// Sparse Space history override (#1655); nil follows the base.
     public var spaceHistory: SpaceHistoryKind?
+    /// Sparse layout-cycle override (#453); nil follows the base.
+    public var modeCycle: [LayoutMode]?
     /// Which look this profile wears (#1752): nil is the shared
     /// look in `gui.json`, `.own` the copy in `settings`.
     public var look: LookReference?
@@ -112,6 +114,7 @@ public struct Profile: Codable, Sendable, Equatable {
         case ignoreRules = "ignore_rules"
         case scrollGesture = "scroll_gesture"
         case spaceHistory = "space_history"
+        case modeCycle = "mode_cycle"
         case look
     }
 
@@ -134,6 +137,7 @@ public struct Profile: Codable, Sendable, Equatable {
         ignoreRules: RuleListOverride? = nil,
         scrollGesture: ScrollGestureOverride? = nil,
         spaceHistory: SpaceHistoryKind? = nil,
+        modeCycle: [LayoutMode]? = nil,
         look: LookReference? = nil
     ) {
         self.format = format
@@ -155,6 +159,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.ignoreRules = ignoreRules
         self.scrollGesture = scrollGesture
         self.spaceHistory = spaceHistory
+        self.modeCycle = modeCycle
         self.look = look
     }
 
@@ -269,6 +274,10 @@ public struct Profile: Codable, Sendable, Equatable {
         spaceHistory = try container.decodeIfPresent(
             SpaceHistoryKind.self,
             forKey: .spaceHistory
+        )
+        modeCycle = try ModeCycle.decodedIfPresent(
+            container,
+            forKey: .modeCycle
         )
         look = try container.decodeIfPresent(
             LookReference.self,

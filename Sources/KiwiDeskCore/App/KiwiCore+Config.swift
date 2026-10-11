@@ -219,7 +219,7 @@ extension KiwiCore {
         resetScrollGestureInputs()
         spaceHistory.base = .defaultKind
         spaceHistory.profileOverride = nil
-        modeCycle = ModeCycle.defaultList
+        modeCycle = ModeCycleState()
         tiler.settings.gapsOverride = [:]
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]
