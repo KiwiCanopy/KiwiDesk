@@ -74,12 +74,20 @@ struct ScreenCoveringCallerCensusTests {
         }
     }
 
-    /// The raw front-to-back read (#1788 item 4): `presents` and
-    /// `showsPresentation` are the doors, so only the seam's
-    /// declaration and the stand-down's one read spell it.
+    /// The raw front-to-back read (#1788 item 4): `presents`,
+    /// `showsPresentation` and `shelfStandsDown` are the doors,
+    /// so the seam, its live default and the CGWindowList read
+    /// beneath it are each spelled in their one home only. A new
+    /// z-order need widens THIS seam's element type, never a
+    /// second front-to-back read beside it.
     private let frontSeamAllowed: [String: Int] = [
-        "App/KiwiCore.swift": 1,
-        "App/KiwiCore+ScreenCovering.swift": 1,
+        // The seam's declaration and its live default.
+        "App/KiwiCore.swift": 2,
+        // The stand-down's one read, the default's definition and
+        // the CGWindowList call it wraps.
+        "App/KiwiCore+ScreenCovering.swift": 3,
+        // The CGWindowList read's own definition.
+        "AX/FloatDetection.swift": 1,
     ]
 
     @Test("only the presentation verdict reads the front windows")
@@ -88,7 +96,8 @@ struct ScreenCoveringCallerCensusTests {
             .appendingPathComponent("Sources/KiwiDeskCore")
         let prefix = root.path + "/"
         let pattern = try NSRegularExpression(
-            pattern: #"\bfrontWindowFrames\b"#
+            pattern: #"\b(frontWindowFrames|liveFrontFrames|"#
+                + #"frontToBackNormalFrames)\b"#
         )
         var counts: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: root) {

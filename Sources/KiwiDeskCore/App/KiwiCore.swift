@@ -235,7 +235,7 @@ public final class KiwiCore {
 
     /// The WindowServer window reads, all pinned by `makeTestCore`: the
     /// Desktop raise gate's on-screen flag and shown host (#1345/#1410),
-    /// and the front-to-back frames `showsPresentation` alone reads (#1788).
+    /// and the front-to-back frames, one door by census (#1788).
     var windowIsOnScreen: (WindowID) -> Bool? = FloatDetection.isOnScreen
     var windowIsOnShownDesktop: (WindowID) -> Bool? =
         NativeSpaces.isOnShownDesktop
