@@ -35,13 +35,13 @@ struct SizeLimitPillPopTests {
         for width in [120.0, 200.0, 480.0] as [CGFloat] {
             let pill = CGRect(x: 300, y: 40, width: width, height: 26)
             let panel = SizeLimitOverlay.panelFrame(for: pill)
-            // The plate, in the panel's own coordinates.
-            let origin = CGPoint(
-                x: pill.minX - panel.minX,
-                y: pill.minY - panel.minY
-            )
+            // The plate, in the panel's own coordinates, where
+            // `flash` puts it.
+            let plate = SizeLimitOverlay.plateFrame(pill: pill, in: panel)
+            #expect(plate.size == pill.size)
+            let origin = plate.origin
             let bounds = CGRect(origin: .zero, size: panel.size)
-            for scale in SizeLimitOverlay.popScales {
+            for scale in SizeLimitOverlay.popKeyframes.map(\.scale) {
                 let t = SizeLimitOverlay.popTransform(
                     scale: scale,
                     size: pill.size,
@@ -87,6 +87,18 @@ struct SizeLimitPillPopTests {
     /// not a scale clamped to 1.
     @Test("the pop grows past the resting size")
     func popGrows() {
-        #expect((SizeLimitOverlay.popScales.max() ?? 1) > 1)
+        let scales = SizeLimitOverlay.popKeyframes.map(\.scale)
+        #expect((scales.max() ?? 1) > 1)
+    }
+
+    /// The plate keeps its resting place on screen: the panel only
+    /// grows around it.
+    @Test("the plate sits where the pill rests")
+    func plateRestsInPlace() {
+        let pill = CGRect(x: 300, y: 40, width: 200, height: 26)
+        let panel = SizeLimitOverlay.panelFrame(for: pill)
+        let plate = SizeLimitOverlay.plateFrame(pill: pill, in: panel)
+        #expect(plate.offsetBy(dx: panel.minX, dy: panel.minY) == pill)
+        #expect(panel.contains(pill) && panel != pill)
     }
 }

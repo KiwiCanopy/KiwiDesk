@@ -31,7 +31,8 @@ final class SizeLimitOverlay {
     /// The entrance pop's keyframe scales. Its PEAK sizes the
     /// panel's margin (`panelFrame`), so a retune cannot clip the
     /// pill's ends at the window edge again (#2033).
-    nonisolated static let popScales: [CGFloat] = [0.95, 1.03, 1.0]
+    nonisolated static let popKeyframes: [(scale: CGFloat, time: Double)] =
+        [(0.95, 0), (1.03, 0.5), (1.0, 1.0)]
 
     init() {}
 
@@ -59,10 +60,24 @@ final class SizeLimitOverlay {
     /// each side by what the pop's peak adds, plus a point, so
     /// the scaled plate never meets the window edge (#2033).
     nonisolated static func panelFrame(for pill: CGRect) -> CGRect {
-        let grow = (popScales.max() ?? 1) - 1
+        let grow = (popKeyframes.map(\.scale).max() ?? 1) - 1
         return pill.insetBy(
             dx: -ceil(pill.width * grow / 2) - 1,
             dy: -ceil(pill.height * grow / 2) - 1
+        )
+    }
+
+    /// Where the plate sits inside the panel's own coordinates:
+    /// the pill's resting rect, unmoved on screen.
+    nonisolated static func plateFrame(
+        pill: CGRect,
+        in panel: CGRect
+    ) -> CGRect {
+        CGRect(
+            x: pill.minX - panel.minX,
+            y: pill.minY - panel.minY,
+            width: pill.width,
+            height: pill.height
         )
     }
 
@@ -126,13 +141,10 @@ final class SizeLimitOverlay {
         )
         let panelRect = Self.panelFrame(for: screenRect)
 
+        // The plate first: the shadow follows what the panel draws.
+        pill.plate.frame = Self.plateFrame(pill: screenRect, in: panelRect)
         pill.panel.setFrame(panelRect, display: true)
-        pill.plate.frame = CGRect(
-            x: screenRect.minX - panelRect.minX,
-            y: screenRect.minY - panelRect.minY,
-            width: screenRect.width,
-            height: screenRect.height
-        )
+        pill.panel.invalidateShadow()
         pill.panel.order(.above, relativeTo: Int(window))
         pill.panel.alphaValue = 1
 
@@ -198,16 +210,17 @@ final class SizeLimitOverlay {
     private func popEntrance(_ plate: SizeLimitPillPlate) {
         guard let layer = plate.layer else { return }
         let pop = CAKeyframeAnimation(keyPath: "transform")
-        pop.values = Self.popScales.map {
+        // The view's own size: the layer's may not be laid out yet.
+        pop.values = Self.popKeyframes.map {
             NSValue(
                 caTransform3D: Self.popTransform(
-                    scale: $0,
-                    size: layer.bounds.size,
+                    scale: $0.scale,
+                    size: plate.bounds.size,
                     anchor: layer.anchorPoint
                 )
             )
         }
-        pop.keyTimes = [0, 0.5, 1.0]
+        pop.keyTimes = Self.popKeyframes.map { NSNumber(value: $0.time) }
         pop.duration = 0.14
         pop.timingFunctions = [
             CAMediaTimingFunction(name: .easeOut),
@@ -254,74 +267,4 @@ final class SizeLimitOverlay {
         return panel
     }
 
-}
-
-/// The pill's visual content: frosted blur plate with symbol and label.
-@MainActor
-private final class SizeLimitPillPlate: NSVisualEffectView {
-    private let icon = NSImageView()
-    private let label = NSTextField(labelWithString: "")
-
-    init() {
-        super.init(frame: .zero)
-        material = .hudWindow
-        blendingMode = .behindWindow
-        state = .active
-        wantsLayer = true
-        layer?.cornerRadius = 13
-        layer?.masksToBounds = true
-
-        // Sized explicitly, matching `StickyMarkPlate`: with no
-        // configuration the symbol renders at the default point
-        // size and scales down into a 12 pt box, which draws a
-        // dense glyph like `nosign` too thin to read (#1260).
-        icon.symbolConfiguration = NSImage.SymbolConfiguration(
-            pointSize: 11,
-            weight: .semibold
-        )
-        icon.contentTintColor = .secondaryLabelColor
-        icon.imageScaling = .scaleProportionallyDown
-        addSubview(icon)
-
-        label.font = NSFont.systemFont(ofSize: 11.5, weight: .medium)
-        label.textColor = .labelColor
-        label.lineBreakMode = .byTruncatingTail
-        addSubview(label)
-    }
-
-    required init?(coder: NSCoder) { nil }
-
-    func setText(_ text: String) {
-        label.stringValue = text
-    }
-
-    /// The leading glyph, chosen by the refusal's own case
-    /// (`ResizeRefusal.pillSymbol`).
-    func setSymbol(_ name: String) {
-        icon.image = NSImage(
-            systemSymbolName: name,
-            accessibilityDescription: nil
-        )
-    }
-
-    override var fittingSize: NSSize {
-        let labelSize = label.intrinsicContentSize
-        return NSSize(width: labelSize.width + 36, height: 26)
-    }
-
-    override func layout() {
-        super.layout()
-        icon.frame = NSRect(
-            x: 8,
-            y: (bounds.height - 12) / 2,
-            width: 12,
-            height: 12
-        )
-        label.frame = NSRect(
-            x: 24,
-            y: (bounds.height - 15) / 2,
-            width: bounds.width - 30,
-            height: 15
-        )
-    }
 }
