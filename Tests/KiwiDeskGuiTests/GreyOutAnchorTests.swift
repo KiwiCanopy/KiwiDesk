@@ -59,43 +59,42 @@ struct GreyOutAnchorTests {
         // say where to go without one.
         (
             "BarColorCards.swift",
-            "help: allows ? nil : AdvancedColorsHelp",
+            "help: gates.shelfDraws ? nil : AdvancedColorsHelp",
             1
         ),
-        // The shelf card's ONE greyed row in a live card
-        // takes a live link beneath the grid instead of the
-        // header `?`, which scopes the card (#1310, owner
-        // ruling 2026-09-14).
-        (
-            "BarColorCards.swift",
-            "prose: AdvancedColorsHelp.focusedItemReference",
-            1
-        ),
-        // So does the border row's, while the border is off
-        // (#1679).
+        // The shelf card's ONE greyed row in a live card takes a
+        // live link beneath the grid instead of the header `?`,
+        // which scopes the card (#1310, owner ruling 2026-09-14;
+        // the border row since #1679).
         (
             "BarColorCards.swift",
             "prose: AdvancedColorsHelp.shelfBorderReference",
             1
         ),
+        // The role groups (#1857) carry no container gate, so
+        // their dimmed rows take links beneath the rows: the
+        // focused-item row its own sentence, every other row one
+        // link per page whose switch dims it.
         (
-            "StructureColorCards.swift",
-            "help: gates.bordersHeaderHelp",
+            "RoleColorCards.swift",
+            "prose: AdvancedColorsHelp.focusedItemReference",
             1
         ),
-        // The Borders card's ONE greyed row (unfocused off, ring
-        // on) takes the link beneath the grid (#1310).
         (
-            "StructureColorCards.swift",
+            "RoleColorCards.swift",
+            "prose: AdvancedColorsHelp.dimmedReference",
+            1
+        ),
+        // Window marks: the unfocused row's own sentence while
+        // the ring is on, the page link while it is off (#1310).
+        (
+            "WindowMarksColorCard.swift",
             "prose: AdvancedColorsHelp.unfocusedReference",
             1
         ),
-        // The drag columns are subheadings, not sections, so
-        // their live `?` is a `HelpButton` beside the title —
-        // outside the dimmed rows either way.
         (
-            "StructureColorCards.swift",
-            "HelpButton(explanation: help, subject: title)",
+            "WindowMarksColorCard.swift",
+            "prose: AdvancedColorsHelp.dimmedReference",
             1
         ),
         // The column header `?` anchor reads the resolver's

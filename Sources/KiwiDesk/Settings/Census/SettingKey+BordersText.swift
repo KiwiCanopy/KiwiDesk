@@ -6,7 +6,7 @@ extension BordersKey {
         case .borderEnabled:
             return .text("border.enabled")
         case .borderFocusedColor:
-            return .text("border.color.focused")
+            return .text("border.title")
         case .borderUnfocusedEnabled:
             return .text("border.unfocused_enabled")
         case .borderUnfocusedColor:
@@ -42,15 +42,19 @@ extension BordersKey {
             return .text("drag.enabled")
         case .dragGhostBorder, .dragDropZoneBorder:
             return .text("drag.border")
-        case .dragGhostBorderColor, .dragDropZoneBorderColor:
-            return .text("drag.border")
+        case .dragGhostBorderColor:
+            return .text("colors.ghost_border")
+        case .dragDropZoneBorderColor:
+            return .text("colors.drop_zone_border")
         case .dragGhostBorderAlignment,
             .dragDropZoneBorderAlignment:
             return .none
         case .dragGhostFill, .dragDropZoneFill:
             return .text("drag.fill")
-        case .dragGhostFillColor, .dragDropZoneFillColor:
-            return .text("drag.fill")
+        case .dragGhostFillColor:
+            return .text("colors.ghost_fill")
+        case .dragDropZoneFillColor:
+            return .text("colors.drop_zone_fill")
         case .floatingColor:
             return .text("floating.color")
         }

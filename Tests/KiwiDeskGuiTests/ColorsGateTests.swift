@@ -111,42 +111,38 @@ struct ColorsGateTests {
     /// ring is off would send the user to fix the wrong switch.
     @MainActor
     @Test("an off-page gate names the outermost reason")
-    func headerHelpPicksTheOuterReason() {
+    func rowHelpPicksTheOuterReason() {
         var settings = TilingSettings()
         settings.borderStyle.enabled = false
         settings.borderStyle.unfocusedEnabled = false
+        // Ring off: the unfocused row's specific link stands
+        // down and the Window marks card names the page instead.
+        var gates = AdvancedColorsGates(settings: settings)
+        #expect(!gates.unfocusedNeedsReference)
         #expect(
-            AdvancedColorsGates(settings: settings)
-                .bordersHeaderHelp == AdvancedColorsHelp.borderOff
-        )
-        #expect(
-            !AdvancedColorsGates(settings: settings)
-                .unfocusedNeedsReference
+            gates.dimmedDestinations(
+                of: ColorsRowOrder.windowMarksAtRest
+            ) == [.gapsAndBorders]
         )
         // Ring on, unfocused off: ONE greyed row in a live card,
-        // which takes the link beneath the grid rather than the
-        // header `?` (#1310).
+        // which takes its own sentence beneath the grid (#1310)
+        // and no generic link beside it.
         settings.borderStyle.enabled = true
+        gates = AdvancedColorsGates(settings: settings)
+        #expect(gates.unfocusedNeedsReference)
         #expect(
-            AdvancedColorsGates(settings: settings)
-                .bordersHeaderHelp == nil
-        )
-        #expect(
-            AdvancedColorsGates(settings: settings)
-                .unfocusedNeedsReference
+            gates.dimmedDestinations(
+                of: ColorsRowOrder.windowMarksAtRest
+            ).isEmpty
         )
         settings.borderStyle.unfocusedEnabled = true
-        #expect(
-            AdvancedColorsGates(settings: settings)
-                .bordersHeaderHelp == nil
-        )
         #expect(
             !AdvancedColorsGates(settings: settings)
                 .unfocusedNeedsReference
         )
 
         // The focused-item row's link (#1310) draws only while
-        // the bar is on — off, the header's outer reason covers
+        // the bar is on — off, the shelf's outer reason covers
         // the row — and stands down once the picker is Glyphs.
         settings.spaceBarStyle.enabled = false
         settings.kiwishelf.iconSource = .appImage
@@ -166,35 +162,76 @@ struct ColorsGateTests {
                 .focusedItemNeedsReference
         )
 
+        // A drag tint names its visual's switch first, its own
+        // part's second.
         settings.dragGhost.enabled = false
         settings.dragGhost.border = false
-        var gates = AdvancedColorsGates(settings: settings)
+        gates = AdvancedColorsGates(settings: settings)
         #expect(
-            gates.dragHeaderHelp(ghost: true)
+            gates.dragHelp(ghost: true, fill: false)
                 == AdvancedColorsHelp.dragOff
         )
-        #expect(gates.dragHeaderHelp(ghost: false) == nil)
-
-        // Border and Fill are siblings, not a second level: with
-        // both off the column's one live `?` must carry BOTH
-        // reasons, or the Fill row sits dimmed and unexplained.
+        #expect(!gates.dragInert(ghost: false, fill: false))
         settings.dragGhost.enabled = true
-        settings.dragGhost.fill = false
         gates = AdvancedColorsGates(settings: settings)
-        // Exact, not two `contains` checks: those pin presence
-        // only, and pass on the two sentences reversed or run
-        // together with no separator — visibly broken help.
+        #expect(gates.dragInert(ghost: true, fill: false))
+        #expect(!gates.dragInert(ghost: true, fill: true))
         #expect(
-            gates.dragHeaderHelp(ghost: true)
-                == AdvancedColorsHelp.dragBorderOff + "\n"
-                + AdvancedColorsHelp.dragFillOff
+            gates.dragHelp(ghost: true, fill: false)
+                == AdvancedColorsHelp.dragBorderOff
+        )
+        #expect(
+            gates.dragHelp(ghost: true, fill: true)
+                == AdvancedColorsHelp.dragFillOff
+        )
+    }
+
+    /// A role group draws ONE link per page whose switch dims a
+    /// row of it, in its rows' order, and none while every row
+    /// draws (#1857, #1310) — a link per row would stack the
+    /// same sentence under the card.
+    @MainActor
+    @Test("a role group links each page that dims one of its rows")
+    func roleGroupLinksEachDimmingPage() {
+        var settings = TilingSettings()
+        settings.spaceBarStyle.enabled = true
+        settings.spaceBarStyle.showFrontApp = true
+        var gates = AdvancedColorsGates(settings: settings)
+        #expect(
+            gates.dimmedDestinations(
+                of: ColorsRowOrder.accentAtRest
+            ).isEmpty
+        )
+        #expect(
+            gates.dimmedDestinations(
+                of: ColorsRowOrder.secondAccentAtRest
+            ).isEmpty
         )
 
-        settings.dragGhost.border = true
+        // Every bar off, the ring off and the ghost's border off:
+        // both pages, once each, the shelf rows' first.
+        settings.spaceBarStyle.enabled = false
+        settings.monocle.appBar.enabled = false
+        settings.scrolling.appBar.enabled = false
+        settings.borderStyle.enabled = false
+        settings.dragGhost.border = false
+        gates = AdvancedColorsGates(settings: settings)
+        #expect(!gates.shelfDraws)
+        #expect(
+            gates.dimmedDestinations(
+                of: ColorsRowOrder.accentAtRest
+            ) == [.bars, .gapsAndBorders]
+        )
+
+        // The drop zone off dims only the Second accent's drag
+        // rows; with the bars back, Gaps & Borders alone.
+        settings.spaceBarStyle.enabled = true
+        settings.dragDropZone.enabled = false
         gates = AdvancedColorsGates(settings: settings)
         #expect(
-            gates.dragHeaderHelp(ghost: true)
-                == AdvancedColorsHelp.dragFillOff
+            gates.dimmedDestinations(
+                of: ColorsRowOrder.secondAccentAtRest
+            ) == [.gapsAndBorders]
         )
     }
 }

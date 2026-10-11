@@ -7,7 +7,7 @@ extension AdvancedColorRow {
         switch key {
         case .borderFocusedColor:
             HexColorField(
-                label: L("border.color.focused", "Focused window"),
+                label: L("border.title", "Focus border"),
                 a11yLabel: L(
                     "border.focused_color.a11y",
                     "Focused window border color"
@@ -67,31 +67,36 @@ extension AdvancedColorRow {
         }
     }
 
-    /// Swatch row for drag visuals (ghost and drop zone).
+    /// Swatch row for one drag tint, labelled by its visual
+    /// since the two visuals sit in different groups (#1857).
     @ViewBuilder private func dragRow(
         ghost: Bool,
         fill: Bool
     ) -> some View {
         let visual = ghost ? settings.dragGhost : settings.dragDropZone
-        let live = gates.dragVisual(ghost)
-        let inert =
-            !live.enabled || (fill ? !live.fill : !live.border)
-        let help =
-            !live.enabled
-            ? AdvancedColorsHelp.dragOff
-            : (fill
-                ? AdvancedColorsHelp.dragFillOff
-                : AdvancedColorsHelp.dragBorderOff)
         HexColorField(
-            label: fill
-                ? L("drag.fill", "Fill") : L("drag.border", "Border"),
-            a11yLabel: fill
-                ? L("drag.fill_color.a11y", "Fill color")
-                : L("drag.border_color.a11y", "Border color"),
-            labelWidth: SettingsMetrics.dragColumnLabelColumn,
+            label: dragLabel(ghost: ghost, fill: fill),
             hex: fill ? visual.fillColor : visual.borderColor
         )
-        .modifier(gated(inert, help))
+        .modifier(
+            gated(
+                gates.dragInert(ghost: ghost, fill: fill),
+                gates.dragHelp(ghost: ghost, fill: fill)
+            )
+        )
+    }
+
+    private func dragLabel(ghost: Bool, fill: Bool) -> String {
+        switch (ghost, fill) {
+        case (true, false):
+            return L("colors.ghost_border", "Ghost border")
+        case (true, true):
+            return L("colors.ghost_fill", "Ghost fill")
+        case (false, false):
+            return L("colors.drop_zone_border", "Drop zone border")
+        case (false, true):
+            return L("colors.drop_zone_fill", "Drop zone fill")
+        }
     }
 
     private var unfocusedInert: Bool {

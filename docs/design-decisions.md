@@ -12043,11 +12043,10 @@ are co-active concerns tuned together in one session, not a
 mutually-exclusive set, so a strip would misapply the #205 "tabs
 fit a fixed exclusive set" principle. The bar colors live on
 Advanced Colors (#678 Phase 3, "Colour is its own destination"
-below), their "Advanced colors" disclosure being "More colors"
-there; the at-rest/behind-a-drawer SPLIT holds: Fill and Highlight
-are the two a drawing of the bar most visibly reflects, and the
-two at rest (the per-group preview strip that once made that point
-went with #793's composite scene; the split never rested on it).
+below). Since #1857 none of them sits behind a drawer: the
+accent ones open the page in its role groups and the rest are all
+at rest under KiwiShelf colors, because a browse should not hide
+half its subject.
 
 **[Principle] Colour is its own destination, and a colour renders
 in exactly one of them.** (#678 Phase 3, 2026-08-02.) Filing a
@@ -12070,6 +12069,22 @@ who does want the individual tints meets them grouped by
 *where you see it*, because you arrive at that page having
 noticed something on screen is wrong, not looking for
 "highlight colour" in the abstract.
+
+**Amended by #1857 (2026-10-11): the accent groups by role.**
+That premise fails for one colour. "My green" is one thing a user
+notices, drawn on four surfaces — the active Space, the bar's
+highlight, the focus border and the drag ghost — and the palette
+rules already treat it as one role, held apart from a second
+accent by the two colour-vision pair floors (active item against
+the Space Bar's focused window, the ghost against the drop zone).
+So Advanced Colours opens with two role groups side by side,
+**Accent** and **Second accent**, which are exactly one half of
+each pair, and groups by surface everywhere else, where the
+premise holds. A role group is not a second home: every colour
+still renders in one place, which is why the ring's row there is
+"Focus border" and "Focused window" names only the Space Bar ink.
+Grouping by role elsewhere — the shelf's item and fill, the
+window marks — would invent a role no palette rule defines.
 
 The cost is real and is paid deliberately: every gate on the
 Advanced Colours page now names a switch on another page, so

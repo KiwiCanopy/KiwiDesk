@@ -1,75 +1,40 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The shelf's one colour group on Advanced Colours (#1517):
-/// every colour both bars draw, plus the Space Bar's own
-/// focused-window ink.
+/// The shelf's own colours on Advanced Colours (#1517, #1857),
+/// all at rest; its accent rows open the page in the role groups.
 struct KiwiShelfColorCard: View {
     @ObservedObject var model: SettingsModel
-    @State private var moreExpanded = false
 
     private var gates: AdvancedColorsGates {
         AdvancedColorsGates(settings: model.config.settings)
-    }
-    private var allows: Bool {
-        gates.bars.containerReason(for: .kiwishelf) == nil
     }
 
     var body: some View {
         // Section header help provides the block gate anchor (#527).
         SettingsSection(
             SettingsCatalog.advancedColors.kiwishelfGroup,
-            help: allows ? nil : AdvancedColorsHelp.kiwishelfOff
+            help: gates.shelfDraws ? nil : AdvancedColorsHelp.kiwishelfOff
         ) {
             ColorGrid {
                 AdvancedColorRows(
                     model: model,
                     keys: ColorsRowOrder.kiwishelfAtRest,
-                    allows: allows,
+                    allows: gates.shelfDraws,
                     gateHelp: AdvancedColorsHelp.kiwishelfOff
                 )
             }
-            SettingsDisclosure(
-                SettingsCatalog.advancedColors.kiwishelfMore,
-                isExpanded: $moreExpanded,
-                scrollHoisted: true,
-                summary: summary
-            ) {
-                ColorGrid {
-                    AdvancedColorRows(
-                        model: model,
-                        keys: ColorsRowOrder.kiwishelfMore,
-                        allows: allows,
-                        gateHelp: AdvancedColorsHelp.kiwishelfOff
-                    )
-                }
-                .padding(.top, 8)
-                // One greyed ROW in a live card takes its reason
-                // beneath it as a live link, outside the dimmed
-                // subtree — a header `?` scopes the card (#1310).
-                if gates.shelfBorderNeedsReference {
-                    CrossReferenceRow(
-                        prose: AdvancedColorsHelp.shelfBorderReference,
-                        linkTitle: SettingsDestination.bars.title,
-                        destination: .bars
-                    )
-                }
-                if gates.focusedItemNeedsReference {
-                    CrossReferenceRow(
-                        prose: AdvancedColorsHelp.focusedItemReference,
-                        linkTitle: SettingsDestination.bars.title,
-                        destination: .bars
-                    )
-                }
+            // One greyed ROW in a live card takes its reason
+            // beneath it as a live link, outside the dimmed
+            // subtree — a header `?` scopes the card (#1310).
+            if gates.shelfBorderNeedsReference {
+                CrossReferenceRow(
+                    prose: AdvancedColorsHelp.shelfBorderReference,
+                    linkTitle: SettingsDestination.bars.title,
+                    destination: .bars
+                )
             }
         }
-    }
-
-    private var summary: String {
-        L(
-            "colors.more.kiwishelf.summary",
-            "Border, hover, badges, focused window"
-        )
     }
 }
 

@@ -14,15 +14,9 @@ struct AdvancedColorsGates {
     var borderOn: Bool { settings.borderStyle.enabled }
     var unfocusedOn: Bool { settings.borderStyle.unfocusedEnabled }
 
-    /// The Borders group's header reason: the ring off greys the
-    /// whole card, which a header `?` scopes; the unfocused row
-    /// alone takes a link beneath the grid instead (#1310).
-    var bordersHeaderHelp: String? {
-        borderOn ? nil : AdvancedColorsHelp.borderOff
-    }
-
     /// Whether the unfocused row draws its remote reason as a
-    /// link beneath the grid (#1310): only while the ring is on.
+    /// link beneath the grid (#1310): only while the ring is on —
+    /// off, the role links name the page instead.
     var unfocusedNeedsReference: Bool {
         borderOn && !unfocusedOn
     }
@@ -33,17 +27,75 @@ struct AdvancedColorsGates {
         ghost ? settings.dragGhost : settings.dragDropZone
     }
 
-    /// Header explanation for a drag column (#527).
-    func dragHeaderHelp(ghost: Bool) -> String? {
+    /// Whether a drag tint draws nothing: its visual is off, or
+    /// the part it tints is (#527).
+    func dragInert(ghost: Bool, fill: Bool) -> Bool {
         let visual = dragVisual(ghost)
-        if !visual.enabled { return AdvancedColorsHelp.dragOff }
-        let reasons = [
-            visual.border ? nil : AdvancedColorsHelp.dragBorderOff,
-            visual.fill ? nil : AdvancedColorsHelp.dragFillOff,
-        ]
-        .compactMap { $0 }
-        return reasons.isEmpty
-            ? nil : reasons.joined(separator: "\n")
+        return !visual.enabled || (fill ? !visual.fill : !visual.border)
+    }
+
+    /// The hover reason for one drag tint.
+    func dragHelp(ghost: Bool, fill: Bool) -> String {
+        if !dragVisual(ghost).enabled { return AdvancedColorsHelp.dragOff }
+        return fill
+            ? AdvancedColorsHelp.dragFillOff
+            : AdvancedColorsHelp.dragBorderOff
+    }
+
+    // MARK: - Role groups (#1857)
+
+    /// Whether any bar shows, so the shelf's colours draw.
+    var shelfDraws: Bool {
+        bars.containerReason(for: .kiwishelf) == nil
+    }
+
+    /// The destinations whose switches dim a row of a group, in
+    /// the order the group lists them — each one link beneath
+    /// the group (#1310), a row with its own sentence excepted.
+    func dimmedDestinations(
+        of keys: [SettingKey]
+    ) -> [SettingsDestination] {
+        var out: [SettingsDestination] = []
+        for key in keys {
+            guard let destination = genericReason(for: key),
+                !out.contains(destination)
+            else { continue }
+            out.append(destination)
+        }
+        return out
+    }
+
+    /// Where the switch that dims `key` lives, for a row that
+    /// takes the group's generic link; nil while the row draws,
+    /// or where it names its own reason beneath the group.
+    func genericReason(for key: SettingKey) -> SettingsDestination? {
+        switch key {
+        case .kiwishelf:
+            return shelfDraws ? nil : .bars
+        case .spaceBar(.spaceBarFocusedItemColor):
+            // Bar on, the row's own sentence explains it.
+            return shelfDraws ? nil : .bars
+        case .spaceBar(.spaceBarFocusedHighlightColor):
+            return !shelfDraws || focusedHighlightInert ? .bars : nil
+        case .borders(.borderFocusedColor):
+            return borderOn ? nil : .gapsAndBorders
+        case .borders(.borderUnfocusedColor):
+            return borderOn ? nil : .gapsAndBorders
+        case .borders(.dragGhostBorderColor):
+            return dragInert(ghost: true, fill: false)
+                ? .gapsAndBorders : nil
+        case .borders(.dragGhostFillColor):
+            return dragInert(ghost: true, fill: true)
+                ? .gapsAndBorders : nil
+        case .borders(.dragDropZoneBorderColor):
+            return dragInert(ghost: false, fill: false)
+                ? .gapsAndBorders : nil
+        case .borders(.dragDropZoneFillColor):
+            return dragInert(ghost: false, fill: true)
+                ? .gapsAndBorders : nil
+        default:
+            return nil
+        }
     }
 
     // MARK: - KiwiShelf
@@ -87,147 +139,5 @@ struct AdvancedColorsGates {
         bars.containerReason(for: .spaceBar) == nil
             && bars.containerReason(for: .kiwishelf) == nil
             && focusedItemInert
-    }
-}
-
-/// Explanatory strings for disabled swatches across destinations
-/// (`SourceScan.interpolatingFrames`, `InterpolatedLabelTests.converted`).
-/// Only the TITLE is derived — which destination owns each gate
-/// is chosen by hand below, and no map can derive it (an area is
-/// not a destination; one area spans two). So the obligation:
-/// moving a gating control to another destination updates the
-/// sentence that points at it, in the same change set — nothing
-/// here reds when it does not.
-@MainActor
-enum AdvancedColorsHelp {
-    static var borderOff: String {
-        L(
-            "colors.border_off.help",
-            "The focus border is off, so its two colors aren't "
-                + "drawn. Turn it on in %1$@.",
-            SettingsDestination.gapsAndBorders.title
-        )
-    }
-
-    static var unfocusedOff: String {
-        L(
-            "colors.unfocused_off.help",
-            "Unfocused windows get no border, so this color "
-                + "isn't drawn. Turn it on in %1$@.",
-            SettingsDestination.gapsAndBorders.title
-        )
-    }
-
-    static var dragOff: String {
-        L(
-            "colors.drag_off.help",
-            "This drag visual is off, so its colors aren't "
-                + "drawn. Turn it on in %1$@.",
-            SettingsDestination.gapsAndBorders.title
-        )
-    }
-
-    static var dragBorderOff: String {
-        L(
-            "colors.drag_border_off.help",
-            "This visual draws no border. Turn %1$@ on in %2$@.",
-            L("drag.border", "Border"),
-            SettingsDestination.gapsAndBorders.title
-        )
-    }
-
-    static var dragFillOff: String {
-        L(
-            "colors.drag_fill_off.help",
-            "This visual draws no fill. Turn %1$@ on in %2$@.",
-            L("drag.fill", "Fill"),
-            SettingsDestination.gapsAndBorders.title
-        )
-    }
-
-    /// The unfocused row's remote gate, as the sentence a
-    /// `CrossReferenceRow` links to Gaps & Borders (#1310): the
-    /// row and the switch by their own keys (#818); `%3$@` is the
-    /// link slot.
-    static var unfocusedReference: String {
-        L(
-            "colors.unfocused_off.xref",
-            "\u{201C}%1$@\u{201D} isn't drawn while "
-                + "\u{201C}%2$@\u{201D} is off — turn it on in %3$@.",
-            L("border.color.unfocused", "Unfocused windows"),
-            L(
-                "border.unfocused_enabled",
-                "Show border on unfocused windows"
-            ),
-            CrossReferenceRow.linkSlot
-        )
-    }
-
-    /// The focused-item row's remote gate, as the sentence a
-    /// `CrossReferenceRow` links to Bars (#1310): the row, the
-    /// control, its value and the value to set, every label by
-    /// its own key (#818); `%5$@` is the link slot.
-    static var focusedItemReference: String {
-        L(
-            "colors.focused_item_inert.xref",
-            "\u{201C}%1$@\u{201D} tints nothing while "
-                + "\u{201C}%2$@\u{201D} is \u{201C}%3$@\u{201D} — set "
-                + "it to \u{201C}%4$@\u{201D} in %5$@.",
-            L("space_bar.color.focused_item", "Focused window"),
-            L("kiwishelf.icon_source.label", "App glyph style"),
-            L("app_bar.icon_source.app_image", "App icons"),
-            L("app_bar.icon_source.app_font", "Symbols"),
-            CrossReferenceRow.linkSlot
-        )
-    }
-
-    /// The front-app indicator row's hover reason (#1856): the
-    /// switch by its own key, on the page that holds it (#818).
-    static var frontAppOff: String {
-        L(
-            "colors.front_app_off.help",
-            "No front-app segment draws, so its indicator isn't "
-                + "drawn. Turn on \u{201C}%1$@\u{201D} in %2$@.",
-            L("space_bar.show_front_app", "Show front app"),
-            SettingsDestination.bars.title
-        )
-    }
-
-    /// The border row's hover reason (#1679): the switch by its
-    /// own key, on the page that holds it (#818).
-    static var shelfBorderOff: String {
-        L(
-            "colors.kiwishelf_border_off.help",
-            "The border is off, so its color isn't drawn. Turn on "
-                + "\u{201C}%1$@\u{201D} in %2$@.",
-            L("kiwishelf.border", "Border"),
-            SettingsDestination.bars.title
-        )
-    }
-
-    /// The border row's remote gate, as the sentence a
-    /// `CrossReferenceRow` links to Bars (#1310): the switch by
-    /// its own key (#818); `%2$@` is the link slot.
-    static var shelfBorderReference: String {
-        L(
-            "colors.kiwishelf_border_off.xref",
-            "The border color isn't drawn while "
-                + "\u{201C}%1$@\u{201D} is off — turn it on in "
-                + "%2$@.",
-            L("kiwishelf.border", "Border"),
-            CrossReferenceRow.linkSlot
-        )
-    }
-
-    /// No bar shows, so the shelf draws no colour (#705, #818).
-    static var kiwishelfOff: String {
-        L(
-            "colors.kiwishelf_off.help",
-            "No bar shows, so these colors aren't drawn. In %1$@, "
-                + "turn one on under “%2$@” in %3$@.",
-            SettingsDestination.bars.title,
-            L("kiwishelf.show.label", "Show"),
-            L("bars.switch.kiwishelf", "KiwiShelf")
-        )
     }
 }

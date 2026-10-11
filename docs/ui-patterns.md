@@ -271,9 +271,10 @@ spelled with one word: Advanced Colors is the deep-mode twin of
 Looks & Animations (`SettingsArea.minimumMode` is `.powerUser`
 there), so on that page "advanced" already means *which mode
 you are in* and no drawer may re-use it to mean *which rows are
-hidden*. Its colour drawers are **"More colors"**, with the
-collapsed summary doing the naming ("Plate, highlight, hover,
-badges"); "More" cannot be misread as a mode.
+hidden*. A colour drawer there is **"More colors"**, with the
+collapsed summary doing the naming; "More" cannot be misread as
+a mode. (Since #1857 the page has none: every colour is at
+rest.)
 
 A connector (`Advanced: Lua bindings`) is not the fix: it
 restores the tier reading but re-splits the format. Dropping
@@ -1361,9 +1362,8 @@ Greying applied across a whole editor (#520, #527):
   and leave the label live. A block gate therefore must not
   wrap a section that *contains* a disclosure: push it down to
   the siblings, or pass the gate into the child view
-  (`AdvancedColorRows(allows:gateHelp:)`, which the bar colour
-  cards hand the same gate on both sides of their "More colors"
-  drawer). Expansion state is preserved across the toggle —
+  (`AdvancedColorRows(allows:gateHelp:)`, which the Advanced
+  Colours cards hand the shelf's block gate row by row). Expansion state is preserved across the toggle —
   with the label live, closing is one click.
 - **A block gate's explanation lives on a live anchor, not
   inside the block.** SwiftUI's `.disabled` is cumulative and
@@ -1407,9 +1407,11 @@ Greying applied across a whole editor (#520, #527):
   names the destination to go to**, in one of two shapes. Where
   the block has a live label, the pointer is a `?` on the
   nearest live label above the dimmed rows: on Advanced Colours
-  every gate is remote, so its Borders card and each Drag
-  column carry a header `?` with no block gate at all
-  (`AdvancedColorsHelp`). Where it does not, the pointer is a
+  every gate is remote, so the KiwiShelf colors card carries a
+  header `?` for its block gate (`AdvancedColorsHelp`), while a
+  row greyed in a live card takes a `CrossReferenceRow` beneath
+  it (#1310) — in the role groups, one per page whose switch
+  dims a row (#1857). Where it does not, the pointer is a
   `CrossReferenceRow` drawn under the dimmed rows and outside
   the dimmed subtree, so it stays clickable while they are
   inert — the per-space override editor's Grid auto-size and

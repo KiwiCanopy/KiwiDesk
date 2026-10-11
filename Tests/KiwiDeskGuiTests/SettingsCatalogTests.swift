@@ -282,7 +282,7 @@ struct SettingsCatalogTests {
         #expect(!perEdge.shouldExpand(revealing: nil))
         // A leaf drawer never expands for anything.
         #expect(
-            !SettingsCatalog.advancedColors.kiwishelfMore
+            !SettingsCatalog.shortcuts.luaBindings
                 .shouldExpand(revealing: "gaps.top")
         )
     }
@@ -308,15 +308,11 @@ struct SettingsCatalogTests {
     }
 
     /// Drawers sharing a label key stay distinct by instance —
-    /// the shelf's Style drawer against a future bar drawer, its
-    /// "More colors" against another card's — so no two resolve
-    /// to one `scrollTo` id (#1517 left one of each).
+    /// the shelf's Style drawer against a future bar drawer — so
+    /// no two resolve to one `scrollTo` id (#1517).
     @Test("shared-label drawers carry an instance id")
     func instanceIdsAreDistinct() {
         let style = SettingsCatalog.bars.kiwishelfStyle
         #expect(style.control.id == "kiwishelf/bars.style")
-        let colors = SettingsCatalog.advancedColors.kiwishelfMore
-        #expect(colors.control.id == "kiwishelf/colors.more")
-        #expect(colors.control.key == "colors.more")
     }
 }

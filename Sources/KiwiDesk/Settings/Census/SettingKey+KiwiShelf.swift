@@ -122,19 +122,20 @@ extension KiwiShelfKey {
             return .luaOnly
         case .dimFactor:
             return .luaOnly
-        case .fillColor, .itemColor, .activeItemColor, .highlightColor:
+        case .activeItemColor, .highlightColor, .hoverFillColor:
+            // The accent's bar half (#1857).
+            return .row(
+                .advancedColours,
+                .accent,
+                .atRest,
+                gate: Self.showGate
+            )
+        case .fillColor, .itemColor, .hoverItemColor,
+            .groupBadgeColor, .groupBadgeTextColor:
             return .row(
                 .advancedColours,
                 .kiwishelf,
                 .atRest,
-                gate: Self.showGate
-            )
-        case .hoverFillColor, .hoverItemColor, .groupBadgeColor,
-            .groupBadgeTextColor:
-            return .row(
-                .advancedColours,
-                .kiwishelf,
-                .showMore,
                 gate: Self.showGate
             )
         case .borderColor:
@@ -142,7 +143,7 @@ extension KiwiShelfKey {
             return .row(
                 .advancedColours,
                 .kiwishelf,
-                .showMore,
+                .atRest,
                 gate: .anyOf(
                     Self.showGate.settings + [.kiwishelf(.border)]
                 )
