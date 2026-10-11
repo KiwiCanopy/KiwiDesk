@@ -4488,7 +4488,7 @@ the Dock and the shelf on purpose — that is the point of it — so
 a fit pushing it clear of a strip, or a floating-mode entry
 laying it into the quit grid, breaks the thing the user just
 started, as either would break native fullscreen, which both
-already skip. The verdict is the frame alone: edge for edge with
+already skip. The verdict is the frame: edge for edge with
 a whole screen, within 2 pt, over every screen's WHOLE frame —
 never larger, which is an oversized float the fit still owes.
 The fit's skip is load-bearing twice: its frame write also
@@ -4497,14 +4497,20 @@ live entry is the whole bounce verdict, so without the skip the
 show's own first focus reads as an app answering our placement
 and the distrust raises the editor back over the show.
 
-What the frame alone costs, accepted: a titled window normally
-stops at the menu bar, but with the menu bar set to auto-hide
-and no Dock on that screen a float maximised by Fill matches the
-screen too, and is read as presenting — left unfitted, and the
-shelf standing down while it is in front. Telling the two apart
-needs the window's AX subrole, which state does not carry; the
-cost is a bar hidden behind a window the user sized to cover it.
-Every other reader of a window is ruled against the verdict one
+And the window's AX subrole, read at adoption: a titled window
+normally stops at the menu bar, but with the menu bar set to
+auto-hide and no Dock on that screen a float maximised by Fill
+matches the screen too. Its title bar is what tells it from a
+show — it reads `AXStandardWindow` whatever its frame, while
+PowerPoint's show reads `AXUnknown` (device, 2026-10-11) and so
+does Firefox's non-native fullscreen (the AX corpus) — so every
+consumer of the verdict asks `mayPresent` beside the frame
+(#1788). A subrole nothing read keeps the frame verdict. The
+verbs native fullscreen's own exemption skips — the
+inactive-Space stash, focus stepping, the sticky carry — stay on
+it alone: a show lives on the Desktop the user sees, so it parks
+with its Space, is stepped to and travels when sticky (owner,
+2026-10-11). Every other reader of a window is ruled against the verdict one
 verb at a time
 ([#1788](https://github.com/KiwiCanopy/KiwiDesk/issues/1788)),
 through the one `presents` door, which asks an effective float

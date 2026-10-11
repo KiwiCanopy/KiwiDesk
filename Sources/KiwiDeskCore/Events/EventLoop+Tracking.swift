@@ -124,6 +124,7 @@ extension EventLoop {
                 layer: layer ?? 0
             )
         window.isRaisedLayer = (layer ?? 0) != 0
+        window.subrole = subrole
         // Native fullscreen suppresses the focus ring (a ring
         // around a display-filling window shows only at the
         // corners); snapshot it here, refresh on reconcile.

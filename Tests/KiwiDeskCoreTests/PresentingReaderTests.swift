@@ -32,7 +32,8 @@ struct PresentingReaderTests {
     /// on one space, the show focused.
     private func makeCore(
         frame: CGRect,
-        floating: Bool = true
+        floating: Bool = true,
+        subrole: String? = nil
     ) -> KiwiCore {
         let core = makeTestCore(
             configDirectory: FileManager.default
@@ -50,7 +51,8 @@ struct PresentingReaderTests {
                     pid: 1,
                     appName: "Slides",
                     frame: frame,
-                    isFloating: floating
+                    isFloating: floating,
+                    subrole: subrole
                 )
             )
         )
@@ -91,6 +93,26 @@ struct PresentingReaderTests {
         #expect(!core.presents(show, at: Self.screen))
         #expect(
             core.desiredBorderSpecs().contains { $0.window == show }
+        )
+    }
+
+    /// A float maximised by Fill under an auto-hiding menu bar
+    /// covers its screen too; its title bar is what tells it from
+    /// a show (#1788 item 5), PowerPoint's show reading
+    /// `AXUnknown` on the device.
+    @Test("A titled float filling its screen is no show")
+    func titledFloatIsNoPresentation() {
+        let show = makeCore(frame: Self.screen, subrole: "AXUnknown")
+        #expect(show.presents(self.show, at: Self.screen))
+        let titled = makeCore(
+            frame: Self.screen,
+            subrole: "AXStandardWindow"
+        )
+        #expect(!titled.presents(self.show, at: Self.screen))
+        #expect(
+            titled.desiredBorderSpecs().contains {
+                $0.window == self.show
+            }
         )
     }
 

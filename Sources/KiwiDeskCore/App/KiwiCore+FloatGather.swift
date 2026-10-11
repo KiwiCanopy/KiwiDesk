@@ -57,7 +57,8 @@ extension KiwiCore {
                 // app put it (#1787); the pointer owns a dragged
                 // one.
                 !window.isFullscreen,
-                !coversAScreen(wouldBeFrame(of: window)),
+                !(Self.mayPresent(window)
+                    && coversAScreen(wouldBeFrame(of: window))),
                 id != tiler.dragExemptWindow
             else { continue }
             frames[id] = wouldBeFrame(of: window)
