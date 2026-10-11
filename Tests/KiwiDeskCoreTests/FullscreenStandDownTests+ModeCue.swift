@@ -42,6 +42,17 @@ extension FullscreenStandDownTests {
         )
     }
 
+    /// The ring is the LIVE list: a profile's own cycle wins.
+    @Test("the layout cue draws the profile's own cycle")
+    func cueDrawsTheProfileCycle() {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let (core, box) = makeCueCore(isUser: true)
+        core.modeCycle.profileOverride = [.bsp, .grid]
+        #expect(core.execute("cycle_mode", args: []).isSuccess)
+        #expect(box.cues.map(\.cycle) == [[.bsp, .grid]])
+        #expect(box.cues.map(\.current) == [.grid])
+    }
+
     @Test("a full-screen Space keeps the layout cue away")
     func fullScreenKeepsTheModeCueAway() {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
