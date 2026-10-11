@@ -280,8 +280,8 @@ public final class KiwiCore {
     var spaceHistory = SpaceHistoryState()
     /// The shared look's state (#1752, `KiwiCore+SharedLook`).
     var sharedLookLedger = SharedLookLedger()
-    /// The rehome target (#68), adopted from the active profile;
-    /// nil falls back to the space order's first survivor.
+    /// Rehome target (#68): adopted from the active profile, GUI-edited,
+    /// saved back; nil falls back to the space order's first survivor.
     var fallbackSpace: SpaceID?
     /// The layouts `cycle_mode` walks (#453, `KiwiCore+ModeCycle`).
     var modeCycle = ModeCycle.defaultList

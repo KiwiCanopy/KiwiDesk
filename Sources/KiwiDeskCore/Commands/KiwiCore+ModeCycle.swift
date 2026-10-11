@@ -8,9 +8,14 @@ extension KiwiCore {
     /// Steps the focused Space — the one `set_mode` without a
     /// Space names — and never creates one.
     func cycleMode(_ args: [JSONValue]) -> CommandResponse {
-        let raw = args.first?.stringValue ?? ModeCycleDirection.next.rawValue
-        guard let direction = ModeCycleDirection(rawValue: raw) else {
-            return .expected(ModeCycleDirection.self)
+        let direction: ModeCycleDirection
+        if let first = args.first {
+            guard let raw = first.stringValue,
+                let named = ModeCycleDirection(rawValue: raw)
+            else { return .expected(ModeCycleDirection.self) }
+            direction = named
+        } else {
+            direction = .next
         }
         guard let space = state.workspaces.activeSpace,
             let current = state.workspaces[space]?.mode
@@ -27,8 +32,10 @@ extension KiwiCore {
 
     /// `set_mode_cycle({...})`: the list the cycle walks, in order
     /// — at least two layouts, each once — as one Lua table or, from
-    /// the CLI, one argument per layout. Writes the global base,
-    /// which lasts until the next config load.
+    /// the CLI, one argument per layout. Writes the global base:
+    /// a config load resets it, and where Settings owns the config
+    /// every re-apply of `gui.json` (a profile apply, a rule write)
+    /// puts the stored list back.
     func setModeCycle(_ args: [JSONValue]) -> CommandResponse {
         let items: [JSONValue]
         if case .array(let list)? = args.first, args.count == 1 {

@@ -35,6 +35,20 @@ struct ModeCycleTests {
         #expect(mode(core) == .floating)
     }
 
+    /// Through `set_mode`'s own write, so a keyed change tells the
+    /// world like a menu pick: a `layout_change` event.
+    @Test("a cycle emits the layout change set_mode emits")
+    func emitsLikeSetMode() {
+        let core = makeCore()
+        final class Count { var value = 0 }
+        let changes = Count()
+        _ = core.bus.addSink { event, _ in
+            if event == .layoutChange { changes.value += 1 }
+        }
+        _ = core.execute("cycle_mode", args: [])
+        #expect(changes.value == 1)
+    }
+
     @Test("a layout outside the list goes to the seam")
     func outsideGoesToTheSeam() {
         let core = makeCore(mode: .grid)

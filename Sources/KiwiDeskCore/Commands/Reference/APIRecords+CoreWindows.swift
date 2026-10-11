@@ -169,9 +169,9 @@ extension APIReference {
             )
         ),
         "set_mode_cycle": APIRecord(
-            "Sets the layouts cycle_mode walks, in order: two or "
-                + "more, each once.",
-            .text("layouts")
+            "Sets the cycle_mode layouts in order, each once: a "
+                + "table, or one per argument.",
+            .choice("layouts", LayoutMode.self)
         ),
         "set_mode": APIRecord(
             "Sets a Space's layout mode; omit the Space to set "

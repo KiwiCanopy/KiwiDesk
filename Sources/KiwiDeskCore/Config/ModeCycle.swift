@@ -29,7 +29,8 @@ public enum ModeCycle {
             throw DecodingError.dataCorruptedError(
                 forKey: key,
                 in: container,
-                debugDescription: "needs two different layouts or more"
+                debugDescription:
+                    "needs \(minimumCount) different layouts or more"
             )
         }
         return modes
