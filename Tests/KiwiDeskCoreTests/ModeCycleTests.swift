@@ -30,7 +30,7 @@ struct ModeCycleTests {
             #expect(core.execute("cycle_mode", args: []).isSuccess)
             #expect(mode(core) == expected)
         }
-        let back = core.execute("cycle_mode", args: [.string("previous")])
+        let back = core.execute("cycle_mode", args: [.string("prev")])
         #expect(back.isSuccess)
         #expect(mode(core) == .floating)
     }
@@ -55,7 +55,7 @@ struct ModeCycleTests {
         _ = core.execute("cycle_mode", args: [.string("next")])
         #expect(mode(core) == .bsp)
         core.state.workspaces.setMode("1", .grid)
-        _ = core.execute("cycle_mode", args: [.string("previous")])
+        _ = core.execute("cycle_mode", args: [.string("prev")])
         #expect(mode(core) == .floating)
     }
 
@@ -88,6 +88,11 @@ struct ModeCycleTests {
         }
         #expect(core.modeCycle == [.stack, .grid])
         #expect(!core.execute("cycle_mode", args: [.string("up")]).isSuccess)
+        // Listed in `move_to_track`'s order, read off `allCases`.
+        #expect(ModeCycleDirection.allCases == [.prev, .next])
+        // One spelling, as `move_to_track`'s: no `previous` alias.
+        let alias = core.execute("cycle_mode", args: [.string("previous")])
+        #expect(!alias.isSuccess)
         let number = core.execute("cycle_mode", args: [.number(1)])
         #expect(!number.isSuccess, "a non-string direction is refused")
     }
