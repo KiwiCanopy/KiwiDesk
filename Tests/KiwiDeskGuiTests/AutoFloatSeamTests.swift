@@ -54,7 +54,7 @@ struct AutoFloatCardBranchTests {
             "GreyOut(active: !automaticOn, help: AutoFloatWords.offNote)",
             "GreyOut(active: dimmed, help: AutoFloatWords.offNote)",
             "dimmed: !automaticOn,",
-            "if floatsEveryWindow {",
+            "if Self.floatsEveryWindow(app: app, config: model.config) {",
             "Text(AutoFloatWords.inert)",
         ] {
             #expect(card.contains(needle), "\(needle)")
@@ -63,5 +63,30 @@ struct AutoFloatCardBranchTests {
         let row = try #require(card.range(of: "struct AppRuleTileRow"))
         let rowBody = String(card[row.lowerBound...])
         #expect(rowBody.occurrences(of: "GreyOut(") == 1)
+        let identity = try Self.statement(
+            in: rowBody,
+            from: "AppRuleIdentity(app: app)",
+            to: "if showsReach"
+        )
+        #expect(identity.contains("GreyOut(active: dimmed"))
+        let trash = try Self.statement(
+            in: rowBody,
+            from: "AppRuleDeleteButton(",
+            to: "floatsEveryWindow(app:"
+        )
+        #expect(!trash.contains("GreyOut("))
+    }
+
+    /// The text from `start` up to the next `end` after it.
+    private static func statement(
+        in source: String,
+        from start: String,
+        to end: String
+    ) throws -> Substring {
+        let open = try #require(source.range(of: start))
+        let close = try #require(
+            source.range(of: end, range: open.upperBound..<source.endIndex)
+        )
+        return source[open.lowerBound..<close.lowerBound]
     }
 }

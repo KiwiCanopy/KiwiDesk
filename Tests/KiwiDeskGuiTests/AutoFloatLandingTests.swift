@@ -42,4 +42,57 @@ struct AutoFloatLandingTests {
         guessed.core.eventLoop.detectedFloating[id] = .floats(.panel)
         #expect(AppRulesSection.card(holding: app, in: guessed) == nil)
     }
+
+    @Test("another app's guessed float lands nothing for this app")
+    func guessIsPerApp() {
+        let model = model()
+        let own = WindowID(4_202)
+        let other = WindowID(4_203)
+        model.core.state.windows.upsert(
+            ManagedWindow(
+                id: own,
+                pid: 4_202,
+                appName: "Steam",
+                appBundleID: app
+            )
+        )
+        model.core.state.windows.upsert(
+            ManagedWindow(
+                id: other,
+                pid: 4_203,
+                appName: "NoMachine",
+                appBundleID: "com.nomachine.nxplayer"
+            )
+        )
+        model.core.eventLoop.detectedFloating[own] = .floats(.panel)
+        model.core.eventLoop.detectedFloating[other] = .floats(.fixedSize)
+        #expect(model.core.floatsOnGuess(app: "com.nomachine.nxplayer"))
+        #expect(AppRulesSection.card(holding: app, in: model) == nil)
+    }
+}
+
+/// The Tile row's ⚠ note (#2173): only a Float rule for the whole
+/// app leaves a Tile rule nothing to tile.
+@Suite("Automatic floating inert Tile rule (#2173)")
+@MainActor
+struct AutoFloatInertRowTests {
+    private let app = "com.valvesoftware.steam"
+
+    private func floatsEvery(_ rules: [String]) -> Bool {
+        var config = GuiConfig()
+        config.floatRules = rules
+        return AppRuleTileRow.floatsEveryWindow(app: app, config: config)
+    }
+
+    @Test("a whole-app Float rule, in any case, makes the rule inert")
+    func wholeAppRule() {
+        #expect(floatsEvery(["com.ValveSoftware.Steam"]))
+    }
+
+    @Test("a title rule or another app's rule leaves it live")
+    func otherRules() {
+        #expect(!floatsEvery([]))
+        #expect(!floatsEvery(["com.valvesoftware.steam:Friends"]))
+        #expect(!floatsEvery(["com.nomachine.nxplayer"]))
+    }
 }

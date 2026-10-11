@@ -159,7 +159,7 @@ struct AppRuleTileRow: View {
                 // The row's focus destination (#816).
                 .focused($returningRow, equals: app)
             }
-            if floatsEveryWindow {
+            if Self.floatsEveryWindow(app: app, config: model.config) {
                 Text(AutoFloatWords.inert)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.warningInk)
@@ -170,9 +170,9 @@ struct AppRuleTileRow: View {
     }
 
     /// A Float rule for every window of the app leaves nothing for
-    /// this rule to tile.
-    private var floatsEveryWindow: Bool {
-        model.config.floatRules.contains {
+    /// this rule to tile; a title rule floats only some.
+    static func floatsEveryWindow(app: String, config: GuiConfig) -> Bool {
+        config.floatRules.contains {
             FloatRules.normalizedRule($0) == app
         }
     }
