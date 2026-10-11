@@ -45,36 +45,59 @@ struct AppRuleDeleteButton: View {
 
     @ViewBuilder var body: some View {
         if let sharedFrom {
-            Menu {
+            Self.menu(help: help, sharedFrom: sharedFrom, onDelete)
+        } else {
+            // Stands in the menu form's width, so a list mixing
+            // shared and unshared rules keeps one trailing column.
+            ZStack {
+                Self.slot
+                Button {
+                    onDelete(.everywhere)
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.borderless)
+                .iconButtonAffordance(help)
+            }
+        }
+    }
+
+    /// The trash's width, held empty and unannounced, for a row
+    /// with nothing to remove beside rows ending in this trash.
+    static var slot: some View {
+        menu(help: "", sharedFrom: nil) { _ in }
+            .hidden()
+            .accessibilityHidden(true)
+    }
+
+    private static func menu(
+        help: String,
+        sharedFrom: RuleReachReading?,
+        _ onDelete: @escaping (RuleRemoval) -> Void
+    ) -> some View {
+        Menu {
+            if let sharedFrom {
                 Button(RuleReachWords.removeHere(sharedFrom)) {
                     onDelete(.here)
                 }
                 Button(RuleReachWords.removeEverywhere(sharedFrom)) {
                     onDelete(.everywhere)
                 }
-            } label: {
-                // The icon ink, which the neutral menu label's own
-                // ink would otherwise outrank (#1393).
-                Image(systemName: "trash")
-                    .foregroundStyle(SettingsTheme.ink2)
             }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .neutralMenuLabel()
-            .fixedSize()
-            .iconHoverChip()
-            .help(help)
-            .accessibilityLabel(help)
-            .accessibilityValue(sharedFrom.editing)
-        } else {
-            Button {
-                onDelete(.everywhere)
-            } label: {
-                Image(systemName: "trash")
-            }
-            .buttonStyle(.borderless)
-            .iconButtonAffordance(help)
+        } label: {
+            // The icon ink, which the neutral menu label's own
+            // ink would otherwise outrank (#1393).
+            Image(systemName: "trash")
+                .foregroundStyle(SettingsTheme.ink2)
         }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .neutralMenuLabel()
+        .fixedSize()
+        .iconHoverChip()
+        .help(help)
+        .accessibilityLabel(help)
+        .accessibilityValue(sharedFrom?.editing ?? "")
     }
 }
 
