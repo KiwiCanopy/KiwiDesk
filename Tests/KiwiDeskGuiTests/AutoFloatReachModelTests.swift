@@ -80,7 +80,9 @@ struct AutoFloatReachModelTests {
         #expect(model.config.tileRules == [steam])
         #expect(!model.config.floatAutomatically)
         model.config.floatAutomatically = true
+        model.config.tileRules = []
         model.adoptRuleHalf()
         #expect(model.cleanConfig.floatAutomatically)
+        #expect(model.cleanConfig.tileRules.isEmpty)
     }
 }
