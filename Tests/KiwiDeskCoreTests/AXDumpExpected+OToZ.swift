@@ -70,20 +70,23 @@ extension AXDumpExpected {
         .row(
             "slack_huddle_share_screen_draw_on_screen_fake_window",
             .floats(.panel),
-            .kept,
-            .furnished
+            .ignored,
+            .furnished,
+            .ruled(issue: 2069)
         ),
         .row(
             "slack_huddle_share_screen_floating_popup",
             .floats(.panel),
-            .kept,
-            .furnished
+            .ignored,
+            .furnished,
+            .ruled(issue: 2069)
         ),
         .row(
             "slack_huddle_share_screen_target_picker",
             .floats(.panel),
-            .kept,
-            nil
+            .ignored,
+            nil,
+            .ruled(issue: 2069)
         ),
         .row("spotify", .tiles, .kept, .furnished),
         .row("spotify_miniplayer", .floats(.panel), .kept, .furnished),
@@ -109,7 +112,13 @@ extension AXDumpExpected {
         .row("vs_codium", .tiles, .kept, .furnished),
         .row("vs_codium_nativeFullScreen_false", .tiles, .kept, .furnished),
         .row("wisprFlow1", .floats(.accessoryApp), .ignored, nil),
-        .row("wisprFlow2", .floats(.panel), .kept, nil),
+        .row(
+            "wisprFlow2",
+            .floats(.panel),
+            .ignored,
+            nil,
+            .ruled(issue: 2069)
+        ),
         .row("xcode", .tiles, .kept, .furnished),
         .row("xcode_build_succeeded_popup", .floats(.panel), .kept, nil),
         .row("xcode_installing_system_components", nil, nil, nil),

@@ -259,6 +259,8 @@ extension EventLoop {
     /// (#1933); nil asks the element. `titlebarButton` likewise:
     /// the off-main list read carries it for a raised-layer
     /// window, and nil reads it here where the #2072 escape needs it.
+    /// `tracked` judges a window already in state below the
+    /// screen-saver level (#2069).
     func shouldIgnore(
         _ element: AXUIElement,
         id known: WindowID? = nil,
@@ -266,6 +268,7 @@ extension EventLoop {
         app: AppRef,
         layer: Int? = nil,
         isAccessory: Bool,
+        tracked: Bool,
         titlebarButton: Bool? = nil
     ) -> Bool {
         if Self.isOwnProcess(pid) {
@@ -289,7 +292,10 @@ extension EventLoop {
         guard let id = known ?? AXHelper.windowID(of: element) else {
             return false
         }
-        let resolved = layer ?? FloatDetection.windowLayer(of: id) ?? 0
+        let resolved = FloatDetection.judgedLayer(
+            layer ?? FloatDetection.windowLayer(of: id) ?? 0,
+            tracked: tracked
+        )
         let button =
             FloatDetection.needsTitlebarButton(
                 layer: resolved,

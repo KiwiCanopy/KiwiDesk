@@ -4031,6 +4031,13 @@ lifecycle keepalive some menu-bar apps create) is never tracked.
 `ignore_rules` remains the whole-app escape hatch for anything
 either heuristic misses.
 
+:::unreleased
+A window at the screen-saver level or above — a dictation HUD, a
+screen-share overlay you draw on — is ignored too, whatever its
+app: it covers the screen or hovers over everything, and is never a
+window to arrange.
+:::
+
 ### app_rules
 
 **Expects:** a Lua table mapping app **bundle identifiers** to

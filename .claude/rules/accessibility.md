@@ -112,10 +112,15 @@ editing AX code:
   untracked-focus classifier reads it from the report's element.
   `hasVisibleIgnoredPanel` cannot see buttons, so it takes the
   gate's admitted ids through `admittedWindows(of:)`
-  (`CommandBarIgnoreTests`, `AXDumpCorpusTests`). A fixed size
-  (#2070) is judged at adoption: a recheck never floats a tiled
-  window on a disabled zoom button alone, since a sheet can grey
-  it for a moment.
+  (`CommandBarIgnoreTests`, `AXDumpCorpusTests`). The escape
+  stops at the screen-saver level (#2069), whose arm takes no
+  button, arms the ignored-panel distrust for any app, and
+  refuses ADOPTION only: a tracked window rising to it is judged
+  through the one `FloatDetection.judgedLayer`, since its sweep
+  removal would read as a close (`ScreenSaverLayerWiringTests`).
+  A fixed size (#2070) is judged at adoption: a recheck never
+  floats a tiled window on a disabled zoom button alone, since a
+  sheet can grey it for a moment.
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever

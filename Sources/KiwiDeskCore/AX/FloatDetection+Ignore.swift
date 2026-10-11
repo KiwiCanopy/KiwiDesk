@@ -21,6 +21,20 @@ extension FloatDetection {
         "com.apple.controlcenter",
     ]
 
+    /// The screen-saver level: a window at or above it is a HUD or
+    /// a full-screen overlay, whatever its app, and is never
+    /// ADOPTED (#2069).
+    static let screenSaverLayer = Int(
+        CGWindowLevelForKey(.screenSaverWindow)
+    )
+
+    /// The layer the gate judges: a window tracked before it rose
+    /// to the screen-saver level keeps the verdict it had below
+    /// it, since the sweep would read its removal as a close.
+    static func judgedLayer(_ layer: Int, tracked: Bool) -> Int {
+        tracked ? min(layer, screenSaverLayer - 1) : layer
+    }
+
     public static func isBuiltInIgnoredApp(
         bundleID: String?
     ) -> Bool {
@@ -42,6 +56,7 @@ extension FloatDetection {
     ) -> Bool {
         rules.matches(bundleID: bundleID)
             || isBuiltInIgnoredApp(bundleID: bundleID)
+            || layer >= screenSaverLayer
             || layer != 0
                 && (isAccessory && !titlebarButton
                     || bundleID.map {
@@ -72,25 +87,27 @@ extension FloatDetection {
             } == true
     }
 
-    /// Checks if a window ID corresponds to a built-in layer-scoped
-    /// ignored panel.
+    /// Whether an untracked window of `layer` is a built-in
+    /// ignored panel — a layer-scoped one, or any app's at the
+    /// screen-saver level (#2069).
     public static func isBuiltInIgnoredPanel(
         bundleID: String?,
-        id: WindowID,
+        layer: Int,
         isAccessory: Bool,
         titlebarButton: Bool
     ) -> Bool {
         guard
-            requiresWindowLayers(
-                bundleID: bundleID,
-                isAccessory: isAccessory
-            )
+            layer >= screenSaverLayer
+                || requiresWindowLayers(
+                    bundleID: bundleID,
+                    isAccessory: isAccessory
+                )
         else {
             return false
         }
         return shouldIgnore(
             bundleID: bundleID,
-            layer: windowLayer(of: id) ?? 0,
+            layer: layer,
             isAccessory: isAccessory,
             rules: IgnoreRules(),
             titlebarButton: titlebarButton
