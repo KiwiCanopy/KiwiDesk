@@ -8,15 +8,37 @@ import Testing
 /// (combos parse, rows are unique, digits map to positions).
 /// This suite owns the senses those combos carry, which is a
 /// different question and the one #1094 settled: `⇧` qualifies a
-/// positional row and nothing else, and each sticky scope takes
-/// the letter its own rationale gives it.
+/// positional row, or reverses its unshifted twin (#1655, #453),
+/// and each sticky scope takes the letter its own rationale
+/// gives it.
 @Suite("The seeded ladder's modifier senses (#1094)")
 struct DefaultKeybindingLadderTests {
     private func spaces(_ count: Int) -> [SpaceID] {
         (1...count).map { SpaceID($0) }
     }
 
-    @Test("⇧ carries one meaning: no lettered row spends it")
+    /// The ruled reversals: an unshifted step → its `⇧` twin.
+    /// A new pair is a ruling (profiles.md ▸ seeded keymap).
+    private static let reversals: [String: String] = [
+        "KiwiDesk.focus_space_back()": "KiwiDesk.focus_space_forward()",
+        "KiwiDesk.cycle_mode()": "KiwiDesk.cycle_mode(\"prev\")",
+    ]
+
+    /// Whether `row` is the ruled `⇧` reversal of its seeded twin.
+    private func reversesItsTwin(
+        _ combo: KeyCombo,
+        _ row: KeyBinding,
+        in combos: [(KeyCombo, KeyBinding)]
+    ) -> Bool {
+        var plain = combo.modifiers
+        plain.remove(.shift)
+        let twin = combos.first {
+            $0.0.keyCode == combo.keyCode && $0.0.modifiers == plain
+        }?.1
+        return twin.flatMap { Self.reversals[$0.lua] } == row.lua
+    }
+
+    @Test("⇧ on a letter only reverses its twin")
     func shiftNeverQualifiesALetter() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(9),
@@ -26,9 +48,13 @@ struct DefaultKeybindingLadderTests {
         // ever qualifies a POSITIONAL row — an arrow or a digit.
         // A lettered row is a toggle or app chrome and escalates
         // nothing, so a ⇧ on one would be the second sense of ⇧
-        // that #1094 retired with `⌃⌥⇧S`. Derived from each row's
-        // own key rather than a hand-listed set, so a toggle
-        // added later joins the invariant by existing.
+        // that #1094 retired with `⌃⌥⇧S` — save the ruled reversal
+        // of a stepping twin (`⌃⌥⇧C`, #453). Derived from each
+        // row's own key rather than a hand-listed set, so a
+        // toggle added later joins the invariant by existing.
+        let combos = rows.compactMap { row in
+            KeyCombo.parse(row.combo).map { ($0, row) }
+        }
         var shifted = 0
         for row in rows {
             guard let combo = KeyCombo.parse(row.combo),
@@ -39,7 +65,10 @@ struct DefaultKeybindingLadderTests {
             let isLetter =
                 key.count == 1 && key.allSatisfy(\.isLetter)
             let site = "\(row.combo) (\(row.label))"
-            #expect(!isLetter, "⇧ on a lettered row — \(site)")
+            #expect(
+                !isLetter || reversesItsTwin(combo, row, in: combos),
+                "⇧ on a lettered row — \(site)"
+            )
         }
         // Non-vacuity: a builder that emitted no ⇧ row at all
         // would satisfy the loop above without guarding anything
@@ -96,11 +125,11 @@ struct DefaultKeybindingLadderTests {
         )
     }
 
-    /// `⇧` reverses Tab, as it does everywhere on macOS — the one
-    /// sense it carries off a positional key (#1655 ruling, an
-    /// exception #1094 argues in `docs/design-decisions.md`). So
-    /// a `⇧` row on any key that is neither an arrow nor a digit
-    /// has its unshifted twin seeded, running the opposite step.
+    /// `⇧` reverses its twin, as on Tab everywhere on macOS — the
+    /// one sense it carries off a positional key (#1655, widened
+    /// to the layout cycle's `C` by #453). So a `⇧` row on any key
+    /// that is neither an arrow nor a digit has its unshifted twin
+    /// seeded, running the opposite step.
     @Test("off a positional key, ⇧ only reverses its twin")
     func shiftReversesItsTwin() {
         let rows = DefaultKeybindings.bindings(
@@ -123,18 +152,13 @@ struct DefaultKeybindingLadderTests {
             && !positional.contains(combo.keyCode)
         {
             reversed += 1
-            var plain = combo.modifiers
-            plain.remove(.shift)
-            let twin = combos.first {
-                $0.0.keyCode == combo.keyCode && $0.0.modifiers == plain
-            }?.1
             #expect(
-                twin?.lua == "KiwiDesk.focus_space_back()"
-                    && row.lua == "KiwiDesk.focus_space_forward()",
+                reversesItsTwin(combo, row, in: combos),
                 "⇧ on \(row.combo) is not a reversal of its twin"
             )
         }
-        #expect(reversed > 0, "no ⇧ reversal seeded at all")
+        // Every ruled pair is seeded, or the register outgrew it.
+        #expect(reversed == Self.reversals.count)
     }
 
     @Test("sticky seeds ⌃⌥S global and ⌃⌥P screen-scoped")

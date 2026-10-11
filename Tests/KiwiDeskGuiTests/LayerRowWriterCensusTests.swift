@@ -100,7 +100,7 @@ struct LayerRowWriterCensusTests {
         "KiwiDesk/Settings/Sections/ShortcutsSection.swift":
             (1, "the layer's rows handed down, written back whole"),
         "KiwiDesk/Settings/Components/Keybindings/KeybindingGroups.swift":
-            (5, "catalog groups: hand the holder to their rows"),
+            (6, "catalog groups: hand the holder to their rows"),
         "KiwiDesk/Settings/Components/Keybindings/"
             + "OrphanedShortcutsGroup.swift":
             (1, "Inactive rows: hands the holder to its rows"),
