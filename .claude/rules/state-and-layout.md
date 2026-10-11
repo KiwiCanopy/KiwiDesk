@@ -2090,11 +2090,14 @@ editing here:
   new one joins `MotionScopeCensusTests`' map with its reason; a
   hotkey and a hold-glide step read as user motion through their
   own flags, and the CLI/IPC socket stays ambient by ruling. An
-  app event the user's own press caused — a close that lost the
-  active Space's focus, a window the frontmost app opened, within
-  `LaunchFollowIntent.pressGrace` of `pressAge` — is user motion
-  through the one `withAppActMotion` at the event retile, never
-  a keypress alone (#2187, `AppActMotionTests`). A
+  app event the user's own press caused — a removal that lost
+  the active Space's focus (a hide or minimize included, never a
+  window that left with its Desktop), a window the frontmost app
+  opened, inside `LaunchFollowIntent.recentPress()` — is user
+  motion through the one `withAppActMotion` at the event retile
+  (`MotionScopeCensusTests` ▸ `scopeHasOneHome`), never a
+  keypress alone (#2187, `AppActMotionTests` ▸
+  `unfocusedCloseWaits`, `backgroundOpenWaits`). A
   new `DeferredTasks.Key` states in `carriesCause` whether its
   body carries its scheduler's cause, late, or runs ambient —
   the switch is exhaustive, so the compiler asks. The scope is

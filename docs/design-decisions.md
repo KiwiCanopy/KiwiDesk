@@ -2160,9 +2160,10 @@ aimed, so it waits like ambient motion. Keyboard activity never
 counts: moving a window steals no keystroke.
 
 :::unreleased
-Your own act in an app is not ambient either (#2187). Closing the
-focused window, or a new window from the app in front, within a
-second of a key-down or click lays out at once: ⌘W and ⌘N are as
+Your own act in an app is not ambient either (#2187). Closing,
+hiding or minimizing the focused window, or a new window from the
+app in front, just after a key-down or click lays out at once —
+but never a window that left with its Desktop: ⌘W and ⌘N are as
 deliberate as a hotkey, and holding their reflow left a stack
 stale for seconds while the mouse moved. The press only admits
 such a pass; it never holds one. A window a background app opens,

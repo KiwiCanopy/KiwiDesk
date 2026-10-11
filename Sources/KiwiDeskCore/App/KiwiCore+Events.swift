@@ -270,7 +270,11 @@ extension KiwiCore {
             // A Desktop switch's re-sync takes one pass at its end.
             if !foldIntoSwitchResync() {
                 // The user's own close or open runs now (#2187).
-                withAppActMotion(event, effects: effects) {
+                withAppActMotion(
+                    event,
+                    effects: effects,
+                    reason: goneReason
+                ) {
                     retile(newlyCreatedWindow: newlyCreatedWindow)
                 }
             }

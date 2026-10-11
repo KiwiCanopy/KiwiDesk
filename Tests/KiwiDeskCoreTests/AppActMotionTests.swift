@@ -84,6 +84,43 @@ struct AppActMotionTests {
         #expect(desk.owed)
     }
 
+    /// A Desktop switch is a press too, and its focused window's
+    /// destroy can beat the switch notification: that removal is
+    /// the switch's, not the app's.
+    @Test("A focus lost to a Desktop departure waits for the hand")
+    func eagerDepartureWaits() throws {
+        let desk = try Desk()
+        desk.core.eventLoop.eagerDepartureInFlight = WindowID(1)
+        defer { desk.core.eventLoop.eagerDepartureInFlight = nil }
+        desk.core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
+        #expect(desk.issued.isEmpty)
+        #expect(desk.owed)
+    }
+
+    @Test("A focused window that vanished with its Desktop is no act")
+    func vanishedIsNoAct() throws {
+        let desk = try Desk()
+        var effects = AppliedEffects()
+        effects.removedWindow = .init(
+            app: nil,
+            bundleID: nil,
+            pid: nil,
+            isTransientOverlay: false,
+            space: nil,
+            focusLost: true,
+            tiledSlot: nil
+        )
+        let gone = KiwiEvent.windowDestroyed(
+            WindowID(1),
+            wasMinimized: false
+        )
+        let act = { (reason: WindowGoneReason) in
+            desk.core.appActPress(gone, effects: effects, reason: reason)
+        }
+        #expect(act(.closed) != nil)
+        #expect(act(.vanished) == nil)
+    }
+
     @Test("A window the frontmost app opens after a press lays out now")
     func frontmostOpenRuns() throws {
         let desk = try Desk()

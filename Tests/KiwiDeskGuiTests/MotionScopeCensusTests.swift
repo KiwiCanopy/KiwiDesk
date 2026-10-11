@@ -100,6 +100,15 @@ struct MotionScopeCensusTests {
         #expect(
             found == ["KiwiDeskCore/App/KiwiCore+MotionCause.swift": 5]
         )
+        // The app-act attribution has one door and one caller,
+        // the event retile (#2187).
+        let acts = try Self.counts(of: "withAppActMotion(")
+        #expect(
+            acts == [
+                "KiwiDeskCore/App/KiwiCore+MotionCause.swift": 1,
+                "KiwiDeskCore/App/KiwiCore+Events.swift": 1,
+            ]
+        )
         // The gate's reading is wired once, to the one fold.
         let wired = try Self.counts(of: "applier.cause =")
         #expect(
