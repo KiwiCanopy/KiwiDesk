@@ -4,17 +4,19 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Every rule-reach family reaches the three places a Save reads
-/// it (#1655's architect review): the families are the
-/// `RuleReachTable` properties of `RuleReachSnapshot`, found by
-/// reflection, so a sixth one reds here until `isEdited`,
-/// `saveRuleReach` and `overwriteProfile`'s `writingRules: false`
-/// restore all name it. Reach is a needle per site, not the
-/// encode — the behaviour suites per family hold that.
+/// it (#1655's architect review) and the one place a profile apply
+/// resolves it: the families are the `RuleReachTable` properties
+/// of `RuleReachSnapshot`, found by reflection, so a new one reds
+/// here until `isEdited`, `saveRuleReach`, `overwriteProfile`'s
+/// `writingRules: false` restore and `applyBehaviorOverrides` all
+/// name it. Reach is a needle per site, not the encode — the
+/// behaviour suites per family hold that.
 @Suite("Rule reach family parity")
 @MainActor
 struct RuleReachFamilyParityTests {
-    /// Each family → the `Profile` field a stored-profile Save
-    /// keeps as stored, or nil with the reason it keeps none.
+    /// Each family → its `Profile` field, which a stored-profile
+    /// Save keeps as stored and the apply helper resolves, or nil
+    /// with the reason it does neither.
     private static let profileField: [String: String?] = [
         "appRules": "appRules",
         "floatRules": "floatRules",
@@ -22,7 +24,8 @@ struct RuleReachFamilyParityTests {
         "spaceHistory": "spaceHistory",
         "modeCycle": "modeCycle",
         // The shortcut override is always the Save's own diff
-        // (`overwriteProfile`'s docstring), never kept as stored.
+        // (`overwriteProfile`'s docstring), never kept as stored,
+        // and each apply caller registers it with its own VM.
         "keyLayers": nil,
     ]
 
@@ -87,6 +90,24 @@ struct RuleReachFamilyParityTests {
             #expect(
                 body.contains("snapshot.\(family)"),
                 "saveRuleReach never reads \(family)"
+            )
+        }
+    }
+
+    @Test("every family's override is applied through the one helper")
+    func applyResolvesEveryFamily() throws {
+        let body = try SourceScan.functionBody(
+            of: "applyBehaviorOverrides",
+            in: "KiwiCore+StructuredConfig.swift",
+            under: "App"
+        )
+        for family in try families() {
+            guard let field = Self.profileField[family] ?? nil else {
+                continue
+            }
+            #expect(
+                body.contains("profile?.\(field)"),
+                "\(family) never resolves on a profile apply"
             )
         }
     }

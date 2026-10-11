@@ -41,17 +41,14 @@ extension KiwiCore {
         )
     }
 
-    /// Re-applies the profile's behavior overrides from one
-    /// sidecar decode: keybindings and all window-rule families.
-    /// Called from `apply(profile:)` / `apply(composed:)` so
-    /// load_profile, dock/undock, and native-Space switches
-    /// update both. Takes the overrides explicitly: callers
-    /// adopt AFTER applying, so `profiles.currentName` may
-    /// still point at the previous profile here. Resets the
-    /// active key mode to default (the set may change with the
-    /// profile). Window-rule overrides apply for either global
-    /// owner; only the keybinding half is GUI-managed and needs
-    /// a live VM.
+    /// Re-applies `profile`'s behaviour overrides — every family
+    /// `applyBehaviorOverrides` resolves, then the shortcuts — from
+    /// one sidecar decode; nil (a composed Standard) is the base.
+    /// Called from `apply(profile:)` / `apply(composed:)`, which
+    /// adopt AFTER applying, so the profile is passed rather than
+    /// read from `profiles.currentName`. Resets the active key mode
+    /// to default. The families resolve for either config owner;
+    /// only the shortcuts are GUI-managed and need a live VM.
     func reapplyStructuredOverrides(_ profile: Profile?) {
         var structured: GuiConfig?
         if isGuiManaged {
@@ -59,7 +56,6 @@ extension KiwiCore {
                 return
             }
             structured = config
-            captureGlobalWindowRuleBase(from: config)
         }
         // Resolves over either owner: the sidecar's base, or the
         // one `init.lua`'s verbs left in hand.
@@ -92,12 +88,9 @@ extension KiwiCore {
 
     // MARK: - Rules
 
-    /// Sets window rules and native-space profile bindings
-    /// directly from GuiConfig — overrides what the managed
-    /// block in `init.lua` set via Lua globals. Each rule family
-    /// resolves through the active profile's sparse override.
+    /// Adopts the sidecar's Desktop bindings and Desktop memory,
+    /// over what the managed block in `init.lua` set.
     private func applyStructuredRules(from config: GuiConfig) {
-        captureGlobalWindowRuleBase(from: config)
         desktopBindings = config.profileBindings
         // #1230: what each Desktop was showing, so a restart does
         // not re-scatter them.
@@ -132,7 +125,6 @@ extension KiwiCore {
             return
         }
         let profile = activeProfileOverrides()
-        captureGlobalWindowRuleBase(from: config)
         applyBehaviorOverrides(base: config, profile: profile)
         guard changed, let lua = keys.lua else { return }
         applyStructuredKeybindings(
@@ -145,13 +137,15 @@ extension KiwiCore {
 
     /// Every behaviour-override family but the shortcuts, resolved
     /// over `base` — the sidecar's, or nil to keep what `init.lua`'s
-    /// verbs left — with `profile`'s sparse overrides on top. The
-    /// one place a family is added; the shortcuts stay with each
+    /// verbs left — with `profile`'s sparse overrides on top. A new
+    /// family applies here, never at a call site
+    /// (`RuleReachFamilyParityTests`); the shortcuts stay with each
     /// caller, which owns the VM and the layer to land on.
     private func applyBehaviorOverrides(
         base: GuiConfig?,
         profile: Profile?
     ) {
+        if let base { captureGlobalWindowRuleBase(from: base) }
         setResolvedWindowRules(
             appRules: profile?.appRules,
             floatRules: profile?.floatRules,
