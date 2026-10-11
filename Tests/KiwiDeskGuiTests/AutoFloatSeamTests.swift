@@ -34,3 +34,34 @@ struct AutoFloatSeamTests {
         #expect(tracking.contains(".windowOverlayChanged(id, isOverlay:"))
     }
 }
+
+/// The card's grey-don't-hide branches (#2173): each is an `if` or
+/// a modifier no other guard sees, so each is needled at its site.
+@Suite("Automatic floating card branches (#2173)")
+struct AutoFloatCardBranchTests {
+    @Test("the card draws its greys, its notes and its live controls")
+    func branchesAreDrawn() throws {
+        let card = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Sections/"
+                        + "AppRulesSection+Automatic.swift"
+                )
+        )
+        for needle in [
+            "if !automaticOn, !tileApps.isEmpty {",
+            "Text(AutoFloatWords.offNote)",
+            "GreyOut(active: !automaticOn, help: AutoFloatWords.offNote)",
+            "GreyOut(active: dimmed, help: AutoFloatWords.offNote)",
+            "dimmed: !automaticOn,",
+            "if floatsEveryWindow {",
+            "Text(AutoFloatWords.inert)",
+        ] {
+            #expect(card.contains(needle), "\(needle)")
+        }
+        // The trash and the reach stay outside the dim.
+        let row = try #require(card.range(of: "struct AppRuleTileRow"))
+        let rowBody = String(card[row.lowerBound...])
+        #expect(rowBody.occurrences(of: "GreyOut(") == 1)
+    }
+}

@@ -41,10 +41,8 @@ extension KiwiCore {
     /// a bar menu's App Rules… lands (#2173).
     public func floatsOnGuess(app: String) -> Bool {
         state.windows.all.contains { window in
-            window.appBundleID == app
-                && [.fixedSize, .accessoryApp].contains(
-                    tileRefusal(of: window.id)
-                )
+            window.appBundleID?.lowercased() == app.lowercased()
+                && tileRefusal(of: window.id)?.isGuess == true
         }
     }
 }

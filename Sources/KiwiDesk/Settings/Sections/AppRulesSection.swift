@@ -51,6 +51,7 @@ struct AppRulesSection: View {
         holding app: String,
         in model: SettingsModel
     ) -> SettingsControl? {
+        let app = app.lowercased()
         if model.config.appRules.keys.contains(app) {
             return SettingsCatalog.appRules.spaceList
         }

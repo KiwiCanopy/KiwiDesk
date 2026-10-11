@@ -47,9 +47,17 @@ extension AppRulesKey {
             )
         case .ignoreRules:
             return .luaOnly
-        case .floatAutomatically, .tileRules, .appRulesAddTile,
-            .tileRuleDelete:
+        case .floatAutomatically, .tileRuleDelete:
             return .row(.appRules, .automaticFloating, .atRest)
+        case .tileRules, .appRulesAddTile:
+            // Greyed while the switch is off: nothing floats on a
+            // guess then, so a Tile rule has nothing to change.
+            return .row(
+                .appRules,
+                .automaticFloating,
+                .atRest,
+                gate: .setting(.appRules(.floatAutomatically))
+            )
         }
     }
 }

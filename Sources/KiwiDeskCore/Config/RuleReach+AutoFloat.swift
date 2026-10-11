@@ -38,7 +38,7 @@ extension RuleReachTable where Value == Bool {
 
     /// The base as the table now holds it.
     public var floatAutomaticallyBase: Bool {
-        base[Self.floatAutomaticallyKey] ?? true
+        base[Self.floatAutomaticallyKey] ?? FloatGuess.enabledByDefault
     }
 
     /// `profile`'s override against the table's base; nil where it

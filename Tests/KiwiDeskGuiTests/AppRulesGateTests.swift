@@ -46,6 +46,7 @@ struct AppRulesGateTests {
         // the card's container would grey nothing, silently.
         #expect(SettingsContainer.spaceRules.gate == nil)
         #expect(SettingsContainer.floatRules.gate == nil)
+        #expect(SettingsContainer.automaticFloating.gate == nil)
     }
 
     // MARK: - The two reasons
@@ -126,5 +127,30 @@ struct AppRulesGateTests {
                 "\(site) no longer asks `AppRulesGates`"
             )
         }
+    }
+}
+
+extension AppRulesGateTests {
+    /// The Tile list and its picker grey while the switch is off
+    /// (#2173), and the card reads it through the resolver.
+    @Test("the switch off is the Tile list's reason")
+    func automaticOff() throws {
+        var config = GuiConfig()
+        config.floatAutomatically = false
+        let off = AppRulesGates(config: config)
+        #expect(off.inertReason(for: .appRules(.tileRules)) == .automaticOff)
+        #expect(
+            off.inertReason(for: .appRules(.appRulesAddTile)) == .automaticOff
+        )
+        #expect(!off.automaticFloats)
+        #expect(AppRulesGates(config: GuiConfig()).automaticFloats)
+        let card = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Sections/"
+                        + "AppRulesSection+Automatic.swift"
+                )
+        )
+        #expect(card.contains("automaticOn: Bool { gates.automaticFloats }"))
     }
 }

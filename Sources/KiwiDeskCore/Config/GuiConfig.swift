@@ -53,7 +53,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// Whether detection floats windows on a guess — a fixed size,
     /// no Dock icon — (#2173); a profile diverges through
     /// `Profile.floatAutomatically`.
-    public var floatAutomatically = true
+    public var floatAutomatically = FloatGuess.enabledByDefault
     /// Apps whose guessed floats tile (`tile_rules`, #2173).
     public var tileRules: [String] = []
     /// The settings no profile carries (#1741); nil until this
@@ -182,7 +182,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.decodeIfPresent(
                 Bool.self,
                 forKey: .floatAutomatically
-            ) ?? true
+            ) ?? FloatGuess.enabledByDefault
         tileRules =
             try container.decodeIfPresent(
                 [String].self,

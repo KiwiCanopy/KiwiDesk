@@ -15,6 +15,7 @@ extension AppRulesSection {
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink3)
             }
+            Divider()
             HStack(spacing: 6) {
                 Text(AutoFloatWords.tileTitle)
                     .font(.subheadline)
@@ -49,7 +50,7 @@ extension AppRulesSection {
         }
     }
 
-    private var automaticOn: Bool { model.config.floatAutomatically }
+    private var automaticOn: Bool { gates.automaticFloats }
 
     /// Apps this list draws: every Tile rule the edited profile
     /// resolves.
