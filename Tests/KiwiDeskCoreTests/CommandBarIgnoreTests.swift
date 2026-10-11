@@ -133,8 +133,8 @@ struct CommandBarIgnoreTests {
     }
 
     /// A screen-saver-level window is a HUD or an overlay whatever
-    /// its app (#2069): the line is the level itself, so 999 is
-    /// still a regular app's float.
+    /// its app (#2069): the line is the level itself, so one below
+    /// it is still a regular app's float.
     @Test("any app's screen-saver-level window is never managed")
     func screenSaverLevelIgnored() {
         func ignored(_ layer: Int, button: Bool = false) -> Bool {
@@ -146,9 +146,10 @@ struct CommandBarIgnoreTests {
                 titlebarButton: button
             )
         }
-        #expect(ignored(1_000))
-        #expect(ignored(1_001, button: true))
-        #expect(!ignored(999))
+        let level = FloatDetection.screenSaverLayer
+        #expect(ignored(level))
+        #expect(ignored(level + 1, button: true))
+        #expect(!ignored(level - 1))
     }
 
     /// The level refuses adoption, never a tracked window rising
