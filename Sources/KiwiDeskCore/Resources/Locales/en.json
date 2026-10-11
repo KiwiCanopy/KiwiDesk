@@ -260,6 +260,7 @@
   "colors.sheen.spoken.lighter": "Lighter by %1$@",
   "colors.ticked_rows": "Ticked rows",
   "colors.ticked_rows.a11y": "Color for ticked rows in %1$@",
+  "colors.ticked_rows.all_dimmed": "Every ticked row is dimmed, so there is nothing to color right now.",
   "colors.ticked_rows.help": "Sets every ticked row to this color. Each row keeps its own transparency, and a dimmed row is left as it is.",
   "colors.ticked_rows.mixed_help": "The ticked rows are different colors right now. A color here sets all of them.",
   "colors.ticked_rows.none": "Tick a row to give it this color.",

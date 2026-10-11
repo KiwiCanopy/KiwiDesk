@@ -2,8 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// A role group's colour (#1857): one well over the ticked rows,
-/// a `?` and a "mixed" readout while they differ (#1383's shape),
-/// greyed while no row is ticked.
+/// a "mixed" readout while they differ — the `?` answering it is
+/// on the group's title (#1383's shape) — and, greyed while it has
+/// nothing to write, the reason beside it rather than in a hover.
 struct RolePaintRow: View {
     let role: ColorRole
     let paint: RolePaint
@@ -12,34 +13,43 @@ struct RolePaintRow: View {
     let hex: Binding<String>
 
     var body: some View {
-        HStack(spacing: 8) {
-            HexColorField(
-                label: L("colors.ticked_rows", "Ticked rows"),
-                a11yLabel: L(
-                    "colors.ticked_rows.a11y",
-                    "Color for ticked rows in %1$@",
-                    role.control.text
-                ),
-                hex: hex
-            )
-            .help(Self.help)
-            .accessibilityValue(
-                paint.mixed ? Self.mixedWord : paint.wellHex
-            )
-            if paint.mixed {
-                HelpButton(
-                    explanation: Self.mixedHelp,
-                    subject: role.control.text
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                HexColorField(
+                    label: L("colors.ticked_rows", "Ticked rows"),
+                    a11yLabel: L(
+                        "colors.ticked_rows.a11y",
+                        "Color for ticked rows in %1$@",
+                        role.control.text
+                    ),
+                    hex: hex
                 )
-                Text(Self.mixedWord)
+                .help(Self.help)
+                if paint.mixed {
+                    Text(Self.mixedWord)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            .modifier(
+                GreyOut(active: paint.idle != nil, help: idleReason)
+            )
+            // The cause is the ticks and dims right below, so the
+            // reason sits beside the well, outside its grey (#815).
+            if paint.idle != nil {
+                Text(idleReason)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .accessibilityHidden(true)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .modifier(
-            GreyOut(active: paint.targets.isEmpty, help: Self.noneHelp)
-        )
+    }
+
+    /// Why the well has nothing to write: no row is ticked, or
+    /// every ticked row is dimmed.
+    private var idleReason: String {
+        paint.idle == .allTickedDimmed
+            ? Self.allDimmedHelp : Self.noneHelp
     }
 
     static var help: String {
@@ -62,6 +72,14 @@ struct RolePaintRow: View {
 
     static var noneHelp: String {
         L("colors.ticked_rows.none", "Tick a row to give it this color.")
+    }
+
+    static var allDimmedHelp: String {
+        L(
+            "colors.ticked_rows.all_dimmed",
+            "Every ticked row is dimmed, so there is nothing to color "
+                + "right now."
+        )
     }
 }
 

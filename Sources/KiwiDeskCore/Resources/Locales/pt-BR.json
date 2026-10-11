@@ -260,6 +260,7 @@
   "colors.sheen.spoken.lighter": "Mais claro em %1$@",
   "colors.ticked_rows": "Linhas marcadas",
   "colors.ticked_rows.a11y": "Cor das linhas marcadas em “%1$@”",
+  "colors.ticked_rows.all_dimmed": "Todas as linhas marcadas estão esmaecidas, então não há nada para colorir agora.",
   "colors.ticked_rows.help": "Aplica esta cor a cada linha marcada. Cada linha mantém sua própria transparência, e uma linha esmaecida fica como está.",
   "colors.ticked_rows.mixed_help": "As linhas marcadas estão com cores diferentes agora. Uma cor aqui define todas elas.",
   "colors.ticked_rows.none": "Marque uma linha para dar a ela esta cor.",

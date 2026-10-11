@@ -260,6 +260,7 @@
   "colors.sheen.spoken.lighter": "Plus clair de %1$@",
   "colors.ticked_rows": "Lignes cochées",
   "colors.ticked_rows.a11y": "Couleur des lignes cochées dans « %1$@ »",
+  "colors.ticked_rows.all_dimmed": "Toutes les lignes cochées sont estompées, il n'y a donc rien à colorer pour l'instant.",
   "colors.ticked_rows.help": "Applique cette couleur à chaque ligne cochée. Chaque ligne garde sa propre transparence, et une ligne estompée reste telle quelle.",
   "colors.ticked_rows.mixed_help": "Les lignes cochées ont actuellement des couleurs différentes. Une couleur ici les règle toutes.",
   "colors.ticked_rows.none": "Cochez une ligne pour lui donner cette couleur.",

@@ -260,6 +260,7 @@
   "colors.sheen.spoken.lighter": "Más claro en %1$@",
   "colors.ticked_rows": "Filas marcadas",
   "colors.ticked_rows.a11y": "Color de las filas marcadas en «%1$@»",
+  "colors.ticked_rows.all_dimmed": "Todas las filas marcadas están atenuadas, así que ahora no hay nada que colorear.",
   "colors.ticked_rows.help": "Aplica este color a cada fila marcada. Cada fila conserva su propia transparencia, y una fila atenuada se queda como está.",
   "colors.ticked_rows.mixed_help": "Las filas marcadas tienen ahora colores distintos. Un color aquí los iguala a todos.",
   "colors.ticked_rows.none": "Marca una fila para darle este color.",

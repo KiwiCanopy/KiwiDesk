@@ -47,6 +47,18 @@ struct RolePaint {
             ?? Self.rgb(of: role.anchor, in: settings) ?? ""
     }
 
+    /// Why the well has nothing to write, or nil while it has.
+    enum Idle: Equatable {
+        case nothingTicked
+        case allTickedDimmed
+    }
+
+    var idle: Idle? {
+        guard targets.isEmpty else { return nil }
+        return ticked.contains(where: tickable)
+            ? .allTickedDimmed : .nothingTicked
+    }
+
     /// The targets differ, so the well shows only the first.
     var mixed: Bool {
         Set(targets.compactMap { Self.rgb(of: $0, in: settings) })

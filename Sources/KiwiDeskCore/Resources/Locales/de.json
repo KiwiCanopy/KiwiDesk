@@ -260,6 +260,7 @@
   "colors.sheen.spoken.lighter": "Heller um %1$@",
   "colors.ticked_rows": "Angehakte Zeilen",
   "colors.ticked_rows.a11y": "Farbe für angehakte Zeilen in „%1$@“",
+  "colors.ticked_rows.all_dimmed": "Jede angehakte Zeile ist abgeblendet, daher gibt es gerade nichts einzufärben.",
   "colors.ticked_rows.help": "Setzt jede angehakte Zeile auf diese Farbe. Jede Zeile behält ihre eigene Transparenz, und eine abgeblendete Zeile bleibt, wie sie ist.",
   "colors.ticked_rows.mixed_help": "Die angehakten Zeilen haben gerade verschiedene Farben. Eine Farbe hier setzt sie alle.",
   "colors.ticked_rows.none": "Hake eine Zeile an, um ihr diese Farbe zu geben.",

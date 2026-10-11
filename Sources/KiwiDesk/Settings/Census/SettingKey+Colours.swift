@@ -144,6 +144,9 @@ extension ColoursKey {
         case .lookAppliesTo:
             return .row(.coloursAndMotion, .sharedLook, .atRest)
         case .accentPaint:
+            // Its grey reads the card's own ticks — editor state the
+            // saved config cannot answer, so a wiring predicate and
+            // no census gate (gui.md); the reason is drawn beside it.
             return .row(.advancedColours, .accent, .atRest)
         case .secondAccentPaint:
             return .row(.advancedColours, .secondAccent, .atRest)

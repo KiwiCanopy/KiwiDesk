@@ -260,6 +260,7 @@
   "colors.sheen.spoken.lighter": "明るさ +%1$@",
   "colors.ticked_rows": "チェックした行",
   "colors.ticked_rows.a11y": "「%1$@」でチェックした行のカラー",
+  "colors.ticked_rows.all_dimmed": "チェックした行がすべて淡色表示のため、現在カラーを付ける対象がありません。",
   "colors.ticked_rows.help": "チェックしたすべての行をこのカラーにします。各行は自身の透明度を保ち、淡色表示の行はそのままです。",
   "colors.ticked_rows.mixed_help": "チェックした行は現在異なるカラーです。ここでカラーを選ぶとすべてに設定されます。",
   "colors.ticked_rows.none": "このカラーにする行をチェックしてください。",

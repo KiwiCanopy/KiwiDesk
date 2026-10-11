@@ -129,7 +129,7 @@ struct ColorsVerdictAnchorTests {
     func verdictMatchesTheCensus() {
         let keys = SettingKey.allCases.filter {
             $0.placement.area == .advancedColours
-                && !ColorRole.paintKeys.contains($0)
+                && SettingsDraftDiff.namesModelPath($0.id)
         }
         #expect(keys.count == 19)
         let all = states()

@@ -260,6 +260,7 @@
   "colors.sheen.spoken.lighter": "调亮 %1$@",
   "colors.ticked_rows": "勾选的行",
   "colors.ticked_rows.a11y": "“%1$@”中勾选行的颜色",
+  "colors.ticked_rows.all_dimmed": "所有勾选的行都已变暗，因此当前没有可着色的对象。",
   "colors.ticked_rows.help": "将每个勾选的行设为此颜色。每行保留自己的透明度，变暗的行保持不变。",
   "colors.ticked_rows.mixed_help": "勾选的行目前颜色不同。在这里选择的颜色会应用到全部。",
   "colors.ticked_rows.none": "勾选一行以赋予它此颜色。",

@@ -12103,6 +12103,11 @@ for the drag pair, and a seed by meaning would paint the bar's
 green onto both the moment the page opened. A dimmed row is left
 alone, and a row whose empty value follows another colour takes
 no tick at all, or a pick would pin a hex over that pairing.
+While the ticked rows differ, the well shows the first and says
+"mixed", the group's title carrying the `?` (#1383's master
+shape); and a field's commit that names the colour already stored
+writes nothing, so focus passing through the well never repaints
+the group.
 
 There is deliberately **no colour-vision warning** on the pick
 (owner, 2026-10-11). The separation floor holds the BUNDLED

@@ -160,7 +160,7 @@ struct SettingsColorSurfaceTests {
         // rows, not colours of their own (#1857).
         let placed = SettingKey.allCases.filter {
             $0.placement.area == .advancedColours
-                && !ColorRole.paintKeys.contains($0)
+                && SettingsDraftDiff.namesModelPath($0.id)
         }
         // 17 rows since #1517: the shelf's eight colours replaced
         // the two bars' seventeen; 18 since #1679, the border; 19

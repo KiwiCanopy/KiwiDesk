@@ -45,7 +45,13 @@ struct RoleColorCard: View {
     }
 
     var body: some View {
-        SettingsSection(role.control, caption: role.caption) {
+        // While the ticked rows differ, the title's `?` says so
+        // (#1383's master shape; `RolePaint.mixed` is its one home).
+        SettingsSection(
+            role.control,
+            caption: role.caption,
+            help: paint.mixed ? RolePaintRow.mixedHelp : nil
+        ) {
             RolePaintRow(role: role, paint: paint, hex: wellHex)
             Divider()
             VStack(alignment: .leading, spacing: 8) {

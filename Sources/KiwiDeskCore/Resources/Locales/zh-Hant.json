@@ -260,6 +260,7 @@
   "colors.sheen.spoken.lighter": "調亮 %1$@",
   "colors.ticked_rows": "已勾選的列",
   "colors.ticked_rows.a11y": "「%1$@」中已勾選列的顏色",
+  "colors.ticked_rows.all_dimmed": "所有已勾選的列都已變暗，因此目前沒有可著色的對象。",
   "colors.ticked_rows.help": "將每個已勾選的列設為此顏色。每列保留自己的透明度，變暗的列維持不變。",
   "colors.ticked_rows.mixed_help": "已勾選的列目前顏色不同。在這裡選擇的顏色會套用到全部。",
   "colors.ticked_rows.none": "勾選一列以賦予它此顏色。",
