@@ -178,6 +178,11 @@ struct SettingsAnchorPrimitiveTests {
         // Settings destination, so nothing there is a reveal
         // target.
         "OnboardingLooksRows.swift": 2,
+        // Animation identity (#2144): the layout plate's name
+        // crossfades on a step, old name out and new one in. Not
+        // a Settings destination, so nothing there is a reveal
+        // target.
+        "ModeCueView.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")

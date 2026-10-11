@@ -265,6 +265,8 @@ Spaces by their order and by the ones you visited
 ([`focus_space_back`](lua-reference.md#focus_space_back--focus_space_forward)).
 `set_desktop_cue` turns off the plate a Desktop switch shows
 ([`set_desktop_cue`](lua-reference.md#set_desktop_cue)).
+`set_mode_cue` turns off the plate `cycle_mode` shows
+([`set_mode_cue`](lua-reference.md#set_mode_cue)).
 :::
 
 | Category | Command | Arguments |
@@ -306,6 +308,7 @@ Spaces by their order and by the ones you visited
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
 | | `set_desktop_cue` | true\|false (default `true`) — the plate naming the Desktop a `focus_desktop` lands on |
+| | `set_mode_cue` | true\|false (default `true`) — the plate showing the layout a `cycle_mode` lands on |
 | | `set_space_history` | `per_screen` (default) \| `all_screens` — whose visits Space back and forward walk |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_float_placement` | `center` (default) \| `keep` — where a window lands when it toggles to floating or moves into a floating Space |

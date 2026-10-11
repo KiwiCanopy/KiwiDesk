@@ -12,7 +12,7 @@ extension SettingsValueReadout {
         switch key {
         case .language, .appearance, .startAtLogin,
             .installUpdatesAutomatically, .refusalSound,
-            .quitGridTargetDepth, .quitLayout,
+            .quitGridTargetDepth, .quitLayout, .modeCue,
             .advancedConfigFile,
             .advancedEditLua, .advancedDiscardArrangement,
             .advancedResetAll, .onboardingDiscoveryShown,

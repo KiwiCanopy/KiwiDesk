@@ -1019,6 +1019,7 @@
   "menu.window.zoom": "Zoom",
   "mode.power_user": "Power User",
   "mode.simple": "Simple",
+  "mode_cue.ax": "Layout: %1$@",
   "monitor_card.drop_here": "Drop a Space here",
   "monitor_card.follows_main": "Follows main screen",
   "monitor_card.main_badge": "main",

@@ -108,6 +108,8 @@ extension KiwiCore {
             return setRefusalSound(args)
         case "set_desktop_cue":
             return setDesktopCue(args)
+        case "set_mode_cue":
+            return setModeCue(args)
         case "set_space_history":
             return setSpaceHistory(args)
         case "set_shortcut_panel_liquid_glass":

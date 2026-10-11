@@ -27,7 +27,11 @@ extension KiwiCore {
                 direction: direction
             )
         else { return .fail("the layout cycle is empty") }
-        return setMode([.string(space.raw), .string(next.rawValue)])
+        let response = setMode([
+            .string(space.raw), .string(next.rawValue),
+        ])
+        if response.isSuccess { payModeCue(space) }
+        return response
     }
 
     /// `set_mode_cycle({...})`: the list the cycle walks, in order

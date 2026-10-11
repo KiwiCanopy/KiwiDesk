@@ -1019,6 +1019,7 @@
   "menu.window.zoom": "Zoom",
   "mode.power_user": "Avancé",
   "mode.simple": "Simple",
+  "mode_cue.ax": "Disposition : %1$@",
   "monitor_card.drop_here": "Déposez un espace ici",
   "monitor_card.follows_main": "Suit l'écran principal",
   "monitor_card.main_badge": "Principal",

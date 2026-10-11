@@ -1019,6 +1019,7 @@
   "menu.window.zoom": "縮放",
   "mode.power_user": "進階",
   "mode.simple": "簡單",
+  "mode_cue.ax": "佈局：%1$@",
   "monitor_card.drop_here": "將空間拖放到這裡",
   "monitor_card.follows_main": "跟隨主螢幕",
   "monitor_card.main_badge": "主要",

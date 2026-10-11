@@ -193,6 +193,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case refusal
         case quit
         case desktop
+        case mode
         case look
     }
 
@@ -282,6 +283,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             desktop: try container.decodeIfPresent(
                 AppWideSettings.Desktop.self,
                 forKey: .desktop
+            ),
+            mode: try container.decodeIfPresent(
+                AppWideSettings.Mode.self,
+                forKey: .mode
             )
         )
         // Additive since #1752: absence is "no shared look adopted
@@ -303,9 +308,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
 
     /// Strict, per AGENTS.md §5: format 1's `"2": "Work"` is
     /// rewritten once by `ConfigMigration`, never read leniently
-    /// here — a lenient reader never ends, so nothing would ever
-    /// signal that the last file carrying the retired shape is
-    /// gone.
+    /// here — a lenient reader never ends.
     private func decodeProfileBindings(
         from container: KeyedDecodingContainer<CodingKeys>
     ) throws -> [DesktopKey: DesktopBinding] {
@@ -340,6 +343,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.encode(appWide.refusal, forKey: .refusal)
             try container.encode(appWide.quit, forKey: .quit)
             try container.encode(appWide.desktop, forKey: .desktop)
+            try container.encode(appWide.mode, forKey: .mode)
         }
         try container.encodeIfPresent(look, forKey: .look)
     }

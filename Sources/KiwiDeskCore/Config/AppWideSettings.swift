@@ -18,6 +18,10 @@ public struct AppWideSettings: Equatable, Sendable {
     /// ON by default: the instant switch removed the slide that
     /// was the cue.
     public var desktopCue = true
+    /// Whether `cycle_mode` shows the plate with the cycle list
+    /// and the layout it landed on (`mode.cue`, #2144). ON by
+    /// default: the press asked for it.
+    public var modeCue = true
 
     public init() {}
 
@@ -52,14 +56,25 @@ extension AppWideSettings {
         var cue: Bool?
     }
 
+    /// `gui.json`'s `mode` group (#2144) — additive, as `desktop`.
+    struct Mode: Codable {
+        var cue: Bool?
+    }
+
     /// The stored value, or nil when neither #1741 group is
     /// present — the file predates #1741 and the crossing is still
-    /// owed. The `desktop` group (#2142) crossed nothing, so it
-    /// never decides that.
-    init?(refusal: Refusal?, quit: Quit?, desktop: Desktop? = nil) {
+    /// owed. The `desktop` (#2142) and `mode` (#2144) groups
+    /// crossed nothing, so they never decide that.
+    init?(
+        refusal: Refusal?,
+        quit: Quit?,
+        desktop: Desktop? = nil,
+        mode: Mode? = nil
+    ) {
         guard refusal != nil || quit != nil else { return nil }
         self.init()
         if let cue = desktop?.cue { desktopCue = cue }
+        if let cue = mode?.cue { modeCue = cue }
         if let sound = refusal?.sound { refusalSound = sound }
         if let depth = quit?.gridTargetDepth {
             quitGridTargetDepth = Self.clampedDepth(depth)
@@ -72,4 +87,5 @@ extension AppWideSettings {
         Quit(gridTargetDepth: quitGridTargetDepth, layout: quitLayout)
     }
     var desktop: Desktop { Desktop(cue: desktopCue) }
+    var mode: Mode { Mode(cue: modeCue) }
 }
