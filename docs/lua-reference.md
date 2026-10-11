@@ -612,6 +612,29 @@ KiwiDesk.set_mode_cycle({ "bsp", "stack", "monocle" })
 ```
 :::
 
+:::unreleased
+### show_layout_picker
+
+**Expects:** nothing.
+
+**Does:** opens a menu at the pointer listing the layouts, the
+current one checked, for the Space shown on the screen under the
+pointer — its name heads the menu. Pick a layout with the mouse,
+the arrow keys and Return, or by typing its first letters; Escape
+closes it. A pick works like `set_mode` for that Space. The menu
+opens with the current layout under the pointer. A call within
+0.15 s of the menu closing opens nothing: it is the press made
+while the menu was open.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+l", function()
+    KiwiDesk.show_layout_picker()
+end)
+```
+:::
+
 ### set_gap_global
 
 **Expects:**

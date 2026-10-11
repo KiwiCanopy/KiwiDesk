@@ -143,6 +143,10 @@ func makeTestCore(
     core.shelves.peek.now = { 0 }
     // A bar menu's Quit row terminates a real app (#1518).
     core.shelves.contextMenus.terminateApp = { _ in }
+    // The layout picker's pointer and pop-up (#762): a real
+    // pop-up tracks modally and would hang the suite.
+    core.shelves.contextMenus.pointer = { .zero }
+    core.shelves.contextMenus.popUp = { _, _ in }
     // New Window activates the target's app and both window
     // actions press another app's AX element (#1518).
     core.openOrFocus.activate = { _ in }

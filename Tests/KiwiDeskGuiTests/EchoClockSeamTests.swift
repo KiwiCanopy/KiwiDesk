@@ -46,6 +46,9 @@ struct EchoClockSeamTests {
         "BootNoticeController.swift": 1,
         // `BarPeek.now`, the hover peek's cool-down clock (#1946).
         "BarPeek.swift": 1,
+        // `BarContextMenus.clock`, the layout picker's
+        // queued-press window (#762).
+        "BarContextMenus.swift": 1,
     ]
 
     @Test("the host uptime is read only as a seam's default")

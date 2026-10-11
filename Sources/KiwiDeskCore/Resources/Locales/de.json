@@ -876,6 +876,7 @@
   "layout_params.stack_position": "Stack-Position",
   "layout_params.stack_position.help": "Welche Bildschirmseite der Stack-Bereich einnimmt; der Hauptbereich erhält die andere Seite. Der Stack richtet sich passend aus: Ein linker oder rechter Stack verläuft von oben nach unten, ein oberer oder unterer nebeneinander.",
   "layout_params.wrap_focus.help": "Wenn aktiv, springt die Fokusbewegung nach dem letzten Fenster zum ersten und nach dem ersten zurück zum letzten, anstatt am Ende zu stoppen.",
+  "layout_picker.header": "Space %1$@",
   "looks.applied_other_colors": "Angewendet, mit anderen Farben",
   "looks.bundled": "Mitgeliefert",
   "looks.caption": "Wende einen mitgelieferten oder gespeicherten Look an — seine Farben, wo die Leisten sitzen, Form, Schrift und Indikatoren von KiwiShelf, Form und Glanz des Fokus-Rahmens sowie die Fensterabstände. Einmalig übernommen, keine Live-Verknüpfung; was die Leisten anzeigen, gehört nie zu einem Look. Seine Abstände verschieben deine Fenster, sobald du sicherst.",
