@@ -874,8 +874,8 @@ or one with a name, has no digit: the space steps and the history
 reach it, and Shortcuts & Gestures can give it a key of its own.
 
 `⌃⌥C` moves the focused space to its next layout
-([`cycle_mode`](lua-reference.md#cycle_mode)). Previous layout
-has no default key; give it one in Shortcuts & Gestures ▸ Layout.
+([`cycle_mode`](lua-reference.md#cycle_mode)) and `⌃⌥⇧C` to the
+previous one, `⇧` stepping back as it does on `Tab`.
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each
 Desktop gets its key the first time KiwiDesk sees it, so a key you

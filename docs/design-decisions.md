@@ -9799,12 +9799,16 @@ paid.** Stepping a Space to its next layout is a verb you tap, so
 it takes a mnemonic letter on `⌃⌥` — C for cycle — beside the
 toggles. It goes in the base seed, not `appChromeRows`: it acts on
 a Space, and a GUI-created layer re-seeds only chrome. Previous
-layout ships unbound, since its natural key would be `⌃⌥⇧C` and
-`⇧` never qualifies a letter (#1094). The collision measure (2026-10-11,
-recorded on #453): `SystemShortcuts.map`,
+layout takes `⌃⌥⇧C` (owner, 2026-10-11): #1094 keeps `⇧` off a
+lettered toggle because there it read as "act on the window",
+but a letter whose unshifted row STEPS has a twin to reverse, the
+second sense #1655 gave `⇧` on `Tab`. A toggle still never takes
+it. The collision measure (2026-10-11, recorded on #453):
+`SystemShortcuts.map`,
 `com.apple.symbolichotkeys`, sixteen apps' menus read through AX
 with the fn bit decoded, and the Xcode, VS Code and JetBrains
-default tables found nothing on `⌃⌥C`. VoiceOver's VO-C and
+default tables found nothing on `⌃⌥C` or `⌃⌥⇧C` (JetBrains'
+Ctrl+Alt+Shift+C becomes ⌥⇧⌘C on a Mac). VoiceOver's VO-C and
 Emacs's C-M-c under Option-as-Meta are the class the whole `⌃⌥`
 tier already accepts.
 :::

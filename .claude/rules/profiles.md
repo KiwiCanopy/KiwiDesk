@@ -71,8 +71,11 @@ because two real clients now remove drift — see
   `⇧Tab` does everywhere on macOS (#1655).** It qualifies a
   positional row, so a lettered toggle never carries it: `⌃⌥⇧S`
   did, and it was the one chord in the seed a user who had
-  learned the ladder read wrong (#1094, `DefaultKeybindingsTests`
-  ▸ `shiftNeverQualifiesALetter`). On the ladder `⇧` acts on the
+  learned the ladder read wrong (#1094,
+  `DefaultKeybindingLadderTests` ▸ `shiftNeverQualifiesALetter`).
+  A letter whose unshifted row STEPS may take the reversal — the
+  layout cycle's `⌃⌥⇧C` (#453) — and a further pair joins that
+  suite's `reversals` register as a ruling. On the ladder `⇧` acts on the
   window on an arrow (swap) and on a digit (send it to a Space),
   and `⌘` steps the Spaces on an arrow and sends-and-follows on a
   digit, which is #1655's re-ruling of #1176; the tier an arrow

@@ -3,8 +3,9 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The layout cycle's seed (#453, keys ruled 2026-10-09): Next
-/// layout on `⌃⌥C` in the BASE seed, Previous layout unbound.
+/// The layout cycle's seed (#453, keys ruled 2026-10-09 and
+/// 2026-10-11): Next layout on `⌃⌥C` and Previous layout on
+/// `⌃⌥⇧C`, in the BASE seed.
 /// Chord hygiene — parse, uniqueness, the system register — is
 /// the generic nets' in `DefaultKeybindingsTests` and
 /// `SizeLayerSeedTests`.
@@ -24,21 +25,27 @@ struct LayoutCycleSeedTests {
         #expect(seeded.filter { $0 == row }.count == 1)
     }
 
-    /// No `⇧` on a lettered row (#1094), so the back step
-    /// has no seeded key at all.
-    @Test("Previous layout ships unbound")
-    func previousLayoutIsUnbound() {
+    /// `⇧` reverses its twin (#1655, widened by #453); the
+    /// ladder's senses are `DefaultKeybindingLadderTests`'.
+    @Test("⌃⌥⇧C runs Previous layout in the base seed")
+    func seedsPreviousLayout() {
+        let row = DefaultKeybindings.previousLayoutRow()
+        #expect(row.combo == "control+option+shift+c")
+        #expect(row.lua == "KiwiDesk.cycle_mode(\"prev\")")
+        #expect(row.label == "Previous layout")
         #expect(
-            seeded.filter { $0.lua.contains("cycle_mode") }
-                == [DefaultKeybindings.nextLayoutRow()]
+            seeded.filter { $0.lua.contains("cycle_mode") } == [
+                DefaultKeybindings.nextLayoutRow(),
+                DefaultKeybindings.previousLayoutRow(),
+            ]
         )
     }
 
     /// A layout verb, not app chrome: a GUI-created layer
     /// does not inherit it (the ruling's "base seed, not
     /// `appChromeRows`").
-    @Test("Next layout is not app chrome")
-    func nextLayoutIsNotChrome() {
+    @Test("the layout cycle is not app chrome")
+    func cycleIsNotChrome() {
         #expect(
             !DefaultKeybindings.appChromeRows().contains {
                 $0.lua.hasPrefix("KiwiDesk.cycle_mode")
