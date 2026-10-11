@@ -19,6 +19,8 @@ enum SettingsContainer: CaseIterable, Hashable {
     case appliesImmediately
     case layers
     case looks
+    /// Shortcuts' Layout group (#453).
+    case layout
     case luaBindings
     case screenFingerprints
     case monocle
@@ -68,6 +70,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .grid,
             .habits, .kiwishelf, .appliesImmediately, .layers,
+            .layout,
             .looks, .luaBindings,
             .screenFingerprints, .monocle, .gestures,
             .moveWindows, .openApplications,

@@ -78,6 +78,10 @@ struct ShortcutsControls: Sendable {
         "shortcuts.tracks.move",
         "Move windows in the track layout"
     )
+    let layoutKeys = SettingsControl(
+        "shortcuts.section.layout",
+        "Layout"
+    )
     let sizeFloat = SettingsControl(
         "shortcuts.section.size_float",
         "Size & float"

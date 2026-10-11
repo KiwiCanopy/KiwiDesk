@@ -51,10 +51,11 @@ because two real clients now remove drift — see
   user holds, so it is the only held thing on `⌥⌘`, and no other
   pressed verb joins the history pair there — a second key is a
   ruling of its own, argued in `docs/design-decisions.md` ▸ "One
-  pressed exception rides `⌥⌘`". The toggles (`⌃⌥F`, `⌃⌥S`,
-  `⌃⌥P`) and app chrome (`⌃⌥K`, `⌃⌥,`) are pressed, so they stay
-  on the base tier as mnemonic keys (`SizeLayerSeedTests` ▸
-  `sizeLayerCarriesOnlySize`, `DefaultKeybindingsTests`).
+  pressed exception rides `⌥⌘`". Every other pressed verb off
+  the ladder — the toggles, Next layout, app chrome — stays on
+  the base tier as a mnemonic letter (`SizeLayerSeedTests` ▸
+  `sizeLayerCarriesOnlySize`, `DefaultKeybindingsTests`,
+  `LayoutCycleSeedTests`).
 - **App chrome is seeded from the ONE `appChromeRows`, and
   every site that authors a layer takes it (#602/#1381).** The
   base seed and a GUI-created layer are two authoring sites, and
@@ -70,8 +71,11 @@ because two real clients now remove drift — see
   `⇧Tab` does everywhere on macOS (#1655).** It qualifies a
   positional row, so a lettered toggle never carries it: `⌃⌥⇧S`
   did, and it was the one chord in the seed a user who had
-  learned the ladder read wrong (#1094, `DefaultKeybindingsTests`
-  ▸ `shiftNeverQualifiesALetter`). On the ladder `⇧` acts on the
+  learned the ladder read wrong (#1094,
+  `DefaultKeybindingLadderTests` ▸ `shiftNeverQualifiesALetter`).
+  A letter whose unshifted row STEPS may take the reversal — the
+  layout cycle's `⌃⌥⇧C` (#453) — and a further pair joins that
+  suite's `reversals` register as a ruling. On the ladder `⇧` acts on the
   window on an arrow (swap) and on a digit (send it to a Space),
   and `⌘` steps the Spaces on an arrow and sends-and-follows on a
   digit, which is #1655's re-ruling of #1176; the tier an arrow

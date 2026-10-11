@@ -100,7 +100,8 @@ struct SettingsCatalogSiteTests {
         // two rows stay as Open applications' controls.
         // 124 since #1948: the two Per screen drawers.
         // 125 since #2142: the Desktop switch cue row.
-        #expect(names.count == 125)
+        // 126 since #453: Shortcuts' Layout group.
+        #expect(names.count == 126)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

@@ -43,6 +43,10 @@ struct ShortcutsBespokeContainerTests {
                 ShortcutsRowOrder.moveWindowsAtRest
             ),
             (
+                "layoutAtRest", .layout,
+                ShortcutsRowOrder.layoutAtRest
+            ),
+            (
                 "sizeAndFloatAtRest", .sizeAndFloat,
                 ShortcutsRowOrder.sizeAndFloatAtRest
             ),

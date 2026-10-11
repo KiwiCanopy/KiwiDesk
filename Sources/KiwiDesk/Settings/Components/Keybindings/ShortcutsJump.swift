@@ -8,6 +8,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     case gestures
     case focus
     case moveWindows
+    case layout
     case sizeFloat
     case openApplications
 
@@ -20,6 +21,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .gestures: return SettingsCatalog.shortcuts.gestures.control
         case .focus: return SettingsCatalog.shortcuts.focusKeys
         case .moveWindows: return SettingsCatalog.shortcuts.moveWindows
+        case .layout: return SettingsCatalog.shortcuts.layoutKeys
         case .sizeFloat: return SettingsCatalog.shortcuts.sizeFloat
         case .openApplications:
             return SettingsCatalog.shortcuts.openApplications
@@ -32,6 +34,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .gestures: return .gestures
         case .focus: return .focus
         case .moveWindows: return .moveWindows
+        case .layout: return .layout
         case .sizeFloat: return .sizeAndFloat
         case .openApplications: return .openApplications
         }
