@@ -35,6 +35,7 @@ struct EventLoopWindowLedgerParityTests {
     /// Every stored property whose type names `WindowID`.
     private static let register: Set<String> = [
         "elements", "detectedFloating", "detectedFullscreen",
+        "detectedSubroles",
         "ignorePending", "trackedFrames", "tabCarriers",
         "removalDistrusted", "healQuiet", "transientRetried",
         "eagerDepartureInFlight",
@@ -113,6 +114,7 @@ struct EventLoopWindowLedgerParityTests {
         loop.elements[pid] = [old: element]
         loop.detectedFloating[old] = .floats(.fixedSize)
         loop.detectedFullscreen[old] = true
+        loop.detectedSubroles[old] = "AXUnknown"
         loop.ignorePending.insert(old)
         loop.trackedFrames[old] = .zero
         loop.tabCarriers.insert(old)

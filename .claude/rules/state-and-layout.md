@@ -1638,11 +1638,16 @@ editing here:
 - **A tracked window's "is it presenting" is asked through the
   one `KiwiCore.presents` door (#1788)**, which rules the float
   gate once — a tiled slot a gapless layout sizes to its screen
-  is no show. The raw `covers` / `coversAScreen` stays for a
-  CANDIDATE frame whose float ruling its caller already made
-  (the fit, the gather) and for the verdict's own home;
-  `ScreenCoveringCallerCensusTests` reds a new raw caller until
-  it routes or names its reason. A reader of the verdict that
+  is no show. A CANDIDATE frame whose float ruling its caller
+  already made (the fit, the gather) takes `coversAsShow`, the
+  one composition of the frame verdict with the subrole's
+  `mayPresent`, and the raw `covers` / `coversAScreen` stays in
+  the verdict's own home; `ScreenCoveringCallerCensusTests` reds
+  a new raw caller, and a `mayPresent` or `coversAsShow` read
+  outside its census, until it routes or names its reason. The
+  subrole is the event loop's, refreshed change-only like the
+  fullscreen flag on every recheck and re-read on a cover
+  crossing (`PresentingSubroleWiringTests`). A reader of the verdict that
   draws refreshes on the cover CROSSING too, since a move or
   resize may retile nothing (`PresentingReaderTests` ▸
   `crossingRefreshesRingAndMark`); the readers ruled so far are

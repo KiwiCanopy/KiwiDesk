@@ -27,7 +27,7 @@ struct ReconcileSnapshotTests {
     }
 
     @MainActor
-    private final class Box {
+    final class Box {
         var applying = false
         var reading = false
         /// LaunchServices seams asked outside the off-main read.
@@ -49,10 +49,10 @@ struct ReconcileSnapshotTests {
         }
     }
 
-    private let pid: pid_t = 727_727
-    private let first = WindowID(41)
+    let pid: pid_t = 727_727
+    let first = WindowID(41)
     private let second = WindowID(42)
-    private var ref: AppRef {
+    var ref: AppRef {
         AppRef(bundleID: "test.kiwi.snapshot", name: "Snapshot")
     }
     private var elementOne: AXUIElement {
@@ -64,7 +64,7 @@ struct ReconcileSnapshotTests {
 
     /// A loop tracking two windows of `pid`, both listed, every
     /// read pumped synchronously and the delivery marked.
-    private func makeLoop(
+    func makeLoop(
         policy: NSApplication.ActivationPolicy = .regular
     ) -> (loop: EventLoop, box: Box) {
         let loop = EventLoop()
@@ -153,6 +153,8 @@ struct ReconcileSnapshotTests {
                 box.events.append("fullscreen w\(id.raw) \(on)")
             case .windowFloatChanged(let id, let on):
                 box.events.append("float w\(id.raw) \(on)")
+            case .windowSubroleChanged(let id, let subrole):
+                box.events.append("subrole w\(id.raw) \(subrole)")
             case .windowDestroyed(let id, _):
                 box.events.append("destroyed w\(id.raw)")
             case .windowHidden(let id):
