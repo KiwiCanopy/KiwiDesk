@@ -57,4 +57,32 @@ struct LayoutPickerTests {
         perform()
         #expect(core.state.workspaces[SpaceID("3")]?.mode == .monocle)
     }
+
+    /// The pointer names the screen, the screen names the Space:
+    /// on a desk of two, the one under the pointer, not the
+    /// focused one. A point on the seam belongs to the upper
+    /// screen, as every other pointer reader decides.
+    @Test("the screen under the pointer names the Space")
+    func pointerPicksTheScreen() {
+        let left = CGRect(x: 0, y: 0, width: 1000, height: 800)
+        let right = CGRect(x: 1000, y: 0, width: 1000, height: 800)
+        let below = CGRect(x: 0, y: -800, width: 1000, height: 800)
+        let screens = [
+            (frame: left, id: DisplayID(1)),
+            (frame: right, id: DisplayID(2)),
+            (frame: below, id: DisplayID(3)),
+        ]
+        #expect(
+            KiwiCore.display(at: CGPoint(x: 1500, y: 400), among: screens)
+                == DisplayID(2)
+        )
+        #expect(
+            KiwiCore.display(at: CGPoint(x: 500, y: 0), among: screens)
+                == DisplayID(1)
+        )
+        #expect(
+            KiwiCore.display(at: CGPoint(x: 5000, y: 0), among: screens)
+                == nil
+        )
+    }
 }

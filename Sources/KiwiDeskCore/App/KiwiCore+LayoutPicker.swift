@@ -16,40 +16,33 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// The Space shown on the screen holding `point` (Cocoa).
+    /// The Space shown on the screen holding `point` (Cocoa), else
+    /// the active one.
     func spaceUnderPointer(_ point: NSPoint) -> SpaceID? {
-        let screen = ScreenList.all.first {
-            NSMouseInRect(point, $0.frame, false)
+        let screens = ScreenList.all.compactMap { screen in
+            screen.kiwiDisplayID.map { (frame: screen.frame, id: $0) }
         }
-        guard let number = screen?.screenNumber else {
-            return state.workspaces.activeSpace
-        }
-        return state.workspaces.activeSpace(on: DisplayID(number))
+        return Self.display(at: point, among: screens)
+            .flatMap { state.workspaces.activeSpace(on: $0) }
             ?? state.workspaces.activeSpace
     }
 
-    /// A header naming the Space, then one row per layout from the
-    /// one `LayoutModeRows`, the live one checked.
+    /// Which of `screens` holds `point`, through the one lookup
+    /// the pointer's other readers take.
+    nonisolated static func display(
+        at point: CGPoint,
+        among screens: [(frame: CGRect, id: DisplayID)]
+    ) -> DisplayID? {
+        GeometryUtils.screenIndex(
+            holding: point,
+            in: screens.map(\.frame)
+        ).map { screens[$0].id }
+    }
+
+    /// A header naming the Space, then the Layout menu's rows.
     func layoutPickerRows(_ id: SpaceID) -> [BarMenuRow] {
-        guard let space = state.workspaces[id] else { return [] }
-        let saved = savedModes(for: [id])[id]
-        let rows = LayoutModeRows.entries(
-            live: space.mode,
-            drifted: LayoutModeRows.drifted(live: space.mode, saved: saved),
-            words: LayoutModeRows.coreWords
-        ).map { entry in
-            BarMenuRow.action(
-                entry.title,
-                checked: entry.checked,
-                symbol: entry.symbol,
-                subtitle: entry.subtitle
-            ) { [weak self] in
-                _ = self?.execute(
-                    "set_mode",
-                    args: [.string(id.raw), .string(entry.mode.rawValue)]
-                )
-            }
-        }
+        let rows = layoutModeMenuRows(for: id)
+        guard !rows.isEmpty else { return [] }
         return [.header(L("layout_picker.header", "Space %1$@", id.raw))]
             + rows
     }

@@ -35,11 +35,15 @@ final class BarContextMenus {
         NSRunningApplication(processIdentifier: $0)?.terminate()
     }
     /// The pointer, in Cocoa screen coordinates, and the pop-up a
-    /// menu at it — the layout picker's (#762). Pinned in both
-    /// `makeTestCore` twins: a real pop-up tracks modally.
+    /// menu at it — the layout picker's (#762). The pop-up waits
+    /// for the next turn: its tracking loop is modal, and run inside
+    /// the call it would hold a CLI reply and spend a Lua binding's
+    /// deadline. Pinned in both `makeTestCore` twins.
     var pointer: @MainActor () -> NSPoint = { NSEvent.mouseLocation }
     var popUp: @MainActor (NSMenu, NSPoint) -> Void = { menu, point in
-        menu.popUp(positioning: nil, at: point, in: nil)
+        DispatchQueue.main.async {
+            menu.popUp(positioning: nil, at: point, in: nil)
+        }
     }
 
     func menu(for hit: BarHit) -> NSMenu? {
