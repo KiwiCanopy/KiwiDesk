@@ -157,7 +157,7 @@ enum KeybindingCatalog {
                     + trackRows
                     + moveToSpace(spaces)
             ),
-            NavGroup(title: "Layout", commands: layoutCycleRows),
+            NavGroup(title: "Layout", commands: layoutRows),
         ]
     }
 

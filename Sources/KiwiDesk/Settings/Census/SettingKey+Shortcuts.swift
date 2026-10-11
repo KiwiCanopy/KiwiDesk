@@ -26,6 +26,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
         "keybinding.move_to_desktop_follow (x N)"
     /// Next / previous layout of the focused Space (#453).
     case layoutCycle = "keybinding.{next,previous}_layout"
+    /// The layout picker at the pointer (#762).
+    case layoutPicker = "keybinding.show_layout_picker"
     /// The layouts the cycle walks (#453).
     case modeCycle = "config.modeCycle"
     /// The plate shown after a cycle (#2144): app-wide (#1741).
@@ -96,7 +98,7 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.desktopBindingsExist)
             )
-        case .layoutCycle, .modeCycle:
+        case .layoutCycle, .layoutPicker, .modeCycle:
             return .row(.shortcuts, .layout, .atRest)
         case .modeCue:
             // Written at once; greys where init.lua owns the
@@ -152,7 +154,7 @@ extension ShortcutsKey {
             .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
             .moveToDesktop, .moveToDesktopFollow, .switchToLayer,
-            .layoutCycle:
+            .layoutCycle, .layoutPicker:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")
