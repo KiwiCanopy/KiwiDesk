@@ -1023,6 +1023,7 @@
   "menu.window.zoom": "缩放",
   "mode.power_user": "高级",
   "mode.simple": "简单",
+  "mode_cue.ax": "布局：%1$@",
   "monitor_card.drop_here": "将空间拖放到此处",
   "monitor_card.follows_main": "跟随主显示器",
   "monitor_card.main_badge": "主显示器",

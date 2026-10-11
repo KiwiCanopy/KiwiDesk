@@ -936,6 +936,35 @@ KiwiDesk.set_desktop_cue(false)
 ```
 :::
 
+:::unreleased
+### set_mode_cue
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether [`cycle_mode`](#cycle_mode) shows a plate in
+the middle of the focused Space's screen: your layout cycle list
+(see [`set_mode_cycle`](#set_mode_cycle)) as a ring of layout
+symbols, the first at the top and the rest clockwise, with the
+layout the Space landed on large in the centre and its name
+under it (#2144). Pressing again while the plate is up moves the
+next layout from its place on the ring into the centre and the
+previous one back out; with Reduce Motion on, it jumps. It takes
+no focus or click, fades after about a second, and stays away
+from a screen showing a full-screen app or a presentation. Only
+`cycle_mode` shows it — [`set_mode`](#set_mode) and the Layout
+menu do not.
+
+Like [`set_desktop_cue`](#set_desktop_cue), the setting is
+app-wide, stored in `gui.json` as `mode.cue`; the verb changes
+the running value only.
+
+**Example:**
+
+```lua
+KiwiDesk.set_mode_cue(false)
+```
+:::
+
 ### set_shortcut_panel_liquid_glass
 
 **Expects:** `true` or `false` (default `true`).

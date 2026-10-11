@@ -68,6 +68,7 @@ public enum APIReference {
                 "set_refusal_sound"
             ),
             ("set_desktop_cue", "set_desktop_cue"),
+            ("set_mode_cue", "set_mode_cue"),
             ("set_space_history", "set_space_history"),
             (
                 "set_shortcut_panel_liquid_glass",

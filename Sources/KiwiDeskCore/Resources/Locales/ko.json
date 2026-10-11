@@ -1023,6 +1023,7 @@
   "menu.window.zoom": "확대/축소",
   "mode.power_user": "고급",
   "mode.simple": "기본",
+  "mode_cue.ax": "레이아웃: %1$@",
   "monitor_card.drop_here": "여기에 공간을 놓으십시오",
   "monitor_card.follows_main": "주 화면을 따름",
   "monitor_card.main_badge": "주 화면",

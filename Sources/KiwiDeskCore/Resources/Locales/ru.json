@@ -1023,6 +1023,7 @@
   "menu.window.zoom": "Масштаб",
   "mode.power_user": "Расширенный",
   "mode.simple": "Простой",
+  "mode_cue.ax": "Раскладка: %1$@",
   "monitor_card.drop_here": "Перетащи пространство сюда",
   "monitor_card.follows_main": "Следует за главным экраном",
   "monitor_card.main_badge": "главный",

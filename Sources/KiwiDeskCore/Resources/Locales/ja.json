@@ -1023,6 +1023,7 @@
   "menu.window.zoom": "拡大/縮小",
   "mode.power_user": "高度",
   "mode.simple": "シンプル",
+  "mode_cue.ax": "レイアウト：%1$@",
   "monitor_card.drop_here": "ここにスペースをドロップ",
   "monitor_card.follows_main": "メイン画面に追従",
   "monitor_card.main_badge": "メイン",
