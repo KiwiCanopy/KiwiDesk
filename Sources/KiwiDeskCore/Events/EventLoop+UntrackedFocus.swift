@@ -19,15 +19,16 @@ extension EventLoop {
         // The gate's own #2072 escape: a buttoned window it is
         // about to admit is no panel. An activation carries no
         // element and reads as one.
+        let layer = FloatDetection.windowLayer(of: id) ?? 0
         let button =
             FloatDetection.needsTitlebarButton(
-                layer: FloatDetection.windowLayer(of: id) ?? 0,
+                layer: layer,
                 isAccessory: isAccessory
             )
             && element.map { Self.readsTitlebarButton($0, id: id) } == true
         if FloatDetection.isBuiltInIgnoredPanel(
             bundleID: bundleID,
-            id: id,
+            layer: layer,
             isAccessory: isAccessory,
             titlebarButton: button
         ) {

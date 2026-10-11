@@ -1721,6 +1721,20 @@ terminal #21). The draw-time heuristic remains for the structural
 floats that stay managed: panel-subrole windows of regular apps
 and accessory apps' layer-0 windows.
 
+:::unreleased
+Above that class sits the **screen-saver level** (#2069): a
+window at CG layer 1000 or above is ignored whatever its app and
+whatever its buttons — a dictation HUD, a screen-share overlay
+drawn over the whole display. Nothing at that level is a window
+to arrange, and the level is the one signal strong enough to
+move a default toward ignore (#1810): every corpus window there
+is a HUD or an overlay. The trade is that a window an app lifts
+there cannot be managed and has no per-window way back, since
+`ignore_rules` only adds. The level refuses adoption, never a
+window already tracked that rises to it — that removal would
+read as a close, raise a neighbour and lose the slot.
+:::
+
 The optional **glow** (#358) — a soft blurred colored bloom around
 the ring, the JankyBorders `COLOR_STYLE_GLOW` look — is a global
 bool (`border.glow`, default OFF) with two deliberate scope choices.

@@ -93,7 +93,8 @@ extension EventLoop {
                 pid: pid,
                 app: app,
                 layer: layer ?? 0,
-                isAccessory: isAccessory
+                isAccessory: isAccessory,
+                tracked: false
             )
         else {
             return

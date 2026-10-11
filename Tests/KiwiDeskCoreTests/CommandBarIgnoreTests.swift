@@ -151,6 +151,34 @@ struct CommandBarIgnoreTests {
         #expect(!ignored(999))
     }
 
+    /// The level refuses adoption, never a tracked window rising
+    /// to it, whose removal the sweep would read as a close.
+    @Test("a tracked window keeps its verdict from below the level")
+    func trackedWindowIsJudgedBelowTheLevel() {
+        let level = FloatDetection.screenSaverLayer
+        #expect(FloatDetection.judgedLayer(level, tracked: false) == level)
+        #expect(
+            FloatDetection.judgedLayer(level + 1, tracked: true) == level - 1
+        )
+        #expect(FloatDetection.judgedLayer(8, tracked: true) == 8)
+    }
+
+    /// A focus report for a screen-saver-level window arms the
+    /// ignored-panel distrust for any app, as the gate ignores it.
+    @Test("an untracked screen-saver-level window is an ignored panel")
+    func screenSaverLevelIsAPanel() {
+        func panel(_ layer: Int) -> Bool {
+            FloatDetection.isBuiltInIgnoredPanel(
+                bundleID: "com.tinyspeck.slackmacgap",
+                layer: layer,
+                isAccessory: false,
+                titlebarButton: false
+            )
+        }
+        #expect(panel(FloatDetection.screenSaverLayer))
+        #expect(!panel(FloatDetection.screenSaverLayer - 1))
+    }
+
     @Test("The visible-panel scan counts only the panel band")
     func panelBandExcludesStatusItems() {
         // Command bars and quick terminals: floating (3) up to
