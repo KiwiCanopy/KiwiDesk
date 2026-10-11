@@ -20,9 +20,23 @@ extension KeybindingCatalog {
         }
     )
 
-    /// The Layout group's rows, one copy for every reader.
+    /// The layout picker at the pointer (#762).
+    static let showLayoutPicker = NavCommand(
+        label: "Show layout picker",
+        lua: "KiwiDesk.show_layout_picker()",
+        displayLabel: {
+            L("keybinding.show_layout_picker", "Show layout picker")
+        }
+    )
+
+    /// The layout cycle's rows (#453).
     static let layoutCycleRows: [NavCommand] = [
         nextLayout,
         previousLayout,
     ]
+
+    /// Every Layout group row, one copy for every reader.
+    static var layoutRows: [NavCommand] {
+        layoutCycleRows + [showLayoutPicker]
+    }
 }

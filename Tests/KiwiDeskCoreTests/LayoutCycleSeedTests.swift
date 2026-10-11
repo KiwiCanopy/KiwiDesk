@@ -5,7 +5,8 @@ import Testing
 
 /// The layout cycle's seed (#453, keys ruled 2026-10-09 and
 /// 2026-10-11): Next layout on `⌃⌥C` and Previous layout on
-/// `⌃⌥⇧C`, in the BASE seed.
+/// `⌃⌥⇧C`, and the layout picker on `⌃⌥L` (#762), in the BASE
+/// seed.
 /// Chord hygiene — parse, uniqueness, the system register — is
 /// the generic nets' in `DefaultKeybindingsTests` and
 /// `SizeLayerSeedTests`.
@@ -41,6 +42,16 @@ struct LayoutCycleSeedTests {
         )
     }
 
+    /// L for layout (#762, keys ruled 2026-10-09).
+    @Test("⌃⌥L runs the layout picker in the base seed")
+    func seedsLayoutPicker() {
+        let row = DefaultKeybindings.layoutPickerRow()
+        #expect(row.combo == "control+option+l")
+        #expect(row.lua == "KiwiDesk.show_layout_picker()")
+        #expect(row.label == "Show layout picker")
+        #expect(seeded.filter { $0 == row }.count == 1)
+    }
+
     /// A layout verb, not app chrome: a GUI-created layer
     /// does not inherit it (the ruling's "base seed, not
     /// `appChromeRows`").
@@ -49,6 +60,7 @@ struct LayoutCycleSeedTests {
         #expect(
             !DefaultKeybindings.appChromeRows().contains {
                 $0.lua.hasPrefix("KiwiDesk.cycle_mode")
+                    || $0.lua.hasPrefix("KiwiDesk.show_layout_picker")
             }
         )
     }

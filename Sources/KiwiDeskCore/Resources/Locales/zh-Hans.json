@@ -630,6 +630,7 @@
   "keybinding.next_layout": "下一个布局",
   "keybinding.open_settings": "打开设置",
   "keybinding.previous_layout": "上一个布局",
+  "keybinding.show_layout_picker": "显示布局选择器",
   "keybinding.show_shortcuts": "显示快捷键面板",
   "keybinding.shrink_height": "减小高度",
   "keybinding.shrink_width": "减小宽度",
