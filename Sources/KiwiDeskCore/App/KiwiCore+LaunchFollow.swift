@@ -30,8 +30,7 @@ extension KiwiCore {
             launchFollow.forget(keeping: activation.bundleID)
         }
         guard let bundleID = activation.bundleID,
-            let press = launchFollow.pressAge?(),
-            press <= LaunchFollowIntent.pressGrace,
+            let press = launchFollow.recentPress(),
             isOpening(activation, now: now)
         else { return }
         guard
