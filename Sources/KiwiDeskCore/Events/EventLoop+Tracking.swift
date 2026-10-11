@@ -209,14 +209,12 @@ extension EventLoop {
         app: AppRef
     ) {
         recheckFullscreen(element, id: id)
-        let facts = WindowFacts.read(
-            element,
-            layer: FloatDetection.windowLayer(of: id)
-        )
-        applySubrole(facts.subrole, id: id)
+        // Beside the verdict, not from its facts: the element
+        // source reads facts only where nothing forces the float.
+        applySubrole(AXHelper.subrole(of: element), id: id)
         offMain.noteFreshWrite(id, [.detection])
         let verdict = autoFloatVerdict(
-            .facts(facts),
+            .element(element, layer: FloatDetection.windowLayer(of: id)),
             id: id,
             pid: pid,
             bundleID: app.bundleID

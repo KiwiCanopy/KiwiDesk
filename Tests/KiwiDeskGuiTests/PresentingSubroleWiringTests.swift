@@ -38,7 +38,11 @@ struct PresentingSubroleWiringTests {
     func rechecksRefresh() throws {
         let tracking = try source("Events/EventLoop+Tracking.swift")
         #expect(count("applySubrole(", in: tracking) == 3)
-        #expect(tracking.contains("applySubrole(facts.subrole, id: id)"))
+        #expect(
+            tracking.contains(
+                "applySubrole(AXHelper.subrole(of: element), id: id)"
+            )
+        )
         #expect(tracking.contains("applySubrole(reading.subrole, id: id)"))
     }
 
