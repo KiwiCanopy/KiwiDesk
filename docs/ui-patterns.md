@@ -271,10 +271,9 @@ spelled with one word: Advanced Colors is the deep-mode twin of
 Looks & Animations (`SettingsArea.minimumMode` is `.powerUser`
 there), so on that page "advanced" already means *which mode
 you are in* and no drawer may re-use it to mean *which rows are
-hidden*. A colour drawer there is **"More colors"**, with the
-collapsed summary doing the naming; "More" cannot be misread as
-a mode. (Since #1857 the page has none: every colour is at
-rest.)
+hidden*. Its last colour drawer was **"More colors"**, the
+collapsed summary doing the naming — "More" cannot be misread
+as a mode; since #1857 every colour there is at rest.
 
 A connector (`Advanced: Lua bindings`) is not the fix: it
 restores the tier reading but re-splits the format. Dropping
@@ -1445,13 +1444,15 @@ dimmed, not only from whether a live label exists (#1310): a
 header `?` scopes the CARD, so it answers for a greyed block,
 while ONE greyed row inside a live card takes a
 `CrossReferenceRow` directly beneath its grid, outside the
-dimmed subtree — the KiwiShelf colours card's *Focused window*
+dimmed subtree — the Second accent group's *Focused window*
 row, whose gating picker lives on KiwiShelf, draws
-`AdvancedColorsHelp.focusedItemReference` there, and the Border
-colours card's *Unfocused windows* row draws
-`unfocusedReference` the same way while the ring is on, each
-linking the destination in the sentence; the Borders header `?`
-answers only for the ring being off. The argument is
+`AdvancedColorsHelp.focusedItemReference` there, and Window
+marks' *Unfocused windows* row draws `unfocusedReference` the
+same way while the ring is on, each linking the destination in
+the sentence. A row with no sentence of its own takes its
+card's one link per page whose switch dims it (#1857), and
+which of these a row owes is its one `ColorRowVerdict`, which
+the grey reads too. The argument is
 `docs/design-decisions.md` ▸ *a dim is not a sentence*.
 
 A control whose *only* consumer is off may still have a second

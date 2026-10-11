@@ -27,7 +27,7 @@ struct WindowMarksColorCard: View {
             }
             // One greyed ROW in a live card takes its reason
             // beneath it as a live link (#1310).
-            if gates.unfocusedNeedsReference {
+            if gates.needsOwnSentence(.borders(.borderUnfocusedColor)) {
                 CrossReferenceRow(
                     prose: AdvancedColorsHelp.unfocusedReference,
                     linkTitle: SettingsDestination.gapsAndBorders.title,

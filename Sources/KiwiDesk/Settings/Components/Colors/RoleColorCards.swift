@@ -1,65 +1,43 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The two role groups that open Advanced Colours, side by side
-/// (#1857): each holds one half of both colour-vision pairs, so
-/// the halves that must stay apart are read together.
+/// The two role groups that open Advanced Colours, side by side,
+/// stacked where the window's rows stack (#1857): the halves of
+/// each colour-vision pair are read together.
 struct RoleColorCards: View {
     @ObservedObject var model: SettingsModel
+    @Environment(\.settingsWidth) private var width
 
     var body: some View {
-        HStack(alignment: .top, spacing: 16) {
-            RoleColorCard(
-                model: model,
-                control: SettingsCatalog.advancedColors.accentGroup,
-                caption: L(
-                    "colors.accent.caption",
-                    "The active Space, the focus border and the "
-                        + "window you drag."
-                ),
-                keys: ColorsRowOrder.accentAtRest
-            )
-            RoleColorCard(
-                model: model,
-                control: SettingsCatalog.advancedColors
-                    .secondAccentGroup,
-                caption: L(
-                    "colors.second_accent.caption",
-                    "The focused window on the Space Bar, and where "
-                        + "a dragged window lands."
-                ),
-                keys: ColorsRowOrder.secondAccentAtRest
-            )
+        let layout =
+            width.stacksRows
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 20))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: 16))
+        layout {
+            ForEach(ColorRole.allCases, id: \.self) { role in
+                RoleColorCard(model: model, role: role)
+            }
         }
     }
 }
 
-/// One role group: its rows, each greyed by its own surface, and
-/// a live link beneath for each page whose switch dims one (#1310).
+/// One role group: its rows, each greyed by its verdict, and a
+/// live link beneath for each reason (#1310).
 struct RoleColorCard: View {
     @ObservedObject var model: SettingsModel
-    let control: SettingsControl
-    let caption: String
-    let keys: [SettingKey]
+    let role: ColorRole
 
     private var gates: AdvancedColorsGates {
         AdvancedColorsGates(settings: model.config.settings)
     }
 
     var body: some View {
-        SettingsSection(control, caption: caption) {
+        SettingsSection(role.control, caption: role.caption) {
             VStack(alignment: .leading, spacing: 8) {
-                ForEach(keys, id: \.id) { key in
-                    AdvancedColorRows(
-                        model: model,
-                        keys: [key],
-                        allows: allows(key),
-                        gateHelp: AdvancedColorsHelp.kiwishelfOff
-                    )
-                }
+                AdvancedColorRows(model: model, keys: role.keys)
             }
-            if keys.contains(.spaceBar(.spaceBarFocusedItemColor)),
-                gates.focusedItemNeedsReference
+            if role.keys.contains(.spaceBar(.spaceBarFocusedItemColor)),
+                gates.needsOwnSentence(.spaceBar(.spaceBarFocusedItemColor))
             {
                 CrossReferenceRow(
                     prose: AdvancedColorsHelp.focusedItemReference,
@@ -68,7 +46,7 @@ struct RoleColorCard: View {
                 )
             }
             ForEach(
-                gates.dimmedDestinations(of: keys),
+                gates.dimmedDestinations(of: role.keys),
                 id: \.self
             ) { destination in
                 CrossReferenceRow(
@@ -79,14 +57,5 @@ struct RoleColorCard: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    /// The shelf's rows grey as a unit while no bar shows; every
-    /// other row greys on its own surface's switch.
-    private func allows(_ key: SettingKey) -> Bool {
-        switch key {
-        case .kiwishelf, .spaceBar: return gates.shelfDraws
-        default: return true
-        }
     }
 }

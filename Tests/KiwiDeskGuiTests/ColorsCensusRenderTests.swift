@@ -231,8 +231,23 @@ struct ColorsCensusRenderTests {
         #expect(accent.contains(.borders(.dragGhostBorderColor)))
         #expect(second.contains(.borders(.dragDropZoneBorderColor)))
         // Each group leads with the colour its pair is anchored on.
-        #expect(accent.first == .kiwishelf(.activeItemColor))
-        #expect(second.first == .spaceBar(.spaceBarFocusedItemColor))
+        #expect(accent.first == ColorRole.accent.anchor)
+        #expect(second.first == ColorRole.secondAccent.anchor)
+        // Every tint of a drag visual sits with its visual: the
+        // ghost's in Accent, the drop zone's in Second accent,
+        // derived from the key rather than re-listed.
+        let drag = SettingKey.allCases.filter {
+            $0.placement.area == .advancedColours
+                && $0.id.contains("drag")
+        }
+        #expect(drag.count == 4)
+        for key in drag {
+            let ghost = key.id.contains("dragGhost")
+            #expect(
+                (ghost ? accent : second).contains(key),
+                "\(key.id) left its visual's group"
+            )
+        }
     }
 
     /// Four groups, matching the four cards on screen. A fifth

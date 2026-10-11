@@ -14,9 +14,6 @@ extension AdvancedColorRow {
                 ),
                 hex: settings.borderStyle.focusedColor
             )
-            .modifier(
-                gated(!gates.borderOn, AdvancedColorsHelp.borderOff)
-            )
         case .borderUnfocusedColor:
             HexColorField(
                 label: L(
@@ -29,7 +26,6 @@ extension AdvancedColorRow {
                 ),
                 hex: settings.borderStyle.unfocusedColor
             )
-            .modifier(gated(unfocusedInert, unfocusedHelp))
         case .stickyColor:
             HexColorField(
                 label: L("sticky.color", "Sticky"),
@@ -78,12 +74,6 @@ extension AdvancedColorRow {
             label: dragLabel(ghost: ghost, fill: fill),
             hex: fill ? visual.fillColor : visual.borderColor
         )
-        .modifier(
-            gated(
-                gates.dragInert(ghost: ghost, fill: fill),
-                gates.dragHelp(ghost: ghost, fill: fill)
-            )
-        )
     }
 
     private func dragLabel(ghost: Bool, fill: Bool) -> String {
@@ -97,15 +87,5 @@ extension AdvancedColorRow {
         case (false, true):
             return L("colors.drop_zone_fill", "Drop zone fill")
         }
-    }
-
-    private var unfocusedInert: Bool {
-        !gates.borderOn || !gates.unfocusedOn
-    }
-
-    private var unfocusedHelp: String {
-        gates.borderOn
-            ? AdvancedColorsHelp.unfocusedOff
-            : AdvancedColorsHelp.borderOff
     }
 }

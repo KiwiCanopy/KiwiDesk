@@ -19,15 +19,13 @@ struct KiwiShelfColorCard: View {
             ColorGrid {
                 AdvancedColorRows(
                     model: model,
-                    keys: ColorsRowOrder.kiwishelfAtRest,
-                    allows: gates.shelfDraws,
-                    gateHelp: AdvancedColorsHelp.kiwishelfOff
+                    keys: ColorsRowOrder.kiwishelfAtRest
                 )
             }
             // One greyed ROW in a live card takes its reason
             // beneath it as a live link, outside the dimmed
             // subtree — a header `?` scopes the card (#1310).
-            if gates.shelfBorderNeedsReference {
+            if gates.needsOwnSentence(.kiwishelf(.borderColor)) {
                 CrossReferenceRow(
                     prose: AdvancedColorsHelp.shelfBorderReference,
                     linkTitle: SettingsDestination.bars.title,
@@ -38,36 +36,25 @@ struct KiwiShelfColorCard: View {
     }
 }
 
-/// Renders color rows with parallel container and row-level gates.
+/// Renders colour rows, each greyed by its one verdict (#1857).
 struct AdvancedColorRows: View {
     @ObservedObject var model: SettingsModel
     let keys: [SettingKey]
-    var allows = true
-    var gateHelp = ""
+
+    private var gates: AdvancedColorsGates {
+        AdvancedColorsGates(settings: model.config.settings)
+    }
 
     var body: some View {
         ForEach(keys, id: \.id) { key in
-            let gate = Self.gate(allows: allows, key: key)
-            AdvancedColorRow(
-                model: model,
-                key: key,
-                ownPredicateLive: gate.rowPredicateLive
-            )
-            .modifier(
-                GreyOut(active: gate.containerGrey, help: gateHelp)
-            )
+            let verdict = gates.verdict(for: key)
+            AdvancedColorRow(model: model, key: key)
+                .modifier(
+                    GreyOut(
+                        active: verdict != nil,
+                        help: verdict?.help ?? ""
+                    )
+                )
         }
-    }
-
-    /// Resolves container gate and row predicate state for a setting key.
-    nonisolated static func gate(
-        allows: Bool,
-        key: SettingKey
-    ) -> (rowPredicateLive: Bool, containerGrey: Bool) {
-        let exempt = key.placement.exemptFromContainerGate
-        return (
-            rowPredicateLive: allows || exempt,
-            containerGrey: !allows && !exempt
-        )
     }
 }

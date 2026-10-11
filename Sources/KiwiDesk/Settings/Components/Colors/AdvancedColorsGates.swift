@@ -14,13 +14,6 @@ struct AdvancedColorsGates {
     var borderOn: Bool { settings.borderStyle.enabled }
     var unfocusedOn: Bool { settings.borderStyle.unfocusedEnabled }
 
-    /// Whether the unfocused row draws its remote reason as a
-    /// link beneath the grid (#1310): only while the ring is on —
-    /// off, the role links name the page instead.
-    var unfocusedNeedsReference: Bool {
-        borderOn && !unfocusedOn
-    }
-
     // MARK: - Drag visuals
 
     func dragVisual(_ ghost: Bool) -> DragVisual {
@@ -42,73 +35,15 @@ struct AdvancedColorsGates {
             : AdvancedColorsHelp.dragBorderOff
     }
 
-    // MARK: - Role groups (#1857)
-
     /// Whether any bar shows, so the shelf's colours draw.
     var shelfDraws: Bool {
         bars.containerReason(for: .kiwishelf) == nil
-    }
-
-    /// The destinations whose switches dim a row of a group, in
-    /// the order the group lists them — each one link beneath
-    /// the group (#1310), a row with its own sentence excepted.
-    func dimmedDestinations(
-        of keys: [SettingKey]
-    ) -> [SettingsDestination] {
-        var out: [SettingsDestination] = []
-        for key in keys {
-            guard let destination = genericReason(for: key),
-                !out.contains(destination)
-            else { continue }
-            out.append(destination)
-        }
-        return out
-    }
-
-    /// Where the switch that dims `key` lives, for a row that
-    /// takes the group's generic link; nil while the row draws,
-    /// or where it names its own reason beneath the group.
-    func genericReason(for key: SettingKey) -> SettingsDestination? {
-        switch key {
-        case .kiwishelf:
-            return shelfDraws ? nil : .bars
-        case .spaceBar(.spaceBarFocusedItemColor):
-            // Bar on, the row's own sentence explains it.
-            return shelfDraws ? nil : .bars
-        case .spaceBar(.spaceBarFocusedHighlightColor):
-            return !shelfDraws || focusedHighlightInert ? .bars : nil
-        case .borders(.borderFocusedColor):
-            return borderOn ? nil : .gapsAndBorders
-        case .borders(.borderUnfocusedColor):
-            return borderOn ? nil : .gapsAndBorders
-        case .borders(.dragGhostBorderColor):
-            return dragInert(ghost: true, fill: false)
-                ? .gapsAndBorders : nil
-        case .borders(.dragGhostFillColor):
-            return dragInert(ghost: true, fill: true)
-                ? .gapsAndBorders : nil
-        case .borders(.dragDropZoneBorderColor):
-            return dragInert(ghost: false, fill: false)
-                ? .gapsAndBorders : nil
-        case .borders(.dragDropZoneFillColor):
-            return dragInert(ghost: false, fill: true)
-                ? .gapsAndBorders : nil
-        default:
-            return nil
-        }
     }
 
     // MARK: - KiwiShelf
 
     /// The shelf draws no border, so its colour is inert (#1679).
     var shelfBorderOff: Bool { !settings.kiwishelf.border }
-
-    /// Whether the border row draws its remote reason as a link
-    /// beneath the grid (#1310): only while a bar shows — with
-    /// none, the header carries the outer reason.
-    var shelfBorderNeedsReference: Bool {
-        bars.containerReason(for: .kiwishelf) == nil && shelfBorderOff
-    }
 
     // MARK: - Space Bar
 
@@ -129,15 +64,5 @@ struct AdvancedColorsGates {
     var focusedHighlightInert: Bool {
         let style = settings.spaceBarLook
         return !style.enabled || !style.showFrontApp
-    }
-
-    /// Whether the focused-item row draws its remote reason as a
-    /// link beneath the grid (#1310): only while the bar is on —
-    /// off, the header carries the outer reason and the row is
-    /// greyed for that.
-    var focusedItemNeedsReference: Bool {
-        bars.containerReason(for: .spaceBar) == nil
-            && bars.containerReason(for: .kiwishelf) == nil
-            && focusedItemInert
     }
 }

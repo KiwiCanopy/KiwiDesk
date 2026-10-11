@@ -153,4 +153,20 @@ enum AdvancedColorsHelp {
             L("bars.switch.kiwishelf", "KiwiShelf")
         )
     }
+
+    /// The icon mode is INTERPOLATED from the picker entry's own
+    /// key rather than named as text (#818) — this help lives on
+    /// another page than the picker it names, which is exactly
+    /// where a hand-typed label drifts unnoticed.
+    static var focusedItemHelp: String {
+        L(
+            "space_bar.color.focused_item.help",
+            "Tints the focused window — its glyph in the active "
+                + "Space and the front-app segment. Glyph tint "
+                + "needs \u{201C}%2$@\u{201D} set to "
+                + "\u{201C}%1$@\u{201D}.",
+            L("app_bar.icon_source.app_font", "Symbols"),
+            L("kiwishelf.icon_source.label", "App glyph style")
+        )
+    }
 }

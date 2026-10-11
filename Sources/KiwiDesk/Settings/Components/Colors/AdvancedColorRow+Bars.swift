@@ -62,12 +62,6 @@ extension AdvancedColorRow {
                 ),
                 hex: shelf.borderColor
             )
-            .modifier(
-                gated(
-                    gates.shelfBorderOff,
-                    AdvancedColorsHelp.shelfBorderOff
-                )
-            )
         default:
             let _ = assertionFailure(
                 "non-colour KiwiShelf key in Advanced Colours: "
@@ -88,9 +82,6 @@ extension AdvancedColorRow {
                 ),
                 hex: style.focusedItemColor
             )
-            .modifier(
-                gated(gates.focusedItemInert, focusedItemHelp)
-            )
         case .spaceBarFocusedHighlightColor:
             HexColorField(
                 label: L(
@@ -108,12 +99,6 @@ extension AdvancedColorRow {
                 hex: style.focusedHighlightColor
             )
             .help(focusedHighlightHelp)
-            .modifier(
-                gated(
-                    gates.focusedHighlightInert,
-                    AdvancedColorsHelp.frontAppOff
-                )
-            )
         default:
             let _ = assertionFailure(
                 "non-colour Space Bar key in Advanced Colours: "
@@ -131,22 +116,6 @@ extension AdvancedColorRow {
             "The outline or edge mark around the front-app segment. "
                 + "Automatic uses \u{201C}%1$@\u{201D}.",
             L("space_bar.color.focused_item", "Focused window")
-        )
-    }
-
-    /// The icon mode is INTERPOLATED from the picker entry's own
-    /// key rather than named as text (#818) — this help lives on
-    /// another page than the picker it names, which is exactly
-    /// where a hand-typed label drifts unnoticed.
-    private var focusedItemHelp: String {
-        L(
-            "space_bar.color.focused_item.help",
-            "Tints the focused window — its glyph in the active "
-                + "Space and the front-app segment. Glyph tint "
-                + "needs \u{201C}%2$@\u{201D} set to "
-                + "\u{201C}%1$@\u{201D}.",
-            L("app_bar.icon_source.app_font", "Symbols"),
-            L("kiwishelf.icon_source.label", "App glyph style")
         )
     }
 }

@@ -58,8 +58,8 @@ struct BarsGateWiringTests {
             "Components/Colors/BarColorCards.swift": [
                 "gates.shelfDraws"
             ],
-            "Components/Colors/RoleColorCards.swift": [
-                "gates.shelfDraws"
+            "Components/Colors/AdvancedColorsGates+Verdict.swift": [
+                "if!shelfDraws,Self.takesShelfGate(key)"
             ],
         ]
         for (path, needles) in consults {

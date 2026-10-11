@@ -265,6 +265,10 @@ struct DetailPanelTests {
                 "Components/Colors/RoleColorCards.swift",
                 "DragVisualPreview("
             ),
+            (
+                "Components/Colors/WindowMarksColorCard.swift",
+                "FocusBorderPreview("
+            ),
             // #794: the per-space editor gave up its own copy,
             // which is what let the panel take it. The needle
             // names a LIVE renderer the section must not re-grow

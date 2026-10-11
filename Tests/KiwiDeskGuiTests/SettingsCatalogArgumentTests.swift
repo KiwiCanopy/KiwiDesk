@@ -32,10 +32,11 @@ struct SettingsCatalogArgumentTests {
         // (`dragGhost` / `dragDropZone`), which the dotted-
         // reference sweep still covers.
         "DragVisualsEditor.swift: control",
-        // The two role groups share one card view (#1857); its
-        // one caller passes `accentGroup` / `secondAccentGroup`,
-        // which the dotted-reference sweep still covers.
-        "RoleColorCards.swift: control",
+        // The two role groups share one card view (#1857), which
+        // takes its control from `ColorRole.control` — the
+        // `accentGroup` / `secondAccentGroup` declarations, which
+        // the dotted-reference sweep still covers.
+        "RoleColorCards.swift: role.control",
         // The collapsible card forwards its drawer's declaration
         // to the one `SettingsSection` it is (#1741); its mount
         // takes the drawer outright (`GesturesDrawer`), which the
