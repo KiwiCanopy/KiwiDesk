@@ -67,6 +67,7 @@ struct ApplicationsGroup: View {
                 bindings: $bindings,
                 expander: expander
             )
+            .environment(\.keybindingReservesTrashSlot, true)
         }
         .onAppear(perform: recomputeOrder)
         // The section view is reused across modes (no per-mode
