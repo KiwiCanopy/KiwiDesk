@@ -211,10 +211,8 @@ public final class KiwiCore {
     /// without a hand-kept list (#49); bodies at the `schedule*`
     /// call sites.
     let deferred = DeferredTasks()
-
     /// The in-flight boot's phase, spans and timestamps (#801).
     let boot = BootRun()
-
     /// The tunable waits; tests assign milliseconds.
     var timings = CoreTimings()
 
@@ -235,11 +233,13 @@ public final class KiwiCore {
     /// The last native Desktop switch; focus during it changes no space.
     var lastDesktopSwitch: Date = .distantPast
 
-    /// The Desktop raise gate's two reads (#1345/#1410) — the on-screen
-    /// flag and the shown host — both pinned to nil by `makeTestCore`.
+    /// The WindowServer window reads, all pinned by `makeTestCore`: the
+    /// Desktop raise gate's on-screen flag and shown host (#1345/#1410),
+    /// and the front-to-back frames, one door by census (#1788).
     var windowIsOnScreen: (WindowID) -> Bool? = FloatDetection.isOnScreen
     var windowIsOnShownDesktop: (WindowID) -> Bool? =
         NativeSpaces.isOnShownDesktop
+    var frontWindowFrames: @MainActor () -> [CGRect] = liveFrontFrames
     /// A move verb's departures, claimed at the vanish (#1345).
     var desktopMoveDepartures: [WindowID: Date] = [:]
     /// A `.returned` window's arrival time (#1345).
