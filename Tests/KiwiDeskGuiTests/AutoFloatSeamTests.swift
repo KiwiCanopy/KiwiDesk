@@ -56,6 +56,7 @@ struct AutoFloatCardBranchTests {
             "dimmed: !automaticOn,",
             "if Self.floatsEveryWindow(app: app, config: model.config) {",
             "Text(AutoFloatWords.inert)",
+            "FloatFacet.current(config.floatRules, app: app) == .all",
         ] {
             #expect(card.contains(needle), "\(needle)")
         }

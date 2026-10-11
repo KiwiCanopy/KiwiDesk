@@ -84,9 +84,10 @@ struct AutoFloatInertRowTests {
         return AppRuleTileRow.floatsEveryWindow(app: app, config: config)
     }
 
-    @Test("a whole-app Float rule, in any case, makes the rule inert")
+    @Test("a whole-app Float rule makes the rule inert")
     func wholeAppRule() {
-        #expect(floatsEvery(["com.ValveSoftware.Steam"]))
+        #expect(floatsEvery([app]))
+        #expect(floatsEvery(["\(app):Friends", app]))
     }
 
     @Test("a title rule or another app's rule leaves it live")

@@ -170,11 +170,9 @@ struct AppRuleTileRow: View {
     }
 
     /// A Float rule for every window of the app leaves nothing for
-    /// this rule to tile; a title rule floats only some.
+    /// this rule to tile — the Float list's own facet reading.
     static func floatsEveryWindow(app: String, config: GuiConfig) -> Bool {
-        config.floatRules.contains {
-            FloatRules.normalizedRule($0) == app
-        }
+        FloatFacet.current(config.floatRules, app: app) == .all
     }
 
     private var sharedFrom: RuleReachReading? {
