@@ -147,15 +147,7 @@ extension KiwiCore {
         // THIS profile's override tiers (#55, #109), passed
         // explicitly: callers adopt after apply, so
         // `currentName` may still be the old profile.
-        reapplyStructuredOverrides(
-            profileModes: profile.layers,
-            profileAppRules: profile.appRules,
-            profileFloatRules: profile.floatRules,
-            profileIgnoreRules: profile.ignoreRules,
-            profileScrollGesture: profile.scrollGesture,
-            profileSpaceHistory: profile.spaceHistory,
-            profileModeCycle: profile.modeCycle
-        )
+        reapplyStructuredOverrides(profile)
         // A renumbered held Space owes its ⌃⌥N (#485's top-up).
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
@@ -240,15 +232,7 @@ extension KiwiCore {
         // A transient Standard has no keybinding or app-rule
         // override — revert to the base gui.json config
         // (#55 phase 6, #109).
-        reapplyStructuredOverrides(
-            profileModes: nil,
-            profileAppRules: nil,
-            profileFloatRules: nil,
-            profileIgnoreRules: nil,
-            profileScrollGesture: nil,
-            profileSpaceHistory: nil,
-            profileModeCycle: nil
-        )
+        reapplyStructuredOverrides(nil)
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
         retile(pass: forceRetile ? .apply : .event)
