@@ -284,7 +284,7 @@ public final class KiwiCore {
     /// saved back; nil falls back to the space order's first survivor.
     var fallbackSpace: SpaceID?
     /// The layouts `cycle_mode` walks (#453, `KiwiCore+ModeCycle`).
-    var modeCycle = ModeCycle.defaultList
+    var modeCycle = ModeCycleState()
     /// The announced in-place restart (#930, `KiwiCore+InPlaceRestart`).
     var inPlaceRestart = InPlaceRestartState()
     /// Profile bound per macOS Desktop, keyed by the Desktop
