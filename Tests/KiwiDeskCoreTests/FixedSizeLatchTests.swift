@@ -27,6 +27,7 @@ struct FixedSizeLatchTests {
             app: AppRef(pid: pid),
             reading: TrackedReading(
                 fullscreen: false,
+                subrole: "",
                 frame: .zero,
                 autoReason: reason,
                 traits: nil
