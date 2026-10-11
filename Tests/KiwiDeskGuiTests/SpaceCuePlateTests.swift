@@ -1,4 +1,5 @@
 import KiwiDeskCore
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk
@@ -52,5 +53,28 @@ struct SpaceCuePlateTests {
             a.spaceChange = style
             #expect(!a.anyEnabled)
         }
+    }
+
+    /// The master's setter, the half the getter cannot show: off
+    /// and back on leaves the picker's choice standing.
+    @Test("the master's switch leaves the style alone")
+    func masterSetterLeavesTheStyle() {
+        let model = makeTestModel()
+        model.config.settings.animations.spaceChange = .slide
+        let master = MotionCard(model: model).animationsMasterBinding
+        master.wrappedValue = false
+        #expect(model.config.settings.animations.spaceChange == .slide)
+        master.wrappedValue = true
+        #expect(model.config.settings.animations.spaceChange == .slide)
+    }
+
+    /// The picker stays live under Reduce Motion; the duration it
+    /// gates greys with the card (owner, 2026-10-11).
+    @Test("only the picker escapes Reduce Motion's grey")
+    func pickerIsExempt() {
+        let picker = SettingKey.colours(.animationsSpaceChange)
+        let duration = SettingKey.colours(.animationsSpaceChangeDurationMS)
+        #expect(picker.placement.exemptFromContainerGate)
+        #expect(!duration.placement.exemptFromContainerGate)
     }
 }
