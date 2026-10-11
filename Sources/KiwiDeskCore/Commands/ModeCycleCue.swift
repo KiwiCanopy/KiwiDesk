@@ -49,7 +49,11 @@ extension KiwiCore {
             !shelfStandsDown(on: display)
         else { return }
         modeCue.onCue(
-            ModeCycleCue(display: display, cycle: modeCycle, current: mode)
+            ModeCycleCue(
+                display: display,
+                cycle: modeCycle.list,
+                current: mode
+            )
         )
     }
 

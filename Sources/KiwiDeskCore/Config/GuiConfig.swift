@@ -69,10 +69,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// The layouts the cycle walks (#453); a profile diverges
     /// through `Profile.modeCycle`.
     public var modeCycle = ModeCycle.defaultList
-    /// The settings no profile carries (#1741); nil until this
-    /// file has adopted them. Stamped at the write
-    /// (`GuiConfigStore.liveAppWide`) rather than drafted: General
-    /// writes them the moment they change.
+    /// The settings no profile carries (#1741); nil until adopted.
+    /// Stamped at the write (`GuiConfigStore.liveAppWide`), never
+    /// drafted: General writes them the moment they change.
     public var appWide: AppWideSettings?
     /// The shared look every profile without its own wears
     /// (#1752); nil until this file has adopted one. Stamped at the
