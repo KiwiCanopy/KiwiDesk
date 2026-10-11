@@ -143,6 +143,61 @@ struct AutoFloatLiveTests {
         #expect(box.log == ["float true", "overlay true"])
     }
 
+    /// The event lands in state, and the retile it earns redraws
+    /// the ring and bar rows the flag gates.
+    @Test("the overlay event folds into state")
+    func overlayEventFolds() {
+        var state = StateCoordinator()
+        state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: Self.id,
+                    pid: Self.pid,
+                    appName: "Steam",
+                    isFloating: true,
+                    isTransientOverlay: true
+                )
+            )
+        )
+        state.apply(.windowOverlayChanged(Self.id, isOverlay: false))
+        #expect(state.windows[Self.id]?.isTransientOverlay == false)
+        state.apply(.windowOverlayChanged(Self.id, isOverlay: true))
+        #expect(state.windows[Self.id]?.isTransientOverlay == true)
+        #expect(
+            TilingEngine.shouldRetile(
+                after: .windowOverlayChanged(Self.id, isOverlay: true)
+            )
+        )
+    }
+
+    /// An own window's overlay is its structure, fixed at track: a
+    /// recheck of one never moves it.
+    @Test("an own window's recheck emits no overlay change")
+    func ownWindowKeepsItsOverlay() {
+        let loop = EventLoop()
+        let box = Box()
+        loop.onLog = { _ in }
+        loop.ownWindowIdentifier = { _ in nil }
+        loop.onEvent = { event in
+            if case .windowOverlayChanged = event { box.log.append("overlay") }
+        }
+        loop.detectedFloating[Self.id] = .tiles
+        loop.recheckFloat(
+            id: Self.id,
+            pid: getpid(),
+            app: AppRef(bundleID: nil, name: "KiwiDesk"),
+            reading: TrackedReading(
+                fullscreen: false,
+                subrole: kAXDialogSubrole,
+                frame: .zero,
+                autoReason: .panel,
+                traits: nil
+            )
+        )
+        #expect(loop.detectedFloating[Self.id] == .floats(.panel))
+        #expect(box.log.isEmpty)
+    }
+
     /// The door forgets the verdicts a changed guess reaches, and
     /// none an unchanged one does.
     @Test("installing a changed guess forgets the verdicts it reaches")
