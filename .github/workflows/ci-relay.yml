@@ -1,0 +1,56 @@
+# Forwards a red CI run to the private planning repo, which explains
+# it to the owner on Telegram. Only runs of this repository's own
+# branches qualify — `main`, `release/*`, or a PR with auto-merge
+# armed — so nothing a fork pushed reaches it. No model runs here;
+# the payload is the run's ids and the tail of its failed log.
+name: CI relay
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  actions: read
+  pull-requests: read
+
+jobs:
+  relay:
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_repository.full_name ==
+      github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch to the planning repo
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISPATCH_TOKEN: ${{ secrets.PLAN_DISPATCH_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          if [ -z "$DISPATCH_TOKEN" ]; then
+            echo "PLAN_DISPATCH_TOKEN not set; skipping"
+            exit 0
+          fi
+          pr=$(gh pr list -R "$REPO" --head "$BRANCH" --state open \
+            --json number,autoMergeRequest \
+            --jq '[.[] | select(.autoMergeRequest != null)][0].number // ""')
+          case "$BRANCH" in
+            main|release/*) ;;
+            *) [ -n "$pr" ] || { echo "not a watched branch"; exit 0; } ;;
+          esac
+          gh run view "$RUN_ID" -R "$REPO" --log-failed 2>/dev/null \
+            | tail -c 12000 > log.txt || true
+          jq -n --arg run "$RUN_ID" --arg branch "$BRANCH" \
+            --arg sha "$SHA" --arg url "$URL" --arg pr "$pr" \
+            --rawfile log log.txt \
+            '{event_type: "ci-failed", client_payload: {run: $run,
+              branch: $branch, sha: $sha, url: $url, pr: $pr,
+              log: $log}}' \
+            | GH_TOKEN="$DISPATCH_TOKEN" gh api \
+                repos/KiwiCanopy/KiwiDesk-plan/dispatches --input -
