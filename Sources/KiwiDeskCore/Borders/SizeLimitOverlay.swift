@@ -222,10 +222,11 @@ final class SizeLimitOverlay {
         }
         pop.keyTimes = Self.popKeyframes.map { NSNumber(value: $0.time) }
         pop.duration = 0.14
-        pop.timingFunctions = [
-            CAMediaTimingFunction(name: .easeOut),
-            CAMediaTimingFunction(name: .easeIn),
-        ]
+        // One per segment: out while growing, in while settling.
+        let scales = Self.popKeyframes.map(\.scale)
+        pop.timingFunctions = zip(scales, scales.dropFirst()).map {
+            CAMediaTimingFunction(name: $1 > $0 ? .easeOut : .easeIn)
+        }
         layer.add(pop, forKey: "entrancePop")
     }
 
