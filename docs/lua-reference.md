@@ -4571,8 +4571,8 @@ KiwiDesk.bind("ctrl+shift+return", function()
 end)
 ```
 
-It is the third choice in an Open applications shortcut's menu
-in Settings, *Gather Windows*; that menu is now called **Action**.
+It is the third choice, *Gather Windows*, in the **Action** menu
+of an Open applications shortcut in Settings.
 :::
 
 ## User Interface
@@ -6147,9 +6147,9 @@ through `6×T` windows, 4×2 through `8×T`, 4×3 through `12×T`,
 quit.set_grid_target_depth(10)  -- denser piles, later growth
 ```
 
-When AX permission is revoked mid-session, KiwiDesk pauses window
-management but cannot spread windows into the grid — `setFrame`
-calls return `kAXErrorAPIDisabled` and are silent no-ops. Windows stay wherever
+When AX permission is revoked mid-session, KiwiDesk pauses
+window management but cannot spread windows into the grid —
+`setFrame` calls return `kAXErrorAPIDisabled` and are silent no-ops. Windows stay wherever
 the WM left them; re-enabling Accessibility in System Settings
 resumes management.
 

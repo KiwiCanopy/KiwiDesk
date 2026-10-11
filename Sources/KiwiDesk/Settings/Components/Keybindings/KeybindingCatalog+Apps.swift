@@ -24,12 +24,12 @@ enum AppShortcutAction: String, CaseIterable {
 /// #333).
 extension KeybindingCatalog {
     /// Formats Lua command for launching bundle identifier with specified
-    /// behavior.
+    /// action.
     static func appCommand(
         _ bundleID: String,
-        behavior: AppShortcutAction = .openOrFocus
+        action: AppShortcutAction = .openOrFocus
     ) -> String {
-        "KiwiDesk.\(behavior.verb)(\"\(bundleID)\")"
+        "KiwiDesk.\(action.verb)(\"\(bundleID)\")"
     }
 
     /// Extracts bundle identifier from app-launch Lua command string.
@@ -37,16 +37,16 @@ extension KeybindingCatalog {
         parseAppCommand(lua)?.bundleID
     }
 
-    /// Extracts launch behavior from app-launch Lua command string.
+    /// Extracts action from app-launch Lua command string.
     static func appShortcutAction(
         from lua: String
     ) -> AppShortcutAction? {
-        parseAppCommand(lua)?.behavior
+        parseAppCommand(lua)?.action
     }
 
-    /// Launch behaviors already bound for `bundleID` in given keybindings
+    /// actions already bound for `bundleID` in given keybindings
     /// (#334).
-    static func takenBehaviors(
+    static func takenActions(
         for bundleID: String,
         in bindings: [KeyBinding],
         excluding id: UUID? = nil
@@ -60,26 +60,26 @@ extension KeybindingCatalog {
         )
     }
 
-    /// First available launch behavior for `bundleID` (#334).
-    static func firstAvailableBehavior(
+    /// First available action for `bundleID` (#334).
+    static func firstAvailableAction(
         for bundleID: String,
         in bindings: [KeyBinding]
     ) -> AppShortcutAction? {
-        let taken = takenBehaviors(for: bundleID, in: bindings)
+        let taken = takenActions(for: bundleID, in: bindings)
         return AppShortcutAction.allCases.first {
             !taken.contains($0)
         }
     }
 
-    /// Resolves preferred or available behavior when reassigning application
+    /// Resolves preferred or available action when reassigning application
     /// row (#334).
-    static func behaviorForAssignment(
+    static func actionForAssignment(
         to bundleID: String,
         preferred: AppShortcutAction,
         in bindings: [KeyBinding],
         excluding id: UUID
     ) -> AppShortcutAction {
-        let taken = takenBehaviors(
+        let taken = takenActions(
             for: bundleID,
             in: bindings,
             excluding: id
@@ -94,17 +94,17 @@ extension KeybindingCatalog {
     /// quote means escaped content the app menu never authors.
     private static func parseAppCommand(
         _ lua: String
-    ) -> (bundleID: String, behavior: AppShortcutAction)? {
+    ) -> (bundleID: String, action: AppShortcutAction)? {
         let suffix = "\")"
-        for behavior in AppShortcutAction.allCases {
-            let prefix = "KiwiDesk.\(behavior.verb)(\""
+        for action in AppShortcutAction.allCases {
+            let prefix = "KiwiDesk.\(action.verb)(\""
             guard lua.hasPrefix(prefix), lua.hasSuffix(suffix),
                 lua.count > prefix.count + suffix.count
             else { continue }
             let inner = lua.dropFirst(prefix.count)
                 .dropLast(suffix.count)
             guard !inner.contains("\"") else { continue }
-            return (String(inner), behavior)
+            return (String(inner), action)
         }
         return nil
     }

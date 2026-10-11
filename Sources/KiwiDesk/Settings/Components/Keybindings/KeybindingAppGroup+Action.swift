@@ -1,11 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Launch behavior picker menu for application shortcuts
+/// action picker menu for application shortcuts
 /// (`AppShortcutAction`, #334).
 extension ApplicationsGroup {
     @ViewBuilder
-    func behaviorMenu(
+    func actionMenu(
         _ binding: Binding<KeyBinding>
     ) -> some View {
         let lua = binding.wrappedValue.lua
@@ -18,21 +18,21 @@ extension ApplicationsGroup {
                 ForEach(
                     AppShortcutAction.allCases,
                     id: \.self
-                ) { behavior in
-                    Button(behaviorLabel(behavior)) {
-                        setBehavior(binding, behavior)
+                ) { action in
+                    Button(actionLabel(action)) {
+                        setAction(binding, action)
                     }
                     .disabled(
-                        behavior != current
-                            && behaviorTaken(
-                                behavior,
+                        action != current
+                            && actionTaken(
+                                action,
                                 bundleID: bundleID,
                                 excluding: binding.wrappedValue.id
                             )
                     )
                 }
             } label: {
-                behaviorLabelView(behaviorLabel(current))
+                actionLabelView(actionLabel(current))
             }
             .menuStyle(.borderlessButton)
             .neutralMenuLabel()
@@ -40,16 +40,16 @@ extension ApplicationsGroup {
             .accessibilityLabel(
                 L("shortcuts.app_behavior", "Action")
             )
-            .accessibilityValue(behaviorLabel(current))
+            .accessibilityValue(actionLabel(current))
             HelpButton(
-                explanation: behaviorHelp,
+                explanation: actionHelp,
                 subject: L("shortcuts.app_behavior", "Action")
             )
         }
     }
 
-    func behaviorLabel(_ behavior: AppShortcutAction) -> String {
-        switch behavior {
+    func actionLabel(_ action: AppShortcutAction) -> String {
+        switch action {
         case .openOrFocus:
             return L(
                 "shortcuts.app_behavior.open_or_focus",
@@ -62,8 +62,8 @@ extension ApplicationsGroup {
         }
     }
 
-    /// Help explanation text for launch behavior options (#673).
-    private var behaviorHelp: String {
+    /// Help explanation text for action options (#673).
+    private var actionHelp: String {
         L(
             "shortcuts.app_behavior.help",
             "**%1$@** takes you to the app's existing window, "
@@ -89,10 +89,10 @@ extension ApplicationsGroup {
         )
     }
 
-    /// Rewrites Lua binding command to selected launch behavior.
-    private func setBehavior(
+    /// Rewrites Lua binding command to selected action.
+    private func setAction(
         _ binding: Binding<KeyBinding>,
-        _ behavior: AppShortcutAction
+        _ action: AppShortcutAction
     ) {
         guard
             let bundleID = KeybindingCatalog.appBundleID(
@@ -101,36 +101,36 @@ extension ApplicationsGroup {
         else { return }
         binding.wrappedValue.lua = KeybindingCatalog.appCommand(
             bundleID,
-            behavior: behavior
+            action: action
         )
     }
 
-    /// Checks if target bundle ID already binds the specified behavior.
-    private func behaviorTaken(
-        _ behavior: AppShortcutAction,
+    /// Checks if target bundle ID already binds the specified action.
+    private func actionTaken(
+        _ action: AppShortcutAction,
         bundleID: String?,
         excluding id: UUID?
     ) -> Bool {
         guard let bundleID else { return false }
-        return KeybindingCatalog.takenBehaviors(
+        return KeybindingCatalog.takenActions(
             for: bundleID,
             in: bindings,
             excluding: id
-        ).contains(behavior)
+        ).contains(action)
     }
 
-    /// Finds first unbound launch behavior for the application (#334).
-    func firstAvailableBehavior(
+    /// Finds first unbound action for the application (#334).
+    func firstAvailableAction(
         for bundleID: String
     ) -> AppShortcutAction? {
-        KeybindingCatalog.firstAvailableBehavior(
+        KeybindingCatalog.firstAvailableAction(
             for: bundleID,
             in: bindings
         )
     }
 
     /// Label view with dropdown chevron (`AppRuleMenuLabel`).
-    private func behaviorLabelView(
+    private func actionLabelView(
         _ text: String
     ) -> some View {
         HStack(spacing: 4) {

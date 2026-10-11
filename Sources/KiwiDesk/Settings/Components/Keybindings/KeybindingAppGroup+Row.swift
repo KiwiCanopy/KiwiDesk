@@ -22,7 +22,7 @@ extension ApplicationsGroup {
         HStack {
             HStack(spacing: 6) {
                 appMenu(binding)
-                behaviorMenu(binding)
+                actionMenu(binding)
             }
             Spacer()
             KeyReachColumn(
@@ -116,7 +116,7 @@ extension ApplicationsGroup {
         app: KeybindingCatalog.InstalledApp
     ) {
         let id = binding.wrappedValue.id
-        let taken = KeybindingCatalog.takenBehaviors(
+        let taken = KeybindingCatalog.takenActions(
             for: app.bundleID,
             in: bindings,
             excluding: id
@@ -134,7 +134,7 @@ extension ApplicationsGroup {
             KeybindingCatalog.appShortcutAction(
                 from: binding.wrappedValue.lua
             ) ?? .openOrFocus
-        let behavior = KeybindingCatalog.behaviorForAssignment(
+        let action = KeybindingCatalog.actionForAssignment(
             to: app.bundleID,
             preferred: current,
             in: bindings,
@@ -143,7 +143,7 @@ extension ApplicationsGroup {
         binding.wrappedValue.label = app.name
         binding.wrappedValue.lua = KeybindingCatalog.appCommand(
             app.bundleID,
-            behavior: behavior
+            action: action
         )
     }
 

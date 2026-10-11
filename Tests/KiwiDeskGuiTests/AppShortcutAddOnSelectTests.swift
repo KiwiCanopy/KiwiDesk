@@ -190,7 +190,7 @@ struct AppShortcutAddOnSelectTests {
         for (file, function, condition) in [
             (
                 "KeybindingAppGroup+AddRow.swift", "funcadd(",
-                "firstAvailableBehavior(for:app.bundleID)"
+                "firstAvailableAction(for:app.bundleID)"
             ),
             (
                 "KeybindingAppGroup+Row.swift",
@@ -219,7 +219,7 @@ struct AppShortcutAddOnSelectTests {
                 },
                 Comment(
                     rawValue:
-                        "\(file)'s no-behavior case no longer "
+                        "\(file)'s no-action case no longer "
                         + "guards at all"
                 )
             )
@@ -236,7 +236,7 @@ struct AppShortcutAddOnSelectTests {
                 branch.contains("refuse("),
                 Comment(
                     rawValue:
-                        "\(file)'s no-behavior branch returns "
+                        "\(file)'s no-action branch returns "
                         + "without recording a refusal "
                         + "(`\(branch.prefix(50))`) — an "
                         + "\u{201C}Other\u{2026}\u{201D} pick "
@@ -258,7 +258,7 @@ struct AppShortcutAddOnSelectTests {
             )
         }
         // DERIVED, not stored: the sentence re-asks the live
-        // question, so freeing a behavior clears it with nothing
+        // question, so freeing a action clears it with nothing
         // having to notice.
         let notice = try declarationBody(
             "funcallBoundNotice(aboutapp:",
@@ -266,14 +266,14 @@ struct AppShortcutAddOnSelectTests {
         )
         #expect(
             notice.contains(
-                "firstAvailableBehavior(for:app.bundleID)==nil"
+                "firstAvailableAction(for:app.bundleID)==nil"
             ),
             Comment(
                 rawValue:
                     "the refusal notice no longer re-derives "
                     + "from live state (`\(notice.prefix(60))`) — "
                     + "a stored message stands after the user "
-                    + "frees a behavior"
+                    + "frees a action"
             )
         )
     }
