@@ -388,9 +388,13 @@ editing here:
   (#1564): filed at the DEPARTURE by `rememberDeparture` from
   `lastHonoredOn` — macOS's restore report beats the handler and
   overwrites the memory, so the departure's filing is what
-  survives — owed by `oweStickyReturn` and paid at the settle by
-  `payStickyReturn` once the carry landed, standing down on a
-  left click since the switch (`StickyReturnFocusTests`). The `.windowCreated` fold takes the debt mirrored in as
+  survives; the handler only COPIES that report-time memory and
+  never reads a live focus — owed by `oweStickyReturn` behind the
+  follow's precedence, retired like the #1207 debt by a focus
+  honored in the active space meanwhile, taken at the head of
+  every settle and paid there by `payStickyReturn` once the carry
+  landed, standing down on a left click since the switch
+  (`StickyReturnFocusTests`, `ReturningFocusSeamTests`). The `.windowCreated` fold takes the debt mirrored in as
   `returningFocus` (the `arrivalDisplay` pattern) and rules two
   clauses: the owed RETURNING window takes the focus even beside
   a non-nil one — and into the ACTIVE space only

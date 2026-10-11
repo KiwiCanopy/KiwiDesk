@@ -22,14 +22,12 @@ extension KiwiCore {
     }
 
     /// Owes the carried sticky window the arriving `native`
-    /// Desktop was left with; the last return's debt goes first.
-    /// macOS's own restore report, which beats the handler, has
-    /// already overwritten the memory — the departure's filing is
-    /// what survives it.
-    func oweStickyReturn(native: SkyLight.SpaceID?) {
-        desktopMemory.stickyReturn = nil
-        guard let native,
-            let id = desktopMemory.stickyLeft.removeValue(forKey: native),
+    /// Desktop was left with — `oweReturningFocus` cleared the
+    /// last debt and ruled the follow's precedence first. macOS's
+    /// own restore report, which beats the handler, has already
+    /// overwritten the memory; the departure's filing survives it.
+    func oweStickyReturn(native: SkyLight.SpaceID) {
+        guard let id = desktopMemory.stickyLeft.removeValue(forKey: native),
             state.windows[id] != nil
         else { return }
         desktopMemory.stickyReturn = id
@@ -39,14 +37,21 @@ extension KiwiCore {
         )
     }
 
-    /// Pays the debt at the settle, once the carry has landed:
-    /// the window must still be carried and render on the active
-    /// Space, and no click may have chosen since the switch.
-    /// Returns whether it raised.
-    func payStickyReturn() -> Bool {
-        guard let id = desktopMemory.stickyReturn else { return false }
-        desktopMemory.stickyReturn = nil
-        if let click = lastLeftClick, click.at >= lastDesktopSwitch {
+    /// Takes the debt at the head of the settle, so a settle that
+    /// stands down, or pays the #1207 debt instead, still ends it.
+    func takeStickyReturn() -> WindowID? {
+        defer { desktopMemory.stickyReturn = nil }
+        return desktopMemory.stickyReturn
+    }
+
+    /// Pays `owed` once the carry has landed: still carried, on
+    /// the active Space, raisable without a Desktop switch, and no
+    /// click since the switch. A focus honored meanwhile already
+    /// retired it (`rememberHonoredFocus`). True when it took the
+    /// focus, which stands the settle's own refocus down.
+    func payStickyReturn(_ owed: WindowID?) -> Bool {
+        guard let id = owed else { return false }
+        if leftPress(since: lastDesktopSwitch) {
             onLog(
                 "desktop return: w\(id.raw) not raised — a click "
                     + "since the switch chose (#1564)"
@@ -56,7 +61,8 @@ extension KiwiCore {
         guard let window = state.windows[id],
             stickyReachCarried().contains(id),
             state.stickyRenderSpace(of: window)
-                == state.workspaces.activeSpace
+                == state.workspaces.activeSpace,
+            !raiseCrossesDesktops(id)
         else { return false }
         guard state.workspaces.lastFocused != id else { return true }
         onLog("desktop return: focus back to carried w\(id.raw) (#1564)")

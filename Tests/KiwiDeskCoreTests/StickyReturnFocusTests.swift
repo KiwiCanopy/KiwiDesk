@@ -58,6 +58,7 @@ struct StickyReturnFocusTests {
 
     private let sticky = WindowID(1)
     private let other = WindowID(2)
+    private let third = WindowID(3)
 
     private func makeCore() -> (KiwiCore, Box) {
         NativeSpaces.spacesOverride = authorityTopology(
@@ -70,7 +71,7 @@ struct StickyReturnFocusTests {
         WMBridge.classResolverOverride = { bridgeClasses[$0] }
         let core = makeAuthorityCore()
         let box = Box()
-        box.hosts = [sticky: 10, other: 10]
+        box.hosts = [sticky: 10, other: 10, third: 10]
         core.desktopMemory.readWindowSpace = { id in
             box.hosts[id].map { .hosted($0) } ?? .unavailable
         }
@@ -84,7 +85,7 @@ struct StickyReturnFocusTests {
         core.state.workspaces.ensureSpace(SpaceID("1"))
         core.state.workspaces.assign(SpaceID("1"), to: DisplayID(1))
         core.state.workspaces.activate(SpaceID("1"))
-        for id in [other, sticky] {
+        for id in [other, third, sticky] {
             core.state.apply(
                 .windowCreated(
                     ManagedWindow(id: id, pid: 1, appName: "App")
@@ -144,6 +145,7 @@ struct StickyReturnFocusTests {
         let (core, box) = makeCore()
         defer { teardown() }
         roundTrip(core, box, leavingWith: sticky)
+        #expect(core.desktopMemory.stickyReturn == sticky)
         #expect(core.state.workspaces.lastFocused == other)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(core.state.workspaces.lastFocused == sticky)
@@ -155,8 +157,31 @@ struct StickyReturnFocusTests {
         let (core, box) = makeCore()
         defer { teardown() }
         roundTrip(core, box, leavingWith: other)
+        #expect(core.desktopMemory.stickyReturn == nil)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(core.state.workspaces.lastFocused == other)
+    }
+
+    /// A focus chosen by keyboard before the settle retires the
+    /// debt, as it retires the #1207 one.
+    @Test("a focus honored before the settle keeps its choice")
+    func honoredFocusRetires() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        roundTrip(core, box, leavingWith: sticky)
+        core.handle(.windowFocused(third))
+        #expect(core.desktopMemory.stickyReturn == nil)
+        core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
+        #expect(core.state.workspaces.lastFocused == third)
+    }
+
+    /// A follow (#1007) names its window: it outranks the memory.
+    @Test("a standing follow outranks the sticky debt")
+    func followOutranks() {
+        let (core, box) = makeCore()
+        defer { teardown() }
+        core.followFocus.record(third)
+        roundTrip(core, box, leavingWith: sticky)
         #expect(core.desktopMemory.stickyReturn == nil)
     }
 
@@ -179,6 +204,8 @@ struct StickyReturnFocusTests {
         defer { teardown() }
         core.tiler.settings.stickyStyle.desktopReach = false
         roundTrip(core, box, leavingWith: sticky)
+        #expect(core.desktopMemory.stickyLeft.isEmpty)
+        #expect(core.desktopMemory.stickyReturn == nil)
         core.desktopSettle(ifStill: core.desktopMemory.lastDesktopSpace)
         #expect(core.state.workspaces.lastFocused == other)
     }

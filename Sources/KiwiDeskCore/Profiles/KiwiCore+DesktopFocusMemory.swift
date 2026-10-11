@@ -27,6 +27,17 @@ extension KiwiCore {
                     + "focus honored on w\(id.raw)"
             )
         }
+        // The sticky debt yields the same way (#1564): a keyboard
+        // focus, ⌘-Tab or a verb chose before the settle paid.
+        if let owed = desktopMemory.stickyReturn, owed != id,
+            space == state.workspaces.activeSpace
+        {
+            desktopMemory.stickyReturn = nil
+            onLog(
+                "desktop return: w\(owed.raw) not raised — focus "
+                    + "honored on w\(id.raw) (#1564)"
+            )
+        }
         guard let native = hostedNativeSpace(of: id) else { return }
         desktopMemory.honoredFocus[space, default: [:]][native] = id
         desktopMemory.lastHonoredOn[native] = id
@@ -46,10 +57,12 @@ extension KiwiCore {
     /// Owes the arriving `target` the focus last honored on
     /// `native`, the Desktop being shown. The last return's debt
     /// is retired first — a debt lives from one return to the
-    /// next. A standing follow (#1007) outranks the memory. Only a
-    /// window GONE from state is owed: a carried sticky (#1145) or
-    /// a window macOS restored and KiwiDesk already honored is
-    /// present and needs nothing. Reached for EVERY user-Desktop
+    /// next. A standing follow (#1007) outranks the memory and the
+    /// sticky debt alike. Only a window GONE from state is owed
+    /// here: a window macOS restored and KiwiDesk already honored
+    /// is present and needs nothing, and a carried sticky (#1145)
+    /// takes the settle's debt instead (`oweStickyReturn`, #1564).
+    /// Reached for EVERY user-Desktop
     /// arrival only because `virtualSpaceTarget` falls back to the
     /// first space (`DesktopFocusMemoryTests` ▸ the unremembered
     /// pass-through).
@@ -58,20 +71,21 @@ extension KiwiCore {
         native: SkyLight.SpaceID?
     ) {
         desktopMemory.returnFocus.forget()
-        oweStickyReturn(native: native)
-        guard let native,
-            let remembered = desktopMemory.honoredFocus[target]?[
-                native
-            ],
-            state.windows[remembered] == nil
-        else { return }
+        desktopMemory.stickyReturn = nil
+        guard let native else { return }
+        let remembered = desktopMemory.honoredFocus[target]?[native]
+            .flatMap { state.windows[$0] == nil ? $0 : nil }
         if let followed = followFocus.owed() {
-            onLog(
-                "desktop return: w\(remembered.raw) not owed — "
-                    + "a follow owes w\(followed.raw)"
-            )
+            if let remembered {
+                onLog(
+                    "desktop return: w\(remembered.raw) not owed — "
+                        + "a follow owes w\(followed.raw)"
+                )
+            }
             return
         }
+        oweStickyReturn(native: native)
+        guard let remembered else { return }
         desktopMemory.returnFocus.record(remembered)
         onLog(
             "desktop return: owing focus to w\(remembered.raw) "

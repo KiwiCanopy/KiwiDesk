@@ -42,6 +42,8 @@ extension KiwiCore {
     /// `lastDesktop`, for the re-key reason above — core-owned,
     /// so this reads no machine state.
     func desktopSettle(ifStill desktop: SkyLight.SpaceID?) {
+        // Ended by every settle, the stale one too (#1564).
+        let stickyOwed = takeStickyReturn()
         guard desktopMemory.lastDesktopSpace == desktop else { return }
         // The switch's `reconcileAll` is census-gated (#1037),
         // and that census can beat the compositor: a window
@@ -80,7 +82,7 @@ extension KiwiCore {
                 "desktop return: focus owed to w\(owed.raw), "
                     + "settle refocus stands down"
             )
-        } else if payStickyReturn() {
+        } else if payStickyReturn(stickyOwed) {
             // #1564: the carried sticky window the user left with
             // took the focus back; the refocus below is moot.
         } else if let focused = activeSpace?.focused,
