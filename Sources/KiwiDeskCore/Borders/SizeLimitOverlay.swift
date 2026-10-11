@@ -204,6 +204,18 @@ final class SizeLimitOverlay {
         )
     }
 
+    #if DEBUG
+        /// Test-only: a shown pill's panel frame and its plate,
+        /// as `flash` placed them.
+        func pillForTest(
+            _ window: CGWindowID
+        ) -> (panel: CGRect, content: NSView?, plate: NSView)? {
+            pills[window].map {
+                ($0.panel.frame, $0.panel.contentView, $0.plate)
+            }
+        }
+    #endif
+
     private func makePanel(
         _ plate: SizeLimitPillPlate
     ) -> NSPanel {

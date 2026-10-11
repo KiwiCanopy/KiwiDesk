@@ -283,6 +283,9 @@ final class StickyMarkOverlay {
 
         /// Test-only: the panel's frame.
         var panelFrameForTest: CGRect? { panel?.frame }
+
+        /// Test-only: the panel's content view.
+        var panelContentForTest: NSView? { panel?.contentView }
     #endif
 
     private func markRect(

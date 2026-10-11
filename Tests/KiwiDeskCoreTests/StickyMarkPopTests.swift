@@ -53,10 +53,20 @@ struct StickyMarkPopTests {
         panel: CGSize
     ) {
         let bounds = CGRect(origin: .zero, size: panel)
+        // A transform about the centre, never a bare scale: an
+        // NSNumber is an NSValue too, and decodes to no transform.
+        #expect(pop.keyPath == "transform")
         let transforms = (pop.values ?? []).compactMap {
-            ($0 as? NSValue)?.caTransform3DValue
+            value -> CATransform3D? in
+            guard let value = value as? NSValue,
+                String(cString: value.objCType).hasPrefix("{CATransform3D")
+            else { return nil }
+            return value.caTransform3DValue
         }
-        #expect(transforms.count == StickyMarkOverlay.popKeyframes.count)
+        #expect(
+            transforms.map(\.m11)
+                == StickyMarkOverlay.popKeyframes.map(\.scale)
+        )
         for step in 0...10 {
             let plate = mix(from, to, CGFloat(step) / 10)
             for t in transforms {
@@ -165,6 +175,9 @@ struct StickyMarkPopTests {
         overlay.update(frame: CGRect(x: 200, y: 200, width: 800, height: 600))
         defer { overlay.hide() }
         let panel = try #require(overlay.panelFrameForTest)
+        let content = try #require(overlay.panelContentForTest)
+        #expect(content !== overlay.plate)
+        #expect(overlay.plate.superview === content)
         let plate = overlay.plate.frame
         let peak = StickyMarkOverlay.popKeyframes.map(\.scale).max() ?? 1
         let grown = plate.insetBy(

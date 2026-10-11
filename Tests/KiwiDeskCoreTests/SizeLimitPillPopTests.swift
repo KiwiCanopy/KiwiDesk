@@ -1,3 +1,4 @@
+import AppKit
 import CoreGraphics
 import QuartzCore
 import Testing
@@ -104,5 +105,32 @@ struct SizeLimitPillPopTests {
         )
         let plate = PopRoom.plateFrame(plate: pill, in: panel)
         #expect(plate.offsetBy(dx: panel.minX, dy: panel.minY) == pill)
+    }
+
+    /// The overlay's own call site: a pill `flash` shows sits in
+    /// a room with space for the peak, inside the panel's content
+    /// view and never as it.
+    @Test("a flashed pill rests in a room with space for the pop")
+    @MainActor
+    func flashedPillHasRoom() throws {
+        let overlay = SizeLimitOverlay()
+        let shown = overlay.flash(
+            window: 1,
+            frame: CGRect(x: 200, y: 200, width: 800, height: 600),
+            text: "Can't be any smaller",
+            symbol: "nosign"
+        )
+        try #require(shown)
+        let pill = try #require(overlay.pillForTest(1))
+        let content = try #require(pill.content)
+        #expect(content !== pill.plate)
+        #expect(pill.plate.superview === content)
+        let plate = pill.plate.frame
+        let peak = SizeLimitOverlay.popKeyframes.map(\.scale).max() ?? 1
+        let grown = plate.insetBy(
+            dx: -plate.width * (peak - 1) / 2,
+            dy: -plate.height * (peak - 1) / 2
+        )
+        #expect(CGRect(origin: .zero, size: pill.panel.size).contains(grown))
     }
 }
