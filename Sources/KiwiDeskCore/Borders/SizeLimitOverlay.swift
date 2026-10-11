@@ -28,6 +28,10 @@ final class SizeLimitOverlay {
     private static let fadeDuration: TimeInterval = 0.2
     private static let pillHeight: CGFloat = 26
     nonisolated static let pillPadding: CGFloat = 20
+    /// The entrance pop's keyframe scales. Its PEAK sizes the
+    /// panel's margin (`panelFrame`), so a retune cannot clip the
+    /// pill's ends at the window edge again (#2033).
+    nonisolated static let popScales: [CGFloat] = [0.95, 1.03, 1.0]
 
     init() {}
 
@@ -49,6 +53,33 @@ final class SizeLimitOverlay {
             max(textWidth + pillPadding, 120)
         )
         return width > 40 ? width : nil
+    }
+
+    /// The panel frame hosting a pill drawn at `pill`: grown on
+    /// each side by what the pop's peak adds, plus a point, so
+    /// the scaled plate never meets the window edge (#2033).
+    nonisolated static func panelFrame(for pill: CGRect) -> CGRect {
+        let grow = (popScales.max() ?? 1) - 1
+        return pill.insetBy(
+            dx: -ceil(pill.width * grow / 2) - 1,
+            dy: -ceil(pill.height * grow / 2) - 1
+        )
+    }
+
+    /// Scales a layer of `size` by `scale` about its CENTRE,
+    /// whatever its `anchor` — a layer-backed view's layer keeps
+    /// AppKit's anchor, which a hand-set one does not survive.
+    nonisolated static func popTransform(
+        scale: CGFloat,
+        size: CGSize,
+        anchor: CGPoint
+    ) -> CATransform3D {
+        let dx = (0.5 - anchor.x) * size.width * (1 - scale)
+        let dy = (0.5 - anchor.y) * size.height * (1 - scale)
+        return CATransform3DConcat(
+            CATransform3DMakeScale(scale, scale, 1),
+            CATransform3DMakeTranslation(dx, dy, 0)
+        )
     }
 
     /// Flashes size-limit pill on window frame in AX coordinates
@@ -93,8 +124,15 @@ final class SizeLimitOverlay {
             pillRect,
             primaryHeight: GeometryUtils.primaryHeight
         )
+        let panelRect = Self.panelFrame(for: screenRect)
 
-        pill.panel.setFrame(screenRect, display: true)
+        pill.panel.setFrame(panelRect, display: true)
+        pill.plate.frame = CGRect(
+            x: screenRect.minX - panelRect.minX,
+            y: screenRect.minY - panelRect.minY,
+            width: screenRect.width,
+            height: screenRect.height
+        )
         pill.panel.order(.above, relativeTo: Int(window))
         pill.panel.alphaValue = 1
 
@@ -159,8 +197,16 @@ final class SizeLimitOverlay {
 
     private func popEntrance(_ plate: SizeLimitPillPlate) {
         guard let layer = plate.layer else { return }
-        let pop = CAKeyframeAnimation(keyPath: "transform.scale")
-        pop.values = [0.95, 1.03, 1.0]
+        let pop = CAKeyframeAnimation(keyPath: "transform")
+        pop.values = Self.popScales.map {
+            NSValue(
+                caTransform3D: Self.popTransform(
+                    scale: $0,
+                    size: layer.bounds.size,
+                    anchor: layer.anchorPoint
+                )
+            )
+        }
         pop.keyTimes = [0, 0.5, 1.0]
         pop.duration = 0.14
         pop.timingFunctions = [
@@ -200,7 +246,11 @@ final class SizeLimitOverlay {
             .fullScreenAuxiliary,
             .ignoresCycle,
         ]
-        panel.contentView = plate
+        // A clear host with the plate inside it, so the pop grows
+        // into the margin rather than past the window (#2033).
+        let host = NSView()
+        host.addSubview(plate)
+        panel.contentView = host
         return panel
     }
 
