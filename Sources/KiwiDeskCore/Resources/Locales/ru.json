@@ -149,7 +149,7 @@
   "behavior.animations.shelf_duration": "Длительность KiwiShelf",
   "behavior.animations.shelf_duration.help": "Сколько времени панели вырастают, сжимаются, плавно появляются и исчезают и скользят на своё место.",
   "behavior.animations.space_change.caption": "Пластины накрывают твои окна и скользят к пространству, на которое ты переключаешься.",
-  "behavior.animations.space_change.cue": "Показать пространство",
+  "behavior.animations.space_change.cue": "Мгновенно + название",
   "behavior.animations.space_change.cue.caption": "Экран сменяется сразу, а на мгновение показывается, в каком ты пространстве. Экран, на котором есть Space Bar, этого не делает: панель и так показывает пространство.",
   "behavior.animations.space_change.instant": "Мгновенно",
   "behavior.animations.space_change.instant.caption": "Экран сменяется сразу.",

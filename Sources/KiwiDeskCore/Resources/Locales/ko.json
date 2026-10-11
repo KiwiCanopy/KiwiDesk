@@ -149,7 +149,7 @@
   "behavior.animations.shelf_duration": "KiwiShelf 지속 시간",
   "behavior.animations.shelf_duration.help": "바가 펼쳐지고, 접히고, 서서히 나타나거나 사라지고, 새 위치로 부드럽게 이동하는 데 걸리는 시간입니다.",
   "behavior.animations.space_change.caption": "판이 윈도우를 덮고 전환하는 공간으로 미끄러져 갑니다.",
-  "behavior.animations.space_change.cue": "공간 표시",
+  "behavior.animations.space_change.cue": "즉시 + 이름",
   "behavior.animations.space_change.cue.caption": "화면이 즉시 바뀌고, 도착한 공간이 잠시 표시됩니다. Space Bar를 표시하는 화면에서는 바가 이미 공간을 알려 주므로 표시하지 않습니다.",
   "behavior.animations.space_change.instant": "즉시",
   "behavior.animations.space_change.instant.caption": "화면이 즉시 바뀝니다.",

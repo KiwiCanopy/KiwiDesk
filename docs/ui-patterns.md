@@ -1033,7 +1033,7 @@ The Space-switch plate slide is the second: drawn chrome that
 moves no window, picked with **Space switches** at the top of that
 card and paced by **Space switch duration** beneath it (#1956,
 #1931). Reduce Motion greys the duration and leaves the picker
-live, since its Show the Space is how a switch reads with less
+live, since its Instant + name is how a switch reads with less
 motion (#2143).
 
 Nothing is exempt, including the marks whose movement carries

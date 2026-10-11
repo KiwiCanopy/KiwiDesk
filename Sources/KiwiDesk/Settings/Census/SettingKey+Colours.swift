@@ -72,7 +72,7 @@ extension ColoursKey {
             )
         case .animationsSpaceChange:
             // Its own row above the master, outside Reduce Motion's
-            // grey: Show the Space is how a switch reads with less
+            // grey: Instant + name is how a switch reads with less
             // motion (#2143, owner 2026-10-11).
             return .row(
                 .coloursAndMotion,

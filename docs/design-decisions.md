@@ -3276,8 +3276,8 @@ changes. `animations.duration` keeps pacing windows only, since
 the slide moves none.
 
 *Three ways, and the plate by default (#2143).* One picker,
-"Space switches", offers Instant, Show the Space and Slide. Show
-the Space is #2142's glass plate naming the Space you arrived on
+"Space switches", offers Instant, Instant + name and Slide.
+Instant + name is #2142's glass plate naming the Space you arrived on
 and its layout's symbol — dots mean a Desktop, a symbol a Space —
 on the screen that switched, after an instant switch. It is the
 default because it answers the question the slide answered —
@@ -3293,7 +3293,7 @@ plate stands down on a screen that draws a Space Bar, which
 already names the Space, so it never says a thing twice. The
 picker is its own row above the window animations' master and
 outside Reduce Motion's grey: under Reduce Motion, Slide shows
-the plate without its fade, and Show the Space is how a switch
+the plate without its fade, and Instant + name is how a switch
 reads with less motion, so greying it would hide the one answer
 that setting leaves.
 

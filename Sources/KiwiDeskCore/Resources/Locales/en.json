@@ -149,7 +149,7 @@
   "behavior.animations.shelf_duration": "KiwiShelf duration",
   "behavior.animations.shelf_duration.help": "How long the bars take to grow, shrink, fade and glide into place.",
   "behavior.animations.space_change.caption": "Plates cover your windows and slide to the Space you're switching to.",
-  "behavior.animations.space_change.cue": "Show the Space",
+  "behavior.animations.space_change.cue": "Instant + name",
   "behavior.animations.space_change.cue.caption": "The screen changes at once, and the Space you arrived on is named for a moment. A screen that draws a Space Bar skips it, since the bar already names the Space.",
   "behavior.animations.space_change.instant": "Instant",
   "behavior.animations.space_change.instant.caption": "The screen changes at once.",

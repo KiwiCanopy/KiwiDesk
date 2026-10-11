@@ -149,7 +149,7 @@
   "behavior.animations.shelf_duration": "Duração do KiwiShelf",
   "behavior.animations.shelf_duration.help": "Quanto tempo as barras levam para crescer, encolher, aparecer e desaparecer gradualmente e deslizar para o lugar.",
   "behavior.animations.space_change.caption": "Placas cobrem suas janelas e deslizam até o espaço para o qual você vai.",
-  "behavior.animations.space_change.cue": "Mostrar o espaço",
+  "behavior.animations.space_change.cue": "Instantâneo + nome",
   "behavior.animations.space_change.cue.caption": "A tela muda na hora, e o espaço em que você chegou é indicado por um instante. Uma tela que mostra uma Space Bar pula isso, já que a barra já indica o espaço.",
   "behavior.animations.space_change.instant": "Instantâneo",
   "behavior.animations.space_change.instant.caption": "A tela muda na hora.",

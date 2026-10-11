@@ -149,7 +149,7 @@
   "behavior.animations.shelf_duration": "KiwiShelf 時間長度",
   "behavior.animations.shelf_duration.help": "各列展開、縮回、淡入淡出以及滑到新位置所需的時間。",
   "behavior.animations.space_change.caption": "薄板會蓋住你的視窗，並滑向你要切換到的空間。",
-  "behavior.animations.space_change.cue": "顯示空間",
+  "behavior.animations.space_change.cue": "立即 + 名稱",
   "behavior.animations.space_change.cue.caption": "螢幕會立即切換，並短暫顯示你抵達的空間。顯示 Space Bar 的螢幕會略過這一步，因為該列已標明空間。",
   "behavior.animations.space_change.instant": "立即",
   "behavior.animations.space_change.instant.caption": "螢幕會立即切換。",

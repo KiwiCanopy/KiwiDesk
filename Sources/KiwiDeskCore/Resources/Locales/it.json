@@ -149,7 +149,7 @@
   "behavior.animations.shelf_duration": "Durata di KiwiShelf",
   "behavior.animations.shelf_duration.help": "Quanto impiegano le barre a espandersi, ritrarsi, apparire e scomparire in dissolvenza e scivolare al loro posto.",
   "behavior.animations.space_change.caption": "Delle piastre coprono le tue finestre e scorrono verso lo spazio a cui passi.",
-  "behavior.animations.space_change.cue": "Mostra lo spazio",
+  "behavior.animations.space_change.cue": "Istantaneo + nome",
   "behavior.animations.space_change.cue.caption": "Lo schermo cambia all'istante e lo spazio in cui arrivi viene indicato per un momento. Uno schermo che mostra una Space Bar lo salta, perché la barra indica già lo spazio.",
   "behavior.animations.space_change.instant": "Istantaneo",
   "behavior.animations.space_change.instant.caption": "Lo schermo cambia all'istante.",

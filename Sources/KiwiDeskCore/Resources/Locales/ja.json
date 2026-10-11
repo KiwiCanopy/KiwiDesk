@@ -149,7 +149,7 @@
   "behavior.animations.shelf_duration": "KiwiShelfの継続時間",
   "behavior.animations.shelf_duration.help": "バーが広がったり縮んだり、フェードしたり、新しい位置へ滑らかに移動したりするのにかかる時間です。",
   "behavior.animations.space_change.caption": "プレートがウインドウを覆い、切り替え先のスペースへスライドします。",
-  "behavior.animations.space_change.cue": "スペースを表示",
+  "behavior.animations.space_change.cue": "即時 + 名前",
   "behavior.animations.space_change.cue.caption": "画面がすぐに切り替わり、移動先のスペースが一瞬表示されます。Space Barを表示している画面では、バーがすでにスペースを示しているため表示されません。",
   "behavior.animations.space_change.instant": "即時",
   "behavior.animations.space_change.instant.caption": "画面がすぐに切り替わります。",

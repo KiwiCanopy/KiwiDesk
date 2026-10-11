@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Space switch picker (#2143): Instant, Show the Space or
+/// The Space switch picker (#2143): Instant, Instant + name or
 /// Slide, its own row above the window master and outside Reduce
 /// Motion's grey. The caption follows the selection.
 extension MotionCard {
@@ -37,7 +37,7 @@ extension MotionCard {
         case .cue:
             return L(
                 "behavior.animations.space_change.cue",
-                "Show the Space"
+                "Instant + name"
             )
         case .slide:
             return L("behavior.animations.space_change.slide", "Slide")
