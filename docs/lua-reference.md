@@ -598,8 +598,12 @@ end)
 each at most once.
 
 **Does:** sets the layouts `cycle_mode` walks. The default is
-`{ "bsp", "scrolling", "floating" }`. Settings and `gui.json`
-keep it as `mode_cycle`.
+`{ "bsp", "scrolling", "floating" }`.
+
+It is stored like the shortcuts: `mode_cycle` in `gui.json` is
+the list every profile uses, and a profile may keep its own. The
+verb sets the shared list for the running session and never
+reaches a file; a profile's own list still wins.
 
 **Example:**
 

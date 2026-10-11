@@ -25,7 +25,7 @@ struct ModeCycleTests {
     @Test("Next walks the list and wraps; Previous walks back")
     func walksAndWraps() {
         let core = makeCore()
-        #expect(core.modeCycle == [.bsp, .scrolling, .floating])
+        #expect(core.modeCycle.list == [.bsp, .scrolling, .floating])
         for expected: LayoutMode in [.scrolling, .floating, .bsp] {
             #expect(core.execute("cycle_mode", args: []).isSuccess)
             #expect(mode(core) == expected)
@@ -67,14 +67,14 @@ struct ModeCycleTests {
             args: [.array([.string("monocle"), .string("grid")])]
         )
         #expect(two.isSuccess)
-        #expect(core.modeCycle == [.monocle, .grid])
+        #expect(core.modeCycle.list == [.monocle, .grid])
         // The CLI's shape: one argument per layout.
         let cli = core.execute(
             "set_mode_cycle",
             args: [.string("stack"), .string("grid")]
         )
         #expect(cli.isSuccess)
-        #expect(core.modeCycle == [.stack, .grid])
+        #expect(core.modeCycle.list == [.stack, .grid])
         for bad: [JSONValue] in [
             [.string("grid")],
             [.string("grid"), .string("grid")],
@@ -86,7 +86,7 @@ struct ModeCycleTests {
             )
             #expect(!response.isSuccess)
         }
-        #expect(core.modeCycle == [.stack, .grid])
+        #expect(core.modeCycle.list == [.stack, .grid])
         #expect(!core.execute("cycle_mode", args: [.string("up")]).isSuccess)
         let number = core.execute("cycle_mode", args: [.number(1)])
         #expect(!number.isSuccess, "a non-string direction is refused")

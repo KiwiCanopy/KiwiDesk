@@ -22,9 +22,21 @@ public enum ModeCycle {
         _ container: KeyedDecodingContainer<Key>,
         forKey key: Key
     ) throws -> [LayoutMode] {
-        let modes =
-            try container.decodeIfPresent([LayoutMode].self, forKey: key)
-            ?? defaultList
+        try decodedIfPresent(container, forKey: key) ?? defaultList
+    }
+
+    /// The stored list under `key`, nil where absent — a profile's
+    /// sparse override; a present list is held to the same bar.
+    static func decodedIfPresent<Key: CodingKey>(
+        _ container: KeyedDecodingContainer<Key>,
+        forKey key: Key
+    ) throws -> [LayoutMode]? {
+        guard
+            let modes = try container.decodeIfPresent(
+                [LayoutMode].self,
+                forKey: key
+            )
+        else { return nil }
         guard isValid(modes) else {
             throw DecodingError.dataCorruptedError(
                 forKey: key,
@@ -34,6 +46,15 @@ public enum ModeCycle {
             )
         }
         return modes
+    }
+
+    /// A profile's sparse override for `value` over `base`: nil
+    /// where it follows the base.
+    public static func sparse(
+        _ value: [LayoutMode],
+        over base: [LayoutMode]
+    ) -> [LayoutMode]? {
+        value == base ? nil : value
     }
 
     /// The layout after `current` in `list`, or before it going
