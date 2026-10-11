@@ -144,10 +144,8 @@ extension KiwiCore {
         ) {
             setSpaceMode(id, profile.spaceModes[id] ?? .bsp)
         }
-        // Per-profile override tiers — keybindings (#55 phase
-        // 6) and app rules (#109): register THIS profile's
-        // overrides (base survives unmentioned). Passed
-        // explicitly — callers adopt after apply, so
+        // THIS profile's override tiers (#55, #109), passed
+        // explicitly: callers adopt after apply, so
         // `currentName` may still be the old profile.
         reapplyStructuredOverrides(
             profileModes: profile.layers,
@@ -155,7 +153,8 @@ extension KiwiCore {
             profileFloatRules: profile.floatRules,
             profileIgnoreRules: profile.ignoreRules,
             profileScrollGesture: profile.scrollGesture,
-            profileSpaceHistory: profile.spaceHistory
+            profileSpaceHistory: profile.spaceHistory,
+            profileModeCycle: profile.modeCycle
         )
         // A renumbered held Space owes its ⌃⌥N (#485's top-up).
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
@@ -247,7 +246,8 @@ extension KiwiCore {
             profileFloatRules: nil,
             profileIgnoreRules: nil,
             profileScrollGesture: nil,
-            profileSpaceHistory: nil
+            profileSpaceHistory: nil,
+            profileModeCycle: nil
         )
         if heldRenumbered(since: heldBefore) { topUpDigitShortcuts() }
         resolveSpaceDisplays()
