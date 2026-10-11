@@ -3801,6 +3801,17 @@ crossing out of the profiles, and why General's card needs the
 immediate write are argued once, in [Spaces, profiles & config
 ownership](#spaces-profiles--config-ownership) (#1741).
 
+General is the home of an app-wide value with no feature of its
+own — this sound, the quit layout — and not of every app-wide
+value (owner ruling 2026-10-11). A switch that belongs to a
+feature sits beside that feature, where someone setting the
+feature up looks for it: the Desktop switch cue in Profiles ▸
+Desktops (#2142), the layout plate's in Shortcuts & Gestures ▸
+Layout under the cycle list (#2144). Such a switch is still
+written the moment it changes, on a page whose other rows wait
+for Save, so it says in its `?` that it applies at once and to
+every profile.
+
 **An arrow means a resize stopped; a non-arrow means there is
 no resize here (#1260).** [Principle] The pill carries two kinds
 of message, and they ask for different things of the reader:

@@ -13,13 +13,16 @@ enum RuleFamily: Hashable {
     /// The Space history setting, keyed by
     /// `RuleReachTable.spaceHistoryKey` (#1655).
     case history
+    /// The layout cycle, keyed by `RuleReachTable.modeCycleKey`
+    /// (#453).
+    case cycle
 
     /// How a row's subject keys its table: app rules by the
     /// lowercased bundle id, a shortcut's action and a scroll
     /// setting verbatim.
     func key(_ subject: String) -> String {
         switch self {
-        case .key, .scroll, .history: subject
+        case .key, .scroll, .history, .cycle: subject
         case .space, .float: subject.lowercased()
         }
     }

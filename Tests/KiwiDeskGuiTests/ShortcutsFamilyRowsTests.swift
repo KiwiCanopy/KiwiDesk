@@ -69,6 +69,8 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.scrollNaturalTrackpad),
             .shortcuts(.scrollNaturalMouse),
             .shortcuts(.spaceHistory),
+            .shortcuts(.modeCycle),
+            .shortcuts(.modeCue),
         ]
         let expander = fixture()
         let placed = SettingKey.allCases.filter {

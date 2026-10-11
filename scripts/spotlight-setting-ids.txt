@@ -52,6 +52,7 @@ UserDefaults.SUAutomaticallyUpdate (Sparkle)
 UserDefaults.appearance
 UserDefaults.language
 appWide.desktopCue
+appWide.modeCue
 appWide.quitGridTargetDepth
 appWide.refusalSound
 config.appRules[app]
@@ -59,6 +60,7 @@ config.floatRules
 config.layers[].icon
 config.layers[].reach
 config.mainSpaces
+config.modeCycle
 config.scrollGesture.longSwipes
 config.scrollGesture.naturalMouse
 config.scrollGesture.naturalTrackpad

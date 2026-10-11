@@ -10,9 +10,6 @@ enum GeneralKey: String, CaseIterable, Hashable {
     case quitGridTargetDepth = "appWide.quitGridTargetDepth"
     /// Lua-only while `grid` is the one strategy (#197).
     case quitLayout = "appWide.quitLayout"
-    /// Lua-only until Settings ▸ Layout draws its row under the
-    /// cycle list (#2144, #453).
-    case modeCue = "appWide.modeCue"
     case startAtLogin = "AutoStartManager (no stored pref)"
     case installUpdatesAutomatically =
         "UserDefaults.SUAutomaticallyUpdate (Sparkle)"
@@ -70,7 +67,7 @@ extension GeneralKey {
             return .row(.general, .advanced, .showMore)
         case .onboardingDiscoveryShown, .iconPickerRecents:
             return .internalOnly
-        case .quitLayout, .modeCue:
+        case .quitLayout:
             return .luaOnly
         case .onboardingOpenAtLogin:
             return .outsideSettings
@@ -149,7 +146,7 @@ extension GeneralKey {
                 help: "general.advanced.backup.restore.help"
             )
         case .onboardingDiscoveryShown, .iconPickerRecents,
-            .onboardingOpenAtLogin, .quitLayout, .modeCue:
+            .onboardingOpenAtLogin, .quitLayout:
             return .none
         }
     }

@@ -46,6 +46,12 @@ struct ShortcutsBespokeContainerTests {
                 "layoutAtRest", .layout,
                 ShortcutsRowOrder.layoutAtRest
             ),
+            // The cycle list and the plate's switch, drawn above
+            // the walked shortcuts by their own views (#453).
+            (
+                "layoutList", .layout,
+                ShortcutsRowOrder.layoutList
+            ),
             (
                 "sizeAndFloatAtRest", .sizeAndFloat,
                 ShortcutsRowOrder.sizeAndFloatAtRest

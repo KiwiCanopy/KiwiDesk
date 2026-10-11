@@ -102,8 +102,11 @@ struct ShortcutsGates {
     /// and Restore Defaults' gates are live-editor questions no
     /// saved `GuiConfig` can answer, so `ShortcutsHeader` keeps
     /// them. Naming them keeps the gap deliberate.
+    /// The layout plate's switch greys on `SettingsModel
+    /// .guiManaged`, which no saved config answers either (#2144).
     static let resolvedElsewhere: Set<SettingKey> = [
         .shortcuts(.`import`),
         .shortcuts(.restoreDefaults),
+        .shortcuts(.modeCue),
     ]
 }
