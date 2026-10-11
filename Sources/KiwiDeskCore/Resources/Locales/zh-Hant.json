@@ -543,7 +543,7 @@
   "home.card.bars.shelf_subtitle_space_off": "KiwiShelf · %1$@ · Space Bar 關閉",
   "home.card.bars.split_subtitle": "Space Bar：%1$@ · App Bar：%2$@",
   "home.card.colors.subtitle": "動畫開啟 · %1$d 毫秒",
-  "home.card.colors.subtitle_off": "動畫關閉",
+  "home.card.colors.subtitle_window_off": "視窗動畫關閉",
   "home.card.conflict_many": "%1$d 處衝突",
   "home.card.conflict_one": "1 處衝突",
   "home.card.gaps.subtitle": "外側 %1$d · 內側 %2$d · 邊框 %3$d pt",

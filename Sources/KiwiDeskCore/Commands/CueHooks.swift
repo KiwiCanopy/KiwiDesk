@@ -1,0 +1,12 @@
+import Foundation
+
+/// The GUI's hooks for the plate cues Core pays at once — the
+/// layout cue (`payModeCue`) and the Space cue (`paySpaceCue`). The
+/// Desktop cue's hook rides its own ledger
+/// (`DesktopCueLedger.onCue`), since that cue is owed and paid
+/// later.
+@MainActor
+final class CueHooks {
+    var onModeCue: @MainActor (ModeCycleCue) -> Void = { _ in }
+    var onSpaceCue: @MainActor (SpaceSwitchCue) -> Void = { _ in }
+}

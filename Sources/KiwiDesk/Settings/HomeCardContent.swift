@@ -72,8 +72,8 @@ enum HomeCardContent {
                 )
             }
             return L(
-                "home.card.colors.subtitle_off",
-                "Animations off"
+                "home.card.colors.subtitle_window_off",
+                "Window animations off"
             )
         case .layoutDefaults:
             return L(

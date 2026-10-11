@@ -25,15 +25,12 @@ extension KiwiCore {
         set { cueHooks.onSpaceCue = newValue }
     }
 
-    /// Called after a switch the slide would play on, where it did
-    /// not: on Show the Space, or Slide under Reduce Motion. Stands
+    /// Called by `spaceSwitchRetile` alone, after a switch the
+    /// slide would play on, where the drawn style is the cue. Stands
     /// down where `display` draws a Space Bar, which already names
     /// the Space, and where the shelf stands down (#1787).
     func paySpaceCue(on display: DisplayID) {
-        let style = tiler.settings.animations.spaceChange
-        guard
-            style == .cue
-                || (style == .slide && spaceSlide.reduceMotion()),
+        guard drawnSpaceChange == .cue,
             let space = state.workspaces.activeSpace(on: display),
             let mode = state.workspaces[space]?.mode,
             !spaceBars.shownDisplays.contains(display),

@@ -26,6 +26,13 @@ final class CuePlateModel: ObservableObject {
     /// centred, so a cue never resizes the panel.
     static let room = CGSize(width: captionWidth + 32, height: tallSide)
     static let captionFont = NSFont.systemFont(ofSize: 13, weight: .medium)
+    /// The large number both plates draw — a Desktop's, and a
+    /// Space's short identifier (#2142, #2143).
+    static let digitFont = Font.system(
+        size: 64,
+        weight: .semibold,
+        design: .rounded
+    )
     /// The layout step (#2144): one critically damped spring, no
     /// overshoot.
     static let step = Animation.spring(duration: 0.3, bounce: 0)
@@ -59,9 +66,12 @@ final class CuePlateModel: ObservableObject {
 
     /// The caption's own width, capped: a bare `maxWidth` frame
     /// would stretch the plate to the cap for any name.
-    static func captionFit(_ text: String) -> CGFloat {
+    static func captionFit(
+        _ text: String,
+        font: NSFont = captionFont
+    ) -> CGFloat {
         let width = (text as NSString)
-            .size(withAttributes: [.font: captionFont]).width
+            .size(withAttributes: [.font: font]).width
         return min(ceil(width) + 1, captionWidth)
     }
 

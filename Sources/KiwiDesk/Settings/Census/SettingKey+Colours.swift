@@ -93,15 +93,13 @@ extension ColoursKey {
             )
         case .animationsSpaceChangeDurationMS:
             // Paces the slide alone, so sits under the picker and
-            // greys unless it is on Slide (#1931, #2143); its own
-            // grey takes Reduce Motion too, never nested in the
-            // card's.
+            // greys unless it is on Slide (#1931, #2143), and with
+            // the card under Reduce Motion.
             return .row(
                 .coloursAndMotion,
                 .motion,
                 .atRest,
-                gate: .setting(.colours(.animationsSpaceChange)),
-                exemptFromContainerGate: true
+                gate: .setting(.colours(.animationsSpaceChange))
             )
         case .animationsOnShelf:
             // Not under the master: the shelf glides whatever the

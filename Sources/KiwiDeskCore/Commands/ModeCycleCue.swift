@@ -25,14 +25,6 @@ public struct ModeCycleCue: Equatable, Sendable {
     }
 }
 
-/// The GUI's hooks for the plate cues Core pays at once — the
-/// layout cue (`payModeCue`) and the Space cue (`paySpaceCue`).
-@MainActor
-final class CueHooks {
-    var onModeCue: @MainActor (ModeCycleCue) -> Void = { _ in }
-    var onSpaceCue: @MainActor (SpaceSwitchCue) -> Void = { _ in }
-}
-
 extension KiwiCore {
     /// The GUI's hook: handed every cue `cycle_mode` pays.
     public var onModeCue: @MainActor (ModeCycleCue) -> Void {

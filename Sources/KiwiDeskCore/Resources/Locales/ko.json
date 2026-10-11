@@ -543,7 +543,7 @@
   "home.card.bars.shelf_subtitle_space_off": "KiwiShelf · %1$@ · Space Bar 끔",
   "home.card.bars.split_subtitle": "Space Bar: %1$@ · App Bar: %2$@",
   "home.card.colors.subtitle": "애니메이션 켬 · %1$d 밀리초",
-  "home.card.colors.subtitle_off": "애니메이션 끔",
+  "home.card.colors.subtitle_window_off": "윈도우 애니메이션 끔",
   "home.card.conflict_many": "%1$d개 충돌",
   "home.card.conflict_one": "1개 충돌",
   "home.card.gaps.subtitle": "바깥쪽 %1$d · 안쪽 %2$d · 테두리 %3$d pt",

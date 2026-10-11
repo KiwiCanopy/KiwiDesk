@@ -1030,9 +1030,11 @@ card — **Animate KiwiShelf** and its duration — and Reduce Motion
 still wins over them (#1838).
 
 The Space-switch plate slide is the second: drawn chrome that
-moves no window, with **Animate Space switches** and **Space
-switch duration** on that card, and Reduce Motion winning over
-both (#1956, #1931).
+moves no window, picked with **Space switches** at the top of that
+card and paced by **Space switch duration** beneath it (#1956,
+#1931). Reduce Motion greys the duration and leaves the picker
+live, since its Show the Space is how a switch reads with less
+motion (#2143).
 
 Nothing is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays

@@ -3306,6 +3306,12 @@ instant switch it drew. The cost is a user who chose the slide on
 purpose meeting the plate once, one picker step from the slide
 again.
 
+The style stays per profile, the scope `on_space_change` had,
+where the Desktop and layout cues are app-wide (#1741): a profile
+may want the slide on one desk and not another, and moving it
+app-wide would be an adoption crossing of its own, not a rider on
+this one.
+
 *One panel per screen, ordered in once.* Moving or re-ordering
 a panel per switch queues behind the compositor exactly when
 the switch is busiest (#1960), so each screen's panel stays

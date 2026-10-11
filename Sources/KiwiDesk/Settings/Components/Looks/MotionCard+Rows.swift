@@ -40,12 +40,6 @@ extension MotionCard {
                         + "slower."
                 )
             )
-            .modifier(
-                GreyOut(
-                    active: reduceMotion
-                        || animations.spaceChange.wrappedValue != .slide
-                )
-            )
             // The Space switch rows stand apart from the window
             // master, which does not reach them (#1932, #2143).
             Divider()

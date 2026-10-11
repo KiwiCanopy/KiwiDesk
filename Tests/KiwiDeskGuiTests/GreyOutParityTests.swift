@@ -109,6 +109,14 @@ struct GreyOutParityTests {
             "reduceTransparency && !key.placement.exemptFromContainerGate",
             1
         ),
+        // Reduce Motion dims the Animations card's at-rest rows
+        // (#171) per row, so the Space switch picker's exemption
+        // holds (#2143); both conjuncts are the needle.
+        (
+            "MotionCard.swift",
+            "reduceMotion && !key.placement.exemptFromContainerGate",
+            1
+        ),
         // Each drag column's outer gate resolves through
         // `GapsBordersGates` (#678 Phase 3) — the enabled reason
         // wraps border, width, alignment and fill.

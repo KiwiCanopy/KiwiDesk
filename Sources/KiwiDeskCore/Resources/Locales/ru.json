@@ -543,7 +543,7 @@
   "home.card.bars.shelf_subtitle_space_off": "KiwiShelf · %1$@ · Space Bar выключена",
   "home.card.bars.split_subtitle": "Space Bar: %1$@ · App Bar: %2$@",
   "home.card.colors.subtitle": "Анимации включены · %1$d мс",
-  "home.card.colors.subtitle_off": "Анимации выключены",
+  "home.card.colors.subtitle_window_off": "Анимация окон выключена",
   "home.card.conflict_many": "%1$d конфликтов",
   "home.card.conflict_one": "1 конфликт",
   "home.card.gaps.subtitle": "Внешний %1$d · внутренний %2$d · рамка %3$d pt",

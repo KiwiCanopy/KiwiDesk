@@ -82,6 +82,29 @@ extension FullscreenStandDownTests {
         #expect(box.cues.map(\.space) == ["2"])
     }
 
+    /// A follow pays it too: `followSwitch` hands the switch the
+    /// same intent an explicit switch does.
+    @Test(
+        "a move-and-follow names the Space it lands on",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func followPaysTheSpaceCue() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let (core, box, display) = try #require(
+            makeSpaceCueCore(style: .cue)
+        )
+        let window = WindowID(9)
+        core.state.apply(
+            .windowCreated(ManagedWindow(id: window, pid: 1, appName: "A"))
+        )
+        core.state.workspaces.withSpace("1") { $0.focused = window }
+        core.followSwitch(to: "2", focusing: window)
+        #expect(
+            box.cues
+                == [SpaceSwitchCue(display: display, space: "2", mode: .grid)]
+        )
+    }
+
     @Test(
         "a screen drawing a Space Bar shows no plate",
         .enabled(if: NSScreen.main != nil)

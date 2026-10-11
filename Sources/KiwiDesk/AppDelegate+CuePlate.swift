@@ -18,11 +18,15 @@ extension AppDelegate {
             else { return }
             self.cuePlate.show(.mode(cue), on: screen)
         }
+        // Paid mid-switch; the plate orders in on a later main turn
+        // so the switch's own focus and raise go first (#2143).
         core.onSpaceCue = { [weak self] cue in
-            guard let self,
-                let screen = self.core.screen(for: cue.display)
-            else { return }
-            self.cuePlate.show(.space(cue), on: screen)
+            DispatchQueue.main.async {
+                guard let self,
+                    let screen = self.core.screen(for: cue.display)
+                else { return }
+                self.cuePlate.show(.space(cue), on: screen)
+            }
         }
     }
 }

@@ -42,25 +42,22 @@ struct SpaceCueView: View {
         let name = cue.space.raw
         if name.count <= Self.digitLength {
             Text(verbatim: name)
-                .font(.system(size: 64, weight: .semibold, design: .rounded))
+                .font(CuePlateModel.digitFont)
                 .monospacedDigit()
         } else {
             Text(verbatim: name)
                 .font(Self.titleFont)
                 .lineLimit(1)
                 .truncationMode(.tail)
-                .frame(width: Self.titleFit(name))
+                .frame(
+                    width: CuePlateModel.captionFit(
+                        name,
+                        font: Self.titleNSFont
+                    )
+                )
         }
     }
 
     static let titleNSFont = NSFont.systemFont(ofSize: 26, weight: .semibold)
     static var titleFont: Font { Font(titleNSFont) }
-
-    /// The name's own width, capped at the caption width, so the
-    /// plate widens with a long name only that far.
-    static func titleFit(_ text: String) -> CGFloat {
-        let width = (text as NSString)
-            .size(withAttributes: [.font: titleNSFont]).width
-        return min(ceil(width) + 1, CuePlateModel.captionWidth)
-    }
 }

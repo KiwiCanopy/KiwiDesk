@@ -1011,9 +1011,11 @@ corner of their screen — [Parking is not a Desktop
 move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
 owns the model.
 
+:::unreleased
 How the switch shows itself — at once, at once with a plate naming
 the Space, or the plate slide — is
 [animations.set_space_change](#animationsset_space_change).
+:::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
 Floating windows, picture-in-picture included, are never parked
@@ -5851,11 +5853,13 @@ animations.set_space_change("slide")
 **Expects:** a number (milliseconds, clamped 150–1000; default
 `300`).
 
+:::unreleased
 **Does:** sets the pace of the plate slide a Space switch plays
 ([animations.set_space_change](#animationsset_space_change)):
 how long the plates take to slide to the new Space, their fades
 scaling with it. It has no effect unless the style is `"slide"`,
-nor while Reduce Motion is on. Window motion keeps its own pace
+nor while Reduce Motion is on.
+::: Window motion keeps its own pace
 ([animations.set_duration](#animationsset_duration)). Read at
 the next switch.
 
