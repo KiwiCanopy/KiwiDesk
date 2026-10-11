@@ -1376,12 +1376,14 @@
   "shortcuts.add_layer.stored_page": "共享层需在已加载描述文件的页面上加入。",
   "shortcuts.advanced.caption": "可将任意 Lua 代码绑定到快捷键。这是为高级用户预留的入口，上方的分组已涵盖内置操作。",
   "shortcuts.advanced.title": "Lua 快捷键",
-  "shortcuts.app_behavior": "启动行为",
-  "shortcuts.app_behavior.help": "**%1$@**会带你到 App 的现有窗口，无论它在哪里；如果 App 未运行则启动它。当该窗口已聚焦时再次按下，会依次切换到该 App 的其他窗口。如果 App 在屏幕上没有任何窗口，按下快捷键会恢复最近一次最小化的窗口；否则最小化的窗口会留在程序坞中。\n\n**%2$@**总是启动一个新实例，即使 App 已经打开。",
+  "shortcuts.app_behavior": "操作",
+  "shortcuts.app_behavior.gather": "收集窗口",
+  "shortcuts.app_behavior.gather.badge": "将窗口收集到这里",
+  "shortcuts.app_behavior.help": "**%1$@**会带你到 App 的现有窗口，无论它在哪里；如果 App 未运行则启动它。当该窗口已聚焦时再次按下，会依次切换到该 App 的其他窗口。如果 App 在屏幕上没有任何窗口，按下快捷键会恢复最近一次最小化的窗口；否则最小化的窗口会留在程序坞中。\n\n**%2$@**总是启动一个新实例，即使 App 已经打开。\n\n**%3$@**会把 App 的所有窗口（包括其他桌面上的）移到你当前所在的空间，但从不启动 App。",
   "shortcuts.app_behavior.open_new": "打开新实例",
   "shortcuts.app_behavior.open_new.badge": "打开一个新实例",
   "shortcuts.app_behavior.open_or_focus": "打开或聚焦",
-  "shortcuts.apps.all_bound": "“%1$@”的每种打开方式都已有按键。请更改上方的某个快捷键，为它指定另一个。",
+  "shortcuts.apps.all_bound": "“%1$@”的每种操作都已有按键。请更改上方的某个快捷键，为它指定另一个。",
   "shortcuts.apps.empty": "还没有任何 App 拥有专属按键。添加一个后，它的按键会带你到该 App 的窗口，无论它在哪里；如果 App 未运行则启动它。",
   "shortcuts.choose_app": "选择 App…",
   "shortcuts.clear_shared.title": "其他描述文件也在使用此快捷键。",
@@ -1743,5 +1745,6 @@
   "whatsnew.trail.from": "来自“新功能”",
   "whatsnew.trail.next": "下一项：%1$@",
   "window_action.refusal.no_close_button": "“%1$@”没有关闭按钮",
-  "window_action.refusal.no_new_window": "%1$@ 没有“新建窗口”命令"
+  "window_action.refusal.no_new_window": "%1$@ 没有“新建窗口”命令",
+  "window_action.refusal.nothing_to_gather": "没有可收集的 %1$@ 窗口"
 }

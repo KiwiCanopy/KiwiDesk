@@ -4,16 +4,16 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The app-launch behavior encoding (#334): `appCommand` and its
-/// two inverses (`appBundleID` / `appLaunchBehavior`) round-trip
+/// The app-action encoding (#334): `appCommand` and its
+/// two inverses (`appBundleID` / `appShortcutAction`) round-trip
 /// both verbs, and non-app Lua stays unmatched.
-@Suite("App launch behavior")
-struct AppLaunchBehaviorTests {
+@Suite("App action")
+struct AppShortcutActionTests {
     @Test("open-or-focus round-trips through focus_or_spawn")
     func openOrFocusRoundTrip() {
         let lua = KeybindingCatalog.appCommand(
             "com.apple.safari",
-            behavior: .openOrFocus
+            action: .openOrFocus
         )
         #expect(lua == "KiwiDesk.focus_or_spawn(\"com.apple.safari\")")
         #expect(
@@ -21,7 +21,7 @@ struct AppLaunchBehaviorTests {
                 == "com.apple.safari"
         )
         #expect(
-            KeybindingCatalog.appLaunchBehavior(from: lua)
+            KeybindingCatalog.appShortcutAction(from: lua)
                 == .openOrFocus
         )
     }
@@ -30,7 +30,7 @@ struct AppLaunchBehaviorTests {
     func openNewRoundTrip() {
         let lua = KeybindingCatalog.appCommand(
             "com.apple.terminal",
-            behavior: .openNew
+            action: .openNew
         )
         #expect(
             lua == "KiwiDesk.spawn_new(\"com.apple.terminal\")"
@@ -40,13 +40,25 @@ struct AppLaunchBehaviorTests {
                 == "com.apple.terminal"
         )
         #expect(
-            KeybindingCatalog.appLaunchBehavior(from: lua)
+            KeybindingCatalog.appShortcutAction(from: lua)
                 == .openNew
         )
     }
 
-    @Test("behavior defaults to open-or-focus")
-    func defaultBehavior() {
+    @Test("gather round-trips through gather (#1510)")
+    func gatherRoundTrip() {
+        let lua = KeybindingCatalog.appCommand(
+            "com.apple.notes",
+            action: .gather
+        )
+        #expect(lua == "KiwiDesk.gather(\"com.apple.notes\")")
+        #expect(
+            KeybindingCatalog.appShortcutAction(from: lua) == .gather
+        )
+    }
+
+    @Test("action defaults to open-or-focus")
+    func defaultAction() {
         // The parameterless call keeps the pre-#334 meaning, so
         // existing call sites author open-or-focus unchanged.
         #expect(
@@ -55,7 +67,7 @@ struct AppLaunchBehaviorTests {
         )
     }
 
-    @Test("every behavior verb is a real API command")
+    @Test("every action verb is a real API command")
     func verbsExistInAPIReference() {
         // The GUI hardcodes these verb strings to author and parse
         // `lua`; `APIReference` is their single source of truth.
@@ -64,82 +76,83 @@ struct AppLaunchBehaviorTests {
         // round-trip tests above check the GUI against itself and
         // would stay green through such a drift.
         let known = Set(APIReference.commands.map(\.lua))
-        for behavior in AppLaunchBehavior.allCases {
-            #expect(known.contains(behavior.verb))
+        for action in AppShortcutAction.allCases {
+            #expect(known.contains(action.verb))
         }
     }
 
-    // MARK: - Taken / available behaviors (add-row seed, grey-out)
+    // MARK: - Taken / available actions (add-row seed, grey-out)
 
     private func appBinding(
         _ bundleID: String,
-        _ behavior: AppLaunchBehavior
+        _ action: AppShortcutAction
     ) -> KeyBinding {
         KeyBinding(
             lua: KeybindingCatalog.appCommand(
                 bundleID,
-                behavior: behavior
+                action: action
             ),
             kind: .application
         )
     }
 
-    @Test("seed skips a behavior already bound for the app")
+    @Test("seed skips a action already bound for the app")
     func seedSkipsTaken() {
         let bindings = [appBinding("com.a", .openOrFocus)]
-        // Re-adding com.a lands on the free behavior, not a
+        // Re-adding com.a lands on the free action, not a
         // duplicate default.
         #expect(
-            KeybindingCatalog.firstAvailableBehavior(
+            KeybindingCatalog.firstAvailableAction(
                 for: "com.a",
                 in: bindings
             ) == .openNew
         )
         // A fresh app takes the default first.
         #expect(
-            KeybindingCatalog.firstAvailableBehavior(
+            KeybindingCatalog.firstAvailableAction(
                 for: "com.b",
                 in: bindings
             ) == .openOrFocus
         )
     }
 
-    @Test("both behaviors bound ⇒ no available behavior")
+    @Test("every action bound ⇒ no available action")
     func fullyBound() {
         let bindings = [
             appBinding("com.a", .openOrFocus),
             appBinding("com.a", .openNew),
+            appBinding("com.a", .gather),
         ]
         #expect(
-            KeybindingCatalog.firstAvailableBehavior(
+            KeybindingCatalog.firstAvailableAction(
                 for: "com.a",
                 in: bindings
             ) == nil
         )
     }
 
-    @Test("takenBehaviors excludes the edited row")
+    @Test("takenActions excludes the edited row")
     func takenExcludesSelf() {
         let row = appBinding("com.a", .openNew)
         // Only the row itself binds com.a; excluding it leaves the
-        // set empty, so its own behavior isn't greyed against it.
+        // set empty, so its own action isn't greyed against it.
         #expect(
-            KeybindingCatalog.takenBehaviors(
+            KeybindingCatalog.takenActions(
                 for: "com.a",
                 in: [row],
                 excluding: row.id
             ).isEmpty
         )
         #expect(
-            KeybindingCatalog.takenBehaviors(
+            KeybindingCatalog.takenActions(
                 for: "com.a",
                 in: [row]
             ) == [.openNew]
         )
     }
 
-    @Test("re-pick keeps a free behavior, else takes the first free")
-    func assignmentBehavior() {
+    @Test("re-pick keeps a free action, else takes the first free")
+    func assignmentAction() {
         // The edited row lives in the array and is genuinely
         // excluded (its old com.b binding must not count against
         // the com.a target); another row holds com.a / Open New.
@@ -148,7 +161,7 @@ struct AppLaunchBehaviorTests {
         // Preferred (.openNew) is taken by the other row ⇒ fall to
         // the first free (.openOrFocus): no collision.
         #expect(
-            KeybindingCatalog.behaviorForAssignment(
+            KeybindingCatalog.actionForAssignment(
                 to: "com.a",
                 preferred: .openNew,
                 in: bindings,
@@ -157,7 +170,7 @@ struct AppLaunchBehaviorTests {
         )
         // Preferred is free ⇒ preserved.
         #expect(
-            KeybindingCatalog.behaviorForAssignment(
+            KeybindingCatalog.actionForAssignment(
                 to: "com.a",
                 preferred: .openOrFocus,
                 in: bindings,
@@ -167,7 +180,7 @@ struct AppLaunchBehaviorTests {
         // Fresh app ⇒ preferred preserved (the edited row's own
         // old com.b binding is excluded, so it doesn't interfere).
         #expect(
-            KeybindingCatalog.behaviorForAssignment(
+            KeybindingCatalog.actionForAssignment(
                 to: "com.b",
                 preferred: .openNew,
                 in: bindings,
@@ -187,7 +200,7 @@ struct AppLaunchBehaviorTests {
         ] {
             #expect(KeybindingCatalog.appBundleID(from: lua) == nil)
             #expect(
-                KeybindingCatalog.appLaunchBehavior(from: lua)
+                KeybindingCatalog.appShortcutAction(from: lua)
                     == nil
             )
         }

@@ -45,6 +45,7 @@ public enum APIReference {
             ("move_to_track", "move_to_track"),
             ("focus_or_spawn", "focus_or_spawn"),
             ("spawn_new", "spawn_new"),
+            ("gather", "gather"),
             ("set_mode", "set_mode"),
             ("set_gap_global", "set_gap_global"),
             ("set_gap_override", "set_gap_override"),
