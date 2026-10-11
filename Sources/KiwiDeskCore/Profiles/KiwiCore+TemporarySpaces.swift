@@ -122,6 +122,14 @@ extension KiwiCore {
         return retired
     }
 
+    /// Lines the temporary Spaces up by number (#1994): made on the
+    /// fly, their place says nothing. Judged against the settled
+    /// adoption only, like the retire. True when one moved.
+    func sortTemporarySpaces() -> Bool {
+        guard profiles.arrangementInFlight == 0 else { return false }
+        return state.workspaces.sortInPlace(Set(liveTemporarySpaces))
+    }
+
     /// Whether any screen shows `id` now.
     private func isShown(_ id: SpaceID) -> Bool {
         state.workspaces.allDisplays.contains {

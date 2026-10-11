@@ -40,19 +40,17 @@ extension KiwiCore {
         endSpaceSlideIfOvertaken()
         noteSpaceVisits()  // #1655: a Space shown without an event
         let heldRetired = retireEmptiedHeldSpaces()
+        var spacesChanged = false
         if retireEmptiedTemporarySpaces() || heldRetired {
             resolveSpaceDisplays()
-            emitSpaceChange()
+            spacesChanged = true
         } else if placeUnplacedSpaces() {
             // A Space some door created by an undeclared id takes
             // its screen here, every other placement left (#1994).
-            emitSpaceChange()
+            spacesChanged = true
         }
-        // Made on the fly, a temporary Space's place says nothing:
-        // the bar shows them by number (#1994).
-        if state.workspaces.sortInPlace(Set(liveTemporarySpaces)) {
-            emitSpaceChange()
-        }
+        if sortTemporarySpaces() { spacesChanged = true }
+        if spacesChanged { emitSpaceChange() }
         payOwedShortcutDrops()  // #1827
         // Ambient motion waits for the hand to rest (#804): the pass
         // is owed and re-run then; state, bars and rings move now.
