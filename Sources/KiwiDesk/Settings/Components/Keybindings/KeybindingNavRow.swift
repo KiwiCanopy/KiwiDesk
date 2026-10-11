@@ -11,6 +11,8 @@ struct NavRow: View {
     private var layerName
     @Environment(\.disabledSystemShortcuts)
     private var disabledSystemShortcuts
+    @Environment(\.keybindingReservesTrashSlot)
+    private var reservesTrashSlot
     /// A clear of a shortcut other profiles share asks where it
     /// goes, as the trash does (#1393).
     @State private var confirmingClear = false
@@ -57,6 +59,9 @@ struct NavRow: View {
                 onRecord: record,
                 onClear: clear
             )
+            if reservesTrashSlot {
+                KeyReachTrashSlot()
+            }
         }
         .keybindingRowStyle(unavailable: command.unavailable?())
         .confirmationDialog(

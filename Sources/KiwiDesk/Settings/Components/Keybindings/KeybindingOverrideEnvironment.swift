@@ -18,10 +18,23 @@ private struct DisabledSystemShortcutsKey: EnvironmentKey {
     static let defaultValue: Set<SystemShortcut> = []
 }
 
+/// Set on rows sharing a card with trash-ended rows (#334), so a
+/// row with nothing to remove holds the trash's width and its
+/// reach and key columns line up with theirs.
+private struct KeybindingReservesTrashSlotKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
 extension EnvironmentValues {
     var disabledSystemShortcuts: Set<SystemShortcut> {
         get { self[DisabledSystemShortcutsKey.self] }
         set { self[DisabledSystemShortcutsKey.self] = newValue }
+    }
+
+    /// Whether a trash-less row holds the trash's width.
+    var keybindingReservesTrashSlot: Bool {
+        get { self[KeybindingReservesTrashSlotKey.self] }
+        set { self[KeybindingReservesTrashSlotKey.self] = newValue }
     }
 
     /// Name of layer whose keybindings are currently rendered.

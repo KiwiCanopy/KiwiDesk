@@ -39,6 +39,30 @@ struct KeyReachColumn: View {
     }
 }
 
+/// The trash column's width, held empty and unannounced: the
+/// shared-rule menu form, the wider of the trash's two, so a card's
+/// reach and key columns line up whichever form a row draws.
+struct KeyReachTrashSlot: View {
+    var body: some View {
+        AppRuleDeleteButton(help: "", sharedFrom: Self.menuForm) { _ in }
+            .hidden()
+            .accessibilityHidden(true)
+    }
+
+    private static let menuForm = RuleReachReading(
+        editing: "",
+        loaded: nil,
+        profiles: [],
+        unreadable: [],
+        shared: true,
+        hasShared: true,
+        users: [],
+        own: [:],
+        ownIsShared: [],
+        leftOut: []
+    )
+}
+
 /// A shortcut row's trash, asking where a shared shortcut goes
 /// (#1393): "Remove from <profile>" leaves that profile out and
 /// keeps it for the others.
@@ -49,12 +73,15 @@ struct KeyReachTrash: View {
     let onRemove: () -> Void
 
     var body: some View {
-        AppRuleDeleteButton(
-            help: L("shortcuts.remove_binding", "Remove shortcut"),
-            sharedFrom: sharedFrom
-        ) { removal in
-            model.recordRemoval(.key, key, removal)
-            onRemove()
+        ZStack {
+            KeyReachTrashSlot()
+            AppRuleDeleteButton(
+                help: L("shortcuts.remove_binding", "Remove shortcut"),
+                sharedFrom: sharedFrom
+            ) { removal in
+                model.recordRemoval(.key, key, removal)
+                onRemove()
+            }
         }
     }
 
