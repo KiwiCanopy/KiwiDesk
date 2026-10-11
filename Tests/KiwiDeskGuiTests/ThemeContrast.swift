@@ -16,14 +16,13 @@ import Testing
 /// and made shared rather than an extension when that same
 /// change gave it a second consumer.
 ///
-/// That is the `ColorVision` argument one family over, and it
-/// is admitted on the same DIVERGENCE ground `tests.md` names:
-/// both suites assert floors on the number this returns, so a
-/// hand-copied linearisation that drifted would move a
-/// threshold a guard rests on without failing anything. The
-/// resolution path matters as much as the arithmetic — it is
-/// the one the token suite pins, so all three suites measure
-/// one truth.
+/// It is admitted on the DIVERGENCE ground `tests.md` names for
+/// a shared test helper: both suites assert floors on the
+/// number this returns, so a hand-copied linearisation that
+/// drifted would move a threshold a guard rests on without
+/// failing anything. The resolution path matters as much as the
+/// arithmetic — it is the one the token suite pins, so all
+/// three suites measure one truth.
 enum ThemeContrast {
 
     /// Contrast of the ink AS DRAWN — alpha-composited over the

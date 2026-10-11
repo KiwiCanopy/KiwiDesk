@@ -44,9 +44,10 @@ bite large test PRs:
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Eleven ratified exceptions, none with setup/teardown coupling
-  or assertions of their own — save the one non-vacuity check
-  the build-script reader keeps, named below — and all but the
+  The ratified exceptions are the bullets below, none with
+  setup/teardown coupling or assertions of their own — save the
+  one non-vacuity check the build-script reader keeps, named
+  below — and all but the
   fake WindowServer *stateless primitives*:
   - *structural-parity primitives* (reflection helpers backing
     the field-list guards) in `ReflectionParity.swift` — a
@@ -129,21 +130,6 @@ bite large test PRs:
     a copy that parsed the array less completely would leave one
     suite's membership check passing on a list it only half
     read.
-  - *colour-vision maths* in `ColorVision.swift` — the
-    Viénot protanopia transform and the measures the CVD guards
-    assert on. **Which suites share it is that file's own doc
-    comment**, not a list here; a suite joining the family
-    extends it there (`PaletteHighlightRoleTests` was the third,
-    and the pair named here went stale the day it landed).
-    Extracted at the **second** copy
-    (#511): every one of them asserts on the numbers it returns,
-    and the numbers *are* the argument the palette decisions rest
-    on, so a drifted copy silently moves a threshold without
-    failing anything. It also owns the shared separation
-    **floor**: the two families share hexes (the drop-zone amber
-    *is* the Space Bar's focused accent), so one threshold over
-    one colour is deliberate, not policy misfiled into a maths
-    helper.
   - *source-scanning primitives* in `SourceScan.swift` and its
     `SourceScan+*.swift` extensions — the walkers, matchers and
     file enumeration shared by the parity guards that scan Swift
@@ -250,6 +236,12 @@ bite large test PRs:
     per-instance — each test builds its own, nothing is carried
     between tests — so it clears the bar the fake WindowServer
     entry above says the statelessness rule was protecting.
+
+  (Colour-vision maths is not a test helper: it lives in Core
+  as `ColorVision`, so the app and the guards measure from one
+  copy (#1857). A guard measuring a colour pair reads it there
+  and never re-derives the transform or restates
+  `separationFloor`.)
 
   (The status-item seam deliberately does NOT add a shared
   factory here: its fake is a per-file `StatusItemHandle`

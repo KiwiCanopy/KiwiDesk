@@ -62,51 +62,18 @@ extension KiwiShelf {
     ) -> Double? {
         var worst: Double?
         for ground in Self.inkGrounds {
-            guard let shelf = Self.composite(fill, over: ground),
-                let plate = layer.map({ Self.composite($0, over: shelf) })
-                    ?? shelf,
-                let a = Self.composite(ink, over: plate),
-                let b = other.map({ Self.composite($0, over: plate) })
-                    ?? plate,
-                let ratio = Self.contrast(a, b)
+            guard let shelf = ColorVision.composite(fill, over: ground),
+                let plate = layer.map({
+                    ColorVision.composite($0, over: shelf)
+                }) ?? shelf,
+                let a = ColorVision.composite(ink, over: plate),
+                let b = other.map({
+                    ColorVision.composite($0, over: plate)
+                }) ?? plate,
+                let ratio = ColorVision.contrast(a, b)
             else { return nil }
             worst = min(worst ?? ratio, ratio)
         }
         return worst
-    }
-
-    /// `top` over an opaque `bottom`, mixed on the sRGB bytes the
-    /// window server blends, as an opaque hex.
-    private static func composite(
-        _ top: String,
-        over bottom: String
-    ) -> String? {
-        guard let over = DragVisual.parseHex(top),
-            let under = DragVisual.parseHex(bottom)
-        else { return nil }
-        let a = over.alpha
-        let mix = [
-            (over.red, under.red), (over.green, under.green),
-            (over.blue, under.blue),
-        ]
-        .map { Int((($0.0 * a + $0.1 * (1 - a)) * 255).rounded()) }
-        return "#" + mix.map { String(format: "%02X", $0) }.joined()
-    }
-
-    /// WCAG contrast ratio of two opaque colours, 1...21.
-    private static func contrast(_ a: String, _ b: String) -> Double? {
-        guard let x = luminance(a), let y = luminance(b) else {
-            return nil
-        }
-        return (max(x, y) + 0.05) / (min(x, y) + 0.05)
-    }
-
-    private static func luminance(_ hex: String) -> Double? {
-        guard let c = DragVisual.parseHex(hex) else { return nil }
-        let linear = { (v: Double) in
-            v <= 0.03928 ? v / 12.92 : pow((v + 0.055) / 1.055, 2.4)
-        }
-        return 0.2126 * linear(c.red) + 0.7152 * linear(c.green)
-            + 0.0722 * linear(c.blue)
     }
 }
