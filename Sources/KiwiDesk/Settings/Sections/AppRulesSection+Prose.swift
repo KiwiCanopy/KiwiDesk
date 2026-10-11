@@ -12,8 +12,8 @@ extension AppRulesSection {
     static var emptyProse: String {
         L(
             "app_rules.empty",
-            "Apps with no rule tile normally, in whichever "
-                + "Space you open them."
+            "Apps with no rule open in whichever Space you open "
+                + "them, and tile unless they float automatically."
         )
     }
 

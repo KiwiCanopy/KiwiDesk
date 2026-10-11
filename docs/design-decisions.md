@@ -15605,6 +15605,14 @@ cards, **Open in a Space** and **Float**, each over its own store
 the Float row it qualifies (`AppRuleListsWiringTests` ▸
 `patternEditorScopesToFloat`). An app may sit in both lists.
 This is the storage's own shape, so it costs the engine nothing.
+A third card, **Automatic floating**, carries the escape for a
+guess (#2173): the "Float windows automatically" switch on top
+and the **Tile instead** list it gates below it, so the Tile rows
+read as the switch's exceptions. It is one card rather than a
+list and a switch apart because the switch is what gives the
+list meaning — with it off nothing floats on a guess, so its rows
+grey (the trash and "Applies to" stay live, since other profiles
+may have it on).
 
 **This reverses "a rule is a sentence, and the sentence is the
 control"** (#678 turn 14a). Running prose renders an empty rule

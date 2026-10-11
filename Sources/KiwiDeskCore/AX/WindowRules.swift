@@ -101,7 +101,13 @@ public struct FloatGuess: Sendable, Equatable {
     public var enabled: Bool
     private let tiled: Set<String>
 
-    public init(enabled: Bool = true, tileRules: [String] = []) {
+    /// `float_automatically`'s default: the guesses float.
+    public static let enabledByDefault = true
+
+    public init(
+        enabled: Bool = FloatGuess.enabledByDefault,
+        tileRules: [String] = []
+    ) {
         self.enabled = enabled
         tiled = Set(tileRules.map(Self.normalizedRule))
     }

@@ -127,6 +127,8 @@ struct AnnouncedValuePinTests {
         "GestureEntry.swift": 1,
         // The tour looks step's two row headers (#1720).
         "OnboardingLooksRows.swift": 1,
+        // App Rules ▸ Automatic floating's "Tile instead" (#2173).
+        "AppRulesSection+Automatic.swift": 1,
     ]
 
     @Test("title components are rotor headings")

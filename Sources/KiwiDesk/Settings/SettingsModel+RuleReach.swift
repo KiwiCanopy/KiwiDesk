@@ -39,6 +39,8 @@ extension SettingsModel {
             layers: config.layers,
             scrollGesture: config.scrollGesture,
             spaceHistory: config.spaceHistory,
+            tileRules: config.tileRules,
+            floatAutomatically: config.floatAutomatically,
             profile: reachProfile,
             isLoaded: reachIsLoaded
         )
@@ -113,6 +115,27 @@ extension SettingsModel {
             reach: reachEdits.reach[.history] ?? [:],
             removal: [:]
         )
+        snapshot.tileRules = RuleReachDraft.encode(
+            snapshot.tileRules,
+            current: RuleReachTable<[String]>.groupedByApp(
+                config.tileRules.map(FloatGuess.normalizedRule)
+            ),
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.tile] ?? [:],
+            removal: reachEdits.removal[.tile] ?? [:]
+        )
+        snapshot.floatAutomatically = RuleReachDraft.encode(
+            snapshot.floatAutomatically,
+            current: [
+                RuleReachTable<Bool>.floatAutomaticallyKey:
+                    config.floatAutomatically
+            ],
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.autoFloat] ?? [:],
+            removal: [:]
+        )
         // The loaded page's gui.json layers, derived ONCE so the rule
         // write and the globals write read the same base.
         if reachIsLoaded {
@@ -148,6 +171,14 @@ extension SettingsModel {
                 RuleReachTable<SpaceHistoryKind>.spaceHistoryKey,
                 for: loaded
             ) ?? stored.spaceHistory.spaceHistoryBase
+        config.tileRules = stored.tileRules.resolved(for: loaded)
+            .sorted { $0.key < $1.key }
+            .flatMap(\.value)
+        config.floatAutomatically =
+            stored.floatAutomatically.resolved(
+                RuleReachTable<Bool>.floatAutomaticallyKey,
+                for: loaded
+            ) ?? stored.floatAutomatically.floatAutomaticallyBase
     }
 
     /// The draft as gui.json must hold it: on the live target the
@@ -170,6 +201,11 @@ extension SettingsModel {
             original: reach.storedScrollBase
         )
         sidecar.spaceHistory = reach.spaceHistory.spaceHistoryBase
+        sidecar.tileRules = reach.tileRules.floatRuleBase(
+            original: reach.storedTileBase
+        )
+        sidecar.floatAutomatically =
+            reach.floatAutomatically.floatAutomaticallyBase
         return sidecar
     }
 
@@ -210,6 +246,8 @@ extension SettingsModel {
         cleanConfig.floatRules = config.floatRules
         cleanConfig.scrollGesture = config.scrollGesture
         cleanConfig.spaceHistory = config.spaceHistory
+        cleanConfig.tileRules = config.tileRules
+        cleanConfig.floatAutomatically = config.floatAutomatically
         // Not the layers: a stored page's own shortcut diff is the
         // tiling write's, which is what failed.
         ruleReachStored = core.ruleReachSnapshot()
@@ -226,6 +264,8 @@ extension SettingsModel {
         config.layers = cleanConfig.layers
         config.scrollGesture = cleanConfig.scrollGesture
         config.spaceHistory = cleanConfig.spaceHistory
+        config.tileRules = cleanConfig.tileRules
+        config.floatAutomatically = cleanConfig.floatAutomatically
         reachEdits = RuleReachEdits()
     }
 

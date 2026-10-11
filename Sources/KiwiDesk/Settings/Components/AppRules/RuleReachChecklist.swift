@@ -38,6 +38,8 @@ struct RuleReachChecklist: View {
         case .key: model.keyReach(app)
         case .scroll: model.scrollReach(app)
         case .history: model.historyReach()
+        case .tile: model.tileReach(app)
+        case .autoFloat: model.autoFloatReach()
         }
     }
 
