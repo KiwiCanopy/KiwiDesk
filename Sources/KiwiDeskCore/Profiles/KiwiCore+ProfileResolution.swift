@@ -151,9 +151,7 @@ extension KiwiCore {
         // `currentName` may still be the old profile.
         reapplyStructuredOverrides(
             profileModes: profile.layers,
-            profileAppRules: profile.appRules,
-            profileFloatRules: profile.floatRules,
-            profileIgnoreRules: profile.ignoreRules,
+            profileRules: WindowRuleOverrides(profile),
             profileScrollGesture: profile.scrollGesture,
             profileSpaceHistory: profile.spaceHistory
         )
@@ -243,9 +241,7 @@ extension KiwiCore {
         // (#55 phase 6, #109).
         reapplyStructuredOverrides(
             profileModes: nil,
-            profileAppRules: nil,
-            profileFloatRules: nil,
-            profileIgnoreRules: nil,
+            profileRules: WindowRuleOverrides(nil),
             profileScrollGesture: nil,
             profileSpaceHistory: nil
         )

@@ -13,6 +13,7 @@ public enum ManagedConfig {
     public static let managedTokens: [String] = [
         "app_rules",
         "float_rules",
+        "tile_rules",
         "ignore_rules",
         "KiwiDesk.bind(",
         "KiwiDesk.define_layer(",

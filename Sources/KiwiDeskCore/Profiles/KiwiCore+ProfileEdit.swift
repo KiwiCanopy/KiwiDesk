@@ -179,6 +179,8 @@ extension KiwiCore {
             // `ignoreRules` is deliberately untouched: the GUI has
             // no ignore editor, so even an inert hidden tombstone must
             // survive overwrite/copy until an external edit removes it.
+            // So are `tileRules` and `floatAutomatically` until the
+            // App Rules card edits them (#2173).
         }
         let live = liveFingerprints
         if profile.set(matching: live) != nil {

@@ -8,4 +8,7 @@ struct GlobalRuleBase {
     var appRules: [String: SpaceID] = [:]
     var floatRules: [String] = []
     var ignoreRules: [String] = []
+    var tileRules: [String] = []
+    /// `float_automatically`'s base (#2173).
+    var floatAutomatically = true
 }

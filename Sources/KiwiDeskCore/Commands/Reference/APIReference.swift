@@ -67,6 +67,7 @@ public enum APIReference {
             ),
             ("set_desktop_cue", "set_desktop_cue"),
             ("set_space_history", "set_space_history"),
+            ("set_float_automatically", "set_float_automatically"),
             (
                 "set_shortcut_panel_liquid_glass",
                 "set_shortcut_panel_liquid_glass"

@@ -124,18 +124,14 @@ struct SpaceHistorySettingTests {
         work.spaceHistory = .allScreens
         core.reapplyStructuredOverrides(
             profileModes: nil,
-            profileAppRules: nil,
-            profileFloatRules: nil,
-            profileIgnoreRules: nil,
+            profileRules: WindowRuleOverrides(nil),
             profileScrollGesture: nil,
             profileSpaceHistory: work.spaceHistory
         )
         #expect(core.spaceHistory.kind == .allScreens)
         core.reapplyStructuredOverrides(
             profileModes: nil,
-            profileAppRules: nil,
-            profileFloatRules: nil,
-            profileIgnoreRules: nil,
+            profileRules: WindowRuleOverrides(nil),
             profileScrollGesture: nil,
             profileSpaceHistory: nil
         )

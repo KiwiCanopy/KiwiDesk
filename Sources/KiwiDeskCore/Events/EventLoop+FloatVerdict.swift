@@ -47,7 +47,7 @@ extension EventLoop {
             pid: pid,
             activationPolicy: activationPolicy,
             tilesAsOwnWindow: tilesAsOwnWindow
-        ) {
+        ), forced != .accessoryApp || rules.guess.applies(to: bundleID) {
             return .floats(forced)
         }
         let facts: WindowFacts
