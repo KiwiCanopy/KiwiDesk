@@ -5,12 +5,15 @@ import SwiftUI
 /// The layout cycle's editable list (#453): the chosen layouts in
 /// cycle order, each with its symbol; a vertical handle drag and
 /// Move Up / Move Down / Remove through `rowActions` reorder and
-/// trim it, ＋ offers the layouts not in it and − removes the
-/// selected one. ＋ greys with all seven listed and − at two, the
-/// row's `?` saying why.
+/// trim it, ＋ offers the layouts not in it and − (or Delete)
+/// removes the selected one. ＋ greys with all seven listed and −
+/// at two, the row's `?` saying why. Each item holds keyboard
+/// focus, which selects it, so − and the row menu's chord reach a
+/// keyboard user; a click selects without a focus ring (#991).
 struct LayoutCycleList: View {
     @ObservedObject var model: SettingsModel
-    @State private var selected: LayoutMode?
+    @State private var picked: LayoutMode?
+    @FocusState private var focused: LayoutMode?
     @State private var dragOrder: [LayoutMode]?
     @State private var dragged: LayoutMode?
     @State private var rowFrames: [LayoutMode: CGRect] = [:]
@@ -28,6 +31,14 @@ struct LayoutCycleList: View {
         }
         .coordinateSpace(name: Self.listSpace)
         .onPreferenceChange(ItemFrames.self) { rowFrames = $0 }
+        .onChange(of: focused) { _, now in
+            guard let now else { return }
+            picked = now
+            // A click selects; it does not ring the item.
+            if ClickBornFocus.isClickBorn(focusMayBeADescendant: false) {
+                focused = nil
+            }
+        }
         .background(
             RoundedRectangle(cornerRadius: 6)
                 .fill(SettingsTheme.sunken)
@@ -36,11 +47,17 @@ struct LayoutCycleList: View {
             RoundedRectangle(cornerRadius: 6)
                 .strokeBorder(SettingsTheme.hairline)
         )
-        .frame(maxWidth: 320, alignment: .leading)
+        .frame(maxWidth: SettingsMetrics.cycleListWidth, alignment: .leading)
     }
 
     private var displayed: [LayoutMode] {
         dragOrder ?? model.config.modeCycle
+    }
+
+    /// The selection, while it is still in the list — a Revert or a
+    /// reload can take it out from under the row.
+    private var selected: LayoutMode? {
+        picked.flatMap { model.config.modeCycle.contains($0) ? $0 : nil }
     }
 
     private func item(_ mode: LayoutMode) -> some View {
@@ -57,10 +74,13 @@ struct LayoutCycleList: View {
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
         .background(
-            selected == mode ? SettingsTheme.chipPressed : Color.clear
+            selected == mode ? SettingsTheme.rowSelected : Color.clear
         )
         .contentShape(Rectangle())
-        .onTapGesture { selected = mode }
+        .onTapGesture { picked = mode }
+        .focusable()
+        .focused($focused, equals: mode)
+        .onDeleteCommand { remove(mode) }
         .background(
             GeometryReader { proxy in
                 Color.clear.preference(
@@ -70,6 +90,7 @@ struct LayoutCycleList: View {
             }
         )
         .accessibilityElement(children: .combine)
+        .accessibilityValue(position(of: mode))
         .accessibilityAddTraits(selected == mode ? .isSelected : [])
         .rowActions { actions(mode) }
     }
@@ -116,7 +137,7 @@ struct LayoutCycleList: View {
             ForEach(model.modeCycleAddable, id: \.self) { mode in
                 Button {
                     model.addCycleMode(mode)
-                    selected = mode
+                    picked = mode
                 } label: {
                     Label(mode.displayName, systemImage: mode.symbol)
                 }
@@ -138,7 +159,12 @@ struct LayoutCycleList: View {
 
     private func remove(_ mode: LayoutMode) {
         model.removeCycleMode(mode)
-        if selected == mode { selected = nil }
+    }
+
+    private func position(of mode: LayoutMode) -> String {
+        let list = model.config.modeCycle
+        guard let index = list.firstIndex(of: mode) else { return "" }
+        return LayoutCycleWords.position(index, of: list.count)
     }
 
     // MARK: - Drag
@@ -157,6 +183,14 @@ struct LayoutCycleList: View {
                 guard dragged == nil else { return }
                 (inside ? NSCursor.openHand : .arrow).set()
             }
+            .onDisappear {
+                // A cancelled drag (the window resigning key) skips
+                // onEnded, and a handle removed under the pointer
+                // never sends the balancing hover: commit and reset
+                // here, as the Spaces list does.
+                guard dragged == mode else { return }
+                endDrag()
+            }
             .gesture(drag(mode))
     }
 
@@ -170,12 +204,15 @@ struct LayoutCycleList: View {
                 }
                 retarget(mode, at: value.location.y)
             }
-            .onEnded { _ in
-                NSCursor.arrow.set()
-                if let order = dragOrder { model.reorderCycle(order) }
-                dragOrder = nil
-                dragged = nil
-            }
+            .onEnded { _ in endDrag() }
+    }
+
+    /// Commits the dragged order once and resets the drag.
+    private func endDrag() {
+        NSCursor.arrow.set()
+        if let order = dragOrder { model.reorderCycle(order) }
+        dragOrder = nil
+        dragged = nil
     }
 
     /// Swaps once the pointer crosses the candidate's midpoint, as

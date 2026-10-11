@@ -1487,6 +1487,7 @@
   "shortcuts.mode_cycle.help": "Mit %1$@ wechselt der fokussierte Space zum nächsten Layout dieser Liste und nach dem letzten wieder zum ersten. Steht sein Layout nicht in der Liste, wechselt er zum ersten. Ein Durchlauf braucht mindestens zwei Layouts, und jedes Layout kommt nur einmal vor.",
   "shortcuts.mode_cycle.move_down": "Nach unten verschieben",
   "shortcuts.mode_cycle.move_up": "Nach oben verschieben",
+  "shortcuts.mode_cycle.position": "Position: %1$d von %2$d",
   "shortcuts.mode_cycle.remove": "Entfernen",
   "shortcuts.mode_cycle.separator": "›",
   "shortcuts.move_to_desktop": "Auf einen Schreibtisch verschieben",

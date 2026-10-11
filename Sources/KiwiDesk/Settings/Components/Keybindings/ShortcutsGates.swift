@@ -1,14 +1,18 @@
 import KiwiDeskCore
 
 /// Resolves Shortcuts census gates (#678 Phase 3). This area's
-/// gates SURFACE rather than grey: non-nil means "not yet at
-/// rest" (withheld behind the offer), so there is no inline
-/// sentence and no `GateHelp` companion. `LayersCard` asks this
+/// gates SURFACE rather than grey — non-nil means "not yet at
+/// rest" (withheld behind the offer), with no inline sentence —
+/// save the layout plate's switch, which greys with General's
+/// Lua-owned sentence (#2144). `LayersCard` asks this
 /// rather than re-deriving — a renderer whose predicate silently
 /// disagreed once hid a user's own configured layers
 /// (`ShortcutsGateTests`).
 struct ShortcutsGates {
     let config: GuiConfig
+    /// `SettingsModel.guiManaged`; read by the plate switch alone,
+    /// which writes `gui.json` at once (#2144).
+    var guiManaged = true
 
     /// Reason why a Shortcuts setting is withheld or gated.
     enum InertReason: Hashable, CaseIterable {
@@ -18,6 +22,9 @@ struct ShortcutsGates {
         case noDesktopBinding
         /// No Track space and no Track verb bound (`.trackInUse`).
         case trackUnused
+        /// `init.lua` owns the config, so the app-wide plate switch
+        /// has no store to write (`.luaOwnsConfig`, #2144).
+        case appWideLuaOwned
     }
 
     /// Evaluates inert reason for setting key.
@@ -37,6 +44,8 @@ struct ShortcutsGates {
         case .shortcuts(.moveWindowToTrack),
             .shortcuts(.swapWithTrack):
             return trackIsUsed ? nil : .trackUnused
+        case .shortcuts(.modeCue):
+            return guiManaged ? nil : .appWideLuaOwned
         default:
             assertionFailure(
                 "ShortcutsGates does not own \(key.id)"
@@ -96,17 +105,15 @@ struct ShortcutsGates {
         .shortcuts(.moveToDesktopFollow),
         .shortcuts(.moveWindowToTrack),
         .shortcuts(.swapWithTrack),
+        .shortcuts(.modeCue),
     ]
 
     /// Gated keys resolved dynamically in view state: Import's
     /// and Restore Defaults' gates are live-editor questions no
     /// saved `GuiConfig` can answer, so `ShortcutsHeader` keeps
     /// them. Naming them keeps the gap deliberate.
-    /// The layout plate's switch greys on `SettingsModel
-    /// .guiManaged`, which no saved config answers either (#2144).
     static let resolvedElsewhere: Set<SettingKey> = [
         .shortcuts(.`import`),
         .shortcuts(.restoreDefaults),
-        .shortcuts(.modeCue),
     ]
 }

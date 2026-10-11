@@ -1487,6 +1487,7 @@
   "shortcuts.mode_cycle.help": "Avec %1$@, l'espace actif passe à la disposition suivante de cette liste, puis revient à la première après la dernière. Si sa disposition n'est pas dans la liste, il passe à la première. Un cycle demande au moins deux dispositions, et chacune n'y figure qu'une fois.",
   "shortcuts.mode_cycle.move_down": "Descendre",
   "shortcuts.mode_cycle.move_up": "Monter",
+  "shortcuts.mode_cycle.position": "Position : %1$d sur %2$d",
   "shortcuts.mode_cycle.remove": "Retirer",
   "shortcuts.mode_cycle.separator": "›",
   "shortcuts.move_to_desktop": "Déplacer vers le Bureau",

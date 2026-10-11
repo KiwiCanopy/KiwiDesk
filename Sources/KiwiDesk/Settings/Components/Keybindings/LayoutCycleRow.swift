@@ -23,6 +23,8 @@ struct LayoutCycleRow: View {
                     heading
                 }
                 .layoutPriority(1)
+                .accessibilityLabel(LayoutCycleWords.title)
+                .accessibilityValue(spokenValue)
                 HelpButton(
                     explanation: LayoutCycleWords.help,
                     subject: LayoutCycleWords.title
@@ -39,7 +41,18 @@ struct LayoutCycleRow: View {
         .searchAnchored(SettingsCatalog.shortcuts.modeCycle)
     }
 
-    static let iconSlot: CGFloat = 18
+    static let iconSlot = SettingsMetrics.shortcutIconSlot
+
+    /// The list without the drawn mark, then the button's own
+    /// expanded / collapsed state, which the label replaced.
+    private var spokenValue: String {
+        let state =
+            expanded
+            ? L("settings.disclosure.ax_expanded", "expanded")
+            : L("settings.disclosure.ax_collapsed", "collapsed")
+        return LayoutCycleWords.spoken(model.config.modeCycle)
+            + ", " + state
+    }
 
     /// The label, then the readout while shut: beside it where it
     /// fits, on a second line where it does not.
@@ -88,12 +101,26 @@ struct LayoutCycleRow: View {
 
 /// The plate's switch (#2144) under the cycle list: app-wide
 /// (#1741), written at once like the Desktop switch cue, and
-/// greyed with its sentence only where `init.lua` owns the config.
+/// greyed with its sentence only where `init.lua` owns the config,
+/// as `ShortcutsGates` answers it. Indented to the cycle row's
+/// chevron, both rows taking the shortcut rows' icon slot.
 struct LayoutCueRow: View {
     @ObservedObject var model: SettingsModel
 
+    private var reason: ShortcutsGates.InertReason? {
+        ShortcutsGates(config: model.config, guiManaged: model.guiManaged)
+            .inertReason(for: .shortcuts(.modeCue))
+    }
+
     var body: some View {
-        let luaOwned = !model.guiManaged
+        VStack(alignment: .leading, spacing: 4) {
+            toggle
+        }
+        .padding(.leading, LayoutCycleRow.iconSlot + 8)
+    }
+
+    @ViewBuilder private var toggle: some View {
+        let luaOwned = reason == .appWideLuaOwned
         ToggleRow(
             label: LayoutCycleWords.cueTitle,
             isOn: Binding(

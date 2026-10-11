@@ -63,7 +63,7 @@ struct LayoutCycleModelTests {
         )
     }
 
-    @Test("an edit lights the draft and Revert drops it")
+    @Test("an edit lights the draft and a dropped rule half drops it")
     func editIsDrafted() throws {
         let model = try makeModel()
         #expect(!model.isDirty)
@@ -120,5 +120,13 @@ struct LayoutCycleModelTests {
             LayoutCycleWords.readout([.bsp, .scrolling, .floating])
                 == "BSP › Scrolling › Floating"
         )
+    }
+
+    @Test("a translated readout keeps the spaces around its mark")
+    func translatedReadoutKeepsSpaces() {
+        LocalizationManager.shared.select("de")
+        defer { LocalizationManager.shared.select("en") }
+        let text = LayoutCycleWords.readout([.bsp, .stack])
+        #expect(text.contains(" › "), "\(text)")
     }
 }

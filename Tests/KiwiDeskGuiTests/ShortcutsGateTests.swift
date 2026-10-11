@@ -143,12 +143,17 @@ struct ShortcutsGateTests {
         #expect(ShortcutsGates(config: track).trackInUse)
         #expect(!ShortcutsGates(config: track).layersExist)
         #expect(!ShortcutsGates(config: track).desktopBindingsExist)
-        // All cases are spoken for above; a FOURTH reds here —
-        // check what each named reading should answer for it
-        // before extending, since none is written against nil.
+        // All cases are spoken for above, the plate switch's
+        // greying reason (#2144) answering none of the three
+        // readings; a FIFTH reds here — check what each named
+        // reading should answer for it before extending, since
+        // none is written against nil.
         #expect(
             Set(ShortcutsGates.InertReason.allCases)
-                == [.onlyDefaultLayer, .noDesktopBinding, .trackUnused]
+                == [
+                    .onlyDefaultLayer, .noDesktopBinding, .trackUnused,
+                    .appWideLuaOwned,
+                ]
         )
     }
 

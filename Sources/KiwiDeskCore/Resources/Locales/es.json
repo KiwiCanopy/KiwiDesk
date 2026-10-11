@@ -1487,6 +1487,7 @@
   "shortcuts.mode_cycle.help": "Con %1$@, el espacio enfocado pasa al siguiente diseño de esta lista y, tras el último, vuelve al primero. Si su diseño no está en la lista, pasa al primero. Un ciclo necesita al menos dos diseños, y cada diseño aparece una sola vez.",
   "shortcuts.mode_cycle.move_down": "Bajar",
   "shortcuts.mode_cycle.move_up": "Subir",
+  "shortcuts.mode_cycle.position": "Posición: %1$d de %2$d",
   "shortcuts.mode_cycle.remove": "Quitar",
   "shortcuts.mode_cycle.separator": "›",
   "shortcuts.move_to_desktop": "Mover al Escritorio",

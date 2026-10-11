@@ -1487,6 +1487,7 @@
   "shortcuts.mode_cycle.help": "使用“%1$@”时，聚焦的空间会切换到此列表中的下一个布局，最后一个之后回到第一个。如果空间的布局不在列表中，则切换到第一个。循环至少需要两个布局，且每个布局只能出现一次。",
   "shortcuts.mode_cycle.move_down": "下移",
   "shortcuts.mode_cycle.move_up": "上移",
+  "shortcuts.mode_cycle.position": "位置：第 %1$d 个，共 %2$d 个",
   "shortcuts.mode_cycle.remove": "移除",
   "shortcuts.mode_cycle.separator": "›",
   "shortcuts.move_to_desktop": "移动到桌面",

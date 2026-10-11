@@ -1487,6 +1487,7 @@
   "shortcuts.mode_cycle.help": "Con %1$@ lo spazio con focus passa al layout successivo di questo elenco e, dopo l'ultimo, riparte dal primo. Se il suo layout non è nell'elenco, passa al primo. Un ciclo richiede almeno due layout, e ogni layout compare una sola volta.",
   "shortcuts.mode_cycle.move_down": "Sposta in basso",
   "shortcuts.mode_cycle.move_up": "Sposta in alto",
+  "shortcuts.mode_cycle.position": "Posizione: %1$d di %2$d",
   "shortcuts.mode_cycle.remove": "Rimuovi",
   "shortcuts.mode_cycle.separator": "›",
   "shortcuts.move_to_desktop": "Sposta sulla Scrivania",

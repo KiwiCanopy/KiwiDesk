@@ -1487,6 +1487,7 @@
   "shortcuts.mode_cycle.help": "使用「%1$@」時，焦點空間會切換到此列表中的下一個佈局，最後一個之後回到第一個。如果空間的佈局不在列表中，則切換到第一個。循環至少需要兩個佈局，且每個佈局只能出現一次。",
   "shortcuts.mode_cycle.move_down": "下移",
   "shortcuts.mode_cycle.move_up": "上移",
+  "shortcuts.mode_cycle.position": "位置：第 %1$d 個，共 %2$d 個",
   "shortcuts.mode_cycle.remove": "移除",
   "shortcuts.mode_cycle.separator": "›",
   "shortcuts.move_to_desktop": "移至桌面",

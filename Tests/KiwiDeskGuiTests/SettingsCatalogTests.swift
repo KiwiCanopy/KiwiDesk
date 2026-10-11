@@ -127,6 +127,7 @@ struct SettingsCatalogTests {
         // 130 since #1948: Each bar's two Per screen drawers.
         // 131 since #2142: the Desktop switch cue row.
         // 132 since #453: Shortcuts' Layout group.
+        // 134 with #2144: the cycle and plate rows (#453).
         #expect(allEntries.count == 134)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {

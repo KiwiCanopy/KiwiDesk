@@ -5,7 +5,7 @@ import KiwiDeskCore
 @MainActor
 enum LayoutCycleWords {
     static var title: String {
-        L("shortcuts.mode_cycle", "Layouts to cycle")
+        SettingsCatalog.shortcuts.modeCycle.text
     }
 
     static var help: String {
@@ -20,11 +20,27 @@ enum LayoutCycleWords {
     }
 
     /// The list in one line, in cycle order: "BSP › Scrolling ›
-    /// Floating". The separator is the locale's, so a
-    /// right-to-left or CJK catalog can choose its own.
+    /// Floating". The mark is the locale's; the spaces around it
+    /// are the code's, since a catalog value keeps no edge space.
     static func readout(_ modes: [LayoutMode]) -> String {
         modes.map(\.displayName).joined(
-            separator: L("shortcuts.mode_cycle.separator", " › ")
+            separator: " \(L("shortcuts.mode_cycle.separator", "›")) "
+        )
+    }
+
+    /// The readout as VoiceOver reads it: the locale's list, with
+    /// no mark to speak (#812).
+    static func spoken(_ modes: [LayoutMode]) -> String {
+        LocalizedList.join(modes.map(\.displayName))
+    }
+
+    /// An item's place in the cycle, spoken after its name.
+    static func position(_ index: Int, of count: Int) -> String {
+        L(
+            "shortcuts.mode_cycle.position",
+            "Position: %1$d of %2$d",
+            index + 1,
+            count
         )
     }
 
@@ -49,7 +65,7 @@ enum LayoutCycleWords {
     }
 
     static var cueTitle: String {
-        L("shortcuts.mode_cue", "Show the layout after cycling")
+        SettingsCatalog.shortcuts.modeCue.text
     }
 
     static var cueHelp: String {
