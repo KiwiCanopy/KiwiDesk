@@ -40,10 +40,41 @@ final class BarContextMenus {
     /// the call it would hold a CLI reply and spend a Lua binding's
     /// deadline. Pinned in both `makeTestCore` twins.
     var pointer: @MainActor () -> NSPoint = { NSEvent.mouseLocation }
-    var popUp: @MainActor (NSMenu, NSPoint) -> Void = { menu, point in
-        DispatchQueue.main.async {
-            menu.popUp(positioning: nil, at: point, in: nil)
+    var popUp: @MainActor (NSMenu, NSPoint) -> Void = { _, _ in }
+    /// When the picker's menu last closed, on `clock`. A hotkey
+    /// press reaches Core only once the menu's modal tracking ends,
+    /// so a press made while it was open arrives within ms of the
+    /// close (measured 3–13 ms, #762) and `pressWasQueued` drops it.
+    var pickerClosedAt: TimeInterval?
+    var clock: @MainActor () -> TimeInterval = {
+        ProcessInfo.processInfo.systemUptime
+    }
+    static let queuedPressWindow: TimeInterval = 0.15
+
+    init() {
+        popUp = { [weak self] menu, point in
+            DispatchQueue.main.async {
+                let current = menu.items.first { $0.state == .on }
+                let at = current == nil ? point : Self.pickerAnchor(point)
+                menu.popUp(positioning: current, at: at, in: nil)
+                self?.pickerClosedAt = self?.clock()
+            }
         }
+    }
+
+    /// Whether a picker request is the press made while its menu
+    /// was open, rather than a new one.
+    func pressWasQueued() -> Bool {
+        guard let closed = pickerClosedAt else { return false }
+        return clock() - closed < Self.queuedPressWindow
+    }
+
+    /// Where the current row's top-left goes so the pointer rests
+    /// over that row's symbol rather than on its corner: AppKit
+    /// pins the positioning item's top-left to the point (24 pt
+    /// rows, macOS 27).
+    nonisolated static func pickerAnchor(_ pointer: NSPoint) -> NSPoint {
+        NSPoint(x: pointer.x - 32, y: pointer.y + 12)
     }
 
     func menu(for hit: BarHit) -> NSMenu? {

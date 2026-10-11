@@ -12,6 +12,7 @@ import Testing
 struct LayoutPickerTests {
     private final class Box {
         var menus: [NSMenu] = []
+        var now: TimeInterval = 100
     }
 
     private func makeCore() -> (KiwiCore, Box) {
@@ -56,6 +57,33 @@ struct LayoutPickerTests {
         }
         perform()
         #expect(core.state.workspaces[SpaceID("3")]?.mode == .monocle)
+    }
+
+    /// Carbon holds a press made while the menu tracks until it
+    /// closes, then delivers it within ms (measured 3–13 ms): that
+    /// press is dropped, and a later one opens the menu again.
+    @Test("a press queued behind the open menu opens nothing")
+    func queuedPressIsDropped() {
+        let (core, box) = makeCore()
+        let menus = core.shelves.contextMenus
+        menus.clock = { box.now }
+        menus.pickerClosedAt = 99.99
+        #expect(core.execute("show_layout_picker", args: []).isSuccess)
+        #expect(box.menus.isEmpty)
+        box.now = 100.5
+        #expect(core.execute("show_layout_picker", args: []).isSuccess)
+        #expect(box.menus.count == 1)
+    }
+
+    /// AppKit pins the positioning row's top-left to the point; the
+    /// anchor puts that corner up and to the left of the pointer so
+    /// the pointer lands inside the current row.
+    @Test("the pointer lands inside the current row")
+    func anchorPutsThePointerInsideTheRow() {
+        let pointer = NSPoint(x: 500, y: 400)
+        let anchor = BarContextMenus.pickerAnchor(pointer)
+        #expect(anchor.x < pointer.x)
+        #expect(anchor.y > pointer.y)
     }
 
     /// The pointer names the screen, the screen names the Space:

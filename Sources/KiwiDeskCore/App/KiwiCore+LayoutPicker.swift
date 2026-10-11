@@ -8,6 +8,7 @@ import AppKit
 extension KiwiCore {
     func showLayoutPicker() -> CommandResponse {
         let menus = shelves.contextMenus
+        if menus.pressWasQueued() { return .ok() }
         let point = menus.pointer()
         guard let space = spaceUnderPointer(point) else {
             return .fail("no Space under the pointer")
