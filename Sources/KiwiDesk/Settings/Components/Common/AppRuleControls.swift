@@ -21,7 +21,7 @@ import SwiftUI
 /// gesture stays one click on the app, exactly as #1172 ruled.
 struct AppSelector: View {
     /// The rule this picker composes.
-    enum Role { case space, float }
+    enum Role { case space, float, tile }
 
     let role: Role
     /// Bundle identifier of chosen app (`AppRef`).
@@ -84,6 +84,8 @@ struct AppSelector: View {
             )
         case .float:
             return L("app_rules.add_float", "Float an app…")
+        case .tile:
+            return L("app_rules.add_tile", "Tile an app…")
         }
     }
 }

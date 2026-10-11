@@ -57,6 +57,13 @@ extension KiwiCore {
             profile.scrollGesture?.resolved(onto: config.scrollGesture)
             ?? config.scrollGesture
         config.spaceHistory = profile.spaceHistory ?? config.spaceHistory
+        config.tileRules =
+            profile.tileRules?.resolved(
+                onto: config.tileRules,
+                normalizing: FloatGuess.normalizedRule
+            ) ?? config.tileRules
+        config.floatAutomatically =
+            profile.floatAutomatically ?? config.floatAutomatically
     }
 
     /// Copies the live profile-scoped state into the model:

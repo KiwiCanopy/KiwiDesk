@@ -10,7 +10,7 @@ struct GlobalRuleBase {
     var ignoreRules: [String] = []
     var tileRules: [String] = []
     /// `float_automatically`'s base (#2173).
-    var floatAutomatically = true
+    var floatAutomatically = FloatGuess.enabledByDefault
     /// The live profile's `float_automatically` override as last
     /// resolved, so the verb re-resolves without a file read
     /// (profiles.md, #1245). Not a base: a profile apply writes it.

@@ -44,8 +44,24 @@ extension SettingsValueReadout {
                 old: old.ignoreRules,
                 new: new.ignoreRules
             )
+        case .floatAutomatically:
+            return [
+                .change(
+                    census,
+                    label: label(for: census),
+                    old: AutoFloatWords.value(old.floatAutomatically),
+                    new: AutoFloatWords.value(new.floatAutomatically)
+                )
+            ]
+        case .tileRules:
+            return appRulesListNotes(
+                census,
+                base: label(for: census),
+                old: old.tileRules,
+                new: new.tileRules
+            )
         case .appRulesAddSpace, .appRulesAddFloat, .spaceRuleDelete,
-            .floatRuleDelete:
+            .floatRuleDelete, .appRulesAddTile, .tileRuleDelete:
             // No model path — never booked by the diff.
             return []
         }

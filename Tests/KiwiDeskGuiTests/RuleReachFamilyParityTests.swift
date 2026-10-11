@@ -20,6 +20,8 @@ struct RuleReachFamilyParityTests {
         "floatRules": "floatRules",
         "scrollGestures": "scrollGesture",
         "spaceHistory": "spaceHistory",
+        "tileRules": "tileRules",
+        "floatAutomatically": "floatAutomatically",
         // The shortcut override is always the Save's own diff
         // (`overwriteProfile`'s docstring), never kept as stored.
         "keyLayers": nil,

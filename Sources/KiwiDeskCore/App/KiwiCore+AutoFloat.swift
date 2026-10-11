@@ -36,4 +36,13 @@ extension KiwiCore {
         guard old != rules.guess else { return }
         eventLoop.rejudgeGuesses(from: old)
     }
+
+    /// Whether a tracked window of `app` floats on a guess — where
+    /// a bar menu's App Rules… lands (#2173).
+    public func floatsOnGuess(app: String) -> Bool {
+        state.windows.all.contains { window in
+            window.appBundleID?.lowercased() == app.lowercased()
+                && tileRefusal(of: window.id)?.isGuess == true
+        }
+    }
 }
