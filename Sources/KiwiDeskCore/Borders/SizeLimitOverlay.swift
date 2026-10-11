@@ -28,6 +28,11 @@ final class SizeLimitOverlay {
     private static let fadeDuration: TimeInterval = 0.2
     private static let pillHeight: CGFloat = 26
     nonisolated static let pillPadding: CGFloat = 20
+    /// The entrance pop's keyframe scales. Its PEAK sizes the
+    /// panel's margin (`panelFrame`), so a retune cannot clip the
+    /// pill's ends at the window edge again (#2033).
+    nonisolated static let popKeyframes: [(scale: CGFloat, time: Double)] =
+        [(0.95, 0), (1.03, 0.5), (1.0, 1.0)]
 
     init() {}
 
@@ -49,6 +54,47 @@ final class SizeLimitOverlay {
             max(textWidth + pillPadding, 120)
         )
         return width > 40 ? width : nil
+    }
+
+    /// The panel frame hosting a pill drawn at `pill`: grown on
+    /// each side by what the pop's peak adds, plus a point, so
+    /// the scaled plate never meets the window edge (#2033).
+    nonisolated static func panelFrame(for pill: CGRect) -> CGRect {
+        let grow = (popKeyframes.map(\.scale).max() ?? 1) - 1
+        return pill.insetBy(
+            dx: -ceil(pill.width * grow / 2) - 1,
+            dy: -ceil(pill.height * grow / 2) - 1
+        )
+    }
+
+    /// Where the plate sits inside the panel's own coordinates:
+    /// the pill's resting rect, unmoved on screen.
+    nonisolated static func plateFrame(
+        pill: CGRect,
+        in panel: CGRect
+    ) -> CGRect {
+        CGRect(
+            x: pill.minX - panel.minX,
+            y: pill.minY - panel.minY,
+            width: pill.width,
+            height: pill.height
+        )
+    }
+
+    /// Scales a layer of `size` by `scale` about its CENTRE,
+    /// whatever its `anchor` — a layer-backed view's layer keeps
+    /// AppKit's anchor, which a hand-set one does not survive.
+    nonisolated static func popTransform(
+        scale: CGFloat,
+        size: CGSize,
+        anchor: CGPoint
+    ) -> CATransform3D {
+        let dx = (0.5 - anchor.x) * size.width * (1 - scale)
+        let dy = (0.5 - anchor.y) * size.height * (1 - scale)
+        return CATransform3DConcat(
+            CATransform3DMakeScale(scale, scale, 1),
+            CATransform3DMakeTranslation(dx, dy, 0)
+        )
     }
 
     /// Flashes size-limit pill on window frame in AX coordinates
@@ -93,8 +139,12 @@ final class SizeLimitOverlay {
             pillRect,
             primaryHeight: GeometryUtils.primaryHeight
         )
+        let panelRect = Self.panelFrame(for: screenRect)
 
-        pill.panel.setFrame(screenRect, display: true)
+        // The plate first: the shadow follows what the panel draws.
+        pill.plate.frame = Self.plateFrame(pill: screenRect, in: panelRect)
+        pill.panel.setFrame(panelRect, display: true)
+        pill.panel.invalidateShadow()
         pill.panel.order(.above, relativeTo: Int(window))
         pill.panel.alphaValue = 1
 
@@ -159,14 +209,24 @@ final class SizeLimitOverlay {
 
     private func popEntrance(_ plate: SizeLimitPillPlate) {
         guard let layer = plate.layer else { return }
-        let pop = CAKeyframeAnimation(keyPath: "transform.scale")
-        pop.values = [0.95, 1.03, 1.0]
-        pop.keyTimes = [0, 0.5, 1.0]
+        let pop = CAKeyframeAnimation(keyPath: "transform")
+        // The view's own size: the layer's may not be laid out yet.
+        pop.values = Self.popKeyframes.map {
+            NSValue(
+                caTransform3D: Self.popTransform(
+                    scale: $0.scale,
+                    size: plate.bounds.size,
+                    anchor: layer.anchorPoint
+                )
+            )
+        }
+        pop.keyTimes = Self.popKeyframes.map { NSNumber(value: $0.time) }
         pop.duration = 0.14
-        pop.timingFunctions = [
-            CAMediaTimingFunction(name: .easeOut),
-            CAMediaTimingFunction(name: .easeIn),
-        ]
+        // One per segment: out while growing, in while settling.
+        let scales = Self.popKeyframes.map(\.scale)
+        pop.timingFunctions = zip(scales, scales.dropFirst()).map {
+            CAMediaTimingFunction(name: $1 > $0 ? .easeOut : .easeIn)
+        }
         layer.add(pop, forKey: "entrancePop")
     }
 
@@ -200,78 +260,12 @@ final class SizeLimitOverlay {
             .fullScreenAuxiliary,
             .ignoresCycle,
         ]
-        panel.contentView = plate
+        // A clear host with the plate inside it, so the pop grows
+        // into the margin rather than past the window (#2033).
+        let host = NSView()
+        host.addSubview(plate)
+        panel.contentView = host
         return panel
     }
 
-}
-
-/// The pill's visual content: frosted blur plate with symbol and label.
-@MainActor
-private final class SizeLimitPillPlate: NSVisualEffectView {
-    private let icon = NSImageView()
-    private let label = NSTextField(labelWithString: "")
-
-    init() {
-        super.init(frame: .zero)
-        material = .hudWindow
-        blendingMode = .behindWindow
-        state = .active
-        wantsLayer = true
-        layer?.cornerRadius = 13
-        layer?.masksToBounds = true
-
-        // Sized explicitly, matching `StickyMarkPlate`: with no
-        // configuration the symbol renders at the default point
-        // size and scales down into a 12 pt box, which draws a
-        // dense glyph like `nosign` too thin to read (#1260).
-        icon.symbolConfiguration = NSImage.SymbolConfiguration(
-            pointSize: 11,
-            weight: .semibold
-        )
-        icon.contentTintColor = .secondaryLabelColor
-        icon.imageScaling = .scaleProportionallyDown
-        addSubview(icon)
-
-        label.font = NSFont.systemFont(ofSize: 11.5, weight: .medium)
-        label.textColor = .labelColor
-        label.lineBreakMode = .byTruncatingTail
-        addSubview(label)
-    }
-
-    required init?(coder: NSCoder) { nil }
-
-    func setText(_ text: String) {
-        label.stringValue = text
-    }
-
-    /// The leading glyph, chosen by the refusal's own case
-    /// (`ResizeRefusal.pillSymbol`).
-    func setSymbol(_ name: String) {
-        icon.image = NSImage(
-            systemSymbolName: name,
-            accessibilityDescription: nil
-        )
-    }
-
-    override var fittingSize: NSSize {
-        let labelSize = label.intrinsicContentSize
-        return NSSize(width: labelSize.width + 36, height: 26)
-    }
-
-    override func layout() {
-        super.layout()
-        icon.frame = NSRect(
-            x: 8,
-            y: (bounds.height - 12) / 2,
-            width: 12,
-            height: 12
-        )
-        label.frame = NSRect(
-            x: 24,
-            y: (bounds.height - 15) / 2,
-            width: bounds.width - 30,
-            height: 15
-        )
-    }
 }
