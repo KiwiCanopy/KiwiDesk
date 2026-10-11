@@ -177,13 +177,49 @@ struct ModeCycleSettingTests {
         #expect(core.modeCycle.list == [.stack, .monocle])
     }
 
+    @Test("Lua-owned: a profile apply keeps init.lua's base")
+    func luaOwnedKeepsTheBase() {
+        let core = makeTestCore(
+            configDirectory: FileManager.default.temporaryDirectory
+                .appendingPathComponent("kiwi-cycle-\(UUID().uuidString)")
+        )
+        #expect(!core.isGuiManaged)
+        core.execute(
+            "set_mode_cycle",
+            args: [.array([.string("grid"), .string("track")])]
+        )
+        reapply(core, cycle: [.stack, .monocle])
+        #expect(core.modeCycle.list == [.stack, .monocle])
+        reapply(core, cycle: nil)
+        #expect(core.modeCycle.list == [.grid, .track])
+    }
+
     @Test("a config load drops the profile override with the base")
-    func loadResets() throws {
-        let core = try makeCore()
+    func loadResets() {
+        // Lua-owned, so no gui.json pass re-seeds what the reset
+        // cleared and the reset alone answers.
+        let core = makeTestCore(
+            configDirectory: FileManager.default.temporaryDirectory
+                .appendingPathComponent("kiwi-cycle-\(UUID().uuidString)")
+        )
         reapply(core, cycle: [.stack, .monocle])
         core.modeCycle.base = [.grid, .track]
         core.loadConfig()
         #expect(core.modeCycle.profileOverride == nil)
         #expect(core.modeCycle.base == ModeCycle.defaultList)
+    }
+
+    @Test("loading a profile, then reloading, walks its own list")
+    func profileLoadAndReloadResolve() throws {
+        let core = try makeCore()
+        var work = try core.profiles.read(name: "Work")
+        work.modeCycle = [.stack, .monocle]
+        try core.profiles.write(work)
+        try core.loadProfile(named: "Work")
+        #expect(core.modeCycle.list == [.stack, .monocle])
+        core.loadConfig()
+        #expect(core.modeCycle.list == [.stack, .monocle])
+        try core.loadProfile(named: "Home")
+        #expect(core.modeCycle.list == ModeCycle.defaultList)
     }
 }
