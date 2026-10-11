@@ -51,15 +51,24 @@ final class BarContextMenus {
     }
     static let queuedPressWindow: TimeInterval = 0.15
 
+    /// The modal AppKit pop-up itself: the menu, the row placed
+    /// at the point, the point.
+    var track: @MainActor (NSMenu, NSMenuItem?, NSPoint) -> Void = {
+        $0.popUp(positioning: $1, at: $2, in: nil)
+    }
+
     init() {
         popUp = { [weak self] menu, point in
-            DispatchQueue.main.async {
-                let current = menu.items.first { $0.state == .on }
-                let at = current == nil ? point : Self.pickerAnchor(point)
-                menu.popUp(positioning: current, at: at, in: nil)
-                self?.pickerClosedAt = self?.clock()
-            }
+            DispatchQueue.main.async { self?.presentPicker(menu, at: point) }
         }
+    }
+
+    /// Tracks `menu` with its checked row under the pointer, then
+    /// stamps the close.
+    func presentPicker(_ menu: NSMenu, at point: NSPoint) {
+        let current = menu.items.first { $0.state == .on }
+        track(menu, current, current == nil ? point : Self.pickerAnchor(point))
+        pickerClosedAt = clock()
     }
 
     /// Whether a picker request is the press made while its menu

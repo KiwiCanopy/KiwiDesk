@@ -13,6 +13,7 @@ struct LayoutPickerTests {
     private final class Box {
         var menus: [NSMenu] = []
         var now: TimeInterval = 100
+        var tracked: (NSMenuItem?, NSPoint, TimeInterval?)?
     }
 
     private func makeCore() -> (KiwiCore, Box) {
@@ -73,6 +74,35 @@ struct LayoutPickerTests {
         box.now = 100.5
         #expect(core.execute("show_layout_picker", args: []).isSuccess)
         #expect(box.menus.count == 1)
+    }
+
+    /// The default pop-up, run as production runs it: on the next
+    /// turn it tracks the checked row at the anchor, and stamps the
+    /// close only once tracking has returned.
+    @Test("the default pop-up places the checked row and stamps the close")
+    func defaultPopUpStampsAfterTracking() async {
+        let menus = BarContextMenus()
+        let box = Box()
+        menus.clock = { box.now }
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "BSP", action: nil, keyEquivalent: ""))
+        let checked = NSMenuItem(title: "Grid", action: nil, keyEquivalent: "")
+        checked.state = .on
+        menu.addItem(checked)
+        menus.track = { _, item, point in
+            box.tracked = (item, point, menus.pickerClosedAt)
+        }
+        let pointer = NSPoint(x: 500, y: 400)
+        menus.popUp(menu, pointer)
+        #expect(box.tracked == nil)
+        await withCheckedContinuation { done in
+            DispatchQueue.main.async { done.resume() }
+        }
+        let seen = box.tracked
+        #expect(seen?.0 === checked)
+        #expect(seen?.1 == BarContextMenus.pickerAnchor(pointer))
+        #expect(seen?.2 == nil)
+        #expect(menus.pickerClosedAt == box.now)
     }
 
     /// AppKit pins the positioning row's top-left to the point; the
