@@ -26,6 +26,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
         "keybinding.move_to_desktop_follow (x N)"
     /// Next / previous layout of the focused Space (#453).
     case layoutCycle = "keybinding.{next,previous}_layout"
+    /// The layout picker at the pointer (#762).
+    case layoutPicker = "keybinding.show_layout_picker"
     case growWidth = "keybinding.grow_width"
     case shrinkWidth = "keybinding.shrink_width"
     case growHeight = "keybinding.grow_height"
@@ -92,7 +94,7 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.desktopBindingsExist)
             )
-        case .layoutCycle:
+        case .layoutCycle, .layoutPicker:
             return .row(.shortcuts, .layout, .atRest)
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .toggleFloating, .toggleSticky, .toggleDisplaySticky:
@@ -139,7 +141,7 @@ extension ShortcutsKey {
             .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
             .moveToDesktop, .moveToDesktopFollow, .switchToLayer,
-            .layoutCycle:
+            .layoutCycle, .layoutPicker:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")

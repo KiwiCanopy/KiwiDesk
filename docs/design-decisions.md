@@ -9855,6 +9855,13 @@ default tables found nothing on `⌃⌥C` or `⌃⌥⇧C` (JetBrains'
 Ctrl+Alt+Shift+C becomes ⌥⇧⌘C on a Mac). VoiceOver's VO-C and
 Emacs's C-M-c under Option-as-Meta are the class the whole `⌃⌥`
 tier already accepts.
+
+The layout picker takes `⌃⌥L` (#762), L for layout, beside the
+cycle's `C`: each letter names what its key does, so the two
+carrying different letters is intended. It is a layout verb too,
+so it joins the base seed and not `appChromeRows`. The same sweep
+found `⌃⌥L` free; the nearest chords taken are Terminal's `⌃⌥⌘L`
+and the `⌥⌘L` Downloads item Finder, Safari and Chrome keep.
 :::
 
 :::unreleased

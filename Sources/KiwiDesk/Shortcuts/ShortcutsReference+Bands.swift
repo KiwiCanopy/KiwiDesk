@@ -58,7 +58,7 @@ extension ShortcutsReferenceBuilder {
             ),
             ShortcutSubgroup(
                 title: L("shortcuts.section.layout", "Layout"),
-                rows: rows(KeybindingCatalog.layoutCycleRows)
+                rows: rows(KeybindingCatalog.layoutRows)
             ),
             ShortcutSubgroup(
                 title: L(
