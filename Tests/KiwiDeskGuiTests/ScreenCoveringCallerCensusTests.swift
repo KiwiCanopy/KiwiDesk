@@ -6,9 +6,10 @@ import Testing
 /// TRACKED window is presenting takes `KiwiCore.presents`, which
 /// rules the float gate once; the raw `covers` / `coversAScreen`
 /// is for a CANDIDATE frame whose float ruling the caller already
-/// made (the fit, the gather) and for the verdict's own home. A
-/// new raw caller is the drift #1788 closes, so it reds here
-/// until it routes through the door or names its reason.
+/// made (the fit, the gather, through `coversAsShow`) and for
+/// the verdict's own home. A new raw caller is the drift #1788
+/// closes, so it reds here until it routes through the door or
+/// names its reason.
 ///
 /// Pinned by COUNT per file over comment-stripped source, each
 /// name matched whole — a call or a bare function reference
@@ -22,13 +23,8 @@ struct ScreenCoveringCallerCensusTests {
         // The home: both definitions, `coversAScreen`'s own
         // `covers`, the front-window reads, the door and
         // the crossing's before/after.
-        "App/KiwiCore+ScreenCovering.swift": 8,
-        // The float fit judges the frame it would write, on the
-        // workspace its caller names (#1787).
-        "App/KiwiCore+FloatClamp.swift": 1,
-        // The gather judges the frame a member would show, on the
-        // entry the mode write makes (#1787).
-        "App/KiwiCore+FloatGather.swift": 1,
+        // `coversAsShow`'s `coversAScreen`.
+        "App/KiwiCore+ScreenCovering.swift": 8
     ]
 
     /// `covers` or `coversAScreen` as a whole identifier.
@@ -72,6 +68,43 @@ struct ScreenCoveringCallerCensusTests {
                 "\(file) no longer reads the verdict \(pinned)×"
             )
         }
+    }
+
+    /// The show verdict's two halves have one composition
+    /// (#1788 item 5): `mayPresent` is spelled in the home alone,
+    /// and a candidate-frame caller takes `coversAsShow`, so no
+    /// caller can keep the frame and drop the subrole.
+    private let showAllowed: [String: Int] = [
+        // Both definitions, `coversAsShow`'s `mayPresent`, the
+        // door's `coversAsShow` and the stand-down's `mayPresent`.
+        "App/KiwiCore+ScreenCovering.swift": 5,
+        // The float fit judges the frame it would write, on the
+        // workspace its caller names (#1787).
+        "App/KiwiCore+FloatClamp.swift": 1,
+        // The gather judges the frame a member would show, on the
+        // entry the mode write makes (#1787).
+        "App/KiwiCore+FloatGather.swift": 1,
+    ]
+
+    @Test("the show verdict is composed in one home")
+    func showVerdictHasOneComposition() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        let prefix = root.path + "/"
+        let pattern = try NSRegularExpression(
+            pattern: #"\b(mayPresent|coversAsShow)\b"#
+        )
+        var counts: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = try SourceScan.strippedSource(at: file)
+            let hits = pattern.numberOfMatches(
+                in: source,
+                range: NSRange(source.startIndex..., in: source)
+            )
+            guard hits > 0 else { continue }
+            counts[String(file.path.dropFirst(prefix.count))] = hits
+        }
+        #expect(counts == showAllowed)
     }
 
     /// The raw front-to-back read (#1788 item 4): `presents`,

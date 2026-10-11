@@ -28,6 +28,7 @@ struct ListedWindow {
 /// would otherwise read of a tracked window on the main actor.
 struct TrackedReading {
     let fullscreen: Bool
+    let subrole: String
     let frame: CGRect
     /// Detection's verdict, before the force-float override the
     /// main actor applies (`autoFloatVerdict`).
@@ -99,6 +100,7 @@ struct ListedWindowReader: @unchecked Sendable {
         if let id, !minimized, tracked.contains(id) {
             reading = TrackedReading(
                 fullscreen: fullscreen(element),
+                subrole: facts.subrole,
                 frame: AXHelper.frame(of: element),
                 autoReason: FloatDetection.autoFloatReason(
                     facts,

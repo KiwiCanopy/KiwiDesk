@@ -124,6 +124,7 @@ extension EventLoop {
                 layer: layer ?? 0
             )
         window.isRaisedLayer = (layer ?? 0) != 0
+        window.subrole = subrole
         // Native fullscreen suppresses the focus ring (a ring
         // around a display-filling window shows only at the
         // corners); snapshot it here, refresh on reconcile.
@@ -131,6 +132,7 @@ extension EventLoop {
         window.carriesOwnMark = tilesAsOwnWindow(pid: pid, id: window.id)
         detectedFloating[window.id] = verdict
         detectedFullscreen[window.id] = window.isFullscreen
+        detectedSubroles[window.id] = subrole
         elements[pid, default: [:]][window.id] = element
         observers[pid]?.observe(window: element)
         // Remember every window's frame, and which windows carry a
@@ -207,6 +209,9 @@ extension EventLoop {
         app: AppRef
     ) {
         recheckFullscreen(element, id: id)
+        // Beside the verdict, not from its facts: the element
+        // source reads facts only where nothing forces the float.
+        applySubrole(AXHelper.subrole(of: element), id: id)
         offMain.noteFreshWrite(id, [.detection])
         let verdict = autoFloatVerdict(
             .element(element, layer: FloatDetection.windowLayer(of: id)),
@@ -239,6 +244,7 @@ extension EventLoop {
         reading: TrackedReading
     ) {
         applyFullscreen(reading.fullscreen, id: id)
+        applySubrole(reading.subrole, id: id)
         let verdict = autoFloatVerdict(
             .read(reading.autoReason),
             id: id,
@@ -257,6 +263,26 @@ extension EventLoop {
         id: WindowID
     ) {
         applyFullscreen(readFullscreen(element), id: id)
+    }
+
+    /// Emits a changed subrole (#1788): a window may drop its
+    /// title bar in place as it starts presenting. An empty read
+    /// is a failed one, never evidence (#1285): it files nothing.
+    func applySubrole(_ subrole: String, id: WindowID) {
+        guard !subrole.isEmpty, detectedSubroles[id] != subrole
+        else { return }
+        detectedSubroles[id] = subrole
+        onEvent(.windowSubroleChanged(id, subrole: subrole))
+    }
+
+    /// Reconciles `id`'s app off the main actor for its subrole:
+    /// a window crossing into covering its screen may have dropped
+    /// its title bar (#1788). The whole-app read is the one that
+    /// already carries the subrole off main, and a crossing is a
+    /// boundary event, not a per-frame one.
+    func reconcileForCoverCrossing(of id: WindowID) {
+        guard let pid = trackingPID(of: id) else { return }
+        reconcileOffMain(pid: pid, app: appRef(of: pid))
     }
 
     private func applyFullscreen(_ fullscreen: Bool, id: WindowID) {

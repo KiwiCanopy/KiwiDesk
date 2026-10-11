@@ -93,6 +93,11 @@ public struct WindowManager: Sendable {
         windows[id]?.isFullscreen = fullscreen
     }
 
+    /// Sets the AX subrole (`.windowSubroleChanged`, #1788).
+    public mutating func setSubrole(_ id: WindowID, _ subrole: String) {
+        windows[id]?.subrole = subrole
+    }
+
     public mutating func setFloating(
         _ id: WindowID,
         _ floating: Bool
