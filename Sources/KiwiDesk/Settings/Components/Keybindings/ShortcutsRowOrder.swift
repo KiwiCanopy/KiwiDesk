@@ -93,8 +93,9 @@ enum ShortcutsRowOrder {
         }
     }
 
-    /// Layout group order (#453); the rows' own order is
-    /// `KeybindingCatalog.layoutCycleRows`'.
+    /// Layout group order (#453, #762): this list orders the
+    /// families; `KeybindingCatalog.layoutCycleRows` orders the
+    /// rows inside the cycle family.
     static let layoutAtRest: [SettingKey] = [
         .shortcuts(.layoutCycle),
         .shortcuts(.layoutPicker),

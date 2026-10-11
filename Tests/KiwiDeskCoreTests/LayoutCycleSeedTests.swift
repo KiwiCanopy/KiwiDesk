@@ -48,6 +48,7 @@ struct LayoutCycleSeedTests {
         let row = DefaultKeybindings.layoutPickerRow()
         #expect(row.combo == "control+option+l")
         #expect(row.lua == "KiwiDesk.show_layout_picker()")
+        #expect(row.kind == .navigation)
         #expect(row.label == "Show layout picker")
         #expect(seeded.filter { $0 == row }.count == 1)
     }

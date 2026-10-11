@@ -1,8 +1,9 @@
 import KiwiDeskCore
 
-/// Layout cycle shortcut rows (#453): the focused Space steps
-/// through the `mode_cycle` list. Written out per row so each
-/// key stays a literal `scripts/extract-keys` can see.
+/// The Layout group's shortcut rows: the cycle through the
+/// `mode_cycle` list (#453) and the layout picker (#762). Written
+/// out per row so each key stays a literal `scripts/extract-keys`
+/// can see.
 extension KeybindingCatalog {
     static let nextLayout = NavCommand(
         label: "Next layout",
