@@ -229,10 +229,12 @@ extension EventLoop {
         // the `from` side.
         let floating = detectedFloating[from]
         let fullscreen = detectedFullscreen[from]
+        let subrole = detectedSubroles[from]
         releaseWindowRegistration(from, pid: pid)
         elements[pid, default: [:]][to] = element
         detectedFloating[to] = floating
         detectedFullscreen[to] = fullscreen
+        detectedSubroles[to] = subrole
         trackedFrames[to] = AXHelper.frame(of: element)
         offMain.noteFreshWrite(to)
         if AXHelper.hasNativeTabs(element) {

@@ -221,6 +221,7 @@ extension EventLoop {
         elements[pid]?[id] = nil
         detectedFloating[id] = nil
         detectedFullscreen[id] = nil
+        detectedSubroles[id] = nil
         ignorePending.remove(id)
         trackedFrames[id] = nil
         tabCarriers.remove(id)

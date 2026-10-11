@@ -64,9 +64,10 @@ public struct ManagedWindow: Sendable, Equatable {
     /// its reopen identity is the mark, never its area-named title
     /// (#2059).
     public var carriesOwnMark: Bool
-    /// The AX subrole read at adoption; nil where none was read.
-    /// A titled window reads `AXStandardWindow` whatever its
-    /// frame, so it never presents (#1788).
+    /// The AX subrole, read at adoption and refreshed by
+    /// `.windowSubroleChanged`; empty where the read failed, nil
+    /// before any. A titled window reads `AXStandardWindow`
+    /// whatever its frame, so it never presents (#1788).
     public var subrole: String?
 
     public init(

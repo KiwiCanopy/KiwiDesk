@@ -114,6 +114,15 @@ struct PresentingReaderTests {
                 $0.window == self.show
             }
         )
+        // Dropping its title bar in place makes it a show, and
+        // the change retiles like a fullscreen flip.
+        let change = KiwiEvent.windowSubroleChanged(
+            self.show,
+            subrole: "AXUnknown"
+        )
+        #expect(TilingEngine.shouldRetile(after: change))
+        titled.state.apply(change)
+        #expect(titled.presents(self.show, at: Self.screen))
     }
 
     @Test("A presenting sticky float wears no mark")

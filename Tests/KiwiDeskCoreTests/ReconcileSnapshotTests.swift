@@ -153,6 +153,8 @@ struct ReconcileSnapshotTests {
                 box.events.append("fullscreen w\(id.raw) \(on)")
             case .windowFloatChanged(let id, let on):
                 box.events.append("float w\(id.raw) \(on)")
+            case .windowSubroleChanged(let id, let subrole):
+                box.events.append("subrole w\(id.raw) \(subrole)")
             case .windowDestroyed(let id, _):
                 box.events.append("destroyed w\(id.raw)")
             case .windowHidden(let id):
@@ -191,6 +193,27 @@ struct ReconcileSnapshotTests {
         #expect(box.events.contains("fullscreen w41 true"))
         #expect(box.events.contains("fullscreen w42 true"))
         #expect(loop.detectedFullscreen[first] == true)
+    }
+
+    /// A window adopted titled can drop its title bar in place
+    /// as it starts presenting (#1788 item 5): both reconcile
+    /// paths re-file the subrole, change-only. The fabricated
+    /// elements answer no subrole, which differs from the seed.
+    @Test("a subrole change lands on both reconcile paths")
+    func subroleChangeLands() {
+        for offMain in [true, false] {
+            let (loop, box) = makeLoop()
+            loop.detectedSubroles[first] = "AXStandardWindow"
+            loop.detectedSubroles[second] = ""
+            if offMain {
+                loop.reconcileOffMain(pid: pid, app: ref)
+            } else {
+                loop.reconcile(pid: pid, app: ref)
+            }
+            #expect(box.events.contains("subrole w41 "), "\(offMain)")
+            #expect(!box.events.contains("subrole w42 "), "\(offMain)")
+            #expect(loop.detectedSubroles[first] == "")
+        }
     }
 
     @Test("the float verdict read off main matches the main-actor one")

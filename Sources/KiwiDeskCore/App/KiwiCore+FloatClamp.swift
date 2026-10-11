@@ -241,7 +241,7 @@ extension KiwiCore {
             // fit would push a slide show under nothing and its
             // stamp read the show's first focus as a bounce
             // (#1787).
-            !(Self.mayPresent(window) && coversAScreen(frame)),
+            !coversAsShow(window, at: frame),
             // EFFECTIVE float, never the flag (#1178).
             EffectiveFloat.applies(
                 isFloating: window.isFloating,

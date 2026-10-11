@@ -132,6 +132,7 @@ extension EventLoop {
         window.carriesOwnMark = tilesAsOwnWindow(pid: pid, id: window.id)
         detectedFloating[window.id] = verdict
         detectedFullscreen[window.id] = window.isFullscreen
+        detectedSubroles[window.id] = subrole
         elements[pid, default: [:]][window.id] = element
         observers[pid]?.observe(window: element)
         // Remember every window's frame, and which windows carry a
@@ -208,6 +209,7 @@ extension EventLoop {
         app: AppRef
     ) {
         recheckFullscreen(element, id: id)
+        applySubrole(AXHelper.subrole(of: element), id: id)
         offMain.noteFreshWrite(id, [.detection])
         let verdict = autoFloatVerdict(
             .element(element, layer: FloatDetection.windowLayer(of: id)),
@@ -236,6 +238,7 @@ extension EventLoop {
         reading: TrackedReading
     ) {
         applyFullscreen(reading.fullscreen, id: id)
+        applySubrole(reading.subrole, id: id)
         let verdict = autoFloatVerdict(
             .read(reading.autoReason),
             id: id,
@@ -254,6 +257,24 @@ extension EventLoop {
         id: WindowID
     ) {
         applyFullscreen(readFullscreen(element), id: id)
+    }
+
+    /// Emits a changed subrole (#1788): a window may drop its
+    /// title bar in place as it starts presenting.
+    private func applySubrole(_ subrole: String, id: WindowID) {
+        guard detectedSubroles[id] != subrole else { return }
+        detectedSubroles[id] = subrole
+        onEvent(.windowSubroleChanged(id, subrole: subrole))
+    }
+
+    /// Re-reads `id`'s app off the main actor, whose recheck
+    /// re-reads the subrole: a window crossing into covering its
+    /// screen may have dropped its title bar (#1788).
+    func recheckSubrole(of id: WindowID) {
+        guard
+            let pid = elements.first(where: { $0.value[id] != nil })?.key
+        else { return }
+        reconcileOffMain(pid: pid, app: appRef(of: pid))
     }
 
     private func applyFullscreen(_ fullscreen: Bool, id: WindowID) {

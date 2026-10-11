@@ -48,6 +48,14 @@ extension KiwiCore {
         tiler.allScreenFrames().contains { Self.covers(frame, $0) }
     }
 
+    /// Whether `window` at `frame` (AX) covers a screen AS A
+    /// SHOW: the frame verdict and `mayPresent` together, the one
+    /// composition a caller judging a candidate frame takes
+    /// (#1788), its float ruling already made.
+    func coversAsShow(_ window: ManagedWindow, at frame: CGRect) -> Bool {
+        Self.mayPresent(window) && coversAScreen(frame)
+    }
+
     /// Whether window `id` at `frame` (AX) is PRESENTING — the
     /// one door a reader of a tracked window asks (#1788): an
     /// EFFECTIVE float, never a tiled slot a gapless layout may
@@ -62,7 +70,6 @@ extension KiwiCore {
     /// 2026-10-11) — a show is on the Desktop the user sees.
     func presents(_ id: WindowID, at frame: CGRect) -> Bool {
         guard let window = state.windows[id], !window.isFullscreen,
-            Self.mayPresent(window),
             EffectiveFloat.applies(
                 isFloating: window.isFloating,
                 mode: state.workspaces.space(of: id).flatMap {
@@ -70,7 +77,7 @@ extension KiwiCore {
                 }
             )
         else { return false }
-        return coversAScreen(frame)
+        return coversAsShow(window, at: frame)
     }
 
     /// Whether the shelf stands down on `display`: a native

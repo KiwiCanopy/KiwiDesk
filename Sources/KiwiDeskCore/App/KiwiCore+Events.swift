@@ -231,6 +231,11 @@ extension KiwiCore {
                 // rebuilds the bars itself.
                 handleTitleChangedForBars(id)
             }
+        case .windowSubroleChanged:
+            // Whether the window may present changed (#1788); the
+            // `shouldRetile` pass re-fits it and redraws the bars,
+            // the ring and the marks.
+            break
         case .windowFullscreenChanged:
             // The state fold already flipped the snapshot flag;
             // the generic `shouldRetile` retile re-partitions
@@ -264,7 +269,13 @@ extension KiwiCore {
             }
         } else if crossedScreenCover(event, before: preEventFrame) {
             // Every reader of the verdict, since no retile runs
-            // (#1787, #1788).
+            // (#1787, #1788) — and the subrole re-read, since a
+            // window may drop its title bar as it covers.
+            if case .windowResized(let id, _) = event {
+                eventLoop.recheckSubrole(of: id)
+            } else if case .windowMoved(let id, _) = event {
+                eventLoop.recheckSubrole(of: id)
+            }
             updateBars()
             updateBorders()
             updateStickyMarks()

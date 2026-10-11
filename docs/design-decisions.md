@@ -4488,24 +4488,30 @@ the Dock and the shelf on purpose — that is the point of it — so
 a fit pushing it clear of a strip, or a floating-mode entry
 laying it into the quit grid, breaks the thing the user just
 started, as either would break native fullscreen, which both
-already skip. The verdict is the frame: edge for edge with
-a whole screen, within 2 pt, over every screen's WHOLE frame —
-never larger, which is an oversized float the fit still owes.
+already skip. The verdict has two inputs: the frame, edge for
+edge with a whole screen, within 2 pt, over every screen's WHOLE
+frame — never larger, which is an oversized float the fit still
+owes — and the window's AX subrole, below.
 The fit's skip is load-bearing twice: its frame write also
 stamps the #1161 placement ledger, and in a Scrolling Space a
 live entry is the whole bounce verdict, so without the skip the
 show's own first focus reads as an app answering our placement
 and the distrust raises the editor back over the show.
 
-And the window's AX subrole, read at adoption: a titled window
-normally stops at the menu bar, but with the menu bar set to
-auto-hide and no Dock on that screen a float maximised by Fill
-matches the screen too. Its title bar is what tells it from a
-show — it reads `AXStandardWindow` whatever its frame, while
+The subrole is read at adoption and refreshed with the
+fullscreen state on every reconcile, and a move or resize that
+crosses into covering a screen asks the app again, since a game
+may drop its title bar in place as it goes borderless. A titled
+window normally stops at the menu bar, but with the menu bar set
+to auto-hide and no Dock on that screen a float maximised by
+Fill matches the screen too. Its title bar is what tells it from
+a show — it reads `AXStandardWindow` whatever its frame, while
 PowerPoint's show reads `AXUnknown` (device, 2026-10-11) and so
-does Firefox's non-native fullscreen (the AX corpus) — so every
-consumer of the verdict asks `mayPresent` beside the frame
-(#1788). A subrole nothing read keeps the frame verdict. The
+does Firefox's non-native fullscreen window (the AX corpus) — so
+the frame and `mayPresent` are composed once, in `coversAsShow`
+(#1788). A subrole the read could not answer keeps the frame
+verdict, and a titled window whose app reports another subrole
+still reads as a show. The
 verbs native fullscreen's own exemption skips — the
 inactive-Space stash, focus stepping, the sticky carry — stay on
 it alone: a show lives on the Desktop the user sees, so it parks
