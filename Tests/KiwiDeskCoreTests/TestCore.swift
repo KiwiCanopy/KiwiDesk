@@ -167,7 +167,7 @@ func makeTestCore(
     // The WindowServer z-order and screen frames the
     // presentation verdict reads (#1787): live, they hand every
     // fixture the host desk.
-    core.shelves.frontWindowFrames = { [] }
+    core.frontWindowFrames = { [] }
     core.tiler.allScreenFrames = { [] }
     // Same class, fifth time (#933): the own-key-window seam
     // defaults to a live `NSApplication.shared` read, so a

@@ -20,7 +20,7 @@ struct ScreenCoveringCallerCensusTests {
     /// Files spelling the raw verdict, with their reason.
     private let allowed: [String: Int] = [
         // The home: both definitions, `coversAScreen`'s own
-        // `covers`, the shelf's front-window reads, the door and
+        // `covers`, the front-window reads, the door and
         // the crossing's before/after.
         "App/KiwiCore+ScreenCovering.swift": 8,
         // The float fit judges the frame it would write, on the
@@ -72,5 +72,37 @@ struct ScreenCoveringCallerCensusTests {
                 "\(file) no longer reads the verdict \(pinned)×"
             )
         }
+    }
+
+    /// The raw front-to-back read (#1788 item 4): `presents` and
+    /// `showsPresentation` are the doors, so only the seam's
+    /// declaration and the stand-down's one read spell it.
+    private let frontSeamAllowed: [String: Int] = [
+        "App/KiwiCore.swift": 1,
+        "App/KiwiCore+ScreenCovering.swift": 1,
+    ]
+
+    @Test("only the presentation verdict reads the front windows")
+    func frontWindowSeamHasOneReader() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore")
+        let prefix = root.path + "/"
+        let pattern = try NSRegularExpression(
+            pattern: #"\bfrontWindowFrames\b"#
+        )
+        var counts: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = try SourceScan.strippedSource(at: file)
+            let hits = pattern.numberOfMatches(
+                in: source,
+                range: NSRange(source.startIndex..., in: source)
+            )
+            guard hits > 0 else { continue }
+            counts[String(file.path.dropFirst(prefix.count))] = hits
+        }
+        #expect(
+            counts == frontSeamAllowed,
+            "the front-window seam is read through showsPresentation"
+        )
     }
 }
