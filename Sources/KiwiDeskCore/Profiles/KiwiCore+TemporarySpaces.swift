@@ -92,10 +92,12 @@ extension KiwiCore {
         return pins.merging(kept) { own, _ in own }
     }
 
-    /// Arms each temporary Space that holds something, and deletes
-    /// each armed one that holds nothing any more — once no screen
-    /// shows it, and never a screen's last Space, which the #1175
-    /// heal would mint straight back. Returns whether any went.
+    /// Arms each temporary Space that holds something or that a
+    /// screen shows — a visit counts, so an empty one made by
+    /// `focus_space` goes once left (#1994) — and deletes each
+    /// armed one that holds nothing — once no screen shows it, and
+    /// never a screen's last Space, which the #1175 heal would
+    /// mint straight back. Returns whether any went.
     @discardableResult
     func retireEmptiedTemporarySpaces() -> Bool {
         guard profiles.arrangementInFlight == 0 else { return false }
@@ -104,11 +106,11 @@ extension KiwiCore {
         state.temporaryArmed.formIntersection(temporaries)
         var retired = false
         for id in temporaries {
-            guard spaceHoldsNothing(id) else {
+            guard spaceHoldsNothing(id), !isShown(id) else {
                 state.temporaryArmed.insert(id)
                 continue
             }
-            guard state.temporaryArmed.contains(id), !isShown(id),
+            guard state.temporaryArmed.contains(id),
                 let other = sibling(onScreenOf: id)
             else { continue }
             tiler.settings.removeSpace(id)
@@ -118,6 +120,14 @@ extension KiwiCore {
             retired = true
         }
         return retired
+    }
+
+    /// Lines the temporary Spaces up by number (#1994): made on the
+    /// fly, their place says nothing. Judged against the settled
+    /// adoption only, like the retire. True when one moved.
+    func sortTemporarySpaces() -> Bool {
+        guard profiles.arrangementInFlight == 0 else { return false }
+        return state.workspaces.sortInPlace(Set(liveTemporarySpaces))
     }
 
     /// Whether any screen shows `id` now.

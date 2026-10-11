@@ -1253,8 +1253,17 @@ in the profile*. The obligations:
   since only Core can say what is temporary
   (`TemporarySpaceRestartTests`).
 - **It deletes itself at the head of `retile()`**, armed once it
-  has held anything, while no screen shows it and never a
-  screen's last Space (`TemporarySpaceTests` ▸ `autoDelete`).
+  has held anything or a screen has shown it, while no screen
+  shows it and never a screen's last Space
+  (`TemporarySpaceTests` ▸ `autoDelete`). A visit arms it so an
+  empty Space `focus_space` made goes once left, and a New Space
+  nobody has visited waits for its first (#1994,
+  `TemporarySpaceTests` ▸ `visitedEmptyGoes`).
+- **It sorts by number among its own slots** at the head of
+  `retile()`, through `WorkspaceManager.sortInPlace`: made on the
+  fly, its place carries no choice, while a declared or held
+  Space keeps the order it was given (#1994,
+  `TemporarySpaceTests` ▸ `sortByNumber`).
 - **The live-write door keeps the adoption record with its write,
   and no other write does.** `ProfileManager.redeclare`, called by
   `writeThroughLiveProfile` alone, re-adopts the file the door
