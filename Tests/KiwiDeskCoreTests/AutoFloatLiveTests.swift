@@ -11,6 +11,7 @@ import Testing
 struct AutoFloatLiveTests {
     private final class Box {
         var floats: [Bool] = []
+        var log: [String] = []
     }
 
     private static let pid: pid_t = 727_051
@@ -79,42 +80,84 @@ struct AutoFloatLiveTests {
     }
 
     /// A Dock-less app's window is an overlay — no ring, no bar row
-    /// — only while a guess may float it; a raised-layer one stays
-    /// an overlay under a Tile rule.
-    @Test("a Tile rule clears a Dock-less app's overlay flag")
-    func tileRuleClearsOverlay() {
+    /// — only while a guess floats it; a dialog or panel stays one,
+    /// and an own window's overlay is its structure (#300, #315).
+    @Test("the overlay flag follows the verdict's reason")
+    func overlayFollowsTheReason() {
+        func overlay(_ reason: AutoFloatReason?, own: Bool = false) -> Bool {
+            EventLoop.isOverlay(
+                FloatVerdict(reason),
+                ownProcess: own,
+                structural: false
+            )
+        }
+        #expect(overlay(.accessoryApp))
+        #expect(overlay(.panel))
+        #expect(!overlay(.rule))
+        #expect(!overlay(.fixedSize))
+        #expect(!overlay(nil))
+        #expect(!overlay(.panel, own: true))
+        #expect(
+            EventLoop.isOverlay(
+                .tiles,
+                ownProcess: true,
+                structural: true
+            )
+        )
+    }
+
+    /// A Tile rule tiles a Dock-less app's window and ends its
+    /// overlay in the same recheck; the guess back on restores both.
+    @Test("a recheck under a Tile rule ends the overlay")
+    func recheckEndsTheOverlay() {
+        let loop = EventLoop()
+        let box = Box()
+        loop.onLog = { _ in }
+        loop.activationPolicy = { _ in .accessory }
+        loop.onEvent = { event in
+            switch event {
+            case .windowFloatChanged(_, let on): box.log.append("float \(on)")
+            case .windowOverlayChanged(_, let on):
+                box.log.append("overlay \(on)")
+            default: break
+            }
+        }
+        let app = AppRef(bundleID: "com.valvesoftware.steam", name: "Steam")
+        let tiled = TrackedReading(
+            fullscreen: false,
+            subrole: kAXStandardWindowSubrole,
+            frame: .zero,
+            autoReason: nil,
+            traits: nil
+        )
+        loop.detectedFloating[Self.id] = .floats(.accessoryApp)
+        loop.floatRules = FloatRules(
+            [],
+            guess: FloatGuess(tileRules: ["com.valvesoftware.steam"])
+        )
+        loop.recheckFloat(id: Self.id, pid: Self.pid, app: app, reading: tiled)
+        #expect(box.log == ["float false", "overlay false"])
+        box.log = []
+        loop.floatRules = FloatRules([], guess: FloatGuess())
+        loop.recheckFloat(id: Self.id, pid: Self.pid, app: app, reading: tiled)
+        #expect(box.log == ["float true", "overlay true"])
+    }
+
+    /// The door forgets the verdicts a changed guess reaches, and
+    /// none an unchanged one does.
+    @Test("installing a changed guess forgets the verdicts it reaches")
+    func installRejudges() {
         let core = makeTestCore()
-        core.eventLoop.activationPolicy = { _ in .accessory }
-        let app = "com.valvesoftware.steam"
-        let raised = WindowID(52)
-        core.state.windows.upsert(
-            ManagedWindow(
-                id: Self.id,
-                pid: Self.pid,
-                appName: "Steam",
-                appBundleID: app,
-                isTransientOverlay: true,
-                subrole: kAXStandardWindowSubrole
-            )
-        )
-        core.state.windows.upsert(
-            ManagedWindow(
-                id: raised,
-                pid: Self.pid,
-                appName: "Steam",
-                appBundleID: app,
-                isTransientOverlay: true,
-                isRaisedLayer: true,
-                subrole: kAXStandardWindowSubrole
-            )
-        )
-        core.installFloatRules(
-            FloatRules([], guess: FloatGuess(tileRules: [app]))
-        )
-        #expect(core.state.windows[Self.id]?.isTransientOverlay == false)
-        #expect(core.state.windows[raised]?.isTransientOverlay == true)
+        core.eventLoop.elements[Self.pid] = [
+            Self.id: AXUIElementCreateApplication(901_051)
+        ]
+        core.eventLoop.detectedFloating[Self.id] = .tiles
         core.installFloatRules(FloatRules([], guess: FloatGuess()))
-        #expect(core.state.windows[Self.id]?.isTransientOverlay == true)
+        #expect(core.eventLoop.detectedFloating[Self.id] == .tiles)
+        core.installFloatRules(
+            FloatRules([], guess: FloatGuess(enabled: false))
+        )
+        #expect(core.eventLoop.detectedFloating[Self.id] == nil)
     }
 
     /// Inside a load the verb writes its base and nothing else: a

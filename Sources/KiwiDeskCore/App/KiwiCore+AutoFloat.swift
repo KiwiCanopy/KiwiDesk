@@ -1,4 +1,3 @@
-import ApplicationServices
 import Foundation
 
 /// The escape for automatic floats (#2173): `float_automatically`
@@ -28,31 +27,13 @@ extension KiwiCore {
     }
 
     /// The one writer of `EventLoop.floatRules`. A changed guess
-    /// re-judges the windows of every app it reaches as at adoption
-    /// and re-derives their overlay flag, since a Tile rule tiles a
-    /// window its app's missing Dock icon would float.
+    /// forgets the verdicts of every app it reaches, so their next
+    /// recheck judges them as at adoption — the float flag and the
+    /// overlay flag with them.
     func installFloatRules(_ rules: FloatRules) {
         let old = eventLoop.floatRules.guess
         eventLoop.floatRules = rules
         guard old != rules.guess else { return }
         eventLoop.rejudgeGuesses(from: old)
-        refreshGuessedOverlays()
-    }
-
-    /// A Dock-less app's windows are overlays — no ring, no bar row
-    /// (#300) — only while a guess may float them; a dialog, panel
-    /// or raised-layer window stays one whatever the guess.
-    func refreshGuessedOverlays() {
-        let guess = eventLoop.floatRules.guess
-        for window in state.windows.all
-        where eventLoop.classifiesAsOverlay(pid: window.pid) {
-            let structural =
-                window.isRaisedLayer
-                || (window.subrole.map { !$0.isEmpty } == true
-                    && window.subrole != kAXStandardWindowSubrole)
-            let overlay = structural || guess.applies(to: window.appBundleID)
-            guard window.isTransientOverlay != overlay else { continue }
-            state.windows.setTransientOverlay(window.id, overlay)
-        }
     }
 }

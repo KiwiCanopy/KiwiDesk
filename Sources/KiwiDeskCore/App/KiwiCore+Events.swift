@@ -231,6 +231,10 @@ extension KiwiCore {
                 // rebuilds the bars itself.
                 handleTitleChangedForBars(id)
             }
+        case .windowOverlayChanged:
+            // The fold set the flag; the `shouldRetile` pass
+            // redraws the ring and the bar rows it gates (#2173).
+            break
         case .windowSubroleChanged:
             // Whether the window may present changed (#1788); the
             // `shouldRetile` pass re-fits it and redraws the bars,

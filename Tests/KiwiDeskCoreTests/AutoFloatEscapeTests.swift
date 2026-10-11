@@ -116,6 +116,19 @@ struct AutoFloatEscapeTests {
         #expect(verdict == .floats(.panel))
     }
 
+    /// The pill and the bar menu's subtitle: a guess names App
+    /// Rules, where the escape is; a panel says always.
+    @MainActor
+    @Test("a guess's pill names App Rules")
+    func refusalSentence() {
+        LocalizationManager.shared.select("en")
+        let rules = L("destination.app_rules", "App Rules")
+        #expect(AutoFloatReason.fixedSize.sentence.contains(rules))
+        #expect(AutoFloatReason.accessoryApp.sentence.contains(rules))
+        #expect(!AutoFloatReason.fixedSize.sentence.contains("always"))
+        #expect(AutoFloatReason.panel.sentence.contains("always"))
+    }
+
     @Test("a guess's refusal names App Rules; structure says always")
     func refusalWording() {
         #expect(AutoFloatReason.fixedSize.failure.contains("automatically"))

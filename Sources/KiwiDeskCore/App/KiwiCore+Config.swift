@@ -210,7 +210,11 @@ extension KiwiCore {
     private func resetDeclarativeState() {
         state.appRules = [:]
         globalRuleBase.liveFloatAutomatically = nil
-        installFloatRules(FloatRules([], guess: FloatGuess()))
+        // The guess stays: the load's tail judges the one it builds
+        // against the live one, once.
+        installFloatRules(
+            FloatRules([], guess: eventLoop.floatRules.guess)
+        )
         eventLoop.ignoreRules = IgnoreRules([])
         globalRuleBase.appRules = [:]
         globalRuleBase.floatRules = []

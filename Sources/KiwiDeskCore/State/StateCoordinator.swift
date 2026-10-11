@@ -322,6 +322,9 @@ public struct StateCoordinator: Sendable {
         case .windowSubroleChanged(let id, let subrole):
             windows.setSubrole(id, subrole)
 
+        case .windowOverlayChanged(let id, let overlay):
+            windows.setTransientOverlay(id, overlay)
+
         case .windowRekeyed(let old, let new):
             rekey(old, to: new)
 
