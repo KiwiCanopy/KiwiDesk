@@ -77,12 +77,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// save pill constantly, and it is stamped at the write
     /// (`GuiConfigStore.liveDesktopSpaces`) rather than drafted.
     /// `appWide` (#1741) and the shared `look` (#1752) are
-    /// stamped the same way. `floatAutomatically` and `tileRules`
-    /// (#2173) have no Settings row until the App Rules card that
-    /// edits them lands, and leave this list with it.
+    /// stamped the same way.
     public static let undraftedFields: Set<String> = [
         "format", "desktopSpaces", "appWide", "look",
-        "floatAutomatically", "tileRules",
     ]
 
     public init() {}

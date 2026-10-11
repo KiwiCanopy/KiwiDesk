@@ -9,6 +9,10 @@ enum AppRulesKey: String, CaseIterable, Hashable {
     case appRulesAddFloat = "(action) app_rules.add_float"
     case spaceRuleDelete = "(action) app_rules.space.delete"
     case floatRuleDelete = "(action) app_rules.float.delete"
+    case floatAutomatically = "config.floatAutomatically"
+    case tileRules = "config.tileRules"
+    case appRulesAddTile = "(action) app_rules.add_tile"
+    case tileRuleDelete = "(action) app_rules.tile.delete"
 }
 
 extension AppRulesKey {
@@ -43,6 +47,9 @@ extension AppRulesKey {
             )
         case .ignoreRules:
             return .luaOnly
+        case .floatAutomatically, .tileRules, .appRulesAddTile,
+            .tileRuleDelete:
+            return .row(.appRules, .automaticFloating, .atRest)
         }
     }
 }
@@ -71,8 +78,17 @@ extension AppRulesKey {
             return .text("app_rules.add_space")
         case .appRulesAddFloat:
             return .text("app_rules.add_float")
-        case .spaceRuleDelete, .floatRuleDelete:
+        case .spaceRuleDelete, .floatRuleDelete, .tileRuleDelete:
             return .dynamic
+        case .floatAutomatically:
+            return .text(
+                "app_rules.auto_float",
+                help: "app_rules.auto_float.help"
+            )
+        case .tileRules:
+            return .text("app_rules.tile", help: "app_rules.tile.help")
+        case .appRulesAddTile:
+            return .text("app_rules.add_tile")
         }
     }
 }

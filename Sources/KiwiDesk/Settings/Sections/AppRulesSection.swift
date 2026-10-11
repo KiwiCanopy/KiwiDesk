@@ -14,6 +14,7 @@ struct AppRulesSection: View {
     /// per list: an app may sit in both.
     @FocusState var returningSpaceRow: String?
     @FocusState var returningFloatRow: String?
+    @FocusState var returningTileRow: String?
     /// The app whose pattern editor is open. Owned here, not by
     /// the row, because a row composing its first pattern may
     /// hold no stored rule and `floatApps` is derived from the
@@ -22,12 +23,14 @@ struct AppRulesSection: View {
     @State var composingTitles: String?
     @State var newSpaceApp = ""
     @State var newFloatingApp = ""
+    @State var newTileApp = ""
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 spaceList
                 floatList
+                automaticList
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
@@ -39,8 +42,10 @@ struct AppRulesSection: View {
     }
 
     /// The list card holding `app`'s rule — the Space list first —
-    /// where a bar menu's App Rules… lands (#1518); nil for an app
-    /// with no rule, which lands on the page and creates none.
+    /// where a bar menu's App Rules… lands (#1518): the Automatic
+    /// floating card for a Tile rule, or for an app a guess floats
+    /// (#2173); nil for any other app, which lands on the page and
+    /// creates none.
     @MainActor
     static func card(
         holding app: String,
@@ -50,7 +55,12 @@ struct AppRulesSection: View {
             return SettingsCatalog.appRules.spaceList
         }
         let floats = model.config.floatRules.map(FloatFacet.appSegment(of:))
-        return floats.contains(app) ? SettingsCatalog.appRules.floatList : nil
+        if floats.contains(app) { return SettingsCatalog.appRules.floatList }
+        let tiles = model.config.tileRules.map(FloatGuess.normalizedRule)
+        if tiles.contains(app) || model.core.floatsOnGuess(app: app) {
+            return SettingsCatalog.appRules.automaticList
+        }
+        return nil
     }
 
     /// The area's census gates, from one construction site for

@@ -160,6 +160,10 @@ struct AppRulesControls: Sendable {
         "app_rules.float_list.title",
         "Float"
     )
+    let automaticList = SettingsControl(
+        "app_rules.auto_list.title",
+        "Automatic floating"
+    )
 }
 
 struct GeneralControls: Sendable {
