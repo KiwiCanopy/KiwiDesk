@@ -132,6 +132,25 @@ struct CommandBarIgnoreTests {
         )
     }
 
+    /// A screen-saver-level window is a HUD or an overlay whatever
+    /// its app (#2069): the line is the level itself, so 999 is
+    /// still a regular app's float.
+    @Test("any app's screen-saver-level window is never managed")
+    func screenSaverLevelIgnored() {
+        func ignored(_ layer: Int, button: Bool = false) -> Bool {
+            FloatDetection.shouldIgnore(
+                bundleID: "com.tinyspeck.slackmacgap",
+                layer: layer,
+                isAccessory: false,
+                rules: noRules,
+                titlebarButton: button
+            )
+        }
+        #expect(ignored(1_000))
+        #expect(ignored(1_001, button: true))
+        #expect(!ignored(999))
+    }
+
     @Test("The visible-panel scan counts only the panel band")
     func panelBandExcludesStatusItems() {
         // Command bars and quick terminals: floating (3) up to

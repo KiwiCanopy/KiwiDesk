@@ -21,6 +21,14 @@ extension FloatDetection {
         "com.apple.controlcenter",
     ]
 
+    /// The screen-saver level: a window at or above it is a HUD or
+    /// a full-screen overlay, whatever its app, and is never
+    /// managed (#2069). Every caller of the gate already holds the
+    /// window's layer, so the rule costs no WindowServer read.
+    static let screenSaverLayer = Int(
+        CGWindowLevelForKey(.screenSaverWindow)
+    )
+
     public static func isBuiltInIgnoredApp(
         bundleID: String?
     ) -> Bool {
@@ -42,6 +50,7 @@ extension FloatDetection {
     ) -> Bool {
         rules.matches(bundleID: bundleID)
             || isBuiltInIgnoredApp(bundleID: bundleID)
+            || layer >= screenSaverLayer
             || layer != 0
                 && (isAccessory && !titlebarButton
                     || bundleID.map {
