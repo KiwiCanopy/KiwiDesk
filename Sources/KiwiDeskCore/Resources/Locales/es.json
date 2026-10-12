@@ -952,6 +952,7 @@
   "lua_editor.adopt_help.body": "Tu init.lua no se elimina: se conserva como copia de seguridad comentada dentro del archivo nuevo. Se importan los espaciados, los diseños, las reglas y los atajos de teclado; un atajo que no se pueda volver a leer permanece en la copia de seguridad — vuelve a añadirlo en «%1$@».",
   "lua_editor.adopt_into_visual": "Adoptar en el editor visual…",
   "lua_editor.back_to_visual": "Volver al editor visual",
+  "lua_editor.changed_on_disk": "init.lua se cambió fuera de Ajustes mientras editabas, así que guardar lo sobrescribiría. Pulsa «%1$@» y vuelve a hacer tus cambios.",
   "lua_editor.editing_directly": "Editando init.lua directamente.",
   "lua_editor.foreign_code": "Este init.lua contiene Lua escrito a mano, así que el editor visual está desactivado para no sobrescribirlo.",
   "mac_checklist.click_wallpaper": "Poner «Hacer clic en el fondo de pantalla para mostrar el escritorio» en «Solo en el organizador visual»",
