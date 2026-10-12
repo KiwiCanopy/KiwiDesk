@@ -46,6 +46,14 @@ struct StarterTuningTests {
         #expect(tall.stack.stackPosition == .bottom)
         #expect(tall.scrolling.orientation == .vertical)
         #expect(tall.grid.splitDirection == .vertical)
+        // A laptop alone takes Grid through the main-shape
+        // fallback, so one row would pile the third window (#2171).
+        let laptop = StarterTuning.settings(
+            mainShape: .laptop,
+            hosts: [:]
+        )
+        #expect(laptop.grid.columns == 2)
+        #expect(laptop.grid.rows == 2)
         // One master on a 3440 pt screen is an absurd pane.
         let wide = StarterTuning.settings(
             mainShape: .ultrawide,
