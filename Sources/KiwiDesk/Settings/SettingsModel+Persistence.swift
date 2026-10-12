@@ -5,7 +5,19 @@ import KiwiDeskCore
 /// for SettingsModel.
 extension SettingsModel {
     /// Writes raw Lua editor buffer to disk and reloads runtime state.
+    /// Refuses when init.lua changed on disk since the buffer was
+    /// loaded, rather than overwriting that edit (#2206).
     func saveLuaSource() {
+        if luaChangedOnDisk {
+            profileWarning = L(
+                "lua_editor.changed_on_disk",
+                "init.lua was changed outside Settings while you "
+                    + "were editing, so saving would overwrite it. "
+                    + "%1$@, then make your edits again.",
+                L("footer.revert", "Revert")
+            )
+            return
+        }
         do {
             try luaSource.write(
                 to: configURL,
@@ -20,6 +32,16 @@ extension SettingsModel {
         } catch {
             core.onLog("settings save failed: \(error)")
         }
+    }
+
+    /// Whether init.lua on disk differs from what the Lua buffer
+    /// was loaded from (#2206). Live target only: a stored
+    /// profile's page carries no buffer.
+    var luaChangedOnDisk: Bool {
+        guard target == .live, editingLua else { return false }
+        let onDisk =
+            (try? String(contentsOf: configURL, encoding: .utf8)) ?? ""
+        return onDisk != cleanLuaSource
     }
 
     /// Discards the staged draft. Model-only, as before #123
