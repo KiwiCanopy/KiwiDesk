@@ -73,6 +73,15 @@ struct ConfigOwnerMovedTests {
         )
     }
 
+    @Test("A clean draft is never refused before its refresh")
+    func cleanDraftIsNotRefused() throws {
+        let model = try makeModel()
+        try writeForeignLua(model)
+        #expect(model.ownerMoved)
+
+        #expect(model.staleDraftReason == nil)
+    }
+
     @Test("A paused globals Save refuses too")
     func pausedGlobalsRefuse() throws {
         let model = try makeModel()
