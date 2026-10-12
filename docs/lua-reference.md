@@ -6159,6 +6159,14 @@ calls in `init.lua` apply only until a bound profile activates.
 To make a value stick on a bound Desktop, set it and re-save
 that profile (or edit the profile JSON).
 
+:::unreleased
+With a GUI-managed configuration the animations are part of the
+look: a profile using the shared look runs the shared look's
+`animations.*`, and a profile with its own look keeps its own.
+A saved look carries them; a bundled look carries none, so
+applying one leaves the animations unchanged.
+:::
+
 ### Quit & Restart
 
 Quitting KiwiDesk saves the current arrangement — window order

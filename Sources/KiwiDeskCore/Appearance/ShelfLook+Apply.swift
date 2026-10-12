@@ -2,8 +2,9 @@ import Foundation
 
 /// One-shot application of a ShelfLook (#1684). Every value is
 /// parsed by its `set_*` command's parser — the border's by
-/// `BorderCommandSetting` (#1739) — except the stored gaps, which
-/// the config's own decoder reads (`Gaps.stored`); either way a
+/// `BorderCommandSetting` (#1739) — except the stored gaps and the
+/// animations, which the config's own decoder reads (`Gaps.stored`,
+/// `AnimationSettings.setting`, #2176); either way a
 /// look can never set a value a command couldn't, and an unknown
 /// path or a refused value is skipped, never fatal. Two writes
 /// reach further than their COMMAND, by ruling
@@ -114,6 +115,13 @@ extension ShelfLook {
                 .parse(field: parts[1], args: args)
             {
                 setting.apply(to: &settings.borderStyle)
+            }
+        case "animations":
+            if let next = settings.animations.setting(
+                parts[1],
+                to: value
+            ) {
+                settings.animations = next
             }
         case "gap" where parts[1] == "global":
             // Only the global gaps; a Space's override stays (#1739).

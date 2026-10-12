@@ -35,7 +35,9 @@ struct LooksShelf: View {
                     + "sheen, and the window gaps. A one-time "
                     + "paint, not a live link; what the bars show "
                     + "is never part of a look. Its gaps move your "
-                    + "windows once you save."
+                    + "windows once you save. A look you saved also "
+                    + "brings its animations; a bundled one leaves "
+                    + "yours as they are."
             )
         ) {
             bundledGroup

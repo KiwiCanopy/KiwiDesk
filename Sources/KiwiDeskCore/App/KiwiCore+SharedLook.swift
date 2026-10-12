@@ -7,6 +7,15 @@ struct SharedLookLedger {
     /// Whether the crossing is owed: a readable, GUI-managed
     /// `gui.json` that carries no look yet.
     var owed = false
+
+    /// Whether the motion crossing is owed (#2176): a shared look
+    /// adopted before animations joined it, so it carries none.
+    /// Derived from the look, so the election that writes motion
+    /// into it is what ends it.
+    var motionOwed: Bool {
+        guard let base else { return false }
+        return !base.style.keys.contains(where: LookKeys.motion.contains)
+    }
 }
 
 /// The look every profile without its own wears (#1752) — the one
@@ -57,10 +66,27 @@ extension KiwiCore {
     /// — a built-in lends nothing: its look becomes the shared one
     /// (`crossWith`).
     func adoptSharedLook(from profile: Profile) {
-        guard sharedLookLedger.owed, isGuiManaged,
-            profiles.list().contains(profile.name)
+        guard sharedLookLedger.owed || sharedLookLedger.motionOwed,
+            isGuiManaged, profiles.list().contains(profile.name)
         else { return }
+        guard sharedLookLedger.owed else {
+            crossMotion(from: profile.settings)
+            return
+        }
         crossWith(LookBody(of: profile.settings))
+    }
+
+    /// The motion crossing (#2176): the shared look takes
+    /// `settings`' animations beside the styling and colours it
+    /// already carries, and the election runs again — a follower
+    /// whose animations differ keeps its own look from now on, so
+    /// nothing on screen moves.
+    func crossMotion(from settings: TilingSettings) {
+        guard var base = sharedLook else { return }
+        base.style.merge(
+            LookKeys.extract(from: settings, paths: LookKeys.motion)
+        ) { $1 }
+        crossWith(base)
     }
 
     /// The crossing's election: `base` becomes the shared look, and

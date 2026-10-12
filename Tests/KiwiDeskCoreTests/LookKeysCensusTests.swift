@@ -24,7 +24,10 @@ struct LookKeysCensusTests {
             + TilingSettings.GapKeys.allCases.map {
                 "gap.\($0.stringValue)"
             }
-        #expect(paths.count > 40)
+            + AnimationSettings.CodingKeys.allCases.map {
+                "animations.\($0.stringValue)"
+            }
+        #expect(paths.count > 50)
         let homes = [
             Set(LookKeys.all), Set(ColorPaletteKeys.all),
             Set(LookKeys.leftOut.keys),
