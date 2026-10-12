@@ -64,9 +64,9 @@ struct PresetShapeTuningTests {
                 == .center
         )
         // An undeclared leaf is the shape tuning's: a laptop's
-        // Grid is one row.
+        // Grid is two by two.
         let developer = try preset("Developer")
-        #expect(developer.settings(sizes: [laptop]).grid.rows == 1)
+        #expect(developer.settings(sizes: [laptop]).grid.rows == 2)
     }
 
     /// The host is the screen the layout's FIRST space sits on in
@@ -85,7 +85,7 @@ struct PresetShapeTuningTests {
         let settings = layout.settings(sizes: [laptop, ultrawide])
         #expect(settings.stack.masterCount == 2)
         #expect(settings.grid.columns == 2)
-        #expect(settings.grid.rows == 1)
+        #expect(settings.grid.rows == 2)
         // Profile-wide leaves stay the main screen's: not the
         // ultrawide's 420 pt floor.
         #expect(settings.minWindowSize == TilingSettings().minWindowSize)
