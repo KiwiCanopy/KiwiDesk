@@ -101,9 +101,8 @@ extension KiwiCore {
     private func hiddenAppJumpEntries() -> [JumpEntry] {
         eventLoop.liveApps(owners: [])
             .filter { app in
-                !EventLoop.isOwnProcess(app.pid)
+                app.isHidden && !EventLoop.isOwnProcess(app.pid)
                     && eventLoop.policy(of: app.pid) == .regular
-                    && eventLoop.appIsHidden(app.pid)
             }
             .sorted {
                 $0.ref.name.localizedStandardCompare($1.ref.name)

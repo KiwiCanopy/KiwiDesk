@@ -18,7 +18,6 @@ struct JumpListTests {
         pinTwoDisplays()
         let core = makeTestCore()
         core.eventLoop.runningApplications = { apps }
-        core.eventLoop.appIsHidden = { $0 == 300 }
         for space in ["1", "2"] {
             core.state.workspaces.ensureSpace(SpaceID(space))
         }
@@ -224,27 +223,27 @@ struct JumpListTests {
     @Test("hidden regular apps come last, one row each, by name")
     func hiddenApps() {
         let app:
-            (pid_t, String, NSApplication.ActivationPolicy)
-                -> RunningApp = { pid, name, policy in
+            (pid_t, String, NSApplication.ActivationPolicy, Bool)
+                -> RunningApp = { pid, name, policy, hidden in
                     RunningApp(
                         pid: pid,
                         activationPolicy: policy,
-                        ref: AppRef(bundleID: "app.test.\(pid)", name: name)
+                        ref: AppRef(bundleID: "app.test.\(pid)", name: name),
+                        isHidden: hidden
                     )
                 }
         let apps = [
-            app(300, "Spotify", .regular),
-            app(301, "Mail", .regular),
-            app(303, "Calendar", .regular),
-            app(302, "Agent", .accessory),
-            app(getpid(), "KiwiDesk", .regular),
+            app(300, "Spotify", .regular, true),
+            app(301, "Mail", .regular, false),
+            app(303, "Calendar", .regular, true),
+            app(302, "Agent", .accessory, true),
+            app(getpid(), "KiwiDesk", .regular, true),
         ]
         let core = makeCore(apps: apps)
         defer { resetAuthorityOverrides() }
         core.eventLoop.activationPolicy = { pid in
             apps.first { $0.pid == pid }?.activationPolicy
         }
-        core.eventLoop.appIsHidden = { $0 != 301 }
         track(core, 1, title: "a")
         let rows = core.jumpEntries()
         #expect(windows(rows) == [1])
@@ -252,7 +251,6 @@ struct JumpListTests {
             rows.dropFirst().map(\.target)
                 == [.hiddenApp(303), .hiddenApp(300)]
         )
-        #expect(rows.last?.status == .shown)
         #expect(rows.last?.app == "Spotify")
     }
 }

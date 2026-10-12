@@ -39,10 +39,8 @@ extension KiwiCore {
                 return moveAway(away, into: active)
             }
             if let parked = minimized(id) {
-                // Filed for here before it comes back, so the
-                // arrival lands where the user is (#1207's memory).
-                state.remember(id, in: active)
-                jump.owe(id, in: active, at: wallClock())
+                // Filed here at its arrival, wherever it lands.
+                jump.owe(id, in: active, at: wallClock(), relocates: true)
                 openOrFocus.deminiaturize(parked.pid, id)
                 openOrFocus.activate(parked.pid)
             }
@@ -86,6 +84,11 @@ extension KiwiCore {
             if let unminimized = parked.bundleID {
                 oweLaunchFollow(unminimized)
             }
+            // Where no rule carries it away it lands here, and is
+            // focused; where the follow switches, this stands down.
+            if let active = state.workspaces.activeSpace {
+                jump.owe(id, in: active, at: wallClock(), relocates: false)
+            }
             openOrFocus.deminiaturize(parked.pid, id)
             openOrFocus.activate(parked.pid)
         }
@@ -121,6 +124,15 @@ extension KiwiCore {
         guard !window.isFullscreen else {
             cueWindowAction(.cannotMoveHere(window: name), on: window.id)
             return false
+        }
+        // A ∞ window already renders here, so it is only focused;
+        // any other block is the sticky gate's own refusal, cued.
+        if let block = stickyMoveBlock(window.id, to: active) {
+            guard block == .global, window.stickyScope == .global else {
+                return !stickyMoveRefused(window.id, to: active)
+            }
+            pickBarRow(window.id, on: nil)
+            return true
         }
         if state.workspaces.space(of: window.id) != active {
             let moved = execute(
@@ -162,7 +174,7 @@ extension KiwiCore {
             )
             return false
         }
-        jump.owe(away.id, in: active, at: wallClock())
+        jump.owe(away.id, in: active, at: wallClock(), relocates: false)
         return true
     }
 }

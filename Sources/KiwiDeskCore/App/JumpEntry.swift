@@ -15,7 +15,8 @@ public struct JumpEntry: Sendable, Equatable {
     /// Where the window is, as far as a pick is concerned; a
     /// hidden app's row is `.shown`, its target saying the rest.
     public enum Status: Sendable, Equatable {
-        /// Tracked on a Desktop some screen shows.
+        /// Tracked on a Desktop some screen shows — or a hidden
+        /// app's row, which `isHiddenApp` tells apart.
         case shown
         /// Up on a Desktop no screen shows; `desktop` is its
         /// Mission Control number, a label only (profiles.md),

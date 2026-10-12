@@ -313,23 +313,26 @@ editing here:
 - **Jump to window's Move here owes a plain ARRIVAL focus, never a
   follow (#1875).** `JumpState` records it only where a move was
   DISPATCHED for that window — a hop the bridge accepted, an
-  un-minimize filed for the active Space — so the arrival is
-  certain; the `.windowCreated` arm pays it with a bare focus
-  into the Space it was owed for, and stands down off that Space,
-  past `FollowFocusIntent.drainWindow`, or after a press or a
+  un-minimize — so the arrival is certain; the `.windowCreated`
+  arm pays it with a bare focus while the Space it was owed for
+  is still active, a Move here that landed elsewhere filed there
+  first through `fileMembership` — never ahead of the arrival,
+  which may not come — and it stands down off that Space, past
+  `FollowFocusIntent.drainWindow`, or after a press or a
   commanded focus since. Keep it off `followFocus`: that debt
   pays as a Space switch and, while it stands, holds the #1207
   return and the #1564 sticky return down — the follow's
   register therefore names no Jump site
-  (`JumpActionsTests` ▸ `moveHereAwayPaysAtArrival`,
-  `moveHereFocusStandsDown`).
+  (`JumpActionsTests` ▸ `moveHereAwayPaysAtArrival`;
+  `JumpFocusTests` holds each stand-down arm).
 - **Opening an app follows its window into its app rule's Space,
   and only an OPEN owes it (#1599).** The debt is
   `LaunchFollowIntent`, keyed by the app's bundle id because the
   window does not exist when it is owed, and owed through the
   one `oweLaunchFollow` door: by Open or Focus, by `new_window`
   (#1518, which retires its own debt when the app answers that
-  it opened nothing), and by `noteAppActivation` for an
+  it opened nothing), by Jump to window's un-minimize (#1875,
+  an open by the same rule), and by `noteAppActivation` for an
   activation within `pressGrace` of a click or key-down, of a process started within `launchGrace`
   or showing no window (a reopen, an un-minimize — owner ruling
   2026-09-23), outside a Desktop switch — never on "the app is

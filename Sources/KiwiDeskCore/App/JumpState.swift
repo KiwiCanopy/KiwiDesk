@@ -5,13 +5,17 @@ import Foundation
 /// the list drops a stale minimize record by.
 ///
 /// The focus is owed only where a move was DISPATCHED for that
-/// window — a hop the bridge accepted, an un-minimize filed for
-/// the active Space — so its arrival is certain; it is paid at
-/// that arrival with a plain focus, never a Space switch, and
-/// only into the Space it was owed for while that Space is
-/// still the active one. Not a `FollowFocusIntent`: that debt
-/// pays as a switch and holds the Desktop return down (#1207)
-/// while it stands, and this one must do neither.
+/// window — a hop the bridge accepted, an un-minimize — so its
+/// arrival is certain; it is paid at that arrival with a plain
+/// focus, never a Space switch, and only while the Space it was
+/// owed for is still the active one. A Move here that lands
+/// elsewhere (an un-minimized window taking its app rule) is
+/// filed into that Space at the payment, so nothing is filed
+/// ahead of an arrival that may never come. Not a
+/// `FollowFocusIntent`: that debt pays as a switch and holds the
+/// Desktop return down (#1207) while it stands, and this one
+/// must do neither. A window that never arrives needs no retire:
+/// the debt is judged by its age when it is taken.
 @MainActor
 final class JumpState {
     /// One owed focus: the window, the Space it was moved into,
@@ -22,6 +26,9 @@ final class JumpState {
         let space: SpaceID
         let at: Date
         let commandedAt: ContinuousClock.Instant
+        /// Move here: file the window into `space` if it lands
+        /// anywhere else; a Jump's focus only stands down there.
+        let relocates: Bool
     }
 
     private(set) var owed: Owed?
@@ -30,15 +37,29 @@ final class JumpState {
     /// reading answers (the list then keeps every record). Pinned
     /// by `makeTestCore`.
     var knownWindows: () -> Set<WindowID>? = {
-        Set(AXHelper.allNormalWindowOwners().keys)
+        JumpState.known(AXHelper.allNormalWindowOwners())
     }
 
-    func owe(_ window: WindowID, in space: SpaceID, at now: Date) {
+    /// The reading's ids, nil for an empty one: a failed read
+    /// answers empty, and "no window at all" keeps every record.
+    nonisolated static func known(
+        _ owners: [WindowID: pid_t]
+    ) -> Set<WindowID>? {
+        owners.isEmpty ? nil : Set(owners.keys)
+    }
+
+    func owe(
+        _ window: WindowID,
+        in space: SpaceID,
+        at now: Date,
+        relocates: Bool
+    ) {
         owed = Owed(
             window: window,
             space: space,
             at: now,
-            commandedAt: .now
+            commandedAt: .now,
+            relocates: relocates
         )
     }
 
@@ -74,13 +95,20 @@ extension KiwiCore {
         let commanded =
             eventLoop.lastCommandedFocus.map { $0 > owed.commandedAt }
             ?? false
+        let landed = state.workspaces.space(of: window)
+        let relocates =
+            owed.relocates && landed != nil
+            && stickyMoveBlock(window, to: owed.space) == nil
         guard age < FollowFocusIntent.drainWindow,
             state.workspaces.activeSpace == owed.space,
-            state.workspaces.space(of: window) == owed.space,
+            landed == owed.space || relocates,
             !pressed, !commanded
         else {
             onLog("move here: w\(window.raw) arrived — focus stood down")
             return
+        }
+        if landed != owed.space {
+            fileMembership(window, into: owed.space, from: landed)
         }
         focusWindow(window, refocusRetile: false, warp: true)
         onLog("move here: focus handed to w\(window.raw)")

@@ -83,7 +83,8 @@ struct JumpActionsTests {
         _ core: KiwiCore,
         _ id: UInt32,
         in space: String,
-        fullscreen: Bool = false
+        fullscreen: Bool = false,
+        sticky: StickyScope = .none
     ) {
         var window = ManagedWindow(
             id: WindowID(id),
@@ -92,6 +93,7 @@ struct JumpActionsTests {
             appBundleID: bundle
         )
         window.isFullscreen = fullscreen
+        window.stickyScope = sticky
         core.state.apply(.windowCreated(window))
         core.state.workspaces.add(WindowID(id), to: SpaceID(space))
     }
@@ -269,45 +271,6 @@ struct JumpActionsTests {
         #expect(activated == [300])
     }
 
-    /// Filed for here, restored, and focused at its arrival —
-    /// through the real fold and the arrival arm.
-    @Test("Move here restores a minimized window here, focused")
-    func moveHereMinimized() {
-        let core = makeCore()
-        defer { teardown() }
-        track(core, 1, in: "1")
-        track(core, 4, in: "2")
-        minimize(core, 4)
-        var restored: [WindowID] = []
-        core.openOrFocus.deminiaturize = { restored.append($1) }
-        #expect(core.moveHere(.window(WindowID(4))))
-        #expect(restored == [WindowID(4)])
-        arrive(core, 4)
-        #expect(core.state.workspaces.space(of: WindowID(4)) == "1")
-        #expect(core.state.workspaces.lastFocused == WindowID(4))
-        #expect(core.jump.owed == nil)
-    }
-
-    /// The user went on to another Space before the window came:
-    /// the arrival pays nothing and pulls nobody back.
-    @Test("a Space switch before the arrival stands the focus down")
-    func moveHereFocusStandsDown() {
-        let core = makeCore()
-        defer { teardown() }
-        track(core, 1, in: "1")
-        track(core, 2, in: "2")
-        track(core, 4, in: "1")
-        minimize(core, 4)
-        core.openOrFocus.deminiaturize = { _, _ in }
-        #expect(core.moveHere(.window(WindowID(4))))
-        core.state.workspaces.activate("2")
-        core.state.workspaces.focus(WindowID(2), in: "2")
-        arrive(core, 4)
-        #expect(core.state.workspaces.activeSpace == "2")
-        #expect(core.state.workspaces.lastFocused == WindowID(2))
-        #expect(core.jump.owed == nil)
-    }
-
     /// The hop's arrival pays the focus, with no Space switch.
     @Test("an away window moved here is focused when it arrives")
     func moveHereAwayPaysAtArrival() {
@@ -321,5 +284,33 @@ struct JumpActionsTests {
         #expect(core.state.workspaces.space(of: WindowID(7)) == "1")
         #expect(core.state.workspaces.activeSpace == "1")
         #expect(core.state.workspaces.lastFocused == WindowID(7))
+    }
+
+    /// The bridge resolves but refuses the move: nothing is owed
+    /// and the window's memory stays where it was.
+    @Test("a refused hop owes nothing and moves nothing")
+    func moveHereAwayRefused() {
+        let core = makeCore()
+        defer { teardown() }
+        WMBridge.classResolverOverride = { name in
+            name == "CopyManagedDisplaySpacesOperation"
+                ? bridgeClasses[name] : nil
+        }
+        park(core)
+        #expect(!core.moveHere(.window(WindowID(7))))
+        #expect(core.jump.owed == nil)
+        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("2"))
+    }
+
+    /// A ∞ window already renders here: focused, never moved.
+    @Test("Move here focuses a global sticky window in place")
+    func moveHereGlobalSticky() {
+        let core = makeCore()
+        defer { teardown() }
+        track(core, 1, in: "1")
+        track(core, 2, in: "2", sticky: .global)
+        #expect(core.moveHere(.window(WindowID(2))))
+        #expect(core.state.workspaces.space(of: WindowID(2)) == "2")
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
     }
 }
