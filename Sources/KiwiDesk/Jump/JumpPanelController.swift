@@ -113,13 +113,14 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     }
 
     /// The one close. `closing` stops the resign-key that
-    /// `orderOut` fires from closing a second time.
+    /// `orderOut` fires from closing a second time, and a panel
+    /// already hidden has no blip to distrust nor target to give.
     @discardableResult
     private func dismiss(
         yielding: Bool,
         distrusting: Bool
     ) -> NSRunningApplication? {
-        guard !closing else { return nil }
+        guard !closing, panel?.isVisible != false else { return nil }
         closing = true
         defer { closing = false }
         model = nil

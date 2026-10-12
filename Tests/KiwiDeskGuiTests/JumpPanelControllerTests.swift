@@ -129,4 +129,17 @@ struct JumpPanelControllerTests {
         controller.close(yieldingActivation: true)
         #expect(yielded == 1)
     }
+
+    @Test("a close of an already hidden panel does nothing")
+    func hiddenPanelCloseIsInert() {
+        let (controller, core) = controller()
+        controller.panel = controller.makePanel()
+        controller.handBack.returnTarget = NSRunningApplication.current
+        var yielded = 0
+        controller.handBack.activateReturnTarget = { _ in yielded += 1 }
+        controller.close(yieldingActivation: true)
+        #expect(yielded == 0)
+        #expect(controller.handBack.returnTarget != nil)
+        #expect(core.ignoredPanel.active.isEmpty)
+    }
 }

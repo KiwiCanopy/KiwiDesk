@@ -71,7 +71,7 @@ extension KiwiCore {
                 space: space,
                 spaceIcon: space.flatMap(jumpSpaceIcon),
                 status: .away(desktop: snapshot.number(of: entry.nativeSpace)),
-                movesHere: canDriveDesktops
+                movesHere: canDriveDesktops && entry.appBundleID != nil
                     && state.workspaces.activeSpace != nil
             )
         }
@@ -128,8 +128,9 @@ extension KiwiCore {
     /// Whether `moveHere(_:)` would move a tracked window: not a
     /// full-screen one, not one already here, and not one the
     /// sticky gate holds — a ∞ window, already drawn here, is only
-    /// focused. An away row asks the bridge alone: whether its
-    /// hop reaches is known only when it runs.
+    /// focused. An away row asks the bridge and its bundle id, the
+    /// hop's gates known ahead of it: whether it reaches is known
+    /// only when it runs.
     private func jumpMovesHere(
         _ window: ManagedWindow,
         from space: SpaceID?

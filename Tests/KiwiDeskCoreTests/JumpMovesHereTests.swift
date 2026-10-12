@@ -116,4 +116,39 @@ struct JumpMovesHereTests {
             #expect(movesHere(core, 7) == bridge)
         }
     }
+
+    /// The fact and the act agree: a row says it moves here
+    /// exactly where `moveHere(_:)` files it into the current
+    /// Space — the display-sticky arm included, whose block reads
+    /// the screens.
+    @Test("movesHere agrees with what Move here does")
+    func agreesWithTheAct() {
+        let scopes: [StickyScope] = [.none, .display, .global]
+        for (offset, scope) in scopes.enumerated() {
+            let core = makeCore()
+            defer { teardown() }
+            let id = UInt32(20 + offset)
+            track(core, id, in: "2") { $0.stickyScope = scope }
+            let claim = movesHere(core, id)
+            core.moveHere(.window(WindowID(id)))
+            let space = core.state.workspaces.space(of: WindowID(id))
+            let moved = space == "1"
+            #expect(claim == moved, Comment(rawValue: "\(scope)"))
+        }
+    }
+
+    @Test("an away window with no bundle id cannot move here")
+    func awayWithoutBundle() {
+        let core = makeCore(bridge: true)
+        defer { teardown() }
+        core.state.awayWindows[WindowID(8)] = AwayWindow(
+            id: WindowID(8),
+            pid: 100,
+            appName: "Notes",
+            appBundleID: nil,
+            nativeSpace: 11
+        )
+        core.state.rememberedSpaces[WindowID(8)] = .departed("2")
+        #expect(movesHere(core, 8) == false)
+    }
 }
