@@ -129,6 +129,8 @@ struct AnnouncedValuePinTests {
         "OnboardingLooksRows.swift": 1,
         // App Rules ▸ Automatic floating's "Tile instead" (#2173).
         "AppRulesSection+Automatic.swift": 1,
+        // Jump to window's Hidden section header (#1875).
+        "JumpPanelView.swift": 1,
     ]
 
     @Test("title components are rotor headings")

@@ -183,6 +183,10 @@ struct SettingsAnchorPrimitiveTests {
         // a Settings destination, so nothing there is a reveal
         // target.
         "ModeCueView.swift": 1,
+        // Scroll identity: Jump to window scrolls its selected
+        // row into view (#1875). Not a Settings destination, so
+        // nothing there is a reveal target.
+        "JumpPanelView.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")

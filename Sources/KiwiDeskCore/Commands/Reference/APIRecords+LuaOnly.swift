@@ -46,5 +46,9 @@ extension APIReference {
             "Opens the Settings window and brings it to the "
                 + "front."
         ),
+        "show_jump_to_window": APIRecord(
+            "Opens the Jump to window panel, or closes it if "
+                + "it is open."
+        ),
     ]
 }

@@ -298,7 +298,7 @@ struct SettingsThemeContrastTests {
         #expect(!pairings.isEmpty)
         for pairing
             in pairings + Self.updateWindow + Self.jumpChips
-            + Self.chips
+            + Self.chips + Self.jumpPanel
         {
             for dark in [false, true] {
                 let ratio = try ThemeContrast.contrast(
