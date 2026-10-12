@@ -15,6 +15,7 @@ struct MoveHereCommandTests {
     private final class Recorder {
         var opened: [String] = []
         var activated: [pid_t] = []
+        var logs: [String] = []
     }
 
     private func makeCore(running: Bool = true) -> (KiwiCore, Recorder) {
@@ -30,6 +31,7 @@ struct MoveHereCommandTests {
             return true
         }
         core.frontmostPIDProvider = { 300 }
+        core.onLog = { recorder.logs.append($0) }
         core.eventLoop.shadows.focusedWindow = { _ in nil }
         for space: SpaceID in ["1", "2", "3"] {
             core.state.workspaces.ensureSpace(space)
@@ -90,6 +92,15 @@ struct MoveHereCommandTests {
         #expect(!run(core).isSuccess)
         #expect(recorder.opened.isEmpty)
         #expect(space(core, 1) == "1")
+        #expect(refused(recorder, .allHere(app: "")))
+    }
+
+    /// Whether the run logged `refusal`'s reason, the pill's own.
+    private func refused(
+        _ recorder: Recorder,
+        _ refusal: WindowActionRefusal
+    ) -> Bool {
+        recorder.logs.contains { $0.contains(refusal.logReason) }
     }
 
     @Test("text no title holds refuses and never launches")
@@ -99,9 +110,11 @@ struct MoveHereCommandTests {
         #expect(!run(core, "inbox").isSuccess)
         #expect(space(core, 1) == "2")
         #expect(recorder.opened.isEmpty)
+        #expect(refused(recorder, .noTitleMatch(app: "", text: "")))
         let (bare, bareRecorder) = makeCore(running: false)
         #expect(!run(bare, "inbox").isSuccess)
         #expect(bareRecorder.opened.isEmpty)
+        #expect(refused(bareRecorder, .noTitleMatch(app: "", text: "")))
     }
 
     @Test("text picks the matching window, not the most recent")

@@ -18,10 +18,11 @@ extension KiwiCore {
     }
 
     /// Pays at the app's first honored focus report, in
-    /// `handleWindowFocused`. Stands down past the follow's bound,
-    /// off the Space it was owed for, after a press or a commanded
-    /// focus since, and for a window no move can take — full
-    /// screen, or held by the sticky gate.
+    /// `handleWindowFocused`, ahead of the #1207 memory, which
+    /// then files the window under the Space it now holds. Stands
+    /// down past the follow's bound, off the Space it was owed for,
+    /// after a press or a commanded focus since, and for a window
+    /// no move can take — full screen, or held by the sticky gate.
     func payHiddenAppMove(focused window: WindowID) {
         guard let managed = state.windows[window],
             let owed = jump.takeApp(managed.pid)
@@ -41,17 +42,19 @@ extension KiwiCore {
             onLog("move here: w\(window.raw) unhidden — move stood down")
             return
         }
+        // Logged, never drawn: the follow is about to switch away
+        // from the Space the pill would draw on.
         if let text = owed.matching,
             !Self.titleMatches(managed.title, text)
         {
-            cueWindowAction(
-                .noTitleMatch(app: managed.appName, text: text),
-                on: window
-            )
+            onLog("move here: w\(window.raw) unhidden — no title match")
             return
         }
         fileMembership(window, into: owed.space, from: landed)
-        retile(animated: true)
+        // A focus-driven layout retiles on this same report.
+        if activeSpace?.mode.isFocusDriven != true {
+            retile(animated: true)
+        }
         onLog("move here: unhidden w\(window.raw) filed here")
     }
 }

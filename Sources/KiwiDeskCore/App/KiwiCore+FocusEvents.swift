@@ -276,8 +276,8 @@ extension KiwiCore {
                 + "before \(honoredBefore), "
                 + "selfEcho=\(selfEcho)"
         )
-        rememberHonoredFocus(id)
         payHiddenAppMove(focused: id)
+        rememberHonoredFocus(id)
         noteDelayedClose(id, after: effects, selfEcho: selfEcho)
         emitFocusChange(id)
         // Move the focus ring to the newly focused window.

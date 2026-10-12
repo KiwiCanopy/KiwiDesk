@@ -11,10 +11,13 @@ extension KiwiCore {
     /// What `move_here` resolved to.
     enum MoveHerePick: Equatable {
         case window(WindowID)
+        /// No matching window can move here — full screen, or held
+        /// elsewhere by the sticky gate; Move here cues why.
+        case unmovable(WindowID)
         /// Every matching window is already in this Space.
         case allHere
         /// The app has windows, and none matches the text.
-        case noMatch
+        case noMatch(text: String)
         /// The app has no window KiwiDesk knows.
         case noWindow
     }
@@ -28,18 +31,16 @@ extension KiwiCore {
             return .fail("no active Space to move into")
         }
         switch moveHerePick(bundleID: bundleID, into: active, text: text) {
-        case .window(let id):
+        case .window(let id), .unmovable(let id):
             onLog("move_here: \(bundleID) — w\(id.raw)")
             return moveHere(.window(id))
                 ? .ok() : .fail("could not move the \(bundleID) window here")
         case .allHere:
             cueMoveHere(.allHere(app: appName(bundleID)))
             return .fail("every \(bundleID) window is already here")
-        case .noMatch:
-            cueMoveHere(
-                .noTitleMatch(app: appName(bundleID), text: text ?? "")
-            )
-            return .fail("no \(bundleID) window matches \(text ?? "")")
+        case .noMatch(let text):
+            cueMoveHere(.noTitleMatch(app: appName(bundleID), text: text))
+            return .fail("no \(bundleID) window matches \(text)")
         case .noWindow:
             // A hidden app's windows are not in state (#913).
             if let pid = openOrFocus.runningAppPID(bundleID),
@@ -60,9 +61,10 @@ extension KiwiCore {
 
     /// The pick, by `JumpTier`: open windows — tracked and, with the
     /// Desktop bridge, up on an away Desktop, in ring order — before
-    /// minimized ones, each by recency. A full-screen window and one
-    /// the sticky gate keeps elsewhere are no candidates; a window
-    /// already drawn in `active` is skipped.
+    /// minimized ones, each by recency. A window already drawn in
+    /// `active` counts as here; a full-screen window and one the
+    /// sticky gate keeps elsewhere are picked only where nothing
+    /// else can move, so Move here cues why.
     func moveHerePick(
         bundleID: String,
         into active: SpaceID,
@@ -89,18 +91,24 @@ extension KiwiCore {
         let matching: (WindowID) -> Bool = { id in
             text.map { Self.titleMatches(title(id), $0) } ?? true
         }
-        let open = ring.filter { matching($0) && movableHere($0, active) }
+        let open = ring.filter(matching)
         let elsewhere = open.filter { !isDrawnHere($0, active) }
+        let movable = elsewhere.filter { movableHere($0, active) }
         let parked = minimized.map(\.id).filter(matching)
         let pid =
             openOrFocus.runningAppPID(bundleID)
             ?? ring.first.flatMap { state.windows[$0]?.pid }
-        if let id = mostRecentWindow(of: elsewhere, pid: pid)
+        if let id = mostRecentWindow(of: movable, pid: pid)
             ?? mostRecentWindow(of: parked, pid: pid)
         {
             return .window(id)
         }
-        return open.isEmpty ? .noMatch : .allHere
+        if let id = mostRecentWindow(of: elsewhere, pid: pid) {
+            return .unmovable(id)
+        }
+        if !open.isEmpty { return .allHere }
+        // Without text every window matches, so the app has none.
+        return text.map { .noMatch(text: $0) } ?? .noWindow
     }
 
     /// Whether `title` contains `text`, case-, accent- and
@@ -119,12 +127,8 @@ extension KiwiCore {
     /// held elsewhere by the sticky gate.
     private func movableHere(_ id: WindowID, _ active: SpaceID) -> Bool {
         guard let window = state.windows[id] else { return true }
-        guard !window.isFullscreen else { return false }
-        guard let block = stickyMoveBlock(id, to: active) else {
-            return true
-        }
-        // A ∞ window is drawn here already, which the pick skips.
-        return block == .global && window.stickyScope == .global
+        return !window.isFullscreen
+            && stickyMoveBlock(id, to: active) == nil
     }
 
     /// In `active` already, or a sticky window rendering there.
