@@ -117,7 +117,9 @@ public enum StarterTuning {
         for shape: ScreenClass
     ) {
         switch shape {
-        case .desktop:
+        case .desktop, .laptop:
+            // A laptop alone reaches this through the main-shape
+            // fallback, so it needs the full 2×2 too (#2171).
             settings.grid.columns = 2
             settings.grid.rows = 2
         case .pivoted:
@@ -125,12 +127,6 @@ public enum StarterTuning {
             settings.grid.splitDirection = .vertical
             settings.grid.columns = 1
             settings.grid.rows = 3
-        case .laptop:
-            // Two by two: a laptop alone reaches this through the
-            // main-shape fallback, and one row piled the third
-            // window into the last cell (#2171).
-            settings.grid.columns = 2
-            settings.grid.rows = 2
         case .superUltrawide, .ultrawide:
             break
         }
