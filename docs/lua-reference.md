@@ -4015,6 +4015,12 @@ apps leave KiwiDesk state, and apps removed from the list are
 discovered again. Ghostty's quick terminal is a built-in exception:
 only its panel, not normal Ghostty windows, is ignored.
 
+:::unreleased
+A raised Ghostty window with title-bar buttons, such as its
+configuration-error window, is one of Ghostty's own windows and is
+managed as a float; the buttonless quick terminal stays ignored.
+:::
+
 **Command bars are ignored automatically.** A Spotlight/Raycast-style
 launcher is a menu-bar (accessory) app whose bar is a raised-layer
 overlay; KiwiDesk never manages such a window, so the bar is not

@@ -18,7 +18,13 @@ extension AXDumpExpected {
             .ignored,
             nil
         ),
-        .row("ghostty_config_error", .floats(.panel), .ignored, .furnished),
+        .row(
+            "ghostty_config_error",
+            .floats(.panel),
+            .kept,
+            .furnished,
+            .ruled(issue: 2067)
+        ),
         .row("ghostty_quick_terminal", .floats(.panel), .ignored, nil),
         .row("ghostty_window_decorations_false", .tiles, .kept, nil),
         .row("intellij", .tiles, .kept, .furnished),

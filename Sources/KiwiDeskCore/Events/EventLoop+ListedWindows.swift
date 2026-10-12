@@ -90,7 +90,8 @@ struct ListedWindowReader: @unchecked Sendable {
         let layer = id.flatMap { layers[$0] } ?? 0
         let asksButton = FloatDetection.needsTitlebarButton(
             layer: layer,
-            isAccessory: isAccessory
+            isAccessory: isAccessory,
+            bundleID: bundleID
         )
         // One traits read serves the shadow rule and the escape.
         let traitsRead =
