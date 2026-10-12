@@ -42,6 +42,7 @@ extension AppRulesSection {
                 role: .tile,
                 name: $newTileApp,
                 exclude: Set(tileApps),
+                guessed: { model.core.guessedFloatApps() },
                 onCommit: addTile
             )
             .modifier(

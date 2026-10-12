@@ -15,6 +15,9 @@ struct AppPickerButton: View {
     let onEscape: () -> Void
     /// Bundle IDs to omit from the picker list (#334).
     var exclude: Set<String> = []
+    /// Where given, the list is these apps instead of every
+    /// installed one, read when the popover opens (#2071).
+    var guessed: (() -> [GuessedFloatApp])?
 
     @State private var showing = false
     @State private var search = ""
@@ -41,7 +44,13 @@ struct AppPickerButton: View {
                 _ = KeybindingCatalog.diskAppIconPaths
             }
         }
-        .popover(isPresented: $showing) { popover }
+        .popover(isPresented: $showing) {
+            if let guessed {
+                guessedPopover(guessed())
+            } else {
+                popover
+            }
+        }
         // Every open starts with an empty search (#1357): the
         // reset rides the popover's own dismissal edge.
         .onChange(of: showing) { _, isShowing in
@@ -74,6 +83,29 @@ struct AppPickerButton: View {
         }
         .padding(12)
         .frame(width: 280, height: 360)
+    }
+
+    /// The Tile picker's list (#2071): no search over a short list,
+    /// the escape first and the hint saying where the rows come from.
+    private func guessedPopover(_ apps: [GuessedFloatApp]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            escapeRow
+            Divider()
+            GuessedAppRows(
+                apps: apps.filter { !exclude.contains($0.bundleID) },
+                onPick: { app in
+                    onPick(app)
+                    showing = false
+                }
+            )
+            Divider()
+            Text(GuessedAppRows.hint)
+                .font(.caption)
+                .foregroundStyle(SettingsTheme.ink3)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(12)
+        .frame(width: 280)
     }
 
     private var escapeRow: some View {
