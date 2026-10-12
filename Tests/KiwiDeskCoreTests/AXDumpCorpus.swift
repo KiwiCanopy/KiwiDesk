@@ -171,7 +171,11 @@ extension AXDump {
             layer: layer,
             isAccessory: isAccessory,
             rules: IgnoreRules(),
-            titlebarButton: hasTitlebarButton == true
+            titlebarButton: FloatDetection.needsTitlebarButton(
+                layer: layer,
+                isAccessory: isAccessory,
+                bundleID: bundleID
+            ) && hasTitlebarButton == true
         )
         return ignored ? .ignored : .kept
     }

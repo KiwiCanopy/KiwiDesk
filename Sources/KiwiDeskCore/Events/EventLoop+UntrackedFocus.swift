@@ -18,7 +18,7 @@ extension EventLoop {
     ) {
         // The gate's own #2072 escape: a buttoned window it is
         // about to admit is no panel. An activation carries no
-        // element and reads as one.
+        // element and reads as one, Ghostty's config window too.
         let layer = FloatDetection.windowLayer(of: id) ?? 0
         let button =
             FloatDetection.needsTitlebarButton(
