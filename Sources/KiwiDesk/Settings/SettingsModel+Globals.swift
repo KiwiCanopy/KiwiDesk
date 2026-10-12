@@ -43,11 +43,11 @@ extension SettingsModel {
         // can seize config ownership must not depend on its only
         // caller remembering to check (§5 — refine the one
         // `isGuiManaged` predicate, never mirror it).
-        guard core.isGuiManaged else { return }
-        if let moved = pageMovedReason {
+        if let moved = staleDraftReason {
             profileWarning = moved
             return
         }
+        guard core.isGuiManaged else { return }
         // The spaces freshness net runs here too — but only when
         // live is trustworthy: on an AX-off cold boot it would
         // append StateCoordinator's boot default and the saved
