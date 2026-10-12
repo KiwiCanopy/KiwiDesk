@@ -43,6 +43,10 @@ extension SettingsModel {
         // can seize config ownership must not depend on its only
         // caller remembering to check (§5 — refine the one
         // `isGuiManaged` predicate, never mirror it).
+        if let moved = ownerMovedReason {
+            profileWarning = moved
+            return
+        }
         guard core.isGuiManaged else { return }
         if let moved = pageMovedReason {
             profileWarning = moved

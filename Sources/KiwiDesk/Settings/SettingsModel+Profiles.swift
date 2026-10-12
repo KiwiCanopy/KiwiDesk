@@ -99,7 +99,7 @@ extension SettingsModel {
     private func persist(named name: String) -> Bool {
         // One draft, one identity: never split a Save between the
         // page it was drawn for and a profile loaded under it.
-        if let moved = pageMovedReason {
+        if let moved = ownerMovedReason ?? pageMovedReason {
             profileWarning = moved
             return false
         }

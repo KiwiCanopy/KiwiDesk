@@ -54,6 +54,30 @@ extension SettingsModel {
             && reachPage != core.profiles.currentName
     }
 
+    /// Whether the live page's shell disagrees with `init.lua`:
+    /// the file gained or lost code the visual editor cannot
+    /// co-own since the page was drawn (#2183).
+    var ownerMoved: Bool {
+        target == .live
+            && forcedLuaEditor != core.configHasForeignCode
+    }
+
+    /// Why a dirty structured draft cannot be saved: `init.lua`
+    /// now owns what it would write, so the load would ignore
+    /// the `gui.json` half (#2183).
+    var ownerMovedReason: String? {
+        guard ownerMoved, !forcedLuaEditor, isDirty else {
+            return nil
+        }
+        return L(
+            "profiles.owner_moved",
+            "init.lua was changed while you were editing, and it "
+                + "now sets these itself. %1$@ to open it in the "
+                + "Lua editor.",
+            L("footer.revert", "Revert")
+        )
+    }
+
     /// Why a dirty live draft cannot be saved as it stands: its
     /// page is not the loaded profile's any more.
     var pageMovedReason: String? {
