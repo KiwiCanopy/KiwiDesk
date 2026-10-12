@@ -15,8 +15,9 @@ extension AXDumpExpected {
         .row(
             "ghostty_check_for_updates_2_alert",
             .floats(.panel),
-            .ignored,
-            nil
+            .kept,
+            nil,
+            .ruled(issue: 2200)
         ),
         .row(
             "ghostty_config_error",

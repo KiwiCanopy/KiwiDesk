@@ -1721,7 +1721,6 @@ terminal #21). The draw-time heuristic remains for the structural
 floats that stay managed: panel-subrole windows of regular apps
 and accessory apps' layer-0 windows.
 
-:::unreleased
 Above that class sits the **screen-saver level** (#2069): a
 window at CG layer 1000 or above is ignored whatever its app and
 whatever its buttons — a dictation HUD, a screen-share overlay
@@ -1733,7 +1732,6 @@ there cannot be managed and has no per-window way back, since
 `ignore_rules` only adds. The level refuses adoption, never a
 window already tracked that rises to it — that removal would
 read as a close, raise a neighbour and lose the slot.
-:::
 
 The optional **glow** (#358) — a soft blurred colored bloom around
 the ring, the JankyBorders `COLOR_STYLE_GLOW` look — is a global
@@ -2173,7 +2171,6 @@ command's own but lands later, when the next click may already be
 aimed, so it waits like ambient motion. Keyboard activity never
 counts: moving a window steals no keystroke.
 
-:::unreleased
 Your own act in an app is not ambient either (#2187). Closing,
 hiding or minimizing the focused window, or a new window from the
 app in front, just after a key-down or click lays out at once —
@@ -2182,7 +2179,6 @@ deliberate as a hotkey, and holding their reflow left a stack
 stale for seconds while the mouse moved. The press only admits
 such a pass; it never holds one. A window a background app opens,
 or a close nothing pressed for, still waits.
-:::
 
 What waits is the layout pass, never its frames. A held pass is
 owed and run again once the hand rests, against the windows as
@@ -4484,14 +4480,12 @@ wherever it is drawn. The number is not invented for this — it is
 `BorderStyle.fittingGaps` already answers the same question for
 the layout with the same value on all four edges.
 
-:::unreleased
 Painted chrome counts only on an edge the layout reserves: a bar
 set not to reserve its strip keeps no float out, as it keeps no
 tiled window out ([*Reserved where a bar draws*](#app-bar), #1524).
 The same holds for the floating gather's strips and for the drop
 fit's lift clear of a bottom bar: both carve or clear only a
 strip on a reserved edge.
-:::
 
 A tempting alternative was rejected on that same principle: to
 follow `gap.outer` instead, so `border.fit_gaps` would cover
@@ -5471,7 +5465,6 @@ to recall, not screen area. And we run out of keys before we run
 out of spaces: past ⌥1–9 and ⌥0 there are no default go-to keys
 left.
 
-:::unreleased
 **Beside an ultrawide, Scrolling lives on the ultrawide alone.**
 With an ultrawide or super ultrawide among several screens, the
 budget and lead rules around this paragraph give way: the ultrawides lead Scrolling, every
@@ -5489,7 +5482,6 @@ row because a laptop alone reaches the same tuning when a Space
 is switched to Grid, and a two-cell cap piles the third window
 into the last cell, which reads as a broken Grid; the dynamic
 grid still lays two windows side by side (#2171).
-:::
 
 **Every screen opens in Scrolling but the smallest, which opens
 in Monocle.** The shape rule above decides what a screen is good
@@ -5667,7 +5659,6 @@ rulings:
   promise to the user — switch, and the window is already there;
   the one visible difference is Mission Control, which shows a
   sticky window on one Desktop at a time.
-:::unreleased
 - **Only a carried window's overlays ride the switch.** A ring
   belongs to its window's Desktop and slides away with it; a
   carried window's ring, and every sticky mark, join every Desktop
@@ -5675,7 +5666,6 @@ rulings:
   slide until the switch handler places them (#2149). Accepted:
   the carry moves the window under them, and a panel that left
   with the origin Desktop would strand there.
-:::
 - **Both scopes carry within the screen they are shown on.** ∞
   and 📌 differ in which KiwiDesk Spaces a window follows; across
   Desktops they behave alike — each follows the Desktop switches
@@ -7013,7 +7003,6 @@ menu bar or hotkey. Ephemeral completion surfaces (the tour,
 Config Issues) stay un-miniaturizable so they are completed or
 dismissed rather than parked indefinitely.
 
-:::unreleased
 ### Unsaved edits ask at the window; a quit closes every dialog (#2049)
 
 **[Principle]**
@@ -7086,7 +7075,6 @@ keeps the draft and cancels. Where saving is blocked (#335) the
 question offers Discard and Cancel, Cancel the default, with the
 existing reason. It is a kind of the one discard gate
 (`PendingDiscard`), so it shares that gate's single pending slot.
-:::
 
 ### The tour is chrome, and chrome is not tiled
 
@@ -9019,12 +9007,10 @@ menu-bar Load Profile and the Config Issues delete go straight
 to the core and never `reload()` the model, so they drop
 nothing.
 
-:::unreleased
 Since #2049 that guard keeps only an OPEN window's draft through
 a raise: a closed window has none to keep, because a close with
 unsaved edits asks Save / Discard / Cancel first and a close that
 did not ask drops the draft (*Unsaved edits ask at the window*).
-:::
 
 A **profile delete** confirms even when nothing is staged
 (#1619): a profile holds a whole setup and nothing undoes its
@@ -9048,14 +9034,12 @@ honest reduction. Adding the third verb later means changing
 `PendingDiscard` and every call site — decide before doing it,
 not by accretion.
 
-:::unreleased
 The third verb was decided for a close or a quit alone (#2049,
 *Unsaved edits ask at the window*), where leaving with the work
 unsaved is the whole question. It is a `PendingDiscard` kind of
 its own that runs the naming prompt, or offers the two verbs
 where saving is blocked; an action's gate never takes it, so the
 reduction above still holds for every action.
-:::
 
 **A paused engine blocks profile saves, never global ones.** The
 #335 gate exists for one reason: with Accessibility off no
@@ -9841,7 +9825,6 @@ Stated that way the rule **predicts**, which is what makes it a
 rule rather than a label: a future glide-able verb goes to `⌥⌘`,
 anything you tap stays on `⌃⌥`.
 
-:::unreleased
 **One pressed exception rides `⌥⌘`: the Space history on `Tab`
 (#1655, owner ruling 2026-10-09).** Back and Forward through the
 Spaces you visited are pressed, so the rule above sends them to
@@ -9856,9 +9839,7 @@ key: `⌥⌘` still carries no pressed verb on any other key, and
 under cover of the first. Before seeding, the owner pressed
 `⌥⌘Tab` (2026-10-09): macOS's app switcher does not take it, and
 `SystemShortcuts.map` reserves `⌘Tab` alone.
-:::
 
-:::unreleased
 **The Desktop tier is seeded: `⌃⌥⇧⌘` + digit goes to that macOS
 Desktop (owner ruling 2026-10-10).** Going to a Desktop is the one
 Desktop verb a user presses as often as they swipe, so it is the
@@ -9893,7 +9874,6 @@ the trade for keeping a per-Mac count out of a file that travels.
 A Lua-owned setup leaves the mark alone, so moving to Settings
 later still offers every Desktop. Restore Defaults restores the
 tier for the Desktops the Mac has.
-:::
 
 **Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
 2026-09-13). A menu-bar app with no Dock tile is almost never
@@ -9955,7 +9935,6 @@ known-truth check that settles it: Window ▸ Move & Resize ▸ Left
 reads `mods=28`, which is `fn` + control + "no command" and
 matches Apple's own documented `fn⌃←`.
 
-:::unreleased
 **Swap returns to `⌃⌥⇧`, and `⌃⌥⌘`+arrows steps the Spaces
 (#1655, owner ruling 2026-10-09, amending #1176 above).** The
 previous and next Space need a chord, and the obvious base is the
@@ -9989,9 +9968,23 @@ owed on the owner's desk before the release, and the register
 check is necessary and not sufficient (#1098).
 
 **Nobody is moved.** As with every later default, an existing
-install keeps its keymap: its swap stays on `⌃⌥⌘`+arrows and the
-four new rows stay unbound until a Record or Shortcuts & Gestures
-▸ Restore Defaults… lands them.
+install keeps its keymap: its swap stays on `⌃⌥⌘`+arrows. The
+four new rows reach it through the generation top-up below, each
+only where its chord is free, so the history pair lands and the
+steps wait on that swap until a Record or Shortcuts & Gestures ▸
+Restore Defaults… moves it.
+
+**A default a release adds reaches an existing install once
+(#2211, owner ruling 2026-10-12).** The seed is written at first
+run, so a row added later was invisible to everyone who updated,
+including a spotlight feature's own keys. Each such row joins a
+numbered generation (`DefaultKeybindings.rows(ofGeneration:)`),
+and the first launch after an update appends the rows of every
+generation past the Mac's mark where the action is unbound and
+the chord free, then advances the mark. Adding is not moving: an
+occupied chord keeps its binding, and a row deleted after its
+generation was offered is never added back. A fresh seed carries
+every generation, so it tops up nothing.
 
 **Space history walks the visits, never the order (#1655, owner
 rulings 2026-10-09).** Back and Forward answer "where was I", which
@@ -10037,7 +10030,6 @@ before the restart, chosen by visits nobody remembers, is a
 surprise rather than a convenience, and carrying it would make the
 history one more store the snapshot must keep coherent with
 renumbered and dropped Spaces for no visible gain.
-:::
 
 **`⇧` has one meaning, and a toggle does not qualify (#1094).**
 `⌃⌥⇧S` spent `⇧` on "a broader scope" while the ladder three rows
@@ -10366,7 +10358,6 @@ the 8-space one — silently deleting it would lose config across a
 routine monitor swap. The rows stay live at runtime by design.
 (#92)
 
-:::unreleased
 **A Space that was only ever live takes its shortcuts with it
 (#1827, owner ruling 2026-10-09, amending #92 and #1507).** #92's
 argument is that another arrangement can use the binding again:
@@ -10402,7 +10393,6 @@ Inactive shortcuts judges against every LIVE Space rather than the
 profile's list. Listing a working chord under Inactive, captioned
 "pressing one recreates its Space", told the user the opposite of
 what a press does; Inactive keeps only #92's true orphans.
-:::
 
 **The shortcuts panel scrolls, and says so — in words, in the
 footer.** The panel is a glance surface but not a small one: the
@@ -12850,7 +12840,6 @@ layout appearing, while reserving everywhere left an empty
 strip — permanently, in every layout that draws nothing there —
 to spare it.
 
-:::unreleased
 *Shown is not reserved* ([#1524](https://github.com/KiwiCanopy/KiwiDesk/issues/1524)).
 Each bar carries a `reserve` flag, `space_bar.set_reserve` and
 `app_bar.set_reserve`: off, the bar still draws but the layout
@@ -12867,7 +12856,6 @@ drawn plate, so clicks beside a short bar fall through, is a
 later improvement rather than a condition of the verb. It is
 global, never a layout's: like the edge, a reservation per
 layout would move windows on a layout switch.
-:::
 
 A split App Bar pays the same price with the Space Bar on — the
 reflow paragraph of *Amended* below.
@@ -13183,7 +13171,6 @@ by a rule that no longer holds. `kiwishelf.set_edge` retires naming `space_bar.s
 the per-layout App Bar edge verbs name `app_bar.set_edge`; and
 the bars' own `set_edge` verbs are live.
 
-:::unreleased
 *Amended: a bar's edge may differ per screen, and nothing else
 does.* ([#1948](https://github.com/KiwiCanopy/KiwiDesk/issues/1948),
 owner rulings 2026-10-04 and 2026-10-09.) A landscape screen
@@ -13239,7 +13226,6 @@ open by what it shows greys its chevron. Readers that ask
 whether a setting has any effect — order and minimum, the
 front-app colour — ask every screen and grey only where none is
 affected; the Home card pictures the main screen.
-:::
 
 **The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
@@ -15690,7 +15676,6 @@ list meaning — with it off nothing floats on a guess, so its rows
 grey (the trash and "Applies to" stay live, since other profiles
 may have it on).
 
-:::unreleased
 Its **Tile an app…** picker lists only the apps the guess has
 floated a window of since KiwiDesk started (#2071), never every
 installed app: a Tile rule on any other app says nothing, and a
@@ -15704,7 +15689,6 @@ the Tile rules say, so a profile whose live counterpart already
 tiles it still finds it; a fixed-size window is seen only where
 the live guess reads its zoom button. *Other…* and Lua reach the
 rest.
-:::
 
 **This reverses "a rule is a sentence, and the sentence is the
 control"** (#678 turn 14a). Running prose renders an empty rule
@@ -16069,11 +16053,9 @@ Space and slot, and a window left in place is set to the frame
 it already has. This holds for every launch, not only an
 in-place one.
 
-:::unreleased
 After a restart of the Mac the same replay carries the windows
 the cross-session match paired at boot, re-keyed onto their new
 ids, so they too land before the first pass.
-:::
 
 **[Trade-off]**
 
@@ -16092,7 +16074,6 @@ restores the arrangement without the sizing. The payload is one
 build writing for the next, so a payload the reading build cannot
 decode costs only itself.
 
-:::unreleased
 ### A quit arranges floats too
 
 **[Principle]**
@@ -16130,9 +16111,7 @@ Past ten minutes the Quit lets the arrangement go, as before:
 someone who quit, worked without KiwiDesk and restarted later has
 not asked for it back. Within one boot the login's start cannot be
 read, so the launch stands in for it, which can only refuse more.
-:::
 
-:::unreleased
 ### A restart of the Mac restores by app and title
 
 **[Rationale]**
@@ -16188,7 +16167,6 @@ places a window whose title settled late moves it quietly, with
 no focus change and no `window_moved_to_space` event, as the boot
 replay it completes does, and never moves the window the user is
 in or one the user moved since launch.
-:::
 
 ### A bulk reconcile asks the WindowServer before it asks Accessibility
 

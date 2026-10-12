@@ -33,6 +33,15 @@ struct GhosttyButtonEscapeTests {
         #expect(!ignored(Self.ghostty, layer: 0, button: false))
     }
 
+    /// The update alert has no button but sits at the modal-panel
+    /// level, which the quick terminal never takes (#2200).
+    @Test("Ghostty's update alert is kept")
+    func ghosttyKeepsItsAlert() {
+        #expect(FloatDetection.modalPanelLayer == 8)
+        #expect(!ignored(Self.ghostty, layer: 8, button: false))
+        #expect(ignored("com.raycast.macos", layer: 8, button: false))
+    }
+
     @Test("Raycast's belt ignores a buttoned window as before")
     func raycastKeepsItsBelt() {
         #expect(ignored("com.raycast.macos", layer: 8, button: true))
