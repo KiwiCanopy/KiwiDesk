@@ -188,6 +188,8 @@ func makeTestCore(
     // fixture offers nothing unless it states a mark.
     core.desktopMemory.readShortcutMark = { .max }
     core.desktopMemory.writeShortcutMark = { _ in }
+    core.desktopMemory.readDefaultsGeneration = { .max }
+    core.desktopMemory.writeDefaultsGeneration = { _ in }
     // Same class, eighth time (#1103/#1199): the mouse-button
     // read defaults LIVE, and three gesture decisions consult
     // it — the warp gate, `isResizeGesture` and the drag

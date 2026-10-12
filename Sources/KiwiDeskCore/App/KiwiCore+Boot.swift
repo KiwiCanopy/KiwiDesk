@@ -189,6 +189,7 @@ extension KiwiCore {
         topUpDesktopShortcuts(
             desktops: NativeSpaces.desktopSnapshot().userDesktops
         )
+        topUpGenerationShortcuts()  // #2211
         otherWindowManagers.scanRunning(  // #1882
             eventLoop.liveApps(owners: []).map { ($0.pid, $0.ref.bundleID) }
         )
