@@ -90,7 +90,7 @@ because two real clients now remove drift — see
   through `topUpDesktopShortcuts`, which advances the per-Mac mark
   only once its rows landed — a writer that adds them beside it
   re-offers a row the user deleted — and a writer that discards
-  `gui.json` clears that mark (`DesktopShortcutTopUpTests`,
+  `gui.json` clears that mark and the generation mark below (`DesktopShortcutTopUpTests`,
   `DesktopShortcutSeamTests`). Moving a window to a Desktop stays
   an offer (#1125), and a further `⇧`-lifted tier is a ruling of
   its own.
@@ -101,8 +101,10 @@ because two real clients now remove drift — see
   `topUpGenerationShortcuts` — added only where its action is
   unbound and its chord free, never moving a binding — while a
   fresh seed already carries it (`DefaultShortcutGenerationTests`
-  ▸ `seedCarriesEveryGeneration`). A row left out of a generation
-  reaches new installs alone.
+  ▸ `seedCarriesEveryGeneration`). A seed action outside the
+  frozen 2.2.0 baseline and every generation reds
+  `DefaultShortcutGenerationTests` ▸ `everySeedRowHasAGeneration`;
+  move a row into that baseline only by ruling.
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took

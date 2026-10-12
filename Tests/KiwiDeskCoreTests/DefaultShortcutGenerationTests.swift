@@ -95,6 +95,48 @@ struct DefaultShortcutGenerationTests {
         )
     }
 
+    /// The actions the 2.2.0 seed bound, its digit and Desktop
+    /// families aside, which their own top-ups own. Frozen: a later
+    /// seed row joins a generation, never this list.
+    private let seededBeforeGenerations: Set<String> = [
+        "KiwiDesk.focus(\"left\")", "KiwiDesk.focus(\"down\")",
+        "KiwiDesk.focus(\"up\")", "KiwiDesk.focus(\"right\")",
+        "KiwiDesk.swap(\"left\")", "KiwiDesk.swap(\"down\")",
+        "KiwiDesk.swap(\"up\")", "KiwiDesk.swap(\"right\")",
+        "KiwiDesk.resize(\"x\", 10)", "KiwiDesk.resize(\"x\", -10)",
+        "KiwiDesk.resize(\"y\", 10)", "KiwiDesk.resize(\"y\", -10)",
+        "KiwiDesk.toggle_floating()", "KiwiDesk.toggle_sticky()",
+        "KiwiDesk.toggle_display_sticky()",
+        "KiwiDesk.show_shortcuts()", "KiwiDesk.open_settings()",
+    ]
+
+    /// The direction a release forgets: a seed row added with no
+    /// generation reaches new installs alone, and reds here.
+    @Test("Every seed row is the 2.2.0 baseline or a generation's")
+    func everySeedRowHasAGeneration() {
+        let seed = DefaultKeybindings.bindings(
+            spaces: [SpaceID("1")],
+            resizeStep: 10
+        )
+        let families = [
+            "KiwiDesk.focus_space(", "KiwiDesk.move_to_space(",
+            "KiwiDesk.move_to_space_and_follow(",
+            "KiwiDesk.focus_desktop(",
+        ]
+        let actions = Set(
+            seed.map(\.lua).filter { lua in
+                !families.contains { lua.hasPrefix($0) }
+            }
+        )
+        let generations = Set(
+            (1...DefaultKeybindings.newestGeneration).flatMap {
+                DefaultKeybindings.rows(ofGeneration: $0).map(\.lua)
+            }
+        )
+        #expect(!actions.isEmpty)
+        #expect(actions == seededBeforeGenerations.union(generations))
+    }
+
     private final class Mark { var value = 0 }
 
     private func makeCore(
@@ -140,18 +182,66 @@ struct DefaultShortcutGenerationTests {
         #expect(!baseLua(core).contains(back))
     }
 
+    /// The mark vouches for rows in gui.json, so a discarded or
+    /// replaced sidecar — a restored backup, a reset — is offered
+    /// every generation again.
+    @Test("Discarding gui.json resets the generation mark")
+    func discardClearsTheMark() throws {
+        let mark = Mark()
+        let core = try makeCore(mark: mark, base: swapOnSteps)
+        core.topUpGenerationShortcuts()
+        #expect(mark.value == DefaultKeybindings.newestGeneration)
+        _ = core.discardArtifacts(
+            [.guiConfig],
+            reason: "test",
+            trash: { try FileManager.default.removeItem(at: $0) }
+        )
+        #expect(mark.value == 0)
+    }
+
+    @Test("A profile's own row for the action counts as bound")
+    func profileRowCountsAsBound() throws {
+        let mark = Mark()
+        let core = try makeCore(mark: mark, base: swapOnSteps)
+        var profile = Profile(
+            name: "Work",
+            monitorSets: [MonitorSet(monitors: [])],
+            spaces: [SpaceID("1")],
+            spaceModes: [:],
+            settings: TilingSettings()
+        )
+        profile.layers = KeyLayerOverride(layers: [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [
+                    KeyBinding(
+                        combo: "control+option+b",
+                        lua: back,
+                        kind: .navigation
+                    )
+                ]
+            )
+        ])
+        try core.profiles.write(profile)
+        core.topUpGenerationShortcuts()
+        #expect(!baseLua(core).contains(back))
+        #expect(baseLua(core).contains(forward))
+    }
+
+    /// The guard's own case: a sidecar beside an init.lua that owns
+    /// the managed vocabulary.
     @Test("A setup the GUI does not manage keeps its mark")
     func luaOwnedKeepsTheMark() throws {
         let mark = Mark()
-        let core = makeTestCore(
-            configDirectory: FileManager.default.temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-generation-lua-\(UUID().uuidString)"
-                )
+        let core = try makeCore(mark: mark, base: swapOnSteps)
+        try "KiwiDesk.bind(\"cmd+1\", function() end)".write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
         )
-        core.desktopMemory.readDefaultsGeneration = { mark.value }
-        core.desktopMemory.writeDefaultsGeneration = { mark.value = $0 }
+        #expect(!core.isGuiManaged)
         core.topUpGenerationShortcuts()
         #expect(mark.value == 0)
+        #expect(!baseLua(core).contains(back))
     }
 }

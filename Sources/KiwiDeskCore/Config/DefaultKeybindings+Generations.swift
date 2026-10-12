@@ -9,7 +9,9 @@ extension DefaultKeybindings {
     /// bumps it and lists the rows in `rows(ofGeneration:)`.
     public static let newestGeneration = 1
 
-    /// The rows generation `number` introduced.
+    /// The rows generation `number` introduced, built from today's
+    /// rows: an install not yet topped up gets the current chord
+    /// even where a later release re-chorded one.
     public static func rows(ofGeneration number: Int) -> [KeyBinding] {
         switch number {
         // 2.3.0: the Space steps and the Space history (#1655).
@@ -28,7 +30,7 @@ extension DefaultKeybindings {
     ) -> [KeyBinding] {
         guard mark < newestGeneration else { return [] }
         var taken = Set(existing.compactMap { KeyCombo.parse($0.combo) })
-        let bound = Set(existing.map(\.lua))
+        var bound = Set(existing.map(\.lua))
         var added: [KeyBinding] = []
         for number in (max(mark, 0) + 1)...newestGeneration {
             for row in rows(ofGeneration: number) {
@@ -36,6 +38,7 @@ extension DefaultKeybindings {
                     let combo = KeyCombo.parse(row.combo),
                     taken.insert(combo).inserted
                 else { continue }
+                bound.insert(row.lua)
                 added.append(row)
             }
         }
