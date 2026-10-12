@@ -14,6 +14,11 @@ extension FloatDetection {
         "com.raycast-x.macos",
     ]
 
+    /// Layer-scoped apps whose raised window with a title-bar button
+    /// is one of the app's own windows — Ghostty's config error —
+    /// rather than its quick terminal, which has none (#2067).
+    private static let buttonEscapedApps: Set<String> = [ghosttyBundleID]
+
     /// System UI overlay processes that should not enter window state (#177).
     private static let ignoredSystemApps: Set<String> = [
         "com.apple.textinputmenuagent",
@@ -62,18 +67,25 @@ extension FloatDetection {
                     || bundleID.map {
                         layerScopedIgnoredApps
                             .contains($0.lowercased())
-                    } == true)
+                    } == true
+                        && !(escapesWithButton(bundleID) && titlebarButton))
+    }
+
+    private static func escapesWithButton(_ bundleID: String?) -> Bool {
+        bundleID.map { buttonEscapedApps.contains($0.lowercased()) } == true
     }
 
     /// Whether the ignore gate asks the window's title-bar button:
     /// the #2072 escape decides only for an accessory app's raised
-    /// window. The one copy of the condition — the off-main list
-    /// read and the main-actor gate both ask it.
+    /// window, and for Ghostty's (#2067). The one copy of the
+    /// condition — the off-main list read and the main-actor gate
+    /// both ask it.
     public static func needsTitlebarButton(
         layer: Int,
-        isAccessory: Bool
+        isAccessory: Bool,
+        bundleID: String?
     ) -> Bool {
-        isAccessory && layer != 0
+        layer != 0 && (isAccessory || escapesWithButton(bundleID))
     }
 
     /// Whether ignore classification depends on CGWindow layer lookup.

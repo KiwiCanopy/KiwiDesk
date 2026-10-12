@@ -23,7 +23,8 @@ extension EventLoop {
         let button =
             FloatDetection.needsTitlebarButton(
                 layer: layer,
-                isAccessory: isAccessory
+                isAccessory: isAccessory,
+                bundleID: bundleID
             )
             && element.map { Self.readsTitlebarButton($0, id: id) } == true
         if FloatDetection.isBuiltInIgnoredPanel(

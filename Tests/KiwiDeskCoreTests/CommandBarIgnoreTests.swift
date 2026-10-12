@@ -38,8 +38,9 @@ struct CommandBarIgnoreTests {
 
     /// A buttoned window of a Dock-less app is one of its normal
     /// windows, not a launcher (#2072) — the escape is the
-    /// accessory branch's alone; a layer-scoped bundle's raised
-    /// window stays ignored with buttons.
+    /// accessory branch's, and Ghostty's alone among the
+    /// layer-scoped bundles (#2067); Raycast's raised window stays
+    /// ignored with buttons.
     @Test("a buttoned accessory window escapes the ignore")
     func buttonedAccessoryWindowEscapes() {
         #expect(

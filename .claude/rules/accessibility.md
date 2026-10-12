@@ -104,7 +104,9 @@ editing AX code:
   never an edit to make the suite pass.
 - **Every reader of the ignore predicate states the title-bar
   button the #2072 escape decides on** — an accessory app's
-  raised window with a button is admitted, not ignored. The
+  raised window with a button is admitted, not ignored, and so
+  is Ghostty's among the layer-scoped bundles (#2067,
+  `GhosttyButtonEscapeTests`). The
   condition is the one `FloatDetection.needsTitlebarButton`, which
   the off-main list read and the main-actor gate both ask;
   `FloatDetection.shouldIgnore` and `isBuiltInIgnoredPanel` take
