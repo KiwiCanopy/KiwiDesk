@@ -2,6 +2,95 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "2.3.0",
+      "tag": "v2.3.0",
+      "date": "2026-10-12",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v2.3.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v2.3.0/KiwiDesk-2.3.0.dmg",
+      "summary": "KiwiDesk 2.3.0 puts windows back after a restart, adds keys for moving between Spaces, and floats Settings windows on its own.",
+      "spotlight": [
+        {
+          "title": "Back where they were after a restart",
+          "line": "When your Mac restarts and macOS reopens your apps, each window goes back to the Space it was in.",
+          "symbol": "desktopcomputer"
+        },
+        {
+          "title": "Keys for moving between Spaces",
+          "line": "⌃⌥⌘← and → step to the previous or next Space; ⌥⌘Tab jumps back to the Space you were just on, like a browser's Back button. Updated from an earlier version? Restore Defaults… in Shortcuts & Gestures brings the arrows.",
+          "setting": "config.spaceHistory",
+          "symbol": "keyboard"
+        },
+        {
+          "title": "Each screen can put its bars on its own edge",
+          "line": "With two screens, the Space Bar can sit at the top of one and at the bottom of the other.",
+          "setting": "settings.spaceBarStyle.edgeOverride[screen]",
+          "symbol": "display.2"
+        },
+        {
+          "title": "Settings windows float on their own",
+          "line": "Windows that can't be resized, like an app's Settings or Calculator, now float instead of being squeezed into a tile. If one floats that you'd rather tile, add its app under App Rules ▸ Tile.",
+          "setting": "config.tileRules",
+          "symbol": "macwindow.on.rectangle"
+        }
+      ],
+      "sections": [
+        {
+          "title": "New",
+          "items": [
+            "**After a restart of the Mac or a logout, your windows now go back to the Spaces they were in**, and the notice under the menu-bar icon counts them back in.",
+            "**New keys for moving between Spaces:** ⌃⌥⌘← / → step to the previous or next Space, and ⌥⌘Tab / ⌥⌘⇧Tab go back and forward through the Spaces you visited, like a browser. An updated setup gets ⌥⌘Tab / ⌥⌘⇧Tab added; the arrows keep your swap until you restore the defaults (see below).",
+            "**Each screen can now put its bars on its own edge** — the Space Bar at the top of one screen and the bottom of another, say — under KiwiShelf ▸ Each bar ▸ Per screen.",
+            "**A Desktop switch KiwiDesk makes now shows the Desktop's number** for a moment; turn it off under Profiles ▸ Profiles per macOS Desktop.",
+            "**An app's shortcut can now bring all of that app's windows into the Space you're on**: pick Gather Windows as its action.",
+            "**KiwiDesk now warns once when AeroSpace, Amethyst or OmniWM runs beside it**, and can quit it for you."
+          ],
+          "type": "new"
+        },
+        {
+          "title": "Improved",
+          "items": [
+            "**Some default shortcuts now sit on better keys:** swap is now ⌃⌥⇧ + arrows, freeing ⌃⌥⌘ + arrows for the previous and next Space. Your keys stay as they are; to take the new ones, click Restore Defaults… in Shortcuts & Gestures. It resets only the Default layer, keeps shortcuts you made yourself unless they use one of those keys, and shows what it changes before you confirm.",
+            "**New default shortcuts now reach your setup when you update:** from this release on, each one is added where its key is free and you have no shortcut for that action yet. Nothing you set is changed, and one you remove isn't added back.",
+            "**Windows that can't be resized, like many apps' Settings windows or Calculator, now float on their own** instead of being squeezed into a tile. If one floats that you'd rather tile, add its app under App Rules ▸ Tile; App Rules ▸ Automatic floating turns the guess off altogether.",
+            "**⌃⌥⇧⌘ + a number now goes to that macOS Desktop**, added for each Desktop whose shortcut is free; one you remove isn't added back.",
+            "**Quitting KiwiDesk now gathers floating windows too**, and the next launch puts each one back where it floated.",
+            "**Unsaved Settings edits no longer wait in a closed window:** closing Settings or quitting now asks whether to save them, and open dialogs close instead of holding up a quit.",
+            "**A Space can now have its own gaps**, set in its Customize… overrides on the Spaces page.",
+            "**Advanced Colours now groups colours by what they colour**, so one pick can recolour a whole group at once.",
+            "**The Monitors page is now called Screens**, and KiwiDesk calls a physical screen a screen in every language; searching for \"monitor\" still finds it.",
+            "**An empty temporary Space you visit and leave now goes away**, and temporary Spaces sort by number."
+          ],
+          "type": "improved"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**A window you close with ⌘W or open with ⌘N is now arranged at once** instead of waiting for the mouse to rest.",
+            "**Switching macOS Desktops no longer freezes a busy desk for a moment**, and the focus border slides away with its window.",
+            "**Coming back to a Desktop now focuses the sticky window that followed you**, and switching profiles away and back keeps every window in its Space.",
+            "**Overlays that cover the whole screen, like Slack's huddle drawing or a dictation HUD, are now left alone.**",
+            "**Ghostty's configuration-error and update windows, and titled windows of menu-bar apps, now float** instead of being ignored.",
+            "**A floating window that fills the screen no longer hides the bars as if it were a slide show**, and the focus border now fits a floating window that keeps its own size.",
+            "**App Bar boxes no longer leave faint trails as they slide with the Liquid Glass look**, and pop-up notices no longer clip their ends.",
+            "**Settings no longer saves over an init.lua you changed in another editor**, and it now says when a first Save moves your shortcuts and rules into the visual editor.",
+            "**A new laptop profile's Grid now holds four windows, two by two**, instead of piling the third onto the second.",
+            "**Open at Login no longer registers a copy that can't start at login**, such as one run straight from a download.",
+            "**The detached preview card in Settings no longer judders while you drag it.**"
+          ],
+          "type": "fixed"
+        },
+        {
+          "title": "Lua & CLI",
+          "items": [
+            "**`space_bar.set_reserve` and `app_bar.set_reserve` are new:** with reserve off, a bar draws over the windows instead of making room, so showing or hiding it moves no window.",
+            "**`kiwidesk self_test` is new**, and reports which of the private macOS calls KiwiDesk relies on this macOS still answers."
+          ],
+          "type": "scripting"
+        }
+      ]
+    },
+    {
       "version": "2.2.0",
       "tag": "v2.2.0",
       "date": "2026-10-09",
