@@ -72,4 +72,26 @@ struct LuaEditorStaleSaveTests {
         #expect(try onDisk(model) == mine)
         #expect(model.profileWarning == nil)
     }
+
+    /// The refusal is drawn wherever the Lua editor's Save can
+    /// fire: General opens that editor on a profileless page,
+    /// where the header's profile rows stay hidden.
+    @Test("the header draws the warning in the Lua editor")
+    func warningIsDrawnInTheEditor() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/SettingsHeaderBar.swift"
+            )
+        let raw = try String(contentsOf: url, encoding: .utf8)
+        #expect(!raw.isEmpty)
+        let squashed = SourceScan.stripComments(raw)
+            .split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            squashed.contains(
+                "ifshowsProfileContext||model.editingLua,"
+                    + "letwarning=model.profileWarning"
+                    + "{warningRow(warning)}"
+            )
+        )
+    }
 }
