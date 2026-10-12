@@ -1474,7 +1474,14 @@ rules into the shared base (`RuleReachIdentityTests` ▸
 live page, a clean draft repins by reloading and a dirty one
 refuses its Save rather than splitting it
 (`RuleReachIdentityTests` ▸ `pageMovedRefuses`,
-`cleanPageRepins`). On a checklist Save the rule families are
+`cleanPageRepins`). The same holds when `init.lua` changes owner
+under a live structured page (#2183): a clean draft re-draws as
+the Lua editor, and a dirty one refuses its WHOLE Save, the
+profile half included, since the page it was drawn on is gone
+(`ConfigOwnerMovedTests`). Every gui.json door refuses first
+through the one `staleDraftReason`
+(`SidecarConfigSeamTests` ▸ `writersCheckThePage`). On a
+checklist Save the rule families are
 written by `saveRuleReach` alone — `overwriteProfile` keeps the
 stored ones (`writingRules: false`, `OverwriteProfileRulesTests`
 ▸ `keepsStoredRules`)
