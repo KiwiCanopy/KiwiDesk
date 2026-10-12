@@ -125,7 +125,8 @@ struct JumpHiddenAppTests {
     func commandedStandsDown() {
         let core = makeCore()
         core.moveHere(.hiddenApp(100))
-        core.eventLoop.lastCommandedFocus = .now
+        // Strictly after the owe's own stamp, whatever the clock.
+        core.eventLoop.lastCommandedFocus = .now.advanced(by: .seconds(1))
         returns(core)
         core.payHiddenAppMove(focused: WindowID(5))
         #expect(core.state.workspaces.space(of: WindowID(5)) == "2")

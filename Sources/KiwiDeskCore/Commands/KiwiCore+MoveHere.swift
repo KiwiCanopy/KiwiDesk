@@ -108,8 +108,9 @@ extension KiwiCore {
             return .unmovable(id)
         }
         if !open.isEmpty { return .allHere }
-        // Without text every window matches, so the app has none.
-        return text.map { .noMatch(text: $0) } ?? .noWindow
+        // Reached only with a text: without one every window
+        // matches, and the guard above leaves a window to pick.
+        return .noMatch(text: text ?? "")
     }
 
     /// Whether `title` contains `text`, case-, accent- and
