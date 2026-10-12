@@ -49,6 +49,24 @@ struct RuleReachFamilyParityTests {
         return try SourceScan.strippedSource(at: url)
     }
 
+    /// The body of `WindowRuleOverrides.init(_ profile:)`.
+    private func windowRuleOverridesInit() throws -> String {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore/App")
+            .appendingPathComponent("KiwiCore+StructuredRules.swift")
+        let text = try SourceScan.strippedSource(at: url)
+        let start = try #require(
+            text.range(of: "init(_ profile: Profile?) {")
+        )
+        let end = try #require(
+            text.range(
+                of: "\n    }\n",
+                range: start.upperBound..<text.endIndex
+            )
+        )
+        return String(text[start.upperBound..<end.lowerBound])
+    }
+
     @Test("every family is mapped, and found")
     func everyFamilyIsMapped() throws {
         let found = try families()
@@ -98,11 +116,17 @@ struct RuleReachFamilyParityTests {
 
     @Test("every family's override is applied through the one helper")
     func applyResolvesEveryFamily() throws {
-        let body = try SourceScan.functionBody(
+        let helper = try SourceScan.functionBody(
             of: "applyBehaviorOverrides",
-            in: "KiwiCore+StructuredConfig.swift",
+            in: "KiwiCore+StructuredRules.swift",
             under: "App"
         )
+        // The window-rule families resolve through the one
+        // `WindowRuleOverrides(profile)` reading, so its init joins
+        // the helper's body — only while the helper calls it.
+        #expect(helper.contains("WindowRuleOverrides(profile)"))
+        let rules = try windowRuleOverridesInit()
+        let body = helper + rules
         for family in try families() {
             guard let field = Self.profileField[family] ?? nil else {
                 continue

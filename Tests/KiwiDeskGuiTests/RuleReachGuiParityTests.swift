@@ -25,6 +25,8 @@ struct RuleReachGuiParityTests {
         "scrollGestures": "scrollGesture",
         "spaceHistory": "spaceHistory",
         "modeCycle": "modeCycle",
+        "tileRules": "tileRules",
+        "floatAutomatically": "floatAutomatically",
     ]
 
     /// Sites a family skips by design, with the reason.
