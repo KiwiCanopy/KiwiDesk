@@ -23,19 +23,23 @@ struct JumpViewGateTests {
     }
 
     /// The typed glyphs AND the caret go clear under the stand-in,
-    /// or both show through the selected name. The inks are glue
-    /// holding the needle contiguous on the field's own chain.
+    /// or both show through the selected name. Located by the
+    /// clear arm alone, so the visible ink and tint stay retunable.
     @Test("the field's typing is drawn clear under the stand-in")
     func fieldTypingIsClear() throws {
         let view = try squashed("JumpPanelView.swift")
         #expect(
-            view.contains(
-                ".font(.largeTitle)"
-                    + ".foregroundStyle(model.field==nil"
-                    + "?Color.primary:Color.clear)"
-                    + ".tint(model.field==nil"
-                    + "?SettingsTheme.accent:.clear)"
-            )
+            view.range(
+                of: #"\.foregroundStyle\(model\.field==nil"#
+                    + #"\?[^:]+:Color\.clear\)"#,
+                options: .regularExpression
+            ) != nil
+        )
+        #expect(
+            view.range(
+                of: #"\.tint\(model\.field==nil\?[^:]+:\.clear\)"#,
+                options: .regularExpression
+            ) != nil
         )
     }
 

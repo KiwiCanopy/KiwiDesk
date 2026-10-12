@@ -69,11 +69,11 @@ struct PanelChordTests {
         #expect(MainMenu.performPanelChord(copy, in: bar))
     }
 
-    /// The flagged submenus are the real File and Edit menus:
-    /// Close and the edit chords, never Quit, Hide, Settings or
-    /// Minimize.
-    @Test("the flags sit on the real File and Edit menus")
-    func flagsSitOnFileAndEdit() {
+    /// What a panel's chord may trigger is an allow-list of
+    /// ACTIONS: a row later added to File or Edit reds here until
+    /// it is ruled safe to fire while another app is in front.
+    @Test("a panel's chords reach only the ruled actions")
+    func onlyRuledActions() {
         let bar = MainMenu.make(
             settingsTarget: Recorder(),
             settingsAction: #selector(Recorder.hit(_:))
@@ -81,20 +81,54 @@ struct PanelChordTests {
         let flagged = bar.items.filter {
             $0.identifier.map(MainMenu.panelChordMenus.contains) == true
         }
-        #expect(flagged.count == 2)
-        let actions = Set(
-            flagged.flatMap { $0.submenu?.items ?? [] }
-                .compactMap(\.action)
-        )
-        #expect(actions.contains(#selector(NSWindow.performClose(_:))))
-        #expect(actions.contains(#selector(NSText.copy(_:))))
-        for barred in [
-            #selector(NSApplication.terminate(_:)),
-            #selector(NSApplication.hide(_:)),
-            #selector(Recorder.hit(_:)),
-            #selector(NSWindow.performMiniaturize(_:)),
-        ] {
-            #expect(!actions.contains(barred))
+        let actions = flagged.flatMap { $0.submenu?.items ?? [] }
+            .compactMap(\.action)
+        let ruled: Set<Selector> = [
+            #selector(NSWindow.performClose(_:)),
+            Selector(("undo:")),
+            Selector(("redo:")),
+            #selector(NSText.cut(_:)),
+            #selector(NSText.copy(_:)),
+            #selector(NSText.paste(_:)),
+            #selector(NSText.selectAll(_:)),
+        ]
+        #expect(Set(actions) == ruled)
+        #expect(actions.count == ruled.count)
+    }
+
+    /// No key panel forwards to the whole menu: the one forward
+    /// lives in `MainMenu`, and every window that makes itself
+    /// key-capable (`canBecomeKey` → true, the key panels' shape)
+    /// takes it. Trade: a key window spelled another way is
+    /// outside the second needle.
+    @Test("the whole-menu forward has no home outside MainMenu")
+    func noWholeMenuForward() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var forwards: Set<String> = []
+        var panels: Set<String> = []
+        var scanned = 0
+        for file in try SourceScan.swiftSources(under: root) {
+            scanned += 1
+            let source = try SourceScan.strippedSource(at: file)
+                .replacingOccurrences(of: " ", with: "")
+                .replacingOccurrences(of: "\n", with: "")
+            if source.range(
+                of: #"mainMenu\??\.performKeyEquivalent"#,
+                options: .regularExpression
+            ) != nil {
+                forwards.insert(file.lastPathComponent)
+            }
+            if source.contains("canBecomeKey:Bool{true}") {
+                panels.insert(file.lastPathComponent)
+                #expect(
+                    source.contains("MainMenu.performPanelChord(event)"),
+                    "\(file.lastPathComponent)"
+                )
+            }
         }
+        #expect(scanned > 100)
+        #expect(forwards.isEmpty)
+        #expect(!panels.isEmpty)
     }
 }

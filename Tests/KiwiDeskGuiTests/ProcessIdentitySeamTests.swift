@@ -286,6 +286,22 @@ struct ProcessIdentitySeamTests {
         )
     }
 
+    /// "Is this pid's app in front" is `frontmostOwns(pid:)`, which
+    /// reads a sibling process as its app; a raw comparison of the
+    /// frontmost pid beside it drops the second profile (#1875's
+    /// Jump list did). Trade: a comparison through a local binding
+    /// (`let front = …` then `front == pid`) is outside the needle.
+    @Test("the frontmost pid is compared in one place")
+    func frontmostComparedThroughTheDoor() throws {
+        #expect(
+            try sites(
+                of: #"frontmostPIDProvider\?\(\)\s*[=!]=|"#
+                    + #"[=!]=\s*frontmostPIDProvider\?\(\)"#,
+                regex: true
+            ).isEmpty
+        )
+    }
+
     /// Every pass that attaches apps reads `liveApps`; the raw list
     /// has no entry for an unlisted process. `ReconcileAll` keeps
     /// the raw read for its pre-start branch alone.

@@ -132,10 +132,8 @@ struct PanelFadeGuardTests {
         #expect(front.keyed.isEmpty)
     }
 
-    /// The pick's close is refused, so the row's Move here never
-    /// runs: the window stays in its own Space.
-    @Test("a pick during the exit fade runs nothing")
-    func pickDuringFade() {
+    /// A core holding window 9 in Space 2 while Space 1 is shown.
+    private func coreWithAwayWindow() -> KiwiCore {
         let core = makeTestCore()
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 25, width: 1440, height: 875)
@@ -155,19 +153,49 @@ struct PanelFadeGuardTests {
             )
         )
         core.state.workspaces.add(WindowID(9), to: "2")
+        return core
+    }
+
+    private let entry = JumpEntry(
+        target: .window(WindowID(9)),
+        pid: 4242,
+        app: "Notes",
+        title: "",
+        space: "2",
+        spaceIcon: nil,
+        status: .shown
+    )
+
+    /// The fixture's control: a pick on a panel that is up moves
+    /// the window here, so the refusal below is the guard's.
+    @Test("a pick on an open panel runs Move here")
+    func pickOnOpenPanel() {
+        let core = coreWithAwayWindow()
         let controller = JumpPanelController(core: core)
         controller.reduceMotion = { true }
-        controller.handBack.isAppActive = { true }
+        let front = Front()
+        front.wire(controller.handBack)
+        controller.show()
+        front.drain()
+        defer { front.keyed.forEach { $0.orderOut(nil) } }
+        controller.pick(entry, moveHere: true)
+        #expect(core.state.workspaces.space(of: WindowID(9)) == "1")
+    }
+
+    /// The pick's close is refused while the exit fade runs, so
+    /// the row's Move here never runs: the window stays put.
+    @Test("a pick during the exit fade runs nothing")
+    func pickDuringFade() {
+        let core = coreWithAwayWindow()
+        let controller = JumpPanelController(core: core)
+        controller.reduceMotion = { true }
+        let front = Front()
+        front.wire(controller.handBack)
+        controller.show()
+        front.drain()
+        defer { front.keyed.forEach { $0.orderOut(nil) } }
         controller.close(commanded: false)
-        let entry = JumpEntry(
-            target: .window(WindowID(9)),
-            pid: 4242,
-            app: "Notes",
-            title: "",
-            space: "2",
-            spaceIcon: nil,
-            status: .shown
-        )
+        #expect(controller.panel?.isVisible == true)
         controller.pick(entry, moveHere: true)
         #expect(core.state.workspaces.space(of: WindowID(9)) == "2")
     }

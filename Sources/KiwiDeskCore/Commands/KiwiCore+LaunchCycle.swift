@@ -26,8 +26,9 @@ extension KiwiCore {
             window.appBundleID?.lowercased() == bundleID,
             // OS truth, not just our state: after a cmd-tab
             // away, the stale state focus must not turn a
-            // "bring it back" press into a surprise cycle.
-            frontmostPIDProvider?() == window.pid
+            // "bring it back" press into a surprise cycle. A
+            // sibling process in front is the same app (#1785).
+            frontmostOwns(pid: window.pid)
         else { return false }
         let reach = canDriveDesktops ? awayReach(bundleID: bundleID) : nil
         let ring = cycleRing(
