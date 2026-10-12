@@ -33,13 +33,14 @@ extension KiwiCore {
     }
 
     /// The window the user is in: the bar's focus, only while its
-    /// app is the one in front — `lastFocused` outlives a move to an
-    /// app KiwiDesk does not track, whose last window is then the
-    /// one the user most likely wants back.
+    /// app is the one in front — a sibling process included (#1785).
+    /// `lastFocused` outlives a move to an app KiwiDesk does not
+    /// track, whose last window is then the one the user most
+    /// likely wants back.
     private func jumpFocusedWindow() -> WindowID? {
         guard let id = barFocus(on: nil),
             let pid = state.windows[id]?.pid,
-            frontmostPIDProvider?() == pid
+            frontmostOwns(pid: pid)
         else { return nil }
         return id
     }

@@ -282,4 +282,27 @@ struct JumpListTests {
         core.frontmostPIDProvider = { 999 }
         #expect(Set(windows(core.jumpEntries())) == [1, 2])
     }
+
+    /// A sibling process announced in front (#1785) is the same
+    /// app: its focused window is still the one the user is in.
+    @Test("the focused window is left out under a sibling process")
+    func focusedLeftOutUnderSibling() {
+        let core = makeCore()
+        defer { resetAuthorityOverrides() }
+        track(core, 1, title: "a")
+        track(core, 2, title: "b")
+        let family = AppRef(bundleID: "app.test.notes", name: "Notes")
+        let sibling: pid_t = 178_903
+        core.eventLoop.processIdentity.appAt = { asked in
+            asked == 100
+                ? RunningApp(pid: 100, activationPolicy: .regular, ref: family)
+                : nil
+        }
+        core.eventLoop.processIdentity.record(
+            RunningApp(pid: sibling, activationPolicy: .regular, ref: family)
+        )
+        core.frontmostPIDProvider = { sibling }
+        core.state.workspaces.focus(WindowID(2), in: "1")
+        #expect(windows(core.jumpEntries()) == [1])
+    }
 }

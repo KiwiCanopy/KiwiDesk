@@ -6,8 +6,8 @@ import Testing
 
 /// The list grows to a third of the screen's visible height, never
 /// fewer than 6 rows nor more than 12, and shrinks to fit fewer
-/// results (#1875 ▸ Panel). A pick distrusts the dismiss blip, and
-/// a refused Move here hands activation back (#952).
+/// results (#1875 ▸ Panel). A pick of another app's window and a
+/// commanded close distrust the dismiss blip (#952).
 @Suite("Jump to window panel controller")
 @MainActor
 struct JumpPanelControllerTests {

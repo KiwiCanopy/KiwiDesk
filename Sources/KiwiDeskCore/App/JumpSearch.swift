@@ -1,12 +1,13 @@
 import Foundation
 
-/// The ranking Jump to window filters by (#1875 ▸ Ruling): an
-/// app name that starts with the query, then one that contains
+/// The ranking Jump to window filters by (#1875 ▸ Ruling), one
+/// section at a time — open windows, minimized ones, hidden apps:
+/// an app name that starts with the query, then one that contains
 /// it, then a title word that starts with it, then a title that
 /// contains it — each tier in the order the entries came, which
 /// is most recently used first. A hidden-app row matches by name
-/// and ranks below every window. Case- and accent-insensitive; no
-/// fuzzy initials. Pure, so the panel and its tests share it.
+/// alone. Case- and accent-insensitive; no fuzzy initials. Pure,
+/// so the panel and its tests share it.
 public enum JumpSearch {
     /// One surviving row and where its text matched — ranges into
     /// the entry's own `app` and `title`, never a folded copy.

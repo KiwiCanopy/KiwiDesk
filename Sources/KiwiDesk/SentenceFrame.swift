@@ -11,9 +11,9 @@ import Foundation
 /// reorder and which this app's four verb-final locales cannot
 /// render grammatically.
 ///
-/// Two surfaces split frames through it — the keyboard preview's
-/// layout line and Jump to window's rows (#1875) — so it sits at
-/// the GUI root rather than inside either one's tree.
+/// The keyboard preview's layout line and Jump to window (#1875)
+/// both split frames through it, so it sits at the GUI root
+/// rather than inside either one's tree.
 struct SentenceFrame {
     /// Literal text chunk or argument position.
     enum Slot: Hashable {

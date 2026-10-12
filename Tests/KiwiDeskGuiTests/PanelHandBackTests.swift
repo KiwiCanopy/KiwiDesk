@@ -85,9 +85,13 @@ struct PanelHandBackTests {
                 .replacingOccurrences(of: "\n", with: "")
             #expect(!source.isEmpty)
             #expect(
-                source.contains("mainMenu?.performKeyEquivalent(with:event"),
+                source.contains(
+                    "||MainMenu.performPanelChord(event)"
+                ),
                 "\(path)"
             )
+            // The whole menu would hand ⌘Q to KiwiDesk's Quit.
+            #expect(!source.contains("mainMenu"), "\(path)")
         }
     }
 

@@ -15,13 +15,11 @@ final class JumpPanel: NSPanel {
     override var canBecomeKey: Bool { true }
 
     /// Non-activating, so KiwiDesk's menu is not the one in the
-    /// menu bar: its chords — ⌘W's Close (#1533), the edit chords
-    /// — are handed to it here, keyboard layouts and all.
+    /// menu bar: the File and Edit chords — ⌘W's Close (#1533),
+    /// the edit chords — are handed to it here, and nothing else.
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         super.performKeyEquivalent(with: event)
-            || NSApplication.shared.mainMenu?.performKeyEquivalent(
-                with: event
-            ) == true
+            || MainMenu.performPanelChord(event)
     }
 
     override func cancelOperation(_ sender: Any?) {

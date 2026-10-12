@@ -305,7 +305,10 @@ with no target, so the key window answers it. A NON-ACTIVATING
 key panel — both keyboard panels (#1875) — hands its key
 equivalents to that menu itself, since KiwiDesk's menu is not the
 one in the menu bar while the panel is up
-(`PanelHandBackTests` ▸ `chordsReachTheMainMenu`). AppKit's own
+(`PanelHandBackTests` ▸ `chordsReachTheMainMenu`) — the File and
+Edit submenus' alone, through `MainMenu.performPanelChord`, so a
+⌘Q aimed at the app in front never quits KiwiDesk (owner ruling
+2026-10-13, `PanelChordTests`). AppKit's own
 validation greys that item for a window whose style mask lacks
 `.closable` (measured: a borderless `NSPanel` fails
 `validateUserInterfaceItem` for `performClose(_:)`), so a

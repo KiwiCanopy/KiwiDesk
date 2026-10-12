@@ -3,7 +3,7 @@ import KiwiDeskCore
 import SwiftUI
 import os
 
-/// Diagnostic logging for panel activation and hand-back (#952).
+/// Diagnostic logging for the panel's show and close (#952).
 private let panelLog = Logger(
     subsystem: KiwiLog.subsystem,
     category: "gui"
@@ -24,13 +24,11 @@ final class ShortcutsPanel: NSPanel {
     override var canBecomeKey: Bool { true }
 
     /// Non-activating, so KiwiDesk's menu is not the one in the
-    /// menu bar: its chords — ⌘W's Close (#1533), the edit chords
-    /// — are handed to it here, keyboard layouts and all.
+    /// menu bar: the File and Edit chords — ⌘W's Close (#1533),
+    /// the edit chords — are handed to it here, and nothing else.
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         super.performKeyEquivalent(with: event)
-            || NSApplication.shared.mainMenu?.performKeyEquivalent(
-                with: event
-            ) == true
+            || MainMenu.performPanelChord(event)
     }
 
     override func cancelOperation(_ sender: Any?) {
@@ -38,7 +36,7 @@ final class ShortcutsPanel: NSPanel {
     }
 
     /// The File menu's Close (⌘W) is a keyboard-commanded close,
-    /// so it yields like Esc. AppKit greys Close for a window
+    /// so it closes like Esc. AppKit greys Close for a window
     /// without `.closable`, which a borderless panel is, so the
     /// item is validated here (#1533).
     override func performClose(_ sender: Any?) {
@@ -72,7 +70,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     let core: KiwiCore
     private let onEdit: () -> Void
     private var panel: ShortcutsPanel?
-    /// The #952 activation hand-back.
+    /// The keyed show and the close's dismiss distrust (#952).
     let handBack: PanelHandBack
     /// This opening; a fade a later show overtook orders nothing
     /// out.
@@ -102,9 +100,9 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     func show() {
         let reference = buildReference()
         let onEdit: () -> Void = { [weak self] in
-            // A click whose next step is Settings — our own
-            // app — coming forward, not the remembered one,
-            // so it does not yield (#952).
+            // A click whose next step is Settings coming
+            // forward: an intended focus, so the close arms no
+            // dismiss distrust (#952).
             self?.close(commanded: false)
             self?.onEdit()
         }

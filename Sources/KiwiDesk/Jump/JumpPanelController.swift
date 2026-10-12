@@ -3,7 +3,7 @@ import KiwiDeskCore
 import SwiftUI
 import os
 
-/// Diagnostic logging for the panel's activation and hand-back.
+/// Diagnostic logging for the panel's show, pick and close.
 /// `privacy: .public`, or macOS redacts every line (#951).
 private let jumpLog = Logger(
     subsystem: KiwiLog.subsystem,
@@ -17,7 +17,7 @@ private let jumpLog = Logger(
 @MainActor
 final class JumpPanelController: NSObject, NSWindowDelegate {
     let core: KiwiCore
-    /// The #952 activation hand-back.
+    /// The keyed show and the close's dismiss distrust (#952).
     let handBack: PanelHandBack
     var panel: JumpPanel?
     private var model: JumpModel?
