@@ -57,6 +57,7 @@ extension KiwiCore {
                 titles: open[$0.bundleID] ?? []
             )
         }
+        // Live but unrecorded only after the cap evicted it.
         let unseen = open.keys.filter { app in
             !apps.contains { $0.bundleID == app }
         }
@@ -69,7 +70,7 @@ extension KiwiCore {
                 titles: open[app] ?? []
             )
         }
-        return live + apps.filter { !$0.titles.isEmpty }
+        return apps.filter { !$0.titles.isEmpty } + live
             + apps.filter { $0.titles.isEmpty }
     }
 
@@ -80,13 +81,4 @@ extension KiwiCore {
             $0.bundleID == app.lowercased() && !$0.titles.isEmpty
         }
     }
-}
-
-/// One app the Tile picker offers (#2071).
-public struct GuessedFloatApp: Sendable, Equatable {
-    /// Lowercased, as a Tile rule matches it.
-    public let bundleID: String
-    public let name: String
-    /// The titles of its windows floating on a guess now.
-    public let titles: [String]
 }

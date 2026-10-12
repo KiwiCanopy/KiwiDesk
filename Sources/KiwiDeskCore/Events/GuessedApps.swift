@@ -2,7 +2,8 @@ import Foundation
 
 /// The apps the automatic-float guess has floated a window of since
 /// launch (#2071), most recently seen first — the Tile picker's
-/// list. Recorded whatever the switch and the Tile rules say, kept
+/// list. No Dock icon is recorded whatever the switch and the Tile
+/// rules say; a fixed size only where the live guess read it. Kept
 /// in memory only, and bounded at `cap`, the least recently seen
 /// app dropped first.
 struct GuessedApps: Equatable {

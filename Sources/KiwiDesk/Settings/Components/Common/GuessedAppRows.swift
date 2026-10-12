@@ -13,16 +13,22 @@ struct GuessedAppRows: View {
             Text(Self.empty)
                 .font(.callout)
                 .foregroundStyle(SettingsTheme.ink3)
+        } else if apps.count <= Self.unscrolled {
+            list
         } else {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(apps, id: \.bundleID) { row($0) }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .frame(maxHeight: 280)
-            .fixedSize(horizontal: false, vertical: true)
+            ScrollView { list }
+                .frame(height: 280)
         }
+    }
+
+    /// The rows a popover shows before it scrolls.
+    static let unscrolled = 8
+
+    private var list: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(apps, id: \.bundleID) { row($0) }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func row(_ app: GuessedFloatApp) -> some View {

@@ -31,7 +31,8 @@ extension EventLoop {
             bundleID: bundleID,
             rules: floatRules
         )
-        noteGuess(verdict, id: id, pid: pid, bundleID: bundleID)
+        let forced = forceFloatReason(pid: pid, id: id)
+        noteGuess(verdict, forced: forced, pid: pid, bundleID: bundleID)
         return verdict
     }
 
@@ -40,12 +41,12 @@ extension EventLoop {
     /// rules; a fixed size only where the guess asked (#2071).
     private func noteGuess(
         _ verdict: FloatVerdict,
-        id: WindowID,
+        forced: AutoFloatReason?,
         pid: pid_t,
         bundleID: String?
     ) {
         guard let bundleID,
-            forceFloatReason(pid: pid, id: id)?.isGuess == true
+            forced?.isGuess == true
                 || verdict.reason?.isGuess == true
         else { return }
         guessedApps.note(bundleID: bundleID, name: appRef(of: pid).name)

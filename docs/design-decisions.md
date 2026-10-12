@@ -15692,10 +15692,12 @@ guessed window can belong to a helper process no disk scan offers
 — Steam's main window is Steam Helper's, so a rule on Steam
 itself leaves it floating. Apps with a guessed window open lead,
 captioned with its title; the rest follow by recency, capped at
-`GuessedApps.cap` with the least recently seen dropped. The list
-is recorded whatever the switch and the Tile rules say, so a
-profile whose live counterpart already tiles an app still finds
-it, and it is never persisted. *Other…* and Lua reach the rest.
+`GuessedApps.cap` with the least recently seen dropped, and never
+persisted. A Dock-less app is recorded whatever the switch and
+the Tile rules say, so a profile whose live counterpart already
+tiles it still finds it; a fixed-size window is seen only where
+the live guess reads its zoom button. *Other…* and Lua reach the
+rest.
 :::
 
 **This reverses "a rule is a sentence, and the sentence is the

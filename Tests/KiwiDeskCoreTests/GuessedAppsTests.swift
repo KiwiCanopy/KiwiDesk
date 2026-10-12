@@ -78,6 +78,19 @@ struct GuessedAppsTests {
         #expect(apps(off) == [Self.steam])
     }
 
+    /// A fixed size is read only where the live guess asks, so an
+    /// escaped regular app's window files nothing (the stated gap).
+    @Test("an escaped regular app files nothing")
+    func escapedRegularAppIsUnseen() {
+        let ruled = loop(.regular)
+        ruled.floatRules = FloatRules(
+            [],
+            guess: FloatGuess(tileRules: [Self.steam])
+        )
+        recheck(ruled, nil)
+        #expect(apps(ruled).isEmpty)
+    }
+
     @Test("a note moves its app first and the cap drops the oldest")
     func recencyAndCap() {
         var guessed = GuessedApps()
@@ -118,5 +131,28 @@ struct GuessedAppsTests {
         #expect(apps.dropFirst().allSatisfy { $0.titles.isEmpty })
         core.eventLoop.detectedFloating[id] = .floats(.panel)
         #expect(core.guessedFloatApps().first?.bundleID == "gone.app")
+    }
+
+    /// The cap drops only the store's record: a window still
+    /// floating on a guess lists its app whatever the store holds.
+    @Test("an open guess the store no longer holds is still listed")
+    func openGuessOutlivesTheCap() {
+        let core = makeTestCore()
+        let id = WindowID(7_102)
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: id,
+                pid: Self.pid,
+                appName: "Steam Helper",
+                appBundleID: Self.steam,
+                title: "Steam"
+            )
+        )
+        core.eventLoop.detectedFloating[id] = .floats(.fixedSize)
+        core.eventLoop.guessedApps.note(bundleID: "kept.app", name: "Kept")
+        let apps = core.guessedFloatApps()
+        #expect(apps.map(\.bundleID) == [Self.steam, "kept.app"])
+        #expect(apps.first?.name == "Steam Helper")
+        #expect(apps.first?.titles == ["Steam"])
     }
 }
