@@ -54,43 +54,40 @@ enum ColorsRowOrder {
 
     // MARK: - Advanced Colours (the Power-User area)
 
-    /// Border swatches at rest (`AdvancedColorsSection`).
-    static let bordersAtRest: [SettingKey] = [
+    /// The Accent group (#1857): the hue the active Space, the
+    /// focus border and the drag ghost share — one half of each
+    /// colour-vision pair, beside the Second accent's other half.
+    static let accentAtRest: [SettingKey] = [
+        .kiwishelf(.activeItemColor),
+        .kiwishelf(.highlightColor),
+        .kiwishelf(.hoverFillColor),
         .borders(.borderFocusedColor),
-        .borders(.borderUnfocusedColor),
-        .borders(.stickyColor),
-        .borders(.floatingColor),
-    ]
-
-    /// Drag visuals twin columns (#231).
-    static let dragGhostColumn: [SettingKey] = [
         .borders(.dragGhostBorderColor),
         .borders(.dragGhostFillColor),
     ]
 
-    static let dragDropZoneColumn: [SettingKey] = [
+    /// The Second accent group (#1857), its follower last.
+    static let secondAccentAtRest: [SettingKey] = [
+        .spaceBar(.spaceBarFocusedItemColor),
         .borders(.dragDropZoneBorderColor),
         .borders(.dragDropZoneFillColor),
+        .spaceBar(.spaceBarFocusedHighlightColor),
     ]
 
-    /// KiwiShelf colours at rest — the one set both bars draw
-    /// (#1517).
+    /// The shelf's own colours — every one at rest (#1857).
     static let kiwishelfAtRest: [SettingKey] = [
         .kiwishelf(.fillColor),
         .kiwishelf(.itemColor),
-        .kiwishelf(.activeItemColor),
-        .kiwishelf(.highlightColor),
-    ]
-
-    /// KiwiShelf colours behind More, with the Space Bar's own
-    /// focused-window ink.
-    static let kiwishelfMore: [SettingKey] = [
-        .kiwishelf(.hoverFillColor),
         .kiwishelf(.hoverItemColor),
+        .kiwishelf(.borderColor),
         .kiwishelf(.groupBadgeColor),
         .kiwishelf(.groupBadgeTextColor),
-        .kiwishelf(.borderColor),
-        .spaceBar(.spaceBarFocusedItemColor),
-        .spaceBar(.spaceBarFocusedHighlightColor),
+    ]
+
+    /// The marks on windows that are not the focus (#1857).
+    static let windowMarksAtRest: [SettingKey] = [
+        .borders(.borderUnfocusedColor),
+        .borders(.stickyColor),
+        .borders(.floatingColor),
     ]
 }

@@ -58,7 +58,7 @@ extension BordersKey {
         case .borderFocusedColor:
             return .row(
                 .advancedColours,
-                .borders,
+                .accent,
                 .atRest,
                 gate: .setting(.borders(.borderEnabled))
             )
@@ -76,7 +76,7 @@ extension BordersKey {
         case .borderUnfocusedColor:
             return .row(
                 .advancedColours,
-                .borders,
+                .windowMarks,
                 .atRest,
                 gate: .anyOf([
                     .borders(.borderEnabled),
@@ -86,7 +86,7 @@ extension BordersKey {
         case .stickyColor, .floatingColor:
             // Both paint on the window, so neither takes the Space
             // Bar's gate (StickyMarkUngatedTests, #1799).
-            return .row(.advancedColours, .borders, .atRest)
+            return .row(.advancedColours, .windowMarks, .atRest)
         case .borderGlowSize:
             return .row(
                 .gapsAndBorders,
@@ -134,7 +134,7 @@ extension BordersKey {
         case .dragGhostBorderColor:
             return .row(
                 .advancedColours,
-                .dragAndDrop,
+                .accent,
                 .atRest,
                 gate: .anyOf([
                     .borders(.dragGhostEnabled),
@@ -144,7 +144,7 @@ extension BordersKey {
         case .dragGhostFillColor:
             return .row(
                 .advancedColours,
-                .dragAndDrop,
+                .accent,
                 .atRest,
                 gate: .anyOf([
                     .borders(.dragGhostEnabled),
@@ -157,7 +157,7 @@ extension BordersKey {
         case .dragDropZoneBorderColor:
             return .row(
                 .advancedColours,
-                .dragAndDrop,
+                .secondAccent,
                 .atRest,
                 gate: .anyOf([
                     .borders(.dragDropZoneEnabled),
@@ -167,7 +167,7 @@ extension BordersKey {
         case .dragDropZoneFillColor:
             return .row(
                 .advancedColours,
-                .dragAndDrop,
+                .secondAccent,
                 .atRest,
                 gate: .anyOf([
                     .borders(.dragDropZoneEnabled),

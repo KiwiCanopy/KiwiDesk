@@ -30,7 +30,10 @@ struct PresentationGatherTests {
     private static let scrolledOut = WindowID(2)
     private static let space = SpaceID("1")
 
-    private func makeCore(pinsScreen: Bool) -> KiwiCore? {
+    private func makeCore(
+        pinsScreen: Bool,
+        subrole: String? = nil
+    ) -> KiwiCore? {
         guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay
         else { return nil }
@@ -56,7 +59,8 @@ struct PresentationGatherTests {
                         id: id,
                         pid: 1,
                         appName: "App",
-                        frame: frame
+                        frame: frame,
+                        subrole: subrole
                     )
                 )
             )
@@ -86,5 +90,20 @@ struct PresentationGatherTests {
 
         #expect(core.tiler.stashOriginal(Self.scrolledOut) != nil)
         #expect(core.tiler.stashOriginal(Self.show) == nil)
+    }
+
+    /// A titled window covering its screen is a float maximised
+    /// by Fill, not a show (#1788 item 5): the entry grids it.
+    @Test(
+        "Entering floating grids a titled window covering its screen",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func entryGridsATitledCover() throws {
+        let core = try #require(
+            makeCore(pinsScreen: true, subrole: "AXStandardWindow")
+        )
+        core.setSpaceMode(Self.space, .floating)
+        core.retile(pass: .apply)
+        #expect(core.tiler.stashOriginal(Self.show) != nil)
     }
 }

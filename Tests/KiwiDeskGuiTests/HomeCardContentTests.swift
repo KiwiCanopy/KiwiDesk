@@ -225,7 +225,9 @@ struct HomeCardContentTests {
                 && [.atRest, .showMore].contains(
                     $0.placement.tier
                 )
+                && SettingsDraftDiff.namesModelPath($0.id)
         }.count
+        #expect(expected == 19)
         let line = HomeCardContent.subtitle(
             for: .advancedColors,
             model: model()

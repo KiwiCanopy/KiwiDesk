@@ -237,23 +237,39 @@ struct ColorSwatch: View {
 
     /// Parse draft and normalize hex; empty field commits Automatic (#429).
     private func commit() {
-        if automatic,
-            draft.trimmingCharacters(in: .whitespaces).isEmpty
-        {
-            hex = ""
-            draft = ""
-            return
-        }
-        if let rgba = DragVisual.parseHex(draft) {
-            let ns = NSColor(
-                srgbRed: CGFloat(rgba.red),
-                green: CGFloat(rgba.green),
-                blue: CGFloat(rgba.blue),
-                alpha: CGFloat(rgba.alpha)
-            )
-            hex = HexColorField.hexString(from: ns)
+        if let value = Self.committed(
+            draft: draft,
+            over: hex,
+            automatic: automatic
+        ) {
+            hex = value
         }
         draft = hex
+    }
+
+    /// What a commit of `draft` writes over `current`, or nil when
+    /// it writes nothing: an unparseable draft, or one naming the
+    /// colour already stored — a blur is not an edit, and a well
+    /// whose binding writes several rows (#1857) must not repaint
+    /// them on one.
+    static func committed(
+        draft: String,
+        over current: String,
+        automatic: Bool
+    ) -> String? {
+        if automatic, draft.trimmingCharacters(in: .whitespaces).isEmpty {
+            return current.isEmpty ? nil : ""
+        }
+        guard let rgba = DragVisual.parseHex(draft),
+            rgba != DragVisual.parseHex(current)
+        else { return nil }
+        let ns = NSColor(
+            srgbRed: CGFloat(rgba.red),
+            green: CGFloat(rgba.green),
+            blue: CGFloat(rgba.blue),
+            alpha: CGFloat(rgba.alpha)
+        )
+        return HexColorField.hexString(from: ns)
     }
 
     private func present() {

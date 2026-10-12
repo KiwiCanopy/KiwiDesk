@@ -256,14 +256,20 @@ extension EventLoop {
     }
 
     /// `id` is the window's, where the caller already read it
-    /// (#1933); nil asks the element.
+    /// (#1933); nil asks the element. `titlebarButton` likewise:
+    /// the off-main list read carries it for a raised-layer
+    /// window, and nil reads it here where the #2072 escape needs it.
+    /// `tracked` judges a window already in state below the
+    /// screen-saver level (#2069).
     func shouldIgnore(
         _ element: AXUIElement,
         id known: WindowID? = nil,
         pid: pid_t,
         app: AppRef,
         layer: Int? = nil,
-        isAccessory: Bool
+        isAccessory: Bool,
+        tracked: Bool,
+        titlebarButton: Bool? = nil
     ) -> Bool {
         if Self.isOwnProcess(pid) {
             guard
@@ -286,11 +292,41 @@ extension EventLoop {
         guard let id = known ?? AXHelper.windowID(of: element) else {
             return false
         }
+        let resolved = FloatDetection.judgedLayer(
+            layer ?? FloatDetection.windowLayer(of: id) ?? 0,
+            tracked: tracked
+        )
+        let button =
+            FloatDetection.needsTitlebarButton(
+                layer: resolved,
+                isAccessory: isAccessory,
+                bundleID: app.bundleID
+            )
+            ? titlebarButton ?? Self.readsTitlebarButton(element, id: id)
+            : false
         return FloatDetection.shouldIgnore(
             bundleID: app.bundleID,
-            layer: layer ?? FloatDetection.windowLayer(of: id) ?? 0,
+            layer: resolved,
             isAccessory: isAccessory,
-            rules: ignoreRules
+            rules: ignoreRules,
+            titlebarButton: button
         )
+    }
+
+    /// The title-bar button where no list read carried it: `track`,
+    /// a sync reconcile, an untracked focus report. An unanswered
+    /// read is no button, so the window stays ignored.
+    static func readsTitlebarButton(
+        _ element: AXUIElement,
+        id: WindowID
+    ) -> Bool {
+        AXHelper.windowTraits(element, id: id)?.hasTitlebarButton == true
+    }
+
+    /// The ids the ignore gate admitted for `pid` — what the
+    /// visible-panel distrust leaves out, since it cannot see the
+    /// #2072 escape.
+    func admittedWindows(of pid: pid_t) -> Set<WindowID> {
+        Set(elements[pid]?.keys ?? [:].keys)
     }
 }

@@ -271,9 +271,9 @@ spelled with one word: Advanced Colors is the deep-mode twin of
 Looks & Animations (`SettingsArea.minimumMode` is `.powerUser`
 there), so on that page "advanced" already means *which mode
 you are in* and no drawer may re-use it to mean *which rows are
-hidden*. Its colour drawers are **"More colors"**, with the
-collapsed summary doing the naming ("Plate, highlight, hover,
-badges"); "More" cannot be misread as a mode.
+hidden*. Its last colour drawer was **"More colors"**, the
+collapsed summary doing the naming — "More" cannot be misread
+as a mode; since #1857 every colour there is at rest.
 
 A connector (`Advanced: Lua bindings`) is not the fix: it
 restores the tier reading but re-splits the format. Dropping
@@ -1095,6 +1095,12 @@ costs every other user a second thing to understand (#1279). The
 list itself reaches one folder deep, so browsing is the rare
 fallback.
 
+:::unreleased
+The Tile picker's list is the one exception: it holds only the
+apps a guess floated (#2071, design-decisions ▸ App rules), with
+no search field over its short list.
+:::
+
 The Space name field is the same channel for a typed edit
 (#1623): while the draft names another Space or is empty, a
 caption with a warning triangle under the row says why the edit
@@ -1363,9 +1369,8 @@ Greying applied across a whole editor (#520, #527):
   and leave the label live. A block gate therefore must not
   wrap a section that *contains* a disclosure: push it down to
   the siblings, or pass the gate into the child view
-  (`AdvancedColorRows(allows:gateHelp:)`, which the bar colour
-  cards hand the same gate on both sides of their "More colors"
-  drawer). Expansion state is preserved across the toggle —
+  (`AdvancedColorRows(allows:gateHelp:)`, which the Advanced
+  Colours cards hand the shelf's block gate row by row). Expansion state is preserved across the toggle —
   with the label live, closing is one click.
 - **A block gate's explanation lives on a live anchor, not
   inside the block.** SwiftUI's `.disabled` is cumulative and
@@ -1409,9 +1414,11 @@ Greying applied across a whole editor (#520, #527):
   names the destination to go to**, in one of two shapes. Where
   the block has a live label, the pointer is a `?` on the
   nearest live label above the dimmed rows: on Advanced Colours
-  every gate is remote, so its Borders card and each Drag
-  column carry a header `?` with no block gate at all
-  (`AdvancedColorsHelp`). Where it does not, the pointer is a
+  every gate is remote, so the KiwiShelf colors card carries a
+  header `?` for its block gate (`AdvancedColorsHelp`), while a
+  row greyed in a live card takes a `CrossReferenceRow` beneath
+  it (#1310) — in the role groups, one per page whose switch
+  dims a row (#1857). Where it does not, the pointer is a
   `CrossReferenceRow` drawn under the dimmed rows and outside
   the dimmed subtree, so it stays clickable while they are
   inert — the per-space override editor's Grid auto-size and
@@ -1445,13 +1452,15 @@ dimmed, not only from whether a live label exists (#1310): a
 header `?` scopes the CARD, so it answers for a greyed block,
 while ONE greyed row inside a live card takes a
 `CrossReferenceRow` directly beneath its grid, outside the
-dimmed subtree — the KiwiShelf colours card's *Focused window*
+dimmed subtree — the Second accent group's *Focused window*
 row, whose gating picker lives on KiwiShelf, draws
-`AdvancedColorsHelp.focusedItemReference` there, and the Border
-colours card's *Unfocused windows* row draws
-`unfocusedReference` the same way while the ring is on, each
-linking the destination in the sentence; the Borders header `?`
-answers only for the ring being off. The argument is
+`AdvancedColorsHelp.focusedItemReference` there, and Window
+marks' *Unfocused windows* row draws `unfocusedReference` the
+same way while the ring is on, each linking the destination in
+the sentence. A row with no sentence of its own takes its
+card's one link per page whose switch dims it (#1857), and
+which of these a row owes is its one `ColorRowVerdict`, which
+the grey reads too. The argument is
 `docs/design-decisions.md` ▸ *a dim is not a sentence*.
 
 A control whose *only* consumer is off may still have a second

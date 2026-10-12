@@ -42,9 +42,9 @@ public final class EventLoop {
     var onRemovalDistrust: @MainActor () -> Void = {}
     var onRemovalEpisodesEnded: @MainActor (Set<WindowID>) -> Void = { _ in }
 
-    /// Lua `float_rules`. Assigning does NOT resync `detectedFloating`: rules
-    /// change hands inside loadConfig's reset→reassign transaction, so a new
-    /// assignment site outside it follows with `reconcileAll()` or a scoped
+    /// The resolved float rules and guess, written only through
+    /// `KiwiCore.installFloatRules` (`AutoFloatSeamTests`); the
+    /// re-check is the writer's — `reconcileAll()` or a scoped
     /// recheck (#164).
     public var floatRules = FloatRules()
 
@@ -93,10 +93,10 @@ public final class EventLoop {
     /// reason (#1810), so reconcile can re-check and emit only
     /// actual changes.
     var detectedFloating: [WindowID: FloatVerdict] = [:]
-    /// Last native-fullscreen verdict per tracked window, so the
-    /// reconcile recheck emits `.windowFullscreenChanged` only on
-    /// an actual transition (mirrors `detectedFloating`).
+    /// Last native-fullscreen verdict and AX subrole per tracked
+    /// window, so a recheck emits only on a change (#1788).
     var detectedFullscreen: [WindowID: Bool] = [:]
+    var detectedSubroles: [WindowID: String] = [:]
     /// Tracked windows whose CGWindow layer read as ignored
     /// once; untracked only if the reading persists (layers
     /// flicker during fullscreen transitions).
@@ -331,9 +331,8 @@ public final class EventLoop {
     /// the flag at; the frame applier's holds restore that (#1508).
     var onEnhancedUIRetired: (pid_t, Bool) -> Void = { _, _ in }
 
-    /// Applies the process-global AX messaging timeout at
-    /// `start` (#672) — see `AXHelper.setGlobalMessagingTimeout`
-    /// for what it bounds and why.
+    /// The AX messaging timeout `start` applies (#672) — see
+    /// `AXHelper.setGlobalMessagingTimeout`.
     var applyAXMessagingTimeout: (Float) -> Void =
         AXHelper.setGlobalMessagingTimeout
 
@@ -345,6 +344,7 @@ public final class EventLoop {
     /// Pids LaunchServices cannot name, and shadow windows (#1785).
     var processIdentity = ProcessIdentity()
     var shadows = ShadowWindows()
+    var guessedApps = GuessedApps()
 
     public init() {}
 }

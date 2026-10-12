@@ -15,10 +15,10 @@ import Testing
 /// to be hover's own full-strength accent; #1173 moved the
 /// pointer off this channel entirely.
 ///
-/// Lives in this target because `ColorVision` does; every input
-/// is PARSED from `SettingsTheme.swift` — the hex pairs and the
-/// opacity — so the guard follows a retune instead of pinning a
-/// stale copy of it (a number-pin derives, never restates).
+/// Every input is PARSED from `SettingsTheme.swift` — the hex
+/// pairs and the opacity — so the guard follows a retune
+/// instead of pinning a stale copy of it (a number-pin derives,
+/// never restates).
 @Suite("Mode-gated frame separation")
 struct ModeGatedFrameSeparationTests {
     private func themeSource() throws -> String {

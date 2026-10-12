@@ -38,6 +38,8 @@ extension KiwiCore {
             existing.scrollGesture = stored.scrollGesture
             existing.spaceHistory = stored.spaceHistory
             existing.modeCycle = stored.modeCycle
+            existing.tileRules = stored.tileRules
+            existing.floatAutomatically = stored.floatAutomatically
         }
         try profiles.write(existing)
         refreshConfigIssues()
@@ -181,6 +183,14 @@ extension KiwiCore {
                 config.modeCycle,
                 over: base.modeCycle
             )
+            profile.tileRules = RuleListOverride.diff(
+                base: sidecar?.tileRules ?? globalRuleBase.tileRules,
+                edited: config.tileRules,
+                normalizing: FloatGuess.normalizedRule
+            )
+            profile.floatAutomatically =
+                config.floatAutomatically == base.floatAutomatically
+                ? nil : config.floatAutomatically
             // `ignoreRules` is deliberately untouched: the GUI has
             // no ignore editor, so even an inert hidden tombstone must
             // survive overwrite/copy until an external edit removes it.

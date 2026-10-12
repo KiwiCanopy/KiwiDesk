@@ -93,7 +93,8 @@ extension EventLoop {
                 pid: pid,
                 app: app,
                 layer: layer ?? 0,
-                isAccessory: isAccessory
+                isAccessory: isAccessory,
+                tracked: false
             )
         else {
             return
@@ -110,20 +111,17 @@ extension EventLoop {
             bundleID: app.bundleID
         )
         window.isFloating = verdict.floats
-        // A transient overlay floats for a *structural* reason
-        // (third-party accessory app, panel subrole, or raised
-        // layer), never just because a float rule matched — so a
-        // user-floated standard window keeps its ring while a
-        // launcher does not (#300). Our own Settings window is
-        // exempt (#315, see `classifiesAsOverlay`).
-        window.isTransientOverlay =
-            isAccessory
-            || FloatDetection.shouldFloat(
+        window.isTransientOverlay = Self.isOverlay(
+            verdict,
+            ownProcess: Self.isOwnProcess(pid),
+            structural: FloatDetection.shouldFloat(
                 role: role,
                 subrole: subrole,
                 layer: layer ?? 0
             )
+        )
         window.isRaisedLayer = (layer ?? 0) != 0
+        window.subrole = subrole
         // Native fullscreen suppresses the focus ring (a ring
         // around a display-filling window shows only at the
         // corners); snapshot it here, refresh on reconcile.
@@ -131,6 +129,7 @@ extension EventLoop {
         window.carriesOwnMark = tilesAsOwnWindow(pid: pid, id: window.id)
         detectedFloating[window.id] = verdict
         detectedFullscreen[window.id] = window.isFullscreen
+        detectedSubroles[window.id] = subrole
         elements[pid, default: [:]][window.id] = element
         observers[pid]?.observe(window: element)
         // Remember every window's frame, and which windows carry a
@@ -207,6 +206,9 @@ extension EventLoop {
         app: AppRef
     ) {
         recheckFullscreen(element, id: id)
+        // Beside the verdict, not from its facts: the element
+        // source reads facts only where nothing forces the float.
+        applySubrole(AXHelper.subrole(of: element), id: id)
         offMain.noteFreshWrite(id, [.detection])
         let verdict = autoFloatVerdict(
             .element(element, layer: FloatDetection.windowLayer(of: id)),
@@ -214,16 +216,58 @@ extension EventLoop {
             pid: pid,
             bundleID: app.bundleID
         )
-        applyFloatVerdict(verdict, id: id)
+        applyFloatVerdict(verdict, id: id, pid: pid)
     }
 
-    private func applyFloatVerdict(_ verdict: FloatVerdict, id: WindowID) {
+    /// A transient overlay floats for a *structural* reason — a
+    /// dialog, panel or raised layer, or a Dock-less app while a
+    /// guess may float it (#2173) — never because a float rule
+    /// matched, so a user-floated standard window keeps its ring
+    /// while a launcher does not (#300). For a foreign window the
+    /// verdict's reason says it; an own window has no such reason
+    /// (#315, see `classifiesAsOverlay`), so its structure does.
+    nonisolated static func isOverlay(
+        _ verdict: FloatVerdict,
+        ownProcess: Bool,
+        structural: Bool
+    ) -> Bool {
+        guard !ownProcess else { return structural }
+        return verdict.reason == .panel || verdict.reason == .accessoryApp
+    }
+
+    private func applyFloatVerdict(
+        _ verdict: FloatVerdict,
+        id: WindowID,
+        pid: pid_t
+    ) {
         let before = detectedFloating[id]
+        // A fixed size is judged at adoption (#2070): a sheet can
+        // grey the zoom button for a moment, and a recheck never
+        // floats a tiled window on that reading alone — save one
+        // whose verdict a changed guess forgot (#2173).
+        if verdict == .floats(.fixedSize), let before, before != verdict {
+            return
+        }
         detectedFloating[id] = verdict
         // A changed REASON alone is stored silently: the flag
         // follows only whether the window floats.
-        guard before?.floats != verdict.floats else { return }
-        onEvent(.windowFloatChanged(id, isFloating: verdict.floats))
+        if before?.floats != verdict.floats {
+            onEvent(.windowFloatChanged(id, isFloating: verdict.floats))
+        }
+        // An own window's overlay is its structure, fixed at track.
+        guard !Self.isOwnProcess(pid) else { return }
+        let overlay = Self.isOverlay(
+            verdict,
+            ownProcess: false,
+            structural: false
+        )
+        if before.map({
+            Self.isOverlay($0, ownProcess: false, structural: false)
+        })
+            != overlay
+        {
+            onEvent(.windowOverlayChanged(id, isOverlay: overlay))
+        }
     }
 
     /// `recheckFloat` over what the off-main read found (#1933):
@@ -235,13 +279,14 @@ extension EventLoop {
         reading: TrackedReading
     ) {
         applyFullscreen(reading.fullscreen, id: id)
+        applySubrole(reading.subrole, id: id)
         let verdict = autoFloatVerdict(
             .read(reading.autoReason),
             id: id,
             pid: pid,
             bundleID: app.bundleID
         )
-        applyFloatVerdict(verdict, id: id)
+        applyFloatVerdict(verdict, id: id, pid: pid)
     }
 
     /// Re-reads native-fullscreen state on reconcile so a
@@ -253,6 +298,26 @@ extension EventLoop {
         id: WindowID
     ) {
         applyFullscreen(readFullscreen(element), id: id)
+    }
+
+    /// Emits a changed subrole (#1788): a window may drop its
+    /// title bar in place as it starts presenting. An empty read
+    /// is a failed one, never evidence (#1285): it files nothing.
+    func applySubrole(_ subrole: String, id: WindowID) {
+        guard !subrole.isEmpty, detectedSubroles[id] != subrole
+        else { return }
+        detectedSubroles[id] = subrole
+        onEvent(.windowSubroleChanged(id, subrole: subrole))
+    }
+
+    /// Reconciles `id`'s app off the main actor for its subrole:
+    /// a window crossing into covering its screen may have dropped
+    /// its title bar (#1788). The whole-app read is the one that
+    /// already carries the subrole off main, and a crossing is a
+    /// boundary event, not a per-frame one.
+    func reconcileForCoverCrossing(of id: WindowID) {
+        guard let pid = trackingPID(of: id) else { return }
+        reconcileOffMain(pid: pid, app: appRef(of: pid))
     }
 
     private func applyFullscreen(_ fullscreen: Bool, id: WindowID) {

@@ -319,6 +319,12 @@ public struct StateCoordinator: Sendable {
         case .windowFullscreenChanged(let id, let fullscreen):
             windows.setFullscreen(id, fullscreen)
 
+        case .windowSubroleChanged(let id, let subrole):
+            windows.setSubrole(id, subrole)
+
+        case .windowOverlayChanged(let id, let overlay):
+            windows.setTransientOverlay(id, overlay)
+
         case .windowRekeyed(let old, let new):
             rekey(old, to: new)
 

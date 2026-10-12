@@ -103,7 +103,8 @@ struct SettingsCatalogSiteTests {
         // 126 since #453: Shortcuts' Layout group.
         // 128 with #2144: the cycle and plate rows (#453); 126 once
         // #2143's picker and the slide's duration left the drawer.
-        #expect(names.count == 126)
+        // 127 since #2173: App Rules ▸ Automatic floating.
+        #expect(names.count == 127)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

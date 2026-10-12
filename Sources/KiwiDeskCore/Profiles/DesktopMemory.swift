@@ -94,6 +94,10 @@ final class DesktopMemory {
     /// ask again.
     var shortcutTopUpDeclined = 0
 
+    /// The apps a `gather` moved windows of from other Desktops,
+    /// drained by its one reap (#1510).
+    var gatherReapPIDs: Set<pid_t> = []
+
     /// Last observed native Space ID per display (`KiwiCore+BootSeams`,
     /// docs/cli.md).
     var lastDisplaySpaces: [String: SkyLight.SpaceID] = [:]

@@ -21,7 +21,7 @@ import SwiftUI
 /// gesture stays one click on the app, exactly as #1172 ruled.
 struct AppSelector: View {
     /// The rule this picker composes.
-    enum Role { case space, float }
+    enum Role { case space, float, tile }
 
     let role: Role
     /// Bundle identifier of chosen app (`AppRef`).
@@ -29,6 +29,8 @@ struct AppSelector: View {
     /// Bundle IDs to omit — the apps the picker's own list
     /// already holds (#1608).
     var exclude: Set<String> = []
+    /// The Tile role's list: the apps the guess floated (#2071).
+    var guessed: (() -> [GuessedFloatApp])?
     /// Called with the bundle id the user committed. The caller
     /// owns normalisation and dedup; this view only says when.
     let onCommit: (String) -> Void
@@ -55,7 +57,8 @@ struct AppSelector: View {
                     onCommit(app.bundleID)
                 }
             },
-            exclude: exclude
+            exclude: exclude,
+            guessed: guessed
         )
         // Hug the content (no fixed column to align with) instead
         // of filling the row.
@@ -84,6 +87,8 @@ struct AppSelector: View {
             )
         case .float:
             return L("app_rules.add_float", "Float an app…")
+        case .tile:
+            return L("app_rules.add_tile", "Tile an app…")
         }
     }
 }

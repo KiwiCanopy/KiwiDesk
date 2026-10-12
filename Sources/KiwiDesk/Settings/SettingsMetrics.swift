@@ -31,9 +31,6 @@ enum SettingsMetrics {
     /// Destination icon square tile (#678).
     static let sidebarTile: CGFloat = 22
 
-    /// Label column for half-width drag columns (#231, #754).
-    static let dragColumnLabelColumn: CGFloat = 80
-
     /// The layout cycle list's well (#453): wide enough for the
     /// longest layout name with its symbol and handle.
     static let cycleListWidth: CGFloat = 320

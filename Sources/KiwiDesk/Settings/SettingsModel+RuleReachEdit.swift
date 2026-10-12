@@ -75,19 +75,6 @@ extension SettingsModel {
         )
     }
 
-    /// The layout cycle row's checklist (#453).
-    func cycleReach() -> RuleReachReading? {
-        guard let reach = encodedReach else { return nil }
-        let key = RuleReachTable<[LayoutMode]>.modeCycleKey
-        return reading(
-            reach.modeCycle,
-            key,
-            reach.unreadable,
-            picked: reachEdits.reach[.cycle]?[key],
-            LayoutCycleWords.readout
-        )
-    }
-
     /// Who binds this row's combo to another action, per profile,
     /// read off the encoded table — the action ticking would take
     /// the key from.
@@ -120,12 +107,21 @@ extension SettingsModel {
         if reach.appRules.profiles.count >= 2 { return true }
         let spaces = reach.appRules.resolved(for: editing).keys
         let floats = reach.floatRules.resolved(for: editing).keys
+        let tiles = reach.tileRules.resolved(for: editing).keys
+        let automatic = RuleReachTable<Bool>.floatAutomaticallyKey
         return spaces.contains {
             !reach.appRules.reach(of: $0, editing: editing).isShared
         }
             || floats.contains {
                 !reach.floatRules.reach(of: $0, editing: editing).isShared
             }
+            || tiles.contains {
+                !reach.tileRules.reach(of: $0, editing: editing).isShared
+            }
+            || !reach.floatAutomatically.reach(
+                of: automatic,
+                editing: editing
+            ).isShared
     }
 
     /// Ticks or unticks "All profiles" on a row.
@@ -197,10 +193,12 @@ extension SettingsModel {
         case .scroll: scrollReach(app)
         case .history: historyReach()
         case .cycle: cycleReach()
+        case .tile: tileReach(app)
+        case .autoFloat: autoFloatReach()
         }
     }
 
-    private func reading<V>(
+    func reading<V>(
         _ table: RuleReachTable<V>,
         _ app: String,
         _ unreadable: [String],
@@ -311,6 +309,20 @@ extension SettingsModel {
             return RuleReachDraft.defaultReach(
                 of: key,
                 in: stored.modeCycle,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .tile:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.tileRules,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .autoFloat:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.floatAutomatically,
                 editing: editing,
                 isLoaded: reachIsLoaded
             )

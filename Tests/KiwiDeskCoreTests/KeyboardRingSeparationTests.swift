@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 import Testing
 
 /// The keyboard board's two ring warnings, measured through the

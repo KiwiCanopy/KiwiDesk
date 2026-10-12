@@ -190,7 +190,7 @@ extension APIReference {
 
     static let quitRecords: [String: APIRecord] = [
         "set_layout": APIRecord(
-            "Sets how windows are gathered when KiwiDesk quits.",
+            "Sets how windows are laid out when KiwiDesk quits.",
             .choice("layout", QuitLayoutStyle.self)
         ),
         "set_grid_target_depth": APIRecord(

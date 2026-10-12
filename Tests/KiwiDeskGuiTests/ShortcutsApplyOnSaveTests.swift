@@ -93,10 +93,12 @@ struct ShortcutsApplyOnSaveTests {
             (1, "the one structured door's manager swap"),
         "KiwiDeskCore/App/KiwiCore+StructuredConfig.swift":
             (
-                3,
-                "config load, profile re-apply and rule refresh,"
-                    + " each from the saved gui.json"
+                2,
+                "config load and profile re-apply, each from the"
+                    + " saved gui.json"
             ),
+        "KiwiDeskCore/App/KiwiCore+StructuredRules.swift":
+            (1, "the rule refresh, from the saved gui.json"),
         "KiwiDeskCore/Profiles/KiwiCore+ShortcutTopUp.swift":
             (1, "the top-ups' append, from the sidecar it just saved"),
         "KiwiDeskCore/App/KiwiCore+Config.swift":

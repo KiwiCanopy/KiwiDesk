@@ -11,16 +11,22 @@ public struct WindowFacts {
     public let layer: Int?
     /// Asked only where structure tiles: live, a round trip.
     public let title: () -> String
+    /// Whether the zoom button is enabled (#2070): false for a
+    /// window that cannot be resized, nil where it has no zoom
+    /// button or the read failed. Asked like the title.
+    public let zoomable: () -> Bool?
 
     public init(
         role: String,
         subrole: String,
         layer: Int?,
+        zoomable: @escaping () -> Bool? = { nil },
         title: @escaping () -> String
     ) {
         self.role = role
         self.subrole = subrole
         self.layer = layer
+        self.zoomable = zoomable
         self.title = title
     }
 
@@ -34,7 +40,20 @@ public struct WindowFacts {
         WindowFacts(
             role: role ?? AXHelper.role(of: element),
             subrole: AXHelper.subrole(of: element),
-            layer: layer
+            layer: layer,
+            zoomable: {
+                AXHelper.attribute(
+                    element,
+                    kAXZoomButtonAttribute,
+                    as: AXUIElement.self
+                ).flatMap {
+                    AXHelper.attribute(
+                        $0,
+                        kAXEnabledAttribute,
+                        as: Bool.self
+                    )
+                }
+            }
         ) { AXHelper.title(of: element) }
     }
 }

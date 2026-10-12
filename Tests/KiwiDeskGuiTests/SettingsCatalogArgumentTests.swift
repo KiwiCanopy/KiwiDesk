@@ -32,6 +32,11 @@ struct SettingsCatalogArgumentTests {
         // (`dragGhost` / `dragDropZone`), which the dotted-
         // reference sweep still covers.
         "DragVisualsEditor.swift: control",
+        // The two role groups share one card view (#1857), which
+        // takes its control from `ColorRole.control` — the
+        // `accentGroup` / `secondAccentGroup` declarations, which
+        // the dotted-reference sweep still covers.
+        "RoleColorCards.swift: role.control",
         // The collapsible card forwards its drawer's declaration
         // to the one `SettingsSection` it is (#1741); its mount
         // takes the drawer outright (`GesturesDrawer`), which the
@@ -222,7 +227,11 @@ struct SettingsCatalogArgumentTests {
         // 102 since #453: Shortcuts' Layout group's.
         // 104 with #2144: the cycle and plate rows (#453); 102 once
         // #2143's picker and the slide's duration left the drawer.
-        #expect(direct.values.reduce(0, +) == 102)
+        // 103 with #2173: the Automatic floating card's. 101 since
+        // #1857: the Border, Drag and More colors mounts left,
+        // Window marks came, and the two role groups mount through
+        // the indirect parameter above.
+        #expect(direct.values.reduce(0, +) == 101)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

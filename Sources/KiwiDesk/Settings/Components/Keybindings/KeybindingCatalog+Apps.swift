@@ -1,17 +1,21 @@
 import AppKit
 import KiwiDeskCore
 
-/// Launch behavior for Open-Applications shortcut bindings (#334),
-/// derived from the binding's `lua` verb, never a persisted field
-/// — so there is no `KeyBinding` shape to migrate or parity-test.
-enum AppLaunchBehavior: String, CaseIterable {
+/// What an Open applications shortcut does with its app (#334,
+/// #1510), derived from the binding's `lua` verb, never a
+/// persisted field — so there is no `KeyBinding` shape to migrate
+/// or parity-test.
+enum AppShortcutAction: String, CaseIterable {
     case openOrFocus
     case openNew
+    /// Brings the app's windows to the user (#1510).
+    case gather
 
     var verb: String {
         switch self {
         case .openOrFocus: return "focus_or_spawn"
         case .openNew: return "spawn_new"
+        case .gather: return "gather"
         }
     }
 }
@@ -20,12 +24,12 @@ enum AppLaunchBehavior: String, CaseIterable {
 /// #333).
 extension KeybindingCatalog {
     /// Formats Lua command for launching bundle identifier with specified
-    /// behavior.
+    /// action.
     static func appCommand(
         _ bundleID: String,
-        behavior: AppLaunchBehavior = .openOrFocus
+        action: AppShortcutAction = .openOrFocus
     ) -> String {
-        "KiwiDesk.\(behavior.verb)(\"\(bundleID)\")"
+        "KiwiDesk.\(action.verb)(\"\(bundleID)\")"
     }
 
     /// Extracts bundle identifier from app-launch Lua command string.
@@ -33,55 +37,55 @@ extension KeybindingCatalog {
         parseAppCommand(lua)?.bundleID
     }
 
-    /// Extracts launch behavior from app-launch Lua command string.
-    static func appLaunchBehavior(
+    /// Extracts action from app-launch Lua command string.
+    static func appShortcutAction(
         from lua: String
-    ) -> AppLaunchBehavior? {
-        parseAppCommand(lua)?.behavior
+    ) -> AppShortcutAction? {
+        parseAppCommand(lua)?.action
     }
 
-    /// Launch behaviors already bound for `bundleID` in given keybindings
+    /// actions already bound for `bundleID` in given keybindings
     /// (#334).
-    static func takenBehaviors(
+    static func takenActions(
         for bundleID: String,
         in bindings: [KeyBinding],
         excluding id: UUID? = nil
-    ) -> Set<AppLaunchBehavior> {
+    ) -> Set<AppShortcutAction> {
         Set(
             bindings.filter {
                 $0.kind == .application && $0.id != id
                     && appBundleID(from: $0.lua) == bundleID
             }
-            .map { appLaunchBehavior(from: $0.lua) ?? .openOrFocus }
+            .map { appShortcutAction(from: $0.lua) ?? .openOrFocus }
         )
     }
 
-    /// First available launch behavior for `bundleID` (#334).
-    static func firstAvailableBehavior(
+    /// First available action for `bundleID` (#334).
+    static func firstAvailableAction(
         for bundleID: String,
         in bindings: [KeyBinding]
-    ) -> AppLaunchBehavior? {
-        let taken = takenBehaviors(for: bundleID, in: bindings)
-        return AppLaunchBehavior.allCases.first {
+    ) -> AppShortcutAction? {
+        let taken = takenActions(for: bundleID, in: bindings)
+        return AppShortcutAction.allCases.first {
             !taken.contains($0)
         }
     }
 
-    /// Resolves preferred or available behavior when reassigning application
+    /// Resolves preferred or available action when reassigning application
     /// row (#334).
-    static func behaviorForAssignment(
+    static func actionForAssignment(
         to bundleID: String,
-        preferred: AppLaunchBehavior,
+        preferred: AppShortcutAction,
         in bindings: [KeyBinding],
         excluding id: UUID
-    ) -> AppLaunchBehavior {
-        let taken = takenBehaviors(
+    ) -> AppShortcutAction {
+        let taken = takenActions(
             for: bundleID,
             in: bindings,
             excluding: id
         )
         if !taken.contains(preferred) { return preferred }
-        return AppLaunchBehavior.allCases.first {
+        return AppShortcutAction.allCases.first {
             !taken.contains($0)
         } ?? preferred
     }
@@ -90,17 +94,17 @@ extension KeybindingCatalog {
     /// quote means escaped content the app menu never authors.
     private static func parseAppCommand(
         _ lua: String
-    ) -> (bundleID: String, behavior: AppLaunchBehavior)? {
+    ) -> (bundleID: String, action: AppShortcutAction)? {
         let suffix = "\")"
-        for behavior in AppLaunchBehavior.allCases {
-            let prefix = "KiwiDesk.\(behavior.verb)(\""
+        for action in AppShortcutAction.allCases {
+            let prefix = "KiwiDesk.\(action.verb)(\""
             guard lua.hasPrefix(prefix), lua.hasSuffix(suffix),
                 lua.count > prefix.count + suffix.count
             else { continue }
             let inner = lua.dropFirst(prefix.count)
                 .dropLast(suffix.count)
             guard !inner.contains("\"") else { continue }
-            return (String(inner), behavior)
+            return (String(inner), action)
         }
         return nil
     }

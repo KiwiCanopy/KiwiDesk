@@ -1,3 +1,4 @@
+import ApplicationServices
 import Foundation
 
 /// The untracked-focus classification the two report channels
@@ -12,12 +13,25 @@ extension EventLoop {
         pid: pid_t,
         bundleID: String?,
         isAccessory: Bool,
+        element: AXUIElement?,
         channel: String
     ) {
+        // The gate's own #2072 escape: a buttoned window it is
+        // about to admit is no panel. An activation carries no
+        // element and reads as one, Ghostty's config window too.
+        let layer = FloatDetection.windowLayer(of: id) ?? 0
+        let button =
+            FloatDetection.needsTitlebarButton(
+                layer: layer,
+                isAccessory: isAccessory,
+                bundleID: bundleID
+            )
+            && element.map { Self.readsTitlebarButton($0, id: id) } == true
         if FloatDetection.isBuiltInIgnoredPanel(
             bundleID: bundleID,
-            id: id,
-            isAccessory: isAccessory
+            layer: layer,
+            isAccessory: isAccessory,
+            titlebarButton: button
         ) {
             onLog(
                 "\(channel): untracked w\(id.raw) "

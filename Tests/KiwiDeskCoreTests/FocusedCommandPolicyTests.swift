@@ -38,6 +38,8 @@ struct FocusedCommandPolicyTests {
         // Re-lays the focused Space out, like set_mode without a
         // Space, moving no window between Spaces (#453).
         "cycle_mode",
+        // Names an app, never the focused window (#1510).
+        "gather",
         "get_state",
         "get_layout_info",
         "list_monitors",

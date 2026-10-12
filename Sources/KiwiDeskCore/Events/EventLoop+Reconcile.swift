@@ -208,7 +208,9 @@ extension EventLoop {
                 pid: pid,
                 app: app,
                 layer: read == nil ? layers[id] : layers[id] ?? 0,
-                isAccessory: isAccessory
+                isAccessory: isAccessory,
+                tracked: elements[pid]?[id] != nil,
+                titlebarButton: read?.titlebarButton
             ) {
                 // App-wide user rules are stable config, not a
                 // flickering window-server signal. Apply them

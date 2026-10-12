@@ -207,6 +207,7 @@ enum HomeCardContent {
                 && [.atRest, .showMore].contains(
                     $0.placement.tier
                 )
+                && SettingsDraftDiff.namesModelPath($0.id)
         }.count
     }
 

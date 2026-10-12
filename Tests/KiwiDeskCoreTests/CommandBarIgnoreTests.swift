@@ -20,7 +20,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.raycast.macos",
                 layer: 8,
                 isAccessory: true,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
         // Any accessory app, not just known bundle ids.
@@ -29,7 +30,35 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.example.somelauncher",
                 layer: 3,
                 isAccessory: true,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
+            )
+        )
+    }
+
+    /// A buttoned window of a Dock-less app is one of its normal
+    /// windows, not a launcher (#2072) — the escape is the
+    /// accessory branch's, and Ghostty's alone among the
+    /// layer-scoped bundles (#2067); Raycast's raised window stays
+    /// ignored with buttons.
+    @Test("a buttoned accessory window escapes the ignore")
+    func buttonedAccessoryWindowEscapes() {
+        #expect(
+            !FloatDetection.shouldIgnore(
+                bundleID: "com.apple.captivenetworkassistant",
+                layer: 8,
+                isAccessory: true,
+                rules: noRules,
+                titlebarButton: true
+            )
+        )
+        #expect(
+            FloatDetection.shouldIgnore(
+                bundleID: "com.raycast.macos",
+                layer: 8,
+                isAccessory: false,
+                rules: noRules,
+                titlebarButton: true
             )
         )
     }
@@ -41,7 +70,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.raycast.macos",
                 layer: 0,
                 isAccessory: true,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
         #expect(
@@ -49,7 +79,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.example.menubarapp",
                 layer: 0,
                 isAccessory: true,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
     }
@@ -64,7 +95,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.raycast.macos",
                 layer: 8,
                 isAccessory: false,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
         #expect(
@@ -72,7 +104,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.raycast.macos",
                 layer: 0,
                 isAccessory: false,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
         // Raycast 2 (the "Raycast X" beta) has its own id.
@@ -81,7 +114,8 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.raycast-x.macos",
                 layer: 8,
                 isAccessory: false,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
     }
@@ -93,9 +127,58 @@ struct CommandBarIgnoreTests {
                 bundleID: "com.apple.finder",
                 layer: 8,
                 isAccessory: false,
-                rules: noRules
+                rules: noRules,
+                titlebarButton: false
             )
         )
+    }
+
+    /// A screen-saver-level window is a HUD or an overlay whatever
+    /// its app (#2069): the line is the level itself, so one below
+    /// it is still a regular app's float.
+    @Test("any app's screen-saver-level window is never managed")
+    func screenSaverLevelIgnored() {
+        func ignored(_ layer: Int, button: Bool = false) -> Bool {
+            FloatDetection.shouldIgnore(
+                bundleID: "com.tinyspeck.slackmacgap",
+                layer: layer,
+                isAccessory: false,
+                rules: noRules,
+                titlebarButton: button
+            )
+        }
+        let level = FloatDetection.screenSaverLayer
+        #expect(ignored(level))
+        #expect(ignored(level + 1, button: true))
+        #expect(!ignored(level - 1))
+    }
+
+    /// The level refuses adoption, never a tracked window rising
+    /// to it, whose removal the sweep would read as a close.
+    @Test("a tracked window keeps its verdict from below the level")
+    func trackedWindowIsJudgedBelowTheLevel() {
+        let level = FloatDetection.screenSaverLayer
+        #expect(FloatDetection.judgedLayer(level, tracked: false) == level)
+        #expect(
+            FloatDetection.judgedLayer(level + 1, tracked: true) == level - 1
+        )
+        #expect(FloatDetection.judgedLayer(8, tracked: true) == 8)
+    }
+
+    /// A focus report for a screen-saver-level window arms the
+    /// ignored-panel distrust for any app, as the gate ignores it.
+    @Test("an untracked screen-saver-level window is an ignored panel")
+    func screenSaverLevelIsAPanel() {
+        func panel(_ layer: Int) -> Bool {
+            FloatDetection.isBuiltInIgnoredPanel(
+                bundleID: "com.tinyspeck.slackmacgap",
+                layer: layer,
+                isAccessory: false,
+                titlebarButton: false
+            )
+        }
+        #expect(panel(FloatDetection.screenSaverLayer))
+        #expect(!panel(FloatDetection.screenSaverLayer - 1))
     }
 
     @Test("The visible-panel scan counts only the panel band")

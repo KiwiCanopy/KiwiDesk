@@ -14,6 +14,12 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     public var spaceHistory: RuleReachTable<SpaceHistoryKind>
     /// The layout cycle, one key (#453).
     public var modeCycle: RuleReachTable<[LayoutMode]>
+    /// The Tile list and the "Float windows automatically" switch
+    /// (#2173).
+    public var tileRules: RuleReachTable<[String]>
+    public var floatAutomatically: RuleReachTable<Bool>
+    public let storedTileBase: [String]
+    public let storedTileOverrides: [String: RuleListOverride]
     /// The shortcut base and overrides the key table reads: the
     /// files, with the draft's layer edits laid over them
     /// (`rewriteLayers`, #2022).
@@ -43,6 +49,10 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         storedScrollBase: ScrollGestureBase,
         spaceHistory: RuleReachTable<SpaceHistoryKind>,
         modeCycle: RuleReachTable<[LayoutMode]>,
+        tileRules: RuleReachTable<[String]>,
+        floatAutomatically: RuleReachTable<Bool>,
+        storedTileBase: [String],
+        storedTileOverrides: [String: RuleListOverride],
         storedKeyBase: [KeyLayer],
         storedKeyOverrides: [String: KeyLayerOverride],
         keyTemplates: [String: KeyBinding],
@@ -58,6 +68,10 @@ public struct RuleReachSnapshot: Equatable, Sendable {
         self.storedScrollBase = storedScrollBase
         self.spaceHistory = spaceHistory
         self.modeCycle = modeCycle
+        self.tileRules = tileRules
+        self.floatAutomatically = floatAutomatically
+        self.storedTileBase = storedTileBase
+        self.storedTileOverrides = storedTileOverrides
         self.storedKeyBase = storedKeyBase
         self.storedKeyOverrides = storedKeyOverrides
         self.fileKeyBase = storedKeyBase
@@ -76,6 +90,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
             || !scrollGestures.baseTouched.isEmpty
             || !spaceHistory.baseTouched.isEmpty
             || !modeCycle.baseTouched.isEmpty
+            || !tileRules.baseTouched.isEmpty
+            || !floatAutomatically.baseTouched.isEmpty
             || !RuleReachTable<String>.sameShortcuts(keyBase, fileKeyBase)
             || storedKeyOverrides != fileKeyOverrides
             || appRules.touched.values.contains { !$0.isEmpty }
@@ -84,6 +100,8 @@ public struct RuleReachSnapshot: Equatable, Sendable {
             || scrollGestures.touched.values.contains { !$0.isEmpty }
             || spaceHistory.touched.values.contains { !$0.isEmpty }
             || modeCycle.touched.values.contains { !$0.isEmpty }
+            || tileRules.touched.values.contains { !$0.isEmpty }
+            || floatAutomatically.touched.values.contains { !$0.isEmpty }
     }
 
     /// The loaded page's gui.json layers, when the draft is that
@@ -119,6 +137,7 @@ extension KiwiCore {
         }
         let stored = profiles.allProfiles()
         var floats: [String: RuleListOverride] = [:]
+        var tiles: [String: RuleListOverride] = [:]
         var keys: [String: KeyLayerOverride] = [:]
         var templates: [String: KeyBinding] = [:]
         let keyBase = sidecar.layers
@@ -127,6 +146,7 @@ extension KiwiCore {
         RuleReachTable<String>.collectTemplates(keyBase, into: &templates)
         for profile in stored {
             floats[profile.name] = profile.floatRules
+            tiles[profile.name] = profile.tileRules
             keys[profile.name] = profile.layers
             RuleReachTable<String>.collectTemplates(
                 profile.layers?.resolved(onto: keyBase) ?? keyBase,
@@ -159,6 +179,16 @@ extension KiwiCore {
                 base: sidecar.modeCycle,
                 overrides: stored.map { ($0.name, $0.modeCycle) }
             ),
+            tileRules: .tileRules(
+                base: sidecar.tileRules,
+                overrides: stored.map { ($0.name, $0.tileRules) }
+            ),
+            floatAutomatically: .floatAutomatically(
+                base: sidecar.floatAutomatically,
+                overrides: stored.map { ($0.name, $0.floatAutomatically) }
+            ),
+            storedTileBase: sidecar.tileRules,
+            storedTileOverrides: tiles,
             storedKeyBase: keyBase,
             storedKeyOverrides: keys,
             keyTemplates: templates,
@@ -190,6 +220,8 @@ extension KiwiCore {
         let scroll = snapshot.scrollGestures
         let history = snapshot.spaceHistory
         let cycle = snapshot.modeCycle
+        let tile = snapshot.tileRules
+        let automatic = snapshot.floatAutomatically
         var pending: [Profile] = []
         for name in app.profiles {
             let original = snapshot.storedFloatOverrides[name]
@@ -206,10 +238,18 @@ extension KiwiCore {
             let scrollTouched = !(scroll.touched[name] ?? []).isEmpty
             let historyTouched = !(history.touched[name] ?? []).isEmpty
             let cycleTouched = !(cycle.touched[name] ?? []).isEmpty
+            let tileOriginal = snapshot.storedTileOverrides[name]
+            let tileOverride = tile.floatRuleOverride(
+                for: name,
+                original: tileOriginal
+            )
+            let automaticTouched =
+                !(automatic.touched[name] ?? []).isEmpty
             guard
                 appTouched || keyTouched || scrollTouched
                     || historyTouched || cycleTouched
                     || floatOverride != original
+                    || tileOverride != tileOriginal || automaticTouched
             else { continue }
             var profile = try profiles.read(name: name)
             if appTouched {
@@ -237,7 +277,12 @@ extension KiwiCore {
             if cycleTouched {
                 profile.modeCycle = cycle.modeCycleOverride(for: name)
             }
+            if automaticTouched {
+                profile.floatAutomatically =
+                    automatic.floatAutomaticallyOverride(for: name)
+            }
             profile.floatRules = floatOverride
+            profile.tileRules = tileOverride
             pending.append(profile)
         }
         var sidecar: GuiConfig?
@@ -251,6 +296,7 @@ extension KiwiCore {
             || !scroll.baseTouched.isEmpty
             || !history.baseTouched.isEmpty
             || !cycle.baseTouched.isEmpty || keysMoved
+            || !tile.baseTouched.isEmpty || !automatic.baseTouched.isEmpty
         {
             guard var stored = guiConfigStore.load() else {
                 throw SidecarError.unreadable
@@ -267,6 +313,10 @@ extension KiwiCore {
             )
             stored.spaceHistory = history.spaceHistoryBase
             stored.modeCycle = cycle.modeCycleBase
+            stored.tileRules = tile.floatRuleBase(
+                original: snapshot.storedTileBase
+            )
+            stored.floatAutomatically = automatic.floatAutomaticallyBase
             sidecar = stored
         }
         for profile in pending { try profiles.write(profile) }

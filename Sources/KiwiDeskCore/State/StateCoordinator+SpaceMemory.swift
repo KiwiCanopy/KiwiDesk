@@ -121,7 +121,9 @@ extension StateCoordinator {
     }
 
     /// Re-points an AWAY window's remembered Space at the one the
-    /// incoming profile records for it (#1248), keeping the kind:
+    /// incoming profile records for it (#1248) — or at the Space a
+    /// `gather` hop brings it into (#1510), whose arrival carries
+    /// the frame macOS kept for it like any return — keeping the kind:
     /// a watched departure stays `.departed`, a boot-seeded
     /// `.restored` filing stays restored — the population most
     /// likely to be away across a switch is the one a restart

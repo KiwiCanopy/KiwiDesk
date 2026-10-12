@@ -58,6 +58,13 @@ extension KiwiCore {
             ?? config.scrollGesture
         config.spaceHistory = profile.spaceHistory ?? config.spaceHistory
         config.modeCycle = profile.modeCycle ?? config.modeCycle
+        config.tileRules =
+            profile.tileRules?.resolved(
+                onto: config.tileRules,
+                normalizing: FloatGuess.normalizedRule
+            ) ?? config.tileRules
+        config.floatAutomatically =
+            profile.floatAutomatically ?? config.floatAutomatically
     }
 
     /// Copies the live profile-scoped state into the model:
@@ -190,6 +197,8 @@ extension KiwiCore {
         config.layers = recoverKeybindings()
         config.floatRules = globalRuleBase.floatRules
         config.ignoreRules = globalRuleBase.ignoreRules
+        config.tileRules = globalRuleBase.tileRules
+        config.floatAutomatically = globalRuleBase.floatAutomatically
         // The base `init.lua`'s verbs declared (#1656).
         config.scrollGesture = mouse.scroll.base
         config.spaceHistory = spaceHistory.base

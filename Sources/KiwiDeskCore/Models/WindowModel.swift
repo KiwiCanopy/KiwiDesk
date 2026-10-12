@@ -64,6 +64,11 @@ public struct ManagedWindow: Sendable, Equatable {
     /// its reopen identity is the mark, never its area-named title
     /// (#2059).
     public var carriesOwnMark: Bool
+    /// The AX subrole, read at adoption and refreshed by
+    /// `.windowSubroleChanged`; empty where the read failed, nil
+    /// before any. A titled window reads `AXStandardWindow`
+    /// whatever its frame, so it never presents (#1788).
+    public var subrole: String?
 
     public init(
         id: WindowID,
@@ -77,7 +82,8 @@ public struct ManagedWindow: Sendable, Equatable {
         isTransientOverlay: Bool = false,
         isRaisedLayer: Bool = false,
         isFullscreen: Bool = false,
-        carriesOwnMark: Bool = false
+        carriesOwnMark: Bool = false,
+        subrole: String? = nil
     ) {
         self.id = id
         self.pid = pid
@@ -91,6 +97,7 @@ public struct ManagedWindow: Sendable, Equatable {
         self.isRaisedLayer = isRaisedLayer
         self.isFullscreen = isFullscreen
         self.carriesOwnMark = carriesOwnMark
+        self.subrole = subrole
     }
 
     /// Reconstructs the snapshot with a new `WindowID` for native
@@ -110,7 +117,8 @@ public struct ManagedWindow: Sendable, Equatable {
             isTransientOverlay: isTransientOverlay,
             isRaisedLayer: isRaisedLayer,
             isFullscreen: isFullscreen,
-            carriesOwnMark: carriesOwnMark
+            carriesOwnMark: carriesOwnMark,
+            subrole: subrole
         )
     }
 }

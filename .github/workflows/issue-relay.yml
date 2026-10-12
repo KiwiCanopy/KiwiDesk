@@ -1,0 +1,32 @@
+# Forwards a new issue from someone other than the owner to the
+# private planning repo, which drafts a reply for the owner to
+# approve. Only the issue NUMBER crosses; no model runs here, and
+# nothing the issue says reaches this job's shell.
+name: Issue relay
+
+on:
+  issues:
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  relay:
+    if: >-
+      github.event.issue.user.login != 'hajiboy95' &&
+      github.event.issue.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch to the planning repo
+        env:
+          GH_TOKEN: ${{ secrets.PLAN_DISPATCH_TOKEN }}
+          NUMBER: ${{ github.event.issue.number }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "PLAN_DISPATCH_TOKEN not set; skipping"
+            exit 0
+          fi
+          gh api repos/KiwiCanopy/KiwiDesk-plan/dispatches \
+            -f event_type=issue-opened \
+            -F "client_payload[number]=$NUMBER"

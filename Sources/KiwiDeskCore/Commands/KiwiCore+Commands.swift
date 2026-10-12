@@ -86,6 +86,8 @@ extension KiwiCore {
             return launch(args, newInstance: false)
         case "spawn_new":
             return launch(args, newInstance: true)
+        case "gather":
+            return gather(args)
         case "set_mode":
             return setMode(args)
         case "show_layout_picker":
@@ -114,6 +116,8 @@ extension KiwiCore {
             return setModeCue(args)
         case "set_space_history":
             return setSpaceHistory(args)
+        case "set_float_automatically":
+            return setFloatAutomatically(args)
         case "set_shortcut_panel_liquid_glass":
             return setShortcutPanelLiquidGlass(args)
         case "set_space_switch_liquid_glass":

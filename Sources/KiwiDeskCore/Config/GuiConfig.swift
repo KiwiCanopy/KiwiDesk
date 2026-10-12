@@ -13,22 +13,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// rather than spelling that default again at a call site.
     public var spaceModes: [SpaceID: LayoutMode] = [:]
 
-    /// This draft's mode for every space in `spaces`, dense.
-    ///
-    /// The sparse encoding omits `.bsp`, and a reader that
-    /// spells that default itself is a second copy of it — which
-    /// is how a mode-scoped write can disagree with the apply
-    /// beside it (#1179).
-    public func modes(
-        for spaces: [SpaceID]
-    ) -> [SpaceID: LayoutMode] {
-        var dense: [SpaceID: LayoutMode] = [:]
-        for space in spaces {
-            dense[space] = spaceModes[space] ?? .bsp
-        }
-        return dense
-    }
-
     /// App -> space assignment (`app_rules`).
     public var appRules: [String: SpaceID] = [:]
     /// Space -> monitor fingerprint pin (profile-scoped).
@@ -69,6 +53,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// The layouts the cycle walks (#453); a profile diverges
     /// through `Profile.modeCycle`.
     public var modeCycle = ModeCycle.defaultList
+    /// Whether detection floats windows on a guess — a fixed size,
+    /// no Dock icon — (#2173); a profile diverges through
+    /// `Profile.floatAutomatically`.
+    public var floatAutomatically = FloatGuess.enabledByDefault
+    /// Apps whose guessed floats tile (`tile_rules`, #2173).
+    public var tileRules: [String] = []
     /// The settings no profile carries (#1741); nil until adopted.
     /// Stamped at the write (`GuiConfigStore.liveAppWide`), never
     /// drafted: General writes them the moment they change.
@@ -96,80 +86,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
 
     public init() {}
 
-    /// Renames a space across all references, overrides, and keybindings
-    /// (#13).
-    @discardableResult
-    public mutating func renameSpace(
-        from: SpaceID,
-        to: SpaceID
-    ) -> Bool {
-        guard from != to else { return true }
-        guard !to.raw.isEmpty else { return false }
-        guard spaces.contains(from), !spaces.contains(to) else {
-            return false
-        }
-        spaces = spaces.map { $0 == from ? to : $0 }
-        if let mode = spaceModes.removeValue(forKey: from) {
-            spaceModes[to] = mode
-        }
-        if let pin = spacePins.removeValue(forKey: from) {
-            spacePins[to] = pin
-        }
-        if mainSpaces.remove(from) != nil {
-            mainSpaces.insert(to)
-        }
-        if fallbackSpace == from { fallbackSpace = to }
-        settings.renameSpace(from: from, to: to)
-        for (app, space) in appRules where space == from {
-            appRules[app] = to
-        }
-        layers = layers.map { layer in
-            var layer = layer
-            layer.bindings = layer.bindings.map { binding in
-                var binding = binding
-                binding.lua = SpaceLuaArg.rename(
-                    in: binding.lua,
-                    from: from.raw,
-                    to: to.raw
-                )
-                return binding
-            }
-            return layer
-        }
-        // Rows a deleted `to` left behind (#92) now meet the
-        // renamed ones; nothing else is touched.
-        NavigationChords.deduplicate(&self, touching: to)
-        return true
-    }
-
-    /// Deletes a space and all profile-scoped overrides (#68) — a
-    /// pin left behind keeps the space in `Profile.declaredSpaces`
-    /// and the next authoritative load resurrects it. Deliberately
-    /// does NOT touch `appRules` (unlike `renameSpace`): app rules
-    /// are global, and another profile may still declare a space
-    /// of this name.
-    public mutating func removeSpace(_ space: SpaceID) {
-        spaces.removeAll { $0 == space }
-        spaceModes[space] = nil
-        spacePins[space] = nil
-        mainSpaces.remove(space)
-        if fallbackSpace == space { fallbackSpace = nil }
-        settings.removeSpace(space)
-    }
-
-    /// True if deleting space would drop custom overrides (#205).
-    /// The settings half probes by mutating a copy and comparing,
-    /// so it can never drift from `TilingSettings.removeSpace`'s
-    /// reflection-guarded map list.
-    public func carriesOverrides(_ space: SpaceID) -> Bool {
-        if spacePins[space] != nil { return true }
-        if mainSpaces.contains(space) { return true }
-        if fallbackSpace == space { return true }
-        var probe = settings
-        probe.removeSpace(space)
-        return probe != settings
-    }
-
     /// Only the global fields persist in the sidecar — the
     /// profile-scoped ones round-trip through the profile JSON
     /// instead (#36), which is what lets the two files never
@@ -186,6 +102,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case scrollGesture = "scroll_gesture"
         case spaceHistory = "space_history"
         case modeCycle = "mode_cycle"
+        case floatAutomatically = "float_automatically"
+        case tileRules = "tile_rules"
         case refusal
         case quit
         case desktop
@@ -265,6 +183,17 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             ) ?? .defaultKind
         // Additive since #453: absence is the default list.
         modeCycle = try ModeCycle.decoded(container, forKey: .modeCycle)
+        // Additive since #2173: absence is the defaults.
+        floatAutomatically =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .floatAutomatically
+            ) ?? FloatGuess.enabledByDefault
+        tileRules =
+            try container.decodeIfPresent(
+                [String].self,
+                forKey: .tileRules
+            ) ?? []
         // Additive since #1741, like `desktopSpaces`: absence is
         // "not adopted yet", which the adoption reads.
         appWide = AppWideSettings(
@@ -335,6 +264,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(scrollGesture, forKey: .scrollGesture)
         try container.encode(spaceHistory, forKey: .spaceHistory)
         try container.encode(modeCycle, forKey: .modeCycle)
+        try container.encode(
+            floatAutomatically,
+            forKey: .floatAutomatically
+        )
+        try container.encode(tileRules, forKey: .tileRules)
         if let appWide {
             try container.encode(appWide.refusal, forKey: .refusal)
             try container.encode(appWide.quit, forKey: .quit)

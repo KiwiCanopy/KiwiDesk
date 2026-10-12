@@ -112,6 +112,11 @@ extension KiwiCore {
         config.appRules = baseAppRules()
         config.floatRules = baseFloatRules()
         config.ignoreRules = baseIgnoreRules()
+        if !isGuiManaged {
+            // A stale sidecar is no base for a Lua-owned config.
+            config.tileRules = globalRuleBase.tileRules
+            config.floatAutomatically = globalRuleBase.floatAutomatically
+        }
         overlayProfileState(&config, from: profile)
         return config
     }
