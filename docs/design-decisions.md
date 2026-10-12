@@ -9989,9 +9989,23 @@ owed on the owner's desk before the release, and the register
 check is necessary and not sufficient (#1098).
 
 **Nobody is moved.** As with every later default, an existing
-install keeps its keymap: its swap stays on `⌃⌥⌘`+arrows and the
-four new rows stay unbound until a Record or Shortcuts & Gestures
-▸ Restore Defaults… lands them.
+install keeps its keymap: its swap stays on `⌃⌥⌘`+arrows. The
+four new rows reach it through the generation top-up below, each
+only where its chord is free, so the history pair lands and the
+steps wait on that swap until a Record or Shortcuts & Gestures ▸
+Restore Defaults… moves it.
+
+**A default a release adds reaches an existing install once
+(#2211, owner ruling 2026-10-12).** The seed is written at first
+run, so a row added later was invisible to everyone who updated,
+including a spotlight feature's own keys. Each such row joins a
+numbered generation (`DefaultKeybindings.rows(ofGeneration:)`),
+and the first launch after an update appends the rows of every
+generation past the Mac's mark where the action is unbound and
+the chord free, then advances the mark. Adding is not moving: an
+occupied chord keeps its binding, and a row deleted after its
+generation was offered is never added back. A fresh seed carries
+every generation, so it tops up nothing.
 
 **Space history walks the visits, never the order (#1655, owner
 rulings 2026-10-09).** Back and Forward answer "where was I", which

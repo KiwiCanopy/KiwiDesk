@@ -94,6 +94,15 @@ because two real clients now remove drift — see
   `DesktopShortcutSeamTests`). Moving a window to a Desktop stays
   an offer (#1125), and a further `⇧`-lifted tier is a ruling of
   its own.
+- **A default row added after the first-run seed joins the next
+  generation (#2211).** Bump `DefaultKeybindings.newestGeneration`
+  and list the row in `rows(ofGeneration:)`, beside adding it to
+  the seed, so an existing install gets it once through
+  `topUpGenerationShortcuts` — added only where its action is
+  unbound and its chord free, never moving a binding — while a
+  fresh seed already carries it (`DefaultShortcutGenerationTests`
+  ▸ `seedCarriesEveryGeneration`). A row left out of a generation
+  reaches new installs alone.
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took

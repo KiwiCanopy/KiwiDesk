@@ -89,6 +89,22 @@ final class DesktopMemory {
         UserDefaults.standard.set($0, forKey: DesktopMemory.shortcutMarkKey)
     }
     nonisolated static let shortcutMarkKey = "desktopShortcutMark"
+    /// The newest default-shortcut generation this Mac was
+    /// offered (#2211) — live in the app's defaults, pinned by both
+    /// `makeTestCore` twins. Zero on an install that predates it.
+    var readDefaultsGeneration: @MainActor () -> Int = {
+        UserDefaults.standard.integer(
+            forKey: DesktopMemory.defaultsGenerationKey
+        )
+    }
+    var writeDefaultsGeneration: @MainActor (Int) -> Void = {
+        UserDefaults.standard.set(
+            $0,
+            forKey: DesktopMemory.defaultsGenerationKey
+        )
+    }
+    nonisolated static let defaultsGenerationKey =
+        "defaultShortcutsGeneration"
     /// The highest Desktop a declining setup (Lua-owned, no
     /// sidecar) was asked about this session, so a switch does not
     /// ask again.
