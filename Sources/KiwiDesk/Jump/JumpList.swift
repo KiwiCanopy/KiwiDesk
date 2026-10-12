@@ -1,4 +1,3 @@
-import Foundation
 import KiwiDeskCore
 
 /// The panel's list state over one opening's snapshot (#1875):
@@ -28,8 +27,10 @@ struct JumpList {
         guard text != query else { return }
         query = text
         results = JumpSearch.matches(snapshot.entries, query: text)
-        let blank = text.trimmingCharacters(in: .whitespaces).isEmpty
-        selection = Self.preselection(results.count, blank: blank)
+        selection = Self.preselection(
+            results.count,
+            blank: text.isEmpty
+        )
     }
 
     /// Moves the selection by `delta` rows, clamped at both ends.
@@ -62,16 +63,6 @@ struct JumpList {
     /// Where the Hidden section starts, nil without one.
     var hiddenStart: Int? {
         results.firstIndex { $0.entry.isHiddenApp }
-    }
-
-    /// Whether ⇧ draws `entry`'s way here: a window that can
-    /// move, from a Space that is not the current one.
-    func showsWayHere(_ entry: JumpEntry) -> Bool {
-        guard !entry.isHiddenApp, entry.status != .fullscreen,
-            snapshot.here != nil
-        else { return false }
-        return entry.space != snapshot.here
-            || entry.status != .shown
     }
 
     private static func preselection(

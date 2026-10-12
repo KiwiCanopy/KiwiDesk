@@ -100,29 +100,4 @@ struct JumpListTests {
         #expect(list.quick(3)?.entry.isHiddenApp == true)
         #expect(self.list(three).hiddenStart == nil)
     }
-
-    @Test("⇧ shows the way here only for a window that can move")
-    func wayHere() {
-        let list = list([])
-        #expect(list.showsWayHere(Self.row(1, "A", space: "2")))
-        #expect(!list.showsWayHere(Self.row(1, "A", space: "1")))
-        #expect(
-            list.showsWayHere(
-                Self.row(1, "A", space: nil, status: .minimized)
-            )
-        )
-        #expect(
-            list.showsWayHere(
-                Self.row(1, "A", space: "1", status: .away(desktop: 2))
-            )
-        )
-        #expect(
-            !list.showsWayHere(
-                Self.row(1, "A", space: "2", status: .fullscreen)
-            )
-        )
-        #expect(!list.showsWayHere(Self.row(1, "A", hidden: true)))
-        let nowhere = self.list([], here: nil)
-        #expect(!nowhere.showsWayHere(Self.row(1, "A", space: "2")))
-    }
 }

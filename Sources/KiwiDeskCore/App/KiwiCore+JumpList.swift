@@ -46,7 +46,8 @@ extension KiwiCore {
                     title: window.title,
                     space: space,
                     spaceIcon: space.flatMap(jumpSpaceIcon),
-                    status: window.isFullscreen ? .fullscreen : .shown
+                    status: window.isFullscreen ? .fullscreen : .shown,
+                    movesHere: jumpMovesHere(window, from: space)
                 )
             }
     }
@@ -69,7 +70,9 @@ extension KiwiCore {
                 title: entry.title,
                 space: space,
                 spaceIcon: space.flatMap(jumpSpaceIcon),
-                status: .away(desktop: snapshot.number(of: entry.nativeSpace))
+                status: .away(desktop: snapshot.number(of: entry.nativeSpace)),
+                movesHere: canDriveDesktops
+                    && state.workspaces.activeSpace != nil
             )
         }
     }
@@ -89,7 +92,8 @@ extension KiwiCore {
                 title: record.title,
                 space: nil,
                 spaceIcon: nil,
-                status: .minimized
+                status: .minimized,
+                movesHere: state.workspaces.activeSpace != nil
             )
         }
     }
@@ -119,6 +123,21 @@ extension KiwiCore {
                     status: .shown
                 )
             }
+    }
+
+    /// Whether `moveHere(_:)` would move a tracked window: not a
+    /// full-screen one, not one already here, and not one the
+    /// sticky gate holds — a ∞ window, already drawn here, is only
+    /// focused. An away row asks the bridge alone: whether its
+    /// hop reaches is known only when it runs.
+    private func jumpMovesHere(
+        _ window: ManagedWindow,
+        from space: SpaceID?
+    ) -> Bool {
+        guard let active = state.workspaces.activeSpace,
+            !window.isFullscreen, space != active
+        else { return false }
+        return stickyMoveBlock(window.id, to: active) == nil
     }
 
     /// The Space's own icon, the bar chip's reading, nil without

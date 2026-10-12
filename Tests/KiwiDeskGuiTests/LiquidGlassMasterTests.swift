@@ -130,11 +130,20 @@ struct LiquidGlassMasterTests {
     /// Two needles because they are two different failures: the
     /// controller can stop READING the setting, and the view can
     /// stop HANDING it to the material.
-    @Test("the panel is wired to the setting it stores")
+    ///
+    /// Jump to window (#1875) is the second keyboard panel and
+    /// wears the same leaf, so both panels carry both needles.
+    @Test("the panels are wired to the setting they store")
     func panelReadsTheSetting() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Shortcuts")
-        let files = try SourceScan.swiftSources(under: root)
+        let gui = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let files =
+            try SourceScan.swiftSources(
+                under: gui.appendingPathComponent("Shortcuts")
+            )
+            + SourceScan.swiftSources(
+                under: gui.appendingPathComponent("Jump")
+            )
         func source(_ name: String) throws -> String {
             let file = try #require(
                 files.first { $0.lastPathComponent == name }
@@ -160,6 +169,16 @@ struct LiquidGlassMasterTests {
             `glassChrome`, so it draws one finish whatever the \
             row says.
             """
+        )
+        #expect(
+            try source("JumpPanelController.swift")
+                .contains("settings.shortcutPanelLiquidGlass"),
+            "Jump to window no longer reads the stored leaf."
+        )
+        #expect(
+            try source("JumpPanelView.swift")
+                .contains("enabled:liquidGlass"),
+            "Jump to window no longer hands its setting on."
         )
     }
 

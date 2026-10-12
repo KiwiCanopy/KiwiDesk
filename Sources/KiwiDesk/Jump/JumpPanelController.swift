@@ -17,30 +17,16 @@ private let jumpLog = Logger(
 @MainActor
 final class JumpPanelController: NSObject, NSWindowDelegate {
     let core: KiwiCore
-    private var panel: JumpPanel?
+    /// The #952 activation hand-back.
+    let handBack: PanelHandBack
+    var panel: JumpPanel?
     private var model: JumpModel?
     private var closing = false
-    /// The app in front before the panel took activation (#952).
-    var returnTarget: NSRunningApplication?
-    /// Seam for activating the return target (#565).
-    var activateReturnTarget: (NSRunningApplication) -> Void = {
-        $0.activate()
-    }
-    /// Seam answering whether KiwiDesk is the active app (#565).
-    var isAppActive: () -> Bool = {
-        NSApplication.shared.isActive
-    }
 
     init(core: KiwiCore) {
         self.core = core
+        handBack = PanelHandBack(core: core)
         super.init()
-    }
-
-    /// The most rows the list shows: a third of the screen's
-    /// visible height, never fewer than 6 nor more than 12.
-    static func rowCap(visibleHeight: CGFloat) -> Int {
-        let rows = Int(visibleHeight / 3 / JumpRowView.height)
-        return min(max(rows, 6), 12)
     }
 
     var isOpen: Bool { panel?.isVisible == true }
@@ -54,7 +40,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     }
 
     func show() {
-        let screen = screenUnderPointer()
+        let screen = PanelHandBack.screenUnderPointer()
         let snapshot = core.jumpSnapshot()
         let model = JumpModel(
             snapshot: snapshot,
@@ -77,13 +63,8 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         )
         panel.contentView = hosting
         panel.setContentSize(hosting.fittingSize)
-        center(panel, on: screen)
-        let frontmost = NSWorkspace.shared.frontmostApplication
-        returnTarget =
-            frontmost?.processIdentifier
-                == ProcessInfo.processInfo.processIdentifier
-            ? nil : frontmost
-        let front = frontmost?.bundleIdentifier ?? "none"
+        PanelHandBack.center(panel, on: screen)
+        let front = handBack.capture()?.bundleIdentifier ?? "none"
         let rows = snapshot.entries.count
         jumpLog.log(
             "KiwiDesk: jump show; \(rows, privacy: .public) rows"
@@ -93,23 +74,22 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.makeKeyAndOrderFront(nil)
     }
 
-    /// Closes the panel, optionally returning activation to the
-    /// app that was in front (#952) — only on a keyboard-commanded
-    /// close; a pick or a click away activates something itself.
+    /// Closes the panel; a keyboard-commanded close hands
+    /// activation back (#952), a click away does not.
     func close(yieldingActivation: Bool) {
         dismiss(
             yielding: yieldingActivation,
-            handoff: yieldingActivation
+            distrusting: yieldingActivation
         )
     }
 
-    /// Closes on a pick, then runs it. The orderOut's own-window
-    /// focus blip is distrusted unless the pick is our own window,
-    /// whose report the distrust would eat.
+    /// Closes on a pick, then runs it. A Move here Core refuses
+    /// leaves no window to take the focus, so activation goes back
+    /// to the app the user came from, as Esc would have.
     func pick(_ entry: JumpEntry, moveHere: Bool) {
-        dismiss(
+        let target = dismiss(
             yielding: false,
-            handoff: Self.distrustsHandoff(
+            distrusting: Self.distrustsHandoff(
                 pick: entry.pid,
                 own: ProcessInfo.processInfo.processIdentifier
             )
@@ -117,10 +97,12 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         jumpLog.log(
             "KiwiDesk: jump pick; here \(moveHere, privacy: .public)"
         )
-        if moveHere {
-            core.moveHere(entry.target)
-        } else {
+        guard moveHere else {
             core.jump(to: entry.target)
+            return
+        }
+        if !core.moveHere(entry.target), let target {
+            handBack.activateReturnTarget(target)
         }
     }
 
@@ -130,26 +112,22 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         pid != own
     }
 
-    private func dismiss(yielding: Bool, handoff: Bool) {
-        guard !closing, let panel, panel.isVisible else { return }
+    /// The one close. `closing` stops the resign-key that
+    /// `orderOut` fires from closing a second time.
+    @discardableResult
+    private func dismiss(
+        yielding: Bool,
+        distrusting: Bool
+    ) -> NSRunningApplication? {
+        guard !closing else { return nil }
         closing = true
         defer { closing = false }
-        // Consumed BEFORE orderOut, whose resign-key re-enters
-        // here (`ShortcutsPanelController.close`, #952).
-        let target = returnTarget
-        returnTarget = nil
-        let active = isAppActive()
-        if handoff, active {
-            core.distrustOwnDismissHandoff()
-        }
-        panel.orderOut(nil)
         model = nil
-        if ShortcutsPanelController.shouldYield(
-            commanded: yielding,
-            appActive: active,
-            target: target
-        ), let target {
-            activateReturnTarget(target)
+        return handBack.release(
+            yielding: yielding,
+            distrusting: distrusting
+        ) { [panel] in
+            panel?.orderOut(nil)
         }
     }
 
@@ -202,62 +180,11 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
                 ]
             )
         }
-        model.onResultsChange = { [weak self] in self?.refit() }
-    }
-
-    private static func icons(
-        for snapshot: JumpSnapshot
-    ) -> [pid_t: NSImage] {
-        var icons: [pid_t: NSImage] = [:]
-        for pid in Set(snapshot.entries.map(\.pid)) {
-            icons[pid] =
-                NSRunningApplication(processIdentifier: pid)?.icon
+        // The next turn: the hosting view has not re-laid the new
+        // results out in the setter's own.
+        model.onResultsChange = { [weak self] in
+            DispatchQueue.main.async { self?.refit() }
         }
-        return icons
-    }
-
-    // MARK: - Sizing & placement
-
-    /// Fits the panel to its list, keeping the top edge where it
-    /// is so the field stays under the user's eyes.
-    private func refit() {
-        guard let panel, let content = panel.contentView else {
-            return
-        }
-        content.layoutSubtreeIfNeeded()
-        let size = content.fittingSize
-        let top = panel.frame.maxY
-        panel.setFrame(
-            NSRect(
-                x: panel.frame.minX,
-                y: top - size.height,
-                width: size.width,
-                height: size.height
-            ),
-            display: true
-        )
-    }
-
-    private func center(_ panel: JumpPanel, on screen: NSScreen?) {
-        guard let screen else {
-            panel.center()
-            return
-        }
-        let frame = screen.visibleFrame
-        let size = panel.frame.size
-        panel.setFrameOrigin(
-            NSPoint(
-                x: frame.midX - size.width / 2,
-                y: frame.midY - size.height / 2
-            )
-        )
-    }
-
-    private func screenUnderPointer() -> NSScreen? {
-        let mouse = NSEvent.mouseLocation
-        return NSScreen.screens.first {
-            NSMouseInRect(mouse, $0.frame, false)
-        } ?? NSScreen.main
     }
 
     // MARK: - NSWindowDelegate

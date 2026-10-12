@@ -616,7 +616,7 @@
   "jump.ax.results": "Resultados: %1$d",
   "jump.empty.no_match": "Nenhuma janela aberta corresponde",
   "jump.empty.none": "Nenhuma janela aberta",
-  "jump.field.label": "Ir para janela",
+  "jump.field.label": "Ir para a janela",
   "jump.footer.jump": "%1$@ Ir",
   "jump.footer.move_here": "%1$@ Mover para cá",
   "jump.footer.quick": "%1$@ Salto rápido",

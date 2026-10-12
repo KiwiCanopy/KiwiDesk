@@ -33,7 +33,7 @@ struct ShortcutsPanelReturnTests {
     @Test("Yields only when commanded, active, with a target")
     func yieldsWhenAllThreeHold() {
         #expect(
-            ShortcutsPanelController.shouldYield(
+            PanelHandBack.shouldYield(
                 commanded: true,
                 appActive: true,
                 target: NSRunningApplication.current
@@ -44,7 +44,7 @@ struct ShortcutsPanelReturnTests {
     @Test("Does not yield an uncommanded (click-away) close")
     func doesNotYieldUncommanded() {
         #expect(
-            !ShortcutsPanelController.shouldYield(
+            !PanelHandBack.shouldYield(
                 commanded: false,
                 appActive: true,
                 target: NSRunningApplication.current
@@ -55,7 +55,7 @@ struct ShortcutsPanelReturnTests {
     @Test("Does not yield while KiwiDesk is not the active app")
     func doesNotYieldWhenInactive() {
         #expect(
-            !ShortcutsPanelController.shouldYield(
+            !PanelHandBack.shouldYield(
                 commanded: true,
                 appActive: false,
                 target: NSRunningApplication.current
@@ -66,7 +66,7 @@ struct ShortcutsPanelReturnTests {
     @Test("Does not yield with no remembered target")
     func doesNotYieldWithNoTarget() {
         #expect(
-            !ShortcutsPanelController.shouldYield(
+            !PanelHandBack.shouldYield(
                 commanded: true,
                 appActive: true,
                 target: nil
@@ -86,10 +86,10 @@ struct ShortcutsPanelReturnTests {
     func closeYieldsUnderInjectedConditions() {
         let controller = makeController()
         let target = NSRunningApplication.current
-        controller.returnTarget = target
-        controller.isAppActive = { true }
+        controller.handBack.returnTarget = target
+        controller.handBack.isAppActive = { true }
         var recorded: NSRunningApplication?
-        controller.activateReturnTarget = { recorded = $0 }
+        controller.handBack.activateReturnTarget = { recorded = $0 }
         controller.close(yieldingActivation: true)
         #expect(recorded === target)
     }
@@ -99,10 +99,10 @@ struct ShortcutsPanelReturnTests {
     )
     func closeDoesNotYieldWhenInactive() {
         let controller = makeController()
-        controller.returnTarget = NSRunningApplication.current
-        controller.isAppActive = { false }
+        controller.handBack.returnTarget = NSRunningApplication.current
+        controller.handBack.isAppActive = { false }
         var recorded: NSRunningApplication?
-        controller.activateReturnTarget = { recorded = $0 }
+        controller.handBack.activateReturnTarget = { recorded = $0 }
         controller.close(yieldingActivation: true)
         #expect(recorded == nil)
     }
@@ -117,10 +117,10 @@ struct ShortcutsPanelReturnTests {
     )
     func resignKeyNeverYields() {
         let controller = makeController()
-        controller.returnTarget = NSRunningApplication.current
-        controller.isAppActive = { true }
+        controller.handBack.returnTarget = NSRunningApplication.current
+        controller.handBack.isAppActive = { true }
         var recorded: NSRunningApplication?
-        controller.activateReturnTarget = { recorded = $0 }
+        controller.handBack.activateReturnTarget = { recorded = $0 }
         controller.close(yieldingActivation: false)
         #expect(recorded == nil)
     }
@@ -141,7 +141,7 @@ struct ShortcutsPanelReturnTests {
             core: core,
             onEdit: {}
         )
-        controller.isAppActive = { true }
+        controller.handBack.isAppActive = { true }
         controller.close(yieldingActivation: true)
         #expect(
             core.ignoredPanel.active.contains(
@@ -163,7 +163,7 @@ struct ShortcutsPanelReturnTests {
             core: core,
             onEdit: {}
         )
-        controller.isAppActive = { true }
+        controller.handBack.isAppActive = { true }
         controller.close(yieldingActivation: false)
         #expect(core.ignoredPanel.active.isEmpty)
     }
@@ -175,14 +175,14 @@ struct ShortcutsPanelReturnTests {
     )
     func doubleCloseConsumesTarget() {
         let controller = makeController()
-        controller.returnTarget = NSRunningApplication.current
-        controller.isAppActive = { true }
+        controller.handBack.returnTarget = NSRunningApplication.current
+        controller.handBack.isAppActive = { true }
         var callCount = 0
-        controller.activateReturnTarget = { _ in callCount += 1 }
+        controller.handBack.activateReturnTarget = { _ in callCount += 1 }
         controller.close(yieldingActivation: true)
         #expect(callCount == 1)
         controller.close(yieldingActivation: true)
         #expect(callCount == 1)
-        #expect(controller.returnTarget == nil)
+        #expect(controller.handBack.returnTarget == nil)
     }
 }

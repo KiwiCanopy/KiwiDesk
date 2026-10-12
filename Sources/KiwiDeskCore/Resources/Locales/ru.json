@@ -613,7 +613,7 @@
   "icon_picker.symbols": "Символы",
   "icon_picker.tabs_ax": "Источник значков",
   "icon_picker.use_as_text": "Использовать «%1$@» как текст",
-  "jump.ax.results": "Результатов: %1$d",
+  "jump.ax.results": "Результаты: %1$d",
   "jump.empty.no_match": "Нет подходящих открытых окон",
   "jump.empty.none": "Нет открытых окон",
   "jump.field.label": "Перейти к окну",

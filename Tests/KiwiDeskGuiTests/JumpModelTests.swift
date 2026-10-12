@@ -54,11 +54,25 @@ struct JumpModelTests {
 
     @Test("a page moves the selection by the visible rows")
     func paging() {
-        let model = model()
+        let entries = (1...20).map {
+            JumpListTests.row(UInt32($0), "App \($0)")
+        }
+        let model = JumpModel(
+            snapshot: JumpSnapshot(
+                entries: entries,
+                here: "1",
+                hereIcon: nil
+            ),
+            icons: [:],
+            rowCap: 6
+        )
+        #expect(model.list.selection == 1)
         model.handle(.page(1))
-        #expect(model.list.selection == 2)
+        #expect(model.list.selection == 7)
+        model.handle(.page(1))
+        #expect(model.list.selection == 13)
         model.handle(.page(-1))
-        #expect(model.list.selection == 0)
+        #expect(model.list.selection == 7)
     }
 
     @Test("VoiceOver hears the selection and the result count")

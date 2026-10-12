@@ -62,10 +62,9 @@ struct MouseButtonSeamGuardTests {
         "BarPeek.swift",
         "KiwiCore+Drag.swift",
         "MouseTracker.swift",
-        "ShortcutsPanelController.swift",
-        // Jump to window opens on the screen under the pointer,
-        // the shortcuts panel's one-shot read (#1875).
-        "JumpPanelController.swift",
+        // The shortcuts and Jump to window panels open on the
+        // screen under the pointer (#1875).
+        "PanelHandBack.swift",
     ]
 
     @Test("the live pointer read stays in its seam homes")

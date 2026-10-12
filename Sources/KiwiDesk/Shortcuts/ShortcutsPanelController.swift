@@ -61,34 +61,14 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     let core: KiwiCore
     private let onEdit: () -> Void
     private var panel: ShortcutsPanel?
-    /// Previously frontmost application before summon stole activation (#952).
-    var returnTarget: NSRunningApplication?
-    /// Seam for activating return target application (#565).
-    var activateReturnTarget: (NSRunningApplication) -> Void = {
-        $0.activate()
-    }
-    /// Seam returning whether KiwiDesk is currently active app (#565).
-    var isAppActive: () -> Bool = {
-        NSApplication.shared.isActive
-    }
+    /// The #952 activation hand-back.
+    let handBack: PanelHandBack
 
     init(core: KiwiCore, onEdit: @escaping () -> Void) {
         self.core = core
         self.onEdit = onEdit
+        handBack = PanelHandBack(core: core)
         super.init()
-    }
-
-    /// Whether close should yield activation back to the previous
-    /// app (#952): only a keyboard-commanded close — a click-away
-    /// already activated the clicked app, and re-activating the
-    /// remembered one would fight it. Pure, so all four arms are
-    /// testable without NSApp.
-    static func shouldYield(
-        commanded: Bool,
-        appActive: Bool,
-        target: NSRunningApplication?
-    ) -> Bool {
-        commanded && appActive && target != nil
     }
 
     /// Whether the content exceeds the height ceiling — the ONE
@@ -139,12 +119,11 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
                 LocaleScopedRoot { view(overflows: true) }
                 .environmentObject(LocalizationManager.shared)
         }
-        center(panel)
-        let frontmost = NSWorkspace.shared.frontmostApplication
-        returnTarget =
-            frontmost?.processIdentifier
-                == ProcessInfo.processInfo.processIdentifier
-            ? nil : frontmost
+        PanelHandBack.center(
+            panel,
+            on: PanelHandBack.screenUnderPointer()
+        )
+        let frontmost = handBack.capture()
         let front = frontmost?.bundleIdentifier ?? "none"
         logPanel("sheet show; front \(front)")
         NSApplication.shared.activate()
@@ -163,27 +142,14 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     func close(yieldingActivation: Bool) {
         let key = NSApplication.shared.keyWindow?.title ?? "none"
         logPanel("sheet close; key \(key)")
-        // Consume BEFORE orderOut: it fires `windowDidResignKey`,
-        // whose re-entrant close would nil `returnTarget` under
-        // this frame — the Escape yield dead in production while
-        // tests (no real key panel) stay green.
-        let target = returnTarget
-        returnTarget = nil
-        let active = isAppActive()
-        // Armed BEFORE orderOut and only on a commanded close of
-        // the still-active app — a click-away already resigned,
-        // and arming on Edit-in-Settings ate the intended focus
-        // (#952 capture; review, 2026-08-23).
-        if yieldingActivation, active {
-            core.distrustOwnDismissHandoff()
-        }
-        panel?.orderOut(nil)
-        if Self.shouldYield(
-            commanded: yieldingActivation,
-            appActive: active,
-            target: target
-        ), let target {
-            activateReturnTarget(target)
+        // Armed only on a commanded close — a click-away already
+        // resigned, and arming on Edit-in-Settings ate the
+        // intended focus (#952 capture; review, 2026-08-23).
+        handBack.release(
+            yielding: yieldingActivation,
+            distrusting: yieldingActivation
+        ) {
+            panel?.orderOut(nil)
         }
         DispatchQueue.main.async {
             let key = NSApplication.shared.keyWindow?.title ?? "none"
@@ -236,7 +202,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         guard let content = panel.contentView else { return false }
         let fitting = content.fittingSize
         let screen =
-            screenUnderPointer()?.visibleFrame.height
+            PanelHandBack.screenUnderPointer()?.visibleFrame.height
             ?? fitting.height
         let ceiling = min(screen * 0.7, 720)
         let height = min(fitting.height, ceiling)
@@ -247,27 +213,6 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             fitting: fitting.height,
             ceiling: ceiling
         )
-    }
-
-    private func center(_ panel: ShortcutsPanel) {
-        guard let screen = screenUnderPointer() else {
-            panel.center()
-            return
-        }
-        let frame = screen.visibleFrame
-        let size = panel.frame.size
-        let origin = NSPoint(
-            x: frame.midX - size.width / 2,
-            y: frame.midY - size.height / 2
-        )
-        panel.setFrameOrigin(origin)
-    }
-
-    private func screenUnderPointer() -> NSScreen? {
-        let mouse = NSEvent.mouseLocation
-        return NSScreen.screens.first {
-            NSMouseInRect(mouse, $0.frame, false)
-        } ?? NSScreen.main
     }
 
     // MARK: - NSWindowDelegate

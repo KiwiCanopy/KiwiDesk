@@ -102,7 +102,7 @@ struct JumpPanelView: View {
                     number: JumpList.number(ofRow: index),
                     commandHeld: model.commandHeld,
                     shiftHeld: model.shiftHeld,
-                    wayHere: list.showsWayHere(match.entry) ? here : nil
+                    wayHere: match.entry.movesHere ? here : nil
                 ) { moveHere in
                     model.onPick(match.entry, moveHere)
                 }

@@ -52,7 +52,7 @@ struct JumpRowView: View {
                 .fixedSize()
                 .layoutPriority(1)
             if showsNumber, let number {
-                Text(shiftHeld ? "⇧⌘\(number)" : "⌘\(number)")
+                Text(verbatim: shiftHeld ? "⇧⌘\(number)" : "⌘\(number)")
                     .font(.callout.monospacedDigit())
                     .foregroundStyle(.secondary)
                     .fixedSize()

@@ -628,7 +628,7 @@
   "jump.row.ax.placed": "%1$@、%2$@",
   "jump.row.ax.titled": "%1$@、%2$@",
   "jump.section.hidden": "非表示",
-  "jump.space.numbered": "スペース%1$@",
+  "jump.space.numbered": "スペース %1$@",
   "jump.status.fullscreen": "フルスクリーン",
   "jump.status.hidden": "非表示",
   "jump.status.minimized": "Dock内",
