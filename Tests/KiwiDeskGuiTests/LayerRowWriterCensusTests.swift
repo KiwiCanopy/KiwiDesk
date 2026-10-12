@@ -40,10 +40,11 @@ struct LayerRowWriterCensusTests {
         "KiwiDeskCore/Profiles/KiwiCore+ShortcutTopUp.swift":
             (
                 1,
-                "the digit and Desktop top-ups' one append: adds"
-                    + " only actions no profile binds"
+                "the digit, Desktop and generation top-ups' one"
+                    + " append: adds only actions no profile binds"
                     + " (DigitTopUpOverrideTests,"
-                    + " DesktopShortcutTopUpTests)"
+                    + " DesktopShortcutTopUpTests,"
+                    + " DefaultShortcutGenerationTests)"
             ),
         "KiwiDesk/Settings/SettingsModel+LiveWrite.swift":
             (

@@ -5487,6 +5487,7 @@ to recall, not screen area. And we run out of keys before we run
 out of spaces: past ⌥1–9 and ⌥0 there are no default go-to keys
 left.
 
+:::unreleased
 **Beside an ultrawide, Scrolling lives on the ultrawide alone.**
 With an ultrawide or super ultrawide among several screens, the
 budget and lead rules around this paragraph give way: the ultrawides lead Scrolling, every
@@ -5494,12 +5495,17 @@ other screen leads Monocle and never scrolls, and each screen
 gets three spaces ending in its own Floating space — a
 widescreen Monocle · BSP · Floating, a portrait screen Monocle ·
 Grid (one column of three) · Floating, a laptop Monocle · Grid
-(two across) · Floating. A Scrolling row belongs where it has
+(two by two) · Floating. A Scrolling row belongs where it has
 width to run; beside one, the other screen's job is to hold
 whole windows. The total is three a screen, capped at ten, and
 each screen has its own Floating space — the one place the
 budget and the one-Floating rule above do not bind. (Owner
-ruling, #1662.)
+ruling, #1662.) A laptop's Grid is two by two rather than one
+row because a laptop alone reaches the same tuning when a Space
+is switched to Grid, and a two-cell cap piles the third window
+into the last cell, which reads as a broken Grid; the dynamic
+grid still lays two windows side by side (#2171).
+:::
 
 **Every screen opens in Scrolling but the smallest, which opens
 in Monocle.** The shape rule above decides what a screen is good
@@ -10104,9 +10110,23 @@ owed on the owner's desk before the release, and the register
 check is necessary and not sufficient (#1098).
 
 **Nobody is moved.** As with every later default, an existing
-install keeps its keymap: its swap stays on `⌃⌥⌘`+arrows and the
-four new rows stay unbound until a Record or Shortcuts & Gestures
-▸ Restore Defaults… lands them.
+install keeps its keymap: its swap stays on `⌃⌥⌘`+arrows. The
+four new rows reach it through the generation top-up below, each
+only where its chord is free, so the history pair lands and the
+steps wait on that swap until a Record or Shortcuts & Gestures ▸
+Restore Defaults… moves it.
+
+**A default a release adds reaches an existing install once
+(#2211, owner ruling 2026-10-12).** The seed is written at first
+run, so a row added later was invisible to everyone who updated,
+including a spotlight feature's own keys. Each such row joins a
+numbered generation (`DefaultKeybindings.rows(ofGeneration:)`),
+and the first launch after an update appends the rows of every
+generation past the Mac's mark where the action is unbound and
+the chord free, then advances the mark. Adding is not moving: an
+occupied chord keeps its binding, and a row deleted after its
+generation was offered is never added back. A fresh seed carries
+every generation, so it tops up nothing.
 
 **Space history walks the visits, never the order (#1655, owner
 rulings 2026-10-09).** Back and Forward answer "where was I", which

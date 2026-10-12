@@ -37,6 +37,18 @@ struct DesktopShortcutSeamTests {
             "desktopMemory.readShortcutMark = { .max }",
             "Tests/KiwiDeskGuiTests", "TestCore.swift"
         ),
+        (
+            "desktopMemory.readDefaultsGeneration = { .max }",
+            "Tests/KiwiDeskCoreTests", "TestCore.swift"
+        ),
+        (
+            "desktopMemory.readDefaultsGeneration = { .max }",
+            "Tests/KiwiDeskGuiTests", "TestCore.swift"
+        ),
+        (
+            "desktopMemory.writeDefaultsGeneration(0)",
+            "Sources/KiwiDeskCore/App", "KiwiCore+ConfigArtifacts.swift"
+        ),
     ]
 
     @Test("each wiring exists exactly once, in its own file")

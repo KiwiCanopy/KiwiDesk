@@ -4114,7 +4114,8 @@ only its panel, not normal Ghostty windows, is ignored.
 :::unreleased
 A raised Ghostty window with title-bar buttons, such as its
 configuration-error window, is one of Ghostty's own windows and is
-managed as a float; the buttonless quick terminal stays ignored.
+managed as a float, as is its update alert; the buttonless quick
+terminal stays ignored.
 :::
 
 **Command bars are ignored automatically.** A Spotlight/Raycast-style
