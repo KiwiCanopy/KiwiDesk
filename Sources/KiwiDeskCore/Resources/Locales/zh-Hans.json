@@ -295,6 +295,7 @@
   "config_issues.title": "配置问题",
   "config_issues.unknown_call": "未知调用“%1$@”。",
   "config_issues.unknown_call_suggestion": "未知调用“%1$@”——你是指“%2$@”吗？",
+  "custom_lua_banner.adopts": "你的 init.lua 自行指定了部分设置。在此保存会将你的快捷键和规则移入可视化编辑器；init.lua 会继续运行，App 也绝不会修改它。",
   "custom_lua_banner.text": "你的 init.lua 中还包含自定的 Lua 代码。它不会与可视化编辑器冲突，App 也绝不会修改 init.lua。",
   "desktop_cue.ax": "桌面 %1$d，第 %2$d 个，共 %3$d 个",
   "desktop_cue.ax.profile": "%1$@，描述文件“%2$@”",

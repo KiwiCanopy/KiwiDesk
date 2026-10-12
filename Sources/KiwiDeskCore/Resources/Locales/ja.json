@@ -295,6 +295,7 @@
   "config_issues.title": "設定の問題",
   "config_issues.unknown_call": "不明な呼び出し「%1$@」です。",
   "config_issues.unknown_call_suggestion": "不明な呼び出し「%1$@」です。「%2$@」ではありませんか？",
+  "custom_lua_banner.adopts": "init.luaは一部の設定を自分で指定しています。ここで保存すると、ショートカットとルールがビジュアルエディタに移ります。init.luaは引き続き実行され、Appがinit.luaを変更することはありません。",
   "custom_lua_banner.text": "init.luaにはカスタムのLuaも含まれています。ビジュアルエディタと競合することはなく、Appがinit.luaを変更することもありません。",
   "desktop_cue.ax": "デスクトップ%1$d、%3$d個中%2$d番目",
   "desktop_cue.ax.profile": "%1$@、プロファイル「%2$@」",
