@@ -140,7 +140,10 @@ extension KiwiCore {
                 args: [.string(active.raw), .number(Double(window.id.raw))]
             )
             // `move_to_space` answers `.ok` where the sticky gate
-            // stood the move down, so the membership is the verdict.
+            // stood the move down, so the membership is the verdict
+            // — a construction net: the gate asked above reads the
+            // same display for the placed active Space, so no
+            // fixture reaches it (guard-prover, 2026-10-12).
             guard moved.isSuccess,
                 state.workspaces.space(of: window.id) == active
             else {
