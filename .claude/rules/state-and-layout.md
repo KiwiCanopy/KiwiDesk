@@ -324,7 +324,15 @@ editing here:
   return and the #1564 sticky return down — the follow's
   register therefore names no Jump site
   (`JumpActionsTests` ▸ `moveHereAwayPaysAtArrival`;
-  `JumpFocusTests` holds each stand-down arm).
+  `JumpFocusTests` holds each stand-down arm). A Move here on a
+  HIDDEN app owes its second debt, `JumpState.owedApp`, to the
+  window the unhide brings back focused, and it is paid at that
+  app's first HONORED focus REPORT rather than an arrival — ahead
+  of `rememberHonoredFocus`, so the #1207 memory files the Space
+  the window now holds, and ahead of the focus follow, which would
+  otherwise switch away to it; the handler, not the payer, decides
+  whether that report retiles (`JumpHiddenAppTests` ▸
+  `reportWiring`, `onePass`).
 - **Opening an app follows its window into its app rule's Space,
   and only an OPEN owes it (#1599).** The debt is
   `LaunchFollowIntent`, keyed by the app's bundle id because the

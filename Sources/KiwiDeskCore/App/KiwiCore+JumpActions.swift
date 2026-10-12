@@ -21,15 +21,22 @@ extension KiwiCore {
     }
 
     /// Moves `target` into the active Space and focuses it at its
-    /// arrival. Returns false, cued, where it cannot move; a hidden
-    /// app, which has no window to move yet, is jumped to.
+    /// arrival. Returns false, cued, where it cannot move. A hidden
+    /// app has no window to move yet: it is unhidden, and the
+    /// window it brings back focused is moved here at its report.
     @discardableResult
     public func moveHere(_ target: JumpEntry.Target) -> Bool {
         withUserMotion {
-            guard case .window(let id) = target,
-                let active = state.workspaces.activeSpace
-            else {
+            guard let active = state.workspaces.activeSpace else {
                 jump(to: target)
+                return true
+            }
+            guard case .window(let id) = target else {
+                if case .hiddenApp(let pid) = target {
+                    moveHiddenApp(pid, into: active, matching: nil)
+                } else {
+                    jump(to: target)
+                }
                 return true
             }
             if let window = state.windows[id] {

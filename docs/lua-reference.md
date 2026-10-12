@@ -4153,15 +4153,17 @@ Profile overrides resolve the same way over a Lua-owned base.
 
 ### Finding a bundle identifier
 
-App rules and `focus_or_spawn` identify an app by its bundle
-identifier. The Settings app's pickers list installed apps by
-name and store the identifier for you. To find one by hand:
+App rules and the app verbs (`focus_or_spawn`, `spawn_new`,
+`gather`) identify an app by its bundle identifier.
+The Settings app's pickers list installed apps by name and store
+the identifier for you. To find one by hand:
 
-- Run `kiwidesk get_state` (or the `get_state` command over
+- Ask macOS: `osascript -e 'id of app "Safari"'` →
+  `com.apple.Safari`. It answers for any installed app — hidden,
+  windowless or not running.
+- Or run `kiwidesk get_state` (or the `get_state` command over
   IPC): every window carries a `bundle_id` field alongside its
-  display `app` name. Focus a window of the app and read it off.
-- Or ask macOS directly:
-  `osascript -e 'id of app "Safari"'` →  `com.apple.Safari`.
+  display `app` name.
 - Or `mdls -name kMDItemCFBundleIdentifier /Applications/Safari.app`.
 
 Identifiers are matched case-insensitively. An app with no bundle
@@ -4699,6 +4701,48 @@ end)
 
 It is the third choice, *Gather Windows*, in the **Action** menu
 of an Open applications shortcut in Settings.
+
+:::unreleased
+### move_here
+
+**Expects:** an app bundle identifier (e.g. `com.apple.Notes`),
+then optionally a piece of window title. See [Finding a bundle
+identifier](#finding-a-bundle-identifier).
+
+**Does:** moves one window of the app into the Space you are on
+and focuses it: the open window you focused most recently that is
+not here yet — in another Space, or up on another macOS Desktop —
+and only once none is left, a minimized one. Press it again for
+the next. The app's other windows stay where they are; to move
+them all, use [gather](#gather).
+
+With a title, only windows whose title contains it count,
+ignoring case and accents, so `"Inbox"` keeps finding Mail's
+window as its message count changes.
+
+- A window in native full screen is skipped, and so is a window
+  on another Desktop when the Desktop bridge is absent. When
+  nothing else is left, a refusal says the window can't be moved
+  here.
+- Every matching window already here, or a title no window has,
+  shows a refusal on the focused window and moves nothing. A
+  sticky window shown here counts as here.
+- A hidden app is unhidden, and the window it brings back
+  focused moves here — with a title, only if it matches.
+- An app with no window at all is opened, the same as
+  [focus_or_spawn](#focus_or_spawn).
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+shift+n", function()
+    KiwiDesk.move_here("com.apple.Notes")
+end)
+KiwiDesk.bind("ctrl+shift+i", function()
+    KiwiDesk.move_here("com.apple.mail", "Inbox")
+end)
+```
+:::
 
 ## User Interface
 

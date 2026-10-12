@@ -77,7 +77,24 @@ public struct JumpSnapshot: Sendable, Equatable {
     }
 }
 
+/// Which tier a window ranks in (#1875, #1513 ▸ Ruling): an open
+/// window — tracked or up on an away Desktop — before one put away
+/// in the Dock, each by recency. The ONE rule Jump to window's list
+/// and `move_here`'s pick share; hidden apps sit below both.
+public enum JumpTier: Int, Comparable, Sendable {
+    case open
+    case minimized
+
+    public static func < (lhs: JumpTier, rhs: JumpTier) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+}
+
 extension JumpEntry {
+    public var tier: JumpTier {
+        status == .minimized ? .minimized : .open
+    }
+
     /// Whether the row is a hidden app's rather than a window's.
     public var isHiddenApp: Bool {
         if case .hiddenApp = target { return true }

@@ -1,0 +1,323 @@
+import CoreGraphics
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+private final class FakePlistArrayResult: NSObject {
+    @objc let propertyListArray: [[String: Any]]
+    init(propertyListArray: [[String: Any]]) {
+        self.propertyListArray = propertyListArray
+    }
+}
+
+private final class FakeCopyManagedDisplaySpaces: NSObject {
+    @objc override init() {}
+    @objc func performWithWMBridgeDelegate() -> AnyObject? {
+        FakePlistArrayResult(propertyListArray: [["Spaces": []]])
+    }
+}
+
+/// Which window `move_here` takes (#1513 ▸ Ruling): the most
+/// recently focused open window not already here, a minimized one
+/// only once none is left, by the shared `JumpTier` rule; a title
+/// text narrows by containment.
+@MainActor
+@Suite("move_here's pick (#1513)", .serialized)
+struct MoveHerePickTests {
+    private static let bundle = "app.test.100"
+
+    private final class Recorder {
+        var opened: [String] = []
+        var activated: [pid_t] = []
+        var restored: [UInt32] = []
+    }
+
+    private func makeCore(running: Bool = true) -> (KiwiCore, Recorder) {
+        let core = makeTestCore()
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 25, width: 1440, height: 875)
+        }
+        let recorder = Recorder()
+        core.openOrFocus.runningAppPID = { _ in running ? 100 : nil }
+        core.openOrFocus.activate = { recorder.activated.append($0) }
+        core.openOrFocus.deminiaturize = { recorder.restored.append($1.raw) }
+        core.openOrFocus.openApp = { id, _ in
+            recorder.opened.append(id)
+            return true
+        }
+        core.frontmostPIDProvider = { 300 }
+        core.eventLoop.shadows.focusedWindow = { _ in nil }
+        for space: SpaceID in ["1", "2", "3"] {
+            core.state.workspaces.ensureSpace(space)
+        }
+        core.state.workspaces.activate("1")
+        return (core, recorder)
+    }
+
+    private func addWindow(
+        _ core: KiwiCore,
+        _ id: UInt32,
+        pid: pid_t = 100,
+        space: SpaceID,
+        fullscreen: Bool = false,
+        sticky: StickyScope = .none,
+        title: String = ""
+    ) {
+        var window = ManagedWindow(
+            id: WindowID(id),
+            pid: pid,
+            appName: "App\(pid)",
+            appBundleID: pid == 100
+                ? Self.bundle : "app.test.\(pid)"
+        )
+        window.isFullscreen = fullscreen
+        window.stickyScope = sticky
+        window.title = title
+        core.state.windows.upsert(window)
+        core.state.workspaces.add(WindowID(id), to: space)
+    }
+
+    private func pick(
+        _ core: KiwiCore,
+        text: String? = nil
+    ) -> WindowID? {
+        let pick = core.moveHerePick(
+            bundleID: Self.bundle,
+            into: "1",
+            text: text
+        )
+        guard case .window(let id) = pick else { return nil }
+        return id
+    }
+
+    private func run(_ core: KiwiCore) -> CommandResponse {
+        core.execute("move_here", args: [.string(Self.bundle)])
+    }
+
+    @Test("the most recently focused window moves here, alone")
+    func movesTheRecentOne() {
+        let (core, _) = makeCore()
+        addWindow(core, 1, space: "2")
+        addWindow(core, 2, space: "3")
+        addWindow(core, 3, space: "2")
+        core.state.stampFocusRecency(WindowID(1))
+        core.state.stampFocusRecency(WindowID(2))
+        #expect(run(core).isSuccess)
+        #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
+        #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
+        #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+    }
+
+    @Test("another app's window is never chosen")
+    func onlyTheNamedApp() {
+        let (core, _) = makeCore()
+        addWindow(core, 1, space: "2")
+        addWindow(core, 9, pid: 300, space: "3")
+        core.state.stampFocusRecency(WindowID(1))
+        core.state.stampFocusRecency(WindowID(9))
+        #expect(pick(core) == WindowID(1))
+    }
+
+    @Test("an open window outranks a more recent minimized one")
+    func openBeforeMinimized() {
+        let (core, _) = makeCore()
+        addWindow(core, 1, space: "2")
+        addWindow(core, 4, space: "1")
+        core.state.stampFocusRecency(WindowID(1))
+        core.state.stampFocusRecency(WindowID(4))
+        var effects = AppliedEffects()
+        core.state.applyWindowDestroyed(
+            WindowID(4),
+            wasMinimized: true,
+            effects: &effects
+        )
+        #expect(pick(core) == WindowID(1))
+    }
+
+    @Test("a minimized window is restored once no open one is left")
+    func recentMinimizedIsRestored() {
+        let (core, recorder) = makeCore()
+        addWindow(core, 1, space: "1")
+        addWindow(core, 4, space: "1")
+        core.state.stampFocusRecency(WindowID(1))
+        core.state.stampFocusRecency(WindowID(4))
+        var effects = AppliedEffects()
+        core.state.applyWindowDestroyed(
+            WindowID(4),
+            wasMinimized: true,
+            effects: &effects
+        )
+        #expect(pick(core) == WindowID(4))
+        #expect(run(core).isSuccess)
+        #expect(recorder.restored == [4])
+    }
+
+    @Test("with no focus on record, the first in Space order moves")
+    func freshKiwiDeskTakesTheFirst() {
+        let (core, _) = makeCore()
+        addWindow(core, 5, space: "3")
+        addWindow(core, 6, space: "2")
+        #expect(pick(core) == WindowID(6))
+    }
+
+    @Test("an app with no window takes Open or Focus's path")
+    func noWindowOpens() {
+        let (core, recorder) = makeCore(running: false)
+        #expect(run(core).isSuccess)
+        #expect(recorder.opened == [Self.bundle])
+        #expect(core.launchFollow.owed() == Self.bundle)
+    }
+
+    @Test("a full-screen window is passed over for the next one")
+    func fullscreenIsPassedOver() {
+        let (core, _) = makeCore()
+        addWindow(core, 1, space: "2", fullscreen: true)
+        addWindow(core, 2, space: "3")
+        core.state.stampFocusRecency(WindowID(2))
+        core.state.stampFocusRecency(WindowID(1))
+        #expect(run(core).isSuccess)
+        #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
+        #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
+    }
+
+    @Test("a fresh KiwiDesk takes the app's own focused window")
+    func freshTakesTheAppsFocus() {
+        let (core, _) = makeCore()
+        addWindow(core, 5, space: "2")
+        addWindow(core, 6, space: "3")
+        core.eventLoop.shadows.focusedWindow = { _ in WindowID(6) }
+        #expect(pick(core) == WindowID(6))
+    }
+
+    @Test("an away window is a candidate only with the Desktop bridge")
+    func awayNeedsTheBridge() {
+        for bridge in [false, true] {
+            NativeSpaces.spacesOverride = authorityTopology(
+                mainCurrent: 10,
+                secondaryCurrent: 20
+            )
+            WMBridge.classResolverOverride = { name in
+                bridge && name == "CopyManagedDisplaySpacesOperation"
+                    ? FakeCopyManagedDisplaySpaces.self : nil
+            }
+            defer {
+                WMBridge.classResolverOverride = nil
+                resetAuthorityOverrides()
+            }
+            let (core, _) = makeCore()
+            #expect(core.canDriveDesktops == bridge)
+            addWindow(core, 1, space: "2")
+            // Stamped while tracked, then gone with its Desktop.
+            addWindow(core, 7, space: "3")
+            core.state.stampFocusRecency(WindowID(1))
+            core.state.stampFocusRecency(WindowID(7))
+            core.state.windows.remove(WindowID(7))
+            core.state.workspaces.remove(WindowID(7))
+            core.state.awayWindows[WindowID(7)] = AwayWindow(
+                id: WindowID(7),
+                pid: 100,
+                appName: "App100",
+                appBundleID: Self.bundle,
+                nativeSpace: 11
+            )
+            core.state.rememberedSpaces[WindowID(7)] = .departed("3")
+            #expect(pick(core) == WindowID(bridge ? 7 : 1))
+        }
+    }
+
+    @Test("a hidden app is unhidden, as the panel's Move here does")
+    func hiddenAppUnhides() {
+        let (core, recorder) = makeCore()
+        core.eventLoop.appIsHidden = { _ in true }
+        #expect(run(core).isSuccess)
+        #expect(recorder.activated == [100])
+        #expect(recorder.opened.isEmpty)
+        // The window it brings back focused is owed the move.
+        #expect(core.jump.owedApp?.pid == 100)
+    }
+
+    @Test("no bundle id is refused")
+    func needsAnApp() {
+        let (core, _) = makeCore()
+        #expect(!core.execute("move_here", args: []).isSuccess)
+    }
+
+    @Test("a sticky window the gate holds elsewhere is passed over")
+    func heldStickyIsPassedOver() {
+        let (core, _) = makeCore()
+        addWindow(core, 1, space: "2", sticky: .display)
+        addWindow(core, 2, space: "3")
+        core.state.stampFocusRecency(WindowID(2))
+        core.state.stampFocusRecency(WindowID(1))
+        #expect(core.stickyMoveBlock(WindowID(1), to: "1") != nil)
+        #expect(pick(core) == WindowID(2))
+    }
+
+    @Test("a ∞ window, already drawn here, counts as here")
+    func globalStickyIsHere() {
+        let (core, _) = makeCore()
+        addWindow(core, 1, space: "2", sticky: .global)
+        addWindow(core, 2, space: "3")
+        core.state.stampFocusRecency(WindowID(2))
+        core.state.stampFocusRecency(WindowID(1))
+        #expect(pick(core) == WindowID(2))
+    }
+
+    @Test("a window already here is skipped for the next one")
+    func hereIsSkipped() {
+        let (core, _) = makeCore()
+        addWindow(core, 1, space: "1")
+        addWindow(core, 2, space: "3")
+        core.state.stampFocusRecency(WindowID(2))
+        core.state.stampFocusRecency(WindowID(1))
+        #expect(pick(core) == WindowID(2))
+    }
+
+    @Test("text narrows to titles containing it, any case or accent")
+    func textNarrows() {
+        let (core, _) = makeCore()
+        addWindow(core, 1, space: "2", title: "Inbox — 12 messages")
+        addWindow(core, 2, space: "3", title: "Drafts")
+        core.state.stampFocusRecency(WindowID(1))
+        core.state.stampFocusRecency(WindowID(2))
+        #expect(pick(core, text: "ínbox") == WindowID(1))
+        #expect(pick(core, text: "MESSAGES") == WindowID(1))
+        #expect(pick(core, text: "trash") == nil)
+    }
+
+    @Test("with nothing stamped, the latest minimized window is first")
+    func latestMinimizedFirst() {
+        let (core, _) = makeCore()
+        for id: UInt32 in [4, 5] {
+            addWindow(core, id, space: "1")
+            var effects = AppliedEffects()
+            core.state.applyWindowDestroyed(
+                WindowID(id),
+                wasMinimized: true,
+                effects: &effects
+            )
+        }
+        #expect(pick(core) == WindowID(5))
+    }
+
+    @Test("no pid LaunchServices names is asked for its focus")
+    func unnamedPidIsNeverAsked() {
+        let (core, _) = makeCore(running: false)
+        addWindow(core, 4, space: "1")
+        var effects = AppliedEffects()
+        core.state.applyWindowDestroyed(
+            WindowID(4),
+            wasMinimized: true,
+            effects: &effects
+        )
+        var asked: [pid_t] = []
+        core.eventLoop.shadows.focusedWindow = { pid in
+            asked.append(pid)
+            return nil
+        }
+        #expect(pick(core) == WindowID(4))
+        #expect(asked.allSatisfy { $0 > 0 })
+    }
+}
