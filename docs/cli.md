@@ -424,6 +424,13 @@ an app with nothing to move answers with an error. See
 [gather](lua-reference.md#gather).
 :::
 
+:::unreleased
+`move_here` (Launch) takes an app bundle id and moves that app's
+most recently focused window into the Space you are on and focuses
+it; an app with no window is opened. See
+[move_here](lua-reference.md#move_here).
+:::
+
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last
 argument, a window `id` from `get_state`: they then act on that

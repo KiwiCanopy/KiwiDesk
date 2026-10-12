@@ -4737,6 +4737,30 @@ It is the third choice, *Gather Windows*, in the **Action** menu
 of an Open applications shortcut in Settings.
 :::
 
+:::unreleased
+### move_here
+
+**Expects:** an app bundle identifier (e.g. `com.apple.Notes`).
+See [Finding a bundle identifier](#finding-a-bundle-identifier).
+
+**Does:** moves one window of the app — the one you focused most
+recently, whether it is in another Space, minimized or up on
+another macOS Desktop — into the Space you are on, and focuses
+it. The app's other windows stay where they are; to move them
+all, use [gather](#gather). A window on another Desktop needs the
+Desktop bridge, and a window in native full screen is not moved:
+both refuse with a cue on the window. An app with no window is
+opened, the same as [focus_or_spawn](#focus_or_spawn).
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+shift+n", function()
+    KiwiDesk.move_here("com.apple.Notes")
+end)
+```
+:::
+
 ## User Interface
 
 ### show_shortcuts

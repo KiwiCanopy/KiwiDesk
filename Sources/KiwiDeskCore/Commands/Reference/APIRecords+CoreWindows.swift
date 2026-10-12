@@ -181,6 +181,11 @@ extension APIReference {
                 + "on, from other Desktops too.",
             .text("bundle_id")
         ),
+        "move_here": APIRecord(
+            "Moves an app's latest window into the Space you are "
+                + "on; opens the app if it has none.",
+            .text("bundle_id")
+        ),
         "set_mode": APIRecord(
             "Sets a Space's layout mode; omit the Space to set "
                 + "the active one.",

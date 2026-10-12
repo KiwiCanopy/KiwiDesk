@@ -40,6 +40,9 @@ struct FocusedCommandPolicyTests {
         "cycle_mode",
         // Names an app, never the focused window (#1510).
         "gather",
+        // Names an app too: one of its windows, never the focus
+        // (#1513).
+        "move_here",
         "get_state",
         "get_layout_info",
         "list_monitors",
