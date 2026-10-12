@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 
@@ -64,7 +65,7 @@ struct ConfigOwnerMovedTests {
 
         model.updateActiveProfile()
 
-        #expect(model.profileWarning == model.ownerMovedReason)
+        #expect(model.profileWarning == model.staleDraftReason)
         #expect(model.profileWarning != nil)
         #expect(
             model.core.guiConfigStore.load()?.appRules["mail"]
@@ -80,10 +81,22 @@ struct ConfigOwnerMovedTests {
 
         model.saveGlobalsWhilePaused()
 
+        // Only the warning can red: the door's own ownership guard
+        // already kept gui.json unwritten before #2183.
+        #expect(model.profileWarning == model.staleDraftReason)
         #expect(model.profileWarning != nil)
-        #expect(
-            model.core.guiConfigStore.load()?.appRules["mail"]
-                == SpaceID("1")
+    }
+
+    @Test("Settings becoming key re-draws a clean page")
+    func windowKeyReloads() throws {
+        let model = try makeModel()
+        let controller = SettingsWindowController(model: model)
+        try writeForeignLua(model)
+
+        controller.windowDidBecomeKey(
+            Notification(name: NSWindow.didBecomeKeyNotification)
         )
+
+        #expect(model.editingLua)
     }
 }

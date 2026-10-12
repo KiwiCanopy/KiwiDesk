@@ -62,25 +62,36 @@ extension SettingsModel {
             && forcedLuaEditor != core.configHasForeignCode
     }
 
-    /// Why a dirty structured draft cannot be saved: `init.lua`
-    /// now owns what it would write, so the load would ignore
-    /// the `gui.json` half (#2183).
-    var ownerMovedReason: String? {
+    /// Whether the live draft no longer matches what the next
+    /// load reads: a profile loaded under the page (#1393), or
+    /// `init.lua` changing owner under it (#2183).
+    var draftStale: Bool { pageMoved || ownerMoved }
+
+    /// Why a dirty live draft cannot be saved — the ONE refusal
+    /// every gui.json door reads first, owner ahead of page.
+    var staleDraftReason: String? {
+        ownerMovedReason ?? pageMovedReason
+    }
+
+    /// `init.lua` now owns what the draft would write, so the load
+    /// would ignore its gui.json half. The whole Save refuses: a
+    /// clean page re-draws as the Lua editor (#2183).
+    private var ownerMovedReason: String? {
         guard ownerMoved, !forcedLuaEditor, isDirty else {
             return nil
         }
         return L(
             "profiles.owner_moved",
-            "init.lua was changed while you were editing, and it "
-                + "now sets these itself. %1$@ to open it in the "
-                + "Lua editor.",
+            "init.lua was changed outside Settings and now sets "
+                + "these settings itself, so your edits can't be "
+                + "saved. %1$@, then make them in init.lua.",
             L("footer.revert", "Revert")
         )
     }
 
     /// Why a dirty live draft cannot be saved as it stands: its
     /// page is not the loaded profile's any more.
-    var pageMovedReason: String? {
+    private var pageMovedReason: String? {
         guard pageMoved, isDirty else { return nil }
         guard let current = core.profiles.currentName else {
             // The loaded profile went away under the page.
