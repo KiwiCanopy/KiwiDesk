@@ -295,6 +295,7 @@
   "config_issues.title": "Konfigurationsprobleme",
   "config_issues.unknown_call": "Unbekannter Aufruf „%1$@“.",
   "config_issues.unknown_call_suggestion": "Unbekannter Aufruf „%1$@“ — meintest du „%2$@“?",
+  "custom_lua_banner.adopts": "Deine init.lua legt einige Einstellungen selbst fest. Beim Sichern hier wandern deine Tastenkürzel und Regeln in den visuellen Editor; die init.lua läuft weiter und wird niemals von der App überschrieben.",
   "custom_lua_banner.text": "Deine init.lua enthält eigenen Code. Das stört den visuellen Editor nicht — deine Datei wird niemals von der App überschrieben.",
   "desktop_cue.ax": "Schreibtisch %1$d, %2$d von %3$d",
   "desktop_cue.ax.profile": "%1$@, Profil %2$@",

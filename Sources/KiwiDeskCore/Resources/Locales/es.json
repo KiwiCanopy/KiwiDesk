@@ -295,6 +295,7 @@
   "config_issues.title": "Problemas de configuración",
   "config_issues.unknown_call": "Llamada desconocida «%1$@».",
   "config_issues.unknown_call_suggestion": "Llamada desconocida «%1$@»: ¿querías decir «%2$@»?",
+  "custom_lua_banner.adopts": "Tu init.lua define algunos ajustes por sí mismo. Al guardar aquí, tus atajos y reglas pasan al editor visual; init.lua sigue ejecutándose, y la app nunca lo modifica.",
   "custom_lua_banner.text": "Tu init.lua también contiene Lua propio. No entra en conflicto con el editor visual, y la app nunca modifica init.lua.",
   "desktop_cue.ax": "Escritorio %1$d, %2$d de %3$d",
   "desktop_cue.ax.profile": "%1$@, perfil %2$@",

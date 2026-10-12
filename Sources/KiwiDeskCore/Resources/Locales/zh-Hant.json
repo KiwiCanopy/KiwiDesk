@@ -295,6 +295,7 @@
   "config_issues.title": "設定問題",
   "config_issues.unknown_call": "未知呼叫「%1$@」。",
   "config_issues.unknown_call_suggestion": "未知呼叫「%1$@」——你是指「%2$@」嗎？",
+  "custom_lua_banner.adopts": "你的 init.lua 自行指定了部分設定。在此儲存會將你的快速鍵與規則移入視覺化編輯器；init.lua 會繼續執行，而且此 App 從不修改它。",
   "custom_lua_banner.text": "你的 init.lua 另外還有自訂 Lua。它不會與視覺化編輯器衝突，而且此 App 從不修改 init.lua。",
   "desktop_cue.ax": "桌面 %1$d，第 %2$d 個，共 %3$d 個",
   "desktop_cue.ax.profile": "%1$@，描述檔「%2$@」",
