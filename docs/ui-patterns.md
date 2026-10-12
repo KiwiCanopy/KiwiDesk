@@ -1093,11 +1093,9 @@ costs every other user a second thing to understand (#1279). The
 list itself reaches one folder deep, so browsing is the rare
 fallback.
 
-:::unreleased
 The Tile picker's list is the one exception: it holds only the
 apps a guess floated (#2071, design-decisions ▸ App rules), with
 no search field over its short list.
-:::
 
 The Space name field is the same channel for a typed edit
 (#1623): while the draft names another Space or is empty, a
@@ -1322,13 +1320,11 @@ that takes the plain gate. *Why* is
 [Design decisions](design-decisions.md) ▸ every edit-dropping
 action routes through one discard gate.
 
-:::unreleased
 **Leaving the window takes the gate's third verb.** A close or a
 quit over unsaved edits goes through `SettingsModel.leavingDraft`,
 the one place Save / Discard / Cancel is offered; an action never
 takes it. `DraftLeaveTests` holds its verdicts and
 `QuitSheetsWiringTests` the close and quit paths that reach it.
-:::
 
 Greying applied across a whole editor (#520, #527):
 

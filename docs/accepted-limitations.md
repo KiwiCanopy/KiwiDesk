@@ -112,9 +112,7 @@ A snapshot written in **another login session** is discarded at launch too, so a
 
 The first launch after updating onto this version **other than through KiwiDesk's own updater** — replacing the app by hand, for one — starts fresh once in the same way: the older version's quit wrote an arrangement without the login-session mark, which is discarded by design. An update installed by KiwiDesk's own updater keeps the arrangement.
 
-:::unreleased
 After a restart of the Mac, or a logout and login, KiwiDesk matches the windows macOS reopens to the arrangement it saved when the restart or logout began — or at a Quit of KiwiDesk up to 10 minutes before it — by app and title rather than by window id ([#1385](https://github.com/KiwiCanopy/KiwiDesk/issues/1385)); the [Quit & Restart](lua-reference.md#quit--restart) section says how. What the match cannot do is listed here. An app's windows that share one title go back to that app's Spaces in no particular order. A window that reopens with a changed title, or one more than its app had, lands as a new window, and one placed after launch joins its Space where a new window would rather than in its old slot. Held and temporary Spaces, and the Spaces a profile that is not loaded remembers, do not come back. And if a window was hidden, minimized or left with its Desktop in the 30 seconds before the restart began, KiwiDesk cannot tell macOS's quitting from your own work, so it keeps the arrangement as it stood when the restart reached it — after macOS had already closed some of the apps. A logout you cancel and then a Quit of KiwiDesk within two minutes of it still counts as the logout: the next restart puts that arrangement back. Switching profiles, or a Desktop or screen change that switches them, in the first two minutes after launch stops the matching for the windows still to come.
-:::
 
 The focused-window shortcut row above has one exception: `focus` itself runs through the activation race when it is KiwiDesk's own raise toward the focused window — a raise pending a scrolling pan or issued a moment ago, while the managed app it left is still in front ([#1812](https://github.com/KiwiCanopy/KiwiDesk/issues/1812)). Every other focused verb still waits for the foreground.
 
@@ -126,14 +124,12 @@ with its slot, sticky scope and reach pin kept
 ([#1215](https://github.com/KiwiCanopy/KiwiDesk/issues/1215)),
 rather than staying on the Desktop you left until you return.
 
-:::unreleased
 When you leave a macOS Desktop with a sticky window focused and
 come back, that window takes the focus back once the switch has
 settled, even though macOS first restores the focus to the last
 window that stayed on that Desktop
 ([#1564](https://github.com/KiwiCanopy/KiwiDesk/issues/1564)).
 A click on another window during the switch keeps your choice.
-:::
 
 A window you closed and then reopened — an app whose close hides the window and whose reopen shows the same one again, Telegram's main window for one — comes back like a new window: to the Space its app rule names, else the Space you are on, taking the focus there in every layout, rather than to the Space you closed it in with the slot it had there ([#1414](https://github.com/KiwiCanopy/KiwiDesk/issues/1414), [#1561](https://github.com/KiwiCanopy/KiwiDesk/issues/1561); the ruling is in [design decisions](design-decisions.md)); the [#1161](https://github.com/KiwiCanopy/KiwiDesk/issues/1161) row's bounce no longer reaches it. What remains: an app that re-shows a closed window on its own, with nothing you did behind it, takes the focus once, where you are.
 
@@ -153,12 +149,10 @@ With the **Space Bar off**, switching a Space between a layout that shows an App
 
 The same holds, with the Space Bar on, for an App Bar on an edge of its own: its edge is reserved only in the layouts that show it, so switching a Space between Monocle or Scrolling and a layout without an App Bar moves its windows by the App Bar's strip ([#1731](https://github.com/KiwiCanopy/KiwiDesk/issues/1731); the ruling is in [design decisions](design-decisions.md)). Put both bars on one edge and the switch moves nothing again.
 
-:::unreleased
 Or set the bar not to reserve its strip at all
 ([`space_bar.set_reserve`](lua-reference.md#space_barset_reserve),
 [`app_bar.set_reserve`](lua-reference.md#app_barset_reserve)): it
 then draws over the windows and no switch moves one.
-:::
 
 The light-`fill_color` glass row above also reaches surfaces that are not bars: the **sticky mark** on its default **Automatic** color, and a sticky or drag color light enough to pin nothing, are unpinned glass too. Over dark window content macOS may draw such a mark's glass dark while its glyph — the system label color under KiwiDesk's Appearance — stays dark. Not observed; reasoned from the mechanism ([#1621](https://github.com/KiwiCanopy/KiwiDesk/issues/1621)). A dark `sticky.set_color` pins the glass dark with a light glyph; `sticky.set_liquid_glass(false)` returns the badge with its disc.
 
