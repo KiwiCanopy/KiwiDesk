@@ -45,6 +45,7 @@ public enum APIReference {
             ("move_to_track", "move_to_track"),
             ("focus_or_spawn", "focus_or_spawn"),
             ("spawn_new", "spawn_new"),
+            ("gather", "gather"),
             ("set_mode", "set_mode"),
             ("show_layout_picker", "show_layout_picker"),
             ("cycle_mode", "cycle_mode"),
@@ -70,6 +71,7 @@ public enum APIReference {
             ("set_desktop_cue", "set_desktop_cue"),
             ("set_mode_cue", "set_mode_cue"),
             ("set_space_history", "set_space_history"),
+            ("set_float_automatically", "set_float_automatically"),
             (
                 "set_shortcut_panel_liquid_glass",
                 "set_shortcut_panel_liquid_glass"

@@ -31,7 +31,10 @@ extension FullscreenStandDownTests {
     /// A core showing the Space Bar over one Scrolling space
     /// that holds one flag-floating window at `frame` — the
     /// device shape. Nil where the host has no screen.
-    private func makeShelfCore(frame: CGRect) -> KiwiCore? {
+    private func makeShelfCore(
+        frame: CGRect,
+        subrole: String? = nil
+    ) -> KiwiCore? {
         guard let screen = NSScreen.screens.first,
             let display = screen.kiwiDisplay,
             let bounds = screenFrame
@@ -47,7 +50,8 @@ extension FullscreenStandDownTests {
                     pid: 1,
                     appName: "Slides",
                     frame: frame,
-                    isFloating: true
+                    isFloating: true,
+                    subrole: subrole
                 )
             )
         )
@@ -120,6 +124,34 @@ extension FullscreenStandDownTests {
         core.updateBars()
         #expect(core.spaceBars.shownStrips.isEmpty)
         #expect(core.appBars.shownStrips.isEmpty)
+    }
+
+    /// A float maximised by Fill under an auto-hiding menu bar
+    /// covers its screen with its title bar: the shelf stays, and
+    /// the fit takes it like any float (#1788 item 5).
+    @Test("A titled float covering its screen is no show")
+    func titledFloatKeepsTheShelf() throws {
+        let screen = try #require(screenFrame)
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let core = try #require(
+            makeShelfCore(frame: screen, subrole: "AXStandardWindow")
+        )
+        core.frontWindowFrames = { [screen] }
+        core.updateBars()
+        #expect(!core.spaceBars.shownStrips.isEmpty)
+        core.clampFloatsClearOfBars()
+        #expect(core.tiler.recentInstantTarget(Self.show) != nil)
+
+        // Control: the show's own subrole stands the shelf down
+        // over the same frames, and the fit leaves it.
+        let show = try #require(
+            makeShelfCore(frame: screen, subrole: "AXUnknown")
+        )
+        show.frontWindowFrames = { [screen] }
+        show.updateBars()
+        #expect(show.spaceBars.shownStrips.isEmpty)
+        show.clampFloatsClearOfBars()
+        #expect(show.tiler.recentInstantTarget(Self.show) == nil)
     }
 
     @Test("A neighbour screen's show overscanning in stays out")

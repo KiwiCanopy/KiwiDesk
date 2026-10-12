@@ -24,6 +24,13 @@ public enum KiwiEvent: Sendable {
     case windowFloatChanged(WindowID, isFloating: Bool)
     /// Window native fullscreen state changed.
     case windowFullscreenChanged(WindowID, isFullscreen: Bool)
+    /// A window became or stopped being a transient overlay — no
+    /// ring, no bar row (#300) — as its float verdict's reason
+    /// changed: a Dock-less app's guess turned on or off (#2173).
+    case windowOverlayChanged(WindowID, isOverlay: Bool)
+    /// A tracked window's AX subrole changed (#1788): a window
+    /// dropping its title bar in place may now present.
+    case windowSubroleChanged(WindowID, subrole: String)
     /// Native tab group active window ID switched in place
     /// (`TabReconciler`, #308).
     case windowRekeyed(WindowID, WindowID)

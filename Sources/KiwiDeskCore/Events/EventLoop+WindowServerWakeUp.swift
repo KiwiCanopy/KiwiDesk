@@ -6,11 +6,14 @@ extension EventLoop {
     /// Re-reads the app tracking `id`, off the main actor, when
     /// it still tracks it; reads nothing from WindowServer.
     func windowServerDestroyed(_ id: WindowID) {
-        guard isRunning,
-            let pid = elements.first(where: { $0.value[id] != nil })?.key
-        else { return }
+        guard isRunning, let pid = trackingPID(of: id) else { return }
         onLog("wake-up: w\(id.raw) destroyed unanswered, pid \(pid)")
         reconcileOffMain(pid: pid, app: appRef(of: pid))
+    }
+
+    /// The process whose element map tracks `id`.
+    func trackingPID(of id: WindowID) -> pid_t? {
+        elements.first(where: { $0.value[id] != nil })?.key
     }
 
     /// Reads the census off the main actor, then wakes on it and

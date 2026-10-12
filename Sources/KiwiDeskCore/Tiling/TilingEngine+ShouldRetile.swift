@@ -18,7 +18,8 @@ extension TilingEngine {
         case .windowCreated, .windowDestroyed, .appTerminated,
             .displaysChanged, .windowFloatChanged,
             .windowRekeyed, .windowFullscreenChanged,
-            .windowHidden:
+            .windowSubroleChanged, .windowHidden,
+            .windowOverlayChanged:
             // A re-key swaps the tracked id in one slot; the newly
             // active tab must be placed into that slot's frame
             // (#308), so retile even though the array shape is

@@ -11,6 +11,10 @@ struct ListedWindow {
     let minimized: Bool
     let role: String
     let subrole: String
+    /// The window's title-bar button where the #2072 escape asks
+    /// it (`needsTitlebarButton`); false elsewhere and where the
+    /// read did not answer.
+    var titlebarButton = false
     /// Read only for a window tracked when the read began; the
     /// reconcile reads any other the way it always has.
     let tracked: TrackedReading?
@@ -24,6 +28,7 @@ struct ListedWindow {
 /// would otherwise read of a tracked window on the main actor.
 struct TrackedReading {
     let fullscreen: Bool
+    let subrole: String
     let frame: CGRect
     /// Detection's verdict, before the force-float override the
     /// main actor applies (`autoFloatVerdict`).
@@ -61,6 +66,8 @@ struct ListedWindowReader: @unchecked Sendable {
     let bundleID: String?
     let rules: FloatRules
     let tracked: Set<WindowID>
+    /// The app's overlay class, resolved at request time.
+    let isAccessory: Bool
 
     func read(
         _ elements: [AXUIElement],
@@ -80,17 +87,28 @@ struct ListedWindowReader: @unchecked Sendable {
             element,
             layer: id.flatMap { layers[$0] }
         )
+        let layer = id.flatMap { layers[$0] } ?? 0
+        let asksButton = FloatDetection.needsTitlebarButton(
+            layer: layer,
+            isAccessory: isAccessory,
+            bundleID: bundleID
+        )
+        // One traits read serves the shadow rule and the escape.
+        let traitsRead =
+            id.map { tracked.contains($0) } == true && many || asksButton
+            ? traits(element, id) : nil
         var reading: TrackedReading?
         if let id, !minimized, tracked.contains(id) {
             reading = TrackedReading(
                 fullscreen: fullscreen(element),
+                subrole: facts.subrole,
                 frame: AXHelper.frame(of: element),
                 autoReason: FloatDetection.autoFloatReason(
                     facts,
                     bundleID: bundleID,
                     rules: rules
                 ),
-                traits: many ? traits(element, id) : nil
+                traits: many ? traitsRead : nil
             )
         }
         return ListedWindow(
@@ -98,6 +116,8 @@ struct ListedWindowReader: @unchecked Sendable {
             minimized: minimized,
             role: facts.role,
             subrole: facts.subrole,
+            titlebarButton: asksButton
+                && traitsRead?.hasTitlebarButton == true,
             tracked: reading
         )
     }

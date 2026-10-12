@@ -1721,6 +1721,20 @@ terminal #21). The draw-time heuristic remains for the structural
 floats that stay managed: panel-subrole windows of regular apps
 and accessory apps' layer-0 windows.
 
+:::unreleased
+Above that class sits the **screen-saver level** (#2069): a
+window at CG layer 1000 or above is ignored whatever its app and
+whatever its buttons — a dictation HUD, a screen-share overlay
+drawn over the whole display. Nothing at that level is a window
+to arrange, and the level is the one signal strong enough to
+move a default toward ignore (#1810): every corpus window there
+is a HUD or an overlay. The trade is that a window an app lifts
+there cannot be managed and has no per-window way back, since
+`ignore_rules` only adds. The level refuses adoption, never a
+window already tracked that rises to it — that removal would
+read as a close, raise a neighbour and lose the slot.
+:::
+
 The optional **glow** (#358) — a soft blurred colored bloom around
 the ring, the JankyBorders `COLOR_STYLE_GLOW` look — is a global
 bool (`border.glow`, default OFF) with two deliberate scope choices.
@@ -2158,6 +2172,17 @@ switch's settle, a follow's reap, a launch follow) is the
 command's own but lands later, when the next click may already be
 aimed, so it waits like ambient motion. Keyboard activity never
 counts: moving a window steals no keystroke.
+
+:::unreleased
+Your own act in an app is not ambient either (#2187). Closing,
+hiding or minimizing the focused window, or a new window from the
+app in front, just after a key-down or click lays out at once —
+but never a window that left with its Desktop: ⌘W and ⌘N are as
+deliberate as a hotkey, and holding their reflow left a stack
+stale for seconds while the mouse moved. The press only admits
+such a pass; it never holds one. A window a background app opens,
+or a close nothing pressed for, still waits.
+:::
 
 What waits is the layout pass, never its frames. A held pass is
 owed and run again once the hand rests, against the windows as
@@ -4504,23 +4529,35 @@ the Dock and the shelf on purpose — that is the point of it — so
 a fit pushing it clear of a strip, or a floating-mode entry
 laying it into the quit grid, breaks the thing the user just
 started, as either would break native fullscreen, which both
-already skip. The verdict is the frame alone: edge for edge with
-a whole screen, within 2 pt, over every screen's WHOLE frame —
-never larger, which is an oversized float the fit still owes.
+already skip. The verdict has two inputs: the frame, edge for
+edge with a whole screen, within 2 pt, over every screen's WHOLE
+frame — never larger, which is an oversized float the fit still
+owes — and the window's AX subrole, below.
 The fit's skip is load-bearing twice: its frame write also
 stamps the #1161 placement ledger, and in a Scrolling Space a
 live entry is the whole bounce verdict, so without the skip the
 show's own first focus reads as an app answering our placement
 and the distrust raises the editor back over the show.
 
-What the frame alone costs, accepted: a titled window normally
-stops at the menu bar, but with the menu bar set to auto-hide
-and no Dock on that screen a float maximised by Fill matches the
-screen too, and is read as presenting — left unfitted, and the
-shelf standing down while it is in front. Telling the two apart
-needs the window's AX subrole, which state does not carry; the
-cost is a bar hidden behind a window the user sized to cover it.
-Every other reader of a window is ruled against the verdict one
+The subrole is read at adoption and refreshed with the
+fullscreen state on every reconcile, and a move or resize that
+crosses into covering a screen asks the app again, since a game
+may drop its title bar in place as it goes borderless. A titled
+window normally stops at the menu bar, but with the menu bar set
+to auto-hide and no Dock on that screen a float maximised by
+Fill matches the screen too. Its title bar is what tells it from
+a show — it reads `AXStandardWindow` whatever its frame, while
+PowerPoint's show reads `AXUnknown` (device, 2026-10-11) and so
+does Firefox's non-native fullscreen window (the AX corpus) — so
+the frame and `mayPresent` are composed once, in `coversAsShow`
+(#1788). A subrole the read could not answer keeps the frame
+verdict, and a titled window whose app reports another subrole
+still reads as a show. The
+verbs native fullscreen's own exemption skips — the
+inactive-Space stash, focus stepping, the sticky carry — stay on
+it alone: a show lives on the Desktop the user sees, so it parks
+with its Space, is stepped to and travels when sticky (owner,
+2026-10-11). Every other reader of a window is ruled against the verdict one
 verb at a time
 ([#1788](https://github.com/KiwiCanopy/KiwiDesk/issues/1788)),
 through the one `presents` door, which asks an effective float
@@ -4962,8 +4999,8 @@ tile override back:
 - A Tile pressed during a momentary misread mid-launch stuck
   after detection healed.
 - Its one real beneficiary, an app that hides its Dock icon, is
-  better served by an app-level rule, which waits until someone
-  asks for it.
+  better served by an app-level rule: the Tile rule
+  ([#2173](https://github.com/KiwiCanopy/KiwiDesk/issues/2173)).
 
 *Tile on a window the verdict floats refuses.* Overriding the
 verdict there is the third state again, so the verb does nothing
@@ -4975,7 +5012,12 @@ seam), and CLI/IPC fail in English. The bar menu's
 Tile Window row greys with the same sentence rather than hiding
 (grey, don't hide), and the row and the cue read the one reason
 value so they cannot disagree. A rule's reason names App Rules,
-because that is where the user can change the answer.
+because that is where the user can change the answer — and so
+does a guess's, which says "floats automatically" where a dialog
+says "always": the word tells which floats have an escape
+(#2173). The label names the first obstacle met, so a fixed-size
+window a Float rule also matches names its size first and, once a
+Tile rule tiles the guess, the rule: two steps, each one true.
 
 *Float records nothing where the verdict already floats.* Such a
 record changes nothing now, and later keeps the window floating
@@ -12154,11 +12196,10 @@ are co-active concerns tuned together in one session, not a
 mutually-exclusive set, so a strip would misapply the #205 "tabs
 fit a fixed exclusive set" principle. The bar colors live on
 Advanced Colors (#678 Phase 3, "Colour is its own destination"
-below), their "Advanced colors" disclosure being "More colors"
-there; the at-rest/behind-a-drawer SPLIT holds: Fill and Highlight
-are the two a drawing of the bar most visibly reflects, and the
-two at rest (the per-group preview strip that once made that point
-went with #793's composite scene; the split never rested on it).
+below). Since #1857 none of them sits behind a drawer: the
+accent ones open the page in its role groups and the rest are all
+at rest under KiwiShelf colors, because a browse should not hide
+half its subject.
 
 **[Principle] Colour is its own destination, and a colour renders
 in exactly one of them.** (#678 Phase 3, 2026-08-02.) Filing a
@@ -12181,6 +12222,52 @@ who does want the individual tints meets them grouped by
 *where you see it*, because you arrive at that page having
 noticed something on screen is wrong, not looking for
 "highlight colour" in the abstract.
+
+**Amended by #1857 (2026-10-11): the accent groups by role.**
+That premise fails for one colour. "My green" is one thing a user
+notices, drawn on four surfaces — the active Space, the bar's
+highlight, the focus border and the drag ghost — and the palette
+rules already treat it as one role, held apart from a second
+accent by the two colour-vision pair floors (active item against
+the Space Bar's focused window, the ghost against the drop zone).
+So Advanced Colours opens with two role groups side by side,
+**Accent** and **Second accent**, which are exactly one half of
+each pair, and groups by surface everywhere else, where the
+premise holds. A role group is not a second home: every colour
+still renders in one place, which is why the ring's row there is
+"Focus border" and "Focused window" names only the Space Bar ink.
+Grouping by role elsewhere — the shelf's item and fill, the
+window marks — would invent a role no palette rule defines.
+
+**A role group's colour writes its rows; it is never a colour of
+its own** (#1857). Retinting a look used to mean editing each of
+the accent's wells in turn, so each role group carries one well,
+"Ticked rows", whose pick lands on every ticked row of the group
+— at that row's own alpha, since a hover fill and a ghost fill are
+the accent at their own strength, and a pick never makes a stroke
+translucent. It stores nothing: the writes land on the existing
+leaves in the draft, so Revert is the undo and nothing migrates.
+The ticks are scratch, re-seeded each time the page opens from
+the palette itself — a row starts ticked when it already draws
+its group's first colour, ignoring alpha — because ticking by
+meaning would undo the palettes' own splits: the shipped default
+darkens its ring for stroke contrast and draws an emerald ghost
+for the drag pair, and a seed by meaning would paint the bar's
+green onto both the moment the page opened. A dimmed row is left
+alone, and a row whose empty value follows another colour takes
+no tick at all, or a pick would pin a hex over that pairing.
+While the ticked rows differ, the well shows the first and says
+"mixed", the group's title carrying the `?` (#1383's master
+shape); and a field's commit that names the colour already stored
+writes nothing, so focus passing through the well never repaints
+the group.
+
+There is deliberately **no colour-vision warning** on the pick
+(owner, 2026-10-11). The separation floor holds the BUNDLED
+palettes to what every reader can tell apart; a user picking their
+own colours is choosing for their own eyes, and a reader who
+cannot tell the pair apart sees that on the bar without being
+told. The guards keep the bundled half.
 
 The cost is real and is paid deliberately: every gate on the
 Advanced Colours page now names a switch on another page, so
@@ -15691,8 +15778,17 @@ does *differently* from an unruled one, so a row that states
 nothing must not be expressible. Each rule says something on
 its own — a Space ("Finder opens in *work*"), floating
 ("Spotify stays out of tiling") — and either alone is a whole
-rule. Tiling is not: it is what every app without a rule
-already does, which the card's own empty note says.
+rule. Tiling was not while every app without a rule tiled.
+Detection now also floats some windows on a guess — a fixed size
+([#2070](https://github.com/KiwiCanopy/KiwiDesk/issues/2070)), no
+Dock icon — so an unruled app may float, and *tile what a guess
+floats* says something too
+([#2173](https://github.com/KiwiCanopy/KiwiDesk/issues/2173)). A
+Tile rule reaches the guesses alone: a dialog, sheet or panel and
+a Float rule for the same app still float, so a Tile rule never
+fights structure or a rule the user wrote. It is the app-level
+rule #1810 left for when someone asked, and the "Float windows
+automatically" switch is its every-app form.
 
 **One list per rule, because the rules have different scopes.**
 A Space is title-blind — every new window of the app opens in
@@ -15707,6 +15803,30 @@ cards, **Open in a Space** and **Float**, each over its own store
 the Float row it qualifies (`AppRuleListsWiringTests` ▸
 `patternEditorScopesToFloat`). An app may sit in both lists.
 This is the storage's own shape, so it costs the engine nothing.
+A third card, **Automatic floating**, carries the escape for a
+guess (#2173): the "Float windows automatically" switch on top
+and the **Tile instead** list it gates below it, so the Tile rows
+read as the switch's exceptions. It is one card rather than a
+list and a switch apart because the switch is what gives the
+list meaning — with it off nothing floats on a guess, so its rows
+grey (the trash and "Applies to" stay live, since other profiles
+may have it on).
+
+:::unreleased
+Its **Tile an app…** picker lists only the apps the guess has
+floated a window of since KiwiDesk started (#2071), never every
+installed app: a Tile rule on any other app says nothing, and a
+guessed window can belong to a helper process no disk scan offers
+— Steam's main window is Steam Helper's, so a rule on Steam
+itself leaves it floating. Apps with a guessed window open lead,
+captioned with its title; the rest follow by recency, capped at
+`GuessedApps.cap` with the least recently seen dropped, and never
+persisted. A Dock-less app is recorded whatever the switch and
+the Tile rules say, so a profile whose live counterpart already
+tiles it still finds it; a fixed-size window is seen only where
+the live guess reads its zoom button. *Other…* and Lua reach the
+rest.
+:::
 
 **This reverses "a rule is a sentence, and the sentence is the
 control"** (#678 turn 14a). Running prose renders an empty rule

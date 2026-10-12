@@ -70,6 +70,8 @@ struct TileRefusalSeamTests {
                 "Events/EventLoop+Notifications.swift",
                 "Events/EventLoop+Tabs.swift",
                 "Events/EventLoop+Queries.swift",
+                // A changed guess forgets verdicts (#2173).
+                "Events/EventLoop+FloatVerdict.swift",
             ]
         )
     }
@@ -87,6 +89,9 @@ struct TileRefusalSeamTests {
                 "Commands/KiwiCore+FloatCommands.swift": 1,
                 // The single row and each submenu row.
                 "App/KiwiCore+BarWindowMenus.swift": 2,
+                // The Tile picker's open guesses, which App
+                // Rules… lands on too (#2173, #2071).
+                "App/KiwiCore+AutoFloat.swift": 1,
             ]
         )
     }

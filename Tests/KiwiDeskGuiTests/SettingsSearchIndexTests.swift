@@ -220,8 +220,8 @@ struct SettingsSearchIndexTests {
                 // #1752: "Keep previous colors" and "Applies to";
                 // 17: #2143's picker and duration, at rest.
                 .looks: 17,
-                // 17 #1517 (one shelf set), 18 #1679, 19 #1856.
-                .advancedColors: 19,
+                // 17 #1517, 18 #1679, 19 #1856, 21 #1857 (wells).
+                .advancedColors: 21,
                 // 6: `(action) presets.layouts` joined anchor-less
                 // in #859 — the preset card's preview opener. This
                 // count RISING is the unusual direction the
@@ -245,8 +245,8 @@ struct SettingsSearchIndexTests {
                 // 4 since #1022: the one `app_rules.add_rule`
                 // action became two, one picker per rule, because
                 // a row can no longer be a no-op — a new census
-                // row landing, not an anchor going missing.
-                .appRules: 4,
+                // row landing; 7 since #2173's card.
+                .appRules: 7,
                 // 3 since #1250: the eight Advanced rows gained
                 // their catalog anchors so a hit opens the
                 // drawer; language, appearance and the login

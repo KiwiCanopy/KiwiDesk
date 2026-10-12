@@ -185,6 +185,8 @@ struct EncodedReachCache {
         let scrollGesture: ScrollGestureBase
         let spaceHistory: SpaceHistoryKind
         let modeCycle: [LayoutMode]
+        let tileRules: [String]
+        let floatAutomatically: Bool
         let profile: String?
         let isLoaded: Bool
     }

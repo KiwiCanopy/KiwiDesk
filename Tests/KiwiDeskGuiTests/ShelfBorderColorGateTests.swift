@@ -29,10 +29,10 @@ struct ShelfBorderColorGateTests {
     func gateFollowsTheSwitch() {
         let off = AdvancedColorsGates(settings: Self.settings(border: false))
         #expect(off.shelfBorderOff)
-        #expect(off.shelfBorderNeedsReference)
+        #expect(off.needsOwnSentence(.kiwishelf(.borderColor)))
         let on = AdvancedColorsGates(settings: Self.settings(border: true))
         #expect(!on.shelfBorderOff)
-        #expect(!on.shelfBorderNeedsReference)
+        #expect(on.verdict(for: .kiwishelf(.borderColor)) == nil)
     }
 
     @Test("With no bar shown the header's reason stands instead")
@@ -41,7 +41,11 @@ struct ShelfBorderColorGateTests {
             settings: Self.settings(border: false, barShows: false)
         )
         #expect(gates.shelfBorderOff)
-        #expect(!gates.shelfBorderNeedsReference)
+        #expect(!gates.needsOwnSentence(.kiwishelf(.borderColor)))
+        #expect(
+            gates.verdict(for: .kiwishelf(.borderColor))?.help
+                == AdvancedColorsHelp.kiwishelfOff
+        )
     }
 
     /// One branch, one value (`CrossReferenceRowSlotTests`).
@@ -56,21 +60,22 @@ struct ShelfBorderColorGateTests {
         )
     }
 
-    /// The render sites wire those two values: the colour row
-    /// greys on `shelfBorderOff`, and the link renders under
-    /// `shelfBorderNeedsReference` alone. Whitespace is squashed
-    /// so a re-wrap cannot red it.
+    /// The render sites wire those values: the row's verdict
+    /// greys on `shelfBorderOff`, and the link renders under the
+    /// row's own-sentence verdict alone (#1857). Whitespace is
+    /// squashed so a re-wrap cannot red it.
     @Test(
         "The row greys and the link renders on the gate's values",
         arguments: [
             (
-                "AdvancedColorRow+Bars.swift",
-                "gated(gates.shelfBorderOff,"
-                    + "AdvancedColorsHelp.shelfBorderOff)"
+                "AdvancedColorsGates+Verdict.swift",
+                "returnshelfBorderOff?ColorRowVerdict("
+                    + "help:AdvancedColorsHelp.shelfBorderOff,"
             ),
             (
                 "BarColorCards.swift",
-                "ifgates.shelfBorderNeedsReference{CrossReferenceRow("
+                "ifgates.needsOwnSentence(.kiwishelf(.borderColor)){"
+                    + "CrossReferenceRow("
                     + "prose:AdvancedColorsHelp.shelfBorderReference,"
             ),
         ]

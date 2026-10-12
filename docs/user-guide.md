@@ -186,7 +186,7 @@ its `.gitignore`.
 {
   "spaces": [ "1", "2", "mail" ],
   "app_rules": { "com.spotify.client": "music" },
-  "float_rules": [ "com.apple.calculator" ],
+  "float_rules": [ "com.apple.systempreferences" ],
   "ignore_rules": [ "eu.exelban.Stats" ],
   "profile_bindings": {
     "9C1F2A44-3B0E-4E7D-9A21-6D5C8B7E0143": {
@@ -399,7 +399,8 @@ reference](lua-reference.md) the verbs.
 
 ### Focus Border
 
-The ring's colours are in **Advanced Colors ▸ Border colors**,
+The ring's colours are in **Advanced Colors**: the focused one
+under **Accent**, the unfocused one under **Window marks**, each
 dimmed while the matching switch here is off.
 
 **What gets no border.** Launcher and panel overlays (Spotlight,
@@ -769,7 +770,7 @@ entries add rules and `null` entries remove inherited ones:
 {
   "app_rules": { "com.apple.mail": null },
   "float_rules": {
-    "com.apple.calculator": null,
+    "com.apple.systempreferences": null,
     "com.apple.finder:Get Info": true
   },
   "ignore_rules": {

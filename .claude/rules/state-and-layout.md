@@ -1638,11 +1638,16 @@ editing here:
 - **A tracked window's "is it presenting" is asked through the
   one `KiwiCore.presents` door (#1788)**, which rules the float
   gate once — a tiled slot a gapless layout sizes to its screen
-  is no show. The raw `covers` / `coversAScreen` stays for a
-  CANDIDATE frame whose float ruling its caller already made
-  (the fit, the gather) and for the verdict's own home;
-  `ScreenCoveringCallerCensusTests` reds a new raw caller until
-  it routes or names its reason. A reader of the verdict that
+  is no show. A CANDIDATE frame whose float ruling its caller
+  already made (the fit, the gather) takes `coversAsShow`, the
+  one composition of the frame verdict with the subrole's
+  `mayPresent`, and the raw `covers` / `coversAScreen` stays in
+  the verdict's own home; `ScreenCoveringCallerCensusTests` reds
+  a new raw caller, and a `mayPresent` or `coversAsShow` read
+  outside its census, until it routes or names its reason. The
+  subrole is the event loop's, refreshed change-only like the
+  fullscreen flag on every recheck and re-read on a cover
+  crossing (`PresentingSubroleWiringTests`). A reader of the verdict that
   draws refreshes on the cover CROSSING too, since a move or
   resize may retile nothing (`PresentingReaderTests` ▸
   `crossingRefreshesRingAndMark`); the readers ruled so far are
@@ -2084,7 +2089,15 @@ editing here:
   scroll gesture — runs its work inside `withUserMotion`, and a
   new one joins `MotionScopeCensusTests`' map with its reason; a
   hotkey and a hold-glide step read as user motion through their
-  own flags, and the CLI/IPC socket stays ambient by ruling. A
+  own flags, and the CLI/IPC socket stays ambient by ruling. An
+  app event the user's own press caused — a removal that lost
+  the active Space's focus (a hide or minimize included, never a
+  window that left with its Desktop), a window the frontmost app
+  opened, inside `LaunchFollowIntent.recentPress()` — is user
+  motion through the one `withAppActMotion` at the event retile
+  (`MotionScopeCensusTests` ▸ `scopeHasOneHome`), never a
+  keypress alone (#2187, `AppActMotionTests` ▸
+  `unfocusedCloseWaits`, `backgroundOpenWaits`). A
   new `DeferredTasks.Key` states in `carriesCause` whether its
   body carries its scheduler's cause, late, or runs ambient —
   the switch is exhaustive, so the compiler asks. The scope is

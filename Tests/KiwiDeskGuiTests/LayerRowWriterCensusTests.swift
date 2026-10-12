@@ -29,7 +29,7 @@ struct LayerRowWriterCensusTests {
                 "drop: removes the rows naming a gone Space, adds"
                     + " none (#1827)"
             ),
-        "KiwiDeskCore/Config/GuiConfig.swift":
+        "KiwiDeskCore/Config/GuiConfig+Spaces.swift":
             (
                 1,
                 "rename: rewrites Lua in place, then takes the dedupe"

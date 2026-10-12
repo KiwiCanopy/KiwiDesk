@@ -23,6 +23,8 @@ struct RuleReachFamilyParityTests {
         "scrollGestures": "scrollGesture",
         "spaceHistory": "spaceHistory",
         "modeCycle": "modeCycle",
+        "tileRules": "tileRules",
+        "floatAutomatically": "floatAutomatically",
         // The shortcut override is always the Save's own diff
         // (`overwriteProfile`'s docstring), never kept as stored,
         // and each apply caller registers it with its own VM.

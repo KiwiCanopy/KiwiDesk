@@ -20,6 +20,8 @@ extension SettingsModel {
         target.appRules = source.appRules
         target.floatRules = source.floatRules
         target.ignoreRules = source.ignoreRules
+        target.tileRules = source.tileRules
+        target.floatAutomatically = source.floatAutomatically
         target.profileBindings = source.profileBindings
         target.spaces = source.spaces
     }

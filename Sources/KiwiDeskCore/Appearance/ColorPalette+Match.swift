@@ -42,6 +42,26 @@ extension ColorPalette {
         return left == nil && right == nil
             && a.caseInsensitiveCompare(b) == .orderedSame
     }
+
+    /// `#RRGGBB` of any parseable hex, its alpha dropped; nil
+    /// where it does not parse (#1857).
+    public static func rgbHex(_ hex: String) -> String? {
+        guard let c = DragVisual.parseHex(hex) else { return nil }
+        return "#" + [c.red, c.green, c.blue].map(byteHex).joined()
+    }
+
+    /// The `AA` a hex carries, or "" where it is opaque or does
+    /// not parse — what a colour write keeps of the old value.
+    public static func alphaSuffix(_ hex: String) -> String {
+        guard let c = DragVisual.parseHex(hex), c.alpha < 1 else {
+            return ""
+        }
+        return byteHex(c.alpha)
+    }
+
+    private static func byteHex(_ value: Double) -> String {
+        String(format: "%02X", Int((min(max(value, 0), 1) * 255).rounded()))
+    }
 }
 
 extension ColorPalette {

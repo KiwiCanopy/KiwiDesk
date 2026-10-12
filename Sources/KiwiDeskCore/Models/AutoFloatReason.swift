@@ -11,6 +11,18 @@ public enum AutoFloatReason: Sendable, Equatable {
     case panel
     /// The app runs with no Dock icon (accessory policy).
     case accessoryApp
+    /// A standard window that cannot be resized — its zoom button
+    /// is disabled: Settings and About windows (#2070).
+    case fixedSize
+
+    /// Whether the reason is a GUESS a Tile rule or the switch can
+    /// escape (#2173), rather than structure or the user's rule.
+    public var isGuess: Bool {
+        switch self {
+        case .accessoryApp, .fixedSize: true
+        case .rule, .panel: false
+        }
+    }
 }
 
 /// Float detection's last verdict for one tracked window (#1810).

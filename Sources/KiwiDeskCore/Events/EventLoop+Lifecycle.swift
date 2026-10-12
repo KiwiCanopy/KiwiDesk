@@ -44,6 +44,7 @@ extension EventLoop {
         manualAXApplied = []
         detectedFloating = [:]
         detectedFullscreen = [:]
+        detectedSubroles = [:]
         ignorePending = []
         trackedFrames = [:]
         tabCarriers = []

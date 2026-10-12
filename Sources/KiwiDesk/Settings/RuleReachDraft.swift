@@ -16,14 +16,19 @@ enum RuleFamily: Hashable {
     /// The layout cycle, keyed by `RuleReachTable.modeCycleKey`
     /// (#453).
     case cycle
+    /// A Tile rule, keyed like a float rule (#2173).
+    case tile
+    /// The "Float windows automatically" switch, keyed by
+    /// `RuleReachTable.floatAutomaticallyKey` (#2173).
+    case autoFloat
 
     /// How a row's subject keys its table: app rules by the
     /// lowercased bundle id, a shortcut's action and a scroll
     /// setting verbatim.
     func key(_ subject: String) -> String {
         switch self {
-        case .key, .scroll, .history, .cycle: subject
-        case .space, .float: subject.lowercased()
+        case .key, .scroll, .history, .cycle, .autoFloat: subject
+        case .space, .float, .tile: subject.lowercased()
         }
     }
 }

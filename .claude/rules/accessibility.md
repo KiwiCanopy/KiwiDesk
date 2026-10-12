@@ -102,6 +102,27 @@ editing AX code:
   unjudged — and changing one is a ruling on that app, made in
   its own change, that marks the row `.ruled` with its issue;
   never an edit to make the suite pass.
+- **Every reader of the ignore predicate states the title-bar
+  button the #2072 escape decides on** — an accessory app's
+  raised window with a button is admitted, not ignored, and so
+  is Ghostty's among the layer-scoped bundles (#2067,
+  `GhosttyButtonEscapeTests`). The
+  condition is the one `FloatDetection.needsTitlebarButton`, which
+  the off-main list read and the main-actor gate both ask;
+  `FloatDetection.shouldIgnore` and `isBuiltInIgnoredPanel` take
+  the button with no default, so a new caller decides it, and the
+  untracked-focus classifier reads it from the report's element.
+  `hasVisibleIgnoredPanel` cannot see buttons, so it takes the
+  gate's admitted ids through `admittedWindows(of:)`
+  (`CommandBarIgnoreTests`, `AXDumpCorpusTests`). The escape
+  stops at the screen-saver level (#2069), whose arm takes no
+  button, arms the ignored-panel distrust for any app, and
+  refuses ADOPTION only: a tracked window rising to it is judged
+  through the one `FloatDetection.judgedLayer`, since its sweep
+  removal would read as a close (`ScreenSaverLayerWiringTests`).
+  A fixed size (#2070) is judged at adoption: a recheck never
+  floats a tiled window on a disabled zoom button alone, since a
+  sheet can grey it for a moment.
 - **Every AX message to another app runs inside
   `WorkMeter.shared.ax { … }`** (#1508) — the attribute reads
   and writes, the actions and the multi-attribute read, wherever

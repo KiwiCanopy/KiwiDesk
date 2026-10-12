@@ -45,7 +45,7 @@ struct AppRulesCensusRenderTests {
                 .filter { $0.placement.area == .appRules }
                 .compactMap { $0.placement.container }
         )
-        #expect(declared == [.spaceRules, .floatRules])
+        #expect(declared == [.spaceRules, .floatRules, .automaticFloating])
     }
 
     /// The bespoke claim, read off the TREE rather than restated
@@ -58,7 +58,7 @@ struct AppRulesCensusRenderTests {
     func bespokeMeansNoOrderList() throws {
         #expect(
             AppRulesRowOrder.bespokeContainers
-                == [.spaceRules, .floatRules]
+                == [.spaceRules, .floatRules, .automaticFloating]
         )
         // Whitespace-normalised, and the AppRules directory is
         // scanned WHOLE rather than by filename: guard-prover

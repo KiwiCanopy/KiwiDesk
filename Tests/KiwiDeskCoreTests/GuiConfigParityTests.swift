@@ -47,6 +47,7 @@ struct GuiConfigParityTests {
                 "profileBindings", "desktopSpaces", "layers",
                 "scrollGesture", "appWide", "look", "spaceHistory",
                 "modeCycle",
+                "floatAutomatically", "tileRules",
             ]
         )
     }
@@ -87,6 +88,8 @@ struct GuiConfigParityTests {
         )
         config.spaceHistory = .allScreens
         config.modeCycle = [.grid, .monocle]
+        config.floatAutomatically = false
+        config.tileRules = ["com.valvesoftware.steam"]
         config.layers = [
             KeyLayer(
                 name: "default",
@@ -117,6 +120,8 @@ struct GuiConfigParityTests {
         #expect(back.scrollGesture == config.scrollGesture)
         #expect(back.spaceHistory == config.spaceHistory)
         #expect(back.modeCycle == config.modeCycle)
+        #expect(back.floatAutomatically == config.floatAutomatically)
+        #expect(back.tileRules == config.tileRules)
         // Profile-scoped fields deliberately do NOT ride the
         // sidecar (#36) — they come back default.
         #expect(back.settings == TilingSettings())

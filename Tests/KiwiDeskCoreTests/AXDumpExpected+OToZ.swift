@@ -8,13 +8,20 @@ extension AXDumpExpected {
         .row("qutebrowser_context_menu", .floats(.panel), .kept, nil),
         .row("qutebrowser_hide_decoration", .floats(.panel), .kept, nil),
         .row("raycast", .floats(.accessoryApp), .ignored, nil),
-        .row("raycast_settings", .tiles, .kept, .furnished),
+        .row(
+            "raycast_settings",
+            .floats(.fixedSize),
+            .kept,
+            .furnished,
+            .ruled(issue: 2070)
+        ),
         .row("safari", .tiles, .kept, .furnished),
         .row(
             "safari_pinterest_sign_in_with_google",
-            .tiles,
+            .floats(.fixedSize),
             .kept,
-            .furnished
+            .furnished,
+            .ruled(issue: 2070)
         ),
         .row(
             "scenario_firefox_google_meet_share_window/01_firefox",
@@ -63,20 +70,23 @@ extension AXDumpExpected {
         .row(
             "slack_huddle_share_screen_draw_on_screen_fake_window",
             .floats(.panel),
-            .kept,
-            .furnished
+            .ignored,
+            .furnished,
+            .ruled(issue: 2069)
         ),
         .row(
             "slack_huddle_share_screen_floating_popup",
             .floats(.panel),
-            .kept,
-            .furnished
+            .ignored,
+            .furnished,
+            .ruled(issue: 2069)
         ),
         .row(
             "slack_huddle_share_screen_target_picker",
             .floats(.panel),
-            .kept,
-            nil
+            .ignored,
+            nil,
+            .ruled(issue: 2069)
         ),
         .row("spotify", .tiles, .kept, .furnished),
         .row("spotify_miniplayer", .floats(.panel), .kept, .furnished),
@@ -102,7 +112,13 @@ extension AXDumpExpected {
         .row("vs_codium", .tiles, .kept, .furnished),
         .row("vs_codium_nativeFullScreen_false", .tiles, .kept, .furnished),
         .row("wisprFlow1", .floats(.accessoryApp), .ignored, nil),
-        .row("wisprFlow2", .floats(.panel), .kept, nil),
+        .row(
+            "wisprFlow2",
+            .floats(.panel),
+            .ignored,
+            nil,
+            .ruled(issue: 2069)
+        ),
         .row("xcode", .tiles, .kept, .furnished),
         .row("xcode_build_succeeded_popup", .floats(.panel), .kept, nil),
         .row("xcode_installing_system_components", nil, nil, nil),

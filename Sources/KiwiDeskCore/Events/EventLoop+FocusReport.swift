@@ -126,6 +126,7 @@ extension EventLoop {
                 pid: pid,
                 bundleID: app.bundleID,
                 isAccessory: classifiesAsOverlay(pid: pid),
+                element: element,
                 channel: "focus"
             )
             return

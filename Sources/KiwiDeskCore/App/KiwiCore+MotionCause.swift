@@ -31,6 +31,53 @@ extension KiwiCore {
         )
     }
 
+    /// Runs `body` as immediate user motion when `event` is the
+    /// user's own act in an app (#2187): a removal that took the
+    /// active Space's focus, or a window the frontmost app opened,
+    /// within a press's grace. Any other app event stays ambient.
+    func withAppActMotion(
+        _ event: KiwiEvent,
+        effects: AppliedEffects,
+        reason: WindowGoneReason?,
+        _ body: () -> Void
+    ) {
+        guard
+            let pressedAt = appActPress(
+                event,
+                effects: effects,
+                reason: reason
+            )
+        else { return body() }
+        tiler.applier.motion.with(
+            .user(pressedAt: pressedAt, late: false),
+            body
+        )
+    }
+
+    /// When the press `event` answers was made, or nil when the
+    /// event is not attributed to one (#2187). A hide or minimize
+    /// counts; a window that left with its Desktop is the switch's,
+    /// asked as the close-return stand-down asks it.
+    func appActPress(
+        _ event: KiwiEvent,
+        effects: AppliedEffects,
+        reason: WindowGoneReason?
+    ) -> Date? {
+        guard let press = launchFollow.recentPress() else { return nil }
+        let attributed: Bool
+        if case .windowCreated(let window) = event {
+            attributed = frontmostOwns(pid: window.pid)
+        } else {
+            attributed =
+                effects.removedWindow?.focusLost == true
+                && reason != .vanished
+                && eventLoop.eagerDepartureInFlight == nil
+        }
+        guard attributed else { return nil }
+        onLog("motion: an app act \(Int(press * 1000)) ms after a press")
+        return wallClock().addingTimeInterval(-press)
+    }
+
     /// Deferred tails carry their scheduler's cause, late (Ruling 2).
     func wireMotionCause() {
         tiler.motionGate.cause = { [weak self] in

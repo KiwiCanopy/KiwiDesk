@@ -17,7 +17,7 @@ extension KiwiShelfCard {
                     + "\u{201C}%3$@\u{201D}.",
                 L("app_bar.background_style.boxed", "Boxed"),
                 SettingsDestination.advancedColors.title,
-                L("colors.more", "More colors")
+                L("kiwishelf.colors.title", "KiwiShelf colors")
             )
         )
         .searchAnchored(
