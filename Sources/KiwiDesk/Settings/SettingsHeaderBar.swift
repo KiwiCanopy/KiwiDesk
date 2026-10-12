@@ -40,9 +40,13 @@ struct SettingsHeaderBar: View {
                 if let status = statusText {
                     statusRow(status)
                 }
-                if let warning = model.profileWarning {
-                    warningRow(warning)
-                }
+            }
+            // The Lua editor's Save refuses through it too (#2206),
+            // and General opens that editor on a profileless page.
+            if showsProfileContext || model.editingLua,
+                let warning = model.profileWarning
+            {
+                warningRow(warning)
             }
         }
         .padding(.horizontal, 16)

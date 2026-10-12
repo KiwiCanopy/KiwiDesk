@@ -952,6 +952,7 @@
   "lua_editor.adopt_help.body": "Il tuo init.lua non viene eliminato: resta come backup commentato nel nuovo file. Spaziature, layout, regole e scorciatoie da tastiera vengono importati; una scorciatoia che non può essere riletta rimane nel backup — riaggiungila in «%1$@».",
   "lua_editor.adopt_into_visual": "Adotta nell'editor visuale…",
   "lua_editor.back_to_visual": "Torna all'editor visuale",
+  "lua_editor.changed_on_disk": "init.lua è stato modificato fuori da Impostazioni mentre stavi modificando, quindi salvare lo sovrascriverebbe. Usa «%1$@», poi ripeti le tue modifiche.",
   "lua_editor.editing_directly": "Stai modificando init.lua direttamente.",
   "lua_editor.foreign_code": "Questo init.lua contiene codice Lua scritto a mano, quindi l'editor visuale è disattivato per non sovrascriverlo.",
   "mac_checklist.click_wallpaper": "Imposta «Fai clic sullo sfondo per mostrare la scrivania» su «Solo in Stage Manager»",

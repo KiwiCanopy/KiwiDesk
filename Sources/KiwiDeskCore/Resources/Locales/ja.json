@@ -952,6 +952,7 @@
   "lua_editor.adopt_help.body": "init.luaは削除されません。新しいファイル内にコメントアウトされたバックアップとして残ります。ギャップ、レイアウト、ルール、ショートカットは読み込まれます。読み戻せないショートカットはバックアップに残るので、「%1$@」で追加し直してください。",
   "lua_editor.adopt_into_visual": "ビジュアルエディタに取り込む…",
   "lua_editor.back_to_visual": "ビジュアルエディタに戻る",
+  "lua_editor.changed_on_disk": "編集中にinit.luaが設定以外の場所で変更されたため、保存するとinit.luaが上書きされます。「%1$@」を実行してから、もう一度編集してください。",
   "lua_editor.editing_directly": "init.luaを直接編集しています。",
   "lua_editor.foreign_code": "このinit.luaには手書きのLuaが含まれているため、上書きを避けるためビジュアルエディタは無効になっています。",
   "mac_checklist.click_wallpaper": "「壁紙をクリックしてデスクトップを表示」を「ステージマネージャ使用時のみ」にする",

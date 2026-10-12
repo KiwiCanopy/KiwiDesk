@@ -70,9 +70,10 @@ extension SettingsModel {
     }
 
     /// Re-draws a clean live page whose `init.lua` changed owner
-    /// (#2183) — one file read, cheap enough for every window-key.
+    /// (#2183) or, in the Lua editor, changed at all (#2206) —
+    /// file reads cheap enough for every window-key.
     func refreshOwner() {
-        if ownerMoved, !isDirty { reload() }
+        if ownerMoved || luaChangedOnDisk, !isDirty { reload() }
     }
 
     /// Re-reads what each draft binding loads (#1609). Owed by

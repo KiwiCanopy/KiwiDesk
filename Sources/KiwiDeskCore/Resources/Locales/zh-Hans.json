@@ -952,6 +952,7 @@
   "lua_editor.adopt_help.body": "init.lua 不会被删除：它会作为注释掉的备份保留在新文件中。间距、布局、规则和键位绑定都会导入；无法回读的快捷键会留在备份中，请到“%1$@”中重新添加。",
   "lua_editor.adopt_into_visual": "采用到可视化编辑器…",
   "lua_editor.back_to_visual": "返回可视化编辑器",
+  "lua_editor.changed_on_disk": "你编辑时，init.lua 已在“设置”之外被更改，因此保存会覆盖它。请先“%1$@”，然后重新进行编辑。",
   "lua_editor.editing_directly": "正在直接编辑 init.lua。",
   "lua_editor.foreign_code": "此 init.lua 中包含手写的 Lua 代码，为避免覆盖，可视化编辑器已停用。",
   "mac_checklist.click_wallpaper": "将“点按墙纸显示桌面”设为“仅在台前调度中”",
