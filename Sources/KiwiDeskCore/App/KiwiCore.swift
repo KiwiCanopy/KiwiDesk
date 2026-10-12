@@ -206,23 +206,23 @@ public final class KiwiCore {
     /// The warp's machine tail (#186); nil until `start()` wires it.
     var pointerWarp: (@MainActor (CGRect) -> Void)?
 
-    /// The deferred one-shot settle tasks (focus follow, startup
-    /// sweep, space settles), keyed so `stop()` cancels them all
-    /// without a hand-kept list (#49); bodies at the `schedule*`
-    /// call sites.
+    /// The deferred one-shot settle tasks, keyed so `stop()` cancels
+    /// them all without a hand-kept list (#49).
     let deferred = DeferredTasks()
     /// The in-flight boot's phase, spans and timestamps (#801).
     let boot = BootRun()
     /// The tunable waits; tests assign milliseconds.
     var timings = CoreTimings()
 
-    /// Four intent ledgers, each type doc carrying its argument:
-    /// the move latch (#482/#483), the follow focus debt (#1007),
-    /// a hidden-Desktop move's Space (#1150), a launch's (#1599).
+    /// The intent ledgers, each type doc carrying its argument: the
+    /// move latch (#482/#483), the follow focus debt (#1007), a
+    /// hidden-Desktop move's Space (#1150), a launch's (#1599), and
+    /// Jump to window's (#1875).
     let moveLatch = MoveIntentLatch()
     let followFocus = FollowFocusIntent()
     let pendingSpace = PendingSpaceAssignment()
     let launchFollow = LaunchFollowIntent()
+    let jump = JumpState()
 
     /// The MAIN display's current native Desktop (#888): the binding
     /// authority and the Space memory's key (#1147), never a number.

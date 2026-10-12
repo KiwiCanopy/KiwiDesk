@@ -169,6 +169,7 @@ extension AppliedEffects.RemovedWindow {
         Self(
             app: app,
             bundleID: bundleID,
+            title: title,
             pid: pid,
             isTransientOverlay: isTransientOverlay,
             space: space,

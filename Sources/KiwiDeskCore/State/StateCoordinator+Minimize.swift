@@ -8,6 +8,9 @@ extension StateCoordinator {
         var id: WindowID
         let pid: pid_t
         let bundleID: String?
+        /// What Jump to window lists it by (#1875).
+        let app: String
+        let title: String
     }
 
     /// Records window minimization, newest last. Call while the
@@ -23,7 +26,9 @@ extension StateCoordinator {
             MinimizedWindow(
                 id: id,
                 pid: window.pid,
-                bundleID: window.appBundleID?.lowercased()
+                bundleID: window.appBundleID?.lowercased(),
+                app: window.appName,
+                title: window.title
             )
         )
     }

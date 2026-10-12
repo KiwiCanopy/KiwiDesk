@@ -26,6 +26,7 @@ extension KiwiCore {
             pid: pid,
             appName: removed.app ?? "",
             appBundleID: removed.bundleID,
+            title: removed.title ?? "",
             nativeSpace: nativeSpace
         )
         scheduleAwayCensus()
@@ -81,6 +82,7 @@ extension KiwiCore {
         state.focusRecency[id] = nil
         desktopMemory.returnFocus.retire(id)
         followFocus.retire(id)
+        jump.retire(id)
     }
 
     /// The app's exit ends its entries (the state fold) and

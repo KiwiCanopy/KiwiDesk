@@ -104,6 +104,7 @@ struct AppActMotionTests {
         effects.removedWindow = .init(
             app: nil,
             bundleID: nil,
+            title: nil,
             pid: nil,
             isTransientOverlay: false,
             space: nil,

@@ -274,22 +274,27 @@ struct RunningApp {
     let pid: pid_t
     let activationPolicy: NSApplication.ActivationPolicy
     let ref: AppRef
+    /// Hidden with ⌘H when the list was read (#1875 lists it).
+    let isHidden: Bool
 
     init(
         pid: pid_t,
         activationPolicy: NSApplication.ActivationPolicy,
-        ref: AppRef
+        ref: AppRef,
+        isHidden: Bool = false
     ) {
         self.pid = pid
         self.activationPolicy = activationPolicy
         self.ref = ref
+        self.isHidden = isHidden
     }
 
     init(_ app: NSRunningApplication) {
         self.init(
             pid: app.processIdentifier,
             activationPolicy: app.activationPolicy,
-            ref: AppRef(app)
+            ref: AppRef(app),
+            isHidden: app.isHidden
         )
     }
 }

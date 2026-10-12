@@ -172,6 +172,9 @@ func makeTestCore(
     // presentation verdict reads (#1787): live, they hand every
     // fixture the host desk.
     core.frontWindowFrames = { [] }
+    // Jump to window's minimize-record check (#1875) reads every
+    // window id on the host otherwise.
+    core.jump.knownWindows = { nil }
     core.tiler.allScreenFrames = { [] }
     // Same class, fifth time (#933): the own-key-window seam
     // defaults to a live `NSApplication.shared` read, so a
