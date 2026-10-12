@@ -295,6 +295,7 @@
   "config_issues.title": "Problemi di configurazione",
   "config_issues.unknown_call": "Chiamata sconosciuta «%1$@».",
   "config_issues.unknown_call_suggestion": "Chiamata sconosciuta «%1$@»: intendevi «%2$@»?",
+  "custom_lua_banner.adopts": "Il tuo init.lua definisce da sé alcune impostazioni. Salvando qui, le tue scorciatoie e regole passano all'editor visuale; init.lua continua a essere eseguito e l'app non lo modifica mai.",
   "custom_lua_banner.text": "Il tuo init.lua contiene anche codice Lua personalizzato. Non va in conflitto con l'editor visuale e l'app non modifica mai init.lua.",
   "desktop_cue.ax": "Scrivania %1$d, %2$d di %3$d",
   "desktop_cue.ax.profile": "%1$@, profilo %2$@",
