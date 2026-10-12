@@ -267,8 +267,7 @@ extension KiwiCore {
         // State and the OS agree again (#1130).
         disarmWakeFocusHeal()
         retireOwnFronts(honoring: id)
-        let honoredApp: String =
-            state.windows[id]?.appName ?? "?"
+        let honoredApp = state.windows[id]?.appName ?? "?"
         let honoredBefore: String = describe(
             effects.focusBefore
         )
@@ -278,6 +277,7 @@ extension KiwiCore {
                 + "selfEcho=\(selfEcho)"
         )
         rememberHonoredFocus(id)
+        payHiddenAppMove(focused: id)
         noteDelayedClose(id, after: effects, selfEcho: selfEcho)
         emitFocusChange(id)
         // Move the focus ring to the newly focused window.

@@ -1792,8 +1792,10 @@
   "whatsnew.trail.dismiss": "Fechar",
   "whatsnew.trail.from": "Das Novidades",
   "whatsnew.trail.next": "Próximo: %1$@",
+  "window_action.refusal.all_here": "Todas as janelas de %1$@ estão aqui",
   "window_action.refusal.cannot_move_here": "“%1$@” não pode ser movido para cá",
   "window_action.refusal.no_close_button": "“%1$@” não tem botão de fechar",
   "window_action.refusal.no_new_window": "%1$@ não tem o comando “Nova Janela”",
+  "window_action.refusal.no_title_match": "Nenhuma janela de %1$@ corresponde a “%2$@”",
   "window_action.refusal.nothing_to_gather": "Nenhuma janela de %1$@ para reunir"
 }

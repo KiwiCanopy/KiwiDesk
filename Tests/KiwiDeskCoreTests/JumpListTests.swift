@@ -63,17 +63,19 @@ struct JumpListTests {
         #expect(windows(core.jumpEntries()) == [3, 1, 2])
     }
 
-    /// Tracked, away and minimized rows ranked together: one
-    /// recency order across all three, never per kind.
-    @Test("recency interleaves tracked, away and minimized rows")
+    /// Tracked and away rows rank together as the open tier, by
+    /// recency; a minimized row follows them, however recent its
+    /// stamp (#1875 ▸ Ruling — minimized windows rank after open
+    /// ones).
+    @Test("open rows interleave by recency, minimized rows follow")
     func recencyAcrossKinds() {
         let core = makeCore()
         defer { resetAuthorityOverrides() }
         track(core, 1, title: "here")
         track(core, 7, title: "away", in: "2")
         track(core, 4, title: "parked")
-        core.state.stampFocusRecency(WindowID(7))
         core.state.stampFocusRecency(WindowID(1))
+        core.state.stampFocusRecency(WindowID(7))
         core.state.stampFocusRecency(WindowID(4))
         core.state.rememberedSpaces[WindowID(7)] = .departed("2")
         core.recordAwayWindow(
@@ -89,7 +91,7 @@ struct JumpListTests {
             wasMinimized: true,
             effects: &effects
         )
-        #expect(windows(core.jumpEntries()) == [4, 1, 7])
+        #expect(windows(core.jumpEntries()) == [7, 1, 4])
     }
 
     @Test("the snapshot names the Space the user is in")

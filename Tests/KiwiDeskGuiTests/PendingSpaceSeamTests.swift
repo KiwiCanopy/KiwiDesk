@@ -42,7 +42,7 @@ struct PendingSpaceSeamTests {
         // float cross fake screens, so the WIRING is the guard.
         // The needle is the call shape, which the definition
         // line does not match — it binds the callers' `window`
-        // spelling, so it counts these five and a sixth spelled
+        // spelling, so it counts these six and a seventh spelled
         // otherwise is not seen; `filingReanchors` below holds
         // the step the copies lost. Jump to window's Move here
         // files an un-minimized window at its arrival (#1875).
@@ -54,6 +54,9 @@ struct PendingSpaceSeamTests {
                 "KiwiCore+DesktopMoveSpace.swift",
                 "KiwiCore+SpaceBarDrop.swift",
                 "JumpState.swift",
+                // And a hidden app's returning window, at its
+                // focus report (#1513).
+                "KiwiCore+JumpHiddenApp.swift",
             ]
         ),
     ]

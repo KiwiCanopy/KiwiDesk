@@ -1792,8 +1792,10 @@
   "whatsnew.trail.dismiss": "关闭",
   "whatsnew.trail.from": "来自“新功能”",
   "whatsnew.trail.next": "下一项：%1$@",
+  "window_action.refusal.all_here": "%1$@ 的所有窗口都在这里",
   "window_action.refusal.cannot_move_here": "“%1$@”无法移到这里",
   "window_action.refusal.no_close_button": "“%1$@”没有关闭按钮",
   "window_action.refusal.no_new_window": "%1$@ 没有“新建窗口”命令",
+  "window_action.refusal.no_title_match": "没有与“%2$@”匹配的 %1$@ 窗口",
   "window_action.refusal.nothing_to_gather": "没有可收集的 %1$@ 窗口"
 }

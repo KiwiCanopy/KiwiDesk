@@ -16,6 +16,10 @@ enum WindowActionRefusal: Equatable {
     /// stood down, or an away window the hop cannot reach — no
     /// bridge, another screen's Desktop, unfiled, no census.
     case cannotMoveHere(window: String)
+    /// `move_here` found every matching window already here (#1513).
+    case allHere(app: String)
+    /// `move_here`'s title text matched no window of the app.
+    case noTitleMatch(app: String, text: String)
 
     /// The pill's glyph: there is no such action here.
     var pillSymbol: String { "nosign" }
@@ -49,6 +53,19 @@ enum WindowActionRefusal: Equatable {
                 "“%1$@” can't be moved here",
                 window
             )
+        case .allHere(let app):
+            L(
+                "window_action.refusal.all_here",
+                "Every %1$@ window is here",
+                app
+            )
+        case .noTitleMatch(let app, let text):
+            L(
+                "window_action.refusal.no_title_match",
+                "No %1$@ window matches “%2$@”",
+                app,
+                text
+            )
         }
     }
 
@@ -59,6 +76,8 @@ enum WindowActionRefusal: Equatable {
         case .noCloseButton: "no enabled close button"
         case .nothingToGather: "no window to gather"
         case .cannotMoveHere: "cannot move the window here"
+        case .allHere: "every matching window is already here"
+        case .noTitleMatch: "no window title matches"
         }
     }
 }

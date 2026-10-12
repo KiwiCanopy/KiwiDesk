@@ -425,10 +425,11 @@ an app with nothing to move answers with an error. See
 :::
 
 :::unreleased
-`move_here` (Launch) takes an app bundle id and moves that app's
-most recently focused window into the Space you are on and focuses
-it; an app with no window is opened. See
-[move_here](lua-reference.md#move_here).
+`move_here` (Launch) takes an app bundle id and optionally a piece
+of window title, and moves that app's most recently focused window
+not yet here into the Space you are on and focuses it — a
+minimized one only once no open one is left; an app with no window
+is opened. See [move_here](lua-reference.md#move_here).
 :::
 
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
