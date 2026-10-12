@@ -149,10 +149,22 @@ struct GuessedAppsTests {
             )
         )
         core.eventLoop.detectedFloating[id] = .floats(.fixedSize)
+        let kept = WindowID(7_103)
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: kept,
+                pid: Self.pid + 1,
+                appName: "Kept",
+                appBundleID: "kept.app",
+                title: "Prefs"
+            )
+        )
+        core.eventLoop.detectedFloating[kept] = .floats(.fixedSize)
         core.eventLoop.guessedApps.note(bundleID: "kept.app", name: "Kept")
         let apps = core.guessedFloatApps()
-        #expect(apps.map(\.bundleID) == [Self.steam, "kept.app"])
-        #expect(apps.first?.name == "Steam Helper")
-        #expect(apps.first?.titles == ["Steam"])
+        // The recorded open app leads; the evicted one follows it.
+        #expect(apps.map(\.bundleID) == ["kept.app", Self.steam])
+        #expect(apps.last?.name == "Steam Helper")
+        #expect(apps.last?.titles == ["Steam"])
     }
 }
