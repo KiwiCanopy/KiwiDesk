@@ -51,17 +51,20 @@ struct MouseButtonSeamGuardTests {
 
     /// The pointer read's homes (#1532, the same class one read
     /// over): the drag pipeline's cursor seam (#1103), the
-    /// reveal-strip seam beside `pressedButtons`, and the GUI's
-    /// shortcuts panel placing itself under the pointer at open —
-    /// a one-shot position no suite measures — and the hover
-    /// peek's hull hold, pinned by both `makeTestCore` twins (#1946).
+    /// reveal-strip seam beside `pressedButtons`, the GUI's
+    /// shortcuts and Jump to window panels placing themselves
+    /// under the pointer at open — a one-shot position no suite
+    /// measures — and the hover peek's hull hold, pinned by both
+    /// `makeTestCore` twins (#1946).
     private static let pointerHomes = [
         // The layout picker's pointer (#762).
         "BarContextMenus.swift",
         "BarPeek.swift",
         "KiwiCore+Drag.swift",
         "MouseTracker.swift",
-        "ShortcutsPanelController.swift",
+        // The shortcuts and Jump to window panels open on the
+        // screen under the pointer (#1875).
+        "PanelHandBack.swift",
     ]
 
     @Test("the live pointer read stays in its seam homes")

@@ -38,6 +38,10 @@ public struct JumpEntry: Sendable, Equatable {
     /// shows the name alone rather than the id twice.
     public let spaceIcon: SpaceGlyph?
     public let status: Status
+    /// Whether Move here would move the window into the current
+    /// Space — the GUI draws the way there by it, never by its own
+    /// reading of the gates `moveHere(_:)` applies.
+    public let movesHere: Bool
 
     public init(
         target: Target,
@@ -46,7 +50,8 @@ public struct JumpEntry: Sendable, Equatable {
         title: String,
         space: SpaceID?,
         spaceIcon: SpaceGlyph?,
-        status: Status
+        status: Status,
+        movesHere: Bool = false
     ) {
         self.target = target
         self.pid = pid
@@ -55,6 +60,7 @@ public struct JumpEntry: Sendable, Equatable {
         self.space = space
         self.spaceIcon = spaceIcon
         self.status = status
+        self.movesHere = movesHere
     }
 }
 

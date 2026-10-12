@@ -45,17 +45,16 @@ extension KiwiCore {
     }
 
     /// Arms the same dismiss distrust for KIWIDESK'S OWN pid
-    /// (#952): closing the shortcuts summon blip-keys another
-    /// own window (Settings) while the app is still active, and
-    /// AX re-reports it clickless ~60-110 ms later (capture
-    /// 2026-08-23) — AFTER the close's activation yield already
-    /// landed, so honoring it moves state focus, ring and warp
-    /// onto Settings against the yield. The grace consumes that
-    /// handoff report; a genuine click on an own window still
-    /// escapes on provenance (#687). Public because the GUI's
-    /// panel controller is the caller — and the caller gates
-    /// the arm on a commanded close of the still-active app,
-    /// the only close whose orderOut produces the blip. The
+    /// (#952): closing a key panel blip-keys another own window
+    /// (Settings) while the app is still active, and AX
+    /// re-reports it clickless ~60-110 ms later (capture
+    /// 2026-08-23), so honoring it would move state focus, ring
+    /// and warp onto Settings. The grace consumes that handoff
+    /// report; a genuine click on an own window still escapes on
+    /// provenance (#687). Public because the GUI's panel
+    /// controllers are the callers — and they gate the arm on a
+    /// commanded close of the still-active app, the only close
+    /// whose orderOut produces the blip. The
     /// residue is the #292 command guard denying a focused
     /// command on an own window inside the ≤1 s grace — rare,
     /// self-clearing, and the same latch semantics every

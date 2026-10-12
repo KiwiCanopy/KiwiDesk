@@ -52,6 +52,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     /// it survives close/reopen. Its "Edit in Settings…" bridge
     /// opens the dashboard already navigated to Shortcuts.
     var shortcutsPanel: ShortcutsPanelController?
+    var jumpPanel: JumpPanelController?
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
     private var sigtermSource: DispatchSourceSignal?
@@ -146,6 +147,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // Every forceFront is an own front Core honors (#1861).
         NSApplication.ownFrontNote = { [weak core] number in
             core?.noteOwnFront(number: number)
+        }
+        // Hotkey toggles Jump to window (#1875).
+        let jumpPanel = JumpPanelController(core: core)
+        self.jumpPanel = jumpPanel
+        core.uiBridge.onShowJumpToWindow = { [weak jumpPanel] in
+            jumpPanel?.toggle()
         }
         // Opens or raises Settings without toggling (#678).
         core.uiBridge.onOpenSettings = { [weak self] in

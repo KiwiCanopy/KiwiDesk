@@ -40,6 +40,9 @@ enum ChromeScanRoots {
     /// directory was not partly covered but silently exempt.
     /// The membership test is met: a raw colour there ships a
     /// defect the tint makes visible.
+    ///
+    /// Jump joined in the change that created it (#1875): its
+    /// panel draws a selection fill and plain buttons.
     static let paths = [
         "Sources/KiwiDesk/Settings",
         "Sources/KiwiDesk/Onboarding",
@@ -47,6 +50,7 @@ enum ChromeScanRoots {
         "Sources/KiwiDesk/Updates",
         "Sources/KiwiDesk/BootNotice",
         "Sources/KiwiDesk/CuePlate",
+        "Sources/KiwiDesk/Jump",
     ]
 
     static func urls(from filePath: String) -> [URL] {

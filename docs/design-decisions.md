@@ -2713,10 +2713,10 @@ it closes. The grace length is derived from the measured race
 margin and argued at its constant
 (`KiwiCore+IgnoredPanel.swift`); `IgnoredPanelGraceTests` pins
 the state machine, the escape and the expiry. The same grace
-also covers KiwiDesk's own summon chrome: closing the ⌃⌥K
-panel blip-keys another own window, whose clickless AX
-re-report trails the close's activation yield (#952 — the
-yield itself is a Shortcuts-section ruling). (#951)
+also covers KiwiDesk's own summon chrome: closing a keyboard
+panel with Settings in front blip-keys Settings, whose clickless
+AX re-report trails the close (#952 — the panels' activation is
+a Shortcuts-section ruling). (#951)
 
 ### A wake restore pays the focus it adopts; a launch never steals one
 
@@ -10746,30 +10746,27 @@ fresh layer (seeded with only the opener) honestly shows the
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing it
 re-leaks the seed into Custom. (#602, PR #638)
 
-**The summoned reference yields the activation it stole — and
-only where the user chose nothing else.** The ⌃⌥K panel is
-borderless chrome, so `show()` must activate KiwiDesk for the
-panel to receive Escape at all: an activation the user asked
-to *borrow*, not to keep. On a keyboard-commanded close
-(Escape, the ⌃⌥K toggle, the layer-switch auto-close) the
-summon re-activates the app that was frontmost when it opened
-— left to macOS, the still-active app's next window takes key,
-which is the Settings window whenever it happens to be open,
-landing the user in a window they were not using (#952). Three
-deliberate boundaries. The yield lives in the GUI summon that
-stole the activation, never in a Core focus stand-down: at OS
-level the post-close handoff is a genuine focus event, and
-Core refusing to follow one would split state focus from real
-key focus. A click-away dismissal never yields: the click
-already activated the app the user chose, and re-activating
-the remembered one would fight the click. And a summon from
-KiwiDesk's own Settings window remembers nothing — closing
-back to Settings there IS the user's previous context. The
-residue — the clickless AX re-report of Settings trailing the
-yield — is consumed by the same dismissal grace the
-ignored-panel family uses, armed at close for KiwiDesk's own
-pid. `ShortcutsPanelReturnTests` pins the yield gate's arms
-and the double-close consume. (#952)
+:::unreleased
+**The keyboard panels never take activation, so there is none to
+hand back.** The ⌃⌥K panel and Jump to window are
+non-activating panels (#1875): they take the keyboard while the
+app the user came from stays active. Activating KiwiDesk to give
+a borderless panel the keyboard raised its other windows — the
+Settings window, whenever it was open — and AX re-reported
+Settings focused on every open; it also left #952's question,
+which window the user lands in after a close, for a hand-back to
+answer. Not activating removes both: a close lands where the user
+already was, and a click away was always the user's choice. What
+a close still owes is the dismiss grace: with Settings in front,
+KiwiDesk is the active app, and the panel's order-out blip-keys
+Settings, whose clickless AX re-report the ignored-panel grace
+consumes, armed at a keyboard-commanded close for KiwiDesk's own
+pid. Because KiwiDesk's main menu is not the one in the menu bar
+while a panel is up, each panel hands its key equivalents to that
+menu itself, so ⌘W and the edit chords keep working.
+`ShortcutsPanelReturnTests` pins the grace's arms and
+`PanelHandBackTests` the non-activating show. (#952, #1875)
+:::
 
 **An accessibility steal is returned, not refused (#958).**
 Starting VoiceOver activates `com.apple.universalaccesscontrol`,

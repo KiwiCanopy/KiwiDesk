@@ -75,6 +75,10 @@ extension KiwiCore {
             self?.uiBridge.onOpenSettings()
             return .none
         }
+        lua.register("show_jump_to_window") { [weak self] _ in
+            self?.uiBridge.onShowJumpToWindow()
+            return .none
+        }
     }
 
     /// `KiwiDesk.bind`, `define_layer`, and `switch_layer`.
@@ -202,10 +206,9 @@ extension KiwiCore {
 /// **A field's name IS its verb name**, lower-snake with the
 /// `on` dropped (`onOpenSettings` ↔ `open_settings`), which is
 /// what lets `UIBridgeParityTests` derive the roster by
-/// reflection rather than re-listing it. The two verbs do not
-/// share a prefix on purpose: `show_shortcuts` toggles a panel
-/// and `open_settings` opens-or-raises a window, and naming
-/// both `show_*` would promise one behaviour for both.
+/// reflection rather than re-listing it. The prefix says the
+/// behaviour: a `show_*` verb toggles a panel, while
+/// `open_settings` opens-or-raises a window.
 public struct UIBridgeHooks {
     /// `KiwiDesk.show_shortcuts()` (#330): opens (toggles) the
     /// read-only shortcuts reference panel (#326).
@@ -216,6 +219,10 @@ public struct UIBridgeHooks {
     /// raises, never toggles — a key that closed Settings
     /// would discard the draft state the save pill narrates.
     public var onOpenSettings: @MainActor () -> Void = {}
+
+    /// `KiwiDesk.show_jump_to_window()` (#1875): opens (toggles)
+    /// the Jump to window panel.
+    public var onShowJumpToWindow: @MainActor () -> Void = {}
 
     public init() {}
 }

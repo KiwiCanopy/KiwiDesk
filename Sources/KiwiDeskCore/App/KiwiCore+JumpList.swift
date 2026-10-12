@@ -3,7 +3,9 @@ import AppKit
 /// The rows of Jump to window (#1875): every window KiwiDesk
 /// knows — the open ones, tracked or up on an away Desktop, then
 /// the minimized ones, each tier most recently used first — then
-/// one row per hidden app. Read once
+/// one row per hidden app. The focused window is left out:
+/// neither a jump nor Move here does anything for the window the
+/// user is in (owner, 2026-10-12). Read once
 /// when the panel opens; the panel keeps that snapshot.
 extension KiwiCore {
     public func jumpSnapshot() -> JumpSnapshot {
@@ -27,7 +29,24 @@ extension KiwiCore {
             let right = jumpRecency(rhs.element)
             return left != right ? left > right : lhs.offset < rhs.offset
         }
-        return ordered.map(\.element) + hiddenAppJumpEntries()
+        let focused = jumpFocusedWindow().map {
+            JumpEntry.Target.window($0)
+        }
+        return ordered.map(\.element).filter { $0.target != focused }
+            + hiddenAppJumpEntries()
+    }
+
+    /// The window the user is in: the bar's focus, only while its
+    /// app is the one in front — a sibling process included (#1785).
+    /// `lastFocused` outlives a move to an app KiwiDesk does not
+    /// track, whose last window is then the one the user most
+    /// likely wants back.
+    private func jumpFocusedWindow() -> WindowID? {
+        guard let id = barFocus(on: nil),
+            let pid = state.windows[id]?.pid,
+            frontmostOwns(pid: pid)
+        else { return nil }
+        return id
     }
 
     /// The most recent honored focus first; a window never focused
@@ -50,7 +69,8 @@ extension KiwiCore {
                     title: window.title,
                     space: space,
                     spaceIcon: space.flatMap(jumpSpaceIcon),
-                    status: window.isFullscreen ? .fullscreen : .shown
+                    status: window.isFullscreen ? .fullscreen : .shown,
+                    movesHere: jumpMovesHere(window, from: space)
                 )
             }
     }
@@ -73,7 +93,9 @@ extension KiwiCore {
                 title: entry.title,
                 space: space,
                 spaceIcon: space.flatMap(jumpSpaceIcon),
-                status: .away(desktop: snapshot.number(of: entry.nativeSpace))
+                status: .away(desktop: snapshot.number(of: entry.nativeSpace)),
+                movesHere: canDriveDesktops && entry.appBundleID != nil
+                    && state.workspaces.activeSpace != nil
             )
         }
     }
@@ -93,7 +115,8 @@ extension KiwiCore {
                 title: record.title,
                 space: nil,
                 spaceIcon: nil,
-                status: .minimized
+                status: .minimized,
+                movesHere: state.workspaces.activeSpace != nil
             )
         }
     }
@@ -123,6 +146,22 @@ extension KiwiCore {
                     status: .shown
                 )
             }
+    }
+
+    /// Whether `moveHere(_:)` would move a tracked window: not a
+    /// full-screen one, not one already here, and not one the
+    /// sticky gate holds — a ∞ window, already drawn here, is only
+    /// focused. An away row asks the bridge and its bundle id, the
+    /// hop's gates known ahead of it: whether it reaches is known
+    /// only when it runs.
+    private func jumpMovesHere(
+        _ window: ManagedWindow,
+        from space: SpaceID?
+    ) -> Bool {
+        guard let active = state.workspaces.activeSpace,
+            !window.isFullscreen, space != active
+        else { return false }
+        return stickyMoveBlock(window.id, to: active) == nil
     }
 
     /// The Space's own icon, the bar chip's reading, nil without

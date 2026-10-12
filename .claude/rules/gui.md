@@ -301,8 +301,18 @@ controllers rather than as a claim about the process, is
 ## A key window without `.closable` answers Close itself (#1533)
 
 The hidden main menu carries the standard File ▸ Close on ⌘W
-with no target, so the key window answers it — which is the
-only way the chord reaches any own window. AppKit's own
+with no target, so the key window answers it. A NON-ACTIVATING
+key panel — both keyboard panels (#1875) — hands its key
+equivalents to that menu itself, since KiwiDesk's menu is not the
+one in the menu bar while the panel is up
+(`PanelHandBackTests` ▸ `chordsReachTheMainMenu`). **A
+non-activating key panel hands its chords only through
+`MainMenu.performPanelChord`, and a row joins the File or Edit
+menu only once it is ruled safe to fire while another app is in
+front** — the user believes that app has the keyboard, so a ⌘Q
+aimed at it must never quit KiwiDesk (owner ruling 2026-10-13,
+`PanelChordTests` ▸ `onlyRuledActions`, `PanelChordTests` ▸
+`noWholeMenuForward`). AppKit's own
 validation greys that item for a window whose style mask lacks
 `.closable` (measured: a borderless `NSPanel` fails
 `validateUserInterfaceItem` for `performClose(_:)`), so a
@@ -311,8 +321,13 @@ the item itself, routing to the close its keyboard already has,
 or ⌘W beeps at it while closing everything else. `ShortcutsPanel`
 is the instance, and `MainMenuTests` holds the item and the
 panel's verdict. Adding `.closable` instead is the wrong door: it
-routes through AppKit's `close()` and past the #952 activation
-hand-back.
+routes through AppKit's `close()` and past the panel's own close,
+which arms the #952 dismiss grace and runs the exit fade.
+
+A keyboard panel is keyed through `PanelHandBack.present` and
+never activates KiwiDesk: an activation raises the Settings
+window and re-reports it focused (#1875, `PanelHandBackTests` ▸
+`panelsPresentThroughTheDoor`, `panelsAreNonActivating`).
 
 ## Unsaved edits ask at the window; a quit closes every dialog (#2049)
 

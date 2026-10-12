@@ -12,7 +12,8 @@ struct JumpSearchTests {
         _ id: UInt32,
         _ app: String,
         _ title: String,
-        hidden: Bool = false
+        hidden: Bool = false,
+        status: JumpEntry.Status = .shown
     ) -> JumpEntry {
         JumpEntry(
             target: hidden
@@ -22,7 +23,7 @@ struct JumpSearchTests {
             title: title,
             space: nil,
             spaceIcon: nil,
-            status: .shown
+            status: status
         )
     }
 
@@ -108,5 +109,20 @@ struct JumpSearchTests {
     func noMatchDrops() {
         let rows = [row(1, "Mail", "Inbox")]
         #expect(JumpSearch.matches(rows, query: "zzq").isEmpty)
+    }
+
+    /// A minimized window stays under its section's header: no
+    /// match quality, and no recency, lifts it above an open one.
+    @Test("minimized windows rank after open ones, typed or not")
+    func minimizedAfterOpen() {
+        let rows = [
+            row(7, "Mail", "Inbox", status: .minimized),
+            row(1, "Notes", "Mail drafts"),
+            row(9, "Mailmate", "", hidden: true),
+        ]
+        #expect(ids(JumpSearch.matches(rows, query: "")) == [1, 7, 9])
+        // "mail" is an app-prefix match for 7 and a title match for
+        // 1, and still the open window leads.
+        #expect(ids(JumpSearch.matches(rows, query: "mail")) == [1, 7, 9])
     }
 }

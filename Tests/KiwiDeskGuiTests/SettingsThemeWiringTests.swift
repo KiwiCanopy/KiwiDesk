@@ -58,6 +58,7 @@ struct SettingsThemeWiringTests {
         // that must never lose it — pairing it with the fill is
         // the whole reason the style exists.
         "accentInk": "KiwiProminentButton.swift",
+        "accentInkSecondary": "JumpRowView.swift",
         "accentPressed": "KiwiProminentButton.swift",
         "accentDisabled": "KiwiProminentButton.swift",
         "warningSurface": "PermissionPausedBanner.swift",

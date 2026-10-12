@@ -103,4 +103,29 @@ struct MainMenuTests {
         )
         #expect(!panel.validateUserInterfaceItem(minimize))
     }
+
+    /// Jump to window's panel is the second borderless key window
+    /// (#1875): ⌘W closes it as Esc on an empty field does.
+    @Test("the borderless Jump panel validates and answers Close")
+    func jumpPanelHonoursClose() {
+        let controller = JumpPanelController(core: makeTestCore())
+        let panel = controller.makePanel()
+        #expect(!panel.styleMask.contains(.closable))
+        var cancelled = 0
+        panel.onCancel = { cancelled += 1 }
+        let close = NSMenuItem(
+            title: "Close",
+            action: closeSelector,
+            keyEquivalent: "w"
+        )
+        #expect(panel.validateUserInterfaceItem(close))
+        panel.performClose(nil)
+        #expect(cancelled == 1)
+        let minimize = NSMenuItem(
+            title: "Minimize",
+            action: #selector(NSWindow.performMiniaturize(_:)),
+            keyEquivalent: "m"
+        )
+        #expect(!panel.validateUserInterfaceItem(minimize))
+    }
 }

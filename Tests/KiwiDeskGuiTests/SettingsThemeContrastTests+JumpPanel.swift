@@ -1,0 +1,93 @@
+import SwiftUI
+import Testing
+
+@testable import KiwiDesk
+
+/// Jump to window's selected row (#1875 ▸ Ruling — the selected
+/// row is the kiwi accent): an opaque accent fill whose inks are
+/// fixed in both modes, as the fill is. The panel's ground is
+/// glass, which has no hex, so `page` stands in for it — the
+/// nearest opaque match for the `.regularMaterial` fallback. A
+/// proxy: the glass branch is a device check.
+extension SettingsThemeContrastTests {
+    static let jumpPanel: [Pairing] = [
+        Pairing(
+            "accentInk on the selected Jump to window row",
+            SettingsTheme.accentInk,
+            on: SettingsTheme.accent
+        ),
+        Pairing(
+            "accentInkSecondary on the selected Jump to window row",
+            SettingsTheme.accentInkSecondary,
+            on: SettingsTheme.accent
+        ),
+    ]
+
+    /// The fill must read as a selection against the panel's ground
+    /// — more than the container hairline separates from it, by
+    /// luminance, which no colour-vision deficiency removes.
+    @Test("the selected Jump row outreads the container hairline")
+    func jumpSelectionOutreadsHairline() throws {
+        for dark in [false, true] {
+            let fill = try ThemeContrast.contrast(
+                SettingsTheme.accent,
+                over: SettingsTheme.page,
+                inkAlpha: 1,
+                dark: dark
+            )
+            let hairline = try ThemeContrast.contrast(
+                SettingsTheme.hairline,
+                over: SettingsTheme.page,
+                inkAlpha: 1,
+                dark: dark
+            )
+            #expect(
+                fill > hairline,
+                Comment(
+                    rawValue: (dark ? "dark" : "light")
+                        + String(
+                            format: ": fill %.2f, hairline %.2f",
+                            fill,
+                            hairline
+                        )
+                )
+            )
+        }
+    }
+
+    /// The clauses above measure the token; this holds the row to
+    /// drawing it, or a swapped fill passes both.
+    @Test("the Jump row draws the measured selection fill")
+    func jumpRowDrawsTheMeasuredFill() throws {
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Jump/JumpRowView.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        #expect(source.occurrences(of: ".fill(") == 1)
+        #expect(
+            source.occurrences(of: ".fill(SettingsTheme.accent)") == 1
+        )
+    }
+
+    /// The row draws its measured inks on the fill, never the
+    /// vibrant styles, which move with the appearance.
+    @Test("the selected Jump row draws its measured inks")
+    func jumpRowDrawsTheMeasuredInks() throws {
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Jump/JumpRowView.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        #expect(source.contains("SettingsTheme.accentInk)"))
+        #expect(source.contains("SettingsTheme.accentInkSecondary)"))
+    }
+}

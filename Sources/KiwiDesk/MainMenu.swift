@@ -21,6 +21,34 @@ enum MainMenu {
         return bar
     }
 
+    /// The submenus a non-activating key panel hands its chords to
+    /// (owner ruling 2026-10-13, #1875): File and Edit alone, so
+    /// ⌘Q, ⌘H or ⌘, aimed at the app in front never quits, hides
+    /// or opens KiwiDesk while a panel holds the keyboard.
+    static let panelChordMenus = [fileMenuID, editMenuID]
+    static let fileMenuID = NSUserInterfaceItemIdentifier(
+        "kiwidesk.menu.file"
+    )
+    static let editMenuID = NSUserInterfaceItemIdentifier(
+        "kiwidesk.menu.edit"
+    )
+
+    /// Hands `event` to the panel chord submenus of `bar`; true
+    /// where one of them performed it.
+    static func performPanelChord(
+        _ event: NSEvent,
+        in bar: NSMenu? = NSApplication.shared.mainMenu
+    ) -> Bool {
+        guard let bar else { return false }
+        return bar.items.contains { item in
+            guard let id = item.identifier,
+                panelChordMenus.contains(id),
+                let menu = item.submenu
+            else { return false }
+            return menu.performKeyEquivalent(with: event)
+        }
+    }
+
     private static func submenu(_ title: String) -> NSMenuItem {
         let item = NSMenuItem()
         item.submenu = NSMenu(title: title)
@@ -89,6 +117,7 @@ enum MainMenu {
     /// itself, as `ShortcutsPanel` does.
     private static func fileMenu() -> NSMenuItem {
         let item = submenu(L("menu.file.title", "File"))
+        item.identifier = fileMenuID
         let menu = item.submenu!
         menu.addItem(
             withTitle: L("menu.file.close", "Close"),
@@ -100,6 +129,7 @@ enum MainMenu {
 
     private static func editMenu() -> NSMenuItem {
         let item = submenu(L("menu.edit.title", "Edit"))
+        item.identifier = editMenuID
         let menu = item.submenu!
         menu.addItem(
             withTitle: L("menu.edit.undo", "Undo"),
