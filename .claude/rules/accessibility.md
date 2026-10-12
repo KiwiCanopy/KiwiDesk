@@ -106,7 +106,9 @@ editing AX code:
   button the #2072 escape decides on** — an accessory app's
   raised window with a button is admitted, not ignored, and so
   is Ghostty's among the layer-scoped bundles (#2067,
-  `GhosttyButtonEscapeTests`). The
+  `GhosttyButtonEscapeTests`) — and Ghostty's window at the
+  modal-panel level with or without one, since its quick
+  terminal never takes that level (#2200). The
   condition is the one `FloatDetection.needsTitlebarButton`, which
   the off-main list read and the main-actor gate both ask;
   `FloatDetection.shouldIgnore` and `isBuiltInIgnoredPanel` take
