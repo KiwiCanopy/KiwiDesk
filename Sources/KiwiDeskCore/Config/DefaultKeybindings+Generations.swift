@@ -16,8 +16,13 @@ extension DefaultKeybindings {
         switch number {
         // 2.3.0: the Space steps and the Space history (#1655).
         case 1: spaceStepRows() + spaceHistoryRows()
-        // 3.0.0: the layout keys (#453, #762).
-        case 2: [nextLayoutRow(), previousLayoutRow(), layoutPickerRow()]
+        // 3.0.0: the layout keys (#453, #762) and Jump to window
+        // (#1875).
+        case 2:
+            [
+                nextLayoutRow(), previousLayoutRow(), layoutPickerRow(),
+                jumpToWindowRow(),
+            ]
         default: []
         }
     }

@@ -29,6 +29,7 @@ extension ShortcutsReferenceBuilder {
                 desktops.desktops,
                 absent: desktops.absent
             )
+            + [KeybindingCatalog.jumpToWindow]
         let move =
             KeybindingCatalog.swapDirections
             + KeybindingCatalog.trackRows

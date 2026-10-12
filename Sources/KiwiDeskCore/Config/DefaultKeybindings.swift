@@ -82,6 +82,7 @@ public enum DefaultKeybindings {
         rows.append(nextLayoutRow())
         rows.append(previousLayoutRow())
         rows.append(layoutPickerRow())
+        rows.append(jumpToWindowRow())
         rows.append(contentsOf: appChromeRows())
         return rows
     }
@@ -103,6 +104,16 @@ public enum DefaultKeybindings {
             lua: "KiwiDesk.show_layout_picker()",
             kind: .navigation,
             label: "Show layout picker"
+        )
+    }
+
+    /// Jump to window on `⌃⌥J` (#1875), J for jump.
+    public static func jumpToWindowRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+j",
+            lua: "KiwiDesk.show_jump_to_window()",
+            kind: .navigation,
+            label: "Jump to window"
         )
     }
 
