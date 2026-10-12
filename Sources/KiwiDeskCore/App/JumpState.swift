@@ -33,6 +33,43 @@ final class JumpState {
 
     private(set) var owed: Owed?
 
+    /// A hidden app's Move here (#1513): its windows are not
+    /// tracked until the unhide brings them back, so the debt is
+    /// the app's, paid by its first honored focus report.
+    struct OwedApp: Equatable {
+        let pid: pid_t
+        let space: SpaceID
+        let at: Date
+        let commandedAt: ContinuousClock.Instant
+        /// `move_here`'s title text: the window moves only if its
+        /// title contains it.
+        let matching: String?
+    }
+
+    private(set) var owedApp: OwedApp?
+
+    func oweApp(
+        _ pid: pid_t,
+        in space: SpaceID,
+        at now: Date,
+        matching text: String?
+    ) {
+        owedApp = OwedApp(
+            pid: pid,
+            space: space,
+            at: now,
+            commandedAt: .now,
+            matching: text
+        )
+    }
+
+    /// Ends the app's debt at its first honored report, paid or not.
+    func takeApp(_ pid: pid_t) -> OwedApp? {
+        guard let owedApp, owedApp.pid == pid else { return nil }
+        self.owedApp = nil
+        return owedApp
+    }
+
     /// Every layer-0 window id on any Desktop, nil where no
     /// reading answers (the list then keeps every record). Pinned
     /// by `makeTestCore`.

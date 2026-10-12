@@ -152,6 +152,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         return false
     }
 
+    /// Coming back to Settings re-reads who owns the config: an
+    /// `init.lua` edited elsewhere does not call back (#2183).
+    func windowDidBecomeKey(_ notification: Notification) {
+        model.refreshOwner()
+    }
+
     /// Re-reads saved profiles list without discarding staged edits (#246).
     func refreshProfiles() {
         model.refreshProfiles()

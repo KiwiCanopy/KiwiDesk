@@ -29,8 +29,9 @@ that section is free.
 
 ## Next on my list
 
-_As of 2026-10-09_
+_As of 2026-10-12_
 
-- Your windows back in their places after a restart or after quitting KiwiDesk
-- Each screen's shelf with settings of its own, so a portrait screen and a wide one can differ
 - Set up your whole desk from your own AI assistant, just by asking
+- Jump to any window by typing its name, or bring it into the Space you're on
+- KiwiVision, a new way to focus
+

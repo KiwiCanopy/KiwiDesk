@@ -88,6 +88,8 @@ extension KiwiCore {
             return launch(args, newInstance: true)
         case "gather":
             return gather(args)
+        case "move_here":
+            return moveHereCommand(args)
         case "set_mode":
             return setMode(args)
         case "show_layout_picker":

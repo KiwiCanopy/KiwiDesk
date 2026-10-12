@@ -46,12 +46,12 @@ public enum JumpSearch {
         }.map(\.match)
     }
 
-    /// The panel's sections in order — open windows, then minimized
-    /// ones, then hidden apps — each drawn under its own header, so
-    /// no match quality lifts a row out of its section.
+    /// The panel's sections in order — the window tiers, then hidden
+    /// apps — each drawn under its own header, so no match quality
+    /// lifts a row out of its section.
     private static func section(_ entry: JumpEntry) -> Int {
-        if entry.isHiddenApp { return 2 }
-        return entry.status == .minimized ? 1 : 0
+        entry.isHiddenApp
+            ? JumpTier.minimized.rawValue + 1 : entry.tier.rawValue
     }
 
     /// The tier `entry` ranks in for `needle`, nil where nothing

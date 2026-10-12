@@ -146,8 +146,11 @@ private struct MovableCard<Content: View>: View {
             .frame(width: 34, height: 4)
             .padding(.vertical, 6)
             .contentShape(Rectangle())
+            // Global space: the grip rides the card it moves, so a
+            // local translation is measured from a moving origin
+            // and fed back into the offset — the judder (#813).
             .gesture(
-                DragGesture(minimumDistance: 2)
+                DragGesture(minimumDistance: 2, coordinateSpace: .global)
                     .updating($dragging) { value, state, _ in
                         state = value.translation
                     }

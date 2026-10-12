@@ -46,6 +46,7 @@ public enum APIReference {
             ("focus_or_spawn", "focus_or_spawn"),
             ("spawn_new", "spawn_new"),
             ("gather", "gather"),
+            ("move_here", "move_here"),
             ("set_mode", "set_mode"),
             ("show_layout_picker", "show_layout_picker"),
             ("cycle_mode", "cycle_mode"),

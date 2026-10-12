@@ -1,10 +1,11 @@
 import AppKit
 
 /// The rows of Jump to window (#1875): every window KiwiDesk
-/// knows — tracked, up on an away Desktop, or minimized — most
-/// recently used first, then one row per hidden app. The focused
-/// window is left out: neither a jump nor Move here does anything
-/// for the window the user is in (owner, 2026-10-12). Read once
+/// knows — the open ones, tracked or up on an away Desktop, then
+/// the minimized ones, each tier most recently used first — then
+/// one row per hidden app. The focused window is left out:
+/// neither a jump nor Move here does anything for the window the
+/// user is in (owner, 2026-10-12). Read once
 /// when the panel opens; the panel keeps that snapshot.
 extension KiwiCore {
     public func jumpSnapshot() -> JumpSnapshot {
@@ -21,6 +22,9 @@ extension KiwiCore {
             trackedJumpEntries() + awayJumpEntries()
             + minimizedJumpEntries()
         let ordered = windows.enumerated().sorted { lhs, rhs in
+            if lhs.element.tier != rhs.element.tier {
+                return lhs.element.tier < rhs.element.tier
+            }
             let left = jumpRecency(lhs.element)
             let right = jumpRecency(rhs.element)
             return left != right ? left > right : lhs.offset < rhs.offset
