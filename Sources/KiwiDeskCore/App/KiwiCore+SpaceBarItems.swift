@@ -191,11 +191,16 @@ extension KiwiCore {
     func spaceIdentifier(
         for id: SpaceID
     ) -> SpaceGlyph {
-        Self.spaceIdentifier(
-            id: id,
-            icon: tiler.settings.spaceIcons[id]
-                ?? state.heldSpaces[id]?.icon
-        )
+        Self.spaceIdentifier(id: id, icon: configuredSpaceIcon(of: id))
+    }
+
+    /// A Space's own icon — the configured one, else the one a
+    /// held Space keeps — nil without one: the one reading the
+    /// chip, the menu bar mark and Jump to window share (#1875).
+    func configuredSpaceIcon(of id: SpaceID) -> String? {
+        let icon = tiler.settings.spaceIcons[id] ?? state.heldSpaces[id]?.icon
+        guard let icon, !icon.isEmpty else { return nil }
+        return icon
     }
 
     /// The identifier ladder, pure — the bar and the Bars preview
@@ -268,7 +273,7 @@ extension KiwiCore {
     /// else the FULL id — the sticky pill and the menu bar item
     /// (#1413) share it, unlike the bar's monogram above.
     func spaceGlyph(for id: SpaceID) -> SpaceGlyph {
-        if let icon = tiler.settings.spaceIcons[id], !icon.isEmpty {
+        if let icon = configuredSpaceIcon(of: id) {
             return Self.iconGlyph(icon)
         }
         return Self.textGlyph(id.raw)

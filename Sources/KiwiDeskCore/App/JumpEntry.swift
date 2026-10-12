@@ -12,7 +12,8 @@ public struct JumpEntry: Sendable, Equatable {
         case hiddenApp(pid_t)
     }
 
-    /// Where the window is, as far as a pick is concerned.
+    /// Where the window is, as far as a pick is concerned; a
+    /// hidden app's row is `.shown`, its target saying the rest.
     public enum Status: Sendable, Equatable {
         /// Tracked on a Desktop some screen shows.
         case shown
@@ -22,7 +23,6 @@ public struct JumpEntry: Sendable, Equatable {
         case away(desktop: Int?)
         case minimized
         case fullscreen
-        case hidden
     }
 
     public let target: Target
@@ -54,5 +54,32 @@ public struct JumpEntry: Sendable, Equatable {
         self.space = space
         self.spaceIcon = spaceIcon
         self.status = status
+    }
+}
+
+/// What Jump to window shows, read at ONE instant when the panel
+/// opens (#1875): the rows, and the Space the user is in — the
+/// "here" a Move here lands in, named with the rows' own reading.
+public struct JumpSnapshot: Sendable, Equatable {
+    public let entries: [JumpEntry]
+    public let here: SpaceID?
+    public let hereIcon: SpaceGlyph?
+
+    public init(
+        entries: [JumpEntry],
+        here: SpaceID?,
+        hereIcon: SpaceGlyph?
+    ) {
+        self.entries = entries
+        self.here = here
+        self.hereIcon = hereIcon
+    }
+}
+
+extension JumpEntry {
+    /// Whether the row is a hidden app's rather than a window's.
+    public var isHiddenApp: Bool {
+        if case .hiddenApp = target { return true }
+        return false
     }
 }

@@ -1792,7 +1792,7 @@
   "whatsnew.trail.dismiss": "Schließen",
   "whatsnew.trail.from": "Aus „Neu in KiwiDesk“",
   "whatsnew.trail.next": "Weiter: %1$@",
-  "window_action.refusal.cannot_bring_here": "„%1$@“ kann nicht hierher geholt werden",
+  "window_action.refusal.cannot_move_here": "„%1$@“ kann nicht hierher verschoben werden",
   "window_action.refusal.no_close_button": "„%1$@“ hat keine Schließen-Taste",
   "window_action.refusal.no_new_window": "%1$@ hat keinen Befehl „Neues Fenster“",
   "window_action.refusal.nothing_to_gather": "Kein Fenster von %1$@ zum Sammeln"

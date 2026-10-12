@@ -12,17 +12,17 @@ struct JumpSearchTests {
         _ id: UInt32,
         _ app: String,
         _ title: String,
-        status: JumpEntry.Status = .shown
+        hidden: Bool = false
     ) -> JumpEntry {
         JumpEntry(
-            target: status == .hidden
+            target: hidden
                 ? .hiddenApp(pid_t(id)) : .window(WindowID(id)),
             pid: pid_t(id),
             app: app,
             title: title,
             space: nil,
             spaceIcon: nil,
-            status: status
+            status: .shown
         )
     }
 
@@ -59,7 +59,11 @@ struct JumpSearchTests {
     @Test("an app name that starts with the query outranks one containing it")
     func appPrefixFirst() {
         let rows = [row(1, "Superhuman", "x"), row(2, "Human", "y")]
-        #expect(ids(JumpSearch.matches(rows, query: "hum")) == [2, 1])
+        let matches = JumpSearch.matches(rows, query: "hum")
+        #expect(ids(matches) == [2, 1])
+        let app = matches[1].entry.app
+        #expect(matches[1].appRange.map { String(app[$0]) } == "hum")
+        #expect(matches[1].titleRange == nil)
     }
 
     @Test("a title word starting with the query outranks a match inside one")
@@ -92,9 +96,9 @@ struct JumpSearchTests {
     @Test("a hidden app matches by name only and ranks below windows")
     func hiddenRanksLast() {
         let rows = [
-            row(9, "Spotify", "", status: .hidden),
+            row(9, "Spotify", "", hidden: true),
             row(1, "Notes", "Spotify playlist"),
-            row(8, "Mail", "", status: .hidden),
+            row(8, "Mail", "", hidden: true),
         ]
         #expect(ids(JumpSearch.matches(rows, query: "spot")) == [1, 9])
         #expect(JumpSearch.matches(rows, query: "playlist").count == 1)

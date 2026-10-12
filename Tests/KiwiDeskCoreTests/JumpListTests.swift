@@ -64,6 +64,60 @@ struct JumpListTests {
         #expect(windows(core.jumpEntries()) == [3, 1, 2])
     }
 
+    /// Tracked, away and minimized rows ranked together: one
+    /// recency order across all three, never per kind.
+    @Test("recency interleaves tracked, away and minimized rows")
+    func recencyAcrossKinds() {
+        let core = makeCore()
+        defer { resetAuthorityOverrides() }
+        track(core, 1, title: "here")
+        track(core, 7, title: "away", in: "2")
+        track(core, 4, title: "parked")
+        core.state.stampFocusRecency(WindowID(7))
+        core.state.stampFocusRecency(WindowID(1))
+        core.state.stampFocusRecency(WindowID(4))
+        core.state.rememberedSpaces[WindowID(7)] = .departed("2")
+        core.recordAwayWindow(
+            WindowID(7),
+            removed: core.state.removalFacts(WindowID(7)),
+            nativeSpace: 11
+        )
+        core.state.windows.remove(WindowID(7))
+        core.state.workspaces.remove(WindowID(7))
+        var effects = AppliedEffects()
+        core.state.applyWindowDestroyed(
+            WindowID(4),
+            wasMinimized: true,
+            effects: &effects
+        )
+        #expect(windows(core.jumpEntries()) == [4, 1, 7])
+    }
+
+    @Test("the snapshot names the Space the user is in")
+    func snapshotNamesHere() {
+        let core = makeCore()
+        defer { resetAuthorityOverrides() }
+        core.tiler.settings.spaceIcons[SpaceID("1")] = "house"
+        let snapshot = core.jumpSnapshot()
+        #expect(snapshot.here == "1")
+        #expect(snapshot.hereIcon == .symbol("house"))
+    }
+
+    /// The bar chip's reading: a held Space keeps its icon.
+    @Test("a held Space's row carries the icon its chip shows")
+    func heldSpaceIcon() {
+        let core = makeCore()
+        defer { resetAuthorityOverrides() }
+        core.state.heldSpaces[SpaceID("2")] = HeldOrigin(
+            name: SpaceID("3"),
+            screen: "DELL:2560x1440",
+            icon: "star",
+            arrangement: .profile("Desk")
+        )
+        track(core, 1, title: "held", in: "2")
+        #expect(core.jumpEntries().first?.spaceIcon == .symbol("star"))
+    }
+
     @Test("a row names its Space, its icon and its state")
     func rowFacts() {
         let core = makeCore()
@@ -90,7 +144,7 @@ struct JumpListTests {
         #expect(core.jumpEntries().isEmpty)
     }
 
-    /// Through the real fold: the title is kept at the departure.
+    /// The gone handler's own filing, from the removal facts.
     @Test("an away window keeps its title, Space and Desktop")
     func awayRow() {
         let core = makeCore()
@@ -145,33 +199,60 @@ struct JumpListTests {
         #expect(row?.status == .minimized)
     }
 
+    /// A window closed while minimized fires no event: the record
+    /// the WindowServer no longer lists is left out.
+    @Test("a stale minimize record is not listed")
+    func staleMinimizedLeftOut() {
+        let core = makeCore()
+        defer { resetAuthorityOverrides() }
+        track(core, 4, title: "live")
+        track(core, 5, title: "closed")
+        var effects = AppliedEffects()
+        for id in [4, 5] as [UInt32] {
+            core.state.applyWindowDestroyed(
+                WindowID(id),
+                wasMinimized: true,
+                effects: &effects
+            )
+        }
+        core.jump.knownWindows = { [WindowID(4)] }
+        #expect(windows(core.jumpEntries()) == [4])
+        core.jump.knownWindows = { nil }
+        #expect(Set(windows(core.jumpEntries())) == [4, 5])
+    }
+
     @Test("hidden regular apps come last, one row each, by name")
     func hiddenApps() {
+        let app:
+            (pid_t, String, NSApplication.ActivationPolicy)
+                -> RunningApp = { pid, name, policy in
+                    RunningApp(
+                        pid: pid,
+                        activationPolicy: policy,
+                        ref: AppRef(bundleID: "app.test.\(pid)", name: name)
+                    )
+                }
         let apps = [
-            RunningApp(
-                pid: 300,
-                activationPolicy: .regular,
-                ref: AppRef(bundleID: "app.test.spotify", name: "Spotify")
-            ),
-            RunningApp(
-                pid: 301,
-                activationPolicy: .regular,
-                ref: AppRef(bundleID: "app.test.mail", name: "Mail")
-            ),
-            RunningApp(
-                pid: 302,
-                activationPolicy: .accessory,
-                ref: AppRef(bundleID: "app.test.agent", name: "Agent")
-            ),
+            app(300, "Spotify", .regular),
+            app(301, "Mail", .regular),
+            app(303, "Calendar", .regular),
+            app(302, "Agent", .accessory),
+            app(getpid(), "KiwiDesk", .regular),
         ]
         let core = makeCore(apps: apps)
         defer { resetAuthorityOverrides() }
+        core.eventLoop.activationPolicy = { pid in
+            apps.first { $0.pid == pid }?.activationPolicy
+        }
         core.eventLoop.appIsHidden = { $0 != 301 }
         track(core, 1, title: "a")
         let rows = core.jumpEntries()
-        #expect(rows.count == 2)
-        #expect(rows.last?.target == .hiddenApp(300))
-        #expect(rows.last?.status == .hidden)
+        #expect(windows(rows) == [1])
+        #expect(
+            rows.dropFirst().map(\.target)
+                == [.hiddenApp(303), .hiddenApp(300)]
+        )
+        #expect(rows.last?.status == .shown)
         #expect(rows.last?.app == "Spotify")
     }
 }

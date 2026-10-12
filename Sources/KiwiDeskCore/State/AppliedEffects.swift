@@ -46,7 +46,7 @@ public struct AppliedEffects: Sendable {
         let app: String?
         let bundleID: String?
         /// For the away ledger's entry (#1875 lists it by title).
-        var title: String? = nil
+        let title: String?
         /// The owner, for the away ledger's entry (#1146) — which
         /// a transient overlay (#300) never gets.
         let pid: pid_t?

@@ -129,6 +129,9 @@ extension KiwiCore {
             // #1207: the Desktop return's owed focus, paid where
             // the fold said it returned.
             payReturningFocus(arrived: window.id, effects: effects)
+            // #1875: Move here's focus, a plain one, into the Space
+            // the window was moved into.
+            payMoveHereFocus(arrived: window.id)
             // #1599: a launch follows its window into the Space
             // its app rule chose — claimed here, switched after
             // the arrival retile below has filed the window.

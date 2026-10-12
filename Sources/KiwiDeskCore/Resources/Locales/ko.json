@@ -1792,7 +1792,7 @@
   "whatsnew.trail.dismiss": "닫기",
   "whatsnew.trail.from": "새로운 기능에서",
   "whatsnew.trail.next": "다음: %1$@",
-  "window_action.refusal.cannot_bring_here": "‘%1$@’은(는) 여기로 가져올 수 없습니다",
+  "window_action.refusal.cannot_move_here": "‘%1$@’은(는) 여기로 이동할 수 없습니다",
   "window_action.refusal.no_close_button": "‘%1$@’에는 닫기 버튼이 없습니다",
   "window_action.refusal.no_new_window": "%1$@에는 ‘새로운 윈도우’ 명령이 없습니다",
   "window_action.refusal.nothing_to_gather": "모을 %1$@ 윈도우가 없습니다"

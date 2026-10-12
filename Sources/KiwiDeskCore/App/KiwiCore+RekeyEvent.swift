@@ -55,6 +55,7 @@ extension KiwiCore {
         // its re-report can arrive under the fresh id.
         moveLatch.rekey(old: old, new: new)
         followFocus.rekey(old: old, new: new)
+        jump.rekey(old: old, new: new)
         pendingSpace.rekey(old: old, new: new)
         rekeyDesktopFocus(old: old, new: new)
         if let fronted = ownFronts.removeValue(forKey: old) {

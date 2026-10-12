@@ -5,7 +5,16 @@ import AppKit
 /// recently used first, then one row per hidden app. Read once
 /// when the panel opens; the panel keeps that snapshot.
 extension KiwiCore {
-    public func jumpEntries() -> [JumpEntry] {
+    public func jumpSnapshot() -> JumpSnapshot {
+        let here = state.workspaces.activeSpace
+        return JumpSnapshot(
+            entries: jumpEntries(),
+            here: here,
+            hereIcon: here.flatMap(jumpSpaceIcon)
+        )
+    }
+
+    func jumpEntries() -> [JumpEntry] {
         let windows =
             trackedJumpEntries() + awayJumpEntries()
             + minimizedJumpEntries()
@@ -65,8 +74,14 @@ extension KiwiCore {
         }
     }
 
+    /// The minimize record is advisory: a window closed while
+    /// minimized fires no event, so a record the WindowServer no
+    /// longer lists is left out. No reading keeps every record.
     private func minimizedJumpEntries() -> [JumpEntry] {
-        state.minimizeOrder.reversed().map { record in
+        let known = jump.knownWindows()
+        return state.minimizeOrder.reversed().filter { record in
+            known.map { $0.contains(record.id) } ?? true
+        }.map { record in
             JumpEntry(
                 target: .window(record.id),
                 pid: record.pid,
@@ -86,8 +101,8 @@ extension KiwiCore {
     private func hiddenAppJumpEntries() -> [JumpEntry] {
         eventLoop.liveApps(owners: [])
             .filter { app in
-                app.activationPolicy == .regular
-                    && !EventLoop.isOwnProcess(app.pid)
+                !EventLoop.isOwnProcess(app.pid)
+                    && eventLoop.policy(of: app.pid) == .regular
                     && eventLoop.appIsHidden(app.pid)
             }
             .sorted {
@@ -102,16 +117,14 @@ extension KiwiCore {
                     title: "",
                     space: nil,
                     spaceIcon: nil,
-                    status: .hidden
+                    status: .shown
                 )
             }
     }
 
-    /// The Space's own icon, nil without one — the id alone is
-    /// the name the panel already shows.
+    /// The Space's own icon, the bar chip's reading, nil without
+    /// one — the id alone is the name the panel already shows.
     private func jumpSpaceIcon(_ space: SpaceID) -> SpaceGlyph? {
-        guard let icon = tiler.settings.spaceIcons[space], !icon.isEmpty
-        else { return nil }
-        return Self.iconGlyph(icon)
+        configuredSpaceIcon(of: space).map(Self.iconGlyph)
     }
 }

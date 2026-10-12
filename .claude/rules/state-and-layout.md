@@ -310,6 +310,19 @@ editing here:
   any one of them leaves `FollowFocusIntentTests` fully green
   while the follow silently stops carrying focus. The ruling is
   `docs/design-decisions.md`'s.
+- **Jump to window's Move here owes a plain ARRIVAL focus, never a
+  follow (#1875).** `JumpState` records it only where a move was
+  DISPATCHED for that window — a hop the bridge accepted, an
+  un-minimize filed for the active Space — so the arrival is
+  certain; the `.windowCreated` arm pays it with a bare focus
+  into the Space it was owed for, and stands down off that Space,
+  past `FollowFocusIntent.drainWindow`, or after a press or a
+  commanded focus since. Keep it off `followFocus`: that debt
+  pays as a Space switch and, while it stands, holds the #1207
+  return and the #1564 sticky return down — the follow's
+  register therefore names no Jump site
+  (`JumpActionsTests` ▸ `moveHereAwayPaysAtArrival`,
+  `moveHereFocusStandsDown`).
 - **Opening an app follows its window into its app rule's Space,
   and only an OPEN owes it (#1599).** The debt is
   `LaunchFollowIntent`, keyed by the app's bundle id because the

@@ -47,7 +47,7 @@ public enum JumpSearch {
         _ entry: JumpEntry,
         _ needle: String
     ) -> (Int, Match)? {
-        let floor = entry.status == .hidden ? 4 : 0
+        let floor = entry.isHiddenApp ? 4 : 0
         if let range = find(needle, in: entry.app) {
             let tier = range.lowerBound == entry.app.startIndex ? 0 : 1
             return (

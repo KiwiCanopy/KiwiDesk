@@ -11,10 +11,11 @@ enum WindowActionRefusal: Equatable {
     case noCloseButton(window: String)
     /// `gather` found no window of the app to bring (#1510).
     case nothingToGather(app: String)
-    /// Jump to window's Bring here cannot move the window into
-    /// this Space — full screen, or another Desktop without the
-    /// bridge (#1875).
-    case cannotBringHere(window: String)
+    /// Jump to window's Move here cannot move the window into
+    /// this Space (#1875): full screen, a move the sticky gate
+    /// stood down, or an away window the hop cannot reach — no
+    /// bridge, another screen's Desktop, unfiled, no census.
+    case cannotMoveHere(window: String)
 
     /// The pill's glyph: there is no such action here.
     var pillSymbol: String { "nosign" }
@@ -42,10 +43,10 @@ enum WindowActionRefusal: Equatable {
                 "No %1$@ window to gather",
                 app
             )
-        case .cannotBringHere(let window):
+        case .cannotMoveHere(let window):
             L(
-                "window_action.refusal.cannot_bring_here",
-                "“%1$@” can't be brought here",
+                "window_action.refusal.cannot_move_here",
+                "“%1$@” can't be moved here",
                 window
             )
         }
@@ -57,7 +58,7 @@ enum WindowActionRefusal: Equatable {
         case .noNewWindow: "no enabled New Window item"
         case .noCloseButton: "no enabled close button"
         case .nothingToGather: "no window to gather"
-        case .cannotBringHere: "cannot bring the window here"
+        case .cannotMoveHere: "cannot move the window here"
         }
     }
 }
