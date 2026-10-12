@@ -23,10 +23,14 @@ final class ShortcutsPanel: NSPanel {
 
     override var canBecomeKey: Bool { true }
 
-    /// Non-activating, so the menu chords are answered here.
+    /// Non-activating, so KiwiDesk's menu is not the one in the
+    /// menu bar: its chords — ⌘W's Close (#1533), the edit chords
+    /// — are handed to it here, keyboard layouts and all.
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        PanelKeyEquivalents.perform(event, in: self)
-            || super.performKeyEquivalent(with: event)
+        super.performKeyEquivalent(with: event)
+            || NSApplication.shared.mainMenu?.performKeyEquivalent(
+                with: event
+            ) == true
     }
 
     override func cancelOperation(_ sender: Any?) {
@@ -101,7 +105,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             // A click whose next step is Settings — our own
             // app — coming forward, not the remembered one,
             // so it does not yield (#952).
-            self?.close(yieldingActivation: false)
+            self?.close(commanded: false)
             self?.onEdit()
         }
         let combo = ShortcutsOpenBinding.comboGlyphs(core: core)
@@ -143,32 +147,34 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             panel,
             on: PanelHandBack.screenUnderPointer()
         )
-        let frontmost = handBack.capture()
-        let front = frontmost?.bundleIdentifier ?? "none"
-        logPanel("sheet show; front \(front)")
-        handBack.present(panel)
+        logPanel("sheet show; front \(PanelHandBack.frontmostBundleID())")
+        handBack.present(panel) { [weak self, presence] in
+            self?.presence === presence && !presence.leaving
+        }
     }
 
+    /// Up and not leaving: a toggle during the exit fade opens a
+    /// new panel rather than closing one already going.
+    var isOpen: Bool { panel?.isVisible == true && !presence.leaving }
+
     func toggle() {
-        if let panel, panel.isVisible {
-            close(yieldingActivation: true)
+        if isOpen {
+            close(commanded: true)
         } else {
             show()
         }
     }
 
-    /// Dismisses panel, optionally returning activation to prior app (#952).
-    func close(yieldingActivation: Bool) {
+    /// Dismisses the panel; a keyboard-commanded close arms the
+    /// dismiss distrust (#952), a click away does not.
+    func close(commanded: Bool) {
         guard !presence.leaving else { return }
         let key = NSApplication.shared.keyWindow?.title ?? "none"
         logPanel("sheet close; key \(key)")
         // Armed only on a commanded close — a click-away already
         // resigned, and arming on Edit-in-Settings ate the
         // intended focus (#952 capture; review, 2026-08-23).
-        handBack.release(
-            yielding: yieldingActivation,
-            distrusting: yieldingActivation
-        ) { [weak self] in
+        handBack.release(distrusting: commanded) { [weak self] in
             guard let self else { return }
             self.presence.fadeOut(
                 self.panel,
@@ -187,8 +193,8 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
 
     /// Closes panel on keybinding layer switch (#603).
     func closeIfOpen() {
-        guard let panel, panel.isVisible else { return }
-        close(yieldingActivation: true)
+        guard isOpen else { return }
+        close(commanded: true)
     }
 
     // MARK: - Panel construction
@@ -217,7 +223,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         ]
         panel.delegate = self
         panel.onCancel = { [weak self] in
-            self?.close(yieldingActivation: true)
+            self?.close(commanded: true)
         }
         return panel
     }
@@ -246,6 +252,6 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
 
     func windowDidResignKey(_ notification: Notification) {
         logPanel("sheet resign key; open \(panel?.isVisible == true)")
-        close(yieldingActivation: false)
+        close(commanded: false)
     }
 }

@@ -35,6 +35,8 @@ struct JumpRowMotionTests {
     func wayHereGrows() throws {
         let row = try squashedRow()
         #expect(row.contains("expanded:showsWayHere"))
-        #expect(!row.contains("ifshowsWayHere"))
+        // Exactly one way-here view, built for every row it can
+        // reach: a second construction is the swap coming back.
+        #expect(row.components(separatedBy: "JumpWayHereView(").count == 2)
     }
 }

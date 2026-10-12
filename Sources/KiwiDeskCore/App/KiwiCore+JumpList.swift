@@ -25,11 +25,23 @@ extension KiwiCore {
             let right = jumpRecency(rhs.element)
             return left != right ? left > right : lhs.offset < rhs.offset
         }
-        let focused = state.workspaces.lastFocused.map {
+        let focused = jumpFocusedWindow().map {
             JumpEntry.Target.window($0)
         }
         return ordered.map(\.element).filter { $0.target != focused }
             + hiddenAppJumpEntries()
+    }
+
+    /// The window the user is in: the bar's focus, only while its
+    /// app is the one in front — `lastFocused` outlives a move to an
+    /// app KiwiDesk does not track, whose last window is then the
+    /// one the user most likely wants back.
+    private func jumpFocusedWindow() -> WindowID? {
+        guard let id = barFocus(on: nil),
+            let pid = state.windows[id]?.pid,
+            frontmostPIDProvider?() == pid
+        else { return nil }
+        return id
     }
 
     /// The most recent honored focus first; a window never focused

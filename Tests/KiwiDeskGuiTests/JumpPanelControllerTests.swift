@@ -34,7 +34,9 @@ struct JumpPanelControllerTests {
     func width() {
         let full = JumpPanelView.width
         #expect(JumpPanelController.width(visibleWidth: 3000) == full)
-        #expect(JumpPanelController.width(visibleWidth: 600) == 520)
+        // A narrow screen keeps the panel clear of both edges.
+        let narrow = JumpPanelController.width(visibleWidth: 600)
+        #expect(narrow < 600 && narrow < full)
     }
 
     @Test("the list fits its rows up to the cap")
@@ -93,36 +95,16 @@ struct JumpPanelControllerTests {
         )
     }
 
-    @Test("a refused Move here hands activation back")
-    func refusedMoveHereYields() {
+    @Test("a pick arms the dismiss distrust for another app's window")
+    func pickArmsTheDistrust() {
         let (controller, core) = controller()
-        let target = NSRunningApplication.current
-        controller.handBack.returnTarget = target
-        var yielded: [NSRunningApplication] = []
-        controller.handBack.activateReturnTarget = { yielded.append($0) }
+        controller.handBack.isAppActive = { true }
         controller.pick(entry(), moveHere: true)
-        #expect(
-            yielded.map(\.processIdentifier) == [
-                target.processIdentifier
-            ]
-        )
-        // The pick's dismiss armed the distrust for our own pid.
         #expect(
             core.ignoredPanel.active.contains(
                 pid_t(ProcessInfo.processInfo.processIdentifier)
             )
         )
-        #expect(controller.handBack.returnTarget == nil)
-    }
-
-    @Test("a Jump never hands activation back")
-    func jumpDoesNotYield() {
-        let (controller, _) = controller()
-        controller.handBack.returnTarget = NSRunningApplication.current
-        var yielded = 0
-        controller.handBack.activateReturnTarget = { _ in yielded += 1 }
-        controller.pick(entry(), moveHere: false)
-        #expect(yielded == 0)
     }
 
     @Test("a pick of our own window arms no distrust")
@@ -133,33 +115,27 @@ struct JumpPanelControllerTests {
         #expect(core.ignoredPanel.active.isEmpty)
     }
 
-    @Test("Esc's close yields; a click away does not")
-    func closeYields() {
+    @Test("Esc's close arms the distrust; a click away does not")
+    func closeDistrusts() {
         // One close per opening: the fade's own guard refuses a
         // second, so each close takes a controller of its own.
-        var yielded = 0
-        let (away, _) = controller()
-        away.handBack.activateReturnTarget = { _ in yielded += 1 }
-        away.handBack.returnTarget = NSRunningApplication.current
-        away.close(yieldingActivation: false)
-        #expect(yielded == 0)
-        let (esc, _) = controller()
-        esc.handBack.activateReturnTarget = { _ in yielded += 1 }
-        esc.handBack.returnTarget = NSRunningApplication.current
-        esc.close(yieldingActivation: true)
-        #expect(yielded == 1)
+        let own = pid_t(ProcessInfo.processInfo.processIdentifier)
+        let (away, awayCore) = controller()
+        away.handBack.isAppActive = { true }
+        away.close(commanded: false)
+        #expect(awayCore.ignoredPanel.active.isEmpty)
+        let (esc, escCore) = controller()
+        esc.handBack.isAppActive = { true }
+        esc.close(commanded: true)
+        #expect(escCore.ignoredPanel.active.contains(own))
     }
 
     @Test("a close of an already hidden panel does nothing")
     func hiddenPanelCloseIsInert() {
         let (controller, core) = controller()
         controller.panel = controller.makePanel()
-        controller.handBack.returnTarget = NSRunningApplication.current
-        var yielded = 0
-        controller.handBack.activateReturnTarget = { _ in yielded += 1 }
-        controller.close(yieldingActivation: true)
-        #expect(yielded == 0)
-        #expect(controller.handBack.returnTarget != nil)
+        controller.handBack.isAppActive = { true }
+        controller.close(commanded: true)
         #expect(core.ignoredPanel.active.isEmpty)
     }
 

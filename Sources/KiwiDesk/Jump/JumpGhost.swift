@@ -11,7 +11,9 @@ import SwiftUI
 enum JumpGhost {
     struct Field: Equatable {
         let name: AttributedString
-        let action: String
+        /// One localized frame: `%1$@` is the name, the literals
+        /// say what ↩ does and carry their own spacing.
+        let frame: String
     }
 
     static func field(
@@ -27,10 +29,10 @@ enum JumpGhost {
             // Ink alone marks the typed letters; the weight stays.
             name[run.range].inlinePresentationIntent = nil
         }
-        let action =
+        let frame =
             moveHere
-            ? L("jump.ghost.move_here", "— Move here")
-            : L("jump.ghost.jump", "— Jump")
-        return Field(name: name, action: action)
+            ? L("jump.field.move_here", "%1$@ — Move here")
+            : L("jump.field.jump", "%1$@ — Jump")
+        return Field(name: name, frame: frame)
     }
 }

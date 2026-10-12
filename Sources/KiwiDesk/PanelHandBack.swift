@@ -2,23 +2,16 @@ import AppKit
 import KiwiDeskCore
 
 /// The show and close of a KiwiDesk key panel, shared by the
-/// shortcuts panel and Jump to window. Both panels are
-/// non-activating (#1875): they take the keyboard without
-/// activating KiwiDesk, so macOS raises no other own window and
-/// the app the user came from stays active. Only where KiwiDesk
-/// itself was active — Settings in front — does a close still
-/// owe the #952 hand-back: the app the user came from is
-/// remembered and given back only on a keyboard-commanded close,
-/// a click-away having already activated the clicked app.
+/// shortcuts panel and Jump to window. Both are non-activating
+/// (#1875): they take the keyboard without activating KiwiDesk,
+/// so macOS raises no other own window and the app the user came
+/// from stays active — which retired #952's activation hand-back,
+/// there being nothing to hand back. What a close still owes is
+/// the dismiss distrust, for the one close whose order-out
+/// blip-keys another own window: Settings in front.
 @MainActor
 final class PanelHandBack {
     let core: KiwiCore
-    /// The app in front before the panel took activation.
-    var returnTarget: NSRunningApplication?
-    /// Seam for activating the return target (#565).
-    var activateReturnTarget: (NSRunningApplication) -> Void = {
-        $0.activate()
-    }
     /// Seam answering whether KiwiDesk is the active app (#565).
     var isAppActive: () -> Bool = {
         NSApplication.shared.isActive
@@ -36,72 +29,37 @@ final class PanelHandBack {
         self.core = core
     }
 
-    /// Whether a close yields activation back: only a commanded
-    /// one, of the still-active app, with an app to go back to.
-    /// Pure, so all four arms are testable without NSApp.
-    static func shouldYield(
-        commanded: Bool,
-        appActive: Bool,
-        target: NSRunningApplication?
-    ) -> Bool {
-        commanded && appActive && target != nil
+    /// The app in front as a panel opens, for the panels' logs.
+    static func frontmostBundleID() -> String {
+        NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+            ?? "none"
     }
 
-    /// Remembers the frontmost app — never KiwiDesk itself — at
-    /// show, before the panel takes the key.
-    func capture() -> NSRunningApplication? {
-        let frontmost = NSWorkspace.shared.frontmostApplication
-        returnTarget =
-            frontmost?.processIdentifier
-                == ProcessInfo.processInfo.processIdentifier
-            ? nil : frontmost
-        return frontmost
-    }
-
-    /// Keys `panel` without activating KiwiDesk. An activation
-    /// raised Settings and re-reported it focused on every open
-    /// (owner eyeball, 2026-10-12).
-    ///
-    /// A turn later: a menu click opens the panel while the menu
-    /// still tracks, and keyed in that turn the menu's close handed
-    /// the key back to the window it came from (owner eyeball,
-    /// 2026-10-12: the third open of open, close, open took no
-    /// typing).
-    func present(_ panel: NSWindow) {
+    /// Keys `panel` without activating KiwiDesk, a turn later, and
+    /// only while `stillWanted` — a close in between wins. An
+    /// activation raised Settings and re-reported it focused on
+    /// every open; keyed in the opening turn, a menu click's close
+    /// handed the key back to the window it came from (owner
+    /// eyeball, 2026-10-12).
+    func present(
+        _ panel: NSWindow,
+        while stillWanted: @escaping @MainActor () -> Bool = { true }
+    ) {
         nextTurn { [weak panel, orderFrontKey] in
-            if let panel { orderFrontKey(panel) }
+            if let panel, stillWanted() { orderFrontKey(panel) }
         }
     }
 
-    /// Closes through `orderOut`, in the order #952 needs: the
-    /// target is consumed and the dismiss distrust armed BEFORE
-    /// `orderOut`, whose resign-key re-enters the close — the
-    /// Escape yield went dead in production that way while tests,
-    /// with no real key panel, stayed green. The distrust is armed
-    /// only while the app is still active, the one close whose
-    /// orderOut blips an own window key. Returns the target it
-    /// consumed, for a caller whose own act may still need it.
-    @discardableResult
-    func release(
-        yielding: Bool,
-        distrusting: Bool,
-        orderOut: () -> Void
-    ) -> NSRunningApplication? {
-        let target = returnTarget
-        returnTarget = nil
-        let active = isAppActive()
-        if distrusting, active {
+    /// Closes through `orderOut`, the dismiss distrust armed
+    /// BEFORE it: `orderOut`'s resign-key re-enters the close, and
+    /// the blip it keys reaches Core ahead of anything after it.
+    /// Armed only while the app is active, the one close whose
+    /// order-out blip-keys an own window (#952).
+    func release(distrusting: Bool, orderOut: () -> Void) {
+        if distrusting, isAppActive() {
             core.distrustOwnDismissHandoff()
         }
         orderOut()
-        if Self.shouldYield(
-            commanded: yielding,
-            appActive: active,
-            target: target
-        ), let target {
-            activateReturnTarget(target)
-        }
-        return target
     }
 
     /// The screen a panel opens on: the one under the pointer.

@@ -21,7 +21,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     let handBack: PanelHandBack
     var panel: JumpPanel?
     private var model: JumpModel?
-    private var closing = false
     /// This opening; a fade a later show overtook orders nothing
     /// out.
     private var presence = PanelPresence()
@@ -36,11 +35,13 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         super.init()
     }
 
-    var isOpen: Bool { panel?.isVisible == true }
+    /// Up and not leaving: a toggle during the exit fade opens a
+    /// new panel rather than closing one already going.
+    var isOpen: Bool { panel?.isVisible == true && !presence.leaving }
 
     func toggle() {
         if isOpen {
-            close(yieldingActivation: true)
+            close(commanded: true)
         } else {
             show()
         }
@@ -83,35 +84,34 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.contentView = hosting
         panel.setContentSize(hosting.fittingSize)
         PanelHandBack.center(panel, on: screen)
-        let front = handBack.capture()?.bundleIdentifier ?? "none"
+        let front = PanelHandBack.frontmostBundleID()
         let rows = snapshot.entries.count
         jumpLog.log(
             "KiwiDesk: jump show; \(rows, privacy: .public) rows"
         )
         jumpLog.log("KiwiDesk: jump front \(front, privacy: .public)")
-        handBack.present(panel)
+        handBack.present(panel) { [weak self, presence] in
+            self?.presence === presence && !presence.leaving
+        }
     }
 
-    /// Closes the panel; a keyboard-commanded close hands
-    /// activation back (#952), a click away does not.
-    func close(yieldingActivation: Bool) {
-        dismiss(
-            yielding: yieldingActivation,
-            distrusting: yieldingActivation
-        )
+    /// Closes the panel; a keyboard-commanded close arms the
+    /// dismiss distrust (#952), a click away does not.
+    func close(commanded: Bool) {
+        dismiss(distrusting: commanded)
     }
 
-    /// Closes on a pick, then runs it. A Move here Core refuses
-    /// leaves no window to take the focus, so activation goes back
-    /// to the app the user came from, as Esc would have.
+    /// Closes on a pick, then runs it — once: a click during the
+    /// exit fade picks nothing.
     func pick(_ entry: JumpEntry, moveHere: Bool) {
-        let target = dismiss(
-            yielding: false,
-            distrusting: Self.distrustsHandoff(
-                pick: entry.pid,
-                own: ProcessInfo.processInfo.processIdentifier
+        guard
+            dismiss(
+                distrusting: Self.distrustsHandoff(
+                    pick: entry.pid,
+                    own: ProcessInfo.processInfo.processIdentifier
+                )
             )
-        )
+        else { return }
         jumpLog.log(
             "KiwiDesk: jump pick; here \(moveHere, privacy: .public)"
         )
@@ -119,9 +119,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             core.jump(to: entry.target)
             return
         }
-        if !core.moveHere(entry.target), let target {
-            handBack.activateReturnTarget(target)
-        }
+        core.moveHere(entry.target)
     }
 
     /// Whether a pick arms the own-window handoff distrust: never
@@ -130,25 +128,18 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         pid != own
     }
 
-    /// The one close. `closing` stops the resign-key that
-    /// `orderOut` fires from closing a second time, and a panel
-    /// already hidden has no blip to distrust nor target to give.
+    /// The one close; false where there is nothing to close. A
+    /// close already fading refuses the resign-key it fires, and a
+    /// panel already hidden has no blip to distrust.
     @discardableResult
-    private func dismiss(
-        yielding: Bool,
-        distrusting: Bool
-    ) -> NSRunningApplication? {
-        guard !closing, panel?.isVisible != false,
-            !presence.leaving
-        else { return nil }
-        closing = true
-        defer { closing = false }
-        return handBack.release(
-            yielding: yielding,
-            distrusting: distrusting
-        ) { [weak self] in
+    private func dismiss(distrusting: Bool) -> Bool {
+        guard panel?.isVisible != false, !presence.leaving else {
+            return false
+        }
+        handBack.release(distrusting: distrusting) { [weak self] in
             self?.fadeOut()
         }
+        return true
     }
 
     /// Fades the panel out, then orders it out; it stops taking
@@ -187,7 +178,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         ]
         panel.delegate = self
         panel.onCancel = { [weak self] in
-            self?.close(yieldingActivation: true)
+            self?.close(commanded: true)
         }
         return panel
     }
@@ -204,7 +195,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             self?.pick(entry, moveHere: moveHere)
         }
         model.onClose = { [weak self] in
-            self?.close(yieldingActivation: true)
+            self?.close(commanded: true)
         }
         model.onAnnounce = { [weak panel] text in
             guard let panel else { return }
@@ -234,6 +225,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
 
     func windowDidResignKey(_ notification: Notification) {
         jumpLog.log("KiwiDesk: jump resign key; open \(self.isOpen)")
-        close(yieldingActivation: false)
+        close(commanded: false)
     }
 }

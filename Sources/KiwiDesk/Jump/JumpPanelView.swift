@@ -88,13 +88,21 @@ struct JumpPanelView: View {
     /// truncates; VoiceOver reads the row, not this.
     @ViewBuilder private var fieldName: some View {
         if let field = model.field {
-            HStack(spacing: 8) {
-                Text(field.name)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                Text(verbatim: field.action)
-                    .foregroundStyle(.secondary)
-                    .fixedSize()
+            HStack(spacing: 0) {
+                ForEach(SentenceFrame(field.frame).segments) { segment in
+                    switch segment.slot {
+                    case .text(let literal):
+                        Text(literal)
+                            .foregroundStyle(.secondary)
+                            .fixedSize()
+                    case .argument(1):
+                        Text(field.name)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    case .argument:
+                        EmptyView()
+                    }
+                }
             }
             .font(.largeTitle)
             .allowsHitTesting(false)

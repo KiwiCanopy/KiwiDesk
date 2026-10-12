@@ -263,9 +263,23 @@ struct JumpListTests {
         defer { resetAuthorityOverrides() }
         track(core, 1, title: "a")
         track(core, 2, title: "b")
+        core.frontmostPIDProvider = { 100 }
         core.state.workspaces.focus(WindowID(2), in: "1")
         #expect(windows(core.jumpEntries()) == [1])
         core.state.workspaces.focus(WindowID(1), in: "1")
         #expect(windows(core.jumpEntries()) == [2])
+    }
+
+    /// The last tracked focus is no longer the window the user is
+    /// in once another app is in front: it stays a row.
+    @Test("a stale focus under another app stays a row")
+    func staleFocusStays() {
+        let core = makeCore()
+        defer { resetAuthorityOverrides() }
+        track(core, 1, title: "a")
+        track(core, 2, title: "b")
+        core.state.workspaces.focus(WindowID(2), in: "1")
+        core.frontmostPIDProvider = { 999 }
+        #expect(Set(windows(core.jumpEntries())) == [1, 2])
     }
 }

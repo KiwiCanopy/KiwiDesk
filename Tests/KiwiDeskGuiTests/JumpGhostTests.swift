@@ -46,7 +46,7 @@ struct JumpGhostTests {
                 $0.inlinePresentationIntent == nil
             }
         )
-        #expect(field.action == "— Jump")
+        #expect(field.frame == "%1$@ — Jump")
     }
 
     @Test("nothing typed draws the whole name grey")
@@ -59,7 +59,7 @@ struct JumpGhostTests {
             )
         )
         #expect(inked(field).isEmpty)
-        #expect(field.action == "— Move here")
+        #expect(field.frame == "%1$@ — Move here")
     }
 
     @Test("no selection draws nothing over the typing")
