@@ -11,6 +11,12 @@ extension JumpPanelController {
         return min(max(rows, 6), 12)
     }
 
+    /// The panel's width: `JumpPanelView.width`, kept 40 pt clear
+    /// of each edge of a narrower screen.
+    static func width(visibleWidth: CGFloat) -> CGFloat {
+        min(JumpPanelView.width, visibleWidth - 80)
+    }
+
     /// Fits the panel to its list, keeping the top edge where it
     /// is so the field stays under the user's eyes.
     func refit() {

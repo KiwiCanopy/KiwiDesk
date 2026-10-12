@@ -23,12 +23,15 @@ struct JumpPlaceView: View {
     }
 }
 
-/// The selected row's column while ⇧ is held: where the window
-/// is, then the current Space, in the frame's own order. The
-/// frame's literals carry the spacing, so the stack adds none.
+/// The column of a row Move here can bring: where the window is,
+/// and — on the selected row while ⇧ is held — the way to the
+/// current Space, in the frame's own order. The source stays one
+/// view, so the way here grows beside it rather than replacing
+/// it. The frame's literals carry the spacing.
 struct JumpWayHereView: View {
     let source: JumpRowText.Place?
     let here: JumpRowText.Place
+    let expanded: Bool
 
     var body: some View {
         HStack(spacing: 0) {
@@ -36,12 +39,17 @@ struct JumpWayHereView: View {
                 SentenceFrame(JumpRowText.wayHereFrame).segments
             ) { segment in
                 switch segment.slot {
-                case .text(let literal):
-                    Text(literal)
                 case .argument(1):
                     if let source { JumpPlaceView(place: source) }
+                case .text(let literal):
+                    if expanded {
+                        Text(literal).transition(.opacity)
+                    }
                 case .argument(2):
-                    JumpPlaceView(place: here)
+                    if expanded {
+                        JumpPlaceView(place: here)
+                            .transition(.opacity)
+                    }
                 case .argument:
                     EmptyView()
                 }

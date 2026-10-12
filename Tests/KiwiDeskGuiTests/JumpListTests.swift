@@ -4,8 +4,9 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Jump to window's list state (#1875 ▸ Ruling — keys): an empty
-/// query preselects row 2, typing row 1; the selection never
+/// Jump to window's list state (#1875 ▸ Ruling — keys): row 1 is
+/// preselected, the focused window being left out of the rows by
+/// Core (owner, 2026-10-12); the selection never
 /// wraps; ⌘ numbers run by result across the Hidden header.
 @Suite("Jump to window list")
 struct JumpListTests {
@@ -50,16 +51,15 @@ struct JumpListTests {
         ]
     }
 
-    @Test("an empty query preselects row 2; typing preselects row 1")
+    @Test("row 1 is preselected, typed or not")
     func preselection() {
         var list = list(three)
-        #expect(list.selection == 1)
+        #expect(list.selection == 0)
         list.setQuery("m")
         #expect(list.selection == 0)
         #expect(list.selected?.entry.app == "Mail")
         list.setQuery("")
-        #expect(list.selection == 1)
-        // One row: row 2 does not exist, so row 1 is selected.
+        #expect(list.selection == 0)
         #expect(self.list([Self.row(1, "Mail")]).selection == 0)
         #expect(self.list([]).selection == nil)
         list.setQuery("nothing matches this")
@@ -99,5 +99,25 @@ struct JumpListTests {
         #expect(list.hiddenStart == 3)
         #expect(list.quick(3)?.entry.isHiddenApp == true)
         #expect(self.list(three).hiddenStart == nil)
+    }
+
+    /// Minimized windows sit under their own header, as hidden
+    /// apps do (owner eyeball, 2026-10-12); a list without either
+    /// draws none.
+    @Test("minimized windows and hidden apps each take a section")
+    func sections() {
+        let entries =
+            three + [
+                Self.row(7, "Notes", status: .minimized),
+                Self.row(8, "Mail", status: .minimized),
+                Self.row(9, "Spotify", hidden: true),
+            ]
+        let list = list(entries)
+        #expect(list.minimizedStart == 3)
+        #expect(list.section(at: 3) == .minimized)
+        #expect(list.section(at: 4) == nil)
+        #expect(list.section(at: 5) == .hidden)
+        #expect(list.sectionCount == 2)
+        #expect(self.list(three).sectionCount == 0)
     }
 }

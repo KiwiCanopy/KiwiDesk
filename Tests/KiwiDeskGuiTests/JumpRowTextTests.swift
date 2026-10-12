@@ -24,21 +24,24 @@ struct JumpRowTextTests {
         LocalizationManager.shared.select("en")
         let shown = Row.row(1, "A", space: "term")
         #expect(JumpRowText.place(of: shown)?.text == "term")
+        // Under their headers: a minimized window names its Space,
+        // a hidden app nothing (owner eyeball, 2026-10-12).
         #expect(
             JumpRowText.place(
-                of: Row.row(1, "A", status: .minimized)
-            )?.text == "Minimized"
+                of: Row.row(1, "A", space: "4", status: .minimized)
+            )?.text == "Space 4"
+        )
+        #expect(
+            JumpRowText.place(
+                of: Row.row(1, "A", space: nil, status: .minimized)
+            ) == nil
         )
         #expect(
             JumpRowText.place(
                 of: Row.row(1, "A", status: .fullscreen)
             )?.text == "Full Screen"
         )
-        #expect(
-            JumpRowText.place(
-                of: Row.row(1, "A", hidden: true)
-            )?.text == "Hidden"
-        )
+        #expect(JumpRowText.place(of: Row.row(1, "A", hidden: true)) == nil)
         let nowhere = Row.row(1, "A", space: nil)
         #expect(JumpRowText.place(of: nowhere) == nil)
     }
@@ -96,6 +99,12 @@ struct JumpRowTextTests {
         #expect(
             JumpRowText.spoken(Row.row(1, "Spotify", hidden: true))
                 == "Spotify, Hidden"
+        )
+        // VoiceOver keeps the status the header now draws.
+        #expect(
+            JumpRowText.spoken(
+                Row.row(1, "Mail", space: "4", status: .minimized)
+            ) == "Mail, Minimized"
         )
     }
 

@@ -150,6 +150,12 @@ struct SettingsThemeTokenTests {
             SettingsTheme.accentInk
         ),
         Pin(
+            "accentInkSecondary",
+            0x2B_41_26,
+            0x2B_41_26,
+            SettingsTheme.accentInkSecondary
+        ),
+        Pin(
             "accentPressed",
             0x7E_A2_4D,
             0x7E_A2_4D,

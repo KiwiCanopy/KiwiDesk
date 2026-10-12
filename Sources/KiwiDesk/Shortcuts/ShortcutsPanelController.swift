@@ -14,13 +14,20 @@ private func logPanel(_ message: String) {
 }
 
 /// Floating panel receiving keyboard events and dismissing on Esc
-/// or click-away. Borderless, so it opts into key status — and the
-/// app is activated on show, or an accessory app's key window
-/// never actually receives keyboard events.
+/// or click-away. Borderless, so it opts into key status, and
+/// non-activating, so it takes the keyboard without activating
+/// KiwiDesk (#1875) — an ordinary panel of an accessory app
+/// receives no keyboard events unless the app activates.
 final class ShortcutsPanel: NSPanel {
     var onCancel: () -> Void = {}
 
     override var canBecomeKey: Bool { true }
+
+    /// Non-activating, so the menu chords are answered here.
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        PanelKeyEquivalents.perform(event, in: self)
+            || super.performKeyEquivalent(with: event)
+    }
 
     override func cancelOperation(_ sender: Any?) {
         onCancel()
@@ -63,6 +70,13 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     private var panel: ShortcutsPanel?
     /// The #952 activation hand-back.
     let handBack: PanelHandBack
+    /// This opening; a fade a later show overtook orders nothing
+    /// out.
+    private var presence = PanelPresence()
+    /// Seam for the system Reduce Motion flag (#565).
+    var reduceMotion: () -> Bool = {
+        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+    }
 
     init(core: KiwiCore, onEdit: @escaping () -> Void) {
         self.core = core
@@ -92,8 +106,11 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         }
         let combo = ShortcutsOpenBinding.comboGlyphs(core: core)
         let glass = core.tiler.settings.shortcutPanelLiquidGlass
+        let presence = PanelPresence()
+        self.presence = presence
         func view(overflows: Bool) -> ShortcutsPanelView {
             ShortcutsPanelView(
+                presence: presence,
                 reference: reference,
                 dismissCombo: combo,
                 overflows: overflows,
@@ -111,6 +128,9 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             rootView: LocaleScopedRoot { view(overflows: false) }
                 .environmentObject(LocalizationManager.shared)
         )
+        // A field editor left by the last opening would keep the
+        // keys from the new content's field.
+        panel.makeFirstResponder(nil)
         panel.contentView = hosting
         // Measured without the cue, re-rooted where it clipped;
         // no second measure (#1292).
@@ -126,8 +146,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         let frontmost = handBack.capture()
         let front = frontmost?.bundleIdentifier ?? "none"
         logPanel("sheet show; front \(front)")
-        NSApplication.shared.activate()
-        panel.makeKeyAndOrderFront(nil)
+        handBack.present(panel)
     }
 
     func toggle() {
@@ -140,6 +159,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
 
     /// Dismisses panel, optionally returning activation to prior app (#952).
     func close(yieldingActivation: Bool) {
+        guard !presence.leaving else { return }
         let key = NSApplication.shared.keyWindow?.title ?? "none"
         logPanel("sheet close; key \(key)")
         // Armed only on a commanded close — a click-away already
@@ -148,8 +168,12 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         handBack.release(
             yielding: yieldingActivation,
             distrusting: yieldingActivation
-        ) {
-            panel?.orderOut(nil)
+        ) { [weak self] in
+            guard let self else { return }
+            self.presence.fadeOut(
+                self.panel,
+                reduceMotion: self.reduceMotion()
+            ) { [weak self] in self?.presence === $0 }
         }
         DispatchQueue.main.async {
             let key = NSApplication.shared.keyWindow?.title ?? "none"
@@ -175,7 +199,9 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     func makePanel() -> ShortcutsPanel {
         let panel = ShortcutsPanel(
             contentRect: .zero,
-            styleMask: [.borderless, .fullSizeContentView],
+            styleMask: [
+                .borderless, .fullSizeContentView, .nonactivatingPanel,
+            ],
             backing: .buffered,
             defer: true
         )
@@ -184,7 +210,8 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         panel.hasShadow = true
         panel.level = .floating
         panel.isReleasedWhenClosed = false
-        panel.animationBehavior = .utilityWindow
+        // The view animates its own entrance and exit.
+        panel.animationBehavior = .none
         panel.collectionBehavior = [
             .canJoinAllSpaces, .fullScreenAuxiliary,
         ]
@@ -218,6 +245,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     // MARK: - NSWindowDelegate
 
     func windowDidResignKey(_ notification: Notification) {
+        logPanel("sheet resign key; open \(panel?.isVisible == true)")
         close(yieldingActivation: false)
     }
 }

@@ -21,20 +21,16 @@ enum JumpRowText {
 
     /// The trailing column at rest, nil where there is nothing to
     /// say. The Desktop shows only for a window on a Desktop its
-    /// screen is not showing.
+    /// screen is not showing. A hidden app and a minimized window
+    /// sit under their section's header, which says so; a
+    /// minimized window names the Space it belongs to.
     static func place(of entry: JumpEntry) -> Place? {
-        if entry.isHiddenApp {
-            return Place(
-                glyph: nil,
-                text: L("jump.status.hidden", "Hidden")
-            )
-        }
+        if entry.isHiddenApp { return nil }
         switch entry.status {
         case .minimized:
-            return Place(
-                glyph: nil,
-                text: L("jump.status.minimized", "Minimized")
-            )
+            return entry.space.map {
+                Place(glyph: entry.spaceIcon, text: spaceName($0))
+            }
         case .fullscreen:
             return Place(
                 glyph: nil,
@@ -63,9 +59,21 @@ enum JumpRowText {
     }
 
     /// The Hidden section's header — a key apart from a hidden
-    /// app's column, whose word agrees with one app, not many.
+    /// app's spoken status, whose word agrees with one app, not
+    /// many.
     static var hidden: String {
         L("jump.section.hidden", "Hidden")
+    }
+
+    /// The Minimized section's header, apart from a window's
+    /// spoken status for the same reason.
+    static var minimized: String {
+        L("jump.section.minimized", "Minimized")
+    }
+
+    /// The footer's cue while the list runs past what it shows.
+    static var scrollHint: String {
+        L("jump.footer.scroll_hint", "Scroll for more windows")
     }
 
     /// What the row shows as its title: the window's title after
@@ -135,6 +143,12 @@ enum JumpRowText {
     }
 
     private static func spokenPlace(_ entry: JumpEntry) -> String? {
+        if entry.isHiddenApp {
+            return L("jump.status.hidden", "Hidden")
+        }
+        if entry.status == .minimized {
+            return L("jump.status.minimized", "Minimized")
+        }
         guard case .away(let desktop?) = entry.status,
             !entry.isHiddenApp
         else { return place(of: entry)?.text }

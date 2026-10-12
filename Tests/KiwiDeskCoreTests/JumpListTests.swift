@@ -253,4 +253,19 @@ struct JumpListTests {
         )
         #expect(rows.last?.app == "Spotify")
     }
+
+    /// Nothing a row does reaches the window the user is in, so it
+    /// is no row (owner, 2026-10-12): the list starts at the
+    /// previous window.
+    @Test("the focused window is left out")
+    func focusedLeftOut() {
+        let core = makeCore()
+        defer { resetAuthorityOverrides() }
+        track(core, 1, title: "a")
+        track(core, 2, title: "b")
+        core.state.workspaces.focus(WindowID(2), in: "1")
+        #expect(windows(core.jumpEntries()) == [1])
+        core.state.workspaces.focus(WindowID(1), in: "1")
+        #expect(windows(core.jumpEntries()) == [2])
+    }
 }

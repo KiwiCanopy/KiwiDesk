@@ -3,6 +3,8 @@ import SwiftUI
 
 /// Read-only shortcuts cheat sheet panel (#326, #820).
 struct ShortcutsPanelView: View {
+    /// This opening, which the entrance and the fade out read.
+    let presence: PanelPresence
     let reference: ShortcutsReference?
     /// Bound dismiss combo string, or nil when unbound (#330).
     let dismissCombo: String?
@@ -22,6 +24,7 @@ struct ShortcutsPanelView: View {
             Divider()
             footer
         }
+        .panelContentFade(presence)
         .frame(width: 760)
         // The floor for a control below that states no style of
         // its own (#1293). BELOW the glass deliberately: applied
@@ -41,6 +44,7 @@ struct ShortcutsPanelView: View {
             variant: .regular,
             fallback: AnyShapeStyle(.regularMaterial)
         )
+        .panelEntrance(presence)
     }
 
     // MARK: - Layer label

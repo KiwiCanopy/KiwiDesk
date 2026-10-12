@@ -10,6 +10,18 @@ final class JumpModel: ObservableObject {
     @Published private(set) var list: JumpList
     @Published private(set) var commandHeld = false
     @Published private(set) var shiftHeld = false
+    /// Whether an input method is composing in the field; the
+    /// ghost after the typed text stands down meanwhile.
+    @Published private(set) var composing = false
+    /// Bumped each time the panel becomes key; the field takes the
+    /// focus on every bump.
+    @Published private(set) var fieldFocusRequests = 0
+
+    func requestFieldFocus() { fieldFocusRequests += 1 }
+    /// Set when a close starts its fade; keys stop counting.
+    @Published private(set) var leaving = false
+
+    func leave() { leaving = true }
     /// Each app's icon, read once when the panel opens.
     let icons: [pid_t: NSImage]
     /// The most rows the list shows before it scrolls.
@@ -42,7 +54,20 @@ final class JumpModel: ObservableObject {
         }
     }
 
+    func noteComposing(_ composing: Bool) {
+        if composing != self.composing { self.composing = composing }
+    }
+
+    /// What the field shows in place of the typing; nil while an
+    /// input method composes, which owns the field meanwhile.
+    var field: JumpGhost.Field? {
+        composing
+            ? nil
+            : JumpGhost.field(selected: list.selected, moveHere: shiftHeld)
+    }
+
     func handle(_ key: JumpKey) {
+        guard !leaving else { return }
         switch key {
         case .step(let delta):
             move(by: delta)
@@ -89,7 +114,7 @@ final class JumpModel: ObservableObject {
     /// The line an empty list shows.
     var emptyText: String {
         list.snapshot.entries.isEmpty
-            ? L("jump.empty.none", "No open windows")
+            ? L("jump.empty.other", "No other windows")
             : L("jump.empty.no_match", "No open windows match")
     }
 

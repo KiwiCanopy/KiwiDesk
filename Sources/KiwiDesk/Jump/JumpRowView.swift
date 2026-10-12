@@ -20,9 +20,32 @@ struct JumpRowView: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
-    static let height: CGFloat = 32
+    /// Rows the size of the search field, at Spotlight's scale
+    /// (#1875): a `.title` line with room above and below.
+    static let height: CGFloat = 56
+    static let iconSize: CGFloat = 36
+    /// The selection's inset from the panel's sides; its radius is
+    /// concentric with the panel's corners.
+    static let selectionInset: CGFloat = 10
+    static var selectionRadius: CGFloat {
+        JumpPanelView.cornerRadius - selectionInset
+    }
 
     private var showsNumber: Bool { commandHeld && number != nil }
+    /// The accent fill is fixed in both modes, so its inks are.
+    private var titleInk: AnyShapeStyle {
+        isSelected
+            ? AnyShapeStyle(SettingsTheme.accentInk)
+            : AnyShapeStyle(.primary)
+    }
+    private var secondaryInk: AnyShapeStyle {
+        isSelected
+            ? AnyShapeStyle(SettingsTheme.accentInkSecondary)
+            : AnyShapeStyle(.secondary)
+    }
+    private var showsWayHere: Bool {
+        isSelected && shiftHeld && wayHere != nil
+    }
 
     var body: some View {
         Button {
@@ -31,39 +54,43 @@ struct JumpRowView: View {
             content
         }
         .buttonStyle(.plain)
+        // The panel's keys move the list and the field keeps the
+        // focus; a row taking it drew a focus ring on row 1.
+        .focusable(false)
         .accessibilityLabel(JumpRowText.spoken(match.entry))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .modifier(MoveHereAction(entry: match.entry, run: onActivate))
     }
 
     private var content: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 12) {
             iconView
             Text(JumpTitle.attributed(match))
-                .font(.body)
-                .foregroundStyle(.primary)
+                .font(.title)
+                .foregroundStyle(titleInk)
                 .lineLimit(1)
                 .truncationMode(.tail)
             Spacer(minLength: 12)
             trailing
-                .font(.callout)
-                .foregroundStyle(.secondary)
+                .font(.title2)
+                .foregroundStyle(secondaryInk)
                 .lineLimit(1)
                 .fixedSize()
                 .layoutPriority(1)
             if showsNumber, let number {
                 Text(verbatim: shiftHeld ? "⇧⌘\(number)" : "⌘\(number)")
-                    .font(.callout.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                    .font(.title2.monospacedDigit())
+                    .foregroundStyle(secondaryInk)
                     .fixedSize()
                     .transition(.opacity)
             }
         }
         // The ⌘ slide: the digit takes its room and the Space
-        // column moves left to give it (#1875 ▸ keys).
+        // column moves left to give it (#1875 ▸ keys); ⇧'s way
+        // here takes its room the same way, alone or with ⌘.
         .animation(
             reduceMotion ? nil : .easeOut(duration: 0.15),
-            value: showsNumber
+            value: [showsNumber, showsWayHere]
         )
         .padding(.horizontal, 10)
         .frame(height: Self.height)
@@ -75,16 +102,20 @@ struct JumpRowView: View {
         if let icon {
             Image(nsImage: icon)
                 .resizable()
-                .frame(width: 20, height: 20)
+                .frame(width: Self.iconSize, height: Self.iconSize)
         } else {
-            Color.clear.frame(width: 20, height: 20)
+            Color.clear.frame(width: Self.iconSize, height: Self.iconSize)
         }
     }
 
     @ViewBuilder private var trailing: some View {
         let place = JumpRowText.place(of: match.entry)
-        if isSelected, shiftHeld, let wayHere {
-            JumpWayHereView(source: place, here: wayHere)
+        if let wayHere {
+            JumpWayHereView(
+                source: place,
+                here: wayHere,
+                expanded: showsWayHere
+            )
         } else if let place {
             JumpPlaceView(place: place)
         }
@@ -92,8 +123,11 @@ struct JumpRowView: View {
 
     @ViewBuilder private var selection: some View {
         if isSelected {
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .fill(SettingsTheme.rowSelected)
+            RoundedRectangle(
+                cornerRadius: Self.selectionRadius,
+                style: .continuous
+            )
+            .fill(SettingsTheme.accent)
         }
     }
 }

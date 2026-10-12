@@ -22,6 +22,13 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     var panel: JumpPanel?
     private var model: JumpModel?
     private var closing = false
+    /// This opening; a fade a later show overtook orders nothing
+    /// out.
+    private var presence = PanelPresence()
+    /// Seam for the system Reduce Motion flag (#565).
+    var reduceMotion: () -> Bool = {
+        NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+    }
 
     init(core: KiwiCore) {
         self.core = core
@@ -53,14 +60,26 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         self.model = model
+        let presence = PanelPresence()
+        self.presence = presence
         wire(model, panel)
         let glass = core.tiler.settings.shortcutPanelLiquidGlass
-        let hosting = NSHostingView(
-            rootView: LocaleScopedRoot {
-                JumpPanelView(model: model, liquidGlass: glass)
-            }
-            .environmentObject(LocalizationManager.shared)
+        let width = Self.width(
+            visibleWidth: screen?.visibleFrame.width ?? 1440
         )
+        let root = JumpPanelView(
+            model: model,
+            liquidGlass: glass,
+            presence: presence,
+            width: width
+        )
+        let hosting = NSHostingView(
+            rootView: LocaleScopedRoot { root }
+                .environmentObject(LocalizationManager.shared)
+        )
+        // A field editor left by the last opening would keep the
+        // keys from the new content's field.
+        panel.makeFirstResponder(nil)
         panel.contentView = hosting
         panel.setContentSize(hosting.fittingSize)
         PanelHandBack.center(panel, on: screen)
@@ -70,8 +89,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             "KiwiDesk: jump show; \(rows, privacy: .public) rows"
         )
         jumpLog.log("KiwiDesk: jump front \(front, privacy: .public)")
-        NSApplication.shared.activate()
-        panel.makeKeyAndOrderFront(nil)
+        handBack.present(panel)
     }
 
     /// Closes the panel; a keyboard-commanded close hands
@@ -120,15 +138,25 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         yielding: Bool,
         distrusting: Bool
     ) -> NSRunningApplication? {
-        guard !closing, panel?.isVisible != false else { return nil }
+        guard !closing, panel?.isVisible != false,
+            !presence.leaving
+        else { return nil }
         closing = true
         defer { closing = false }
-        model = nil
         return handBack.release(
             yielding: yielding,
             distrusting: distrusting
-        ) { [panel] in
-            panel?.orderOut(nil)
+        ) { [weak self] in
+            self?.fadeOut()
+        }
+    }
+
+    /// Fades the panel out, then orders it out; it stops taking
+    /// keys the moment the fade starts.
+    private func fadeOut() {
+        model?.leave()
+        presence.fadeOut(panel, reduceMotion: reduceMotion()) {
+            [weak self] in self?.presence === $0
         }
     }
 
@@ -138,7 +166,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     func makePanel() -> JumpPanel {
         let panel = JumpPanel(
             contentRect: .zero,
-            styleMask: [.borderless, .fullSizeContentView],
+            styleMask: [
+                .borderless, .fullSizeContentView, .nonactivatingPanel,
+            ],
             backing: .buffered,
             defer: true
         )
@@ -150,7 +180,8 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         // A deactivation hide would leave the panel to come back
         // with the next activation; the resign-key close owns it.
         panel.hidesOnDeactivate = false
-        panel.animationBehavior = .utilityWindow
+        // The view animates its own entrance and exit.
+        panel.animationBehavior = .none
         panel.collectionBehavior = [
             .canJoinAllSpaces, .fullScreenAuxiliary,
         ]
@@ -165,6 +196,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.onKey = { [weak model] in model?.handle($0) }
         panel.onModifiers = { [weak model] in
             model?.noteModifiers($0)
+        }
+        panel.onComposing = { [weak model] in
+            model?.noteComposing($0)
         }
         model.onPick = { [weak self] entry, moveHere in
             self?.pick(entry, moveHere: moveHere)
@@ -193,7 +227,13 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
 
     // MARK: - NSWindowDelegate
 
+    /// The field takes the keys whenever the panel does.
+    func windowDidBecomeKey(_ notification: Notification) {
+        model?.requestFieldFocus()
+    }
+
     func windowDidResignKey(_ notification: Notification) {
+        jumpLog.log("KiwiDesk: jump resign key; open \(self.isOpen)")
         close(yieldingActivation: false)
     }
 }

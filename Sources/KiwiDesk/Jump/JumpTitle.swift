@@ -28,6 +28,18 @@ enum JumpTitle {
         return text
     }
 
+    /// The row's title as plain text, the app alone where the
+    /// window has no title.
+    static func plain(_ entry: JumpEntry) -> String {
+        guard !entry.title.isEmpty else { return entry.app }
+        return L(
+            "jump.row.title",
+            "%1$@ · %2$@",
+            entry.app,
+            entry.title
+        )
+    }
+
     /// `text` with `range` strongly emphasized.
     static func marked(
         _ text: String,

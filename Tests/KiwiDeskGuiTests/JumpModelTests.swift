@@ -48,7 +48,7 @@ struct JumpModelTests {
         model.handle(.pick(moveHere: false))
         model.handle(.quick(2, moveHere: true))
         model.handle(.quick(5, moveHere: false))
-        #expect(picked.map(\.0) == ["Mail", "Notes"])
+        #expect(picked.map(\.0) == ["Ghostty", "Notes"])
         #expect(picked.map(\.1) == [false, true])
     }
 
@@ -66,13 +66,13 @@ struct JumpModelTests {
             icons: [:],
             rowCap: 6
         )
-        #expect(model.list.selection == 1)
+        #expect(model.list.selection == 0)
         model.handle(.page(1))
-        #expect(model.list.selection == 7)
+        #expect(model.list.selection == 6)
         model.handle(.page(1))
-        #expect(model.list.selection == 13)
+        #expect(model.list.selection == 12)
         model.handle(.page(-1))
-        #expect(model.list.selection == 7)
+        #expect(model.list.selection == 6)
     }
 
     @Test("VoiceOver hears the selection and the result count")
@@ -82,12 +82,14 @@ struct JumpModelTests {
         var heard: [String] = []
         model.onAnnounce = { heard.append($0) }
         model.handle(.step(1))
+        model.handle(.step(1))
         // At the end: nothing moved, nothing said.
         model.handle(.step(1))
         model.query = "zzz"
         model.query = "no"
         #expect(
             heard == [
+                "Mail, Inbox, Space 1",
                 "Notes, Ideas, Space 1",
                 "No open windows match",
                 "Results: 1",

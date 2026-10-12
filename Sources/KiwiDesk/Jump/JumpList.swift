@@ -17,20 +17,17 @@ struct JumpList {
     init(snapshot: JumpSnapshot) {
         self.snapshot = snapshot
         results = JumpSearch.matches(snapshot.entries, query: "")
-        selection = Self.preselection(results.count, blank: true)
+        selection = results.isEmpty ? nil : 0
     }
 
-    /// Re-ranks for `text`. An empty query preselects row 2, so
-    /// opening and pressing Return goes back to the previous
-    /// window; typing preselects row 1.
+    /// Re-ranks for `text`; row 1 is preselected either way — with
+    /// the focused window left out, an empty query's row 1 is the
+    /// previous window, so opening and pressing Return goes back.
     mutating func setQuery(_ text: String) {
         guard text != query else { return }
         query = text
         results = JumpSearch.matches(snapshot.entries, query: text)
-        selection = Self.preselection(
-            results.count,
-            blank: text.isEmpty
-        )
+        selection = results.isEmpty ? nil : 0
     }
 
     /// Moves the selection by `delta` rows, clamped at both ends.
@@ -65,11 +62,27 @@ struct JumpList {
         results.firstIndex { $0.entry.isHiddenApp }
     }
 
-    private static func preselection(
-        _ count: Int,
-        blank: Bool
-    ) -> Int? {
-        guard count > 0 else { return nil }
-        return blank && count > 1 ? 1 : 0
+    /// Where the Minimized section starts, nil without one: the
+    /// first minimized window, which ranks after every open one.
+    var minimizedStart: Int? {
+        results.firstIndex {
+            !$0.entry.isHiddenApp && $0.entry.status == .minimized
+        }
     }
+
+    /// The section header drawn above row `index`, if one starts
+    /// there.
+    func section(at index: Int) -> Section? {
+        if index == minimizedStart { return .minimized }
+        if index == hiddenStart { return .hidden }
+        return nil
+    }
+
+    /// How many section headers the list draws.
+    var sectionCount: Int {
+        [minimizedStart, hiddenStart].compactMap { $0 }.count
+    }
+
+    enum Section { case minimized, hidden }
+
 }

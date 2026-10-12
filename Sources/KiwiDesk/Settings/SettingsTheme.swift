@@ -165,6 +165,14 @@ enum SettingsTheme {
         dark: 0x12_25_1A
     )
 
+    /// Secondary text on `accent` — Jump to window's Space and
+    /// number columns on the selected row (#1875): `accentInk`
+    /// mixed toward the accent, opaque so the pair stays measured.
+    static let accentInkSecondary = token(
+        light: 0x2B_41_26,
+        dark: 0x2B_41_26
+    )
+
     /// The accent seal's PRESSED fill — the accent darkened
     /// toward `accentInk`. Fixed in both modes for the same
     /// reason `accent` is: the seal's promise is a pair that

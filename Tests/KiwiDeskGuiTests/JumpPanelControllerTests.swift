@@ -21,20 +21,36 @@ struct JumpPanelControllerTests {
         #expect(JumpPanelController.rowCap(visibleHeight: 5000) == 12)
     }
 
+    /// The footer's scroll cue shows exactly when the content runs
+    /// past the cap — headers included.
+    @Test("the list overflows only past the cap")
+    func overflow() {
+        #expect(!JumpPanelView.overflows(rows: 6, headers: 0, rowCap: 6))
+        #expect(JumpPanelView.overflows(rows: 7, headers: 0, rowCap: 6))
+        #expect(JumpPanelView.overflows(rows: 6, headers: 1, rowCap: 6))
+    }
+
+    @Test("the panel keeps its width, narrowed on a small screen")
+    func width() {
+        let full = JumpPanelView.width
+        #expect(JumpPanelController.width(visibleWidth: 3000) == full)
+        #expect(JumpPanelController.width(visibleWidth: 600) == 520)
+    }
+
     @Test("the list fits its rows up to the cap")
     func listHeight() {
         let row = JumpRowView.height
         let pad = 2 * JumpPanelView.listPadding
         #expect(
-            JumpPanelView.listHeight(rows: 2, hasHeader: false, rowCap: 6)
+            JumpPanelView.listHeight(rows: 2, headers: 0, rowCap: 6)
                 == 2 * row + pad
         )
         #expect(
-            JumpPanelView.listHeight(rows: 2, hasHeader: true, rowCap: 6)
-                == 2 * row + JumpPanelView.headerHeight + pad
+            JumpPanelView.listHeight(rows: 2, headers: 2, rowCap: 6)
+                == 2 * row + 2 * JumpPanelView.headerHeight + pad
         )
         #expect(
-            JumpPanelView.listHeight(rows: 40, hasHeader: true, rowCap: 6)
+            JumpPanelView.listHeight(rows: 40, headers: 1, rowCap: 6)
                 == 6 * row + pad
         )
     }
@@ -119,14 +135,18 @@ struct JumpPanelControllerTests {
 
     @Test("Esc's close yields; a click away does not")
     func closeYields() {
-        let (controller, _) = controller()
+        // One close per opening: the fade's own guard refuses a
+        // second, so each close takes a controller of its own.
         var yielded = 0
-        controller.handBack.activateReturnTarget = { _ in yielded += 1 }
-        controller.handBack.returnTarget = NSRunningApplication.current
-        controller.close(yieldingActivation: false)
+        let (away, _) = controller()
+        away.handBack.activateReturnTarget = { _ in yielded += 1 }
+        away.handBack.returnTarget = NSRunningApplication.current
+        away.close(yieldingActivation: false)
         #expect(yielded == 0)
-        controller.handBack.returnTarget = NSRunningApplication.current
-        controller.close(yieldingActivation: true)
+        let (esc, _) = controller()
+        esc.handBack.activateReturnTarget = { _ in yielded += 1 }
+        esc.handBack.returnTarget = NSRunningApplication.current
+        esc.close(yieldingActivation: true)
         #expect(yielded == 1)
     }
 

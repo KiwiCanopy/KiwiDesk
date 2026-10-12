@@ -48,10 +48,12 @@ enum JumpKey: Equatable {
             return .swallow
         case escapeKey:
             return plain ? .escape : nil
+        // Whatever is held: ⇧ previews Move here and ⌘ the numbers,
+        // and the list must still move under either.
         case up, down:
-            return plain ? .step(keyCode == up ? -1 : 1) : nil
+            return .step(keyCode == up ? -1 : 1)
         case pageUp, pageDown:
-            return plain ? .page(keyCode == pageUp ? -1 : 1) : nil
+            return .page(keyCode == pageUp ? -1 : 1)
         case returnKey, enter:
             guard held.subtracting(.shift).isEmpty else { return nil }
             return .pick(moveHere: held.contains(.shift))

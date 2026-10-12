@@ -10,8 +10,15 @@ final class JumpPanel: NSPanel {
     var onCancel: () -> Void = {}
     var onKey: (JumpKey) -> Void = { _ in }
     var onModifiers: (NSEvent.ModifierFlags) -> Void = { _ in }
+    var onComposing: (Bool) -> Void = { _ in }
 
     override var canBecomeKey: Bool { true }
+
+    /// Non-activating, so the menu chords are answered here.
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        PanelKeyEquivalents.perform(event, in: self)
+            || super.performKeyEquivalent(with: event)
+    }
 
     override func cancelOperation(_ sender: Any?) {
         onKey(.escape)
@@ -49,6 +56,7 @@ final class JumpPanel: NSPanel {
             break
         }
         super.sendEvent(event)
+        if event.type == .keyDown { onComposing(composing) }
     }
 
     /// Whether the field's editor holds marked text: Return then

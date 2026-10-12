@@ -2,7 +2,9 @@ import AppKit
 
 /// The rows of Jump to window (#1875): every window KiwiDesk
 /// knows — tracked, up on an away Desktop, or minimized — most
-/// recently used first, then one row per hidden app. Read once
+/// recently used first, then one row per hidden app. The focused
+/// window is left out: neither a jump nor Move here does anything
+/// for the window the user is in (owner, 2026-10-12). Read once
 /// when the panel opens; the panel keeps that snapshot.
 extension KiwiCore {
     public func jumpSnapshot() -> JumpSnapshot {
@@ -23,7 +25,11 @@ extension KiwiCore {
             let right = jumpRecency(rhs.element)
             return left != right ? left > right : lhs.offset < rhs.offset
         }
-        return ordered.map(\.element) + hiddenAppJumpEntries()
+        let focused = state.workspaces.lastFocused.map {
+            JumpEntry.Target.window($0)
+        }
+        return ordered.map(\.element).filter { $0.target != focused }
+            + hiddenAppJumpEntries()
     }
 
     /// The most recent honored focus first; a window never focused

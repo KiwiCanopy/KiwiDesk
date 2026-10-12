@@ -24,10 +24,12 @@ struct JumpKeyTests {
         // AppKit flags an arrow `.function` and `.numericPad`;
         // neither may refuse it.
         #expect(key(125, [.function, .numericPad]) == .step(1))
-        // A modified arrow belongs to the field's editor.
-        #expect(key(126, .shift) == nil)
-        #expect(key(126, .command) == nil)
-        #expect(key(126, .option) == nil)
+        // Held ⇧ (Move here's preview) or ⌘ (the numbers) never
+        // stops the list moving (owner eyeball, 2026-10-12).
+        #expect(key(126, .shift) == .step(-1))
+        #expect(key(125, [.shift, .command]) == .step(1))
+        #expect(key(126, .option) == .step(-1))
+        #expect(key(121, .shift) == .page(1))
     }
 
     @Test("Return jumps, ⇧Return moves here")
