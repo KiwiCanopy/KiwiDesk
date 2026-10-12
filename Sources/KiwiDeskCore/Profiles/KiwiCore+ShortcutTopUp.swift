@@ -1,7 +1,8 @@
 import Foundation
 
-/// The seed's two top-ups: the Space digit rows (#485) and the
-/// Desktop tier's `⌃⌥⇧⌘` + digit rows. Both are additive and
+/// The seed's three top-ups: the Space digit rows (#485), the
+/// Desktop tier's `⌃⌥⇧⌘` + digit rows and the rows a release added
+/// (#2211). All three are additive and
 /// GUI-managed only, append through `appendBaseShortcuts`, and tell
 /// an open Settings draft what they added.
 extension KiwiCore {
@@ -87,6 +88,39 @@ extension KiwiCore {
             || appendBaseShortcuts(added, to: &config, layer: index)
         {
             desktopMemory.writeShortcutMark(top)
+        }
+    }
+
+    /// Adds the default rows of every generation this Mac has not
+    /// been offered (#2211), where the action is unbound and the
+    /// chord free. The mark advances only once the rows landed; a
+    /// declining setup (Lua-owned, no sidecar) is asked again on
+    /// the next launch.
+    func topUpGenerationShortcuts() {
+        let mark = desktopMemory.readDefaultsGeneration()
+        guard mark < DefaultKeybindings.newestGeneration,
+            isGuiManaged, var config = guiConfigStore.load(),
+            let index = config.layers.firstIndex(where: { $0.isDefault })
+        else { return }
+        // A profile's own row for one of these actions counts.
+        let offered = Set(
+            (1...DefaultKeybindings.newestGeneration).flatMap {
+                DefaultKeybindings.rows(ofGeneration: $0).map(\.lua)
+            }
+        )
+        let overrides = profiles.allProfiles().flatMap {
+            $0.layers?.layers.first { $0.isDefault }?.bindings ?? []
+        }.filter { offered.contains($0.lua) }
+        let added = DefaultKeybindings.generationTopUp(
+            existing: config.layers[index].bindings + overrides,
+            above: mark
+        )
+        if added.isEmpty
+            || appendBaseShortcuts(added, to: &config, layer: index)
+        {
+            desktopMemory.writeDefaultsGeneration(
+                DefaultKeybindings.newestGeneration
+            )
         }
     }
 

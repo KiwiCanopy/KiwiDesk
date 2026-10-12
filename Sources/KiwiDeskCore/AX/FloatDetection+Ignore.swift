@@ -9,7 +9,9 @@ extension FloatDetection {
     /// Layer-scoped ignored apps: only raised-layer panels are ignored
     /// (#21, #448). The value says whether a raised window with a
     /// title-bar button escapes, as Ghostty's config error does
-    /// beside its buttonless quick terminal (#2067).
+    /// beside its buttonless quick terminal (#2067) — and a window
+    /// at the modal-panel level, its update alert, which the quick
+    /// terminal never takes (3 shown, 101 hidden; #2200).
     private static let layerScopedIgnoredApps: [String: Bool] = [
         ghosttyBundleID: true,
         "com.raycast.macos": false,
@@ -65,8 +67,15 @@ extension FloatDetection {
                     || bundleID.map {
                         layerScopedIgnoredApps[$0.lowercased()] != nil
                     } == true
-                        && !(escapesWithButton(bundleID) && titlebarButton))
+                        && !(escapesWithButton(bundleID)
+                            && (titlebarButton || layer == modalPanelLayer)))
     }
+
+    /// The modal-panel level: an app's own alert, never a
+    /// launcher or HUD (#2200).
+    static let modalPanelLayer = Int(
+        CGWindowLevelForKey(.modalPanelWindow)
+    )
 
     private static func escapesWithButton(_ bundleID: String?) -> Bool {
         bundleID.flatMap { layerScopedIgnoredApps[$0.lowercased()] }

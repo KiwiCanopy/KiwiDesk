@@ -11,11 +11,16 @@ name: Update App Font
 # the drop is reviewed like any other change, because a new
 # upstream release can retire a ligature the App Bar draws.
 #
-# Why it runs the full suite before opening the PR: a PR created
-# with the default GITHUB_TOKEN does NOT fire `pull_request`, so
-# ci.yml stays silent on it. The gate therefore runs here, in the
-# job that produced the drop, and the run log is the proof. Pushing
-# any further commit to the branch by hand starts CI normally.
+# The PR is opened with RELEASE_SYNC_TOKEN, the owner's PAT
+# changelog.yml threads for the same reason (#1154): a real actor's
+# push and PR fire `pull_request`, so ci.yml and cla.yml report on
+# it, and GitHub holds no "Approve and run" over it. ci.yml is then
+# the gate, and this job runs none of its own.
+#
+# Without the secret it falls back to GITHUB_TOKEN, which fires
+# nothing: ci.yml stays silent, so the full suite runs here before
+# the PR exists and the run log is the proof; pushing any further
+# commit to the branch by hand starts CI.
 on:
   schedule:
     # Mondays, 06:17 UTC. Off the hour so the run is not queued
@@ -96,8 +101,16 @@ jobs:
     runs-on: xcode-27
     env:
       TAG: ${{ needs.check.outputs.tag }}
+      # Whether the PR step has the PAT: a step `if:` cannot read a
+      # secret, so its presence is lifted here.
+      HAS_SYNC_TOKEN: ${{ secrets.RELEASE_SYNC_TOKEN != '' }}
     steps:
+      # The PAT never reaches a step that runs the tree's code: the
+      # checkout persists no credential, and only the PR step,
+      # which runs no build, holds the token.
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Select Xcode
         run: |
@@ -129,16 +142,23 @@ jobs:
       # unloadable font, and on a drop that lost the :kiwidesk:
       # ligature — but the whole suite runs because a resource the
       # App Bar draws is not the only thing that reads that map.
+      # Only where ci.yml will not run on the PR — the GITHUB_TOKEN
+      # fallback.
       - name: Build
+        if: env.HAS_SYNC_TOKEN != 'true'
         run: swift build
 
       - name: Test
+        if: env.HAS_SYNC_TOKEN != 'true'
         run: swift test --skip ExecTests
 
       - name: Open the pull request
         env:
-          GH_TOKEN: ${{ github.token }}
+          # The PAT where the repository has it, so the push and the
+          # PR fire `pull_request`; GITHUB_TOKEN otherwise.
+          GH_TOKEN: ${{ secrets.RELEASE_SYNC_TOKEN || github.token }}
           BASE: ${{ github.event.repository.default_branch }}
+          REPO: ${{ github.repository }}
           RUN_URL: >-
             ${{ github.server_url }}/${{ github.repository
             }}/actions/runs/${{ github.run_id }}
@@ -151,20 +171,26 @@ jobs:
           git switch -c "$branch"
           git add Sources/KiwiDeskCore/Resources/AppFont
           git commit -m "chore(bar): update sketchybar-app-font to $TAG"
-          git push origin "$branch"
+          # The checkout persisted no credential, so the push names
+          # the token itself.
+          git push \
+            "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" \
+            "$branch"
           # A heredoc into a file, not an inline --body: the body is
           # Markdown, and any indentation shell would keep turns a
           # paragraph into a code block.
           body="$RUNNER_TEMP/pr-body.md"
+          if [ "$HAS_SYNC_TOKEN" = "true" ]; then
+            GATE="CI runs on this PR."
+          else
+            GATE="\`swift build\` and \`swift test --skip ExecTests\` passed in [this run]($RUN_URL). A PR opened by \`GITHUB_TOKEN\` does not fire \`pull_request\`, so CI reports nothing here — push any commit to the branch to start it."
+          fi
           cat > "$body" <<EOF
           Automated re-vendor of [sketchybar-app-font][upstream]
           \`$TAG\` via \`scripts/update-app-font.sh\`, run by
           \`.github/workflows/app-font.yml\`.
 
-          \`swift build\` and \`swift test --skip ExecTests\` passed
-          in [this run]($RUN_URL). A PR opened by \`GITHUB_TOKEN\`
-          does not fire \`pull_request\`, so CI reports nothing here
-          — push any commit to the branch to start it.
+          $GATE
 
           Before merging, check the App Bar with the new glyphs: an
           upstream release can retire or restyle a ligature.

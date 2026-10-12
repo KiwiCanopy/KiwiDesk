@@ -56,6 +56,18 @@ reaches people who did not ask to read anything.
    improved surface — the Discord community joining Settings
    Home was New in 2.0.0, not an Improved Home page (owner,
    2026-09-25).
+   **Lead with what the reader sees or can now do, in their
+   words — never the feature's name or the control's** (owner,
+   2026-10-12). A spotlight title names the outcome ("Settings
+   windows float on their own"), not the setting ("You choose
+   what floats"). Say it concretely: the keys a shortcut uses, an
+   example ("the Space Bar at the top of one screen and the bottom
+   of another") rather than "per screen". A change that alters
+   what happens without being asked — a new default, an automatic
+   float — states what happens AND where to undo it, in the same
+   bullet. Keep Settings' internal nouns out (a colour well, a
+   ticked row, a window that "refuses" a size); name the page or
+   row a user can find instead.
 4. **Draft into the parser's form**, then validate every time —
    `python3 scripts/changelog-sync --body <file>`. It refuses
    rather than half-rendering, so a green run is the floor, not
@@ -147,7 +159,10 @@ window*; what the site does with it is `.claude/rules/site.md` ▸
    removing or renaming the heading fails the site build.
 2. **Learn which issues are next from the next release's plan**
    (`plan/roadmap-<version>.md`, whose rows are the owner's order),
-   else from the next milestone's open Feature issues. Write each
+   else from the next milestone's open Feature issues. An item the
+   owner has named as a lead stays on the list ahead of plan
+   order; when the list's cap forces a choice, drop the item the
+   release notes will announce anyway, and say which you dropped. Write each
    item from the public issue, never from the plan's text: `plan/`
    is private and nothing in it may reach the repo.
 3. **Pass the release-notes test** above — the thing a user would
