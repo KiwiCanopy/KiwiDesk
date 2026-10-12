@@ -52,4 +52,24 @@ extension SettingsThemeContrastTests {
             )
         }
     }
+
+    /// The clauses above measure the token; this holds the row to
+    /// drawing it, or a swapped fill passes both.
+    @Test("the Jump row draws the measured selection fill")
+    func jumpRowDrawsTheMeasuredFill() throws {
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Jump/JumpRowView.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        #expect(source.occurrences(of: ".fill(") == 1)
+        #expect(
+            source.occurrences(of: ".fill(SettingsTheme.rowSelected)")
+                == 1
+        )
+    }
 }

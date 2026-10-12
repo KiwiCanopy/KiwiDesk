@@ -147,6 +147,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.hasShadow = true
         panel.level = .floating
         panel.isReleasedWhenClosed = false
+        // A deactivation hide would leave the panel to come back
+        // with the next activation; the resign-key close owns it.
+        panel.hidesOnDeactivate = false
         panel.animationBehavior = .utilityWindow
         panel.collectionBehavior = [
             .canJoinAllSpaces, .fullScreenAuxiliary,

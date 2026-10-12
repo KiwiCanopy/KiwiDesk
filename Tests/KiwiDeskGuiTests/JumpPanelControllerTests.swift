@@ -142,4 +142,10 @@ struct JumpPanelControllerTests {
         #expect(controller.handBack.returnTarget != nil)
         #expect(core.ignoredPanel.active.isEmpty)
     }
+
+    @Test("deactivation never hides the panel behind the close")
+    func deactivationDoesNotHide() {
+        let (controller, _) = controller()
+        #expect(!controller.makePanel().hidesOnDeactivate)
+    }
 }
