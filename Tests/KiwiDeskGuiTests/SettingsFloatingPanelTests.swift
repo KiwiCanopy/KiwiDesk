@@ -187,6 +187,25 @@ struct SettingsFloatingPanelTests {
         )
     }
 
+    /// The grip rides the card it moves, so a drag measured in
+    /// the grip's own space reads its translation from a moving
+    /// origin and feeds it back into the offset — the judder
+    /// (#813). Every drag here names a space that stays put.
+    @Test("the card's drag is measured in a space that stays put")
+    func dragSpaceStaysPut() throws {
+        let source = try squashed(
+            "Sources/KiwiDesk/Settings/SettingsFloatingPanel.swift"
+        )
+        let calls = source.components(separatedBy: "DragGesture(")
+            .dropFirst()
+            .map { $0.prefix { $0 != ")" } }
+        #expect(!calls.isEmpty)
+        for args in calls {
+            #expect(args.contains("coordinateSpace:"))
+            #expect(!args.contains("coordinateSpace:.local"))
+        }
+    }
+
     private func squashed(_ path: String) throws -> String {
         let url = Self.root.appendingPathComponent(path)
         let raw = try String(contentsOf: url, encoding: .utf8)
