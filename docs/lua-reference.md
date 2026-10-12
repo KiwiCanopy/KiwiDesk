@@ -169,7 +169,6 @@ KiwiDesk.focus_space(2)
 KiwiDesk.focus_space("mail")
 ```
 
-:::unreleased
 ### focus_space_previous / focus_space_next
 
 **Expects:** nothing.
@@ -219,7 +218,6 @@ an existing one gets them through **Restore Defaults…**.
 ```lua
 KiwiDesk.focus_space_back()
 ```
-:::
 
 ### move_to_space
 
@@ -649,11 +647,9 @@ bars and windows never overlap. An auto-hiding menu bar's strip
 is reclaimed. On MacBooks with a notch, the camera housing
 stays reserved.
 
-:::unreleased
 The one exception is a bar set not to reserve its strip
 ([`space_bar.set_reserve`](#space_barset_reserve) and
 [`app_bar.set_reserve`](#app_barset_reserve)), which draws over the windows.
-:::
 
 **Example:**
 
@@ -881,7 +877,6 @@ the GUI** keeps the value `init.lua` set.
 KiwiDesk.set_refusal_sound(true)
 ```
 
-:::unreleased
 ### set_space_history
 
 **Expects:** `"per_screen"` or `"all_screens"` (default
@@ -905,9 +900,7 @@ profile's own value still wins.
 ```lua
 KiwiDesk.set_space_history("all_screens")
 ```
-:::
 
-:::unreleased
 ### set_desktop_cue
 
 **Expects:** `true` or `false` (default `true`).
@@ -935,7 +928,6 @@ changes the running value only.
 ```lua
 KiwiDesk.set_desktop_cue(false)
 ```
-:::
 
 :::unreleased
 ### set_mode_cue
@@ -2098,12 +2090,10 @@ by default). With the Space Bar off, switching a Space between a
 layout that shows an App Bar and one that does not moves its
 windows by the strip.
 
-:::unreleased
 A bar can also show without reserving:
 [`space_bar.set_reserve`](#space_barset_reserve) and
 [`app_bar.set_reserve`](#app_barset_reserve) draw it over the windows instead, and an edge
 stays reserved while either bar on it reserves.
-:::
 
 Both bars hide on a screen showing a native-fullscreen app and
 return with the Desktop.
@@ -2130,18 +2120,14 @@ moves its windows by the App Bar's strip. Where the two edges
 meet at a corner, the Space Bar runs the whole edge and the App
 Bar stops at it.
 
-:::unreleased
 A bar's edge may also differ per screen — `set_edge`'s optional
 screen argument — and each screen reserves the edges its own
 bars sit on, so the bars may share one shelf on one screen and
 sit apart on another.
-:::
 
-:::unreleased
 An edge whose every bar has `reserve` off is not reserved
 ([`space_bar.set_reserve`](#space_barset_reserve)): its bar
 draws over the windows.
-:::
 
 While both bars show they are one plate with two sections, in
 the order `set_order` gives them, placed along the edge as one
@@ -2715,10 +2701,8 @@ places:
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
 (default `"top"`; the starter setup seeds `"bottom"`).
 
-:::unreleased
 Then, optionally, a screen, named as
 [`space_bar.set_edge`](#space_barset_edge) names one.
-:::
 
 **Does:** sets the screen edge the App Bar sits on, for every
 layout — no layout sets its own. On the Space Bar's edge the two
@@ -2732,16 +2716,13 @@ it does not follow a layout's orientation.
 app_bar.set_edge("bottom")
 ```
 
-:::unreleased
 With a screen, the edge is that screen's alone, as
 [`space_bar.set_edge`](#space_barset_edge) describes.
 
 ```lua
 app_bar.set_edge("right", "LG HDR 4K:3840x2160")
 ```
-:::
 
-:::unreleased
 ### app_bar.set_reserve
 
 **Expects:** boolean (default `true`).
@@ -2769,7 +2750,6 @@ Global only: no layout sets its own.
 ```lua
 app_bar.set_reserve(false)
 ```
-:::
 
 ### app_bar.set_active_indicator
 
@@ -2895,7 +2875,6 @@ none is.
 space_bar.set_enabled(true)
 ```
 
-:::unreleased
 ### space_bar.set_reserve
 
 **Expects:** boolean (default `true`).
@@ -2921,19 +2900,16 @@ its own [`app_bar.set_reserve`](#app_barset_reserve) off.
 ```lua
 space_bar.set_reserve(false)
 ```
-:::
 
 ### space_bar.set_edge
 
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
 (default `"top"`).
 
-:::unreleased
 Then, optionally, a screen, in the forms
 [`move_space_to_display`](#move_space_to_display) takes — a
 number, or a screen's fingerprint or name — or the fingerprint
 of a screen that is not connected, kept for when it is.
-:::
 
 **Does:** sets the screen edge the Space Bar sits on. On the App
 Bar's edge the two share one [KiwiShelf](#kiwishelf); on another
@@ -2946,7 +2922,6 @@ edge is absolute — it does not follow a layout's orientation.
 space_bar.set_edge("left")
 ```
 
-:::unreleased
 **Per screen:** with a screen, the bar takes that edge on that
 screen alone. A screen with no edge of its own uses the bar's,
 so a new screen needs no setup. Naming the bar's own edge
@@ -2965,7 +2940,6 @@ fingerprint.
 space_bar.set_edge("top")
 space_bar.set_edge("left", "LG HDR 4K:3840x2160")
 ```
-:::
 
 ### space_bar.set_glyph_span
 
@@ -3991,13 +3965,11 @@ remain accessory processes are tracked but forced floating. If an app
 promotes itself to a regular process, its standard windows follow the
 normal float-or-tile rules.
 
-:::unreleased
 A standard window that cannot be resized — its green zoom button is
 disabled, as on most Settings and About windows — floats
 automatically too, and a window of an app with no Dock icon that
 carries its own title-bar buttons on a raised layer (a system
 "Join Network" sheet, for one) is floated rather than ignored.
-:::
 
 This table is the global base. A profile may add rules or remove
 inherited ones with its sparse `float_rules` object (`true` adds,
@@ -4041,7 +4013,6 @@ float_rules = {
 }
 ```
 
-:::unreleased
 ### tile_rules
 
 **Expects:** a Lua table of app bundle identifiers.
@@ -4078,7 +4049,6 @@ loaded, and lasts until the next config load.
 ```lua
 KiwiDesk.set_float_automatically(false)
 ```
-:::
 
 ### ignore_rules
 
@@ -4111,11 +4081,10 @@ apps leave KiwiDesk state, and apps removed from the list are
 discovered again. Ghostty's quick terminal is a built-in exception:
 only its panel, not normal Ghostty windows, is ignored.
 
-:::unreleased
 A raised Ghostty window with title-bar buttons, such as its
 configuration-error window, is one of Ghostty's own windows and is
-managed as a float; the buttonless quick terminal stays ignored.
-:::
+managed as a float, as is its update alert; the buttonless quick
+terminal stays ignored.
 
 **Command bars are ignored automatically.** A Spotlight/Raycast-style
 launcher is a menu-bar (accessory) app whose bar is a raised-layer
@@ -4133,12 +4102,10 @@ lifecycle keepalive some menu-bar apps create) is never tracked.
 `ignore_rules` remains the whole-app escape hatch for anything
 either heuristic misses.
 
-:::unreleased
 A window at the screen-saver level or above — a dictation HUD, a
 screen-share overlay you draw on — is ignored too, whatever its
 app: it covers the screen or hovers over everything, and is never a
 window to arrange.
-:::
 
 ### app_rules
 
@@ -4259,11 +4226,9 @@ CLI it fails. Remove the `float_rules` entry to tile such a
 window. A window that floats only because its Space is in
 floating layout still floats there.
 
-:::unreleased
 A window floated only because it can't be resized or its app has
 no Dock icon tiles once its app is in [`tile_rules`](#tile_rules)
 or [`set_float_automatically`](#set_float_automatically) is off.
-:::
 
 Dragging a window out of a floating-layout Space onto a tiled
 Space on another screen floats it the way `make_floating` does,
@@ -4711,7 +4676,6 @@ Both launch verbs are also reachable from the Settings app, from
 the per-row menu of an Open applications shortcut: *Open or Focus*
 (`focus_or_spawn`, the default) or *Open New* (`spawn_new`).
 
-:::unreleased
 ### gather
 
 **Expects:** an app bundle identifier (e.g. `com.apple.Notes`).
@@ -4737,7 +4701,6 @@ end)
 
 It is the third choice, *Gather Windows*, in the **Action** menu
 of an Open applications shortcut in Settings.
-:::
 
 :::unreleased
 ### move_here
@@ -6207,7 +6170,6 @@ that was active at quit. This works within one login session
 are re-tiled fresh). Crashes restore from the last autosave
 (30 s interval) instead.
 
-:::unreleased
 A restart of the Mac, or a logout, that begins while KiwiDesk is
 running is the exception: KiwiDesk keeps the arrangement it had
 when the restart began, and the first launch after it matches the
@@ -6222,9 +6184,7 @@ arrangement is used once, by that first launch. A plain Quit
 counts the same way when the restart or login that follows it
 begins within 10 minutes; later than that, the next launch starts
 fresh: quitting lets the arrangement go.
-:::
 
-:::unreleased
 A quit, restart or logout closes a dialog left open in KiwiDesk
 as if you had pressed Cancel. If Settings is open with unsaved
 edits, the quit stops and asks whether to save them, with
@@ -6235,7 +6195,6 @@ Settings never keeps unsaved edits once its window is closed. A
 logout, restart or shut down, and a SIGTERM — `kill`, launchd,
 `kiwidesk service restart` — cannot wait for an answer and
 discard them.
-:::
 
 On quit, KiwiDesk moves each managed tiled window
 back onto the screen its space is assigned to and arranges them
@@ -6247,7 +6206,6 @@ together. Windows on a screen's background Desktops cannot be
 repositioned without disabling SIP, which KiwiDesk never does —
 the visible Desktop per screen is the arranged scope.
 
-:::unreleased
 Floating windows are arranged too, on every space, shown or not;
 a popup or other transient window is left alone. The next launch
 puts each one back — in its space, still floating, at the frame
@@ -6257,7 +6215,6 @@ logout keeps them too, under the rules above. After a crash, a
 window you floated by hand comes back without its float, so it
 tiles again unless its space is in floating mode; only one that
 had not reopened yet since the last quit keeps it.
-:::
 
 Two restarts arrange nothing: an update's **Install and
 Relaunch**, and `kiwidesk service restart` of a running service

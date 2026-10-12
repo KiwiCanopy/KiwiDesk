@@ -21,10 +21,14 @@ import Testing
 ///    are one hand-written pair: reword that heredoc and the read
 ///    yields empty, which compares unequal to every upstream tag,
 ///    so the expensive job runs every week forever.
-/// 3. The drop is validated before the PR exists. A PR created
-///    with `GITHUB_TOKEN` does not fire `pull_request`, so ci.yml
-///    never sees it — dropping the test step would hand the
-///    reviewer an unverified drop with no red anywhere.
+/// 3. The PR is opened with the owner's PAT (`RELEASE_SYNC_TOKEN`,
+///    #1154's token), so `pull_request` fires and ci.yml is the
+///    gate — and only the PR step holds it, never a step that runs
+///    the tree's code. Without the secret the PR falls back to
+///    `GITHUB_TOKEN`, which fires nothing, so the drop is validated
+///    before the PR exists on that path alone — dropping the test
+///    step there would hand the reviewer an unverified drop with
+///    no red anywhere.
 ///
 /// **What this cannot see**: whether the cron fires at all (GitHub
 /// disables schedules after 60 days of repo inactivity), and
@@ -106,6 +110,51 @@ struct AppFontWorkflowTests {
             on a GITHUB_TOKEN PR, so nothing else would catch a bad \
             drop
             """
+        )
+        // Skipped only where the PAT opens the PR and ci.yml runs.
+        let gated = "if: env.HAS_SYNC_TOKEN != 'true'\n        run: swift test"
+        #expect(
+            yaml.contains(gated),
+            "the suite is no longer gated on the token fallback"
+        )
+        #expect(
+            yaml.contains(
+                "HAS_SYNC_TOKEN: ${{ secrets.RELEASE_SYNC_TOKEN != '' }}"
+            ),
+            "the fallback gate no longer reads the secret's presence"
+        )
+    }
+
+    /// The PAT opens the PR — or nothing fires on it — and nothing
+    /// but the PR step holds it: the checkout persists no
+    /// credential, so `swift build` and the vendoring script run
+    /// without it.
+    @Test("Only the PR step holds the PAT")
+    func patStaysInThePullRequestStep() throws {
+        // Comments dropped: the header names the secret in prose.
+        let yaml = try workflow.split(separator: "\n")
+            .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("#") }
+            .joined(separator: "\n")
+        let token = "${{ secrets.RELEASE_SYNC_TOKEN || github.token }}"
+        // The presence flag and the PR step's token.
+        #expect(
+            yaml.components(separatedBy: "RELEASE_SYNC_TOKEN").count
+                - 1 == 2,
+            "RELEASE_SYNC_TOKEN reaches a step beyond the PR's"
+        )
+        let pat = try #require(
+            yaml.range(of: "GH_TOKEN: \(token)"),
+            "the PR is no longer opened with the PAT"
+        )
+        let create = try #require(yaml.range(of: "gh pr create"))
+        let step = try #require(
+            yaml.range(of: "- name: Open the pull request")
+        )
+        #expect(step.upperBound < pat.lowerBound)
+        #expect(pat.upperBound < create.lowerBound)
+        #expect(
+            yaml.contains("persist-credentials: false"),
+            "the checkout persists a credential the build could read"
         )
     }
 

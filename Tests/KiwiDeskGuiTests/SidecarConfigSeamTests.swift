@@ -57,13 +57,13 @@ struct SidecarConfigSeamTests {
     }
 
     /// A door that writes the draft to gui.json refuses first when
-    /// the live page moved (#1393) — a third door without the check
-    /// splits a Save between two profiles.
+    /// the draft went stale — the page moved (#1393) or `init.lua`
+    /// changed owner (#2183) — through the one `staleDraftReason`.
     @Test("each writing door checks the page first")
     func writersCheckThePage() throws {
         for (name, source) in try files where writers[name] != nil {
             #expect(
-                source.occurrences(of: "pageMovedReason")
+                source.occurrences(of: "staleDraftReason")
                     == source.occurrences(of: "saveGuiConfig(sidecarConfig)"),
                 Comment(
                     rawValue: "\(name): a gui.json door without the page check"
@@ -77,7 +77,7 @@ struct SidecarConfigSeamTests {
     @Test("the page check precedes every change and write")
     func pageCheckComesFirst() throws {
         for (name, source) in try files where writers[name] != nil {
-            guard let check = source.range(of: "pageMovedReason") else {
+            guard let check = source.range(of: "staleDraftReason") else {
                 continue
             }
             for later in ["mergeLiveSpaces(", "saveRuleReach()"] {

@@ -64,8 +64,16 @@ extension SettingsModel {
         refreshBindingReadings()
         // A profile loaded under a CLEAN live page (a Desktop
         // binding, `load_profile`) takes the page with it (#1393);
-        // a dirty draft keeps its page and its Save refuses.
-        if pageMoved, !isDirty { reload() }
+        // a dirty draft keeps its page and its Save refuses. So
+        // does an `init.lua` that changed owner under it (#2183).
+        if draftStale, !isDirty { reload() }
+    }
+
+    /// Re-draws a clean live page whose `init.lua` changed owner
+    /// (#2183) or, in the Lua editor, changed at all (#2206) —
+    /// file reads cheap enough for every window-key.
+    func refreshOwner() {
+        if ownerMoved || luaChangedOnDisk, !isDirty { reload() }
     }
 
     /// Re-reads what each draft binding loads (#1609). Owed by

@@ -767,10 +767,15 @@ enforced by `AppFontWorkflowTests`: it **calls the developer
 script** rather than re-implementing the vendoring inline, because
 only the hand-run path is ever exercised outside the cron; it
 **gates the macOS job on a cheap `ubuntu-latest` check**, the same
-trade `ci.yml` makes; and it **runs the gate before the PR
-exists** — a PR opened with `GITHUB_TOKEN` does not fire
-`pull_request`, so `ci.yml` reports nothing on it and the workflow
-run log is the only proof the drop was ever built.
+trade `ci.yml` makes; and it **opens its PR with the sync PAT and,
+only on the `GITHUB_TOKEN` fallback, runs the gate before the PR
+exists**. The PAT (`RELEASE_SYNC_TOKEN`, the token below) fires
+`pull_request`, so `ci.yml` and `cla.yml` report on the PR with no
+"Approve and run" and `ci.yml` is the gate; a PR opened with
+`GITHUB_TOKEN` fires nothing, so there the workflow run log is the
+only proof the drop was ever built. The PAT reaches the PR step
+alone — the checkout persists no credential, so the vendoring
+script and the build never hold it.
 
 **A workflow-opened PR gets its CI started for it, and one it
 expects to merge itself gets armed too.** Running the gate before
@@ -812,18 +817,20 @@ delivers less since the CLA check (#1521):** a `github.token` PR
 fires no `pull_request_target` either, and `cla.yml` cannot be
 dispatched — the action needs a PR event — so on that path the
 sync PR sits blocked on "CLA" until a human pushes any commit to
-its branch, `app-font.yml`'s standing remedy. The PAT path is
-untouched: the PR's author is the owner, signed once, and the
-`github-actions[bot]` commit author is on the allowlist.
+its branch, the remedy `app-font.yml`'s fallback PR still states.
+The PAT path is untouched: the PR's author is the owner, signed
+once, and the `github-actions[bot]` commit author is on the
+allowlist.
 
 **The dispatch and the arming are owed to a PR nobody is
 watching land, and that is the scope.** The release path is unwatched by
 construction — publish, and the feed waits on the sync PR — so
 it owes both. `app-font.yml`'s PR is the other shape: a human
 reads it before it lands, because an upstream drop can restyle
-a glyph, so auto-merge would be wrong there and its manual CI
-start is a cost its reviewer already pays. That is a scope line,
-not an argument that it is fine: the two halves are separable,
+a glyph, so auto-merge would be wrong there; with the PAT its CI
+starts on the PR's own event, and only its fallback leaves the
+start to its reviewer. That is a scope line, not an argument that
+it is fine: the two halves are separable,
 and a workflow-opened PR that acquires an unwatched landing owes
 the dispatch on the day it does.
 

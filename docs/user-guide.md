@@ -518,10 +518,8 @@ Lua-only: an `app_bar.*` field has a `monocle.set_app_bar_*` /
 overrides](lua-reference.md#per-layout-app-bar-overrides)),
 except the App Bar's edge, which every layout shares.
 
-:::unreleased
 Whether the App Bar reserves its strip is global too
 ([`app_bar.set_reserve`](lua-reference.md#app_barset_reserve)).
-:::
 
 The starter setup puts the App Bar on the bottom edge and
 the Space Bar on top; set both to one edge to share one shelf.
@@ -835,7 +833,7 @@ ultrawide alone: every other screen opens in monocle, and each
 screen gets three spaces ending in its own floating one — a
 widescreen monocle · bsp · floating, a portrait screen monocle ·
 grid (one column of three) · floating, a laptop monocle · grid
-(two across) · floating.
+(two by two) · floating.
 
 While you are still on the starter setup, connecting or removing
 a screen re-derives it and the `⌃⌥N` space shortcuts extend to
@@ -865,7 +863,6 @@ and the same setup is always available as a preset of that name.
 
 **Open Settings** ships on `⌃⌥,` as well.
 
-:::unreleased
 `⌃⌥` moves your focus, `⇧` acts on the window — swaps it or
 sends it to a space — and `⌘` steps through the spaces or sends
 the window and follows. Resizing has its own layer, `⌥⌘`, which
@@ -874,17 +871,18 @@ other way as it does everywhere on macOS. A space past the tenth,
 or one with a name, has no digit: the space steps and the history
 reach it, and Shortcuts & Gestures can give it a key of its own.
 
+:::unreleased
 `⌃⌥C` moves the focused space to its next layout
 ([`cycle_mode`](lua-reference.md#cycle_mode)) and `⌃⌥⇧C` to the
 previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥L` opens
 a menu of every layout at the pointer
 ([`show_layout_picker`](lua-reference.md#show_layout_picker)) for
 the space on that screen.
+:::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each
 Desktop gets its key the first time KiwiDesk sees it, so a key you
 delete stays deleted.
-:::
 
 Each space digit is bound *by name* and follows a rename;
 spaces past the tenth ship without a digit. The set is seeded

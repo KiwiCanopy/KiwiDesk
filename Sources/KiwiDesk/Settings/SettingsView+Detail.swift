@@ -61,7 +61,7 @@ extension SettingsView {
     @ViewBuilder private var contentColumn: some View {
         VStack(spacing: 0) {
             if model.hasCustomLua {
-                CustomLuaBanner()
+                CustomLuaBanner(savingAdopts: !model.sidecarExists)
                     .padding(.horizontal, 12)
                     .padding(.top, 10)
                 Divider()

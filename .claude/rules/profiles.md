@@ -94,10 +94,21 @@ because two real clients now remove drift — see
   through `topUpDesktopShortcuts`, which advances the per-Mac mark
   only once its rows landed — a writer that adds them beside it
   re-offers a row the user deleted — and a writer that discards
-  `gui.json` clears that mark (`DesktopShortcutTopUpTests`,
+  `gui.json` clears that mark and the generation mark below (`DesktopShortcutTopUpTests`,
   `DesktopShortcutSeamTests`). Moving a window to a Desktop stays
   an offer (#1125), and a further `⇧`-lifted tier is a ruling of
   its own.
+- **A default row added after the first-run seed joins the next
+  generation (#2211).** Bump `DefaultKeybindings.newestGeneration`
+  and list the row in `rows(ofGeneration:)`, beside adding it to
+  the seed, so an existing install gets it once through
+  `topUpGenerationShortcuts` — added only where its action is
+  unbound and its chord free, never moving a binding — while a
+  fresh seed already carries it (`DefaultShortcutGenerationTests`
+  ▸ `seedCarriesEveryGeneration`). A seed action outside the
+  frozen 2.2.0 baseline and every generation reds
+  `DefaultShortcutGenerationTests` ▸ `everySeedRowHasAGeneration`;
+  move a row into that baseline only by ruling.
 - **Check a new `⌥⌘` default against `SystemShortcuts.map`, never
   against prose — and do not stop there.** That base is free only
   where the register says so: the first draft of this layer took
@@ -1478,7 +1489,14 @@ rules into the shared base (`RuleReachIdentityTests` ▸
 live page, a clean draft repins by reloading and a dirty one
 refuses its Save rather than splitting it
 (`RuleReachIdentityTests` ▸ `pageMovedRefuses`,
-`cleanPageRepins`). On a checklist Save the rule families are
+`cleanPageRepins`). The same holds when `init.lua` changes owner
+under a live structured page (#2183): a clean draft re-draws as
+the Lua editor, and a dirty one refuses its WHOLE Save, the
+profile half included, since the page it was drawn on is gone
+(`ConfigOwnerMovedTests`). Every gui.json door refuses first
+through the one `staleDraftReason`
+(`SidecarConfigSeamTests` ▸ `writersCheckThePage`). On a
+checklist Save the rule families are
 written by `saveRuleReach` alone — `overwriteProfile` keeps the
 stored ones (`writingRules: false`, `OverwriteProfileRulesTests`
 ▸ `keepsStoredRules`)
