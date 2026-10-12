@@ -222,7 +222,6 @@ exports nothing.
 
 ## Checking the Private Fast Paths
 
-:::unreleased
 KiwiDesk reaches some of macOS through private WindowServer
 calls, each with a public fallback or, where macOS offers none, a
 refusal. A new macOS can drop any of them without a crash, so
@@ -254,17 +253,17 @@ cannot call it.
 The exit code is 2 when any path `failed`, and 0 otherwise —
 `absent`, `resolved` and `inconclusive` are findings, not
 failures. 1 still means the command itself did not get through.
-:::
 
 ## Commands
 
-:::unreleased
 `focus_space_previous`, `focus_space_next`, `focus_space_back`,
 `focus_space_forward` and `set_space_history` step through the
 Spaces by their order and by the ones you visited
 ([`focus_space_back`](lua-reference.md#focus_space_back--focus_space_forward)).
 `set_desktop_cue` turns off the plate a Desktop switch shows
 ([`set_desktop_cue`](lua-reference.md#set_desktop_cue)).
+
+:::unreleased
 `set_mode_cue` turns off the plate `cycle_mode` shows
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).
 :::
@@ -416,13 +415,11 @@ moves the focused Space to the next layout in its cycle list;
 [cycle_mode](lua-reference.md#cycle_mode).
 :::
 
-:::unreleased
 `gather` (Launch) takes an app bundle id and moves every window of
 that app into the Space you are on, from other macOS Desktops too
 where the Desktop bridge is present; it never launches the app, and
 an app with nothing to move answers with an error. See
 [gather](lua-reference.md#gather).
-:::
 
 `move_to_space`, `move_to_space_and_follow`, `make_floating`,
 `make_tiled` and `toggle_floating` take an optional last

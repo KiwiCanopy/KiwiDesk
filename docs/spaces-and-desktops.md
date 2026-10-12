@@ -95,12 +95,10 @@ Switch to another profile while it holds windows and it is held
 like any other Space, and comes back temporary; an empty one goes
 away on the switch.
 
-:::unreleased
 An empty temporary Space also goes away once you have switched to
 it and then left it with nothing in it, so a Space shortcut that
 made one by mistake leaves nothing behind. Temporary Spaces sit
 in the Space Bar in number order.
-:::
 
 Plug the screen back in and a held Space goes back to it with
 everything in it, windows opened while it was held included, when
