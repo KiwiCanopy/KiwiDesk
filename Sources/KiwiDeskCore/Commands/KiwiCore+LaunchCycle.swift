@@ -55,12 +55,23 @@ extension KiwiCore {
         return focusCycleTarget(target, reach: nil)
     }
 
-    /// Recency first; with none yet (a fresh KiwiDesk) the app's
-    /// own focused window, else the first in ring order.
     private func pullTarget(bundleID: String, pid: pid_t) -> WindowID? {
-        let ring = cycleRing(bundleID: bundleID, away: [])
-        guard !ring.isEmpty else { return nil }
-        let recent = ring.max {
+        mostRecentWindow(
+            of: cycleRing(bundleID: bundleID, away: []),
+            pid: pid
+        )
+    }
+
+    /// The app's window a press means (#1840), shared with
+    /// `move_here` (#1513): recency first; with none yet (a fresh
+    /// KiwiDesk) the app's own focused window, else the first of
+    /// `candidates`, which come in ring order.
+    func mostRecentWindow(
+        of candidates: [WindowID],
+        pid: pid_t
+    ) -> WindowID? {
+        guard !candidates.isEmpty else { return nil }
+        let recent = candidates.max {
             state.focusRecencyRank(of: $0)
                 < state.focusRecencyRank(of: $1)
         }
@@ -68,11 +79,11 @@ extension KiwiCore {
             return recent
         }
         if let own = eventLoop.focusedWindowID(pid: pid),
-            ring.contains(own)
+            candidates.contains(own)
         {
             return own
         }
-        return ring.first
+        return candidates.first
     }
 
     /// Every window of the app in cycle order: spaces in their
@@ -82,7 +93,7 @@ extension KiwiCore {
     /// Transient overlays (a launcher's panel, #300) are not in
     /// it: they exist momentarily, never wear a ring, and are
     /// not "the app's windows" in the user's mental model.
-    private func cycleRing(
+    func cycleRing(
         bundleID: String,
         away: Set<WindowID>
     ) -> [WindowID] {

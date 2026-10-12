@@ -4,6 +4,20 @@ import Testing
 
 @testable import KiwiDeskCore
 
+private final class FakePlistArrayResult: NSObject {
+    @objc let propertyListArray: [[String: Any]]
+    init(propertyListArray: [[String: Any]]) {
+        self.propertyListArray = propertyListArray
+    }
+}
+
+private final class FakeCopyManagedDisplaySpaces: NSObject {
+    @objc override init() {}
+    @objc func performWithWMBridgeDelegate() -> AnyObject? {
+        FakePlistArrayResult(propertyListArray: [["Spaces": []]])
+    }
+}
+
 /// `move_here <app>` (#1513): one window of an app — its most
 /// recently focused — moved into the Space the user is on and
 /// focused, through Jump to window's `moveHere(_:)`; an app with
@@ -60,6 +74,10 @@ struct MoveHereCommandTests {
         core.state.workspaces.add(WindowID(id), to: space)
     }
 
+    private func pick(_ core: KiwiCore) -> WindowID? {
+        core.moveHereWindow(bundleID: Self.bundle, into: "1")
+    }
+
     private func run(_ core: KiwiCore) -> CommandResponse {
         core.execute("move_here", args: [.string(Self.bundle)])
     }
@@ -86,7 +104,7 @@ struct MoveHereCommandTests {
         addWindow(core, 9, pid: 300, space: "3")
         core.state.stampFocusRecency(WindowID(1))
         core.state.stampFocusRecency(WindowID(9))
-        #expect(core.moveHereWindow(bundleID: Self.bundle) == WindowID(1))
+        #expect(pick(core) == WindowID(1))
     }
 
     @Test("a minimized window more recent than the rest is restored")
@@ -102,7 +120,7 @@ struct MoveHereCommandTests {
             wasMinimized: true,
             effects: &effects
         )
-        #expect(core.moveHereWindow(bundleID: Self.bundle) == WindowID(4))
+        #expect(pick(core) == WindowID(4))
         #expect(run(core).isSuccess)
         #expect(recorder.restored == [4])
     }
@@ -112,7 +130,7 @@ struct MoveHereCommandTests {
         let (core, _) = makeCore()
         addWindow(core, 5, space: "3")
         addWindow(core, 6, space: "2")
-        #expect(core.moveHereWindow(bundleID: Self.bundle) == WindowID(6))
+        #expect(pick(core) == WindowID(6))
     }
 
     @Test("an app with no window takes Open or Focus's path")
@@ -123,13 +141,70 @@ struct MoveHereCommandTests {
         #expect(core.launchFollow.owed() == Self.bundle)
     }
 
-    @Test("a refused move fails and moves nothing")
-    func refusedMoveFails() {
+    @Test("a full-screen window is passed over for the next one")
+    func fullscreenIsPassedOver() {
         let (core, _) = makeCore()
         addWindow(core, 1, space: "2", fullscreen: true)
+        addWindow(core, 2, space: "3")
+        core.state.stampFocusRecency(WindowID(2))
         core.state.stampFocusRecency(WindowID(1))
-        #expect(!run(core).isSuccess)
+        #expect(run(core).isSuccess)
         #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
+        #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
+    }
+
+    @Test("a fresh KiwiDesk takes the app's own focused window")
+    func freshTakesTheAppsFocus() {
+        let (core, _) = makeCore()
+        addWindow(core, 5, space: "2")
+        addWindow(core, 6, space: "3")
+        core.eventLoop.shadows.focusedWindow = { _ in WindowID(6) }
+        #expect(pick(core) == WindowID(6))
+    }
+
+    @Test("an away window is a candidate only with the Desktop bridge")
+    func awayNeedsTheBridge() {
+        for bridge in [false, true] {
+            NativeSpaces.spacesOverride = authorityTopology(
+                mainCurrent: 10,
+                secondaryCurrent: 20
+            )
+            WMBridge.classResolverOverride = { name in
+                bridge && name == "CopyManagedDisplaySpacesOperation"
+                    ? FakeCopyManagedDisplaySpaces.self : nil
+            }
+            defer {
+                WMBridge.classResolverOverride = nil
+                resetAuthorityOverrides()
+            }
+            let (core, _) = makeCore()
+            #expect(core.canDriveDesktops == bridge)
+            addWindow(core, 1, space: "2")
+            // Stamped while tracked, then gone with its Desktop.
+            addWindow(core, 7, space: "3")
+            core.state.stampFocusRecency(WindowID(1))
+            core.state.stampFocusRecency(WindowID(7))
+            core.state.windows.remove(WindowID(7))
+            core.state.workspaces.remove(WindowID(7))
+            core.state.awayWindows[WindowID(7)] = AwayWindow(
+                id: WindowID(7),
+                pid: 100,
+                appName: "App100",
+                appBundleID: Self.bundle,
+                nativeSpace: 11
+            )
+            core.state.rememberedSpaces[WindowID(7)] = .departed("3")
+            #expect(pick(core) == WindowID(bridge ? 7 : 1))
+        }
+    }
+
+    @Test("a hidden app is unhidden, as the panel's Move here does")
+    func hiddenAppUnhides() {
+        let (core, recorder) = makeCore()
+        core.eventLoop.appIsHidden = { _ in true }
+        #expect(run(core).isSuccess)
+        #expect(recorder.activated == [100])
+        #expect(recorder.opened.isEmpty)
     }
 
     @Test("no bundle id is refused")

@@ -182,8 +182,8 @@ extension APIReference {
             .text("bundle_id")
         ),
         "move_here": APIRecord(
-            "Moves an app's latest window into the Space you are "
-                + "on; opens the app if it has none.",
+            "Moves an app's most recently focused window into the "
+                + "Space you are on, or opens the app.",
             .text("bundle_id")
         ),
         "set_mode": APIRecord(

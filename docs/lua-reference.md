@@ -4747,10 +4747,11 @@ See [Finding a bundle identifier](#finding-a-bundle-identifier).
 recently, whether it is in another Space, minimized or up on
 another macOS Desktop — into the Space you are on, and focuses
 it. The app's other windows stay where they are; to move them
-all, use [gather](#gather). A window on another Desktop needs the
-Desktop bridge, and a window in native full screen is not moved:
-both refuse with a cue on the window. An app with no window is
-opened, the same as [focus_or_spawn](#focus_or_spawn).
+all, use [gather](#gather). A window in native full screen is
+skipped for the app's next one, and so is a window on another
+Desktop when the Desktop bridge is absent. A hidden app is
+unhidden, its windows staying in their Spaces. An app with no
+window is opened, the same as [focus_or_spawn](#focus_or_spawn).
 
 **Example:**
 
