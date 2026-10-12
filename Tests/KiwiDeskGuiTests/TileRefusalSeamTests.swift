@@ -89,7 +89,8 @@ struct TileRefusalSeamTests {
                 "Commands/KiwiCore+FloatCommands.swift": 1,
                 // The single row and each submenu row.
                 "App/KiwiCore+BarWindowMenus.swift": 2,
-                // Where App Rules… lands for a guess (#2173).
+                // The Tile picker's open guesses, which App
+                // Rules… lands on too (#2173, #2071).
                 "App/KiwiCore+AutoFloat.swift": 1,
             ]
         )

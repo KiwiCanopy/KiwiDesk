@@ -15684,6 +15684,22 @@ list meaning — with it off nothing floats on a guess, so its rows
 grey (the trash and "Applies to" stay live, since other profiles
 may have it on).
 
+:::unreleased
+Its **Tile an app…** picker lists only the apps the guess has
+floated a window of since KiwiDesk started (#2071), never every
+installed app: a Tile rule on any other app says nothing, and a
+guessed window can belong to a helper process no disk scan offers
+— Steam's main window is Steam Helper's, so a rule on Steam
+itself leaves it floating. Apps with a guessed window open lead,
+captioned with its title; the rest follow by recency, capped at
+`GuessedApps.cap` with the least recently seen dropped, and never
+persisted. A Dock-less app is recorded whatever the switch and
+the Tile rules say, so a profile whose live counterpart already
+tiles it still finds it; a fixed-size window is seen only where
+the live guess reads its zoom button. *Other…* and Lua reach the
+rest.
+:::
+
 **This reverses "a rule is a sentence, and the sentence is the
 control"** (#678 turn 14a). Running prose renders an empty rule
 most convincingly of all — "Finder opens in whichever Space you

@@ -36,6 +36,8 @@ struct AutoFloatLandingTests {
                 appBundleID: app
             )
         )
+        // Remembered from earlier is no open guess to land on.
+        guessed.core.eventLoop.guessedApps.note(bundleID: app, name: "Steam")
         #expect(AppRulesSection.card(holding: app, in: guessed) == nil)
         guessed.core.eventLoop.detectedFloating[id] = .floats(.fixedSize)
         #expect(AppRulesSection.card(holding: app, in: guessed) == card)

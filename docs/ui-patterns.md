@@ -1093,6 +1093,12 @@ costs every other user a second thing to understand (#1279). The
 list itself reaches one folder deep, so browsing is the rare
 fallback.
 
+:::unreleased
+The Tile picker's list is the one exception: it holds only the
+apps a guess floated (#2071, design-decisions ▸ App rules), with
+no search field over its short list.
+:::
+
 The Space name field is the same channel for a typed edit
 (#1623): while the draft names another Space or is empty, a
 caption with a warning triangle under the row says why the edit

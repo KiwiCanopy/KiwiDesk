@@ -37,12 +37,48 @@ extension KiwiCore {
         eventLoop.rejudgeGuesses(from: old)
     }
 
+    /// The apps the Tile picker offers (#2071): those with a window
+    /// floating on a guess now, then those the guess floated a
+    /// window of earlier this session, each by recency. `titles`
+    /// are the open guessed windows', empty for a remembered app.
+    public func guessedFloatApps() -> [GuessedFloatApp] {
+        var open: [String: [String]] = [:]
+        for window in state.windows.all
+        where tileRefusal(of: window.id)?.isGuess == true {
+            guard let app = window.appBundleID?.lowercased() else {
+                continue
+            }
+            open[app, default: []].append(window.title)
+        }
+        let apps = eventLoop.guessedApps.entries.map {
+            GuessedFloatApp(
+                bundleID: $0.bundleID,
+                name: $0.name,
+                titles: open[$0.bundleID] ?? []
+            )
+        }
+        // Live but unrecorded only after the cap evicted it.
+        let unseen = open.keys.filter { app in
+            !apps.contains { $0.bundleID == app }
+        }
+        let live = unseen.sorted().map { app in
+            GuessedFloatApp(
+                bundleID: app,
+                name: state.windows.all.first {
+                    $0.appBundleID?.lowercased() == app
+                }?.appName ?? app,
+                titles: open[app] ?? []
+            )
+        }
+        return apps.filter { !$0.titles.isEmpty } + live
+            + apps.filter { $0.titles.isEmpty }
+    }
+
     /// Whether a tracked window of `app` floats on a guess — where
     /// a bar menu's App Rules… lands (#2173).
     public func floatsOnGuess(app: String) -> Bool {
-        state.windows.all.contains { window in
-            window.appBundleID?.lowercased() == app.lowercased()
-                && tileRefusal(of: window.id)?.isGuess == true
+        guessedFloatApps().contains {
+            $0.bundleID == app.lowercased() && !$0.titles.isEmpty
         }
     }
 }

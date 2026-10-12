@@ -331,9 +331,8 @@ public final class EventLoop {
     /// the flag at; the frame applier's holds restore that (#1508).
     var onEnhancedUIRetired: (pid_t, Bool) -> Void = { _, _ in }
 
-    /// Applies the process-global AX messaging timeout at
-    /// `start` (#672) — see `AXHelper.setGlobalMessagingTimeout`
-    /// for what it bounds and why.
+    /// The AX messaging timeout `start` applies (#672) — see
+    /// `AXHelper.setGlobalMessagingTimeout`.
     var applyAXMessagingTimeout: (Float) -> Void =
         AXHelper.setGlobalMessagingTimeout
 
@@ -345,6 +344,7 @@ public final class EventLoop {
     /// Pids LaunchServices cannot name, and shadow windows (#1785).
     var processIdentity = ProcessIdentity()
     var shadows = ShadowWindows()
+    var guessedApps = GuessedApps()
 
     public init() {}
 }
