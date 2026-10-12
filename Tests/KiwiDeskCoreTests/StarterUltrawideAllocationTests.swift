@@ -130,7 +130,7 @@ struct StarterUltrawideAllocationTests {
         #expect(tall.grid.splitDirection == .vertical)
         let pair = StarterSetup.settings(sizes: [laptop, ultrawide])
         #expect(pair.grid.columns == 2)
-        #expect(pair.grid.rows == 1)
+        #expect(pair.grid.rows == 2)
         // Scrolling lives on the ultrawide, so it is tuned there
         // and needs no per-space override.
         #expect(pair.scrolling.anchor == .center)

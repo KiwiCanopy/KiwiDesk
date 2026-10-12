@@ -126,10 +126,11 @@ public enum StarterTuning {
             settings.grid.columns = 1
             settings.grid.rows = 3
         case .laptop:
-            // Two side by side — only ever hosted beside an
-            // ultrawide (#1662).
+            // Two by two: a laptop alone reaches this through the
+            // main-shape fallback, and one row piled the third
+            // window into the last cell (#2171).
             settings.grid.columns = 2
-            settings.grid.rows = 1
+            settings.grid.rows = 2
         case .superUltrawide, .ultrawide:
             break
         }
