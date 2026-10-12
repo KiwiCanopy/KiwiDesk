@@ -953,6 +953,7 @@
   "lua_editor.adopt_help.body": "Deine init.lua wird nicht gelöscht: Sie bleibt als auskommentierte Sicherung in der neuen Datei erhalten. Abstände, Layouts, Regeln und Tastenkürzel werden importiert; ein nicht lesbares Kürzel bleibt in der Sicherung — füge es unter „%1$@“ erneut hinzu.",
   "lua_editor.adopt_into_visual": "In visuellen Editor übernehmen…",
   "lua_editor.back_to_visual": "Zurück zum visuellen Editor",
+  "lua_editor.changed_on_disk": "Die init.lua wurde während deiner Bearbeitung außerhalb der Einstellungen geändert, daher würde das Sichern sie überschreiben. Wähle „%1$@“ und nimm deine Änderungen dann erneut vor.",
   "lua_editor.editing_directly": "Direktes Bearbeiten der init.lua.",
   "lua_editor.foreign_code": "Diese init.lua enthält handgeschriebenen Lua-Code, daher ist der visuelle Editor deaktiviert, um ein Überschreiben zu verhindern.",
   "mac_checklist.click_wallpaper": "„Zum Anzeigen des Schreibtischs auf Hintergrundbild klicken“ auf „Nur in Stage Manager“ stellen",

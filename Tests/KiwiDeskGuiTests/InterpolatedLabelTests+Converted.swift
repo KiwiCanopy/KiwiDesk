@@ -263,6 +263,8 @@ extension InterpolatedLabelTests {
         "profiles.page_moved": 1,
         "profiles.page_moved.unnamed": 1,
         "profiles.page_gone": 1,
+        // A Lua buffer whose file moved names Revert (#2206).
+        "lua_editor.changed_on_disk": 1,
         // So does one whose init.lua changed owner (#2183).
         "profiles.owner_moved": 1,
         // The Track drawer's `?` (#1440): names the Layout

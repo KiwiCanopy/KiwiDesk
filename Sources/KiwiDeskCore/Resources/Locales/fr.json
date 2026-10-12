@@ -953,6 +953,7 @@
   "lua_editor.adopt_help.body": "Votre init.lua n'est pas supprimé : il est conservé sous forme de sauvegarde commentée dans le nouveau fichier. Les écarts, dispositions, règles et raccourcis clavier sont importés ; un raccourci qui ne peut pas être relu reste dans la sauvegarde — rajoutez-le dans « %1$@ ».",
   "lua_editor.adopt_into_visual": "Adopter dans l'éditeur visuel…",
   "lua_editor.back_to_visual": "Revenir à l'éditeur visuel",
+  "lua_editor.changed_on_disk": "init.lua a été modifié en dehors des Réglages pendant vos modifications : un enregistrement l'écraserait donc. Choisissez « %1$@ », puis refaites vos modifications.",
   "lua_editor.editing_directly": "Modification directe de init.lua.",
   "lua_editor.foreign_code": "Cet init.lua contient du Lua écrit à la main : l'éditeur visuel est donc désactivé pour éviter de l'écraser.",
   "mac_checklist.click_wallpaper": "Régler « Cliquer sur le fond dʼécran pour afficher le bureau » sur « Uniquement dans Stage Manager »",

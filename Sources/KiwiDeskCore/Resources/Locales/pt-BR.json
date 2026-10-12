@@ -953,6 +953,7 @@
   "lua_editor.adopt_help.body": "Seu init.lua não é excluído: ele é mantido como um backup comentado dentro do novo arquivo. Espaçamentos, layouts, regras e atalhos são importados; um atalho que não puder ser lido de volta permanece no backup — adicione-o novamente em “%1$@”.",
   "lua_editor.adopt_into_visual": "Adotar no editor visual…",
   "lua_editor.back_to_visual": "Voltar ao editor visual",
+  "lua_editor.changed_on_disk": "O init.lua foi alterado fora dos Ajustes enquanto você editava, então salvar o sobrescreveria. Use “%1$@” e depois refaça suas edições.",
   "lua_editor.editing_directly": "Editando o init.lua diretamente.",
   "lua_editor.foreign_code": "Este init.lua contém Lua escrito à mão, então o editor visual está desativado para não sobrescrevê-lo.",
   "mac_checklist.click_wallpaper": "Defina “Clicar na imagem de fundo para mostrar a mesa” como “Apenas no Organizador Visual”",

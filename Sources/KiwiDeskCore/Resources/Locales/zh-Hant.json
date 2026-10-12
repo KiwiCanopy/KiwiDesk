@@ -953,6 +953,7 @@
   "lua_editor.adopt_help.body": "你的 init.lua 不會被刪除：它會以註解形式保留在新檔案中作為備份。間距、佈局、規則與按鍵綁定都會輸入；無法讀回的快速鍵會留在備份裡，請在「%1$@」中重新加入。",
   "lua_editor.adopt_into_visual": "採用到視覺化編輯器…",
   "lua_editor.back_to_visual": "返回視覺化編輯器",
+  "lua_editor.changed_on_disk": "你編輯時，init.lua 已在「設定」之外被更動，因此儲存會覆寫它。請先「%1$@」，再重新進行編輯。",
   "lua_editor.editing_directly": "正在直接編輯 init.lua。",
   "lua_editor.foreign_code": "這份 init.lua 含有手寫的 Lua，因此視覺化編輯器已停用，以避免覆寫它。",
   "mac_checklist.click_wallpaper": "將「按一下背景圖片來顯示桌面」設為僅在「幕前調度」",
