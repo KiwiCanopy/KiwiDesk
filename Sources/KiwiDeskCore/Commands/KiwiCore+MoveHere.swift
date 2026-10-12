@@ -62,7 +62,7 @@ extension KiwiCore {
             .map(\.id)
         let pid =
             openOrFocus.runningAppPID(bundleID)
-            ?? ring.first.flatMap { state.windows[$0]?.pid } ?? 0
+            ?? ring.first.flatMap { state.windows[$0]?.pid }
         return mostRecentWindow(of: ring + minimized, pid: pid)
     }
 

@@ -60,7 +60,8 @@ struct MoveHereCommandTests {
         _ id: UInt32,
         pid: pid_t = 100,
         space: SpaceID,
-        fullscreen: Bool = false
+        fullscreen: Bool = false,
+        sticky: StickyScope = .none
     ) {
         var window = ManagedWindow(
             id: WindowID(id),
@@ -70,6 +71,7 @@ struct MoveHereCommandTests {
                 ? Self.bundle : "app.test.\(pid)"
         )
         window.isFullscreen = fullscreen
+        window.stickyScope = sticky
         core.state.windows.upsert(window)
         core.state.workspaces.add(WindowID(id), to: space)
     }
@@ -211,5 +213,60 @@ struct MoveHereCommandTests {
     func needsAnApp() {
         let (core, _) = makeCore()
         #expect(!core.execute("move_here", args: []).isSuccess)
+    }
+
+    @Test("a sticky window the gate holds elsewhere is passed over")
+    func heldStickyIsPassedOver() {
+        let (core, _) = makeCore()
+        addWindow(core, 1, space: "2", sticky: .display)
+        addWindow(core, 2, space: "3")
+        core.state.stampFocusRecency(WindowID(2))
+        core.state.stampFocusRecency(WindowID(1))
+        #expect(core.stickyMoveBlock(WindowID(1), to: "1") != nil)
+        #expect(pick(core) == WindowID(2))
+    }
+
+    @Test("a ∞ window, already drawn here, stays the pick")
+    func globalStickyIsKept() {
+        let (core, _) = makeCore()
+        addWindow(core, 1, space: "2", sticky: .global)
+        addWindow(core, 2, space: "3")
+        core.state.stampFocusRecency(WindowID(2))
+        core.state.stampFocusRecency(WindowID(1))
+        #expect(pick(core) == WindowID(1))
+    }
+
+    @Test("with nothing stamped, the latest minimized window is first")
+    func latestMinimizedFirst() {
+        let (core, _) = makeCore()
+        for id: UInt32 in [4, 5] {
+            addWindow(core, id, space: "1")
+            var effects = AppliedEffects()
+            core.state.applyWindowDestroyed(
+                WindowID(id),
+                wasMinimized: true,
+                effects: &effects
+            )
+        }
+        #expect(pick(core) == WindowID(5))
+    }
+
+    @Test("no pid LaunchServices names is asked for its focus")
+    func unnamedPidIsNeverAsked() {
+        let (core, _) = makeCore(running: false)
+        addWindow(core, 4, space: "1")
+        var effects = AppliedEffects()
+        core.state.applyWindowDestroyed(
+            WindowID(4),
+            wasMinimized: true,
+            effects: &effects
+        )
+        var asked: [pid_t] = []
+        core.eventLoop.shadows.focusedWindow = { pid in
+            asked.append(pid)
+            return nil
+        }
+        #expect(pick(core) == WindowID(4))
+        #expect(asked.allSatisfy { $0 > 0 })
     }
 }

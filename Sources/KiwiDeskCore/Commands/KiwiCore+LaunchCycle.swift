@@ -64,11 +64,12 @@ extension KiwiCore {
 
     /// The app's window a press means (#1840), shared with
     /// `move_here` (#1513): recency first; with none yet (a fresh
-    /// KiwiDesk) the app's own focused window, else the first of
-    /// `candidates`, which come in ring order.
+    /// KiwiDesk) the app's own focused window — asked only of a
+    /// pid LaunchServices names — else the first of `candidates`,
+    /// which come in ring order.
     func mostRecentWindow(
         of candidates: [WindowID],
-        pid: pid_t
+        pid: pid_t?
     ) -> WindowID? {
         guard !candidates.isEmpty else { return nil }
         let recent = candidates.max {
@@ -78,7 +79,8 @@ extension KiwiCore {
         if let recent, state.focusRecencyRank(of: recent) > 0 {
             return recent
         }
-        if let own = eventLoop.focusedWindowID(pid: pid),
+        if let pid, pid > 0,
+            let own = eventLoop.focusedWindowID(pid: pid),
             candidates.contains(own)
         {
             return own
