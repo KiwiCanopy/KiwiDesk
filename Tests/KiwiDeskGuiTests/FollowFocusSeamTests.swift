@@ -38,9 +38,15 @@ struct FollowFocusSeamTests {
         // verb's follow branch in `moveToDesktop`, and the
         // Open-or-Focus reach onto an away window (#1146), which
         // is a follow by the same rule: the press named the window.
+        // Jump to window's Bring here (#1875) records behind its
+        // own gate, a hop the bridge accepted: the window it names
+        // arrives HERE, so the debt is drained like a follow's.
         (
             "followFocus.record(",
-            ["KiwiCore+DesktopMove.swift", "KiwiCore+LaunchReach.swift"]
+            [
+                "KiwiCore+DesktopMove.swift", "KiwiCore+LaunchReach.swift",
+                "KiwiCore+JumpActions.swift",
+            ]
         ),
         // The drain, at the ARRIVAL — the moment the window
         // re-materializes, which is when it becomes addressable

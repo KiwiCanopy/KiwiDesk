@@ -133,8 +133,9 @@ struct CoreLocalizationBoundaryTests {
         // Delete is greyed (#1790), on the same Core-drawn menu.
         "App/KiwiCore+SpaceChipLifecycle.swift": 9,
         // The window actions' refusal pills (#1518), which Core
-        // draws on the window, as the resize pills are.
-        "Commands/WindowActionRefusal.swift": 3,
+        // draws on the window, as the resize pills are — and Jump
+        // to window's Bring here refusal (#1875).
+        "Commands/WindowActionRefusal.swift": 4,
         "Bar/BarMenu.swift": 3,
         "Bar/LayoutModeRows.swift": 8,
     ]

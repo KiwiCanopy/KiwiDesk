@@ -1792,6 +1792,7 @@
   "whatsnew.trail.dismiss": "Cerrar",
   "whatsnew.trail.from": "Desde Novedades",
   "whatsnew.trail.next": "Siguiente: %1$@",
+  "window_action.refusal.cannot_bring_here": "«%1$@» no se puede traer aquí",
   "window_action.refusal.no_close_button": "«%1$@» no tiene botón de cerrar",
   "window_action.refusal.no_new_window": "%1$@ no tiene el comando «Nueva ventana»",
   "window_action.refusal.nothing_to_gather": "No hay ventanas de %1$@ que reunir"

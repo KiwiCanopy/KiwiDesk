@@ -47,6 +47,8 @@ struct MotionScopeCensusTests {
         "KiwiDeskCore/App/KiwiCore+SpaceBarClick.swift": 2,
         // Every bar menu row's action.
         "KiwiDeskCore/App/KiwiCore+BarMenus.swift": 1,
+        // Jump to window's Jump and Bring here (#1875).
+        "KiwiDeskCore/App/KiwiCore+JumpActions.swift": 2,
         // The scroll gestures' two consumers.
         "KiwiDeskCore/App/KiwiCore+ScrollPan.swift": 1,
         "KiwiDeskCore/App/KiwiCore+ScrollSpaceStep.swift": 1,

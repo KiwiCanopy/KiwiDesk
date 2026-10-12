@@ -26,6 +26,7 @@ extension KiwiCore {
             pid: pid,
             appName: removed.app ?? "",
             appBundleID: removed.bundleID,
+            title: removed.title ?? "",
             nativeSpace: nativeSpace
         )
         scheduleAwayCensus()

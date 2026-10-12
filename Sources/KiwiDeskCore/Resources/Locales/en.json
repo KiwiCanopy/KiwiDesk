@@ -1796,6 +1796,7 @@
   "whatsnew.trail.dismiss": "Dismiss",
   "whatsnew.trail.from": "From What's new",
   "whatsnew.trail.next": "Next: %1$@",
+  "window_action.refusal.cannot_bring_here": "“%1$@” can't be brought here",
   "window_action.refusal.no_close_button": "“%1$@” has no close button",
   "window_action.refusal.no_new_window": "%1$@ has no New Window command",
   "window_action.refusal.nothing_to_gather": "No %1$@ window to gather"
