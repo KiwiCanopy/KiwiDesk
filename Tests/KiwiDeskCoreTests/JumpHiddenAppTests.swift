@@ -196,6 +196,24 @@ struct JumpHiddenAppTests {
         #expect(core.state.workspaces.space(of: WindowID(5)) == "2")
     }
 
+    /// One pass places the filed window: the handler's own, in a
+    /// focus-driven layout or a static one alike.
+    @Test(
+        "the report places the filed window in one pass",
+        arguments: ["bsp", "scrolling"]
+    )
+    func onePass(mode: String) {
+        let core = makeCore()
+        _ = core.execute("set_mode", args: [.string("1"), .string(mode)])
+        core.moveHere(.hiddenApp(100))
+        returns(core)
+        let meter = WorkMeter(now: { 0 })
+        core.tiler.meter = meter
+        core.handle(.windowFocused(WindowID(5)))
+        #expect(core.state.workspaces.space(of: WindowID(5)) == "1")
+        #expect(meter.snapshot(reset: false).counts.retiles == 1)
+    }
+
     @Test("the honored focus report pays the debt")
     func reportWiring() throws {
         let source = try String(

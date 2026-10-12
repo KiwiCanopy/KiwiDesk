@@ -11,8 +11,8 @@ extension KiwiCore {
     /// What `move_here` resolved to.
     enum MoveHerePick: Equatable {
         case window(WindowID)
-        /// No matching window can move here — full screen, or held
-        /// elsewhere by the sticky gate; Move here cues why.
+        /// No matching window can move here — each is in native
+        /// full screen; Move here cues why.
         case unmovable(WindowID)
         /// Every matching window is already in this Space.
         case allHere
@@ -62,9 +62,10 @@ extension KiwiCore {
     /// The pick, by `JumpTier`: open windows — tracked and, with the
     /// Desktop bridge, up on an away Desktop, in ring order — before
     /// minimized ones, each by recency. A window already drawn in
-    /// `active` counts as here; a full-screen window and one the
-    /// sticky gate keeps elsewhere are picked only where nothing
-    /// else can move, so Move here cues why.
+    /// `active` counts as here — a sticky window the gate holds is
+    /// always drawn here, so the gate refuses no candidate; a
+    /// full-screen window is picked only where nothing else can
+    /// move, so Move here cues why.
     func moveHerePick(
         bundleID: String,
         into active: SpaceID,
@@ -93,7 +94,7 @@ extension KiwiCore {
         }
         let open = ring.filter(matching)
         let elsewhere = open.filter { !isDrawnHere($0, active) }
-        let movable = elsewhere.filter { movableHere($0, active) }
+        let movable = elsewhere.filter(movableHere)
         let parked = minimized.map(\.id).filter(matching)
         let pid =
             openOrFocus.runningAppPID(bundleID)
@@ -123,12 +124,9 @@ extension KiwiCore {
         ) != nil
     }
 
-    /// An away window, or a tracked one neither in full screen nor
-    /// held elsewhere by the sticky gate.
-    private func movableHere(_ id: WindowID, _ active: SpaceID) -> Bool {
-        guard let window = state.windows[id] else { return true }
-        return !window.isFullscreen
-            && stickyMoveBlock(id, to: active) == nil
+    /// An away window, or a tracked one not in native full screen.
+    private func movableHere(_ id: WindowID) -> Bool {
+        state.windows[id]?.isFullscreen != true
     }
 
     /// In `active` already, or a sticky window rendering there.

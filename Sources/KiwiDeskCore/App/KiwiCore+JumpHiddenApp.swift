@@ -23,10 +23,13 @@ extension KiwiCore {
     /// down past the follow's bound, off the Space it was owed for,
     /// after a press or a commanded focus since, and for a window
     /// no move can take — full screen, or held by the sticky gate.
-    func payHiddenAppMove(focused window: WindowID) {
+    /// Returns whether it filed the window; the handler, which
+    /// decides whether this report retiles, places it.
+    @discardableResult
+    func payHiddenAppMove(focused window: WindowID) -> Bool {
         guard let managed = state.windows[window],
             let owed = jump.takeApp(managed.pid)
-        else { return }
+        else { return false }
         let age = wallClock().timeIntervalSince(owed.at)
         let pressed = launchFollow.pressAge?().map { $0 < age } ?? false
         let commanded =
@@ -40,7 +43,7 @@ extension KiwiCore {
             stickyMoveBlock(window, to: owed.space) == nil
         else {
             onLog("move here: w\(window.raw) unhidden — move stood down")
-            return
+            return false
         }
         // Logged, never drawn: the follow is about to switch away
         // from the Space the pill would draw on.
@@ -48,13 +51,10 @@ extension KiwiCore {
             !Self.titleMatches(managed.title, text)
         {
             onLog("move here: w\(window.raw) unhidden — no title match")
-            return
+            return false
         }
         fileMembership(window, into: owed.space, from: landed)
-        // A focus-driven layout retiles on this same report.
-        if activeSpace?.mode.isFocusDriven != true {
-            retile(animated: true)
-        }
         onLog("move here: unhidden w\(window.raw) filed here")
+        return true
     }
 }

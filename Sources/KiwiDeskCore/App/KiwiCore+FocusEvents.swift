@@ -276,7 +276,7 @@ extension KiwiCore {
                 + "before \(honoredBefore), "
                 + "selfEcho=\(selfEcho)"
         )
-        payHiddenAppMove(focused: id)
+        let filedHere = payHiddenAppMove(focused: id)
         rememberHonoredFocus(id)
         noteDelayedClose(id, after: effects, selfEcho: selfEcho)
         emitFocusChange(id)
@@ -306,9 +306,7 @@ extension KiwiCore {
         // cover this: in a focus-driven layout the click PANS
         // the row, so the clicked window's settled slot slides
         // out from under the cursor and the "warp" yanks the
-        // pointer after it (#689 device QA — pre-#689 that
-        // warp was dropped by the in-flight hold; the re-fire
-        // surfaced it).
+        // pointer after it (#689 device QA).
         if !selfEcho, effects.focusBefore != id,
             !recentClickReached(id, now: wallClock())
         {
@@ -339,6 +337,8 @@ extension KiwiCore {
             } else {
                 retileWithScrollDuration()
             }
+        } else if filedHere {
+            retile(animated: true)
         }
         // Keep floats above the just-focused tiled window
         // (#418). Skipped on a self-echo so the raise's own

@@ -4757,10 +4757,10 @@ With a title, only windows whose title contains it count,
 ignoring case and accents, so `"Inbox"` keeps finding Mail's
 window as its message count changes.
 
-- A window in native full screen, or one its sticky setting keeps
-  where it is, is skipped, and so is a window on another Desktop
-  when the Desktop bridge is absent. When nothing else is left,
-  the refusal says why that window can't be moved here.
+- A window in native full screen is skipped, and so is a window
+  on another Desktop when the Desktop bridge is absent. When
+  nothing else is left, a refusal says the window can't be moved
+  here.
 - Every matching window already here, or a title no window has,
   shows a refusal on the focused window and moves nothing. A
   sticky window shown here counts as here.
