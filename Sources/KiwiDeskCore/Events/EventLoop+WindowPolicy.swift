@@ -299,7 +299,8 @@ extension EventLoop {
         let button =
             FloatDetection.needsTitlebarButton(
                 layer: resolved,
-                isAccessory: isAccessory
+                isAccessory: isAccessory,
+                bundleID: app.bundleID
             )
             ? titlebarButton ?? Self.readsTitlebarButton(element, id: id)
             : false
