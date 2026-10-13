@@ -12,10 +12,14 @@ extension FloatDetection {
     /// beside its buttonless quick terminal (#2067) — and a window
     /// at the modal-panel level, its update alert, which the quick
     /// terminal never takes (3 shown, 101 hidden; #2200).
+    /// Spotlight's panel on macOS 27 is `com.apple.campo`'s, a
+    /// layer-23 window whose AX lists all three title-bar buttons,
+    /// so it takes no escape (#2236).
     private static let layerScopedIgnoredApps: [String: Bool] = [
         ghosttyBundleID: true,
         "com.raycast.macos": false,
         "com.raycast-x.macos": false,
+        "com.apple.campo": false,
     ]
 
     /// System UI overlay processes that should not enter window state (#177).

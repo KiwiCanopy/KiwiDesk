@@ -41,7 +41,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
 
     func toggle() {
         if isOpen {
-            close(commanded: true)
+            close()
         } else {
             show()
         }
@@ -95,10 +95,11 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         }
     }
 
-    /// Closes the panel; a keyboard-commanded close arms the
-    /// dismiss distrust (#952), a click away does not.
-    func close(commanded: Bool) {
-        dismiss(distrusting: commanded)
+    /// Closes the panel. No close arms the dismiss distrust: the
+    /// panels are non-activating, so the window a close keys again
+    /// is the one the user was in (owner ruling 2026-10-13).
+    func close() {
+        dismiss(distrusting: false)
     }
 
     /// Closes on a pick, then runs it — once: a click during the
@@ -178,7 +179,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         ]
         panel.delegate = self
         panel.onCancel = { [weak self] in
-            self?.close(commanded: true)
+            self?.close()
         }
         return panel
     }
@@ -195,7 +196,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             self?.pick(entry, moveHere: moveHere)
         }
         model.onClose = { [weak self] in
-            self?.close(commanded: true)
+            self?.close()
         }
         model.onAnnounce = { [weak panel] text in
             guard let panel else { return }
@@ -225,6 +226,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
 
     func windowDidResignKey(_ notification: Notification) {
         jumpLog.log("KiwiDesk: jump resign key; open \(self.isOpen)")
-        close(commanded: false)
+        close()
     }
 }

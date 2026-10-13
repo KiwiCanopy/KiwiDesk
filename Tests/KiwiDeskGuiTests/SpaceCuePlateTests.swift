@@ -4,10 +4,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Space cue's GUI half (#2143): the one spoken sentence, a
-/// cue that never steps, and the master that no longer reaches the
-/// Space switch picker (owner, 2026-10-11).
-@Suite("Space cue plate (#2143)")
+/// The Space cue's GUI half (#2143, #2228): the one spoken
+/// sentence, a cue that never steps, and its switch's place under
+/// the Space Bar's own.
+@Suite("Space cue plate (#2143, #2228)")
 @MainActor
 struct SpaceCuePlateTests {
     private let cue = SpaceSwitchCue(
@@ -41,40 +41,19 @@ struct SpaceCuePlateTests {
         )
     }
 
-    /// The window animations' master counts no Space switch style,
-    /// so turning it off leaves the picker's choice standing.
-    @Test("the master ignores the Space switch style")
-    func masterIgnoresTheStyle() {
-        var a = AnimationSettings()
-        a.onWindowResize = false
-        a.onWindowSwap = false
-        a.onRelayout = false
-        for style in SpaceChangeStyle.allCases {
-            a.spaceChange = style
-            #expect(!a.anyEnabled)
-        }
-    }
-
-    /// The master's setter, the half the getter cannot show: off
-    /// and back on leaves the picker's choice standing.
-    @Test("the master's switch leaves the style alone")
-    func masterSetterLeavesTheStyle() {
-        let model = makeTestModel()
-        model.config.settings.animations.spaceChange = .slide
-        let master = MotionCard(model: model).animationsMasterBinding
-        master.wrappedValue = false
-        #expect(model.config.settings.animations.spaceChange == .slide)
-        master.wrappedValue = true
-        #expect(model.config.settings.animations.spaceChange == .slide)
-    }
-
-    /// The picker stays live under Reduce Motion; the duration it
-    /// gates greys with the card (owner, 2026-10-11).
-    @Test("only the picker escapes Reduce Motion's grey")
-    func pickerIsExempt() {
-        let picker = SettingKey.colours(.animationsSpaceChange)
-        let duration = SettingKey.colours(.animationsSpaceChangeDurationMS)
-        #expect(picker.placement.exemptFromContainerGate)
-        #expect(!duration.placement.exemptFromContainerGate)
+    /// The plate is for a screen the Space Bar does not draw on,
+    /// so its switch sits directly under the bar's own in the Show
+    /// group, which no block gate greys — never in the Space Bar card,
+    /// which greys while the bar is off (#2228).
+    @Test("the switch sits under the Space Bar's own")
+    func switchSitsUnderTheSpaceBar() throws {
+        let show = BarsRowOrder.kiwishelfShow
+        let bar = try #require(
+            show.firstIndex(of: .spaceBar(.spaceBarEnabled))
+        )
+        #expect(show.firstIndex(of: .spaceBar(.spaceCue)) == bar + 1)
+        let placement = SettingKey.spaceBar(.spaceCue).placement
+        #expect(placement.container == .kiwishelf)
+        #expect(placement.gate == .runtime(.luaOwnsConfig))
     }
 }

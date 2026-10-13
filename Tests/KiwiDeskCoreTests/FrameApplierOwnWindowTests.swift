@@ -75,19 +75,4 @@ struct FrameApplierOwnWindowTests {
         applier.applyInstant(w, frame, setSize: true)
         #expect(moves.all.isEmpty)
     }
-
-    @Test("a held own window moves at its landing, through AppKit")
-    func heldOwnWindowMovesAtTheLanding() async throws {
-        let moves = Moves()
-        let applier = makeApplier(pid: getpid(), moves)
-        applier.holdWrites([w], until: .now() + 0.05)
-        applier.applyInstant(w, frame, setSize: true)
-        #expect(moves.all.isEmpty)
-        // A generous guard, never a tight deadline (#344).
-        for _ in 0..<500 where moves.all.isEmpty {
-            try await Task.sleep(for: .milliseconds(10))
-        }
-        #expect(moves.all.count == 1)
-        #expect(moves.all.first?.2 == true)
-    }
 }

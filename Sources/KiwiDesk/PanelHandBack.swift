@@ -6,9 +6,10 @@ import KiwiDeskCore
 /// (#1875): they take the keyboard without activating KiwiDesk,
 /// so macOS raises no other own window and the app the user came
 /// from stays active — which retired #952's activation hand-back,
-/// there being nothing to hand back. What a close still owes is
-/// the dismiss distrust, for the one close whose order-out
-/// blip-keys another own window: Settings in front.
+/// there being nothing to hand back. A plain close owes nothing —
+/// the window it keys again is the one the user was in; only a
+/// Jump pick of another app's window arms the dismiss distrust,
+/// since its order-out would key Settings ahead of the pick.
 @MainActor
 final class PanelHandBack {
     let core: KiwiCore
@@ -53,8 +54,8 @@ final class PanelHandBack {
     /// Closes through `orderOut`, the dismiss distrust armed
     /// BEFORE it: `orderOut`'s resign-key re-enters the close, and
     /// the blip it keys reaches Core ahead of anything after it.
-    /// Armed only while the app is active, the one close whose
-    /// order-out blip-keys an own window (#952).
+    /// Armed only while the app is active, when the order-out
+    /// blip-keys an own window (#952) — a Jump pick's alone.
     func release(distrusting: Bool, orderOut: () -> Void) {
         if distrusting, isAppActive() {
             core.distrustOwnDismissHandoff()

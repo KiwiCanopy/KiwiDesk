@@ -7,12 +7,8 @@ enum ColoursKey: String, CaseIterable, Hashable {
         "settings.shortcutPanelLiquidGlass"
     case dragLiquidGlass = "settings.dragLiquidGlass"
     case stickyLiquidGlass = "settings.stickyStyle.liquidGlass"
-    case spaceSwitchLiquidGlass = "settings.spaceSwitchLiquidGlass"
     case borderSheen = "settings.borderStyle.sheen"
     case animationsMaster = "settings.animations (master)"
-    case animationsSpaceChange = "settings.animations.spaceChange"
-    case animationsSpaceChangeDurationMS =
-        "settings.animations.spaceChangeDurationMS"
     case animationsOnWindowResize = "settings.animations.onWindowResize"
     case animationsOnWindowSwap = "settings.animations.onWindowSwap"
     case animationsOnRelayout = "settings.animations.onRelayout"
@@ -60,7 +56,7 @@ extension ColoursKey {
                 gate: .runtime(.liquidGlassUnavailable)
             )
         case .shortcutPanelLiquidGlass, .dragLiquidGlass,
-            .stickyLiquidGlass, .spaceSwitchLiquidGlass:
+            .stickyLiquidGlass:
             // Written by the master row, never its own row —
             // and reachable from Lua like the shelf's leaf.
             return .luaOnly
@@ -74,16 +70,6 @@ extension ColoursKey {
                 .atRest,
                 exemptFromContainerGate: true
             )
-        case .animationsSpaceChange:
-            // Its own row above the master, outside Reduce Motion's
-            // grey: Instant + name is how a switch reads with less
-            // motion (#2143, owner 2026-10-11).
-            return .row(
-                .coloursAndMotion,
-                .motion,
-                .atRest,
-                exemptFromContainerGate: true
-            )
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
         case .animationsOnWindowResize,
@@ -94,16 +80,6 @@ extension ColoursKey {
                 .motion,
                 .showMore,
                 gate: .setting(.colours(.animationsMaster))
-            )
-        case .animationsSpaceChangeDurationMS:
-            // Paces the slide alone, so sits under the picker and
-            // greys unless it is on Slide (#1931, #2143), and with
-            // the card under Reduce Motion.
-            return .row(
-                .coloursAndMotion,
-                .motion,
-                .atRest,
-                gate: .setting(.colours(.animationsSpaceChange))
             )
         case .animationsOnShelf:
             // Not under the master: the shelf glides whatever the
@@ -176,7 +152,7 @@ extension ColoursKey {
     var text: SettingRowText {
         switch self {
         case .shortcutPanelLiquidGlass, .dragLiquidGlass,
-            .stickyLiquidGlass, .spaceSwitchLiquidGlass:
+            .stickyLiquidGlass:
             return .none
         case .borderSheen:
             return .text("colors.sheen", caption: "colors.sheen.caption")
@@ -189,13 +165,6 @@ extension ColoursKey {
             return .text(
                 "behavior.animations.master",
                 help: "behavior.animations.master.help"
-            )
-        case .animationsSpaceChange:
-            return .text("behavior.animations.space_change_style")
-        case .animationsSpaceChangeDurationMS:
-            return .text(
-                "behavior.animations.space_change_duration",
-                help: "behavior.animations.space_change_duration.help"
             )
         case .animationsOnWindowResize:
             return .text("behavior.animations.window_resize")

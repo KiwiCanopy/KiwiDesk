@@ -1029,12 +1029,13 @@ The shelf's own glide is the one chrome motion with rows on that
 card — **Animate KiwiShelf** and its duration — and Reduce Motion
 still wins over them (#1838).
 
-The Space-switch plate slide is the second: drawn chrome that
-moves no window, picked with **Space switches** at the top of that
-card and paced by **Space switch duration** beneath it (#1956,
-#1931). Reduce Motion greys the duration and leaves the picker
-live, since its Instant + name is how a switch reads with less
-motion (#2143).
+:::unreleased
+The plate naming the Space after a switch is not on that card:
+it is a cue rather than motion, so its row, **Show the Space after
+a switch**, sits on KiwiShelf under the Space Bar switch, and
+neither Reduce Motion nor the animations master greys it. Reduce
+Motion drops only its fade (#2228).
+:::
 
 Nothing is exempt, including the marks whose movement carries
 meaning. The setup tour's waiting dot stops pulsing and stays

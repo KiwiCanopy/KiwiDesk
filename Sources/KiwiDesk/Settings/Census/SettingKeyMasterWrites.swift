@@ -14,7 +14,6 @@ extension SettingKey {
             "settings.shortcutPanelLiquidGlass",
             "settings.dragLiquidGlass",
             "settings.stickyStyle.liquidGlass",
-            "settings.spaceSwitchLiquidGlass",
         ],
     ]
 }

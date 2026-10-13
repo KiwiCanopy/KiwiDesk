@@ -42,16 +42,18 @@ struct LayoutSchematicCaptionMonocleTests {
             #expect(stacked.caption != parked.caption)
             #expect(stacked.axLabel != parked.axLabel)
         }
-        // The orientation still reaches the words under park:
-        // the cycle direction is the axis's fact.
-        #expect(
-            monocle(orientation: .horizontal, hideStyle: .park)
-                .caption
-                != monocle(
-                    orientation: .vertical,
-                    hideStyle: .park
-                ).caption
-        )
+        // The orientation reaches the words under both styles:
+        // the step direction is the axis's fact (#2230).
+        for hideStyle in [MonocleParams.HideStyle.stack, .park] {
+            #expect(
+                monocle(orientation: .horizontal, hideStyle: hideStyle)
+                    .caption
+                    != monocle(
+                        orientation: .vertical,
+                        hideStyle: hideStyle
+                    ).caption
+            )
+        }
     }
 
     /// The frame collapses the behind-fan exactly under park —

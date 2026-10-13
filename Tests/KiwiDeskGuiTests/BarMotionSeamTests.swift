@@ -26,7 +26,7 @@ struct BarMotionSeamTests {
     /// The files the bars' motion lives in: `BarMotion` and its
     /// extensions split at the §2.1 ceiling, one home.
     private static let homes = [
-        "BarMotion.swift", "BarMotion+Fade.swift", "BarMotion+Slide.swift",
+        "BarMotion.swift", "BarMotion+Fade.swift",
     ]
 
     /// Ways to start AppKit or Core Animation motion. Type
@@ -122,8 +122,7 @@ struct BarMotionSeamTests {
         "flipTurn": ["reduceMotion"],
         "flipMorph": ["reduceMotion"],
         "flipFade": ["reduceMotion"],
-        "slideFade": ["reduceMotion"],
-        "slideSpring": ["reduceMotion"],
+        "opacityFade": ["reduceMotion"],
     ]
 
     private static func stripped(_ home: String) throws -> String {

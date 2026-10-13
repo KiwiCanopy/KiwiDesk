@@ -230,8 +230,9 @@ struct SettingsCatalogArgumentTests {
         // 103 with #2173: the Automatic floating card's. 101 since
         // #1857: the Border, Drag and More colors mounts left,
         // Window marks came, and the two role groups mount through
-        // the indirect parameter above.
-        #expect(direct.values.reduce(0, +) == 101)
+        // the indirect parameter above. 102 since #2228: KiwiShelf's
+        // Show the Space switch.
+        #expect(direct.values.reduce(0, +) == 102)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

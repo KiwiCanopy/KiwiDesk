@@ -20,15 +20,6 @@ extension KiwiCore {
         tiler.settings.onScreen(screenFingerprint(of: display))
     }
 
-    /// The axis a Space switch's plates slide along on `display`:
-    /// across the Space Bar's edge as that screen has it (#1956,
-    /// #1948).
-    func spaceSlideAxis(on display: DisplayID) -> SpaceSlidePlan.Axis {
-        SpaceSlidePlan.axis(
-            spaceBarEdge: settings(on: display).spaceBarStyle.edge
-        )
-    }
-
     /// Every layout's layout-bounds input on every connected
     /// screen, and with no screen (the bars' own edges) — read
     /// through the one `shelfReservation(in:on:)` `layoutBounds`

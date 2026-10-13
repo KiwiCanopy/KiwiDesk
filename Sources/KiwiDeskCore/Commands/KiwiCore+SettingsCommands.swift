@@ -134,13 +134,6 @@ extension KiwiCore {
             tiler.settings.animations.onShelf = on
             updateBars()
             return .ok()
-        case "animations.set_space_change_duration":
-            // The plate slide's pace (#1931); read at each press.
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            tiler.settings.animations.spaceChangeDurationMS = ms
-            return .ok()
         case "animations.set_shelf_duration":
             // The shelf glide's pace (#1838).
             guard let ms = args.first?.intValue else {
@@ -166,13 +159,6 @@ extension KiwiCore {
                 return .fail("expected hertz")
             }
             tiler.animation.sizeRateHz = hz > 0 ? hz : nil
-            return .ok()
-        case "animations.set_space_change":
-            // Read at each switch; no retile (#2143).
-            guard let raw = args.first?.stringValue,
-                let style = SpaceChangeStyle(rawValue: raw)
-            else { return .expected(SpaceChangeStyle.self) }
-            tiler.settings.animations.spaceChange = style
             return .ok()
         case "animations.set_on_scrolling":
             return setBool(args) {

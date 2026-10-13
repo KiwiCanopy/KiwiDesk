@@ -218,8 +218,9 @@ struct SettingsSearchIndexTests {
                 // 8: #1644's Sheen row; 13 since #1684: the look
                 // shelf's five labelled actions; 14 and 15 since
                 // #1752: "Keep previous colors" and "Applies to";
-                // 17: #2143's picker and duration, at rest.
-                .looks: 17,
+                // 17: #2143's picker and duration, at rest; 15
+                // since #2228 took both out.
+                .looks: 15,
                 // 17 #1517, 18 #1679, 19 #1856, 21 #1857 (wells).
                 .advancedColors: 21,
                 // 6: `(action) presets.layouts` joined anchor-less

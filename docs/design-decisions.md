@@ -1719,7 +1719,16 @@ across space switches (#446). They are never tracked at all
 bundle belt for a dock-icon Raycast, alongside Ghostty's quick
 terminal #21). The draw-time heuristic remains for the structural
 floats that stay managed: panel-subrole windows of regular apps
-and accessory apps' layer-0 windows.
+and accessory apps' layer-0 windows. A raised window of an
+accessory app that has a title-bar button is admitted as one of
+its app's normal windows (#2072, the `macos_join_network` dump),
+which is the escape's weak point: a launcher that lists buttons
+anyway reads as a window.
+
+Such a launcher takes the bundle belt with no button escape.
+Spotlight's panel on macOS 27 is one (`com.apple.campo`, #2236):
+its AX lists all three buttons, and managed as a float it was
+moved off its own position by the float fit.
 
 Above that class sits the **screen-saver level** (#2069): a
 window at CG layer 1000 or above is ignored whatever its app and
@@ -3208,141 +3217,71 @@ the animations master like it. The #881 sentence above,
 is still the swap, and the card is what the eye follows across
 it.
 
-**A Space switch plays a drawn plate slide; the windows move
-once, underneath (#1956).** With `animations.space_change` on
-Slide, an explicit switch — a follow and a launch follow included,
-since each changes which Space you are looking at — fades a plate in over each window the
-screen shows, parks those windows AT the press, moves the plates
-as one rigid strip one screen page in the Space Bar's reading
-direction on a critically damped spring — no overshoot, so the
-strip never swings past the page it lands on — lands the
-incoming windows under their plates and fades the plates out.
-`SpaceSlidePlan` holds the times. It retires the corner
-slide (#207), which animated the windows themselves: every
-frame of it was an AX write to every window of two Spaces, and
-a slow app's write sticks for half a second inside its own
-commit, so the corner slide paid in main-thread stalls exactly
-where the switch was meant to feel smooth (measured on the
-owner's desk, the issue's tables). The plate slide sends each
-window one write, as the instant switch does, and draws the
-motion in the render server.
+:::unreleased
+**A Space switch is instant, and names the Space only where no
+Space Bar does (#2228).** Every KiwiDesk Space switch lands in one
+instant pass. After an explicit one — `focus_space` and the Space
+history and order steps, the scroll Space step, a move-and-follow,
+Open or Focus onto another Space or a launch follow — the screen
+that switched shows #2142's plate with the Space's identifier and
+its layout's symbol (dots mean a Desktop, a symbol a Space),
+unless that screen draws a Space Bar. Where the shelf stands down
+for a full-screen app or a presentation it shows nothing either:
+a plate over a slide show is the intrusion #1787 keeps the bars
+from, and the Desktop plate stands down there for the same
+reason.
 
-*Why plates, and not a blur or a picture of the windows.* A
-blur dissolve was built on the device and dropped: a blur reads
-as something in front of your work, and a jump still showed as
-blurred shapes. A picture of the real windows needs Screen
-Recording, which the owner ruled out for an animation (#1391's
-measurement). A plate per window, carrying its app's icon on
-the part the screen shows, says what moved and where without a
-pixel of the window. The desktop picture was tried as a ground
-and dropped: reading the file triggers a folder-access prompt.
+*Why no slide.* A switch is the verb a KiwiDesk user presses most,
+and motion on it is a wait on every press. The corner slide (#207)
+animated the windows themselves, an AX write per frame to every
+window of two Spaces, and a slow app's write sticks inside its own
+commit, so it stalled exactly where it was meant to feel smooth.
+The plate slide that replaced it (#1956) sent each window one
+write, but only by holding the arriving windows' writes until its
+drawn strip landed and building a plate per window: the most
+fragile machinery in the switch path, there to answer "where am I
+now". The plate answers that at the instant switch's cost. Keeping
+the slide as an option, as #2143's picker did, kept all of that
+machinery for the few who would pick it.
 
-*The timing follows the apps, not the clock.* An app performs a
-park 60–100 ms after the write leaves, so the strip waits
-120 ms after the press; the incoming writes are HELD per window
-until the strip has settled and leave from each app's own queue
-at that deadline, so a stalled main turn delays no landing; the
-plates lift once the landed windows have had their own time to
-show. A press while the strip still moves carries its position
-and speed into the next page rather than restarting, and a
-window whose write was still held never showed, so the strip
-need not wait for it to park.
+*Why only where no Space Bar is drawn.* The Space Bar already
+names the Space and marks the current one on that screen, so a
+plate over the user's windows there says it twice on every press.
+Where no bar is drawn because it is off or that screen has none,
+nothing on screen says which Space came up, and that is where the
+cue is owed: #2142's reasoning, answering only where the cue is
+missing.
 
-*Piles show one face.* Every member of a pile keeps a plate at
-its frame; only the front face carries an icon — the focus if
-it is in the pile, else the WindowServer's front-most member,
-read once at the press, since parking moves frames and never
-restacks. A plate wholly behind another is dropped, so a
-Monocle Space shows one plate, and a scrolling row only its
-on-screen columns. One builder draws both directions. A sticky
-window stays on screen through the switch, so it draws no plate
-and the strip is cut around it, and a follow's moved window,
-already on screen in the Space it goes to, travels with the user
-uncovered — the one thing that makes a follow look different.
+*The accepted trade: no direction.* The slide said which way the
+switch went, and showed a follow's window travelling with you. The
+plate says neither. The Space Bar's indicator, where it is drawn,
+and the key the user pressed carry the direction; a follow shows
+the moved window in place and focused.
 
-*What it wears.* The shortcuts panel's glass — `.regular`
-Liquid Glass, each pile one container so overlapping plates read
-as glass on glass — on a leaf of their own,
-`space_switch.liquid_glass`, which the one Liquid Glass switch
-writes beside the others, since every surface it covers keeps
-its own. A
-file from before it fills the leaf from the switch's agreement,
-the #1620/#1621 crossing's shape, so an upgrade never opens the
-switch reading "differ". With glass off, under Reduce
-Transparency or before macOS 26 the plates take the blur nearest
-the shortcuts panel's own fallback, so the two surfaces keep one
-look. Mid-slide that blur reads close to glass — what sets Liquid
-Glass apart barely shows in a fade and a half-second move — and
-a solid
-material that would set glass-off apart was tried on the device
-and refused for not matching the panel. Reduce Motion shows the
-Space plate instead (#2143, below).
+*A switch, app-wide, on by default.* It is stored as `space.cue`
+beside `desktop.cue` and `mode.cue`, and nobody varies it per
+profile (#1741). Its row sits under the Space Bar switch rather
+than on the Animations card, because it is a cue rather than
+motion: neither Reduce Motion nor the animations master greys it,
+Reduce Motion drops only its fade, and the Space Bar switch does
+not grey it either, since it matters exactly when the bar is off.
+A two-state choice is a switch; "Always", showing the plate where
+a Space Bar is drawn too, waits until someone asks for it, and
+turning the switch into a picker then owes `space.cue` a crossing.
 
-*Its own pace (#1931).* `animations.space_change_duration` is the
-strip's spring response, and both fades scale with it from the
-times they were tuned at (300 ms). Its default is that 300 ms.
-A slower pace does not buy readable icons: the strip crosses the
-screen too fast to read at any pace in the band, and what reads
-is the arriving plates at rest, which 550 ms lengthens by about
-45 ms while lengthening the whole slide by about 380 ms. Under a
-saturated GPU the switch work that overlaps the plates grows
-with the pace too, and 300 ms is the one pace measured steady
-there (#1931's numbers). If the arriving icons ever fail to
-register, the remedy is a short fixed hold on those plates, not
-a slower pace. No crossing is owed, since the leaf ships with
-the slide itself. The two waits on apps — the strip's
-delay for the parks and the landed windows' margin — do not
-scale: they measure how long an app takes, which no pace
-changes. `animations.duration` keeps pacing windows only, since
-the slide moves none.
+*No crossing out of the slide.* Neither the stored slide nor what
+#2143 would have crossed it to survives, and the settings
+decoders skip keys they do not know, so a stored
+`on_space_change`, `space_change`, `space_change_duration` or
+`space_switch.liquid_glass` loads and drops away and every user
+gets the default. The cost: a user who had turned the slide off
+now sees the plate, only on a screen with no Space Bar, one click
+from off. The retired verbs are refused rather than aliased.
+:::
 
-*Three ways, and the plate by default (#2143).* One picker,
-"Space switches", offers Instant, Instant + name and Slide.
-Instant + name is #2142's glass plate naming the Space you arrived on
-and its layout's symbol — dots mean a Desktop, a symbol a Space —
-on the screen that switched, after an instant switch. It is the
-default because it answers the question the slide answered —
-where am I now — at the instant switch's cost: the slide holds
-the GPU at 55–65 % switching back-to-back where the instant
-switch holds 33 %, and it carries the most fragile machinery in
-the switch path, the write hold and the plate builder. What the
-plate does not show is the direction of the switch and a
-follow's window travelling with you, which is why the slide
-stays an option rather than being retired: nothing is stripped,
-and a user who wants the motion is one picker step away. The
-plate stands down on a screen that draws a Space Bar, which
-already names the Space, so it never says a thing twice. The
-picker is its own row above the window animations' master and
-outside Reduce Motion's grey: under Reduce Motion, Slide shows
-the plate without its fade, and Instant + name is how a switch
-reads with less motion, so greying it would hide the one answer
-that setting leaves.
-
-The crossing maps a stored `on_space_change: true` to the plate
-and `false` to Instant (`SpaceChangeStyleMigrationTests`). The
-`true` is #1931's reasoning again — the encoder writes
-`animations` whole, so a `true` is nearly always the default
-rather than a choice of the slide — and a `false` keeps the
-instant switch it drew. The cost is a user who chose the slide on
-purpose meeting the plate once, one picker step from the slide
-again.
-
-The style stays per profile, the scope `on_space_change` had,
-where the Desktop and layout cues are app-wide (#1741): a profile
-may want the slide on one desk and not another, and moving it
-app-wide would be an adoption crossing of its own, not a rider on
-this one.
-
-*One panel per screen, ordered in once.* Moving or re-ordering
-a panel per switch queues behind the compositor exactly when
-the switch is busiest (#1960), so each screen's panel stays
-ordered in, dormant and empty between plays; everything that
-moves is a layer. KiwiDesk's own windows move through AppKit
-inside the switch's own turn, since the main queue would run
-their park only after it. A slow app's window can still land
-after the plates have faded, and its focus ring waits for it: the
-ring appears on the window's own report near the frame it was
-sent, or at a 300 ms cap, and never before the plates lift
+*The focused ring waits for its window.* A slow app's window can
+land after the switch, so the ring appears on the window's own
+report near the frame it was sent, or at a cap, never ahead of it
 (#1959). Inside a Space the ring still leads a focus move, since
 there the moving ring is the cue; after a switch a leading ring
 would sit on an empty spot.
@@ -6145,47 +6084,12 @@ Nobody varies it per profile, so it is app-wide (#1741).
 **What was not shipped:** a number alone (no sense of where among
 how many), dots alone (counted, not read, past about five), a pill
 by KiwiShelf (hidden whenever the shelf is), a mini-map of the
-screens, and the KiwiDesk Space — a Space switch names its own
-Space with the same plate (#2143).
+screens, and the KiwiDesk Space.
 
-### Cycling layouts shows the cycle, on its own switch (#2144)
-
-**[Principle]**
-
-`cycle_mode` shows #2142's plate with the user's cycle list as a
-ring — first entry at 12 o'clock, clockwise in Next order — the
-current layout large in the centre, its slot empty. Only the
-verb shows it; `set_mode` and the Layout menu do not.
-
-With three windows, bsp and grid or stack and track can look
-alike, so the rearranged windows say that something changed and
-not what. The ring IS the list the key walks, so the plate also
-teaches the order, and a second press visibly steps around it.
-
-**The step is one shared element per symbol**: the incoming
-layout flies from its slot to the centre and grows while the
-outgoing one flies back to its own slot, in one critically damped
-spring. It shows which layout came in and where the old one went;
-a symbol morph in place says only the first. The first
-appearance stays instant, as #2142's, and Reduce Motion jumps.
-
-**No strip of options and no circling windows.** The plate takes
-no mouse, so a row of layouts reads as a menu it cannot honour;
-and the frame animation already moves each window from its old
-frame to its new one, which is the honest motion — a circular
-path lengthens the change and brings back the AX-write stalls
-#1956 fought.
-
-**Its own switch, not a shared "switch cue".** The Desktop cue
-stands in for motion the instant switch removed; this one
-confirms the user's own press. A user may want one and not the
-other, and merging them would have owed a `ConfigMigration` of
-`desktop.cue` only to merge two choices. On by default and
-app-wide, for #2142's reasons. It is stored as `mode.cue` beside
-the other app-wide groups (`desktop.cue`, `refusal.sound`), while
-`mode_cycle` stays a flat key: the list is the global base a
-profile overrides, the switch is app-wide, and the two shapes
-follow those two families rather than the shared word.
+:::unreleased
+A Space switch names its own Space with the same plate where no
+Space Bar does (#2228).
+:::
 
 ### Cycling layouts shows the cycle, on its own switch (#2144)
 
@@ -10765,15 +10669,17 @@ Settings window, whenever it was open — and AX re-reported
 Settings focused on every open; it also left #952's question,
 which window the user lands in after a close, for a hand-back to
 answer. Not activating removes both: a close lands where the user
-already was, and a click away was always the user's choice. What
-a close still owes is the dismiss grace: with Settings in front,
-KiwiDesk is the active app, and the panel's order-out blip-keys
-Settings, whose clickless AX re-report the ignored-panel grace
-consumes, armed at a keyboard-commanded close for KiwiDesk's own
-pid. Because KiwiDesk's main menu is not the one in the menu bar
+already was, and a click away was always the user's choice. A
+close therefore owes nothing, Esc included: with Settings in
+front the order-out keys Settings again, which is where the user
+was (owner ruling 2026-10-13). Only a Jump pick of another app's
+window arms the ignored-panel grace for KiwiDesk's own pid, since
+its order-out would key Settings ahead of the window picked.
+Because KiwiDesk's main menu is not the one in the menu bar
 while a panel is up, each panel hands its key equivalents to that
 menu itself, so ⌘W and the edit chords keep working.
-`ShortcutsPanelReturnTests` pins the grace's arms and
+`ShortcutsPanelReturnTests` and `JumpPanelControllerTests` pin
+the arms and
 `PanelHandBackTests` the non-activating show. (#952, #1875)
 :::
 
@@ -13907,9 +13813,8 @@ load-bearing details:
   `focusSpace`: that command warps the cursor to hand off AX
   focus, which would rip the pointer out of the OS drag loop. No
   focus hand-off, no warp, and the spring retile is
-  `animated: false` regardless of `animations.space_change`
-  (a crisp switch must not add motion competing with the live
-  foreign-app drag).
+  `animated: false` (a crisp switch must not add motion competing
+  with the live foreign-app drag).
 - Space membership flips **eagerly at spring** (QA revision):
   the window is moved into the target the moment the view springs,
   so the live drag shows the ordinary drop preview (ghost + drop-
@@ -14257,7 +14162,7 @@ again and elects among them, the shape #1741's crossing takes.
 bundled look and the tour's paint say nothing about it: picking a
 picture never changes how fast things move (#2176).** Animations
 were the one presentation family a profile kept apart, so turning
-the Space slide off meant repeating it on every profile; folding
+an animation off meant repeating it on every profile; folding
 them into the look shares them through the switch above, where an
 app-wide value (#1741) would have lost the profile that wants
 animations off while presenting. `LookKeys.motion` is every field
@@ -14446,9 +14351,8 @@ the shelf's, which both bars read, the panel's, and (below) the
 drag visuals' and the sticky mark's — stored side by side in the
 profile.
 
-The Space switch plates' leaf joins them (#1956). The slow-boot
-notice (#1715) reads the panel's leaf rather than storing one of
-its own.
+The slow-boot notice (#1715) reads the panel's leaf rather than
+storing one of its own.
 
 **Profile-scoped, and the alternative was not merely riskier but
 unbuildable.** Moving the value app-wide into `gui.json` needed a

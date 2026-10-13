@@ -6,8 +6,8 @@ import Testing
 
 /// The list grows to a third of the screen's visible height, never
 /// fewer than 6 rows nor more than 12, and shrinks to fit fewer
-/// results (#1875 ▸ Panel). A pick of another app's window and a
-/// commanded close distrust the dismiss blip (#952).
+/// results (#1875 ▸ Panel). A pick of another app's window
+/// distrusts the dismiss blip (#952); a close arms nothing.
 @Suite("Jump to window panel controller")
 @MainActor
 struct JumpPanelControllerTests {
@@ -115,27 +115,24 @@ struct JumpPanelControllerTests {
         #expect(core.ignoredPanel.active.isEmpty)
     }
 
-    @Test("Esc's close arms the distrust; a click away does not")
-    func closeDistrusts() {
-        // One close per opening: the fade's own guard refuses a
-        // second, so each close takes a controller of its own.
-        let own = pid_t(ProcessInfo.processInfo.processIdentifier)
-        let (away, awayCore) = controller()
-        away.handBack.isAppActive = { true }
-        away.close(commanded: false)
-        #expect(awayCore.ignoredPanel.active.isEmpty)
-        let (esc, escCore) = controller()
-        esc.handBack.isAppActive = { true }
-        esc.close(commanded: true)
-        #expect(escCore.ignoredPanel.active.contains(own))
+    /// The window a close keys again is the one the user was in,
+    /// so its report is honored (owner ruling 2026-10-13).
+    @Test("a close arms no distrust, even with KiwiDesk active")
+    func closeArmsNothing() {
+        let (controller, core) = controller()
+        controller.handBack.isAppActive = { true }
+        controller.close()
+        #expect(core.ignoredPanel.active.isEmpty)
     }
 
-    @Test("a close of an already hidden panel does nothing")
-    func hiddenPanelCloseIsInert() {
+    /// A panel already hidden has no blip to distrust: the same
+    /// pick `pickArmsTheDistrust` arms on stands down here.
+    @Test("a pick on a hidden panel arms nothing")
+    func hiddenPanelPickIsInert() {
         let (controller, core) = controller()
         controller.panel = controller.makePanel()
-        controller.handBack.isAppActive = { true }
-        controller.close(commanded: true)
+        #expect(controller.panel?.isVisible == false)
+        controller.pick(entry(), moveHere: true)
         #expect(core.ignoredPanel.active.isEmpty)
     }
 

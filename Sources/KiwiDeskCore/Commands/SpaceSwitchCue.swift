@@ -25,12 +25,22 @@ extension KiwiCore {
         set { cueHooks.onSpaceCue = newValue }
     }
 
-    /// Called by `spaceSwitchRetile` alone, after a switch the
-    /// slide would play on, where the drawn style is the cue. Stands
-    /// down where `display` draws a Space Bar, which already names
-    /// the Space, and where the shelf stands down (#1787).
+    /// The screen an explicit switch to `target` changes, read
+    /// BEFORE the switch activates it; nil where that screen
+    /// already shows it, so the switch names nothing.
+    func spaceSwitchDisplay(to target: SpaceID) -> DisplayID? {
+        guard let display = state.workspaces.display(of: target),
+            state.workspaces.activeSpace(on: display) != target
+        else { return nil }
+        return display
+    }
+
+    /// Called by `spaceSwitchRetile` alone, after an explicit
+    /// switch, while `space.cue` is on (#2228). Stands down where
+    /// `display` draws a Space Bar, which already names the Space,
+    /// and where the shelf stands down (#1787).
     func paySpaceCue(on display: DisplayID) {
-        guard drawnSpaceChange == .cue,
+        guard appWide.spaceCue,
             let space = state.workspaces.activeSpace(on: display),
             let mode = state.workspaces[space]?.mode,
             !spaceBars.shownDisplays.contains(display),
@@ -39,5 +49,16 @@ extension KiwiCore {
         cueHooks.onSpaceCue(
             SpaceSwitchCue(display: display, space: space, mode: mode)
         )
+    }
+
+    /// `KiwiDesk.set_space_cue(bool)` (#2228): turns the plate on
+    /// or off. App-wide (#1741) and session-only, as every app-wide
+    /// verb; no retile.
+    func setSpaceCue(_ args: [JSONValue]) -> CommandResponse {
+        guard let on = args.first?.boolValue else {
+            return .fail("expected a boolean")
+        }
+        setAppWide(persisting: false) { $0.spaceCue = on }
+        return .ok()
     }
 }
