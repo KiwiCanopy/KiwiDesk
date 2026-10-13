@@ -312,7 +312,11 @@ menu only once it is ruled safe to fire while another app is in
 front** — the user believes that app has the keyboard, so a ⌘Q
 aimed at it must never quit KiwiDesk (owner ruling 2026-10-13,
 `PanelChordTests` ▸ `onlyRuledActions`, `PanelChordTests` ▸
-`noWholeMenuForward`). AppKit's own
+`noWholeMenuForward`). **While key, such a panel claims its own
+⌘ chords before any menu, hands only the File and Edit chords on,
+and swallows any other chord a KiwiDesk menu holds**
+(`JumpPanelEventTests` ▸ `appMenuChordsAreSwallowed`,
+`JumpPanelEventTests` ▸ `panelChordsLeaveEditAlone`). AppKit's own
 validation greys that item for a window whose style mask lacks
 `.closable` (measured: a borderless `NSPanel` fails
 `validateUserInterfaceItem` for `performClose(_:)`), so a

@@ -9828,8 +9828,8 @@ a window, and "Switch to next layout" rather than a bare noun.
 "Show" and not "Toggle" is Apple's own pattern for a key whose
 second press dismisses the surface ("Show Spotlight search",
 "Show Notification Center"). The panel's verb stays "Jump": the
-field, the preview and the footer say it, and J backs it up for an
-English reader. What links a key to its side in every language is
+Windows side's field prompt and the footer's ↩ hint say it, and J
+backs it up for an English reader. What links a key to its side in every language is
 position — `⌃⌥J`, `⌃⌥K` and `⌃⌥L` sit side by side on the home row
 — and the chord the scope switch prints beside each side, read
 from the live binding. A word mnemonic links only in English, so
@@ -10437,11 +10437,12 @@ auto-hide, with a mouse macOS already draws a legacy scroller, and
 under *Always* the scroller is permanent anyway — so it is not
 kept as a hedge.
 
-**Why words, and why in the footer: a partial row is not a fold
-cue when a terminator sits under it.** The fold cuts a row in
-half, which looks like a hint that the list continues — and is
-not, because immediately below it sit a full-width `Divider()`
-and a footer carrying a hint and a button. A hard rule plus
+**Why words, and why in the button row under the sheet: a partial
+row is not a fold cue when a terminator sits under it.** The fold
+cuts a row in half, which looks like a hint that the list
+continues — and is not, because immediately below it sits the
+sheet's own button row, carrying the layer label and **Edit in
+Settings…**, and under that the panel's footer. A strip of
 chrome is the strongest "this is the bottom" signal a panel
 has, and it cancels the cut above it. That is why no further
 geometry at the fold can win: it would have to argue against a
@@ -10482,11 +10483,10 @@ constructs, `.legacy` becomes legitimate and is re-argued then.
 
 Making the content *fit* (#1294) lowers how often the fold
 appears and cannot retire the cue — 45 rows do not fit under a
-720 pt ceiling at any column count, and an install with many
-app or raw-Lua rows overflows any fixed size. The cue is
-permanent, not a stopgap. The asymmetry that issue would
-exploit — the panel's height derives from the screen while its
-width is a literal 760 — is its own ruling if taken.
+screen-derived cap, and an install with many app or raw-Lua rows
+overflows any fixed size. The cue is permanent, not a stopgap.
+The panel's width is ruled under ▸ *The shortcuts sheet is the
+key panel's middle side*.
 
 **The shortcuts panel takes UNTINTED Liquid Glass, and the
 untinted half is a ruling rather than a limit.** (#1295/#1293,
@@ -10515,8 +10515,8 @@ Three reasons it is declined, hardest first:
    before the dimming is counted.
 2. **The bars' argument does not transfer.** A bar's ink is fixed
    palette hex with no vibrancy path, so its fill is a legibility
-   floor. This panel's prose is vibrant throughout — seven
-   `foregroundStyle` sites, all `.secondary` — and its two fixed
+   floor. This panel's prose is vibrant throughout — its
+   `foregroundStyle` sites are `.secondary` — and its two fixed
    hexes are not prose: the chip's accent fill and the seal's
    `ink`, which sits on the button's own fill rather than on bare
    glass. `.regular` strengthens this rather than weakening it: a
@@ -10591,8 +10591,8 @@ information** — the layer name is text, drawn vibrant — so the
 failure mode is "identity fades on some desktops", not "the user
 cannot tell which layer they are in", and nothing rides the hue
 for a colour-vision floor to bind. Both escalations are worse: an
-opaque accent capsule puts the loudest mark in the footer on a
-passive readout and reads as a control, and an accent stroke swaps
+opaque accent capsule puts the loudest mark in the sheet's button
+row on a passive readout and reads as a control, and an accent stroke swaps
 an unmeasurable wash for an unmeasurable hairline at fixed
 luminance — the same objection that defers the panel edge.
 
@@ -10630,9 +10630,9 @@ with only the openers shows Open Settings alone, under Apps.
 re-leaks the seed into Custom. (#602, PR #638, #2246)
 
 :::unreleased
-**The keyboard panels never take activation, so there is none to
-hand back.** The ⌃⌥K panel and the ⌃⌥J / ⌃⌥L panel are
-non-activating panels (#1875): they take the keyboard while the
+**The key panel never takes activation, so there is none to
+hand back.** The one panel ⌃⌥J, ⌃⌥K and ⌃⌥L open is a
+non-activating panel (#1875): it takes the keyboard while the
 app the user came from stays active. Activating KiwiDesk to give
 a borderless panel the keyboard raised its other windows — the
 Settings window, whenever it was open — and AX re-reported
@@ -10646,8 +10646,11 @@ was (owner ruling 2026-10-13). Only a Jump pick of another app's
 window arms the ignored-panel grace for KiwiDesk's own pid, since
 its order-out would key Settings ahead of the window picked.
 Because KiwiDesk's main menu is not the one in the menu bar
-while a panel is up, each panel hands its key equivalents to that
-menu itself, so ⌘W and the edit chords keep working.
+while the panel is up, the panel hands the File and Edit chords to
+that menu itself, so ⌘W and the edit chords keep working; it
+claims its own ⌘ chords first and swallows any other chord a
+KiwiDesk menu holds, since the user believes the app behind it
+has the keyboard and a ⌘Q aimed there must not quit KiwiDesk.
 `JumpPanelControllerTests` pins the arms and
 `PanelHandBackTests` the non-activating show. (#952, #1875)
 :::
@@ -10716,11 +10719,13 @@ accent because re-tinting a menu fights the platform. So green
 marks what KiwiDesk draws and the user's accent marks what macOS
 draws, and the line between them is the window, not the feature.
 
-One panel holds both scopes because both answer "take me
-somewhere" from the keyboard, and one field on top keeps typing
-the quick way in, as Spotlight's categories do. ⇥ switches scope
-and clears the field, since the same letters mean a window in one
-and a layout in the other. The other scope's own shortcut switches
+One panel holds the windows and the layouts because both answer
+"take me somewhere" from the keyboard, and one field on top keeps
+typing the quick way in, as Spotlight's categories do; the
+shortcuts joined as a third side under ▸ *The shortcuts sheet is
+the key panel's middle side*. ⇥ steps between the sides and clears
+the field, since the same letters mean a window in one and a
+layout in another. The other scope's own shortcut switches
 too, so ⌃⌥L inside Jump lands on Layouts. In the Layouts scope ←
 and → move the tiles even while the field has focus: a one-word
 filter has almost nothing to edit with a caret, and the tiles are
@@ -14834,7 +14839,7 @@ Decisions folded in (ui-designer consult and owner direction,
   not third-party trademark rights in the depicted app marks —
   accepted deliberately.
 - **The shortcuts panel follows the GLOBAL glyph style**: with
-  `app_font` active its Apps band leads with the same ligatures. The
+  `app_font` active its Apps section leads with the same ligatures. The
   panel spans all layouts, so a Lua-only per-layout
   `icon_source` override deliberately does not steer it.
 

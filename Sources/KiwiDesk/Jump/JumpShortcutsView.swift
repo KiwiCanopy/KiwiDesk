@@ -114,8 +114,8 @@ private struct SheetHeightKey: PreferenceKey {
 }
 
 /// Scrolls the enclosing scroll view by the lines or pages a key
-/// asked for. SwiftUI on macOS 14 scrolls only to a view's id, and
-/// the sheet's two-column bands have no single row order to step.
+/// asked for: the sheet scrolls with no selection to scroll to, and
+/// SwiftUI on macOS 14 scrolls only to a view's id.
 private struct SheetScrollDriver: NSViewRepresentable {
     let scroll: SheetScroll
 
@@ -140,9 +140,14 @@ private struct SheetScrollDriver: NSViewRepresentable {
         scrollView.reflectScrolledClipView(clip)
     }
 
-    func makeCoordinator() -> Coordinator { Coordinator() }
+    /// Seeded with the scroll already asked, so a side re-entered
+    /// replays nothing.
+    func makeCoordinator() -> Coordinator {
+        Coordinator(serial: scroll.serial)
+    }
 
     final class Coordinator {
-        var serial = 0
+        var serial: Int
+        init(serial: Int) { self.serial = serial }
     }
 }

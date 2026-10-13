@@ -18,8 +18,6 @@ final class JumpModel: ObservableObject {
     @Published var sheetScroll = SheetScroll()
     @Published private(set) var commandHeld = false
     @Published private(set) var shiftHeld = false
-    /// Whether an input method is composing in the field.
-    @Published private(set) var composing = false
     /// Bumped each time the panel becomes key; the field takes the
     /// focus on every bump.
     @Published private(set) var fieldFocusRequests = 0
@@ -38,14 +36,14 @@ final class JumpModel: ObservableObject {
     var currentPointer = JumpModel.livePointer
     /// Each side's own chord, read from the live bindings when the
     /// panel opens; a side with none bound is absent (#2245).
-    var chords: [JumpScope: String] = [:]
+    @Published var chords: [JumpScope: String] = [:]
     /// Each app's icon, read once when the panel opens.
     let icons: [pid_t: NSImage]
     /// The most rows the list shows before it scrolls.
     let rowCap: Int
     /// The tallest the Shortcuts side's sheet stands, from the
-    /// screen it opens on.
-    var sheetCap: CGFloat = 400
+    /// screen it opens on (`JumpPanelController.sheetCap`).
+    let sheetCap: CGFloat
 
     var onPick: (JumpEntry, _ moveHere: Bool) -> Void = { _, _ in }
     var onClose: () -> Void = {}
@@ -68,6 +66,7 @@ final class JumpModel: ObservableObject {
         snapshot: JumpSnapshot,
         icons: [pid_t: NSImage],
         rowCap: Int,
+        sheetCap: CGFloat = 400,
         modifiers: NSEvent.ModifierFlags = [],
         pointer: CGPoint? = nil
     ) {
@@ -75,6 +74,7 @@ final class JumpModel: ObservableObject {
         lastPointer = pointer ?? Self.livePointer()
         self.icons = icons
         self.rowCap = rowCap
+        self.sheetCap = sheetCap
         noteModifiers(modifiers)
     }
 
@@ -105,20 +105,15 @@ final class JumpModel: ObservableObject {
         }
     }
 
-    func noteComposing(_ composing: Bool) {
-        if composing != self.composing { self.composing = composing }
-    }
-
     func handle(_ key: JumpKey) {
         guard !leaving else { return }
         if case .stepScope(let forward) = key {
             // A Layouts side with no Space to act on is stepped
             // past rather than stopping ⇥.
-            var next = scope.stepped(forward: forward)
-            if next == .layouts, loadLayouts(nil) == nil {
-                next = next.stepped(forward: forward)
+            let next = scope.stepped(forward: forward)
+            if !setScope(next), next == .layouts {
+                setScope(next.stepped(forward: forward))
             }
-            setScope(next)
             return
         }
         switch scope {
@@ -159,10 +154,12 @@ final class JumpModel: ObservableObject {
     /// Layouts reads its Space fresh, and stays out of reach
     /// where that Space is gone. Shortcuts reads the active layer
     /// fresh.
-    func setScope(_ scope: JumpScope) {
-        guard scope != self.scope else { return }
+    /// False where the side stayed out of reach.
+    @discardableResult
+    func setScope(_ scope: JumpScope) -> Bool {
+        guard scope != self.scope else { return true }
         if scope == .layouts {
-            guard let fresh = loadLayouts(nil) else { return }
+            guard let fresh = loadLayouts(nil) else { return false }
             layouts = fresh
         }
         if scope == .shortcuts {
@@ -175,6 +172,7 @@ final class JumpModel: ObservableObject {
         lastPointer = currentPointer()
         onScopeChange()
         onAnnounce(scope.title)
+        return true
     }
 
     /// The selection follows the pointer, on a real move only

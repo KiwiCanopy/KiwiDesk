@@ -617,10 +617,10 @@ KiwiDesk.set_mode_cycle({ "bsp", "stack", "monocle" })
 **Expects:** nothing.
 
 **Does:** opens the **layout picker**, the **Layouts** side of the
-panel the [window switcher](#show_jump_to_window) shares, for the
-Space shown on the screen under the pointer. It
-switches to it from the windows, or closes the panel if it already
-shows Layouts. Every layout is a tile with its
+key panel the [window switcher](#show_jump_to_window) opens, for
+the Space shown on the screen under the pointer. It switches to it
+from another side, or closes the panel if it already shows
+Layouts. Every layout is a tile with its
 picture, the current one marked ✓.
 
 - **←** and **→**, or moving the mouse over a tile, move the
@@ -631,8 +631,9 @@ picture, the current one marked ✓.
 - **⌘S** keeps the layouts in the profile, as the Layout menu's
   Keep does; **⌘,** opens Layout Defaults in Settings on the
   selected layout.
-- **Tab** or **⇧Tab** switches to the windows list; **Escape**
-  clears the typing, then closes the panel.
+- **Tab** steps to the panel's next side and **⇧Tab** to the one
+  before, as on the window switcher; **Escape** clears the typing,
+  then closes the panel.
 
 **Example:**
 
@@ -1010,6 +1011,14 @@ shortcuts panel, the one ⌃⌥K opens (#1307). Off, or below
 macOS&nbsp;26, the panel draws `.regularMaterial`. The panel's
 glass is untinted: it draws `.regular` where the bars draw
 `.clear`, and no Fill reaches it (#1295).
+
+:::unreleased
+The shortcuts panel is a side of the key panel, so this leaf sets
+the material of the whole key panel — the
+[window switcher](#show_jump_to_window), the
+[shortcuts panel](#show_shortcuts) and the
+[layout picker](#show_layout_picker).
+:::
 
 Stored as `shortcut_panel.liquid_glass` in the profile, so a
 profile switch can change the panel's material.
@@ -2521,7 +2530,7 @@ kiwishelf.set_font_weight("semibold")
 `"app_image"`).
 
 **Does:** sets how app icons are drawn on both bars and in the
-shortcuts panel's Apps band. `app_image` shows the app's icon as
+shortcuts panel's Apps section. `app_image` shows the app's icon as
 macOS provides it, which follows the system-wide Icon & widget
 style the user picked; the system's Dark, Clear and Tinted looks
 are not separate choices
@@ -4017,7 +4026,7 @@ window verbs. Its float rules work the same way yours do, so a
 `float_rules` entry can keep it out of the layout permanently.
 KiwiDesk's *other* windows are not managed: the setup tour and
 the Config Issues window are tracked but always floating, and its
-panels — the ⌃⌥K shortcuts panel, drag/drop overlays, App Bar
+panels — the ⌃⌥K panel, drag/drop overlays, App Bar
 overlays and focus borders — are ignored outright and appear in
 no bar and no window list KiwiDesk publishes.
 
@@ -4777,19 +4786,26 @@ end)
 
 **Expects:** nothing.
 
-**Does:** opens the key panel on its **Shortcuts** side — a live,
-read-only list of the active layer's bindings — switches to it
-from another side, or closes the panel if it already shows
-Shortcuts. It is the panel behind the menu bar's *View
-Shortcuts…* row.
+**Does:** opens the read-only **shortcuts panel** — a live glance
+at the active layer's bindings — or closes it if it is already
+open. It is the panel behind the menu bar's *View Shortcuts…*
+row; the bound combo shows beside that row and in the panel's
+close hint.
 
 :::unreleased
+The shortcuts panel is the **Shortcuts** side of the key panel
+the [window switcher](#show_jump_to_window) opens, and it carries
+no close hint: the call switches to it from another side and
+closes the panel only when it already shows Shortcuts. The bound
+combo shows beside the *View Shortcuts…* row.
+
 - Typing narrows the list by name, the matched letters in bold.
 - **↑** **↓** and **Page Up** / **Page Down** scroll the list;
   **Return** runs nothing.
 - **⌘,** or **Edit in Settings…** opens Shortcuts & Gestures.
-- **Tab** and **⇧Tab** step to the other sides, as on the
-  [window switcher](#show_jump_to_window).
+- **Tab** steps to the panel's next side and **⇧Tab** to the one
+  before, as on the window switcher.
+- **Escape** clears the typing, then closes the panel.
 :::
 
 Seeded to **⌃⌥K** in the base layer and in every layer you
@@ -4838,9 +4854,9 @@ end)
 **Expects:** nothing.
 
 **Does:** opens the **window switcher**, a search panel on the screen
-under the pointer, its field at Spotlight's height; on its Layouts
-side it switches to the windows, and showing the windows it
-closes. It lists every window KiwiDesk knows except the one you are in —
+under the pointer, its field at Spotlight's height — the Windows
+side of the key panel. From another side it switches to the
+windows, and showing the windows it closes. It lists every window KiwiDesk knows except the one you are in —
 open windows first, most recently used first, including those up
 on another macOS Desktop, then minimized windows, then one row per
 hidden app. Typing narrows the list by app name, then by title.
@@ -4854,9 +4870,10 @@ Moving the mouse over a row selects it.
 - **⌘1** … **⌘9** pick one of the first nine results.
 - **Tab** steps to the panel's next side and **⇧Tab** to the one
   before — Windows, [Shortcuts](#show_shortcuts) and
-  [Layouts](#show_layout_picker), wrapping — clearing the
-  typing. The switch at the end of the field shows each side's own
-  key, read from your shortcuts.
+  [Layouts](#show_layout_picker), wrapping, and past Layouts when
+  the Space it would show is gone — clearing the typing. The
+  switch at the end of the field shows each side's own key, read
+  from your shortcuts.
 - **Escape** clears the typing, then closes the panel; **⌘W**, a
   click elsewhere or another app taking the keyboard close it too.
 

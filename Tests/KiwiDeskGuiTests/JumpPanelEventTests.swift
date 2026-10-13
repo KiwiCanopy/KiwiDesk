@@ -91,6 +91,7 @@ struct JumpPanelEventTests {
     @Test("⌘, reaches a side before the app menu's Settings…")
     func commandCommaIsTheSides() {
         let (panel, _) = panel()
+        panel.keyedForTesting = true
         var keys: [JumpKey] = []
         panel.onKey = { keys.append($0) }
         let comma = NSEvent.keyEvent(
@@ -115,4 +116,106 @@ struct JumpPanelEventTests {
         _ = panel.performKeyEquivalent(with: comma)
         #expect(keys.count == 2)
     }
+
+    private func chord(
+        _ key: String,
+        _ code: UInt16,
+        _ flags: NSEvent.ModifierFlags = .command
+    ) -> NSEvent {
+        NSEvent.keyEvent(
+            with: .keyDown,
+            location: .zero,
+            modifierFlags: flags,
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            characters: key,
+            charactersIgnoringModifiers: key,
+            isARepeat: false,
+            keyCode: code
+        )!
+    }
+
+    /// ⌘Q, ⌘H and ⌘, aimed at the app in front never reach
+    /// KiwiDesk's own Quit, Hide or Settings… while the panel holds
+    /// the keyboard (owner ruling 2026-10-13): the real menu's
+    /// chords are swallowed, the File and Edit ones handed on.
+    @Test("KiwiDesk's other menu chords are swallowed, not performed")
+    func appMenuChordsAreSwallowed() {
+        let bar = MainMenu.make(
+            settingsTarget: NSObject(),
+            settingsAction: #selector(NSObject.description)
+        )
+        #expect(MainMenu.holdsChord(chord("q", 12), in: bar))
+        #expect(MainMenu.holdsChord(chord("h", 4), in: bar))
+        #expect(MainMenu.holdsChord(chord(",", 43), in: bar))
+        #expect(!MainMenu.holdsChord(chord("k", 40), in: bar))
+        #expect(
+            !MainMenu.holdsChord(chord("q", 12, [.command, .option]), in: bar)
+        )
+        let (panel, _) = panel()
+        panel.keyedForTesting = true
+        panel.scope = { .windows }
+        var keys: [JumpKey] = []
+        panel.onKey = { keys.append($0) }
+        let old = NSApplication.shared.mainMenu
+        NSApplication.shared.mainMenu = bar
+        defer { NSApplication.shared.mainMenu = old }
+        #expect(panel.performKeyEquivalent(with: chord("q", 12)))
+        #expect(panel.performKeyEquivalent(with: chord("h", 4)))
+        #expect(keys.isEmpty)
+        // Not key, the panel claims nothing.
+        panel.keyedForTesting = false
+        panel.scope = { .shortcuts }
+        _ = panel.performKeyEquivalent(with: chord(",", 43))
+        #expect(keys.isEmpty)
+    }
+
+    /// The panel's own ⌘ chords never shadow a File or Edit chord
+    /// the field relies on (⌘W, ⌘A, ⌘C, ⌘V, ⌘X, ⌘Z): every
+    /// handed-on item is asked of `JumpKey` on every side, so a new panel
+    /// chord is checked without joining a list here.
+    @Test("the panel's chords and the handed-on menus do not overlap")
+    func panelChordsLeaveEditAlone() {
+        let bar = MainMenu.make(
+            settingsTarget: NSObject(),
+            settingsAction: #selector(NSObject.description)
+        )
+        let items = bar.items
+            .filter {
+                $0.identifier.map(MainMenu.panelChordMenus.contains)
+                    == true
+            }
+            .flatMap { $0.submenu?.items ?? [] }
+            .filter { !$0.keyEquivalent.isEmpty }
+        #expect(items.count >= 6)
+        for item in items {
+            let key = item.keyEquivalent.lowercased()
+            guard let code = Self.ansiCodes[key] else {
+                Issue.record("no key code for ⌘\(key)")
+                continue
+            }
+            for scope in JumpScope.allCases {
+                #expect(
+                    JumpKey.of(
+                        keyCode: code,
+                        modifiers: item.keyEquivalentModifierMask,
+                        scope: scope
+                    ) == nil,
+                    "the panel claims \(item.title)'s chord on \(scope)"
+                )
+            }
+        }
+    }
+
+    /// ANSI key codes of the characters a menu key equivalent uses.
+    private static let ansiCodes: [String: UInt16] = [
+        "a": 0, "s": 1, "d": 2, "f": 3, "h": 4, "g": 5, "z": 6,
+        "x": 7, "c": 8, "v": 9, "b": 11, "q": 12, "w": 13, "e": 14,
+        "r": 15, "y": 16, "t": 17, "1": 18, "2": 19, "3": 20,
+        "4": 21, "6": 22, "5": 23, "=": 24, "9": 25, "7": 26,
+        "-": 27, "8": 28, "0": 29, "o": 31, "u": 32, "i": 34,
+        "p": 35, "l": 37, "j": 38, "k": 40, ",": 43, "/": 44,
+        "n": 45, "m": 46, ".": 47,
+    ]
 }

@@ -10,8 +10,10 @@ private let jumpLog = Logger(
     category: "gui"
 )
 
-/// Jump to window (#1875): a key panel centred on the current
-/// screen, opened over a snapshot of every window KiwiDesk knows.
+/// The key panel (#1875, #2229, #2246): the window switcher, the
+/// shortcuts sheet and the layout picker, one panel at Spotlight's
+/// height on the screen under the pointer, opened over a snapshot
+/// of every window KiwiDesk knows.
 /// A pick closes it and hands the row to Core's `jump(to:)` or
 /// `moveHere(_:)`; Esc, ⌘W and a click away close it.
 @MainActor
@@ -79,15 +81,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         {
             return
         }
-        let snapshot = core.jumpSnapshot()
-        let model = JumpModel(
-            snapshot: snapshot,
-            icons: Self.icons(for: snapshot),
-            rowCap: Self.rowCap(
-                visibleHeight: screen?.visibleFrame.height ?? 900
-            ),
-            modifiers: NSEvent.modifierFlags
-        )
         let visible =
             screen?.visibleFrame
             ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
@@ -95,10 +88,15 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             visible: visible,
             shelves: core.shelfFrames()
         )
-        model.sheetCap = Self.sheetCap(visible: visible, area: area)
-        model.chords = Self.chords { [core] lua in
-            ShortcutsOpenBinding.comboGlyphs(core: core, lua: lua)
-        }
+        let snapshot = core.jumpSnapshot()
+        let model = JumpModel(
+            snapshot: snapshot,
+            icons: Self.icons(for: snapshot),
+            rowCap: Self.rowCap(visibleHeight: visible.height),
+            sheetCap: Self.sheetCap(visible: visible, area: area),
+            modifiers: NSEvent.modifierFlags
+        )
+        model.chords = liveChords()
         let panel = self.panel ?? makePanel()
         self.panel = panel
         self.currentModel = model
@@ -143,6 +141,13 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         jumpLog.log("KiwiDesk: jump front \(front, privacy: .public)")
         handBack.present(panel) { [weak self, presence] in
             self?.presence === presence && !presence.leaving
+        }
+    }
+
+    /// Each side's chord from the live bindings.
+    func liveChords() -> [JumpScope: String] {
+        Self.chords { [core] lua in
+            ShortcutsOpenBinding.comboGlyphs(core: core, lua: lua)
         }
     }
 
@@ -252,9 +257,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.onKey = { [weak model] in model?.handle($0) }
         panel.onModifiers = { [weak model] in
             model?.noteModifiers($0)
-        }
-        panel.onComposing = { [weak model] in
-            model?.noteComposing($0)
         }
         model.onPick = { [weak self] entry, moveHere in
             self?.pick(entry, moveHere: moveHere)

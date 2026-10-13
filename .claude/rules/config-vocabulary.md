@@ -397,8 +397,8 @@ synonym:
   section is where the two collide), and not "tier" either:
   *tier* is already spoken for twice over by `SettingTier` /
   row tiers (`docs/ui-patterns.md`) and the bars' dim tiers.
-- **shortcuts panel** — the read-only surface ⌃⌥K opens (#326),
-  since #2246 the key panel's Shortcuts side; its VoiceOver name.
+- **shortcuts panel** — the key panel's Shortcuts side, the
+  read-only list ⌃⌥K opens (#326, #2246); its VoiceOver name.
   Retired as names for it: *shortcuts reference*, *reference
   panel*. Binds **copy** — a label, a catalog value, CLI help
   text, `docs/` prose — and not identifiers, so
@@ -415,11 +415,13 @@ synonym:
   cannot see — but THIS surface is held:
   `ShortcutsPanelNounTests` asks, per catalog, that the panel's
   own accessibility name is the noun the shortcut opening it
-  already uses, and the same of each side of the ⌃⌥J / ⌃⌥L panel
+  already uses, and the same of every side of the key panel
   (#2245). **A panel a shortcut row opens joins that suite's
   `pairs` in the change that adds it.**
-- **window switcher** / **layout picker** — the two sides of the
-  ⌃⌥J / ⌃⌥L key panel, by their VoiceOver names (#2245); a side
+- **window switcher** / **layout picker** — the key panel's
+  Windows and Layouts sides, which ⌃⌥J and ⌃⌥L open, by their
+  VoiceOver names (#2245); with the shortcuts panel between them
+  the panel has three sides, J, K and L (#2246); a side
   name is translated, never kept as an English word. Retired as
   the panel's NAME: *Jump to window*, which stays its field
   prompt — the panel's own verb is *Jump* — and never a brand

@@ -49,6 +49,32 @@ enum MainMenu {
         }
     }
 
+    /// Whether any item of `bar` carries `event`'s chord — the
+    /// chords a key panel swallows rather than lets AppKit hand to
+    /// KiwiDesk's other menus.
+    static func holdsChord(
+        _ event: NSEvent,
+        in bar: NSMenu? = NSApplication.shared.mainMenu
+    ) -> Bool {
+        guard let bar,
+            let key = event.charactersIgnoringModifiers?.lowercased()
+        else { return false }
+        let mask: NSEvent.ModifierFlags = [
+            .command, .shift, .option, .control,
+        ]
+        let held = event.modifierFlags.intersection(mask)
+        func holds(_ menu: NSMenu) -> Bool {
+            menu.items.contains { item in
+                if let sub = item.submenu, holds(sub) { return true }
+                return !item.keyEquivalent.isEmpty
+                    && item.keyEquivalent.lowercased() == key
+                    && item.keyEquivalentModifierMask.intersection(mask)
+                        == held
+            }
+        }
+        return holds(bar)
+    }
+
     private static func submenu(_ title: String) -> NSMenuItem {
         let item = NSMenuItem()
         item.submenu = NSMenu(title: title)

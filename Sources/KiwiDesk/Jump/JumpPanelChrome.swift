@@ -46,10 +46,17 @@ extension JumpFooter {
     /// selection with the modifiers held now, read off `JumpKey`
     /// itself — ↩ where it picks, else the ⌘ digits. Navigation and
     /// bridges never light; the Shortcuts side picks nothing (#2246).
+    /// The index is into `hints`, whose order it follows: Jump,
+    /// Move here, the digits on Windows; Choose, Apply, the digits
+    /// on Layouts.
     var leading: Int? {
         guard hasSelection, scope != .shortcuts else { return nil }
         let held = modifiers.intersection([.shift, .command])
-        switch JumpKey.of(keyCode: 36, modifiers: held, scope: scope) {
+        switch JumpKey.of(
+            keyCode: JumpKey.returnKey,
+            modifiers: held,
+            scope: scope
+        ) {
         // Windows: ↩ Jump, ⇧↩ Move here; Layouts: ↩ Apply.
         case .pick(let moveHere):
             guard scope == .windows else { return 1 }
@@ -57,7 +64,8 @@ extension JumpFooter {
         default:
             break
         }
-        let digit = JumpKey.of(keyCode: 18, modifiers: held, scope: scope)
+        let one = UInt16(JumpKey.digitRows[0])
+        let digit = JumpKey.of(keyCode: one, modifiers: held, scope: scope)
         if case .quick = digit { return 2 }
         return nil
     }

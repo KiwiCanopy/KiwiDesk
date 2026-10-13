@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import CoreGraphics
 import Foundation
 import Testing
@@ -15,18 +16,26 @@ struct JumpPanelShapeTests {
     private typealias C = JumpPanelController
     private let visible = CGRect(x: 0, y: 0, width: 1440, height: 900)
 
-    @Test("a shelf on any edge but the top is cut from the area")
+    @Test("a shelf is cut by the edge Core says it sits on")
     func shelvesCutTheArea() {
-        let bottom = CGRect(x: 0, y: 0, width: 1440, height: 30)
-        #expect(C.clearArea(visible: visible, shelves: [bottom]).minY == 30)
-        let left = CGRect(x: 0, y: 0, width: 40, height: 900)
-        let leftCut = C.clearArea(visible: visible, shelves: [left])
-        #expect(leftCut.minX == 40 && leftCut.width == 1400)
-        #expect(leftCut.minY == 0)
-        let right = CGRect(x: 1400, y: 0, width: 40, height: 900)
-        #expect(C.clearArea(visible: visible, shelves: [right]).maxX == 1400)
-        let top = CGRect(x: 0, y: 870, width: 1440, height: 30)
-        #expect(C.clearArea(visible: visible, shelves: [top]) == visible)
+        func cut(_ frame: CGRect, _ edge: AppBarEdge) -> CGRect {
+            C.clearArea(
+                visible: visible,
+                shelves: [ShelfFrame(frame: frame, edge: edge)]
+            )
+        }
+        let bottom = cut(CGRect(x: 0, y: 0, width: 1440, height: 30), .bottom)
+        #expect(bottom.minY == 30 && bottom.maxY == 900)
+        let left = cut(CGRect(x: 0, y: 0, width: 40, height: 900), .left)
+        #expect(left.minX == 40 && left.width == 1400 && left.minY == 0)
+        let right = cut(CGRect(x: 1400, y: 0, width: 40, height: 900), .right)
+        #expect(right.maxX == 1400 && right.minX == 0)
+        let top = cut(CGRect(x: 0, y: 870, width: 1440, height: 30), .top)
+        #expect(top == visible)
+        // The edge decides, not the strip's shape: a square bottom
+        // strip still cuts from the bottom.
+        let square = cut(CGRect(x: 700, y: 0, width: 40, height: 40), .bottom)
+        #expect(square.minY == 40 && square.width == 1440)
     }
 
     /// A side shelf narrows the panel; it never collapses the sheet
@@ -36,10 +45,15 @@ struct JumpPanelShapeTests {
     func sheetCap() {
         let free = C.sheetCap(visible: visible, area: visible)
         let top = visible.maxY - visible.height * C.topFraction
-        #expect(free == min(top - 40, 720) - C.shortcutsChrome)
+        #expect(free == min(top - 40, C.maxPanelHeight) - C.shortcutsChrome)
         let side = C.clearArea(
             visible: visible,
-            shelves: [CGRect(x: 0, y: 0, width: 40, height: 900)]
+            shelves: [
+                ShelfFrame(
+                    frame: CGRect(x: 0, y: 0, width: 40, height: 900),
+                    edge: .left
+                )
+            ]
         )
         #expect(C.sheetCap(visible: visible, area: side) == free)
         let raised = CGRect(x: 0, y: 200, width: 1440, height: 700)
@@ -161,8 +175,70 @@ struct JumpPanelShapeTests {
         #expect(
             view.occurrences(of: "prompt: Text(model.scope.fieldName)") == 1
         )
-        #expect(view.occurrences(of: ".foregroundStyle(Color.clear)") == 0)
+        // No typing drawn clear under a stand-in, in any spelling.
+        #expect(view.occurrences(of: "Color.clear") == 0)
         #expect(view.occurrences(of: "fieldName }") == 0)
         #expect(view.occurrences(of: "maxHeight: model.sheetCap") == 1)
+    }
+
+    @Test("the controller hands the real shelves and area through")
+    func controllerWiresTheArea() throws {
+        let controller = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Jump/JumpPanelController.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        .split(whereSeparator: \.isWhitespace).joined()
+        for needle in [
+            "shelves:core.shelfFrames()",
+            "sheetCap:Self.sheetCap(visible:visible,area:area)",
+            "visible:visible,area:area)",
+            "Self.width(visibleWidth:area.width)",
+        ] {
+            #expect(controller.contains(needle), "\(needle)")
+        }
+    }
+
+    @Test("the model reads its selection and held modifiers")
+    func modelState() {
+        let empty = JumpModel(
+            snapshot: JumpSnapshot(entries: [], here: nil, hereIcon: nil),
+            icons: [:],
+            rowCap: 8,
+            modifiers: [.shift, .command]
+        )
+        #expect(!empty.hasSelection)
+        #expect(empty.heldModifiers == [.shift, .command])
+        let full = JumpModel(
+            snapshot: JumpSnapshot(
+                entries: [JumpListTests.row(1, "Safari")],
+                here: nil,
+                hereIcon: nil
+            ),
+            icons: [:],
+            rowCap: 8
+        )
+        #expect(full.hasSelection)
+        #expect(full.heldModifiers.isEmpty)
+    }
+
+    /// A layer switch re-reads the chords while the panel shows any
+    /// side, so the switch must redraw on the assignment itself.
+    @Test("a re-read chord redraws the switch")
+    func chordsPublish() {
+        let model = JumpModel(
+            snapshot: JumpSnapshot(entries: [], here: nil, hereIcon: nil),
+            icons: [:],
+            rowCap: 8
+        )
+        var changes = 0
+        let watch = model.objectWillChange.sink { changes += 1 }
+        model.chords = [.windows: "⌃⌥W"]
+        #expect(changes == 1)
+        watch.cancel()
     }
 }

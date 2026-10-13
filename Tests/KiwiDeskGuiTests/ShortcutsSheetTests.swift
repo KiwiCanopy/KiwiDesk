@@ -44,6 +44,17 @@ struct ShortcutsSheetTests {
         #expect(sheet.matchCount == 2)
     }
 
+    @Test("a section the query empties is dropped, the rest kept")
+    func emptiedSectionDrops() {
+        var sheet = ShortcutsSheet(reference: Self.reference)
+        sheet.setQuery("above")
+        #expect(sheet.shown?.controls.map(\.title) == ["Focus"])
+        LocalizationManager.shared.select("en")
+        let shown = try! #require(sheet.shown)
+        let view = ShortcutsSheetView(reference: shown, needle: "above")
+        #expect(view.sections(shown).map(\.title) == ["Focus"])
+    }
+
     @Test("an empty query shows the whole sheet")
     func emptyShowsAll() {
         let sheet = ShortcutsSheet(reference: Self.reference)
@@ -147,5 +158,38 @@ struct ShortcutsSheetTests {
         #expect(reference.controls.isEmpty)
         #expect(reference.apps.first?.ownApp == true)
         #expect(reference.custom.isEmpty)
+    }
+
+    /// The glyphs set at their own sites — Custom's Lua mark and
+    /// the gather badge — resolve where they are used.
+    @Test("Custom's and the gather badge's glyphs resolve at their sites")
+    func siteGlyphsResolve() throws {
+        let layer = KeyLayer(
+            name: KeyLayer.defaultName,
+            bindings: [
+                KeyBinding(combo: "control+option+9", lua: "print(1)")
+            ]
+        )
+        let reference = ShortcutsReferenceBuilder.build(
+            layer: layer,
+            spaces: [],
+            spaceIcons: [:],
+            desktops: [],
+            resizeStep: 50,
+            layerNames: [KeyLayer.defaultName]
+        )
+        let custom = try #require(reference.custom.first?.icon)
+        let gather = try #require(
+            ShortcutsReferenceBuilder.actionBadge(.gather)?.0
+        )
+        for symbol in [custom, gather] {
+            #expect(
+                NSImage(
+                    systemSymbolName: symbol,
+                    accessibilityDescription: nil
+                ) != nil,
+                "\(symbol) does not resolve"
+            )
+        }
     }
 }

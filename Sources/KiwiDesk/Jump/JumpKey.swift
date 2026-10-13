@@ -33,7 +33,7 @@ enum JumpKey: Equatable {
     private static let down: UInt16 = 125
     private static let pageUp: UInt16 = 116
     private static let pageDown: UInt16 = 121
-    private static let returnKey: UInt16 = 36
+    static let returnKey: UInt16 = 36
     private static let enter: UInt16 = 76
     private static let escapeKey: UInt16 = 53
     private static let tab: UInt16 = 48
@@ -44,7 +44,7 @@ enum JumpKey: Equatable {
 
     /// The number-row codes of 1–9, in order; a keypad digit is
     /// its row twin (`KeypadKeys`, #1074).
-    private static let digitRows: [UInt32] = KeypadKeys.digits
+    static let digitRows: [UInt32] = KeypadKeys.digits
         .filter { $0.legend != "0" }
         .sorted { $0.legend < $1.legend }
         .map(\.row)

@@ -1463,7 +1463,7 @@ the grey reads too. The argument is
 A control whose *only* consumer is off may still have a second
 one. KiwiShelf's "App glyph style" stays live even when no
 bar shows, because `iconSource` also drives the shortcuts
-panel's Apps band — check for a second reader before dimming.
+panel's Apps section — check for a second reader before dimming.
 
 The tree-wide half of the convention is guarded by suites that
 scan for a *shape* rather than listing the greyed controls,

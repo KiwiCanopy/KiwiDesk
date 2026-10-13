@@ -884,8 +884,9 @@ listed under Shortcuts & Gestures ▸ Focus, and `⌃⌥L` opens the same
 panel on its Layouts side, the **layout picker**
 ([`show_layout_picker`](lua-reference.md#show_layout_picker)), for
 the space on the screen under the pointer. `⌃⌥K` opens its
-Shortcuts side between the two, where typing searches your
-shortcuts; `Tab` and `⇧Tab` step through the three sides.
+Shortcuts side between the two
+([`show_shortcuts`](lua-reference.md#show_shortcuts)), where typing
+searches your shortcuts; `Tab` and `⇧Tab` step through the three sides.
 :::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each

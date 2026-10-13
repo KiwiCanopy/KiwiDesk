@@ -12,41 +12,49 @@ extension JumpPanelController {
         return min(max(rows, 8), 10)
     }
 
-    /// The visible area with every KiwiShelf strip on its edges
-    /// cut away — the one home for where the panel may stand, read
-    /// by its width, its place and the Shortcuts sheet's cap
-    /// (#2246). `NSScreen.visibleFrame` leaves the shelf in. A
-    /// strip wider than tall sits on the bottom or top edge, the
-    /// others on a side; the top's is ignored, the field standing
-    /// below it at `topFraction`.
-    static func clearArea(visible: CGRect, shelves: [CGRect]) -> CGRect {
+    /// The visible area with every KiwiShelf strip cut away by the
+    /// edge Core says it sits on — the one home for where the panel
+    /// may stand, read by its width, its place and the Shortcuts
+    /// sheet's cap (#2246). `NSScreen.visibleFrame` leaves the shelf
+    /// in. A top strip is ignored: the field stands below it at
+    /// `topFraction`.
+    static func clearArea(
+        visible: CGRect,
+        shelves: [ShelfFrame]
+    ) -> CGRect {
         var area = visible
-        for shelf in shelves where shelf.intersects(visible) {
-            if shelf.width >= shelf.height {
-                if shelf.midY < visible.midY {
-                    area.size.height -= max(shelf.maxY - area.minY, 0)
-                    area.origin.y = max(area.minY, shelf.maxY)
-                }
-            } else if shelf.midX < visible.midX {
-                let cut = max(shelf.maxX - area.minX, 0)
+        for shelf in shelves where shelf.frame.intersects(visible) {
+            let frame = shelf.frame
+            switch shelf.edge {
+            case .top:
+                break
+            case .bottom:
+                let cut = max(frame.maxY - area.minY, 0)
+                area.origin.y += cut
+                area.size.height -= cut
+            case .left:
+                let cut = max(frame.maxX - area.minX, 0)
                 area.origin.x += cut
                 area.size.width -= cut
-            } else {
-                area.size.width -= max(area.maxX - shelf.minX, 0)
+            case .right:
+                area.size.width -= max(area.maxX - frame.minX, 0)
             }
         }
         return area
     }
 
     /// The Shortcuts side's tallest sheet: the panel runs from its
-    /// field down to 40 pt above the clear area's bottom, never past
-    /// the 720 pt the ⌃⌥K sheet always capped at, less the field,
-    /// the button row and the footer (#2246).
+    /// field down to 40 pt above the clear area's bottom, never
+    /// taller than `maxPanelHeight`, less the field, the button row
+    /// and the footer (#2246).
     static func sheetCap(visible: CGRect, area: CGRect) -> CGFloat {
         let top = visible.maxY - visible.height * topFraction
         let below = top - area.minY - 40
-        return max(min(below, 720) - shortcutsChrome, 200)
+        return max(min(below, maxPanelHeight) - shortcutsChrome, 200)
     }
+
+    /// The tallest the panel stands on its Shortcuts side.
+    static let maxPanelHeight: CGFloat = 720
 
     /// What the Shortcuts side draws besides its sheet: the field,
     /// the button row, the footer and their dividers.

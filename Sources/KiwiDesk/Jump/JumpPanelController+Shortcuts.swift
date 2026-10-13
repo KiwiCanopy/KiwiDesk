@@ -14,11 +14,13 @@ extension JumpPanelController {
         }
     }
 
-    /// Re-reads the sheet on a layer switch (#603), where it shows.
+    /// A layer switch (#603) re-reads what the open panel shows
+    /// from the layer: the switch's chords on any side, and the
+    /// sheet where it shows.
     func reloadShortcutsIfShown() {
-        guard isOpen, let model = currentModel, model.scope == .shortcuts
-        else { return }
-        model.reloadShortcuts()
+        guard isOpen, let model = currentModel else { return }
+        model.chords = liveChords()
+        if model.scope == .shortcuts { model.reloadShortcuts() }
     }
 
     /// Builds the shortcuts reference for the active key layer
@@ -52,8 +54,8 @@ extension JumpPanelController {
         // spaces/icons/step for candidate rows. A transient
         // disagreement can only MISFILE a binding (into Inactive
         // or Custom), never hide or invent one — safe for a
-        // read-only glance panel, and the window closes itself on
-        // the next apply (#820).
+        // read-only glance, and a layer switch re-reads the sheet
+        // (#820, #2246).
         let reference = ShortcutsReferenceBuilder.build(
             layer: layer,
             // Every live Space, so a temporary or held Space's

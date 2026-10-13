@@ -67,7 +67,9 @@ extension ShortcutsReferenceBuilder {
         return nil
     }
 
-    /// Every symbol `verbIcon` can answer, for the resolve guard.
+    /// The symbols the Shortcuts side draws beyond `verbIcon`'s
+    /// Core marks — its own literals, Custom's Lua mark and the
+    /// gather badge — for the resolve guard.
     static let verbSymbols = [
         "rectangle.righthalf.inset.filled.arrow.right",
         "rectangle.lefthalf.inset.filled.arrow.left",

@@ -250,6 +250,9 @@ struct ShortcutsPanelScrollCueTests {
         let text = try Self.source("JumpShortcutsView.swift")
         for needle in [
             "Self.overflows(content: contentHeight, cap: maxHeight)",
+            // The writer as well as the reader: without it the
+            // height stays 0 and the cue never shows.
+            "key: SheetHeightKey.self",
             "onPreferenceChange(SheetHeightKey.self)",
             ".frame(maxHeight: maxHeight)",
         ] {
