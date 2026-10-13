@@ -63,7 +63,8 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             rowCap: Self.rowCap(
                 visibleHeight: screen?.visibleFrame.height ?? 900
             ),
-            modifiers: NSEvent.modifierFlags
+            modifiers: NSEvent.modifierFlags,
+            pointer: NSEvent.mouseLocation
         )
         let panel = self.panel ?? makePanel()
         self.panel = panel

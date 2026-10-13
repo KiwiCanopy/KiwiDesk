@@ -12,6 +12,8 @@ struct JumpLayoutsView: View {
     let onApply: (LayoutMode) -> Void
     let onKeep: () -> Void
     let onLayoutDefaults: (LayoutMode) -> Void
+    /// The pointer moved over a tile.
+    let onHover: (LayoutMode) -> Void
 
     static let tileWidth: CGFloat = 80
     static let tileSpacing: CGFloat = 6
@@ -51,8 +53,10 @@ struct JumpLayoutsView: View {
                     isSelected: index == list.selection,
                     isCurrent: mode == list.state.live,
                     isDimmed: list.isDimmed(index),
-                    showsNumber: commandHeld
-                ) { onApply(mode) }
+                    showsNumber: commandHeld,
+                    onActivate: { onApply(mode) },
+                    onHover: { onHover(mode) }
+                )
             }
         }
         .frame(maxWidth: .infinity)
@@ -116,6 +120,7 @@ struct JumpLayoutTile: View {
     let isDimmed: Bool
     let showsNumber: Bool
     let onActivate: () -> Void
+    let onHover: () -> Void
 
     var body: some View {
         Button(action: onActivate) { content }
@@ -125,6 +130,9 @@ struct JumpLayoutTile: View {
                 LayoutPickText.spoken(mode, current: isCurrent)
             )
             .accessibilityAddTraits(isSelected ? .isSelected : [])
+            .onContinuousHover { phase in
+                if case .active = phase { onHover() }
+            }
     }
 
     private var content: some View {

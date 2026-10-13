@@ -25,6 +25,9 @@ final class JumpModel: ObservableObject {
     @Published private(set) var leaving = false
 
     func leave() { leaving = true }
+    /// Where the pointer last moved, so a row sliding under a
+    /// still pointer selects nothing (#2229).
+    private var lastPointer: CGPoint
     /// Each app's icon, read once when the panel opens.
     let icons: [pid_t: NSImage]
     /// The most rows the list shows before it scrolls.
@@ -47,9 +50,11 @@ final class JumpModel: ObservableObject {
         snapshot: JumpSnapshot,
         icons: [pid_t: NSImage],
         rowCap: Int,
-        modifiers: NSEvent.ModifierFlags = []
+        modifiers: NSEvent.ModifierFlags = [],
+        pointer: CGPoint = .zero
     ) {
         list = JumpList(snapshot: snapshot)
+        lastPointer = pointer
         self.icons = icons
         self.rowCap = rowCap
         noteModifiers(modifiers)
@@ -130,6 +135,26 @@ final class JumpModel: ObservableObject {
         self.scope = scope
         onScopeChange()
         onAnnounce(scope.title)
+    }
+
+    /// The selection follows the pointer, on a real move only
+    /// (#2229 ▸ designer ruling): the panel opening under it, a
+    /// re-rank or a scroll slides rows under a still pointer and
+    /// moves nothing.
+    func hoverRow(_ index: Int, pointer: CGPoint) {
+        guard scope == .windows, pointerMoved(to: pointer) else { return }
+        list.select(index)
+    }
+
+    func hoverTile(_ mode: LayoutMode, pointer: CGPoint) {
+        guard scope == .layouts, pointerMoved(to: pointer) else { return }
+        layouts?.select(mode)
+    }
+
+    private func pointerMoved(to point: CGPoint) -> Bool {
+        guard point != lastPointer else { return false }
+        lastPointer = point
+        return true
     }
 
     func noteModifiers(_ flags: NSEvent.ModifierFlags) {

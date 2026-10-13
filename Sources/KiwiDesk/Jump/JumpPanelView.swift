@@ -105,7 +105,10 @@ struct JumpPanelView: View {
                     commandHeld: model.commandHeld,
                     onApply: { model.onApply($0) },
                     onKeep: { model.onKeep() },
-                    onLayoutDefaults: { model.onLayoutDefaults($0) }
+                    onLayoutDefaults: { model.onLayoutDefaults($0) },
+                    onHover: {
+                        model.hoverTile($0, pointer: NSEvent.mouseLocation)
+                    }
                 )
                 .transition(.opacity)
             }
@@ -202,10 +205,14 @@ struct JumpPanelView: View {
             number: JumpList.number(ofRow: index),
             commandHeld: model.commandHeld,
             shiftHeld: model.shiftHeld,
-            wayHere: match.entry.movesHere ? here : nil
-        ) { moveHere in
-            model.onPick(match.entry, moveHere)
-        }
+            wayHere: match.entry.movesHere ? here : nil,
+            onActivate: { moveHere in
+                model.onPick(match.entry, moveHere)
+            },
+            onHover: {
+                model.hoverRow(index, pointer: NSEvent.mouseLocation)
+            }
+        )
     }
 
     private func sectionHeader(_ section: JumpList.Section) -> some View {

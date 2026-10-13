@@ -115,3 +115,63 @@ struct JumpScopeModelTests {
         #expect(field?.frame == "%1$@ — Apply")
     }
 }
+
+/// The selection follows the pointer on a real move only (#2229 ▸
+/// designer ruling): a row or tile sliding under a still pointer —
+/// the panel opening there, a re-rank — moves nothing.
+@Suite("Jump to window hover")
+@MainActor
+struct JumpHoverTests {
+    private func model() -> JumpModel {
+        JumpModel(
+            snapshot: JumpSnapshot(
+                entries: [
+                    JumpListTests.row(1, "Mail", "Inbox"),
+                    JumpListTests.row(2, "Notes", "Ideas"),
+                ],
+                here: "1",
+                hereIcon: nil
+            ),
+            icons: [:],
+            rowCap: 8,
+            pointer: CGPoint(x: 10, y: 10)
+        )
+    }
+
+    @Test("a still pointer selects nothing, a moved one selects")
+    func movementOnly() {
+        let model = model()
+        model.hoverRow(1, pointer: CGPoint(x: 10, y: 10))
+        #expect(model.list.selection == 0)
+        model.hoverRow(1, pointer: CGPoint(x: 10, y: 30))
+        #expect(model.list.selection == 1)
+        // The list re-ranks under the same pointer: no move.
+        model.query = "mail"
+        model.hoverRow(0, pointer: CGPoint(x: 10, y: 30))
+        #expect(model.list.selection == 0)
+    }
+
+    @Test("a tile hover moves the selection, never the current mark")
+    func tileHover() {
+        let model = model()
+        model.loadLayouts = { _ in
+            LayoutPickList(
+                state: LayoutPickerState(
+                    space: "3",
+                    live: .grid,
+                    drifted: false,
+                    profile: nil,
+                    keepArmed: false
+                ),
+                names: JumpPanelController.layoutNames
+            )
+        }
+        model.setScope(.layouts)
+        model.hoverTile(.stack, pointer: CGPoint(x: 40, y: 10))
+        #expect(model.layouts?.selected == .stack)
+        #expect(model.layouts?.state.live == .grid)
+        // A row hover reaches nothing while Layouts shows.
+        model.hoverRow(1, pointer: CGPoint(x: 50, y: 10))
+        #expect(model.list.selection == 0)
+    }
+}

@@ -16,6 +16,8 @@ struct JumpRowView: View {
     /// changes nothing on this row.
     let wayHere: JumpRowText.Place?
     let onActivate: (_ moveHere: Bool) -> Void
+    /// The pointer moved over this row.
+    var onHover: () -> Void = {}
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
@@ -57,6 +59,9 @@ struct JumpRowView: View {
         .accessibilityLabel(JumpRowText.spoken(match.entry))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .modifier(MoveHereAction(entry: match.entry, run: onActivate))
+        .onContinuousHover { phase in
+            if case .active = phase { onHover() }
+        }
     }
 
     private var content: some View {
