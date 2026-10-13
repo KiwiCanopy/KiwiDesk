@@ -119,8 +119,15 @@ struct KiwiVisionCoreTests {
     func targetWatchedWithoutRings() {
         let core = makeCore()
         core.tiler.settings.borderStyle.enabled = false
+        // The request sent to the WindowServer, read at its seam.
+        var watched: Set<WindowID> = []
+        core.borders.watchOverride = {
+            watched = $0
+            return true
+        }
         core.vision.isOn = true
         core.updateBorders()
+        #expect(watched == [w1])
         #expect(core.borders.overlays.isEmpty)
         #expect(core.borders.visionTracked == [w1])
         var restacked: [WindowID] = []
@@ -173,11 +180,14 @@ struct KiwiVisionCoreTests {
         #expect(core.visionRequest().standDown == [DisplayID(77)])
     }
 
-    @Test("stopping the core turns KiwiVision off")
+    @Test("stopping the core turns KiwiVision off, unannounced")
     func stopClears() {
         let core = makeCore()
+        var heard: [Bool] = []
+        core.vision.onChange = { heard.append($0) }
         core.vision.isOn = true
         core.stop()
         #expect(!core.kiwiVisionIsOn)
+        #expect(heard.isEmpty)
     }
 }

@@ -106,6 +106,20 @@ struct BorderOrderCensusTests {
             "overlays[id]?.order(relativeTo:id.raw)"
             + "onWindowRestacked(id)"
         #expect(events.components(separatedBy: restack).count == 3)
+        // The stand-down is the shelf's verdict, filed by the one
+        // bar refresh, never a read of the plate's own.
+        let shelf = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Shelf.swift"
+            )
+        )
+        #expect(shelf.contains("noteVisionStandDown(standingDown)"))
+        let vision = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Vision.swift"
+            )
+        )
+        #expect(!vision.contains("shelfStandsDown("))
     }
 
     /// The #1959 hold is armed in one door, the switch's own
