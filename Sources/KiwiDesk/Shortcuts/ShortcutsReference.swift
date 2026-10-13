@@ -3,8 +3,8 @@ import KiwiDeskCore
 
 /// Builds `ShortcutsReference` from a live key layer (`KeybindingCatalog`).
 ///
-/// Suppresses `KiwiDesk.show_shortcuts()` from rows (`ShortcutsSelfRowTests`,
-/// #602). Unrecognized shortcuts fall through to the Custom band.
+/// Suppresses the key panel's openers from rows (`ShortcutsSelfRowTests`,
+/// #602, #2246). Unrecognized shortcuts fall through to the Custom band.
 @MainActor
 enum ShortcutsReferenceBuilder {
     static func build(
@@ -15,17 +15,17 @@ enum ShortcutsReferenceBuilder {
         resizeStep: Int,
         layerNames: [String]
     ) -> ShortcutsReference {
-        // Drop the panel's own opener from the working set BEFORE
-        // any band builds, so the suppression holds by
-        // construction. Scoped to callers entering HERE: the §2.1
+        // Drop the key panel's three openers from the working set
+        // BEFORE any band builds, so the suppression holds by
+        // construction: the panel's switch already prints each
+        // side's chord (#2246). Scoped to callers entering HERE: the §2.1
         // split cost the band builders `private`, so a caller
         // invoking one directly would re-leak the seeded ⌃⌥K row
         // `ShortcutsSelfRowTests` pins — a band builder is
         // `build`'s to call.
         var layer = layer
-        layer.bindings.removeAll {
-            $0.lua == ShortcutsOpenBinding.lua
-        }
+        let openers = Set(JumpScope.allCases.map(\.lua))
+        layer.bindings.removeAll { openers.contains($0.lua) }
 
         // Keyed by row identity (UUID), never `lua`: two bindings
         // can share a command's Lua with different combos (vim
@@ -87,7 +87,13 @@ enum ShortcutsReferenceBuilder {
             spaceIcons: spaceIcons,
             rows: rows
         )
-        let apps = buildApps(layer, consumed: &consumed)
+        // KiwiDesk's own app row leads Apps, as the editor's Open
+        // applications ▸ KiwiDesk does (#1520, #2246); without it a
+        // bound Open Settings fell through to Custom as raw Lua
+        // (#678 item 18).
+        let apps =
+            rows([KeybindingCatalog.openSettings])
+            + buildApps(layer, consumed: &consumed)
         let custom = buildCustom(layer, consumed: consumed)
 
         return ShortcutsReference(

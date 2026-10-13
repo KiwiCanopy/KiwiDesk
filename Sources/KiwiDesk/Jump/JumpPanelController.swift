@@ -20,7 +20,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// The keyed show and the close's dismiss distrust (#952).
     let handBack: PanelHandBack
     var panel: JumpPanel?
-    private var currentModel: JumpModel?
+    private(set) var currentModel: JumpModel?
+    /// Opens Settings on Shortcuts & Gestures, set by the app.
+    var onEditShortcuts: () -> Void = {}
     /// This opening; a fade a later show overtook orders nothing
     /// out.
     private var presence = PanelPresence()
@@ -86,6 +88,14 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             ),
             modifiers: NSEvent.modifierFlags
         )
+        let visible =
+            screen?.visibleFrame
+            ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
+        let area = Self.clearArea(
+            visible: visible,
+            shelves: core.shelfFrames()
+        )
+        model.sheetCap = Self.sheetCap(visible: visible, area: area)
         model.chords = Self.chords { [core] lua in
             ShortcutsOpenBinding.comboGlyphs(core: core, lua: lua)
         }
@@ -96,10 +106,8 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         self.presence = presence
         wire(model, panel)
         let glass = core.tiler.settings.shortcutPanelLiquidGlass
-        let width = Self.width(
-            visibleWidth: screen?.visibleFrame.width ?? 1440
-        )
-        if scope == .layouts { model.setScope(.layouts) }
+        let width = Self.width(visibleWidth: area.width)
+        if scope != .windows { model.setScope(scope) }
         let root = JumpPanelView(
             model: model,
             settings: core.tiler.settings,
@@ -116,9 +124,13 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.makeFirstResponder(nil)
         panel.contentView = hosting
         panel.setContentSize(hosting.fittingSize)
-        if let visible = screen?.visibleFrame {
+        if screen != nil {
             panel.setFrameOrigin(
-                Self.origin(size: panel.frame.size, visible: visible)
+                Self.origin(
+                    size: panel.frame.size,
+                    visible: visible,
+                    area: area
+                )
             )
         } else {
             panel.center()
@@ -279,6 +291,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         }
         panel.scope = { [weak model] in model?.scope ?? .windows }
         wireLayouts(model)
+        wireShortcuts(model)
     }
 
     // MARK: - NSWindowDelegate

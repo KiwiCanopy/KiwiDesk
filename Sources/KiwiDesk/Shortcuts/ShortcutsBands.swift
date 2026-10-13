@@ -4,12 +4,14 @@ import SwiftUI
 /// Shortcut reference row display (`ShortcutRow`).
 struct ShortcutRowView: View {
     let row: ShortcutRow
+    /// The Shortcuts side's query, drawn bold in the name (#2246).
+    @Environment(\.shortcutMatch) private var match
 
     var body: some View {
         HStack(spacing: 8) {
             leadingGlyph
                 .frame(width: 20, height: 20)
-            Text(row.label)
+            Text(label)
                 .font(
                     row.monospaced
                         ? .system(.callout, design: .monospaced)
@@ -40,6 +42,18 @@ struct ShortcutRowView: View {
         )
     }
 
+    /// The name with the query's match in bold.
+    private var label: AttributedString {
+        var text = AttributedString(row.label)
+        guard
+            let range = ShortcutsSheet.matchRange(of: match, in: row.label),
+            let lower = AttributedString.Index(range.lowerBound, within: text),
+            let upper = AttributedString.Index(range.upperBound, within: text)
+        else { return text }
+        text[lower..<upper].inlinePresentationIntent = .stronglyEmphasized
+        return text
+    }
+
     @ViewBuilder private var leadingGlyph: some View {
         if let glyph = row.glyph {
             Text(glyph)
@@ -63,112 +77,6 @@ struct ShortcutRowView: View {
                 .foregroundStyle(.secondary)
         } else {
             Color.clear
-        }
-    }
-}
-
-/// Titled subgroup container for shortcut rows (`ShortcutSubgroup`).
-struct ShortcutSubgroupView: View {
-    let subgroup: ShortcutSubgroup
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(subgroup.title)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-                .accessibilityAddTraits(.isHeader)
-            ForEach(subgroup.rows) { ShortcutRowView(row: $0) }
-        }
-    }
-}
-
-/// Band section header view.
-struct ShortcutsBandHeader: View {
-    let title: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.headline)
-                .accessibilityAddTraits(.isHeader)
-            Divider()
-        }
-    }
-}
-
-/// Two-column balanced shortcut controls band.
-struct ControlsBand: View {
-    let subgroups: [ShortcutSubgroup]
-
-    var body: some View {
-        let split = Self.balance(subgroups)
-        HStack(alignment: .top, spacing: 32) {
-            column(split.left)
-            if split.right.isEmpty {
-                Color.clear.frame(maxWidth: .infinity)
-            } else {
-                column(split.right)
-            }
-        }
-    }
-
-    private func column(
-        _ groups: [ShortcutSubgroup]
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            ForEach(groups) { ShortcutSubgroupView(subgroup: $0) }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    /// Balances subgroups across two columns by cumulative row count.
-    static func balance(
-        _ groups: [ShortcutSubgroup]
-    ) -> (left: [ShortcutSubgroup], right: [ShortcutSubgroup]) {
-        var left: [ShortcutSubgroup] = []
-        var right: [ShortcutSubgroup] = []
-        var leftHeight = 0
-        var rightHeight = 0
-        for group in groups {
-            let height = group.rows.count + 2
-            if leftHeight <= rightHeight {
-                left.append(group)
-                leftHeight += height
-            } else {
-                right.append(group)
-                rightHeight += height
-            }
-        }
-        return (left, right)
-    }
-}
-
-/// Grid band for application-specific shortcuts.
-struct AppsBand: View {
-    let rows: [ShortcutRow]
-
-    var body: some View {
-        let pairs = stride(from: 0, to: rows.count, by: 2).map {
-            Array(rows[$0..<min($0 + 2, rows.count)])
-        }
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(Array(pairs.enumerated()), id: \.offset) {
-                _,
-                pair in
-                HStack(alignment: .top, spacing: 32) {
-                    ForEach(pair) { row in
-                        ShortcutRowView(row: row)
-                            .frame(
-                                maxWidth: .infinity,
-                                alignment: .leading
-                            )
-                    }
-                    if pair.count == 1 {
-                        Color.clear
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-            }
         }
     }
 }

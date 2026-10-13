@@ -1,9 +1,28 @@
 import AppKit
 import KiwiDeskCore
 
-/// Shortcuts reference panel data builder (`ShortcutsReferenceBuilder`, #820).
-extension ShortcutsPanelController {
-    /// Builds shortcuts reference snapshot for active key layer.
+/// The key panel's Shortcuts side (#2246): the sheet it reads, and
+/// its bridge into Settings.
+extension JumpPanelController {
+    func wireShortcuts(_ model: JumpModel) {
+        model.loadShortcuts = { [weak self] in self?.buildReference() }
+        // No distrust: a close arms none, and the next own report
+        // is Settings coming forward (#952).
+        model.onEditShortcuts = { [weak self] in
+            guard let self, self.dismiss(distrusting: false) else { return }
+            self.onEditShortcuts()
+        }
+    }
+
+    /// Re-reads the sheet on a layer switch (#603), where it shows.
+    func reloadShortcutsIfShown() {
+        guard isOpen, let model = currentModel, model.scope == .shortcuts
+        else { return }
+        model.reloadShortcuts()
+    }
+
+    /// Builds the shortcuts reference for the active key layer
+    /// (`ShortcutsReferenceBuilder`, #820).
     func buildReference() -> ShortcutsReference? {
         let layers: [KeyLayer]
         let activeLayer: String

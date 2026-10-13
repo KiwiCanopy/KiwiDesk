@@ -16,14 +16,16 @@ enum JumpKey: Equatable {
     case quick(Int, moveHere: Bool)
     /// Esc: clears a query, then closes.
     case escape
-    /// ⇥ or ⇧⇥: the other scope, with the query cleared.
-    case toggleScope
+    /// ⇥ (forward) or ⇧⇥ (back): the next side, wrapping, with
+    /// the query cleared.
+    case stepScope(forward: Bool)
     /// ← / → in Layouts: one tile, never wrapping.
     case side(Int)
     /// ⌘S in Layouts: Keep in Profile.
     case keep
-    /// ⌘, in Layouts: Layout Defaults in Settings.
-    case layoutDefaults
+    /// ⌘, in Layouts or Shortcuts: that side's Settings page —
+    /// Layout Defaults, or Shortcuts & Gestures.
+    case settings
     /// Tab with ⌃ or ⌥ stays in the field.
     case swallow
 
@@ -59,10 +61,14 @@ enum JumpKey: Equatable {
         if scope == .layouts, let key = layouts(keyCode, held) {
             return key
         }
+        if scope != .windows, keyCode == comma, held == .command {
+            return .settings
+        }
         switch keyCode {
         case tab:
             return held.subtracting(.shift).isEmpty
-                ? .toggleScope : .swallow
+                ? .stepScope(forward: !held.contains(.shift))
+                : .swallow
         case escapeKey:
             return plain ? .escape : nil
         // Whatever is held: ⇧ previews Move here and ⌘ the numbers,
@@ -80,8 +86,7 @@ enum JumpKey: Equatable {
     }
 
     /// The Layouts scope's own keys: ← → move the tiles even while
-    /// the field has focus (owner ruling, #2229), ⌘S keeps, ⌘,
-    /// opens Layout Defaults.
+    /// the field has focus (owner ruling, #2229), ⌘S keeps.
     private static func layouts(
         _ keyCode: UInt16,
         _ held: NSEvent.ModifierFlags
@@ -92,8 +97,6 @@ enum JumpKey: Equatable {
             return .side(keyCode == left ? -1 : 1)
         case sKey:
             return held == .command ? .keep : nil
-        case comma:
-            return held == .command ? .layoutDefaults : nil
         default:
             return nil
         }

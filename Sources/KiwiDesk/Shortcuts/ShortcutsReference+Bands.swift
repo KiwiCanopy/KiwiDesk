@@ -72,14 +72,6 @@ extension ShortcutsReferenceBuilder {
                     )
                 )
             ),
-            // The editor's Open applications ▸ KiwiDesk rows
-            // (#1520) minus the panel's own opener. Without it a
-            // bound Open Settings fell through to Custom and
-            // rendered as raw untranslated Lua (#678 item 18).
-            ShortcutSubgroup(
-                title: L("app.name", "KiwiDesk"),
-                rows: rows([KeybindingCatalog.openSettings])
-            ),
             ShortcutSubgroup(
                 title: L(
                     "shortcuts.section.switch_layers",

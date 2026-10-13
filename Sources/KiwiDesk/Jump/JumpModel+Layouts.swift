@@ -40,7 +40,7 @@ extension JumpModel {
             if layouts.state.keepArmed, layouts.state.profile != nil {
                 onKeep()
             }
-        case .layoutDefaults:
+        case .settings:
             onLayoutDefaults(layouts.selected ?? layouts.state.live)
         case .escape:
             if layouts.query.isEmpty {
@@ -48,19 +48,9 @@ extension JumpModel {
             } else {
                 setLayoutQuery("")
             }
-        case .step, .page, .toggleScope, .swallow:
+        case .step, .page, .stepScope, .swallow:
             break
         }
-    }
-
-    /// The field's stand-in for the typing in Layouts: the
-    /// selected layout, or nothing where the query matches none.
-    var layoutField: JumpGhost.Field? {
-        guard let layouts, let mode = layouts.selected else { return nil }
-        return JumpGhost.layoutField(
-            name: mode.displayName,
-            query: layouts.query
-        )
     }
 
     /// What VoiceOver hears as the Layouts selection moves.

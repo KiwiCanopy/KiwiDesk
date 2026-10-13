@@ -77,6 +77,9 @@ final class ShelfManager {
     }
     private var last: [Key: Shelf] = [:]
 
+    /// Every shelf strip last laid, in AX coordinates.
+    var strips: [CGRect] { last.values.map(\.strip) }
+
     /// Shows `shelves`, fading out every shelf absent from them —
     /// a display's second one included, once its bars re-fuse —
     /// and retiring it once it has left (#1838).
