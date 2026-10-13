@@ -63,6 +63,41 @@ struct CommandBarIgnoreTests {
         )
     }
 
+    /// Spotlight on macOS 27 is `com.apple.campo`'s layer-23
+    /// panel, whose AX lists all three title-bar buttons: managed
+    /// as a float, its own resize as results appeared read as
+    /// unsolicited and the fit moved it (device, 2026-10-13). A
+    /// layer-0 window of the app still tiles.
+    @Test("Spotlight's panel takes no button escape")
+    func spotlightPanelIgnored() {
+        #expect(
+            FloatDetection.shouldIgnore(
+                bundleID: "com.apple.campo",
+                layer: 23,
+                isAccessory: true,
+                rules: noRules,
+                titlebarButton: true
+            )
+        )
+        #expect(
+            !FloatDetection.shouldIgnore(
+                bundleID: "com.apple.campo",
+                layer: 0,
+                isAccessory: true,
+                rules: noRules,
+                titlebarButton: true
+            )
+        )
+        #expect(
+            FloatDetection.isBuiltInIgnoredPanel(
+                bundleID: "com.apple.campo",
+                layer: 23,
+                isAccessory: true,
+                titlebarButton: true
+            )
+        )
+    }
+
     @Test("Accessory layer-0 windows stay managed floats")
     func accessoryNormalWindowTracked() {
         #expect(
