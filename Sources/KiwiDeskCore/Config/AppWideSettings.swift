@@ -18,6 +18,10 @@ public struct AppWideSettings: Equatable, Sendable {
     /// ON by default: the instant switch removed the slide that
     /// was the cue.
     public var desktopCue = true
+    /// Whether an explicit Space switch shows the plate naming the
+    /// Space it landed on, where no Space Bar is drawn
+    /// (`space.cue`, #2228). ON by default: the switch is instant.
+    public var spaceCue = true
     /// Whether `cycle_mode` shows the plate with the cycle list
     /// and the layout it landed on (`mode.cue`, #2144). ON by
     /// default: the press asked for it.
@@ -56,6 +60,11 @@ extension AppWideSettings {
         var cue: Bool?
     }
 
+    /// `gui.json`'s `space` group (#2228) — additive, as `desktop`.
+    struct Space: Codable {
+        var cue: Bool?
+    }
+
     /// `gui.json`'s `mode` group (#2144) — additive, as `desktop`.
     struct Mode: Codable {
         var cue: Bool?
@@ -63,17 +72,19 @@ extension AppWideSettings {
 
     /// The stored value, or nil when neither #1741 group is
     /// present — the file predates #1741 and the crossing is still
-    /// owed. The `desktop` (#2142) and `mode` (#2144) groups
-    /// crossed nothing, so they never decide that.
+    /// owed. The `desktop` (#2142), `space` (#2228) and `mode`
+    /// (#2144) groups crossed nothing, so they never decide that.
     init?(
         refusal: Refusal?,
         quit: Quit?,
         desktop: Desktop? = nil,
+        space: Space? = nil,
         mode: Mode? = nil
     ) {
         guard refusal != nil || quit != nil else { return nil }
         self.init()
         if let cue = desktop?.cue { desktopCue = cue }
+        if let cue = space?.cue { spaceCue = cue }
         if let cue = mode?.cue { modeCue = cue }
         if let sound = refusal?.sound { refusalSound = sound }
         if let depth = quit?.gridTargetDepth {
@@ -87,5 +98,6 @@ extension AppWideSettings {
         Quit(gridTargetDepth: quitGridTargetDepth, layout: quitLayout)
     }
     var desktop: Desktop { Desktop(cue: desktopCue) }
+    var space: Space { Space(cue: spaceCue) }
     var mode: Mode { Mode(cue: modeCue) }
 }

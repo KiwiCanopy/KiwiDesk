@@ -78,14 +78,6 @@ func makeTestCore(
     // Space would read the focus before it landed. A flip suite
     // states the read itself.
     core.monocleFlip.reduceMotion = { true }
-    // The plate slide's read (#1956), pinned the same way: a
-    // playing slide holds the incoming windows' writes until it
-    // lands, which every switching suite would read too early. A
-    // slide suite states the read, and keeps the panel and the
-    // WindowServer stack read inert, which default live.
-    core.spaceSlide.reduceMotion = { true }
-    core.spaceSlide.present = { _ in }
-    core.spaceSlide.stackOrder = { [:] }
     // The focused ring's arrival hold (#1959) reads the render
     // clock, the host's Reduce Motion and a live timer: frozen and
     // inert here, so ring visibility after a switch never depends

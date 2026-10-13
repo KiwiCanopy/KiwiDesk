@@ -34,7 +34,7 @@ struct SettingsCodingTests {
                 "mouse_resize", "new_window_placement_override",
                 "shortcut_panel",
                 "floating", "resize", "space",
-                "space_bar", "space_switch",
+                "space_bar",
                 "sticky", "swap_skips_cascade",
             ]
         )
@@ -134,7 +134,6 @@ struct SettingsCodingTests {
         // Toggles (issue #11) and duration knobs (issue #51).
         // Keys mirror the Lua names per the one-vocabulary rule.
         let animations = try object(root["animations"])
-        #expect(animations["space_change"] as? String == "cue")
         #expect(animations["on_scrolling"] as? Bool == true)
         #expect(animations["on_window_resize"] as? Bool == true)
         #expect(animations["on_window_swap"] as? Bool == true)

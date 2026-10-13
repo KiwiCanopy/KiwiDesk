@@ -1,34 +1,7 @@
 import Foundation
 
-/// How a Space switch shows itself (#2143), `animations.space_change`.
-public enum SpaceChangeStyle: String, Codable, CaseIterable, Sendable {
-    /// The screen changes at once.
-    case instant
-    /// At once, and #2142's plate names the Space for a moment.
-    case cue
-    /// The #1956 plate slide; Reduce Motion shows the plate instead.
-    case slide
-}
-
 /// Per-trigger animation configuration and duration settings (#11, #50).
 public struct AnimationSettings: Sendable, Equatable, Codable {
-    /// How a Space switch shows itself (#2143): at once, at once
-    /// with the plate naming the Space, or the #1956 plate slide.
-    /// The plate by default; a stored `on_space_change` crosses
-    /// once (`SpaceChangeStyleMigrationTests`).
-    public var spaceChange: SpaceChangeStyle = .cue
-
-    /// The plate slide's pace in milliseconds (#1931): the strip's
-    /// spring response, its fades scaling with it. The default is
-    /// the slide's own timing, so an unset file plays as before.
-    public var spaceChangeDurationMS = spaceChangeDefaultMS {
-        didSet {
-            spaceChangeDurationMS = Self.clampSpaceChangeMS(
-                spaceChangeDurationMS
-            )
-        }
-    }
-
     /// Animate scrolling layout viewport shifts.
     public var onScrolling = true
 
@@ -86,28 +59,12 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// The flip's band: below 100 ms the plate is a flash, not a
     /// turn.
     public static let flipDurationBand = 100...1000
-    /// The plate slide's default: its own timing (owner,
-    /// 2026-10-09, #1931 — the steadiest pace under GPU load, and a
-    /// slower one lengthens the blur, not the readable plates).
-    /// Moving it moves a stored default and owes profiles.md's
-    /// crossing question (#1369).
-    public static let spaceChangeDefaultMS = 300
-    /// The slide's band: below it the strip is a jump; above it a
-    /// switch outlasts the hand that pressed it.
-    public static let spaceChangeDurationBand = 150...1000
     /// The shelf glide's band (owner, 2026-09-30): below half a
     /// second it barely reads on a decelerating curve.
     public static let shelfDurationBand = 500...2000
 
     static func clampMS(_ ms: Int) -> Int {
         min(max(ms, durationBand.lowerBound), durationBand.upperBound)
-    }
-
-    static func clampSpaceChangeMS(_ ms: Int) -> Int {
-        min(
-            max(ms, spaceChangeDurationBand.lowerBound),
-            spaceChangeDurationBand.upperBound
-        )
     }
 
     static func clampShelfMS(_ ms: Int) -> Int {
@@ -125,8 +82,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     }
 
     enum CodingKeys: String, CodingKey, CaseIterable {
-        case spaceChange = "space_change"
-        case spaceChangeDurationMS = "space_change_duration"
         case onScrolling = "on_scrolling"
         case onWindowResize = "on_window_resize"
         case onWindowSwap = "on_window_swap"
@@ -144,17 +99,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(
             keyedBy: CodingKeys.self
-        )
-        spaceChange =
-            try container.decodeIfPresent(
-                SpaceChangeStyle.self,
-                forKey: .spaceChange
-            ) ?? .cue
-        spaceChangeDurationMS = Self.clampSpaceChangeMS(
-            try container.decodeIfPresent(
-                Int.self,
-                forKey: .spaceChangeDurationMS
-            ) ?? Self.spaceChangeDefaultMS
         )
         onScrolling =
             try container.decodeIfPresent(
@@ -210,12 +154,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 forKey: .shelfDurationMS
             ) ?? 750
         )
-    }
-
-    /// The plate slide's timings as a share of the plan's own.
-    var spaceSlidePace: Double {
-        Double(spaceChangeDurationMS)
-            / Double(SpaceSlidePlan.baseResponseMS)
     }
 
     /// The shelf glide's length in seconds, nothing while it is off.

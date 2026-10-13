@@ -227,8 +227,7 @@ enum HomeCardContent {
 }
 
 extension AnimationSettings {
-    /// True when any window animation is enabled. The Space
-    /// switch picker is its own row, outside the master (#2143).
+    /// True when any window animation is enabled.
     var anyEnabled: Bool {
         onWindowResize || onWindowSwap || onRelayout
     }

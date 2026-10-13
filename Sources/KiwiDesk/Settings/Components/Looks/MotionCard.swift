@@ -27,8 +27,8 @@ struct MotionCard: View {
                 // header, so the `?` stays a live #527 anchor —
                 // the `.motion` container's `.runtime` census
                 // gate (#171) — per row, less the census's
-                // exemption (#2143); parallel `GreyOut`s, never
-                // nested (gui.md).
+                // exemption; parallel `GreyOut`s, never nested
+                // (gui.md).
                 ForEach(ColorsRowOrder.motionAtRest, id: \.id) { key in
                     row(for: key).modifier(GreyOut(active: greyed(key)))
                 }
@@ -48,15 +48,10 @@ struct MotionCard: View {
     }
 
     /// Whether `key` greys: the card's Reduce Motion gate, less the
-    /// census's exemption — and the slide's duration while the
-    /// picker is not on Slide, its row's own gate (#2143), one
-    /// `GreyOut` per row, never nested (gui.md).
+    /// census's exemption, one `GreyOut` per row, never nested
+    /// (gui.md).
     private func greyed(_ key: SettingKey) -> Bool {
-        if reduceMotion && !key.placement.exemptFromContainerGate {
-            return true
-        }
-        return key == .colours(.animationsSpaceChangeDurationMS)
-            && animations.spaceChange.wrappedValue != .slide
+        reduceMotion && !key.placement.exemptFromContainerGate
     }
 
     private var disclosure: some View {
