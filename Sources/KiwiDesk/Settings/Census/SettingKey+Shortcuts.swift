@@ -14,6 +14,9 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case spaceHistory = "config.spaceHistory"
     case goToSpace = "keybinding.go_to_space (x N spaces)"
     case focusDesktop = "keybinding.focus_desktop (x N desktops)"
+    /// Jump to window (#1875), its row named by the panel's own
+    /// label (`JumpPanelView.fieldName`).
+    case jumpToWindow = "keybinding.show_jump_to_window"
     case swapDir = "keybinding.swap_dir (x4)"
     case moveWindowToTrack =
         "keybinding.move_window_to_{prev,next}_track"
@@ -67,7 +70,7 @@ extension ShortcutsKey {
                 gate: .runtime(.layersExist)
             )
         case .focusDir, .spaceStep, .spaceHistoryStep, .spaceHistory,
-            .goToSpace:
+            .goToSpace, .jumpToWindow:
             return .row(.shortcuts, .focus, .atRest)
         case .swapDir, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
@@ -154,7 +157,7 @@ extension ShortcutsKey {
             .moveWindowToTrack, .swapWithTrack,
             .moveToSpace, .moveToSpaceFollow, .focusDesktop,
             .moveToDesktop, .moveToDesktopFollow, .switchToLayer,
-            .layoutCycle, .layoutPicker:
+            .layoutCycle, .layoutPicker, .jumpToWindow:
             return .dynamic
         case .layersIcon:
             return .text("shortcuts.menu_bar_icon")

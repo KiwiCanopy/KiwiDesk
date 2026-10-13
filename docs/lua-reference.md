@@ -4794,6 +4794,42 @@ KiwiDesk.bind("ctrl+alt+shift+comma", function()
 end)
 ```
 
+:::unreleased
+### show_jump_to_window
+
+**Expects:** nothing.
+
+**Does:** opens **Jump to window**, a search panel centred on the
+screen under the pointer, or closes it if it is already open. It
+lists every window KiwiDesk knows except the one you are in —
+open windows first, most recently used first, including those up
+on another macOS Desktop, then minimized windows, then one row per
+hidden app. Typing narrows the list by app name, then by title.
+
+- **Return** goes to the selected window, switching Space or
+  Desktop as needed; on a minimized window it brings it back, on a
+  hidden app it unhides it.
+- **⇧Return** moves the window into the Space you are on instead,
+  as [move_here](#move_here) does.
+- **⌘1** … **⌘9** pick one of the first nine results.
+- **Escape** clears the typing, then closes the panel; **⌘W**, a
+  click elsewhere or another app taking the keyboard close it too.
+
+A window in native full screen is listed, and Return activates its
+app rather than switching to its full-screen Space.
+
+Seeded on **`⌃⌥J`** in the base layer, and offered under
+**Shortcuts & Gestures ▸ Focus** ("Jump to window").
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+space", function()
+    KiwiDesk.show_jump_to_window()
+end)
+```
+:::
+
 ## Keybindings
 
 ```lua

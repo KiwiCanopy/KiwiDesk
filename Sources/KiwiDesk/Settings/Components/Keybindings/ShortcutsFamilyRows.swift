@@ -73,6 +73,8 @@ struct ShortcutsFamilyRows {
             return KeybindingCatalog.layoutCycleRows
         case .layoutPicker:
             return [KeybindingCatalog.showLayoutPicker]
+        case .jumpToWindow:
+            return [KeybindingCatalog.jumpToWindow]
         case .growWidth:
             return [resizeRow(.growWidth)]
         case .shrinkWidth:

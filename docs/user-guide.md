@@ -886,7 +886,9 @@ reach it, and Shortcuts & Gestures can give it a key of its own.
 previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥L` opens
 a menu of every layout at the pointer
 ([`show_layout_picker`](lua-reference.md#show_layout_picker)) for
-the space on that screen.
+the space on that screen. `⌃⌥J` opens **Jump to window**
+([`show_jump_to_window`](lua-reference.md#show_jump_to_window)),
+listed under Shortcuts & Gestures ▸ Focus.
 :::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each
