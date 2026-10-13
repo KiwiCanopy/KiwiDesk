@@ -53,37 +53,50 @@ struct SharedLookMotionTests {
         try core.profiles.read(name: name)
     }
 
-    /// Saved last, the own profile is the live one, so the election
-    /// falls to the first follower by name — never the own one.
-    @Test("the load elects a follower's animations")
-    func loadElectsFromAFollower() throws {
+    private func load(_ name: String, _ core: KiwiCore) {
+        #expect(
+            core.execute("load_profile", args: [.string(name)])
+                .isSuccess
+        )
+    }
+
+    private func duration(_ name: String, _ core: KiwiCore) throws -> Int {
+        try stored(name, core).settings.animations.durationMS
+    }
+
+    /// The boot shape: nothing adopted, so the load elects nothing
+    /// and the first apply of a follower elects its animations.
+    @Test("the first apply of a follower elects its animations")
+    func followerApplyElects() throws {
         let core = try makeCore()
         try core.profiles.save(profile("Calm", duration: 300))
         try core.profiles.save(profile("Fast", duration: 100))
         try core.profiles.save(profile("Odd", duration: 50, look: .own))
+        core.profiles.resetAdoption()
         core.prepareSharedLook()
+        #expect(core.sharedLookLedger.motionOwed)
+        load("Fast", core)
         #expect(!core.sharedLookLedger.motionOwed)
         let shared = core.guiConfigStore.load()?.look
-        #expect(shared?.style["animations.duration"] == .number(300))
-        #expect(try stored("Calm", core).look == nil)
-        // A follower that differs keeps its own look, and its speed.
-        #expect(try stored("Fast", core).look == .own)
-        #expect(
-            try stored("Fast", core).settings.animations.durationMS == 100
-        )
-        // An own profile is never touched.
+        #expect(shared?.style["animations.duration"] == .number(100))
+        #expect(try stored("Fast", core).look == nil)
+        // Another follower that differs keeps its own, and its speed.
+        #expect(try stored("Calm", core).look == .own)
+        #expect(try duration("Calm", core) == 300)
         #expect(try stored("Odd", core).look == .own)
+        #expect(try duration("Odd", core) == 50)
     }
 
-    @Test("the live follower is the one elected")
-    func liveFollowerIsElected() throws {
+    @Test("an own profile elects nothing")
+    func ownApplyElectsNothing() throws {
         let core = try makeCore()
         try core.profiles.save(profile("Calm", duration: 300))
-        try core.profiles.save(profile("Work", duration: 500))
+        try core.profiles.save(profile("Odd", duration: 50, look: .own))
+        core.profiles.resetAdoption()
         core.prepareSharedLook()
-        let shared = core.guiConfigStore.load()?.look
-        #expect(shared?.style["animations.duration"] == .number(500))
-        #expect(try stored("Calm", core).look == .own)
+        load("Odd", core)
+        #expect(core.sharedLookLedger.motionOwed)
+        #expect(try stored("Calm", core).look == nil)
     }
 
     /// The frozen copy wears the shared styling it ran, not the
@@ -95,7 +108,9 @@ struct SharedLookMotionTests {
             profile("Stale", duration: 100, fill: "#0A0B0C")
         )
         try core.profiles.save(profile("Work", duration: 300))
+        core.profiles.resetAdoption()
         core.prepareSharedLook()
+        load("Work", core)
         let stale = try stored("Stale", core)
         #expect(stale.look == .own)
         #expect(
@@ -105,25 +120,56 @@ struct SharedLookMotionTests {
         #expect(stale.settings.animations.durationMS == 100)
     }
 
-    /// The real write shape: the file is written, then the look
-    /// write lands — a styling and motion edit keeps its writer
-    /// following and reaches the other followers.
-    @Test("a look write after the election keeps its writer")
-    func writeKeepsItsWriter() throws {
+    /// The real write shape with the crossing still owed: the file
+    /// is written, then the look write lands — its writer elects,
+    /// stays following, and its styling reaches the followers left.
+    @Test("a look write while owed elects its writer")
+    func writeElectsItsWriter() throws {
         let core = try makeCore()
-        try core.profiles.save(profile("Calm", duration: 300))
+        try core.profiles.save(profile("Calm", duration: 500))
+        try core.profiles.save(profile("Fast", duration: 100))
         try core.profiles.save(profile("Work", duration: 300))
+        core.profiles.resetAdoption()
         core.prepareSharedLook()
         var work = try stored("Work", core)
         work.settings.animations.durationMS = 500
         work.settings.kiwishelf.fillColor = "#102030"
         try core.profiles.write(work)
         core.commitSharedLook(ofProfile: "Work")
+        #expect(!core.sharedLookLedger.motionOwed)
         #expect(try stored("Work", core).look == nil)
         let calm = try stored("Calm", core)
         #expect(calm.look == nil)
-        #expect(calm.settings.animations.durationMS == 500)
         #expect(calm.settings.kiwishelf.fillColor == "#102030")
+        #expect(try stored("Fast", core).look == .own)
+        #expect(try duration("Fast", core) == 100)
+    }
+
+    /// No `gui.json` write, no profile write: the crossing stays
+    /// owed for the next apply.
+    @Test("a failed write leaves it owed and every profile as it was")
+    func failedWriteChangesNothing() throws {
+        let core = try makeCore()
+        try core.profiles.save(profile("Calm", duration: 300))
+        try core.profiles.save(profile("Fast", duration: 100))
+        core.profiles.resetAdoption()
+        core.prepareSharedLook()
+        let config = core.guiConfigStore.url
+        let directory = config.deletingLastPathComponent()
+        let manager = FileManager.default
+        try manager.setAttributes(
+            [.posixPermissions: 0o555],
+            ofItemAtPath: directory.path
+        )
+        defer {
+            try? manager.setAttributes(
+                [.posixPermissions: 0o755],
+                ofItemAtPath: directory.path
+            )
+        }
+        core.settleSharedMotion(electing: try stored("Calm", core))
+        #expect(core.sharedLookLedger.motionOwed)
+        #expect(try stored("Fast", core).look == nil)
     }
 
     @Test("a shared look that carries motion owes no election")

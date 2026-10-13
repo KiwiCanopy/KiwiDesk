@@ -31,10 +31,10 @@ extension KiwiCore {
     func recordLookWrite(of profile: Profile) {
         guard profile.look == nil, sharedLook != nil, isGuiManaged
         else { return }
-        // A crossing a failed load write left owed settles first,
-        // or the re-stamp would hand this profile's animations to
-        // every follower that ran its own (#2176).
-        settleSharedMotion()
+        // An owed motion crossing elects this writer first, or the
+        // re-stamp would hand its animations to every follower that
+        // ran its own (#2176).
+        settleSharedMotion(electing: profile)
         let written = LookBody(of: profile.settings)
         guard written != sharedLook else { return }
         landSharedLook(written)
