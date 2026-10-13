@@ -26,6 +26,16 @@ struct OpenOrFocusSeams {
         }?.processIdentifier
     }
 
+    /// The bundle id of a running app whose localized name is
+    /// `name`, case-insensitively — read only to name the id in an
+    /// app verb's refusal (#2222), never to resolve the verb.
+    var bundleIDNamed: @MainActor (String) -> String? = { name in
+        NSWorkspace.shared.runningApplications.first {
+            $0.localizedName?.caseInsensitiveCompare(name)
+                == .orderedSame
+        }?.bundleIdentifier
+    }
+
     /// How many windows the app has up, and which are parked.
     var census: @MainActor (pid_t) -> KiwiCore.AppWindowCensus =
         KiwiCore.readAppWindowCensus

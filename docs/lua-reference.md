@@ -4186,6 +4186,12 @@ the identifier for you. To find one by hand:
   display `app` name.
 - Or `mdls -name kMDItemCFBundleIdentifier /Applications/Safari.app`.
 
+:::unreleased
+An app verb passed a running app's name instead is still refused,
+and the refusal names that app's identifier:
+`app not found: safari — did you mean 'com.apple.Safari'?`.
+:::
+
 Identifiers are matched case-insensitively. An app with no bundle
 identifier (a rare unbundled helper process) cannot be targeted
 by a rule.

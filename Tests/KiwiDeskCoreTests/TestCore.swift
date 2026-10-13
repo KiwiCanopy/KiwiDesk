@@ -123,6 +123,7 @@ func makeTestCore(
     // pid itself.
     core.openOrFocus.runningAppPID = { _ in nil }
     core.openOrFocus.openApp = { _, _ in false }
+    core.openOrFocus.bundleIDNamed = { _ in nil }
     // A Space Bar menu pops modally and would hang the run (#1528).
     core.spaceBars.glyphActions.present = { _, _ in }
     // A hover's dwell would open the peek's panel on a live
