@@ -29,8 +29,9 @@ final class JumpModel: ObservableObject {
     /// still pointer selects nothing (#2229).
     private var lastPointer: CGPoint
     /// The pointer now — the panel's one live read; a test pins
-    /// it.
-    var currentPointer: () -> CGPoint = { NSEvent.mouseLocation }
+    /// it, and passes `pointer:` to `init`.
+    static let livePointer: () -> CGPoint = { NSEvent.mouseLocation }
+    var currentPointer = JumpModel.livePointer
     /// Each app's icon, read once when the panel opens.
     let icons: [pid_t: NSImage]
     /// The most rows the list shows before it scrolls.
@@ -57,8 +58,7 @@ final class JumpModel: ObservableObject {
         pointer: CGPoint? = nil
     ) {
         list = JumpList(snapshot: snapshot)
-        lastPointer = .zero
-        lastPointer = pointer ?? currentPointer()
+        lastPointer = pointer ?? Self.livePointer()
         self.icons = icons
         self.rowCap = rowCap
         noteModifiers(modifiers)

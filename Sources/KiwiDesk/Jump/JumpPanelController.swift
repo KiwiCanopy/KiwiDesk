@@ -254,7 +254,8 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         // stack still lays that scope out.
         model.onScopeChange = { [weak self] in
             guard let self else { return }
-            let delay = self.reduceMotion() ? 0 : 0.14
+            let delay =
+                self.reduceMotion() ? 0 : JumpPanelView.scopeFade + 0.02
             DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
                 self.refit(animated: true)
             }

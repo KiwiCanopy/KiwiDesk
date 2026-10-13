@@ -43,6 +43,10 @@ struct LayoutPickListTests {
         #expect(list.selected == .monocle)
         let monocle = LayoutMode.allCases.firstIndex(of: .monocle)!
         #expect(list.matches == [monocle])
+        // "s" starts Stack and Scrolling and is only inside BSP,
+        // which is drawn first: the prefix still wins.
+        list.setQuery("s")
+        #expect(list.selected == .stack)
     }
 
     @Test("non-matches dim and stay in place")
@@ -58,11 +62,13 @@ struct LayoutPickListTests {
 
     @Test("no match selects nothing; clearing returns to the live")
     func noMatch() {
-        var list = list(live: .bsp)
+        // Not the first tile, so "back to live" and "back to the
+        // first tile" answer apart.
+        var list = list(live: .grid)
         list.setQuery("xyz")
         #expect(list.selected == nil)
         list.setQuery("")
-        #expect(list.selected == .bsp)
+        #expect(list.selected == .grid)
     }
 
     @Test("the arrows walk the matches and never wrap")

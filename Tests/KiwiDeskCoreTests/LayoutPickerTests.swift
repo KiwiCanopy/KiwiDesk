@@ -41,6 +41,10 @@ struct LayoutPickerTests {
         #expect(state.space == "3")
         #expect(state.live == .grid)
         #expect(core.layoutPickerState(for: "nope") == nil)
+        // A Space not shown answers for itself, not the active one.
+        core.state.workspaces.ensureSpace("4")
+        core.state.workspaces.setMode("4", .monocle)
+        #expect(core.layoutPickerState(for: "4")?.live == .monocle)
     }
 
     @Test("a pick sets the Space's layout")

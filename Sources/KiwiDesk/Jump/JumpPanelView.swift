@@ -23,6 +23,8 @@ struct JumpPanelView: View {
     /// The key panels' scale (#2229 ▸ shared panel style).
     static let width: CGFloat = 640
     static let fieldHeight: CGFloat = 44
+    /// The scope switch's cross-fade; the refit waits it out.
+    static let scopeFade: TimeInterval = 0.12
     static let headerHeight: CGFloat = 26
     static let listPadding: CGFloat = 6
 
@@ -36,7 +38,7 @@ struct JumpPanelView: View {
         }
         // The field stays put; only what is below it changes.
         .animation(
-            reduceMotion ? nil : .easeInOut(duration: 0.12),
+            reduceMotion ? nil : .easeInOut(duration: Self.scopeFade),
             value: model.scope
         )
         .frame(maxHeight: .infinity, alignment: .top)

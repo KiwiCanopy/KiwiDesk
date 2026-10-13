@@ -10,7 +10,10 @@ import Testing
 @Suite("Jump to window scopes")
 @MainActor
 struct JumpScopeModelTests {
-    private func model(keepArmed: Bool = true) -> JumpModel {
+    private func model(
+        keepArmed: Bool = true,
+        profile: String? = "Dual"
+    ) -> JumpModel {
         let model = JumpModel(
             snapshot: JumpSnapshot(
                 entries: [JumpListTests.row(1, "Mail", "Inbox")],
@@ -18,15 +21,17 @@ struct JumpScopeModelTests {
                 hereIcon: nil
             ),
             icons: [:],
-            rowCap: 8
+            rowCap: 8,
+            pointer: .zero
         )
+        model.currentPointer = { .zero }
         model.loadLayouts = { _ in
             LayoutPickList(
                 state: LayoutPickerState(
                     space: "3",
                     live: .grid,
                     drifted: keepArmed,
-                    profile: "Dual",
+                    profile: profile,
                     keepArmed: keepArmed
                 ),
                 names: JumpPanelController.layoutNames
@@ -89,6 +94,12 @@ struct JumpScopeModelTests {
         saved.setScope(.layouts)
         saved.handle(.keep)
         #expect(kept == 1)
+        // No profile, no Keep, whatever the drift.
+        let unprofiled = model(keepArmed: true, profile: nil)
+        unprofiled.onKeep = { kept += 1 }
+        unprofiled.setScope(.layouts)
+        unprofiled.handle(.keep)
+        #expect(kept == 1)
     }
 
     @Test("⌘, lands on the selected tile's layout")
@@ -147,8 +158,9 @@ struct JumpHoverTests {
         model.hoverRow(1, pointer: CGPoint(x: 10, y: 30))
         #expect(model.list.selection == 1)
         // The list re-ranks under the same pointer: no move.
-        model.query = "mail"
-        model.hoverRow(0, pointer: CGPoint(x: 10, y: 30))
+        model.query = "i"
+        #expect(model.list.results.count == 2)
+        model.hoverRow(1, pointer: CGPoint(x: 10, y: 30))
         #expect(model.list.selection == 0)
     }
 
