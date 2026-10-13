@@ -10846,9 +10846,10 @@ switching, honored), by an own window keyed since (a quick-menu
 row fronting a panel), never when the re-assert would switch
 Desktops (#1345) — asked again at the payment, which can come
 seconds later — and bounded to 30 s from the report. A stand-down
-that leaves macOS keying the revealed app honors the report the
-arm held back, so state never names a window macOS no longer
-keys. The quick-menu half needs no macOS 27 or auto-hide gate: no
+that leaves macOS keying the revealed app replays the report the
+arm held back through the focus handler, honored like any report
+but moving no pointer, so state never names a window macOS no
+longer keys. The quick-menu half needs no macOS 27 or auto-hide gate: no
 foreign activation while KiwiDesk's own menu tracks is the
 user's. The accepted trade: while
 the bar shows, the Settings window looks inactive and the other

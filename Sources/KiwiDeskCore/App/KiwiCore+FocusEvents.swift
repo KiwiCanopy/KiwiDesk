@@ -295,11 +295,10 @@ extension KiwiCore {
         // same rule (#293): layout-independent, so it can't
         // ride the focus-driven retile alone.
         updateBars()
-        // Warp only for focus changes KiwiDesk did not
-        // make itself (cmd+tab, app-driven focus): a
-        // self-raise already warped at intent time in
-        // `focusWindow`, and an echo that moved no focus
-        // (same-window re-focus) is not a change (#186).
+        // Warp only for focus changes KiwiDesk did not make
+        // itself (cmd+tab, app-driven focus): a self-raise
+        // already warped at intent time in `focusWindow`, and
+        // an echo that moved no focus is not a change (#186).
         // A report with CLICK provenance is mouse-made focus
         // and needs no warp — the pointer is exactly where
         // the user put it. The fire-time inside check cannot
@@ -308,7 +307,8 @@ extension KiwiCore {
         // out from under the cursor and the "warp" yanks the
         // pointer after it (#689 device QA).
         if !selfEcho, effects.focusBefore != id,
-            !recentClickReached(id, now: wallClock())
+            !recentClickReached(id, now: wallClock()),
+            !replaysHeldReveal(id)
         {
             warpMouseToFocused(id)
         }

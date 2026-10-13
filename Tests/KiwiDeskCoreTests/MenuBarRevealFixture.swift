@@ -11,6 +11,10 @@ enum MenuBarRevealFixture {
     /// instead of leaving the negative one vacuously green.
     static let returnLogNeedle = "menu-bar reveal activation"
 
+    /// The focus handler's own honor line for window 2: a
+    /// stand-down that honors the held report replays it there.
+    static let honoredNeedle = "w2 (Other) honored"
+
     /// Windows 1 (OUR pid — the anchor) and 2 (a foreign regular
     /// app), window 1 focused, the pointer read pinned IN the
     /// strip: the reveal's shape.

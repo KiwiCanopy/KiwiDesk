@@ -1,3 +1,4 @@
+import AppKit
 import CoreGraphics
 import Foundation
 import Testing
@@ -58,6 +59,7 @@ struct MenuBarRevealPaymentTests {
         // The report the arm held back is honored, or state focus
         // stays on a window macOS no longer keys.
         #expect(F.focused(core) == WindowID(2))
+        #expect(lines.contain(F.honoredNeedle))
         #expect(!core.deferred.isScheduled(.menuBarRevealReturn))
     }
 
@@ -90,6 +92,7 @@ struct MenuBarRevealPaymentTests {
         #expect(core.menuBarReveal.debt == nil)
         #expect(lines.contain("past its bound"))
         #expect(F.focused(core) == WindowID(2))
+        #expect(lines.contain(F.honoredNeedle))
     }
 
     /// KiwiDesk's own quick menu (#2224): the activation that comes
@@ -185,6 +188,7 @@ struct MenuBarRevealPaymentTests {
         #expect(core.menuBarReveal.debt == nil)
         #expect(lines.contain("its window closed"))
         #expect(F.focused(core) == WindowID(2))
+        #expect(lines.contain(F.honoredNeedle))
     }
 
     /// The bound runs from the report, never from the quick
@@ -218,6 +222,7 @@ struct MenuBarRevealPaymentTests {
         #expect(lines.contain("not on screen"))
         #expect(!lines.contain("menu bar hidden"))
         #expect(F.focused(core) == WindowID(2))
+        #expect(lines.contain(F.honoredNeedle))
     }
 
     /// A quick-menu row that fronts an own panel (View Shortcuts)
@@ -246,5 +251,58 @@ struct MenuBarRevealPaymentTests {
         }
         anchor.payMenuBarRevealIfDue()
         #expect(paid.contain("menu bar hidden"))
+    }
+
+    /// The replay is the handler's honor, warp aside: the user's
+    /// hand is on the revealed app's bar, not on its window.
+    @Test("A stand-down's replay moves no pointer")
+    func replayMovesNoPointer() {
+        // Slot resolution needs a real screen; a screenless
+        // runner skips (the screen-guard convention).
+        guard NSScreen.main != nil else { return }
+        let core = F.makeCore()
+        core.tiler.settings.mouse.followsFocus = true
+        var warped: [CGRect] = []
+        core.pointerWarp = { warped.append($0) }
+        core.handle(.windowFocused(WindowID(2)))
+        core.lastLeftClick = (
+            at: core.wallClock().addingTimeInterval(1),
+            point: .zero,
+            reached: nil
+        )
+        core.payMenuBarRevealIfDue()
+        #expect(F.focused(core) == WindowID(2))
+        #expect(warped.isEmpty)
+        // The control: the same report honored outright warps.
+        let plain = F.makeCore(inStrip: false)
+        plain.tiler.settings.mouse.followsFocus = true
+        var moved: [CGRect] = []
+        plain.pointerWarp = { moved.append($0) }
+        plain.handle(.windowFocused(WindowID(2)))
+        #expect(moved.count == 1)
+    }
+
+    /// A press while the bar still shows: the replayed report
+    /// meets the arm again, which stands aside for it.
+    @Test("A replay is never taken as a fresh reveal")
+    func replayIsNotRetaken() {
+        let core = F.makeCore()
+        let lines = F.log(core)
+        let start = core.wallClock()
+        core.handle(.windowFocused(WindowID(2)))
+        // A press since the report, but outside the echo window by
+        // the time the payment polls: only the replay guard keeps
+        // the arm from taking the replay as a new reveal.
+        core.lastLeftClick = (
+            at: start.addingTimeInterval(1),
+            point: .zero,
+            reached: nil
+        )
+        core.wallClock = { start.addingTimeInterval(10) }
+        #expect(!core.recentLeftPress(now: core.wallClock()))
+        core.payMenuBarRevealIfDue()
+        #expect(core.menuBarReveal.debt == nil)
+        #expect(F.focused(core) == WindowID(2))
+        #expect(lines.contain(F.honoredNeedle))
     }
 }

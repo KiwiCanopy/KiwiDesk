@@ -6,6 +6,9 @@ import Foundation
 struct MenuBarRevealState {
     var debt: MenuBarRevealDebt?
     var statusMenuOpen = false
+    /// The held report a stand-down replays through the focus
+    /// handler, for the length of that one call.
+    var replaying: WindowID?
 }
 
 /// A menu-bar reveal's owed return (#1532, #2224): the own window
@@ -67,6 +70,7 @@ extension KiwiCore {
         intended: WindowID?,
         now: Date
     ) -> Bool {
+        guard menuBarReveal.replaying != id else { return false }
         if let debt = menuBarReveal.debt {
             guard id == debt.revealed else {
                 dropMenuBarRevealDebt("another window reported")
@@ -202,21 +206,23 @@ extension KiwiCore {
     }
 
     /// A stand-down that leaves the OS where the reveal put it:
-    /// the report the arm held back is honored now, or state
-    /// focus stays on a window macOS no longer keys. The Desktop
-    /// memory keeps the anchor until the next report (#1207).
+    /// the report the arm held back is replayed through the focus
+    /// handler and honored like any report — pan, follow, float
+    /// raise — or state names a window macOS no longer keys. The
+    /// replay moves no pointer: the user's hand is elsewhere.
     private func standDownMenuBarReveal(_ reason: String) {
         guard let debt = menuBarReveal.debt else { return }
         dropMenuBarRevealDebt(reason)
-        guard state.windows[debt.revealed] != nil,
-            let space = state.workspaces.space(of: debt.revealed),
-            space == state.workspaces.activeSpace
-        else { return }
-        state.workspaces.focus(debt.revealed, in: space)
-        emitFocusChange(debt.revealed)
-        updateBorders()
-        updateStickyMarks()
-        updateBars()
+        guard state.windows[debt.revealed] != nil else { return }
+        menuBarReveal.replaying = debt.revealed
+        defer { menuBarReveal.replaying = nil }
+        handle(.windowFocused(debt.revealed))
+    }
+
+    /// Whether `id`'s report is a stand-down's replay, whose
+    /// honor warps no pointer.
+    func replaysHeldReveal(_ id: WindowID) -> Bool {
+        menuBarReveal.replaying == id
     }
 
     private func dropMenuBarRevealDebt(_ reason: String) {
