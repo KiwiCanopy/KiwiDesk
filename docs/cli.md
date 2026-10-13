@@ -264,6 +264,8 @@ Spaces by their order and by the ones you visited
 ([`set_desktop_cue`](lua-reference.md#set_desktop_cue)).
 
 :::unreleased
+`set_space_cue` turns off the plate naming the Space a switch
+lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
 `set_mode_cue` turns off the plate `cycle_mode` shows
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).
 :::
@@ -307,6 +309,7 @@ Spaces by their order and by the ones you visited
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
 | | `set_desktop_cue` | true\|false (default `true`) — the plate naming the Desktop a `focus_desktop` lands on |
+| | `set_space_cue` | true\|false (default `true`) — the plate naming the Space an explicit switch lands on, where no Space Bar is drawn |
 | | `set_mode_cue` | true\|false (default `true`) — the plate showing the layout a `cycle_mode` lands on |
 | | `set_space_history` | `per_screen` (default) \| `all_screens` — whose visits Space back and forward walk |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
@@ -331,8 +334,6 @@ Spaces by their order and by the ones you visited
 | | `debug_log` | [message] |
 | Animation | `animations.set_duration` | ms (50–1000); persisted per-profile |
 | | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration, persisted per-profile |
-| | `animations.set_space_change` | `instant\|cue\|slide` (default `cue`); how a Space switch shows itself, persisted per-profile |
-| | `animations.set_space_change_duration` | ms (150–1000, default 300); the plate slide's pace, persisted per-profile |
 | | `animations.set_on_scrolling` | true\|false (default true) |
 | | `animations.set_on_window_resize` | true\|false (default true) |
 | | `animations.set_on_window_swap` | true\|false (default true) |
@@ -396,13 +397,12 @@ Spaces by their order and by the ones you visited
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
-`animations.set_space_change_duration` is new; while a saved
-profile is live, its value applies over `init.lua`'s.
-
 :::unreleased
-`animations.set_space_change` replaces
-`animations.set_on_space_change`, which is refused, naming it
-([animations.set_space_change](lua-reference.md#animationsset_space_change)).
+`animations.set_on_space_change` and `animations.set_space_change`
+are refused, naming `set_space_cue`;
+`animations.set_space_change_duration` and
+`set_space_switch_liquid_glass` are refused, since a Space switch
+is instant and no longer slides.
 :::
 
 `focus_or_spawn` was `pull_or_spawn`; the old name is refused,

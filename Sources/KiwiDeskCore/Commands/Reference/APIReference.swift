@@ -71,15 +71,12 @@ public enum APIReference {
             ),
             ("set_desktop_cue", "set_desktop_cue"),
             ("set_mode_cue", "set_mode_cue"),
+            ("set_space_cue", "set_space_cue"),
             ("set_space_history", "set_space_history"),
             ("set_float_automatically", "set_float_automatically"),
             (
                 "set_shortcut_panel_liquid_glass",
                 "set_shortcut_panel_liquid_glass"
-            ),
-            (
-                "set_space_switch_liquid_glass",
-                "set_space_switch_liquid_glass"
             ),
             ("set_fallback_space", "set_fallback_space"),
             ("set_space_icon", "set_space_icon"),
@@ -124,7 +121,6 @@ public enum APIReference {
     public static let namespaces: [String: [String]] = [
         "animations": [
             "set_duration", "set_scroll_duration",
-            "set_space_change", "set_space_change_duration",
             "set_on_scrolling",
             "set_on_window_resize", "set_on_window_swap",
             "set_on_relayout",

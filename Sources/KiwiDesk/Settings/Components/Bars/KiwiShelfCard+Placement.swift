@@ -39,6 +39,8 @@ extension KiwiShelfCard {
                 L("kiwishelf.show.space_bar", "Space Bar"),
                 isOn: $model.config.settings.spaceBarStyle.enabled
             )
+        case .spaceBar(.spaceCue):
+            spaceCueRow
         case .layoutAppBar(.monocleAppBarEnabled):
             Toggle(
                 SettingsCatalog.bars.monocleShowIn.text,

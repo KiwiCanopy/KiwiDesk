@@ -164,8 +164,6 @@ struct ShelfLookApplyTests {
             inner: .init(horizontal: 7, vertical: 8)
         )
         // #2176: a saved look carries motion too.
-        source.animations.spaceChange = .slide
-        source.animations.spaceChangeDurationMS = 500
         source.animations.onScrolling = false
         source.animations.onWindowResize = false
         source.animations.onWindowSwap = false

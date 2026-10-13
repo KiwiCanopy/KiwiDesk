@@ -286,7 +286,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         CATransaction.begin()
         layer.removeAnimation(forKey: "reveal")
         layer.add(
-            BarMotion.slideFade(
+            BarMotion.opacityFade(
                 from: 0,
                 to: 1,
                 begin: CACurrentMediaTime(),
@@ -300,8 +300,8 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         panel?.alphaValue = 1
     }
 
-    /// The reveal's length: a cue that the window has arrived,
-    /// shorter than the plates' own fade (#1959).
+    /// The reveal's length: a cue that the window has arrived
+    /// (#1959).
     static let revealDuration: CFTimeInterval = 0.15
 
     private func makePanel() -> NSPanel {

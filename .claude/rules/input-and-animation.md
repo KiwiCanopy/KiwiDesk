@@ -722,43 +722,24 @@ editing here:
   And the overlay starts no motion of its own: its turn and
   fades are `BarMotion`'s censused members
   (`BarMotionSeamTests`), so Core's motion keeps one home.
-- **A Space switch's motion is DRAWN, and each window still
-  moves once (#1956).** The plate slide is a picture over the
-  windows, never an animation of them: keep the switch's pass
-  the instant one, since re-animating window frames on a switch,
-  or adding a write per window, re-opens the corner slide's
-  per-frame AX cost (`SpaceSlideSwitchTests` ▸
-  `slideCostsNoExtraWork`). Four obligations. Stage an incoming
-  window's writes in `FrameApplier`'s hold through EVERY applier
-  write path (`SpaceSlideSeamTests` ▸ `writePathsReachTheHold`)
-  and release them from the app's own queue at the landing —
-  KiwiDesk's own window, whose queue is main, excepted — once,
-  inside one Enhanced UI hold (`FrameApplierHeldTests`); a play
-  that ends early releases what it held, whichever activation
-  overtook it — asked once at the head of every retile, never per
-  activation door (`SpaceSlideSwitchTests` ▸
-  `instantSwitchReleasesHolds`, `overtakenPlayEnds`), and
-  the quit gather drops every hold, being the one frame write
-  outside the applier. Move KiwiDesk's own window through AppKit
-  inside the caller's turn, never on a later main-queue turn
-  (`FrameApplierOwnWindowTests`). Order the overlay's panel in
-  once per screen and never move it during a play — what moves
-  is a layer timed from the press, through `BarMotion`'s
-  censused members (`BarMotionSeamTests`); the panel half is
-  review's, since no fixture orders a panel in. And play only
-  for navigation that passes a `SpaceSlideIntent`
-  (`SpaceSlideSwitchTests` ▸ `onlyNavigationPlays` holds the
-  display follow; boot, wake and a restore pass none through
-  `spaceSwitchRetile`'s nil default, which review holds). The
-  Space cue (#2143) rides the same intent: `spaceSwitchRetile`
-  is its one payer, where no slide ran, and the slide and the cue
-  ask the one `drawnSpaceChange` — a stand-down added to either
-  beside it leaves a switch with neither
-  (`SpaceCueSeamTests`). A live
-  read the slide adds is pinned inert in both `makeTestCore`
-  twins (`SpaceSlideSeamTests` ▸ `bothTwinsPinTheReads`). The
-  product ruling is `docs/design-decisions.md` ▸ *A Space switch
-  plays a drawn plate slide*.
+- **A Space switch is instant, and each window moves once
+  (#2228).** Keep the switch's pass the instant one: re-animating
+  window frames on a switch, or adding a write per window,
+  re-opens the corner slide's per-frame AX cost. Move KiwiDesk's
+  own window through AppKit inside the caller's turn, never on a
+  later main-queue turn (`FrameApplierOwnWindowTests`). The Space
+  cue (#2143) is the switch's one picture: `spaceSwitchRetile` is
+  its one payer, handed the screen an explicit switch changes
+  (`spaceSwitchDisplay`, read before the switch activates), and
+  `paySpaceCue` reads `space.cue` itself — a second payer, or a
+  reader of the toggle beside it, is a switch that shows the
+  plate past the user's off (`SpaceCueSeamTests`). A display
+  follow passes no screen, since its screen already shows the
+  Space (`FullscreenStandDownTests` ▸ `displayFollowNamesNothing`);
+  boot, wake and a restore pass none through `spaceSwitchRetile`'s
+  nil default, which review holds. The product ruling is
+  `docs/design-decisions.md` ▸ *A Space switch is instant, and
+  names the Space only where no Space Bar does*.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

@@ -58,6 +58,7 @@ appWide.desktopCue
 appWide.modeCue
 appWide.quitGridTargetDepth
 appWide.refusalSound
+appWide.spaceCue
 config.appRules[app]
 config.floatAutomatically
 config.floatRules
@@ -94,8 +95,6 @@ settings.animations.onWindowResize
 settings.animations.onWindowSwap
 settings.animations.scrollDurationMS
 settings.animations.shelfDurationMS
-settings.animations.spaceChange
-settings.animations.spaceChangeDurationMS
 settings.appBarStyle.activeIndicator
 settings.appBarStyle.edge
 settings.appBarStyle.edgeOverride[screen]

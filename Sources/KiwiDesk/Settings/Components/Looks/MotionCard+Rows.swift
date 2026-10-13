@@ -21,28 +21,6 @@ extension MotionCard {
                         + "Reduce Motion on also keeps them off."
                 )
             )
-        case .animationsSpaceChange:
-            spaceChangeRow
-        case .animationsSpaceChangeDurationMS:
-            StepperRow(
-                label: L(
-                    "behavior.animations.space_change_duration",
-                    "Space switch duration"
-                ),
-                value: animations.spaceChangeDurationMS,
-                in: AnimationSettings.spaceChangeDurationBand,
-                step: 10,
-                suffix: "ms",
-                help: L(
-                    "behavior.animations.space_change_duration.help",
-                    "How long the plates take to slide to the Space "
-                        + "you're switching to. A longer duration is "
-                        + "slower."
-                )
-            )
-            // The Space switch rows stand apart from the window
-            // master, which does not reach them (#1932, #2143).
-            Divider()
         case .animationsOnWindowResize:
             Toggle(
                 L(

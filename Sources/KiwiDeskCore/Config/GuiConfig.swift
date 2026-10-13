@@ -107,6 +107,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case refusal
         case quit
         case desktop
+        case space
         case mode
         case look
     }
@@ -209,6 +210,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 AppWideSettings.Desktop.self,
                 forKey: .desktop
             ),
+            space: try container.decodeIfPresent(
+                AppWideSettings.Space.self,
+                forKey: .space
+            ),
             mode: try container.decodeIfPresent(
                 AppWideSettings.Mode.self,
                 forKey: .mode
@@ -273,6 +278,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.encode(appWide.refusal, forKey: .refusal)
             try container.encode(appWide.quit, forKey: .quit)
             try container.encode(appWide.desktop, forKey: .desktop)
+            try container.encode(appWide.space, forKey: .space)
             try container.encode(appWide.mode, forKey: .mode)
         }
         try container.encodeIfPresent(look, forKey: .look)

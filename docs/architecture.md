@@ -180,12 +180,14 @@ A `space_bar.*` or `app_bar.*` write that leaves every layout's
 unchanged on every screen runs no pass at all: it repaints the bars and
 re-clamps the floats (#1524).
 
-An explicit Space switch with switch animation on wraps that
-reissue in the plate slide (`Commands/KiwiCore+SpaceSlide`):
-before the pass, the overlay in `Animation/` covers the windows
-shown and the incoming windows' writes are held in the
-`FrameApplier`'s hold; after it, the strip runs, and each held
-write leaves from its app's queue when the strip lands (#1956).
+:::unreleased
+A Space switch is always that one instant reissue. After an
+explicit switch, Core hands the GUI the Space and its layout for
+the screen that switched (`paySpaceCue`, in
+`Commands/SpaceSwitchCue`), standing down where that screen draws
+a Space Bar or the shelf stands down; the plate itself is drawn in
+`Sources/KiwiDesk/CuePlate` (#2143, #2228).
+:::
 
 A commanded focus in a Monocle Space goes through the flip door
 (`App/KiwiCore+MonocleFlip`), which plays the card flip from

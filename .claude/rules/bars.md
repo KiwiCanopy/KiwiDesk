@@ -25,7 +25,6 @@ paths:
   - "Sources/KiwiDeskCore/Appearance/*Look*.swift"
   # The app-icon readers outside Bar: one icon source (#1901).
   - "Sources/KiwiDeskCore/App/KiwiCore+MonocleFlip.swift"
-  - "Sources/KiwiDeskCore/Animation/SpaceSlideOverlay.swift"
   # The Settings preview asks ShelfArrangement and the hard floor
   # like the live plan does; a hand placement there is this
   # file's defect, not gui.md's.
@@ -42,13 +41,9 @@ paths:
   - "Sources/KiwiDeskCore/Tiling/DragOverlay.swift"
   - "Sources/KiwiDeskCore/Tiling/DragMarkerView.swift"
   - "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Glass.swift"
-  # The Space switch's plates (#1956): untinted `.regular` glass by
-  # the issue's ruling, the shortcuts panel's.
-  - "Sources/KiwiDeskCore/Animation/SpaceSlideOverlay+Plates.swift"
   # ...and the sites that decide their glass through the gate.
   - "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
-  - "Sources/KiwiDeskCore/Commands/KiwiCore+SpaceSlide.swift"
 ---
 
 # Bars (App Bar & Space Bar overlays)
@@ -261,8 +256,8 @@ twice, was a question the user answered twice. The argument is
   the bars' app icons come from the one `BarIconCache`: a fresh
   `NSImage` per read never compares equal and costs a
   LaunchServices round trip besides. Any other Core surface that
-  draws an app's icon — the Monocle flip's card, the Space
-  switch's plates — reads it there too, since an app activation
+  draws an app's icon — the Monocle flip's card — reads it there
+  too, since an app activation
   makes every retained `NSRunningApplication` read again (#1936,
   `AppIconSourceSeamTests`).
 - **Reuse a Space item's glyph and badge views slot by slot,
