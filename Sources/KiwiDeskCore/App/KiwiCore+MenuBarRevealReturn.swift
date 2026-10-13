@@ -16,8 +16,10 @@ struct MenuBarRevealDebt {
     /// The foreign window whose report the reveal produced; a
     /// repeat of it is the same reveal.
     let revealed: WindowID
-    /// The report's wall time — a press since stands it down.
-    let at: Date
+    /// A press after this stands it down: the report's wall time,
+    /// moved past the quick menu's close, whose dismissing click
+    /// never reaches the app beneath (#2224).
+    var at: Date
     /// The report's monotonic time — a commanded focus since does.
     let commandedAt: ContinuousClock.Instant
 }
@@ -36,6 +38,9 @@ extension KiwiCore {
     static let menuBarRevealPoll: Duration = .milliseconds(150)
     /// How long a return may stay owed before it is dropped.
     static let menuBarRevealBound: TimeInterval = 30
+    /// How late the quick menu's dismissing press may be stamped
+    /// after its close; the press monitor enqueues its write.
+    static let statusMenuCloseGrace: TimeInterval = 0.25
 
     /// The `handleWindowFocused` arm, between the placement bounce
     /// and the #958 return — its guard list is the roster of what
@@ -111,6 +116,11 @@ extension KiwiCore {
     public func statusMenuDidClose() {
         menuBarReveal.statusMenuOpen = false
         guard menuBarReveal.debt != nil else { return }
+        // The click that dismissed the menu is no choice: rebased
+        // past it, with the grace its stamp may land late by.
+        menuBarReveal.debt?.at = wallClock().addingTimeInterval(
+            Self.statusMenuCloseGrace
+        )
         scheduleMenuBarRevealPayment()
     }
 

@@ -222,6 +222,39 @@ struct MenuBarRevealReturnTests {
         #expect(focused(core) == WindowID(1))
     }
 
+    /// The click that dismisses the quick menu never reaches the
+    /// app beneath it, so it stands nothing down (#2224).
+    @Test("The quick menu's dismissing click is no choice")
+    func dismissingClickIsNoChoice() {
+        let core = makeCore(inStrip: false)
+        core.statusMenuDidOpen()
+        core.handle(.windowFocused(WindowID(2)))
+        core.lastLeftClick = (
+            at: core.wallClock().addingTimeInterval(0.1),
+            point: .zero,
+            reached: nil
+        )
+        core.statusMenuDidClose()
+        core.payMenuBarRevealIfDue()
+        #expect(core.menuBarReveal.debt == nil)
+        #expect(focused(core) == WindowID(1))
+        let lines = log(core)
+        // A click after the close is a choice again.
+        core.lastLeftClick = nil
+        core.statusMenuDidOpen()
+        core.handle(.windowFocused(WindowID(2)))
+        core.statusMenuDidClose()
+        core.lastLeftClick = (
+            at: core.wallClock().addingTimeInterval(
+                KiwiCore.statusMenuCloseGrace + 1
+            ),
+            point: .zero,
+            reached: nil
+        )
+        core.payMenuBarRevealIfDue()
+        #expect(lines.contain("a press since"))
+    }
+
     /// The reason the re-assert is a stamped raise and not the
     /// focus command: the command's displacement note would put
     /// the foreign window in the placement ledger, and in an
