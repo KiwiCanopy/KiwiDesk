@@ -173,11 +173,11 @@ enum KeybindingCatalog {
     }
 
     /// Jump to window (#1875): its label is the panel's own name,
-    /// so the feature is one key in every catalog.
+    /// read from the panel, so the feature is one string.
     static let jumpToWindow = NavCommand(
         label: "Jump to window",
         lua: "KiwiDesk.show_jump_to_window()",
-        displayLabel: { L("jump.field.label", "Jump to window") }
+        displayLabel: { JumpPanelView.fieldName }
     )
 
     /// Command opening shortcuts cheat sheet overlay (#330, #602).

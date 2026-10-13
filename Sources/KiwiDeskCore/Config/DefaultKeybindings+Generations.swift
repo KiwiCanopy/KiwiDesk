@@ -7,7 +7,7 @@ import Foundation
 extension DefaultKeybindings {
     /// The newest generation. A release that adds a default row
     /// bumps it and lists the rows in `rows(ofGeneration:)`.
-    public static let newestGeneration = 2
+    public static let newestGeneration = 3
 
     /// The rows generation `number` introduced, built from today's
     /// rows: an install not yet topped up gets the current chord
@@ -16,13 +16,11 @@ extension DefaultKeybindings {
         switch number {
         // 2.3.0: the Space steps and the Space history (#1655).
         case 1: spaceStepRows() + spaceHistoryRows()
-        // 3.0.0: the layout keys (#453, #762) and Jump to window
-        // (#1875).
-        case 2:
-            [
-                nextLayoutRow(), previousLayoutRow(), layoutPickerRow(),
-                jumpToWindowRow(),
-            ]
+        // 3.0.0: the layout keys (#453, #762).
+        case 2: [nextLayoutRow(), previousLayoutRow(), layoutPickerRow()]
+        // 3.0.0: Jump to window (#1875), a generation of its own
+        // since installs had already taken 2 from release/3.0.0.
+        case 3: [jumpToWindowRow()]
         default: []
         }
     }

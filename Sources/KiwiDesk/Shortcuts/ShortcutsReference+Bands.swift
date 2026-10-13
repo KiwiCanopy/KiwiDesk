@@ -25,11 +25,11 @@ extension ShortcutsReferenceBuilder {
             + KeybindingCatalog.spaceStepRows
             + KeybindingCatalog.spaceHistoryRows
             + KeybindingCatalog.goToSpace(spaces, icons: spaceIcons)
+            + [KeybindingCatalog.jumpToWindow]
             + KeybindingCatalog.goToDesktop(
                 desktops.desktops,
                 absent: desktops.absent
             )
-            + [KeybindingCatalog.jumpToWindow]
         let move =
             KeybindingCatalog.swapDirections
             + KeybindingCatalog.trackRows

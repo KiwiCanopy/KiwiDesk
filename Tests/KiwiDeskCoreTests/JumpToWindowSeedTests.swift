@@ -4,8 +4,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Jump to window's seed (#1875, keys ruled 2026-10-09, swept
-/// 2026-10-11): `⌃⌥J` in the BASE seed, and in 3.0.0's
-/// generation so an existing install gets it once where free.
+/// 2026-10-11): `⌃⌥J` in the BASE seed, and in a generation of its
+/// own so an existing install gets it once where free.
 /// Chord hygiene is the generic nets' in `DefaultKeybindingsTests`.
 @Suite("Jump to window seed (#1875)")
 struct JumpToWindowSeedTests {
@@ -24,15 +24,15 @@ struct JumpToWindowSeedTests {
         )
     }
 
-    @Test("an existing install gets ⌃⌥J with 3.0.0's generation")
+    /// An install already topped up to generation 2 from
+    /// release/3.0.0 still gets the key.
+    @Test("an install past generation 2 still gets ⌃⌥J")
     func joinsTheGeneration() {
         let row = DefaultKeybindings.jumpToWindowRow()
+        #expect(DefaultKeybindings.rows(ofGeneration: 3) == [row])
         #expect(
-            DefaultKeybindings.rows(ofGeneration: 2).contains(row)
-        )
-        #expect(
-            DefaultKeybindings.generationTopUp(existing: [], above: 1)
-                .contains(row)
+            DefaultKeybindings.generationTopUp(existing: [], above: 2)
+                == [row]
         )
     }
 
