@@ -24,7 +24,7 @@ import Testing
 /// This suite reads no vocabulary at all. It compares two strings
 /// the SAME catalog ships, the way `SidebarCrossReferenceTests`
 /// does, and a `Tests/` suite may carry a reasoned `allowed` map
-/// — which is the standing idiom for a dozen AGENTS.md §5 rows.
+/// — which is the standing idiom for a dozen AGENTS.md §5 entries.
 /// So the two coexist: the script cannot hold this, and this
 /// holds only the sub-class it can prove.
 ///
