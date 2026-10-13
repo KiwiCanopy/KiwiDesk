@@ -24,7 +24,7 @@ table below lists,
 so they share their decisions rather than mirroring them.
 
 A new `BorderStyle` field owes a look ruling (#1739) — styling
-joins `LookKeys.all`, anything else `LookKeys.leftOut` with its
+joins `LookKeys.styling`, anything else `LookKeys.leftOut` with its
 reason; the obligation is [bars.md](bars.md)'s and
 `LookKeysCensusTests` reds an unruled field.
 

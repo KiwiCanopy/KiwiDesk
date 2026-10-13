@@ -9,12 +9,12 @@ struct SharedLookLedger {
     var owed = false
 
     /// Whether the motion crossing is owed (#2176): a shared look
-    /// adopted before animations joined it, so it carries none.
-    /// Derived from the look, so the election that writes motion
-    /// into it is what ends it.
+    /// missing a motion path — adopted before animations joined it,
+    /// or before a field was added. Derived from the look, so the
+    /// write that completes it is what ends it.
     var motionOwed: Bool {
         guard let base else { return false }
-        return !base.style.keys.contains(where: LookKeys.motion.contains)
+        return LookKeys.motion.contains { base.style[$0] == nil }
     }
 }
 
@@ -59,6 +59,7 @@ extension KiwiCore {
             base: config.look,
             owed: config.look == nil
         )
+        settleSharedMotion()
     }
 
     /// Ends an owed crossing at the first apply of a STORED
@@ -66,27 +67,55 @@ extension KiwiCore {
     /// — a built-in lends nothing: its look becomes the shared one
     /// (`crossWith`).
     func adoptSharedLook(from profile: Profile) {
-        guard sharedLookLedger.owed || sharedLookLedger.motionOwed,
-            isGuiManaged, profiles.list().contains(profile.name)
+        guard sharedLookLedger.owed, isGuiManaged,
+            profiles.list().contains(profile.name)
         else { return }
-        guard sharedLookLedger.owed else {
-            crossMotion(from: profile.settings)
-            return
-        }
         crossWith(LookBody(of: profile.settings))
     }
 
-    /// The motion crossing (#2176): the shared look takes
-    /// `settings`' animations beside the styling and colours it
-    /// already carries, and the election runs again — a follower
-    /// whose animations differ keeps its own look from now on, so
-    /// nothing on screen moves.
-    func crossMotion(from settings: TilingSettings) {
-        guard var base = sharedLook else { return }
+    /// The motion crossing (#2176), at the config load ahead of any
+    /// write: the shared look takes, for each motion path it lacks,
+    /// the value of a profile that FOLLOWS it — the live one, else
+    /// the first by name, else the shipped default — and a follower
+    /// whose animations then differ keeps its own look, frozen as it
+    /// runs now, so nothing on screen moves. An own profile is never
+    /// touched. `gui.json` first; a failed write leaves it owed
+    /// (`SharedLookMotionTests`).
+    func settleSharedMotion() {
+        guard sharedLookLedger.motionOwed, let before = sharedLook
+        else { return }
+        let followers = profiles.list()
+            .compactMap { try? profiles.read(name: $0) }
+            .filter { $0.look == nil }
+        let source =
+            followers.first { $0.name == profiles.currentName }
+            ?? followers.first
+        var base = before
         base.style.merge(
-            LookKeys.extract(from: settings, paths: LookKeys.motion)
-        ) { $1 }
-        crossWith(base)
+            LookKeys.extract(
+                from: source?.settings ?? TilingSettings(),
+                paths: LookKeys.motion
+            )
+        ) { kept, _ in kept }
+        let ledger = sharedLookLedger
+        sharedLookLedger.base = base
+        guard persistSharedLook() else {
+            sharedLookLedger = ledger
+            return
+        }
+        let motion = base.style.filter { LookKeys.motion.contains($0.key) }
+        for var stored in followers
+        where LookKeys.extract(from: stored.settings, paths: LookKeys.motion)
+            != motion
+        {
+            stored.settings = before.worn(over: stored.settings)
+            stored.look = .own
+            do {
+                try profiles.write(stored)
+            } catch {
+                onLog("shared look: \(stored.name) not frozen: \(error)")
+            }
+        }
     }
 
     /// The crossing's election: `base` becomes the shared look, and

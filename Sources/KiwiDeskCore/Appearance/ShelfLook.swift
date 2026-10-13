@@ -38,10 +38,10 @@ extension ShelfLook {
     /// This look without its motion (#2176): what the tour's paint
     /// reaches, which never changes how fast things move.
     public var stylingOnly: ShelfLook {
-        let motion = Set(LookKeys.motion)
+        let styling = Set(LookKeys.styling)
         return ShelfLook(
             name: name,
-            style: style.filter { !motion.contains($0.key) },
+            style: style.filter { styling.contains($0.key) },
             colors: colors
         )
     }

@@ -6,7 +6,7 @@ import Foundation
 /// and doubles as the shape reset (#1739); a bundled look carries
 /// styling alone, never motion (#2176); every other bundled
 /// look is Glass with its authored differences laid over it, so
-/// each names the whole of `LookKeys` and reproduces its picture
+/// each names the whole of `LookKeys.styling` and reproduces its picture
 /// wherever it is applied. Its colours are its authored palette's,
 /// resolved at load (#1752).
 public enum LookCatalog {

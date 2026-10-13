@@ -81,4 +81,29 @@ struct LookKeysCensusTests {
         let extracted = LookKeys.extract(from: TilingSettings())
         #expect(Set(extracted.keys) == Set(LookKeys.all))
     }
+
+    /// Every stored look carries these wire paths as data (#2176):
+    /// `LookKeys.motion` is derived from `AnimationSettings`' keys,
+    /// so only a frozen copy reds a rename, which owes every stored
+    /// look a `ConfigMigration` crossing (profiles.md). A new field
+    /// joins here by ruling.
+    @Test("the motion wire paths are frozen")
+    func motionWirePathsAreFrozen() {
+        #expect(
+            LookKeys.motion == [
+                "animations.space_change",
+                "animations.space_change_duration",
+                "animations.on_scrolling",
+                "animations.on_window_resize",
+                "animations.on_window_swap",
+                "animations.on_relayout",
+                "animations.duration",
+                "animations.scroll_duration",
+                "animations.on_monocle_focus",
+                "animations.monocle_flip_duration",
+                "animations.on_shelf",
+                "animations.shelf_duration",
+            ]
+        )
+    }
 }
