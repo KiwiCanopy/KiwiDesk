@@ -63,7 +63,7 @@ struct PanelFadeGuardTests {
         front.drain()
         defer { front.keyed.forEach { $0.orderOut(nil) } }
         #expect(controller.isOpen)
-        controller.close(commanded: false)
+        controller.close()
         #expect(controller.panel?.isVisible == true)
         #expect(!controller.isOpen)
     }
@@ -75,7 +75,7 @@ struct PanelFadeGuardTests {
         front.drain()
         defer { front.keyed.forEach { $0.orderOut(nil) } }
         #expect(controller.isOpen)
-        controller.close(commanded: false)
+        controller.close()
         #expect(front.keyed.first?.isVisible == true)
         #expect(!controller.isOpen)
     }
@@ -117,7 +117,7 @@ struct PanelFadeGuardTests {
         front.drain()
         defer { front.keyed.forEach { $0.orderOut(nil) } }
         controller.show()
-        controller.close(commanded: false)
+        controller.close()
         front.drain()
         #expect(front.keyed.count == 1)
     }
@@ -126,7 +126,7 @@ struct PanelFadeGuardTests {
     func shortcutsClosedBeforeKey() {
         let (controller, front) = shortcuts()
         controller.show()
-        controller.close(commanded: false)
+        controller.close()
         defer { front.keyed.forEach { $0.orderOut(nil) } }
         front.drain()
         #expect(front.keyed.isEmpty)
@@ -194,7 +194,7 @@ struct PanelFadeGuardTests {
         controller.show()
         front.drain()
         defer { front.keyed.forEach { $0.orderOut(nil) } }
-        controller.close(commanded: false)
+        controller.close()
         #expect(controller.panel?.isVisible == true)
         controller.pick(entry, moveHere: true)
         #expect(core.state.workspaces.space(of: WindowID(9)) == "2")

@@ -10631,15 +10631,17 @@ Settings window, whenever it was open — and AX re-reported
 Settings focused on every open; it also left #952's question,
 which window the user lands in after a close, for a hand-back to
 answer. Not activating removes both: a close lands where the user
-already was, and a click away was always the user's choice. What
-a close still owes is the dismiss grace: with Settings in front,
-KiwiDesk is the active app, and the panel's order-out blip-keys
-Settings, whose clickless AX re-report the ignored-panel grace
-consumes, armed at a keyboard-commanded close for KiwiDesk's own
-pid. Because KiwiDesk's main menu is not the one in the menu bar
+already was, and a click away was always the user's choice. A
+close therefore owes nothing, Esc included: with Settings in
+front the order-out keys Settings again, which is where the user
+was (owner ruling 2026-10-13). Only a Jump pick of another app's
+window arms the ignored-panel grace for KiwiDesk's own pid, since
+its order-out would key Settings ahead of the window picked.
+Because KiwiDesk's main menu is not the one in the menu bar
 while a panel is up, each panel hands its key equivalents to that
 menu itself, so ⌘W and the edit chords keep working.
-`ShortcutsPanelReturnTests` pins the grace's arms and
+`ShortcutsPanelReturnTests` and `JumpPanelControllerTests` pin
+the arms and
 `PanelHandBackTests` the non-activating show. (#952, #1875)
 :::
 
