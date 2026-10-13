@@ -91,8 +91,6 @@ struct LookKeysCensusTests {
     func motionWirePathsAreFrozen() {
         #expect(
             LookKeys.motion == [
-                "animations.space_change",
-                "animations.space_change_duration",
                 "animations.on_scrolling",
                 "animations.on_window_resize",
                 "animations.on_window_swap",

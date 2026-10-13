@@ -569,9 +569,9 @@ holds the secondary-switch decision including its nil case.
   and that signal keeps it, the step reads the file's format as
   the meaning-change clause above requires, and the design entry
   states the cost to a user who chose the old value. The slide
-  turn-on is the precedent and its bound (#1931,
-  `SpaceChangeOnMigrationTests`: 2.1.1's master-off write keeps
-  the `false`); a flip with no such signal keeps #1359's answer.
+  turn-on was the precedent and its bound (#1931: 2.1.1's
+  master-off write kept the `false`), retired with the slide
+  (#2228); a flip with no such signal keeps #1359's answer.
 - **A per-profile value moving app-wide crosses by ADOPTION, a
   ruled shape beside `ConfigMigration` (#1741).** N profile
   files → one value is an election, and a byte-level step cannot
@@ -938,10 +938,10 @@ resolve, so it had no `spaceDisplay` entry, no chip, no
   temporary retire, since every membership change retiles
   (`UndeclaredSpaceDisplayTests` ▸ `setModeTargetHasAChip`). A
   path that reads a new Space's screen BEFORE its own retile
-  places it first: the switch ahead of `spaceSlideIntent`
-  (`UndeclaredSpaceDisplayTests` ▸ `firstVisitSlides`), the one
+  places it first: the switch ahead of `spaceSwitchDisplay`
+  (`UndeclaredSpaceDisplayTests` ▸ `firstVisitIsNamed`), the one
   `followSwitch` likewise, a launch follow's rule Space included
-  (`UndeclaredSpaceDisplayTests` ▸ `launchFollowSlides`), the one
+  (`UndeclaredSpaceDisplayTests` ▸ `launchFollowIsNamed`), the one
   `fileMembership` ahead of the float re-anchor, and boot ahead
   of its activation — those two read `NSScreen` and the
   frontmost app, which no fixture pins, so they have no test;

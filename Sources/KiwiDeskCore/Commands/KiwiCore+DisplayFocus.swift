@@ -97,9 +97,9 @@ extension KiwiCore {
     ) {
         let priorFrontmost = frontmostPIDProvider?()
         // A launch follow arrives with its rule's undeclared Space
-        // filed but unplaced: place it before the slide reads it.
+        // filed but unplaced: place it before the cue reads it.
         placeUnplacedSpaces()
-        let slide = spaceSlideIntent(to: target)
+        let cueOn = spaceSwitchDisplay(to: target)
         state.workspaces.activate(target)
         focusWindow(id, refocusRetile: false, warp: true)
         emitSpaceChange()
@@ -110,7 +110,7 @@ extension KiwiCore {
         spaceSwitchRetile(
             asSwitch: true,
             newcomer: arriving ? id : nil,
-            slide: slide
+            cueOn: cueOn
         )
         raiseLandingFloats(thenFocus: id)
     }

@@ -103,10 +103,12 @@ struct UndeclaredSpaceDisplayTests {
         #expect(core.state.workspaces.space(of: window) == origin)
     }
 
-    /// One screen, Space 1 shown with one window — the plate
-    /// slide's ground. The main screen is the fixture's display, so
-    /// a headless host skips (#531).
-    private func slideCore() throws -> (KiwiCore, DisplayID) {
+    private final class CueBox { var displays: [DisplayID] = [] }
+
+    /// One screen, Space 1 shown with one window, the Space Bar off
+    /// so the Space cue pays (#2228). The main screen is the
+    /// fixture's display, so a headless host skips (#531).
+    private func cueCore() throws -> (KiwiCore, DisplayID, CueBox) {
         let screen = try #require(NSScreen.main)
         let display = try #require(screen.kiwiDisplayID)
         let core = makeTestCore()
@@ -114,8 +116,8 @@ struct UndeclaredSpaceDisplayTests {
             CGRect(x: 0, y: 25, width: 1200, height: 775)
         }
         core.tiler.animation.isEnabled = false
-        core.tiler.settings.animations.spaceChange = .slide
-        core.spaceSlide.reduceMotion = { false }
+        core.tiler.settings.spaceBarStyle.enabled = false
+        core.frontWindowFrames = { [] }
         core.tiler.applier.writer = FrameWriter(
             setFrame: { _, _ in },
             setPosition: { _, _ in },
@@ -134,54 +136,53 @@ struct UndeclaredSpaceDisplayTests {
         core.state.workspaces.activate(SpaceID(1))
         core.retile()
         #expect(core.state.workspaces[scratch] == nil)
-        return (core, display)
+        let box = CueBox()
+        core.onSpaceCue = { box.displays.append($0.display) }
+        return (core, display, box)
     }
 
-    /// The switch gives it a screen ahead of the slide's read, so
-    /// the first visit slides too.
+    /// The switch gives it a screen ahead of the cue's read, so the
+    /// first visit is named too.
     @Test(
-        "a first visit to it slides",
+        "a first visit to it is named",
         .enabled(if: NSScreen.main != nil)
     )
-    func firstVisitSlides() throws {
-        let (core, display) = try slideCore()
+    func firstVisitIsNamed() throws {
+        let (core, display, box) = try cueCore()
         core.execute("focus_space", args: [.string(scratch.raw)])
-        defer { core.spaceSlide.end() }
         #expect(core.state.workspaces.display(of: scratch) == display)
-        #expect(core.spaceSlide.isPlaying)
+        #expect(box.displays == [display])
     }
 
     /// A move-and-follow files the window first, and the filing
-    /// places the target before the follow reads its slide.
+    /// places the target before the follow reads its screen.
     @Test(
-        "a move-and-follow into it slides",
+        "a move-and-follow into it is named",
         .enabled(if: NSScreen.main != nil)
     )
-    func followSlides() throws {
-        let (core, display) = try slideCore()
+    func followIsNamed() throws {
+        let (core, display, box) = try cueCore()
         core.execute(
             "move_to_space_and_follow",
             args: [.string(scratch.raw), .number(2)]
         )
-        defer { core.spaceSlide.end() }
         #expect(core.state.workspaces.display(of: scratch) == display)
-        #expect(core.spaceSlide.isPlaying)
+        #expect(box.displays == [display])
     }
 
     /// A launch follow's window is filed into its rule's Space by
     /// the create fold, which places nothing; the follow places it
-    /// before it reads the slide.
+    /// before it reads the screen.
     @Test(
-        "a launch follow into it slides",
+        "a launch follow into it is named",
         .enabled(if: NSScreen.main != nil)
     )
-    func launchFollowSlides() throws {
-        let (core, display) = try slideCore()
+    func launchFollowIsNamed() throws {
+        let (core, display, box) = try cueCore()
         core.state.workspaces.add(WindowID(2), to: scratch)
         #expect(core.state.workspaces.display(of: scratch) == nil)
         core.followSwitch(to: scratch, focusing: WindowID(2))
-        defer { core.spaceSlide.end() }
         #expect(core.state.workspaces.display(of: scratch) == display)
-        #expect(core.spaceSlide.isPlaying)
+        #expect(box.displays == [display])
     }
 }

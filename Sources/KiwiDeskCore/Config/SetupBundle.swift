@@ -60,8 +60,8 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// `[Profile]` alone.
     /// 24 = a stored `on_space_change: false` turned on once
     /// (#1931), on `[Profile]` alone.
-    /// 25 = `on_space_change` crossed onto `space_change` (#2143),
-    /// on `[Profile]` alone.
+    /// 25 = #2143's `space_change` step, withdrawn unreleased by
+    /// #2228; kept so a development build's bundle still loads.
     public static let currentFormat = 25
 
     public let format: Int

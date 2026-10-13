@@ -126,10 +126,10 @@ $F down <scratch>/fx-<label>
 The fixture pins only the animation settings every measured
 release shares; a setting one release changes or lacks is stated
 per bundle in `extra.lua`, which `up` appends to the config — a
-*slide off* bundle appends `animations.set_on_space_change(false)`.
-Compare like with like: every release with all animations off,
-and every release with its Space-switch animation on at one
-shared pace, each set through `extra.lua`. Pass `--gap` past the
+2.x *slide off* bundle appends `animations.set_on_space_change(false)`
+(3.0.0 has no slide, #2228). Compare like with like: every release
+with all animations off, and every release that has the Space-switch
+slide with it on at one shared pace, each set through `extra.lua`. Pass `--gap` past the
 longest animation measured, or a press cuts it short and the run
 reads cheaper than the motion is.
 

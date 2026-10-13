@@ -18,12 +18,6 @@ extension APIReference {
                 + "milliseconds.",
             .integer("milliseconds")
         ),
-        "set_space_change": APIRecord(
-            "Sets how a Space switch shows itself: at once, at "
-                + "once naming the Space, or the plate slide.",
-            .choice("style", SpaceChangeStyle.self)
-        ),
-
         "set_on_scrolling": APIRecord(
             "Enables or disables the layout slide when scrolling.",
             .boolean("enabled")
@@ -40,10 +34,6 @@ extension APIReference {
         "set_on_relayout": APIRecord(
             "Enables or disables animation on layout reflows.",
             .boolean("enabled")
-        ),
-        "set_space_change_duration": APIRecord(
-            "Sets the Space-switch slide's pace in milliseconds.",
-            .integer("milliseconds")
         ),
         "set_on_monocle_focus": APIRecord(
             "Enables or disables the card flip when focus moves "

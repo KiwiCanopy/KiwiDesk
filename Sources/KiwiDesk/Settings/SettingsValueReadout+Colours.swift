@@ -32,12 +32,6 @@ extension SettingsValueReadout {
                 old.settings.stickyStyle.liquidGlass,
                 new.settings.stickyStyle.liquidGlass
             )
-        case .spaceSwitchLiquidGlass:
-            return coloursOnOffRow(
-                census,
-                old.settings.spaceSwitchLiquidGlass,
-                new.settings.spaceSwitchLiquidGlass
-            )
         case .borderSheen:
             return coloursRow(
                 census,
@@ -61,12 +55,6 @@ extension SettingsValueReadout {
                 o.anyEnabled,
                 n.anyEnabled
             )
-        case .animationsSpaceChange:
-            return coloursRow(
-                census,
-                MotionCard.spaceChangeTitle(o.spaceChange),
-                MotionCard.spaceChangeTitle(n.spaceChange)
-            )
         case .animationsOnWindowResize:
             return coloursOnOffRow(
                 census,
@@ -84,12 +72,6 @@ extension SettingsValueReadout {
                 census,
                 o.onRelayout,
                 n.onRelayout
-            )
-        case .animationsSpaceChangeDurationMS:
-            return coloursRow(
-                census,
-                milliseconds(Double(o.spaceChangeDurationMS)),
-                milliseconds(Double(n.spaceChangeDurationMS))
             )
         case .animationsDurationMS:
             return coloursRow(

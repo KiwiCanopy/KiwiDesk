@@ -930,6 +930,39 @@ KiwiDesk.set_desktop_cue(false)
 ```
 
 :::unreleased
+### set_space_cue
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether an explicit Space switch —
+[`focus_space`](#focus_space), a Space Bar click, the
+[scroll Space step](#scroll_gestureset_space_step), a
+[move-and-follow](#move_to_space_and_follow) or a launch follow —
+shows a plate in the middle of the screen that switched: the
+Space's name or number and its layout's symbol. The plate shows
+only where that screen draws no Space Bar — the Space Bar is off,
+that screen has none, or the shelf is hidden for a full-screen app
+or a presentation. It takes no focus or click and fades after
+about a second; with Reduce Motion on it appears and leaves
+without the fade. The switch itself is always instant.
+
+The GUI twin is **KiwiShelf ▸ KiwiShelf ▸ Show ▸ Show the Space
+after a switch**. Like [`set_desktop_cue`](#set_desktop_cue), the
+setting is app-wide, stored in `gui.json` as `space.cue`; the verb
+changes the running value only. It replaces
+`animations.set_space_change` and `animations.set_on_space_change`,
+which are refused, naming it; `animations.set_space_change_duration`
+and `set_space_switch_liquid_glass` are refused, since a Space
+switch no longer slides.
+
+**Example:**
+
+```lua
+KiwiDesk.set_space_cue(false)
+```
+:::
+
+:::unreleased
 ### set_mode_cue
 
 **Expects:** `true` or `false` (default `true`).
@@ -989,27 +1022,6 @@ what it writes.
 KiwiDesk.set_shortcut_panel_liquid_glass(true)
 ```
 
-### set_space_switch_liquid_glass
-
-**Expects:** `true` or `false` (default `true`).
-
-**Does:** draws the plates a Space switch slides
-([animations.set_space_change](#animationsset_space_change))
-in macOS&nbsp;26 Liquid Glass, the shortcuts panel's `.regular`
-glass. Off, or below macOS&nbsp;26, they draw a blurred material,
-as the panel does. Read at the next switch.
-
-Stored as `space_switch.liquid_glass` in the profile. Also stood
-down while macOS's Reduce transparency is on, the stored value
-untouched. The GUI twin is the one **Liquid Glass** switch on
-Looks &amp; Animations.
-
-**Example:**
-
-```lua
-KiwiDesk.set_space_switch_liquid_glass(true)
-```
-
 ### Space Identity
 
 Spaces are identified by **strings or numbers** — `1` and `"1"`
@@ -1028,9 +1040,8 @@ move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
 owns the model.
 
 :::unreleased
-How the switch shows itself — at once, at once with a plate naming
-the Space, or the plate slide — is
-[animations.set_space_change](#animationsset_space_change).
+The switch is instant; whether a plate names the Space it lands
+on is [`set_space_cue`](#set_space_cue).
 :::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
@@ -2318,8 +2329,6 @@ and the sticky mark their flat look. The stored values are
 untouched, so the glass and the alpha return the moment the
 setting goes off (#1374).
 
-The Space switch's plates draw their material then too.
-
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
 shortcuts panel's
@@ -2329,9 +2338,7 @@ and the sticky mark's
 ([sticky.set_liquid_glass](#stickyset_liquid_glass)) together,
 and shows on only when all of them are on.
 
-It writes the Space switch plates' leaf too
-([set_space_switch_liquid_glass](#set_space_switch_liquid_glass)),
-and the slow-boot notice follows the shortcuts panel's.
+The slow-boot notice follows the shortcuts panel's.
 
 This verb sets the
 bars alone; setting them apart is a Lua-only state, and the
@@ -5960,73 +5967,6 @@ under `"mid_slide"`. Engine-only, not persisted (#47, #593).
 ```lua
 animations.set_size_rate(30)   -- throttle a heavy app
 animations.set_size_rate(0)    -- back to per-tick default
-```
-
-:::unreleased
-### animations.set_space_change
-
-**Expects:** `"instant"`, `"cue"` or `"slide"` (default `"cue"`).
-
-**Does:** sets how an explicit Space switch — `focus_space`, a
-Space Bar click, the scroll Space step, a move-and-follow or a
-launch follow — shows itself:
-
-- `"instant"`: the screen changes at once.
-- `"cue"`: the screen changes at once, and a glass plate in the
-  middle of the screen that switched names the Space you arrived
-  on and shows its layout's symbol, for about a second. A screen
-  that draws a Space Bar skips it, since the bar already names the
-  Space, and so does one showing a full-screen app or a
-  presentation.
-- `"slide"`: the plate slide. A plate with its app's icon fades in
-  over each window on the screen, the plates slide as one strip
-  one screen toward the new Space — across for a Space Bar on the
-  top or bottom edge, up or down for one on a side — and fade out
-  over the windows that arrive. The windows themselves move once
-  each, under the plates. The plates wear Liquid Glass
-  ([set_space_switch_liquid_glass](#set_space_switch_liquid_glass)).
-  With Reduce Motion on it shows the `"cue"` plate instead, the
-  stored value staying `"slide"`.
-
-The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Space
-switches**, which Reduce Motion does not grey and the **Animate
-windows** switch does not turn off. It replaces
-`animations.set_on_space_change`, which is refused, naming this
-verb; a profile that stored the old switch on shows the plate, and
-one that stored it off is instant. While a saved profile is live,
-its value applies over this call.
-
-macOS Desktop switches are never animated in either direction —
-macOS stops reporting an inactive Desktop's windows to
-Accessibility (see
-[Accepted limitations](accepted-limitations.md)).
-
-**Example:**
-
-```lua
-animations.set_space_change("slide")
-```
-:::
-
-### animations.set_space_change_duration
-
-**Expects:** a number (milliseconds, clamped 150–1000; default
-`300`).
-
-:::unreleased
-**Does:** sets the pace of the plate slide a Space switch plays
-([animations.set_space_change](#animationsset_space_change)):
-how long the plates take to slide to the new Space, their fades
-scaling with it. It has no effect unless the style is `"slide"`,
-nor while Reduce Motion is on. Window motion keeps its own pace
-([animations.set_duration](#animationsset_duration)). Read at
-the next switch.
-:::
-
-**Example:**
-
-```lua
-animations.set_space_change_duration(450)
 ```
 
 ### animations.set_on_scrolling

@@ -92,6 +92,9 @@ extension SettingsValueReadout {
                 bordersAutoHex(o.focusedHighlightColor),
                 bordersAutoHex(n.focusedHighlightColor)
             )
+        case .spaceCue:
+            // No model path: the cue writes at once (#1741).
+            return []
         }
     }
 }

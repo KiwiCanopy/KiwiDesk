@@ -4,10 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The Space cue (#2143): an explicit switch pays a cue naming the
-/// Space and its layout on the screen that switched — on Show the
-/// Space, or on Slide under Reduce Motion — and stands down where
-/// that screen draws a Space Bar or the shelf stands down (#1787).
+/// The Space cue (#2143, #2228): an explicit switch pays a cue
+/// naming the Space and its layout on the screen that switched,
+/// while `space.cue` is on, and stands down where that screen draws
+/// a Space Bar or the shelf stands down (#1787).
 /// An extension of this suite, not a second one: every case holds
 /// the process-global `currentSpaceIsUserOverride`.
 extension FullscreenStandDownTests {
@@ -16,7 +16,7 @@ extension FullscreenStandDownTests {
     /// Two Spaces on the primary screen, "1" shown, the Space Bar
     /// on or off. Nil where the host has no screen.
     private func makeSpaceCueCore(
-        style: SpaceChangeStyle,
+        cue: Bool = true,
         spaceBar: Bool = false,
         isUser: Bool = true
     ) -> (KiwiCore, SpaceCueBox, DisplayID)? {
@@ -34,9 +34,8 @@ extension FullscreenStandDownTests {
         core.state.workspaces.setMode("2", .grid)
         core.state.workspaces.activate("1")
         core.frontWindowFrames = { [] }
-        core.spaceSlide.reduceMotion = { false }
+        core.setAppWide(persisting: false) { $0.spaceCue = cue }
         var settings = core.tiler.settings
-        settings.animations.spaceChange = style
         settings.spaceBarStyle.enabled = spaceBar
         core.tiler.settings = settings
         core.updateBars()
@@ -52,7 +51,7 @@ extension FullscreenStandDownTests {
     func switchPaysTheSpaceCue() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, box, display) = try #require(
-            makeSpaceCueCore(style: .cue)
+            makeSpaceCueCore()
         )
         _ = core.execute("focus_space", args: [.string("2")])
         #expect(
@@ -62,24 +61,14 @@ extension FullscreenStandDownTests {
     }
 
     @Test(
-        "Instant and Slide show no plate; Slide under Reduce Motion does",
+        "with space.cue off, a switch shows no plate",
         .enabled(if: NSScreen.main != nil)
     )
-    func styleDecidesTheCue() throws {
+    func toggleDecidesTheCue() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        for style in [SpaceChangeStyle.instant, .slide] {
-            let (core, box, _) = try #require(
-                makeSpaceCueCore(style: style)
-            )
-            _ = core.execute("focus_space", args: [.string("2")])
-            #expect(box.cues.isEmpty, "\(style) showed the plate")
-        }
-        let (core, box, _) = try #require(
-            makeSpaceCueCore(style: .slide)
-        )
-        core.spaceSlide.reduceMotion = { true }
+        let (core, box, _) = try #require(makeSpaceCueCore(cue: false))
         _ = core.execute("focus_space", args: [.string("2")])
-        #expect(box.cues.map(\.space) == ["2"])
+        #expect(box.cues.isEmpty)
     }
 
     /// A follow pays it too: `followSwitch` hands the switch the
@@ -91,7 +80,7 @@ extension FullscreenStandDownTests {
     func followPaysTheSpaceCue() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, box, display) = try #require(
-            makeSpaceCueCore(style: .cue)
+            makeSpaceCueCore()
         )
         let window = WindowID(9)
         core.state.apply(
@@ -112,7 +101,7 @@ extension FullscreenStandDownTests {
     func spaceBarKeepsTheCueAway() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, box, display) = try #require(
-            makeSpaceCueCore(style: .cue, spaceBar: true)
+            makeSpaceCueCore(spaceBar: true)
         )
         #expect(core.spaceBars.shownDisplays.contains(display))
         _ = core.execute("focus_space", args: [.string("2")])
@@ -126,7 +115,7 @@ extension FullscreenStandDownTests {
     func fullScreenKeepsTheSpaceCueAway() throws {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         let (core, box, _) = try #require(
-            makeSpaceCueCore(style: .cue, isUser: false)
+            makeSpaceCueCore(isUser: false)
         )
         _ = core.execute("focus_space", args: [.string("2")])
         #expect(box.cues.isEmpty)
