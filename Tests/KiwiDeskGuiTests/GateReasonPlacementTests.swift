@@ -72,6 +72,9 @@ struct GateReasonPlacementTests {
                 // #2144: the layout plate's switch, the same
                 // shape on Shortcuts ▸ Layout.
                 .shortcuts(.modeCue),
+                // #2228: the Space plate's switch, the same shape
+                // on KiwiShelf ▸ Show.
+                .spaceBar(.spaceCue),
                 // Back in the set with #1392: the stored-profile
                 // arm (cause on the surface) retired, and the
                 // one that greys now — a stored Save with no

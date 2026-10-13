@@ -256,8 +256,8 @@ twice, was a question the user answered twice. The argument is
   the bars' app icons come from the one `BarIconCache`: a fresh
   `NSImage` per read never compares equal and costs a
   LaunchServices round trip besides. Any other Core surface that
-  draws an app's icon — the Monocle flip's card, the Space
-  switch's plates — reads it there too, since an app activation
+  draws an app's icon — the Monocle flip's card — reads it there
+  too, since an app activation
   makes every retained `NSRunningApplication` read again (#1936,
   `AppIconSourceSeamTests`).
 - **Reuse a Space item's glyph and badge views slot by slot,

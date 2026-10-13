@@ -120,4 +120,76 @@ extension FullscreenStandDownTests {
         _ = core.execute("focus_space", args: [.string("2")])
         #expect(box.cues.isEmpty)
     }
+
+    /// A display follow lands on a Space its screen already shows,
+    /// so nothing needs naming: it passes no screen to the switch.
+    @Test(
+        "a display follow names nothing",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func displayFollowNamesNothing() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let (core, box, _) = try #require(makeSpaceCueCore())
+        core.applyFocusedSpaceSwitch(to: "2")
+        #expect(core.state.workspaces.activeSpace == "2")
+        #expect(box.cues.isEmpty)
+    }
+
+    /// A Space no declaration names takes its screen ahead of the
+    /// cue's read (#1994), so a first visit, a move-and-follow and
+    /// a launch follow into one name it too.
+    @Test(
+        "an undeclared Space is named on its first visit",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func firstVisitIsNamed() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let (core, box, display) = try #require(makeSpaceCueCore())
+        _ = core.execute("focus_space", args: [.string("6")])
+        #expect(core.state.workspaces.display(of: "6") == display)
+        #expect(box.cues.map(\.space) == ["6"])
+    }
+
+    /// The filing places the Space before the follow reads its
+    /// screen, so this holds whichever of the two placements runs;
+    /// `followSwitch`'s own is `launchFollowIsNamed`'s.
+    @Test(
+        "a move-and-follow into an undeclared Space names it",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func followIsNamed() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let (core, box, display) = try #require(makeSpaceCueCore())
+        let window = WindowID(9)
+        core.state.apply(
+            .windowCreated(ManagedWindow(id: window, pid: 1, appName: "A"))
+        )
+        core.state.workspaces.add(window, to: "1")
+        _ = core.execute(
+            "move_to_space_and_follow",
+            args: [.string("6"), .number(9)]
+        )
+        #expect(core.state.workspaces.display(of: "6") == display)
+        #expect(box.cues.map(\.space) == ["6"])
+    }
+
+    /// The create fold files a launch's window into its rule's
+    /// Space and places nothing; the follow places it first.
+    @Test(
+        "a launch follow into an undeclared Space names it",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func launchFollowIsNamed() throws {
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let (core, box, display) = try #require(makeSpaceCueCore())
+        let window = WindowID(9)
+        core.state.apply(
+            .windowCreated(ManagedWindow(id: window, pid: 1, appName: "A"))
+        )
+        core.state.workspaces.add(window, to: "6")
+        #expect(core.state.workspaces.display(of: "6") == nil)
+        core.followSwitch(to: "6", focusing: window)
+        #expect(core.state.workspaces.display(of: "6") == display)
+        #expect(box.cues.map(\.space) == ["6"])
+    }
 }

@@ -60,9 +60,9 @@ extension KiwiCore {
     }
 
     /// Commits a focused-display / space switch to `space`: makes
-    /// it the active space, force-retiles honouring the
-    /// space-change animation (§5: an explicit switch forces past
-    /// the "already there" tolerance check), and tells the bars.
+    /// it the active space, force-retiles (§5: an explicit switch
+    /// forces past the "already there" tolerance check), and tells
+    /// the bars. It names no Space: the screen already shows it.
     /// The shared tail of the empty-desktop display follow (#446)
     /// and the AX focus-follow (`scheduleFocusFollow`, #22) — each
     /// caller adds its own raise / warp / settle afterwards.

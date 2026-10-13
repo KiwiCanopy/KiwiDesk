@@ -122,7 +122,7 @@ extension KiwiCore {
             || target == state.workspaces.activeSpace
         addFocusedToSpace(window, to: target, restoring: restoring)
         // A target named by an undeclared id takes its screen now:
-        // the re-anchor and a follow's slide read it (#1994).
+        // the re-anchor and a follow's Space cue read it (#1994).
         placeUnplacedSpaces()
         if from != target,
             !placeEnteringFloat(window, wasFloat: wasFloat)

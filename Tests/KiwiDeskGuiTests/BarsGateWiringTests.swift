@@ -61,6 +61,12 @@ struct BarsGateWiringTests {
             "Components/Colors/AdvancedColorsGates+Verdict.swift": [
                 "if!shelfDraws,Self.takesShelfGate(key)"
             ],
+            // The one row gate the area answers (#2228): the Space
+            // cue's Lua-owned grey, and its sentence.
+            "Components/Bars/KiwiShelfCard+SpaceCue.swift": [
+                "inertReason(for:.spaceBar(.spaceCue))",
+                "BarsGateHelp.sentence(for:reason)",
+            ],
         ]
         for (path, needles) in consults {
             let source = try squashed(path)
@@ -142,7 +148,7 @@ struct BarsGateWiringTests {
     func eachReasonHasItsOwnSentence() {
         let all: [BarsGates.InertReason] = [
             .noBarShown, .spaceBarOff, .shelfEmpty,
-            .boxedShelf, .barsSplit,
+            .boxedShelf, .barsSplit, .appWideLuaOwned,
         ]
         let sentences = all.map(BarsGateHelp.sentence)
         for sentence in sentences { #expect(!sentence.isEmpty) }

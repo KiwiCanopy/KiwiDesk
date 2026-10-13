@@ -35,9 +35,16 @@ extension SpaceBarKey {
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceCue:
             // Under the Space Bar switch in the Show group, which
-            // has no gate: it matters most while the bar is off,
-            // where the Space Bar card greys (#2228).
-            return .row(.bars, .kiwishelf, .atRest)
+            // has no block gate: it matters most while the bar is
+            // off, where the Space Bar card greys (#2228). App-wide
+            // (#1741), so it greys where init.lua owns the config,
+            // as the Desktop cue does (#2142).
+            return .row(
+                .bars,
+                .kiwishelf,
+                .atRest,
+                gate: .runtime(.luaOwnsConfig)
+            )
         case .spaceBarHideEmpty, .spaceBarShowFrontApp,
             .spaceBarGroupAdjacent,
             .spaceBarActiveIndicator, .spaceBarSpringDelay,

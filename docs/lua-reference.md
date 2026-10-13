@@ -935,14 +935,15 @@ KiwiDesk.set_desktop_cue(false)
 **Expects:** `true` or `false` (default `true`).
 
 **Does:** whether an explicit Space switch —
-[`focus_space`](#focus_space), a Space Bar click, the
-[scroll Space step](#scroll_gestureset_space_step), a
-[move-and-follow](#move_to_space_and_follow) or a launch follow —
-shows a plate in the middle of the screen that switched: the
-Space's name or number and its layout's symbol. The plate shows
-only where that screen draws no Space Bar — the Space Bar is off,
-that screen has none, or the shelf is hidden for a full-screen app
-or a presentation. It takes no focus or click and fades after
+[`focus_space`](#focus_space) and the Space history and order
+steps, the [scroll Space step](#scroll_gestureset_space_step), a
+[move-and-follow](#move_to_space_and_follow), Open or Focus onto
+another Space or a launch follow — shows a plate in the middle of
+the screen that switched: the Space's name or number and its
+layout's symbol. The plate shows only where that screen draws no
+Space Bar — the Space Bar is off or that screen has none — and
+never over a full-screen app or a presentation. It takes no focus
+or click and fades after
 about a second; with Reduce Motion on it appears and leaves
 without the fade. The switch itself is always instant.
 

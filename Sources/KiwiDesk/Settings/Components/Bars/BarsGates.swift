@@ -6,6 +6,8 @@ import KiwiDeskCore
 /// exemptions.
 struct BarsGates {
     let settings: TilingSettings
+    /// Whether the GUI owns the config — the app-wide rows' gate.
+    var guiManaged = true
 
     /// Why a bar block or shown-bar-gated row is inert.
     enum InertReason: Hashable {
@@ -23,6 +25,21 @@ struct BarsGates {
         /// The shelf's font family is not installed, so System
         /// draws and the family has no weights to offer (#1681).
         case fontMissing(family: String)
+        /// `init.lua` owns the config, so an app-wide row it does
+        /// not store is not the GUI's to write (#1741).
+        case appWideLuaOwned
+    }
+
+    /// Resolves a row's declared census gate — the Space cue's
+    /// switch, the one row gate this area answers (#2228).
+    func inertReason(for key: SettingKey) -> InertReason? {
+        switch key {
+        case .spaceBar(.spaceCue):
+            return guiManaged ? nil : .appWideLuaOwned
+        default:
+            assertionFailure("BarsGates does not own \(key.id)")
+            return nil
+        }
     }
 
     /// Resolves container gate to an inert reason, or nil if active.
@@ -158,6 +175,8 @@ enum BarsGateHelp {
                     + "of its own to choose.",
                 family
             )
+        case .appWideLuaOwned:
+            return GeneralGateHelp.sentence(for: .luaOwned)
         }
     }
 }

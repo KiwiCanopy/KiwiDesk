@@ -3211,13 +3211,16 @@ it.
 :::unreleased
 **A Space switch is instant, and names the Space only where no
 Space Bar does (#2228).** Every KiwiDesk Space switch lands in one
-instant pass. After an explicit one — `focus_space`, a Space Bar
-click, the scroll Space step, a move-and-follow or a launch
-follow — the screen that switched shows #2142's plate with the
-Space's identifier and its layout's symbol (dots mean a Desktop, a
-symbol a Space), unless that screen draws a Space Bar. Where the
-shelf stands down for a full-screen app or a presentation the bar
-is not drawn, so the plate shows there.
+instant pass. After an explicit one — `focus_space` and the Space
+history and order steps, the scroll Space step, a move-and-follow,
+Open or Focus onto another Space or a launch follow — the screen
+that switched shows #2142's plate with the Space's identifier and
+its layout's symbol (dots mean a Desktop, a symbol a Space),
+unless that screen draws a Space Bar. Where the shelf stands down
+for a full-screen app or a presentation it shows nothing either:
+a plate over a slide show is the intrusion #1787 keeps the bars
+from, and the Desktop plate stands down there for the same
+reason.
 
 *Why no slide.* A switch is the verb a KiwiDesk user presses most,
 and motion on it is a wait on every press. The corner slide (#207)
@@ -3235,10 +3238,10 @@ machinery for the few who would pick it.
 *Why only where no Space Bar is drawn.* The Space Bar already
 names the Space and marks the current one on that screen, so a
 plate over the user's windows there says it twice on every press.
-Where no bar is drawn — it is off, that screen has none, or the
-shelf stands down — nothing on screen says which Space came up,
-and that is where the cue is owed: #2142's reasoning, answering
-only where the cue is missing.
+Where no bar is drawn because it is off or that screen has none,
+nothing on screen says which Space came up, and that is where the
+cue is owed: #2142's reasoning, answering only where the cue is
+missing.
 
 *The accepted trade: no direction.* The slide said which way the
 switch went, and showed a follow's window travelling with you. The
@@ -3258,13 +3261,14 @@ a Space Bar is drawn too, waits until someone asks for it, and
 turning the switch into a picker then owes `space.cue` a crossing.
 
 *No crossing out of the slide.* Neither the stored slide nor what
-#2143 would have crossed it to survives, and the animations
-decoder skips keys it does not know, so a stored
+#2143 would have crossed it to survives, and the settings
+decoders skip keys they do not know, so a stored
 `on_space_change`, `space_change`, `space_change_duration` or
 `space_switch.liquid_glass` loads and drops away and every user
 gets the default. The cost: a user who had turned the slide off
 now sees the plate, only on a screen with no Space Bar, one click
 from off. The retired verbs are refused rather than aliased.
+:::
 
 *The focused ring waits for its window.* A slow app's window can
 land after the switch, so the ring appears on the window's own
@@ -3272,7 +3276,6 @@ report near the frame it was sent, or at a cap, never ahead of it
 (#1959). Inside a Space the ring still leads a focus move, since
 there the moving ring is the cue; after a switch a leading ring
 would sit on an empty spot.
-:::
 
 **A resize span is the layout region, not the display
 (#537).** Anything that divides a delta by a span — or
@@ -6072,8 +6075,12 @@ Nobody varies it per profile, so it is app-wide (#1741).
 **What was not shipped:** a number alone (no sense of where among
 how many), dots alone (counted, not read, past about five), a pill
 by KiwiShelf (hidden whenever the shelf is), a mini-map of the
-screens, and the KiwiDesk Space — a Space switch names its own
-Space with the same plate where no Space Bar does (#2228).
+screens, and the KiwiDesk Space.
+
+:::unreleased
+A Space switch names its own Space with the same plate where no
+Space Bar does (#2228).
+:::
 
 ### Cycling layouts shows the cycle, on its own switch (#2144)
 

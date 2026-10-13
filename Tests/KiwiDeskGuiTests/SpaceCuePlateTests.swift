@@ -43,7 +43,7 @@ struct SpaceCuePlateTests {
 
     /// The plate is for a screen the Space Bar does not draw on,
     /// so its switch sits directly under the bar's own in the Show
-    /// group, which no gate greys — never in the Space Bar card,
+    /// group, which no block gate greys — never in the Space Bar card,
     /// which greys while the bar is off (#2228).
     @Test("the switch sits under the Space Bar's own")
     func switchSitsUnderTheSpaceBar() throws {
@@ -54,6 +54,6 @@ struct SpaceCuePlateTests {
         #expect(show.firstIndex(of: .spaceBar(.spaceCue)) == bar + 1)
         let placement = SettingKey.spaceBar(.spaceCue).placement
         #expect(placement.container == .kiwishelf)
-        #expect(placement.gate == nil)
+        #expect(placement.gate == .runtime(.luaOwnsConfig))
     }
 }

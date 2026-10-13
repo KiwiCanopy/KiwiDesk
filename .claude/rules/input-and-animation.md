@@ -733,9 +733,11 @@ editing here:
   (`spaceSwitchDisplay`, read before the switch activates), and
   `paySpaceCue` reads `space.cue` itself — a second payer, or a
   reader of the toggle beside it, is a switch that shows the
-  plate past the user's off (`SpaceCueSeamTests`). Boot, wake
-  and a restore pass no screen through `spaceSwitchRetile`'s nil
-  default, which review holds. The product ruling is
+  plate past the user's off (`SpaceCueSeamTests`). A display
+  follow passes no screen, since its screen already shows the
+  Space (`FullscreenStandDownTests` ▸ `displayFollowNamesNothing`);
+  boot, wake and a restore pass none through `spaceSwitchRetile`'s
+  nil default, which review holds. The product ruling is
   `docs/design-decisions.md` ▸ *A Space switch is instant, and
   names the Space only where no Space Bar does*.
 - Env levers for device QA of this subsystem are **listed and
