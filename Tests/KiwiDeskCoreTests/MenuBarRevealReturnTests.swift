@@ -236,6 +236,64 @@ struct MenuBarRevealReturnTests {
         #expect(core.menuBarReveal.debt?.window == WindowID(1))
     }
 
+    /// A focus command between the report and the open is a
+    /// choice the arm never sees (its echo is a self raise), so
+    /// the open asks the commanded-focus ledger itself.
+    @Test("A commanded focus since is not owed at the open")
+    func commandedSinceIsNotOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        core.handle(.windowFocused(WindowID(2)))
+        core.eventLoop.lastCommandedFocus =
+            .now.advanced(by: .seconds(1))
+        core.statusMenuDidOpen()
+        #expect(core.menuBarReveal.debt == nil)
+        #expect(F.focused(core) == WindowID(2))
+    }
+
+    /// A click that reached the revealed window since is a window
+    /// choice, as it is at the report.
+    @Test("A click on the revealed window since is not owed")
+    func clickOnTheRevealedSinceIsNotOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        core.handle(.windowFocused(WindowID(2)))
+        core.lastLeftClick = (
+            at: core.wallClock(),
+            point: .zero,
+            reached: WindowID(2)
+        )
+        core.statusMenuDidOpen()
+        #expect(core.menuBarReveal.debt == nil)
+        #expect(F.focused(core) == WindowID(2))
+    }
+
+    /// The honored other-Space report scheduled the 250 ms Space
+    /// follow; the open owing the return cancels it, since the
+    /// user asked for the menu and not that Space.
+    @Test("The open cancels the follow the honored report scheduled")
+    func openCancelsTheHonoredFollow() {
+        let core = F.makeCore(inStrip: false)
+        core.state.workspaces.add(WindowID(2), to: SpaceID("2"))
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(core.deferred.task(for: .focusFollow) != nil)
+        core.statusMenuDidOpen()
+        #expect(core.deferred.task(for: .focusFollow) == nil)
+        #expect(core.menuBarReveal.debt?.window == WindowID(1))
+    }
+
+    /// An other-Space repeat reaches the decline branch again (the
+    /// anchor is still the active Space's focus); the grace keeps
+    /// running from the FIRST report.
+    @Test("An other-Space repeat keeps the first stamp")
+    func otherSpaceRepeatKeepsTheFirstStamp() {
+        let core = F.makeCore(inStrip: false)
+        core.state.workspaces.add(WindowID(2), to: SpaceID("2"))
+        let first = core.wallClock()
+        core.handle(.windowFocused(WindowID(2)))
+        core.wallClock = { first.addingTimeInterval(0.5) }
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(core.menuBarReveal.declined?.armedAt == first)
+    }
+
     /// A window honored after the declined report is the user's
     /// choice; the open owes nothing over it.
     @Test("A later choice is not owed at the open")

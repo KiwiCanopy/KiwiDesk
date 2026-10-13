@@ -10781,12 +10781,15 @@ activation's report lands inside that build — 52 ms ahead of
 declined every quick-menu report, and the press itself reaches no
 local event monitor (measured the same day). So the arm keeps the
 one report it declined only for the menu being shut, and the open
-looks back: within a one-second grace, with that window still the
-focus and the anchor present, the open owes the return the report
-would have, state focus going back to the own window and the
-payment waiting on the close as it does. The residue is a ⌘-Tab
-out of Settings and a click on the item inside one second, which
-is paid over. A click chooses
+looks back: within a one-second grace, with no other window
+reported, no commanded focus and no click on that window since,
+and the anchor present, the open owes the return the report
+would have — state focus back on the own window, the Space follow
+that report scheduled cancelled, the payment waiting on the close
+as it does. The residue is any clickless OS-made switch out of
+Settings inside that second — a ⌘-Tab, a Dock click, a Spotlight
+open — followed by a click on the item, which is paid over. A
+click chooses
 nothing (owner, 2026-10-13): the bar a reveal shows is macOS's,
 since KiwiDesk owns none, so opening that app's menus or picking
 one of their rows is not the user picking that app — only a

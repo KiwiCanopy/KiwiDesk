@@ -7,10 +7,9 @@ struct MenuBarRevealState {
     var debt: MenuBarRevealDebt?
     var statusMenuOpen = false
     /// The last report the arm declined only for the menu being
-    /// shut and the pointer out of the strip: the quick menu's
-    /// activation report lands BEFORE `menuWillOpen`, inside the
-    /// menu's build (52 ms ahead on device, 2026-10-13), so the
-    /// open looks back on it.
+    /// shut and the pointer out of the strip, kept for the open to
+    /// look back on: the quick menu's activation reports ahead of
+    /// `menuWillOpen` (#2224).
     var declined: MenuBarRevealDebt?
 }
 
@@ -112,7 +111,9 @@ extension KiwiCore {
                     + "clicked=\(clicked) menu=\(menu) "
                     + "strip=\(strip) (#2224)"
             )
-            if !clicked, !menu, !strip {
+            // A repeat keeps the first stamp, so the grace runs
+            // from the first report in both Space shapes.
+            if !clicked, !menu, !strip, menuBarReveal.declined == nil {
                 menuBarReveal.declined = candidate
             }
             return false
@@ -128,13 +129,16 @@ extension KiwiCore {
     }
 
     /// The report already moved state focus: put it back on the own
-    /// window, raising nothing while the bar shows.
+    /// window, raising nothing while the bar shows. The bars too —
+    /// a report the open looks back on ran the honored tail, which
+    /// moved the Space Bar's accent.
     private func keepStateFocus(on window: WindowID) {
         if let space = state.workspaces.space(of: window) {
             state.workspaces.focus(window, in: space)
         }
         updateBorders()
         updateStickyMarks()
+        updateBars()
     }
 
     /// The GUI's status menu opened: while it is open an owed
@@ -147,26 +151,36 @@ extension KiwiCore {
         oweDeclinedReveal()
     }
 
-    /// Owes the return for a report the arm declined only for the
-    /// menu being shut: within the grace, no other window reported
-    /// since (the arm ends the candidate), its anchor present, and
-    /// a re-assert that switches no Desktop — asked here, since
-    /// the report's own verdict never reached that clause. Which
-    /// Space holds the revealed window does not matter: a reveal
-    /// of a window in another Space switches nothing, and the
-    /// return still goes to the anchor.
+    /// The OPEN's roster, the third moment beside the arm's and
+    /// the payment's: a report the arm declined only for the menu
+    /// being shut, within the grace, no other window reported
+    /// since (the arm ends the candidate), no commanded focus and
+    /// no click that reached the revealed window since, the anchor
+    /// present, and a re-assert that switches no Desktop — asked
+    /// here, since the report's own verdict never reached that
+    /// clause. Owing cancels the Space follow the honored report
+    /// scheduled: the user asked for the menu, not that window's
+    /// Space.
     private func oweDeclinedReveal() {
         guard let declined = menuBarReveal.declined else { return }
         menuBarReveal.declined = nil
+        let now = wallClock()
+        let commandedSince =
+            eventLoop.lastCommandedFocus.map {
+                $0 > declined.commandedAt
+            } ?? false
         guard menuBarReveal.debt == nil,
-            wallClock().timeIntervalSince(declined.armedAt)
+            now.timeIntervalSince(declined.armedAt)
                 < Self.menuBarRevealOpenGrace,
+            !commandedSince,
+            !recentClickReached(declined.revealed, now: now),
             state.windows[declined.window] != nil,
             !reassertCrossesDesktops(
                 declined.window,
                 against: declined.revealed
             )
         else { return }
+        deferred.cancel(.focusFollow)
         menuBarReveal.debt = declined
         onLog(
             "focus: w\(declined.revealed.raw) menu-bar reveal "
@@ -183,7 +197,6 @@ extension KiwiCore {
     /// the bar still shows.
     public func statusMenuDidClose() {
         menuBarReveal.statusMenuOpen = false
-        menuBarReveal.declined = nil
         let owed = menuBarReveal.debt.map { "w\($0.window.raw)" }
         onLog(
             "focus: status menu closed; owed=\(owed ?? "none") (#2224)"

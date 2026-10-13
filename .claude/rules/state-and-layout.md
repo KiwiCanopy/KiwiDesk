@@ -640,9 +640,14 @@ editing here:
   or KiwiDesk's quick menu is open — and at the OPEN for the one
   report the arm declined only for the menu being shut, since
   the quick menu's activation reports ahead of `menuWillOpen`
-  and its press reaches no local monitor: `statusMenuDidOpen`
-  looks back within `menuBarRevealOpenGrace`, on a focus nothing
-  honored since, never a second arm beside it — and never raises
+  and its press reaches no local monitor (#2224, measured
+  2026-10-13 on macOS 27.0.1): `statusMenuDidOpen` looks back
+  within `menuBarRevealOpenGrace` on `oweDeclinedReveal`'s
+  roster, the open's — the candidate ended by a report for
+  another window at the arm, by a commanded focus or a click on
+  the revealed window since, and the owe cancelling the Space
+  follow the honored report scheduled — never a second arm
+  beside it — and never raises
   before the
   bar hides, since a return raised at once was taken back every
   ~1.3 s (#2224), then pays it once with the
