@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -62,9 +63,14 @@ struct BarsGateWiringTests {
                 "if!shelfDraws,Self.takesShelfGate(key)"
             ],
             // The one row gate the area answers (#2228): the Space
-            // cue's Lua-owned grey, and its sentence.
+            // cue's Lua-owned grey — the whole constructor, since
+            // `guiManaged` has a default a dropped argument would
+            // fall back to — the grey it drives, and its sentence.
             "Components/Bars/KiwiShelfCard+SpaceCue.swift": [
-                "inertReason(for:.spaceBar(.spaceCue))",
+                "BarsGates(settings:model.config.settings,"
+                    + "guiManaged:model.guiManaged)"
+                    + ".inertReason(for:.spaceBar(.spaceCue))",
+                "disabled:reason!=nil",
                 "BarsGateHelp.sentence(for:reason)",
             ],
         ]
@@ -153,5 +159,42 @@ struct BarsGateWiringTests {
         let sentences = all.map(BarsGateHelp.sentence)
         for sentence in sentences { #expect(!sentence.isEmpty) }
         #expect(Set(sentences).count == all.count)
+    }
+
+    /// Every runtime-gated bars row is answered by `BarsGates` or
+    /// named as answered elsewhere, and the two sets are disjoint
+    /// (gui.md, the census-gate convergence).
+    @Test("every runtime-gated bars row is resolved")
+    func runtimeGatesAreResolved() {
+        let gated = Set(
+            SettingKey.allCases.filter {
+                $0.placement.area == .bars
+                    && !($0.placement.gate?.runtimeConditions.isEmpty
+                        ?? true)
+            }
+        )
+        #expect(
+            gated == BarsGates.resolved.union(BarsGates.resolvedElsewhere)
+        )
+        #expect(
+            BarsGates.resolved
+                .isDisjoint(with: BarsGates.resolvedElsewhere)
+        )
+    }
+
+    /// The Space cue's switch greys under a Lua-owned config and
+    /// stays live where the GUI owns it (#2228).
+    @Test("the Space cue switch greys under Lua")
+    func spaceCueGreysUnderLua() {
+        let settings = TilingSettings()
+        let key = SettingKey.spaceBar(.spaceCue)
+        #expect(
+            BarsGates(settings: settings, guiManaged: true)
+                .inertReason(for: key) == nil
+        )
+        #expect(
+            BarsGates(settings: settings, guiManaged: false)
+                .inertReason(for: key) == .appWideLuaOwned
+        )
     }
 }

@@ -30,8 +30,16 @@ struct BarsGates {
         case appWideLuaOwned
     }
 
-    /// Resolves a row's declared census gate — the Space cue's
-    /// switch, the one row gate this area answers (#2228).
+    /// Runtime-gated keys this resolver answers directly. Data, so
+    /// the guard asserts the split against the census — a new
+    /// runtime-gated bars row landing in neither set reds. A bars
+    /// row's `.setting` gate is wiring's, as gui.md rules.
+    static let resolved: Set<SettingKey> = [.spaceBar(.spaceCue)]
+
+    /// Runtime-gated bars keys answered elsewhere.
+    static let resolvedElsewhere: Set<SettingKey> = []
+
+    /// Resolves a row's declared runtime gate (#2228).
     func inertReason(for key: SettingKey) -> InertReason? {
         switch key {
         case .spaceBar(.spaceCue):
