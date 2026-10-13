@@ -35,8 +35,8 @@ final class ShortcutsPanel: NSPanel {
         onCancel()
     }
 
-    /// The File menu's Close (⌘W) is a keyboard-commanded close,
-    /// so it closes like Esc. AppKit greys Close for a window
+    /// The File menu's Close (⌘W) closes like Esc. AppKit greys
+    /// Close for a window
     /// without `.closable`, which a borderless panel is, so the
     /// item is validated here (#1533).
     override func performClose(_ sender: Any?) {
@@ -100,9 +100,6 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     func show() {
         let reference = buildReference()
         let onEdit: () -> Void = { [weak self] in
-            // A click whose next step is Settings coming
-            // forward: an intended focus, so the close arms no
-            // dismiss distrust (#952).
             self?.close()
             self?.onEdit()
         }
@@ -170,6 +167,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         guard !presence.leaving else { return }
         let key = NSApplication.shared.keyWindow?.title ?? "none"
         logPanel("sheet close; key \(key)")
+        // The one close door, though this panel never arms.
         handBack.release(distrusting: false) { [weak self] in
             guard let self else { return }
             self.presence.fadeOut(

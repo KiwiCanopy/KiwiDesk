@@ -6,8 +6,8 @@ import Testing
 
 /// The list grows to a third of the screen's visible height, never
 /// fewer than 6 rows nor more than 12, and shrinks to fit fewer
-/// results (#1875 ▸ Panel). A pick of another app's window and a
-/// commanded close distrust the dismiss blip (#952).
+/// results (#1875 ▸ Panel). A pick of another app's window
+/// distrusts the dismiss blip (#952); a close arms nothing.
 @Suite("Jump to window panel controller")
 @MainActor
 struct JumpPanelControllerTests {
@@ -122,6 +122,17 @@ struct JumpPanelControllerTests {
         let (controller, core) = controller()
         controller.handBack.isAppActive = { true }
         controller.close()
+        #expect(core.ignoredPanel.active.isEmpty)
+    }
+
+    /// A panel already hidden has no blip to distrust: the same
+    /// pick `pickArmsTheDistrust` arms on stands down here.
+    @Test("a pick on a hidden panel arms nothing")
+    func hiddenPanelPickIsInert() {
+        let (controller, core) = controller()
+        controller.panel = controller.makePanel()
+        #expect(controller.panel?.isVisible == false)
+        controller.pick(entry(), moveHere: true)
         #expect(core.ignoredPanel.active.isEmpty)
     }
 
