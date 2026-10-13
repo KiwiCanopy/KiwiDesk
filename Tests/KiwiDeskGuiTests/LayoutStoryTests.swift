@@ -44,8 +44,8 @@ struct LayoutStoryTests {
             #expect(story.start.motion.focus != 0)
         case .monocle:
             #expect(story.start.windows == 4)
-            // The next window starts behind the one it replaces,
-            // a little smaller, and grows to full size at rest.
+            // The next window starts one fan step back, without
+            // the focus mark, and steps into the front wearing it.
             #expect(story.start.motion.arrival == 1)
             let start = MonocleSchematic(
                 orientation: .horizontal,
@@ -55,8 +55,13 @@ struct LayoutStoryTests {
                 orientation: .horizontal,
                 arrival: story.rest.motion.arrival
             )
-            #expect(start.arrivingScale < 1)
-            #expect(rest.arrivingScale == 1)
+            #expect(start.drawnLevel(0) == 1)
+            #expect(rest.drawnLevel(0) == 0)
+            #expect(start.focusWeight == 0)
+            #expect(rest.focusWeight == 1)
+            let back = start.fanDepth
+            #expect(start.opacity(ofLevel: back) == 0)
+            #expect(rest.opacity(ofLevel: back) == 1)
         case .floating:
             #expect(story.start.windows == 4)
             #expect(story.start.motion.drag < 1)
