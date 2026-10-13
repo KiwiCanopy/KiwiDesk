@@ -5,7 +5,8 @@ import Testing
 /// the name (owner ruling 2026-10-13, #2245): drawn over the
 /// schematic it covered the picture, and beside the name it cut
 /// the name off. The line keeps its height while ⌘ is up, so the
-/// panel never resizes on a press.
+/// panel never resizes on a press, and sits below the selection
+/// fill, so the fill keeps one shape.
 @Suite("A layout tile's chord sits under its name")
 struct JumpLayoutTileChordTests {
     @Test("the chord is a line of the tile, never an overlay")
@@ -14,6 +15,11 @@ struct JumpLayoutTileChordTests {
         #expect(tile.occurrences(of: ".overlay(") == 0)
         let content = try #require(Self.body(of: "content", in: tile))
         #expect(content.occurrences(of: "numberMark") == 1)
+        // The fill hugs the tile proper, never the chord line.
+        #expect(content.occurrences(of: ".background(") == 0)
+        let tileBody = try #require(Self.body(of: "tile", in: tile))
+        #expect(tileBody.occurrences(of: "numberMark") == 0)
+        #expect(tileBody.occurrences(of: ".background(selection)") == 1)
     }
 
     @Test("the chord's line is held while ⌘ is up")
