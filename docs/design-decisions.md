@@ -1725,12 +1725,10 @@ its app's normal windows (#2072, the `macos_join_network` dump),
 which is the escape's weak point: a launcher that lists buttons
 anyway reads as a window.
 
-:::unreleased
 Such a launcher takes the bundle belt with no button escape.
 Spotlight's panel on macOS 27 is one (`com.apple.campo`, #2236):
 its AX lists all three buttons, and managed as a float it was
 moved off its own position by the float fit.
-:::
 
 Above that class sits the **screen-saver level** (#2069): a
 window at CG layer 1000 or above is ignored whatever its app and
