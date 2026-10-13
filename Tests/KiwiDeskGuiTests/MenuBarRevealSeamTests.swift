@@ -76,4 +76,58 @@ struct MenuBarRevealSeamTests {
         #expect(bounce.lowerBound < reveal.lowerBound)
         #expect(reveal.lowerBound < steal.lowerBound)
     }
+
+    /// The quick menu's open and close reach Core (#2224): every
+    /// Core suite calls `statusMenuDidOpen` / `statusMenuDidClose`
+    /// by hand, so a dropped forwarder or closure leaves them all
+    /// green while the quick-menu half stops working.
+    @Test("the quick menu's open and close reach Core")
+    func statusMenuWiring() throws {
+        let gui = Self.root.appendingPathComponent("Sources/KiwiDesk")
+        let menu = try SourceScan.strippedSource(
+            at: gui.appendingPathComponent(
+                "StatusItemController+Menu.swift"
+            )
+        )
+        let delegate = try SourceScan.strippedSource(
+            at: gui.appendingPathComponent("AppDelegate.swift")
+        )
+        let controller = try SourceScan.strippedSource(
+            at: gui.appendingPathComponent("StatusItemController.swift")
+        )
+        #expect(controller.contains("menu.delegate = self"))
+        let willOpen = try #require(
+            menu.range(of: "func menuWillOpen(")
+        )
+        let didClose = try #require(
+            menu.range(of: "func menuDidClose(")
+        )
+        #expect(
+            menu.range(
+                of: "onMenuOpen()",
+                range: willOpen.upperBound..<didClose.lowerBound
+            ) != nil
+        )
+        let next = try #require(
+            menu.range(of: "func menuNeedsUpdate(")
+        )
+        #expect(
+            menu.range(
+                of: "onMenuClose()",
+                range: didClose.upperBound..<next.lowerBound
+            ) != nil
+        )
+        for (closure, call) in [
+            ("statusItem.onMenuOpen", "core.statusMenuDidOpen()"),
+            ("statusItem.onMenuClose", "core.statusMenuDidClose()"),
+        ] {
+            let site = try #require(delegate.range(of: closure))
+            let rest = delegate[site.upperBound...]
+            let end = try #require(rest.range(of: "}"))
+            #expect(
+                rest[..<end.lowerBound].contains(call),
+                "\(closure) does not call \(call)"
+            )
+        }
+    }
 }

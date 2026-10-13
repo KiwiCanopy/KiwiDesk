@@ -632,9 +632,25 @@ editing here:
   stored state beside a call site. The #1532 menu-bar reveal
   return is the third of the family and takes the same one-home
   shape: `KiwiCore+MenuBarRevealReturn.swift` owns the arm and
-  its one-shot stamp, decides at the report — its docstring is
-  the roster of what it reads there, and a new stand-down joins
-  that roster rather than a call site — and re-asserts with the
+  its debt, decides at the report and again at the payment — the
+  arm's docstring is the roster of what it reads at the report,
+  `payMenuBarRevealIfDue`'s of what it reads at the payment, and
+  a new stand-down joins the roster of the moment it reads at
+  rather than a call site — OWES the return while the bar shows
+  or KiwiDesk's quick menu is open — and at the OPEN for the one
+  report the arm declined only for the menu being shut, since
+  the quick menu's activation reports ahead of `menuWillOpen`
+  and its press reaches no local monitor (#2224, measured
+  2026-10-13 on macOS 27.0.1): `statusMenuDidOpen` looks back
+  within `menuBarRevealOpenGrace` on `oweDeclinedReveal`'s
+  roster, the open's — the candidate ended by a report for
+  another window at the arm, by a commanded focus or a click on
+  the revealed window since, and the owe cancelling the Space
+  follow the honored report scheduled — never a second arm
+  beside it — and never raises
+  before the
+  bar hides, since a return raised at once was taken back every
+  ~1.3 s (#2224), then pays it once with the
   STAMPED raise, `raiseWindow`, so the report that follows is our
   own echo (#1281) and the scrolling placement distrust does not
   bounce it (#1414's class): never a bare `AXHelper.raise(`, and
@@ -652,9 +668,11 @@ editing here:
   further member takes the same one-home shape with its own
   consulting site there, and a new live host read on any arm
   takes a `MouseTracker` seam pinned in both twins
-  (`MenuBarRevealReturnTests` the verdicts,
+  (`MenuBarRevealReturnTests` the arm's verdicts,
+  `MenuBarRevealPaymentTests` the payment's,
   `MenuBarRevealSeamTests` the stamped raise and the arm's place
-  between #1161 and #958, `MouseButtonSeamGuardTests` the read's
+  between #1161 and #958 and the quick menu's GUI wiring,
+  `MouseButtonSeamGuardTests` the read's
   home and the pins).
   `IgnoredPanelGraceTests` pins the machine's transitions (the
   dismissal grace, the click-provenance escape, expiry, the

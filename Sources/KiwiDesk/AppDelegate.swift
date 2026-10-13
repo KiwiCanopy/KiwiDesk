@@ -94,6 +94,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()
         }
+        statusItem.onMenuOpen = { [weak self] in
+            self?.core.statusMenuDidOpen()
+        }
+        statusItem.onMenuClose = { [weak self] in
+            self?.core.statusMenuDidClose()
+        }
         // The quick menu's dynamic entries (#68 §3.10).
         statusItem.profilesProvider = { [weak self] in
             (

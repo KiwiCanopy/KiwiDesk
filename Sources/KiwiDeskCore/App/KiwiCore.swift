@@ -183,8 +183,8 @@ public final class KiwiCore {
     /// #2002 delayed-close debt; `KiwiCore+DelayedCloseReturn`.
     var delayedCloseDebt: DelayedCloseDebt?
 
-    /// The last #1532 reveal return; `KiwiCore+MenuBarRevealReturn`.
-    var menuBarRevealReturnAt: Date?
+    /// #1532/#2224 reveal state; `KiwiCore+MenuBarRevealReturn`.
+    var menuBarReveal = MenuBarRevealState()
 
     /// Z-order restores not yet re-asserted (#186): their echoes
     /// lack provenance (#152), so the warp holds while one is in

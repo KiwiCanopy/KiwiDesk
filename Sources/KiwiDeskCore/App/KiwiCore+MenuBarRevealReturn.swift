@@ -1,65 +1,290 @@
 import Foundation
 
+/// The reveal return's state (#1532, #2224): the owed return, and
+/// whether KiwiDesk's own status menu is open, which the GUI sets
+/// through `statusMenuDidOpen` / `statusMenuDidClose`.
+struct MenuBarRevealState {
+    var debt: MenuBarRevealDebt?
+    var statusMenuOpen = false
+    /// The last report the arm declined only for the menu being
+    /// shut and the pointer out of the strip, kept for the open to
+    /// look back on: the quick menu's activation reports ahead of
+    /// `menuWillOpen` (#2224).
+    var declined: MenuBarRevealDebt?
+}
+
+/// A menu-bar reveal's owed return (#1532, #2224): the own window
+/// the reveal's activation took the focus from, and when.
+struct MenuBarRevealDebt {
+    /// The own window to give the focus back to.
+    let window: WindowID
+    /// The foreign window whose report the reveal produced; a
+    /// repeat of it is the same reveal.
+    let revealed: WindowID
+    /// Its app, whose open menu keeps the revealed bar up.
+    let revealedPID: pid_t
+    /// The report's wall time, which the bound runs from.
+    let armedAt: Date
+    /// The report's monotonic time — a commanded focus since does.
+    let commandedAt: ContinuousClock.Instant
+}
+
 /// The menu-bar reveal return (#1532): with the bar set to
 /// auto-hide, macOS 27 answers the pointer reaching the top edge
 /// by activating the last REGULAR app so it has a bar to reveal —
 /// KiwiDesk is an accessory app and owns none — and the clickless
-/// focus report that follows has a cmd-tab's shape. The #958
-/// return one arm over, decided at the report; the measurement
-/// and the ruling are in `docs/design-decisions.md`.
+/// focus report that follows has a cmd-tab's shape. Since #2224
+/// the return is OWED while the bar shows and paid once it hides:
+/// returned at once, macOS took the activation back every ~1.3 s
+/// for as long as the pointer stayed (macOS 27.0.1). The ruling
+/// and the measurement are in `docs/design-decisions.md`.
 extension KiwiCore {
-    /// One return per reveal: a second foreign report inside this
-    /// bound is honored, so an activation KiwiDesk cannot hold is
-    /// never fought twice. The echo window, derived, so the two
-    /// cannot drift.
-    static let menuBarRevealReturnWindow = zOrderRaiseEchoWindow
+    /// How often an owed return looks for the bar to hide.
+    static let menuBarRevealPoll: Duration = .milliseconds(150)
+    /// How long a return may stay owed before it is dropped.
+    static let menuBarRevealBound: TimeInterval = 30
+    /// How far back the quick menu's open looks for the report
+    /// its activation produced: the menu's build is tens of
+    /// milliseconds, longer under load, and a report older than
+    /// this was the user's — a ⌘-Tab and a click on the item
+    /// inside one second is the accepted residue.
+    static let menuBarRevealOpenGrace: TimeInterval = 1
 
     /// The `handleWindowFocused` arm, between the placement bounce
     /// and the #958 return — its guard list is the roster of what
     /// the arm reads: a report from another app while `intended`
     /// (the active Space's focused window before the report, so a
     /// sticky own window rendering as a traveler is not one) is a
-    /// window of our own pid, no left press inside the echo window
-    /// (a click into the revealed bar's menus is the user choosing
-    /// that app), the one-shot bound open, the pointer in the
-    /// reveal strip, and a re-assert that switches no Desktop
-    /// (#1345). Re-asserts with the STAMPED raise: `raiseWindow`
-    /// mints the self stamp, so the report that follows is our
-    /// own echo (#1281's point) — never the focus command, whose
-    /// displacement note would arm the scrolling placement bounce
-    /// against every later report from that app for the ledger's
-    /// window. Returns whether the report was taken.
+    /// window of our own pid, no recent click that reached the
+    /// reported window (a click into the revealed bar's menus
+    /// reaches none and chooses nothing), the pointer in the
+    /// reveal strip or our own status menu open — on any macOS,
+    /// since no foreign activation while our menu tracks is the
+    /// user's — and a re-assert that switches no Desktop (#1345).
+    /// Takes the report WITHOUT honoring it and owes the return;
+    /// a repeat of the same report is the same reveal, while a
+    /// report for any other foreign window is the user switching,
+    /// which drops the debt and is honored. Returns whether the
+    /// report was taken. A report declined only for the menu
+    /// being shut is kept as `declined`, since the quick menu's
+    /// activation reports AHEAD of `menuWillOpen`, and the open
+    /// owes it then (`statusMenuDidOpen`).
     func returnMenuBarReveal(
         id: WindowID,
         intended: WindowID?,
         now: Date
     ) -> Bool {
+        // A report for any other window is the user moving on;
+        // a repeat of the declined one (a lazy app's duplicate,
+        // #887) keeps it for the open.
+        if menuBarReveal.declined?.revealed != id {
+            menuBarReveal.declined = nil
+        }
+        if let debt = menuBarReveal.debt {
+            guard id == debt.revealed else {
+                dropMenuBarRevealDebt("another window reported")
+                return false
+            }
+            keepStateFocus(on: debt.window)
+            return true
+        }
         let own = pid_t(ProcessInfo.processInfo.processIdentifier)
         guard let intended, intended != id,
             state.windows[intended]?.pid == own,
-            let reported = state.windows[id], reported.pid != own,
-            !recentLeftPress(now: now),
-            !returnedMenuBarRevealRecently(now: now),
-            mouse.pointerInMenuBarStrip(),
-            !reassertCrossesDesktops(intended, against: id)
+            let reported = state.windows[id], reported.pid != own
         else { return false }
-        menuBarRevealReturnAt = now
-        onLog(
-            "focus: w\(id.raw) menu-bar reveal activation returned; "
-                + "re-focusing w\(intended.raw) (#1532)"
+        let clicked = recentClickReached(id, now: now)
+        let menu = menuBarReveal.statusMenuOpen
+        let strip = mouse.pointerInMenuBarStrip()
+        let candidate = MenuBarRevealDebt(
+            window: intended,
+            revealed: id,
+            revealedPID: reported.pid,
+            armedAt: now,
+            commandedAt: .now
         )
-        if let space = state.workspaces.space(of: intended) {
-            state.workspaces.focus(intended, in: space)
+        guard !clicked, menu || strip,
+            !reassertCrossesDesktops(intended, against: id)
+        else {
+            onLog(
+                "focus: w\(id.raw) reveal arm declined — "
+                    + "clicked=\(clicked) menu=\(menu) "
+                    + "strip=\(strip) (#2224)"
+            )
+            // A repeat keeps the first stamp, so the grace runs
+            // from the first report in both Space shapes.
+            if !clicked, !menu, !strip, menuBarReveal.declined == nil {
+                menuBarReveal.declined = candidate
+            }
+            return false
         }
-        raiseWindow(intended)
-        updateBorders()
-        updateStickyMarks()
+        menuBarReveal.debt = candidate
+        onLog(
+            "focus: w\(id.raw) menu-bar reveal activation; "
+                + "w\(intended.raw) owed its return (#1532)"
+        )
+        keepStateFocus(on: intended)
+        scheduleMenuBarRevealPayment()
         return true
     }
 
-    private func returnedMenuBarRevealRecently(now: Date) -> Bool {
-        guard let at = menuBarRevealReturnAt else { return false }
-        return now.timeIntervalSince(at)
-            < Self.menuBarRevealReturnWindow
+    /// The report already moved state focus: put it back on the own
+    /// window, raising nothing while the bar shows. The bars too —
+    /// a report the open looks back on ran the honored tail, which
+    /// moved the Space Bar's accent.
+    private func keepStateFocus(on window: WindowID) {
+        if let space = state.workspaces.space(of: window) {
+            state.workspaces.focus(window, in: space)
+        }
+        updateBorders()
+        updateStickyMarks()
+        updateBars()
+    }
+
+    /// The GUI's status menu opened: while it is open an owed
+    /// return waits, as it does for the bar (#2224), and the open
+    /// looks back for the report its activation produced ahead of
+    /// it.
+    public func statusMenuDidOpen() {
+        menuBarReveal.statusMenuOpen = true
+        onLog("focus: status menu opened (#2224)")
+        oweDeclinedReveal()
+    }
+
+    /// The OPEN's roster, the third moment beside the arm's and
+    /// the payment's: a report the arm declined only for the menu
+    /// being shut, within the grace, no other window reported
+    /// since (the arm ends the candidate), no commanded focus and
+    /// no click that reached the revealed window since, the anchor
+    /// present, and a re-assert that switches no Desktop — asked
+    /// here, since the report's own verdict never reached that
+    /// clause. Owing cancels the Space follow the honored report
+    /// scheduled: the user asked for the menu, not that window's
+    /// Space.
+    private func oweDeclinedReveal() {
+        guard let declined = menuBarReveal.declined else { return }
+        menuBarReveal.declined = nil
+        let now = wallClock()
+        let commandedSince =
+            eventLoop.lastCommandedFocus.map {
+                $0 > declined.commandedAt
+            } ?? false
+        guard menuBarReveal.debt == nil,
+            now.timeIntervalSince(declined.armedAt)
+                < Self.menuBarRevealOpenGrace,
+            !commandedSince,
+            !recentClickReached(declined.revealed, now: now),
+            state.windows[declined.window] != nil,
+            !reassertCrossesDesktops(
+                declined.window,
+                against: declined.revealed
+            )
+        else { return }
+        deferred.cancel(.focusFollow)
+        menuBarReveal.debt = declined
+        onLog(
+            "focus: w\(declined.revealed.raw) menu-bar reveal "
+                + "activation ahead of the quick menu; "
+                + "w\(declined.window.raw) owed its return (#1532)"
+        )
+        keepStateFocus(on: declined.window)
+        scheduleMenuBarRevealPayment()
+    }
+
+    /// The status menu closed: an owed return is paid at the next
+    /// poll — AppKit closes the menu BEFORE the picked row runs, so
+    /// a row that moves the focus stands it down first — unless
+    /// the bar still shows.
+    public func statusMenuDidClose() {
+        menuBarReveal.statusMenuOpen = false
+        let owed = menuBarReveal.debt.map { "w\($0.window.raw)" }
+        onLog(
+            "focus: status menu closed; owed=\(owed ?? "none") (#2224)"
+        )
+        guard menuBarReveal.debt != nil else { return }
+        scheduleMenuBarRevealPayment()
+    }
+
+    private func scheduleMenuBarRevealPayment() {
+        deferred.schedule(
+            .menuBarRevealReturn,
+            after: Self.menuBarRevealPoll
+        ) { [weak self] in
+            self?.payMenuBarRevealIfDue()
+        }
+    }
+
+    /// Pays an owed return once the bar has hidden — the pointer
+    /// out of the strip, no menu of the revealed app open, and the
+    /// status menu closed — with the
+    /// STAMPED raise, so the report that follows is our own echo
+    /// (#1281) and the scrolling placement distrust does not
+    /// bounce it; never the focus command, whose displacement note
+    /// would arm that bounce. A click in the bar chooses nothing —
+    /// the bar a reveal shows is macOS's, not the user picking that
+    /// app; only a window's own report does (the arm). A click on
+    /// the revealed window inside one poll of the bar hiding is
+    /// the residue: it reports nothing and is paid over. The
+    /// pay-time roster of stand-downs, each dropping the debt: a
+    /// commanded focus since, the anchor gone, the bound, an own
+    /// window keyed since (a quick-menu row fronting a panel), and
+    /// a raise that would switch Desktops (#1345) — asked again
+    /// here, since the Desktop may have changed since the report.
+    func payMenuBarRevealIfDue() {
+        guard let debt = menuBarReveal.debt else { return }
+        if let commanded = eventLoop.lastCommandedFocus,
+            commanded > debt.commandedAt
+        {
+            dropMenuBarRevealDebt("a commanded focus since")
+            return
+        }
+        guard state.windows[debt.window] != nil else {
+            dropMenuBarRevealDebt("its window closed")
+            return
+        }
+        let now = wallClock()
+        let age = now.timeIntervalSince(debt.armedAt)
+        guard age < Self.menuBarRevealBound else {
+            dropMenuBarRevealDebt("past its bound")
+            return
+        }
+        guard !menuBarReveal.statusMenuOpen,
+            !mouse.pointerInMenuBarStrip(),
+            !mouse.menuOpen(debt.revealedPID)
+        else {
+            scheduleMenuBarRevealPayment()
+            return
+        }
+        if let key = eventLoop.ownKeyWindow(),
+            UInt32(exactly: key.number) != debt.window.raw
+        {
+            dropMenuBarRevealDebt("an own window keyed since")
+            return
+        }
+        guard !raiseCrossesDesktops(debt.window) else {
+            dropMenuBarRevealDebt("not on screen")
+            return
+        }
+        menuBarReveal.debt = nil
+        onLog(
+            "focus: menu bar hidden; returning w\(debt.window.raw) "
+                + "(#1532)"
+        )
+        if let space = state.workspaces.space(of: debt.window) {
+            state.workspaces.focus(debt.window, in: space)
+        }
+        raiseWindow(debt.window)
+        updateBorders()
+        updateStickyMarks()
+    }
+
+    private func dropMenuBarRevealDebt(_ reason: String) {
+        guard let debt = menuBarReveal.debt else { return }
+        menuBarReveal.debt = nil
+        deferred.cancel(.menuBarRevealReturn)
+        onLog(
+            "focus: w\(debt.window.raw) reveal return stood down — "
+                + reason
+        )
     }
 }

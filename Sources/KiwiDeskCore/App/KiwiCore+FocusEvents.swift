@@ -229,9 +229,9 @@ extension KiwiCore {
             return
         }
         // A menu-bar reveal's activation (#1532): macOS fronts
-        // the last regular app so it has a bar to show. Returned
-        // once, with the stamped raise so the report that follows
-        // is our own echo (#1281); the arm's own file argues.
+        // the last regular app so it has a bar to show. Taken and
+        // owed, the return paid once the bar hides (#2224); the
+        // arm's own file argues.
         if !selfEcho,
             returnMenuBarReveal(
                 id: id,
