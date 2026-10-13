@@ -65,6 +65,9 @@ struct MouseButtonSeamGuardTests {
         // The shortcuts and Jump to window panels open on the
         // screen under the pointer (#1875).
         "PanelHandBack.swift",
+        // The key panel's selection follows a real pointer move
+        // (#2229); its suites pin `currentPointer`.
+        "JumpModel.swift",
     ]
 
     @Test("the live pointer read stays in its seam homes")

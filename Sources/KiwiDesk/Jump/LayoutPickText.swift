@@ -40,7 +40,7 @@ enum LayoutPickText {
     }
 
     static func keep(_ profile: String) -> String {
-        L("menu.layout.keep", "Keep Layout in Profile “%1$@”", profile)
+        L("layout_picker.keep", "Keep in Profile “%1$@”", profile)
     }
 
     /// Why Keep is greyed, for VoiceOver.
@@ -52,7 +52,11 @@ enum LayoutPickText {
     }
 
     static var layoutDefaults: String {
-        L("layout_picker.layout_defaults", "Layout Defaults…")
+        L(
+            "layout_picker.layout_defaults",
+            "%1$@…",
+            L("destination.layout", "Layout Defaults")
+        )
     }
 
     /// A button's chord, spoken as a hint rather than its name.

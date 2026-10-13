@@ -7,7 +7,7 @@ extension JumpPanelController {
     func wireLayouts(_ model: JumpModel) {
         model.loadLayouts = { [weak self] space in
             guard let self,
-                let id = space ?? self.core.layoutPickerSpace(),
+                let id = space ?? self.pickerSpace,
                 let state = self.core.layoutPickerState(for: id)
             else { return nil }
             return LayoutPickList(state: state, names: Self.layoutNames)
@@ -21,8 +21,10 @@ extension JumpPanelController {
             self?.core.barMenuHooks.keepLayout()
             model?.reloadLayouts()
         }
+        // No distrust: the next own focus report is Settings coming
+        // forward, which the grace would eat (#952).
         model.onLayoutDefaults = { [weak self] mode in
-            guard let self, self.dismiss(distrusting: true) else { return }
+            guard let self, self.dismiss(distrusting: false) else { return }
             self.core.barMenuHooks.openSettings(.layoutDefaults(mode))
         }
     }

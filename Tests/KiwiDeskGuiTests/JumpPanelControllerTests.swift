@@ -66,6 +66,21 @@ struct JumpPanelControllerTests {
         #expect(tall.y == visible.minY)
     }
 
+    /// A scope's own shortcut (#2229): closes where it shows,
+    /// switches from the other, opens where nothing shows.
+    @Test("a scope's shortcut opens, switches or closes")
+    func toggleAction() {
+        typealias C = JumpPanelController
+        #expect(C.toggleAction(showing: nil, asked: .layouts) == .open)
+        #expect(
+            C.toggleAction(showing: .windows, asked: .layouts)
+                == .switchScope
+        )
+        #expect(
+            C.toggleAction(showing: .layouts, asked: .layouts) == .close
+        )
+    }
+
     @Test("the list fits its rows up to the cap")
     func listHeight() {
         let row = JumpRowView.height

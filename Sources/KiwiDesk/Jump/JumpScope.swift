@@ -12,6 +12,11 @@ enum JumpScope: CaseIterable, Equatable {
 
     var other: JumpScope { self == .windows ? .layouts : .windows }
 
+    /// The scope switch's VoiceOver name.
+    @MainActor static var switchName: String {
+        L("jump.scope.label", "Show")
+    }
+
     /// The switch's segment and the footer's ⇥ hint.
     @MainActor var title: String {
         switch self {
@@ -25,7 +30,7 @@ enum JumpScope: CaseIterable, Equatable {
         switch self {
         case .windows: return L("jump.field.label", "Jump to window")
         case .layouts:
-            return L("layout_defaults.choose", "Choose a layout")
+            return L("layout_picker.field.label", "Choose a layout")
         }
     }
 }

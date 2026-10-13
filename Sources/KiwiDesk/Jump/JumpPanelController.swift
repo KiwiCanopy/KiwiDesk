@@ -39,23 +39,44 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// new panel rather than closing one already going.
     var isOpen: Bool { panel?.isVisible == true && !presence.leaving }
 
-    /// A scope's own shortcut: closes the panel where it already
-    /// shows that scope, switches to it where it shows the other
-    /// (#2229), else opens on it.
+    /// The Space the Layouts scope acts on, read with the screen
+    /// the panel opens on so the two never disagree.
+    var pickerSpace: SpaceID?
+
+    /// A scope's own shortcut (#2229).
     func toggle(_ scope: JumpScope = .windows) {
-        guard isOpen, let model = currentModel else {
-            show(scope)
-            return
+        switch Self.toggleAction(
+            showing: isOpen ? currentModel?.scope : nil,
+            asked: scope
+        ) {
+        case .open: show(scope)
+        case .close: close(commanded: true)
+        case .switchScope: currentModel?.setScope(scope)
         }
-        if model.scope == scope {
-            close(commanded: true)
-        } else {
-            model.setScope(scope)
-        }
+    }
+
+    enum ToggleAction: Equatable { case open, close, switchScope }
+
+    /// Closes the panel where it already shows the asked scope,
+    /// switches where it shows the other, else opens on it.
+    static func toggleAction(
+        showing: JumpScope?,
+        asked: JumpScope
+    ) -> ToggleAction {
+        guard let showing else { return .open }
+        return showing == asked ? .close : .switchScope
     }
 
     func show(_ scope: JumpScope = .windows) {
         let screen = PanelHandBack.screenUnderPointer()
+        pickerSpace = core.layoutPickerSpace()
+        // ⌃⌥L with no Space to act on opens nothing, rather than
+        // the other scope.
+        if scope == .layouts,
+            pickerSpace.flatMap(core.layoutPickerState(for:)) == nil
+        {
+            return
+        }
         let snapshot = core.jumpSnapshot()
         let model = JumpModel(
             snapshot: snapshot,
@@ -63,8 +84,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             rowCap: Self.rowCap(
                 visibleHeight: screen?.visibleFrame.height ?? 900
             ),
-            modifiers: NSEvent.modifierFlags,
-            pointer: NSEvent.mouseLocation
+            modifiers: NSEvent.modifierFlags
         )
         let panel = self.panel ?? makePanel()
         self.panel = panel
@@ -230,8 +250,14 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         model.onResultsChange = { [weak self] in
             DispatchQueue.main.async { self?.refit() }
         }
+        // After the outgoing scope's fade: until it ends, the
+        // stack still lays that scope out.
         model.onScopeChange = { [weak self] in
-            DispatchQueue.main.async { self?.refit(animated: true) }
+            guard let self else { return }
+            let delay = self.reduceMotion() ? 0 : 0.14
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                self.refit(animated: true)
+            }
         }
         panel.scope = { [weak model] in model?.scope ?? .windows }
         wireLayouts(model)

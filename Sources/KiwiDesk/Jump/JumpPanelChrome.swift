@@ -55,7 +55,7 @@ extension JumpFooter {
                 L(
                     "layout_picker.footer.quick",
                     "%1$@ Quick apply",
-                    "⌘1–7"
+                    "⌘1–\(LayoutMode.allCases.count)"
                 ),
                 other,
             ]
@@ -71,6 +71,7 @@ struct JumpScopeSwitch: View {
 
     var body: some View {
         SegmentedPicker(
+            spokenLabel: JumpScope.switchName,
             hugsLabels: true,
             selection: Binding(
                 get: { model.scope },

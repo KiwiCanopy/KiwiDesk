@@ -18,11 +18,13 @@ extension JumpPanelController {
         min(JumpPanelView.width, visibleWidth - 80)
     }
 
-    /// Where the panel's top sits: Spotlight's height, a quarter
-    /// of the way down the screen's visible area (owner eyeball,
-    /// 2026-10-13), so the field lands where a search field is
-    /// looked for and the list grows down from it.
-    static let topFraction: CGFloat = 0.25
+    /// Where the panel's top — its field — sits: Spotlight's, so
+    /// the field lands where a search field is looked for and the
+    /// list grows down from it (#2229). Measured on macOS 27:
+    /// Spotlight's field top 278 pt below the visible area's top
+    /// of 1083 pt, on a 1728×1117 screen. One screen size, so
+    /// whether it scales or holds a fixed offset is unmeasured.
+    static let topFraction: CGFloat = 0.257
 
     /// The panel's origin on `visible`: centred across, its top at
     /// `topFraction`, and lifted where a tall panel would run past

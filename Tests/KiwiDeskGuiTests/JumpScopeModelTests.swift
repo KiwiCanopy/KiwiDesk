@@ -141,6 +141,7 @@ struct JumpHoverTests {
     @Test("a still pointer selects nothing, a moved one selects")
     func movementOnly() {
         let model = model()
+        model.currentPointer = { CGPoint(x: 10, y: 30) }
         model.hoverRow(1, pointer: CGPoint(x: 10, y: 10))
         #expect(model.list.selection == 0)
         model.hoverRow(1, pointer: CGPoint(x: 10, y: 30))
@@ -148,6 +149,19 @@ struct JumpHoverTests {
         // The list re-ranks under the same pointer: no move.
         model.query = "mail"
         model.hoverRow(0, pointer: CGPoint(x: 10, y: 30))
+        #expect(model.list.selection == 0)
+    }
+
+    /// The pointer moved where no row hears it — the field, the
+    /// footer — then the list re-ranked under it: no move.
+    @Test("a re-rank under a pointer moved off the rows selects nothing")
+    func reRankAfterOffRowMove() {
+        let model = model()
+        var pointer = CGPoint(x: 10, y: 10)
+        model.currentPointer = { pointer }
+        pointer = CGPoint(x: 300, y: 5)
+        model.query = "i"
+        model.hoverRow(1, pointer: pointer)
         #expect(model.list.selection == 0)
     }
 
@@ -166,6 +180,7 @@ struct JumpHoverTests {
                 names: JumpPanelController.layoutNames
             )
         }
+        model.currentPointer = { CGPoint(x: 10, y: 10) }
         model.setScope(.layouts)
         model.hoverTile(.stack, pointer: CGPoint(x: 40, y: 10))
         #expect(model.layouts?.selected == .stack)

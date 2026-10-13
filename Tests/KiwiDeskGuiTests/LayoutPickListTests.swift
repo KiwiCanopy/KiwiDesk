@@ -88,4 +88,23 @@ struct LayoutPickListTests {
         #expect(list.quick(0) == LayoutMode.allCases[0])
         #expect(list.quick(7) == nil)
     }
+
+    /// A native-script name still answers the config's spelling.
+    @Test("the config's spelling matches beside the drawn name")
+    func rawSpellingMatches() {
+        var names = Self.names
+        names[.monocle] = "モノクル"
+        var list = LayoutPickList(
+            state: LayoutPickerState(
+                space: "3",
+                live: .bsp,
+                drifted: false,
+                profile: nil,
+                keepArmed: false
+            ),
+            names: names
+        )
+        list.setQuery("mon")
+        #expect(list.selected == .monocle)
+    }
 }

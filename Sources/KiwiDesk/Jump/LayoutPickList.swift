@@ -29,10 +29,17 @@ struct LayoutPickList: Equatable {
         let typed = query.trimmingCharacters(in: .whitespaces)
             .lowercased()
         guard !typed.isEmpty else { return Array(modes.indices) }
-        let lowered = modes.map { (names[$0] ?? $0.rawValue).lowercased() }
-        let prefix = modes.indices.filter { lowered[$0].hasPrefix(typed) }
-        let inner = modes.indices.filter {
-            !lowered[$0].hasPrefix(typed) && lowered[$0].contains(typed)
+        // The drawn name, then the config's own spelling, which a
+        // native-script name cannot be typed as.
+        let spellings = modes.map {
+            [(names[$0] ?? $0.rawValue).lowercased(), $0.rawValue]
+        }
+        let prefix = modes.indices.filter { index in
+            spellings[index].contains { $0.hasPrefix(typed) }
+        }
+        let inner = modes.indices.filter { index in
+            !prefix.contains(index)
+                && spellings[index].contains { $0.contains(typed) }
         }
         return prefix + inner
     }

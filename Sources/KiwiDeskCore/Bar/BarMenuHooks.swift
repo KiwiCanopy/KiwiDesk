@@ -18,8 +18,9 @@ public enum SettingsLanding: Equatable, Sendable {
     case layoutDefaults(LayoutMode)
 }
 
-/// What a bar menu asks of the GUI (#1518) — set at the GUI's
-/// bootstrap, beside `uiBridge`.
+/// What a bar menu, or the key panel's Layouts side (#2229), asks
+/// of the GUI (#1518) — set at the GUI's bootstrap, beside
+/// `uiBridge`.
 public struct BarMenuHooks {
     /// Opens Settings on `landing`.
     public var openSettings: @MainActor (SettingsLanding) -> Void = {

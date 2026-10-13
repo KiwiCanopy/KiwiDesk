@@ -104,10 +104,10 @@ struct JumpPanelView: View {
                     settings: settings,
                     commandHeld: model.commandHeld,
                     onApply: { model.onApply($0) },
-                    onKeep: { model.onKeep() },
+                    onKeep: { model.handle(.keep) },
                     onLayoutDefaults: { model.onLayoutDefaults($0) },
                     onHover: {
-                        model.hoverTile($0, pointer: NSEvent.mouseLocation)
+                        model.hoverTile($0, pointer: model.currentPointer())
                     }
                 )
                 .transition(.opacity)
@@ -210,7 +210,7 @@ struct JumpPanelView: View {
                 model.onPick(match.entry, moveHere)
             },
             onHover: {
-                model.hoverRow(index, pointer: NSEvent.mouseLocation)
+                model.hoverRow(index, pointer: model.currentPointer())
             }
         )
     }

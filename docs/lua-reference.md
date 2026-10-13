@@ -618,19 +618,20 @@ KiwiDesk.set_mode_cycle({ "bsp", "stack", "monocle" })
 
 **Does:** opens the [Jump to window](#show_jump_to_window) panel
 on its **Layouts** side, for the Space shown on the screen under
-the pointer, or closes it if it already shows Layouts. Every
-layout is a tile with its picture, the current one marked ✓.
+the pointer, switches to it from the windows, or closes the panel
+if it already shows Layouts. Every layout is a tile with its
+picture, the current one marked ✓.
 
-- **←** and **→** move the selection; typing narrows the tiles by
-  name, dimming the rest.
+- **←** and **→**, or moving the mouse over a tile, move the
+  selection; typing narrows the tiles by name, dimming the rest.
 - **Return** applies the selected layout, like `set_mode` for that
   Space, and closes the panel; **⌘1** … **⌘7** apply a tile
   directly.
 - **⌘S** keeps the layouts in the profile, as the Layout menu's
   Keep does; **⌘,** opens Layout Defaults in Settings on the
   selected layout.
-- **Tab** switches to the windows list; **Escape** clears the
-  typing, then closes the panel.
+- **Tab** or **⇧Tab** switches to the windows list; **Escape**
+  clears the typing, then closes the panel.
 
 **Example:**
 
@@ -4806,12 +4807,14 @@ end)
 
 **Expects:** nothing.
 
-**Does:** opens **Jump to window**, a search panel centred on the
-screen under the pointer, or closes it if it is already open. It
-lists every window KiwiDesk knows except the one you are in —
+**Does:** opens **Jump to window**, a search panel on the screen
+under the pointer, its field at Spotlight's height; on its Layouts
+side it switches to the windows, and showing the windows it
+closes. It lists every window KiwiDesk knows except the one you are in —
 open windows first, most recently used first, including those up
 on another macOS Desktop, then minimized windows, then one row per
 hidden app. Typing narrows the list by app name, then by title.
+Moving the mouse over a row selects it.
 
 - **Return** goes to the selected window, switching Space or
   Desktop as needed; on a minimized window it brings it back, on a
@@ -4819,7 +4822,7 @@ hidden app. Typing narrows the list by app name, then by title.
 - **⇧Return** moves the window into the Space you are on instead,
   as [move_here](#move_here) does.
 - **⌘1** … **⌘9** pick one of the first nine results.
-- **Tab** switches to the panel's Layouts side
+- **Tab** or **⇧Tab** switches to the panel's Layouts side
   ([show_layout_picker](#show_layout_picker)), clearing the
   typing.
 - **Escape** clears the typing, then closes the panel; **⌘W**, a

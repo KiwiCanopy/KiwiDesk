@@ -28,6 +28,9 @@ final class JumpModel: ObservableObject {
     /// Where the pointer last moved, so a row sliding under a
     /// still pointer selects nothing (#2229).
     private var lastPointer: CGPoint
+    /// The pointer now — the panel's one live read; a test pins
+    /// it.
+    var currentPointer: () -> CGPoint = { NSEvent.mouseLocation }
     /// Each app's icon, read once when the panel opens.
     let icons: [pid_t: NSImage]
     /// The most rows the list shows before it scrolls.
@@ -51,10 +54,11 @@ final class JumpModel: ObservableObject {
         icons: [pid_t: NSImage],
         rowCap: Int,
         modifiers: NSEvent.ModifierFlags = [],
-        pointer: CGPoint = .zero
+        pointer: CGPoint? = nil
     ) {
         list = JumpList(snapshot: snapshot)
-        lastPointer = pointer
+        lastPointer = .zero
+        lastPointer = pointer ?? currentPointer()
         self.icons = icons
         self.rowCap = rowCap
         noteModifiers(modifiers)
@@ -64,6 +68,8 @@ final class JumpModel: ObservableObject {
         get { scope == .windows ? list.query : layouts?.query ?? "" }
         set {
             guard newValue != query else { return }
+            // What re-ranks under the pointer is no pointer move.
+            lastPointer = currentPointer()
             guard scope == .windows else {
                 setLayoutQuery(newValue)
                 return
@@ -133,6 +139,7 @@ final class JumpModel: ObservableObject {
         if !list.query.isEmpty { list.setQuery("") }
         layouts?.setQuery("")
         self.scope = scope
+        lastPointer = currentPointer()
         onScopeChange()
         onAnnounce(scope.title)
     }
