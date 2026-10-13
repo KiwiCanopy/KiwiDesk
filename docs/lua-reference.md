@@ -4000,6 +4000,12 @@ launcher or HUD qualifies without a rule; the app's normal windows
 additionally recognized by bundle id for setups where Raycast shows
 a dock icon and loses the accessory policy.
 
+:::unreleased
+Spotlight on macOS 27 is recognized by bundle id too: its panel
+lists title-bar buttons, which would otherwise mark it as one of
+its app's normal windows.
+:::
+
 Invisible helper windows are ignored automatically: a raised-layer
 window that is fully transparent or sits entirely off-screen (the
 lifecycle keepalive some menu-bar apps create) is never tracked.
