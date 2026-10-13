@@ -60,7 +60,9 @@ struct JumpLayoutsView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        // The chord line under each tile stands in for the bottom
+        // padding.
+        .padding(.top, 8)
     }
 
     private var buttons: some View {
@@ -121,6 +123,8 @@ struct JumpLayoutTile: View {
     let showsNumber: Bool
     let onActivate: () -> Void
     let onHover: () -> Void
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
     var body: some View {
         Button(action: onActivate) { content }
@@ -130,12 +134,28 @@ struct JumpLayoutTile: View {
                 LayoutPickText.spoken(mode, current: isCurrent)
             )
             .accessibilityAddTraits(isSelected ? .isSelected : [])
+            // Spoken whether or not ⌘ is held: a VoiceOver user
+            // explores without holding it.
+            .accessibilityHint(LayoutPickText.chordHint("⌘\(number)"))
             .onContinuousHover { phase in
                 if case .active = phase { onHover() }
             }
     }
 
+    /// The tile proper on its selection fill, then the chord line
+    /// under it, outside the fill: the fill keeps one shape with
+    /// ⌘ up or down.
     private var content: some View {
+        VStack(spacing: 2) {
+            tile
+            numberMark
+        }
+        .frame(width: JumpLayoutsView.tileWidth)
+        .opacity(isDimmed ? 0.35 : 1)
+        .contentShape(Rectangle())
+    }
+
+    private var tile: some View {
         VStack(spacing: 5) {
             schematic
             HStack(spacing: 2) {
@@ -155,9 +175,6 @@ struct JumpLayoutTile: View {
         .padding(.vertical, 7)
         .frame(width: JumpLayoutsView.tileWidth)
         .background(selection)
-        .overlay(alignment: .topTrailing) { numberMark }
-        .opacity(isDimmed ? 0.35 : 1)
-        .contentShape(Rectangle())
     }
 
     private var schematic: some View {
@@ -200,17 +217,19 @@ struct JumpLayoutTile: View {
         }
     }
 
-    @ViewBuilder private var numberMark: some View {
-        if showsNumber {
-            Text(verbatim: "⌘\(number)")
-                .font(.caption2.monospacedDigit())
-                .foregroundStyle(
-                    isSelected
-                        ? AnyShapeStyle(SettingsTheme.accentInkSecondary)
-                        : AnyShapeStyle(.secondary)
-                )
-                .padding(4)
-                .accessibilityHidden(true)
-        }
+    /// The quick-apply chord on its own line under the tile, off
+    /// the schematic and the fill and never shortening the name;
+    /// its height is held while ⌘ is up, so the panel never
+    /// resizes on a press. On the panel ground on every tile.
+    private var numberMark: some View {
+        Text(verbatim: "⌘\(number)")
+            .font(.caption2.monospacedDigit())
+            .foregroundStyle(.secondary)
+            .opacity(showsNumber ? 1 : 0)
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.15),
+                value: showsNumber
+            )
+            .accessibilityHidden(true)
     }
 }

@@ -1867,6 +1867,13 @@ being a static state it draws either way.
 
 ## Strings
 
+- **A shortcut row's title is a verb phrase saying what pressing
+  it does: "Show ‹panel name›" for a panel, using the panel's
+  VoiceOver name; "Open" for a window** (#2245,
+  `JumpSideNameTests`). The pairing of a row with its panel's name
+  is [config-vocabulary.md](config-vocabulary.md)'s ▸ shortcuts
+  panel. Renaming a row leaves the verb INSIDE its panel ("Jump")
+  alone.
 - **A surface narrating the boot count reads
   `BootCountText.line(for:)`**, the one author of that sentence
   (#1715). The grant screen, the relaunched "What's new" and the

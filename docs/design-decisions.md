@@ -9811,7 +9811,8 @@ so it joins the base seed and not `appChromeRows`. The same sweep
 found `⌃⌥L` free; the nearest chords taken are Terminal's `⌃⌥⌘L`
 and the `⌥⌘L` Downloads item Finder, Safari and Chrome keep.
 
-Jump to window takes `⌃⌥J` (#1875), J for jump. It opens a panel
+The window switcher takes `⌃⌥J` (#1875), J for the Jump its panel
+does. It opens a panel
 rather than acting on a window, but a pressed one, so it joins the
 base seed beside the layout keys and not `appChromeRows`. The same
 sweep found it free in macOS and in every app menu read; its one
@@ -9819,6 +9820,22 @@ app collision is VS Code's notebook "Join With Next Cell", bound
 only while a notebook cell has focus, where the panel wins. It
 reaches an install in a generation of its own (3), since installs
 built from `release/3.0.0` had already taken generation 2.
+
+**A shortcut row says what pressing it does (#2245).** Its title
+is a verb phrase: "Show" and the panel's VoiceOver name for a
+panel — "Show window switcher", "Show layout picker" — "Open" for
+a window, and "Switch to next layout" rather than a bare noun.
+"Show" and not "Toggle" is Apple's own pattern for a key whose
+second press dismisses the surface ("Show Spotlight search",
+"Show Notification Center"). The panel's verb stays "Jump": the
+field, the preview and the footer say it, and J backs it up for an
+English reader. What links a key to its side in every language is
+position — `⌃⌥J`, `⌃⌥K` and `⌃⌥L` sit side by side on the home row
+— and the chord the scope switch prints beside each side, read
+from the live binding. A word mnemonic links only in English, so
+`G K L` for "Go to" was dropped, and the side names stay
+translated rather than kept as English words that read as missing
+translations.
 :::
 
 **One pressed exception rides `⌥⌘`: the Space history on `Tab`
@@ -10623,7 +10640,7 @@ re-leaks the seed into Custom. (#602, PR #638)
 
 :::unreleased
 **The keyboard panels never take activation, so there is none to
-hand back.** The ⌃⌥K panel and Jump to window are
+hand back.** The ⌃⌥K panel and the ⌃⌥J / ⌃⌥L panel are
 non-activating panels (#1875): they take the keyboard while the
 app the user came from stays active. Activating KiwiDesk to give
 a borderless panel the keyboard raised its other windows — the
@@ -10646,7 +10663,7 @@ the arms and
 :::
 
 :::unreleased
-**The layout picker is a scope of Jump to window, not a menu
+**The layout picker is a side of the ⌃⌥J panel, not a menu
 (#2229).** #762 made the picker a native menu because a menu
 brings arrows, type-select, Return, Escape and VoiceOver for free.
 That argument holds for a list of names, and it is why the status

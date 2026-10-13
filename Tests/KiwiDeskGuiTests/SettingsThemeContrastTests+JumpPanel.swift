@@ -21,6 +21,16 @@ extension SettingsThemeContrastTests {
             SettingsTheme.accentInkSecondary,
             on: SettingsTheme.accent
         ),
+        // The scope switch's chord hints (#2245): the selected
+        // segment's is `accentInkSecondary` on the accent, above,
+        // and a hovered one's is `ink`, which the segment
+        // pairings measure.
+        Pairing(
+            "ink2 chord on the Jump scope switch's track",
+            SettingsTheme.ink2,
+            on: SettingsTheme.page,
+            layers: [SettingsTheme.trackFill]
+        ),
     ]
 
     /// The fill must read as a selection against the panel's ground

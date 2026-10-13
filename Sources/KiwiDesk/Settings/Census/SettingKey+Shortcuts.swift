@@ -14,8 +14,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case spaceHistory = "config.spaceHistory"
     case goToSpace = "keybinding.go_to_space (x N spaces)"
     case focusDesktop = "keybinding.focus_desktop (x N desktops)"
-    /// Jump to window (#1875), its row named by the panel's own
-    /// label (`JumpScope.windows.fieldName`).
+    /// The window switcher (#1875), its row named "Show" and the
+    /// side's VoiceOver name (#2245).
     case jumpToWindow = "keybinding.show_jump_to_window"
     case swapDir = "keybinding.swap_dir (x4)"
     case moveWindowToTrack =

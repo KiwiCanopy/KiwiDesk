@@ -414,8 +414,15 @@ synonym:
   cannot see — but THIS surface is held:
   `ShortcutsPanelNounTests` asks, per catalog, that the panel's
   own accessibility name is the noun the shortcut opening it
-  already uses. A second surface naming itself twice is still
-  review's until someone gives it the same pairing.
+  already uses, and the same of each side of the ⌃⌥J / ⌃⌥L panel
+  (#2245). **A panel a shortcut row opens joins that suite's
+  `pairs` in the change that adds it.**
+- **window switcher** / **layout picker** — the two sides of the
+  ⌃⌥J / ⌃⌥L key panel, by their VoiceOver names (#2245); a side
+  name is translated, never kept as an English word. Retired as
+  the panel's NAME: *Jump to window*, which stays its field
+  prompt — the panel's own verb is *Jump* — and never a brand
+  name.
 
 See `docs/design-decisions.md` for each ruling's rationale, and
 `docs/ui-patterns.md` ("Labels & wire names") for when a rename

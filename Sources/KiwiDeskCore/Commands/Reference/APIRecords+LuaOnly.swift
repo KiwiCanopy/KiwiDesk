@@ -47,12 +47,12 @@ extension APIReference {
                 + "front."
         ),
         "show_layout_picker": APIRecord(
-            "Opens the Jump to window panel on Layouts, switches it "
-                + "there, or closes it."
+            "Opens the key panel on its layout picker side, "
+                + "switches it there, or closes it."
         ),
         "show_jump_to_window": APIRecord(
-            "Opens the Jump to window panel on its windows, switches "
-                + "it there, or closes it."
+            "Opens the key panel on its window switcher side, "
+                + "switches it there, or closes it."
         ),
     ]
 }

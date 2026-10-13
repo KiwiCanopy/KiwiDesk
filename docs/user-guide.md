@@ -878,11 +878,11 @@ reach it, and Shortcuts & Gestures can give it a key of its own.
 `⌃⌥C` moves the focused space to its next layout
 ([`cycle_mode`](lua-reference.md#cycle_mode)) and `⌃⌥⇧C` to the
 previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥J` opens
-**Jump to window**
+the **window switcher**
 ([`show_jump_to_window`](lua-reference.md#show_jump_to_window)),
 listed under Shortcuts & Gestures ▸ Focus, and `⌃⌥L` opens the same
-panel on its Layouts side
-([`show_layout_picker`](lua-reference.md#show_layout_picker)) for
+panel on its Layouts side, the **layout picker**
+([`show_layout_picker`](lua-reference.md#show_layout_picker)), for
 the space on the screen under the pointer; `Tab` switches between
 the two.
 :::

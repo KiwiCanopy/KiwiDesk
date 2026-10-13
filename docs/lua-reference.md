@@ -616,10 +616,11 @@ KiwiDesk.set_mode_cycle({ "bsp", "stack", "monocle" })
 
 **Expects:** nothing.
 
-**Does:** opens the [Jump to window](#show_jump_to_window) panel
-on its **Layouts** side, for the Space shown on the screen under
-the pointer, switches to it from the windows, or closes the panel
-if it already shows Layouts. Every layout is a tile with its
+**Does:** opens the **layout picker**, the **Layouts** side of the
+panel the [window switcher](#show_jump_to_window) shares, for the
+Space shown on the screen under the pointer. It
+switches to it from the windows, or closes the panel if it already
+shows Layouts. Every layout is a tile with its
 picture, the current one marked ✓.
 
 - **←** and **→**, or moving the mouse over a tile, move the
@@ -4825,7 +4826,7 @@ end)
 
 **Expects:** nothing.
 
-**Does:** opens **Jump to window**, a search panel on the screen
+**Does:** opens the **window switcher**, a search panel on the screen
 under the pointer, its field at Spotlight's height; on its Layouts
 side it switches to the windows, and showing the windows it
 closes. It lists every window KiwiDesk knows except the one you are in —
@@ -4842,7 +4843,8 @@ Moving the mouse over a row selects it.
 - **⌘1** … **⌘9** pick one of the first nine results.
 - **Tab** or **⇧Tab** switches to the panel's Layouts side
   ([show_layout_picker](#show_layout_picker)), clearing the
-  typing.
+  typing. The switch at the end of the field shows each side's own
+  key, read from your shortcuts.
 - **Escape** clears the typing, then closes the panel; **⌘W**, a
   click elsewhere or another app taking the keyboard close it too.
 
@@ -4850,7 +4852,7 @@ A window in native full screen is listed, and Return activates its
 app rather than switching to its full-screen Space.
 
 Seeded on **`⌃⌥J`** in the base layer, and offered under
-**Shortcuts & Gestures ▸ Focus** ("Jump to window").
+**Shortcuts & Gestures ▸ Focus** ("Show window switcher").
 
 **Example:**
 

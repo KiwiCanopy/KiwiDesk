@@ -25,6 +25,25 @@ enum JumpScope: CaseIterable, Equatable {
         }
     }
 
+    /// The side's VoiceOver name, and the noun its shortcut row
+    /// shows (#2245, `ShortcutsPanelNounTests`).
+    @MainActor var panelName: String {
+        switch self {
+        case .windows: return L("jump.panel.ax_label", "Window switcher")
+        case .layouts:
+            return L("layout_picker.panel.ax_label", "Layout picker")
+        }
+    }
+
+    /// The Lua the side's own shortcut runs, whose live chord the
+    /// switch prints (#2245).
+    var lua: String {
+        switch self {
+        case .windows: return KeybindingCatalog.jumpToWindow.lua
+        case .layouts: return KeybindingCatalog.showLayoutPicker.lua
+        }
+    }
+
     /// The field's placeholder and its VoiceOver name.
     @MainActor var fieldName: String {
         switch self {

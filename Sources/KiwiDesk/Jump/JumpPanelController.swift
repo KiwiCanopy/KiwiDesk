@@ -86,6 +86,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             ),
             modifiers: NSEvent.modifierFlags
         )
+        model.chords = Self.chords { [core] lua in
+            ShortcutsOpenBinding.comboGlyphs(core: core, lua: lua)
+        }
         let panel = self.panel ?? makePanel()
         self.panel = panel
         self.currentModel = model
@@ -129,6 +132,19 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         handBack.present(panel) { [weak self, presence] in
             self?.presence === presence && !presence.leaving
         }
+    }
+
+    /// Each side's chord, read by `glyphs` from the live bindings
+    /// for the Lua that side's own shortcut runs, so a rebind
+    /// prints the key that now opens it (#2245).
+    static func chords(
+        glyphs: (String) -> String?
+    ) -> [JumpScope: String] {
+        var chords: [JumpScope: String] = [:]
+        for scope in JumpScope.allCases {
+            chords[scope] = glyphs(scope.lua)
+        }
+        return chords
     }
 
     /// Closes the panel. No close arms the dismiss distrust: the
