@@ -77,23 +77,23 @@ struct ShortcutsPanelNounTests {
         ),
         Pair(
             panelName: "jump.panel.ax_label",
-            opener: "keybinding.show_window_switcher"
+            opener: "keybinding.show_window_switcher",
+            translated: true
         ),
         Pair(
             panelName: "layout_picker.panel.ax_label",
-            opener: "keybinding.show_layout_picker"
+            opener: "keybinding.show_layout_picker",
+            translated: true
         ),
     ]
 
     /// Panel names authored before their translation round, whose
     /// opener a catalog already carries — the one copy of who may
-    /// be absent beside it. Until the round that follows #2245
-    /// translates them, such a side announces the English name
-    /// beside a translated row; an entry reds once any translation
-    /// carries the key, so that round must retire it.
-    static let awaitingTranslation: Set<String> = [
-        "layout_picker.panel.ax_label"
-    ]
+    /// be absent beside it. Such a side announces the English name
+    /// beside a translated row until its round; an entry reds once
+    /// any translation carries the key, so that round retires it.
+    /// EMPTY: #2245's round translated both panel sides.
+    static let awaitingTranslation: Set<String> = []
 
     /// Locales whose grammar inflects the noun inside the verb
     /// phrase, keyed by panel name and then locale, valued by the
