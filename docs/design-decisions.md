@@ -5672,6 +5672,25 @@ them, measured on device, is an OPEN the user caused:
   the password, and a scripted launch 17 s or more after the
   last press. The read is the HID state's last click or
   key-down, which needs no permission.
+- **Or a press just before the process started.** A cold start
+  activates late — after a purge, Xcode came forward 1.39 s
+  after the Spotlight Return, VS Code 3.70 s and Word 7.75 s —
+  while each process started within 0.21 s of the press
+  ([#2201](https://github.com/KiwiCanopy/KiwiDesk/issues/2201)).
+  So a press at most a second BEFORE the process started is the
+  launch's cause, and the process is opening by construction —
+  for an activation up to 15 s after the start, twice Word's
+  measured 7.58 s; past that, an app activating itself is its
+  own act, as a press alone is not a cause. The grace is keyed to the START rather
+  than widened: a wider press grace would take the user along to
+  any app activating seconds after any key press, and would
+  widen #2187's app-act motion with it; Xcode relaunching itself
+  after its install prompt started 5.18 s after the last press
+  and stays put. A press from before KiwiDesk began managing
+  windows never counts — the login password precedes every
+  restored app. A press KiwiDesk does see, such as the unlock
+  password, can still precede a helper's launch; the 15 s
+  ceiling bounds that.
 - **An app with nothing showing.** A press alone is not a
   cause — anyone typing has pressed a key in the last second,
   and an app that brings itself forward then, or a plain switch
