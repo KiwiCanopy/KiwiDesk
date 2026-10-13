@@ -35,6 +35,13 @@ struct LaunchFollowSeamTests {
             "launchFollow.pressAge = { KiwiCore.secondsSinceUserPress() }",
             "KiwiCore+BootSeams.swift", 1
         ),
+        // Since when that read is KiwiDesk's: unwired, a cold
+        // start never follows (#2201).
+        (
+            "launchFollow.watchedFor = {",
+            "KiwiCore+BootSeams.swift", 1
+        ),
+        ("launchFollow.pressBefore(", followFile, 1),
         // The ONE door that owes, and its owers: the activation
         // judged a launch, Open or Focus's launch and pull
         // branches, New Window (#1518), and Jump to window's

@@ -737,11 +737,13 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   `new_window` — retired when its press opened nothing (#1518) — by the window
   switcher's un-minimize (#1875), or an OPEN-shaped activation — a press within
   a second, of a process that just started or shows no window (a reopen, an
-  un-minimize), outside a Desktop switch, a window landing before that
-  activation paid by it — never by the app being active or a press alone, keyed
-  by bundle id and paid on the fold's own rule verdict (#1599,
-  `LaunchFollowTests`, `LaunchFollowRetireTests`, `LaunchFollowReopenTests`,
-  `LaunchFollowSeamTests`)
+  un-minimize), or a press at most a second before a process started that
+  activates within `coldStartGrace` (#2201, never a press older than KiwiDesk's
+  start), outside a Desktop switch, a window landing before that activation
+  paid by it — never by the app being active or a press alone, keyed by bundle
+  id and paid on the fold's own rule verdict (#1599, `LaunchFollowTests`,
+  `LaunchFollowRetireTests`, `LaunchFollowReopenTests`,
+  `LaunchFollowColdStartTests`, `LaunchFollowSeamTests`)
 - a Move here on a hidden app is paid at that app's first honored focus REPORT,
   ahead of the #1207 memory and the follow, the handler deciding the retile
   (#1513, `JumpHiddenAppTests`)
