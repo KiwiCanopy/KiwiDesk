@@ -128,7 +128,7 @@ struct LayoutStoryWiringTests {
     func phaseInputsComeFromTheView() throws {
         let inputs = [
             ("ScrollingSchematic(", "focusStep:"),
-            ("MonocleSchematic(", "turn:"),
+            ("MonocleSchematic(", "arrival:"),
             ("FloatingSchematic(", "drag:"),
         ]
         for (call, label) in inputs {

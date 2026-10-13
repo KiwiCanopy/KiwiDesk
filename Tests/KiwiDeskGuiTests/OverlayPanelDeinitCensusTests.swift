@@ -219,7 +219,7 @@ struct OverlayPanelDeinitCensusTests {
         #expect(types.contains("BorderOverlayPanel"))
         for expected in [
             "ShelfOverlay", "StickyMarkOverlay", "SizeLimitOverlay",
-            "Marker", "MonocleFlipOverlay", "AppKitBorderOverlay",
+            "Marker", "AppKitBorderOverlay",
             "BarPeekPanel",
         ] {
             #expect(

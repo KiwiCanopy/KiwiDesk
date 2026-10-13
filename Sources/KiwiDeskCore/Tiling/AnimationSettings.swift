@@ -27,22 +27,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         }
     }
 
-    /// The Monocle focus-change card flip (#1391): a blurred
-    /// plate turns from the outgoing window's app icon to the
-    /// incoming one's while the focus swaps beneath it. Not
-    /// under the `anyEnabled` master, like `onScrolling`.
-    public var onMonocleFocus = true
-
-    /// The flip's turn in milliseconds (100–1000 ms, #1391); the
-    /// blur fades around it on fixed times.
-    public var monocleFlipDurationMS = 450 {
-        didSet {
-            monocleFlipDurationMS = Self.clampFlipMS(
-                monocleFlipDurationMS
-            )
-        }
-    }
-
     /// The shelf's glide (#1838): a section growing in or out, the
     /// plate and sections re-placing, a group folding — one motion
     /// on one pace. Off, the shelf lands; not under `anyEnabled`.
@@ -56,9 +40,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// The band every spring duration clamps to, and the one a
     /// control's edges derive from (gui.md, #1359).
     public static let durationBand = 50...1000
-    /// The flip's band: below 100 ms the plate is a flash, not a
-    /// turn.
-    public static let flipDurationBand = 100...1000
     /// The shelf glide's band (owner, 2026-09-30): below half a
     /// second it barely reads on a decelerating curve.
     public static let shelfDurationBand = 500...2000
@@ -74,13 +55,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         )
     }
 
-    static func clampFlipMS(_ ms: Int) -> Int {
-        min(
-            max(ms, flipDurationBand.lowerBound),
-            flipDurationBand.upperBound
-        )
-    }
-
     enum CodingKeys: String, CodingKey, CaseIterable {
         case onScrolling = "on_scrolling"
         case onWindowResize = "on_window_resize"
@@ -88,8 +62,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         case onRelayout = "on_relayout"
         case durationMS = "duration"
         case scrollDurationMS = "scroll_duration"
-        case onMonocleFocus = "on_monocle_focus"
-        case monocleFlipDurationMS = "monocle_flip_duration"
         case onShelf = "on_shelf"
         case shelfDurationMS = "shelf_duration"
     }
@@ -133,17 +105,6 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 Int.self,
                 forKey: .scrollDurationMS
             ) ?? 150
-        )
-        onMonocleFocus =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .onMonocleFocus
-            ) ?? true
-        monocleFlipDurationMS = Self.clampFlipMS(
-            try container.decodeIfPresent(
-                Int.self,
-                forKey: .monocleFlipDurationMS
-            ) ?? 450
         )
         onShelf =
             try container.decodeIfPresent(Bool.self, forKey: .onShelf)

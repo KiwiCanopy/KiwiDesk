@@ -347,10 +347,6 @@ track shortcut bound.
 That grid's windows per pile is set at **General ▸ Windows per
 pile on quit**.
 
-**Monocle** — a focus change flips a card from one app's icon
-to the next over a blur; the flip and its duration live here
-too, beside the layout.
-
 > **A few resize behaviors are accepted limitations, not bugs** —
 > the inner window of a nested BSP pair not growing, or the shares
 > of masters lined up along the split not moving. See

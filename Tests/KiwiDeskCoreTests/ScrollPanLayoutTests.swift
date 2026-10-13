@@ -104,37 +104,4 @@ struct ScrollPanLayoutTests {
         #expect(core.activeSpace?.focused == WindowID(4))
         #expect(warps == 0)
     }
-
-    /// A flip still owes its focus when the next step reads the
-    /// anchor: the step lands it first, so it starts from there.
-    @Test("a Monocle step lands a flip's owed focus first")
-    func owedFocusLandsFirst() {
-        let (core, session) = makeCore("monocle", focus: WindowID(2))
-        core.pendingMonocleFocus = (
-            from: WindowID(2),
-            to: WindowID(3),
-            warp: false
-        )
-        swipe(core, session, dx: -80)
-        #expect(core.activeSpace?.focused == WindowID(4))
-        #expect(core.pendingMonocleFocus == nil)
-    }
-
-    /// The owed landing honours the warp the step recorded.
-    @Test("an owed landing warps only when its step did")
-    func owedLandingKeepsWarp() {
-        for warp in [false, true] {
-            let (core, _) = makeCore("monocle", focus: WindowID(2))
-            core.tiler.settings.mouse.followsFocus = true
-            var warps = 0
-            core.pointerWarp = { _ in warps += 1 }
-            core.pendingMonocleFocus = (
-                from: WindowID(2),
-                to: WindowID(3),
-                warp: warp
-            )
-            core.runPendingMonocleFocus()
-            #expect(warps == (warp ? 1 : 0))
-        }
-    }
 }

@@ -101,9 +101,6 @@ extension KiwiCore {
         )
         switch space.mode {
         case .scrolling, .monocle:
-            // A flip's owed focus lands first, as `execute` does
-            // ahead of every focused-window command (#1391).
-            runPendingMonocleFocus()
             return navigate(
                 [.string(direction.rawValue)],
                 swapping: false,

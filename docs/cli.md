@@ -338,8 +338,6 @@ lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
 | | `animations.set_on_window_resize` | true\|false (default true) |
 | | `animations.set_on_window_swap` | true\|false (default true) |
 | | `animations.set_on_relayout` | true\|false (default true) |
-| | `animations.set_on_monocle_focus` | true\|false (default true); the Monocle focus card flip, persisted per-profile |
-| | `animations.set_monocle_flip_duration` | ms (100–1000, default 450); the flip's turn, persisted per-profile |
 | | `animations.set_on_shelf` | true\|false (default true); the KiwiShelf motion on a Space switch, persisted per-profile |
 | | `animations.set_shelf_duration` | ms (500–2000, default 750); the shelf glide's length, persisted per-profile |
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
@@ -403,6 +401,9 @@ are refused, naming `set_space_cue`;
 `animations.set_space_change_duration` and
 `set_space_switch_liquid_glass` are refused, since a Space switch
 is instant and no longer slides.
+`animations.set_on_monocle_focus` and
+`animations.set_monocle_flip_duration` are refused, since a
+Monocle focus change is a raise and plays no flip.
 :::
 
 `focus_or_spawn` was `pull_or_spawn`; the old name is refused,

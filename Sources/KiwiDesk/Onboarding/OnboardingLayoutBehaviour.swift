@@ -38,8 +38,8 @@ enum OnboardingLayoutBehaviour {
         case .monocle:
             return L(
                 "onboarding.starter_spaces.behaviour.monocle",
-                "One window fills the screen, and focus flips to "
-                    + "the next one."
+                "One window fills the screen, and the next one "
+                    + "comes to the front."
             )
         case .floating:
             return L(

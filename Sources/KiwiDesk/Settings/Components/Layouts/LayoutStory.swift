@@ -48,7 +48,8 @@ struct LayoutStory: Equatable {
     /// `mode`'s story ending on `windows`, the count the surface
     /// draws at rest. Tiling layouts gain a window, which the
     /// engine places; Scrolling steps focus and pans; Monocle
-    /// turns its front card; Floating drags one window.
+    /// brings the next window to the front; Floating drags one
+    /// window.
     static func of(_ mode: LayoutMode, resting windows: Int) -> Self {
         let rest = Frame(windows: windows)
         var start = rest
@@ -60,7 +61,7 @@ struct LayoutStory: Equatable {
         case .scrolling:
             start.motion.focus = 1
         case .monocle:
-            start.motion.turn = -1
+            start.motion.arrival = 1
         case .floating:
             start.motion.drag = 0
         }

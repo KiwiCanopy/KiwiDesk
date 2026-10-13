@@ -98,7 +98,7 @@ extension KiwiCore {
     /// window where the bar draws it — a traveler included, which
     /// its home Space would switch away from.
     func selectFromAppBar(_ window: WindowID) {
-        focusWithMonocleFlip(window, step: nil)
+        focusWindow(window, warp: true)
     }
 
     /// Switches to `space` landing on `window` through the one
@@ -113,7 +113,7 @@ extension KiwiCore {
             state.effectiveMembers(of: members).contains(window)
         else { return }
         guard space != activeSpace?.id else {
-            focusWithMonocleFlip(window, step: nil)
+            focusWindow(window, warp: true)
             return
         }
         guard !raiseCrossesDesktops(window) else {

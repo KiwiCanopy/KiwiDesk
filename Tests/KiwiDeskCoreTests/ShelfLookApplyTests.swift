@@ -170,8 +170,6 @@ struct ShelfLookApplyTests {
         source.animations.onRelayout = false
         source.animations.durationMS = 250
         source.animations.scrollDurationMS = 260
-        source.animations.onMonocleFocus = false
-        source.animations.monocleFlipDurationMS = 300
         source.animations.onShelf = false
         source.animations.shelfDurationMS = 900
         let saved = ShelfLook(

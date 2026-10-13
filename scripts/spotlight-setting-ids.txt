@@ -86,8 +86,6 @@ keybinding.toggle_sticky
 profile.isDefault
 settings.animations (master)
 settings.animations.durationMS
-settings.animations.monocleFlipDurationMS
-settings.animations.onMonocleFocus
 settings.animations.onRelayout
 settings.animations.onScrolling
 settings.animations.onShelf
