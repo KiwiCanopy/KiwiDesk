@@ -616,9 +616,9 @@ KiwiDesk.set_mode_cycle({ "bsp", "stack", "monocle" })
 
 **Expects:** nothing.
 
-**Does:** opens the layout picker: the
-[window switcher](#show_jump_to_window)'s panel on its **Layouts**
-side, for the Space shown on the screen under the pointer. It
+**Does:** opens the **layout picker**, the **Layouts** side of the
+panel the [window switcher](#show_jump_to_window) shares, for the
+Space shown on the screen under the pointer. It
 switches to it from the windows, or closes the panel if it already
 shows Layouts. Every layout is a tile with its
 picture, the current one marked ✓.

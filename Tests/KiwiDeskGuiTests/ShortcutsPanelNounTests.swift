@@ -62,7 +62,9 @@ struct ShortcutsPanelNounTests {
         let panelName: String
         let opener: String
         /// Whether translations of the pair have shipped, so a
-        /// run comparing English alone means they were lost.
+        /// run comparing English alone means they were lost. A
+        /// pair left false reds once a translation lands, so the
+        /// round that lands one sets it.
         var translated = false
     }
 
@@ -116,6 +118,18 @@ struct ShortcutsPanelNounTests {
             let catalog = try Self.catalog(locale)
             let name = catalog[pair.panelName]
             let opens = catalog[pair.opener]
+            if !pair.translated, locale != "en",
+                !Self.awaitingTranslation.contains(pair.panelName),
+                name != nil || opens != nil
+            {
+                Issue.record(
+                    """
+                    \(locale) translates \(pair.panelName) / \
+                    \(pair.opener): set the pair's `translated`, \
+                    so the floor holds its translations.
+                    """
+                )
+            }
             if Self.awaitingTranslation.contains(pair.panelName) {
                 if locale != "en", name != nil {
                     Issue.record(
