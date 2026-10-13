@@ -17,11 +17,21 @@ struct AppVerbHintTests {
         return core
     }
 
+    /// Every verb whose first argument is a bundle id, read off the
+    /// API records, so a new app verb reds here until it is wrapped.
+    nonisolated static let appVerbs = APIReference.entries
+        .filter { $0.record.arguments.first?.name == "bundle_id" }
+        .map(\.qualifiedName)
+        .sorted()
+
+    @Test("the app verbs are read off the records")
+    func appVerbsAreRead() {
+        #expect(Self.appVerbs.count >= 4, "\(Self.appVerbs)")
+    }
+
     @Test(
         "each app verb's refusal names the bundle id",
-        arguments: [
-            "focus_or_spawn", "spawn_new", "gather", "move_here",
-        ]
+        arguments: AppVerbHintTests.appVerbs
     )
     func refusalNamesTheID(_ verb: String) {
         let core = makeCore()

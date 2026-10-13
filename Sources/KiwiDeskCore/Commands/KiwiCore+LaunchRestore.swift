@@ -1,7 +1,7 @@
 import AppKit
 import Foundation
 
-/// Every machine touch Open or Focus makes — both branches of
+/// Every machine touch the app verbs make — both branches of
 /// `launch` — in one place, so a test can state the world and
 /// record what the command did to it (#673). `new_window`
 /// brings its app forward through the same `activate` (#1518).

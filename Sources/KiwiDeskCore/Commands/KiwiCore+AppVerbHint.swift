@@ -12,10 +12,11 @@ extension KiwiCore {
         _ response: CommandResponse,
         _ args: [JSONValue]
     ) -> CommandResponse {
-        guard !response.isSuccess, let error = response.error,
-            let name = args.first?.stringValue,
-            let id = openOrFocus.bundleIDNamed(name),
-            id.lowercased() != name.lowercased()
+        // A dot reads as a bundle id already, and spares the
+        // running-app walk the refusals a key press can hit.
+        guard let error = response.error,
+            let name = args.first?.stringValue, !name.contains("."),
+            let id = openOrFocus.bundleIDNamed(name)
         else { return response }
         return .fail("\(error) — did you mean '\(id)'?")
     }
