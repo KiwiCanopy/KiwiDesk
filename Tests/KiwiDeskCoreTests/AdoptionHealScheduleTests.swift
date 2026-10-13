@@ -108,8 +108,8 @@ struct AdoptionHealScheduleTests {
         loop.scanChunk(budget: nil)
     }
 
-    /// After the first heal fired: its read's completion re-arms
-    /// at this interval, and at the 1 ms one a loaded runner fires
+    /// Once the first heal is armed at 1 ms: its read's completion
+    /// re-arms at this interval, and at 1 ms a loaded runner fires
     /// a second sweep before the assertions read the count.
     private static func parkRearm(_ core: KiwiCore) {
         core.timings.adoptionHealInterval = .seconds(3_600)
@@ -124,9 +124,9 @@ struct AdoptionHealScheduleTests {
         }
         core.timings.adoptionHealInterval = .milliseconds(1)
         core.scheduleAdoptionHeal()
+        Self.parkRearm(core)
         let armed = core.deferred.task(for: .adoptionHeal)
         await armed?.value
-        Self.parkRearm(core)
         // The census is read off the main actor (#1956); the sweep
         // and the re-arm land when it answers.
         let read = core.deferred.task(for: .adoptionHealRead)
@@ -168,8 +168,8 @@ struct AdoptionHealScheduleTests {
         }
         core.timings.adoptionHealInterval = .milliseconds(1)
         core.scheduleAdoptionHeal()
-        await core.deferred.task(for: .adoptionHeal)?.value
         Self.parkRearm(core)
+        await core.deferred.task(for: .adoptionHeal)?.value
         let read = core.deferred.task(for: .adoptionHealRead)
         #expect(read != nil)
         await read?.value
