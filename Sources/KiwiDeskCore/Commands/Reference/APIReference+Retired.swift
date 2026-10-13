@@ -79,6 +79,14 @@ extension APIReference {
         ] {
             map[verb] = switchNoLongerSlides
         }
+        // A Monocle focus change is a raise and nothing else
+        // (#2099).
+        for verb in [
+            "animations.set_on_monocle_focus",
+            "animations.set_monocle_flip_duration",
+        ] {
+            map[verb] = monocleFocusIsARaise
+        }
         // The App Bar always draws icon and title (#1528).
         for verb in [
             "app_bar.set_content", "monocle.set_app_bar_content",
@@ -93,6 +101,8 @@ extension APIReference {
         "a Space item's length follows its content"
     private static let switchNoLongerSlides =
         "a Space switch is instant and no longer slides"
+    private static let monocleFocusIsARaise =
+        "a Monocle focus change is a raise and plays no flip"
     private static let appBarDrawsBoth =
         "the App Bar always draws each item's icon and title"
 

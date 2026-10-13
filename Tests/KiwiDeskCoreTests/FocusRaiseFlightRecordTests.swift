@@ -160,24 +160,4 @@ struct FocusRaiseFlightRecordTests {
         #expect(core.raiseFlight == nil)
         #expect(preflight(core, "focus")?.error == Self.generic)
     }
-
-    /// A Monocle flip defers the state write (#1391): the press
-    /// records the focus the flip owes, not the unmoved anchor.
-    @Test("A flip's owed focus is the flight's target")
-    func flipOwedTargetRecords() {
-        let core = makeCore()
-        core.pendingMonocleFocus = (from: anchor, to: previous, warp: false)
-        _ = core.focusRecordingFlight([.string("nowhere")])
-        #expect(core.raiseFlight?.target == previous)
-        #expect(core.raiseFlight?.leftPID == previousPID)
-    }
-
-    @Test("A landing flip restamps the flight")
-    func flipLandingRestamps() {
-        let core = makeCore()
-        raise(core, to: anchor, age: KiwiCore.selfRaiseEchoWindow)
-        core.pendingMonocleFocus = (from: previous, to: anchor, warp: false)
-        core.runPendingMonocleFocus()
-        #expect(preflight(core, "focus") == nil)
-    }
 }

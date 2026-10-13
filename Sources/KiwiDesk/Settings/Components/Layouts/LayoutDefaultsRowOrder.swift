@@ -55,8 +55,6 @@ enum LayoutDefaultsRowOrder {
         .layout(.monocleHideStyle),
         .layout(.monocleWrapFocus),
         .layout(.monocleNewWindowPlacement),
-        .colours(.animationsOnMonocleFocus),
-        .colours(.animationsMonocleFlipDurationMS),
     ]
 
     static let track: [SettingKey] = [

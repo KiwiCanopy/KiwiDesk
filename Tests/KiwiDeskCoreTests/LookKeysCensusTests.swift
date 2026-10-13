@@ -97,8 +97,6 @@ struct LookKeysCensusTests {
                 "animations.on_relayout",
                 "animations.duration",
                 "animations.scroll_duration",
-                "animations.on_monocle_focus",
-                "animations.monocle_flip_duration",
                 "animations.on_shelf",
                 "animations.shelf_duration",
             ]

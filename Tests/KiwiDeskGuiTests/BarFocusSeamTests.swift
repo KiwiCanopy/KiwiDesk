@@ -41,7 +41,6 @@ struct BarFocusSeamTests {
         )
         #expect(peek.occurrences(of: raw) == 1)
         #expect(focus.contains(raw))
-        #expect(focus.contains("pendingMonocleFocus?.to"))
         let click = try Self.source("KiwiCore+SpaceBarClick.swift")
         #expect(click.occurrences(of: raw) == 0)
         let items = try Self.source("KiwiCore+SpaceBarItems.swift")
