@@ -28,6 +28,15 @@ struct BarMenuLandingTests {
             SettingsAnchor(landing: .advancedColors)
                 == SettingsAnchor(destination: .advancedColors)
         )
+        // The key panel's Layout Defaults… (#2229): the page, on
+        // the layout's own tab.
+        #expect(
+            SettingsAnchor(landing: .layoutDefaults(.track))
+                == SettingsAnchor(
+                    destination: .layoutDefaults,
+                    surface: .layoutMode(.track)
+                )
+        )
     }
 
     /// A Space's card is a surface of Spaces alone: the reveal

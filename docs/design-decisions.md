@@ -10683,6 +10683,56 @@ the arms and
 `PanelHandBackTests` the non-activating show. (#952, #1875)
 :::
 
+:::unreleased
+**The layout picker is a scope of Jump to window, not a menu
+(#2229).** #762 made the picker a native menu because a menu
+brings arrows, type-select, Return, Escape and VoiceOver for free.
+That argument holds for a list of names, and it is why the status
+item's and a Space chip's Layout menus stay menus. The picker
+became a panel because a panel can show each layout's picture,
+drawn by the same schematics Settings uses, and a picture answers
+"which one is Track?" faster than a name; a panel of names alone
+would pay the same cost for nothing. The cost is real, and it is
+paid in the panel: the arrows, the typed filter,
+Return, Escape and the ⌘ digits are its own keys, each tile is a
+VoiceOver button that says which layout is current, and the
+current layout is marked with a ✓ glyph so it is never told apart
+by colour alone.
+
+The selection is kiwi green because the panel is KiwiDesk's own
+window (#1293 tints every one), and a native menu keeps the system
+accent because re-tinting a menu fights the platform. So green
+marks what KiwiDesk draws and the user's accent marks what macOS
+draws, and the line between them is the window, not the feature.
+
+One panel holds both scopes because both answer "take me
+somewhere" from the keyboard, and one field on top keeps typing
+the quick way in, as Spotlight's categories do. ⇥ switches scope
+and clears the field, since the same letters mean a window in one
+and a layout in the other. The other scope's own shortcut switches
+too, so ⌃⌥L inside Jump lands on Layouts. In the Layouts scope ←
+and → move the tiles even while the field has focus: a one-word
+filter has almost nothing to edit with a caret, and the tiles are
+one row. The buttons are not Tab stops, because Tab is the scope
+switch and the field must keep the keys; each shows its chord
+instead (⌘S Keep, ⌘, Layout Defaults…), the way a menu item does.
+One row of seven tiles was chosen over a 3/3/1 grid: the row keeps
+the panel at Jump's width, and ↓ from an outer tile in a grid has
+no tile below it.
+
+The selection follows the mouse, as a menu's highlight does, so
+the row under the pointer is the one ↩ acts on — but only on a
+real pointer move. A row that slides under a still pointer, as
+the panel opens there or the list re-ranks while typing, is not a
+choice the user made, and selecting it would steal the keyboard's
+selection. The ✓ never moves with it: the pill marks where ↩
+goes, the ✓ what the Space shows. `show_layout_picker` is a
+Lua-only verb like the other panels' (`show_jump_to_window`,
+`show_shortcuts`): it opens a window and returns nothing a CLI
+caller could read, so a launcher reaches it through a keybinding. `JumpScopeModelTests`, `LayoutPickListTests` and
+`JumpKeyTests` hold the keys. (#2229)
+:::
+
 **An accessibility steal is returned, not refused (#958).**
 Starting VoiceOver activates `com.apple.universalaccesscontrol`,
 and when that process yields, macOS re-activates the most

@@ -16,15 +16,18 @@ struct JumpModelTests {
             JumpListTests.row(2, "Mail", "Inbox"),
             JumpListTests.row(3, "Notes", "Ideas"),
         ]
-        return JumpModel(
+        let model = JumpModel(
             snapshot: JumpSnapshot(
                 entries: entries,
                 here: "1",
                 hereIcon: nil
             ),
             icons: [:],
-            rowCap: 6
+            rowCap: 6,
+            pointer: .zero
         )
+        model.currentPointer = { .zero }
+        return model
     }
 
     @Test("Esc clears a query, then closes")
@@ -64,7 +67,8 @@ struct JumpModelTests {
                 hereIcon: nil
             ),
             icons: [:],
-            rowCap: 6
+            rowCap: 6,
+            pointer: .zero
         )
         #expect(model.list.selection == 0)
         model.handle(.page(1))

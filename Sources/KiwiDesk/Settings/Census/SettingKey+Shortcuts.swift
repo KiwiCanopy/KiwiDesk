@@ -15,7 +15,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case goToSpace = "keybinding.go_to_space (x N spaces)"
     case focusDesktop = "keybinding.focus_desktop (x N desktops)"
     /// Jump to window (#1875), its row named by the panel's own
-    /// label (`JumpPanelView.fieldName`).
+    /// label (`JumpScope.windows.fieldName`).
     case jumpToWindow = "keybinding.show_jump_to_window"
     case swapDir = "keybinding.swap_dir (x4)"
     case moveWindowToTrack =

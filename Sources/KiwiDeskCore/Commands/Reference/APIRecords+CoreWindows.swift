@@ -159,9 +159,6 @@ extension APIReference {
                 + "identifier.",
             .text("bundle_id")
         ),
-        "show_layout_picker": APIRecord(
-            "Opens a layout menu at the pointer for the Space under it."
-        ),
         "cycle_mode": APIRecord(
             "Moves the focused Space to the next layout in the cycle "
                 + "list, or the previous one.",

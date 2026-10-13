@@ -3,11 +3,14 @@ import Combine
 import KiwiDeskCore
 
 /// What the Jump to window panel shows and how its keys move it
-/// (#1875). The controller wires the four callbacks; the view
-/// reads the rest.
+/// (#1875), on either scope (#2229). The controller wires the
+/// callbacks; the view reads the rest.
 @MainActor
 final class JumpModel: ObservableObject {
     @Published private(set) var list: JumpList
+    @Published private(set) var scope: JumpScope = .windows
+    /// The Layouts scope's tiles, read fresh on each entry to it.
+    @Published var layouts: LayoutPickList?
     @Published private(set) var commandHeld = false
     @Published private(set) var shiftHeld = false
     /// Whether an input method is composing in the field; the
@@ -22,6 +25,13 @@ final class JumpModel: ObservableObject {
     @Published private(set) var leaving = false
 
     func leave() { leaving = true }
+    /// Where the pointer last moved, so a row sliding under a
+    /// still pointer selects nothing (#2229).
+    private var lastPointer: CGPoint
+    /// The pointer now — the panel's one live read; a test pins
+    /// it, and passes `pointer:` to `init`.
+    static let livePointer: () -> CGPoint = { NSEvent.mouseLocation }
+    var currentPointer = JumpModel.livePointer
     /// Each app's icon, read once when the panel opens.
     let icons: [pid_t: NSImage]
     /// The most rows the list shows before it scrolls.
@@ -31,23 +41,39 @@ final class JumpModel: ObservableObject {
     var onClose: () -> Void = {}
     var onAnnounce: (String) -> Void = { _ in }
     var onResultsChange: () -> Void = {}
+    /// The panel's height glides to the new scope.
+    var onScopeChange: () -> Void = {}
+    /// Reads the layout picker's Space — the one under the pointer
+    /// for nil — now; nil where it is gone.
+    var loadLayouts: (SpaceID?) -> LayoutPickList? = { _ in nil }
+    var onApply: (LayoutMode) -> Void = { _ in }
+    var onKeep: () -> Void = {}
+    var onLayoutDefaults: (LayoutMode) -> Void = { _ in }
 
     init(
         snapshot: JumpSnapshot,
         icons: [pid_t: NSImage],
         rowCap: Int,
-        modifiers: NSEvent.ModifierFlags = []
+        modifiers: NSEvent.ModifierFlags = [],
+        pointer: CGPoint? = nil
     ) {
         list = JumpList(snapshot: snapshot)
+        lastPointer = pointer ?? Self.livePointer()
         self.icons = icons
         self.rowCap = rowCap
         noteModifiers(modifiers)
     }
 
     var query: String {
-        get { list.query }
+        get { scope == .windows ? list.query : layouts?.query ?? "" }
         set {
-            guard newValue != list.query else { return }
+            guard newValue != query else { return }
+            // What re-ranks under the pointer is no pointer move.
+            lastPointer = currentPointer()
+            guard scope == .windows else {
+                setLayoutQuery(newValue)
+                return
+            }
             list.setQuery(newValue)
             onResultsChange()
             onAnnounce(resultsSpoken)
@@ -61,13 +87,21 @@ final class JumpModel: ObservableObject {
     /// What the field shows in place of the typing; nil while an
     /// input method composes, which owns the field meanwhile.
     var field: JumpGhost.Field? {
-        composing
-            ? nil
-            : JumpGhost.field(selected: list.selected, moveHere: shiftHeld)
+        guard !composing else { return nil }
+        guard scope == .windows else { return layoutField }
+        return JumpGhost.field(selected: list.selected, moveHere: shiftHeld)
     }
 
     func handle(_ key: JumpKey) {
         guard !leaving else { return }
+        if key == .toggleScope {
+            setScope(scope.other)
+            return
+        }
+        if scope == .layouts {
+            handleLayouts(key)
+            return
+        }
         switch key {
         case .step(let delta):
             move(by: delta)
@@ -87,9 +121,47 @@ final class JumpModel: ObservableObject {
             } else {
                 query = ""
             }
-        case .swallow:
+        case .toggleScope, .side, .keep, .layoutDefaults, .swallow:
             break
         }
+    }
+
+    /// Switches to `scope` with both queries cleared (owner
+    /// ruling, #2229) — a query means different things in each.
+    /// Layouts reads its Space fresh, and stays out of reach
+    /// where that Space is gone.
+    func setScope(_ scope: JumpScope) {
+        guard scope != self.scope else { return }
+        if scope == .layouts {
+            guard let fresh = loadLayouts(nil) else { return }
+            layouts = fresh
+        }
+        if !list.query.isEmpty { list.setQuery("") }
+        layouts?.setQuery("")
+        self.scope = scope
+        lastPointer = currentPointer()
+        onScopeChange()
+        onAnnounce(scope.title)
+    }
+
+    /// The selection follows the pointer, on a real move only
+    /// (#2229 ▸ designer ruling): the panel opening under it, a
+    /// re-rank or a scroll slides rows under a still pointer and
+    /// moves nothing.
+    func hoverRow(_ index: Int, pointer: CGPoint) {
+        guard scope == .windows, pointerMoved(to: pointer) else { return }
+        list.select(index)
+    }
+
+    func hoverTile(_ mode: LayoutMode, pointer: CGPoint) {
+        guard scope == .layouts, pointerMoved(to: pointer) else { return }
+        layouts?.select(mode)
+    }
+
+    private func pointerMoved(to point: CGPoint) -> Bool {
+        guard point != lastPointer else { return false }
+        lastPointer = point
+        return true
     }
 
     func noteModifiers(_ flags: NSEvent.ModifierFlags) {
