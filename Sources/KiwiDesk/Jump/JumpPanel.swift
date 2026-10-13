@@ -16,11 +16,25 @@ final class JumpPanel: NSPanel {
 
     override var canBecomeKey: Bool { true }
 
-    /// Non-activating, so KiwiDesk's menu is not the one in the
-    /// menu bar: the File and Edit chords — ⌘W's Close (#1533),
-    /// the edit chords — are handed to it here, and nothing else.
+    /// The panel's own ⌘ chords come first: AppKit offers a ⌘ key
+    /// to the menus before the window's `keyDown`, so KiwiDesk's
+    /// "Settings… ⌘," would take ⌘, from a side that answers it
+    /// (#2246). Then, non-activating, so KiwiDesk's menu is not the
+    /// one in the menu bar: the File and Edit chords — ⌘W's Close
+    /// (#1533), the edit chords — are handed to it here, and
+    /// nothing else.
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        super.performKeyEquivalent(with: event)
+        if event.type == .keyDown, !composing,
+            let key = JumpKey.of(
+                keyCode: event.keyCode,
+                modifiers: event.modifierFlags,
+                scope: scope()
+            )
+        {
+            onKey(key)
+            return true
+        }
+        return super.performKeyEquivalent(with: event)
             || MainMenu.performPanelChord(event)
     }
 

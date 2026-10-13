@@ -197,6 +197,23 @@ final class JumpModel: ObservableObject {
         return true
     }
 
+    /// ⇧ and ⌘ as held now, for the footer's one lit hint.
+    var heldModifiers: NSEvent.ModifierFlags {
+        var flags: NSEvent.ModifierFlags = []
+        if shiftHeld { flags.insert(.shift) }
+        if commandHeld { flags.insert(.command) }
+        return flags
+    }
+
+    /// Whether the side shown has a selection a pick acts on.
+    var hasSelection: Bool {
+        switch scope {
+        case .windows: return list.selected != nil
+        case .shortcuts: return false
+        case .layouts: return layouts?.selected != nil
+        }
+    }
+
     func noteModifiers(_ flags: NSEvent.ModifierFlags) {
         let command = flags.contains(.command)
         let shift = flags.contains(.shift)

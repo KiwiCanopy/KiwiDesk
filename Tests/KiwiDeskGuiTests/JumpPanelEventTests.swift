@@ -84,4 +84,35 @@ struct JumpPanelEventTests {
         panel.sendEvent(event)
         #expect(flags.map { $0.contains(.command) } == [true])
     }
+
+    /// AppKit offers a ⌘ key to the menus before `keyDown`, and
+    /// KiwiDesk's "Settings… ⌘," took ⌘, from the Shortcuts and
+    /// Layouts sides (#2246): the panel claims its own chord there.
+    @Test("⌘, reaches a side before the app menu's Settings…")
+    func commandCommaIsTheSides() {
+        let (panel, _) = panel()
+        var keys: [JumpKey] = []
+        panel.onKey = { keys.append($0) }
+        let comma = NSEvent.keyEvent(
+            with: .keyDown,
+            location: .zero,
+            modifierFlags: .command,
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            characters: ",",
+            charactersIgnoringModifiers: ",",
+            isARepeat: false,
+            keyCode: 43
+        )!
+        for scope in [JumpScope.shortcuts, .layouts] {
+            panel.scope = { scope }
+            #expect(panel.performKeyEquivalent(with: comma))
+        }
+        #expect(keys == [.settings, .settings])
+        // Windows answers no ⌘, of its own.
+        panel.scope = { .windows }
+        _ = panel.performKeyEquivalent(with: comma)
+        #expect(keys.count == 2)
+    }
 }

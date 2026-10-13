@@ -6,9 +6,10 @@ import SwiftUI
 struct JumpFooter: View {
     let scope: JumpScope
     let overflows: Bool
-    /// ⇧ held: "⇧↩ Move here" takes the full ink from "↩ Jump",
-    /// the field no longer previewing it (#2246).
-    var shiftHeld = false
+    /// The modifiers held now, which decide the one lit hint.
+    var modifiers: NSEvent.ModifierFlags = []
+    /// Whether a row or tile is selected; with none, nothing lights.
+    var hasSelection = true
 
     var body: some View {
         HStack(spacing: 8) {
@@ -41,12 +42,27 @@ struct JumpFooter: View {
 }
 
 extension JumpFooter {
-    /// The hint ↩ acts by now, in full ink: Jump, or Move here
-    /// while ⇧ is held. The other sides lead with none.
+    /// The one hint in full ink: the pick that acts on the
+    /// selection with the modifiers held now, read off `JumpKey`
+    /// itself — ↩ where it picks, else the ⌘ digits. Navigation and
+    /// bridges never light; the Shortcuts side picks nothing (#2246).
     var leading: Int? {
-        guard scope == .windows else { return nil }
-        return shiftHeld ? 1 : 0
+        guard hasSelection, scope != .shortcuts else { return nil }
+        let held = modifiers.intersection([.shift, .command])
+        switch JumpKey.of(keyCode: 36, modifiers: held, scope: scope) {
+        // Windows: ↩ Jump, ⇧↩ Move here; Layouts: ↩ Apply.
+        case .pick(let moveHere):
+            guard scope == .windows else { return 1 }
+            return moveHere ? 1 : 0
+        default:
+            break
+        }
+        let digit = JumpKey.of(keyCode: 18, modifiers: held, scope: scope)
+        if case .quick = digit { return 2 }
+        return nil
     }
+
+    private var shiftHeld: Bool { modifiers.contains(.shift) }
 
     var hints: [String] {
         let other = L(
@@ -60,7 +76,15 @@ extension JumpFooter {
             return [
                 L("jump.footer.jump", "%1$@ Jump", "↩"),
                 L("jump.footer.move_here", "%1$@ Move here", "⇧↩"),
-                L("jump.footer.quick", "%1$@ Quick jump", "⌘1–9"),
+                // ⇧ already rewrites the digits to what they then
+                // do; ⌘ joining only lights them.
+                shiftHeld
+                    ? L(
+                        "jump.footer.quick_move_here",
+                        "%1$@ Quick move here",
+                        "⇧⌘1–9"
+                    )
+                    : L("jump.footer.quick", "%1$@ Quick jump", "⌘1–9"),
                 other,
             ]
         case .shortcuts:

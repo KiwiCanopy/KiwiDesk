@@ -10673,8 +10673,25 @@ screen's bottom or a KiwiShelf strip, which the visible frame
 does not exclude. The field shows only the typing: the selection
 is the green row or tile, shown once, and inline completion —
 weighed — reads as native only where → or Tab would accept it,
-which here they never do. Holding ⇧ lights "⇧↩ Move here" in the
-footer instead.
+which here they never do.
+
+**The footer lights one hint: the pick live now (#2246, owner
+ruling 2026-10-13).** With the selection gone from the field, the
+footer says what a press would do: exactly one hint in full ink —
+the pick that acts on the selection with the modifiers held now,
+read off the panel's own key map rather than a modifier table —
+and every other hint secondary. On Windows that is ↩ Jump at
+rest, ⇧↩ Move here under ⇧, and the digits under ⌘ or ⇧⌘; ⇧
+already rewrites the digit hint to "⇧⌘1–9 Quick move here", so ⌘
+joining only lights it — one press changes one thing. Layouts
+lights ↩ Apply, or its digits under ⌘. Navigation (⇥, ← →) and
+bridges (⌘, Edit) never light, the Shortcuts side lights nothing
+since ↩ runs nothing there, and an empty list lights nothing. Ink
+alone carries it, with no tint or weight, and it swaps without
+motion. The way here follows the chord's reach: ⇧ alone moves the
+selected row, so only it shows its "Space n → Space m"; under ⇧⌘
+every numbered row is a target through its digit, so each shows
+its own.
 :::
 
 :::unreleased

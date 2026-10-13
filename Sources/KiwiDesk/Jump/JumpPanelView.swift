@@ -37,7 +37,8 @@ struct JumpPanelView: View {
             JumpFooter(
                 scope: model.scope,
                 overflows: overflows,
-                shiftHeld: model.shiftHeld
+                modifiers: model.heldModifiers,
+                hasSelection: model.hasSelection
             )
         }
         // The side's own name, which its shortcut row shows (#2245).

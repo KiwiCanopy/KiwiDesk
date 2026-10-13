@@ -617,6 +617,7 @@
   "jump.footer.jump": "%1$@ Vai",
   "jump.footer.move_here": "%1$@ Sposta qui",
   "jump.footer.quick": "%1$@ Salto rapido",
+  "jump.footer.quick_move_here": "%1$@ Sposta qui subito",
   "jump.footer.scope": "%1$@ %2$@",
   "jump.footer.scroll_hint": "Scorri per altre finestre",
   "jump.panel.ax_label": "Selettore di finestre",
