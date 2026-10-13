@@ -21,8 +21,8 @@ enum MCPWording {
             return "KiwiDesk is not reachable. Is the app running? "
                 + "(\(error))"
         default:
-            return "KiwiDesk gave no answer within "
-                + "\(MCPTools.answerTimeout) s; the command may have run."
+            return "KiwiDesk did not answer; the command may have run. "
+                + "(\(error))"
         }
     }
 }

@@ -20,7 +20,7 @@ struct APIDestructiveCensusTests {
         "delete", "remove", "close", "reset", "clear", "reload",
         "load", "save", "import", "restore", "discard", "forget",
         "kill", "quit", "prepare_restart", "drop", "overwrite",
-        "apply", "replace", "rename", "unbind",
+        "apply", "replace", "rename", "bind", "unbind",
     ]
 
     /// Commands whose name reads destructive and which lose
@@ -91,13 +91,18 @@ struct APIDestructiveCensusTests {
         #expect(other["destructive"] == .bool(false))
         #expect(APIReference.isDestructive("delete_space"))
         #expect(!APIReference.isDestructive("focus"))
-        // A Lua spelling resolves to its command's flag.
+        // A Lua spelling resolves to its command, so it reads
+        // that command's flag.
         let alias = try #require(
             APIReference.entries.first {
                 !$0.aliases.isEmpty && $0.command != nil
             }
         )
         for name in alias.aliases {
+            #expect(
+                APIReference.entry(named: name)?.qualifiedName
+                    == alias.qualifiedName
+            )
             #expect(
                 APIReference.isDestructive(name)
                     == APIReference.isDestructive(alias)
