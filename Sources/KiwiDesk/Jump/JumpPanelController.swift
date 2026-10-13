@@ -92,7 +92,13 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.makeFirstResponder(nil)
         panel.contentView = hosting
         panel.setContentSize(hosting.fittingSize)
-        PanelHandBack.center(panel, on: screen)
+        if let visible = screen?.visibleFrame {
+            panel.setFrameOrigin(
+                Self.origin(size: panel.frame.size, visible: visible)
+            )
+        } else {
+            panel.center()
+        }
         let front = PanelHandBack.frontmostBundleID()
         let rows = snapshot.entries.count
         jumpLog.log(

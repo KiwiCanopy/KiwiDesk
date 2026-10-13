@@ -39,6 +39,33 @@ struct JumpPanelControllerTests {
         #expect(narrow < 600 && narrow < full)
     }
 
+    /// Spotlight's height rather than the screen's middle (owner
+    /// eyeball, 2026-10-13): the top sits a quarter down and stays
+    /// there for every panel height that fits.
+    @Test("the panel's top sits at Spotlight's height")
+    func origin() {
+        let visible = CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        let top: CGFloat =
+            visible.maxY - visible.height
+            * JumpPanelController.topFraction
+        for height: CGFloat in [200, 400] {
+            let size = CGSize(width: 640, height: height)
+            let origin = JumpPanelController.origin(
+                size: size,
+                visible: visible
+            )
+            #expect(origin.x == 480)
+            #expect(origin.y + height == top)
+        }
+        // A panel taller than the room below that top is lifted
+        // rather than run off the screen.
+        let tall = JumpPanelController.origin(
+            size: CGSize(width: 640, height: 900),
+            visible: visible
+        )
+        #expect(tall.y == visible.minY)
+    }
+
     @Test("the list fits its rows up to the cap")
     func listHeight() {
         let row = JumpRowView.height

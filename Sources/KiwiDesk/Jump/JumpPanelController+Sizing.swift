@@ -18,6 +18,21 @@ extension JumpPanelController {
         min(JumpPanelView.width, visibleWidth - 80)
     }
 
+    /// Where the panel's top sits: Spotlight's height, a quarter
+    /// of the way down the screen's visible area (owner eyeball,
+    /// 2026-10-13), so the field lands where a search field is
+    /// looked for and the list grows down from it.
+    static let topFraction: CGFloat = 0.25
+
+    /// The panel's origin on `visible`: centred across, its top at
+    /// `topFraction`, and lifted where a tall panel would run past
+    /// the bottom.
+    static func origin(size: CGSize, visible: CGRect) -> CGPoint {
+        let top = visible.maxY - visible.height * topFraction
+        let bottom = max(top - size.height, visible.minY)
+        return CGPoint(x: visible.midX - size.width / 2, y: bottom)
+    }
+
     /// Fits the panel to its list, keeping the top edge where it
     /// is so the field stays under the user's eyes; a scope switch
     /// glides there (#2229), at once under Reduce Motion.
