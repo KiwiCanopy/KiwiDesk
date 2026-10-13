@@ -135,12 +135,64 @@ each group carrying one object per command — `name`,
 `aliases`, and an `arguments` array whose enum entries add
 `values`.
 
+:::unreleased
+Each command object also carries `destructive`: `true` for a
+command that cannot be undone, which `kiwidesk mcp` sends only
+through its `run_destructive` tool.
+:::
+
 The Swift type an enum's values were read from is **not** a JSON
 field; it appears in the terminal rendering only. `values` is
 what answers "what may I send".
 
 Bare `kiwidesk help` (and `--help` / `-h`) still prints the short
 usage block. Add a name, or `--json`, to get the API instead.
+
+## Using KiwiDesk from AI Apps
+
+:::unreleased
+`kiwidesk mcp` runs a [Model Context Protocol](https://modelcontextprotocol.io)
+server on stdin and stdout, so an AI app that launches local MCP
+servers — Claude Desktop, Claude Code, Cursor, Codex — can drive
+KiwiDesk. Point the app at the binary inside the bundle:
+
+```json
+{
+  "mcpServers": {
+    "kiwidesk": {
+      "command": "/Applications/KiwiDesk.app/Contents/MacOS/KiwiDesk",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+The server speaks MCP `2026-07-28` and, after an `initialize`,
+`2025-11-25`, `2025-06-18` and `2025-03-26`. It offers six tools:
+
+| Tool | Does |
+|---|---|
+| `list_commands` | The commands `run` can send, filtered by name, group or summary |
+| `help` | One command's arguments, as `kiwidesk help` shows them |
+| `get_state` | `get_state`'s answer |
+| `run` | One command that can be undone |
+| `run_batch` | Up to 100 commands in order, stopping at the first failure |
+| `run_destructive` | One command that cannot be undone |
+
+`list_commands` and `help` answer without the app; the others
+need it running. A command `list_commands --json` marks
+`destructive` — one that deletes, closes, overwrites a saved
+profile or replaces unsaved live changes — goes only through
+`run_destructive`, which carries MCP's destructive hint so the app
+asks you first; `run` and `run_batch` refuse it. `subscribe` and the Lua-only verbs are not
+offered.
+
+A change made through MCP is a setter like any other: it lasts
+until the next profile load, config reload or restart. `get_state`
+hands the AI app your window titles. ChatGPT reaches only remote
+MCP servers, so it needs OpenAI's MCP tunnel in front of
+`kiwidesk mcp`.
+:::
 
 ## Service Control
 
@@ -256,6 +308,11 @@ failures. 1 still means the command itself did not get through.
 
 ## Commands
 
+A `set_*` command other than `set_default_profile` changes the
+running setting. A profile keeps it once `save_profile` or a
+Settings Save captures it; otherwise the next profile load, config
+reload or restart replaces it.
+
 `focus_space_previous`, `focus_space_next`, `focus_space_back`,
 `focus_space_forward` and `set_space_history` step through the
 Spaces by their order and by the ones you visited
@@ -332,14 +389,14 @@ lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
 | | `debug_log` | [message] |
-| Animation | `animations.set_duration` | ms (50–1000); persisted per-profile |
-| | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration, persisted per-profile |
+| Animation | `animations.set_duration` | ms (50–1000) |
+| | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration |
 | | `animations.set_on_scrolling` | true\|false (default true) |
 | | `animations.set_on_window_resize` | true\|false (default true) |
 | | `animations.set_on_window_swap` | true\|false (default true) |
 | | `animations.set_on_relayout` | true\|false (default true) |
-| | `animations.set_on_shelf` | true\|false (default true); the KiwiShelf motion on a Space switch, persisted per-profile |
-| | `animations.set_shelf_duration` | ms (500–2000, default 750); the shelf glide's length, persisted per-profile |
+| | `animations.set_on_shelf` | true\|false (default true); the KiwiShelf motion on a Space switch |
+| | `animations.set_shelf_duration` | ms (500–2000, default 750); the shelf glide's length |
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
 | | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
 | Scroll gestures | `scroll_gesture.set_pan` | modifiers joined by `+` (default `control+option`; `""` off) — held with a scroll to move focus window by window |

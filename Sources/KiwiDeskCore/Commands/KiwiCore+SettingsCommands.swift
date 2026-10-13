@@ -101,9 +101,8 @@ extension KiwiCore {
         // knob whose arm was gone (#1009, `CommandDispatchReachTests`).
         switch command {
         case "animations.set_duration":
-            // Persisted per-profile (issue #51). Writes both
-            // the settings struct and the engine so the value
-            // is live immediately AND captured on next save.
+            // Live only: a later save_profile or Settings
+            // Save captures it into the profile (#51, #1685).
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
