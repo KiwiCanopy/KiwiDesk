@@ -51,10 +51,10 @@ extension KiwiCore {
     /// 2026-08-23), so honoring it would move state focus, ring
     /// and warp onto Settings. The grace consumes that handoff
     /// report; a genuine click on an own window still escapes on
-    /// provenance (#687). Public because the GUI's panel
-    /// controllers are the callers — and they gate the arm on a
-    /// commanded close of the still-active app, the only close
-    /// whose orderOut produces the blip. The
+    /// provenance (#687). Public because the GUI's Jump panel is
+    /// the caller — a pick of another app's window while KiwiDesk
+    /// is active; a plain close lands where the user was and arms
+    /// nothing (owner ruling 2026-10-13). The
     /// residue is the #292 command guard denying a focused
     /// command on an own window inside the ≤1 s grace — rare,
     /// self-clearing, and the same latch semantics every

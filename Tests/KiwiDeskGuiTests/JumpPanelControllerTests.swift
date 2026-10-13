@@ -115,27 +115,13 @@ struct JumpPanelControllerTests {
         #expect(core.ignoredPanel.active.isEmpty)
     }
 
-    @Test("Esc's close arms the distrust; a click away does not")
-    func closeDistrusts() {
-        // One close per opening: the fade's own guard refuses a
-        // second, so each close takes a controller of its own.
-        let own = pid_t(ProcessInfo.processInfo.processIdentifier)
-        let (away, awayCore) = controller()
-        away.handBack.isAppActive = { true }
-        away.close(commanded: false)
-        #expect(awayCore.ignoredPanel.active.isEmpty)
-        let (esc, escCore) = controller()
-        esc.handBack.isAppActive = { true }
-        esc.close(commanded: true)
-        #expect(escCore.ignoredPanel.active.contains(own))
-    }
-
-    @Test("a close of an already hidden panel does nothing")
-    func hiddenPanelCloseIsInert() {
+    /// The window a close keys again is the one the user was in,
+    /// so its report is honored (owner ruling 2026-10-13).
+    @Test("a close arms no distrust, even with KiwiDesk active")
+    func closeArmsNothing() {
         let (controller, core) = controller()
-        controller.panel = controller.makePanel()
         controller.handBack.isAppActive = { true }
-        controller.close(commanded: true)
+        controller.close()
         #expect(core.ignoredPanel.active.isEmpty)
     }
 
