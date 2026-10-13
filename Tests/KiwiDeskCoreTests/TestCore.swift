@@ -72,12 +72,6 @@ func makeTestCore(
     // silently turn a KiwiCore test's animations into instant
     // snaps (same host-state-leak class as the hotkey registrar).
     core.tiler.animation.reduceMotion = { false }
-    // The Monocle flip's own read (#1391), pinned the OTHER way:
-    // the flip defers a commanded `focusWindow` to its midpoint,
-    // so with it playing every suite that navigates a Monocle
-    // Space would read the focus before it landed. A flip suite
-    // states the read itself.
-    core.monocleFlip.reduceMotion = { true }
     // The focused ring's arrival hold (#1959) reads the render
     // clock, the host's Reduce Motion and a live timer: frozen and
     // inert here, so ring visibility after a switch never depends
@@ -123,6 +117,7 @@ func makeTestCore(
     // pid itself.
     core.openOrFocus.runningAppPID = { _ in nil }
     core.openOrFocus.openApp = { _, _ in false }
+    core.openOrFocus.bundleIDNamed = { _ in nil }
     // A Space Bar menu pops modally and would hang the run (#1528).
     core.spaceBars.glyphActions.present = { _, _ in }
     // A hover's dwell would open the peek's panel on a live

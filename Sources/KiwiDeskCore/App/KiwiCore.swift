@@ -27,11 +27,6 @@ public final class KiwiCore {
     /// Focus rings (#278) and sticky marks (#414), driven by `retile()`.
     public let borders = BorderManager()
     public let stickyMarks = StickyMarkManager()
-    /// The Monocle flip, a drawn transition (#1391).
-    let monocleFlip = MonocleFlipOverlay()
-    /// The focus a playing flip owes at its landing (#1391) —
-    /// landed, dropped and carried in `KiwiCore+MonocleFlip`.
-    var pendingMonocleFocus: (from: WindowID, to: WindowID, warp: Bool)?
     let strandDetector = StrandDetector()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager

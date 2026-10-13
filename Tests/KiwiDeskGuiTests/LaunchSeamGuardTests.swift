@@ -98,7 +98,9 @@ struct LaunchSeamGuardTests {
     /// a test naming an installed app.
     @Test("the test factory neutralizes the launch seams")
     func factoryNeutralizesLaunchSeams() throws {
-        for needle in ["runningAppPID", "openApp"] {
+        // `bundleIDNamed` (#2222) reads the running apps too: live,
+        // a refusal's hint would follow the developer's open apps.
+        for needle in ["runningAppPID", "openApp", "bundleIDNamed"] {
             let sites = try Self.sites(
                 of: needle,
                 under: Self.testTrees

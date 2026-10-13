@@ -154,9 +154,9 @@ extension BarMotion {
 
     /// A layer `opacity` fade from `from` to `to` across
     /// `duration`, starting at render-server time `begin` — the
-    /// focused ring's arrival reveal (#1959). Forwards only, as
-    /// `flipFade`: a later fade on the key must not be overridden
-    /// from the start.
+    /// focused ring's arrival reveal (#1959). Forwards only: a
+    /// later fade on the key must not be overridden from the
+    /// start.
     static func opacityFade(
         from: Float,
         to: Float,

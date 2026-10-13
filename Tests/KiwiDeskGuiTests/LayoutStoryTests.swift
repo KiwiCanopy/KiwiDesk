@@ -44,9 +44,19 @@ struct LayoutStoryTests {
             #expect(story.start.motion.focus != 0)
         case .monocle:
             #expect(story.start.windows == 4)
-            // A whole number of half-turns is the resting card.
-            let turn = story.start.motion.turn
-            #expect(turn != 0 && turn == turn.rounded())
+            // The next window starts behind the one it replaces,
+            // a little smaller, and grows to full size at rest.
+            #expect(story.start.motion.arrival == 1)
+            let start = MonocleSchematic(
+                orientation: .horizontal,
+                arrival: story.start.motion.arrival
+            )
+            let rest = MonocleSchematic(
+                orientation: .horizontal,
+                arrival: story.rest.motion.arrival
+            )
+            #expect(start.arrivingScale < 1)
+            #expect(rest.arrivingScale == 1)
         case .floating:
             #expect(story.start.windows == 4)
             #expect(story.start.motion.drag < 1)

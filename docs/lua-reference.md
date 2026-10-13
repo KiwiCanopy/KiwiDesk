@@ -4187,6 +4187,12 @@ the identifier for you. To find one by hand:
   display `app` name.
 - Or `mdls -name kMDItemCFBundleIdentifier /Applications/Safari.app`.
 
+:::unreleased
+An app verb passed a running app's name instead is still refused,
+and the refusal names that app's identifier:
+`app not found: safari — did you mean 'com.apple.Safari'?`.
+:::
+
 Identifiers are matched case-insensitively. An app with no bundle
 identifier (a rare unbundled helper process) cannot be targeted
 by a rule.
@@ -6055,48 +6061,17 @@ changes.
 animations.set_on_relayout(true)
 ```
 
-### animations.set_on_monocle_focus
+:::unreleased
+### Retired Monocle flip verbs
 
-**Expects:** `true` or `false` (default `true`).
-
-**Does:** enables or disables the card flip when focus moves
-between the windows of a Monocle Space. The window blurs and a
-plate turns from the outgoing app's icon to the incoming one's;
-the focus swaps beneath it as soon as the blur covers it, so the
-keyboard reaches the new window at once. Further presses during
-the turn land instantly, the card showing the newest window's
-icon and the blur lifting a quarter second after you pause. The
-plate turns forward for the next window in the Space's order
-and back for the previous one — the way the key pointed, on a
-`focus` step — about the vertical axis in a horizontal Monocle
-and the horizontal one in a vertical Monocle. It plays only for
-a focus change KiwiDesk itself commands — a `focus` step, an App
-Bar click, `focus_or_spawn` — never for one macOS made (⌘Tab, the
-Dock), and never onto a floating window. A plate whose next
-window is smaller (an app that refuses the full slot) lands on
-that window's own frame. macOS's Reduce Motion keeps the flip
-off regardless.
-
-**Example:**
-
-```lua
-animations.set_on_monocle_focus(false)
-```
-
-### animations.set_monocle_flip_duration
-
-**Expects:** a number (milliseconds, clamped 100–1000; default
-`450`).
-
-**Does:** sets how long the Monocle flip's turn takes; the blur
-fades in and out around it on fixed times. It has no effect
-while `set_on_monocle_focus` is off.
-
-**Example:**
-
-```lua
-animations.set_monocle_flip_duration(300)
-```
+`animations.set_on_monocle_focus` and
+`animations.set_monocle_flip_duration` are retired → nothing: a
+Monocle focus change brings the window to the front and plays no
+flip. A call in `init.lua` is reported in Config Issues; over the
+CLI each fails with `…: a Monocle focus change is a raise and
+plays no flip`. A saved profile's stored values are dropped on its
+next write.
+:::
 
 ### animations.set_on_shelf, animations.set_shelf_duration
 

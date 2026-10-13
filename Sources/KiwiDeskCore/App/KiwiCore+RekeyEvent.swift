@@ -33,13 +33,6 @@ extension KiwiCore {
         raiseFlight?.rekey(old: old, new: new)
         // The re-key releases the episode, so its debt goes too.
         retireDelayedClose(touching: [old, new], why: "re-keyed")
-        if let pending = pendingMonocleFocus {
-            pendingMonocleFocus = (
-                from: pending.from == old ? new : pending.from,
-                to: pending.to == old ? new : pending.to,
-                warp: pending.warp
-            )
-        }
         // The split heal's said-cue memo (#934) is id-keyed too.
         for (spaceID, cues) in splitFloorCues {
             splitFloorCues[spaceID] = Set(

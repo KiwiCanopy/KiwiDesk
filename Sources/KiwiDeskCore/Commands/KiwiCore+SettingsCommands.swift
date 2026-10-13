@@ -118,14 +118,6 @@ extension KiwiCore {
             }
             tiler.settings.animations.scrollDurationMS = ms
             return .ok()
-        case "animations.set_monocle_flip_duration":
-            // The Monocle flip's turn (#1391), its own knob
-            // like `set_scroll_duration`.
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            tiler.settings.animations.monocleFlipDurationMS = ms
-            return .ok()
         case "animations.set_on_shelf":
             // The shelf's glide on and off (#1838).
             guard let on = args.first?.boolValue else {
@@ -175,10 +167,6 @@ extension KiwiCore {
         case "animations.set_on_relayout":
             return setBool(args) {
                 tiler.settings.animations.onRelayout = $0
-            }
-        case "animations.set_on_monocle_focus":
-            return setBool(args) {
-                tiler.settings.animations.onMonocleFocus = $0
             }
         default:
             return .fail("unknown command: \(command)")
