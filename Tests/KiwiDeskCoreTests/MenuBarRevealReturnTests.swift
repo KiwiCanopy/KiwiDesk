@@ -304,6 +304,9 @@ struct MenuBarRevealReturnTests {
                 ManagedWindow(id: WindowID(3), pid: 98, appName: "Third")
             )
         )
+        // The new window took the focus; the anchor must hold it
+        // for the first report to arm a candidate at all.
+        core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
         let lines = F.log(core)
         core.handle(.windowFocused(WindowID(2)))
         core.handle(.windowFocused(WindowID(3)))
