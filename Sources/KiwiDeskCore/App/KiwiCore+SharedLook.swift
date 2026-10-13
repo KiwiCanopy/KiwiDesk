@@ -67,7 +67,10 @@ extension KiwiCore {
     /// (`crossWith`); once one exists, the same apply of a follower
     /// settles an owed motion crossing (`settleSharedMotion`).
     func adoptSharedLook(from profile: Profile) {
-        guard isGuiManaged, profiles.list().contains(profile.name)
+        // Owed first: an apply runs on every Desktop swipe, and the
+        // two reads after it touch the disk (profiles.md, #1245).
+        guard sharedLookLedger.owed || sharedLookLedger.motionOwed,
+            isGuiManaged, profiles.list().contains(profile.name)
         else { return }
         guard sharedLookLedger.owed else {
             settleSharedMotion(electing: profile)
@@ -118,6 +121,7 @@ extension KiwiCore {
                 onLog("shared look: \(name) not frozen: \(error)")
             }
         }
+        reresolveLiveLook()
     }
 
     /// The crossing's election: `base` becomes the shared look, and

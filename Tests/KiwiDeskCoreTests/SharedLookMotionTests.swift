@@ -1,13 +1,14 @@
+import CoreGraphics
 import Foundation
 import Testing
 
 @testable import KiwiDeskCore
 
-/// Animations join the shared look (#2176): a shared look adopted
-/// before they joined lacks them, so the config load elects them
-/// from a profile that FOLLOWS it, and a follower whose animations
-/// differ keeps its own look — nothing on screen moves, and an own
-/// profile is never touched.
+/// Animations join the shared look (#2176): a shared look missing a
+/// motion path owes an election, settled by the first apply or look
+/// write of a stored profile that FOLLOWS it, which elects its own
+/// animations; another follower whose animations differ keeps its
+/// own look, and an own profile is never touched.
 @Suite("Shared look motion (#2176)", .serialized)
 @MainActor
 struct SharedLookMotionTests {
@@ -170,6 +171,49 @@ struct SharedLookMotionTests {
         core.settleSharedMotion(electing: try stored("Calm", core))
         #expect(core.sharedLookLedger.motionOwed)
         #expect(try stored("Fast", core).look == nil)
+    }
+
+    /// A Standard saved through `applyStandard` is born a follower,
+    /// so its preset animations are the ones elected.
+    @Test("a saved Standard elects its animations")
+    func savedStandardElects() throws {
+        let core = try makeCore()
+        try core.profiles.save(profile("Fast", duration: 100))
+        core.profiles.resetAdoption()
+        core.prepareSharedLook()
+        core.state.apply(
+            .displaysChanged([
+                Display(
+                    id: DisplayID(10),
+                    name: "D",
+                    frame: CGRect(x: 0, y: 0, width: 1920, height: 1080)
+                )
+            ])
+        )
+        let preset = try #require(
+            StandardProfiles.workflows.first { $0.screenCount == 1 }
+        )
+        try core.applyStandard(preset)
+        #expect(!core.sharedLookLedger.motionOwed)
+        #expect(try stored("Fast", core).look == .own)
+        #expect(try duration("Fast", core) == 100)
+    }
+
+    /// The tour's paint is a look write through the live-profile
+    /// door: adopted but never applied, its writer elects.
+    @Test("a paint through the live-profile door elects its writer")
+    func livePaintElectsItsWriter() throws {
+        let core = try makeCore()
+        try core.profiles.save(profile("Fast", duration: 100))
+        try core.profiles.save(profile("Work", duration: 300))
+        core.prepareSharedLook()
+        #expect(core.sharedLookLedger.motionOwed)
+        let pick = LookBody(of: TilingSettings()).named("Pick")
+        core.paintShelf(look: pick, palette: nil)
+        #expect(!core.sharedLookLedger.motionOwed)
+        #expect(try stored("Work", core).look == nil)
+        #expect(try stored("Fast", core).look == .own)
+        #expect(try duration("Fast", core) == 100)
     }
 
     @Test("a shared look that carries motion owes no election")

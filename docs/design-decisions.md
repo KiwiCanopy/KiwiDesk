@@ -14247,14 +14247,16 @@ Glass, carries none, and the tour's paint and its Revert strip it
 — otherwise each picture would reset tuned animations and a
 bundled tile would never read as applied over them
 (`LookMotionTests`, `LookCatalogSeamTests` ▸ `glassReadsTheStarter`).
-A shared look missing a motion path owes the election again, run
-by the first apply of a stored profile that FOLLOWS the look, or
-its first look write: the missing paths come from that profile,
-and every other follower that runs different animations keeps its
-own look, frozen as it ran, so no stored profile's animations move.
-An own profile elects nothing and is never touched: an own look is
-a user's choice once followers exist, and electing from one would
-detach every follower (`SharedLookMotionTests`). A built-in layout has no file to keep
+A shared look missing a motion path owes the election again. The
+next apply of a stored profile that FOLLOWS the look — a Standard
+saved through Apply included, since it is born following — or the
+next look write of one, settles it: the missing paths come from
+that profile, and every other follower that runs different
+animations keeps its own look, frozen as it ran, so no stored
+profile's animations move. An apply of an own profile leaves the
+election owed and touches nothing: an own look is a user's choice
+once followers exist, and electing from one would detach every
+follower (`SharedLookMotionTests`). A built-in layout has no file to keep
 its own animations in, so after the election it runs the shared
 look's, as it already runs the shared styling. No
 format moves: the look's style is a sparse map an older build
