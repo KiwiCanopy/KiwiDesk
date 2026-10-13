@@ -25,7 +25,10 @@ extension ShortcutsReferenceBuilder {
             + KeybindingCatalog.spaceStepRows
             + KeybindingCatalog.spaceHistoryRows
             + KeybindingCatalog.goToSpace(spaces, icons: spaceIcons)
-            + [KeybindingCatalog.jumpToWindow]
+            + [
+                KeybindingCatalog.jumpToWindow,
+                KeybindingCatalog.toggleKiwiVision,
+            ]
             + KeybindingCatalog.goToDesktop(
                 desktops.desktops,
                 absent: desktops.absent

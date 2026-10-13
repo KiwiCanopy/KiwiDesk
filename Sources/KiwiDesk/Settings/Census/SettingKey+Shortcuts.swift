@@ -17,6 +17,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// The window switcher (#1875), its row named "Show" and the
     /// side's VoiceOver name (#2245).
     case jumpToWindow = "keybinding.show_jump_to_window"
+    case toggleKiwiVision = "keybinding.toggle_kiwivision"
     case swapDir = "keybinding.swap_dir (x4)"
     case moveWindowToTrack =
         "keybinding.move_window_to_{prev,next}_track"
@@ -70,7 +71,7 @@ extension ShortcutsKey {
                 gate: .runtime(.layersExist)
             )
         case .focusDir, .spaceStep, .spaceHistoryStep, .spaceHistory,
-            .goToSpace, .jumpToWindow:
+            .goToSpace, .jumpToWindow, .toggleKiwiVision:
             return .row(.shortcuts, .focus, .atRest)
         case .swapDir, .moveToSpace, .moveToSpaceFollow:
             return .row(.shortcuts, .moveWindows, .atRest)
@@ -173,6 +174,8 @@ extension ShortcutsKey {
             return .text("keybinding.shrink_height")
         case .toggleFloating:
             return .text("keybinding.toggle_floating")
+        case .toggleKiwiVision:
+            return .text("keybinding.toggle_kiwivision")
         case .toggleSticky:
             return .text(
                 "keybinding.toggle_sticky",

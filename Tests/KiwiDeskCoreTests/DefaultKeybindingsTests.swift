@@ -45,7 +45,12 @@ struct DefaultKeybindingsTests {
         for row in rows {
             #expect(row.kind == .navigation)
             #expect(!row.label.isEmpty)
-            #expect(row.lua.hasPrefix("KiwiDesk."))
+            // A KiwiDesk verb, or a namespaced one (#2103).
+            let table = row.lua.prefix { $0 != "." }
+            #expect(
+                table == "KiwiDesk"
+                    || APIReference.namespaces[String(table)] != nil
+            )
         }
     }
 

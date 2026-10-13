@@ -75,6 +75,8 @@ struct ShortcutsFamilyRows {
             return [KeybindingCatalog.showLayoutPicker]
         case .jumpToWindow:
             return [KeybindingCatalog.jumpToWindow]
+        case .toggleKiwiVision:
+            return [KeybindingCatalog.toggleKiwiVision]
         case .growWidth:
             return [resizeRow(.growWidth)]
         case .shrinkWidth:

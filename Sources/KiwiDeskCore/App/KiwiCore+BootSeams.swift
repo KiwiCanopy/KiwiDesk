@@ -119,6 +119,7 @@ extension KiwiCore {
         }
         borders.onWindowReordered = { [weak self] id in
             self?.stickyMarks.reassert(id)
+            self?.visionTargetReordered(id)
         }
         stickyMarks.isWindowServerTracked = { [weak self] id in
             self?.borders.markUsesWindowServerTracking(id) ?? false

@@ -199,4 +199,11 @@ extension APIReference {
             .integer("depth")
         ),
     ]
+
+    static let kiwivisionRecords: [String: APIRecord] = [
+        "toggle": APIRecord(
+            "Turns KiwiVision on or off: every screen dims but the "
+                + "focused window."
+        )
+    ]
 }

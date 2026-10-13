@@ -99,6 +99,7 @@ file list; grep within a subsystem for specifics:
 | `IPC` | CLI / external command IPC |
 | `Bar` | KiwiShelf: one panel per display carrying the App Bar & Space Bar sections |
 | `Borders` | Focus & sticky overlays (rings, sticky marks) |
+| `Vision` | KiwiVision: a dim plate per screen below the focus (#2103) |
 | `Power` | Power / display-state handling |
 | `Permissions` | AX / permission prompts |
 | `Localization` | `L()` string routing & locale catalogs |

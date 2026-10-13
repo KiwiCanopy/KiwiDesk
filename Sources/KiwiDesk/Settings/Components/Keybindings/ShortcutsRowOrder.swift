@@ -30,7 +30,8 @@ enum ShortcutsRowOrder {
 
     /// Focus group order: directions, the Space steps, the
     /// history setting above its two rows (#1655), live spaces,
-    /// then the window switcher, which reaches any of them (#1875).
+    /// then the window switcher, which reaches any of them (#1875),
+    /// and KiwiVision, which keeps the focused one clear (#2103).
     static let focusAtRest: [SettingKey] = [
         .shortcuts(.focusDir),
         .shortcuts(.spaceStep),
@@ -38,6 +39,7 @@ enum ShortcutsRowOrder {
         .shortcuts(.spaceHistoryStep),
         .shortcuts(.goToSpace),
         .shortcuts(.jumpToWindow),
+        .shortcuts(.toggleKiwiVision),
     ]
 
     /// Move windows group order: swaps, then space moves.

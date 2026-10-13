@@ -7,7 +7,7 @@ import Foundation
 extension DefaultKeybindings {
     /// The newest generation. A release that adds a default row
     /// bumps it and lists the rows in `rows(ofGeneration:)`.
-    public static let newestGeneration = 3
+    public static let newestGeneration = 4
 
     /// The rows generation `number` introduced, built from today's
     /// rows: an install not yet topped up gets the current chord
@@ -21,6 +21,8 @@ extension DefaultKeybindings {
         // 3.0.0: Jump to window (#1875), a generation of its own
         // since installs had already taken 2 from release/3.0.0.
         case 3: [jumpToWindowRow()]
+        // 3.0.0: KiwiVision (#2103).
+        case 4: [kiwiVisionRow()]
         default: []
         }
     }

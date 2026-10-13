@@ -67,6 +67,49 @@ struct BorderOrderCensusTests {
         )
     }
 
+    /// A KiwiVision plate's stack is the same round trip, one per
+    /// screen (#2103): its callers are the sync, gated on the
+    /// target moving or a settle pass, and the target's reorder
+    /// event, beside the one definition in the plate.
+    @Test("only the ruled sites stack a KiwiVision plate")
+    func plateOrderSitesAreCensused() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "order(below:",
+            under: Self.root.appendingPathComponent("Sources/KiwiDeskCore")
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent).sorted() == [
+                "VisionManager.swift", "VisionManager.swift",
+            ],
+            "found \(sites.map(\.site))"
+        )
+        // The reorder event's tee is wired at boot, which no test
+        // core runs: the plates must re-stack ahead of the ring's
+        // own order, or the ring lands under the plate.
+        let seams = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+BootSeams.swift"
+            )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            seams.contains(
+                "borders.onWindowReordered={[weakself]idin"
+                    + "self?.stickyMarks.reassert(id)"
+                    + "self?.visionTargetReordered(id)}"
+            )
+        )
+        let events = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/Borders/BorderManager+SkyLight.swift"
+            )
+        ).filter { !$0.isWhitespace }
+        #expect(
+            events.contains(
+                "onWindowReordered(id)overlays[id]?.order(relativeTo:id.raw)"
+            )
+        )
+    }
+
     /// The #1959 hold is armed in one door, the switch's own
     /// retile, which knows whether the switch un-parks its anchor;
     /// a second switch path arming its own would hold a ring with

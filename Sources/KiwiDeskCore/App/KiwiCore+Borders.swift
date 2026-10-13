@@ -39,6 +39,7 @@ extension KiwiCore {
             alive: alive,
             reassertOrder: reassertOrder
         )
+        updateVision(reassertOrder: reassertOrder)
     }
 
     /// Re-evaluates the ring set when one of OUR OWN windows

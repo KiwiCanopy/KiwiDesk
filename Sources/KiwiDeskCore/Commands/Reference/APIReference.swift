@@ -249,6 +249,9 @@ public enum APIReference {
         "floating": [
             "set_mark", "set_color",
         ],
+        "kiwivision": [
+            "toggle"
+        ],
     ]
 
     /// Lua-only commands on KiwiDesk table bypassing dispatcher (#37).

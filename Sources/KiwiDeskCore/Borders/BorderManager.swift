@@ -188,6 +188,20 @@ public final class BorderManager {
         activeOrder = mapped
     }
 
+    /// The panel of `id`'s ring where it is ordered in BEHIND its
+    /// window — what a KiwiVision plate stacks under, or it covers
+    /// the ring (#2103). Nil for a front ring, which clears the
+    /// plate by sitting above its window.
+    func ringPanel(of id: WindowID) -> CGWindowID? {
+        guard activeOrder == .below,
+            let ring = overlays[id]?.backend as? AppKitBorderOverlay,
+            ring.isOrderedIn,
+            let number = ring.panelNumber.flatMap(UInt32.init(exactly:)),
+            number > 0
+        else { return nil }
+        return number
+    }
+
     /// Window corner radius from SkyLight or system fallback (#357).
     func cornerRadius(for id: WindowID) -> CGFloat {
         if let cached = cornerRadii[id] { return cached }
