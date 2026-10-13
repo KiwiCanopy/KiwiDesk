@@ -114,19 +114,14 @@ extension KiwiCore {
             return setDesktopCue(args)
         case "set_mode_cue":
             return setModeCue(args)
+        case "set_space_cue":
+            return setSpaceCue(args)
         case "set_space_history":
             return setSpaceHistory(args)
         case "set_float_automatically":
             return setFloatAutomatically(args)
         case "set_shortcut_panel_liquid_glass":
             return setShortcutPanelLiquidGlass(args)
-        case "set_space_switch_liquid_glass":
-            // Read at the next switch's press, so no retile.
-            guard let on = args.first?.boolValue else {
-                return .fail("expected a boolean")
-            }
-            tiler.settings.spaceSwitchLiquidGlass = on
-            return .ok()
         case "help", "list_commands":
             // With a name, one record; without, the whole
             // surface grouped (#1033). The argument used to be

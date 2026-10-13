@@ -130,7 +130,8 @@ struct SettingsCatalogTests {
         // 134 with #2144: the cycle and plate rows (#453); 132 once
         // #2143's picker and the slide's duration left the drawer.
         // 133 since #2173: App Rules ▸ Automatic floating.
-        #expect(allEntries.count == 133)
+        // 134 since #2228: KiwiShelf's Show the Space switch.
+        #expect(allEntries.count == 134)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

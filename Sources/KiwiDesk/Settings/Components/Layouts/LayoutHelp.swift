@@ -111,14 +111,13 @@ enum LayoutHelp {
     @MainActor static var monocleHideStyle: String {
         L(
             "monocle.hide_style.help",
-            "**%1$@** — Hidden windows stay behind the focused "
-                + "one, at full size.\n**%2$@** — Hidden "
-                + "windows park in a corner instead, and focus "
-                + "changes instantly. Choose this when the "
-                + "windows behind show — through a transparent "
-                + "window, or around one that can't fill the "
-                + "whole screen. A thin edge of each parked "
-                + "window stays visible in the corner.",
+            "Other windows showing through the focused one, "
+                + "or around it? Choose **%2$@**: hidden windows "
+                + "park in a corner instead, and focus changes "
+                + "instantly. A thin edge of each parked window "
+                + "stays visible there.\n**%1$@** — Hidden "
+                + "windows stay behind the focused one, at full "
+                + "size.",
             L("monocle.hide_style.stack", "Stack behind"),
             L("monocle.hide_style.park", "Park in corner")
         )

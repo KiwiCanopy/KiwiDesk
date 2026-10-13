@@ -568,10 +568,9 @@ holds the secondary-switch decision including its nil case.
   one only where a stored signal tells a deliberate choice apart
   and that signal keeps it, the step reads the file's format as
   the meaning-change clause above requires, and the design entry
-  states the cost to a user who chose the old value. The slide
-  turn-on is the precedent and its bound (#1931,
-  `SpaceChangeOnMigrationTests`: 2.1.1's master-off write keeps
-  the `false`); a flip with no such signal keeps #1359's answer.
+  states the cost to a user who chose the old value; #1931
+  argued the bound (2.1.1's master-off write kept the `false`).
+  A flip with no such signal keeps #1359's answer.
 - **A per-profile value moving app-wide crosses by ADOPTION, a
   ruled shape beside `ConfigMigration` (#1741).** N profile
   files → one value is an election, and a byte-level step cannot
@@ -628,11 +627,15 @@ holds the secondary-switch decision including its nil case.
     `profiles.delete(` or `profiles.rename(` takes the same call
     (`AppWideSeamTests` ▸ `captureFollowsEveryDoor`).
   - Give a new member of `AppWideSettings` a crossing of its
-    own: the ledger's crossing is per group of settings, and on
+    own where a per-profile value with the same meaning precedes
+    it: the ledger's crossing is per group of settings, and on
     an install that has adopted it has already ended, so a
-    member added later inherits nothing from it. The member also
-    joins the census (`SettingKeyModelParityTests` ▸
-    `appWideFieldsAreCensused`).
+    member added later inherits nothing from it. A member with
+    no such predecessor states so in its design entry — the
+    Space cue's is the worked case (#2228: the per-profile slide
+    toggle before it meant something else). The member also
+    joins the census
+    (`SettingKeyModelParityTests` ▸ `appWideFieldsAreCensused`).
 
   The argument, and the trade (the first profile applied
   decides; a Lua-owned setup crosses nothing), is
@@ -938,10 +941,10 @@ resolve, so it had no `spaceDisplay` entry, no chip, no
   temporary retire, since every membership change retiles
   (`UndeclaredSpaceDisplayTests` ▸ `setModeTargetHasAChip`). A
   path that reads a new Space's screen BEFORE its own retile
-  places it first: the switch ahead of `spaceSlideIntent`
-  (`UndeclaredSpaceDisplayTests` ▸ `firstVisitSlides`), the one
+  places it first: the switch ahead of `spaceSwitchDisplay`
+  (`FullscreenStandDownTests` ▸ `firstVisitIsNamed`), the one
   `followSwitch` likewise, a launch follow's rule Space included
-  (`UndeclaredSpaceDisplayTests` ▸ `launchFollowSlides`), the one
+  (`FullscreenStandDownTests` ▸ `launchFollowIsNamed`), the one
   `fileMembership` ahead of the float re-anchor, and boot ahead
   of its activation — those two read `NSScreen` and the
   frontmost app, which no fixture pins, so they have no test;

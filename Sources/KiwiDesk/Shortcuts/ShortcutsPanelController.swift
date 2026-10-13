@@ -35,8 +35,8 @@ final class ShortcutsPanel: NSPanel {
         onCancel()
     }
 
-    /// The File menu's Close (⌘W) is a keyboard-commanded close,
-    /// so it closes like Esc. AppKit greys Close for a window
+    /// The File menu's Close (⌘W) closes like Esc. AppKit greys
+    /// Close for a window
     /// without `.closable`, which a borderless panel is, so the
     /// item is validated here (#1533).
     override func performClose(_ sender: Any?) {
@@ -100,10 +100,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     func show() {
         let reference = buildReference()
         let onEdit: () -> Void = { [weak self] in
-            // A click whose next step is Settings coming
-            // forward: an intended focus, so the close arms no
-            // dismiss distrust (#952).
-            self?.close(commanded: false)
+            self?.close()
             self?.onEdit()
         }
         let combo = ShortcutsOpenBinding.comboGlyphs(core: core)
@@ -157,22 +154,21 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
 
     func toggle() {
         if isOpen {
-            close(commanded: true)
+            close()
         } else {
             show()
         }
     }
 
-    /// Dismisses the panel; a keyboard-commanded close arms the
-    /// dismiss distrust (#952), a click away does not.
-    func close(commanded: Bool) {
+    /// Dismisses the panel. No close arms the dismiss distrust: the
+    /// panels are non-activating, so the window a close keys again
+    /// is the one the user was in (owner ruling 2026-10-13).
+    func close() {
         guard !presence.leaving else { return }
         let key = NSApplication.shared.keyWindow?.title ?? "none"
         logPanel("sheet close; key \(key)")
-        // Armed only on a commanded close — a click-away already
-        // resigned, and arming on Edit-in-Settings ate the
-        // intended focus (#952 capture; review, 2026-08-23).
-        handBack.release(distrusting: commanded) { [weak self] in
+        // The one close door, though this panel never arms.
+        handBack.release(distrusting: false) { [weak self] in
             guard let self else { return }
             self.presence.fadeOut(
                 self.panel,
@@ -192,7 +188,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     /// Closes panel on keybinding layer switch (#603).
     func closeIfOpen() {
         guard isOpen else { return }
-        close(commanded: true)
+        close()
     }
 
     // MARK: - Panel construction
@@ -221,7 +217,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         ]
         panel.delegate = self
         panel.onCancel = { [weak self] in
-            self?.close(commanded: true)
+            self?.close()
         }
         return panel
     }
@@ -250,6 +246,6 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
 
     func windowDidResignKey(_ notification: Notification) {
         logPanel("sheet resign key; open \(panel?.isVisible == true)")
-        close(commanded: false)
+        close()
     }
 }

@@ -22,13 +22,13 @@ extension KiwiCore {
         let priorFrontmost = frontmostPIDProvider?()
         tiler.meter.noteSpaceSwitch()  // #1508
         // A first visit to an undeclared id gets its screen ahead
-        // of the slide's read, so it slides too (#1994).
+        // of the cue's read, so it is named too (#1994).
         state.workspaces.ensureSpace(space)
         placeUnplacedSpaces()
-        let slide = spaceSlideIntent(to: space)
+        let cueOn = spaceSwitchDisplay(to: space)
         state.workspaces.activate(space)
         logSpaceContents(space)
-        spaceSwitchRetile(asSwitch: true, slide: slide)
+        spaceSwitchRetile(asSwitch: true, cueOn: cueOn)
         // Floats and sticky windows come back above the
         // tiled plane, then real (AX) focus lands on the
         // space's last focused window — otherwise keystrokes

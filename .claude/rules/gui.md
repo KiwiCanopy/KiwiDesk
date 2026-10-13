@@ -322,7 +322,7 @@ or ⌘W beeps at it while closing everything else. `ShortcutsPanel`
 is the instance, and `MainMenuTests` holds the item and the
 panel's verdict. Adding `.closable` instead is the wrong door: it
 routes through AppKit's `close()` and past the panel's own close,
-which arms the #952 dismiss grace and runs the exit fade.
+which runs the exit fade.
 
 A keyboard panel is keyed through `PanelHandBack.present` and
 never activates KiwiDesk: an activation raises the Settings

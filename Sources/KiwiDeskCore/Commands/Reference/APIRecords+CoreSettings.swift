@@ -56,6 +56,11 @@ extension APIReference {
                 + "after KiwiDesk's own Desktop switch.",
             .boolean("enabled")
         ),
+        "set_space_cue": APIRecord(
+            "Shows the Space and its layout on the screen that "
+                + "switched, where no Space Bar is drawn.",
+            .boolean("enabled")
+        ),
         "set_mode_cue": APIRecord(
             "Shows the cycle list and the new layout on the "
                 + "Space's screen after cycle_mode.",
@@ -74,11 +79,6 @@ extension APIReference {
         "set_shortcut_panel_liquid_glass": APIRecord(
             "Lays a macOS 26 Liquid Glass material over the "
                 + "shortcuts panel and the slow-boot notice.",
-            .boolean("enabled")
-        ),
-        "set_space_switch_liquid_glass": APIRecord(
-            "Draws the Space switch's plates in macOS 26 Liquid "
-                + "Glass.",
             .boolean("enabled")
         ),
         "set_new_window_placement_override": APIRecord(

@@ -50,9 +50,10 @@ extension APIReference {
         // A window is tiled or floating, and Tile hands it back
         // to detection (#1810).
         map["make_auto"] = "make_tiled"
-        // A Space switch shows itself one of three ways (#2143).
-        map["animations.set_on_space_change"] =
-            "animations.set_space_change"
+        // A Space switch is instant, and names the Space where no
+        // Space Bar does (#2228).
+        map["animations.set_on_space_change"] = "set_space_cue"
+        map["animations.set_space_change"] = "set_space_cue"
         map["kiwishelf.set_item_padding"] = "kiwishelf.set_glyph_size"
         // The centred strip draws one more glyph at a row's end,
         // so the count is a span, not a cap (#1528).
@@ -71,6 +72,13 @@ extension APIReference {
     /// the one list `retired` takes its nil entries from.
     static let retiredReasons: [String: String] = {
         var map = ["space_bar.set_item_size": itemFollowsContent]
+        // The Space switch no longer slides (#2228).
+        for verb in [
+            "animations.set_space_change_duration",
+            "set_space_switch_liquid_glass",
+        ] {
+            map[verb] = switchNoLongerSlides
+        }
         // The App Bar always draws icon and title (#1528).
         for verb in [
             "app_bar.set_content", "monocle.set_app_bar_content",
@@ -83,6 +91,8 @@ extension APIReference {
 
     private static let itemFollowsContent =
         "a Space item's length follows its content"
+    private static let switchNoLongerSlides =
+        "a Space switch is instant and no longer slides"
     private static let appBarDrawsBoth =
         "the App Bar always draws each item's icon and title"
 

@@ -31,11 +31,6 @@ struct OverlayGlassGateTests {
             function: "func stickyMarkSpecs(",
             stored: "glass: tiler.settings.stickyStyle.liquidGlass"
         ),
-        (
-            file: "Commands/KiwiCore+SpaceSlide.swift",
-            function: "func prepareSpaceSlide(",
-            stored: "glass: tiler.settings.spaceSwitchLiquidGlass"
-        ),
     ]
 
     /// Exactly one gate read, handed the stored leaf, which the
@@ -88,7 +83,6 @@ struct OverlayGlassGateTests {
         "Bar/ShelfOverlay+Views.swift": "ShelfPlateGlassGateTests",
         "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",
         "Borders/StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
-        "Animation/SpaceSlideOverlay+Plates.swift": "OverlayGlassGateTests",
         "Bar/BarPeekPanel.swift": "BarPeekSeamTests",
     ]
 

@@ -53,15 +53,17 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 20 = a layer holds one chord per navigation action (#1797),
     /// which reaches a bundle's `config` and its `[Profile]` alike.
     /// 21 = the Space switch plates' Liquid Glass leaf filled
-    /// (#1956), on `[Profile]` alone.
+    /// (#1956), on `[Profile]` alone; the step retired with the
+    /// slide (#2228).
     /// 22 = a stored app shortcut calls `focus_or_spawn` (#1511),
     /// which reaches a bundle's `config` and its `[Profile]` alike.
     /// 23 = a layer override's left-out layer (#2022), on
     /// `[Profile]` alone.
     /// 24 = a stored `on_space_change: false` turned on once
-    /// (#1931), on `[Profile]` alone.
-    /// 25 = `on_space_change` crossed onto `space_change` (#2143),
-    /// on `[Profile]` alone.
+    /// (#1931), on `[Profile]` alone; retired with the slide
+    /// (#2228).
+    /// 25 = #2143's `space_change` step, withdrawn unreleased by
+    /// #2228; kept so a development build's bundle still loads.
     public static let currentFormat = 25
 
     public let format: Int

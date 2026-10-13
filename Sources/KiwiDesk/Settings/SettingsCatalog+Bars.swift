@@ -27,6 +27,10 @@ struct BarsControls: Sendable {
         instance: "kiwishelf",
         children: KiwiShelfMarginControls()
     )
+    let spaceCue = SettingsControl(
+        "space_bar.cue",
+        "Show the Space after a switch"
+    )
     let monocleShowIn = SettingsControl(
         "kiwishelf.show.monocle",
         "App Bar in %1$@",

@@ -4,9 +4,10 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// The shared key-panel layer: a close arms the dismiss distrust
-/// BEFORE `orderOut`, whose resign-key re-enters the close (#952);
-/// a show keys the panel a turn later and never activates.
+/// The shared key-panel layer: a pick's close arms the dismiss
+/// distrust BEFORE `orderOut`, whose resign-key re-enters the
+/// close (#952); a show keys the panel a turn later and never
+/// activates.
 @Suite("Key panel show and close")
 @MainActor
 struct PanelHandBackTests {

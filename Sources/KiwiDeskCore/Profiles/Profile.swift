@@ -21,13 +21,17 @@ public struct Profile: Codable, Sendable, Equatable {
     /// it wears and one from before is stamped `own` (#1752), 14
     /// since `app_bar.content` retired (#1528), 15 since a layer
     /// override holds one chord per navigation action (#1797), 16
-    /// since the Space switch plates' Liquid Glass leaf is filled
-    /// (#1956), 17 since a stored app shortcut calls
-    /// `focus_or_spawn` (#1511), 18 since a layer override may leave
-    /// a shared layer out whole (#2022) — no step, as for 7 — 19
-    /// since a stored `on_space_change: false` is turned on once
-    /// (#1931), 20 since `on_space_change` became `space_change`
-    /// (#2143). The bump is what RUNS a step: `needsMigration`
+    /// since the Space switch plates' Liquid Glass leaf was filled
+    /// (#1956; the step retired with the slide, #2228), 17 since a
+    /// stored app shortcut calls `focus_or_spawn` (#1511), 18 since
+    /// a layer override may leave a shared layer out whole (#2022)
+    /// — no step, as for 7 — 19 since a stored
+    /// `on_space_change: false` was turned on once (#1931; retired
+    /// with the slide, #2228), 20 since #2143's `space_change` step
+    /// — withdrawn unreleased by #2228, the number kept so a file a
+    /// 3.0.0 development build stamped still loads; no step, as
+    /// for 7.
+    /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.

@@ -84,7 +84,7 @@ struct LookMotionTests {
             style: [
                 "animations.duration": .number(5000),
                 "animations.on_shelf": .bool(false),
-                "animations.space_change": .string("slide"),
+                "animations.on_window_swap": .bool(false),
                 "animations.scroll_duration": .string("fast"),
             ],
             colors: [:]
@@ -96,7 +96,7 @@ struct LookMotionTests {
         // Clamped as a stored file would be; a wrong type skipped.
         #expect(settings.animations.durationMS == 1000)
         #expect(!settings.animations.onShelf)
-        #expect(settings.animations.spaceChange == .slide)
+        #expect(!settings.animations.onWindowSwap)
         #expect(settings.animations.scrollDurationMS == 400)
     }
 }

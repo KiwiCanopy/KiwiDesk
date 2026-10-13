@@ -21,8 +21,8 @@ extension JumpPanelController {
             self?.core.barMenuHooks.keepLayout()
             model?.reloadLayouts()
         }
-        // No distrust: the next own focus report is Settings coming
-        // forward, which the grace would eat (#952).
+        // No distrust: a close arms none, and the next own report
+        // is Settings coming forward (#952).
         model.onLayoutDefaults = { [weak self] mode in
             guard let self, self.dismiss(distrusting: false) else { return }
             self.core.barMenuHooks.openSettings(.layoutDefaults(mode))
@@ -30,9 +30,10 @@ extension JumpPanelController {
     }
 
     /// Closes on a pick, then sets the layout — once: a click
-    /// during the exit fade applies nothing.
+    /// during the exit fade applies nothing. No distrust: the
+    /// window the close keys again is the one the user was in.
     private func apply(_ mode: LayoutMode, to space: SpaceID) {
-        guard dismiss(distrusting: true) else { return }
+        guard dismiss(distrusting: false) else { return }
         core.applyLayout(mode, to: space)
     }
 
