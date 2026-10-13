@@ -1,26 +1,34 @@
 import Foundation
 import KiwiDeskCore
 
+/// The sentences the server says more than once (#1685), each
+/// stated here and nowhere beside it.
+enum MCPWording {
+    /// Nothing over the socket writes a setting to disk, so a
+    /// `set_*` value lasts until something replaces the live
+    /// settings (#1685 ▸ Ruling 4). An app-wide value outlives a
+    /// profile load, hence "may".
+    static let temporary =
+        "A setting changed with a set_* command is temporary: it "
+        + "lasts at most until the next config reload or restart, "
+        + "and a profile load may replace it sooner."
+
+    /// Why a call got no answer: no app to connect to, or an app
+    /// that took the request and did not reply in time.
+    static func unanswered(_ error: Error) -> String {
+        switch error {
+        case SocketError.connectFailed, SocketError.pathTooLong:
+            return "KiwiDesk is not reachable. Is the app running? "
+                + "(\(error))"
+        default:
+            return "KiwiDesk gave no answer within "
+                + "\(MCPTools.answerTimeout) s; the command may have run."
+        }
+    }
+}
+
 /// The readings and result shapes the tools share (#1685).
 extension MCPTools {
-    /// Told after every setter: nothing over the socket writes to
-    /// disk, so a value lasts until something replaces the live
-    /// settings (#1685 ▸ Ruling 4).
-    static let temporaryNote =
-        "This change is temporary: it lasts until the next profile "
-        + "load, config reload or restart."
-
-    /// A command the socket answers: Lua-only verbs have no
-    /// command, and `subscribe` streams instead of answering.
-    static func isRunnable(_ entry: APIEntry) -> Bool {
-        entry.command != nil
-            && entry.qualifiedName != APIReference.socketOnlyCommand
-    }
-
-    static func isDestructive(_ entry: APIEntry) -> Bool {
-        APIReference.destructive.contains(entry.qualifiedName)
-    }
-
     /// `set_*` verbs that write their own file rather than a
     /// running value, so no temporary note follows them.
     static let savingSetters: Set<String> = ["set_default_profile"]
@@ -31,52 +39,72 @@ extension MCPTools {
     /// until the keep ledger reports what changed instead.
     static func isSetter(_ command: String) -> Bool {
         let verb = command.split(separator: ".").last ?? ""
-        return verb.hasPrefix("set_")
-            && !savingSetters.contains(command)
+        return verb.hasPrefix("set_") && !savingSetters.contains(command)
     }
 
-    /// Why `command` may not go through the tool asked for, or
-    /// nil. An unknown name is left to the app, which suggests
-    /// the closest spelling.
-    static func refusal(of command: String, _ destructive: Bool) -> String? {
-        guard let entry = APIReference.entry(named: command) else {
-            return nil
-        }
-        guard isRunnable(entry) else {
-            return "\(entry.qualifiedName) is not available over MCP"
-        }
-        switch (isDestructive(entry), destructive) {
-        case (true, false):
-            return "\(entry.qualifiedName) cannot be undone: call "
-                + "run_destructive, which asks the user first"
-        case (false, true):
-            return "\(entry.qualifiedName) is not destructive: "
-                + "call run"
-        default:
-            return nil
-        }
+    /// A command the socket answers: Lua-only verbs have no
+    /// command, and `subscribe` streams instead of answering.
+    static func isRunnable(_ entry: APIEntry) -> Bool {
+        entry.command != nil
+            && entry.qualifiedName != APIReference.socketOnlyCommand
     }
 
     /// The socket request a tool's `command` and `args` describe,
-    /// an alias sent as the command it names.
+    /// or why that tool may not send it. A name the binary does not
+    /// know is refused, never forwarded, so no command reaches the
+    /// app past the destructive check; an alias is sent as the
+    /// command it names.
     static func request(
-        from fields: [String: JSONValue]
+        from fields: [String: JSONValue],
+        destructive: Bool
     ) -> Result<CommandRequest, MCPToolRefusal> {
         guard let name = fields["command"]?.stringValue, !name.isEmpty
         else {
             return .failure(MCPToolRefusal("needs a command"))
         }
-        var args: [JSONValue]?
+        guard let entry = APIReference.entry(named: name) else {
+            let answer = APIReference.helpResponse(for: name)
+            return .failure(
+                MCPToolRefusal(answer.error ?? "unknown command: \(name)")
+            )
+        }
+        guard isRunnable(entry), let command = entry.command else {
+            return .failure(
+                MCPToolRefusal(
+                    "\(entry.qualifiedName) is not available over MCP"
+                )
+            )
+        }
+        switch (APIReference.isDestructive(entry), destructive) {
+        case (true, false):
+            return .failure(
+                MCPToolRefusal(
+                    "\(entry.qualifiedName) cannot be undone: call "
+                        + "run_destructive, which asks the user first"
+                )
+            )
+        case (false, true):
+            return .failure(
+                MCPToolRefusal(
+                    "\(entry.qualifiedName) is not destructive: call run"
+                )
+            )
+        default:
+            break
+        }
         switch fields["args"] {
         case nil, .null?:
-            args = nil
+            return .success(CommandRequest(command: command))
         case .array(let given)?:
-            args = given.isEmpty ? nil : given
+            return .success(
+                CommandRequest(
+                    command: command,
+                    args: given.isEmpty ? nil : given
+                )
+            )
         default:
             return .failure(MCPToolRefusal("args must be an array"))
         }
-        let command = APIReference.entry(named: name)?.command ?? name
-        return .success(CommandRequest(command: command, args: args))
     }
 
     /// A tool result: the text the model reads, and the same
@@ -84,25 +112,22 @@ extension MCPTools {
     /// which the legacy revisions require.
     static func result(_ text: String, structured: JSONValue) -> JSONValue {
         .object([
-            "content": .array([
-                .object(["type": .string("text"), "text": .string(text)])
-            ]),
+            "content": content(text),
             "structuredContent": wrapped(structured),
             "isError": .bool(false),
         ])
     }
 
-    static func failure(_ text: String) -> JSONValue {
-        .object([
-            "content": .array([
-                .object(["type": .string("text"), "text": .string(text)])
-            ]),
+    static func failure(
+        _ text: String,
+        structured: JSONValue? = nil
+    ) -> JSONValue {
+        var fields: [String: JSONValue] = [
+            "content": content(text),
             "isError": .bool(true),
-        ])
-    }
-
-    static func failure(_ refusal: MCPToolRefusal) -> JSONValue {
-        failure(refusal.reason)
+        ]
+        if let structured { fields["structuredContent"] = wrapped(structured) }
+        return .object(fields)
     }
 
     static func wrapped(_ value: JSONValue) -> JSONValue {
@@ -114,6 +139,10 @@ extension MCPTools {
     static func text(of value: JSONValue) -> String {
         if case .string(let text) = value { return text }
         return CLIOutput.render(value, pretty: false) ?? ""
+    }
+
+    private static func content(_ text: String) -> JSONValue {
+        .array([.object(["type": .string("text"), "text": .string(text)])])
     }
 }
 

@@ -10,7 +10,7 @@ enum MCPProtocol {
     static let modern = ["2026-07-28"]
     /// Revisions served after an `initialize` handshake, newest
     /// first.
-    static let legacy = ["2025-11-25", "2025-06-18", "2025-03-26"]
+    static let legacy = ["2025-11-25", "2025-06-18"]
 
     static let versionKey = "io.modelcontextprotocol/protocolVersion"
     static let serverInfoKey = "io.modelcontextprotocol/serverInfo"
@@ -28,17 +28,14 @@ enum MCPProtocol {
     }
 
     /// Guidance a client hands the model with the tools.
-    static let instructions = """
-        KiwiDesk is a tiling window manager for macOS. Find a \
-        command with list_commands, read its arguments with \
-        help, and run it with run (or run_batch for several). \
-        get_state shows the Spaces and windows. Commands that \
-        cannot be undone go through run_destructive, which your \
-        client asks the user to confirm. Changes made here are \
-        temporary: they last until the next profile load, \
-        config reload or restart. Tell the user so after a \
-        change.
-        """
+    static let instructions =
+        "KiwiDesk is a tiling window manager for macOS. Find a "
+        + "command with list_commands, read its arguments with help, "
+        + "and run it with run (or run_batch for several). get_state "
+        + "shows the Spaces and windows. Commands that cannot be "
+        + "undone go only through run_destructive, so ask the user "
+        + "before calling it. " + MCPWording.temporary
+        + " Tell the user so after such a change."
 
     /// The version an `initialize` settles on: the client's if
     /// served, else the newest legacy one.

@@ -93,19 +93,19 @@ struct MCPToolsTests {
             Self.command("version")
         )
         #expect(read["isError"] == .bool(false))
-        #expect(!Self.text(read).contains(MCPTools.temporaryNote))
+        #expect(!Self.text(read).contains(MCPWording.temporary))
         let set = try Self.call(
             app.tools,
             MCPTools.run,
             Self.command("border.set_width", [.number(4)])
         )
-        #expect(Self.text(set).contains(MCPTools.temporaryNote))
+        #expect(Self.text(set).contains(MCPWording.temporary))
         let saved = try Self.call(
             app.tools,
             MCPTools.run,
             Self.command("set_default_profile", [.string("Work")])
         )
-        #expect(!Self.text(saved).contains(MCPTools.temporaryNote))
+        #expect(!Self.text(saved).contains(MCPWording.temporary))
         #expect(
             app.sent.map(\.command)
                 == ["version", "border.set_width", "set_default_profile"]
@@ -124,7 +124,7 @@ struct MCPToolsTests {
         #expect(refused["isError"] == .bool(true))
         #expect(Self.text(refused) == "expected width")
         var dead = MCPTools()
-        dead.send = { _ in throw SocketError.closed }
+        dead.send = { _ in throw SocketError.connectFailed("refused") }
         let unreachable = try Self.call(
             dead,
             MCPTools.run,
@@ -204,8 +204,18 @@ struct MCPToolsTests {
         #expect(text.contains("[destructive]"))
         #expect(!text.contains("focus_space"))
         let all = Self.text(try Self.call(tools, MCPTools.listCommands))
-        #expect(!all.contains("\nsubscribe "))
-        #expect(!all.contains("define_layer —"), "Lua-only is not runnable")
+        let listed = Set(
+            all.split(separator: "\n").map {
+                String($0.split(separator: " ").first ?? "")
+            }
+        )
+        let luaOnly = APIReference.entries.filter { $0.command == nil }
+        #expect(!luaOnly.isEmpty)
+        for entry in luaOnly {
+            #expect(!listed.contains(entry.qualifiedName))
+        }
+        #expect(!listed.contains(APIReference.socketOnlyCommand))
+        #expect(listed.contains("focus"))
     }
 
     @Test("help answers from the binary, without the app")
@@ -237,5 +247,91 @@ struct MCPToolsTests {
             }
         }
         #expect(destructive == [MCPTools.runDestructive])
+    }
+
+    @Test("an unknown command is refused, never forwarded")
+    func unknownIsRefused() throws {
+        let app = FakeApp()
+        let result = try Self.call(
+            app.tools,
+            MCPTools.run,
+            Self.command("focsu")
+        )
+        #expect(result["isError"] == .bool(true))
+        #expect(Self.text(result).contains("did you mean"))
+        #expect(app.sent.isEmpty)
+    }
+
+    @Test("an alias is sent as the command it names")
+    func aliasResolves() throws {
+        let app = FakeApp()
+        let entry = try #require(
+            APIReference.entries.first {
+                !$0.aliases.isEmpty && $0.command != nil
+                    && !APIReference.isDestructive($0)
+            }
+        )
+        _ = try Self.call(
+            app.tools,
+            MCPTools.run,
+            Self.command(try #require(entry.aliases.first))
+        )
+        #expect(app.sent.map(\.command) == [entry.command])
+    }
+
+    @Test("structured content is an object whatever the app sent")
+    func structuredIsAnObject() throws {
+        let app = FakeApp()
+        app.reply = { _ in .ok(.array([.string("a")])) }
+        let result = try Self.call(
+            app.tools,
+            MCPTools.run,
+            Self.command("version")
+        )
+        guard case .object(let fields)? = result["structuredContent"]
+        else {
+            Issue.record("structuredContent is not an object")
+            return
+        }
+        #expect(fields["value"] == .array([.string("a")]))
+    }
+
+    @Test("a call the app took but did not answer may have run")
+    func timeoutIsNotUnreachable() throws {
+        var hung = MCPTools()
+        hung.send = { _ in throw SocketError.closed }
+        let result = try Self.call(
+            hung,
+            MCPTools.run,
+            Self.command("version")
+        )
+        #expect(Self.text(result).contains("may have run"))
+        var down = MCPTools()
+        down.send = { _ in throw SocketError.connectFailed("refused") }
+        let dead = try Self.call(
+            down,
+            MCPTools.run,
+            Self.command("version")
+        )
+        #expect(Self.text(dead).contains("not reachable"))
+    }
+
+    @Test("every listed tool answers its own name")
+    func everyToolIsCallable() throws {
+        guard case .array(let defined) = MCPTools().definitions else {
+            Issue.record("no tools")
+            return
+        }
+        let names = defined.compactMap { tool -> String? in
+            guard case .object(let fields) = tool else { return nil }
+            return fields["name"]?.stringValue
+        }
+        #expect(names.count == MCPTools.all.count)
+        #expect(Set(names).count == names.count)
+        for name in names {
+            #expect(throws: Never.self) {
+                _ = try FakeApp().tools.call(["name": .string(name)])
+            }
+        }
     }
 }

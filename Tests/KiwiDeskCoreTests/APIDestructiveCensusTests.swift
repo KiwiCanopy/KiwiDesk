@@ -20,6 +20,7 @@ struct APIDestructiveCensusTests {
         "delete", "remove", "close", "reset", "clear", "reload",
         "load", "save", "import", "restore", "discard", "forget",
         "kill", "quit", "prepare_restart", "drop", "overwrite",
+        "apply", "replace", "rename", "unbind",
     ]
 
     /// Commands whose name reads destructive and which lose
@@ -75,7 +76,7 @@ struct APIDestructiveCensusTests {
     }
 
     @Test("the listing carries the flag, by name and by alias")
-    func listingCarriesTheFlag() {
+    func listingCarriesTheFlag() throws {
         let response = APIReference.helpResponse(for: "delete_space")
         guard case .object(let entry)? = response.data else {
             Issue.record("expected an object payload")
@@ -90,5 +91,17 @@ struct APIDestructiveCensusTests {
         #expect(other["destructive"] == .bool(false))
         #expect(APIReference.isDestructive("delete_space"))
         #expect(!APIReference.isDestructive("focus"))
+        // A Lua spelling resolves to its command's flag.
+        let alias = try #require(
+            APIReference.entries.first {
+                !$0.aliases.isEmpty && $0.command != nil
+            }
+        )
+        for name in alias.aliases {
+            #expect(
+                APIReference.isDestructive(name)
+                    == APIReference.isDestructive(alias)
+            )
+        }
     }
 }

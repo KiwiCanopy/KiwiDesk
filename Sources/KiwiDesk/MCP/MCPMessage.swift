@@ -17,30 +17,65 @@ struct MCPRequest {
         return meta[MCPProtocol.versionKey]?.stringValue
     }
 
-    /// Parses one line, or answers why it is not a request.
-    static func parse(_ line: String) -> Result<MCPRequest, MCPFailure> {
+    /// Parses one line, or answers why it is not a request, with
+    /// the request's id where one could be read.
+    static func parse(
+        _ line: String
+    ) -> Result<MCPRequest, MCPParseFailure> {
         guard let data = line.data(using: .utf8),
             let value = try? JSONDecoder().decode(
                 JSONValue.self,
                 from: data
             )
         else {
-            return .failure(MCPFailure(.parseError, "parse error"))
-        }
-        guard case .object(let fields) = value,
-            let method = fields["method"]?.stringValue
-        else {
             return .failure(
-                MCPFailure(.invalidRequest, "invalid request")
+                MCPParseFailure(MCPFailure(.parseError, "parse error"))
             )
+        }
+        guard case .object(let fields) = value else {
+            return .failure(MCPParseFailure(invalid))
+        }
+        let id = fields["id"]
+        if let id, !isValidID(id) {
+            return .failure(MCPParseFailure(invalid))
+        }
+        guard let method = fields["method"]?.stringValue else {
+            return .failure(MCPParseFailure(invalid, id: id))
         }
         var params: [String: JSONValue] = [:]
         if case .object(let given)? = fields["params"] {
             params = given
         }
-        return .success(
-            MCPRequest(id: fields["id"], method: method, params: params)
-        )
+        return .success(MCPRequest(id: id, method: method, params: params))
+    }
+
+    private static let invalid = MCPFailure(
+        .invalidRequest,
+        "invalid request"
+    )
+
+    /// MCP ids are strings or integers, and an integer must survive
+    /// the `Double` `JSONValue` carries it in.
+    static func isValidID(_ id: JSONValue) -> Bool {
+        switch id {
+        case .string:
+            return true
+        case .number(let n):
+            return n == n.rounded() && abs(n) <= 9_007_199_254_740_991
+        default:
+            return false
+        }
+    }
+}
+
+/// A line that is no request, and the id to answer it under.
+struct MCPParseFailure: Error {
+    let failure: MCPFailure
+    var id: JSONValue?
+
+    init(_ failure: MCPFailure, id: JSONValue? = nil) {
+        self.failure = failure
+        self.id = id
     }
 }
 
@@ -52,6 +87,7 @@ struct MCPFailure: Error {
         case invalidRequest = -32600
         case methodNotFound = -32601
         case invalidParams = -32602
+        case internalError = -32603
         case unsupportedProtocolVersion = -32022
     }
 

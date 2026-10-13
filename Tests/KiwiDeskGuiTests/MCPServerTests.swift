@@ -139,6 +139,37 @@ struct MCPServerTests {
         #expect(!line.contains("\n"))
     }
 
+    @Test("a modern tool result carries resultType")
+    func modernCallIsComplete() {
+        var params = Self.meta(Self.modern)
+        params["name"] = .string(MCPTools.listCommands)
+        let result = Self.object(
+            Self.ask("tools/call", params: params)["result"]
+        )
+        #expect(result["resultType"] == .string("complete"))
+        params = ["name": .string(MCPTools.listCommands)]
+        let legacy = Self.object(
+            Self.ask("tools/call", params: params)["result"]
+        )
+        #expect(legacy["resultType"] == nil)
+    }
+
+    @Test("an id must be a string or an integer, and is echoed")
+    func idsAreChecked() {
+        let bad = Self.object(
+            Self.server().reply(
+                to: #"{"jsonrpc":"2.0","id":true,"method":"ping"}"#
+            )
+        )
+        #expect(Self.object(bad["error"])["code"] == .number(-32600))
+        #expect(bad["id"] == .null)
+        let noMethod = Self.object(
+            Self.server().reply(to: #"{"jsonrpc":"2.0","id":7}"#)
+        )
+        #expect(noMethod["id"] == .number(7))
+        #expect(Self.object(noMethod["error"])["code"] == .number(-32600))
+    }
+
     @Test("nothing in the MCP tree prints to stdout")
     func stdoutCarriesOnlyReplies() throws {
         let root = SourceScan.repoRoot(from: #filePath)
@@ -146,12 +177,20 @@ struct MCPServerTests {
             under: root.appendingPathComponent("Sources/KiwiDesk/MCP")
         )
         #expect(!files.isEmpty, "the MCP tree moved; this scans nothing")
+        var writes = 0
         for file in files {
             let text = try SourceScan.strippedSource(at: file)
-            #expect(
-                !text.contains("print("),
-                "\(file.lastPathComponent) prints; stdout is JSON-RPC"
-            )
+            for needle in ["print(", "fputs(", "putchar(", "stdout"] {
+                #expect(
+                    !text.contains(needle),
+                    "\(file.lastPathComponent) writes stdout"
+                )
+            }
+            writes +=
+                text.components(separatedBy: "standardOutput")
+                .count - 1
         }
+        // The server loop's one write of each reply.
+        #expect(writes == 1, "stdout carries only the loop's replies")
     }
 }

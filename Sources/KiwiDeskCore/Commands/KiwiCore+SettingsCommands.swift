@@ -101,8 +101,8 @@ extension KiwiCore {
         // knob whose arm was gone (#1009, `CommandDispatchReachTests`).
         switch command {
         case "animations.set_duration":
-            // Live only: a later save_profile or Settings
-            // Save captures it into the profile (#51, #1685).
+            // Live only: a later save_profile captures it, into
+            // the shared look for a profile wearing it (#1685).
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }

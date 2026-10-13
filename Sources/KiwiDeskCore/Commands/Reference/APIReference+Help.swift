@@ -58,9 +58,7 @@ extension APIReference {
             "arguments": .array(
                 entry.record.arguments.map(json(for:))
             ),
-            "destructive": .bool(
-                destructive.contains(entry.qualifiedName)
-            ),
+            "destructive": .bool(isDestructive(entry)),
         ]
         if let command = entry.command {
             object["command"] = .string(command)

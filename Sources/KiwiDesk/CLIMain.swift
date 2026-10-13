@@ -99,9 +99,7 @@ private func runSocketCommand(
 
     let client: SocketClient
     do {
-        client = try SocketClient(
-            path: KiwiCore.defaultSocketPath
-        )
+        client = try AppSocket.connect()
     } catch {
         FileHandle.standardError.write(
             Data(

@@ -137,8 +137,8 @@ each group carrying one object per command — `name`,
 
 :::unreleased
 Each command object also carries `destructive`: `true` for a
-command that cannot be undone, which `kiwidesk mcp` sends only
-through its `run_destructive` tool.
+command that cannot be undone
+([Using KiwiDesk from AI Apps](#using-kiwidesk-from-ai-apps)).
 :::
 
 The Swift type an enum's values were read from is **not** a JSON
@@ -154,7 +154,9 @@ usage block. Add a name, or `--json`, to get the API instead.
 `kiwidesk mcp` runs a [Model Context Protocol](https://modelcontextprotocol.io)
 server on stdin and stdout, so an AI app that launches local MCP
 servers — Claude Desktop, Claude Code, Cursor, Codex — can drive
-KiwiDesk. Point the app at the binary inside the bundle:
+KiwiDesk. Point the app at the binary inside the bundle; most apps
+take this entry, and one with its own config format takes the same
+`command` and `args`:
 
 ```json
 {
@@ -168,12 +170,12 @@ KiwiDesk. Point the app at the binary inside the bundle:
 ```
 
 The server speaks MCP `2026-07-28` and, after an `initialize`,
-`2025-11-25`, `2025-06-18` and `2025-03-26`. It offers six tools:
+`2025-11-25` and `2025-06-18`. It offers six tools:
 
 | Tool | Does |
 |---|---|
-| `list_commands` | The commands `run` can send, filtered by name, group or summary |
-| `help` | One command's arguments, as `kiwidesk help` shows them |
+| `list_commands` | Every command the tools can send, filtered by name, group or summary, the destructive ones marked |
+| `help` | One command's arguments, as `kiwidesk help <name> --json` returns them |
 | `get_state` | `get_state`'s answer |
 | `run` | One command that can be undone |
 | `run_batch` | Up to 100 commands in order, stopping at the first failure |
@@ -181,17 +183,18 @@ The server speaks MCP `2026-07-28` and, after an `initialize`,
 
 `list_commands` and `help` answer without the app; the others
 need it running. A command `list_commands --json` marks
-`destructive` — one that deletes, closes, overwrites a saved
-profile or replaces unsaved live changes — goes only through
-`run_destructive`, which carries MCP's destructive hint so the app
-asks you first; `run` and `run_batch` refuse it. `subscribe` and the Lua-only verbs are not
-offered.
+`destructive` goes only through `run_destructive`, and `run` and
+`run_batch` refuse it. `run_destructive` carries MCP's destructive
+hint, which an AI app that honours it turns into a question to you
+before the command runs. `subscribe` and the Lua-only verbs are
+not offered.
 
-A change made through MCP is a setter like any other: it lasts
-until the next profile load, config reload or restart. `get_state`
-hands the AI app your window titles. ChatGPT reaches only remote
-MCP servers, so it needs OpenAI's MCP tunnel in front of
-`kiwidesk mcp`.
+A setter sent through MCP lasts as [Commands](#commands) says, and
+the AI app is told so after each one. A command the binary does
+not know is refused rather than sent. `get_state` hands the AI app
+your window titles. ChatGPT reaches only remote MCP servers, so it
+needs [OpenAI's secure MCP tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
+in front of `kiwidesk mcp`.
 :::
 
 ## Service Control
@@ -308,10 +311,11 @@ failures. 1 still means the command itself did not get through.
 
 ## Commands
 
-A `set_*` command other than `set_default_profile` changes the
-running setting. A profile keeps it once `save_profile` or a
-Settings Save captures it; otherwise the next profile load, config
-reload or restart replaces it.
+A `set_*` command other than `set_default_profile` writes no file:
+it changes the running value only.
+[`save_profile`](lua-reference.md#save_profile-load_profile-delete_profile-set_default_profile)
+keeps what it captures; any other value lasts until a profile load
+or a config reload sets it again, or until KiwiDesk quits.
 
 `focus_space_previous`, `focus_space_next`, `focus_space_back`,
 `focus_space_forward` and `set_space_history` step through the

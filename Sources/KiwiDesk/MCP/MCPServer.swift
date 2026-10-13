@@ -16,6 +16,9 @@ final class MCPServer {
     /// Reads requests until stdin closes. stdout carries only
     /// JSON-RPC lines; nothing else may be printed there.
     static func run() -> Int32 {
+        // A client or app that hangs up mid-write ends the loop
+        // with an error, never a signal.
+        signal(SIGPIPE, SIG_IGN)
         let server = MCPServer()
         while let line = readLine(strippingNewline: true) {
             guard
@@ -23,7 +26,13 @@ final class MCPServer {
                 let reply = server.reply(to: line),
                 let text = MCPReply.line(reply)
             else { continue }
-            FileHandle.standardOutput.write(Data((text + "\n").utf8))
+            do {
+                try FileHandle.standardOutput.write(
+                    contentsOf: Data((text + "\n").utf8)
+                )
+            } catch {
+                return 0
+            }
         }
         return 0
     }
@@ -32,8 +41,8 @@ final class MCPServer {
     func reply(to line: String) -> JSONValue? {
         let request: MCPRequest
         switch MCPRequest.parse(line) {
-        case .failure(let failure):
-            return MCPReply.error(nil, failure)
+        case .failure(let failed):
+            return MCPReply.error(failed.id, failed.failure)
         case .success(let parsed):
             request = parsed
         }
@@ -45,7 +54,7 @@ final class MCPServer {
         } catch {
             return MCPReply.error(
                 id,
-                MCPFailure(.invalidRequest, "\(error)")
+                MCPFailure(.internalError, "\(error)")
             )
         }
     }
