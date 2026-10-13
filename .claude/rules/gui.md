@@ -1867,15 +1867,13 @@ being a static state it draws either way.
 
 ## Strings
 
-- **A row's title is a verb phrase saying what pressing it does:
-  "Show ‹panel name›" for a panel, using the panel's VoiceOver
-  name; "Open" for a window** (#2245). A key panel's side names
-  its own shortcut row, so the row's key and the side's
-  accessibility name are a pair; `ShortcutsPanelNounTests` holds
-  each pair per catalog and `JumpSideNameTests` holds the views
-  to the keys it compares. A new panel a row opens joins that
-  suite's `pairs` in the same change. The verb INSIDE a panel is
-  the panel's own ("Jump"), and stays.
+- **A shortcut row's title is a verb phrase saying what pressing
+  it does: "Show ‹panel name›" for a panel, using the panel's
+  VoiceOver name; "Open" for a window** (#2245,
+  `JumpSideNameTests`). The pairing of a row with its panel's name
+  is [config-vocabulary.md](config-vocabulary.md)'s ▸ shortcuts
+  panel. Renaming a row leaves the verb INSIDE its panel ("Jump")
+  alone.
 - **A surface narrating the boot count reads
   `BootCountText.line(for:)`**, the one author of that sentence
   (#1715). The grant screen, the relaunched "What's new" and the

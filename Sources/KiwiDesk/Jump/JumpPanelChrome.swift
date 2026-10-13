@@ -75,6 +75,7 @@ struct JumpScopeSwitch: View {
             spokenLabel: JumpScope.switchName,
             hugsLabels: true,
             hints: model.chords,
+            spokenHint: LayoutPickText.chordHint,
             selection: Binding(
                 get: { model.scope },
                 set: { model.setScope($0) }

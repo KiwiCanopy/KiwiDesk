@@ -61,13 +61,17 @@ struct ShortcutsPanelNounTests {
     struct Pair {
         let panelName: String
         let opener: String
+        /// Whether translations of the pair have shipped, so a
+        /// run comparing English alone means they were lost.
+        var translated = false
     }
 
     /// Every panel a shortcut row opens.
     static let pairs = [
         Pair(
             panelName: "shortcuts.panel.ax_label",
-            opener: "keybinding.show_shortcuts"
+            opener: "keybinding.show_shortcuts",
+            translated: true
         ),
         Pair(
             panelName: "jump.panel.ax_label",
@@ -81,8 +85,10 @@ struct ShortcutsPanelNounTests {
 
     /// Panel names authored before their translation round, whose
     /// opener a catalog already carries — the one copy of who may
-    /// be absent beside it. An entry reds once any translation
-    /// carries the key, so the round must retire it (#2245).
+    /// be absent beside it. Until the round that follows #2245
+    /// translates them, such a side announces the English name
+    /// beside a translated row; an entry reds once any translation
+    /// carries the key, so that round must retire it.
     static let awaitingTranslation: Set<String> = [
         "layout_picker.panel.ax_label"
     ]
@@ -160,7 +166,7 @@ struct ShortcutsPanelNounTests {
         // compares nothing (`guard-prover`, #1316). A pair before
         // its translation round compares English alone.
         #expect(
-            compared >= 1,
+            compared > (pair.translated ? 1 : 0),
             """
             \(compared) catalog(s) actually compared — this \
             suite passed for having looked at nothing.

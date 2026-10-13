@@ -888,8 +888,7 @@ listed under Shortcuts & Gestures ▸ Focus, and `⌃⌥L` opens the same
 panel on its Layouts side, the **layout picker**
 ([`show_layout_picker`](lua-reference.md#show_layout_picker)), for
 the space on the screen under the pointer; `Tab` switches between
-the two, and the switch at the end of the field shows each side's
-key.
+the two.
 :::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each

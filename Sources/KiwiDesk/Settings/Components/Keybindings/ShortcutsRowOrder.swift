@@ -30,7 +30,7 @@ enum ShortcutsRowOrder {
 
     /// Focus group order: directions, the Space steps, the
     /// history setting above its two rows (#1655), live spaces,
-    /// then Jump to window, which reaches any of them (#1875).
+    /// then the window switcher, which reaches any of them (#1875).
     static let focusAtRest: [SettingKey] = [
         .shortcuts(.focusDir),
         .shortcuts(.spaceStep),

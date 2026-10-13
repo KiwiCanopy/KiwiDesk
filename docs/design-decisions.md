@@ -10678,7 +10678,7 @@ re-leaks the seed into Custom. (#602, PR #638)
 
 :::unreleased
 **The keyboard panels never take activation, so there is none to
-hand back.** The ⌃⌥K panel and Jump to window are
+hand back.** The ⌃⌥K panel and the window switcher are
 non-activating panels (#1875): they take the keyboard while the
 app the user came from stays active. Activating KiwiDesk to give
 a borderless panel the keyboard raised its other windows — the
@@ -10701,7 +10701,7 @@ the arms and
 :::
 
 :::unreleased
-**The layout picker is a scope of Jump to window, not a menu
+**The layout picker is a side of the window switcher, not a menu
 (#2229).** #762 made the picker a native menu because a menu
 brings arrows, type-select, Return, Escape and VoiceOver for free.
 That argument holds for a list of names, and it is why the status

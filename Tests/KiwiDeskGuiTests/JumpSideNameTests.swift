@@ -55,6 +55,13 @@ struct JumpSideNameTests {
         )
         let chrome = try Self.source("JumpPanelChrome.swift")
         #expect(chrome.occurrences(of: "hints: model.chords") == 1)
+        // VoiceOver hears the chord in the panel's own frame, as
+        // the layout tiles speak theirs.
+        #expect(
+            chrome.occurrences(
+                of: "spokenHint: LayoutPickText.chordHint"
+            ) == 1
+        )
     }
 
     @Test("the panel is named for the side it shows")
@@ -81,7 +88,7 @@ struct JumpSideNameTests {
         )
         #expect(
             picker.occurrences(
-                of: ".accessibilityHint(hints[option.value]"
+                of: ".accessibilityHint(hints[option.value].map(spokenHint)"
             ) == 1
         )
         let body = try #require(

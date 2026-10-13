@@ -103,7 +103,10 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             self?.close()
             self?.onEdit()
         }
-        let combo = ShortcutsOpenBinding.comboGlyphs(core: core)
+        let combo = ShortcutsOpenBinding.comboGlyphs(
+            core: core,
+            lua: ShortcutsOpenBinding.lua
+        )
         let glass = core.tiler.settings.shortcutPanelLiquidGlass
         let presence = PanelPresence()
         self.presence = presence

@@ -12,8 +12,11 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// segment to the widest label at the selected weight instead.
     private let hugsLabels: Bool
     /// A key drawn in secondary ink after a segment's title, and
-    /// read as that segment's VoiceOver hint, never its name.
+    /// read as that segment's VoiceOver hint, never its name. A new
+    /// caller adds its ground to the contrast suite's pairings.
     private let hints: [Value: String]
+    /// The words VoiceOver reads a hint in.
+    private let spokenHint: (String) -> String
     @Binding private var selection: Value
     private let options: [(title: String, value: Value)]
     /// Optional field help text (#94).
@@ -30,6 +33,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         spokenLabel: String? = nil,
         hugsLabels: Bool = false,
         hints: [Value: String] = [:],
+        spokenHint: @escaping (String) -> String = { $0 },
         selection: Binding<Value>,
         options: [(title: String, value: Value)],
         help: String? = nil
@@ -38,6 +42,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         self.spokenLabel = spokenLabel
         self.hugsLabels = hugsLabels
         self.hints = hints
+        self.spokenHint = spokenHint
         self._selection = selection
         self.options = options
         self.help = help
@@ -196,7 +201,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         .accessibilityAddTraits(
             selected ? [.isSelected] : []
         )
-        .accessibilityHint(hints[option.value] ?? "")
+        .accessibilityHint(hints[option.value].map(spokenHint) ?? "")
     }
 
     private func segmentLabel(
