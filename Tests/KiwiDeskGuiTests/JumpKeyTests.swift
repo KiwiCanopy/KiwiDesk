@@ -54,13 +54,36 @@ struct JumpKeyTests {
         #expect(key(18, [.command, .option]) == nil)
     }
 
-    @Test("Esc is the escape, Tab stays in the field, letters type")
+    @Test("Esc is the escape, Tab switches scope, letters type")
     func escapeTabAndTyping() {
         #expect(key(53) == .escape)
-        #expect(key(48) == .swallow)
-        #expect(key(48, .shift) == .swallow)
+        #expect(key(48) == .toggleScope)
+        #expect(key(48, .shift) == .toggleScope)
         #expect(key(48, .control) == .swallow)
         #expect(key(0) == nil)
         #expect(key(0, .shift) == nil)
+    }
+
+    @Test("Layouts reads ← → as tiles, ⌘S Keep, ⌘, Layout Defaults")
+    func layoutsKeys() {
+        func layouts(
+            _ code: UInt16,
+            _ modifiers: NSEvent.ModifierFlags = []
+        ) -> JumpKey? {
+            JumpKey.of(keyCode: code, modifiers: modifiers, scope: .layouts)
+        }
+        #expect(layouts(123) == .side(-1))
+        #expect(layouts(124) == .side(1))
+        #expect(layouts(1, .command) == .keep)
+        #expect(layouts(43, .command) == .layoutDefaults)
+        #expect(layouts(48) == .toggleScope)
+        #expect(layouts(36) == .pick(moveHere: false))
+        #expect(layouts(19, .command) == .quick(1, moveHere: false))
+        // In Windows the arrows move the caret and ⌘S, ⌘, type.
+        #expect(key(123) == nil)
+        #expect(key(1, .command) == nil)
+        #expect(key(43, .command) == nil)
+        // A plain S types a filter.
+        #expect(layouts(1) == nil)
     }
 }

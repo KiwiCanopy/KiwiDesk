@@ -19,22 +19,25 @@ extension JumpPanelController {
     }
 
     /// Fits the panel to its list, keeping the top edge where it
-    /// is so the field stays under the user's eyes.
-    func refit() {
+    /// is so the field stays under the user's eyes; a scope switch
+    /// glides there (#2229), at once under Reduce Motion.
+    func refit(animated: Bool = false) {
         guard let panel, panel.isVisible,
             let content = panel.contentView
         else { return }
         content.layoutSubtreeIfNeeded()
         let size = content.fittingSize
         let top = panel.frame.maxY
+        let frame = NSRect(
+            x: panel.frame.minX,
+            y: top - size.height,
+            width: size.width,
+            height: size.height
+        )
         panel.setFrame(
-            NSRect(
-                x: panel.frame.minX,
-                y: top - size.height,
-                width: size.width,
-                height: size.height
-            ),
-            display: true
+            frame,
+            display: true,
+            animate: animated && !reduceMotion()
         )
     }
 

@@ -928,7 +928,6 @@
   "layout_params.stack_position": "Posizione dello Stack",
   "layout_params.stack_position.help": "Quale lato dello schermo occupa la zona dello Stack; la zona principale prende l'altro. Lo Stack si allinea alla sua striscia: uno Stack a sinistra o a destra va dall'alto in basso, uno in alto o in basso va da un lato all'altro.",
   "layout_params.wrap_focus.help": "Quando è attivo, spostare il focus oltre l'ultima finestra torna alla prima, e oltre la prima torna all'ultima, invece di fermarsi alla fine.",
-  "layout_picker.header": "Spazio %1$@",
   "looks.applied_other_colors": "Applicato, con colori diversi",
   "looks.bundled": "Look inclusi",
   "looks.caption": "Applica un look incluso o salvato: i suoi colori, la posizione delle barre, forma, carattere e indicatori di KiwiShelf, forma e riflesso del contorno di focus e le spaziature tra le finestre. Un'applicazione una tantum, non un collegamento attivo; ciò che mostrano le barre non fa mai parte di un look. Le sue spaziature spostano le tue finestre non appena salvi. Un look che hai salvato porta con sé anche le sue animazioni; uno incluso lascia le tue come sono.",

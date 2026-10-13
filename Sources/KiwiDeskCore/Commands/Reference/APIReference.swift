@@ -48,7 +48,6 @@ public enum APIReference {
             ("gather", "gather"),
             ("move_here", "move_here"),
             ("set_mode", "set_mode"),
-            ("show_layout_picker", "show_layout_picker"),
             ("cycle_mode", "cycle_mode"),
             ("set_mode_cycle", "set_mode_cycle"),
             ("set_gap_global", "set_gap_global"),
@@ -261,6 +260,7 @@ public enum APIReference {
     public static let luaOnly: [String] = [
         "exec", "bind", "on", "define_layer", "switch_layer",
         "show_shortcuts", "open_settings", "show_jump_to_window",
+        "show_layout_picker",
     ]
 
     /// Command names reachable through dispatcher and CLI/IPC (#37).

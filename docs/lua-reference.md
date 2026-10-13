@@ -616,14 +616,21 @@ KiwiDesk.set_mode_cycle({ "bsp", "stack", "monocle" })
 
 **Expects:** nothing.
 
-**Does:** opens a menu at the pointer listing the layouts, the
-current one checked, for the Space shown on the screen under the
-pointer — its name heads the menu. Pick a layout with the mouse,
-the arrow keys and Return, or by typing its first letters; Escape
-closes it. A pick works like `set_mode` for that Space. The menu
-opens with the current layout under the pointer. A call within
-0.15 s of the menu closing opens nothing: it is the press made
-while the menu was open.
+**Does:** opens the [Jump to window](#show_jump_to_window) panel
+on its **Layouts** side, for the Space shown on the screen under
+the pointer, or closes it if it already shows Layouts. Every
+layout is a tile with its picture, the current one marked ✓.
+
+- **←** and **→** move the selection; typing narrows the tiles by
+  name, dimming the rest.
+- **Return** applies the selected layout, like `set_mode` for that
+  Space, and closes the panel; **⌘1** … **⌘7** apply a tile
+  directly.
+- **⌘S** keeps the layouts in the profile, as the Layout menu's
+  Keep does; **⌘,** opens Layout Defaults in Settings on the
+  selected layout.
+- **Tab** switches to the windows list; **Escape** clears the
+  typing, then closes the panel.
 
 **Example:**
 
@@ -4812,6 +4819,9 @@ hidden app. Typing narrows the list by app name, then by title.
 - **⇧Return** moves the window into the Space you are on instead,
   as [move_here](#move_here) does.
 - **⌘1** … **⌘9** pick one of the first nine results.
+- **Tab** switches to the panel's Layouts side
+  ([show_layout_picker](#show_layout_picker)), clearing the
+  typing.
 - **Escape** clears the typing, then closes the panel; **⌘W**, a
   click elsewhere or another app taking the keyboard close it too.
 

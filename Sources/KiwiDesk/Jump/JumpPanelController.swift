@@ -20,7 +20,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// The keyed show and the close's dismiss distrust (#952).
     let handBack: PanelHandBack
     var panel: JumpPanel?
-    private var model: JumpModel?
+    private var currentModel: JumpModel?
     /// This opening; a fade a later show overtook orders nothing
     /// out.
     private var presence = PanelPresence()
@@ -39,15 +39,22 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// new panel rather than closing one already going.
     var isOpen: Bool { panel?.isVisible == true && !presence.leaving }
 
-    func toggle() {
-        if isOpen {
+    /// A scope's own shortcut: closes the panel where it already
+    /// shows that scope, switches to it where it shows the other
+    /// (#2229), else opens on it.
+    func toggle(_ scope: JumpScope = .windows) {
+        guard isOpen, let model = currentModel else {
+            show(scope)
+            return
+        }
+        if model.scope == scope {
             close(commanded: true)
         } else {
-            show()
+            model.setScope(scope)
         }
     }
 
-    func show() {
+    func show(_ scope: JumpScope = .windows) {
         let screen = PanelHandBack.screenUnderPointer()
         let snapshot = core.jumpSnapshot()
         let model = JumpModel(
@@ -60,7 +67,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         )
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        self.model = model
+        self.currentModel = model
         let presence = PanelPresence()
         self.presence = presence
         wire(model, panel)
@@ -68,8 +75,10 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         let width = Self.width(
             visibleWidth: screen?.visibleFrame.width ?? 1440
         )
+        if scope == .layouts { model.setScope(.layouts) }
         let root = JumpPanelView(
             model: model,
+            settings: core.tiler.settings,
             liquidGlass: glass,
             presence: presence,
             width: width
@@ -132,7 +141,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// close already fading refuses the resign-key it fires, and a
     /// panel already hidden has no blip to distrust.
     @discardableResult
-    private func dismiss(distrusting: Bool) -> Bool {
+    func dismiss(distrusting: Bool) -> Bool {
         guard panel?.isVisible != false, !presence.leaving else {
             return false
         }
@@ -145,7 +154,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// Fades the panel out, then orders it out; it stops taking
     /// keys the moment the fade starts.
     private func fadeOut() {
-        model?.leave()
+        currentModel?.leave()
         presence.fadeOut(panel, reduceMotion: reduceMotion()) {
             [weak self] in self?.presence === $0
         }
@@ -214,13 +223,18 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         model.onResultsChange = { [weak self] in
             DispatchQueue.main.async { self?.refit() }
         }
+        model.onScopeChange = { [weak self] in
+            DispatchQueue.main.async { self?.refit(animated: true) }
+        }
+        panel.scope = { [weak model] in model?.scope ?? .windows }
+        wireLayouts(model)
     }
 
     // MARK: - NSWindowDelegate
 
     /// The field takes the keys whenever the panel does.
     func windowDidBecomeKey(_ notification: Notification) {
-        model?.requestFieldFocus()
+        currentModel?.requestFieldFocus()
     }
 
     func windowDidResignKey(_ notification: Notification) {

@@ -1,20 +1,14 @@
 import AppKit
 
-/// `show_layout_picker` (#762): the Layout menu's rows as a native
-/// menu at the pointer, acting on the Space the pointer's screen
-/// shows — on a desk of several screens the pointer is the one
-/// unambiguous "this screen". A menu brings arrows, type-select,
-/// Return, Escape and VoiceOver for free.
+/// The layout picker (#762, #2229): the GUI's key panel on its
+/// Layouts scope, acting on the Space the pointer's screen shows —
+/// on a desk of several screens the pointer is the one unambiguous
+/// "this screen".
 extension KiwiCore {
-    func showLayoutPicker() -> CommandResponse {
-        let menus = shelves.contextMenus
-        if menus.pressWasQueued() { return .ok() }
-        let point = menus.pointer()
-        guard let space = spaceUnderPointer(point) else {
-            return .fail("no Space under the pointer")
-        }
-        menus.popUp(BarMenu.make(layoutPickerRows(space)), point)
-        return .ok()
+    /// The Space the layout picker acts on: the one shown on the
+    /// screen under the pointer.
+    public func layoutPickerSpace() -> SpaceID? {
+        spaceUnderPointer(shelves.contextMenus.pointer())
     }
 
     /// The Space shown on the screen holding `point` (Cocoa), else
@@ -40,11 +34,78 @@ extension KiwiCore {
         ).map { screens[$0].id }
     }
 
-    /// A header naming the Space, then the Layout menu's rows.
-    func layoutPickerRows(_ id: SpaceID) -> [BarMenuRow] {
-        let rows = layoutModeMenuRows(for: id)
-        guard !rows.isEmpty else { return [] }
-        return [.header(L("layout_picker.header", "Space %1$@", id.raw))]
-            + rows
+    /// What the picker draws for `id`, from the Layout menu's own
+    /// drift reading; nil for a Space that no longer exists.
+    public func layoutPickerState(for id: SpaceID) -> LayoutPickerState? {
+        guard let drift = layoutDrift(for: id) else { return nil }
+        return LayoutPickerState(
+            space: id,
+            live: drift.live,
+            drifted: drift.drifted,
+            profile: profiles.currentName,
+            keepArmed: drift.keepArmed
+        )
+    }
+
+    /// Sets `id`'s layout as the Layout menu's row does, as user
+    /// motion (#804).
+    public func applyLayout(_ mode: LayoutMode, to id: SpaceID) {
+        withUserMotion {
+            _ = execute(
+                "set_mode",
+                args: [.string(id.raw), .string(mode.rawValue)]
+            )
+        }
+    }
+
+    /// `id`'s live layout, whether it drifted from the profile,
+    /// and whether Keep is armed — which any shown Space's drift
+    /// arms, since Keep keeps every screen's layout (#1179).
+    func layoutDrift(
+        for id: SpaceID
+    ) -> (live: LayoutMode, drifted: Bool, keepArmed: Bool)? {
+        guard let space = state.workspaces[id] else { return nil }
+        let shown = state.workspaces.allDisplays.compactMap {
+            state.workspaces.activeSpace(on: $0.id)
+        }
+        let spaces = Array(Set(shown + [id]))
+        let saved = savedModes(for: spaces)
+        let drifted = { (space: SpaceID) in
+            LayoutModeRows.drifted(
+                live: self.state.workspaces[space]?.mode,
+                saved: saved[space]
+            )
+        }
+        return (
+            space.mode,
+            drifted(id),
+            LayoutModeRows.keepArmed(drifts: spaces.map(drifted))
+        )
+    }
+}
+
+/// The layout picker's facts for one Space (#2229); the GUI words
+/// them (#96).
+public struct LayoutPickerState: Equatable, Sendable {
+    public let space: SpaceID
+    public let live: LayoutMode
+    /// The live layout differs from the profile's.
+    public let drifted: Bool
+    /// The adopted profile's name; nil offers no Keep.
+    public let profile: String?
+    public let keepArmed: Bool
+
+    public init(
+        space: SpaceID,
+        live: LayoutMode,
+        drifted: Bool,
+        profile: String?,
+        keepArmed: Bool
+    ) {
+        self.space = space
+        self.live = live
+        self.drifted = drifted
+        self.profile = profile
+        self.keepArmed = keepArmed
     }
 }
