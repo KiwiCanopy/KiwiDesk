@@ -177,7 +177,7 @@ enum KeybindingCatalog {
     static let jumpToWindow = NavCommand(
         label: "Jump to window",
         lua: "KiwiDesk.show_jump_to_window()",
-        displayLabel: { JumpPanelView.fieldName }
+        displayLabel: { JumpScope.windows.fieldName }
     )
 
     /// Command opening shortcuts cheat sheet overlay (#330, #602).

@@ -11,6 +11,8 @@ final class JumpPanel: NSPanel {
     var onKey: (JumpKey) -> Void = { _ in }
     var onModifiers: (NSEvent.ModifierFlags) -> Void = { _ in }
     var onComposing: (Bool) -> Void = { _ in }
+    /// The scope the keys are read for (#2229).
+    var scope: () -> JumpScope = { .windows }
 
     override var canBecomeKey: Bool { true }
 
@@ -48,7 +50,8 @@ final class JumpPanel: NSPanel {
             if !composing,
                 let key = JumpKey.of(
                     keyCode: event.keyCode,
-                    modifiers: event.modifierFlags
+                    modifiers: event.modifierFlags,
+                    scope: scope()
                 )
             {
                 onKey(key)

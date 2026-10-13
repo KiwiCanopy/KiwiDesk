@@ -39,6 +39,12 @@ struct JumpList {
         )
     }
 
+    /// Selects row `index` where one exists.
+    mutating func select(_ index: Int) {
+        guard results.indices.contains(index) else { return }
+        selection = index
+    }
+
     var selected: JumpSearch.Match? {
         selection.map { results[$0] }
     }

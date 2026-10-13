@@ -80,6 +80,11 @@ extension SettingsAnchor {
             self.init(destination: .spaces, surface: .space(space))
         case .appRule(let app):
             self.init(destination: .appRules, surface: .appRule(app))
+        case .layoutDefaults(let mode):
+            self.init(
+                destination: .layoutDefaults,
+                surface: .layoutMode(mode)
+            )
         }
     }
 }

@@ -5,20 +5,20 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The list grows to a third of the screen's visible height, never
-/// fewer than 6 rows nor more than 12, and shrinks to fit fewer
-/// results (#1875 ▸ Panel). A pick of another app's window
+/// fewer than 8 rows nor more than 10 (#2229), and shrinks to fit
+/// fewer results (#1875 ▸ Panel). A pick of another app's window
 /// distrusts the dismiss blip (#952); a close arms nothing.
 @Suite("Jump to window panel controller")
 @MainActor
 struct JumpPanelControllerTests {
-    @Test("the row cap is a third of the screen, 6 to 12 rows")
+    @Test("the row cap is a third of the screen, 8 to 10 rows")
     func rowCap() {
         let row = JumpRowView.height
-        #expect(JumpPanelController.rowCap(visibleHeight: 300) == 6)
+        #expect(JumpPanelController.rowCap(visibleHeight: 300) == 8)
         #expect(
-            JumpPanelController.rowCap(visibleHeight: 3 * row * 8) == 8
+            JumpPanelController.rowCap(visibleHeight: 3 * row * 9) == 9
         )
-        #expect(JumpPanelController.rowCap(visibleHeight: 5000) == 12)
+        #expect(JumpPanelController.rowCap(visibleHeight: 5000) == 10)
     }
 
     /// The footer's scroll cue shows exactly when the content runs
@@ -37,6 +37,48 @@ struct JumpPanelControllerTests {
         // A narrow screen keeps the panel clear of both edges.
         let narrow = JumpPanelController.width(visibleWidth: 600)
         #expect(narrow < 600 && narrow < full)
+    }
+
+    /// Spotlight's height rather than the screen's middle (owner
+    /// eyeball, 2026-10-13): the top sits a quarter down and stays
+    /// there for every panel height that fits.
+    @Test("the panel's top sits at Spotlight's height")
+    func origin() {
+        let visible = CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        let top: CGFloat =
+            visible.maxY - visible.height
+            * JumpPanelController.topFraction
+        for height: CGFloat in [200, 400] {
+            let size = CGSize(width: 640, height: height)
+            let origin = JumpPanelController.origin(
+                size: size,
+                visible: visible
+            )
+            #expect(origin.x == 480)
+            #expect(origin.y + height == top)
+        }
+        // A panel taller than the room below that top is lifted
+        // rather than run off the screen.
+        let tall = JumpPanelController.origin(
+            size: CGSize(width: 640, height: 900),
+            visible: visible
+        )
+        #expect(tall.y == visible.minY)
+    }
+
+    /// A scope's own shortcut (#2229): closes where it shows,
+    /// switches from the other, opens where nothing shows.
+    @Test("a scope's shortcut opens, switches or closes")
+    func toggleAction() {
+        typealias C = JumpPanelController
+        #expect(C.toggleAction(showing: nil, asked: .layouts) == .open)
+        #expect(
+            C.toggleAction(showing: .windows, asked: .layouts)
+                == .switchScope
+        )
+        #expect(
+            C.toggleAction(showing: .layouts, asked: .layouts) == .close
+        )
     }
 
     @Test("the list fits its rows up to the cap")

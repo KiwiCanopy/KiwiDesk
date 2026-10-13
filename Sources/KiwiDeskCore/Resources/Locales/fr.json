@@ -918,7 +918,6 @@
   "layout_params.stack_position": "Position du Stack",
   "layout_params.stack_position.help": "Quel côté de l'écran occupe la zone du Stack ; la zone principale prend l'autre. Le Stack s'aligne selon sa bande : un Stack à gauche ou à droite va de haut en bas, un Stack en haut ou en bas va de gauche à droite.",
   "layout_params.wrap_focus.help": "Lorsque cette option est activée, déplacer le focus au-delà de la dernière fenêtre revient à la première, et au-delà de la première revient à la dernière, au lieu de s'arrêter à l'extrémité.",
-  "layout_picker.header": "Espace %1$@",
   "looks.applied_other_colors": "Appliqué, avec des couleurs différentes",
   "looks.bundled": "Looks intégrés",
   "looks.caption": "Appliquez un look intégré ou enregistré — ses couleurs, l'emplacement des barres, la forme, la police et les indicateurs de KiwiShelf, la forme et le reflet de la bordure de focus, et les écarts entre les fenêtres. Une application unique, pas un lien en direct ; ce qu'affichent les barres ne fait jamais partie d'un look. Ses écarts déplacent vos fenêtres dès que vous enregistrez. Un look que vous avez enregistré apporte aussi ses animations ; un look intégré laisse les vôtres telles quelles.",

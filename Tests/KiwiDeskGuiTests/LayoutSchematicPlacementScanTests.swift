@@ -32,6 +32,9 @@ struct LayoutSchematicPlacementScanTests {
     /// same trigger, one tree over, and the obligation above
     /// discharged rather than reasoned about.
     ///
+    /// `Jump` joined in #2229, when the key panel's Layouts scope
+    /// began mounting `LayoutSchematicView` for its tiles.
+    ///
     /// **Stated limit on what a new root buys.** The sharper half
     /// of this suite — `schematicsConsumePlacementOnlyByPassingItOn`
     /// — filters on filenames containing "Schematic", and no file
@@ -50,6 +53,7 @@ struct LayoutSchematicPlacementScanTests {
             "Sources/KiwiDesk/Settings/Components/Layouts",
             "Sources/KiwiDesk/Settings/Components/Profiles",
             "Sources/KiwiDesk/Onboarding",
+            "Sources/KiwiDesk/Jump",
         ].map { repo.appendingPathComponent($0) }
     }
 

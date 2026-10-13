@@ -46,9 +46,13 @@ extension APIReference {
             "Opens the Settings window and brings it to the "
                 + "front."
         ),
+        "show_layout_picker": APIRecord(
+            "Opens the Jump to window panel on Layouts, switches it "
+                + "there, or closes it."
+        ),
         "show_jump_to_window": APIRecord(
-            "Opens the Jump to window panel, or closes it if "
-                + "it is open."
+            "Opens the Jump to window panel on its windows, switches "
+                + "it there, or closes it."
         ),
     ]
 }

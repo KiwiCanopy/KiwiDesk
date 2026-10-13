@@ -66,6 +66,8 @@ extension InterpolatedLabelTests {
     /// translation that pronominalises it. `gui.md` ▸ Strings
     /// now bans it outright.
     static let converted: [String: Int] = [
+        // The key panel's Layout Defaults… button (#2229).
+        "layout_picker.layout_defaults": 1,
         // The two per-space remote-gate pointers (#841). One
         // control label each — the second specifier is
         // `CrossReferenceRow.linkSlot`, a destination link

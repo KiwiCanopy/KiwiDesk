@@ -1,11 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Jump to window panel (#1875): a search field, the ranked
-/// windows with the hidden apps below them, and a static footer.
+/// The Jump to window panel (#1875): a search field, then either
+/// scope (#2229) — the ranked windows with the hidden apps below
+/// them, or the layout tiles — and a footer of the scope's keys.
 /// Native like the shortcuts panel — system font, untinted glass.
 struct JumpPanelView: View {
     @ObservedObject var model: JumpModel
+    /// The live tuning the layout tiles draw.
+    let settings: TilingSettings
     /// The #1307 switch's keyboard-panel leaf, read by the
     /// controller from the active profile.
     let liquidGlass: Bool
@@ -14,31 +17,36 @@ struct JumpPanelView: View {
     /// The panel's width on its screen, from the controller.
     let width: CGFloat
     @FocusState private var fieldFocused: Bool
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
-    /// Wide enough for a 22 pt title beside its Space (#1875 ▸
-    /// rows the size of the field).
-    static let width: CGFloat = 760
-    /// Spotlight's corners; the selection is concentric with them.
-    static let cornerRadius: CGFloat = 26
-    static let headerHeight: CGFloat = 32
+    /// The key panels' scale (#2229 ▸ shared panel style).
+    static let width: CGFloat = 640
+    static let fieldHeight: CGFloat = 44
+    /// The scope switch's cross-fade; the refit waits it out.
+    static let scopeFade: TimeInterval = 0.12
+    static let headerHeight: CGFloat = 26
     static let listPadding: CGFloat = 6
 
     var body: some View {
         VStack(spacing: 0) {
             field
             Divider()
-            results
+            scopeContent
             Divider()
-            JumpFooter(overflows: overflows)
+            JumpFooter(scope: model.scope, overflows: overflows)
         }
+        // The field stays put; only what is below it changes.
+        .animation(
+            reduceMotion ? nil : .easeInOut(duration: Self.scopeFade),
+            value: model.scope
+        )
+        .frame(maxHeight: .infinity, alignment: .top)
         .panelContentFade(presence)
         .frame(width: width)
         .tint(SettingsTheme.accent)
         .glassChrome(
-            in: RoundedRectangle(
-                cornerRadius: Self.cornerRadius,
-                style: .continuous
-            ),
+            in: KeyPanelStyle.shape,
             enabled: liquidGlass,
             variant: .regular,
             fallback: AnyShapeStyle(.regularMaterial)
@@ -49,9 +57,9 @@ struct JumpPanelView: View {
     private var field: some View {
         // The glyph's frame matches the row icon's, so the field
         // text and the row titles share one leading edge.
-        HStack(spacing: 12) {
+        HStack(spacing: JumpRowView.spacing) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(.secondary)
                 .frame(width: JumpRowView.iconSize)
                 .accessibilityHidden(true)
@@ -61,26 +69,52 @@ struct JumpPanelView: View {
                     get: { model.query },
                     set: { model.query = $0 }
                 ),
-                prompt: model.field == nil ? Text(Self.fieldName) : nil
+                prompt: model.field == nil
+                    ? Text(model.scope.fieldName) : nil
             )
             .textFieldStyle(.plain)
-            .font(.largeTitle)
+            .font(.title3)
             // The selected name stands in for the typing, so the
             // typed glyphs and the caret are drawn clear under it.
             .foregroundStyle(model.field == nil ? Color.primary : Color.clear)
             .tint(model.field == nil ? SettingsTheme.accent : .clear)
             .focused($fieldFocused)
-            .accessibilityLabel(Self.fieldName)
+            .accessibilityLabel(model.scope.fieldName)
             .overlay(alignment: .leading) { fieldName }
+            JumpScopeSwitch(model: model)
         }
-        // More room than a row: the field leads the panel, and its
-        // text keeps the row titles' leading edge (10 + 10 inside the
-        // selection, 20 here).
-        .padding(.horizontal, 20)
-        .padding(.top, 8)
-        .frame(height: JumpRowView.height + 12)
+        // The glyph keeps the row icons' leading edge: the
+        // selection's inset plus the row's own padding.
+        .padding(
+            .horizontal,
+            KeyPanelStyle.selectionInset + JumpRowView.padding
+        )
+        .frame(height: Self.fieldHeight)
         .onAppear { fieldFocused = true }
         .onChange(of: model.fieldFocusRequests) { fieldFocused = true }
+        .onChange(of: model.scope) { fieldFocused = true }
+    }
+
+    /// One scope at a time, cross-faded in place.
+    @ViewBuilder private var scopeContent: some View {
+        ZStack(alignment: .top) {
+            if model.scope == .windows {
+                results.transition(.opacity)
+            } else if let layouts = model.layouts {
+                JumpLayoutsView(
+                    list: layouts,
+                    settings: settings,
+                    commandHeld: model.commandHeld,
+                    onApply: { model.onApply($0) },
+                    onKeep: { model.handle(.keep) },
+                    onLayoutDefaults: { model.onLayoutDefaults($0) },
+                    onHover: {
+                        model.hoverTile($0, pointer: model.currentPointer())
+                    }
+                )
+                .transition(.opacity)
+            }
+        }
     }
 
     /// The selected row's name in place of the typing — the typed
@@ -104,20 +138,16 @@ struct JumpPanelView: View {
                     }
                 }
             }
-            .font(.largeTitle)
+            .font(.title3)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
         }
     }
 
-    static var fieldName: String {
-        L("jump.field.label", "Jump to window")
-    }
-
     @ViewBuilder private var results: some View {
         if model.list.results.isEmpty {
             Text(model.emptyText)
-                .font(.title2)
+                .font(.body)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity)
                 .frame(height: JumpRowView.height)
@@ -129,7 +159,7 @@ struct JumpPanelView: View {
                         .padding(.vertical, Self.listPadding)
                         .padding(
                             .horizontal,
-                            JumpRowView.selectionInset
+                            KeyPanelStyle.selectionInset
                         )
                 }
                 .frame(height: listHeight)
@@ -177,10 +207,14 @@ struct JumpPanelView: View {
             number: JumpList.number(ofRow: index),
             commandHeld: model.commandHeld,
             shiftHeld: model.shiftHeld,
-            wayHere: match.entry.movesHere ? here : nil
-        ) { moveHere in
-            model.onPick(match.entry, moveHere)
-        }
+            wayHere: match.entry.movesHere ? here : nil,
+            onActivate: { moveHere in
+                model.onPick(match.entry, moveHere)
+            },
+            onHover: {
+                model.hoverRow(index, pointer: model.currentPointer())
+            }
+        )
     }
 
     private func sectionHeader(_ section: JumpList.Section) -> some View {
@@ -188,11 +222,12 @@ struct JumpPanelView: View {
             section == .hidden
                 ? JumpRowText.hidden : JumpRowText.minimized
         )
-        .font(.headline)
+        .font(.subheadline.weight(.semibold))
         .foregroundStyle(.secondary)
         .accessibilityAddTraits(.isHeader)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 10)
+        .padding(.horizontal, JumpRowView.padding)
+        .padding(.bottom, 3)
         .frame(height: Self.headerHeight, alignment: .bottom)
     }
 
@@ -232,36 +267,5 @@ struct JumpPanelView: View {
         let cap = CGFloat(rowCap) * JumpRowView.height
         return min(content(rows: rows, headers: headers), cap)
             + 2 * listPadding
-    }
-}
-
-/// The panel's static key hints — hidden from VoiceOver, whose
-/// row actions say the same (#1875 ▸ footer).
-private struct JumpFooter: View {
-    let overflows: Bool
-
-    var body: some View {
-        HStack(spacing: 8) {
-            // Worded rather than positional, so it stays true at
-            // any scroll offset — the shortcuts panel's cue (#1292).
-            if overflows {
-                HStack(spacing: 4) {
-                    Image(systemName: "chevron.down")
-                    Text(JumpRowText.scrollHint)
-                }
-                Text(verbatim: "·")
-            }
-            Text(L("jump.footer.jump", "%1$@ Jump", "↩"))
-            Text(verbatim: "·")
-            Text(L("jump.footer.move_here", "%1$@ Move here", "⇧↩"))
-            Text(verbatim: "·")
-            Text(L("jump.footer.quick", "%1$@ Quick jump", "⌘1–9"))
-        }
-        .font(.callout)
-        .foregroundStyle(.secondary)
-        .lineLimit(1)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
-        .accessibilityHidden(true)
     }
 }

@@ -2,9 +2,9 @@ import AppKit
 import KiwiDeskCore
 
 /// What a key press means inside Jump to window (#1875 ▸ Ruling —
-/// keys): fixed, never rebindable. Pure, so every chord is
-/// testable without a panel. A press this answers nil for goes to
-/// the search field as typing.
+/// keys; #2229 for the Layouts scope's): fixed, never rebindable.
+/// Pure, so every chord is testable without a panel. A press this
+/// answers nil for goes to the search field as typing.
 enum JumpKey: Equatable {
     /// ↑ / ↓: one row, never wrapping.
     case step(Int)
@@ -16,7 +16,15 @@ enum JumpKey: Equatable {
     case quick(Int, moveHere: Bool)
     /// Esc: clears a query, then closes.
     case escape
-    /// Tab and its variants stay in the field.
+    /// ⇥ or ⇧⇥: the other scope, with the query cleared.
+    case toggleScope
+    /// ← / → in Layouts: one tile, never wrapping.
+    case side(Int)
+    /// ⌘S in Layouts: Keep in Profile.
+    case keep
+    /// ⌘, in Layouts: Layout Defaults in Settings.
+    case layoutDefaults
+    /// Tab with ⌃ or ⌥ stays in the field.
     case swallow
 
     private static let up: UInt16 = 126
@@ -27,6 +35,10 @@ enum JumpKey: Equatable {
     private static let enter: UInt16 = 76
     private static let escapeKey: UInt16 = 53
     private static let tab: UInt16 = 48
+    private static let left: UInt16 = 123
+    private static let right: UInt16 = 124
+    private static let sKey: UInt16 = 1
+    private static let comma: UInt16 = 43
 
     /// The number-row codes of 1–9, in order; a keypad digit is
     /// its row twin (`KeypadKeys`, #1074).
@@ -37,15 +49,20 @@ enum JumpKey: Equatable {
 
     static func of(
         keyCode: UInt16,
-        modifiers: NSEvent.ModifierFlags
+        modifiers: NSEvent.ModifierFlags,
+        scope: JumpScope = .windows
     ) -> JumpKey? {
         let held = modifiers.intersection(
             [.shift, .command, .option, .control]
         )
         let plain = held.isEmpty
+        if scope == .layouts, let key = layouts(keyCode, held) {
+            return key
+        }
         switch keyCode {
         case tab:
-            return .swallow
+            return held.subtracting(.shift).isEmpty
+                ? .toggleScope : .swallow
         case escapeKey:
             return plain ? .escape : nil
         // Whatever is held: ⇧ previews Move here and ⌘ the numbers,
@@ -59,6 +76,26 @@ enum JumpKey: Equatable {
             return .pick(moveHere: held.contains(.shift))
         default:
             return quick(keyCode, held)
+        }
+    }
+
+    /// The Layouts scope's own keys: ← → move the tiles even while
+    /// the field has focus (owner ruling, #2229), ⌘S keeps, ⌘,
+    /// opens Layout Defaults.
+    private static func layouts(
+        _ keyCode: UInt16,
+        _ held: NSEvent.ModifierFlags
+    ) -> JumpKey? {
+        switch keyCode {
+        case left, right:
+            guard held.subtracting(.shift).isEmpty else { return nil }
+            return .side(keyCode == left ? -1 : 1)
+        case sKey:
+            return held == .command ? .keep : nil
+        case comma:
+            return held == .command ? .layoutDefaults : nil
+        default:
+            return nil
         }
     }
 

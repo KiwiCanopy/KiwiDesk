@@ -78,9 +78,6 @@ struct CoreLocalizationBoundaryTests {
         // become real violations, with no compiler event to say
         // so. Re-check this entry if that move happens.
         "App/KiwiCore+StickyMarks.swift": 4,
-        // The layout picker's header (#762): a menu Core draws,
-        // like the bar menus beside it.
-        "App/KiwiCore+LayoutPicker.swift": 1,
         // The refusal pills (#933, #1055, #1091, widened #1255,
         // #1258) are the same shape as `+StickyMarks`: sentences
         // authored in Core for the Core-drawn `SizeLimitOverlay`,

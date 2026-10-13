@@ -21,7 +21,7 @@ extension KeybindingCatalog {
         }
     )
 
-    /// The layout picker at the pointer (#762).
+    /// The layout picker, the Jump panel's Layouts side (#2229).
     static let showLayoutPicker = NavCommand(
         label: "Show layout picker",
         lua: "KiwiDesk.show_layout_picker()",
