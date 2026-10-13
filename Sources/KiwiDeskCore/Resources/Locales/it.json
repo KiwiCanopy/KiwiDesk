@@ -1108,7 +1108,7 @@
   "monitors.selection.showing.many": "%1$d spazi qui · lo spazio %2$@ è visibile",
   "monitors.selection.showing.one": "1 spazio qui · lo spazio %1$@ è visibile",
   "monitors.space_placement": "Disposizione degli spazi",
-  "monocle.app_bar_xref_off": "L'App Bar di Monocle è disattivata, quindi nulla elenca le finestre dietro quella con focus. Attivala in %1$@.",
+  "monocle.app_bar_xref_off": "L'App Bar di Monocle è disattivata, quindi le finestre dietro quella con focus non sono elencate da nessuna parte. Attivala in %1$@.",
   "monocle.app_bar_xref_on": "L'App Bar di Monocle (attualmente attivata) si configura in %1$@.",
   "monocle.flip": "Capovolgi tra le finestre",
   "monocle.flip.help": "Sfoca la finestra e capovolge una carta dall'icona di un'app a quella della successiva quando cambia il focus in uno spazio Monocle, così vedi quale finestra è arrivata. Disattivalo per passare all'istante. «%1$@» stabilisce quanto dura il capovolgimento e non ha effetto quando questo è disattivato. Anche «Riduci movimento» di macOS lo mantiene disattivato.",

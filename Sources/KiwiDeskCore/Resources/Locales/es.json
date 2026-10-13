@@ -1108,7 +1108,7 @@
   "monitors.selection.showing.many": "%1$d espacios aquí · se muestra el espacio %2$@",
   "monitors.selection.showing.one": "1 espacio aquí · se muestra el espacio %1$@",
   "monitors.space_placement": "Distribución de espacios",
-  "monocle.app_bar_xref_off": "La App Bar de Monocle está desactivada, así que nada muestra las ventanas que quedan detrás de la enfocada. Actívala en %1$@.",
+  "monocle.app_bar_xref_off": "La App Bar de Monocle está desactivada, así que las ventanas que quedan detrás de la enfocada no aparecen en ninguna lista. Actívala en %1$@.",
   "monocle.app_bar_xref_on": "La App Bar de Monocle (actualmente activada) se configura en %1$@.",
   "monocle.flip": "Voltear entre ventanas",
   "monocle.flip.help": "Desenfoca la ventana y voltea una tarjeta del icono de una app al de la siguiente cuando cambia el foco en un espacio Monocle, para que veas qué ventana ha entrado. Desactiva esto para cambiar al instante. «%1$@» determina cuánto dura el volteo y no tiene efecto con el volteo desactivado. «Reducir movimiento» de macOS también lo mantiene desactivado.",
