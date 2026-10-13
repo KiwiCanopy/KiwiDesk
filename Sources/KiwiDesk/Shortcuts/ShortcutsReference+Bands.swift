@@ -72,14 +72,6 @@ extension ShortcutsReferenceBuilder {
                     )
                 )
             ),
-            // The editor's Open applications ▸ KiwiDesk rows
-            // (#1520) minus the panel's own opener. Without it a
-            // bound Open Settings fell through to Custom and
-            // rendered as raw untranslated Lua (#678 item 18).
-            ShortcutSubgroup(
-                title: L("app.name", "KiwiDesk"),
-                rows: rows([KeybindingCatalog.openSettings])
-            ),
             ShortcutSubgroup(
                 title: L(
                     "shortcuts.section.switch_layers",
@@ -163,9 +155,11 @@ extension ShortcutsReferenceBuilder {
                     "Opens a new instance"
                 )
             )
+        // Not the floating mark's symbol, which the Shortcuts side
+        // shows beside it for a different meaning (#2246).
         case .gather:
             return (
-                "macwindow.on.rectangle",
+                "rectangle.stack",
                 L(
                     "shortcuts.app_behavior.gather.badge",
                     "Gathers its windows here"
@@ -190,6 +184,7 @@ extension ShortcutsReferenceBuilder {
                     id: binding.id.uuidString,
                     label: binding.lua,
                     combo: glyphs(binding.combo),
+                    icon: "curlybraces",
                     monospaced: true
                 )
             }

@@ -12,6 +12,54 @@ extension JumpPanelController {
         return min(max(rows, 8), 10)
     }
 
+    /// The visible area with every KiwiShelf strip cut away by the
+    /// edge Core says it sits on — the one home for where the panel
+    /// may stand, read by its width, its place and the Shortcuts
+    /// sheet's cap (#2246). `NSScreen.visibleFrame` leaves the shelf
+    /// in. A top strip is ignored: the field stands below it at
+    /// `topFraction`.
+    static func clearArea(
+        visible: CGRect,
+        shelves: [ShelfFrame]
+    ) -> CGRect {
+        var area = visible
+        for shelf in shelves where shelf.frame.intersects(visible) {
+            let frame = shelf.frame
+            switch shelf.edge {
+            case .top:
+                break
+            case .bottom:
+                let cut = max(frame.maxY - area.minY, 0)
+                area.origin.y += cut
+                area.size.height -= cut
+            case .left:
+                let cut = max(frame.maxX - area.minX, 0)
+                area.origin.x += cut
+                area.size.width -= cut
+            case .right:
+                area.size.width -= max(area.maxX - frame.minX, 0)
+            }
+        }
+        return area
+    }
+
+    /// The Shortcuts side's tallest sheet: the panel runs from its
+    /// field down to 40 pt above the clear area's bottom, never
+    /// taller than `maxPanelHeight`, less the field, the button row
+    /// and the footer (#2246).
+    static func sheetCap(visible: CGRect, area: CGRect) -> CGFloat {
+        let top = visible.maxY - visible.height * topFraction
+        let below = top - area.minY - 40
+        return max(min(below, maxPanelHeight) - shortcutsChrome, 200)
+    }
+
+    /// The tallest the panel stands on its Shortcuts side.
+    static let maxPanelHeight: CGFloat = 720
+
+    /// What the Shortcuts side draws besides its sheet: the field,
+    /// the button row, the footer and their dividers.
+    static let shortcutsChrome: CGFloat = 130
+
     /// The panel's width: `JumpPanelView.width`, kept 40 pt clear
     /// of each edge of a narrower screen.
     static func width(visibleWidth: CGFloat) -> CGFloat {
@@ -29,10 +77,15 @@ extension JumpPanelController {
     /// The panel's origin on `visible`: centred across, its top at
     /// `topFraction`, and lifted where a tall panel would run past
     /// the bottom.
-    static func origin(size: CGSize, visible: CGRect) -> CGPoint {
+    static func origin(
+        size: CGSize,
+        visible: CGRect,
+        area: CGRect? = nil
+    ) -> CGPoint {
+        let area = area ?? visible
         let top = visible.maxY - visible.height * topFraction
-        let bottom = max(top - size.height, visible.minY)
-        return CGPoint(x: visible.midX - size.width / 2, y: bottom)
+        let bottom = max(top - size.height, area.minY)
+        return CGPoint(x: area.midX - size.width / 2, y: bottom)
     }
 
     /// Fits the panel to its list, keeping the top edge where it

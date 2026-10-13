@@ -826,12 +826,12 @@ and its menu.
 
 **"+N" governs a bounded container that cannot scroll; content
 past the fold of a SCROLLING container is cued in words
-instead** (#1292). The ⌃⌥K shortcuts panel is the case: its
-bands are non-uniform (headers, a caption, two-column layouts),
-the fold cuts *through* a row, and the controller knows heights
-rather than rows, so any N would be an estimate wearing a
-precise shape. The panel says "Scroll for more shortcuts" and
-counts nothing; it is read-only, so the hidden items have no
+instead** (#1292). The key panel's Shortcuts side is the case
+(#2246): its sections are non-uniform (titles, a caption), the
+fold cuts *through* a row, and the sheet knows heights rather
+than rows, so any N would be an estimate wearing a precise
+shape. The side says "Scroll for more shortcuts" and counts
+nothing; it is read-only, so the hidden items have no
 controls to lose and a label is admissible.
 
 The middle clause is arithmetic, so it is code:
@@ -1463,7 +1463,7 @@ the grey reads too. The argument is
 A control whose *only* consumer is off may still have a second
 one. KiwiShelf's "App glyph style" stays live even when no
 bar shows, because `iconSource` also drives the shortcuts
-panel's Apps band — check for a second reader before dimming.
+panel's Apps section — check for a second reader before dimming.
 
 The tree-wide half of the convention is guarded by suites that
 scan for a *shape* rather than listing the greyed controls,

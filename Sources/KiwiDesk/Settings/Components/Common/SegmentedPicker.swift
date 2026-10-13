@@ -11,6 +11,11 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// longest. A strip that hugs its content (#1726) sizes every
     /// segment to the widest label at the selected weight instead.
     private let hugsLabels: Bool
+    /// Each segment keeps its own label's width, reserved at the
+    /// selected weight so picking never changes it, without the
+    /// equal sizing `hugsLabels` adds — a strip whose longest label
+    /// must not cost every segment its width (#2246).
+    private let reservesWeight: Bool
     /// A key drawn in secondary ink after a segment's title, and
     /// read as that segment's VoiceOver hint, never its name. A new
     /// caller adds its ground to the contrast suite's pairings.
@@ -32,6 +37,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         _ label: String? = nil,
         spokenLabel: String? = nil,
         hugsLabels: Bool = false,
+        reservesWeight: Bool = false,
         hints: [Value: String] = [:],
         spokenHint: @escaping (String) -> String = { $0 },
         selection: Binding<Value>,
@@ -41,6 +47,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         self.label = label
         self.spokenLabel = spokenLabel
         self.hugsLabels = hugsLabels
+        self.reservesWeight = reservesWeight
         self.hints = hints
         self.spokenHint = spokenHint
         self._selection = selection
@@ -94,7 +101,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         let label = Text(title)
             .font(selected ? .body.weight(.semibold) : .callout)
             .lineLimit(1)
-        if hugsLabels {
+        if hugsLabels || reservesWeight {
             Text(title)
                 .font(.body.weight(.semibold))
                 .hidden()

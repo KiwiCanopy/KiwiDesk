@@ -737,11 +737,13 @@ Touching `State`, `Tiling`, `Layouts`, `Commands`, `App`, `Tabs`, `Models`,
   `new_window` — retired when its press opened nothing (#1518) — by the window
   switcher's un-minimize (#1875), or an OPEN-shaped activation — a press within
   a second, of a process that just started or shows no window (a reopen, an
-  un-minimize), outside a Desktop switch, a window landing before that
-  activation paid by it — never by the app being active or a press alone, keyed
-  by bundle id and paid on the fold's own rule verdict (#1599,
-  `LaunchFollowTests`, `LaunchFollowRetireTests`, `LaunchFollowReopenTests`,
-  `LaunchFollowSeamTests`)
+  un-minimize), or a press at most a second before a process started that
+  activates within `coldStartGrace` (#2201, never a press older than KiwiDesk's
+  start), outside a Desktop switch, a window landing before that activation
+  paid by it — never by the app being active or a press alone, keyed by bundle
+  id and paid on the fold's own rule verdict (#1599, `LaunchFollowTests`,
+  `LaunchFollowRetireTests`, `LaunchFollowReopenTests`,
+  `LaunchFollowColdStartTests`, `LaunchFollowSeamTests`)
 - a Move here on a hidden app is paid at that app's first honored focus REPORT,
   ahead of the #1207 memory and the follow, the handler deciding the retile
   (#1513, `JumpHiddenAppTests`)
@@ -1800,7 +1802,7 @@ Touching `Sources/KiwiDesk` (the GUI).
   `SettingsOpenFocusSeamTests`' `allowed` map is the one copy of who may call
   the door (#1281)
 - a key-capable own window built without `.closable` validates and performs
-  File ▸ Close itself, or ⌘W beeps at it — `ShortcutsPanel` is the instance,
+  File ▸ Close itself, or ⌘W beeps at it — `JumpPanel` is the instance,
   `MainMenuTests` the guard (#1533) — and a non-activating key panel hands the
   main menu only the File and Edit chords, through
   `MainMenu.performPanelChord`, a row joining those menus only once ruled safe

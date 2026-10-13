@@ -32,7 +32,7 @@ enum ChromeScanRoots {
     ///
     /// Shortcuts joined for the same reason one tree over
     /// (#1293/#1295), and it is the #828 lesson repeating: the
-    /// ⌃⌥K panel drew the retired `Color.accentColor` and a
+    /// old ⌃⌥K panel drew the retired `Color.accentColor` and a
     /// `Button` with no style at all, so on a Mac whose system
     /// accent is not green it rendered a pink chip and a pink
     /// button inside a kiwi app — shipped, and invisible to

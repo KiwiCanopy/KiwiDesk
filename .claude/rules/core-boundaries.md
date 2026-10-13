@@ -50,7 +50,7 @@ below, so it corrects itself when a seventh is added.
   fire and the documented capture reads nothing.
   `LogSeamSinkTests` pins Core's sink both ways; a GUI-side
   logger owes the same shape with no guard, so its doc comment
-  carries the danger (`ShortcutsPanelController`'s `panelLog`
+  carries the danger (`JumpPanelController`'s `jumpLog`
   is the worked example). Four guards, reading
   different things — `LogSeamWiringTests` scans source for the
   wiring and its `allowed` map is the exemption list;

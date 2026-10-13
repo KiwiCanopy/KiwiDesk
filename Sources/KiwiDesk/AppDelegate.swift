@@ -48,10 +48,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         return created
     }
     private let configIssues = ConfigIssuesWindowController()
-    /// The read-only shortcuts reference panel (#326), retained so
-    /// it survives close/reopen. Its "Edit in Settings…" bridge
-    /// opens the dashboard already navigated to Shortcuts.
-    var shortcutsPanel: ShortcutsPanelController?
+    /// The key panel: the window switcher, the shortcuts sheet
+    /// (#326, #2246) and the layout picker, retained so it
+    /// survives close and reopen.
     var jumpPanel: JumpPanelController?
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
@@ -137,26 +136,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         statusItem.onSaveLayoutToProfile = { [weak self] in
             self?.keepLayoutInProfile()
         }
-        let shortcutsPanel = ShortcutsPanelController(
-            core: core
-        ) { [weak self] in
-            self?.openSettingsFromTour(at: .shortcuts)
-        }
-        self.shortcutsPanel = shortcutsPanel
-        statusItem.onShowShortcuts = { [weak shortcutsPanel] in
-            shortcutsPanel?.toggle()
-        }
-        // Hotkey toggles the shortcuts reference panel (#330).
-        core.uiBridge.onShowShortcuts = { [weak shortcutsPanel] in
-            shortcutsPanel?.toggle()
-        }
         // Every forceFront is an own front Core honors (#1861).
         NSApplication.ownFrontNote = { [weak core] number in
             core?.noteOwnFront(number: number)
         }
-        // Hotkey toggles Jump to window (#1875).
+        // Hotkey toggles the window switcher (#1875).
         let jumpPanel = JumpPanelController(core: core)
         self.jumpPanel = jumpPanel
+        // The Shortcuts side's bridge lands Settings on Shortcuts.
+        jumpPanel.onEditShortcuts = { [weak self] in
+            self?.openSettingsFromTour(at: .shortcuts)
+        }
+        statusItem.onShowShortcuts = { [weak jumpPanel] in
+            jumpPanel?.toggle(.shortcuts)
+        }
+        // ⌃⌥K opens the panel on its Shortcuts side (#330, #2246).
+        core.uiBridge.onShowShortcuts = { [weak jumpPanel] in
+            jumpPanel?.toggle(.shortcuts)
+        }
         core.uiBridge.onShowJumpToWindow = { [weak jumpPanel] in
             jumpPanel?.toggle(.windows)
         }
@@ -250,12 +247,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.configIssues.model.issues = issues
         }
 
-        // Close a stale shortcuts panel on layer change (#603) —
+        // Re-read a shown shortcuts sheet on layer change (#603) —
         // read off the `layer_change` event like any other
         // consumer (#1168), so Core keeps one seam.
         core.bus.addSink { [weak self] event, _ in
             guard event == .layerChange else { return }
-            self?.shortcutsPanel?.closeIfOpen()
+            self?.jumpPanel?.reloadShortcutsIfShown()
         }
         // The menu bar's layer icon and, while the Space Bar is
         // off, the active Space (#1413) — off the bar's own

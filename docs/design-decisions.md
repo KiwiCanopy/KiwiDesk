@@ -5672,6 +5672,25 @@ them, measured on device, is an OPEN the user caused:
   the password, and a scripted launch 17 s or more after the
   last press. The read is the HID state's last click or
   key-down, which needs no permission.
+- **Or a press just before the process started.** A cold start
+  activates late — after a purge, Xcode came forward 1.39 s
+  after the Spotlight Return, VS Code 3.70 s and Word 7.75 s —
+  while each process started within 0.21 s of the press
+  ([#2201](https://github.com/KiwiCanopy/KiwiDesk/issues/2201)).
+  So a press at most a second BEFORE the process started is the
+  launch's cause, and the process is opening by construction —
+  for an activation up to 15 s after the start, twice Word's
+  measured 7.58 s; past that, an app activating itself is its
+  own act, as a press alone is not a cause. The grace is keyed to the START rather
+  than widened: a wider press grace would take the user along to
+  any app activating seconds after any key press, and would
+  widen #2187's app-act motion with it; Xcode relaunching itself
+  after its install prompt started 5.18 s after the last press
+  and stays put. A press from before KiwiDesk began managing
+  windows never counts — the login password precedes every
+  restored app. A press KiwiDesk does see, such as the unlock
+  password, can still precede a helper's launch; the 15 s
+  ceiling bounds that.
 - **An app with nothing showing.** A press alone is not a
   cause — anyone typing has pressed a key in the last second,
   and an app that brings itself forward then, or a plain switch
@@ -9828,8 +9847,8 @@ a window, and "Switch to next layout" rather than a bare noun.
 "Show" and not "Toggle" is Apple's own pattern for a key whose
 second press dismisses the surface ("Show Spotlight search",
 "Show Notification Center"). The panel's verb stays "Jump": the
-field, the preview and the footer say it, and J backs it up for an
-English reader. What links a key to its side in every language is
+Windows side's field prompt and the footer's ↩ hint say it, and J
+backs it up for an English reader. What links a key to its side in every language is
 position — `⌃⌥J`, `⌃⌥K` and `⌃⌥L` sit side by side on the home row
 — and the chord the scope switch prints beside each side, read
 from the live binding. A word mnemonic links only in English, so
@@ -10414,15 +10433,14 @@ profile's list. Listing a working chord under Inactive, captioned
 "pressing one recreates its Space", told the user the opposite of
 what a press does; Inactive keeps only #92's true orphans.
 
-**The shortcuts panel scrolls, and says so — in words, in the
-footer.** The panel is a glance surface but not a small one: the
-seeded keymap grows three rows per Space, so a stock setup runs
-to more rows than fit under the height ceiling
-`ShortcutsPanelController.resize` derives from the screen. It
-may therefore exceed the viewport, and the fold is cued by a
-line in the footer drawn only when `resize`'s own verdict says
-the content clipped — `overflows(fitting:ceiling:)`, one home,
-handed to the view rather than re-derived by it, so the cue
+**The shortcuts sheet scrolls, and says so — in words.** The
+sheet is a glance surface but not a small one: the seeded keymap
+grows three rows per Space, so a stock setup runs to more rows
+than fit under the cap `JumpPanelController.sheetCap` derives from
+the screen (#2246). It may therefore exceed the viewport, and the
+fold is cued by a line beside the sheet's buttons drawn only when
+the measured sheet runs past that cap —
+`JumpShortcutsView.overflows(content:cap:)`, one home, so the cue
 cannot disagree with the clamp that causes it.
 
 **The platform's own indicator does not work.**
@@ -10438,11 +10456,12 @@ auto-hide, with a mouse macOS already draws a legacy scroller, and
 under *Always* the scroller is permanent anyway — so it is not
 kept as a hedge.
 
-**Why words, and why in the footer: a partial row is not a fold
-cue when a terminator sits under it.** The fold cuts a row in
-half, which looks like a hint that the list continues — and is
-not, because immediately below it sit a full-width `Divider()`
-and a footer carrying a hint and a button. A hard rule plus
+**Why words, and why in the button row under the sheet: a partial
+row is not a fold cue when a terminator sits under it.** The fold
+cuts a row in half, which looks like a hint that the list
+continues — and is not, because immediately below it sits the
+sheet's own button row, carrying the layer label and **Edit in
+Settings…**, and under that the panel's footer. A strip of
 chrome is the strongest "this is the bottom" signal a panel
 has, and it cancels the cut above it. That is why no further
 geometry at the fold can win: it would have to argue against a
@@ -10483,11 +10502,10 @@ constructs, `.legacy` becomes legitimate and is re-argued then.
 
 Making the content *fit* (#1294) lowers how often the fold
 appears and cannot retire the cue — 45 rows do not fit under a
-720 pt ceiling at any column count, and an install with many
-app or raw-Lua rows overflows any fixed size. The cue is
-permanent, not a stopgap. The asymmetry that issue would
-exploit — the panel's height derives from the screen while its
-width is a literal 760 — is its own ruling if taken.
+screen-derived cap, and an install with many app or raw-Lua rows
+overflows any fixed size. The cue is permanent, not a stopgap.
+The panel's width is ruled under ▸ *The shortcuts sheet is the
+key panel's middle side*.
 
 **The shortcuts panel takes UNTINTED Liquid Glass, and the
 untinted half is a ruling rather than a limit.** (#1295/#1293,
@@ -10516,8 +10534,8 @@ Three reasons it is declined, hardest first:
    before the dimming is counted.
 2. **The bars' argument does not transfer.** A bar's ink is fixed
    palette hex with no vibrancy path, so its fill is a legibility
-   floor. This panel's prose is vibrant throughout — seven
-   `foregroundStyle` sites, all `.secondary` — and its two fixed
+   floor. This panel's prose is vibrant throughout — its
+   `foregroundStyle` sites are `.secondary` — and its two fixed
    hexes are not prose: the chip's accent fill and the seal's
    `ink`, which sits on the button's own fill rather than on bare
    glass. `.regular` strengthens this rather than weakening it: a
@@ -10592,8 +10610,8 @@ information** — the layer name is text, drawn vibrant — so the
 failure mode is "identity fades on some desktops", not "the user
 cannot tell which layer they are in", and nothing rides the hue
 for a colour-vision floor to bind. Both escalations are worse: an
-opaque accent capsule puts the loudest mark in the footer on a
-passive readout and reads as a control, and an accent stroke swaps
+opaque accent capsule puts the loudest mark in the sheet's button
+row on a passive readout and reads as a control, and an accent stroke swaps
 an unmeasurable wash for an unmeasurable hairline at fixed
 luminance — the same objection that defers the panel edge.
 
@@ -10614,34 +10632,26 @@ tree outside `ChromeScanRoots` — the panel's `Shortcuts/` tree was
 one — is not partly covered but *silently exempt*, which is how
 such a surface ships.
 
-**The shortcuts panel never lists its own opener.** The
-`show_shortcuts` binding (⌃⌥K, seeded per layer, #602) is dropped
-from the panel builder's working set and renders in no band — the
-one deliberate exception to the panel's "no bound shortcut is ever
-invisible" contract. The footer's dismiss hint is its home: it
-shows the live resolved combo wherever bindings are live, follows
-a rebind automatically, and still renders in the empty and
-unavailable states, which no band does — a row can't match that. A
-row would also be self-referential (you just pressed the combo it
-teaches; no macOS surface lists its own trigger as content) and,
-listed, it surfaces in *Custom*, the band that means
-"user-authored raw Lua" — a first-party seeded default there reads
-as the user's own script. Promoting the row to the top instead was
-considered and rejected: redundancy with the footer is most
-jarring as the first line read, ahead of the actions the user
-opened the panel to look up. The editor's General section likewise
-stays low — macOS's own Keyboard pane puts "Keyboard Shortcuts…"
-below the content, and the menu bar's "View Shortcuts…" plus the
-onboarding hint already carry discovery. Consequence to keep: a
-fresh layer (seeded with only the opener) honestly shows the
-"nothing bound" placeholder while the footer teaches ⌃⌥K.
+**The shortcuts sheet never lists the key panel's own openers.**
+The three bindings that open the panel's sides — ⌃⌥J, ⌃⌥K
+(`show_shortcuts`, seeded per layer, #602) and ⌃⌥L — are dropped
+from the builder's working set and render in no section: the one
+deliberate exception to the sheet's "no bound shortcut is ever
+invisible" contract. Their home is the side switch, which prints
+each side's live chord (#2245): it follows a rebind, and it shows
+in the empty and unavailable states, which no section does. A row
+would also be self-referential — you just pressed the chord it
+teaches, and no macOS surface lists its own trigger as content —
+and, listed, it would surface in *Custom*, the section that means
+"user-authored raw Lua". Consequence to keep: a fresh layer seeded
+with only the openers shows Open Settings alone, under Apps.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing it
-re-leaks the seed into Custom. (#602, PR #638)
+re-leaks the seed into Custom. (#602, PR #638, #2246)
 
 :::unreleased
-**The keyboard panels never take activation, so there is none to
-hand back.** The ⌃⌥K panel and the ⌃⌥J / ⌃⌥L panel are
-non-activating panels (#1875): they take the keyboard while the
+**The key panel never takes activation, so there is none to
+hand back.** The one panel ⌃⌥J, ⌃⌥K and ⌃⌥L open is a
+non-activating panel (#1875): it takes the keyboard while the
 app the user came from stays active. Activating KiwiDesk to give
 a borderless panel the keyboard raised its other windows — the
 Settings window, whenever it was open — and AX re-reported
@@ -10655,11 +10665,55 @@ was (owner ruling 2026-10-13). Only a Jump pick of another app's
 window arms the ignored-panel grace for KiwiDesk's own pid, since
 its order-out would key Settings ahead of the window picked.
 Because KiwiDesk's main menu is not the one in the menu bar
-while a panel is up, each panel hands its key equivalents to that
-menu itself, so ⌘W and the edit chords keep working.
-`ShortcutsPanelReturnTests` and `JumpPanelControllerTests` pin
-the arms and
+while the panel is up, the panel hands the File and Edit chords to
+that menu itself, so ⌘W and the edit chords keep working; it
+claims its own ⌘ chords first and swallows any other chord a
+KiwiDesk menu holds, since the user believes the app behind it
+has the keyboard and a ⌘Q aimed there must not quit KiwiDesk.
+`JumpPanelControllerTests` pins the arms and
 `PanelHandBackTests` the non-activating show. (#952, #1875)
+:::
+
+:::unreleased
+**The shortcuts sheet is the key panel's middle side (#2246).**
+⌃⌥J, ⌃⌥K and ⌃⌥L open one panel on its Windows, Shortcuts and
+Layouts sides, in the order of the keys under the right hand; ⇥
+steps forward and ⇧⇥ back, wrapping. Three keyboard surfaces in
+two shapes were more to learn than one — and a third side earns
+its place only because the field searches it: a read-only page
+bolted on beside two searchable sides was refused. The sheet is
+one titled column, as Spotlight's and Raycast's results are: a
+searchable panel is read top-down, ↑ ↓ and VoiceOver then share
+one row order, and every label gets the panel's width in every
+language, where the old two columns halved it. Open Settings
+leads Apps, which is KiwiDesk's own app row, rather than standing
+alone in a one-row group. The panel holds one fixed width, 720 pt,
+since a width that changed on ⇥ would move the field and the
+switch under the eye; only the height follows each side, its top
+fixed at the field, the sheet growing down to just above the
+screen's bottom or a KiwiShelf strip, which the visible frame
+does not exclude. The field shows only the typing: the selection
+is the green row or tile, shown once, and inline completion —
+weighed — reads as native only where → or Tab would accept it,
+which here they never do.
+
+**The footer lights one hint: the pick live now (#2246, owner
+ruling 2026-10-13).** With the selection gone from the field, the
+footer says what a press would do: exactly one hint in full ink —
+the pick that acts on the selection with the modifiers held now,
+read off the panel's own key map rather than a modifier table —
+and every other hint secondary. On Windows that is ↩ Jump at
+rest, ⇧↩ Move here under ⇧, and the digits under ⌘ or ⇧⌘; ⇧
+already rewrites the digit hint to "⇧⌘1–9 Quick move here", so ⌘
+joining only lights it — one press changes one thing. Layouts
+lights ↩ Apply, or its digits under ⌘. Navigation (⇥, ← →) and
+bridges (⌘, Edit) never light, the Shortcuts side lights nothing
+since ↩ runs nothing there, and an empty list lights nothing. Ink
+alone carries it, with no tint or weight, and it swaps without
+motion. The way here follows the chord's reach: ⇧ alone moves the
+selected row, so only it shows its "Space n → Space m"; under ⇧⌘
+every numbered row is a target through its digit, so each shows
+its own.
 :::
 
 :::unreleased
@@ -10684,11 +10738,13 @@ accent because re-tinting a menu fights the platform. So green
 marks what KiwiDesk draws and the user's accent marks what macOS
 draws, and the line between them is the window, not the feature.
 
-One panel holds both scopes because both answer "take me
-somewhere" from the keyboard, and one field on top keeps typing
-the quick way in, as Spotlight's categories do. ⇥ switches scope
-and clears the field, since the same letters mean a window in one
-and a layout in the other. The other scope's own shortcut switches
+One panel holds the windows and the layouts because both answer
+"take me somewhere" from the keyboard, and one field on top keeps
+typing the quick way in, as Spotlight's categories do; the
+shortcuts joined as a third side under ▸ *The shortcuts sheet is
+the key panel's middle side*. ⇥ steps between the sides and clears
+the field, since the same letters mean a window in one and a
+layout in another. The other scope's own shortcut switches
 too, so ⌃⌥L inside Jump lands on Layouts. In the Layouts scope ←
 and → move the tiles even while the field has focus: a one-word
 filter has almost nothing to edit with a caret, and the tiles are
@@ -14802,7 +14858,7 @@ Decisions folded in (ui-designer consult and owner direction,
   not third-party trademark rights in the depicted app marks —
   accepted deliberately.
 - **The shortcuts panel follows the GLOBAL glyph style**: with
-  `app_font` active its Apps band leads with the same ligatures. The
+  `app_font` active its Apps section leads with the same ligatures. The
   panel spans all layouts, so a Lua-only per-layout
   `icon_source` override deliberately does not steer it.
 

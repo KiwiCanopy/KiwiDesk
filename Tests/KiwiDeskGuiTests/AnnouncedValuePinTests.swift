@@ -109,12 +109,9 @@ struct AnnouncedValuePinTests {
         // #1655: the Space history group's heading.
         "SpaceHistoryRow.swift": 1,
         "HomeScreen.swift": 1,
-        // The ⌃⌥K panel's band and subgroup headers, in the census
-        // from the moment `Sources/KiwiDesk/Shortcuts` joined
-        // `ChromeScanRoots` (#1293). #1292 gave them the trait
-        // while the directory was still outside every lens, so
-        // this is the backlog arriving rather than a new title.
-        "ShortcutsBands.swift": 2,
+        // The key panel's Shortcuts section titles (#1292, #2246),
+        // one heading level since the bands went.
+        "ShortcutsSheetView.swift": 1,
         // The update window's title, the Highlights and Before you
         // update labels (#1542), and each kind card's heading and
         // the checking state's title (#1849).

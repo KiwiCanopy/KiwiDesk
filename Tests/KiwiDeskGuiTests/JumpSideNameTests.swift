@@ -59,8 +59,11 @@ struct JumpSideNameTests {
     func chordsAreWired() throws {
         let controller = try Self.source("JumpPanelController.swift")
         #expect(
-            controller.occurrences(of: "model.chords = Self.chords") == 1
+            controller.occurrences(of: "model.chords = liveChords()") == 1
         )
+        // A layer switch re-reads them on whatever side shows.
+        let reload = try Self.source("JumpPanelController+Shortcuts.swift")
+        #expect(reload.occurrences(of: "model.chords = liveChords()") == 1)
         #expect(
             controller.occurrences(
                 of: "ShortcutsOpenBinding.comboGlyphs(core: core, lua:"

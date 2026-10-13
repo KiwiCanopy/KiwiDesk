@@ -57,25 +57,21 @@ struct PanelHandBackTests {
         #expect(core.ignoredPanel.active.isEmpty)
     }
 
-    @Test("both key panels are non-activating")
+    @Test("the key panel is non-activating")
     func panelsAreNonActivating() {
         let core = makeTestCore()
         let jump = JumpPanelController(core: core).makePanel()
-        let sheet = ShortcutsPanelController(core: core, onEdit: {})
-            .makePanel()
         #expect(jump.styleMask.contains(.nonactivatingPanel))
-        #expect(sheet.styleMask.contains(.nonactivatingPanel))
     }
 
     /// A non-activating panel's app is not the one in the menu
     /// bar, so both hand their chords to KiwiDesk's main menu —
     /// ⌘W's Close (#1533) and the edit chords, one table.
-    @Test("both panels hand their chords to the main menu")
+    @Test("the key panel hands its chords to the main menu")
     func chordsReachTheMainMenu() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         for path in [
-            "Sources/KiwiDesk/Jump/JumpPanel.swift",
-            "Sources/KiwiDesk/Shortcuts/ShortcutsPanelController.swift",
+            "Sources/KiwiDesk/Jump/JumpPanel.swift"
         ] {
             let source = SourceScan.stripComments(
                 try String(
@@ -96,13 +92,13 @@ struct PanelHandBackTests {
         }
     }
 
-    /// Both key panels open through the one door.
-    @Test("both panels present through the hand-back")
+    /// The key panel opens through the one door (#2246 retired the
+    /// second).
+    @Test("the key panel presents through the hand-back")
     func panelsPresentThroughTheDoor() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         for path in [
-            "Sources/KiwiDesk/Jump/JumpPanelController.swift",
-            "Sources/KiwiDesk/Shortcuts/ShortcutsPanelController.swift",
+            "Sources/KiwiDesk/Jump/JumpPanelController.swift"
         ] {
             let raw = try String(
                 contentsOf: root.appendingPathComponent(path),

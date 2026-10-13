@@ -21,7 +21,7 @@ struct JumpPanelView: View {
     private var reduceMotion
 
     /// The key panels' scale (#2229 ▸ shared panel style).
-    static let width: CGFloat = 640
+    static let width: CGFloat = 720
     static let fieldHeight: CGFloat = 44
     /// The scope switch's cross-fade; the refit waits it out.
     static let scopeFade: TimeInterval = 0.12
@@ -34,7 +34,12 @@ struct JumpPanelView: View {
             Divider()
             scopeContent
             Divider()
-            JumpFooter(scope: model.scope, overflows: overflows)
+            JumpFooter(
+                scope: model.scope,
+                overflows: overflows,
+                modifiers: model.heldModifiers,
+                hasSelection: model.hasSelection
+            )
         }
         // The side's own name, which its shortcut row shows (#2245).
         .accessibilityElement(children: .contain)
@@ -72,18 +77,15 @@ struct JumpPanelView: View {
                     get: { model.query },
                     set: { model.query = $0 }
                 ),
-                prompt: model.field == nil
-                    ? Text(model.scope.fieldName) : nil
+                // The field shows only the typing; the selection is
+                // the row or tile below (#2246).
+                prompt: Text(model.scope.fieldName)
             )
             .textFieldStyle(.plain)
             .font(.title3)
-            // The selected name stands in for the typing, so the
-            // typed glyphs and the caret are drawn clear under it.
-            .foregroundStyle(model.field == nil ? Color.primary : Color.clear)
-            .tint(model.field == nil ? SettingsTheme.accent : .clear)
+            .tint(SettingsTheme.accent)
             .focused($fieldFocused)
             .accessibilityLabel(model.scope.fieldName)
-            .overlay(alignment: .leading) { fieldName }
             JumpScopeSwitch(model: model)
         }
         // The glyph keeps the row icons' leading edge: the
@@ -103,6 +105,14 @@ struct JumpPanelView: View {
         ZStack(alignment: .top) {
             if model.scope == .windows {
                 results.transition(.opacity)
+            } else if model.scope == .shortcuts, let sheet = model.shortcuts {
+                JumpShortcutsView(
+                    sheet: sheet,
+                    scroll: model.sheetScroll,
+                    maxHeight: model.sheetCap,
+                    onEdit: { model.handle(.settings) }
+                )
+                .transition(.opacity)
             } else if let layouts = model.layouts {
                 JumpLayoutsView(
                     list: layouts,
@@ -117,33 +127,6 @@ struct JumpPanelView: View {
                 )
                 .transition(.opacity)
             }
-        }
-    }
-
-    /// The selected row's name in place of the typing — the typed
-    /// letters at full ink — then what ↩ does, which never
-    /// truncates; VoiceOver reads the row, not this.
-    @ViewBuilder private var fieldName: some View {
-        if let field = model.field {
-            HStack(spacing: 0) {
-                ForEach(SentenceFrame(field.frame).segments) { segment in
-                    switch segment.slot {
-                    case .text(let literal):
-                        Text(literal)
-                            .foregroundStyle(.secondary)
-                            .fixedSize()
-                    case .argument(1):
-                        Text(field.name)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                    case .argument:
-                        EmptyView()
-                    }
-                }
-            }
-            .font(.title3)
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
         }
     }
 

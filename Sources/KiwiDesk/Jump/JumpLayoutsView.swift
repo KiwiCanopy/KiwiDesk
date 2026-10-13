@@ -67,13 +67,16 @@ struct JumpLayoutsView: View {
 
     private var buttons: some View {
         HStack(spacing: 8) {
-            chordButton(LayoutPickText.layoutDefaults, chord: "⌘,") {
+            KeyPanelChordButton(
+                title: LayoutPickText.layoutDefaults,
+                chord: "⌘,"
+            ) {
                 onLayoutDefaults(list.selected ?? list.state.live)
             }
             Spacer(minLength: 0)
             if let profile = list.state.profile {
-                chordButton(
-                    LayoutPickText.keep(profile),
+                KeyPanelChordButton(
+                    title: LayoutPickText.keep(profile),
                     chord: "⌘S",
                     hint: list.state.keepArmed
                         ? nil : LayoutPickText.keepSaved
@@ -83,31 +86,6 @@ struct JumpLayoutsView: View {
         }
         .padding(.horizontal, KeyPanelStyle.selectionInset + 10)
         .padding(.bottom, 10)
-    }
-
-    /// A button drawing its chord the way a menu item does; the
-    /// chord is its hint, never its name.
-    private func chordButton(
-        _ title: String,
-        chord: String,
-        hint: String? = nil,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                Text(title).lineLimit(1)
-                Text(verbatim: chord)
-                    .font(.callout.monospaced())
-                    .foregroundStyle(.secondary)
-                    .accessibilityHidden(true)
-            }
-        }
-        .settingsActionButton()
-        .controlSize(.small)
-        // The field keeps the keys; the chord reaches the button.
-        .focusable(false)
-        .accessibilityLabel(title)
-        .accessibilityHint(hint ?? LayoutPickText.chordHint(chord))
     }
 }
 

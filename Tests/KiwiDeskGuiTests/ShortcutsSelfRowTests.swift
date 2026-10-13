@@ -54,7 +54,9 @@ struct ShortcutsSelfRowTests {
         reset()
         let reference = build(DefaultKeybindings.appChromeRows())
         #expect(!reference.isEmpty)
-        let rows = reference.controls.flatMap(\.rows)
+        // Open Settings leads Apps (#2246), never Controls.
+        #expect(reference.controls.isEmpty)
+        let rows = reference.apps
         #expect(rows.count == 1)
         #expect(reference.custom.isEmpty)
         #expect(

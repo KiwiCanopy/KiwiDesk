@@ -11,11 +11,13 @@ final class JumpModel: ObservableObject {
     @Published private(set) var scope: JumpScope = .windows
     /// The Layouts scope's tiles, read fresh on each entry to it.
     @Published var layouts: LayoutPickList?
+    /// The Shortcuts side's sheet, read fresh on each entry to it
+    /// (#2246).
+    @Published var shortcuts: ShortcutsSheet?
+    /// The scroll the Shortcuts side's keys last asked for.
+    @Published var sheetScroll = SheetScroll()
     @Published private(set) var commandHeld = false
     @Published private(set) var shiftHeld = false
-    /// Whether an input method is composing in the field; the
-    /// ghost after the typed text stands down meanwhile.
-    @Published private(set) var composing = false
     /// Bumped each time the panel becomes key; the field takes the
     /// focus on every bump.
     @Published private(set) var fieldFocusRequests = 0
@@ -34,11 +36,14 @@ final class JumpModel: ObservableObject {
     var currentPointer = JumpModel.livePointer
     /// Each side's own chord, read from the live bindings when the
     /// panel opens; a side with none bound is absent (#2245).
-    var chords: [JumpScope: String] = [:]
+    @Published var chords: [JumpScope: String] = [:]
     /// Each app's icon, read once when the panel opens.
     let icons: [pid_t: NSImage]
     /// The most rows the list shows before it scrolls.
     let rowCap: Int
+    /// The tallest the Shortcuts side's sheet stands, from the
+    /// screen it opens on (`JumpPanelController.sheetCap`).
+    let sheetCap: CGFloat
 
     var onPick: (JumpEntry, _ moveHere: Bool) -> Void = { _, _ in }
     var onClose: () -> Void = {}
@@ -52,11 +57,16 @@ final class JumpModel: ObservableObject {
     var onApply: (LayoutMode) -> Void = { _ in }
     var onKeep: () -> Void = {}
     var onLayoutDefaults: (LayoutMode) -> Void = { _ in }
+    /// Reads the active layer's shortcuts now; nil where
+    /// `init.lua` owns them.
+    var loadShortcuts: () -> ShortcutsReference? = { nil }
+    var onEditShortcuts: () -> Void = {}
 
     init(
         snapshot: JumpSnapshot,
         icons: [pid_t: NSImage],
         rowCap: Int,
+        sheetCap: CGFloat = 400,
         modifiers: NSEvent.ModifierFlags = [],
         pointer: CGPoint? = nil
     ) {
@@ -64,16 +74,28 @@ final class JumpModel: ObservableObject {
         lastPointer = pointer ?? Self.livePointer()
         self.icons = icons
         self.rowCap = rowCap
+        self.sheetCap = sheetCap
         noteModifiers(modifiers)
     }
 
     var query: String {
-        get { scope == .windows ? list.query : layouts?.query ?? "" }
+        get {
+            switch scope {
+            case .windows: return list.query
+            case .shortcuts: return shortcuts?.query ?? ""
+            case .layouts: return layouts?.query ?? ""
+            }
+        }
         set {
             guard newValue != query else { return }
             // What re-ranks under the pointer is no pointer move.
             lastPointer = currentPointer()
-            guard scope == .windows else {
+            switch scope {
+            case .windows: break
+            case .shortcuts:
+                setShortcutQuery(newValue)
+                return
+            case .layouts:
                 setLayoutQuery(newValue)
                 return
             }
@@ -83,25 +105,23 @@ final class JumpModel: ObservableObject {
         }
     }
 
-    func noteComposing(_ composing: Bool) {
-        if composing != self.composing { self.composing = composing }
-    }
-
-    /// What the field shows in place of the typing; nil while an
-    /// input method composes, which owns the field meanwhile.
-    var field: JumpGhost.Field? {
-        guard !composing else { return nil }
-        guard scope == .windows else { return layoutField }
-        return JumpGhost.field(selected: list.selected, moveHere: shiftHeld)
-    }
-
     func handle(_ key: JumpKey) {
         guard !leaving else { return }
-        if key == .toggleScope {
-            setScope(scope.other)
+        if case .stepScope(let forward) = key {
+            // A Layouts side with no Space to act on is stepped
+            // past rather than stopping ⇥.
+            let next = scope.stepped(forward: forward)
+            if !setScope(next), next == .layouts {
+                setScope(next.stepped(forward: forward))
+            }
             return
         }
-        if scope == .layouts {
+        switch scope {
+        case .windows: break
+        case .shortcuts:
+            handleShortcuts(key)
+            return
+        case .layouts:
             handleLayouts(key)
             return
         }
@@ -124,27 +144,35 @@ final class JumpModel: ObservableObject {
             } else {
                 query = ""
             }
-        case .toggleScope, .side, .keep, .layoutDefaults, .swallow:
+        case .stepScope, .side, .keep, .settings, .swallow:
             break
         }
     }
 
-    /// Switches to `scope` with both queries cleared (owner
+    /// Switches to `scope` with every query cleared (owner
     /// ruling, #2229) — a query means different things in each.
     /// Layouts reads its Space fresh, and stays out of reach
-    /// where that Space is gone.
-    func setScope(_ scope: JumpScope) {
-        guard scope != self.scope else { return }
+    /// where that Space is gone. Shortcuts reads the active layer
+    /// fresh.
+    /// False where the side stayed out of reach.
+    @discardableResult
+    func setScope(_ scope: JumpScope) -> Bool {
+        guard scope != self.scope else { return true }
         if scope == .layouts {
-            guard let fresh = loadLayouts(nil) else { return }
+            guard let fresh = loadLayouts(nil) else { return false }
             layouts = fresh
+        }
+        if scope == .shortcuts {
+            shortcuts = ShortcutsSheet(reference: loadShortcuts())
         }
         if !list.query.isEmpty { list.setQuery("") }
         layouts?.setQuery("")
+        shortcuts?.setQuery("")
         self.scope = scope
         lastPointer = currentPointer()
         onScopeChange()
         onAnnounce(scope.title)
+        return true
     }
 
     /// The selection follows the pointer, on a real move only
@@ -165,6 +193,23 @@ final class JumpModel: ObservableObject {
         guard point != lastPointer else { return false }
         lastPointer = point
         return true
+    }
+
+    /// ⇧ and ⌘ as held now, for the footer's one lit hint.
+    var heldModifiers: NSEvent.ModifierFlags {
+        var flags: NSEvent.ModifierFlags = []
+        if shiftHeld { flags.insert(.shift) }
+        if commandHeld { flags.insert(.command) }
+        return flags
+    }
+
+    /// Whether the side shown has a selection a pick acts on.
+    var hasSelection: Bool {
+        switch scope {
+        case .windows: return list.selected != nil
+        case .shortcuts: return false
+        case .layouts: return layouts?.selected != nil
+        }
     }
 
     func noteModifiers(_ flags: NSEvent.ModifierFlags) {

@@ -52,6 +52,8 @@ struct SymbolClassifierSeamTests {
             "builds the refusal pill's image from `pillSymbol`",
         "Tests/KiwiDeskCoreTests/ResizeRefusalSymbolTests.swift":
             "asserts every pill symbol RESOLVES; classifies nothing",
+        "Tests/KiwiDeskGuiTests/ShortcutsSheetTests.swift":
+            "asserts every verb glyph RESOLVES; classifies nothing",
         "Sources/KiwiDeskCore/Bar/BarMenu.swift":
             "builds a bar menu row's image from a fixed name",
         "Sources/KiwiDeskCore/Bar/ShelfCountView.swift":
@@ -123,6 +125,8 @@ struct SymbolClassifierSeamTests {
             "asserts every pill symbol resolves",
         "Tests/KiwiDeskCoreTests/ShelfCountTests.swift":
             "asserts every count chevron resolves",
+        "Tests/KiwiDeskGuiTests/ShortcutsSheetTests.swift":
+            "asserts every verb glyph resolves",
     ]
 
     @Test("A nil-compared lookup lives in the classifier alone")
