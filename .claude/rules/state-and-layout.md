@@ -341,9 +341,16 @@ editing here:
   (#1518, which retires its own debt when the app answers that
   it opened nothing), by the window switcher's un-minimize (#1875,
   an open by the same rule), and by `noteAppActivation` for an
-  activation within `pressGrace` of a click or key-down, of a process started within `launchGrace`
-  or showing no window (a reopen, an un-minimize — owner ruling
-  2026-09-23), outside a Desktop switch — never on "the app is
+  activation within `pressGrace` of a click or key-down, of a
+  process started within `launchGrace` or showing no window (a
+  reopen, an un-minimize — owner ruling 2026-09-23), or of a
+  process that started at most `pressGrace` AFTER the last press
+  and activates within `coldStartGrace` of its start — a slow
+  cold start (#2201) — outside a Desktop switch. That press-keyed
+  arm reads the press timing through `pressBefore` alone, and a
+  press older than `watchedFor` (KiwiDesk's own start) never
+  counts, or the login password launches every restored app
+  (`LaunchFollowColdStartTests`) — never on "the app is
   active" or "a press just happened" alone, which the boot scan,
   a switch's arriving app and any app that activates while the
   user types satisfy (the measurements are

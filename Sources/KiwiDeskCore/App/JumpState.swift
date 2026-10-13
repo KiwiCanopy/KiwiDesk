@@ -128,7 +128,7 @@ extension KiwiCore {
         guard let owed = jump.take(arrived: window) else { return }
         let now = wallClock()
         let age = now.timeIntervalSince(owed.at)
-        let pressed = launchFollow.pressAge?().map { $0 < age } ?? false
+        let pressed = launchFollow.pressed(within: age)
         let commanded =
             eventLoop.lastCommandedFocus.map { $0 > owed.commandedAt }
             ?? false

@@ -73,8 +73,7 @@ extension KiwiCore {
     ) -> TimeInterval? {
         if let launchedAt = activation.launchedAt,
             let press = launchFollow.pressBefore(
-                launch: launchedAt,
-                now: now
+                startedAgo: now.timeIntervalSince(launchedAt)
             )
         {
             return press

@@ -27,7 +27,12 @@ extension KiwiCore {
         eventLoop.frontmostPID = frontmost
         // The launch follow's press read (#1599).
         launchFollow.pressAge = { KiwiCore.secondsSinceUserPress() }
-        launchFollow.watchingSince = wallClock()
+        launchFollow.watchedFor = { [weak self] in
+            self?.boot.began.map {
+                TimeInterval($0.duration(to: .now) / .milliseconds(1))
+                    / 1_000
+            }
+        }
         // The wake payment's fallback seed reads the one trusted
         // frontmost chain (#442/#1130).
         trustedFrontmostProvider = { [weak self] in

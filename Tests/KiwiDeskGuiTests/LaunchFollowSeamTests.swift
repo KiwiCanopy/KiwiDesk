@@ -38,7 +38,7 @@ struct LaunchFollowSeamTests {
         // Since when that read is KiwiDesk's: unwired, a cold
         // start never follows (#2201).
         (
-            "launchFollow.watchingSince = wallClock()",
+            "launchFollow.watchedFor = {",
             "KiwiCore+BootSeams.swift", 1
         ),
         ("launchFollow.pressBefore(", followFile, 1),

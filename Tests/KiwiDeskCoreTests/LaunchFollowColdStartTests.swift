@@ -17,27 +17,23 @@ import Testing
 struct LaunchFollowColdStartTests {
     private typealias F = LaunchFollowTests
 
-    /// A core whose last press is `pressAge` before `now`, watched
-    /// since `watchedAgo` before it.
+    /// A core whose last press is `pressAge` old, KiwiDesk having
+    /// managed windows for `watched` seconds.
     private static func makeCore(
         pressAge: TimeInterval,
-        now: Date,
-        watchedAgo: TimeInterval? = 60
+        watched: TimeInterval? = 60
     ) -> KiwiCore {
         let core = F.makeCore(pressAge: pressAge)
-        core.launchFollow.watchingSince = watchedAgo.map {
-            now.addingTimeInterval(-$0)
-        }
+        core.launchFollow.watchedFor = { watched }
         return core
     }
 
-    /// Activates at `now` and lands the ruled window.
+    /// Activates and lands the ruled window.
     private static func launch(
         _ core: KiwiCore,
-        launchedAgo: TimeInterval,
-        now: Date
+        launchedAgo: TimeInterval
     ) {
-        F.activate(core, launchedAgo: launchedAgo, at: now)
+        F.activate(core, launchedAgo: launchedAgo)
         F.arrive(9, on: core)
     }
 
@@ -46,39 +42,55 @@ struct LaunchFollowColdStartTests {
         arguments: [(1.39, 1.18), (7.75, 7.58), (3.70, 3.57)]
     )
     func coldStartFollows(press: Double, launched: Double) {
-        let now = F.ahead
-        let core = Self.makeCore(pressAge: press, now: now)
-        Self.launch(core, launchedAgo: launched, now: now)
+        let core = Self.makeCore(pressAge: press)
+        Self.launch(core, launchedAgo: launched)
         #expect(core.state.workspaces.activeSpace == F.ruled)
         #expect(core.focusedWindowID == WindowID(9))
     }
 
     @Test("The lead bound is inclusive at the press grace")
     func leadAtTheGraceFollows() {
-        let now = F.ahead
-        let core = Self.makeCore(pressAge: 6, now: now)
+        let core = Self.makeCore(pressAge: 6)
         Self.launch(
             core,
-            launchedAgo: 6 - LaunchFollowIntent.pressGrace,
-            now: now
+            launchedAgo: 6 - LaunchFollowIntent.pressGrace
         )
         #expect(core.state.workspaces.activeSpace == F.ruled)
+    }
+
+    @Test("A lead just past the press grace stays put")
+    func leadPastTheGraceStays() {
+        let core = Self.makeCore(pressAge: 6)
+        Self.launch(
+            core,
+            launchedAgo: 6 - LaunchFollowIntent.pressGrace - 0.05
+        )
+        F.expectStayed(core)
+    }
+
+    @Test("The cold-start bound is inclusive, and past it stays put")
+    func coldStartBound() {
+        let grace = LaunchFollowIntent.coldStartGrace
+        let at = Self.makeCore(pressAge: grace + 0.2)
+        Self.launch(at, launchedAgo: grace)
+        #expect(at.state.workspaces.activeSpace == F.ruled)
+        let past = Self.makeCore(pressAge: grace + 0.3)
+        Self.launch(past, launchedAgo: grace + 0.1)
+        F.expectStayed(past)
     }
 
     @Test("A process started long after the press stays put")
     func selfRelaunchStays() {
         // Xcode relaunching itself after its install prompt.
-        let now = F.ahead
-        let core = Self.makeCore(pressAge: 5.64, now: now)
-        Self.launch(core, launchedAgo: 0.46, now: now)
+        let core = Self.makeCore(pressAge: 5.64)
+        Self.launch(core, launchedAgo: 0.46)
         F.expectStayed(core)
     }
 
     @Test("A press after the process started is no launch")
     func pressAfterStartStays() {
-        let now = F.ahead
-        let core = Self.makeCore(pressAge: 2, now: now)
-        Self.launch(core, launchedAgo: 3, now: now)
+        let core = Self.makeCore(pressAge: 2)
+        Self.launch(core, launchedAgo: 3)
         F.expectStayed(core)
     }
 
@@ -86,26 +98,23 @@ struct LaunchFollowColdStartTests {
     func pressBeforeWatchingStays() {
         // The login password: the restored apps start right after
         // it, and KiwiDesk itself starts later still.
-        let now = F.ahead
-        let core = Self.makeCore(pressAge: 7.75, now: now, watchedAgo: 5)
-        Self.launch(core, launchedAgo: 7.58, now: now)
+        let core = Self.makeCore(pressAge: 7.75, watched: 5)
+        Self.launch(core, launchedAgo: 7.58)
         F.expectStayed(core)
     }
 
     @Test("Unwired, the launch-keyed press is inert")
     func unwiredStays() {
-        let now = F.ahead
-        let core = Self.makeCore(pressAge: 7.75, now: now, watchedAgo: nil)
-        Self.launch(core, launchedAgo: 7.58, now: now)
+        let core = Self.makeCore(pressAge: 7.75, watched: nil)
+        Self.launch(core, launchedAgo: 7.58)
         F.expectStayed(core)
     }
 
     @Test("A Desktop switch around a cold launch still owes nothing")
     func desktopSwitchStillStays() {
-        let now = F.ahead
-        let core = Self.makeCore(pressAge: 7.75, now: now)
-        core.lastDesktopSwitch = now
-        Self.launch(core, launchedAgo: 7.58, now: now)
+        let core = Self.makeCore(pressAge: 7.75)
+        core.lastDesktopSwitch = F.ahead
+        Self.launch(core, launchedAgo: 7.58)
         F.expectStayed(core)
     }
 }
