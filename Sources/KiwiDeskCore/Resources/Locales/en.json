@@ -1164,7 +1164,7 @@
   "onboarding.starter_spaces.behaviour.bsp": "A new window splits the one it lands on.",
   "onboarding.starter_spaces.behaviour.floating": "Windows stay wherever you put them.",
   "onboarding.starter_spaces.behaviour.grid": "Windows share a grid that rebalances as they open.",
-  "onboarding.starter_spaces.behaviour.monocle": "One window fills the screen, and focus flips to the next one.",
+  "onboarding.starter_spaces.behaviour.monocle": "One window fills the screen, and the next one comes to the front.",
   "onboarding.starter_spaces.behaviour.scrolling": "Windows sit in a row, and the view scrolls to follow focus.",
   "onboarding.starter_spaces.behaviour.stack": "One master window; new windows join the stack beside it.",
   "onboarding.starter_spaces.behaviour.track": "Windows line up in tracks, and a new one can start a track of its own.",

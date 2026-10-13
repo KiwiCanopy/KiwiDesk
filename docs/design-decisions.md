@@ -3153,10 +3153,10 @@ array order, and the key the user pressed already states it.
 every existing profile stores the flip's old default, and turning
 the default off would leave it on for all of them; an opt-in
 would keep the owed-focus ledger and its hooks in every focus
-path for the few who chose it. The
-retired verbs are refused with no replacement, and the stored
-keys need no crossing: the animation settings decoder skips keys
-it does not know, so they drop away on the next write.
+path for the few who chose it. The stored keys need no
+crossing: the animation settings decoder and a
+look's admission both skip keys they do not know, and a profile
+drops them on its next write.
 
 Revisit this only on device evidence that a wordless step leaves
 users unsure which window came in — and then try a title-only
@@ -7954,10 +7954,10 @@ layout gains one more window, which the engine places — BSP and
 Grid resting on four, every other layout on three, one ruled
 count both hosts share (`LayoutStoryTests`), lowered where the
 Space fits fewer (below) — Scrolling steps
-focus and pans, Monocle's window in front fades away while the
-next one grows into the front (#2099), and a Floating window is
-dragged and left where it lands. Each story plays once when its thumbnail first appears —
-staggered down a list — and again on hover, and never loops.
+focus and pans, Monocle brings its next window to the front, and
+a Floating window is dragged and left where it lands. Each story
+plays once when its thumbnail first appears — staggered down a
+list — and again on hover, and never loops.
 
 This does not reopen the ruling above, which retired a SECOND
 FRAME: a pair shows two states and leaves the tween to the
@@ -7996,7 +7996,9 @@ teach a placement the engine does not make (the #702 rule). No
 story draws a `+`, Scrolling's included: a story shows a window
 arriving, and where the next one would go is the chooser's fact,
 not this one's. Only Floating's drag and Monocle's step are
-drawn by hand: the engine claims no placement for either.
+drawn by hand: the engine claims no placement for either, and
+Monocle's step pictures a window coming to the front rather than
+motion the app plays.
 
 **A story rests on what its Space fits** (owner ruling
 2026-09-28). The ruled count is a ceiling, lowered to the most

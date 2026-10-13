@@ -1155,7 +1155,7 @@
   "onboarding.starter_spaces.behaviour.bsp": "Новое окно делит то, на которое попадает.",
   "onboarding.starter_spaces.behaviour.floating": "Окна остаются там, куда ты их поставишь.",
   "onboarding.starter_spaces.behaviour.grid": "Окна занимают общий Grid, который перестраивается по мере их открытия.",
-  "onboarding.starter_spaces.behaviour.monocle": "Одно окно заполняет экран, а фокус переходит к следующему.",
+  "onboarding.starter_spaces.behaviour.monocle": "Одно окно заполняет экран, а следующее выходит на передний план.",
   "onboarding.starter_spaces.behaviour.scrolling": "Окна стоят в ряд, а экран прокручивается вслед за фокусом.",
   "onboarding.starter_spaces.behaviour.stack": "Одно главное окно; новые окна попадают в Stack рядом с ним.",
   "onboarding.starter_spaces.behaviour.track": "Окна выстраиваются в несколько Track, а новое может открыть собственный Track.",

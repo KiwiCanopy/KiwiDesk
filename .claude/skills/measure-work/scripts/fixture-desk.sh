@@ -86,8 +86,9 @@ scroll.set_slot_size("50%")
 -- Every animation both releases know, pinned to the shipped
 -- defaults, so a default moving in a release cannot move a row.
 -- The Space-switch animation and the Monocle flip differ between
--- releases (3.0.0 retired both) and are the caller's to state,
--- through [extra.lua].
+-- releases (3.0.0 retired both): a 2.x bundle states each in
+-- [extra.lua], animations.set_on_monocle_focus(false) for parity
+-- with 3.0.0.
 animations.set_duration(150)
 animations.set_scroll_duration(150)
 animations.set_on_shelf(true)

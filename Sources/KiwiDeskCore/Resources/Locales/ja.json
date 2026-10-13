@@ -1158,7 +1158,7 @@
   "onboarding.starter_spaces.behaviour.bsp": "新しいウインドウは、それが載ったウインドウを分割します。",
   "onboarding.starter_spaces.behaviour.floating": "ウインドウは置いた場所にとどまります。",
   "onboarding.starter_spaces.behaviour.grid": "ウインドウはグリッドを共有し、開くたびにグリッドが均等に調整されます。",
-  "onboarding.starter_spaces.behaviour.monocle": "1つのウインドウが画面全体を覆い、フォーカスは次のウインドウへ移ります。",
+  "onboarding.starter_spaces.behaviour.monocle": "1つのウインドウが画面全体を覆い、次のウインドウが前面に来ます。",
   "onboarding.starter_spaces.behaviour.scrolling": "ウインドウは1列に並び、画面がフォーカスを追ってスクロールします。",
   "onboarding.starter_spaces.behaviour.stack": "マスターウインドウは1つで、新しいウインドウはその隣のスタックに加わります。",
   "onboarding.starter_spaces.behaviour.track": "ウインドウはトラックに並び、新しいウインドウは専用のトラックを開くこともできます。",

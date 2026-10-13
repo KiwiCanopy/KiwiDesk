@@ -1155,7 +1155,7 @@
   "onboarding.starter_spaces.behaviour.bsp": "Ein neues Fenster teilt das Fenster, auf dem es landet.",
   "onboarding.starter_spaces.behaviour.floating": "Fenster bleiben, wo immer du sie hinstellst.",
   "onboarding.starter_spaces.behaviour.grid": "Fenster teilen sich ein Grid, das sich neu ausgleicht, wenn sie sich öffnen.",
-  "onboarding.starter_spaces.behaviour.monocle": "Ein Fenster füllt den Bildschirm, und der Fokus wechselt zum nächsten.",
+  "onboarding.starter_spaces.behaviour.monocle": "Ein Fenster füllt den Bildschirm, und das nächste kommt nach vorne.",
   "onboarding.starter_spaces.behaviour.scrolling": "Fenster stehen in einer Reihe, und der Bildschirm scrollt dem Fokus nach.",
   "onboarding.starter_spaces.behaviour.stack": "Ein Hauptfenster; neue Fenster kommen in den Stack daneben.",
   "onboarding.starter_spaces.behaviour.track": "Fenster reihen sich in Tracks auf, und ein neues kann einen eigenen Track öffnen.",

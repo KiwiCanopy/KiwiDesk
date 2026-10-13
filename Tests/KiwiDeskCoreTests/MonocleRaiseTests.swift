@@ -39,8 +39,8 @@ struct MonocleRaiseTests {
     }
 
     /// No migration: a 2.x file's `on_monocle_focus` and
-    /// `monocle_flip_duration` decode as unknown keys, keep every
-    /// leaf beside them, and are not written back.
+    /// `monocle_flip_duration` decode as unknown keys, cost none
+    /// of the leaves beside them, and are not written back.
     @Test("stored flip keys load and are dropped on save")
     func storedFlipKeysAreIgnored() throws {
         let stored = """
@@ -78,10 +78,13 @@ struct MonocleRaiseTests {
             )
         }
         let space = core.state.workspaces.space(of: WindowID(1))!
-        core.execute(
-            "set_mode",
-            args: [.string(space.raw), .string("monocle")]
+        #expect(
+            core.execute(
+                "set_mode",
+                args: [.string(space.raw), .string("monocle")]
+            ).isSuccess
         )
+        #expect(core.activeSpace?.mode == .monocle)
         core.state.workspaces.focus(WindowID(1), in: space)
         #expect(
             core.execute("focus", args: [.string("right")]).isSuccess

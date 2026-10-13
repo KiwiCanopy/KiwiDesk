@@ -45,8 +45,8 @@ editing here:
   which private surfaces may be adopted at all.
 - Never disable SIP, and never ask the user to.
 - **Another app's window cannot be transformed, faded or
-  captured from here** (measured 2026-09-16 for #1391's flip,
-  since retired by #2099): `SLSSetWindowTransform` and
+  captured from here** (measured 2026-09-16 for #1391):
+  `SLSSetWindowTransform` and
   `SLSSetWindowAlpha` on a foreign window perform and apply
   nothing — #884's performed-not-applied shape — and its live
   pixels need Screen Recording, which KiwiDesk does not ask

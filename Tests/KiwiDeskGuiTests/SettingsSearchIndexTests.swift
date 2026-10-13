@@ -189,9 +189,7 @@ struct SettingsSearchIndexTests {
         #expect(
             counts == [
                 .spaces: 2,
-                // 37 since #1389: the two lone-window fill rows;
-                // 39 with #1391's Monocle flip pair, which #2099
-                // removed.
+                // 37 since #1389: the two lone-window fill rows.
                 .layoutDefaults: 37,
                 .screens: 3,
                 // 18 since #1473: the focus border's four rows,

@@ -5,10 +5,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Where a raise flight (#1812) is written, carried and ended:
-/// the `focus` verb records it — a Monocle flip's owed target
-/// included — a re-assert never does, a deferred raise or a
-/// landing flip restamps it, a tab switch rekeys it, and any app
-/// activation ends it. `FocusRaiseFlightGuardTests` reads it.
+/// the `focus` verb records it, a re-assert never does, a
+/// deferred raise restamps it, a tab switch rekeys it, and any
+/// app activation ends it. `FocusRaiseFlightGuardTests` reads it.
 @Suite("Raise flight write sites", .serialized)
 @MainActor
 struct FocusRaiseFlightRecordTests {

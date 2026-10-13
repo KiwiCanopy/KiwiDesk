@@ -3,7 +3,8 @@ import Foundation
 /// Retired verbs: #1517's, when the two bars moved onto one
 /// shelf, #1674's `set_float_nudge`, #1713's item padding and
 /// #1731's shelf edge, which each bar took back, #1528's App Bar
-/// content, #1810's `make_auto` and #1511's `pull_or_spawn`.
+/// content, #1810's `make_auto`, #1511's `pull_or_spawn`,
+/// #2228's slide and #2099's Monocle flip.
 /// No aliases (AGENTS.md §5): a retired name fails, and the
 /// failure names what replaces it — in Lua as a
 /// `ConfigIssue.Kind.retiredCall`, over IPC through

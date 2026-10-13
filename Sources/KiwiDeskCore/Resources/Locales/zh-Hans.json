@@ -1158,7 +1158,7 @@
   "onboarding.starter_spaces.behaviour.bsp": "新窗口会分割它落到的那个窗口。",
   "onboarding.starter_spaces.behaviour.floating": "窗口会停在你放置的任何位置。",
   "onboarding.starter_spaces.behaviour.grid": "窗口共用一个网格，网格会随窗口打开重新均衡。",
-  "onboarding.starter_spaces.behaviour.monocle": "一个窗口铺满屏幕，焦点会转到下一个窗口。",
+  "onboarding.starter_spaces.behaviour.monocle": "一个窗口铺满屏幕，下一个窗口会来到最前。",
   "onboarding.starter_spaces.behaviour.scrolling": "窗口排成一行，屏幕会跟随焦点滚动。",
   "onboarding.starter_spaces.behaviour.stack": "一个主窗口；新窗口会加入旁边的堆叠。",
   "onboarding.starter_spaces.behaviour.track": "窗口排列在轨道中，新窗口也可以打开一条自己的轨道。",

@@ -1158,7 +1158,7 @@
   "onboarding.starter_spaces.behaviour.bsp": "新視窗會分割它落到的那個視窗。",
   "onboarding.starter_spaces.behaviour.floating": "視窗會停在你放置的任何位置。",
   "onboarding.starter_spaces.behaviour.grid": "視窗共用一個 Grid，Grid 會隨著視窗開啟重新平衡。",
-  "onboarding.starter_spaces.behaviour.monocle": "一個視窗填滿螢幕，焦點會轉到下一個視窗。",
+  "onboarding.starter_spaces.behaviour.monocle": "一個視窗填滿螢幕，下一個視窗會來到最前。",
   "onboarding.starter_spaces.behaviour.scrolling": "視窗排成一列，螢幕會跟著焦點捲動。",
   "onboarding.starter_spaces.behaviour.stack": "一個主視窗；新視窗會加入旁邊的 Stack。",
   "onboarding.starter_spaces.behaviour.track": "視窗排列在 Track 中，新視窗也可以開啟一條自己的 Track。",

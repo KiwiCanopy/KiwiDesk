@@ -189,11 +189,6 @@ a Space Bar or the shelf stands down; the plate itself is drawn in
 `Sources/KiwiDesk/CuePlate` (#2143, #2228).
 :::
 
-:::unreleased
-A commanded focus in a Monocle Space is the ordinary
-`focusWindow` raise, with nothing drawn over it (#2099).
-:::
-
 The Lua watchdog is an instruction-count hook and **cannot**
 interrupt a blocking C call, so anything that blocks in C
 (external commands) goes through `ExecLauncher`, never inline on
