@@ -96,9 +96,12 @@ struct JumpSideNameTests {
         )
         let rest = picker[body.lowerBound...]
         let end = try #require(rest.range(of: "\n    }\n"))
-        #expect(
-            rest[..<end.upperBound].contains(".accessibilityHidden(true)")
-        )
+        let hintBody = rest[..<end.upperBound]
+        #expect(hintBody.contains(".accessibilityHidden(true)"))
+        // The inks the contrast suite measures, drawn here — the
+        // pairing reads the token and cannot see the site.
+        #expect(hintBody.contains("SettingsTheme.accentInkSecondary"))
+        #expect(hintBody.contains(": SettingsTheme.ink2"))
     }
 
     private static func source(_ name: String) throws -> String {

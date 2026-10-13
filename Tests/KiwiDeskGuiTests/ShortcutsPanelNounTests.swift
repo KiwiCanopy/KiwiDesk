@@ -105,6 +105,12 @@ struct ShortcutsPanelNounTests {
     /// it was granted for. EMPTY: nothing shipped inflects it.
     static let allowed: [String: [String: String]] = [:]
 
+    @Test("every awaiting panel name is a pair's")
+    func awaitingNamesAPair() {
+        let names = Set(Self.pairs.map(\.panelName))
+        #expect(Self.awaitingTranslation.isSubset(of: names))
+    }
+
     @Test(
         "the panel's own name is the noun its opener uses",
         arguments: pairs.map(\.panelName)
