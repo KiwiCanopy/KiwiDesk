@@ -9944,6 +9944,15 @@ carrying different letters is intended. It is a layout verb too,
 so it joins the base seed and not `appChromeRows`. The same sweep
 found `⌃⌥L` free; the nearest chords taken are Terminal's `⌃⌥⌘L`
 and the `⌥⌘L` Downloads item Finder, Safari and Chrome keep.
+
+Jump to window takes `⌃⌥J` (#1875), J for jump. It opens a panel
+rather than acting on a window, but a pressed one, so it joins the
+base seed beside the layout keys and not `appChromeRows`. The same
+sweep found it free in macOS and in every app menu read; its one
+app collision is VS Code's notebook "Join With Next Cell", bound
+only while a notebook cell has focus, where the panel wins. It
+reaches an install in a generation of its own (3), since installs
+built from `release/3.0.0` had already taken generation 2.
 :::
 
 **One pressed exception rides `⌥⌘`: the Space history on `Tab`

@@ -150,6 +150,7 @@ enum KeybindingCatalog {
                 title: "Focus",
                 commands: focusDirections + spaceStepRows
                     + spaceHistoryRows + goToSpace(spaces)
+                    + [jumpToWindow]
             ),
             NavGroup(
                 title: "Window Management",
@@ -170,6 +171,14 @@ enum KeybindingCatalog {
     static func quote(_ raw: String) -> String {
         SpaceLuaArg.quote(raw)
     }
+
+    /// Jump to window (#1875): its label is the panel's own name,
+    /// read from the panel, so the feature is one string.
+    static let jumpToWindow = NavCommand(
+        label: "Jump to window",
+        lua: "KiwiDesk.show_jump_to_window()",
+        displayLabel: { JumpPanelView.fieldName }
+    )
 
     /// Command opening shortcuts cheat sheet overlay (#330, #602).
     static let showShortcuts = NavCommand(
