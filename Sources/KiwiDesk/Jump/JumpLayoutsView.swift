@@ -121,6 +121,8 @@ struct JumpLayoutTile: View {
     let showsNumber: Bool
     let onActivate: () -> Void
     let onHover: () -> Void
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
 
     var body: some View {
         Button(action: onActivate) { content }
@@ -130,6 +132,9 @@ struct JumpLayoutTile: View {
                 LayoutPickText.spoken(mode, current: isCurrent)
             )
             .accessibilityAddTraits(isSelected ? .isSelected : [])
+            // Spoken whether or not ⌘ is held: a VoiceOver user
+            // explores without holding it.
+            .accessibilityHint(LayoutPickText.chordHint("⌘\(number)"))
             .onContinuousHover { phase in
                 if case .active = phase { onHover() }
             }
@@ -151,11 +156,11 @@ struct JumpLayoutTile: View {
                     ? AnyShapeStyle(SettingsTheme.accentInk)
                     : AnyShapeStyle(.primary)
             )
+            numberMark
         }
         .padding(.vertical, 7)
         .frame(width: JumpLayoutsView.tileWidth)
         .background(selection)
-        .overlay(alignment: .topTrailing) { numberMark }
         .opacity(isDimmed ? 0.35 : 1)
         .contentShape(Rectangle())
     }
@@ -200,17 +205,22 @@ struct JumpLayoutTile: View {
         }
     }
 
-    @ViewBuilder private var numberMark: some View {
-        if showsNumber {
-            Text(verbatim: "⌘\(number)")
-                .font(.caption2.monospacedDigit())
-                .foregroundStyle(
-                    isSelected
-                        ? AnyShapeStyle(SettingsTheme.accentInkSecondary)
-                        : AnyShapeStyle(.secondary)
-                )
-                .padding(4)
-                .accessibilityHidden(true)
-        }
+    /// The quick-apply chord on its own line under the name, off
+    /// the schematic and never shortening the name; its height is
+    /// held while ⌘ is up, so the panel never resizes on a press.
+    private var numberMark: some View {
+        Text(verbatim: "⌘\(number)")
+            .font(.caption2.monospacedDigit())
+            .foregroundStyle(
+                isSelected
+                    ? AnyShapeStyle(SettingsTheme.accentInkSecondary)
+                    : AnyShapeStyle(.secondary)
+            )
+            .opacity(showsNumber ? 1 : 0)
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.15),
+                value: showsNumber
+            )
+            .accessibilityHidden(true)
     }
 }
