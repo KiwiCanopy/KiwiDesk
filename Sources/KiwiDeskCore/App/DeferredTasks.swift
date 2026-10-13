@@ -81,6 +81,9 @@ final class DeferredTasks {
         /// (#1385, `KiwiCore+CrossSession`).
         case crossSessionSettle
         case crossSessionClose
+        /// Pays an owed menu-bar reveal return once the bar hides
+        /// (#2224).
+        case menuBarRevealReturn
 
         /// Whether a body in this slot runs as its scheduler's
         /// motion, late (#804 ▸ Ruling 2), or always as ambient
@@ -98,7 +101,8 @@ final class DeferredTasks {
                 .adoptionHealWake,
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
-                .monitorSettle, .crossSessionSettle, .crossSessionClose:
+                .monitorSettle, .crossSessionSettle, .crossSessionClose,
+                .menuBarRevealReturn:
                 return false
             }
         }

@@ -632,9 +632,12 @@ editing here:
   stored state beside a call site. The #1532 menu-bar reveal
   return is the third of the family and takes the same one-home
   shape: `KiwiCore+MenuBarRevealReturn.swift` owns the arm and
-  its one-shot stamp, decides at the report — its docstring is
-  the roster of what it reads there, and a new stand-down joins
-  that roster rather than a call site — and re-asserts with the
+  its debt, decides at the report — its docstring is the roster
+  of what it reads there, and a new stand-down joins that roster
+  rather than a call site — OWES the return while the bar shows
+  or KiwiDesk's quick menu is open, and never raises before the
+  bar hides, since a return raised at once was taken back every
+  ~1.3 s (#2224), then pays it once with the
   STAMPED raise, `raiseWindow`, so the report that follows is our
   own echo (#1281) and the scrolling placement distrust does not
   bounce it (#1414's class): never a bare `AXHelper.raise(`, and

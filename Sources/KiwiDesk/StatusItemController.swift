@@ -7,6 +7,10 @@ import SwiftUI
 @MainActor
 final class StatusItemController: NSObject, NSMenuDelegate {
     var onOpenDashboard: () -> Void = {}
+    /// The quick menu opened and closed — Core's #1532 reveal return
+    /// waits while it is open (#2224).
+    var onMenuOpen: () -> Void = {}
+    var onMenuClose: () -> Void = {}
     /// Opens the read-only shortcuts reference panel (#326).
     var onShowShortcuts: () -> Void = {}
     var onShowConfigIssues: () -> Void = {}

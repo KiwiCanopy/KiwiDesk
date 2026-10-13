@@ -3,6 +3,14 @@ import KiwiDeskCore
 
 /// Status bar quick menu builder (#68 §3.10, #802).
 extension StatusItemController {
+    func menuWillOpen(_ menu: NSMenu) {
+        onMenuOpen()
+    }
+
+    func menuDidClose(_ menu: NSMenu) {
+        onMenuClose()
+    }
+
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
         menu.autoenablesItems = false
