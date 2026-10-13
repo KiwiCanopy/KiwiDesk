@@ -10819,7 +10819,8 @@ stayed, and the Settings window flickered between active and
 inactive (device log, 2026-10-13, #2224; the 2026-09-21 reading
 that the re-assert HOLDS no longer does). So the report is taken
 and the return OWED, and paid once — when the pointer leaves the
-strip, or KiwiDesk's own quick menu closes, whose opening brings
+strip with none of the revealed app's menus open, or KiwiDesk's
+own quick menu closes, whose opening brings
 the same activation wherever the pointer is. Not dropping the
 return entirely: after a peek at the bar the user keeps typing,
 and the keystrokes would land in the other app. Not promoting

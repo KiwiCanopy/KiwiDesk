@@ -169,21 +169,23 @@ struct MenuBarRevealPaymentTests {
         #expect(lines.contain("its window closed"))
     }
 
-    /// The bound runs from the report, never from the quick
-    /// menu's close, which moves only the press baseline.
-    @Test("The bound runs from the report")
-    func boundRunsFromTheReport() {
-        let core = F.makeCore(inStrip: false)
+    /// An open menu keeps the revealed bar up while the pointer
+    /// sits in it, below the strip: paying then would close the
+    /// menu under the user (#2224).
+    @Test("An open menu of the revealed app holds the return")
+    func openMenuHoldsTheReturn() {
+        let core = F.makeCore()
         let lines = F.log(core)
-        let start = core.wallClock()
-        core.statusMenuDidOpen()
         core.handle(.windowFocused(WindowID(2)))
-        core.wallClock = { start.addingTimeInterval(20) }
-        core.statusMenuDidClose()
-        core.wallClock = { start.addingTimeInterval(35) }
+        core.mouse.pointerInMenuBarStrip = { false }
+        core.mouse.menuOpen = { $0 == 99 }
         core.payMenuBarRevealIfDue()
-        #expect(lines.contain("past its bound"))
+        #expect(core.menuBarReveal.debt != nil)
         #expect(!lines.contain("menu bar hidden"))
+        #expect(core.deferred.isScheduled(.menuBarRevealReturn))
+        core.mouse.menuOpen = { _ in false }
+        core.payMenuBarRevealIfDue()
+        #expect(lines.contain("menu bar hidden; returning w1"))
     }
 
     /// The payment can run seconds after the report, so the #1345

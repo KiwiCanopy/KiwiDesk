@@ -16,6 +16,8 @@ struct MenuBarRevealDebt {
     /// The foreign window whose report the reveal produced; a
     /// repeat of it is the same reveal.
     let revealed: WindowID
+    /// Its app, whose open menu keeps the revealed bar up.
+    let revealedPID: pid_t
     /// The report's wall time, which the bound runs from.
     let armedAt: Date
     /// The report's monotonic time — a commanded focus since does.
@@ -79,6 +81,7 @@ extension KiwiCore {
         menuBarReveal.debt = MenuBarRevealDebt(
             window: intended,
             revealed: id,
+            revealedPID: reported.pid,
             armedAt: now,
             commandedAt: .now
         )
@@ -127,17 +130,20 @@ extension KiwiCore {
     }
 
     /// Pays an owed return once the bar has hidden — the pointer
-    /// out of the strip and the status menu closed — with the
+    /// out of the strip, no menu of the revealed app open, and the
+    /// status menu closed — with the
     /// STAMPED raise, so the report that follows is our own echo
     /// (#1281) and the scrolling placement distrust does not
     /// bounce it; never the focus command, whose displacement note
-    /// would arm that bounce. A click chooses nothing — the bar a
-    /// reveal shows is macOS's, not the user picking that app;
-    /// only a window's own report does (the arm). The pay-time
-    /// roster of stand-downs, each dropping the debt: a commanded
-    /// focus since, the anchor gone, the bound, an own window
-    /// keyed since (a quick-menu row fronting a panel), and a
-    /// raise that would switch Desktops (#1345) — asked again
+    /// would arm that bounce. A click in the bar chooses nothing —
+    /// the bar a reveal shows is macOS's, not the user picking that
+    /// app; only a window's own report does (the arm). A click on
+    /// the revealed window inside one poll of the bar hiding is
+    /// the residue: it reports nothing and is paid over. The
+    /// pay-time roster of stand-downs, each dropping the debt: a
+    /// commanded focus since, the anchor gone, the bound, an own
+    /// window keyed since (a quick-menu row fronting a panel), and
+    /// a raise that would switch Desktops (#1345) — asked again
     /// here, since the Desktop may have changed since the report.
     func payMenuBarRevealIfDue() {
         guard let debt = menuBarReveal.debt else { return }
@@ -157,7 +163,8 @@ extension KiwiCore {
             return
         }
         guard !menuBarReveal.statusMenuOpen,
-            !mouse.pointerInMenuBarStrip()
+            !mouse.pointerInMenuBarStrip(),
+            !mouse.menuOpen(debt.revealedPID)
         else {
             scheduleMenuBarRevealPayment()
             return

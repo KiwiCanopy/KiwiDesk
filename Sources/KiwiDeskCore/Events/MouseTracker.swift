@@ -47,6 +47,34 @@ public final class MouseTracker {
     /// gesture, whichever button started it.
     var anyButtonHeld: Bool { pressedButtons() != 0 }
 
+    /// Whether `pid` has one of its menus open — a pop-up-level
+    /// window of its own on a screen. An open menu keeps the bar a
+    /// reveal shows up while the pointer sits in it, below the
+    /// strip (#2224). Live in production, pinned false by
+    /// `makeTestCore` the way `pointerInMenuBarStrip` is.
+    var menuOpen: @MainActor (pid_t) -> Bool = { pid in
+        let level = Int(CGWindowLevelForKey(.popUpMenuWindow))
+        let screens = ScreenList.all.map(\.frame)
+        let list =
+            CGWindowListCopyWindowInfo(
+                [.optionOnScreenOnly],
+                kCGNullWindowID
+            ) as? [[String: Any]] ?? []
+        return list.contains { info in
+            guard info[kCGWindowOwnerPID as String] as? pid_t == pid,
+                info[kCGWindowLayer as String] as? Int == level,
+                let bounds = info[kCGWindowBounds as String]
+                    as? [String: CGFloat],
+                let x = bounds["X"], let width = bounds["Width"]
+            else { return false }
+            // Off-screen stand-ins (a status bar's parked panels)
+            // share the level; a menu lies on a screen.
+            return screens.contains {
+                x < $0.maxX && x + width > $0.minX
+            }
+        }
+    }
+
     /// Whether the pointer sits in the strip an auto-hidden menu
     /// bar reveals from (#1532); false outright while the bar
     /// does not auto-hide, and below macOS 27, where the reveal
