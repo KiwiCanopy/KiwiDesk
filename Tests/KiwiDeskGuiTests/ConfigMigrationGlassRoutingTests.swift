@@ -123,7 +123,9 @@ struct ConfigMigrationGlassRoutingTests {
     /// a second stored `animations` key would send the edit past
     /// the walk and every migration to the re-serializing
     /// fallback. The API reference names the namespace without
-    /// storing it.
+    /// storing it, and a look stores its motion under flat
+    /// `animations.<field>` keys, never an `animations` object
+    /// (#2176).
     @Test("The slide turn-on's group key has one declarer")
     func spaceChangeGroupKeyStaysUnique() throws {
         let root = coreRoot
@@ -133,6 +135,7 @@ struct ConfigMigrationGlassRoutingTests {
             "Config/ConfigMigration+SpaceChangeOn.swift",
             "Commands/Reference/APIReference.swift",
             "Commands/Reference/APIReference+Records.swift",
+            "Appearance/ShelfLook+Apply.swift",
         ]
         var declarers: Set<String> = []
         for file in try SourceScan.swiftSources(under: root) {

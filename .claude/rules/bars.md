@@ -81,7 +81,7 @@ twice, was a question the user answered twice. The argument is
   that is not `AppBarStyle`'s; whether a NEW field is shared or
   a bar's own is review's, since no guard can tell. **And a new
   field is ruled for the looks (#1684)**: styling — how the same
-  items look or where they sit — joins `LookKeys.all`,
+  items look or where they sit — joins `LookKeys.styling`,
   functionality or a field left alone joins `LookKeys.leftOut`
   with its reason, a colour joins `ColorPaletteKeys`, which a
   look carries whole (#1752); the owner's test

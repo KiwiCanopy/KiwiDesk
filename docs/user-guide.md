@@ -291,6 +291,15 @@ with its own look the list is greyed. A new profile shares the
 look if the profile it was saved from does. With a Lua-owned
 `init.lua` there is no shared look.
 
+:::unreleased
+The animations are part of the look too: a profile using the
+shared look takes its animations, and a look you save keeps them.
+Applying a bundled look, or picking one in the tour, leaves your
+animations as they are. When you first run this version, a profile
+whose animations differ from the shared look's starts keeping its
+own look, so nothing changes on screen.
+:::
+
 The General section leaves the grid while you edit a stored
 profile without switching to it.
 

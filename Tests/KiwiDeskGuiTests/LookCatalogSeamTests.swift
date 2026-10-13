@@ -67,6 +67,9 @@ struct LookCatalogSeamTests {
         )
     }
 
+    /// Glass extracts the styling alone: every authored look merges
+    /// onto it, so motion here would reset a user's animations on
+    /// every bundled pick (#2176).
     @Test("Glass is derived from the starter's settings")
     func glassReadsTheStarter() throws {
         let file = try #require(
@@ -78,7 +81,8 @@ struct LookCatalogSeamTests {
             .filter { !$0.isWhitespace }
         #expect(
             squashed.contains(
-                "LookKeys.extract(from:StarterSetup.settings(sizes:sizes))"
+                "LookKeys.extract(from:StarterSetup.settings(sizes:sizes),"
+                    + "paths:LookKeys.styling)"
             )
         )
         #expect(!squashed.contains("TilingSettings()"))

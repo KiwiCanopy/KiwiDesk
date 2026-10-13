@@ -810,8 +810,16 @@ inside a stored value such as `gap.global`'s `{outer, inner}`
 owes (§5), reaching every home of a stored look named above — since
 `ShelfLook.apply` and `ShelfLook.admitted` skip a path they do
 not know, an unmigrated rename drops the user's styling
-silently. `LookKeysCensusTests` reds the rename; the migration
-crossing is review's.
+silently. `LookKeysCensusTests` reds the rename — the motion paths
+through its frozen wire list (`LookKeysCensusTests` ▸
+`motionWirePathsAreFrozen`), since `LookKeys.motion` is derived
+from `AnimationSettings`' keys; the migration crossing is review's.
+**A stored `AnimationSettings` field joins every look and the
+shared look by that derivation (#2176)**, so adding one is a look
+change too, and a shared look missing it owes
+`settleSharedMotion` its value; **a bundled look, the tour's paint
+and its Revert carry `LookKeys.styling` alone**, never motion
+(`LookMotionTests`, `LookCatalogSeamTests` ▸ `glassReadsTheStarter`).
 
 Nothing can guard the format bumps above, and they are the
 obligation the format integers rest on: `<=` is decoder tolerance rather than a

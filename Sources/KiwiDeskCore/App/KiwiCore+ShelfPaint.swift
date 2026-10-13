@@ -41,7 +41,8 @@ extension KiwiCore {
         palette: ColorPalette?
     ) -> TilingSettings {
         var painted = settings
-        look?.apply(to: &painted)
+        // A paint reaches styling and colours, never motion (#2176).
+        look?.stylingOnly.apply(to: &painted)
         palette?.apply(to: &painted)
         return painted
     }
@@ -70,7 +71,8 @@ extension KiwiCore {
     }
 
     /// `current` with everything a paint reaches returned to
-    /// `before` and nothing else: the look's styling and colours,
+    /// `before` and nothing else: the look's styling — never its
+    /// motion, which a paint does not reach (#2176) — and colours,
     /// then the writes `ShelfLook.apply` makes beyond its keys —
     /// every glass leaf, the per-layout indicators — put back too
     /// (`ShelfPaintRoundTripTests`).
@@ -82,7 +84,10 @@ extension KiwiCore {
             current,
             look: ShelfLook(
                 name: "",
-                style: LookKeys.extract(from: before),
+                style: LookKeys.extract(
+                    from: before,
+                    paths: LookKeys.styling
+                ),
                 colors: ColorPaletteKeys.extract(from: before)
             ),
             palette: nil

@@ -14239,6 +14239,40 @@ never did. A restore takes the bundle's shared look ahead of the
 none, its step stamps its profiles own, and the crossing is owed
 again and elects among them, the shape #1741's crossing takes.
 
+:::unreleased
+**Motion shares the look so it travels between profiles, but a
+bundled look and the tour's paint say nothing about it: picking a
+picture never changes how fast things move (#2176).** Animations
+were the one presentation family a profile kept apart, so turning
+the Space slide off meant repeating it on every profile; folding
+them into the look shares them through the switch above, where an
+app-wide value (#1741) would have lost the profile that wants
+animations off while presenting. `LookKeys.motion` is every field
+of `AnimationSettings`, read off its keys, and a look's motion is
+read by the config's own decoder, clamps included. A look the user
+saves and the shared look carry it; Glass extracts the styling
+alone (`LookKeys.styling`), so every bundled look, merged onto
+Glass, carries none, and the tour's paint and its Revert strip it
+— otherwise each picture would reset tuned animations and a
+bundled tile would never read as applied over them
+(`LookMotionTests`, `LookCatalogSeamTests` ▸ `glassReadsTheStarter`).
+A shared look missing a motion path owes the election again. The
+next apply of a stored profile that FOLLOWS the look — a Standard
+saved through Apply included, since it is born following — or the
+next look write of one, settles it: the missing paths come from
+that profile, and every other follower that runs different
+animations keeps its own look, frozen as it ran, so no stored
+profile's animations move. An apply of an own profile leaves the
+election owed and touches nothing: an own look is a user's choice
+once followers exist, and electing from one would detach every
+follower (`SharedLookMotionTests`). A built-in layout has no file to keep
+its own animations in, so after the election it runs the shared
+look's, as it already runs the shared styling. No
+format moves: the look's style is a sparse map an older build
+reads past, keeping only the paths it knows, and a `LookExport`
+sidecar with motion imports there without it.
+:::
+
 **The shared look changes through one door, `landSharedLook`:
 `gui.json` first, then every follower's file copy re-stamped,
 then the live screen's look re-resolved** (`SharedLookLandTests`).

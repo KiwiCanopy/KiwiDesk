@@ -124,7 +124,7 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         )
     }
 
-    private enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey, CaseIterable {
         case spaceChange = "space_change"
         case spaceChangeDurationMS = "space_change_duration"
         case onScrolling = "on_scrolling"
@@ -221,5 +221,25 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// The shelf glide's length in seconds, nothing while it is off.
     public var shelfGlideSeconds: TimeInterval {
         onShelf ? TimeInterval(shelfDurationMS) / 1000 : 0
+    }
+}
+
+extension AnimationSettings {
+    /// `self` with the stored field `key` set to `value`, read
+    /// through the config's own decoder — its clamps included — so
+    /// a look never sets a value a stored file could not (#2176).
+    /// Nil for an unknown key or a value of the wrong type.
+    func setting(_ key: String, to value: JSONValue) -> Self? {
+        guard CodingKeys(rawValue: key) != nil,
+            let data = try? JSONEncoder().encode(self),
+            case .object(var map) = try? JSONDecoder().decode(
+                JSONValue.self,
+                from: data
+            )
+        else { return nil }
+        map[key] = value
+        guard let patched = try? JSONEncoder().encode(JSONValue.object(map))
+        else { return nil }
+        return try? JSONDecoder().decode(Self.self, from: patched)
     }
 }
