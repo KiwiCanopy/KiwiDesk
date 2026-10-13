@@ -63,11 +63,8 @@ struct CommandBarIgnoreTests {
         )
     }
 
-    /// Spotlight on macOS 27 is `com.apple.campo`'s layer-23
-    /// panel, whose AX lists all three title-bar buttons: managed
-    /// as a float, its own resize as results appeared read as
-    /// unsolicited and the fit moved it (device, 2026-10-13). A
-    /// layer-0 window of the app still tiles.
+    /// Spotlight's macOS 27 panel lists title-bar buttons and still
+    /// takes no escape (#2236); a layer-0 window of its app tiles.
     @Test("Spotlight's panel takes no button escape")
     func spotlightPanelIgnored() {
         #expect(
