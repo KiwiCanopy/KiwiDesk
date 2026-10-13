@@ -6,6 +6,10 @@ import SwiftUI
 struct JumpFooter: View {
     let scope: JumpScope
     let overflows: Bool
+    /// The modifiers held now, which decide the one lit hint.
+    var modifiers: NSEvent.ModifierFlags = []
+    /// Whether a row or tile is selected; with none, nothing lights.
+    var hasSelection = true
 
     var body: some View {
         HStack(spacing: 8) {
@@ -21,6 +25,11 @@ struct JumpFooter: View {
             ForEach(Array(hints.enumerated()), id: \.offset) { index, hint in
                 if index > 0 { Text(verbatim: "·") }
                 Text(hint)
+                    .foregroundStyle(
+                        index == leading
+                            ? AnyShapeStyle(.primary)
+                            : AnyShapeStyle(.secondary)
+                    )
             }
         }
         .font(.caption)
@@ -33,19 +42,62 @@ struct JumpFooter: View {
 }
 
 extension JumpFooter {
-    private var hints: [String] {
+    /// The one hint in full ink: the pick that acts on the
+    /// selection with the modifiers held now, read off `JumpKey`
+    /// itself — ↩ where it picks, else the ⌘ digits. Navigation and
+    /// bridges never light; the Shortcuts side picks nothing (#2246).
+    /// The index is into `hints`, whose order it follows: Jump,
+    /// Move here, the digits on Windows; Choose, Apply, the digits
+    /// on Layouts.
+    var leading: Int? {
+        guard hasSelection, scope != .shortcuts else { return nil }
+        let held = modifiers.intersection([.shift, .command])
+        switch JumpKey.of(
+            keyCode: JumpKey.returnKey,
+            modifiers: held,
+            scope: scope
+        ) {
+        // Windows: ↩ Jump, ⇧↩ Move here; Layouts: ↩ Apply.
+        case .pick(let moveHere):
+            guard scope == .windows else { return 1 }
+            return moveHere ? 1 : 0
+        default:
+            break
+        }
+        let one = UInt16(JumpKey.digitRows[0])
+        let digit = JumpKey.of(keyCode: one, modifiers: held, scope: scope)
+        if case .quick = digit { return 2 }
+        return nil
+    }
+
+    private var shiftHeld: Bool { modifiers.contains(.shift) }
+
+    var hints: [String] {
         let other = L(
             "jump.footer.scope",
             "%1$@ %2$@",
             "⇥",
-            scope.other.title
+            scope.stepped(forward: true).title
         )
         switch scope {
         case .windows:
             return [
                 L("jump.footer.jump", "%1$@ Jump", "↩"),
                 L("jump.footer.move_here", "%1$@ Move here", "⇧↩"),
-                L("jump.footer.quick", "%1$@ Quick jump", "⌘1–9"),
+                // ⇧ already rewrites the digits to what they then
+                // do; ⌘ joining only lights them.
+                shiftHeld
+                    ? L(
+                        "jump.footer.quick_move_here",
+                        "%1$@ Quick move here",
+                        "⇧⌘1–9"
+                    )
+                    : L("jump.footer.quick", "%1$@ Quick jump", "⌘1–9"),
+                other,
+            ]
+        case .shortcuts:
+            return [
+                L("shortcuts.footer.edit", "%1$@ Edit", "⌘,"),
                 other,
             ]
         case .layouts:
@@ -73,7 +125,7 @@ struct JumpScopeSwitch: View {
     var body: some View {
         SegmentedPicker(
             spokenLabel: JumpScope.switchName,
-            hugsLabels: true,
+            reservesWeight: true,
             hints: model.chords,
             spokenHint: LayoutPickText.chordHint,
             selection: Binding(

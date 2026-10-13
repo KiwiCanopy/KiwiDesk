@@ -1802,7 +1802,7 @@ Touching `Sources/KiwiDesk` (the GUI).
   `SettingsOpenFocusSeamTests`' `allowed` map is the one copy of who may call
   the door (#1281)
 - a key-capable own window built without `.closable` validates and performs
-  File ▸ Close itself, or ⌘W beeps at it — `ShortcutsPanel` is the instance,
+  File ▸ Close itself, or ⌘W beeps at it — `JumpPanel` is the instance,
   `MainMenuTests` the guard (#1533) — and a non-activating key panel hands the
   main menu only the File and Edit chords, through
   `MainMenu.performPanelChord`, a row joining those menus only once ruled safe

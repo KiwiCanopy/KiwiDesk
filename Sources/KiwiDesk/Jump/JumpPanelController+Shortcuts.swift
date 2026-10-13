@@ -1,9 +1,30 @@
 import AppKit
 import KiwiDeskCore
 
-/// Shortcuts reference panel data builder (`ShortcutsReferenceBuilder`, #820).
-extension ShortcutsPanelController {
-    /// Builds shortcuts reference snapshot for active key layer.
+/// The key panel's Shortcuts side (#2246): the sheet it reads, and
+/// its bridge into Settings.
+extension JumpPanelController {
+    func wireShortcuts(_ model: JumpModel) {
+        model.loadShortcuts = { [weak self] in self?.buildReference() }
+        // No distrust: a close arms none, and the next own report
+        // is Settings coming forward (#952).
+        model.onEditShortcuts = { [weak self] in
+            guard let self, self.dismiss(distrusting: false) else { return }
+            self.onEditShortcuts()
+        }
+    }
+
+    /// A layer switch (#603) re-reads what the open panel shows
+    /// from the layer: the switch's chords on any side, and the
+    /// sheet where it shows.
+    func reloadShortcutsIfShown() {
+        guard isOpen, let model = currentModel else { return }
+        model.chords = liveChords()
+        if model.scope == .shortcuts { model.reloadShortcuts() }
+    }
+
+    /// Builds the shortcuts reference for the active key layer
+    /// (`ShortcutsReferenceBuilder`, #820).
     func buildReference() -> ShortcutsReference? {
         let layers: [KeyLayer]
         let activeLayer: String
@@ -33,8 +54,8 @@ extension ShortcutsPanelController {
         // spaces/icons/step for candidate rows. A transient
         // disagreement can only MISFILE a binding (into Inactive
         // or Custom), never hide or invent one — safe for a
-        // read-only glance panel, and the window closes itself on
-        // the next apply (#820).
+        // read-only glance, and a layer switch re-reads the sheet
+        // (#820, #2246).
         let reference = ShortcutsReferenceBuilder.build(
             layer: layer,
             // Every live Space, so a temporary or held Space's

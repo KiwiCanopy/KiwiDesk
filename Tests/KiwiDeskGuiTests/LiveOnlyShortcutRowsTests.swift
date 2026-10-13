@@ -64,7 +64,7 @@ struct LiveOnlyShortcutRowsTests {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk")
         let sites = [
-            "Shortcuts/ShortcutsPanelController+Reference.swift":
+            "Jump/JumpPanelController+Shortcuts.swift":
                 "liveOnlySpaces.shortcutSpaces(",
             "Settings/SettingsModel+Reset.swift":
                 "liveOnlyShortcutSpaces.shortcutSpaces(",

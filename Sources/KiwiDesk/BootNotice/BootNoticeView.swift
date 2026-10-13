@@ -56,7 +56,7 @@ struct BootNoticeView: View {
         )
         .glassChrome(
             in: Capsule(),
-            // `.regular` carries text, as the ⌃⌥K panel does.
+            // `.regular` carries text, as the key panel does.
             enabled: model.liquidGlass,
             variant: .regular,
             fallback: AnyShapeStyle(.regularMaterial)

@@ -42,8 +42,11 @@ struct JumpRowView: View {
             ? AnyShapeStyle(SettingsTheme.accentInkSecondary)
             : AnyShapeStyle(.secondary)
     }
-    private var showsWayHere: Bool {
-        isSelected && shiftHeld && wayHere != nil
+    /// ⇧ alone moves the selected row (⇧↩); ⇧⌘ reaches every
+    /// numbered row through its digit, so each shows its way here.
+    var showsWayHere: Bool {
+        shiftHeld && wayHere != nil
+            && (isSelected || (commandHeld && number != nil))
     }
 
     var body: some View {

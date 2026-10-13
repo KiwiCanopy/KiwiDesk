@@ -130,8 +130,8 @@ struct LiquidGlassMasterTests {
     /// controller can stop READING the setting, and the view can
     /// stop HANDING it to the material.
     ///
-    /// Jump to window (#1875) is the second keyboard panel and
-    /// wears the same leaf, so both panels carry both needles.
+    /// The key panel (#1875) wears the leaf the retired ⌃⌥K sheet
+    /// wore, the Shortcuts side now one of its sides (#2246).
     @Test("the panels are wired to the setting they store")
     func panelReadsTheSetting() throws {
         let gui = SourceScan.repoRoot(from: #filePath)
@@ -152,23 +152,6 @@ struct LiquidGlassMasterTests {
             )
             .split(whereSeparator: \.isWhitespace).joined()
         }
-        #expect(
-            try source("ShortcutsPanelController.swift")
-                .contains("settings.shortcutPanelLiquidGlass"),
-            """
-            the controller no longer reads the stored leaf, so \
-            the one Liquid Glass row cannot reach the panel.
-            """
-        )
-        #expect(
-            try source("ShortcutsPanelView.swift")
-                .contains("enabled:liquidGlass"),
-            """
-            the panel no longer hands its setting to \
-            `glassChrome`, so it draws one finish whatever the \
-            row says.
-            """
-        )
         #expect(
             try source("JumpPanelController.swift")
                 .contains("settings.shortcutPanelLiquidGlass"),

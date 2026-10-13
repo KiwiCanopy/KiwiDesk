@@ -21,6 +21,9 @@ struct BarEdgeWriteCensusTests {
     private static let allowed: [String: (Int, String)] = [
         "ScreenEdged.swift": (4, "the doors themselves"),
         "ShelfEdge.swift": (1, "`ShelfEdge`'s own field, no bar's"),
+        "KiwiCore+ShelfFrames.swift": (
+            1, "`ShelfFrame`'s own field, a drawn strip's, no bar's"
+        ),
         "AppBarStyle+Coding.swift": (3, "its coding key and decoder"),
         "SpaceBarStyle+Coding.swift": (3, "its coding key and decoder"),
     ]

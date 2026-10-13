@@ -3,8 +3,9 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The ⌃⌥K reference panel cues its own fold in the footer,
-/// and its titles are headings (#1292).
+/// The key panel's Shortcuts side (#2246, formerly the ⌃⌥K
+/// reference panel) cues its own fold, and its section titles are
+/// headings (#1292).
 ///
 /// It cued the fold with `.scrollIndicators(.visible)` for one
 /// commit. That was measured inert on device — macOS declines
@@ -33,11 +34,14 @@ import Testing
 /// whole suite green (2026-09-06).
 @Suite("Shortcuts panel scroll cue (#1292)")
 struct ShortcutsPanelScrollCueTests {
-    private static func source(_ name: String) throws -> String {
+    private static func source(
+        _ name: String,
+        in directory: String = "Jump"
+    ) throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources")
             .appendingPathComponent("KiwiDesk")
-            .appendingPathComponent("Shortcuts")
+            .appendingPathComponent(directory)
             .appendingPathComponent(name)
         let text = try String(contentsOf: url, encoding: .utf8)
         // Comments are stripped so one quoting a modifier cannot
@@ -164,7 +168,7 @@ struct ShortcutsPanelScrollCueTests {
     }
 
     private static func panelScrollViews() throws -> [String] {
-        let text = try source("ShortcutsPanelView.swift")
+        let text = try source("JumpShortcutsView.swift")
         let runs = scrollViewModifiers(in: text)
         #expect(!runs.isEmpty, "no ScrollView found to guard")
         return runs
@@ -182,7 +186,7 @@ struct ShortcutsPanelScrollCueTests {
                 "a panel ScrollView carries no label"
             )
             #expect(
-                run.contains("shortcuts.panel.ax_label"),
+                run.contains("JumpScope.shortcuts.panelName"),
                 "the label is not the panel's own key"
             )
         }
@@ -190,30 +194,15 @@ struct ShortcutsPanelScrollCueTests {
 
     /// The fold's verdict is arithmetic and lives in ONE place,
     /// so it is asserted directly at the boundary rather than
-    /// scanned for. Equal is NOT overflow: the content is
-    /// clamped to the ceiling, so a panel exactly at it lost
-    /// nothing and must not claim there is more.
+    /// scanned for. Equal is NOT overflow: the sheet is clamped
+    /// to its cap, so a sheet exactly at it lost nothing and must
+    /// not claim there is more.
     @Test("the overflow verdict is exact at the boundary")
     @MainActor
     func theOverflowVerdictIsExactAtTheBoundary() {
-        #expect(
-            !ShortcutsPanelController.overflows(
-                fitting: 720,
-                ceiling: 720
-            )
-        )
-        #expect(
-            ShortcutsPanelController.overflows(
-                fitting: 720.5,
-                ceiling: 720
-            )
-        )
-        #expect(
-            !ShortcutsPanelController.overflows(
-                fitting: 719.5,
-                ceiling: 720
-            )
-        )
+        #expect(!JumpShortcutsView.overflows(content: 520, cap: 520))
+        #expect(JumpShortcutsView.overflows(content: 520.5, cap: 520))
+        #expect(!JumpShortcutsView.overflows(content: 519.5, cap: 520))
     }
 
     /// The cue is MOUNTED, gated, and draws its own string.
@@ -229,20 +218,20 @@ struct ShortcutsPanelScrollCueTests {
     /// it (`guard-prover`, 2026-09-07).
     @Test("the cue is mounted, gated, and drawn")
     func theCueIsMountedGatedAndDrawn() throws {
-        let text = try Self.source("ShortcutsPanelView.swift")
-        let footer = try #require(
+        let text = try Self.source("JumpShortcutsView.swift")
+        let buttons = try #require(
             SourceScan.declarationBody(
-                after: "private var footer",
+                after: "private var buttons",
                 in: text
             ),
-            "footer not found"
+            "buttons not found"
         )
         #expect(
-            footer.contains("scrollCue"),
-            "the footer does not mount the cue"
+            buttons.contains("scrollCue"),
+            "the button row does not mount the cue"
         )
         #expect(
-            text.contains("if overflows"),
+            text.contains("if Self.overflows("),
             "the cue is drawn ungated"
         )
         #expect(
@@ -251,22 +240,21 @@ struct ShortcutsPanelScrollCueTests {
         )
     }
 
-    /// The verdict REACHES the view. Proven arithmetic whose
-    /// caller ignores it is the #1292 defect back verbatim:
-    /// `resize` returning a constant, or the re-root deleted
-    /// outright, left every other clause here green
-    /// (`guard-prover`, 2026-09-07). Counted on BOTH sides, so
-    /// deleting the wiring reds as loudly as duplicating it.
+    /// The verdict READS the measured sheet against its cap.
+    /// Proven arithmetic whose inputs are constants is the #1292
+    /// defect back verbatim (`guard-prover`, 2026-09-07). Counted
+    /// on both sides, so deleting the wiring reds as loudly as
+    /// duplicating it.
     @Test("the verdict reaches the view")
     func theVerdictReachesTheView() throws {
-        let text = try Self.source(
-            "ShortcutsPanelController.swift"
-        )
+        let text = try Self.source("JumpShortcutsView.swift")
         for needle in [
-            "Self.overflows(",
-            "if resize(panel)",
-            "view(overflows: true)",
-            "view(overflows: false)",
+            "Self.overflows(content: contentHeight, cap: maxHeight)",
+            // The writer as well as the reader: without it the
+            // height stays 0 and the cue never shows.
+            "key: SheetHeightKey.self",
+            "onPreferenceChange(SheetHeightKey.self)",
+            ".frame(maxHeight: maxHeight)",
         ] {
             #expect(
                 text.occurrences(of: needle) == 1,
@@ -275,28 +263,25 @@ struct ShortcutsPanelScrollCueTests {
         }
     }
 
-    /// Both title components carry the heading trait, asked of
-    /// each one's own body — the headings rotor is the only way
+    /// Each section title carries the heading trait, asked of
+    /// the section's own body — the headings rotor is the only way
     /// through forty rows without a mouse.
-    @Test("both panel title components are headings")
-    func bothTitleComponentsAreHeadings() throws {
-        let text = try Self.source("ShortcutsBands.swift")
-        for component in [
-            "ShortcutsBandHeader", "ShortcutSubgroupView",
-        ] {
-            let body = try #require(
-                SourceScan.declarationBody(
-                    after: "struct \(component)",
-                    in: text
-                ),
-                "\(component) not found"
-            )
-            #expect(
-                body.contains(
-                    ".accessibilityAddTraits(.isHeader)"
-                ),
-                "\(component): title is not a heading"
-            )
-        }
+    @Test("every section title is a heading")
+    func everySectionTitleIsAHeading() throws {
+        let text = try Self.source(
+            "ShortcutsSheetView.swift",
+            in: "Shortcuts"
+        )
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "private func sectionView",
+                in: text
+            ),
+            "sectionView not found"
+        )
+        #expect(
+            body.contains(".accessibilityAddTraits(.isHeader)"),
+            "a section title is not a heading"
+        )
     }
 }

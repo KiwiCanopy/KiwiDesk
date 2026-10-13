@@ -40,26 +40,38 @@ struct JumpScopeModelTests {
         return model
     }
 
-    @Test("⇥ switches scope and clears the query on both sides")
+    @Test("⇥ steps the sides J K L, wrapping, and clears each query")
     func tabClearsTheQuery() {
         let model = model()
         model.query = "mai"
-        model.handle(.toggleScope)
-        #expect(model.scope == .layouts)
+        model.handle(.stepScope(forward: true))
+        #expect(model.scope == .shortcuts)
         #expect(model.query == "")
         #expect(model.list.query == "")
+        model.query = "flo"
+        model.handle(.stepScope(forward: true))
+        #expect(model.scope == .layouts)
+        #expect(model.shortcuts?.query == "")
         model.query = "mon"
-        model.handle(.toggleScope)
+        model.handle(.stepScope(forward: true))
         #expect(model.scope == .windows)
         #expect(model.layouts?.query == "")
+        model.handle(.stepScope(forward: false))
+        #expect(model.scope == .layouts)
     }
 
-    @Test("Layouts stays out of reach where its Space is gone")
-    func goneSpaceStaysOnWindows() {
+    @Test("⇥ steps past a Layouts side whose Space is gone")
+    func goneSpaceIsSteppedPast() {
         let model = model()
         model.loadLayouts = { _ in nil }
-        model.handle(.toggleScope)
+        model.setScope(.layouts)
         #expect(model.scope == .windows)
+        model.handle(.stepScope(forward: true))
+        #expect(model.scope == .shortcuts)
+        model.handle(.stepScope(forward: true))
+        #expect(model.scope == .windows)
+        model.handle(.stepScope(forward: false))
+        #expect(model.scope == .shortcuts)
     }
 
     @Test("↩ and ⌘ digits apply, Esc clears then closes")
@@ -109,22 +121,11 @@ struct JumpScopeModelTests {
         model.onLayoutDefaults = { landed.append($0) }
         model.setScope(.layouts)
         model.handle(.side(1))
-        model.handle(.layoutDefaults)
+        model.handle(.settings)
         let grid = LayoutMode.allCases.firstIndex(of: .grid)!
         #expect(landed == [LayoutMode.allCases[grid + 1]])
     }
 
-    @Test("the field names the selected layout and what ↩ does")
-    func fieldPreview() {
-        LocalizationManager.shared.select("en")
-        let model = model()
-        model.setScope(.layouts)
-        model.query = "mon"
-        let field = model.field
-        let name = field.map { String($0.name.characters) }
-        #expect(name == "Monocle")
-        #expect(field?.frame == "%1$@ — Apply")
-    }
 }
 
 /// The selection follows the pointer on a real move only (#2229 ▸

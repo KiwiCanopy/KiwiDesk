@@ -60,7 +60,7 @@ struct BindingNameDoorTests {
             1,
             "a KeyLayer's chord label, not a binding's"
         ),
-        "ShortcutsPanelController+Reference.swift": (
+        "JumpPanelController+Shortcuts.swift": (
             1,
             "a built ShortcutRow's display label"
         ),
