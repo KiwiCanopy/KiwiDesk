@@ -90,14 +90,13 @@ struct LookMotionTests {
             colors: [:]
         )
         var settings = TilingSettings()
+        // Off its default, so a skip and a reset tell apart.
+        settings.animations.scrollDurationMS = 400
         look.apply(to: &settings)
         // Clamped as a stored file would be; a wrong type skipped.
         #expect(settings.animations.durationMS == 1000)
         #expect(!settings.animations.onShelf)
         #expect(settings.animations.spaceChange == .slide)
-        #expect(
-            settings.animations.scrollDurationMS
-                == TilingSettings().animations.scrollDurationMS
-        )
+        #expect(settings.animations.scrollDurationMS == 400)
     }
 }

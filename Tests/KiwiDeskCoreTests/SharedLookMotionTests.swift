@@ -216,6 +216,32 @@ struct SharedLookMotionTests {
         #expect(try duration("Fast", core) == 100)
     }
 
+    /// A field added after the shared look took its motion: only the
+    /// missing path is elected, and the paths it carries stay.
+    @Test("a shared look missing one motion path elects only that one")
+    func partialMotionElectsTheMissingPath() throws {
+        let core = try makeCore()
+        var config = try #require(core.guiConfigStore.load())
+        var look = LookBody(of: TilingSettings())
+        look.style["animations.shelf_duration"] = nil
+        config.look = look
+        try core.guiConfigStore.save(config)
+        var work = profile("Work", duration: 300)
+        work.settings.animations.shelfDurationMS = 900
+        try core.profiles.save(work)
+        core.profiles.resetAdoption()
+        core.prepareSharedLook()
+        #expect(core.sharedLookLedger.motionOwed)
+        load("Work", core)
+        let shared = try #require(core.guiConfigStore.load()?.look)
+        #expect(shared.style["animations.shelf_duration"] == .number(900))
+        #expect(
+            shared.style["animations.duration"]
+                == .number(Double(TilingSettings().animations.durationMS))
+        )
+        #expect(try stored("Work", core).look == nil)
+    }
+
     @Test("a shared look that carries motion owes no election")
     func carriedMotionOwesNothing() throws {
         let core = try makeCore()

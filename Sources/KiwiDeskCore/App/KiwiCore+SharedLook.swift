@@ -103,7 +103,9 @@ extension KiwiCore {
             return
         }
         let motion = base.style.filter { LookKeys.motion.contains($0.key) }
-        for name in profiles.list() where name != source.name {
+        // The source runs exactly the elected motion, so it is never
+        // frozen.
+        for name in profiles.list() {
             guard var stored = try? profiles.read(name: name),
                 stored.look == nil
             else { continue }
