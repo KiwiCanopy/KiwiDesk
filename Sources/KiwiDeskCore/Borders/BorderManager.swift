@@ -125,6 +125,12 @@ public final class BorderManager {
     /// Windows tracked for state mark z-order without active rings
     /// — every window wearing a mark (#414, #1799).
     var markTracked: Set<WindowID> = []
+    /// The window KiwiVision keeps clear, watched for its reorder
+    /// events whether or not it wears a ring (#2103).
+    var visionTracked: Set<WindowID> = []
+    /// WindowServer z-order tee AFTER a reordered window's ring
+    /// re-ordered: KiwiVision's plates stack under that ring.
+    var onWindowRestacked: @MainActor (WindowID) -> Void = { _ in }
     /// The ring a Space switch keeps dormant until its window
     /// arrives (#1959, `BorderManager+Arrival`).
     var arrival: ArrivalHold?
@@ -193,13 +199,8 @@ public final class BorderManager {
     /// the ring (#2103). Nil for a front ring, which clears the
     /// plate by sitting above its window.
     func ringPanel(of id: WindowID) -> CGWindowID? {
-        guard activeOrder == .below,
-            let ring = overlays[id]?.backend as? AppKitBorderOverlay,
-            ring.isOrderedIn,
-            let number = ring.panelNumber.flatMap(UInt32.init(exactly:)),
-            number > 0
-        else { return nil }
-        return number
+        guard activeOrder == .below else { return nil }
+        return overlays[id]?.backend.orderedPanelNumber
     }
 
     /// Window corner radius from SkyLight or system fallback (#357).
@@ -224,6 +225,7 @@ public final class BorderManager {
         specs = [:]
         cornerRadii = [:]
         markTracked = []
+        visionTracked = []
         arrival = nil
         _ = eventSource?.watch([])
     }

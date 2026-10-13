@@ -42,6 +42,14 @@ struct DefaultShortcutGenerationTests {
         #expect(rows.map(\.lua) == [back, forward] + layoutKeys)
     }
 
+    @Test("KiwiVision is generation 4, alone")
+    func kiwiVisionGeneration() {
+        #expect(
+            DefaultKeybindings.rows(ofGeneration: 4)
+                == [DefaultKeybindings.kiwiVisionRow()]
+        )
+    }
+
     @Test("Free chords get every generation's rows")
     func freeChordsGetAll() {
         let rows = DefaultKeybindings.generationTopUp(

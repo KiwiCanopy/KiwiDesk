@@ -94,3 +94,11 @@ extension AppKitBorderOverlay {
         )
     }
 }
+
+extension AppKitBorderOverlay {
+    var orderedPanelNumber: CGWindowID? {
+        guard isOrderedIn, let number = panelNumber, number > 0
+        else { return nil }
+        return CGWindowID(exactly: number)
+    }
+}

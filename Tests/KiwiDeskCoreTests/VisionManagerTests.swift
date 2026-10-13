@@ -29,6 +29,7 @@ struct VisionManagerTests {
         target: CGWindowID?,
         below: CGWindowID? = nil,
         standDown: Set<DisplayID> = [],
+        tracked: Bool = true,
         screens: [DisplayID]? = nil
     ) -> VisionManager.Request {
         let all = screens ?? [left, right]
@@ -42,6 +43,7 @@ struct VisionManagerTests {
             target: target,
             below: below,
             standDown: standDown,
+            tracked: tracked,
             dim: 0.4
         )
     }
@@ -88,12 +90,34 @@ struct VisionManagerTests {
         #expect(made().allSatisfy { $0.orders == [7, 7, 8] })
     }
 
-    @Test("nothing focused shows no fresh plate")
+    @Test("nothing focused shows no plate, fresh or standing")
     func noTargetNoPlateShown() {
         let (vision, made) = manager()
         vision.isOn = true
         vision.sync(request(target: nil), reassert: false)
-        #expect(made().allSatisfy { !$0.isShown && $0.orders.isEmpty })
+        #expect(made().isEmpty)
+        vision.sync(request(target: 7), reassert: false)
+        vision.sync(request(target: nil), reassert: false)
+        #expect(made().allSatisfy { !$0.isShown })
+        vision.sync(request(target: 7), reassert: false)
+        #expect(made().allSatisfy { $0.isShown && $0.orders == [7, 7] })
+    }
+
+    @Test("an untracked target re-stacks on every sync, as a ring does")
+    func untrackedRestacksEverySync() {
+        let (vision, made) = manager()
+        vision.isOn = true
+        vision.sync(request(target: 7, tracked: false), reassert: false)
+        vision.sync(request(target: 7, tracked: false), reassert: false)
+        #expect(made().allSatisfy { $0.orders == [7, 7] })
+    }
+
+    @Test("the shelf's stand-down verdict is filed once per change")
+    func standDownIsFiled() {
+        let (vision, _) = manager()
+        #expect(vision.noteStandDown([left]))
+        #expect(!vision.noteStandDown([left]))
+        #expect(vision.standDown == [left])
     }
 
     @Test("a screen standing down hides, and re-stacks on its return")
@@ -137,19 +161,19 @@ struct VisionManagerTests {
         #expect(!vision.hasShownPlates)
     }
 
-    @Test("the target's reorder event re-stacks; another window's does not")
+    @Test("the target's restack re-stacks under the sync's anchor")
     func restackFollowsTheTarget() {
         let (vision, made) = manager()
         vision.isOn = true
         vision.sync(request(target: 7, below: 70), reassert: false)
-        vision.restack(below: 9)
+        vision.restack(after: 9)
         #expect(made().allSatisfy { $0.orders == [70] })
-        vision.restack(below: 7)
-        #expect(made().allSatisfy { $0.orders == [70, 7] })
+        vision.restack(after: 7)
+        #expect(made().allSatisfy { $0.orders == [70, 70] })
     }
 
-    @Test("clear turns the mode off and says so")
-    func clearAnnounces() {
+    @Test("clear turns the mode off without announcing a toggle")
+    func clearIsSilent() {
         let (vision, _) = manager()
         var heard: [Bool] = []
         vision.onChange = { heard.append($0) }
@@ -158,6 +182,6 @@ struct VisionManagerTests {
         vision.clear()
         #expect(!vision.isOn)
         #expect(vision.plates.isEmpty)
-        #expect(heard == [false])
+        #expect(heard.isEmpty)
     }
 }

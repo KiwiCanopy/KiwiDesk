@@ -24,9 +24,13 @@ protocol BorderOverlayBackend: AnyObject {
     func reveal(reduceMotion: Bool)
     /// Joins every Desktop while its window is carried (#2149).
     func setSpansDesktops(_ on: Bool)
+    /// The panel's window number while ordered in, nil otherwise —
+    /// what a KiwiVision plate stacks under (#2103).
+    var orderedPanelNumber: CGWindowID? { get }
 }
 
 extension BorderOverlayBackend {
+    var orderedPanelNumber: CGWindowID? { nil }
     func setDormant(_ dormant: Bool) {}
     func reveal(reduceMotion: Bool) { setDormant(false) }
     func setSpansDesktops(_ on: Bool) {}

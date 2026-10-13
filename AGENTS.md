@@ -1536,7 +1536,7 @@ item builders (`+SpaceBar*`, `+AppBar*`, `+Shelf*`), the shelf and bar-style
 
 ### [borders](.claude/rules/borders.md)
 
-Touching `Borders`.
+Touching `Borders`, `Vision`.
 
 - A ring stays on its window's Desktop and spans every Desktop only while its
   window is carried, the sticky mark always spanning, and a ring is re-homed
@@ -1587,6 +1587,13 @@ Touching `Borders`.
   `placedFrame` its frame of record (#1956, `BorderPanelMoveTests`,
   `BorderPanelSeamTests`)
 
+- a KiwiVision plate stacks under its target's behind ring through
+  the one `ringPanel(of:)` reading, re-stacks only through the
+  ring's `ordersOverlay` gate and the post-ring `onWindowRestacked`
+  tee, keeps its target watched with borders off, reads the
+  shelf's stand-down verdict, and is a session value no snapshot
+  carries (#2103, `BorderOrderCensusTests`, `KiwiVisionCoreTests`,
+  `VisionManagerTests`)
 ### [gui](.claude/rules/gui.md)
 
 Touching `Sources/KiwiDesk` (the GUI).

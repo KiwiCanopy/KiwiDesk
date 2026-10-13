@@ -17,8 +17,13 @@ public final class VisionManager {
         /// where it sits behind the target, else the target.
         var below: CGWindowID?
         /// Screens standing the plate down: a native full-screen
-        /// Space or a presentation in front.
+        /// Space or a presentation in front, as the shelf last
+        /// judged them (`noteStandDown`).
         var standDown: Set<DisplayID>
+        /// Whether a WindowServer stream reports the target
+        /// restacking; without one a sync re-stacks every time,
+        /// as a ring does (`BorderManager.ordersOverlay`).
+        var tracked: Bool
         /// The dim, 0...1.
         var dim: CGFloat
     }
@@ -35,6 +40,12 @@ public final class VisionManager {
     private var stackedUnder: [DisplayID: CGWindowID] = [:]
     /// The window the plates keep clear, as the last sync read it.
     private(set) var target: CGWindowID?
+    /// What the plates stack under, as the last sync read it: the
+    /// target's behind ring, else the target.
+    private var below: CGWindowID?
+    /// The shelf's per-screen stand-down, filed by `updateBars`
+    /// once per pass so the plate reads no WindowServer itself.
+    private(set) var standDown: Set<DisplayID> = []
     /// The Reduce Motion read the fades name (borders.md).
     var reduceMotion: @MainActor () -> Bool = { BarMotion.isReduced }
     #if DEBUG
@@ -51,9 +62,16 @@ public final class VisionManager {
         plates.values.contains { $0.isShown }
     }
 
+    /// Files the shelf's stand-down verdict; true when it changed.
+    func noteStandDown(_ displays: Set<DisplayID>) -> Bool {
+        guard displays != standDown else { return false }
+        standDown = displays
+        return true
+    }
+
     /// Draws `request`: every screen not standing down shows its
-    /// plate below the target, re-stacked where the target moved
-    /// or `reassert` asks; off, every plate fades out.
+    /// plate below the target, re-stacked through the ring's own
+    /// gate; with nothing focused, or off, every plate fades out.
     func sync(_ request: Request, reassert: Bool) {
         let motion = reduceMotion()
         let live = Set(request.screens.map(\.display))
@@ -63,6 +81,7 @@ public final class VisionManager {
             stackedUnder[display] = nil
         }
         target = request.target
+        below = request.target.map { request.below ?? $0 }
         guard isOn else {
             for plate in plates.values { plate.hide(reduceMotion: motion) }
             stackedUnder = [:]
@@ -75,38 +94,48 @@ public final class VisionManager {
                 stackedUnder[display] = nil
                 continue
             }
+            // Nothing focused, nothing to keep clear: no stale
+            // stack under a window that left.
+            guard let target = request.target, let below else {
+                plates[display]?.hide(reduceMotion: motion)
+                stackedUnder[display] = nil
+                continue
+            }
             let plate = plates[display] ?? makePlate()
             plates[display] = plate
             plate.update(frame: screen.frame, dim: request.dim)
-            guard let target = request.target else { continue }
-            if reassert || stackedUnder[display] != target {
-                plate.order(below: request.below ?? target)
+            if BorderManager.ordersOverlay(
+                reassert: reassert,
+                needsOrder: stackedUnder[display] != target,
+                tracked: request.tracked
+            ) {
+                plate.order(below: below)
                 stackedUnder[display] = target
             }
             plate.show(reduceMotion: motion)
         }
     }
 
-    /// Re-stacks every shown plate under `window` after its own
-    /// reorder event, ahead of its ring's re-order, which lands
-    /// the ring between the two.
-    func restack(below window: CGWindowID) {
-        guard isOn, window == target else { return }
+    /// Re-stacks every shown plate after the target's reorder
+    /// event has re-ordered its ring, under the same anchor the
+    /// last sync chose.
+    func restack(after window: CGWindowID) {
+        guard isOn, window == target, let below else { return }
         for (display, plate) in plates where plate.isShown {
-            plate.order(below: window)
+            plate.order(below: below)
             stackedUnder[display] = window
         }
     }
 
-    /// Turns the mode off and drops every plate at once.
+    /// Turns the mode off and drops every plate at once, saying
+    /// nothing: a stop or a quit is no toggle to announce.
     func clear() {
-        let wasOn = isOn
         isOn = false
         for plate in plates.values { plate.hide(reduceMotion: true) }
         plates = [:]
         stackedUnder = [:]
         target = nil
-        if wasOn { onChange(false) }
+        below = nil
     }
 
     private func makePlate() -> any VisionPlateBackend {

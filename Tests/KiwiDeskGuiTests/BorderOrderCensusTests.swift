@@ -68,9 +68,9 @@ struct BorderOrderCensusTests {
     }
 
     /// A KiwiVision plate's stack is the same round trip, one per
-    /// screen (#2103): its callers are the sync, gated on the
-    /// target moving or a settle pass, and the target's reorder
-    /// event, beside the one definition in the plate.
+    /// screen (#2103): its callers are the sync, gated by the
+    /// ring's own `ordersOverlay`, and the target's restack after
+    /// its reorder event, beside the one definition in the plate.
     @Test("only the ruled sites stack a KiwiVision plate")
     func plateOrderSitesAreCensused() throws {
         let sites = try SourceScan.identifierSites(
@@ -83,9 +83,9 @@ struct BorderOrderCensusTests {
             ],
             "found \(sites.map(\.site))"
         )
-        // The reorder event's tee is wired at boot, which no test
-        // core runs: the plates must re-stack ahead of the ring's
-        // own order, or the ring lands under the plate.
+        // The restack tee is wired at boot, which no test core
+        // runs, and fires AFTER the ring's own order in both arms,
+        // or the ring lands under the plate.
         let seams = try SourceScan.strippedSource(
             at: Self.root.appendingPathComponent(
                 "Sources/KiwiDeskCore/App/KiwiCore+BootSeams.swift"
@@ -93,9 +93,8 @@ struct BorderOrderCensusTests {
         ).filter { !$0.isWhitespace }
         #expect(
             seams.contains(
-                "borders.onWindowReordered={[weakself]idin"
-                    + "self?.stickyMarks.reassert(id)"
-                    + "self?.visionTargetReordered(id)}"
+                "borders.onWindowRestacked={[weakself]idin"
+                    + "self?.visionTargetRestacked(id)}"
             )
         )
         let events = try SourceScan.strippedSource(
@@ -103,11 +102,10 @@ struct BorderOrderCensusTests {
                 "Sources/KiwiDeskCore/Borders/BorderManager+SkyLight.swift"
             )
         ).filter { !$0.isWhitespace }
-        #expect(
-            events.contains(
-                "onWindowReordered(id)overlays[id]?.order(relativeTo:id.raw)"
-            )
-        )
+        let restack =
+            "overlays[id]?.order(relativeTo:id.raw)"
+            + "onWindowRestacked(id)"
+        #expect(events.components(separatedBy: restack).count == 3)
     }
 
     /// The #1959 hold is armed in one door, the switch's own

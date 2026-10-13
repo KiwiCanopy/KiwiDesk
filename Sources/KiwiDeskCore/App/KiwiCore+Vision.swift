@@ -4,8 +4,8 @@ import AppKit
 /// screen dims around it. The plate follows the focus ring's
 /// triggers — `updateBorders` ends in `updateVision` — so a focus
 /// change, a retile and an own key window re-stack it with the
-/// ring, and the ring's WindowServer reorder event re-stacks it
-/// ahead of the ring.
+/// ring, and the target's WindowServer reorder event re-stacks it
+/// once the ring has re-ordered (borders.md ▸ KiwiVision).
 extension KiwiCore {
     /// The dim until KiwiVision's settings land (#2103 ruling 10).
     static let visionDim: CGFloat = 0.4
@@ -28,14 +28,30 @@ extension KiwiCore {
     /// Re-draws the plates from the live focus. Costs nothing
     /// while the mode is off and every plate has faded.
     func updateVision(reassertOrder: Bool = false) {
-        guard vision.isOn || vision.hasShownPlates else { return }
-        vision.sync(visionRequest(), reassert: reassertOrder)
+        guard
+            vision.isOn || vision.hasShownPlates
+                || !borders.visionTracked.isEmpty
+        else { return }
+        var request = visionRequest()
+        // Watched whether or not a ring or a mark asks (#2103).
+        borders.setVisionTracked(
+            vision.isOn
+                ? Set(request.target.map { [WindowID($0)] } ?? []) : []
+        )
+        request.tracked = borders.skyLightActive
+        vision.sync(request, reassert: reassertOrder)
     }
 
-    /// The target's WindowServer reorder event: the plates go back
-    /// under it before its ring does (`BorderManager+SkyLight`).
-    func visionTargetReordered(_ id: WindowID) {
-        vision.restack(below: id.raw)
+    /// The target's WindowServer reorder event, after its ring's
+    /// re-order (`BorderManager+SkyLight`).
+    func visionTargetRestacked(_ id: WindowID) {
+        vision.restack(after: id.raw)
+    }
+
+    /// The shelf's stand-down verdict, judged once per pass in
+    /// `updateBars`; a change re-draws the plates.
+    func noteVisionStandDown(_ displays: Set<DisplayID>) {
+        if vision.noteStandDown(displays) { updateVision() }
     }
 
     /// What the plates draw now. The window kept clear is the
@@ -56,19 +72,15 @@ extension KiwiCore {
         let ring =
             ownKey == nil
             ? anchor.flatMap { borders.ringPanel(of: $0) } : nil
-        var screens: [(display: DisplayID, frame: CGRect)] = []
-        var standDown: Set<DisplayID> = []
-        for screen in ScreenList.all {
-            guard let number = screen.screenNumber else { continue }
-            let display = DisplayID(number)
-            screens.append((display, screen.frame))
-            if shelfStandsDown(on: display) { standDown.insert(display) }
+        let screens = ScreenList.all.compactMap { screen in
+            screen.screenNumber.map { (DisplayID($0), screen.frame) }
         }
         return VisionManager.Request(
             screens: screens,
             target: target,
             below: ring,
-            standDown: standDown,
+            standDown: vision.standDown,
+            tracked: borders.skyLightActive,
             dim: Self.visionDim
         )
     }

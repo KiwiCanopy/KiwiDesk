@@ -55,16 +55,49 @@ struct KiwiVisionCoreTests {
         #expect(heard == [true, false])
     }
 
-    @Test("the focus anchor is the window kept clear")
-    func anchorIsTheTarget() {
+    /// A ring backend reporting an ordered-in panel, so
+    /// `ringPanel(of:)` answers in a test core.
+    private final class OrderedRing: BorderOverlayBackend {
+        let orderMode: BorderGeometry.Order
+        init(_ order: BorderGeometry.Order) { orderMode = order }
+        var orderedPanelNumber: CGWindowID? { 4242 }
+        func update(
+            geometry: BorderGeometry,
+            colorHex: String,
+            screen: NSScreen?,
+            room: CGRect?
+        ) {}
+        func order(relativeTo windowNumber: CGWindowID) {}
+        func hide() {}
+    }
+
+    private func ringedCore() -> KiwiCore {
         let core = makeCore()
-        #expect(core.visionRequest().target == w1.raw)
-        #expect(core.visionRequest().dim == KiwiCore.visionDim)
+        core.borders.backendFactory = { OrderedRing($0) }
+        core.updateBorders()
+        return core
+    }
+
+    @Test("the plate stacks under the anchor's behind ring")
+    func anchorRingIsBelow() {
+        let core = ringedCore()
+        let request = core.visionRequest()
+        #expect(request.target == w1.raw)
+        #expect(request.below == 4242)
+        #expect(request.dim == KiwiCore.visionDim)
+    }
+
+    @Test("a front ring sits above its window, so the plate takes it")
+    func frontRingIsNotBelow() {
+        let core = ringedCore()
+        core.tiler.settings.borderStyle.drawOrder = .front
+        core.updateBorders()
+        #expect(core.visionRequest().below == nil)
     }
 
     @Test("an own key window that is not the anchor stays clear")
     func ownKeyWindowIsTheTarget() {
-        let core = makeCore()
+        let core = ringedCore()
         core.eventLoop.ownKeyWindow = {
             OwnKeyWindowReading(number: 999_999, isDialog: false)
         }
@@ -72,17 +105,35 @@ struct KiwiVisionCoreTests {
         #expect(core.visionRequest().below == nil)
     }
 
-    @Test("the anchor as own key window keeps the anchor's request")
+    @Test("the anchor as own key window keeps its ring below")
     func anchorAsOwnKeyWindow() {
-        let core = makeCore()
+        let core = ringedCore()
         core.eventLoop.ownKeyWindow = { [w1] in
             OwnKeyWindowReading(number: Int(w1.raw), isDialog: false)
         }
         #expect(core.visionRequest().target == w1.raw)
+        #expect(core.visionRequest().below == 4242)
     }
 
-    @Test("the target's reorder re-stacks the plates under it")
-    func reorderTeeRestacks() {
+    @Test("the target is watched with borders off, and its event tees")
+    func targetWatchedWithoutRings() {
+        let core = makeCore()
+        core.tiler.settings.borderStyle.enabled = false
+        core.vision.isOn = true
+        core.updateBorders()
+        #expect(core.borders.overlays.isEmpty)
+        #expect(core.borders.visionTracked == [w1])
+        var restacked: [WindowID] = []
+        core.borders.onWindowRestacked = { restacked.append($0) }
+        core.borders.handleSkyLightEvent(.reorder, window: w1)
+        #expect(restacked == [w1])
+        core.vision.isOn = false
+        core.updateBorders()
+        #expect(core.borders.visionTracked.isEmpty)
+    }
+
+    @Test("the target's restack re-stacks the plates under it")
+    func restackReorders() {
         let core = makeCore()
         let plate = InertVisionPlate()
         core.vision.plateFactory = { plate }
@@ -95,30 +146,31 @@ struct KiwiVisionCoreTests {
                 target: w1.raw,
                 below: nil,
                 standDown: [],
+                tracked: true,
                 dim: 0.4
             ),
             reassert: false
         )
-        core.visionTargetReordered(w2)
+        core.visionTargetRestacked(w2)
         #expect(plate.orders == [w1.raw])
-        core.visionTargetReordered(w1)
+        core.visionTargetRestacked(w1)
         #expect(plate.orders == [w1.raw, w1.raw])
     }
 
-    @Test("updateBorders re-draws the plates")
+    @Test("updateBorders re-draws the plates for the anchor")
     func bordersDriveTheVision() {
         let core = makeCore()
-        var made = 0
-        core.vision.plateFactory = {
-            made += 1
-            return InertVisionPlate()
-        }
         core.vision.isOn = true
         core.updateBorders()
-        // One plate per screen not standing down; at least the
-        // request ran, which a host with no screen cannot show.
         #expect(core.vision.target == w1.raw)
-        #expect(made == core.vision.plates.count)
+    }
+
+    @Test("the shelf's verdict reaches the plates")
+    func standDownComesFromTheShelf() {
+        let core = makeCore()
+        core.vision.isOn = true
+        core.noteVisionStandDown([DisplayID(77)])
+        #expect(core.visionRequest().standDown == [DisplayID(77)])
     }
 
     @Test("stopping the core turns KiwiVision off")
