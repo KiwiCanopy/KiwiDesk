@@ -60,6 +60,27 @@ final class LaunchFollowIntent {
         return press
     }
 
+    /// When `start()` armed the press read. A press older than it
+    /// predates KiwiDesk — the login password — and never opened
+    /// a launch (#2201). nil until wired, like `pressAge`.
+    var watchingSince: Date?
+
+    /// The last press's age when it came at most `pressGrace`
+    /// BEFORE a process started at `launchedAt`, and while
+    /// KiwiDesk watched: that press launched it, however late a
+    /// cold start activates — 1.4–7.8 s measured (#2201).
+    func pressBefore(launch launchedAt: Date, now: Date) -> TimeInterval? {
+        guard let watchingSince, let press = pressAge?() else {
+            return nil
+        }
+        let pressedAt = now.addingTimeInterval(-press)
+        let lead = launchedAt.timeIntervalSince(pressedAt)
+        guard pressedAt >= watchingSince, lead >= 0,
+            lead <= Self.pressGrace
+        else { return nil }
+        return press
+    }
+
     private var pending: (bundleID: String, at: Date)?
 
     /// A rule-placed window that arrived with NO debt standing — a
