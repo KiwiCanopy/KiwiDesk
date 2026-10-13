@@ -15,12 +15,10 @@ struct JumpPanelView: View {
     let width: CGFloat
     @FocusState private var fieldFocused: Bool
 
-    /// Wide enough for a 22 pt title beside its Space (#1875 ▸
-    /// rows the size of the field).
-    static let width: CGFloat = 760
-    /// Spotlight's corners; the selection is concentric with them.
-    static let cornerRadius: CGFloat = 26
-    static let headerHeight: CGFloat = 32
+    /// The key panels' scale (#2229 ▸ shared panel style).
+    static let width: CGFloat = 640
+    static let fieldHeight: CGFloat = 44
+    static let headerHeight: CGFloat = 26
     static let listPadding: CGFloat = 6
 
     var body: some View {
@@ -35,10 +33,7 @@ struct JumpPanelView: View {
         .frame(width: width)
         .tint(SettingsTheme.accent)
         .glassChrome(
-            in: RoundedRectangle(
-                cornerRadius: Self.cornerRadius,
-                style: .continuous
-            ),
+            in: KeyPanelStyle.shape,
             enabled: liquidGlass,
             variant: .regular,
             fallback: AnyShapeStyle(.regularMaterial)
@@ -49,9 +44,9 @@ struct JumpPanelView: View {
     private var field: some View {
         // The glyph's frame matches the row icon's, so the field
         // text and the row titles share one leading edge.
-        HStack(spacing: 12) {
+        HStack(spacing: JumpRowView.spacing) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(.secondary)
                 .frame(width: JumpRowView.iconSize)
                 .accessibilityHidden(true)
@@ -64,7 +59,7 @@ struct JumpPanelView: View {
                 prompt: model.field == nil ? Text(Self.fieldName) : nil
             )
             .textFieldStyle(.plain)
-            .font(.largeTitle)
+            .font(.title3)
             // The selected name stands in for the typing, so the
             // typed glyphs and the caret are drawn clear under it.
             .foregroundStyle(model.field == nil ? Color.primary : Color.clear)
@@ -73,12 +68,13 @@ struct JumpPanelView: View {
             .accessibilityLabel(Self.fieldName)
             .overlay(alignment: .leading) { fieldName }
         }
-        // More room than a row: the field leads the panel, and its
-        // text keeps the row titles' leading edge (10 + 10 inside the
-        // selection, 20 here).
-        .padding(.horizontal, 20)
-        .padding(.top, 8)
-        .frame(height: JumpRowView.height + 12)
+        // The glyph keeps the row icons' leading edge: the
+        // selection's inset plus the row's own padding.
+        .padding(
+            .horizontal,
+            KeyPanelStyle.selectionInset + JumpRowView.padding
+        )
+        .frame(height: Self.fieldHeight)
         .onAppear { fieldFocused = true }
         .onChange(of: model.fieldFocusRequests) { fieldFocused = true }
     }
@@ -104,7 +100,7 @@ struct JumpPanelView: View {
                     }
                 }
             }
-            .font(.largeTitle)
+            .font(.title3)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
         }
@@ -117,7 +113,7 @@ struct JumpPanelView: View {
     @ViewBuilder private var results: some View {
         if model.list.results.isEmpty {
             Text(model.emptyText)
-                .font(.title2)
+                .font(.body)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity)
                 .frame(height: JumpRowView.height)
@@ -129,7 +125,7 @@ struct JumpPanelView: View {
                         .padding(.vertical, Self.listPadding)
                         .padding(
                             .horizontal,
-                            JumpRowView.selectionInset
+                            KeyPanelStyle.selectionInset
                         )
                 }
                 .frame(height: listHeight)
@@ -188,11 +184,12 @@ struct JumpPanelView: View {
             section == .hidden
                 ? JumpRowText.hidden : JumpRowText.minimized
         )
-        .font(.headline)
+        .font(.subheadline.weight(.semibold))
         .foregroundStyle(.secondary)
         .accessibilityAddTraits(.isHeader)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 10)
+        .padding(.horizontal, JumpRowView.padding)
+        .padding(.bottom, 3)
         .frame(height: Self.headerHeight, alignment: .bottom)
     }
 
@@ -257,11 +254,11 @@ private struct JumpFooter: View {
             Text(verbatim: "·")
             Text(L("jump.footer.quick", "%1$@ Quick jump", "⌘1–9"))
         }
-        .font(.callout)
+        .font(.caption)
         .foregroundStyle(.secondary)
         .lineLimit(1)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .padding(.vertical, 7)
         .accessibilityHidden(true)
     }
 }

@@ -5,20 +5,20 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The list grows to a third of the screen's visible height, never
-/// fewer than 6 rows nor more than 12, and shrinks to fit fewer
-/// results (#1875 ▸ Panel). A pick of another app's window and a
+/// fewer than 8 rows nor more than 10 (#2229), and shrinks to fit
+/// fewer results (#1875 ▸ Panel). A pick of another app's window and a
 /// commanded close distrust the dismiss blip (#952).
 @Suite("Jump to window panel controller")
 @MainActor
 struct JumpPanelControllerTests {
-    @Test("the row cap is a third of the screen, 6 to 12 rows")
+    @Test("the row cap is a third of the screen, 8 to 10 rows")
     func rowCap() {
         let row = JumpRowView.height
-        #expect(JumpPanelController.rowCap(visibleHeight: 300) == 6)
+        #expect(JumpPanelController.rowCap(visibleHeight: 300) == 8)
         #expect(
-            JumpPanelController.rowCap(visibleHeight: 3 * row * 8) == 8
+            JumpPanelController.rowCap(visibleHeight: 3 * row * 9) == 9
         )
-        #expect(JumpPanelController.rowCap(visibleHeight: 5000) == 12)
+        #expect(JumpPanelController.rowCap(visibleHeight: 5000) == 10)
     }
 
     /// The footer's scroll cue shows exactly when the content runs

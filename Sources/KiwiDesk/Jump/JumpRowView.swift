@@ -20,16 +20,13 @@ struct JumpRowView: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
-    /// Rows the size of the search field, at Spotlight's scale
-    /// (#1875): a `.title` line with room above and below.
-    static let height: CGFloat = 56
-    static let iconSize: CGFloat = 36
-    /// The selection's inset from the panel's sides; its radius is
-    /// concentric with the panel's corners.
-    static let selectionInset: CGFloat = 10
-    static var selectionRadius: CGFloat {
-        JumpPanelView.cornerRadius - selectionInset
-    }
+    /// The key panels' row (#2229 ▸ shared panel style): a
+    /// `.body` line with room above and below.
+    static let height: CGFloat = 34
+    static let iconSize: CGFloat = 22
+    /// The row's padding inside its selection.
+    static let padding: CGFloat = 10
+    static let spacing: CGFloat = 10
 
     private var showsNumber: Bool { commandHeld && number != nil }
     /// The accent fill is fixed in both modes, so its inks are.
@@ -63,23 +60,23 @@ struct JumpRowView: View {
     }
 
     private var content: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Self.spacing) {
             iconView
             Text(JumpTitle.attributed(match))
-                .font(.title)
+                .font(.body)
                 .foregroundStyle(titleInk)
                 .lineLimit(1)
                 .truncationMode(.tail)
             Spacer(minLength: 12)
             trailing
-                .font(.title2)
+                .font(.callout)
                 .foregroundStyle(secondaryInk)
                 .lineLimit(1)
                 .fixedSize()
                 .layoutPriority(1)
             if showsNumber, let number {
                 Text(verbatim: shiftHeld ? "⇧⌘\(number)" : "⌘\(number)")
-                    .font(.title2.monospacedDigit())
+                    .font(.callout.monospacedDigit())
                     .foregroundStyle(secondaryInk)
                     .fixedSize()
                     .transition(.opacity)
@@ -92,7 +89,7 @@ struct JumpRowView: View {
             reduceMotion ? nil : .easeOut(duration: 0.15),
             value: [showsNumber, showsWayHere]
         )
-        .padding(.horizontal, 10)
+        .padding(.horizontal, Self.padding)
         .frame(height: Self.height)
         .background(selection)
         .contentShape(Rectangle())
@@ -124,7 +121,7 @@ struct JumpRowView: View {
     @ViewBuilder private var selection: some View {
         if isSelected {
             RoundedRectangle(
-                cornerRadius: Self.selectionRadius,
+                cornerRadius: KeyPanelStyle.selectionRadius,
                 style: .continuous
             )
             .fill(SettingsTheme.accent)

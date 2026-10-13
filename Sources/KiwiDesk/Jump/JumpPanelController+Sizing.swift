@@ -5,10 +5,11 @@ import KiwiDeskCore
 /// third of the screen and the panel follows its results.
 extension JumpPanelController {
     /// The most rows the list shows: a third of the screen's
-    /// visible height, never fewer than 6 nor more than 12.
+    /// visible height, never fewer than 8 nor more than 10
+    /// (#2229).
     static func rowCap(visibleHeight: CGFloat) -> Int {
         let rows = Int(visibleHeight / 3 / JumpRowView.height)
-        return min(max(rows, 6), 12)
+        return min(max(rows, 8), 10)
     }
 
     /// The panel's width: `JumpPanelView.width`, kept 40 pt clear
