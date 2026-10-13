@@ -28,6 +28,19 @@ struct JumpSideNameTests {
         }
     }
 
+    @Test("the cycle help names each row where it means it")
+    func cycleHelpNamesItsRows() throws {
+        LocalizationManager.shared.select("en")
+        let next = KeybindingCatalog.nextLayout.resolvedLabel
+        let previous = KeybindingCatalog.previousLayout.resolvedLabel
+        #expect(LayoutCycleWords.help.contains(next))
+        #expect(!LayoutCycleWords.help.contains(previous))
+        let cue = LayoutCycleWords.cueHelp
+        let nextAt = try #require(cue.range(of: next))
+        let previousAt = try #require(cue.range(of: previous))
+        #expect(nextAt.lowerBound < previousAt.lowerBound)
+    }
+
     @Test("each side's chord is read for its own shortcut's Lua")
     func chordFollowsTheBinding() {
         let bound = [
