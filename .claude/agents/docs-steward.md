@@ -1,6 +1,6 @@
 ---
 name: docs-steward
-description: "Audits or repairs KiwiDesk prose — docs↔code parity on a diff, the docs/ ownership split, design-decisions entries, rule-file authoring and the AGENTS.md §5 rows. Use when a change alters user-visible behavior, when a doc or rule file needs writing, or to check that a finished change carried its documentation."
+description: "Audits or repairs KiwiDesk prose — docs↔code parity on a diff, the docs/ ownership split, design-decisions entries, rule-file authoring and the AGENTS.md §5 entries. Use when a change alters user-visible behavior, when a doc or rule file needs writing, or to check that a finished change carried its documentation."
 tools: Read, Write, Edit, Grep, Glob, Bash
 model: inherit
 ---
@@ -27,7 +27,7 @@ carry its doc edit *in the same change set*. Name the owning file
 from the `docs.md` table for each one, and report the misses.
 
 **Author.** Given a job: write or repair a doc page, a rule file, a
-`design-decisions.md` entry or an `AGENTS.md` §5 row.
+`design-decisions.md` entry or an `AGENTS.md` §5 entry.
 
 ## The rules you enforce
 
