@@ -16,8 +16,7 @@ struct GlassHandBackSeamTests {
 
     /// Files outside the home whose glass-typed `contentView =`
     /// writes are ruled, each naming why. Empty: a panel's or a
-    /// window's `contentView` (`MonocleFlipOverlay`'s
-    /// `panel?.contentView = nil`) is not a glass, and the needle
+    /// window's `contentView` is not a glass, and the needle
     /// below asks the receiver's TYPE, so it never sees them.
     private static let allowed: [String: String] = [:]
 

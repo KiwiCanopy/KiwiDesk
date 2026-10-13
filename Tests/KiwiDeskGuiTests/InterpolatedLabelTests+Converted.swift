@@ -186,7 +186,6 @@ extension InterpolatedLabelTests {
         // #1799: the floating mark's help names the layout.
         "floating.mark.help": 1,
         "scroll_grid.scroll_duration.animation_off": 1,
-        "monocle.flip_duration.flip_off": 1,
         "track.auto_tracks.limit_inert": 1,
         "monitors.not_connected.caption": 1,
         "menu.status.config_error.tooltip": 1,
@@ -232,7 +231,6 @@ extension InterpolatedLabelTests {
         "drag.disabled.help": 1,
         "border.fit_gaps.updated_new": 1,
         "scroll_grid.animate_focus_shifts.help": 1,
-        "monocle.flip.help": 1,
         "sticky.caption": 2,
         "general.login_item.managed_by_service": 1,
         // 4. #1094. The help quoted "Toggle sticky" as literal

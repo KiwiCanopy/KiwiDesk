@@ -138,7 +138,7 @@ extension KiwiCore {
             space != state.workspaces.activeSpace,
             state.windows[id]?.isSticky != true
         else {
-            focusWithMonocleFlip(id, step: nil)
+            focusWindow(id, warp: true)
             return true
         }
         followSwitch(to: space, focusing: id)

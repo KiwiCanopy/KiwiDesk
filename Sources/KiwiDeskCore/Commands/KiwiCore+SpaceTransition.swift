@@ -33,10 +33,6 @@ extension KiwiCore {
         newcomer: WindowID? = nil,
         cueOn: DisplayID? = nil
     ) {
-        // A Monocle flip owed on the Space being left is DROPPED
-        // with its play (#1391): the switch's own raise picks the
-        // focus, and the plate must not linger over the arrival.
-        dropMonocleFlip()
         // The focused ring appears with its window (#1959) — a
         // window this switch brings out of its park; one already
         // shown keeps its ring.

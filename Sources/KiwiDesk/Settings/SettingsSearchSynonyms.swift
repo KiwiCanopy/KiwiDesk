@@ -101,10 +101,6 @@ enum SettingsSearchSynonyms {
             return ["speed", "animation speed"]
         case .colours(.animationsScrollDurationMS):
             return ["speed", "scroll speed", "scrolling speed"]
-        case .colours(.animationsOnMonocleFocus):
-            return ["card flip", "transition", "blur"]
-        case .colours(.animationsMonocleFlipDurationMS):
-            return ["speed", "flip speed"]
         case .colours(.animationsOnShelf):
             return ["bar", "app bar", "space bar", "grow", "fade", "slide"]
         case .colours(.animationsShelfDurationMS):

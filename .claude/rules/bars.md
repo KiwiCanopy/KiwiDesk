@@ -23,8 +23,6 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+Shelf*.swift"
   # The looks (#1684): which bar fields a look may set.
   - "Sources/KiwiDeskCore/Appearance/*Look*.swift"
-  # The app-icon readers outside Bar: one icon source (#1901).
-  - "Sources/KiwiDeskCore/App/KiwiCore+MonocleFlip.swift"
   # The Settings preview asks ShelfArrangement and the hard floor
   # like the live plan does; a hand placement there is this
   # file's defect, not gui.md's.
@@ -256,8 +254,7 @@ twice, was a question the user answered twice. The argument is
   the bars' app icons come from the one `BarIconCache`: a fresh
   `NSImage` per read never compares equal and costs a
   LaunchServices round trip besides. Any other Core surface that
-  draws an app's icon — the Monocle flip's card — reads it there
-  too, since an app activation
+  draws an app's icon reads it there too, since an app activation
   makes every retained `NSRunningApplication` read again (#1936,
   `AppIconSourceSeamTests`).
 - **Reuse a Space item's glyph and badge views slot by slot,
@@ -949,16 +946,13 @@ reading a bar still makes for itself:
 - A bar derivation answering *which window holds the SYSTEM
   focus* — the glyph tint, the `+n` badge's, a list peek's check,
   a glyph click's cycle, a window menu's state — reads the one
-  `KiwiCore.barFocus(on:)`: a playing Monocle flip's owed target,
-  else `workspaces.lastFocused`, gated on the active Space —
-  never on the display's own shown one and never on a Space's
-  remembered `focused` slot (`BarFocusSeamTests`, #2063). Those
-  diverge on an injected ∞ traveler, which holds `lastFocused`
-  and can never be the membership-guarded `space.focused` (#431),
-  and that is the one case the `+n` tint exists for; the owed
-  flip target keeps a glyph and its list naming one window
-  through a flip (`BarGlyphCycleTests` ▸
-  `owedMonocleFocusCounts`).
+  `KiwiCore.barFocus(on:)`: `workspaces.lastFocused`, gated on
+  the active Space — never on the display's own shown one and
+  never on a Space's remembered `focused` slot
+  (`BarFocusSeamTests`, #2063). Those diverge on an injected ∞
+  traveler, which holds `lastFocused` and can never be the
+  membership-guarded `space.focused` (#431), and that is the one
+  case the `+n` tint exists for.
 - `currentSpace(on:)` answers *which Space is this screen
   showing*: the item that draws as active, the Space a bar is
   BUILT for, chrome coverage. It is a bare alias of
