@@ -32,6 +32,9 @@ final class JumpModel: ObservableObject {
     /// it, and passes `pointer:` to `init`.
     static let livePointer: () -> CGPoint = { NSEvent.mouseLocation }
     var currentPointer = JumpModel.livePointer
+    /// Each side's own chord, read from the live bindings when the
+    /// panel opens; a side with none bound is absent (#2245).
+    var chords: [JumpScope: String] = [:]
     /// Each app's icon, read once when the panel opens.
     let icons: [pid_t: NSImage]
     /// The most rows the list shows before it scrolls.

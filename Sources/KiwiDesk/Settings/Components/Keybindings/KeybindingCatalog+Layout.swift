@@ -9,7 +9,7 @@ extension KeybindingCatalog {
         label: "Next layout",
         lua: "KiwiDesk.cycle_mode()",
         displayLabel: {
-            L("keybinding.next_layout", "Next layout")
+            L("keybinding.next_layout", "Switch to next layout")
         }
     )
 
@@ -17,7 +17,7 @@ extension KeybindingCatalog {
         label: "Previous layout",
         lua: "KiwiDesk.cycle_mode(\"prev\")",
         displayLabel: {
-            L("keybinding.previous_layout", "Previous layout")
+            L("keybinding.previous_layout", "Switch to previous layout")
         }
     )
 

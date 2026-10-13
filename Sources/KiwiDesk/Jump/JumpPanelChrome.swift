@@ -65,7 +65,8 @@ extension JumpFooter {
 
 /// The scope switch at the field's trailing end (#2229): a click
 /// target and a mark of where ⇥ goes. The panel reads Tab ahead of
-/// every view, so the field keeps the keys.
+/// every view, so the field keeps the keys. Each side prints its
+/// own shortcut's live chord (#2245).
 struct JumpScopeSwitch: View {
     @ObservedObject var model: JumpModel
 
@@ -73,6 +74,7 @@ struct JumpScopeSwitch: View {
         SegmentedPicker(
             spokenLabel: JumpScope.switchName,
             hugsLabels: true,
+            hints: model.chords,
             selection: Binding(
                 get: { model.scope },
                 set: { model.setScope($0) }

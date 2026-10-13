@@ -82,10 +82,10 @@ enum LayoutCycleWords {
     /// The two shortcut rows' own labels, interpolated rather than
     /// quoted (#818).
     private static var nextLayout: String {
-        L("keybinding.next_layout", "Next layout")
+        L("keybinding.next_layout", "Switch to next layout")
     }
 
     private static var previousLayout: String {
-        L("keybinding.previous_layout", "Previous layout")
+        L("keybinding.previous_layout", "Switch to previous layout")
     }
 }

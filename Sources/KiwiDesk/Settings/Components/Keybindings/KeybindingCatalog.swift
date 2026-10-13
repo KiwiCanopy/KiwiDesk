@@ -172,12 +172,15 @@ enum KeybindingCatalog {
         SpaceLuaArg.quote(raw)
     }
 
-    /// Jump to window (#1875): its label is the panel's own name,
-    /// read from the panel, so the feature is one string.
+    /// The window switcher (#1875): "Show" and the side's
+    /// VoiceOver name (#2245). The stored label stays the identity
+    /// a binding is matched by.
     static let jumpToWindow = NavCommand(
         label: "Jump to window",
         lua: "KiwiDesk.show_jump_to_window()",
-        displayLabel: { JumpScope.windows.fieldName }
+        displayLabel: {
+            L("keybinding.show_window_switcher", "Show window switcher")
+        }
     )
 
     /// Command opening shortcuts cheat sheet overlay (#330, #602).

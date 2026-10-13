@@ -36,6 +36,9 @@ struct JumpPanelView: View {
             Divider()
             JumpFooter(scope: model.scope, overflows: overflows)
         }
+        // The side's own name, which its shortcut row shows (#2245).
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(model.scope.panelName)
         // The field stays put; only what is below it changes.
         .animation(
             reduceMotion ? nil : .easeInOut(duration: Self.scopeFade),

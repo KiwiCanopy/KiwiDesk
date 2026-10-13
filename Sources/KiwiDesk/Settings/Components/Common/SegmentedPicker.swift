@@ -11,6 +11,9 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// longest. A strip that hugs its content (#1726) sizes every
     /// segment to the widest label at the selected weight instead.
     private let hugsLabels: Bool
+    /// A key drawn in secondary ink after a segment's title, and
+    /// read as that segment's VoiceOver hint, never its name.
+    private let hints: [Value: String]
     @Binding private var selection: Value
     private let options: [(title: String, value: Value)]
     /// Optional field help text (#94).
@@ -26,6 +29,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         _ label: String? = nil,
         spokenLabel: String? = nil,
         hugsLabels: Bool = false,
+        hints: [Value: String] = [:],
         selection: Binding<Value>,
         options: [(title: String, value: Value)],
         help: String? = nil
@@ -33,6 +37,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         self.label = label
         self.spokenLabel = spokenLabel
         self.hugsLabels = hugsLabels
+        self.hints = hints
         self._selection = selection
         self.options = options
         self.help = help
@@ -167,6 +172,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         } label: {
             segmentLabel(
                 option.title,
+                hint: hints[option.value],
                 selected: selected,
                 index: index
             )
@@ -190,34 +196,63 @@ struct SegmentedPicker<Value: Hashable>: View {
         .accessibilityAddTraits(
             selected ? [.isSelected] : []
         )
+        .accessibilityHint(hints[option.value] ?? "")
     }
 
     private func segmentLabel(
         _ title: String,
+        hint: String?,
         selected: Bool,
         index: Int
     ) -> some View {
-        labelText(title, selected: selected)
+        HStack(spacing: 5) {
+            labelText(title, selected: selected)
+                .foregroundStyle(
+                    selected
+                        ? SettingsTheme.accentInk
+                        : SettingsTheme.ink
+                )
+            if let hint {
+                hintText(
+                    hint,
+                    selected: selected,
+                    hovered: hoveredIndex == index
+                )
+            }
+        }
+        .lineLimit(1)
+        .padding(.vertical, 4)
+        .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity)
+        .background(
+            Capsule().fill(
+                isEnabled && !selected && hoveredIndex == index
+                    ? SettingsTheme.chipRest : .clear
+            )
+        )
+        .animation(
+            reduceMotion ? nil : .easeOut(duration: 0.12),
+            value: hoveredIndex
+        )
+        .contentShape(Capsule())
+    }
+
+    /// The fill is fixed in both modes on the selected segment,
+    /// so its ink is too; the hover lift takes full ink, `ink2`
+    /// falling under 4.5:1 on it in dark.
+    private func hintText(
+        _ hint: String,
+        selected: Bool,
+        hovered: Bool
+    ) -> some View {
+        Text(hint)
+            .font(.callout)
             .foregroundStyle(
                 selected
-                    ? SettingsTheme.accentInk
-                    : SettingsTheme.ink
+                    ? SettingsTheme.accentInkSecondary
+                    : hovered ? SettingsTheme.ink : SettingsTheme.ink2
             )
-            .lineLimit(1)
-            .padding(.vertical, 4)
-            .padding(.horizontal, 10)
-            .frame(maxWidth: .infinity)
-            .background(
-                Capsule().fill(
-                    isEnabled && !selected && hoveredIndex == index
-                        ? SettingsTheme.chipRest : .clear
-                )
-            )
-            .animation(
-                reduceMotion ? nil : .easeOut(duration: 0.12),
-                value: hoveredIndex
-            )
-            .contentShape(Capsule())
+            .accessibilityHidden(true)
     }
 
     private func updateHover(

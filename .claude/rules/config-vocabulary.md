@@ -414,8 +414,10 @@ synonym:
   cannot see — but THIS surface is held:
   `ShortcutsPanelNounTests` asks, per catalog, that the panel's
   own accessibility name is the noun the shortcut opening it
-  already uses. A second surface naming itself twice is still
-  review's until someone gives it the same pairing.
+  already uses, and since #2245 asks it of each side of the
+  ⌃⌥J / ⌃⌥L panel too — the **window switcher** and the
+  **layout picker**. A further surface naming itself twice is
+  review's until it joins that suite's `pairs`.
 
 See `docs/design-decisions.md` for each ruling's rationale, and
 `docs/ui-patterns.md` ("Labels & wire names") for when a rename

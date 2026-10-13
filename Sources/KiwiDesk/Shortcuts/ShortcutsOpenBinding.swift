@@ -11,8 +11,11 @@ enum ShortcutsOpenBinding {
     /// #330), read from the RESOLVED active layer, never raw
     /// `gui.json` — the displayed combo must match what Carbon
     /// actually has installed.
-    @MainActor static func comboGlyphs(core: KiwiCore) -> String? {
-        guard let parsed = combo(core: core, lua: lua) else {
+    @MainActor static func comboGlyphs(
+        core: KiwiCore,
+        lua verb: String = ShortcutsOpenBinding.lua
+    ) -> String? {
+        guard let parsed = combo(core: core, lua: verb) else {
             return nil
         }
         return ComboSymbols.render(
