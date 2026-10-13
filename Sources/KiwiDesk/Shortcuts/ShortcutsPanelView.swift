@@ -34,10 +34,7 @@ struct ShortcutsPanelView: View {
         // not something a guard here could see.
         .tint(SettingsTheme.accent)
         .glassChrome(
-            in: RoundedRectangle(
-                cornerRadius: 12,
-                style: .continuous
-            ),
+            in: KeyPanelStyle.shape,
             // `.regular` for its dense text; off is the shipped
             // material, which the #1307 switch's leaf returns to.
             enabled: liquidGlass,

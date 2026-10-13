@@ -52,7 +52,7 @@ because two real clients now remove drift — see
   pressed verb joins the history pair there — a second key is a
   ruling of its own, argued in `docs/design-decisions.md` ▸ "One
   pressed exception rides `⌥⌘`". Every other pressed verb off
-  the ladder — the toggles, Next layout, app chrome — stays on
+  the ladder — the toggles, the layout cycle, app chrome — stays on
   the base tier as a mnemonic letter (`SizeLayerSeedTests` ▸
   `sizeLayerCarriesOnlySize`, `DefaultKeybindingsTests`,
   `LayoutCycleSeedTests`).

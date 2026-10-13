@@ -158,7 +158,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         let jumpPanel = JumpPanelController(core: core)
         self.jumpPanel = jumpPanel
         core.uiBridge.onShowJumpToWindow = { [weak jumpPanel] in
-            jumpPanel?.toggle()
+            jumpPanel?.toggle(.windows)
+        }
+        // ⌃⌥L opens the same panel on its Layouts scope (#2229).
+        core.uiBridge.onShowLayoutPicker = { [weak jumpPanel] in
+            jumpPanel?.toggle(.layouts)
         }
         // Opens or raises Settings without toggling (#678).
         core.uiBridge.onOpenSettings = { [weak self] in

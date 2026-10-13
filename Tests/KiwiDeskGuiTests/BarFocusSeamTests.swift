@@ -4,10 +4,11 @@ import Testing
 /// "Which window holds the system focus" is answered for a bar in
 /// ONE place, `KiwiCore.barFocus(on:)` (#2063): the glyph tint,
 /// the `+n` disc, the peek's check, the click's cycle and the
-/// window menu's state read it, so a playing Monocle flip's owed
-/// focus cannot name one window on the glyph and another in its
-/// list. The strip's centring reads `lastFocused` for a different
-/// question — which app the chip shows — and is its one exemption.
+/// window menu's state read it, gated on the active Space, so an
+/// injected ∞ traveler holding `lastFocused` tints the `+n` it
+/// sits under (#1214). The strip's centring reads `lastFocused`
+/// for a different question — which app the chip shows — and is
+/// its one exemption.
 @Suite("Bar focus seam")
 struct BarFocusSeamTests {
     private static let app = SourceScan.repoRoot(from: #filePath)
@@ -41,7 +42,6 @@ struct BarFocusSeamTests {
         )
         #expect(peek.occurrences(of: raw) == 1)
         #expect(focus.contains(raw))
-        #expect(focus.contains("pendingMonocleFocus?.to"))
         let click = try Self.source("KiwiCore+SpaceBarClick.swift")
         #expect(click.occurrences(of: raw) == 0)
         let items = try Self.source("KiwiCore+SpaceBarItems.swift")

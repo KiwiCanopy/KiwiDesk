@@ -20,7 +20,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// The keyed show and the close's dismiss distrust (#952).
     let handBack: PanelHandBack
     var panel: JumpPanel?
-    private var model: JumpModel?
+    private var currentModel: JumpModel?
     /// This opening; a fade a later show overtook orders nothing
     /// out.
     private var presence = PanelPresence()
@@ -39,16 +39,44 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// new panel rather than closing one already going.
     var isOpen: Bool { panel?.isVisible == true && !presence.leaving }
 
-    func toggle() {
-        if isOpen {
-            close()
-        } else {
-            show()
+    /// The Space the Layouts scope acts on, read with the screen
+    /// the panel opens on so the two never disagree.
+    var pickerSpace: SpaceID?
+
+    /// A scope's own shortcut (#2229).
+    func toggle(_ scope: JumpScope = .windows) {
+        switch Self.toggleAction(
+            showing: isOpen ? currentModel?.scope : nil,
+            asked: scope
+        ) {
+        case .open: show(scope)
+        case .close: close()
+        case .switchScope: currentModel?.setScope(scope)
         }
     }
 
-    func show() {
+    enum ToggleAction: Equatable { case open, close, switchScope }
+
+    /// Closes the panel where it already shows the asked scope,
+    /// switches where it shows the other, else opens on it.
+    static func toggleAction(
+        showing: JumpScope?,
+        asked: JumpScope
+    ) -> ToggleAction {
+        guard let showing else { return .open }
+        return showing == asked ? .close : .switchScope
+    }
+
+    func show(_ scope: JumpScope = .windows) {
         let screen = PanelHandBack.screenUnderPointer()
+        pickerSpace = core.layoutPickerSpace()
+        // ⌃⌥L with no Space to act on opens nothing, rather than
+        // the other scope.
+        if scope == .layouts,
+            pickerSpace.flatMap(core.layoutPickerState(for:)) == nil
+        {
+            return
+        }
         let snapshot = core.jumpSnapshot()
         let model = JumpModel(
             snapshot: snapshot,
@@ -58,9 +86,12 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             ),
             modifiers: NSEvent.modifierFlags
         )
+        model.chords = Self.chords { [core] lua in
+            ShortcutsOpenBinding.comboGlyphs(core: core, lua: lua)
+        }
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        self.model = model
+        self.currentModel = model
         let presence = PanelPresence()
         self.presence = presence
         wire(model, panel)
@@ -68,8 +99,10 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         let width = Self.width(
             visibleWidth: screen?.visibleFrame.width ?? 1440
         )
+        if scope == .layouts { model.setScope(.layouts) }
         let root = JumpPanelView(
             model: model,
+            settings: core.tiler.settings,
             liquidGlass: glass,
             presence: presence,
             width: width
@@ -83,7 +116,13 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.makeFirstResponder(nil)
         panel.contentView = hosting
         panel.setContentSize(hosting.fittingSize)
-        PanelHandBack.center(panel, on: screen)
+        if let visible = screen?.visibleFrame {
+            panel.setFrameOrigin(
+                Self.origin(size: panel.frame.size, visible: visible)
+            )
+        } else {
+            panel.center()
+        }
         let front = PanelHandBack.frontmostBundleID()
         let rows = snapshot.entries.count
         jumpLog.log(
@@ -93,6 +132,19 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         handBack.present(panel) { [weak self, presence] in
             self?.presence === presence && !presence.leaving
         }
+    }
+
+    /// Each side's chord, read by `glyphs` from the live bindings
+    /// for the Lua that side's own shortcut runs, so a rebind
+    /// prints the key that now opens it (#2245).
+    static func chords(
+        glyphs: (String) -> String?
+    ) -> [JumpScope: String] {
+        var chords: [JumpScope: String] = [:]
+        for scope in JumpScope.allCases {
+            chords[scope] = glyphs(scope.lua)
+        }
+        return chords
     }
 
     /// Closes the panel. No close arms the dismiss distrust: the
@@ -133,7 +185,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// close already fading refuses the resign-key it fires, and a
     /// panel already hidden has no blip to distrust.
     @discardableResult
-    private func dismiss(distrusting: Bool) -> Bool {
+    func dismiss(distrusting: Bool) -> Bool {
         guard panel?.isVisible != false, !presence.leaving else {
             return false
         }
@@ -146,7 +198,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// Fades the panel out, then orders it out; it stops taking
     /// keys the moment the fade starts.
     private func fadeOut() {
-        model?.leave()
+        currentModel?.leave()
         presence.fadeOut(panel, reduceMotion: reduceMotion()) {
             [weak self] in self?.presence === $0
         }
@@ -215,13 +267,25 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         model.onResultsChange = { [weak self] in
             DispatchQueue.main.async { self?.refit() }
         }
+        // After the outgoing scope's fade: until it ends, the
+        // stack still lays that scope out.
+        model.onScopeChange = { [weak self] in
+            guard let self else { return }
+            let delay =
+                self.reduceMotion() ? 0 : JumpPanelView.scopeFade + 0.02
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                self.refit(animated: true)
+            }
+        }
+        panel.scope = { [weak model] in model?.scope ?? .windows }
+        wireLayouts(model)
     }
 
     // MARK: - NSWindowDelegate
 
     /// The field takes the keys whenever the panel does.
     func windowDidBecomeKey(_ notification: Notification) {
-        model?.requestFieldFocus()
+        currentModel?.requestFieldFocus()
     }
 
     func windowDidResignKey(_ notification: Notification) {

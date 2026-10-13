@@ -79,6 +79,10 @@ extension KiwiCore {
             self?.uiBridge.onShowJumpToWindow()
             return .none
         }
+        lua.register("show_layout_picker") { [weak self] _ in
+            self?.uiBridge.onShowLayoutPicker()
+            return .none
+        }
     }
 
     /// `KiwiDesk.bind`, `define_layer`, and `switch_layer`.
@@ -223,6 +227,11 @@ public struct UIBridgeHooks {
     /// `KiwiDesk.show_jump_to_window()` (#1875): opens (toggles)
     /// the Jump to window panel.
     public var onShowJumpToWindow: @MainActor () -> Void = {}
+
+    /// `KiwiDesk.show_layout_picker()` (#762, #2229): opens (toggles)
+    /// the same panel on its Layouts scope, which reads the Space
+    /// through `layoutPickerSpace()`.
+    public var onShowLayoutPicker: @MainActor () -> Void = {}
 
     public init() {}
 }

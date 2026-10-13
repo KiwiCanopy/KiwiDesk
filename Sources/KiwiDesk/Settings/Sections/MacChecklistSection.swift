@@ -47,7 +47,8 @@ struct MacChecklistSection: View {
     private var habits: some View {
         // One live-layer read per render, not one per row.
         let panelChord = ShortcutsOpenBinding.comboGlyphs(
-            core: model.core
+            core: model.core,
+            lua: ShortcutsOpenBinding.lua
         )
         return SettingsSection(
             SettingsCatalog.macChecklist.habitsCard

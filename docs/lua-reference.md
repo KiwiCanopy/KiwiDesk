@@ -616,14 +616,23 @@ KiwiDesk.set_mode_cycle({ "bsp", "stack", "monocle" })
 
 **Expects:** nothing.
 
-**Does:** opens a menu at the pointer listing the layouts, the
-current one checked, for the Space shown on the screen under the
-pointer — its name heads the menu. Pick a layout with the mouse,
-the arrow keys and Return, or by typing its first letters; Escape
-closes it. A pick works like `set_mode` for that Space. The menu
-opens with the current layout under the pointer. A call within
-0.15 s of the menu closing opens nothing: it is the press made
-while the menu was open.
+**Does:** opens the **layout picker**, the **Layouts** side of the
+panel the [window switcher](#show_jump_to_window) shares, for the
+Space shown on the screen under the pointer. It
+switches to it from the windows, or closes the panel if it already
+shows Layouts. Every layout is a tile with its
+picture, the current one marked ✓.
+
+- **←** and **→**, or moving the mouse over a tile, move the
+  selection; typing narrows the tiles by name, dimming the rest.
+- **Return** applies the selected layout, like `set_mode` for that
+  Space, and closes the panel; **⌘1** … **⌘7** apply a tile
+  directly.
+- **⌘S** keeps the layouts in the profile, as the Layout menu's
+  Keep does; **⌘,** opens Layout Defaults in Settings on the
+  selected layout.
+- **Tab** or **⇧Tab** switches to the windows list; **Escape**
+  clears the typing, then closes the panel.
 
 **Example:**
 
@@ -4178,6 +4187,12 @@ the identifier for you. To find one by hand:
   display `app` name.
 - Or `mdls -name kMDItemCFBundleIdentifier /Applications/Safari.app`.
 
+:::unreleased
+An app verb passed a running app's name instead is still refused,
+and the refusal names that app's identifier:
+`app not found: safari — did you mean 'com.apple.Safari'?`.
+:::
+
 Identifiers are matched case-insensitively. An app with no bundle
 identifier (a rare unbundled helper process) cannot be targeted
 by a rule.
@@ -4811,12 +4826,14 @@ end)
 
 **Expects:** nothing.
 
-**Does:** opens **Jump to window**, a search panel centred on the
-screen under the pointer, or closes it if it is already open. It
-lists every window KiwiDesk knows except the one you are in —
+**Does:** opens the **window switcher**, a search panel on the screen
+under the pointer, its field at Spotlight's height; on its Layouts
+side it switches to the windows, and showing the windows it
+closes. It lists every window KiwiDesk knows except the one you are in —
 open windows first, most recently used first, including those up
 on another macOS Desktop, then minimized windows, then one row per
 hidden app. Typing narrows the list by app name, then by title.
+Moving the mouse over a row selects it.
 
 - **Return** goes to the selected window, switching Space or
   Desktop as needed; on a minimized window it brings it back, on a
@@ -4824,6 +4841,10 @@ hidden app. Typing narrows the list by app name, then by title.
 - **⇧Return** moves the window into the Space you are on instead,
   as [move_here](#move_here) does.
 - **⌘1** … **⌘9** pick one of the first nine results.
+- **Tab** or **⇧Tab** switches to the panel's Layouts side
+  ([show_layout_picker](#show_layout_picker)), clearing the
+  typing. The switch at the end of the field shows each side's own
+  key, read from your shortcuts.
 - **Escape** clears the typing, then closes the panel; **⌘W**, a
   click elsewhere or another app taking the keyboard close it too.
 
@@ -4831,7 +4852,7 @@ A window in native full screen is listed, and Return activates its
 app rather than switching to its full-screen Space.
 
 Seeded on **`⌃⌥J`** in the base layer, and offered under
-**Shortcuts & Gestures ▸ Focus** ("Jump to window").
+**Shortcuts & Gestures ▸ Focus** ("Show window switcher").
 
 **Example:**
 
@@ -6040,48 +6061,17 @@ changes.
 animations.set_on_relayout(true)
 ```
 
-### animations.set_on_monocle_focus
+:::unreleased
+### Retired Monocle flip verbs
 
-**Expects:** `true` or `false` (default `true`).
-
-**Does:** enables or disables the card flip when focus moves
-between the windows of a Monocle Space. The window blurs and a
-plate turns from the outgoing app's icon to the incoming one's;
-the focus swaps beneath it as soon as the blur covers it, so the
-keyboard reaches the new window at once. Further presses during
-the turn land instantly, the card showing the newest window's
-icon and the blur lifting a quarter second after you pause. The
-plate turns forward for the next window in the Space's order
-and back for the previous one — the way the key pointed, on a
-`focus` step — about the vertical axis in a horizontal Monocle
-and the horizontal one in a vertical Monocle. It plays only for
-a focus change KiwiDesk itself commands — a `focus` step, an App
-Bar click, `focus_or_spawn` — never for one macOS made (⌘Tab, the
-Dock), and never onto a floating window. A plate whose next
-window is smaller (an app that refuses the full slot) lands on
-that window's own frame. macOS's Reduce Motion keeps the flip
-off regardless.
-
-**Example:**
-
-```lua
-animations.set_on_monocle_focus(false)
-```
-
-### animations.set_monocle_flip_duration
-
-**Expects:** a number (milliseconds, clamped 100–1000; default
-`450`).
-
-**Does:** sets how long the Monocle flip's turn takes; the blur
-fades in and out around it on fixed times. It has no effect
-while `set_on_monocle_focus` is off.
-
-**Example:**
-
-```lua
-animations.set_monocle_flip_duration(300)
-```
+`animations.set_on_monocle_focus` and
+`animations.set_monocle_flip_duration` are retired → nothing: a
+Monocle focus change brings the window to the front and plays no
+flip. A call in `init.lua` is reported in Config Issues; over the
+CLI each fails with `…: a Monocle focus change is a raise and
+plays no flip`. A saved profile's stored values are dropped on its
+next write.
+:::
 
 ### animations.set_on_shelf, animations.set_shelf_duration
 

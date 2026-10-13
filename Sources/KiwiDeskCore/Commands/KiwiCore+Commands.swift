@@ -83,17 +83,15 @@ extension KiwiCore {
             // same policy as its sibling `move_to_track`.
             return trackSwap(args)
         case "focus_or_spawn":
-            return launch(args, newInstance: false)
+            return namingBundleID(launch(args, newInstance: false), args)
         case "spawn_new":
-            return launch(args, newInstance: true)
+            return namingBundleID(launch(args, newInstance: true), args)
         case "gather":
-            return gather(args)
+            return namingBundleID(gather(args), args)
         case "move_here":
-            return moveHereCommand(args)
+            return namingBundleID(moveHereCommand(args), args)
         case "set_mode":
             return setMode(args)
-        case "show_layout_picker":
-            return showLayoutPicker()
         case "cycle_mode":
             return cycleMode(args)
         case "set_mode_cycle":

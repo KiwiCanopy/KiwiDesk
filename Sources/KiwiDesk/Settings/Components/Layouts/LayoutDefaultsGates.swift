@@ -13,7 +13,6 @@ struct LayoutDefaultsGates {
         case autoSizedGrid
         case autoTracks
         case scrollAnimationOff
-        case monocleFlipOff
     }
 
     /// Resolves inert reason for setting key (fail-open if unhandled).
@@ -31,9 +30,6 @@ struct LayoutDefaultsGates {
         case .colours(.animationsScrollDurationMS):
             return settings.animations.onScrolling
                 ? nil : .scrollAnimationOff
-        case .colours(.animationsMonocleFlipDurationMS):
-            return settings.animations.onMonocleFocus
-                ? nil : .monocleFlipOff
         default:
             assertionFailure(
                 "unhandled Layout Defaults gate: \(key.id)"
@@ -49,7 +45,6 @@ struct LayoutDefaultsGates {
         .layout(.gridRows),
         .layout(.trackLimit),
         .colours(.animationsScrollDurationMS),
-        .colours(.animationsMonocleFlipDurationMS),
     ]
 
     /// Gated rows the area declares but resolves elsewhere. Empty
@@ -97,7 +92,6 @@ enum LayoutDefaultsGateHelp {
         case .autoSizedGrid: return autoSizedGrid
         case .autoTracks: return autoTracks
         case .scrollAnimationOff: return scrollAnimationOff
-        case .monocleFlipOff: return monocleFlipOff
         }
     }
 
@@ -134,15 +128,6 @@ enum LayoutDefaultsGateHelp {
             "track.auto_tracks.limit_inert",
             "The track limit follows the screen while %1$@ is on.",
             L("track.auto_tracks", "Auto track limit")
-        )
-    }
-
-    static var monocleFlipOff: String {
-        L(
-            "monocle.flip_duration.flip_off",
-            "Focus changes show the new window at once while "
-                + "%1$@ is off.",
-            L("monocle.flip", "Flip between windows")
         )
     }
 

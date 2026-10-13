@@ -9,7 +9,7 @@ extension KeybindingCatalog {
         label: "Next layout",
         lua: "KiwiDesk.cycle_mode()",
         displayLabel: {
-            L("keybinding.next_layout", "Next layout")
+            L("keybinding.next_layout", "Switch to next layout")
         }
     )
 
@@ -17,11 +17,11 @@ extension KeybindingCatalog {
         label: "Previous layout",
         lua: "KiwiDesk.cycle_mode(\"prev\")",
         displayLabel: {
-            L("keybinding.previous_layout", "Previous layout")
+            L("keybinding.previous_layout", "Switch to previous layout")
         }
     )
 
-    /// The layout picker at the pointer (#762).
+    /// The layout picker, the Jump panel's Layouts side (#2229).
     static let showLayoutPicker = NavCommand(
         label: "Show layout picker",
         lua: "KiwiDesk.show_layout_picker()",

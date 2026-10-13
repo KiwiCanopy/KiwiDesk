@@ -96,24 +96,13 @@ extension KiwiCore {
 
     /// A Space's Layout menu rows — the status item's, Keep
     /// included, since a mode picked here is a temporary layout like
-    /// any other (#1179). The chip's menu and the layout picker
-    /// (#762) both take these.
+    /// any other (#1179). The layout picker (#2229) reads the same
+    /// `layoutDrift`.
     func layoutModeMenuRows(for id: SpaceID) -> [BarMenuRow] {
-        guard let space = state.workspaces[id] else { return [] }
-        let shown = state.workspaces.allDisplays.compactMap {
-            state.workspaces.activeSpace(on: $0.id)
-        }
-        let spaces = Array(Set(shown + [id]))
-        let saved = savedModes(for: spaces)
-        let drifted = { (space: SpaceID) in
-            LayoutModeRows.drifted(
-                live: self.state.workspaces[space]?.mode,
-                saved: saved[space]
-            )
-        }
+        guard let drift = layoutDrift(for: id) else { return [] }
         var layout = LayoutModeRows.entries(
-            live: space.mode,
-            drifted: drifted(id),
+            live: drift.live,
+            drifted: drift.drifted,
             words: LayoutModeRows.coreWords
         ).map { entry in
             BarMenuRow.action(
@@ -137,9 +126,7 @@ extension KiwiCore {
                         "Keep Layout in Profile “%1$@”",
                         profile
                     ),
-                    enabled: LayoutModeRows.keepArmed(
-                        drifts: spaces.map(drifted)
-                    )
+                    enabled: drift.keepArmed
                 ) { [weak self] in
                     self?.barMenuHooks.keepLayout()
                 },

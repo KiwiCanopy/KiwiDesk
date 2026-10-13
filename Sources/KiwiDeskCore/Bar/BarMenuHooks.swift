@@ -14,10 +14,13 @@ public enum SettingsLanding: Equatable, Sendable {
     case space(SpaceID)
     /// App Rules, on this app's row, by its lower-cased bundle id.
     case appRule(String)
+    /// Layout Defaults, on this layout's tab (#2229).
+    case layoutDefaults(LayoutMode)
 }
 
-/// What a bar menu asks of the GUI (#1518) — set at the GUI's
-/// bootstrap, beside `uiBridge`.
+/// What a bar menu, or the key panel's Layouts side (#2229), asks
+/// of the GUI (#1518) — set at the GUI's bootstrap, beside
+/// `uiBridge`.
 public struct BarMenuHooks {
     /// Opens Settings on `landing`.
     public var openSettings: @MainActor (SettingsLanding) -> Void = {

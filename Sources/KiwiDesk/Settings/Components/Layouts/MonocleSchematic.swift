@@ -9,8 +9,8 @@ struct MonocleSchematic: View {
     @Environment(\.schematicPalette) private var palette
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
-    /// Tour story phase (`SchematicMotion.turn`, #1750).
-    var turn: Double = 0
+    /// Tour story phase (`SchematicMotion.arrival`, #1750, #2099).
+    var arrival: Double = 0
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
@@ -47,6 +47,7 @@ struct MonocleSchematic: View {
         ) {
             ZStack(alignment: .bottomTrailing) {
                 cards
+                leavingCard
                 if drawsParkedPile {
                     parkedPile
                 }
@@ -66,11 +67,7 @@ struct MonocleSchematic: View {
             ) { level in
                 card(front: level == 0)
                     .padding(10)
-                    .rotation3DEffect(
-                        .degrees(level == 0 ? turn * 180 : 0),
-                        axis: turnAxis,
-                        perspective: 0.6
-                    )
+                    .scaleEffect(level == 0 ? arrivingScale : 1)
                     .offset(
                         x: CGFloat(level) * 5,
                         y: -CGFloat(level) * 5
@@ -79,13 +76,17 @@ struct MonocleSchematic: View {
         }
     }
 
-    /// The axis the front card turns about: the live flip's own
-    /// (`MonocleFlipPlan.axis(for:)`, #1391).
-    private var turnAxis: (x: CGFloat, y: CGFloat, z: CGFloat) {
-        switch MonocleFlipPlan.axis(for: orientation) {
-        case .vertical: return (0, 1, 0)
-        case .horizontal: return (1, 0, 0)
-        }
+    /// The arriving front card's size: a little smaller while the
+    /// window it replaces is still in front, full at rest (#2099).
+    var arrivingScale: CGFloat { 1 - 0.15 * CGFloat(arrival) }
+
+    /// The window the story's step replaces: in front at the
+    /// start, gone at rest, so the rest frame draws nothing here.
+    private var leavingCard: some View {
+        card(front: true)
+            .padding(10)
+            .opacity(arrival)
+            .allowsHitTesting(false)
     }
 
     /// Parked window pile schematic at bottom corner (#881).

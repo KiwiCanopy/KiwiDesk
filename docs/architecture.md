@@ -189,12 +189,6 @@ a Space Bar or the shelf stands down; the plate itself is drawn in
 `Sources/KiwiDesk/CuePlate` (#2143, #2228).
 :::
 
-A commanded focus in a Monocle Space goes through the flip door
-(`App/KiwiCore+MonocleFlip`), which plays the card flip from
-`Animation/` and lands the ordinary `focusWindow` once the blur
-covers the surface. A later command that reads the focused window
-lands that focus ahead of its own dispatch (#1391).
-
 The Lua watchdog is an instruction-count hook and **cannot**
 interrupt a blocking C call, so anything that blocks in C
 (external commands) goes through `ExecLauncher`, never inline on

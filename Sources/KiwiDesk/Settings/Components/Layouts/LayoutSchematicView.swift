@@ -90,7 +90,7 @@ struct LayoutSchematicView: View {
                 hideStyle: settings.monocle.hideStyle,
                 windows: windows,
                 scale: scale,
-                turn: motion.turn
+                arrival: motion.arrival
             )
         case .track:
             TrackSchematic(

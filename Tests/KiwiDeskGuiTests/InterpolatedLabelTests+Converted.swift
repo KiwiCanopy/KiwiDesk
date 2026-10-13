@@ -66,6 +66,8 @@ extension InterpolatedLabelTests {
     /// translation that pronominalises it. `gui.md` ▸ Strings
     /// now bans it outright.
     static let converted: [String: Int] = [
+        // The key panel's Layout Defaults… button (#2229).
+        "layout_picker.layout_defaults": 1,
         // The two per-space remote-gate pointers (#841). One
         // control label each — the second specifier is
         // `CrossReferenceRow.linkSlot`, a destination link
@@ -184,7 +186,6 @@ extension InterpolatedLabelTests {
         // #1799: the floating mark's help names the layout.
         "floating.mark.help": 1,
         "scroll_grid.scroll_duration.animation_off": 1,
-        "monocle.flip_duration.flip_off": 1,
         "track.auto_tracks.limit_inert": 1,
         "monitors.not_connected.caption": 1,
         "menu.status.config_error.tooltip": 1,
@@ -230,7 +231,6 @@ extension InterpolatedLabelTests {
         "drag.disabled.help": 1,
         "border.fit_gaps.updated_new": 1,
         "scroll_grid.animate_focus_shifts.help": 1,
-        "monocle.flip.help": 1,
         "sticky.caption": 2,
         "general.login_item.managed_by_service": 1,
         // 4. #1094. The help quoted "Toggle sticky" as literal

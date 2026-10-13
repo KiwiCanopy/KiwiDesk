@@ -347,10 +347,6 @@ track shortcut bound.
 That grid's windows per pile is set at **General ▸ Windows per
 pile on quit**.
 
-**Monocle** — a focus change flips a card from one app's icon
-to the next over a blur; the flip and its duration live here
-too, beside the layout.
-
 > **A few resize behaviors are accepted limitations, not bugs** —
 > the inner window of a nested BSP pair not growing, or the shares
 > of masters lined up along the split not moving. See
@@ -881,12 +877,14 @@ reach it, and Shortcuts & Gestures can give it a key of its own.
 :::unreleased
 `⌃⌥C` moves the focused space to its next layout
 ([`cycle_mode`](lua-reference.md#cycle_mode)) and `⌃⌥⇧C` to the
-previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥L` opens
-a menu of every layout at the pointer
-([`show_layout_picker`](lua-reference.md#show_layout_picker)) for
-the space on that screen. `⌃⌥J` opens **Jump to window**
+previous one, `⇧` stepping back as it does on `Tab`. `⌃⌥J` opens
+the **window switcher**
 ([`show_jump_to_window`](lua-reference.md#show_jump_to_window)),
-listed under Shortcuts & Gestures ▸ Focus.
+listed under Shortcuts & Gestures ▸ Focus, and `⌃⌥L` opens the same
+panel on its Layouts side, the **layout picker**
+([`show_layout_picker`](lua-reference.md#show_layout_picker)), for
+the space on the screen under the pointer; `Tab` switches between
+the two.
 :::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each

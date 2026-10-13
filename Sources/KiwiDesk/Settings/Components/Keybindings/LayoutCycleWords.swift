@@ -11,7 +11,7 @@ enum LayoutCycleWords {
     static var help: String {
         L(
             "shortcuts.mode_cycle.help",
-            "%1$@ moves the focused Space to the next layout in this "
+            "“%1$@” moves the focused Space to the next layout in this "
                 + "list and starts again at the top. A layout not in "
                 + "the list goes to the first. A cycle needs at least "
                 + "two layouts, and each layout appears once.",
@@ -71,8 +71,8 @@ enum LayoutCycleWords {
     static var cueHelp: String {
         L(
             "shortcuts.mode_cue.help",
-            "After %1$@ or %2$@, KiwiDesk shows the cycle list for a "
-                + "moment with the new layout in the middle. This "
+            "After “%1$@” or “%2$@”, KiwiDesk shows the cycle list "
+                + "for a moment with the new layout in the middle. This "
                 + "switch applies at once, to every profile.",
             nextLayout,
             previousLayout
@@ -82,10 +82,10 @@ enum LayoutCycleWords {
     /// The two shortcut rows' own labels, interpolated rather than
     /// quoted (#818).
     private static var nextLayout: String {
-        L("keybinding.next_layout", "Next layout")
+        KeybindingCatalog.nextLayout.resolvedLabel
     }
 
     private static var previousLayout: String {
-        L("keybinding.previous_layout", "Previous layout")
+        KeybindingCatalog.previousLayout.resolvedLabel
     }
 }

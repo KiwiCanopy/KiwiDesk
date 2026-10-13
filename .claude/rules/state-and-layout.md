@@ -310,7 +310,7 @@ editing here:
   any one of them leaves `FollowFocusIntentTests` fully green
   while the follow silently stops carrying focus. The ruling is
   `docs/design-decisions.md`'s.
-- **Jump to window's Move here owes a plain ARRIVAL focus, never a
+- **The window switcher's Move here owes a plain ARRIVAL focus, never a
   follow (#1875).** `JumpState` records it only where a move was
   DISPATCHED for that window — a hop the bridge accepted, an
   un-minimize — so the arrival is certain; the `.windowCreated`
@@ -339,7 +339,7 @@ editing here:
   window does not exist when it is owed, and owed through the
   one `oweLaunchFollow` door: by Open or Focus, by `new_window`
   (#1518, which retires its own debt when the app answers that
-  it opened nothing), by Jump to window's un-minimize (#1875,
+  it opened nothing), by the window switcher's un-minimize (#1875,
   an open by the same rule), and by `noteAppActivation` for an
   activation within `pressGrace` of a click or key-down, of a process started within `launchGrace`
   or showing no window (a reopen, an un-minimize — owner ruling

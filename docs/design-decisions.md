@@ -3113,109 +3113,71 @@ would retune a shipped surface for all of them. The focus
 switch under `park` snaps instead of animating: the park is a
 hide mechanism, not motion the user asked to watch, and an
 animated park would turn every focus change into a corner
-flight where monocle's promise is the raise-only flip. Truly
-hiding the windows was rejected on platform grounds: macOS
-offers no public API to hide another app's window (minimize is
-slow and changes Dock state; moving them to another native
-Space is the SIP list above; ordering lower in z changes
-nothing — they are already behind, and a transparent body
-shows whatever is behind it).
+flight where a Monocle focus change is a raise and nothing
+else. Truly hiding the windows was rejected on platform
+grounds: macOS offers no public API to hide another app's
+window (minimize is slow and changes Dock state; moving them to
+another native Space is the SIP list above; ordering lower in z
+changes nothing — they are already behind, and a transparent
+body shows whatever is behind it).
 
-**A Monocle focus change flips a drawn card over a blur, and
-never the window's own pixels (#1391).** A focus change in
-Monocle is a jump cut — the whole surface swaps at once — and
-the transition that says *which* window came in, and from
-which side, is a card flip: the surface blurs, a plate turns
-from the outgoing app's icon to the incoming one's, and the
-focus swaps beneath it the moment the blur has covered the
-surface. Both
-halves are public API with no permission: the compositor blurs
-what lies behind the panel (`NSVisualEffectView`, behind-window
-blending), and the plate is a layer KiwiDesk draws. Measured
-before it was built: from an ordinary SkyLight connection,
-`SLSSetWindowTransform` and `SLSSetWindowAlpha` on another
-app's window return success and apply nothing (the read-back
-unchanged, the before-and-during captures byte-identical) —
-the #884 shape, performed but not applied — and the window's
-live pixels, which a flip of the real window would need,
-reach no process without Screen Recording through any API,
-public or private. The owner ruled no new permission prompt,
-so the drawn plate is the only tier; a live-image flip is
-closed, not deferred.
+:::unreleased
+**A Monocle focus change is a raise and nothing else, with no
+cue (#2099).** A `focus` step, an App Bar click or
+`focus_or_spawn` in a Monocle Space lands the ordinary
+`focusWindow`: the window comes to the front, and nothing is
+drawn over it, whether the App Bar is on or off. No setting and
+no Lua verb govern it, since there is nothing to switch.
 
-*The plate is a wash, not a colour, and it lies on the
-window.* An untinted achromatic wash — white on a light
-appearance, black on a dark one, since a white wash over a dark
-blurred ground reads as a grey slab — because a palette Fill
-becomes a colour on glass only through `GlassTint.apply`
-(#1297) and this plate is a `CALayer` with no ink to floor; a
-rotated effect view was refused as undefined compositor
-territory. It takes the window's own corner radius, read
-through the same seam the focus ring uses, because it lies
-coincident with the window during the fades, and it lands on
-the incoming window's ISSUED frame — a size-bound window's
-centred one (#677) — so no real window is resized for the
-effect. Icons only, no app name: the turn is below reading
-time, and the Space Bar is icon-only by ruling.
+*The landed window identifies itself.* It fills the screen with
+its own title bar and content, so a plate naming it says less
+than the window already does. The one case a plate seemed to
+help with is three windows of one app: they share an icon, only
+their titles tell them apart, and the title is already on
+screen. An app that hides its own title still shows its content.
 
-*The turn conveys direction, which a cross-fade could not.*
-The axis follows `monocle.orientation` — a horizontal Monocle
-turns about the vertical axis, like a page; a vertical one
-about the horizontal — and the sign follows the step: next one
-way, previous the other, a target named outright by array
-order, a wrapped step keeping the pressed direction. No setting
-is added for it. The eye distance scales with the extent that
-rotates, or a window-sized plate's edges fly off screen.
+*A plate belongs to a change of arrangement, not to a step.*
+#2142's plate, which #2228 shows for a Space switch too, answers
+a change where screens can look alike and a name is the only
+cue. A Monocle step always changes what is on screen. macOS's
+own analogues — `` ⌘` `` cycling an app's windows, a click on a
+window — raise with no overlay, and a plate on every press of a
+burst would cover the window the user is trying to read. Monocle
+with its App Bar turned off is a choice for bare windows, so the
+bar's absence opens no gap a cue would have to fill.
 
-*The swap lands when the blur covers it, not when the card is
-edge-on.* Landing the focus at the turn's midpoint, 345 ms
-after the press, makes every hop of an all-day verb pay a third
-of a second of keyboard-focus latency for an illusion the blur
-already provides (owner, device). The landing is the end of the
-fade-in, 120 ms; the card's edge-on moment is what the eye
-follows across the swap, not what hides it.
+*The accepted trade: no direction.* In Monocle, direction is
+array order, and the key the user pressed already states it.
 
-*A burst is navigation: it retargets the card and holds the
-blur.* A press that arrives while a flip is playing lands at
-once, repaints the incoming face with the newest target's icon
-and pushes the fade-out back; the blur lifts only once the
-presses have been quiet for `MonocleFlipPlan.hold` (250 ms —
-200 read as lifting under the hand, owner, device). Restarting
-the play per press reads as the show fighting the user; cutting
-it per press reads as a jump. One motion, retargeted — the
-spring engine's own idiom for a window whose target moves
-mid-flight — is the shape.
+*Removed, not defaulted off.* `animations` is written whole, so
+every existing profile stores the flip's old default, and turning
+the default off would leave it on for all of them; an opt-in
+would keep the owed-focus ledger and its hooks in every focus
+path for the few who chose it. The stored keys need no
+crossing: the animation settings decoder and a
+look's admission both skip keys they do not know, and a profile
+drops them on its next write.
 
-*It plays only for a focus KiwiDesk COMMANDS, and the focus it
-owes is a ledger, not a closure.* A `focus` step, an App Bar
-click, `focus_or_spawn` — the door is `focusWithMonocleFlip`,
-which records `pendingMonocleFocus` and lands the ordinary
-`focusWindow` at the landing; every OS-reported focus (⌘Tab,
-the Dock) takes no door, since its swap already happened. The
-owed focus takes the hooks its sibling `pendingFocusRaise`
-earned: a command that reads the focused window lands it ahead
-of its own dispatch, because a second `focus` press read the
-anchor the first had not yet moved and targeted the same window
-(a query lands nothing — the play continues over it); the door
-itself lands a play's focus before it acts, since the App Bar
-click never passes the dispatcher; an honored report for any
-OTHER window drops it, the user having gone elsewhere, while
-the leaving window's own duplicate echo (#887) keeps it; a
-rekey carries it, a gone target lands nothing, and a Space
-switch drops the debt with the play, its own raise picking the
-focus on arrival. Reduce
-Motion stands the whole transition down, read at the site and
-handed to the pure decision; Reduce Transparency takes the
-OS's own flat rendering of the effect view. `MonocleFlipPlan`
-is the decision, `MonocleFlipOverlay` the drawing — one panel,
-reused across plays — and `BarMotion` builds every animation,
-so Core's motion still has one home. The two `animations` leaves — `on_monocle_focus`,
-default on, and `monocle_flip_duration`, default 450 ms — are
-the scrolling pair's shape one layout over, and stay outside
-the animations master like it. The #881 sentence above,
-"monocle's promise is the raise-only flip", stands: the raise
-is still the swap, and the card is what the eye follows across
-it.
+Revisit this only on device evidence that a wordless step leaves
+users unsure which window came in — and then try a title-only
+plate behind the App-Bar-off gate first, never an always-on cue.
+:::
+
+**Monocle is not Scrolling at 100 %, because it moves
+differently (#2099).** At rest the two look alike: Scrolling's
+edge slivers (`ScrollingLayout.edgePeek`) sit under a
+full-width focused window, so neither shows more than one
+window. On a focus step they part. Scrolling pans the row, so
+every window moves; Monocle with `stack` raises one window and
+writes to no app, so a slow app costs it nothing. A strip you pan
+along and a deck you lift cards from are two ideas, and one name
+for both costs simplicity. Folding Monocle into Scrolling would
+also cost a stored-mode crossing and retired verbs, grow
+Scrolling a "stack the scrolled-out windows" option that is
+Monocle under another name, and open the smallest screen (#1662)
+in "Scrolling, special setting". A Monocle with no chrome needs
+no layout of its own either: its per-layout App Bar row turned
+off is that already.
 
 :::unreleased
 **A Space switch is instant, and names the Space only where no
@@ -7992,10 +7954,10 @@ layout gains one more window, which the engine places — BSP and
 Grid resting on four, every other layout on three, one ruled
 count both hosts share (`LayoutStoryTests`), lowered where the
 Space fits fewer (below) — Scrolling steps
-focus and pans, Monocle's front card turns on the live flip's
-axis (#1391), and a Floating window is dragged and left where it
-lands. Each story plays once when its thumbnail first appears —
-staggered down a list — and again on hover, and never loops.
+focus and pans, Monocle brings its next window to the front, and
+a Floating window is dragged and left where it lands. Each story
+plays once when its thumbnail first appears — staggered down a
+list — and again on hover, and never loops.
 
 This does not reopen the ruling above, which retired a SECOND
 FRAME: a pair shows two states and leaves the tween to the
@@ -8033,10 +7995,10 @@ puts the newcomer, whether Track opens a new track — and cannot
 teach a placement the engine does not make (the #702 rule). No
 story draws a `+`, Scrolling's included: a story shows a window
 arriving, and where the next one would go is the chooser's fact,
-not this one's. Only Floating's drag and Monocle's turn are
+not this one's. Only Floating's drag and Monocle's step are
 drawn by hand: the engine claims no placement for either, and
-the turn takes the live flip's own axis
-(`MonocleFlipPlan.axis(for:)`) rather than a second copy of it.
+Monocle's step pictures a window coming to the front rather than
+motion the app plays.
 
 **A story rests on what its Space fits** (owner ruling
 2026-09-28). The ruled count is a ceiling, lowered to the most
@@ -9849,7 +9811,8 @@ so it joins the base seed and not `appChromeRows`. The same sweep
 found `⌃⌥L` free; the nearest chords taken are Terminal's `⌃⌥⌘L`
 and the `⌥⌘L` Downloads item Finder, Safari and Chrome keep.
 
-Jump to window takes `⌃⌥J` (#1875), J for jump. It opens a panel
+The window switcher takes `⌃⌥J` (#1875), J for the Jump its panel
+does. It opens a panel
 rather than acting on a window, but a pressed one, so it joins the
 base seed beside the layout keys and not `appChromeRows`. The same
 sweep found it free in macOS and in every app menu read; its one
@@ -9857,6 +9820,22 @@ app collision is VS Code's notebook "Join With Next Cell", bound
 only while a notebook cell has focus, where the panel wins. It
 reaches an install in a generation of its own (3), since installs
 built from `release/3.0.0` had already taken generation 2.
+
+**A shortcut row says what pressing it does (#2245).** Its title
+is a verb phrase: "Show" and the panel's VoiceOver name for a
+panel — "Show window switcher", "Show layout picker" — "Open" for
+a window, and "Switch to next layout" rather than a bare noun.
+"Show" and not "Toggle" is Apple's own pattern for a key whose
+second press dismisses the surface ("Show Spotlight search",
+"Show Notification Center"). The panel's verb stays "Jump": the
+field, the preview and the footer say it, and J backs it up for an
+English reader. What links a key to its side in every language is
+position — `⌃⌥J`, `⌃⌥K` and `⌃⌥L` sit side by side on the home row
+— and the chord the scope switch prints beside each side, read
+from the live binding. A word mnemonic links only in English, so
+`G K L` for "Go to" was dropped, and the side names stay
+translated rather than kept as English words that read as missing
+translations.
 :::
 
 **One pressed exception rides `⌥⌘`: the Space history on `Tab`
@@ -10661,7 +10640,7 @@ re-leaks the seed into Custom. (#602, PR #638)
 
 :::unreleased
 **The keyboard panels never take activation, so there is none to
-hand back.** The ⌃⌥K panel and Jump to window are
+hand back.** The ⌃⌥K panel and the ⌃⌥J / ⌃⌥L panel are
 non-activating panels (#1875): they take the keyboard while the
 app the user came from stays active. Activating KiwiDesk to give
 a borderless panel the keyboard raised its other windows — the
@@ -10681,6 +10660,56 @@ menu itself, so ⌘W and the edit chords keep working.
 `ShortcutsPanelReturnTests` and `JumpPanelControllerTests` pin
 the arms and
 `PanelHandBackTests` the non-activating show. (#952, #1875)
+:::
+
+:::unreleased
+**The layout picker is a side of the ⌃⌥J panel, not a menu
+(#2229).** #762 made the picker a native menu because a menu
+brings arrows, type-select, Return, Escape and VoiceOver for free.
+That argument holds for a list of names, and it is why the status
+item's and a Space chip's Layout menus stay menus. The picker
+became a panel because a panel can show each layout's picture,
+drawn by the same schematics Settings uses, and a picture answers
+"which one is Track?" faster than a name; a panel of names alone
+would pay the same cost for nothing. The cost is real, and it is
+paid in the panel: the arrows, the typed filter,
+Return, Escape and the ⌘ digits are its own keys, each tile is a
+VoiceOver button that says which layout is current, and the
+current layout is marked with a ✓ glyph so it is never told apart
+by colour alone.
+
+The selection is kiwi green because the panel is KiwiDesk's own
+window (#1293 tints every one), and a native menu keeps the system
+accent because re-tinting a menu fights the platform. So green
+marks what KiwiDesk draws and the user's accent marks what macOS
+draws, and the line between them is the window, not the feature.
+
+One panel holds both scopes because both answer "take me
+somewhere" from the keyboard, and one field on top keeps typing
+the quick way in, as Spotlight's categories do. ⇥ switches scope
+and clears the field, since the same letters mean a window in one
+and a layout in the other. The other scope's own shortcut switches
+too, so ⌃⌥L inside Jump lands on Layouts. In the Layouts scope ←
+and → move the tiles even while the field has focus: a one-word
+filter has almost nothing to edit with a caret, and the tiles are
+one row. The buttons are not Tab stops, because Tab is the scope
+switch and the field must keep the keys; each shows its chord
+instead (⌘S Keep, ⌘, Layout Defaults…), the way a menu item does.
+One row of seven tiles was chosen over a 3/3/1 grid: the row keeps
+the panel at Jump's width, and ↓ from an outer tile in a grid has
+no tile below it.
+
+The selection follows the mouse, as a menu's highlight does, so
+the row under the pointer is the one ↩ acts on — but only on a
+real pointer move. A row that slides under a still pointer, as
+the panel opens there or the list re-ranks while typing, is not a
+choice the user made, and selecting it would steal the keyboard's
+selection. The ✓ never moves with it: the pill marks where ↩
+goes, the ✓ what the Space shows. `show_layout_picker` is a
+Lua-only verb like the other panels' (`show_jump_to_window`,
+`show_shortcuts`): it opens a window and returns nothing a CLI
+caller could read, so a launcher reaches it through a keybinding. `JumpScopeModelTests`, `LayoutPickListTests` and
+`JumpKeyTests` hold the keys. (#2229)
 :::
 
 **An accessibility steal is returned, not refused (#958).**
