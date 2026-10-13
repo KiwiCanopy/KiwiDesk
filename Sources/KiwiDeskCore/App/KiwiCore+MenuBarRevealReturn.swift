@@ -16,10 +16,12 @@ struct MenuBarRevealDebt {
     /// The foreign window whose report the reveal produced; a
     /// repeat of it is the same reveal.
     let revealed: WindowID
+    /// The report's wall time, which the bound runs from.
+    let armedAt: Date
     /// A press after this stands it down: the report's wall time,
     /// moved past the quick menu's close, whose dismissing click
     /// never reaches the app beneath (#2224).
-    var at: Date
+    var pressSince: Date
     /// The report's monotonic time — a commanded focus since does.
     let commandedAt: ContinuousClock.Instant
 }
@@ -39,7 +41,9 @@ extension KiwiCore {
     /// How long a return may stay owed before it is dropped.
     static let menuBarRevealBound: TimeInterval = 30
     /// How late the quick menu's dismissing press may be stamped
-    /// after its close; the press monitor enqueues its write.
+    /// after its close; the press monitor enqueues its write, and
+    /// stamps at delivery, so a main actor stalled past this
+    /// reads that press as a choice.
     static let statusMenuCloseGrace: TimeInterval = 0.25
 
     /// The `handleWindowFocused` arm, between the placement bounce
@@ -50,7 +54,9 @@ extension KiwiCore {
     /// window of our own pid, no left press inside the echo window
     /// (a click into the revealed bar's menus is the user choosing
     /// that app), the pointer in the reveal strip or our own status
-    /// menu open, and a re-assert that switches no Desktop (#1345).
+    /// menu open — on any macOS, since no foreign activation while
+    /// our menu tracks is the user's — and a re-assert that
+    /// switches no Desktop (#1345).
     /// Takes the report WITHOUT honoring it and owes the return;
     /// a repeat of the same report is the same reveal, while a
     /// report for any other foreign window is the user switching,
@@ -81,7 +87,8 @@ extension KiwiCore {
         menuBarReveal.debt = MenuBarRevealDebt(
             window: intended,
             revealed: id,
-            at: now,
+            armedAt: now,
+            pressSince: now,
             commandedAt: .now
         )
         onLog(
@@ -118,7 +125,7 @@ extension KiwiCore {
         guard menuBarReveal.debt != nil else { return }
         // The click that dismissed the menu is no choice: rebased
         // past it, with the grace its stamp may land late by.
-        menuBarReveal.debt?.at = wallClock().addingTimeInterval(
+        menuBarReveal.debt?.pressSince = wallClock().addingTimeInterval(
             Self.statusMenuCloseGrace
         )
         scheduleMenuBarRevealPayment()
@@ -138,13 +145,16 @@ extension KiwiCore {
     /// STAMPED raise, so the report that follows is our own echo
     /// (#1281) and the scrolling placement distrust does not
     /// bounce it; never the focus command, whose displacement note
-    /// would arm that bounce. A press, a commanded focus or the
-    /// bound since the reveal drops it instead.
+    /// would arm that bounce. The pay-time roster of stand-downs,
+    /// each dropping the debt instead: a press since, a commanded
+    /// focus since, the anchor gone, the bound, an own window
+    /// keyed since (a quick-menu row fronting a panel), and a
+    /// raise that would switch Desktops (#1345) — asked again
+    /// here, since the Desktop may have changed since the report.
     func payMenuBarRevealIfDue() {
         guard let debt = menuBarReveal.debt else { return }
-        let now = wallClock()
-        if leftPress(since: debt.at) {
-            dropMenuBarRevealDebt("a press since")
+        if leftPress(since: debt.pressSince) {
+            standDownMenuBarReveal("a press since")
             return
         }
         if let commanded = eventLoop.lastCommandedFocus,
@@ -153,16 +163,29 @@ extension KiwiCore {
             dropMenuBarRevealDebt("a commanded focus since")
             return
         }
-        guard now.timeIntervalSince(debt.at) < Self.menuBarRevealBound,
-            state.windows[debt.window] != nil
-        else {
-            dropMenuBarRevealDebt("past its bound")
+        guard state.windows[debt.window] != nil else {
+            standDownMenuBarReveal("its window closed")
+            return
+        }
+        let age = wallClock().timeIntervalSince(debt.armedAt)
+        guard age < Self.menuBarRevealBound else {
+            standDownMenuBarReveal("past its bound")
             return
         }
         guard !menuBarReveal.statusMenuOpen,
             !mouse.pointerInMenuBarStrip()
         else {
             scheduleMenuBarRevealPayment()
+            return
+        }
+        if let key = eventLoop.ownKeyWindow(),
+            UInt32(exactly: key.number) != debt.window.raw
+        {
+            dropMenuBarRevealDebt("an own window keyed since")
+            return
+        }
+        guard !raiseCrossesDesktops(debt.window) else {
+            standDownMenuBarReveal("not on screen")
             return
         }
         menuBarReveal.debt = nil
@@ -176,6 +199,24 @@ extension KiwiCore {
         raiseWindow(debt.window)
         updateBorders()
         updateStickyMarks()
+    }
+
+    /// A stand-down that leaves the OS where the reveal put it:
+    /// the report the arm held back is honored now, or state
+    /// focus stays on a window macOS no longer keys. The Desktop
+    /// memory keeps the anchor until the next report (#1207).
+    private func standDownMenuBarReveal(_ reason: String) {
+        guard let debt = menuBarReveal.debt else { return }
+        dropMenuBarRevealDebt(reason)
+        guard state.windows[debt.revealed] != nil,
+            let space = state.workspaces.space(of: debt.revealed),
+            space == state.workspaces.activeSpace
+        else { return }
+        state.workspaces.focus(debt.revealed, in: space)
+        emitFocusChange(debt.revealed)
+        updateBorders()
+        updateStickyMarks()
+        updateBars()
     }
 
     private func dropMenuBarRevealDebt(_ reason: String) {

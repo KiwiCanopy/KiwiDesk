@@ -632,8 +632,10 @@ editing here:
   stored state beside a call site. The #1532 menu-bar reveal
   return is the third of the family and takes the same one-home
   shape: `KiwiCore+MenuBarRevealReturn.swift` owns the arm and
-  its debt, decides at the report — its docstring is the roster
-  of what it reads there, and a new stand-down joins that roster
+  its debt, decides at the report and again at the payment — the
+  arm's docstring is the roster of what it reads at the report,
+  `payMenuBarRevealIfDue`'s of what it reads at the payment, and
+  a new stand-down joins the roster of the moment it reads at
   rather than a call site — OWES the return while the bar shows
   or KiwiDesk's quick menu is open, and never raises before the
   bar hides, since a return raised at once was taken back every
@@ -655,9 +657,11 @@ editing here:
   further member takes the same one-home shape with its own
   consulting site there, and a new live host read on any arm
   takes a `MouseTracker` seam pinned in both twins
-  (`MenuBarRevealReturnTests` the verdicts,
+  (`MenuBarRevealReturnTests` the arm's verdicts,
+  `MenuBarRevealPaymentTests` the payment's,
   `MenuBarRevealSeamTests` the stamped raise and the arm's place
-  between #1161 and #958, `MouseButtonSeamGuardTests` the read's
+  between #1161 and #958 and the quick menu's GUI wiring,
+  `MouseButtonSeamGuardTests` the read's
   home and the pins).
   `IgnoredPanelGraceTests` pins the machine's transitions (the
   dismissal grace, the click-provenance escape, expiry, the

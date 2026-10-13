@@ -10842,12 +10842,20 @@ press, at the report or since — a click into the revealed bar's
 menus reaches no managed window, so the click-reached escape
 cannot see it — by a commanded focus since, by a report for any
 other foreign window (a ⌘-Tab, Spotlight's Return: the user
-switching, honored), never when the re-assert would switch
-Desktops (#1345), and bounded to 30 s. The accepted trade: while
+switching, honored), by an own window keyed since (a quick-menu
+row fronting a panel), never when the re-assert would switch
+Desktops (#1345) — asked again at the payment, which can come
+seconds later — and bounded to 30 s from the report. A stand-down
+that leaves macOS keying the revealed app honors the report the
+arm held back, so state never names a window macOS no longer
+keys. The quick-menu half needs no macOS 27 or auto-hide gate: no
+foreign activation while KiwiDesk's own menu tracks is the
+user's. The accepted trade: while
 the bar shows, the Settings window looks inactive and the other
 app's menus are in the bar.
 :::
-(`MenuBarRevealReturnTests`, `MenuBarRevealSeamTests`)
+(`MenuBarRevealReturnTests`, `MenuBarRevealPaymentTests`,
+`MenuBarRevealSeamTests`)
 
 **Open or Focus is `focus_or_spawn`, not `pull_or_spawn`
 ([#1511](https://github.com/KiwiCanopy/KiwiDesk/issues/1511)).**
