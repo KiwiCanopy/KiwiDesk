@@ -10837,21 +10837,21 @@ report from readable facts rather than armed ahead, since nothing
 precedes the reveal: a report from another app while the active
 Space's focused window is one of our own pid — a sticky own
 window rendering as a traveler elsewhere is not — and the pointer
-in the reveal strip or the quick menu open. Stood down by any left
-press, at the report or since — a click into the revealed bar's
-menus reaches no managed window, so the click-reached escape
-cannot see it — by a commanded focus since, by a report for any
-other foreign window (a ⌘-Tab, Spotlight's Return: the user
-switching, honored), by an own window keyed since (a quick-menu
-row fronting a panel), never when the re-assert would switch
-Desktops (#1345) — asked again at the payment, which can come
-seconds later — and bounded to 30 s from the report. A stand-down
-that leaves macOS keying the revealed app replays the report the
-arm held back through the focus handler, honored like any report
-but moving no pointer, so state never names a window macOS no
-longer keys. The quick-menu half needs no macOS 27 or auto-hide gate: no
-foreign activation while KiwiDesk's own menu tracks is the
-user's. The accepted trade: while
+in the reveal strip or the quick menu open. A click chooses
+nothing (owner, 2026-10-13): the bar a reveal shows is macOS's,
+since KiwiDesk owns none, so opening that app's menus or picking
+one of their rows is not the user picking that app — only a
+window's own focus report is. So the return is stood down by a
+report for any other window, honored (a ⌘-Tab, a click into
+another window, a window a menu row opens), and otherwise only by
+the user or the arrangement moving on: a commanded focus since, an
+own window keyed since (a quick-menu row fronting a panel), the
+anchor closed, a re-assert that would switch Desktops (#1345) —
+asked again at the payment, which can come seconds later — and 30
+s from the report. A click that reached the reported window still
+refuses the arm, being a window choice. The quick-menu half needs
+no macOS 27 or auto-hide gate: no foreign activation while
+KiwiDesk's own menu tracks is the user's. The accepted trade: while
 the bar shows, the Settings window looks inactive and the other
 app's menus are in the bar.
 :::

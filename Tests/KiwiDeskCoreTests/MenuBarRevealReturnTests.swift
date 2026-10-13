@@ -11,8 +11,9 @@ import Testing
 /// app — and a clickless foreign focus report lands ~190 ms
 /// later. The report is taken and the return OWED until the bar
 /// hides or KiwiDesk's quick menu closes (#2224). This suite holds
-/// the arm — each let-out at the report (a press, another window,
-/// a foreign anchor, a self echo, the pointer elsewhere) is a case
+/// the arm — each let-out at the report (a click on the window,
+/// another window, a foreign anchor, a self echo, the pointer
+/// elsewhere) is a case
 /// below; the payment and its stand-downs are
 /// `MenuBarRevealPaymentTests`'. The device evidence is on the
 /// issues.
@@ -40,23 +41,33 @@ struct MenuBarRevealReturnTests {
         #expect(!lines.contain(F.returnLogNeedle))
     }
 
-    @Test("A left press anywhere is the user choosing")
-    func recentPressStandsDown() {
-        // A click into the revealed bar's menus reaches no
-        // managed window, so the stand-down is ANY press, not a
-        // press that reached the reported window.
+    /// A click into the revealed bar's menus reaches no window and
+    /// chooses nothing (owner, 2026-10-13); a click that reached
+    /// the reported window is a window choice.
+    @Test("Only a click on the reported window is a choice")
+    func clickOnTheWindowIsAChoice() {
         let core = F.makeCore()
         // Stamped AHEAD: an "inside the window" verdict measured
         // against the wall clock races a starved runner (#1371).
         core.lastLeftClick = (
             at: core.wallClock().addingTimeInterval(60),
             point: .zero,
-            reached: nil
+            reached: WindowID(2)
         )
         let lines = F.log(core)
         core.handle(.windowFocused(WindowID(2)))
         #expect(F.focused(core) == WindowID(2))
         #expect(!lines.contain(F.returnLogNeedle))
+        // The control: the same press in the bar is no choice.
+        let bar = F.makeCore()
+        bar.lastLeftClick = (
+            at: bar.wallClock().addingTimeInterval(60),
+            point: .zero,
+            reached: nil
+        )
+        bar.handle(.windowFocused(WindowID(2)))
+        #expect(F.focused(bar) == WindowID(1))
+        #expect(bar.menuBarReveal.debt != nil)
     }
 
     /// A lazy app reports a raised window twice (#887): the repeat
