@@ -2,6 +2,24 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "2.3.1",
+      "tag": "v2.3.1",
+      "date": "2026-10-13",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v2.3.1",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v2.3.1/KiwiDesk-2.3.1.dmg",
+      "summary": "KiwiDesk 2.3.1 leaves Spotlight alone on macOS 27.",
+      "sections": [
+        {
+          "title": "Fixed",
+          "items": [
+            "**Spotlight stays where it opens on macOS 27** — KiwiDesk mistook Spotlight's search panel for one of your windows: typing nudged it down, and sometimes it opened in a corner of the screen. KiwiDesk now leaves it alone."
+          ],
+          "type": "fixed"
+        }
+      ]
+    },
+    {
       "version": "2.3.0",
       "tag": "v2.3.0",
       "date": "2026-10-12",
