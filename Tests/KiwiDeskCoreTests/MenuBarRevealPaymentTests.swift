@@ -230,4 +230,23 @@ struct MenuBarRevealPaymentTests {
         anchor.payMenuBarRevealIfDue()
         #expect(paid.contain("menu bar hidden"))
     }
+
+    /// A return the open owed over a report ahead of it waits for
+    /// the menu to close and is paid then, like one owed at the
+    /// report.
+    @Test("A return owed at the open is paid at the close")
+    func openLookBackPaysAtTheClose() {
+        let core = F.makeCore(inStrip: false)
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        core.statusMenuDidOpen()
+        core.payMenuBarRevealIfDue()
+        #expect(core.menuBarReveal.debt != nil)
+        #expect(!lines.contain("menu bar hidden"))
+        core.statusMenuDidClose()
+        core.payMenuBarRevealIfDue()
+        #expect(core.menuBarReveal.debt == nil)
+        #expect(lines.contain("menu bar hidden; returning w1"))
+        #expect(F.focused(core) == WindowID(1))
+    }
 }

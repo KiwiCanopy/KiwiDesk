@@ -637,7 +637,13 @@ editing here:
   `payMenuBarRevealIfDue`'s of what it reads at the payment, and
   a new stand-down joins the roster of the moment it reads at
   rather than a call site — OWES the return while the bar shows
-  or KiwiDesk's quick menu is open, and never raises before the
+  or KiwiDesk's quick menu is open — and at the OPEN for the one
+  report the arm declined only for the menu being shut, since
+  the quick menu's activation reports ahead of `menuWillOpen`
+  and its press reaches no local monitor: `statusMenuDidOpen`
+  looks back within `menuBarRevealOpenGrace`, on a focus nothing
+  honored since, never a second arm beside it — and never raises
+  before the
   bar hides, since a return raised at once was taken back every
   ~1.3 s (#2224), then pays it once with the
   STAMPED raise, `raiseWindow`, so the report that follows is our

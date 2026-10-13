@@ -10741,10 +10741,23 @@ command either: its displacement note would put the foreign
 window in the placement ledger, which in an active scrolling
 Space bounces every later report from that app. Decided at the
 report from readable facts rather than armed ahead, since nothing
-precedes the reveal: a report from another app while the active
-Space's focused window is one of our own pid — a sticky own
-window rendering as a traveler elsewhere is not — and the pointer
-in the reveal strip or the quick menu open. A click chooses
+precedes the bar's reveal: a report from another app while the
+active Space's focused window is one of our own pid — a sticky
+own window rendering as a traveler elsewhere is not — and the
+pointer in the reveal strip or the quick menu open. The quick
+menu's half has ONE more moment, because its report comes first:
+the status item is pressed, AppKit builds the menu, and the
+activation's report lands inside that build — 52 ms ahead of
+`menuWillOpen` on device (2026-10-13), so a flag set at the open
+declined every quick-menu report, and the press itself reaches no
+local event monitor (measured the same day). So the arm keeps the
+one report it declined only for the menu being shut, and the open
+looks back: within a one-second grace, with that window still the
+focus and the anchor present, the open owes the return the report
+would have, state focus going back to the own window and the
+payment waiting on the close as it does. The residue is a ⌘-Tab
+out of Settings and a click on the item inside one second, which
+is paid over. A click chooses
 nothing (owner, 2026-10-13): the bar a reveal shows is macOS's,
 since KiwiDesk owns none, so opening that app's menus or picking
 one of their rows is not the user picking that app — only a

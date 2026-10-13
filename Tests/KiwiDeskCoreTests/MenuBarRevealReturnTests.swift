@@ -174,4 +174,84 @@ struct MenuBarRevealReturnTests {
         #expect(!lines.contain(F.returnLogNeedle))
         #expect(core.menuBarReveal.debt == nil)
     }
+
+    /// The quick menu's activation reports AHEAD of `menuWillOpen`,
+    /// inside the menu's build (device, 2026-10-13: 52 ms ahead),
+    /// so the report is honored at the time and the open owes it.
+    @Test("A report ahead of the quick menu's open is owed at the open")
+    func reportAheadOfTheOpenIsOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(F.focused(core) == WindowID(2))
+        #expect(!lines.contain(F.returnLogNeedle))
+        core.statusMenuDidOpen()
+        #expect(F.focused(core) == WindowID(1))
+        #expect(lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt?.window == WindowID(1))
+    }
+
+    /// A report older than the grace was the user's.
+    @Test("A stale report is not owed at the open")
+    func staleReportIsNotOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        let late = core.wallClock().addingTimeInterval(
+            KiwiCore.menuBarRevealOpenGrace + 1
+        )
+        core.wallClock = { late }
+        core.statusMenuDidOpen()
+        #expect(F.focused(core) == WindowID(2))
+        #expect(!lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt == nil)
+    }
+
+    /// The revealed window may sit in another Space — its report
+    /// switches nothing and leaves the active Space's focus on the
+    /// anchor (device, 2026-10-13) — and the open still owes it.
+    @Test("A revealed window in another Space is owed at the open")
+    func otherSpaceReportIsOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        core.state.workspaces.add(WindowID(2), to: SpaceID("2"))
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        #expect(!lines.contain(F.returnLogNeedle))
+        core.statusMenuDidOpen()
+        #expect(lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt?.window == WindowID(1))
+        #expect(F.focused(core) == WindowID(1))
+    }
+
+    /// A lazy app's duplicate of the declined report (#887) keeps
+    /// the candidate for the open.
+    @Test("A repeat of the declined report keeps it for the open")
+    func repeatKeepsTheDeclinedReport() {
+        let core = F.makeCore(inStrip: false)
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        core.handle(.windowFocused(WindowID(2)))
+        core.statusMenuDidOpen()
+        #expect(lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt?.window == WindowID(1))
+    }
+
+    /// A window honored after the declined report is the user's
+    /// choice; the open owes nothing over it.
+    @Test("A later choice is not owed at the open")
+    func laterChoiceIsNotOwedAtTheOpen() {
+        let core = F.makeCore(inStrip: false)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(3), pid: 98, appName: "Third")
+            )
+        )
+        let lines = F.log(core)
+        core.handle(.windowFocused(WindowID(2)))
+        core.handle(.windowFocused(WindowID(3)))
+        core.statusMenuDidOpen()
+        #expect(F.focused(core) == WindowID(3))
+        #expect(!lines.contain(F.returnLogNeedle))
+        #expect(core.menuBarReveal.debt == nil)
+    }
 }
