@@ -65,23 +65,53 @@ struct MonocleSchematic: View {
                 Array((0...fanDepth).reversed()),
                 id: \.self
             ) { level in
-                card(front: level == 0)
+                fanCard(level: level)
                     .padding(10)
-                    .scaleEffect(level == 0 ? arrivingScale : 1)
+                    .opacity(opacity(ofLevel: level))
                     .offset(
-                        x: CGFloat(level) * 5,
-                        y: -CGFloat(level) * 5
+                        x: drawnLevel(level) * 5,
+                        y: -drawnLevel(level) * 5
                     )
             }
         }
     }
 
-    /// The arriving front card's size: a little smaller while the
-    /// window it replaces is still in front, full at rest (#2099).
-    var arrivingScale: CGFloat { 1 - 0.15 * CGFloat(arrival) }
+    /// The card resting at `level`: the front one crossfades from
+    /// a back card to the focus mark as it arrives (#2099).
+    private func fanCard(level: Int) -> some View {
+        ZStack {
+            card(front: false)
+                .opacity(level == 0 ? arrival : 1)
+            if level == 0 {
+                card(front: true).opacity(focusWeight)
+            }
+        }
+    }
+
+    /// How much of the focus mark the arriving card wears: none
+    /// while the window it replaces is in front, all at rest.
+    var focusWeight: Double { 1 - arrival }
+
+    /// Where the card resting at `level` is drawn, in fan steps:
+    /// one step further back while the story's step is still to
+    /// come, so the fan steps forward as the front card fades.
+    /// The backmost card fades in where it rests instead.
+    func drawnLevel(_ level: Int) -> CGFloat {
+        guard fanDepth > 0, level < fanDepth else {
+            return CGFloat(level)
+        }
+        return CGFloat(level) + CGFloat(arrival)
+    }
+
+    /// The backmost card of a fan appears as the fan steps
+    /// forward; every other card is always drawn.
+    func opacity(ofLevel level: Int) -> Double {
+        fanDepth > 0 && level == fanDepth ? 1 - arrival : 1
+    }
 
     /// The window the story's step replaces: in front at the
-    /// start, gone at rest, so the rest frame draws nothing here.
+    /// start, gone at rest — fill and focus stroke together — so
+    /// the rest frame draws nothing here.
     private var leavingCard: some View {
         card(front: true)
             .padding(10)
