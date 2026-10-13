@@ -163,14 +163,16 @@ struct MonocleSchematic: View {
         case (false, true):
             return L(
                 "layout.schematic.monocle.caption_h",
-                "All windows fill the screen; new ones come to "
-                    + "the front, and focus cycles left/right."
+                "One window at a time; the rest wait behind it. "
+                    + "Stepping left/right brings the next to the "
+                    + "front, and nothing moves."
             )
         case (false, false):
             return L(
                 "layout.schematic.monocle.caption_v",
-                "All windows fill the screen; new ones come to "
-                    + "the front, and focus cycles up/down."
+                "One window at a time; the rest wait behind it. "
+                    + "Stepping up/down brings the next to the "
+                    + "front, and nothing moves."
             )
         case (true, true):
             return L(
@@ -199,8 +201,10 @@ struct MonocleSchematic: View {
             )
             : L(
                 "layout.schematic.monocle.ax",
-                "Monocle preview: one window fills the screen; "
-                    + "focus cycles through the others."
+                "Monocle preview: one window fills the screen "
+                    + "and the others wait behind it; focus "
+                    + "brings the next to the front without "
+                    + "moving any window."
             )
     }
 }
