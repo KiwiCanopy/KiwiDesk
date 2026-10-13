@@ -296,6 +296,12 @@ struct ShortcutsReferenceTests {
         let controlRows = reference.controls.reduce(0) {
             $0 + $1.rows.count
         }
-        #expect(controlRows == commands.count)
+        // Open Settings leads Apps, and the key panel's own openers
+        // are not listed (#2246).
+        let openers = Set(JumpScope.allCases.map(\.lua))
+        let listed = commands.filter { !openers.contains($0.lua) }
+        #expect(controlRows + reference.apps.count == listed.count)
+        let ownApps = reference.apps.allSatisfy { $0.ownApp }
+        #expect(ownApps)
     }
 }

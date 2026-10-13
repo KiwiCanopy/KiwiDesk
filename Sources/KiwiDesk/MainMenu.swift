@@ -114,7 +114,7 @@ enum MainMenu {
 
     /// Close answers for whichever window is key (#1533); a
     /// borderless panel earns it by validating `performClose(_:)`
-    /// itself, as `ShortcutsPanel` does.
+    /// itself, as `JumpPanel` does.
     private static func fileMenu() -> NSMenuItem {
         let item = submenu(L("menu.file.title", "File"))
         item.identifier = fileMenuID

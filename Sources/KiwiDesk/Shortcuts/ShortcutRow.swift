@@ -10,6 +10,9 @@ struct ShortcutRow: Identifiable {
     var bundleID: String? = nil
     /// App Font ligature name overriding bundle icon (#294).
     var glyph: String? = nil
+    /// Draws KiwiDesk's own app icon — its Open Settings row
+    /// (#2246).
+    var ownApp = false
     var monospaced: Bool = false
     /// Trailing accessory glyph for non-default actions (#334).
     var accessoryIcon: String? = nil

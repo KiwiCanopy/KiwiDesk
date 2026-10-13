@@ -64,6 +64,10 @@ struct ShortcutRowView: View {
                     )
                 )
                 .frame(width: 16, height: 16)
+        } else if row.ownApp {
+            Image(nsImage: NSApplication.shared.applicationIconImage)
+                .resizable()
+                .frame(width: 16, height: 16)
         } else if let bundleID = row.bundleID {
             Image(
                 nsImage: AppIconCache.shared.icon(

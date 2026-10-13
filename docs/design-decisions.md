@@ -10414,15 +10414,14 @@ profile's list. Listing a working chord under Inactive, captioned
 "pressing one recreates its Space", told the user the opposite of
 what a press does; Inactive keeps only #92's true orphans.
 
-**The shortcuts panel scrolls, and says so — in words, in the
-footer.** The panel is a glance surface but not a small one: the
-seeded keymap grows three rows per Space, so a stock setup runs
-to more rows than fit under the height ceiling
-`ShortcutsPanelController.resize` derives from the screen. It
-may therefore exceed the viewport, and the fold is cued by a
-line in the footer drawn only when `resize`'s own verdict says
-the content clipped — `overflows(fitting:ceiling:)`, one home,
-handed to the view rather than re-derived by it, so the cue
+**The shortcuts sheet scrolls, and says so — in words.** The
+sheet is a glance surface but not a small one: the seeded keymap
+grows three rows per Space, so a stock setup runs to more rows
+than fit under the cap `JumpPanelController.sheetCap` derives from
+the screen (#2246). It may therefore exceed the viewport, and the
+fold is cued by a line beside the sheet's buttons drawn only when
+the measured sheet runs past that cap —
+`JumpShortcutsView.overflows(content:cap:)`, one home, so the cue
 cannot disagree with the clamp that causes it.
 
 **The platform's own indicator does not work.**
@@ -10614,29 +10613,21 @@ tree outside `ChromeScanRoots` — the panel's `Shortcuts/` tree was
 one — is not partly covered but *silently exempt*, which is how
 such a surface ships.
 
-**The shortcuts panel never lists its own opener.** The
-`show_shortcuts` binding (⌃⌥K, seeded per layer, #602) is dropped
-from the panel builder's working set and renders in no band — the
-one deliberate exception to the panel's "no bound shortcut is ever
-invisible" contract. The footer's dismiss hint is its home: it
-shows the live resolved combo wherever bindings are live, follows
-a rebind automatically, and still renders in the empty and
-unavailable states, which no band does — a row can't match that. A
-row would also be self-referential (you just pressed the combo it
-teaches; no macOS surface lists its own trigger as content) and,
-listed, it surfaces in *Custom*, the band that means
-"user-authored raw Lua" — a first-party seeded default there reads
-as the user's own script. Promoting the row to the top instead was
-considered and rejected: redundancy with the footer is most
-jarring as the first line read, ahead of the actions the user
-opened the panel to look up. The editor's General section likewise
-stays low — macOS's own Keyboard pane puts "Keyboard Shortcuts…"
-below the content, and the menu bar's "View Shortcuts…" plus the
-onboarding hint already carry discovery. Consequence to keep: a
-fresh layer (seeded with only the opener) honestly shows the
-"nothing bound" placeholder while the footer teaches ⌃⌥K.
+**The shortcuts sheet never lists the key panel's own openers.**
+The three bindings that open the panel's sides — ⌃⌥J, ⌃⌥K
+(`show_shortcuts`, seeded per layer, #602) and ⌃⌥L — are dropped
+from the builder's working set and render in no section: the one
+deliberate exception to the sheet's "no bound shortcut is ever
+invisible" contract. Their home is the side switch, which prints
+each side's live chord (#2245): it follows a rebind, and it shows
+in the empty and unavailable states, which no section does. A row
+would also be self-referential — you just pressed the chord it
+teaches, and no macOS surface lists its own trigger as content —
+and, listed, it would surface in *Custom*, the section that means
+"user-authored raw Lua". Consequence to keep: a fresh layer seeded
+with only the openers shows Open Settings alone, under Apps.
 `ShortcutsSelfRowTests` pins the suppression — un-suppressing it
-re-leaks the seed into Custom. (#602, PR #638)
+re-leaks the seed into Custom. (#602, PR #638, #2246)
 
 :::unreleased
 **The keyboard panels never take activation, so there is none to
@@ -10657,9 +10648,33 @@ its order-out would key Settings ahead of the window picked.
 Because KiwiDesk's main menu is not the one in the menu bar
 while a panel is up, each panel hands its key equivalents to that
 menu itself, so ⌘W and the edit chords keep working.
-`ShortcutsPanelReturnTests` and `JumpPanelControllerTests` pin
-the arms and
+`JumpPanelControllerTests` pins the arms and
 `PanelHandBackTests` the non-activating show. (#952, #1875)
+:::
+
+:::unreleased
+**The shortcuts sheet is the key panel's middle side (#2246).**
+⌃⌥J, ⌃⌥K and ⌃⌥L open one panel on its Windows, Shortcuts and
+Layouts sides, in the order of the keys under the right hand; ⇥
+steps forward and ⇧⇥ back, wrapping. Three keyboard surfaces in
+two shapes were more to learn than one — and a third side earns
+its place only because the field searches it: a read-only page
+bolted on beside two searchable sides was refused. The sheet is
+one titled column, as Spotlight's and Raycast's results are: a
+searchable panel is read top-down, ↑ ↓ and VoiceOver then share
+one row order, and every label gets the panel's width in every
+language, where the old two columns halved it. Open Settings
+leads Apps, which is KiwiDesk's own app row, rather than standing
+alone in a one-row group. The panel holds one fixed width, 720 pt,
+since a width that changed on ⇥ would move the field and the
+switch under the eye; only the height follows each side, its top
+fixed at the field, the sheet growing down to just above the
+screen's bottom or a KiwiShelf strip, which the visible frame
+does not exclude. The field shows only the typing: the selection
+is the green row or tile, shown once, and inline completion —
+weighed — reads as native only where → or Tab would accept it,
+which here they never do. Holding ⇧ lights "⇧↩ Move here" in the
+footer instead.
 :::
 
 :::unreleased

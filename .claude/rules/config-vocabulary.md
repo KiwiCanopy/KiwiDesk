@@ -397,7 +397,8 @@ synonym:
   section is where the two collide), and not "tier" either:
   *tier* is already spoken for twice over by `SettingTier` /
   row tiers (`docs/ui-patterns.md`) and the bars' dim tiers.
-- **shortcuts panel** — the read-only surface ⌃⌥K opens (#326).
+- **shortcuts panel** — the read-only surface ⌃⌥K opens (#326),
+  since #2246 the key panel's Shortcuts side; its VoiceOver name.
   Retired as names for it: *shortcuts reference*, *reference
   panel*. Binds **copy** — a label, a catalog value, CLI help
   text, `docs/` prose — and not identifiers, so

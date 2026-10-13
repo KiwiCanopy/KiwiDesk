@@ -4777,12 +4777,23 @@ end)
 
 **Expects:** nothing.
 
-**Does:** opens the read-only **shortcuts panel** — a live glance
-at the active layer's bindings — or closes it if it is already
-open. It is the panel behind the menu bar's *View Shortcuts…*
-row; the bound combo shows beside that row and in the panel's
-close hint. Seeded to **⌃⌥K** in the base layer and in every
-layer you create.
+**Does:** opens the key panel on its **Shortcuts** side — a live,
+read-only list of the active layer's bindings — switches to it
+from another side, or closes the panel if it already shows
+Shortcuts. It is the panel behind the menu bar's *View
+Shortcuts…* row.
+
+:::unreleased
+- Typing narrows the list by name, the matched letters in bold.
+- **↑** **↓** and **Page Up** / **Page Down** scroll the list;
+  **Return** runs nothing.
+- **⌘,** or **Edit in Settings…** opens Shortcuts & Gestures.
+- **Tab** and **⇧Tab** step to the other sides, as on the
+  [window switcher](#show_jump_to_window).
+:::
+
+Seeded to **⌃⌥K** in the base layer and in every layer you
+create.
 
 Offered under **Shortcuts & Gestures ▸ Open applications ▸
 KiwiDesk** ("Show shortcuts panel"), where you can rebind or clear
@@ -4841,8 +4852,9 @@ Moving the mouse over a row selects it.
 - **⇧Return** moves the window into the Space you are on instead,
   as [move_here](#move_here) does.
 - **⌘1** … **⌘9** pick one of the first nine results.
-- **Tab** or **⇧Tab** switches to the panel's Layouts side
-  ([show_layout_picker](#show_layout_picker)), clearing the
+- **Tab** steps to the panel's next side and **⇧Tab** to the one
+  before — Windows, [Shortcuts](#show_shortcuts) and
+  [Layouts](#show_layout_picker), wrapping — clearing the
   typing. The switch at the end of the field shows each side's own
   key, read from your shortcuts.
 - **Escape** clears the typing, then closes the panel; **⌘W**, a

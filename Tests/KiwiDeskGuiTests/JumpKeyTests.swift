@@ -54,11 +54,11 @@ struct JumpKeyTests {
         #expect(key(18, [.command, .option]) == nil)
     }
 
-    @Test("Esc is the escape, Tab switches scope, letters type")
+    @Test("Esc is the escape, ⇥ steps forward, ⇧⇥ back, letters type")
     func escapeTabAndTyping() {
         #expect(key(53) == .escape)
-        #expect(key(48) == .toggleScope)
-        #expect(key(48, .shift) == .toggleScope)
+        #expect(key(48) == .stepScope(forward: true))
+        #expect(key(48, .shift) == .stepScope(forward: false))
         #expect(key(48, .control) == .swallow)
         #expect(key(0) == nil)
         #expect(key(0, .shift) == nil)
@@ -75,8 +75,8 @@ struct JumpKeyTests {
         #expect(layouts(123) == .side(-1))
         #expect(layouts(124) == .side(1))
         #expect(layouts(1, .command) == .keep)
-        #expect(layouts(43, .command) == .layoutDefaults)
-        #expect(layouts(48) == .toggleScope)
+        #expect(layouts(43, .command) == .settings)
+        #expect(layouts(48) == .stepScope(forward: true))
         #expect(layouts(36) == .pick(moveHere: false))
         #expect(layouts(19, .command) == .quick(1, moveHere: false))
         // In Windows the arrows move the caret and ⌘S, ⌘, type.
@@ -85,5 +85,24 @@ struct JumpKeyTests {
         #expect(key(43, .command) == nil)
         // A plain S types a filter.
         #expect(layouts(1) == nil)
+    }
+
+    /// The Shortcuts side scrolls with the list keys and opens
+    /// Settings on ⌘, (#2246); ↩ and the ⌘ digits run nothing
+    /// there, which the model owns.
+    @Test("Shortcuts reads ↑ ↓ and the pages, and ⌘, Settings")
+    func shortcutsKeys() {
+        func sheet(
+            _ code: UInt16,
+            _ modifiers: NSEvent.ModifierFlags = []
+        ) -> JumpKey? {
+            JumpKey.of(keyCode: code, modifiers: modifiers, scope: .shortcuts)
+        }
+        #expect(sheet(125) == .step(1))
+        #expect(sheet(116) == .page(-1))
+        #expect(sheet(43, .command) == .settings)
+        #expect(sheet(48, .shift) == .stepScope(forward: false))
+        // ← → move the caret on this side.
+        #expect(sheet(123) == nil)
     }
 }

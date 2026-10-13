@@ -45,17 +45,6 @@ struct PanelFadeGuardTests {
         return (controller, front)
     }
 
-    private func shortcuts() -> (ShortcutsPanelController, Front) {
-        let controller = ShortcutsPanelController(
-            core: makeTestCore(),
-            onEdit: {}
-        )
-        controller.reduceMotion = { true }
-        let front = Front()
-        front.wire(controller.handBack)
-        return (controller, front)
-    }
-
     @Test("a Jump panel fading out is no longer open")
     func jumpLeavingIsClosed() {
         let (controller, front) = jump()
@@ -68,35 +57,9 @@ struct PanelFadeGuardTests {
         #expect(!controller.isOpen)
     }
 
-    @Test("a shortcuts panel fading out is no longer open")
-    func shortcutsLeavingIsClosed() {
-        let (controller, front) = shortcuts()
-        controller.show()
-        front.drain()
-        defer { front.keyed.forEach { $0.orderOut(nil) } }
-        #expect(controller.isOpen)
-        controller.close()
-        #expect(front.keyed.first?.isVisible == true)
-        #expect(!controller.isOpen)
-    }
-
     @Test("a Jump show a later show overtook keys nothing")
     func jumpOvertakenShow() {
         let (controller, front) = jump()
-        controller.show()
-        let first = front.deferred
-        front.deferred = []
-        controller.show()
-        defer { front.keyed.forEach { $0.orderOut(nil) } }
-        first.forEach { $0() }
-        #expect(front.keyed.isEmpty)
-        front.drain()
-        #expect(front.keyed.count == 1)
-    }
-
-    @Test("a shortcuts show a later show overtook keys nothing")
-    func shortcutsOvertakenShow() {
-        let (controller, front) = shortcuts()
         controller.show()
         let first = front.deferred
         front.deferred = []
@@ -120,16 +83,6 @@ struct PanelFadeGuardTests {
         controller.close()
         front.drain()
         #expect(front.keyed.count == 1)
-    }
-
-    @Test("a shortcuts show closed before its turn keys nothing")
-    func shortcutsClosedBeforeKey() {
-        let (controller, front) = shortcuts()
-        controller.show()
-        controller.close()
-        defer { front.keyed.forEach { $0.orderOut(nil) } }
-        front.drain()
-        #expect(front.keyed.isEmpty)
     }
 
     /// A core holding window 9 in Space 2 while Space 1 is shown.

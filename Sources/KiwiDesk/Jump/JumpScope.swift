@@ -62,7 +62,7 @@ enum JumpScope: CaseIterable, Equatable {
         switch self {
         case .windows: return L("jump.field.label", "Jump to window")
         case .shortcuts:
-            return L("shortcuts.field.label", "Find a shortcut")
+            return L("shortcuts.field.label", "Search shortcuts")
         case .layouts:
             return L("layout_picker.field.label", "Choose a layout")
         }

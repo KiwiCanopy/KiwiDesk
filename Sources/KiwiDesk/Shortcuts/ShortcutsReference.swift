@@ -51,6 +51,7 @@ enum ShortcutsReferenceBuilder {
                     cmd.icon.flatMap { $0.isEmpty ? nil : $0 }
                     ?? directionalIcon(for: cmd.lua)
                     ?? spaceFallbackIcon(for: cmd.lua)
+                    ?? verbIcon(for: cmd.lua)
                 return ShortcutRow(
                     id: cmd.lua,
                     label: cmd.resolvedLabel,
@@ -92,7 +93,11 @@ enum ShortcutsReferenceBuilder {
         // bound Open Settings fell through to Custom as raw Lua
         // (#678 item 18).
         let apps =
-            rows([KeybindingCatalog.openSettings])
+            rows([KeybindingCatalog.openSettings]).map { row in
+                var row = row
+                row.ownApp = true
+                return row
+            }
             + buildApps(layer, consumed: &consumed)
         let custom = buildCustom(layer, consumed: consumed)
 

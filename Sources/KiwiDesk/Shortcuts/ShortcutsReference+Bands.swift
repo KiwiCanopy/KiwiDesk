@@ -155,9 +155,11 @@ extension ShortcutsReferenceBuilder {
                     "Opens a new instance"
                 )
             )
+        // Not the floating mark's symbol, which the Shortcuts side
+        // shows beside it for a different meaning (#2246).
         case .gather:
             return (
-                "macwindow.on.rectangle",
+                "rectangle.stack",
                 L(
                     "shortcuts.app_behavior.gather.badge",
                     "Gathers its windows here"
@@ -182,6 +184,7 @@ extension ShortcutsReferenceBuilder {
                     id: binding.id.uuidString,
                     label: binding.lua,
                     combo: glyphs(binding.combo),
+                    icon: "curlybraces",
                     monospaced: true
                 )
             }
