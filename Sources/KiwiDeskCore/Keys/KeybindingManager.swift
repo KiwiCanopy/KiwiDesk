@@ -66,6 +66,19 @@ public final class KeybindingManager {
 
     /// Hold-to-glide engine (#1056, #1082).
     let holdGlide = HoldGlide()
+    /// The Hyper layer's trigger and held registrations (#1870).
+    var hyper = HyperLayer()
+    /// The key the user chose as Hyper, nil for none; KiwiCore
+    /// owns its remap (`KiwiCore+HyperKey`).
+    public internal(set) var hyperSource: HyperSourceKey?
+    /// Whether the Hyper key is on: its remap is in place, so F18
+    /// arrives when it is pressed (`KiwiCore.applyHyperKey`).
+    public var hyperEnabled = false {
+        didSet {
+            guard hyperEnabled != oldValue else { return }
+            activate(currentLayer)
+        }
+    }
     private var suspended = false
     let registrar: HotkeyRegistrar
 

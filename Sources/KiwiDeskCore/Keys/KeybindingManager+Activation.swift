@@ -7,6 +7,7 @@ extension KeybindingManager {
         // The ids are about to vanish, so no release can ever
         // arrive to stop a live glide — end it here (#1056).
         holdGlide.cancelRun()
+        disarmHyper()
         for id in activeBindings.keys {
             registrar.unregister(id: id)
         }
@@ -17,7 +18,13 @@ extension KeybindingManager {
         deactivate()
         activationFailures = []
         guard !isSuspended else { return }
+        var hyperRows: [(KeyCombo, Int32)] = []
         for (combo, ref) in bindings(for: layer) {
+            // A Hyper combo registers only while the key is held.
+            if combo.modifiers.contains(.hyper) {
+                hyperRows.append((combo, ref))
+                continue
+            }
             guard
                 registerPhysical(
                     code: combo.keyCode,
@@ -49,6 +56,7 @@ extension KeybindingManager {
                 )
             }
         }
+        armHyper(hyperRows)
     }
 
     /// Registers ONE physical key for combo. Each physical key
@@ -57,7 +65,8 @@ extension KeybindingManager {
     /// the fire (#1056 review) — a box shared with the keypad twin
     /// would hand the second press the first's id, and hold-glide
     /// keys its whole run by that id (`KeypadKeys`).
-    private func registerPhysical(
+    /// A Hyper combo registers bare: its modifiers less `hyper`.
+    func registerPhysical(
         code: UInt32,
         combo: KeyCombo,
         ref: Int32
@@ -65,7 +74,7 @@ extension KeybindingManager {
         let box = RegistrationBox()
         let id = registrar.register(
             keyCode: code,
-            modifiers: combo.modifiers
+            modifiers: combo.modifiers.subtracting(.hyper)
         ) { [weak self] in
             self?.pressFire(ref: ref, combo: combo, id: box.id)
         }

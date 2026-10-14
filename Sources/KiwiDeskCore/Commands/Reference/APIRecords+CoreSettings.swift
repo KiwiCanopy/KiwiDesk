@@ -56,6 +56,11 @@ extension APIReference {
                 + "after KiwiDesk's own Desktop switch.",
             .boolean("enabled")
         ),
+        "set_hyper_key": APIRecord(
+            "Turns a key into the Hyper modifier for this "
+                + "session, or `off`; it becomes F18 until quit.",
+            .choice("key", HyperSourceKey.self)
+        ),
         "set_space_cue": APIRecord(
             "Shows the Space and its layout on the screen that "
                 + "switched, where no Space Bar is drawn.",

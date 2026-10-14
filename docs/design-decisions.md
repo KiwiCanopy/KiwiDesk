@@ -9522,6 +9522,26 @@ recordable — the first non-modifier key locks the combo
 (#212) — and a hand-written `cmd+j+k` is inert and flagged
 ⚠ unrecognized.
 
+:::unreleased
+**The Hyper key is a modifier KiwiDesk owns, and needs no
+Input Monitoring (#1870).** The usual hyper key is an event
+tap rewriting Caps Lock into `⌃⌥⇧⌘`, which needs the permission
+this app refuses. KiwiDesk instead remaps the chosen key to F18
+with `hidutil` — per user, no permission, gone at a restart —
+and watches F18 with a Carbon hotkey, which hears both its press
+and its release. Only while it is held are the `hyper+…`
+shortcuts registered, as bare keys; at the release they go. So
+Hyper is a modifier of its own, not an alias for the four: a
+`hyper+h` collides with nothing, including an app that already
+binds `⌃⌥⇧⌘H`. The key is the Mac's, not a profile's: it remaps a
+physical key, and a profile can change on a Desktop swipe, which
+would flip Caps Lock mid-sentence. KiwiDesk touches a key mapping
+only where it is exactly the one KiwiDesk recorded writing —
+Caps Lock → F18 is also a common Hammerspoon setup — and refuses
+otherwise. The trade: "tap Hyper alone for Escape" needs a posted
+key event, which is Input Monitoring, so it stays with #1874.
+:::
+
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get
 opposite treatments, so the line is drawn here rather than
@@ -10148,8 +10168,10 @@ before seeding (2026-10-10, macOS 27.0.1): no entry in
 AX menu bars of fifteen running apps (858 shortcut items) one
 claimed a `⌃⌥⇧⌘` digit — Antigravity IDE's Split Terminal on 7,
 which KiwiDesk's hotkey takes from it as every seeded chord takes
-an app menu's. If a later change makes Input Monitoring a
-requirement, a dedicated Hyper key is the place to revisit this.
+an app menu's. #1870's Hyper key does not move this tier: it is a
+separate modifier and off by default, so the seed cannot depend on
+it, and the users the four-modifier chord serves are the ones whose
+own tool already presses all four.
 
 The rows are topped up rather than seeded once, because Desktops
 come and go: at boot, and at a switch that shows a Desktop numbered

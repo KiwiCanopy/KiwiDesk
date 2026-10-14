@@ -112,6 +112,8 @@ extension KiwiCore {
             return setRefusalSound(args)
         case "set_desktop_cue":
             return setDesktopCue(args)
+        case "set_hyper_key":
+            return setHyperKey(args)
         case "set_mode_cue":
             return setModeCue(args)
         case "set_space_cue":

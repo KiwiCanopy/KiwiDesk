@@ -211,6 +211,7 @@ extension KiwiCore {
         retargetVisionAppearance(nil)  // a quit puts it back
         retireReduceTransparency()
         retireFontSet()
+        retireHyperKey()
         payOwedShortcutDrops()  // nothing carries the debt (#1827)
         // Captured BEFORE the gather moves anything: each float's
         // record is the frame the next launch gives back (#1864,

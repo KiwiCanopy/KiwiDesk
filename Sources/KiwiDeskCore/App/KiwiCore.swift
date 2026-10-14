@@ -209,11 +209,11 @@ public final class KiwiCore {
     let boot = BootRun()
     /// The tunable waits; tests assign milliseconds.
     var timings = CoreTimings()
+    /// The Hyper key's `hidutil` host (#1870); tests pin it inert.
+    var hyperRemapHost = HyperKeyRemap.Host.live
 
-    /// The intent ledgers, each type doc carrying its argument: the
-    /// move latch (#482/#483), the follow focus debt (#1007), a
-    /// hidden-Desktop move's Space (#1150), a launch's (#1599), and
-    /// Jump to window's (#1875).
+    /// The intent ledgers; each type's doc carries its argument
+    /// (#482/#483, #1007, #1150, #1599, #1875).
     let moveLatch = MoveIntentLatch()
     let followFocus = FollowFocusIntent()
     let pendingSpace = PendingSpaceAssignment()
