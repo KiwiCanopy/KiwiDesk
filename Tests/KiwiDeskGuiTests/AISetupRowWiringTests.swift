@@ -27,9 +27,12 @@ struct AISetupRowWiringTests {
                     + "==.translocated"
             ) == 1
         )
+        // Tied to the button, so a grey on the `?` reds.
         #expect(
-            row.occurrences(of: ".modifier(GreyOut(active:translocated))")
-                == 1
+            row.occurrences(
+                of: "AICopyButton(title:title,text:prompt)"
+                    + ".modifier(GreyOut(active:translocated))"
+            ) == 1
         )
         #expect(
             row.occurrences(of: "Text(translocated?movedCaption:caption)")
@@ -44,6 +47,19 @@ struct AISetupRowWiringTests {
         #expect(
             row.occurrences(
                 of: ".searchAnchored(SettingsCatalog.ai.copySetupPrompt)"
+            ) == 1
+        )
+    }
+
+    /// The row draws the caption the census guard checks.
+    @Test("a prompt row draws its prompt's caption")
+    func promptRowDrawsTheCaption() throws {
+        let row = try flat(
+            "Sources/KiwiDesk/Settings/Components/AI/AIPromptRow.swift"
+        )
+        #expect(
+            row.occurrences(
+                of: "Text(AIReadyPrompt.caption(for:key)??\"\")"
             ) == 1
         )
     }
