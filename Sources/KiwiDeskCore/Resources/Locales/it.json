@@ -20,7 +20,7 @@
   "ai.prompt.look": "Crea un nuovo look",
   "ai.prompt.look.caption": "L'atmosfera, i colori o quelli del tuo sfondo, e l'aspetto delle barre.",
   "ai.prompt.look.text": "Aiutami a creare il mio look personale in KiwiDesk. Fammi una domanda alla volta: che atmosfera voglio, quali colori (oppure proponi di abbinarli al mio sfondo da un'istantanea dello schermo), come devono apparire le barre (bordo dello schermo, spessore, vetro o pieno) e cosa voglio lasciare com'è. Mostra ogni modifica dal vivo. Dirò «conserva» quando il risultato mi piace.",
-  "ai.prompt.migrate": "Se arrivi da un altro gestore di finestre",
+  "ai.prompt.migrate": "Passa da un altro gestore di finestre",
   "ai.prompt.migrate.caption": "Incolla la tua vecchia configurazione: la tua app di IA la ricrea in KiwiDesk e ti dice cosa non ha un equivalente.",
   "ai.prompt.migrate.text": "Aiutami a passare a KiwiDesk da un altro gestore di finestre. Fammi una domanda alla volta: quale usavo (ad esempio AeroSpace, yabai, Amethyst o Rectangle), e chiedimi di incollarne la configurazione. Poi ricrea i miei spazi, layout e spaziature, le mie regole app e le mie scorciatoie, e dimmi cosa non ha un equivalente in KiwiDesk. Mostra ogni modifica dal vivo, ma mostrami le scorciatoie prima di aggiungerle, perché vengono salvate subito. Dirò «conserva» quando il risultato mi piace.",
   "ai.prompt.spaces": "Configura i miei spazi",

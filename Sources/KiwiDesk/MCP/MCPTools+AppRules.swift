@@ -15,8 +15,6 @@ extension MCPTools {
         title: "Set up KiwiDesk app rules",
         lead: "Lists and changes app rules: which Space an app's new "
             + "windows open in, and which windows float. app is the "
-            + "bundle_id \(getState) lists for the app's windows. A "
-            + "Space rule moves no window already open; a float rule "
-            + "re-checks the open ones."
+            + "bundle_id \(getState) lists for the app's windows."
     )
 }

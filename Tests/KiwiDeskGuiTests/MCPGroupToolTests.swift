@@ -109,37 +109,46 @@ struct MCPGroupToolTests {
     }
 
     /// A call naming every argument sends them in the record's
-    /// positional order, never the call's key order.
+    /// positional order, never the call's key order. Walked over
+    /// every entry a tool may send, so an order that is neither
+    /// alphabetical nor its reverse is among them, which a sorted
+    /// or hash-ordered `send` cannot pass by chance.
     @Test("arguments are sent in the record's order")
     func argumentsKeepTheirOrder() {
-        var checked = 0
-        for spec in MCPTools.groupTools {
-            for entry in MCPTools.offered(group: spec.group)
-            where entry.record.arguments.count > 1 {
-                let app = MCPKeepTests.FakeApp()
-                let arguments = entry.record.arguments
-                var call: [String: JSONValue] = [
-                    "action": .string(entry.name)
-                ]
-                for (index, argument) in arguments.enumerated() {
-                    call[argument.name] = Self.sample(argument, index)
-                }
-                _ = app.tools.runGroupAction(group: spec.group, call)
-                let expected = arguments.enumerated().map {
-                    Self.sample($0.element, $0.offset)
-                }
-                #expect(
-                    app.sent.last?.command == entry.qualifiedName,
-                    "\(entry.qualifiedName)"
-                )
-                #expect(
-                    app.sent.last?.args == expected,
-                    "\(entry.qualifiedName)"
-                )
-                checked += 1
-            }
+        let entries = APIReference.entries.filter {
+            MCPTools.isRunnable($0) && !APIReference.isDestructive($0)
+                && $0.record.arguments.count > 1
         }
-        #expect(checked > 0)
+        let unsorted = entries.filter {
+            let names = $0.record.arguments.map(\.name)
+            return names != names.sorted()
+                && names != names.sorted().reversed()
+        }
+        #expect(!unsorted.isEmpty)
+        let grouped = MCPTools.groupTools.flatMap {
+            MCPTools.offered(group: $0.group)
+        }
+        #expect(grouped.contains { $0.record.arguments.count > 1 })
+        for entry in entries {
+            let app = MCPKeepTests.FakeApp()
+            let arguments = entry.record.arguments
+            var call: [String: JSONValue] = [:]
+            for (index, argument) in arguments.enumerated() {
+                call[argument.name] = Self.sample(argument, index)
+            }
+            _ = app.tools.send(entry, call)
+            let expected = arguments.enumerated().map {
+                Self.sample($0.element, $0.offset)
+            }
+            #expect(
+                app.sent.last?.command == entry.qualifiedName,
+                "\(entry.qualifiedName)"
+            )
+            #expect(
+                app.sent.last?.args == expected,
+                "\(entry.qualifiedName)"
+            )
+        }
     }
 
     @Test("a window argument is an integer id")

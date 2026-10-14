@@ -5,7 +5,7 @@
   "ai.capability.inspect": "Voir vos espaces et vos fenêtres, et consulter n'importe quelle commande.",
   "ai.capability.looks": "Créer, appliquer et enregistrer des looks, assortis à votre fond d'écran à partir d'une capture d'écran.",
   "ai.capability.settings": "Modifier les écarts, les bordures et les barres de KiwiShelf.",
-  "ai.capability.shortcuts": "Ajouter des raccourcis pour des commandes, une fois la liste validée par vous.",
+  "ai.capability.shortcuts": "Ajouter des raccourcis pour des commandes, une fois que vous avez validé la liste.",
   "ai.capability.spaces": "Changer d'espace, créer et déplacer des espaces, et changer leur disposition.",
   "ai.capability.windows": "Mettre en mosaïque, faire flotter, échanger et déplacer vos fenêtres.",
   "ai.copied": "Copié",
