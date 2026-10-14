@@ -43,7 +43,7 @@ public final class WindowServerWatch {
         /// Production must not set it.
         var override: ((Set<WindowID>) -> Bool)?
 
-        /// Test-only: forces the stream's verdict past the next
+        /// Test-only: forces the stream's verdict until the next
         /// request. Production must not call it.
         func setActive(_ active: Bool) { isActive = active }
     #endif
@@ -112,7 +112,9 @@ public final class WindowServerWatch {
     func stop() {
         heard = [:]
         kept = [:]
-        submit()
+        // A best-effort clear outside the verdict path: a quit
+        // reports no tracking state.
+        if started { _ = source?.watch([]) }
         started = false
         isActive = false
         reported = nil

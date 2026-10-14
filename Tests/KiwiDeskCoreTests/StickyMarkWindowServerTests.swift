@@ -73,6 +73,41 @@ struct StickyChipWindowServerTeeTests {
     }
 }
 
+/// The core's own wiring of the mark to the watch (#2275): a
+/// marked, unringed window hears the stream as the mark, and the
+/// watch's frame and restack phases reach the core's mark.
+@Suite("Sticky mark core wiring")
+@MainActor
+struct StickyMarkCoreWiringTests {
+    @Test("the core's mark hears its own window through the watch")
+    func coreMarkHearsTheWatch() {
+        let core = makeTestCore()
+        let window = WindowID(7)
+        let frame = CGRect(x: 30, y: 40, width: 400, height: 300)
+        core.windowServer.override = { _ in true }
+        core.windowServer.readWindowBounds = { _ in frame }
+        core.stickyMarks.sync([
+            StickyMarkManager.Spec(
+                window: window,
+                frame: CGRect(x: 0, y: 0, width: 400, height: 300),
+                glass: false
+            )
+        ])
+        defer { core.stickyMarks.clear() }
+        #expect(!core.stickyMarks.isWindowServerTracked(window))
+        core.windowServer.request([window], for: .mark)
+        #expect(core.stickyMarks.isWindowServerTracked(window))
+        // The ring's request does not make the mark hear.
+        core.windowServer.request([], for: .mark)
+        core.windowServer.request([window], for: .ring)
+        #expect(!core.stickyMarks.isWindowServerTracked(window))
+        core.windowServer.request([], for: .ring)
+        core.windowServer.request([window], for: .mark)
+        core.windowServer.handle(.move, window: window)
+        #expect(core.stickyMarks.lastFrame(window) == frame)
+    }
+}
+
 /// The mark manager's WS-driven entry points are no-ops for a window
 /// wearing no mark — the tee fires for every watched window (rings
 /// included), so a re-assert / reposition of an unmarked id must not

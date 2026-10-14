@@ -205,8 +205,8 @@ extension KiwiCore {
         // Retire focus rings first: the gather below moves windows
         // by direct AX (no animation tee), so a ring left up would
         // sit stranded over the scattered desktop.
+        windowServer.stop()  // first: the ring's clear sends nothing
         borders.stop()
-        windowServer.stop()
         stickyMarks.clear()
         vision.clear()
         retargetVisionAppearance(nil)  // a quit puts it back

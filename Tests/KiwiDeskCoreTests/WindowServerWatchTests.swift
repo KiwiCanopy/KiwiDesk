@@ -137,9 +137,15 @@ struct WindowServerWatchTests {
     @Test("stop drops every registration")
     func stopDropsAll() {
         let (watch, calls) = recordingWatch()
+        var lines: [String] = []
+        watch.onLog = { lines.append($0) }
+        watch.override = { _ in true }
         watch.request([w1], for: .mark)
         watch.request([w1], for: .vision)
+        #expect(watch.isActive)
+        lines = []
         watch.stop()
+        #expect(lines.isEmpty, "a stop reports no tracking state")
         #expect(watch.requested(by: .mark).isEmpty)
         #expect(watch.requested(by: .vision).isEmpty)
         watch.handle(.reorder, window: w1)

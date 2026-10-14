@@ -31,7 +31,7 @@ struct WindowServerWatchSeamTests {
             try sites(of: ".attach(self)") == ["WindowServerWatch.swift": 2]
         )
         #expect(
-            try sites(of: "source?.watch(") == ["WindowServerWatch.swift": 1]
+            try sites(of: "source?.watch(") == ["WindowServerWatch.swift": 2]
         )
     }
 
@@ -50,10 +50,18 @@ struct WindowServerWatchSeamTests {
 
     @Test("the watch is built in one place")
     func oneConstructionSite() throws {
+        // The core builds its watch; BorderManager's default is a
+        // test's standalone manager, never started.
         #expect(
             try sites(of: "WindowServerWatch()")
-                == ["BorderManager.swift": 1]
+                == ["KiwiCore.swift": 1, "BorderManager.swift": 1]
         )
+        // The sink is taken at start, so one door starts it.
+        #expect(
+            try sites(of: "windowServer.start()")
+                == ["KiwiCore+BootSeams.swift": 1]
+        )
+        #expect(try sites(of: "watch.start()") == [:])
     }
 
     @Test("the core wires the watch's log and animation reads")

@@ -132,8 +132,9 @@ public final class BorderManager {
     /// Observers for key window transitions (#933).
     var ownKeyWindowObservers: [NSObjectProtocol] = []
 
-    /// `watch` is the core's one stream; a standalone manager's
-    /// default is never started, so it never attaches.
+    /// `watch` is the core's one stream, built by `KiwiCore`; a
+    /// test's standalone default is never started, so it never
+    /// attaches.
     public init(watch: WindowServerWatch = WindowServerWatch()) {
         self.watch = watch
         connectRing()

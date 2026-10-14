@@ -13,8 +13,9 @@ extension KiwiCore {
     /// do for the rings (#2026).
     func updateStickyMarks(reassertOrder: Bool = false) {
         let specs = stickyMarkSpecs()
-        // Ahead of the sync, whose follow reads the verdict: the
-        // mark hears its windows with or without a ring (#414).
+        // Ahead of the sync, whose order gate reads this request's
+        // verdict, as the ring's does (#1925); the mark hears its
+        // windows with or without a ring (#414).
         windowServer.request(Set(specs.map(\.window)), for: .mark)
         stickyMarks.sync(specs, reassertOrder: reassertOrder)
     }
