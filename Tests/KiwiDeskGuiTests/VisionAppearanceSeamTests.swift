@@ -72,6 +72,11 @@ struct VisionAppearanceSeamTests {
                 "App/KiwiCore.swift", "var appWideLedger",
                 "appWideLiveChanged(from: oldValue.live)"
             ),
+            // The whole stored group, so a new plate input re-draws.
+            (
+                "App/KiwiCore+Vision.swift", "func appWideLiveChanged(",
+                "if new.vision != old.vision { updateVision() }"
+            ),
             (
                 "App/KiwiCore+Lifecycle.swift", "public func stop(",
                 "retargetVisionAppearance(nil)"

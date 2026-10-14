@@ -270,11 +270,12 @@ public final class KiwiCore {
     /// instead of minting another. Session state, retired where a
     /// declaration adopts it (`retireHealedSpaces`) and by the #634 reset.
     var healedSpaces: [String: SpaceID] = [:]
-    /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
-    /// Every change of `live` reaches KiwiVision (#2103).
+    /// Settings no profile carries (#1741); a live change reaches
+    /// KiwiVision and `onAppWideChange`, which the GUI redraws on.
     var appWideLedger = AppWideLedger() {
         didSet { appWideLiveChanged(from: oldValue.live) }
     }
+    public var onAppWideChange: @MainActor () -> Void = {}
     /// Space history and its setting (#1655, `KiwiCore+SpaceHistory`).
     var spaceHistory = SpaceHistoryState()
     /// The shared look's state (#1752, `KiwiCore+SharedLook`).

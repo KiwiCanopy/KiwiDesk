@@ -61,7 +61,7 @@ struct KiwiVisionLevelsCard: View {
                         model.setAppWide { $0.visionDim = Double(percent) }
                     }
                 ),
-                in: 0...100,
+                in: Self.dimRange,
                 step: 5,
                 suffix: "%",
                 labelHidden: true
@@ -69,6 +69,12 @@ struct KiwiVisionLevelsCard: View {
             .disabled(gates.inertReason(for: .kiwiVision(.dim)) != nil)
         }
         .searchAnchored(SettingsCatalog.kiwiVision.dim)
+    }
+
+    /// Core's band, never a second copy (#1359).
+    static var dimRange: ClosedRange<Int> {
+        let band = AppWideSettings.visionDimRange
+        return Int(band.lowerBound)...Int(band.upperBound)
     }
 
     private var blurRow: some View {

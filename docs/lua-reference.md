@@ -3682,10 +3682,13 @@ KiwiVision keeps the focused window clear and dims every screen
 around it, the wallpaper included; the menu bar, the Dock and
 KiwiShelf stay clear. It is off at every launch.
 
-Its settings are app-wide, stored in `gui.json` as the
-`kiwivision` group (`dim`, `blur`, `appearance`), and set in
-Settings ▸ **KiwiVision**. The `set_*` verbs below change the
-running value only, as every app-wide setter does.
+Its settings are app-wide: they are stored in `gui.json` as the
+`kiwivision` group (`dim`, `blur`, `appearance`), no profile
+carries them, and loading a profile never changes them. Their GUI
+twin is Settings ▸ **KiwiVision**. The `set_*` verbs below change
+the running value only, never `gui.json`; in a Lua-owned setup,
+`init.lua` is where they are kept, and the KiwiVision rows are
+greyed.
 
 ### kiwivision.toggle
 

@@ -1604,12 +1604,14 @@ Touching `Borders`, `Vision`.
   ring's `ordersOverlay` gate and the post-ring `onWindowRestacked`
   tee, keeps its target watched with borders off, reads the
   shelf's stand-down verdict, stands its blur down at the one
-  `LiquidGlassGate.rendered(blur:)` read, switches the system
-  appearance through one seam whose debt every way out pays, and
-  is a session value no snapshot carries (#2103,
-  `BorderOrderCensusTests`, `KiwiVisionCoreTests`,
+  `kiwiVisionDrawsBlur` door every reader of the drawn blur takes,
+  takes every live app-wide change through the one
+  `appWideLiveChanged`, which compares the whole stored group,
+  switches the system appearance through one seam whose debt every
+  way out pays, and its on/off is a session value no snapshot
+  carries (#2103, `BorderOrderCensusTests`, `KiwiVisionCoreTests`,
   `VisionManagerTests`, `OverlayGlassGateTests`,
-  `VisionAppearanceSeamTests`)
+  `VisionAppearanceSeamTests`, `KiwiVisionStoredTests`)
 ### [gui](.claude/rules/gui.md)
 
 Touching `Sources/KiwiDesk` (the GUI).
@@ -1713,7 +1715,9 @@ Touching `Sources/KiwiDesk` (the GUI).
 - a picture whose object is NOT the draft takes a read-only sheet instead,
   which answers Return AND Escape and is hosted above the subtree that opens it
   (#859, `SheetPresentationSeamTests` is the register of who may host one,
-  `PresetPreviewSheetTests` the structural no-draft half)
+  `PresetPreviewSheetTests` the structural no-draft half) — save that a page
+  with no draft whose rows write at once takes the panel for its own live
+  values (KiwiVision, #2103, `DetailPanelTests`)
 - a presentation built from ONE row is handed that row by `item:`, sheet or
   popover alike (#843)
 - a diff row narrates through `SettingsValueReadout`, whose totality net covers

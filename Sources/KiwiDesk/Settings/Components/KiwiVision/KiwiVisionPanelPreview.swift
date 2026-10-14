@@ -6,42 +6,50 @@ import SwiftUI
 /// when macOS switches appearance, which the windows follow.
 struct KiwiVisionPanelPreview: View {
     @ObservedObject var model: SettingsModel
-    /// Bumped by macOS's theme notification to redraw.
-    @State private var themeTick = 0
-
-    private var effect: KiwiVisionEffect {
-        KiwiVisionEffect(
-            dims: model.appWide.visionDim > 0,
-            blurs: model.core.kiwiVisionDrawsBlur
-        )
-    }
+    /// Read so a flip re-renders; the verdict stays Core's door.
+    @Environment(\.accessibilityReduceTransparency)
+    private var reduceTransparency
+    /// The appearance the windows show, read once per change —
+    /// it asks macOS's preferences — never per render.
+    @State private var darkWindows = false
 
     var body: some View {
-        let _ = themeTick
+        let _ = reduceTransparency
+        let dim = model.appWide.visionDim
+        let blurs = model.core.kiwiVisionDrawsBlur
+        let effect = KiwiVisionEffect(
+            dims: VisionPlateDim.opacity(forDim: dim / 100) > 0,
+            blurs: blurs
+        )
         VStack(alignment: .leading, spacing: 8) {
             KiwiVisionScene(
-                dimPercent: model.appWide.visionDim,
-                blurs: model.core.kiwiVisionDrawsBlur,
-                darkWindows: model.core.kiwiVisionShowsDark,
+                dimPercent: dim,
+                blurs: blurs,
+                darkWindows: darkWindows,
                 settings: model.config.settings
             )
             .accessibilityElement()
-            .accessibilityLabel(
-                effect.spoken(dimPercent: model.appWide.visionDim)
-            )
+            .accessibilityLabel(effect.spoken(dimPercent: dim))
             Text(effect.caption)
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink3)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityHidden(true)
         }
+        .onAppear(perform: readAppearance)
+        .onChange(of: model.appWide.visionAppearance) { readAppearance() }
+        .onChange(of: model.core.kiwiVisionIsOn) { readAppearance() }
         .onReceive(
             DistributedNotificationCenter.default().publisher(
                 for: Notification.Name(
                     "AppleInterfaceThemeChangedNotification"
                 )
             )
-        ) { _ in themeTick += 1 }
+        ) { _ in readAppearance() }
+    }
+
+    private func readAppearance() {
+        darkWindows = model.core.kiwiVisionShowsDark
     }
 }
 

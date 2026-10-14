@@ -29,7 +29,8 @@ extension KiwiCore {
         case "kiwivision.set_dim":
             // Lua's whole range, as the GUI's (ruling 10, amended).
             guard let percent = args.first?.numberValue,
-                percent.isFinite, (0...100).contains(percent)
+                percent.isFinite,
+                AppWideSettings.visionDimRange.contains(percent)
             else { return .fail("expected 0-100") }
             setAppWide(persisting: false) { $0.visionDim = percent }
         case "kiwivision.set_blur":
@@ -65,15 +66,13 @@ extension KiwiCore {
     /// `didSet`), so none of them leaves the mode out of step.
     func appWideLiveChanged(from old: AppWideSettings) {
         let new = appWide
+        guard new != old else { return }
         if new.visionAppearance != old.visionAppearance, vision.isOn {
             retargetVisionAppearance(new.visionAppearance)
         }
-        if new.visionDim != old.visionDim
-            || new.visionBlur != old.visionBlur
-            || new.visionAppearance != old.visionAppearance
-        {
-            updateVision()
-        }
+        // The whole stored group, so a field v3 adds re-draws too.
+        if new.vision != old.vision { updateVision() }
+        onAppWideChange()
     }
 
     /// Re-draws the plates from the live focus. Costs nothing
@@ -153,7 +152,7 @@ extension KiwiCore {
             standDown: vision.standDown,
             tracked: borders.skyLightActive,
             dim: CGFloat(appWide.visionDim / 100),
-            blur: LiquidGlassGate.rendered(blur: appWide.visionBlur)
+            blur: kiwiVisionDrawsBlur
         )
     }
 }

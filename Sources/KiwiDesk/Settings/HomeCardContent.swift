@@ -269,7 +269,8 @@ extension HomeCardContent {
         let dim = SettingsValueReadout.percent(
             model.appWide.visionDim / 100
         )
-        return model.appWide.visionBlur
+        // The blur as drawn: Reduce transparency stands it down.
+        return model.core.kiwiVisionDrawsBlur
             ? L(
                 "home.card.kiwivision.on_blur",
                 "On · Dim %1$@, blur on",

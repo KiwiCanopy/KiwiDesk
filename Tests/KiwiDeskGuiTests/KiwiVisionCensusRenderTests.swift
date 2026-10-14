@@ -127,8 +127,19 @@ struct KiwiVisionCensusRenderTests {
         )
         #expect(
             appearance.contains(
-                "ForEach(KiwiVisionRowOrder.appearance,id:\\.id)"
+                "ForEach(KiwiVisionRowOrder.appearance,id:\\.id){keyin"
             )
+        )
+        #expect(
+            appearance.occurrences(of: "appearanceRow") == 2,
+            "the row draws once, from its key's case"
+        )
+        #expect(
+            appearance.contains("case.kiwiVision(.appearance):appearanceRow")
+        )
+        #expect(
+            card.contains("in:Self.dimRange")
+                && card.contains("AppWideSettings.visionDimRange")
         )
     }
 
@@ -140,8 +151,13 @@ struct KiwiVisionCensusRenderTests {
     func pictureReadsTheDoors() throws {
         let dir = "Sources/KiwiDesk/Settings/Components/KiwiVision/"
         let panel = try Self.squashed(dir + "KiwiVisionPanelPreview.swift")
-        #expect(panel.occurrences(of: "model.core.kiwiVisionDrawsBlur") == 2)
-        #expect(panel.contains("darkWindows:model.core.kiwiVisionShowsDark"))
+        #expect(
+            panel.occurrences(of: "model.core.kiwiVisionDrawsBlur") == 1
+        )
+        #expect(
+            panel.contains("darkWindows=model.core.kiwiVisionShowsDark")
+        )
+        #expect(panel.contains("VisionPlateDim.opacity(forDim:"))
         #expect(!panel.contains("visionBlur"))
         let scene = try Self.squashed(dir + "KiwiVisionScene.swift")
         #expect(scene.contains("VisionPlateDim.opacity(forDim:"))

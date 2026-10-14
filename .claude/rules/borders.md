@@ -347,12 +347,22 @@ Obligations:
   `shelfStandsDown` read of the plate's own: that read is a
   WindowServer round trip per screen on the switch path.
 - **Stand the blur down under Reduce transparency at the one
-  `LiquidGlassGate.rendered(blur:)` read in `visionRequest`,
-  keeping the dim** — the plate draws `hud` where glass cannot, so
-  the door asks no platform glass, and a second reader of the
-  stored blur beside it would draw the blur under the setting
+  `KiwiCore.kiwiVisionDrawsBlur` door, keeping the dim, and read
+  whether the blur draws through that door alone** — the plate's
+  `visionRequest` and every Settings surface naming the drawn blur
+  included, never the stored `visionBlur` beside it, which would
+  draw or name the blur under the setting. The plate draws `hud`
+  where glass cannot, so the door asks no platform glass
   (`OverlayGlassGateTests` ▸ `overlaysTakeTheGate`,
+  `KiwiVisionCensusRenderTests` ▸ `pictureReadsTheDoors`,
   `KiwiVisionSettingsTests` ▸ `flipRedraws`).
+- **Every change of the live app-wide values reaches the plate and
+  the appearance ledger through the one `appWideLedger` `didSet` →
+  `appWideLiveChanged`**, which compares the whole stored group, so
+  a new plate input joins `AppWideSettings.Vision` rather than
+  being compared beside it (`VisionAppearanceSeamTests` ▸
+  `transitionIsWired`, `KiwiVisionStoredTests` ▸
+  `valuesRedrawThePlate`).
 - **Switch the system appearance only through the one
   `VisionAppearanceSwitch` seam, and move it only through the one
   `retargetVisionAppearance`** — on, off, a new ask, `stop()` and
@@ -369,7 +379,7 @@ Obligations:
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).
-- **The mode is a session value, carried by no snapshot**: off at
+- **Its on/off is a session value, carried by no snapshot**: off at
   every launch, an in-place restart included, and off when the
   core stops — silently, since a stop is no toggle to announce
   (`VisionManagerTests` ▸ `clearIsSilent`).

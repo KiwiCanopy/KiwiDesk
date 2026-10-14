@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 
@@ -136,5 +137,42 @@ struct KiwiVisionStoredTests {
         core.prepareAppWide()
         #expect(core.appWide.visionAppearance == .dark)
         #expect(system.asked == [true])
+    }
+
+    /// A shown plate takes a new dim or blur at once, whether a
+    /// verb, a row or a reload changed it — not at the next focus
+    /// change.
+    @Test(
+        "every change of the values re-draws a shown plate",
+        .enabled(if: !NSScreen.screens.isEmpty, "needs a screen")
+    )
+    func valuesRedrawThePlate() throws {
+        let before = LiquidGlassGate.override
+        defer { LiquidGlassGate.override = before }
+        LiquidGlassGate.override = { false }
+        let core = makeCore()
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1200, height: 800)
+        }
+        let window = WindowID(1)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: window, pid: 1, appName: "App1")
+            )
+        )
+        let space = try #require(core.state.workspaces.space(of: window))
+        core.state.workspaces.focus(window, in: space)
+        let plate = InertVisionPlate()
+        core.vision.plateFactory = { plate }
+        core.noteVisionStandDown([])
+        core.setKiwiVision(true)
+        try #require(plate.dim == 0.6)
+        _ = core.execute("kiwivision.set_dim", args: [.number(25)])
+        #expect(plate.dim == 0.25)
+        core.setAppWide(persisting: false) { $0.visionBlur = false }
+        #expect(plate.blur == false)
+        core.resetAppWide()
+        #expect(plate.dim == 0.6)
+        #expect(plate.blur == true)
     }
 }

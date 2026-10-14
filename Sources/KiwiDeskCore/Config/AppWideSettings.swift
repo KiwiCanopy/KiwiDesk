@@ -45,9 +45,15 @@ public struct AppWideSettings: Equatable, Sendable {
         return min(max(raw, range.lowerBound), range.upperBound)
     }
 
-    /// `raw` clamped into the dim's 0...100 %, as `clampedDepth`.
+    /// The dim's band in percent: the verb, the decode and the
+    /// Settings stepper all read it.
+    public static let visionDimRange: ClosedRange<Double> = 0...100
+
+    /// `raw` clamped into `visionDimRange`, as `clampedDepth`.
     static func clampedDim(_ raw: Double) -> Double {
-        raw.isFinite ? min(max(raw, 0), 100) : 60
+        guard raw.isFinite else { return AppWideSettings().visionDim }
+        let range = visionDimRange
+        return min(max(raw, range.lowerBound), range.upperBound)
     }
 }
 
@@ -86,7 +92,7 @@ extension AppWideSettings {
 
     /// `gui.json`'s `kiwivision` group (#2103) — additive, as
     /// `desktop`; v3's sets join it.
-    struct Vision: Codable {
+    struct Vision: Codable, Equatable {
         var dim: Double?
         var blur: Bool?
         var appearance: VisionAppearance?

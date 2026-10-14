@@ -13,8 +13,8 @@ struct KiwiVisionAppearanceCard: View {
             caption: KiwiVisionCopy.appliesAtOnce
         ) {
             VStack(alignment: .leading, spacing: 8) {
-                ForEach(KiwiVisionRowOrder.appearance, id: \.id) { _ in
-                    appearanceRow
+                ForEach(KiwiVisionRowOrder.appearance, id: \.id) { key in
+                    row(key)
                     if let reason = reason {
                         KiwiVisionCopy.reason(
                             KiwiVisionGates.sentence(for: reason)
@@ -22,6 +22,17 @@ struct KiwiVisionAppearanceCard: View {
                     }
                 }
             }
+        }
+    }
+
+    @ViewBuilder private func row(_ key: SettingKey) -> some View {
+        switch key {
+        case .kiwiVision(.appearance): appearanceRow
+        default:
+            let _ = assertionFailure(
+                "unrendered KiwiVision census key: \(key.id)"
+            )
+            EmptyView()
         }
     }
 
