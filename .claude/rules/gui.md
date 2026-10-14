@@ -577,11 +577,11 @@ never views.
 tier, gate and text keys, and the redesigned GUI renders from
 it. **Bars, Looks & Animations, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
-Layouts, Profiles, Screens, Behaviour and the Mac Checklist
-render from it now** (#678 Phases 2-3; #1365): each
+Layouts, Profiles, Screens, Behaviour, the Mac Checklist and AI
+render from it now** (#678 Phases 2-3; #1365; #1685): each
 carries its own order list and a census-render suite pinning that
 order to the census (`MacChecklistRowOrder` /
-`MacChecklistCensusRenderTests` is the newest pair; its
+`MacChecklistCensusRenderTests` is the worked pair; its
 `bespokeContainers` is empty, and `MacChecklistCensusRenderTests`
 ▸ `containersWalkTheirLists` holds that every container walks its
 list), so a row in a
@@ -602,7 +602,10 @@ asserted by `ShortcutsBespokeContainerTests`, whose table of
 order lists is a census held against the declarations in every
 `ShortcutsRowOrder` body (#1121), so an order list added without
 a row reds — and another going bespoke has to edit that set;
-check it before assuming an edit will show up.
+check it before assuming an edit will show up. AI's setup card
+is bespoke the same way (`AIRowOrder.bespokeContainers`, its
+mount needled by `AICensusRenderTests`); its ready-made prompts
+walk their list.
 
 General, Gaps & Borders, Spaces & Layouts, Profiles, Screens
 and Behaviour push that edge wider: EVERY container in them is
@@ -1032,7 +1035,10 @@ must keep:
   "Simple" / "Power User", wire and label alike
   (`docs/localization-naming.md` owns the pair's policy).
 - **A card is an answer**: subtitles derive from the draft
-  (`HomeCardContentTests` holds the derivations), previews
+  (`HomeCardContentTests` holds the derivations), save AI's,
+  which is fixed because KiwiDesk cannot read an AI app's state
+  (`docs/design-decisions.md` ▸ The AI page sets an AI app up
+  and never reports on it), previews
   come only from renderers that already ask the real data, and
   only the Shortcuts conflict may shout — glyph + text, never
   hue alone. A profile card's picture rides the desktop plate
@@ -1893,6 +1899,9 @@ authoring rules apply here even though the catalogs live in Core:
 - Every user-facing string goes through `L("key", "English")`
   (issue #9). English is the source of truth, inlined at the call
   site.
+- **The AI page's setup prompt is not this carve-out** — it is
+  never drawn, only copied for an AI app's model, and is ruled
+  in [localization.md](localization.md) ▸ Call sites.
 - **One carve-out, and it is CLOSED: the four modifier
   abbreviations the tour draws.** `OnboardingModifierNames` draws
   `ctrl` / `opt` / `shift` / `cmd` under `⌃ ⌥ ⇧ ⌘` with no catalog

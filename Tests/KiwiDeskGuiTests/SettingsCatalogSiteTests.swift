@@ -105,7 +105,8 @@ struct SettingsCatalogSiteTests {
         // #2143's picker and the slide's duration left the drawer.
         // 127 since #2173: App Rules ▸ Automatic floating.
         // 128 since #2228: KiwiShelf's Show the Space switch.
-        #expect(names.count == 128)
+        // 133 since #1685: the AI page's five declarations.
+        #expect(names.count == 133)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

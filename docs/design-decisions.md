@@ -7730,6 +7730,34 @@ check cannot tell a down site from a captive portal from a
 machine that is simply offline, and a wrong "you are offline"
 beside a working link is worse than the browser's own error page.
 
+:::unreleased
+### The AI page sets an AI app up and never reports on it
+
+**[Rationale]**
+
+KiwiDesk cannot see what an AI app has configured without reading
+another app's files, so the AI page offers setup and claims no
+state: no "configured" line, and a fixed Home subtitle — the one
+card that is not an answer (gui.md ▸ Home), since a status built
+on a guess is wrong exactly when it is read. Nor is there a
+KiwiDesk switch: configuring the AI app is the activation, that
+app's per-server switch is the off, and a KiwiDesk gate would stop
+nothing the command line cannot already do.
+
+The setup prompt is English and has no catalog key: the AI app's
+model reads it, and its command path and JSON must reach the model
+verbatim; a "Reply in <language>." line asks for the Settings
+language instead. The ready-made prompts are localized, since the
+user reads them, and each has the AI app interview the user one
+question at a time, so it works pasted unchanged. A ready-made
+prompt lands with the tools it needs and is never drawn before
+them — removed rather than dimmed, as with any entry whose channel
+does not exist yet. Copy Setup Prompt greys on a translocated copy
+through the one `RunningCopy` verdict the login item reads too
+(▸ Open at login), because the path it would copy dies at the next
+launch.
+:::
+
 ### Open at login
 
 **[Principle]**
@@ -11280,8 +11308,8 @@ says "you cannot change this".
 **A mouse or trackpad setting lives beside the gesture it tunes,
 whatever page that is, and profile scope does not stop it.** The
 mouse resize action and the pointer-follow are profile values, and
-this page shows the header's profile chip like every page but
-General and the Mac Checklist, so they edit the profile the chip
+this page shows the header's profile chip like every page a
+profile owns, so they edit the profile the chip
 names. The pointer-follow is its own entry rather than a row in
 the Focus card: it fires on every focus change KiwiDesk sees — a
 Space switch, a closed window, ⌘-Tab — not only on focus

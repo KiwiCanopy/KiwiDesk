@@ -15,7 +15,7 @@ func runCLI(_ arguments: [String]) -> Int32 {
         return 0
     case "service":
         return runService(arguments)
-    case "mcp":
+    case MCPInvocation.verb:
         // An MCP client's stdio server (#1685), not a socket verb.
         return MCPServer.run()
     default:

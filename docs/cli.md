@@ -170,6 +170,12 @@ take this entry, and one with its own config format takes the same
 }
 ```
 
+Settings ▸ AI ▸ **Copy Setup Prompt** puts a short prompt carrying
+this entry, with the path of the copy you are running, on the
+clipboard: paste it into the AI app, which adds the server itself
+or walks you through it. The same page has ready-made prompts that
+have the AI app ask you what you want, one question at a time.
+
 The server speaks MCP `2026-07-28` and, after an `initialize`,
 `2025-11-25` and `2025-06-18`. It offers seven tools:
 

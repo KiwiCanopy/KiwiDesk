@@ -18,6 +18,7 @@ enum SettingsArea: CaseIterable, Hashable {
     case screens
     case profiles
     case appRules
+    case ai
     case general
     case macChecklist
 
@@ -28,7 +29,7 @@ enum SettingsArea: CaseIterable, Hashable {
             return .powerUser
         case .layoutDefaults, .gapsAndBorders, .shortcuts,
             .coloursAndMotion, .bars, .spacesAndLayouts,
-            .profiles, .appRules, .general, .macChecklist:
+            .profiles, .appRules, .ai, .general, .macChecklist:
             return .simple
         }
     }

@@ -58,7 +58,8 @@ struct SettingsRawColorTests {
             + ".purple beside two RGB literals) — the tile "
             + "retune is an eyeball item of the responsive "
             + "pass, and until it lands these are the shipped "
-            + "design",
+            + "design; the AI tile's .orange is owner-ruled "
+            + "(#1685)",
         "Color+KiwiHex.swift":
             "RGBA tuple member accessors (c.red, c.green) in "
             + "the hex parser — the token scan cannot tell a "

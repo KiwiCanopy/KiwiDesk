@@ -36,6 +36,13 @@ enum SettingsSearchSynonyms {
     ) -> [String] {
         switch destination {
         case .screens: return ["monitors", "displays"]
+        // The title is just "AI" (#1685), so the app names and
+        // the protocol a user arrives with reach the page.
+        case .ai:
+            return [
+                "mcp", "model context protocol", "claude",
+                "cursor", "codex", "assistant", "llm",
+            ]
         default: return []
         }
     }

@@ -90,6 +90,9 @@ struct GateReasonPlacementTests {
                 // its layout is picked in the Space list, not in
                 // the overrides box, so the row draws its reason.
                 .gaps(.perSpaceOverride),
+                // #1685: Copy Setup Prompt greys on a translocated
+                // copy, a cause shown nowhere else.
+                .ai(.copySetupPrompt),
             ]
         )
     }

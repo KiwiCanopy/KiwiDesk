@@ -2,6 +2,7 @@
 /// `id` is the machine-checked key for `settings.*`/`config.*` slices
 /// (parsed by model-parity guard); other prefixes are convention-only.
 enum SettingKey: Hashable, CaseIterable {
+    case ai(AIKey)
     case appBar(AppBarKey)
     case appRules(AppRulesKey)
     case behaviour(BehaviourKey)
@@ -20,7 +21,8 @@ enum SettingKey: Hashable, CaseIterable {
     case spaces(SpacesKey)
 
     static var allCases: [SettingKey] {
-        AppBarKey.allCases.map(Self.appBar)
+        AIKey.allCases.map(Self.ai)
+            + AppBarKey.allCases.map(Self.appBar)
             + AppRulesKey.allCases.map(Self.appRules)
             + BehaviourKey.allCases.map(Self.behaviour)
             + BordersKey.allCases.map(Self.borders)
@@ -41,6 +43,7 @@ enum SettingKey: Hashable, CaseIterable {
     /// Verbatim census row key.
     var id: String {
         switch self {
+        case .ai(let k): return k.rawValue
         case .appBar(let k): return k.rawValue
         case .appRules(let k): return k.rawValue
         case .behaviour(let k): return k.rawValue
@@ -62,6 +65,7 @@ enum SettingKey: Hashable, CaseIterable {
 
     var placement: SettingPlacement {
         switch self {
+        case .ai(let k): return k.placement
         case .appBar(let k): return k.placement
         case .appRules(let k): return k.placement
         case .behaviour(let k): return k.placement
@@ -83,6 +87,7 @@ enum SettingKey: Hashable, CaseIterable {
 
     var text: SettingRowText {
         switch self {
+        case .ai(let k): return k.text
         case .appBar(let k): return k.text
         case .appRules(let k): return k.text
         case .behaviour(let k): return k.text

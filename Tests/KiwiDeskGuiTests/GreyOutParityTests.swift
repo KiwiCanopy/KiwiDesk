@@ -76,6 +76,12 @@ struct GreyOutParityTests {
             "active: inertReason != nil",
             1
         ),
+        // Copy Setup Prompt on a translocated copy (#1685).
+        (
+            "AISetupRow.swift",
+            "GreyOut(active: translocated)",
+            1
+        ),
         (
             "FocusBorderEditor.swift",
             "active: glowAutoReason != nil",

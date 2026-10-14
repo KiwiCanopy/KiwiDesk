@@ -1,6 +1,10 @@
 /// Titled card or group within an area. Spans multiple areas where relevant.
 enum SettingsContainer: CaseIterable, Hashable {
     case advanced
+    /// AI ▸ Set up (#1685).
+    case aiSetup
+    /// AI ▸ Ready-made prompts (#1685).
+    case readyMadePrompts
     /// Advanced Colours' first role group (#1857): the hue the
     /// active Space, the focus border and the drag ghost share.
     case accent
@@ -75,7 +79,8 @@ enum SettingsContainer: CaseIterable, Hashable {
             return .setting(.borders(.borderEnabled))
         case .motion:
             return .runtime(.reduceMotion)
-        case .accent, .advanced, .borders, .bsp,
+        case .accent, .advanced, .aiSetup, .readyMadePrompts,
+            .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .grid,
             .habits, .kiwishelf, .appliesImmediately, .layers,

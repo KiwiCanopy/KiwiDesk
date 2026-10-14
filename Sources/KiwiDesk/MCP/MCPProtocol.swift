@@ -21,7 +21,7 @@ enum MCPProtocol {
 
     static var serverInfo: JSONValue {
         .object([
-            "name": .string("kiwidesk"),
+            "name": .string(MCPInvocation.serverName),
             "title": .string("KiwiDesk"),
             "version": .string(KiwiDeskVersion.semantic),
         ])

@@ -212,6 +212,16 @@ GLOSSARY = {
     "ko",
     "fi",
     "ide",
+    # The AI apps and the protocol the AI page names (#1685), the
+    # same class as `github`: proper nouns no locale translates.
+    # Trade: a stray English "code" or "cursor" in non-Latin
+    # prose is no longer caught.
+    "ai",
+    "claude",
+    "code",
+    "codex",
+    "cursor",
+    "mcp",
     "json",  # the profile file format, named in `profiles.broken.*`
     "kiwidesk",
     # The one edge both bars sit on (#1517): a product name, kept
@@ -225,6 +235,7 @@ GLOSSARY = {
     "liquid",
     "glass",
     "lua",
+    "mac",  # the machine, in the AI page's MCP help (#1685)
     "macos",
     "tiling",
     "sip",

@@ -137,6 +137,13 @@ enum HomeCardContent {
                 "%1$d apps pinned or floating",
                 rules
             )
+        case .ai:
+            // Fixed: KiwiDesk cannot know what an AI app has
+            // configured, and a status line is ruled out (#1685).
+            return L(
+                "home.card.ai.subtitle",
+                "Set up and control KiwiDesk with your own AI app"
+            )
         case .general:
             if model.autoStart.level != .off {
                 return L(
