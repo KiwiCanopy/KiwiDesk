@@ -122,7 +122,7 @@ struct BorderMovingRoomTests {
         defer { border.clear() }
         let backend = RoomCapturingBackend()
         border.backendFactory = { _ in backend }
-        border.watchOverride = { _ in true }
+        border.watch.override = { _ in true }
         let screen = CGRect(x: 0, y: 0, width: 1000, height: 800)
         border.roomScreenOverride = screen
         let frame = CGRect(x: 0, y: 0, width: 400, height: 300)

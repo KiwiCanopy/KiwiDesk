@@ -75,7 +75,7 @@ struct BorderOrderReassertTests {
         border.backendFactory = { _ in
             CountingBackend { orders += 1 }
         }
-        border.watchOverride = { _ in true }
+        border.watch.override = { _ in true }
         let both = [spec(1), spec(2)]
         border.sync(both, alive: nil, reassertOrder: false)
         #expect(orders == 2)
@@ -88,7 +88,7 @@ struct BorderOrderReassertTests {
         #expect(orders == 5)
         // The verdict is this sync's: a stream that just failed
         // re-stacks at once rather than one sync late.
-        border.watchOverride = { _ in false }
+        border.watch.override = { _ in false }
         border.sync(both, alive: nil, reassertOrder: false)
         #expect(orders == 7)
     }

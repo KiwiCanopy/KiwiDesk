@@ -105,26 +105,6 @@ extension KiwiCore {
         // never renders an image-fallback frame.
         appFont.preload()
         borders.start()
-        // The mark rides the ring's WindowServer bounds stream —
-        // AX move echoes alone lag visibly during drags. The
-        // reposition path is unguarded (WS bounds are the truth);
-        // the reorder tee re-asserts stacking on a raise that
-        // fires no AX focus event (a re-click on the focused
-        // window); and the tracking predicate lets the mark's
-        // AX-echo `follow` stand down while the WS stream owns
-        // the frame.
-        borders.onFrameReconciled = { [weak self] id, frame in
-            self?.stickyMarks
-                .reposition(id, windowFrame: frame)
-        }
-        borders.onWindowReordered = { [weak self] id in
-            self?.stickyMarks.reassert(id)
-        }
-        borders.onWindowRestacked = { [weak self] id in
-            self?.visionTargetRestacked(id)
-        }
-        stickyMarks.isWindowServerTracked = { [weak self] id in
-            self?.borders.markUsesWindowServerTracking(id) ?? false
-        }
+        windowServer.start()
     }
 }

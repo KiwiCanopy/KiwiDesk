@@ -25,7 +25,7 @@ public final class KiwiCore {
     /// Glyph-vs-image icon decisions: bars, shortcuts panel (#294).
     public let appFont = AppFontResolver()
     /// Focus rings (#278) and sticky marks (#414), driven by `retile()`.
-    public let borders = BorderManager()
+    public let borders = BorderManager(watch: WindowServerWatch())
     public let stickyMarks = StickyMarkManager()
     /// KiwiVision's plates (#2103), driven with the rings.
     public let vision = VisionManager()
