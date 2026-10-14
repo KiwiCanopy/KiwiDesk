@@ -53,6 +53,7 @@ extension KiwiCore {
         strandDetector.onLog = log
         mouse.scroll.onLog = log
         tiler.motionGate.onLog = log
+        vision.appearanceSwitch = .live(onLog: log)
         wireScrollPan()
         wireScrollSpaceStep()
         // QA lever (#596), read once: `KIWIDESK_NO_WS_TRACKING`

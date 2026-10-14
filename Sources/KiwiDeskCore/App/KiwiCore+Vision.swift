@@ -37,6 +37,12 @@ extension KiwiCore {
                 return .fail("expected boolean")
             }
             vision.blur = on
+        case "kiwivision.set_appearance":
+            guard
+                let raw = args.first?.stringValue,
+                let appearance = VisionAppearance(rawValue: raw)
+            else { return .expected(VisionAppearance.self) }
+            setVisionAppearance(appearance)
         default:
             return .fail("unknown command: \(command)")
         }
@@ -47,6 +53,11 @@ extension KiwiCore {
     func setKiwiVision(_ on: Bool) {
         guard on != vision.isOn else { return }
         vision.isOn = on
+        if on {
+            applyVisionAppearance()
+        } else {
+            payVisionAppearanceDebt()
+        }
         updateVision(reassertOrder: true)
         vision.onChange(on)
     }

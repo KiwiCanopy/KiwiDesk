@@ -353,6 +353,14 @@ Obligations:
   stored blur beside it would draw the blur under the setting
   (`OverlayGlassGateTests` ▸ `overlaysTakeTheGate`,
   `KiwiVisionSettingsTests` ▸ `flipRedraws`).
+- **Switch the system appearance only through the one
+  `VisionAppearanceSwitch` seam, and pay its debt on every way
+  out** — the toggle off, `stop()`, the next `start()` — since a
+  lost payment leaves the user's Mac switched with no suite red.
+  The debt is this Mac's state, so it waits in the app's
+  defaults, never the config folder, stored BEFORE the switch;
+  both `makeTestCore` twins pin the inert machine
+  (`VisionAppearanceSeamTests`, `KiwiVisionAppearanceTests`).
 - **Nothing focused shows no plate**, a standing one included, so
   no plate stays stacked under a window that left
   (`VisionManagerTests` ▸ `noTargetNoPlateShown`).

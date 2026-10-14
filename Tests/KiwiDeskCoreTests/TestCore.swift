@@ -212,6 +212,10 @@ func makeTestCore(
     // "nothing held"; a test that wants the branch states the
     // mask itself.
     core.mouse.pressedButtons = { 0 }
+    // KiwiVision's appearance switch defaults LIVE (#2103): a
+    // fixture turning the mode on with an appearance asked would
+    // flip the developer's own Mac. Pin the inert machine.
+    core.vision.appearanceSwitch = .inert()
     // The motion gate's mouse-quiet read defaults LIVE (#804):
     // pin "the mouse is at rest", so every pass is admitted
     // unless a test states otherwise.

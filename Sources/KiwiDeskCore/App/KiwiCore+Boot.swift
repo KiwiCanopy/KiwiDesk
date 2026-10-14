@@ -81,6 +81,8 @@ extension KiwiCore {
         sleepWake.start()
         wireReduceTransparency()
         wireFontSet()
+        // A switch a crash left unpaid (#2103 ruling 7).
+        payVisionAppearanceDebt()
         // One retile for the whole scan instead of one per
         // discovered window (#672): windows fold into state as
         // the events arrive, geometry lands once in the tail.

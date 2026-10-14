@@ -208,6 +208,7 @@ extension KiwiCore {
         borders.stop()
         stickyMarks.clear()
         vision.clear()
+        payVisionAppearanceDebt()  // a quit puts the appearance back
         retireReduceTransparency()
         retireFontSet()
         payOwedShortcutDrops()  // nothing carries the debt (#1827)
