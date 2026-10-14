@@ -71,6 +71,66 @@ extension SettingsModel {
         recomputeDirty()
     }
 
+    /// An AI app's keep wrote rules (#1685 ▸ Ruling 6c) — the
+    /// shared base or a profile's own — so a draft of ANY target
+    /// re-reads the stored tables its Save diffs against: a clean
+    /// draft re-reads whole, and a dirty one takes each rule the
+    /// keep changed on its page on both sides of its diff, the newer
+    /// act winning, as `adoptLiveWrite` does — or its Save would
+    /// encode the old rule back over the keep.
+    func adoptRuleKeep() {
+        guard isDirty else {
+            reload()
+            return
+        }
+        suppressDirty = true
+        ruleReachStored = core.ruleReachSnapshot()
+        if let page = reachPage, let stored = ruleReachStored {
+            let old = cleanConfig
+            Self.takeKeptRules(stored, page: page, over: old, into: &config)
+            Self.takeKeptRules(
+                stored,
+                page: page,
+                over: old,
+                into: &cleanConfig
+            )
+        }
+        suppressDirty = false
+        recomputeDirty()
+    }
+
+    /// Lays `page`'s rules as the files hold them now over `config`
+    /// wherever they differ from `old`, the draft's last read.
+    static func takeKeptRules(
+        _ stored: RuleReachSnapshot,
+        page: String,
+        over old: GuiConfig,
+        into config: inout GuiConfig
+    ) {
+        let apps = stored.appRules.resolved(for: page)
+        for app in Set(old.appRules.keys).union(apps.keys)
+        where old.appRules[app] != apps[app] {
+            config.appRules[app] = apps[app]
+        }
+        let was = Set(old.floatRules.map(FloatRules.normalizedRule))
+        let now = Set(stored.floatRules.resolved(for: page).values.joined())
+        let gone = was.subtracting(now)
+        var floats = config.floatRules.filter {
+            !gone.contains(FloatRules.normalizedRule($0))
+        }
+        floats += now.subtracting(was)
+            .subtracting(floats.map(FloatRules.normalizedRule)).sorted()
+        config.floatRules = floats
+        let auto =
+            stored.floatAutomatically.resolved(
+                RuleReachTable<Bool>.floatAutomaticallyKey,
+                for: page
+            ) ?? stored.floatAutomatically.floatAutomaticallyBase
+        if auto != old.floatAutomatically {
+            config.floatAutomatically = auto
+        }
+    }
+
     /// Appends `rows` to the default layer, skipping a row whose
     /// action that layer already runs.
     private static func appendToDefault(

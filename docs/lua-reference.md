@@ -4283,6 +4283,51 @@ pins, and unlisted apps inherit the base rule. Edit it from the
 Settings app's App Rules section while editing a stored profile.
 Profile overrides resolve the same way over a Lua-owned base.
 
+:::unreleased
+### App rule verbs
+
+The `app_rule` table changes the live rules from Lua, the CLI and
+an AI app. It is not the [`app_rules`](#app_rules) and
+[`float_rules`](#float_rules) globals, which declare the rules in
+`init.lua`. A change lasts until a config reload, a profile load, a
+Settings Save of the rules or a quit; over the CLI or an AI app,
+[`keep_settings`](cli.md#raw-ipc-protocol) keeps it.
+
+#### app_rule.list
+
+**Expects:** nothing.
+
+**Does:** returns the live rules: `spaces` (bundle id → Space),
+`floats`, `tiles`, `ignores`, `float_automatically`, the `owner`
+of the rules (`gui` or `lua`) and the live `profile`.
+
+#### app_rule.set_space / app_rule.remove_space
+
+**Expects:** a bundle identifier, and for `set_space` a Space that
+exists.
+
+**Does:** the app's NEXT windows open in that Space, or stop
+doing so; windows already open stay where they are.
+`remove_space` refuses an app with no rule.
+
+#### app_rule.set_float / app_rule.remove_float
+
+**Expects:** a bundle identifier, and optionally a title fragment.
+
+**Does:** adds or removes a float rule — the app's every window,
+or those whose title contains the fragment. Open windows are
+checked again at once. `remove_float` removes exactly the rule
+named, so an app's title rules stay unless each is named, and
+refuses a rule that is not there.
+
+**Example:**
+
+```lua
+app_rule.set_space("com.spotify.client", "music")
+app_rule.set_float("com.apple.finder", "Get Info")
+```
+:::
+
 ### Finding a bundle identifier
 
 App rules and the app verbs (`focus_or_spawn`, `spawn_new`,

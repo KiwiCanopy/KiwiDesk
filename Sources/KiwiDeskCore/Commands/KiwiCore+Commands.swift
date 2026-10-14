@@ -188,6 +188,10 @@ extension KiwiCore {
         case let vision where vision.hasPrefix("kiwivision."):
             // No window moves: the plates re-draw, nothing else.
             return visionCommand(command, args)
+        case let rule where rule.hasPrefix("app_rule."):
+            // A rule changes where the NEXT window goes; a float
+            // rule re-checks open windows, whose events retile.
+            return appRuleCommand(command, args)
         case let look where look.hasPrefix("look."):
             // Its own retile where a look is worn; the rest move
             // nothing (#1685).

@@ -208,7 +208,11 @@ A setting changed through MCP is live but not kept, and every
 command result after the change tells the AI app so, with where
 `keep` would write it: the live profile, or the shared look for a
 look setting of a profile that wears it — a kept look setting
-changes every profile wearing that look, and `keep` names them.
+changes every profile wearing that look, and `keep` names them. An
+app rule the live profile does not hold for itself is kept in the
+shared rules, which every profile without its own rule for that app
+follows, and removing one of those takes it from every profile
+holding it; `keep` names every profile whose rule changed.
 Say "keep" and `keep` writes those changes as they are now; a
 change `init.lua` owns, one made while no saved profile is live, an
 app-wide one, or one belonging to a Space that is not in the
@@ -369,6 +373,13 @@ lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
 <name>` and `look.delete <name>` reach the look library
 ([Looks](lua-reference.md#looks)). `look.apply` wears a look
 without writing it.
+:::
+
+:::unreleased
+`app_rule.list`, `app_rule.set_space <app> <space>`,
+`app_rule.remove_space <app>`, `app_rule.set_float <app> [title]`
+and `app_rule.remove_float <app> [title]` change the app rules live
+([App rule verbs](lua-reference.md#app-rule-verbs)).
 :::
 
 | Category | Command | Arguments |
@@ -879,12 +890,16 @@ and the response then carries a `changes` object: the live
 `profile`, and the setting leaves the command changed under
 `touched`, each an `id` (a JSON Pointer such as
 `/settings/border/width`, `/space_modes/2` or
-`/app_wide/refusal/sound`), an `owner` (`profile`, `shared_look`,
-`init_lua` or `none`), its live `value`, whether that is the
+`/app_wide/refusal/sound`, `/app_rules/com.spotify.client`), an
+`owner` (`profile`, `shared_look`, `shared_rules`, `init_lua` or
+`none`), its live `value`, whether that is the
 `stored` one, and a `not_keepable` reason where no keep can write
 it. Ids sent as `"keep_watch": [...]` come back judged the same way
 under `watched`. `keep_settings` writes those ids as they are live
-and answers which ones it `kept`:
+and answers which ones it `kept`, which it could not
+(`not_keepable`), the live `profile`, the profiles wearing a kept
+shared look (`followers`) and the profiles whose rule a kept rule
+changed (`rule_profiles`):
 
 ```sh
 kiwidesk keep_settings /settings/border/width

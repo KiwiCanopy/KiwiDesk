@@ -280,7 +280,7 @@ final class SettingsModel: ObservableObject {
     var profileEditingBaseLayers: [KeyLayer]?
     /// The App Rules families across the shared base and every
     /// profile, as stored (#1393); nil where no checklist is
-    /// offered. Re-read by `reload()` alone.
+    /// offered. Re-read by `reload()` and the outside-write adopters.
     var ruleReachStored: RuleReachSnapshot? {
         didSet { dropReachCaches() }
     }

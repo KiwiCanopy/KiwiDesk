@@ -1,10 +1,11 @@
 import Foundation
 
 /// `keep_settings` (#1685 ▸ Ruling 4): the leaves a change report
-/// named, written as they are live NOW into the live profile — one
-/// `LiveProfileEdit` through `writeThroughLiveProfile`, whose
+/// named, written as they are live NOW — the settings and layouts
+/// as one `LiveProfileEdit` through `writeThroughLiveProfile`, whose
 /// `recordLookWrite` lands a follower's look leaves in the shared
-/// look without repainting the live one. Never `save_profile`,
+/// look without repainting the live one, and the rule leaves through
+/// the App Rules page's door (`keepRules`, Ruling 6c). Never `save_profile`,
 /// which snapshots everything live. What it answers as kept is
 /// re-judged after the write, so a write that did not land is
 /// never told as kept; a leaf a load already put back is stored,
@@ -24,19 +25,27 @@ extension KiwiCore {
             return .fail("expected leaf ids from a change report")
         }
         let unique = Set(paths).sorted { $0.lexicographicallyPrecedes($1) }
-        let judge = keepJudge()
+        let judge = keepJudge(
+            judgingRules: paths.contains(where: Self.isRulePath)
+        )
         let verdicts = unique.compactMap(judge.verdict(of:))
-        let wanted = verdicts.filter { $0.notKeepable == nil && !$0.stored }
+        let pending = verdicts.filter { $0.notKeepable == nil && !$0.stored }
+        let wanted = pending.filter { !Self.isRuleLeaf($0) }
+        let rules = pending.filter(Self.isRuleLeaf)
         var refused = verdicts.filter { $0.notKeepable != nil }
         let (leaves, conflicting) = keptLeaves(wanted, judge)
         refused += conflicting
         let skipped = Set(conflicting.map(\.id))
-        let attempted = wanted.filter { !skipped.contains($0.id) }
+        let attempted =
+            wanted.filter { !skipped.contains($0.id) } + rules
         if !leaves.isEmpty {
             writeThroughLiveProfile(.kept(leaves))
         }
+        let reached = rules.isEmpty ? [] : keepRules(rules, live: judge.live)
         // Judged again after the write: kept is what landed.
-        let after = keepJudge()
+        let after = keepJudge(
+            judgingRules: paths.contains(where: Self.isRulePath)
+        )
         var kept = verdicts.filter { $0.notKeepable == nil && $0.stored }
         for leaf in attempted {
             let landed = KeepPointer.path(leaf.id).map(after.holds) ?? false
@@ -46,7 +55,7 @@ extension KiwiCore {
                 refused.append(Self.unwritten(leaf))
             }
         }
-        return .ok(keepAnswer(kept: kept, refused: refused))
+        return .ok(keepAnswer(kept: kept, refused: refused, reached: reached))
     }
 
     /// The live values of `leaves`, and those that cannot be laid
@@ -110,7 +119,8 @@ extension KiwiCore {
 
     private func keepAnswer(
         kept: [TouchedLeaf],
-        refused: [TouchedLeaf]
+        refused: [TouchedLeaf],
+        reached: [String]
     ) -> JSONValue {
         let byID: (TouchedLeaf, TouchedLeaf) -> Bool = { $0.id < $1.id }
         var answer: [String: JSONValue] = [
@@ -125,6 +135,10 @@ extension KiwiCore {
             answer["followers"] = .array(
                 followingProfiles().map { .string($0.name) }
             )
+        }
+        // Every profile whose rule a kept rule leaf changed.
+        if kept.contains(where: Self.isRuleLeaf) {
+            answer["rule_profiles"] = .array(reached.map(JSONValue.string))
         }
         return .object(answer)
     }

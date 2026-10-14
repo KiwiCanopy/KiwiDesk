@@ -16,6 +16,13 @@ public enum RuleReach: Hashable, Sendable {
     }
 }
 
+/// Who wrote a rule snapshot: the Settings window, whose Save makes
+/// its page what the screen does, or a write from outside it.
+public enum RuleWriteOrigin: Sendable {
+    case settings
+    case outside
+}
+
 /// What removing a rule from the edited profile takes with it.
 public enum RuleRemoval: Hashable, Sendable {
     /// The edited profile alone; the others keep theirs.
@@ -102,6 +109,35 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
             guard $0 != editing, let other = resolved(key, for: $0)
             else { return false }
             return other != value
+        }
+    }
+
+    /// The reach a rule has before anyone picks one — the one
+    /// policy the Settings encoder and an AI app's keep share
+    /// (#1393, #1685): its stored reach, or for a NEW rule, shared
+    /// on the loaded profile and the edited profile alone on a
+    /// stored one. A rule the page leaves out is new here.
+    public func defaultReach(
+        of key: String,
+        editing: String,
+        isLoaded: Bool
+    ) -> RuleReach {
+        if resolved(key, for: editing) != nil {
+            return reach(of: key, editing: editing)
+        }
+        return isLoaded ? .shared(joining: []) : .listed([editing])
+    }
+
+    /// Profiles whose resolved `keys` differ between `old` and this
+    /// table — every profile a write of these keys reached.
+    public func profilesChanged(
+        from old: Self,
+        keys: Set<String>
+    ) -> [String] {
+        profiles.filter { profile in
+            keys.contains {
+                old.resolved($0, for: profile) != resolved($0, for: profile)
+            }
         }
     }
 

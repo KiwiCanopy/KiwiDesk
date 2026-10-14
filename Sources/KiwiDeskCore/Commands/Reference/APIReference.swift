@@ -256,6 +256,10 @@ public enum APIReference {
         "look": [
             "list", "current", "apply", "save", "delete",
         ],
+        "app_rule": [
+            "list", "set_space", "remove_space", "set_float",
+            "remove_float",
+        ],
     ]
 
     /// Lua-only commands on KiwiDesk table bypassing dispatcher (#37).
