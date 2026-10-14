@@ -51,6 +51,12 @@ final class AppKitVisionPlate: VisionPlateBackend {
         var panelBehavior: NSWindow.CollectionBehavior? {
             panel?.collectionBehavior
         }
+        /// Whether the blur view draws.
+        var blurShown: Bool { !blurView.isHidden }
+        /// Whether the dim draws above the blur.
+        var dimAboveBlur: Bool {
+            dimLayer.zPosition > (blurView.layer?.zPosition ?? 0)
+        }
     #endif
 
     func update(frame: CGRect, dim: CGFloat, blur: Bool) {
@@ -158,10 +164,8 @@ final class AppKitVisionPlate: VisionPlateBackend {
 
     /// The blur view a plate carries; glass where it can draw.
     static func makeBlur() -> NSView {
-        if #available(macOS 26.0, *) {
-            let glass = NSGlassEffectView()
-            glass.style = .clear
-            glass.cornerRadius = 0
+        if let glass = GlassPlate.make() {
+            GlassPlate.update(glass, frame: .zero, cornerRadius: 0)
             GlassTint.pinDark(glass)
             return glass
         }

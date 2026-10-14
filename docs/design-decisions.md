@@ -6238,8 +6238,9 @@ ruled only if the transience shows on a device.
 **[Rationale]**
 
 The blur is one on/off switch that draws Liquid Glass `clear`,
-pinned to its dark variant since the dim over it is always black,
-and `hud` (`NSVisualEffectView`) only where glass cannot draw —
+pinned to its dark variant since the dim over it is always black
+— a plate has no Fill, so the pin outranks the Settings Appearance
+pick as a dark Fill's does on the bars — and `hud` (`NSVisualEffectView`) only where glass cannot draw —
 macOS 14 and 15. There is no style picker, and no strength.
 
 The owner compared Off, `hud`, glass `regular` and glass `clear`

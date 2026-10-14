@@ -7,11 +7,15 @@ import Testing
 /// KiwiVision's dim and blur verbs (#2103, ruling 10 as amended
 /// 2026-10-14): dim takes the whole 0–100 % in Lua as in the GUI,
 /// default 60 %; the glass blur is ON by default, and Reduce
-/// transparency stands it down while the dim stays.
-/// `.serialized`: `LiquidGlassGate.override` is process-global.
+/// transparency stands it down while the dim stays. Asserts read
+/// the plate request, which outlives where the values are stored.
+/// `.serialized`: `LiquidGlassGate.override` is process-global,
+/// so each test restores the value it found.
 @Suite("KiwiVision dim and blur", .serialized)
 @MainActor
 struct KiwiVisionSettingsTests {
+    private let w1 = WindowID(1)
+
     private func makeCore() -> KiwiCore {
         let core = makeTestCore(
             configDirectory: FileManager.default
@@ -24,87 +28,104 @@ struct KiwiVisionSettingsTests {
         return core
     }
 
+    /// Runs `body` with Reduce transparency read as `reduced`,
+    /// handing neighbours back the value they pinned.
+    private func withTransparency(
+        reduced: Bool,
+        _ body: () throws -> Void
+    ) rethrows {
+        let before = LiquidGlassGate.override
+        defer { LiquidGlassGate.override = before }
+        LiquidGlassGate.override = { reduced }
+        try body()
+    }
+
     @Test("defaults: 60 % dim, blur on")
     func defaults() {
-        let core = makeCore()
-        #expect(core.vision.dim == 0.6)
-        #expect(core.vision.blur)
+        withTransparency(reduced: false) {
+            let request = makeCore().visionRequest()
+            #expect(request.dim == 0.6)
+            #expect(request.blur)
+        }
     }
 
     @Test("set_dim takes 0–100 and refuses past it")
     func setDim() {
         let core = makeCore()
-        #expect(
-            core.execute("kiwivision.set_dim", args: [.number(65)])
-                .isSuccess
-        )
-        #expect(core.vision.dim == 0.65)
-        #expect(
-            core.execute("kiwivision.set_dim", args: [.number(0)])
-                .isSuccess
-        )
-        #expect(core.vision.dim == 0)
-        #expect(
-            core.execute("kiwivision.set_dim", args: [.number(100)])
-                .isSuccess
-        )
-        #expect(core.vision.dim == 1)
+        for (percent, dim) in [(65.0, 0.65), (0, 0), (100, 1)] {
+            #expect(
+                core.execute(
+                    "kiwivision.set_dim",
+                    args: [.number(percent)]
+                ).isSuccess
+            )
+            #expect(core.visionRequest().dim == CGFloat(dim))
+        }
         for bad: JSONValue in [.number(-1), .number(101), .bool(true)] {
             #expect(
                 !core.execute("kiwivision.set_dim", args: [bad])
                     .isSuccess
             )
         }
-        #expect(core.vision.dim == 1)
+        #expect(core.visionRequest().dim == 1)
     }
 
     @Test("set_blur switches the blur the request carries")
     func setBlur() {
-        LiquidGlassGate.override = { false }
-        defer { LiquidGlassGate.override = nil }
-        let core = makeCore()
-        #expect(
-            core.execute("kiwivision.set_blur", args: [.bool(false)])
-                .isSuccess
-        )
-        #expect(!core.vision.blur)
-        #expect(!core.visionRequest().blur)
-        _ = core.execute("kiwivision.set_blur", args: [.bool(true)])
-        #expect(core.visionRequest().blur)
-        #expect(
-            !core.execute("kiwivision.set_blur", args: [.number(1)])
-                .isSuccess
-        )
+        withTransparency(reduced: false) {
+            let core = makeCore()
+            #expect(
+                core.execute("kiwivision.set_blur", args: [.bool(false)])
+                    .isSuccess
+            )
+            #expect(!core.visionRequest().blur)
+            _ = core.execute("kiwivision.set_blur", args: [.bool(true)])
+            #expect(core.visionRequest().blur)
+            #expect(
+                !core.execute("kiwivision.set_blur", args: [.number(1)])
+                    .isSuccess
+            )
+        }
     }
 
     @Test("Reduce transparency stands the blur down, not the dim")
     func reduceTransparency() {
-        LiquidGlassGate.override = { true }
-        defer { LiquidGlassGate.override = nil }
-        let core = makeCore()
-        _ = core.execute("kiwivision.set_blur", args: [.bool(true)])
-        _ = core.execute("kiwivision.set_dim", args: [.number(50)])
-        #expect(!core.visionRequest().blur)
-        #expect(core.visionRequest().dim == 0.5)
+        withTransparency(reduced: true) {
+            let core = makeCore()
+            _ = core.execute("kiwivision.set_blur", args: [.bool(true)])
+            _ = core.execute("kiwivision.set_dim", args: [.number(50)])
+            #expect(!core.visionRequest().blur)
+            #expect(core.visionRequest().dim == 0.5)
+        }
     }
 
-    @Test("a flip of Reduce transparency re-draws the plates")
-    func flipRedraws() {
-        let core = makeCore()
-        let plate = InertVisionPlate()
-        core.vision.plateFactory = { plate }
-        core.vision.isOn = true
-        _ = core.execute("kiwivision.set_blur", args: [.bool(true)])
-        LiquidGlassGate.override = { false }
-        defer { LiquidGlassGate.override = nil }
-        core.noteVisionStandDown([])
-        core.updateVision()
-        // A host with no screen draws no plate to read.
-        guard core.vision.plates.isEmpty == false else { return }
-        #expect(plate.blur == true)
-        LiquidGlassGate.override = { true }
-        core.reduceTransparencyDidChange()
-        #expect(plate.blur == false)
+    @Test(
+        "a flip of Reduce transparency re-draws the plates",
+        .enabled(if: !NSScreen.screens.isEmpty, "needs a screen")
+    )
+    func flipRedraws() throws {
+        let screen = CGRect(x: 0, y: 0, width: 1200, height: 800)
+        try withTransparency(reduced: false) {
+            let core = makeCore()
+            core.tiler.visibleBounds = { _ in screen }
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(id: w1, pid: 1, appName: "App1")
+                )
+            )
+            let space = try #require(core.state.workspaces.space(of: w1))
+            core.state.workspaces.focus(w1, in: space)
+            let plate = InertVisionPlate()
+            core.vision.plateFactory = { plate }
+            core.vision.isOn = true
+            core.noteVisionStandDown([])
+            core.updateVision()
+            try #require(!core.vision.plates.isEmpty)
+            #expect(plate.blur == true)
+            LiquidGlassGate.override = { true }
+            core.reduceTransparencyDidChange()
+            #expect(plate.blur == false)
+        }
     }
 
     @Test("the blur is Liquid Glass clear, hud where glass cannot draw")
@@ -120,5 +141,18 @@ struct KiwiVisionSettingsTests {
             #expect(hud.material == .hudWindow)
             #expect(hud.blendingMode == .behindWindow)
         }
+    }
+
+    @Test("the real plate shows its blur only when asked, under the dim")
+    func realPlateDrawsTheBlur() {
+        let plate = AppKitVisionPlate()
+        let frame = CGRect(x: 0, y: 0, width: 300, height: 200)
+        plate.update(frame: frame, dim: 0.6, blur: false)
+        #expect(plate.blurShown == false)
+        plate.update(frame: frame, dim: 0.6, blur: true)
+        #expect(plate.blurShown == true)
+        #expect(plate.dimAboveBlur)
+        plate.update(frame: frame, dim: 0.6, blur: false)
+        #expect(plate.blurShown == false)
     }
 }

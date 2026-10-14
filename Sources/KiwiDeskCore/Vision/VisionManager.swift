@@ -35,9 +35,9 @@ public final class VisionManager {
     public internal(set) var isOn = false
     /// The dim, 0...1 — 60 % by default (#2103 ruling 10). A
     /// session value until KiwiVision's settings are stored.
-    public internal(set) var dim: CGFloat = 0.6
+    var dim: CGFloat = 0.6
     /// Whether the plate blurs, ON by default (#2103 ruling 10).
-    public internal(set) var blur = true
+    var blur = true
     /// Hears every change of `isOn`; the GUI announces it.
     public var onChange: @MainActor (Bool) -> Void = { _ in }
     var plates: [DisplayID: any VisionPlateBackend] = [:]

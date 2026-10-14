@@ -108,9 +108,7 @@ extension KiwiCore {
             standDown: vision.standDown,
             tracked: borders.skyLightActive,
             dim: vision.dim,
-            // Reduce transparency stands the blur down; the dim
-            // stays (#2103, design-decisions ▸ Reduce transparency).
-            blur: vision.blur && !LiquidGlassGate.reducesTransparency
+            blur: LiquidGlassGate.rendered(blur: vision.blur)
         )
     }
 }

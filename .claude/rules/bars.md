@@ -1167,7 +1167,12 @@ Obligations:
   Nothing else in Core writes `.appearance =` on a view
   (`GlassTintSeamTests` ▸ one-home clause, allow map empty by
   design); a surface that needs to owes `docs/design-decisions.md`
-  an argument first.
+  an argument first. **A surface with no Fill whose own ink is
+  fixed black pins through the one Fill-less door,
+  `GlassTint.pinDark`** — KiwiVision's plate (#2103), its dark pin
+  outranking the Appearance pick as a dark Fill's does — and a new
+  caller joins `GlassTintPinDarkCallerTests`' register, since the
+  one-home scan exempts the home file and cannot see who calls it.
 - **A `Sources/KiwiDesk` surface that tints glass owes this suite
   a root.** `GlassTintSeamTests` scans Core alone, so the GUI
   tree is not covered by it — a Fill→colour derivation that lands

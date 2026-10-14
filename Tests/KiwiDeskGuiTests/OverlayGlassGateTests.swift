@@ -1,8 +1,9 @@
 import Foundation
 import Testing
 
-/// The drag markers' and the sticky mark's glass is decided where
-/// each is rendered, through the one gate (#1374, #1620, #1621) —
+/// The drag markers', the sticky mark's and KiwiVision's plate's
+/// glass is decided where each is rendered, through the one gate
+/// (#1374, #1620, #1621, #2103) —
 /// the shelf plate's rule (`ShelfPlateGlassGateTests`) for two
 /// surfaces that host glass without `GlassHosting`, which
 /// `ReduceTransparencySeamTests`' host scan cannot see.
@@ -30,6 +31,11 @@ struct OverlayGlassGateTests {
             file: "App/KiwiCore+StickyMarks.swift",
             function: "func stickyMarkSpecs(",
             stored: "glass: tiler.settings.stickyStyle.liquidGlass"
+        ),
+        (
+            file: "App/KiwiCore+Vision.swift",
+            function: "func visionRequest(",
+            stored: "blur: vision.blur"
         ),
     ]
 
@@ -63,7 +69,10 @@ struct OverlayGlassGateTests {
                 )?.trimmingCharacters(in: .whitespacesAndNewlines)
             )
             #expect(stored == render.stored, "\(render.file)")
-            let leaf = String(stored.dropFirst("glass: ".count))
+            let leaf = try #require(
+                stored.split(separator: " ", maxSplits: 1).last
+                    .map(String.init)
+            )
             #expect(
                 body.occurrences(of: leaf) == 1,
                 "\(render.file) reads \(leaf) beside the gate"
@@ -84,6 +93,7 @@ struct OverlayGlassGateTests {
         "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",
         "Borders/StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
         "Bar/BarPeekPanel.swift": "BarPeekSeamTests",
+        "Vision/VisionPlate.swift": "OverlayGlassGateTests",
     ]
 
     @Test("every glass host in Core names the gate that covers it")
