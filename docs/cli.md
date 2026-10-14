@@ -92,7 +92,8 @@ scroll
 Required arguments are in `<angle brackets>`, optional ones in
 `[square brackets]`. A command the CLI cannot reach is marked:
 `(lua only)` for the entry points that live on the Lua table
-alone (`bind`, `on`, `exec`, …), `(cli only)` for `subscribe`.
+alone (`bind`, `on`, `exec`, …), `(cli only)` for the commands
+a config never calls, such as `subscribe`.
 
 Naming one command prints its full signature, including the legal
 values of an enum argument and the Swift type they come from:
@@ -170,7 +171,7 @@ take this entry, and one with its own config format takes the same
 ```
 
 The server speaks MCP `2026-07-28` and, after an `initialize`,
-`2025-11-25` and `2025-06-18`. It offers six tools:
+`2025-11-25` and `2025-06-18`. It offers seven tools:
 
 | Tool | Does |
 |---|---|
@@ -180,6 +181,7 @@ The server speaks MCP `2026-07-28` and, after an `initialize`,
 | `run` | One command that can be undone |
 | `run_batch` | Up to 100 commands in order, stopping at the first failure |
 | `run_destructive` | One command that cannot be undone |
+| `keep` | Makes this session's setting changes permanent |
 
 `list_commands` and `help` answer without the app; the others
 need it running. A command `list_commands --json` marks
@@ -189,8 +191,19 @@ hint, which an AI app that honours it turns into a question to you
 before the command runs. `subscribe` and the Lua-only verbs are
 not offered.
 
-A setter sent through MCP lasts as [Commands](#commands) says, and
-the AI app is told so after each one. A command the binary does
+A setting changed through MCP is live but not kept, and every
+command result after the change tells the AI app so, with where
+`keep` would write it: the live profile, or the shared look for a
+look setting of a profile that wears it — a kept look setting
+changes every profile wearing that look, and `keep` names them.
+Say "keep" and `keep` writes those changes as they are now; a
+change `init.lua` owns, one made while no saved profile is live, an
+app-wide one, or one belonging to a Space that is not in the
+profile is named but cannot be kept. A change a Settings Save
+stored, or one set back to its saved value, needs no keep. A config
+reload, a profile load, a built-in layout's apply or Settings that
+puts another value there before the keep replaces it, and the AI
+app is told. A command the binary does
 not know is refused rather than sent. `get_state` hands the AI app
 your window titles. ChatGPT reaches only remote MCP servers, so it
 needs [OpenAI's secure MCP tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
@@ -825,3 +838,21 @@ Response:
 
 Unknown commands come back with a did-you-mean suggestion when
 a close match exists.
+
+:::unreleased
+A request may add `"report_changes": true` — `kiwidesk mcp` does —
+and the response then carries a `changes` object: the live
+`profile`, and the setting leaves the command changed under
+`touched`, each an `id` (a JSON Pointer such as
+`/settings/border/width`, `/space_modes/2` or
+`/app_wide/refusal/sound`), an `owner` (`profile`, `shared_look`,
+`init_lua` or `none`), its live `value`, whether that is the
+`stored` one, and a `not_keepable` reason where no keep can write
+it. Ids sent as `"keep_watch": [...]` come back judged the same way
+under `watched`. `keep_settings` writes those ids as they are live
+and answers which ones it `kept`:
+
+```sh
+kiwidesk keep_settings /settings/border/width
+```
+:::

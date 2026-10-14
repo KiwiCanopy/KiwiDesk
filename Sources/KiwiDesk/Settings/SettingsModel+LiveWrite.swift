@@ -5,7 +5,8 @@ import KiwiDeskCore
 /// (#1720), a bar menu's row (#1518), a Space added to or removed
 /// from the profile by the bar's Delete, `create_space` /
 /// `delete_space` with `profile`, or Settings ▸ Spaces' own add
-/// button (#1790). profiles.md rules the draft policy.
+/// button (#1790), and an AI app's `keep_settings` (#1685).
+/// profiles.md rules the draft policy.
 extension SettingsModel {
     /// A clean draft re-reads. A dirty one takes a `persisted`
     /// edit on both sides of its diff, so the change is neither

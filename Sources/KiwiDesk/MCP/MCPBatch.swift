@@ -24,17 +24,16 @@ struct MCPBatch {
             let skipped = requests.count - outcomes.count
             if skipped > 0 { lines.append("Not run: \(skipped).") }
         }
-        if outcomes.contains(where: \.changed) {
-            lines.append(MCPWording.temporary)
-        }
         let structured = JSONValue.object([
             "results": .array(outcomes.map(\.step)),
             "completed": .number(Double(outcomes.filter(\.ok).count)),
         ])
         let text = lines.joined(separator: "\n")
         guard failed == nil else {
-            return MCPTools.failure(text, structured: structured)
+            return tools.decorated(
+                MCPTools.failure(text, structured: structured)
+            )
         }
-        return MCPTools.result(text, structured: structured)
+        return tools.decorated(MCPTools.result(text, structured: structured))
     }
 }
