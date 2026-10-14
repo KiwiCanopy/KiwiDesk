@@ -84,6 +84,7 @@ extension SettingsModel {
             return
         }
         suppressDirty = true
+        let before = ruleReachStored
         ruleReachStored = core.ruleReachSnapshot()
         if let page = reachPage, let stored = ruleReachStored {
             let old = cleanConfig
@@ -94,6 +95,11 @@ extension SettingsModel {
                 over: old,
                 into: &cleanConfig
             )
+            if let before {
+                let moved = Self.movedShortcuts(before, stored, page: page)
+                Self.takeShortcuts(moved, into: &config.layers)
+                Self.takeShortcuts(moved, into: &cleanConfig.layers)
+            }
         }
         suppressDirty = false
         recomputeDirty()
@@ -128,6 +134,53 @@ extension SettingsModel {
             ) ?? stored.floatAutomatically.floatAutomaticallyBase
         if auto != old.floatAutomatically {
             config.floatAutomatically = auto
+        }
+    }
+
+    /// The shortcuts whose combo on `page` an outside write changed,
+    /// by `layer␟lua` key: the new combo, nil for an unbound one.
+    static func movedShortcuts(
+        _ before: RuleReachSnapshot,
+        _ after: RuleReachSnapshot,
+        page: String
+    ) -> [String: String?] {
+        let old = before.keyLayers.resolved(for: page)
+        let new = after.keyLayers.resolved(for: page)
+        var moved: [String: String?] = [:]
+        for key in Set(old.keys).union(new.keys) where old[key] != new[key] {
+            moved[key] = .some(new[key])
+        }
+        return moved
+    }
+
+    /// Lays `moved` over `layers`: a row's combo set, a row added, or
+    /// an unbound row dropped — a row matched by the action it runs
+    /// (`NavigationChords.sameAction`), and a written chord taken
+    /// from any other row holding it, the newer act winning.
+    static func takeShortcuts(
+        _ moved: [String: String?],
+        into layers: inout [KeyLayer]
+    ) {
+        for (key, combo) in moved.sorted(by: { $0.key < $1.key }) {
+            let parts = RuleReachTable<String>.keyParts(key)
+            guard let at = layers.firstIndex(where: { $0.name == parts.layer })
+            else { continue }
+            let written = KeyBinding(combo: combo ?? "", lua: parts.lua)
+            var placed = false
+            var rows: [KeyBinding] = []
+            for var row in layers[at].bindings {
+                if NavigationChords.sameAction(row, written) {
+                    // The action keeps its place, once, at the chord.
+                    guard let combo, !placed else { continue }
+                    row.combo = combo
+                    placed = true
+                } else if let combo, row.combo == combo {
+                    continue
+                }
+                rows.append(row)
+            }
+            if combo != nil, !placed { rows.append(written) }
+            layers[at].bindings = rows
         }
     }
 

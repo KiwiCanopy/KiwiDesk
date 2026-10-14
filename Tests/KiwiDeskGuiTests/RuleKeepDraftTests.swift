@@ -95,6 +95,86 @@ struct RuleKeepDraftTests {
         #expect(!model.isDirty)
     }
 
+    /// A shortcut an AI app writes saves at once; a dirty draft
+    /// takes it on both sides, so its Save neither drops the row nor
+    /// counts it as the user's edit.
+    @Test("a dirty draft takes a written shortcut")
+    @MainActor func dirtyDraftTakesAShortcut() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        try core.profiles.save(
+            Profile(
+                name: "Work",
+                monitorSets: [MonitorSet(monitors: [])],
+                spaces: [SpaceID("1")],
+                spaceModes: [:],
+                settings: TilingSettings()
+            )
+        )
+        #expect(
+            core.execute("load_profile", args: [.string("Work")]).isSuccess
+        )
+        let model = makeTestModel(core: core)
+        model.reload()
+        model.config.floatRules.append("com.dirty")
+        let set = core.execute(
+            "shortcut.set",
+            args: [
+                .string("ctrl+alt+h"), .string("focus"),
+                .array([.string("left")]),
+            ]
+        )
+        #expect(set.isSuccess)
+        model.adoptRuleKeep()
+        let row = { (config: GuiConfig) in
+            config.layers.first(where: \.isDefault)?.bindings.first {
+                $0.lua == "KiwiDesk.focus(\"left\")"
+            }?.combo
+        }
+        #expect(row(model.config) == "control+option+h")
+        #expect(row(model.cleanConfig) == "control+option+h")
+        model.config.floatRules.removeAll { $0 == "com.dirty" }
+        #expect(!model.isDirty)
+    }
+
+    /// The merge matches a row by the action it runs and lets the
+    /// written chord win over another row holding it.
+    @Test("a written shortcut moves its action and takes its chord")
+    @MainActor func takeShortcutsMatchesByAction() {
+        var layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [
+                    KeyBinding(
+                        combo: "control+option+1",
+                        lua: "KiwiDesk.focus_space(\"1\")"
+                    ),
+                    KeyBinding(
+                        combo: "control+option+h",
+                        lua: "KiwiDesk.focus(\"up\")"
+                    ),
+                ]
+            )
+        ]
+        let key = { (lua: String) in
+            RuleReachTable<String>.keyID(layer: KeyLayer.defaultName, lua: lua)
+        }
+        SettingsModel.takeShortcuts(
+            [
+                key("KiwiDesk.focus_space(1)"): .some("control+option+2"),
+                key("KiwiDesk.focus(\"left\")"): .some("control+option+h"),
+            ],
+            into: &layers
+        )
+        let rows = layers[0].bindings.map { "\($0.combo) \($0.lua)" }
+        #expect(
+            rows == [
+                "control+option+2 KiwiDesk.focus_space(\"1\")",
+                "control+option+h KiwiDesk.focus(\"left\")",
+            ]
+        )
+    }
+
     /// The hook, its route to the model, and the keep firing it —
     /// each deletable with the merge above still green.
     static let wirings: [(String, String, String)] = [

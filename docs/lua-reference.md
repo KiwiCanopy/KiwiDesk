@@ -5399,6 +5399,53 @@ Profiles re-resolve their bindings whenever they apply: on
 switch. Switching profiles also returns you to the default
 layer.
 
+:::unreleased
+### Shortcut verbs
+
+The `shortcut` table writes the saved shortcuts of the live profile
+from Lua, the CLI and an AI app, in the default layer. Shortcuts
+load only from the saved files, so a write saves at once and the
+key works straight away — the shortcut rows alone, never the rest
+of the profile. A new shortcut goes into the shared base on the
+loaded profile, as Settings ▸ Shortcuts starts one. With
+`init.lua` owning the config, or no saved profile live, the verbs
+refuse.
+
+#### shortcut.list
+
+**Expects:** nothing.
+
+**Does:** returns the live `profile` and its `layers`, each with
+its `name`, whether it is the `default`, and its `shortcuts` —
+each `chord` and the `lua` it runs.
+
+#### shortcut.set
+
+**Expects:** a chord (`"ctrl+alt+h"`), a command's name, and that
+command's arguments.
+
+**Does:** binds the chord to one call of the command, built from
+the arguments — strings, numbers and booleans. Only a command the
+CLI could run is bound: never a destructive one, never `exec` or
+another Lua-only verb, so the binding cannot run other Lua. A
+chord another action holds, or a command already bound to another
+chord, is refused; remove the old binding first.
+
+#### shortcut.remove
+
+**Expects:** a chord.
+
+**Does:** unbinds it, from every profile holding it when it is a
+shared shortcut. A chord with no shortcut is refused.
+
+**Example:**
+
+```lua
+shortcut.set("ctrl+alt+h", "focus", "left")
+shortcut.remove("ctrl+alt+h")
+```
+:::
+
 ## Events
 
 Subscribe to state changes (see also the [recipes](recipes/index.md)):

@@ -57,6 +57,10 @@ struct FocusedCommandPolicyTests {
         "app_rule.list",
         "app_rule.remove_space",
         "app_rule.remove_float",
+        // The shortcut rows, saved at once: no window moves (#1685).
+        "shortcut.list",
+        "shortcut.set",
+        "shortcut.remove",
         "get_state",
         "get_layout_info",
         "list_monitors",

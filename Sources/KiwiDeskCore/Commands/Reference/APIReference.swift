@@ -260,6 +260,7 @@ public enum APIReference {
             "list", "set_space", "remove_space", "set_float",
             "remove_float",
         ],
+        "shortcut": ["list", "set", "remove"],
     ]
 
     /// Lua-only commands on KiwiDesk table bypassing dispatcher (#37).

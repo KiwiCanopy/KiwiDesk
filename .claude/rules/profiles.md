@@ -1352,8 +1352,10 @@ fact about its command*. The obligations:
   so a look leaf the keep did not name stays pending rather than
   taking the stored value (`KeepSettingsEdgeTests` ▸
   `partialKeepKeepsOthersLive`), and its rule write passes
-  `saveRuleReach` the `.outside` origin, which re-resolves nothing
-  live (`AppRuleKeepTests` ▸ `partialKeepMovesNothingLive`).
+  `saveRuleReach` the `.outside` origin, which leaves the rules as
+  live holds them and registers only the shortcuts — which have no
+  live layer — from the files (`AppRuleKeepTests` ▸
+  `partialKeepMovesNothingLive`).
 - **Judge a leaf against the stored profile, read once per
   judgement and only where a caller holds leaves, and against the
   rule snapshot only where a rule leaf is judged — built over that
@@ -1481,8 +1483,10 @@ profile never moves `currentName` (#1249). **A rule write from
 outside Settings takes the same door with the `.outside` origin
 (#1685)**, never `writeThroughLiveProfile`, whose one
 `LiveProfileEdit` cannot reach another profile or the shared base:
-`keep_settings` keeps a rule at the encoder's own
-`RuleReachTable.defaultReach` on the loaded profile, snapshots
+`keep_settings` and the `shortcut.*` verbs write at the encoder's
+own `RuleReachTable.defaultReach` on the loaded profile — a
+shortcut write re-registering the keys from the saved files through
+`reregisterStoredKeys` (`ShortcutCommandsTests`) — snapshot
 the files after any `gui.json` write it follows, and the door —
 not the caller — tells an open draft of ANY target through
 `onRulesKept`, whose policy is `SettingsModel.adoptRuleKeep`: a
