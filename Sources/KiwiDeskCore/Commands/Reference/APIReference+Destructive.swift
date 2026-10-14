@@ -30,11 +30,6 @@ extension APIReference {
         ServiceManager.prepareRestartCommand,
     ]
 
-    /// True for a command in `destructive`, by name or alias.
-    public static func isDestructive(_ name: String) -> Bool {
-        entry(named: name).map(isDestructive) ?? false
-    }
-
     /// True for an entry in `destructive`.
     public static func isDestructive(_ entry: APIEntry) -> Bool {
         destructive.contains(entry.qualifiedName)

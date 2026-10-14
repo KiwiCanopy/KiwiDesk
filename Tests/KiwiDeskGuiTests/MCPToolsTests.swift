@@ -52,6 +52,7 @@ struct MCPToolsTests {
     @Test("run refuses a destructive command and sends nothing")
     func runRefusesDestructive() throws {
         let app = FakeApp()
+        #expect(!APIReference.destructive.isEmpty)
         for name in APIReference.destructive.sorted() {
             let result = try Self.call(
                 app.tools,

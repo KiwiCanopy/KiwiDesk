@@ -124,12 +124,29 @@ struct MCPToolsEdgeTests {
             guard case .object(let fields) = tool else { return nil }
             return fields["name"]?.stringValue
         }
-        #expect(names.count == MCPTools.all.count)
+        // The ruled tool set (#1685 ▸ Ruling 2–3); a domain tool
+        // joins it by ruling.
+        #expect(
+            Set(names) == [
+                "list_commands", "help", "get_state", "run",
+                "run_batch", "run_destructive",
+            ]
+        )
         #expect(Set(names).count == names.count)
         for name in names {
             #expect(throws: Never.self) {
                 _ = try FakeApp().tools.call(["name": .string(name)])
             }
         }
+    }
+
+    @Test("get_state forwards the app's own answer")
+    func getStateForwards() throws {
+        let app = FakeApp()
+        app.reply = { _ in .ok(.object(["active_space": .string("1")])) }
+        let result = try Self.call(app.tools, MCPTools.getState)
+        #expect(result["isError"] == .bool(false))
+        #expect(app.sent.map(\.command) == ["get_state"])
+        #expect(Self.text(result).contains("active_space"))
     }
 }

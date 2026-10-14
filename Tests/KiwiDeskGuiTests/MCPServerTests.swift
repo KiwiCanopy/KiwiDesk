@@ -180,7 +180,10 @@ struct MCPServerTests {
         var writes = 0
         for file in files {
             let text = try SourceScan.strippedSource(at: file)
-            for needle in ["print(", "fputs(", "putchar(", "stdout"] {
+            for needle in [
+                "print(", "debugPrint(", "dump(", "fputs(", "putchar(",
+                "stdout", "Darwin.write(", "fileDescriptor: 1",
+            ] {
                 #expect(
                     !text.contains(needle),
                     "\(file.lastPathComponent) writes stdout"

@@ -89,10 +89,8 @@ struct APIDestructiveCensusTests {
             return
         }
         #expect(other["destructive"] == .bool(false))
-        #expect(APIReference.isDestructive("delete_space"))
-        #expect(!APIReference.isDestructive("focus"))
-        // A Lua spelling resolves to its command, so it reads
-        // that command's flag.
+        // A Lua spelling resolves to its command's entry, which is
+        // what every reader of the flag asks.
         let alias = try #require(
             APIReference.entries.first {
                 !$0.aliases.isEmpty && $0.command != nil
@@ -102,10 +100,6 @@ struct APIDestructiveCensusTests {
             #expect(
                 APIReference.entry(named: name)?.qualifiedName
                     == alias.qualifiedName
-            )
-            #expect(
-                APIReference.isDestructive(name)
-                    == APIReference.isDestructive(alias)
             )
         }
     }
