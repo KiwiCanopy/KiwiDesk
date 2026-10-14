@@ -167,4 +167,41 @@ struct AppRuleKeepTests {
                 .normalizedRules["com.x"] == nil
         )
     }
+
+    @Test("a float rule the profile holds is kept in its file")
+    func ownFloatRuleLandsInTheProfile() throws {
+        let core = try KeepFixture.core()
+        var odd = KeepFixture.profile("Odd")
+        odd.floatRules = RuleListOverride(rules: ["com.x:A": true])
+        try core.profiles.save(odd)
+        KeepFixture.load("Odd", core)
+        let set = KeepFixture.report(
+            core,
+            "app_rule.set_float",
+            [.string("com.x"), .string("B")]
+        )
+        #expect(KeepFixture.leaf(set, "/float_rules/")?.owner == .profile)
+        #expect(kept(keep(core, ids(set))) == ["/float_rules/com.x:B"])
+        let stored = try core.profiles.read(name: "Odd")
+        #expect(stored.floatRules?.rules["com.x:B"] == .some(true))
+        #expect(core.guiConfigStore.load()?.floatRules.isEmpty == true)
+    }
+
+    @Test("keeping one of an app's float rules leaves the other unkept")
+    func keepsOnlyTheNamedFloatRule() throws {
+        let core = try KeepFixture.core()
+        let first = KeepFixture.report(
+            core,
+            "app_rule.set_float",
+            [.string("com.x"), .string("A")]
+        )
+        _ = KeepFixture.report(
+            core,
+            "app_rule.set_float",
+            [.string("com.x"), .string("B")]
+        )
+        #expect(kept(keep(core, ids(first))) == ["/float_rules/com.x:A"])
+        #expect(core.guiConfigStore.load()?.floatRules == ["com.x:A"])
+        #expect(core.eventLoop.floatRules.rawRules.contains("com.x:B"))
+    }
 }

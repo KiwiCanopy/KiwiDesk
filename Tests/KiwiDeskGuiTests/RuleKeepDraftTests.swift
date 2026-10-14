@@ -25,7 +25,7 @@ struct RuleKeepDraftTests {
         try core.guiConfigStore.save(base)
         let stored = try #require(core.ruleReachSnapshot())
         var old = GuiConfig()
-        old.appRules = ["com.a": "1", "com.b": "2"]
+        old.appRules = ["com.a": "1", "com.b": "2", "com.r": "5"]
         old.floatRules = ["com.f", "com.g"]
         old.floatAutomatically = true
         var draft = old
