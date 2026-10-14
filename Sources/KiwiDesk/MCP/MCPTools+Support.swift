@@ -11,6 +11,13 @@ enum MCPWording {
         + "user once per task, and call keep when they want it to "
         + "last — at once if they asked for that (\"from now on\")."
 
+    /// Shortcuts load only from saved files, so their verbs save at
+    /// once (#1685 ▸ Ruling 6c): the model asks before writing.
+    static let shortcutsSave =
+        "shortcut.set and shortcut.remove save at once and are not "
+        + "undone by a reload: show the user the whole mapping and get "
+        + "a yes before calling them."
+
     /// The pending changes and where `keep` would write them.
     static func unkept(
         _ pending: [TouchedLeaf],

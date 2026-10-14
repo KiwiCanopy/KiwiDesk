@@ -19,7 +19,7 @@ extension MCPTools {
             title: "Run a KiwiDesk command",
             "Runs one command that can be undone. Destructive commands "
                 + "are refused: use run_destructive. "
-                + MCPWording.liveNotKept,
+                + MCPWording.liveNotKept + " " + MCPWording.shortcutsSave,
             properties: MCPToolSchema.command,
             required: ["command"]
         ),

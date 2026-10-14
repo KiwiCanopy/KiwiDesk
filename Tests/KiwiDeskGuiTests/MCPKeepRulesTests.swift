@@ -30,4 +30,17 @@ struct MCPKeepRulesTests {
         let kept = try MCPKeepTests.call(app, MCPTools.keep)
         #expect(MCPKeepTests.text(kept).contains("apply in: Home, Work"))
     }
+
+    @Test("run tells the model a shortcut saves at once")
+    func runWarnsShortcutsSave() throws {
+        let run = try #require(
+            MCPTools.all.first { $0.name == MCPTools.run }
+        )
+        guard case .object(let tool) = run.definition else {
+            Issue.record("no definition")
+            return
+        }
+        let text = tool["description"]?.stringValue ?? ""
+        #expect(text.contains(MCPWording.shortcutsSave))
+    }
 }

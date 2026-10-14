@@ -195,7 +195,8 @@ need it running. A command `list_commands --json` marks
 `destructive` goes only through `run_destructive`, and `run` and
 `run_batch` refuse it. `run_destructive` carries MCP's destructive
 hint, which an AI app that honours it turns into a question to you
-before the command runs. `subscribe` and the Lua-only verbs are
+before the command runs. A shortcut verb saves at once, so `run`
+tells the AI app to show you the mapping and ask first. `subscribe` and the Lua-only verbs are
 not offered.
 
 `looks` takes an `action` — each `look.*` verb that can be undone —
@@ -373,6 +374,12 @@ lands on ([`set_space_cue`](lua-reference.md#set_space_cue)).
 <name>` and `look.delete <name>` reach the look library
 ([Looks](lua-reference.md#looks)). `look.apply` wears a look
 without writing it.
+:::
+
+:::unreleased
+`shortcut.list`, `shortcut.set <chord> <command> [argument…]` and
+`shortcut.remove <chord>` read and write the saved shortcuts; a
+write saves at once ([Shortcut verbs](lua-reference.md#shortcut-verbs)).
 :::
 
 :::unreleased
