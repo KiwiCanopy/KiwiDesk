@@ -1,14 +1,16 @@
 import Foundation
 
-/// How an AI app starts `kiwidesk mcp` (#1685): the CLI verb and
-/// the `mcpServers` entry every setup path hands out — the AI
-/// page's setup prompt today, the #2258 extension later.
+/// How an AI app starts `kiwidesk mcp` (#1685): the server's
+/// name and arguments, and the `mcpServers` entry the AI page's
+/// setup prompt hands out.
 enum MCPInvocation {
     /// The CLI verb `runCLI` dispatches to `MCPServer`.
     static let verb = "mcp"
     /// The server's name: its `mcpServers` key and the name the
     /// handshake reports.
     static let serverName = "kiwidesk"
+    /// The arguments an AI app passes the executable.
+    static let args = [verb]
 
     /// The `mcpServers` entry for `executable` as one line of
     /// JSON, encoded rather than interpolated so any path stays
@@ -16,7 +18,7 @@ enum MCPInvocation {
     static func serverEntry(executable: String) -> String {
         let entry = [
             "mcpServers": [
-                serverName: Server(command: executable, args: [verb])
+                serverName: Server(command: executable, args: args)
             ]
         ]
         let encoder = JSONEncoder()

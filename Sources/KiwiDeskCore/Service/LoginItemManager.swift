@@ -52,7 +52,7 @@ public enum LoginItemManager {
     public static func setEnabled(_ enabled: Bool) -> LoginItemState {
         guardedWrite(
             enabled,
-            at: Bundle.main.bundleURL,
+            at: RunningCopy.bundleURL,
             write: serviceWrite
         )
     }
