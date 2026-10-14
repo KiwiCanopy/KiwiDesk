@@ -2,9 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// AI ▸ What it can do: one line per capability the MCP tools
-/// have TODAY, each later #1685 lane adding its own line with its
-/// tool, then the two facts a user must meet on the page itself,
-/// never only behind a `?` (`ui-patterns.md`).
+/// have, never one ahead of its tool, then the two facts a user
+/// must meet on the page itself, never only behind a `?`
+/// (`ui-patterns.md`).
 struct AICapabilitiesCard: View {
     var body: some View {
         SettingsSection(SettingsCatalog.ai.capabilitiesCard) {

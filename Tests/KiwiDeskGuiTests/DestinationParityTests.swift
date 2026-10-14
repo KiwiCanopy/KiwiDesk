@@ -36,7 +36,7 @@ struct DestinationParityTests {
     // stay separate concepts — header presence vs edit
     // reachability. Pin both so a new case can't silently land
     // in the wrong bucket.
-    @Test("only the profileless pair omits the profile context")
+    @Test("only the profileless trio omits the profile context")
     func profileContextExcludesOnlyProfileless() {
         let profileless: Set<SettingsDestination> = [
             .ai, .general, .macChecklist,

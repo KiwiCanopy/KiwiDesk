@@ -17,7 +17,7 @@ struct AISetupPromptTests {
     }
 
     private func decoded(_ path: String) throws -> Entry.Server? {
-        let line = AISetupPrompt.serverEntry(executable: path)
+        let line = MCPInvocation.serverEntry(executable: path)
         let entry = try JSONDecoder().decode(
             Entry.self,
             from: Data(line.utf8)
@@ -43,7 +43,7 @@ struct AISetupPromptTests {
     /// broken path to a person checking the entry by eye.
     @Test("the entry keeps slashes readable")
     func slashesStayPlain() {
-        let line = AISetupPrompt.serverEntry(
+        let line = MCPInvocation.serverEntry(
             executable: "/Applications/KiwiDesk.app"
         )
         #expect(line.contains("\"/Applications/KiwiDesk.app\""))
@@ -56,7 +56,8 @@ struct AISetupPromptTests {
             executable: path,
             replyLanguage: nil
         )
-        #expect(text.contains(AISetupPrompt.serverEntry(executable: path)))
+        let entry = MCPInvocation.serverEntry(executable: path)
+        #expect(text.contains(entry))
         #expect(!text.contains("Reply in"))
     }
 

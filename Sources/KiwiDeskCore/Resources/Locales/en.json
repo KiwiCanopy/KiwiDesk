@@ -17,7 +17,7 @@
   "ai.prompts.title": "Ready-made prompts",
   "ai.setup.copy": "Copy Setup Prompt",
   "ai.setup.copy.caption": "Paste it into Claude Desktop, Claude Code, Cursor or Codex. It holds everything the app needs to connect to KiwiDesk.",
-  "ai.setup.copy.help": "MCP (Model Context Protocol) is how an AI app uses tools on your Mac. KiwiDesk gives it the same commands as the kiwidesk command line.",
+  "ai.setup.copy.help": "MCP is the standard way an AI app uses tools on your Mac. KiwiDesk gives it the same commands you can type in Terminal.",
   "ai.setup.intro": "KiwiDesk has no AI of its own. Connect the AI app you already use, and set up and control KiwiDesk by asking it.",
   "ai.setup.title": "Set up",
   "ai.setup.translocated": "Move KiwiDesk to your Applications folder first. Opened from Downloads, it runs from a temporary location that changes each time it starts.",

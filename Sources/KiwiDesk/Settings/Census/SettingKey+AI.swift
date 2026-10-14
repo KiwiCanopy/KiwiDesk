@@ -9,7 +9,12 @@ extension AIKey {
     var placement: SettingPlacement {
         switch self {
         case .copySetupPrompt:
-            return .row(.ai, .aiSetup, .atRest)
+            return .row(
+                .ai,
+                .aiSetup,
+                .atRest,
+                gate: .runtime(.runningCopyTranslocated)
+            )
         case .promptSpaces:
             return .row(.ai, .readyMadePrompts, .atRest)
         }

@@ -1,7 +1,6 @@
 /// AI page row order (`AICensusRenderTests`, #1685). A ready-made
-/// prompt joins `readyMadePrompts` in the PR that ships the tools
-/// it needs, never earlier and never greyed (issue #1685 ▸
-/// Ruling 6a): look, migration, app rules, Spaces.
+/// prompt is listed only once the tools it needs exist, never
+/// greyed before (issue #1685 ▸ Ruling 6a).
 enum AIRowOrder {
     static let setup: [SettingKey] = [.ai(.copySetupPrompt)]
 

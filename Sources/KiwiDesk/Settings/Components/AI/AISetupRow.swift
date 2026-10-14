@@ -4,14 +4,14 @@ import SwiftUI
 /// AI ▸ Set up's one row: Copy Setup Prompt, its `?`, and the
 /// caption. A copy opened from Downloads runs from a translocated
 /// path that dies at relaunch, so there the button greys and the
-/// caption says why — the login item's one predicate, read at
-/// render (#1685 ▸ Ruling 6a). A bare binary keeps the button.
+/// caption says why — the census gate `runningCopyTranslocated`,
+/// read from the one `RunningCopy` verdict at render (#1685 ▸
+/// Ruling 6a). A bare binary keeps the button.
 struct AISetupRow: View {
     @EnvironmentObject private var localization: LocalizationManager
 
     var body: some View {
-        let translocated =
-            LoginItemManager.unavailableCopy == .translocated
+        let translocated = RunningCopy.location == .translocated
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
                 AICopyButton(title: title, text: prompt)
@@ -27,7 +27,7 @@ struct AISetupRow: View {
 
     private func prompt() -> String {
         AISetupPrompt.text(
-            executable: Bundle.main.executablePath ?? "",
+            executable: RunningCopy.executablePath,
             replyLanguage: AISetupPrompt.replyLanguage(
                 for: localization.effectiveLocale
             )
@@ -35,7 +35,7 @@ struct AISetupRow: View {
     }
 
     private var title: String {
-        L("ai.setup.copy", "Copy Setup Prompt")
+        SettingsCatalog.ai.copySetupPrompt.text
     }
 
     private var caption: String {
@@ -59,9 +59,9 @@ struct AISetupRow: View {
     private var help: String {
         L(
             "ai.setup.copy.help",
-            "MCP (Model Context Protocol) is how an AI app uses "
-                + "tools on your Mac. KiwiDesk gives it the same "
-                + "commands as the kiwidesk command line."
+            "MCP is the standard way an AI app uses tools on "
+                + "your Mac. KiwiDesk gives it the same commands "
+                + "you can type in Terminal."
         )
     }
 }

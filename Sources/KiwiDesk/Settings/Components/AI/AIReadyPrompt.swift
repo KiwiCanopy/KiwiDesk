@@ -1,10 +1,28 @@
 import KiwiDeskCore
 
-/// A ready-made prompt's localized text (#1685 ▸ Ruling 6a). Each
-/// makes the AI app ask the user one question at a time, so it
-/// works pasted and sent unchanged. Layout names are the Layouts
-/// page's own labels, interpolated (#818).
+/// A ready-made prompt's localized caption and text (#1685 ▸
+/// Ruling 6a), the one switch a new prompt row fills. Each makes
+/// the AI app ask the user one question at a time, so it works
+/// pasted and sent unchanged. Layout names are the Layouts page's
+/// own labels, interpolated (#818).
 enum AIReadyPrompt {
+    /// The row's one-line caption; nil for a key that is no
+    /// ready-made prompt.
+    @MainActor static func caption(for key: AIKey) -> String? {
+        switch key {
+        case .promptSpaces:
+            return L(
+                "ai.prompt.spaces.caption",
+                "How many Spaces, what goes where, and each "
+                    + "one\u{2019}s layout."
+            )
+        case .copySetupPrompt:
+            return nil
+        }
+    }
+
+    /// The text Copy puts on the clipboard; nil for a key that is
+    /// no ready-made prompt.
     @MainActor static func text(for key: AIKey) -> String? {
         switch key {
         case .promptSpaces:

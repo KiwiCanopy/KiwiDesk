@@ -121,8 +121,8 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     }
 
     /// Whether destination is visible when editing a stored
-    /// profile (#18): General and the Mac Checklist are global
-    /// surfaces a profile edit never writes. App Rules joined
+    /// profile (#18): General, the Mac Checklist and AI are
+    /// global surfaces a profile edit never writes. App Rules joined
     /// when its Space facet grew a per-profile override (#109) —
     /// the Float facet stays global and renders disabled there.
     var visibleWhileEditingStoredProfile: Bool {

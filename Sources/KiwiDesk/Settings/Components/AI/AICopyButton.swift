@@ -8,6 +8,8 @@ import SwiftUI
 /// (#812). Both labels share one frame so nothing beside it moves.
 struct AICopyButton: View {
     let title: String
+    /// The VoiceOver name, where `title` alone is ambiguous.
+    var spokenName: String? = nil
     let text: () -> String
 
     @State private var copied = false
@@ -26,6 +28,8 @@ struct AICopyButton: View {
             }
         }
         .settingsActionButton()
+        .accessibilityLabel(spokenName ?? title)
+        .accessibilityValue(copied ? copiedTitle : "")
         .onDisappear(perform: reset)
     }
 

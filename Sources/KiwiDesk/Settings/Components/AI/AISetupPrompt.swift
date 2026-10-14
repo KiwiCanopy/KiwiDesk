@@ -20,7 +20,7 @@ enum AISetupPrompt {
             "Add this server to your MCP configuration, keeping any "
                 + "servers already there:",
             "",
-            serverEntry(executable: executable),
+            MCPInvocation.serverEntry(executable: executable),
             "",
             "If your configuration uses another format, use the same "
                 + "command and args. If you can edit your configuration "
@@ -35,24 +35,6 @@ enum AISetupPrompt {
         return lines.joined(separator: "\n")
     }
 
-    /// The `mcpServers` entry as one line of JSON, encoded rather
-    /// than interpolated so any path stays valid JSON.
-    static func serverEntry(executable: String) -> String {
-        let entry = [
-            "mcpServers": [
-                "kiwidesk": Server(command: executable, args: ["mcp"])
-            ]
-        ]
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [
-            .sortedKeys, .withoutEscapingSlashes,
-        ]
-        guard let data = try? encoder.encode(entry),
-            let json = String(data: data, encoding: .utf8)
-        else { return "" }
-        return json
-    }
-
     /// English name of `locale`'s language, nil for English or an
     /// unknown code — the `Reply in …` line is owed only then.
     static func replyLanguage(for locale: String?) -> String? {
@@ -62,10 +44,5 @@ enum AISetupPrompt {
         else { return nil }
         return Locale(identifier: "en")
             .localizedString(forIdentifier: locale)
-    }
-
-    private struct Server: Encodable {
-        let command: String
-        let args: [String]
     }
 }

@@ -27,15 +27,16 @@ public enum LoginItemManager {
         unavailableReason(for: Bundle.main.bundleURL)
     }
 
-    /// Why bundle at `url` cannot register (nil if registerable).
+    /// Why bundle at `url` cannot register (nil if registerable),
+    /// read off the one `RunningCopy` location verdict.
     static func unavailableReason(
         for url: URL
     ) -> LoginItemUnavailable? {
-        guard url.pathExtension == "app" else { return .notBundled }
-        if url.path.contains("/AppTranslocation/") {
-            return .translocated
+        switch RunningCopy.location(of: url) {
+        case .bundled: return nil
+        case .translocated: return .translocated
+        case .bare: return .notBundled
         }
-        return nil
     }
 
     /// Registers or unregisters the app as a login item and returns

@@ -8,7 +8,8 @@ description: The localization workflow — how to add or fix a translation.
 KiwiDesk's GUI — the Settings window, the dashboard, the menu-bar
 quick menu, tooltips and the first-launch onboarding — is
 localizable. This page is the contributor workflow for adding or
-fixing a translation. Lua- and CLI-facing strings stay
+fixing a translation. Lua- and CLI-facing strings, and the AI
+page's setup prompt (written for the AI app's model), stay
 English-only and are not covered.
 
 The **marketing website** (the landing page and the `/guide/`

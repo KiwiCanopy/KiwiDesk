@@ -46,13 +46,13 @@ struct AICensusRenderTests {
                 continue
             }
             #expect(label == key.labelKey)
-            #expect(key.text.captionKey == key.labelKey + ".caption")
         }
     }
 
     /// A ready-made prompt row with no text would copy an empty
-    /// clipboard — every listed prompt has its prompt.
-    @Test("every ready-made prompt has its text")
+    /// clipboard, one with no caption draws a bare title — every
+    /// listed prompt has both.
+    @Test("every ready-made prompt has its caption and text")
     @MainActor func everyPromptHasText() {
         LocalizationManager.shared.select("en")
         for row in AIRowOrder.readyMadePrompts {
@@ -60,6 +60,8 @@ struct AICensusRenderTests {
                 Issue.record("\(row.id) is not an AI row")
                 continue
             }
+            let caption = AIReadyPrompt.caption(for: key) ?? ""
+            #expect(!caption.isEmpty, "\(key)")
             let text = AIReadyPrompt.text(for: key) ?? ""
             #expect(text.contains("one question at a time"), "\(key)")
             #expect(text.contains("keep"), "\(key)")
@@ -85,11 +87,10 @@ struct AICensusRenderTests {
         }
     }
 
-    /// The prompts card walks its list; the setup card is the
-    /// one bespoke container.
-    @Test("the prompts card is a ForEach over its list")
+    /// The prompts card walks its list; the setup card draws its
+    /// one row by hand, so the row must be mounted there.
+    @Test("the prompts card walks its list, the setup row mounts")
     func promptsWalkTheirList() throws {
-        #expect(AIRowOrder.bespokeContainers == [.aiSetup])
         let root = SourceScan.repoRoot(from: #filePath)
         let section = root.appendingPathComponent(
             "Sources/KiwiDesk/Settings/Sections/AISection.swift"
@@ -104,5 +105,7 @@ struct AICensusRenderTests {
                     + ".enumerated())"
             )
         )
+        #expect(squashed.contains("AISetupRow()"))
+        #expect(!squashed.contains("AIRowOrder.setup"))
     }
 }

@@ -11,33 +11,24 @@ struct AIPromptRow: View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(control.text)
-                Text(caption)
+                Text(AIReadyPrompt.caption(for: key) ?? "")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            AICopyButton(title: copyTitle) {
+            AICopyButton(
+                title: copyTitle,
+                spokenName: L(
+                    "ai.prompt.copy.ax",
+                    "Copy prompt: %1$@",
+                    control.text
+                )
+            ) {
                 AIReadyPrompt.text(for: key) ?? ""
             }
-            .accessibilityLabel(
-                L("ai.prompt.copy.ax", "Copy prompt: %1$@", control.text)
-            )
         }
         .searchAnchored(control)
     }
 
     private var copyTitle: String { L("ai.prompt.copy", "Copy") }
-
-    private var caption: String {
-        switch key {
-        case .promptSpaces:
-            return L(
-                "ai.prompt.spaces.caption",
-                "How many Spaces, what goes where, and each "
-                    + "one\u{2019}s layout."
-            )
-        case .copySetupPrompt:
-            return ""
-        }
-    }
 }
