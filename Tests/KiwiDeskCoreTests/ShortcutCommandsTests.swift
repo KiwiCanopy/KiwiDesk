@@ -88,6 +88,8 @@ struct ShortcutCommandsTests {
             ("no_such_verb", []),
             ("focus", [.array([])]),
             ("focus", [.string("left"), .string("extra"), .string("x")]),
+            // CLI-only, with arguments its record takes.
+            ("get_work_counters", []),
             ("focus", [.number(42)]),
             ("focus", [.string("sideways")]),
         ]
@@ -243,5 +245,38 @@ struct ShortcutCommandsTests {
             ]
         )
         #expect(set.error?.contains("remove it first") == true)
+    }
+
+    /// A row written by hand keeps its own spelling; a chord is the
+    /// same chord however it is spelled.
+    @Test("a hand-spelled chord is found by its keys")
+    func chordsCompareParsed() throws {
+        let core = try KeepFixture.core()
+        var base = try #require(core.guiConfigStore.load())
+        base.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [
+                    KeyBinding(
+                        combo: "ctrl+alt+h",
+                        lua: "KiwiDesk.focus(\"up\")"
+                    )
+                ]
+            )
+        ]
+        try core.guiConfigStore.save(base)
+        let set = run(
+            core,
+            "shortcut.set",
+            [
+                .string("control+option+h"), .string("focus"),
+                .array([.string("left")]),
+            ]
+        )
+        #expect(set.error?.contains("remove it first") == true)
+        #expect(
+            run(core, "shortcut.remove", [.string("alt+ctrl+h")]).isSuccess
+        )
+        #expect(baseRows(core).isEmpty)
     }
 }
