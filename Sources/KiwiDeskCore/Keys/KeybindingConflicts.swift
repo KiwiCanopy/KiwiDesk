@@ -34,14 +34,17 @@ public enum KeybindingConflicts {
         in bindings: [KeyBinding]
     ) -> Conflict? {
         guard !binding.combo.isEmpty else { return nil }
-        guard let combo = KeyCombo.parse(binding.combo) else {
+        guard let parsed = KeyCombo.parse(binding.combo) else {
             return Conflict(binding: binding, target: .unrecognized)
         }
+        // Compared as registered: a held Hyper row IS its bare
+        // chord (#1870), so `hyper+cmd+space` meets Spotlight.
+        let combo = parsed.registered
         for other in bindings
         where other.id != binding.id && !other.combo.isEmpty {
             guard let otherCombo = KeyCombo.parse(other.combo)
             else { continue }
-            if otherCombo == combo {
+            if otherCombo.registered == combo {
                 return Conflict(
                     binding: binding,
                     target: .otherBinding(other)

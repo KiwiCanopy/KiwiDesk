@@ -242,6 +242,13 @@ func makeTestCore(
     // bar sits at the top of the primary screen, where a hand on
     // the menu bar rests. Pin "off every window".
     BarHoverHit.pointerOverride = { _ in BarHoverHit.offWindow }
+    // The Hyper remap rewrites the host's live key mapping and
+    // its record lives in the real defaults (#1870).
+    core.hyperRemapHost = HyperKeyRemap.Host(
+        run: { _ in nil },
+        readWritten: { nil },
+        writeWritten: { _ in }
+    )
     // A shelf panel is a real window on the developer's screen,
     // and a core outlives its test while a task still holds it
     // (#1894): placed, never ordered in, unless the suite asks.

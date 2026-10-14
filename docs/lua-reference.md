@@ -907,6 +907,34 @@ KiwiDesk.set_desktop_cue(false)
 ```
 
 :::unreleased
+### set_hyper_key
+
+**Expects:** a key name, or `off` (default `off`): `caps_lock`,
+`left_command` / `right_command`, `left_option` /
+`right_option`, `left_control` / `right_control`, `left_shift`
+/ `right_shift`, or `f1` … `f20`.
+
+**Does:** turns that key into the Hyper modifier, `hyper` in a
+combo (`"hyper+h"`), drawn ✦ (#1870). KiwiDesk remaps the key
+while it runs and gives it back at quit, so the key stops doing
+its own job meanwhile — Caps Lock types no capitals, Right ⌘ is
+no longer ⌘. Left and right are different keys here. Hyper
+needs no Input Monitoring, and a shortcut on it collides with no
+app. If a key mapping KiwiDesk did not set is already in place
+(another remapping tool, `hidutil` by hand), the verb refuses
+and leaves it alone.
+
+The verb changes the running session only.
+
+**Example:**
+
+```lua
+KiwiDesk.set_hyper_key("caps_lock")
+KiwiDesk.bind("hyper+h", function() KiwiDesk.focus("left") end)
+```
+:::
+
+:::unreleased
 ### set_space_cue
 
 **Expects:** `true` or `false` (default `true`).
@@ -5054,6 +5082,14 @@ end)
 
 **Modifiers:** `cmd`/`command`, `alt`/`opt`/`option`,
 `ctrl`/`control`, `shift`.
+
+:::unreleased
+`hyper` is KiwiDesk's own Hyper modifier, live once
+[`set_hyper_key`](#set_hyper_key) names a key; it combines with
+any of the others (`"hyper+cmd+ctrl+x"`). Held, a Hyper combo is
+its chord without `hyper`, so an enabled macOS shortcut on that
+chord (`hyper+cmd+space` is Spotlight's) still wins.
+:::
 
 **Keys:** letters, digits, `left`, `right`, `up`, `down`,
 `home`, `end`, `pageup`, `pagedown`, `space`,
