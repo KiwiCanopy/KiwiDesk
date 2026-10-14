@@ -45,6 +45,16 @@ struct AICapabilitiesCard: View {
                     + "wallpaper from a screenshot."
             ),
             L(
+                "ai.capability.app_rules",
+                "Choose which apps float and which Space each app "
+                    + "opens in."
+            ),
+            L(
+                "ai.capability.shortcuts",
+                "Add shortcuts for commands, once you agree to the "
+                    + "list."
+            ),
+            L(
                 "ai.capability.inspect",
                 "See your Spaces and windows, and look up any "
                     + "command."

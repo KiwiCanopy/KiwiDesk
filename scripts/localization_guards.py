@@ -222,6 +222,14 @@ GLOSSARY = {
     "codex",
     "cursor",
     "mcp",
+    # The window managers the AI page's migration prompt names
+    # (`ai.prompt.migrate.text`), the same class: proper nouns no
+    # locale translates. Trade: a stray English "rectangle" or
+    # "amethyst" in non-Latin prose is no longer caught.
+    "aerospace",
+    "amethyst",
+    "rectangle",
+    "yabai",
     "json",  # the profile file format, named in `profiles.broken.*`
     "kiwidesk",
     # The one edge both bars sit on (#1517): a product name, kept
