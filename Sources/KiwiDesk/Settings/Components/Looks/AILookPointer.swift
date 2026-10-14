@@ -10,7 +10,7 @@ struct AILookPointer: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
-        if SettingsDestination.ai.isReachable(
+        if Self.isDrawn(
             editingStoredProfile: model.editingStoredProfile
         ) {
             CrossReferenceRow(
@@ -19,6 +19,12 @@ struct AILookPointer: View {
                 destination: .ai
             )
         }
+    }
+
+    static func isDrawn(editingStoredProfile: Bool) -> Bool {
+        SettingsDestination.ai.isReachable(
+            editingStoredProfile: editingStoredProfile
+        )
     }
 
     static var prose: String {

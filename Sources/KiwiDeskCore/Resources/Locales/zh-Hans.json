@@ -13,7 +13,7 @@
   "ai.prompt.copy": "拷贝",
   "ai.prompt.copy.ax": "拷贝提示词：%1$@",
   "ai.prompt.look": "创建新造型",
-  "ai.prompt.look.caption": "氛围、颜色或墙纸的配色，以及栏的外观。",
+  "ai.prompt.look.caption": "氛围、颜色或墙纸的配色，以及栏的样子。",
   "ai.prompt.look.text": "帮我在 KiwiDesk 中打造我自己的造型。请一次只问一个问题：我想要什么氛围、用哪些颜色（或者提出根据截屏匹配我的墙纸）、栏应该是什么样子（屏幕边缘、厚度、玻璃还是不透明），以及哪些地方不想改动。每次更改都实时展示给我看。满意时我会说“保留”。",
   "ai.prompt.spaces": "设置我的空间",
   "ai.prompt.spaces.caption": "多少个空间、什么放在哪里，以及每个空间的布局。",

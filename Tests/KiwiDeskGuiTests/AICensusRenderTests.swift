@@ -108,7 +108,7 @@ struct AICensusRenderTests {
     }
 
     /// The look row leads the prompts (#1685 ▸ Ruling 6a), and its
-    /// prompt asks for a screenshot: the wallpaper is never read.
+    /// ruled text asks for a screenshot of the wallpaper.
     @Test("the look prompt leads and asks for a screenshot")
     @MainActor func lookPromptLeads() {
         LocalizationManager.shared.select("en")

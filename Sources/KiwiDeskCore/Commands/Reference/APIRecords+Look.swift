@@ -11,8 +11,8 @@ extension APIReference {
                 + "path's setter."
         ),
         "apply": APIRecord(
-            "Wears a look live; keep_settings or save_profile "
-                + "stores it.",
+            "Wears a look live, like a setter; it is not stored "
+                + "until kept.",
             .text("name")
         ),
         "save": APIRecord(

@@ -64,11 +64,61 @@ struct MCPLooksTests {
 
     @Test("every record argument is a property")
     func argumentsAreProperties() {
-        let names = Set(
-            MCPTools.lookEntries.flatMap(\.record.arguments).map(\.name)
-        )
+        let offered = MCPTools.offered(group: MCPTools.lookGroup)
+        let arguments = offered.flatMap(\.record.arguments)
+        let names = Set(arguments.map(\.name))
         #expect(!names.isEmpty)
         #expect(Set(Self.schema.keys) == names.union(["action"]))
+        // One name, one argument: the schema keeps the first.
+        for argument in arguments {
+            let first = arguments.first { $0.name == argument.name }
+            #expect(first?.kind == argument.kind, "\(argument.name)")
+        }
+        for argument in arguments {
+            let built = MCPToolSchema.property(for: argument, "")
+            #expect(
+                Self.schema[argument.name]?["type"] == built["type"],
+                "\(argument.name)"
+            )
+        }
+    }
+
+    @Test("a property's type and values come from the kind")
+    func propertyFollowsKind() {
+        let mode = APIArgument.choice("mode", LayoutMode.self)
+        guard
+            case .object(let fields) = MCPToolSchema.property(
+                for: mode,
+                ""
+            ),
+            case .array(let values)? = fields["enum"]
+        else {
+            Issue.record("a choice has no enum")
+            return
+        }
+        #expect(
+            values.compactMap(\.stringValue)
+                == LayoutMode.allCases.map(\.rawValue)
+        )
+        let flag = MCPToolSchema.property(for: .boolean("on"), "")
+        guard case .object(let flagFields) = flag else { return }
+        #expect(flagFields["type"] == .string("boolean"))
+    }
+
+    @Test("a later argument never skips an omitted earlier one")
+    func positionalGapIsRefused() {
+        let app = FakeApp()
+        let refused = app.tools.runGroupAction(
+            group: APIReference.coreGroup,
+            [
+                "action": .string("create_space"),
+                "space": .string("9"),
+                "scope": .string("profile"),
+            ]
+        )
+        guard case .object(let fields) = refused else { return }
+        #expect(fields["isError"] == .bool(true))
+        #expect(app.sent.isEmpty)
     }
 
     @Test("an action sends its command with the record's arguments")
@@ -124,5 +174,13 @@ struct MCPLooksTests {
         #expect(app.sent.last?.command == MCPTools.keepCommand)
         #expect(app.sent.last?.args == [.string(id)])
         #expect(MCPKeepTests.text(kept).contains("Home, Work"))
+    }
+}
+
+extension JSONValue {
+    /// An object's member, or nil for any other value.
+    fileprivate subscript(_ key: String) -> JSONValue? {
+        if case .object(let members) = self { return members[key] }
+        return nil
     }
 }

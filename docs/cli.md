@@ -199,11 +199,10 @@ before the command runs. `subscribe` and the Lua-only verbs are
 not offered.
 
 `looks` takes an `action` — each `look.*` verb that can be undone —
-and the verb's own arguments by name. Wearing a look is live and
-not kept, like any setting a command changes; deleting one goes
-through `run_destructive`. The AI page's **Make a new look** prompt
-has the AI app ask what you want and, to match your wallpaper, ask
-for a screenshot of it: KiwiDesk never reads the wallpaper itself.
+and that verb's arguments by name; `look.delete` goes through
+`run_destructive`. The AI page's **Make a new look** prompt offers to
+match your wallpaper from a screenshot you give the AI app: KiwiDesk
+never reads the wallpaper itself.
 
 A setting changed through MCP is live but not kept, and every
 command result after the change tells the AI app so, with where

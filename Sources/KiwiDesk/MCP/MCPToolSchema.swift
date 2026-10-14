@@ -10,6 +10,32 @@ enum MCPToolSchema {
         ])
     }
 
+    /// One record argument as a property: its JSON type from the
+    /// argument's kind, a choice's values as its enum.
+    static func property(
+        for argument: APIArgument,
+        _ description: String
+    ) -> JSONValue {
+        var fields: [String: JSONValue] = [
+            "description": .string(description)
+        ]
+        switch argument.kind {
+        case .number: fields["type"] = .string("number")
+        case .integer, .desktop: fields["type"] = .string("integer")
+        case .boolean: fields["type"] = .string("boolean")
+        case .text, .color: fields["type"] = .string("string")
+        case .space:
+            // A Space id is a string or a number (AGENTS.md §5).
+            fields["type"] = .array([.string("string"), .string("integer")])
+        case .choice(let choice):
+            fields["type"] = .string("string")
+            fields["enum"] = .array(choice.values.map(JSONValue.string))
+        case .window, .callback, .table:
+            break
+        }
+        return .object(fields)
+    }
+
     /// `command` and `args`, as `run` and `run_batch` take them.
     static let command: [String: JSONValue] = [
         "command": string("The command name, as list_commands shows it."),
