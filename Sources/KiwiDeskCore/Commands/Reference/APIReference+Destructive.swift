@@ -31,6 +31,9 @@ extension APIReference {
         "reset_layout_sizing",
         // A saved look is gone; nothing brings it back (#1685).
         "look.delete",
+        // Saved at once, and a shared shortcut leaves every profile
+        // holding it (#1685 ▸ Ruling 6c).
+        "shortcut.remove",
         ServiceManager.prepareRestartCommand,
     ]
 

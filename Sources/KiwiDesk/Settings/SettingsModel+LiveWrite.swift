@@ -84,6 +84,7 @@ extension SettingsModel {
             return
         }
         suppressDirty = true
+        let before = ruleReachStored
         ruleReachStored = core.ruleReachSnapshot()
         if let page = reachPage, let stored = ruleReachStored {
             let old = cleanConfig
@@ -94,6 +95,11 @@ extension SettingsModel {
                 over: old,
                 into: &cleanConfig
             )
+            if let before {
+                let moved = Self.movedShortcuts(before, stored, page: page)
+                Self.takeShortcuts(moved, into: &config.layers)
+                Self.takeShortcuts(moved, into: &cleanConfig.layers)
+            }
         }
         suppressDirty = false
         recomputeDirty()
@@ -128,6 +134,48 @@ extension SettingsModel {
             ) ?? stored.floatAutomatically.floatAutomaticallyBase
         if auto != old.floatAutomatically {
             config.floatAutomatically = auto
+        }
+    }
+
+    /// The shortcuts whose combo on `page` an outside write changed,
+    /// by `layer␟lua` key: the new combo, nil for an unbound one.
+    static func movedShortcuts(
+        _ before: RuleReachSnapshot,
+        _ after: RuleReachSnapshot,
+        page: String
+    ) -> [String: String?] {
+        let old = before.keyLayers.resolved(for: page)
+        let new = after.keyLayers.resolved(for: page)
+        var moved: [String: String?] = [:]
+        for key in Set(old.keys).union(new.keys) where old[key] != new[key] {
+            moved[key] = .some(new[key])
+        }
+        return moved
+    }
+
+    /// Lays `moved` over `layers`: a row's combo set, a row added, or
+    /// an unbound row dropped.
+    static func takeShortcuts(
+        _ moved: [String: String?],
+        into layers: inout [KeyLayer]
+    ) {
+        for (key, combo) in moved.sorted(by: { $0.key < $1.key }) {
+            let parts = RuleReachTable<String>.keyParts(key)
+            guard let at = layers.firstIndex(where: { $0.name == parts.layer })
+            else { continue }
+            let row = layers[at].bindings.firstIndex { $0.lua == parts.lua }
+            switch (combo, row) {
+            case (let combo?, let row?):
+                layers[at].bindings[row].combo = combo
+            case (let combo?, nil):
+                layers[at].bindings.append(
+                    KeyBinding(combo: combo, lua: parts.lua)
+                )
+            case (nil, let row?):
+                layers[at].bindings.remove(at: row)
+            case (nil, nil):
+                break
+            }
         }
     }
 

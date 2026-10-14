@@ -332,14 +332,17 @@ extension KiwiCore {
         for profile in pending { try profiles.write(profile) }
         if let sidecar { try guiConfigStore.save(sidecar) }
         refreshConfigIssues()
+        let keysChanged =
+            keysMoved
+            || snapshot.keyLayers.touched.values.contains { !$0.isEmpty }
+            || snapshot.storedKeyOverrides != snapshot.fileKeyOverrides
         guard origin == .settings else {
+            // Keys load only from files, so a written shortcut
+            // registers now; the rules stay as live holds them.
+            if keysChanged { reregisterStoredKeys() }
             onRulesKept()
             return
         }
-        refreshStructuredOverrides(
-            keys: keysMoved
-                || snapshot.keyLayers.touched.values.contains { !$0.isEmpty }
-                || snapshot.storedKeyOverrides != snapshot.fileKeyOverrides
-        )
+        refreshStructuredOverrides(keys: keysChanged)
     }
 }

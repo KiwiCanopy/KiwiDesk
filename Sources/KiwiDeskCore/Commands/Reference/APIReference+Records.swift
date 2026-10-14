@@ -40,6 +40,7 @@ extension APIReference {
         "kiwihub": kiwihubRecords,
         "look": lookRecords,
         "app_rule": appRuleRecords,
+        "shortcut": shortcutRecords,
     ]
 }
 
