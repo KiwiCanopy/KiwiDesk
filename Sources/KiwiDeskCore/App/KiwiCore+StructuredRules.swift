@@ -52,10 +52,24 @@ extension KiwiCore {
         }
         let profile = activeProfileOverrides()
         applyBehaviorOverrides(base: config, profile: profile)
-        guard changed, let lua = keys.lua else { return }
+        guard changed else { return }
+        reregisterStoredKeys(config, profile: profile)
+    }
+
+    /// Re-registers the shortcuts from the saved files alone, in
+    /// the running layer, touching no other family — the rule
+    /// refresh's tail and an outside shortcut write (#1685).
+    func reregisterStoredKeys(
+        _ config: GuiConfig? = nil,
+        profile: Profile? = nil
+    ) {
+        guard isGuiManaged,
+            let config = config ?? loadStructuredConfig(),
+            let lua = keys.lua
+        else { return }
         applyStructuredKeybindings(
             layers: config.layers,
-            profile: profile?.layers,
+            profile: (profile ?? activeProfileOverrides())?.layers,
             lua: lua,
             preferredLayer: keys.currentLayer
         )

@@ -74,6 +74,9 @@ public enum KeepOwner: String, Codable, Sendable, CaseIterable {
     case profile
     /// `gui.json`'s shared look, worn by every following profile.
     case sharedLook = "shared_look"
+    /// `gui.json`'s shared app rules, which every profile without
+    /// its own rule for that app follows (#1685 ▸ Ruling 6c).
+    case sharedRules = "shared_rules"
     /// `init.lua`, which no keep writes.
     case initLua = "init_lua"
     /// Nowhere a keep can reach.

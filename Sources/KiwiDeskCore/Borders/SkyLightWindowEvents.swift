@@ -2,11 +2,10 @@ import CoreFoundation
 import CoreGraphics
 import Darwin
 
-/// Process-lifetime WindowServer notification pump for focus
-/// borders (#285 Tier 2). Registration has no reliable public
-/// unregister seam, so callbacks never retain a `BorderManager`;
-/// the current manager is a weak sink replaceable after an
-/// in-process stop/start.
+/// Process-lifetime WindowServer notification pump (#285 Tier 2).
+/// Registration has no reliable public unregister seam, so
+/// callbacks never retain their sink, the one `WindowServerWatch`
+/// (#2275), replaceable after an in-process stop/start.
 @MainActor
 final class SkyLightWindowEvents {
     enum Kind: UInt32, CaseIterable {
@@ -64,15 +63,12 @@ final class SkyLightWindowEvents {
         requestNotificationsSymbol.function
     }
 
-    private weak var manager: BorderManager?
+    private weak var sink: WindowServerWatch?
     private let connection: SkyLight.ConnectionID
     private var lastRequested: Set<WindowID>?
     private lazy var deliveryQueue = SkyLightWindowEventQueue {
         [weak self] event in
-        self?.manager?.handleSkyLightEvent(
-            event.kind,
-            window: event.window
-        )
+        self?.sink?.handle(event.kind, window: event.window)
     }
 
     private init?() {
@@ -96,13 +92,13 @@ final class SkyLightWindowEvents {
         )
     }
 
-    func attach(_ manager: BorderManager) {
-        self.manager = manager
+    func attach(_ sink: WindowServerWatch) {
+        self.sink = sink
     }
 
     /// Requests notifications for these windows. The private API's
     /// replacement-vs-additive semantics are undocumented; stale
-    /// deliveries are dropped by the manager, and an empty request
+    /// deliveries are dropped by the watch, and an empty request
     /// is a best-effort clear, not a teardown guarantee.
     func watch(_ windows: Set<WindowID>) -> Bool {
         if lastRequested == windows { return true }

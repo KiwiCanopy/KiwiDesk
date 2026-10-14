@@ -48,9 +48,12 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDesk/Settings/SettingsModel+LiveWrite.swift":
             (
-                1,
+                2,
                 "draft adopts a top-up's rows: refuses an action the"
-                    + " layer already runs (DesktopShortcutDraftTests)"
+                    + " layer already runs (DesktopShortcutDraftTests);"
+                    + " and an outside shortcut write's rows: one row per"
+                    + " action by sameAction, the written chord taken"
+                    + " from any other row (RuleKeepDraftTests)"
             ),
         "KiwiDesk/Settings/SettingsModel+Reset.swift":
             (

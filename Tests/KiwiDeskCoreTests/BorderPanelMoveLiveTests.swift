@@ -63,7 +63,7 @@ struct BorderPanelMoveLiveTests {
             moves += 1
             return true
         }
-        border.watchOverride = { _ in true }
+        border.watch.override = { _ in true }
         let spec: (CGFloat) -> BorderManager.Spec = { x in
             BorderManager.Spec(
                 window: WindowID(9),

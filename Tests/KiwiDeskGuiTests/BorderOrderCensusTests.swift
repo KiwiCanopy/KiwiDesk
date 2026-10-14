@@ -26,8 +26,9 @@ struct BorderOrderCensusTests {
                 + "pass or no WindowServer stream"
         ),
         "BorderManager+SkyLight.swift": (
-            2,
-            "the WindowServer reorder and unhide events"
+            1,
+            "the watch's restack phase: the WindowServer reorder "
+                + "and unhide events (#2275)"
         ),
         "BorderManager+DeadEnd.swift": (1, "the transient dead-end ring"),
     ]
@@ -83,29 +84,20 @@ struct BorderOrderCensusTests {
             ],
             "found \(sites.map(\.site))"
         )
-        // The restack tee is wired at boot, which no test core
-        // runs, and fires AFTER the ring's own order in both arms,
-        // or the ring lands under the plate.
-        let seams = try SourceScan.strippedSource(
+        // The plate restacks AFTER the ring's own order — the
+        // watch's consumer order, held by `WindowServerWatchTests`
+        // ▸ `phaseOrder`, or the ring lands under the plate — and
+        // its restack hook is the one the core connects.
+        let wiring = try SourceScan.strippedSource(
             at: Self.root.appendingPathComponent(
-                "Sources/KiwiDeskCore/App/KiwiCore+BootSeams.swift"
+                "Sources/KiwiDeskCore/App/KiwiCore+WindowServer.swift"
             )
         ).filter { !$0.isWhitespace }
         #expect(
-            seams.contains(
-                "borders.onWindowRestacked={[weakself]idin"
-                    + "self?.visionTargetRestacked(id)}"
+            wiring.contains(
+                "restack:{[weakself]idinself?.visionTargetRestacked(id)}"
             )
         )
-        let events = try SourceScan.strippedSource(
-            at: Self.root.appendingPathComponent(
-                "Sources/KiwiDeskCore/Borders/BorderManager+SkyLight.swift"
-            )
-        ).filter { !$0.isWhitespace }
-        let restack =
-            "overlays[id]?.order(relativeTo:id.raw)"
-            + "onWindowRestacked(id)"
-        #expect(events.components(separatedBy: restack).count == 3)
         // The stand-down is the shelf's verdict, filed by the one
         // bar refresh, never a read of the plate's own.
         let shelf = try SourceScan.strippedSource(

@@ -77,7 +77,8 @@ extension MCPTools {
         let text = MCPWording.kept(
             kept,
             profile: data["profile"]?.stringValue,
-            followers: data["followers"]
+            followers: data["followers"],
+            ruleProfiles: data["rule_profiles"]
         )
         return decorated(Self.result(text, structured: data))
     }

@@ -123,7 +123,7 @@ struct FloatingMarkOverlayTests {
         )
         core.state.setFloating(WindowID(1), true)
         core.updateStickyMarks()
-        #expect(core.borders.markTracked == [WindowID(1)])
+        #expect(core.windowServer.requested(by: .mark) == [WindowID(1)])
         #expect(core.stickyMarks.markedWindows == [WindowID(1)])
     }
 }

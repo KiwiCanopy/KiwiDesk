@@ -25,7 +25,7 @@ public final class KiwiCore {
     /// Glyph-vs-image icon decisions: bars, shortcuts panel (#294).
     public let appFont = AppFontResolver()
     /// Focus rings (#278) and sticky marks (#414), driven by `retile()`.
-    public let borders = BorderManager()
+    public let borders = BorderManager(watch: WindowServerWatch())
     public let stickyMarks = StickyMarkManager()
     /// KiwiVision's plates (#2103), driven with the rings.
     public let vision = VisionManager()
@@ -312,15 +312,15 @@ public final class KiwiCore {
     /// inside a keybinding closure) to log-only.
     var typoIssues: [ConfigIssue]?
     /// Fired whenever `configIssues` changes, back to empty too.
-    public var onConfigIssuesChange:
-        @MainActor ([ConfigIssue])
-            -> Void = { _ in }
+    public var onConfigIssuesChange: ConfigIssuesChanged = { _ in }
     /// Fired on every live-profile write from outside Settings.
     public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
     public var onShortcutsDropped: ShortcutsDropped = { _ in }
     public var onShortcutsAdded: ShortcutsAdded = { _ in }
     /// A verb saved or deleted a look (#1685): Settings re-reads.
     public var onLookLibraryChanged: @MainActor () -> Void = {}
+    /// An outside rule write landed (#1685): a draft adopts it.
+    public var onRulesKept: @MainActor () -> Void = {}
 
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18), argued
     /// as a bundle in `KiwiCore+LuaAPI`, the `openOrFocus` shape.

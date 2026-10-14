@@ -24,7 +24,14 @@ extension KiwiCore {
             KeepPointer.path(_:)
         )
         let judge =
-            touched.isEmpty && watched.isEmpty ? nil : keepJudge(live: after)
+            touched.isEmpty && watched.isEmpty
+            ? nil
+            : keepJudge(
+                live: after,
+                judgingRules: (touched + watched).contains(
+                    where: Self.isRulePath
+                )
+            )
         response.changes = ChangeReport(
             profile: profiles.currentName,
             touched: touched.compactMap { judge?.verdict(of: $0) },
@@ -46,7 +53,51 @@ extension KiwiCore {
             KeepRoot.settings: tiler.settings.keepJSON ?? .null,
             KeepRoot.spaceModes: .object(modes),
             KeepRoot.appWide: appWide.groupsJSON,
+            KeepRoot.appRules: Self.appRuleJSON(state.appRules),
+            KeepRoot.floatRules: Self.floatRuleJSON(
+                eventLoop.floatRules.rawRules
+            ),
+            KeepRoot.floatAutomatically: .bool(
+                eventLoop.floatRules.guess.enabled
+            ),
         ])
+    }
+
+    /// `page`'s rules as the files resolve them.
+    static func storedRuleDoc(
+        _ rules: RuleReachSnapshot,
+        page: String
+    ) -> [String: JSONValue] {
+        let floats = rules.floatRules.resolved(for: page).values.flatMap { $0 }
+        let auto = rules.floatAutomatically.resolved(
+            RuleReachTable<Bool>.floatAutomaticallyKey,
+            for: page
+        )
+        return [
+            KeepRoot.appRules: appRuleJSON(rules.appRules.resolved(for: page)),
+            KeepRoot.floatRules: floatRuleJSON(floats),
+            KeepRoot.floatAutomatically: .bool(
+                auto ?? rules.floatAutomatically.floatAutomaticallyBase
+            ),
+        ]
+    }
+
+    /// The app rules as the keep document carries them.
+    static func appRuleJSON(_ rules: [String: SpaceID]) -> JSONValue {
+        .object(rules.mapValues { .string($0.raw) })
+    }
+
+    /// The float rules as an object, each rule a leaf of its own —
+    /// an array would diff as one leaf.
+    static func floatRuleJSON(_ rules: [String]) -> JSONValue {
+        .object(
+            Dictionary(
+                rules.map {
+                    (FloatRules.normalizedRule($0), JSONValue.bool(true))
+                },
+                uniquingKeysWith: { first, _ in first }
+            )
+        )
     }
 
     /// A Space made or dropped is no change of its layout: a mode
@@ -66,24 +117,38 @@ extension KiwiCore {
     /// leaf is to be judged — a caller holding leaves, never the
     /// switch path (profiles.md ▸ A change report reads one
     /// judgement, beside #1245).
-    func keepJudge(live: JSONValue? = nil) -> KeepJudge {
+    /// `judgingRules` reads the rule snapshot — every profile and
+    /// `gui.json` — only where a rule leaf is judged.
+    func keepJudge(
+        live: JSONValue? = nil,
+        judgingRules: Bool = true
+    ) -> KeepJudge {
         let managed = isGuiManaged
         let stored =
             managed
             ? profiles.currentName.flatMap { try? profiles.read(name: $0) }
             : nil
         var storedDoc: JSONValue?
+        let rules =
+            stored == nil || !judgingRules
+            ? nil : ruleReachSnapshot(reading: stored)
         if let stored {
             var modes: [String: JSONValue] = [:]
             for id in stored.declaredSpaces {
                 let mode = stored.spaceModes[id] ?? .bsp
                 modes[id.raw] = .string(mode.rawValue)
             }
-            storedDoc = .object([
+            var doc: [String: JSONValue] = [
                 KeepRoot.settings: resolvedSettings(of: stored).keepJSON
                     ?? .null,
                 KeepRoot.spaceModes: .object(modes),
-            ])
+            ]
+            // The rules as the files resolve them, from the one
+            // snapshot the owner is judged by too (#1685 ▸ 6c).
+            if let rules, let page = profiles.currentName {
+                doc.merge(Self.storedRuleDoc(rules, page: page)) { $1 }
+            }
+            storedDoc = .object(doc)
         }
         return KeepJudge(
             guiManaged: managed,
@@ -91,6 +156,8 @@ extension KiwiCore {
             follows: stored.map(followsSharedLook) ?? false,
             live: live ?? keepDocument,
             stored: storedDoc,
+            rules: rules,
+            page: profiles.currentName,
             liveSettings: tiler.settings,
             liveSpaces: Set(state.workspaces.allSpaces.map(\.id))
         )
@@ -108,6 +175,10 @@ struct KeepJudge {
     let live: JSONValue
     /// The live profile's keep document as stored; nil with none.
     let stored: JSONValue?
+    /// The rule families across the files, read once; nil where
+    /// `gui.json` does not own them.
+    let rules: RuleReachSnapshot?
+    let page: String?
     let liveSettings: TilingSettings
     let liveSpaces: Set<SpaceID>
 
@@ -142,6 +213,9 @@ struct KeepJudge {
         case KeepRoot.appWide?: known = !rest.isEmpty
         case KeepRoot.settings?: known = !rest.isEmpty
         case KeepRoot.spaceModes?: known = rest.count == 1
+        case KeepRoot.appRules?, KeepRoot.floatRules?:
+            known = rest.count == 1
+        case KeepRoot.floatAutomatically?: known = rest.isEmpty
         default: known = false
         }
         guard known else { return leaf(.none, .unknown) }
@@ -157,6 +231,19 @@ struct KeepJudge {
         if path.first == KeepRoot.spaceModes {
             return declared.contains(SpaceID(rest[0]))
                 ? leaf(.profile) : leaf(.none, .temporarySpace)
+        }
+        if path.first == KeepRoot.appRules {
+            if let space = liveValue?.stringValue,
+                !declared.contains(SpaceID(space))
+            {
+                return leaf(.none, .temporarySpace)
+            }
+            return ruleLeaf(path, leaf)
+        }
+        if path.first == KeepRoot.floatAutomatically
+            || path.first == KeepRoot.floatRules
+        {
+            return ruleLeaf(path, leaf)
         }
         if namesTemporarySpace(rest, declared: declared) {
             return leaf(.none, .temporarySpace)
@@ -191,6 +278,31 @@ struct KeepJudge {
 }
 
 extension KeepJudge {
+    /// A rule leaf's owner, read off the reach the keep's write
+    /// takes, so the report and the keep never disagree (#1685).
+    func ruleLeaf(
+        _ path: [String],
+        _ leaf: (KeepOwner, NotKeepable?) -> TouchedLeaf
+    ) -> TouchedLeaf {
+        guard let rules, let page else { return leaf(.none, .notWritten) }
+        let shared: Bool
+        switch path.first {
+        case KeepRoot.appRules?:
+            shared = rules.appRules.keepIsShared(path[1], editing: page)
+        case KeepRoot.floatRules?:
+            shared = rules.floatRules.keepIsShared(
+                RuleReachTable<[String]>.app(of: path[1]),
+                editing: page
+            )
+        default:
+            shared = rules.floatAutomatically.keepIsShared(
+                RuleReachTable<Bool>.floatAutomaticallyKey,
+                editing: page
+            )
+        }
+        return leaf(shared ? .sharedRules : .profile, nil)
+    }
+
     /// Whether a settings leaf belongs to a look — under one of
     /// the look's styling or colour paths.
     static func isLookLeaf(_ path: [String]) -> Bool {
@@ -206,4 +318,7 @@ enum KeepRoot {
     static let settings = "settings"
     static let spaceModes = "space_modes"
     static let appWide = "app_wide"
+    static let appRules = "app_rules"
+    static let floatRules = "float_rules"
+    static let floatAutomatically = "float_automatically"
 }

@@ -1140,6 +1140,19 @@ re-reads as stored, never what it meant to write. `look.apply` is a
 setter in this sense and paints live only; the tour's click writes
 through because the tour has no keep (▸ *The tour's look is
 written through, and the tour owns its undo*).
+
+A kept app rule lands where Settings ▸ App Rules would put it: a
+rule the live profile already holds keeps the reach it has, and a
+new one goes into the shared rules every profile without its own
+follows (▸ the *Applies to* checklist; #1685 ▸ Ruling 6c). It
+takes that page's own door rather than the live-profile one, since
+a shared rule's reach spans files the live-profile door cannot
+write; an open Settings draft still takes it.
+Writing a new rule into the live profile alone would make an AI
+app's rules quietly profile-local while the page's are shared, and
+a user switching profiles would find the rule gone. The keep
+answers every profile whose rule it changed, so the AI app can say
+so.
 :::
 
 ### The landing page argues from the papercut, not from the mess

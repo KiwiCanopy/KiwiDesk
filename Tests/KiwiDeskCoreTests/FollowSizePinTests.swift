@@ -101,7 +101,7 @@ struct FollowSizePinTests {
                 cornerStyle: .rounded
             )
         ])
-        border.skyLightActive = false
+        border.watch.setActive(false)
         border.isAnimating = { _ in false }
         let echo = CGRect(x: 8, y: 8, width: 830, height: 300)
         border.follow(

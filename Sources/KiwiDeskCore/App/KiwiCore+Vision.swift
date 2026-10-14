@@ -80,15 +80,16 @@ extension KiwiCore {
     func updateVision(reassertOrder: Bool = false) {
         guard
             vision.isOn || vision.hasShownPlates
-                || !borders.visionTracked.isEmpty
+                || !windowServer.requested(by: .vision).isEmpty
         else { return }
         var request = visionRequest()
         // Watched whether or not a ring or a mark asks (#2103).
-        borders.setVisionTracked(
+        windowServer.request(
             vision.isOn
-                ? Set(request.target.map { [WindowID($0)] } ?? []) : []
+                ? Set(request.target.map { [WindowID($0)] } ?? []) : [],
+            for: .vision
         )
-        request.tracked = borders.skyLightActive
+        request.tracked = windowServer.isActive
         vision.sync(request, reassert: reassertOrder)
     }
 
@@ -150,7 +151,7 @@ extension KiwiCore {
             target: target,
             below: ring,
             standDown: vision.standDown,
-            tracked: borders.skyLightActive,
+            tracked: windowServer.isActive,
             dim: CGFloat(appWide.visionDim / 100),
             blur: kiwiVisionDrawsBlur
         )

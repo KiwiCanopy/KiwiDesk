@@ -38,9 +38,8 @@ public enum FollowSource {
     /// (that is the mechanism — a guard bolted on beside the
     /// call in one `follow` body is still possible, so review
     /// for it). Each manager passes its own predicates
-    /// (`usesWindowServerTracking` vs the broader
-    /// `markUsesWindowServerTracking`); only the decision is
-    /// shared.
+    /// (each asks `WindowServerWatch.hears` under its own
+    /// consumer); only the decision is shared.
     public func renderFrame(
         reported: CGRect,
         pin: SizePin?,

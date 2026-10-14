@@ -237,6 +237,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.onLookLibraryChanged = { [weak self] in
             self?.dashboardIfCreated?.refreshLooks()
         }
+        core.onRulesKept = { [weak self] in
+            self?.dashboardIfCreated?.adoptRuleKeep()
+        }
         wireBarMenus()
         wireWhatsNewTrail()
         core.onConfigIssuesChange = { [weak self] issues in

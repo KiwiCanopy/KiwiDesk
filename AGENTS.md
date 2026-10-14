@@ -971,10 +971,12 @@ Touching `Config`, `Profiles`, `Commands`.
   one `writeThroughLiveProfile` door every write of the live profile from
   outside Settings takes, its draft policy ruled once in
   `SettingsModel.adoptLiveWrite` (#1720, #1518, `ShelfPaintTests`,
-  `BarMenuLandingTests`)
+  `BarMenuLandingTests`) — save a rule write, which takes `saveRuleReach`
+  with the `.outside` origin and `SettingsModel.adoptRuleKeep` (#1685,
+  `AppRuleKeepTests`, `RuleKeepDraftTests`)
 - a change report reads one judgement — where a leaf is kept, why not and
   whether it already is answered by the one `KeepJudge` over one read of the
-  stored profile, taken only where a caller holds leaves (`ChangeReportTests`,
+  stored profile and the rule snapshot, taken only where a caller holds leaves (`ChangeReportTests`,
   `KeepSettingsEdgeTests`), a keep landing the shared look without repainting
   live, and a live store a verb writes joining the keep document or reporting
   nothing, which is review's (#1685)
@@ -1601,8 +1603,8 @@ Touching `Borders`, `Vision`.
 
 - a KiwiVision plate stacks under its target's behind ring through
   the one `ringPanel(of:)` reading, re-stacks only through the
-  ring's `ordersOverlay` gate and the post-ring `onWindowRestacked`
-  tee, keeps its target watched with borders off, reads the
+  ring's `ordersOverlay` gate and the watch's post-ring restack,
+  keeps its target watched with borders off, reads the
   shelf's stand-down verdict, stands its blur down at the one
   `kiwiVisionDrawsBlur` door every reader of the drawn blur takes,
   takes every live app-wide change through the one
@@ -1612,6 +1614,10 @@ Touching `Borders`, `Vision`.
   carries (#2103, `BorderOrderCensusTests`, `KiwiVisionCoreTests`,
   `VisionManagerTests`, `OverlayGlassGateTests`,
   `VisionAppearanceSeamTests`, `KiwiVisionStoredTests`)
+- an overlay hearing WindowServer's per-window events connects to the one
+  `WindowServerWatch` under its own `Consumer` case, whose position is its
+  place in the fan-out, and calls no `SkyLightWindowEvents` door itself
+  (#2275, `WindowServerWatchTests`, `WindowServerWatchSeamTests`)
 ### [gui](.claude/rules/gui.md)
 
 Touching `Sources/KiwiDesk` (the GUI).

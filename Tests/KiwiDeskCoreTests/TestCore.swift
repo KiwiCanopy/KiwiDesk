@@ -83,10 +83,12 @@ func makeTestCore(
     // `KIWIDESK_NO_WS_TRACKING` QA lever from the real process
     // environment, so a developer who has it exported would get a
     // different core in every test. Inert today — the private
-    // runtime never starts under test, so `skyLightActive` is
+    // runtime never starts under test, so `isActive` is
     // already false — but neutralized here so it stays that way
     // if the lever ever gains a second effect.
-    core.borders.windowServerTrackingDisabled = false
+    core.windowServer.trackingDisabled = false
+    // A frame event fed through the core reads no live bounds.
+    core.windowServer.readWindowBounds = { _ in nil }
     // A front-order ring reads its target's level from WindowServer
     // on every sync otherwise (#1868).
     core.borders.windowLevel = { _ in nil }

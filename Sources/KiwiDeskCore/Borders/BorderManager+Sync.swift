@@ -43,7 +43,7 @@ extension BorderManager {
         }
         // Before the loop, so the order policy reads this sync's
         // tracking verdict; the set equals the one after it.
-        updateSkyLightSubscription(wanted)
+        requestRingTracking(wanted)
         for spec in desired {
             specs[spec.window] = spec
             let overlay = overlay(for: spec.window)
