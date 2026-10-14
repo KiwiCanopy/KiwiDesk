@@ -4055,7 +4055,7 @@ window verbs. Its float rules work the same way yours do, so a
 `float_rules` entry can keep it out of the layout permanently.
 KiwiDesk's *other* windows are not managed: the setup tour and
 the Config Issues window are tracked but always floating, and its
-panels — the ⌃⌥K panel, drag/drop overlays, App Bar
+panels — KiwiHub, drag/drop overlays, App Bar
 overlays and focus borders — are ignored outright and appear in
 no bar and no window list KiwiDesk publishes.
 
@@ -4814,11 +4814,6 @@ end)
 :::unreleased
 ### kiwihub.show
 
-Replaces `show_shortcuts`, `show_jump_to_window` and
-`show_layout_picker`, which are now refused with a Config Issue
-naming this verb. A shortcut made in Settings is updated for you;
-a call in your `init.lua` needs the new verb.
-
 **Expects:** a side: `"windows"`, `"shortcuts"` or `"layouts"`.
 
 **Does:** opens **KiwiHub** on that side, switches to it from
@@ -4889,6 +4884,16 @@ KiwiDesk.bind("alt+space", function()
     kiwihub.show("windows")
 end)
 ```
+:::
+
+:::unreleased
+### Retired panel verbs
+
+`show_shortcuts`, `show_jump_to_window` and `show_layout_picker`
+are retired for [kiwihub.show](#kiwihubshow). A call in
+`init.lua` is reported in Config Issues, naming `kiwihub.show`;
+over the CLI it fails with `<verb> was retired — use
+kiwihub.show`. A shortcut made in Settings is updated for you.
 :::
 
 ### open_settings

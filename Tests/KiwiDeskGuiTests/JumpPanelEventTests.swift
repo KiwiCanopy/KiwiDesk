@@ -1,4 +1,5 @@
 import AppKit
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk

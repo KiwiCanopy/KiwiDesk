@@ -230,6 +230,8 @@ GLOSSARY = {
     "kiwishelf",
     # The focus mode (#2103): a product name like KiwiShelf.
     "kiwivision",
+    # The key panel (#2265): a product name like KiwiShelf.
+    "kiwihub",
     # Apple's `Liquid Glass`, a product name (see PRODUCT_NAMES).
     # Trade: a stray "glass" in non-Latin prose is no longer caught.
     "liquid",

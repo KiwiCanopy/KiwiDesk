@@ -33,8 +33,10 @@ struct ShowShortcutsClassifyTests {
 
     @Test("The catalog row and the Core verb share one Lua body")
     func luaMatchesCoreVerb() {
+        // Spelled, not derived: both sides of a derived pair are
+        // one value by construction (#2265).
         #expect(
-            ShortcutsOpenBinding.lua == KiwiHubSide.shortcuts.lua
+            ShortcutsOpenBinding.lua == "kiwihub.show(\"shortcuts\")"
         )
         #expect(
             KeybindingCatalog.showShortcuts.lua

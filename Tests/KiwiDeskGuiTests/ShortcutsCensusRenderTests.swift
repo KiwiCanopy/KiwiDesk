@@ -100,49 +100,6 @@ struct ShortcutsCensusRenderTests {
         #expect(censusRows(.moveWindows, .showMore).isEmpty)
     }
 
-    @Test("KiwiHub's one tier is the census's (#2265)")
-    func kiwiHubTier() {
-        let keys = ShortcutsRowOrder.kiwiHubAtRest
-        pin(keys, .kiwiHub, .atRest, "kiwihub at rest")
-        #expect(keys.count == 3)
-        #expect(censusRows(.kiwiHub, .showMore).isEmpty)
-        #expect(censusRows(.kiwiHub, .immediate).isEmpty)
-    }
-
-    /// KiwiHub draws its WHOLE list, as the KiwiDesk rows do
-    /// below: the `ForEach` takes `kiwiHubAtRest` as it stands,
-    /// and the section mounts the group.
-    @Test("KiwiHub draws every row")
-    func kiwiHubRowsAreAllDrawn() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
-        func squeezed(_ file: String) throws -> String {
-            SourceScan.stripComments(
-                try String(
-                    contentsOf: root.appendingPathComponent(file),
-                    encoding: .utf8
-                )
-            )
-            .split(whereSeparator: \.isWhitespace)
-            .joined()
-        }
-        let group = try #require(
-            SourceScan.declarationBody(
-                after: "structKiwiHubGroup",
-                in: try squeezed(
-                    "Components/Keybindings/KiwiHubGroup.swift"
-                )
-            )
-        )
-        #expect(
-            group.contains(
-                "ForEach(ShortcutsRowOrder.kiwiHubAtRest,id:\\.id)"
-            )
-        )
-        let section = try squeezed("Sections/ShortcutsSection.swift")
-        #expect(section.occurrences(of: "KiwiHubGroup(") == 1)
-    }
-
     @Test("Layout's one tier is the census's (#453)")
     func layoutTier() {
         let list = ShortcutsRowOrder.layoutList

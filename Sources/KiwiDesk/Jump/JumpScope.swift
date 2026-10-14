@@ -6,12 +6,12 @@ import SwiftUI
 /// switcher's list, the shortcuts sheet and the layout picker's
 /// tiles, one field above all three, in the order of their keys
 /// J K L. ⇥ steps forward and ⇧⇥ back, wrapping, and each side's
-/// own shortcut reaches it while the panel is up.
-enum JumpScope: CaseIterable, Equatable {
-    case windows
-    case shortcuts
-    case layouts
+/// own shortcut reaches it while the panel is up. One enum with
+/// Core's, so the panel and `kiwihub.show` cannot map a side two
+/// ways.
+typealias JumpScope = KiwiHubSide
 
+extension KiwiHubSide {
     /// The side ⇥ (forward) or ⇧⇥ reaches, wrapping.
     func stepped(forward: Bool) -> JumpScope {
         let all = Self.allCases
@@ -52,25 +52,6 @@ enum JumpScope: CaseIterable, Equatable {
             return L("layout_picker.panel.ax_label", "Layout picker")
         }
     }
-
-    /// The Core side this scope is — the one copy of the mapping
-    /// (#2265).
-    var side: KiwiHubSide {
-        switch self {
-        case .windows: return .windows
-        case .shortcuts: return .shortcuts
-        case .layouts: return .layouts
-        }
-    }
-
-    /// The scope `kiwihub.show` names, read off `side`.
-    init(_ side: KiwiHubSide) {
-        self = Self.allCases.first { $0.side == side } ?? .windows
-    }
-
-    /// The Lua the side's own shortcut runs, whose live chord the
-    /// switch prints (#2245).
-    var lua: String { side.lua }
 
     /// The field's placeholder and its VoiceOver name.
     @MainActor var fieldName: String {

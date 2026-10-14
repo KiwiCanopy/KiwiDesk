@@ -832,6 +832,18 @@ right, and which silently becomes a lie the first time a
 actively encourages that rename, so the bump is the reader's
 responsibility here.
 
+**A long-lived release branch keeps every `currentFormat` above
+`main`'s (#2265).** `needsMigration` stops at the stamp, and a
+step with no floor of its own runs only below it — so a 2.x patch
+on `main` that takes a number the release branch already spent
+stamps its files past the release branch's step, which then never
+runs there. At each `main` → release sync, a bump on either side
+moves the release branch's `GuiConfig`, `Profile`, `SetupBundle`,
+`PaletteDocument` and `LookDocument` formats above `main`'s, and
+the merge re-numbers the release branch's steps rather than
+reusing a number `main` stamped. Nothing guards it: the two
+branches are never in one tree.
+
 When removing an old migration from `ConfigMigration`, the removal
 advances the supported format floor: files below the floor are
 refused explicitly rather than silently failing (#902).

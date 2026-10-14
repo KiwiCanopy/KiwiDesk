@@ -1010,6 +1010,9 @@ Touching `Config`, `Profiles`, `Commands`.
   `LookKeysCensusTests` notices and review must pay — a new `AnimationSettings`
   field joining every look by derivation while a bundled look and the tour's
   paint carry styling alone (#2176, `LookMotionTests`)
+- a long-lived release branch keeps every `currentFormat` above `main`'s at
+  each sync, or a `main` patch stamping the same number skips the release
+  branch's step — review's, the two branches never sharing a tree (#2265)
 - `SetupBundleTests` holds the bundle's shape both ways by reflection and
   `SetupBundleArtifactTests` the register, but neither sees a store that never
   joined (#606)

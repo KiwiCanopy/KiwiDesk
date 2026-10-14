@@ -152,7 +152,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         // ⌃⌥J/K/L open KiwiHub on a side (#2246, #2265).
         core.uiBridge.onKiwihubShow = { [weak jumpPanel] side in
-            jumpPanel?.toggle(JumpScope(side))
+            jumpPanel?.toggle(side)
         }
         // Opens or raises Settings without toggling (#678).
         core.uiBridge.onOpenSettings = { [weak self] in

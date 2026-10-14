@@ -7276,7 +7276,7 @@ system already holds.
 
 The companion affordance: **"Open Settings" is bindable**
 (`KiwiDesk.open_settings()`, offered under Shortcuts & Gestures
-▸ General) — a window that lives among the user's tiled windows
+▸ Open applications ▸ KiwiDesk) — a window that lives among the user's tiled windows
 earns a keyboard road back. Which chord it ships on is the
 seeded ladder's ruling ([Shortcuts](#shortcuts), #1381). It
 opens or raises, never
@@ -7285,7 +7285,7 @@ the save pill narrates. The key spelling follows the verb rather
 than the label — `open_settings`, matching
 `keybinding.open_settings`, while the row reads "Open
 Settings" — and it is a different word from its sibling
-`show_shortcuts` on purpose, one toggling a panel and the other
+`kiwihub.show` on purpose, one toggling a panel and the other
 opening a window.
 
 ### Where the app lives is taught inside the tour's own window
@@ -10804,7 +10804,7 @@ such a surface ships.
 
 **The shortcuts sheet never lists the key panel's own openers.**
 The three bindings that open the panel's sides — ⌃⌥J, ⌃⌥K
-(`show_shortcuts`, seeded per layer, #602) and ⌃⌥L — are dropped
+(seeded per layer, #602) and ⌃⌥L, `kiwihub.show`'s — are dropped
 from the builder's working set and render in no section: the one
 deliberate exception to the sheet's "no bound shortcut is ever
 invisible" contract. Their home is the side switch, which prints
@@ -10949,7 +10949,10 @@ and VoiceOver already use, and the panel's container speaks the
 product name around them, so a side announces "KiwiHub, window
 switcher". The Shortcuts page groups the three rows under one
 KiwiHub card, J K L in key order, because the panel is the topic
-and the trio reads as one.
+and the trio reads as one. Open applications ▸ KiwiDesk keeps
+Open Settings under its subheading, one row and all: there the
+heading says whose window the row opens, among rows that open
+other apps, which a lone row still needs.
 
 The three `show_*` verbs became `kiwihub.show(side)`, the side a
 typed argument read off `KiwiHubSide`. Only `show_shortcuts` had
@@ -11536,7 +11539,8 @@ overlooked at the top of the page.
 General drawer — two rows, Show shortcuts panel and Open
 Settings — folds into Open applications under a "KiwiDesk"
 subheading: both open something by key, and a two-row drawer was
-a disclosure guarding almost nothing. Focus and Move windows stay
+a disclosure guarding almost nothing. (Show shortcuts panel has
+since moved to the KiwiHub group, #2265.) Focus and Move windows stay
 apart although they share keys: merged they run 17–23 rows, and
 the header is what tells "where focus goes" from "where a window
 goes" on the same arrows. The section keeps its name: *Controls*
