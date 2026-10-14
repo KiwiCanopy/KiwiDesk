@@ -25,14 +25,20 @@ final class MCPKeepLedger {
     /// reload, Settings or another tool — and is told once and
     /// forgotten; a leaf Core calls stored with this session's
     /// value was kept — a keep, a Save or a set-back — and leaves
-    /// silently.
-    func absorb(_ report: ChangeReport) {
+    /// silently. A `replacing` request — a command Core registers
+    /// destructive, such as a load — sets no value of the
+    /// session's: what it touched is judged like any other change.
+    func absorb(_ report: ChangeReport, replacing: Bool = false) {
         profile = report.profile
-        for leaf in report.touched {
-            leaves[leaf.id] = leaf
-            ownValues[leaf.id] = .some(leaf.value)
+        if !replacing {
+            for leaf in report.touched {
+                leaves[leaf.id] = leaf
+                ownValues[leaf.id] = .some(leaf.value)
+            }
         }
-        for leaf in report.watched where leaves[leaf.id] != nil {
+        let judged =
+            replacing ? report.touched + report.watched : report.watched
+        for leaf in judged where leaves[leaf.id] != nil {
             if let mine = ownValues[leaf.id], mine != leaf.value {
                 replaced.append(leaf.id)
                 forget(leaf.id)
@@ -72,13 +78,19 @@ final class MCPKeepLedger {
 
     /// What every result reports while anything is outstanding: the
     /// live, unkept leaves with their owner, the pending count, the
-    /// unkeepable ones and — once — what a load replaced. Nil where
-    /// there is nothing to say.
+    /// unkeepable ones — once where no later state lifts the
+    /// refusal — and, once, what was replaced. Nil where there is
+    /// nothing to say.
     func status() -> (text: String, structure: JSONValue)? {
         let pending = pending
         let refused = refused
         let replaced = replaced
         self.replaced = []
+        // A refusal no later state lifts is told once, then dropped.
+        for leaf in refused
+        where !(leaf.notKeepable?.isLiftable ?? true) {
+            forget(leaf.id)
+        }
         guard !pending.isEmpty || !refused.isEmpty || !replaced.isEmpty
         else { return nil }
         var lines: [String] = []

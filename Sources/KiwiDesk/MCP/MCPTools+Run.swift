@@ -129,7 +129,12 @@ extension MCPTools {
         request.keepWatch = watch.isEmpty ? nil : watch
         do {
             let response = try send(request)
-            if let changes = response.changes { ledger.absorb(changes) }
+            if let changes = response.changes {
+                let replacing =
+                    APIReference.entry(named: request.command)
+                    .map(APIReference.isDestructive) ?? false
+                ledger.absorb(changes, replacing: replacing)
+            }
             return MCPOutcome(
                 request: request,
                 ok: response.isSuccess,

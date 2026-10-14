@@ -99,6 +99,16 @@ public enum NotKeepable: String, Codable, Sendable, CaseIterable {
     case conflicting
     /// Not a leaf of the keep document.
     case unknown
+
+    /// Whether a later state can make the leaf keepable — the
+    /// Space added to the profile, the file writable again, the
+    /// leaf kept alone — so a caller holding it asks again.
+    public var isLiftable: Bool {
+        switch self {
+        case .temporarySpace, .notWritten, .conflicting: return true
+        case .luaOwned, .noProfile, .appWide, .unknown: return false
+        }
+    }
 }
 
 extension CommandRequest {

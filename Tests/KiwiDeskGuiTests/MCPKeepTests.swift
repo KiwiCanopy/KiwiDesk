@@ -239,18 +239,46 @@ struct MCPKeepTests {
         #expect(app.sent.count == count)
     }
 
-    @Test("a refusal ends once its value moves on")
-    func refusalEndsWithItsValue() throws {
+    @Test("a refusal no later state lifts is told once")
+    func unliftableRefusalIsToldOnce() throws {
         let app = FakeApp()
         let id = "/app_wide/refusal/sound"
         app.touched["set_refusal_sound"] = [Self.leaf(id, .none, .appWide)]
-        _ = try Self.run(app, "set_refusal_sound")
-        let still = try Self.run(app, "version")
-        #expect(Self.text(still).contains("cannot be kept"))
-        #expect(app.sent.last?.keepWatch == [id])
-        app.values[id] = .bool(false)
-        _ = try Self.run(app, "version")
+        let told = try Self.run(app, "set_refusal_sound")
+        #expect(Self.text(told).contains("cannot be kept"))
         #expect(Self.status(try Self.run(app, "version")) == nil)
+        #expect(app.sent.last?.keepWatch == nil)
+    }
+
+    @Test("a liftable refusal is asked again")
+    func liftableRefusalIsWatched() throws {
+        let app = FakeApp()
+        let id = "/space_modes/9"
+        app.touched["set_mode"] = [Self.leaf(id, .none, .temporarySpace)]
+        _ = try Self.run(app, "set_mode")
+        _ = try Self.run(app, "version")
+        #expect(app.sent.last?.keepWatch == [id])
+    }
+
+    @Test("a load this session runs tells its own changes replaced")
+    func ownLoadReplaces() throws {
+        let app = FakeApp()
+        let id = "/settings/border/width"
+        app.touched["border.set_width"] = [Self.leaf(id)]
+        app.values[id] = .number(9)
+        _ = try Self.run(app, "border.set_width")
+        app.touched["load_profile"] = [Self.leaf(id)]
+        app.values[id] = .number(5)
+        app.stored.insert(id)
+        let load = try Self.call(
+            app,
+            MCPTools.runDestructive,
+            [
+                "command": .string("load_profile"),
+                "args": .array([.string("A")]),
+            ]
+        )
+        #expect(Self.status(load)?["replaced"] == .array([.string(id)]))
     }
 
     @Test("a shared-look keep names the profiles wearing it")
