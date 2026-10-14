@@ -30,7 +30,10 @@ enum MCPToolSchema {
         case .choice(let choice):
             fields["type"] = .string("string")
             fields["enum"] = .array(choice.values.map(JSONValue.string))
-        case .window, .callback, .table:
+        case .window:
+            // A window id as `get_state` reports it.
+            fields["type"] = .string("integer")
+        case .callback, .table:
             break
         }
         return .object(fields)

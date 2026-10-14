@@ -9,7 +9,7 @@ extension MCPTools {
     /// The command group the tool wraps.
     static let lookGroup = "look"
 
-    static let looksTool = groupTool(
+    static let looksSpec = GroupToolSpec(
         name: looks,
         group: lookGroup,
         title: "Make and wear KiwiDesk looks",

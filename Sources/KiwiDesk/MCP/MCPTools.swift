@@ -24,11 +24,14 @@ struct MCPTools {
 
     /// Every tool, in a fixed order so a client can cache the
     /// list. The one copy: `definitions` and `call` both read it.
-    static let all: [Tool] = [
-        listCommandsTool, helpTool, getStateTool,
-        runTool, runBatchTool, runDestructiveTool, keepTool,
-        looksTool,
-    ]
+    static let all: [Tool] =
+        [
+            listCommandsTool, helpTool, getStateTool,
+            runTool, runBatchTool, runDestructiveTool, keepTool,
+        ] + groupTools.map(groupTool)
+
+    /// Every domain tool over a command group (#1685 ▸ Ruling 2).
+    static let groupTools: [GroupToolSpec] = [looksSpec]
 
     var definitions: JSONValue { .array(Self.all.map(\.definition)) }
 

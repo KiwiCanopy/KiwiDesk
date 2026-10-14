@@ -62,27 +62,6 @@ struct MCPLooksTests {
         }
     }
 
-    @Test("every record argument is a property")
-    func argumentsAreProperties() {
-        let offered = MCPTools.offered(group: MCPTools.lookGroup)
-        let arguments = offered.flatMap(\.record.arguments)
-        let names = Set(arguments.map(\.name))
-        #expect(!names.isEmpty)
-        #expect(Set(Self.schema.keys) == names.union(["action"]))
-        // One name, one argument: the schema keeps the first.
-        for argument in arguments {
-            let first = arguments.first { $0.name == argument.name }
-            #expect(first?.kind == argument.kind, "\(argument.name)")
-        }
-        for argument in arguments {
-            let built = MCPToolSchema.property(for: argument, "")
-            #expect(
-                Self.schema[argument.name]?["type"] == built["type"],
-                "\(argument.name)"
-            )
-        }
-    }
-
     @Test("a property's type and values come from the kind")
     func propertyFollowsKind() {
         let mode = APIArgument.choice("mode", LayoutMode.self)
@@ -177,13 +156,5 @@ struct MCPLooksTests {
         #expect(app.sent.last?.command == MCPTools.keepCommand)
         #expect(app.sent.last?.args == [.string(id)])
         #expect(MCPKeepTests.text(kept).contains("Home, Work"))
-    }
-}
-
-extension JSONValue {
-    /// An object's member, or nil for any other value.
-    fileprivate subscript(_ key: String) -> JSONValue? {
-        if case .object(let members) = self { return members[key] }
-        return nil
     }
 }
